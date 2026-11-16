@@ -6,16 +6,44 @@
  */
 
 import {
+  agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
-  agentToolEventInvestigationAttachEventType,
+  agentToolEventSearchEventType,
   agentToolEventStatusUpdateEventType,
   agentToolEventWriteEventType,
+  agentToolKiIdentificationStartedEventType,
+  detectionScanEventType,
+  discoveryTriggeredEventType,
+  eventStatusChangedEventType,
+  knowledgeIndicatorEventsGeneratedEventType,
+  knowledgeIndicatorFeaturesIdentifiedEventType,
+  onboardingScheduledEventType,
 } from './events';
 
 const isOptional = (field: { _meta?: { optional?: boolean } }) => field._meta?.optional === true;
 
 describe('EBT event types', () => {
-  it.each([agentToolEventStatusUpdateEventType, agentToolEventInvestigationAttachEventType])(
+  it.each([
+    agentBuilderKnowledgeIndicatorCreatedEventType,
+    agentToolEventCreateEventType,
+    agentToolEventSearchEventType,
+    agentToolEventStatusUpdateEventType,
+    agentToolEventWriteEventType,
+    agentToolKiIdentificationStartedEventType,
+    detectionScanEventType,
+    discoveryTriggeredEventType,
+    eventStatusChangedEventType,
+    knowledgeIndicatorEventsGeneratedEventType,
+    knowledgeIndicatorFeaturesIdentifiedEventType,
+    onboardingScheduledEventType,
+  ])('$eventType registers the CPS target context', ({ schema }) => {
+    expect(isOptional(schema.space_id)).toBe(false);
+    expect(isOptional(schema.target_cluster_scope)).toBe(true);
+    expect(isOptional(schema.target_cluster_ids)).toBe(true);
+    expect(isOptional(schema.target_cluster_ids_complete)).toBe(true);
+  });
+
+  it.each([agentToolEventStatusUpdateEventType, eventStatusChangedEventType])(
     '$eventType requires the full alert identity on an event about an existing alert',
     ({ schema }) => {
       const { alert_source: source, fingerprint, space_id: spaceId } = schema;
@@ -38,4 +66,12 @@ describe('EBT event types', () => {
       [fingerprint, groupHash].forEach((field) => expect(isOptional(field)).toBe(true));
     }
   );
+
+  it('lets a failed knowledge indicator create omit the id but not the space', () => {
+    const { space_id: spaceId, knowledge_indicator_id: id } =
+      agentBuilderKnowledgeIndicatorCreatedEventType.schema;
+
+    expect(isOptional(spaceId)).toBe(false);
+    expect(isOptional(id)).toBe(true);
+  });
 });

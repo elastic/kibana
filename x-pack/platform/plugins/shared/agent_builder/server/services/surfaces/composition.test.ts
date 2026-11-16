@@ -30,7 +30,6 @@ const context = {
   request: httpServerMock.createKibanaRequest(),
   spaceId: 'space-1',
   agentId: 'agent-1',
-  kibanaUrl: undefined,
 };
 
 /** An attachment with two versions, whose data names the version, so tests can see which one rendered. */

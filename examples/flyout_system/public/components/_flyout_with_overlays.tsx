@@ -179,6 +179,7 @@ const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
       {
         id,
         session: 'inherit',
+        flyoutMenuProps: { title: `Child flyout ${label} of ${title}` },
         historyKey,
         size: childSize,
         hasChildBackground: true,
@@ -315,6 +316,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
       overlayRef.current = overlays.openFlyoutTemplate(
         {
           id: `mainFlyout-${title}`,
+          flyoutMenuProps: { title },
           type: flyoutType,
           ownFocus: flyoutOwnFocus,
           size: mainSize,

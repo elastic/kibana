@@ -169,6 +169,38 @@ describe('resolveHuntScope', () => {
     expect(scope.missing).toEqual(['winlogbeat-*']);
   });
 
+  describe('a pattern that resolves only on a linked project', () => {
+    const linkedOnly = () =>
+      createEsClient({
+        resolved: resolveResponse({ dataStreams: ['linked:logs-okta.system-default'] }),
+      });
+
+    it('is missing under cross-cluster semantics, where an unqualified pattern stays local', async () => {
+      const { esClient } = linkedOnly();
+
+      const scope = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: ['logs-*'],
+      });
+
+      expect(scope.missing).toEqual(['logs-*']);
+    });
+
+    it('is not missing with cross-project search on, where it reaches linked projects', async () => {
+      const { esClient } = linkedOnly();
+
+      const scope = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: ['logs-*', 'winlogbeat-*'],
+        crossProjectSearch: true,
+      });
+
+      expect(scope.missing).toEqual(['winlogbeat-*']);
+    });
+  });
+
   it('never searches alerts: the universe is exactly what the caller supplied', async () => {
     const { esClient } = createEsClient();
 

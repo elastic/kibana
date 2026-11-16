@@ -40,7 +40,7 @@ import { faker } from '@faker-js/faker';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
-import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 import { trackCreateUiCounterEvents } from '../lens_ui_telemetry';
@@ -129,14 +129,14 @@ describe('Lens App', () => {
   } = {}) {
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
       <KibanaContextProvider services={services}>
-        <ChromeServiceProvider value={{ chrome }}>
+        <MockChromeContextProvider chrome={chrome}>
           <EditorFrameServiceProvider
             visualizationMap={visualizationMap}
             datasourceMap={datasourceMapOverride ?? datasourceMap}
           >
             {children}
           </EditorFrameServiceProvider>
-        </ChromeServiceProvider>
+        </MockChromeContextProvider>
       </KibanaContextProvider>
     );
 

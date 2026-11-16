@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiToolTip,
   useEuiTheme,
@@ -31,6 +32,37 @@ const copyLabel = i18n.translate('xpack.streams.canvas.routingNode.copyBadgeLabe
   defaultMessage: 'copy',
 });
 
+const diagnosticsTitle = i18n.translate('xpack.streams.canvas.routingNode.diagnosticsTitle', {
+  defaultMessage: 'The last save rejected this routing. Open it to fix the rules.',
+});
+
+function RoutingDiagnosticsIcon({
+  diagnostics,
+  dataTestSubj,
+}: {
+  diagnostics: string[];
+  dataTestSubj: string;
+}) {
+  return (
+    <EuiIconTip
+      type="error"
+      color="danger"
+      size="m"
+      anchorProps={{ 'data-test-subj': dataTestSubj }}
+      content={
+        <>
+          <p>{diagnosticsTitle}</p>
+          <ul>
+            {diagnostics.map((message, index) => (
+              <li key={index}>{message}</li>
+            ))}
+          </ul>
+        </>
+      }
+    />
+  );
+}
+
 const getRoutingRowStyle = (euiTheme: UseEuiTheme['euiTheme']) => css`
   padding-left: ${euiTheme.size.xs};
   border-top: 2px solid ${euiTheme.border.color};
@@ -39,7 +71,18 @@ const getRoutingRowStyle = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 `;
 
-function RoutingRuleRow({ rule }: { rule: RoutingNodeRule }) {
+const RULE_PREFIX = i18n.translate('xpack.streams.canvas.routingNode.rulePrefix', {
+  defaultMessage: 'rule',
+});
+
+const DEFAULT_RULE_LABEL = i18n.translate('xpack.streams.canvas.routingNode.defaultRuleLabel', {
+  defaultMessage: 'default',
+});
+
+const getRuleLabel = (rule: RoutingNodeRule, index: number) =>
+  rule.isCatchAll ? DEFAULT_RULE_LABEL : `${RULE_PREFIX} ${index}`;
+
+function RoutingRuleRow({ rule, id }: { rule: RoutingNodeRule; id: number }) {
   const { euiTheme } = useEuiTheme();
 
   const tooltipContent = (
@@ -86,10 +129,18 @@ function RoutingRuleRow({ rule }: { rule: RoutingNodeRule }) {
         <EuiFlexItem grow={false}>
           <EuiToolTip content={tooltipContent}>
             <EuiText tabIndex={0}>
-              <strong>{rule.handleId}</strong>
+              <strong>{getRuleLabel(rule, id)}</strong>
             </EuiText>
           </EuiToolTip>
         </EuiFlexItem>
+        {rule.diagnostics ? (
+          <EuiFlexItem grow={false}>
+            <RoutingDiagnosticsIcon
+              diagnostics={rule.diagnostics}
+              dataTestSubj="streamsCanvasRoutingRuleDiagnostics"
+            />
+          </EuiFlexItem>
+        ) : null}
         {rule.action === 'copy' ? (
           <EuiFlexItem grow={false}>
             <EuiText color="subdued">
@@ -127,6 +178,7 @@ export function RoutingNode({ data, selected, dragging }: NodeProps<RoutingNodeT
           width: ROUTING_NODE_WIDTH,
           selected,
           dragging,
+          danger: data.diagnostics !== undefined,
         })}
       >
         <EuiFlexGroup gutterSize="none" alignItems="stretch" responsive={false}>
@@ -137,7 +189,12 @@ export function RoutingNode({ data, selected, dragging }: NodeProps<RoutingNodeT
               border-right: 2px solid ${euiTheme.border.color};
             `}
           >
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="center"
+              direction="column"
+              gutterSize="s"
+            >
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   type="branch"
@@ -149,13 +206,21 @@ export function RoutingNode({ data, selected, dragging }: NodeProps<RoutingNodeT
                   `}
                 />
               </EuiFlexItem>
+              {data.diagnostics ? (
+                <EuiFlexItem grow={false}>
+                  <RoutingDiagnosticsIcon
+                    diagnostics={data.diagnostics}
+                    dataTestSubj="streamsCanvasRoutingNodeDiagnostics"
+                  />
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiFlexGroup gutterSize="none" direction="column">
-              {data.rules.map((rule) => (
+              {data.rules.map((rule, index) => (
                 <EuiFlexItem css={getRoutingRowStyle(euiTheme)}>
-                  <RoutingRuleRow key={rule.handleId} rule={rule} />
+                  <RoutingRuleRow key={rule.handleId} rule={rule} id={index + 1} />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
