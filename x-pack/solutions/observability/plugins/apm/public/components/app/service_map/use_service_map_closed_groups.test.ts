@@ -20,11 +20,6 @@ jest.mock('../../../hooks/use_service_map_grouping_enabled', () => ({
   useServiceMapGroupingEnabled: jest.fn(),
 }));
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: () => ({ search: '' }),
-}));
-
 const mockedUseServiceMapGroupingEnabled = jest.mocked(useServiceMapGroupingEnabled);
 
 function serviceNode(id: string): ServiceMapNode {
