@@ -10,6 +10,8 @@ import { render } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import type { RectAnnotationProps } from '@elastic/charts';
 import { PartialBucketsEndzones } from './partial_buckets_endzones';
+import { getTimeChartXDomain } from '../utils/histogram_interval';
+import type { QueriedRange } from '../utils/time_range_query';
 
 const mockShadedZones: RectAnnotationProps['dataValues'][] = [];
 
@@ -26,38 +28,49 @@ jest.mock('@elastic/charts', () => {
 });
 
 const HOUR = 60 * 60 * 1000;
-const INTERVAL = { value: 3600, unit: 's' as const };
-const POINTS = [0, HOUR, 2 * HOUR].map((timestamp) => ({ timestamp }));
+const POINTS = [0, HOUR, 2 * HOUR].map((timestamp) => {
+  return { timestamp };
+});
 
-const renderEndzones = (range: { start: number; end: number }) =>
-  render(
-    <PartialBucketsEndzones points={POINTS} interval={INTERVAL} range={range} timeZone="UTC" />,
+const renderEndzones = (
+  range: QueriedRange | undefined,
+  {
+    points = POINTS,
+    histogramMode = true,
+  }: { points?: typeof POINTS; histogramMode?: boolean } = {}
+) => {
+  const xDomain = getTimeChartXDomain({
+    points,
+    interval: { value: 3600, unit: 's' },
+    range,
+    timeZone: 'UTC',
+    hasBars: histogramMode,
+  });
+  return render(
+    <PartialBucketsEndzones xDomain={xDomain} range={range} histogramMode={histogramMode} />,
     { wrapper: EuiProvider }
   );
+};
 
-const lastShadedZones = () => mockShadedZones[mockShadedZones.length - 1];
+const lastShadedZones = () => {
+  return mockShadedZones[mockShadedZones.length - 1];
+};
 
 describe('PartialBucketsEndzones', () => {
   beforeEach(() => {
     mockShadedZones.length = 0;
   });
 
-  it('shades the first bucket when the range starts inside it', () => {
+  it('shades the first bucket of bars when the range starts inside it', () => {
     renderEndzones({ start: HOUR / 2, end: 3 * HOUR });
 
     expect(lastShadedZones()).toEqual([{ coordinates: { x1: HOUR / 2 } }]);
   });
 
-  it('shades the last bucket when the range ends inside it', () => {
+  it('shades the last bucket of bars when the range ends inside it', () => {
     renderEndzones({ start: 0, end: 2.5 * HOUR });
 
     expect(lastShadedZones()).toEqual([{ coordinates: { x0: 2.5 * HOUR } }]);
-  });
-
-  it('shades both edge buckets when the range cuts both', () => {
-    renderEndzones({ start: HOUR / 2, end: 2.5 * HOUR });
-
-    expect(lastShadedZones()).toHaveLength(2);
   });
 
   it('shades nothing when the range matches the bucket edges', () => {
@@ -66,66 +79,24 @@ describe('PartialBucketsEndzones', () => {
     expect(lastShadedZones()).toEqual([]);
   });
 
-  it('shades the empty last bucket that starts at the end of the range', () => {
-    // Elasticsearch returns it for `extended_bounds` ending on a bucket edge.
-    render(
-      <PartialBucketsEndzones
-        points={[0, HOUR, 2 * HOUR, 3 * HOUR].map((timestamp) => ({ timestamp }))}
-        interval={INTERVAL}
-        range={{ start: 0, end: 3 * HOUR }}
-        timeZone="UTC"
-      />,
-      { wrapper: EuiProvider }
-    );
+  it('shades whole edge buckets outside the domain of areas, as Lens does', () => {
+    // `isFullBin` zones lie outside the domain, so an area chart draws nothing.
+    renderEndzones({ start: HOUR / 2, end: 2.5 * HOUR }, { histogramMode: false });
 
-    // It lies entirely past the range, so it is shaded from `end` on.
-    expect(lastShadedZones()).toEqual([{ coordinates: { x0: 3 * HOUR } }]);
-  });
-
-  it('measures the last calendar bucket by its own length, not the shortest one', () => {
-    // Monthly buckets: February is 28 days, March 31, so a range ending on March 30 cuts March.
-    const months = ['2026-01-01', '2026-02-01', '2026-03-01'].map((day) => ({
-      timestamp: Date.parse(`${day}T00:00:00.000Z`),
-    }));
-    const end = Date.parse('2026-03-30T00:00:00.000Z');
-
-    render(
-      <PartialBucketsEndzones
-        points={months}
-        interval={{ value: 1, unit: 'M' }}
-        range={{ start: months[0].timestamp, end }}
-        timeZone="UTC"
-      />,
-      { wrapper: EuiProvider }
-    );
-
-    expect(lastShadedZones()).toEqual([{ coordinates: { x0: end } }]);
+    expect(lastShadedZones()).toEqual([
+      { coordinates: { x1: 0 } },
+      { coordinates: { x0: 3 * HOUR } },
+    ]);
   });
 
   it('renders nothing without buckets', () => {
-    render(
-      <PartialBucketsEndzones
-        points={[]}
-        interval={INTERVAL}
-        range={{ start: 0, end: HOUR }}
-        timeZone="UTC"
-      />,
-      { wrapper: EuiProvider }
-    );
+    renderEndzones({ start: 0, end: HOUR }, { points: [] });
 
     expect(mockShadedZones).toHaveLength(0);
   });
 
   it('renders nothing before the range of the response is known', () => {
-    render(
-      <PartialBucketsEndzones
-        points={POINTS}
-        interval={INTERVAL}
-        range={undefined}
-        timeZone="UTC"
-      />,
-      { wrapper: EuiProvider }
-    );
+    renderEndzones(undefined);
 
     expect(mockShadedZones).toHaveLength(0);
   });

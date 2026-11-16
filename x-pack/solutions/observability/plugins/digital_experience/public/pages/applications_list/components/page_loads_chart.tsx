@@ -21,6 +21,7 @@ import type { HistogramInterval, TimeSeriesPoint } from '../../../../common/type
 import { ChartArea } from '../../../components/chart_area';
 import type { QueriedRange } from '../../../utils/time_range_query';
 import { PartialBucketsEndzones } from '../../../components/partial_buckets_endzones';
+import { getTimeChartXDomain } from '../../../utils/histogram_interval';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { usePersistedChoice } from '../../../hooks/use_persisted_choice';
 import { PAGE_LOADS_LABEL, SESSIONS_LABEL, SESSIONS_UNAVAILABLE_LABEL } from '../../../labels';
@@ -93,6 +94,7 @@ export function PageLoadsChart({
   const points = shownMetric === 'sessions' ? sessions ?? [] : pageLoads;
   const label = METRIC_LABELS[shownMetric];
   const hasData = points.some(({ count }) => count > 0);
+  const xDomain = getTimeChartXDomain({ points, interval, range, timeZone, hasBars: true });
 
   return (
     <EuiPanel hasBorder data-test-subj="digitalExperiencePageLoadsChart">
@@ -140,14 +142,10 @@ export function PageLoadsChart({
             showLegend={false}
             locale={i18n.getLocale()}
             onBrushEnd={onBrushTimeRange(onTimeRangeSelect)}
+            xDomain={xDomain}
           />
           <Tooltip headerFormatter={({ value }) => formatDate(value)} />
-          <PartialBucketsEndzones
-            points={points}
-            interval={interval}
-            range={range}
-            timeZone={timeZone}
-          />
+          <PartialBucketsEndzones xDomain={xDomain} range={range} histogramMode />
           <Axis id="time" position={Position.Bottom} />
           <Axis id="count" position={Position.Left} gridLine={{ visible: true }} ticks={4} />
           <BarSeries

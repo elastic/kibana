@@ -8,43 +8,35 @@
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { Endzones } from '@kbn/charts-plugin/public';
-import type { HistogramInterval } from '../../common/types/applications';
 import type { QueriedRange } from '../utils/time_range_query';
-import { getBucketEnd } from '../utils/histogram_interval';
+import type { TimeChartXDomain } from '../utils/histogram_interval';
 
-/** Shades the first and last buckets of a chart where they cover only part of the queried range. */
+/** Shades the edge buckets that cover only part of `range`, as Lens's `XyEndzones` does. */
 export function PartialBucketsEndzones({
-  points,
-  interval,
+  xDomain,
   range,
-  timeZone,
+  histogramMode,
 }: {
-  /** The buckets, sorted by their start in epoch milliseconds. */
-  points: Array<{ timestamp: number }>;
-  interval: HistogramInterval;
-  /** Nothing is shaded until the range of the response is known. */
+  xDomain: TimeChartXDomain | undefined;
   range: QueriedRange | undefined;
-  timeZone: string;
+  /** Whether the chart draws bars, whose histogram mode spans each bucket. */
+  histogramMode: boolean;
 }) {
   const { colorMode } = useEuiTheme();
 
-  if (!range || points.length === 0) {
+  if (!xDomain || !range) {
     return null;
   }
 
-  const firstKey = points[0].timestamp;
-  const lastKey = points[points.length - 1].timestamp;
-
   return (
     <Endzones
+      isFullBin={!histogramMode}
       isDarkMode={colorMode === 'DARK'}
       domainStart={range.start}
       domainEnd={range.end}
-      domainMin={firstKey}
-      domainMax={lastKey}
-      // `Endzones` shades the end when `domainEnd - interval < domainMax`, i.e. before the last
-      // bucket's own end, so a long month isn't measured by the shortest one.
-      interval={getBucketEnd(lastKey, interval, timeZone) - lastKey}
+      interval={xDomain.minInterval}
+      domainMin={xDomain.min}
+      domainMax={xDomain.max}
       hideTooltips={false}
     />
   );

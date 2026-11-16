@@ -18,7 +18,6 @@ import {
   Settings,
   Tooltip,
 } from '@elastic/charts';
-import type { DomainRange } from '@elastic/charts';
 import {
   EuiButtonGroup,
   EuiSelect,
@@ -44,7 +43,7 @@ import type { OverviewTrendPoint } from '../../../../../common/types/overview';
 import { ChartArea } from '../../../../components/chart_area';
 import type { QueriedRange } from '../../../../utils/time_range_query';
 import { PartialBucketsEndzones } from '../../../../components/partial_buckets_endzones';
-import { getBucketEnd } from '../../../../utils/histogram_interval';
+import { getTimeChartXDomain, type TimeChartXDomain } from '../../../../utils/histogram_interval';
 import {
   APPLICATION_OVERVIEW_EBT_ELEMENTS,
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
@@ -139,19 +138,17 @@ function TrendChart({
   formatValue,
   chartType,
   xDomain,
-  interval,
   range,
   onTimeRangeSelect,
 }: {
   points: OverviewTrendPoint[];
-  interval: HistogramInterval;
   range: QueriedRange | undefined;
   metric: 'pageLoads' | 'loadTimePercentileMs';
   name: string;
   color: string;
   formatValue: (value: number) => string;
   chartType: TrendChartType;
-  xDomain: DomainRange | undefined;
+  xDomain: TimeChartXDomain | undefined;
   onTimeRangeSelect: TimeRangeSelect;
 }) {
   const baseTheme = useElasticChartsTheme();
@@ -179,12 +176,7 @@ function TrendChart({
         xDomain={xDomain}
       />
       <Tooltip headerFormatter={({ value }) => formatDate(value)} />
-      <PartialBucketsEndzones
-        points={points}
-        interval={interval}
-        range={range}
-        timeZone={timeZone}
-      />
+      <PartialBucketsEndzones xDomain={xDomain} range={range} histogramMode={chartType === 'bar'} />
       <Axis id="time" position={Position.Bottom} style={HIDDEN_AXIS_LINES} />
       <Axis
         id={`${metric}Axis`}
@@ -302,19 +294,16 @@ export function OverviewTrends({
   const hasPageLoads = points.some((point) => point.pageLoads > 0);
   const hasLoadTimes = points.some((point) => point.loadTimePercentileMs !== null);
 
-  // Both charts span the whole time range, whatever each one has data for. Bars' histogram mode
-  // runs on to the last bucket's end; areas stop at its start, so their domain is widened to it,
-  // which keeps both types on the same axis and the partial last bucket's shading in view.
-  const lastKey = points[points.length - 1]?.timestamp;
-  const xDomain: DomainRange | undefined =
-    lastKey === undefined
-      ? undefined
-      : {
-          min: points[0].timestamp,
-          max: chartType === 'bar' ? lastKey : getBucketEnd(lastKey, interval, timeZone),
-        };
+  // Both charts span the whole time range, whatever each one has data for.
+  const xDomain = getTimeChartXDomain({
+    points,
+    interval,
+    range,
+    timeZone,
+    hasBars: chartType === 'bar',
+  });
 
-  const chartProps = { points, interval, range, chartType, xDomain, onTimeRangeSelect };
+  const chartProps = { points, range, chartType, xDomain, onTimeRangeSelect };
 
   return (
     <EuiPanel

@@ -163,29 +163,38 @@ describe('OverviewTrends', () => {
     expect(screen.getByRole('button', { name: 'Bar' })).toHaveAttribute('aria-pressed', 'true');
   });
 
-  // The last bucket runs from 2_000 to 3_000, so the shading from 2_500 on is drawn only when the
-  // domain reaches past it: bars' histogram mode extends it, areas need it widened.
+  // As in Lens: bars shade from the range's edges, areas take whole buckets outside their domain,
+  // which draws nothing.
   it.each([
-    ['area', { min: 1_000, max: 3_000 }],
-    ['bar', { min: 1_000, max: 2_000 }],
+    [
+      'area',
+      { min: 1_000, max: 3_000, minInterval: 1_000 },
+      [{ coordinates: { x1: 1_000 } }, { coordinates: { x0: 3_000 } }],
+    ],
+    [
+      'bar',
+      { min: 1_000, max: 2_000, minInterval: 1_000 },
+      [{ coordinates: { x1: 1_500 } }, { coordinates: { x0: 2_500 } }],
+    ],
   ])(
-    'shades the partial first and last buckets of both %s charts, inside their domain',
-    (chartType, xDomain) => {
+    'marks the partial first and last buckets of both %s charts as Lens does',
+    (chartType, xDomain, zones) => {
       window.localStorage.setItem(
         'xpack.digitalExperience.overview.trendChartType',
         JSON.stringify(chartType)
       );
       renderTrends(POINTS, false, jest.fn(), 75, jest.fn(), { start: 1_500, end: 2_500 });
 
-      expect(mockShadedZones.slice(-2)).toEqual([
-        [{ coordinates: { x1: 1_500 } }, { coordinates: { x0: 2_500 } }],
-        [{ coordinates: { x1: 1_500 } }, { coordinates: { x0: 2_500 } }],
-      ]);
+      expect(mockShadedZones.slice(-2)).toEqual([zones, zones]);
       expect(mockXDomains.slice(-2)).toEqual([xDomain, xDomain]);
     }
   );
 
-  it('shades nothing when the range matches the bucket edges', () => {
+  it('shades nothing on bars when the range matches the bucket edges', () => {
+    window.localStorage.setItem(
+      'xpack.digitalExperience.overview.trendChartType',
+      JSON.stringify('bar')
+    );
     renderTrends();
 
     expect(mockShadedZones.slice(-2)).toEqual([[], []]);
