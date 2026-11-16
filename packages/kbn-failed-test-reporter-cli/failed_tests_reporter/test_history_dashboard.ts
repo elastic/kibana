@@ -27,7 +27,7 @@ export const testHistoryUrl = (testId: string): string => {
   )}`;
 };
 
-/** Link an FTR, Jest, or Scout failure to its test history in the test-event stream. */
+/** Link an FTR, Jest, Cypress or Scout failure to its test history in the test-event stream. */
 export const testHistoryDashboardUrl = (
   failure: TestFailure | ScoutTestFailureExtended
 ): string | undefined => {

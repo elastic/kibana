@@ -28,7 +28,7 @@ next to `REPORT_FAILED_TESTS_TO_GITHUB`, only on pipelines the daily flaky repor
 anywhere else a new failure would never get an issue. Flip it back to fall back to the legacy
 reporting at any time.
 
-Issues for FTR, Jest (unit and integration) and Scout tests link to the
+Issues for FTR, Jest (unit and integration), Cypress and Scout tests link to the
 [Single test history](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history)
 dashboard in the CI space, which shows the test's daily passed and failed attempts, its daily
 failure percentage and its recent failed attempts with their Buildkite jobs. Existing issues get

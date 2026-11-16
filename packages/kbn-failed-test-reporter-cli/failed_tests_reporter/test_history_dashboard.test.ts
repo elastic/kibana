@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { computeTestID } from '@kbn/scout-reporting';
 import { getIssueMetadata } from './issue_metadata';
 import {
   testHistoryDashboardUrl,
@@ -61,6 +62,25 @@ describe('testHistoryDashboardUrl', () => {
     const appState = new URLSearchParams(url?.split('?')[1]).get('_a');
 
     expect(appState).toContain('test.id : "216c0be6ee589d4-12fee6abc92965a"');
+  });
+
+  it('uses the spec file and the full title for Cypress tests', () => {
+    const url = testHistoryDashboardUrl({
+      ...ftrFailure,
+      classname:
+        'Cypress Tests.x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/rule_details/execution_log·cy·ts',
+      // Cypress reports the full title followed by the test's own title
+      name: 'Event log should display the execution log should display the execution log',
+      testType: 'cypress',
+    });
+    const appState = new URLSearchParams(url?.split('?')[1]).get('_a');
+
+    expect(appState).toContain(
+      `test.id : "${computeTestID(
+        'x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/rule_details/execution_log.cy.ts',
+        'Event log should display the execution log'
+      )}"`
+    );
   });
 
   it('omits a link when a Jest report has no exact file path', () => {
