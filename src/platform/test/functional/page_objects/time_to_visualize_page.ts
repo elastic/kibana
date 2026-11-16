@@ -65,6 +65,40 @@ export class TimeToVisualizePageObject extends FtrService {
     });
   }
 
+  private async setDashboardOption(option: DashboardPickerOption) {
+    this.log.debug('save modal dashboard selector, choosing option:', option);
+
+    const dashboardSelector = await this.testSubjects.find('add-to-dashboard-options');
+    const label = await dashboardSelector.findByCssSelector(`label[for="${option}"]`);
+    await label.click();
+
+    await this.retry.waitForWithTimeout(`${option} to be selected`, 10000, async () => {
+      const radio = await this.find.byCssSelector(`#${option}`);
+      return await radio.isSelected();
+    });
+  }
+
+  private async setAddToLibrary(addToLibrary: boolean) {
+    const state = addToLibrary ? 'checked' : 'unchecked';
+    this.log.debug('save to library checkbox exists. Setting its state to', state);
+
+    const libraryCheckbox = await this.find.byCssSelector('#add-to-library-checkbox');
+    if ((await libraryCheckbox.isSelected()) !== addToLibrary) {
+      const selector = await this.testSubjects.find('add-to-library-checkbox');
+      const label = await selector.findByCssSelector(`label[for="add-to-library-checkbox"]`);
+      await label.click();
+    }
+
+    await this.retry.waitForWithTimeout(
+      `add to library checkbox to be ${state}`,
+      10000,
+      async () => {
+        const checkbox = await this.find.byCssSelector('#add-to-library-checkbox');
+        return (await checkbox.isSelected()) === addToLibrary;
+      }
+    );
+  }
+
   public async setSaveModalValues(
     vizName: string,
     {
@@ -95,35 +129,32 @@ export class TimeToVisualizePageObject extends FtrService {
       await this.testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
     }
 
-    const hasDashboardSelector = await this.testSubjects.exists('add-to-dashboard-options');
-    if (hasDashboardSelector && addToDashboard !== undefined) {
-      let option: DashboardPickerOption = 'add-to-library-option';
-      if (addToDashboard) {
-        option = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
-      }
-      this.log.debug('save modal dashboard selector, choosing option:', option);
-      const dashboardSelector = await this.testSubjects.find('add-to-dashboard-options');
-      const label = await dashboardSelector.findByCssSelector(`label[for="${option}"]`);
-      await label.click();
+    if (addToDashboard) {
+      await this.testSubjects.existOrFail('add-to-dashboard-options', { timeout: 10000 });
+      await this.setDashboardOption(
+        dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option'
+      );
 
       if (dashboardId) {
         await this.selectDashboard(dashboardId);
       }
+    } else if (
+      addToDashboard === null &&
+      // Absent only for users who cannot add to a dashboard, which already means "library only".
+      (await this.testSubjects.waitForExists('add-to-dashboard-options'))
+    ) {
+      await this.setDashboardOption('add-to-library-option');
     }
 
-    const hasSaveToLibrary = await this.testSubjects.exists('add-to-library-checkbox');
-    if (hasSaveToLibrary && saveToLibrary !== undefined) {
-      const libraryCheckbox = await this.find.byCssSelector('#add-to-library-checkbox');
-      const isChecked = await libraryCheckbox.isSelected();
-      const needsClick = isChecked !== saveToLibrary;
-      const state = saveToLibrary ? 'check' : 'uncheck';
-
-      this.log.debug('save to library checkbox exists. Setting its state to', state);
-      if (needsClick) {
-        const selector = await this.testSubjects.find('add-to-library-checkbox');
-        const label = await selector.findByCssSelector(`label[for="add-to-library-checkbox"]`);
-        await label.click();
-      }
+    if (saveToLibrary) {
+      await this.testSubjects.existOrFail('add-to-library-checkbox', { timeout: 10000 });
+      await this.setAddToLibrary(true);
+    } else if (
+      saveToLibrary === false &&
+      // Absent only for users who cannot save by reference, which already means "by value".
+      (await this.testSubjects.waitForExists('add-to-library-checkbox'))
+    ) {
+      await this.setAddToLibrary(false);
     }
 
     const hasRedirectToOrigin = await this.testSubjects.exists('returnToOriginModeSwitch');

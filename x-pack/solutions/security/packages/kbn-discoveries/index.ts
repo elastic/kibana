@@ -12,7 +12,9 @@ export { getLlmType } from './impl/lib/helpers/get_llm_type';
 export {
   extractJson,
   getFormatInstructionsFromZodV4Schema,
+  getModelRefusalErrorMessage,
   getStructuredGenerationPrompt,
+  handleModelRefusal,
 } from './impl/lib/langchain';
 export {
   getGenerateNode,

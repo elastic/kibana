@@ -11,7 +11,6 @@ import { QueryResponseSizeExceededError } from '../../errors/query_response_size
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { coreMock } from '@kbn/core/server/mocks';
 import { ExecuteRuleQueryStep } from './execute_rule_query_step';
 import {
   collectStreamResults,
@@ -33,10 +32,11 @@ import type { PluginConfig } from '../../../config';
 import { NON_STREAMING_MAX_ROWS } from '../../services/query_service/formats';
 import type { EsqlResponseFormatName } from '../../services/query_service/formats';
 import { createEsqlResponseFormatService } from '../../services/esql_response_format_service/esql_response_format_service.mock';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 
 const DEFAULT_MAX_ALERTS_PER_RUN = 10000;
 
-const createPluginConfigAccessor = ({
+const createPluginConfigService = ({
   maxAlertsPerRun = DEFAULT_MAX_ALERTS_PER_RUN,
 }: {
   maxAlertsPerRun?: number;
@@ -60,7 +60,7 @@ const createPluginConfigAccessor = ({
     },
   };
 
-  return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
+  return createConfigServiceMock(config);
 };
 
 describe('ExecuteRuleQueryStep', () => {
@@ -76,7 +76,7 @@ describe('ExecuteRuleQueryStep', () => {
     return new ExecuteRuleQueryStep(
       mocks.queryService,
       createEsqlResponseFormatService(responseFormat),
-      createPluginConfigAccessor({ maxAlertsPerRun })
+      createPluginConfigService({ maxAlertsPerRun })
     );
   }
 

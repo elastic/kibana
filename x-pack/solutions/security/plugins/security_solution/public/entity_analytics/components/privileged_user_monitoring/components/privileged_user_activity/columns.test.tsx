@@ -17,7 +17,7 @@ import { TestProviders } from '../../../../../common/mock';
 import type { TableItemType } from './types';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 
-const mockOpenRightPanel = jest.fn();
+const mockOpenDocument = jest.fn();
 
 const baseRecord: TableItemType = {
   _id: 'test-id',
@@ -38,19 +38,14 @@ const baseRecord: TableItemType = {
 
 describe('columns', () => {
   describe('buildGrantedRightsColumns', () => {
-    const columns = buildGrantedRightsColumns(mockOpenRightPanel);
+    const columns = buildGrantedRightsColumns(mockOpenDocument);
 
-    it('renders actions column and calls openRightPanel on click', () => {
+    it('renders actions column and calls openDocument on click', () => {
       const col = columns[0] as EuiTableFieldDataColumnType<TableItemType>;
       render(<>{col.render?.(baseRecord, baseRecord)}</>, { wrapper: TestProviders });
       const btn = screen.getByRole('button');
       fireEvent.click(btn);
-      expect(mockOpenRightPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: expect.any(String),
-          params: expect.objectContaining({ id: 'test-id', indexName: 'test-index' }),
-        })
-      );
+      expect(mockOpenDocument).toHaveBeenCalledWith('test-id', 'test-index');
     });
 
     it('renders timestamp column', () => {
@@ -92,7 +87,7 @@ describe('columns', () => {
   });
 
   describe('buildAccountSwitchesColumns', () => {
-    const columns = buildAccountSwitchesColumns(mockOpenRightPanel);
+    const columns = buildAccountSwitchesColumns(mockOpenDocument);
 
     it('renders privileged_user column with different field', () => {
       const col = columns[2] as EuiTableFieldDataColumnType<TableItemType>;
@@ -124,7 +119,7 @@ describe('columns', () => {
   });
 
   describe('buildAuthenticationsColumns', () => {
-    const columns = buildAuthenticationsColumns(mockOpenRightPanel);
+    const columns = buildAuthenticationsColumns(mockOpenDocument);
 
     it('renders privileged_user column', () => {
       const col = columns[2] as EuiTableFieldDataColumnType<TableItemType>;

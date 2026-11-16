@@ -26,6 +26,9 @@ let mockBlocksActivity = false;
 
 jest.mock('../../../data/rules/use_detection_rules');
 jest.mock('../../../data/rules/use_rules_demote');
+jest.mock('../../../components/ui/time_range_picker', () => ({
+  NightshiftTimeRangePicker: () => <div data-test-subj="detectionTimeRangePickerStub" />,
+}));
 jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({ blocksActivity: mockBlocksActivity }),
 }));

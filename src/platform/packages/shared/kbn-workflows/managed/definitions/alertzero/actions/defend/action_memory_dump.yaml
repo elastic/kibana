@@ -27,6 +27,8 @@ consts:
   # Sentinel id used only to probe Actions-log privilege before dumping.
   # A 404 means the privilege is present; anything else must fail closed.
   privilege_probe_action_id: "00000000-0000-0000-0000-000000000000"
+  # Defend's response code when the target process does not exist on the endpoint.
+  process_not_found_code: ra_memory-dump_error_not-found
 triggers:
   - type: manual
     inputs:
@@ -207,7 +209,32 @@ steps:
           was_successful: true
           message: "{{ consts.actionLabel }} completed successfully. Action ID: {{ steps.poll_status.output.data.id }}"
     else:
-      - name: emit_failure
-        type: workflow.fail
+      # The process is gone, usually because it already exited, so another
+      # attempt cannot find it either. Only when every endpoint reports this is
+      # the failure non-retryable, so the proposal gate settles it instead of
+      # re-offering it. Any other failure stays retryable.
+      - name: check_process_not_found
+        type: data.set
         with:
-          message: "{{ consts.actionLabel }} failed. Action ID: {{ steps.poll_status.output.data.id }}"
+          process_not_found: >-
+            {%- assign not_found = true -%}
+            {%- for agent_id in inputs.actionInput.endpoint_ids -%}
+            {%- if steps.poll_status.output.data.outputs[agent_id].content.code != consts.process_not_found_code -%}
+            {%- assign not_found = false -%}
+            {%- endif -%}
+            {%- endfor -%}
+            {{ not_found }}
+      - name: emit_failure_by_cause
+        type: if
+        condition: "${{ variables.process_not_found == 'true' }}"
+        steps:
+          - name: emit_process_not_found
+            type: workflow.fail
+            with:
+              type: NonRetryableError
+              message: "{{ consts.actionLabel }} was not applied because the process was not found. It may have already exited. Action ID: {{ steps.poll_status.output.data.id }}"
+        else:
+          - name: emit_failure
+            type: workflow.fail
+            with:
+              message: "{{ consts.actionLabel }} failed. Action ID: {{ steps.poll_status.output.data.id }}"

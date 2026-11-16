@@ -12,15 +12,16 @@ configs=""
 # Parallel execution tuning (can be overridden via env)
 #   JEST_MAX_PARALLEL: number of concurrent Jest config processes
 #   JEST_MAX_OLD_SPACE_MB: per-process max old space size (MB)
-# NOTE: defaults depend on TEST_TYPE — unit tests run 3 parallel processes
-# with a lower heap limit, while integration tests run 1 process with more memory.
+# NOTE: the Jest steps set JEST_MAX_PARALLEL to match their agent size. Without it, defaults
+# depend on TEST_TYPE — unit tests run 3 parallel processes with a lower heap limit, while
+# integration tests run 1 process with more memory.
 if [[ "$1" == 'jest.config.js' ]]; then
   TEST_TYPE="unit"
-  JEST_MAX_PARALLEL=3
+  JEST_MAX_PARALLEL="${JEST_MAX_PARALLEL:-3}"
   JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-4096}"
 else
   TEST_TYPE="integration"
-  JEST_MAX_PARALLEL=1
+  JEST_MAX_PARALLEL="${JEST_MAX_PARALLEL:-1}"
   JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-6144}"
 fi
 

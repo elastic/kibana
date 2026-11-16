@@ -84,3 +84,5 @@ paths:
                           $ref: './evaluate_route.schema.yaml#/components/schemas/EvaluateResultScore'
                       error:
                         $ref: './evaluate_route.schema.yaml#/components/schemas/EvaluateResultError'
+                      usage:
+                        $ref: './evaluate_route.schema.yaml#/components/schemas/EvaluateResultUsage'

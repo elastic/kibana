@@ -1,5 +1,5 @@
 {
-  "sha1": "e7d3dc1987775048c83583f9c0a675bd9273c47d",
+  "sha1": "96a81e7835531e809765c9024f13cc2dde029dde",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 89,
-        "column": 59
+        "line": 104,
+        "column": 13
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-40eab50d9c65d43",
+      "title": "Lens form-based → ES|QL conversion query execution aggregates the Other bucket over the remaining documents like the DSL terms query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 154,
+        "column": 49
       }
     },
     {
@@ -28,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -42,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -56,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -70,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -84,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -98,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -112,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -126,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -140,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -154,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -168,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -182,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -196,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -210,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -224,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -238,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -252,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -266,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -280,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -294,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -308,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -322,8 +336,78 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-e1c0ae745b79fb1",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: single terms with other bucket ordered alphabetically",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 314,
+        "column": 35
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-0e483be42bd9762",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: single terms with other bucket ordered alphabetically DESC keeps Other last",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 314,
+        "column": 35
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-fec6de3e438ee30",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: single terms with other bucket ranked by metric DESC",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 314,
+        "column": 35
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-5bfe88747a88199",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: single terms with other bucket ranked by metric ASC",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 314,
+        "column": 35
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-558300c04ddcda3",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: single terms on an ip field with other bucket groups by the typed ip key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -336,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -350,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -364,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -378,8 +462,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -392,8 +476,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -406,8 +490,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -420,8 +504,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -434,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -448,8 +532,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -462,8 +546,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -476,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -490,8 +574,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -504,8 +588,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -518,8 +602,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -532,8 +616,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -546,8 +630,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -560,8 +644,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -574,8 +658,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -588,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -602,8 +686,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -616,8 +700,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -630,8 +714,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -644,8 +728,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -658,8 +742,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -672,8 +756,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -686,8 +770,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -700,8 +784,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -714,8 +798,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -728,8 +812,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -742,8 +826,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {
@@ -756,8 +840,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 314,
+        "column": 35
       }
     },
     {

@@ -40,12 +40,13 @@ const errorResult = (id: string): ToolResult => ({
   data: { message: 'boom' },
 });
 
-const makeStep = (results: ToolResult[]) =>
+const makeStep = (results: ToolResult[], intent?: string) =>
   createToolCallStep({
     tool_call_id: 'call-1',
     tool_id: 'search',
     params: {},
     results,
+    intent,
   });
 
 describe('ToolCallStep', () => {
@@ -57,6 +58,27 @@ describe('ToolCallStep', () => {
     expect(status).toHaveTextContent('running…');
     await user.click(screen.getByRole('button'));
     expect(screen.getByText('tool: search')).toBeInTheDocument();
+  });
+
+  it('shows the intent before the tool badge when the step has one', () => {
+    renderWithProviders(<ToolCallStep step={makeStep([], 'Searching for failed logins')} />);
+    const intent = screen.getByTestId('agentBuilderToolCallIntent');
+    expect(intent).toHaveTextContent('Searching for failed logins');
+    const badge = screen.getByRole('status').querySelector('.euiBadge')!;
+    expect(badge).toHaveTextContent('tool: search');
+    // eslint-disable-next-line no-bitwise
+    expect(intent.compareDocumentPosition(badge) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('lets the headline shrink so a long intent can be truncated', () => {
+    renderWithProviders(<ToolCallStep step={makeStep([], 'A very long intent '.repeat(20))} />);
+    const labelItem = screen.getByRole('status').closest('.euiFlexItem')!;
+    expect(window.getComputedStyle(labelItem).minWidth).toBe('0');
+  });
+
+  it('does not render an intent when the step has none', () => {
+    renderWithProviders(<ToolCallStep step={makeStep([])} />);
+    expect(screen.queryByTestId('agentBuilderToolCallIntent')).not.toBeInTheDocument();
   });
 
   it('shows "tool: search" and "ran" and opens the response flyout directly on click', async () => {

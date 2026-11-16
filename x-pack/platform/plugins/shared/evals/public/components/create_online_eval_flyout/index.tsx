@@ -173,7 +173,7 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiEmptyPrompt
-            iconType="checkInCircleFilled"
+            iconType="checkCircleFill"
             iconColor="success"
             title={
               <h2>
@@ -196,7 +196,7 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
                 ? [
                     <EuiButton
                       key="openWorkflow"
-                      iconType="popout"
+                      iconType="external"
                       href={workflowHref}
                       data-test-subj="onlineEvalSavedOpenWorkflowButton"
                     >

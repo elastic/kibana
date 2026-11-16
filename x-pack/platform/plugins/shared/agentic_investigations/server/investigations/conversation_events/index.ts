@@ -14,6 +14,11 @@ import {
   INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE,
   investigationSeverityChangedEventSchema,
 } from '../../../common/investigations/severity_change';
+import {
+  INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE,
+  investigationRunFailedEventSchema,
+} from '../../../common/investigations/run_failure';
 
 /**
  * Shown to the agent as well as the user, so an agent continuing the investigation knows the
@@ -39,8 +44,42 @@ export const investigationSeverityChangedEventType: ConversationEventTypeDefinit
   }),
 };
 
+export const investigationRunFailedEventType: ConversationEventTypeDefinition<
+  typeof INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  typeof investigationRunFailedEventSchema
+> = {
+  type: INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  payloadSchema: investigationRunFailedEventSchema,
+  format: ({ data }) => ({
+    type: 'text',
+    value: [
+      `A previous investigation workflow run (${data.execution_id}) failed. This is a historical failure report, not a successful investigation result.`,
+      data.request ? `Original request:\n${data.request}` : 'Original request unavailable.',
+      `Failure reason:\n${data.reason}`,
+    ].join('\n\n'),
+  }),
+};
+
+export const investigationRunTimedOutEventType: ConversationEventTypeDefinition<
+  typeof INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE,
+  typeof investigationRunFailedEventSchema
+> = {
+  type: INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE,
+  payloadSchema: investigationRunFailedEventSchema,
+  format: ({ data }) => ({
+    type: 'text',
+    value: [
+      `A previous investigation workflow run (${data.execution_id}) timed out. This is a historical timeout report, not a successful investigation result.`,
+      data.request ? `Original request:\n${data.request}` : 'Original request unavailable.',
+      `Timeout reason:\n${data.reason}`,
+    ].join('\n\n'),
+  }),
+};
+
 export const registerInvestigationConversationEvents = (
   agentBuilder: AgentBuilderPluginSetup
 ): void => {
   agentBuilder.conversationEvents.register(investigationSeverityChangedEventType);
+  agentBuilder.conversationEvents.register(investigationRunFailedEventType);
+  agentBuilder.conversationEvents.register(investigationRunTimedOutEventType);
 };

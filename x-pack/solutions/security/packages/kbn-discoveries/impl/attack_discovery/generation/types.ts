@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type {
   AnalyticsServiceSetup,
   CoreStart,
@@ -104,6 +105,11 @@ export interface WorkflowConfig {
    * run step sets `false` for callers that own the false-positive decision later.
    */
   ground_truth_gate_enabled?: boolean;
+  /**
+   * Producer identity forwarded to the validation workflow, where it contributes to the
+   * attack hash. Set by the run step; omitted for Kibana Attack Discovery.
+   */
+  generation_source?: string;
   /** Toggle 1: whether the attack discovery skill performs its own additional alert retrieval. */
   skill_enabled: boolean;
   /** ID of the validation workflow to use (or `'default'` for built-in). */
@@ -215,6 +221,11 @@ export interface ExecuteGenerationWorkflowParams {
   source?: AttackDiscoverySource;
   sourceMetadata?: SourceMetadata;
   start?: string;
+  /**
+   * Token-usage attribution forwarded to the generation model calls, so a caller can roll their
+   * cost up under its own parent feature. Omitted means the calls stay untagged.
+   */
+  telemetryMetadata?: TelemetryMetadata;
   trigger?: string;
   type: string;
   workflowConfig: WorkflowConfig;

@@ -515,6 +515,7 @@ export async function executeGenerationWorkflow({
   source,
   sourceMetadata,
   start,
+  telemetryMetadata,
   trigger,
   type,
   workflowConfig,
@@ -650,8 +651,12 @@ export async function executeGenerationWorkflow({
       logger.warn(`Could not install the AI Assistant resources for space '${spaceId}'`);
     }
 
+    // The anonymization fields index is Kibana-owned configuration, not user data.
+    // It is read with the internal user, as the AI Assistant `_find` route does, so
+    // callers are not required to hold index privileges on it. The caller was
+    // already authorized above, and every alert read still runs as the caller.
     const anonymizationFields = await fetchAnonymizationFields({
-      esClient,
+      esClient: coreStart.elasticsearch.client.asInternalUser,
       logger,
       spaceId,
     });
@@ -797,6 +802,7 @@ export async function executeGenerationWorkflow({
       sourceMetadata,
       spaceId,
       start,
+      ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
       trigger,
       workflowConfig,
       workflowsManagementApi: workflowsApi,

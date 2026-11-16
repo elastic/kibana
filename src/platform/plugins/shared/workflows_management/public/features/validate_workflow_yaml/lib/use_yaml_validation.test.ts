@@ -602,6 +602,41 @@ steps:
     expect(getLastBatchedMarkers()).toEqual([]);
   });
 
+  it('keeps workflow validation results when an execution is opened', async () => {
+    const yamlContent = `
+version: "1"
+name: "Test Workflow"
+enabled: true
+triggers:
+  - type: manual
+    enabled: true
+steps:
+  - name: duplicate
+    type: console
+  - name: duplicate
+    type: console
+`;
+    const mockEditor = createMockEditor(yamlContent);
+    const { result, store } = renderHookWithProviders(mockEditor as any, yamlContent);
+
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+      await Promise.resolve();
+    });
+    await waitFor(() => {
+      expect(result.current.validationResults.length).toBeGreaterThan(0);
+    });
+
+    await act(async () => {
+      store.dispatch(setActiveTab('executions'));
+      jest.advanceTimersByTime(500);
+      await Promise.resolve();
+    });
+
+    expect(result.current.validationResults.length).toBeGreaterThan(0);
+    expect(getLastBatchedMarkers()).toEqual([]);
+  });
+
   it('reports failed connector metadata as a prerequisite error, not a diagnostic', async () => {
     jest.mocked(useWorkflowYamlValidationContext).mockReturnValue({
       ...readyValidationContext,

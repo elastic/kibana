@@ -26,6 +26,7 @@ tags:
   - dev
   - group-platform
   - private
+  - scout-tests
 fileGroups:
   src:
     - '**/*.ts'

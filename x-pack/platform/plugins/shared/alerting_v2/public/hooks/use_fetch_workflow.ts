@@ -12,7 +12,11 @@ import type { WorkflowDetailDto } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { workflowKeys } from './query_key_factory';
 
-export const useFetchWorkflow = (id: string | undefined, isEnabled = true) => {
+export const useFetchWorkflow = (
+  id: string | undefined,
+  isEnabled = true,
+  { notifyOnError = true }: { notifyOnError?: boolean } = {}
+) => {
   const workflowsApi = useService(WorkflowApi);
   const { toasts } = useService(CoreStart('notifications'));
 
@@ -22,6 +26,9 @@ export const useFetchWorkflow = (id: string | undefined, isEnabled = true) => {
     enabled: !!id && isEnabled,
     refetchOnWindowFocus: false,
     onError: (error: Error) => {
+      if (!notifyOnError) {
+        return;
+      }
       toasts.addError(error, {
         title: i18n.translate('xpack.alertingV2.workflow.fetchError', {
           defaultMessage: 'Failed to load workflow',

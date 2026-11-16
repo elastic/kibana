@@ -95,10 +95,28 @@ describe('reportOutcome', () => {
       },
     ],
     [
+      ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped,
+      {
+        alerts_joined: 0,
+        alerts_pooled: 0,
+        alerts_with_strict_key: 1,
+        conversation_created: false,
+        event: 'alert_triage_batch_grouped' as const,
+        fp_candidates_on_fallback: 0,
+        grouping: 'on' as const,
+        proposals_created: 0,
+        strict_keys: 1,
+        strict_keys_single_alert: 1,
+        wide_keys: 1,
+        wide_keys_single_alert: 1,
+      },
+    ],
+    [
       ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved,
       {
         alerts_proposed: 1,
         alerts_retag_failed: 0,
+        revisions: 1,
         auto_approve_requested: false,
         event: 'alert_triage_closure_resolved' as const,
         investigation_id: '0b9f4a3e-1c2d-8e3f-8a4b-5c6d7e8f9a0b',
