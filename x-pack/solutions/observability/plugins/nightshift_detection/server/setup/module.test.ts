@@ -15,6 +15,7 @@ import { NIGHTSHIFT_DETECTION_TIERED_FEATURES } from '../../common/constants';
 import { module } from '..';
 import { AvailabilityService } from '../lib/availability/availability_service';
 import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
+import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 
 function createContainer() {
   const core = coreMock.createStart();
@@ -40,6 +41,7 @@ describe('module', () => {
     const { container, core, coreSetup } = createContainer();
 
     container.get(AvailabilityService);
+    container.get(StrategyCatalog);
     container.getAll(OnStart);
     container.getAll(OnSetup).forEach((onSetup) => onSetup(container));
 
