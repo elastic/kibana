@@ -328,15 +328,15 @@ A comparison tests one pair per example and evaluator. When an example ran sever
 - `median` takes the median of the repetitions instead. It needs scores in [0, 1]. Slices with other scores are left out and listed in `pairing.rejectedSlices`, and the request fails with 400 when no slice is left. On pass/fail scores with an odd number of repetitions the median is a majority vote, so the row gets McNemar.
 - `pool` pairs every repetition by its index, as comparisons did before. Use it only when the repetitions are independent by design. By default they are not: they share the same input, so their scores are correlated. They are independent by design only when each repetition is in effect a different input (for example, a template that generates a new input on every repetition); when in doubt, keep the default.
 
-Averaged pass/fail scores are fractions when the repetitions disagree, so those rows get Wilcoxon signed-rank or the paired t-test, never McNemar. Whole-number scores (a 1 to 5 scale, a count) also become decimals when averaged, so those rows count as continuous and can get the paired t-test from 30 examples; in a simulation this kept false positives at about 5 in 100. The means are averages of the per-example scores, so they can differ from a plain average over all repetitions.
+Averaged pass/fail scores are fractions when the repetitions disagree, so those rows get Wilcoxon signed-rank or the paired t-test, never McNemar. Whole-number scores (a 1 to 5 scale, a count) also become decimals when the repetitions disagree. Those rows then count as continuous and can get the paired t-test from 30 examples. The means are averages of the per-example scores, so they can differ from a plain average over all repetitions.
 
 Because N counts examples, Wilcoxon signed-rank cannot reach p < 0.05 with 5 or fewer examples, so those rows cannot flag a difference in such a suite. With `pool` they could, through the repetitions.
 
 Each row also reports, per experiment, the valid and the missing (null) repetitions, and the stability: the mean sample standard deviation of each paired example's valid repetitions, over the examples with at least two (null when there are none). A row is flagged when an example has a different number of valid repetitions in the two experiments, or a null score.
 
-When a repetition fails, the example keeps its other valid repetitions for the mean, and it drops out of the stability when only one valid repetition is left. A failed repetition counts as missing only when it has a score document with a null score; one with no score document is not counted, and flags the row only when the example then has a different number of valid repetitions in the two experiments.
+When a repetition fails, the example keeps its other valid repetitions for the mean. It drops out of the stability when only one is left. Only a repetition stored with a null score counts as missing. One with no score document is not counted.
 
-With one repetition per example the results are the same as with `pool`, except in two cases. When an example's score is stored under repetition index 1 in one experiment and under index 0 in the other, the two scores are paired; `pool` leaves both unpaired. When one execution holds the same example twice (`type=execution`), its two scores are averaged; `pool` keeps the last one.
+With one repetition per example the results are the same as with `pool`, except in two cases. When an example's score is stored under repetition index 1 in one experiment and under index 0 in the other, the two scores are paired; `pool` leaves both unpaired. When one execution holds the same example twice (`type=execution`), its two scores are averaged; `pool` pairs only one of them.
 
 #### Score direction
 

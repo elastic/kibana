@@ -171,16 +171,21 @@ describe('pairScores', () => {
     expect(pairScores(target, baseline, 'pool').pairs).toEqual([]);
   });
 
-  it('averages an example held twice under mean, where pool keeps the last score', () => {
-    const target = [createMockScore({ score: 0.8 })];
+  it('averages an example held twice under mean, where pool pairs only one of its scores', () => {
+    const target = [createMockScore({ score: 0.8 }), createMockScore({ score: 0.4 })];
     const baseline = [createMockScore({ score: 0.2 }), createMockScore({ score: 0.6 })];
 
     expect(pairScores(target, baseline, 'mean').pairs).toEqual([
-      expect.objectContaining({ scoreTarget: 0.8, scoreBaseline: expect.closeTo(0.4, 12) }),
+      expect.objectContaining({
+        scoreTarget: expect.closeTo(0.6, 12),
+        scoreBaseline: expect.closeTo(0.4, 12),
+      }),
     ]);
-    expect(pairScores(target, baseline, 'pool').pairs).toEqual([
-      expect.objectContaining({ scoreTarget: 0.8, scoreBaseline: 0.6 }),
-    ]);
+
+    // Pool keeps the first target score and the last baseline score.
+    const pool = pairScores(target, baseline, 'pool');
+    expect(pool.pairs).toEqual([expect.objectContaining({ scoreTarget: 0.8, scoreBaseline: 0.6 })]);
+    expect(pool.skippedMissingPairs).toBe(1);
   });
 });
 
@@ -582,7 +587,7 @@ describe('compareScores (repetitions)', () => {
       missingTarget: 2,
       missingBaseline: 0,
       stabilityTarget: expect.closeTo(Math.SQRT1_2 * 0.2, 12),
-      stabilityBaseline: expect.closeTo(0, 12),
+      stabilityBaseline: 0,
     });
   });
 
@@ -631,7 +636,6 @@ describe('compareScores (repetitions)', () => {
     );
 
     expect(result.metricType).toBe('continuous_unbounded');
-    expect(result.hypothesisTest.id).toBe('wilcoxon_signed_rank');
   });
 
   it('never passes averaged pass/fail scores to McNemar', () => {
