@@ -14,6 +14,7 @@ import { distinctUntilChanged } from 'rxjs';
 
 import { isEqual } from 'lodash';
 
+import { CONTROL_WIDTH_PIXELS } from '@kbn/controls-constants';
 import { FlexLayout } from '@kbn/grid-layout';
 import type { FlexLayoutData, FlexLayoutSettings } from '@kbn/grid-layout';
 
@@ -21,7 +22,6 @@ import { ControlPanel } from './components/control_panel';
 import type { ControlsLayout, ControlsRendererParentApi } from './types';
 import {
   apiPublishesFocusedPanelId,
-  CONTROL_WIDTH_PIXELS,
   controlsLayoutToFlexLayout,
   flexLayoutToControlsLayout,
 } from './utils';

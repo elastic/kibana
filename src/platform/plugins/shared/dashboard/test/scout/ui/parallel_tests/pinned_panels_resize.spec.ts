@@ -10,9 +10,9 @@
 import {
   CONTROL_WIDTH_LARGE,
   CONTROL_WIDTH_MEDIUM,
+  CONTROL_WIDTH_PIXELS,
   CONTROL_WIDTH_SMALL,
 } from '@kbn/controls-constants';
-import { CONTROL_WIDTH_PIXELS } from '@kbn/controls-renderer';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {

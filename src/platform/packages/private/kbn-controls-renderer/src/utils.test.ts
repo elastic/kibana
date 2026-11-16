@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CONTROL_WIDTH_PIXELS } from '@kbn/controls-constants';
+
 import type { ControlsLayout } from './types';
 import {
-  CONTROL_WIDTH_PIXELS,
   controlsLayoutToFlexLayout,
   flexLayoutToControlsLayout,
   getClosestControlWidth,

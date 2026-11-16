@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  CONTROL_WIDTH_LARGE,
-  CONTROL_WIDTH_MEDIUM,
-  CONTROL_WIDTH_SMALL,
-} from '@kbn/controls-constants';
+import { CONTROL_WIDTH_MEDIUM, CONTROL_WIDTH_PIXELS } from '@kbn/controls-constants';
 import type { ControlWidth } from '@kbn/controls-schemas';
 import type { FlexLayoutData } from '@kbn/grid-layout';
 
@@ -22,13 +18,6 @@ export const apiPublishesFocusedPanelId = (api: unknown): api is PublishesFocuse
 
 export const apiPublishesLabel = (api: unknown): api is PublishesLabel =>
   Boolean((api as PublishesLabel).label$);
-
-/** the pixel width the flex layout renders for each control width option */
-export const CONTROL_WIDTH_PIXELS: Readonly<Record<ControlWidth, number>> = {
-  [CONTROL_WIDTH_SMALL]: 224,
-  [CONTROL_WIDTH_MEDIUM]: 400,
-  [CONTROL_WIDTH_LARGE]: 800,
-};
 
 /** snaps an arbitrary pixel width (e.g. from a resize) to the closest control width option */
 export const getClosestControlWidth = (pixels: number): ControlWidth => {

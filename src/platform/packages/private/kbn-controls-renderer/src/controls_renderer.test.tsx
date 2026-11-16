@@ -16,6 +16,7 @@ import userEvent from '@testing-library/user-event';
 import {
   CONTROL_WIDTH_LARGE,
   CONTROL_WIDTH_MEDIUM,
+  CONTROL_WIDTH_PIXELS,
   CONTROL_WIDTH_SMALL,
   OPTIONS_LIST_CONTROL,
 } from '@kbn/controls-constants';
@@ -23,7 +24,6 @@ import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
 
 import { ControlsRenderer } from './controls_renderer';
 import type { ControlsLayout, ControlsRendererParentApi } from './types';
-import { CONTROL_WIDTH_PIXELS } from './utils';
 
 // the control itself is not under test; render a placeholder so only the layout is exercised
 jest.mock('./components/control_panel', () => ({
