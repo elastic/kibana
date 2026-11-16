@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment-timezone';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
@@ -33,7 +34,9 @@ const SLOW_TEST_TIMEOUT_MS = 180_000;
  */
 apiTest.describe(
   'SyntheticsCustomStatusRule — time window, firstUp recovery',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  {
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
+  },
   () => {
     const env = createStatusRuleTestEnv('time-window-first-up');
 

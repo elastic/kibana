@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { ConfigKey } from '../../../../../common/runtime_types';
@@ -38,7 +39,7 @@ const isValidDate = (value: unknown) => !Number.isNaN(new Date(value as string).
 apiTest.describe(
   'EditMonitorAPI - Public Location',
   {
-    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
   },
   () => {
     let editorHeaders: Record<string, string>;

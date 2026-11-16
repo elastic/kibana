@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { KibanaRole } from '@kbn/scout-oblt';
 import { apiTest, mergeSyntheticsApiHeaders } from '../../../common/fixtures';
@@ -41,7 +42,7 @@ const ROLE_CONFIGS = {
   },
 } satisfies Record<string, KibanaRole>;
 
-apiTest.describe('RunTestManuallyPermissions', { tag: ['@local-stateful-classic'] }, () => {
+apiTest.describe('RunTestManuallyPermissions', { tag: tags.local.stateful.classic }, () => {
   let allHeaders: Record<string, string>;
   let readOnlyHeaders: Record<string, string>;
   let readWithRunHeaders: Record<string, string>;

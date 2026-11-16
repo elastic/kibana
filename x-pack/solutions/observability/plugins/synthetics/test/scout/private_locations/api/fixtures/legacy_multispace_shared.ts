@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApiClientFixture, KbnClient } from '@kbn/scout-oblt';
 import {
@@ -61,7 +62,9 @@ export const registerLegacyAndMultiSpaceTests = ({
 }) => {
   apiTest.describe(
     suiteName,
-    { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+    {
+      tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
+    },
     () => {
       let editorHeaders: Record<string, string>;
       // All-spaces private location used for the happy-path tests (mirrors the

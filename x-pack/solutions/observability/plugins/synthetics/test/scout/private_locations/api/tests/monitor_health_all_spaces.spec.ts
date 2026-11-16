@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import {
   apiTest,
@@ -37,7 +38,9 @@ const monitorHealthUrl = (monitorId: string) =>
  */
 apiTest.describe(
   'MonitorHealthAllSpaces',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  {
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
+  },
   () => {
     let editorApiHeaders: Record<string, string>;
     let editorCookieHeaders: Record<string, string>;

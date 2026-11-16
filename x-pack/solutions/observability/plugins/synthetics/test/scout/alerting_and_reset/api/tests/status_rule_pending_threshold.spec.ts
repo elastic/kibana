@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import type { ApiClientFixture, EsClient } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import {
@@ -51,7 +52,7 @@ interface AlertingRuleBody {
 apiTest.describe(
   'statusRulePendingThreshold',
   {
-    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
   },
   () => {
     let editorHeaders: Record<string, string>;

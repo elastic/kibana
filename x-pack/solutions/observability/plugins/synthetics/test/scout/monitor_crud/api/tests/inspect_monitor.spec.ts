@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import {
   apiTest,
@@ -58,7 +59,9 @@ const DECODED_BROWSER_CODE =
  */
 apiTest.describe(
   'inspectSyntheticsMonitor',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  {
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
+  },
   () => {
     let editorHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;

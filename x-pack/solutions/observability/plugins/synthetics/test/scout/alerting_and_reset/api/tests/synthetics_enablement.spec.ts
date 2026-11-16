@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, KIBANA_HEADERS, SYNTHETICS_API_URLS } from '../../../common/fixtures';
@@ -84,7 +85,7 @@ const SYNTHETICS_API_KEY_NAME = 'synthetics-api-key (required for Synthetics App
 apiTest.describe(
   'SyntheticsEnablement',
   {
-    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
   },
   () => {
     interface ApiKey {

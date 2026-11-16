@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApiClientFixture, KbnClient, KibanaRole } from '@kbn/scout-oblt';
 import {
@@ -124,7 +125,7 @@ const addLegacyPrivateLocations = async (
   return locations;
 };
 
-apiTest.describe('PrivateLocationAPI', { tag: ['@local-stateful-classic'] }, () => {
+apiTest.describe('PrivateLocationAPI', { tag: tags.local.stateful.classic }, () => {
   let adminHeaders: Record<string, string>;
   let minimalAllHeaders: Record<string, string>;
   let canManageHeaders: Record<string, string>;

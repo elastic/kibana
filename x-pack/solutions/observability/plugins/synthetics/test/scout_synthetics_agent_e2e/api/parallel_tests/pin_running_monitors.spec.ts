@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { mergeSyntheticsApiHeaders } from '../../../scout/common/fixtures';
@@ -48,7 +49,7 @@ const setShardRebalance = async (
  */
 apiTest.describe(
   'Synthetics real-agent pinning of running monitors',
-  { tag: ['@local-stateful-classic'] },
+  { tag: tags.local.stateful.classic },
   () => {
     let editorHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;

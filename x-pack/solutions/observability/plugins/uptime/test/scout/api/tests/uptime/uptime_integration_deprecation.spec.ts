@@ -6,11 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../../fixtures';
 
-apiTest.describe('UptimeIntegrationDeprecation', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('UptimeIntegrationDeprecation', { tag: tags.local.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
   let agentPolicyId: string;
   let syntheticsVersion: string;

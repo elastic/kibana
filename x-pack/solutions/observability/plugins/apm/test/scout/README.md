@@ -34,11 +34,13 @@ feature_flags.overrides:
 In Scout, turn the flag on at runtime with the helpers exported from `shared/`:
 
 ```ts
+import { tags } from '@kbn/scout-oblt';
 import { enableServiceMapGrouping, removeServiceMapGroupingOverride } from '../../shared';
 
 test.describe(
   'Service map grouping',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  // Local targets only: the flag can't be overridden on Cloud
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
       await enableServiceMapGrouping(apiServices);

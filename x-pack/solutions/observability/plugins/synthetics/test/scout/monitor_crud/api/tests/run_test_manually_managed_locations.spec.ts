@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { KibanaRole } from '@kbn/scout-oblt';
 import {
@@ -49,7 +50,7 @@ const ROLE_CONFIGS = {
  */
 apiTest.describe(
   'RunTestManuallyPermissions - Elastic managed locations',
-  { tag: ['@local-stateful-classic'] },
+  { tag: tags.local.stateful.classic },
   () => {
     let allHeaders: Record<string, string>;
     let readWithRunHeaders: Record<string, string>;
