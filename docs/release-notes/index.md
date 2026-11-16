@@ -54,7 +54,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % * Fix saving a dashboard through the API with a tag that doesn't exist, which could crash {{kib}} [#303299]({{kib-pull}}303299).
 
 **Data ingestion and {{fleet}}**:
-* Fix unenrolled agentless agents appearing in the {{fleet}} agents list after you delete the agentless integration [#304146]({{kib-pull}}304146).
+* Fix the collectors of deleted managed integrations appearing in the {{fleet}} **Agents** list even when you hide managed integration resources [#304146]({{kib-pull}}304146).
 * Fix the **Add Elastic Agent to your hosts** button in the dialog that opens after you add an integration not opening the **Add agent** flyout [#303762]({{kib-pull}}303762).
 * Return a `400` error when the `id` in the body of `PUT /api/fleet/agent_policies/{agentPolicyId}` differs from the ID in the path [#303513]({{kib-pull}}303513).
 * Fix agent policies failing to apply when an integration policy ID contains characters that {{es}} rejects in role descriptor names, such as IDs generated for Synthetics project monitors [#303384]({{kib-pull}}303384).
