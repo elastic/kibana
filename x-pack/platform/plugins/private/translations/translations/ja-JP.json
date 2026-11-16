@@ -47304,7 +47304,6 @@
     "xpack.nightshift.automations.timeRange.last90Days": "過去90日間",
     "xpack.nightshift.automations.timeRange.today": "今日",
     "xpack.nightshift.automations.timeRange.yesterday": "昨日",
-    "xpack.nightshift.automations.toggleLabel": "{action} {name}",
     "xpack.nightshift.automations.triggerFilter": "トリガー",
     "xpack.nightshift.automations.updateError": "自動化を更新できませんでした",
     "xpack.nightshift.automations.updateSuccess": "自動化が更新されました",
