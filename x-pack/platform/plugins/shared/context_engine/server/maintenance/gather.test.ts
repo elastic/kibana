@@ -235,31 +235,28 @@ describe('gatherMaintenance', () => {
     ]);
   });
 
-  it('does not refresh an entity it wrote after the facts about it changed', async () => {
-    const byWriter = { provenance: { updated_by: { uri: WRITER, metadata: {} } } };
-    const factAt = (id: string, updatedAt: string) =>
-      fact(id, { updated_at: updatedAt, governance: byWriter });
+  it('never shows an entity a fact about it that this run tombstones', async () => {
     const stored = [
-      memory('m-1'),
-      factAt('fact-a', '2026-11-03T00:00:00.000Z'),
-      factAt('fact-b', '2026-11-05T00:00:00.000Z'),
-      entity('entity-summarized', { updated_at: '2026-11-04T00:00:00.000Z', governance: byWriter }),
-      entity('entity-stale', { updated_at: '2026-11-04T00:00:00.000Z', governance: byWriter }),
-      entity('entity-seen', { updated_at: '2026-11-04T00:00:00.000Z' }),
-      relationship('fact-a', 'about', 'entity-summarized'),
-      relationship('fact-b', 'about', 'entity-stale'),
-      relationship('fact-a', 'about', 'entity-seen'),
+      memory('m-1', { governance: deleted }),
+      memory('m-2'),
+      fact('fact-lost'),
+      fact('fact-kept', { references: derivedFrom('m-2') }),
+      entity('entity-a', { references: derivedFrom('m-2') }),
+      relationship('fact-lost', 'about', 'entity-a'),
+      relationship('fact-kept', 'about', 'entity-a'),
     ];
 
     const output = await gatherMaintenance(
-      fakeReader(stored, { changed: [stored[1], stored[2]] }),
+      fakeReader(stored, { changed: [stored[0], stored[3]] }),
       options
     );
 
-    expect(output.batches.flatMap(({ items }) => items.map(({ id }) => id))).toEqual([
-      'entity-stale',
-      'entity-seen',
+    expect(output.fixes).toEqual([
+      { id: 'fact-lost', change: 'tombstoned', reason: 'Every memory it came from was deleted.' },
     ]);
+    const [batch] = output.batches;
+    expect(batch.items.find(({ id }) => id === 'entity-a')?.about_fact_ids).toEqual(['fact-kept']);
+    expect(batch.about_facts).toEqual([]);
   });
 
   it('tombstones relationships that link a deleted item or differ in permissions from their ends', async () => {

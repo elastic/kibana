@@ -167,7 +167,6 @@ export const gatherMaintenance = async (
     ...aboutLinks(changed.kis).map(({ to, ki }) => ({
       entityId: to,
       permissions: ki.permissions,
-      changedAt: ki.updated_at,
       cause: positionOf.get(ki.id) ?? 0,
     })),
     ...aboutLinks(factLinks).flatMap(({ from, to }) => {
@@ -177,7 +176,6 @@ export const gatherMaintenance = async (
             {
               entityId: to,
               permissions: changedFact.permissions,
-              changedAt: changedFact.updated_at,
               cause: positionOf.get(from) ?? 0,
             },
           ]
@@ -187,16 +185,11 @@ export const gatherMaintenance = async (
   const aboutEntities = factChanges.length
     ? await reader.latestByIds([...new Set(factChanges.map(({ entityId }) => entityId))])
     : new Map<string, DreamedKi>();
-  const writtenSince = (ki: DreamedKi, changedAt: DreamedKi['updated_at']): boolean =>
-    ki.governance?.provenance?.updated_by?.uri === writerUri &&
-    Date.parse(String(ki.updated_at ?? '')) >= Date.parse(String(changedAt ?? ''));
   for (const ki of aboutEntities.values()) {
     const causes = factChanges
       .filter(
-        ({ entityId, permissions, changedAt }) =>
-          entityId === ki.id &&
-          samePermissions(permissions, ki.permissions) &&
-          !writtenSince(ki, changedAt)
+        ({ entityId, permissions }) =>
+          entityId === ki.id && samePermissions(permissions, ki.permissions)
       )
       .map(({ cause }) => cause);
     if (causes.length > 0 && isLiveItem(ki) && kindOf(ki) === 'entity') {
@@ -346,6 +339,7 @@ export const gatherMaintenance = async (
   const liveLinks = links.filter(({ id }) => !brokenLinks.has(id));
 
   const reviewedIds = new Set(reviewed.map(({ id }) => id));
+  const fixedIds = new Set(fixes.map(({ id }) => id));
   const aboutFactIdsOf = new Map<string, string[]>();
   for (const link of liveLinks) {
     if (link.relation === ABOUT_RELATIONSHIP_TYPE && reviewedIds.has(link.to)) {
@@ -359,7 +353,10 @@ export const gatherMaintenance = async (
       factIds
         .map((factId) => known.get(factId))
         .filter(isLiveItem)
-        .filter((factKi) => samePermissions(factKi.permissions, entityPermissions))
+        .filter(
+          (factKi) =>
+            !fixedIds.has(factKi.id) && samePermissions(factKi.permissions, entityPermissions)
+        )
         .sort(newestFirst)
         .slice(0, MAX_MAINTENANCE_ABOUT_FACTS)
         .map(({ id }) => id)
