@@ -168,7 +168,7 @@ describe('isNonRoutableIpIoc', () => {
     expect(isNonRoutableIpIoc({ type: 'ip', value: '203.0.113.10:443' })).toBe(false);
   });
 
-  it.each(['203.0.113.1000', '203.0.113.256', '999.0.0.1'])(
+  it.each(['203.0.113.1000', '203.0.113.256', '999.0.0.1', '127.0.0.1000', '10.0.0.5000'])(
     'does not read out-of-range octets in %s as an address',
     (value) => {
       expect(isNonRoutableIpIoc({ type: 'ip', value })).toBe(false);
