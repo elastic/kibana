@@ -61,7 +61,7 @@ export const PutAwsOnboardingCredentialsRequestSchema = {
   }),
 };
 
-export const GetAwsOnboardingBootstrapTemplateRequestSchema = {
+export const GetAwsOnboardingBootstrapLaunchRequestSchema = {
   query: schema.object({
     mode: schema.oneOf([schema.literal('fully-managed'), schema.literal('partially-managed')], {
       defaultValue: 'fully-managed',

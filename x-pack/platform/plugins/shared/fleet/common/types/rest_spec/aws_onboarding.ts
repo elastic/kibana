@@ -133,8 +133,9 @@ export interface GetAwsOnboardingStackResponse {
   };
 }
 
-export interface GetAwsOnboardingBootstrapTemplateResponse {
-  filename: string;
-  /** CloudFormation YAML the customer uploads once to create the bootstrap identity. */
-  template: string;
+export interface GetAwsOnboardingBootstrapLaunchResponse {
+  /** CloudFormation console link that pre-fills the bootstrap stack; embeds a short-lived signed template URL. */
+  quickCreateUrl: string;
+  expiresAt: string;
+  blueprint: { id: string; version: string };
 }

@@ -9,8 +9,6 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaResponseFactory } from '@kbn/core/server';
 
 import {
-  BOOTSTRAP_TEMPLATE_FILENAME,
-  BOOTSTRAP_TEMPLATE_YAML,
   awsOnboardingCredentialsService,
   awsOnboardingDiscoveryService,
   awsOnboardingStackService,
@@ -18,6 +16,15 @@ import {
 } from '../../services/aws_onboarding';
 import { appContextService } from '../../services/app_context';
 import { isAwsManagedOnboardingEnabled } from '../../services/utils/aws_onboarding';
+import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
+import { iacProvisionerService } from '../../services/iac_provisioner';
+import {
+  getQuickCreateUrl,
+  setQuickCreateStackName,
+  setQuickCreateStackParams,
+} from '../../../common/services';
+import { IAC_MANAGED_ONBOARDING_BOOTSTRAP_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
+import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
 import {
   FleetNotFoundError,
   IacProvisionerRequestError,
@@ -27,11 +34,13 @@ import type { FleetRequestHandler } from '../../types';
 import type {
   CreateAwsOnboardingStackRequestSchema,
   DeleteAwsOnboardingCredentialsRequestSchema,
-  GetAwsOnboardingBootstrapTemplateRequestSchema,
+  GetAwsOnboardingBootstrapLaunchRequestSchema,
   GetAwsOnboardingStackRequestSchema,
   PutAwsOnboardingCredentialsRequestSchema,
   UpdateAwsOnboardingStackRequestSchema,
 } from '../../types/rest_spec/aws_onboarding';
+
+const BOOTSTRAP_STACK_NAME = 'elastic-onboarding-bootstrap';
 
 const notEnabled = (response: KibanaResponseFactory) =>
   response.notFound({ body: { message: 'Managed AWS onboarding is not enabled' } });
@@ -146,18 +155,47 @@ export const updateStackHandler: FleetRequestHandler<
   }
 };
 
-export const getBootstrapTemplateHandler: FleetRequestHandler<
+export const getBootstrapLaunchHandler: FleetRequestHandler<
   undefined,
-  TypeOf<typeof GetAwsOnboardingBootstrapTemplateRequestSchema.query>
+  TypeOf<typeof GetAwsOnboardingBootstrapLaunchRequestSchema.query>
 > = async (context, request, response) => {
   if (!(await isAwsManagedOnboardingEnabled())) return notEnabled(response);
-  // The mode chosen in Kibana becomes the parameter default, so the console form opens pre-set
-  // to what was requested; it stays editable there, like any approval screen.
-  const template = BOOTSTRAP_TEMPLATE_YAML.replace(
-    'Default: fully-managed\n',
-    `Default: ${request.query.mode}\n`
-  );
-  return response.ok({ body: { filename: BOOTSTRAP_TEMPLATE_FILENAME, template } });
+  if (!(await isIacProvisionerEnabled())) {
+    return response.customError({
+      statusCode: 503,
+      body: { message: 'The IaC Provisioner is not available' },
+    });
+  }
+  const logger = appContextService.getLogger().get('AwsOnboarding');
+  try {
+    const rendered = await iacProvisionerService.renderAccountTemplate({
+      provider: AWS_CLOUD_PROVIDER,
+      workflow: IAC_MANAGED_ONBOARDING_BOOTSTRAP_WORKFLOW,
+    });
+    if (!rendered.render || !rendered.artifactUrl || !rendered.expiresAt) {
+      return response.customError({
+        statusCode: 502,
+        body: { message: 'The IaC Provisioner did not render the bootstrap template' },
+      });
+    }
+    // The mode chosen in Kibana pre-fills the console form's ManagementMode parameter; it stays
+    // editable there, like any approval screen.
+    const quickCreateUrl = setQuickCreateStackParams(
+      setQuickCreateStackName(getQuickCreateUrl(rendered.artifactUrl), BOOTSTRAP_STACK_NAME),
+      { ManagementMode: request.query.mode }
+    );
+    return response.ok({
+      body: { quickCreateUrl, expiresAt: rendered.expiresAt, blueprint: rendered.blueprint },
+    });
+  } catch (error) {
+    // Message only: the artifact URL embeds signing credentials.
+    logger.warn(
+      `Bootstrap template render failed: ${
+        error instanceof Error ? error.message : 'unknown error'
+      }`
+    );
+    return mapError(error, response);
+  }
 };
 
 export const getDiscoveryHandler: FleetRequestHandler = async (context, request, response) => {

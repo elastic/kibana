@@ -10,7 +10,3 @@ export type { AwsOnboardingCredentials } from './credentials';
 export { awsOnboardingStackService } from './stacks';
 export { awsOnboardingDiscoveryService } from './discovery';
 export { isAwsSdkError } from './cloudformation_client';
-export {
-  BOOTSTRAP_TEMPLATE_YAML,
-  BOOTSTRAP_TEMPLATE_FILENAME,
-} from './templates/bootstrap_template';
