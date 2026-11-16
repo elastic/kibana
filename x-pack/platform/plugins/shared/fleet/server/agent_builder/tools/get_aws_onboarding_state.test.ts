@@ -71,7 +71,15 @@ const waitingExecution = (waitingStepId: string, stepExecutions: unknown[]) => (
 const existingCard = (status: string) => ({
   id: 'att-9',
   type: 'fleet_aws_onboarding_credentials',
-  data: { execution_id: 'exec-1', region: 'us-east-1', status },
+  versions: [
+    {
+      version: 1,
+      data: { execution_id: 'exec-1', region: 'us-east-1', status },
+      created_at: '2026-11-16T00:00:00Z',
+      content_hash: 'hash-1',
+    },
+  ],
+  current_version: 1,
 });
 
 describe('get_aws_onboarding_state', () => {

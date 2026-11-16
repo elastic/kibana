@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { toWorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflows';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
@@ -84,7 +85,8 @@ const syncCredentialsCard = async ({
     .find(
       (a) =>
         a.type === AWS_ONBOARDING_CREDENTIALS_ATTACHMENT_TYPE &&
-        (a.data as Partial<AwsOnboardingCredentialsAttachmentData>)?.execution_id === executionId
+        (getLatestVersion(a)?.data as Partial<AwsOnboardingCredentialsAttachmentData> | undefined)
+          ?.execution_id === executionId
     );
 
   if (!existing) {
@@ -104,7 +106,7 @@ const syncCredentialsCard = async ({
     return created.id;
   }
 
-  const stored = existing.data as AwsOnboardingCredentialsAttachmentData;
+  const stored = getLatestVersion(existing)?.data as AwsOnboardingCredentialsAttachmentData;
   const next = deriveCardState(credentialsOutput);
   if (next.status !== stored.status || next.error !== stored.error) {
     // Replace the derived fields wholesale so a stale account_id or error does not linger.
