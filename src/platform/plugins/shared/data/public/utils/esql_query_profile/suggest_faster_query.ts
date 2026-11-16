@@ -8,10 +8,12 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import type { OptimizeQueryResponse } from '@kbn/esql-types';
 import { OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import type { QueryProfileView } from './aggregate_esql_profile';
+import type { QueryProfileView } from './query_profile_model';
 import { buildProfileContext } from './profile_prompt_context';
+import { readErrorMessage } from './read_error_message';
 
 export interface FasterQuerySuggestion {
   /** A rewritten query, or undefined when the AI found no safe improvement. */
@@ -47,11 +49,6 @@ export function checkFasterQueryAvailable(http: Pick<HttpStart, 'get'>): Promise
   return request;
 }
 
-interface OptimizeQueryResponse {
-  query: string | null;
-  reason: string;
-}
-
 /** Asks the AI for a faster query that should return the same results as the profiled one. */
 export async function suggestFasterQuery({
   http,
@@ -71,18 +68,20 @@ export async function suggestFasterQuery({
     });
     return { query: response.query ?? undefined, reason: response.reason };
   } catch (caught: unknown) {
-    throw new Error(readErrorMessage(caught));
+    throw new Error(readFailureMessage(caught));
   }
 }
 
-function readErrorMessage(caught: unknown): string {
+/** The message the server sent with a failed request, or the one of the error itself. */
+function readFailureMessage(caught: unknown): string {
   const body = (caught as { body?: { message?: unknown } } | undefined)?.body;
   if (typeof body?.message === 'string' && body.message.length > 0) {
     return body.message;
   }
-  return caught instanceof Error && caught.message
-    ? caught.message
-    : i18n.translate('data.inspector.queryProfile.suggestFailedMessage', {
-        defaultMessage: 'The AI could not suggest a faster query.',
-      });
+  return readErrorMessage(
+    caught,
+    i18n.translate('data.inspector.queryProfile.suggestFailedMessage', {
+      defaultMessage: 'The AI could not suggest a faster query.',
+    })
+  );
 }

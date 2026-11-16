@@ -12,6 +12,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
+import type { OptimizeQueryResponse } from '@kbn/esql-types';
 import { OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
 import type { EsqlServerPluginStart } from '../types';
 import { createScopedModel, resolveConnectorId } from './helpers';
@@ -187,9 +188,11 @@ export const registerOptimizeQueryRoute = (
           suggestion.length > 0 &&
           normalize(suggestion) !== normalize(queryString);
 
-        return response.ok({
-          body: { query: isUsable ? suggestion : null, reason: result.reason.trim() },
-        });
+        const body: OptimizeQueryResponse = {
+          query: isUsable ? suggestion : null,
+          reason: result.reason.trim(),
+        };
+        return response.ok({ body });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error(`ES|QL query optimization failed: ${errorMessage}`);

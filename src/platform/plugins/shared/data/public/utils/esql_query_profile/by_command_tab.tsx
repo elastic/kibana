@@ -9,17 +9,16 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiSpacer, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiToolTip, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { QueryProfileView } from './aggregate_esql_profile';
+import type { QueryProfileView } from './query_profile_model';
 import { mapOperatorsToCommands } from './map_operators_to_commands';
 import type { CommandHeat } from './map_operators_to_commands';
 import { splitQueryCommands } from './query_commands';
 import { formatShare } from './profile_format';
+import { HOT_SHARE, WARM_SHARE } from './profile_heat';
 
-const HOT_SHARE = 0.5;
-const WARM_SHARE = 0.25;
 const MAX_COMMAND_LENGTH = 90;
 /** Time in steps that belong to no command is only mentioned when it is at least this share. */
 const MIN_UNATTRIBUTED_SHARE = 0.01;
@@ -54,7 +53,7 @@ const CommandRow = ({ entry, isNested }: { entry: CommandHeat; isNested: boolean
           defaultMessage: 'No operator of its own. It was likely pushed into the search.',
         })
       : undefined;
-  const small = `${euiTheme.font.scale.xs * euiTheme.base}px`;
+  const { fontSize: small } = useEuiFontSize('xs');
 
   const styles = {
     row: css`

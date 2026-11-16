@@ -20,11 +20,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { QueryProfileView, TimelineDriver, TimelineOperator } from './aggregate_esql_profile';
+import type { QueryProfileView, TimelineDriver, TimelineOperator } from './query_profile_model';
 import { operatorCategory, useOperatorCategoryColors } from './operator_category';
 import { computeTicks } from './timeline_ticks';
 import { formatCount, formatDurationMillis } from './profile_format';
 import { LegendSwatch } from './legend_swatch';
+import { HOT_SHARE, WARM_SHARE } from './profile_heat';
 import {
   groupLabel,
   operatorShareLabel,
@@ -200,15 +201,14 @@ const OperatorDetails = ({
   </div>
 );
 
-const HOT_DRIVER_SHARE = 0.25;
-const HOT_QUERY_SHARE = 0.05;
-const VERY_HOT_DRIVER_SHARE = 0.5;
+/** An operator also has to be at least this share of the whole query to be flagged. */
+const MIN_QUERY_SHARE = 0.05;
 
 /** An operator is hot when it is a large part of its driver and a real part of the whole query. */
 const isHotOperator = (operator: TimelineOperator, totalOperatorNanos: number): boolean =>
-  operator.share >= HOT_DRIVER_SHARE &&
+  operator.share >= WARM_SHARE &&
   totalOperatorNanos > 0 &&
-  operator.processNanos / totalOperatorNanos >= HOT_QUERY_SHARE;
+  operator.processNanos / totalOperatorNanos >= MIN_QUERY_SHARE;
 
 const OperatorTooltip = ({
   operator,
@@ -317,7 +317,7 @@ const DriverOperators = ({
                       <EuiIcon
                         type="thermometer"
                         size="s"
-                        color={operator.share >= VERY_HOT_DRIVER_SHARE ? 'danger' : 'warning'}
+                        color={operator.share >= HOT_SHARE ? 'danger' : 'warning'}
                         aria-hidden="true"
                       />
                     ) : null}

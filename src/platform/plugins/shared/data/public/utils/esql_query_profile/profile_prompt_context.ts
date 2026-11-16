@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryProfileView } from './aggregate_esql_profile';
+import type { QueryProfileView } from './query_profile_model';
 
 /** Stays below the limit the optimize route accepts for the profile context. */
 const MAX_CONTEXT_LENGTH = 50_000;

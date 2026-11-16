@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregatedOperator } from './aggregate_esql_profile';
+import { commandNames, sourceCommandNames } from '@elastic/esql-definitions';
+import type { AggregatedOperator } from './query_profile_model';
 import { shareOf } from './aggregate_esql_profile';
 import type { QueryCommand } from './query_commands';
 
@@ -18,10 +19,6 @@ export interface CommandHeat {
    * a command of the main query.
    */
   subquery?: number;
-  /** CPU time of operators that belong to this command and to no other. */
-  nanos: number;
-  /** CPU time of operators that could belong to this command or to another one like it. */
-  sharedNanos: number;
   /** Share of all operator CPU time, counting shared time. From 0 to 1. */
   share: number;
   /** True when part of the time is shared, so the share is an upper bound. */
@@ -33,14 +30,12 @@ export interface CommandHeat {
 export interface QueryHeat {
   /** The commands in the order they are written, with those of subqueries in place. */
   commands: CommandHeat[];
-  /** CPU time of operators that no command explains, such as exchanges. */
-  unattributedNanos: number;
+  /** Share of the operator CPU time that no command explains, such as exchanges. From 0 to 1. */
   unattributedShare: number;
   /** True when the query has subqueries, so the commands belong to different queries. */
   hasSubqueries: boolean;
 }
 
-const SOURCE_COMMANDS = ['FROM', 'TS', 'ROW', 'SHOW', 'EXPLAIN'];
 const normalize = (name: string): string => name.toLowerCase().replace(/[^a-z]/g, '');
 
 /** Whether an operator reads the data, which is what the first command of a query does. */
@@ -50,6 +45,10 @@ const isSourceOperator = (title: string): boolean => {
 };
 
 /** The command names an operator can stand for, from most to least specific. */
+/** The commands whose name contains one of these, such as STATS and INLINE STATS for `stats`. */
+const commandsNamedLike = (...parts: string[]): string[] =>
+  commandNames.filter((command) => parts.some((part) => normalize(command).includes(part)));
+
 function candidateCommandNames(title: string): string[] {
   const name = normalize(title);
 
@@ -57,13 +56,13 @@ function candidateCommandNames(title: string): string[] {
     return [];
   }
   if (isSourceOperator(title)) {
-    return SOURCE_COMMANDS;
+    return [...sourceCommandNames];
   }
   if (name.includes('filter')) {
     return ['WHERE'];
   }
   if (name.includes('aggregation') || name.includes('stats')) {
-    return ['STATS', 'INLINE', 'INLINESTATS'];
+    return commandsNamedLike('stats');
   }
   if (name.includes('topn')) {
     return ['SORT', 'LIMIT'];
@@ -79,15 +78,10 @@ function candidateCommandNames(title: string): string[] {
   }
   // A LOOKUP JOIN runs as a StreamingLookupOperator. Enrich has its own operators.
   if (name.includes('join') || (name.includes('lookup') && !name.includes('enrich'))) {
-    return ['LOOKUP', 'JOIN'];
+    return commandsNamedLike('join', 'lookup');
   }
   // Other operators are named after their command, such as Enrich, Dissect, Grok or MvExpand.
-  return [
-    title
-      .replace(/Operator$/, '')
-      .replace(/([a-z])([A-Z])/g, '$1_$2')
-      .toUpperCase(),
-  ];
+  return commandNames.filter((command) => normalize(command) === name);
 }
 
 type Scope = { kind: 'flat' } | { kind: 'main' } | { kind: 'subquery'; index: number };
@@ -225,15 +219,12 @@ export function mapOperatorsToCommands(
     commands: accumulators.map(({ entry, exactNanos, sharedNanos, operatorNanos }) => ({
       command: entry.command,
       subquery: entry.subquery,
-      nanos: exactNanos,
-      sharedNanos,
       share: shareOf(exactNanos + sharedNanos, total),
       isApproximate: sharedNanos > 0,
       operators: [...operatorNanos.entries()]
         .sort((left, right) => right[1] - left[1])
         .map(([title]) => title),
     })),
-    unattributedNanos,
     unattributedShare: shareOf(unattributedNanos, total),
     hasSubqueries: owner !== undefined,
   };

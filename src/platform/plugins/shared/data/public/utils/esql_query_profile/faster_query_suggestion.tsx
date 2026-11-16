@@ -24,10 +24,11 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchStart } from '../../search';
-import type { QueryProfileView } from './aggregate_esql_profile';
+import type { QueryProfileView } from './query_profile_model';
 import { compareResults } from './compare_results';
 import type { ResultsVerdict } from './compare_results';
 import { loadEsqlQueryProfile } from './load_esql_query_profile';
+import { readErrorMessage } from './read_error_message';
 import { formatChange, formatDurationMillis } from './profile_format';
 import { checkFasterQueryAvailable, suggestFasterQuery } from './suggest_faster_query';
 
@@ -41,11 +42,12 @@ type Stage =
   | { kind: 'error'; message: string };
 
 const errorMessage = (caught: unknown): string =>
-  caught instanceof Error && caught.message
-    ? caught.message
-    : i18n.translate('data.inspector.queryProfile.suggestionFailedMessage', {
-        defaultMessage: 'Something went wrong while checking the suggested query.',
-      });
+  readErrorMessage(
+    caught,
+    i18n.translate('data.inspector.queryProfile.suggestionFailedMessage', {
+      defaultMessage: 'Something went wrong while checking the suggested query.',
+    })
+  );
 
 /** Flush left aligns a lone button with the text above it. Next to another button it needs its padding. */
 function DismissButton({ onClick, isAlone = true }: { onClick: () => void; isAlone?: boolean }) {

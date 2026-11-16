@@ -1,0 +1,122 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { esqlProfileResponseSchema } from '@elastic/esql-definitions/profile-schema';
+import type { EsqlProfilePlan } from '@kbn/es-types';
+import type { QueryResultsSummary } from './compare_results';
+
+type SchemaProperties = typeof esqlProfileResponseSchema.properties;
+
+/** The top-level properties of the profile that are a time span, as the schema describes them. */
+type TimeSpanProperty = {
+  [Name in keyof SchemaProperties]: SchemaProperties[Name] extends {
+    readonly anyOf: readonly [
+      { readonly properties: { readonly took_millis: unknown } },
+      ...unknown[]
+    ];
+  }
+    ? Name
+    : never;
+}[keyof SchemaProperties];
+
+/** The phases of planning, such as parsing and analysis. `query` and `planning` are their totals. */
+export type PlanningPhaseId = Exclude<TimeSpanProperty, 'query' | 'planning'>;
+
+export interface PlanningPhase {
+  id: PlanningPhaseId;
+  tookMillis: number;
+}
+
+/** A stretch of the wall clock, in epoch milliseconds. */
+export interface TimeSpan {
+  startMillis: number;
+  stopMillis: number;
+}
+
+/** What an operator reported: its time and its rows. */
+export interface OperatorMeasures {
+  processNanos: number;
+  /** False when no time was reported at all, which is not the same as 0 ms. */
+  timeReported: boolean;
+  rowsReceived: number;
+  rowsEmitted: number;
+}
+
+/** How an operator is shown: a short title, and the bracketed detail of its description. */
+interface OperatorName {
+  title: string;
+  detail?: string;
+}
+
+/** The part of an operator in one driver that is needed to attribute it to a query. */
+export interface AggregatedOperatorDriver {
+  /** Position of the driver in the profile. Drivers that belong together are listed together. */
+  driverIndex: number;
+  /** What the driver is for, such as data, final or subplan-0.final. */
+  description: string;
+  processNanos: number;
+  timeReported: boolean;
+}
+
+/** One kind of operator, summed over all the drivers it ran in. */
+export interface AggregatedOperator extends OperatorName, OperatorMeasures {
+  /** Share of summed process time, from 0 to 1. */
+  share: number;
+  drivers: AggregatedOperatorDriver[];
+}
+
+/** One operator inside a single driver, in that driver's pipeline order. */
+export interface TimelineOperator extends OperatorName, OperatorMeasures {
+  /** The operator as ES describes it, with its detail. */
+  operator: string;
+  /** Share of this driver's summed process time, from 0 to 1. */
+  share: number;
+  rawStatus: Record<string, unknown>;
+}
+
+/** One stretch where a driver was waiting, on the same clock as the driver span. */
+export interface TimelineSleep extends TimeSpan {
+  reason: string;
+}
+
+/** Wall-clock span for one driver. Operators are not placed on this clock. */
+export interface TimelineDriver extends TimeSpan {
+  id: string;
+  description: string;
+  nodeName?: string;
+  label: string;
+  cpuNanos?: number;
+  /** Recorded waits inside this driver's span, in start order. */
+  sleeps: TimelineSleep[];
+  /** Time spent in the recorded waits. ES records only some of them, so this can be too low. */
+  waitedMillis: number;
+  /** Every wait ES counted. It can exceed `sleeps.length` because ES only records a few. */
+  sleepCount: number;
+  operators: TimelineOperator[];
+}
+
+export interface QueryProfileTimeline {
+  planning?: TimeSpan;
+  drivers: TimelineDriver[];
+}
+
+export interface QueryProfileView {
+  queryTookMillis?: number;
+  planningTookMillis?: number;
+  executionTookMillis?: number;
+  planningPhases: PlanningPhase[];
+  driverCount: number;
+  operators: AggregatedOperator[];
+  plans: EsqlProfilePlan[];
+  /** True when at least one driver has a usable start and stop. */
+  hasTimeline: boolean;
+  timeline: QueryProfileTimeline;
+  /** What the profiled run returned. Set by the loader, since the profile does not hold rows. */
+  results?: QueryResultsSummary;
+}

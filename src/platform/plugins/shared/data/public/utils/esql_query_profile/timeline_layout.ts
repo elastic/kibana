@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryProfileTimeline, TimelineDriver } from './aggregate_esql_profile';
+import type { QueryProfileTimeline, TimelineDriver, TimeSpan } from './query_profile_model';
 
 /** The kinds of driver in the order a query runs them. Any other kind is listed after these. */
 const GROUP_ORDER = ['data', 'node_reduce', 'final'];
@@ -22,13 +22,10 @@ export interface LaneBox {
 }
 
 /** How long a span of the timeline lasted. */
-export const spanMillis = (span: { startMillis: number; stopMillis: number }): number =>
-  span.stopMillis - span.startMillis;
+export const spanMillis = (span: TimeSpan): number => span.stopMillis - span.startMillis;
 
 /** The time range that holds planning and every driver. */
-export const fullDomain = (
-  timeline: QueryProfileTimeline
-): { startMillis: number; stopMillis: number } => {
+export const fullDomain = (timeline: QueryProfileTimeline): TimeSpan => {
   const spans = [...(timeline.planning ? [timeline.planning] : []), ...timeline.drivers];
   return {
     startMillis: Math.min(...spans.map((span) => span.startMillis)),
@@ -37,11 +34,7 @@ export const fullDomain = (
 };
 
 /** Places a span on a track as percentages. */
-export const laneBox = (
-  startMillis: number,
-  stopMillis: number,
-  domain: { startMillis: number; stopMillis: number }
-): LaneBox => {
+export const laneBox = (startMillis: number, stopMillis: number, domain: TimeSpan): LaneBox => {
   const length = domain.stopMillis - domain.startMillis;
   if (length <= 0) {
     return { left: 0, width: 100 };

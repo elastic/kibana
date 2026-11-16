@@ -7,138 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsqlProfileDriver, EsqlProfilePlan, EsqlQueryProfile } from '@kbn/es-types';
-import type { QueryResultsSummary } from './compare_results';
+import type { EsqlProfileDriver, EsqlQueryProfile } from '@kbn/es-types';
+import type {
+  AggregatedOperator,
+  AggregatedOperatorDriver,
+  OperatorMeasures,
+  PlanningPhase,
+  QueryProfileTimeline,
+  QueryProfileView,
+  TimelineOperator,
+  TimelineSleep,
+  TimeSpan,
+} from './query_profile_model';
+import { PHASE_NANOS_FIELDS, PLANNING_PHASE_IDS, PROCESS_NANOS_FIELD } from './profile_schema';
 import { isRecord } from './json_helpers';
 
-const PLANNING_PHASE_IDS = [
-  'parsing',
-  'view_resolution',
-  'dataset_resolution',
-  'preanalysis',
-  'indices_resolution',
-  'enrich_resolution',
-  'inference_resolution',
-  'analysis',
-] as const;
-
-export type PlanningPhaseId = (typeof PLANNING_PHASE_IDS)[number];
-
-export interface PlanningPhase {
-  id: PlanningPhaseId;
-  tookMillis: number;
-}
-
-export interface AggregatedOperatorDriver {
-  /** Position of the driver in the profile. Drivers that belong together are listed together. */
-  driverIndex: number;
-  /** What the driver is for, such as data, final or subplan-0.final. */
-  description: string;
-  label: string;
-  processNanos: number;
-  /** False when this operator type reports no time at all, which is not the same as 0 ms. */
-  timeReported: boolean;
-  rowsReceived: number;
-  rowsEmitted: number;
-  rawStatus: Record<string, unknown>;
-}
-
-export interface AggregatedOperator {
+interface OperatorAccumulator extends OperatorMeasures {
   operator: string;
-  title: string;
-  detail?: string;
-  processNanos: number;
-  /** False when no driver reported any time for this operator. */
-  timeReported: boolean;
-  /** Share of summed process time, from 0 to 1. */
-  share: number;
-  /**
-   * Position in the data driver's pipeline. Operators that only appear on other
-   * drivers are appended after that pipeline.
-   */
-  pipelineIndex: number;
-  rowsReceived: number;
-  rowsEmitted: number;
-  drivers: AggregatedOperatorDriver[];
-}
-
-/** One operator inside a single driver, in that driver's pipeline order. */
-export interface TimelineOperator {
-  operator: string;
-  title: string;
-  detail?: string;
-  processNanos: number;
-  /** False when this operator reports no time, so it should show a dash instead of 0%. */
-  timeReported: boolean;
-  /** Share of this driver's summed process time, from 0 to 1. */
-  share: number;
-  rowsReceived: number;
-  rowsEmitted: number;
-  rawStatus: Record<string, unknown>;
-}
-
-/** Wall-clock span for one driver. Operators are not placed on this clock. */
-export interface TimelineDriver {
-  id: string;
-  description: string;
-  nodeName?: string;
-  label: string;
-  startMillis: number;
-  stopMillis: number;
-  tookNanos?: number;
-  cpuNanos?: number;
-  /** Recorded waits inside this driver's span, in start order. */
-  sleeps: TimelineSleep[];
-  /** Time spent in the recorded waits. ES records only some of them, so this can be too low. */
-  waitedMillis: number;
-  /** Every wait ES counted. It can exceed `sleeps.length` because ES only records a few. */
-  sleepCount: number;
-  operators: TimelineOperator[];
-}
-
-/** One stretch where a driver was waiting, on the same clock as the driver span. */
-export interface TimelineSleep {
-  reason: string;
-  startMillis: number;
-  stopMillis: number;
-}
-
-export interface TimelinePlanning {
-  startMillis: number;
-  stopMillis: number;
-}
-
-export interface QueryProfileTimeline {
-  planning?: TimelinePlanning;
-  drivers: TimelineDriver[];
-}
-
-export interface QueryProfileView {
-  queryTookMillis?: number;
-  planningTookMillis?: number;
-  executionTookMillis?: number;
-  planningPhases: PlanningPhase[];
-  driverCount: number;
-  operators: AggregatedOperator[];
-  plans: EsqlProfilePlan[];
-  /** True when at least one driver has a usable start and stop. */
-  hasTimeline: boolean;
-  timeline: QueryProfileTimeline;
-  /** What the profiled run returned. Set by the loader, since the profile does not hold rows. */
-  results?: QueryResultsSummary;
-}
-
-interface OperatorAccumulator {
-  operator: string;
-  processNanos: number;
-  timeReported: boolean;
-  rowsReceived: number;
-  rowsEmitted: number;
   drivers: AggregatedOperatorDriver[];
 }
 
 /** Shortens `ValuesSourceReaderOperator[fields = [body]]` to a title plus the bracketed detail. */
-export function formatOperatorLabel(operator: string): { title: string; detail?: string } {
+function formatOperatorLabel(operator: string): { title: string; detail?: string } {
   const bracketAt = operator.indexOf('[');
   const className = (bracketAt === -1 ? operator : operator.slice(0, bracketAt)).trim();
   const detail = bracketAt === -1 ? undefined : operator.slice(bracketAt).trim();
@@ -163,7 +53,7 @@ export function aggregateEsqlProfile(profile: unknown): QueryProfileView {
       : Math.max(0, queryTookMillis - planningTookMillis);
 
   const drivers = parsed?.drivers ?? [];
-  const operators = aggregateOperators(drivers, readPipelineIndex(drivers));
+  const operators = aggregateOperators(drivers);
   const timeline = readTimeline(parsed, drivers);
 
   return {
@@ -204,34 +94,9 @@ function readPlanningPhases(profile: EsqlQueryProfile | undefined): PlanningPhas
   });
 }
 
-/**
- * Pipeline order follows the first `data` driver. Other drivers only contribute
- * operators that the data pipeline did not already list.
- */
-function readPipelineIndex(drivers: EsqlProfileDriver[]): Map<string, number> {
-  const dataDrivers = drivers.filter((driver) => driver.description === 'data');
-  const ordered = dataDrivers.length > 0 ? [...dataDrivers, ...drivers] : drivers;
-  const index = new Map<string, number>();
-
-  ordered.forEach((driver) => {
-    readOperatorReadings(driver).forEach(({ operator }) => {
-      if (!index.has(operator)) {
-        index.set(operator, index.size);
-      }
-    });
-  });
-
-  return index;
-}
-
 /** What one operator of a driver reported, with its time and rows read out of its status. */
-interface OperatorReading {
+interface OperatorReading extends OperatorMeasures {
   operator: string;
-  processNanos: number;
-  /** False when this operator type reports no time at all, which is not the same as 0 ms. */
-  timeReported: boolean;
-  rowsReceived: number;
-  rowsEmitted: number;
   rawStatus: Record<string, unknown>;
 }
 
@@ -256,21 +121,6 @@ function readOperatorReadings(driver: EsqlProfileDriver): OperatorReading[] {
   });
 }
 
-/**
- * Most operators report `process_nanos`. Aggregation, TopN and sampling operators report their time
- * in separate phases instead, so those are summed. Exchange and output operators report no time.
- * The test next to this file checks these against every operator the ES|QL profile schema lists.
- */
-export const PROCESS_NANOS_FIELD = 'process_nanos';
-export const PHASE_NANOS_FIELDS: readonly string[] = [
-  'hash_nanos',
-  'aggregation_nanos',
-  'aggregation_finish_nanos',
-  'receive_nanos',
-  'collect_nanos',
-  'emit_nanos',
-];
-
 function readOperatorNanos(status: Record<string, unknown>): number | undefined {
   const processNanos = readFinite(status[PROCESS_NANOS_FIELD]);
   if (processNanos !== undefined) {
@@ -280,14 +130,10 @@ function readOperatorNanos(status: Record<string, unknown>): number | undefined 
   return phases.length > 0 ? phases.reduce((sum, nanos) => sum + nanos, 0) : undefined;
 }
 
-function aggregateOperators(
-  drivers: EsqlProfileDriver[],
-  pipelineIndex: Map<string, number>
-): AggregatedOperator[] {
+function aggregateOperators(drivers: EsqlProfileDriver[]): AggregatedOperator[] {
   const byOperator = new Map<string, OperatorAccumulator>();
 
   drivers.forEach((driver, index) => {
-    const label = driverLabel(driver.description, driver.node_name, index);
     readOperatorReadings(driver).forEach(({ operator, ...reading }) => {
       const current: OperatorAccumulator = byOperator.get(operator) ?? {
         operator,
@@ -305,8 +151,8 @@ function aggregateOperators(
       current.drivers.push({
         driverIndex: index,
         description: driver.description ?? '',
-        label,
-        ...reading,
+        processNanos: reading.processNanos,
+        timeReported: reading.timeReported,
       });
       byOperator.set(operator, current);
     });
@@ -318,33 +164,19 @@ function aggregateOperators(
   );
 
   return [...byOperator.values()]
-    .map((operator) =>
-      toAggregatedOperator(
-        operator,
-        totalProcessNanos,
-        pipelineIndex.get(operator.operator) ?? pipelineIndex.size
-      )
-    )
-    .sort(
-      (left, right) =>
-        right.processNanos - left.processNanos || left.pipelineIndex - right.pipelineIndex
-    );
+    .map((operator) => toAggregatedOperator(operator, totalProcessNanos))
+    .sort((left, right) => right.processNanos - left.processNanos);
 }
 
 function toAggregatedOperator(
   operator: OperatorAccumulator,
-  totalProcessNanos: number,
-  pipelineIndex: number
+  totalProcessNanos: number
 ): AggregatedOperator {
-  const { title, detail } = formatOperatorLabel(operator.operator);
   return {
-    operator: operator.operator,
-    title,
-    detail,
+    ...formatOperatorLabel(operator.operator),
     processNanos: operator.processNanos,
     timeReported: operator.timeReported,
     share: shareOf(operator.processNanos, totalProcessNanos),
-    pipelineIndex,
     rowsReceived: operator.rowsReceived,
     rowsEmitted: operator.rowsEmitted,
     drivers: operator.drivers,
@@ -370,7 +202,6 @@ function readTimeline(
         nodeName: driver.node_name,
         label: driverLabel(driver.description, driver.node_name, index),
         ...clock,
-        tookNanos: readFinite(driver.took_nanos),
         cpuNanos: readFinite(driver.cpu_nanos),
         sleeps,
         waitedMillis: sleeps.reduce(
@@ -393,10 +224,7 @@ function readTimeline(
  * ES keeps only the first and last few sleeps, and they overlap when there are few of them.
  * Sleeps are merged, de-duplicated and clipped to the driver's own span.
  */
-function readSleeps(
-  driver: EsqlProfileDriver,
-  clock: { startMillis: number; stopMillis: number }
-): TimelineSleep[] {
+function readSleeps(driver: EsqlProfileDriver, clock: TimeSpan): TimelineSleep[] {
   const recorded = [...(driver.sleeps?.first ?? []), ...(driver.sleeps?.last ?? [])];
   const seen = new Set<string>();
 
@@ -444,10 +272,7 @@ export function shareOf(nanos: number, totalNanos: number): number {
   return totalNanos > 0 ? nanos / totalNanos : 0;
 }
 
-function readClock(
-  start: number | undefined,
-  stop: number | undefined
-): { startMillis: number; stopMillis: number } | undefined {
+function readClock(start: number | undefined, stop: number | undefined): TimeSpan | undefined {
   const startMillis = readFinite(start);
   const stopMillis = readFinite(stop);
   if (startMillis === undefined || stopMillis === undefined || stopMillis < startMillis) {

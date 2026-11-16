@@ -20,14 +20,11 @@ type DeepPartial<T> = T extends ReadonlyArray<infer Item>
 /** What the schema describes, with every property optional. */
 type ProfileFromSchema = DeepPartial<FromSchema<typeof esqlProfileResponseSchema>>;
 
-/** A planning or query phase duration from an ES|QL profile. */
-export type EsqlProfileTimeSpan = NonNullable<ProfileFromSchema['query']>;
-
 /**
  * One operator inside an ES|QL profile driver. Its `status` fields depend on the kind of operator,
  * and the readers look at them by name, so they are not narrowed here.
  */
-export interface EsqlProfileOperator {
+interface EsqlProfileOperator {
   operator: string;
   status?: Record<string, unknown>;
 }

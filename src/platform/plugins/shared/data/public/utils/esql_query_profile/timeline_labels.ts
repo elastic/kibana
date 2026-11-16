@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { PlanningPhaseId, TimelineOperator } from './aggregate_esql_profile';
+import type { PlanningPhaseId, TimelineOperator } from './query_profile_model';
 import { formatDurationMillis, formatShare } from './profile_format';
 
 export const planningLabel = () =>

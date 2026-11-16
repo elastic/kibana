@@ -8,11 +8,11 @@
  */
 
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 
 export const useTimelineStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const small = `${euiTheme.font.scale.xs * euiTheme.base}px`;
+  const { fontSize: small } = useEuiFontSize('xs');
   const labelColumn = `minmax(${euiTheme.base * 8}px, ${euiTheme.base * 12}px) 1fr`;
 
   return {

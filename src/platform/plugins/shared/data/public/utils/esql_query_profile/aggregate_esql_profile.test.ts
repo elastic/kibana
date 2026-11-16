@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { aggregateEsqlProfile, formatOperatorLabel } from './aggregate_esql_profile';
+import { aggregateEsqlProfile } from './aggregate_esql_profile';
 
 describe('aggregateEsqlProfile', () => {
   it('sums time and rows across drivers', () => {
@@ -89,44 +89,6 @@ describe('aggregateEsqlProfile', () => {
     expect(view.operators.map((operator) => operator.title)).toEqual(['Slow', 'Fast']);
     expect(view.operators[0].share).toBe(0.75);
     expect(view.operators[1].share).toBe(0.25);
-    expect(view.operators.map((operator) => operator.pipelineIndex)).toEqual([1, 0]);
-  });
-
-  it('records pipeline order from the data driver when another driver is logged first', () => {
-    const view = aggregateEsqlProfile({
-      drivers: [
-        {
-          description: 'node_reduce',
-          operators: [
-            {
-              operator: 'ExchangeOperator',
-              status: { process_nanos: 5, rows_received: 1, rows_emitted: 1 },
-            },
-          ],
-        },
-        {
-          description: 'data',
-          operators: [
-            {
-              operator: 'LuceneSourceOperator',
-              status: { process_nanos: 1, rows_received: 1, rows_emitted: 1 },
-            },
-            {
-              operator: 'EvalOperator',
-              status: { process_nanos: 9, rows_received: 1, rows_emitted: 1 },
-            },
-          ],
-        },
-      ],
-    });
-
-    expect(
-      Object.fromEntries(view.operators.map((operator) => [operator.title, operator.pipelineIndex]))
-    ).toEqual({
-      LuceneSource: 0,
-      Eval: 1,
-      Exchange: 2,
-    });
   });
 
   it('returns an empty view when the profile is missing', () => {
@@ -200,7 +162,6 @@ describe('aggregateEsqlProfile', () => {
         label: 'data · node-b',
         startMillis: 1_010,
         stopMillis: 1_050,
-        tookNanos: 40_000_000,
         cpuNanos: 30_000_000,
       })
     );
@@ -443,14 +404,5 @@ describe('aggregateEsqlProfile sleeps', () => {
 
     expect(timeline.drivers[0].sleeps).toEqual([]);
     expect(timeline.drivers[0].sleepCount).toBe(0);
-  });
-});
-
-describe('formatOperatorLabel', () => {
-  it('keeps the bracketed detail and drops the Operator suffix', () => {
-    expect(formatOperatorLabel('LuceneSourceOperator[index=logs]')).toEqual({
-      title: 'LuceneSource',
-      detail: '[index=logs]',
-    });
   });
 });

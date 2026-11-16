@@ -22,8 +22,6 @@ export interface QueryCommand {
   branches?: QueryCommand[][];
 }
 
-const BRANCHING_COMMANDS = ['from', 'fork'];
-
 const isParens = (item: ESQLAstItem): item is ESQLParens =>
   !Array.isArray(item) && item.type === 'parens';
 
@@ -45,13 +43,13 @@ const readBranches = (query: string, command: ESQLAstCommand): QueryCommand[][] 
 };
 
 /**
- * Splits an ES|QL query into its commands. A FROM or FORK command with queries in parentheses gets
- * them as `branches`. The query is parsed, so pipes in strings and comments do not split it.
+ * Splits an ES|QL query into its commands. A command with queries in parentheses, such as a FROM
+ * with subqueries or a FORK, gets them as `branches`. The query is parsed, so pipes in strings and comments do not split it.
  */
 export function splitQueryCommands(query: string): QueryCommand[] {
   return Parser.parse(query).root.commands.map((command) => {
     const queryCommand = toQueryCommand(query, command);
-    const branches = BRANCHING_COMMANDS.includes(command.name) ? readBranches(query, command) : [];
+    const branches = readBranches(query, command);
     return branches.length > 0 ? { ...queryCommand, branches } : queryCommand;
   });
 }

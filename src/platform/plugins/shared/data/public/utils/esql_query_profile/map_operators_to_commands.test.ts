@@ -41,15 +41,14 @@ describe('mapOperatorsToCommands', () => {
     );
 
     const byName = Object.fromEntries(heat.commands.map((entry) => [entry.command.name, entry]));
-    expect(byName.FROM.nanos).toBe(70_000_000);
     expect(byName.FROM.share).toBeCloseTo(0.7);
     expect(byName.FROM.operators).toEqual(['LuceneSource', 'ValuesSourceReader']);
-    expect(byName.WHERE.nanos).toBe(5_000_000);
-    expect(byName.STATS.nanos).toBe(15_000_000);
-    expect(byName.SORT.nanos).toBe(3_000_000);
-    expect(byName.KEEP.nanos).toBe(2_000_000);
+    expect(byName.WHERE.share).toBeCloseTo(0.05);
+    expect(byName.STATS.share).toBeCloseTo(0.15);
+    expect(byName.SORT.share).toBeCloseTo(0.03);
+    expect(byName.KEEP.share).toBeCloseTo(0.02);
     expect(heat.commands.every((entry) => !entry.isApproximate)).toBe(true);
-    expect(heat.unattributedNanos).toBe(0);
+    expect(heat.unattributedShare).toBe(0);
   });
 
   it('shares the time of an operator between commands it could belong to', () => {
@@ -67,13 +66,11 @@ describe('mapOperatorsToCommands', () => {
     );
 
     const [, firstStats, secondStats, sort] = heat.commands;
-    expect(firstStats.nanos).toBe(0);
-    expect(firstStats.sharedNanos).toBe(80_000_000);
     expect(firstStats.share).toBeCloseTo(0.8);
     expect(firstStats.isApproximate).toBe(true);
-    expect(secondStats.sharedNanos).toBe(80_000_000);
+    expect(secondStats.share).toBeCloseTo(0.8);
     expect(secondStats.isApproximate).toBe(true);
-    expect(sort.nanos).toBe(10_000_000);
+    expect(sort.share).toBeCloseTo(0.1);
     expect(sort.isApproximate).toBe(false);
   });
 
@@ -88,9 +85,8 @@ describe('mapOperatorsToCommands', () => {
       ])
     );
 
-    expect(heat.unattributedNanos).toBe(2_000_000);
     expect(heat.unattributedShare).toBeCloseTo(0.2);
-    expect(heat.commands[1].nanos).toBe(0);
+    expect(heat.commands[1].share).toBe(0);
   });
 
   it('matches operators named after their command', () => {
@@ -103,8 +99,8 @@ describe('mapOperatorsToCommands', () => {
       ])
     );
 
-    expect(heat.commands[1].nanos).toBe(4_000_000);
-    expect(heat.commands[2].nanos).toBe(6_000_000);
+    expect(heat.commands[1].share).toBeCloseTo(0.4);
+    expect(heat.commands[2].share).toBeCloseTo(0.6);
   });
 
   it('matches commands that the parser names with a space or a subtype, such as INLINE STATS', () => {
@@ -124,8 +120,8 @@ describe('mapOperatorsToCommands', () => {
       'INLINE STATS',
       'JOIN',
     ]);
-    expect(heat.commands[1].nanos).toBe(6_000_000);
-    expect(heat.commands[2].nanos).toBe(4_000_000);
+    expect(heat.commands[1].share).toBeCloseTo(0.6);
+    expect(heat.commands[2].share).toBeCloseTo(0.4);
   });
 
   it('returns zero shares when nothing reports a time', () => {
@@ -198,19 +194,18 @@ describe('mapOperatorsToCommands with subqueries', () => {
     const [firstFrom, firstStats, secondStats, secondFrom, where, lastStats, sort] = heat.commands;
     const total = 2 + 1 + 1 + 1 + 20 + 60 + 10 + 4 + 1 + 1;
     // The first subquery reads two fields and the data comes from its own drivers.
-    expect(firstFrom.nanos).toBe(80_000_000);
     expect(firstFrom.share).toBeCloseTo(80 / total);
     // Two aggregations in one subquery cannot be told apart, so they share the time.
-    expect(firstStats.sharedNanos).toBe(15_000_000);
-    expect(secondStats.sharedNanos).toBe(15_000_000);
+    expect(firstStats.share).toBeCloseTo(15 / total);
+    expect(secondStats.share).toBeCloseTo(15 / total);
     expect(firstStats.isApproximate).toBe(true);
     // The second subquery has one aggregation, so its time is exact.
-    expect(secondFrom.nanos).toBe(3_000_000);
-    expect(where.nanos).toBe(0);
-    expect(lastStats.nanos).toBe(2_000_000);
+    expect(secondFrom.share).toBeCloseTo(3 / total);
+    expect(where.share).toBe(0);
+    expect(lastStats.share).toBeCloseTo(2 / total);
     expect(lastStats.isApproximate).toBe(false);
-    expect(sort.nanos).toBe(1_000_000);
-    expect(heat.unattributedNanos).toBe(0);
+    expect(sort.share).toBeCloseTo(1 / total);
+    expect(heat.unattributedShare).toBe(0);
   });
 
   it('treats every command as a candidate when the profile does not name the subplans', () => {
@@ -225,12 +220,14 @@ describe('mapOperatorsToCommands with subqueries', () => {
     const heat = mapOperatorsToCommands(splitQueryCommands(query), unlabeled);
 
     // Without the names the time goes to the first source command, and to all aggregations.
-    expect(heat.commands[0].nanos).toBe(10_000_000);
+    expect(heat.commands[0].share).toBeCloseTo(0.5);
     const aggregations = heat.commands.filter(({ command }) => command.name === 'STATS');
-    expect(aggregations.map(({ sharedNanos }) => sharedNanos)).toEqual([
-      6_000_000, 6_000_000, 6_000_000,
+    expect(aggregations.map(({ share }) => share)).toEqual([
+      expect.closeTo(0.3),
+      expect.closeTo(0.3),
+      expect.closeTo(0.3),
     ]);
-    expect(heat.commands.at(-1)?.nanos).toBe(4_000_000);
+    expect(heat.commands.at(-1)?.share).toBeCloseTo(0.2);
   });
 
   it('ignores the driver names for a query without subqueries', () => {
@@ -246,6 +243,6 @@ describe('mapOperatorsToCommands with subqueries', () => {
     const heat = mapOperatorsToCommands(single, labeled);
 
     // subplan-1 does not exist in this query, so its operators belong to nothing.
-    expect(heat.unattributedNanos).toBe(3_000_000 + 1_000_000 + 1_000_000);
+    expect(heat.unattributedShare).toBeCloseTo(5 / 101);
   });
 });

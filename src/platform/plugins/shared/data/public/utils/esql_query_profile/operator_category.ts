@@ -8,11 +8,11 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import type { AggregatedOperator } from './aggregate_esql_profile';
+import type { AggregatedOperator } from './query_profile_model';
 
 export type OperatorCategory = 'exchange' | 'source' | 'filter' | 'aggregate' | 'compute' | 'other';
 
-export const OPERATOR_CATEGORIES: readonly OperatorCategory[] = [
+const OPERATOR_CATEGORIES: readonly OperatorCategory[] = [
   'source',
   'filter',
   'compute',
