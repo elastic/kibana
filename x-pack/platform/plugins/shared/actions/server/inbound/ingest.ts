@@ -91,6 +91,7 @@ const toEmittedHttpResult = (
   };
 };
 
+/** Legacy `config.ingestTokenHash`. Nothing reads it; the live hash is on the ingress credential. */
 const stripIngestTokenHash = (config: Record<string, unknown>): Record<string, unknown> => {
   const { ingestTokenHash: _omit, ...spokeConfig } = config;
   return spokeConfig;

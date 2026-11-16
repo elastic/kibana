@@ -44,7 +44,6 @@ interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
   experimentalFeatures: ExperimentalFeatures;
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
-  kibanaVersion: string;
   logger: Logger;
   ml: EntityAnalyticsRoutesDeps['ml'];
   options: {
@@ -59,7 +58,6 @@ export const registerSkills = async ({
   agentBuilder,
   experimentalFeatures,
   getStartServices,
-  kibanaVersion,
   logger,
   ml,
   options,
@@ -74,9 +72,7 @@ export const registerSkills = async ({
   }
 
   const isEntityStoreV2Enabled = experimentalFeatures.entityAnalyticsEntityStoreV2;
-  await agentBuilder.skills.register(
-    getEntityAnalyticsSkill({ getStartServices, isEntityStoreV2Enabled, kibanaVersion, logger })
-  );
+  await agentBuilder.skills.register(getEntityAnalyticsSkill());
 
   if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
     agentBuilder.skills.register(manageWatchlistsSkill);
