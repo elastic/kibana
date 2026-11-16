@@ -10,7 +10,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { esqlFixtureDocumentRequests } from './documents';
-import { esqlFixtureIndexWildcards, esqlFixtureIndicesCreateRequests } from './indices';
+import { esqlFixtureIndicesCreateRequests } from './indices';
 
 /**
  * Creates the fixture indices and seeds the APM documents. Fails fast: without
@@ -62,94 +62,4 @@ export async function setupEsqlFixtures({
       .map((req) => req.index)
       .concat(esqlFixtureDocumentRequests.map((req) => req.index)),
   });
-}
-
-/**
- * Delete every concrete or aliased index that any fixture file could have
- * created during this run. Resolves the configured wildcard patterns
- * (`logs-production.evaluations.*`, `traces-apm-*`, …) to concrete index
- * and data-stream names first, then deletes by exact name. Scout clusters
- * boot with `action.destructive_requires_name=true`, which rejects
- * wildcard deletes outright, so the resolve-then-delete pattern is
- * required — mirrors the legacy `PrepareIndicesForAssistantGraphEvaluations.cleanup`
- * loop.
- *
- * Tolerates missing indices (`ignore_unavailable: true` on resolve) so a
- * partially-completed setup doesn't cascade into a fixture leak on the
- * next run.
- */
-export async function cleanupEsqlFixtures({
-  esClient,
-  log,
-}: {
-  esClient: EsClient;
-  log: ToolingLog;
-}): Promise<void> {
-  log.info('[workflows-esql] cleaning up fixture indices');
-
-  const resolveResponses = await Promise.all(
-    esqlFixtureIndexWildcards.map(async (pattern) => {
-      try {
-        return await esClient.indices.resolveIndex({
-          name: pattern,
-          expand_wildcards: 'open',
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        });
-      } catch (err) {
-        log.warning(
-          new Error(`[workflows-esql] cleanup resolve failed for pattern "${pattern}" — skipping`, {
-            cause: err instanceof Error ? err : new Error(String(err)),
-          })
-        );
-        return undefined;
-      }
-    })
-  );
-
-  const indicesToDelete = Array.from(
-    new Set(
-      resolveResponses.flatMap((response) => response?.indices ?? []).map((index) => index.name)
-    )
-  );
-
-  const dataStreamsToDelete = Array.from(
-    new Set(
-      resolveResponses
-        .flatMap((response) => response?.data_streams ?? [])
-        .map((dataStream) => dataStream.name)
-    )
-  );
-
-  if (indicesToDelete.length > 0) {
-    try {
-      await esClient.indices.delete({ index: indicesToDelete });
-      log.debug(`[workflows-esql] deleted indices: ${indicesToDelete.join(', ')}`);
-    } catch (err) {
-      log.warning(
-        new Error(
-          `[workflows-esql] cleanup failed to delete indices ${indicesToDelete.join(
-            ', '
-          )} — continuing`,
-          { cause: err instanceof Error ? err : new Error(String(err)) }
-        )
-      );
-    }
-  }
-
-  if (dataStreamsToDelete.length > 0) {
-    try {
-      await esClient.indices.deleteDataStream({ name: dataStreamsToDelete });
-      log.debug(`[workflows-esql] deleted data streams: ${dataStreamsToDelete.join(', ')}`);
-    } catch (err) {
-      log.warning(
-        new Error(
-          `[workflows-esql] cleanup failed to delete data streams ${dataStreamsToDelete.join(
-            ', '
-          )} — continuing`,
-          { cause: err instanceof Error ? err : new Error(String(err)) }
-        )
-      );
-    }
-  }
 }

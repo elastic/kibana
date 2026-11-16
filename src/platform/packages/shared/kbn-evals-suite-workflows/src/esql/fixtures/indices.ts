@@ -13,7 +13,7 @@ import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types'
  * Fixture index mappings for the `workflow-esql` dataset. Copied from
  * `x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression/src/fixtures`
  * because a platform package cannot depend on a security solution package.
- * One concrete index per template; cleanup deletes by wildcard.
+ * One concrete index per template.
  */
 
 export const postgresLogsIndexCreateRequest: IndicesCreateRequest = {
@@ -197,21 +197,4 @@ export const esqlFixtureIndicesCreateRequests: readonly IndicesCreateRequest[] =
   metricbeatIndexCreateRequest,
   employeesIndexCreateRequest,
   logsIndexCreateRequest,
-];
-
-/**
- * Wildcard patterns covering every fixture index, including the
- * `traces-apm-*` and `metrics-apm-*` indices created implicitly by the
- * document-index requests in `./documents.ts`. Used for cleanup so any
- * drift in the concrete names is still swept.
- */
-export const esqlFixtureIndexWildcards: readonly string[] = [
-  'postgres-logs-*',
-  'packetbeat-*',
-  'nyc_taxis-*',
-  'metricbeat-*',
-  'employees-*',
-  'logs-production.evaluations.*',
-  'traces-apm-*',
-  'metrics-apm-*',
 ];

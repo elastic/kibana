@@ -28,6 +28,8 @@ export interface ExtractedEsqlQuery {
   rawQuery: string;
   query: string;
   status: 'executable' | 'structural';
+  /** `with.params` values for `?` placeholders, with Liquid replaced by typed placeholders. */
+  params?: unknown[];
 }
 
 type ScannerState = 'normal' | 'string-double' | 'string-triple' | 'line-comment' | 'block-comment';
@@ -133,7 +135,11 @@ export const maskLiquidInEsql = (
   query: string
 ): { query: string; status: ExtractedEsqlQuery['status'] } => {
   const spans = scanLiquidSpans(query);
-  if (spans === null || spans.some(({ inString }) => !inString)) {
+  // A quoted source (`FROM "{{ idx }}"`) is still structural: the index is unknown until run time.
+  const pipe = query.indexOf('|');
+  const sourceEnd = /^\s*(FROM|TS)\b/i.test(query) ? (pipe === -1 ? query.length : pipe) : 0;
+  const inSource = (start: number) => start < sourceEnd;
+  if (spans === null || spans.some(({ inString, start }) => !inString || inSource(start))) {
     return { query, status: 'structural' };
   }
   if (spans.length === 0) {
@@ -147,6 +153,21 @@ export const maskLiquidInEsql = (
   }
   parts.push(query.slice(cursor));
   return { query: parts.join(''), status: 'executable' };
+};
+
+const LIQUID_SPAN = /\{\{[^}]*\}\}|\{%[^%]*%\}/g;
+
+/** Replaces Liquid inside one `with.params` value (scalar or `{ name: value }`). */
+const maskLiquidInParam = (param: unknown): unknown => {
+  if (typeof param === 'string') {
+    return param.replace(LIQUID_SPAN, placeholderForLiquid);
+  }
+  if (param && typeof param === 'object' && !Array.isArray(param)) {
+    return Object.fromEntries(
+      Object.entries(param).map(([key, value]) => [key, maskLiquidInParam(value)])
+    );
+  }
+  return param;
 };
 
 /** Collects the query of every `elasticsearch.esql.query` step, including nested steps. */
@@ -165,8 +186,14 @@ export const extractEsqlQueriesFromYaml = (yaml: string | undefined): ExtractedE
   return collectAllSteps(steps)
     .filter((step) => step.type === ESQL_QUERY_STEP_TYPE)
     .map((step) => {
-      const rawQuery = (step as { with?: { query?: unknown } }).with?.query;
+      const { query: rawQuery, params } =
+        (step as { with?: { query?: unknown; params?: unknown } }).with ?? {};
       const text = typeof rawQuery === 'string' ? rawQuery : '';
-      return { stepName: step.name, rawQuery: text, ...maskLiquidInEsql(text) };
+      return {
+        stepName: step.name,
+        rawQuery: text,
+        ...maskLiquidInEsql(text),
+        ...(Array.isArray(params) ? { params: params.map(maskLiquidInParam) } : {}),
+      };
     });
 };

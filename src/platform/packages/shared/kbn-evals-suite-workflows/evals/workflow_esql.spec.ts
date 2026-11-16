@@ -48,7 +48,7 @@ import {
   skipInfraErrors,
 } from '../src/evaluators';
 import { createEsqlExecutionEvaluator, createEsqlValidityEvaluator } from '../src/esql/evaluators';
-import { cleanupEsqlFixtures, setupEsqlFixtures } from '../src/esql/fixtures/setup';
+import { setupEsqlFixtures } from '../src/esql/fixtures/setup';
 
 const evaluate = base.extend<
   {
@@ -344,12 +344,10 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
 };
 
 evaluate.describe('Workflow ES|QL quality', { tag: tags.serverless.observability.complete }, () => {
+  // No afterAll cleanup: parallel workers share the cluster, so the first to finish would delete
+  // fixtures that others still query. Setup is idempotent and Scout is thrown away after the run.
   evaluate.beforeAll(async ({ esClient, log }) => {
     await setupEsqlFixtures({ esClient, log });
-  });
-
-  evaluate.afterAll(async ({ esClient, log }) => {
-    await cleanupEsqlFixtures({ esClient, log });
   });
 
   evaluate('workflow-esql', async ({ evaluateEsqlDataset }) => {

@@ -67,6 +67,10 @@ describe('maskLiquidInEsql', () => {
     );
   });
 
+  it('marks quoted Liquid in the source command as structural', () => {
+    expect(maskLiquidInEsql('FROM "{{ consts.index }}" | LIMIT 10').status).toBe('structural');
+  });
+
   it('marks an unclosed Liquid span as structural', () => {
     expect(maskLiquidInEsql('FROM logs-* | WHERE a == "{{ x"').status).toBe('structural');
   });
@@ -107,6 +111,23 @@ steps:
       ['inner', 'executable'],
     ]);
     expect(queries[1].query).toBe('FROM logs-* | WHERE user.name == "placeholder"');
+  });
+
+  it('keeps with.params and replaces Liquid inside them', () => {
+    const yaml = `
+name: test
+steps:
+  - name: q
+    type: elasticsearch.esql.query
+    with:
+      query: FROM logs-* | WHERE host.name == ? AND @timestamp > ?
+      params:
+        - "{{ inputs.host }}"
+        - start_time: "{{ inputs.start_time }}"
+`;
+    const [{ status, params }] = extractEsqlQueriesFromYaml(yaml);
+    expect(status).toBe('executable');
+    expect(params).toEqual(['placeholder', { start_time: '2025-01-01T00:00:00.000Z' }]);
   });
 
   it('returns an empty list for invalid or missing YAML', () => {
@@ -171,5 +192,27 @@ describe('createEsqlExecutionEvaluator', () => {
     expect(query).toHaveBeenCalledWith({ query: 'FROM logs-* | KEEP host.name\n| LIMIT 0' });
     expect(result.score).toBe(0.5);
     expect(result.explanation).toContain('Unknown column [nope]');
+  });
+
+  it('passes with.params to Elasticsearch', async () => {
+    const query = jest.fn().mockResolvedValue({ columns: [], values: [] });
+    const esClient = { esql: { query } } as unknown as EsClient;
+    const yaml = [
+      'name: t',
+      'steps:',
+      '  - name: q',
+      '    type: elasticsearch.esql.query',
+      '    with:',
+      '      query: FROM logs-* | WHERE host.name == ?',
+      '      params: ["{{ inputs.host }}"]',
+    ].join('\n');
+
+    const result = await run(createEsqlExecutionEvaluator({ esClient }), yaml);
+
+    expect(query).toHaveBeenCalledWith({
+      query: 'FROM logs-* | WHERE host.name == ?\n| LIMIT 0',
+      params: ['placeholder'],
+    });
+    expect(result.score).toBe(1);
   });
 });

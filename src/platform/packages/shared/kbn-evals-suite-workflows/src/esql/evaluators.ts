@@ -8,11 +8,14 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { validateQuery } from '@kbn/esql-language';
 import type { Evaluator, EvaluationResult, Example } from '@kbn/evals';
 import type { EsqlExpectations, WorkflowTaskOutput } from '../types';
 import type { ExtractedEsqlQuery } from './extract_esql';
 import { extractEsqlQueriesFromYaml } from './extract_esql';
+
+type EsqlQueryParams = NonNullable<EsqlQueryRequest['params']>;
 
 export const ESQL_VALIDITY_EVALUATOR_NAME = 'EsqlValidity';
 export const ESQL_EXECUTION_EVALUATOR_NAME = 'EsqlExecution';
@@ -77,7 +80,7 @@ const scoreQueries = (
 
 const createEsqlEvaluator = <TExample extends Example>(
   name: string,
-  checkQuery: (query: string) => Promise<string | undefined>
+  checkQuery: (query: string, params?: unknown[]) => Promise<string | undefined>
 ): Evaluator<TExample, WorkflowTaskOutput> => ({
   name,
   kind: 'CODE',
@@ -104,11 +107,11 @@ const createEsqlEvaluator = <TExample extends Example>(
     }
 
     const results = await Promise.all(
-      executable.map(async ({ stepName, query }): Promise<QueryResult> => {
+      executable.map(async ({ stepName, query, params }): Promise<QueryResult> => {
         if (query.trim().length === 0) {
           return { stepName, query, ok: false, error: 'Empty query' };
         }
-        const error = await checkQuery(query);
+        const error = await checkQuery(query, params);
         return { stepName, query, ok: error === undefined, error };
       })
     );
@@ -131,18 +134,21 @@ export const createEsqlValidityEvaluator = <TExample extends Example>(): Evaluat
   });
 
 /**
- * Runs each ES|QL step query with `LIMIT 0` against the fixture indices.
- * Catches unknown indices, unknown columns and type errors. Score = fraction
- * of queries that Elasticsearch accepts.
+ * Runs each ES|QL step query with `LIMIT 0` against the fixture indices, with
+ * the step's `with.params`. Catches unknown indices, unknown columns and type
+ * errors. Score = fraction of queries that Elasticsearch accepts.
  */
 export const createEsqlExecutionEvaluator = <TExample extends Example>({
   esClient,
 }: {
   esClient: EsClient;
 }): Evaluator<TExample, WorkflowTaskOutput> =>
-  createEsqlEvaluator<TExample>(ESQL_EXECUTION_EVALUATOR_NAME, async (query) => {
+  createEsqlEvaluator<TExample>(ESQL_EXECUTION_EVALUATOR_NAME, async (query, params) => {
     try {
-      await esClient.esql.query({ query: toLimitZeroQuery(query) });
+      await esClient.esql.query({
+        query: toLimitZeroQuery(query),
+        ...(params ? { params: params as EsqlQueryParams } : {}),
+      });
       return undefined;
     } catch (error) {
       return errorText(error);
