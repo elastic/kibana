@@ -588,15 +588,20 @@ describe('renderDriftIssue', () => {
     expect(body).not.toContain('(see the table).');
   });
 
-  it('says when the actions pass but the check found problems outside them', () => {
+  it('says when the actions pass but the check found problems outside them, as a table', () => {
+    const invalid = (authType: string) =>
+      `Auth type ${authType}: 1 schema(s) are invalid:\n  POST /items (response 200 application/json): $ref "#/components/schemas/Void" does not resolve to a schema`;
     const { title, body } = renderDriftIssue(
       {
         ...drifted,
+        sources: { main: { status: 'unchanged' } },
         actions: drifted.actions?.map((action) => ({ ...action, latestProblems: [] })),
         otherProblems: {
           snapshot: [],
           latest: [
-            'Auth type bearer: 1 schema(s) are invalid:\n  POST /items: $ref does not resolve',
+            `${invalid('bearer')}\n${invalid('oauth')}`,
+            'GET /items (main) looks like it returns a collection, as it returns an array; declare its "pagination" in manifest.json, or "none" if it returns everything at once',
+            'something the renderer does not recognise',
           ],
         },
       },
@@ -604,14 +609,20 @@ describe('renderDriftIssue', () => {
     );
 
     expect(title).toBe(
-      '[Connector validation] .acme: the latest spec fails the drift check (1 problem outside the actions)'
+      '[Connector validation] .acme: the latest spec fails the drift check (3 problems outside the actions)'
+    );
+    expect(body).toContain('> **All 2 actions work with the latest spec.**');
+    expect(body).toContain(
+      `> The check found 3 problems outside the actions, which don't occur against the committed snapshot (see "Other problems").`
+    );
+    expect(body).toContain('| Problem | Operation | Details | How to fix |');
+    expect(body).toContain(
+      '| Invalid schema in the spec | `POST /items` | response 200 application/json: $ref "#/components/schemas/Void" does not resolve to a schema (auth types `bearer`, `oauth`) | Correct the spec in `overlay.yaml` |'
     );
     expect(body).toContain(
-      '**Every checked action of `.acme` passes against the latest spec, but the check found 1 problem outside the actions**'
+      '| Pagination not declared | `GET /items` (`main`) | returns a collection, as it returns an array | Declare its `pagination` in `manifest.json`, or `"none"` |'
     );
-    expect(body).toContain(
-      '- Auth type bearer: 1 schema(s) are invalid:\n    POST /items: $ref does not resolve'
-    );
+    expect(body).toContain('| Other | — | something the renderer does not recognise | — |');
   });
 
   it('reports unreachable sources and caps long change lists', () => {
@@ -645,7 +656,7 @@ describe('renderDriftIssue', () => {
     );
 
     expect(title).toBe('[Connector validation] .acme: vendor drift');
-    expect(body).toContain('- search: limit must be <= 50');
+    expect(body).toContain('| Other | — | search: limit must be <= 50 | — |');
     expect(body).toContain('cc @elastic/response-ops');
   });
 });

@@ -136,6 +136,81 @@ const listed = (items: readonly string[], max = MAX_LISTED): string => {
   return shown.length > 1 ? `${shown.slice(0, -1).join(', ')} and ${shown.at(-1)}` : shown[0];
 };
 
+interface OtherProblemRow {
+  readonly problem: string;
+  readonly operation: string;
+  readonly details: string;
+  readonly fix: string;
+}
+
+const METHOD = '(GET|PUT|POST|DELETE|PATCH|HEAD|OPTIONS|TRACE)';
+// `Auth type bearer: 2 schema(s) are invalid:`, then one line per schema, indented.
+const INVALID_SCHEMAS = /^Auth type (\S+): \d+ schema\(s\) are invalid:$/;
+const INVALID_SCHEMA = new RegExp(`^\\s+${METHOD} (\\S+) \\(([^)]*)\\): (.*)$`);
+const UNDECLARED_PAGINATION = new RegExp(
+  `^${METHOD} (\\S+) \\(([^)]+)\\) looks like it returns a collection, as (.+); declare its "pagination" in manifest\\.json, or "none" if it returns everything at once$`
+);
+
+/**
+ * The problems that concern no single action, as table rows: the messages the drift check writes
+ * for invalid spec schemas (once per auth type) and undeclared pagination are read into their
+ * parts, and any other message is kept as it is.
+ */
+const otherProblemRows = (problems: readonly string[]): OtherProblemRow[] => {
+  const schemas = new Map<string, { operation: string; details: string; authTypes: string[] }>();
+  const rows: OtherProblemRow[] = [];
+  for (const problem of problems) {
+    const pagination = problem.match(UNDECLARED_PAGINATION);
+    if (pagination) {
+      const [, method, path, source, reason] = pagination;
+      rows.push({
+        problem: 'Pagination not declared',
+        operation: `${code(`${method} ${path}`)} (${code(source)})`,
+        details: `returns a collection, as ${reason}`,
+        fix: 'Declare its `pagination` in `manifest.json`, or `"none"`',
+      });
+      continue;
+    }
+    let authType: string | undefined;
+    let parsed = false;
+    for (const line of problem.split('\n')) {
+      const header = line.match(INVALID_SCHEMAS);
+      const schema = line.match(INVALID_SCHEMA);
+      if (header) {
+        [, authType] = header;
+        parsed = true;
+      } else if (schema && authType !== undefined) {
+        const [, method, path, where, message] = schema;
+        const key = `${method} ${path} ${where} ${message}`;
+        const entry = schemas.get(key) ?? {
+          operation: code(`${method} ${path}`),
+          details: `${where}: ${message}`,
+          authTypes: [],
+        };
+        entry.authTypes.push(authType);
+        schemas.set(key, entry);
+      } else {
+        parsed = false;
+        break;
+      }
+    }
+    if (!parsed) {
+      rows.push({ problem: 'Other', operation: '—', details: problem, fix: '—' });
+    }
+  }
+  return [
+    ...[...schemas.values()].map(({ operation, details, authTypes }) => ({
+      problem: 'Invalid schema in the spec',
+      operation,
+      details: `${details} (auth ${authTypes.length === 1 ? 'type' : 'types'} ${authTypes
+        .map(code)
+        .join(', ')})`,
+      fix: `Correct the spec in \`${OVERLAY}\``,
+    })),
+    ...rows,
+  ];
+};
+
 const link = (text: string, folder: string | undefined, file = ''): string =>
   folder === undefined ? text : `[${text}](${REPO_BLOB_URL}/${folder}${file ? `/${file}` : ''})`;
 
@@ -522,6 +597,68 @@ export const renderDriftIssue = (
   const overlayCausesMoves = movedOnly && serversCorrection !== undefined;
 
   // Summary
+  // The note when no action fails: how many work, which need attention and why, and what to do.
+  const passingSummary = (extra: readonly string[]): string => {
+    const { readers, byKind, missing, unattached, total } = attention;
+    const working = total - attention.actions.size;
+    // The actions are the point of these sentences, so more of them are named.
+    const sentence = (named: readonly string[], [one, many]: readonly [string, string]) =>
+      `${listed(named.map(code), MAX_NAMED_ACTIONS)} ${named.length === 1 ? one : many}.`;
+    const reasons = [
+      ...(readers.length > 0
+        ? [
+            sentence(readers, [
+              'passes but reads fields that changed',
+              'pass but read fields that changed',
+            ]),
+          ]
+        : []),
+      ...[...byKind]
+        .filter(([, named]) => named.size > 0)
+        .map(([kind, named]) => sentence([...named], AFFECTED[kind])),
+      ...(missing.length > 0
+        ? [
+            sentence(missing, [
+              'calls an endpoint that is missing from the current spec',
+              'call endpoints that are missing from the current spec',
+            ]),
+          ]
+        : []),
+      ...(unattached > 0
+        ? [
+            `${plural(unattached, 'other spec change')} ${
+              unattached === 1 ? 'needs' : 'need'
+            } review (see the table).`,
+          ]
+        : []),
+      ...(stale.length > 0
+        ? [
+            `${plural(stale.length, 'spec correction')} in \`${OVERLAY}\` no longer ${
+              stale.length === 1 ? 'applies' : 'apply'
+            }.`,
+          ]
+        : []),
+      ...extra,
+    ];
+    const headline =
+      attention.actions.size === 0
+        ? `**All ${plural(total, 'action')} ${
+            total === 1 ? 'works' : 'work'
+          } with the latest spec.**`
+        : `**${working} of ${plural(total, 'action')} ${
+            working === 1 ? 'works' : 'work'
+          } with the latest spec. ${plural(attention.actions.size, 'action')} ${
+            attention.actions.size === 1 ? 'needs' : 'need'
+          } attention.**`;
+    return [
+      headline,
+      reasons.length > 0 ? reasons.join(' ') : 'Its spec changed.',
+      'Update the connector to ensure it will continue working.',
+    ].join('\n\n');
+  };
+
+  // No action fails, but the latest spec has problems that belong to no single action.
+  const latestOutsideOnly = drift.verdict === 'vendor-drift' && failing.length === 0;
   let alert: 'NOTE' | 'WARNING' | 'CAUTION';
   let summary: string;
   switch (drift.verdict) {
@@ -544,17 +681,14 @@ export const renderDriftIssue = (
             )} outside the actions (see "Other problems"). The vendor didn't cause this: the connector, its artifacts or the checking tooling changed.`;
       break;
     case 'vendor-drift':
-      if (failing.length === 0) {
+      if (latestOutsideOnly) {
         alert = 'WARNING';
         const others = drift.otherProblems?.latest?.length ?? 0;
-        summary = `**Every checked action of \`${
-          drift.connector
-        }\` passes against the latest spec, but the check found ${plural(
-          others,
-          'problem'
-        )} outside the actions** (see "Other problems"). ${
-          others === 1 ? "It doesn't" : "They don't"
-        } occur against the committed snapshot, so the vendor's spec changed.`;
+        summary = passingSummary([
+          `The check found ${plural(others, 'problem')} outside the actions, which ${
+            others === 1 ? "doesn't" : "don't"
+          } occur against the committed snapshot (see "Other problems").`,
+        ]);
       } else if (movedOnly) {
         alert = 'NOTE';
         summary = `**${name}'s spec moved ${listed(
@@ -576,69 +710,15 @@ export const renderDriftIssue = (
         }\` fail against the latest spec.** They pass against the committed snapshot, so the vendor's API or its spec changed. Check the vendor's docs before changing the connector.`;
       }
       break;
-    default: {
+    default:
       alert = 'NOTE';
-      // Which actions need attention, and why: one sentence per reason.
-      const { readers, byKind, missing, unattached, total } = attention;
-      const working = total - attention.actions.size;
-      // The actions are the point of these sentences, so more of them are named.
-      const sentence = (named: readonly string[], [one, many]: readonly [string, string]) =>
-        `${listed(named.map(code), MAX_NAMED_ACTIONS)} ${named.length === 1 ? one : many}.`;
-      const reasons = [
-        ...(readers.length > 0
-          ? [
-              sentence(readers, [
-                'passes but reads fields that changed',
-                'pass but read fields that changed',
-              ]),
-            ]
-          : []),
-        ...[...byKind]
-          .filter(([, named]) => named.size > 0)
-          .map(([kind, named]) => sentence([...named], AFFECTED[kind])),
-        ...(missing.length > 0
-          ? [
-              sentence(missing, [
-                'calls an endpoint that is missing from the current spec',
-                'call endpoints that are missing from the current spec',
-              ]),
-            ]
-          : []),
-        ...(unattached > 0
-          ? [
-              `${plural(unattached, 'other spec change')} ${
-                unattached === 1 ? 'needs' : 'need'
-              } review (see the table).`,
-            ]
-          : []),
-        ...(stale.length > 0
-          ? [
-              `${plural(stale.length, 'spec correction')} in \`${OVERLAY}\` no longer ${
-                stale.length === 1 ? 'applies' : 'apply'
-              }.`,
-            ]
-          : []),
-      ];
-      const headline =
-        attention.actions.size === 0
-          ? `**All ${plural(total, 'action')} ${
-              total === 1 ? 'works' : 'work'
-            } with the latest spec.**`
-          : `**${working} of ${plural(total, 'action')} ${
-              working === 1 ? 'works' : 'work'
-            } with the latest spec. ${plural(attention.actions.size, 'action')} ${
-              attention.actions.size === 1 ? 'needs' : 'need'
-            } attention.**`;
-      summary = [
-        headline,
-        reasons.length > 0 ? reasons.join(' ') : 'Its spec changed.',
-        'Update the connector to ensure it will continue working.',
-      ].join('\n\n');
-    }
+      summary = passingSummary([]);
   }
   // The note for passing actions names these already.
   const missingEndpoints =
-    drift.verdict === 'healthy' ? [] : notChecked.filter(({ unmatched }) => unmatched.length > 0);
+    drift.verdict === 'healthy' || latestOutsideOnly
+      ? []
+      : notChecked.filter(({ unmatched }) => unmatched.length > 0);
   if (missingEndpoints.length > 0) {
     summary += ` ${plural(missingEndpoints.length, 'action')} ${
       missingEndpoints.length === 1 ? 'calls an endpoint' : 'call endpoints'
@@ -663,11 +743,15 @@ export const renderDriftIssue = (
         `vendor_api/${snapshotFile(source)}`
       )} |`
     );
-    if (servers && servers.snapshot.join() !== servers.latest.join()) {
+    // A spec can list a server twice.
+    const [before, after] = servers
+      ? [[...new Set(servers.snapshot)], [...new Set(servers.latest)]]
+      : [[], []];
+    if (servers && before.join() !== after.join()) {
       const label = Object.keys(drift.sources).length > 1 ? ` ${code(source)}` : '';
       facts.push(
-        `| **Server URL${label}** | ${servers.snapshot.map(code).join(', ') || 'none'} → ${
-          servers.latest.map(code).join(', ') || 'none'
+        `| **Server URL${label}** | ${before.map(code).join(', ') || 'none'} → ${
+          after.map(code).join(', ') || 'none'
         } |`
       );
     }
@@ -873,8 +957,12 @@ export const renderDriftIssue = (
       ? [
           '### Other problems',
           '',
-          // Continuation lines stay inside their list item
-          ...unattributed.map((problem) => `- ${problem.replace(/\n/g, '\n  ')}`),
+          '| Problem | Operation | Details | How to fix |',
+          '|---|---|---|---|',
+          ...otherProblemRows(unattributed).map(
+            ({ problem, operation, details, fix }) =>
+              `| ${problem} | ${operation} | ${cell(details)} | ${fix} |`
+          ),
           '',
         ]
       : []),
