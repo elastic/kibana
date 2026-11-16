@@ -23832,7 +23832,6 @@ paths:
                           value: ai-index-ds-customer-support
                         id: customer_support
                         managed: false
-                        memory_enabled: true
                         sources:
                           - type: esql
                             value: FROM support-cases | LIMIT 100
@@ -23966,9 +23965,6 @@ paths:
                         managed:
                           description: Whether the AI Index is managed by a plugin and therefore immutable.
                           type: boolean
-                        memory_enabled:
-                          description: Whether this AI Index accepts memory writes.
-                          type: boolean
                         sources:
                           description: Additional sources that provide context for the AI Index.
                           items:
@@ -24015,7 +24011,6 @@ paths:
                       required:
                         - id
                         - managed
-                        - memory_enabled
                         - date_created
                         - date_modified
                         - dest
@@ -24293,7 +24288,8 @@ paths:
                   minLength: 1
                   type: string
                 memory_enabled:
-                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  deprecated: true
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted. Deprecated and ignored in Serverless and in Elastic 9.7 and later.
                   type: boolean
                 sources:
                   default: []
@@ -25004,7 +25000,6 @@ paths:
                       value: ai-index-ds-customer-support
                     id: customer_support
                     managed: false
-                    memory_enabled: true
                     sources:
                       - type: esql
                         value: FROM support-cases | LIMIT 100
@@ -25137,9 +25132,6 @@ paths:
                   managed:
                     description: Whether the AI Index is managed by a plugin and therefore immutable.
                     type: boolean
-                  memory_enabled:
-                    description: Whether this AI Index accepts memory writes.
-                    type: boolean
                   sources:
                     description: Additional sources that provide context for the AI Index.
                     items:
@@ -25186,7 +25178,6 @@ paths:
                 required:
                   - id
                   - managed
-                  - memory_enabled
                   - date_created
                   - date_modified
                   - dest
@@ -25437,7 +25428,8 @@ paths:
                   required:
                     - enabled
                 memory_enabled:
-                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  deprecated: true
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted. Deprecated and ignored in Serverless and in Elastic 9.7 and later.
                   type: boolean
                 sources:
                   default: []
@@ -27081,7 +27073,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a data view and returns it. Kibana generates the data view ID. If a data view with the same name already exists, the request fails with a conflict.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+        Creates a data view and returns it. Kibana generates the data view ID. If a data view with the same name already exists, the request fails with a conflict. Scripted fields are deprecated and can't be set through this API; sending `scripted_fields` fails with a `400`.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
       operationId: post-data-views-v2
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -27152,7 +27144,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema'
                     description: The data view definition.
                   id:
                     description: The ID of the data view.
@@ -27292,7 +27284,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema'
                     description: The data view definition.
                   id:
                     description: The ID of the data view.
@@ -27353,7 +27345,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+        Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`, and also removes any deprecated scripted fields the data view has. Scripted fields can't be set through this API; sending `scripted_fields` fails with a `400`.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
       operationId: put-data-views-v2-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -27432,7 +27424,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema'
                     description: The data view definition.
                   id:
                     description: The ID of the data view.
@@ -27498,7 +27490,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema'
                     description: The data view definition.
                   id:
                     description: The ID of the data view.
@@ -175180,9 +175172,9 @@ components:
         - fields
       title: Saved composite runtime field
       type: object
-    Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema:
+    Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema:
       additionalProperties: false
-      description: Defines an stored data source with a mandatory index pattern and optional settings like id, name, show hidden indices and field settings.
+      description: A stored data view, including its deprecated scripted fields when it has any.
       properties:
         allow_hidden_indices:
           description: When `true`, allows the data view to match hidden indices.
@@ -175210,11 +175202,18 @@ components:
           minLength: 1
           title: Data view name
           type: string
+        scripted_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-scripted-field-schema'
+          deprecated: true
+          description: 'Deprecated scripted fields, keyed by field name. This property is read-only: it is only returned in responses, and sending it in a create or update request fails with a 400.'
+          title: Scripted fields
+          type: object
         time_field:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
       required:
         - index_pattern
-      title: Saved data view spec
+      title: Saved data view spec with scripted fields
       type: object
     Kibana_HTTP_APIs_kbn-saved-field-settings-entry:
       anyOf:
@@ -175258,6 +175257,40 @@ components:
       required:
         - type
       title: Saved runtime field
+      type: object
+    Kibana_HTTP_APIs_kbn-saved-scripted-field-schema:
+      additionalProperties: false
+      description: A deprecated scripted field. Scripted fields are evaluated at query time by Elasticsearch and are read-only in this API.
+      properties:
+        custom_description:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-description'
+        custom_label:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-label'
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format'
+        lang:
+          description: 'The language of the script. Example: "painless".'
+          maxLength: 1000
+          minLength: 1
+          title: Script language
+          type: string
+        popularity:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-popularity'
+        script:
+          description: The script that computes the value of the scripted field. Scripted fields are deprecated; use runtime fields instead.
+          minLength: 1
+          title: Script
+          type: string
+        type:
+          description: The Kibana field type of the scripted field (e.g., "string", "number", "date", "boolean", "ip", "geo_point").
+          maxLength: 1000
+          minLength: 1
+          title: Type
+          type: string
+      required:
+        - type
+        - script
+      title: Saved scripted field
       type: object
     Kibana_HTTP_APIs_kbn-tags-attributes:
       additionalProperties: false
@@ -211050,12 +211083,22 @@ components:
                   example: true
                   type: boolean
                 path:
-                  description: The full file path to retrieve from the endpoint.
+                  description: The full file path to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both.
                   maxLength: 4096
                   minLength: 1
                   type: string
-              required:
-                - path
+                paths:
+                  description: The list of file paths to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both. Valid for the Elastic Defend Endpoint agent type only, and requires an Endpoint that supports the `get_file_multi_path` capability.
+                  example:
+                    - /var/log/syslog
+                    - /var/log/auth.log
+                  items:
+                    maxLength: 4096
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  minItems: 1
+                  type: array
           required:
             - parameters
     Security_Endpoint_Management_API_GetProcessesRouteRequestBody:

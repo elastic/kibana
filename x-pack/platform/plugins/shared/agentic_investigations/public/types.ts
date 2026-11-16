@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ImpactEntityTarget,
-  RegisterFlyoutGroupedAttachment,
-} from '@kbn/agentic-investigations-common';
+import type { RegisterFlyoutGroupedAttachment } from '@kbn/agentic-investigations-common';
+import type { ImpactEntityTarget } from '@kbn/agentic-investigations-impact';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { ComponentType } from 'react';
