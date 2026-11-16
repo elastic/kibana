@@ -18,7 +18,10 @@ set -euo pipefail
 # that has an issue of its own gets it refreshed: its metadata records the report, a comment
 # with the report's numbers is posted when it failed since the issue was filed or last commented
 # on, and that was FLAKY_TESTS_COMMENT_COOLDOWN_DAYS days ago at least, and it is reopened when
-# it failed after the close. The body's text stays as filed.
+# it failed after the close. The body's text stays as filed. With
+# FLAKY_TESTS_REPLACE_PER_TEST_ISSUES set to 'true', open per-test issues don't count as
+# tracking a suite: those about its flaky tests are closed as duplicates of its issue once it is
+# filed or refreshed.
 # GITHUB_TOKEN is the pipeline's short-lived Vault plugin token (elastic-vault-github-plugin-prod[bot]),
 # set by .buildkite/scripts/common/setup_job_env.sh.
 
@@ -33,6 +36,7 @@ FLAKY_TESTS_MAX_NEW_ISSUES="${FLAKY_TESTS_MAX_NEW_ISSUES:-10}"
 FLAKY_TESTS_OMIT_SKIPPED_TESTS="${FLAKY_TESTS_OMIT_SKIPPED_TESTS:-true}"
 FLAKY_TESTS_UPDATE_ISSUES="${FLAKY_TESTS_UPDATE_ISSUES:-true}"
 FLAKY_TESTS_COMMENT_COOLDOWN_DAYS="${FLAKY_TESTS_COMMENT_COOLDOWN_DAYS:-3}"
+FLAKY_TESTS_REPLACE_PER_TEST_ISSUES="${FLAKY_TESTS_REPLACE_PER_TEST_ISSUES:-false}"
 FLAKY_TESTS_TRACKING_REPO="${FLAKY_TESTS_TRACKING_REPO-elastic/kibana}"
 
 REPORT_DIR="target/flaky_tests"
@@ -66,6 +70,7 @@ echo "    Closed issues since : $FLAKY_TESTS_CLOSED_ISSUES_DAYS days ago"
 echo "    Max new issues      : $FLAKY_TESTS_MAX_NEW_ISSUES"
 echo "    Omit skipped tests  : $FLAKY_TESTS_OMIT_SKIPPED_TESTS"
 echo "    Update issues       : $FLAKY_TESTS_UPDATE_ISSUES ($FLAKY_TESTS_COMMENT_COOLDOWN_DAYS days between comments at least)"
+echo "    Replace per-test    : $FLAKY_TESTS_REPLACE_PER_TEST_ISSUES"
 if [[ -n "$FLAKY_TESTS_TRACKING_REPO" && "$FLAKY_TESTS_TRACKING_REPO" != "$GITHUB_REPO" ]]; then
   echo "    Also tracked in     : $FLAKY_TESTS_TRACKING_REPO (suites whose every test has an issue there get none)"
 fi
@@ -87,6 +92,9 @@ if [[ "$FLAKY_TESTS_OMIT_SKIPPED_TESTS" == "false" ]]; then
 fi
 if [[ "$FLAKY_TESTS_UPDATE_ISSUES" == "false" ]]; then
   args+=(--no-update-issues)
+fi
+if [[ "$FLAKY_TESTS_REPLACE_PER_TEST_ISSUES" == "true" ]]; then
+  args+=(--replace-per-test-issues)
 fi
 
 # A failed GitHub write makes the CLI exit non-zero after handling every suite; annotate first,
@@ -131,6 +139,7 @@ section() {
       + (if .issue and .issue.state == "closed" then " (closed)" else "" end)
       + (if .reopened then " (reopened)" elif .commented then " (commented)" else "" end)
       + (if .supersedes then " (previously " + ([.supersedes[] | "[#\(.number)](\(.url))"] | join(", ")) + ")" else "" end)
+      + (if .replaced then " (closed as duplicates: " + ([.replaced[] | "[#\(.number)](\(.url))"] | join(", ")) + ")" else "" end)
       + (if .match then " (\(.match))" else "" end)
       + (if .reason then ": \(.reason)" else "" end)
       + (if .error then ": \(.error)" else "" end)' "$SUMMARY_PATH"

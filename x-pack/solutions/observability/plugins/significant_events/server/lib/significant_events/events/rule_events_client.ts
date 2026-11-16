@@ -8,9 +8,12 @@
 import { esql, type ComposerQuery } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import { isBoom } from '@hapi/boom';
 import {
+  ALERT_EPISODE_ACTION_TYPE,
   ALERT_EPISODE_STATUS,
+  INVALID_ALERT_STATE_TRANSITION_CODE,
   type AlertEpisodeStatus,
   type AlertEventSeverity,
   type CreateAlertEventResponse,
@@ -27,6 +30,7 @@ import {
   type Severity,
   type SignalVerdict,
   type SignificantEventStatus,
+  type SignificantEventCloseReason,
 } from '@kbn/significant-events-schema';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
@@ -53,7 +57,11 @@ import {
   type SignificantEventsSortOrder,
 } from '../../../../common/events_list';
 import { RULE_EVENTS_INDEX } from '../alerting/rule_events_metric_series';
-import type { EventsFilterOptions, EventsPaginatedSearchOptions } from './types';
+import type {
+  EventsFilterOptions,
+  EventsPaginatedSearchOptions,
+  InvestigationEpisodes,
+} from './types';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import {
   decideStatusChange,
@@ -62,7 +70,30 @@ import {
   type LifecycleSkipReason,
 } from './lifecycle/lifecycle_controller';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import {
+  reportEventStatusChange,
+  type EventStatusChangeReporter,
+  type WriteOrigin,
+} from './event_status_change_telemetry';
+import type { SignificantEventActor } from '../../telemetry/ebt';
 import { toRuleEvent } from './to_rule_event';
+
+/** Alerting v2 rejects `activate` / `deactivate` of a superseded episode with this code; it is not exported by a package. */
+const ALERT_NOT_LATEST_CODE = 'ALERT_NOT_LATEST';
+
+/** The `code` Alerting v2 attaches to the Boom error of a rejected alert action, if any. */
+const getAlertActionErrorCode = (error: unknown): string | undefined => {
+  if (!isBoom(error)) {
+    return undefined;
+  }
+  const { data } = error;
+  return typeof data === 'object' &&
+    data !== null &&
+    'code' in data &&
+    typeof data.code === 'string'
+    ? data.code
+    : undefined;
+};
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
@@ -187,10 +218,12 @@ const normalizeSourceIds = (value: unknown): string[] => {
  * Decodes a `.rule-events` row into a `SignificantEvent`.
  */
 const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
-  const data = JSON.parse(row.data_json || '{}') as Omit<
-    SignificantEvent,
-    '@timestamp' | 'status' | 'severity'
-  >;
+  // Legacy rows still carry `investigations`; it is no longer read.
+  const { investigations: _legacyInvestigations, ...data } = JSON.parse(
+    row.data_json || '{}'
+  ) as Omit<SignificantEvent, '@timestamp' | 'status' | 'severity'> & {
+    investigations?: unknown;
+  };
   const alertStatus = row.alert?.status ?? ALERT_EPISODE_STATUS.ACTIVE;
   const severity = row.severity ?? 'medium';
   return {
@@ -303,22 +336,35 @@ const topologyFeatureIdsIntersects = (values: string[]): ESQLAstExpression => {
 const INVESTIGATION_STATE_COLUMN = 'investigation_state';
 
 /**
- * Derives `not_started` / `in_progress` / `completed` from the flattened `investigations` entries:
- * an entry without `completed_at` means a run is still open. Mirrors the browser's
- * `getInvestigationState` so the filter and the list agree. `FIELD_EXTRACT` drops duplicate
- * values, so two runs finishing in the same millisecond would read as in progress (verified live).
+ * Derives `not_started` / `in_progress` / `completed` from the episode id (`alert.id`) of the
+ * current revision: the episodes of a running investigation, then the ones of a finished one, and
+ * `not_started` for any other. An empty list is left out because `IN ()` is not valid ES|QL.
  */
-const withInvestigationState = (query: ComposerQuery): ComposerQuery => {
-  const dataCol = esql.col('data');
-  const started = esql.exp`COALESCE(MV_COUNT(FIELD_EXTRACT(${dataCol}, ${esql.str(
-    'investigations.workflow_execution_id'
-  )})), 0)`;
-  const completed = esql.exp`COALESCE(MV_COUNT(FIELD_EXTRACT(${dataCol}, ${esql.str(
-    'investigations.completed_at'
-  )})), 0)`;
-  return query.pipe`EVAL ${esql.col(INVESTIGATION_STATE_COLUMN)} = CASE(${started} == 0, ${esql.str(
-    'not_started'
-  )}, ${completed} < ${started}, ${esql.str('in_progress')}, ${esql.str('completed')})`;
+const withInvestigationState = (
+  query: ComposerQuery,
+  { inProgress, completed }: InvestigationEpisodes
+): ComposerQuery => {
+  const stateCol = esql.col(INVESTIGATION_STATE_COLUMN);
+  const episode = esql.col('alert.id');
+  const ids = (episodeIds: string[]) => episodeIds.map((id) => esql.str(id));
+  const notStarted = esql.str('not_started');
+
+  if (inProgress.length && completed.length) {
+    return query.pipe`EVAL ${stateCol} = CASE(${episode} IN (${ids(inProgress)}), ${esql.str(
+      'in_progress'
+    )}, ${episode} IN (${ids(completed)}), ${esql.str('completed')}, ${notStarted})`;
+  }
+  if (inProgress.length) {
+    return query.pipe`EVAL ${stateCol} = CASE(${episode} IN (${ids(inProgress)}), ${esql.str(
+      'in_progress'
+    )}, ${notStarted})`;
+  }
+  if (completed.length) {
+    return query.pipe`EVAL ${stateCol} = CASE(${episode} IN (${ids(completed)}), ${esql.str(
+      'completed'
+    )}, ${notStarted})`;
+  }
+  return query.pipe`EVAL ${stateCol} = ${notStarted}`;
 };
 
 const SORT_RANK_COLUMN = 'sort_rank';
@@ -401,7 +447,7 @@ const isLaterAction = (candidate: ActionRow, current: ActionRow): boolean => {
 
 /**
  * `.rule-events` client used by agent-side call sites (`event_search`, `event_write`'s dedup scan,
- * `attach_investigation`, SML): reads, plus `createEvent` / `updateEvent` / `updateEventStatus` to
+ * SML): reads, plus `createEvent` / `updateEvent` / `updateEventStatus` to
  * write versions. Query strategy (which ES|QL extraction form to use per field) is validated
  * per-shape on nightshift-program#1492 and #1517 before this client's output is trusted in
  * production.
@@ -415,7 +461,10 @@ export class RuleEventsClient {
       esClient: ElasticsearchClient;
       space: string;
       getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
+      /** Writes operator deactivate and activate as alert actions; required for operator changes. */
+      getAlertActionsClient?: () => Promise<AlertActionsClientApi>;
       emitTrigger?: TriggerEmitter;
+      telemetry?: EventStatusChangeReporter;
       /** Reads `.alert-actions`, a private Alerting v2 index; falls back to `esClient`. */
       internalEsClient?: ElasticsearchClient;
       logger?: Logger;
@@ -481,10 +530,10 @@ export class RuleEventsClient {
     if (entityFilter && options.unassignedEntityIds?.length !== 0) {
       query = query.where`${entityFilter}`;
     }
-    if (options.investigationStates?.length) {
-      query = withInvestigationState(query).where`${esql.col(
+    if (options.investigation?.states.length) {
+      query = withInvestigationState(query, options.investigation.episodes).where`${esql.col(
         INVESTIGATION_STATE_COLUMN
-      )} IN (${options.investigationStates.map((state) => esql.str(state))})`;
+      )} IN (${options.investigation.states.map((state) => esql.str(state))})`;
     }
 
     return query;
@@ -549,10 +598,17 @@ export class RuleEventsClient {
     };
   }
 
-  /** Counts the latest revisions per severity, status and investigation state. */
-  async countFacets(
-    options: RuleEventsCurrentStateSearchOptions
-  ): Promise<SignificantEventsFacets> {
+  /**
+   * Counts the latest revisions per severity, status and investigation state. The investigation
+   * counts wait for `investigationEpisodes`, so a slow listing does not hold back the other two,
+   * and are left out when it resolves to `undefined` (the episodes could not be read).
+   */
+  async countFacets({
+    investigationEpisodes,
+    ...options
+  }: RuleEventsCurrentStateSearchOptions & {
+    investigationEpisodes?: Promise<InvestigationEpisodes | undefined>;
+  } = {}): Promise<SignificantEventsFacets> {
     const { esClient } = this.clients;
     const [severity, status, investigation] = await Promise.all([
       countBy({
@@ -568,17 +624,22 @@ export class RuleEventsClient {
         column: 'event_status',
         keys: SIGNIFICANT_EVENT_STATUS_OPTIONS,
       }),
-      countBy({
-        esClient,
-        query: withInvestigationState(
-          this.buildLatestByCurrentStateQuery({ ...options, investigationStates: undefined })
-        ),
-        column: INVESTIGATION_STATE_COLUMN,
-        keys: SIGNIFICANT_EVENT_INVESTIGATION_STATES,
-      }),
+      investigationEpisodes?.then((episodes) =>
+        episodes
+          ? countBy({
+              esClient,
+              query: withInvestigationState(
+                this.buildLatestByCurrentStateQuery({ ...options, investigation: undefined }),
+                episodes
+              ),
+              column: INVESTIGATION_STATE_COLUMN,
+              keys: SIGNIFICANT_EVENT_INVESTIGATION_STATES,
+            })
+          : undefined
+      ),
     ]);
 
-    return { severity, status, investigation };
+    return { severity, status, ...(investigation ? { investigation } : {}) };
   }
 
   async countActiveEventsByEntity(
@@ -996,8 +1057,14 @@ export class RuleEventsClient {
   }
 
   /** Writes the first version of an event; unguarded, as there is no prior version to compare. */
-  async createEvent({ event }: { event: SignificantEvent }): Promise<CreateEventResult> {
-    const { group_hash: groupHash, alert_id: alertId } = await this.writeVersion({ event });
+  async createEvent({
+    event,
+    origin,
+  }: {
+    event: SignificantEvent;
+    origin: WriteOrigin;
+  }): Promise<CreateEventResult> {
+    const { group_hash: groupHash, alert_id: alertId } = await this.writeVersion({ event, origin });
     return { groupHash, alertId };
   }
 
@@ -1005,9 +1072,11 @@ export class RuleEventsClient {
   async updateEvent({
     event,
     prior,
+    origin,
   }: {
     event: SignificantEvent;
     prior: SignificantEvent;
+    origin: WriteOrigin;
   }): Promise<UpdateEventResult> {
     // A head that cannot be read back is not a version to build on.
     const head = await this.findLatestByEventId(event.event_id);
@@ -1015,7 +1084,7 @@ export class RuleEventsClient {
       return { updated: false, head };
     }
 
-    await this.writeVersion({ event, prior });
+    await this.writeVersion({ event, prior, origin });
     return { updated: true };
   }
 
@@ -1023,14 +1092,21 @@ export class RuleEventsClient {
   async updateEventStatus({
     eventId,
     change,
+    actor,
+    closeReason,
     assessmentNote,
     expectedTimestamp,
+    workflowExecutionId,
   }: {
     eventId: string;
     change: StatusChange;
+    /** Not derived from `change`: a `byOperator` change comes from the update route or from a chat tool. */
+    actor: SignificantEventActor;
+    closeReason?: SignificantEventCloseReason;
     assessmentNote?: string;
     /** Skips the write when the latest version's `@timestamp` differs (the event changed since). */
     expectedTimestamp?: string;
+    workflowExecutionId?: string;
   }): Promise<UpdateEventStatusResult> {
     const latest = await this.findLatestByEventId(eventId);
     if (!latest) {
@@ -1054,7 +1130,23 @@ export class RuleEventsClient {
       return { updated: 0, ignored: 1, status: decision.status, reason: decision.reason };
     }
 
-    const written = await this.updateEvent({ event: decision.event, prior: latest });
+    // An operator's change is an Alerting v2 alert action, not a rule event: the engine treats
+    // user-initiated transitions differently, and the action records the actor and the reason.
+    if (change.kind === 'operator') {
+      return this.applyOperatorChange({
+        latest,
+        event: { ...decision.event, workflow_execution_id: workflowExecutionId },
+        change,
+        assessmentNote,
+        origin: { actor, change, closeReason },
+      });
+    }
+
+    const written = await this.updateEvent({
+      event: { ...decision.event, workflow_execution_id: workflowExecutionId },
+      prior: latest,
+      origin: { actor, change, closeReason },
+    });
     if (!written.updated) {
       return {
         updated: 0,
@@ -1067,14 +1159,88 @@ export class RuleEventsClient {
     return { updated: 1, ignored: 0, status: decision.event.status };
   }
 
+  /**
+   * Deactivates or reactivates the event's latest episode through an alert action. Alerting v2
+   * writes the synthetic `.rule-events` version (it keeps the head's stored data) and the audit
+   * row in one bulk, so there is no second write here. A bulk that rejects one of the two
+   * documents is reported as an error (the other may already be written); a retry then meets
+   * `already_in_state` when the synthetic version landed. The episode id is the stored head's,
+   * never the caller's.
+   */
+  private async applyOperatorChange({
+    latest,
+    event,
+    change,
+    assessmentNote,
+    origin,
+  }: {
+    latest: SignificantEventResponse;
+    event: SignificantEvent;
+    change: Extract<StatusChange, { kind: 'operator' }>;
+    assessmentNote?: string;
+    origin: WriteOrigin;
+  }): Promise<UpdateEventStatusResult> {
+    const { getAlertActionsClient, emitTrigger, telemetry, logger, space } = this.clients;
+    if (!getAlertActionsClient) {
+      throw new Error(
+        'RuleEventsClient was created without an alert actions client, so it cannot apply an operator change'
+      );
+    }
+
+    const episodeId = latest.episode_id;
+    if (episodeId === undefined) {
+      return { updated: 0, ignored: 1, status: latest.status, reason: 'not_found' };
+    }
+
+    const alertActionsClient = await getAlertActionsClient();
+    try {
+      await alertActionsClient.createEpisodeAction({
+        episodeId,
+        action: {
+          action_type:
+            change.status === ALERT_EPISODE_STATUS.INACTIVE
+              ? ALERT_EPISODE_ACTION_TYPE.DEACTIVATE
+              : ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+          reason: assessmentNote?.trim() || operatorFallbackAssessmentNote(change.status),
+        },
+      });
+    } catch (error) {
+      const code = getAlertActionErrorCode(error);
+      if (code === ALERT_NOT_LATEST_CODE) {
+        return { updated: 0, ignored: 1, status: latest.status, reason: 'superseded' };
+      }
+      if (code === INVALID_ALERT_STATE_TRANSITION_CODE) {
+        return { updated: 0, ignored: 1, status: change.status, reason: 'already_in_state' };
+      }
+      throw error;
+    }
+
+    emitSignificantEventWriteTriggers({
+      emitTrigger,
+      significantEvent: event,
+      priorSignificantEvent: latest,
+    });
+    reportEventStatusChange({
+      telemetry,
+      logger,
+      event,
+      prior: latest,
+      origin,
+      spaceId: space,
+    });
+    return { updated: 1, ignored: 0, status: event.status };
+  }
+
   private async writeVersion({
     event,
     prior,
+    origin,
   }: {
     event: SignificantEvent;
     prior?: SignificantEvent;
+    origin: WriteOrigin;
   }): Promise<CreateAlertEventResponse> {
-    const { getAlertEventsClient, emitTrigger } = this.clients;
+    const { getAlertEventsClient, emitTrigger, telemetry, logger, space } = this.clients;
     if (!getAlertEventsClient) {
       throw new Error('RuleEventsClient was created without a writer, so it cannot write events');
     }
@@ -1087,6 +1253,7 @@ export class RuleEventsClient {
       significantEvent: event,
       priorSignificantEvent: prior,
     });
+    reportEventStatusChange({ telemetry, logger, event, prior, origin, spaceId: space });
     return response;
   }
 }

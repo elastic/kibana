@@ -9,6 +9,7 @@ import { css } from '@emotion/react';
 import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
+  EuiBanner,
   EuiButton,
   EuiCallOut,
   EuiConfirmModal,
@@ -17,7 +18,6 @@ import {
   EuiIcon,
   EuiIllustration,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -31,9 +31,13 @@ import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/co
 import { NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { InvestigationCardActions } from '../../../components/entities/investigation/investigation_card_actions';
 import { useInvestigationAssignees } from '../../../components/entities/investigation/use_investigation_assignees';
+import { SourceCard } from '../../../components/entities/sandbox_connector/source_card';
+import { sourceGridStyles } from '../../../components/entities/sandbox_connector/source_grid_styles';
+import { IconMark } from '../../../components/ui/icon_mark';
 import {
   useCreateAutomation,
   useDeleteAutomation,
+  useRunAutomation,
   type Automation,
 } from '../../../data/automations/use_automations';
 import { useInvestigatorServiceAccount } from '../../../data/service_accounts/use_investigator_service_account';
@@ -50,6 +54,24 @@ const CREATE_AUTOMATION = i18n.translate(
   'xpack.nightshift.onboarding.automate.createAutomationButton',
   { defaultMessage: 'Create automation' }
 );
+
+const FIRST_AUTOMATION_TITLE = i18n.translate(
+  'xpack.nightshift.onboarding.automate.firstAutomationTitle',
+  { defaultMessage: 'Create first automation' }
+);
+
+const FIRST_AUTOMATION_DESCRIPTION = i18n.translate(
+  'xpack.nightshift.onboarding.automate.firstAutomationDescription',
+  {
+    defaultMessage:
+      "Let investigations start automatically — and don't do the same work over and over again",
+  }
+);
+
+/** Shared pitch on the trial card (in progress + done). */
+const AUTOMATION_PITCH = i18n.translate('xpack.nightshift.onboarding.automate.automationPitch', {
+  defaultMessage: "Create an automation so you don't repeat this work manually",
+});
 const TRIGGER_ALERT = i18n.translate('xpack.nightshift.onboarding.automate.triggerAlert', {
   defaultMessage: 'alert',
 });
@@ -86,11 +108,14 @@ const triggerIcon = (automation: Automation): string => {
 /** Step 3: the trial investigation, then the first automation and any that follow. */
 export function OnboardingAutomationStep({
   investigation,
+  isInvestigationSelected = false,
   automations,
   automationsAvailable,
   onInvestigationClick,
 }: {
   investigation: InvestigationSummary;
+  /** True while the trial investigation flyout is open (in progress or done). */
+  isInvestigationSelected?: boolean;
   automations: Automation[];
   /** False when automations are unavailable in this deployment. */
   automationsAvailable: boolean;
@@ -122,6 +147,7 @@ export function OnboardingAutomationStep({
       {/* Section title lives above the onboarding grid so Get started lines up with this card. */}
       <TrialInvestigationCard
         investigation={investigation}
+        isSelected={isInvestigationSelected}
         onOpenInvestigation={onInvestigationClick}
       />
 
@@ -207,9 +233,11 @@ function useOnboardingAutomationPermissions(): {
 
 function TrialInvestigationCard({
   investigation,
+  isSelected = false,
   onOpenInvestigation,
 }: {
   investigation: InvestigationSummary;
+  isSelected?: boolean;
   onOpenInvestigation: (investigation: InvestigationSummary) => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -217,37 +245,80 @@ function TrialInvestigationCard({
   const { in_progress: isActive } = investigation;
   const investigations = useMemo(() => [investigation], [investigation]);
   const renderAssignees = useInvestigationAssignees(investigations);
-  // Figma AI Background Base + AI Border Base (primary → assistance).
-  const aiFill = `linear-gradient(97.76deg, ${euiTheme.colors.backgroundBasePrimary} 17%, ${euiTheme.colors.backgroundBaseAssistance} 83%)`;
-  const aiBorder = `linear-gradient(97.76deg, ${euiTheme.colors.borderBasePrimary} 17%, ${euiTheme.colors.borderBaseAssistance} 83%)`;
   const borderWidth = euiTheme.border.width.thin;
-
-  // Same radius as EuiPanel (Get started / Automations). Parent overflow clips the
-  // nested card and footer so corners stay round — no negative-margin overlap.
-  const panelRadius = euiTheme.border.radius.panel;
+  // EUI default card/panel radius (same as EuiPanel / EuiCard / prototype CARD_BORDER_RADIUS_PX).
+  const cardRadius = euiTheme.border.radius.panel;
+  // In progress: AI shell. Done: success fill + border (prototype complete trial card).
+  const shellFill = isActive
+    ? `linear-gradient(97.76deg, ${euiTheme.colors.backgroundBasePrimary} 17%, ${euiTheme.colors.backgroundBaseAssistance} 83%)`
+    : `linear-gradient(${euiTheme.colors.backgroundBaseSuccess}, ${euiTheme.colors.backgroundBaseSuccess})`;
+  const shellBorder = isActive
+    ? `linear-gradient(97.76deg, ${euiTheme.colors.borderBasePrimary} 17%, ${euiTheme.colors.borderBaseAssistance} 83%)`
+    : `linear-gradient(${euiTheme.colors.borderBaseSuccess}, ${euiTheme.colors.borderBaseSuccess})`;
+  const cellBorder = isActive ? shellBorder : undefined;
+  const selectedBorder = isActive
+    ? euiTheme.colors.borderStrongAssistance
+    : euiTheme.colors.borderStrongSuccess;
 
   return (
     <div
       data-test-subj="nightshiftOnboardingTrialInvestigation"
       css={css`
+        position: relative;
         box-sizing: border-box;
-        overflow: hidden;
-        border-radius: ${panelRadius};
+        display: flex;
+        flex-direction: column;
+        gap: ${euiTheme.size.base};
+        padding: 0;
+        padding-bottom: ${euiTheme.size.base};
+        border-radius: ${cardRadius};
         border: ${borderWidth} solid transparent;
-        background-image: ${aiFill}, ${aiBorder};
+        background-image: ${shellFill}, ${shellBorder};
         background-origin: border-box;
         background-clip: padding-box, border-box;
+        /* Keep overflow visible so the nested cell can share the shell outline. */
+        overflow: visible;
       `}
     >
       {InvestigationCard && (
         <div
           css={css`
-            background: ${euiTheme.colors.emptyShade};
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+            /* Overlap the shell border on L/T/R so the two strokes read as one. */
+            margin: -${borderWidth} -${borderWidth} 0;
+            width: calc(100% + 2 * ${borderWidth});
+            border-radius: ${cardRadius};
+            overflow: hidden;
+            border: ${borderWidth} solid
+              ${isActive ? 'transparent' : euiTheme.colors.borderBaseSuccess};
+            background-color: ${euiTheme.colors.emptyShade};
+            ${cellBorder
+              ? css`
+                  background-image: linear-gradient(
+                      ${euiTheme.colors.emptyShade},
+                      ${euiTheme.colors.emptyShade}
+                    ),
+                    ${cellBorder};
+                  background-origin: border-box;
+                  background-clip: padding-box, border-box;
+                `
+              : ''}
+            /* Solid strong ring when open — keeps panel radius (gradient can clip corners). */
+            ${isSelected
+              ? css`
+                  border-color: ${selectedBorder};
+                  background-image: none;
+                  background-color: ${euiTheme.colors.emptyShade};
+                `
+              : ''}
           `}
         >
           <InvestigationCard
             borderless
             investigation={investigation}
+            /* Outline-only selection: skip InvestigationCard's blue selected fill. */
             onClick={onOpenInvestigation}
             actions={
               <InvestigationCardActions
@@ -261,17 +332,35 @@ function TrialInvestigationCard({
       )}
       <EuiFlexGroup
         alignItems="center"
-        gutterSize="s"
+        gutterSize="none"
         responsive={false}
         css={css`
-          padding: ${euiTheme.size.m} ${euiTheme.size.base};
+          /* One step under size.m (16 → 12). */
+          gap: calc(${euiTheme.size.m} - ${euiTheme.size.xs});
+          padding: 0 ${euiTheme.size.base};
         `}
       >
         <EuiFlexItem grow={false}>
           {isActive ? (
-            <EuiLoadingSpinner size="m" />
+            <EuiLoadingSpinner
+              size="m"
+              color={{
+                // Kibana AI label end token (textPrimary → textAssistance).
+                highlight: euiTheme.colors.textAssistance,
+                border: euiTheme.colors.borderBasePlain,
+              }}
+            />
           ) : (
-            <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
+            <EuiIcon
+              type="checkCircleFill"
+              color="success"
+              size="m"
+              aria-hidden={true}
+              css={css`
+                inline-size: 16px;
+                block-size: 16px;
+              `}
+            />
           )}
         </EuiFlexItem>
         <EuiFlexItem>
@@ -284,17 +373,27 @@ function TrialInvestigationCard({
                   })}
                 </strong>
                 {' · '}
-                {i18n.translate('xpack.nightshift.onboarding.automate.investigatingDescription', {
-                  defaultMessage:
-                    'It might take a few minutes. Meanwhile, set up an automation for future investigations.',
-                })}
+                {i18n.translate(
+                  'xpack.nightshift.onboarding.automate.investigatingAutomationHint',
+                  {
+                    defaultMessage:
+                      "It might take up to 5 minutes. Meanwhile, create an automation so you don't repeat this work manually",
+                  }
+                )}
               </>
             ) : (
-              <strong>
-                {i18n.translate('xpack.nightshift.onboarding.automate.completedTitle', {
-                  defaultMessage: 'Results are ready',
-                })}
-              </strong>
+              <>
+                <strong>
+                  {i18n.translate(
+                    'xpack.nightshift.onboarding.automate.investigationResultsReadyTitle',
+                    {
+                      defaultMessage: 'Investigation results are ready',
+                    }
+                  )}
+                </strong>
+                {' · '}
+                {AUTOMATION_PITCH}
+              </>
             )}
           </EuiText>
         </EuiFlexItem>
@@ -302,11 +401,12 @@ function TrialInvestigationCard({
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
+              color="success"
               onClick={() => onOpenInvestigation(investigation)}
               data-test-subj="nightshiftOnboardingTrialInvestigationOpen"
             >
-              {i18n.translate('xpack.nightshift.onboarding.automate.openButton', {
-                defaultMessage: 'Open',
+              {i18n.translate('xpack.nightshift.onboarding.automate.viewResultsButton', {
+                defaultMessage: 'View results',
               })}
             </EuiButton>
           </EuiFlexItem>
@@ -325,55 +425,38 @@ function FirstAutomationCard({
   canManage: boolean;
   editDisabledReason?: string;
 }): React.ReactElement {
-  const { euiTheme } = useEuiTheme();
+  // Keep EuiToolTip (not native title / actionProps) so the manage_security reason stays
+  // hover- and keyboard-discoverable — same as AutomationsPage / SourceCard.
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="nightshiftOnboardingFirstAutomation">
-      <EuiFlexGroup alignItems="center" gutterSize="xl">
-        <EuiFlexItem grow={false}>
-          <EuiIllustration
-            type={connectedPowerPlug}
-            alt=""
-            data-test-subj="nightshiftOnboardingFirstAutomationIllustration"
-            css={css`
-              max-inline-size: ${euiTheme.base * 10}px;
-            `}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>
-              {i18n.translate('xpack.nightshift.onboarding.automate.firstAutomationTitle', {
-                defaultMessage: 'Create first automation',
-              })}
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.nightshift.onboarding.automate.firstAutomationDescription', {
-                defaultMessage:
-                  "Let investigations start automatically — and don't do the same work over and over again",
-              })}
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <div>
-            <EuiToolTip content={editDisabledReason}>
-              <EuiButton
-                size="s"
-                fill
-                iconType="plus"
-                onClick={onCreate}
-                isDisabled={!canManage}
-                data-test-subj="nightshiftOnboardingCreateAutomation"
-              >
-                {CREATE_AUTOMATION}
-              </EuiButton>
-            </EuiToolTip>
-          </div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <EuiBanner
+      size="m"
+      color="plain"
+      title={FIRST_AUTOMATION_TITLE}
+      text={FIRST_AUTOMATION_DESCRIPTION}
+      headingElement="h4"
+      aria-label={FIRST_AUTOMATION_TITLE}
+      data-test-subj="nightshiftOnboardingFirstAutomation"
+      media={
+        <EuiIllustration
+          type={connectedPowerPlug}
+          alt=""
+          data-test-subj="nightshiftOnboardingFirstAutomationIllustration"
+        />
+      }
+    >
+      <EuiToolTip content={editDisabledReason}>
+        <EuiButton
+          size="s"
+          fill
+          iconType="plus"
+          onClick={onCreate}
+          isDisabled={!canManage}
+          data-test-subj="nightshiftOnboardingCreateAutomation"
+        >
+          {CREATE_AUTOMATION}
+        </EuiButton>
+      </EuiToolTip>
+    </EuiBanner>
   );
 }
 
@@ -390,108 +473,64 @@ function AutomationCards({
   canManage: boolean;
   editDisabledReason?: string;
 }): React.ReactElement {
-  const { euiTheme } = useEuiTheme();
   return (
     <div
       data-test-subj="nightshiftOnboardingAutomationCards"
-      css={css`
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: ${euiTheme.size.base};
-      `}
+      css={sourceGridStyles}
+      role="list"
+      aria-label={i18n.translate('xpack.nightshift.onboarding.automate.cardsLabel', {
+        defaultMessage: 'Automations',
+      })}
     >
       {automations.map((automation) => (
-        <EuiPanel
+        <SourceCard
           key={automation.id}
-          hasBorder
-          paddingSize="l"
+          mark={<IconMark icon={triggerIcon(automation)} />}
+          title={automation.name}
+          description={triggeredByLabel(automation)}
+          badge={
+            <EuiBadge
+              color={automation.isEnabled ? 'success' : 'hollow'}
+              iconType={automation.isEnabled ? 'check' : undefined}
+            >
+              {automation.isEnabled ? statusLabels.enabled : statusLabels.paused}
+            </EuiBadge>
+          }
           data-test-subj="nightshiftOnboardingAutomationCard"
-        >
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <IconTile icon={triggerIcon(automation)} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color={automation.isEnabled ? 'success' : 'hollow'}>
-                {automation.isEnabled ? statusLabels.enabled : statusLabels.paused}
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          <EuiTitle size="xs">
-            <h4>{automation.name}</h4>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText size="s" color="subdued">
-            <p>{triggeredByLabel(automation)}</p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiButton
-            size="s"
-            iconType="pencil"
-            onClick={() => onEdit(automation)}
-            data-test-subj="nightshiftOnboardingEditAutomation"
-          >
-            {i18n.translate('xpack.nightshift.onboarding.automate.editAutomation', {
+          action={{
+            label: i18n.translate('xpack.nightshift.onboarding.automate.editAutomation', {
               defaultMessage: 'Edit automation',
-            })}
-          </EuiButton>
-        </EuiPanel>
+            }),
+            icon: 'pencil',
+            onClick: () => onEdit(automation),
+            'data-test-subj': 'nightshiftOnboardingEditAutomation',
+          }}
+        />
       ))}
-      <EuiPanel hasBorder paddingSize="l" data-test-subj="nightshiftOnboardingAddAutomation">
-        <IconTile icon="plus" />
-        <EuiSpacer size="m" />
-        <EuiTitle size="xs">
-          <h4>
-            {i18n.translate('xpack.nightshift.onboarding.automate.addAnotherTitle', {
-              defaultMessage: 'Add one more automation',
-            })}
-          </h4>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p>
-            {i18n.translate('xpack.nightshift.onboarding.automate.addAnotherDescription', {
-              defaultMessage:
-                'Investigate alerts, Slack messages, GitHub pull requests — or run on a schedule',
-            })}
-          </p>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiToolTip content={editDisabledReason}>
-          <EuiButton
-            size="s"
-            iconType="plus"
-            onClick={onCreate}
-            isDisabled={!canManage}
-            data-test-subj="nightshiftOnboardingCreateAutomation"
-          >
-            {CREATE_AUTOMATION}
-          </EuiButton>
-        </EuiToolTip>
-      </EuiPanel>
-    </div>
-  );
-}
-
-/** Same tinted plate as the leading Mark on earlier onboarding steps. */
-function IconTile({ icon }: { icon: string }): React.ReactElement {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <div
-      aria-hidden={true}
-      css={css`
-        width: ${euiTheme.size.xxl};
-        height: ${euiTheme.size.xxl};
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: ${euiTheme.colors.backgroundLightText};
-        border-radius: ${euiTheme.size.s};
-        color: ${euiTheme.colors.textParagraph};
-      `}
-    >
-      <EuiIcon type={icon} size="m" aria-hidden={true} />
+      <SourceCard
+        mark={<IconMark icon="workflow" />}
+        title={i18n.translate('xpack.nightshift.onboarding.automate.addAnotherTitle', {
+          defaultMessage: 'Add one more automation',
+        })}
+        description={i18n.translate('xpack.nightshift.onboarding.automate.addAnotherDescription', {
+          defaultMessage:
+            'Investigate alerts, Slack messages, GitHub pull requests — or run on a schedule',
+        })}
+        data-test-subj="nightshiftOnboardingAddAutomation"
+        action={{
+          label: CREATE_AUTOMATION,
+          icon: 'plus',
+          onClick: onCreate,
+          // SourceCard disables whenever a reason is set (including a generic fallback).
+          disabledReason: canManage
+            ? undefined
+            : editDisabledReason ??
+              i18n.translate('xpack.nightshift.onboarding.automate.createUnavailable', {
+                defaultMessage: 'You cannot create automations right now.',
+              }),
+          'data-test-subj': 'nightshiftOnboardingCreateAutomation',
+        }}
+      />
     </div>
   );
 }
@@ -517,8 +556,9 @@ function EditAutomationFlyout({
 }): React.ReactElement {
   const deleteAutomation = useDeleteAutomation();
   const cloneAutomation = useCreateAutomation(true);
+  const runAutomation = useRunAutomation();
   const [automationToDelete, setAutomationToDelete] = useState<Automation>();
-  const [refreshedAt] = useState(() => Date.now());
+  const [refreshedAt, setRefreshedAt] = useState(() => Date.now());
   const { runRange, usedToday } = useAutomationUsage(
     automations,
     { start: 'now-48h', end: 'now' },
@@ -541,6 +581,10 @@ function EditAutomationFlyout({
         rangeLabel={listLabels.last48Hours}
         onClose={onClose}
         onSelectAutomation={onSelectAutomation}
+        onRun={(source) =>
+          runAutomation.mutate(source, { onSuccess: () => setRefreshedAt(Date.now()) })
+        }
+        isRunPending={runAutomation.isLoading}
         onClone={
           canManage
             ? (source) =>

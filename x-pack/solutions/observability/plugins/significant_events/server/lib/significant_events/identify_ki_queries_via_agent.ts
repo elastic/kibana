@@ -34,6 +34,7 @@ import {
   type AcceptedQuery,
 } from '../../agent_builder/skills/ki_query_generation';
 import { chatTokenCountFromModelUsage } from './features/chat_token_count';
+import { getWorkflowExecutionIdFromRequest } from '../telemetry/ebt/workflow_execution_id';
 
 const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
 
@@ -113,6 +114,7 @@ export async function executeKIQueryGenerationAgent({
           productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
           interactionId,
         },
+        workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
       },
     });
 

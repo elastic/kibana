@@ -8,14 +8,19 @@
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { InvestigationQuotasResponse } from '@kbn/nightshift-investigations-plugin/common';
+import { useInvestigationQuotas } from '../run_quotas/use_investigation_quotas';
+import { INVESTIGATION_QUOTAS_QUERY_KEY } from '../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import {
   AUTOMATIONS_QUERY_KEY,
   useAutomationsRunsInRange,
+  useAutomationRunActivity,
   useCreateAutomation,
   useDeleteAutomation,
   useFetchAutomations,
   useRefreshAutomations,
+  useRunAutomation,
   useToggleAutomation,
 } from './use_automations';
 
@@ -115,6 +120,132 @@ describe('use_automations', () => {
       signal: null,
     });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: AUTOMATIONS_QUERY_KEY });
+  });
+
+  it('requests a run without configuration overrides and refreshes run history', async () => {
+    investigationsFetch.mockResolvedValue({ workflowExecutionId: 'exec-1' });
+    const { result, invalidateQueries } = renderWithClient(() => useRunAutomation());
+    act(() => result.current.mutate({ id: 'automation-1', name: 'Triage' }));
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith({ title: 'Run requested', text: 'Triage' })
+    );
+    expect(investigationsFetch).toHaveBeenCalledWith(
+      'POST /internal/nightshift/automations/{id}/run',
+      {
+        params: { path: { id: 'automation-1' } },
+        signal: null,
+      }
+    );
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: AUTOMATIONS_QUERY_KEY });
+  });
+
+  it('refreshes quotas after acceptance and polls later admission and daily reset while the menu is open', async () => {
+    jest.useFakeTimers();
+    try {
+      let quotas: InvestigationQuotasResponse = {
+        enabled: true,
+        canManage: true,
+        limits: {
+          automatic_investigation: null,
+          manual_investigation: 1,
+          total_investigation: null,
+        },
+        counts: {
+          automatic_investigation: 0,
+          manual_investigation: 0,
+          total_investigation: 0,
+        },
+        window: {
+          start: '2040-01-01T00:00:00.000Z',
+          resetsAt: '2040-01-02T00:00:00.000Z',
+          timezone: 'UTC',
+        },
+      };
+      investigationsFetch.mockImplementation(async (endpoint: string) =>
+        endpoint.startsWith('GET /internal/nightshift/investigation_quotas')
+          ? quotas
+          : { workflowExecutionId: 'exec-1' }
+      );
+      const { result, invalidateQueries } = renderWithClient(() => ({
+        quota: useInvestigationQuotas({ poll: true }),
+        run: useRunAutomation(),
+      }));
+      await waitFor(() => expect(result.current.quota.data?.counts.manual_investigation).toBe(0));
+      act(() => result.current.run.mutate({ id: 'automation-1', name: 'Triage' }));
+      await waitFor(() => expect(result.current.run.isSuccess).toBe(true));
+      expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: INVESTIGATION_QUOTAS_QUERY_KEY });
+      expect(result.current.quota.data?.counts.manual_investigation).toBe(0);
+
+      quotas = { ...quotas, counts: { ...quotas.counts, manual_investigation: 1 } };
+      await act(async () => {
+        jest.advanceTimersByTime(5_000);
+      });
+      await waitFor(() => expect(result.current.quota.data?.counts.manual_investigation).toBe(1));
+
+      quotas = {
+        ...quotas,
+        counts: { ...quotas.counts, manual_investigation: 0 },
+        window: {
+          ...quotas.window,
+          start: '2040-01-02T00:00:00.000Z',
+          resetsAt: '2040-01-03T00:00:00.000Z',
+        },
+      };
+      await act(async () => {
+        jest.advanceTimersByTime(5_000);
+      });
+      await waitFor(() => expect(result.current.quota.data?.counts.manual_investigation).toBe(0));
+      expect(result.current.quota.data?.window.resetsAt).toBe('2040-01-03T00:00:00.000Z');
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('keeps an accepted run busy until polling observes completion, even before search refresh', async () => {
+    jest.useFakeTimers();
+    try {
+      let completed = false;
+      investigationsFetch.mockImplementation((endpoint, { params }) => {
+        if (endpoint.startsWith('POST')) return Promise.resolve({ workflowExecutionId: 'exec-1' });
+        const executionId = params.query.executionId;
+        return Promise.resolve({
+          isRunning: executionId === 'exec-1' && !completed,
+          executionId: completed ? undefined : executionId,
+        });
+      });
+      const { result } = renderWithClient(() => ({
+        activity: useAutomationRunActivity({
+          id: 'automation-1',
+          isEnabled: true,
+          trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+          runtime: {},
+        }),
+        run: useRunAutomation(),
+      }));
+      await waitFor(() => expect(result.current.activity.data?.isRunning).toBe(false));
+      act(() => result.current.run.mutate({ id: 'automation-1', name: 'Triage' }));
+      await waitFor(() => expect(result.current.run.isSuccess).toBe(true));
+      expect(result.current.activity.data?.isRunning).toBe(true);
+      completed = true;
+      await act(async () => {
+        jest.advanceTimersByTime(5_000);
+      });
+      await waitFor(() => expect(result.current.activity.data?.isRunning).toBe(false));
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('reports a rejected run without showing acceptance feedback', async () => {
+    investigationsFetch.mockRejectedValue(new Error('Workflow is invalid'));
+    const { result } = renderWithClient(() => useRunAutomation());
+    act(() => result.current.mutate({ id: 'automation-1', name: 'Triage' }));
+    await waitFor(() =>
+      expect(addError).toHaveBeenCalledWith(expect.any(Error), {
+        title: 'Failed to run automation',
+      })
+    );
+    expect(addSuccess).not.toHaveBeenCalled();
   });
 
   it('toggles and deletes automations', async () => {

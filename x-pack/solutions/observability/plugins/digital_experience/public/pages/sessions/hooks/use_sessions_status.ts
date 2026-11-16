@@ -15,7 +15,7 @@ export interface SessionsStatusState {
   loading: boolean;
   error: Error | undefined;
   refresh: () => void;
-  /** Installs or updates the sessions transforms with the current user's access. */
+  /** Sets sessions up with the current user's access. */
   enable: () => Promise<void>;
   enabling: boolean;
   enableError: Error | undefined;
@@ -27,7 +27,7 @@ interface Versioned {
   enables: number;
 }
 
-/** Whether sessions are set up and healthy, and a way to set them up. */
+/** Whether sessions are set up, and a way to set them up. */
 export const useSessionsStatus = (): SessionsStatusState => {
   const apiClient = useApiClient();
   const finishedEnables = useRef(0);

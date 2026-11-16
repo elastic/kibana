@@ -7,12 +7,25 @@
 
 import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
-import type { CreateActivateEpisodeActionBody } from '@kbn/alerting-v2-schemas';
+import type {
+  BulkAckEpisodeActionBody,
+  BulkResponse,
+  CreateActivateEpisodeActionBody,
+} from '@kbn/alerting-v2-schemas';
 import { COMMON_HEADERS } from '../constants';
-import { getActivateEpisodeActionUrl } from '../urls';
+import {
+  BULK_ACK_EPISODE_ACTION_URL,
+  getAckEpisodeActionUrl,
+  getActivateEpisodeActionUrl,
+} from '../urls';
 
 export interface ActivateAlertActionParams extends CreateActivateEpisodeActionBody {
   /** The id of the alert episode to activate. */
+  episodeId: string;
+}
+
+export interface AckAlertActionParams {
+  /** The id of the alert episode to acknowledge. */
   episodeId: string;
 }
 
@@ -31,6 +44,16 @@ export interface AlertActionsApiService {
    * returns 204 on success.
    */
   activate: (params: ActivateAlertActionParams) => Promise<void>;
+  /**
+   * Hits `POST /api/alerting/v2/alerts/{alertId}/_ack`. The route returns 204
+   * on success.
+   */
+  ack: (params: AckAlertActionParams) => Promise<void>;
+  /**
+   * Hits `POST /api/alerting/v2/alerts/_bulk_ack`. The route returns the bulk
+   * result, including actions that failed their precondition.
+   */
+  bulkAck: (body: BulkAckEpisodeActionBody) => Promise<BulkResponse>;
 }
 
 export const getAlertActionsApiService = ({
@@ -48,5 +71,24 @@ export const getAlertActionsApiService = ({
         headers: COMMON_HEADERS,
         body,
       });
+    }),
+  ack: ({ episodeId }) =>
+    measurePerformanceAsync(log, 'alertActions.ack', async () => {
+      await kbnClient.request({
+        method: 'POST',
+        path: getAckEpisodeActionUrl(episodeId),
+        headers: COMMON_HEADERS,
+        body: {},
+      });
+    }),
+  bulkAck: (body) =>
+    measurePerformanceAsync(log, 'alertActions.bulkAck', async () => {
+      const response = await kbnClient.request<BulkResponse>({
+        method: 'POST',
+        path: BULK_ACK_EPISODE_ACTION_URL,
+        headers: COMMON_HEADERS,
+        body,
+      });
+      return response.data;
     }),
 });

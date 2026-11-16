@@ -61,7 +61,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
-import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
+import type { ISessionService, PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { FilterableSource } from '@kbn/data-source';
 import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
@@ -184,6 +184,11 @@ const getWrapperWithTooltip = (
 // @internal
 export type ShowDatePicker = boolean | { disabled: boolean; disabledReason?: string };
 
+export type LegacyDatePickerProps = Pick<
+  React.ComponentProps<typeof EuiSuperDatePicker>,
+  'minDate' | 'commonlyUsedRanges'
+>;
+
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
   customSubmitButton?: any;
@@ -239,6 +244,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * Defaults to true.
    */
   showTimeWindowButtons?: boolean;
+  legacyDatePickerProps?: LegacyDatePickerProps;
   /**
    * Style of the submit button
    * `iconOnly` - use IconButton
@@ -336,6 +342,38 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   };
 }
 
+/** Returns the absolute ISO representation of a date math string, or `undefined` if it's invalid. */
+function toAbsoluteString(value: string, roundUp = false): string | undefined {
+  const valueAsMoment = dateMath.parse(value, { roundUp });
+  if (!valueAsMoment) {
+    return value;
+  }
+  return valueAsMoment.isValid() ? valueAsMoment.toISOString() : undefined;
+}
+
+function SharedTimefilterDuration({
+  timeFrom,
+  timeTo,
+  dateFormat,
+}: {
+  timeFrom: string;
+  timeTo: string;
+  dateFormat: string;
+}) {
+  const dateRangePretty = usePrettyDuration({
+    timeFrom,
+    timeTo,
+    quickRanges: [],
+    dateFormat,
+  });
+  return (
+    <div
+      data-shared-timefilter-duration={dateRangePretty}
+      data-test-subj="dataSharedTimefilterDuration"
+    />
+  );
+}
+
 export const SharingMetaFields = React.memo(function SharingMetaFields({
   from,
   to,
@@ -345,30 +383,14 @@ export const SharingMetaFields = React.memo(function SharingMetaFields({
   to: string;
   dateFormat: string;
 }) {
-  function toAbsoluteString(value: string, roundUp = false) {
-    const valueAsMoment = dateMath.parse(value, { roundUp });
-    if (!valueAsMoment) {
-      return value;
-    }
-    return valueAsMoment.toISOString();
-  }
+  const timeFrom = toAbsoluteString(from);
+  const timeTo = toAbsoluteString(to, true);
 
-  try {
-    const dateRangePretty = usePrettyDuration({
-      timeFrom: toAbsoluteString(from),
-      timeTo: toAbsoluteString(to, true),
-      quickRanges: [],
-      dateFormat,
-    });
-    return (
-      <div
-        data-shared-timefilter-duration={dateRangePretty}
-        data-test-subj="dataSharedTimefilterDuration"
-      />
-    );
-  } catch (e) {
+  if (timeFrom === undefined || timeTo === undefined) {
     return <div data-test-subj="dataSharedTimefilterDuration" />;
   }
+
+  return <SharedTimefilterDuration timeFrom={timeFrom} timeTo={timeTo} dateFormat={dateFormat} />;
 });
 
 type GenericQueryBarTopRow = <QT extends AggregateQuery | Query = Query>(
@@ -380,6 +402,7 @@ export const QueryBarTopRow = React.memo(
     props: QueryBarTopRowProps<QT>
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
+    const isEsqlLayoutStacked = useIsWithinBreakpoints(['xs', 's', 'm']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [isSendingToBackground, setIsSendingToBackground] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
@@ -528,8 +551,14 @@ export const QueryBarTopRow = React.memo(
         })
       )
     );
+    const backgroundSearchAvailability = getBackgroundSearchAvailability(
+      data.search.session,
+      props.useBackgroundSearchButton
+    );
     const canSendToBackground =
-      backgroundSearchState === SearchSessionState.Loading && !isSendingToBackground;
+      backgroundSearchState === SearchSessionState.Loading &&
+      !isSendingToBackground &&
+      !backgroundSearchAvailability.disabled;
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
@@ -575,7 +604,7 @@ export const QueryBarTopRow = React.memo(
       timeHistory$,
       toRecentlyUsedRanges(timeHistory?.get() ?? [])
     );
-    const [commonlyUsedRanges] = useState(() => {
+    const [uiSettingsCommonlyUsedRanges] = useState(() => {
       return (
         uiSettings
           ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
@@ -588,6 +617,8 @@ export const QueryBarTopRow = React.memo(
           }) ?? []
       );
     });
+    const commonlyUsedRanges =
+      props.legacyDatePickerProps?.commonlyUsedRanges ?? uiSettingsCommonlyUsedRanges;
 
     // A submit (e.g. a manual Refresh) refetches the data without changing the date range props,
     // so tell the DateRangePicker to re-resolve relative bounds (e.g. `now-15m`) against the new
@@ -1013,6 +1044,7 @@ export const QueryBarTopRow = React.memo(
             recentlyUsedRanges={recentlyUsedRanges}
             locale={i18n.getLocale()}
             commonlyUsedRanges={commonlyUsedRanges}
+            minDate={props.legacyDatePickerProps?.minDate}
             dateFormat={uiSettings.get('dateFormat')}
             isAutoRefreshOnly={showAutoRefreshOnly}
             className="kbnQueryBar__datePicker"
@@ -1509,7 +1541,10 @@ export const QueryBarTopRow = React.memo(
         {!isScreenshotMode &&
           (shouldRenderESQLUi ? (
             <>
-              <EuiFlexGroup {...queryBarFlexGroupProps}>
+              <EuiFlexGroup
+                {...queryBarFlexGroupProps}
+                direction={isEsqlLayoutStacked ? 'column' : 'row'}
+              >
                 {props.dataViewPickerOverride || renderDataViewsPicker()}
                 <EuiFlexItem>
                   <QuickSearchVisor
@@ -1605,4 +1640,15 @@ const getSplitButtonSecondaryActionClassName = (
       ...(fill && { color: getEuiFilledButtonColorValues(euiThemeContext, color).color }),
     },
   });
+};
+
+const getBackgroundSearchAvailability = (
+  session: ISessionService,
+  useBackgroundSearchButton?: boolean
+) => {
+  if (!useBackgroundSearchButton) {
+    return { disabled: false } as const;
+  }
+
+  return session.getSearchSessionIndicatorUiConfig().isDisabled();
 };

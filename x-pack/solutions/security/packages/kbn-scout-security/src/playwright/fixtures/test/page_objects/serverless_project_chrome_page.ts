@@ -75,6 +75,10 @@ export class ServerlessProjectChromePage {
   }
 
   private async openMoreMenuIfTriggerVisible(): Promise<void> {
+    // Until the overflow split is measured, the More trigger and its popover can be unmounted and
+    // recreated (every nav-tree change resets measurement), which drops a click's open state. Once
+    // measured, the trigger's presence is final and a click on it sticks.
+    await this.measuredPrimaryNav.waitFor({ state: 'visible' });
     if ((await this.moreMenuTrigger.count()) === 0 || !(await this.moreMenuTrigger.isVisible())) {
       return;
     }

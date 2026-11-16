@@ -334,27 +334,39 @@ export const SEVERITY_OPTIONS = [
   'low',
 ] as const satisfies readonly AlertEventSeverity[];
 
-/** The most confidence an event can carry while no signal on it confirms anything. */
-export const UNCONFIRMED_EVENT_MAX_CONFIDENCE = 0.3;
-
 /**
  * Severity field contract — single source of truth for schema `.describe()`, the discovery agent
- * and eval judges. It is the ladder the investigation agent applies. Order of `SEVERITY_OPTIONS`
- * is part of this contract (most-severe first).
+ * and eval judges. Discovery and `event_create` share it; the investigation agent rates severity
+ * with its own rubric. Order of `SEVERITY_OPTIONS` is part of this contract (most-severe first).
  */
 export const SEVERITY_CONTRACT_RULE = dedent`
     Severity rates the situation the grounding evidence confirms.
 
     Decide in order and stop at the first match:
-    - "critical": a global outage affecting all or most customers; several distinct core operations confirmed blocked at once (for example balance, history, and payment together); a mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the component can no longer perform its primary function — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high"; or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
-    - "high": the affected operation fails or is blocked on the verified path, or is broadly degraded, intermittent, or partially failing for a significant subset. A single endpoint or lookup path stays here even when every caller hits it. An error signature on the operation's path with no signals showing the operation failing to complete is not enough: that is "medium".
-    - "medium": minor confirmed degradation with limited reach, signals say the operation is slow, or cannot say whether it is failing or completing. Not for a confirmed failing operation.
+    - "critical": a global outage affecting all or most customers; several distinct core operations confirmed blocked at once; a mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the component can no longer perform its primary function — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high"; or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
+    - "high": the affected operation fails or is blocked on the verified path, or is broadly degraded, intermittent, or partially failing for a significant subset, as the evidence measures it. An error signature on the operation's path with no signals showing the operation failing to complete is not enough: that is "medium".
+    - "medium": minor confirmed degradation with limited reach, signals say the operation is slow, or cannot say whether it is failing or completing.
     - "low": confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
 
-    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. A signal's evidence that could not be collected (a query that timed out or returned nothing) is no evidence, not ambiguous evidence: it adds nothing to the rating and is never grounds for "medium". Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate it from its most direct failure measure (the share of attempts that fail, otherwise the share of log lines), never by adding shares across signals or taking the highest of differently scoped ones.
+    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and for how long. A signal's evidence that could not be collected (a query that timed out or returned nothing) is no evidence, not ambiguous evidence: it adds nothing to the rating. Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate it from its most direct failure measure (the share of attempts that fail), never by adding shares across signals or taking the highest of differently scoped ones.
     A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply.
 
-    Tie-break: when two adjacent tiers fit the same evidence, choose the lower only when it is genuinely unresolved whether the operation still completes.
+    Tie-break: when two adjacent tiers fit the same evidence, choose the lower only when it is unresolved whether the operation still completes.
+  `;
+
+/**
+ * Confidence field contract: the single owner of what confidence means. The field description, the
+ * skill and the eval judge point to it.
+ */
+export const CONFIDENCE_CONTRACT_RULE = dedent`
+    Confidence is a score from 0.0 to 1.0 for how strongly the evidence you hold supports the symptom this event reports. It rates the evidence, not the impact: severity rates the impact, and neither is set from the other.
+    Check what the evidence shows:
+    - the failure itself (an error signature or a stated outcome), not only a volume of log lines;
+    - that it agrees with itself and with the knowledge-base topology where both speak: signals disagree when one shows the operation healthy while another shows it failing, or when they name different failing places for the same operation; different failures on connected paths are not a disagreement, and an edge the evidence does not show is context;
+    - where it fails (a service, operation or scope).
+    With every check shown the score is near the top of the range. Each check not shown lowers it by how far it weakens support for the symptom.
+    These never lower the score: a figure that was not measured about a failure the evidence does show (a reach, outcome or rate, including one whose query failed); a cause that is not established; a service or dependency the knowledge base does not cover; an empty blast_radius (unknown, not none).
+    The score never reflects how strong or unusual the detection was.
   `;
 
 /** Canonical severity used by storage, APIs, and tools. */
@@ -426,22 +438,14 @@ export const significantEventBaseSchema = lazySchema(() =>
         dedent`
         Objective, self-contained account of the observed state and potential impact.
         ${SUMMARY_ROLE_RULE}
-        Good: "inventory-db refuses connections on port 5432 (SQLState 08001), failing checkout stock reads. Impact is confirmed for 18.5% of the operation's log lines; first seen 40 minutes ago and still active." Bad: "The verification returned no rows, so a backend connectivity issue is probably causing instability."
+        Good: "\`inventory-db\` refuses connections on port 5432 (SQLState 08001), failing \`checkout\` stock reads. Impact is confirmed for 18.5% of the operation's log lines; first seen at 09:20 and still present in the latest hour." Bad: "The verification returned no rows, so a backend connectivity issue is probably causing instability."
         On a continuation, build on the stored summary: keep its existing wording, including its opening sentence, for the signatures and paths it already covers (rephrase only to stay within three sentences), add sentences only for what is newly confirmed, and never rewrite it; leave it unchanged when nothing new matters to an operator. Counts and timestamps change every cycle, so keep them out of it. A single healthy or unrelated signal never replaces what other signals on the event still confirm.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
       ),
     // 4-level enum aligned with Elastic Incident Management;
     severity: severitySchema,
-    confidence: z
-      .number()
-      .min(0)
-      .max(1)
-      .describe(
-        'symptom_hypothesis correctness 0.0–1.0 float. Higher values reflect stronger evidence grounding and more corroboration. ' +
-          'causal_features ceiling: cap at 0.65 when causal_features is empty (applies to open status only). ' +
-          `When the evidence establishes nothing, at most ${UNCONFIRMED_EVENT_MAX_CONFIDENCE}.`
-      ),
+    confidence: z.number().min(0).max(1).describe(CONFIDENCE_CONTRACT_RULE),
     source_ids: z
       .array(z.string().max(MAX_ID_LENGTH))
       .max(MAX_ARRAY_LENGTH)
