@@ -21,7 +21,8 @@ import { getAlertEventsResourceDefinition } from '../../../../../server/resource
 import { apiTest, testData } from '../fixtures';
 
 const MARKER = 'scout-final-pipeline';
-const DATA_IGNORE_ABOVE_RULE_ID = 'scout-data-ignore-above';
+// Unique per run, so events left behind by an interrupted run don't match this run's searches.
+const DATA_IGNORE_ABOVE_RULE_ID = `scout-data-ignore-above-${Date.now()}`;
 
 const RESOURCES = [
   {
