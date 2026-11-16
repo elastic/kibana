@@ -148,7 +148,6 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       const check = () => step('check_alerts_index');
 
       it('checks that the space alerts index exists before querying it', () => {
-        expect(check().type).toBe('elasticsearch.indices.exists');
         expect(check().with?.index).toBe('.alerts-security.alerts-{{ workflow.spaceId }}');
         expect(parsed.steps?.findIndex((s) => s.name === 'check_alerts_index')).toBeLessThan(
           parsed.steps?.findIndex((s) => s.name === 'retrieve_alert_ids') ?? -1
@@ -156,8 +155,15 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       });
 
       it('skips retrieve_alert_ids unless the index exists, and only on that condition', () => {
-        expect(retrieve().if).toBe('${{ steps.check_alerts_index.output.result == true }}');
+        expect(retrieve().if).toBe('${{ steps.check_alerts_index.output._shards.total > 0 }}');
         expect(retrieve().type).toBe('elasticsearch.esql.query');
+      });
+
+      // `elasticsearch.indices.exists` needs `view_index_metadata`, which a principal that
+      // can read the alerts alias may not hold. A size-0 search needs only `read`.
+      it('probes with a read-only search, not an index-metadata call', () => {
+        expect(check().type).toBe('elasticsearch.search');
+        expect(check().with).toMatchObject({ ignore_unavailable: true, size: 0 });
       });
 
       it('does not loosen the query, so a genuine ES|QL error still fails the run', () => {
