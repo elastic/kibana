@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { CoreStart as CoreStartToken } from '@kbn/core-di-server';
 import { EngineHttpError } from '../errors/engine_http_error';
-import { createNotSetUpError } from './create_not_set_up_error';
+import { createNotSetUpError } from '../errors/create_not_set_up_error';
 import { DETECTION_ENGINE_WORKLOAD_ID, DETECTION_ENGINE_WORKLOAD_TYPE } from './workload';
 
 /** The detection engine's identity: the service account bound to each space. */
