@@ -14,6 +14,31 @@ import { getConnectorSkillRegistryIds } from '@kbn/connector-specs';
 
 const MAX_CONCURRENT_CONNECTOR_LOOKUPS = 5;
 
+type ActionsClient = Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>;
+
+/** Reads the connector types with one bulk request, or one at a time when an id is stale. */
+const getActionTypeIds = async (
+  actionsClient: ActionsClient,
+  ids: string[]
+): Promise<Array<string | undefined>> => {
+  try {
+    const connectors = await actionsClient.getBulk({ ids, throwIfSystemAction: false });
+    return connectors.map(({ actionTypeId }) => actionTypeId);
+  } catch (error) {
+    // The bulk call fails as a whole on a missing id. Nothing removes a deleted connector from an
+    // agent's `connector_ids`, so a stale id is possible: skip only the ids that cannot be read.
+    return pMap(
+      ids,
+      (id) =>
+        actionsClient.get({ id }).then(
+          ({ actionTypeId }) => actionTypeId,
+          () => undefined
+        ),
+      { concurrency: MAX_CONCURRENT_CONNECTOR_LOOKUPS }
+    );
+  }
+};
+
 export const createConnectorSkillsService = ({
   actions,
   request,
@@ -28,16 +53,8 @@ export const createConnectorSkillsService = ({
       if (connectorIds.length === 0) return [];
       try {
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        // Fetch only the agent's connectors, a few at a time; a stale id is skipped, not fatal.
-        const actionTypeIds = await pMap(
-          [...new Set(connectorIds)],
-          (id) =>
-            actionsClient.get({ id }).then(
-              ({ actionTypeId }) => actionTypeId,
-              () => undefined
-            ),
-          { concurrency: MAX_CONCURRENT_CONNECTOR_LOOKUPS }
-        );
+        const ids = [...new Set(connectorIds)];
+        const actionTypeIds = await getActionTypeIds(actionsClient, ids);
         const connectorTypes = new Set(
           actionTypeIds.filter((id): id is string => id !== undefined)
         );
