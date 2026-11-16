@@ -112,6 +112,7 @@ export const DataGridCell = <TRow extends object>({
 
       if (key === keys.ESCAPE) {
         event.preventDefault();
+        event.stopPropagation();
         void focusCell(stableAddress);
         return;
       }

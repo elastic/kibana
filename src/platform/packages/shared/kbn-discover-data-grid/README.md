@@ -111,6 +111,8 @@ them with Enter, and they stay clickable and reachable through screen-reader lin
   to it first.
 - Tab and Shift+Tab from a cell, or from an empty grid, hand focus to the matching guard, and the
   browser's default Tab continues from there, past the grid.
+- If scrolling removes the focused cell's row, focus moves to the grid itself, so Tab and Shift+Tab
+  still leave through the guards.
 
 Consumers that need semantic control can pass `apiRef` and call `focusCell` or `scrollToCell` with a
 stable `{ rowId, columnId }` address. Commands return explicit completed, failed, or cancelled

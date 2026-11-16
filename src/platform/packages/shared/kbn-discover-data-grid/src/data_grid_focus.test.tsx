@@ -368,14 +368,14 @@ describe('DataGrid keyboard and logical focus', () => {
     await act(async () => {
       await apiRef.current?.scrollToCell({ rowId: 'row-50', columnId: 'name' });
     });
-    expect(document.activeElement).toBe(document.body);
+    expect(screen.getByRole('grid')).toHaveFocus();
     expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenCalledTimes(1);
 
     rerender(
       <TestDataGrid gridRows={[rows[2], rows[1], rows[0], ...rows.slice(3)]} apiRef={apiRef} />
     );
 
-    expect(document.activeElement).toBe(document.body);
+    expect(screen.getByRole('grid')).toHaveFocus();
     expect(screen.queryByRole('gridcell', { name: 'Name 1' })).toBeNull();
     expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenCalledTimes(1);
   });
@@ -589,6 +589,32 @@ describe('DataGrid keyboard and logical focus', () => {
 
         await expectFocus('Name 1');
         expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(1, 'auto');
+      }
+    );
+
+    it.each([
+      { key: 'Tab', shift: false, destination: 'After grid' },
+      { key: 'Shift+Tab', shift: true, destination: 'Before grid' },
+    ])(
+      'hands $key to a guard after the focused row scrolls out of the rendered window',
+      async ({ shift, destination }) => {
+        const user = userEvent.setup();
+        const apiRef = createRef<DataGridApi>();
+        renderGridBetweenButtons({ gridColumns: columnsWithLinks, apiRef });
+
+        await user.tab();
+        await user.tab();
+        await expectFocus('Name 0');
+        await act(async () => {
+          await apiRef.current?.scrollToCell({ rowId: 'row-50', columnId: 'name' });
+        });
+        expect(screen.getByRole('grid')).toHaveFocus();
+
+        await user.tab({ shift });
+
+        expect(screen.getByRole('button', { name: destination })).toHaveFocus();
+        expect(screen.queryByRole('gridcell', { name: 'Name 0' })).toBeNull();
+        expect(getFocusedLinks()).toEqual([]);
       }
     );
 

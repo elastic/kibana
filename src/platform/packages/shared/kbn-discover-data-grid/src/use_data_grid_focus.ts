@@ -250,6 +250,9 @@ export const useDataGridFocus = ({
         if (elementOwnsFocus(previousElement)) {
           lostOwnedFocusRef.current = address;
           lostOwnedFocusModelRef.current = modelRef.current;
+          // The cell is still attached when its ref detaches, so focus can move to the grid instead of
+          // falling to the page, where the browser would continue Tab from the removed cell's position.
+          gridRef.current?.focus({ preventScroll: true });
         }
         return;
       }
