@@ -86,6 +86,44 @@ describe('createOperationMatcher', () => {
     expect(match(scoped(false), 'GET', url)).toMatchObject({ status: 404 });
   });
 
+  it('prefers templates without parameters spanning segments over a catch-all', () => {
+    const resourceId = {
+      name: 'resourceId',
+      in: 'path',
+      required: true,
+      schema: { type: 'string' },
+      'x-ms-skip-url-encoding': true,
+    };
+    const matcher = createOperationMatcher(
+      loadOperations({
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1' },
+        servers: [{ url: 'https://management.azure.com' }],
+        paths: {
+          '/{resourceId}': {
+            get: { operationId: 'getById', parameters: [resourceId], responses: ok },
+          },
+          '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}':
+            { get: { operationId: 'getCluster', responses: ok } },
+        },
+      })
+    );
+
+    expect(
+      match(
+        matcher,
+        'GET',
+        'https://management.azure.com/subscriptions/s1/resourceGroups/rg/providers/Microsoft.ContainerService/managedClusters/c1'
+      )
+    ).toMatchObject({ operation: 'getCluster' });
+    expect(
+      match(matcher, 'GET', 'https://management.azure.com/subscriptions/s1/resourceGroups/rg')
+    ).toEqual({
+      operation: 'getById',
+      pathParameters: { resourceId: 'subscriptions/s1/resourceGroups/rg' },
+    });
+  });
+
   it('matches server URL variables by their enum values', () => {
     const matcher = createMatcher([
       {

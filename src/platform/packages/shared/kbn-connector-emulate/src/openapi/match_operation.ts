@@ -35,6 +35,10 @@ interface Route {
   readonly servers: readonly ServerPrefix[];
   readonly path: RegExp;
   readonly parameterNames: readonly string[];
+  /** The path template, without the fixed query parameters of an `x-ms-paths` key. */
+  readonly template: string;
+  /** How many of its parameters span segments, as `x-ms-skip-url-encoding` ones do. */
+  readonly multiSegmentCount: number;
   /** The length of the template's text outside parameters. */
   readonly literalLength: number;
 }
@@ -113,6 +117,8 @@ const compileRoute = (operation: ContractOperation): Route => {
     servers: operation.servers.map(compileServer),
     path: new RegExp(`^${source}$`),
     parameterNames,
+    template,
+    multiSegmentCount: parameterNames.filter((name) => multiSegment.has(name)).length,
     literalLength: template.replace(new RegExp(TEMPLATE_PARAMETER, 'g'), '').length,
   };
 };
@@ -269,8 +275,10 @@ const decodePathSegment = (segment: string): string => {
 
 /**
  * Creates a router that finds the operation for a request. When several path templates match,
- * the one with the fewest parameters wins, so `/items/new` takes precedence over `/items/{id}`,
- * then the one with the most literal text, so `/items/{id}:archive` takes precedence over
+ * the one with the fewest parameters spanning segments wins, so Azure's
+ * `/subscriptions/{subscriptionId}/…/managedClusters/{resourceName}` takes precedence over the
+ * catch-all `/{resourceId}`, then the one with the fewest parameters, so `/items/new` takes
+ * precedence over `/items/{id}`, then the one with the most literal text, so `/items/{id}:archive` takes precedence over
  * `/items/{id}`. Operations on that template, as `x-ms-paths` declares them, are told apart by
  * the query parameters their keys fix and their required parameters with one allowed value:
  * those the request sends with another value are left out, unless every operation is, then the
@@ -281,6 +289,14 @@ const decodePathSegment = (segment: string): string => {
  */
 export const createOperationMatcher = (operations: readonly ContractOperation[]) => {
   const routes = operations.map(compileRoute);
+  // Operations on one template may mark its parameters differently, so they rank the same.
+  const multiSegmentByTemplate = new Map<string, number>();
+  for (const { template, multiSegmentCount } of routes) {
+    multiSegmentByTemplate.set(
+      template,
+      Math.max(multiSegmentByTemplate.get(template) ?? 0, multiSegmentCount)
+    );
+  }
 
   return (
     method: string,
@@ -309,16 +325,21 @@ export const createOperationMatcher = (operations: readonly ContractOperation[])
       ({ route }) => route.operation.method === method.toLowerCase()
     );
     // The most specific path template wins first, so `/items/new` takes precedence over
-    // `/items/{id}` whatever the request's parameters; discriminators only tell apart operations
-    // on that template, as `x-ms-paths` declares them.
+    // `/items/{id}`, and both over a catch-all `/{resourceId}`, whatever the request's parameters;
+    // discriminators only tell apart operations on that template, as `x-ms-paths` declares them.
     const specificity = ({ route }: (typeof forMethod)[number]) =>
-      [route.parameterNames.length, -route.literalLength] as const;
-    const [mostSpecific] = forMethod.map(specificity).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+      [
+        multiSegmentByTemplate.get(route.template) ?? 0,
+        route.parameterNames.length,
+        -route.literalLength,
+      ] as const;
+    const [mostSpecific] = forMethod
+      .map(specificity)
+      .sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]);
     const onTemplate = forMethod
-      .filter((candidate) => {
-        const [parameters, literal] = specificity(candidate);
-        return parameters === mostSpecific[0] && literal === mostSpecific[1];
-      })
+      .filter((candidate) =>
+        specificity(candidate).every((value, index) => value === mostSpecific[index])
+      )
       .map((candidate) => ({ ...candidate, ...discriminate(candidate.route, { url, headers }) }));
     // A conflicting discriminator rules an operation out only when another is left, so a request
     // to a single operation still reaches validation, which names the wrong value.
