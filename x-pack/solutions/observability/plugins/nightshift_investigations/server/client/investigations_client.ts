@@ -1616,6 +1616,12 @@ export class NightshiftInvestigationsClient {
       snapshot: alertSubject?.snapshot,
     });
 
+    // The recovery context has no `alerts`, so the rule type travels on its own for online evals.
+    // The step passes an empty string when the rule event has no type.
+    const snapshotRuleType = alertSubject?.snapshot?.rule_type_id;
+    const alertRuleType =
+      alertInput.ruleTypeId || (typeof snapshotRuleType === 'string' ? snapshotRuleType : '');
+
     const spaceId = this.getSpaceId();
     this.warnOnSpaceMismatch(spaceId);
     const workflow = await this.getInvestigationWorkflow(spaceId);
@@ -1626,6 +1632,7 @@ export class NightshiftInvestigationsClient {
         source: 'alert',
         follow_up: ALERT_RECOVERED_FOLLOW_UP,
         entry_point: 'alert_recovery' satisfies InvestigationEntryPoint,
+        ...(alertRuleType ? { alert_rule_type: alertRuleType } : {}),
       },
     });
     this.telemetry?.reportInvestigationStarted({
