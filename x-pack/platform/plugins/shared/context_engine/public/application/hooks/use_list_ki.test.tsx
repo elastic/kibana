@@ -120,13 +120,13 @@ describe('useListKi', () => {
     );
   });
 
-  it('passes lifecycleStatus through to the list endpoint when set', async () => {
+  it('passes status through to the list endpoint when set', async () => {
     const core = coreMock.createStart();
     (core.http.get as jest.Mock).mockResolvedValue({ kis: [], total: 0 });
 
     renderUseListKi(core, {
       aiIndexId: 'my-ai-index',
-      lifecycleStatus: ['deleted'],
+      status: ['deleted'],
     });
 
     await waitFor(() => {
