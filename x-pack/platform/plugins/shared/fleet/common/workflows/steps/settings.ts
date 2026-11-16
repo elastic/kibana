@@ -145,11 +145,8 @@ const validateStream = (
 ): SettingsProblem[] => {
   const { input: chosen, vars, var_group_selections: selections } = answer;
 
-  if (chosen === null) {
-    return stream.choice === 'one_of'
-      ? [{ path: `${prefix}.input`, message: `${stream.title}: choose a collection method.` }]
-      : [];
-  }
+  // Null switches the stream off; whether a service may be left with nothing on is checked there.
+  if (chosen === null) return [];
 
   const input = stream.inputs.find((candidate) => candidate.input === chosen);
   if (!input) {
@@ -216,11 +213,26 @@ export const validateSettingsAnswer = (
       if (streamAnswer) return validateStream(prefix, stream, streamAnswer);
       // An omitted toggle takes the package default; an omitted log stream is a missing choice.
       return stream.choice === 'one_of'
-        ? [{ path: `${prefix}.input`, message: `${stream.title}: choose a collection method.` }]
+        ? [
+            {
+              path: `${prefix}.input`,
+              message: `${stream.title}: choose a collection method or set it off.`,
+            },
+          ]
         : [];
     });
 
-    return [...unknownStreams, ...streamProblems];
+    const anyEnabled = service.data_streams.some((stream) => {
+      const streamAnswer = answeredStreams[stream.id];
+      return streamAnswer
+        ? streamAnswer.input !== null
+        : stream.choice === 'toggle' && stream.default_enabled === true;
+    });
+    const serviceProblems = anyEnabled
+      ? []
+      : [{ path: serviceId, message: `${service.name}: enable at least one data stream.` }];
+
+    return [...unknownStreams, ...streamProblems, ...serviceProblems];
   });
 };
 

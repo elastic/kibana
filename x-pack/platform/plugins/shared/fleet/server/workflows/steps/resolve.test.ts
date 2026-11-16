@@ -32,7 +32,7 @@ const logsSettings = {
   },
 };
 
-/** GuardDuty offers httpjson or S3; EC2 is reduced to a metrics stream with a CloudWatch input listed. */
+/** GuardDuty offers httpjson or S3; EC2 has metrics and logs, with logs switched off in the answer. */
 const choicePackageInfo = {
   ...awsPackageInfoFixture,
   policy_templates: [
@@ -49,7 +49,7 @@ const choicePackageInfo = {
     {
       name: 'ec2',
       title: 'AWS EC2',
-      data_streams: ['ec2_metrics'],
+      data_streams: ['ec2_metrics', 'ec2_logs'],
       deployment_modes: { agentless: { enabled: true } },
       inputs: [
         { type: 'aws/metrics', title: 'Metrics', deployment_modes: ['default', 'agentless'] },
@@ -79,6 +79,16 @@ const choicePackageInfo = {
       title: 'EC2 metrics',
       streams: [{ input: 'aws/metrics', enabled: true, vars: [] }],
     },
+    {
+      path: 'ec2_logs',
+      type: 'logs',
+      dataset: 'aws.ec2_logs',
+      title: 'EC2 logs',
+      streams: [
+        { input: 'aws-cloudwatch', enabled: true, vars: [] },
+        { input: 'aws-s3', enabled: false, vars: [] },
+      ],
+    },
   ],
 } as unknown as PackageInfo;
 
@@ -87,7 +97,7 @@ const choiceSettings = {
     guardduty: {
       data_streams: { guardduty: { input: 'httpjson', vars: { detector_id: 'abc123' } } },
     },
-    ec2: { data_streams: { ec2_metrics: { input: 'aws/metrics' } } },
+    ec2: { data_streams: { ec2_metrics: { input: 'aws/metrics' }, ec2_logs: { input: null } } },
   },
 };
 

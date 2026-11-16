@@ -142,12 +142,30 @@ describe('validateSettingsAnswer', () => {
 
   it('rejects a one_of stream with no input', () => {
     const problems = validateSettingsAnswer(req, {
-      services: { guardduty: { data_streams: { guardduty: { input: null } } } },
+      services: { guardduty: { data_streams: {} } },
     });
     expect(problems).toContainEqual({
       path: 'guardduty.guardduty.input',
       message: expect.stringContaining('choose a collection method'),
     });
+  });
+
+  it('accepts a logs stream set to null when another stream stays enabled', () => {
+    expect(
+      validateSettingsAnswer(req, {
+        services: { ec2: { data_streams: { ec2_logs: { input: null } } } },
+      })
+    ).toEqual([]);
+  });
+
+  it('rejects a service whose streams are all off', () => {
+    expect(
+      validateSettingsAnswer(req, {
+        services: {
+          ec2: { data_streams: { ec2_metrics: { input: null }, ec2_logs: { input: null } } },
+        },
+      })
+    ).toEqual([{ path: 'ec2', message: expect.stringContaining('at least one data stream') }]);
   });
 
   it('rejects a missing required value for the chosen input', () => {
