@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
+import type { IntervalSchedule } from '@kbn/alerting-types';
 import type {
   RuleResponseInternalV1,
   RuleParamsV1,
@@ -112,7 +113,8 @@ export const transformRuleToRuleResponseInternal = <Params extends RuleParams = 
   tags: rule.tags,
   rule_type_id: rule.alertTypeId,
   consumer: rule.consumer,
-  schedule: rule.schedule,
+  // TODO: routes do not expose rrule schedules yet, see https://github.com/elastic/kibana-team/issues/2955
+  schedule: rule.schedule as IntervalSchedule,
   actions: transformRuleActions(rule.actions, rule.systemActions ?? []),
   params: rule.params,
   ...(rule.mapped_params ? { mapped_params: rule.mapped_params } : {}),

@@ -27,9 +27,9 @@ import type {
 import { getDeleteRuleTaskRunResult } from './types';
 import { getExecutorServices } from './get_executor_services';
 import { isAlertStatusChangedEnabled } from '../lib/workflow_extensions/alert_status_changed_opt_in';
-import { getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
+import { getNextRuleRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
+import type { RuleSchedule } from '../../common';
 import type {
-  IntervalSchedule,
   RawRuleExecutionStatus,
   RawRuleLastRun,
   RawRuleMonitoring,
@@ -893,7 +893,7 @@ export class TaskRunner<
     schedule,
     runRuleResult,
   }: {
-    schedule: Result<IntervalSchedule, Error>;
+    schedule: Result<RuleSchedule, Error>;
     runRuleResult: Result<RunRuleResult, Error>;
   }) {
     const result = await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
@@ -905,10 +905,10 @@ export class TaskRunner<
 
       let nextRun: string | null = null;
       if (isOk(schedule)) {
-        nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
+        nextRun = getNextRuleRun({ startDate: startedAt, schedule: schedule.value });
       } else if (taskSchedule) {
-        // rules cannot use rrule for scheduling yet
-        nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
+        // the rule could not be loaded, fall back to the schedule stored on the task
+        nextRun = getNextRuleRun({ startDate: startedAt, schedule: taskSchedule });
       }
 
       const { executionStatus, executionMetrics, lastRun, outcome } = processRunResults({
@@ -1048,7 +1048,7 @@ export class TaskRunner<
     });
 
     let runRuleResult: Result<RunRuleResult, Error>;
-    let schedule: Result<IntervalSchedule, Error>;
+    let schedule: Result<RuleSchedule, Error>;
     let shouldDisableTask = false;
     try {
       const validatedRuleData = await this.prepareToRun();
@@ -1164,8 +1164,7 @@ export class TaskRunner<
 
     let nextRun: string | null = null;
     if (taskSchedule) {
-      // rules cannot use rrule for scheduling yet
-      nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
+      nextRun = getNextRuleRun({ startDate: startedAt, schedule: taskSchedule });
     }
 
     const outcomeMsg = [

@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { Schedule as RuleSchedule } from '@kbn/response-ops-scheduling-types';
 import type { createRuleDataSchema } from '../schemas';
 import type { RuleParams } from '../../../types';
 
@@ -19,7 +20,7 @@ export interface CreateRuleData<Params extends RuleParams = never> {
   tags: CreateRuleDataType['tags'];
   throttle?: CreateRuleDataType['throttle'];
   params: Params;
-  schedule: CreateRuleDataType['schedule'];
+  schedule: RuleSchedule;
   actions: CreateRuleDataType['actions'];
   systemActions?: CreateRuleDataType['systemActions'];
   notifyWhen?: CreateRuleDataType['notifyWhen'];

@@ -12,10 +12,11 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import type { SanitizedRule, RawRule } from '../../../../types';
 import { getDefaultMonitoring } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
+import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { getRuleExecutionStatusPendingAttributes } from '../../../../lib/rule_execution_status';
 import { isDetectionEngineAADRuleType } from '../../../../saved_objects/migrations/utils';
@@ -80,7 +81,9 @@ export async function cloneRule<Params extends RuleParams = never>(
   if (ruleSavedObject.attributes.enabled) {
     validationPayload = await validateScheduleLimit({
       context,
-      updatedInterval: ruleSavedObject.attributes.schedule.interval,
+      updatedInterval: isIntervalSchedule(ruleSavedObject.attributes.schedule)
+        ? ruleSavedObject.attributes.schedule.interval
+        : [],
     });
   }
   if (validationPayload) {
@@ -186,7 +189,6 @@ export async function cloneRule<Params extends RuleParams = never>(
     { name: 'createRuleSavedObject', type: 'rules' },
     () =>
       createRuleSavedObject(context, {
-        intervalInMs: parseDuration(ruleAttributes.schedule.interval),
         rawRule: ruleAttributes,
         references: ruleSavedObject.references,
         ruleId,

@@ -21,6 +21,7 @@ import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -205,7 +206,11 @@ const bulkEnableRulesWithOCC = async (
       }
       await rulesFinder.close();
 
-      const updatedInterval = rulesFinderRules.map((rule) => rule.attributes.schedule?.interval);
+      // TODO: rrule schedules are not counted towards the schedule limit yet, see
+      // https://github.com/elastic/kibana-team/issues/2683
+      const updatedInterval = rulesFinderRules.flatMap((rule) =>
+        isIntervalSchedule(rule.attributes.schedule) ? [rule.attributes.schedule.interval] : []
+      );
 
       const validationPayload = await validateScheduleLimit({
         context,

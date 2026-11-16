@@ -7,7 +7,7 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { RuleChangeTracking } from '@kbn/alerting-types';
-import type { IntervalSchedule } from '../../../../../common';
+import type { RuleSchedule } from '../../../../../common';
 import type { RuleParams } from '../../types';
 import type { CreateRuleData } from '../create/types';
 import type { CreateRuleOptions } from '../create/create_rule';
@@ -21,7 +21,7 @@ export interface PreparedRule {
   enabled: boolean;
   rawRule: RawRule;
   references: SavedObjectReference[];
-  schedule: IntervalSchedule;
+  schedule: RuleSchedule;
   consumer: string;
   ruleTypeId: string;
   producer: string;

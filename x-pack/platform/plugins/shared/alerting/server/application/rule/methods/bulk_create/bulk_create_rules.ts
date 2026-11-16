@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import pMap from 'p-map';
 import { withSpan } from '@kbn/apm-utils';
 import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
@@ -169,21 +170,25 @@ async function preValidate<Params extends RuleParams>({
         context.ruleTypeRegistry.ensureRuleTypeEnabled(data.alertTypeId);
         validateRuleTypeParams(data.params, ruleType.validate.params);
 
-        const intervalInMs = parseDuration(data.schedule.interval);
-        if (
-          intervalInMs < context.minimumScheduleIntervalInMs &&
-          context.minimumScheduleInterval.enforce
-        ) {
+        // The minimum interval does not apply to rrule schedules, which have no single interval.
+        const intervalInMs = isIntervalSchedule(data.schedule)
+          ? parseDuration(data.schedule.interval)
+          : undefined;
+        const isBelowMinimumInterval =
+          intervalInMs != null && intervalInMs < context.minimumScheduleIntervalInMs;
+
+        if (isBelowMinimumInterval && context.minimumScheduleInterval.enforce) {
           throw Boom.badRequest(
             `Error creating rule: the interval is less than the allowed minimum interval of ${context.minimumScheduleInterval.value}`
           );
         }
-        if (
-          intervalInMs < context.minimumScheduleIntervalInMs &&
-          !context.minimumScheduleInterval.enforce
-        ) {
+        if (isBelowMinimumInterval && !context.minimumScheduleInterval.enforce) {
           logger.warn(
-            `Rule schedule interval (${data.schedule.interval}) for "${ruleType.id}" rule type with ID "${id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+            `Rule schedule interval (${
+              isIntervalSchedule(data.schedule) ? data.schedule.interval : ''
+            }) for "${ruleType.id}" rule type with ID "${id}" is less than the minimum value (${
+              context.minimumScheduleInterval.value
+            }). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
           );
         }
 
@@ -231,9 +236,13 @@ async function preValidate<Params extends RuleParams>({
   );
 
   // Phase A3: schedule-limit circuit breaker across all enabled rules upfront.
+  // TODO: rrule schedules are not counted towards the schedule limit yet, see
+  // https://github.com/elastic/kibana-team/issues/2683
   const updatedInterval = [...validated.values()]
     .filter((v) => v.rule.data.enabled)
-    .map((v) => v.rule.data.schedule.interval);
+    .flatMap((v) =>
+      isIntervalSchedule(v.rule.data.schedule) ? [v.rule.data.schedule.interval] : []
+    );
 
   if (updatedInterval.length > 0) {
     const overflow = await withSpan(

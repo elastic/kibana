@@ -7,7 +7,9 @@
 
 import type { SavedObjectReference, SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import type { Rule, RuleWithLegacyId, RawRule, RuleTypeParams } from '../../types';
+import { parseDuration } from '../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import type { SavedObjectOptions } from '../types';
@@ -19,7 +21,6 @@ import { createRuleSo, deleteRuleSo, updateRuleSo } from '../../data/rule';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 interface CreateRuleSavedObjectParams {
-  intervalInMs: number;
   rawRule: RawRule;
   references: SavedObjectReference[];
   ruleId: string;
@@ -28,7 +29,6 @@ interface CreateRuleSavedObjectParams {
 }
 
 interface CreateRuleSavedObjectAttributeParams {
-  intervalInMs: number;
   rawRule: RawRule;
   references: SavedObjectReference[];
   ruleId: string;
@@ -50,7 +50,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
   context: RulesClientContext,
   params: CreateRuleSavedObjectParams | CreateRuleSavedObjectAttributeParams
 ): Promise<Rule<Params> | RuleWithLegacyId<Params> | SavedObject<RawRule>> {
-  const { intervalInMs, rawRule, references, ruleId, options, returnRuleAttributes } = params;
+  const { rawRule, references, ruleId, options, returnRuleAttributes } = params;
 
   context.auditLogger?.log(
     ruleAuditEvent({
@@ -138,14 +138,15 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     createdAlert.attributes.scheduledTaskId = scheduledTaskId;
   }
 
-  // Log warning if schedule interval is less than the minimum but we're not enforcing it
-  if (
-    intervalInMs < context.minimumScheduleIntervalInMs &&
-    !context.minimumScheduleInterval.enforce
-  ) {
-    context.logger.warn(
-      `Rule schedule interval (${rawRule.schedule.interval}) for "${createdAlert.attributes.alertTypeId}" rule type with ID "${createdAlert.id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
-    );
+  // Log warning if schedule interval is less than the minimum but we're not enforcing it.
+  // Rrule schedules have no interval to compare, so the minimum does not apply to them.
+  if (isIntervalSchedule(rawRule.schedule) && !context.minimumScheduleInterval.enforce) {
+    const intervalInMs = parseDuration(rawRule.schedule.interval);
+    if (intervalInMs < context.minimumScheduleIntervalInMs) {
+      context.logger.warn(
+        `Rule schedule interval (${rawRule.schedule.interval}) for "${createdAlert.attributes.alertTypeId}" rule type with ID "${createdAlert.id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+      );
+    }
   }
 
   // TODO (http-versioning): Remove casts

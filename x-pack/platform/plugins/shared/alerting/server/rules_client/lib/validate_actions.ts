@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorType } from '@kbn/actions-plugin/server';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import { validateHours } from '../../routes/lib/validate_hours';
 import type { RawRule } from '../../types';
 import { RuleNotifyWhen } from '../../types';
@@ -165,7 +166,10 @@ export async function validateActions(
     }
   }
 
-  const scheduleInterval = parseDuration(data.schedule.interval);
+  // Rrule schedules have no single interval to compare an action throttle against, so the
+  // throttle check below only runs for interval schedules.
+  const scheduleInterval = isIntervalSchedule(data.schedule) ? data.schedule.interval : undefined;
+  const scheduleIntervalMs = scheduleInterval ? parseDuration(scheduleInterval) : undefined;
   const actionsWithInvalidThrottles = [];
   const actionWithoutQueryAndTimeframe = [];
   const actionWithInvalidTimeframe = [];
@@ -178,8 +182,10 @@ export async function validateActions(
 
     // check for actions throttled shorter than the rule schedule
     if (
+      scheduleIntervalMs != null &&
       action.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
-      parseDuration(action.frequency.throttle!) < scheduleInterval
+      action.frequency.throttle != null &&
+      parseDuration(action.frequency.throttle) < scheduleIntervalMs
     ) {
       actionsWithInvalidThrottles.push(action);
     }
@@ -226,7 +232,7 @@ export async function validateActions(
         defaultMessage:
           'Action frequency cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
         values: {
-          scheduleIntervalText: data.schedule.interval,
+          scheduleIntervalText: scheduleInterval ?? '',
           groups: actionsWithInvalidThrottles
             .map((a) => `${a.group} (${a.frequency?.throttle})`)
             .join(', '),

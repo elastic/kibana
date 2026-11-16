@@ -16,6 +16,7 @@ import { nanosToMillis } from '@kbn/event-log-plugin/common';
 import type { CancellableTask, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import type { IntervalSchedule } from '@kbn/alerting-types';
 import type { AdHocRunStatus } from '../../common/constants';
 import { adHocRunStatus } from '../../common/constants';
 import type {
@@ -283,6 +284,9 @@ export class AdHocTaskRunner implements CancellableTask {
       executorServices,
       rule: {
         ...rule,
+        // The ad hoc run snapshots the rule, which may carry an rrule schedule. Rule
+        // executors still receive the interval shape until the rule APIs expose rrule.
+        schedule: rule.schedule as IntervalSchedule,
         actions: [],
         muteAll: false,
         createdAt: new Date(rule.createdAt),
@@ -308,6 +312,9 @@ export class AdHocTaskRunner implements CancellableTask {
     const actionScheduler = new ActionScheduler({
       rule: {
         ...rule,
+        // The ad hoc run snapshots the rule, which may carry an rrule schedule. Rule
+        // executors still receive the interval shape until the rule APIs expose rrule.
+        schedule: rule.schedule as IntervalSchedule,
         muteAll: false,
         mutedInstanceIds: [],
         createdAt: new Date(rule.createdAt),

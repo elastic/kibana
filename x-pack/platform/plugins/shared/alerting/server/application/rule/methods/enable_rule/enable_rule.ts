@@ -8,8 +8,9 @@ import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import type { RawRule, IntervalSchedule, RuleTypeParams } from '../../../../types';
-import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+import type { RawRule, RuleTypeParams } from '../../../../types';
+import { resetMonitoringLastRun, getNextRuleRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -75,10 +76,14 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     version = alert.version;
   }
 
-  const validationPayload = await validateScheduleLimit({
-    context,
-    updatedInterval: attributes.schedule.interval,
-  });
+  // TODO: rrule schedules are not counted towards the schedule limit yet, see
+  // https://github.com/elastic/kibana-team/issues/2683
+  const validationPayload = isIntervalSchedule(attributes.schedule)
+    ? await validateScheduleLimit({
+        context,
+        updatedInterval: attributes.schedule.interval,
+      })
+    : null;
 
   if (validationPayload) {
     throw Boom.badRequest(
@@ -154,8 +159,6 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     const now = new Date();
     const nowIso = now.toISOString();
 
-    const schedule = attributes.schedule as IntervalSchedule;
-
     const apiKeyAttributes = !existingApiKey
       ? await createNewAPIKeySet(context, {
           id: attributes.alertTypeId,
@@ -173,7 +176,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
       ...(attributes.monitoring && {
         monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),
-      nextRun: getNextRun({ interval: schedule.interval }),
+      nextRun: getNextRuleRun({ schedule: attributes.schedule }),
       enabled: true,
       updatedBy: username,
       updatedByProfileUid: profileUid,
@@ -272,7 +275,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
       id,
       consumer: attributes.consumer,
       ruleTypeId: attributes.alertTypeId,
-      schedule: attributes.schedule as IntervalSchedule,
+      schedule: attributes.schedule,
       throwOnConflict: false,
     });
     await context.unsecuredSavedObjectsClient.update(RULE_SAVED_OBJECT_TYPE, id, {

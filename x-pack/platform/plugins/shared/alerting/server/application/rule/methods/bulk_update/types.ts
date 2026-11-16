@@ -7,7 +7,7 @@
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import type { RuleChangeTracking } from '@kbn/alerting-types';
-import type { IntervalSchedule } from '../../../../../common';
+import type { RuleSchedule } from '../../../../../common';
 import type { BulkOperationError } from '../../../../rules_client/types';
 import type { RawRule } from '../../../../types';
 import type { RuleParams } from '../../types';
@@ -44,8 +44,8 @@ export interface PreparedUpdate {
   version?: string;
   rawRule: RawRule;
   references: SavedObjectReference[];
-  previousSchedule: IntervalSchedule;
-  newSchedule: IntervalSchedule;
+  previousSchedule: RuleSchedule;
+  newSchedule: RuleSchedule;
   scheduledTaskId?: string | null;
   oldKeys: ApiKeyEntry;
 }

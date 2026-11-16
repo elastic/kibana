@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { UntypedNormalizedRuleType } from '../../../../rule_type_registry';
 import { updateRuleInMemory } from '../../../../rules_client/common/bulk_edit';
@@ -170,12 +171,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
         });
 
         // validate the updated schedule interval
-        validateScheduleInterval(
-          context,
-          result.rule.schedule.interval,
-          ruleType.id,
-          domainRule.id
-        );
+        validateScheduleInterval(context, result.rule.schedule, ruleType.id, domainRule.id);
 
         return result;
       },
@@ -409,13 +405,16 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
 
 function validateScheduleInterval(
   context: RulesClientContext,
-  scheduleInterval: string,
+  schedule: RuleDomain['schedule'],
   ruleTypeId: string,
   ruleId: string
 ): void {
-  if (!scheduleInterval) {
+  // The minimum interval does not apply to rrule schedules, which have no single interval.
+  if (!isIntervalSchedule(schedule)) {
     return;
   }
+
+  const scheduleInterval = schedule.interval;
   const isIntervalInvalid = parseDuration(scheduleInterval) < context.minimumScheduleIntervalInMs;
   if (isIntervalInvalid && context.minimumScheduleInterval.enforce) {
     throw Error(
@@ -438,6 +437,11 @@ function validateScheduleOperation(
   actions: RuleDomain['actions'],
   ruleId: string
 ): void {
+  // Rrule schedules have no single interval to compare action throttles against.
+  if (!isIntervalSchedule(schedule)) {
+    return;
+  }
+
   const scheduleInterval = parseDuration(schedule.interval);
   const actionsWithInvalidThrottles = [];
 

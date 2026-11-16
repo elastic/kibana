@@ -16,6 +16,7 @@ import type {
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import { logRuleChanges } from '../../../application/rule/methods/common_utils/log_rule_changes';
 import type { RuleParams } from '../../../application/rule/types';
 import type { ValidateScheduleLimitResult } from '../../../application/rule/methods/get_schedule_frequency';
@@ -80,7 +81,11 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
     if (options.shouldValidateSchedule) {
       const intervals = response.saved_objects
         .filter((rule) => rule.attributes.enabled)
-        .map((rule) => rule.attributes.schedule?.interval)
+        .map((rule) =>
+          isIntervalSchedule(rule.attributes.schedule)
+            ? rule.attributes.schedule.interval
+            : undefined
+        )
         .filter(isValidInterval);
 
       prevInterval.concat(intervals);
@@ -113,7 +118,9 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
   if (options.shouldValidateSchedule) {
     const updatedInterval = rules
       .filter((rule) => rule.attributes.enabled)
-      .map((rule) => rule.attributes.schedule?.interval)
+      .map((rule) =>
+        isIntervalSchedule(rule.attributes.schedule) ? rule.attributes.schedule.interval : undefined
+      )
       .filter(isValidInterval);
 
     let validationPayload: ValidateScheduleLimitResult = null;

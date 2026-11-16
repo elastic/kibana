@@ -14,7 +14,7 @@ export const transformBulkEnableResponseInternal = <Params extends RuleParams = 
 ) => {
   return {
     rules: response.rules.map((rule) =>
-      transformRuleToRuleResponseInternalV1<Params>(rule as Rule)
+      transformRuleToRuleResponseInternalV1<Params>(rule as Rule<Params>)
     ),
     errors: response.errors,
     total: response.total,

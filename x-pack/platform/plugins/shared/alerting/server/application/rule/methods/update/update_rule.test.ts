@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { ApiKeyType } from '../../../../task_runner/types';
-import type { IntervalSchedule } from '../../../../types';
+import type { IntervalSchedule, RuleSchedule } from '../../../../types';
 import { RuleNotifyWhen } from '../../../../types';
 import { RecoveredActionGroup } from '../../../../../common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -20,6 +20,7 @@ import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_a
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RuleDomain } from '../../types';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { Frequency } from '@kbn/rrule';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import {
   bulkMigrateLegacyActions,
@@ -5305,5 +5306,100 @@ describe('update()', () => {
       }),
       expect.anything()
     );
+  });
+  // Placed last so the shared uuid counter these tests advance does not shift the
+  // generated action uuids the tests above assert on.
+  describe('rrule schedules', () => {
+    const alertId = 'rrule-rule-id';
+    const taskId = 'rrule-task-id';
+
+    const mockRruleSchedule = {
+      rrule: {
+        freq: Frequency.DAILY as const,
+        interval: 1,
+        tzid: 'UTC',
+        byhour: [9],
+        byminute: [0],
+      },
+    };
+
+    const mockUpdateData = {
+      schedule: mockRruleSchedule,
+      name: 'abc',
+      tags: ['foo'],
+      params: { bar: true },
+      actions: [],
+    };
+
+    const mockApiCallsForSchedule = (currentSchedule: RuleSchedule) => {
+      ruleTypeRegistry.get.mockReturnValueOnce({
+        id: '123',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        async executor() {
+          return { state: {} };
+        },
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: { params: { validate: (params) => params } },
+        validLegacyConsumers: [],
+      });
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+        id: alertId,
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          actions: [],
+          enabled: true,
+          alertTypeId: '123',
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
+          schedule: currentSchedule,
+          scheduledTaskId: taskId,
+        },
+        references: [],
+        version: '123',
+      });
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: alertId,
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: true,
+          schedule: mockRruleSchedule,
+          actions: [],
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
+          scheduledTaskId: taskId,
+        },
+        references: [],
+      });
+    };
+
+    it('moves a rule from an interval schedule to an rrule schedule', async () => {
+      mockApiCallsForSchedule({ interval: '60m' });
+
+      const result = await rulesClient.update({ id: alertId, data: mockUpdateData });
+
+      expect(result.schedule).toEqual(mockRruleSchedule);
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith([taskId], mockRruleSchedule);
+    });
+
+    it('does not update the task schedule when the rrule is unchanged', async () => {
+      mockApiCallsForSchedule(mockRruleSchedule);
+
+      await rulesClient.update({ id: alertId, data: mockUpdateData });
+
+      expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+    });
   });
 });
