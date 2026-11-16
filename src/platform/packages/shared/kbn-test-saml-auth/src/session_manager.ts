@@ -69,13 +69,13 @@ export interface GetCookieOptions {
    * `organization-admin`. Only supported for local UIAM-enabled serverless sessions. Each distinct
    * combination is a distinct user with its own session.
    */
-  uiamOrganizationRoles?: string[];
+  organizationRoles?: string[];
   /**
    * Built-in UIAM project roles the user holds on the project type Kibana runs as, named without
    * the type prefix, such as `admin`. Only supported for local UIAM-enabled serverless sessions.
    * Each distinct combination is a distinct user with its own session.
    */
-  uiamProjectRoles?: string[];
+  projectRoles?: string[];
 }
 
 /**
@@ -188,18 +188,18 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
   private getSessionByRole = async (options: GetSessionByRole): Promise<Session> => {
     const { role, forceNewSession, spaceId } = options;
     // The same set of UIAM roles must map to the same user regardless of order.
-    const uiamOrganizationRoles = [...new Set(options.uiamOrganizationRoles ?? [])].sort();
-    const uiamProjectRoles = [...new Set(options.uiamProjectRoles ?? [])].sort();
+    const organizationRoles = [...new Set(options.organizationRoles ?? [])].sort();
+    const projectRoles = [...new Set(options.projectRoles ?? [])].sort();
 
     // Validate role before creating SAML session
     this.validateRole(role);
-    this.validateUiamRoles('organization', uiamOrganizationRoles);
-    this.validateUiamRoles('project', uiamProjectRoles);
+    this.validateUiamRoles('organization', organizationRoles);
+    this.validateUiamRoles('project', projectRoles);
 
     const userKey = [
       role,
-      ...uiamOrganizationRoles,
-      ...uiamProjectRoles.map((projectRole) => `project-${projectRole}`),
+      ...organizationRoles,
+      ...projectRoles.map((projectRole) => `project-${projectRole}`),
     ].join('+');
     const cacheKey = spaceId ? `${userKey}:${spaceId}` : userKey;
 
@@ -208,7 +208,7 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       return this.sessionCache.get(cacheKey)!;
     }
 
-    const session = await this.createSessionForRole(role, uiamOrganizationRoles, uiamProjectRoles);
+    const session = await this.createSessionForRole(role, organizationRoles, projectRoles);
     this.sessionCache.set(cacheKey, session);
 
     if (forceNewSession) {
@@ -220,8 +220,8 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
 
   private createSessionForRole = async (
     role: string,
-    uiamOrganizationRoles: string[] = [],
-    uiamProjectRoles: string[] = []
+    organizationRoles: string[] = [],
+    projectRoles: string[] = []
   ): Promise<Session> => {
     if (this.isCloud) {
       const kbnVersion = await this.getKibanaVersionForCloudSaml();
@@ -258,8 +258,8 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
     // A user holding extra UIAM roles is a different user from the plain role holder.
     const userName = [
       role,
-      ...uiamOrganizationRoles,
-      ...uiamProjectRoles.map((projectRole) => `project-${projectRole}`),
+      ...organizationRoles,
+      ...projectRoles.map((projectRole) => `project-${projectRole}`),
     ].join('_');
     // UIAM service requires numeric usernames, so we hash the role name (first 4 bytes) to generate a unique username.
     const username = this.serverless?.uiam
@@ -268,8 +268,8 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
     this.log.debug(
       `Creating new local SAML session for a user '${username}' with role '${role}' (serverless: ${!!this
         .serverless}, uiam: ${!!this.serverless?.uiam}, uiam organization roles: ${JSON.stringify(
-        uiamOrganizationRoles
-      )}, uiam project roles: ${JSON.stringify(uiamProjectRoles)})`
+        organizationRoles
+      )}, uiam project roles: ${JSON.stringify(projectRoles)})`
     );
     return await createLocalSAMLSession({
       username,
@@ -282,10 +282,8 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
             organizationId: this.serverless.organizationId,
             projectType: this.serverless.projectType,
             uiamEnabled: this.serverless.uiam,
-            ...(uiamOrganizationRoles.length > 0
-              ? { organizationRoleIds: uiamOrganizationRoles }
-              : {}),
-            ...(uiamProjectRoles.length > 0 ? { projectRoles: uiamProjectRoles } : {}),
+            ...(organizationRoles.length > 0 ? { organizationRoleIds: organizationRoles } : {}),
+            ...(projectRoles.length > 0 ? { projectRoles } : {}),
           }
         : undefined,
       log: this.log,
@@ -320,8 +318,8 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
     const session = await this.getSessionByRole({
       role,
       forceNewSession: options?.forceNewSession ?? false,
-      uiamOrganizationRoles: options?.uiamOrganizationRoles,
-      uiamProjectRoles: options?.uiamProjectRoles,
+      organizationRoles: options?.organizationRoles,
+      projectRoles: options?.projectRoles,
     });
     return { Cookie: `sid=${session.getCookieValue()}` };
   }
@@ -331,34 +329,34 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       role,
       forceNewSession: options?.forceNewSession ?? false,
       spaceId: options?.spaceId,
-      uiamOrganizationRoles: options?.uiamOrganizationRoles,
-      uiamProjectRoles: options?.uiamProjectRoles,
+      organizationRoles: options?.organizationRoles,
+      projectRoles: options?.projectRoles,
     });
     return session.getCookieValue();
   }
 
   async getEmail(
     role: string,
-    options?: Pick<GetCookieOptions, 'uiamOrganizationRoles' | 'uiamProjectRoles'>
+    options?: Pick<GetCookieOptions, 'organizationRoles' | 'projectRoles'>
   ) {
     const session = await this.getSessionByRole({
       role,
       forceNewSession: false,
-      uiamOrganizationRoles: options?.uiamOrganizationRoles,
-      uiamProjectRoles: options?.uiamProjectRoles,
+      organizationRoles: options?.organizationRoles,
+      projectRoles: options?.projectRoles,
     });
     return session.email;
   }
 
   async getUserData(
     role: string,
-    options?: Pick<GetCookieOptions, 'uiamOrganizationRoles' | 'uiamProjectRoles'>
+    options?: Pick<GetCookieOptions, 'organizationRoles' | 'projectRoles'>
   ) {
     const { cookie } = await this.getSessionByRole({
       role,
       forceNewSession: false,
-      uiamOrganizationRoles: options?.uiamOrganizationRoles,
-      uiamProjectRoles: options?.uiamProjectRoles,
+      organizationRoles: options?.organizationRoles,
+      projectRoles: options?.projectRoles,
     });
     const profileData = await getSecurityProfile({ kbnHost: this.kbnHost, cookie, log: this.log });
     return profileData;

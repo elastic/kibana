@@ -33,7 +33,7 @@ apiTest.describe('[NON-MKI] UIAM access checks through Core', { tag: tags.server
     apiClient: ApiClientFixture,
     samlAuth: SamlAuth,
     role: string,
-    uiamRoles: { uiamOrganizationRoles?: string[]; uiamProjectRoles?: string[] } = {}
+    uiamRoles: { organizationRoles?: string[]; projectRoles?: string[] } = {}
   ) => {
     const credentials = await samlAuth.session.getApiCredentialsForRole(role, uiamRoles);
     return accessWith(apiClient, credentials);
@@ -60,7 +60,7 @@ apiTest.describe('[NON-MKI] UIAM access checks through Core', { tag: tags.server
     'grants only billing access to a billing admin regardless of project role',
     async ({ apiClient, samlAuth }) => {
       const response = await accessAs(apiClient, samlAuth, 'viewer', {
-        uiamOrganizationRoles: ['billing-admin'],
+        organizationRoles: ['billing-admin'],
       });
 
       expect(response).toHaveStatusCode(200);
@@ -70,7 +70,7 @@ apiTest.describe('[NON-MKI] UIAM access checks through Core', { tag: tags.server
 
   apiTest('denies everything to a project viewer', async ({ apiClient, samlAuth }) => {
     const response = await accessAs(apiClient, samlAuth, 'viewer', {
-      uiamProjectRoles: ['viewer'],
+      projectRoles: ['viewer'],
     });
 
     expect(response).toHaveStatusCode(200);
@@ -79,7 +79,7 @@ apiTest.describe('[NON-MKI] UIAM access checks through Core', { tag: tags.server
 
   apiTest('grants everything to an organization admin', async ({ apiClient, samlAuth }) => {
     const response = await accessAs(apiClient, samlAuth, 'admin', {
-      uiamOrganizationRoles: ['organization-admin'],
+      organizationRoles: ['organization-admin'],
     });
 
     expect(response).toHaveStatusCode(200);

@@ -95,6 +95,6 @@ export interface GetSessionByRole {
   role: string;
   forceNewSession: boolean;
   spaceId?: string;
-  uiamOrganizationRoles?: string[];
-  uiamProjectRoles?: string[];
+  organizationRoles?: string[];
+  projectRoles?: string[];
 }

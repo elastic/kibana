@@ -170,12 +170,12 @@ describe('SamlSessionManager', () => {
         serverless: { organizationId: 'org123', projectType: 'oblt', uiam: true },
       });
       await samlSessionManager.getApiCredentialsForRole(roleViewer, {
-        uiamOrganizationRoles: ['billing-admin'],
+        organizationRoles: ['billing-admin'],
       });
       await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer, {
-        uiamOrganizationRoles: ['billing-admin'],
+        organizationRoles: ['billing-admin'],
       });
-      await samlSessionManager.getEmail(roleViewer, { uiamOrganizationRoles: ['billing-admin'] });
+      await samlSessionManager.getEmail(roleViewer, { organizationRoles: ['billing-admin'] });
       await samlSessionManager.getApiCredentialsForRole(roleViewer);
 
       expect(createLocalSAMLSessionMock).toHaveBeenCalledTimes(2);
@@ -210,10 +210,10 @@ describe('SamlSessionManager', () => {
         serverless: { organizationId: 'org123', projectType: 'oblt', uiam: true },
       });
       await samlSessionManager.getApiCredentialsForRole(roleViewer, {
-        uiamOrganizationRoles: ['organization-admin', 'billing-admin'],
+        organizationRoles: ['organization-admin', 'billing-admin'],
       });
       await samlSessionManager.getApiCredentialsForRole(roleViewer, {
-        uiamOrganizationRoles: ['billing-admin', 'organization-admin', 'billing-admin'],
+        organizationRoles: ['billing-admin', 'organization-admin', 'billing-admin'],
       });
 
       expect(createLocalSAMLSessionMock).toHaveBeenCalledTimes(1);
@@ -233,14 +233,14 @@ describe('SamlSessionManager', () => {
         serverless: { organizationId: 'org123', projectType: 'oblt', uiam: true },
       });
       await samlSessionManager.getApiCredentialsForRole(roleViewer, {
-        uiamProjectRoles: ['admin'],
+        projectRoles: ['admin'],
       });
       await samlSessionManager.getApiCredentialsForRole(roleViewer, {
-        uiamOrganizationRoles: ['billing-admin'],
-        uiamProjectRoles: ['admin'],
+        organizationRoles: ['billing-admin'],
+        projectRoles: ['admin'],
       });
       await samlSessionManager.getApiCredentialsForRole(roleViewer, {
-        uiamProjectRoles: ['admin', 'admin'],
+        projectRoles: ['admin', 'admin'],
       });
 
       expect(createLocalSAMLSessionMock).toHaveBeenCalledTimes(2);
@@ -274,7 +274,7 @@ describe('SamlSessionManager', () => {
         serverless: { organizationId: 'org123', projectType: 'oblt', uiam: false },
       });
       await expect(
-        samlSessionManager.getApiCredentialsForRole(roleViewer, { uiamProjectRoles: ['admin'] })
+        samlSessionManager.getApiCredentialsForRole(roleViewer, { projectRoles: ['admin'] })
       ).rejects.toThrow(
         `UIAM project roles [admin] can only be granted to local UIAM-enabled serverless sessions.`
       );
@@ -288,7 +288,7 @@ describe('SamlSessionManager', () => {
       });
       getSecurityProfileMock.mockResolvedValue({} as UserProfile);
       await samlSessionManager.getUserData(roleViewer, {
-        uiamOrganizationRoles: ['organization-admin'],
+        organizationRoles: ['organization-admin'],
       });
 
       expect(createLocalSAMLSessionMock).toHaveBeenCalledTimes(1);
@@ -307,7 +307,7 @@ describe('SamlSessionManager', () => {
       });
       await expect(
         samlSessionManager.getApiCredentialsForRole(roleViewer, {
-          uiamOrganizationRoles: ['billing-admin'],
+          organizationRoles: ['billing-admin'],
         })
       ).rejects.toThrow(
         `UIAM organization roles [billing-admin] can only be granted to local UIAM-enabled serverless sessions.`
