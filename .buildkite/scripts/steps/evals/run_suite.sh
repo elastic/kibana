@@ -243,9 +243,10 @@ EOF
       # most suite/model combinations through without per-suite special-casing.
       timeout_in_minutes="${EVAL_STEP_TIMEOUT_IN_MINUTES:-${EVAL_SUITE_STEP_TIMEOUT:-120}}"
 
-      # The reason is free-form prose going into a double-quoted YAML scalar: escape
-      # backslashes and quotes, and flatten newlines, or the pipeline upload fails.
-      eval_pin_baseline_reason_yaml="$(printf '%s' "${EVAL_PIN_BASELINE_REASON:-}" | tr '\r\n' '  ' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')"
+      # The reason is free-form prose going into a double-quoted YAML scalar that
+      # buildkite-agent interpolates on upload: escape backslashes, quotes and `$`
+      # (as `$$`), and flatten newlines, or the upload fails or substitutes env vars.
+      eval_pin_baseline_reason_yaml="$(printf '%s' "${EVAL_PIN_BASELINE_REASON:-}" | tr '\r\n' '  ' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/\$/$$/g')"
 
       fanout_step_keys=()
       fanout_connector_ids=()
