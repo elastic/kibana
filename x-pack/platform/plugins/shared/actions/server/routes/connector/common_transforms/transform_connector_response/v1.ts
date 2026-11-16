@@ -7,6 +7,7 @@
 
 import type { ConnectorResponseV1 } from '../../../../../common/routes/connector/response';
 import type { Connector } from '../../../../application/connector/types';
+import { omitIngestTokenHashFromConfig } from '../omit_ingest_token_hash';
 
 export const transformConnectorResponse = (
   {
@@ -26,7 +27,7 @@ export const transformConnectorResponse = (
 ): ConnectorResponseV1 => ({
   id,
   name,
-  config,
+  config: omitIngestTokenHashFromConfig(config),
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
   is_deprecated: isDeprecated,

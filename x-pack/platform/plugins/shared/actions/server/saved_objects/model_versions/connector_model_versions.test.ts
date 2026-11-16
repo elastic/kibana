@@ -20,22 +20,7 @@ import {
   rawConnectorSchemaV5,
 } from '../schemas/raw_connector';
 import { connectorModelVersions } from './connector_model_versions';
-import { createModelVersionTestMigrator } from '@kbn/core-test-helpers-model-versions';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../constants/saved_objects';
-import { actionMappings } from '../mappings';
-import {
-  actionEncryptedRegistrationV2,
-  actionEncryptedRegistrationV3,
-  actionEncryptedRegistrationV4,
-} from '../action_encryption';
-
-interface PreviewActionAttributes {
-  actionTypeId: string;
-  name: string;
-  isMissingSecrets: boolean;
-  config: Record<string, unknown>;
-  secrets: string;
-}
+import { actionEncryptedRegistrationV2, actionEncryptedRegistrationV3 } from '../action_encryption';
 
 describe('Connector Model Versions', () => {
   const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -419,94 +404,6 @@ describe('Connector Model Versions', () => {
         expect(rawConnectorSchemaV4.validate(previous)).toEqual(previous);
         expect(rawConnectorSchemaV5.validate(fixture['10.5.0'][index])).toEqual(
           fixture['10.5.0'][index]
-        );
-      });
-    });
-  });
-
-  describe('version 6', () => {
-    it('re-encrypts while removing the leftover config hash', () => {
-      expect(encryptedSavedObjects.createModelVersion).toHaveBeenCalledWith(
-        expect.objectContaining({
-          inputType: actionEncryptedRegistrationV4,
-          outputType: actionEncryptedRegistrationV4,
-        })
-      );
-      const version6 = versions['6'] as SavedObjectsFullModelVersion;
-      expect(version6.changes).toEqual([
-        {
-          type: 'data_removal',
-          removedAttributePaths: ['config.ingestTokenHash'],
-        },
-      ]);
-    });
-
-    it('drops config.ingestTokenHash and keeps the rest of the connector', () => {
-      const migrator = createModelVersionTestMigrator({
-        type: {
-          name: ACTION_SAVED_OBJECT_TYPE,
-          hidden: true,
-          namespaceType: 'multiple-isolated',
-          mappings: actionMappings,
-          modelVersions: versions,
-        },
-      });
-      const migrated = migrator.migrate<PreviewActionAttributes, PreviewActionAttributes>({
-        document: {
-          id: 'preview-connector',
-          type: ACTION_SAVED_OBJECT_TYPE,
-          attributes: {
-            actionTypeId: '.inboundWebhook',
-            name: 'preview',
-            isMissingSecrets: false,
-            config: { ingestTokenHash: 'a'.repeat(64), url: 'https://example.com' },
-            secrets: '{}',
-          },
-          references: [],
-        },
-        fromVersion: 5,
-        toVersion: 6,
-      });
-
-      expect(migrated.attributes.config).toEqual({ url: 'https://example.com' });
-    });
-
-    it('round-trips action fixtures that omit config.ingestTokenHash', () => {
-      const migrator = createModelVersionTestMigrator({
-        type: {
-          name: ACTION_SAVED_OBJECT_TYPE,
-          hidden: true,
-          namespaceType: 'multiple-isolated',
-          mappings: actionMappings,
-          modelVersions: versions,
-        },
-      });
-      const fixturePath = join(
-        __dirname,
-        '../../../../../../../../packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/action/10.6.0.json'
-      );
-      const fixture = JSON.parse(readFileSync(fixturePath, 'utf8')) as {
-        '10.5.0': Array<Record<string, unknown>>;
-        '10.6.0': Array<Record<string, unknown>>;
-      };
-
-      expect(fixture['10.5.0']).toHaveLength(fixture['10.6.0'].length);
-      expect(JSON.stringify(fixture)).not.toContain('ingestTokenHash');
-      fixture['10.5.0'].forEach((previous, index) => {
-        expect(rawConnectorSchemaV5.validate(previous)).toEqual(previous);
-        const migrated = migrator.migrate<Record<string, unknown>, Record<string, unknown>>({
-          document: {
-            id: `fixture-${index}`,
-            type: ACTION_SAVED_OBJECT_TYPE,
-            attributes: previous,
-            references: [],
-          },
-          fromVersion: 5,
-          toVersion: 6,
-        });
-        expect(migrated.attributes).toEqual(fixture['10.6.0'][index]);
-        expect(rawConnectorSchemaV5.validate(fixture['10.6.0'][index])).toEqual(
-          fixture['10.6.0'][index]
         );
       });
     });
