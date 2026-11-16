@@ -6,6 +6,7 @@
  */
 
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
+import type { OutputColumnKind } from '../../../common';
 import { getDynamicBlock } from './dynamic';
 import { InventoryDefinitionError } from './errors';
 import type { IdentityPlan } from './identity';
@@ -14,9 +15,6 @@ import type { QueryPlan } from './types';
 
 /** The column holding the newest `@timestamp` of an entity. */
 export const LAST_SEEN_COLUMN = 'last_seen';
-
-/** What an output column holds. */
-export type OutputColumnKind = 'id' | 'identity' | 'attribute' | 'last_seen';
 
 /** One column of the inventory output. */
 export interface OutputColumn {
@@ -34,7 +32,7 @@ const RESERVED_COLUMNS: ReadonlySet<string> = new Set([ENTITY_ID_COLUMN, LAST_SE
  */
 export const buildColumns = (
   definition: EntityDefinitionWithoutId,
-  plans: QueryPlan[],
+  plans: ReadonlyArray<Pick<QueryPlan, 'index' | 'attributes'>>,
   { groupingFields, helperColumns }: IdentityPlan
 ): OutputColumn[] => {
   getDynamicBlock(definition);

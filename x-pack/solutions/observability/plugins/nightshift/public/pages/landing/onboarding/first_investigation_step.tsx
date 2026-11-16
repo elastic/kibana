@@ -11,54 +11,33 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
-  EuiIcon,
+  EuiEmptyPrompt,
+  EuiIllustration,
+  EuiPanel,
   EuiProgress,
   EuiSpacer,
+  EuiText,
   EuiTextArea,
   EuiTitle,
-  useEuiShadow,
   useEuiTheme,
   type IconType,
 } from '@elastic/eui';
+import { notFound } from '@elastic/eui-illustrations';
 import { i18n } from '@kbn/i18n';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type {
   OnboardingSuggestion,
   OnboardingSuggestionsExecution,
 } from '@kbn/nightshift-investigations-plugin/common';
+import { ShowMoreButton } from '../../../components/ui/show_more_button';
 import { useStartInvestigation } from '../../../data/investigations/use_start_investigation';
-import { ConnectSourcesGrid } from '../../../components/entities/sandbox_connector/connect_sources_grid';
+import {
+  ConnectSourcesGrid,
+  isAdditionalType,
+} from '../../../components/entities/sandbox_connector/connect_sources_grid';
+import { IconMark } from '../../../components/ui/icon_mark';
+import { CONNECT_SOURCES_TITLE } from './connect_sources_step';
 import { useStartOnboardingSuggestions } from './use_onboarding';
-
-/** Generic prompts offered when the suggestion run failed; they work on any cluster. */
-const FALLBACK_SUGGESTIONS: OnboardingSuggestion[] = [
-  {
-    title: i18n.translate('xpack.nightshift.onboarding.fallback.errors.title', {
-      defaultMessage: 'Noisiest errors in the last 24 hours',
-    }),
-    prompt: 'Which services logged the most errors in the last 24 hours, and why?',
-    rationale: '',
-    source: 'error_spike',
-  },
-  {
-    title: i18n.translate('xpack.nightshift.onboarding.fallback.degrading.title', {
-      defaultMessage: 'Anything degrading right now?',
-    }),
-    prompt:
-      'Is anything in my system degrading right now? Check error rates and latency of the last hour against the day before.',
-    rationale: '',
-    source: 'latency',
-  },
-  {
-    title: i18n.translate('xpack.nightshift.onboarding.fallback.changes.title', {
-      defaultMessage: 'What changed in the last hour?',
-    }),
-    prompt: 'What changed in my system in the last hour, and did it cause any errors?',
-    rationale: '',
-    source: 'other',
-  },
-];
 
 const SOURCE_LABELS: Record<OnboardingSuggestion['source'], string> = {
   alert: i18n.translate('xpack.nightshift.onboarding.source.alert', { defaultMessage: 'Alert' }),
@@ -113,13 +92,12 @@ export function OnboardingFirstInvestigationStep({
   const retry = useStartOnboardingSuggestions();
   const isRunning = execution.status === 'running';
 
+  // A failed run and a run with nothing to suggest look the same: an empty state with a retry.
   const suggestions = useMemo(
-    () =>
-      execution.status === 'failed' || execution.suggestions?.length === 0
-        ? FALLBACK_SUGGESTIONS
-        : execution.suggestions ?? [],
+    () => (execution.status === 'failed' ? [] : execution.suggestions ?? []),
     [execution.status, execution.suggestions]
   );
+  const hasSuggestions = suggestions.length > 0;
 
   const start = useCallback(
     (prompt: string, title?: string) => {
@@ -143,14 +121,10 @@ export function OnboardingFirstInvestigationStep({
         <AnalyzingBanner />
         <section data-test-subj="nightshiftOnboardingAnalyzingSources">
           <EuiTitle size="xs">
-            <h4>
-              {i18n.translate('xpack.nightshift.onboarding.investigate.knowledgeSourcesTitle', {
-                defaultMessage: 'Additional knowledge sources',
-              })}
-            </h4>
+            <h4>{CONNECT_SOURCES_TITLE}</h4>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <ConnectSourcesGrid group="additional" />
+          <ConnectSourcesGrid filter={isAdditionalType} />
         </section>
       </div>
     );
@@ -165,43 +139,75 @@ export function OnboardingFirstInvestigationStep({
         gap: ${euiTheme.size.base};
       `}
     >
-      {execution.status === 'failed' && (
-        <EuiCallOut
-          announceOnMount
-          size="s"
-          color="warning"
-          iconType="warning"
-          title={i18n.translate('xpack.nightshift.onboarding.investigate.failedTitle', {
-            defaultMessage: 'Nightshift could not suggest investigations for your data',
-          })}
+      {hasSuggestions ? (
+        <SuggestionList
+          suggestions={suggestions}
+          isStarting={isStarting}
+          startingPrompt={startingPrompt}
+          onInvestigate={(suggestion) => start(suggestion.prompt, suggestion.title)}
+        />
+      ) : (
+        <EuiPanel
+          hasBorder
+          paddingSize="none"
+          data-test-subj="nightshiftOnboardingSuggestionsEmpty"
         >
-          <p>
-            {i18n.translate('xpack.nightshift.onboarding.investigate.failedDescription', {
-              defaultMessage:
-                'Start with one of these general questions, write your own, or try again.',
-            })}
-          </p>
-          <EuiButton
-            size="s"
-            color="warning"
-            iconType="refresh"
-            isLoading={retry.isLoading}
-            onClick={() => retry.mutate()}
-            data-test-subj="nightshiftOnboardingRetryButton"
-          >
-            {i18n.translate('xpack.nightshift.onboarding.investigate.retryButton', {
-              defaultMessage: 'Try again',
-            })}
-          </EuiButton>
-        </EuiCallOut>
+          <EuiEmptyPrompt
+            titleSize="xs"
+            paddingSize="none"
+            color="transparent"
+            css={css`
+              max-inline-size: none;
+              width: 100%;
+              padding-block: ${euiTheme.size.l};
+              padding-inline: ${euiTheme.size.m};
+            `}
+            icon={
+              <EuiIllustration
+                type={notFound}
+                alt=""
+                fullWidth={false}
+                css={css`
+                  max-inline-size: 80px;
+                  margin-inline: auto;
+                `}
+              />
+            }
+            title={
+              <h3>
+                {i18n.translate('xpack.nightshift.onboarding.investigate.emptyTitle', {
+                  defaultMessage: 'No investigation suggestions found',
+                })}
+              </h3>
+            }
+            body={
+              <p>
+                {i18n.translate('xpack.nightshift.onboarding.investigate.emptySuggestionsBody', {
+                  defaultMessage:
+                    "Elastic nightshift couldn't find anything worth investigating in your data. Try again later, or ask your own question below.",
+                })}
+              </p>
+            }
+            actions={
+              <EuiButton
+                size="s"
+                iconType="refresh"
+                isLoading={retry.isLoading}
+                onClick={() => retry.mutate()}
+                data-test-subj="nightshiftOnboardingRetryButton"
+              >
+                {i18n.translate('xpack.nightshift.onboarding.investigate.retryButton', {
+                  defaultMessage: 'Try again',
+                })}
+              </EuiButton>
+            }
+          />
+        </EuiPanel>
       )}
-      <SuggestionList
-        suggestions={suggestions}
-        isStarting={isStarting}
-        startingPrompt={startingPrompt}
-        onInvestigate={(suggestion) => start(suggestion.prompt, suggestion.title)}
-      />
       <ComposeCard
+        title={i18n.translate('xpack.nightshift.onboarding.investigate.customTitle', {
+          defaultMessage: 'Ask your own question',
+        })}
         value={message}
         onChange={setMessage}
         isStarting={isStarting}
@@ -215,39 +221,93 @@ export function OnboardingFirstInvestigationStep({
   );
 }
 
+/**
+ * Banner-style layout (not EuiBanner) with Arturo's indeterminate EuiProgress.
+ * AI accents on the Mark plate, icon, and progress only — body stays plain.
+ */
 function AnalyzingBanner(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
+  const title = i18n.translate('xpack.nightshift.onboarding.investigate.analyzingTitle', {
+    defaultMessage: 'Gathering and triaging signals that can be investigated',
+  });
+  const description = i18n.translate(
+    'xpack.nightshift.onboarding.investigate.analyzingDescription',
+    {
+      defaultMessage:
+        'This might take a couple of minutes. Meanwhile, consider connecting additional knowledge sources.',
+    }
+  );
+  // Same AI tokens as prototype analyzing chrome / Nightshift hero surfaces.
+  const aiSurface = `linear-gradient(99.4deg, ${euiTheme.colors.backgroundLightPrimary} 3.97%, ${euiTheme.colors.backgroundLightAssistance} 65.6%)`;
+  const aiProgressTrack = `linear-gradient(97.76deg, ${euiTheme.colors.borderBasePrimary} 17%, ${euiTheme.colors.borderBaseAssistance} 83%)`;
+  const aiProgressFill = `linear-gradient(90deg, ${euiTheme.colors.backgroundFilledPrimary} 0%, ${euiTheme.colors.backgroundFilledAssistance} 100%)`;
+
   return (
     <div
       data-test-subj="nightshiftOnboardingAnalyzing"
+      role="status"
+      aria-label={title}
       css={css`
         position: relative;
         overflow: hidden;
+        border: ${euiTheme.border.thin};
         border-radius: ${euiTheme.border.radius.panel};
-        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePrimary};
+        background: ${euiTheme.colors.emptyShade};
       `}
     >
-      <EuiProgress size="xs" color="primary" position="absolute" />
-      <EuiCallOut
+      <EuiProgress
+        size="xs"
         color="primary"
-        size="s"
-        title={i18n.translate('xpack.nightshift.onboarding.investigate.analyzingTitle', {
-          defaultMessage: 'Gathering and triaging signals that can be investigated',
-        })}
+        position="absolute"
         css={css`
-          border: none;
-          border-radius: 0;
-          box-shadow: none;
-          padding-top: calc(${euiTheme.size.m} + 2px);
+          background-color: transparent;
+          background-image: ${aiProgressTrack};
+
+          /* EUI defaults to 1s — slow the sweep a bit for the analyzing state. */
+          &::before {
+            background-color: transparent !important;
+            background-image: ${aiProgressFill};
+            animation-duration: 2.75s;
+            border-radius: ${euiTheme.border.radius.medium};
+          }
+        `}
+      />
+      <div
+        css={css`
+          display: flex;
+          align-items: flex-start;
+          gap: ${euiTheme.size.base};
+          padding: ${euiTheme.size.base};
         `}
       >
-        <p>
-          {i18n.translate('xpack.nightshift.onboarding.investigate.analyzingDescription', {
-            defaultMessage:
-              'This might take a couple of minutes. Meanwhile, consider connecting additional knowledge sources.',
-          })}
-        </p>
-      </EuiCallOut>
+        <IconMark icon="inspect" color="ai" surface={aiSurface} />
+        <EuiText size="s">
+          <p
+            css={css`
+              margin: 0;
+            `}
+          >
+            <strong>{title}</strong>
+            <span
+              css={css`
+                display: inline-block;
+                inline-size: calc(${euiTheme.size.s} + ${euiTheme.size.xxs});
+                text-align: center;
+                color: ${euiTheme.colors.textHeading};
+              `}
+            >
+              ·
+            </span>
+            <span
+              css={css`
+                color: ${euiTheme.colors.textParagraph};
+              `}
+            >
+              {description}
+            </span>
+          </p>
+        </EuiText>
+      </div>
     </div>
   );
 }
@@ -300,48 +360,12 @@ function SuggestionList({
         ))}
       </ul>
       {remaining > 0 && (
-        <button
-          type="button"
-          onClick={() => setVisibleCount((count) => count + SUGGESTIONS_PAGE_SIZE)}
+        <ShowMoreButton
+          count={SUGGESTIONS_PAGE_SIZE}
+          remaining={remaining}
+          onClick={() => setVisibleCount((n) => n + SUGGESTIONS_PAGE_SIZE)}
           data-test-subj="nightshiftOnboardingSuggestionsShowMore"
-          css={css`
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: ${euiTheme.size.xs};
-            width: 100%;
-            padding: ${euiTheme.size.m};
-            border: none;
-            border-top: ${euiTheme.border.thin};
-            background: ${euiTheme.colors.emptyShade};
-            cursor: pointer;
-            font-size: ${euiTheme.size.m};
-            line-height: ${euiTheme.size.base};
-            font-weight: ${euiTheme.font.weight.bold};
-            color: ${euiTheme.colors.textParagraph};
-
-            &:hover {
-              background: ${euiTheme.colors.backgroundBaseSubdued};
-            }
-          `}
-        >
-          <EuiIcon type="chevronSingleDown" size="s" aria-hidden={true} />
-          {i18n.translate('xpack.nightshift.onboarding.investigate.showMore', {
-            defaultMessage: 'Show {count} more',
-            values: { count: Math.min(SUGGESTIONS_PAGE_SIZE, remaining) },
-          })}
-          <span
-            css={css`
-              font-weight: ${euiTheme.font.weight.regular};
-              color: ${euiTheme.colors.textDisabled};
-            `}
-          >
-            {i18n.translate('xpack.nightshift.onboarding.investigate.showMoreOf', {
-              defaultMessage: 'of {count}',
-              values: { count: remaining },
-            })}
-          </span>
-        </button>
+        />
       )}
     </div>
   );
@@ -371,7 +395,7 @@ function SuggestionRow({
           ${euiTheme.size.l};
       `}
     >
-      <Mark icon={mark.icon} isLogo={mark.isLogo} />
+      <IconMark icon={mark.icon} isLogo={mark.isLogo} />
       <div
         css={css`
           flex: 1;
@@ -437,14 +461,16 @@ function SuggestionRow({
   );
 }
 
-/** "Want something else investigated?": a free-text question, with its own Investigate. */
+/** A free-text question, with its own Investigate. */
 function ComposeCard({
+  title,
   value,
   onChange,
   isStarting,
   isLoading,
   onSubmit,
 }: {
+  title: string;
   value: string;
   onChange: (value: string) => void;
   isStarting: boolean;
@@ -452,9 +478,6 @@ function ComposeCard({
   onSubmit: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const title = i18n.translate('xpack.nightshift.onboarding.investigate.customTitle', {
-    defaultMessage: 'Want something else investigated?',
-  });
   const hasDraft = value.trim().length > 0;
 
   return (
@@ -463,15 +486,17 @@ function ComposeCard({
       css={css`
         display: flex;
         align-items: flex-start;
+        /* Match SuggestionRow: 24px left + gap, 16px other sides. */
         gap: ${euiTheme.size.l};
         margin-top: ${euiTheme.size.m};
-        padding: ${euiTheme.size.base};
+        padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base}
+          ${euiTheme.size.l};
         border: ${euiTheme.border.thin};
         border-radius: ${euiTheme.border.radius.panel};
         background: ${euiTheme.colors.emptyShade};
       `}
     >
-      <Mark icon="reporter" />
+      <IconMark icon="reporter" />
       <div
         css={css`
           flex: 1;
@@ -559,31 +584,6 @@ function ComposeCard({
           })}
         />
       </div>
-    </div>
-  );
-}
-
-/** The 40px leading plate of a row: tinted for glyphs, plain with a shadow for product logos. */
-function Mark({ icon, isLogo = false }: { icon: IconType; isLogo?: boolean }): React.ReactElement {
-  const { euiTheme } = useEuiTheme();
-  const plateShadow = useEuiShadow('xs');
-  return (
-    <div
-      aria-hidden={true}
-      css={css`
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        border-radius: ${euiTheme.size.s};
-        ${isLogo
-          ? `background: ${euiTheme.colors.backgroundBasePlain}; color: ${euiTheme.colors.textHeading}; ${plateShadow}`
-          : `background: ${euiTheme.colors.backgroundLightText}; color: ${euiTheme.colors.textParagraph};`}
-      `}
-    >
-      <EuiIcon type={icon} size="m" aria-hidden={true} />
     </div>
   );
 }

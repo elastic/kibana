@@ -9,13 +9,14 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import type { Row } from '@tanstack/react-table';
 import { CascadeRowCellPrimitive } from './cascade_row_cell';
 import type {
   ChildVirtualizerController,
-  CascadeRootVirtualizerReturnValue,
+  CascadeVirtualizerReturnValue,
 } from '../../../lib/core/virtualizer';
-import { DataCascadeProvider } from '../../../store_provider';
+import type { CascadeTableRow } from '../../../lib/core/table';
+import { DataCascadeProvider, type GroupNode } from '../../../store_provider';
+import { StickyHeaderExtensionPointProvider } from '../data_cascade_row/components/cascade_row_header_extension_point';
 
 const renderComponent = ({
   cascadeGroups,
@@ -25,31 +26,37 @@ const renderComponent = ({
   getVirtualizer,
   onCascadeLeafNodeExpanded = jest.fn(),
   onCascadeLeafNodeCollapsed,
-  virtualRowIndex = 0,
 }: Pick<
   React.ComponentProps<typeof CascadeRowCellPrimitive>,
   'onCascadeLeafNodeExpanded' | 'onCascadeLeafNodeCollapsed' | 'row' | 'children' | 'getVirtualizer'
 > &
-  Pick<React.ComponentProps<typeof DataCascadeProvider>, 'cascadeGroups' | 'initialGroupColumn'> & {
-    virtualRowIndex?: number;
-  }) => {
+  Pick<
+    React.ComponentProps<typeof DataCascadeProvider>,
+    'cascadeGroups' | 'initialGroupColumn'
+  >) => {
   return render(
     <DataCascadeProvider
       data={[]}
       cascadeGroups={cascadeGroups}
       initialGroupColumn={initialGroupColumn}
     >
-      {/* @ts-expect-error -- we don't need to provide all the props */}
-      <CascadeRowCellPrimitive
-        size="m"
-        onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
-        onCascadeLeafNodeCollapsed={onCascadeLeafNodeCollapsed}
-        row={row}
-        getVirtualizer={getVirtualizer}
-        virtualRowIndex={virtualRowIndex}
+      <StickyHeaderExtensionPointProvider
+        stickyEnabled={false}
+        rowIndex={4}
+        rowElement={null}
+        headerElementRef={React.createRef<HTMLDivElement>()}
+        extensionPointElement={document.createElement('div')}
       >
-        {children}
-      </CascadeRowCellPrimitive>
+        <CascadeRowCellPrimitive
+          size="m"
+          onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
+          onCascadeLeafNodeCollapsed={onCascadeLeafNodeCollapsed}
+          row={row}
+          getVirtualizer={getVirtualizer}
+        >
+          {children}
+        </CascadeRowCellPrimitive>
+      </StickyHeaderExtensionPointProvider>
     </DataCascadeProvider>
   );
 };
@@ -67,15 +74,16 @@ describe('CascadeRowCellPrimitive', () => {
         scrollOffset: 0,
         scrollElement: null,
         activeStickyIndex: null,
-        virtualizedRowComputedTranslateValue: new Map(),
         preventRowSizeChangePropagation: jest.fn(() => jest.fn()),
         childController: {
+          isDetached: jest.fn(() => false),
+          clearPersistedAnchor: jest.fn(),
           subscribe: jest.fn(() => () => {}),
           shouldActivate: jest.fn(() => true),
           enqueue: jest.fn(() => jest.fn()),
           isReturningCell: jest.fn(() => false),
         },
-      } as unknown as CascadeRootVirtualizerReturnValue)
+      } as unknown as CascadeVirtualizerReturnValue)
   );
 
   it('will invoke the passed onCascadeLeafNodeExpanded if the leafNode has no data', () => {
@@ -95,7 +103,10 @@ describe('CascadeRowCellPrimitive', () => {
         original: rowData,
         getToggleSelectedHandler: jest.fn(),
         getToggleExpandedHandler: jest.fn(),
-      } as unknown as Row<any>,
+        getIsSelected: jest.fn(() => false),
+        getIsSomeSelected: jest.fn(() => false),
+        getCanSelect: jest.fn(() => true),
+      } as unknown as CascadeTableRow<GroupNode>,
       children: () => <div>Test Child</div>,
       onCascadeLeafNodeExpanded,
       getVirtualizer: mockVirtualizerGetter,
@@ -127,7 +138,10 @@ describe('CascadeRowCellPrimitive', () => {
         original: rowData,
         getToggleSelectedHandler: jest.fn(),
         getToggleExpandedHandler: jest.fn(),
-      } as unknown as Row<any>,
+        getIsSelected: jest.fn(() => false),
+        getIsSomeSelected: jest.fn(() => false),
+        getCanSelect: jest.fn(() => true),
+      } as unknown as CascadeTableRow<GroupNode>,
       children: () => <div>Test Child</div>,
       onCascadeLeafNodeExpanded,
       onCascadeLeafNodeCollapsed,
@@ -156,7 +170,7 @@ describe('CascadeRowCellPrimitive', () => {
         randomField: 'randomValue',
       });
 
-      renderComponent({
+      const { container } = renderComponent({
         cascadeGroups,
         initialGroupColumn: [cascadeGroups[0]],
         row: {
@@ -166,7 +180,10 @@ describe('CascadeRowCellPrimitive', () => {
           original: rowData,
           getToggleSelectedHandler: jest.fn(),
           getToggleExpandedHandler: jest.fn(),
-        } as unknown as Row<any>,
+          getIsSelected: jest.fn(() => false),
+          getIsSomeSelected: jest.fn(() => false),
+          getCanSelect: jest.fn(() => true),
+        } as unknown as CascadeTableRow<GroupNode>,
         children: (props) => {
           childPropsSpy(props);
           return <div>Test Child</div>;
@@ -175,6 +192,9 @@ describe('CascadeRowCellPrimitive', () => {
         getVirtualizer: mockVirtualizerGetter,
       });
 
+      const cell = container.querySelector('[data-cascade-row-loading]');
+      expect(cell).toHaveAttribute('data-cascade-row-loading', 'true');
+
       await waitFor(() => {
         expect(childPropsSpy).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -182,10 +202,16 @@ describe('CascadeRowCellPrimitive', () => {
             nodePath: expect.any(Array),
             nodePathMap: expect.any(Object),
             data: expect.anything(),
-            rowIndex: expect.any(Number),
+            rowIndex: 4,
+            stickyHeaderExtensionPoint: expect.objectContaining({
+              stickyEnabled: false,
+              extensionPointElement: expect.any(HTMLDivElement),
+            }),
           })
         );
       });
+
+      expect(cell).toHaveAttribute('data-cascade-row-loading', 'false');
     });
 
     it('should provide virtualizerController from the virtualizer childController', async () => {
@@ -194,6 +220,8 @@ describe('CascadeRowCellPrimitive', () => {
       const mockOnCascadeLeafNodeExpanded = jest.fn().mockResolvedValue(mockLeafData);
 
       const mockChildController = {
+        isDetached: jest.fn(() => false),
+        clearPersistedAnchor: jest.fn(),
         subscribe: jest.fn(() => () => {}),
         shouldActivate: jest.fn(() => true),
         enqueue: jest.fn(() => jest.fn()),
@@ -210,9 +238,8 @@ describe('CascadeRowCellPrimitive', () => {
             scrollOffset: 0,
             scrollElement: null,
             activeStickyIndex: null,
-            virtualizedRowComputedTranslateValue: new Map(),
             childController: mockChildController,
-          } as unknown as CascadeRootVirtualizerReturnValue)
+          } as unknown as CascadeVirtualizerReturnValue)
       );
 
       const rowData = cascadeGroups.reduce((acc, value, idx) => ({ ...acc, [value]: idx }), {
@@ -230,7 +257,10 @@ describe('CascadeRowCellPrimitive', () => {
           original: rowData,
           getToggleSelectedHandler: jest.fn(),
           getToggleExpandedHandler: jest.fn(),
-        } as unknown as Row<any>,
+          getIsSelected: jest.fn(() => false),
+          getIsSomeSelected: jest.fn(() => false),
+          getCanSelect: jest.fn(() => true),
+        } as unknown as CascadeTableRow<GroupNode>,
         children: (props) => {
           capturedVirtualizerController = props.virtualizerController;
           return <div>Test Child</div>;
@@ -244,57 +274,6 @@ describe('CascadeRowCellPrimitive', () => {
       });
 
       expect(capturedVirtualizerController).toBe(mockChildController);
-    });
-
-    it('keys controller state by the virtual row index it is given, not by row.index', async () => {
-      const cascadeGroups = ['group1', 'group2'];
-      const childPropsSpy = jest.fn();
-      const mockChildController = {
-        subscribe: jest.fn(() => () => {}),
-        shouldActivate: jest.fn(() => true),
-        enqueue: jest.fn(() => jest.fn()),
-        isReturningCell: jest.fn(() => false),
-      };
-      const customMockVirtualizerGetter = jest.fn(
-        () =>
-          ({
-            ...mockVirtualizerGetter(),
-            childController: mockChildController,
-          } as unknown as CascadeRootVirtualizerReturnValue)
-      );
-
-      const rowData = cascadeGroups.reduce((acc, value, idx) => ({ ...acc, [value]: idx }), {
-        id: '1',
-        randomField: 'randomValue',
-      });
-
-      renderComponent({
-        cascadeGroups,
-        initialGroupColumn: [cascadeGroups[0]],
-        virtualRowIndex: 7,
-        row: {
-          id: '1',
-          index: 0,
-          depth: 0,
-          original: rowData,
-          getToggleSelectedHandler: jest.fn(),
-          getToggleExpandedHandler: jest.fn(),
-        } as unknown as Row<any>,
-        children: (props) => {
-          childPropsSpy(props);
-          return <div>Test Child</div>;
-        },
-        onCascadeLeafNodeExpanded: jest.fn().mockResolvedValue(mockLeafData),
-        getVirtualizer: customMockVirtualizerGetter,
-      });
-
-      await waitFor(() => {
-        expect(mockChildController.enqueue).toHaveBeenCalledWith(expect.any(String), 7);
-      });
-      expect(mockChildController.shouldActivate).toHaveBeenCalledWith(7);
-      await waitFor(() => {
-        expect(childPropsSpy).toHaveBeenCalledWith(expect.objectContaining({ rowIndex: 7 }));
-      });
     });
   });
 });

@@ -15,8 +15,16 @@ import type { PackageInputEntry, AgentCredentialVars } from '../package_inputs';
 import { REGION_FIELD_NAMES } from '../../service_settings_step/field_config';
 import type { DeployGroup } from '../deploy_groups';
 import type { SecretRefValue } from '../secret_refs';
-import { buildGroupPolicyNameStem, deriveGroupPolicyName } from '../deploy_group_helpers';
-import { getPolicySettings, type PolicySettings } from '../../../common/policy_settings';
+import {
+  buildGroupPolicyNameStem,
+  deriveGroupPolicyName,
+  getCreateDatasetTemplates,
+} from '../deploy_group_helpers';
+import {
+  getPolicySettings,
+  getPolicyVarSettings,
+  type PolicySettings,
+} from '../../../common/policy_settings';
 
 export interface BuildPackagePolicyOpts {
   namespace: string;
@@ -265,7 +273,9 @@ export async function buildGroupPackagePolicy(
   package: { name: string; version: string };
   namespace?: string;
   output_id?: string;
-  vars?: Record<string, string | SecretRefValue>;
+  condition?: string;
+  vars?: Record<string, string | SecretRefValue | null>;
+  create_dataset_templates?: boolean;
   inputs: Record<string, unknown>;
 }> {
   const { members } = group;
@@ -282,6 +292,11 @@ export async function buildGroupPackagePolicy(
   } = opts;
   const descriptionField = description?.trim() ? { description: description.trim() } : {};
   const policySettingsFields = getPolicySettings(policySettings, 'agent_based');
+  const createDatasetTemplates = getCreateDatasetTemplates(group, storedServiceVars);
+  const createDatasetTemplatesField =
+    createDatasetTemplates !== undefined
+      ? { create_dataset_templates: createDatasetTemplates }
+      : {};
 
   // Build serviceVarsMap for all members. Key by service.id for buildPackageInputs.
   // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
@@ -307,7 +322,12 @@ export async function buildGroupPackagePolicy(
   }
 
   const services = members.map(({ service }) => service);
-  const allInputs = buildPackageInputs(services, serviceVarsMap, globalRegion);
+  const allInputs = buildPackageInputs(
+    services,
+    serviceVarsMap,
+    globalRegion,
+    getPolicyVarSettings(policySettings, 'agent_based')
+  );
 
   // For a bundled group (multiple services), we apply per-service pruning independently.
   // For a duplicate group (one member), this is equivalent to the old single-target pruning.
@@ -336,7 +356,8 @@ export async function buildGroupPackagePolicy(
     authenticateAndDeployStep.staticKeys,
     pkgVarNames,
     agentCredentials,
-    authenticateAndDeployStep.existingSecretRefs
+    authenticateAndDeployStep.existingSecretRefs,
+    getPolicyVarSettings(policySettings, 'agent_based', pkgVarNames)
   );
 
   if (Object.keys(prunedInputs).length === 0) {
@@ -353,6 +374,7 @@ export async function buildGroupPackagePolicy(
         package: { name: firstService.packageName, version: pkgVersion },
         ...(group.namespace ? { namespace: group.namespace } : {}),
         ...policySettingsFields,
+        ...createDatasetTemplatesField,
         ...(vars ? { vars } : {}),
         inputs: { ...disabledOtherInputs, ...selfDisabled },
       };
@@ -386,6 +408,7 @@ export async function buildGroupPackagePolicy(
     package: { name: firstService.packageName, version: pkgVersion },
     ...(group.namespace ? { namespace: group.namespace } : {}),
     ...policySettingsFields,
+    ...createDatasetTemplatesField,
     ...(vars ? { vars } : {}),
     // disabled entries first so our enabled inputs win if there's any key overlap
     inputs: { ...disabledOtherInputs, ...disabledOwnInputs, ...prunedInputs },

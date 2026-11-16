@@ -39,6 +39,30 @@ const MonitorNameField = () => {
   );
 };
 
+const RequiredField = ({
+  fieldConfigKey,
+  defaultValues,
+}: {
+  fieldConfigKey: keyof ReturnType<typeof FIELD>;
+  defaultValues: Partial<FormConfig>;
+}) => {
+  const methods = useFormWrapped<FormConfig>({
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
+    defaultValues,
+    shouldFocusError: false,
+  });
+
+  return (
+    <FormProvider {...methods}>
+      <form onSubmit={methods.handleSubmit(() => {})}>
+        <Field {...FIELD()[fieldConfigKey]} />
+        <button type="submit">submit</button>
+      </form>
+    </FormProvider>
+  );
+};
+
 describe('Field', () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -69,6 +93,28 @@ describe('Field', () => {
       } else {
         expect(queryByText('Monitor name already exists')).not.toBeInTheDocument();
       }
+    }
+  );
+
+  it.each([
+    [ConfigKey.LOCATIONS, { [ConfigKey.LOCATIONS]: [] }, 'At least one location is required'],
+    ['urls__http', { [ConfigKey.URLS]: '' }, 'URL is required'],
+    ['hosts__tcp', { [ConfigKey.HOSTS]: '' }, 'Host is required'],
+  ])(
+    'shows a required error message for empty "%s"',
+    async (fieldConfigKey, defaultValues, error) => {
+      const { getByText } = render(
+        <RequiredField
+          fieldConfigKey={fieldConfigKey as keyof ReturnType<typeof FIELD>}
+          defaultValues={defaultValues as Partial<FormConfig>}
+        />
+      );
+
+      await act(async () => {
+        fireEvent.click(getByText('submit'));
+      });
+
+      expect(getByText(error)).toBeInTheDocument();
     }
   );
 });

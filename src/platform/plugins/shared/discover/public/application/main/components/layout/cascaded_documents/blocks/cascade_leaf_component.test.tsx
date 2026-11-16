@@ -8,11 +8,12 @@
  */
 
 import React, { useSyncExternalStore } from 'react';
-import { act } from '@testing-library/react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { act, render, screen, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
@@ -21,7 +22,10 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import { createChildVirtualizerController } from '@kbn/shared-ux-document-data-cascade/src/lib/core/virtualizer/child_virtualizer_controller';
+import {
+  createChildVirtualizerController,
+  type DataCascadeRowCellProps,
+} from '@kbn/shared-ux-document-data-cascade';
 import { createDiscoverServicesMock } from '../../../../../../__mocks__/services';
 import { DiscoverTestProvider } from '../../../../../../__mocks__/test_provider';
 import { dataViewWithTimefieldMock } from '../../../../../../__mocks__/data_view_with_timefield';
@@ -30,7 +34,12 @@ import {
   CascadedDocumentsProvider,
   type CascadedDocumentsContext,
 } from '../cascaded_documents_provider';
-import { ESQLDataCascadeLeafCell } from './cascade_leaf_component';
+import {
+  CustomCascadeComparisonGridBodyMemoized,
+  CustomCascadeGridBodyMemoized,
+  ESQLDataCascadeLeafCell,
+} from './cascade_leaf_component';
+import type { ESQLDataGroupNode } from './types';
 import {
   CascadedDocumentsFetcher,
   type CascadedDocumentsStateManager,
@@ -42,6 +51,25 @@ jest.mock('@kbn/unified-data-table', () => ({
   ...jest.requireActual('@kbn/unified-data-table'),
   UnifiedDataTable: jest.fn(() => <div data-test-subj="unifiedDataTableMock" />),
 }));
+
+const mockGetOffsetForIndex = jest.fn(() => [1234, 'center']);
+const mockScrollToIndex = jest.fn();
+
+jest.mock('@kbn/shared-ux-document-data-cascade', () => {
+  const actual = jest.requireActual('@kbn/shared-ux-document-data-cascade');
+  return {
+    ...actual,
+    useConnectedChildVirtualizer: (...args: unknown[]) => {
+      const result = actual.useConnectedChildVirtualizer(...args);
+      result.virtualizer.getOffsetForIndex = mockGetOffsetForIndex;
+      Object.defineProperty(result.virtualizer, 'scrollToIndex', {
+        value: mockScrollToIndex,
+        configurable: true,
+      });
+      return result;
+    },
+  };
+});
 
 const unifiedDataTableMock = jest.mocked(UnifiedDataTable);
 
@@ -80,13 +108,29 @@ const createCascadedDocumentsFetcher = (services: DiscoverServices) => {
   );
 };
 
+type StickyHeaderExtensionPoint = Parameters<
+  DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
+>[0]['stickyHeaderExtensionPoint'];
+
+const createStickyHeaderExtensionPoint = (): StickyHeaderExtensionPoint & {
+  extensionPointElement: HTMLDivElement;
+} => ({
+  stickyEnabled: true,
+  rowIndex: 0,
+  rowElement: null,
+  headerElementRef: React.createRef<HTMLDivElement>(),
+  extensionPointElement: document.createElement('div'),
+});
+
 const renderLeafCellWithContext = ({
   contextValue,
   services,
+  stickyHeaderExtensionPoint = createStickyHeaderExtensionPoint(),
   virtualizerController = createVirtualizerController(),
 }: {
   contextValue: CascadedDocumentsContext;
   services: DiscoverServices;
+  stickyHeaderExtensionPoint?: StickyHeaderExtensionPoint;
   virtualizerController?: ReturnType<typeof createVirtualizerController>;
 }) => {
   return (
@@ -102,8 +146,8 @@ const renderLeafCellWithContext = ({
           dataGridDensityState={DataGridDensity.COMPACT}
           showTimeCol={true}
           dataView={dataViewWithTimefieldMock}
-          showKeyboardShortcuts={false}
           onUpdateDataGridDensity={jest.fn()}
+          stickyHeaderExtensionPoint={stickyHeaderExtensionPoint}
         />
       </CascadedDocumentsProvider>
     </DiscoverTestProvider>
@@ -199,8 +243,14 @@ describe('ESQLDataCascadeLeafCell', () => {
     expect(unifiedDataTableProps.rows).toEqual(cellData);
     expect(unifiedDataTableProps.dataSource).toBe(cascadedLeafDataSource);
     expect(unifiedDataTableProps.enableComparisonMode).toBe(true);
-    expect(unifiedDataTableProps.renderCustomGridBody).toEqual(expect.any(Function));
-    expect(unifiedDataTableProps.renderCustomComparisonGridBody).toEqual(expect.any(Function));
+    // stable body components, so that EUI never remounts the bodies
+    expect(unifiedDataTableProps.renderCustomGridBody).toBe(CustomCascadeGridBodyMemoized);
+    expect(unifiedDataTableProps.renderCustomComparisonGridBody).toBe(
+      CustomCascadeComparisonGridBodyMemoized
+    );
+    expect(unifiedDataTableProps.renderCustomComparisonToolbar).toEqual(expect.any(Function));
+    expect(unifiedDataTableProps.isPaginationEnabled).toBe(false);
+    expect(unifiedDataTableProps.paginationMode).toBe('infinite');
     expect(unifiedDataTableProps.renderDocumentView).toBe('external');
     expect(unifiedDataTableProps.expandedDoc).toEqual(expandedDoc);
     expect(unifiedDataTableProps.setExpandedDoc).toBe(ownerBoundSetExpandedDoc);
@@ -248,27 +298,196 @@ describe('ESQLDataCascadeLeafCell', () => {
       ownerBoundSetRenderDocumentViewMeta
     );
   });
-  describe('bringing the comparison into view', () => {
+
+  describe('sticky header extension point', () => {
+    /**
+     * `UnifiedDataTable` is mocked, so render the toolbar and custom grid body the leaf cell
+     * hands to it, the same way `EuiDataGrid` would: toolbar first, then the grid body.
+     */
+    const renderGridPartsFromProps = (props: UnifiedDataTableProps) => {
+      const BodyElement = props.renderCustomGridBody!;
+      return (
+        <div data-test-subj="gridRoot">
+          {props.renderCustomToolbar!({
+            toolbarProps: {
+              hasRoomForGridControls: true,
+              columnControl: null,
+              columnSortingControl: null,
+              keyboardShortcutsControl: null,
+              displayControl: null,
+              fullScreenControl: null,
+            },
+            gridProps: {},
+          })}
+          <div data-test-subj="gridBody">
+            <BodyElement
+              Cell={() => null}
+              visibleColumns={[]}
+              visibleRowData={{ startRow: 0, endRow: 0, visibleRowCount: 0 }}
+              headerRow={
+                <div data-test-subj="gridHeaderRow">
+                  <input aria-label="Column setting" defaultValue="initial" />
+                </div>
+              }
+              footerRow={null}
+              gridWidth={800}
+              setCustomGridBodyProps={jest.fn()}
+            />
+          </div>
+        </div>
+      );
+    };
+
+    const renderLeafAndGridParts = (stickyHeaderExtensionPoint: StickyHeaderExtensionPoint) => {
+      const services = createDiscoverServicesMock();
+      const { contextValue } = createContextValue({
+        currentOwner: cellId,
+        ownerBoundSetExpandedDoc: jest.fn(),
+        ownerBoundSetRenderDocumentViewMeta: jest.fn(),
+        services,
+      });
+
+      unifiedDataTableMock.mockImplementation(renderGridPartsFromProps);
+      const virtualizerController = createVirtualizerController();
+      const renderLeaf = (extensionPoint: StickyHeaderExtensionPoint) =>
+        renderLeafCellWithContext({
+          contextValue,
+          services,
+          stickyHeaderExtensionPoint: extensionPoint,
+          virtualizerController,
+        });
+      const view = render(renderLeaf(stickyHeaderExtensionPoint), { wrapper: I18nProvider });
+      return {
+        rerender: (extensionPoint: StickyHeaderExtensionPoint) =>
+          view.rerender(renderLeaf(extensionPoint)),
+      };
+    };
+
+    it('renders the toolbar and column headers in the persistent inline host', () => {
+      const extensionPointElement = document.createElement('div');
+      document.body.appendChild(extensionPointElement);
+      try {
+        renderLeafAndGridParts({ ...createStickyHeaderExtensionPoint(), extensionPointElement });
+        expect(extensionPointElement).toContainElement(
+          screen.getByTestId('unifiedDataTableToolbar')
+        );
+        expect(extensionPointElement).toContainElement(screen.getByTestId('gridHeaderRow'));
+        const body = screen.getByTestId('discoverCascadeCustomDataGridBody');
+        expect(body).not.toHaveAttribute('data-sticky-header-active');
+        expect(body.style.getPropertyValue('--discoverCascadeStickyHeaderSpacer')).toBe('');
+      } finally {
+        extensionPointElement.remove();
+      }
+    });
+
+    it('preserves the body, toolbar, and headers through fullscreen round trips', () => {
+      const extensionPointElement = document.createElement('div');
+      document.body.appendChild(extensionPointElement);
+      try {
+        renderLeafAndGridParts({ ...createStickyHeaderExtensionPoint(), extensionPointElement });
+        const body = screen.getByTestId('discoverCascadeCustomDataGridBody');
+        const toolbar = screen.getByTestId('unifiedDataTableToolbar');
+        const headerRow = screen.getByTestId('gridHeaderRow');
+        expect(unifiedDataTableMock.mock.lastCall?.[0].additionalSearchScopeElements).toEqual([
+          extensionPointElement,
+        ]);
+        const headerInput = screen.getByRole('textbox', { name: 'Column setting' });
+        headerInput.focus();
+        fireEvent.change(headerInput, { target: { value: 'retained' } });
+        act(() => unifiedDataTableMock.mock.lastCall?.[0].onFullScreenChange?.(true));
+        expect(headerInput).toHaveFocus();
+        expect(headerInput).toHaveValue('retained');
+        expect(unifiedDataTableMock.mock.lastCall?.[0].additionalSearchScopeElements).toEqual([]);
+        expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toBe(body);
+        expect(screen.getByTestId('gridRoot')).toContainElement(toolbar);
+        expect(body).toContainElement(headerRow);
+        expect(extensionPointElement).not.toContainElement(toolbar);
+        act(() => unifiedDataTableMock.mock.lastCall?.[0].onFullScreenChange?.(false));
+        expect(headerInput).toHaveFocus();
+        expect(headerInput).toHaveValue('retained');
+        expect(unifiedDataTableMock.mock.lastCall?.[0].additionalSearchScopeElements).toEqual([
+          extensionPointElement,
+        ]);
+        expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toBe(body);
+        expect(extensionPointElement).toContainElement(toolbar);
+        expect(extensionPointElement).toContainElement(headerRow);
+      } finally {
+        extensionPointElement.remove();
+      }
+    });
+
+    it('keeps the same header host when sticky positioning is disabled', () => {
+      const extensionPointElement = document.createElement('div');
+      document.body.appendChild(extensionPointElement);
+      try {
+        const view = renderLeafAndGridParts({
+          ...createStickyHeaderExtensionPoint(),
+          extensionPointElement,
+        });
+        const body = screen.getByTestId('discoverCascadeCustomDataGridBody');
+        const toolbar = screen.getByTestId('unifiedDataTableToolbar');
+        view.rerender({
+          ...createStickyHeaderExtensionPoint(),
+          stickyEnabled: false,
+          extensionPointElement,
+        });
+        expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toBe(body);
+        expect(extensionPointElement).toContainElement(toolbar);
+        expect(extensionPointElement).toContainElement(screen.getByTestId('gridHeaderRow'));
+      } finally {
+        extensionPointElement.remove();
+      }
+    });
+
+    it('scrolls the custom virtualized body to the active in-table search match', () => {
+      renderLeafAndGridParts(createStickyHeaderExtensionPoint());
+
+      const unifiedDataTableProps = unifiedDataTableMock.mock.lastCall?.[0]!;
+      expect(unifiedDataTableProps.enableInTableSearch).toBe(true);
+
+      unifiedDataTableProps.scrollToCell!({ rowIndex: 7, columnIndex: 1, align: 'center' });
+
+      expect(mockScrollToIndex).toHaveBeenCalledWith(7, { align: 'auto', behavior: 'auto' });
+    });
+  });
+  describe('comparison of the selected documents', () => {
+    type GridView = 'documents' | 'comparison';
     type CascadeRootVirtualizer = NonNullable<
       ReturnType<Parameters<typeof createChildVirtualizerController>[0]['getRootVirtualizer']>
     >;
-    type GridView = 'documents' | 'comparison';
 
+    const toolbarProps = {
+      hasRoomForGridControls: true,
+      columnControl: null,
+      columnSortingControl: null,
+      keyboardShortcutsControl: null,
+      displayControl: null,
+      fullScreenControl: null,
+    };
     const gridBodyProps = {
       Cell: () => null,
       visibleColumns: [],
       visibleRowData: { startRow: 0, endRow: 0, visibleRowCount: 0 },
-      headerRow: null,
+      headerRow: <div data-test-subj="gridHeaderRow" />,
       footerRow: null,
       gridWidth: 800,
       setCustomGridBodyProps: jest.fn(),
     };
 
+    beforeEach(() => {
+      jest.useFakeTimers();
+      mockScrollToIndex.mockClear();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     /**
-     * Renders the leaf with a `UnifiedDataTable` that mounts the custom body of the given view, the
-     * way `EuiDataGrid` does, against a cascade scroll element whose scrolling is observed.
+     * Renders the leaf with a `UnifiedDataTable` that mounts the toolbar and custom body of the given view,
+     * the way `EuiDataGrid` does.
      */
-    const renderLeafWithGridBody = (initialView: GridView) => {
+    const renderLeafWithGridParts = (initialView: GridView) => {
       let view = initialView;
       const listeners = new Set<() => void>();
       const subscribe = (listener: () => void) => {
@@ -277,26 +496,36 @@ describe('ESQLDataCascadeLeafCell', () => {
       };
       unifiedDataTableMock.mockImplementation((props) => {
         const currentView = useSyncExternalStore(subscribe, () => view);
-        return currentView === 'comparison'
-          ? props.renderCustomComparisonGridBody!(gridBodyProps)
-          : props.renderCustomGridBody!(gridBodyProps);
+        const BodyElement =
+          currentView === 'comparison'
+            ? props.renderCustomComparisonGridBody!
+            : props.renderCustomGridBody!;
+        return (
+          <div data-test-subj="gridRoot">
+            {currentView === 'comparison'
+              ? props.renderCustomComparisonToolbar!({
+                  toolbar: <div data-test-subj="comparisonToolbar" />,
+                  toolbarProps,
+                })
+              : props.renderCustomToolbar!({ toolbarProps, gridProps: {} })}
+            <BodyElement {...gridBodyProps} />
+          </div>
+        );
       });
 
-      // The cascade is scrolled to 500; a body mounting on it scrolls it back to its row, which
-      // has no layout in jsdom, i.e. to 500. The virtualizer's own scroll on attaching targets 0.
-      const scrollElement = document.createElement('div');
-      Object.defineProperty(scrollElement, 'scrollTop', { value: 500, writable: true });
-      const scrollTo = jest.fn();
-      Object.assign(scrollElement, { scrollTo });
       const rootVirtualizer = {
         scrollOffset: 0,
-        scrollElement,
+        scrollElement: document.createElement('div'),
         measurementsCache: [],
+        cancelScroll: jest.fn(),
       } as unknown as CascadeRootVirtualizer;
       const virtualizerController = createChildVirtualizerController({
         getRootVirtualizer: () => rootVirtualizer,
       });
+      virtualizerController.markRootStable();
 
+      const extensionPointElement = document.createElement('div');
+      document.body.appendChild(extensionPointElement);
       const services = createDiscoverServicesMock();
       const { contextValue } = createContextValue({
         currentOwner: cellId,
@@ -304,33 +533,72 @@ describe('ESQLDataCascadeLeafCell', () => {
         ownerBoundSetRenderDocumentViewMeta: jest.fn(),
         services,
       });
-      renderWithI18n(renderLeafCellWithContext({ contextValue, services, virtualizerController }));
+      render(
+        renderLeafCellWithContext({
+          contextValue,
+          services,
+          virtualizerController,
+          stickyHeaderExtensionPoint: {
+            ...createStickyHeaderExtensionPoint(),
+            extensionPointElement,
+          },
+        }),
+        { wrapper: I18nProvider }
+      );
+      // the staggered activation of the mounted view
+      act(() => {
+        jest.advanceTimersByTime(16);
+      });
 
       return {
+        extensionPointElement,
         scrolledIntoView: () =>
-          scrollTo.mock.calls.some(([options]: [{ top?: number }]) => options.top === 500),
+          mockScrollToIndex.mock.calls.some(
+            ([index, options]) => index === 0 && options?.align === 'start'
+          ),
         showView: (nextView: GridView) => {
           act(() => {
             view = nextView;
             listeners.forEach((listener) => listener());
           });
         },
+        cleanup: () => extensionPointElement.remove(),
       };
     };
 
+    it('renders the comparison toolbar and headers in the persistent inline host', () => {
+      const { extensionPointElement, showView, cleanup } = renderLeafWithGridParts('documents');
+      try {
+        showView('comparison');
+
+        expect(screen.getByTestId('discoverCascadeComparisonGridBody')).toBeInTheDocument();
+        expect(extensionPointElement).toContainElement(screen.getByTestId('comparisonToolbar'));
+        expect(extensionPointElement).toContainElement(screen.getByTestId('gridHeaderRow'));
+      } finally {
+        cleanup();
+      }
+    });
+
     it('scrolls the group into view when the comparison replaces the documents', () => {
-      const { scrolledIntoView, showView } = renderLeafWithGridBody('documents');
-      expect(scrolledIntoView()).toBe(false);
+      const { scrolledIntoView, showView, cleanup } = renderLeafWithGridParts('documents');
+      try {
+        expect(scrolledIntoView()).toBe(false);
 
-      showView('comparison');
+        showView('comparison');
 
-      expect(scrolledIntoView()).toBe(true);
+        expect(scrolledIntoView()).toBe(true);
+      } finally {
+        cleanup();
+      }
     });
 
     it('keeps the cascade scroll position when an active comparison is mounted again', () => {
-      const { scrolledIntoView } = renderLeafWithGridBody('comparison');
-
-      expect(scrolledIntoView()).toBe(false);
+      const { scrolledIntoView, cleanup } = renderLeafWithGridParts('comparison');
+      try {
+        expect(scrolledIntoView()).toBe(false);
+      } finally {
+        cleanup();
+      }
     });
   });
 });

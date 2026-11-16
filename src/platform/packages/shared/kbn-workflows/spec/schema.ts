@@ -18,6 +18,7 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
+import { validatePageTriggers } from './schema/triggers/page_trigger_schema';
 import {
   CONNECTOR_ID_MAX_LENGTH,
   IF_CONDITION_MAX_LENGTH,
@@ -1437,29 +1438,31 @@ function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSc
   return undefined;
 }
 
-export const WorkflowSchema = WorkflowSchemaBase.extend({
-  triggers: z.array(TriggerSchema).min(1),
-}).transform((data) => {
-  const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
+export const WorkflowSchema = lazySchema(() =>
+  WorkflowSchemaBase.extend({
+    triggers: z.array(TriggerSchema).min(1).superRefine(validatePageTriggers),
+  }).transform((data) => {
+    const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 
-  const mappedTriggers = (data.triggers ?? []).map((trigger) => {
-    if (!isManualTrigger(trigger) || !trigger.inputs) {
-      return trigger;
-    }
+    const mappedTriggers = (data.triggers ?? []).map((trigger) => {
+      if (!isManualTrigger(trigger) || !trigger.inputs) {
+        return trigger;
+      }
 
+      return {
+        ...trigger,
+        inputs: normalizeFieldsToJsonSchema(trigger.inputs),
+      };
+    });
+
+    const { outputs: __, ...rest } = data;
     return {
-      ...trigger,
-      inputs: normalizeFieldsToJsonSchema(trigger.inputs),
+      ...rest,
+      ...(normalizedOutputs !== undefined && { outputs: normalizedOutputs }),
+      triggers: mappedTriggers,
     };
-  });
-
-  const { outputs: __, ...rest } = data;
-  return {
-    ...rest,
-    ...(normalizedOutputs !== undefined && { outputs: normalizedOutputs }),
-    triggers: mappedTriggers,
-  };
-});
+  })
+);
 
 // Export base schema for extension (used in generate_yaml_schema_from_connectors.ts)
 export { WorkflowSchemaBase };

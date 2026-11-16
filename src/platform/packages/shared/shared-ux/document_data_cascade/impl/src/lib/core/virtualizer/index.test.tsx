@@ -9,32 +9,20 @@
 
 import React from 'react';
 import { act, renderHook, render } from '@testing-library/react';
-import type { Row } from '@tanstack/react-table';
-import { defaultRangeExtractor, type Range, type VirtualItem } from '@tanstack/react-virtual';
+import * as ReactVirtual from '@tanstack/react-virtual';
+import { defaultRangeExtractor, type Range } from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
+import type { CascadeTableRow } from '../table';
 import {
   useCascadeVirtualizer,
+  calculateActiveStickyIndex,
   useCascadeVirtualizerRangeExtractor,
-  useAnchorVirtualizerToItemIndex,
   VirtualizedCascadeRowList,
-  type UseVirtualizerReturnType,
+  type VirtualizerInstanceType,
 } from '.';
+import { useAnchorVirtualizerToItemIndex } from './use_scroll_restoration';
 
-let mockLastVirtualizer: UseVirtualizerReturnType | undefined;
-
-jest.mock('@tanstack/react-virtual', () => {
-  const actual = jest.requireActual('@tanstack/react-virtual');
-  return {
-    ...actual,
-    useVirtualizer: (options: unknown) => {
-      const instance = actual.useVirtualizer(options);
-      mockLastVirtualizer = instance;
-      return instance;
-    },
-  };
-});
-
-const rowsToRender = (rowCount: number): Row<GroupNode>[] => {
+const rowsToRender = (rowCount: number): Array<CascadeTableRow<GroupNode>> => {
   return Array.from(
     { length: rowCount },
     (_, index) =>
@@ -44,9 +32,9 @@ const rowsToRender = (rowCount: number): Row<GroupNode>[] => {
           index,
           depth: 0,
           getIsExpanded: () => false,
-          getParentRows: () => [] as Row<GroupNode>[],
-          subRows: [] as Row<GroupNode>[],
-        } as Row<GroupNode>,
+          getParentRows: () => [] as Array<CascadeTableRow<GroupNode>>,
+          subRows: [] as Array<CascadeTableRow<GroupNode>>,
+        } as CascadeTableRow<GroupNode>,
         {
           // escape hatch so we don't have to mock every property on the Row object
           get(target, prop) {
@@ -57,8 +45,78 @@ const rowsToRender = (rowCount: number): Row<GroupNode>[] => {
   );
 };
 
+jest.mock('@tanstack/react-virtual', () => {
+  const actual = jest.requireActual('@tanstack/react-virtual');
+  return { ...actual, useVirtualizer: jest.fn(actual.useVirtualizer) };
+});
+
 describe('virtualizer', () => {
+  describe('calculateActiveStickyIndex', () => {
+    it('uses flattened indices for expanded rows after earlier expanded siblings', () => {
+      const rows = rowsToRender(6);
+      rows[4].index = 1;
+      jest.spyOn(rows[4], 'getIsExpanded').mockReturnValue(true);
+      expect(calculateActiveStickyIndex(rows, 4, true)).toBe(4);
+    });
+
+    it('selects the nearest parent by identity through multiple nesting levels', () => {
+      const rows = rowsToRender(8);
+      rows[5].index = 0;
+      jest.spyOn(rows[6], 'getParentRows').mockReturnValue([rows[2], rows[5]]);
+      expect(calculateActiveStickyIndex(rows, 6, true)).toBe(5);
+    });
+
+    it('selects an expanded leaf itself and restores its parent for a collapsed sibling', () => {
+      const rows = rowsToRender(8);
+      rows[5].index = 0;
+      jest.spyOn(rows[5], 'getParentRows').mockReturnValue([rows[2], rows[4]]);
+      jest.spyOn(rows[5], 'getIsExpanded').mockReturnValue(true);
+      jest.spyOn(rows[6], 'getParentRows').mockReturnValue([rows[2], rows[4]]);
+      expect(calculateActiveStickyIndex(rows, 5, true)).toBe(5);
+      expect(calculateActiveStickyIndex(rows, 6, true)).toBe(4);
+    });
+
+    it('has no candidate for disabled stickiness, collapsed roots or an empty range', () => {
+      const rows = rowsToRender(1);
+      expect(calculateActiveStickyIndex(rows, 0, false)).toBeNull();
+      expect(calculateActiveStickyIndex(rows, 0, true)).toBeNull();
+      expect(calculateActiveStickyIndex([], 0, true)).toBeNull();
+    });
+  });
+
   describe('useCascadeVirtualizer', () => {
+    it.each([0, 4])(
+      'retains the flattened root row %i size while its child is in fullscreen',
+      (rowIndex) => {
+        const spy = jest.mocked(ReactVirtual.useVirtualizer);
+        const rows = rowsToRender(5);
+        rows[rowIndex].index = 0;
+        const { result } = renderHook(() =>
+          useCascadeVirtualizer({
+            rows,
+            enableStickyGroupHeader: true,
+            getScrollElement: () => document.body,
+          })
+        );
+
+        const instance = spy.mock.results.at(-1)?.value as VirtualizerInstanceType;
+
+        const element = document.createElement('div');
+        element.dataset.index = String(rowIndex);
+        Object.defineProperty(element, 'offsetHeight', { value: 40 });
+
+        act(() => {
+          instance.resizeItem(rowIndex, 2000);
+          instance.getTotalSize();
+        });
+
+        const handle = result.current.childController?.connect('fullscreen-cell', rowIndex);
+        handle?.detachScrollElement();
+
+        expect(instance.options.measureElement(element, undefined, instance)).toBe(2000);
+      }
+    );
+
     it('marks a connected row as measured once the root measures it', () => {
       const { result } = renderHook(() =>
         useCascadeVirtualizer({
@@ -67,11 +125,12 @@ describe('virtualizer', () => {
           getScrollElement: () => document.body,
         })
       );
-      const instance = mockLastVirtualizer!;
+      const instance = jest.mocked(ReactVirtual.useVirtualizer).mock.results.at(-1)
+        ?.value as VirtualizerInstanceType;
       const element = document.createElement('div');
       element.dataset.index = '0';
       Object.defineProperty(element, 'offsetHeight', { value: 40 });
-      const controller = result.current.childController!;
+      const controller = result.current.childController;
 
       const handle = controller.connect('cell', 0);
       expect(controller.getRowsAwaitingMeasurement()).toEqual([0]);
@@ -94,134 +153,28 @@ describe('virtualizer', () => {
       expect(result.current).toHaveProperty('getVirtualItems');
       expect(result.current).toHaveProperty('getTotalSize');
       expect(result.current).toHaveProperty('range');
-      expect(result.current).toHaveProperty('virtualizedRowsSizeCache');
-      expect(result.current).toHaveProperty('virtualizedRowComputedTranslateValue');
       expect(result.current).toHaveProperty('scrollToVirtualizedIndex');
-      expect(result.current).toHaveProperty('scrollToLastVirtualizedRow');
       expect(result.current).toHaveProperty('scrollOffset');
       expect(result.current).toHaveProperty('measureElement');
       expect(result.current).toHaveProperty('measurementsCache');
-      expect(result.current).toHaveProperty('calculateRange');
-    });
-
-    it('keeps the item at the top of the viewport in place when the estimated row height of a child changes', () => {
-      const scrollElement = document.createElement('div');
-      const scrollTo = jest.fn();
-      Object.assign(scrollElement, { scrollTo });
-      const rows = rowsToRender(100);
-      const { rerender } = renderHook(
-        ({ estimatedRowHeight }: { estimatedRowHeight: number }) =>
-          useCascadeVirtualizer({
-            rows,
-            estimatedRowHeight,
-            isRoot: false,
-            enableStickyGroupHeader: false,
-            getScrollElement: () => scrollElement,
-          }),
-        { initialProps: { estimatedRowHeight: 40 } }
-      );
-      const virtualizer = mockLastVirtualizer!;
-      // 10px into item 21 (which starts at 840)
-      virtualizer.scrollOffset = 850;
-
-      rerender({ estimatedRowHeight: 80 });
-
-      // item 21 now starts at 1680
-      expect(scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 1690 }));
-      expect(virtualizer.measurementsCache[21].start).toBe(1680);
-    });
-
-    it('keeps the measured row sizes of the root when its estimated row height changes', () => {
-      const scrollElement = document.createElement('div');
-      const scrollTo = jest.fn();
-      Object.assign(scrollElement, { scrollTo });
-      const rows = rowsToRender(100);
-      const { rerender } = renderHook(
-        ({ estimatedRowHeight }: { estimatedRowHeight: number }) =>
-          useCascadeVirtualizer({
-            rows,
-            estimatedRowHeight,
-            enableStickyGroupHeader: false,
-            getScrollElement: () => scrollElement,
-          }),
-        { initialProps: { estimatedRowHeight: 40 } }
-      );
-      const virtualizer = mockLastVirtualizer!;
-      // an expanded row measured far taller than the estimate, with the viewport inside of it
-      virtualizer.getTotalSize();
-      virtualizer.resizeItem(5, 2000);
-      virtualizer.scrollOffset = 1000;
-      scrollTo.mockClear();
-
-      rerender({ estimatedRowHeight: 48 });
-
-      expect(scrollTo).not.toHaveBeenCalled();
-      virtualizer.getTotalSize();
-      expect(virtualizer.measurementsCache[5].size).toBe(2000);
-    });
-
-    it('defers scroll compensation for a row to its synced child connection', () => {
-      const { result } = renderHook(() =>
-        useCascadeVirtualizer({
-          rows: rowsToRender(100),
-          overscan: 5,
-          enableStickyGroupHeader: false,
-          getScrollElement: () => document.body,
-        })
-      );
-      const virtualizer = mockLastVirtualizer!;
-      const item: VirtualItem = { index: 2, key: 'row-2', start: 0, end: 40, size: 40, lane: 0 };
-      virtualizer.scrollOffset = 500;
-
-      const shouldAdjust = () =>
-        virtualizer.shouldAdjustScrollPositionOnItemSizeChange?.(item, 10, virtualizer);
-
-      expect(shouldAdjust()).toBe(true);
-
-      const handle = result.current.childController!.connect('cell-a', 2);
-      handle.reportState({ scrollOffset: 500 });
-      expect(shouldAdjust()).toBe(false);
-
-      handle.disconnect();
-      expect(shouldAdjust()).toBe(true);
-    });
-
-    it('resumes scroll compensation after the stabilization timeout when a restoring child never stabilizes', () => {
-      jest.useFakeTimers();
-      try {
-        const { result } = renderHook(() =>
-          useCascadeVirtualizer({
-            rows: rowsToRender(100),
-            overscan: 5,
-            enableStickyGroupHeader: false,
-            getScrollElement: () => document.body,
-            initialPersistedAnchors: { 'cell-a': 5 },
-          })
-        );
-        const virtualizer = mockLastVirtualizer!;
-        const item: VirtualItem = { index: 2, key: 'row-2', start: 0, end: 40, size: 40, lane: 0 };
-        virtualizer.scrollOffset = 500;
-        const shouldAdjust = () =>
-          virtualizer.shouldAdjustScrollPositionOnItemSizeChange?.(item, 10, virtualizer);
-
-        expect(result.current.isStable).toBe(false);
-        expect(shouldAdjust()).toBe(false);
-
-        act(() => {
-          jest.advanceTimersByTime(1000);
-        });
-
-        expect(result.current.isStable).toBe(true);
-        // the re-render re-observed the (jsdom) scroll element, so put the offset back
-        virtualizer.scrollOffset = 500;
-        expect(shouldAdjust()).toBe(true);
-      } finally {
-        jest.useRealTimers();
-      }
     });
   });
 
   describe('useCascadeVirtualizerRangeExtractor', () => {
+    it('keeps the retained rows in the range, also without sticky group headers', () => {
+      const range: Range = { startIndex: 10, endIndex: 20, overscan: 5, count: 100 };
+      const { result } = renderHook(() =>
+        useCascadeVirtualizerRangeExtractor({
+          rows: rowsToRender(100),
+          enableStickyGroupHeader: false,
+          // an index beyond the row count is ignored
+          getRetainedRowIndexes: () => [2, 150],
+        })
+      );
+
+      expect(result.current(range)).toEqual([2, ...defaultRangeExtractor(range)]);
+    });
+
     it('should return the default virtualizer range when the prop `enableStickyGroupHeader` is false', () => {
       const { result } = renderHook(() =>
         useCascadeVirtualizerRangeExtractor({
@@ -238,20 +191,6 @@ describe('virtualizer', () => {
       };
 
       expect(result.current(range)).toEqual(defaultRangeExtractor(range));
-    });
-
-    it('keeps the retained rows in the range, also without sticky group headers', () => {
-      const range: Range = { startIndex: 10, endIndex: 20, overscan: 5, count: 100 };
-      const { result } = renderHook(() =>
-        useCascadeVirtualizerRangeExtractor({
-          rows: rowsToRender(100),
-          enableStickyGroupHeader: false,
-          // an index beyond the row count is ignored
-          getRetainedRowIndexes: () => [2, 150],
-        })
-      );
-
-      expect(result.current(range)).toEqual([2, ...defaultRangeExtractor(range)]);
     });
 
     it('will mark a row with depth 0 as sticky when the prop `enableStickyGroupHeader` is true and the row is expanded', () => {
@@ -289,7 +228,7 @@ describe('virtualizer', () => {
       // mock the child row to have a parent row
       jest
         .spyOn(rows[childRowIndex], 'getParentRows')
-        .mockReturnValue([rows[parentRowIndex]] as Row<GroupNode>[]);
+        .mockReturnValue([rows[parentRowIndex]] as Array<CascadeTableRow<GroupNode>>);
 
       const range: Range = {
         startIndex: childRowIndex,
@@ -310,486 +249,53 @@ describe('virtualizer', () => {
   });
 
   describe('useAnchorVirtualizerToItemIndex', () => {
-    const createMockVirtualizer = (
-      overrides: Partial<{
-        scrollOffset: number;
-        scrollMargin: number;
-        paddingStart: number;
-        measurementsCache: VirtualItem[];
-      }> = {}
-    ) => {
-      const {
-        scrollOffset = 0,
-        scrollMargin = 0,
-        paddingStart = 0,
-        measurementsCache = [],
-      } = overrides;
-
-      return {
-        scrollOffset,
-        options: {
-          scrollMargin,
-          paddingStart,
-          count: measurementsCache.length,
-          scrollToFn: jest.fn(),
-        },
-        measurementsCache,
-        calculateRange: jest.fn(),
-      } as unknown as UseVirtualizerReturnType;
-    };
-
-    /**
-     * Mirrors real tanstack virtual behavior: the first item starts at
-     * paddingStart + scrollMargin, and subsequent items chain from there.
-     */
-    const buildMeasurementsCache = (
-      sizes: number[],
-      scrollMargin = 0,
-      paddingStart = 0
-    ): VirtualItem[] => {
-      let offset = paddingStart + scrollMargin;
-      return sizes.map((size, index) => {
-        const item = {
-          index,
-          key: index,
-          start: offset,
-          end: offset + size,
-          size,
-          lane: 0,
-        };
-        offset += size;
-        return item;
-      });
-    };
-
-    const flushRaf = () => jest.advanceTimersByTime(16);
-
-    beforeEach(() => {
-      jest.useFakeTimers();
-      Object.defineProperty(window, 'performance', {
-        value: {
-          mark: jest.fn(),
-          measure: jest.fn(),
-          now: jest.fn(),
-        },
-        writable: true,
-      });
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
-    it('should not scroll when there is no anchor', () => {
-      const virtualizer = createMockVirtualizer();
-
-      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, undefined));
-
-      expect(virtualizer.options.scrollToFn).not.toHaveBeenCalled();
-      expect(virtualizer.calculateRange).not.toHaveBeenCalled();
-    });
-
-    it('restores to the first item when the anchor is 0', () => {
-      const scrollMargin = 100;
-      const virtualizer = createMockVirtualizer({
-        scrollMargin,
-        scrollOffset: 1000,
-        measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
+    const createVirtualizer = () =>
+      new ReactVirtual.Virtualizer<Element, Element>({
+        count: 10,
+        getScrollElement: () => null,
+        estimateSize: () => 65,
+        observeElementOffset: jest.fn(),
+        observeElementRect: jest.fn(),
+        scrollToFn: jest.fn(),
       });
 
-      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 0, { itemOffset: 10 }));
+    it.each([undefined, -1, 12])(
+      'finishes without scrolling for absent or invalid anchor %s',
+      (anchor) => {
+        const instance = createVirtualizer();
+        const scroll = jest.spyOn(instance, 'scrollToIndex');
+        const { result } = renderHook(() => useAnchorVirtualizerToItemIndex(instance, anchor));
+        expect(result.current.isRestored).toBe(true);
+        expect(scroll).not.toHaveBeenCalled();
+      }
+    );
 
-      expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
-      expect(virtualizer.scrollOffset).toBe(scrollMargin + 10);
-    });
-
-    it('places the viewport above the anchor item for a negative offset', () => {
-      const scrollMargin = 100;
-      const virtualizer = createMockVirtualizer({
-        scrollMargin,
-        scrollOffset: 1000,
-        measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
-      });
-
-      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 0, { itemOffset: -30 }));
-
-      expect(virtualizer.scrollOffset).toBe(scrollMargin - 30);
-    });
-
-    it('should not scroll when the provided ref is already true and corrections are skipped', () => {
-      const scrollMargin = 100;
-      const virtualizer = createMockVirtualizer({
-        scrollMargin,
-        measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
-      });
-
-      const ref = {
-        get current() {
-          return true;
-        },
-      } as React.MutableRefObject<boolean>;
-
-      renderHook(() =>
-        useAnchorVirtualizerToItemIndex(virtualizer, 2, {
-          hasRestoredScrollPositionRef: ref,
-          skipCorrections: true,
-        })
+    it.each([0, 4, 9])('starts exactly one native restoration for anchor %i', (anchor) => {
+      const instance = createVirtualizer();
+      const scroll = jest.spyOn(instance, 'scrollToIndex');
+      const { result, rerender } = renderHook(() =>
+        useAnchorVirtualizerToItemIndex(instance, anchor)
       );
-
-      expect(virtualizer.options.scrollToFn).not.toHaveBeenCalled();
-    });
-
-    it('should not scroll while the target item has not been measured yet', () => {
-      const scrollMargin = 200;
-      const restoredRef = { current: false };
-      const virtualizer = createMockVirtualizer({
-        scrollOffset: 500,
-        scrollMargin,
-        measurementsCache: buildMeasurementsCache([60], scrollMargin),
-      });
-      // more items than measurements, so the target index is in range but not measured
-      virtualizer.options.count = 6;
-
-      renderHook(() =>
-        useAnchorVirtualizerToItemIndex(virtualizer, 5, {
-          hasRestoredScrollPositionRef: restoredRef,
-        })
-      );
-
-      expect(virtualizer.options.scrollToFn).not.toHaveBeenCalled();
-      expect(restoredRef.current).toBe(false);
-    });
-
-    it('should compute the correct scroll adjustment for a nested virtualizer', () => {
-      const scrollMargin = 500;
-      const scrollOffset = 800;
-      const itemSizes = [75, 75, 75, 75, 75, 75];
-      const targetIndex = 5;
-
-      const measurementsCache = buildMeasurementsCache(itemSizes, scrollMargin);
-      const virtualizer = createMockVirtualizer({
-        scrollMargin,
-        scrollOffset,
-        measurementsCache,
-      });
-
-      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, targetIndex));
-
-      const expectedTargetOffset = measurementsCache[targetIndex].start;
-      const expectedAdjustment = expectedTargetOffset - scrollOffset;
-
-      expect(virtualizer.options.scrollToFn).toHaveBeenCalledWith(
-        scrollOffset,
-        { behavior: undefined, adjustments: expectedAdjustment },
-        virtualizer
-      );
-      expect(virtualizer.scrollOffset).toBe(expectedTargetOffset);
-    });
-
-    it('should scroll forward when the target item is ahead of the current offset', () => {
-      const scrollMargin = 200;
-      const scrollOffset = 200;
-      const measurementsCache = buildMeasurementsCache([60, 60, 60, 60, 60], scrollMargin);
-      const targetIndex = 4;
-
-      const virtualizer = createMockVirtualizer({
-        scrollMargin,
-        scrollOffset,
-        measurementsCache,
-      });
-
-      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, targetIndex));
-
-      const expectedTarget = measurementsCache[targetIndex].start;
-
-      expect(expectedTarget).toBeGreaterThan(scrollOffset);
-      expect(virtualizer.options.scrollToFn).toHaveBeenCalledWith(
-        scrollOffset,
-        expect.objectContaining({ adjustments: expectedTarget - scrollOffset }),
-        virtualizer
-      );
-    });
-
-    it('should scroll backward when the target item is behind the current offset', () => {
-      const scrollMargin = 200;
-      const scrollOffset = 1500;
-      const measurementsCache = buildMeasurementsCache([60, 60, 60], scrollMargin);
-      const targetIndex = 1;
-
-      const virtualizer = createMockVirtualizer({
-        scrollMargin,
-        scrollOffset,
-        measurementsCache,
-      });
-
-      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, targetIndex));
-
-      const expectedTarget = measurementsCache[targetIndex].start;
-
-      expect(expectedTarget).toBeLessThan(scrollOffset);
-      expect(virtualizer.options.scrollToFn).toHaveBeenCalledWith(
-        scrollOffset,
-        expect.objectContaining({ adjustments: expectedTarget - scrollOffset }),
-        virtualizer
-      );
-    });
-
-    it('should set the resolved ref to true after anchoring', () => {
-      const ref = { current: false } as React.MutableRefObject<boolean>;
-      const scrollMargin = 100;
-      const virtualizer = createMockVirtualizer({
-        scrollMargin,
-        scrollOffset: 100,
-        measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
-      });
-
-      renderHook(() =>
-        useAnchorVirtualizerToItemIndex(virtualizer, 2, { hasRestoredScrollPositionRef: ref })
-      );
-
-      expect(ref.current).toBe(true);
-    });
-
-    it('restores to the offset within the anchor item, clamped to the item size', () => {
-      const scrollMargin = 100;
-      const virtualizer = createMockVirtualizer({
-        scrollMargin,
-        scrollOffset: 0,
-        measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
-      });
-
-      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 2, { itemOffset: 25 }));
-
-      // item 2 starts at scrollMargin + 120
-      expect(virtualizer.scrollOffset).toBe(scrollMargin + 120 + 25);
-
-      const clampedVirtualizer = createMockVirtualizer({
-        scrollMargin,
-        scrollOffset: 0,
-        measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
-      });
-
-      renderHook(() => useAnchorVirtualizerToItemIndex(clampedVirtualizer, 2, { itemOffset: 500 }));
-
-      expect(clampedVirtualizer.scrollOffset).toBe(scrollMargin + 120 + 60);
-    });
-
-    it('should use an internal ref when no external ref is provided', () => {
-      const scrollMargin = 100;
-      const virtualizer = createMockVirtualizer({
-        scrollMargin,
-        scrollOffset: 100,
-        measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
-      });
-
-      const { rerender } = renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 2));
-
-      expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
-
-      (virtualizer.options.scrollToFn as jest.Mock).mockClear();
       rerender();
-
-      expect(virtualizer.options.scrollToFn).not.toHaveBeenCalled();
+      expect(result.current.isRestored).toBe(true);
+      expect(scroll).toHaveBeenCalledTimes(1);
+      expect(scroll).toHaveBeenCalledWith(anchor, { align: 'start', behavior: 'auto' });
     });
 
-    it('should not re-anchor on subsequent renders', () => {
-      const ref = { current: false } as React.MutableRefObject<boolean>;
-      const scrollMargin = 100;
-      const virtualizer = createMockVirtualizer({
-        scrollMargin,
-        scrollOffset: 100,
-        measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
-      });
-
-      const { rerender } = renderHook(() =>
-        useAnchorVirtualizerToItemIndex(virtualizer, 2, { hasRestoredScrollPositionRef: ref })
-      );
-
-      expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
-      expect(ref.current).toBe(true);
-
-      (virtualizer.options.scrollToFn as jest.Mock).mockClear();
-      rerender();
-
-      expect(virtualizer.options.scrollToFn).not.toHaveBeenCalled();
+    it('finishes when the saved data is now empty', () => {
+      const instance = createVirtualizer();
+      instance.setOptions({ ...instance.options, count: 0 });
+      const { result } = renderHook(() => useAnchorVirtualizerToItemIndex(instance, 2));
+      expect(result.current.isRestored).toBe(true);
     });
 
-    it('should produce zero adjustment when the target is already at the current scroll position', () => {
-      const scrollMargin = 300;
-      const measurementsCache = buildMeasurementsCache([80, 80, 80], scrollMargin);
-      const targetIndex = 2;
-      const scrollOffset = measurementsCache[targetIndex].start;
-
-      const virtualizer = createMockVirtualizer({
-        scrollMargin,
-        scrollOffset,
-        measurementsCache,
-      });
-
-      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, targetIndex));
-
-      expect(virtualizer.options.scrollToFn).toHaveBeenCalledWith(
-        scrollOffset,
-        { behavior: undefined, adjustments: 0 },
-        virtualizer
-      );
-      expect(virtualizer.scrollOffset).toBe(scrollOffset);
-    });
-
-    it('should handle variable row heights correctly', () => {
-      const scrollMargin = 400;
-      const scrollOffset = 600;
-      const measurementsCache = buildMeasurementsCache([30, 100, 50, 80, 120], scrollMargin);
-      const targetIndex = 3;
-
-      const virtualizer = createMockVirtualizer({
-        scrollMargin,
-        scrollOffset,
-        measurementsCache,
-      });
-
-      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, targetIndex));
-
-      // item 3 starts at scrollMargin(400) + 30 + 100 + 50 = 580
-      const expectedTarget = measurementsCache[targetIndex].start;
-      expect(expectedTarget).toBe(scrollMargin + 30 + 100 + 50);
-      expect(virtualizer.options.scrollToFn).toHaveBeenCalledWith(
-        scrollOffset,
-        { behavior: undefined, adjustments: expectedTarget - scrollOffset },
-        virtualizer
-      );
-      expect(virtualizer.scrollOffset).toBe(expectedTarget);
-    });
-
-    it('should anchor to the last item when the target index exceeds the item count', () => {
-      const scrollMargin = 100;
-      const scrollOffset = 100;
-      const measurementsCache = buildMeasurementsCache([60, 60, 60], scrollMargin);
-      const restoredRef = { current: false };
-      const virtualizer = createMockVirtualizer({ scrollMargin, scrollOffset, measurementsCache });
-
-      renderHook(() =>
-        useAnchorVirtualizerToItemIndex(virtualizer, 10, {
-          hasRestoredScrollPositionRef: restoredRef,
-        })
-      );
-
-      const lastItemStart = measurementsCache[2].start;
-      expect(virtualizer.options.scrollToFn).toHaveBeenCalledWith(
-        scrollOffset,
-        { behavior: undefined, adjustments: lastItemStart - scrollOffset },
-        virtualizer
-      );
-      expect(restoredRef.current).toBe(true);
-    });
-
-    it('should restart the restoration when the restoration key changes', () => {
-      const scrollMargin = 100;
-      const measurementsCache = buildMeasurementsCache([60, 60, 60, 60], scrollMargin);
-      const virtualizer = createMockVirtualizer({
-        scrollMargin,
-        scrollOffset: 0,
-        measurementsCache,
-      });
-
-      const { rerender } = renderHook(
-        ({ itemIndex, restorationKey }: { itemIndex: number; restorationKey: string }) =>
-          useAnchorVirtualizerToItemIndex(virtualizer, itemIndex, { restorationKey }),
-        { initialProps: { itemIndex: 1, restorationKey: 'a' } }
-      );
-      expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
-
-      // same key: already restored, nothing happens
-      rerender({ itemIndex: 2, restorationKey: 'a' });
-      expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
-
-      rerender({ itemIndex: 3, restorationKey: 'b' });
-      expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(2);
-      expect(virtualizer.scrollOffset).toBe(measurementsCache[3].start);
-    });
-
-    describe('rAF correction loop', () => {
-      it('should correct scroll offset via rAF when measurements drift after initial restore', () => {
-        const scrollMargin = 100;
-        const scrollOffset = 100;
-        const measurementsCache = buildMeasurementsCache([60, 60, 60], scrollMargin);
-        const targetIndex = 2;
-
-        const virtualizer = createMockVirtualizer({
-          scrollMargin,
-          scrollOffset,
-          measurementsCache,
-        });
-
-        renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, targetIndex));
-
-        // useLayoutEffect restore fires synchronously — 1 call
-        expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
-
-        // Simulate measurements drifting (e.g. item 0 was remeasured larger)
-        const driftedCache = buildMeasurementsCache([90, 60, 60], scrollMargin);
-        (virtualizer as any).measurementsCache = driftedCache;
-
-        // Flush one rAF frame — correction should fire
-        flushRaf();
-
-        expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(2);
-        expect(virtualizer.scrollOffset).toBe(driftedCache[targetIndex].start);
-      });
-
-      it('should stabilize when drift is within 1px', () => {
-        const scrollMargin = 100;
-        const measurementsCache = buildMeasurementsCache([60, 60, 60], scrollMargin);
-        const targetIndex = 2;
-        const scrollOffset = measurementsCache[targetIndex].start;
-
-        const stabilizedRef = { current: false };
-        const virtualizer = createMockVirtualizer({
-          scrollMargin,
-          scrollOffset,
-          measurementsCache,
-        });
-
-        renderHook(() =>
-          useAnchorVirtualizerToItemIndex(virtualizer, targetIndex, {
-            hasStabilizedRef: stabilizedRef,
-          })
-        );
-
-        // rAF fires, sees drift is 0 → stabilizes
-        flushRaf();
-        expect(stabilizedRef.current).toBe(true);
-      });
-
-      it('should skip corrections when skipCorrections is true and mark stabilized immediately', () => {
-        const scrollMargin = 100;
-        const measurementsCache = buildMeasurementsCache([60, 60, 60], scrollMargin);
-        const targetIndex = 2;
-
-        const stabilizedRef = { current: false };
-        const virtualizer = createMockVirtualizer({
-          scrollMargin,
-          scrollOffset: 100,
-          measurementsCache,
-        });
-
-        renderHook(() =>
-          useAnchorVirtualizerToItemIndex(virtualizer, targetIndex, {
-            hasStabilizedRef: stabilizedRef,
-            skipCorrections: true,
-          })
-        );
-
-        // useLayoutEffect still fires the initial restore
-        expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
-
-        // stabilized immediately (useEffect marks it without rAF)
-        expect(stabilizedRef.current).toBe(true);
-
-        // No additional calls from rAF
-        flushRaf();
-        expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
-      });
+    it('cancels native reconciliation when the user takes over', () => {
+      const instance = createVirtualizer();
+      const cancel = jest.spyOn(instance, 'cancelScroll');
+      const { result } = renderHook(() => useAnchorVirtualizerToItemIndex(instance, 4));
+      act(() => result.current.cancel());
+      expect(cancel).toHaveBeenCalled();
+      expect(result.current.isRestored).toBe(true);
     });
   });
 
@@ -798,17 +304,20 @@ describe('virtualizer', () => {
       const rowRenderer = jest.fn(() => null);
       const mockRows = rowsToRender(50);
       const mockVirtualItems = [
-        { index: 0, start: 0, end: 50 },
-        { index: 1, start: 51, end: 100 },
+        { index: 0, start: 0, end: 50, size: 50, key: 'row-0', lane: 0 },
+        { index: 1, start: 51, end: 100, size: 49, key: 'row-1', lane: 0 },
       ];
-      const getVirtualItems = jest.fn(() => mockVirtualItems);
+      const getVirtualItems = Object.assign(
+        jest.fn(() => mockVirtualItems),
+        {
+          updateDeps: jest.fn(),
+        }
+      );
 
       render(
         <VirtualizedCascadeRowList
           rows={mockRows}
-          virtualizedRowComputedTranslateValue={new Map()}
           activeStickyIndex={null}
-          // @ts-expect-error -- we're only interested in testing the rowRenderer prop here
           getVirtualItems={getVirtualItems}
           listItemRenderer={rowRenderer}
         />
@@ -819,10 +328,6 @@ describe('virtualizer', () => {
         expect.objectContaining({
           row: expect.any(Object), // because we passed an empty array as rows
           virtualItem: expect.any(Object),
-          virtualRowStyle: expect.objectContaining({
-            transform: expect.stringMatching(/translateY\(\d+px\)/),
-            zIndex: expect.any(Number),
-          }),
           isActiveSticky: expect.any(Boolean),
         })
       );

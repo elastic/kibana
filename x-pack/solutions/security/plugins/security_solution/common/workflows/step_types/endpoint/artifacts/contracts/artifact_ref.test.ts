@@ -30,10 +30,16 @@ const item = (tags: string[]): ArtifactItem =>
   } as ArtifactItem);
 
 describe('toArtifactRef', () => {
-  it('maps policy:<id> tags to policies and keeps the ids', () => {
-    const ref = toArtifactRef(item(['policy:policy-1', 'policy:policy-2', 'disabled']));
+  it.each([
+    ['endpoint_trusted_apps', 'trusted_apps'],
+    ['endpoint_custom_yara_signatures', 'custom_yara_signatures'],
+  ])('maps policy:<id> tags to policies for %s and keeps the ids', (listId, family) => {
+    const ref = toArtifactRef({
+      ...item(['policy:policy-1', 'policy:policy-2', 'disabled']),
+      list_id: listId,
+    });
     expect(ref.policy_scope).toEqual({ kind: 'policies', policy_ids: ['policy-1', 'policy-2'] });
-    expect(ref.family).toBe('trusted_apps');
+    expect(ref.family).toBe(family);
     expect(ref.namespace_type).toBe('agnostic');
     expect(ref._version).toBe('WzEsMV0=');
   });

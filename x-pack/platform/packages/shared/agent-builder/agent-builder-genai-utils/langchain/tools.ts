@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import type { StructuredTool } from '@langchain/core/tools';
 import { tool as toTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
-import type { ChatAgentEvent, ToolResult } from '@kbn/agent-builder-common';
+import type { ChatAgentEvent, DynamicToolDefinition, ToolResult } from '@kbn/agent-builder-common';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type {
   AgentBuilderToolEvent,
@@ -21,6 +21,7 @@ import type {
 } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { isDynamicToolEvent, isDynamicToolRunReturn } from '@kbn/agent-builder-server/runner';
+import { zodToolInputToJsonSchema } from '../tools/utils/json_schema';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;
@@ -69,6 +70,29 @@ export interface BuildToolContentParams {
 
 export type BuildToolContentFn = (params: BuildToolContentParams) => string;
 
+/** The description the model sees for a tool, natively bound or dynamic. */
+const getToolLlmDescription = async (tool: ExecutableTool): Promise<string> =>
+  tool.getLlmDescription
+    ? tool.getLlmDescription({ description: tool.description, config: tool.configuration })
+    : tool.description;
+
+/**
+ * Renders the definition the model sees for a dynamic tool: the description and input schema
+ * `toolToLangchain` gives it as a native tool, with the schema serialized the same way the
+ * inference adapter serializes natively bound tools.
+ */
+export const renderDynamicToolDefinition = async (
+  tool: ExecutableTool
+): Promise<DynamicToolDefinition> => {
+  const description = await getToolLlmDescription(tool);
+  const schema = await tool.getSchema();
+  return {
+    tool_id: tool.id,
+    description,
+    parameters: zodToolInputToJsonSchema(schema),
+  };
+};
+
 export const toolToLangchain = async ({
   tool,
   toolId,
@@ -84,9 +108,7 @@ export const toolToLangchain = async ({
   addIntentParam?: boolean;
   buildContent?: BuildToolContentFn;
 }): Promise<StructuredTool> => {
-  const description = tool.getLlmDescription
-    ? await tool.getLlmDescription({ description: tool.description, config: tool.configuration })
-    : tool.description;
+  const description = await getToolLlmDescription(tool);
 
   const schema = await tool.getSchema();
 

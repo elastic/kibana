@@ -8,29 +8,29 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
-import type { Row } from '@tanstack/react-table';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import type { VirtualizerInstanceType } from './types';
+import { createChildVirtualizerController } from './child_controller/child_virtualizer_controller';
 import {
-  createChildVirtualizerController,
-  type ChildVirtualizerController,
-} from './child_virtualizer_controller';
-import { useConnectedChildVirtualizer } from './use_connected_child_virtualizer';
-import {
-  useCascadeVirtualizer,
-  type CascadeVirtualizerReturnValue,
-  type UseVirtualizerReturnType,
-} from '.';
+  useConnectedChildVirtualizer,
+  RESTORATION_SETTLE_MS,
+  RESTORATION_TIMEOUT_MS,
+} from './use_connected_child_virtualizer';
+import type { CascadeVirtualizerReturnValue } from './types';
 import type { GroupNode } from '../../../store_provider';
+import type { CascadeTableRow } from '../table';
 
-jest.mock('.', () => {
-  const actual = jest.requireActual('.');
-  return { ...actual, useCascadeVirtualizer: jest.fn(actual.useCascadeVirtualizer) };
+jest.mock('@tanstack/react-virtual', () => {
+  const actual = jest.requireActual('@tanstack/react-virtual');
+  return { ...actual, useVirtualizer: jest.fn(actual.useVirtualizer) };
 });
 
-const useCascadeVirtualizerMock = jest.mocked(useCascadeVirtualizer);
+const getNativeVirtualizer = (): VirtualizerInstanceType =>
+  jest.mocked(useVirtualizer).mock.results.at(-1)?.value;
 
-const createMockRows = (count: number): Row<GroupNode>[] =>
+const createMockRows = (count: number): Array<CascadeTableRow<GroupNode>> =>
   Array.from(
     { length: count },
     (_, index) =>
@@ -40,9 +40,9 @@ const createMockRows = (count: number): Row<GroupNode>[] =>
           index,
           depth: 0,
           getIsExpanded: () => false,
-          getParentRows: () => [] as Row<GroupNode>[],
-          subRows: [] as Row<GroupNode>[],
-        } as Row<GroupNode>,
+          getParentRows: () => [] as Array<CascadeTableRow<GroupNode>>,
+          subRows: [] as Array<CascadeTableRow<GroupNode>>,
+        } as CascadeTableRow<GroupNode>,
         {
           get(target, prop) {
             return Reflect.get(target, prop);
@@ -54,8 +54,10 @@ const createMockRows = (count: number): Row<GroupNode>[] =>
 const createMockRootVirtualizer = (): CascadeVirtualizerReturnValue => {
   const scrollElement = document.createElement('div');
   Object.defineProperty(scrollElement, 'clientHeight', { value: 600 });
+  scrollElement.scrollTop = 500;
 
   return {
+    cancelScroll: jest.fn(),
     scrollOffset: 500,
     scrollElement,
     measurementsCache: [
@@ -69,11 +71,14 @@ const createMockRootVirtualizer = (): CascadeVirtualizerReturnValue => {
 const flushRaf = () => jest.advanceTimersByTime(16);
 
 describe('useConnectedChildVirtualizer', () => {
-  let controller: ChildVirtualizerController;
+  let controller: ReturnType<typeof createChildVirtualizerController>;
+  let rows: ReturnType<typeof createMockRows>;
+  let mockRoot: CascadeVirtualizerReturnValue;
 
   beforeEach(() => {
     jest.useFakeTimers();
-    const mockRoot = createMockRootVirtualizer();
+    rows = createMockRows(50);
+    mockRoot = createMockRootVirtualizer();
     controller = createChildVirtualizerController({
       getRootVirtualizer: () => mockRoot,
     });
@@ -92,7 +97,7 @@ describe('useConnectedChildVirtualizer', () => {
         controller,
         cellId: 'cell-a',
         rowIndex: 2,
-        rows: createMockRows(50),
+        rows,
         estimatedRowHeight: 30,
         overscan: 5,
       })
@@ -101,8 +106,8 @@ describe('useConnectedChildVirtualizer', () => {
     expect(result.current.virtualizer).toBeDefined();
     expect(result.current.virtualizer.getVirtualItems).toBeDefined();
     expect(result.current.handle).toBeDefined();
-    expect(result.current.handle.disconnect).toBeDefined();
-    expect(result.current.handle.reportState).toBeDefined();
+    expect(result.current.handle.detachScrollElement).toBeDefined();
+    expect(result.current.handle.reattachScrollElement).toBeDefined();
   });
 
   it('connects to the controller on mount', () => {
@@ -111,7 +116,7 @@ describe('useConnectedChildVirtualizer', () => {
         controller,
         cellId: 'cell-a',
         rowIndex: 2,
-        rows: createMockRows(50),
+        rows,
       })
     );
 
@@ -125,7 +130,7 @@ describe('useConnectedChildVirtualizer', () => {
         controller,
         cellId: 'cell-a',
         rowIndex: 2,
-        rows: createMockRows(50),
+        rows,
       })
     );
 
@@ -134,314 +139,273 @@ describe('useConnectedChildVirtualizer', () => {
     expect(controller.getConnectedChildren().size).toBe(0);
   });
 
-  it('creates the virtualizer with isRoot=false (no childController)', () => {
-    const { result } = renderHook(() =>
-      useConnectedChildVirtualizer({
-        controller,
-        cellId: 'cell-a',
-        rowIndex: 2,
-        rows: createMockRows(50),
-      })
-    );
-
-    expect(result.current.virtualizer.childController).toBeNull();
-  });
-
-  it('uses the scroll margin from the controller config', () => {
-    const spy = jest.spyOn(controller, 'getChildConfig');
+  it('uses the scroll margin of its row from the controller', () => {
+    const spy = jest.spyOn(controller, 'getScrollMarginForRow');
 
     renderHook(() =>
       useConnectedChildVirtualizer({
         controller,
         cellId: 'cell-a',
         rowIndex: 2,
-        rows: createMockRows(50),
+        rows,
       })
     );
 
     expect(spy).toHaveBeenCalledWith(2);
   });
 
-  describe('connection lifecycle', () => {
-    it('reconnects when the connection identity changes', () => {
-      const { rerender } = renderHook(
-        ({ cellId, rowIndex }: { cellId: string; rowIndex: number }) =>
-          useConnectedChildVirtualizer({ controller, cellId, rowIndex, rows: createMockRows(50) }),
-        { initialProps: { cellId: 'cell-a', rowIndex: 2 } }
-      );
-      expect(Array.from(controller.getConnectedChildren().keys())).toEqual(['cell-a']);
-
-      rerender({ cellId: 'cell-b', rowIndex: 4 });
-
-      expect(Array.from(controller.getConnectedChildren().keys())).toEqual(['cell-b']);
-      expect(controller.getConnectedChildren().get('cell-b')?.rowIndex).toBe(4);
-      // the new connection id restores from its own anchor
-      expect(useCascadeVirtualizerMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({ scrollRestorationKey: 'cell-b' })
-      );
-    });
-
-    it('keeps the scroll position when the cell moves to another row, and restores it for a new id', () => {
-      const root = createMockRootVirtualizer();
-      const scrollElement = root.scrollElement as HTMLElement;
-      const scrollTo = jest.fn();
-      Object.defineProperty(scrollElement, 'scrollTop', { value: 0, writable: true });
-      Object.assign(scrollElement, { scrollTo });
-      const localController = createChildVirtualizerController({ getRootVirtualizer: () => root });
-      localController.markRootStable();
+  it('reports the item below the sticky header as the anchor, with the offset into it', () => {
+    // the cascade is scrolled 10px into the 15th row of this cell: its row starts at 80, the rows are 30px
+    mockRoot.scrollElement!.scrollTop = 510;
+    renderHook(() =>
+      useConnectedChildVirtualizer({
+        controller,
+        cellId: 'cell-a',
+        rowIndex: 2,
+        rows,
+        estimatedRowHeight: 30,
+      })
+    );
+    act(() => {
       flushRaf();
-      // scroll restoration records performance marks, which jsdom does not provide
-      Object.defineProperty(window, 'performance', {
-        value: { mark: jest.fn(), measure: jest.fn(), now: jest.fn() },
-        writable: true,
-      });
-      // another cell of the same cascade left a persisted anchor behind
-      const otherHandle = localController.connect('cell-b', 2);
-      otherHandle.reportState({ scrollAnchorItemIndex: 5 });
-      otherHandle.disconnect();
-
-      const { result, rerender } = renderHook(
-        ({ cellId, rowIndex }: { cellId: string; rowIndex: number }) =>
-          useConnectedChildVirtualizer({
-            controller: localController,
-            cellId,
-            rowIndex,
-            rows: createMockRows(50),
-            estimatedRowHeight: 30,
-          }),
-        { initialProps: { cellId: 'cell-a', rowIndex: 1 } }
-      );
-      act(() => {
-        flushRaf();
-      });
-      expect(result.current.isActive).toBe(true);
-
-      // the user scrolled within the cell
-      act(() => {
-        scrollElement.scrollTop = 300;
-        scrollElement.dispatchEvent(new Event('scroll'));
-      });
-      expect(result.current.virtualizer.scrollOffset).toBe(300);
-      scrollTo.mockClear();
-
-      rerender({ cellId: 'cell-a', rowIndex: 2 });
-      act(() => {
-        flushRaf();
-      });
-
-      expect(localController.getConnectedChildren().get('cell-a')?.rowIndex).toBe(2);
-      expect(result.current.isActive).toBe(true);
-      // the new row's start is used as scroll margin, but the position is left alone
-      expect(useCascadeVirtualizerMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({ scrollRestorationKey: 'cell-a', scrollMargin: 80 })
-      );
-      expect(scrollTo).not.toHaveBeenCalled();
-      expect(result.current.virtualizer.scrollOffset).toBe(300);
-
-      // a different connection id is a new view of the row and restores its own anchor
-      rerender({ cellId: 'cell-b', rowIndex: 2 });
-
-      expect(scrollTo).toHaveBeenCalledTimes(1);
-      localController.destroy();
     });
 
-    it('keeps a single connection under React strict mode', () => {
-      const { unmount } = renderHook(
-        () =>
-          useConnectedChildVirtualizer({
-            controller,
-            cellId: 'cell-a',
-            rowIndex: 2,
-            rows: createMockRows(50),
-          }),
-        { wrapper: React.StrictMode }
-      );
-      expect(controller.getConnectedChildren().size).toBe(1);
+    const state = controller.getConnectedChildren().get('cell-a');
+    expect(state?.scrollAnchorItemIndex).toBe(14);
+    expect(state?.scrollAnchorItemOffset).toBe(10);
+  });
 
-      unmount();
-      expect(controller.getConnectedChildren().size).toBe(0);
+  it('hands its activation over to a connection that replaces it for the same row', () => {
+    const { rerender } = renderHook(
+      ({ cellId }: { cellId: string }) =>
+        useConnectedChildVirtualizer({ controller, cellId, rowIndex: 2, rows }),
+      { initialProps: { cellId: 'cell-a' } }
+    );
+    act(() => {
+      flushRaf();
     });
+    expect(controller.shouldActivate('cell-a')).toBe(true);
+
+    rerender({ cellId: 'cell-a/comparison' });
+
+    expect(controller.shouldActivate('cell-a/comparison')).toBe(true);
+    expect(controller.getConnectedChildren().has('cell-a')).toBe(false);
   });
 
   describe('activation gating', () => {
-    it('reports isActive=false before root is stable', () => {
+    it('renders no items before root is stable', () => {
       const unstableController = createChildVirtualizerController({
-        getRootVirtualizer: () => createMockRootVirtualizer(),
+        getRootVirtualizer: () => mockRoot,
       });
 
-      const { result } = renderHook(() =>
+      renderHook(() =>
         useConnectedChildVirtualizer({
           controller: unstableController,
           cellId: 'cell-a',
           rowIndex: 2,
-          rows: createMockRows(50),
+          rows,
         })
       );
 
-      expect(result.current.isActive).toBe(false);
+      expect(getNativeVirtualizer().options.count).toBe(0);
       unstableController.destroy();
     });
 
-    it('transitions to isActive=true after markRootStable + rAF', () => {
+    it('renders its items after markRootStable + rAF', () => {
       const unstableController = createChildVirtualizerController({
-        getRootVirtualizer: () => createMockRootVirtualizer(),
+        getRootVirtualizer: () => mockRoot,
       });
 
-      const { result } = renderHook(() =>
+      renderHook(() =>
         useConnectedChildVirtualizer({
           controller: unstableController,
           cellId: 'cell-a',
           rowIndex: 2,
-          rows: createMockRows(50),
+          rows,
         })
       );
 
-      expect(result.current.isActive).toBe(false);
+      expect(getNativeVirtualizer().options.count).toBe(0);
 
       act(() => {
         unstableController.markRootStable();
         flushRaf();
       });
 
-      expect(result.current.isActive).toBe(true);
+      expect(getNativeVirtualizer().options.count).toBe(rows.length);
       unstableController.destroy();
-    });
-
-    it('is active on the first render when another connection for the row is already activated', () => {
-      controller.connect('cell-a', 2);
-      flushRaf();
-      expect(controller.shouldActivate(2)).toBe(true);
-
-      const { result } = renderHook(() =>
-        useConnectedChildVirtualizer({
-          controller,
-          cellId: 'cell-a/alternate',
-          rowIndex: 2,
-          rows: createMockRows(50),
-        })
-      );
-
-      expect(result.current.isActive).toBe(true);
     });
   });
 
-  describe('scroll anchor persistence', () => {
-    const createStabilizedInstance = (scrollOffset: number) =>
-      ({
-        range: { startIndex: 0, endIndex: 5 },
-        scrollOffset,
-        scrollRect: { width: 800, height: 400 },
-        getTotalSize: () => 1000,
-        options: { count: 50 },
-        // items of 40px, starting at 0
-        measurementsCache: Array.from({ length: 50 }, (_, index) => ({
-          index,
-          start: index * 40,
-          end: index * 40 + 40,
-          size: 40,
-        })),
-        getVirtualItemForOffset: (offset: number) => {
-          const index = Math.max(0, Math.min(49, Math.floor(offset / 40)));
-          return { index, start: index * 40 };
-        },
-      } as unknown as UseVirtualizerReturnType);
-    // the scroll offset sits 20px into item 3
-    const stabilizedInstance = createStabilizedInstance(140);
+  it('cleans up and reconnects under Strict Mode without duplicate registrations', () => {
+    const { unmount } = renderHook(
+      () => useConnectedChildVirtualizer({ controller, cellId: 'strict', rowIndex: 2, rows }),
+      {
+        wrapper: ({ children }) => React.createElement(React.StrictMode, null, children),
+      }
+    );
+    act(flushRaf);
+    expect(getNativeVirtualizer().options.count).toBe(rows.length);
+    expect(controller.getConnectedChildren().size).toBe(1);
+    expect(controller.hasAttachedChildForRow(2)).toBe(true);
+    unmount();
+    expect(controller.getConnectedChildren().size).toBe(0);
+  });
 
-    const renderActiveHook = () => {
-      const hook = renderHook(() =>
+  it('keeps measured heights across ordinary remounts without restoring an old scroll anchor', () => {
+    const renderChild = () =>
+      renderHook(() =>
+        useConnectedChildVirtualizer({ controller, cellId: 'cached', rowIndex: 2, rows })
+      );
+    const first = renderChild();
+    act(flushRaf);
+    act(() => getNativeVirtualizer().resizeItem(0, 120));
+    first.unmount();
+    const second = renderChild();
+    expect(getNativeVirtualizer().options.count).toBe(rows.length);
+    expect(second.result.current.virtualizer.takeSnapshot()[0].size).toBe(120);
+    expect(controller.getRestoreAnchor('cached')).toBeNull();
+    second.unmount();
+  });
+
+  it('invalidates cached heights after density, columns, or data changes', () => {
+    const { rerender } = renderHook(
+      ({ measurementKey, data }) =>
         useConnectedChildVirtualizer({
           controller,
-          cellId: 'cell-a',
+          cellId: 'layout',
           rowIndex: 2,
-          rows: createMockRows(50),
-        })
-      );
-      act(() => {
-        flushRaf();
+          rows: data,
+          measurementKey,
+        }),
+      { initialProps: { measurementKey: 'compact:message', data: rows } }
+    );
+    act(flushRaf);
+    const instance = getNativeVirtualizer();
+    act(() => instance.resizeItem(0, 120));
+    rerender({ measurementKey: 'expanded:message,host', data: rows });
+    expect(instance.takeSnapshot()).toEqual([]);
+    act(() => instance.resizeItem(0, 150));
+    rerender({ measurementKey: 'expanded:message,host', data: createMockRows(50) });
+    expect(instance.takeSnapshot()).toEqual([]);
+  });
+
+  it('uses offset scrolling when attached and native index scrolling in fullscreen', () => {
+    const { result } = renderHook(() =>
+      useConnectedChildVirtualizer({
+        controller,
+        cellId: 'fullscreen',
+        rowIndex: 2,
+        rows,
+        privateScrollElement: { current: document.createElement('div') },
+      })
+    );
+    act(flushRaf);
+    const instance = getNativeVirtualizer();
+    const scrollIndex = jest.spyOn(instance, 'scrollToIndex');
+    const scrollOffset = jest.spyOn(instance, 'scrollToOffset');
+    act(() => result.current.virtualizer.scrollToIndex(49));
+    expect(scrollIndex).not.toHaveBeenCalled();
+    expect(scrollOffset).toHaveBeenCalled();
+    act(() => result.current.handle.detachScrollElement());
+    act(() => result.current.virtualizer.scrollToIndex(49));
+    expect(scrollIndex).toHaveBeenCalledWith(49, undefined);
+  });
+
+  describe('restoring the saved document', () => {
+    const renderRestoringChild = () => {
+      controller.destroy();
+      controller = createChildVirtualizerController({
+        getRootVirtualizer: () => mockRoot,
+        initialPersistedAnchors: { target: 5 },
+        initialRestorationCellId: 'target',
       });
-      expect(hook.result.current.isActive).toBe(true);
-      return hook;
+      const view = renderHook(() =>
+        useConnectedChildVirtualizer({ controller, cellId: 'target', rowIndex: 2, rows })
+      );
+      expect(getNativeVirtualizer().options.count).toBe(0);
+      expect(controller.isRestoring).toBe(true);
+      act(() => controller.markRootStable());
+      return view;
     };
 
-    const reportStabilizedState = (instance = stabilizedInstance) => {
-      const { onStateChange } = useCascadeVirtualizerMock.mock.calls.at(-1)![0];
-      act(() => {
-        onStateChange!(instance, true, true);
-      });
-    };
+    // a row above the saved document changes height, which moves the position being restored
+    let rowAboveSize = 100;
+    const moveRestoredPosition = () =>
+      act(() => getNativeVirtualizer().resizeItem(0, (rowAboveSize += 1)));
 
-    it('reports stabilization once the virtualizer is stable, without waiting for scroll events', () => {
-      renderActiveHook();
+    it('waits for root restoration, then finishes once the restored position has settled', () => {
+      renderRestoringChild();
+      expect(controller.getRestoreAnchor('target')).toBe(5);
 
-      expect(controller.getConnectedChildren().get('cell-a')?.hasStabilized).toBe(true);
+      // no row reports a height that differs from the estimate, the restoration still has to end
+      act(() => jest.advanceTimersByTime(RESTORATION_SETTLE_MS - 1));
+      expect(controller.isRestoring).toBe(true);
+      act(() => jest.advanceTimersByTime(1));
+      expect(controller.isRestoring).toBe(false);
     });
 
-    it('does not try to restore an anchor for an active connection without rows', () => {
-      const previousHandle = controller.connect('cell-a', 2);
-      previousHandle.reportState({ scrollAnchorItemIndex: 10 });
-      previousHandle.disconnect();
-
-      const { result } = renderHook(() =>
-        useConnectedChildVirtualizer({ controller, cellId: 'cell-a', rowIndex: 2, rows: [] })
-      );
-      act(() => {
-        flushRaf();
-      });
-      expect(result.current.isActive).toBe(true);
-      expect(useCascadeVirtualizerMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({ initialAnchorItemIndex: undefined })
-      );
-
-      act(() => {
-        flushRaf();
-        flushRaf();
-      });
-      expect(controller.getConnectedChildren().get('cell-a')?.hasStabilized).toBe(true);
+    it('starts the wait over when the restored position moves', () => {
+      renderRestoringChild();
+      act(() => jest.advanceTimersByTime(RESTORATION_SETTLE_MS - 1));
+      moveRestoredPosition();
+      act(() => jest.advanceTimersByTime(RESTORATION_SETTLE_MS - 1));
+      expect(controller.isRestoring).toBe(true);
+      act(() => jest.advanceTimersByTime(1));
+      expect(controller.isRestoring).toBe(false);
     });
 
-    it('anchors to the first item with a negative offset when the viewport starts above it', () => {
-      renderActiveHook();
-      reportStabilizedState(createStabilizedInstance(-30));
-
-      const state = controller.getConnectedChildren().get('cell-a');
-      expect(state?.scrollAnchorItemIndex).toBe(0);
-      expect(state?.scrollAnchorItemOffset).toBe(-30);
+    it('stops waiting at the timeout when the restored position never settles', () => {
+      renderRestoringChild();
+      const step = RESTORATION_SETTLE_MS - 1;
+      let elapsed = 0;
+      for (; elapsed + step < RESTORATION_TIMEOUT_MS; elapsed += step) {
+        moveRestoredPosition();
+        act(() => jest.advanceTimersByTime(step));
+        expect(controller.isRestoring).toBe(true);
+      }
+      moveRestoredPosition();
+      act(() => jest.advanceTimersByTime(RESTORATION_TIMEOUT_MS - elapsed));
+      expect(controller.isRestoring).toBe(false);
     });
 
-    it('reports no anchor while the items do not intersect the viewport', () => {
-      renderActiveHook();
-
-      // viewport entirely above the items
-      reportStabilizedState(createStabilizedInstance(-500));
-      expect(controller.getConnectedChildren().get('cell-a')?.scrollAnchorItemIndex).toBeNull();
-
-      // viewport entirely below the items
-      reportStabilizedState(createStabilizedInstance(2500));
-      expect(controller.getConnectedChildren().get('cell-a')?.scrollAnchorItemIndex).toBeNull();
-    });
-
-    it('persists the scroll anchor and the offset within its item once stabilized, and restores them on reconnect', () => {
-      const { unmount } = renderActiveHook();
-      reportStabilizedState();
-
-      const state = controller.getConnectedChildren().get('cell-a');
-      expect(state?.scrollAnchorItemIndex).toBe(3);
-      expect(state?.scrollAnchorItemOffset).toBe(20);
-
+    it('does not finish a restoration that was taken over after it unmounted', () => {
+      const { unmount } = renderRestoringChild();
+      const finishRestoration = jest.spyOn(controller, 'finishRestoration');
       unmount();
-      expect(controller.getPersistedAnchor('cell-a')).toBe(3);
-      expect(controller.getPersistedAnchorOffset('cell-a')).toBe(20);
-
-      // scroll restoration records performance marks, which jsdom does not provide
-      Object.defineProperty(window, 'performance', {
-        value: { mark: jest.fn(), measure: jest.fn(), now: jest.fn() },
-        writable: true,
-      });
-      renderActiveHook();
-      expect(useCascadeVirtualizerMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({ initialAnchorItemIndex: 3, initialAnchorItemOffset: 20 })
-      );
+      act(() => jest.advanceTimersByTime(RESTORATION_TIMEOUT_MS));
+      expect(finishRestoration).not.toHaveBeenCalled();
     });
+  });
+
+  it.each([-1, 50])('finishes restoration for missing document index %i', (anchor) => {
+    controller.destroy();
+    controller = createChildVirtualizerController({
+      getRootVirtualizer: () => mockRoot,
+      initialPersistedAnchors: { target: anchor },
+      initialRestorationCellId: 'target',
+    });
+    controller.markRootStable();
+    renderHook(() =>
+      useConnectedChildVirtualizer({ controller, cellId: 'target', rowIndex: 2, rows })
+    );
+    expect(controller.isRestoring).toBe(false);
+  });
+
+  it('stops a pending restoration when the group collapses before its document is measured', () => {
+    controller.destroy();
+    controller = createChildVirtualizerController({
+      getRootVirtualizer: () => mockRoot,
+      initialPersistedAnchors: { target: 5 },
+      initialRestorationCellId: 'target',
+    });
+    controller.markRootStable();
+    const { unmount } = renderHook(() =>
+      useConnectedChildVirtualizer({ controller, cellId: 'target', rowIndex: 2, rows })
+    );
+    expect(controller.isRestoring).toBe(true);
+    unmount();
+    controller.clearPersistedAnchor('target');
+    expect(controller.isRestoring).toBe(false);
   });
 });

@@ -14,7 +14,6 @@ import {
   type OtelLogDocument,
   type Timerange,
 } from '@kbn/synthtrace-client';
-import type { ToolingLog } from '@kbn/tooling-log';
 import {
   DIGITAL_EXPERIENCE_APPS,
   generateEdotBrowserSessions,
@@ -24,11 +23,7 @@ import {
 } from './digital_experience_apps';
 import { DIGITAL_EXPERIENCE_EDGE_CASES } from './digital_experience_edge_cases';
 
-const range = timerange(
-  new Date('2026-10-16T12:00:00.000Z'),
-  new Date('2026-10-16T12:02:00.000Z'),
-  {} as ToolingLog
-);
+const range = timerange(new Date('2026-10-16T12:00:00.000Z'), new Date('2026-10-16T12:02:00.000Z'));
 
 const FROM = range.from.getTime();
 
@@ -46,6 +41,10 @@ const collect = (
     includeRawAttribution,
     environments: false,
     edgeCases: false,
+    replayRate: 0,
+    errorReplayRate: 0,
+    replaySize: 'typical',
+    sessionLength: 'typical',
     scale,
     // Pin the seed so the minimums the tests rely on don't depend on the range's start
     seed: 'digital-experience-test',
@@ -61,6 +60,10 @@ describe('digital experience apps', () => {
         includeRawAttribution: false,
         environments: false,
         edgeCases: false,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
+        sessionLength: 'typical',
         scale: 1,
         seed: getDefaultSeed(FROM),
       });
@@ -74,6 +77,10 @@ describe('digital experience apps', () => {
             includeRawAttribution: true,
             environments: true,
             edgeCases: true,
+            replayRate: 0,
+            errorReplayRate: 0,
+            replaySize: 'typical',
+            sessionLength: 'typical',
             scale: 3,
           },
           FROM
@@ -83,6 +90,10 @@ describe('digital experience apps', () => {
         includeRawAttribution: true,
         environments: true,
         edgeCases: true,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
+        sessionLength: 'typical',
         scale: 3,
         seed: getDefaultSeed(FROM),
       });
@@ -105,6 +116,10 @@ describe('digital experience apps', () => {
         includeRawAttribution: true,
         environments: true,
         edgeCases: true,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
+        sessionLength: 'typical',
         scale: 2.5,
         seed: getDefaultSeed(FROM),
       });
@@ -190,7 +205,7 @@ describe('digital experience apps', () => {
 
     it('generates data for runs of one minute or less', () => {
       [60, 30].forEach((seconds) => {
-        const shortRange = timerange(range.from, at(seconds), {} as ToolingLog);
+        const shortRange = timerange(range.from, at(seconds));
         const docs = collect(false, false, { timeRange: shortRange });
 
         expect(docs.length).toBeGreaterThan(0);
@@ -218,6 +233,10 @@ describe('digital experience apps', () => {
           includeRawAttribution: false,
           environments: false,
           edgeCases: false,
+          replayRate: 0,
+          errorReplayRate: 0,
+          replaySize: 'typical',
+          sessionLength: 'typical',
           scale,
           // Like the scenarios, without a seed option the parser defaults it to the run's start
           seed: parseDigitalExperienceScenarioOpts(seed === undefined ? {} : { seed }, from).seed,
@@ -251,7 +270,7 @@ describe('digital experience apps', () => {
         const batched = batches
           .slice(1)
           .flatMap((end, i) =>
-            generate(undefined, { timeRange: timerange(batches[i], end, {} as ToolingLog), from })
+            generate(undefined, { timeRange: timerange(batches[i], end), from })
           );
 
         expect(sorted(batched)).toEqual(sorted(generate(undefined)));
@@ -274,9 +293,7 @@ describe('digital experience apps', () => {
         const batches = [0, 13.37, 61.5, 119.25, 120].map((seconds) => at(seconds));
         const batched = batches
           .slice(1)
-          .flatMap((end, i) =>
-            generate('seed-a', { timeRange: timerange(batches[i], end, {} as ToolingLog), from })
-          );
+          .flatMap((end, i) => generate('seed-a', { timeRange: timerange(batches[i], end), from }));
 
         expect(sorted(batched)).toEqual(sorted(generate('seed-a')));
       });
@@ -309,7 +326,7 @@ describe('digital experience apps', () => {
       });
 
       describe('visits', () => {
-        const hour = timerange(at(0), at(3600), {} as ToolingLog);
+        const hour = timerange(at(0), at(3600));
         // From the epoch on, so that sessions that started before the run are kept whole
         const docs = generate('seed-a', { timeRange: hour, from: 0, scale: 3 });
         const attribute = (doc: EdotBrowserDocument, key: string) => doc.attributes?.[key];
@@ -421,7 +438,7 @@ describe('digital experience apps', () => {
       });
 
       it('does not repeat session, trace or span IDs', () => {
-        const hour = timerange(at(0), at(3600), {} as ToolingLog);
+        const hour = timerange(at(0), at(3600));
         // From the epoch on, so that sessions that started before the run are kept whole
         const docs = generate('seed-a', { timeRange: hour, from: 0, scale: 3 });
         const sessionCount = docs.filter(
@@ -512,7 +529,7 @@ describe('digital experience apps', () => {
 
   describe('catalogue', () => {
     // Half an hour of every app, with the traffic of two, to see rare cases too
-    const halfHour = timerange(at(0), at(1800), {} as ToolingLog);
+    const halfHour = timerange(at(0), at(1800));
     const generate = (environments: boolean, edgeCases: boolean = false) =>
       generateEdotBrowserSessions(halfHour, {
         environment: 'test',
@@ -521,6 +538,10 @@ describe('digital experience apps', () => {
         includeRawAttribution: false,
         environments,
         edgeCases,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
+        sessionLength: 'typical',
         scale: 2,
         seed: 'digital-experience-test',
       }).flatMap((generator) =>
@@ -745,7 +766,7 @@ describe('digital experience apps', () => {
 
       it('has the errors that one engine words or throws in the sessions of that engine only', () => {
         // Rare ones, as only the sessions of one engine throw them: three hours of traffic
-        const threeHours = timerange(at(0), at(3 * 3_600), {} as ToolingLog);
+        const threeHours = timerange(at(0), at(3 * 3_600));
         const longRun = generateEdotBrowserSessions(threeHours, {
           environment: 'test',
           from: threeHours.from.getTime(),
@@ -753,6 +774,10 @@ describe('digital experience apps', () => {
           includeRawAttribution: false,
           environments: false,
           edgeCases: true,
+          replayRate: 0,
+          errorReplayRate: 0,
+          replaySize: 'typical',
+          sessionLength: 'typical',
           scale: 1,
           seed: 'digital-experience-test',
         }).flatMap((generator) =>
@@ -912,7 +937,7 @@ describe('digital experience apps', () => {
     it('creates the same events whatever the batch size', () => {
       // Live mode uploads batches of one second, each generated on its own
       const liveBatches = Array.from({ length: 120 }, (_, second) =>
-        indices(timerange(at(second), at(second + 1), {} as ToolingLog), 7.5)
+        indices(timerange(at(second), at(second + 1)), 7.5)
       ).flat();
 
       expect(liveBatches).toEqual(indices(range, 7.5));
@@ -931,32 +956,28 @@ describe('digital experience apps', () => {
         return created;
       };
       const batches = [0, 7.3, 31, 60].map((seconds) => at(seconds));
-      const batchTimes = batches
-        .slice(1)
-        .flatMap((end, i) => times(timerange(batches[i], end, {} as ToolingLog)));
+      const batchTimes = batches.slice(1).flatMap((end, i) => times(timerange(batches[i], end)));
 
-      expect(batchTimes).toEqual(times(timerange(at(0), at(60), {} as ToolingLog)));
-      expect(times(timerange(at(0), at(60), {} as ToolingLog))).toEqual(
+      expect(batchTimes).toEqual(times(timerange(at(0), at(60))));
+      expect(times(timerange(at(0), at(60)))).toEqual(
         Array.from({ length: 6 }, (_, i) => range.from.getTime() + (i + 1) * 10_000 - 1)
       );
     });
 
     it('creates events in runs of less than a minute', () => {
-      expect(indices(timerange(at(0), at(30), {} as ToolingLog), 6).length).toBeGreaterThan(0);
-      expect(indices(timerange(at(0), at(0.5), {} as ToolingLog), 600).length).toBeGreaterThan(0);
+      expect(indices(timerange(at(0), at(30)), 6).length).toBeGreaterThan(0);
+      expect(indices(timerange(at(0), at(0.5)), 600).length).toBeGreaterThan(0);
     });
 
     it('keeps fractional rates, so apps stay apart at a low scale', () => {
-      const fiveMinutes = timerange(at(0), at(300), {} as ToolingLog);
+      const fiveMinutes = timerange(at(0), at(300));
 
       expect(indices(fiveMinutes, 6 * 0.2)).toHaveLength(6);
       expect(indices(fiveMinutes, 1 * 0.2)).toHaveLength(1);
     });
 
     it('numbers events by absolute time', () => {
-      expect(indices(timerange(at(0), at(60), {} as ToolingLog), 3)).toEqual(
-        indices(range, 3).slice(0, 3)
-      );
+      expect(indices(timerange(at(0), at(60)), 3)).toEqual(indices(range, 3).slice(0, 3));
     });
   });
 });
