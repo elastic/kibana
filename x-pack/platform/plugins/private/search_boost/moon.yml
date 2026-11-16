@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/storybook'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/data-lifecycle-phases'
 tags:
   - plugin
   - prod

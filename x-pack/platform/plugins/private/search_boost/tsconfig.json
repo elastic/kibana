@@ -20,7 +20,8 @@
     "@kbn/app-header",
     "@kbn/scout",
     "@kbn/storybook",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/data-lifecycle-phases"
   ],
   "exclude": [
     "target/**/*"
