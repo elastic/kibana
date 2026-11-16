@@ -303,6 +303,38 @@ actions:
     expect(drift.outcome).toBe('issue');
   });
 
+  it('keeps what the actions send in their field use', async () => {
+    const sender: ConnectorSpec = {
+      ...connector,
+      actions: {
+        getItems: {
+          scope: 'read',
+          input: z.object({}),
+          handler: async ({ client }) =>
+            (await client.get(`${BASE}/items`, { params: { limit: 5 } })).data,
+        },
+      },
+    };
+    documents[SPEC_URL] = specYaml().replace(
+      '    get:\n',
+      '    get:\n      parameters: [{ name: limit, in: query, schema: { type: integer } }]\n'
+    );
+    const senderDirectory = path.join(directory, 'sender');
+    await fs.mkdir(senderDirectory);
+    await updateVendorApi({
+      connector: sender,
+      directory: senderDirectory,
+      sources: { main: SPEC_URL },
+      fetchText: async (url) => documents[url],
+      now: () => new Date('2026-10-07T12:00:00.000Z'),
+      log: { info: () => {}, warning: () => {} },
+    });
+
+    const drift = await detect({ connector: sender, directory: senderDirectory });
+
+    expect(drift.actions?.[0].fieldUse?.['main GET /items']).toMatchObject({ sent: ['?limit'] });
+  });
+
   it('proposes a refresh for a breaking response change to fields no action reads', async () => {
     documents[SPEC_URL] = specYaml({ itemProperties: '{ name: { type: integer } }' });
     diffEntries = [entry('response-property-type-changed', 3)];

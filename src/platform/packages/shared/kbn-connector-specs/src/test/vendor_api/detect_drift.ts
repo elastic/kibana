@@ -570,20 +570,33 @@ export const detectDrift = async ({
 const mergeFieldUse = (
   ...uses: ReadonlyArray<Readonly<Record<string, RecordedFieldUse>> | undefined>
 ): Record<string, RecordedFieldUse> => {
-  const merged: Record<string, { read: Set<string>; copied: Set<string>; returned: Set<string> }> =
-    {};
+  const merged: Record<
+    string,
+    { read: Set<string>; copied: Set<string>; returned: Set<string>; sent: Set<string> }
+  > = {};
   for (const byOperation of uses) {
     for (const [key, use] of Object.entries(byOperation ?? {})) {
-      const entry = (merged[key] ??= { read: new Set(), copied: new Set(), returned: new Set() });
+      const entry = (merged[key] ??= {
+        read: new Set(),
+        copied: new Set(),
+        returned: new Set(),
+        sent: new Set(),
+      });
       use.read.forEach((field) => entry.read.add(field));
       use.copied.forEach((field) => entry.copied.add(field));
       use.returned.forEach((field) => entry.returned.add(field));
+      use.sent?.forEach((field) => entry.sent.add(field));
     }
   }
   return Object.fromEntries(
-    Object.entries(merged).map(([key, { read, copied, returned }]) => [
+    Object.entries(merged).map(([key, { read, copied, returned, sent }]) => [
       key,
-      { read: [...read].sort(), copied: [...copied].sort(), returned: [...returned].sort() },
+      {
+        read: [...read].sort(),
+        copied: [...copied].sort(),
+        returned: [...returned].sort(),
+        ...(sent.size > 0 ? { sent: [...sent].sort() } : {}),
+      },
     ])
   );
 };
