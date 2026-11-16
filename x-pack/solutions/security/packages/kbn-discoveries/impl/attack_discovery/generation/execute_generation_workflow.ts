@@ -640,14 +640,13 @@ export async function executeGenerationWorkflow({
 
     authenticatedUser = createAuthenticatedUserForEventLogging({ authenticationInfo });
 
-    // A space that never opened the AI Assistant has no anonymization fields data stream yet;
-    // without this every batch fails with `index_not_found_exception`. A failed install is
-    // only logged: the fetch below then fails with its own error.
+    // A space that never used the AI Assistant has no anonymization fields data stream yet.
+    // A failed install is only logged: the fetch below then fails with its own error.
     const { elasticAssistant } = pluginsStart as {
       elasticAssistant?: ElasticAssistantStart;
     };
 
-    if ((await elasticAssistant?.ensureSpaceResources?.(spaceId)) === false) {
+    if ((await elasticAssistant?.ensureSpaceResources(spaceId)) === false) {
       logger.warn(`Could not install the AI Assistant resources for space '${spaceId}'`);
     }
 

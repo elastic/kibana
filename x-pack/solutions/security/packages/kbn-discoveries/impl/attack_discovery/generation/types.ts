@@ -57,12 +57,7 @@ export type GetStartServices = () => Promise<{
   pluginsStart: unknown;
 }>;
 
-/**
- * The slice of the elastic_assistant plugin start contract that Attack Discovery
- * generation consumes: installing the AI Assistant space-level resources a space
- * is missing before they are read. Named here so the workflow's `pluginsStart`
- * cast and the discoveries plugin's local cross-plugin stub share one shape.
- */
+/** The slice of the elastic_assistant start contract that generation consumes. */
 export interface ElasticAssistantStart {
   ensureSpaceResources: (spaceId: string) => Promise<boolean>;
 }

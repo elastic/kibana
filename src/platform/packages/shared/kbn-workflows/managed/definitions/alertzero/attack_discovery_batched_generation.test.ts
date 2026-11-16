@@ -144,9 +144,6 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     const retrieve = () => step('retrieve_alert_ids');
     const query = () => String(retrieve().with?.query);
 
-    // ES|QL has no `ignore_unavailable`: `FROM` on a space that has no alerts index yet fails
-    // with `Unknown index` instead of returning zero rows. The query is therefore gated on
-    // the index existing, rather than loosened, so a real query error still fails the run.
     describe('in a space with no alerts index yet', () => {
       const check = () => step('check_alerts_index');
 

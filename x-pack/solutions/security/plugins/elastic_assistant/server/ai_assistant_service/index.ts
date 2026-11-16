@@ -589,15 +589,10 @@ export class AIAssistantService {
     const licensing = await opts.licensing;
     if (!hasAIAssistantLicense(licensing.license)) return null;
 
-    const installed = await this.ensureSpaceResources(opts.spaceId);
-    if (!installed) return null;
+    if (!(await this.ensureSpaceResources(opts.spaceId))) return null;
   }
 
-  /**
-   * Installs the space-level resources if missing, retrying a failed install. No license
-   * check; see `ensureSpaceResources` on the plugin start contract.
-   * @returns `false` when the install and its retry both failed.
-   */
+  /** @returns `false` when the install and its retry both failed. No license check. */
   public async ensureSpaceResources(spaceId: string): Promise<boolean> {
     // Check if resources installation has succeeded
     const { result: initialized, error } = await this.getSpaceResourcesInitializationPromise(

@@ -74,14 +74,10 @@ triggers:
           type: integer
 
 steps:
-  # A space whose alerts index has not been created yet (no rule has ever
-  # written an alert there) is a quiet run, not a failure. ES|QL has no
-  # `ignore_unavailable`, and `FROM` on a missing index is a hard
-  # `Unknown index` error, so existence is checked first and `retrieve_alert_ids`
-  # is skipped when the index is absent. Gating the query rather than loosening
-  # it keeps every other ES|QL error (syntax, mapping, privilege) fatal. The
-  # alias is checked, not a concrete backing index, so a rolled-over index still
-  # counts as present.
+  # ES|QL has no `ignore_unavailable`: `FROM` on a space with no alerts index yet
+  # is a hard `Unknown index` error. Gating the query, rather than loosening it,
+  # keeps every other ES|QL error fatal. The alias is checked, so a rolled-over
+  # index still counts as present.
   - name: check_alerts_index
     type: elasticsearch.indices.exists
     with:
