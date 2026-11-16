@@ -32,6 +32,8 @@ const setAnomalyThreshold = async (kbnClient: KbnClient, anomalyThreshold: numbe
   });
 };
 
+// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
+// serverless, or update its tags so that it does.
 test.describe('Metrics UI Anomaly Flyout', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, kbnClient, page }) => {
     // Repair state left by a previously interrupted run, and isolate tests that mutate

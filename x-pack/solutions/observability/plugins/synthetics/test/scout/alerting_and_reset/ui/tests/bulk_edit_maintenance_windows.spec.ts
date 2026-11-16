@@ -64,6 +64,8 @@ const capture = async (page: ScoutPage, testInfo: CaptureTestInfo, name: string)
   await testInfo.attach(name, { path: filePath, contentType: 'image/png' });
 };
 
+// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
+// serverless, or update its tags so that it does.
 test.describe('Bulk edit — maintenance windows', { tag: tags.stateful.classic }, () => {
   let maintenanceWindow: MaintenanceWindow;
 

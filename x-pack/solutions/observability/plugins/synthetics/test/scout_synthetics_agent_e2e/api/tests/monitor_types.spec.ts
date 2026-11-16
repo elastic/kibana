@@ -99,6 +99,8 @@ const assertBrowserJourneyStep = async (
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet synthetics_agent_e2e
  *   node scripts/scout run-tests --arch stateful --domain classic --config x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/playwright.config.ts
  */
+// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
+// serverless, or update its tags so that it does.
 apiTest.describe(
   'Synthetics real-agent monitor types',
   { tag: ['@local-stateful-classic'] },

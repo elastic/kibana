@@ -10,6 +10,8 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 import { FormMonitorType, monitorConfigurations } from '../../../common/ui/fixtures/constants';
 
+// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
+// serverless, or update its tags so that it does.
 test.describe('AddMonitor', { tag: tags.stateful.classic }, () => {
   let locationLabel: string;
   let configs: ReturnType<typeof monitorConfigurations>;

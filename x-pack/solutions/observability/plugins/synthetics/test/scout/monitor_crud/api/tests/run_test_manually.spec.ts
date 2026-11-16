@@ -41,6 +41,8 @@ const ROLE_CONFIGS = {
   },
 } satisfies Record<string, KibanaRole>;
 
+// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
+// serverless, or update its tags so that it does.
 apiTest.describe('RunTestManuallyPermissions', { tag: ['@local-stateful-classic'] }, () => {
   let allHeaders: Record<string, string>;
   let readOnlyHeaders: Record<string, string>;

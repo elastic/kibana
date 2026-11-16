@@ -10,6 +10,8 @@ import { expect } from '@kbn/scout-oblt/api';
 import { DEFAULT_SETTINGS } from '../../../../../server/services/slo_settings_repository';
 import { apiTest, mergeSloApiHeaders } from '../../fixtures';
 
+// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
+// serverless, or update its tags so that it does.
 apiTest.describe('SLO settings API (stateful)', { tag: [...tags.stateful.classic] }, () => {
   apiTest('PUT updates settings', async ({ apiClient, requestAuth }) => {
     const { apiKeyHeader } = await requestAuth.getApiKey('admin');

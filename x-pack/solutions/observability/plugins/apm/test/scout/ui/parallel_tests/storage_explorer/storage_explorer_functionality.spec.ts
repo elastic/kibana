@@ -16,6 +16,8 @@ const timeRange = {
   rangeTo: testData.END_DATE,
 };
 
+// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
+// serverless, or update its tags so that it does.
 test.describe('Storage Explorer - Admin User', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     // Use privileged user (admin) to ensure we have all necessary permissions

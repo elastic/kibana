@@ -13,6 +13,8 @@ import { waitForApmAppMenuReady } from '../../fixtures/page_helpers';
 const APM_INDICES_SAVED_OBJECT_TYPE = 'apm-indices';
 const APM_INDICES_SAVED_OBJECT_ID = 'apm-indices';
 
+// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
+// serverless, or update its tags so that it does.
 test.describe('Indices', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ kbnClient }) => {
     // The settings are persisted as the `apm-indices` saved object. Deleting it

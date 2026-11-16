@@ -39,6 +39,8 @@ const CASE_PAYLOAD = {
   owner: OBSERVABILITY_OWNER,
 };
 
+// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
+// serverless, or update its tags so that it does.
 test.describe(
   'Observability Alerting - add to case for classic alerts',
   { tag: tags.stateful.classic },

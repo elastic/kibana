@@ -105,6 +105,8 @@ function createServiceMapAlertBadgeTest(alertIndex: string) {
   };
 }
 
+// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
+// serverless, or update its tags so that it does.
 test.describe('Service map - active alert badge on node', () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
