@@ -17,6 +17,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   FAILED_SPAN_CONDITION,
   LatencyMap,
+  TRACE_CONDITION_FIELDS,
   isFailedOnlyCondition,
   isOperationCondition,
   isSelectionCondition,
@@ -84,6 +85,31 @@ export function TracesLatencyMapView({
   // 'Browser' resolves to the browser's own zone, which is also what the map defaults to.
   const timeZone = getTimeZoneFromSettings(services.uiSettings.get<string>('dateFormat:tz'));
 
+  // Whether a written clause still needs `SET unmapped_fields="NULLIFY"`: one field-caps
+  // call per pattern says if every field the clauses reference is mapped somewhere under
+  // it - then the SET is dropped and the user's query stays as short as it can be. Until
+  // the answer arrives, or if the check fails, the safe default keeps the SET.
+  const nullifyRef = useRef(true);
+  useEffect(() => {
+    nullifyRef.current = true;
+    const controller = new AbortController();
+    services.dataViews
+      .getFieldsForWildcard({
+        pattern: indexPattern,
+        fields: [...TRACE_CONDITION_FIELDS],
+        abortSignal: controller.signal,
+      })
+      .then((fields) => {
+        if (controller.signal.aborted) return;
+        const mapped = new Set(fields.map((field) => field.name));
+        nullifyRef.current = !TRACE_CONDITION_FIELDS.every((name) => mapped.has(name));
+      })
+      .catch(() => {
+        // The default stands: a clause with the SET always runs.
+      });
+    return () => controller.abort();
+  }, [services.dataViews, indexPattern]);
+
   const runEsql: RunEsql = useCallback(
     async (query, options) => {
       try {
@@ -110,7 +136,7 @@ export function TracesLatencyMapView({
           .filter(isSelectionCondition)
           .reduce(removeWhere, query);
         return esqlCondition
-          ? appendMapClause(withoutSelection, esqlCondition)
+          ? appendMapClause(withoutSelection, esqlCondition, { nullify: nullifyRef.current })
           : removeMapSetResidue(withoutSelection);
       });
     },
@@ -127,7 +153,7 @@ export function TracesLatencyMapView({
         const withoutOperation = extractFilters(query)
           .filter(isOperationCondition)
           .reduce(removeWhere, query);
-        return appendMapClause(withoutOperation, esqlCondition);
+        return appendMapClause(withoutOperation, esqlCondition, { nullify: nullifyRef.current });
       });
     },
     [updateESQLQuery]
@@ -165,7 +191,9 @@ export function TracesLatencyMapView({
           .filter(isFailedOnlyCondition)
           .reduce(removeWhere, query);
         return next
-          ? appendMapClause(withoutFailedOnly, FAILED_SPAN_CONDITION)
+          ? appendMapClause(withoutFailedOnly, FAILED_SPAN_CONDITION, {
+              nullify: nullifyRef.current,
+            })
           : removeMapSetResidue(withoutFailedOnly);
       });
     },

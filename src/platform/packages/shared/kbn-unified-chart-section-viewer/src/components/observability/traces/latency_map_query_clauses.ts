@@ -37,11 +37,17 @@ const MAP_SET_PREFIX = 'SET unmapped_fields="NULLIFY";\n';
  * Append a WHERE clause the map writes. It names fields of every trace family (`duration` of
  * OTel, `span.duration.us` of classic APM, `status.code`), and a source that maps only some of
  * them would fail with an unknown column, so the query gets `SET unmapped_fields="NULLIFY"`, as
- * the map's own queries have, unless it already sets it.
+ * the map's own queries have, unless it already sets it - or unless the host knows every
+ * referenced field is mapped (`nullify: false`, from a field-caps check), which keeps the
+ * user's query as short as it can be.
  */
-export const appendMapClause = (query: string, clause: string) => {
+export const appendMapClause = (
+  query: string,
+  clause: string,
+  { nullify = true }: { nullify?: boolean } = {}
+) => {
   const appended = appendToESQLQuery(query, `| WHERE ${clause}`);
-  return UNMAPPED_FIELDS_SET.test(appended) ? appended : `${MAP_SET_PREFIX}${appended}`;
+  return !nullify || UNMAPPED_FIELDS_SET.test(appended) ? appended : `${MAP_SET_PREFIX}${appended}`;
 };
 
 const isMapClause = (condition: string) =>

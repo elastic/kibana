@@ -13,6 +13,7 @@ import { getESQLResults } from '@kbn/esql-utils';
 import {
   FAILED_SPAN_CONDITION,
   LatencyMap,
+  TRACE_CONDITION_FIELDS,
   operationToEsqlCondition,
   selectionToEsqlCondition,
 } from '@kbn/trace-latency-map';
@@ -47,9 +48,12 @@ const cell = {
   failed: 2,
 };
 
+// Unresolved by default: the SET stays until field caps has answered, as in the view.
+const getFieldsForWildcard = jest.fn((): Promise<Array<{ name: string }>> => new Promise(() => {}));
 const services = {
   uiSettings: { get: jest.fn().mockReturnValue('Browser') },
   data: { search: { search: jest.fn() } },
+  dataViews: { getFieldsForWildcard },
 } as unknown as TracesLatencyMapViewProps['services'];
 
 const renderView = (overrides: Partial<TracesLatencyMapViewProps> = {}) => {
@@ -74,6 +78,7 @@ const SET_NULLIFY = 'SET unmapped_fields="NULLIFY";\n';
 
 describe('TracesLatencyMapView', () => {
   beforeEach(() => {
+    getFieldsForWildcard.mockImplementation(() => new Promise(() => {}));
     jest.mocked(LatencyMap).mockClear();
     jest.mocked(getESQLResults).mockReset();
   });
@@ -147,6 +152,38 @@ describe('TracesLatencyMapView', () => {
     expect(updater(`FROM traces-apm*\n| WHERE ${condition}`)).toBe('FROM traces-apm*');
     expect(updater(`${SET_NULLIFY}FROM traces-apm*\n| WHERE ${condition}`)).toBe(
       'FROM traces-apm*'
+    );
+  });
+
+  it('drops the SET once field caps says every referenced field is mapped', async () => {
+    getFieldsForWildcard.mockResolvedValueOnce(TRACE_CONDITION_FIELDS.map((name) => ({ name })));
+    const { actions, mapProps } = renderView();
+    // Let the field-caps answer land before committing.
+    await act(async () => {});
+    mapProps.onSelectionCommit(selection, selectionClause);
+    const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
+    expect(updater('FROM traces-apm*')).toBe(`FROM traces-apm*\n| WHERE ${selectionClause}`);
+  });
+
+  it('keeps the SET while a referenced field is missing from the pattern', async () => {
+    getFieldsForWildcard.mockResolvedValueOnce([{ name: 'transaction.duration.us' }]);
+    const { actions, mapProps } = renderView();
+    await act(async () => {});
+    mapProps.onSelectionCommit(selection, selectionClause);
+    const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
+    expect(updater('FROM traces-apm*')).toBe(
+      `${SET_NULLIFY}FROM traces-apm*\n| WHERE ${selectionClause}`
+    );
+  });
+
+  it('keeps the SET when the field check fails: the safe default always runs', async () => {
+    getFieldsForWildcard.mockRejectedValueOnce(new Error('no caps'));
+    const { actions, mapProps } = renderView();
+    await act(async () => {});
+    mapProps.onSelectionCommit(selection, selectionClause);
+    const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
+    expect(updater('FROM traces-apm*')).toBe(
+      `${SET_NULLIFY}FROM traces-apm*\n| WHERE ${selectionClause}`
     );
   });
 

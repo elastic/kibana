@@ -20,6 +20,22 @@ export const SERVICE_NAME_FIELD = 'service.name';
 /** The fields that name a span's operation: classic transaction, classic span, OTel span. */
 export const OPERATION_NAME_FIELDS = ['transaction.name', 'span.name', 'name'];
 
+/**
+ * Every raw field a condition this package writes may reference (`selectionToEsqlCondition`,
+ * `FAILED_SPAN_CONDITION`, `operationToEsqlCondition`). A host can check these against its
+ * source (field caps) to know whether a written clause needs `SET unmapped_fields="NULLIFY"`:
+ * when all of them are mapped somewhere under the pattern, the clause runs without it.
+ */
+export const TRACE_CONDITION_FIELDS = [
+  TRANSACTION_DURATION_FIELD,
+  SPAN_DURATION_FIELD,
+  OTEL_DURATION,
+  EVENT_OUTCOME_FIELD,
+  OTEL_STATUS_CODE,
+  ...OPERATION_NAME_FIELDS,
+  SERVICE_NAME_FIELD,
+];
+
 /** Classic APM data streams, legacy APM indices, and OTel-native traces. */
 export const TRACES_INDEX_PATTERN = 'traces-apm*, apm-*, traces-*.otel-*';
 

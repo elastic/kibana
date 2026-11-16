@@ -53,6 +53,12 @@ describe('appendMapClause', () => {
     expect(appendMapClause(own, clause)).toBe(appendToESQLQuery(own, `| WHERE ${clause}`));
   });
 
+  it('writes no SET when the host knows every referenced field is mapped', () => {
+    expect(appendMapClause(query, clause, { nullify: false })).toBe(
+      appendToESQLQuery(query, `| WHERE ${clause}`)
+    );
+  });
+
   it('removes the clause again', () => {
     expect(removeWhere(appendMapClause(query, clause), clause)).toBe(
       `SET unmapped_fields="NULLIFY";\n${query}`

@@ -18,7 +18,11 @@ export {
 export { operationToEsqlCondition } from './src/operations/to_esql';
 export { isOperationCondition, parseOperationCondition } from './src/operations/from_esql';
 export type { LatencyMapOperation } from './src/operations/operation_bands';
-export { FAILED_SPAN_CONDITION, TRACES_INDEX_PATTERN } from './src/query/fields';
+export {
+  FAILED_SPAN_CONDITION,
+  TRACES_INDEX_PATTERN,
+  TRACE_CONDITION_FIELDS,
+} from './src/query/fields';
 export type {
   DurationStats,
   LatencyMapCell,
