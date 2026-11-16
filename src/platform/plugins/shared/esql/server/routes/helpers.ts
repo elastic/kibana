@@ -17,14 +17,12 @@ export const createScopedModel = async ({
   inference,
   request,
   connectorId,
-  chatModelOptions = {},
 }: {
   inference: InferenceServerStart;
   request: KibanaRequest;
   connectorId: string;
-  chatModelOptions?: { temperature?: number };
 }): Promise<ScopedModel> => {
-  const chatModel = await inference.getChatModel({ request, connectorId, chatModelOptions });
+  const chatModel = await inference.getChatModel({ request, connectorId, chatModelOptions: {} });
   const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
   const connector = await inference.getConnectorById(connectorId, request);
 

@@ -10,6 +10,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import type { OptimizeQueryResponse } from '@kbn/esql-types';
 import { OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
+import { isNoAiConnectorError } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { QueryProfileView } from './query_profile_model';
 import { buildProfileContext } from './profile_prompt_context';
@@ -19,34 +20,6 @@ export interface FasterQuerySuggestion {
   /** A rewritten query, or undefined when the AI found no safe improvement. */
   query?: string;
   reason: string;
-}
-
-// Only an available answer is kept. HttpStart outlives a visit to Discover, so a user who sets up a
-// connector after seeing "unavailable" must not stay stuck on that answer.
-const availability = new WeakMap<object, Promise<boolean>>();
-
-/**
- * Tells whether an AI connector is available, so the action can be hidden when it is not.
- * A positive answer is kept per http service, so the server is asked once per page for it.
- */
-export function checkFasterQueryAvailable(http: Pick<HttpStart, 'get'>): Promise<boolean> {
-  const known = availability.get(http);
-  if (known) {
-    return known;
-  }
-
-  const request = http
-    .get<{ available?: boolean }>(OPTIMIZE_QUERY_ROUTE)
-    .then((response) => response.available === true)
-    .catch(() => false)
-    .then((isAvailable) => {
-      if (!isAvailable) {
-        availability.delete(http);
-      }
-      return isAvailable;
-    });
-  availability.set(http, request);
-  return request;
 }
 
 /** Asks the AI for a faster query that should return the same results as the profiled one. */
@@ -68,7 +41,13 @@ export async function suggestFasterQuery({
     });
     return { query: response.query ?? undefined, reason: response.reason };
   } catch (caught: unknown) {
-    throw new Error(readFailureMessage(caught));
+    throw new SuggestFasterQueryFailure(readFailureMessage(caught), isNoAiConnectorError(caught));
+  }
+}
+
+export class SuggestFasterQueryFailure extends Error {
+  constructor(message: string, public readonly isNoConnector: boolean) {
+    super(message);
   }
 }
 

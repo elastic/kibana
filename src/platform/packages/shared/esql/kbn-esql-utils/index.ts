@@ -133,3 +133,5 @@ export {
 } from './src';
 
 export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';
+
+export { getConnectorsUrl, isNoAiConnectorError } from './src/utils/ai_connector';

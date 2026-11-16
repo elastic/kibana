@@ -19,16 +19,30 @@ export const useTimelineStyles = () => {
     lanes: css`
       max-height: ${euiTheme.base * 22}px;
       overflow-y: auto;
+      /* The ruler's z-index stays inside the lanes, so it does not compete with anything outside. */
+      isolation: isolate;
     `,
     ruler: css`
       position: sticky;
       top: 0;
-      z-index: ${euiTheme.levels.content};
+      /* Above the bars, which are positioned too and would otherwise draw over the ruler. */
+      z-index: ${euiTheme.levels.menu};
       display: grid;
       grid-template-columns: ${labelColumn};
       gap: ${euiTheme.size.s};
       padding: ${euiTheme.size.xs};
       background: ${euiTheme.colors.backgroundBasePlain};
+
+      /* Rows fade out under the ruler, so a row that is half scrolled away is not cut at its line. */
+      &::after {
+        content: '';
+        position: absolute;
+        inset-inline: 0;
+        top: 100%;
+        height: ${euiTheme.size.base};
+        background: linear-gradient(${euiTheme.colors.backgroundBasePlain}, transparent);
+        pointer-events: none;
+      }
     `,
     rulerTrack: css`
       position: relative;

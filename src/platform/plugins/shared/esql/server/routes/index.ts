@@ -32,8 +32,7 @@ export const registerRoutes = (
   setup: CoreSetup<EsqlServerPluginStart>,
   extensionsRegistry: ESQLExtensionsRegistry,
   initContext: PluginInitializerContext,
-  explainError: ExplainErrorRouteOptions,
-  hasEnterpriseLicense: () => Promise<boolean>
+  explainError: ExplainErrorRouteOptions
 ) => {
   const router = setup.http.createRouter();
 
@@ -50,6 +49,6 @@ export const registerRoutes = (
   registerGetSourceInfoRoute(router, initContext);
   registerNLtoESQLRoute(router, setup.getStartServices, initContext);
   registerSuggestFixRoute(router, setup.getStartServices, initContext);
-  registerOptimizeQueryRoute(router, setup.getStartServices, initContext, hasEnterpriseLicense);
+  registerOptimizeQueryRoute(router, setup.getStartServices, initContext);
   registerExplainErrorRoute(router, setup.getStartServices, initContext, explainError);
 };

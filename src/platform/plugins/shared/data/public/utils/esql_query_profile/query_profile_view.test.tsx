@@ -14,7 +14,10 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { RequestStatistics } from '@kbn/inspector-plugin/common';
-import type { HttpStart } from '@kbn/core/public';
+import type { ApplicationStart, HttpStart } from '@kbn/core/public';
+import { NO_AI_CONNECTOR_ERROR_CODE } from '@kbn/esql-types';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { of } from 'rxjs';
 import type { ISearchStart } from '../../search';
 import { getEsqlQueryProfileViewDescription } from '.';
 import { QueryProfileView } from './query_profile_view';
@@ -100,6 +103,7 @@ describe('getEsqlQueryProfileViewDescription', () => {
   const view = getEsqlQueryProfileViewDescription(() => ({
     search: {} as ISearchStart,
     http: {} as HttpStart,
+    application: {} as ApplicationStart,
   }));
 
   it('shows for an ES|QL request and stays hidden for DSL and SQL', () => {
@@ -358,10 +362,22 @@ describe('QueryProfileView faster query suggestion', () => {
   const ORIGINAL = 'FROM logs | WHERE x > 0';
   const SUGGESTED = 'FROM logs | KEEP x | WHERE x > 0';
 
+  const licensingWith = (hasEnterprise: boolean) =>
+    ({
+      license$: of({ isActive: true, hasAtLeast: () => hasEnterprise }),
+    } as unknown as LicensingPluginStart);
+
   const setup = (
     suggestedResponse: { columns: object[]; values: unknown[][] },
-    { available = true }: { available?: boolean } = {}
+    { hasEnterprise = true }: { hasEnterprise?: boolean } = {}
   ) => {
+    const application = {
+      capabilities: {
+        management: { insightsAndAlerting: { triggersActionsConnectors: true } },
+      },
+      getUrlForApp: () =>
+        '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors',
+    } as unknown as ApplicationStart;
     const esql = jest.fn(async ({ query }: { query: string }) => ({
       rawResponse:
         query === SUGGESTED
@@ -369,7 +385,6 @@ describe('QueryProfileView faster query suggestion', () => {
           : { profile: slowProfile, columns, values },
     }));
     const post = jest.fn();
-    const get = jest.fn().mockResolvedValue({ available });
     const requests = new RequestAdapter();
     logRequest(requests, 'Documents', {
       query: ORIGINAL,
@@ -380,10 +395,12 @@ describe('QueryProfileView faster query suggestion', () => {
       <QueryProfileView
         adapters={{ requests }}
         search={{ esql } as unknown as Pick<ISearchStart, 'esql'>}
-        http={{ get, post } as never}
+        http={{ post } as never}
+        licensing={licensingWith(hasEnterprise)}
+        application={application}
       />
     );
-    return { esql, post, get };
+    return { esql, post };
   };
 
   it('suggests a query without running it, then profiles it on request and compares', async () => {
@@ -418,11 +435,10 @@ describe('QueryProfileView faster query suggestion', () => {
     );
   });
 
-  it('hides the action when no AI connector is available', async () => {
-    const { get } = setup({ columns, values }, { available: false });
+  it('hides the action without an enterprise license', async () => {
+    setup({ columns, values }, { hasEnterprise: false });
 
     await screen.findByTestId('esqlQueryProfileDuration');
-    await waitFor(() => expect(get).toHaveBeenCalledWith('/internal/esql/optimize_query'));
     expect(screen.queryByTestId('esqlQueryProfileSuggest')).not.toBeInTheDocument();
   });
 
@@ -458,6 +474,24 @@ describe('QueryProfileView faster query suggestion', () => {
 
     expect(await screen.findByText('No AI connector available.')).toBeInTheDocument();
     expect(screen.getByText('Unable to suggest a faster query')).toBeInTheDocument();
+  });
+
+  it('says no connector is set up and links to where to set one up', async () => {
+    const { post } = setup({ columns, values });
+    post.mockRejectedValue({
+      body: {
+        message: 'No AI connector available.',
+        attributes: { code: NO_AI_CONNECTOR_ERROR_CODE },
+      },
+    });
+
+    await userEvent.click(await screen.findByTestId('esqlQueryProfileSuggest'));
+
+    expect(await screen.findByText('No AI connector is set up.')).toBeInTheDocument();
+    expect(screen.getByTestId('esqlQueryProfileSetUpConnector')).toHaveAttribute(
+      'href',
+      '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors'
+    );
   });
 
   it('does not offer the suggestion without an http service', async () => {

@@ -22,7 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { getConnectorsUrl, hasTransformationalCommand } from '@kbn/esql-utils';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
 import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
@@ -418,13 +418,7 @@ export function DiscoverLayout() {
   }, [customizationContext.displayMode, euiTheme.size.xxl, isProjectChromeStyle]);
 
   const hasEnterpriseLicense = useHasEnterpriseLicense(licensing);
-  const connectorsUrl = core.application.capabilities.management?.insightsAndAlerting
-    ?.triggersActionsConnectors
-    ? core.application.getUrlForApp('management', {
-        deepLinkId: 'triggersActionsConnectors',
-        path: '/connectors',
-      })
-    : undefined;
+  const connectorsUrl = getConnectorsUrl(core.application);
   const errorAiHelp =
     dataState.error && isEsqlMode && isOfAggregateQueryType(query) && hasEnterpriseLicense ? (
       <EsqlErrorHelp

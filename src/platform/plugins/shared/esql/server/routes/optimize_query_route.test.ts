@@ -9,7 +9,7 @@
 
 import { Subject } from 'rxjs';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
-import { OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
+import { NO_AI_CONNECTOR_ERROR_CODE, OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
 import { registerOptimizeQueryRoute } from './optimize_query_route';
 import type { EsqlServerPluginStart } from '../types';
 
@@ -20,13 +20,9 @@ jest.mock('./helpers', () => ({
 
 const { resolveConnectorId, createScopedModel } = jest.requireMock('./helpers');
 
-function buildMocks({ hasEnterpriseLicense = true }: { hasEnterpriseLicense?: boolean } = {}) {
+function buildMocks() {
   const handler = jest.fn();
-  const availabilityHandler = jest.fn();
   const router = {
-    get: jest.fn((_, h) => {
-      availabilityHandler.mockImplementation(h);
-    }),
     post: jest.fn((_, h) => {
       handler.mockImplementation(h);
     }),
@@ -43,14 +39,12 @@ function buildMocks({ hasEnterpriseLicense = true }: { hasEnterpriseLicense?: bo
   registerOptimizeQueryRoute(
     router as unknown as IRouter,
     getStartServices as unknown as CoreSetup<EsqlServerPluginStart>['getStartServices'],
-    context as unknown as PluginInitializerContext,
-    async () => hasEnterpriseLicense
+    context as unknown as PluginInitializerContext
   );
 
   return {
     router,
     handler,
-    availabilityHandler,
     response,
     requestHandlerContext: { core: Promise.resolve({}) },
     request: {
@@ -72,35 +66,6 @@ const modelReturning = (result: unknown) => {
 describe('registerOptimizeQueryRoute', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  describe('availability', () => {
-    it('reports available when a connector can be resolved, without calling the model', async () => {
-      const { router, availabilityHandler, requestHandlerContext, request, response } =
-        buildMocks();
-      resolveConnectorId.mockResolvedValue('connector-1');
-
-      expect(router.get).toHaveBeenCalledWith(
-        expect.objectContaining({ path: OPTIMIZE_QUERY_ROUTE }),
-        expect.any(Function)
-      );
-      await availabilityHandler(requestHandlerContext, request, response);
-
-      expect(response.ok).toHaveBeenCalledWith({ body: { available: true } });
-      expect(createScopedModel).not.toHaveBeenCalled();
-    });
-
-    it('reports unavailable without a connector, and when the lookup fails', async () => {
-      const { availabilityHandler, requestHandlerContext, request, response } = buildMocks();
-
-      resolveConnectorId.mockResolvedValueOnce(undefined);
-      await availabilityHandler(requestHandlerContext, request, response);
-      expect(response.ok).toHaveBeenLastCalledWith({ body: { available: false } });
-
-      resolveConnectorId.mockRejectedValueOnce(new Error('license'));
-      await availabilityHandler(requestHandlerContext, request, response);
-      expect(response.ok).toHaveBeenLastCalledWith({ body: { available: false } });
-    });
-  });
-
   it('rejects a query or a profile that is too long', () => {
     const { router } = buildMocks();
     const [{ path, validate }] = router.post.mock.calls[0];
@@ -112,13 +77,15 @@ describe('registerOptimizeQueryRoute', () => {
     expect(() => body.validate({ queryString: 'q', profileContext: 'p' })).not.toThrow();
   });
 
-  it('returns 400 when no connector is configured', async () => {
+  it('returns 400 with a code the UI can recognize when no connector is configured', async () => {
     const { handler, requestHandlerContext, request, response } = buildMocks();
     resolveConnectorId.mockResolvedValue(undefined);
 
     await handler(requestHandlerContext, request, response);
 
-    expect(response.badRequest).toHaveBeenCalled();
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: expect.objectContaining({ attributes: { code: NO_AI_CONNECTOR_ERROR_CODE } }),
+    });
     expect(createScopedModel).not.toHaveBeenCalled();
   });
 
@@ -142,18 +109,6 @@ describe('registerOptimizeQueryRoute', () => {
     const [messages] = invoke.mock.calls[0];
     expect(JSON.stringify(messages)).toContain('FROM logs | WHERE x > 1');
     expect(JSON.stringify(messages)).toContain('profile text');
-  });
-
-  it('asks the model for a deterministic answer, so the same query gets the same rewrite', async () => {
-    const { handler, requestHandlerContext, request, response } = buildMocks();
-    resolveConnectorId.mockResolvedValue('connector-1');
-    modelReturning({ canImprove: false, query: '', reason: 'Already efficient.' });
-
-    await handler(requestHandlerContext, request, response);
-
-    expect(createScopedModel).toHaveBeenCalledWith(
-      expect.objectContaining({ connectorId: 'connector-1', chatModelOptions: { temperature: 0 } })
-    );
   });
 
   it('returns no query when the model finds no safe improvement', async () => {
@@ -210,31 +165,5 @@ describe('registerOptimizeQueryRoute', () => {
     request.events.aborted$.next();
     request.events.aborted$.complete();
     expect(signal.aborted).toBe(true);
-  });
-
-  describe('license', () => {
-    it('reports unavailable without an enterprise license, even with a connector', async () => {
-      const { availabilityHandler, requestHandlerContext, request, response } = buildMocks({
-        hasEnterpriseLicense: false,
-      });
-      resolveConnectorId.mockResolvedValue('connector-1');
-
-      await availabilityHandler(requestHandlerContext, request, response);
-
-      expect(response.ok).toHaveBeenCalledWith({ body: { available: false } });
-      expect(resolveConnectorId).not.toHaveBeenCalled();
-    });
-
-    it('refuses to suggest without an enterprise license, without calling the model', async () => {
-      const { handler, requestHandlerContext, request, response } = buildMocks({
-        hasEnterpriseLicense: false,
-      });
-      resolveConnectorId.mockResolvedValue('connector-1');
-
-      await handler(requestHandlerContext, request, response);
-
-      expect(response.forbidden).toHaveBeenCalled();
-      expect(createScopedModel).not.toHaveBeenCalled();
-    });
   });
 });

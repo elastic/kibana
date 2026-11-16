@@ -8,7 +8,8 @@
  */
 
 import React, { lazy } from 'react';
-import type { HttpStart } from '@kbn/core/public';
+import type { ApplicationStart, HttpStart } from '@kbn/core/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { InspectorViewProps } from '@kbn/inspector-plugin/public';
 import type { ISearchStart } from '../../search';
 
@@ -18,8 +19,23 @@ const QueryProfileView = lazy(() =>
 
 /** Returns the lazy panel registered as the Query profile inspector view. */
 export const getQueryProfileViewComponent =
-  (getStartServices: () => { search: ISearchStart; http: HttpStart }) =>
+  (
+    getStartServices: () => {
+      search: ISearchStart;
+      http: HttpStart;
+      licensing?: LicensingPluginStart;
+      application: ApplicationStart;
+    }
+  ) =>
   ({ adapters }: InspectorViewProps) => {
-    const { search, http } = getStartServices();
-    return <QueryProfileView adapters={adapters} search={search} http={http} />;
+    const { search, http, licensing, application } = getStartServices();
+    return (
+      <QueryProfileView
+        adapters={adapters}
+        search={search}
+        http={http}
+        licensing={licensing}
+        application={application}
+      />
+    );
   };

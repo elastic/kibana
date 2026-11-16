@@ -30,7 +30,7 @@ import type { ResultsVerdict } from './compare_results';
 import { loadEsqlQueryProfile } from './load_esql_query_profile';
 import { readErrorMessage } from './read_error_message';
 import { formatChange, formatDurationMillis } from './profile_format';
-import { checkFasterQueryAvailable, suggestFasterQuery } from './suggest_faster_query';
+import { SuggestFasterQueryFailure, suggestFasterQuery } from './suggest_faster_query';
 
 type Stage =
   | { kind: 'idle' }
@@ -39,15 +39,18 @@ type Stage =
   | { kind: 'suggested'; query: string; reason: string }
   | { kind: 'profiling'; query: string; reason: string }
   | { kind: 'compared'; query: string; reason: string; view: QueryProfileView }
-  | { kind: 'error'; message: string };
+  | { kind: 'error'; message: string; isNoConnector: boolean };
 
-const errorMessage = (caught: unknown): string =>
-  readErrorMessage(
+const failedWith = (caught: unknown): Stage => ({
+  kind: 'error',
+  message: readErrorMessage(
     caught,
     i18n.translate('data.inspector.queryProfile.suggestionFailedMessage', {
       defaultMessage: 'Something went wrong while checking the suggested query.',
     })
-  );
+  ),
+  isNoConnector: caught instanceof SuggestFasterQueryFailure && caught.isNoConnector,
+});
 
 /** Flush left aligns a lone button with the text above it. Next to another button it needs its padding. */
 function DismissButton({ onClick, isAlone = true }: { onClick: () => void; isAlone?: boolean }) {
@@ -172,6 +175,7 @@ type SuggestedStage = Extract<Stage, { kind: 'suggested' | 'profiling' | 'compar
 interface SuggestionBodyProps {
   stage: Stage;
   originalView: QueryProfileView;
+  connectorsUrl?: string;
   onProfile: (query: string, reason: string) => void;
   onDismiss: () => void;
 }
@@ -245,7 +249,13 @@ function SuggestedQuery({
 }
 
 /** What the panel shows for each stage of asking for, and then checking, a suggestion. */
-function SuggestionBody({ stage, originalView, onProfile, onDismiss }: SuggestionBodyProps) {
+function SuggestionBody({
+  stage,
+  originalView,
+  connectorsUrl,
+  onProfile,
+  onDismiss,
+}: SuggestionBodyProps) {
   switch (stage.kind) {
     case 'idle':
       return null;
@@ -266,10 +276,40 @@ function SuggestionBody({ stage, originalView, onProfile, onDismiss }: Suggestio
             title={i18n.translate('data.inspector.queryProfile.suggestionErrorTitle', {
               defaultMessage: 'Unable to suggest a faster query',
             })}
-            text={<p>{stage.message}</p>}
+            text={
+              <p>
+                {stage.isNoConnector ? (
+                  <FormattedMessage
+                    id="data.inspector.queryProfile.noConnectorMessage"
+                    defaultMessage="No AI connector is set up."
+                  />
+                ) : (
+                  stage.message
+                )}
+              </p>
+            }
           />
           <EuiSpacer size="s" />
-          <DismissButton onClick={onDismiss} />
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <DismissButton onClick={onDismiss} />
+            </EuiFlexItem>
+            {stage.isNoConnector && connectorsUrl ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="plugs"
+                  href={connectorsUrl}
+                  data-test-subj="esqlQueryProfileSetUpConnector"
+                >
+                  <FormattedMessage
+                    id="data.inspector.queryProfile.setUpConnectorLabel"
+                    defaultMessage="Set up a connector"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </>
       );
     case 'noSuggestion':
@@ -309,27 +349,18 @@ export function FasterQuerySuggestion({
   requestJson,
   originalQuery,
   originalView,
+  connectorsUrl,
 }: {
-  http: Pick<HttpStart, 'get' | 'post'>;
+  http: Pick<HttpStart, 'post'>;
   search: Pick<ISearchStart, 'esql'>;
   requestJson: object;
   originalQuery: string;
   originalView: QueryProfileView;
+  /** Where to set up an AI connector, when the user may. Shown when there is none. */
+  connectorsUrl?: string;
 }) {
   const [stage, setStage] = useState<Stage>({ kind: 'idle' });
-  const [isAvailable, setIsAvailable] = useState(false);
 
-  useEffect(() => {
-    let isCurrent = true;
-    checkFasterQueryAvailable(http).then((available) => {
-      if (isCurrent) {
-        setIsAvailable(available);
-      }
-    });
-    return () => {
-      isCurrent = false;
-    };
-  }, [http]);
   const controller = useRef<AbortController | undefined>();
 
   const cancel = () => {
@@ -369,7 +400,7 @@ export function FasterQuerySuggestion({
       );
     } catch (caught: unknown) {
       if (!signal.aborted) {
-        setStage({ kind: 'error', message: errorMessage(caught) });
+        setStage(failedWith(caught));
       }
     }
   };
@@ -388,7 +419,7 @@ export function FasterQuerySuggestion({
       }
     } catch (caught: unknown) {
       if (!signal.aborted) {
-        setStage({ kind: 'error', message: errorMessage(caught) });
+        setStage(failedWith(caught));
       }
     }
   };
@@ -397,10 +428,6 @@ export function FasterQuerySuggestion({
     cancel();
     setStage({ kind: 'idle' });
   };
-
-  if (!isAvailable) {
-    return null;
-  }
 
   if (stage.kind === 'idle') {
     // The wrapper keeps the button at its own width instead of stretching across the row.
@@ -450,6 +477,7 @@ export function FasterQuerySuggestion({
         <SuggestionBody
           stage={stage}
           originalView={originalView}
+          connectorsUrl={connectorsUrl}
           onProfile={profileSuggestion}
           onDismiss={dismiss}
         />

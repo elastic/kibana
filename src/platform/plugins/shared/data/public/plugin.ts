@@ -103,6 +103,8 @@ export class DataPublicPlugin
       getEsqlQueryProfileViewDescription(() => ({
         search: startServices().self.search,
         http: startServices().core.http,
+        licensing: startServices().plugins.licensing,
+        application: startServices().core.application,
       }))
     );
 

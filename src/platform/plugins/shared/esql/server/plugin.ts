@@ -11,8 +11,6 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { schema } from '@kbn/config-schema';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { firstValueFrom } from 'rxjs';
 import { getDeploymentInfo } from './deployment_info';
 import { getUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
@@ -27,7 +25,6 @@ export class EsqlServerPlugin
       {
         contentManagement: ContentManagementServerSetup;
         cloud?: CloudSetup;
-        licensing?: LicensingPluginSetup;
       },
       EsqlServerPluginStart
     >
@@ -44,7 +41,6 @@ export class EsqlServerPlugin
     plugins: {
       contentManagement: ContentManagementServerSetup;
       cloud?: CloudSetup;
-      licensing?: LicensingPluginSetup;
     }
   ) {
     const { initContext } = this;
@@ -59,21 +55,9 @@ export class EsqlServerPlugin
       }),
     });
 
-    registerRoutes(
-      core,
-      this.extensionsRegistry,
-      initContext,
-      { deployment: getDeploymentInfo(initContext.env, plugins.cloud) },
-      // Like the other AI features of ES|QL, these need an active enterprise license. Without the
-      // licensing plugin the license cannot be checked, so they stay off.
-      async () => {
-        if (!plugins.licensing) {
-          return false;
-        }
-        const license = await firstValueFrom(plugins.licensing.license$);
-        return license.isActive && license.hasAtLeast('enterprise');
-      }
-    );
+    registerRoutes(core, this.extensionsRegistry, initContext, {
+      deployment: getDeploymentInfo(initContext.env, plugins.cloud),
+    });
 
     return {
       getExtensionsRegistry: () => this.extensionsRegistry,

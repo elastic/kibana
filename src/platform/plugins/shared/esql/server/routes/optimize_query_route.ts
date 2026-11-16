@@ -13,7 +13,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
 import type { OptimizeQueryResponse } from '@kbn/esql-types';
-import { OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
+import { NO_AI_CONNECTOR_ERROR_CODE, OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
 import type { EsqlServerPluginStart } from '../types';
 import { createScopedModel, resolveConnectorId } from './helpers';
 
@@ -94,40 +94,8 @@ const normalize = (query: string): string => query.replace(/\s+/g, ' ').trim();
 export const registerOptimizeQueryRoute = (
   router: IRouter,
   getStartServices: CoreSetup<EsqlServerPluginStart>['getStartServices'],
-  context: PluginInitializerContext,
-  hasEnterpriseLicense: () => Promise<boolean>
+  context: PluginInitializerContext
 ) => {
-  // A cheap check, with no model call, so the UI can hide the action when it cannot be used: there
-  // is no enterprise license, or no AI connector.
-  router.get(
-    {
-      path: OPTIMIZE_QUERY_ROUTE,
-      validate: false,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route only reports whether an AI connector is available',
-        },
-      },
-    },
-    async (_requestHandlerContext, request, response) => {
-      try {
-        if (!(await hasEnterpriseLicense())) {
-          return response.ok({ body: { available: false } });
-        }
-        const [, { inference, searchInferenceEndpoints }] = await getStartServices();
-        const connectorId = await resolveConnectorId({
-          inference,
-          request,
-          searchInferenceEndpoints,
-        });
-        return response.ok({ body: { available: Boolean(connectorId) } });
-      } catch (error) {
-        return response.ok({ body: { available: false } });
-      }
-    }
-  );
-
   router.post(
     {
       path: OPTIMIZE_QUERY_ROUTE,
@@ -148,11 +116,6 @@ export const registerOptimizeQueryRoute = (
       const logger = context.logger.get();
       try {
         const { queryString, profileContext } = request.body;
-        if (!(await hasEnterpriseLicense())) {
-          return response.forbidden({
-            body: { message: 'Suggesting a faster query needs an enterprise license.' },
-          });
-        }
         const [, { inference, searchInferenceEndpoints }] = await getStartServices();
 
         const connectorId = await resolveConnectorId({
@@ -165,16 +128,12 @@ export const registerOptimizeQueryRoute = (
           return response.badRequest({
             body: {
               message: 'No AI connector available.',
+              attributes: { code: NO_AI_CONNECTOR_ERROR_CODE },
             },
           });
         }
 
-        const model = await createScopedModel({
-          inference,
-          request,
-          connectorId,
-          chatModelOptions: { temperature: 0 },
-        });
+        const model = await createScopedModel({ inference, request, connectorId });
         const result = await model.chatModel
           .withStructuredOutput(OptimizeQuerySchema, { name: 'suggest_faster_query' })
           // The UI aborts its request when the profile changes, so the model stops with it.
