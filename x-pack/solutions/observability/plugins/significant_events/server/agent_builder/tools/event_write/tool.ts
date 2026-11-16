@@ -478,22 +478,25 @@ export function createEventsWriteTool({
             logger,
             description: 'events_write telemetry',
             track: () =>
-              telemetry.trackAgentToolEventsWrite({
-                workflow_execution_id: workflowExecutionId,
-                ...alertCreationAttemptIdentity({
-                  spaceId: request.spaceId,
-                  eventId: eventsWriteResultEventId(result, input.event_id),
-                  groupHash: result.written && result.created ? result.group_hash : undefined,
-                }),
-                success: result.written || isSkipped,
-                event_id: result.event_id ?? 'unknown',
-                status: result.status,
-                written: result.written,
-                source_ids: input.source_ids,
-                ...detectionRunsOf(input),
-                error_message: isBulkError ? result.error.reason : undefined,
-                ...(result.written ? { severity: result.severity } : {}),
-              }),
+              telemetry.trackAgentToolEventsWrite(
+                {
+                  workflow_execution_id: workflowExecutionId,
+                  ...alertCreationAttemptIdentity({
+                    spaceId: request.spaceId,
+                    eventId: eventsWriteResultEventId(result, input.event_id),
+                    groupHash: result.written && result.created ? result.group_hash : undefined,
+                  }),
+                  success: result.written || isSkipped,
+                  event_id: result.event_id ?? 'unknown',
+                  status: result.status,
+                  written: result.written,
+                  source_ids: input.source_ids,
+                  ...detectionRunsOf(input),
+                  error_message: isBulkError ? result.error.reason : undefined,
+                  ...(result.written ? { severity: result.severity } : {}),
+                },
+                request
+              ),
           });
         });
 
@@ -528,19 +531,22 @@ export function createEventsWriteTool({
             logger,
             description: 'failed events_write telemetry',
             track: () =>
-              telemetry.trackAgentToolEventsWrite({
-                workflow_execution_id: workflowExecutionId,
-                ...alertCreationAttemptIdentity({
-                  spaceId: request.spaceId,
-                  eventId: input.event_id,
-                }),
-                success: false,
-                event_id: input.event_id ?? 'unknown',
-                written: false,
-                source_ids: 'source_ids' in input ? input.source_ids : [],
-                ...('source_ids' in input ? detectionRunsOf(input) : {}),
-                error_message: message,
-              }),
+              telemetry.trackAgentToolEventsWrite(
+                {
+                  workflow_execution_id: workflowExecutionId,
+                  ...alertCreationAttemptIdentity({
+                    spaceId: request.spaceId,
+                    eventId: input.event_id,
+                  }),
+                  success: false,
+                  event_id: input.event_id ?? 'unknown',
+                  written: false,
+                  source_ids: 'source_ids' in input ? input.source_ids : [],
+                  ...('source_ids' in input ? detectionRunsOf(input) : {}),
+                  error_message: message,
+                },
+                request
+              ),
           });
         });
         const code = getBulkWriteToolErrorCode(error instanceof Error ? error : new Error(message));
