@@ -480,66 +480,13 @@ const attentionOf = (
   };
 };
 
-const titleOf = (
-  drift: ConnectorDrift,
-  statuses: ReadonlyMap<string, ActionStatus>,
-  attention: Attention
-): string => {
-  const count = (predicate: (status: ActionStatus) => boolean) =>
-    [...statuses.values()].filter(predicate).length;
-  const failing = count(({ rank, text }) => rank === 'fails' || text === MOVED_STATUS);
-  const movedOnly = failing > 0 && count(({ text }) => text === MOVED_STATUS) === failing;
-  let headline: string;
-  // Reports from before the per-action fields can't say how many actions fail.
-  if (drift.actions === undefined) {
-    return `[Connector validation] ${drift.connector}: ${VERDICTS[drift.verdict]
-      .split(':')[0]
-      .toLowerCase()}`;
-  }
-  switch (drift.verdict) {
-    case 'unknown':
-      headline = "a latest vendor spec couldn't be loaded";
-      break;
-    case 'kibana-regression':
-      headline =
-        failing > 0
-          ? `${plural(failing, 'action')} ${fails(failing)} against the committed snapshot`
-          : `the committed snapshot fails the drift check (${plural(
-              drift.otherProblems?.snapshot.length ?? 0,
-              'problem'
-            )} outside the actions)`;
-      break;
-    case 'vendor-drift':
-      if (failing === 0) {
-        headline = `the latest spec fails the drift check (${plural(
-          drift.otherProblems?.latest?.length ?? 0,
-          'problem'
-        )} outside the actions)`;
-      } else {
-        headline = movedOnly
-          ? `spec paths moved into the server URL, ${plural(failing, 'action')} ${fails(
-              failing
-            )} the drift check`
-          : `${plural(failing, 'action')} ${fails(failing)} the drift check`;
-      }
-      break;
-    default: {
-      // e.g. `2 actions pass, 5 actions need attention`
-      const needing = attention.actions.size;
-      const passing = attention.total - needing;
-      const stale = (drift.staleCorrections ?? []).length;
-      const passes = `${plural(passing, 'action')} ${passing === 1 ? 'passes' : 'pass'}`;
-      headline =
-        needing > 0
-          ? `${passes}, ${plural(needing, 'action')} ${needing === 1 ? 'needs' : 'need'} attention`
-          : stale > 0
-          ? `${passes}, ${plural(stale, 'spec correction')} no longer ${
-              stale === 1 ? 'applies' : 'apply'
-            }`
-          : `${passes}, vendor spec changed`;
-    }
-  }
-  return `[Connector validation] ${drift.connector}: ${headline}`;
+/** Every drift issue's title: `[Connectors][Validation] `.acme`: 2 actions need attention`. */
+const titleOf = (drift: ConnectorDrift, attention: Attention): string => {
+  // When a latest spec didn't load, no action could be checked against it.
+  const needing = drift.verdict === 'unknown' ? attention.total : attention.actions.size;
+  return `[Connectors][Validation] \`${drift.connector}\`: ${plural(needing, 'action')} ${
+    needing === 1 ? 'needs' : 'need'
+  } attention`;
 };
 
 export interface RenderDriftIssueOptions {
@@ -602,7 +549,9 @@ export const renderDriftIssue = (
     review,
     actions.flatMap(({ action }) => {
       const status = statuses.get(action);
-      return status?.rank === 'fails' ? [{ action, status: status.text }] : [];
+      return status?.rank === 'fails' || status?.text === MOVED_STATUS
+        ? [{ action, status: status.text }]
+        : [];
     })
   );
 
@@ -1022,7 +971,7 @@ export const renderDriftIssue = (
   ].join('\n');
 
   return {
-    title: titleOf(drift, statuses, attention),
+    title: titleOf(drift, attention),
     body:
       body.length > MAX_BODY_LENGTH
         ? `${body.slice(

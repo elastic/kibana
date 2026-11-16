@@ -148,7 +148,7 @@ describe('surfaceDrift', () => {
     ]);
     expect(tracker.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: '[Connector validation] .acme: 1 action fails the drift check',
+        title: '[Connectors][Validation] `.acme`: 1 action needs attention',
         labels: [DRIFT_ISSUE_LABEL],
       })
     );
@@ -179,7 +179,7 @@ describe('surfaceDrift', () => {
 
     expect(actions[0]).toMatchObject({ action: 'updated', issue: { number: 7 } });
     expect(issues[0].body).toContain('another problem');
-    expect(issues[0].title).toBe('[Connector validation] .acme: 2 actions fail the drift check');
+    expect(issues[0].title).toBe('[Connectors][Validation] `.acme`: 2 actions need attention');
     expect(comments).toEqual([[7, expect.stringContaining('https://buildkite.com/build/1')]]);
   });
 
@@ -190,7 +190,7 @@ describe('surfaceDrift', () => {
     const { actions } = await surface([drifted], tracker);
 
     expect(actions[0].action).toBe('updated');
-    expect(issues[0].title).toBe('[Connector validation] .acme: 1 action fails the drift check');
+    expect(issues[0].title).toBe('[Connectors][Validation] `.acme`: 1 action needs attention');
   });
 
   it('reopens a closed issue when the connector drifts again', async () => {
@@ -384,9 +384,7 @@ describe('renderDriftIssue', () => {
   it('says that paths moved into the server URL, why the check fails and how to fix it', () => {
     const { title, body } = renderDriftIssue(moved, { owners: [] });
 
-    expect(title).toBe(
-      '[Connector validation] .sentry: spec paths moved into the server URL, 1 action fails the drift check'
-    );
+    expect(title).toBe('[Connectors][Validation] `.sentry`: 2 actions need attention');
     expect(body).toContain('> [!NOTE]');
     expect(body).toContain(
       "**Sentry's spec moved `/api/0` from its paths into its server URL. The connector most likely still works.**"
@@ -481,7 +479,7 @@ describe('renderDriftIssue', () => {
     };
     const { title, body } = renderDriftIssue(passing, { owners: [] });
 
-    expect(title).toBe('[Connector validation] .acme: 1 action passes, 1 action needs attention');
+    expect(title).toBe('[Connectors][Validation] `.acme`: 1 action needs attention');
     expect(body).toContain(
       '> **1 of 2 actions works with the latest spec. 1 action needs attention.**\n>\n> `search` passes but calls a deprecated endpoint.\n>\n> Update the connector to ensure it will continue working.'
     );
@@ -526,7 +524,7 @@ describe('renderDriftIssue', () => {
     };
     const { title, body } = renderDriftIssue(passing, { owners: [] });
 
-    expect(title).toBe('[Connector validation] .acme: 1 action passes, 1 action needs attention');
+    expect(title).toBe('[Connectors][Validation] `.acme`: 1 action needs attention');
     expect(body).toContain('`search` passes but reads fields that changed.');
     expect(body).toContain(
       '| `search` | `GET /items` | ⚠️ Passes, but fields it reads changed: `items/state` (new values: locked) |'
@@ -613,9 +611,7 @@ describe('renderDriftIssue', () => {
       { owners: [] }
     );
 
-    expect(title).toBe(
-      '[Connector validation] .acme: the latest spec fails the drift check (3 problems outside the actions)'
-    );
+    expect(title).toBe('[Connectors][Validation] `.acme`: 0 actions need attention');
     expect(body).toContain('> **All 2 actions work with the latest spec.**');
     expect(body).toContain(
       `> The check found 3 problems outside the actions, which don't occur against the committed snapshot (see "Other problems").`
@@ -648,7 +644,7 @@ describe('renderDriftIssue', () => {
       { owners: [] }
     );
 
-    expect(title).toBe("[Connector validation] .acme: a latest vendor spec couldn't be loaded");
+    expect(title).toBe('[Connectors][Validation] `.acme`: 2 actions need attention');
     expect(body).toContain('…and 10 more; run the check for all of them.');
     expect(body).toContain('- `extra`: unreachable: `404 Not Found`');
     expect(body).toContain('| **Vendor spec `extra`** | Latest (unreachable: `404 Not Found`)');
@@ -660,7 +656,7 @@ describe('renderDriftIssue', () => {
       { owners: ['elastic/response-ops'] }
     );
 
-    expect(title).toBe('[Connector validation] .acme: vendor drift');
+    expect(title).toBe('[Connectors][Validation] `.acme`: 0 actions need attention');
     expect(body).toContain('| Other | — | search: limit must be <= 50 | — |');
     expect(body).toContain('cc @elastic/response-ops');
   });
