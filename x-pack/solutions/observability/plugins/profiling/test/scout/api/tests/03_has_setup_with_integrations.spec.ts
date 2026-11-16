@@ -11,6 +11,10 @@ import type { ApiClientFixture, RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/constants';
 
+// Stateful only: Universal Profiling is not supported on serverless (its setup, status and
+// storage explorer routes are not registered there). Serverless will get profiling through
+// OTel profiling data instead, which needs its own tests. See
+// https://github.com/elastic/kibana/issues/297749
 apiTest.describe('Collector integration is not installed', { tag: tags.stateful.classic }, () => {
   let viewerApiCreditials: RoleApiCredentials;
 

@@ -17,9 +17,13 @@ const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
 const FLEET_SETUP_MAX_ATTEMPTS = 5;
 const FLEET_SETUP_RETRY_DELAY_MS = 10_000;
 
+// Stateful only: Universal Profiling is not supported on serverless (its setup, status and
+// storage explorer routes are not registered there). Serverless will get profiling through
+// OTel profiling data instead, which needs its own tests. See
+// https://github.com/elastic/kibana/issues/297749
 globalSetupHook(
   'Ingest data to Elasticsearch',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: tags.stateful.classic },
   async ({ log, apiServices }) => {
     log.info('Running profiling API global setup...');
 

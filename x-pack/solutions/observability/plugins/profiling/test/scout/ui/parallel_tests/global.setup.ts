@@ -11,6 +11,10 @@ import { APM_AGENT_POLICY_ID } from '../../common/fixtures/constants';
 
 const globalSetupHook = mergeTests(obltGlobalSetupHook, profilingFixtures);
 
+// Stateful only: Universal Profiling is not supported on serverless (its setup, status and
+// storage explorer routes are not registered there). Serverless will get profiling through
+// OTel profiling data instead, which needs its own tests. See
+// https://github.com/elastic/kibana/issues/297749
 globalSetupHook(
   'Set up Profiling Resources and Data',
   { tag: tags.stateful.classic },
