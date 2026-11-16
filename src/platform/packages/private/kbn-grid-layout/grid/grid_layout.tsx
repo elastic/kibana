@@ -21,7 +21,8 @@ import {
   GridSectionHeader,
   GridSectionWrapper,
 } from './grid_section';
-import type { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
+import type { GridAccessMode } from '../common/types';
+import type { GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
 import type { GridLayoutContextType } from './use_grid_layout_context';
 import { GridLayoutContext } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';

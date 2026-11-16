@@ -13,7 +13,7 @@ import { combineLatest, filter, map, pairwise, skip, startWith, tap } from 'rxjs
 import { euiBreakpoint, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { useGridLayoutContext } from '../use_grid_layout_context';
+import { useFlexLayoutContext } from '../use_flex_layout_context';
 import { DefaultDragHandle } from '../../common/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
 import { ResizeHandle } from './panel_resize_handle';
@@ -29,7 +29,7 @@ export const Panel = React.memo(({ panelId }: PanelProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
   const { gridLayoutStateManager, useCustomDragHandle, renderPanelContents } =
-    useGridLayoutContext();
+    useFlexLayoutContext();
   const panel$ = usePanelState({ panelId });
   const dragHandleApi = useDragHandleApi({ panelId });
 

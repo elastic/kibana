@@ -11,10 +11,10 @@ import React, { useEffect, useRef } from 'react';
 import { filter, map, pairwise, skip, startWith } from 'rxjs';
 
 import { css } from '@emotion/react';
-import { useGridLayoutContext } from '../use_grid_layout_context';
+import { useFlexLayoutContext } from '../use_flex_layout_context';
 
 export const PanelDragPreview = React.memo(() => {
-  const { gridLayoutStateManager } = useGridLayoutContext();
+  const { gridLayoutStateManager } = useFlexLayoutContext();
 
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
 

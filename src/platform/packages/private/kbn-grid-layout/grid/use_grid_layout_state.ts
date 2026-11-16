@@ -25,10 +25,10 @@ import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfi
 import { useEuiTheme } from '@elastic/eui';
 import { getScrollContainer } from '@kbn/core-chrome-layout-utils';
 
+import type { GridAccessMode } from '../common/types';
 import type { ActivePanelEvent } from './grid_panel';
 import type { ActiveSectionEvent } from './grid_section';
 import type {
-  GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
   GridSettings,

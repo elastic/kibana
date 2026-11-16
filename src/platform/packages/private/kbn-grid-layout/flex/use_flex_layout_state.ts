@@ -17,14 +17,10 @@ import { getScrollContainer } from '@kbn/core-chrome-layout-utils';
 
 import type { ActivePanelEvent } from './panel';
 import { isFlexLayoutEqual } from './utils/equality_checks';
-import type {
-  FlexLayoutData,
-  FlexLayoutStateManager,
-  GridAccessMode,
-  FlexLayoutSettings,
-} from './types';
+import type { GridAccessMode } from '../common/types';
+import type { FlexLayoutData, FlexLayoutStateManager, FlexLayoutSettings } from './types';
 
-export const useGridLayoutState = ({
+export const useFlexLayoutState = ({
   layout,
   layoutRef,
   gridSettings,

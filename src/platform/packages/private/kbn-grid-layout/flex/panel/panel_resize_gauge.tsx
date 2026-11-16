@@ -11,14 +11,14 @@ import React, { useEffect, useState } from 'react';
 import { combineLatest, skip } from 'rxjs';
 import { usePanelState } from './use_panel_state';
 import { resizeGaugeStyles } from '../../common/resize_styles';
-import { useGridLayoutContext } from '../use_grid_layout_context';
+import { useFlexLayoutContext } from '../use_flex_layout_context';
 
 export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   const [width, setWidth] = useState(0);
   const [isResizing, setIsResizing] = useState(false);
 
   const panel$ = usePanelState({ panelId });
-  const { gridLayoutStateManager } = useGridLayoutContext();
+  const { gridLayoutStateManager } = useFlexLayoutContext();
 
   useEffect(() => {
     /** Update the styles via a subscription to prevent re-renders */

@@ -10,7 +10,7 @@
 import { createContext, useContext } from 'react';
 import type { FlexLayoutStateManager } from './types';
 
-export interface GridLayoutContextType<UseCustomDragHandle extends boolean = boolean> {
+export interface FlexLayoutContextType<UseCustomDragHandle extends boolean = boolean> {
   gridLayoutStateManager: FlexLayoutStateManager;
   useCustomDragHandle: UseCustomDragHandle;
   renderPanelContents: (
@@ -21,12 +21,12 @@ export interface GridLayoutContextType<UseCustomDragHandle extends boolean = boo
   ) => React.ReactNode;
 }
 
-export const GridLayoutContext = createContext<GridLayoutContextType | undefined>(undefined);
+export const FlexLayoutContext = createContext<FlexLayoutContextType | undefined>(undefined);
 
-export const useGridLayoutContext = (): GridLayoutContextType => {
-  const context = useContext<GridLayoutContextType | undefined>(GridLayoutContext);
+export const useFlexLayoutContext = (): FlexLayoutContextType => {
+  const context = useContext<FlexLayoutContextType | undefined>(FlexLayoutContext);
   if (!context) {
-    throw new Error('useGridLayoutContext must be used inside GridLayoutContext');
+    throw new Error('useFlexLayoutContext must be used inside GridLayoutContext');
   }
   return context;
 };

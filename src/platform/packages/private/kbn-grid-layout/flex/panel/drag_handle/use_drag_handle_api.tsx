@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useGridLayoutContext } from '../../use_grid_layout_context';
+import { useFlexLayoutContext } from '../../use_flex_layout_context';
 import { useGridLayoutPanelEvents } from '../../use_grid_layout_events';
 import type { UserInteractionEvent } from '../../../common/types';
 import { useCustomDragHandles } from '../../../common/use_custom_drag_handles';
@@ -20,7 +20,7 @@ export interface DragHandleApi {
 }
 
 export const useDragHandleApi = ({ panelId }: { panelId: string }): DragHandleApi => {
-  const { useCustomDragHandle } = useGridLayoutContext();
+  const { useCustomDragHandle } = useFlexLayoutContext();
 
   const startDrag = useGridLayoutPanelEvents({
     interactionType: 'drag',

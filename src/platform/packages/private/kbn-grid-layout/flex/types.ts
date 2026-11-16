@@ -10,6 +10,7 @@
 import type { BehaviorSubject, Observable } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
 import type { ScrollContainer } from '@kbn/core-chrome-layout-utils';
+import type { GridAccessMode } from '../common/types';
 import type { ActivePanelEvent, FlexPanelData } from './panel';
 
 /**
@@ -61,8 +62,3 @@ export type UseCustomDragHandle =
       useCustomDragHandle?: false;
       renderPanelContents: (panelId: string) => React.ReactNode;
     };
-
-/**
- * Controls whether the resize + drag handles are visible and functioning
- */
-export type GridAccessMode = 'VIEW' | 'EDIT';

@@ -10,7 +10,7 @@
 import { useCallback, useRef } from 'react';
 
 import type { ActivePanelEvent, FlexPanelData } from '../../panel';
-import { useGridLayoutContext } from '../../use_grid_layout_context';
+import { useFlexLayoutContext } from '../../use_flex_layout_context';
 import {
   getSensorPosition,
   isKeyboardEvent,
@@ -42,7 +42,7 @@ export const useGridLayoutPanelEvents = ({
   interactionType: ActivePanelEvent['type'];
   panelId: string;
 }) => {
-  const { gridLayoutStateManager } = useGridLayoutContext();
+  const { gridLayoutStateManager } = useFlexLayoutContext();
 
   const lastRequestedPanelPosition = useRef<FlexPanelData | undefined>(undefined);
 

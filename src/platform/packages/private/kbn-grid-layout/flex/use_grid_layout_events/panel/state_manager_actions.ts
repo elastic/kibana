@@ -13,7 +13,7 @@ import { getDragPreviewRect, getSensorOffsets } from '../../../common/utils';
 
 import type { ActivePanelEvent, FlexPanelData } from '../../panel';
 import type { FlexLayoutData, FlexLayoutStateManager } from '../../types';
-import type { GridLayoutContextType } from '../../use_grid_layout_context';
+import type { FlexLayoutContextType } from '../../use_flex_layout_context';
 import { getSensorType } from '../../../common/sensors';
 import type { PointerPosition, UserInteractionEvent } from '../../../common/types';
 import { isFlexPanelDataEqual } from '../../utils/equality_checks';
@@ -88,7 +88,7 @@ export const moveKeyboardDragAction = (
 
 export const moveAction = (
   e: UserInteractionEvent,
-  gridLayoutStateManager: GridLayoutContextType['gridLayoutStateManager'],
+  gridLayoutStateManager: FlexLayoutContextType['gridLayoutStateManager'],
   pointerPixel: PointerPosition,
   lastRequestedPanelPosition: MutableRefObject<FlexPanelData | undefined>
 ) => {

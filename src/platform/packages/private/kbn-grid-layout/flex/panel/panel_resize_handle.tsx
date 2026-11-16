@@ -12,7 +12,7 @@ import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { getResizeHandleStyles } from '../../common/resize_styles';
-import { useGridLayoutContext } from '../use_grid_layout_context';
+import { useFlexLayoutContext } from '../use_flex_layout_context';
 import { useGridLayoutPanelEvents, getEffectiveWidthLimits } from '../use_grid_layout_events';
 
 export const ResizeHandle = React.memo(({ panelId }: { panelId: string }) => {
@@ -21,7 +21,7 @@ export const ResizeHandle = React.memo(({ panelId }: { panelId: string }) => {
     interactionType: 'resize',
     panelId,
   });
-  const { gridLayoutStateManager } = useGridLayoutContext();
+  const { gridLayoutStateManager } = useFlexLayoutContext();
 
   useEffect(() => {
     /** Change the cursor depending on if the panel can be resized in a specific direction */

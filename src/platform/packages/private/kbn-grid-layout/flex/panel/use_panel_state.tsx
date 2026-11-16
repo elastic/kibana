@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, distinctUntilChanged, filter, map } from 'rxjs';
 
-import { useGridLayoutContext } from '../use_grid_layout_context';
+import { useFlexLayoutContext } from '../use_flex_layout_context';
 import type { FlexPanelData } from './types';
 import { nonNullable } from '../../common/utils';
 import { isFlexPanelDataEqual } from '../utils/equality_checks';
@@ -20,7 +20,7 @@ export const usePanelState = ({
 }: {
   panelId: string;
 }): BehaviorSubject<FlexPanelData | undefined> => {
-  const { gridLayoutStateManager } = useGridLayoutContext();
+  const { gridLayoutStateManager } = useFlexLayoutContext();
   const cleanupCallback = useRef<null | (() => void)>();
 
   const panel$ = useMemo(() => {

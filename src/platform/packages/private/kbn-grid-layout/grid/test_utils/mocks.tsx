@@ -13,10 +13,10 @@ import type { ObservedSize } from 'use-resize-observer/polyfilled';
 
 import type { ScrollContainer } from '@kbn/core-chrome-layout-utils';
 
+import type { GridAccessMode } from '../../common/types';
 import type { ActivePanelEvent } from '../grid_panel';
 import type { ActiveSectionEvent } from '../grid_section';
 import type {
-  GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
   OrderedLayout,

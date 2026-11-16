@@ -16,3 +16,8 @@ export interface PointerPosition {
   clientX: number;
   clientY: number;
 }
+
+/**
+ * Controls whether the resize + drag handles are visible and functioning
+ */
+export type GridAccessMode = 'VIEW' | 'EDIT';

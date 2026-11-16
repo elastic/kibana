@@ -14,15 +14,11 @@ import { cloneDeep, isEqual } from 'lodash';
 import { css } from '@emotion/react';
 
 import { Panel, PanelDragPreview } from './panel';
-import type {
-  GridAccessMode,
-  FlexLayoutData,
-  FlexLayoutSettings,
-  UseCustomDragHandle,
-} from './types';
-import type { GridLayoutContextType } from './use_grid_layout_context';
-import { GridLayoutContext } from './use_grid_layout_context';
-import { useGridLayoutState } from './use_grid_layout_state';
+import type { GridAccessMode } from '../common/types';
+import type { FlexLayoutData, FlexLayoutSettings, UseCustomDragHandle } from './types';
+import type { FlexLayoutContextType } from './use_flex_layout_context';
+import { FlexLayoutContext } from './use_flex_layout_context';
+import { useFlexLayoutState } from './use_flex_layout_state';
 import { isFlexLayoutEqual } from './utils/equality_checks';
 import { getPanelKeysInOrder } from './utils/panel_order';
 
@@ -44,7 +40,7 @@ export const FlexLayout = ({
   useCustomDragHandle = false,
 }: GridLayoutProps) => {
   const layoutRef = useRef<HTMLDivElement | null>(null);
-  const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
+  const { gridLayoutStateManager, setDimensionsRef } = useFlexLayoutState({
     layout,
     layoutRef,
     gridSettings,
@@ -99,12 +95,12 @@ export const FlexLayout = ({
         renderPanelContents,
         useCustomDragHandle,
         gridLayoutStateManager,
-      } as GridLayoutContextType),
+      } as FlexLayoutContextType),
     [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
   );
 
   return (
-    <GridLayoutContext.Provider value={memoizedContext}>
+    <FlexLayoutContext.Provider value={memoizedContext}>
       <div
         data-test-subj="kbnFlexLayout"
         role="list"
@@ -120,7 +116,7 @@ export const FlexLayout = ({
         ))}
         <PanelDragPreview />
       </div>
-    </GridLayoutContext.Provider>
+    </FlexLayoutContext.Provider>
   );
 };
 
