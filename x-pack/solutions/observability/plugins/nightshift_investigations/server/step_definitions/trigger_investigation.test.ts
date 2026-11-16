@@ -581,14 +581,14 @@ describe('investigation quota notice', () => {
   });
 });
 
-it('starts a manual question with a fresh subject and forwards scope and timeout', async () => {
+it('starts a manual question with a fresh subject and forwards context and timeout', async () => {
   const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
   const { definition } = createDefinition(start);
   await definition.handler(
     createContext({
       subject_type: 'manual',
       message: 'Review checkout errors.',
-      scope_query: 'service.name:checkout',
+      context: { service: 'checkout' },
       timeout_seconds: 30,
     })
   );
@@ -597,7 +597,7 @@ it('starts a manual question with a fresh subject and forwards scope and timeout
       subject: { type: 'manual', id: 'manual', summary: undefined },
       message: 'Review checkout errors.',
       trigger_type: 'automatic',
-      context: { scope_query: 'service.name:checkout' },
+      context: { service: 'checkout' },
       timeout_seconds: 30,
     }),
     expect.anything()
@@ -698,7 +698,6 @@ describe('automation budget enforcement before dispatch', () => {
           ...input,
           subject_id: 'shared-old-subject',
           trigger_type: 'automatic',
-          scope_query: 'service.name:checkout',
           timeout_seconds: 30,
           notificationDestinations: [
             { type: 'slack', connector_id: 'slack', params: { channel: 'C1' } },
@@ -711,7 +710,6 @@ describe('automation budget enforcement before dispatch', () => {
       expect.objectContaining({
         subject: expect.objectContaining({ type: 'manual', id: 'manual' }),
         trigger_type: 'manual',
-        context: { scope_query: 'service.name:checkout' },
         timeout_seconds: 30,
         message: 'Review errors.',
         notificationDestinations: [
