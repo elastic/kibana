@@ -341,10 +341,7 @@ export const gatherMaintenance = async (
   const liveLinks = links.filter(({ id }) => !brokenLinks.has(id));
 
   const reviewedIds = new Set(reviewed.map(({ id }) => id));
-  const unsettledIds = new Set([
-    ...[...fixes, ...needsReview].map(({ id }) => id),
-    ...rewrites.keys(),
-  ]);
+  const unsettledIds = new Set([...fixes.map(({ id }) => id), ...rewrites.keys()]);
   const aboutFactIdsOf = new Map<string, string[]>();
   for (const link of liveLinks) {
     if (link.relation === ABOUT_RELATIONSHIP_TYPE && reviewedIds.has(link.to)) {
@@ -367,6 +364,25 @@ export const gatherMaintenance = async (
         .map(({ id }) => id)
     );
   }
+  const unsummarizable = new Set(
+    [...rewrites]
+      .filter(
+        ([id, { remaining_memories: remainingMemories }]) =>
+          remainingMemories.length === 0 && !aboutFactIdsOf.get(id)?.length
+      )
+      .map(([id]) => id)
+  );
+  needsReview.push(
+    ...[...unsummarizable].map(
+      (id): MaintenanceChange => ({
+        id,
+        change: 'needs_review',
+        reason:
+          'Some of the memories it came from were deleted, and nothing maintenance can read is left to summarize it from.',
+      })
+    )
+  );
+  const batched = reviewed.filter(({ id }) => !unsummarizable.has(id));
 
   const itemsOf = (ids: Iterable<string>): MaintenanceItem[] =>
     [...ids].flatMap((id) => {
@@ -374,7 +390,17 @@ export const gatherMaintenance = async (
       return ki ? [toMaintenanceItem(ki)] : [];
     });
 
-  const batches: MaintenanceBatch[] = [...chunksOf].flatMap(([audience, chunks]) =>
+  const batchedChunksOf = [...chunksOf].map(
+    ([audience, chunks]) =>
+      [
+        audience,
+        chunks
+          .map((chunk) => chunk.filter(({ id }) => !unsummarizable.has(id)))
+          .filter((chunk) => chunk.length > 0),
+      ] as const
+  );
+
+  const batches: MaintenanceBatch[] = batchedChunksOf.flatMap(([audience, chunks]) =>
     chunks.map((part) => {
       const ids = new Set(part.map(({ id }) => id));
       const neighborIds = new Set(
@@ -423,7 +449,7 @@ export const gatherMaintenance = async (
   );
 
   const countOf = (reason: MaintenanceReviewReason) =>
-    reviewed.filter(({ id }) => review.get(id)?.reasons.has(reason)).length;
+    batched.filter(({ id }) => review.get(id)?.reasons.has(reason)).length;
   const droppedCauses = [...dropped].flatMap((id) => {
     const cause = causeOf.get(id);
     return cause === undefined ? [] : [cause];
@@ -445,10 +471,10 @@ export const gatherMaintenance = async (
       : swept[firstDroppedSweep - 1].id;
 
   // Rounds a hair down first so a share such as 0.1 of 30 allows 3, not 4.
-  const shareOfRun = Math.ceil(maxTombstoneShare * (reviewed.length + itemFixes) - 1e-9);
+  const shareOfRun = Math.ceil(maxTombstoneShare * (batched.length + itemFixes) - 1e-9);
 
   return {
-    reviewed: reviewed.length,
+    reviewed: batched.length,
     max_tombstones: Math.max(shareOfRun, MIN_MAINTENANCE_TOMBSTONES),
     batches,
     fixes: fixes.slice(0, MAX_MAINTENANCE_LISTED_CHANGES),

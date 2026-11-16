@@ -242,13 +242,18 @@ describe('gatherMaintenance', () => {
       memory('m-3', { governance: deleted }),
       fact('fact-lost'),
       fact('fact-partial', { references: derivedFrom('m-3', 'm-2') }),
-      fact('fact-kept', { references: derivedFrom('m-2') }),
+      fact('fact-kept', { references: derivedFrom('m-2'), updated_at: '2026-11-04T00:00:00.000Z' }),
+      fact('fact-traced', {
+        references: [...derivedFrom('m-1'), { uri: 'trace://abc', relation: 'derived_from' }],
+        updated_at: '2026-11-03T00:00:00.000Z',
+      }),
       entity('entity-a', {
         references: [...derivedFrom('m-1'), { uri: 'trace://abc', relation: 'derived_from' }],
       }),
       relationship('fact-lost', 'about', 'entity-a'),
       relationship('fact-partial', 'about', 'entity-a'),
       relationship('fact-kept', 'about', 'entity-a'),
+      relationship('fact-traced', 'about', 'entity-a'),
     ];
 
     const output = await gatherMaintenance(
@@ -259,17 +264,38 @@ describe('gatherMaintenance', () => {
     expect(output.fixes).toEqual([
       { id: 'fact-lost', change: 'tombstoned', reason: 'Every memory it came from was deleted.' },
     ]);
-    expect(output.needs_review).toEqual([]);
+    expect(output.needs_review.map(({ id }) => id)).toEqual(['fact-traced']);
     const [batch] = output.batches;
     expect(batch.items.find(({ id }) => id === 'entity-a')).toEqual(
       expect.objectContaining({
         reasons: ['lost_sources', 'about_facts_changed'],
         lost_source_ids: ['m-1'],
         remaining_memories: [],
-        about_fact_ids: ['fact-kept'],
+        about_fact_ids: ['fact-kept', 'fact-traced'],
       })
     );
-    expect(batch.about_facts.map(({ id }) => id)).toEqual(['fact-kept']);
+    expect(batch.about_facts.map(({ id }) => id)).toEqual(['fact-kept', 'fact-traced']);
+  });
+
+  it('lists for review an entity that lost memories and has nothing left to summarize it from', async () => {
+    const stored = [
+      memory('m-1', { governance: deleted }),
+      entity('entity-a', {
+        references: [...derivedFrom('m-1'), { uri: 'trace://abc', relation: 'derived_from' }],
+      }),
+    ];
+
+    const output = await gatherMaintenance(fakeReader(stored, { changed: [stored[0]] }), options);
+
+    expect(output.batches).toEqual([]);
+    expect(output.reviewed).toBe(0);
+    expect(output.needs_review).toEqual([
+      expect.objectContaining({
+        id: 'entity-a',
+        change: 'needs_review',
+        reason: expect.stringContaining('nothing maintenance can read is left'),
+      }),
+    ]);
   });
 
   it('tombstones relationships that link a deleted item or differ in permissions from their ends', async () => {
