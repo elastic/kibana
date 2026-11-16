@@ -33,6 +33,59 @@ function groupIds(groupOf: ReadonlyMap<string, ServiceMapGroup>): Map<string, st
 const teamServices = ({ services, teamOf }: SyntheticEstate) =>
   services.filter((service) => teamOf.get(service)?.startsWith('team-'));
 
+/** `count` teams of `size` services, named `team<team>-<member>`. */
+const namedTeams = (count: number, size: number): string[][] =>
+  Array.from({ length: count }, (_, team) =>
+    Array.from({ length: size }, (__, member) => `team${team}-${member}`)
+  );
+
+/**
+ * Each member calls 4 others of its team at random, and each team's first member calls the next
+ * team's. Random calls don't break a team into self-contained parts, as a ring of calls would.
+ */
+function randomlyWiredCalls(teams: string[][]): Array<readonly [string, string]> {
+  const random = seededRandom(1);
+  return teams.flatMap((members, team) => [
+    ...members.flatMap((caller, position) =>
+      Array.from({ length: 4 }, () => {
+        const picked = Math.floor(random() * members.length);
+        const callee = members[picked === position ? (picked + 1) % members.length : picked];
+        return [caller, callee] as const;
+      })
+    ),
+    ...(teams.length > 1 ? [[members[0], teams[(team + 1) % teams.length][0]] as const] : []),
+  ]);
+}
+
+/** Groups teams wired at random, next to services with no calls. */
+function groupRandomlyWiredTeams({ teams, idle }: { teams: string[][]; idle: number }) {
+  return group(
+    syntheticEstate({
+      teams: 0,
+      servicesPerTeam: 0,
+      extraServices: [
+        ...teams.flat(),
+        ...Array.from({ length: idle }, (_, index) => `idle-${index}`),
+      ],
+      extraCalls: randomlyWiredCalls(teams),
+    })
+  );
+}
+
+function expectEachTeamInOneCallsGroup({
+  teams,
+  groupOf,
+}: {
+  teams: string[][];
+  groupOf: ReadonlyMap<string, ServiceMapGroup>;
+}) {
+  for (const members of teams) {
+    const groupsOfTeam = new Set(members.map((service) => groupOf.get(service)));
+    expect(groupsOfTeam.size).toBe(1);
+    expect([...groupsOfTeam][0]?.kind).toBe('calls');
+  }
+}
+
 describe('groupServicesByCalls', () => {
   it('puts the services every team calls in the shared group, and still finds the teams', () => {
     const estate = syntheticEstate({ teams: 30, servicesPerTeam: 20, sharedServices: 4, seed: 5 });
@@ -152,39 +205,31 @@ describe('groupServicesByCalls', () => {
   it('keeps a team whole when it is above 40% of the services grouped by calls, but not of the map', () => {
     // A team of 50 next to 6 teams of 10, and 30 services with no calls: the team is 45% of the
     // 110 services grouped by calls, but 36% of the 140 on the map.
-    const random = seededRandom(1);
     const teams = [
       Array.from({ length: 50 }, (_, member) => `big-${member}`),
-      ...Array.from({ length: 6 }, (_, team) =>
-        Array.from({ length: 10 }, (__, member) => `team${team}-${member}`)
-      ),
+      ...namedTeams(6, 10),
     ];
-    const idle = Array.from({ length: 30 }, (_, index) => `idle-${index}`);
-    // each member calls 4 others of its team at random, and each team's first member calls the
-    // next team's
-    const calls = teams.flatMap((members, team) => [
-      ...members.flatMap((caller, position) =>
-        Array.from({ length: 4 }, () => {
-          const picked = Math.floor(random() * members.length);
-          const callee = members[picked === position ? (picked + 1) % members.length : picked];
-          return [caller, callee] as const;
-        })
-      ),
-      [members[0], teams[(team + 1) % teams.length][0]] as const,
-    ]);
-    const estate = syntheticEstate({
-      teams: 0,
-      servicesPerTeam: 0,
-      extraServices: [...teams.flat(), ...idle],
-      extraCalls: calls,
-    });
-    const { groupOf } = group(estate);
+    const { groupOf } = groupRandomlyWiredTeams({ teams, idle: 30 });
 
-    for (const members of teams) {
-      const groupsOfTeam = new Set(members.map((service) => groupOf.get(service)));
-      expect(groupsOfTeam.size).toBe(1);
-      expect([...groupsOfTeam][0]?.kind).toBe('calls');
-    }
+    expectEachTeamInOneCallsGroup({ teams, groupOf });
+  });
+
+  it('groups a map of a few teams as those teams', () => {
+    // 4 teams of 30, each a quarter of the map
+    const teams = namedTeams(4, 30);
+    const { strategy, groupOf } = groupRandomlyWiredTeams({ teams, idle: 0 });
+
+    expectEachTeamInOneCallsGroup({ teams, groupOf });
+    expect(strategy.groups).toHaveLength(4);
+  });
+
+  it('keeps the only team whole when most of the map has no calls', () => {
+    // a team of 40 and 70 services with no calls: the team is 36% of the map
+    const teams = namedTeams(1, 40);
+    const { strategy, groupOf } = groupRandomlyWiredTeams({ teams, idle: 70 });
+
+    expectEachTeamInOneCallsGroup({ teams, groupOf });
+    expect(strategy.groups.map(({ kind }) => kind).sort()).toEqual(['calls', 'notConnected']);
   });
 
   it('has no shared or not connected group when no service is either', () => {

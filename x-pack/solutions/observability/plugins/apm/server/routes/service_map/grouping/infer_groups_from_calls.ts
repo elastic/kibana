@@ -13,7 +13,6 @@ import {
   MAX_TINY_PART_SHARE,
   READABLE_MAX_GROUPS,
   READABLE_MAX_LARGEST_GROUP_SHARE,
-  READABLE_MIN_GROUPS,
   SELF_CONTAINED_CALL_SHARE,
   SELF_CONTAINED_GROUP_SHARE,
   SPLIT_RESOLUTIONS,
@@ -157,7 +156,6 @@ function isReadable({ run, mapServiceCount }: { run: Run; mapServiceCount: numbe
   const { groupCount, largest } = run;
   return (
     isEligible(run) &&
-    groupCount >= READABLE_MIN_GROUPS &&
     groupCount <= READABLE_MAX_GROUPS &&
     largest <= MAX_GROUP_SIZE &&
     largest <= READABLE_MAX_LARGEST_GROUP_SHARE * mapServiceCount

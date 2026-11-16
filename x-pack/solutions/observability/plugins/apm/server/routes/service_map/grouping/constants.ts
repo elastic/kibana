@@ -48,10 +48,14 @@ export const NOT_CONNECTED_MAX_PIECE_SIZE = 3;
  * runs them in, so it can stop early. Higher values give more, smaller groups.
  */
 export const INFERENCE_RESOLUTIONS = [4, 2, 1, 0.5, 0.25, 0.1] as const;
-/** Fewer groups than this read as too coarse. */
-export const READABLE_MIN_GROUPS = 7;
-/** More groups than this stop being readable as groups. */
-export const READABLE_MAX_GROUPS = 50;
+/**
+ * More groups than this don't count as readable. Set for the largest map grouping is built for,
+ * 10,000 services: in groups of at most `MAX_GROUP_SIZE` (150), they need 67 groups, so any lower
+ * maximum would leave no run readable at that size. It only makes a readable run possible there,
+ * with nearly every group full: most maps that large still fall back to the run with no group too
+ * large. It isn't a measure of how many groups people can read on screen, which is still to tune.
+ */
+export const READABLE_MAX_GROUPS = 67;
 /**
  * No group found from calls may hold more than this share of the services on the map, shared and
  * not connected included.
