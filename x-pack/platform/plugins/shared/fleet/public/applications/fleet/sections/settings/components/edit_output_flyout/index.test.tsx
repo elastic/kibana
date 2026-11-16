@@ -2085,17 +2085,32 @@ describe('EditOutputFlyout', () => {
       expect(utils.queryByText(/Make this output the default for/)).toBeNull();
     });
 
-    it('should show the OTel spec default with a link to the versioned spec', () => {
+    it('should show the OTel spec defaults, and link to the versioned specs once per section', () => {
       const { utils } = renderFlyout();
       selectOtlpType(utils);
 
-      const links = utils.getAllByText('OpenTelemetry v0.155.0 spec');
-      expect(links.length).toBeGreaterThan(0);
-      links.forEach((link) =>
-        expect(link.closest('a')?.getAttribute('href')).toContain(
-          'opentelemetry-collector/blob/v0.155.0/'
-        )
+      expect(utils.getByText('Timeout (optional)').closest('.euiFormRow')?.textContent).toContain(
+        'Default: 5s.'
       );
+      // the settings do not link to the spec one by one
+      expect(
+        utils.getByText('Timeout (optional)').closest('.euiFormRow')?.querySelector('a')
+      ).toBeNull();
+
+      [
+        ['otlpExporter', '/exporter/otlpexporter/README.md'],
+        ['otlpHttpExporter', '/exporter/otlphttpexporter/README.md'],
+        ['exporterHelper', '/exporter/exporterhelper/README.md'],
+        ['configGrpc', '/config/configgrpc/README.md'],
+      ].forEach(([spec, path]) => {
+        const links = utils.getAllByTestId(`settingsOutputsFlyout.otlpSpecLink.${spec}`);
+        links.forEach((link) =>
+          expect(link.getAttribute('href')).toBe(
+            `https://github.com/open-telemetry/opentelemetry-collector/blob/v0.155.0${path}`
+          )
+        );
+      });
+      expect(utils.getAllByTestId('settingsOutputsFlyout.otlpSpecLink.configGrpc')).toHaveLength(1);
     });
 
     it('should require the endpoint', async () => {
@@ -2321,10 +2336,7 @@ describe('EditOutputFlyout', () => {
 
       const HTTP_FIELDS = [
         'otlpEncodingInput',
-        'otlpTracesEndpointInput',
-        'otlpMetricsEndpointInput',
-        'otlpLogsEndpointInput',
-        'otlpProfilesEndpointInput',
+        'otlpSignalEndpoints',
         'otlpProxyUrlInput',
         'otlpHttpReadBufferSizeInput',
         'otlpHttpWriteBufferSizeInput',
@@ -2384,13 +2396,14 @@ describe('EditOutputFlyout', () => {
         selectOtlpType(utils);
         selectProtocol(utils, 'HTTP/Protobuf');
 
-        const hint = utils
-          .getByText('Proxy URL (optional)')
-          .closest('.euiFormRow')
-          ?.querySelector('a');
-        expect(hint?.getAttribute('href')).toBe(
+        expect(
+          utils.getByTestId('settingsOutputsFlyout.otlpSpecLink.configHttp').getAttribute('href')
+        ).toBe(
           'https://github.com/open-telemetry/opentelemetry-collector/blob/v0.155.0/config/confighttp/README.md'
         );
+        expect(
+          utils.getByText('Proxy URL (optional)').closest('.euiFormRow')?.textContent
+        ).toContain('Default: none, requests are sent directly.');
         expect(utils.getByText('Timeout (optional)').closest('.euiFormRow')?.textContent).toContain(
           'Default: 30s'
         );
@@ -2409,6 +2422,7 @@ describe('EditOutputFlyout', () => {
         fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEncodingInput'), {
           target: { value: 'json' },
         });
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.otlpTracesEndpointToggle'));
         fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpTracesEndpointInput'), {
           target: { value: ' https://traces.example.com:4318/v1/traces ' },
         });
@@ -2457,6 +2471,46 @@ describe('EditOutputFlyout', () => {
               cookies: { enabled: true },
             },
           });
+        });
+      });
+
+      it('should show the field of a signal endpoint once the signal is selected', async () => {
+        const { utils } = renderFlyout({
+          ...httpOutput,
+          otlp_exporter: {
+            protocol: 'http/protobuf',
+            endpoint: 'https://collector.example.com:4318',
+            logs_endpoint: 'https://logs.example.com:4318/v1/logs',
+          },
+        });
+
+        // a stored signal endpoint is selected
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpLogsEndpointInput')).toHaveValue(
+          'https://logs.example.com:4318/v1/logs'
+        );
+        expect(utils.queryByTestId('settingsOutputsFlyout.otlpTracesEndpointInput')).toBeNull();
+
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.otlpTracesEndpointToggle'));
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpTracesEndpointInput'), {
+          target: { value: 'https://traces.example.com:4318/v1/traces' },
+        });
+        // a signal that is no longer selected is sent to the endpoint
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.otlpLogsEndpointToggle'));
+
+        expect(utils.queryByTestId('settingsOutputsFlyout.otlpLogsEndpointInput')).toBeNull();
+
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputOtlp',
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                traces_endpoint: 'https://traces.example.com:4318/v1/traces',
+                logs_endpoint: null,
+              }),
+            })
+          );
         });
       });
 
@@ -2726,33 +2780,6 @@ describe('EditOutputFlyout', () => {
           );
         });
       });
-    });
-
-    it('should link the headers hint to the spec of the protocol', () => {
-      const { utils: grpcUtils } = renderFlyout(otlpOutput);
-      expect(
-        grpcUtils
-          .getByText('Headers (optional)')
-          .closest('.euiFormRow')
-          ?.querySelector('a')
-          ?.getAttribute('href')
-      ).toContain('/config/configgrpc/README.md');
-      grpcUtils.unmount();
-
-      const { utils: httpUtils } = renderFlyout({
-        ...otlpOutput,
-        otlp_exporter: {
-          protocol: 'http/protobuf',
-          endpoint: 'https://collector.example.com:4318',
-        },
-      });
-      expect(
-        httpUtils
-          .getByText('Headers (optional)')
-          .closest('.euiFormRow')
-          ?.querySelector('a')
-          ?.getAttribute('href')
-      ).toContain('/config/confighttp/README.md');
     });
 
     it('should not send the exporter of a preconfigured output that only allows renaming', async () => {
