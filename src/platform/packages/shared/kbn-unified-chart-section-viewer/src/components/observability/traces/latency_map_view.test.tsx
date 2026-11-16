@@ -182,6 +182,16 @@ describe('TracesLatencyMapView', () => {
     expect(actions.updateESQLQuery).not.toHaveBeenCalled();
   });
 
+  it('keeps a selection the range only just left behind, as a relative window drifts', () => {
+    // The selection ends 30s before the range starts: within the grace, nothing is cleared.
+    const { actions } = renderView({
+      filters: ['service.name == "cart"', selectionClause],
+      timeFrom: '2026-10-26T10:05:30.000Z',
+      timeTo: '2026-10-26T11:00:00.000Z',
+    });
+    expect(actions.updateESQLQuery).not.toHaveBeenCalled();
+  });
+
   it('replaces a clause the rendered props have not caught up with yet', () => {
     // The commit before this one is in the query, but Discover has not pushed the new
     // fetch params: the updater must still find and replace it rather than stack clauses.

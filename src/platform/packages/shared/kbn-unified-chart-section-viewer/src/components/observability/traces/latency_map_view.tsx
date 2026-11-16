@@ -36,6 +36,9 @@ import { buildExampleSpanQuery } from './example_span_query';
 import { getSearchErrorReason } from './search_error';
 import { useStableTraceSource } from './use_stable_trace_source';
 
+/** How far outside the time range a selection may sit before it counts as left behind. */
+const RANGE_CLEAR_GRACE_MS = 60_000;
+
 export interface TracesLatencyMapViewProps {
   indexPattern: string;
   /** WHERE expressions of the Discover query. */
@@ -139,12 +142,14 @@ export function TracesLatencyMapView({
 
   // A selection left outside the picked time range matches nothing: the query would strand
   // the user on the no-results screen, with the map gone. A range that no longer overlaps
-  // the selection at all clears it; a partial overlap keeps it, as results still exist.
+  // the selection at all clears it; a partial overlap keeps it, as results still exist. The
+  // grace keeps a short relative window, re-resolved seconds later, from eating a selection
+  // just drawn at its edge.
   const selectionOutOfRange = Boolean(
     selection &&
       source &&
-      (Date.parse(selection.to) <= Date.parse(source.timeRange.from) ||
-        Date.parse(selection.from) >= Date.parse(source.timeRange.to))
+      (Date.parse(selection.to) <= Date.parse(source.timeRange.from) - RANGE_CLEAR_GRACE_MS ||
+        Date.parse(selection.from) >= Date.parse(source.timeRange.to) + RANGE_CLEAR_GRACE_MS)
   );
   useEffect(() => {
     if (selectionOutOfRange) commitSelection(undefined, undefined);

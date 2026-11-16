@@ -32,8 +32,9 @@ export function SelectionSummary({
   actions,
 }: {
   selection: LatencyMapSelection;
-  spans: number;
-  failed: number;
+  /** Spans the selection holds; absent while the map has no counts (its query failed). */
+  spans?: number;
+  failed?: number;
   /** The selection is about failed spans, by its own condition or by the host's filter. */
   failedOnly: boolean;
   unit: LatencyMapUnit;
@@ -46,7 +47,7 @@ export function SelectionSummary({
     <>
       {formatTimestamp(Date.parse(selection.from), timeZone)} –{' '}
       {formatTimestamp(Date.parse(selection.to), timeZone)}
-      {failed > 0 && (
+      {spans !== undefined && failed !== undefined && failed > 0 && (
         <>
           <br />
           {getFailedText(failed, spans)}
@@ -85,8 +86,7 @@ export function SelectionSummary({
           >
             {selection.label && `${selection.label} · `}
             {formatDuration(selection.minDuration)} – {formatDuration(selection.maxDuration)}
-            {' · '}
-            {getCountText(unit, spans, sampled)}
+            {spans !== undefined && ` · ${getCountText(unit, spans, sampled)}`}
           </EuiBadge>
         </EuiToolTip>
       </EuiFlexItem>

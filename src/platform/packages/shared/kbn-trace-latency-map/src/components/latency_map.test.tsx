@@ -874,6 +874,24 @@ describe('LatencyMap', () => {
       fireEvent.click(await screen.findByTestId('traceLatencyMapClearSelection'));
       expect(onSelectionCommit).toHaveBeenCalledWith(undefined, undefined);
     });
+
+    it('keeps the way to clear a selection when the map itself fails', async () => {
+      // The selection still filters the host's documents; Clear must not go down with the map.
+      const onSelectionCommit = jest.fn();
+      render(
+        <LatencyMap
+          source={source}
+          runEsql={jest.fn().mockRejectedValue(new Error('boom'))}
+          selection={selection}
+          onSelectionCommit={onSelectionCommit}
+        />
+      );
+      await screen.findByTestId('traceLatencyMapError');
+      // Without counts the badge claims nothing it cannot know.
+      expect(screen.getByTestId('traceLatencyMapSelectionSummary')).not.toHaveTextContent('spans');
+      fireEvent.click(screen.getByTestId('traceLatencyMapClearSelection'));
+      expect(onSelectionCommit).toHaveBeenCalledWith(undefined, undefined);
+    });
   });
 
   describe('with a host failure filter', () => {

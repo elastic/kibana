@@ -18,7 +18,13 @@ import type { MapGeometry, Point } from '../geometry/map_geometry';
  * there. A press that does not travel is a click on a cell.
  */
 export type Gesture =
-  | { kind: 'drawing'; origin: Point }
+  | {
+      kind: 'drawing';
+      /** The press, clamped to the plot: where the drawn region anchors. */
+      origin: Point;
+      /** The press as it landed, for telling a click from a drag. */
+      rawOrigin: Point;
+    }
   | { kind: 'moving'; origin: Point; start: CellRange }
   | { kind: 'resizing'; handle: HandleId; start: CellRange };
 
@@ -43,7 +49,7 @@ export function startGesture(point: Point, geometry: MapGeometry, range?: CellRa
     if (handle) return { kind: 'resizing', handle, start: range };
     if (isInsideRect(point, rect)) return { kind: 'moving', origin: point, start: range };
   }
-  return { kind: 'drawing', origin: geometry.clampToPlot(point) };
+  return { kind: 'drawing', origin: geometry.clampToPlot(point), rawOrigin: point };
 }
 
 /** The region the gesture makes with the pointer at `point`. */
@@ -72,8 +78,18 @@ export function moveGesture(gesture: Gesture, point: Point, geometry: MapGeometr
 
 /** What the pointer leaves when released at `point`. */
 export function endGesture(gesture: Gesture, point: Point, geometry: MapGeometry): GestureEnd {
+  if (gesture.kind === 'drawing') {
+    // Measured where the press really landed, not at its clamped anchor: a stationary
+    // press on an axis label must not read as a drag into the plot.
+    const travel = Math.hypot(point.x - gesture.rawOrigin.x, point.y - gesture.rawOrigin.y);
+    if (travel < LAYOUT.dragThresholdPx) {
+      return geometry.isInPlot(gesture.rawOrigin)
+        ? { type: 'click', cell: cellAt(gesture.origin, geometry) }
+        : { type: 'none' };
+    }
+  }
   if (
-    (gesture.kind === 'moving' || gesture.kind === 'drawing') &&
+    gesture.kind === 'moving' &&
     Math.hypot(point.x - gesture.origin.x, point.y - gesture.origin.y) < LAYOUT.dragThresholdPx
   ) {
     return { type: 'click', cell: cellAt(gesture.origin, geometry) };

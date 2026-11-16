@@ -223,8 +223,7 @@ export function LatencyMap({
     // next event confirms it.
     return {
       ...calibrated.plot,
-      colWidth:
-        calibrated.plot.colWidth - (rightMargin - calibrated.rightMargin) / timeGrid.bins,
+      colWidth: calibrated.plot.colWidth - (rightMargin - calibrated.rightMargin) / timeGrid.bins,
     };
   }, [calibrated, plotKey, rightMargin, timeGrid]);
   const handlePlot = useCallback(
@@ -803,11 +802,13 @@ export function LatencyMap({
   }
 
   // In the header's top-right cluster, as in the prototype, so nothing sits under the map.
-  const selectionSummary = selection && geometry && !error && (
+  // Shown in the error state too: the selection still filters the host's documents, so the
+  // way to clear it must not go down with the map (the counts do, so they are left out).
+  const selectionSummary = selection && (geometry || error) && (
     <SelectionSummary
       selection={selection}
-      spans={selectedCounts.spans}
-      failed={selectedCounts.failed}
+      spans={grid ? selectedCounts.spans : undefined}
+      failed={grid ? selectedCounts.failed : undefined}
       failedOnly={failedOnly}
       unit={unit}
       sampled={sampled || selectedCounts.estimated}

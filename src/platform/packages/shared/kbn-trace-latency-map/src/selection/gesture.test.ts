@@ -25,10 +25,15 @@ const range = { x0: 10, x1: 14, y0: 4, y1: 8 };
 
 describe('selection gestures', () => {
   it('draws without a selection, and outside the one there', () => {
-    expect(startGesture(at(12, 6), geometry)).toEqual({ kind: 'drawing', origin: at(12, 6) });
+    expect(startGesture(at(12, 6), geometry)).toEqual({
+      kind: 'drawing',
+      origin: at(12, 6),
+      rawOrigin: at(12, 6),
+    });
     expect(startGesture(at(40, 20), geometry, range)).toEqual({
       kind: 'drawing',
       origin: at(40, 20),
+      rawOrigin: at(40, 20),
     });
   });
 
@@ -58,6 +63,18 @@ describe('selection gestures', () => {
       type: 'click',
       cell: { xi: 12, yi: 6 },
     });
+  });
+
+  it('reads a stationary press outside the plot as nothing, not a drag to the edge', () => {
+    // On a y-axis label: the clamped anchor is ~26px away, but the pointer never moved.
+    const press = { x: geometry.plotLeft - 26, y: geometry.edgeToY(6.5) };
+    const gesture = startGesture(press, geometry);
+    expect(endGesture(gesture, { x: press.x + 1, y: press.y }, geometry)).toEqual({
+      type: 'none',
+    });
+    // Above the plot, in the grab band: a stationary press does nothing either.
+    const above = { x: geometry.edgeToX(10.5), y: geometry.plotTop - 6 };
+    expect(endGesture(startGesture(above, geometry), above, geometry)).toEqual({ type: 'none' });
   });
 
   it('draws at least one cell once the press travels past the click threshold', () => {
