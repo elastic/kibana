@@ -32,7 +32,7 @@ To use the AWS RDS connector, you need:
 To configure the connector:
 
 1. [Enable the RDS Data API](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.enabling.html) on your Aurora DB cluster.
-2. In AWS Secrets Manager, [create a database secret](https://docs.aws.amazon.com/secretsmanager/latest/userguide/create_database_secret.html) with the credentials of a database user. Use a read-only database user unless you need writes (see [Database user permissions](#aws-rds-security)). Copy the secret's Amazon Resource Name (ARN).
+2. In AWS Secrets Manager, [create a database secret](https://docs.aws.amazon.com/secretsmanager/latest/userguide/create_database_secret.html) with the credentials of a database user. Use a read-only database user unless you need writes (see [Database user permissions](#aws-rds-security)). Copy the secret's Amazon Resource Name (ARN), for example `arn:aws:secretsmanager:us-east-1:123456789012:secret:my-db-secret-AbCdEf`. Don't use the cluster's master credentials secret (an ARN containing `rds!cluster-`), because it holds the `admin` user.
 3. Copy the DB cluster ARN, for example `arn:aws:rds:us-east-1:123456789012:cluster:my-cluster`.
 4. Create an AWS Identity and Access Management (IAM) user and access key with the following permissions, scoped to your cluster and secret:
    - `rds-data:ExecuteStatement` on the DB cluster
@@ -126,6 +126,8 @@ GRANT CONNECT ON DATABASE my_database TO kibana_reader;
 GRANT USAGE ON SCHEMA public TO kibana_reader;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO kibana_reader;
 ```
+
+Also limit the IAM user's `secretsmanager:GetSecretValue` permission to this secret's ARN. The Data API accepts only secrets the caller can read, so the access key can't be used with a more powerful secret, such as the cluster's master credentials.
 
 The **Query** action enforces read-only access at the application level by accepting only `SELECT` and `WITH` statements and by blocking multi-statement input and `INTO` clauses.
 
