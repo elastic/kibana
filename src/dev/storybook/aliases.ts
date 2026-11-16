@@ -22,7 +22,7 @@ export const storybookAliases = {
   cloud_security_posture_graph:
     'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/.storybook',
   cloud: 'src/platform/packages/shared/cloud/.storybook',
-  coloring: 'src/platform/packages/shared/kbn-coloring/.storybook',
+  coloring: 'src/platform/packages/shared/kbn-coloring-components/.storybook',
   content_management:
     'src/platform/packages/shared/content-management/kbn-content-management-storybook',
   context_switcher_components:
@@ -70,6 +70,7 @@ export const storybookAliases = {
   profiling: 'x-pack/solutions/observability/plugins/profiling/.storybook',
   random_sampling: 'x-pack/platform/packages/private/kbn-random-sampling/.storybook',
   ['response-ops']: 'x-pack/platform/packages/shared/response-ops/.storybook',
+  search_boost: 'x-pack/platform/plugins/private/search_boost/.storybook',
   search_sessions_management: 'src/platform/plugins/shared/search_sessions_management/.storybook',
   security: 'x-pack/platform/packages/shared/security/form_components/.storybook',
   security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',

@@ -566,6 +566,7 @@ describe('DiscoveriesPlugin', () => {
         expect(installStatic).toHaveBeenCalledTimes(1);
         expect(installStatic).toHaveBeenCalledWith({
           enabled: true,
+          logger: expect.anything(),
           workflowsExtensions: mockWorkflowsExtensionsStart,
         });
       });

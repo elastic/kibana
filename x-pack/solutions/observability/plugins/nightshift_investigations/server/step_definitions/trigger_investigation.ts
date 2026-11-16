@@ -7,7 +7,6 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import {
-  MAX_ARRAY_LENGTH,
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
@@ -46,7 +45,7 @@ import type { NightshiftAutomationAttributes } from '../lib/automations/types';
 import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
-import type { NightshiftTelemetryClient } from '../telemetry';
+import { alertIdentityOf, triggeringAlertOf, type NightshiftTelemetryClient } from '../telemetry';
 
 const inputSchema = lazySchema(() =>
   z.object({
@@ -101,16 +100,6 @@ const inputSchema = lazySchema(() =>
       .describe(
         'Additional operator guidance for this investigation round; empty means no additional guidance'
       ),
-    source_ids: z
-      .array(z.string().max(MAX_ID_LENGTH))
-      .max(MAX_ARRAY_LENGTH)
-      .optional()
-      .describe('Nightshift source ids to scope the investigation'),
-    scope_query: z
-      .string()
-      .max(MAX_TEXT_LENGTH)
-      .optional()
-      .describe('Query scope guidance for a manual investigation; not an enforced access filter'),
     timeout_seconds: z
       .number()
       .int()
@@ -318,7 +307,6 @@ export const triggerInvestigationStepDefinition = (
             instructions:
               input.instructions ??
               (input.automation_id && input.subject_type === 'alert' ? input.message : undefined),
-            source_ids: input.source_ids,
             context: alerts
               ? {
                   alerts,
@@ -326,8 +314,6 @@ export const triggerInvestigationStepDefinition = (
                     ? { source_workflow_execution_id: sourceWorkflowExecutionId }
                     : {}),
                 }
-              : input.scope_query && input.subject_type === 'manual'
-              ? { ...input.context, scope_query: input.scope_query }
               : input.context,
             timeout_seconds: input.timeout_seconds,
             notificationDestinations: input.notificationDestinations,
@@ -346,11 +332,30 @@ export const triggerInvestigationStepDefinition = (
           context.logger.info(
             `Skipped investigation of ${input.subject_type}/${subjectId} for automation ${input.automation_id}: daily limit of ${error.limit} reached`
           );
+          // Other subjects have no triggering alert: the client ignores any alerts they carry.
+          const contextAlerts = input.context?.alerts;
+          const suppliedAlerts = Array.isArray(contextAlerts)
+            ? contextAlerts.filter(
+                (alert): alert is Record<string, unknown> =>
+                  alert != null && typeof alert === 'object' && !Array.isArray(alert)
+              )
+            : [];
+          const alertIdentity =
+            input.subject_type === 'alert'
+              ? alertIdentityOf(spaceId, triggeringAlertOf(subjectId, alerts ?? suppliedAlerts))
+              : {};
+          const significantEventAlertId =
+            alertIdentity.source_kind === 'significant_events'
+              ? alertIdentity.fingerprint
+              : undefined;
           telemetry.reportInvestigationSkipped({
             trigger: 'automation',
             origin: input.subject_type,
             automation_id: input.automation_id,
             skip_reason: 'automation_daily_limit',
+            event_id:
+              input.subject_type === 'significant_event' ? subjectId : significantEventAlertId,
+            ...alertIdentity,
           });
           return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
         }

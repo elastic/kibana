@@ -12,7 +12,9 @@ import { useSessionsStatus } from './use_sessions_status';
 
 jest.mock('../../../hooks/use_api_client');
 
-const statusOf = (reason: string) => ({ reason } as SessionsStatus);
+/** A status the tests tell apart by the point its summaries reached. */
+const statusOf = (marker: string) =>
+  ({ installed: true, summarizedUntil: marker } as SessionsStatus);
 
 /** A promise and the function that resolves it. */
 const deferred = <T>() => {

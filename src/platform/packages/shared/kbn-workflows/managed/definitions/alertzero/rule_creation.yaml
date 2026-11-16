@@ -279,6 +279,33 @@ steps:
           invocationCount: "${{ inputs.preview_invocation_count }}"
           timeframeEnd: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
 
+  # The proposal only says a failed backtest is inconclusive; the error goes here.
+  # Skipped when the proposal already explains the failure (indices the worker cannot
+  # read, or that match nothing). The error is fenced so it cannot break out.
+  - name: post_backtest_error
+    type: ai.conversation.add_user_message
+    if: >-
+      ${{ steps.draft_ready.output.ok == true
+        and steps.preview_creation.output.error_text != blank
+        and steps.preview_creation.output.no_matching_indices != true
+        and steps.preview_creation.output.unreadable_indices == blank }}
+    with:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ inputs.investigation_id }}"
+      message: |-
+        **Backtest could not run**
+        **Rule:** {{ steps.draft_creation.output.structured_output.rule.name }}
+
+        The drafted rule was not tested, so it might not run as drafted. Error:
+
+        ~~~text
+        {{ steps.preview_creation.output.error_text | strip | remove_last: ';' | truncate: 2000, '' | replace: '~~~', '~ ~ ~' }}
+        ~~~
+
+        To check the draft yourself, ask the agent in this investigation to preview it.
+    on-failure:
+      continue: true
+
   # The draft lives as an attachment in the agent's own conversation, which stays
   # opaque to the analyst. Copy it by value onto the investigation so the rule the
   # proposal asks about is right next to the decision.
@@ -343,8 +370,7 @@ steps:
           ```
 
           **Backtest**
-          {% if steps.preview_creation.output.unreadable_indices != blank %}Not run: the Rule Coverage worker's service account cannot read these drafted rule indices: `{{ steps.preview_creation.output.unreadable_indices }}`. The worker reads only the default security index patterns, so a draft on other indices cannot be backtested. To check the draft yourself, ask the agent in this investigation to preview it.{% elsif steps.preview_creation.output.no_matching_indices == true %}Not run: no index the Rule Coverage worker can read matches the drafted rule's index patterns. Either they do not exist, or the worker's service account cannot read them: it reads only the default security index patterns. To check the draft yourself, ask the agent in this investigation to preview it.{% elsif steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{% if steps.preview_creation.output.alert_limit_reached == true %}At least {% endif %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs.{% if steps.preview_creation.output.alert_limit_reached == true %} The preview stopped at the rule's maximum alerts per execution, so the real number is higher.{% endif %}{% else %}Inconclusive.{% endif %}{% if steps.preview_creation.output.no_matching_indices != true and steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
-          Backtest errors: {{ steps.preview_creation.output.error_text }}{% endif %}
+          {% if steps.preview_creation.output.unreadable_indices != blank %}Not run: the Rule Coverage worker's service account cannot read these drafted rule indices: `{{ steps.preview_creation.output.unreadable_indices }}`. The worker reads only the default security index patterns, so a draft on other indices cannot be backtested. To check the draft yourself, ask the agent in this investigation to preview it.{% elsif steps.preview_creation.output.no_matching_indices == true %}Not run: no index the Rule Coverage worker can read matches the drafted rule's index patterns. Either they do not exist, or the worker's service account cannot read them: it reads only the default security index patterns. To check the draft yourself, ask the agent in this investigation to preview it.{% elsif steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{% if steps.preview_creation.output.alert_limit_reached == true %}At least {% endif %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs.{% if steps.preview_creation.output.alert_limit_reached == true %} The preview stopped at the rule's maximum alerts per execution, so the real number is higher.{% endif %}{% else %}Inconclusive: the backtest could not run, so the rule might not work as drafted.{% if steps.preview_creation.output.error_text != blank and steps.post_backtest_error.error == null %} The error is in the investigation.{% endif %}{% endif %}
 
           **On approval**
           If you approve, the agent creates and enables the rule under your identity, so it starts running on its next scheduled interval. If you dismiss, the agent discards the draft.

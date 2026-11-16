@@ -37,4 +37,6 @@ export interface ResolvedConfiguration {
 export interface ResolvedCapabilities {
   /** The generic attachment tools and their system-prompt instructions. */
   attachmentTools: boolean;
+  /** The API tools (`discover_apis`, `describe_api`, `describe_api_type`, `execute_api`). */
+  apiTools: boolean;
 }

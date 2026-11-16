@@ -8,7 +8,8 @@
 import { ENTITY_ID_COLUMN } from '../generator';
 import type { OutputColumn } from '../generator';
 import { lastSeenInstant } from './utils';
-import type { InventoryRow, PlanResult } from './types';
+import type { InventoryRow } from '../../../common';
+import type { PlanResult } from './types';
 
 const compareIds = (a: InventoryRow, b: InventoryRow): number => {
   const idA = String(a[ENTITY_ID_COLUMN]);
