@@ -666,6 +666,50 @@ describe('renderDriftIssue', () => {
     expect(body).toContain('| Other | — | something the renderer does not recognise | — |');
   });
 
+  it('counts problems outside the actions as the table lists them, and says what to fix', () => {
+    const { title, body } = renderDriftIssue(
+      {
+        ...drifted,
+        sources: { main: { status: 'unchanged' } },
+        actions: drifted.actions?.map((action) => ({ ...action, latestProblems: [] })),
+        otherProblems: {
+          snapshot: [],
+          latest: [
+            'Auth type bearer: 2 schema(s) are invalid:\n  POST /a (response 207 application/json): $ref "#/components/schemas/Void" does not resolve to a schema\n  POST /b (response 207 application/json): $ref "#/components/schemas/Void" does not resolve to a schema',
+          ],
+        },
+      },
+      { owners: [] }
+    );
+
+    expect(title).toBe('[Connectors][Validation] `.acme`: 2 problems need attention');
+    expect(body).toContain('The check found 2 problems outside the actions');
+    expect(body).toContain(
+      '| **Result** | Vendor drift: every checked action passes, but the latest spec has problems the committed snapshot has not |'
+    );
+    expect(body).toContain("> The actions don't need to change; fix what the tables below list.");
+    expect(body).not.toContain('Update the connector to ensure it will continue working.');
+  });
+
+  it("doesn't say actions pass when the latest spec didn't load", () => {
+    const { title, body } = renderDriftIssue(
+      {
+        ...drifted,
+        verdict: 'unknown',
+        latestProblems: undefined,
+        sources: { main: { status: 'unreachable', error: '404 Not Found' } },
+        actions: drifted.actions?.map((action) => ({ ...action, latestProblems: undefined })),
+      },
+      { owners: [] }
+    );
+
+    expect(title).toBe('[Connectors][Validation] `.acme`: 2 actions need attention');
+    expect(body).toContain(
+      "| `getItem` | `GET /items/{id}` | ⚠️ Not checked against the latest spec, which didn't load; passes against the committed snapshot |"
+    );
+    expect(body).not.toContain('✅');
+  });
+
   it('reports unreachable sources and caps long change lists', () => {
     const many = Array.from({ length: 70 }, (_, index) => ({
       kind: 'breaking' as const,

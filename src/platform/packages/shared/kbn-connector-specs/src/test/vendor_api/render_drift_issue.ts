@@ -299,6 +299,12 @@ const statusOf = (
       text: `Fails against the committed snapshot: ${firstProblem(action.snapshotProblems)}`,
     };
   }
+  if (action.latestProblems === undefined && isChecked(action)) {
+    return {
+      rank: 'attention',
+      text: "Not checked against the latest spec, which didn't load; passes against the committed snapshot",
+    };
+  }
   const latestProblems = action.latestProblems ?? [];
   if (latestProblems.length > 0) {
     const locations = action.operations.map(({ latest }) => latest?.status);
@@ -381,12 +387,20 @@ const statusOf = (
   };
 };
 
-const VERDICTS: Record<ConnectorDrift['verdict'], string> = {
-  healthy: 'Healthy: passes against the committed snapshot and the latest spec',
-  'vendor-drift':
-    'Vendor drift: passes against the committed snapshot, fails against the latest spec',
-  'kibana-regression': 'Regression: fails against the committed snapshot already',
-  unknown: 'Unknown: a latest spec did not load',
+// What the check found, for the Result row; vendor drift needn't come from a failing action.
+const resultOf = (verdict: ConnectorDrift['verdict'], actionsFail: boolean): string => {
+  switch (verdict) {
+    case 'healthy':
+      return 'Every checked action passes against the committed snapshot and the latest spec';
+    case 'vendor-drift':
+      return actionsFail
+        ? 'Vendor drift: passes against the committed snapshot, fails against the latest spec'
+        : 'Vendor drift: every checked action passes, but the latest spec has problems the committed snapshot has not';
+    case 'kibana-regression':
+      return 'Regression: fails against the committed snapshot already';
+    default:
+      return 'Unknown: a latest spec did not load';
+  }
 };
 
 const locationText = (latest: OperationLocation | undefined): string => {
@@ -511,10 +525,13 @@ const attentionOf = (
 
 // What needs attention besides the actions: problems outside them, spec changes no action calls,
 // spec corrections that no longer apply, and specs that couldn't be fetched or classified.
+// Counted as the "Other problems" table lists them, one row per operation.
 const problemsOutsideActions = (drift: ConnectorDrift, attention: Attention): number =>
-  (drift.verdict === 'kibana-regression'
-    ? drift.otherProblems?.snapshot.length ?? 0
-    : drift.otherProblems?.latest?.length ?? 0) +
+  otherProblemRows(
+    drift.verdict === 'kibana-regression'
+      ? drift.otherProblems?.snapshot ?? []
+      : drift.otherProblems?.latest ?? []
+  ).length +
   attention.unattached +
   (drift.staleCorrections?.length ?? 0) +
   Object.values(drift.sources).filter(
@@ -694,14 +711,16 @@ export const renderDriftIssue = (
     return [
       headline,
       [reasons.length > 0 ? reasons.join(' ') : 'Its spec changed.', ...notInSpecNote].join(' '),
-      'Update the connector to ensure it will continue working.',
+      attention.actions.size > 0
+        ? 'Update the connector to ensure it will continue working.'
+        : "The actions don't need to change; fix what the tables below list.",
     ].join('\n\n');
   };
 
   // Vendor drift gets the same note, unless every failing action only moved in the spec, which
   // has its own diagnosis.
   const vendorDriftNote = drift.verdict === 'vendor-drift' && !movedOnly;
-  const otherLatest = drift.otherProblems?.latest?.length ?? 0;
+  const otherLatest = otherProblemRows(drift.otherProblems?.latest ?? []).length;
   const outsideActions =
     otherLatest > 0
       ? [
@@ -727,7 +746,7 @@ export const renderDriftIssue = (
           : `**The committed snapshot of \`${
               drift.connector
             }\` fails the drift check, though every checked action passes against it:** the check found ${plural(
-              drift.otherProblems?.snapshot.length ?? 0,
+              otherProblemRows(drift.otherProblems?.snapshot ?? []).length,
               'problem'
             )} outside the actions (see "Other problems"). The vendor didn't cause this: the connector, its artifacts or the checking tooling changed.`;
       break;
@@ -763,7 +782,7 @@ export const renderDriftIssue = (
   // Facts
   const facts: string[] = [
     `| **Connector** | ${link(code(drift.connector), folder)} |`,
-    `| **Result** | ${VERDICTS[drift.verdict]} |`,
+    `| **Result** | ${resultOf(drift.verdict, failing.length > 0)} |`,
   ];
   for (const [source, { status, error, url, servers }] of Object.entries(drift.sources)) {
     const latest = url ? `[Latest](${url})` : 'Latest';
