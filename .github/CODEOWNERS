@@ -3895,6 +3895,7 @@ docs-dev/docset.yml                           @elastic/kibana-tech-leads
 docs-dev/index.md                             @elastic/kibana-tech-leads
 docs-dev/kbn-ui/                              @elastic/appex-sharedux
 docs-dev/chrome/                              @elastic/appex-sharedux
+docs-dev/event-bus/                           @elastic/kibana-core
 
 # Side navigation title glossary
 src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @elastic/ski-docs

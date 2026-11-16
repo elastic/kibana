@@ -31,6 +31,7 @@ import {
   useFocusedStepDecoration,
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
+  useStepDurationDecorations,
   useTriggerTypeDecorations,
   useWorkflowEventsOnDecorations,
   useWorkflowIdDecorations,
@@ -328,6 +329,7 @@ export const WorkflowYAMLEditor = ({
   const styles = useWorkflowEditorStyles();
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
+  const { styles: stepDurationStyles } = useStepDurationDecorations(editorRef.current);
 
   useDynamicTypeIcons(connectorsData);
 
@@ -941,8 +943,8 @@ export const WorkflowYAMLEditor = ({
   );
 
   const editorWrapperCss = useMemo(
-    () => css([styles.container, stepExecutionStyles, breakpointStyles]),
-    [styles.container, stepExecutionStyles, breakpointStyles]
+    () => css([styles.container, stepExecutionStyles, stepDurationStyles, breakpointStyles]),
+    [styles.container, stepExecutionStyles, stepDurationStyles, breakpointStyles]
   );
 
   return (
