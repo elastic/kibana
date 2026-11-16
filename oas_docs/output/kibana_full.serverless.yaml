@@ -87949,7 +87949,7 @@ paths:
                   type: string
                 initials:
                   description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                  maxLength: 2
+                  maxLength: 64
                   type: string
                 name:
                   description: 'The display name for the space. '
@@ -87995,7 +87995,7 @@ paths:
                     type: string
                   initials:
                     description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                    maxLength: 2
+                    maxLength: 64
                     type: string
                   name:
                     description: 'The display name for the space. '
@@ -88100,7 +88100,7 @@ paths:
                     type: string
                   initials:
                     description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                    maxLength: 2
+                    maxLength: 64
                     type: string
                   name:
                     description: 'The display name for the space. '
@@ -88166,7 +88166,7 @@ paths:
                   type: string
                 initials:
                   description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                  maxLength: 2
+                  maxLength: 64
                   type: string
                 name:
                   description: 'The display name for the space. '
@@ -88225,7 +88225,7 @@ paths:
                     type: string
                   initials:
                     description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                    maxLength: 2
+                    maxLength: 64
                     type: string
                   name:
                     description: 'The display name for the space. '
