@@ -4202,6 +4202,9 @@ importers:
       '@kbn/workflows-extensions-example':
         specifier: workspace:*
         version: link:examples/workflows_extensions_example
+      '@kbn/workflows-inbound-hub-test-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector
       '@kbn/workflows-library':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-library
@@ -9623,6 +9626,8 @@ importers:
   x-pack/platform/plugins/shared/usage_api: {}
 
   x-pack/platform/test: {}
+
+  x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector: {}
 
   x-pack/platform/test_plugins/agent_builder_sml_test_types: {}
 

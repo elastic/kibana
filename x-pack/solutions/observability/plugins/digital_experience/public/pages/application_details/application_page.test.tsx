@@ -202,7 +202,7 @@ describe('ApplicationPage', () => {
     expect(screen.queryByTestId('digitalExperienceOverviewEmpty')).not.toBeInTheDocument();
   });
 
-  it('links the Overview, Errors, Network and Sessions tabs of an EDOT Browser application', () => {
+  it('links the Overview, Sessions, Errors and Network tabs of an EDOT Browser application', () => {
     useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
 
     render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="overview" />);
@@ -214,15 +214,15 @@ describe('ApplicationPage', () => {
       })
     ).toEqual([
       'digitalExperienceTab-overview',
+      'digitalExperienceTab-sessions',
       'digitalExperienceTab-errors',
       'digitalExperienceTab-network',
-      'digitalExperienceTab-sessions',
     ]);
     expect(
       tabs.map((tab) => {
         return tab.getAttribute('href');
       })
-    ).toEqual(['/overview-href', '/errors-href', '/network-href', '/sessions-href']);
+    ).toEqual(['/overview-href', '/sessions-href', '/errors-href', '/network-href']);
   });
 
   it('renders the errors of the application on the Errors tab', () => {
