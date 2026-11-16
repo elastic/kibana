@@ -576,6 +576,58 @@ describe('renderDriftIssue', () => {
     );
   });
 
+  it('lists what the vendor added to the called operations, and whether it reaches consumers', () => {
+    const { body } = renderDriftIssue(
+      {
+        ...drifted,
+        sources: {
+          main: {
+            status: 'changed',
+            changes: [
+              ...(drifted.sources.main.changes ?? []),
+              {
+                kind: 'non-breaking',
+                id: 'new-optional-request-parameter',
+                text: 'added the new optional `query` request parameter `sort`',
+                operation: 'GET /items',
+              },
+              {
+                kind: 'non-breaking',
+                id: 'response-optional-property-added',
+                text: 'added the optional property `owner` to the response with the `200` status',
+                operation: 'GET /items/{id}',
+              },
+            ],
+          },
+        },
+        actions: drifted.actions?.map((action) =>
+          action.action === 'getItem'
+            ? {
+                ...action,
+                tracked: true,
+                fieldUse: { 'main GET /items/{id}': { read: [], copied: [], returned: [''] } },
+              }
+            : { ...action, tracked: true, fieldUse: {} }
+        ),
+      },
+      { owners: [] }
+    );
+
+    expect(body).toContain(
+      [
+        '### New in the vendor API',
+        '',
+        "What the vendor added to the operations the actions call. The connector doesn't need to change, but its consumers can only use what reaches them.",
+        '',
+        '| Operation | New | Connector Actions | Reaches consumers of Connector |',
+        '|---|---|---|---|',
+        '| `GET /items` | Query parameter `sort` | `search` | No, no action sends it |',
+        '| `GET /items/{id}` | Response field `owner` | `getItem` | Yes, passed along as is |',
+      ].join('\n')
+    );
+    expect(body).not.toContain('<summary>New in the vendor API');
+  });
+
   it('lists the changed fields that passing actions read, and those that read none', () => {
     const passing: ConnectorDrift = {
       ...drifted,

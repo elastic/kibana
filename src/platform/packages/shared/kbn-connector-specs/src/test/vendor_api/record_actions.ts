@@ -36,7 +36,7 @@ export interface RecordedFieldUse {
   readonly read: readonly string[];
   readonly copied: readonly string[];
   readonly returned: readonly string[];
-  /** Fields of the JSON request bodies it sent; left out when there were none. */
+  /** Fields of the JSON request bodies it sent, and query parameters as `?name`; left out when none. */
   readonly sent?: readonly string[];
 }
 

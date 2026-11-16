@@ -19,7 +19,7 @@ export interface FieldUse {
   readonly copied: Set<string>;
   /** Values the handler returned as they were, without reading into them. */
   readonly returned: Set<string>;
-  /** Fields of the JSON request bodies the handler sent. */
+  /** Fields of the JSON request bodies the handler sent, and query parameters as `?name`. */
   readonly sent: Set<string>;
 }
 
@@ -55,6 +55,9 @@ const join = (path: string, segment: string): string => (path ? `${path}/${segme
 /** Adds the fields of a JSON request body to `sent`, array elements as `items`. */
 export const recordSentFields = (body: unknown, use: FieldUse, path = ''): void => {
   if (Array.isArray(body)) {
+    if (body.length > 0) {
+      use.sent.add(join(path, 'items'));
+    }
     body.forEach((item) => recordSentFields(item, use, join(path, 'items')));
     return;
   }

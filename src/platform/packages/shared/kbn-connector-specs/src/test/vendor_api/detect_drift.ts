@@ -263,16 +263,18 @@ const DEPRECATED_PROPERTY = /^(request|response)-property-deprecated$/;
 // `allOf[#/components/schemas/Options]/waitFor`: oasdiff names the subschema a property is in.
 const COMPOSITION = /(?:allOf|anyOf|oneOf)\[[^\]]*\]\/?/g;
 
-// The property a deprecation names, as field use paths do: `items` for array elements.
-const deprecatedPropertyOf = ({ id, text }: SpecChange): string | undefined =>
-  DEPRECATED_PROPERTY.test(id)
-    ? text
-        .match(/property `([^`]+)`/)?.[1]
-        ?.replace(COMPOSITION, '')
-        .replace(/\/$/, '')
-    : undefined;
+/** A property path oasdiff names, as field use paths are: without the subschemas it is in. */
+export const toFieldPath = (oasdiffPath: string): string =>
+  oasdiffPath.replace(COMPOSITION, '').replace(/\/$/, '');
 
-const within = (field: string, parent: string): boolean =>
+// The property a deprecation names.
+const deprecatedPropertyOf = ({ id, text }: SpecChange): string | undefined => {
+  const named = DEPRECATED_PROPERTY.test(id) ? text.match(/property `([^`]+)`/)?.[1] : undefined;
+  return named === undefined ? undefined : toFieldPath(named);
+};
+
+/** Whether a field path is a parent path or inside it. */
+export const within = (field: string, parent: string): boolean =>
   field === parent || field.startsWith(`${parent}/`);
 
 /**

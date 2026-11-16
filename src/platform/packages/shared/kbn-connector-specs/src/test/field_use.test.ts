@@ -101,6 +101,7 @@ describe('recordSentFields', () => {
       'query',
       'query/text',
       'tags',
+      'tags/items',
       'tags/items/name',
     ]);
   });

@@ -296,6 +296,11 @@ export const createContractContext = async ({
     }
     const use = trackFields(matched);
     recordSentFields(parseJsonBody(response.config.data), use);
+    // Query parameters, from `params` or the URL, recorded as `?name`.
+    const url = new URL(client.getUri(response.config));
+    for (const name of new Set(url.searchParams.keys())) {
+      use.sent.add(`?${name}`);
+    }
     return { ...response, data: trackFieldUse(response.data, use) };
   });
   for (const [name, value] of Object.entries(connector.auth?.headers ?? {})) {

@@ -15,6 +15,8 @@ import type {
   StaleCorrection,
 } from './detect_drift';
 import { reviewOfChange } from './detect_drift';
+import type { Addition } from './new_in_vendor_api';
+import { newInVendorApi } from './new_in_vendor_api';
 import { OVERLAY, snapshotFile } from './load_vendor_specs';
 
 /** What kind of change a reviewer looks at, from its `oasdiff` rule. */
@@ -353,6 +355,51 @@ const firstProblem = (problems: readonly string[]): string =>
 
 // Recorded against an operation, or, when the manifest records none, failing against the latest
 // spec, which now describes what it calls (e.g. once a trailing slash no longer keeps it out).
+const MAX_ADDITION_ROWS = 40;
+
+// The New column: what the vendor added.
+const additionText = ({ kind, field, value }: Addition): string => {
+  switch (kind) {
+    case 'request-option':
+      return `Request option ${code(field)}`;
+    case 'query-parameter':
+      return `Query parameter ${code(field)}`;
+    case 'request-value':
+      return value === undefined
+        ? `More forms of request option ${code(field)}`
+        : `Value ${code(value)} for request option ${code(field)}`;
+    default:
+      return `Response field ${code(field)}`;
+  }
+};
+
+// The Reaches consumers of Connector column: whether consumers can use it, through which actions.
+const reachText = ({ kind, field, value, actions, reachedBy, unknownFor }: Addition): string => {
+  const named = (names: readonly string[]) => listed(names.map(code));
+  if (reachedBy.length === 0) {
+    if (unknownFor.length > 0) {
+      return `Unknown: what ${named(unknownFor)} ${
+        unknownFor.length === 1 ? 'does' : 'do'
+      } with it wasn't recorded`;
+    }
+    if (kind === 'response-field') {
+      return 'No, no action passes it along';
+    }
+    return kind === 'request-value'
+      ? `No, no action sends ${code(field)}`
+      : 'No, no action sends it';
+  }
+  if (kind === 'request-value') {
+    return `Possibly, as ${named(reachedBy)} ${reachedBy.length === 1 ? 'sends' : 'send'} ${code(
+      field
+    )}, if its input allows the new ${value === undefined ? 'form' : 'value'}`;
+  }
+  if (reachedBy.length < actions.length) {
+    return `Only through ${named(reachedBy)}`;
+  }
+  return kind === 'response-field' ? 'Yes, passed along as is' : `Yes, sent by ${named(reachedBy)}`;
+};
+
 const isChecked = ({ operations, latestProblems = [] }: ActionDrift): boolean =>
   operations.length > 0 || latestProblems.length > 0;
 
@@ -1006,6 +1053,36 @@ export const renderDriftIssue = (
         ]
       : [];
 
+  // What the vendor added to the operations the actions call, which needs no change.
+  const additions = newInVendorApi(drift);
+  const shownAdditions = additions.slice(0, MAX_ADDITION_ROWS);
+  const additionsSection =
+    additions.length > 0
+      ? [
+          '### New in the vendor API',
+          '',
+          "What the vendor added to the operations the actions call. The connector doesn't need to change, but its consumers can only use what reaches them.",
+          '',
+          '| Operation | New | Connector Actions | Reaches consumers of Connector |',
+          '|---|---|---|---|',
+          ...shownAdditions.map(
+            (addition) =>
+              `| ${code(addition.operation)} | ${additionText(addition)} | ${addition.actions
+                .map(code)
+                .join(', ')} | ${reachText(addition)} |`
+          ),
+          ...(additions.length > shownAdditions.length
+            ? [
+                '',
+                `…and ${
+                  additions.length - shownAdditions.length
+                } more (see the spec changes below).`,
+              ]
+            : []),
+          '',
+        ]
+      : [];
+
   const MAX_REVIEW_ROWS = 30;
   const reviewSection =
     review.length > 0
@@ -1109,6 +1186,7 @@ export const renderDriftIssue = (
     ...why,
     ...fieldsSection,
     ...(reviewFirst ? [] : reviewSection),
+    ...additionsSection,
     ...corrections,
     ...(unattributed.length > 0
       ? [
