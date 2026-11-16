@@ -22,6 +22,7 @@ import {
   selectWorkflow,
   selectWorkflows,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
+import { getCalledWorkflowOutputs } from '../../../entities/workflows/store/workflow_detail/utils/get_called_workflow_outputs';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowEsqlCallbacks } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks';
 
@@ -46,8 +47,11 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
   const isManaged = useSelector(selectWorkflow)?.managed === true;
   const { application, http, data, licensing, workflowsExtensions } = useKibana().services;
   const registry = useMemo(
-    () => createWorkflowContextRegistry(workflowsExtensions),
-    [workflowsExtensions]
+    () =>
+      createWorkflowContextRegistry(workflowsExtensions, (workflowId) =>
+        getCalledWorkflowOutputs(workflows, workflowId)
+      ),
+    [workflows, workflowsExtensions]
   );
   const esqlCallbacks = useWorkflowEsqlCallbacks({
     http,
