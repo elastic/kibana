@@ -385,10 +385,7 @@ describe('renderDriftIssue', () => {
     const { title, body } = renderDriftIssue(moved, { owners: [] });
 
     expect(title).toBe('[Connectors][Validation] `.sentry`: 2 actions need attention');
-    // oasdiff reports the moved path as removed
-    expect(body).toContain(
-      '| `GET /api/0/issues/{id}/` | Moved, same URL | `getIssue` | API path removed without deprecation (`api-path-removed-without-deprecation`) |'
-    );
+    expect(body).not.toContain('### Changes to review');
     expect(body).toContain('> [!NOTE]');
     expect(body).toContain(
       "**Sentry's spec moved `/api/0` from its paths into its server URL. The connector most likely still works.**"
@@ -449,7 +446,7 @@ describe('renderDriftIssue', () => {
     expect(body).toContain('`/update-connector acme <link to this issue>`');
   });
 
-  it('says why the issue is open when the actions pass, and lists the changes to review first', () => {
+  it("says why the issue is open when the actions pass, naming the change in the action's details", () => {
     const passing: ConnectorDrift = {
       ...drifted,
       verdict: 'healthy',
@@ -487,16 +484,9 @@ describe('renderDriftIssue', () => {
     expect(body).toContain(
       '> **1 of 2 actions works with the latest spec. 1 action needs attention.**\n>\n> `search` passes but calls a deprecated endpoint.\n>\n> Update the connector to ensure it will continue working.'
     );
-    expect(body).toContain('| Operation | Change | Connector Actions | Details |');
-    expect(body).toContain(
-      '| `GET /items` | Deprecated | `search` | endpoint deprecated (`endpoint-deprecated`) |'
-    );
-    // The request change is verified by running the actions, so it isn't one to review
-    expect(body).not.toContain('| Request changed |');
-    expect(body.indexOf('### Changes to review')).toBeLessThan(body.indexOf('### Actions'));
-    expect(body).toContain(
-      '| `search` | `GET /items` | ✅ Passes | ⚠️ Deprecated (see changes to review) |'
-    );
+    // The action's details name the change; the request change is verified by running it
+    expect(body).toContain('| `search` | `GET /items` | ✅ Passes | ⚠️ Endpoint deprecated |');
+    expect(body).not.toContain('### Changes to review');
   });
 
   it('counts only the actions that need a look, though another action fails', () => {
@@ -693,9 +683,8 @@ describe('renderDriftIssue', () => {
     );
 
     expect(body).toContain('`search` passes but calls an endpoint removed from the current spec.');
-    expect(body).toContain('| `GET /items` | Removed | `search` |');
     expect(body).toContain(
-      '| `search` | `GET /items` | ✅ Passes | ⚠️ Removed (see changes to review) |'
+      '| `search` | `GET /items` | ✅ Passes | ⚠️ API path removed without deprecation |'
     );
   });
 
@@ -818,10 +807,14 @@ describe('renderDriftIssue', () => {
       '> **1 of 3 actions works with the latest spec. 2 actions need attention.**'
     );
     expect(body).toContain(
-      "> `scan` fails against the latest vendor spec. 1 other spec change needs review (see the table). `quota` calls an endpoint no spec describes, so it isn't checked (see the table)."
+      '> `scan` fails against the latest vendor spec. 1 other spec change needs review (see "Other problems"). `quota` calls an endpoint no spec describes, so it isn\'t checked (see the table).'
     );
     expect(body).toContain('| `scan` | `POST /scan/` | ❌ Fails | Against the latest spec:');
     expect(body).not.toContain('**Not in the spec** (`scan`)');
+    // The spec change on an operation no action calls
+    expect(body).toContain(
+      '| Request changed | `GET /items` | decreased the max of `limit` to 50 (`request-parameter-max-decreased`) | Refresh the artifacts, unless the connector depends on it |'
+    );
   });
 
   it('counts problems outside the actions as the table lists them, and says what to fix', () => {

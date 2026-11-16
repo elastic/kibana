@@ -356,6 +356,10 @@ const firstProblem = (problems: readonly string[]): string =>
 // Recorded against an operation, or, when the manifest records none, failing against the latest
 // spec, which now describes what it calls (e.g. once a trailing slash no longer keeps it out).
 const MAX_ADDITION_ROWS = 40;
+// The changes to review a passing action's Details names, at most.
+const MAX_REVIEW_DETAILS = 3;
+
+const capitalized = (text: string): string => `${text.charAt(0).toUpperCase()}${text.slice(1)}`;
 
 // The New column: what the vendor added.
 const additionText = ({ kind, field, value }: Addition): string => {
@@ -486,19 +490,24 @@ const statusOf = (
       )}`
     );
   }
-  const reviewKinds = [
+  // The action works, but what it calls needs a look, as the summary counts it: oasdiff's own
+  // description of each change says what.
+  const toReview = [
     ...new Set(
       action.operations.flatMap(({ source, operation }) =>
-        reviewOf(source, operation).map(({ kind }) => kind)
+        reviewOf(source, operation).map(({ change: { text } }) => capitalized(text))
       )
     ),
   ];
-  if (reviewKinds.length > 0) {
-    // The action works, but what it calls needs a look, as the summary counts it.
-    const kinds = listed(reviewKinds.map((kind) => kind.toLowerCase()));
+  if (toReview.length > 0) {
+    const shown = toReview.slice(0, MAX_REVIEW_DETAILS);
     return passes(
       'passes',
-      `${ICONS.attention} ${kinds.charAt(0).toUpperCase()}${kinds.slice(1)} (see changes to review)`
+      `${ICONS.attention} ${shown.join('; ')}${
+        toReview.length > shown.length
+          ? ` (and ${plural(toReview.length - shown.length, 'more change')})`
+          : ''
+      }`
     );
   }
   const changes = action.operations.flatMap(({ source, operation }) =>
@@ -837,7 +846,7 @@ export const renderDriftIssue = (
         ? [
             `${plural(unattached, 'other spec change')} ${
               unattached === 1 ? 'needs' : 'need'
-            } review (see the table).`,
+            } review (see "Other problems").`,
           ]
         : []),
       ...(stale.length > 0
@@ -1083,28 +1092,15 @@ export const renderDriftIssue = (
         ]
       : [];
 
-  const MAX_REVIEW_ROWS = 30;
-  const reviewSection =
-    review.length > 0
-      ? [
-          '### Changes to review',
-          '',
-          '| Operation | Change | Connector Actions | Details |',
-          '|---|---|---|---|',
-          ...review
-            .slice(0, MAX_REVIEW_ROWS)
-            .map(
-              ({ kind, change: { operation, text, id: rule }, actions: affected }) =>
-                `| ${operation ? code(operation) : '—'} | ${kind} | ${
-                  affected.map(code).join(', ') || '—'
-                } | ${cell(text)} (${code(rule)}) |`
-            ),
-          ...(review.length > MAX_REVIEW_ROWS
-            ? ['', `…and ${review.length - MAX_REVIEW_ROWS} more (see the spec changes below).`]
-            : []),
-          '',
-        ]
-      : [];
+  // Spec changes to review that no action calls, with the problems outside the actions.
+  const unattachedRows: OtherProblemRow[] = review
+    .filter((item) => item.actions.length === 0)
+    .map(({ kind, change: { operation, text, id: rule } }) => ({
+      problem: kind,
+      operation: operation ? code(operation) : '—',
+      details: `${text} (${code(rule)})`,
+      fix: 'Refresh the artifacts, unless the connector depends on it',
+    }));
 
   const corrections = stale.length
     ? [
@@ -1137,8 +1133,6 @@ export const renderDriftIssue = (
       ? [...new Set([...drift.snapshotProblems, ...(drift.latestProblems ?? [])])]
       : otherProblems;
   const changes = specChanges(drift);
-  // When the actions pass, the changes to review are why the issue is open, so they come first.
-  const reviewFirst = drift.verdict === 'healthy';
 
   // What to do
   const movedCorrections = stale.filter(({ latest }) => latest?.status === 'moved');
@@ -1171,7 +1165,6 @@ export const renderDriftIssue = (
     '|---|---|',
     ...facts,
     '',
-    ...(reviewFirst ? reviewSection : []),
     ...(actions.length > 0
       ? [
           '### Actions',
@@ -1185,16 +1178,15 @@ export const renderDriftIssue = (
       : []),
     ...why,
     ...fieldsSection,
-    ...(reviewFirst ? [] : reviewSection),
     ...additionsSection,
     ...corrections,
-    ...(unattributed.length > 0
+    ...(unattributed.length + unattachedRows.length > 0
       ? [
           '### Other problems',
           '',
           '| Problem | Operation | Details | How to fix |',
           '|---|---|---|---|',
-          ...otherProblemRows(unattributed).map(
+          ...[...otherProblemRows(unattributed), ...unattachedRows].map(
             ({ problem, operation, details, fix }) =>
               `| ${problem} | ${operation} | ${cell(details)} | ${fix} |`
           ),
