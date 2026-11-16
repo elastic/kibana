@@ -42,6 +42,7 @@ import {
 import { assertNever } from '@kbn/std';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { UNKNOWN_ALERT_FIELD } from '../lib/alert_snapshot';
 import { assertNightshiftSpace } from '../lib/assert_nightshift_space';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -1620,7 +1621,10 @@ export class NightshiftInvestigationsClient {
     // The step passes an empty string when the rule event has no type.
     const snapshotRuleType = alertSubject?.snapshot?.rule_type_id;
     const alertRuleType =
-      alertInput.ruleTypeId || (typeof snapshotRuleType === 'string' ? snapshotRuleType : '');
+      alertInput.ruleTypeId ||
+      (typeof snapshotRuleType === 'string' && snapshotRuleType !== UNKNOWN_ALERT_FIELD
+        ? snapshotRuleType
+        : '');
 
     const spaceId = this.getSpaceId();
     this.warnOnSpaceMismatch(spaceId);
