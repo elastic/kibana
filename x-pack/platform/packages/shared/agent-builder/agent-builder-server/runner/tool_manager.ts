@@ -11,15 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { ToolReturnSummarizerFn } from '../tools/builtin';
 import type { AgentEventEmitterFn, ExecutableTool } from '..';
 
-export interface ToolManagerParams {
-  dynamicToolCapacity: number;
-}
-
 export type ToolName = string;
-
-export interface AddToolOptions {
-  dynamic?: boolean;
-}
 
 export type ExecutableToolWithOrigin = ExecutableTool & { origin: ToolOrigin };
 export type BrowserToolWithOrigin = BrowserApiToolMetadata & { origin: ToolOrigin };
@@ -56,7 +48,8 @@ export type AddToolInput = ExecutableToolInput | BrowserToolInput | DynamicToolI
 
 /**
  * Interface for managing tools in the agent system.
- * Handles both static and dynamic tools with LRU eviction for dynamic tools.
+ * Natively bound tools are fixed for the run; dynamic tools are reachable only through the
+ * `execute_dynamic_tool` meta-tool, so adding one leaves the bound tool list unchanged.
  */
 export interface ToolManager {
   /**
@@ -79,22 +72,21 @@ export interface ToolManager {
    * entry, and ids already bound natively are skipped, as the model calls those directly. Use
    * `getDynamicTool` to tell which ids landed in the registry.
    * @param input - The tool input configuration (executable, browser or dynamic)
-   * @param options - Optional configuration for tool storage (static vs dynamic)
    */
-  addTools(input: AddToolInput, options?: AddToolOptions): Promise<void>;
+  addTools(input: AddToolInput): Promise<void>;
 
   /**
-   * Lists all tools in the tool manager.
-   * @returns an array of all tools (static and dynamic)
+   * Removes tools added with a `DynamicToolInput`, so they are no longer reachable through
+   * `execute_dynamic_tool` nor persisted. Natively bound and unknown ids are ignored.
+   * @param toolIds - The internal ids of the dynamic tools to remove
+   */
+  removeDynamicTools(toolIds: string[]): void;
+
+  /**
+   * Lists the tools bound to the model (not the dynamic tools).
+   * @returns an array of the natively bound tools
    */
   list(): StructuredTool[];
-
-  /**
-   * Records the use of a tool, marking it as recently used.
-   * This affects LRU eviction for dynamic tools.
-   * @param name - the name of the tool to record usage for
-   */
-  recordToolUse(langchainToolName: ToolName): void;
 
   /**
    * Gets the tool id mapping.
@@ -115,9 +107,7 @@ export interface ToolManager {
   getExecutable(toolId: string): ExecutableTool | undefined;
 
   /**
-   * Gets the internal tool IDs of all dynamic tools currently in the tool manager: those bound
-   * with the `dynamic` option, then those added with a `dynamic` input.
-   * Returns internal tool IDs (not LangChain names) for persistence.
+   * Gets the internal tool IDs of the dynamic tools, for persistence.
    * @returns array of internal tool IDs
    */
   getDynamicToolIds(): string[];

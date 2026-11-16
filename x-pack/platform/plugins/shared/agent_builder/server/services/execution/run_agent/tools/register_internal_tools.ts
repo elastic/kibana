@@ -210,7 +210,6 @@ export const registerInternalTools = async ({
       createLoadSkillTool({
         analyticsService,
         trackingService,
-        dynamicToolsEnabled: experimentalFeatures.dynamicTools,
       })
     );
   }
@@ -241,7 +240,8 @@ export const registerInternalTools = async ({
         ...builtinToolToExecutable({ tool, runner: runner as ScopedRunner }),
         origin: ToolOrigin.internal,
       })),
-      ...(experimentalFeatures.dynamicTools ? [createExecuteDynamicTool({ toolManager })] : []),
+      // always bound, so the native tool list stays the same however many dynamic tools appear
+      createExecuteDynamicTool({ toolManager }),
     ],
     logger,
   });

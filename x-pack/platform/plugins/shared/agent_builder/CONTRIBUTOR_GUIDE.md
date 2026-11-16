@@ -442,6 +442,24 @@ in `x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lis
 
 (Kibana will fail to start otherwise, with an explicit error message explaining what to do)
 
+#### Tools bound to an attachment
+
+The object returned by `format` can implement `getBoundedTools` to give the agent tools tied to one
+attachment (for example a tool fetching the details of the attached host). Unlike the tools listed by
+`getTools`, which the attachment type declares and which are bound natively, bound tools are
+[dynamic tools](#tools-exposed-by-skills-and-attachments): their definitions are rendered after the
+attachment event that makes them available, and the agent calls them through `execute_dynamic_tool`.
+Adding an attachment therefore never changes the agent's native tool list.
+
+- The definitions are rendered from the attachment version the event announces, so keep each tool's
+  description and schema a function of that version's data: anything else (time, live lookups) would change
+  an already-rendered block and invalidate the prompt cache.
+- A tool added or changed during a run (for example by `attachments.add`) is callable from the next model call.
+  Deleting an attachment, or updating it to a version that binds fewer tools, makes the dropped tools
+  uncallable from the next model call.
+- Bound tool ids are not scoped to the attachment: when two active attachments of one type bind the same
+  tool id, the last one wins.
+
 #### `getAgentDescription` — describing inline rendering to the agent
 
 When your attachment type supports inline rendering, `getAgentDescription` should tell
@@ -1564,6 +1582,30 @@ agentBuilder.skills.register({
   getInlineTools: () => [myInlineToolDefinition],
 });
 ```
+
+### Tools exposed by skills and attachments
+
+Tools a skill exposes (`getRegistryTools`, `getInlineTools`) and tools bound to an attachment
+(`getBoundedTools`, see [Tools bound to an attachment](#tools-bound-to-an-attachment)) are **dynamic tools**.
+They are never added to the model's native tool list, which stays fixed for the whole run so the
+prompt cache prefix stays valid. Instead:
+
+- Their definitions (`tool_id`, `description`, and the `parameters` JSON schema) are written into the
+  conversation: in the `dynamic_tools` field of the `load_skill` result (or an extra result appended when
+  the agent reads a skill's `SKILL.md`), and in a `<dynamic_tools>` block after the attachment event that
+  makes them available.
+- The agent calls them through the always-present `execute_dynamic_tool` tool, with `tool_id` and `params`.
+  The call is stored and shown in the UI as a call to the dynamic tool itself, and runs through the same
+  hooks, confirmation and telemetry as a native call.
+- After a compaction, the definitions of the dynamic tools still available are repeated after the summary.
+
+What this means for your tools:
+
+- Write descriptions and schemas as you would for a native tool: the model reads them as JSON in the
+  conversation instead of in its tool list.
+- A skill can expose at most 25 registry tools.
+- A tool loaded by a skill stays available in later rounds of the conversation as long as its definition
+  is still visible to the agent; otherwise the agent loads the skill again.
 
 ### Defining new base paths for your skills
 

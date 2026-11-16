@@ -6,12 +6,13 @@
  */
 
 import type {
+  AttachmentTimelineEvent,
   CompactionCursor,
   CompactionSummary,
   ConversationRoundStep,
   ToolCallStep,
 } from '@kbn/agent-builder-common';
-import { isToolCallStep, TimelineEventType } from '@kbn/agent-builder-common';
+import { isAttachmentEvent, isToolCallStep, TimelineEventType } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
@@ -293,6 +294,38 @@ export const unitSteps = (
   }
   const source = unit.kind === 'round_cycle' ? unit.round.steps : steps;
   return source.slice(unit.range.start, unit.range.end + 1);
+};
+
+const entryAttachmentEvents = (
+  entry: TimelineEntry<ProcessedTimelineEvent>
+): AttachmentTimelineEvent[] => {
+  if (isTimelineStandaloneEvent(entry)) {
+    return isAttachmentEvent(entry.event) ? [entry.event] : [];
+  }
+  return isTimelineRound(entry) ? entry.events.filter(isAttachmentEvent) : entry.events;
+};
+
+/**
+ * The attachment events of `events` that may still render under a compaction cursor: all of them
+ * but those of the entries the cursor hides whole. A partially hidden round keeps all of its
+ * events, and so does the resumed round, which is not among the entries.
+ */
+export const visibleAttachmentEvents = ({
+  events,
+  entries,
+  visibility,
+}: {
+  events: ProcessedTimelineEvent[];
+  entries: Array<TimelineEntry<ProcessedTimelineEvent>>;
+  visibility: ContextVisibility;
+}): AttachmentTimelineEvent[] => {
+  const hidden = new Set(
+    entries
+      .slice(0, visibility.hiddenEntryCount)
+      .flatMap(entryAttachmentEvents)
+      .map((event) => event.id)
+  );
+  return events.filter(isAttachmentEvent).filter((event) => !hidden.has(event.id));
 };
 
 /**

@@ -65,8 +65,8 @@ export interface ProcessedConversation {
   describeAttachmentType?: (type: string) => string | undefined;
   /**
    * The definitions of the tools an attachment event makes available through
-   * `execute_dynamic_tool`, resolved before rendering (see `BoundToolDefinitions`). Absent when
-   * dynamic tools are off.
+   * `execute_dynamic_tool`, resolved before rendering (see `AttachmentBoundTools`). Set by the
+   * chat agent run; absent on the paths that do not render attachment events.
    */
   boundToolDefinitions?: (event: AttachmentTimelineEvent) => DynamicToolDefinition[] | undefined;
   /** Where each resume's input attachments render: `prompt_response` id → the items its pause waited on. */

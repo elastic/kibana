@@ -48,8 +48,8 @@ import { RunAttachmentEvents } from './run_attachment_events';
 import { registerInternalTools } from './tools/register_internal_tools';
 import { createPromptFactory } from './prompts';
 import { createImageResolver } from './utils/image_resolver';
-import { resolveActiveAttachmentBoundTools } from './utils/attachment_bound_tools';
-import { BoundToolDefinitions } from './utils/bound_tool_definitions';
+import { AttachmentBoundTools } from './utils/attachment_bound_tools';
+import { describedDynamicToolIds } from './utils/described_dynamic_tools';
 import { RunTracker } from './run_tracker';
 import { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import { steps as nodeNames } from './constants';
@@ -79,15 +79,18 @@ jest.mock('./utils/image_resolver', () => ({
   createImageResolver: jest.fn(() => jest.fn()),
 }));
 
+// One instance per run; `mock`-prefixed so the hoisted factory below may close over it.
+const mockAttachmentBoundTools = {
+  prepare: jest.fn(),
+  get: jest.fn(),
+  sync: jest.fn(),
+};
 jest.mock('./utils/attachment_bound_tools', () => ({
-  resolveActiveAttachmentBoundTools: jest.fn(),
+  AttachmentBoundTools: jest.fn(() => mockAttachmentBoundTools),
 }));
 
-jest.mock('./utils/bound_tool_definitions', () => ({
-  BoundToolDefinitions: jest.fn(() => ({
-    prepare: jest.fn().mockResolvedValue(undefined),
-    get: jest.fn(),
-  })),
+jest.mock('./utils/described_dynamic_tools', () => ({
+  describedDynamicToolIds: jest.fn(() => new Set()),
 }));
 
 jest.mock('./prompts', () => ({
@@ -145,7 +148,6 @@ describe('runDefaultAgentMode', () => {
     const dynamicTools: ExecutableToolWithOrigin[] = [
       { ...createMockedExecutableTool({ id: 'dynamic-tool-1' }), origin: ToolOrigin.inline },
     ];
-
     selectToolsMock.mockResolvedValue({
       staticTools,
       dynamicTools,
@@ -199,15 +201,15 @@ describe('runDefaultAgentMode', () => {
       tools: [{ ...browserApiTools[0], origin: ToolOrigin.internal }],
     });
 
-    // Dynamic tools are added afterwards with the dynamic flag
-    expect(context.toolManager.addTools).toHaveBeenNthCalledWith(
-      3,
-      {
-        type: ToolManagerToolType.executable,
-        tools: dynamicTools,
-        logger: context.logger,
-      },
-      { dynamic: true }
+    // Dynamic tools are added afterwards, behind execute_dynamic_tool
+    expect(context.toolManager.addTools).toHaveBeenNthCalledWith(3, {
+      type: ToolManagerToolType.dynamic,
+      tools: dynamicTools,
+    });
+    // then the tools bound to the active attachments are synced into the registry
+    expect(mockAttachmentBoundTools.sync).toHaveBeenCalledWith(context.toolManager);
+    expect(mockAttachmentBoundTools.sync.mock.invocationCallOrder[0]).toBeGreaterThan(
+      context.toolManager.addTools.mock.invocationCallOrder[2]
     );
   });
 
@@ -1617,10 +1619,9 @@ describe('runDefaultAgentMode', () => {
     });
   });
 
-  describe('with dynamic tools enabled', () => {
+  describe('dynamic tools', () => {
     it('re-registers the previous rounds dynamic tools behind execute_dynamic_tool', async () => {
       const context = createAgentHandlerContextMock();
-      context.experimentalFeatures.dynamicTools = true;
 
       jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
         connector: { name: 'test-connector' },
@@ -1669,15 +1670,16 @@ describe('getRecursionLimit', () => {
   });
 });
 
-describe('runDefaultAgentMode tool selection', () => {
+describe('runDefaultAgentMode restored dynamic tools', () => {
+  const describedMock = describedDynamicToolIds as jest.MockedFn<typeof describedDynamicToolIds>;
+
   beforeEach(() => {
     jest.clearAllMocks();
     createPreExecutionStepsMock.mockReturnValue([]);
   });
 
-  it.each([true, false])('passes the dynamic tools flag (%s) to selectTools', async (enabled) => {
+  it('restores only the dynamic tools whose definition the model can see', async () => {
     const context = createAgentHandlerContextMock();
-    context.experimentalFeatures.dynamicTools = enabled;
     jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
       connector: { name: 'test-connector' },
       chatModel: {} as any,
@@ -1686,58 +1688,59 @@ describe('runDefaultAgentMode tool selection', () => {
     context.toolManager.getDynamicToolIds.mockReturnValue([]);
     getPendingTurnMock.mockReturnValue(undefined);
     selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
-    prepareConversationMock.mockResolvedValue({
+    const processedConversation = {
       timeline: [],
       nextInput: { message: 'hello', attachments: [] },
       attachments: [],
       attachmentTypes: [],
       attachmentStateManager: context.attachmentStateManager,
-    } as any);
+    };
+    prepareConversationMock.mockResolvedValue(processedConversation as any);
     extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
     createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+    describedMock.mockReturnValue(new Set(['described.tool']));
 
     await runDefaultAgentMode(
-      { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+      {
+        nextInput: { message: 'hello' },
+        agentConfiguration: { tools: [] } as any,
+        conversation: createEmptyConversation({
+          id: 'conv-1',
+          state: { dynamic_tool_ids: ['described.tool', 'undescribed.tool'] },
+        } as any),
+        roundId: 'round-1',
+      },
       context
     );
 
+    expect(describedMock).toHaveBeenCalledWith(
+      expect.objectContaining({ conversation: processedConversation, roundId: 'round-1' })
+    );
     expect(selectToolsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ dynamicToolsEnabled: enabled })
+      expect.objectContaining({ previousDynamicToolIds: ['described.tool'] })
     );
   });
 });
 
-describe('runDefaultAgentMode bound tool definitions', () => {
-  const BoundToolDefinitionsMock = BoundToolDefinitions as jest.MockedClass<
-    typeof BoundToolDefinitions
+describe('runDefaultAgentMode attachment bound tools', () => {
+  const AttachmentBoundToolsMock = AttachmentBoundTools as jest.MockedClass<
+    typeof AttachmentBoundTools
   >;
   const definition: DynamicToolDefinition = {
     tool_id: 'bound.tool',
     description: 'Fetch the host',
     parameters: { type: 'object', properties: {} },
   };
-  const prepare = jest.fn();
-  const get = jest.fn();
+  const { prepare, get, sync } = mockAttachmentBoundTools;
 
   beforeEach(() => {
     jest.clearAllMocks();
     createPreExecutionStepsMock.mockReturnValue([]);
-    prepare.mockResolvedValue(undefined);
     get.mockReturnValue([definition]);
-    BoundToolDefinitionsMock.mockImplementation(
-      () => ({ prepare, get } as unknown as BoundToolDefinitions)
-    );
   });
 
-  const run = async ({
-    dynamicTools,
-    timeline = [],
-  }: {
-    dynamicTools: boolean;
-    timeline?: unknown[];
-  }) => {
+  const run = async ({ timeline = [] }: { timeline?: unknown[] } = {}) => {
     const context = createAgentHandlerContextMock();
-    context.experimentalFeatures.dynamicTools = dynamicTools;
     jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
       connector: { name: 'test-connector' },
       chatModel: {} as any,
@@ -1770,19 +1773,19 @@ describe('runDefaultAgentMode bound tool definitions', () => {
     };
   };
 
-  it('resolves the definitions of the timeline and incoming attachment events when dynamic tools are on', async () => {
+  it('resolves the definitions of the timeline and incoming attachment events', async () => {
     const timelineEvent = attachmentEventFixture({ id: 'att' });
     const noteEvent = { id: 'note', type: 'note' };
 
     const { context, processedConversation } = await run({
-      dynamicTools: true,
       timeline: [noteEvent, timelineEvent],
     });
 
-    expect(BoundToolDefinitionsMock).toHaveBeenCalledWith({
+    expect(AttachmentBoundToolsMock).toHaveBeenCalledWith({
       attachmentStateManager: context.attachmentStateManager,
       attachmentsService: context.attachments,
       formatContext: { request: context.request, spaceId: context.spaceId },
+      logger: context.logger,
     });
     // only attachment events: the timeline's, then the incoming message's
     expect(prepare).toHaveBeenCalledWith([
@@ -1794,30 +1797,24 @@ describe('runDefaultAgentMode bound tool definitions', () => {
   });
 
   it('resolves the definitions before the prompt is built', async () => {
-    await run({ dynamicTools: true });
+    await run();
 
     expect(prepare.mock.invocationCallOrder[0]).toBeLessThan(
       createPromptFactoryMock.mock.invocationCallOrder[0]
     );
   });
 
-  it('resolves nothing when dynamic tools are off', async () => {
-    const { processedConversation } = await run({ dynamicTools: false });
+  it('syncs the bound tools into the registry after the restored dynamic tools', async () => {
+    const { context } = await run();
 
-    expect(BoundToolDefinitionsMock).not.toHaveBeenCalled();
-    expect(processedConversation.boundToolDefinitions).toBeUndefined();
+    expect(sync).toHaveBeenCalledTimes(1);
+    expect(sync).toHaveBeenCalledWith(context.toolManager);
+    expect(sync.mock.invocationCallOrder[0]).toBeGreaterThan(
+      context.toolManager.addTools.mock.invocationCallOrder.at(-1)!
+    );
   });
 
   describe('when a tool batch produces attachment events', () => {
-    const resolveActiveMock = resolveActiveAttachmentBoundTools as jest.MockedFn<
-      typeof resolveActiveAttachmentBoundTools
-    >;
-    const boundTool = createMockedExecutableTool({ id: 'bound-tool-1' });
-
-    beforeEach(() => {
-      resolveActiveMock.mockResolvedValue([boundTool]);
-    });
-
     /** Ends a tool batch that added an attachment, as the graph does; returns the drained events. */
     const drainToolBatch = async ({ context, graphParams }: Awaited<ReturnType<typeof run>>) => {
       (context.attachmentStateManager.drainChanges as jest.Mock).mockReturnValueOnce([
@@ -1832,24 +1829,8 @@ describe('runDefaultAgentMode bound tool definitions', () => {
       return graphParams.runAttachmentEvents?.drainToolCalls(['c1']);
     };
 
-    it('registers the tools bound to the active attachments behind execute_dynamic_tool', async () => {
-      const result = await run({ dynamicTools: true });
-
-      await drainToolBatch(result);
-
-      expect(resolveActiveMock).toHaveBeenCalledWith({
-        attachmentStateManager: result.context.attachmentStateManager,
-        attachmentsService: result.context.attachments,
-        formatContext: { request: result.context.request, spaceId: result.context.spaceId },
-      });
-      expect(result.context.toolManager.addTools).toHaveBeenLastCalledWith({
-        type: ToolManagerToolType.dynamic,
-        tools: [{ ...boundTool, origin: ToolOrigin.inline }],
-      });
-    });
-
-    it('resolves the definitions of the drained events before registering the tools', async () => {
-      const result = await run({ dynamicTools: true });
+    it('resolves the definitions of the drained events, then syncs the bound tools', async () => {
+      const result = await run();
 
       const drained = await drainToolBatch(result);
 
@@ -1857,19 +1838,10 @@ describe('runDefaultAgentMode bound tool definitions', () => {
         expect.objectContaining({ data: expect.objectContaining({ attachment_id: 'a2' }) }),
       ]);
       expect(prepare).toHaveBeenLastCalledWith(drained);
+      expect(sync).toHaveBeenCalledTimes(2);
+      expect(sync).toHaveBeenLastCalledWith(result.context.toolManager);
       expect(prepare.mock.invocationCallOrder.at(-1)).toBeLessThan(
-        resolveActiveMock.mock.invocationCallOrder[0]
-      );
-    });
-
-    it('registers nothing when dynamic tools are off', async () => {
-      const result = await run({ dynamicTools: false });
-
-      await drainToolBatch(result);
-
-      expect(resolveActiveMock).not.toHaveBeenCalled();
-      expect(result.context.toolManager.addTools).not.toHaveBeenCalledWith(
-        expect.objectContaining({ type: ToolManagerToolType.dynamic })
+        sync.mock.invocationCallOrder.at(-1)!
       );
     });
   });

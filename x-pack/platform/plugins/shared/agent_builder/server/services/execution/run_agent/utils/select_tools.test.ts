@@ -121,59 +121,6 @@ describe('selectTools', () => {
     expect(skills.convertSkillTool).toHaveBeenCalled();
   });
 
-  it('marks attachment-bounded tools as inline origin', async () => {
-    const boundedTool = {
-      id: 'attachment.inline',
-      type: ToolType.builtin,
-    };
-    const convertedBoundedTool = createExecutableTool('attachment.inline');
-    const attachmentDefinition = {
-      format: jest.fn().mockResolvedValue({
-        getBoundedTools: jest.fn().mockResolvedValue([boundedTool]),
-      }),
-    };
-
-    const attachmentsService = {
-      getTypeDefinition: jest.fn().mockReturnValue(attachmentDefinition),
-      convertAttachmentTool: jest.fn().mockReturnValue(convertedBoundedTool),
-    } as any;
-
-    const result = await selectTools({
-      conversation: {
-        attachmentTypes: [],
-        attachmentStateManager: {
-          getActive: jest.fn().mockReturnValue([
-            {
-              id: 'a-1',
-              type: 'text',
-              active: true,
-              current_version: 1,
-              versions: [{ version: 1, data: 'hello', created_at: 'now', content_hash: 'h' }],
-            },
-          ]),
-        },
-      } as any,
-      previousDynamicToolIds: [],
-      filteredSkills: [],
-      skills: { convertSkillTool: jest.fn() } as any,
-      request: {} as any,
-      toolProvider: { list: jest.fn().mockResolvedValue([]) } as any,
-      agentConfiguration: { tools: [], enable_elastic_capabilities: false } as any,
-      aiIndicesEnabled: false,
-      capabilities: { attachmentTools: true, apiTools: true },
-      attachmentsService,
-      spaceId: 'default',
-      runner: {
-        runInternalTool: jest.fn(),
-      } as any,
-    });
-
-    // Attachment-scoped bounded tools are treated as inline because they are not registry entries.
-    expect(result.staticTools.find((tool) => tool.id === 'attachment.inline')?.origin).toBe(
-      ToolOrigin.inline
-    );
-  });
-
   describe('attachment_tools capability', () => {
     const genericAttachmentToolIds = Object.values(attachmentTools);
 
@@ -183,16 +130,9 @@ describe('selectTools', () => {
       attachmentToolsEnabled: boolean;
     }) => {
       const typeToolId = 'text.type_tool';
-      const boundTool = { id: 'attachment.bound', type: ToolType.builtin };
-      const attachmentDefinition = {
-        getTools: () => [typeToolId],
-        format: jest.fn().mockResolvedValue({
-          getBoundedTools: jest.fn().mockResolvedValue([boundTool]),
-        }),
-      };
+      const attachmentDefinition = { getTools: () => [typeToolId] };
       const attachmentsService = {
         getTypeDefinition: jest.fn().mockReturnValue(attachmentDefinition),
-        convertAttachmentTool: jest.fn().mockReturnValue(createExecutableTool('attachment.bound')),
       } as any;
 
       const result = await selectTools({
@@ -231,21 +171,19 @@ describe('selectTools', () => {
       jest.mocked(createAttachmentTools).mockClear();
     });
 
-    it('leaves out the generic attachment tools but keeps type and bound tools when off', async () => {
+    it('leaves out the generic attachment tools but keeps type tools when off', async () => {
       const ids = await selectStaticToolIds({ attachmentToolsEnabled: false });
 
       expect(createAttachmentTools).not.toHaveBeenCalled();
       expect(ids.filter((id) => genericAttachmentToolIds.includes(id))).toEqual([]);
-      expect(ids).toEqual(expect.arrayContaining(['text.type_tool', 'attachment.bound']));
+      expect(ids).toEqual(expect.arrayContaining(['text.type_tool']));
     });
 
     it('adds the generic attachment tools when on', async () => {
       const ids = await selectStaticToolIds({ attachmentToolsEnabled: true });
 
       expect(createAttachmentTools).toHaveBeenCalledTimes(1);
-      expect(ids).toEqual(
-        expect.arrayContaining(['attachments.read', 'text.type_tool', 'attachment.bound'])
-      );
+      expect(ids).toEqual(expect.arrayContaining(['attachments.read', 'text.type_tool']));
     });
   });
 
@@ -384,7 +322,7 @@ describe('selectTools', () => {
 });
 
 describe('selectTools attachment bound tools', () => {
-  const select = ({ dynamicToolsEnabled }: { dynamicToolsEnabled?: boolean }) => {
+  const select = () => {
     const attachmentsService = {
       getTypeDefinition: jest.fn().mockReturnValue({
         getTools: () => ['text.type_tool'],
@@ -428,35 +366,20 @@ describe('selectTools attachment bound tools', () => {
       attachmentsService,
       spaceId: 'default',
       runner: { runInternalTool: jest.fn() } as any,
-      ...(dynamicToolsEnabled === undefined ? {} : { dynamicToolsEnabled }),
     });
   };
 
   const ids = (tools: Array<{ id: string }>) => tools.map((tool) => tool.id);
 
-  it.each([
-    ['by default', undefined],
-    ['when dynamic tools are off', false],
-  ])('keeps them in the native tool list %s', async (_, dynamicToolsEnabled) => {
-    const result = await select({ dynamicToolsEnabled });
+  it('leaves them out: they are registered apart, from the attachment state', async () => {
+    const result = await select();
 
-    expect(result.staticTools).toContainEqual(
-      expect.objectContaining({ id: 'attachment.bound', origin: ToolOrigin.inline })
-    );
+    expect(ids(result.staticTools)).not.toContain('attachment.bound');
     expect(ids(result.dynamicTools)).not.toContain('attachment.bound');
   });
 
-  it('makes them dynamic tools, with inline origin, when dynamic tools are on', async () => {
-    const result = await select({ dynamicToolsEnabled: true });
-
-    expect(ids(result.staticTools)).not.toContain('attachment.bound');
-    expect(result.dynamicTools).toContainEqual(
-      expect.objectContaining({ id: 'attachment.bound', origin: ToolOrigin.inline })
-    );
-  });
-
-  it('keeps the tools of the attachment type and of skills where they were when dynamic tools are on', async () => {
-    const result = await select({ dynamicToolsEnabled: true });
+  it('keeps the tools of the attachment type native and those of skills dynamic', async () => {
+    const result = await select();
 
     expect(ids(result.staticTools)).toContain('text.type_tool');
     expect(ids(result.dynamicTools)).toContain('skill.inline');

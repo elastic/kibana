@@ -24,7 +24,6 @@ import {
   AgentExecutionMode,
   EventActorType,
   parseExecutionId,
-  isAttachmentEvent,
   platformCoreTools,
   unreadSettledSteerIds,
 } from '@kbn/agent-builder-common';
@@ -49,13 +48,17 @@ import { ensureValidInput } from './utils/preflight_checks';
 import { buildResumeInitialization } from './utils/resume_initialization';
 import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
 import { legacyEligibleRoundIds } from './utils/compaction_coverage';
-import { historyView, translateLegacySummary } from './utils/context_coverage';
+import {
+  historyView,
+  resolveVisibility,
+  translateLegacySummary,
+  visibleAttachmentEvents,
+} from './utils/context_coverage';
 import type { PreviousRoundInfo } from './utils/context_management';
 import { createSummarizationTransformer } from './utils/tool_summarization';
 import { buildResumeAnchors, pausedItems, type PausedItem } from './utils/attachment_placement';
-import { resolveActiveAttachmentBoundTools } from './utils/attachment_bound_tools';
-import { BoundToolDefinitions } from './utils/bound_tool_definitions';
-import { withOrigin } from './utils/select_tools';
+import { AttachmentBoundTools } from './utils/attachment_bound_tools';
+import { describedDynamicToolIds } from './utils/described_dynamic_tools';
 import { sourceEvents } from '../../conversation/client/source_events';
 import {
   runTimelineExecutionId,
@@ -250,15 +253,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
   processedConversation.resumedRoundId = pendingTurn?.id;
   const pendingRound = pendingTurn?.compatRound;
-  // With dynamic tools on, the tools bound to an attachment are announced by its events.
+  // The tools bound to an attachment are announced by its events.
   const attachmentFormatContext = { request, spaceId: context.spaceId };
-  const boundToolDefinitions = experimentalFeatures.dynamicTools
-    ? new BoundToolDefinitions({
-        attachmentStateManager: context.attachmentStateManager,
-        attachmentsService: attachments,
-        formatContext: attachmentFormatContext,
-      })
-    : undefined;
+  const attachmentBoundTools = new AttachmentBoundTools({
+    attachmentStateManager: context.attachmentStateManager,
+    attachmentsService: attachments,
+    formatContext: attachmentFormatContext,
+    logger,
+  });
   const runAttachmentEvents = new RunAttachmentEvents({
     attachmentStateManager: context.attachmentStateManager,
     roundId: pendingTurn?.id ?? roundId,
@@ -274,21 +276,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     ),
     agentId: agentIdForEvents,
     // An attachment added or changed by a tool is announced by its event: the tools bound to it
-    // are callable from the next model call, which renders their definitions.
-    onToolCallEvents: boundToolDefinitions
-      ? async (attachmentEvents) => {
-          await boundToolDefinitions.prepare(attachmentEvents);
-          const boundTools = await resolveActiveAttachmentBoundTools({
-            attachmentStateManager: context.attachmentStateManager,
-            attachmentsService: attachments,
-            formatContext: attachmentFormatContext,
-          });
-          await toolManager.addTools({
-            type: ToolManagerToolType.dynamic,
-            tools: withOrigin(boundTools, ToolOrigin.inline),
-          });
-        }
-      : undefined,
+    // are callable from the next model call, which renders their definitions. The tools of a
+    // deleted or replaced version stop being callable.
+    onToolCallEvents: async (attachmentEvents) => {
+      await attachmentBoundTools.prepare(attachmentEvents);
+      await attachmentBoundTools.sync(toolManager);
+    },
   });
   // Everything recorded so far came from the incoming message's attachments.
   const chatInputEvents = runAttachmentEvents.drainChatInput();
@@ -310,14 +303,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       attachment_events: chatInputEvents,
     };
   }
-  // Resolve the definitions of the attachment events that are about to be rendered.
-  if (boundToolDefinitions) {
-    await boundToolDefinitions.prepare([
-      ...processedConversation.timeline.filter(isAttachmentEvent),
-      ...chatInputEvents,
-    ]);
-    processedConversation.boundToolDefinitions = (event) => boundToolDefinitions.get(event);
-  }
   // Only the first execution owns the round's workflow context step.
   const preExecutionWorkflow: PreExecutionWorkflowStepData | undefined = pendingTurn
     ? undefined
@@ -326,14 +311,32 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // The stored summary, with a cursor when it predates cycle-based compaction. What it covers is
   // hidden at render time; the graph replaces it when it compacts.
   const storedSummary = conversation?.state?.compaction_summary;
+  const { entries: historyEntries } = historyView(processedConversation);
   const compactionSummary =
     conversation && storedSummary
       ? translateLegacySummary({
           summary: storedSummary,
-          entries: historyView(processedConversation).entries,
+          entries: historyEntries,
           legacyEligibleIds: legacyEligibleRoundIds(sourceEvents(conversation)),
         })
       : undefined;
+
+  // Resolve the definitions of the attachment events that are about to be rendered: the history's
+  // but those the summary hides, then the incoming message's.
+  await attachmentBoundTools.prepare([
+    ...visibleAttachmentEvents({
+      events: processedConversation.timeline,
+      entries: historyEntries,
+      visibility: resolveVisibility({
+        entries: historyEntries,
+        roundId: pendingTurn?.id ?? roundId,
+        steps: pendingTurn?.steps ?? [],
+        cursor: compactionSummary?.summarized_up_to,
+      }),
+    }),
+    ...chatInputEvents,
+  ]);
+  processedConversation.boundToolDefinitions = (event) => attachmentBoundTools.get(event);
 
   // Started before the tool setup so a 'first' hook overlaps it, as the skill selection below does.
   const cycleHooks = new CycleHookRuntime({
@@ -356,9 +359,19 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   // Closed on every exit so a late background append is refused rather than queued for nothing.
   try {
+    // Dynamic tools of earlier rounds are restored only when the model can see their definition.
+    const describedToolIds = describedDynamicToolIds({
+      conversation: processedConversation,
+      compactionSummary,
+      roundId: pendingTurn?.id ?? roundId,
+      resumedSteps: pendingTurn?.steps,
+    });
+    const previousDynamicToolIds = (conversation?.state?.dynamic_tool_ids ?? []).filter((id) =>
+      describedToolIds.has(id)
+    );
     const { staticTools, dynamicTools } = await selectTools({
       conversation: processedConversation,
-      previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
+      previousDynamicToolIds,
       filteredSkills,
       skills,
       toolProvider,
@@ -370,7 +383,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       request,
       spaceId: context.spaceId,
       runner: context.runner,
-      dynamicToolsEnabled: experimentalFeatures.dynamicTools,
     });
 
     // First add static tools
@@ -421,24 +433,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       capabilities: resolvedConfiguration.capabilities,
     });
 
-    // Then add the dynamic tools
-    if (experimentalFeatures.dynamicTools) {
-      // tools loaded in previous rounds in the registry behind
-      // `execute_dynamic_tool` when the feature is on
-      await toolManager.addTools({ type: ToolManagerToolType.dynamic, tools: dynamicTools });
-    } else {
-      // LRU bound tools with feature off
-      await toolManager.addTools(
-        {
-          type: ToolManagerToolType.executable,
-          tools: dynamicTools,
-          logger,
-        },
-        {
-          dynamic: true,
-        }
-      );
-    }
+    // Then the dynamic tools, reachable only through `execute_dynamic_tool`: the restored ones,
+    // then the ones bound to the active attachments (last wins on an id clash)
+    await toolManager.addTools({ type: ToolManagerToolType.dynamic, tools: dynamicTools });
+    await attachmentBoundTools.sync(toolManager);
 
     const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 

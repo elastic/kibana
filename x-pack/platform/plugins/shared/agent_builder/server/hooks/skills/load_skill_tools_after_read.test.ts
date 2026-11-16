@@ -176,9 +176,13 @@ describe('createLoadSkillToolsAfterRead', () => {
   });
 
   describe('skill tool loading', () => {
+    /** A converted tool, with what its definition is rendered from. */
+    const executableTool = (id: string) =>
+      ({ id, description: `${id} tool`, getSchema: () => z.object({}) } as any);
+
     it('loads inline tools as dynamic tools into the tool manager', async () => {
       const inlineTool = { id: 'inline-1', type: ToolType.builtin } as SkillBoundedTool;
-      const convertedTool = { id: 'inline-1-converted' } as any;
+      const convertedTool = executableTool('inline-1-converted');
 
       const skill = createMockSkill({
         getInlineTools: jest.fn().mockReturnValue([inlineTool]),
@@ -195,18 +199,14 @@ describe('createLoadSkillToolsAfterRead', () => {
 
       expect(skill.getInlineTools).toHaveBeenCalled();
       expect(toolHandlerContext.skills.convertSkillTool).toHaveBeenCalledWith(inlineTool);
-      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
-        {
-          type: ToolManagerToolType.executable,
-          tools: [{ ...convertedTool, origin: ToolOrigin.inline }],
-          logger: toolHandlerContext.logger,
-        },
-        { dynamic: true }
-      );
+      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith({
+        type: ToolManagerToolType.dynamic,
+        tools: [{ ...convertedTool, origin: ToolOrigin.inline }],
+      });
     });
 
     it('loads registry tools as dynamic tools into the tool manager', async () => {
-      const registryTool = { id: 'registry-tool-1' } as any;
+      const registryTool = executableTool('registry-tool-1');
       const skill = createMockSkill({
         getInlineTools: jest.fn().mockReturnValue([]),
         getRegistryTools: jest.fn().mockReturnValue(['registry-tool-1']),
@@ -221,19 +221,16 @@ describe('createLoadSkillToolsAfterRead', () => {
       await loadSkillToolsAfterRead(context);
 
       expect(skill.getRegistryTools).toHaveBeenCalled();
-      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: ToolManagerToolType.executable,
-          tools: expect.arrayContaining([{ ...registryTool, origin: ToolOrigin.registry }]),
-        }),
-        { dynamic: true }
-      );
+      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith({
+        type: ToolManagerToolType.dynamic,
+        tools: [{ ...registryTool, origin: ToolOrigin.registry }],
+      });
     });
 
     it('loads both inline and registry tools together', async () => {
       const inlineTool = { id: 'inline-1', type: ToolType.builtin } as SkillBoundedTool;
-      const convertedInline = { id: 'inline-1-converted' } as any;
-      const registryTool = { id: 'registry-1' } as any;
+      const convertedInline = executableTool('inline-1-converted');
+      const registryTool = executableTool('registry-1');
 
       const skill = createMockSkill({
         getInlineTools: jest.fn().mockReturnValue([inlineTool]),
@@ -249,17 +246,13 @@ describe('createLoadSkillToolsAfterRead', () => {
 
       await loadSkillToolsAfterRead(context);
 
-      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
-        {
-          type: ToolManagerToolType.executable,
-          tools: [
-            { ...convertedInline, origin: ToolOrigin.inline },
-            { ...registryTool, origin: ToolOrigin.registry },
-          ],
-          logger: toolHandlerContext.logger,
-        },
-        { dynamic: true }
-      );
+      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith({
+        type: ToolManagerToolType.dynamic,
+        tools: [
+          { ...convertedInline, origin: ToolOrigin.inline },
+          { ...registryTool, origin: ToolOrigin.registry },
+        ],
+      });
     });
 
     it('handles skills with no getInlineTools method', async () => {
@@ -275,28 +268,9 @@ describe('createLoadSkillToolsAfterRead', () => {
 
       await loadSkillToolsAfterRead(context);
 
-      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
-        {
-          type: ToolManagerToolType.executable,
-          tools: [],
-          logger: toolHandlerContext.logger,
-        },
-        { dynamic: true }
-      );
-    });
-
-    it('adds tools as dynamic (not static)', async () => {
-      const skill = createMockSkill();
-
-      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
-      toolHandlerContext.skills.get.mockResolvedValue(skill);
-
-      const context = createHookContext({ toolHandlerContext });
-
-      await loadSkillToolsAfterRead(context);
-
-      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(expect.any(Object), {
-        dynamic: true,
+      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith({
+        type: ToolManagerToolType.dynamic,
+        tools: [],
       });
     });
 
@@ -342,7 +316,9 @@ describe('createLoadSkillToolsAfterRead', () => {
 
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
       toolHandlerContext.skills.get.mockResolvedValue(skill);
-      toolHandlerContext.toolProvider.list.mockResolvedValue(toolIds.map((id) => ({ id } as any)));
+      toolHandlerContext.toolProvider.list.mockResolvedValue(
+        toolIds.map((id) => ({ id, description: id, getSchema: () => z.object({}) } as any))
+      );
 
       const context = createHookContext({ toolHandlerContext });
 
@@ -404,8 +380,16 @@ describe('createLoadSkillToolsAfterRead', () => {
 
     it('passes the actual tool count (inline + registry) to reportSkillInvoked', async () => {
       const inlineTool = { id: 'inline-1', type: ToolType.builtin } as SkillBoundedTool;
-      const convertedInline = { id: 'inline-1-converted' } as any;
-      const registryTool = { id: 'registry-1' } as any;
+      const convertedInline = {
+        id: 'inline-1-converted',
+        description: 'inline',
+        getSchema: () => z.object({}),
+      } as any;
+      const registryTool = {
+        id: 'registry-1',
+        description: 'registry',
+        getSchema: () => z.object({}),
+      } as any;
 
       const skill = createMockSkill({
         getInlineTools: jest.fn().mockReturnValue([inlineTool]),
@@ -562,7 +546,7 @@ describe('createLoadSkillToolsAfterRead', () => {
     });
   });
 
-  describe('with dynamic tools enabled', () => {
+  describe('tool definitions in the result', () => {
     const inlineTool = { id: 'inline-1', type: ToolType.builtin } as SkillBoundedTool;
     const convertedInline = {
       id: 'inline-1',
@@ -572,7 +556,6 @@ describe('createLoadSkillToolsAfterRead', () => {
     const fileResult = { tool_result_id: 'r-1', type: 'other' as const, data: { body: 'skill' } };
 
     beforeEach(() => {
-      toolHandlerContext.experimentalFeatures.dynamicTools = true;
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
       toolHandlerContext.skills.get.mockResolvedValue(
         createMockSkill({ getInlineTools: jest.fn().mockReturnValue([inlineTool]) })

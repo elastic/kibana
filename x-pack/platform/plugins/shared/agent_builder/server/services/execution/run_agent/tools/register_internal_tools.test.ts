@@ -68,7 +68,6 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
       backgroundWake: false,
       bash: false,
       apiDiscovery: false,
-      dynamicTools: false,
     },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: false },
@@ -224,27 +223,8 @@ describe('registerInternalTools - execute_dynamic_tool', () => {
     resolveAllowedSubagentsMock.mockResolvedValue([]);
   });
 
-  it('is not registered when the dynamicTools flag is off', async () => {
+  it('is always registered with the tool manager', async () => {
     const { context, toolManager } = createContext();
-
-    await register(context, []);
-
-    expect(addedToolIds(toolManager)).not.toContain('execute_dynamic_tool');
-    expect(createExecuteDynamicTool).not.toHaveBeenCalled();
-  });
-
-  it('is registered with the tool manager when the dynamicTools flag is on', async () => {
-    const { context, toolManager } = createContext({
-      experimentalFeatures: {
-        skills: false,
-        aiIndices: false,
-        relevantSkills: false,
-        backgroundWake: false,
-        bash: false,
-        apiDiscovery: false,
-        dynamicTools: true,
-      },
-    });
 
     await register(context, []);
 
@@ -263,7 +243,6 @@ describe('registerInternalTools - skill tools', () => {
         backgroundWake: false,
         bash: false,
         apiDiscovery: false,
-        dynamicTools: false,
       },
     });
 

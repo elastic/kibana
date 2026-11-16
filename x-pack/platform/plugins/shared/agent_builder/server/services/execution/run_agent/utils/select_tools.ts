@@ -22,7 +22,6 @@ import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
 import type { AiIndexCatalogEntry, ResolvedCapabilities } from '../types';
-import { resolveActiveAttachmentBoundTools } from './attachment_bound_tools';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export interface SelectToolsResult {
@@ -44,7 +43,6 @@ export const selectTools = async ({
   attachmentsService,
   spaceId,
   runner,
-  dynamicToolsEnabled = false,
 }: {
   conversation: ProcessedConversation;
   previousDynamicToolIds: string[];
@@ -59,8 +57,6 @@ export const selectTools = async ({
   capabilities: ResolvedCapabilities;
   spaceId: string;
   runner: ScopedRunner;
-  /** Makes the tools bound to attachments dynamic tools, out of the native tool list. */
-  dynamicToolsEnabled?: boolean;
 }): Promise<SelectToolsResult> => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
@@ -71,19 +67,9 @@ export const selectTools = async ({
     tool_ids: attachmentToolIds,
   };
 
-  const versionedAttachmentBoundTools = await resolveActiveAttachmentBoundTools({
-    attachmentStateManager: conversation.attachmentStateManager,
-    attachmentsService,
-    formatContext,
-  });
-
-  // Bound tools of an attachment would change the native tool list whenever one is added, so with
-  // dynamic tools on they are reached through `execute_dynamic_tool` instead.
-  const nativeAttachmentBoundTools = dynamicToolsEnabled ? [] : versionedAttachmentBoundTools;
-  const dynamicAttachmentBoundTools = dynamicToolsEnabled ? versionedAttachmentBoundTools : [];
-
-  // Only the five generic attachment tools are gated. Tools an attachment type declares
-  // (getTools) or binds to one attachment (getBoundedTools) are selected separately and stay.
+  // Only the five generic attachment tools are gated. Tools an attachment type declares (getTools)
+  // are selected separately and stay; tools bound to one attachment (getBoundedTools) are registered
+  // apart, see `AttachmentBoundTools`.
   const versionedAttachmentTools = capabilities.attachmentTools
     ? createVersionedAttachmentTools({ attachmentsService, formatContext, runner })
     : [];
@@ -110,7 +96,6 @@ export const selectTools = async ({
   });
 
   const staticTools = [
-    ...withOrigin(nativeAttachmentBoundTools, ToolOrigin.inline),
     ...withOrigin(versionedAttachmentTools, ToolOrigin.internal),
     ...withOrigin(staticRegistryTools, ToolOrigin.registry),
   ];
@@ -144,7 +129,6 @@ export const selectTools = async ({
     dynamicTools: [
       ...withOrigin(dynamicRegistryTools, ToolOrigin.registry),
       ...withOrigin(dynamicInlineTools, ToolOrigin.inline),
-      ...withOrigin(dynamicAttachmentBoundTools, ToolOrigin.inline),
     ],
   };
 };

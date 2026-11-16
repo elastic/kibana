@@ -6,12 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ToolType } from '@kbn/agent-builder-common';
+import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
+import { TimelineEventType, ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { ExecutableTool } from '@kbn/agent-builder-server';
-import {
-  resolveActiveAttachmentBoundTools,
-  resolveAttachmentBoundTools,
-} from './attachment_bound_tools';
+import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
+import { AttachmentBoundTools, resolveAttachmentBoundTools } from './attachment_bound_tools';
 
 const formatContext = { request: {} as any, spaceId: 'default' };
 
@@ -132,24 +131,256 @@ describe('resolveAttachmentBoundTools', () => {
   });
 });
 
-describe('resolveActiveAttachmentBoundTools', () => {
-  const resolve = (active: unknown[], service = createAttachmentsService().service) =>
-    resolveActiveAttachmentBoundTools({
-      attachmentStateManager: { getActive: jest.fn().mockReturnValue(active) } as any,
+const createEvent = (
+  type: TimelineEventType,
+  data: Record<string, unknown>
+): AttachmentTimelineEvent =>
+  ({
+    id: `${type}-${JSON.stringify(data)}`,
+    type,
+    created_at: '2026-01-01T00:00:00.000Z',
+    actor: { type: 'agent', id: 'agent' },
+    data: { attachment_id: 'a-1', attachment_type: 'text', source: 'execution', ...data },
+  } as unknown as AttachmentTimelineEvent);
+
+const addedEvent = (version = 1) =>
+  createEvent(TimelineEventType.attachmentAdded, { current_version: version, render_inline: true });
+
+const createToolManager = () => ({
+  addTools: jest.fn().mockResolvedValue(undefined),
+  removeDynamicTools: jest.fn(),
+});
+
+describe('AttachmentBoundTools', () => {
+  /** `records` is what the state manager knows, `active` the subset it reports active. */
+  const setup = ({
+    records = [createAttachment()],
+    active = records,
+    service = createAttachmentsService().service,
+    logger,
+  }: {
+    records?: any[];
+    active?: any[];
+    service?: any;
+    logger?: { warn: jest.Mock };
+  } = {}) => {
+    const attachmentStateManager = {
+      getAttachmentRecord: jest.fn((id: string) => records.find((record) => record.id === id)),
+      getActive: jest.fn(() => active),
+    };
+    const boundTools = new AttachmentBoundTools({
+      attachmentStateManager: attachmentStateManager as any,
       attachmentsService: service,
       formatContext,
+      logger: logger as any,
+    });
+    return { boundTools, attachmentStateManager, toolManager: createToolManager() };
+  };
+
+  describe('definitions', () => {
+    it('renders the definitions of an added event', async () => {
+      const { boundTools } = setup();
+      const event = addedEvent(1);
+
+      await boundTools.prepare([event]);
+
+      expect(boundTools.get(event)).toEqual([
+        {
+          tool_id: 'bound.tool',
+          description: 'for first',
+          parameters: expect.objectContaining({ type: 'object' }),
+        },
+      ]);
     });
 
-  it('returns the tools of the active attachments, each at its current version', async () => {
-    const other = { ...createAttachment(), id: 'a-2', current_version: 1 };
+    it('renders restored and updated events too', async () => {
+      const { boundTools } = setup();
+      const restored = createEvent(TimelineEventType.attachmentRestored, { current_version: 2 });
+      const updated = createEvent(TimelineEventType.attachmentUpdated, {
+        previous_version: 1,
+        current_version: 2,
+        render_inline: true,
+      });
 
-    const tools = await resolve([createAttachment(), other]);
+      await boundTools.prepare([restored, updated]);
 
-    // a-1 is at version 2 ("second"), a-2 at version 1 ("first")
-    expect(tools.map((tool) => tool.description)).toEqual(['for second', 'for first']);
+      expect(boundTools.get(restored)?.[0].description).toBe('for second');
+      expect(boundTools.get(updated)?.[0].description).toBe('for second');
+    });
+
+    it('renders each event from the version it announces, not the latest', async () => {
+      const { boundTools } = setup();
+      const first = addedEvent(1);
+      const second = createEvent(TimelineEventType.attachmentUpdated, {
+        previous_version: 1,
+        current_version: 2,
+        render_inline: true,
+      });
+
+      await boundTools.prepare([first, second]);
+
+      expect(boundTools.get(first)?.[0].description).toBe('for first');
+      expect(boundTools.get(second)?.[0].description).toBe('for second');
+    });
+
+    it('carries no definitions on a deleted event', async () => {
+      const { service, format } = createAttachmentsService();
+      const { boundTools } = setup({ service });
+      const deleted = createEvent(TimelineEventType.attachmentDeleted, { hard_delete: false });
+
+      await boundTools.prepare([deleted]);
+
+      expect(boundTools.get(deleted)).toBeUndefined();
+      expect(format).not.toHaveBeenCalled();
+    });
+
+    it('carries no definitions when the attachment record is gone', async () => {
+      const { boundTools } = setup({ records: [] });
+      const event = addedEvent(1);
+
+      await boundTools.prepare([event]);
+
+      expect(boundTools.get(event)).toBeUndefined();
+    });
+
+    it('carries no definitions when the attachment binds no tools', async () => {
+      const { service, format } = createAttachmentsService();
+      format.mockResolvedValue({ getBoundedTools: async () => [] });
+      const { boundTools } = setup({ service });
+      const event = addedEvent(1);
+
+      await boundTools.prepare([event]);
+
+      expect(boundTools.get(event)).toBeUndefined();
+    });
+
+    it('carries no definitions for an event that was not prepared', () => {
+      const { boundTools } = setup();
+
+      expect(boundTools.get(addedEvent(1))).toBeUndefined();
+    });
+
+    it('formats an attachment version once, however often it is prepared', async () => {
+      const { service, format } = createAttachmentsService();
+      const { boundTools } = setup({ service });
+      const event = addedEvent(1);
+      const restored = createEvent(TimelineEventType.attachmentRestored, { current_version: 1 });
+
+      await boundTools.prepare([event, restored]);
+      await boundTools.prepare([event]);
+
+      expect(format).toHaveBeenCalledTimes(1);
+      expect(boundTools.get(restored)).toEqual(boundTools.get(event));
+    });
+
+    it('leaves out a tool whose definition cannot be rendered, keeping the others', async () => {
+      const { service } = createAttachmentsService();
+      const broken = createExecutableTool('broken.tool');
+      broken.getSchema = () => {
+        throw new Error('no schema');
+      };
+      service.getTypeDefinition.mockReturnValue({
+        format: async () => ({
+          getBoundedTools: async () => [{ id: 'broken.tool' }, { id: 'bound.tool' }],
+        }),
+      });
+      service.convertAttachmentTool.mockImplementation((tool: { id: string }) =>
+        tool.id === 'broken.tool' ? broken : createExecutableTool(tool.id)
+      );
+      const logger = { warn: jest.fn() };
+      const { boundTools } = setup({ service, logger });
+      const event = addedEvent(1);
+
+      await boundTools.prepare([event]);
+
+      expect(boundTools.get(event)?.map((definition) => definition.tool_id)).toEqual([
+        'bound.tool',
+      ]);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('broken.tool'));
+    });
+
+    it('carries no definitions when no bound tool can be rendered', async () => {
+      const { service } = createAttachmentsService();
+      service.convertAttachmentTool.mockImplementation((tool: { id: string }) => ({
+        ...createExecutableTool(tool.id),
+        getSchema: () => {
+          throw new Error('no schema');
+        },
+      }));
+      const { boundTools } = setup({ service });
+      const event = addedEvent(1);
+
+      await boundTools.prepare([event]);
+
+      expect(boundTools.get(event)).toBeUndefined();
+    });
   });
 
-  it('returns no tools without active attachments', async () => {
-    expect(await resolve([])).toEqual([]);
+  describe('sync', () => {
+    const registeredIds = (toolManager: ReturnType<typeof createToolManager>) =>
+      toolManager.addTools.mock.calls.at(-1)?.[0].tools.map((tool: { id: string }) => tool.id);
+
+    it('registers the tools of the active attachments, each at its current version, as inline dynamic tools', async () => {
+      const other = { ...createAttachment(), id: 'a-2', current_version: 1 };
+      const { boundTools, toolManager } = setup({ records: [createAttachment(), other] });
+
+      await boundTools.sync(toolManager as any);
+
+      expect(toolManager.removeDynamicTools).toHaveBeenCalledWith([]);
+      expect(toolManager.addTools).toHaveBeenCalledWith({
+        type: ToolManagerToolType.dynamic,
+        tools: [
+          // a-1 is at version 2 ("second"), a-2 at version 1 ("first")
+          expect.objectContaining({ description: 'for second', origin: ToolOrigin.inline }),
+          expect.objectContaining({ description: 'for first', origin: ToolOrigin.inline }),
+        ],
+      });
+    });
+
+    it('registers nothing without active attachments', async () => {
+      const { boundTools, toolManager } = setup({ active: [] });
+
+      await boundTools.sync(toolManager as any);
+
+      expect(registeredIds(toolManager)).toEqual([]);
+    });
+
+    it('removes the tools it registered before that are no longer bound', async () => {
+      const attachment = createAttachment();
+      const { boundTools, toolManager, attachmentStateManager } = setup({
+        records: [attachment],
+      });
+      await boundTools.sync(toolManager as any);
+      // the attachment was deleted
+      attachmentStateManager.getActive.mockReturnValue([]);
+
+      await boundTools.sync(toolManager as any);
+
+      expect(toolManager.removeDynamicTools).toHaveBeenLastCalledWith(['bound.tool']);
+      expect(registeredIds(toolManager)).toEqual([]);
+    });
+
+    it('does not remove a tool again once it is gone', async () => {
+      const { boundTools, toolManager, attachmentStateManager } = setup();
+      await boundTools.sync(toolManager as any);
+      attachmentStateManager.getActive.mockReturnValue([]);
+      await boundTools.sync(toolManager as any);
+
+      await boundTools.sync(toolManager as any);
+
+      expect(toolManager.removeDynamicTools).toHaveBeenLastCalledWith([]);
+    });
+
+    it('reuses the tools resolved for the definitions, formatting each version once', async () => {
+      const { service, format } = createAttachmentsService();
+      const { boundTools, toolManager } = setup({ service });
+
+      await boundTools.prepare([addedEvent(2)]);
+      await boundTools.sync(toolManager as any);
+      await boundTools.sync(toolManager as any);
+
+      expect(format).toHaveBeenCalledTimes(1);
+      expect(registeredIds(toolManager)).toEqual(['bound.tool']);
+    });
   });
 });

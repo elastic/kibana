@@ -28,13 +28,6 @@ const skillParamDescription = `The 'skill' parameter accepts the skill name, the
 
 const description = `Load a skill.
 
-Returns the skill content, its referenced files, and the list of tools the skill makes available.
-Loading a skill also dynamically registers its specialized tools so you can use them in subsequent calls.
-
-${skillParamDescription}`;
-
-const descriptionWithDynamicTools = `Load a skill.
-
 Returns the skill content, its referenced files, and the tools the skill makes available.
 Loading a skill also registers its specialized tools so you can use them in subsequent calls: 'dynamic_tools' carries their definitions.
 
@@ -43,15 +36,12 @@ ${skillParamDescription}`;
 export const createLoadSkillTool = ({
   analyticsService,
   trackingService,
-  dynamicToolsEnabled = false,
 }: {
   analyticsService?: AgentBuilderAnalytics;
   trackingService?: AgentBuilderTracking;
-  /** Mirrors `experimentalFeatures.dynamicTools`; selects the description the model sees. */
-  dynamicToolsEnabled?: boolean;
 } = {}): InternalBuiltinToolDefinition<typeof schema> => ({
   id: internalTools.loadSkill,
-  description: dynamicToolsEnabled ? descriptionWithDynamicTools : description,
+  description,
   type: ToolType.builtin,
   schema,
   tags: ['skills'],
@@ -89,7 +79,6 @@ export const createLoadSkillTool = ({
         toolManager,
         logger,
         runContext,
-        dynamicToolsEnabled: ctx.experimentalFeatures.dynamicTools,
         analyticsService,
         trackingService,
       });

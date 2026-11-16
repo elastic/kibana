@@ -12,15 +12,12 @@ import {
   toolToLangchain,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import { reverseMap } from '@kbn/agent-builder-genai-utils/langchain/tools';
-import { LRUCache } from 'lru-cache';
 import type { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, ExecutableTool } from '@kbn/agent-builder-server';
 import type { ToolReturnSummarizerFn } from '@kbn/agent-builder-server/tools/builtin';
 import type {
   ToolManager as IToolManager,
-  ToolManagerParams,
   ToolName,
-  AddToolOptions,
   AddToolInput,
   ExecutableToolWithOrigin,
   ExecutableToolInput,
@@ -43,40 +40,26 @@ interface ConvertedTools {
 }
 
 export const createToolManager = (): ToolManager => {
-  return new ToolManager({
-    dynamicToolCapacity: 15,
-  });
+  return new ToolManager();
 };
 
 /**
  * ToolManager is a class that manages tools for the agent.
- * It stores static tools and dynamic tools. Static tools do not change through out a round while dynamic tools can be added and removed.
  *
- * Dynamic tools are limited to a certain capacity to prevent too many tools from being added to the agent.
- * Least recently used tools are evicted when the capacity is reached.
- *
- * Tools added with a `DynamicToolInput` are a third kind: never bound to the model, only
- * reachable through the `execute_dynamic_tool` meta-tool (see `DynamicToolRegistry`).
+ * Natively bound tools are fixed for the run, so the bound tool list (and with it the prompt cache
+ * prefix) does not change mid-run. Tools that become available during a conversation (a skill's
+ * tools, an attachment's bound tools) are dynamic tools: never bound to the model, only reachable
+ * through the `execute_dynamic_tool` meta-tool (see `DynamicToolRegistry`).
  */
 export class ToolManager implements IToolManager {
   private staticTools: Map<ToolName, StructuredTool> = new Map<ToolName, StructuredTool>();
-  private dynamicTools: LRUCache<ToolName, StructuredTool>;
-  private toolIdMappings: Map<string, string>;
-  private toolOrigins: Map<string, ToolOrigin>;
-  private toolTypes: Map<string, ToolType>;
+  private toolIdMappings: Map<string, string> = new Map<string, string>();
+  private toolOrigins: Map<string, ToolOrigin> = new Map<string, ToolOrigin>();
+  private toolTypes: Map<string, ToolType> = new Map<string, ToolType>();
   private executableTools: Map<string, ExecutableTool> = new Map<string, ExecutableTool>();
   private dynamicToolRegistry = new DynamicToolRegistry();
   private eventEmitter?: AgentEventEmitterFn;
   private maxToolResultTokens: number = DEFAULT_MAX_TOOL_RESULT_TOKENS;
-
-  constructor(params: ToolManagerParams) {
-    this.dynamicTools = new LRUCache<ToolName, StructuredTool>({
-      max: params.dynamicToolCapacity,
-    });
-    this.toolIdMappings = new Map<string, string>();
-    this.toolOrigins = new Map<string, ToolOrigin>();
-    this.toolTypes = new Map<string, ToolType>();
-  }
 
   public setEventEmitter(eventEmitter: AgentEventEmitterFn): void {
     this.eventEmitter = eventEmitter;
@@ -91,11 +74,8 @@ export class ToolManager implements IToolManager {
    * Supports executable tools, browser API tools and dynamic tools (reachable only through the
    * `execute_dynamic_tool` meta-tool, see `DynamicToolRegistry`).
    * @param input - The tool input configuration (executable, browser or dynamic)
-   * @param options - Optional configuration for tool storage (static vs dynamic)
    */
-  public async addTools(input: AddToolInput, options: AddToolOptions = {}): Promise<void> {
-    const { dynamic = false } = options;
-
+  public async addTools(input: AddToolInput): Promise<void> {
     let langchainTools: StructuredTool[];
     let idMappings: Map<string, string>;
 
@@ -115,39 +95,27 @@ export class ToolManager implements IToolManager {
 
     langchainTools.forEach((langchainTool) => {
       const { name } = langchainTool;
-      if (this.staticTools.has(name)) {
-        /**
-         * If tool already exists as static tool, don't need to add it again.
-         * Dynamic tools are re-added to update LRU eviction.
-         */
-        return;
-      }
-      if (dynamic) {
-        this.dynamicTools.set(name, langchainTool);
-      } else {
-        this.dynamicTools.delete(name);
+      // a tool already bound keeps its first binding
+      if (!this.staticTools.has(name)) {
         this.staticTools.set(name, langchainTool);
       }
     });
   }
 
   /**
-   * Lists all tools in the tool manager.
-   * @returns an array of all tools (static and dynamic)
+   * Removes dynamic tools from the registry. Natively bound and unknown ids are ignored.
+   * @param toolIds - The internal ids of the dynamic tools to remove
    */
-  public list(): StructuredTool[] {
-    return [...this.staticTools.values(), ...this.dynamicTools.values()];
+  public removeDynamicTools(toolIds: string[]): void {
+    this.dynamicToolRegistry.unregister(toolIds);
   }
 
   /**
-   * Records the use of a tool, marking it as recently used.
-   * This affects LRU eviction for dynamic tools.
-   * @param langchainToolName - The name of the LangChain tool to record usage for.
+   * Lists the tools bound to the model (not the dynamic tools).
+   * @returns an array of the natively bound tools
    */
-  public recordToolUse(langchainToolName: ToolName): void {
-    if (this.dynamicTools.has(langchainToolName)) {
-      this.dynamicTools.get(langchainToolName);
-    }
+  public list(): StructuredTool[] {
+    return [...this.staticTools.values()];
   }
 
   /**
@@ -192,21 +160,11 @@ export class ToolManager implements IToolManager {
   }
 
   /**
-   * Gets the internal tool IDs of all dynamic tools currently in the tool manager.
-   * Returns internal tool IDs (not LangChain names) for persistence.
+   * Gets the internal tool IDs of the dynamic tools, for persistence.
    * @returns array of internal tool IDs
    */
   public getDynamicToolIds(): string[] {
-    const internalToolIds: string[] = [];
-    for (const tool of this.dynamicTools.values()) {
-      const langchainName = tool.name;
-      const internalId = this.toolIdMappings.get(langchainName);
-      if (internalId) {
-        internalToolIds.push(internalId);
-      }
-    }
-
-    return [...internalToolIds, ...this.dynamicToolRegistry.ids()];
+    return this.dynamicToolRegistry.ids();
   }
 
   private getMaxToolTokens(tool: ExecutableTool, dynamicToolId?: string): number {
@@ -272,5 +230,3 @@ export class ToolManager implements IToolManager {
     return;
   }
 }
-
-export type { ToolManagerParams };
