@@ -60,12 +60,11 @@
       "hasInboundEventIdentity": false
     },
     {
-      "name": "Inbound webhook with leftover ingest token hash",
+      "name": "Inbound webhook connector",
       "actionTypeId": ".inboundWebhook",
       "isMissingSecrets": false,
       "config": {
-        "url": "https://example.com/inbound",
-        "ingestTokenHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "url": "https://example.com/inbound"
       },
       "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
       "isPreconfigured": false,
@@ -75,12 +74,10 @@
       "hasInboundEventIdentity": true
     },
     {
-      "name": "Preview connector with only the leftover hash",
+      "name": "Preview inbound webhook connector",
       "actionTypeId": ".inboundWebhook",
       "isMissingSecrets": false,
-      "config": {
-        "ingestTokenHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-      },
+      "config": {},
       "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
       "isPreconfigured": false,
       "isSystemAction": false,
@@ -149,7 +146,7 @@
       "hasInboundEventIdentity": false
     },
     {
-      "name": "Inbound webhook with leftover ingest token hash",
+      "name": "Inbound webhook connector",
       "actionTypeId": ".inboundWebhook",
       "isMissingSecrets": false,
       "config": {
@@ -163,7 +160,7 @@
       "hasInboundEventIdentity": true
     },
     {
-      "name": "Preview connector with only the leftover hash",
+      "name": "Preview inbound webhook connector",
       "actionTypeId": ".inboundWebhook",
       "isMissingSecrets": false,
       "config": {},

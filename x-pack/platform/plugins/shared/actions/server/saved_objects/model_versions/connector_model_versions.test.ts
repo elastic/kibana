@@ -471,7 +471,7 @@ describe('Connector Model Versions', () => {
       expect(migrated.attributes.config).toEqual({ url: 'https://example.com' });
     });
 
-    it('drops config.ingestTokenHash from the 10.6.0 action fixtures', () => {
+    it('round-trips action fixtures that omit config.ingestTokenHash', () => {
       const migrator = createModelVersionTestMigrator({
         type: {
           name: ACTION_SAVED_OBJECT_TYPE,
@@ -491,6 +491,7 @@ describe('Connector Model Versions', () => {
       };
 
       expect(fixture['10.5.0']).toHaveLength(fixture['10.6.0'].length);
+      expect(JSON.stringify(fixture)).not.toContain('ingestTokenHash');
       fixture['10.5.0'].forEach((previous, index) => {
         expect(rawConnectorSchemaV5.validate(previous)).toEqual(previous);
         const migrated = migrator.migrate<Record<string, unknown>, Record<string, unknown>>({
