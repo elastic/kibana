@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BuildkiteClient, BuildkiteGroupStep, BuildkiteStep } from '../../buildkite/index.ts';
+import type {
+  BuildkiteClient,
+  BuildkiteGroupStep,
+  BuildkiteStep,
+  BuildkiteWaitStep,
+} from '../../buildkite/index.ts';
 import { AGENT_DISK_GIB, RETRIES, STEP_KEYS, TEST_STEP_TIMEOUT_MINUTES } from './const.ts';
 import type { FunctionalGroup } from './types.ts';
 import { expandAgentQueue } from '#pipeline-utils';
@@ -60,8 +65,12 @@ interface FunctionalStepGroupOptions {
   retryCount: number;
 }
 
+type KeyedBuildkiteGroupStep = BuildkiteGroupStep & { key: string };
+
 /** Build FTR Configs groups small enough for Buildkite's per-upload job limit. */
-export function buildFunctionalStepGroups(opts: FunctionalStepGroupOptions): BuildkiteGroupStep[] {
+export function buildFunctionalStepGroups(
+  opts: FunctionalStepGroupOptions
+): KeyedBuildkiteGroupStep[] {
   // Buildkite rejects pipeline uploads containing more than 500 jobs.
   const maxStepsPerUpload = 400;
   const sortedSteps = sortFunctionalGroups(opts.functionalGroups).map(
@@ -85,17 +94,33 @@ export function buildFunctionalStepGroups(opts: FunctionalStepGroupOptions): Bui
     })
   );
 
-  const groups: BuildkiteGroupStep[] = [];
+  const groups: KeyedBuildkiteGroupStep[] = [];
   for (let start = 0; start < sortedSteps.length; start += maxStepsPerUpload) {
     const groupNumber = groups.length + 1;
     groups.push({
       group: groupNumber === 1 ? 'FTR Configs' : `FTR Configs (${groupNumber})`,
-      key: groupNumber === 1 ? STEP_KEYS.FTR_GROUP : `${STEP_KEYS.FTR_GROUP}-${groupNumber}`,
+      key:
+        sortedSteps.length <= maxStepsPerUpload
+          ? STEP_KEYS.FTR_GROUP
+          : `${STEP_KEYS.FTR_GROUP}-${groupNumber}`,
       depends_on: opts.dependsOn,
       steps: sortedSteps.slice(start, start + maxStepsPerUpload),
     });
   }
   return groups;
+}
+
+/** Keep the existing FTR dependency key waiting for every uploaded group. */
+export function buildFunctionalAggregateWaitStep(
+  groups: KeyedBuildkiteGroupStep[]
+): BuildkiteWaitStep | undefined {
+  if (groups.length <= 1) return undefined;
+
+  return {
+    wait: null,
+    key: STEP_KEYS.FTR_GROUP,
+    depends_on: groups.map((group) => group.key),
+  };
 }
 
 /**

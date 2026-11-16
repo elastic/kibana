@@ -12,6 +12,7 @@ jest.mock('#pipeline-utils', () => ({
 }));
 
 import {
+  buildFunctionalAggregateWaitStep,
   buildFunctionalStepGroups,
   buildJestStep,
   registerCancelKeys,
@@ -135,6 +136,7 @@ describe('buildFunctionalStepGroups', () => {
         ],
       },
     });
+    expect(buildFunctionalAggregateWaitStep([step])).toBeUndefined();
   });
 
   it('splits more than 500 FTR jobs into uploads with unique group keys', () => {
@@ -147,8 +149,13 @@ describe('buildFunctionalStepGroups', () => {
 
     const groups = buildFunctionalStepGroups({ ...baseOpts, functionalGroups });
 
-    expect(groups.map((group) => group.key)).toEqual(['ftr-configs', 'ftr-configs-2']);
+    expect(groups.map((group) => group.key)).toEqual(['ftr-configs-1', 'ftr-configs-2']);
     expect(groups.map((group) => group.steps.length)).toEqual([400, 101]);
+    expect(buildFunctionalAggregateWaitStep(groups)).toEqual({
+      wait: null,
+      key: 'ftr-configs',
+      depends_on: ['ftr-configs-1', 'ftr-configs-2'],
+    });
     expect(
       groups.flatMap((group) => group.steps.map((step) => ('key' in step ? step.key : null)))
     ).toEqual(functionalGroups.map((group) => group.key));
