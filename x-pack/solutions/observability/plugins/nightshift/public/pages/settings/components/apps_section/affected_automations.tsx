@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
@@ -69,6 +69,29 @@ export const findAffectedAutomations = (
   };
 };
 
+const CheckingAutomations = () => (
+  <>
+    <EuiSpacer size="m" />
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      data-test-subj="streamsSlackAppAffectedAutomationsLoading"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued">
+          {i18n.translate('xpack.nightshift.settings.apps.affectedAutomationsChecking', {
+            defaultMessage: 'Checking which automations use Slack triggers',
+          })}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </>
+);
+
 const AutomationsWarning = ({
   removed,
   remaining,
@@ -76,7 +99,8 @@ const AutomationsWarning = ({
   removed: ChannelRef[];
   remaining: ChannelRef[];
 }) => {
-  const { data } = useFetchAutomations();
+  const { data, isLoading } = useFetchAutomations();
+  if (isLoading) return <CheckingAutomations />;
   if (!data) return null;
 
   const { count, names } = findAffectedAutomations(data.automations, removed, remaining);
@@ -110,24 +134,34 @@ const toChannelRefs = (bindings: SlackChannelBinding[]): ChannelRef[] =>
     channel != null ? [{ id: channel, displayName }] : []
   );
 
-/**
- * Warns which automations stop triggering once a channel is disconnected. Renders nothing while
- * loading, on error, or when none are affected, so it never blocks the disconnect.
- */
-export const ChannelAffectedAutomationsWarning = ({ channel }: { channel: ChannelRef }) => {
+const BindingsAwareWarning = ({
+  toChange,
+}: {
+  toChange: (connected: ChannelRef[]) => { removed: ChannelRef[]; remaining: ChannelRef[] };
+}) => {
   const { bindings, isLoading, isError, isComplete } = useAllRelayAppBindings();
-  // Which automations lose every trigger depends on the channels that stay connected.
-  if (isLoading || isError || !isComplete) return null;
-  return (
-    <AutomationsWarning
-      removed={[channel]}
-      remaining={toChannelRefs(bindings).filter(({ id }) => id !== channel.id)}
-    />
-  );
+  if (isLoading) return <CheckingAutomations />;
+  // Which automations lose every trigger depends on the channels that stay connected, so a failed
+  // or cut-short list gives no warning rather than a wrong one.
+  if (isError || !isComplete) return null;
+  return <AutomationsWarning {...toChange(toChannelRefs(bindings))} />;
 };
 
+/**
+ * Warns which automations stop triggering once a channel is disconnected. Shows a loading line
+ * while it checks, and nothing on error or when none are affected, so it never blocks the
+ * disconnect.
+ */
+export const ChannelAffectedAutomationsWarning = ({ channel }: { channel: ChannelRef }) => (
+  <BindingsAwareWarning
+    toChange={(connected) => ({
+      removed: [channel],
+      remaining: connected.filter(({ id }) => id !== channel.id),
+    })}
+  />
+);
+
 /** Same warning for a workspace disconnect, which drops every currently connected channel. */
-export const WorkspaceAffectedAutomationsWarning = () => {
-  const { bindings } = useAllRelayAppBindings();
-  return <AutomationsWarning removed={toChannelRefs(bindings)} remaining={[]} />;
-};
+export const WorkspaceAffectedAutomationsWarning = () => (
+  <BindingsAwareWarning toChange={(connected) => ({ removed: connected, remaining: [] })} />
+);

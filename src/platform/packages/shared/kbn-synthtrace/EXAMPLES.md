@@ -13,6 +13,7 @@ This document contains all usage examples for `@kbn/synthtrace`. See the [README
   - [Combined Scenarios](#combined-scenarios)
   - [Specialized Scenarios](#specialized-scenarios)
   - [Digital Experience Scenarios](#digital-experience-scenarios)
+  - [Synthetics Scenarios](#synthetics-scenarios)
   - [SRE Incident Scenarios](#sre-incident-scenarios)
 - [Advanced Usage Examples](#advanced-usage-examples)
 
@@ -1030,6 +1031,102 @@ node scripts/synthtrace digital_experience_mobile_single_installation --from=now
 node scripts/synthtrace digital_experience_mobile_single_session --from=now-30m --to=now --scenarioOpts platform=ios,health=critical
 node scripts/synthtrace digital_experience_mobile_minimal_app --from=now-30m --to=now
 ```
+
+### Synthetics Scenarios
+
+These scenarios generate check results for Synthetics monitors, so that the Synthetics Overview, Monitors and monitor details pages have data to show.
+
+#### `synthetics_overview`
+
+Generates a mix of HTTP, TCP, ICMP and browser monitors on an existing private location: mostly healthy, plus flapping, always down, and recently failing monitors. HTTP checks carry a status code and response headers, and failed ones a response body. Browser checks are complete journeys with steps, and a failed check fails its second step.
+
+The scenario creates the monitor configurations through the Kibana API in `bootstrap`, and writes the matching check documents. The monitors carry the tag `synthtrace-synthetics_overview`. A re-run deletes the monitors with that tag and creates them again, with the same IDs. The documents of earlier runs stay in Elasticsearch.
+
+**Prerequisite: a private location.** The scenario does not create one, so create it first. It only needs a Fleet agent policy. No Elastic Agent has to run, because synthtrace writes the check documents itself.
+
+- In Kibana: create an agent policy in Fleet, then go to **Synthetics > Settings > Private locations > Add location** and select that policy.
+- Or, to also enroll a real agent, run `node x-pack/scripts/synthetics_private_location.js`. It needs Docker and a Fleet Server configuration in `kibana.yml`, described in the [package README](../../../../../x-pack/packages/kbn-synthetics-private-location/README.md).
+
+With one private location in the Kibana space, the scenario finds it itself. With several, it stops and lists them, because it does not choose for you. Pass the one to use as `privateLocationId` and `privateLocationLabel`, which you can read from:
+
+```sh
+curl -s -u elastic:changeme -H 'elastic-api-version: 2023-10-31' \
+  http://localhost:5601/api/synthetics/private_locations
+```
+
+**Options:**
+
+- `privateLocationId` (string, optional): ID of the private location. Give it together with `privateLocationLabel`, or leave both out.
+- `privateLocationLabel` (string, optional): label of the private location.
+- `monitors` (number, default `8`): number of monitors. Types and outcome patterns cycle through the same sequence.
+- `seed` (string, default `synthtrace`): makes the data reproducible.
+- `spaceId` (string, default `default`): Kibana space to create the monitors in. Monitor ids include the space, so the same scenario in another space creates its own monitors.
+- `deleteMonitorsOnExit` (boolean, default `false`): delete the monitors when the run ends. Reliable for historical runs only; see [Cleaning up](#synthetics-scenarios).
+
+**Usage:**
+
+The scenario calls the Kibana API, so pass `--kibana` when Kibana is not at the default address:
+
+```sh
+node scripts/synthtrace synthetics_overview --from=now-24h --to=now \
+  --target=http://elastic:changeme@localhost:9200 \
+  --kibana=http://elastic:changeme@localhost:5601
+
+node scripts/synthtrace synthetics_overview --live \
+  --target=http://elastic:changeme@localhost:9200 \
+  --kibana=http://elastic:changeme@localhost:5601
+```
+
+To choose the private location when there are several:
+
+```sh
+node scripts/synthtrace synthetics_overview --from=now-24h --to=now \
+  --target=http://elastic:changeme@localhost:9200 \
+  --kibana=http://elastic:changeme@localhost:5601 \
+  --scenarioOpts.privateLocationId=<id> \
+  --scenarioOpts.privateLocationLabel="<label>"
+```
+
+**Notes:**
+
+- Do not use `--clean`: it deletes every `synthetics-*` data stream, not only the data of this scenario.
+- Backfilled data does not appear in the "Last 10 test runs" table of the monitor Overview page. For a monitor younger than 30 days, the page starts its time range at the monitor's `created_at`, and the scenario creates the monitors when it runs, after the backfilled checks. The History page, the Overview and Monitors pages, and the charts show the data. To fill the table, run the scenario with `--live`: it recreates the monitors, and its checks are newer than their creation.
+- With `--from` and `--to`, a check is written at every schedule interval of each monitor (3 minutes for HTTP and TCP, 5 for ICMP, 10 for browser). With `--live`, it is written at the same interval, and the first one is a minute before the start of the run. Outcomes follow the monitor's pattern as the run goes on: flapping monitors keep changing status, and a monitor with a recent outage is down for the whole run.
+- Failed HTTP monitors show "Failed to run steps" instead of a steps list on their step pages. This is how Synthetics treats HTTP monitors.
+
+**Cleaning up:**
+
+The scenario leaves two things behind: the monitors in Kibana and the check documents in Elasticsearch. Both carry the tag `synthtrace-synthetics_overview`. The monitors of a run live in its Kibana space, and the check documents carry `meta.space_id`, so cleanup is limited to that space. The private location, its agent policy and any agent are not created by the scenario, and are not removed.
+
+Nothing is deleted unless you ask for it, so you can look at the data after a run. A new run replaces the monitors of the previous one (same IDs, no duplicates) but keeps the documents, which pile up until you delete them. If an Elastic Agent is enrolled in the agent policy of the private location, it runs the monitors for real, against their made-up targets, and its results mix with the generated ones.
+
+To have the monitors deleted automatically when a historical run (`--from` and `--to`) finishes, start it with `--scenarioOpts.deleteMonitorsOnExit=true`. Then only the documents are left to delete: skip to step 3. A live run only deletes them if it shuts down cleanly after Ctrl+C, which is not guaranteed (a second Ctrl+C, or a worker that does not stop in time, skips it). Don't rely on it for a live run.
+
+Otherwise, and after every live run, clean up in this order:
+
+1. Stop any live run, so that nothing is written after the documents are deleted.
+2. Delete the monitors with the API (this needs `jq`), unless the run did it when it ended. `SPACE` is the `spaceId` of the run (`default` when you did not set one). The default space has no path prefix; any other space is under `/s/$SPACE`:
+
+   ```sh
+   KBN=http://localhost:5601; AUTH=elastic:changeme; SPACE=default
+   PREFIX=; [ "$SPACE" = default ] || PREFIX=/s/$SPACE
+   IDS=$(curl -s -u "$AUTH" "$KBN$PREFIX/api/synthetics/monitors?tags=synthtrace-synthetics_overview&perPage=1000" \
+     -H 'elastic-api-version: 2023-10-31' | jq -c '{ids: [.monitors[] | (.config_id // .id)]}')
+   curl -s -u "$AUTH" -X POST "$KBN$PREFIX/api/synthetics/monitors/_bulk_delete" \
+     -H 'elastic-api-version: 2023-10-31' -H 'kbn-xsrf: true' \
+     -H 'Content-Type: application/json' -d "$IDS"
+   ```
+
+3. Delete the check documents of that space. The tag is the same in every space, so the query also filters on `meta.space_id`. `SPACE` is the `spaceId` of the run. The first line keeps a value you already set, and otherwise uses `default`, so this step works on its own when you skipped step 2. The response has the number of deleted documents:
+
+   ```sh
+   SPACE=${SPACE:-default}
+   curl -s -u elastic:changeme -X POST "http://localhost:9200/synthetics-*/_delete_by_query?refresh=true" \
+     -H 'Content-Type: application/json' \
+     -d "{\"query\":{\"bool\":{\"filter\":[{\"term\":{\"tags\":\"synthtrace-synthetics_overview\"}},{\"term\":{\"meta.space_id\":\"$SPACE\"}}]}}}"
+   ```
+
+To check the result, `GET <kibana>/api/synthetics/monitors?tags=synthtrace-synthetics_overview` in that space should report a `total` of `0`, and `POST <elasticsearch>/synthetics-*/_count` with the same query should return a `count` of `0`.
 
 ### SRE Incident Scenarios
 

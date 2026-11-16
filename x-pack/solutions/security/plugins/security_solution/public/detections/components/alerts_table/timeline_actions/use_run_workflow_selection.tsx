@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
 import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import React, { useEffect, useState } from 'react';
 import type { TimelineItem, TimelineRequestSortField } from '../../../../../common/search_strategy';

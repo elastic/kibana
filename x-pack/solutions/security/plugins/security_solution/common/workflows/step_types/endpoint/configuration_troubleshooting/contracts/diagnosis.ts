@@ -17,7 +17,10 @@ import {
   hostPolicyActionSchema,
   hostPolicyResponseAppliedSchema,
   hostPolicyResponseSchema,
+  hostPolicyUserArtifactIdentifierSchema,
+  hostPolicyUserArtifactsSchema,
   hostRecordSchema,
+  MAX_USER_ARTIFACT_IDENTIFIERS,
 } from '../../hosts';
 import { getEndpointPackageStatusOutputSchema } from '../../package';
 import { AT_CAVEATS_MAX, healthReasonValues } from './diagnosis_enums';
@@ -49,6 +52,15 @@ export const atHostPolicyResponseSchema = lazySchema(() =>
       policy: z.object({
         applied: hostPolicyResponseAppliedSchema.extend({
           actions: z.array(atHostPolicyActionSchema).max(AT_ACTIONS_MAX),
+          artifacts: z
+            .object({
+              user: hostPolicyUserArtifactsSchema.extend({
+                identifiers: z
+                  .array(hostPolicyUserArtifactIdentifierSchema.omit({ sha256: true }))
+                  .max(MAX_USER_ARTIFACT_IDENTIFIERS),
+              }),
+            })
+            .optional(),
         }),
       }),
     }),
