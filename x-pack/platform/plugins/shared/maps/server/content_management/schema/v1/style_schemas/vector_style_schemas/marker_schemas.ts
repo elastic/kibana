@@ -15,36 +15,42 @@ import {
 import { fieldMetaOptionsSchema } from './field_meta_options_schema';
 import { styleFieldSchema } from './style_field_schema';
 
-export const symbolizeAsOptions = z
-  .object({
-    value: z
-      .union([z.literal(SYMBOLIZE_AS_TYPES.CIRCLE), z.literal(SYMBOLIZE_AS_TYPES.ICON)])
-      .optional(),
-  })
-  .strict();
+export const symbolizeAsOptions = lazySchema(() =>
+  z
+    .object({
+      value: z
+        .union([z.literal(SYMBOLIZE_AS_TYPES.CIRCLE), z.literal(SYMBOLIZE_AS_TYPES.ICON)])
+        .optional(),
+    })
+    .strict()
+);
 
-export const symbolizeAsSchema = z
-  .object({
-    options: z
-      .object({
-        value: z
-          .union([z.literal(SYMBOLIZE_AS_TYPES.CIRCLE), z.literal(SYMBOLIZE_AS_TYPES.ICON)])
-          .optional(),
-      })
-      .strict()
-      .default({}), // need default to match config-schema behavior
-  })
-  .strict()
-  .default({
-    options: {
-      value: SYMBOLIZE_AS_TYPES.CIRCLE,
-    },
-  })
-  .meta({
-    description: 'Configure to symbolize Point features as Circle markers or Icons',
-  });
+export const symbolizeAsSchema = lazySchema(() =>
+  z
+    .object({
+      options: z
+        .object({
+          value: z
+            .union([z.literal(SYMBOLIZE_AS_TYPES.CIRCLE), z.literal(SYMBOLIZE_AS_TYPES.ICON)])
+            .optional(),
+        })
+        .strict()
+        .default({}), // need default to match config-schema behavior
+    })
+    .strict()
+    .default({
+      options: {
+        value: SYMBOLIZE_AS_TYPES.CIRCLE,
+      },
+    })
+    .meta({
+      description: 'Configure to symbolize Point features as Circle markers or Icons',
+    })
+);
 
-const iconSource = z.union([z.literal(ICON_SOURCE.CUSTOM), z.literal(ICON_SOURCE.MAKI)]).optional();
+const iconSource = lazySchema(() =>
+  z.union([z.literal(ICON_SOURCE.CUSTOM), z.literal(ICON_SOURCE.MAKI)]).optional()
+);
 
 export const iconStop = lazySchema(() =>
   z
@@ -81,30 +87,32 @@ export const iconStaticOptions = lazySchema(() =>
     .strict()
 );
 
-export const iconSchema = z
-  .union([
-    z
-      .object({
-        type: z.literal(STYLE_TYPE.STATIC),
-        options: iconStaticOptions,
-      })
-      .strict(),
-    z
-      .object({
-        type: z.literal(STYLE_TYPE.DYNAMIC),
-        options: iconDynamicOptions,
-      })
-      .strict(),
-  ])
-  .default({
-    type: STYLE_TYPE.STATIC,
-    options: {
-      value: DEFAULT_ICON,
-    },
-  })
-  .meta({
-    description: 'Configure to set Point feature icon',
-  });
+export const iconSchema = lazySchema(() =>
+  z
+    .union([
+      z
+        .object({
+          type: z.literal(STYLE_TYPE.STATIC),
+          options: iconStaticOptions,
+        })
+        .strict(),
+      z
+        .object({
+          type: z.literal(STYLE_TYPE.DYNAMIC),
+          options: iconDynamicOptions,
+        })
+        .strict(),
+    ])
+    .default({
+      type: STYLE_TYPE.STATIC,
+      options: {
+        value: DEFAULT_ICON,
+      },
+    })
+    .meta({
+      description: 'Configure to set Point feature icon',
+    })
+);
 
 export const orientationDynamicOptions = lazySchema(() =>
   z
@@ -115,37 +123,41 @@ export const orientationDynamicOptions = lazySchema(() =>
     .strict()
 );
 
-export const orientationStaticOptions = z
-  .object({
-    orientation: z.number(),
-  })
-  .strict();
+export const orientationStaticOptions = lazySchema(() =>
+  z
+    .object({
+      orientation: z.number(),
+    })
+    .strict()
+);
 
-export const orientationSchema = z
-  .union([
-    z
-      .object({
-        type: z.literal(STYLE_TYPE.STATIC),
-        options: orientationStaticOptions,
-      })
-      .strict(),
-    z
-      .object({
-        type: z.literal(STYLE_TYPE.DYNAMIC),
-        options: orientationDynamicOptions,
-      })
-      .strict(),
-  ])
-  .default({
-    type: STYLE_TYPE.STATIC,
-    options: {
-      orientation: 0,
-    },
-  })
-  .meta({
-    description:
-      'Configure to rotate the icon clockwise. Ignored when Point features are symbolized as circle markers',
-  });
+export const orientationSchema = lazySchema(() =>
+  z
+    .union([
+      z
+        .object({
+          type: z.literal(STYLE_TYPE.STATIC),
+          options: orientationStaticOptions,
+        })
+        .strict(),
+      z
+        .object({
+          type: z.literal(STYLE_TYPE.DYNAMIC),
+          options: orientationDynamicOptions,
+        })
+        .strict(),
+    ])
+    .default({
+      type: STYLE_TYPE.STATIC,
+      options: {
+        orientation: 0,
+      },
+    })
+    .meta({
+      description:
+        'Configure to rotate the icon clockwise. Ignored when Point features are symbolized as circle markers',
+    })
+);
 
 export const sizeDynamicOptions = lazySchema(() =>
   z
@@ -159,56 +171,68 @@ export const sizeDynamicOptions = lazySchema(() =>
     .strict()
 );
 
-export const sizeStaticOptions = z
-  .object({
-    size: z.number(),
-  })
-  .strict();
+export const sizeStaticOptions = lazySchema(() =>
+  z
+    .object({
+      size: z.number(),
+    })
+    .strict()
+);
 
-const sizeStaticSchema = z
-  .object({
-    type: z.literal(STYLE_TYPE.STATIC),
-    options: sizeStaticOptions,
-  })
-  .strict();
+const sizeStaticSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal(STYLE_TYPE.STATIC),
+      options: sizeStaticOptions,
+    })
+    .strict()
+);
 
-const sizeDynamiceSchema = z
-  .object({
-    type: z.literal(STYLE_TYPE.DYNAMIC),
-    options: sizeDynamicOptions,
-  })
-  .strict();
-export const sizeSchema = z.union([sizeStaticSchema, sizeDynamiceSchema]);
-export const lineWidthSchema = z
-  .union([sizeStaticSchema, sizeDynamiceSchema])
-  .default({
-    type: STYLE_TYPE.STATIC,
-    options: {
-      size: 1,
-    },
-  })
-  .meta({
-    description: 'Configure to set feature border width',
-  });
-export const iconSizeSchema = z
-  .union([sizeStaticSchema, sizeDynamiceSchema])
-  .default({
-    type: STYLE_TYPE.STATIC,
-    options: {
-      size: 6,
-    },
-  })
-  .meta({
-    description: 'Configure to set Point feature radius size in pixels',
-  });
-export const labelSizeSchema = z
-  .union([sizeStaticSchema, sizeDynamiceSchema])
-  .default({
-    type: STYLE_TYPE.STATIC,
-    options: {
-      size: 14,
-    },
-  })
-  .meta({
-    description: 'Configure to set label text size',
-  });
+const sizeDynamiceSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal(STYLE_TYPE.DYNAMIC),
+      options: sizeDynamicOptions,
+    })
+    .strict()
+);
+export const sizeSchema = lazySchema(() => z.union([sizeStaticSchema, sizeDynamiceSchema]));
+export const lineWidthSchema = lazySchema(() =>
+  z
+    .union([sizeStaticSchema, sizeDynamiceSchema])
+    .default({
+      type: STYLE_TYPE.STATIC,
+      options: {
+        size: 1,
+      },
+    })
+    .meta({
+      description: 'Configure to set feature border width',
+    })
+);
+export const iconSizeSchema = lazySchema(() =>
+  z
+    .union([sizeStaticSchema, sizeDynamiceSchema])
+    .default({
+      type: STYLE_TYPE.STATIC,
+      options: {
+        size: 6,
+      },
+    })
+    .meta({
+      description: 'Configure to set Point feature radius size in pixels',
+    })
+);
+export const labelSizeSchema = lazySchema(() =>
+  z
+    .union([sizeStaticSchema, sizeDynamiceSchema])
+    .default({
+      type: STYLE_TYPE.STATIC,
+      options: {
+        size: 14,
+      },
+    })
+    .meta({
+      description: 'Configure to set label text size',
+    })
+);

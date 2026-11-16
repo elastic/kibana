@@ -29,24 +29,26 @@ import {
   symbolizeAsSchema,
 } from './marker_schemas';
 
-export const vectorStylePropertiesSchema = z
-  .object({
-    [VECTOR_STYLES.SYMBOLIZE_AS]: symbolizeAsSchema.optional(),
-    [VECTOR_STYLES.FILL_COLOR]: fillColorSchema.optional(),
-    [VECTOR_STYLES.LINE_COLOR]: lineColorSchema.optional(),
-    [VECTOR_STYLES.LINE_WIDTH]: lineWidthSchema.optional(),
-    [VECTOR_STYLES.ICON]: iconSchema.optional(),
-    [VECTOR_STYLES.ICON_SIZE]: iconSizeSchema.optional(),
-    [VECTOR_STYLES.ICON_ORIENTATION]: orientationSchema.optional(),
-    [VECTOR_STYLES.LABEL_TEXT]: labelSchema.optional(),
-    [VECTOR_STYLES.LABEL_ZOOM_RANGE]: labelZoomRangeSchema.optional(),
-    [VECTOR_STYLES.LABEL_COLOR]: labelColorSchema.optional(),
-    [VECTOR_STYLES.LABEL_SIZE]: labelSizeSchema.optional(),
-    [VECTOR_STYLES.LABEL_BORDER_COLOR]: labelBorderColorSchema.optional(),
-    [VECTOR_STYLES.LABEL_BORDER_SIZE]: labelBorderSizeSchema.optional(),
-    [VECTOR_STYLES.LABEL_POSITION]: labelPositionSchema.optional(),
-  })
-  .strict();
+export const vectorStylePropertiesSchema = lazySchema(() =>
+  z
+    .object({
+      [VECTOR_STYLES.SYMBOLIZE_AS]: symbolizeAsSchema.optional(),
+      [VECTOR_STYLES.FILL_COLOR]: fillColorSchema.optional(),
+      [VECTOR_STYLES.LINE_COLOR]: lineColorSchema.optional(),
+      [VECTOR_STYLES.LINE_WIDTH]: lineWidthSchema.optional(),
+      [VECTOR_STYLES.ICON]: iconSchema.optional(),
+      [VECTOR_STYLES.ICON_SIZE]: iconSizeSchema.optional(),
+      [VECTOR_STYLES.ICON_ORIENTATION]: orientationSchema.optional(),
+      [VECTOR_STYLES.LABEL_TEXT]: labelSchema.optional(),
+      [VECTOR_STYLES.LABEL_ZOOM_RANGE]: labelZoomRangeSchema.optional(),
+      [VECTOR_STYLES.LABEL_COLOR]: labelColorSchema.optional(),
+      [VECTOR_STYLES.LABEL_SIZE]: labelSizeSchema.optional(),
+      [VECTOR_STYLES.LABEL_BORDER_COLOR]: labelBorderColorSchema.optional(),
+      [VECTOR_STYLES.LABEL_BORDER_SIZE]: labelBorderSizeSchema.optional(),
+      [VECTOR_STYLES.LABEL_POSITION]: labelPositionSchema.optional(),
+    })
+    .strict()
+);
 
 export const vectorStyleSchema = lazySchema(() =>
   z

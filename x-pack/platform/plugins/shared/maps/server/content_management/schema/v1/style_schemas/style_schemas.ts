@@ -9,15 +9,17 @@ import { z, lazySchema } from '@kbn/zod';
 import { LAYER_STYLE_TYPE } from '../../../../../common/constants';
 import { vectorStyleSchema } from './vector_style_schemas/vector_style_schemas';
 
-export const EMSVectorTileStyleSchema = z
-  .object({
-    color: z.string(),
-    type: z.literal(LAYER_STYLE_TYPE.EMS_VECTOR_TILE),
-  })
-  .strict()
-  .meta({
-    description: 'Elastic Maps Service (EMS) Vector Tile style configuration.',
-  });
+export const EMSVectorTileStyleSchema = lazySchema(() =>
+  z
+    .object({
+      color: z.string(),
+      type: z.literal(LAYER_STYLE_TYPE.EMS_VECTOR_TILE),
+    })
+    .strict()
+    .meta({
+      description: 'Elastic Maps Service (EMS) Vector Tile style configuration.',
+    })
+);
 
 export const heatmapStyleSchema = lazySchema(() =>
   z
@@ -43,13 +45,15 @@ export const heatmapStyleSchema = lazySchema(() =>
     })
 );
 
-export const styleSchema = z.union([
-  z
-    .object({
-      type: z.string(),
-    })
-    .loose(),
-  EMSVectorTileStyleSchema,
-  heatmapStyleSchema,
-  vectorStyleSchema,
-]);
+export const styleSchema = lazySchema(() =>
+  z.union([
+    z
+      .object({
+        type: z.string(),
+      })
+      .loose(),
+    EMSVectorTileStyleSchema,
+    heatmapStyleSchema,
+    vectorStyleSchema,
+  ])
+);
