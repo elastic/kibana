@@ -12,10 +12,10 @@ import { DetectionEngineSystemClient } from '../engine/es_client_tokens';
 import { StateIndex, STATE_INDEX_NAME } from './state_index';
 import { StateConflictError } from './state_conflict_error';
 import { StateVersionMissingError } from './state_version_missing_error';
-import type { StateDocuments, StateVersion, TStateKind } from './state_kinds';
-import type { IStateStore, IVersionedState } from './state_store';
+import type { StateDocuments, StateVersion, StateKind } from './state_kinds';
+import type { StateStore, VersionedState } from './state_store';
 
-interface IStoredState<TKind extends TStateKind> {
+interface StoredState<TKind extends StateKind> {
   kind: TKind;
   key?: string;
   space_id: string;
@@ -24,7 +24,7 @@ interface IStoredState<TKind extends TStateKind> {
 }
 
 /** `<space>:<kind>[:<key>]` */
-function toDocId({ spaceId, kind, key }: { spaceId: string; kind: TStateKind; key?: string }) {
+function toDocId({ spaceId, kind, key }: { spaceId: string; kind: StateKind; key?: string }) {
   return [spaceId, kind, key].filter((part) => part !== undefined).join(':');
 }
 
@@ -48,13 +48,13 @@ function isConflictError(error: unknown): boolean {
 
 /** The state store on the engine's state index, written as the Kibana system user. */
 @injectable()
-export class ElasticsearchStateStore implements IStateStore {
+export class ElasticsearchStateStore implements StateStore {
   constructor(
     @inject(DetectionEngineSystemClient) private readonly esClient: ElasticsearchClient,
     @inject(StateIndex) private readonly stateIndex: StateIndex
   ) {}
 
-  public async get<TKind extends TStateKind>({
+  public async get<TKind extends StateKind>({
     spaceId,
     kind,
     key,
@@ -62,12 +62,12 @@ export class ElasticsearchStateStore implements IStateStore {
     spaceId: string;
     kind: TKind;
     key?: string;
-  }): Promise<IVersionedState<TKind> | undefined> {
+  }): Promise<VersionedState<TKind> | undefined> {
     await this.stateIndex.ensureReady();
     const docId = toDocId({ spaceId, kind, key });
 
     try {
-      const response = await this.esClient.get<IStoredState<TKind>>({
+      const response = await this.esClient.get<StoredState<TKind>>({
         index: STATE_INDEX_NAME,
         id: docId,
       });
@@ -89,7 +89,7 @@ export class ElasticsearchStateStore implements IStateStore {
     }
   }
 
-  public async put<TKind extends TStateKind>({
+  public async put<TKind extends StateKind>({
     spaceId,
     kind,
     key,
@@ -104,7 +104,7 @@ export class ElasticsearchStateStore implements IStateStore {
   }): Promise<StateVersion> {
     await this.stateIndex.ensureReady();
     const docId = toDocId({ spaceId, kind, key });
-    const document: IStoredState<TKind> = {
+    const document: StoredState<TKind> = {
       kind,
       key,
       space_id: spaceId,
@@ -139,7 +139,7 @@ export class ElasticsearchStateStore implements IStateStore {
     version,
   }: {
     spaceId: string;
-    kind: TStateKind;
+    kind: StateKind;
     key?: string;
     version: StateVersion;
   }): Promise<void> {

@@ -32,4 +32,4 @@ export interface StateDocuments {
 }
 
 /** The kinds of document in the state index. */
-export type TStateKind = keyof StateDocuments;
+export type StateKind = keyof StateDocuments;

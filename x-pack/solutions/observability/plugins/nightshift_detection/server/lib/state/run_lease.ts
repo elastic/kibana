@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { StateConflictError } from './state_conflict_error';
-import type { IStateStore } from './state_store';
+import type { StateStore } from './state_store';
 import type { StateVersion } from './state_kinds';
 
 /**
@@ -17,7 +17,7 @@ import type { StateVersion } from './state_kinds';
 export const DEFAULT_RUN_LEASE_TTL_MS = 6 * 60_000;
 
 /** A lease this process holds. */
-export interface IHeldRunLease {
+export interface HeldRunLease {
   owner: string;
   expires_at: string;
   /** Deletes the lease if it is still ours. Call it in a `finally`. */
@@ -25,8 +25,8 @@ export interface IHeldRunLease {
 }
 
 /** Either the lease is ours, or the space is busy and the holder is named. */
-export type TRunLeaseAttempt =
-  | { acquired: true; held: IHeldRunLease }
+export type RunLeaseAttempt =
+  | { acquired: true; held: HeldRunLease }
   | { acquired: false; held_by: string; expires_at: string };
 
 /**
@@ -39,11 +39,11 @@ export async function acquireRunLease({
   ttlMs = DEFAULT_RUN_LEASE_TTL_MS,
   now = Date.now(),
 }: {
-  state: IStateStore;
+  state: StateStore;
   spaceId: string;
   ttlMs?: number;
   now?: number;
-}): Promise<TRunLeaseAttempt> {
+}): Promise<RunLeaseAttempt> {
   const current = await state.get({ spaceId, kind: 'lease' });
 
   if (current && Date.parse(current.value.expires_at) > now) {
