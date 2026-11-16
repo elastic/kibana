@@ -15,6 +15,7 @@ import { NIGHTSHIFT_DETECTION_TIERED_FEATURES } from '../../common/constants';
 import { module } from '..';
 import { AvailabilityService } from '../lib/availability/availability_service';
 import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
+import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 import { DetectionAccountService } from '../lib/service_account/detection_account';
 import { DetectionSetupService } from '../lib/service_account/setup_service';
 import { DETECTION_ENGINE_WORKLOAD_TYPE } from '../lib/service_account/workload';
@@ -50,6 +51,7 @@ describe('module', () => {
     const { container, core, coreSetup } = createContainer();
 
     container.get(AvailabilityService);
+    container.get(StrategyCatalog);
     container.get(DetectionAccountService);
     container.get(DetectionSetupService);
     container.getAll(OnStart);
