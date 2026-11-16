@@ -16,6 +16,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { selectors } from '@elastic/eui-test-helpers';
 import { spaceTest } from '../../../common/ui/fixtures';
 import { runCascadeQuery } from '../../../common/ui/fixtures/helpers';
 
@@ -92,16 +93,26 @@ spaceTest.describe(
           // requires that). Scoped to the expanded row: while scrolled, the sticky pinned
           // group header renders a `createPortal` duplicate of row content elsewhere in
           // the DOM, so an unscoped page-wide locator can match the wrong copy.
-          const expandedRowGrid = page.components.dataGrid(
-            'docTable',
-            page.locator(`[id="${firstRowId}"]`)
-          );
+          const expandedRow = page.locator(`[id="${firstRowId}"]`);
+          const expandedRowGrid = page.components.dataGrid('docTable', expandedRow);
           await expect(expandedRowGrid.rows).not.toHaveCount(0);
 
-          await expandedRowGrid.openFullScreenMode();
+          // The grid toolbar is rendered into the row's inline header (a sibling of the grid
+          // cell) rather than inside the `docTable` element, and only moves back into the grid
+          // while in fullscreen. The component object's fullscreen helpers look for the button
+          // inside `docTable`, so the button is addressed from the row, which contains the
+          // toolbar in both layouts.
+          const fullScreenButton = expandedRow.getByTestId('dataGridFullScreenButton');
+          const fullScreenGrid = expandedRow.locator(selectors.dataGrid.FULL_SCREEN_ROOT_SELECTOR);
+
+          await fullScreenButton.click();
+          await expect(fullScreenGrid).toBeVisible();
+          await expect(fullScreenButton).toBeFocused();
           await expect(expandedRowGrid.rows).not.toHaveCount(0);
 
-          await expandedRowGrid.closeFullScreenMode();
+          await fullScreenButton.click();
+          await expect(fullScreenGrid).toBeHidden();
+          await expect(fullScreenButton).toBeFocused();
           // Rows are still rendered (the grid didn't unmount/lose its data) after exiting fullscreen.
           await expect(expandedRowGrid.rows).not.toHaveCount(0);
         });

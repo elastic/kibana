@@ -1,5 +1,5 @@
 {
-  "sha1": "7101fd36e966400cd22eda23cc5219e4f313b7bb",
+  "sha1": "25b20b00884a0861ffc105289681cd2ce7f136ba",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -925,8 +925,8 @@
       }
     },
     {
-      "id": "69411a87481f950-afb719b3a3f36ee",
-      "title": "Agent Builder - converse callback API renders the Slack surface payload with attachments in place",
+      "id": "69411a87481f950-2bc1448cfa29b28",
+      "title": "Agent Builder - converse callback API retries round_complete after the Retry-After delay when the receiver answers 429",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -941,6 +941,22 @@
       }
     },
     {
+      "id": "69411a87481f950-afb719b3a3f36ee",
+      "title": "Agent Builder - converse callback API renders the Slack surface payload with attachments in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 268,
+        "column": 15
+      }
+    },
+    {
       "id": "69411a87481f950-92f5e782bc9e4c1",
       "title": "Agent Builder - converse callback API stores callback origin authorship on list and get conversation responses",
       "expectedStatus": "passed",
@@ -952,8 +968,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 268,
-        "column": 14
+        "line": 319,
+        "column": 69
       }
     },
     {
@@ -968,8 +984,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 365,
-        "column": 15
+        "line": 412,
+        "column": 11
       }
     },
     {
@@ -984,8 +1000,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 397,
-        "column": 18
+        "line": 449,
+        "column": 31
       }
     },
     {
@@ -1000,8 +1016,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 439,
-        "column": 19
+        "line": 489,
+        "column": 18
       }
     },
     {
@@ -1016,8 +1032,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 505,
-        "column": 18
+        "line": 553,
+        "column": 13
       }
     },
     {
@@ -1032,8 +1048,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 568,
-        "column": 12
+        "line": 618,
+        "column": 18
       }
     },
     {
@@ -1048,8 +1064,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 628,
-        "column": 28
+        "line": 677,
+        "column": 31
       }
     },
     {
@@ -1064,8 +1080,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 668,
-        "column": 15
+        "line": 716,
+        "column": 9
       }
     },
     {
