@@ -24,22 +24,6 @@ module.exports = {
 
   overrides: [
     /**
-     * Temporarily disable some react rules for specific plugins, remove in separate PRs
-     */
-    {
-      files: ['src/platform/plugins/shared/kibana_react/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/rules-of-hooks': 'off',
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    /**
      * `formatjs/*` rules run in oxlint (.oxlint/formatjs.mts). The plugin stays registered so
      * `eslint-disable` directives naming its rules resolve.
      */
@@ -51,36 +35,6 @@ module.exports = {
     /**
      * APM, UX and Observability overrides
      */
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/observability/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/ux/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/slo/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/packages/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-      },
-    },
-    {
-      files: [
-        'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/{streams,streams_app}/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
-      ],
-      rules: {
-        'react-hooks/exhaustive-deps': [
-          'error',
-          {
-            additionalHooks:
-              '^(useUrl|useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
-          },
-        ],
-      },
-    },
     {
       files: [
         'x-pack/solutions/observability/plugins/apm/**/*.{ts,tsx}',
@@ -272,31 +226,6 @@ module.exports = {
         'x-pack/platform/test/api_integration/apis/cases/**/*.{ts, tsx}',
         'x-pack/solutions/**/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
-    },
-    /**
-     * Custom Content overrides
-     */
-    {
-      files: [
-        'x-pack/platform/plugins/shared/custom_content/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/custom-content/**/*.{ts,tsx}',
-      ],
-      rules: {
-        'react-hooks/exhaustive-deps': 'error',
-      },
-    },
-
-    /**
-     * Enterprise Search overrides
-     * NOTE: We also have a single rule at the bottom of the file that
-     * overrides Prettier's default of not linting unnecessary backticks
-     */
-    {
-      // All files
-      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
     },
 
     /**

@@ -64,18 +64,37 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
   });
 
+  it('publishes a config reference per ML panel type and points the skill at each one', () => {
+    const panelConfigs = skill.referencedContent?.filter(
+      ({ relativePath }) => relativePath === './panel_configs'
+    );
+
+    expect(panelConfigs?.map(({ name }) => name)).toEqual([
+      'ml_anomaly_charts',
+      'ml_anomaly_swimlane',
+      'ml_single_metric_viewer',
+    ]);
+    panelConfigs?.forEach(({ name }) => {
+      expect(skill.content).toContain(
+        `/skills/platform/dashboard/dashboards/panel_configs/${name}.md`
+      );
+    });
+  });
+
   it('loads the enhance workflow from referenced content', () => {
     expect(skill.content).toContain(ENHANCE_GUIDANCE_PATH);
     expect(skill.content).toContain('read_file');
     expect(skill.content).toContain('Do not enhance without reading it');
     expect(skill.content).not.toContain('How would you like to enhance this dashboard?');
-    expect(skill.referencedContent).toEqual([
-      expect.objectContaining({
-        name: 'enhance',
-        relativePath: '.',
-        content: expect.stringContaining('Improving an Existing Dashboard (Enhance)'),
-      }),
-    ]);
+    expect(skill.referencedContent).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'enhance',
+          relativePath: '.',
+          content: expect.stringContaining('Improving an Existing Dashboard (Enhance)'),
+        }),
+      ])
+    );
   });
 
   it('delegates enhance presentation defaults to the chart author', () => {
