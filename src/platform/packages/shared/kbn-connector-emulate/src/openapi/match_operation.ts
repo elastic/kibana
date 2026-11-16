@@ -33,7 +33,10 @@ interface ServerPrefix {
 interface Route {
   readonly operation: ContractOperation;
   readonly servers: readonly ServerPrefix[];
+  /** Matches the path with or without a trailing slash. */
   readonly path: RegExp;
+  /** Matches the path only as the template spells it. */
+  readonly exactPath: RegExp;
   readonly parameterNames: readonly string[];
   /** The path template, without the fixed query parameters of an `x-ms-paths` key. */
   readonly template: string;
@@ -112,10 +115,14 @@ const compileRoute = (operation: ContractOperation): Route => {
     parameterNames.push(name);
     return multiSegment.has(name) ? '(.+?)' : '([^/]+)';
   });
+  // Vendors' docs and specs often disagree on a trailing slash, which their servers accept either
+  // way, so it is optional; `/items/` and `/items` both match `/items`.
+  const withoutSlash = template.length > 1 && source.endsWith('/') ? source.slice(0, -1) : source;
   return {
     operation,
     servers: operation.servers.map(compileServer),
-    path: new RegExp(`^${source}$`),
+    path: new RegExp(`^${withoutSlash}/?$`),
+    exactPath: new RegExp(`^${source}$`),
     parameterNames,
     template,
     multiSegmentCount: parameterNames.filter((name) => multiSegment.has(name)).length,
@@ -286,8 +293,9 @@ export interface OperationMatcherOptions {
  * the one with the fewest parameters spanning segments wins, so Azure's
  * `/subscriptions/{subscriptionId}/…/managedClusters/{resourceName}` takes precedence over the
  * catch-all `/{resourceId}`, then the one with the fewest parameters, so `/items/new` takes
- * precedence over `/items/{id}`, then the one with the most literal text, so `/items/{id}:archive` takes precedence over
- * `/items/{id}`. Operations on that template, as `x-ms-paths` declares them, are told apart by
+ * precedence over `/items/{id}`, then the one that matches the trailing slash as spelled (it is
+ * optional otherwise), then the one with the most literal text, so `/items/{id}:archive` takes
+ * precedence over `/items/{id}`. Operations on that template, as `x-ms-paths` declares them, are told apart by
  * the query parameters their keys fix and their required parameters with one allowed value:
  * those the request sends with another value are left out, unless every operation is, then the
  * one with the most fixed query parameters wins, then the one that declares the most of the query
@@ -318,7 +326,9 @@ export const createOperationMatcher = (
     const pathMatches = routes.flatMap((route) => {
       const path = getOperationPath(route, url);
       const match = path === undefined ? null : route.path.exec(path);
-      return match ? [{ route, values: match.slice(1) }] : [];
+      return match && path !== undefined
+        ? [{ route, values: match.slice(1), exact: route.exactPath.test(path) }]
+        : [];
     });
     if (pathMatches.length === 0) {
       return { status: 404, message: 'No operation matches the path' };
@@ -339,15 +349,18 @@ export const createOperationMatcher = (
     // The most specific path template wins first, so `/items/new` takes precedence over
     // `/items/{id}`, and both over a catch-all `/{resourceId}`, whatever the request's parameters;
     // discriminators only tell apart operations on that template, as `x-ms-paths` declares them.
-    const specificity = ({ route }: (typeof forMethod)[number]) =>
+    // A template that matches without dropping or adding a trailing slash wins among as specific
+    // ones, so a spec with both `/items` and `/items/` answers each from its own.
+    const specificity = ({ route, exact }: (typeof forMethod)[number]) =>
       [
         multiSegmentByTemplate.get(route.template) ?? 0,
         route.parameterNames.length,
+        exact ? 0 : 1,
         -route.literalLength,
       ] as const;
     const [mostSpecific] = forMethod
       .map(specificity)
-      .sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]);
+      .sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2] || a[3] - b[3]);
     const onTemplate = forMethod
       .filter((candidate) =>
         specificity(candidate).every((value, index) => value === mostSpecific[index])

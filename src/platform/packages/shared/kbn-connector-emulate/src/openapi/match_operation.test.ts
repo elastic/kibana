@@ -151,6 +151,37 @@ describe('createOperationMatcher', () => {
     ).toMatchObject({ operation: 'secondList' });
   });
 
+  it('treats a trailing slash as optional, unless the spec spells both', () => {
+    const matcher = (paths: string[]) =>
+      createOperationMatcher(
+        loadOperations({
+          openapi: '3.0.3',
+          info: { title: 'Test', version: '1' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: Object.fromEntries(
+            paths.map((path) => [path, { get: { operationId: path, responses: ok } }])
+          ),
+        })
+      );
+    const scan = matcher(['/scan', '/items/{id}/']);
+
+    expect(match(scan, 'GET', 'https://api.example.com/scan/')).toMatchObject({
+      operation: '/scan',
+    });
+    expect(match(scan, 'GET', 'https://api.example.com/items/a')).toEqual({
+      operation: '/items/{id}/',
+      pathParameters: { id: 'a' },
+    });
+
+    const both = matcher(['/scan', '/scan/']);
+    expect(match(both, 'GET', 'https://api.example.com/scan')).toMatchObject({
+      operation: '/scan',
+    });
+    expect(match(both, 'GET', 'https://api.example.com/scan/')).toMatchObject({
+      operation: '/scan/',
+    });
+  });
+
   it('matches server URL variables by their enum values', () => {
     const matcher = createMatcher([
       {
