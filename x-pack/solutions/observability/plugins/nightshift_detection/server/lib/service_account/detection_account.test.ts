@@ -12,14 +12,14 @@ import { DetectionAccountService } from './detection_account';
 const SPACE_ID = 'default';
 const ACCOUNT_ID = 'account-1';
 
-type TPrincipal = { type: 'user' } | { type: 'service_account'; serviceAccountId: string };
+type Principal = { type: 'user' } | { type: 'service_account'; serviceAccountId: string };
 
 function createService({
   boundAccountId,
   principal,
 }: {
   boundAccountId?: string;
-  principal?: TPrincipal;
+  principal?: Principal;
 }) {
   const withScopedRequestForWorkload = jest.fn(
     (_params: unknown, fn: (request: KibanaRequest) => Promise<unknown>) =>
