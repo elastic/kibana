@@ -8,11 +8,18 @@
  */
 
 import apm from 'elastic-apm-node';
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import type {
+  WorkflowExecutionFinishedData,
+  WorkflowExecutionFinishedStatus,
+} from '@kbn/workflows-topics';
 import { executionFlowLoop } from './execution_flow_loop';
 import { flushState, persistenceLoop } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
 import { emitHitlLifecycle } from '../step/wait_for_input_step/hitl_lifecycle_auditor';
+import { publishWorkflowExecutionFinished } from '../topics/publish_workflow_execution_finished';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { isWorkflowTaskManagerAbortSignal } from '../workflow_task_shutdown';
 
 const TASK_MANAGER_ABORT_CANCELLATION_REASON = 'Cancelled because Task Manager aborted the task';
@@ -118,6 +125,10 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   await params.stepIoService.flush();
   finalStateFlushSpan?.end();
 
+  // The flow loop may have finalized on an earlier saveState. Read the flag once,
+  // after the write, so a later flush of this same run does not publish again.
+  await publishJustFinalizedExecution(workflowRuntime);
+
   // Workflow-end cleanup for transiently-rehydrated outputs. The per-step
   // release lives in `prepareForRead` (deferred-release pattern), so the
   // last step's transient set is still resident when the loop exits — this
@@ -130,4 +141,62 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   });
   finalLogFlushSpan?.end();
   params.signal.removeEventListener('abort', onTaskAbort);
+}
+
+async function publishJustFinalizedExecution(
+  workflowRuntime: WorkflowExecutionRuntimeManager
+): Promise<void> {
+  if (!workflowRuntime.takeJustFinalizedTerminalState()) {
+    return;
+  }
+  const data = toWorkflowExecutionFinishedData(workflowRuntime.getWorkflowExecution());
+  if (!data) {
+    return;
+  }
+  await publishWorkflowExecutionFinished(data);
+}
+
+function toWorkflowExecutionFinishedData(
+  execution: EsWorkflowExecution
+): WorkflowExecutionFinishedData | undefined {
+  const status = toFinishedStatus(execution.status);
+  if (!status) {
+    return undefined;
+  }
+
+  const data: WorkflowExecutionFinishedData = {
+    executionId: execution.id,
+    workflowId: execution.workflowId,
+    spaceId: execution.spaceId,
+    status,
+    finishedAt: execution.finishedAt,
+    isTestRun: execution.isTestRun,
+  };
+  if (execution.triggeredBy) {
+    data.triggeredBy = execution.triggeredBy;
+  }
+  if (Number.isFinite(execution.duration)) {
+    data.durationMs = execution.duration;
+  }
+  if (execution.error?.type) {
+    data.errorType = execution.error.type;
+  }
+  return data;
+}
+
+function toFinishedStatus(status: ExecutionStatus): WorkflowExecutionFinishedStatus | undefined {
+  switch (status) {
+    case ExecutionStatus.COMPLETED:
+      return 'completed';
+    case ExecutionStatus.FAILED:
+      return 'failed';
+    case ExecutionStatus.CANCELLED:
+      return 'cancelled';
+    case ExecutionStatus.TIMED_OUT:
+      return 'timed_out';
+    case ExecutionStatus.SKIPPED:
+      return 'skipped';
+    default:
+      return undefined;
+  }
 }
