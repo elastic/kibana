@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events-plugin/common';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { DetectionStatusBadge } from './detection_status_badge';
 import { MetricCell, type MetricCellProps } from './metric_cell';
 import {
@@ -30,8 +30,14 @@ import {
   OVERVIEW_RETRY_LABEL,
 } from './translations';
 
-/** Hairline before every metric except the first (no leading separator). */
-const METRIC_SEPARATOR_BEFORE_INDEX = 1;
+/**
+ * Fixed 6-column grid; each metric spans 2 columns (3 per row). Keeps slot width
+ * stable when the last row has fewer than 3 metrics — otherwise flex grows them
+ * across the full row.
+ */
+const OVERVIEW_GRID_COLUMNS = 6;
+const OVERVIEW_METRIC_COLUMN_SPAN = 2;
+const OVERVIEW_METRICS_PER_ROW = OVERVIEW_GRID_COLUMNS / OVERVIEW_METRIC_COLUMN_SPAN;
 
 export interface DetectionOverviewCounts {
   entities: number;
@@ -146,41 +152,47 @@ export const DetectionOverview = ({
               }}
             />
           ) : (
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="none"
-              wrap
-              responsive={false}
-              css={{ gap: euiTheme.size.base }}
+            <div
+              css={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${OVERVIEW_GRID_COLUMNS}, minmax(0, 1fr))`,
+                columnGap: euiTheme.size.base,
+                rowGap: euiTheme.size.base,
+                alignItems: 'center',
+              }}
             >
-              {metrics.map((metric, index) => (
-                <Fragment key={metric.testSubject}>
-                  {index >= METRIC_SEPARATOR_BEFORE_INDEX ? (
-                    <EuiFlexItem grow={false}>
+              {metrics.map((metric, index) => {
+                const isRowStart = index % OVERVIEW_METRICS_PER_ROW === 0;
+                return (
+                  <div
+                    key={metric.testSubject}
+                    css={{
+                      gridColumn: `span ${OVERVIEW_METRIC_COLUMN_SPAN}`,
+                      minWidth: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: euiTheme.size.base,
+                    }}
+                  >
+                    {!isRowStart ? (
                       <div
                         aria-hidden
                         css={{
+                          flexShrink: 0,
                           width: euiTheme.border.width.thin,
                           // Match EuiAvatar size="l".
                           height: euiTheme.size.xxl,
                           backgroundColor: euiTheme.colors.borderBaseSubdued,
                         }}
                       />
-                    </EuiFlexItem>
-                  ) : null}
-                  <EuiFlexItem
-                    grow={1}
-                    css={{
-                      // Wrap before labels crush into neighbors at narrow widths / zoom.
-                      flex: `1 1 ${euiTheme.base * 12}px`,
-                      minWidth: 0,
-                    }}
-                  >
-                    <MetricCell {...metric} isLoading={isCountsLoading} />
-                  </EuiFlexItem>
-                </Fragment>
-              ))}
-            </EuiFlexGroup>
+                    ) : null}
+                    <div css={{ minWidth: 0, flex: '1 1 auto' }}>
+                      <MetricCell {...metric} isLoading={isCountsLoading} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </>
       )}
