@@ -13,6 +13,7 @@ import {
   layoutAxis,
   REPEATED_REQUESTS_MIN,
   buildVisitActivity,
+  displayUrl,
   formatElapsed,
   requestFamilyOf,
   type ActivityFilters,
@@ -174,6 +175,77 @@ describe('buildVisitActivity', () => {
       rows: [],
       milestones: [],
     });
+  });
+});
+
+describe('buildVisitActivity keys and milestones', () => {
+  it('keeps a row’s key when a filter drops the rows before it', () => {
+    const requests = [request('/a.js', 100), request('/b.js', 200), request('/c.js', 300)];
+    const all = buildVisitActivity(SOFT_VISIT, [], requests, ALL);
+    const searched = buildVisitActivity(SOFT_VISIT, [], requests, { ...ALL, search: 'c.js' });
+
+    const keyOf = (rows: typeof all.rows, url: string) =>
+      rows.find((row) => row.type === 'request' && row.request.url === url)?.key;
+    expect(keyOf(searched.rows, '/c.js')).toBeDefined();
+    expect(keyOf(searched.rows, '/c.js')).toBe(keyOf(all.rows, '/c.js'));
+  });
+
+  it('keeps the keys of exact repeats apart', () => {
+    const { rows } = buildVisitActivity(
+      SOFT_VISIT,
+      [],
+      [request('/a.js', 100), request('/a.js', 100)],
+      ALL
+    );
+    expect(new Set(rows.map(({ key }) => key)).size).toBe(2);
+  });
+
+  it('prints each milestone as measured, wherever the axis starts', () => {
+    const activity = buildVisitActivity(
+      {
+        startTime: at(0),
+        load: {
+          navigationStart: at(300),
+          responseStartMs: 200,
+          domContentLoadedMs: 900,
+          loadMs: 1_500,
+        },
+      },
+      // Reported before the page load's estimated start, so that the axis starts 300 ms earlier.
+      [event('page_view', 0)],
+      [],
+      ALL
+    );
+
+    expect(activity.originMs).toBe(START_MS);
+    expect(activity.milestones.map(({ id, offsetMs, valueMs }) => [id, offsetMs, valueMs])).toEqual(
+      [
+        ['first_byte', 500, 200],
+        ['dom_content_loaded', 1_200, 900],
+        ['load', 1_800, 1_500],
+      ]
+    );
+  });
+});
+
+describe('displayUrl', () => {
+  const ORIGIN = 'https://a.com';
+
+  it.each([
+    ['https://a.com/api/cart', '/api/cart'],
+    ['https://a.com', '/'],
+    ['https://a.com?x=1', '/?x=1'],
+    ['https://a.com#top', '/#top'],
+    ['https://cdn.b.net/x.js', 'cdn.b.net/x.js'],
+    // Starts with the page's origin without being on it.
+    ['https://a.com:8443/api', 'a.com:8443/api'],
+    ['https://a.com.cdn.net/x.js', 'a.com.cdn.net/x.js'],
+  ])('shows %s as %s on a page of %s', (url, expected) => {
+    expect(displayUrl(url, ORIGIN)).toBe(expected);
+  });
+
+  it('drops only the scheme when the page has no origin', () => {
+    expect(displayUrl('https://a.com/x', null)).toBe('a.com/x');
   });
 });
 

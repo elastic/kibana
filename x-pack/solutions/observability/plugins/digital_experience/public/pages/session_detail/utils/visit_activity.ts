@@ -48,7 +48,13 @@ export interface LoadMilestone {
   label: string;
   /** For the axis, where the full label doesn't fit. */
   shortLabel: string;
+  /**
+   * Where the milestone is on the axis, in milliseconds from its origin: the axis starts at the
+   * first thing on the page, which can be before the page load's estimated start.
+   */
   offsetMs: number;
+  /** What was measured, in milliseconds from the page load's start, as `Loaded in` shows it. */
+  valueMs: number;
 }
 
 /** A stretch of the axis, in milliseconds from the origin and in percent of its width. */
@@ -162,6 +168,24 @@ const DOM_CONTENT_LOADED_SHORT_LABEL = i18n.translate(
   { defaultMessage: 'DCL' }
 );
 
+/**
+ * The URL as short as it reads unambiguously on its page: a path on the page's own origin. A
+ * different origin that merely starts with it, as `https://a.com:8443` or `https://a.com.cdn.net`
+ * does for `https://a.com`, is not on it.
+ */
+export const displayUrl = (url: string, pageOrigin: string | null): string => {
+  if (pageOrigin && url.startsWith(pageOrigin)) {
+    const rest = url.slice(pageOrigin.length);
+    if (rest === '') {
+      return '/';
+    }
+    if (/^[/?#]/.test(rest)) {
+      return rest.startsWith('/') ? rest : `/${rest}`;
+    }
+  }
+  return url.replace(/^https?:\/\//, '');
+};
+
 /** The URL without its query or fragment, so that e.g. `/api/poll?n=1` and `?n=2` match. */
 export const urlWithoutQuery = (url: string): string => url.split(/[?#]/)[0];
 
@@ -237,6 +261,7 @@ const milestonesOf = (load: SessionPageLoad | null): LoadMilestone[] => {
       label: FIRST_BYTE_LABEL,
       shortLabel: FIRST_BYTE_SHORT_LABEL,
       offsetMs: load.responseStartMs,
+      valueMs: load.responseStartMs,
     });
   }
   if (load.domContentLoadedMs !== null) {
@@ -245,6 +270,7 @@ const milestonesOf = (load: SessionPageLoad | null): LoadMilestone[] => {
       label: DOM_CONTENT_LOADED_LABEL,
       shortLabel: DOM_CONTENT_LOADED_SHORT_LABEL,
       offsetMs: load.domContentLoadedMs,
+      valueMs: load.domContentLoadedMs,
     });
   }
   if (load.loadMs !== null) {
@@ -253,6 +279,7 @@ const milestonesOf = (load: SessionPageLoad | null): LoadMilestone[] => {
       label: LOAD_LABEL,
       shortLabel: LOAD_LABEL,
       offsetMs: load.loadMs,
+      valueMs: load.loadMs,
     });
   }
   return milestones;
@@ -262,6 +289,19 @@ const milestonesOf = (load: SessionPageLoad | null): LoadMilestone[] => {
  * The requests and events of a page visit as rows in time order, on one axis: requests as bars,
  * events as instants, repeated requests folded, and the page load milestones.
  */
+/**
+ * Keys that stay the same when a filter drops other rows, unlike an index, so that what the user
+ * expanded stays expanded: what identifies the row, and a count for exact repeats of it.
+ */
+const uniqueKeys = () => {
+  const seen = new Map<string, number>();
+  return (identity: string): string => {
+    const count = seen.get(identity) ?? 0;
+    seen.set(identity, count + 1);
+    return count === 0 ? identity : `${identity}#${count}`;
+  };
+};
+
 export const buildVisitActivity = (
   visit: Pick<SessionPageVisit, 'startTime' | 'load'>,
   events: SessionTimelineEvent[],
@@ -269,14 +309,15 @@ export const buildVisitActivity = (
   filters: ActivityFilters
 ): VisitActivity => {
   const normalized = { ...filters, search: filters.search.trim().toLowerCase() };
+  const keyFor = uniqueKeys();
   const rows: ActivityRow[] = [
     ...requests
       .filter((request) => requestMatches(request, normalized))
-      .map((request, index): ActivityRow => {
+      .map((request): ActivityRow => {
         const startMs = Date.parse(request.startTime);
         return {
           type: 'request',
-          key: `request-${index}-${request.startTime}`,
+          key: keyFor(`request|${request.startTime}|${request.url}|${request.spanId ?? ''}`),
           startMs,
           endMs: startMs + request.durationMs,
           request,
@@ -284,11 +325,11 @@ export const buildVisitActivity = (
       }),
     ...events
       .filter((event) => eventMatches(event, normalized))
-      .map((event, index): ActivityRow => {
+      .map((event): ActivityRow => {
         const startMs = Date.parse(event.timestamp);
         return {
           type: 'event',
-          key: `event-${index}-${event.timestamp}`,
+          key: keyFor(`event|${event.timestamp}|${event.kind}|${event.name}|${event.detail ?? ''}`),
           startMs,
           endMs: startMs,
           event,
@@ -308,7 +349,7 @@ export const buildVisitActivity = (
   const origin = Number.isFinite(originMs) ? originMs : 0;
   const placedMilestones = milestones.map((milestone) => ({
     ...milestone,
-    offsetMs: visitStartMs + milestone.offsetMs - origin,
+    offsetMs: visitStartMs + milestone.valueMs - origin,
   }));
 
   return {

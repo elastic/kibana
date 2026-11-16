@@ -187,7 +187,7 @@ export function RequestDetails({
             }),
             description: [
               request.method,
-              request.statusCode ??
+              request.statusCode ||
                 (request.failed
                   ? i18n.translate('xpack.digitalExperience.sessionDetail.request.noResponse', {
                       defaultMessage: 'no response',

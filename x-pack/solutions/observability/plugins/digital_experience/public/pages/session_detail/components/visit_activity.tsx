@@ -27,6 +27,7 @@ import {
   ACTIVITY_ROW_LIMIT,
   IDLE_GAP_MS,
   axisPercent,
+  displayUrl,
   formatElapsed,
   requestFamilyOf,
   urlWithoutQuery,
@@ -112,14 +113,6 @@ const EVENT_LABELS: Partial<Record<SessionTimelineEvent['kind'], string>> = {
   click: i18n.translate('xpack.digitalExperience.sessionDetail.journey.clickLabel', {
     defaultMessage: 'Click',
   }),
-};
-
-/** The URL as short as it reads unambiguously on its page: a path on the page's own origin. */
-const displayUrl = (url: string, pageOrigin: string | null): string => {
-  if (pageOrigin && url.startsWith(pageOrigin)) {
-    return url.slice(pageOrigin.length) || '/';
-  }
-  return url.replace(/^https?:\/\//, '');
 };
 
 const originOf = (url: string | null): string | null => {
@@ -226,7 +219,8 @@ const durationText = (request: SessionRequest): string => {
     return CACHED_LABEL;
   }
   const duration = formatElapsed(request.durationMs);
-  return request.failed ? `${request.statusCode ?? FAILED_LABEL} · ${duration}` : duration;
+  // A status of 0 is what a network error is recorded as, not a response.
+  return request.failed ? `${request.statusCode || FAILED_LABEL} · ${duration}` : duration;
 };
 
 function TypeBadge({ request }: { request: SessionRequest }) {
@@ -350,12 +344,22 @@ function Row({
   );
 }
 
-const Truncated = ({ children, code }: { children: ReactNode; code?: boolean }) => {
+const Truncated = ({
+  children,
+  code,
+  title,
+}: {
+  children: ReactNode;
+  code?: boolean;
+  /** The full text, for when it is cut short and there is no row to expand to read it. */
+  title?: string;
+}) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiText
       size="xs"
       className="eui-textTruncate"
+      title={title}
       css={css({ minWidth: 0, fontFamily: code ? euiTheme.font.familyCode : undefined })}
     >
       {children}
@@ -409,7 +413,7 @@ function RequestRow({
         request={request}
         offsetMs={offsetMs}
         typeLabel={FAMILY_LABELS[requestFamilyOf(request)]}
-        traceHref={traceHref(request.traceId)}
+        traceHref={traceHref(request.traceId, request)}
       />
     </Row>
   );
@@ -436,73 +440,87 @@ function RepeatedRequestsRow({
     row.requests.reduce((sum, { durationMs }) => sum + durationMs, 0) / row.requests.length;
   const color = FAMILY_COLORS[requestFamilyOf(first)];
   return (
-    <Row
-      data-test-subj="digitalExperienceActivityRepeatedRequests"
-      offsetMs={row.startMs - axis.originMs}
-      label={
-        <>
-          <TypeBadge request={first} />
-          <Truncated code>
-            {[first.method, displayUrl(urlWithoutQuery(first.url), pageOrigin)]
-              .filter(Boolean)
-              .join(' ')}
-          </Truncated>
-          <EuiBadge color="hollow" css={css({ flexShrink: 0 })}>
-            {i18n.translate('xpack.digitalExperience.sessionDetail.activity.repeatedCount', {
-              defaultMessage: '×{count}',
-              values: { count: row.requests.length },
-            })}
-          </EuiBadge>
-          {failed > 0 && (
-            <EuiBadge color="danger" css={css({ flexShrink: 0 })}>
-              {i18n.translate('xpack.digitalExperience.sessionDetail.activity.repeatedFailed', {
-                defaultMessage: '{count} failed',
-                values: { count: failed },
+    <>
+      <Row
+        data-test-subj="digitalExperienceActivityRepeatedRequests"
+        offsetMs={row.startMs - axis.originMs}
+        label={
+          <>
+            <TypeBadge request={first} />
+            <Truncated code>
+              {[first.method, displayUrl(urlWithoutQuery(first.url), pageOrigin)]
+                .filter(Boolean)
+                .join(' ')}
+            </Truncated>
+            <EuiBadge color="hollow" css={css({ flexShrink: 0 })}>
+              {i18n.translate('xpack.digitalExperience.sessionDetail.activity.repeatedCount', {
+                defaultMessage: '×{count}',
+                values: { count: row.requests.length },
               })}
             </EuiBadge>
-          )}
-        </>
-      }
-      track={
-        <Track axis={axis}>
-          {/* The whole run, faint, with each request on it: the rhythm without a solid bar. */}
-          <span
-            css={css({
-              position: 'absolute',
-              top: 2,
-              bottom: 2,
-              opacity: 0.25,
-              borderRadius: euiTheme.border.radius.small,
-            })}
-            style={{
-              left: `${placeSpan(axis, row.startMs, row.endMs).left}%`,
-              width: `${placeSpan(axis, row.startMs, row.endMs).width}%`,
-              background: color,
-            }}
-          />
+            {failed > 0 && (
+              <EuiBadge color="danger" css={css({ flexShrink: 0 })}>
+                {i18n.translate('xpack.digitalExperience.sessionDetail.activity.repeatedFailed', {
+                  defaultMessage: '{count} failed',
+                  values: { count: failed },
+                })}
+              </EuiBadge>
+            )}
+          </>
+        }
+        track={
+          <Track axis={axis}>
+            {/* The whole run, faint, with each request on it: the rhythm without a solid bar. */}
+            <span
+              css={css({
+                position: 'absolute',
+                top: 2,
+                bottom: 2,
+                opacity: 0.25,
+                borderRadius: euiTheme.border.radius.small,
+              })}
+              style={{
+                left: `${placeSpan(axis, row.startMs, row.endMs).left}%`,
+                width: `${placeSpan(axis, row.startMs, row.endMs).width}%`,
+                background: color,
+              }}
+            />
+            {row.requests.map((request, index) => (
+              <RequestBar key={index} request={request} axis={axis} />
+            ))}
+          </Track>
+        }
+        value={i18n.translate('xpack.digitalExperience.sessionDetail.activity.repeatedAverage', {
+          defaultMessage: 'avg {duration}',
+          values: { duration: formatElapsed(average) },
+        })}
+        expanded={expanded}
+        onToggle={onToggle}
+      />
+      {expanded && (
+        // As wide as the rows around it, not indented: each request's bar must sit on the page's
+        // axis, which a narrower grid would shift and rescale.
+        <div
+          data-test-subj="digitalExperienceActivityRepeatedRequestsList"
+          css={css({
+            background: euiTheme.colors.backgroundBaseSubdued,
+            borderRadius: euiTheme.border.radius.small,
+            margin: `${euiTheme.size.xxs} 0 ${euiTheme.size.s}`,
+          })}
+        >
           {row.requests.map((request, index) => (
-            <RequestBar key={index} request={request} axis={axis} />
+            <RequestRow
+              key={index}
+              request={request}
+              axis={axis}
+              pageOrigin={pageOrigin}
+              expanded={openIndex === index}
+              onToggle={() => setOpenIndex(openIndex === index ? null : index)}
+            />
           ))}
-        </Track>
-      }
-      value={i18n.translate('xpack.digitalExperience.sessionDetail.activity.repeatedAverage', {
-        defaultMessage: 'avg {duration}',
-        values: { duration: formatElapsed(average) },
-      })}
-      expanded={expanded}
-      onToggle={onToggle}
-    >
-      {row.requests.map((request, index) => (
-        <RequestRow
-          key={index}
-          request={request}
-          axis={axis}
-          pageOrigin={pageOrigin}
-          expanded={openIndex === index}
-          onToggle={() => setOpenIndex(openIndex === index ? null : index)}
-        />
-      ))}
-    </Row>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -547,7 +565,7 @@ function EventRow({
                 {kindLabel ?? event.name}
               </EuiText>
               {event.detail && (
-                <Truncated code={!isError}>
+                <Truncated code={!isError} title={event.detail ?? undefined}>
                   <span style={isError ? { color: euiTheme.colors.textDanger } : undefined}>
                     {event.detail}
                   </span>
@@ -614,7 +632,7 @@ export function VisitActivity({
           <span />
           <span />
           <div css={css({ position: 'relative', height: euiTheme.size.xl })}>
-            {activity.milestones.map(({ id, label, shortLabel, offsetMs }, index) => (
+            {activity.milestones.map(({ id, label, shortLabel, offsetMs, valueMs }, index) => (
               <EuiText
                 key={id}
                 size="xs"
@@ -630,9 +648,9 @@ export function VisitActivity({
                   left: `${axisPercent(activity.segments, offsetMs)}%`,
                   top: index % 2 === 0 ? 0 : euiTheme.size.base,
                 }}
-                aria-label={`${label} ${formatElapsed(offsetMs)}`}
+                aria-label={`${label} ${formatElapsed(valueMs)}`}
               >
-                {`${shortLabel} ${formatElapsed(offsetMs)}`}
+                {`${shortLabel} ${formatElapsed(valueMs)}`}
               </EuiText>
             ))}
           </div>

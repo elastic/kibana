@@ -378,6 +378,35 @@ describe('buildRequests', () => {
     ]);
   });
 
+  it('drops a record with a timing no page could have, instead of failing the whole session', () => {
+    const { requests } = buildRequests(
+      [
+        resourceTiming({
+          emittedAt: ORIGIN_MS + 1_000,
+          url: 'https://shop.example.com/ok.js',
+          fetchStart: 100,
+          responseEnd: 300,
+        }),
+        // Anyone can send telemetry: past what a date holds, this would throw where it is placed.
+        resourceTiming({
+          emittedAt: ORIGIN_MS + 1_000,
+          url: 'https://shop.example.com/absurd.js',
+          fetchStart: 1e18,
+          responseEnd: 1e18,
+        }),
+        resourceTiming({
+          emittedAt: ORIGIN_MS + 1_000,
+          url: 'https://shop.example.com/absurd-end.js',
+          fetchStart: 100,
+          responseEnd: 1e18,
+        }),
+      ],
+      visits(0)
+    );
+
+    expect(requests.map(({ url }) => url)).toEqual(['https://shop.example.com/ok.js']);
+  });
+
   it('skips events that are neither timings nor HTTP spans, or lack a time or a URL', () => {
     const { requests } = buildRequests(
       [

@@ -64,6 +64,13 @@ export const SESSION_REQUESTS_SIZE = 2000;
  */
 export const DOCUMENT_GAP_MS = 2_000;
 
+/**
+ * Timings the browser reports, which anyone can send, beyond this are dropped: a page lives for less
+ * than a session does, and a value past what a date can hold would make the whole session fail
+ * where its requests are placed.
+ */
+const MAX_TIMING_MS = 7 * 24 * 60 * 60 * 1000;
+
 /** A page view is reported shortly after its page load starts, at most this long before. */
 const VISIT_SLACK_MS = 1_000;
 
@@ -177,7 +184,7 @@ const toTimingRecord = (event: OtelEventFields): TimingRecord | null => {
     return null;
   }
   const isNavigation = name === EVENT_NAVIGATION_TIMING;
-  return {
+  const record: TimingRecord = {
     isNavigation,
     timestampMs,
     url,
@@ -211,6 +218,12 @@ const toTimingRecord = (event: OtelEventFields): TimingRecord | null => {
     traceId: fieldString(event, 'trace_id'),
     spanId: fieldString(event, 'span_id'),
   };
+  const measured = [
+    ...Object.values(record.timings),
+    record.domContentLoadedMs ?? 0,
+    record.loadMs ?? 0,
+  ];
+  return measured.every((ms) => ms <= MAX_TIMING_MS) ? record : null;
 };
 
 /** `fetch` or `xmlhttprequest`, as Resource Timing names them, from the instrumentation scope. */

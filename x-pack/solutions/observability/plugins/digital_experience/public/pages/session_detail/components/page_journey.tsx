@@ -39,21 +39,24 @@ function VisitBadges({ visit, requests }: Pick<PageVisitEvents, 'visit' | 'reque
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
       <EuiFlexItem grow={false}>
-        {visit.load?.loadMs != null ? (
-          <EuiBadge
-            color="hollow"
-            iconType="refreshTime"
-            data-test-subj="digitalExperienceVisitLoad"
-          >
-            {i18n.translate('xpack.digitalExperience.sessionDetail.journey.loadedIn', {
-              defaultMessage: 'Loaded in {duration}',
-              values: { duration: formatElapsed(visit.load.loadMs) },
-            })}
-          </EuiBadge>
-        ) : (
+        {visit.load === null ? (
           <EuiBadge color="hollow" iconType="sortRight">
             {IN_APP_NAVIGATION_LABEL}
           </EuiBadge>
+        ) : (
+          // A page load whose load event never fired, e.g. the user left first, is neither.
+          visit.load.loadMs !== null && (
+            <EuiBadge
+              color="hollow"
+              iconType="refreshTime"
+              data-test-subj="digitalExperienceVisitLoad"
+            >
+              {i18n.translate('xpack.digitalExperience.sessionDetail.journey.loadedIn', {
+                defaultMessage: 'Loaded in {duration}',
+                values: { duration: formatElapsed(visit.load.loadMs) },
+              })}
+            </EuiBadge>
+          )
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

@@ -451,10 +451,16 @@ describe('SessionDetailPage', () => {
     fireEvent.click(within(rows[5]).getByRole('button'));
     const details = within(home).getByTestId('digitalExperienceRequestDetails');
     expect(details).toHaveTextContent('Waiting for the server 60 ms');
-    expect(within(details).getByTestId('digitalExperienceRequestTraceLink')).toHaveAttribute(
-      'href',
-      '/app/apm/link-to/trace/trace-1'
+    // Around the request, so that APM's fallback to its traces page isn't left on a recent window.
+    const traceUrl = new URL(
+      within(details).getByTestId('digitalExperienceRequestTraceLink').getAttribute('href') ?? '',
+      'http://localhost'
     );
+    expect(traceUrl.pathname).toBe('/app/apm/link-to/trace/trace-1');
+    expect(Object.fromEntries(traceUrl.searchParams)).toEqual({
+      rangeFrom: new Date(Date.parse(at(5_010)) - 5 * 60_000).toISOString(),
+      rangeTo: new Date(Date.parse(at(5_010)) + 120 + 5 * 60_000).toISOString(),
+    });
 
     fireEvent.click(within(rows[3]).getByRole('button'));
     expect(within(home).getByTestId('digitalExperienceRequestDetails')).toHaveTextContent(
@@ -509,6 +515,84 @@ describe('SessionDetailPage', () => {
     fireEvent.click(showAll);
     expect(within(cart).getAllByTestId('digitalExperienceActivityRequest')).toHaveLength(20);
     expect(showAll).toHaveTextContent('Show the first 15 rows');
+  });
+
+  it('lays the requests of a folded run out as wide as the rest of the page, on its axis', async () => {
+    const polls = Array.from({ length: 5 }, (_, index) =>
+      request(`https://shop.example.com/api/stock?n=${index}`, 1_000 + index * 500, 0, {
+        initiatorType: 'fetch',
+        method: 'GET',
+        statusCode: 200,
+      })
+    );
+    mockFetch.mockResolvedValue(detail({ requests: polls }));
+    renderPage();
+
+    const [home] = await screen.findAllByTestId('digitalExperiencePageVisit');
+    const run = within(home).getByTestId('digitalExperienceActivityRepeatedRequests');
+    expect(run).toHaveTextContent('×5');
+
+    fireEvent.click(within(run).getByRole('button'));
+    const list = within(home).getByTestId('digitalExperienceActivityRepeatedRequestsList');
+    // Not inside the folded row, whose indent would narrow the grid and shift every bar.
+    expect(run).not.toContainElement(list);
+    expect(within(list).getAllByTestId('digitalExperienceActivityRequest')).toHaveLength(5);
+  });
+
+  it('calls a visit an in-app navigation only when it has no page load', async () => {
+    const { pageVisits } = detail();
+    mockFetch.mockResolvedValue(
+      detail({
+        pageVisits: [
+          {
+            ...pageVisits[0],
+            // The user left before the load event: neither a load time nor an in-app navigation.
+            load: {
+              navigationStart: START,
+              responseStartMs: 150,
+              domContentLoadedMs: null,
+              loadMs: null,
+            },
+          },
+          pageVisits[1],
+        ],
+      })
+    );
+    renderPage();
+
+    const [home, cart] = await screen.findAllByTestId('digitalExperiencePageVisit');
+    expect(home).not.toHaveTextContent('In-app navigation');
+    expect(within(home).queryByTestId('digitalExperienceVisitLoad')).not.toBeInTheDocument();
+    expect(cart).toHaveTextContent('In-app navigation');
+  });
+
+  it('keeps the full text of a click readable when its row cuts it short', async () => {
+    mockFetch.mockResolvedValue(detail());
+    renderPage();
+
+    const click = await screen.findByTestId('digitalExperienceSessionEvent-click');
+    expect(within(click).getByTitle('button#add')).toBeInTheDocument();
+  });
+
+  it('says a request that never got a response failed, not that it answered 0', async () => {
+    mockFetch.mockResolvedValue(
+      detail({
+        requests: [
+          request('https://shop.example.com/api/offline', 6_000, 0, {
+            initiatorType: 'fetch',
+            method: 'GET',
+            failed: true,
+            statusCode: 0,
+          }),
+        ],
+      })
+    );
+    renderPage();
+
+    const [home] = await screen.findAllByTestId('digitalExperiencePageVisit');
+    const row = within(home).getByTestId('digitalExperienceActivityRequest');
+    expect(row).toHaveTextContent('failed · 120 ms');
+    expect(row).not.toHaveTextContent('0 · 120 ms');
   });
 
   it('says when the requests are cut short', async () => {

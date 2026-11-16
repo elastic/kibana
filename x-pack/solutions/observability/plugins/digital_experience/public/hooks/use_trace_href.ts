@@ -11,20 +11,39 @@ import { useKibanaServices } from './use_kibana_services';
 const APM_APP_ID = 'apm';
 
 /**
- * The link to a distributed trace in APM, or `undefined` when the user can't open APM, so that a
- * request's backend calls are a click away.
+ * How far either side of a request APM looks for its trace. Without a range, APM finds the root
+ * transaction over all time but falls back to its default recent window when there is none, as for
+ * a browser trace with no instrumented backend, which is empty for any session but a recent one.
  */
-export const useTraceHref = (): ((traceId: string | null) => string | undefined) => {
+const TRACE_RANGE_MARGIN_MS = 5 * 60_000;
+
+/**
+ * The link to a distributed trace in APM, around the time of the request that made it, or
+ * `undefined` when the user can't open APM, so that a request's backend calls are a click away.
+ */
+export const useTraceHref = (): ((
+  traceId: string | null,
+  request: { startTime: string; durationMs: number }
+) => string | undefined) => {
   const { application } = useKibanaServices();
   const canOpenApm = Boolean(application.capabilities[APM_APP_ID]?.show);
 
   return useCallback(
-    (traceId) =>
-      traceId && canOpenApm
-        ? application.getUrlForApp(APM_APP_ID, {
-            path: `/link-to/trace/${encodeURIComponent(traceId)}`,
-          })
-        : undefined,
+    (traceId, { startTime, durationMs }) => {
+      if (!traceId || !canOpenApm) {
+        return undefined;
+      }
+      const startMs = Date.parse(startTime);
+      const range = Number.isFinite(startMs)
+        ? `?${new URLSearchParams({
+            rangeFrom: new Date(startMs - TRACE_RANGE_MARGIN_MS).toISOString(),
+            rangeTo: new Date(startMs + durationMs + TRACE_RANGE_MARGIN_MS).toISOString(),
+          })}`
+        : '';
+      return application.getUrlForApp(APM_APP_ID, {
+        path: `/link-to/trace/${encodeURIComponent(traceId)}${range}`,
+      });
+    },
     [application, canOpenApm]
   );
 };

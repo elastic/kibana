@@ -27,11 +27,22 @@ export const sessionEsqlQuery = ({
     '| SORT @timestamp ASC',
   ].join('\n');
 
-/** The time range the session's raw events fall in. */
+/**
+ * The time range the session's raw events fall in, or `undefined` for a session the summaries have
+ * no start or end time for, which the API returns as empty strings: such a session still shows,
+ * only without a way into Discover.
+ */
 export const sessionTimeRange = ({
   startTime,
   endTime,
-}: Pick<SessionSummary, 'startTime' | 'endTime'>): { from: string; to: string } => ({
-  from: new Date(Date.parse(startTime) - BEFORE_START_MS).toISOString(),
-  to: new Date(Date.parse(endTime) + AFTER_END_MS).toISOString(),
-});
+}: Pick<SessionSummary, 'startTime' | 'endTime'>): { from: string; to: string } | undefined => {
+  const startMs = Date.parse(startTime);
+  const endMs = Date.parse(endTime);
+  if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) {
+    return undefined;
+  }
+  return {
+    from: new Date(startMs - BEFORE_START_MS).toISOString(),
+    to: new Date(endMs + AFTER_END_MS).toISOString(),
+  };
+};
