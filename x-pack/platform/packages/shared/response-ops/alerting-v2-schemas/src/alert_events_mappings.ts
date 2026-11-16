@@ -7,6 +7,8 @@
 
 import type { MappingsDefinition } from '@kbn/es-mappings';
 
+export const ALERT_EVENTS_DATA_IGNORE_ABOVE = 8191;
+
 /**
  * Mappings of the `.rule-events` data stream. Changing them requires bumping
  * `ALERT_EVENTS_DATA_STREAM_VERSION`, which stays in the `alerting_v2` plugin next to the
@@ -26,7 +28,10 @@ export const ALERT_EVENTS_MAPPINGS: MappingsDefinition = {
       },
     },
     group_hash: { type: 'keyword' },
-    data: { type: 'flattened' },
+    // Leaf values longer than the Lucene term limit (32766 bytes) would reject the whole document.
+    // `ignore_above` counts characters, so 8191 covers 4-byte UTF-8 characters too. Longer values
+    // stay in `_source` but are not indexed.
+    data: { type: 'flattened', ignore_above: ALERT_EVENTS_DATA_IGNORE_ABOVE },
     status: { type: 'keyword' }, // breached | recovered | no_data
     source: { type: 'keyword' },
     type: { type: 'keyword' }, // signal | alert

@@ -46,7 +46,7 @@ This stream is the durable history of rule evaluation.
 | `rule.id` | `keyword` | Rule identifier. |
 | `rule.version` | `long` | Rule version at execution time. |
 | `group_hash` | `keyword` | Per-rule series identity. |
-| `data` | `flattened` | ES\|QL row payload. |
+| `data` | `flattened` | ES\|QL row payload. Leaf values over 8191 characters (`ignore_above`) stay in `_source` but are not indexed, so they cannot be searched or aggregated. |
 | `status` | `keyword` | `breached`, `recovered`, or `no_data`. |
 | `source` | `keyword` | Origin marker. |
 | `type` | `keyword` | `signal` or `alert`. |
