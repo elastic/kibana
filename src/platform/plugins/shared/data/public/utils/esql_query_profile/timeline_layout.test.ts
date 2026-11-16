@@ -8,7 +8,7 @@
  */
 
 import type { TimelineDriver } from './types';
-import { fullDomain, groupDrivers, laneBox } from './timeline_layout';
+import { driverSpread, fullDomain, groupDrivers, laneBox } from './timeline_layout';
 
 const driver = (description: string, startMillis: number, stopMillis: number) =>
   ({ description, startMillis, stopMillis } as TimelineDriver);
@@ -57,5 +57,28 @@ describe('fullDomain', () => {
         drivers: [driver('data', 1_000, 1_400), driver('final', 1_100, 1_300)],
       })
     ).toEqual({ startMillis: 900, stopMillis: 1_400 });
+  });
+});
+
+describe('driverSpread', () => {
+  const durations = (...millis: number[]) => millis.map((length) => driver('data', 0, length));
+
+  it('has no spread for a single driver', () => {
+    expect(driverSpread(durations(100))).toBeUndefined();
+  });
+
+  it('gives the shortest, median and longest duration', () => {
+    expect(driverSpread(durations(100, 120, 140, 160))).toEqual({
+      count: 4,
+      minMillis: 100,
+      medianMillis: 130,
+      maxMillis: 160,
+      isSkewed: false,
+    });
+  });
+
+  it('flags a driver that takes at least twice the median, but not with too few to compare', () => {
+    expect(driverSpread(durations(100, 110, 450))?.isSkewed).toBe(true);
+    expect(driverSpread(durations(100, 450))?.isSkewed).toBe(false);
   });
 });

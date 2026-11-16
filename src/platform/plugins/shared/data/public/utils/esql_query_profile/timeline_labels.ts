@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { PlanningPhaseId, TimelineOperator } from './types';
+import type { DriverSpread } from './timeline_layout';
 import { formatDurationMillis, formatShare } from './profile_format';
 
 export const planningLabel = () =>
@@ -41,3 +42,14 @@ export const operatorTimeLabel = (operator: TimelineOperator): string =>
 
 export const operatorShareLabel = (operator: TimelineOperator): string =>
   operator.timeReported ? formatShare(operator.share) : '–';
+
+/** How many drivers a group has and how long they took, such as "4 drivers, 120 ms to 480 ms". */
+export const spreadLabel = ({ count, minMillis, maxMillis }: DriverSpread): string =>
+  i18n.translate('data.inspector.queryProfile.groupSpreadLabel', {
+    defaultMessage: '{count, plural, one {# driver} other {# drivers}}, {min} to {max}',
+    values: {
+      count,
+      min: formatDurationMillis(minMillis),
+      max: formatDurationMillis(maxMillis),
+    },
+  });

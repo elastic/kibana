@@ -9,16 +9,23 @@
 
 import React, { useState } from 'react';
 import type { SerializedStyles } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { QueryProfileView, TimelineDriver } from './types';
 import { computeTicks } from './timeline_ticks';
 import { formatDurationMillis } from './profile_format';
 import { LegendSwatch } from './legend_swatch';
-import { groupLabel, planningLabel } from './timeline_labels';
+import { groupLabel, planningLabel, spreadLabel } from './timeline_labels';
 import { TimelineDetails } from './timeline_details';
 import type { LaneBox } from './timeline_layout';
-import { fullDomain, groupDrivers, laneBox, spanMillis } from './timeline_layout';
+import { driverSpread, fullDomain, groupDrivers, laneBox, spanMillis } from './timeline_layout';
 import { useTimelineStyles } from './timeline_styles';
 
 /** The id of the selected lane. Drivers use their own id, which is never this one. */
@@ -167,6 +174,44 @@ const Lane = ({
   );
 };
 
+const GroupHeader = ({
+  description,
+  drivers,
+}: {
+  description: string;
+  drivers: TimelineDriver[];
+}) => {
+  const styles = useTimelineStyles();
+  const spread = driverSpread(drivers);
+
+  return (
+    <EuiText size="xs" color="subdued">
+      <p css={styles.groupLabel} data-test-subj="esqlQueryProfileGroupHeader">
+        {groupLabel(description)}
+        {spread ? ` · ${spreadLabel(spread)}` : ''}
+        {spread?.isSkewed ? (
+          <EuiIconTip
+            type="warning"
+            color="warning"
+            size="s"
+            aria-label={i18n.translate('data.inspector.queryProfile.skewedGroupAriaLabel', {
+              defaultMessage: 'Uneven durations',
+            })}
+            content={i18n.translate('data.inspector.queryProfile.skewedGroupTooltip', {
+              defaultMessage:
+                'The slowest driver took {max}, much longer than the typical {median}. One node may hold more data or be slower than the others.',
+              values: {
+                max: formatDurationMillis(spread.maxMillis),
+                median: formatDurationMillis(spread.medianMillis),
+              },
+            })}
+          />
+        ) : null}
+      </p>
+    </EuiText>
+  );
+};
+
 /** Every driver as a lane on one clock. Select a lane to see its details below. */
 export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
   const styles = useTimelineStyles();
@@ -210,9 +255,7 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
         ) : null}
         {groupDrivers(timeline.drivers).map(([description, drivers]) => (
           <div key={description || 'other'}>
-            <EuiText size="xs" color="subdued">
-              <p css={styles.groupLabel}>{groupLabel(description)}</p>
-            </EuiText>
+            <GroupHeader description={description} drivers={drivers} />
             {drivers.map((driver) => (
               <Lane
                 key={driver.id}

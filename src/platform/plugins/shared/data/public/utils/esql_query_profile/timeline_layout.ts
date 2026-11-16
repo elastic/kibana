@@ -60,3 +60,42 @@ export const groupDrivers = (drivers: TimelineDriver[]): Array<[string, Timeline
   const rest = [...groups.keys()].filter((description) => !GROUP_ORDER.includes(description));
   return [...known, ...rest].map((description) => [description, groups.get(description) ?? []]);
 };
+
+/** A group is skewed when its slowest driver takes at least this many times the median. */
+const SKEW_RATIO = 2;
+
+/** At least this many drivers are needed to call one of them an outlier. */
+const MIN_DRIVERS_FOR_SKEW = 3;
+
+/** How much the durations of drivers that do the same work differ. */
+export interface DriverSpread {
+  count: number;
+  minMillis: number;
+  medianMillis: number;
+  maxMillis: number;
+  /** The slowest driver takes much longer than the typical one. */
+  isSkewed: boolean;
+}
+
+/** The spread of the durations of a group of drivers, or nothing when there is one driver only. */
+export const driverSpread = (drivers: TimelineDriver[]): DriverSpread | undefined => {
+  if (drivers.length < 2) {
+    return undefined;
+  }
+  const sorted = drivers.map(spanMillis).sort((left, right) => left - right);
+  const middle = Math.floor(sorted.length / 2);
+  const medianMillis =
+    sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+  const maxMillis = sorted[sorted.length - 1];
+
+  return {
+    count: sorted.length,
+    minMillis: sorted[0],
+    medianMillis,
+    maxMillis,
+    isSkewed:
+      sorted.length >= MIN_DRIVERS_FOR_SKEW &&
+      medianMillis > 0 &&
+      maxMillis >= medianMillis * SKEW_RATIO,
+  };
+};
