@@ -6,7 +6,7 @@
  */
 
 import type { EuiBadgeProps } from '@elastic/eui';
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import React from 'react';
 import { getKnowledgeIndicatorSourceIds } from '../utils/get_knowledge_indicator_source_id';
@@ -28,21 +28,43 @@ export const KnowledgeIndicatorSourceBadge = ({
   const otherSourceTitles = getKnowledgeIndicatorSourceIds(knowledgeIndicator)
     .filter((id) => id !== sourceId)
     .map(getSourceTitle);
-  const badge = (
-    <EuiBadge
-      color="hollow"
-      css={{ maxWidth: '100%' }}
-      iconType={iconType}
-      iconSide={iconType ? 'left' : undefined}
-      tabIndex={otherSourceTitles.length > 0 ? 0 : undefined}
-    >
-      {otherSourceTitles.length > 0 ? `${sourceTitle} +${otherSourceTitles.length}` : sourceTitle}
-    </EuiBadge>
-  );
 
-  return otherSourceTitles.length > 0 ? (
-    <EuiToolTip content={[sourceTitle, ...otherSourceTitles].join(', ')}>{badge}</EuiToolTip>
-  ) : (
-    badge
+  if (otherSourceTitles.length === 0) {
+    return (
+      <EuiBadge
+        color="hollow"
+        css={{ maxWidth: '100%' }}
+        iconType={iconType}
+        iconSide={iconType ? 'left' : undefined}
+      >
+        {sourceTitle}
+      </EuiBadge>
+    );
+  }
+
+  return (
+    <EuiToolTip content={[sourceTitle, ...otherSourceTitles].join(', ')}>
+      <EuiFlexGroup
+        gutterSize="xs"
+        responsive={false}
+        alignItems="center"
+        wrap={false}
+        tabIndex={0}
+      >
+        <EuiFlexItem css={{ minWidth: 0 }}>
+          <EuiBadge
+            color="hollow"
+            css={{ maxWidth: '100%' }}
+            iconType={iconType}
+            iconSide={iconType ? 'left' : undefined}
+          >
+            {sourceTitle}
+          </EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">+{otherSourceTitles.length}</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
   );
 };
