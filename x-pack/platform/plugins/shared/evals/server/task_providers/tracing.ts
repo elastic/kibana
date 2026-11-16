@@ -125,24 +125,30 @@ export const withEvalsEvaluatorSpan = <T>(
  * the caller is already building (for example the online-eval scoring span). Unlike
  * {@link withEvalsEvaluatorSpan}, it does not start a new trace.
  *
- * The inference tracking beacon is set on the judge span's context. A caller with no inference
- * context would otherwise make the model call treat itself as a root, drop the judge span from
- * its parent context and fork a separate `chat <model>` trace.
+ * The inference tracking beacon is set on the parent context before the span starts. A caller
+ * with no inference context would otherwise make the model call treat itself as a root, drop the
+ * judge span from its parent context and fork a separate `chat <model>` trace. Setting it only
+ * after the span starts is not enough: inference span processors decide whether to track a span
+ * from the beacon in its parent context at start, so the judge span would go untracked while the
+ * model call keeps it as its parent.
  */
 export const withEvalsJudgeChildSpan = <T>(
   evaluatorName: string,
   run: () => Promise<T>
-): Promise<T> =>
-  evalsTracer.startActiveSpan(
+): Promise<T> => {
+  const activeContext = context.active();
+  const baggage = (propagation.getBaggage(activeContext) ?? propagation.createBaggage()).setEntry(
+    BAGGAGE_TRACKING_BEACON_KEY,
+    { value: BAGGAGE_TRACKING_BEACON_VALUE }
+  );
+
+  return evalsTracer.startActiveSpan(
     `${JUDGE_SPAN_NAME_PREFIX}${evaluatorName}`,
     { attributes: { 'instrumentationScope.name': '@kbn/evals', 'evaluator.name': evaluatorName } },
+    propagation.setBaggage(activeContext, baggage),
     async (span: Span) => {
       try {
-        const activeContext = context.active();
-        const baggage = (
-          propagation.getBaggage(activeContext) ?? propagation.createBaggage()
-        ).setEntry(BAGGAGE_TRACKING_BEACON_KEY, { value: BAGGAGE_TRACKING_BEACON_VALUE });
-        return await context.with(propagation.setBaggage(activeContext, baggage), run);
+        return await run();
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: SpanStatusCode.ERROR });
@@ -152,3 +158,4 @@ export const withEvalsJudgeChildSpan = <T>(
       }
     }
   );
+};
