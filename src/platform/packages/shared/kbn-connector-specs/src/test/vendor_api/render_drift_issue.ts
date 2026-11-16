@@ -366,7 +366,8 @@ const statusOf = (
   if (reviewKinds.length > 0) {
     return {
       rank: 'passes',
-      text: `Passes · ${listed(
+      // The action works, but what it calls needs a look, as the summary counts it.
+      text: `Passes · ${ICONS.attention} ${listed(
         reviewKinds.map((kind) => kind.toLowerCase())
       )} (see changes to review)`,
     };

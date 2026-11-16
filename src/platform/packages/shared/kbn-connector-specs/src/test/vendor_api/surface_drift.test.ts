@@ -495,7 +495,7 @@ describe('renderDriftIssue', () => {
     expect(body).not.toContain('| Request changed |');
     expect(body.indexOf('### Changes to review')).toBeLessThan(body.indexOf('### Actions'));
     expect(body).toContain(
-      '| `search` | `GET /items` | ✅ Passes · deprecated (see changes to review) |'
+      '| `search` | `GET /items` | ✅ Passes · ⚠️ deprecated (see changes to review) |'
     );
   });
 
@@ -604,7 +604,7 @@ describe('renderDriftIssue', () => {
     expect(body).toContain('`search` passes but calls an endpoint removed from the current spec.');
     expect(body).toContain('| `GET /items` | Removed | `search` |');
     expect(body).toContain(
-      '| `search` | `GET /items` | ✅ Passes · removed (see changes to review) |'
+      '| `search` | `GET /items` | ✅ Passes · ⚠️ removed (see changes to review) |'
     );
   });
 
