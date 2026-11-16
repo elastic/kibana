@@ -14,8 +14,8 @@ import {
   getAnySourceCommandFromESQLQuery,
   getIndexPatternFromESQLQuery,
   getSourceCommandFromESQLQuery,
-  getSourceCommandQueryFromESQLQuery,
   hasTransformationalCommand,
+  retrieveMetadataColumns,
 } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 
@@ -74,10 +74,8 @@ export const getEsqlMissingMetadataExample = (esql: string): string => {
 
 /** Whether the ES|QL query's source command asks for the `_id` and `_index` metadata. */
 export const hasEsqlIdentityMetadata = (esql: string): boolean => {
-  // The printed source command alone: METADATA names are identifiers there, so a literal
-  // elsewhere in the query (a value containing "metadata", say) cannot fool the check.
-  const metadata = /\bMETADATA\b(.*)$/i.exec(getSourceCommandQueryFromESQLQuery(esql))?.[1];
-  return Boolean(metadata && /\b_id\b/i.test(metadata) && /\b_index\b/i.test(metadata));
+  const metadata = retrieveMetadataColumns(esql);
+  return metadata.includes('_id') && metadata.includes('_index');
 };
 
 /**
