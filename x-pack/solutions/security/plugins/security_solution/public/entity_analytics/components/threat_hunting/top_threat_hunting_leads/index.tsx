@@ -39,6 +39,15 @@ import { GeneratedOnLabel } from './generated_on_label';
 import { LeadCard } from './lead_card';
 import { LeadsBanner } from './leads_banner';
 import * as i18n from './translations';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+
+const LEADS_CONNECTOR_ACCESS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.THREAT_HUNTING_LEADS,
+  'leads_connector_access'
+);
 
 const MAX_VISIBLE_CARDS = 5;
 const MIN_CARD_WIDTH = 280;
@@ -121,6 +130,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
     useInferenceConnectorAccess({
       connectors: availableConnectors,
       selectedConnectorId: connectorId ?? '',
+      executionContext: LEADS_CONNECTOR_ACCESS_CONTEXT,
     });
   const hasValidConnector = !!connectorId && canUseSelectedConnector;
 

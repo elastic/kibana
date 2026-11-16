@@ -76,6 +76,33 @@ describe('useInferenceConnectorAccess', () => {
     expect(result.current.missingInferencePrivilege).toBe(false);
   });
 
+  it('forwards the execution context to the privilege check', async () => {
+    const executionContext = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:threat_hunting_leads',
+        id: 'leads_connector_access',
+      },
+    };
+
+    renderHook(
+      () =>
+        useInferenceConnectorAccess({
+          connectors: [inferenceConnector],
+          selectedConnectorId: 'connector-2',
+          executionContext,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    await waitFor(() => {
+      expect(mockHttpFetch).toHaveBeenCalledWith(
+        '/internal/inference_connector/privileges',
+        expect.objectContaining({ context: executionContext })
+      );
+    });
+  });
+
   it('marks the inference connector as unusable when monitor_inference is missing', async () => {
     mockHttpFetch.mockResolvedValue({ has_all_required: false });
 

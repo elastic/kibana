@@ -10,8 +10,17 @@ import { ENTITY_CASE_COUNTS_INTERNAL_URL } from '../../../../../../common/entity
 import { getEntityIds } from '../common';
 import type { RowsMode } from '../common';
 import type { ColumnQuerySpec, PageEnricher, RunContext } from './types';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
 
 const CASE_COUNT_FIELD = 'case_count';
+
+const ENTITIES_GRID_CASES_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'entities_grid_cases'
+);
 
 /** Case counts per entity id; `null` when the user can't read Security cases. */
 const fetchCaseCounts = async (
@@ -29,6 +38,7 @@ const fetchCaseCounts = async (
       }),
       version: '1',
       signal,
+      context: ENTITIES_GRID_CASES_CONTEXT,
     });
     return new Map(Object.entries(result));
   } catch (error) {

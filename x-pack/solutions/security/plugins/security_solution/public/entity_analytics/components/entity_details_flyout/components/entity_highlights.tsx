@@ -52,6 +52,15 @@ import { INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE } from '../../../../../common/inf
 import { buildEntitySummaryStalenessEntitySnapshot } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+
+const ENTITY_HIGHLIGHTS_CONNECTOR_ACCESS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'entity_highlights_connector_access'
+);
 
 export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
@@ -117,6 +126,7 @@ export const EntityHighlightsAccordion: React.FC<{
   } = useInferenceConnectorAccess({
     connectors: aiConnectors,
     selectedConnectorId: connectorId,
+    executionContext: ENTITY_HIGHLIGHTS_CONNECTOR_ACCESS_CONTEXT,
   });
 
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);

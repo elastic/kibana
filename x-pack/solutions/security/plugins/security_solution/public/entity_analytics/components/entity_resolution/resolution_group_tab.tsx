@@ -41,6 +41,15 @@ import {
 } from './translations';
 import { RESOLUTION_GROUP_TAB_CONTENT_TEST_ID } from './test_ids';
 import { RiskScoreCell } from '../home/entities_table/risk_score_cell';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
+
+const RESOLUTION_GROUP_PREFLIGHT_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_RESOLUTION,
+  'resolution_group_preflight'
+);
 
 interface ResolutionGroupTabProps {
   entityId: string;
@@ -161,6 +170,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
           version: API_VERSIONS.public.v1,
           method: 'GET',
           query: { entity_id: newEntityId },
+          context: RESOLUTION_GROUP_PREFLIGHT_CONTEXT,
         });
         if (newEntityGroup.group_size > 1) {
           addError(new Error(ENTITY_HAS_ALIASES_ERROR), { title: RESOLUTION_ERROR_TITLE });

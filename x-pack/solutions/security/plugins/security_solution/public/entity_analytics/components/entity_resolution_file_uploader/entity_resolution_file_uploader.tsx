@@ -17,6 +17,15 @@ import { useFileValidation, useNavigationSteps } from './hooks';
 import type { OnCompleteParams, ResolutionCsvUploadResponse } from './types';
 import { ENTITY_RESOLUTION_CSV_UPLOAD_URL } from '../../../../common/entity_analytics/entity_store/constants';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
+
+const RESOLUTION_CSV_UPLOAD_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_RESOLUTION,
+  'resolution_csv_upload'
+);
 
 export const EntityResolutionFileUploader: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
@@ -75,6 +84,7 @@ export const EntityResolutionFileUploader: React.FC = () => {
             method: 'POST',
             headers: { 'Content-Type': undefined }, // Let the browser set multipart/form-data boundary
             body,
+            context: RESOLUTION_CSV_UPLOAD_CONTEXT,
           }
         );
 
