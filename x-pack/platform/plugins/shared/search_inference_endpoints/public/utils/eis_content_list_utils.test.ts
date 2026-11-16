@@ -23,17 +23,8 @@ import * as eisUtils from './eis_utils';
 import type { GroupedModel, TaskTypeCategory } from './eis_utils';
 import { EisModelStatus } from '../../common/types';
 
-const { getTaskTypeCategoryLabel } = jest.requireActual<typeof eisUtils>('./eis_utils');
-
-jest.mock('./eis_utils', () => ({
-  ...jest.requireActual('./eis_utils'),
-  getTaskTypeCategoryLabel: jest.fn(),
-}));
-
-const mockGetTaskTypeCategoryLabel = jest.mocked(eisUtils.getTaskTypeCategoryLabel);
-
-beforeEach(() => {
-  mockGetTaskTypeCategoryLabel.mockImplementation(getTaskTypeCategoryLabel);
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
 const model = (
@@ -155,7 +146,9 @@ describe('createEisFindItems', () => {
       Rerank: 'Alpha',
       Decision: 'Bravo',
     };
-    mockGetTaskTypeCategoryLabel.mockImplementation((category) => translatedLabels[category]);
+    jest
+      .spyOn(eisUtils, 'getTaskTypeCategoryLabel')
+      .mockImplementation((category) => translatedLabels[category]);
 
     const { items } = await findItems(
       findParams({ sort: { field: EIS_TYPE_SORT_FIELD, direction: 'asc' } })
