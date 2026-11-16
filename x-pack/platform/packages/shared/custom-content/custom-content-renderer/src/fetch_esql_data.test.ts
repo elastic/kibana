@@ -149,7 +149,7 @@ describe('fetchEsqlData', () => {
             },
           },
         }),
-        expect.anything()
+        expect.objectContaining({ abortSignal: mockSignal })
       );
     });
 
@@ -186,7 +186,7 @@ describe('fetchEsqlData', () => {
 
       expect(mockEsql).toHaveBeenCalledWith(
         expect.objectContaining({ filter: expect.objectContaining({ bool: expect.any(Object) }) }),
-        expect.anything()
+        expect.objectContaining({ abortSignal: mockSignal })
       );
     });
 
@@ -199,7 +199,7 @@ describe('fetchEsqlData', () => {
 
       expect(mockEsql).toHaveBeenCalledWith(
         expect.objectContaining({ filter: expect.objectContaining({ bool: expect.any(Object) }) }),
-        expect.anything()
+        expect.objectContaining({ abortSignal: mockSignal })
       );
     });
   });
@@ -226,7 +226,7 @@ describe('fetchEsqlData', () => {
         expect.objectContaining({
           kibanaQueryContext: expect.objectContaining({ esqlVariables }),
         }),
-        expect.anything()
+        expect.objectContaining({ abortSignal: mockSignal })
       );
     });
   });
@@ -246,7 +246,7 @@ describe('fetchEsqlData', () => {
 
       expect(mockEsql).toHaveBeenCalledWith(
         expect.objectContaining({ approximation: true }),
-        expect.anything()
+        expect.objectContaining({ abortSignal: mockSignal })
       );
     });
 
@@ -259,7 +259,7 @@ describe('fetchEsqlData', () => {
 
       expect(mockEsql).toHaveBeenCalledWith(
         expect.objectContaining({ projectRouting }),
-        expect.anything()
+        expect.objectContaining({ abortSignal: mockSignal })
       );
     });
 
@@ -315,6 +315,31 @@ describe('fetchEsqlData', () => {
       });
 
       expect(resetSpy).not.toHaveBeenCalled();
+    });
+
+    it('describes the request for the Inspect action', async () => {
+      const requestAdapter = new RequestAdapter();
+
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+      });
+
+      expect(mockEsql.mock.calls[0][1].inspector).toEqual({
+        adapter: requestAdapter,
+        title: 'Data',
+        description: 'This request queries Elasticsearch to fetch the data for the custom panel.',
+      });
+    });
+
+    it('rethrows an abort as it is, so a superseded fetch can be told apart from a failure', async () => {
+      const abort = new DOMException('The operation was aborted', 'AbortError');
+      mockEsql.mockRejectedValue(abort);
+
+      await expect(
+        fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+          requestAdapter: new RequestAdapter(),
+        })
+      ).rejects.toBe(abort);
     });
 
     it('does not pass an inspector without an adapter', async () => {
