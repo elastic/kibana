@@ -37,6 +37,7 @@ import {
   MAX_KI_SEARCH_QUERY_LENGTH,
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_DESCRIBE_PATH,
+  AI_INDEX_DREAMING_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_RESTORE_PATH,
@@ -63,6 +64,9 @@ import {
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import type { AiIndexService } from '../ai_indices/service';
 import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
+import { createFeedbackAnalysisChangeHandler } from '../feedback_analysis/change_handler';
+import { AiIndexChangeNotifier } from '../ai_indices/changes';
+import type { AiIndexChangeEvent } from '../ai_indices/changes';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { DeleteWorkflowsApi } from '../types';
 import type { GetAiIndexDataReadServiceParams } from '../types';
@@ -113,7 +117,6 @@ const aiIndexItem: AiIndexHttpItem = {
   id: 'customer_support',
   description: 'Customer support context',
   managed: false,
-  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
   automations: [{ type: 'workflow', value: 'nightly-refresh' }],
   sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
@@ -127,11 +130,15 @@ const kiBackingIndex = '.ds-ai-index-ds-customer_support-2026.01.01-000001';
 describe('ai indices routes', () => {
   let routes: Record<string, RegisteredRoute>;
   let aiIndexService: jest.Mocked<
-    Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete' | 'setFeedbackAnalysis'>
+    Pick<
+      AiIndexService,
+      'create' | 'put' | 'get' | 'list' | 'delete' | 'setFeedbackAnalysis' | 'setDreaming'
+    >
   >;
   let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
   let workflowsManagementApi: jest.Mocked<DeleteWorkflowsApi>;
   let scheduleService: jest.Mocked<FeedbackAnalysisScheduleService>;
+  const onAiIndexChange = jest.fn<Promise<void>, [AiIndexChangeEvent]>();
   let readService: jest.Mocked<AiIndexDataReadServiceApi>;
   let readServiceParams: GetAiIndexDataReadServiceParams[];
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
@@ -155,6 +162,13 @@ describe('ai indices routes', () => {
   let analyticsService: jest.Mocked<Pick<ContextEngineAnalyticsService, 'reportKiWrite'>>;
   const logger = loggerMock.create();
   const defaultSpaceId = 'default';
+
+  const createAiIndexChanges = () => {
+    const notifier = new AiIndexChangeNotifier(logger);
+    notifier.register(createFeedbackAnalysisChangeHandler(() => scheduleService));
+    notifier.register({ id: 'spy', onChange: onAiIndexChange });
+    return notifier;
+  };
 
   const createContext = () =>
     ({
@@ -198,6 +212,15 @@ describe('ai indices routes', () => {
     return querySchema;
   };
 
+  const getBodySchema = (method: string, path: string): Type<unknown> => {
+    const { validate } = getRoute(method, path);
+    const bodySchema = validate && validate.request?.body;
+    if (!bodySchema) {
+      throw new Error(`No body schema registered for ${method} ${path}`);
+    }
+    return bodySchema;
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     routes = {};
@@ -228,6 +251,7 @@ describe('ai indices routes', () => {
       list: jest.fn(),
       delete: jest.fn(),
       setFeedbackAnalysis: jest.fn(),
+      setDreaming: jest.fn(),
     };
     improvementsService = { deleteByAiIndex: jest.fn().mockResolvedValue(undefined) };
     workflowsManagementApi = {
@@ -239,7 +263,7 @@ describe('ai indices routes', () => {
     getAgentBuilder = jest.fn().mockResolvedValue(undefined);
     analyticsService = { reportKiWrite: jest.fn() };
     jest.mocked(updateKi).mockResolvedValue({ id: 'ki-1', result: 'updated' });
-    jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1' });
+    jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1', deletedRelationshipIds: [] });
     jest.mocked(restoreKi).mockResolvedValue({ id: 'ki-1' });
     jest.mocked(buildKiApiWriter).mockReturnValue({
       uri: 'api://context_engine.ki.update',
@@ -289,7 +313,7 @@ describe('ai indices routes', () => {
         improvementsSpaceIds.push(spaceId);
         return improvementsService as unknown as ImprovementsServiceApi;
       },
-      getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
+      aiIndexChanges: createAiIndexChanges(),
       isMemoryEnabled: async () => memoryFlagEnabled,
       getActions: async () => actions,
       getAgentBuilder,
@@ -465,29 +489,26 @@ describe('ai indices routes', () => {
       expect(response.created).toHaveBeenCalledWith({ body: { status: 'created' } });
     });
 
-    it('rejects explicitly enabling memory while the memory feature flag is disabled', async () => {
-      memoryFlagEnabled = false;
-
-      await callRoute('POST', AI_INDEX_PATH, {
-        body: { ...postBody, memory_enabled: true },
-      });
-
-      expect(aiIndexService.create).not.toHaveBeenCalled();
-      expect(response.badRequest).toHaveBeenCalledWith({
-        body: { message: expect.stringContaining('Context Engine memory is disabled') },
-      });
+    it('does not accept a dreaming config', () => {
+      expect(() =>
+        getBodySchema('POST', AI_INDEX_PATH).validate({
+          ...postBody,
+          dreaming: { enabled: true, facts: [{ type: 'preference' }] },
+        })
+      ).toThrow("'dreaming' was unexpected");
     });
 
-    it('allows the default or explicit opt-out while the memory feature flag is disabled', async () => {
-      memoryFlagEnabled = false;
+    it('accepts the deprecated memory_enabled from older clients and ignores it', async () => {
       aiIndexService.create.mockResolvedValue(undefined);
 
-      await callRoute('POST', AI_INDEX_PATH, { body: postBody });
-      await callRoute('POST', AI_INDEX_PATH, {
-        body: { ...postBody, memory_enabled: false },
-      });
+      await callRoute('POST', AI_INDEX_PATH, { body: { ...postBody, memory_enabled: true } });
 
-      expect(aiIndexService.create).toHaveBeenCalledTimes(2);
+      const { id, ...properties } = postBody;
+      expect(aiIndexService.create).toHaveBeenCalledWith(
+        'customer_support',
+        defaultSpaceId,
+        properties
+      );
     });
 
     it('returns 409 when the id already exists', async () => {
@@ -661,35 +682,28 @@ describe('ai indices routes', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
     });
 
-    it('rejects explicitly enabling memory while the memory feature flag is disabled', async () => {
-      memoryFlagEnabled = false;
+    it('does not accept a dreaming config', () => {
+      expect(() =>
+        getBodySchema('PUT', AI_INDEX_BY_ID_PATH).validate({
+          ...putRequest.body,
+          dreaming: { enabled: true },
+        })
+      ).toThrow("'dreaming' was unexpected");
+    });
+
+    it('accepts the deprecated memory_enabled from older clients and ignores it', async () => {
+      aiIndexService.put.mockResolvedValue('updated');
 
       await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
         ...putRequest,
-        body: { ...putRequest.body, memory_enabled: true },
+        body: { ...putRequest.body, memory_enabled: false },
       });
 
-      expect(aiIndexService.put).not.toHaveBeenCalled();
-      expect(response.badRequest).toHaveBeenCalledWith({
-        body: { message: expect.stringContaining('Context Engine memory is disabled') },
-      });
-    });
-
-    it('allows preserving enabled memory while updating another field with the feature flag disabled', async () => {
-      memoryFlagEnabled = false;
-      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, memory_enabled: true });
-      aiIndexService.put.mockResolvedValue('updated');
-      const body = {
-        ...putRequest.body,
-        description: 'Updated description',
-        memory_enabled: true,
-      };
-
-      await callRoute('PUT', AI_INDEX_BY_ID_PATH, { ...putRequest, body });
-
-      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', defaultSpaceId);
-      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', defaultSpaceId, body);
-      expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
+      expect(aiIndexService.put).toHaveBeenCalledWith(
+        'customer_support',
+        defaultSpaceId,
+        putRequest.body
+      );
     });
 
     it('returns 400 when the dest is invalid', async () => {
@@ -1574,9 +1588,23 @@ describe('ai indices routes', () => {
   });
 
   describe('DELETE /internal/context_engine/ai_index/{aiIndexId}/kis/{kiId}', () => {
+    it('leaves linked relationships alone while memory is off', async () => {
+      memoryFlagEnabled = false;
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+
+      await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+      });
+
+      expect(softDeleteKi).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ deleteLinkedRelationships: false })
+      );
+    });
+
     it('soft-deletes a Knowledge Indicator', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1' });
+      jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1', deletedRelationshipIds: [] });
       jest.mocked(buildKiApiWriter).mockReturnValue({
         uri: 'api://context_engine.ki.delete',
         metadata: { space_id: defaultSpaceId },
@@ -1594,6 +1622,7 @@ describe('ai indices routes', () => {
           aiIndexId: 'customer_support',
           dest: aiIndexItem.dest,
           kiId: 'ki-1',
+          deleteLinkedRelationships: true,
         })
       );
       expect(analyticsService.reportKiWrite).toHaveBeenCalledWith(
@@ -1615,9 +1644,32 @@ describe('ai indices routes', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: { id: 'ki-1' } });
     });
 
+    it('audits each relationship deleted along with the KI', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      jest
+        .mocked(softDeleteKi)
+        .mockResolvedValue({ id: 'ki-1', deletedRelationshipIds: ['rel-1', 'rel-2'] });
+
+      await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+      });
+
+      expect(
+        auditLogger.log.mock.calls.map(([event]) => [
+          event?.event?.action,
+          event?.kibana?.saved_object?.id,
+        ])
+      ).toEqual([
+        ['ki_delete', 'ki-1'],
+        ['ki_delete', 'rel-1'],
+        ['ki_delete', 'rel-2'],
+      ]);
+      expect(response.ok).toHaveBeenCalledWith({ body: { id: 'ki-1' } });
+    });
+
     it('passes the index query param as backingIndex to softDeleteKi', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1' });
+      jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1', deletedRelationshipIds: [] });
 
       await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
@@ -2058,7 +2110,7 @@ describe('ai indices routes', () => {
           getAiIndexService: () => aiIndexService as unknown as AiIndexService,
           getAiIndexDataReadService: () => readService,
           getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
-          getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
+          aiIndexChanges: createAiIndexChanges(),
           isMemoryEnabled: async () => memoryFlagEnabled,
           getActions: async () => actions,
           getAgentBuilder,
@@ -2309,7 +2361,9 @@ describe('ai indices routes', () => {
 
     it('reconciles after a full update, which can drop the block entirely', async () => {
       aiIndexService.put.mockResolvedValue('updated');
-      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      aiIndexService.get
+        .mockResolvedValueOnce({ ...aiIndexItem, feedback_analysis: feedbackAnalysis })
+        .mockResolvedValue(aiIndexItem);
 
       await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support' },
@@ -2384,6 +2438,7 @@ describe('ai indices routes', () => {
           feedback_analysis: feedbackAnalysis,
         },
       });
+      aiIndexService.get.mockResolvedValueOnce(aiIndexItem);
       await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support' },
         body: {
@@ -2417,6 +2472,269 @@ describe('ai indices routes', () => {
         spaceId: 'marketing',
       });
       expect(improvementsSpaceIds).toEqual(['marketing']);
+    });
+  });
+
+  describe('AI index change notifications', () => {
+    const body = {
+      dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+      automations: [],
+      sources: [],
+      traces: [],
+    };
+
+    it('passes no previous AI index when one is created', async () => {
+      aiIndexService.create.mockResolvedValue(undefined);
+
+      await callRoute('POST', AI_INDEX_PATH, { body: { id: 'customer_support', ...body } });
+
+      expect(onAiIndexChange).toHaveBeenCalledTimes(1);
+      const [event] = onAiIndexChange.mock.calls[0];
+      expect(event.previous).toBeUndefined();
+      expect(event.current).toEqual(aiIndexItem);
+      expect(event.saved).toBeUndefined();
+    });
+
+    it('passes the AI index before and after a full update, and what changed', async () => {
+      const updated = { ...aiIndexItem, description: 'Support cases' };
+      aiIndexService.get.mockResolvedValueOnce(aiIndexItem).mockResolvedValueOnce(updated);
+      aiIndexService.put.mockResolvedValue('updated');
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        body: { ...body, description: 'Support cases' },
+      });
+
+      expect(onAiIndexChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aiIndexId: 'customer_support',
+          spaceId: defaultSpaceId,
+          previous: aiIndexItem,
+          current: updated,
+          changed: new Set(['description']),
+        })
+      );
+    });
+
+    it('passes no previous AI index when a full update creates it', async () => {
+      aiIndexService.get
+        .mockRejectedValueOnce(new AiIndexNotFoundError('customer_support'))
+        .mockResolvedValueOnce(aiIndexItem);
+      aiIndexService.put.mockResolvedValue('created');
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        body,
+      });
+
+      expect(response.created).toHaveBeenCalled();
+      const [event] = onAiIndexChange.mock.calls[0];
+      expect(event.previous).toBeUndefined();
+      expect(event.current).toEqual(aiIndexItem);
+    });
+
+    it('names feedback_analysis as the only field the feedback analysis save wrote', async () => {
+      aiIndexService.setFeedbackAnalysis.mockResolvedValue({ enabled: false });
+
+      await callRoute('PUT', AI_INDEX_FEEDBACK_ANALYSIS_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        body: { enabled: false },
+      });
+
+      const [event] = onAiIndexChange.mock.calls[0];
+      expect(event.saved).toEqual(new Set(['feedback_analysis']));
+    });
+
+    it('passes no current AI index when one is deleted', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, { params: { aiIndexId: 'customer_support' } });
+
+      const [event] = onAiIndexChange.mock.calls[0];
+      expect(event.previous).toEqual(aiIndexItem);
+      expect(event.current).toBeUndefined();
+    });
+
+    it('does not notify when the save fails', async () => {
+      aiIndexService.put.mockRejectedValue(new AiIndexConflictError('customer_support'));
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        body,
+      });
+
+      expect(response.conflict).toHaveBeenCalled();
+      expect(onAiIndexChange).not.toHaveBeenCalled();
+    });
+
+    it('keeps the save and logs when the AI index cannot be read back', async () => {
+      aiIndexService.get
+        .mockResolvedValueOnce(aiIndexItem)
+        .mockRejectedValueOnce(new Error('cluster unavailable'));
+      aiIndexService.put.mockResolvedValue('updated');
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        body,
+      });
+
+      expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
+      expect(onAiIndexChange).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('could not read it back to apply the change: cluster unavailable')
+      );
+    });
+  });
+
+  describe('dreaming', () => {
+    const dreaming = {
+      enabled: true,
+      instructions: 'Remember what customers prefer.',
+      facts: [{ type: 'preference' }],
+    };
+
+    it('registers internal routes', () => {
+      expect(getRoute('GET', AI_INDEX_DREAMING_PATH).config.access).toBe('internal');
+      expect(getRoute('PUT', AI_INDEX_DREAMING_PATH).config.access).toBe('internal');
+    });
+
+    it('returns 404 while the global memory setting is off', async () => {
+      memoryFlagEnabled = false;
+
+      await callRoute('GET', AI_INDEX_DREAMING_PATH, {
+        params: { aiIndexId: 'customer_support' },
+      });
+      await callRoute('PUT', AI_INDEX_DREAMING_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        body: dreaming,
+      });
+
+      expect(response.notFound.mock.calls).toEqual(
+        Array(2).fill([{ body: { message: 'Context Engine memory is turned off.' } }])
+      );
+      expect(aiIndexService.get).not.toHaveBeenCalled();
+      expect(aiIndexService.setDreaming).not.toHaveBeenCalled();
+    });
+
+    it('leaves the config and memory_enabled out of the public AI index', async () => {
+      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, dreaming, memory_enabled: false });
+      readService.list.mockResolvedValue([{ ...aiIndexItem, dreaming, memory_enabled: false }]);
+
+      await callRoute('GET', AI_INDEX_BY_ID_PATH, { params: { aiIndexId: 'customer_support' } });
+      await callRoute('GET', AI_INDEX_PATH, {});
+
+      expect(response.ok.mock.calls).toEqual([
+        [{ body: aiIndexItem }],
+        [{ body: { ai_indices: [aiIndexItem] } }],
+      ]);
+    });
+
+    describe('GET /internal/context_engine/ai_index/{aiIndexId}/dreaming', () => {
+      it('returns the stored config', async () => {
+        aiIndexService.get.mockResolvedValue({ ...aiIndexItem, dreaming });
+
+        await callRoute('GET', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'customer_support' },
+        });
+
+        expect(response.ok).toHaveBeenCalledWith({ body: { dreaming } });
+      });
+
+      it('returns dreaming switched off when it was never configured', async () => {
+        await callRoute('GET', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'customer_support' },
+        });
+
+        expect(response.ok).toHaveBeenCalledWith({ body: { dreaming: { enabled: false } } });
+      });
+
+      it('returns 404 when the AI index does not exist', async () => {
+        aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+        await callRoute('GET', AI_INDEX_DREAMING_PATH, { params: { aiIndexId: 'missing' } });
+
+        expect(response.notFound).toHaveBeenCalled();
+      });
+    });
+
+    describe('PUT /internal/context_engine/ai_index/{aiIndexId}/dreaming', () => {
+      it('stores the config in the request space and returns it', async () => {
+        const spaces = spacesMock.createStart();
+        spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
+        getSpaces.mockResolvedValue(spaces);
+        aiIndexService.setDreaming.mockResolvedValue(dreaming);
+
+        await callRoute('PUT', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'customer_support' },
+          body: dreaming,
+        });
+
+        expect(aiIndexService.setDreaming).toHaveBeenCalledWith(
+          'customer_support',
+          'marketing',
+          dreaming
+        );
+        expect(response.ok).toHaveBeenCalledWith({ body: { dreaming } });
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'ai_index_update', outcome: 'success' }),
+          })
+        );
+      });
+
+      it('tells change handlers what changed, naming dreaming as the field it saved', async () => {
+        const updated = { ...aiIndexItem, dreaming };
+        aiIndexService.get.mockResolvedValueOnce(aiIndexItem).mockResolvedValueOnce(updated);
+        aiIndexService.setDreaming.mockResolvedValue(dreaming);
+
+        await callRoute('PUT', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'customer_support' },
+          body: dreaming,
+        });
+
+        expect(onAiIndexChange).toHaveBeenCalledWith(
+          expect.objectContaining({
+            previous: aiIndexItem,
+            current: updated,
+            changed: new Set(['dreaming']),
+            saved: new Set(['dreaming']),
+          })
+        );
+      });
+
+      it('does not reconcile the feedback analysis schedule', async () => {
+        aiIndexService.setDreaming.mockResolvedValue(dreaming);
+
+        await callRoute('PUT', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'customer_support' },
+          body: dreaming,
+        });
+
+        expect(scheduleService.reconcile).not.toHaveBeenCalled();
+      });
+
+      it('returns 404 when the AI index does not exist', async () => {
+        aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
+        aiIndexService.setDreaming.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+        await callRoute('PUT', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'missing' },
+          body: dreaming,
+        });
+
+        expect(response.notFound).toHaveBeenCalled();
+      });
+
+      it('validates the body with the dreaming config schema', () => {
+        const { validate } = getRoute('PUT', AI_INDEX_DREAMING_PATH);
+        if (validate === false || !validate.request?.body) {
+          throw new Error('Expected a body schema');
+        }
+        const body = validate.request.body as Type<unknown>;
+
+        expect(() => body.validate({ enabled: true, facts: [{ type: 'Not Valid' }] })).toThrow();
+        expect(body.validate(dreaming)).toEqual(dreaming);
+      });
     });
   });
 
@@ -2553,7 +2871,7 @@ describe('ai indices routes', () => {
       expect(validateBody(validBody)).not.toHaveProperty('memory_enabled');
     });
 
-    it('accepts memory_enabled', () => {
+    it('still accepts the deprecated memory_enabled', () => {
       expect(validateBody({ ...validBody, memory_enabled: true })).toMatchObject({
         memory_enabled: true,
       });
@@ -2701,7 +3019,7 @@ describe('ai indices routes', () => {
       expect(validateBody(validBody)).not.toHaveProperty('memory_enabled');
     });
 
-    it('accepts memory_enabled', () => {
+    it('still accepts the deprecated memory_enabled', () => {
       expect(validateBody({ ...validBody, memory_enabled: true })).toMatchObject({
         memory_enabled: true,
       });
@@ -2977,7 +3295,6 @@ describe('ai indices routes', () => {
         aiIndexService.get.mockResolvedValue({
           id: 'customer_support',
           managed: false,
-          memory_enabled: false,
           dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
           automations: [],
           sources: [],
