@@ -117,7 +117,8 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
   text: css`
     display: flex;
     flex-direction: column;
-    gap: ${euiTheme.size.xs};
+    /* Match GroupedAttachmentRow title ↔ caption spacing. */
+    gap: 2px;
     min-inline-size: 0;
   `,
   title: css`
