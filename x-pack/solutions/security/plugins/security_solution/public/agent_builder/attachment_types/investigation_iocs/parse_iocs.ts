@@ -20,6 +20,13 @@ export const CATEGORY_LABELS: Record<InvestigationIocCategory, string> = {
     'xpack.securitySolution.agentBuilder.investigationIocs.category.filePaths',
     { defaultMessage: 'File paths' }
   ),
+  registry_keys: i18n.translate(
+    'xpack.securitySolution.agentBuilder.investigationIocs.category.registryKeys',
+    { defaultMessage: 'Registry keys' }
+  ),
+  mutex: i18n.translate('xpack.securitySolution.agentBuilder.investigationIocs.category.mutex', {
+    defaultMessage: 'Mutexes',
+  }),
   malicious_commands: i18n.translate(
     'xpack.securitySolution.agentBuilder.investigationIocs.category.maliciousCommands',
     { defaultMessage: 'Malicious command lines' }
