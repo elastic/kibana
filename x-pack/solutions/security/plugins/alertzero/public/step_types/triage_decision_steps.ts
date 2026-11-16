@@ -11,7 +11,7 @@ import {
   triageMatchFpDecisionsStepCommonDefinition,
   triageRevokeFpDecisionStepCommonDefinition,
   triageStoreFpDecisionsStepCommonDefinition,
-} from '../../common/step_types/alert_triage';
+} from '../../common/workers/alert_triage/step_types';
 
 export const triageStoreFpDecisionsPublicStepDefinition = createPublicStepDefinition({
   ...triageStoreFpDecisionsStepCommonDefinition,

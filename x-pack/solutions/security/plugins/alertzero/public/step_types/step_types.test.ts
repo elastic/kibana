@@ -11,7 +11,7 @@ import {
   TRIAGE_MATCH_FP_DECISIONS_STEP_ID,
   TRIAGE_REVOKE_FP_DECISION_STEP_ID,
   TRIAGE_STORE_FP_DECISIONS_STEP_ID,
-} from '../../common/step_types/alert_triage';
+} from '../../common/workers/alert_triage/step_types';
 import { registerAlertZeroPublicStepDefinitions } from '.';
 
 type Loader = () => Promise<{ icon?: unknown; id: string } | undefined>;

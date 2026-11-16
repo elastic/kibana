@@ -3328,9 +3328,13 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analy
 /x-pack/solutions/security/plugins/alertzero/server/workers/rule_coverage @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/alertzero/server/workers/rule_tuning @elastic/security-detection-engineering
 
-# AlertZero Triage Watch
-/x-pack/solutions/security/plugins/alertzero/server/alert_triage @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/step_types/alert_triage @elastic/security-investigations
+# AlertZero Alert Triage Worker
+/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/alert_triage @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/workers/alert_triage @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/common/workers/alert_triage @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/public/workers/alert_triage @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/scripts/alert_triage @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/workers/alert_triage @elastic/security-investigations
 
 # AlertZero Worker settings contract
 # Keep this section below every AlertZero Worker section: CODEOWNERS uses the last match.
