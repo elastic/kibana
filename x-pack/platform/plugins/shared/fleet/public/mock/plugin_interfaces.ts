@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
+
 import type { UIExtensionsStorage } from '../types';
 import { createExtensionRegistrationCallback } from '../services/ui_extensions';
 
@@ -46,5 +48,10 @@ export const createStartMock = (extensionsStorage: UIExtensionsStorage = {}): Mo
     },
     config: createConfigurationMock(),
     hooks: { epm: { getBulkAssets: jest.fn() } },
+    ingestHub: {
+      registerIngestFlow: jest.fn(),
+      navigationAvailable$: of(false),
+      AddIntegrationModal: () => null,
+    },
   };
 };
