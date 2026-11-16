@@ -13,7 +13,9 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { isResponseError } from '@kbn/es-errors';
 import type { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import { FleetUnauthorizedError } from '@kbn/fleet-plugin/server';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -54,8 +56,10 @@ export interface PolicyStatus {
   name: string;
   packAssigned: boolean;
   runtimePinned: boolean;
-  agents: { total: number; online: number };
-  reportingInventory: number;
+  /** Null when the caller cannot read Fleet agents. */
+  agents: { total: number; online: number } | null;
+  /** Null when agents or osquery results are not readable by the caller. */
+  reportingInventory: number | null;
   state: PolicyOnboardingState;
 }
 
@@ -65,9 +69,13 @@ export interface OnboardingStatus {
   policies: PolicyStatus[];
   /** Policies without a usable osquery_manager integration. */
   needs_osquery_integration: Array<{ id: string; name: string }>;
+  /** Agentless policies: they cannot run osquerybeat, so they are never onboarded. */
+  agentless_policies: Array<{ id: string; name: string }>;
   lastScan: SummaryDoc | null;
   schedule: { installed: boolean; enabled: boolean };
   scanRunning: boolean;
+  /** False when the caller lacks Fleet agents read: agent counts and reporting are then null. */
+  agentsVisible: boolean;
   /** True when the agent list hit `AGENT_LIST_CAP`, so per-policy counts may be low. */
   agentsTruncated: boolean;
 }
@@ -76,8 +84,10 @@ export interface OnboardingDeps {
   request: KibanaRequest;
   /** Request-scoped: policies and packs are read as the caller. */
   soClient: SavedObjectsClientContract;
-  /** Origin-only under CPS: results and the run summary live in this project. */
-  es: ElasticsearchClient;
+  /** Origin-only under CPS: the run summary lives in this project. Internal user. */
+  esInternal: ElasticsearchClient;
+  /** Reads the osquery result indices as the caller; the internal user has no privileges on them. */
+  esCurrentUser: ElasticsearchClient;
   packRepository: ISavedObjectsRepository;
   agentPolicyService: Pick<AgentPolicyServiceInterface, 'list'>;
   agentClient: Pick<AgentClient, 'listAgents'>;
@@ -109,58 +119,79 @@ interface AgentRef {
   online: boolean;
 }
 
+/** Null when the caller cannot read Fleet agents (status only requires agent policies read). */
 const listAgents = async (
   agentClient: OnboardingDeps['agentClient'],
   policyIds: readonly string[]
-): Promise<{ agents: AgentRef[]; truncated: boolean }> => {
+): Promise<{ agents: AgentRef[]; truncated: boolean } | null> => {
   const agents: AgentRef[] = [];
   let truncated = false;
-  for (const batch of chunk(policyIds, KUERY_POLICY_BATCH)) {
-    const remaining = AGENT_LIST_CAP - agents.length;
-    if (remaining <= 0) {
-      truncated = true;
-      break;
+  try {
+    for (const batch of chunk(policyIds, KUERY_POLICY_BATCH)) {
+      const remaining = AGENT_LIST_CAP - agents.length;
+      if (remaining <= 0) {
+        truncated = true;
+        break;
+      }
+      const result = await agentClient.listAgents({
+        showInactive: false,
+        perPage: remaining,
+        page: 1,
+        kuery: policyAgentsKuery(batch),
+      });
+      for (const { id, policy_id: policyId, status } of result.agents) {
+        if (policyId) agents.push({ id, policyId, online: status === 'online' });
+      }
+      if (result.total > result.agents.length) truncated = true;
     }
-    const result = await agentClient.listAgents({
-      showInactive: false,
-      perPage: remaining,
-      page: 1,
-      kuery: policyAgentsKuery(batch),
-    });
-    for (const { id, policy_id: policyId, status } of result.agents) {
-      if (policyId) agents.push({ id, policyId, online: status === 'online' });
-    }
-    if (result.total > result.agents.length) truncated = true;
+  } catch (error) {
+    if (error instanceof FleetUnauthorizedError) return null;
+    throw error;
   }
   return { agents, truncated };
 };
 
-/** Agents (of the given ones) that sent an inventory result within the reporting window. */
+const isForbidden = (error: unknown): boolean =>
+  isResponseError(error) &&
+  (error.statusCode === 403 || error.body?.error?.type === 'security_exception');
+
+/**
+ * Agents (of the given ones) that sent an inventory result within the reporting window, or null
+ * when the caller cannot read the osquery result indices.
+ */
 const findReportingAgentIds = async (
-  { es, packRepository }: Pick<OnboardingDeps, 'es' | 'packRepository'>,
+  { esCurrentUser, packRepository }: Pick<OnboardingDeps, 'esCurrentUser' | 'packRepository'>,
   agentIds: readonly string[]
-): Promise<Set<string>> => {
+): Promise<Set<string> | null> => {
   if (agentIds.length === 0) return new Set();
   const scheduleIds = Object.values(await findInventoryScheduleIds(packRepository)).flat();
   const reporting = new Set<string>();
-  for (const batch of chunk(agentIds, 1000)) {
-    const response = await es.search<unknown, { reporting: { buckets: Array<{ key: string }> } }>({
-      index: OSQUERY_RESULTS_INDEX,
-      ignore_unavailable: true,
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          // The same filters as the scan's reader: scheduled and live results both count.
-          filter: [
-            inventoryResultsQuery(scheduleIds, REPORTING_WINDOW),
-            { terms: { 'agent.id': batch } },
-          ],
+  try {
+    for (const batch of chunk(agentIds, 1000)) {
+      const response = await esCurrentUser.search<
+        unknown,
+        { reporting: { buckets: Array<{ key: string }> } }
+      >({
+        index: OSQUERY_RESULTS_INDEX,
+        ignore_unavailable: true,
+        size: 0,
+        track_total_hits: false,
+        query: {
+          bool: {
+            // The same filters as the scan's reader: scheduled and live results both count.
+            filter: [
+              inventoryResultsQuery(scheduleIds, REPORTING_WINDOW),
+              { terms: { 'agent.id': batch } },
+            ],
+          },
         },
-      },
-      aggs: { reporting: { terms: { field: 'agent.id', size: batch.length } } },
-    });
-    for (const { key } of response.aggregations?.reporting.buckets ?? []) reporting.add(key);
+        aggs: { reporting: { terms: { field: 'agent.id', size: batch.length } } },
+      });
+      for (const { key } of response.aggregations?.reporting.buckets ?? []) reporting.add(key);
+    }
+  } catch (error) {
+    if (isForbidden(error)) return null;
+    throw error;
   }
   return reporting;
 };
@@ -204,29 +235,36 @@ const policyState = (
   scanned: boolean
 ): PolicyOnboardingState => {
   if (!packAssigned || !runtimePinned) return 'not_configured';
-  if (reportingInventory === 0) return 'pending_inventory';
+  // Without agent or result visibility reporting is unknown: stay at the last state we can prove.
+  if (reportingInventory === null || reportingInventory === 0) return 'pending_inventory';
   return scanned ? 'scanned' : 'reporting';
 };
 
 export const collectOnboardingStatus = async (deps: OnboardingDeps): Promise<OnboardingStatus> => {
-  const { soClient, es, agentPolicyService, agentClient, workflows, request } = deps;
+  const { soClient, esInternal, agentPolicyService, agentClient, workflows, request } = deps;
   const [pack, { items }, lastScan, workflow, scanRunning] = await Promise.all([
     inspectInventoryPack(soClient),
     agentPolicyService.list(soClient, { perPage: POLICY_LIST_CAP, withPackagePolicies: true }),
-    readLastScan(es),
+    readLastScan(esInternal),
     workflows.getWorkflow(NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID, DEFAULT_SPACE_ID, request),
     isScanRunning(deps),
   ]);
 
-  const eligible = items.filter(hasUsableOsqueryManager);
-  const { agents, truncated } = await listAgents(
+  const agentless = items.filter(({ supports_agentless: supportsAgentless }) => supportsAgentless);
+  const eligible = items.filter(
+    (policy) => !policy.supports_agentless && hasUsableOsqueryManager(policy)
+  );
+  const listed = await listAgents(
     agentClient,
     eligible.map(({ id }) => id)
   );
-  const reportingIds = await findReportingAgentIds(
-    deps,
-    agents.map(({ id }) => id)
-  );
+  const agents = listed?.agents ?? [];
+  const reportingIds = listed
+    ? await findReportingAgentIds(
+        deps,
+        agents.map(({ id }) => id)
+      )
+    : null;
   // Coarse by design: the run summary is global, so a successful scan marks every reporting policy.
   const scanned =
     lastScan !== null &&
@@ -240,8 +278,10 @@ export const collectOnboardingStatus = async (deps: OnboardingDeps): Promise<Onb
       name: policy.name,
       packAssigned: pack.policyIds.includes(policy.id),
       runtimePinned: isRuntimePinned(policy),
-      agents: { total: own.length, online: own.filter(({ online }) => online).length },
-      reportingInventory: own.filter(({ id }) => reportingIds.has(id)).length,
+      agents: listed
+        ? { total: own.length, online: own.filter(({ online }) => online).length }
+        : null,
+      reportingInventory: reportingIds ? own.filter(({ id }) => reportingIds.has(id)).length : null,
     };
     return { ...base, state: policyState(base, scanned) };
   });
@@ -251,11 +291,13 @@ export const collectOnboardingStatus = async (deps: OnboardingDeps): Promise<Onb
     pack,
     policies,
     needs_osquery_integration: items
-      .filter((policy) => !hasUsableOsqueryManager(policy))
+      .filter((policy) => !policy.supports_agentless && !hasUsableOsqueryManager(policy))
       .map(({ id, name }) => ({ id, name })),
+    agentless_policies: agentless.map(({ id, name }) => ({ id, name })),
     lastScan,
     schedule: { installed: workflow !== null, enabled: workflow?.enabled === true },
     scanRunning,
-    agentsTruncated: truncated,
+    agentsVisible: listed !== null,
+    agentsTruncated: listed?.truncated ?? false,
   };
 };

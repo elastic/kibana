@@ -27,6 +27,8 @@ interface StoredPackQuery {
   query?: string;
   platform?: string;
   snapshot?: boolean;
+  result_type?: string;
+  enabled?: boolean;
 }
 
 interface StoredPack {
@@ -36,34 +38,79 @@ interface StoredPack {
   queries?: StoredPackQuery[];
 }
 
+/** Machine-readable reason a pack differs; the browser renders the text. */
+export type PackDifferenceCode =
+  | 'pack_disabled'
+  | 'interval_differs'
+  | 'query_missing'
+  | 'query_sql_differs'
+  | 'query_platform_differs'
+  | 'query_not_snapshot'
+  | 'query_disabled';
+
+export interface PackDifference {
+  code: PackDifferenceCode;
+  /** The query concerned; absent for pack-level differences. */
+  queryId?: string;
+}
+
 export interface PackInspection {
   state: PackState;
   /** Why the pack differs from the expected body; empty unless `state` is `differs`. */
-  differences: string[];
+  differences: PackDifference[];
   /** Agent policies the pack is assigned to. */
   policyIds: string[];
 }
 
-const compareQueries = (pack: StoredPack): string[] => {
-  const differences: string[] = [];
-  if (pack.enabled === false) differences.push('pack is disabled');
+const parsePlatformTokens = (value: string): Set<string> =>
+  new Set(
+    value
+      .split(',')
+      .map((token) => token.trim())
+      .filter((token) => token.length > 0)
+  );
+
+/** Same comparison as osquery's `platformSetsEqual`: the distinct token sets, ignoring order and spacing. */
+const samePlatforms = (stored: string | undefined, expected: string): boolean => {
+  if (!stored) return false;
+  const left = parsePlatformTokens(stored);
+  const right = parsePlatformTokens(expected);
+  return left.size === right.size && [...left].every((token) => right.has(token));
+};
+
+/**
+ * osquery stores a snapshot query as `snapshot: true` or, from its own UI, `result_type: 'snapshot'`.
+ */
+const isSnapshot = ({ snapshot, result_type: resultType }: StoredPackQuery): boolean =>
+  snapshot === true || resultType === 'snapshot';
+
+/**
+ * Compares only the fields this plugin owns (SQL, platform, snapshot, enabled and the pack-level
+ * enabled/interval). Fields osquery adds on its own (`ecs_mapping`, `version`, `timeout`,
+ * `schedule_id`, ...) are ignored so an osquery-saved pack does not look drifted.
+ */
+const compareQueries = (pack: StoredPack): PackDifference[] => {
+  const differences: PackDifference[] = [];
+  if (pack.enabled === false) differences.push({ code: 'pack_disabled' });
   // The pack-level interval is ignored by osquerybeat for a query that sets its own, so only
   // a differing pack interval is reported, not a missing one.
   if (pack.interval !== undefined && pack.interval !== INVENTORY_PACK_BODY.interval) {
-    differences.push(`interval is ${pack.interval}, expected ${INVENTORY_PACK_BODY.interval}`);
+    differences.push({ code: 'interval_differs' });
   }
   const stored = new Map((pack.queries ?? []).map((query) => [query.id, query]));
   for (const expected of Object.values(INVENTORY_PACK_BODY.queries)) {
-    const actual = stored.get(expected.id);
+    const queryId = expected.id;
+    const actual = stored.get(queryId);
     if (!actual) {
-      differences.push(`query ${expected.id} is missing`);
-    } else if (
-      actual.query !== expected.query ||
-      actual.platform !== expected.platform ||
-      actual.snapshot !== expected.snapshot
-    ) {
-      differences.push(`query ${expected.id} differs`);
+      differences.push({ code: 'query_missing', queryId });
+      continue;
     }
+    if (actual.query !== expected.query) differences.push({ code: 'query_sql_differs', queryId });
+    if (!samePlatforms(actual.platform, expected.platform)) {
+      differences.push({ code: 'query_platform_differs', queryId });
+    }
+    if (!isSnapshot(actual)) differences.push({ code: 'query_not_snapshot', queryId });
+    if (actual.enabled === false) differences.push({ code: 'query_disabled', queryId });
   }
   return differences;
 };
@@ -105,7 +152,7 @@ export const inspectInventoryPack = async (
 export interface PackPlan {
   state: PackState;
   action: PackAction;
-  differences: string[];
+  differences: PackDifference[];
   /** Selected policies the pack is not yet assigned to. */
   addPolicyIds: string[];
 }

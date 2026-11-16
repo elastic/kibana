@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
+import { FleetUnauthorizedError } from '@kbn/fleet-plugin/server';
 import {
   createMockAgentClient,
   createMockAgentPolicyService,
@@ -34,6 +36,8 @@ interface Scenario {
   lastScan?: Record<string, unknown> | null;
   workflow?: { enabled: boolean } | null;
   runningExecutions?: number;
+  agentsError?: Error;
+  resultsError?: Error;
 }
 
 const setup = ({
@@ -45,6 +49,8 @@ const setup = ({
   lastScan = null,
   workflow = null,
   runningExecutions = 0,
+  agentsError,
+  resultsError,
 }: Scenario = {}) => {
   const request = httpServerMock.createKibanaRequest();
   const soClient = savedObjectsClientMock.create();
@@ -69,13 +75,19 @@ const setup = ({
   const packRepository = savedObjectsRepositoryMock.create();
   packRepository.find.mockResolvedValue({ saved_objects: [], total: 0, per_page: 100, page: 1 });
 
-  const es = elasticsearchServiceMock.createElasticsearchClient();
-  es.search.mockImplementation((async (params: { index: string }) =>
-    params.index === 'logs-osquery_manager.result-*'
-      ? {
-          aggregations: { reporting: { buckets: reportingAgentIds.map((key) => ({ key })) } },
-        }
-      : { hits: { hits: lastScan ? [{ _source: lastScan }] : [] } }) as never);
+  // The summary index is read as the internal user, the osquery result indices as the caller.
+  const esInternal = elasticsearchServiceMock.createElasticsearchClient();
+  esInternal.search.mockResolvedValue({
+    hits: { hits: lastScan ? [{ _source: lastScan }] : [] },
+  } as never);
+  const esCurrentUser = elasticsearchServiceMock.createElasticsearchClient();
+  if (resultsError) {
+    esCurrentUser.search.mockRejectedValue(resultsError);
+  } else {
+    esCurrentUser.search.mockResolvedValue({
+      aggregations: { reporting: { buckets: reportingAgentIds.map((key) => ({ key })) } },
+    } as never);
+  }
 
   const agentPolicyService = createMockAgentPolicyService();
   agentPolicyService.list.mockResolvedValue({
@@ -85,12 +97,16 @@ const setup = ({
     perPage: 1000,
   });
   const agentClient = createMockAgentClient();
-  agentClient.listAgents.mockResolvedValue({
-    agents,
-    total: agentsTotal ?? agents.length,
-    page: 1,
-    perPage: 5000,
-  } as never);
+  if (agentsError) {
+    agentClient.listAgents.mockRejectedValue(agentsError);
+  } else {
+    agentClient.listAgents.mockResolvedValue({
+      agents,
+      total: agentsTotal ?? agents.length,
+      page: 1,
+      perPage: 5000,
+    } as never);
+  }
   const workflows = {
     getWorkflow: jest.fn().mockResolvedValue(workflow),
     getWorkflowExecutions: jest.fn().mockResolvedValue({ total: runningExecutions }),
@@ -99,13 +115,14 @@ const setup = ({
   const deps = {
     request,
     soClient,
-    es,
+    esInternal,
+    esCurrentUser,
     packRepository,
     agentPolicyService,
     agentClient,
     workflows,
   };
-  return { deps, es, soClient, agentPolicyService, agentClient, workflows };
+  return { deps, esInternal, esCurrentUser, soClient, agentPolicyService, agentClient, workflows };
 };
 
 const SCAN = {
@@ -280,10 +297,121 @@ describe('collectOnboardingStatus', () => {
   });
 
   it('does not search results when there are no agents', async () => {
-    const { deps, es } = setup({ policies: [createPolicy({ id: 'p' })] });
+    const { deps, esCurrentUser } = setup({ policies: [createPolicy({ id: 'p' })] });
     const status = await collectOnboardingStatus(deps);
     expect(status.agentsTruncated).toBe(false);
-    expect(es.search).toHaveBeenCalledTimes(1);
+    expect(esCurrentUser.search).not.toHaveBeenCalled();
+  });
+
+  it('reads results as the caller and the summary as the internal user', async () => {
+    const { deps, esInternal, esCurrentUser } = setup({
+      policies: [createPolicy({ id: 'p', agentInternal: OSQUERY_PINNED_YAML })],
+      packPolicyIds: ['p'],
+      agents: [{ id: 'a1', policy_id: 'p', status: 'online' }],
+      reportingAgentIds: ['a1'],
+    });
+    await collectOnboardingStatus(deps);
+    expect(esCurrentUser.search).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'logs-osquery_manager.result-*' })
+    );
+    expect(esInternal.search).toHaveBeenCalledTimes(1);
+    expect(esInternal.search).toHaveBeenCalledWith(
+      expect.objectContaining({ index: expect.stringContaining('native-vuln-scanner') })
+    );
+  });
+
+  it('lists agentless policies separately and does not onboard or query them', async () => {
+    const { deps, agentClient } = setup({
+      policies: [
+        createPolicy({ id: 'ok' }),
+        createPolicy({ id: 'agentless', name: 'Agentless', supportsAgentless: true }),
+      ],
+    });
+    const status = await collectOnboardingStatus(deps);
+    expect(status.policies.map(({ id }) => id)).toEqual(['ok']);
+    expect(status.agentless_policies).toEqual([{ id: 'agentless', name: 'Agentless' }]);
+    expect(status.needs_osquery_integration).toEqual([]);
+    expect(agentClient.listAgents).toHaveBeenCalledWith(
+      expect.objectContaining({ kuery: 'policy_id:("ok")' })
+    );
+  });
+
+  describe('without agents read', () => {
+    const configured = {
+      policies: [
+        createPolicy({ id: 'p', agentInternal: OSQUERY_PINNED_YAML }),
+        createPolicy({ id: 'q' }),
+      ],
+      packPolicyIds: ['p', 'q'],
+    };
+
+    it('degrades to null agent data instead of failing when Fleet denies the agent list', async () => {
+      const { deps, esCurrentUser } = setup({
+        ...configured,
+        agentsError: new FleetUnauthorizedError('no agents read'),
+        lastScan: SCAN,
+      });
+      const status = await collectOnboardingStatus(deps);
+      expect(status.agentsVisible).toBe(false);
+      expect(status.agentsTruncated).toBe(false);
+      expect(
+        status.policies.map(({ id, state, agents, reportingInventory }) => ({
+          id,
+          state,
+          agents,
+          reportingInventory,
+        }))
+      ).toEqual([
+        { id: 'p', state: 'pending_inventory', agents: null, reportingInventory: null },
+        { id: 'q', state: 'not_configured', agents: null, reportingInventory: null },
+      ]);
+      expect(esCurrentUser.search).not.toHaveBeenCalled();
+    });
+
+    it('reports agentsVisible when the agent list is readable', async () => {
+      const { deps } = setup(configured);
+      expect((await collectOnboardingStatus(deps)).agentsVisible).toBe(true);
+    });
+
+    it('propagates any other agent list error', async () => {
+      const { deps } = setup({ ...configured, agentsError: new Error('fleet down') });
+      await expect(collectOnboardingStatus(deps)).rejects.toThrow('fleet down');
+    });
+  });
+
+  describe('without read access to the osquery results', () => {
+    const configured = {
+      policies: [createPolicy({ id: 'p', agentInternal: OSQUERY_PINNED_YAML })],
+      packPolicyIds: ['p'],
+      agents: [{ id: 'a1', policy_id: 'p', status: 'online' }],
+    };
+    const responseError = (statusCode: number, type: string) =>
+      new errors.ResponseError({
+        statusCode,
+        body: { error: { type, reason: 'denied' } },
+        headers: {},
+        warnings: [],
+        meta: {} as never,
+      });
+
+    it.each([
+      ['a 403', responseError(403, 'other')],
+      ['a security_exception', responseError(400, 'security_exception')],
+    ])('degrades reportingInventory to null on %s', async (_, resultsError) => {
+      const { deps } = setup({ ...configured, resultsError });
+      const status = await collectOnboardingStatus(deps);
+      expect(status.agentsVisible).toBe(true);
+      expect(status.policies[0]).toMatchObject({
+        state: 'pending_inventory',
+        agents: { total: 1, online: 1 },
+        reportingInventory: null,
+      });
+    });
+
+    it('propagates any other search error', async () => {
+      const { deps } = setup({ ...configured, resultsError: responseError(500, 'boom') });
+      await expect(collectOnboardingStatus(deps)).rejects.toThrow();
+    });
   });
 });
 

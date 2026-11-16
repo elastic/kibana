@@ -21,6 +21,7 @@ interface PolicyOptions {
   name?: string;
   osqueryVersion?: string | null;
   isManaged?: boolean;
+  supportsAgentless?: boolean;
   agentInternal?: unknown;
 }
 
@@ -30,12 +31,14 @@ export const createPolicy = ({
   name = 'Policy 1',
   osqueryVersion = '1.0.0',
   isManaged = false,
+  supportsAgentless = false,
   agentInternal,
 }: PolicyOptions = {}): AgentPolicy =>
   ({
     id,
     name,
     is_managed: isManaged,
+    supports_agentless: supportsAgentless,
     advanced_settings: agentInternal === undefined ? undefined : { agent_internal: agentInternal },
     package_policies:
       osqueryVersion === null

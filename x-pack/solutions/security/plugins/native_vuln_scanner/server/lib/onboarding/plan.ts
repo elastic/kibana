@@ -20,6 +20,7 @@ export type PolicyPlanOutcome = 'change' | 'no_change' | 'refused' | 'not_found'
 export type PolicyRefusalReason =
   | 'not_found'
   | 'managed'
+  | 'agentless'
   | 'no_osquery_integration'
   | 'invalid_agent_internal';
 
@@ -63,6 +64,17 @@ const refused = (
  * this, so a plan is exactly what apply would write.
  */
 export const planPolicyRuntimePin = (policy: AgentPolicy): PolicyPlan => {
+  // Fleet's HTTP update handler refuses agentless policies, but the service-level update this
+  // route calls does not, and an agentless policy is not always `is_managed`.
+  if (policy.supports_agentless) {
+    return refused(
+      policy,
+      'agentless',
+      i18n.translate('xpack.nativeVulnScanner.onboarding.agentlessPolicy', {
+        defaultMessage: 'The policy is agentless and cannot run osquerybeat.',
+      })
+    );
+  }
   if (policy.is_managed) {
     return refused(
       policy,

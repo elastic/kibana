@@ -46,6 +46,12 @@ describe('planPolicyRuntimePin', () => {
     });
   });
 
+  it('refuses an agentless policy even when it is not managed', () => {
+    expect(
+      planPolicyRuntimePin(createPolicy({ supportsAgentless: true, isManaged: false }))
+    ).toMatchObject({ outcome: 'refused', reason: 'agentless' });
+  });
+
   it.each([
     ['no osquery integration', null],
     ['an osquery integration that is too old', '0.5.0'],
@@ -70,6 +76,22 @@ describe('planPolicyRuntimePin', () => {
       reason: 'invalid_agent_internal',
       key: 'agent.internal.runtime.default',
     });
+  });
+});
+
+describe('buildOnboardingPlan agentless', () => {
+  it('refuses an agentless policy in the plan and never calls update', async () => {
+    const agentPolicyService = createMockAgentPolicyService();
+    agentPolicyService.getByIds.mockResolvedValue([
+      createPolicy({ id: 'a', supportsAgentless: true }),
+    ]);
+    const { plans } = await planPolicies(agentPolicyService, savedObjectsClientMock.create(), [
+      'a',
+    ]);
+    expect(plans).toEqual([
+      expect.objectContaining({ id: 'a', outcome: 'refused', reason: 'agentless' }),
+    ]);
+    expect(agentPolicyService.update).not.toHaveBeenCalled();
   });
 });
 

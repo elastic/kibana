@@ -21,7 +21,10 @@ export interface RouteServices {
   /** Absent when Fleet is disabled; routes answer 503. */
   fleet?: FleetStartContract;
   workflows: WorkflowsManagementApi;
-  /** Plugin-owned and osquery indices only; never used for Fleet writes. */
+  /**
+   * Internal user, for the plugin-owned run summary index only; never used for Fleet writes.
+   * Osquery result indices are read as the caller (`context.core.elasticsearch.client`).
+   */
   es: ElasticsearchClient;
   packRepository: ISavedObjectsRepository;
 }

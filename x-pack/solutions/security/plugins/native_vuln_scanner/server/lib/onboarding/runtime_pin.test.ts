@@ -116,10 +116,14 @@ unrelated:
 
   it('refuses invalid YAML', () => {
     const result = mergeRuntimePin('agent: [unclosed\n  x: : y\n');
-    expect(result.ok).toBe(false);
+    expect(result).toMatchObject({ ok: false, code: 'yaml_parse_error' });
   });
 
   it('refuses a non-mapping document', () => {
-    expect(mergeRuntimePin('- a\n- b\n').ok).toBe(false);
+    expect(mergeRuntimePin('- a\n- b\n')).toMatchObject({
+      ok: false,
+      key: 'agent',
+      code: 'not_mapping',
+    });
   });
 });

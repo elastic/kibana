@@ -68,6 +68,9 @@ export const registerScanRoute = ({
             {},
             request
           );
+          // The returned executionId can still end up SKIPPED: the workflow runs with `drop`
+          // concurrency, so a scan started while another is running is dropped. The UI should
+          // poll the execution rather than assume it ran.
           return response.ok({ body: { executionId } });
         } catch (error) {
           if (error instanceof WorkflowDisabledError) {

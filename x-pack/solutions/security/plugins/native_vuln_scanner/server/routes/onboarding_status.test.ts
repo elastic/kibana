@@ -52,19 +52,30 @@ describe('GET onboarding status', () => {
     const status = { license: 'ok', policies: [] };
     collect.mockResolvedValue(status as never);
     const soClient = savedObjectsClientMock.create();
+    const asCurrentUser = {};
+    const es = services.es;
     const { handler } = setupRoute(registerOnboardingStatusRoute, 'get', {
       services: services as never,
     });
     const request = createRequest();
     const response = createResponse();
 
-    await handler(createContext({ savedObjects: { client: soClient } }), request, response);
+    await handler(
+      createContext({
+        savedObjects: { client: soClient },
+        elasticsearch: { client: { asCurrentUser } },
+      }),
+      request,
+      response
+    );
 
     expect(services.asScoped).toHaveBeenCalledWith(request);
     expect(collect).toHaveBeenCalledWith(
       expect.objectContaining({
         request,
         soClient,
+        esInternal: es,
+        esCurrentUser: asCurrentUser,
         agentPolicyService: services.fleet.agentPolicyService,
       })
     );
@@ -89,7 +100,14 @@ describe('GET onboarding status', () => {
       services: createServices() as never,
     });
     const response = createResponse();
-    await handler(createContext({ savedObjects: { client: {} } }), createRequest(), response);
+    await handler(
+      createContext({
+        savedObjects: { client: {} },
+        elasticsearch: { client: { asCurrentUser: {} } },
+      }),
+      createRequest(),
+      response
+    );
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 500,
       body: { message: 'boom' },

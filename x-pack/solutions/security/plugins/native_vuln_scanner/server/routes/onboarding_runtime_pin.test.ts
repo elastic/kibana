@@ -67,7 +67,7 @@ describe('POST onboarding runtime_pin', () => {
     ).toThrow();
   });
 
-  it('updates with the request-scoped clients and the caller as user, never forcing', async () => {
+  it("updates with the request-scoped SO client, the internal ES client (as Fleet's own update handler) and { user } for audit, never forcing", async () => {
     const ctx = setup();
     ctx.agentPolicyService.getByIds.mockResolvedValue([
       createPolicy({ id: 'a', agentInternal: 'foo: bar\n' }),
@@ -117,6 +117,18 @@ describe('POST onboarding runtime_pin', () => {
       'broken',
     ]);
     expect(resultsOf(response)[4]).toMatchObject({ message: 'conflict' });
+  });
+
+  it('refuses an agentless policy and never calls update', async () => {
+    const ctx = setup();
+    ctx.agentPolicyService.getByIds.mockResolvedValue([
+      createPolicy({ id: 'agentless', supportsAgentless: true }),
+    ]);
+    const response = await run(ctx, ['agentless']);
+    expect(resultsOf(response)).toEqual([
+      expect.objectContaining({ id: 'agentless', outcome: 'refused', reason: 'agentless' }),
+    ]);
+    expect(ctx.agentPolicyService.update).not.toHaveBeenCalled();
   });
 
   it('works without a current user', async () => {

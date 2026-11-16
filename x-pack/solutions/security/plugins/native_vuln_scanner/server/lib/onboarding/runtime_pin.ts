@@ -23,18 +23,27 @@ export interface RuntimePinConflict {
   to: string;
 }
 
+/** Machine-readable reason a policy's `agent_internal` cannot be edited. */
+export type RuntimePinRefusalCode =
+  | 'yaml_parse_error'
+  | 'not_mapping'
+  | 'not_string'
+  | 'set_failed'
+  | 'value_not_set';
+
 export type RuntimePinMerge =
   | { ok: true; before: string; after: string; changed: boolean; conflicts: RuntimePinConflict[] }
-  | { ok: false; before: string; key: string; message: string };
+  | { ok: false; before: string; key: string; code: RuntimePinRefusalCode; message: string };
 
-const refuse = (before: string, key: string, detail: string): RuntimePinMerge => ({
+const refuse = (before: string, key: string, code: RuntimePinRefusalCode): RuntimePinMerge => ({
   ok: false,
   before,
   key,
+  code,
   message: i18n.translate('xpack.nativeVulnScanner.onboarding.runtimePinRefused', {
     defaultMessage:
       'Cannot pin the osquerybeat runtime: "{key}" in the agent_internal settings of the policy is not editable ({detail}). Fix the YAML or remove the key and retry.',
-    values: { key, detail },
+    values: { key, detail: code },
   }),
 });
 
@@ -48,10 +57,10 @@ export const mergeRuntimePin = (before: string | undefined | null): RuntimePinMe
   const source = before ?? '';
   const doc = parseDocument(source);
   if (doc.errors.length > 0) {
-    return refuse(source, RUNTIME_PIN_KEYS[0].join('.'), doc.errors[0].message.split('\n')[0]);
+    return refuse(source, RUNTIME_PIN_KEYS[0].join('.'), 'yaml_parse_error');
   }
   if (doc.contents !== null && !isMap(doc.contents)) {
-    return refuse(source, 'agent', 'the document is not a mapping');
+    return refuse(source, 'agent', 'not_mapping');
   }
   const conflicts: RuntimePinConflict[] = [];
   let edited = false;
@@ -60,14 +69,14 @@ export const mergeRuntimePin = (before: string | undefined | null): RuntimePinMe
     const currentValue = isScalar(current) ? current.value : current;
     if (currentValue === RUNTIME_PIN_VALUE) continue;
     if (currentValue !== undefined && currentValue !== null && typeof currentValue !== 'string') {
-      return refuse(source, path.join('.'), 'it is not a string value');
+      return refuse(source, path.join('.'), 'not_string');
     }
     try {
       // Setting through the scalar keeps its inline comment.
       if (isScalar(current)) current.value = RUNTIME_PIN_VALUE;
       else doc.setIn(path, RUNTIME_PIN_VALUE);
-    } catch (error) {
-      return refuse(source, path.join('.'), error instanceof Error ? error.message : String(error));
+    } catch {
+      return refuse(source, path.join('.'), 'set_failed');
     }
     edited = true;
     if (typeof currentValue === 'string') {
@@ -80,7 +89,7 @@ export const mergeRuntimePin = (before: string | undefined | null): RuntimePinMe
   const verify = parseDocument(after);
   for (const path of RUNTIME_PIN_KEYS) {
     if (verify.getIn(path) !== RUNTIME_PIN_VALUE) {
-      return refuse(source, path.join('.'), 'the value did not take');
+      return refuse(source, path.join('.'), 'value_not_set');
     }
   }
   return { ok: true, before: source, after, changed: after !== source, conflicts };

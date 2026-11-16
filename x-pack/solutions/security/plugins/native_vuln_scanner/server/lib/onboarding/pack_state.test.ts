@@ -72,20 +72,59 @@ describe('inspectInventoryPack', () => {
     expect(result.state).toBe('differs');
     expect(result.differences).toEqual(
       expect.arrayContaining([
-        'pack is disabled',
-        `query ${first.id} differs`,
-        `query ${rest[0].id} is missing`,
+        { code: 'pack_disabled' },
+        { code: 'query_sql_differs', queryId: first.id },
+        { code: 'query_missing', queryId: rest[0].id },
       ])
     );
   });
 
   it('reports a pack-level interval that differs, but not an absent one', async () => {
     const differing = await inspectInventoryPack(findReturns([packObject({ interval: 1 })]));
-    expect(differing.differences).toEqual([
-      `interval is 1, expected ${INVENTORY_PACK_BODY.interval}`,
-    ]);
+    expect(differing.differences).toEqual([{ code: 'interval_differs' }]);
     const absent = await inspectInventoryPack(findReturns([packObject({ interval: undefined })]));
     expect(absent.state).toBe('ok');
+  });
+
+  it('reports a platform, snapshot and enabled difference per query', async () => {
+    const [first, second, third] = Object.values(INVENTORY_PACK_BODY.queries);
+    const { snapshot, ...rest } = third;
+    const soClient = findReturns([
+      packObject({
+        queries: [
+          { ...first, platform: 'darwin' },
+          { ...second, snapshot: false },
+          { ...rest, enabled: false },
+          ...Object.values(INVENTORY_PACK_BODY.queries).slice(3),
+        ],
+      }),
+    ]);
+    const { differences } = await inspectInventoryPack(soClient);
+    expect(differences).toEqual([
+      { code: 'query_platform_differs', queryId: first.id },
+      { code: 'query_not_snapshot', queryId: second.id },
+      { code: 'query_not_snapshot', queryId: third.id },
+      { code: 'query_disabled', queryId: third.id },
+    ]);
+  });
+
+  it('treats an osquery-saved pack with extra fields as ok', async () => {
+    const queries = Object.values(INVENTORY_PACK_BODY.queries).map(
+      ({ snapshot, platform, ...query }) => ({
+        ...query,
+        platform: ` ${platform}, `,
+        result_type: 'snapshot',
+        ecs_mapping: { 'host.name': { field: 'hostname' } },
+        version: '1.0.0',
+        timeout: 60,
+        schedule_id: 'abc',
+        enabled: true,
+      })
+    );
+    const result = await inspectInventoryPack(
+      findReturns([packObject({ queries, interval: undefined, shards: [], created_by: 'u' })])
+    );
+    expect(result).toMatchObject({ state: 'ok', differences: [] });
   });
 
   it('pages on until the exact name turns up', async () => {
@@ -108,7 +147,7 @@ describe('inspectInventoryPack', () => {
 describe('planPackAction', () => {
   const inspection = (state: 'missing' | 'ok' | 'differs', policyIds: string[] = []) => ({
     state,
-    differences: state === 'differs' ? ['query x differs'] : [],
+    differences: state === 'differs' ? [{ code: 'query_sql_differs' as const, queryId: 'x' }] : [],
     policyIds,
   });
 

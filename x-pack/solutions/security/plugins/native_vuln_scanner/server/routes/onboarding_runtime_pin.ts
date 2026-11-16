@@ -49,8 +49,9 @@ export const registerOnboardingRuntimePinRoute = ({
           const { fleet } = await getServices();
           if (!fleet) return fleetUnavailable(response);
           const core = await context.core;
-          // Request-scoped clients and the caller as `user`: the write is attributed to them and
-          // authorised as them. `force` is never passed, so managed policies stay untouched.
+          // Request-scoped saved objects client (the write is authorised as the caller), the
+          // internal ES client (as Fleet's own update handler does) and `{ user }` for the audit
+          // trail. `force` is never passed, so managed policies stay untouched.
           const soClient = core.savedObjects.client;
           const esClient = core.elasticsearch.client.asInternalUser;
           const user = core.security.authc.getCurrentUser() ?? undefined;
