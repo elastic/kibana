@@ -200,16 +200,7 @@ export class RuleCreateWizardPage {
     // rule creation is available, so open the wizard URL directly.
     await this.page.gotoApp('security/rules/create');
     await this.defineStep.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
-
-    // Stays disabled while user-info / lists init and the ad-hoc data view create.
-    await this.queryInput.and(this.page.locator(':enabled')).waitFor({
-      state: 'visible',
-      timeout: APP_LOAD_TIMEOUT_MS,
-    });
-    await this.queryInput.click();
-    // QueryStringInput ignores fill() — it syncs from React props.
-    await this.queryInput.pressSequentially(query);
-    await this.page.keyboard.press('Enter');
+    await this.typeDefineQuery(query);
 
     await this.defineContinue.click();
     await this.aboutRuleName.waitFor({ state: 'visible' });
@@ -227,12 +218,34 @@ export class RuleCreateWizardPage {
   }
 
   /**
+   * Types the query into the Define step's query input and presses Enter.
+   *
+   * Pressing Enter matters: the query bar's autocomplete suggestions popover
+   * stays open after typing and can cover the next control (e.g. the filter
+   * bar's "Add filter" button) until it times out. Enter both closes the
+   * popover and commits the query, matching how a user leaves the field.
+   */
+  async typeDefineQuery(query: string): Promise<void> {
+    // Stays disabled while user-info / lists init and the ad-hoc data view create.
+    await this.queryInput.and(this.page.locator(':enabled')).waitFor({
+      state: 'visible',
+      timeout: APP_LOAD_TIMEOUT_MS,
+    });
+    await this.queryInput.click();
+    // QueryStringInput ignores fill() — it syncs from React props.
+    await this.queryInput.pressSequentially(query);
+    await this.page.keyboard.press('Enter');
+  }
+
+  /**
    * Clicks "Create rule without enabling" and waits for the rule details page to load.
    * Both create buttons navigate to the same rule details page; this variant leaves
    * the rule disabled so it does not execute against the shared stack.
    */
   async createWithoutEnablingRule(): Promise<void> {
     await this.createWithoutEnabling.click();
+    // The page title also exists on the create page, so the URL is the reliable signal
+    await this.page.waitForURL(/\/rules\/id\//, { timeout: DATA_LOAD_TIMEOUT_MS });
     await this.ruleDetailsTitle.waitFor({ state: 'visible', timeout: DATA_LOAD_TIMEOUT_MS });
   }
 
