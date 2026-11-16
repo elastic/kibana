@@ -154,7 +154,7 @@ describe('getDispatchableAlertEventsQuery', () => {
   it('groups INLINE STATS BY subject, group_hash (not rule_id, group_hash)', () => {
     const query = queryOf();
 
-    expect(query).toContain('BY subject, group_hash');
+    expect(query).toMatch(/INLINE STATS[^|]*\bBY subject, group_hash\s*\|/);
     expect(query).not.toContain('BY rule_id, group_hash');
   });
 
@@ -293,6 +293,8 @@ describe('chunkInClauseLiterals', () => {
 
     const chunks = chunkInClauseLiterals(literals);
 
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks.flat()).toEqual(literals);
     for (const chunk of chunks) {
       const chunkBytes = chunk.reduce((sum, lit) => sum + lit.length + PER_LITERAL_OVERHEAD, 0);
       expect(chunkBytes).toBeLessThanOrEqual(ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES);
@@ -353,12 +355,11 @@ describe('chunkInClauseLiterals', () => {
     const chunks = chunkInClauseLiterals(literals, budget);
 
     expect(chunks.length).toBeGreaterThan(chunkInClauseLiterals(literals).length);
+    expect(chunks.flat()).toEqual(literals);
+    expect(chunks[0]).toHaveLength(Math.floor(budget / (literalSize + PER_LITERAL_OVERHEAD)));
     for (const chunk of chunks) {
       const chunkBytes = chunk.reduce((sum, lit) => sum + lit.length + PER_LITERAL_OVERHEAD, 0);
-      // A single literal may exceed the budget (own chunk); multi-literal chunks must stay within.
-      if (chunk.length > 1) {
-        expect(chunkBytes).toBeLessThanOrEqual(budget);
-      }
+      expect(chunkBytes).toBeLessThanOrEqual(budget);
     }
   });
 });
@@ -664,6 +665,7 @@ describe('getSeriesSuppressionsQueries', () => {
   it('places the raw-field pre-filter before the subject EVAL so it can push down', () => {
     const { query } = getSeriesSuppressionsQueries([createAlert()])[0];
 
+    expect(query.indexOf('group_hash IN (')).toBeGreaterThan(-1);
     expect(query.indexOf('group_hash IN (')).toBeLessThan(query.indexOf('subject = CASE('));
   });
 

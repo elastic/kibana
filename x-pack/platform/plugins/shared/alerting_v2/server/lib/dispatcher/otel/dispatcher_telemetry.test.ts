@@ -28,6 +28,9 @@ describe('DispatcherTelemetry', () => {
 
     expect(getMeter).toHaveBeenCalledWith('kibana.alerting_v2');
     const createCounter = jest.mocked(getMeter.mock.results[0].value.createCounter);
+    expect(ALERT_SCAN_TRUNCATED_METRIC).toBe(
+      'kibana.alerting_v2.dispatcher.alert_scan_truncated.count'
+    );
     expect(createCounter).toHaveBeenCalledWith(
       ALERT_SCAN_TRUNCATED_METRIC,
       expect.objectContaining({ unit: '1', valueType: expect.any(Number) })
