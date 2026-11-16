@@ -288,13 +288,14 @@ export class WorkflowCrudService {
     const accountId = document.definition?.settings?.run_as;
     const previous =
       options?.previousDocument ??
-      (bindings && !options?.create
+      ((bindings || this.deps.pagesSystemClient) && !options?.create
         ? await this.getWorkflowDocumentSource(id, document.spaceId, {
             includeDeleted: true,
             includeGlobal: true,
           })
         : null);
     const write = async () => {
+      await this.retireDroppedPages(id, previous, document);
       const response = await this.deps.workflowStorage.getClient().index({
         id,
         document,
@@ -994,23 +995,6 @@ export class WorkflowCrudService {
           }
         : undefined;
 
-    if (yamlResult && this.deps.pagesSystemClient) {
-      // The retire runs before the write, so it needs its own edit check: mutate stays pure.
-      const existing = await this.getWorkflowDocumentSource(id, spaceId, {
-        includeDeleted: true,
-        includeGlobal: true,
-      });
-      if (existing) {
-        assertWorkflowOperation(
-          existing,
-          'edit',
-          profileId,
-          this.accessAuditContext(request, id, spaceId)
-        );
-        await this.retireDroppedPages(id, spaceId, existing, yamlResult.updatedDataPatch);
-      }
-    }
-
     let previousVersion: number | undefined;
     const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
       request,
@@ -1393,26 +1377,26 @@ export class WorkflowCrudService {
   }
 
   /**
-   * Retires the pages a save drops, before the write: a failed retire fails the save, so a
-   * dropped page never stays live. An invalid save keeps its pages. A revive keeps none.
+   * Retires the pages a write drops, right before it, after every write gate passed. A failed
+   * retire fails the write, so a dropped page never stays live.
    */
   private async retireDroppedPages(
-    workflowId: string,
-    spaceId: string,
-    existing: Pick<WorkflowProperties, 'deleted_at' | 'definition' | 'valid'>,
-    next: Partial<Pick<WorkflowProperties, 'definition' | 'valid'>>
+    id: string,
+    previous: WorkflowProperties | null | undefined,
+    next: WorkflowProperties
   ): Promise<void> {
     const { pagesSystemClient } = this.deps;
-    if (!pagesSystemClient) return;
-    if (existing.deleted_at) {
-      await pagesSystemClient.retireWorkflowPages({ workflowIds: [workflowId], spaceId });
+    if (!pagesSystemClient || !previous) return;
+    // A move or a revive starts without the old pages.
+    if (previous.deleted_at || previous.spaceId !== next.spaceId) {
+      await pagesSystemClient.retireWorkflowPages({ workflowIds: [id], spaceId: previous.spaceId });
       return;
     }
-    // A valid stored definition without a page trigger has no pages.
-    if (!next.valid || (existing.valid && !hasPageTrigger(existing.definition))) return;
+    // An invalid save keeps its pages. A valid stored definition without a page trigger has none.
+    if (!next.valid || (previous.valid && !hasPageTrigger(previous.definition))) return;
     await pagesSystemClient.retireRemovedPages({
-      workflowId,
-      spaceId,
+      workflowId: id,
+      spaceId: next.spaceId,
       definition: next.definition,
     });
   }
@@ -1857,11 +1841,6 @@ export class WorkflowCrudService {
       for (const entry of inSpaceUpdateEntries) {
         const prepared = entry.workflowData;
         try {
-          const occHit = occHitById.get(entry.id);
-          if (occHit) {
-            this.assertCanOverwrite(occHit._source, entry.id, spaceId, profileId, params.request);
-            await this.retireDroppedPages(entry.id, spaceId, occHit._source, prepared);
-          }
           let previousVersion: number | undefined;
           const document = await this.readModifyWriteWorkflowDocument(entry.id, spaceId, {
             getOptions: bulkOverwriteGetOptions,

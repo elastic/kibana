@@ -4993,6 +4993,66 @@ describe('workflow page lifecycle', () => {
       expect(pagesService.retireRemovedPages).toHaveBeenCalled();
     });
 
+    it('keeps the pages on a field-only update', async () => {
+      const { service, client, pagesService, request } = setup();
+      storeLive(client);
+
+      await service.updateWorkflow('wf-1', { tags: ['t'] } as any, 'default', request);
+
+      expect(pagesService.retireRemovedPages).toHaveBeenCalledWith(
+        expect.objectContaining({ definition: expect.objectContaining(pageTriggerDefinition) })
+      );
+      expect(pagesService.retireWorkflowPages).not.toHaveBeenCalled();
+    });
+
+    it('retires nothing when a bound workflow save is rejected for missing manage_security', async () => {
+      const core = coreMock.createStart();
+      const scoped = elasticsearchServiceMock.createScopedClusterClient();
+      scoped.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+        username: 'editor',
+        cluster: { manage_security: false },
+        index: {},
+        application: {},
+      });
+      jest.spyOn(core.elasticsearch.client, 'asScoped').mockReturnValue(scoped);
+      const bindings = securityServiceMock.createStart().serviceAccounts;
+      bindings.isEnabled.mockReturnValue(true);
+      const { service, client, pagesService, request } = setup({
+        getCoreStart: () => core,
+        getServiceAccountBindings: () => bindings,
+      });
+      storeLive(client, {
+        definition: {
+          ...pageTriggerDefinition,
+          settings: { run_as: 'account-a' },
+        } as WorkflowProperties['definition'],
+      });
+
+      await expect(
+        service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request)
+      ).rejects.toThrow('manage_security');
+      expect(pagesService.retireRemovedPages).not.toHaveBeenCalled();
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    it('retires the pages in the old space when an import moves a workflow', async () => {
+      const { service, client, pagesService, request } = setup();
+      storeLive(client, { spaceId: 'space-a' });
+
+      await service.bulkCreateWorkflows([{ id: 'wf-1', yaml: noPageYaml }], 'default', request, {
+        overwrite: true,
+      });
+
+      expect(pagesService.retireWorkflowPages).toHaveBeenCalledWith({
+        workflowIds: ['wf-1'],
+        spaceId: 'space-a',
+      });
+      expect(pagesService.retireWorkflowPages.mock.invocationCallOrder[0]).toBeLessThan(
+        client.index.mock.invocationCallOrder[0]
+      );
+    });
+
     it('retires every old page when an import revives a soft-deleted workflow', async () => {
       const { service, client, pagesService, request } = setup();
       storeLive(client, { enabled: false, deleted_at: new Date() });
