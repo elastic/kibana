@@ -11,41 +11,41 @@ import { advanceWatermark, readWatermarks } from './watermarks';
 const SPACE_ID = 'default';
 const STRATEGY_ID = 'error_rate';
 
+const advance = ({
+  state,
+  processedUntil,
+}: {
+  state: InMemoryStateStore;
+  processedUntil: number;
+}) => advanceWatermark({ state, spaceId: SPACE_ID, strategyId: STRATEGY_ID, processedUntil });
+
+const read = async (state: InMemoryStateStore) =>
+  (await readWatermarks({ state, spaceId: SPACE_ID, strategyIds: [STRATEGY_ID] })).get(STRATEGY_ID);
+
 describe('advanceWatermark', () => {
+  it('moves an existing watermark forward, not only the first one', async () => {
+    const state = new InMemoryStateStore();
+    await advance({ state, processedUntil: 100 });
+
+    await advance({ state, processedUntil: 200 });
+
+    expect(await read(state)).toBe(200);
+  });
+
   it('never moves back, so a late writer cannot undo the progress of a newer run', async () => {
     const state = new InMemoryStateStore();
-    await advanceWatermark({
-      state,
-      spaceId: SPACE_ID,
-      strategyId: STRATEGY_ID,
-      processedUntil: 200,
-    });
+    await advance({ state, processedUntil: 200 });
 
-    await advanceWatermark({
-      state,
-      spaceId: SPACE_ID,
-      strategyId: STRATEGY_ID,
-      processedUntil: 100,
-    });
+    await advance({ state, processedUntil: 100 });
 
-    const watermarks = await readWatermarks({
-      state,
-      spaceId: SPACE_ID,
-      strategyIds: [STRATEGY_ID],
-    });
-    expect(watermarks.get(STRATEGY_ID)).toBe(200);
+    expect(await read(state)).toBe(200);
   });
 });
 
 describe('readWatermarks', () => {
   it('leaves out a strategy that never ran', async () => {
     const state = new InMemoryStateStore();
-    await advanceWatermark({
-      state,
-      spaceId: SPACE_ID,
-      strategyId: STRATEGY_ID,
-      processedUntil: 100,
-    });
+    await advance({ state, processedUntil: 100 });
 
     const watermarks = await readWatermarks({
       state,
