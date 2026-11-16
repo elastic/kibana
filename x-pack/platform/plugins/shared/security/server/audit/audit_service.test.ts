@@ -448,7 +448,7 @@ describe('#asScoped', () => {
       const [[onPostAuth]] = http.registerOnPostAuth.mock.calls;
       const request = httpServerMock.createKibanaRequest({ auth: { isAuthenticated: true } });
 
-      onPostAuth(
+      await onPostAuth(
         request,
         httpServerMock.createResponseFactory(),
         httpServiceMock.createOnPostAuthToolkit()
