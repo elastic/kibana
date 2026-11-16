@@ -623,5 +623,21 @@
     "labels": ["Team:Threat Hunting:Investigations"],
     "body": "Add a counter badge to the `Notes` tab in timeline.\n\n## Acceptance criteria\n- The badge shows the number of notes on the timeline.\n- The badge is hidden when there are no notes.",
     "parent": "elastic/kibana#915100"
+  },
+  "elastic/kibana#913701": {
+    "title": "[Timeline] Export timeline events",
+    "type": "Enhancement",
+    "labels": ["Team:Threat Hunting:Investigations"],
+    "body": "## Summary\nAdd an `Export events` action to the timeline toolbar. It opens a flyout where users pick the format and the fields, and downloads the events of the current query.\n\n## Acceptance criteria\n- `Export events` is in the timeline toolbar menu and opens the export flyout.\n- The flyout offers CSV and NDJSON and a field picker with the timeline columns preselected.\n- The download contains the events of the current query and time range, up to 10,000 events, and says so when the cap is reached.\n- Users without read access to an index get no events from it.",
+    "comments": [
+      {
+        "author": "dev-c",
+        "body": "The query helper from the alerts table export can be reused for the download."
+      },
+      {
+        "author": "pm-b",
+        "body": "Scope update after the design review on 2026-11-04. Notes first, the decision for this issue is at the end.\n\nAttendees: design, the Investigations PM, two engineers from the team and one from the data quality group.\n\nOptions we went through:\n1. Ship the export flyout as written above, with CSV and NDJSON, the field picker and the 10,000 event cap. Design liked the flow, but the field picker needs the new field list component, which will not land before the next minor.\n2. Ship CSV only, without the field picker, exporting the columns currently shown in the timeline. Smaller, but support asked twice for NDJSON so that exports can be loaded back into an index, so CSV alone would be revisited soon.\n3. Split the work: keep the export behavior in one issue and track the setting that turns it on in another, so that the setting can ship first and the export later behind it.\n\nConcerns raised: the 10,000 event cap is lower than the alerts table export, which confuses users who use both; the file name should include the timeline title and the time range; and the export must respect the field-level security of the user who runs it, which the current query helper does not do yet.\n\n**Decision for this issue:** option 3. The export flyout and its acceptance criteria move to a new issue owned by the data quality group, and this issue now only adds the advanced setting that turns timeline export on, off by default."
+      }
+    ]
   }
 }

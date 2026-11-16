@@ -315,7 +315,7 @@
     "suggested_level": null,
     "proposed": null,
     "labeled": [],
-    "comments": ["elastic/kibana#911401 rule=N2 suggested=none"]
+    "comments": ["elastic/kibana#911401 rule=N2 suggested=none reason=moves the Timeline data provider state to Redux Toolkit, a refactor with no change for users"]
   },
   "s34-yes-label-and-no": {
     "reps": 3,
@@ -324,7 +324,7 @@
     "suggested_level": null,
     "proposed": null,
     "labeled": ["elastic/kibana#910401"],
-    "comments": ["elastic/kibana#910404 rule=N4 suggested=elastic/kibana#910401"]
+    "comments": ["elastic/kibana#910404 rule=N4 suggested=elastic/kibana#910401 reason=one toggle with two acceptance criteria, a small part of the template editor"]
   },
   "s35-public-slice-private-epic": {
     "reps": 3,
@@ -341,6 +341,16 @@
     "reps": 3,
     "decision": "ask",
     "rule": "A2",
+    "suggested_level": null,
+    "proposed": [],
+    "labeled": [],
+    "comments": [],
+    "answer": {"question": true}
+  },
+  "s37-cut-scope-comment": {
+    "reps": 3,
+    "decision": "ask",
+    "rule": "A4",
     "suggested_level": null,
     "proposed": [],
     "labeled": [],

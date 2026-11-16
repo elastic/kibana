@@ -3,7 +3,9 @@
 
 Commands (JSON on stdout; exit 0 ok, 1 failure, 2 the agent must ask the user):
   context --issue <ref>             Read-only. The issue, every ancestor up to the root, and
-                                    the descendant tree.
+                                    the descendant tree. Long bodies and comments are cut, and
+                                    every cut is reported (`body_truncated`,
+                                    `comments_truncated`, `descendants_truncated`).
   label --issue <ref> [--dry-run]   Add `Needs Test Plan` to one open issue. Never retried.
   comment-no --issue <ref> --rule <N1-N5> [--suggested <ref>] [--dry-run] < reason
                                     Post one fixed-format comment saying the issue needs no
@@ -307,6 +309,16 @@ def collect_descendants(gh: Gh, issue: dict) -> tuple[list[dict], bool]:
     return descendants, False
 
 
+def _comment_summary(comment: dict) -> dict:
+    body, truncated = _excerpt(comment.get("body"), COMMENT_BODY_LIMIT)
+    return {
+        "author": (comment.get("user") or {}).get("login"),
+        "created_at": comment.get("created_at"),
+        "body": body,
+        "body_truncated": truncated,
+    }
+
+
 def context(gh: Gh, ref: IssueRef) -> dict:
     issue = fetch_issue(gh, ref)
     target = summarize(issue, body_limit=TARGET_BODY_LIMIT)
@@ -318,15 +330,9 @@ def context(gh: Gh, ref: IssueRef) -> dict:
     target["has_test_plan"] = has_test_plan(gh, ref, comments)
     no_plan = _marked(comments, NO_PLAN_MARKER)
     target["triaged_no_at"] = no_plan[-1].get("created_at") if no_plan else None
-    target["comments"] = [
-        {
-            "author": (comment.get("user") or {}).get("login"),
-            "created_at": comment.get("created_at"),
-            "body": _excerpt(comment.get("body"), COMMENT_BODY_LIMIT)[0],
-        }
-        for comment in comments[-MAX_COMMENTS:]
-    ]
+    target["comments"] = [_comment_summary(comment) for comment in comments[-MAX_COMMENTS:]]
     target["comments_total"] = len(comments)
+    target["comments_truncated"] = len(comments) > MAX_COMMENTS
     if target["state"] != "open":
         gates.append("closed")
     if target["has_label"]:

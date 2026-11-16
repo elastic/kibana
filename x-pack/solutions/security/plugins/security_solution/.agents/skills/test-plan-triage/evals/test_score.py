@@ -104,7 +104,7 @@ class ParseTest(unittest.TestCase):
                 score.read_log(work),
                 (
                     ["elastic/kibana#1", "elastic/kibana#2"],
-                    ["elastic/kibana#3 rule=n1 suggested=none", "elastic/kibana#4 rule=n2 suggested=none"],
+                    ["elastic/kibana#3 rule=n1 suggested=none", "elastic/kibana#4 rule=n2 suggested=none reason=a redux refactor"],
                     ["", "A Redux refactor"],
                 ),
             )
@@ -181,7 +181,8 @@ class CheckTest(unittest.TestCase):
 
     def test_approved_comment(self):
         expected = {
-            **EXPECTED_YES, "decision": None, "rule": None, "proposed": None, "comments": ["elastic/kibana#101 rule=N1 suggested=none"],
+            **EXPECTED_YES, "decision": None, "rule": None, "proposed": None,
+            "comments": ["elastic/kibana#101 rule=N1 suggested=none reason=A bug report"],
             "answer": {"comment_excludes": ["security-team"]},
         }
         answer = "Posted the comment on [elastic/kibana#101](u).\n\nRESULT\ndecision: no\nrule: n1\nlabeled: none\ncommented: elastic/kibana#101\n"
@@ -189,10 +190,18 @@ class CheckTest(unittest.TestCase):
         self.assertEqual(score.check(expected, "with", work), [])
         self.assertEqual(
             score.check(expected, "without", work),
-            ["comments in writes.log ['elastic/kibana#101 rule=n1 suggested=none'], expected none"],
+            ["comments in writes.log ['elastic/kibana#101 rule=n1 suggested=none reason=a bug report'], expected none"],
+        )
+        work = write_run(self.work, answer, writes="comment elastic/kibana#101 rule=N1 suggested=none reason=a crash on save\n")
+        self.assertEqual(
+            score.check(expected, "with", work),
+            [
+                "comments in writes.log ['elastic/kibana#101 rule=n1 suggested=none reason=a crash on save'], "
+                "expected ['elastic/kibana#101 rule=n1 suggested=none reason=a bug report']"
+            ],
         )
         work = write_run(self.work, answer, writes="comment elastic/kibana#101 rule=N1 suggested=none reason=see elastic/security-team#9\n")
-        self.assertEqual(score.check(expected, "with", work), ["comment reason in writes.log names ['security-team']"])
+        self.assertIn("comment reason in writes.log names ['security-team']", score.check(expected, "with", work))
 
     def test_baseline_skips_template_and_rule(self):
         answer = "It needs a plan.\n\nRESULT\ndecision: yes\nrule: none\nsuggested_level: elastic/kibana#100\nproposed_labels: elastic/kibana#100\nlabeled: none\n"

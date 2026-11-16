@@ -63,7 +63,7 @@ Read `gates` before anything else:
 
 ### 3. Decide on the issue
 
-Read [`references/rules.md`](references/rules.md) now. Apply its rules in the order it gives and stop at the first rule that matches. Record the rule ID and one reason that quotes or points to the issue.
+Read [`references/rules.md`](references/rules.md) now. Apply its rules in the order it gives and stop at the first rule that matches. Record the rule ID and one reason that quotes or points to the issue. The JSON marks every text it cut (`body_truncated`, `comments_truncated`, `descendants_truncated`); `rules.md` says when a cut needs a question. Do not fetch the rest.
 
 ### 4. Look at the hierarchy
 

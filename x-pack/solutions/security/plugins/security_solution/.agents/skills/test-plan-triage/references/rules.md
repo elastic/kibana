@@ -2,6 +2,8 @@
 
 Decide on the issue passed in (the `target` in the `context` JSON). Use its title, type, labels, body and comments. If it has sub-issues, decide on the whole: its body plus the titles, types and labels in `descendants`.
 
+**Cut text.** `context` cuts long text and says so: `body_truncated` on the target, on a comment or on an ancestor, `comments_truncated` when older comments are missing, and `descendants_truncated` when the sub-issue tree is cut. Decide with what you can read. Only when text cut from the target itself (its body or its comments) leaves the decision open, for example a comment that announces a change of scope and is cut before it says what changed, the decision is A4: quote the last words before the cut and ask what the rest says.
+
 Apply the rules **in this order** and stop at the first one that matches. Quote the rule ID in the answer. A short text is not a reason to stop early: when the body is empty or one line and the title does not match N1, N3, N5, N2 or A5, go on to A1. Stop with A4 only when the issue says enough to judge but you still cannot tell whether a rule matches.
 
 | Order | ID | Matches when | Decision |
@@ -14,7 +16,7 @@ Apply the rules **in this order** and stop at the first one that matches. Quote 
 | 6 | A1 | Not enough to decide: the body is empty or one line, and neither it nor the sub-issue titles say what changes for users | Need your input: ask what the issue changes |
 | 7 | A3 | Internal performance or reliability work with no behavior change users can see (batching, refresh policy, caching) | Need your input: ask whether there is a user-visible change to test |
 | 8 | S1 / S2 / S3 | It is a functionality (see below) | Go to the granularity check |
-| 9 | A4 | Nothing above matches, or the issue says enough to judge but you cannot tell whether one of the rules above matches | Need your input: name the rule you are unsure about and quote the text that leaves it open |
+| 9 | A4 | Nothing above matches, or the issue says enough to judge but you cannot tell whether one of the rules above matches, or text cut from the target leaves the decision open (see **Cut text**) | Need your input: name the rule you are unsure about and quote the text that leaves it open |
 
 ## Functionality (S1, S2, S3)
 

@@ -155,6 +155,21 @@ class ContextTests(unittest.TestCase):
         result = triage.context(FakeGh(issues, comments=comments), triage.IssueRef("elastic/kibana", 1))
         self.assertEqual(result["gates"], ["closed", "already_labeled", "test_plan_published"])
 
+    def test_cut_comments_are_reported(self):
+        issues = {"elastic/kibana#1": api_issue("elastic/kibana", 1)}
+        long_body = "x" * (triage.COMMENT_BODY_LIMIT + 1)
+        comments = {"elastic/kibana#1": [{"body": "old", "user": {"login": "pm"}}, {"body": long_body, "user": {"login": "pm"}}]}
+        result = triage.context(FakeGh(issues, comments=comments), triage.IssueRef("elastic/kibana", 1))
+        target = result["target"]
+        self.assertEqual([comment["body_truncated"] for comment in target["comments"]], [False, True])
+        self.assertEqual(len(target["comments"][1]["body"]), triage.COMMENT_BODY_LIMIT)
+        self.assertFalse(target["comments_truncated"])
+        with mock.patch.object(triage, "MAX_COMMENTS", 1):
+            capped = triage.context(FakeGh(issues, comments=comments), triage.IssueRef("elastic/kibana", 1))["target"]
+        self.assertEqual([comment["body"] for comment in capped["comments"]], [long_body[: triage.COMMENT_BODY_LIMIT]])
+        self.assertEqual(capped["comments_total"], 2)
+        self.assertTrue(capped["comments_truncated"])
+
     def test_previous_no_comment_is_a_gate(self):
         issues = {"elastic/kibana#1": api_issue("elastic/kibana", 1)}
         comments = {"elastic/kibana#1": [{"body": f"{triage.NO_PLAN_MARKER}\nno", "created_at": "2026-09-15T08:00:00Z", "user": {"login": "qa"}}]}

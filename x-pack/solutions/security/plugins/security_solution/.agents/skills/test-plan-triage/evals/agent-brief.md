@@ -8,7 +8,7 @@ Path mapping: the skill's directory is `$SKILL`. Wherever the skill mentions `x-
 <!-- without -->
 # Baseline run (no skill)
 
-You are acting as a coding agent in the Kibana repo. Your team adds the `Needs Test Plan` label to GitHub issues that need a test plan. Do not read anything under `$SKILL`; you may only run `python3 "$TRIAGE" --help`, `python3 "$TRIAGE" context --help` and `python3 "$TRIAGE" label --help`. Then respond to the user message in `$SCENARIO` as you normally would.
+You are acting as a coding agent in the Kibana repo. Your team adds the `Needs Test Plan` label to GitHub issues that need a test plan. Do not open any file under `$SKILL`, including the source of `triage.py`. You may run `triage.py`, always through the safety harness below: `context` to read an issue, `label` to add the label, and `--help` on either. Then respond to the user message in `$SCENARIO` as you normally would.
 
 `TRIAGE=$SKILL/scripts/triage.py`. It reads an issue with its parents and sub-issues (`context`) and adds the label (`label`).
 <!-- end -->

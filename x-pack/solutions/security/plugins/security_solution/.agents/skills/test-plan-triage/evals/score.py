@@ -114,7 +114,7 @@ def language(message: str) -> str | None:
 
 
 def read_log(work: Path) -> tuple[list[str], list[str], list[str]]:
-    """Split writes.log into label refs, comment lines without their reason, and comment reasons.
+    """Split writes.log into label refs, comment lines (with their reason) and comment reasons.
 
     A bare ref is a label, and a comment line without `reason=` has no reason (older logs).
     """
@@ -124,9 +124,8 @@ def read_log(work: Path) -> tuple[list[str], list[str], list[str]]:
         kind, _, rest = line.strip().partition(" ")
         kind = kind.lower()
         if kind == "comment":
-            head, _, reason = rest.partition(" reason=")
-            comments.append(head.lower())
-            reasons.append(reason)
+            comments.append(rest.lower())
+            reasons.append(rest.partition(" reason=")[2])
         elif kind == "label":
             labels.append(rest.lower())
         elif kind:
