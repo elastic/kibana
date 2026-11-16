@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { ACTION_POLICY_AUTHORING_SKILL_ID, ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
+import { internalTools } from '@kbn/agent-builder-common/tools';
+import {
+  ACTION_POLICY_AUTHORING_SKILL_ID,
+  ALERTING_API_IDS,
+  ALERTING_TOOL_IDS,
+} from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { AttachActionPolicyToolDeps } from '../tools/attach_action_policy';
-import type { FindActionPoliciesToolDeps } from '../tools/find_action_policies';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import { createAlertingV2Availability } from './alerting_v2_availability';
 import { createActionPolicyAuthoringSkill } from './action_policy_authoring_skill';
@@ -19,7 +23,6 @@ import {
 } from './action_policy_management_references';
 
 const createDeps = (): ManageActionPolicyToolDeps &
-  FindActionPoliciesToolDeps &
   AttachActionPolicyToolDeps & {
     availability: ReturnType<typeof createAlertingV2Availability>;
   } => ({
@@ -76,7 +79,7 @@ describe('createActionPolicyAuthoringSkill', () => {
     expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
-  it('exposes only the action policy inline tools to manage, find and attach policies', async () => {
+  it('exposes only the action policy inline tools to manage and attach policies', async () => {
     const skill = createActionPolicyAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
@@ -84,17 +87,35 @@ describe('createActionPolicyAuthoringSkill', () => {
 
     expect(inlineToolIds).toEqual([
       ALERTING_TOOL_IDS.manageActionPolicy,
-      ALERTING_TOOL_IDS.findActionPolicies,
       ALERTING_TOOL_IDS.attachActionPolicy,
     ]);
     expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageRule);
+  });
+
+  it('discovers saved policies through the Kibana API tools instead of a custom find tool', () => {
+    const skill = createActionPolicyAuthoringSkill(createDeps());
+
+    expect(skill.content).toContain(ALERTING_API_IDS.listActionPolicies);
+    expect(skill.content).toContain(ALERTING_API_IDS.getActionPolicy);
+    expect(skill.content).toContain(internalTools.describeApi);
+    expect(skill.content).toContain(internalTools.executeApi);
+    expect(skill.content).not.toContain('find_action_policies');
+  });
+
+  it('references action policy API operation ids that exist, and are read-only, in the Kibana API registry', async () => {
+    const { kibanaManifest } = await import('@elastic/schemas/kibana/tools/manifest.js');
+
+    for (const apiId of [ALERTING_API_IDS.listActionPolicies, ALERTING_API_IDS.getActionPolicy]) {
+      expect(kibanaManifest.find(({ id }) => id === apiId)).toEqual(
+        expect.objectContaining({ readOnly: true, destructive: false })
+      );
+    }
   });
 
   it('includes action policy discovery and default notification setup instructions', () => {
     const skill = createActionPolicyAuthoringSkill(createDeps());
 
     expect(skill.content).toContain('Action Policy Discovery');
-    expect(skill.content).toContain(ALERTING_TOOL_IDS.findActionPolicies);
     expect(skill.content).toContain(ALERTING_TOOL_IDS.attachActionPolicy);
     expect(skill.content).toContain('space-scoped saved object');
     expect(skill.content).not.toContain('Part 1: Action Policies');

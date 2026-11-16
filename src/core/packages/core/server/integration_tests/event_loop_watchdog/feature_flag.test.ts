@@ -11,6 +11,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { FeatureFlagsService } from '@kbn/core-feature-flags-server-internal';
 import { EventLoopWatchdogService, opsConfig } from '@kbn/core-metrics-server-internal';
@@ -67,14 +68,21 @@ describe('event loop watchdog feature flag', () => {
     const coreContext = mockCoreContext.create({ logger, configService });
 
     featureFlags = new FeatureFlagsService(coreContext);
-    featureFlags.setup({ http: httpServiceMock.createInternalSetupContract() });
+    featureFlags.setup({
+      http: httpServiceMock.createInternalSetupContract(),
+      savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
+    });
     watchdog = new EventLoopWatchdogService(coreContext);
     await watchdog.setup({
       status: { overall$: of({ level: ServiceStatusLevels.available, summary: '' }) },
       nodeRoles: ['ui'],
       serviceVersion: 'test',
     });
-    watchdog.start({ featureFlags: featureFlags.start() });
+    watchdog.start({
+      featureFlags: featureFlags.start({
+        savedObjects: savedObjectsServiceMock.createInternalStartContract(),
+      }),
+    });
   };
 
   beforeEach(() => {

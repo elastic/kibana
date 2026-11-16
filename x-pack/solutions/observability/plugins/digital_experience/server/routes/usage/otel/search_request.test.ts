@@ -55,20 +55,20 @@ describe('usageSearch', () => {
     });
   });
 
-  it('reads the breakdowns from the browser resource attributes', () => {
+  it('reads the breakdowns from the fields the filters read, so a row is a value to filter on', () => {
     const { pageLoads } = inEnvironment(usageSearch(PARAMS)).aggs;
 
     expect(pageLoads.aggs.browsers.terms).toEqual({
-      field: 'resource.attributes.browser.name',
+      field: 'digital_experience_filter_browser',
       size: 10,
     });
     expect(pageLoads.aggs.operatingSystems.terms).toEqual({
-      field: 'resource.attributes.browser.platform',
+      field: 'digital_experience_filter_os',
       size: 10,
     });
     expect(pageLoads.aggs.devices.terms).toEqual({
-      field: 'resource.attributes.browser.mobile',
-      size: 2,
+      field: 'digital_experience_filter_device',
+      size: 10,
     });
   });
 
@@ -77,5 +77,66 @@ describe('usageSearch', () => {
 
     expect(selectors.terms).toEqual({ field: 'browser.css_selector', size: 10 });
     expect(selectors.aggs.tagName.terms).toEqual({ field: 'browser.tag_name', size: 1 });
+  });
+});
+
+describe('usageSearch with filters', () => {
+  const FILTERS = {
+    browser: [
+      { value: 'Chrome', exclude: false },
+      { value: 'Safari', exclude: true },
+    ],
+    country: [{ value: 'DE', exclude: false }],
+    pageUrl: [{ value: 'https://shop.example.com/', exclude: false }],
+  };
+
+  it('defines the runtime fields the filters read', () => {
+    expect(Object.keys(usageSearch(PARAMS).runtime_mappings)).toEqual([
+      'digital_experience_filter_browser',
+      'digital_experience_filter_os',
+      'digital_experience_filter_device',
+      'digital_experience_filter_country',
+      'digital_experience_filter_appVersion',
+    ]);
+  });
+
+  it('narrows the pages, breakdowns and clicks to the selected browser, OS, device and country', () => {
+    const { filter } = inEnvironment(usageSearch({ ...PARAMS, filters: FILTERS }));
+
+    expect(filter).toEqual({
+      bool: {
+        filter: [
+          { match_all: {} },
+          { terms: { digital_experience_filter_browser: ['Chrome'] } },
+          { bool: { must_not: [{ terms: { digital_experience_filter_browser: ['Safari'] } }] } },
+          { terms: { digital_experience_filter_country: ['DE'] } },
+        ],
+      },
+    });
+  });
+
+  it('narrows the page loads to the selected page, not the clicks', () => {
+    const { pageLoads, clicks } = inEnvironment(usageSearch({ ...PARAMS, filters: FILTERS })).aggs;
+
+    expect(pageLoads.filter.bool.filter).toEqual([
+      { term: { event_name: 'browser.navigation_timing' } },
+      { terms: { 'attributes.url.full': ['https://shop.example.com/'] } },
+    ]);
+    expect(clicks.filter).toEqual({
+      bool: { filter: [{ term: { event_name: 'browser.user_action.click' } }] },
+    });
+  });
+
+  it('is unchanged without a selection', () => {
+    expect(inEnvironment(usageSearch({ ...PARAMS, filters: {} })).filter).toEqual({
+      match_all: {},
+    });
+  });
+
+  it('keeps the documents the KQL query matches', () => {
+    const kuery = { match: { 'browser.name': 'Chrome' } };
+
+    expect(usageSearch({ ...PARAMS, kuery }).query.bool.filter).toContainEqual(kuery);
+    expect(usageSearch(PARAMS).query.bool.filter).not.toContainEqual(kuery);
   });
 });

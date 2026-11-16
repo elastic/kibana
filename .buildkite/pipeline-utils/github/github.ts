@@ -119,7 +119,8 @@ export function addComment(
   comment: string,
   owner = process.env.GITHUB_PR_BASE_OWNER,
   repo = process.env.GITHUB_PR_BASE_REPO,
-  prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER
+  prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER,
+  signal?: AbortSignal
 ) {
   if (!owner || !repo || !prNumber) {
     throw Error(
@@ -132,6 +133,7 @@ export function addComment(
     repo,
     issue_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber, 10),
     body: comment,
+    request: { signal },
   });
 }
 
@@ -142,12 +144,20 @@ export async function upsertComment(
     clearPrevious: boolean;
     // When false, only an existing comment is updated; nothing is posted if there is none.
     createIfMissing?: boolean;
+    // Aborts the GitHub requests, so a stalled request can't keep the process alive.
+    signal?: AbortSignal;
   },
   owner = process.env.GITHUB_PR_BASE_OWNER,
   repo = process.env.GITHUB_PR_BASE_REPO,
   prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER
 ) {
-  const { commentBody, commentContext, clearPrevious, createIfMissing = true } = messageOpts;
+  const {
+    commentBody,
+    commentContext,
+    clearPrevious,
+    createIfMissing = true,
+    signal,
+  } = messageOpts;
   if (!owner || !repo || !prNumber) {
     throw Error(
       "Couldn't retrieve Github PR info from environment variables in order to add a comment"
@@ -165,24 +175,27 @@ export async function upsertComment(
       owner,
       repo,
       issue_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber, 10),
+      request: { signal },
     })
   ).find((comment) => comment.body?.includes(commentMarker));
 
   if (!existingComment) {
-    return createIfMissing ? addComment(body, owner, repo, prNumber) : undefined;
+    return createIfMissing ? addComment(body, owner, repo, prNumber, signal) : undefined;
   } else if (clearPrevious) {
     await github.issues.deleteComment({
       owner,
       repo,
       comment_id: existingComment.id,
+      request: { signal },
     });
-    return addComment(body, owner, repo, prNumber);
+    return addComment(body, owner, repo, prNumber, signal);
   } else {
     return github.issues.updateComment({
       owner,
       repo,
       comment_id: existingComment.id,
       body,
+      request: { signal },
     });
   }
 }

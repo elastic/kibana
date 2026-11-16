@@ -13,6 +13,7 @@ import {
   OTEL_LOGS_INDEX,
 } from '../../../../common/otel_data';
 import { LAST_SEEN_AGGREGATION } from '../../../lib/helpers/aggregations';
+import { documentFilters, filterRuntimeMappings } from '../../../lib/otel/overview_filters';
 import {
   applicationDocuments,
   byEnvironment,
@@ -40,36 +41,47 @@ const ERROR_GROUP_AGGS = {
 };
 
 /**
- * One application's JS errors by type and stack trace, and its environments with browser data.
+ * One application's JS errors by type and stack trace, and its environments with browser data. The
+ * errors are those of the Overview's filters; the page filter does not apply, as an error carries
+ * no page URL yet.
  *
  * The message is never a group: it often holds ids or values that would split one error into many.
  * A stack trace over the index's `ignore_above` is not indexed, so it counts as missing.
  */
-export const errorsSearch = ({ environment, ...application }: ApplicationSearchParams) => {
+export const errorsSearch = ({
+  environment,
+  filters = {},
+  ...application
+}: ApplicationSearchParams) => {
   return {
     ...otelSearchDefaults(OTEL_LOGS_INDEX),
+    runtime_mappings: filterRuntimeMappings(),
     query: {
       bool: {
         filter: applicationDocuments(application),
       },
     },
-    aggs: byEnvironment(environment, {
-      exceptions: {
-        ...eventCount(EVENT_EXCEPTION),
-        aggs: {
-          groups: {
-            multi_terms: {
-              terms: [
-                // OTel allows an exception with only a message.
-                { field: EXCEPTION_TYPE, missing: NO_TYPE },
-                { field: EXCEPTION_STACKTRACE, missing: NO_STACKTRACE },
-              ],
-              size: ERROR_GROUPS_ROWS,
+    aggs: byEnvironment(
+      environment,
+      {
+        exceptions: {
+          ...eventCount(EVENT_EXCEPTION),
+          aggs: {
+            groups: {
+              multi_terms: {
+                terms: [
+                  // OTel allows an exception with only a message.
+                  { field: EXCEPTION_TYPE, missing: NO_TYPE },
+                  { field: EXCEPTION_STACKTRACE, missing: NO_STACKTRACE },
+                ],
+                size: ERROR_GROUPS_ROWS,
+              },
+              aggs: ERROR_GROUP_AGGS,
             },
-            aggs: ERROR_GROUP_AGGS,
           },
         },
       },
-    }),
+      documentFilters(filters)
+    ),
   };
 };

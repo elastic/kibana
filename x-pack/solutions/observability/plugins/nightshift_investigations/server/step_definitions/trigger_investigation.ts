@@ -7,10 +7,10 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import {
-  MAX_ARRAY_LENGTH,
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
 } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
@@ -35,13 +35,17 @@ import type {
   GetInvestigationsClient,
 } from '../routes/types';
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
+import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
+import {
+  isScheduleOnlyAutomation,
+  MANUAL_AUTOMATION_TRIGGER_SOURCE,
+} from '../../common/automation_run';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../lib/automations/types';
-import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
 import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
-import type { NightshiftTelemetryClient } from '../telemetry';
+import { alertIdentityOf, triggeringAlertOf, type NightshiftTelemetryClient } from '../telemetry';
 
 const inputSchema = lazySchema(() =>
   z.object({
@@ -96,16 +100,6 @@ const inputSchema = lazySchema(() =>
       .describe(
         'Additional operator guidance for this investigation round; empty means no additional guidance'
       ),
-    source_ids: z
-      .array(z.string().max(MAX_ID_LENGTH))
-      .max(MAX_ARRAY_LENGTH)
-      .optional()
-      .describe('Nightshift source ids to scope the investigation'),
-    scope_query: z
-      .string()
-      .max(MAX_TEXT_LENGTH)
-      .optional()
-      .describe('Query scope guidance for a manual investigation; not an enforced access filter'),
     timeout_seconds: z
       .number()
       .int()
@@ -178,6 +172,9 @@ const resolveAlerts = async ({
   }, ALERT_VISIBILITY_RETRY_OPTIONS);
 };
 
+const nonEmptyString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
+
 const toSubjectId = ({
   subject_type: subjectType,
   subject_id: subjectId,
@@ -219,6 +216,7 @@ export const triggerInvestigationStepDefinition = (
       'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking, or skip_reason when the automation daily limit or the deployment-wide investigation limit is reached.',
     inputSchema,
     outputSchema: z.object({
+      execution_id: z.string().optional(),
       investigation_id: z
         .string()
         .optional()
@@ -238,27 +236,39 @@ export const triggerInvestigationStepDefinition = (
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
-      const { workflow, kibanaUrl } = context.contextManager.getContext();
+      const { workflow, kibanaUrl, execution } = context.contextManager.getContext();
       const spaceId = workflow.spaceId;
       const input = inputSchema.parse(context.input);
-      const subjectId = toSubjectId(input);
       let automationBudget: AutomationBudget | undefined;
+      let isManualAutomationRun = false;
       if (input.automation_id) {
         const soClient = getAutomationsSoClient(request, spaceId);
-        const automationId = input.automation_id;
-        const automation = await soClient.get<NightshiftAutomationAttributes>(
+        const { attributes: automation } = await soClient.get<NightshiftAutomationAttributes>(
           NIGHTSHIFT_AUTOMATION_SO_TYPE,
-          automationId
+          input.automation_id
         );
-        if (automation.attributes.workflowId !== workflow.id) {
+        if (automation.workflowId !== workflow.id) {
           throw new Error('The automation does not belong to this workflow.');
         }
-        automationBudget = createAutomationBudget(
-          soClient,
-          automationId,
-          automation.attributes.runtime.dailyDispatchLimit
-        );
+        // Public workflow inputs and metadata cannot grant manual accounting.
+        isManualAutomationRun = execution.triggeredBy === MANUAL_AUTOMATION_TRIGGER_SOURCE;
+        if (isManualAutomationRun && !isScheduleOnlyAutomation(automation)) {
+          throw new Error(
+            'Only automations with a schedule trigger and no other triggers can be run manually.'
+          );
+        }
+        if (!isManualAutomationRun) {
+          automationBudget = createAutomationBudget(
+            soClient,
+            input.automation_id,
+            automation.runtime.dailyDispatchLimit
+          );
+        }
       }
+      if (isManualAutomationRun && input.subject_type !== 'manual') {
+        throw new Error('Manual automation runs require a manual question subject.');
+      }
+      const subjectId = toSubjectId(input);
       const client = getInvestigationsClient(request, spaceId);
       const alerts =
         input.subject_type === 'alert' && !input.context?.alerts
@@ -270,25 +280,40 @@ export const triggerInvestigationStepDefinition = (
               getEpisodeLookup,
             })
           : undefined;
+      const significantEventData = alerts?.flatMap((snapshot) =>
+        snapshot.alert_version === 'v2' &&
+        snapshot.source === SIGNIFICANT_EVENTS_ALERT_SOURCE &&
+        snapshot.data
+          ? [snapshot.data]
+          : []
+      )[0];
+      const alertTitle = nonEmptyString(significantEventData?.title)?.slice(0, MAX_TITLE_LENGTH);
+      const sourceWorkflowExecutionId = nonEmptyString(
+        significantEventData?.workflow_execution_id
+      )?.slice(0, MAX_ID_LENGTH);
+      const title =
+        input.title && input.title !== subjectId ? input.title : alertTitle ?? input.title;
       try {
         const result = await client.start(
           {
             subject: {
               type: input.subject_type,
-              id: subjectId,
+              id: isManualAutomationRun ? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID : subjectId,
               summary: input.summary,
             },
-            title: input.title,
-            trigger_type: input.trigger_type ?? 'automatic',
+            title,
+            trigger_type: isManualAutomationRun ? 'manual' : input.trigger_type ?? 'automatic',
             message: input.message,
             instructions:
               input.instructions ??
               (input.automation_id && input.subject_type === 'alert' ? input.message : undefined),
-            source_ids: input.source_ids,
             context: alerts
-              ? { alerts }
-              : input.scope_query && input.subject_type === 'manual'
-              ? { ...input.context, scope_query: input.scope_query }
+              ? {
+                  alerts,
+                  ...(sourceWorkflowExecutionId
+                    ? { source_workflow_execution_id: sourceWorkflowExecutionId }
+                    : {}),
+                }
               : input.context,
             timeout_seconds: input.timeout_seconds,
             notificationDestinations: input.notificationDestinations,
@@ -307,27 +332,48 @@ export const triggerInvestigationStepDefinition = (
           context.logger.info(
             `Skipped investigation of ${input.subject_type}/${subjectId} for automation ${input.automation_id}: daily limit of ${error.limit} reached`
           );
+          // Other subjects have no triggering alert: the client ignores any alerts they carry.
+          const contextAlerts = input.context?.alerts;
+          const suppliedAlerts = Array.isArray(contextAlerts)
+            ? contextAlerts.filter(
+                (alert): alert is Record<string, unknown> =>
+                  alert != null && typeof alert === 'object' && !Array.isArray(alert)
+              )
+            : [];
+          const alertIdentity =
+            input.subject_type === 'alert'
+              ? alertIdentityOf(spaceId, triggeringAlertOf(subjectId, alerts ?? suppliedAlerts))
+              : {};
+          const significantEventAlertId =
+            alertIdentity.source_kind === 'significant_events'
+              ? alertIdentity.fingerprint
+              : undefined;
           telemetry.reportInvestigationSkipped({
             trigger: 'automation',
             origin: input.subject_type,
             automation_id: input.automation_id,
             skip_reason: 'automation_daily_limit',
+            event_id:
+              input.subject_type === 'significant_event' ? subjectId : significantEventAlertId,
+            ...alertIdentity,
           });
           return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
         }
         if (error instanceof InvestigationQuotaDeniedError) {
           context.logger.info(
-            `Skipped investigation of ${input.subject_type}/${subjectId}: global investigation limit reached`
+            `Skipped investigation of ${input.subject_type}/${subjectId}: ${error.message}`
           );
           if (input.slack_thread) {
             await notifyInvestigationQuotaReached({
               getSoClient: () => getAutomationsSoClient(request, spaceId),
               getActions,
+              deniedBy: error.deniedBy,
               request,
               spaceId,
               slackThread: input.slack_thread,
               settingsLocator,
               kibanaUrl,
+              limit: error.limit,
               signal: context.abortSignal,
               logger: context.logger,
             });

@@ -7,6 +7,7 @@
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { FilesStart } from '@kbn/files-plugin/server';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -40,6 +41,11 @@ export const registerAttachmentTypes = ({
     return startDeps.files;
   };
 
+  const getActionSavedObjectsClient = async (request: KibanaRequest) => {
+    const [coreStart] = await coreSetup.getStartServices();
+    return coreStart.savedObjects.getScopedClient(request, { includedHiddenTypes: ['action'] });
+  };
+
   const getAgentsStart = async () => {
     const [, startDeps] = await coreSetup.getStartServices();
     return startDeps.agentBuilder.agents;
@@ -58,7 +64,7 @@ export const registerAttachmentTypes = ({
         setupDeps.share.url.locators.get<DiscoverEsqlLocatorParams>(DISCOVER_APP_LOCATOR),
     }),
     createGraphAttachmentType(),
-    createConnectorAttachmentType(),
+    createConnectorAttachmentType({ getActionSavedObjectsClient }),
     createConnectorSetupAttachmentType({
       getAgentsStart,
       getActionsStart,

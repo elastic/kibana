@@ -69,7 +69,12 @@ describe(
     tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
-        kbnServerArgs: ['--uiSettings.overrides.securitySolution:entityStoreEnableV2=true'],
+        kbnServerArgs: [
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
+          // This suite asserts against the legacy home page's `entityAnalyticsHomePage`
+          // test subject; pin the flag until the suite is migrated to the new page.
+          '--feature_flags.overrides.securitySolution.useNewEntityAnalyticsPage=false',
+        ],
       },
     },
   },
