@@ -61,9 +61,10 @@ export class ListingTable {
       .join(',');
     this.itemLinks = page
       .locator(
-        `[data-test-subj="${LEGACY_TABLE_LOADED}"] .euiTableRow .euiLink,` +
-          `[data-test-subj="${LEGACY_TABLE_READY}"] .euiTableRow .euiLink`
+        `[data-test-subj="${LEGACY_TABLE_LOADED}"], [data-test-subj="${LEGACY_TABLE_READY}"]`
       )
+      .getByRole('row')
+      .getByRole('link')
       .or(page.testSubj.locator(CONTENT_LIST_ITEM_LINK));
     this.searchBox = page.testSubj
       .locator(LEGACY_SEARCH_BOX)
