@@ -58,17 +58,6 @@ const evaluate = (expression: unknown, scope: Record<string, unknown>) =>
 const hits = (sources: Array<Record<string, unknown>>) => ({
   output: { hits: { hits: sources.map((source) => ({ _source: source })) } },
 });
-const latestHits = (sources: Array<Record<string, unknown>>) => ({
-  output: {
-    hits: {
-      hits: sources.map((source) => ({
-        _source: { id: source.id },
-        inner_hits: { latest: { hits: { hits: [{ _source: source }] } } },
-      })),
-    },
-  },
-});
-
 const audience = { kibana: { privileges: [{ space: 'default' }] } };
 const bob = {
   id: 'entity-customer--bob',
@@ -117,7 +106,7 @@ const prompt = ({
       foreach: { item: items },
       steps: {
         read_entities: hits(entities),
-        read_facts: latestHits(facts),
+        read_facts: hits(facts),
         read_relationships: hits(relationships),
       },
     }
@@ -259,6 +248,7 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
       'read_entities',
       'read_relationships',
       'mentions',
+      'match_facts',
       'read_facts',
       'relate',
       'apply_relationships',
@@ -377,7 +367,7 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
       ])
     ).toEqual([{ match_none: {} }]);
 
-    const bool = findStep(batchSteps(), 'read_facts').with?.query?.bool ?? {};
+    const bool = findStep(batchSteps(), 'match_facts').with?.query?.bool ?? {};
     expect(
       evaluate(bool.should, {
         variables: { mention_clauses: '[{"match_phrase":{"title":"Bob"}}]' },
@@ -386,25 +376,43 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
     expect(bool.minimum_should_match).toBe(1);
   });
 
-  it('reads up to 100 matching facts, best match first, with the latest revision of each', () => {
-    const read = findStep(batchSteps(), 'read_facts').with;
+  it('matches up to 100 facts, best match first, by id alone', () => {
+    const match = findStep(batchSteps(), 'match_facts').with;
 
-    expect(read?.size).toBe(100);
-    expect(read?.sort).toBeUndefined();
-    expect(read?.query?.bool?.filter).toEqual(
+    expect(match?.size).toBe(100);
+    expect(match?.sort).toBeUndefined();
+    expect(match?._source).toBe(false);
+    expect(match?.collapse).toEqual({ field: 'id' });
+    expect(match?.query?.bool?.filter).toEqual(
       expect.arrayContaining([{ prefix: { type: 'fact.' } }])
     );
     expect(
-      evaluate((read?.query?.bool?.must_not as Array<{ terms: { id: string } }>)[0].terms.id, {
+      evaluate((match?.query?.bool?.must_not as Array<{ terms: { id: string } }>)[0].terms.id, {
         foreach: { item: [bob, fact] },
       })
     ).toEqual([bob.id, fact.id]);
-    expect(read?.collapse).toEqual(
-      expect.objectContaining({
-        field: 'id',
-        inner_hits: expect.objectContaining({ size: 1, sort: [{ updated_at: 'desc' }] }),
-      })
-    );
+  });
+
+  it('reads the latest revision of each matched fact, whether or not it still matches', () => {
+    const read = findStep(batchSteps(), 'read_facts').with;
+    const [ids] = (read?.query?.bool?.filter ?? []) as Array<{ terms: { id: string } }>;
+    const matched = (factIds: string[]) => ({
+      steps: {
+        match_facts: {
+          output: { hits: { hits: factIds.map((id) => ({ fields: { id: [id] } })) } },
+        },
+      },
+    });
+
+    expect(read?.size).toBe(100);
+    expect(read?.sort).toEqual([{ updated_at: 'desc' }]);
+    expect(read?.collapse).toEqual({ field: 'id' });
+    expect(read?.query?.bool?.should).toBeUndefined();
+    expect(evaluate(ids.terms.id, matched([olderFact.id, 'fact-2']))).toEqual([
+      olderFact.id,
+      'fact-2',
+    ]);
+    expect(evaluate(ids.terms.id, matched([]))).toEqual([]);
   });
 
   it('lists the existing facts that could be about an entity of the batch', () => {
