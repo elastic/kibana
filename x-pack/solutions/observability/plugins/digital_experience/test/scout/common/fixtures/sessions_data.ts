@@ -191,6 +191,15 @@ export const ingestSessionsData = async (esClient: EsClient, kbnClient: KbnClien
   }
 };
 
+/** Runs the summaries task now instead of at its next interval. */
+export const runSessionsTask = async (kbnClient: KbnClient) => {
+  await kbnClient.request({
+    method: 'POST',
+    path: `/internal/ftr/task_manager/${encodeURIComponent(SESSIONS_TASK_ID)}/run_soon`,
+    headers: { 'x-elastic-internal-origin': 'kibana' },
+  });
+};
+
 /** Removes the summaries task, which also invalidates its API key; a missing task is fine. */
 export const removeSessionsTask = async (kbnClient: KbnClient) => {
   await kbnClient.request({
@@ -275,11 +284,12 @@ export const ingestOwnedSessions = async (
 /** Deletes `sessions`, and the sessions setup only when `ingestOwnedSessions` made it. */
 export const deleteOwnedSessions = async (
   esClient: EsClient,
+  kbnClient: KbnClient,
   sessions: OwnedSessions,
   { setUpSessions }: { setUpSessions: boolean }
 ): Promise<void> => {
   if (setUpSessions) {
-    await deleteSessionsData(esClient);
+    await deleteSessionsData(esClient, kbnClient);
     return;
   }
   await esClient.deleteByQuery({
