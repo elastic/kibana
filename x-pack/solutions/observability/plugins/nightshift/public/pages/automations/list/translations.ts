@@ -62,7 +62,7 @@ export const listLabels = {
   }),
   emptyBody: i18n.translate('xpack.nightshift.automations.emptyBody', {
     defaultMessage:
-      'When something happens in Slack, PagerDuty, or your stack, Nightshift can investigate and respond automatically.',
+      'When something happens in Slack, PagerDuty, or your stack, nightshift can investigate and respond automatically.',
   }),
   createCustom: i18n.translate('xpack.nightshift.automations.createCustomButton', {
     defaultMessage: 'Create custom automation',

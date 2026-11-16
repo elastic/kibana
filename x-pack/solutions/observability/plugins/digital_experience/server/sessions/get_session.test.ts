@@ -174,7 +174,7 @@ describe('getSession', () => {
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
 
-    // The summary ends at 3s, but the transform has not seen the events at 5s and 6s yet.
+    // The summary ends at 3s, but the summary has not seen the events at 5s and 6s yet.
     expect(detail?.pageVisits.at(-1)).toEqual(
       expect.objectContaining({ page: '/cart', endTime: at(6_000), durationMs: 1_000 })
     );

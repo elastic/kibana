@@ -128,6 +128,15 @@ export const FrequencySelector = ({
       })),
     [frequencyIdPrefix]
   );
+  const frequencyRadioOptions = useMemo<EuiRadioGroupOption[]>(
+    () =>
+      frequencyOptions.map(({ id, label, mode }) => ({
+        id,
+        label,
+        disabled: disabled || mode === undefined,
+      })),
+    [disabled, frequencyOptions]
+  );
 
   const optionIdForMode = useCallback(
     (mode: FrequencyMode): string =>
@@ -245,11 +254,7 @@ export const FrequencySelector = ({
           <EuiRadioGroup
             name={frequencyGroupName}
             css={horizontalGroupCss}
-            options={frequencyOptions.map(({ id, label, mode }) => ({
-              id,
-              label,
-              disabled: disabled || mode === undefined,
-            }))}
+            options={frequencyRadioOptions}
             idSelected={optionIdForMode(value.frequency)}
             onChange={handleFrequencyChange}
             data-test-subj="osquery-frequency-selector-mode"

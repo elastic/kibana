@@ -139,27 +139,37 @@ describe('formatSystemNotice', () => {
 
     expect(notice).toContain('<system_notice>');
     expect(notice).toContain('</system_notice>');
-    expect(notice).toContain('<execution-id>exec-123</execution-id>');
-    expect(notice).toContain('<status>completed</status>');
-    expect(notice).toContain('<result>The task is done.</result>');
-    expect(notice).not.toContain('<error>');
+    expect(notice).toContain('A background agent has reported back.');
+    expect(notice).toContain(
+      '<report>Background sub-agent execution exec-123 finished with status completed.\n\nResult:\nThe task is done.</report>'
+    );
+    expect(notice).not.toContain('<agent-id>');
+    expect(notice).not.toContain('Error:');
   });
 
   it('formats a failed execution as a system notice with error', () => {
     const notice = formatSystemNotice(makeFailedExecution());
 
     expect(notice).toContain('<system_notice>');
-    expect(notice).toContain('has failed');
-    expect(notice).toContain('<execution-id>exec-456</execution-id>');
-    expect(notice).toContain('<status>failed</status>');
-    expect(notice).toContain('<error>LLM timeout</error>');
-    expect(notice).not.toContain('<result>');
+    expect(notice).toContain(
+      '<report>Background sub-agent execution exec-456 finished with status failed.\n\nError: LLM timeout</report>'
+    );
+    expect(notice).not.toContain('Result:');
   });
 
   it('uses "No response" when completed execution has no response', () => {
     const notice = formatSystemNotice(makeCompletedExecution({ response: undefined }));
 
-    expect(notice).toContain('<result>No response</result>');
+    expect(notice).toContain('Result:\nNo response</report>');
+  });
+
+  it('names the agent when the entry records it, in the same shape as a wake report', () => {
+    const notice = formatSystemNotice(makeCompletedExecution({ agent_id: 'log-analyzer' }));
+
+    expect(notice).toContain('<agent-id>log-analyzer</agent-id>');
+    expect(notice).toContain(
+      '<report>Background sub-agent execution exec-123 (agent log-analyzer) finished with status completed.'
+    );
   });
 });
 

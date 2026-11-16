@@ -15,15 +15,15 @@ import { installInvestigationAgent } from './install_investigation_agent';
 
 describe('installInvestigationAgent', () => {
   it.each([true, false, undefined])(
-    'ensures a system-owned persisted typed agent in the requested space with hidden: %s',
+    'ensures a system-owned persisted typed agent in the default space with hidden: %s',
     async (hidden) => {
       const agentBuilder = agentBuilderMocks.createStart();
       const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 
-      await installInvestigationAgent({ agentBuilder, spaceId: 'space-1', availability, hidden });
+      await installInvestigationAgent({ agentBuilder, spaceId: 'default', availability, hidden });
 
       expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
-        spaceId: 'space-1',
+        spaceId: 'default',
         availability,
         hidden,
         agent: {
@@ -31,7 +31,7 @@ describe('installInvestigationAgent', () => {
           type: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
           name: 'Nightshift Investigator',
           description: expect.any(String),
-          labels: ['observability', 'significant-events', 'investigation', 'cortex', 'sandbox'],
+          labels: ['observability', 'significant-events', 'investigation', 'wiki', 'sandbox'],
           avatar_symbol: 'NI',
           access_control: { access_mode: AgentAccessControlMode.Public },
           configuration: {
@@ -42,4 +42,13 @@ describe('installInvestigationAgent', () => {
       });
     }
   );
+  it('refuses to install the investigator in another space', async () => {
+    const agentBuilder = agentBuilderMocks.createStart();
+    const availability = { cacheMode: 'space' as const, handler: jest.fn() };
+
+    await expect(
+      installInvestigationAgent({ agentBuilder, spaceId: 'marketing', availability })
+    ).rejects.toThrow(/only available in the "default" space/);
+    expect(agentBuilder.agents.ensure).not.toHaveBeenCalled();
+  });
 });

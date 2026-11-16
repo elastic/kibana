@@ -60,7 +60,8 @@ export const createUnitStatsClient = ({
     // An empty list is still one request, which gives the window of the response.
     const groups = chunk(request.components, MAX_STREAMS_UNIT_STATS_COMPONENTS);
     const responses: MappedStatsResponse[] = [];
-    const failures: Array<Pick<MappedStatsResponse, 'destinations' | 'processors'>> = [];
+    const failures: Array<Pick<MappedStatsResponse, 'destinations' | 'processors' | 'sources'>> =
+      [];
     let firstError: unknown;
 
     for (const components of groups.length > 0 ? groups : [[]]) {
@@ -90,6 +91,7 @@ export const createUnitStatsClient = ({
     return {
       destinations: Object.assign({}, ...[...responses, ...failures].map((r) => r.destinations)),
       processors: Object.assign({}, ...[...responses, ...failures].map((r) => r.processors)),
+      sources: Object.assign({}, ...[...responses, ...failures].map((r) => r.sources)),
       window: responses[0].window,
     };
   },

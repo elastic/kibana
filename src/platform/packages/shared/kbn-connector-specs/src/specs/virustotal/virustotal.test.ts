@@ -738,6 +738,49 @@ describe('VirusTotalConnector', () => {
       });
     });
 
+    it('should accept IPv4 and IPv6 and reject invalid addresses at the schema boundary', () => {
+      const { input } = VirusTotalConnector.actions.getIpReport;
+
+      expect(input.safeParse({ ip: '8.8.8.8' }).success).toBe(true);
+      expect(input.safeParse({ ip: '2001:4860:4860::8888' }).success).toBe(true);
+      expect(input.safeParse({ ip: '999.1.1.1' }).success).toBe(false);
+      expect(input.safeParse({ ip: 'example.com' }).success).toBe(false);
+      expect(input.safeParse({ ip: `${'0'.repeat(50)}::1` }).success).toBe(false);
+    });
+
+    it('should retrieve IPv6 address reputation report', async () => {
+      const mockResponse = {
+        data: {
+          data: {
+            id: '2001:4860:4860::8888',
+            attributes: {
+              reputation: 0,
+              country: 'US',
+              asn: 15169,
+              as_owner: 'Google LLC',
+            },
+          },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await VirusTotalConnector.actions.getIpReport.handler(mockContext, {
+        ip: '2001:4860:4860::8888',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `https://www.virustotal.com/api/v3/ip_addresses/${encodeURIComponent(
+          '2001:4860:4860::8888'
+        )}`
+      );
+      expect(result).toEqual({
+        id: '2001:4860:4860::8888',
+        attributes: mockResponse.data.data.attributes,
+        reputation: 0,
+        country: 'US',
+      });
+    });
+
     it('should handle malicious IP with negative reputation', async () => {
       const mockResponse = {
         data: {

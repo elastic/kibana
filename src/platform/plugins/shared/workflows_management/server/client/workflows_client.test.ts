@@ -9,7 +9,10 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { EXAMPLE_MANAGED_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  EXAMPLE_MANAGED_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import {
   createManagedWorkflowsSystemApiProvider,
   createWorkflowsClientProvider,
@@ -57,6 +60,7 @@ const createMockWorkflowsService = (
     }),
     getManagedWorkflowStatus,
     installManagedWorkflow: jest.fn().mockResolvedValue(undefined),
+    bulkInstallManagedWorkflows: jest.fn().mockResolvedValue({ failed: [] }),
     uninstallManagedWorkflow: jest.fn().mockResolvedValue(undefined),
     disableManagedWorkflow: overrides.disableManagedWorkflow ?? jest.fn().mockResolvedValue(true),
     getInstalledManagedWorkflowState:
@@ -307,6 +311,31 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
       client.getWorkflowStatus(EXAMPLE_MANAGED_WORKFLOW_ID, { spaceId: 'default' })
     ).rejects.toThrow('Workflows is not available in this environment');
     expect(getManagedWorkflowStatus).not.toHaveBeenCalled();
+  });
+
+  it('should delegate requestless batch installs as the owner plugin when available', async () => {
+    const service = createMockWorkflowsService();
+    const config = { available: true } as WorkflowsManagementConfig;
+    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+    const item = { id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, spaceId: 'default' } as const;
+
+    const client = await provider('testPlugin');
+
+    await expect(client.installMany([item])).resolves.toEqual({ failed: [] });
+    expect(service.bulkInstallManagedWorkflows).toHaveBeenCalledWith([item], 'testPlugin');
+  });
+
+  it('should skip requestless batch installs when unavailable', async () => {
+    const service = createMockWorkflowsService({ hasAtLeast: false });
+    const config = { available: true } as WorkflowsManagementConfig;
+    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+
+    const client = await provider('testPlugin');
+
+    await expect(
+      client.installMany([{ id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, spaceId: 'default' }])
+    ).resolves.toEqual({ failed: [] });
+    expect(service.bulkInstallManagedWorkflows).not.toHaveBeenCalled();
   });
 
   it('should delegate requestless managed workflow disable as the owner plugin when available', async () => {

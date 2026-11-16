@@ -7,7 +7,7 @@
 
 import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/ui';
-import { RULE_CREATED_EBT_EVENT_TYPE } from '../../../../../server/lib/telemetry/rule_ebt_schema';
+import { RULE_CREATED_EBT_EVENT_TYPE } from '../../../../../server/lib/telemetry/rules/rule_ebt_schema';
 import type { RulesApiService } from '../../../../scout/common/services';
 import { test } from '../fixtures';
 
