@@ -24,7 +24,8 @@ export const EVAL_SANDBOX_PORT = 9090;
 
 /**
  * Dev Vault secret names, under `secret/kibana-issues/dev/kbn-evals/`. `nightshift-local-dev` holds
- * only the `sandbox` block; the ORCA key is read from `golden`, which the evals own and rotate.
+ * only the `sandbox` block; the ORCA key is read from `nightshift`, the suite's own secret, whose
+ * `nightshiftOrcaEs` block the evals own and rotate.
  */
 export const LOCAL_DEV_VAULT_SECRET = 'nightshift-local-dev';
 export const ORCA_VAULT_SECRET = 'nightshift';

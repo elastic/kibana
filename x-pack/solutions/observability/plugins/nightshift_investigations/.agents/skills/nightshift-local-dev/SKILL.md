@@ -40,7 +40,7 @@ Elasticsearch.
 The script logs in to Vault when your token is missing or expired, then:
 
 1. Reads the sandbox credential from `secret/kibana-issues/dev/kbn-evals/nightshift-local-dev` and
-   the ORCA key (`nightshiftOrcaEs`) from `secret/kibana-issues/dev/kbn-evals/golden`, and checks
+   the ORCA key (`nightshiftOrcaEs.apiKey`) from `secret/kibana-issues/dev/kbn-evals/nightshift`, and checks
    the credential against sandbox-api.
 2. Writes a block between `# >>> nightshift local-dev ... >>>` markers to `config/kibana.dev.yml`
    (mode `0600`): the `nightshift.enabled` feature flag, the investigations, agentic investigations

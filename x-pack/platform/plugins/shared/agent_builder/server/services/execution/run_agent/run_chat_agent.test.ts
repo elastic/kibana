@@ -22,6 +22,7 @@ import {
   HookLifecycle,
   ToolOrigin,
   createAskUserQuestionStep,
+  platformCoreTools,
 } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
@@ -450,6 +451,65 @@ describe('runDefaultAgentMode', () => {
       expect(selectToolsMock).toHaveBeenCalledWith(
         expect.objectContaining({ capabilities: { attachmentTools: true, apiTools: true } })
       );
+    });
+  });
+
+  describe('connector prompt flags', () => {
+    const run = async ({
+      connectorIds,
+      staticToolIds,
+    }: {
+      connectorIds?: string[];
+      staticToolIds: string[];
+    }) => {
+      const context = createAgentHandlerContextMock();
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      getPendingTurnMock.mockReturnValue(undefined);
+      selectToolsMock.mockResolvedValue({
+        staticTools: staticToolIds.map((id) => ({ id })),
+        dynamicTools: [],
+      } as any);
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [], connector_ids: connectorIds },
+        },
+        context
+      );
+
+      return createPromptFactoryMock.mock.calls[0][0];
+    };
+
+    it('reports assigned connectors and a selected sml_search', async () => {
+      const params = await run({
+        connectorIds: ['c1'],
+        staticToolIds: [platformCoreTools.smlSearch],
+      });
+
+      expect(params.connectorsAssigned).toBe(true);
+      expect(params.smlSearchSelected).toBe(true);
+    });
+
+    it('reports no connectors when connector_ids is missing and no sml_search when it is not selected', async () => {
+      const params = await run({ staticToolIds: [] });
+
+      expect(params.connectorsAssigned).toBe(false);
+      expect(params.smlSearchSelected).toBe(false);
     });
   });
 
