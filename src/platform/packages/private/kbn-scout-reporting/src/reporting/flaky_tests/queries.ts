@@ -200,10 +200,15 @@ export const buildBranchStatsQuery = (
       `is_execution = CASE(${model.executionFilter}, 1, 0)`,
       `failed = CASE(is_execution == 1 AND ${model.failedExpression} == 1, 1, 0)`,
       `status = ${RUN_STATUS}`,
+      `days_ago = DATE_DIFF("day", @timestamp, TO_DATETIME(${quoteEsqlString(
+        scope.to.toISOString()
+      )}))`,
       ...judged.eval,
     ].join(', ')}`,
     'STATS builds = COUNT_DISTINCT(CASE(is_execution == 1, buildkite.build.id, NULL)),' +
       ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
+      ' failed_days_ago = VALUES(CASE(failed == 1, days_ago, NULL)),' +
+      ' ran_days_ago = VALUES(CASE(is_execution == 1, days_ago, NULL)),' +
       ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)),' +
       ' last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1,' +
       ' last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1,' +
@@ -413,6 +418,12 @@ export const fetchTestMetadata = async (
   );
 };
 
+/** `VALUES` gives a single value as itself and none as null. */
+const sortedDays = (value: number | number[] | null | undefined): number[] | undefined =>
+  value === null || value === undefined
+    ? undefined
+    : (Array.isArray(value) ? [...value] : [value]).sort((a, b) => a - b);
+
 /**
  * Per-branch build counts, latest run and whether every setup skipped it, for the given tests,
  * most failed builds first. Tests are grouped by execution model so that each one is counted the
@@ -431,6 +442,8 @@ export const fetchBranchStats = async (
         judged_pipeline?: string | null;
         builds: number;
         failed_builds: number;
+        failed_days_ago?: number | number[] | null;
+        ran_days_ago?: number | number[] | null;
         last_failed_at: string | null;
         last_failed_build_url: string | null;
         last_failed_job_id: string | null;
@@ -507,6 +520,8 @@ export const fetchBranchStats = async (
       skipped:
         record.latest_status === 'skipped' &&
         skipped.get(branchKey(record.test_id, scoped)) === true,
+      failedDaysAgo: sortedDays(record.failed_days_ago),
+      ranDaysAgo: sortedDays(record.ran_days_ago),
     });
     byTest.set(record.test_id, stats);
   }
