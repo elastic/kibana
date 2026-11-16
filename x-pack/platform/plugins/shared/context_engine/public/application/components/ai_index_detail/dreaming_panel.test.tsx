@@ -209,6 +209,91 @@ describe('DreamingPanel', () => {
     expect(screen.queryByTestId('contextAiIndexDreamingSave')).not.toBeInTheDocument();
   });
 
+  it('turns on enrichment with its prompts, keeping the rest of the config', async () => {
+    renderPanel(aiIndexWith(factsOnly, { sources: [{ type: 'esql', value: 'FROM crm' }] }));
+
+    expect(
+      screen.queryByTestId('contextDreamingConfigEnrichmentSelection')
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextDreamingConfigEnrichmentEnabled'));
+    expect(
+      screen.queryByTestId('contextDreamingConfigEnrichmentNoSources')
+    ).not.toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('contextDreamingConfigEnrichmentSelection'), {
+      target: { value: '  Customers with no tier.  ' },
+    });
+    fireEvent.change(screen.getByTestId('contextDreamingConfigEnrichmentImprovement'), {
+      target: { value: 'Their tier.' },
+    });
+    fireEvent.change(screen.getByTestId('contextDreamingConfigEnrichmentMaxDocuments'), {
+      target: { value: '5' },
+    });
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          facts: factsOnly.facts,
+          instructions: 'Record fixes.',
+          enrichment: {
+            enabled: true,
+            selection: 'Customers with no tier.',
+            improvement: 'Their tier.',
+            max_documents: 5,
+          },
+        }),
+      })
+    );
+  });
+
+  it('warns when enrichment is on but the AI index has no source to search', () => {
+    renderPanel(aiIndexWith(factsOnly));
+
+    fireEvent.click(screen.getByTestId('contextDreamingConfigEnrichmentEnabled'));
+
+    expect(screen.getByTestId('contextDreamingConfigEnrichmentNoSources')).toBeInTheDocument();
+  });
+
+  it('saves wiki pages alone, without facts or entities', async () => {
+    renderPanel(aiIndexWith({ enabled: true }));
+
+    fireEvent.click(screen.getByTestId('contextDreamingConfigWikiEnabled'));
+    fireEvent.change(screen.getByTestId('contextDreamingConfigWikiInstructions'), {
+      target: { value: 'One page per customer.' },
+    });
+    fireEvent.click(screen.getByTestId('contextDreamingConfigWikiResearch'));
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          wiki: { enabled: true, instructions: 'One page per customer.', research: false },
+        }),
+      })
+    );
+  });
+
+  it('shows the editor for a paused config that only builds wiki pages', () => {
+    renderPanel(aiIndexWith({ enabled: false, wiki: { enabled: true } }));
+
+    expect(screen.queryByTestId('contextAiIndexDreamingSetUp')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextDreamingConfigWikiInstructions')).toBeInTheDocument();
+  });
+
+  it('does not save an invalid enrichment config', () => {
+    renderPanel(aiIndexWith(factsOnly));
+
+    fireEvent.click(screen.getByTestId('contextDreamingConfigEnrichmentEnabled'));
+    fireEvent.change(screen.getByTestId('contextDreamingConfigEnrichmentRefreshAfter'), {
+      target: { value: '5m' },
+    });
+
+    expect(screen.getByText('Must be at least 15 minutes.')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
+  });
+
   it('lets a managed AI index’s dreaming be edited', () => {
     renderPanel(aiIndexWith({ ...factsOnly, entities: SUPPORT_ENTITIES }, { managed: true }));
 

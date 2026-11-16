@@ -1,0 +1,597 @@
+version: '1'
+name: __NAME__
+description: 'Builds wiki-style overview pages for a Context Engine AI index, as the AI index dreaming config describes: plans which pages the knowledge items that changed belong on, gathers the related knowledge items of each page, researches its topic in the sources, and writes it.'
+enabled: false
+tags:
+  - context-engine
+  - memory
+  - dreaming
+  - wiki
+  - scheduled
+settings:
+  timeout: '60m'
+  concurrency:
+    key: __CONCURRENCY_KEY__
+    strategy: drop
+    max: 1
+consts:
+  ai_index_id: __AI_INDEX_ID__
+  memories_index: __MEMORIES_INDEX__
+  connector_id: __CONNECTOR_ID__
+  instructions: __INSTRUCTIONS__
+  wiki_instructions: __WIKI_INSTRUCTIONS__
+  max_pages: __MAX_PAGES__
+  research: __RESEARCH__
+  # LiquidJS has no array literal, so `| default: []` does not produce an empty array.
+  no_items: []
+outputs:
+  - name: items
+    type: number
+  - name: pages
+    type: number
+  - name: created
+    type: number
+  - name: updated
+    type: number
+  - name: skipped
+    type: number
+  - name: resume_from
+    type: string
+  - name: resume_after_id
+    type: string
+triggers:
+  - type: scheduled
+    with:
+      every: '__INTERVAL_MINUTES__m'
+  - type: manual
+    inputs:
+      additionalProperties: false
+      properties:
+        dry_run:
+          type: boolean
+          default: false
+          description: Report what pages would be written, and write nothing. The run ends cancelled, so the next run reads the same items.
+        since:
+          type: string
+          maxLength: 64
+          description: Build pages for the knowledge items updated since this ISO 8601 time, instead of since the last successful run.
+steps:
+  - name: status
+    type: context-engine.getDreamingStatus
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source: wiki
+
+  - name: paused
+    type: if
+    condition: '${{ steps.status.output.dream != true }}'
+    steps:
+      - name: skip
+        type: workflow.output
+        status: cancelled
+        with:
+          items: 0
+          reason: '{{ steps.status.output.reason }}'
+
+  - name: last_run
+    type: workflow.getLastRun
+    with:
+      default_hours: 168
+      max_hours: 720
+
+  - name: resume
+    type: if
+    condition: '${{ inputs.since == blank and steps.last_run.output.last_success.execution_id != blank }}'
+    steps:
+      - name: last_output
+        type: kibana.request
+        with:
+          method: GET
+          path: '/s/{{ workflow.spaceId }}/api/workflows/executions/{{ steps.last_run.output.last_success.execution_id }}'
+          query:
+            includeOutput: true
+            omitStepExecutions: true
+
+  - name: read_items
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.memories_index }}'
+      ignore_unavailable: true
+      size: 500
+      sort:
+        - updated_at: asc
+        - id: asc
+      collapse:
+        field: id
+        inner_hits:
+          name: latest
+          size: 1
+          sort:
+            - updated_at: desc
+          _source:
+            - id
+            - type
+            - title
+            - description
+            - content
+            - updated_at
+            - permissions
+            - governance.lifecycle.status
+          docvalue_fields:
+            - field: expires_at
+              format: strict_date_time
+      _source:
+        - updated_at
+        - id
+      query:
+        bool:
+          filter:
+            - __MEMBER_TYPE_QUERY__
+            - bool:
+                should:
+                  - range:
+                      updated_at:
+                        gt: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
+                  - bool:
+                      filter:
+                        - term:
+                            updated_at: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
+                        - range:
+                            id:
+                              gt: '{% if inputs.since == blank %}{{ steps.last_output.output.context.output.resume_after_id }}{% endif %}'
+                minimum_should_match: 1
+            - bool:
+                should:
+                  - bool:
+                      must_not:
+                        nested:
+                          path: permissions.kibana.privileges
+                          query:
+                            match_all: {}
+                          ignore_unmapped: true
+                  - nested:
+                      path: permissions.kibana.privileges
+                      ignore_unmapped: true
+                      query:
+                        bool:
+                          should:
+                            - term:
+                                permissions.kibana.privileges.space: '{{ workflow.spaceId }}'
+                            - term:
+                                permissions.kibana.privileges.space: '*'
+                          minimum_should_match: 1
+                minimum_should_match: 1
+
+  - name: active
+    type: data.set
+    with:
+      items: >-
+        ${{ steps.read_items.output.hits.hits | map: "inner_hits.latest.hits.hits.first"
+        | reject_exp: "item", "item._source.governance.lifecycle.status == 'deleted' or item._source.governance.lifecycle.status == 'verification_failed' or item.fields.expires_at.first <= execution.startedAt"
+        | map: "_source" }}
+      resume_from: '{% if steps.read_items.output.hits.hits.size == 500 %}{{ steps.read_items.output.hits.hits.last._source.updated_at }}{% endif %}'
+      resume_after_id: '{% if steps.read_items.output.hits.hits.size == 500 %}{{ steps.read_items.output.hits.hits.last._source.id }}{% endif %}'
+      pages: 0
+      created: 0
+      updated: 0
+      skipped: 0
+      would_write: []
+
+  - name: research_sources
+    type: if
+    condition: '${{ consts.research == true and variables.items.size > 0 }}'
+    steps:
+      - name: sources
+        type: context-engine.listResearchSources
+        with:
+          ai_index_id: '{{ consts.ai_index_id }}'
+
+  - name: build
+    type: if
+    condition: '${{ variables.items.size > 0 }}'
+    steps:
+      - name: batches
+        type: foreach
+        foreach: >-
+          {%- assign batches = "" | split: "" -%}
+          {%- assign audiences = variables.items | group_by_exp: "item", "item.permissions | json" -%}
+          {%- for audience in audiences -%}
+          {%- assign chunks = audience.items | chunk: 50 -%}
+          {%- assign batches = batches | concat: chunks -%}
+          {%- endfor -%}
+          {{ batches | json }}
+        steps:
+          - name: read_pages
+            type: elasticsearch.search
+            with:
+              index: '{{ consts.memories_index }}'
+              ignore_unavailable: true
+              size: 200
+              sort:
+                - updated_at: desc
+              collapse:
+                field: id
+              _source:
+                - id
+                - title
+                - description
+                - attributes
+                - permissions
+                - governance.lifecycle.status
+              query:
+                bool:
+                  filter:
+                    - term:
+                        type: wiki.page
+                    - bool:
+                        should:
+                          - bool:
+                              must_not:
+                                nested:
+                                  path: permissions.kibana.privileges
+                                  query:
+                                    match_all: {}
+                                  ignore_unmapped: true
+                          - nested:
+                              path: permissions.kibana.privileges
+                              ignore_unmapped: true
+                              query:
+                                bool:
+                                  should:
+                                    - term:
+                                        permissions.kibana.privileges.space: '{{ workflow.spaceId }}'
+                                    - term:
+                                        permissions.kibana.privileges.space: '*'
+                                  minimum_should_match: 1
+                        minimum_should_match: 1
+
+          - name: plan_pages
+            type: ai.prompt
+            connector-id: '{{ consts.connector_id }}'
+            connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '30s'
+            with:
+              prompt: |
+                You organize the knowledge of an AI index into wiki pages: overview pages that each tie the knowledge items about one topic together.
+
+                ABOUT THE AI INDEX:
+
+                {{ consts.instructions | default: "Not described." }}
+
+                WHICH PAGES TO BUILD:
+
+                {{ consts.wiki_instructions | default: "One page for each important topic that several items are about, such as a customer, a product, a project or a recurring problem." }}
+
+                You are given ITEMS (knowledge items that are new or changed) and the EXISTING PAGES.
+
+                Decide which pages the ITEMS belong on:
+                - Update an existing page an item belongs on: repeat its id as ref, with its title.
+                - Create a page for a topic that at least two items are about and no existing page covers: give a new key like "new:1".
+                - A page is about one topic: its title names the topic, and its description says in one line what it covers.
+                - seed_ids: the ids of the ITEMS that belong on the page. An item can belong on more than one page.
+                - member_query: a few keywords that describe the topic, used to find older knowledge items that also belong on the page.
+                - Leave out items that belong on no page.
+
+                Return at most {{ consts.max_pages }} pages, the most useful first. An empty list is a valid answer.
+
+                EXISTING PAGES (one per line, none when empty):
+                {%- assign audience = foreach.item.first.permissions | json %}
+                {%- for hit in steps.read_pages.output.hits.hits %}
+                {%- assign page_audience = hit._source.permissions | json %}
+                {%- unless hit._source.governance.lifecycle.status == 'deleted' or page_audience != audience %}
+                {{ hit._source | pick: "id", "title", "description" | json }}
+                {%- endunless %}
+                {%- endfor %}
+
+                ITEMS (one per line):
+                {%- for item in foreach.item %}
+                {"id": {{ item.id | json }}, "type": {{ item.type | json }}, "title": {{ item.title | json }}{% if item.description %}, "description": {{ item.description | json }}{% endif %}{% if item.content %}, "content": {{ item.content | truncate: 300 | json }}{% endif %}}
+                {%- endfor %}
+              schema:
+                type: object
+                properties:
+                  pages:
+                    type: array
+                    description: The pages to create or update, the most useful first.
+                    items:
+                      type: object
+                      properties:
+                        ref:
+                          type: string
+                          description: The id of an existing page, or a new key like "new:1".
+                        title:
+                          type: string
+                          description: The name of the topic.
+                        description:
+                          type: string
+                          description: One line on what the page covers.
+                        seed_ids:
+                          type: array
+                          description: The ids of the ITEMS that belong on the page.
+                          items:
+                            type: string
+                        member_query:
+                          type: string
+                          description: A few keywords that describe the topic.
+                      required:
+                        - ref
+                        - title
+                        - seed_ids
+                required:
+                  - pages
+
+          - name: pages
+            type: foreach
+            foreach: '{{ steps.plan_pages.output.content.pages | slice: 0, consts.max_pages | json }}'
+            steps:
+              - name: page_budget
+                type: if
+                condition: '${{ variables.pages < consts.max_pages }}'
+                steps:
+                  - name: gather
+                    type: context-engine.gatherWikiPage
+                    with:
+                      ai_index_id: '{{ consts.ai_index_id }}'
+                      page_ref: '{{ foreach.item.ref }}'
+                      seed_ids: '${{ foreach.item.seed_ids | default: consts.no_items }}'
+                      member_query: '{{ foreach.item.member_query | default: foreach.item.title }}'
+
+                  - name: has_members
+                    type: if
+                    condition: '${{ steps.gather.output.members.size > 0 }}'
+                    steps:
+                      - name: start_page
+                        type: data.set
+                        with:
+                          pages: '${{ variables.pages | plus: 1 }}'
+                          evidence: '${{ consts.no_items }}'
+                          searches_run: '${{ consts.no_items }}'
+                          research_errors: '${{ consts.no_items }}'
+                          research_done: false
+
+                      - name: researchable
+                        type: if
+                        condition: '${{ consts.research == true and steps.sources.output.usable > 0 }}'
+                        steps:
+                          - name: research
+                            type: while
+                            condition: '${{ variables.research_done != true }}'
+                            max-iterations:
+                              limit: 3
+                              on-limit: continue
+                            steps:
+                              - name: plan
+                                type: ai.prompt
+                                connector-id: '{{ consts.connector_id }}'
+                                connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+                                on-failure:
+                                  retry:
+                                    max-attempts: 2
+                                    delay: '30s'
+                                with:
+                                  prompt: |
+                                    You research the sources of an AI index for information that belongs on one of its wiki pages.
+
+                                    PAGE: {{ foreach.item.title }}{% if foreach.item.description %}: {{ foreach.item.description }}{% endif %}
+
+                                    GOAL: what the sources say about the topic of the page that its members do not.
+
+                                    MEMBERS (the knowledge items already on the page, one per line):
+                                    {%- for member in steps.gather.output.members %}
+                                    - {{ member.title }}{% if member.description %}: {{ member.description }}{% endif %}
+                                    {%- endfor %}
+
+                                    SOURCES (search one by its ref):
+                                    {%- for source in steps.sources.output.sources %}
+                                    {%- unless source.error %}
+                                    - ref: {{ source.ref }}
+                                      {{ source.type }}: {{ source.name }}. {{ source.description }}
+                                    {%- if source.type == 'esql' %}
+                                      Search it with query: a few keywords.
+                                    {%- endif %}
+                                    {%- for sub_action in source.sub_actions %}
+                                      sub_action {{ sub_action.name }}: {{ sub_action.description }}
+                                      params:
+                                    {{ sub_action.params }}
+                                    {%- endfor %}
+                                    {%- if source.guidance %}
+                                      How to use it: {{ source.guidance }}
+                                    {%- endif %}
+                                    {%- endunless %}
+                                    {%- endfor %}
+
+                                    SEARCHES RUN SO FAR (one per line, none when empty):
+                                    {%- for search in variables.searches_run %}
+                                    {{ search | json }}
+                                    {%- endfor %}
+
+                                    FAILED SEARCHES OF THE LAST ROUND (one per line, none when empty):
+                                    {%- for error in variables.research_errors %}
+                                    {{ error | json }}
+                                    {%- endfor %}
+
+                                    FOUND SO FAR (one per line, none when empty):
+                                    {%- for item in variables.evidence %}
+                                    {{ item | json }}
+                                    {%- endfor %}
+
+                                    Return up to 5 searches that would find what the page lacks.
+                                    - For an ES|QL source, give query: a few keywords, such as names, ids and terms of the topic. Not a sentence.
+                                    - For a connector source, give sub_action, one of its sub-actions, and params: its parameters as a JSON object string, such as {"query": "Acme"}.
+                                    - Build on what was found: read a page, file or record whose id a search returned.
+                                    - Fix a failed search, or try another source; never repeat a search that already ran.
+
+                                    Set done to true, with no searches, when what was found is enough or the sources hold nothing more about the topic.
+                                  schema:
+                                    type: object
+                                    properties:
+                                      searches:
+                                        type: array
+                                        description: The searches to run next. Empty when done.
+                                        items:
+                                          type: object
+                                          properties:
+                                            source:
+                                              type: string
+                                              description: The ref of a source.
+                                            query:
+                                              type: string
+                                              description: For an ES|QL source, the keywords to search for.
+                                            sub_action:
+                                              type: string
+                                              description: For a connector source, one of its sub-actions.
+                                            params:
+                                              type: string
+                                              description: For a connector source, the parameters of the sub-action as a JSON object string.
+                                          required:
+                                            - source
+                                      done:
+                                        type: boolean
+                                        description: True when no more searches are needed.
+                                    required:
+                                      - searches
+                                      - done
+
+                              - name: search
+                                type: if
+                                condition: '${{ steps.plan.output.content.searches.size > 0 }}'
+                                steps:
+                                  - name: run_searches
+                                    type: context-engine.searchResearchSources
+                                    with:
+                                      ai_index_id: '{{ consts.ai_index_id }}'
+                                      searches: '${{ steps.plan.output.content.searches | slice: 0, 5 }}'
+                                      skip_evidence_ids: '${{ variables.evidence | map: "id" }}'
+
+                                  - name: collect
+                                    type: data.set
+                                    with:
+                                      evidence: '${{ variables.evidence | concat: steps.run_searches.output.evidence }}'
+                                      searches_run: '${{ variables.searches_run | concat: steps.plan.output.content.searches }}'
+                                      research_errors: '${{ steps.run_searches.output.errors }}'
+
+                              - name: decide
+                                type: data.set
+                                with:
+                                  research_done: '${{ steps.plan.output.content.done == true or steps.plan.output.content.searches.size == 0 }}'
+
+                      - name: write_page
+                        type: ai.prompt
+                        connector-id: '{{ consts.connector_id }}'
+                        connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+                        on-failure:
+                          retry:
+                            max-attempts: 2
+                            delay: '30s'
+                        with:
+                          prompt: |
+                            You write one wiki page of an AI index: an overview that ties the knowledge items about one topic together into a single readable document.
+
+                            ABOUT THE AI INDEX:
+
+                            {{ consts.instructions | default: "Not described." }}
+
+                            WHICH PAGES TO BUILD:
+
+                            {{ consts.wiki_instructions | default: "One page for each important topic that several items are about, such as a customer, a product, a project or a recurring problem." }}
+
+                            PAGE: {{ foreach.item.title }}{% if foreach.item.description %}: {{ foreach.item.description }}{% endif %}
+
+                            CURRENT PAGE (none when the page is new):
+                            {%- if steps.gather.output.page %}
+                            {{ steps.gather.output.page | json }}
+                            {%- endif %}
+
+                            MEMBERS (the knowledge items the page ties together, one per line):
+                            {%- for member in steps.gather.output.members %}
+                            {{ member | json }}
+                            {%- endfor %}
+
+                            EVIDENCE (what the sources of the AI index say about the topic, one per line, none when empty):
+                            {%- for item in variables.evidence %}
+                            {{ item | json }}
+                            {%- endfor %}
+
+                            Write the page in Markdown:
+                            - Open with a short summary of the topic, then sections that group what the members and the evidence say about it.
+                            - State the knowledge itself, with every name, number, code and date exactly as given. Never add what neither the members nor the evidence say.
+                            - When members or evidence disagree, say so, and prefer the most recent.
+                            - Link a member where you use what it says, as [its title](ki://<its id>).
+                            - When the page exists, keep what is still true, fold in what is new, and drop what the members no longer say.
+                            - Do not mention evidence ids, searches, or where evidence was found.
+                            - title: the name of the topic. description: one line on what the page covers.
+                            - member_ids: the ids of the MEMBERS the page covers. Leave out members that do not belong on it.
+                            - citations: the ids of the EVIDENCE the page uses.
+                          schema:
+                            type: object
+                            properties:
+                              title:
+                                type: string
+                                description: The name of the topic.
+                              description:
+                                type: string
+                                description: One line on what the page covers.
+                              content:
+                                type: string
+                                description: The page, in Markdown.
+                              member_ids:
+                                type: array
+                                description: The ids of the MEMBERS the page covers.
+                                items:
+                                  type: string
+                              citations:
+                                type: array
+                                description: The ids of the EVIDENCE the page uses.
+                                items:
+                                  type: string
+                            required:
+                              - title
+                              - content
+                              - member_ids
+
+                      - name: apply_page
+                        type: context-engine.applyWikiPage
+                        with:
+                          ai_index_id: '{{ consts.ai_index_id }}'
+                          page_ref: '{{ steps.gather.output.page.id | default: foreach.item.ref }}'
+                          page: '${{ steps.write_page.output.content }}'
+                          evidence: '${{ variables.evidence }}'
+                          dry_run: '${{ inputs.dry_run == true }}'
+
+                      - name: tally
+                        type: data.set
+                        with:
+                          created: '${{ variables.created | plus: steps.apply_page.output.tally.created }}'
+                          updated: '${{ variables.updated | plus: steps.apply_page.output.tally.updated }}'
+                          skipped: '${{ variables.skipped | plus: steps.apply_page.output.tally.skipped }}'
+                          would_write: '${{ variables.would_write | concat: steps.apply_page.output.would_write }}'
+
+  - name: dry_run_result
+    type: if
+    condition: '${{ inputs.dry_run == true }}'
+    steps:
+      - name: dry_run_output
+        type: workflow.output
+        status: cancelled
+        with:
+          items: '${{ variables.items | size | default: 0 }}'
+          pages: '${{ variables.pages | default: 0 }}'
+          created: '${{ variables.created | default: 0 }}'
+          updated: '${{ variables.updated | default: 0 }}'
+          skipped: '${{ variables.skipped | default: 0 }}'
+          would_write: '${{ variables.would_write }}'
+          reason: 'Dry run: nothing was written.'
+
+  - name: output_result
+    type: workflow.output
+    with:
+      items: '${{ variables.items | size | default: 0 }}'
+      pages: '${{ variables.pages | default: 0 }}'
+      created: '${{ variables.created | default: 0 }}'
+      updated: '${{ variables.updated | default: 0 }}'
+      skipped: '${{ variables.skipped | default: 0 }}'
+      resume_from: '{{ variables.resume_from }}'
+      resume_after_id: '{{ variables.resume_after_id }}'

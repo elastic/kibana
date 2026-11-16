@@ -9,17 +9,28 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_WIKI_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import type { ContextEngineDreamingWorkflowTemplateValues } from '@kbn/workflows/managed';
+import type {
+  ContextEngineEnrichmentWorkflowTemplateValues,
+  ContextEngineWikiWorkflowTemplateValues,
+} from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
   DEFAULT_DREAMING_INTERVAL,
+  DEFAULT_ENRICHMENT_MAX_DOCUMENTS,
+  DEFAULT_WIKI_MAX_PAGES,
   MIN_DREAMING_INTERVAL_MINUTES,
-  dreamingBuildsAnything,
   dreamingTypesOf,
+  dreamsAtAll,
+  dreamsEnrichment,
+  dreamsOnMemories,
+  dreamsWiki,
+  kiTypeFiltersOf,
   type AiIndexDreamingConfig,
 } from '../../common/dreaming';
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
@@ -45,8 +56,8 @@ import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
 
 export interface DreamingScheduleService {
   /**
-   * Installs and enables the dreaming and trace dreaming workflows of an AI index that dreams,
-   * and removes them from one that does not.
+   * Installs and enables the dreaming workflows an AI index's dreaming config turns on, and
+   * removes the others.
    */
   reconcile(params: {
     aiIndex: AiIndexItem;
@@ -76,17 +87,30 @@ export const traceDreamingBatchWorkflowIdFor = (aiIndexId: string, spaceId: stri
 export const relationshipsWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
   `${CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
 
-/** Whether an AI index has dreaming on and configured to build something. */
+/** The id of the workflow that improves the knowledge items of an AI index from its sources. */
+export const enrichmentWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
+  `${CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
+
+/** The id of the workflow that builds the wiki pages of an AI index. */
+export const wikiWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
+  `${CONTEXT_ENGINE_WIKI_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
+
+/** Whether an AI index has dreaming on and configured to build facts or entities. */
 export const shouldDream = ({ dreaming }: { dreaming?: AiIndexDreamingConfig }): boolean =>
-  dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
+  dreamsOnMemories(dreaming);
+
+/** The template values of every dreaming workflow of an AI index. */
+export type DreamingTemplateValues = ContextEngineEnrichmentWorkflowTemplateValues &
+  ContextEngineWikiWorkflowTemplateValues;
 
 /** The dreaming workflow template values for an AI index. */
 export const dreamingTemplateValuesFor = (
   aiIndex: AiIndexItem,
   dreaming: AiIndexDreamingConfig,
   spaceId: string
-): ContextEngineDreamingWorkflowTemplateValues => {
+): DreamingTemplateValues => {
   const { facts, entities, relationships } = dreamingTypesOf(dreaming);
+  const { enrichment, wiki } = dreaming;
   return {
     aiIndexId: aiIndex.id,
     instanceKey: managedWorkflowIdSuffixFor(aiIndex.id, spaceId),
@@ -99,6 +123,17 @@ export const dreamingTemplateValuesFor = (
     factTypes: facts,
     entityTypes: entities,
     relationshipTypes: relationships,
+    enrichment: {
+      selection: enrichment?.selection ?? '',
+      improvement: enrichment?.improvement ?? '',
+      maxDocuments: enrichment?.max_documents ?? DEFAULT_ENRICHMENT_MAX_DOCUMENTS,
+    },
+    wiki: {
+      instructions: wiki?.instructions ?? '',
+      kiTypes: kiTypeFiltersOf(wiki),
+      maxPages: wiki?.max_pages ?? DEFAULT_WIKI_MAX_PAGES,
+      research: wiki?.research ?? true,
+    },
   };
 };
 
@@ -108,24 +143,42 @@ const DREAMING_WORKFLOWS = [
     label: 'dreaming',
     workflowIdFor: dreamingWorkflowIdFor,
     attach: true,
+    isOn: dreamsOnMemories,
   },
   {
     definitionId: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
     label: 'the trace dreaming batch workflow',
     workflowIdFor: traceDreamingBatchWorkflowIdFor,
     attach: false,
+    isOn: dreamsOnMemories,
   },
   {
     definitionId: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
     label: 'trace dreaming',
     workflowIdFor: traceDreamingWorkflowIdFor,
     attach: true,
+    isOn: dreamsOnMemories,
   },
   {
     definitionId: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
     label: 'relationships',
     workflowIdFor: relationshipsWorkflowIdFor,
     attach: true,
+    isOn: dreamsOnMemories,
+  },
+  {
+    definitionId: CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID,
+    label: 'enrichment',
+    workflowIdFor: enrichmentWorkflowIdFor,
+    attach: true,
+    isOn: dreamsEnrichment,
+  },
+  {
+    definitionId: CONTEXT_ENGINE_WIKI_WORKFLOW_ID,
+    label: 'wiki pages',
+    workflowIdFor: wikiWorkflowIdFor,
+    attach: true,
+    isOn: dreamsWiki,
   },
 ] as const;
 
@@ -186,19 +239,28 @@ export const createDreamingScheduleService = ({
   const automationFor = (workflow: DreamingWorkflow, aiIndexId: string, spaceId: string) =>
     ({ type: 'workflow', value: workflow.workflowIdFor(aiIndexId, spaceId) } as const);
 
+  const removeWorkflow = async (
+    workflow: DreamingWorkflow,
+    aiIndex: AiIndexItem,
+    spaceId: string,
+    request: KibanaRequest
+  ) => {
+    await uninstall(workflow, aiIndex.id, spaceId, request);
+    if (workflow.attach && !aiIndex.managed) {
+      await getAiIndexService().removeAutomation(
+        aiIndex.id,
+        spaceId,
+        automationFor(workflow, aiIndex.id, spaceId)
+      );
+    }
+  };
+
   return {
     async reconcile({ aiIndex, spaceId, request }) {
       const { id: aiIndexId, dreaming } = aiIndex;
-      if (!dreaming || !shouldDream(aiIndex)) {
+      if (!dreaming || !dreamsAtAll(dreaming)) {
         for (const workflow of DREAMING_WORKFLOWS) {
-          await uninstall(workflow, aiIndexId, spaceId, request);
-          if (workflow.attach && !aiIndex.managed) {
-            await getAiIndexService().removeAutomation(
-              aiIndexId,
-              spaceId,
-              automationFor(workflow, aiIndexId, spaceId)
-            );
-          }
+          await removeWorkflow(workflow, aiIndex, spaceId, request);
         }
         log.debug(() => `Removed dreaming for AI index '${aiIndexId}' in space '${spaceId}'`);
         return;
@@ -214,6 +276,10 @@ export const createDreamingScheduleService = ({
       const values = dreamingTemplateValuesFor(aiIndex, dreaming, spaceId);
       const client = await getManagedWorkflowsClient();
       for (const workflow of DREAMING_WORKFLOWS) {
+        if (!workflow.isOn(dreaming)) {
+          await removeWorkflow(workflow, aiIndex, spaceId, request);
+          continue;
+        }
         await client.install(workflow.definitionId, {
           spaceId,
           workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),

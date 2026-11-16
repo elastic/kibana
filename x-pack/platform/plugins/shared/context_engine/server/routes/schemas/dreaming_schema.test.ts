@@ -98,4 +98,96 @@ describe('dreamingConfigSchema', () => {
       dreamingConfigSchema.validate({ ...config, instructions: 'x'.repeat(8193) })
     ).toThrow();
   });
+
+  describe('enrichment and wiki pages', () => {
+    const enrichment = {
+      enabled: true,
+      selection: 'Customers with no tier.',
+      improvement: 'The tier and the renewal date.',
+      ki_types: ['entity.customer', 'fact.*'],
+      max_documents: 20,
+      refresh_after: '7d',
+    };
+    const wiki = {
+      enabled: true,
+      instructions: 'One page per customer.',
+      ki_types: ['fact.*'],
+      max_pages: 10,
+      research: false,
+    };
+
+    it('accepts them as they are, or null', () => {
+      expect(dreamingConfigSchema.validate({ ...config, enrichment, wiki })).toEqual({
+        ...config,
+        enrichment,
+        wiki,
+      });
+      expect(
+        dreamingConfigSchema.validate({ enabled: true, enrichment: null, wiki: null })
+      ).toEqual({ enabled: true, enrichment: null, wiki: null });
+    });
+
+    it('rejects a KI type filter that is neither a type nor a prefix', () => {
+      expect(() =>
+        dreamingConfigSchema.validate({ ...config, enrichment: { ...enrichment, ki_types: ['*'] } })
+      ).toThrow('Must be a KI type');
+      expect(() =>
+        dreamingConfigSchema.validate({ ...config, wiki: { ...wiki, ki_types: ['Entity.X'] } })
+      ).toThrow('Must be a KI type');
+    });
+
+    it('rejects a KI type filter listed twice', () => {
+      expect(() =>
+        dreamingConfigSchema.validate({
+          ...config,
+          enrichment: { ...enrichment, ki_types: ['fact.*', 'fact.*'] },
+        })
+      ).toThrow("Enrichment lists KI type 'fact.*' twice.");
+    });
+
+    it('bounds how much one run does', () => {
+      expect(() =>
+        dreamingConfigSchema.validate({
+          ...config,
+          enrichment: { ...enrichment, max_documents: 51 },
+        })
+      ).toThrow();
+      expect(() =>
+        dreamingConfigSchema.validate({
+          ...config,
+          enrichment: { ...enrichment, max_documents: 0 },
+        })
+      ).toThrow();
+      expect(() =>
+        dreamingConfigSchema.validate({ ...config, wiki: { ...wiki, max_pages: 26 } })
+      ).toThrow();
+    });
+
+    it('rejects a refresh shorter than the dreaming floor, and bounds the prompts', () => {
+      expect(() =>
+        dreamingConfigSchema.validate({
+          ...config,
+          enrichment: { ...enrichment, refresh_after: '5m' },
+        })
+      ).toThrow();
+      expect(() =>
+        dreamingConfigSchema.validate({
+          ...config,
+          enrichment: { ...enrichment, improvement: 'x'.repeat(8193) },
+        })
+      ).toThrow();
+      expect(() =>
+        dreamingConfigSchema.validate({
+          ...config,
+          wiki: { ...wiki, instructions: 'x'.repeat(8193) },
+        })
+      ).toThrow();
+    });
+
+    it('requires enabled', () => {
+      expect(() =>
+        dreamingConfigSchema.validate({ ...config, wiki: { research: true } })
+      ).toThrow();
+    });
+  });
 });

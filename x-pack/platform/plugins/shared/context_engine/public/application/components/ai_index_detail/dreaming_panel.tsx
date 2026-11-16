@@ -34,7 +34,10 @@ import React, { useMemo, useState } from 'react';
 import {
   DEFAULT_DREAMING_INTERVAL,
   DREAMING_DISABLED,
+  isDreamingConfigured,
   type AiIndexDreamingConfig,
+  type DreamingEnrichmentConfig,
+  type DreamingWikiConfig,
 } from '../../../../common/dreaming';
 import { matchingTemplateId } from '../../../../common/dreaming_templates';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
@@ -51,6 +54,15 @@ import {
   typesOfDraft,
   type DreamingConfigDraft,
 } from '../dreaming_config/dreaming_config_editor';
+import {
+  EnrichmentEditor,
+  WikiEditor,
+  isEnrichmentValid,
+  isWikiValid,
+  kiTypeSuggestions,
+  normalizedEnrichment,
+  normalizedWiki,
+} from '../dreaming_config/enrichment_and_wiki_editor';
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 
 /** Maximum height of the dreaming config JSON, in pixels, before it scrolls. */
@@ -107,14 +119,20 @@ const DreamingJsonModal = ({
 interface DreamingEditorProps {
   aiIndexId: string;
   dreaming: AiIndexDreamingConfig;
+  /** Whether the AI index has a source enrichment can search. */
+  hasSources: boolean;
 }
 
-const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
+const sameJson = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
+
+const DreamingEditor = ({ aiIndexId, dreaming, hasSources }: DreamingEditorProps) => {
   const saved = useMemo(() => draftOf(dreaming), [dreaming]);
   const [edited, setEdited] = useState<DreamingConfigDraft>();
   const [editedInstructions, setEditedInstructions] = useState<string>();
   const [editedEnabled, setEditedEnabled] = useState<boolean>();
   const [editedInterval, setEditedInterval] = useState<string>();
+  const [editedEnrichment, setEditedEnrichment] = useState<DreamingEnrichmentConfig>();
+  const [editedWiki, setEditedWiki] = useState<DreamingWikiConfig>();
   const { saveConfig, isSaving } = useSaveDreamingConfig();
   const { templates } = useAllDreamingTemplates();
 
@@ -125,23 +143,38 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
   const savedInterval = dreaming.schedule?.interval ?? DEFAULT_DREAMING_INTERVAL;
   const interval = editedInterval ?? savedInterval;
   const intervalError = validateDreamingInterval(interval.trim());
+  const enrichment = editedEnrichment ?? dreaming.enrichment ?? undefined;
+  const wiki = editedWiki ?? dreaming.wiki ?? undefined;
   const isDirty =
     (edited !== undefined && !sameTypes(edited, saved)) ||
     instructions !== savedInstructions ||
     enabled !== dreaming.enabled ||
-    interval.trim() !== savedInterval;
+    interval.trim() !== savedInterval ||
+    (editedEnrichment !== undefined &&
+      !sameJson(
+        normalizedEnrichment(editedEnrichment),
+        dreaming.enrichment ?? { enabled: false }
+      )) ||
+    (editedWiki !== undefined &&
+      !sameJson(normalizedWiki(editedWiki), dreaming.wiki ?? { enabled: false }));
+  const buildsAnything =
+    draftBuildsAnything(draft) || enrichment?.enabled === true || wiki?.enabled === true;
+  const isValid = intervalError === undefined && isEnrichmentValid(enrichment) && isWikiValid(wiki);
   const suggestedId = matchingTemplateId(dreaming, templates);
   const suggestedEntities = templates.find(({ id }) => id === suggestedId)?.dreaming.entities;
+  const suggestions = kiTypeSuggestions(draft);
 
   const discard = () => {
     setEdited(undefined);
     setEditedInstructions(undefined);
     setEditedEnabled(undefined);
     setEditedInterval(undefined);
+    setEditedEnrichment(undefined);
+    setEditedWiki(undefined);
   };
 
   const save = async () => {
-    const { instructions: _, schedule: __, ...rest } = dreaming;
+    const { instructions: _, schedule: __, enrichment: ___, wiki: ____, ...rest } = dreaming;
     const trimmed = instructions.trim();
     const config: AiIndexDreamingConfig = {
       ...rest,
@@ -149,6 +182,8 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
       schedule: { interval: interval.trim() },
       ...(trimmed && { instructions: trimmed }),
       ...typesOfDraft(draft),
+      ...(enrichment && { enrichment: normalizedEnrichment(enrichment) }),
+      ...(wiki && { wiki: normalizedWiki(wiki) }),
     };
     if (await saveConfig({ aiIndexId, config })) {
       discard();
@@ -220,6 +255,15 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
         onChange={setEdited}
         {...(suggestedEntities && { suggestedEntities })}
       />
+      <EuiHorizontalRule margin="xl" />
+      <EnrichmentEditor
+        enrichment={enrichment}
+        onChange={setEditedEnrichment}
+        kiTypeSuggestions={suggestions}
+        hasSources={hasSources}
+      />
+      <EuiHorizontalRule margin="xl" />
+      <WikiEditor wiki={wiki} onChange={setEditedWiki} kiTypeSuggestions={suggestions} />
       {isDirty && (
         <>
           <EuiHorizontalRule margin="l" />
@@ -236,7 +280,7 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
                 fill
                 onClick={save}
                 isLoading={isSaving}
-                isDisabled={!draftBuildsAnything(draft) || intervalError !== undefined}
+                isDisabled={!buildsAnything || !isValid}
                 data-test-subj="contextAiIndexDreamingSave"
               >
                 {i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.save', {
@@ -264,7 +308,7 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
   const [isJsonOpen, setIsJsonOpen] = useState(false);
   const { dreaming: savedDreaming, isLoading } = useAiIndexDreaming(aiIndex.id, { enabled: true });
   const dreaming = savedDreaming ?? DREAMING_DISABLED;
-  const isSetUp = dreaming.enabled || draftBuildsAnything(draftOf(dreaming));
+  const isSetUp = isDreamingConfigured(dreaming);
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextAiIndexDreamingPanel">
@@ -302,7 +346,12 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
       {isLoading ? (
         <EuiSkeletonText lines={3} data-test-subj="contextAiIndexDreamingLoading" />
       ) : isSetUp ? (
-        <DreamingEditor key={JSON.stringify(dreaming)} aiIndexId={aiIndex.id} dreaming={dreaming} />
+        <DreamingEditor
+          key={JSON.stringify(dreaming)}
+          aiIndexId={aiIndex.id}
+          dreaming={dreaming}
+          hasSources={aiIndex.sources.length > 0}
+        />
       ) : (
         <>
           <KbnInfoCallout

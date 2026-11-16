@@ -10,6 +10,7 @@ import type {
   DreamingKiStepDependencies,
   DreamingStepDependencies,
   FeedbackAnalysisStepDependencies,
+  ResearchStepDependencies,
 } from './helpers';
 import type { VerifyKi } from './verify_ki';
 import { getCreateKiStepDefinition } from './create_ki';
@@ -21,18 +22,30 @@ import { getApplyDreamChangesStepDefinition } from './apply_dream_changes';
 import { getApplyDreamRelationshipsStepDefinition } from './apply_dream_relationships';
 import { getDreamingStatusStepDefinition } from './get_dreaming_status';
 import { getReadTraceTranscriptsStepDefinition } from './read_trace_transcripts';
+import {
+  getListResearchSourcesStepDefinition,
+  getSearchResearchSourcesStepDefinition,
+} from './research_steps';
+import {
+  getApplyEnrichmentStepDefinition,
+  getReadKisStepDefinition,
+  getSelectEnrichmentCandidatesStepDefinition,
+} from './enrichment_steps';
+import { getApplyWikiPageStepDefinition, getGatherWikiPageStepDefinition } from './wiki_steps';
 
-/** Registers the KI, feedback analysis and dreaming workflow steps. */
+/** Registers the KI, feedback analysis, dreaming, enrichment and wiki workflow steps. */
 export const registerStepDefinitions = ({
   workflowsExtensions,
   feedbackAnalysis,
   dreaming,
+  research,
   verifyKi,
   ...deps
 }: DreamingKiStepDependencies & {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   feedbackAnalysis: FeedbackAnalysisStepDependencies;
   dreaming: DreamingStepDependencies;
+  research: ResearchStepDependencies;
   verifyKi: VerifyKi;
 }): void => {
   workflowsExtensions.registerStepDefinition(getCreateKiStepDefinition({ ...deps, verifyKi }));
@@ -44,4 +57,11 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(getReadTraceTranscriptsStepDefinition(dreaming));
   workflowsExtensions.registerStepDefinition(getApplyDreamChangesStepDefinition(deps));
   workflowsExtensions.registerStepDefinition(getApplyDreamRelationshipsStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(getListResearchSourcesStepDefinition(research));
+  workflowsExtensions.registerStepDefinition(getSearchResearchSourcesStepDefinition(research));
+  workflowsExtensions.registerStepDefinition(getReadKisStepDefinition(research));
+  workflowsExtensions.registerStepDefinition(getSelectEnrichmentCandidatesStepDefinition(research));
+  workflowsExtensions.registerStepDefinition(getApplyEnrichmentStepDefinition(research));
+  workflowsExtensions.registerStepDefinition(getGatherWikiPageStepDefinition(research));
+  workflowsExtensions.registerStepDefinition(getApplyWikiPageStepDefinition(research));
 };

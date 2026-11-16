@@ -337,6 +337,17 @@ export class ContextEnginePlugin
         isMemoryEnabled: () => this.isGlobalMemoryEnabled(),
         checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
       },
+      research: {
+        getAiIndexService,
+        isDreamingAvailable,
+        checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
+        checkWritePrivilege,
+        getActions: async () => {
+          const [, startDeps] = await coreSetup.getStartServices();
+          return startDeps.actions;
+        },
+        logger: this.logger.get('dreaming_research'),
+      },
     });
 
     // Read-only Signals routes (reads run as the current user, scoped to the active space).

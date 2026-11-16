@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { dreamsAtAll } from '../../common/dreaming';
 import type { AiIndexChangeHandler } from '../ai_indices/changes';
-import { shouldDream } from './schedule';
 import type { DreamingScheduleService } from './schedule';
 
 export const DREAMING_CHANGE_HANDLER_ID = 'dreaming_schedule';
@@ -27,7 +27,7 @@ export const createDreamingChangeHandler = (
       await getScheduleService().remove({ aiIndexId, spaceId, request });
       return;
     }
-    if (shouldDream(current) && !(await isDreamingAvailable(spaceId))) {
+    if (dreamsAtAll(current.dreaming) && !(await isDreamingAvailable(spaceId))) {
       return;
     }
     await getScheduleService().reconcile({ aiIndex: current, spaceId, request });

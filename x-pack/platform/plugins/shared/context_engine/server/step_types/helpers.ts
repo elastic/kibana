@@ -7,6 +7,7 @@
 
 import type { AuditLogger } from '@kbn/core/server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { StepContext } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -15,7 +16,7 @@ import {
   CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
-import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import type { AiIndexDest, AiIndexItem } from '../../common/http_api/ai_indices';
 import type { KiWriter } from '../ai_indices/ki_revision';
 import { samePermissions, type KiPermissions } from '../dreaming/permissions';
 import {
@@ -55,6 +56,19 @@ export interface DreamingStepDependencies {
   isMemoryEnabled: () => Promise<boolean>;
   /** Whether the request has the Context Engine read API privilege in this space. */
   checkReadPrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
+}
+
+/** Dependencies of the enrichment, wiki and research steps. */
+export interface ResearchStepDependencies {
+  getAiIndexService: () => AiIndexService;
+  /** Whether Context Engine, and its global memory setting, are on in this space. */
+  isDreamingAvailable: (spaceId: string) => Promise<boolean>;
+  /** Whether the request has the Context Engine read API privilege in this space. */
+  checkReadPrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
+  /** Whether the request has the Context Engine write API privilege in this space. */
+  checkWritePrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
+  getActions: () => Promise<ActionsPluginStart>;
+  logger: Logger;
 }
 
 /** Dependencies injected into the feedback analysis step definition factories. */
@@ -340,6 +354,39 @@ export const assertSameMemoryPermissions = (
       message:
         "The memories don't all have the same permissions: each dreaming batch must hold one audience's memories",
     });
+  }
+};
+
+/** Fails the step when the workflow user lacks the Context Engine read API privilege. */
+export const assertKiReadPrivilege = async (
+  checkReadPrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>,
+  request: KibanaRequest,
+  spaceId: string
+): Promise<void> => {
+  if (!(await checkReadPrivilege(request, spaceId))) {
+    throw new ExecutionError({
+      type: 'PermissionError',
+      message: 'Insufficient privileges to read AI indices',
+    });
+  }
+};
+
+/** Reads an AI index with everything the server holds, failing the step when it does not exist. */
+export const getAiIndexOrFail = async (
+  getAiIndexService: () => AiIndexService,
+  aiIndexId: string,
+  spaceId: string
+): Promise<AiIndexItem> => {
+  try {
+    return await getAiIndexService().get(aiIndexId, spaceId);
+  } catch (error) {
+    if (error instanceof AiIndexNotFoundError) {
+      throw new ExecutionError({
+        type: 'NotFoundError',
+        message: `AI index '${aiIndexId}' not found`,
+      });
+    }
+    throw error;
   }
 };
 

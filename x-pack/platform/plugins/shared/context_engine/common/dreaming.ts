@@ -87,6 +87,68 @@ export interface DreamingRelationshipType {
   description?: string;
 }
 
+/** The KI type of a wiki page, an overview that ties related knowledge items together. */
+export const WIKI_PAGE_KI_TYPE = 'wiki.page';
+/** When enrichment last looked for more information to add to a KI. */
+export const ENRICHED_AT_ATTRIBUTE = 'memory.enriched_at';
+/** How many knowledge items a wiki page ties together. */
+export const WIKI_MEMBER_COUNT_ATTRIBUTE = 'wiki.member_count';
+/** The `relates_to` description of a wiki page's reference to one of its members. */
+export const WIKI_MEMBER_REFERENCE_DESCRIPTION = 'member';
+
+/**
+ * A KI type filter of enrichment and wiki: an exact type such as `entity.customer`, or every type
+ * under a prefix such as `fact.*`.
+ */
+export const DREAMING_KI_TYPE_FILTER_PATTERN = /^[a-z0-9_]+(\.[a-z0-9_]+)*(\.\*)?$/;
+export const MAX_DREAMING_KI_TYPE_FILTERS = 20;
+/** The KI types enrichment improves, and wiki pages are built from, when none are configured. */
+export const DEFAULT_DREAMING_KI_TYPE_FILTERS: readonly string[] = ['fact.*', 'entity.*'];
+/** KI types neither enrichment nor wiki pages read, whatever the filters say. */
+export const DREAMING_EXCLUDED_KI_TYPES: readonly string[] = [RELATIONSHIP_KI_TYPE];
+
+export const DEFAULT_ENRICHMENT_MAX_DOCUMENTS = 10;
+export const MAX_ENRICHMENT_MAX_DOCUMENTS = 50;
+export const DEFAULT_ENRICHMENT_REFRESH_AFTER = '30d';
+export const DEFAULT_WIKI_MAX_PAGES = 5;
+export const MAX_WIKI_MAX_PAGES = 25;
+
+/**
+ * Pulls more information into existing knowledge items from the AI index's sources: its ES|QL
+ * sources' indices and its connectors.
+ */
+export interface DreamingEnrichmentConfig {
+  /** Whether enrichment runs on the dreaming schedule. */
+  enabled: boolean;
+  /** Which knowledge items are worth improving, as the selecting model reads it. */
+  selection?: string;
+  /** What to improve them in: what to look for in the sources, and what to add. */
+  improvement?: string;
+  /** The KI types to improve. Missing or empty: {@link DEFAULT_DREAMING_KI_TYPE_FILTERS}. */
+  ki_types?: string[];
+  /** At most how many knowledge items one run improves. */
+  max_documents?: number;
+  /** How long an improved KI that has not changed is left alone, such as `30d`. */
+  refresh_after?: string;
+}
+
+/**
+ * Builds wiki-style overview pages that tie related knowledge items together, adding what the AI
+ * index's sources say about their topic.
+ */
+export interface DreamingWikiConfig {
+  /** Whether wiki pages are built on the dreaming schedule. */
+  enabled: boolean;
+  /** Which pages to build and how to write them, as the model reads it. */
+  instructions?: string;
+  /** The KI types pages are built from. Missing or empty: {@link DEFAULT_DREAMING_KI_TYPE_FILTERS}. */
+  ki_types?: string[];
+  /** At most how many pages one run creates or updates. */
+  max_pages?: number;
+  /** Whether pages also draw on the AI index's sources. Defaults to `true`. */
+  research?: boolean;
+}
+
 /**
  * What an AI index learns from its memories: facts, entities, and the relationships between them.
  * A kind with no types configured is not built.
@@ -109,6 +171,10 @@ export interface AiIndexDreamingConfig {
    * also link to the entities they are about, with the built-in `about` type.
    */
   relationships?: DreamingRelationshipType[] | null;
+  /** Improving existing knowledge items from the sources. Missing: off. */
+  enrichment?: DreamingEnrichmentConfig | null;
+  /** Building wiki pages from the knowledge items. Missing: off. */
+  wiki?: DreamingWikiConfig | null;
 }
 
 /** The parts of a dreaming config that say what it builds. */
@@ -150,12 +216,49 @@ export const dreamingTypesOf = ({
  * dreaming runs on its schedule.
  */
 export const isDreamingConfigured = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
-  dreaming !== undefined && (dreaming.enabled || dreamingBuildsAnything(dreaming));
+  dreaming !== undefined &&
+  (dreaming.enabled ||
+    dreamingBuildsAnything(dreaming) ||
+    dreaming.enrichment?.enabled === true ||
+    dreaming.wiki?.enabled === true);
+
+/** Whether dreaming runs on memories and traces: it is on and builds facts or entities. */
+export const dreamsOnMemories = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
+  dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
+
+/** Whether dreaming improves existing knowledge items from the sources. */
+export const dreamsEnrichment = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
+  dreaming?.enabled === true && dreaming.enrichment?.enabled === true;
+
+/** Whether dreaming builds wiki pages. */
+export const dreamsWiki = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
+  dreaming?.enabled === true && dreaming.wiki?.enabled === true;
+
+/** Whether dreaming runs any of its workflows. */
+export const dreamsAtAll = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
+  dreamsOnMemories(dreaming) || dreamsEnrichment(dreaming) || dreamsWiki(dreaming);
+
+/** The KI type filters of enrichment or wiki pages, with the defaults when none are set. */
+export const kiTypeFiltersOf = (
+  config: Pick<DreamingEnrichmentConfig, 'ki_types'> | null | undefined
+): string[] =>
+  config?.ki_types && config.ki_types.length > 0
+    ? config.ki_types
+    : [...DEFAULT_DREAMING_KI_TYPE_FILTERS];
+
+/** Whether a KI type passes a list of KI type filters. */
+export const matchesKiTypeFilters = (type: string, filters: readonly string[]): boolean =>
+  !DREAMING_EXCLUDED_KI_TYPES.includes(type) &&
+  filters.some((filter) =>
+    filter.endsWith('.*') ? type.startsWith(filter.slice(0, -1)) : type === filter
+  );
 
 const DREAMING_AUTOMATION_WORKFLOW_ID_PREFIXES: readonly string[] = [
   'system-context-engine-dreaming-',
   'system-context-engine-trace-dreaming-',
   'system-context-engine-relationships-',
+  'system-context-engine-enrichment-',
+  'system-context-engine-wiki-',
 ];
 
 /** Whether an automation is one of the workflows dreaming attaches to an AI index. */
@@ -203,6 +306,32 @@ export const validateDreamingTypes = ({
   const duplicateRelationship = findDuplicate(relationshipTypes);
   if (duplicateRelationship !== undefined) {
     return `Relationship type '${duplicateRelationship}' is listed twice.`;
+  }
+  return undefined;
+};
+
+/**
+ * What is wrong with a whole dreaming config beyond the shape of its fields, or `undefined`: the
+ * checks of {@link validateDreamingTypes}, and a KI type filter of enrichment or wiki listed twice.
+ */
+export const validateDreamingConfig = (
+  config: Pick<
+    AiIndexDreamingConfig,
+    'facts' | 'entities' | 'relationships' | 'enrichment' | 'wiki'
+  >
+): string | undefined => {
+  const typesError = validateDreamingTypes(config);
+  if (typesError !== undefined) {
+    return typesError;
+  }
+  for (const [kind, block] of [
+    ['Enrichment', config.enrichment],
+    ['Wiki', config.wiki],
+  ] as const) {
+    const duplicate = findDuplicate(block?.ki_types ?? []);
+    if (duplicate !== undefined) {
+      return `${kind} lists KI type '${duplicate}' twice.`;
+    }
   }
   return undefined;
 };

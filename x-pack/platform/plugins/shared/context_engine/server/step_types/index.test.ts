@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
@@ -12,7 +13,7 @@ import { registerStepDefinitions } from '.';
 import { mockKiStepTelemetry } from './test_utils';
 
 describe('registerStepDefinitions', () => {
-  it('registers the KI, feedback analysis and dreaming step definitions', () => {
+  it('registers the KI, feedback analysis, dreaming, enrichment and wiki step definitions', () => {
     const definitions: Array<{ id: string }> = [];
     const workflowsExtensions = {
       registerStepDefinition: jest.fn((definition: { id: string }) => definitions.push(definition)),
@@ -42,6 +43,14 @@ describe('registerStepDefinitions', () => {
         isMemoryEnabled: async () => true,
         checkReadPrivilege: async () => true,
       },
+      research: {
+        getAiIndexService: () => ({} as AiIndexService),
+        isDreamingAvailable: async () => true,
+        checkReadPrivilege: async () => true,
+        checkWritePrivilege: async () => true,
+        getActions: async () => ({} as ActionsPluginStart),
+        logger: telemetry.logger,
+      },
     });
 
     expect(definitions.map((definition) => definition.id)).toEqual([
@@ -54,6 +63,13 @@ describe('registerStepDefinitions', () => {
       'context-engine.readTraceTranscripts',
       'context-engine.applyDreamChanges',
       'context-engine.applyDreamRelationships',
+      'context-engine.listResearchSources',
+      'context-engine.searchResearchSources',
+      'context-engine.readKis',
+      'context-engine.selectEnrichmentCandidates',
+      'context-engine.applyEnrichment',
+      'context-engine.gatherWikiPage',
+      'context-engine.applyWikiPage',
     ]);
   });
 });
