@@ -30,7 +30,9 @@ const toValidSize = (bytes: number | null | undefined): number =>
  *
  * Owns the key scheme (`${type}_${stepExecutionId}`) so raw key strings never
  * appear outside this class. Callers work with `(id, type)` pairs.
- * Inputs and outputs share one byte budget.
+ *
+ * Currently only outputs are cached (inputs go to state only). Caching inputs
+ * later requires no API change — just remove the guard in `StepIoService.write`.
  */
 export class StepIoCache {
   private readonly lru: LRUCache<string, CacheEntry>;

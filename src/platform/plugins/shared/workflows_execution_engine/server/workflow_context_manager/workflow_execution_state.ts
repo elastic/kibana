@@ -64,10 +64,12 @@ export class WorkflowExecutionState {
 
   private lastFailedStepContext: FailedStepContext | undefined = undefined;
 
-  /** Live IO waiting to be flushed. After a confirmed flush, fitting values live in the LRU. */
+  /** Live IO for all steps — includes in-flight writes and resume-loaded inputs. */
   private stepIo = new Map<string, { input?: JsonValue; output?: JsonValue | null }>();
   /** Pending IO changes waiting for the next `flushStepChanges` call. */
   private pendingStepIo = new Map<string, { input?: JsonValue; output?: JsonValue | null }>();
+  /** Finished steps whose persisted input is not in `stepIo`; see `isInputEvicted`. */
+  private evictedInputIds = new Set<string>();
 
   /**
    * Maps step IDs to their execution IDs in chronological order. Enables
@@ -237,6 +239,7 @@ export class WorkflowExecutionState {
     io: { input?: JsonValue; output?: JsonValue | null }
   ): void {
     this.stepIoVersion++;
+    if (io.input !== undefined) this.evictedInputIds.delete(stepExecutionId);
     const existing = this.stepIo.get(stepExecutionId) ?? {};
     this.stepIo.set(stepExecutionId, { ...existing, ...io });
     const existingPending = this.pendingStepIo.get(stepExecutionId) ?? {};
@@ -255,23 +258,43 @@ export class WorkflowExecutionState {
   }
 
   /**
-   * Drops flushed inputs and outputs from the live map. Fitting values stay in
-   * the LRU and are read back from there. Outputs of `data.set` steps are kept:
-   * they are small variable maps that every later node reads through `variables`,
-   * so dropping them would force a refetch per node run.
+   * Whether this step's input was dropped from the live map after flush (or skipped
+   * at resume) and must be re-fetched from Elasticsearch to be read.
+   */
+  public isInputEvicted(stepExecutionId: string): boolean {
+    return this.evictedInputIds.has(stepExecutionId);
+  }
+
+  /**
+   * Drops flushed IO from the live map for each ID, freeing memory. The `output` is
+   * always dropped. The `input` is kept only while the step is still running, so
+   * foreach context re-evaluation across loop iterations keeps working; once the step
+   * is finished its input is dropped too and re-fetched on demand by `StepIoService`.
+   * Outputs of `data.set` steps are kept: they are small variable maps that every later
+   * node reads through `variables`, so dropping them would force a refetch per node run.
    */
   public clearFlushedOutputs(ids: ReadonlyArray<string>): void {
     for (const id of ids) {
       const io = this.stepIo.get(id);
       if (io) {
+        const keepInput = io.input !== undefined && !this.isStepFinished(id);
         const keepOutput = io.output !== undefined && this.dataSetExecutionIds.has(id);
-        if (keepOutput) {
-          this.stepIo.set(id, { output: io.output });
+        if (io.input !== undefined && !keepInput) this.evictedInputIds.add(id);
+        if (keepInput || keepOutput) {
+          this.stepIo.set(id, {
+            ...(keepInput ? { input: io.input } : {}),
+            ...(keepOutput ? { output: io.output } : {}),
+          });
         } else {
           this.stepIo.delete(id);
         }
       }
     }
+  }
+
+  private isStepFinished(stepExecutionId: string): boolean {
+    const status = this.stepExecutions.get(stepExecutionId)?.status;
+    return status !== undefined && isTerminalStatus(status);
   }
 
   // ----- ES persistence primitives -----------------------------------------
@@ -384,8 +407,8 @@ export class WorkflowExecutionState {
 
   /**
    * Flushes pending step-metadata and IO changes to Elasticsearch in a single
-   * `bulkUpsert`. After the write is confirmed, drops inputs and outputs from
-   * the live map. Fitting values remain in the LRU.
+   * `bulkUpsert`. After the write is confirmed, clears output from the live
+   * IO map to free memory (inputs of still-running steps are kept for ongoing loop re-evaluation).
    */
   public async flushStepChanges(): Promise<void> {
     const metadataChanges = this.drainPendingStepChanges();
@@ -412,7 +435,8 @@ export class WorkflowExecutionState {
       this.requeueStepChanges(metadataChanges, ioChanges);
       throw error;
     }
-    // Skip values rewritten while the bulk write was in flight; the next flush persists them.
+    // Skip outputs rewritten while the bulk write was in flight; the next flush persists them.
+    // Metadata-only ids are included so inputs drop once a step's terminal status is flushed.
     this.clearFlushedOutputs([...allIds].filter((id) => !this.pendingStepIo.has(id)));
   }
 
@@ -447,8 +471,11 @@ export class WorkflowExecutionState {
   }
 
   /**
-   * Loads step execution documents from ES at resume time. Fetches metadata
-   * only. Inputs and outputs are read on demand through `StepIoService`.
+   * Loads step execution documents from ES at resume time. Fetches all fields
+   * except `output` (on-demand rehydration handles outputs via `StepIoService`).
+   * Inputs of unfinished steps are loaded into the live IO map but NOT into the
+   * pending map — they are already persisted in ES. Finished steps' inputs are
+   * fetched on demand by `StepIoService`.
    */
   public async load(): Promise<void> {
     const stepExecutionIds = this.getWorkflowExecutionStepExecutionIds();
@@ -461,11 +488,21 @@ export class WorkflowExecutionState {
     const docs = await this.stepExecutionRepository.getStepExecutionsByIds(
       stepExecutionIds,
       undefined,
-      ['input', 'output']
+      ['output']
     );
 
     const metadata: StepExecutionMetadata[] = [];
     for (const doc of docs) {
+      if (doc.input !== undefined) {
+        // Only running steps (e.g. an active foreach) need their input resident.
+        const finished = doc.status !== undefined && isTerminalStatus(doc.status);
+        if (finished) {
+          this.evictedInputIds.add(doc.id);
+        } else {
+          const existing = this.stepIo.get(doc.id) ?? {};
+          this.stepIo.set(doc.id, { ...existing, input: doc.input });
+        }
+      }
       const { input: _input, output: _output, ...meta } = doc;
       metadata.push(meta as StepExecutionMetadata);
     }
