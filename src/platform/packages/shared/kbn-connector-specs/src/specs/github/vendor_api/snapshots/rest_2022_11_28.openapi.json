@@ -1,5 +1,12 @@
 {
   "components": {
+    "headers": {
+      "link": {
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
     "parameters": {
       "issue-number": {
         "in": "path",
@@ -9,12 +16,35 @@
           "type": "integer"
         }
       },
+      "issue-timeline-exclude": {
+        "in": "query",
+        "name": "exclude",
+        "schema": {
+          "type": "string"
+        }
+      },
       "owner": {
         "in": "path",
         "name": "owner",
         "required": true,
         "schema": {
           "type": "string"
+        }
+      },
+      "page": {
+        "in": "query",
+        "name": "page",
+        "schema": {
+          "default": 1,
+          "type": "integer"
+        }
+      },
+      "per-page": {
+        "in": "query",
+        "name": "per_page",
+        "schema": {
+          "default": 30,
+          "type": "integer"
         }
       },
       "pull-number": {
@@ -140,6 +170,84 @@
       }
     },
     "schemas": {
+      "added-to-project-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "project_card": {
+            "properties": {
+              "column_name": {
+                "type": "string"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "previous_column_name": {
+                "type": "string"
+              },
+              "project_id": {
+                "type": "integer"
+              },
+              "project_url": {
+                "format": "uri",
+                "type": "string"
+              },
+              "url": {
+                "format": "uri",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "url",
+              "project_id",
+              "project_url",
+              "column_name"
+            ],
+            "type": "object"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Added to Project Issue Event",
+        "type": "object"
+      },
       "author-association": {
         "enum": [
           "COLLABORATOR",
@@ -200,6 +308,412 @@
           }
         },
         "title": "Basic Error",
+        "type": "object"
+      },
+      "blocked-by-added-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "blocked_by": {
+            "$ref": "#/components/schemas/nullable-issue-reference"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "blocked_by",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Blocked-by Added Issue Event",
+        "type": "object"
+      },
+      "blocked-by-removed-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "blocked_by": {
+            "$ref": "#/components/schemas/nullable-issue-reference"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "blocked_by",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Blocked-by Removed Issue Event",
+        "type": "object"
+      },
+      "blocking-added-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "blocking": {
+            "$ref": "#/components/schemas/nullable-issue-reference"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "blocking",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Blocking Added Issue Event",
+        "type": "object"
+      },
+      "blocking-removed-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "blocking": {
+            "$ref": "#/components/schemas/nullable-issue-reference"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "blocking",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Blocking Removed Issue Event",
+        "type": "object"
+      },
+      "commit-comment": {
+        "properties": {
+          "author_association": {
+            "$ref": "#/components/schemas/author-association"
+          },
+          "body": {
+            "type": "string"
+          },
+          "commit_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "line": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "path": {
+            "nullable": true,
+            "type": "string"
+          },
+          "position": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "reactions": {
+            "$ref": "#/components/schemas/reaction-rollup"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/nullable-simple-user"
+          }
+        },
+        "required": [
+          "url",
+          "html_url",
+          "id",
+          "node_id",
+          "user",
+          "position",
+          "line",
+          "path",
+          "commit_id",
+          "body",
+          "author_association",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Commit Comment",
+        "type": "object"
+      },
+      "converted-note-to-issue-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/integration"
+          },
+          "project_card": {
+            "properties": {
+              "column_name": {
+                "type": "string"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "previous_column_name": {
+                "type": "string"
+              },
+              "project_id": {
+                "type": "integer"
+              },
+              "project_url": {
+                "format": "uri",
+                "type": "string"
+              },
+              "url": {
+                "format": "uri",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "url",
+              "project_id",
+              "project_url",
+              "column_name"
+            ],
+            "type": "object"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Converted Note to Issue Issue Event",
+        "type": "object"
+      },
+      "demilestoned-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "milestone": {
+            "properties": {
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "title"
+            ],
+            "type": "object"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "milestone",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Demilestoned Issue Event",
         "type": "object"
       },
       "enterprise": {
@@ -455,6 +969,103 @@
           "object"
         ],
         "title": "Git Reference",
+        "type": "object"
+      },
+      "integration": {
+        "nullable": true,
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "events": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "external_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "installations_count": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "owner": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/simple-user"
+              },
+              {
+                "$ref": "#/components/schemas/enterprise"
+              }
+            ]
+          },
+          "permissions": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "properties": {
+              "checks": {
+                "type": "string"
+              },
+              "contents": {
+                "type": "string"
+              },
+              "deployments": {
+                "type": "string"
+              },
+              "issues": {
+                "type": "string"
+              },
+              "metadata": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "owner",
+          "name",
+          "description",
+          "external_url",
+          "html_url",
+          "created_at",
+          "updated_at",
+          "permissions",
+          "events"
+        ],
+        "title": "GitHub app",
         "type": "object"
       },
       "issue": {
@@ -947,6 +1558,200 @@
         "title": "Issue Type",
         "type": "object"
       },
+      "issue-type-added-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/nullable-issue-event-intent"
+          },
+          "issue_type": {
+            "$ref": "#/components/schemas/issue-type-webhook"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "issue_type",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Issue Type Added Issue Event",
+        "type": "object"
+      },
+      "issue-type-changed-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/nullable-issue-event-intent"
+          },
+          "issue_type": {
+            "$ref": "#/components/schemas/issue-type-webhook"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "prev_issue_type": {
+            "$ref": "#/components/schemas/issue-type-webhook"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "issue_type",
+          "prev_issue_type",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Issue Type Changed Issue Event",
+        "type": "object"
+      },
+      "issue-type-removed-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/nullable-issue-event-intent"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "prev_issue_type": {
+            "$ref": "#/components/schemas/issue-type-webhook"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "prev_issue_type",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Issue Type Removed Issue Event",
+        "type": "object"
+      },
+      "issue-type-webhook": {
+        "nullable": true,
+        "properties": {
+          "color": {
+            "enum": [
+              "gray",
+              "blue",
+              "green",
+              "yellow",
+              "orange",
+              "red",
+              "pink",
+              "purple"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "Issue Type",
+        "type": "object"
+      },
       "label": {
         "properties": {
           "archived_at": {
@@ -1001,6 +1806,71 @@
         "title": "Label",
         "type": "object"
       },
+      "labeled-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/nullable-issue-event-intent"
+          },
+          "label": {
+            "properties": {
+              "color": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "color"
+            ],
+            "type": "object"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Labeled Issue Event",
+        "type": "object"
+      },
       "link": {
         "properties": {
           "href": {
@@ -1011,6 +1881,193 @@
           "href"
         ],
         "title": "Link",
+        "type": "object"
+      },
+      "locked-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "lock_reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "lock_reason",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Locked Issue Event",
+        "type": "object"
+      },
+      "milestoned-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "milestone": {
+            "properties": {
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "title"
+            ],
+            "type": "object"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "milestone",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Milestoned Issue Event",
+        "type": "object"
+      },
+      "moved-column-in-project-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "project_card": {
+            "properties": {
+              "column_name": {
+                "type": "string"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "previous_column_name": {
+                "type": "string"
+              },
+              "project_id": {
+                "type": "integer"
+              },
+              "project_url": {
+                "format": "uri",
+                "type": "string"
+              },
+              "url": {
+                "format": "uri",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "url",
+              "project_id",
+              "project_url",
+              "column_name"
+            ],
+            "type": "object"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Moved Column in Project Issue Event",
         "type": "object"
       },
       "nullable-integration": {
@@ -1193,6 +2250,81 @@
           "reason"
         ],
         "title": "Minimized Issue Comment",
+        "type": "object"
+      },
+      "nullable-issue-event-intent": {
+        "nullable": true,
+        "properties": {
+          "confidence": {
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "rationale": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "title": "Issue Event Intent",
+        "type": "object"
+      },
+      "nullable-issue-reference": {
+        "nullable": true,
+        "properties": {
+          "issue_type": {
+            "nullable": true,
+            "properties": {
+              "color": {
+                "nullable": true,
+                "type": "string"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "node_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "node_id",
+              "name"
+            ],
+            "title": "Issue Type",
+            "type": "object"
+          },
+          "number": {
+            "type": "integer"
+          },
+          "repository": {
+            "$ref": "#/components/schemas/simple-repository"
+          },
+          "state": {
+            "type": "string"
+          },
+          "state_reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "number",
+          "title",
+          "state",
+          "repository",
+          "issue_type"
+        ],
+        "title": "Issue Reference",
         "type": "object"
       },
       "nullable-license-simple": {
@@ -1516,6 +2648,106 @@
           "type"
         ],
         "title": "Team Simple",
+        "type": "object"
+      },
+      "parent-issue-added-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "parent_issue": {
+            "$ref": "#/components/schemas/nullable-issue-reference"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "parent_issue",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Parent-issue Added Issue Event",
+        "type": "object"
+      },
+      "parent-issue-removed-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "parent_issue": {
+            "$ref": "#/components/schemas/nullable-issue-reference"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "parent_issue",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Parent-issue Removed Issue Event",
         "type": "object"
       },
       "pull-request": {
@@ -1898,6 +3130,214 @@
           "sha"
         ],
         "title": "Pull Request Merge Result",
+        "type": "object"
+      },
+      "pull-request-review-comment": {
+        "properties": {
+          "_links": {
+            "properties": {
+              "html": {
+                "properties": {
+                  "href": {
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "href"
+                ],
+                "type": "object"
+              },
+              "pull_request": {
+                "properties": {
+                  "href": {
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "href"
+                ],
+                "type": "object"
+              },
+              "self": {
+                "properties": {
+                  "href": {
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "href"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "self",
+              "html",
+              "pull_request"
+            ],
+            "type": "object"
+          },
+          "author_association": {
+            "$ref": "#/components/schemas/author-association"
+          },
+          "body": {
+            "type": "string"
+          },
+          "body_html": {
+            "type": "string"
+          },
+          "body_text": {
+            "type": "string"
+          },
+          "commit_id": {
+            "type": "string"
+          },
+          "copilot_code_review_sources": {
+            "items": {
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "SKILL",
+                    "MCP",
+                    "CUSTOM_INSTRUCTIONS"
+                  ],
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "name"
+              ],
+              "type": "object"
+            },
+            "maxItems": 16,
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "diff_hunk": {
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "in_reply_to_id": {
+            "type": "integer"
+          },
+          "is_copilot_code_review": {
+            "type": "boolean"
+          },
+          "line": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "original_commit_id": {
+            "type": "string"
+          },
+          "original_line": {
+            "type": "integer"
+          },
+          "original_position": {
+            "type": "integer"
+          },
+          "original_start_line": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer"
+          },
+          "pull_request_review_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "pull_request_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "reactions": {
+            "$ref": "#/components/schemas/reaction-rollup"
+          },
+          "side": {
+            "default": "RIGHT",
+            "enum": [
+              "LEFT",
+              "RIGHT"
+            ],
+            "type": "string"
+          },
+          "start_line": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "start_side": {
+            "default": "RIGHT",
+            "enum": [
+              "LEFT",
+              "RIGHT"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "subject_type": {
+            "enum": [
+              "line",
+              "file"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/nullable-simple-user"
+          }
+        },
+        "required": [
+          "url",
+          "id",
+          "node_id",
+          "pull_request_review_id",
+          "diff_hunk",
+          "path",
+          "commit_id",
+          "original_commit_id",
+          "user",
+          "body",
+          "created_at",
+          "updated_at",
+          "html_url",
+          "pull_request_url",
+          "author_association",
+          "_links"
+        ],
+        "title": "Pull Request Review Comment",
         "type": "object"
       },
       "pull-request-simple": {
@@ -2292,6 +3732,146 @@
           "rocket"
         ],
         "title": "Reaction Rollup",
+        "type": "object"
+      },
+      "removed-from-project-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "project_card": {
+            "properties": {
+              "column_name": {
+                "type": "string"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "previous_column_name": {
+                "type": "string"
+              },
+              "project_id": {
+                "type": "integer"
+              },
+              "project_url": {
+                "format": "uri",
+                "type": "string"
+              },
+              "url": {
+                "format": "uri",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "url",
+              "project_id",
+              "project_url",
+              "column_name"
+            ],
+            "type": "object"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Removed from Project Issue Event",
+        "type": "object"
+      },
+      "renamed-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "rename": {
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "from",
+              "to"
+            ],
+            "type": "object"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rename",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Renamed Issue Event",
         "type": "object"
       },
       "repository": {
@@ -2811,6 +4391,188 @@
         },
         "type": "object"
       },
+      "review-dismissed-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "dismissed_review": {
+            "properties": {
+              "dismissal_commit_id": {
+                "type": "string"
+              },
+              "dismissal_message": {
+                "nullable": true,
+                "type": "string"
+              },
+              "review_id": {
+                "type": "integer"
+              },
+              "state": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "state",
+              "review_id",
+              "dismissal_message"
+            ],
+            "type": "object"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dismissed_review",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Review Dismissed Issue Event",
+        "type": "object"
+      },
+      "review-request-removed-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "requested_reviewer": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "requested_team": {
+            "$ref": "#/components/schemas/team"
+          },
+          "review_requester": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "review_requester",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Review Request Removed Issue Event",
+        "type": "object"
+      },
+      "review-requested-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "requested_reviewer": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "requested_team": {
+            "$ref": "#/components/schemas/team"
+          },
+          "review_requester": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "review_requester",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Review Requested Issue Event",
+        "type": "object"
+      },
       "scim-error": {
         "properties": {
           "detail": {
@@ -2844,6 +4606,215 @@
       },
       "secret-scanning-push-protection-bypass-placeholder-id": {
         "type": "string"
+      },
+      "simple-repository": {
+        "properties": {
+          "archive_url": {
+            "type": "string"
+          },
+          "assignees_url": {
+            "type": "string"
+          },
+          "blobs_url": {
+            "type": "string"
+          },
+          "branches_url": {
+            "type": "string"
+          },
+          "collaborators_url": {
+            "type": "string"
+          },
+          "comments_url": {
+            "type": "string"
+          },
+          "commits_url": {
+            "type": "string"
+          },
+          "compare_url": {
+            "type": "string"
+          },
+          "contents_url": {
+            "type": "string"
+          },
+          "contributors_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "deployments_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "downloads_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "events_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "fork": {
+            "type": "boolean"
+          },
+          "forks_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "git_commits_url": {
+            "type": "string"
+          },
+          "git_refs_url": {
+            "type": "string"
+          },
+          "git_tags_url": {
+            "type": "string"
+          },
+          "hooks_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "issue_comment_url": {
+            "type": "string"
+          },
+          "issue_events_url": {
+            "type": "string"
+          },
+          "issues_url": {
+            "type": "string"
+          },
+          "keys_url": {
+            "type": "string"
+          },
+          "labels_url": {
+            "type": "string"
+          },
+          "languages_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "merges_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "milestones_url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "notifications_url": {
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "private": {
+            "type": "boolean"
+          },
+          "pulls_url": {
+            "type": "string"
+          },
+          "releases_url": {
+            "type": "string"
+          },
+          "stargazers_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "statuses_url": {
+            "type": "string"
+          },
+          "subscribers_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "subscription_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "tags_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "teams_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "trees_url": {
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "archive_url",
+          "assignees_url",
+          "blobs_url",
+          "branches_url",
+          "collaborators_url",
+          "comments_url",
+          "commits_url",
+          "compare_url",
+          "contents_url",
+          "contributors_url",
+          "deployments_url",
+          "description",
+          "downloads_url",
+          "events_url",
+          "fork",
+          "forks_url",
+          "full_name",
+          "git_commits_url",
+          "git_refs_url",
+          "git_tags_url",
+          "hooks_url",
+          "html_url",
+          "id",
+          "node_id",
+          "issue_comment_url",
+          "issue_events_url",
+          "issues_url",
+          "keys_url",
+          "labels_url",
+          "languages_url",
+          "merges_url",
+          "milestones_url",
+          "name",
+          "notifications_url",
+          "owner",
+          "private",
+          "pulls_url",
+          "releases_url",
+          "stargazers_url",
+          "statuses_url",
+          "subscribers_url",
+          "subscription_url",
+          "tags_url",
+          "teams_url",
+          "trees_url",
+          "url"
+        ],
+        "title": "Simple Repository",
+        "type": "object"
       },
       "simple-user": {
         "properties": {
@@ -2947,6 +4918,159 @@
           "url"
         ],
         "title": "Simple User",
+        "type": "object"
+      },
+      "state-change-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/nullable-issue-event-intent"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "state_reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "State Change Issue Event",
+        "type": "object"
+      },
+      "sub-issue-added-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "sub_issue": {
+            "$ref": "#/components/schemas/nullable-issue-reference"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sub_issue",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Sub-issue Added Issue Event",
+        "type": "object"
+      },
+      "sub-issue-removed-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "sub_issue": {
+            "$ref": "#/components/schemas/nullable-issue-reference"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sub_issue",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Sub-issue Removed Issue Event",
         "type": "object"
       },
       "sub-issues-summary": {
@@ -3153,6 +5277,777 @@
           "type"
         ],
         "title": "Team Simple",
+        "type": "object"
+      },
+      "timeline-assigned-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "assignee": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/nullable-issue-event-intent"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app",
+          "assignee"
+        ],
+        "title": "Timeline Assigned Issue Event",
+        "type": "object"
+      },
+      "timeline-comment-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "author_association": {
+            "$ref": "#/components/schemas/author-association"
+          },
+          "body": {
+            "type": "string"
+          },
+          "body_html": {
+            "type": "string"
+          },
+          "body_text": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "issue_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "minimized": {
+            "$ref": "#/components/schemas/nullable-issue-comment-minimized"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "pin": {
+            "$ref": "#/components/schemas/nullable-pinned-issue-comment"
+          },
+          "reactions": {
+            "$ref": "#/components/schemas/reaction-rollup"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/simple-user"
+          }
+        },
+        "required": [
+          "event",
+          "actor",
+          "id",
+          "node_id",
+          "html_url",
+          "issue_url",
+          "author_association",
+          "user",
+          "url",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Timeline Comment Event",
+        "type": "object"
+      },
+      "timeline-commit-commented-event": {
+        "properties": {
+          "comments": {
+            "items": {
+              "$ref": "#/components/schemas/commit-comment"
+            },
+            "type": "array"
+          },
+          "commit_id": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          }
+        },
+        "title": "Timeline Commit Commented Event",
+        "type": "object"
+      },
+      "timeline-committed-event": {
+        "properties": {
+          "author": {
+            "properties": {
+              "date": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "email",
+              "name",
+              "date"
+            ],
+            "type": "object"
+          },
+          "committer": {
+            "properties": {
+              "date": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "email",
+              "name",
+              "date"
+            ],
+            "type": "object"
+          },
+          "event": {
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "parents": {
+            "items": {
+              "properties": {
+                "html_url": {
+                  "format": "uri",
+                  "type": "string"
+                },
+                "sha": {
+                  "type": "string"
+                },
+                "url": {
+                  "format": "uri",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "sha",
+                "url",
+                "html_url"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "sha": {
+            "type": "string"
+          },
+          "tree": {
+            "properties": {
+              "sha": {
+                "type": "string"
+              },
+              "url": {
+                "format": "uri",
+                "type": "string"
+              }
+            },
+            "required": [
+              "sha",
+              "url"
+            ],
+            "type": "object"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "verification": {
+            "properties": {
+              "payload": {
+                "nullable": true,
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "signature": {
+                "nullable": true,
+                "type": "string"
+              },
+              "verified": {
+                "type": "boolean"
+              },
+              "verified_at": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "verified",
+              "reason",
+              "signature",
+              "payload",
+              "verified_at"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "sha",
+          "node_id",
+          "url",
+          "html_url",
+          "author",
+          "committer",
+          "tree",
+          "message",
+          "parents",
+          "verification"
+        ],
+        "title": "Timeline Committed Event",
+        "type": "object"
+      },
+      "timeline-connected-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Timeline Connected Event",
+        "type": "object"
+      },
+      "timeline-cross-referenced-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "source": {
+            "properties": {
+              "issue": {
+                "$ref": "#/components/schemas/issue"
+              },
+              "type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event",
+          "created_at",
+          "updated_at",
+          "source"
+        ],
+        "title": "Timeline Cross Referenced Event",
+        "type": "object"
+      },
+      "timeline-disconnected-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Timeline Disconnected Event",
+        "type": "object"
+      },
+      "timeline-issue-events": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/labeled-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/unlabeled-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/milestoned-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/demilestoned-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/renamed-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/review-requested-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/review-request-removed-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/review-dismissed-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/locked-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/added-to-project-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/moved-column-in-project-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/removed-from-project-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/converted-note-to-issue-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/timeline-comment-event"
+          },
+          {
+            "$ref": "#/components/schemas/timeline-cross-referenced-event"
+          },
+          {
+            "$ref": "#/components/schemas/timeline-committed-event"
+          },
+          {
+            "$ref": "#/components/schemas/timeline-reviewed-event"
+          },
+          {
+            "$ref": "#/components/schemas/timeline-line-commented-event"
+          },
+          {
+            "$ref": "#/components/schemas/timeline-commit-commented-event"
+          },
+          {
+            "$ref": "#/components/schemas/timeline-assigned-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/timeline-unassigned-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/state-change-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/issue-type-added-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/issue-type-removed-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/issue-type-changed-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/sub-issue-added-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/sub-issue-removed-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/parent-issue-added-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/parent-issue-removed-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/blocked-by-added-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/blocked-by-removed-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/blocking-added-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/blocking-removed-issue-event"
+          },
+          {
+            "$ref": "#/components/schemas/timeline-connected-event"
+          },
+          {
+            "$ref": "#/components/schemas/timeline-disconnected-event"
+          }
+        ],
+        "title": "Timeline Event",
+        "type": "object"
+      },
+      "timeline-line-commented-event": {
+        "properties": {
+          "comments": {
+            "items": {
+              "$ref": "#/components/schemas/pull-request-review-comment"
+            },
+            "type": "array"
+          },
+          "event": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          }
+        },
+        "title": "Timeline Line Commented Event",
+        "type": "object"
+      },
+      "timeline-reviewed-event": {
+        "properties": {
+          "_links": {
+            "properties": {
+              "html": {
+                "properties": {
+                  "href": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "href"
+                ],
+                "type": "object"
+              },
+              "pull_request": {
+                "properties": {
+                  "href": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "href"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "html",
+              "pull_request"
+            ],
+            "type": "object"
+          },
+          "author_association": {
+            "$ref": "#/components/schemas/author-association"
+          },
+          "body": {
+            "nullable": true,
+            "type": "string"
+          },
+          "body_html": {
+            "type": "string"
+          },
+          "body_text": {
+            "type": "string"
+          },
+          "commit_id": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "pull_request_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "submitted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/simple-user"
+          }
+        },
+        "required": [
+          "event",
+          "id",
+          "node_id",
+          "user",
+          "body",
+          "state",
+          "commit_id",
+          "html_url",
+          "pull_request_url",
+          "_links",
+          "author_association"
+        ],
+        "title": "Timeline Reviewed Event",
+        "type": "object"
+      },
+      "timeline-unassigned-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "assignee": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app",
+          "assignee"
+        ],
+        "title": "Timeline Unassigned Issue Event",
+        "type": "object"
+      },
+      "unlabeled-issue-event": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "commit_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "commit_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/nullable-issue-event-intent"
+          },
+          "label": {
+            "properties": {
+              "color": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "color"
+            ],
+            "type": "object"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "id",
+          "node_id",
+          "url",
+          "actor",
+          "event",
+          "commit_id",
+          "commit_url",
+          "created_at",
+          "performed_via_github_app"
+        ],
+        "title": "Unlabeled Issue Event",
         "type": "object"
       },
       "validation-error": {
@@ -4388,6 +7283,59 @@
           },
           "422": {
             "$ref": "#/components/responses/validation_failed"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/issues/{issue_number}/timeline": {
+      "get": {
+        "operationId": "issues/list-events-for-timeline",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/issue-number"
+          },
+          {
+            "$ref": "#/components/parameters/per-page"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/issue-timeline-exclude"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/timeline-issue-events"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "headers": {
+              "Link": {
+                "$ref": "#/components/headers/link"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_request"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "410": {
+            "$ref": "#/components/responses/gone"
           }
         }
       }

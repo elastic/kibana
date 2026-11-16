@@ -74,7 +74,6 @@ export interface AutomationBudget {
 }
 
 export interface NightshiftInvestigationsServerSetup {
-  registerInvestigationQuota: (callback: InvestigationQuotaCallback) => void;
   /** Adds the counts only the registering plugin can read to the daily detection snapshot. */
   registerDetectionSnapshotContributor: (contributor: DetectionSnapshotContributor) => void;
 }

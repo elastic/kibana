@@ -2,6 +2,23 @@
 
 This plugin provides the domain API for starting and reading investigations, independent of which entity (significant event, alert, etc.) triggers them.
 
+## Local development
+
+To run investigations on a local Kibana against the ORCA-bench telemetry cluster, with the shared
+eval sandbox, start Elasticsearch with EIS (`pnpm es snapshot --eis`) and Kibana (`pnpm start`),
+then run:
+
+```bash
+node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/setup_local_dev.js
+```
+
+It needs only dev Vault access. It writes a managed block to `config/kibana.dev.yml`, binds the
+default space to the Nightshift service accounts, saves the ORCA connector on the investigator, and
+gives the space the ORCA evals' source code context with the `github.com` egress it needs.
+`--remove` undoes it. See the
+[`nightshift-local-dev` skill](.agents/skills/nightshift-local-dev/SKILL.md) for
+what it changes, running ORCA questions, troubleshooting and rotating the shared credential.
+
 ## Automation instructions
 
 After choosing a trigger, its panel shows an instructions field limited to 5,000 characters.
@@ -261,7 +278,7 @@ If none match, the start claims the subjects for a new investigation id. That wa
 
 #### Daily investigation limits
 
-The global investigation quota is registered by Significant Events and set on the Nightshift settings page. It has three deployment-wide limits per UTC day, each of which can be turned off:
+The investigation quota is kept by this plugin in two hidden saved objects (the settings and a daily ledger) and set on the Nightshift settings page, through `GET` and `PUT /internal/nightshift/investigation_quotas`. Changing the limits takes the manage and configure privileges in all spaces. It has three deployment-wide limits per UTC day. A limit of `null` is unlimited, and one switch turns enforcement of all three off and on without losing their values (runs are still counted while it is off):
 
 - automatic investigations (`trigger_type: automatic`, all automations combined), default 5;
 - manual investigations (`trigger_type: manual`: the start API behind the homepage and the CLI, and Slack mentions), default 5;

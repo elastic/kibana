@@ -180,6 +180,7 @@ const handleConversationExecution = async ({
   const {
     agentId = agentBuilderDefaultAgentId,
     connectorId,
+    inferenceFeatureId,
     conversationId,
     structuredOutput,
     outputSchema,
@@ -271,14 +272,10 @@ const handleConversationExecution = async ({
       workflowExecutionId,
     });
 
-    const {
-      modelProvider,
-      selectedConnectorId,
-      reasoningLevel: resolvedReasoningLevel,
-    } = await resolveServices({
+    const { modelProvider, defaultModel } = await resolveServices({
       agentId,
       connectorId,
-      reasoningLevel,
+      inferenceFeatureId,
       telemetryMetadata: roundTelemetryMetadata,
       runAs: execution.runAs?.serviceAccountId,
       request,
@@ -300,10 +297,10 @@ const handleConversationExecution = async ({
       conversation,
       // Only a bound run swaps credentials; an unbound run's request already is the owner.
       ...(execution.runAs ? { owner, runAs: execution.runAs } : {}),
-      defaultConnectorId: selectedConnectorId,
+      defaultModel,
       telemetryMetadata: roundTelemetryMetadata,
       maxContentLength,
-      reasoningLevel: resolvedReasoningLevel,
+      reasoningLevel,
       runAgent,
       browserApiTools,
       configurationOverrides,
@@ -670,6 +667,8 @@ const handleStandaloneExecution = async ({
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
   const {
+    connectorId,
+    inferenceFeatureId,
     telemetryMetadata,
     maxContentLength,
     reasoningLevel,
@@ -689,10 +688,10 @@ const handleStandaloneExecution = async ({
     workflowExecutionId,
   });
 
-  const { selectedConnectorId, reasoningLevel: resolvedReasoningLevel } = await resolveServices({
+  const { defaultModel } = await resolveServices({
     agentId,
-    connectorId: execution.agentParams.connectorId,
-    reasoningLevel,
+    connectorId,
+    inferenceFeatureId,
     telemetryMetadata: roundTelemetryMetadata,
     runAs: execution.runAs?.serviceAccountId,
     request,
@@ -710,10 +709,10 @@ const handleStandaloneExecution = async ({
     ...(execution.runAs ? { owner: execution.owner, runAs: execution.runAs } : {}),
     abortSignal,
     conversation: undefined,
-    defaultConnectorId: selectedConnectorId,
+    defaultModel,
     telemetryMetadata: roundTelemetryMetadata,
     maxContentLength,
-    reasoningLevel: resolvedReasoningLevel,
+    reasoningLevel,
     runAgent,
     projectRouting,
     executionMode: AgentExecutionMode.standalone,

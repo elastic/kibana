@@ -132,6 +132,8 @@ import {
   nightshiftSandboxAllowlistSavedObjectType,
   nightshiftAutomationSavedObjectType,
   nightshiftAutomationBudgetSavedObjectType,
+  nightshiftInvestigationQuotaLedgerSavedObjectType,
+  nightshiftInvestigationQuotaSettingsSavedObjectType,
   NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
@@ -143,6 +145,7 @@ import {
 } from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
 import { createSandboxAllowlistClient } from './sandbox_allowlist';
+import { createInvestigationQuotaClient } from './lib/investigation_quotas';
 import { createSlackTurnAdmissionCheck } from './lib/slack_turn_admission';
 import { getNightshiftSettingsUrl } from './lib/notifications/notify_investigation_quota_reached';
 import type {
@@ -305,10 +308,18 @@ export class NightshiftInvestigationsPlugin
     core.savedObjects.registerType(nightshiftAutomationBudgetSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
     core.savedObjects.registerType(nightshiftSandboxAllowlistSavedObjectType);
+    core.savedObjects.registerType(nightshiftInvestigationQuotaSettingsSavedObjectType);
+    core.savedObjects.registerType(nightshiftInvestigationQuotaLedgerSavedObjectType);
 
     const sandboxAllowlistClient = createSandboxAllowlistClient({
       getDeps: () => ({ savedObjects: this.savedObjects, spaces: this.spaces }),
     });
+
+    const investigationQuotaClient = createInvestigationQuotaClient({
+      getDeps: () => ({ savedObjects: this.savedObjects, security: this.securityStart }),
+      logger: this.logger.get('investigation_quotas'),
+    });
+    this.investigationQuotaCallback = (trigger) => investigationQuotaClient.consume(trigger);
 
     const customContextClient = createCustomContextClient({
       getDeps: () => ({
@@ -414,6 +425,7 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             getAgenticInvestigations: () => this.agenticInvestigations,
+            telemetry,
             // The final pass proposes actions for a person to decide, as the investigator's
             // `proposals.create` tool did, and sees which ones the conversation already has.
             getProposals: () =>
@@ -461,11 +473,12 @@ export class NightshiftInvestigationsPlugin
         });
       }
       plugins.agentBuilder.tools.register(createTimeConverterTool());
+      const sandboxToolAvailability = createSandboxToolAvailability({
+        getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
+      });
       plugins.agentBuilder.tools.register({
         ...createSlackReadTool({ getActions: () => this.actionsStart }),
-        availability: createSandboxToolAvailability({
-          getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
-        }),
+        availability: sandboxToolAvailability,
       });
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
@@ -500,16 +513,13 @@ export class NightshiftInvestigationsPlugin
           }),
           logger: outputRedactionLogger,
         };
-        const availability = createSandboxToolAvailability({
-          getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
-        });
         const { agentBuilder } = plugins;
         const registerSandboxTool = <TSchema extends ZodObject>(
           tool: BuiltinToolDefinition<TSchema>
         ) =>
           agentBuilder.tools.register({
             ...withSandboxOutputRedaction(tool, redaction),
-            availability,
+            availability: sandboxToolAvailability,
           });
 
         registerSandboxTool(
@@ -714,6 +724,7 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             analytics: core.analytics,
+            telemetry,
             logger: this.logger.get('wiki'),
             isEnabled: () => this.wikiEnabled,
           })
@@ -740,6 +751,7 @@ export class NightshiftInvestigationsPlugin
             getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
+            telemetry,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -748,6 +760,7 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             isEnabled: () => this.decisionTreesEnabled,
+            telemetry,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -786,6 +799,7 @@ export class NightshiftInvestigationsPlugin
           listSandboxConnectorTypes,
           sandboxAllowlistClient,
           customContextClient,
+          investigationQuotaClient,
           onboardingClient,
           getWikiPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
@@ -854,12 +868,6 @@ export class NightshiftInvestigationsPlugin
     }
 
     return {
-      registerInvestigationQuota: (callback) => {
-        if (this.investigationQuotaCallback) {
-          throw new Error('Investigation quota callback is already registered');
-        }
-        this.investigationQuotaCallback = callback;
-      },
       registerDetectionSnapshotContributor: (contributor) => {
         if (this.detectionSnapshotContributor) {
           throw new Error('Detection snapshot contributor is already registered');
