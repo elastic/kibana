@@ -6,7 +6,12 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import Boom from '@hapi/boom';
+import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  INVALID_ALERT_STATE_TRANSITION_CODE,
+} from '@kbn/alerting-v2-schemas';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import {
   EVENT_CREATED_TRIGGER_ID,
@@ -118,16 +123,33 @@ const makeStatusAlertEventsClient = (
     ...overrides,
   } as jest.Mocked<AlertEventsClientApi>);
 
+const makeStatusAlertActionsClient = (
+  overrides: Partial<jest.Mocked<AlertActionsClientApi>> = {}
+): jest.Mocked<AlertActionsClientApi> =>
+  ({
+    createEpisodeAction: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  } as jest.Mocked<AlertActionsClientApi>);
+
 const createStatusSearchClient = (
   latest: SignificantEvent | undefined,
-  alertEventsClient: jest.Mocked<AlertEventsClientApi>
+  alertEventsClient: jest.Mocked<AlertEventsClientApi>,
+  alertActionsClient: jest.Mocked<AlertActionsClientApi> = makeStatusAlertActionsClient()
 ) =>
   asRuleEventsClient(
     { findLatestByEventId: jest.fn().mockResolvedValue(latest) },
-    { getAlertEventsClient: async () => alertEventsClient }
+    {
+      getAlertEventsClient: async () => alertEventsClient,
+      getAlertActionsClient: async () => alertActionsClient,
+    }
   );
 
+const alertActionError = (statusCode: 409 | 500, code: string) =>
+  Boom.boomify(new Error('rejected'), { statusCode, data: { code } });
+
 const DEACTIVATE_STATUS: StatusChange = StatusChange.byOperator('inactive');
+/** A change a system writer submits (not an operator), so it is written as a rule event. */
+const SYSTEM_DEACTIVATE_STATUS: StatusChange = StatusChange.ruleDeleted();
 
 const lastStatusWritten = (client: jest.Mocked<AlertEventsClientApi>) =>
   client.createAlertEvent.mock.calls[0][0] as {
@@ -137,18 +159,25 @@ const lastStatusWritten = (client: jest.Mocked<AlertEventsClientApi>) =>
 
 describe('RuleEventsClient', () => {
   describe('updateEventStatus', () => {
-    it('appends a version carrying the decided status', async () => {
+    it('writes a system status as a rule event carrying the decided status', async () => {
       const existing = createStatusEvent({ status: 'active' });
       const alertEventsClient = makeStatusAlertEventsClient();
+      const alertActionsClient = makeStatusAlertActionsClient();
 
-      const result = await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
+      const result = await createStatusSearchClient(
+        existing,
+        alertEventsClient,
+        alertActionsClient
+      ).updateEventStatus({
         eventId: existing.event_id,
-        change: DEACTIVATE_STATUS,
+        change: SYSTEM_DEACTIVATE_STATUS,
+        actor: 'rest_api',
       });
 
       expect(result).toEqual({ updated: 1, ignored: 0, status: 'inactive' });
       expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
       expect(lastStatusWritten(alertEventsClient)).toMatchObject({ alert_status: 'inactive' });
+      expect(alertActionsClient.createEpisodeAction).not.toHaveBeenCalled();
     });
 
     it('replaces prior workflow provenance with the workflow that writes the status version', async () => {
@@ -160,7 +189,8 @@ describe('RuleEventsClient', () => {
 
       await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
         eventId: existing.event_id,
-        change: DEACTIVATE_STATUS,
+        change: SYSTEM_DEACTIVATE_STATUS,
+        actor: 'rest_api',
         workflowExecutionId: 'current-workflow',
       });
 
@@ -178,19 +208,21 @@ describe('RuleEventsClient', () => {
 
       await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
         eventId: existing.event_id,
-        change: DEACTIVATE_STATUS,
+        change: SYSTEM_DEACTIVATE_STATUS,
+        actor: 'rest_api',
       });
 
       expect(lastStatusWritten(alertEventsClient).data.workflow_execution_id).toBeUndefined();
     });
 
-    it('records the given note, and falls back to the operator note when it is omitted or blank', async () => {
+    it('records the given note on a system write, and keeps the prior note when it is omitted or blank', async () => {
       const existing = createStatusEvent({ assessment_note: 'Operator dismissed as noise.' });
       const written = async (assessmentNote?: string) => {
         const alertEventsClient = makeStatusAlertEventsClient();
         await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
           eventId: existing.event_id,
-          change: DEACTIVATE_STATUS,
+          change: SYSTEM_DEACTIVATE_STATUS,
+          actor: 'rest_api',
           assessmentNote,
         });
         return lastStatusWritten(alertEventsClient).data;
@@ -200,29 +232,193 @@ describe('RuleEventsClient', () => {
         assessment_note: 'Closed by cleanup.',
       });
       expect(await written('   ')).toMatchObject({
-        assessment_note: operatorFallbackAssessmentNote('inactive'),
+        assessment_note: 'Operator dismissed as noise.',
       });
-      expect(await written()).toMatchObject({
-        assessment_note: operatorFallbackAssessmentNote('inactive'),
-      });
+      expect(await written()).toMatchObject({ assessment_note: 'Operator dismissed as noise.' });
     });
 
-    it.each<'active' | 'inactive'>(['active', 'inactive'])(
-      'uses the operator fallback note stating the %s status when no note is given',
-      async (status) => {
-        const existing = createStatusEvent({ status: status === 'active' ? 'inactive' : 'active' });
+    describe('an operator change', () => {
+      const withEpisode = (overrides: Partial<SignificantEvent> = {}) =>
+        ({ ...createStatusEvent(overrides), episode_id: 'episode-7' } as SignificantEvent);
+
+      it.each<['inactive' | 'active', string]>([
+        ['inactive', ALERT_EPISODE_ACTION_TYPE.DEACTIVATE],
+        ['active', ALERT_EPISODE_ACTION_TYPE.ACTIVATE],
+      ])(
+        'creates a %s alert action for the stored head episode and writes no rule event',
+        async (status, actionType) => {
+          const existing = withEpisode({ status: status === 'active' ? 'inactive' : 'active' });
+          const alertEventsClient = makeStatusAlertEventsClient();
+          const alertActionsClient = makeStatusAlertActionsClient();
+
+          const result = await createStatusSearchClient(
+            existing,
+            alertEventsClient,
+            alertActionsClient
+          ).updateEventStatus({
+            eventId: existing.event_id,
+            change: StatusChange.byOperator(status),
+            actor: 'rest_api',
+          });
+
+          expect(result).toEqual({ updated: 1, ignored: 0, status });
+          expect(alertActionsClient.createEpisodeAction).toHaveBeenCalledWith({
+            episodeId: 'episode-7',
+            action: { action_type: actionType, reason: operatorFallbackAssessmentNote(status) },
+          });
+          expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+        }
+      );
+
+      it('uses the trimmed note as the reason and the operator fallback when it is blank', async () => {
+        const existing = withEpisode({ status: 'active' });
+        const reasonOf = async (assessmentNote?: string) => {
+          const alertActionsClient = makeStatusAlertActionsClient();
+          await createStatusSearchClient(
+            existing,
+            makeStatusAlertEventsClient(),
+            alertActionsClient
+          ).updateEventStatus({
+            eventId: existing.event_id,
+            change: DEACTIVATE_STATUS,
+            assessmentNote,
+            actor: 'rest_api',
+          });
+          return alertActionsClient.createEpisodeAction.mock.calls[0][0].action;
+        };
+
+        expect(await reasonOf('  Duplicate of the payments event.  ')).toMatchObject({
+          reason: 'Duplicate of the payments event.',
+        });
+        expect(await reasonOf('   ')).toMatchObject({
+          reason: operatorFallbackAssessmentNote('inactive'),
+        });
+      });
+
+      it('maps a not-latest episode to superseded and an already-inactive one to already_in_state', async () => {
+        const existing = withEpisode({ status: 'active' });
+        const resultFor = (code: string) =>
+          createStatusSearchClient(
+            existing,
+            makeStatusAlertEventsClient(),
+            makeStatusAlertActionsClient({
+              createEpisodeAction: jest.fn().mockRejectedValue(alertActionError(409, code)),
+            })
+          ).updateEventStatus({
+            eventId: existing.event_id,
+            change: DEACTIVATE_STATUS,
+            actor: 'rest_api',
+          });
+
+        expect(await resultFor('ALERT_NOT_LATEST')).toEqual({
+          updated: 0,
+          ignored: 1,
+          status: 'active',
+          reason: 'superseded',
+        });
+        expect(await resultFor(INVALID_ALERT_STATE_TRANSITION_CODE)).toEqual({
+          updated: 0,
+          ignored: 1,
+          status: 'inactive',
+          reason: 'already_in_state',
+        });
+      });
+
+      it('propagates any other failure, including a rejected bulk write', async () => {
+        const existing = withEpisode({ status: 'active' });
         const alertEventsClient = makeStatusAlertEventsClient();
 
-        await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
+        await expect(
+          createStatusSearchClient(
+            existing,
+            alertEventsClient,
+            makeStatusAlertActionsClient({
+              createEpisodeAction: jest.fn().mockRejectedValue(alertActionError(500, 'INTERNAL')),
+            })
+          ).updateEventStatus({
+            eventId: existing.event_id,
+            change: DEACTIVATE_STATUS,
+            actor: 'rest_api',
+          })
+        ).rejects.toThrow('rejected');
+        expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+      });
+
+      it('reports not_found and creates no action when the head has no episode id', async () => {
+        const existing = createStatusEvent({ status: 'active' });
+        const alertActionsClient = makeStatusAlertActionsClient();
+
+        const result = await createStatusSearchClient(
+          existing,
+          makeStatusAlertEventsClient(),
+          alertActionsClient
+        ).updateEventStatus({
           eventId: existing.event_id,
-          change: StatusChange.byOperator(status),
+          change: DEACTIVATE_STATUS,
+          actor: 'rest_api',
         });
 
-        expect(lastStatusWritten(alertEventsClient).data).toMatchObject({
-          assessment_note: operatorFallbackAssessmentNote(status),
+        expect(result).toEqual({ updated: 0, ignored: 1, status: 'active', reason: 'not_found' });
+        expect(alertActionsClient.createEpisodeAction).not.toHaveBeenCalled();
+      });
+
+      it('runs the superseded and unchanged-status checks before creating any action', async () => {
+        const alertActionsClient = makeStatusAlertActionsClient();
+        const active = withEpisode({ status: 'active' });
+
+        const superseded = await createStatusSearchClient(
+          active,
+          makeStatusAlertEventsClient(),
+          alertActionsClient
+        ).updateEventStatus({
+          eventId: active.event_id,
+          change: DEACTIVATE_STATUS,
+          expectedTimestamp: '2000-01-01T00:00:00.000Z',
+          actor: 'rest_api',
         });
-      }
-    );
+        const unchanged = await createStatusSearchClient(
+          withEpisode({ status: 'inactive' }),
+          makeStatusAlertEventsClient(),
+          alertActionsClient
+        ).updateEventStatus({
+          eventId: active.event_id,
+          change: DEACTIVATE_STATUS,
+          actor: 'rest_api',
+        });
+
+        expect(superseded).toMatchObject({ ignored: 1, reason: 'superseded' });
+        expect(unchanged).toMatchObject({ ignored: 1, reason: 'already_in_state' });
+        expect(alertActionsClient.createEpisodeAction).not.toHaveBeenCalled();
+      });
+
+      it('emits the status-changed trigger after the action succeeds', async () => {
+        const existing = withEpisode({ status: 'active' });
+        const emitTrigger = jest.fn().mockResolvedValue(undefined) as unknown as TriggerEmitter;
+        const client = asRuleEventsClient(
+          { findLatestByEventId: jest.fn().mockResolvedValue(existing) },
+          {
+            getAlertEventsClient: async () => makeStatusAlertEventsClient(),
+            getAlertActionsClient: async () => makeStatusAlertActionsClient(),
+            emitTrigger,
+          }
+        );
+
+        await client.updateEventStatus({
+          eventId: existing.event_id,
+          change: DEACTIVATE_STATUS,
+          actor: 'rest_api',
+        });
+
+        expect(emitTrigger).toHaveBeenCalledWith(
+          EVENT_STATUS_CHANGED_TRIGGER_ID,
+          expect.objectContaining({
+            event_id: existing.event_id,
+            previous_status: 'active',
+            status: 'inactive',
+          })
+        );
+      });
+    });
 
     it.each<[string, StatusChange, string]>([
       ['an operator status', DEACTIVATE_STATUS, 'inactive'],
@@ -235,6 +431,7 @@ describe('RuleEventsClient', () => {
         {
           eventId: 'missing-event',
           change,
+          actor: 'rest_api',
         }
       );
 
@@ -249,6 +446,7 @@ describe('RuleEventsClient', () => {
       const result = await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
+        actor: 'rest_api',
       });
 
       expect(result).toEqual({
@@ -260,7 +458,7 @@ describe('RuleEventsClient', () => {
       expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
     });
 
-    it('drops the write when another writer appended after the read', async () => {
+    it('drops a system write when another writer appended after the read', async () => {
       const existing = createStatusEvent({ status: 'active' });
       const newer = createStatusEvent({ '@timestamp': '2099-01-01T00:00:00.000Z' });
       const alertEventsClient = makeStatusAlertEventsClient();
@@ -276,7 +474,8 @@ describe('RuleEventsClient', () => {
 
       const result = await eventSearchClient.updateEventStatus({
         eventId: existing.event_id,
-        change: DEACTIVATE_STATUS,
+        change: SYSTEM_DEACTIVATE_STATUS,
+        actor: 'rest_api',
       });
 
       expect(result).toEqual({ updated: 0, ignored: 1, status: 'active', reason: 'superseded' });
@@ -290,6 +489,7 @@ describe('RuleEventsClient', () => {
       const superseded = await createStatusSearchClient(existing, stale).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
+        actor: 'rest_api',
         expectedTimestamp: '2000-01-01T00:00:00.000Z',
       });
       expect(superseded).toEqual({
@@ -305,7 +505,8 @@ describe('RuleEventsClient', () => {
         makeStatusAlertEventsClient()
       ).updateEventStatus({
         eventId: existing.event_id,
-        change: DEACTIVATE_STATUS,
+        change: SYSTEM_DEACTIVATE_STATUS,
+        actor: 'rest_api',
         expectedTimestamp: existing['@timestamp'],
       });
       expect(current.updated).toBe(1);
@@ -318,6 +519,7 @@ describe('RuleEventsClient', () => {
       const result = await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
         eventId: existing.event_id,
         change: StatusChange.assessed('breached'),
+        actor: 'rest_api',
       });
 
       expect(result).toEqual({
@@ -327,6 +529,119 @@ describe('RuleEventsClient', () => {
         reason: 'already_in_state',
       });
       expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('status change telemetry', () => {
+    const telemetry = { trackEventStatusChanged: jest.fn() };
+    const withTelemetry = (latest: SignificantEvent | undefined) =>
+      asRuleEventsClient(
+        { findLatestByEventId: jest.fn().mockResolvedValue(latest) },
+        {
+          getAlertEventsClient: async () =>
+            makeStatusAlertEventsClient({
+              createAlertEvent: jest
+                .fn()
+                .mockResolvedValue({ group_hash: 'group-hash-1', alert_id: 'alert-1' }),
+            }),
+          getAlertActionsClient: async () => makeStatusAlertActionsClient(),
+          telemetry,
+        }
+      );
+
+    const withEpisode = (overrides: Partial<SignificantEvent> = {}) =>
+      ({ ...createStatusEvent(overrides), episode_id: 'episode-1' } as SignificantEvent);
+
+    beforeEach(() => telemetry.trackEventStatusChanged.mockReset());
+
+    it('reports an operator transition with the prior status, the actor and the quality fields', async () => {
+      const existing = withEpisode({ status: 'active' });
+
+      await withTelemetry(existing).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+        actor: 'rest_api',
+      });
+
+      const [[reported]] = telemetry.trackEventStatusChanged.mock.calls;
+      expect(reported).toEqual({
+        alert_source: 'elastic.significant_events',
+        fingerprint: existing.event_id,
+        space_id: 'default',
+        entity_type: 'significant_event',
+        previous_status: 'active',
+        status: 'inactive',
+        actor: 'rest_api',
+        change_kind: 'operator',
+        severity: 'medium',
+        confidence: 0.8,
+        signal_count: 0,
+        confirmed_signal_count: 0,
+        source_ids: ['logs.test'],
+      });
+    });
+
+    it('attributes an operator transition to the calling workflow, not the prior writer', async () => {
+      const existing = withEpisode({ status: 'active', workflow_execution_id: 'discovery-run' });
+
+      await withTelemetry(existing).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+        actor: 'agent_tool',
+        workflowExecutionId: 'caller-run',
+      });
+      await withTelemetry(existing).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+        actor: 'rest_api',
+      });
+
+      const [[viaWorkflow], [viaUi]] = telemetry.trackEventStatusChanged.mock.calls;
+      expect(viaWorkflow).toMatchObject({ workflow_execution_id: 'caller-run' });
+      expect(viaUi).not.toHaveProperty('workflow_execution_id');
+    });
+
+    it('reports a created version without a prior status and keeps the assessment outcome', async () => {
+      await withTelemetry(undefined).createEvent({
+        event: createStatusEvent(),
+        origin: { actor: 'agent_tool', change: StatusChange.assessed('breached') },
+      });
+
+      const [[reported]] = telemetry.trackEventStatusChanged.mock.calls;
+      expect(reported).toMatchObject({
+        status: 'active',
+        actor: 'agent_tool',
+        change_kind: 'assessment',
+        assessment_outcome: 'breached',
+      });
+      expect(reported).not.toHaveProperty('previous_status');
+    });
+
+    it('stays silent when a new version keeps the status', async () => {
+      const existing = createStatusEvent();
+
+      await withTelemetry(existing).updateEvent({
+        event: { ...existing, summary: 'Refined summary' },
+        prior: existing,
+        origin: { actor: 'agent_tool' },
+      });
+
+      expect(telemetry.trackEventStatusChanged).not.toHaveBeenCalled();
+    });
+
+    it('never fails the write when reporting throws', async () => {
+      telemetry.trackEventStatusChanged.mockImplementation(() => {
+        throw new Error('ebt down');
+      });
+      const existing = withEpisode({ status: 'active' });
+
+      const result = await withTelemetry(existing).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+        actor: 'rest_api',
+      });
+
+      expect(result).toEqual({ updated: 1, ignored: 0, status: 'inactive' });
     });
   });
 
@@ -1399,7 +1714,10 @@ describe('RuleEventsClient', () => {
       const emitTrigger = jest.fn();
       const client = clientWith({ writer, emitTrigger });
 
-      const result = await client.createEvent({ event: version() });
+      const result = await client.createEvent({
+        event: version(),
+        origin: { actor: 'agent_tool' },
+      });
 
       expect(result).toEqual({ groupHash: 'hash-1', alertId: 'alert-1' });
       expect(writer.createAlertEvent).toHaveBeenCalledWith(
@@ -1419,6 +1737,7 @@ describe('RuleEventsClient', () => {
       const result = await clientWith({ head: prior, writer }).updateEvent({
         event: version({ '@timestamp': '2026-01-02T00:00:00.000Z', status: 'inactive' }),
         prior,
+        origin: { actor: 'agent_tool' },
       });
 
       expect(result).toEqual({ updated: true });
@@ -1436,6 +1755,7 @@ describe('RuleEventsClient', () => {
       const result = await clientWith({ head, writer, emitTrigger }).updateEvent({
         event: version({ status: 'inactive' }),
         prior,
+        origin: { actor: 'agent_tool' },
       });
 
       expect(result).toEqual({ updated: false, head });
@@ -1449,6 +1769,7 @@ describe('RuleEventsClient', () => {
       const result = await clientWith({ writer }).updateEvent({
         event: version({ status: 'inactive' }),
         prior: version(),
+        origin: { actor: 'agent_tool' },
       });
 
       expect(result).toEqual({ updated: false, head: undefined });
@@ -1462,6 +1783,7 @@ describe('RuleEventsClient', () => {
       await clientWith({ head: prior, writer: makeWriter(), emitTrigger }).updateEvent({
         event: version({ '@timestamp': '2026-01-02T00:00:00.000Z', status: 'inactive' }),
         prior,
+        origin: { actor: 'agent_tool' },
       });
 
       expect(emitTrigger).toHaveBeenCalledWith(
@@ -1482,8 +1804,8 @@ describe('RuleEventsClient', () => {
 
         await expect(
           method === 'createEvent'
-            ? client.createEvent({ event: version() })
-            : client.updateEvent({ event: version(), prior })
+            ? client.createEvent({ event: version(), origin: { actor: 'agent_tool' } })
+            : client.updateEvent({ event: version(), prior, origin: { actor: 'agent_tool' } })
         ).rejects.toThrow('index unavailable');
         expect(emitTrigger).not.toHaveBeenCalled();
       }
@@ -1492,7 +1814,9 @@ describe('RuleEventsClient', () => {
     it('refuses to write when the client was created without a writer', async () => {
       const client = asRuleEventsClient({ findLatestByEventId: jest.fn() });
 
-      await expect(client.createEvent({ event: version() })).rejects.toThrow('without a writer');
+      await expect(
+        client.createEvent({ event: version(), origin: { actor: 'agent_tool' } })
+      ).rejects.toThrow('without a writer');
     });
   });
 });

@@ -14,8 +14,30 @@ import {
   ensureNightshiftServiceAccounts,
 } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  SANDBOX_ALLOWLIST_API_PATH,
+  type GetSandboxAllowlistResponse,
+  type PutSandboxAllowlistRequest,
+} from '@kbn/nightshift-investigations-plugin/common';
 import { createAdminSessionRequest } from './admin_session_request';
 import type { AdminSessionRequestOptions } from './admin_session_request';
+
+/** Public repositories the eval custom context tells the agent to clone. */
+const EVAL_GITHUB_REPOS = [
+  'elastic/kibana',
+  'elastic/elasticsearch',
+  'open-telemetry/opentelemetry-demo',
+] as const;
+
+/**
+ * Egress firewall rules the eval adds to the space's sandbox allowlist, on top of connector hosts.
+ * Git over HTTPS only needs `GET <repo>/info/refs` and `POST <repo>/git-upload-pack` on
+ * github.com, so each repo gets a path rule instead of the whole host. Paths match by plain
+ * prefix, so the trailing slash keeps `/elastic/kibana/` from also matching `/elastic/kibana-x`.
+ */
+export const EVAL_SANDBOX_EGRESS_ALLOWLIST: readonly string[] = EVAL_GITHUB_REPOS.flatMap((repo) =>
+  [`/${repo}/`, `/${repo}.git/`].map((path) => `allow https github.com GET,POST ${path}`)
+);
 
 /**
  * Binds the space to the Nightshift service accounts, lifts the daily investigation limits, and
@@ -87,6 +109,20 @@ export const enableNightshiftSpace = async ({
       { timeout: 120_000, intervals: [5_000] }
     )
     .toBe(true);
+  // The sandbox firewall only allows connector hosts and the space allowlist, so evals that
+  // reach other hosts (GitHub clones, for one) fail without this. Merge so a local stack keeps
+  // the entries its developer added.
+  const { hosts: existingHosts } = await setupRequest<GetSandboxAllowlistResponse>(
+    SANDBOX_ALLOWLIST_API_PATH,
+    { method: 'GET' }
+  );
+  const allowlist: PutSandboxAllowlistRequest = {
+    hosts: [...new Set([...existingHosts, ...EVAL_SANDBOX_EGRESS_ALLOWLIST])],
+  };
+  await setupRequest(SANDBOX_ALLOWLIST_API_PATH, {
+    method: 'PUT',
+    body: JSON.stringify(allowlist),
+  });
   // Eval investigations are manual starts, which Significant Events caps at 5 a day (10 for all
   // investigations), so a larger dataset would be denied most of its runs. Each CI shard runs on
   // its own stack, so lifting the limits there affects nothing else.

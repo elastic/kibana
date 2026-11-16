@@ -1,5 +1,5 @@
 {
-  "sha1": "555c409396afb9ca3786c81a45942be25d3fb37e",
+  "sha1": "a396b0dcc2866026ca962a2a4d1eac31842d33a8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -18,6 +18,22 @@
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "5602c2c568d9f5e-f2ddca345953e00",
+      "title": "Automation backing workflow repair recreates a deleted workflow paused, then allows enabling and editing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/automation_workflow_recovery.spec.ts",
+        "line": 75,
+        "column": 42
       }
     },
     {

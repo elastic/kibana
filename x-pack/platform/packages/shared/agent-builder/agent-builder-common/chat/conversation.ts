@@ -885,6 +885,8 @@ export interface BackgroundExecutionCompletedAt {
 export interface BackgroundExecutionState {
   /** The execution ID of the background sub-agent. */
   execution_id: string;
+  /** The id of the sub-agent running it, when known. */
+  agent_id?: string;
   /** Current status of the execution. */
   status: ExecutionStatus;
   /** The sub-agent's response, present when status is 'completed'. */

@@ -333,6 +333,7 @@ export interface DocLinks {
     readonly attackDiscovery: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;
+    readonly valueReport: string;
   };
   readonly server: {
     readonly protocol: string;

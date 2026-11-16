@@ -221,6 +221,10 @@ export interface AgentCapabilities {
    * The generic attachment tools and the attachment instructions in the system prompt.
    */
   attachment_tools?: AgentCapabilityConfig;
+  /**
+   * The API tools: `discover_apis`, `describe_api`, `describe_api_type` and `execute_api`.
+   */
+  api_tools?: AgentCapabilityConfig;
 }
 
 /**

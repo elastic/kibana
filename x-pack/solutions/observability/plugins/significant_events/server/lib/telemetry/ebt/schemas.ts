@@ -15,7 +15,10 @@ import type {
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   DetectionScanProps,
+  DiscoveryCompletedProps,
+  DiscoveryStartedProps,
   DiscoveryTriggeredProps,
+  EventStatusChangedProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
@@ -483,6 +486,106 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   },
 };
 
+const eventStatusChangedSchema: RootSchema<EventStatusChangedProps> = {
+  ...existingAlertIdentitySchema,
+  entity_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The kind of entity whose status changed; always `significant_event` here',
+    },
+  },
+  previous_status: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Status of the stored version before this write (active, recovering or inactive); absent when this write created the event',
+      optional: true,
+    },
+  },
+  status: {
+    type: 'keyword',
+    _meta: {
+      description: 'Status stored on the written version (active, recovering or inactive)',
+    },
+  },
+  actor: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The entry point that wrote the version: `agent_tool` (an Agent Builder tool, in discovery or chat), `rest_api` (the event update route, which the UI calls) or `stale_event_cleanup` (the cleanup that closes events whose rule was deleted). It names the code path, not whether a person was behind it',
+    },
+  },
+  change_kind: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'How the status was decided: `operator` (a status chosen through the update route or a chat tool), `assessment` (discovery re-checked the member signals) or `rule_deleted`. Absent when the writer supplied the status itself, as `event_create` does. An `operator` deactivation is a manual close; `close_reason` says why when the caller stated it',
+      optional: true,
+    },
+  },
+  assessment_outcome: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'For `change_kind: assessment`, what the member signals said: `breached`, `recovered` or `no_data`',
+      optional: true,
+    },
+  },
+  close_reason: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Why an operator set the event inactive: `resolved` (a real problem that is over) or `dismissed` (noise, not worth surfacing). Absent when the caller did not state it and on every other change',
+      optional: true,
+    },
+  },
+  severity: {
+    type: 'keyword',
+    _meta: {
+      description: 'Severity tier stored on the written version',
+    },
+  },
+  confidence: {
+    type: 'float',
+    _meta: {
+      description: 'Confidence stored on the written version, between 0 and 1',
+    },
+  },
+  signal_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'Correlation fan-in: the number of signals stored on the written version, one per member rule',
+    },
+  },
+  confirmed_signal_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of stored signals whose verdict confirms the event',
+    },
+  },
+  source_ids: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A Nightshift source id',
+      },
+    },
+    _meta: {
+      description: 'The Nightshift source ids the event covers',
+    },
+  },
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The workflow execution stored on the written version, when a workflow wrote it; joins the discovery run and the workflow engine events',
+      optional: true,
+    },
+  },
+};
+
 const discoveryTriggeredSchema: RootSchema<DiscoveryTriggeredProps> = {
   ...workflowExecutionTelemetrySchema,
   execution_id: {
@@ -495,6 +598,95 @@ const discoveryTriggeredSchema: RootSchema<DiscoveryTriggeredProps> = {
   space_id: {
     type: 'keyword' as const,
     _meta: { description: 'The Kibana space in which the pipeline was triggered' },
+  },
+};
+
+const optionalCount = (description: string) => ({
+  type: 'long' as const,
+  _meta: { description, optional: true as const },
+});
+
+const discoveryStartedSchema: RootSchema<DiscoveryStartedProps> = {
+  parent_workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The workflow execution that started this run: the orchestrator execution `discovery-triggered` carries as `workflow_execution_id` for a manual run, the scheduled review execution for a scheduled one (several runs can share it, one per review pass); absent when the discovery workflow was run directly',
+      optional: true,
+    },
+  },
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The discovery workflow execution that reported; pairs `discovery-started` with `discovery-completed` and joins the workflow engine events for that execution',
+    },
+  },
+  space_id: {
+    type: 'keyword',
+    _meta: { description: 'The Kibana space the run worked in' },
+  },
+  alert_source: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The `.rule-events` `source` of the alerts this run produces; always `elastic.significant_events` until other sources feed discovery',
+    },
+  },
+};
+
+const discoveryCompletedSchema: RootSchema<DiscoveryCompletedProps> = {
+  ...discoveryStartedSchema,
+  outcome: {
+    type: 'keyword',
+    _meta: {
+      description:
+        '`completed` when the workflow reached an exit, `failed` when a step failed and `timed_out` when the discovery agent step exceeded its timeout; the workflow-level fallback reports both. A cancelled run, or one ended by the workflow timeout, never reports; pair with the workflow engine `workflows_execution_workflow_cancelled` event',
+    },
+  },
+  duration_ms: {
+    type: 'long',
+    _meta: {
+      description:
+        'Milliseconds from the discovery execution start to this report; absent when the execution could not be read',
+      optional: true,
+    },
+  },
+  has_work: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether any detection reached the discovery agent',
+      optional: true,
+    },
+  },
+  budget_denied: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the run ended before reading any detection because the run quota denied it',
+      optional: true,
+    },
+  },
+  processed_count: optionalCount('Detections handed to the run after classification'),
+  skipped_count: optionalCount('Detections the classifier skipped'),
+  held_back_count: optionalCount('Detections the classifier held back'),
+  needs_agent_count: optionalCount('Detections the classifier routed to the agent'),
+  written_rule_count: optionalCount(
+    'Distinct rules the agent reported done in this run, including those whose detections it wrote no event for'
+  ),
+  classifier_failed: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the detection classifier failed and the run fell back to the agent',
+      optional: true,
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'The failing step error when `outcome` is `failed`',
+      optional: true,
+    },
   },
 };
 
@@ -798,7 +990,10 @@ export {
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
+  discoveryCompletedSchema,
+  discoveryStartedSchema,
   discoveryTriggeredSchema,
+  eventStatusChangedSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,

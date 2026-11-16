@@ -7,22 +7,12 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useDynamicEntityFlyout } from './use_dynamic_entity_flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useKibana } from '../../common/lib/kibana';
-import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-}));
-
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
-}));
-
-jest.mock('../../flyout/shared/hooks/use_on_expandable_flyout_close', () => ({
-  useOnExpandableFlyoutClose: jest.fn(),
 }));
 
 jest.mock('../../flyout_v2/use_flyout_api', () => ({
@@ -30,7 +20,6 @@ jest.mock('../../flyout_v2/use_flyout_api', () => ({
 }));
 
 describe('useDynamicEntityFlyout', () => {
-  let closeFlyoutMock: jest.Mock;
   let openHostFlyoutMock: jest.Mock;
   let openUserFlyoutMock: jest.Mock;
   let openServiceFlyoutMock: jest.Mock;
@@ -39,7 +28,6 @@ describe('useDynamicEntityFlyout', () => {
   let onFlyoutCloseMock: jest.Mock;
 
   beforeEach(() => {
-    closeFlyoutMock = jest.fn();
     openHostFlyoutMock = jest.fn();
     openUserFlyoutMock = jest.fn();
     openServiceFlyoutMock = jest.fn();
@@ -47,9 +35,6 @@ describe('useDynamicEntityFlyout', () => {
     toastsMock = { addDanger: jest.fn() };
     onFlyoutCloseMock = jest.fn();
 
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-      closeFlyout: closeFlyoutMock,
-    });
     (useFlyoutApi as jest.Mock).mockReturnValue({
       openHostFlyout: openHostFlyoutMock,
       openUserFlyout: openUserFlyoutMock,
@@ -59,7 +44,6 @@ describe('useDynamicEntityFlyout', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: { notifications: { toasts: toastsMock } },
     });
-    (useOnExpandableFlyoutClose as jest.Mock).mockImplementation(({ callback }) => callback);
   });
 
   it('should open the generic entity flyout for a generic entity', () => {
@@ -170,17 +154,5 @@ describe('useDynamicEntityFlyout', () => {
     expect(toastsMock.addDanger).toHaveBeenCalled();
     expect(onFlyoutCloseMock).toHaveBeenCalled();
     expect(openUserFlyoutMock).not.toHaveBeenCalled();
-  });
-
-  it('should close the flyout when closeDynamicFlyout is called', () => {
-    const { result } = renderHook(() =>
-      useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
-    );
-
-    act(() => {
-      result.current.closeDynamicFlyout();
-    });
-
-    expect(closeFlyoutMock).toHaveBeenCalled();
   });
 });
