@@ -235,14 +235,20 @@ export function TracesLatencyMapView({
       // recognizes the record and the flyout can write a URL reference; the fallback id
       // keeps a span without metadata openable, shown as given.
       const raw = row as DataTableRecord['raw'];
-      setExpandedDoc({
-        id:
-          typeof row._id === 'string' && typeof row._index === 'string'
-            ? getDocId(raw)
-            : `traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`,
-        raw,
-        flattened: row,
-      });
+      setExpandedDoc(
+        {
+          id:
+            typeof row._id === 'string' && typeof row._index === 'string'
+              ? getDocId(raw)
+              : `traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`,
+          raw,
+          flattened: row,
+        },
+        // The traces Overview front and center, not the field table. The id is the traces
+        // document profile's (discover traces_document_profile doc_viewer accessor); as a
+        // package this cannot import it, and an unknown id just falls back to the default.
+        { initialTabId: 'doc_view_obs_traces_overview' }
+      );
     },
     [setExpandedDoc, indexPattern, baseFilters, services.data]
   );

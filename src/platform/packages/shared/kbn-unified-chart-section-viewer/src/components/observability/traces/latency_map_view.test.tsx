@@ -308,7 +308,9 @@ describe('TracesLatencyMapView', () => {
     expect(call?.esqlQuery).not.toContain(selectionClause);
     expect(call?.dropNullColumns).toBe(true);
     expect(actions.setExpandedDoc).toHaveBeenCalledWith(
-      expect.objectContaining({ flattened: { 'service.name': 'cart' } })
+      expect.objectContaining({ flattened: { 'service.name': 'cart' } }),
+      // The flyout opens on the traces Overview, not the field table.
+      { initialTabId: 'doc_view_obs_traces_overview' }
     );
   });
 
@@ -331,7 +333,8 @@ describe('TracesLatencyMapView', () => {
       expect.objectContaining({
         id: '.ds-traces-apm-000001::span-1::',
         raw: expect.objectContaining({ _id: 'span-1', _index: '.ds-traces-apm-000001' }),
-      })
+      }),
+      { initialTabId: 'doc_view_obs_traces_overview' }
     );
   });
 
