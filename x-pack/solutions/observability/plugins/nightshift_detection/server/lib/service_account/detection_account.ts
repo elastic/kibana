@@ -12,6 +12,7 @@ import { CoreStart as CoreStartToken } from '@kbn/core-di-server';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { EngineHttpError } from '../errors/engine_http_error';
 import { createNotSetUpError } from '../errors/create_not_set_up_error';
+import { getStatusCode } from '../errors/get_status_code';
 import { DETECTION_ENGINE_WORKLOAD_ID, DETECTION_ENGINE_WORKLOAD_TYPE } from './workload';
 
 /** The detection engine's identity: the service account bound to each space. */
@@ -38,13 +39,24 @@ export class DetectionAccountService {
       return undefined;
     }
 
-    const binding = await this.security.serviceAccounts.getWorkloadBinding({
-      workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
-      workloadId: DETECTION_ENGINE_WORKLOAD_ID,
-      spaceId,
-    });
+    try {
+      const binding = await this.security.serviceAccounts.getWorkloadBinding({
+        workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
+        workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+        spaceId,
+      });
 
-    return binding?.serviceAccountId;
+      return binding?.serviceAccountId;
+    } catch (error) {
+      // Core answers 403 when the stored binding fails its integrity check, and its own `bind`
+      // then treats the space as having no binding. Doing the same lets `_enable` replace it,
+      // where a thrown error would leave the space unrepairable.
+      if (getStatusCode(error) === 403) {
+        return undefined;
+      }
+
+      throw error;
+    }
   }
 
   /** Whether the request's user holds `manage_security`, which binding an account requires. */

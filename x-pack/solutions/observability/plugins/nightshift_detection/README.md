@@ -32,8 +32,8 @@ xpack.security.serviceAccounts.enabled: true
 ## Setting up a space
 
 The engine runs a space as the deployment's `nightshift_detection` service account. Kibana never
-creates the account: a user with `manage_security` runs the setup, and the server only binds the
-space to the account it is given.
+creates the account: a user with the `manage_security` cluster privilege and the Nightshift manage
+privilege runs the setup, and the server only binds the space to the account it is given.
 
 ```sh
 node x-pack/solutions/observability/plugins/nightshift_detection/scripts/enable.js --space default
