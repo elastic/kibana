@@ -99,6 +99,14 @@ jest.mock('../../../hooks/use_fetch_rule_routing_tags', () => ({
   useFetchRuleRoutingTags: () => ({ data: [], isLoading: false }),
 }));
 
+jest.mock('../../../hooks/use_fetch_workflow', () => ({
+  useFetchWorkflow: (id: string) => ({
+    data: { id, name: `Workflow ${id}` },
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: {

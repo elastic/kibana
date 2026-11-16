@@ -20,6 +20,7 @@ const mockGetUrlForApp = jest.fn(
 );
 let mockWorkflowsEnabled = true;
 const mockRefetchWorkflows = jest.fn();
+let mockWorkflowResults: Array<{ id: string; name: string }> = [];
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -96,9 +97,22 @@ jest.mock('../../../hooks/use_fetch_rule_routing_tags', () => ({
   useFetchRuleRoutingTags: () => ({ data: [], isLoading: false }),
 }));
 
+jest.mock('../../../hooks/use_fetch_workflow', () => ({
+  useFetchWorkflow: (id: string) => ({
+    data: {
+      id,
+      name: `Workflow ${id}`,
+      description: `Description ${id}`,
+      definition: { steps: [] },
+    },
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
-    data: { results: [], total: 0, page: 1, size: 100 },
+    data: { results: mockWorkflowResults, total: mockWorkflowResults.length, page: 1, size: 100 },
     isLoading: false,
     refetch: mockRefetchWorkflows,
   }),
@@ -149,6 +163,7 @@ const TEST_SUBJ = {
 describe('ActionPolicyForm', () => {
   beforeEach(() => {
     mockWorkflowsEnabled = true;
+    mockWorkflowResults = [];
     jest.clearAllMocks();
   });
 
@@ -405,5 +420,45 @@ describe('ActionPolicyForm', () => {
     expect(screen.getByText('Workflows are not enabled')).toBeInTheDocument();
     expect(screen.getByTestId('workflowsDisabledSettingsLink')).toBeInTheDocument();
     expect(screen.queryByTestId('destinationsInput')).not.toBeInTheDocument();
+  });
+
+  describe('destination cards', () => {
+    it('renders a card for each saved destination', () => {
+      renderForm(VALID_FORM_STATE);
+
+      const cards = screen.getByTestId('actionPolicyFormDestinationCards');
+      expect(within(cards).getAllByTestId('actionPolicyDestinationCard')).toHaveLength(1);
+      expect(within(cards).getByText('Workflow workflow-1')).toBeInTheDocument();
+      expect(within(cards).getByText('Description workflow-1')).toBeInTheDocument();
+    });
+
+    it('adds a card on select and removes it on deselect', async () => {
+      mockWorkflowResults = [
+        { id: 'workflow-1', name: 'Workflow 1' },
+        { id: 'workflow-2', name: 'Workflow 2' },
+      ];
+      const user = userEvent.setup({ delay: null });
+      renderForm();
+
+      expect(screen.queryByTestId('actionPolicyFormDestinationCards')).not.toBeInTheDocument();
+
+      const destinationsCombo = screen.getByTestId('destinationsInput');
+      await user.click(within(destinationsCombo).getByRole('combobox'));
+      await user.click(await screen.findByRole('option', { name: 'Workflow 2' }));
+
+      const cards = screen.getByTestId('actionPolicyFormDestinationCards');
+      expect(within(cards).getByText('Workflow workflow-2')).toBeInTheDocument();
+
+      await user.click(within(destinationsCombo).getByTestId('comboBoxClearButton'));
+
+      expect(screen.queryByTestId('actionPolicyFormDestinationCards')).not.toBeInTheDocument();
+    });
+
+    it('does not render cards when workflows are disabled', () => {
+      mockWorkflowsEnabled = false;
+      renderForm(VALID_FORM_STATE);
+
+      expect(screen.queryByTestId('actionPolicyFormDestinationCards')).not.toBeInTheDocument();
+    });
   });
 });
