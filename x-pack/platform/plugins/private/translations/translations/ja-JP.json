@@ -70490,7 +70490,6 @@
     "xpack.synthetics.metricItemIcon.div.urlLabel": "URL：",
     "xpack.synthetics.metricItemIcon.euiButtonIcon.closePopover": "ポップオーバーを閉じる",
     "xpack.synthetics.metricItemIcon.euiButtonIcon.maintenanceWindowActive": "保守時間枠の実行中は、モニターが停止します。",
-    "xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl": "モニターURL",
     "xpack.synthetics.metricItemIcon.staleTooltip": "このモニターは報告を停止しました。最後に報告された状態は古くなっている可能性があり、調査を推奨します。",
     "xpack.synthetics.missingIntegration.callout.title": "Fleet統合が欠落しています",
     "xpack.synthetics.missingIntegration.resetButton": "モニターをリセット",

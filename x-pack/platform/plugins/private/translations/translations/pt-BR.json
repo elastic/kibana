@@ -70503,7 +70503,6 @@
     "xpack.synthetics.metricItemIcon.div.urlLabel": "URL:",
     "xpack.synthetics.metricItemIcon.euiButtonIcon.closePopover": "Fechar popover",
     "xpack.synthetics.metricItemIcon.euiButtonIcon.maintenanceWindowActive": "O monitor fica parado enquanto as janelas de manutenção estão em execução.",
-    "xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl": "Monitorar URL",
     "xpack.synthetics.metricItemIcon.staleTooltip": "Este monitor parou de reportar. O último status conhecido pode estar desatualizado. Vale a pena investigar.",
     "xpack.synthetics.missingIntegration.callout.title": "Integração com Fleet ausente",
     "xpack.synthetics.missingIntegration.resetButton": "Redefinir monitor",
