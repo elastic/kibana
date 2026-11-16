@@ -655,6 +655,7 @@ describe('ThreatAttachmentInlineContent', () => {
             { type: 'hash', value: 'hash-disc', tier: 'discriminating' },
             { type: 'domain', value: 'uncert.example', tier: 'uncertain' },
             { type: 'ip', value: '203.0.113.9', tier: 'reference' },
+            { type: 'ip', value: '127.0.0.1', tier: 'discriminating' },
             {
               type: 'domain',
               value: 'pending.example',
@@ -683,6 +684,8 @@ describe('ThreatAttachmentInlineContent', () => {
     fireEvent.click(screen.getByTestId('alertzeroThreatAttachmentIocNotHuntedToggle'));
     fireEvent.mouseOver(screen.getByText('203.0.113.9'));
     expect(await screen.findByText('Reference')).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByText('127.0.0.1'));
+    expect(await screen.findByText('Non-routable address')).toBeInTheDocument();
     fireEvent.mouseOver(screen.getByText('pending.example'));
     expect(await screen.findByText('Pending review')).toBeInTheDocument();
   });

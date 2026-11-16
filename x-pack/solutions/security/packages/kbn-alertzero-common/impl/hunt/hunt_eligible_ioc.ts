@@ -30,8 +30,8 @@ export const HUNT_ELIGIBLE_IOC_TIERS = ['discriminating', 'contextual', 'uncerta
 export type HuntEligibleIocTier = (typeof HUNT_ELIGIBLE_IOC_TIERS)[number];
 
 export const isHuntEligibleIoc = (ioc: {
-  type?: unknown;
-  value?: unknown;
+  type: unknown;
+  value: unknown;
   tier?: unknown;
   deferred_unreviewed?: unknown;
 }): boolean => {

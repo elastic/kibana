@@ -16,18 +16,25 @@ describe('isHuntEligibleIoc', () => {
     { tier: null },
     { tier: '' },
   ])('returns true for eligible tier $tier when not deferred', ({ tier }) => {
-    expect(isHuntEligibleIoc({ tier })).toBe(true);
+    expect(isHuntEligibleIoc({ type: 'domain', value: 'example.com', tier })).toBe(true);
   });
 
   it.each([{ tier: 'reference' }, { tier: 'denied' }, { tier: 'high' }])(
     'returns false for ineligible tier $tier',
     ({ tier }) => {
-      expect(isHuntEligibleIoc({ tier })).toBe(false);
+      expect(isHuntEligibleIoc({ type: 'domain', value: 'example.com', tier })).toBe(false);
     }
   );
 
   it('returns false when deferred_unreviewed is true even for a promotable tier', () => {
-    expect(isHuntEligibleIoc({ tier: 'discriminating', deferred_unreviewed: true })).toBe(false);
+    expect(
+      isHuntEligibleIoc({
+        type: 'domain',
+        value: 'example.com',
+        tier: 'discriminating',
+        deferred_unreviewed: true,
+      })
+    ).toBe(false);
   });
 
   it.each([

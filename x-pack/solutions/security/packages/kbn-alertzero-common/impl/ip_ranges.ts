@@ -181,12 +181,15 @@ export const isNonRoutableIPv6 = (ip: string): boolean => {
 };
 
 const IPV4_DOTTED = /^(?:\d{1,3}\.){3}\d{1,3}$/;
+const hasValidOctets = (ip: string): boolean =>
+  ip.split('.').every((octet) => Number(octet) <= 255);
 /**
  * Leading IPv4 with an optional `:port`. Unanchored on purpose: free-form extracts
  * sometimes append junk (`127.0.0.1:443junk`, `10.0.0.5extra`), and the address
- * check still applies to the dotted-quad prefix.
+ * check still applies to the dotted-quad prefix. The last octet may not run into
+ * more digits, so `203.0.113.1000` is not read as `203.0.113.100`.
  */
-const IPV4_DOTTED_OPTIONAL_PORT_PREFIX = /^((?:\d{1,3}\.){3}\d{1,3})(?::\d+)?/;
+const IPV4_DOTTED_OPTIONAL_PORT_PREFIX = /^((?:\d{1,3}\.){3}\d{1,3})(?!\d)(?::\d+)?/;
 
 /**
  * Host portion of a stored `ip` / `cidr` value for range classification. Strips a
@@ -227,7 +230,7 @@ export const isNonRoutableIpIoc = (ioc: { type?: unknown; value?: unknown }): bo
   }
   const host = hostForIpIocValue(raw);
   if (IPV4_DOTTED.test(host)) {
-    return isNonRoutableIPv4(host);
+    return hasValidOctets(host) && isNonRoutableIPv4(host);
   }
   if (host.includes(':')) {
     return isNonRoutableIPv6(host);

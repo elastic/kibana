@@ -168,6 +168,13 @@ describe('isNonRoutableIpIoc', () => {
     expect(isNonRoutableIpIoc({ type: 'ip', value: '203.0.113.10:443' })).toBe(false);
   });
 
+  it.each(['203.0.113.1000', '203.0.113.256', '999.0.0.1'])(
+    'does not read out-of-range octets in %s as an address',
+    (value) => {
+      expect(isNonRoutableIpIoc({ type: 'ip', value })).toBe(false);
+    }
+  );
+
   it('leaves a public IPv4 with trailing junk routable', () => {
     expect(isNonRoutableIpIoc({ type: 'ip', value: '203.0.113.10:443junk' })).toBe(false);
   });
