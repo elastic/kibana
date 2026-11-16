@@ -31,7 +31,7 @@ import type {
 } from '@kbn/trace-latency-map';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { extractFilters } from '../../../utils';
-import { appendMapClause, removeWhere } from './latency_map_query_clauses';
+import { appendMapClause, removeMapSetResidue, removeWhere } from './latency_map_query_clauses';
 import { buildExampleSpanQuery } from './example_span_query';
 import { getSearchErrorReason } from './search_error';
 import { useStableTraceSource } from './use_stable_trace_source';
@@ -106,7 +106,9 @@ export function TracesLatencyMapView({
         const withoutSelection = extractFilters(query)
           .filter(isSelectionCondition)
           .reduce(removeWhere, query);
-        return esqlCondition ? appendMapClause(withoutSelection, esqlCondition) : withoutSelection;
+        return esqlCondition
+          ? appendMapClause(withoutSelection, esqlCondition)
+          : removeMapSetResidue(withoutSelection);
       });
     },
     [updateESQLQuery]
@@ -129,7 +131,9 @@ export function TracesLatencyMapView({
   );
   const clearOperation = useCallback(() => {
     updateESQLQuery?.((query) =>
-      extractFilters(query).filter(isOperationCondition).reduce(removeWhere, query)
+      removeMapSetResidue(
+        extractFilters(query).filter(isOperationCondition).reduce(removeWhere, query)
+      )
     );
   }, [updateESQLQuery]);
 
@@ -155,7 +159,9 @@ export function TracesLatencyMapView({
         const withoutFailedOnly = extractFilters(query)
           .filter(isFailedOnlyCondition)
           .reduce(removeWhere, query);
-        return next ? appendMapClause(withoutFailedOnly, FAILED_SPAN_CONDITION) : withoutFailedOnly;
+        return next
+          ? appendMapClause(withoutFailedOnly, FAILED_SPAN_CONDITION)
+          : removeMapSetResidue(withoutFailedOnly);
       });
     },
     [updateESQLQuery]

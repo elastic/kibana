@@ -7,22 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-function splitFilters(value: string) {
-  return value
-    .split(/\bwhere\b/i)
-    .filter((item) => item !== '')
-    .map((item) => item.trim());
+/**
+ * The top-level commands of an ES|QL query: split on pipes outside string literals, so a
+ * `|` inside a `"..."` or `"""..."""` literal (a span name, say) never cuts a command.
+ */
+function splitCommands(query: string): string[] {
+  const commands: string[] = [];
+  let start = 0;
+  let i = 0;
+  while (i < query.length) {
+    if (query.startsWith('"""', i)) {
+      const end = query.indexOf('"""', i + 3);
+      i = end === -1 ? query.length : end + 3;
+      continue;
+    }
+    const char = query[i];
+    if (char === '"') {
+      i += 1;
+      while (i < query.length && query[i] !== '"') i += query[i] === '\\' ? 2 : 1;
+      i += 1;
+      continue;
+    }
+    if (char === '|') {
+      commands.push(query.slice(start, i));
+      start = i + 1;
+    }
+    i += 1;
+  }
+  commands.push(query.slice(start));
+  return commands;
 }
 
+/**
+ * The expressions of the query's WHERE commands. String literals are respected: a pipe or
+ * the word "where" inside a value stays part of its expression, so conditions carrying
+ * arbitrary names (the latency map's operation clause, a user's own filters) round-trip.
+ */
 export function extractFilters(query: string) {
-  return query
-    .split('|')
-    .flatMap((item) => {
-      const value = item.trim();
-      if (/\bwhere\b/i.test(value)) {
-        return splitFilters(value);
-      }
-      return [];
-    })
+  return splitCommands(query)
+    .map((command) => command.trim())
+    .filter((command) => /^where\s/i.test(command))
+    .map((command) => command.slice('where'.length).trim())
     .filter((item) => item !== '');
 }

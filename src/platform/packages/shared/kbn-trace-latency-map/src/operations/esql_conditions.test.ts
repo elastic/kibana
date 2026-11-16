@@ -30,6 +30,13 @@ describe('operation conditions', () => {
     expect(parseOperationCondition(condition)).toEqual(operation);
   });
 
+  it('escapes control characters, which would break the quoted literal raw', () => {
+    const operation = { service: 'cart', name: 'line one\nline two\ttab' };
+    const condition = operationToEsqlCondition(operation);
+    expect(condition).not.toContain('\n');
+    expect(parseOperationCondition(condition)).toEqual(operation);
+  });
+
   it('rejects a condition whose name literals differ: not one this package wrote', () => {
     expect(
       parseOperationCondition(

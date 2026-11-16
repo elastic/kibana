@@ -18,7 +18,10 @@ import { operationToEsqlCondition } from './to_esql';
 const OPERATION_CONDITION_PATTERN =
   /^service\.name == "((?:[^"\\]|\\.)*)" AND \(transaction\.name == "((?:[^"\\]|\\.)*)" OR span\.name == "((?:[^"\\]|\\.)*)" OR name == "((?:[^"\\]|\\.)*)"\)$/;
 
-const unquote = (text: string) => text.replace(/\\(.)/g, '$1');
+/** Inverts `quoteEsqlString`'s escaping, control characters included. */
+const UNESCAPES: Record<string, string> = { n: '\n', r: '\r', t: '\t' };
+const unquote = (text: string) =>
+  text.replace(/\\(.)/g, (_, escaped: string) => UNESCAPES[escaped] ?? escaped);
 
 /**
  * The operation of a condition `operationToEsqlCondition` wrote, for hosts that keep the

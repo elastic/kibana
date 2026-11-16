@@ -10,9 +10,20 @@
 import { OPERATION_NAME_FIELDS, SERVICE_NAME_FIELD } from '../query/fields';
 import type { LatencyMapOperation } from './operation_bands';
 
-/** An ES|QL string literal: backslashes first, so an escaped quote is not escaped again. */
+/**
+ * An ES|QL string literal: backslashes first, so an escaped quote is not escaped again, and
+ * control characters as their escapes, which a raw newline inside quotes would not survive.
+ * Local rather than `escapeStringValue` of `@kbn/esql-utils`, which does the same: this
+ * query layer stays dependency-free, and the escaping must pair exactly with `from_esql`'s
+ * unescaping for the round-trip check.
+ */
 export const quoteEsqlString = (value: string) =>
-  `"${value.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`;
+  `"${value
+    .replaceAll('\\', '\\\\')
+    .replaceAll('"', '\\"')
+    .replaceAll('\n', '\\n')
+    .replaceAll('\r', '\\r')
+    .replaceAll('\t', '\\t')}"`;
 
 /**
  * The ES|QL condition of one operation: its service, and its name in whichever family

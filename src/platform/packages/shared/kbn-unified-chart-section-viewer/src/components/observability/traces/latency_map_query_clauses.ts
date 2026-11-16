@@ -15,6 +15,12 @@
  */
 
 import { appendToESQLQuery } from '@kbn/esql-utils';
+import {
+  isFailedOnlyCondition,
+  isOperationCondition,
+  isSelectionCondition,
+} from '@kbn/trace-latency-map';
+import { extractFilters } from '../../../utils';
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -24,6 +30,9 @@ export const removeWhere = (query: string, clause: string) =>
 
 const UNMAPPED_FIELDS_SET = /\bSET\s+unmapped_fields\b/i;
 
+/** The exact prefix `appendMapClause` writes, which `removeMapSetResidue` takes back off. */
+const MAP_SET_PREFIX = 'SET unmapped_fields="NULLIFY";\n';
+
 /**
  * Append a WHERE clause the map writes. It names fields of every trace family (`duration` of
  * OTel, `span.duration.us` of classic APM, `status.code`), and a source that maps only some of
@@ -32,7 +41,20 @@ const UNMAPPED_FIELDS_SET = /\bSET\s+unmapped_fields\b/i;
  */
 export const appendMapClause = (query: string, clause: string) => {
   const appended = appendToESQLQuery(query, `| WHERE ${clause}`);
-  return UNMAPPED_FIELDS_SET.test(appended)
-    ? appended
-    : `SET unmapped_fields="NULLIFY";\n${appended}`;
+  return UNMAPPED_FIELDS_SET.test(appended) ? appended : `${MAP_SET_PREFIX}${appended}`;
 };
+
+const isMapClause = (condition: string) =>
+  isSelectionCondition(condition) ||
+  isFailedOnlyCondition(condition) ||
+  isOperationCondition(condition);
+
+/**
+ * Take the map's own `SET unmapped_fields` prefix back off once no clause of the map
+ * remains to need it, so clearing the last map filter restores the user's query exactly.
+ * Only the exact text `appendMapClause` wrote is touched: a SET the user typed stays.
+ */
+export const removeMapSetResidue = (query: string) =>
+  query.startsWith(MAP_SET_PREFIX) && !extractFilters(query).some(isMapClause)
+    ? query.slice(MAP_SET_PREFIX.length)
+    : query;

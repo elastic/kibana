@@ -8,10 +8,17 @@
  */
 
 import { appendToESQLQuery } from '@kbn/esql-utils';
-import { appendMapClause, removeWhere } from './latency_map_query_clauses';
+import { FAILED_SPAN_CONDITION, selectionToEsqlCondition } from '@kbn/trace-latency-map';
+import { appendMapClause, removeMapSetResidue, removeWhere } from './latency_map_query_clauses';
 
 const query = 'FROM traces-apm*\n| WHERE service.name == "cart"';
 const clause = '@timestamp >= TO_DATETIME("2026-10-26T10:00:00.000Z") AND (duration >= 1000)';
+const selectionClause = selectionToEsqlCondition({
+  from: '2026-10-26T10:00:00.000Z',
+  to: '2026-10-26T10:05:00.000Z',
+  minDuration: 1_000_000,
+  maxDuration: 5_000_000,
+});
 
 describe('removeWhere', () => {
   it('takes off a WHERE clause appendToESQLQuery added', () => {
@@ -50,5 +57,26 @@ describe('appendMapClause', () => {
     expect(removeWhere(appendMapClause(query, clause), clause)).toBe(
       `SET unmapped_fields="NULLIFY";\n${query}`
     );
+  });
+});
+
+describe('removeMapSetResidue', () => {
+  it('takes the SET back off once the last map clause is gone, restoring the query exactly', () => {
+    const appended = appendMapClause(query, selectionClause);
+    expect(removeMapSetResidue(removeWhere(appended, selectionClause))).toBe(query);
+  });
+
+  it('keeps the SET while another map clause still needs it', () => {
+    const both = appendMapClause(appendMapClause(query, selectionClause), FAILED_SPAN_CONDITION);
+    const withoutSelection = removeWhere(both, selectionClause);
+    expect(removeMapSetResidue(withoutSelection)).toBe(withoutSelection);
+  });
+
+  it('never touches a SET the user wrote, with or without map clauses', () => {
+    const own = `SET unmapped_fields="LOAD";\n${query}`;
+    expect(removeMapSetResidue(own)).toBe(own);
+    // Same value but the user's own spacing: not the exact prefix the map writes.
+    const ownNullify = `SET unmapped_fields="NULLIFY"; ${query}`;
+    expect(removeMapSetResidue(ownNullify)).toBe(ownNullify);
   });
 });

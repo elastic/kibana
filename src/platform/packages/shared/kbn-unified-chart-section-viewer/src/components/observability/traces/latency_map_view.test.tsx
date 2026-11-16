@@ -17,6 +17,7 @@ import {
   selectionToEsqlCondition,
 } from '@kbn/trace-latency-map';
 import type { LatencyMapProps } from '@kbn/trace-latency-map';
+import { extractFilters } from '../../../utils';
 import { TracesLatencyMapView } from './latency_map_view';
 import type { TracesLatencyMapViewProps } from './latency_map_view';
 
@@ -100,13 +101,23 @@ describe('TracesLatencyMapView', () => {
     );
   });
 
-  it('restores the previous query when the selection is cleared', () => {
+  it('restores the previous query when the selection is cleared, its SET prefix included', () => {
     const { actions, mapProps } = renderView({
       filters: ['service.name == "cart"', selectionClause],
     });
     mapProps.onSelectionCommit(undefined, undefined);
     const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
     expect(updater(`FROM traces-apm*\n| WHERE ${selectionClause}`)).toBe('FROM traces-apm*');
+    // The SET the map wrote on append leaves with the last map clause.
+    expect(updater(`${SET_NULLIFY}FROM traces-apm*\n| WHERE ${selectionClause}`)).toBe(
+      'FROM traces-apm*'
+    );
+    // While another map clause remains, the SET stays for it.
+    expect(
+      updater(
+        `${SET_NULLIFY}FROM traces-apm*\n| WHERE ${FAILED_SPAN_CONDITION}\n| WHERE ${selectionClause}`
+      )
+    ).toBe(`${SET_NULLIFY}FROM traces-apm*\n| WHERE ${FAILED_SPAN_CONDITION}`);
   });
 
   it('writes the focused operation into the query, replacing the previous one', () => {
@@ -134,6 +145,20 @@ describe('TracesLatencyMapView', () => {
     mapProps.onClearOperation!();
     const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
     expect(updater(`FROM traces-apm*\n| WHERE ${condition}`)).toBe('FROM traces-apm*');
+    expect(updater(`${SET_NULLIFY}FROM traces-apm*\n| WHERE ${condition}`)).toBe(
+      'FROM traces-apm*'
+    );
+  });
+
+  it('round-trips an operation whose name holds a pipe and "where" through the query', () => {
+    // The clause carries arbitrary names; extracting the query's filters must not shatter it.
+    const operation = { service: 'cart', name: 'GET /where|:id' };
+    const condition = operationToEsqlCondition(operation);
+    const { mapProps } = renderView({
+      filters: extractFilters(`FROM traces-apm* | WHERE ${condition}`),
+    });
+    expect(mapProps.focusedOperation).toEqual(operation);
+    expect(mapProps.source.filters).toEqual([condition]);
   });
 
   it('clears a selection the picked time range no longer overlaps, instead of showing nothing', () => {
@@ -193,7 +218,8 @@ describe('TracesLatencyMapView', () => {
 
     mapProps.onFailedOnlyChange!(false);
     updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
-    expect(updater(withFilter)).toBe(`${SET_NULLIFY}FROM traces-apm*`);
+    // The SET the append wrote leaves with the last map clause: the query is restored exactly.
+    expect(updater(withFilter)).toBe('FROM traces-apm*');
   });
 
   it('replaces a failure filter already in the query rather than stacking another', () => {
