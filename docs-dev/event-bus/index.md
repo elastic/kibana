@@ -1,93 +1,85 @@
 ---
 navigation_title: "In-process event bus"
-description: "A node-local pub/sub service so plugins can publish and subscribe to typed topics without importing each other."
+description: "Pub/sub purpose, plugin dependencies, current delivery guarantees, and planned durability."
 ---
 
 # In-process event bus
 
-The in-process event bus lets one plugin publish a domain event and another plugin react, without the two importing each other.
+The event bus separates event production from consumer processing. Producers publish to shared, typed topics without calling consumers or waiting for their handlers. Consumers subscribe independently; adding one does not require changing the producer.
 
-The in-process event bus is an in-memory service on a single {{kib}} node. Delivery is best effort and at-most-once: the bus does not retry, does not persist events, and does not deliver to other nodes.
+Delivery currently uses memory on one {{kib}} node. Durability is planned to allow consumers to recover events after downtime or restart. **That recovery is not available today.**
 
-A working example lives in `examples/pubsub_example`. Start {{kib}} with `yarn start --run-examples` to load it.
+## What pub/sub provides
 
-## Goals
+Use the bus to publish facts that other plugins may react to, rather than to request a specific plugin operation. Producers can include webhook ingress, saved-object updates, and timers.
 
-- Decouple producers from consumers. A webhook handler, a saved-object update, or a timer can publish. Workflows, Cases, or any other plugin can subscribe without a private bridge.
-- Fan out to every named consumer on the topic. Two plugins that care about the same event both receive it.
-- Keep the publisher fast. `publish` resolves when the event is accepted into memory, not when handlers finish.
-- Keep the node safe. Each consumer has a bounded queue. A slow consumer drops only its own copies.
+- **Independent consumers:** the producer knows the topic, not its subscribers. Each named consumer has a separate subscription.
+- **Asynchronous processing:** publish does not wait for handlers. Handler failures do not reject publish. Handlers still share process resources with the publisher and other consumers.
+- **Planned availability independence:** durable delivery would let consumers process accepted events after recovering from downtime.
 
-This is not a work queue, not Task Manager, and not a cluster-wide broadcast. A subscriber that needs single-winner or durable work should schedule that work itself.
+The topic's meaning, data, and event identity remain a shared contract.
 
-## How it fits the plugin lifecycle
+## When to choose the event bus
 
-`CoreSetup.pubsub` exposes `registerTopic` and `subscribe`. Both are setup-only.
+Choose pub/sub when the producer should not call or await its consumers, or when several consumers need separate reactions to the same fact. For example, webhook ingress could publish an issue update for both Case synchronization and a Workflow trigger.
 
-`CoreStart.pubsub` exposes `publish`.
+A requirement to recover events after downtime is also a reason to adopt this model. Discuss such integrations in `#kibana-event-bus` to establish the required acceptance, retry, recovery, and retention guarantees. If acknowledging a webhook must guarantee recovery after a restart, today's publish alone cannot satisfy that requirement. Until durable delivery is available, retain an existing durable path or use reconciliation where missed events are acceptable.
 
-```mermaid
-sequenceDiagram
-  participant PluginA as Producer plugin
-  participant PluginB as Consumer plugin
-  participant Bus as core.pubsub
-  PluginA->>Bus: setup: registerTopic(topic)
-  PluginB->>Bus: setup: subscribe(topic, consumer)
-  Note over Bus: start()
-  PluginA->>Bus: start: publish(topic, { id, data })
-  Bus-->>PluginA: { id, acceptedAt }
-  Bus->>PluginB: handler(event)
-```
+Use a plugin's API when you need the result of a specific operation. Use Task Manager to schedule and execute background work. A bus consumer can schedule long-running work there, but this does not protect an event lost before the handler runs. Durable event delivery and durable job execution are separate.
 
-Registration and subscribe close at the end of setup. A subscription whose topic no plugin registered is logged at `start` and receives no events. `publish` to an unregistered topic throws. `publish` before start throws.
+## Plugin availability and shared contracts
 
-`Server.stop()` stops the dispatcher after `http.stop()` and before `plugins.stop()`. Events still queued at shutdown are discarded. `publish` after stop still validates the event, then resolves and logs at debug without queueing.
+Shared topic types replace direct plugin API calls, not {{kib}}'s plugin dependency graph.
 
-## Fan-out on one node
+If a consumer requires a particular producer to be enabled, declare it in `requiredPlugins` in `kibana.jsonc`. An observer of optional sources need not require every producer. Required dependencies establish plugin availability, not correct integration configuration or active event production; report missing configuration through integration health.
 
-Every named consumer on the topic receives every event published on that node. The bus copies the payload for each consumer. One handler cannot mutate another consumer's data.
+A producer needs no dependency on consumers merely to publish. A consumer can declare required or optional dependencies while communicating through topics.
+
+Share the topic type from a small types-only package. Each plugin imports the type and calls `defineTopic` independently; consumers should not import the producer's runtime token.
+
+Creating a token does not register the topic. Exactly one plugin can register each topic name on a node. For a single-producer topic, register it in the producer's setup so publication does not depend on a consumer being enabled. Registration does not restrict who can publish.
+
+## Delivery today and the durable direction
+
+The planned behavior below is not a released contract or a commitment to a particular release.
+
+| Concern | Current implementation | Planned durable delivery |
+| --- | --- | --- |
+| Publish completion | Validated and accepted in memory; no proof that a handler ran | Durable acceptance, separate from processing completion |
+| Consumer failure | Handler failure is logged; the bus does not retry | Recoverable delivery with retry |
+| Consumer downtime or restart | Queued events are not recoverable | Recovery of pending accepted events within retention |
+| Node placement | Delivery only on the publishing node | Recovery and delivery independent of the publishing process |
+| Long-running execution | Consumer-owned handoff to an execution service such as Task Manager | Still separate from event delivery |
+
+### Current fan-out and loss boundaries
+
+Delivery is best effort and at-most-once per publication and consumer: zero or one handler invocation, never a bus retry.
 
 ```mermaid
 flowchart LR
   P["Producer plugin<br/>publish(topic, event)"] --> Bus["core.pubsub<br/>this Kibana node"]
-  Bus --> C1["casesPlugin.jira"]
-  Bus --> C2["workflowsPlugin.engine"]
+  Bus --> C1["cases.jira"]
+  Bus --> C2["workflows.engine"]
   Bus --> C3["otherPlugin.audit"]
 ```
 
-Consumer names are plugin-local. Core stores them as `${pluginId}.${consumer}`, so two plugins can both use `engine`. A second subscribe under the same scoped name throws.
+A resolved publish does not guarantee delivery. A consumer's copy is dropped when its queue has 1000 pending events. Overflow is logged on the first drop and with a count when the queue drains. A failed handler is logged; processing continues with the next event. Subscriptions process serially and can run concurrently with each other.
 
-Consumers on other nodes never see the event. If you need one winner across the cluster, do not wait for the bus to become a competing-consumer queue. Schedule a Task Manager task, or make the handler idempotent and accept duplicates when a producer retries.
+Other nodes never receive the publication. Queued events are lost at shutdown; absent consumers have no history to recover. A producer running on every node, such as a timer, publishes separately on each node. If the resulting work must run once across the cluster, coordinate it separately; pub/sub does not elect one consumer.
 
-## Delivery and drops
+At start, subscriptions to unregistered topics generate a warning and receive no events. This does not enforce producer availability. Publishing to an unregistered topic rejects.
 
-The bus is at-most-once for each accepted event and each consumer: zero or one delivery, never a retry.
+## Consumer responsibilities
 
-```mermaid
-flowchart TD
-  Publish["publish(topic, { id, data })"] --> Validate{"Registered topic?<br/>id ≤ 256?<br/>JSON ≤ 256 KiB?<br/>JSON-safe?"}
-  Validate -->|no| Reject[Throw. Not accepted]
-  Validate -->|yes, after stop| Debug["Resolve. Log at debug. Do not queue"]
-  Validate -->|yes, running| Queue["Enqueue a serialized copy<br/>for each consumer"]
-  Queue --> Full{"That consumer already<br/>has 1000 pending?"}
-  Full -->|yes| Drop["Drop that consumer's copy.<br/>Log once, then the count"]
-  Full -->|no| Drain["setImmediate drain"]
-  Drain --> Handler["handler(event)<br/>own JSON.parse copy"]
-  Handler -->|throws| Log["Log and drop.<br/>No retry"]
-  Handler -->|ok| Next[Next event for that consumer]
-```
+Keep handlers short. Obtain the execution identity and authorization needed for the reaction. The bus does not forward the publisher's request or permissions: user, space, and session async stores are detached before dispatch. A `spaceId` in event data is not built-in namespace filtering or authorization.
 
-`publish` resolving means the event was accepted, not that any handler ran. A thrown handler does not reject `publish` and does not block other consumers.
+Use stable, source-derived event IDs. Publishing the same `id` twice creates two publications; the current bus does not deduplicate. Make repeated effects safe where sources retry. For durable adoption, account for concurrent and out-of-order redelivery; do not rely on today's serial dispatch. For state synchronization, prevent older updates from overwriting newer state; event identity does not establish source order.
 
-In development, `publish` rejects data that does not survive a JSON round trip and names the path (`Date`, `Map`, `Set`, class instances, `NaN`, `undefined` array items, functions). Production delivers what `JSON.parse(JSON.stringify(data))` produced.
+Core starts dispatch before plugin start lifecycles run. A handler can run before its plugin's `start()`. Obtain required start services through `core.getStartServices()`.
 
-Handlers run with the consumer's own identity. The publisher's request is not forwarded. Request-scoped async stores (user, space, session) are detached before the handler runs.
+## Current API reference
 
-## API contract
-
-### Define a topic type
-
-Share a `Topic<TData, 'name'>` type from a small types-only package. Producers and consumers both depend on that package, not on each other. `defineTopic` requires the type argument. A typo in the name fails to compile.
+### Topic types
 
 ```ts
 import type { Topic } from '@kbn/core-pubsub-server';
@@ -100,6 +92,8 @@ export interface CaseUpdatedData {
 export type CaseUpdatedTopic = Topic<CaseUpdatedData, 'cases.updated'>;
 ```
 
+Each participating plugin creates its token from the shared type:
+
 ```ts
 import { defineTopic } from '@kbn/core/server';
 import type { CaseUpdatedTopic } from '@kbn/cases-updated-topic';
@@ -107,55 +101,59 @@ import type { CaseUpdatedTopic } from '@kbn/cases-updated-topic';
 const caseUpdated = defineTopic<CaseUpdatedTopic>('cases.updated');
 ```
 
-`Topic` data defaults to `never`. A name-only topic (`Topic<never, 'orders'>`) cannot be published on.
+`defineTopic` requires a type argument and checks the name against it. `Topic` data defaults to `never`, so a name-only topic (`Topic<never, 'orders'>`) cannot be published on. `registerTopic` and `subscribe` also validate the name at runtime.
 
-Topic names are unique across {{kib}}. They are at most 256 characters, and must be dot-separated segments that each start with a letter. A second registration of the same name throws and names the first registrant. Topics have no owner: the plugin id is used for diagnostics only. Anyone who has the token can publish.
+### Setup and publication
 
-A cast can skip `defineTopic`. `registerTopic` and `subscribe` still run `assertTopicName` on `topic.name`.
-
-### Setup
+`CoreSetup.pubsub` exposes `registerTopic` and `subscribe`. Both are setup-only. In the registering plugin's setup:
 
 ```ts
-public setup(core: CoreSetup) {
-  core.pubsub.registerTopic(caseUpdated);
-
-  core.pubsub.subscribe(caseUpdated, {
-    consumer: 'jira',
-    handler: async (event) => {
-      // event: { id, data, topic, acceptedAt }
-    },
-  });
-}
+core.pubsub.registerTopic(caseUpdated);
 ```
 
-### Start
+In each consumer's setup:
 
 ```ts
-public start(core: CoreStart) {
-  void core.pubsub.publish(caseUpdated, {
-    id: 'case:abc:rev-3',
-    data: { caseId: 'abc', spaceId: 'default' },
-  });
-}
+core.pubsub.subscribe(caseUpdated, {
+  consumer: 'jira',
+  handler: async (event) => {
+    // event: { id, data, topic, acceptedAt }
+  },
+});
 ```
 
-The producer writes `{ id, data }`. `id` is required, source-derived, unique within the topic, and at most 256 characters. Phase 1 does not deduplicate: publishing the same `id` twice delivers twice. Reuse the same `id` when retrying a logical delivery so a later durable bus can recognize the duplicate.
+`CoreStart.pubsub` exposes `publish`. Await publication in an async operation and handle rejection through that operation's error handling:
 
-`publish` resolves with `{ id, acceptedAt }`. The delivered event is that input plus `topic` and `acceptedAt`.
+```ts
+const { id, acceptedAt } = await core.pubsub.publish(caseUpdated, {
+  id: 'case:abc:rev-3',
+  data: { caseId: 'abc', spaceId: 'default' },
+});
+```
 
-## Limits
+The producer supplies `{ id, data }`. Publish resolves with `{ id, acceptedAt }`; handlers receive `{ id, data, topic, acceptedAt }`. IDs must be source-derived and unique within the topic for distinct events. Reuse the ID when retrying the same logical delivery.
+
+Consumer names are plugin-local suffixes. Core scopes them as `${pluginId}.${consumer}`, so two plugins can both use `engine`. A second subscription with the same scoped name **on the same topic** throws; the suffix can be reused on another topic.
+
+### Validation and lifecycle limits
 
 | Rule | Value |
 | --- | --- |
-| Topic name | ≤ 256 characters, `letter` then `[A-Za-z0-9_-]*`, dot-separated |
-| Event `id` | ≤ 256 characters |
-| Event `data` | ≤ 256 KiB of JSON |
-| Pending events per consumer | 1000; further copies for that consumer are dropped |
-| Delivery | At-most-once, this node only |
-| Dedup | None in phase 1 |
+| Topic name | 1–256 characters; dot-separated segments, each beginning with a letter followed by `[A-Za-z0-9_-]*` |
+| Topic registration | One registration per topic name on a node |
+| Consumer suffix | 1–128 characters; a letter followed by `[A-Za-z0-9_-]*`; no dots or plugin prefix |
+| Event `id` | Non-empty string, at most 256 characters |
+| Event `data` | At most 256 KiB of UTF-8 JSON |
+| Pending events per subscription | 1000, excluding the event in flight; further copies are dropped |
+| Delivery | Best effort, at-most-once per publication and subscription, this node only |
+| Deduplication | None |
 
-## Example
+Each consumer receives its own `JSON.parse(JSON.stringify(data))` copy. One handler cannot mutate another consumer's data. Use plain objects, arrays, strings, finite numbers, booleans, and `null`; object properties with `undefined` values are dropped in both modes. In development, publish rejects data that does not survive a JSON round trip and names the path (`Date`, `Map`, `Set`, class instances, `NaN`, `undefined` array items, functions). Production delivers the JSON result; data that cannot be serialized at all is rejected in either mode.
 
-`examples/pubsub_example` registers `pubsubExample.ping` and two consumers, `echo` and `length`. The topic type lives in `@kbn/pubsub-example-topic`. `POST /internal/pubsub_example/publish` publishes one event. A timer publishes another every 30 seconds.
+Registration and subscription close at the end of setup. Publishing before the bus starts rejects. `Server.stop()` stops dispatch after `http.stop()` and before `plugins.stop()`. It does not wait for in-flight handlers to finish. A publish after stop still validates the event, then resolves and logs at debug without queueing it.
 
-Questions about adopting the bus, or about later phases (durability, identity, cross-node delivery), belong in `#kibana-event-bus`.
+## Example and adoption
+
+A working example lives in `examples/pubsub_example`. Start {{kib}} with `yarn start --run-examples` to load it. The example registers `pubsubExample.ping` and two consumers, `echo` and `length`; its shared topic type lives in `@kbn/pubsub-example-topic`. `POST /internal/pubsub_example/publish` publishes an event, and a timer publishes every 30 seconds. See the example's README for request details.
+
+Discuss adoption and required delivery guarantees in `#kibana-event-bus`.
