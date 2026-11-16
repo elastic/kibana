@@ -35,6 +35,42 @@ const run = async (execution: unknown) => {
   return returned as unknown as { results: Array<{ data: Record<string, unknown> }> };
 };
 
+const createAttachments = (active: unknown[] = []) => ({
+  getActive: jest.fn().mockReturnValue(active),
+  add: jest.fn().mockResolvedValue({ id: 'att-1', current_version: 1 }),
+  update: jest.fn().mockResolvedValue(undefined),
+});
+
+const runWithAttachments = async (
+  execution: unknown,
+  attachments: ReturnType<typeof createAttachments>
+) => {
+  const workflowApi = { getWorkflowExecution: jest.fn().mockResolvedValue(execution) } as any;
+  const returned = await createGetAwsOnboardingStateTool({ workflowApi }).handler(
+    { execution_id: 'exec-1' },
+    { request, spaceId: 'default', attachments } as any
+  );
+  return returned as unknown as { results: Array<{ data: Record<string, unknown> }> };
+};
+
+const waitingExecution = (waitingStepId: string, stepExecutions: unknown[]) => ({
+  id: 'exec-1',
+  workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
+  status: 'waiting_for_input',
+  startedAt: '2026-11-13T00:00:00Z',
+  workflowDefinition: {
+    name: 'AWS Agentless Onboarding',
+    steps: [{ name: waitingStepId, type: 'waitForInput', with: { message: 'Next?' } }],
+  },
+  stepExecutions: [...stepExecutions, step(waitingStepId, 9, { status: 'waiting_for_input' })],
+});
+
+const existingCard = (status: string) => ({
+  id: 'att-9',
+  type: 'fleet_aws_onboarding_credentials',
+  data: { execution_id: 'exec-1', region: 'us-east-1', status },
+});
+
 describe('get_aws_onboarding_state', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -134,5 +170,84 @@ describe('get_aws_onboarding_state', () => {
 
     expect(Object.keys(results[0].data).sort()).toEqual(['output', 'status']);
     expect(results[0].data.status).toBe('completed');
+  });
+
+  describe('credentials card', () => {
+    it('creates one credentials card when the run waits at ask_credentials', async () => {
+      const attachments = createAttachments();
+      const { results } = await runWithAttachments(
+        waitingExecution('ask_credentials', [
+          step('credentials', 1, { status: 'completed', output: { configured: false } }),
+        ]),
+        attachments
+      );
+
+      expect(attachments.add).toHaveBeenCalledTimes(1);
+      expect(attachments.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'fleet_aws_onboarding_credentials',
+          data: { execution_id: 'exec-1', region: 'us-east-1', status: 'pending' },
+        })
+      );
+      expect(results[0].data.credentials_card_attachment_id).toBe('att-1');
+    });
+
+    it('reuses the existing card for the same execution', async () => {
+      const attachments = createAttachments([existingCard('pending')]);
+      const { results } = await runWithAttachments(
+        waitingExecution('ask_credentials', [
+          step('credentials', 1, { status: 'completed', output: { configured: false } }),
+        ]),
+        attachments
+      );
+
+      expect(attachments.add).not.toHaveBeenCalled();
+      expect(attachments.update).not.toHaveBeenCalled();
+      expect(results[0].data.credentials_card_attachment_id).toBe('att-9');
+    });
+
+    it('marks the card verified once the credentials step reports working roles', async () => {
+      const attachments = createAttachments([existingCard('pending')]);
+      await runWithAttachments(
+        waitingExecution('ask_discover', [
+          step('credentials_recheck', 2, {
+            status: 'completed',
+            output: {
+              configured: true,
+              account_id: '123456789012',
+              discovery_ok: true,
+              provisioning_ok: true,
+            },
+          }),
+        ]),
+        attachments
+      );
+
+      expect(attachments.update).toHaveBeenCalledWith('att-9', {
+        data: expect.objectContaining({ status: 'verified', account_id: '123456789012' }),
+      });
+    });
+
+    it('marks the card verify_failed with the reason when a role cannot be assumed', async () => {
+      const attachments = createAttachments([existingCard('pending')]);
+      await runWithAttachments(
+        waitingExecution('ask_credentials', [
+          step('credentials_recheck', 2, {
+            status: 'completed',
+            output: {
+              configured: true,
+              discovery_ok: true,
+              provisioning_ok: false,
+              error: 'AccessDenied',
+            },
+          }),
+        ]),
+        attachments
+      );
+
+      expect(attachments.update).toHaveBeenCalledWith('att-9', {
+        data: expect.objectContaining({ status: 'verify_failed', error: 'AccessDenied' }),
+      });
+    });
   });
 });

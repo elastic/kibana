@@ -10,9 +10,15 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { toWorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflows';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 
+import {
+  AWS_ONBOARDING_CREDENTIALS_ATTACHMENT_TYPE,
+  type AwsOnboardingCredentialsAttachmentData,
+} from '../../../common/agent_builder/aws_onboarding_credentials_attachment';
+import type { AwsOnboardingCredentialsOutput } from '../../../common/workflows/steps/credentials';
 import type { AwsOnboardingDiscoverOutput } from '../../../common/workflows/steps/discover';
 import type { AwsOnboardingResolveOutput } from '../../../common/workflows/steps/resolve';
 import type { AwsOnboardingCreateStackOutput } from '../../../common/workflows/steps/create_stack';
@@ -39,6 +45,73 @@ const lastOutput = <T>(execution: WorkflowExecutionDto, stepId: string): T | und
   return last.output as T;
 };
 
+const deriveCardState = (
+  output: AwsOnboardingCredentialsOutput | undefined
+): Pick<AwsOnboardingCredentialsAttachmentData, 'status' | 'account_id' | 'error'> => {
+  if (!output?.configured) {
+    return { status: 'pending' };
+  }
+  const accountId = output.account_id ? { account_id: output.account_id } : {};
+  if (output.error) {
+    return { status: 'verify_failed', error: output.error, ...accountId };
+  }
+  if (output.discovery_ok === true && output.provisioning_ok !== false) {
+    return { status: 'verified', ...accountId };
+  }
+  return { status: 'configured', ...accountId };
+};
+
+/**
+ * Creates the credentials card once per execution (only while the run waits for credentials)
+ * and keeps its status in step with the credentials step output. The masked key is never
+ * written here because the card reads it live in the browser.
+ */
+const syncCredentialsCard = async ({
+  attachments,
+  executionId,
+  waitingStepId,
+  credentialsOutput,
+}: {
+  attachments: AttachmentStateManager;
+  executionId: string;
+  waitingStepId: string | undefined;
+  credentialsOutput: AwsOnboardingCredentialsOutput | undefined;
+}): Promise<string | undefined> => {
+  const existing = attachments
+    .getActive()
+    .find(
+      (a) =>
+        a.type === AWS_ONBOARDING_CREDENTIALS_ATTACHMENT_TYPE &&
+        (a.data as Partial<AwsOnboardingCredentialsAttachmentData>)?.execution_id === executionId
+    );
+
+  if (!existing) {
+    if (waitingStepId !== 'ask_credentials') {
+      return undefined;
+    }
+    const data: AwsOnboardingCredentialsAttachmentData = {
+      execution_id: executionId,
+      region: 'us-east-1',
+      status: 'pending',
+    };
+    const created = await attachments.add({
+      type: AWS_ONBOARDING_CREDENTIALS_ATTACHMENT_TYPE,
+      data,
+      description: 'AWS onboarding access setup for this run',
+    });
+    return created.id;
+  }
+
+  const stored = existing.data as AwsOnboardingCredentialsAttachmentData;
+  const next = deriveCardState(credentialsOutput);
+  if (next.status !== stored.status || next.error !== stored.error) {
+    // Replace the derived fields wholesale so a stale account_id or error does not linger.
+    const { account_id: _a, error: _e, ...base } = stored;
+    await attachments.update(existing.id, { data: { ...base, ...next } });
+  }
+  return existing.id;
+};
+
 export const createGetAwsOnboardingStateTool = ({
   workflowApi,
 }: AwsOnboardingToolDeps): BuiltinSkillBoundedTool<typeof stateSchema> => ({
@@ -48,7 +121,7 @@ export const createGetAwsOnboardingStateTool = ({
     'Get the progress of an AWS onboarding run: its status, the step it is waiting on (with the message to relay and the answer schema), and the outputs of the steps completed so far.',
   schema: stateSchema,
   confirmation: { askUser: 'never' },
-  handler: async ({ execution_id: executionId }, { request, spaceId }) => {
+  handler: async ({ execution_id: executionId }, { request, spaceId, attachments }) => {
     const denied = await checkOnboardingAccess(request, 'read');
     if (denied) {
       return { results: [denied] };
@@ -80,6 +153,17 @@ export const createGetAwsOnboardingStateTool = ({
     const stack = lastOutput<AwsOnboardingStackStatusOutput>(execution, 'stack_status');
     const policies = lastOutput<AwsOnboardingCreatePoliciesOutput>(execution, 'create_policies');
     const hasData = lastOutput<AwsOnboardingHasDataOutput>(execution, 'has_data');
+    const credentialsOutput =
+      lastOutput<AwsOnboardingCredentialsOutput>(execution, 'credentials_recheck') ??
+      lastOutput<AwsOnboardingCredentialsOutput>(execution, 'credentials');
+    const cardId = attachments
+      ? await syncCredentialsCard({
+          attachments,
+          executionId,
+          waitingStepId: waitingStep?.stepId,
+          credentialsOutput,
+        })
+      : undefined;
 
     return {
       results: [
@@ -93,6 +177,7 @@ export const createGetAwsOnboardingStateTool = ({
                   schema: state.waiting_input.schema,
                 }
               : null,
+          ...(cardId && { credentials_card_attachment_id: cardId }),
           ...(discover && { region: discover.region, discovered_services: discover.services }),
           ...(resolve && {
             resolved: {
