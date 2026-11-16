@@ -65,19 +65,6 @@ describe('timeZoneShape', () => {
     expect(timeZoneQuery().safeParse({ timeZone: '+14:00' }).success).toBe(true);
   });
 
-  it('names a time zone in any case as Elasticsearch knows it', () => {
-    expect(timeZoneQuery().safeParse({ timeZone: 'america/new_york' }).data?.timeZone).toBe(
-      'America/New_York'
-    );
-    expect(timeZoneQuery().safeParse({ timeZone: 'utc' }).data?.timeZone).toBe('UTC');
-    expect(timeZoneQuery().safeParse({ timeZone: 'est' }).data?.timeZone).toBe('America/Panama');
-  });
-
-  it('names the zones Elasticsearch rejects by the zones they link to', () => {
-    expect(timeZoneQuery().safeParse({ timeZone: 'EST' }).data?.timeZone).toBe('America/Panama');
-    expect(timeZoneQuery().safeParse({ timeZone: 'ROC' }).data?.timeZone).toBe('Asia/Taipei');
-  });
-
   it('rejects an unknown time zone or an impossible offset', () => {
     expect(timeZoneQuery().safeParse({ timeZone: 'Not/AZone' }).success).toBe(false);
     expect(timeZoneQuery().safeParse({ timeZone: '+1:00' }).success).toBe(false);

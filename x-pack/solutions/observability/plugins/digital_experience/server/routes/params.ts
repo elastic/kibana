@@ -42,30 +42,13 @@ export const START_AFTER_END_ISSUE = {
 // The offset `getUserTimeZone` falls back to when the browser can't name its time zone.
 const UTC_OFFSET = /^[+-](0\d|1[0-4]):[0-5]\d$/;
 
-// Every `moment.tz.names()` entry (and so `dateFormat:tz` option) that an Elasticsearch 9.7
-// `date_histogram` rejects, as the zone it links to.
-const ES_TIME_ZONE_OF: Readonly<Record<string, string>> = {
-  EST: 'America/Panama',
-  HST: 'Pacific/Honolulu',
-  MST: 'America/Phoenix',
-  ROC: 'Asia/Taipei',
-};
-
-/**
- * The time zone the histogram buckets of a route line up with, as Elasticsearch names it: a
- * moment-timezone name or a UTC offset.
- */
+/** The time zone the histogram buckets of a route line up with: a moment-timezone name or a UTC offset. */
 export const timeZoneShape = () => ({
   timeZone: z
     .string()
     .max(MAX_TIME_ZONE_LENGTH)
     .refine((value) => UTC_OFFSET.test(value) || moment.tz.zone(value) !== null, {
       message: 'Unknown time zone',
-    })
-    .transform((value) => {
-      // moment-timezone matches names in any case, Elasticsearch only in their own.
-      const name = moment.tz.zone(value)?.name ?? value;
-      return ES_TIME_ZONE_OF[name] ?? name;
     })
     .default('UTC'),
 });
