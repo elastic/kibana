@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-/** Compare the preview selection against the row where "Compare to this version" was invoked. */
-export interface ChangeHistoryCompareRowOverride {
-  type: 'vs_row';
-  rowChangeId: string;
-}
+/** what the user asked to compare the selected change against */
+export type ChangeHistoryCompareMode =
+  | { type: 'vs_previous' }
+  | { type: 'vs_row'; rowChangeId: string };
