@@ -84,6 +84,7 @@ spaceTest.describe('Exceptions flyout builder', { tag: tags.stateful.classic }, 
       severity: 'low',
       type: 'query',
       query: '*:*',
+      from: 'now-6m',
     });
     ruleId = rule.id;
   });
