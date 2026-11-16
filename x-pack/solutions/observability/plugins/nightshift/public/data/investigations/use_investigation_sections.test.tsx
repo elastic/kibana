@@ -228,6 +228,35 @@ describe('useInvestigationSections', () => {
     expect(httpGet).toHaveBeenCalledTimes(1);
   });
 
+  it('falls back to filtered counts when the no-search baseline fails', async () => {
+    httpGet.mockImplementation((_url, options) => {
+      const requestQuery = options?.query as { query?: string } | undefined;
+      if (requestQuery?.query) {
+        return Promise.resolve({ critical: 0, high: 1, medium: 0, low: 9 });
+      }
+      return Promise.reject(new Error('baseline unavailable'));
+    });
+
+    const { result } = renderSections('tr');
+
+    await waitFor(() =>
+      expect(result.current.severityCounts).toEqual({
+        critical: 0,
+        high: 1,
+        medium: 0,
+        low: 9,
+      })
+    );
+    await waitFor(() =>
+      expect(result.current.unfilteredSeverityCounts).toEqual({
+        critical: 0,
+        high: 1,
+        medium: 0,
+        low: 9,
+      })
+    );
+  });
+
   it('leaves running investigations out of the tier counts', async () => {
     const { result } = renderSections();
 

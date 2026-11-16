@@ -169,11 +169,12 @@ export const useInvestigationSections = ({
   });
 
   // Same window as the filtered counts, but without search — only needed while a query is active.
+  // Key uses a separate family (`severityCountsBaseline`) so a search for the literal text
+  // "unfiltered" cannot collide with the filtered `severityCounts` + query slot.
   const unfilteredSeverityCountsQuery = useQuery({
     queryKey: [
       ...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY,
-      'severityCounts',
-      'unfiltered',
+      'severityCountsBaseline',
       updatedAfter,
       updatedBefore,
     ],
@@ -275,7 +276,14 @@ export const useInvestigationSections = ({
     if (!hasSearchQuery) {
       return severityCounts;
     }
-    return toSeverityCounts(unfilteredSeverityCountsQuery.data);
+    if (unfilteredSeverityCountsQuery.data != null) {
+      return toSeverityCounts(unfilteredSeverityCountsQuery.data);
+    }
+    // Baseline still missing or failed: never invent four zeros as "never present" — that would
+    // hollow every tile, including tiers with positive filtered counts. Fall back to filtered
+    // counts so visible tiers stay present; filtered-to-zero tiers may look muted until baseline
+    // recovers.
+    return severityCounts;
   }, [hasSearchQuery, severityCounts, unfilteredSeverityCountsQuery.data]);
 
   const refetchAll = useCallback(() => {
