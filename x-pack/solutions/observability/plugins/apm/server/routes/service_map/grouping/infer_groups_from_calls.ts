@@ -22,7 +22,7 @@ import {
 } from './constants';
 import { detectCommunities } from './detect_communities';
 import type { WeightedEdge } from './types';
-import { edgesBetween } from './utils';
+import { edgesBetween, groupSizes } from './utils';
 
 interface Run {
   groups: Map<string, number>;
@@ -178,14 +178,6 @@ function measureRun({
     selfContained: selfContainedShare({ groups, edges }),
     inTinyParts: tinyPartShare(groups),
   };
-}
-
-function groupSizes(groups: ReadonlyMap<string, number>): Map<number, number> {
-  const sizes = new Map<number, number>();
-  for (const group of groups.values()) {
-    sizes.set(group, (sizes.get(group) ?? 0) + 1);
-  }
-  return sizes;
 }
 
 /** Each group's services, by group number. */

@@ -6,11 +6,28 @@
  */
 
 import type { WeightedEdge } from './types';
-import { compareNames, edgesBetween, verifyEdges } from './utils';
+import { compareNames, edgesBetween, groupSizes, verifyEdges } from './utils';
 
 describe('compareNames', () => {
   it('orders by code unit, uppercase before lowercase', () => {
     expect(['b', 'a', 'B', 'a-b', 'a_b'].sort(compareNames)).toEqual(['B', 'a', 'a-b', 'a_b', 'b']);
+  });
+});
+
+describe('groupSizes', () => {
+  it('counts the services in each group', () => {
+    const groups = new Map([
+      ['a', 0],
+      ['b', 1],
+      ['c', 0],
+    ]);
+
+    expect(groupSizes(groups)).toEqual(
+      new Map([
+        [0, 2],
+        [1, 1],
+      ])
+    );
   });
 });
 

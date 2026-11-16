@@ -26,7 +26,7 @@ const largeGroups: Array<[string, number]> = [
 ];
 
 describe('absorbTinyGroups', () => {
-  it('moves a service in a tiny group into the neighbouring group it shares the most weight with', () => {
+  it('moves a service on its own into the larger group it shares the most weight with', () => {
     const groups = absorbTinyGroups({
       groups: new Map([...largeGroups, ['tiny', 2]]),
       edges: [edge('tiny', 'a', 1), edge('tiny', 'x', 2), edge('tiny', 'y', 2)],
@@ -44,14 +44,34 @@ describe('absorbTinyGroups', () => {
     expect(groups.get('tiny')).toBe(0);
   });
 
-  it('moves both services of a pair, each to its own strongest neighbour', () => {
+  it('moves a pair as a whole, even when only one of its services calls the larger group', () => {
+    const groups = absorbTinyGroups({
+      groups: new Map([...largeGroups, ['checkout', 2], ['payments', 2]]),
+      edges: [edge('checkout', 'payments', 14), edge('checkout', 'x', 0.7)],
+    });
+
+    expect(groups.get('checkout')).toBe(1);
+    expect(groups.get('payments')).toBe(1);
+  });
+
+  it('moves a pair as a whole into the larger group its services share the most weight with', () => {
     const groups = absorbTinyGroups({
       groups: new Map([...largeGroups, ['pair-a', 2], ['pair-b', 2]]),
-      edges: [edge('pair-a', 'pair-b'), edge('pair-a', 'a', 3), edge('pair-b', 'z', 3)],
+      edges: [edge('pair-a', 'pair-b'), edge('pair-a', 'a', 3), edge('pair-b', 'z', 2)],
     });
 
     expect(groups.get('pair-a')).toBe(0);
-    expect(groups.get('pair-b')).toBe(1);
+    expect(groups.get('pair-b')).toBe(0);
+  });
+
+  it('moves a tiny group next to another tiny group once that one has moved', () => {
+    const groups = absorbTinyGroups({
+      groups: new Map([...largeGroups, ['outer', 2], ['inner', 3]]),
+      edges: [edge('outer', 'inner'), edge('inner', 'a')],
+    });
+
+    expect(groups.get('inner')).toBe(0);
+    expect(groups.get('outer')).toBe(0);
   });
 
   it('leaves a tiny group whose neighbours are all in tiny groups', () => {

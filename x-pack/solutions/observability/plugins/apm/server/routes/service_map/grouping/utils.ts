@@ -12,6 +12,15 @@ export function compareNames(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
+/** The number of services in each group, by group number. */
+export function groupSizes(groups: ReadonlyMap<string, number>): Map<number, number> {
+  const sizes = new Map<number, number>();
+  for (const group of groups.values()) {
+    sizes.set(group, (sizes.get(group) ?? 0) + 1);
+  }
+  return sizes;
+}
+
 /** The edges whose services are both among the given ones. */
 export function edgesBetween({
   edges,
