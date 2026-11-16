@@ -193,7 +193,7 @@ describe('ChangeHistoryPreviewPanel', () => {
       });
     });
 
-    it('does not pass the stale change as selectedChange and reports compare context as loading', () => {
+    it('does not pass the stale change as selectedChange and shows loading instead of rendering the preview', () => {
       render(
         <ChangeHistoryPreviewPanel
           selectedChangeId="evt-previous"
@@ -210,9 +210,27 @@ describe('ChangeHistoryPreviewPanel', () => {
           compareMode,
         })
       );
-      expect(mockUseChangeHistoryConfig().renderPreview).toHaveBeenLastCalledWith(
-        expect.objectContaining({ isLoadingCompareContext: true })
+      expect(screen.getByTestId('changeHistoryPreviewLoading')).toBeInTheDocument();
+      expect(mockUseChangeHistoryConfig().renderPreview).not.toHaveBeenCalled();
+    });
+
+    it('shows loading instead of rendering the preview while the compare context loads', () => {
+      mockUseChangeHistoryCompare.mockReturnValue({
+        compareSpec: undefined,
+        isLoadingCompareContext: true,
+      });
+
+      render(
+        <ChangeHistoryPreviewPanel
+          selectedChangeId="evt-current"
+          listItems={listItems}
+          compareMode={compareMode}
+        />,
+        { wrapper: TestProvider }
       );
+
+      expect(screen.getByTestId('changeHistoryPreviewLoading')).toBeInTheDocument();
+      expect(mockUseChangeHistoryConfig().renderPreview).not.toHaveBeenCalled();
     });
 
     it('does not report compare context as loading when no compare mode is active', () => {

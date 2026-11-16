@@ -143,7 +143,7 @@ export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
     );
   }
 
-  if (isLoading) {
+  if (isLoading || (activeCompareMode && isLoadingCompareContext)) {
     return (
       <PreviewPanelState testSubj="changeHistoryPreviewLoading">
         <EuiFlexItem grow={false}>

@@ -36,7 +36,7 @@ export const DashboardChangeHistoryView = ({
   setPreviewTitle,
   inheritedTimeRange,
 }: DashboardChangeHistoryViewProps): JSX.Element => {
-  const { compareSpec, compareMode, diffTelemetry, isLoadingCompareContext } = previewProps;
+  const { compareSpec, compareMode, diffTelemetry } = previewProps;
 
   // stay on the comparison for as long as it is requested, even while loading or after a failed load
   const isShowingComparison = Boolean(compareMode);
@@ -57,14 +57,6 @@ export const DashboardChangeHistoryView = ({
           diffTelemetry={diffTelemetry}
           language="json"
         />
-      );
-    }
-
-    if (isLoadingCompareContext) {
-      return (
-        <div css={contentStyles}>
-          <EuiLoadingSpinner size="xl" data-test-subj="dashboardCompareLoading" />
-        </div>
       );
     }
 
