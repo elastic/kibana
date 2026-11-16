@@ -12,13 +12,10 @@ import { EpisodeSeverity } from '../../severity/severity_utils';
 import type { SeverityChangeEntry } from './entries';
 import { AlertEpisodeTimelineSeverityComment } from './timeline_severity_comment';
 
-const renderComment = (entry: SeverityChangeEntry, collapsedEventLimit?: number) =>
+const renderComment = (entry: SeverityChangeEntry, hideEventCount?: boolean) =>
   render(
     <I18nProvider>
-      <AlertEpisodeTimelineSeverityComment
-        entry={entry}
-        collapsedEventLimit={collapsedEventLimit}
-      />
+      <AlertEpisodeTimelineSeverityComment entry={entry} hideEventCount={hideEventCount} />
     </I18nProvider>
   );
 
@@ -50,19 +47,13 @@ describe('AlertEpisodeTimelineSeverityComment', () => {
     expect(screen.getByText('changed the severity to')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-critical')).toBeInTheDocument();
     expect(screen.getByText(/after 3 high events/i)).toBeInTheDocument();
-    expect(screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')).not.toBeInTheDocument();
   });
 
-  it('shows the collapsed warning on a severity change when events are collapsed', () => {
-    renderComment(changedEntry, 1000);
+  it('hides the after-N-events label when the event count is hidden', () => {
+    renderComment(changedEntry, true);
 
-    expect(screen.getByTestId('alertingV2EpisodeCollapsedEventsWarning')).toBeInTheDocument();
+    expect(screen.getByText('changed the severity to')).toBeInTheDocument();
     expect(screen.queryByText(/after 3 high events/i)).not.toBeInTheDocument();
-  });
-
-  it('does not show the collapsed warning on the initial severity', () => {
-    renderComment({ ...changedEntry, prevSeverity: undefined, prevEventCount: 0 }, 1000);
-
     expect(screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')).not.toBeInTheDocument();
   });
 });

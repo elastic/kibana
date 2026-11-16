@@ -110,18 +110,23 @@ describe('AlertEpisodeTimeline', () => {
       makeStateChange('2024-01-01T00:00:00.000Z'),
     ];
 
-    it('shows the warning on each status and severity change when events are collapsed', () => {
+    it('shows one callout and no per-row warnings or event counts when events are collapsed', () => {
       renderTimeline(entries, { collapsedEventLimit: 1000 });
 
-      expect(screen.getAllByTestId('alertingV2EpisodeCollapsedEventsWarning')).toHaveLength(2);
-    });
-
-    it('does not show the warning when events are not collapsed', () => {
-      renderTimeline(entries);
-
+      expect(screen.getByTestId('alertingV2TimelineCollapsedCallout')).toHaveTextContent(
+        'This alert has more than 1000 events'
+      );
       expect(
         screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')
       ).not.toBeInTheDocument();
+      expect(screen.queryByText(/after 4000 active events/i)).not.toBeInTheDocument();
+    });
+
+    it('shows no callout and keeps the event counts when events are not collapsed', () => {
+      renderTimeline(entries);
+
+      expect(screen.queryByTestId('alertingV2TimelineCollapsedCallout')).not.toBeInTheDocument();
+      expect(screen.getByText(/after 4000 active events/i)).toBeInTheDocument();
     });
   });
 

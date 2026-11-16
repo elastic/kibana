@@ -7,7 +7,15 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiAvatar, EuiButtonEmpty, EuiComment, EuiCommentList, useEuiTheme } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiComment,
+  EuiCommentList,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { TimelineEntry } from './entries';
 import { AlertEpisodeTimelineActionComment } from './timeline_action_comment';
@@ -18,7 +26,7 @@ import * as i18n from './translations';
 export interface AlertEpisodeTimelineProps {
   entries: TimelineEntry[];
   profilesMap: Map<string, UserProfileWithAvatar>;
-  /** When set, status and severity changes are collapsed and warn about this event limit. */
+  /** When set, status and severity changes are collapsed and a callout names this event limit. */
   collapsedEventLimit?: number;
   onLoadMore?: () => void;
   hasMore?: boolean;
@@ -37,6 +45,7 @@ export const AlertEpisodeTimeline = ({
   isLoadingMore,
 }: AlertEpisodeTimelineProps) => {
   const { euiTheme } = useEuiTheme();
+  const isCollapsed = collapsedEventLimit !== undefined;
 
   const lastActionIndex = entries.reduce(
     (lastIdx, item, idx) => (item.kind === 'action' ? idx : lastIdx),
@@ -64,7 +73,7 @@ export const AlertEpisodeTimeline = ({
         <AlertEpisodeTimelineSeverityComment
           key={`severity-${idx}`}
           entry={item}
-          collapsedEventLimit={collapsedEventLimit}
+          hideEventCount={isCollapsed}
         />
       );
     }
@@ -73,7 +82,7 @@ export const AlertEpisodeTimeline = ({
       <AlertEpisodeTimelineStateComment
         key={`state-${idx}`}
         entry={item}
-        collapsedEventLimit={collapsedEventLimit}
+        hideEventCount={isCollapsed}
       />
     );
   });
@@ -111,7 +120,7 @@ export const AlertEpisodeTimeline = ({
     );
   }
 
-  return (
+  const commentList = (
     <EuiCommentList
       css={css`
         /* EuiTimelineItemEvent renders as a bare div with flex:1 and no min-width:0,
@@ -136,5 +145,25 @@ export const AlertEpisodeTimeline = ({
     >
       {renderedEntries}
     </EuiCommentList>
+  );
+
+  if (collapsedEventLimit === undefined) {
+    return commentList;
+  }
+
+  return (
+    <>
+      <EuiCallOut
+        data-test-subj="alertingV2TimelineCollapsedCallout"
+        title={i18n.COLLAPSED_CALLOUT_TITLE}
+        color="warning"
+        iconType="warning"
+        size="s"
+      >
+        <p>{i18n.getCollapsedCalloutBody(collapsedEventLimit)}</p>
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+      {commentList}
+    </>
   );
 };

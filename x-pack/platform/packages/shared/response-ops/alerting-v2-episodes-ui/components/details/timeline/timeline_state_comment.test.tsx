@@ -12,10 +12,10 @@ import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { StateChangeEntry } from './entries';
 import { AlertEpisodeTimelineStateComment } from './timeline_state_comment';
 
-const renderComment = (entry: StateChangeEntry, collapsedEventLimit?: number) =>
+const renderComment = (entry: StateChangeEntry, hideEventCount?: boolean) =>
   render(
     <I18nProvider>
-      <AlertEpisodeTimelineStateComment entry={entry} collapsedEventLimit={collapsedEventLimit} />
+      <AlertEpisodeTimelineStateComment entry={entry} hideEventCount={hideEventCount} />
     </I18nProvider>
   );
 
@@ -47,19 +47,13 @@ describe('AlertEpisodeTimelineStateComment', () => {
     expect(screen.getByText('changed the status to')).toBeInTheDocument();
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.getByText(/after 5 pending events/i)).toBeInTheDocument();
-    expect(screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')).not.toBeInTheDocument();
   });
 
-  it('shows the collapsed warning on a status change when events are collapsed', () => {
-    renderComment(changedEntry, 1000);
+  it('hides the after-N-events label when the event count is hidden', () => {
+    renderComment(changedEntry, true);
 
-    expect(screen.getByTestId('alertingV2EpisodeCollapsedEventsWarning')).toBeInTheDocument();
+    expect(screen.getByText('changed the status to')).toBeInTheDocument();
     expect(screen.queryByText(/after 5 pending events/i)).not.toBeInTheDocument();
-  });
-
-  it('does not show the collapsed warning on the initial status', () => {
-    renderComment({ ...changedEntry, prevStatus: undefined, prevEventCount: 0 }, 1000);
-
     expect(screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')).not.toBeInTheDocument();
   });
 });

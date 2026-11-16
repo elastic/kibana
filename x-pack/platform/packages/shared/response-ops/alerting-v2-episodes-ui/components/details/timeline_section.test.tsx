@@ -288,19 +288,19 @@ describe('AlertEpisodeTimelineSection', () => {
       expect(comments[0]).toHaveAttribute('data-timestamp', '2024-01-02T00:00:00.000Z');
     });
 
-    it('shows the collapsed warning on each change between collapsed phases', () => {
+    it('shows one collapsed callout instead of a warning on each change', () => {
       mockEvents(mockEventRows, false, 5005);
       mockCollapsedEvents(collapsedEvents);
       renderSection();
-      // pending -> active -> recovering: 2 status changes; the single severity is only an initial set
-      expect(screen.getAllByTestId('alertingV2EpisodeCollapsedEventsWarning')).toHaveLength(2);
-    });
-
-    it('does not show the collapsed warning when every event was returned', () => {
-      renderSection();
+      expect(screen.getByTestId('alertingV2TimelineCollapsedCallout')).toBeInTheDocument();
       expect(
         screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')
       ).not.toBeInTheDocument();
+    });
+
+    it('does not show the collapsed callout when every event was returned', () => {
+      renderSection();
+      expect(screen.queryByTestId('alertingV2TimelineCollapsedCallout')).not.toBeInTheDocument();
     });
   });
 });
