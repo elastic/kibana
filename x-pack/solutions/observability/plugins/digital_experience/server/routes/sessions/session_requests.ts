@@ -349,7 +349,8 @@ export interface SessionRequests {
 /**
  * Turns the raw timing events and fetch/XHR spans of a session into its requests, placed in time
  * and attributed to page visits: a request belongs to the last visit of its page load that started
- * before it.
+ * before it. A span with no timing event of its own is given the page load it started in, by its
+ * time, and then a visit of that page load the same way.
  */
 export const buildRequests = (
   events: OtelEventFields[],
@@ -363,24 +364,29 @@ export const buildRequests = (
   const visitStarts = pageVisits.map(({ startTime }) => Date.parse(startTime));
   const everyVisit = allIndices(pageVisits.length);
   const documents = groupIntoDocuments(records, spansById);
-  const documentOrigins = documents.map(({ originMs }) => originMs);
+  const documentVisits = documents.map(({ originMs }, documentIndex) => {
+    const nextOriginMs = documents[documentIndex + 1]?.originMs ?? Infinity;
+    // A page load's visits start once it does, and before the next one.
+    const opened = everyVisit.filter(
+      (index) =>
+        visitStarts[index] >= originMs - VISIT_SLACK_MS &&
+        visitStarts[index] < nextOriginMs - VISIT_SLACK_MS
+    );
+    return {
+      opened,
+      // A reload of the same page starts no visit: its requests belong to the visit it reloaded.
+      candidates:
+        opened.length > 0
+          ? opened
+          : [latestVisitAt(visitStarts, everyVisit, originMs + VISIT_SLACK_MS)],
+    };
+  });
 
   const requests: SessionRequest[] = [];
   const loads = new Map<number, SessionPageLoad>();
 
   documents.forEach(({ originMs, records: documentRecords }, documentIndex) => {
-    const nextOriginMs = documentOrigins[documentIndex + 1] ?? Infinity;
-    // A page load's visits start once it does, and before the next one.
-    const documentVisits = everyVisit.filter(
-      (index) =>
-        visitStarts[index] >= originMs - VISIT_SLACK_MS &&
-        visitStarts[index] < nextOriginMs - VISIT_SLACK_MS
-    );
-    // A reload of the same page starts no visit: its requests belong to the visit it reloaded.
-    const candidates =
-      documentVisits.length > 0
-        ? documentVisits
-        : [latestVisitAt(visitStarts, everyVisit, originMs + VISIT_SLACK_MS)];
+    const { opened, candidates } = documentVisits[documentIndex];
 
     for (const record of documentRecords) {
       const span = record.spanId ? spansById.get(record.spanId) : undefined;
@@ -417,7 +423,7 @@ export const buildRequests = (
         visitIndex,
       });
 
-      if (record.isNavigation && documentVisits.length > 0 && !loads.has(visitIndex)) {
+      if (record.isNavigation && opened.length > 0 && !loads.has(visitIndex)) {
         loads.set(visitIndex, {
           navigationStart: new Date(originMs).toISOString(),
           responseStartMs: positiveOrNull(timings.responseStart),
@@ -428,11 +434,17 @@ export const buildRequests = (
     }
   });
 
-  // Requests without a timing event, such as those that failed before a response.
+  // Requests without a timing event, such as those that failed before a response. Only their time
+  // says where they belong, so the page load comes first: a fetch can start while a page
+  // initializes, before its page view event, and a lookup among all visits would give it the
+  // previous page.
   for (const span of spans) {
     if (span.spanId && linkedSpanIds.has(span.spanId)) {
       continue;
     }
+    const documentIndex = documents.findLastIndex(
+      ({ originMs }) => originMs - VISIT_SLACK_MS <= span.startMs
+    );
     requests.push({
       url: span.url,
       initiatorType: span.initiatorType,
@@ -450,7 +462,11 @@ export const buildRequests = (
       protocol: null,
       traceId: span.traceId,
       spanId: span.spanId,
-      visitIndex: latestVisitAt(visitStarts, everyVisit, span.startMs),
+      visitIndex: latestVisitAt(
+        visitStarts,
+        documentIndex >= 0 ? documentVisits[documentIndex].candidates : everyVisit,
+        span.startMs
+      ),
     });
   }
 

@@ -343,6 +343,41 @@ describe('buildRequests', () => {
     ]);
   });
 
+  it('gives a request with no timing event the visit of the page load it started in', () => {
+    const secondOrigin = ORIGIN_MS + 20_000;
+    const { requests } = buildRequests(
+      [
+        navigationTiming({ originMs: ORIGIN_MS }),
+        navigationTiming({ originMs: secondOrigin, url: 'https://shop.example.com/checkout' }),
+        fetchSpan({
+          startMs: ORIGIN_MS + 5_000,
+          durationMs: 30,
+          spanId: 'during-first-page',
+          error: true,
+          url: 'https://shop.example.com/api/cart',
+        }),
+        // Started while the second page was initializing, before its page view event, and failed
+        // before a response: nothing but its time says where it belongs.
+        fetchSpan({
+          startMs: secondOrigin + 500,
+          durationMs: 30,
+          spanId: 'while-second-page-starts',
+          error: true,
+          url: 'https://shop.example.com/api/session',
+        }),
+      ],
+      // The second page's view is reported at its DOMContentLoaded, after the fetch started.
+      visits(100, 20_900)
+    );
+
+    expect(
+      requests.flatMap(({ spanId, visitIndex }) => (spanId ? [[spanId, visitIndex]] : []))
+    ).toEqual([
+      ['during-first-page', 0],
+      ['while-second-page-starts', 1],
+    ]);
+  });
+
   it('skips events that are neither timings nor HTTP spans, or lack a time or a URL', () => {
     const { requests } = buildRequests(
       [
