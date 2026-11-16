@@ -35,6 +35,8 @@ xpack.features.overrides:
   agentBuilderSml.hidden: true
   ### Context Engine is hidden when Agent Builder is disabled for this tier
   contextEngine.hidden: true
+  ### Digital Experience reads its data through APM, which is disabled for this tier
+  digital_experience.hidden: true
   ### Agentic investigations sits on the workflows platform, which is unavailable above, so no
   ### proposal can be created in this tier. Hiding keeps its privileges out of Role management.
   # agenticInvestigations.hidden: true # TODO: uncomment when agentic investigations plugin is enabled

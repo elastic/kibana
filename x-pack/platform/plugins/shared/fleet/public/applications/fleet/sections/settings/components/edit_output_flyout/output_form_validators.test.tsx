@@ -28,6 +28,16 @@ import {
   validateKafkaOAuth2TokenUrl,
   validateKibanaURL,
   validateKibanaAPIKey,
+  validateOtlpByteSize,
+  validateOtlpCompressionLevel,
+  validateOtlpCount,
+  validateOtlpDuration,
+  validateOtlpEndpoint,
+  validateOtlpHeaders,
+  validateOtlpHttpEndpoint,
+  validateOtlpHttpUrl,
+  validateOtlpProxyUrl,
+  validateOtlpShortString,
   validateSSLCertificate,
   validateSSLKey,
   validateSslPathInput,
@@ -637,6 +647,151 @@ describe('Output form validation', () => {
           },
         ]);
       });
+    });
+  });
+});
+
+describe('OTLP validators', () => {
+  describe('validateOtlpEndpoint', () => {
+    it('should require an endpoint', () => {
+      expect(validateOtlpEndpoint('')).toEqual(['Endpoint is required']);
+      expect(validateOtlpEndpoint('  ')).toEqual(['Endpoint is required']);
+    });
+
+    it('should accept host:port and URLs', () => {
+      expect(validateOtlpEndpoint('collector.example.com:4317')).toBeUndefined();
+      expect(validateOtlpEndpoint('https://collector.example.com:4317')).toBeUndefined();
+    });
+
+    it('should reject spaces and long endpoints', () => {
+      expect(validateOtlpEndpoint('collector example:4317')).toEqual([
+        'Endpoint must not contain spaces',
+      ]);
+      expect(validateOtlpEndpoint('a'.repeat(2049))).toEqual([
+        'Endpoint must be at most 2048 characters',
+      ]);
+    });
+  });
+
+  describe('validateOtlpDuration', () => {
+    it.each(['', '0', '5s', '500ms', '1m30s', '1.5h', '10us', '2µs'])(
+      'should accept %p',
+      (value) => {
+        expect(validateOtlpDuration(value)).toBeUndefined();
+      }
+    );
+
+    it.each(['5', 'five seconds', '-5s', '5 s', 's'])('should reject %p', (value) => {
+      expect(validateOtlpDuration(value)).toEqual(['Specify a duration such as 500ms, 5s, 1m30s']);
+    });
+  });
+
+  describe('validateOtlpByteSize', () => {
+    it.each(['', '0', '524288'])('should accept %p', (value) => {
+      expect(validateOtlpByteSize(value)).toBeUndefined();
+    });
+
+    it.each(['-1', '1.5', 'abc', '99999999999999999999'])('should reject %p', (value) => {
+      expect(validateOtlpByteSize(value)).toEqual(['Specify a whole number of bytes, 0 or more']);
+    });
+  });
+
+  describe('validateOtlpCount', () => {
+    it.each(['', '0', '100'])('should accept %p', (value) => {
+      expect(validateOtlpCount(value)).toBeUndefined();
+    });
+
+    it.each(['-1', '1.5', 'abc', '99999999999999999999'])('should reject %p', (value) => {
+      expect(validateOtlpCount(value)).toEqual(['Specify a whole number, 0 or more']);
+    });
+  });
+
+  describe('validateOtlpCompressionLevel', () => {
+    it.each(['', '-2', '-1', '0', '9'])('should accept %p', (value) => {
+      expect(validateOtlpCompressionLevel(value)).toBeUndefined();
+    });
+
+    it.each(['-3', '10', '1.5', 'best'])('should reject %p', (value) => {
+      expect(validateOtlpCompressionLevel(value)).toEqual(['Specify a whole number from -2 to 9']);
+    });
+  });
+
+  describe('validateOtlpHttpUrl', () => {
+    it.each(['', 'https://collector.example.com:4318/v1/traces', 'http://collector:4318'])(
+      'should accept %p',
+      (value) => {
+        expect(validateOtlpHttpUrl(value)).toBeUndefined();
+      }
+    );
+
+    it.each([
+      'collector',
+      'collector.example.com:4318/v1/traces',
+      'grpc://collector.example.com:4317',
+      'https://collector example.com',
+    ])('should reject %p', (value) => {
+      expect(validateOtlpHttpUrl(value)).toEqual([
+        'Specify a URL such as https://collector.example.com:4318',
+      ]);
+    });
+
+    it('should reject URLs longer than 2048 characters', () => {
+      expect(validateOtlpHttpUrl(`https://${'a'.repeat(2048)}`)).toEqual([
+        'URL must be at most 2048 characters',
+      ]);
+    });
+  });
+
+  describe('validateOtlpProxyUrl', () => {
+    it.each(['', 'http://proxy:3128', 'https://proxy:3128', 'socks5://proxy:1080'])(
+      'should accept %p',
+      (value) => {
+        expect(validateOtlpProxyUrl(value)).toBeUndefined();
+      }
+    );
+
+    it.each(['proxy:3128', 'ftp://proxy:21'])('should reject %p', (value) => {
+      expect(validateOtlpProxyUrl(value)).toEqual([
+        'Specify a URL such as http://proxy.example.com:3128',
+      ]);
+    });
+  });
+
+  describe('validateOtlpHttpEndpoint', () => {
+    it('should require an HTTP or HTTPS URL', () => {
+      expect(validateOtlpHttpEndpoint('')).toEqual(['Endpoint is required']);
+      expect(validateOtlpHttpEndpoint(' https://collector.example.com:4318 ')).toBeUndefined();
+      expect(validateOtlpHttpEndpoint('collector.example.com:4317')).toEqual([
+        'Specify a URL such as https://collector.example.com:4318',
+      ]);
+    });
+  });
+
+  describe('validateOtlpShortString', () => {
+    it('should accept up to 256 characters', () => {
+      expect(validateOtlpShortString('')).toBeUndefined();
+      expect(validateOtlpShortString('a'.repeat(256))).toBeUndefined();
+      expect(validateOtlpShortString('a'.repeat(257))).toEqual(['Must be at most 256 characters']);
+    });
+  });
+
+  describe('validateOtlpHeaders', () => {
+    it('should accept an empty row and complete pairs', () => {
+      expect(validateOtlpHeaders([{ key: '', value: '' }])).toBeUndefined();
+      expect(validateOtlpHeaders([{ key: 'x-tenant', value: 'acme' }])).toBeUndefined();
+    });
+
+    it('should reject incomplete pairs, duplicates and long values', () => {
+      expect(validateOtlpHeaders([{ key: 'a', value: '' }])).toHaveLength(1);
+      expect(
+        validateOtlpHeaders([
+          { key: 'a', value: '1' },
+          { key: 'a', value: '2' },
+        ])
+      ).toHaveLength(1);
+      expect(validateOtlpHeaders([{ key: 'a', value: 'v'.repeat(1001) }])).toEqual([
+        expect.objectContaining({ index: 0, hasKeyError: false, hasValueError: true }),
+      ]);
     });
   });
 });

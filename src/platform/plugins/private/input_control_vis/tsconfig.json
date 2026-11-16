@@ -26,8 +26,8 @@
     "@kbn/ui-actions-plugin",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
-    "@kbn/visualizations-common",
     "@kbn/kql",
+    "@kbn/visualizations-components",
   ],
   "exclude": [
     "target/**/*",

@@ -42,7 +42,7 @@ auth:
       prefix: "SSWS "
 actions:
   listUsers:
-    description: List users with bounded Link-header pagination.
+    description: List one page of users and return the Link header for the next request.
     isTool: true
     scope: read
     input:
@@ -63,8 +63,12 @@ actions:
       query:
         limit: "{{ input.limit }}"
         after: "{{ input.after }}"
+      response:
+        outputKey: users
+        linkHeader:
+          outputKey: link
   getLogs:
-    description: Read recent Okta System Log events with bounded Link-header pagination.
+    description: Read one page of recent Okta System Log events and return the Link header.
     isTool: true
     scope: read
     input:
@@ -99,6 +103,10 @@ actions:
         q: "{{ input.q }}"
         limit: "{{ input.limit }}"
         after: "{{ input.after }}"
+      response:
+        outputKey: events
+        linkHeader:
+          outputKey: link
 test:
   description: Verify connectivity by listing one user.
   request:

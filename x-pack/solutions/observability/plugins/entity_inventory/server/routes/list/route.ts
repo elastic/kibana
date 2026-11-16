@@ -6,7 +6,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { ListResponse } from '../types';
+import type { ListResponse } from '../../../common';
 import { createEntityInventoryServerRoute } from '../create_server_route';
 import { INTERIM_AUTHZ } from '../interim_authz';
 import {
