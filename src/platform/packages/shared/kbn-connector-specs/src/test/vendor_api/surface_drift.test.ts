@@ -479,7 +479,7 @@ describe('renderDriftIssue', () => {
 
     expect(title).toBe('[Connector validation] .acme: actions pass, 1 spec change to review');
     expect(body).toContain(
-      "This issue is open for 1 deprecation (`search`), which running the actions can't settle. Review it before refreshing the artifacts."
+      '> **The connector still works against the latest spec: all 2 checked actions of `.acme` pass.**\n>\n> The reason for this issue is 1 deprecation in the vendor API spec affecting `search`. Update the connector to ensure it will continue working.'
     );
     expect(body).toContain(
       '| Deprecated | `GET /items` | `search` | endpoint deprecated (`endpoint-deprecated`) |'
@@ -523,7 +523,7 @@ describe('renderDriftIssue', () => {
 
     expect(title).toBe('[Connector validation] .acme: actions pass, 1 field they read changed');
     expect(body).toContain(
-      "**The connector still works against the latest spec: all 2 checked actions of `.acme` pass.** This issue is open for 1 changed field the actions read, which running the actions can't settle. Review it before refreshing the artifacts."
+      'The reason for this issue is 1 changed field in the responses `search` reads. Update the connector to ensure it will continue working.'
     );
     expect(body).toContain(
       '| `search` | `GET /items` | ⚠️ Passes, but fields it reads changed: `items/state` (new values: locked) |'
@@ -532,6 +532,39 @@ describe('renderDriftIssue', () => {
       '| `listAll` | `GET /items` | ✅ Passes · fields it reads unchanged; returns response fields as they are |'
     );
     expect(body).toContain('| `search` | `GET /items` | `items/state` | new values: locked |');
+  });
+
+  it('names a path removed without deprecation as a removal', () => {
+    const { body } = renderDriftIssue(
+      {
+        ...drifted,
+        verdict: 'healthy',
+        latestProblems: [],
+        sources: {
+          main: {
+            status: 'changed',
+            changes: [
+              {
+                kind: 'breaking',
+                id: 'api-path-removed-without-deprecation',
+                text: 'API path removed without deprecation',
+                operation: 'GET /items',
+              },
+            ],
+          },
+        },
+        actions: drifted.actions?.map((action) => ({ ...action, latestProblems: [] })),
+      },
+      { owners: [] }
+    );
+
+    expect(body).toContain(
+      'The reason for this issue is 1 removal in the vendor API spec affecting `search`.'
+    );
+    expect(body).toContain('| Removed | `GET /items` | `search` |');
+    expect(body).toContain(
+      '| `search` | `GET /items` | ✅ Passes · removed (see changes to review) |'
+    );
   });
 
   it('says when the actions pass but the check found problems outside them', () => {

@@ -28,13 +28,8 @@ type ReviewKind =
   | 'Response changed'
   | 'Other';
 
+// Removals first: `api-path-removed-without-deprecation` mentions a deprecation it didn't have.
 const reviewKindOf = (id: string): ReviewKind => {
-  if (/sunset/.test(id)) {
-    return 'Sunset';
-  }
-  if (/deprecat/.test(id)) {
-    return 'Deprecated';
-  }
   if (id.startsWith('api-security-')) {
     return 'Auth requirement changed';
   }
@@ -43,6 +38,12 @@ const reviewKindOf = (id: string): ReviewKind => {
   }
   if (/^api-.*removed/.test(id)) {
     return 'Removed';
+  }
+  if (/sunset/.test(id)) {
+    return 'Sunset';
+  }
+  if (/deprecat/.test(id)) {
+    return 'Deprecated';
   }
   if (/^(request-|new-(required|optional)-request-)/.test(id)) {
     return 'Request changed';
@@ -522,31 +523,46 @@ export const renderDriftIssue = (
         item.actions.forEach((action) => entry.actions.add(action));
         kinds.set(item.kind, entry);
       }
-      const parts = [
-        ...(changedFields.length > 0
-          ? [`${plural(changedFields.length, 'changed field')} the actions read`]
+      // e.g. `5 removals in the vendor API spec affecting `listClusters`, …`
+      const counted = [...kinds].map(([kind, { count }]) => {
+        const [one, many] = REVIEW_NOUNS[kind];
+        return `${count} ${count === 1 ? one : many}`;
+      });
+      const affected = [...new Set([...kinds.values()].flatMap(({ actions: own }) => [...own]))];
+      const readers = actions
+        .filter(({ fieldChanges = [] }) => fieldChanges.length > 0)
+        .map(({ action }) => action);
+      const reasons = [
+        ...(counted.length > 0
+          ? [
+              `${listed(counted)} in the vendor API spec${
+                affected.length > 0 ? ` affecting ${listed(affected.map(code))}` : ''
+              }`,
+            ]
           : []),
-        ...[...kinds].map(([kind, { count, actions: affected }]) => {
-          const [one, many] = REVIEW_NOUNS[kind];
-          return `${count} ${count === 1 ? one : many}${
-            affected.size > 0 ? ` (${listed([...affected].map(code))})` : ''
-          }`;
-        }),
+        ...(changedFields.length > 0
+          ? [
+              `${plural(changedFields.length, 'changed field')} in the responses ${listed(
+                readers.map(code)
+              )} ${readers.length === 1 ? 'reads' : 'read'}`,
+            ]
+          : []),
         ...(stale.length > 0
-          ? [`${plural(stale.length, 'spec correction')} that no longer apply`]
+          ? [
+              `${plural(stale.length, 'spec correction')} that no longer ${
+                stale.length === 1 ? 'applies' : 'apply'
+              }`,
+            ]
           : []),
       ];
-      const reasons = changedFields.length + review.length + stale.length;
       summary = `**The connector still works against the latest spec: all ${plural(
         checked.length,
         'checked action'
-      )} of \`${drift.connector}\` pass.** ${
-        parts.length > 0
-          ? `This issue is open for ${listed(
-              parts
-            )}, which running the actions can't settle. Review ${
-              reasons === 1 ? 'it' : 'them'
-            } before refreshing the artifacts.`
+      )} of \`${drift.connector}\` pass.**\n\n${
+        reasons.length > 0
+          ? `The reason for this issue is ${listed(
+              reasons
+            )}. Update the connector to ensure it will continue working.`
           : 'Its spec changed.'
       }`;
     }
@@ -759,7 +775,8 @@ export const renderDriftIssue = (
   const body = [
     markerOf(drift.connector),
     `> [!${alert}]`,
-    `> ${summary}`,
+    // A blank quoted line separates the summary's paragraphs inside the alert.
+    ...summary.split('\n').map((line) => (line ? `> ${line}` : '>')),
     '',
     '| | |',
     '|---|---|',
