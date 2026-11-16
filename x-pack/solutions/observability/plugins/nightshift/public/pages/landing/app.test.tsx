@@ -161,7 +161,11 @@ function setSections({
   mockUseInvestigationSections.mockReturnValue({
     sections,
     severityCounts,
+    // Tests without a search treat filtered and unfiltered counts as the same.
+    unfilteredSeverityCounts: severityCounts,
     areSeverityCountsLoading,
+    areUnfilteredSeverityCountsLoading: false,
+    areSeverityCountsStale: false,
     hasSeverityCountsError,
     hasActiveInvestigations: hasActiveInvestigations || resolvedActiveCount > 0,
     activeInvestigationCount: resolvedActiveCount,
