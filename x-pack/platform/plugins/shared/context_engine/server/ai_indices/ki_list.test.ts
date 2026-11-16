@@ -745,15 +745,14 @@ describe('ki_list', () => {
       expect(queryText(0)).toContain('| SORT id ASC\n| KEEP');
     });
 
-    it('keeps the updated sort when a search query is set', async () => {
+    it('ranks by best match first, then the updated sort, when a search query is set', async () => {
       query.mockReset();
       query.mockResolvedValueOnce(probeResponse([...ALL_FIELDS, 'description']));
       emptyResponses();
 
       await getKis(esClient, { dest: INDEX_DEST, size: 25, query: 'refund' });
 
-      expect(queryText(0)).toContain('| SORT revision_time DESC, id ASC\n| KEEP');
-      expect(queryText(0)).not.toContain('_score');
+      expect(queryText(0)).toContain('| SORT _score DESC, revision_time DESC, id ASC\n| KEEP');
     });
   });
 
@@ -797,18 +796,17 @@ describe('ki_list', () => {
 
     expect(query.mock.calls[1][0]).toEqual({
       query: expect.stringContaining(
-        'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO"}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
+        'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
       ),
       params: [{ searchQuery: 'refund' }],
     });
-    expect(queryText(0)).toContain('METADATA _id, _index\n');
-    expect(queryText(0)).not.toContain('_score');
-    expect(queryText(0)).toContain('SORT revision_time DESC, id ASC');
+    expect(queryText(0)).toContain('METADATA _id, _index, _score\n');
+    expect(queryText(0)).toContain('SORT _score DESC, revision_time DESC, id ASC');
     expect(queryText(1)).toContain(
-      'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO"}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
+      'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
     );
     expect(queryText(2)).toContain(
-      'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO"}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
+      'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
     );
     expect(query.mock.calls[3][0]).toEqual({
       query: expect.stringContaining('| STATS count = COUNT(*) BY type'),
@@ -816,7 +814,7 @@ describe('ki_list', () => {
     });
   });
 
-  it('sorts by title when a search query is set, never by relevance', async () => {
+  it('ranks by best match first, then title, when a search query is set', async () => {
     query.mockReset();
     query
       .mockResolvedValueOnce(probeResponse([...ALL_FIELDS, 'description']))
@@ -827,9 +825,8 @@ describe('ki_list', () => {
     await getKis(esClient, { dest: INDEX_DEST, size: 10, query: 'refund', sort: 'title' });
 
     expect(queryText(0)).toContain(
-      '| EVAL title_sort = CASE(title == "", NULL, TO_LOWER(title))\n| SORT title_sort ASC NULLS LAST, id ASC\n| KEEP'
+      '| EVAL title_sort = CASE(title == "", NULL, TO_LOWER(title))\n| SORT _score DESC, title_sort ASC NULLS LAST, id ASC\n| KEEP'
     );
-    expect(queryText(0)).not.toContain('_score');
   });
 
   it('binds type and search params together on rows and totals', async () => {

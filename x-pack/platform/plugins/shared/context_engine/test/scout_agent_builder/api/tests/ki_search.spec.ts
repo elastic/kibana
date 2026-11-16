@@ -106,7 +106,7 @@ apiTest.describe('context engine KI search', { tag: tags.stateful.classic }, () 
   });
 
   apiTest(
-    'matches title and description, lists the newest first, and excludes a superseded revision',
+    'matches title and description, ranks the older title match first, and excludes a superseded revision',
     async ({ apiClient }) => {
       const response = await apiClient.get(kisPath('refund'), {
         headers: adminHeaders,
@@ -115,8 +115,8 @@ apiTest.describe('context engine KI search', { tag: tags.stateful.classic }, () 
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.kis.map((item: { id: string }) => item.id)).toStrictEqual([
-        'desc-match',
         'title-match',
+        'desc-match',
       ]);
       expect(response.body.total).toBe(2);
     }

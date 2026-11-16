@@ -102,7 +102,7 @@ const searchFilterClause = (has: (field: KiListField) => boolean, query?: string
   }
   const matches: string[] = [];
   if (has('title')) {
-    matches.push('MATCH(title, ?searchQuery, {"fuzziness":"AUTO"})');
+    matches.push('MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2})');
   }
   if (has('description')) {
     matches.push('MATCH(description, ?searchQuery, {"fuzziness":"AUTO"})');
@@ -154,15 +154,24 @@ export const probeColumns = async (
   }
 };
 
-/** ES|QL sorts `text` case-sensitively, and an empty title sorts first unless nulled. */
-const getRowsSort = (sort: KiListSort, hasTimestampColumn: boolean): string[] => {
+/**
+ * A search ranks by best match first; the chosen sort only breaks score ties.
+ * ES|QL sorts `text` case-sensitively, and an empty title sorts first unless nulled.
+ */
+const getRowsSort = (
+  sort: KiListSort,
+  hasTimestampColumn: boolean,
+  query: string | undefined
+): string[] => {
+  const scoreKeys = query !== undefined ? ['_score DESC'] : [];
   if (sort === 'title') {
     return [
       'EVAL title_sort = CASE(title == "", NULL, TO_LOWER(title))',
-      'SORT title_sort ASC NULLS LAST, id ASC',
+      `SORT ${[...scoreKeys, 'title_sort ASC NULLS LAST', 'id ASC'].join(', ')}`,
     ];
   }
-  return [hasTimestampColumn ? 'SORT revision_time DESC, id ASC' : 'SORT id ASC'];
+  const sortKeys = hasTimestampColumn ? ['revision_time DESC', 'id ASC'] : ['id ASC'];
+  return [`SORT ${[...scoreKeys, ...sortKeys].join(', ')}`];
 };
 
 /**
@@ -198,7 +207,9 @@ const currentKisQuery = (
   query?: string
 ): string =>
   [
-    `FROM ${fromSources(sources)} METADATA _id, _index`,
+    `FROM ${fromSources(sources)} ${
+      query !== undefined ? 'METADATA _id, _index, _score' : 'METADATA _id, _index'
+    }`,
     ...latestRevisionPipeline(dest, has),
     lifecycleStatusEvalClause(has),
     kiStatusEvalClause(has),
@@ -248,7 +259,7 @@ export const getKis = async (
     KI_STATUS_ALIAS,
   ].join(', ');
 
-  const rowsSort = getRowsSort(sort, has('@timestamp'));
+  const rowsSort = getRowsSort(sort, has('@timestamp'), query);
 
   const rowsQuery = [
     base,
