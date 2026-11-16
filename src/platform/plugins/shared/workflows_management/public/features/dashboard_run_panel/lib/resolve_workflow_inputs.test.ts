@@ -88,11 +88,15 @@ describe('describeWorkflowInputs', () => {
     const legacy = normalizeFieldsToJsonSchema([
       { name: 'env', type: 'choice', options: ['dev', 'prod'], required: true },
       { name: 'count', type: 'number' },
+      { name: 'tags', type: 'array' },
     ]);
-    expect(describeWorkflowInputs(legacy)).toEqual([
+    const described = describeWorkflowInputs(legacy);
+    expect(described).toEqual([
       expect.objectContaining({ name: 'env', kind: 'enum', enumValues: ['dev', 'prod'] }),
       expect.objectContaining({ name: 'count', kind: 'number' }),
+      expect.objectContaining({ name: 'tags', kind: 'array', itemKind: 'string' }),
     ]);
+    expect(getAllowedMappingSources(described[2])).toEqual(['control', 'constant']);
   });
 
   it('offers only the sources that can fill each kind of input', () => {

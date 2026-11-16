@@ -82,6 +82,15 @@ const scalarKind = (schema: JSONSchema7): ScalarInputKind | undefined => {
   }
 };
 
+/** Legacy `array` inputs allow any scalar item, so plain strings (such as control values) fit. */
+const unionItemKind = (items: JSONSchema7): ScalarInputKind | undefined =>
+  items.anyOf?.some((option) => {
+    const member = asSchema(option);
+    return member?.type === 'string' && !member.format && !member.enum;
+  })
+    ? 'string'
+    : undefined;
+
 const describeSchema = (
   schema: JSONSchema7,
   root: JsonModelSchemaType
@@ -103,7 +112,7 @@ const describeSchema = (
   }
   if (schema.type === 'array') {
     const items = asSchema(Array.isArray(schema.items) ? schema.items[0] : schema.items);
-    const itemKind = items ? scalarKind(items) : undefined;
+    const itemKind = items ? scalarKind(items) ?? unionItemKind(items) : undefined;
     return {
       kind: 'array',
       itemKind: itemKind ?? 'unknown',
