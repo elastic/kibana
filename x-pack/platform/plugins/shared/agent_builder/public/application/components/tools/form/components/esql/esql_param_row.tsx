@@ -264,13 +264,19 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
           )}
         />
       </EuiTableRowCell>
-      <EuiTableRowCell align="center">
+      <EuiTableRowCell
+        align="center"
+        mobileOptions={{
+          header: i18nMessages.optionalParamLabel,
+        }}
+      >
         <Controller
           control={control}
           name={`params.${index}.optional`}
           render={({ field: { ref, onChange, value, ...field } }) => (
             <EuiCheckbox
               id={`params.${index}.optional`}
+              aria-label={i18nMessages.optionalParamLabel}
               inputRef={ref}
               onChange={(e) => {
                 onChange(e.target.checked);
