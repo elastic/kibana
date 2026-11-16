@@ -3230,6 +3230,9 @@ steps:
           isTestRun: true,
           context: { debug: { enabled: true } },
         } as any);
+        mockWorkflowsService.getStepExecution = jest
+          .fn()
+          .mockResolvedValue({ state: { breakpointPaused: true } });
         const access = await mockWorkflowsService.getAccessControl();
         jest.mocked(access.assertAccess).mockImplementation(async (_workflow, operation) => {
           if (operation === 'edit') throw new WorkflowAccessDeniedError();
@@ -3249,6 +3252,16 @@ steps:
 
       it('allows continuing from a breakpoint with execute access', async () => {
         await api.resumeWorkflowExecution('run-1', 'default', {}, mockRequest, {
+          stepExecutionId: 'step-exec-1',
+        });
+
+        expect(mockWorkflowsExecutionEngine.resumeWorkflowExecution).toHaveBeenCalled();
+      });
+
+      it('allows answering a wait step with execute access', async () => {
+        mockWorkflowsService.getStepExecution.mockResolvedValue({ state: {} } as any);
+
+        await api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
           stepExecutionId: 'step-exec-1',
         });
 

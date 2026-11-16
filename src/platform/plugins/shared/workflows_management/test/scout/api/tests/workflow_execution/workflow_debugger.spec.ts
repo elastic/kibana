@@ -144,7 +144,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'pauses before a breakpointed step with resolved input and resumes to completion',
+      'pauses before a breakpointed step and resumes it with edited input',
       async ({ apiServices }) => {
         const { workflowsApi } = apiServices;
 
@@ -182,7 +182,7 @@ spaceTest.describe(
 
         const resumeResponse = await workflowsApi.rawResume(
           workflowExecutionId,
-          {},
+          { message: 'Edited at breakpoint' },
           { stepExecutionId: stepTwoPaused?.id }
         );
         expect(resumeResponse.status).toBe(200);
@@ -191,6 +191,7 @@ spaceTest.describe(
           workflowExecutionId,
           status: ExecutionStatus.COMPLETED,
           timeout: TIMEOUT_MS,
+          includeInput: true,
           includeOutput: true,
           until: (exec) =>
             exec.stepExecutions?.some(
@@ -200,7 +201,8 @@ spaceTest.describe(
 
         const stepTwoCompleted = completed.stepExecutions.find((s) => s.stepId === 'step_two');
         expect(stepTwoCompleted?.status).toBe(ExecutionStatus.COMPLETED);
-        expect(stepTwoCompleted?.output).toBe('Received: mocked-payload-123');
+        expect(stepTwoCompleted?.input).toStrictEqual({ message: 'Edited at breakpoint' });
+        expect(stepTwoCompleted?.output).toBe('Edited at breakpoint');
       }
     );
   }

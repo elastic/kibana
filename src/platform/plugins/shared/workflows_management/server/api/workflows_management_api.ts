@@ -1555,15 +1555,6 @@ export class WorkflowsManagementApi {
       execution.isTestRun === true &&
       debugContext?.enabled === true &&
       Object.keys(input).length > 0;
-    if (isDebugInputOverride) {
-      if (workflow) {
-        const access = await this.workflowsService.getAccessControl();
-        await access.assertAccess(workflow, 'edit', request);
-      }
-      if (execution.workflowDefinition?.settings?.run_as) {
-        await this.assertBoundWorkflowDebugAuthorized(request);
-      }
-    }
     const channel = options?.channel;
     let claimReleased: boolean | undefined;
     try {
@@ -1577,6 +1568,21 @@ export class WorkflowsManagementApi {
           'waiting step not found',
           'waiting_for_input'
         );
+      }
+      const pausedStep = isDebugInputOverride
+        ? await this.workflowsService.getStepExecution(
+            { executionId, id: stepExecutionId },
+            spaceId
+          )
+        : null;
+      if (pausedStep?.state?.breakpointPaused === true) {
+        if (workflow) {
+          const access = await this.workflowsService.getAccessControl();
+          await access.assertAccess(workflow, 'edit', request);
+        }
+        if (execution.workflowDefinition?.settings?.run_as) {
+          await this.assertBoundWorkflowDebugAuthorized(request);
+        }
       }
 
       // Resolved before claiming so a lookup failure cannot strand the claim.
