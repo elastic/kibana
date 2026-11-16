@@ -19,10 +19,13 @@ import { spaceTest, ENDPOINT_MANAGEMENT_LINK_IDS } from '../fixtures';
  * Serverless only, as in the original. `loginAsSecurityRole` recreates the serverless descriptor as
  * a custom role on stateful, so extending these would assert the same descriptor twice rather than
  * cover a second deployment; the privileges themselves are covered per deployment by the matrix.
+ *
+ * The suite only claims local serverless; each test widens to the targets its role is provisioned
+ * for, since MKI resolves these roles to QAF cloud users rather than the shipped descriptors.
  */
 spaceTest.describe(
   'Endpoint management navigation for prebuilt roles',
-  { tag: [...tags.serverless.security.complete] },
+  { tag: ['@local-serverless-security_complete'] },
   () => {
     /**
      * The Cypress original expected no area at all here. That expectation never ran: it looked for
@@ -34,6 +37,7 @@ spaceTest.describe(
      */
     spaceTest(
       'detections_admin reaches only Artifacts, through endpoint exceptions',
+      { tag: [...tags.serverless.security.complete] },
       async ({ browserAuth, pageObjects }) => {
         const nav = pageObjects.endpointManagementNav;
 
@@ -54,6 +58,8 @@ spaceTest.describe(
       }
     );
 
+    // No MKI target: the cloud user holds no Security app privilege, see
+    // https://github.com/elastic/kibana/issues/304279
     spaceTest(
       'soc_manager reaches every Endpoint management area',
       async ({ browserAuth, pageObjects }) => {
