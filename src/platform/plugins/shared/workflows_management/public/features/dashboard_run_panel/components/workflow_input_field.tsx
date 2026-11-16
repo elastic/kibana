@@ -19,6 +19,11 @@ export interface WorkflowInputFieldProps {
   id: string;
 }
 
+const DATE_PLACEHOLDERS: Partial<Record<WorkflowInputDescriptor['kind'], string>> = {
+  date: '2026-01-31',
+  date_time: '2026-01-31T00:00:00.000Z',
+};
+
 const toText = (value: unknown): string =>
   value === undefined || value === null ? '' : String(value);
 
@@ -105,7 +110,7 @@ export const WorkflowInputField = ({
         <EuiFieldText
           id={id}
           fullWidth
-          placeholder={descriptor.kind === 'date' ? '2026-01-31T00:00:00.000Z' : undefined}
+          placeholder={DATE_PLACEHOLDERS[descriptor.kind]}
           value={toText(value)}
           onChange={(event) => onChange(event.target.value === '' ? undefined : event.target.value)}
         />

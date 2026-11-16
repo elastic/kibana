@@ -17,7 +17,14 @@ import { resolveRef } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import type { WorkflowRunInputMapping } from '../../../../server/dashboard_run_panel/schema';
 
-export type ScalarInputKind = 'string' | 'date' | 'number' | 'integer' | 'boolean' | 'enum';
+export type ScalarInputKind =
+  | 'string'
+  | 'date'
+  | 'date_time'
+  | 'number'
+  | 'integer'
+  | 'boolean'
+  | 'enum';
 
 export type WorkflowInputKind =
   | ScalarInputKind
@@ -64,7 +71,8 @@ const scalarKind = (schema: JSONSchema7): ScalarInputKind | undefined => {
   const type = Array.isArray(schema.type) ? schema.type.find((t) => t !== 'null') : schema.type;
   switch (type) {
     case 'string':
-      return schema.format === 'date-time' || schema.format === 'date' ? 'date' : 'string';
+      if (schema.format === 'date-time') return 'date_time';
+      return schema.format === 'date' ? 'date' : 'string';
     case 'number':
     case 'integer':
     case 'boolean':
@@ -141,6 +149,7 @@ export const getAllowedMappingSources = (
     case 'query':
       return ['query'];
     case 'date':
+    case 'date_time':
       return ['time_range', 'constant'];
     case 'boolean':
       return ['constant'];

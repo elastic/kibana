@@ -12,7 +12,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { QueryClientProvider } from '@kbn/react-query';
-import { ConfigFlyout } from './components/config_flyout';
 import { getDashboardControls } from './lib/dashboard_controls';
 import type { WorkflowRunPanelConfig } from './types';
 import { queryClient } from '../../shared/lib/query_client';
@@ -21,8 +20,10 @@ interface OpenConfigFlyoutParams {
   core: CoreStart;
   parentApi: unknown;
   initialConfig?: WorkflowRunPanelConfig;
-  onSave: (config: WorkflowRunPanelConfig, workflowName: string | undefined) => void;
+  onSave: (config: WorkflowRunPanelConfig) => void;
   returnFocus?: () => void;
+  /** The panel being edited, highlighted while the flyout is open. */
+  focusedPanelId?: string;
 }
 
 /** Opens the panel configuration flyout over the dashboard. */
@@ -32,27 +33,31 @@ export const openConfigFlyout = ({
   initialConfig,
   onSave,
   returnFocus,
+  focusedPanelId,
 }: OpenConfigFlyoutParams): void => {
   openLazyFlyout({
     core,
     parentApi,
     returnFocus,
-    loadContent: async ({ closeFlyout, ariaLabelledBy }) => (
-      <KibanaContextProvider services={core}>
-        <QueryClientProvider client={queryClient}>
-          <ConfigFlyout
-            http={core.http}
-            ariaLabelledBy={ariaLabelledBy}
-            controls={getDashboardControls(parentApi)}
-            initialConfig={initialConfig}
-            onCancel={closeFlyout}
-            onSave={(config, workflowName) => {
-              onSave(config, workflowName);
-              closeFlyout();
-            }}
-          />
-        </QueryClientProvider>
-      </KibanaContextProvider>
-    ),
+    flyoutProps: { focusedPanelId },
+    loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+      const { ConfigFlyout } = await import('./components/config_flyout');
+      return (
+        <KibanaContextProvider services={core}>
+          <QueryClientProvider client={queryClient}>
+            <ConfigFlyout
+              ariaLabelledBy={ariaLabelledBy}
+              controls={getDashboardControls(parentApi)}
+              initialConfig={initialConfig}
+              onCancel={closeFlyout}
+              onSave={(config) => {
+                onSave(config);
+                closeFlyout();
+              }}
+            />
+          </QueryClientProvider>
+        </KibanaContextProvider>
+      );
+    },
   });
 };

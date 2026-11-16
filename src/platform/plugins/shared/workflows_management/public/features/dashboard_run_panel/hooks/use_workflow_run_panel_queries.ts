@@ -7,40 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
-import type { HttpStart } from '@kbn/core/public';
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
-import { TerminalExecutionStatuses } from '@kbn/workflows';
-import { WorkflowApi } from '@kbn/workflows-ui';
+import { useEffect } from 'react';
+import type { FetchContext } from '@kbn/presentation-publishing';
+import { useQuery, useQueryClient } from '@kbn/react-query';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
 
 const POLL_INTERVAL_MS = 2_000;
+const PARKED_POLL_INTERVAL_MS = 30_000;
+
+/** Statuses of a run that is paused until something else happens, which can take hours. */
+const PARKED_STATUSES: readonly ExecutionStatus[] = [
+  ExecutionStatus.WAITING,
+  ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
+];
+
+/** Whether a run is still starting or executing steps, as opposed to finished or parked. */
+export const isExecutionInProgress = (status: ExecutionStatus): boolean =>
+  !isTerminalStatus(status) && !PARKED_STATUSES.includes(status);
+
+/** How often to refetch a run with the given status, or `false` once it has finished. */
+export const getPollInterval = (status: ExecutionStatus | undefined): number | false => {
+  if (status === undefined) return POLL_INTERVAL_MS;
+  if (isTerminalStatus(status)) return false;
+  return PARKED_STATUSES.includes(status) ? PARKED_POLL_INTERVAL_MS : POLL_INTERVAL_MS;
+};
 
 const workflowKey = (workflowId: string) => ['dashboardRunPanel', 'workflow', workflowId];
 const lastRunKey = (workflowId: string) => ['dashboardRunPanel', 'lastRun', workflowId];
 
-export const isNotFoundError = (error: unknown): boolean => {
-  const { response, body } = (error ?? {}) as {
-    response?: { status?: number };
-    body?: { statusCode?: number };
-  };
-  return response?.status === 404 || body?.statusCode === 404;
-};
-
-export const useWorkflowApi = (http: HttpStart): WorkflowApi =>
-  useMemo(() => new WorkflowApi(http), [http]);
-
-export const useWorkflowDetail = (api: WorkflowApi, workflowId: string | undefined) =>
-  useQuery({
+export const useWorkflowDetail = (workflowId: string | undefined) => {
+  const api = useWorkflowsApi();
+  return useQuery({
     queryKey: workflowKey(workflowId ?? ''),
     queryFn: () => api.getWorkflow(workflowId ?? ''),
     enabled: Boolean(workflowId),
     retry: false,
     refetchOnWindowFocus: false,
   });
+};
 
 /** The id of the workflow's most recent execution by anyone. */
-export const useLastExecutionId = (api: WorkflowApi, workflowId: string, enabled: boolean) =>
-  useQuery({
+export const useLastExecutionId = (workflowId: string, enabled: boolean) => {
+  const api = useWorkflowsApi();
+  return useQuery({
     queryKey: lastRunKey(workflowId),
     queryFn: async () => {
       const { results } = await api.getWorkflowExecutions(workflowId, {
@@ -55,32 +66,37 @@ export const useLastExecutionId = (api: WorkflowApi, workflowId: string, enabled
     retry: false,
     refetchOnWindowFocus: false,
   });
+};
 
-/** An execution with its step statuses (without step inputs or outputs), polled until it finishes. */
-export const useExecutionWithSteps = (api: WorkflowApi, executionId: string | undefined) =>
-  useQuery({
+/** An execution with its step statuses (without step inputs or outputs), polled until it finishes; slower while it is parked. */
+export const useExecutionWithSteps = (executionId: string | undefined) => {
+  const api = useWorkflowsApi();
+  return useQuery({
     queryKey: ['dashboardRunPanel', 'execution', executionId ?? ''],
     queryFn: () =>
       api.getExecution(executionId ?? '', { includeInput: false, includeOutput: false }),
     enabled: Boolean(executionId),
     retry: false,
     refetchOnWindowFocus: false,
-    refetchInterval: (execution) =>
-      execution && TerminalExecutionStatuses.includes(execution.status) ? false : POLL_INTERVAL_MS,
+    refetchInterval: (execution) => getPollInterval(execution?.status),
   });
+};
 
-export interface RunWorkflowVariables {
-  inputs: Record<string, unknown>;
-  metadata: Record<string, string>;
-}
-
-export const useRunWorkflowFromPanel = (api: WorkflowApi, workflowId: string) => {
+/** Refetches the workflow and its last run when the dashboard is refreshed. */
+export const useRefetchOnReload = (fetchContext: FetchContext, workflowId: string): void => {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ inputs, metadata }: RunWorkflowVariables) =>
-      api.runWorkflow(workflowId, { inputs, metadata }),
+  useEffect(() => {
+    if (!fetchContext.isReload) return;
+    queryClient.invalidateQueries({ queryKey: workflowKey(workflowId) });
+    queryClient.invalidateQueries({ queryKey: lastRunKey(workflowId) });
+  }, [fetchContext, queryClient, workflowId]);
+};
+
+export const useRunWorkflowFromPanel = () => {
+  const queryClient = useQueryClient();
+  return useRunWorkflow({
     // Seeded from the response because the executions list may not include the new run until the index refreshes.
-    onSuccess: ({ workflowExecutionId }) =>
-      queryClient.setQueryData(lastRunKey(workflowId), workflowExecutionId),
+    onSuccess: ({ workflowExecutionId }, { id }) =>
+      queryClient.setQueryData(lastRunKey(id), workflowExecutionId),
   });
 };

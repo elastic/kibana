@@ -8,7 +8,11 @@
  */
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasEditCapabilities, PublishesWritableTitle } from '@kbn/presentation-publishing';
+import type {
+  HasEditCapabilities,
+  PublishesDataLoading,
+  PublishesWritableTitle,
+} from '@kbn/presentation-publishing';
 import type { WorkflowRunEmbeddableState } from '../../../server/dashboard_run_panel/schema';
 
 export type WorkflowRunPanelConfig = Pick<
@@ -18,4 +22,5 @@ export type WorkflowRunPanelConfig = Pick<
 
 export type WorkflowRunEmbeddableApi = DefaultEmbeddableApi<WorkflowRunEmbeddableState> &
   PublishesWritableTitle &
+  PublishesDataLoading &
   HasEditCapabilities;

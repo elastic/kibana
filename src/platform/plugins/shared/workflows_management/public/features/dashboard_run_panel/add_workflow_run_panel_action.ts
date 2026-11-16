@@ -48,10 +48,10 @@ export const getAddWorkflowRunPanelAction = (
       core,
       parentApi,
       returnFocus,
-      onSave: (config, workflowName) => {
+      onSave: (config) => {
         parentApi.addNewPanel<WorkflowRunEmbeddableState>({
           panelType: WORKFLOW_RUN_EMBEDDABLE_TYPE,
-          serializedState: { ...config, title: workflowName },
+          serializedState: config,
         });
       },
     });

@@ -26,6 +26,7 @@ const inputs: JsonModelSchemaType = {
     severity: { type: 'string', enum: ['low', 'high'] },
     limit: { type: 'integer' },
     since: { type: 'string', format: 'date-time' },
+    day: { type: 'string', format: 'date' },
     dryRun: { type: 'boolean' },
     options: { type: 'object' },
   },
@@ -72,7 +73,8 @@ describe('describeWorkflowInputs', () => {
       bytes: 'array',
       severity: 'enum',
       limit: 'integer',
-      since: 'date',
+      since: 'date_time',
+      day: 'date',
       dryRun: 'boolean',
       options: 'object',
     });
@@ -175,6 +177,14 @@ describe('resolveWorkflowInputs', () => {
     expect(resolve([{ input: 'since', source: 'time_range', part: 'from' }]).values).toEqual({
       since: '2026-11-15T11:45:00.000Z',
     });
+  });
+
+  it('passes the calendar day, not a timestamp, to a date-only input', () => {
+    const { values, issues } = resolve([{ input: 'day', source: 'time_range', part: 'from' }], {
+      timeRange: { from: 'now/d', to: 'now' },
+    });
+    expect(issues).toEqual([]);
+    expect(values).toEqual({ day: moment(now).format('YYYY-MM-DD') });
   });
 
   it('rounds the end of a rounded range up, in the time zone the dashboard shows', () => {

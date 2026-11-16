@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Moment } from 'moment';
 import dateMath from '@kbn/datemath';
 import type { AggregateQuery, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
-import { buildEsQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type {
   EnumValue,
@@ -70,6 +71,7 @@ const coerceScalar = (
   switch (kind) {
     case 'string':
     case 'date':
+    case 'date_time':
       return { ok: true, value: String(value) };
     case 'number':
     case 'integer': {
@@ -180,14 +182,16 @@ const resolveControl = (
   return coerceValues(values, descriptor);
 };
 
-const resolveTime = (
-  expression: string,
-  roundUp: boolean,
-  now: Date
-): { ok: true; iso: string } | { ok: false } => {
+const resolveTime = (expression: string, roundUp: boolean, now: Date): Moment | undefined => {
   const parsed = dateMath.parse(expression, { roundUp, forceNow: now });
-  return parsed?.isValid() ? { ok: true, iso: parsed.toISOString() } : { ok: false };
+  return parsed?.isValid() ? parsed : undefined;
 };
+
+/** A `date` input takes the calendar day in the time zone the dashboard shows, not a timestamp. */
+const formatTimeBound = (bound: Moment, descriptor: WorkflowInputDescriptor): string =>
+  descriptor.kind === 'date' || descriptor.itemKind === 'date'
+    ? bound.format('YYYY-MM-DD')
+    : bound.toISOString();
 
 const resolveTimeRange = (
   part: 'from' | 'to' | undefined,
@@ -204,7 +208,7 @@ const resolveTimeRange = (
   }
   const from = resolveTime(timeRange.from, false, now);
   const to = resolveTime(timeRange.to, true, now);
-  if (!from.ok || !to.ok) {
+  if (!from || !to) {
     return invalid(
       i18n.translate('workflows.dashboardRunPanel.resolve.invalidTimeRange', {
         defaultMessage: 'The dashboard time range "{from} to {to}" could not be resolved',
@@ -213,7 +217,7 @@ const resolveTimeRange = (
     );
   }
   if (part) {
-    return coerceValues([part === 'from' ? from.iso : to.iso], descriptor);
+    return coerceValues([formatTimeBound(part === 'from' ? from : to, descriptor)], descriptor);
   }
   if (
     descriptor.kind !== 'time_range' &&
@@ -229,8 +233,8 @@ const resolveTimeRange = (
   return {
     ok: true,
     value: {
-      from: from.iso,
-      to: to.iso,
+      from: from.toISOString(),
+      to: to.toISOString(),
       fromExpression: timeRange.from,
       toExpression: timeRange.to,
     },
@@ -243,10 +247,7 @@ const resolveQuery = (
 ): Coerced => {
   const { query, filters } = context;
   try {
-    const compiledQuery =
-      query && !isOfAggregateQueryType(query)
-        ? buildEsQuery(undefined, query, filters, esQueryConfig)
-        : buildEsQuery(undefined, [], filters, esQueryConfig);
+    const compiledQuery = buildEsQuery(undefined, query ?? [], filters, esQueryConfig);
     return { ok: true, value: { ...(query ? { query } : {}), filters, compiledQuery } };
   } catch (error) {
     return invalid(

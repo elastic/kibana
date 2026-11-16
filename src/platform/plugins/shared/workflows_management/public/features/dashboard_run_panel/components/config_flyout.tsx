@@ -27,7 +27,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import type { HttpStart } from '@kbn/core/public';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
@@ -38,7 +38,7 @@ import type {
   WorkflowRunGraphLayout,
   WorkflowRunInputMapping,
 } from '../../../../server/dashboard_run_panel/schema';
-import { useWorkflowApi, useWorkflowDetail } from '../hooks/use_workflow_run_panel_queries';
+import { useWorkflowDetail } from '../hooks/use_workflow_run_panel_queries';
 import type {
   WorkflowInputDescriptor,
   WorkflowRunMappingSource,
@@ -49,11 +49,10 @@ import { CONFIG_MESSAGES, DEFAULT_BUTTON_LABEL, SOURCE_LABELS } from '../transla
 import type { WorkflowRunPanelConfig } from '../types';
 
 export interface ConfigFlyoutProps {
-  http: HttpStart;
   ariaLabelledBy: string;
   controls: DashboardControlSnapshot[];
   initialConfig?: WorkflowRunPanelConfig;
-  onSave: (config: WorkflowRunPanelConfig, workflowName: string | undefined) => void;
+  onSave: (config: WorkflowRunPanelConfig) => void;
   onCancel: () => void;
 }
 
@@ -268,6 +267,31 @@ const MappingRow = ({ descriptor, draft, controls, onChange }: MappingRowProps) 
   );
 };
 
+interface MappingListProps {
+  descriptors: WorkflowInputDescriptor[];
+  getDraft: (descriptor: WorkflowInputDescriptor) => MappingDraft;
+  controls: DashboardControlSnapshot[];
+  onChange: (input: string, draft: MappingDraft) => void;
+}
+
+const MappingList = ({ descriptors, getDraft, controls, onChange }: MappingListProps) => {
+  if (descriptors.length === 0) return <EuiText size="s">{CONFIG_MESSAGES.noInputs}</EuiText>;
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s">
+      {descriptors.map((descriptor) => (
+        <EuiFlexItem key={descriptor.name} grow={false}>
+          <MappingRow
+            descriptor={descriptor}
+            draft={getDraft(descriptor)}
+            controls={controls}
+            onChange={(draft) => onChange(descriptor.name, draft)}
+          />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+
 const GRAPH_LAYOUT_LABELS: Record<WorkflowRunGraphLayout, string> = {
   auto: CONFIG_MESSAGES.graphLayoutAuto,
   horizontal: CONFIG_MESSAGES.graphLayoutHorizontal,
@@ -302,14 +326,12 @@ const GraphLayoutPicker = ({ value, onChange }: GraphLayoutPickerProps): React.J
 
 /** Flyout for choosing the workflow a panel runs and where each of its inputs comes from. */
 export const ConfigFlyout = ({
-  http,
   ariaLabelledBy,
   controls,
   initialConfig,
   onSave,
   onCancel,
 }: ConfigFlyoutProps): React.JSX.Element => {
-  const api = useWorkflowApi(http);
   const [workflowId, setWorkflowId] = useState(initialConfig?.workflow_id);
   const [buttonLabel, setButtonLabel] = useState(initialConfig?.button_label ?? '');
   const [graphLayout, setGraphLayout] = useState<WorkflowRunGraphLayout>(
@@ -323,7 +345,7 @@ export const ConfigFlyout = ({
       : undefined
   );
 
-  const workflowQuery = useWorkflowDetail(api, workflowId);
+  const workflowQuery = useWorkflowDetail(workflowId);
   const descriptors = useMemo(
     () =>
       describeWorkflowInputs(getInputsFromDefinition(workflowQuery.data?.definition ?? undefined)),
@@ -333,21 +355,24 @@ export const ConfigFlyout = ({
   const getDraft = (descriptor: WorkflowInputDescriptor): MappingDraft =>
     drafts?.[descriptor.name] ?? defaultDraft(descriptor);
 
+  // Without the workflow's inputs the drafts can't be checked, so a panel whose workflow failed to
+  // load keeps its saved mappings rather than losing them on an unrelated edit.
+  const keepsSavedMappings = !workflowQuery.data && workflowId === initialConfig?.workflow_id;
+
   const save = () => {
     if (!workflowId) return;
-    const inputMappings = descriptors.flatMap((descriptor) => {
-      const mapping = toMapping(descriptor.name, getDraft(descriptor), descriptor);
-      return mapping ? [mapping] : [];
+    const inputMappings = keepsSavedMappings
+      ? initialConfig?.input_mappings
+      : descriptors.flatMap((descriptor) => {
+          const mapping = toMapping(descriptor.name, getDraft(descriptor), descriptor);
+          return mapping ? [mapping] : [];
+        });
+    onSave({
+      workflow_id: workflowId,
+      button_label: buttonLabel.trim() || undefined,
+      input_mappings: inputMappings,
+      graph_layout: graphLayout === 'auto' ? undefined : graphLayout,
     });
-    onSave(
-      {
-        workflow_id: workflowId,
-        button_label: buttonLabel.trim() || undefined,
-        input_mappings: inputMappings,
-        graph_layout: graphLayout === 'auto' ? undefined : graphLayout,
-      },
-      workflowQuery.data?.name
-    );
   };
 
   return (
@@ -401,25 +426,25 @@ export const ConfigFlyout = ({
               {CONFIG_MESSAGES.inputsHelp}
             </EuiText>
             <EuiSpacer size="s" />
-            {workflowQuery.isLoading ? (
-              <EuiLoadingSpinner />
-            ) : descriptors.length === 0 ? (
-              <EuiText size="s">{CONFIG_MESSAGES.noInputs}</EuiText>
-            ) : (
-              <EuiFlexGroup direction="column" gutterSize="s">
-                {descriptors.map((descriptor) => (
-                  <EuiFlexItem key={descriptor.name} grow={false}>
-                    <MappingRow
-                      descriptor={descriptor}
-                      draft={getDraft(descriptor)}
-                      controls={controls}
-                      onChange={(draft) =>
-                        setDrafts((current) => ({ ...current, [descriptor.name]: draft }))
-                      }
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
+            {workflowQuery.isLoading && <EuiLoadingSpinner />}
+            {workflowQuery.isError && (
+              <KbnWarningCallout
+                size="s"
+                title={CONFIG_MESSAGES.workflowLoadFailed}
+                data-test-subj="workflowRunPanelConfigLoadFailed"
+              >
+                {keepsSavedMappings && initialConfig?.input_mappings?.length
+                  ? CONFIG_MESSAGES.mappingsKept
+                  : null}
+              </KbnWarningCallout>
+            )}
+            {workflowQuery.data && (
+              <MappingList
+                descriptors={descriptors}
+                getDraft={getDraft}
+                controls={controls}
+                onChange={(name, draft) => setDrafts((current) => ({ ...current, [name]: draft }))}
+              />
             )}
           </>
         )}

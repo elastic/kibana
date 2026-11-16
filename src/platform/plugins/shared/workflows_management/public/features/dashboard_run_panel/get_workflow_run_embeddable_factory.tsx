@@ -12,7 +12,9 @@ import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import {
+  getViewModeSubject,
   initializeStateApi,
   initializeTitleManager,
   titleComparators,
@@ -50,6 +52,10 @@ export const getWorkflowRunEmbeddableFactory = (
   buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
     const services = { ...core, ...pluginServices };
     const titleManager = initializeTitleManager(initialState);
+    const defaultTitle$ = new BehaviorSubject<string | undefined>(undefined);
+    const setDefaultTitle = (name: string | undefined) => defaultTitle$.next(name);
+    const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+    const setDataLoading = (isLoading: boolean) => dataLoading$.next(isLoading);
     const workflowId$ = new BehaviorSubject(initialState.workflow_id);
     const buttonLabel$ = new BehaviorSubject(initialState.button_label);
     const inputMappings$ = new BehaviorSubject(initialState.input_mappings);
@@ -99,11 +105,14 @@ export const getWorkflowRunEmbeddableFactory = (
     const api = finalizeApi({
       ...titleManager.api,
       ...stateApi,
+      defaultTitle$,
+      dataLoading$,
       onEdit: async ({ returnFocus } = {}) => {
         openConfigFlyout({
           core,
           parentApi,
           returnFocus,
+          focusedPanelId: uuid,
           initialConfig: {
             workflow_id: workflowId$.getValue(),
             button_label: buttonLabel$.getValue(),
@@ -118,16 +127,19 @@ export const getWorkflowRunEmbeddableFactory = (
       getTypeDisplayName: () => PANEL_TYPE_DISPLAY_NAME,
     });
 
+    const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
     return {
       api,
       Component: () => {
-        const [workflowId, buttonLabel, inputMappings, graphLayout, parentHasOverlays] =
+        const [workflowId, buttonLabel, inputMappings, graphLayout, parentHasOverlays, viewMode] =
           useBatchedPublishingSubjects(
             workflowId$,
             buttonLabel$,
             inputMappings$,
             graphLayout$,
-            parentHasOverlays$
+            parentHasOverlays$,
+            viewMode$
           );
         const fetchContext = useFetchContext(api);
         return (
@@ -142,7 +154,10 @@ export const getWorkflowRunEmbeddableFactory = (
                 mappings={inputMappings ?? NO_MAPPINGS}
                 graphLayout={graphLayout}
                 holdGraphDirection={parentHasOverlays}
+                isInteractive={viewMode === 'view' || viewMode === 'edit'}
                 fetchContext={fetchContext}
+                onWorkflowNameChange={setDefaultTitle}
+                onDataLoadingChange={setDataLoading}
               />
             </QueryClientProvider>
           </KibanaContextProvider>

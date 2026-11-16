@@ -21,7 +21,7 @@ export const ADD_PANEL_GROUP_DISPLAY_NAME = i18n.translate(
 
 export const PANEL_TYPE_DISPLAY_NAME = i18n.translate(
   'workflows.dashboardRunPanel.typeDisplayName',
-  { defaultMessage: 'workflow' }
+  { defaultMessage: 'workflow panel' }
 );
 
 export const DEFAULT_BUTTON_LABEL = i18n.translate(
@@ -189,6 +189,12 @@ export const CONFIG_MESSAGES = {
   }),
   noInputs: i18n.translate('workflows.dashboardRunPanel.config.noInputs', {
     defaultMessage: 'This workflow takes no inputs.',
+  }),
+  workflowLoadFailed: i18n.translate('workflows.dashboardRunPanel.config.workflowLoadFailed', {
+    defaultMessage: "The workflow's inputs could not be loaded",
+  }),
+  mappingsKept: i18n.translate('workflows.dashboardRunPanel.config.mappingsKept', {
+    defaultMessage: 'Its input mappings are kept as they are when you save.',
   }),
   source: i18n.translate('workflows.dashboardRunPanel.config.source', {
     defaultMessage: 'Value from',

@@ -53,16 +53,16 @@ describe('getAddWorkflowRunPanelAction', () => {
     await expect(action.isCompatible?.({ embeddable: {} })).resolves.toBe(false);
   });
 
-  it('adds the configured panel titled with the workflow name', async () => {
+  it('adds the configured panel without a custom title', async () => {
     const action = getAddWorkflowRunPanelAction(createCore(), () => true);
     await action.execute({ embeddable: dashboard });
 
     const [{ onSave }] = (openConfigFlyout as jest.Mock).mock.calls[0];
-    onSave({ workflow_id: 'wf-1', input_mappings: [] }, 'Isolate host');
+    onSave({ workflow_id: 'wf-1', input_mappings: [] });
 
     expect(dashboard.addNewPanel).toHaveBeenCalledWith({
       panelType: WORKFLOW_RUN_EMBEDDABLE_TYPE,
-      serializedState: { workflow_id: 'wf-1', input_mappings: [], title: 'Isolate host' },
+      serializedState: { workflow_id: 'wf-1', input_mappings: [] },
     });
   });
 });

@@ -10,6 +10,7 @@
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import type { WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
+import { getErrorMessage } from './http_errors';
 
 export type WorkflowPrivilege = 'read' | 'execute' | 'readExecution';
 
@@ -55,7 +56,7 @@ export const getPanelStatus = ({
   if (privileges.length > 0) return { type: 'missing_privileges', privileges };
   if (isNotFound) return { type: 'not_found' };
   if (error) {
-    return { type: 'load_failed', message: error instanceof Error ? error.message : String(error) };
+    return { type: 'load_failed', message: getErrorMessage(error) };
   }
   if (isLoading || !workflow) return { type: 'loading' };
   if (workflow.permissions?.execute === false) return { type: 'not_runnable_by_user', workflow };

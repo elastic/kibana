@@ -16,16 +16,15 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { TerminalExecutionStatuses } from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
-import { getWorkflowsCapabilities, RunWorkflowInputsModal } from '@kbn/workflows-ui';
+import { RunWorkflowInputsModal, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { LastRunStatus, PanelStatusCallout } from './panel_status';
 import { RunNotice } from './run_notice';
 import { WorkflowGraphBackground } from './workflow_graph_background';
@@ -35,17 +34,18 @@ import type {
   WorkflowRunInputMapping,
 } from '../../../../server/dashboard_run_panel/schema';
 import {
-  isNotFoundError,
+  isExecutionInProgress,
   useExecutionWithSteps,
   useLastExecutionId,
+  useRefetchOnReload,
   useRunWorkflowFromPanel,
-  useWorkflowApi,
   useWorkflowDetail,
 } from '../hooks/use_workflow_run_panel_queries';
 import { getDashboardControls } from '../lib/dashboard_controls';
 import { describeWorkflowInputs } from '../lib/describe_workflow_inputs';
 import type { WorkflowRunPanelStatus } from '../lib/get_panel_status';
 import { getPanelStatus } from '../lib/get_panel_status';
+import { getErrorMessage, isNotFoundError } from '../lib/http_errors';
 import type { ResolvedWorkflowInputs } from '../lib/resolve_workflow_inputs';
 import { resolveWorkflowInputs } from '../lib/resolve_workflow_inputs';
 import { DEFAULT_BUTTON_LABEL, RUN_MESSAGES, STATUS_MESSAGES } from '../translations';
@@ -60,7 +60,12 @@ export interface WorkflowRunPanelProps {
   graphLayout: WorkflowRunGraphLayout | undefined;
   /** Keeps an `auto` graph in its current direction, e.g. while a dashboard flyout narrows the panel. */
   holdGraphDirection: boolean;
+  /** False when the dashboard is shown read-only, e.g. printed or embedded as a preview. */
+  isInteractive: boolean;
   fetchContext: FetchContext;
+  /** Called with the workflow's name once it loads, so the panel can be titled after it. */
+  onWorkflowNameChange: (name: string | undefined) => void;
+  onDataLoadingChange: (isLoading: boolean) => void;
 }
 
 const BLOCKED_REASONS: Partial<Record<WorkflowRunPanelStatus['type'], string>> = {
@@ -82,18 +87,22 @@ const getRunMetadata = (panelId: string, parentApi: unknown): Record<string, str
   return { source: 'dashboard', panelId, ...(dashboardId ? { dashboardId } : {}) };
 };
 
+/** Whether the run this panel started is the one it shows and is still starting or executing. */
 const isStartedRunActive = (
   startedExecutionId: string | undefined,
+  shownRunId: string | null | undefined,
   shownRun: Pick<WorkflowExecutionDto, 'id' | 'status'> | undefined
-): boolean =>
-  startedExecutionId !== undefined &&
-  !(shownRun?.id === startedExecutionId && TerminalExecutionStatuses.includes(shownRun.status));
+): boolean => {
+  if (startedExecutionId === undefined || shownRunId !== startedExecutionId) return false;
+  return shownRun?.id !== startedExecutionId || isExecutionInProgress(shownRun.status);
+};
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
 interface RunPanelFooterProps {
   lastRun: React.ReactNode;
+  isInteractive: boolean;
   buttonLabel: string | undefined;
   isBlocked: boolean;
   isBusy: boolean;
@@ -102,6 +111,7 @@ interface RunPanelFooterProps {
 
 const RunPanelFooter = ({
   lastRun,
+  isInteractive,
   buttonLabel,
   isBlocked,
   isBusy,
@@ -126,21 +136,58 @@ const RunPanelFooter = ({
       <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
         {lastRun}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          fill
-          size="s"
-          iconType="play"
-          onClick={onRun}
-          isDisabled={isBlocked || isBusy}
-          isLoading={isBusy}
-          data-test-subj="workflowRunPanelButton"
-        >
-          {isBusy ? RUN_MESSAGES.running : buttonLabel || DEFAULT_BUTTON_LABEL}
-        </EuiButton>
-      </EuiFlexItem>
+      {isInteractive && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            size="s"
+            iconType="play"
+            onClick={onRun}
+            isDisabled={isBlocked || isBusy}
+            isLoading={isBusy}
+            data-test-subj="workflowRunPanelButton"
+          >
+            {isBusy ? RUN_MESSAGES.running : buttonLabel || DEFAULT_BUTTON_LABEL}
+          </EuiButton>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
+};
+
+type RunPanelDataParams = Pick<
+  WorkflowRunPanelProps,
+  'workflowId' | 'fetchContext' | 'onWorkflowNameChange' | 'onDataLoadingChange'
+>;
+
+/** Loads the workflow and its last run, and reports the panel's title and loading state. */
+const useRunPanelData = ({
+  workflowId,
+  fetchContext,
+  onWorkflowNameChange,
+  onDataLoadingChange,
+}: RunPanelDataParams) => {
+  const capabilities = useWorkflowsCapabilities();
+  const workflowQuery = useWorkflowDetail(workflowId);
+  const workflowName = workflowQuery.data?.name;
+  useEffect(() => onWorkflowNameChange(workflowName), [onWorkflowNameChange, workflowName]);
+  const status = getPanelStatus({
+    capabilities,
+    workflow: workflowQuery.data,
+    isLoading: workflowQuery.isLoading,
+    error: workflowQuery.error,
+    isNotFound: isNotFoundError(workflowQuery.error),
+  });
+  const canQuery = status.type !== 'missing_privileges' && status.type !== 'not_found';
+  const lastRunIdQuery = useLastExecutionId(workflowId, canQuery && Boolean(workflowQuery.data));
+  const lastRun = useExecutionWithSteps(lastRunIdQuery.data ?? undefined);
+  useRefetchOnReload(fetchContext, workflowId);
+
+  const isLastRunLoading = lastRunIdQuery.isInitialLoading || lastRun.isInitialLoading;
+  const isDataLoading = workflowQuery.isInitialLoading || isLastRunLoading;
+  useEffect(() => onDataLoadingChange(isDataLoading), [onDataLoadingChange, isDataLoading]);
+
+  return { status, lastRunIdQuery, lastRun, isLastRunLoading };
 };
 
 export const WorkflowRunPanel = ({
@@ -152,34 +199,22 @@ export const WorkflowRunPanel = ({
   mappings,
   graphLayout,
   holdGraphDirection,
+  isInteractive,
   fetchContext,
+  onWorkflowNameChange,
+  onDataLoadingChange,
 }: WorkflowRunPanelProps): React.JSX.Element => {
   const { euiTheme } = useEuiTheme();
-  const api = useWorkflowApi(core.http);
-  const capabilities = useMemo(
-    () => getWorkflowsCapabilities(core.application.capabilities),
-    [core.application.capabilities]
-  );
-
-  const workflowQuery = useWorkflowDetail(api, workflowId);
-  const status = getPanelStatus({
-    capabilities,
-    workflow: workflowQuery.data,
-    isLoading: workflowQuery.isLoading,
-    error: workflowQuery.error,
-    isNotFound: isNotFoundError(workflowQuery.error),
-  });
-  const canQuery = status.type !== 'missing_privileges' && status.type !== 'not_found';
-  const lastRunIdQuery = useLastExecutionId(
-    api,
+  const { status, lastRunIdQuery, lastRun, isLastRunLoading } = useRunPanelData({
     workflowId,
-    canQuery && Boolean(workflowQuery.data)
-  );
-  const lastRun = useExecutionWithSteps(api, lastRunIdQuery.data ?? undefined);
+    fetchContext,
+    onWorkflowNameChange,
+    onDataLoadingChange,
+  });
 
   const [startedExecutionId, setStartedExecutionId] = useState<string>();
 
-  const runMutation = useRunWorkflowFromPanel(api, workflowId);
+  const runMutation = useRunWorkflowFromPanel();
   const [pendingRun, setPendingRun] = useState<ResolvedWorkflowInputs>();
 
   const workflow = 'workflow' in status ? status.workflow : undefined;
@@ -192,7 +227,7 @@ export const WorkflowRunPanel = ({
   const executionHref = useCallback(
     (executionId: string) =>
       core.application.getUrlForApp(PLUGIN_ID, {
-        path: `/${workflowId}?executionId=${executionId}`,
+        path: `/${encodeURIComponent(workflowId)}?executionId=${encodeURIComponent(executionId)}`,
       }),
     [core.application, workflowId]
   );
@@ -200,7 +235,7 @@ export const WorkflowRunPanel = ({
   const run = (runInputs: Record<string, unknown>) => {
     if (!workflow || runMutation.isLoading) return;
     runMutation.mutate(
-      { inputs: runInputs, metadata: getRunMetadata(uuid, parentApi) },
+      { id: workflowId, inputs: runInputs, metadata: getRunMetadata(uuid, parentApi) },
       {
         onSuccess: ({ workflowExecutionId }) => {
           setPendingRun(undefined);
@@ -218,6 +253,7 @@ export const WorkflowRunPanel = ({
         onError: (error) => {
           core.notifications.toasts.addError(toError(error), {
             title: RUN_MESSAGES.runFailedToastTitle(workflow.name),
+            toastMessage: getErrorMessage(error),
           });
         },
       }
@@ -307,15 +343,15 @@ export const WorkflowRunPanel = ({
       </div>
       <RunPanelFooter
         lastRun={
-          <LastRunStatus
-            run={lastRun.data}
-            isLoading={lastRunIdQuery.isLoading || lastRun.isInitialLoading}
-            getHref={executionHref}
-          />
+          <LastRunStatus run={lastRun.data} isLoading={isLastRunLoading} getHref={executionHref} />
         }
+        isInteractive={isInteractive}
         buttonLabel={buttonLabel}
         isBlocked={Boolean(blockedReason)}
-        isBusy={runMutation.isLoading || isStartedRunActive(startedExecutionId, lastRun.data)}
+        isBusy={
+          runMutation.isLoading ||
+          isStartedRunActive(startedExecutionId, lastRunIdQuery.data, lastRun.data)
+        }
         onRun={onRunClick}
       />
 
