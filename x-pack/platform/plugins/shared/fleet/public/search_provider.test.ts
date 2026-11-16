@@ -677,7 +677,7 @@ describe('Package search provider', () => {
             ],
           }),
           ...['One', 'Two', 'Three', 'Four', 'Five'].map((n) =>
-            makePackage(`kafka_${n.toLowerCase()}`, `Stream ${n}`, { group: 'kafka' })
+            makePackage(`docker_${n.toLowerCase()}`, `Stream ${n}`, { group: 'docker' })
           ),
           // A group with a single package is not a collection
           makePackage('redis', 'Redis', { group: 'redis' }),
@@ -792,11 +792,11 @@ describe('Package search provider', () => {
 
             expect(result).toEqual(
               expect.objectContaining({
-                id: 'collection:kafka',
+                id: 'collection:docker',
                 meta: {
                   trailingLabel: 'Collection of 5',
                   description:
-                    'Stream One, Stream Two, Stream Three, and 2 more are part of the Kafka collection',
+                    'Stream One, Stream Two, Stream Three, and 2 more are part of the Docker collection',
                 },
               })
             );
@@ -831,7 +831,7 @@ describe('Package search provider', () => {
           expect(ids(results)).toEqual([
             'aws-onboarding',
             'collection:nginx',
-            'collection:kafka',
+            'collection:docker',
             'redis',
             'sample',
           ]);
@@ -840,7 +840,7 @@ describe('Package search provider', () => {
         test('collections do not use up maxResults', async () => {
           const results = await find({ search: { types: ['integration'] }, maxResults: 3 });
 
-          expect(ids(results)).toEqual(['aws-onboarding', 'collection:nginx', 'collection:kafka']);
+          expect(ids(results)).toEqual(['aws-onboarding', 'collection:nginx', 'collection:docker']);
         });
       });
     });
