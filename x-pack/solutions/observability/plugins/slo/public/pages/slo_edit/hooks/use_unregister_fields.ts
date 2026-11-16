@@ -33,7 +33,7 @@ export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
   const {
     data: { metric: apmIndex },
   } = useFetchApmIndices();
-  const { control, unregister, reset, resetField } = useFormContext<CreateSLOForm>();
+  const { control, unregister, reset } = useFormContext<CreateSLOForm>();
   const indicatorType = useWatch({ control, name: 'indicator.type' });
   const [indicatorTypeState, setIndicatorTypeState] = useState<IndicatorType>(indicatorType);
 
@@ -119,5 +119,5 @@ export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
           assertNever(indicatorType);
       }
     }
-  }, [isEditMode, indicatorType, indicatorTypeState, unregister, reset, resetField, apmIndex]);
+  }, [isEditMode, indicatorType, indicatorTypeState, unregister, reset, apmIndex]);
 }

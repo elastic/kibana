@@ -8,6 +8,7 @@
 import {
   applyEvidenceMetadata,
   extractMermaid,
+  parseEdgeCondition,
   parseMermaidDecisionTree,
   parseStoredDecisionTree,
   serializeEvidenceMetadata,
@@ -159,6 +160,25 @@ describe('parseMermaidDecisionTree', () => {
     );
 
     expect(tree.nodes.find((node) => node.node_id === 'S1')?.label).toBe('Checkout latency');
+  });
+
+  it('strips a fractional reinforcement counter from labels', () => {
+    const tree = parseMermaidDecisionTree(
+      'flowchart TD\n  S1([Checkout latency · visits 4 · reinforced 1.35]) --> E1[Check]'
+    );
+
+    expect(tree.nodes.find((node) => node.node_id === 'S1')?.label).toBe('Checkout latency');
+  });
+});
+
+describe('parseEdgeCondition', () => {
+  it.each([
+    ['"✅ error rate high"', { condition: 'error rate high', isTaken: true }],
+    ['  yes ', { condition: 'yes', isTaken: false }],
+    ['✅', { condition: 'next', isTaken: true }],
+    ['', { condition: 'next', isTaken: false }],
+  ])('parses %j', (rawCondition, expected) => {
+    expect(parseEdgeCondition(rawCondition)).toEqual(expected);
   });
 });
 

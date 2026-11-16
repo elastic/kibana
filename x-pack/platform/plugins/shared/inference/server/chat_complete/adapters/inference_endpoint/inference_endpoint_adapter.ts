@@ -129,6 +129,7 @@ export const inferenceEndpointAdapter = {
       provider,
       cacheControl,
       sessionId,
+      logger,
     });
 
     return defer(() =>
@@ -161,6 +162,7 @@ const createEndpointRequest = ({
   provider,
   cacheControl,
   sessionId,
+  logger,
 }: {
   system?: string;
   messages: Message[];
@@ -174,6 +176,7 @@ const createEndpointRequest = ({
   provider?: string;
   cacheControl?: ChatCompleteCacheControl;
   sessionId?: string;
+  logger?: Logger;
 }): InferenceEndpointRequest => {
   const temperatureOptions = getTemperatureIfValid(temperature, {
     modelId: endpointModelId ?? modelName,
@@ -229,7 +232,10 @@ const createEndpointRequest = ({
     messages: messagesToOpenAI({ system, messages }),
     ...(hasTools
       ? {
-          tool_choice: toolChoiceToOpenAI(toolChoice),
+          tool_choice: toolChoiceToOpenAI(toolChoice, {
+            modelId: endpointModelId ?? modelName,
+            logger,
+          }),
           tools: openAiTools,
         }
       : {}),

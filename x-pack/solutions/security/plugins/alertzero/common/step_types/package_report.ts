@@ -64,7 +64,7 @@ export const packageReportInputSchema = lazySchema(() =>
     hasConfirmedHit: z
       .boolean()
       .describe(
-        "Whether the hunt cleared the confirmed-hit bar (the coordinator's top-level `has_confirmed_hit`: a required-or-baseline index hit from Tier 1, or a Tier 2 behavior that executed and hit). False covers both an environment that is clean and one where nothing was searchable."
+        "Whether the hunt cleared the confirmed-hit bar (the coordinator's top-level `has_confirmed_hit`: a required-or-baseline index hit from IOC Hunt, or a behavior that executed and hit). False covers both an environment that is clean and one where nothing was searchable."
       ),
     /**
      * Number of SSE attachments the hunt child prepared for this run (`hunt.yaml`'s `sse_count`
@@ -75,10 +75,9 @@ export const packageReportInputSchema = lazySchema(() =>
      *
      * Optional, not required: this workflow is a plain `yaml` definition, so its own content
      * hash propagates to every space on the next reconciliation regardless of version, but the
-     * Worker that calls it (`hunt_continuous_threat_hunt.ts`) is a `yamlTemplate` definition,
-     * whose hash covers only the function source, not the imported YAML it renders -- an
-     * already-installed Worker only picks up the call site that supplies this field once its own
-     * `version` bumps. Making it required here would fail every such Worker's packaging call in
+     * Worker that calls it (`hunt_continuous_threat_hunt.ts`) is a `yamlTemplate` definition --
+     * an already-installed Worker only picks up the call site that supplies this field once it is
+     * re-rendered. Making it required here would fail every such Worker's packaging call in
      * the gap between the two. Omitting it instead skips the shortfall check below, which is the
      * same as not having this fix yet -- never a hard failure.
      */
@@ -102,7 +101,7 @@ export const packageReportInputSchema = lazySchema(() =>
       .max(200)
       .optional()
       .describe(
-        "The coordinator's `report_intent_targets`: the datasets the report itself points at, without Tier 1 hit indices or the process-bearing streams. Coverage KIs without hit events name these as `data_sources`."
+        "The coordinator's `report_intent_targets`: the datasets the report itself points at, without IOC Hunt hit indices or the process-bearing streams. Coverage KIs without hit events name these as `data_sources`."
       ),
     behaviors: z
       .array(

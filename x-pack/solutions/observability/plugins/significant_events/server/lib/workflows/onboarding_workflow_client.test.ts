@@ -47,14 +47,14 @@ const onboardingKeyOf = (sourceId: string): string =>
 
 const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
-  const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
+  const telemetry = { trackOnboardingScheduled: jest.fn() };
   const sourcesClientGet = jest.fn(async (sourceId: string) => ({
     source: { id: sourceId, slug: slugOf(sourceId), enabled: true, esql_updated_at: 'revision-2' },
   }));
   const getSourcesClient = jest.fn().mockResolvedValue({ get: sourcesClientGet });
   const client = new SignificantEventsKIsOnboardingClient({
     managementApi: managementApi as never,
-    telemetry,
+    telemetry: telemetry as never,
     getSourcesClient,
   });
   return { client, managementApi, telemetry };
@@ -164,7 +164,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('fetches the workflow definition and runs it and returns executionId', async () => {
-      const { client, managementApi } = createClient();
+      const { client, managementApi, telemetry } = createClient();
       const request = httpServerMock.createKibanaRequest();
 
       const result = await client.run({
@@ -177,6 +177,13 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       });
 
       expect(result).toEqual({ executionId: 'execution-id' });
+      expect(telemetry.trackOnboardingScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflow_execution_id: 'execution-id',
+          execution_id: 'execution-id',
+        }),
+        expect.anything()
+      );
       expect(managementApi.getWorkflow).toHaveBeenCalledWith(
         SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
         '*'

@@ -8,100 +8,143 @@
 import { i18n } from '@kbn/i18n';
 
 export const LINKED_INVESTIGATIONS_LABELS = Object.freeze({
-  sectionTitle: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.sectionTitle', {
-    defaultMessage: 'Linked investigations',
-  }),
-  typeBadge: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.typeBadge', {
-    defaultMessage: 'Investigation',
-  }),
-  statusOpen: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.statusOpen', {
-    defaultMessage: 'Open',
-  }),
-  statusClosed: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.statusClosed', {
-    defaultMessage: 'Closed',
-  }),
+  sectionTitle: i18n.translate(
+    'xpack.agenticInvestigations.detailsFlyout.linkedInvestigations.sectionTitle',
+    {
+      defaultMessage: 'Linked investigations',
+    }
+  ),
+  typeBadge: i18n.translate(
+    'xpack.agenticInvestigations.detailsFlyout.linkedInvestigations.typeBadge',
+    {
+      defaultMessage: 'Investigation',
+    }
+  ),
+  statusOpen: i18n.translate(
+    'xpack.agenticInvestigations.detailsFlyout.linkedInvestigations.statusOpen',
+    {
+      defaultMessage: 'Open',
+    }
+  ),
+  statusClosed: i18n.translate(
+    'xpack.agenticInvestigations.detailsFlyout.linkedInvestigations.statusClosed',
+    {
+      defaultMessage: 'Closed',
+    }
+  ),
   actionRequired: i18n.translate(
-    'xpack.alertzero.detailsFlyout.linkedInvestigations.actionRequired',
+    'xpack.agenticInvestigations.detailsFlyout.linkedInvestigations.actionRequired',
     { defaultMessage: 'Action required' }
   ),
-  empty: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.empty', {
+  empty: i18n.translate('xpack.agenticInvestigations.detailsFlyout.linkedInvestigations.empty', {
     defaultMessage: 'No linked investigations',
   }),
-  errorTitle: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.errorTitle', {
-    defaultMessage: 'Could not load linked investigations',
-  }),
+  errorTitle: i18n.translate(
+    'xpack.agenticInvestigations.detailsFlyout.linkedInvestigations.errorTitle',
+    {
+      defaultMessage: 'Could not load linked investigations',
+    }
+  ),
 });
 
 export const DETAILS_FLYOUT_LABELS = Object.freeze({
-  ariaLabel: i18n.translate('xpack.alertzero.detailsFlyout.ariaLabel', {
+  ariaLabel: i18n.translate('xpack.agenticInvestigations.detailsFlyout.ariaLabel', {
     defaultMessage: 'Conversation details',
   }),
   tabs: {
-    overview: i18n.translate('xpack.alertzero.detailsFlyout.tabs.overview', {
+    overview: i18n.translate('xpack.agenticInvestigations.detailsFlyout.tabs.overview', {
       defaultMessage: 'Overview',
     }),
   },
   sections: {
-    overview: i18n.translate('xpack.alertzero.detailsFlyout.sections.situation', {
+    overview: i18n.translate('xpack.agenticInvestigations.detailsFlyout.sections.situation', {
       defaultMessage: "What's happened",
     }),
-    conclusion: i18n.translate('xpack.alertzero.detailsFlyout.sections.conclusion', {
+    conclusion: i18n.translate('xpack.agenticInvestigations.detailsFlyout.sections.conclusion', {
       defaultMessage: 'Conclusion',
     }),
     parentInvestigation: i18n.translate(
-      'xpack.alertzero.detailsFlyout.sections.parentInvestigation',
+      'xpack.agenticInvestigations.detailsFlyout.sections.parentInvestigation',
       {
         defaultMessage: 'Parent investigation',
       }
     ),
-    proposedActions: i18n.translate('xpack.alertzero.detailsFlyout.sections.proposedActions', {
-      defaultMessage: 'Proposed actions',
-    }),
-    impact: i18n.translate('xpack.alertzero.detailsFlyout.sections.impact', {
+    proposedActions: i18n.translate(
+      'xpack.agenticInvestigations.detailsFlyout.sections.proposedActions',
+      {
+        defaultMessage: 'Proposed actions',
+      }
+    ),
+    impact: i18n.translate('xpack.agenticInvestigations.detailsFlyout.sections.impact', {
       defaultMessage: 'Impact',
     }),
   },
   overview: {
-    showMore: i18n.translate('xpack.alertzero.detailsFlyout.overview.showMore', {
+    showMore: i18n.translate('xpack.agenticInvestigations.detailsFlyout.overview.showMore', {
       defaultMessage: 'Show more',
     }),
-    showLess: i18n.translate('xpack.alertzero.detailsFlyout.overview.showLess', {
+    showLess: i18n.translate('xpack.agenticInvestigations.detailsFlyout.overview.showLess', {
       defaultMessage: 'Show less',
     }),
-    triggerAlert: i18n.translate('xpack.alertzero.detailsFlyout.overview.triggerAlert', {
-      defaultMessage: 'Trigger · Alert',
-    }),
+    triggerAlert: i18n.translate(
+      'xpack.agenticInvestigations.detailsFlyout.overview.triggerAlert',
+      {
+        defaultMessage: 'Trigger · Alert',
+      }
+    ),
   },
   actions: {
-    openChat: i18n.translate('xpack.alertzero.detailsFlyout.actions.openChat', {
+    openChat: i18n.translate('xpack.agenticInvestigations.detailsFlyout.actions.openChat', {
       defaultMessage: 'Open chat',
     }),
-    openCase: i18n.translate('xpack.alertzero.detailsFlyout.actions.openCase', {
+    openCase: i18n.translate('xpack.agenticInvestigations.detailsFlyout.actions.openCase', {
       defaultMessage: 'Open a case',
     }),
-    assign: i18n.translate('xpack.alertzero.detailsFlyout.actions.assign', {
+    assign: i18n.translate('xpack.agenticInvestigations.detailsFlyout.actions.assign', {
       defaultMessage: 'Assign',
     }),
-    dismiss: i18n.translate('xpack.alertzero.detailsFlyout.actions.dismiss', {
+    dismiss: i18n.translate('xpack.agenticInvestigations.detailsFlyout.actions.dismiss', {
       defaultMessage: 'Dismiss',
     }),
   },
   proposedAction: {
-    needsReviewBadge: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.needsReview', {
-      defaultMessage: 'Needs review',
-    }),
-    reversible: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.reversible', {
-      defaultMessage: 'Reversible',
-    }),
-    irreversible: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.irreversible', {
-      defaultMessage: 'Irreversible',
-    }),
+    needsReviewBadge: i18n.translate(
+      'xpack.agenticInvestigations.detailsFlyout.proposedAction.needsReview',
+      {
+        defaultMessage: 'Needs review',
+      }
+    ),
+    noTypeCaption: i18n.translate(
+      'xpack.agenticInvestigations.detailsFlyout.proposedAction.noType',
+      {
+        defaultMessage: 'No action type',
+      }
+    ),
+    /** An expired proposal that saved no reason: true whether it timed out or ended early. */
+    expiredCaption: i18n.translate(
+      'xpack.agenticInvestigations.detailsFlyout.proposedAction.expiredCaption',
+      {
+        defaultMessage: 'Can no longer be applied',
+      }
+    ),
+    reversible: i18n.translate(
+      'xpack.agenticInvestigations.detailsFlyout.proposedAction.reversible',
+      {
+        defaultMessage: 'Reversible',
+      }
+    ),
+    irreversible: i18n.translate(
+      'xpack.agenticInvestigations.detailsFlyout.proposedAction.irreversible',
+      {
+        defaultMessage: 'Irreversible',
+      }
+    ),
     /**
      * Distinct per row: a screen reader announces this button-by-button, so a fixed string would
      * leave every proposed action indistinguishable from the others in the list.
      */
     ariaLabel: ({ title, status }: { title: string; status: string }) =>
-      i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.ariaLabel', {
+      i18n.translate('xpack.agenticInvestigations.detailsFlyout.proposedAction.ariaLabel', {
         defaultMessage: 'Review proposed action: {title}, {status}',
         values: { title, status },
       }),

@@ -1,9 +1,23 @@
 {
-  "sha1": "25eea903aff81847e7fda1db4f20fc1e5e447255",
+  "sha1": "f7108b6616f0763c658f1ed057ec1290b494447f",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "c1e17ebfa263323-d2572eefe71a2f9",
+      "title": "AlertZero approved proposal caption names who approved a proposal that had no action to run, and when",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/approved_proposal_caption.spec.ts",
+        "line": 38,
+        "column": 37
+      }
+    },
     {
       "id": "12e1f9dc0a1a5b4-20dcfefc21169df",
       "title": "AlertZero queue page width keeps the trend charts within the window and resizes them when it narrows",
@@ -14,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/queue_page_width.spec.ts",
-        "line": 54,
-        "column": 26
+        "line": 29,
+        "column": 5
       }
     }
   ]

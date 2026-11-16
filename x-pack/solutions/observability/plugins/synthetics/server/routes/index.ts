@@ -9,6 +9,8 @@ import { syncParamsSettingsParamsRoute } from './settings/params/sync_global_par
 import { syncParamsSyntheticsParamsRoute } from './settings/params/sync_global_params';
 import {
   getSecretConnectionsRoute,
+  getAffectedMonitorsRoute,
+  previewAffectedMonitorsRoute,
   saveSecretConnectionRoute,
   deleteSecretConnectionRoute,
   testSecretConnectionRoute,
@@ -161,6 +163,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   resetPrivateLocationRoute,
   syncParamsSyntheticsParamsRoute,
   getSecretConnectionsRoute,
+  getAffectedMonitorsRoute,
+  previewAffectedMonitorsRoute,
   saveSecretConnectionRoute,
   deleteSecretConnectionRoute,
   testSecretConnectionRoute,

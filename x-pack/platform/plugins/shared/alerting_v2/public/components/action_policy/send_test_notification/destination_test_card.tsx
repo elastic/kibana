@@ -5,54 +5,22 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiCheckableCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import type {
-  ActionPolicyTestDestination,
-  ActionPolicyTestSendResult,
-} from '@kbn/alerting-v2-schemas';
+import { EuiCheckableCard, EuiText } from '@elastic/eui';
+import type { ActionPolicyTestDestination } from '@kbn/alerting-v2-schemas';
 import React from 'react';
-import { useFetchWorkflow } from '../../../hooks/use_fetch_workflow';
-import {
-  getWorkflowConnectorTypes,
-  WorkflowConnectorIcons,
-} from '../details_flyout/workflow_connector_icons';
-import { DestinationTestStatus } from './destination_test_status';
-import * as labels from './translations';
-
-const TRUNCATE_CSS = {
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-} as const;
+import { DestinationLabel, useDestinationWorkflow } from './destination_label';
 
 interface Props {
   destination: ActionPolicyTestDestination;
   checked: boolean;
   disabled: boolean;
   onChange: () => void;
-  /** The test run started for this destination, once sent. */
-  result?: ActionPolicyTestSendResult;
 }
 
-/** A selectable destination of the test notification, with the status of its test run. */
-export const DestinationTestCard = ({
-  destination,
-  checked,
-  disabled,
-  onChange,
-  result,
-}: Props) => {
-  const { id, name, executable } = destination;
-  // A destination without a name could not be read by the user, so it is not fetched either.
-  const { data: workflow } = useFetchWorkflow(id, name !== undefined);
-  const connectorTypes = getWorkflowConnectorTypes(workflow?.definition);
+/** A selectable destination of the test notification. */
+export const DestinationTestCard = ({ destination, checked, disabled, onChange }: Props) => {
+  const { id } = destination;
+  const workflow = useDestinationWorkflow(destination, { notifyOnError: true });
   const description = workflow?.description;
 
   return (
@@ -63,42 +31,12 @@ export const DestinationTestCard = ({
       disabled={disabled}
       onChange={onChange}
       data-test-subj={`sendTestNotificationDestination-${id}`}
-      label={
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} component="span">
-          <EuiFlexItem grow={false} component="span" css={{ minWidth: 0 }}>
-            <EuiText size="s" component="span" css={TRUNCATE_CSS}>
-              <strong>{name ?? id}</strong>
-            </EuiText>
-          </EuiFlexItem>
-          {connectorTypes.length > 0 && (
-            <EuiFlexItem grow={false} component="span">
-              <WorkflowConnectorIcons types={connectorTypes} />
-            </EuiFlexItem>
-          )}
-          {!executable && (
-            <EuiFlexItem grow={false} component="span">
-              <EuiBadge
-                color="hollow"
-                title={labels.NOT_EXECUTABLE_TOOLTIP}
-                data-test-subj={`sendTestNotificationNotExecutable-${id}`}
-              >
-                {labels.NOT_EXECUTABLE}
-              </EuiBadge>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      }
+      label={<DestinationLabel destination={destination} workflow={workflow} />}
     >
       {description && (
-        <EuiText size="xs" color="subdued" css={TRUNCATE_CSS}>
+        <EuiText size="xs" color="subdued" className="eui-textTruncate">
           {description}
         </EuiText>
-      )}
-      {result && (
-        <>
-          {description && <EuiSpacer size="s" />}
-          <DestinationTestStatus result={result} />
-        </>
       )}
     </EuiCheckableCard>
   );

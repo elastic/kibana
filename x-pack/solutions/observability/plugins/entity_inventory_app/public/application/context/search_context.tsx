@@ -14,6 +14,8 @@ import { DEFAULT_TIME_RANGE, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../con
 import { useKibana } from '../../hooks/use_kibana';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
 import { clampTimeRange } from '../utils/clamp_time_range';
+import { EMPTY_SELECTION } from '../filters/selection';
+import type { FilterControlsSelection } from '../filters/selection';
 
 export interface EntityInventorySearchSubmitPayload {
   dateRange: TimeRange;
@@ -26,6 +28,10 @@ export interface EntityInventorySearchContextValue {
   filters: Filter[];
   dateRange: TimeRange;
   setFilters: (filters: Filter[]) => void;
+  filterSelection: FilterControlsSelection;
+  setFilterSelection: (selection: FilterControlsSelection) => void;
+  /** False when `xpack.entityInventoryApp.timeRangeLimit.disabled` turns the time range limit off. */
+  isTimeRangeLimited: boolean;
   /** Commits a search and returns the effective date range. An invalid query is not committed. */
   submit: (payload: EntityInventorySearchSubmitPayload) => TimeRange;
 }
@@ -43,11 +49,24 @@ export const EntityInventorySearchProvider = ({
   children?: React.ReactNode;
 }) => {
   const {
-    services: { notifications, uiSettings },
+    services: { notifications, uiSettings, config },
   } = useKibana();
+  const isTimeRangeLimited = !config.timeRangeLimit.disabled;
   const [query, setQuery] = useState<Query>(DEFAULT_QUERY);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [dateRange, setDateRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
+  const [selectionState, setSelectionState] = useState({
+    entityCategory,
+    selection: EMPTY_SELECTION,
+  });
+  if (selectionState.entityCategory !== entityCategory) {
+    setSelectionState({ entityCategory, selection: EMPTY_SELECTION });
+  }
+  const filterSelection = selectionState.selection;
+  const setFilterSelection = useCallback(
+    (selection: FilterControlsSelection) => setSelectionState({ entityCategory, selection }),
+    [entityCategory]
+  );
 
   const submit = useCallback(
     ({ dateRange: submittedRange, query: submittedQuery }: EntityInventorySearchSubmitPayload) => {
@@ -65,9 +84,10 @@ export const EntityInventorySearchProvider = ({
         }
       }
 
+      // Without the limit, clampTimeRange never clamps and only checks that the range is valid.
       const { range, wasClamped, isValid } = clampTimeRange(
         submittedRange,
-        ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS
+        isTimeRangeLimited ? ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS : Infinity
       );
       const effectiveRange = isValid ? range : dateRange;
 
@@ -81,12 +101,31 @@ export const EntityInventorySearchProvider = ({
 
       return effectiveRange;
     },
-    [dateRange, notifications, uiSettings]
+    [dateRange, isTimeRangeLimited, notifications, uiSettings]
   );
 
   const value = useMemo(
-    () => ({ entityCategory, query, filters, dateRange, setFilters, submit }),
-    [entityCategory, query, filters, dateRange, submit]
+    () => ({
+      entityCategory,
+      query,
+      filters,
+      dateRange,
+      setFilters,
+      filterSelection,
+      setFilterSelection,
+      isTimeRangeLimited,
+      submit,
+    }),
+    [
+      entityCategory,
+      query,
+      filters,
+      dateRange,
+      filterSelection,
+      setFilterSelection,
+      isTimeRangeLimited,
+      submit,
+    ]
   );
 
   return (

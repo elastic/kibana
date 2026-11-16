@@ -29,6 +29,7 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   useIsDecliningProposal: jest.fn(),
   useReopenProposal: jest.fn(() => ({ mutateAsync: jest.fn() })),
   useIsReopeningProposal: jest.fn(() => false),
+  isDecisionShown: jest.fn(() => false),
 }));
 
 jest.mock('../../../user_profiles', () => ({
@@ -246,7 +247,8 @@ describe('ProposedActionsSlot', () => {
     fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-2'));
 
     const dialog = screen.getByRole('dialog');
-    expect(within(dialog).getByText('Applied')).toBeInTheDocument();
+    // The badge's own label and the outcome banner's own title.
+    expect(within(dialog).getAllByText('Applied')).toHaveLength(2);
     expect(
       screen.queryByTestId('investigationFlyoutProposedAction-proposal-2-modal-confirm')
     ).not.toBeInTheDocument();

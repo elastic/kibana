@@ -22,10 +22,34 @@ import { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams, StartWorkflowExecutionParams } from './types';
 import { resolveQueueTtlMs } from '../concurrency/queue_concurrency_utils';
-import { getWorkflowOriginalRequest } from '../service_account_execution';
+import {
+  getWorkflowOriginalRequest,
+  getWorkflowTaskRunAs,
+  type WorkflowTaskRunAs,
+} from '../service_account_execution';
 import { generateExecutionTaskScope } from '../utils';
 
 export { getWorkflowRunTaskId } from './get_workflow_run_task_id';
+
+type ScheduleOptions = NonNullable<Parameters<TaskManagerStartContract['schedule']>[1]>;
+
+// Task Manager's `TaskCredential.type` for a task that runs as a service account workload.
+const SERVICE_ACCOUNT_CREDENTIAL_TYPE = 'service_account';
+
+/** A task of an execution started by a service account runs as the execution's binding. */
+const runAsFields = (
+  request: KibanaRequest | undefined,
+  runAs: WorkflowTaskRunAs | undefined = request && getWorkflowTaskRunAs(request)
+): { runAs?: WorkflowTaskRunAs } => (runAs ? { runAs } : {});
+
+/** Other tasks clone the caller's API key, which a service account's credential is not. */
+const cloneApiKeyOptions = (
+  request: KibanaRequest | undefined,
+  options: Omit<ScheduleOptions, 'request' | 'cloneApiKey'> = {}
+): ScheduleOptions | undefined =>
+  request && !getWorkflowTaskRunAs(request)
+    ? { request: getWorkflowOriginalRequest(request), cloneApiKey: true, ...options }
+    : undefined;
 
 export const getTaskPriority = (context?: Record<string, unknown> | null): TaskPriority =>
   context?.isUserInteractive === true ? TaskPriority.UserInteractive : TaskPriority.Standard;
@@ -130,8 +154,9 @@ export class WorkflowTaskManager {
         state: {},
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+        ...runAsFields(fakeRequest),
       },
-      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+      cloneApiKeyOptions(fakeRequest)
     );
 
     return {
@@ -161,8 +186,9 @@ export class WorkflowTaskManager {
         state: {},
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+        ...runAsFields(fakeRequest),
       },
-      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+      cloneApiKeyOptions(fakeRequest)
     );
 
     return {
@@ -177,9 +203,12 @@ export class WorkflowTaskManager {
   async scheduleDormantQueuedRunTask({
     workflowExecution,
     request,
+    runAs,
   }: {
     workflowExecution: EsWorkflowExecution;
     request: KibanaRequest;
+    /** Set when a service account queued a bound execution: its credential can't be cloned. */
+    runAs?: WorkflowTaskRunAs;
   }): Promise<{ taskId: string }> {
     if (!workflowExecution.id || !workflowExecution.spaceId) {
       throw new Error('Workflow execution must have id and spaceId to schedule a queued run task');
@@ -212,8 +241,9 @@ export class WorkflowTaskManager {
         scope: generateExecutionTaskScope(workflowExecution),
         enabled: true,
         priority,
+        ...runAsFields(request, runAs),
       },
-      { request: getWorkflowOriginalRequest(request), cloneApiKey: true }
+      runAs ? undefined : cloneApiKeyOptions(request)
     );
 
     return { taskId: task.id };
@@ -275,15 +305,20 @@ export class WorkflowTaskManager {
     fakeRequest,
     isUserInteractive,
     regenerateApiKey,
+    ...params
   }: {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
     isUserInteractive?: boolean;
     regenerateApiKey?: boolean;
+    runAs?: WorkflowTaskRunAs;
   }): Promise<{ taskId: string }> {
     const taskId = getWorkflowImmediateResumeTaskId(executionId);
     const priority = getTaskPriority({ isUserInteractive });
+    // A caller that knows the identity of the execution's tasks passes it, even when it is none.
+    const runAs =
+      'runAs' in params ? params.runAs : await this.getHandoffRunAs(executionId, fakeRequest);
 
     await this.taskManager.ensureScheduled(
       {
@@ -293,16 +328,53 @@ export class WorkflowTaskManager {
         state: {},
         scope: [`workflow:execution:${executionId}`],
         priority,
+        ...runAsFields(fakeRequest, runAs),
       },
-      fakeRequest
-        ? {
-            request: getWorkflowOriginalRequest(fakeRequest),
-            cloneApiKey: true,
-            ...(regenerateApiKey ? { regenerateApiKey: true } : {}),
-          }
-        : undefined
+      runAs
+        ? undefined
+        : cloneApiKeyOptions(fakeRequest, regenerateApiKey ? { regenerateApiKey: true } : {})
     );
     return { taskId };
+  }
+
+  /**
+   * The `runAs` of the tasks that hand off a resume for `executionId`. An approver's request has
+   * none, but a waiting execution's tasks may run as its binding, and Task Manager rejects updating
+   * a task with another identity, so the identity comes from the tasks the execution already has.
+   */
+  private async getHandoffRunAs(
+    executionId: string,
+    request: KibanaRequest | undefined
+  ): Promise<WorkflowTaskRunAs | undefined> {
+    const requestRunAs = request && getWorkflowTaskRunAs(request);
+    if (requestRunAs) {
+      return requestRunAs;
+    }
+    const tasks = await this.taskManager.bulkGet([
+      getWorkflowImmediateResumeTaskId(executionId),
+      getWorkflowWakeTaskId(executionId),
+      getWorkflowGlobalTimeoutResumeTaskId(executionId),
+    ]);
+    // A missing task has no identity to keep, but an unreadable one might run as the binding.
+    const unreadable = tasks.find(
+      (result) => result.tag === 'err' && result.error.error.statusCode !== 404
+    );
+    if (unreadable?.tag === 'err') {
+      throw new Error(`Failed to read task ${unreadable.error.id} while resolving its identity`);
+    }
+    for (const result of tasks) {
+      const { type, workloadType, workloadId, spaceId, expectedServiceAccountId } =
+        (result.tag === 'ok' && result.value.credential) || {};
+      if (type === SERVICE_ACCOUNT_CREDENTIAL_TYPE && workloadType && workloadId && spaceId) {
+        return {
+          workloadType,
+          workloadId,
+          spaceId,
+          expectedServiceAccountId: expectedServiceAccountId ?? null,
+        };
+      }
+    }
+    return undefined;
   }
 
   /**
@@ -344,6 +416,7 @@ export class WorkflowTaskManager {
     fakeRequest?: KibanaRequest;
     isUserInteractive?: boolean;
     regenerateApiKey?: boolean;
+    runAs?: WorkflowTaskRunAs;
   }): Promise<boolean> {
     const { taskId } = await this.scheduleImmediateResume(params);
     try {
@@ -372,7 +445,19 @@ export class WorkflowTaskManager {
     isUserInteractive?: boolean;
     regenerateApiKey?: boolean;
   }): Promise<void> {
-    if (await this.tryRunImmediateResume(params)) return;
+    const runAs = await this.getHandoffRunAs(params.executionId, params.fakeRequest);
+    if (await this.tryRunImmediateResume({ ...params, runAs })) return;
+    await this.handOffToWakeTask({ ...params, runAs });
+  }
+
+  /** Wakes the retained wake task, which keeps retrying while the immediate runner is claimed. */
+  async handOffToWakeTask(params: {
+    executionId: string;
+    spaceId: string;
+    fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
+    runAs?: WorkflowTaskRunAs;
+  }): Promise<void> {
     await this.ensureWakeTask(params);
     try {
       await this.runSoonWithConflictRetry(
@@ -429,6 +514,7 @@ export class WorkflowTaskManager {
     spaceId: string;
     fakeRequest?: KibanaRequest;
     runAt?: Date;
+    runAs?: WorkflowTaskRunAs;
   }): Promise<void> {
     await this.taskManager.ensureScheduled(
       {
@@ -439,10 +525,9 @@ export class WorkflowTaskManager {
         state: {},
         runAt: params.runAt ?? new Date(Date.now() + 1000),
         scope: [`workflow:execution:${params.executionId}`],
+        ...runAsFields(params.fakeRequest, params.runAs),
       },
-      params.fakeRequest
-        ? { request: getWorkflowOriginalRequest(params.fakeRequest), cloneApiKey: true }
-        : undefined
+      params.runAs ? undefined : cloneApiKeyOptions(params.fakeRequest)
     );
   }
 

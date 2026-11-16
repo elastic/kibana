@@ -70,7 +70,7 @@ describe('nightshift sandbox materialize workspace workflow', () => {
     }
   });
 
-  it('obtains one sandbox then materializes cortex and memory in parallel with that id', () => {
+  it('obtains one sandbox then materializes wiki and memory in parallel with that id', () => {
     expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.id).toBe(
       NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID
     );
@@ -96,11 +96,11 @@ describe('nightshift sandbox materialize workspace workflow', () => {
         if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}',
         branches: [
           expect.objectContaining({
-            name: 'cortex',
+            name: 'wiki',
             steps: [
               expect.objectContaining({
-                name: 'hydrate_cortex',
-                type: 'nightshift.cortexHydrate',
+                name: 'hydrate_wiki',
+                type: 'nightshift.wikiHydrate',
                 with: { sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}' },
               }),
             ],
@@ -145,9 +145,9 @@ describe('nightshift sandbox materialize workspace workflow', () => {
         with: {
           writers: [
             {
-              directory: '/workspace/cortex',
-              notification: '{{ steps.hydrate_cortex.output.notification }}',
-              completed: '${{ steps.hydrate_cortex.output != null }}',
+              directory: '/workspace/wiki',
+              notification: '{{ steps.hydrate_wiki.output.notification }}',
+              completed: '${{ steps.hydrate_wiki.output != null }}',
             },
             {
               directory: '/workspace/memories',
@@ -191,7 +191,7 @@ describe('nightshift sandbox materialize workspace workflow', () => {
     // Directories must be the real sandbox roots the handlers write to; the plugin's own
     // integration test compares them against the handler constants themselves.
     expect(writers.map((writer) => writer.directory)).toEqual([
-      '/workspace/cortex',
+      '/workspace/wiki',
       '/workspace/memories',
       '/workspace/decision-trees',
     ]);
@@ -229,8 +229,8 @@ describe('nightshift sandbox materialize workspace workflow', () => {
 
     expect(atomicStepIds).toEqual([
       'compose_prompt',
-      'hydrate_cortex',
       'hydrate_decision_trees',
+      'hydrate_wiki',
       'memory_materialize_to_sandbox',
       'obtain_sandbox',
     ]);
@@ -239,7 +239,7 @@ describe('nightshift sandbox materialize workspace workflow', () => {
     // A branch writer must NOT: a wrapper inside a branch body is what the parallel executor
     // cannot drive, and the graph builder rejects it. No wrapper may name a writer step.
     const writerStepIds = new Set([
-      'hydrate_cortex',
+      'hydrate_wiki',
       'hydrate_decision_trees',
       'memory_materialize_to_sandbox',
     ]);

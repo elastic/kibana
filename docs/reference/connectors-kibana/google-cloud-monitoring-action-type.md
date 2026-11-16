@@ -102,7 +102,7 @@ List services
 List Service Level Objectives
 :   List the SLOs defined for a service, to read error-budget status while triaging an incident.
     - `serviceId` (required): From *List services*.
-    - `filter`, `view` (`DEFAULT` or `EXPLICIT`), `pageSize`, `pageToken`, `projectId` (optional).
+    - `filter`, `view` (`FULL` or `EXPLICIT`), `pageSize`, `pageToken`, `projectId` (optional).
 
 :::::{tip}
 To triage a firing alert: *List alert policies* (optionally filtering by `displayName`) to find the policy, then *Get alert policy* for its full conditions and notification channels. Use the same filter from the fired condition with *List time series* to see the metric values that triggered it. Prefer *Create snooze* over *Set alert policy enabled* whenever the suppression is meant to end on its own.

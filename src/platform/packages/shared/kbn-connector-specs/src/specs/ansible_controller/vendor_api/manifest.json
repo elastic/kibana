@@ -1,0 +1,232 @@
+{
+  "operations": {
+    "cancelJob": [
+      {
+        "method": "post",
+        "path": "/api/v2/jobs/{id}/cancel/",
+        "source": "v2"
+      }
+    ],
+    "getJob": [
+      {
+        "method": "get",
+        "path": "/api/v2/jobs/{id}/",
+        "source": "v2"
+      }
+    ],
+    "getJobStdout": [
+      {
+        "method": "get",
+        "path": "/api/v2/jobs/{id}/stdout/",
+        "source": "v2"
+      }
+    ],
+    "getJobTemplate": [
+      {
+        "method": "get",
+        "path": "/api/v2/job_templates/{id}/",
+        "source": "v2"
+      }
+    ],
+    "getJobTemplateLaunchOptions": [
+      {
+        "method": "get",
+        "path": "/api/v2/job_templates/{id}/launch/",
+        "source": "v2"
+      }
+    ],
+    "getMe": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "firstPage": 1,
+            "pageParam": "page",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "results",
+            "totalPath": "count"
+          },
+          "style": "page"
+        },
+        "path": "/api/v2/me/",
+        "source": "v2"
+      }
+    ],
+    "launchJobTemplate": [
+      {
+        "method": "post",
+        "path": "/api/v2/job_templates/{id}/launch/",
+        "source": "v2"
+      }
+    ],
+    "listHosts": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "firstPage": 1,
+            "pageParam": "page",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "results",
+            "totalPath": "count"
+          },
+          "style": "page"
+        },
+        "path": "/api/v2/hosts/",
+        "source": "v2"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "firstPage": 1,
+            "pageParam": "page",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "results",
+            "totalPath": "count"
+          },
+          "style": "page"
+        },
+        "path": "/api/v2/inventories/{id}/hosts/",
+        "source": "v2"
+      }
+    ],
+    "listInventories": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "firstPage": 1,
+            "pageParam": "page",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "results",
+            "totalPath": "count"
+          },
+          "style": "page"
+        },
+        "path": "/api/v2/inventories/",
+        "source": "v2"
+      }
+    ],
+    "listJobEvents": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "firstPage": 1,
+            "pageParam": "page",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "results",
+            "totalPath": "count"
+          },
+          "style": "page"
+        },
+        "path": "/api/v2/jobs/{id}/job_events/",
+        "source": "v2"
+      }
+    ],
+    "listJobTemplates": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "firstPage": 1,
+            "pageParam": "page",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "results",
+            "totalPath": "count"
+          },
+          "style": "page"
+        },
+        "path": "/api/v2/job_templates/",
+        "source": "v2"
+      }
+    ],
+    "listJobs": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "firstPage": 1,
+            "pageParam": "page",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "results",
+            "totalPath": "count"
+          },
+          "style": "page"
+        },
+        "path": "/api/v2/jobs/",
+        "source": "v2"
+      }
+    ],
+    "listProjects": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "firstPage": 1,
+            "pageParam": "page",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "results",
+            "totalPath": "count"
+          },
+          "style": "page"
+        },
+        "path": "/api/v2/projects/",
+        "source": "v2"
+      }
+    ],
+    "request": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "firstPage": 1,
+            "pageParam": "page",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "results",
+            "totalPath": "count"
+          },
+          "style": "page"
+        },
+        "path": "/api/v2/job_templates/",
+        "source": "v2"
+      }
+    ]
+  },
+  "sources": {
+    "v2": {
+      "apiVersion": "",
+      "fetchedAt": "2026-10-07T20:27:03.123Z",
+      "format": "swagger",
+      "url": "https://ansible.readthedocs.io/projects/awx/en/latest/_static/swagger.json"
+    }
+  }
+}

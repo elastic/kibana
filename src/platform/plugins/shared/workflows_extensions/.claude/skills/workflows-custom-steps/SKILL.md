@@ -127,6 +127,7 @@ These are easy to miss during implementation or review — they are not always s
 | Public async loader | Prefer async import to keep zod + step module out of the plugin's main bundle. Loaders that reject (or throw inside the registry) are caught and logged; one broken loader does NOT prevent other steps from registering — verify the log when a step is silently missing |
 | Conditional registration | Loaders run once. Return `undefined` only for a decision that cannot change after startup. Feature flags must be subscribed to in `start()` and checked in the handler — do not snapshot them with `firstValueFrom` |
 | Registration timing | All `registerStepDefinition` calls happen in `setup()`, never `start()`. Engine and UI both `await workflowsExtensions.isReady()` before reading the registry |
+| Loops over user data | A loop with no I/O never frees the event loop, and concurrent runs add up to one long block (health checks fail, the pod restarts). Use a `for` loop (not `.map` / `.forEach` / `.reduce`), `await yieldToEventLoop()` from `@kbn/workflows/server` at the top of each iteration, then check `context.abortSignal.aborted`. Make helpers with loops `async` and `return await` them inside `try` |
 
 For the YAML naming conventions (the single most common mistake — only the step type action is camelCase, config/input keys we own never are), follow [STEPS.md → Workflow YAML Naming Conventions](../../dev_docs/STEPS.md#workflow-yaml-naming-conventions).
 
@@ -175,6 +176,7 @@ When adding a new step:
    - [ ] Uses `createServerStepDefinition` (no explicit `ServerStepDefinition` annotation)
    - [ ] Spreads `myStepCommonDefinition` — no duplicated `label`/`category`/schemas
    - [ ] `context.abortSignal` is passed to every ES query, `fetch`, and tight loop
+   - [ ] Every loop over user data calls `await yieldToEventLoop()` (`@kbn/workflows/server`) in each iteration
    - [ ] Uses `context.contextManager.getFakeRequest()` with a real plugin client when available, falls back to `callKibanaApi` only otherwise
    - [ ] Errors with custom categories or structured detail use `ExecutionError`; raw errors are fine for everything else
    - [ ] `onCancel` is implemented only if the step allocates resources outside the signal's reach, and is idempotent
@@ -210,6 +212,7 @@ When reviewing a PR that adds or modifies a custom step:
 - [ ] Workflow-owned config/input keys follow the [naming conventions](../../dev_docs/STEPS.md#workflow-yaml-naming-conventions) — config keys kebab-case, `with:` input keys kebab-case or snake_case, **no camelCase** for keys we own (inherited OpenAPI/connector shapes excepted)
 - [ ] Server handler uses `createServerStepDefinition`; types are inferred, not restated
 - [ ] `abortSignal` flows through every ES/HTTP call in the diff — search for new `esClient.search(` / `fetch(` without a `signal:`
+- [ ] New loops over user data (`items`, arrays, object keys) call `await yieldToEventLoop()` in each iteration
 - [ ] If `callKibanaApi` is used, check whether a request-scoped client from the target plugin would work instead
 - [ ] Errors thrown inside the handler are either intentional plain errors or `ExecutionError` with a specific `type`
 - [ ] Public file uses `React.lazy` for the icon; no inline `<EuiIcon type="..." />` references
