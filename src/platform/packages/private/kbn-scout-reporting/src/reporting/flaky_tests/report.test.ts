@@ -101,6 +101,21 @@ describe('flakiestQualifyingBranch', () => {
       flakiestQualifyingBranch([branch('main', 100, 10), branch('9.5', 20, 2)], thresholds)?.branch
     ).toBe('main');
   });
+
+  it('judges a pipeline judged on its own apart from the same branch of the others', () => {
+    // 4 of 514 judged together would be 0.8%; FIPS alone is 29%
+    const byBranch = [
+      branch('main', 500, 0),
+      { ...branch('main', 14, 4), pipeline: 'kibana-fips' },
+    ];
+    expect(flakiestQualifyingBranch(byBranch, { ...thresholds, minFailRate: 0.03 })).toEqual({
+      branch: 'main',
+      pipeline: 'kibana-fips',
+      builds: 14,
+      failedBuilds: 4,
+      buildFailRate: 4 / 14,
+    });
+  });
 });
 
 /** Builds run an hour apart, build 0 on Oct 1, 2026. */
@@ -244,6 +259,36 @@ describe('checkFlakyTest', () => {
       const bothCounts = [...counts, branchCounts('9.6', 100, 10)];
       expect(checkFlakyTest(setups, bothCounts, strict, after(1100, 24))).toEqual({
         outcome: 'none',
+      });
+    });
+
+    it('is judged in a pipeline judged on its own by that pipeline’s builds only', () => {
+      // stopped failing in the pipelines judged together, still failing in FIPS on the same branch
+      const fips = {
+        ...setupBuilds('.........x'.repeat(10), 1000),
+        pipeline: 'kibana-fips',
+        setup: 'kibana-fips a.config.ts stateful-classic local',
+      };
+      const fipsCounts = [...counts, { ...branchCounts('main', 100, 10), pipeline: 'kibana-fips' }];
+      expect(
+        checkFlakyTest([setupBuilds(pattern), fips], fipsCounts, strict, after(1100, 24))
+      ).toEqual({ outcome: 'none' });
+
+      // stopped failing in FIPS too, 20 builds ago: dropped, the least fixed pipeline named
+      const fixedInFips = {
+        ...fips,
+        builds: setupBuilds(`${'.........x'.repeat(10)}${'.'.repeat(20)}`, 1000).builds,
+      };
+      const fixedCounts = [
+        ...counts,
+        { ...branchCounts('main', 120, 10), pipeline: 'kibana-fips' },
+      ];
+      expect(
+        checkFlakyTest([setupBuilds(pattern), fixedInFips], fixedCounts, strict, after(1100, 24))
+      ).toMatchObject({
+        outcome: 'dropped',
+        cause: 'fixed',
+        reason: expect.stringContaining('builds on main in kibana-fips since'),
       });
     });
 

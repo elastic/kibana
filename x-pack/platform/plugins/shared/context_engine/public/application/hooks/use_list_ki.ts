@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import { useEffect } from 'react';
 import { DEFAULT_KI_PAGE_SIZE } from '../../../common/constants';
-import type { KiLifecycleStatus } from '../../../common/step_types/ki';
+import type { KiStatus } from '../../../common/ki_lifecycle_status';
 import type { KiTypeCount } from '../../../common/http_api/ai_indices';
 import type { ListKisResponse } from '../../../common/http_api/knowledge_indicators';
 import { listKis } from '../api/knowledge_indicators';
@@ -22,7 +22,7 @@ interface UseListKiArgs {
   size?: number;
   type?: string;
   query?: string;
-  lifecycleStatus?: KiLifecycleStatus[];
+  status?: KiStatus[];
   enabled?: boolean;
   notifyOnError?: boolean;
 }
@@ -47,7 +47,7 @@ export const useListKi = ({
   size = DEFAULT_KI_PAGE_SIZE,
   type,
   query,
-  lifecycleStatus,
+  status,
   enabled = true,
   notifyOnError = false,
 }: UseListKiArgs): UseListKiResult => {
@@ -56,13 +56,7 @@ export const useListKi = ({
   } = useKibana();
 
   const { data, isLoading, isFetching, error, refetch } = useQuery<ListKisResponse, Error>({
-    queryKey: contextEngineQueryKeys.aiIndex.listKi(
-      aiIndexId ?? '',
-      size,
-      type,
-      query,
-      lifecycleStatus
-    ),
+    queryKey: contextEngineQueryKeys.aiIndex.listKi(aiIndexId ?? '', size, type, query, status),
     queryFn: ({ signal }) => {
       if (!aiIndexId) {
         throw new Error('AI index id is required');
@@ -72,7 +66,7 @@ export const useListKi = ({
         size,
         ...(type !== undefined ? { type } : {}),
         ...(query !== undefined ? { query } : {}),
-        ...(lifecycleStatus !== undefined ? { lifecycleStatus: [...lifecycleStatus] } : {}),
+        ...(status !== undefined ? { status: [...status] } : {}),
         signal,
       });
     },

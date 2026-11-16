@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LearningKind, LearningRecord } from '@kbn/nightshift-decision-trees';
-import { getLearningKindLabel } from './labels';
+import { getLearningCategoryLabel, getLearningKindLabel } from './labels';
 
 interface LearningsPanelProps {
   learnings: LearningRecord[];
@@ -42,7 +42,7 @@ const LearningRow = ({ learning }: { learning: LearningRecord }) => (
       </EuiFlexItem>
       {learning.category !== undefined && (
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{learning.category}</EuiBadge>
+          <EuiBadge color="hollow">{getLearningCategoryLabel(learning.category)}</EuiBadge>
         </EuiFlexItem>
       )}
       {learning.connector_name !== undefined && (
