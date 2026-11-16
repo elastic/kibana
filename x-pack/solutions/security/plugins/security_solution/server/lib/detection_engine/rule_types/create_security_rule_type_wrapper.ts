@@ -32,6 +32,7 @@ import {
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
 import { getListClient } from './utils/get_list_client';
+import { checkErrorDetails } from './utils/check_error_details';
 // eslint-disable-next-line no-restricted-imports
 import { getNotificationResultsLink } from '../rule_actions_legacy';
 // eslint-disable-next-line no-restricted-imports
@@ -625,6 +626,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 enrichmentDurations: result.enrichmentTimes,
                 frozenIndicesQueriedCount,
               },
+              userError: checkErrorDetails(error).isUserError,
             });
           }
 
