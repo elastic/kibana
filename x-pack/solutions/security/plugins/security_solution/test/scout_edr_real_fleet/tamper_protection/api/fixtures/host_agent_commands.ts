@@ -124,13 +124,15 @@ const runOnHost = async (
   return { exitCode, stdout, stderr };
 };
 
+/** Runs `elastic-agent uninstall`, with `--uninstall-token` only when a token is given. */
 export const uninstallAgent = async (
   log: ScoutLogger,
   hostname: string,
-  uninstallToken: string
+  uninstallToken?: string
 ): Promise<HostCommandResult> => {
+  const tokenFlag = uninstallToken ? ` --uninstall-token ${uninstallToken}` : '';
   const { exitCode, stdout, stderr } = await runOnHost(log, hostname, {
-    command: `sudo elastic-agent uninstall -f --uninstall-token ${uninstallToken}`,
+    command: `sudo elastic-agent uninstall -f${tokenFlag}`,
     label: 'elastic-agent uninstall',
     timeoutMs: UNINSTALL_TIMEOUT_MS,
     secret: uninstallToken,
