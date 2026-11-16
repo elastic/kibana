@@ -51,7 +51,7 @@ import {
   getSaveBlocker,
   isTriggerValid,
 } from '../flyouts/form/validation';
-import { useRunQuotas } from '../../../data/run_quotas/use_significant_events_run_quotas';
+import { useInvestigationQuotas } from '../../../data/run_quotas/use_investigation_quotas';
 import {
   RUN_AUTOMATION_LABEL,
   getRunAutomationDisabledReason,
@@ -205,7 +205,7 @@ export const AutomationDetailFlyout = ({
   const [selectedRun, setSelectedRun] = useState<Run>();
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const activity = useAutomationRunActivity(automation, { enabled: isActionsOpen });
-  const quotas = useRunQuotas({ enabled: isActionsOpen, poll: isActionsOpen });
+  const quotas = useInvestigationQuotas({ enabled: isActionsOpen, poll: isActionsOpen });
   const originalValues = useMemo(() => toAutomationFormValues(automation), [automation]);
   const [values, setValues] = useState<AutomationFormValues>(originalValues);
   const updateAutomation = useUpdateAutomation();
