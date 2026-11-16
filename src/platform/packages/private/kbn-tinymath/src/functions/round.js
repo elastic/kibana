@@ -10,13 +10,13 @@
 const rounder = (a, b = 0) => Math.round(a * Math.pow(10, b)) / Math.pow(10, b);
 
 /**
- * Rounds a number towards the nearest integer by default or decimal place if specified. For arrays, the function will be applied index-wise to each element.
+ * Rounds a number to the nearest integer by default, or to a number of decimal places if you pass `b`. For arrays, the function will be applied index-wise to each element.
  * @param {(number|number[])} a a number or an array of numbers
  * @param {(number)} b (optional) number of decimal places, default value: 0
- * @return {(number|number[])} The rounded value of `a`. Returns an array with the the rounded values of each element if `a` is an array.
+ * @return {(number|number[])} The rounded value of `a`. Returns an array with the rounded values of each element if `a` is an array.
  *
  * @example
- * round(1.2) // returns 2
+ * round(1.2) // returns 1
  * round(-10.51) // returns -11
  * round(-10.1, 2) // returns -10.1
  * round(10.93745987, 4) // returns 10.9375

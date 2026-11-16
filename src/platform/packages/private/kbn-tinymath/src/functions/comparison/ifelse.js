@@ -8,17 +8,17 @@
  */
 
 /**
- * Evaluates the a conditional argument and returns one of the two values based on that.
- * @param {(boolean)} cond a boolean value
- * @param {(any|any[])} a a value or an array of any values
- * @param {(any|any[])} b a value or an array of any values
- * @return {(any|any[])} if the value of cond is truthy, return `a`, otherwise return `b`.
- * @throws `'Condition clause is of the wrong type'` if the `cond` provided is not of boolean type
+ * Returns one of two values, depending on a condition.
+ * @param {(boolean)} cond a condition, such as `5 > 6` or the result of a comparison function
+ * @param {(any|any[])} a the value to return if `cond` is true
+ * @param {(any|any[])} b the value to return if `cond` is false
+ * @return {(any|any[])} `a` if `cond` is true, otherwise `b`.
+ * @throws `'Condition clause is of the wrong type'` if `cond` is not a boolean
  * @throws `'Missing a value'` if `a` is not provided
  * @throws `'Missing b value'` if `b` is not provided
  * @example
  * ifelse(5 > 6, 1, 0) // returns 0
- * ifelse(1 == 1, [1, 2, 3], 5) // returns [1, 2, 3]
+ * ifelse(1 == 1, 7, 5) // returns 7
  * ifelse(1 < 2, [1, 2, 3], [2, 3, 4]) // returns [1, 2, 3]
  */
 

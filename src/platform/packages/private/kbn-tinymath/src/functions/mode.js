@@ -30,7 +30,7 @@ const findMode = (a) => {
 };
 
 /**
- * Finds the mode value(s) of one of more numbers/arrays of numbers into the function. If at least one array of numbers is passed into the function, the function will find the mode by index.
+ * Finds the mode value(s) of one or more numbers or arrays of numbers. If at least one array of numbers is passed into the function, the function will find the mode by index.
  * @param {...(number|number[])} args one or more numbers or arrays of numbers
  * @return {(number[]|number[][])} An array mode value(s) of all numbers if `args` contains only numbers. Returns an array of arrays with mode value(s) of each index, including all scalar numbers in `args` in the calculation at each index  if `args` contains at least one array.
  *
@@ -38,7 +38,7 @@ const findMode = (a) => {
  * mode(1, 1, 2, 3) // returns [1]
  * mode(1, 1, 2, 2, 3) // returns [1,2]
  * mode([10, 20, 30, 40], 10, 20, 30) // returns [[10], [20], [30], [10, 20, 30, 40]]
- * mode([1, 9], 1, 4, [3, 5]) // returns [mode([1, 1, 4, 3]), mode([9, 1, 4, 5])] = [[1], [4, 5, 9]]
+ * mode([1, 9], 1, 4, [3, 5]) // returns [mode([1, 1, 4, 3]), mode([9, 1, 4, 5])] = [[1], [1, 4, 5, 9]]
  */
 
 function mode(...args) {
