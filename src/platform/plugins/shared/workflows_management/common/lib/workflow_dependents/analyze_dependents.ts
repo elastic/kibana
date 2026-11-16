@@ -203,6 +203,33 @@ const isCertainIssue = (issue: ValidationIssue, value: unknown): boolean => {
   return true;
 };
 
+type Validator = ReturnType<typeof convertJsonSchemaToZodWithRefs>;
+type FieldSchema = NonNullable<ContractField['schema']>;
+type InputsSchema = NonNullable<WorkflowContract['inputsSchema']>;
+
+// Validators by field schema, then by the inputs schema its refs resolve against; null for a
+// schema the converter can't compile. Every caller's values are checked against the same ones.
+const validatorCache = new WeakMap<FieldSchema, WeakMap<InputsSchema, Validator | null>>();
+
+const getFieldValidator = (schema: FieldSchema, inputsSchema: InputsSchema): Validator | null => {
+  let byRoot = validatorCache.get(schema);
+  if (!byRoot) {
+    byRoot = new WeakMap();
+    validatorCache.set(schema, byRoot);
+  }
+  let validator = byRoot.get(inputsSchema);
+  if (validator === undefined) {
+    try {
+      validator = convertJsonSchemaToZodWithRefs(schema, inputsSchema);
+    } catch {
+      // Schemas the converter can't compile are not checked, the same as in the editor.
+      validator = null;
+    }
+    byRoot.set(inputsSchema, validator);
+  }
+  return validator;
+};
+
 const validateAgainstField = (
   value: unknown,
   field: ContractField,
@@ -211,13 +238,11 @@ const validateAgainstField = (
   if (!field.schema || !contract.inputsSchema) {
     return [];
   }
+  const validator = getFieldValidator(field.schema, contract.inputsSchema);
   try {
-    const result = convertJsonSchemaToZodWithRefs(field.schema, contract.inputsSchema).safeParse(
-      value
-    );
-    return result.success ? [] : (result.error.issues as ValidationIssue[]);
+    const result = validator?.safeParse(value);
+    return !result || result.success ? [] : (result.error.issues as ValidationIssue[]);
   } catch {
-    // Schemas the converter can't compile are not checked, the same as in the editor.
     return [];
   }
 };
@@ -471,7 +496,8 @@ const evaluateOutputs = (
     if (field && !contract.alwaysReturnsOutput) {
       // The caller gets whatever the child's last step returns, which may or may not hold `field`.
       issue = { kind: 'outputFromLastStep', severity: 'warning', stepName, field };
-    } else if (field && contract.outputsSource === 'none') {
+    } else if (field && contract.outputsSource === 'none' && !contract.returnedOutputs) {
+      // Nothing is declared and the returned outputs are computed, so `field` may be among them.
       issue = { kind: 'undeclaredOutput', severity: 'warning', stepName, field };
     } else if (field && !contractField) {
       issue = contract.returnedOutputs?.includes(field)
@@ -597,8 +623,13 @@ const toChildFailsIssue = (stepName: string, failure: RunFailure): DraftIssue =>
 const getOutputs = (definition: unknown): unknown =>
   isRecord(definition) ? definition.outputs : undefined;
 
-/** Whether a call fails its step, for the calls a check knows about. */
-type CallFails = (callSite: WorkflowCallSite) => boolean;
+/**
+ * Whether a call fails its step, for the calls a check knows about. `hypothetically` runs a check
+ * of steps that might never run, when the answer depends on what else is running.
+ */
+type CallFails = ((callSite: WorkflowCallSite) => boolean) & {
+  hypothetically?: <T>(check: () => T) => T;
+};
 
 // Whether running `steps` as a fallback of `definition` fails every time: its end step fails, or
 // a call that always runs fails and nothing recovers it.
@@ -609,8 +640,8 @@ const fallbackFails = (steps: unknown, definition: unknown, callFails: CallFails
     collectWorkflowCallSites(fallbackDefinition).some(
       (callSite) =>
         !callSite.isConditional &&
-        failureEscapes(callSite, definition, callFails) &&
-        callFails(callSite)
+        callFails(callSite) &&
+        failureEscapes(callSite, definition, callFails)
     )
   );
 };
@@ -644,12 +675,42 @@ const mayEndSuccessfullyBefore = (
 ): boolean => {
   const workflowOnFailure = getWorkflowOnFailure(definition);
   const steps = isRecord(definition) && Array.isArray(definition.steps) ? definition.steps : [];
-  return (
-    isRecord(workflowOnFailure) &&
-    containsCompletingOutputStep(workflowOnFailure.fallback) &&
-    usesWorkflowOnFailure(steps.slice(0, steps.indexOf(endStep))) &&
-    !fallbackFails(workflowOnFailure.fallback, definition, callFails)
-  );
+  if (
+    !isRecord(workflowOnFailure) ||
+    !containsCompletingOutputStep(workflowOnFailure.fallback) ||
+    !usesWorkflowOnFailure(steps.slice(0, steps.indexOf(endStep)))
+  ) {
+    return false;
+  }
+  // The fallback runs only if one of those steps fails.
+  const check = () => !fallbackFails(workflowOnFailure.fallback, definition, callFails);
+  return callFails.hypothetically ? callFails.hypothetically(check) : check();
+};
+
+type OutputsValidator = ReturnType<typeof buildFieldsZodValidator>;
+
+const outputsValidatorCache = new WeakMap<object, OutputsValidator | null>();
+
+// The validator for declared `outputs`; null when none are declared or they can't be compiled.
+const getOutputsValidator = (outputs: unknown): OutputsValidator | null => {
+  if (typeof outputs !== 'object' || outputs === null) {
+    return null;
+  }
+  let validator = outputsValidatorCache.get(outputs);
+  if (validator === undefined) {
+    const schema = normalizeFieldsToJsonSchema(outputs);
+    try {
+      validator =
+        schema?.properties && Object.keys(schema.properties).length > 0
+          ? buildFieldsZodValidator(schema)
+          : null;
+    } catch {
+      // Schemas the converter can't compile are not checked, the same as in the editor.
+      validator = null;
+    }
+    outputsValidatorCache.set(outputs, validator);
+  }
+  return validator;
 };
 
 // The status a `workflow.output` or `workflow.fail` step ends the run with.
@@ -670,17 +731,16 @@ function findEndStepFailure(definition: unknown, callFails: CallFails): RunFailu
   if (status === 'failed' || status === 'cancelled') {
     return { stepName, issue: stepIssue('runEndsUnsuccessfully', stepName, status) };
   }
-  const outputsSchema = normalizeFieldsToJsonSchema(getOutputs(definition));
-  if (!outputsSchema?.properties || Object.keys(outputsSchema.properties).length === 0) {
+  const validator = getOutputsValidator(getOutputs(definition));
+  if (!validator) {
     return undefined;
   }
   const values = isRecord(step.with) ? step.with : {};
   let issues: ValidationIssue[];
   try {
-    const result = buildFieldsZodValidator(outputsSchema).safeParse(values);
+    const result = validator.safeParse(values);
     issues = result.success ? [] : (result.error.issues as ValidationIssue[]);
   } catch {
-    // Schemas the converter can't compile are not checked, the same as in the editor.
     return undefined;
   }
   const [firstIssue] = issues.filter((issue) => isCertainIssue(issue, values));
@@ -1121,12 +1181,29 @@ const findRunFailures = (workflows: ReadonlyMap<string, WorkflowLookupItem>): Ru
   const failures = new Map<string, RunFailure | undefined>();
   const unchecked = new Map<string, UncheckedCall>();
   const inProgress = new Set<string>();
+  // Set while checking steps that might never run. A workflow running further up isn't then known
+  // to run again, so meeting it is no cycle, and the results hold only for that check.
+  let hypotheticalFailures: Map<string, RunFailure | undefined> | undefined;
+  const hypothetically = <T>(check: () => T): T => {
+    if (hypotheticalFailures) {
+      return check();
+    }
+    hypotheticalFailures = new Map();
+    try {
+      return check();
+    } finally {
+      hypotheticalFailures = undefined;
+    }
+  };
   const resolve = (workflowId: string, depth: number): RunFailureResolution => {
     if (inProgress.has(workflowId)) {
-      return IN_PROGRESS;
+      return hypotheticalFailures ? undefined : IN_PROGRESS;
     }
     if (failures.has(workflowId)) {
       return failures.get(workflowId);
+    }
+    if (hypotheticalFailures?.has(workflowId)) {
+      return hypotheticalFailures.get(workflowId);
     }
     const workflow = workflows.get(workflowId);
     if (!workflow || depth > MAX_INDIRECT_DEPTH) {
@@ -1141,29 +1218,50 @@ const findRunFailures = (workflows: ReadonlyMap<string, WorkflowLookupItem>): Ru
         workflows.get(callSite.workflowId),
         (id) => resolve(id, depth + 1)
       );
-    const callFails: CallFails = (callSite) => getIssue(callSite) !== undefined;
+    const callFails: CallFails = Object.assign(
+      (callSite: WorkflowCallSite) => getIssue(callSite) !== undefined,
+      { hypothetically }
+    );
+    // A call that always runs and always fails fails every run, unless something recovers it.
+    // Its fallbacks then run every time too.
+    const getCallRunFailure = (callSite: WorkflowCallSite): RunFailure | undefined => {
+      const { workflowId: calledId } = callSite;
+      const called = workflows.get(calledId);
+      const calledName = called?.name ?? calledId;
+      const issue = getIssue(callSite);
+      if (issue) {
+        return failureEscapes(callSite, workflow.definition, callFails)
+          ? { stepName: callSite.stepName, calledName, issue }
+          : undefined;
+      }
+      const isUnchecked = called
+        ? callSite.stepType === 'workflow.execute' && unchecked.has(calledId)
+        : calledId !== workflowId;
+      if (
+        isUnchecked &&
+        !hypotheticalFailures &&
+        !unchecked.has(workflowId) &&
+        hypothetically(() => failureEscapes(callSite, workflow.definition, callFails))
+      ) {
+        unchecked.set(workflowId, { from: callSite.stepName, to: calledName });
+      }
+      return undefined;
+    };
     let failure = findEndStepFailure(workflow.definition, callFails);
     // In step order, so that the failure is the first one a run reaches.
     for (const callSite of collectWorkflowCallSites(workflow.definition)) {
       if (failure) {
         break;
       }
-      // Only a step that runs every time, and stops the run when it fails, fails every run.
-      if (!callSite.isConditional && failureEscapes(callSite, workflow.definition, callFails)) {
-        const { workflowId: calledId } = callSite;
-        const called = workflows.get(calledId);
-        const issue = getIssue(callSite);
-        const calledName = called?.name ?? calledId;
-        failure = issue ? { stepName: callSite.stepName, calledName, issue } : undefined;
-        const isUnchecked = called
-          ? callSite.stepType === 'workflow.execute' && unchecked.has(calledId)
-          : calledId !== workflowId;
-        if (!issue && isUnchecked && !unchecked.has(workflowId)) {
-          unchecked.set(workflowId, { from: callSite.stepName, to: calledName });
-        }
+      if (!callSite.isConditional) {
+        failure = getCallRunFailure(callSite);
       }
     }
     inProgress.delete(workflowId);
+    if (hypotheticalFailures) {
+      hypotheticalFailures.set(workflowId, failure);
+      return failure;
+    }
     failures.set(workflowId, failure);
     if (failure) {
       unchecked.delete(workflowId);

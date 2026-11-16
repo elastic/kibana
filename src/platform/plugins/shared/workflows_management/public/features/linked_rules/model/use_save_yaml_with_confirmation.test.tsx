@@ -24,6 +24,25 @@ jest.mock('../../../entities/workflows/model/use_save_yaml', () => ({
   useSaveYaml: () => mockSaveYaml,
 }));
 
+let mockProposalContent: string | undefined;
+jest.mock('../../ai_integration/active_proposal_manager', () => ({
+  ...jest.requireActual('../../ai_integration/active_proposal_manager'),
+  getActiveProposalContent: () => mockProposalContent,
+}));
+
+const workflowDto = (id: string) => ({
+  id,
+  name: 'Test Workflow',
+  enabled: true,
+  yaml: buildYaml(true),
+  lastUpdatedAt: '2024-01-01T00:00:00Z',
+  createdAt: '2024-01-01T00:00:00Z',
+  createdBy: 'test-user',
+  lastUpdatedBy: 'test-user',
+  definition: null,
+  valid: true,
+});
+
 const buildYaml = (enabled: boolean) =>
   `name: Test Workflow\nenabled: ${enabled}\ntriggers:\n  - type: manual\nsteps:\n  - name: log\n    type: console\n    with:\n      message: hello`;
 
@@ -31,27 +50,19 @@ describe('useSaveYamlWithConfirmation', () => {
   const confirmDisable = jest.fn();
   let store: ReturnType<typeof createMockStore>;
 
-  const renderSave = (
+  const renderSaves = (
     yamlEnabledEdits: boolean[],
     confirmBreakingChange?: WorkflowDependentsContextValue['confirmBreakingChange']
   ) => {
     store = createMockStore();
-    store.dispatch(
-      setWorkflow({
-        id: 'wf-1',
-        name: 'Test Workflow',
-        enabled: true,
-        yaml: buildYaml(true),
-        lastUpdatedAt: '2024-01-01T00:00:00Z',
-        createdAt: '2024-01-01T00:00:00Z',
-        createdBy: 'test-user',
-        lastUpdatedBy: 'test-user',
-        definition: null,
-        valid: true,
-      })
-    );
+    store.dispatch(setWorkflow(workflowDto('wf-1')));
     yamlEnabledEdits.forEach((enabled) => store.dispatch(setYamlString(buildYaml(enabled))));
-    const { result } = renderHook(() => useSaveYamlWithConfirmation(confirmDisable), {
+    // The header and the editor each save through their own hook.
+    const useSaves = () => [
+      useSaveYamlWithConfirmation(confirmDisable),
+      useSaveYamlWithConfirmation(confirmDisable),
+    ];
+    const { result } = renderHook(useSaves, {
       wrapper: ({ children }) => (
         <TestWrapper store={store}>
           {confirmBreakingChange ? (
@@ -68,17 +79,19 @@ describe('useSaveYamlWithConfirmation', () => {
     });
     return result.current;
   };
+  const renderSave = (...args: Parameters<typeof renderSaves>) => renderSaves(...args)[0];
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockSaveYaml.mockResolvedValue(undefined);
+    mockProposalContent = undefined;
   });
 
   it('saves without confirmation when the workflow stays enabled', async () => {
     await expect(renderSave([true])()).resolves.toBe(true);
 
     expect(confirmDisable).not.toHaveBeenCalled();
-    expect(mockSaveYaml).toHaveBeenCalled();
+    expect(mockSaveYaml).toHaveBeenCalledWith({ id: 'wf-1', yamlString: buildYaml(true) });
   });
 
   it('saves after the user confirms disabling the workflow', async () => {
@@ -158,5 +171,60 @@ describe('useSaveYamlWithConfirmation', () => {
     expect(confirmBreakingChange).toHaveBeenNthCalledWith(1, buildYaml(true));
     expect(confirmBreakingChange).toHaveBeenNthCalledWith(2, editedYaml);
     expect(mockSaveYaml).not.toHaveBeenCalled();
+  });
+
+  it('ignores a save from another hook while the first is still checking', async () => {
+    let finishCheck: (confirmed: boolean) => void = () => {};
+    const confirmBreakingChange = jest.fn(
+      () => new Promise<boolean>((resolve) => (finishCheck = resolve))
+    );
+    const [headerSave, editorSave] = renderSaves([true], confirmBreakingChange);
+
+    const first = headerSave();
+    await expect(editorSave()).resolves.toBe(false);
+    finishCheck(true);
+    await expect(first).resolves.toBe(true);
+
+    expect(mockSaveYaml).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not save when another workflow is opened while the check is pending', async () => {
+    const confirmBreakingChange = jest.fn(async () => {
+      store.dispatch(setWorkflow(workflowDto('wf-b')));
+      return true;
+    });
+
+    await expect(renderSave([true], confirmBreakingChange)()).resolves.toBe(false);
+
+    expect(mockSaveYaml).not.toHaveBeenCalled();
+  });
+
+  it('checks and saves the draft with pending AI proposals accepted', async () => {
+    const proposedYaml = `${buildYaml(
+      true
+    )}\ninputs:\n  - name: id\n    type: string\n    required: true`;
+    mockProposalContent = proposedYaml;
+    const confirmBreakingChange = jest.fn().mockResolvedValue(true);
+
+    await expect(renderSave([true], confirmBreakingChange)()).resolves.toBe(true);
+
+    expect(confirmBreakingChange).toHaveBeenCalledWith(proposedYaml);
+    expect(mockSaveYaml).toHaveBeenCalledWith({ id: 'wf-1', yamlString: proposedYaml });
+  });
+
+  it('checks again when an AI proposal arrives while the check is pending', async () => {
+    const proposedYaml = `${buildYaml(true)}\n`;
+    const confirmBreakingChange = jest
+      .fn()
+      .mockImplementationOnce(async () => {
+        mockProposalContent = proposedYaml;
+        return true;
+      })
+      .mockResolvedValueOnce(true);
+
+    await renderSave([true], confirmBreakingChange)();
+
+    expect(confirmBreakingChange).toHaveBeenNthCalledWith(2, proposedYaml);
+    expect(mockSaveYaml).toHaveBeenCalledWith({ id: 'wf-1', yamlString: proposedYaml });
   });
 });

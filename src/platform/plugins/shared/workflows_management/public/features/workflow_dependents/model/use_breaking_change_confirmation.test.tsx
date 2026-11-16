@@ -67,23 +67,25 @@ describe('useBreakingChangeConfirmation', () => {
     return hook.confirmModal;
   };
 
+  let store: ReturnType<typeof createMockStore>;
+
+  const workflowDto = (id: string, name: string) => ({
+    id,
+    name,
+    enabled: true,
+    yaml: SAVED_YAML,
+    lastUpdatedAt: '2024-01-01T00:00:00Z',
+    createdAt: '2024-01-01T00:00:00Z',
+    createdBy: 'test-user',
+    lastUpdatedBy: 'test-user',
+    definition: null,
+    valid: true,
+  });
+
   const renderWithDraft = (draftYaml: string) => {
     draft = draftYaml;
-    const store = createMockStore();
-    store.dispatch(
-      setWorkflow({
-        id: 'alert-context',
-        name: 'Alert context',
-        enabled: true,
-        yaml: SAVED_YAML,
-        lastUpdatedAt: '2024-01-01T00:00:00Z',
-        createdAt: '2024-01-01T00:00:00Z',
-        createdBy: 'test-user',
-        lastUpdatedBy: 'test-user',
-        definition: null,
-        valid: true,
-      })
-    );
+    store = createMockStore();
+    store.dispatch(setWorkflow(workflowDto('alert-context', 'Alert context')));
     store.dispatch(setYamlString(draftYaml));
     render(
       <TestProvider services={services} store={store}>
@@ -193,5 +195,29 @@ describe('useBreakingChangeConfirmation', () => {
     expect(screen.getByText('Caller 9')).toBeInTheDocument();
     expect(screen.queryByText('Caller 10')).not.toBeInTheDocument();
     expect(screen.getByText('and 2 more')).toBeInTheDocument();
+  });
+
+  it('cancels the save when another workflow is opened while the dialog is open', async () => {
+    (services.http.post as jest.Mock).mockResolvedValue(impact([caller({})]));
+    renderWithDraft(`${SAVED_YAML}\n`);
+
+    const { confirmation } = await openConfirmation();
+    act(() => {
+      store.dispatch(setWorkflow(workflowDto('triage', 'Triage')));
+    });
+
+    await expect(confirmation).resolves.toBe(false);
+    expect(screen.queryByTestId('workflowBreakingChangeConfirmModal')).not.toBeInTheDocument();
+  });
+
+  it('does not ask about a workflow that was closed while its check ran', async () => {
+    (services.http.post as jest.Mock).mockImplementation(async () => {
+      store.dispatch(setWorkflow(workflowDto('triage', 'Triage')));
+      return impact([caller({})]);
+    });
+    renderWithDraft(`${SAVED_YAML}\n`);
+
+    await expect(confirmBreakingChange(draft)).resolves.toBe(false);
+    expect(screen.queryByTestId('workflowBreakingChangeConfirmModal')).not.toBeInTheDocument();
   });
 });

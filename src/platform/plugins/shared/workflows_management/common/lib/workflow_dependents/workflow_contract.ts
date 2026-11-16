@@ -109,8 +109,7 @@ export const extractInputFields = (definition: unknown): Record<string, Contract
   return toFields(inputsSchema, getRuntimeInputDefaults(inputsSchema));
 };
 
-/** Extracts the input/output contract a workflow exposes to the workflows that call it. */
-export const extractWorkflowContract = (definition: unknown): WorkflowContract => {
+const buildWorkflowContract = (definition: unknown): WorkflowContract => {
   const inputsSchema = getInputsSchema(definition);
   const inputDefaults = getRuntimeInputDefaults(inputsSchema);
   const additionalInputs = toAdditionalInputsField(inputsSchema);
@@ -152,6 +151,22 @@ export const extractWorkflowContract = (definition: unknown): WorkflowContract =
     outputsSource: Object.keys(inferredOutputs).length > 0 ? 'inferred' : 'none',
     unreturnedOutputs: [],
   };
+};
+
+// Contracts by definition, since every call to a workflow is checked against the same one.
+const contractCache = new WeakMap<object, WorkflowContract>();
+
+/** Extracts the input/output contract a workflow exposes to the workflows that call it. */
+export const extractWorkflowContract = (definition: unknown): WorkflowContract => {
+  if (!isRecord(definition)) {
+    return buildWorkflowContract(definition);
+  }
+  let contract = contractCache.get(definition);
+  if (!contract) {
+    contract = buildWorkflowContract(definition);
+    contractCache.set(definition, contract);
+  }
+  return contract;
 };
 
 const toTypeSet = (type?: string): string[] | undefined => type?.split(' | ');

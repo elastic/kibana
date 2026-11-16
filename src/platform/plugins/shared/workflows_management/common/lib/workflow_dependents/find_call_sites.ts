@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Output } from 'liquidjs';
+import { Output, toValueSync } from 'liquidjs';
 import { isEqual } from 'lodash';
 import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { getNestedStepGroups, type WorkflowStep } from '@kbn/workflows';
 import { createWorkflowLiquidEngine, extractTemplateVariables } from '@kbn/workflows/common/utils';
 import { parsePath } from '@kbn/workflows/common/utils/zod';
+import { allowsWorkflowLevelOnFailure } from '@kbn/workflows/graph';
 import { isDynamicValue, isRecord } from '@kbn/workflows-yaml';
 import type { WorkflowCallSite, WorkflowExecuteStepType } from './types';
 import {
@@ -138,23 +139,10 @@ const containsNestedFailures = (step: WorkflowStep): boolean => {
   );
 };
 
-// Steps the execution engine never wraps in the workflow-level `on-failure`.
-const NO_WORKFLOW_ON_FAILURE_STEP_TYPES = new Set([
-  'if',
-  'foreach',
-  'while',
-  'parallel',
-  'loop.break',
-  'loop.continue',
-  'switch',
-  'wait',
-]);
-
 // Whether the engine wraps the step in the workflow-level `on-failure` (outside fallbacks). Its own
 // `on-failure` replaces the workflow-level one.
 const getsWorkflowOnFailure = (step: Record<string, unknown>): boolean =>
-  !step['on-failure'] &&
-  !(typeof step.type === 'string' && NO_WORKFLOW_ON_FAILURE_STEP_TYPES.has(step.type));
+  !step['on-failure'] && typeof step.type === 'string' && allowsWorkflowLevelOnFailure(step.type);
 
 /** The `on-failure` the engine applies to a step: its own, or the workflow-level one. */
 export const getStepOnFailure = (
@@ -276,8 +264,8 @@ interface VariableRead {
   hasFallback: boolean;
 }
 
-// KQL expressions, where variables are referenced by bare field names.
-const CONDITION_KEYS = new Set(['if', 'condition', 'continue']);
+// Step types whose `condition` is a KQL expression, where variables are referenced by bare names.
+const CONDITION_STEP_TYPES = new Set(['if', 'while']);
 
 const liquid = createWorkflowLiquidEngine({ strictFilters: false, strictVariables: false });
 
@@ -304,9 +292,20 @@ const parseTemplate = (template: string): ReturnType<typeof liquid.parse> | unde
   }
 };
 
+type LiquidTemplate = NonNullable<ReturnType<typeof parseTemplate>>[number];
+
+// The `{{ }}` outputs with a `default` filter, including those in the body of tags, in order.
+const findDefaultedOutputs = (templates: readonly LiquidTemplate[]): Output[] =>
+  templates.flatMap((node) => {
+    if (node instanceof Output) {
+      return node.value.filters.some(({ name }) => name === 'default') ? [node] : [];
+    }
+    return findDefaultedOutputs(node.children ? toValueSync(node.children(false, true)) : []);
+  });
+
 /**
  * Reads in a Liquid template. A read has a fallback when it is the value of a `{{ }}` output with
- * a `default` filter; reads in tags, in filter arguments and in other outputs have none.
+ * a `default` filter; reads in tag arguments, in filter arguments and in other outputs have none.
  */
 const readsInTemplate = (template: string): VariableRead[] => {
   const templates = parseTemplate(template);
@@ -317,16 +316,14 @@ const readsInTemplate = (template: string): VariableRead[] => {
   const withoutFallback: string[] = [];
   let rest = '';
   let restStart = 0;
-  for (const node of templates) {
-    if (node instanceof Output && node.value.filters.some(({ name }) => name === 'default')) {
-      const { begin, end } = node.token;
-      rest += template.slice(restStart, begin);
-      restStart = end;
-      const { postfix } = node.value.initial;
-      const valuePath = postfix.length === 1 ? parsePath(postfix[0].getText()) : null;
-      for (const variable of extractVariables(template.slice(begin, end))) {
-        (isEqual(parsePath(variable), valuePath) ? withFallback : withoutFallback).push(variable);
-      }
+  for (const node of findDefaultedOutputs(templates)) {
+    const { begin, end } = node.token;
+    rest += template.slice(restStart, begin);
+    restStart = end;
+    const { postfix } = node.value.initial;
+    const valuePath = postfix.length === 1 ? parsePath(postfix[0].getText()) : null;
+    for (const variable of extractVariables(template.slice(begin, end))) {
+      (isEqual(parsePath(variable), valuePath) ? withFallback : withoutFallback).push(variable);
     }
   }
   rest += template.slice(restStart);
@@ -344,21 +341,37 @@ const readsInCondition = (condition: string): VariableRead[] => {
   }
 };
 
-const collectReads = (value: unknown, key?: string): VariableRead[] => {
+// Reads in the Liquid templates anywhere in `value`.
+const collectReads = (value: unknown): VariableRead[] => {
   if (typeof value === 'string') {
-    const reads = value.includes('{{') || value.includes('{%') ? readsInTemplate(value) : [];
-    return key !== undefined && CONDITION_KEYS.has(key)
-      ? [...reads, ...readsInCondition(value)]
-      : reads;
+    return value.includes('{{') || value.includes('{%') ? readsInTemplate(value) : [];
   }
   if (Array.isArray(value)) {
-    return value.flatMap((item) => collectReads(item));
+    return value.flatMap(collectReads);
   }
   if (isRecord(value)) {
-    return Object.entries(value).flatMap(([childKey, child]) => collectReads(child, childKey));
+    return Object.values(value).flatMap(collectReads);
   }
   return [];
 };
+
+// The conditions an `on-failure` handler evaluates when its step fails.
+const getOnFailureConditions = (onFailure: unknown): unknown[] =>
+  isRecord(onFailure)
+    ? [onFailure.continue, isRecord(onFailure.retry) ? onFailure.retry.condition : undefined]
+    : [];
+
+// The KQL conditions the engine evaluates for `step`, other than in its nested steps.
+const getStepConditions = (step: Record<string, unknown>): unknown[] => [
+  step.if,
+  typeof step.type === 'string' && CONDITION_STEP_TYPES.has(step.type) ? step.condition : undefined,
+  ...getOnFailureConditions(step['on-failure']),
+];
+
+const readsInConditions = (conditions: readonly unknown[]): VariableRead[] =>
+  conditions.flatMap((condition) =>
+    typeof condition === 'string' ? readsInCondition(condition) : []
+  );
 
 const toOutputUsages = (reads: readonly VariableRead[], stepName: string): OutputUsage[] => {
   const usages = new Map<string, boolean>();
@@ -382,10 +395,13 @@ const getDefinitionReads = (definition: unknown): readonly VariableRead[] => {
     return cached;
   }
   const onFailure = getWorkflowOnFailure(definition);
-  const reads = collectReads([
-    definition.steps,
-    isRecord(onFailure) ? onFailure.fallback : undefined,
-  ]);
+  const reads = [
+    ...collectReads([definition.steps, onFailure]),
+    ...readsInConditions(getOnFailureConditions(onFailure)),
+  ];
+  walkDefinitionSteps(definition, (step) => {
+    reads.push(...readsInConditions(getStepConditions(step)));
+  });
   definitionReadsCache.set(definition, reads);
   return reads;
 };

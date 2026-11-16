@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { convertJsonSchemaToZodWithRefs } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   analyzeCalledWorkflows,
   analyzeDependents,
@@ -21,6 +22,14 @@ import {
   findOutputUsages,
 } from './find_call_sites';
 import type { DependentsAnalysis, ImpactIssue, WorkflowLookupItem } from './types';
+
+jest.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => {
+  const actual = jest.requireActual('@kbn/workflows/spec/lib/build_fields_zod_validator');
+  return {
+    ...actual,
+    convertJsonSchemaToZodWithRefs: jest.fn(actual.convertJsonSchemaToZodWithRefs),
+  };
+});
 
 const CHILD_ID = 'alert-context';
 
@@ -381,10 +390,36 @@ describe('findOutputUsages', () => {
           with: { message: 'hi' },
           'on-failure': { continue: 'steps.ctx.output.severity : "high"' },
         },
+        {
+          name: 'again',
+          type: 'console',
+          with: { message: 'hi' },
+          'on-failure': { retry: { 'max-attempts': 2, condition: 'steps.ctx.output.retry : *' } },
+        },
+      ],
+      settings: { 'on-failure': { continue: 'steps.ctx.output.ignored : *' } },
+    };
+
+    expect(findOutputUsages(definition, 'ctx').map(({ field }) => field)).toEqual([
+      'ignored',
+      'severity',
+      'retry',
+    ]);
+  });
+
+  it('reads KQL only where the engine evaluates a condition, not in step payloads', () => {
+    const definition = {
+      steps: [
+        {
+          name: 'post',
+          type: 'http',
+          with: { condition: 'steps.ctx.output.value: *', if: 'steps.ctx.output.other: *' },
+        },
+        { name: 'loop', type: 'foreach', foreach: '[1]', condition: 'steps.ctx.output.x: *' },
       ],
     };
 
-    expect(findOutputUsages(definition, 'ctx').map(({ field }) => field)).toEqual(['severity']);
+    expect(findOutputUsages(definition, 'ctx')).toEqual([]);
   });
 
   it('treats a read as covered only when every reference has a default filter', () => {
@@ -398,6 +433,9 @@ describe('findOutputUsages', () => {
               a: '{{ steps.ctx.output.score | default: 0 }}',
               b: '{{ steps.ctx.output.severity | default: "low" }}',
               c: 'Severity: {{ steps.ctx.output.severity }}',
+              d: "{% if true %}{{ steps.ctx.output.value | default: 'safe' }}{% endif %}",
+              e: '{% for i in (1..2) %}{% if i %}{{ steps.ctx.output.rank | default: 1 }}{% endif %}{% endfor %}',
+              f: '{% if steps.ctx.output.flag %}{{ steps.ctx.output.flag | default: 0 }}{% endif %}',
             },
           },
         ],
@@ -407,6 +445,9 @@ describe('findOutputUsages', () => {
     expect(usages).toEqual([
       { field: 'score', hasFallback: true },
       { field: 'severity', hasFallback: false },
+      { field: 'value', hasFallback: true },
+      { field: 'rank', hasFallback: true },
+      { field: 'flag', hasFallback: false },
     ]);
   });
 
@@ -612,6 +653,33 @@ describe('analyzeDependents', () => {
     expect(kinds(dependentOf(analysis, 'triage')?.issues)).toEqual(['unreturnedOutput:breaking']);
   });
 
+  it('flags callers that read the last output an undeclared workflow returns once it is gone', () => {
+    const reader = workflow('reader', [
+      callStep('ctx', { inputs: { alert_id: 'a' } }),
+      { name: 'log', type: 'console', with: { m: '{{ steps.ctx.output.value }}' } },
+    ]);
+    const undeclared = (emit: Record<string, unknown>) => ({
+      ...makeChild({ emit }),
+      outputs: undefined,
+    });
+    const computed = {
+      ...undeclared({}),
+      steps: [{ name: 'emit', type: 'workflow.output', with: '${{ inputs.payload }}' }],
+    };
+
+    expect(
+      kinds(
+        dependentOf(analyzeWith([reader], undeclared({}), undeclared({ value: 1 })), 'reader')
+          ?.issues
+      )
+    ).toEqual(['removedOutput:breaking']);
+    expect(
+      kinds(
+        dependentOf(analyzeWith([reader], computed, undeclared({ value: 1 })), 'reader')?.issues
+      )
+    ).toEqual(['undeclaredOutput:warning']);
+  });
+
   it('only warns when the removed output is read with a default value', () => {
     const reader = workflow('reader', [
       callStep('ctx', { inputs: { alert_id: 'a' } }),
@@ -657,6 +725,28 @@ describe('analyzeDependents', () => {
       'already-broken': 'breaking',
       fanout: 'unknown',
     });
+  });
+
+  it('compiles each input schema once however many workflows call this one', () => {
+    const callers = Array.from({ length: 1000 }, (_, i) =>
+      workflow(`caller-${i}`, [
+        callStep('ctx', { inputs: { alert_id: `alert-${i}`, depth: i % 2 === 0 ? i : `${i}` } }),
+      ])
+    );
+    const draft = makeChild({
+      inputs: [
+        { name: 'alert_id', type: 'string', required: true },
+        { name: 'depth', type: 'string', default: '1' },
+      ],
+    });
+    jest.mocked(convertJsonSchemaToZodWithRefs).mockClear();
+
+    const analysis = analyzeWith(callers, draft);
+
+    expect(analysis.summary.direct).toBe(1000);
+    expect(analysis.summary.breaking).toBe(500);
+    // One per input, for the saved and the draft contract.
+    expect(jest.mocked(convertJsonSchemaToZodWithRefs).mock.calls.length).toBeLessThanOrEqual(4);
   });
 
   it('flags values that no longer match the input type, including text templates', () => {
@@ -1481,6 +1571,26 @@ describe('analyzeCalledWorkflows', () => {
         },
       ])
     ).toBeUndefined();
+  });
+
+  it('does not count a loop through a fallback that never runs as a cycle', () => {
+    const b = workflow('b', [{ name: 'log', type: 'console', with: {} }]);
+    const a = workflow('a', [
+      {
+        ...callStep('run-b', {}, undefined, 'b'),
+        'on-failure': {
+          fallback: [
+            callStep('run-c', {}, undefined, 'c'),
+            { name: 'done', type: 'workflow.output' },
+          ],
+        },
+      },
+    ]);
+    const c = workflow('c', [callStep('run-a', {}, undefined, 'a')]);
+
+    expect(findRunFailure(c, [a, b])).toBeUndefined();
+    expect(findRunFailure(c, [b, a])).toBeUndefined();
+    expect(findRunFailure(a, [c, b])).toBeUndefined();
   });
 
   it('counts a failing call whose fallback fails every run as failing every run', () => {

@@ -14,8 +14,8 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useRef, useState } from 'react';
-import { useStore } from 'react-redux-v7';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useSelector, useStore } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQueryClient } from '@kbn/react-query';
@@ -24,7 +24,10 @@ import type { ConfirmBreakingChange } from './workflow_dependents_context';
 import { isBreakingRun } from '../../../../common/lib/workflow_dependents/api';
 import type { DependentImpact } from '../../../../common/lib/workflow_dependents/types';
 import type { RootState } from '../../../entities/workflows/store/types';
-import { selectWorkflow } from '../../../entities/workflows/store/workflow_detail/selectors';
+import {
+  selectWorkflow,
+  selectWorkflowId,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getIssueMessage } from '../ui/translations';
 
@@ -83,7 +86,11 @@ export const useBreakingChangeConfirmation = (
 
   const confirmBreakingChange = useCallback<ConfirmBreakingChange>(
     async (draftYaml) => {
+      const workflowId = selectWorkflowId(store.getState());
       const impact = await getSaveImpact(draftYaml);
+      if (selectWorkflowId(store.getState()) !== workflowId) {
+        return false;
+      }
       if (impact.breakingDependents.length === 0 && !impact.checkFailed) {
         return true;
       }
@@ -97,11 +104,17 @@ export const useBreakingChangeConfirmation = (
     [getSaveImpact, store]
   );
 
-  const close = (confirmed: boolean) => {
+  const close = useCallback((confirmed: boolean) => {
     resolveRef.current?.(confirmed);
     resolveRef.current = undefined;
     setPending(null);
-  };
+  }, []);
+
+  // The dialog is about the workflow that was open, so opening another one cancels it.
+  const openWorkflowId = useSelector(selectWorkflowId);
+  useEffect(() => {
+    close(false);
+  }, [openWorkflowId, close]);
 
   const listedDependents = pending?.breakingDependents.slice(0, MAX_LISTED_DEPENDENTS) ?? [];
   const unlistedCount = (pending?.breakingDependents.length ?? 0) - listedDependents.length;
