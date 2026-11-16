@@ -95,18 +95,16 @@ describe('buildListSessionsRequest', () => {
       ...baseParams,
       facets: { browsers: 'Chrome', countries: 'NL' },
     });
-    const failed = { exists: { field: 'error.message' } };
     expect(request.post_filter).toEqual({
       bool: {
         filter: [
           { term: { 'user_agent.browser': 'Chrome' } },
           { term: { 'geo.country_iso': 'NL' } },
         ],
-        must_not: [failed],
       },
     });
     expect(request.aggs?.browsers.filter).toEqual({
-      bool: { filter: [{ term: { 'geo.country_iso': 'NL' } }], must_not: [failed] },
+      bool: { filter: [{ term: { 'geo.country_iso': 'NL' } }] },
     });
     expect(request.aggs?.os.filter).toEqual(request.post_filter);
     expect(request.aggs?.kpis.filter).toEqual(request.post_filter);
@@ -118,65 +116,29 @@ describe('buildListSessionsRequest', () => {
       facets: { browsers: 'Chrome' },
       filters: { hasErrors: true, minDurationMs: 10_000, maxDurationMs: 60_000 },
     });
-    const failed = { exists: { field: 'error.message' } };
     const filters = [
       { term: { has_error: true } },
       { range: { duration_ms: { gte: 10_000, lt: 60_000 } } },
     ];
     expect(request.post_filter).toEqual({
-      bool: {
-        filter: [...filters, { term: { 'user_agent.browser': 'Chrome' } }],
-        must_not: [failed],
-      },
+      bool: { filter: [...filters, { term: { 'user_agent.browser': 'Chrome' } }] },
     });
     expect(request.aggs?.kpis.filter).toEqual(request.post_filter);
-    expect(request.aggs?.browsers.filter).toEqual({
-      bool: { filter: filters, must_not: [failed] },
-    });
+    expect(request.aggs?.browsers.filter).toEqual({ bool: { filter: filters } });
   });
 
   it('applies an open-ended duration range', () => {
     const request = buildListSessionsRequest({ ...baseParams, filters: { minDurationMs: 0 } });
     expect(request.post_filter).toEqual({
-      bool: {
-        filter: [{ range: { duration_ms: { gte: 0 } } }],
-        must_not: [{ exists: { field: 'error.message' } }],
-      },
+      bool: { filter: [{ range: { duration_ms: { gte: 0 } } }] },
     });
   });
 
-  it('leaves summaries the pipeline failed on out of the list and KPIs, and counts them', () => {
+  it('lists every session, and counts the same ones in the KPIs, without filters', () => {
     const request = buildListSessionsRequest(baseParams);
-    const failed = { exists: { field: 'error.message' } };
-    expect(request.post_filter).toEqual({ bool: { filter: [], must_not: [failed] } });
+    expect(request.post_filter).toEqual({ bool: { filter: [] } });
     expect(request.aggs?.kpis.filter).toEqual(request.post_filter);
-    expect(request.aggs?.failed_summaries.filter).toEqual({ bool: { filter: [failed] } });
-  });
-
-  it('narrows the failed summaries by facets and duration, but not by errors they lack', () => {
-    const request = buildListSessionsRequest({
-      ...baseParams,
-      facets: { browsers: 'Chrome' },
-      filters: { hasErrors: true, minDurationMs: 300_000 },
-    });
-
-    expect(request.aggs?.failed_summaries.filter).toEqual({
-      bool: {
-        filter: [
-          { term: { 'user_agent.browser': 'Chrome' } },
-          { range: { failed_summary_duration_ms: { gte: 300_000 } } },
-          { exists: { field: 'error.message' } },
-        ],
-      },
-    });
-    expect(Object.keys(request.runtime_mappings ?? {})).toEqual(['failed_summary_duration_ms']);
-  });
-
-  it('maps the failed summary duration only when a duration range is set', () => {
-    expect(buildListSessionsRequest(baseParams).runtime_mappings).toBeUndefined();
-    expect(
-      buildListSessionsRequest({ ...baseParams, filters: { hasErrors: true } }).runtime_mappings
-    ).toBeUndefined();
+    expect(request.runtime_mappings).toBeUndefined();
   });
 
   it('computes the bounce rate over sessions with a page view', () => {
@@ -245,14 +207,12 @@ describe('parseListSessionsResponse', () => {
           with_errors: { doc_count: 5 },
           vital_lcp: { values: { '75.0': 2100 } },
         },
-        failed_summaries: { doc_count: 3 },
       },
     } as unknown as SearchResponse<SessionDocument, ListSessionsAggs>;
 
     const parsed = parseListSessionsResponse(response, { page: 0, perPage: 25 });
 
     expect(parsed.total).toBe(120);
-    expect(parsed.failedSummaries).toBe(3);
     expect(parsed.sessions).toHaveLength(1);
     expect(parsed.facets.browsers).toEqual([{ key: 'Chrome', count: 80 }]);
     expect(parsed.facets.countries).toEqual([{ key: 'NL', count: 12 }]);
@@ -298,7 +258,6 @@ describe('parseListSessionsResponse', () => {
       expect.objectContaining({
         sessions: [],
         total: 0,
-        failedSummaries: 0,
         kpis: expect.objectContaining({ totalSessions: 0, bounceRate: null }),
       })
     );

@@ -284,7 +284,11 @@ export class InvestigationStatusService {
       return { conversation_id: conversationId, severity, previous_severity: previousSeverity };
     }
 
-    await client.patchMetadata(conversationId, { severity }, { access: 'converse' });
+    await client.patchMetadata(
+      conversationId,
+      { severity },
+      { access: 'converse', refresh: 'wait_for' }
+    );
 
     const data: InvestigationSeverityChangedEventData = {
       severity,
@@ -407,7 +411,7 @@ export class InvestigationStatusService {
     const { conversation: updated } = await client.patchMetadata(
       conversationId,
       { status: body.status },
-      { access: 'converse' }
+      { access: 'converse', refresh: 'wait_for' }
     );
 
     return {

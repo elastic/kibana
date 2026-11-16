@@ -11,7 +11,6 @@ import { EuiFlyout, EuiSplitPanel, useIsWithinBreakpoints } from '@elastic/eui';
 import { DetailsPanel, TreePanel, NotFoundPanel } from './flyout_content';
 import type { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
-
 export interface Props {
   ingestPipeline: string;
   onClose: () => void;
@@ -33,7 +32,10 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
   onDeleteClick,
 }) => {
   const {
-    services: { api },
+    services: {
+      api,
+      config: { canManage },
+    },
   } = useKibana();
 
   const [pipelineName, setPipelineName] = useState(ingestPipeline);
@@ -104,7 +106,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
                 onEditClick={onEditClick}
                 onCloneClick={onCloneClick}
                 onDeleteClick={onDeleteClick}
-                renderActions={!error}
+                renderActions={canManage && !error}
                 renderViewTreeButton={
                   isResponsiveFlyout && responsiveFlyoutContent === DETAILS_VIEW
                 }
