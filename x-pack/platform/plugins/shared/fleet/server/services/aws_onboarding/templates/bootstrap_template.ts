@@ -54,7 +54,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub "arn:\${AWS::Partition}:iam::\${AWS::AccountId}:user/kibana-managed-onboarding-\${AWS::StackName}"
+              AWS: !GetAtt KibanaOnboardingUser.Arn
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - !Sub "arn:\${AWS::Partition}:iam::aws:policy/job-function/ViewOnlyAccess"
@@ -82,7 +82,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub "arn:\${AWS::Partition}:iam::\${AWS::AccountId}:user/kibana-managed-onboarding-\${AWS::StackName}"
+              AWS: !GetAtt KibanaOnboardingUser.Arn
             Action: sts:AssumeRole
       Policies:
         - PolicyName: ManageFederatedIdentityStacks
