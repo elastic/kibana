@@ -36,17 +36,21 @@ const WORKLOAD_TYPE_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes
 const BINDER_TYPE_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.boundBy.type`;
 const SERVICE_ACCOUNT_ID_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.serviceAccountId`;
 
-/** Far more than the plugins, workload types and binder types that exist. */
+/**
+ * How many buckets each terms aggregation in the summary returns. It is well above the number of
+ * plugins, workload types and binder types today, so no bucket is dropped.
+ */
 const SUMMARY_TERMS_SIZE = 100;
 
 /** Every binding in every space, counted for usage telemetry. */
 export interface WorkloadBindingSummary {
+  /** Workloads bound to a service account, across every plugin and space. */
   total: number;
   /** Accounts with at least one binding. */
   serviceAccounts: number;
   /** Binding counts keyed by `<pluginId>__<workloadType>`. */
   byWorkload: Record<string, number>;
-  /** Spelled out, because the telemetry schema parser can't read an indexed access type. */
+  /** Binding counts by who bound the workload: a user, an API key or a service account. */
   byBinderType: { user: number; api_key: number; service_account: number };
 }
 
