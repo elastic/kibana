@@ -235,6 +235,33 @@ describe('gatherMaintenance', () => {
     ]);
   });
 
+  it('does not refresh an entity it wrote after the facts about it changed', async () => {
+    const byWriter = { provenance: { updated_by: { uri: WRITER, metadata: {} } } };
+    const factAt = (id: string, updatedAt: string) =>
+      fact(id, { updated_at: updatedAt, governance: byWriter });
+    const stored = [
+      memory('m-1'),
+      factAt('fact-a', '2026-11-03T00:00:00.000Z'),
+      factAt('fact-b', '2026-11-05T00:00:00.000Z'),
+      entity('entity-summarized', { updated_at: '2026-11-04T00:00:00.000Z', governance: byWriter }),
+      entity('entity-stale', { updated_at: '2026-11-04T00:00:00.000Z', governance: byWriter }),
+      entity('entity-seen', { updated_at: '2026-11-04T00:00:00.000Z' }),
+      relationship('fact-a', 'about', 'entity-summarized'),
+      relationship('fact-b', 'about', 'entity-stale'),
+      relationship('fact-a', 'about', 'entity-seen'),
+    ];
+
+    const output = await gatherMaintenance(
+      fakeReader(stored, { changed: [stored[1], stored[2]] }),
+      options
+    );
+
+    expect(output.batches.flatMap(({ items }) => items.map(({ id }) => id))).toEqual([
+      'entity-stale',
+      'entity-seen',
+    ]);
+  });
+
   it('tombstones relationships that link a deleted item or differ in permissions from their ends', async () => {
     const restricted = { kibana: { privileges: [{ space: 'default', name: ['a'], count: 1 }] } };
     const stored = [

@@ -295,6 +295,12 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       expect(rendered).not.toContain('"Gone"');
     });
 
+    it('tells the model to leave a person-edited item as it is', () => {
+      expect(prompt()).toContain(
+        'An EXISTING item with attributes["memory.edited_by"] was edited by a person, and its text cannot change. When a memory changes or contradicts what it says, write what the memory says as a new item, and do not return the edited item\'s ref for that memory.'
+      );
+    });
+
     it('tells the model not to create a kind with no types configured', () => {
       expect(prompt({ entityTypes: [] })).toContain(
         'ENTITY TYPES:\nnone: do not create entities.\n\nINSTRUCTIONS:'

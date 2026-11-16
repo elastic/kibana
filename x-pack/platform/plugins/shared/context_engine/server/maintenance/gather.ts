@@ -167,6 +167,7 @@ export const gatherMaintenance = async (
     ...aboutLinks(changed.kis).map(({ to, ki }) => ({
       entityId: to,
       permissions: ki.permissions,
+      changedAt: ki.updated_at,
       cause: positionOf.get(ki.id) ?? 0,
     })),
     ...aboutLinks(factLinks).flatMap(({ from, to }) => {
@@ -176,6 +177,7 @@ export const gatherMaintenance = async (
             {
               entityId: to,
               permissions: changedFact.permissions,
+              changedAt: changedFact.updated_at,
               cause: positionOf.get(from) ?? 0,
             },
           ]
@@ -185,11 +187,16 @@ export const gatherMaintenance = async (
   const aboutEntities = factChanges.length
     ? await reader.latestByIds([...new Set(factChanges.map(({ entityId }) => entityId))])
     : new Map<string, DreamedKi>();
+  const writtenSince = (ki: DreamedKi, changedAt: DreamedKi['updated_at']): boolean =>
+    ki.governance?.provenance?.updated_by?.uri === writerUri &&
+    Date.parse(String(ki.updated_at ?? '')) >= Date.parse(String(changedAt ?? ''));
   for (const ki of aboutEntities.values()) {
     const causes = factChanges
       .filter(
-        ({ entityId, permissions }) =>
-          entityId === ki.id && samePermissions(permissions, ki.permissions)
+        ({ entityId, permissions, changedAt }) =>
+          entityId === ki.id &&
+          samePermissions(permissions, ki.permissions) &&
+          !writtenSince(ki, changedAt)
       )
       .map(({ cause }) => cause);
     if (causes.length > 0 && isLiveItem(ki) && kindOf(ki) === 'entity') {

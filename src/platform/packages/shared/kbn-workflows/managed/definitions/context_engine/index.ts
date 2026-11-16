@@ -94,7 +94,7 @@ export const memoryConcurrencyKeyFor = (instanceKey: string): string =>
 export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 6,
+  version: 7,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(DREAMING_YAML, {
