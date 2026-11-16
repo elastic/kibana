@@ -17,7 +17,7 @@ import { isHttpClientError } from '../../common/http_error';
 import { useKibana } from '../../hooks/use_kibana';
 import {
   AUTOMATIONS_QUERY_KEY,
-  RUN_QUOTAS_QUERY_KEY,
+  INVESTIGATION_QUOTAS_QUERY_KEY,
   automationRunActivityQueryKey,
   automationDetailQueryKey,
 } from '../query_keys';
@@ -346,7 +346,7 @@ export const useRunAutomation = () => {
         }),
         text: name,
       });
-      await queryClient.invalidateQueries({ queryKey: RUN_QUOTAS_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: INVESTIGATION_QUOTAS_QUERY_KEY });
     }
   );
 };
