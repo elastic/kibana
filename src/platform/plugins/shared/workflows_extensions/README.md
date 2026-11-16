@@ -24,6 +24,8 @@ This separation ensures that:
 - UI definition is available directly to client-side code without HTTP requests
 - Type safety is maintained between server and client registries via step type IDs
 
+Every custom step must be registered in **both** registries: the execution engine reads the server registry, while the workflow editor builds its YAML schema from the public one. A Scout UI test enforces this; see [Server and Client Registration Check](dev_docs/STEPS.md#server-and-client-registration-check).
+
 **Async registration (public only):** The public step registry accepts either a definition or a **loader function** `() => Promise<PublicStepDefinition>`. Using a loader (e.g. `() => import('./my_step').then(m => m.myStepDefinition)`) allows step modules—and heavy dependencies like zod—to be loaded asynchronously, keeping them out of your plugin’s main bundle. The registry resolves loaders in the background; the workflows app awaits `workflowsExtensions.isReady()` before rendering so definitions are ready when needed.
 
 ## Trigger Registry Architecture

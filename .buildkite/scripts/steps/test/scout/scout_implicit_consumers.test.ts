@@ -8,12 +8,17 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { ChangedFileReader } from './scout_implicit_consumers.ts';
 import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
 
 const WORKFLOWS_EXTENSIONS_MODULE = '@kbn/workflows-extensions';
 
 const createMockLog = (): ToolingLog =>
   ({ info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog);
+
+/** Serves file contents from memory; files not listed are treated as deleted. */
+const createFileReader = (files: Record<string, string>) =>
+  jest.fn<ReturnType<ChangedFileReader>, Parameters<ChangedFileReader>>((file) => files[file]);
 
 describe('expandWithImplicitConsumers — workflow trigger catalog', () => {
   it('adds workflows_extensions when a publisher changes common trigger schemas', () => {
@@ -54,14 +59,93 @@ describe('expandWithImplicitConsumers — workflow trigger catalog', () => {
 
   it('does not add workflows_extensions for unrelated plugin changes', () => {
     const log = createMockLog();
+    const file = 'x-pack/platform/plugins/shared/alerting_v2/server/routes/foo.ts';
     const expanded = expandWithImplicitConsumers(
       new Set(['@kbn/alerting-v2-plugin']),
-      ['x-pack/platform/plugins/shared/alerting_v2/server/routes/foo.ts'],
-      log
+      [file],
+      log,
+      createFileReader({ [file]: 'export const registerFooRoute = () => {};' })
     );
 
     expect(expanded.has(WORKFLOWS_EXTENSIONS_MODULE)).toBe(false);
     expect(expanded.has('@kbn/alerting-v2-plugin')).toBe(true);
+  });
+});
+
+describe('expandWithImplicitConsumers — workflow custom steps', () => {
+  it.each([
+    [
+      'a common step definition',
+      'x-pack/platform/plugins/shared/cases/common/workflows/steps/get_case.ts',
+      'export const getCaseStepCommonDefinition: CommonStepDefinition<Input, Output> = {',
+    ],
+    [
+      'a server step definition',
+      'x-pack/platform/plugins/shared/cases/server/workflows/steps/get_case.ts',
+      'export const getCaseStepDefinition = createServerStepDefinition({',
+    ],
+    [
+      'a public step definition',
+      'x-pack/platform/plugins/shared/cases/public/workflows/steps/get_case.ts',
+      'export const getCaseStepDefinition = createPublicStepDefinition({',
+    ],
+    [
+      'a step registration in a plugin setup',
+      'x-pack/solutions/security/plugins/alertzero/server/plugin.ts',
+      'workflowsExtensions.registerStepDefinition(loadAlertsStepDefinition);',
+    ],
+  ])('adds workflows_extensions when a change touches %s', (_, file, content) => {
+    const expanded = expandWithImplicitConsumers(
+      new Set(),
+      [file],
+      createMockLog(),
+      createFileReader({ [file]: content })
+    );
+
+    expect(expanded.has(WORKFLOWS_EXTENSIONS_MODULE)).toBe(true);
+  });
+
+  it('does not add workflows_extensions when a step file is deleted', () => {
+    const expanded = expandWithImplicitConsumers(
+      new Set(),
+      ['x-pack/platform/plugins/shared/cases/server/workflows/steps/get_case.ts'],
+      createMockLog(),
+      createFileReader({})
+    );
+
+    expect(expanded.has(WORKFLOWS_EXTENSIONS_MODULE)).toBe(false);
+  });
+
+  it('does not read files when workflows_extensions is already affected', () => {
+    const file = 'x-pack/platform/plugins/shared/cases/server/workflows/steps/get_case.ts';
+    const readFile = createFileReader({ [file]: 'createServerStepDefinition({' });
+
+    const expanded = expandWithImplicitConsumers(
+      new Set([WORKFLOWS_EXTENSIONS_MODULE]),
+      [file],
+      createMockLog(),
+      readFile
+    );
+
+    expect(expanded).toEqual(new Set([WORKFLOWS_EXTENSIONS_MODULE]));
+    expect(readFile).not.toHaveBeenCalled();
+  });
+
+  it('does not read Jest tests or non-source files', () => {
+    const readFile = createFileReader({});
+
+    expandWithImplicitConsumers(
+      new Set(),
+      [
+        'x-pack/platform/plugins/shared/cases/server/workflows/steps/get_case.test.ts',
+        'x-pack/platform/plugins/shared/cases/server/workflows/steps/README.md',
+        'x-pack/platform/plugins/shared/cases/kibana.jsonc',
+      ],
+      createMockLog(),
+      readFile
+    );
+
+    expect(readFile).not.toHaveBeenCalled();
   });
 });
 

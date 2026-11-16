@@ -18,19 +18,29 @@
  *
  * This overlay augments the affected-modules set with a small allowlist of
  * (patterns -> consumer @kbn/ IDs) entries when the corresponding publisher
- * files change.
+ * files change. Rules can also match on file content, for publishers that
+ * don't follow a common path convention.
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
 import { minimatch } from 'minimatch';
 import { filterIgnoredFiles } from '../../../../pipeline-utils/affected-packages/utils.ts';
+import { getKibanaDir } from '../../../../pipeline-utils/get_kibana_dir.ts';
 import type { ScoutLog } from './scout_log.ts';
 import { SCOUT_MODULE_GRAPH_IGNORE } from './scout_module_graph_ignore.ts';
 
 interface ImplicitConsumerRule {
   reason: string;
+  /** Globs matched against the changed file paths. */
   patterns: readonly string[];
+  /** When set, a changed file matching `patterns` also needs content matching this to trigger the rule. */
+  contentPattern?: RegExp;
   consumers: readonly string[];
 }
+
+/** Returns a changed file's content, or `undefined` when the change deleted it. */
+export type ChangedFileReader = (file: string) => string | undefined;
 
 const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
   {
@@ -69,7 +79,33 @@ const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
     ],
     consumers: ['@kbn/workflows-extensions'],
   },
+  {
+    reason:
+      'Custom workflow steps are defined and registered into workflows_extensions at runtime, from files without a common path convention. Changes to these files would not select the step registration tests by default.',
+    patterns: ['**/*.{ts,tsx}'],
+    contentPattern:
+      /\b(?:registerStepDefinition|createServerStepDefinition|createPollServerStepDefinition|createPublicStepDefinition|CommonStepDefinition)\b/,
+    consumers: ['@kbn/workflows-extensions'],
+  },
 ];
+
+const readChangedFile: ChangedFileReader = (file) => {
+  const filePath = path.resolve(getKibanaDir(), file);
+  return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : undefined;
+};
+
+const matchesRule = (
+  rule: ImplicitConsumerRule,
+  file: string,
+  readFile: ChangedFileReader
+): boolean => {
+  const { patterns, contentPattern } = rule;
+  if (!patterns.some((pattern) => minimatch(file, pattern, { dot: true }))) return false;
+  if (!contentPattern) return true;
+
+  const content = readFile(file);
+  return content !== undefined && contentPattern.test(content);
+};
 
 /**
  * Augment an affected-modules set with consumer @kbn/ IDs whose registries are
@@ -80,19 +116,19 @@ const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
 export function expandWithImplicitConsumers(
   affected: ReadonlySet<string>,
   changedFiles: readonly string[],
-  log: ScoutLog
+  log: ScoutLog,
+  readFile: ChangedFileReader = readChangedFile
 ): Set<string> {
   const expanded = new Set(affected);
   const relevantFiles = filterIgnoredFiles([...changedFiles], SCOUT_MODULE_GRAPH_IGNORE);
 
   for (const rule of IMPLICIT_REGISTRY_CONSUMERS) {
-    const trigger = relevantFiles.find((file) =>
-      rule.patterns.some((pattern) => minimatch(file, pattern, { dot: true }))
-    );
-    if (!trigger) continue;
-
+    // Check the consumers first, so content rules don't read files when there is nothing to add.
     const added = rule.consumers.filter((id) => !expanded.has(id));
     if (added.length === 0) continue;
+
+    const trigger = relevantFiles.find((file) => matchesRule(rule, file, readFile));
+    if (!trigger) continue;
 
     for (const id of added) expanded.add(id);
     log.info(
