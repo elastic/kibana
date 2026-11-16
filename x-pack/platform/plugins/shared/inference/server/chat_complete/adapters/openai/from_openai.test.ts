@@ -66,6 +66,7 @@ describe('chunkFromOpenAI', () => {
       type: ChatCompletionEventType.ChatCompletionChunk,
       content: '',
       refusal: CONTENT_FILTER_REFUSAL,
+      finish_reason: 'content_filter',
       tool_calls: [],
     });
   });
@@ -98,6 +99,7 @@ describe('chunkFromCompletionResponse', () => {
       type: ChatCompletionEventType.ChatCompletionChunk,
       content: 'Answer',
       reasoning: 'Let me think',
+      finish_reason: 'stop',
       tool_calls: [],
     });
   });
