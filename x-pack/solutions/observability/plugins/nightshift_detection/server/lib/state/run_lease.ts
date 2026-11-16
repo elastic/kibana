@@ -11,8 +11,9 @@ import type { StateStore } from './state_store';
 import type { StateVersion } from './state_kinds';
 
 /**
- * Longer than a run can last (`RUN_BUDGET_MS`), so a live holder never loses its lease, and short
- * enough that a crashed holder blocks the space for one or two ticks only.
+ * Meant to be longer than a run. The lease is never renewed, so the runner must finish within a
+ * budget below this TTL, or a takeover can overlap a live run. Short enough that a crashed holder
+ * blocks the space for one or two ticks only.
  */
 export const DEFAULT_RUN_LEASE_TTL_MS = 6 * 60_000;
 

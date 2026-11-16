@@ -54,8 +54,9 @@ function planWindow({
     return undefined;
   }
 
-  // A strategy that never ran starts one run's worth back, so its first window has data to read.
-  const start = watermark ?? settledEnd - maxRunMs;
+  // A strategy that never ran starts about one run's worth back, so its first window has data to
+  // read. Aligned up, so the window opens on a cadence boundary and has no partial first bucket.
+  const start = watermark ?? alignUp({ time: settledEnd - maxRunMs, stepMs: cadenceMs });
   // The oldest minute a run may start at: the catch-up limit, or the latest cadence step when the
   // backlog is skipped. The limit never leaves less than one cadence step to run.
   const latestStep = settledEnd - cadenceMs;
