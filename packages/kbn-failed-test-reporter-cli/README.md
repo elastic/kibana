@@ -120,8 +120,7 @@ it is flaky on, back from the end of the window, from `byBranch[].failedDaysAgo`
 `byBranch[].ranDaysAgo` in the report; reports written before those were recorded get neither.
 A line names the owners and the config. Then come the suite's distinct errors with their share of
 the failures and a line on where each was last seen, the status by branch (⏭️ marks the branches
-every setup skips it on) and by Scout target, each flaky (🔴) when a test clears the thresholds
-there, the failures by pipeline when it failed on more than
+every setup skips it on) and by Scout target, the failures by pipeline when it failed on more than
 one, and issues that mention the same file as possibly related.
 
 ### Which issues count as tracking a test

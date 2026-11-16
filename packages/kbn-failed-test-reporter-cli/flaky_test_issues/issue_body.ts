@@ -498,20 +498,21 @@ const branchStatus = (worst: BuildCounts, flaky: boolean, skip?: BranchSkip): Br
 };
 
 const BRANCH_STATUS_LABELS: Readonly<Record<BranchStatus, string>> = {
-  flaky: `🔴${NBSP}Flaky`,
-  failing: `🟠${NBSP}Some${NBSP}failures`,
-  skipped: `⏭️${NBSP}Skipped`,
-  clean: `✅${NBSP}No${NBSP}failures`,
+  flaky: '🔴 Flaky',
+  failing: '🟠 Some failures',
+  skipped: '⏭️ Skipped',
+  clean: '✅ No failures',
 };
 
-/** `🔴 Flaky`, or `⏭️ Skipped` over when the suite last ran there for a skipped branch. */
-const statusCell = (status: BranchStatus, skip?: BranchSkip): string => {
+/** `🔴 Flaky: \`main\``, or `⏭️ Skipped: \`main\`, last ran 7 Sep` for a skipped branch. */
+const branchCell = (scope: string, status: BranchStatus, skip?: BranchSkip): string => {
+  const cell = `${BRANCH_STATUS_LABELS[status]}: ${scope}`;
   if (status !== 'skipped') {
-    return BRANCH_STATUS_LABELS[status];
+    return cell;
   }
-  return `${BRANCH_STATUS_LABELS[status]}<br>${
-    skip?.lastRanAt ? `last ran ${formatDay(skip.lastRanAt)}` : 'in every run'
-  }`;
+  return skip?.lastRanAt
+    ? `${cell}, last ran ${formatDay(skip.lastRanAt)}`
+    : `${cell}, in every run`;
 };
 
 const latestOf = (a: Date | undefined, b: Date | undefined): Date | undefined =>
@@ -561,14 +562,13 @@ const statusByBranch = (suite: FlakySuite, { thresholds }: FlakyTestReport): str
   const rows = branches
     .sort((a, b) => BRANCH_STATUSES.indexOf(a.status) - BRANCH_STATUSES.indexOf(b.status))
     .map(({ row, skip, status }) => [
-      statusCell(status, skip),
-      formatScope(row.worst),
+      branchCell(formatScope(row.worst), status, skip),
       ...failuresCells(row),
     ]);
   return [
     '#### Status by Branch',
     '',
-    table(['Status', 'Branch', 'Failed builds', 'Last failure'], rows),
+    table(['Branch', 'Failed builds', 'Last failure'], rows),
   ].join('\n');
 };
 
@@ -576,39 +576,29 @@ const statusByBranch = (suite: FlakySuite, { thresholds }: FlakyTestReport): str
 const UNKNOWN_TARGET_MODE = 'unknown';
 
 /**
- * Which Scout targets the suite is flaky on, fails on and is clean on, judged on the report's
- * thresholds as branches are, with where each ran (local deployment or serverless simulation,
- * ECH, MKI). Runs that recorded no target are left out, so the table only appears for suites that
- * have one.
+ * Which Scout targets the suite fails on and which it does not, with where each ran (local
+ * deployment or serverless simulation, ECH, MKI). Runs that recorded no target are left out, so
+ * the table only appears for suites that have one.
  */
-const statusByTarget = (suite: FlakySuite, { thresholds }: FlakyTestReport): string | undefined => {
-  const keyOf = (stats: FlakySuite['tests'][number]['byTarget'][number]) =>
-    // a pipeline judged on its own, such as FIPS, has rows of its own for the same targets
-    [stats.mode, stats.type, stats.pipeline ?? ''].join(' · ');
-  const flaky = new Set(
-    suite.tests.flatMap((test) =>
-      test.byTarget.filter((stats) => isFlakyBranch(stats, thresholds)).map(keyOf)
-    )
-  );
+const statusByTarget = (suite: FlakySuite): string | undefined => {
   const targets = worstPerKey(
     suite,
     (test) => test.byTarget.filter((stats) => stats.mode !== UNKNOWN_TARGET_MODE),
-    keyOf
-  ).map((row) => ({ row, status: branchStatus(row.worst, flaky.has(keyOf(row.worst))) }));
+    // a pipeline judged on its own, such as FIPS, has rows of its own for the same targets
+    (stats) => [stats.mode, stats.type, stats.pipeline ?? ''].join(' · ')
+  );
   if (targets.length === 0) {
     return undefined;
   }
-  const rows = targets
-    .sort((a, b) => BRANCH_STATUSES.indexOf(a.status) - BRANCH_STATUSES.indexOf(b.status))
-    .map(({ row, status }) => [
-      statusCell(status),
-      `${pipelineTargetEnvironment(row.worst)}<br>${inlineCode(row.worst.mode)}`,
-      ...failuresCells(row),
-    ]);
+  const rows = targets.map((row) => [
+    `${row.worst.failedBuilds > 0 ? '🔴' : '✅'} ${pipelineTargetEnvironment(row.worst)}`,
+    inlineCode(row.worst.mode),
+    ...failuresCells(row),
+  ]);
   return [
     '#### Status by Target',
     '',
-    table(['Status', 'Target', 'Failed builds', 'Last failure'], rows),
+    table(['Environment', 'Target', 'Failed builds', 'Last failure'], rows),
   ].join('\n');
 };
 
@@ -879,7 +869,7 @@ const reportSections = (
 const failureSections = (suite: FlakySuite, report: FlakyTestReport): Array<string | undefined> => [
   failuresByErrorMessage(suite),
   statusByBranch(suite, report),
-  statusByTarget(suite, report),
+  statusByTarget(suite),
   failuresByPipeline(suite, report),
 ];
 
