@@ -13,14 +13,9 @@ import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { getNestedStepGroups, type WorkflowStep } from '@kbn/workflows';
 import { createWorkflowLiquidEngine, extractTemplateVariables } from '@kbn/workflows/common/utils';
 import { parsePath } from '@kbn/workflows/common/utils/zod';
-import { allowsWorkflowLevelOnFailure } from '@kbn/workflows/graph';
 import { isDynamicValue, isRecord } from '@kbn/workflows-yaml';
 import type { WorkflowCallSite, WorkflowExecuteStepType } from './types';
-import {
-  containsCompletingOutputStep,
-  hasCondition,
-  isCompletingOutputStep,
-} from '../get_returned_output_names';
+import { isCompletingOutputStep } from '../get_returned_output_names';
 import { WORKFLOW_EXECUTE_TYPES, WORKFLOW_REFERENCE_KEY } from '../import';
 
 /** True for values rendered at runtime (`{{ }}`, `{% %}` or `${{ }}`), which cannot be checked statically. */
@@ -35,28 +30,6 @@ export const isTextTemplate = (value: unknown): boolean =>
 const getSteps = (definition: unknown): unknown =>
   isRecord(definition) ? definition.steps : undefined;
 
-const continuesOnFailure = (onFailure: unknown): boolean => {
-  if (!isRecord(onFailure)) {
-    return false;
-  }
-  const { continue: shouldContinue } = onFailure;
-  // A templated `continue` is decided while running; treat it as continuing so that failures are
-  // never reported as spreading further than they might.
-  return (
-    shouldContinue === true ||
-    (typeof shouldContinue === 'string' &&
-      shouldContinue.trim() !== '' &&
-      shouldContinue !== 'false')
-  );
-};
-
-// The fallback of an `on-failure` handler, when it might complete the run with a `workflow.output`
-// step, which ends the run successfully before the step's failure is re-raised.
-const getCompletingFallback = (onFailure: unknown): unknown =>
-  isRecord(onFailure) && containsCompletingOutputStep(onFailure.fallback)
-    ? onFailure.fallback
-    : undefined;
-
 // The engine sends no inputs for a value that isn't an object, and a list's items by index.
 const toCheckedInputs = (inputs: unknown): Record<string, unknown> | undefined => {
   if (isRecord(inputs)) {
@@ -65,10 +38,8 @@ const toCheckedInputs = (inputs: unknown): Record<string, unknown> | undefined =
   return Array.isArray(inputs) ? { ...inputs } : undefined;
 };
 
-const toCallSite = (
-  step: Record<string, unknown>,
-  { isContained, isConditional, recoveryFallbacks }: StepContext
-): WorkflowCallSite | undefined => {
+/** The call a step makes, when it runs a workflow with a static `workflow-id`. */
+export const toCallSite = (step: Record<string, unknown>): WorkflowCallSite | undefined => {
   const { type, name, with: withBlock } = step;
   if (typeof type !== 'string' || !WORKFLOW_EXECUTE_TYPES.has(type) || !isRecord(withBlock)) {
     return undefined;
@@ -85,117 +56,23 @@ const toCallSite = (
     inputs: toCheckedInputs(inputs),
     // Only an expression keeps its type; a `{{ }}` template renders to text, which sends no inputs.
     isDynamicInputs: isDynamicValue(inputs),
-    continuesOnFailure: isContained || recoveryFallbacks.length > 0,
-    ...(!isContained && recoveryFallbacks.length > 0 ? { recoveryFallbacks } : {}),
-    isConditional,
   };
 };
 
-interface StepContext {
-  /** True when a `continue` on the step or an enclosing one absorbs its failure. */
-  isContained: boolean;
-  /** True when the step might not run: it has an `if`, or sits in a branch, loop or fallback. */
-  isConditional: boolean;
-  /** The fallbacks, on the step or enclosing ones, that might complete the run when it fails. */
-  recoveryFallbacks: readonly unknown[];
-}
-
-interface WalkContext extends StepContext {
-  /** The workflow-level `on-failure`, when it applies to steps here (not in fallbacks). */
-  workflowOnFailure: unknown;
-}
-
-type StepVisitor = (step: Record<string, unknown>, context: StepContext) => void;
+type StepVisitor = (step: Record<string, unknown>) => void;
 
 const isWorkflowStep = (node: unknown): node is WorkflowStep =>
   isRecord(node) && typeof node.type === 'string';
 
-// Nested steps that run whenever their parent does: every `parallel` branch, and the first
-// iteration of a `while` loop, which runs before its condition is checked. Other containers may
-// skip theirs.
-const alwaysRunsNestedSteps = (step: WorkflowStep, pathSuffix: string): boolean =>
-  (step.type === 'parallel' && pathSuffix.startsWith('.branch[')) ||
-  (step.type === 'while' && pathSuffix === '');
-
-const LOOP_STEP_TYPES = new Set(['foreach', 'while']);
-
-// Whether a step might end the current loop iteration early: a `loop.break` or `loop.continue`, or
-// a step (other than a nested loop, which they then apply to) containing one.
-const mayLeaveIteration = (step: WorkflowStep): boolean =>
-  step.type === 'loop.break' ||
-  step.type === 'loop.continue' ||
-  (!LOOP_STEP_TYPES.has(step.type) &&
-    getNestedStepGroups(step).some(
-      ({ steps }) => Array.isArray(steps) && steps.filter(isWorkflowStep).some(mayLeaveIteration)
-    ));
-
-// Whether a container step completes when one of its nested steps fails: a loop that continues
-// past failed iterations, or a `parallel` step that waits for every branch to settle.
-const containsNestedFailures = (step: WorkflowStep): boolean => {
-  const record: Record<string, unknown> = step;
-  return (
-    continuesOnFailure(record['iteration-on-failure']) ||
-    (step.type === 'parallel' && record.mode === 'settled')
-  );
-};
-
-// Whether the engine wraps the step in the workflow-level `on-failure` (outside fallbacks). Its own
-// `on-failure` replaces the workflow-level one.
-const getsWorkflowOnFailure = (step: Record<string, unknown>): boolean =>
-  !step['on-failure'] && typeof step.type === 'string' && allowsWorkflowLevelOnFailure(step.type);
-
-/** The `on-failure` the engine applies to a step: its own, or the workflow-level one. */
-export const getStepOnFailure = (
-  step: Record<string, unknown>,
-  workflowOnFailure: unknown
-): unknown => (getsWorkflowOnFailure(step) ? workflowOnFailure : step['on-failure']);
-
-/**
- * Whether the workflow-level `on-failure` applies to one of `steps` or a step nested in them, as
- * in the engine: not to steps with their own handler, flow control, `wait`, or fallbacks.
- */
-export const usesWorkflowOnFailure = (steps: readonly unknown[]): boolean =>
-  steps.filter(isWorkflowStep).some((step) => {
-    if (getsWorkflowOnFailure(step)) {
-      return true;
-    }
-    return getNestedStepGroups(step).some(
-      ({ pathSuffix, steps: nested }) =>
-        !pathSuffix.endsWith('.fallback') && Array.isArray(nested) && usesWorkflowOnFailure(nested)
-    );
-  });
-
-const walkSteps = (steps: unknown, visit: StepVisitor, parentContext: WalkContext): void => {
+const walkSteps = (steps: unknown, visit: StepVisitor): void => {
   if (!Array.isArray(steps)) {
     return;
   }
-  // Once a step might complete the run or leave the loop iteration, the steps after it might not run.
-  let mayHaveStopped = false;
   for (const step of steps.filter(isWorkflowStep)) {
-    const record: Record<string, unknown> = step;
-    const onFailure = getStepOnFailure(record, parentContext.workflowOnFailure);
-    const completingFallback = getCompletingFallback(onFailure);
-    const context: StepContext = {
-      isContained: parentContext.isContained || continuesOnFailure(onFailure),
-      isConditional: parentContext.isConditional || mayHaveStopped || hasCondition(record),
-      recoveryFallbacks: completingFallback
-        ? [...parentContext.recoveryFallbacks, completingFallback]
-        : parentContext.recoveryFallbacks,
-    };
-    visit(record, context);
-    const isContainedInside = context.isContained || containsNestedFailures(step);
-    for (const { pathSuffix, steps: nestedSteps } of getNestedStepGroups(step)) {
-      const isFallback = pathSuffix.endsWith('.fallback');
-      walkSteps(nestedSteps, visit, {
-        // A failing fallback re-raises the step's failure, which its own fallback doesn't catch.
-        isContained: isFallback ? context.isContained : isContainedInside,
-        isConditional: context.isConditional || !alwaysRunsNestedSteps(step, pathSuffix),
-        recoveryFallbacks: isFallback ? parentContext.recoveryFallbacks : context.recoveryFallbacks,
-        workflowOnFailure: isFallback ? undefined : parentContext.workflowOnFailure,
-      });
+    visit(step);
+    for (const { steps: nestedSteps } of getNestedStepGroups(step)) {
+      walkSteps(nestedSteps, visit);
     }
-    mayHaveStopped =
-      mayHaveStopped || containsCompletingOutputStep(record) || mayLeaveIteration(step);
   }
 };
 
@@ -207,26 +84,15 @@ export const getWorkflowOnFailure = (definition: unknown): unknown =>
 // The workflow's steps, then the fallback steps its `settings.on-failure` runs when it fails.
 const walkDefinitionSteps = (definition: unknown, visit: StepVisitor): void => {
   const onFailure = getWorkflowOnFailure(definition);
-  walkSteps(getSteps(definition), visit, {
-    isContained: false,
-    isConditional: false,
-    recoveryFallbacks: [],
-    workflowOnFailure: onFailure,
-  });
-  // The workflow-level handler runs its fallback for the failed step, and its `continue` covers it.
-  walkSteps(isRecord(onFailure) ? onFailure.fallback : undefined, visit, {
-    isContained: continuesOnFailure(onFailure),
-    isConditional: true,
-    recoveryFallbacks: [],
-    workflowOnFailure: undefined,
-  });
+  walkSteps(getSteps(definition), visit);
+  walkSteps(isRecord(onFailure) ? onFailure.fallback : undefined, visit);
 };
 
 /** Returns every static `workflow.execute` / `workflow.executeAsync` call in a workflow definition. */
 export const collectWorkflowCallSites = (definition: unknown): WorkflowCallSite[] => {
   const callSites: WorkflowCallSite[] = [];
-  walkDefinitionSteps(definition, (step, context) => {
-    const callSite = toCallSite(step, context);
+  walkDefinitionSteps(definition, (step) => {
+    const callSite = toCallSite(step);
     if (callSite) {
       callSites.push(callSite);
     }

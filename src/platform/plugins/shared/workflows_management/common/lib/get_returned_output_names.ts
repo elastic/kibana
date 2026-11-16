@@ -33,8 +33,8 @@ const visitSteps = (node: unknown, visit: (step: Record<string, unknown>) => voi
 export const isCompletingOutputStep = (step: Record<string, unknown>): boolean =>
   step.type === 'workflow.output' && (step.status === undefined || step.status === 'completed');
 
-/** Whether a step has an `if`, so it might be skipped; an empty `if` always runs, as in the engine. */
-export const hasCondition = (step: Record<string, unknown>): boolean => Boolean(step.if);
+// Whether a step has an `if`, so it might be skipped; an empty `if` always runs, as in the engine.
+const hasCondition = (step: Record<string, unknown>): boolean => Boolean(step.if);
 
 // Whether running `steps` in order always reaches a `workflow.output` or `workflow.fail` step, which
 // ends the run.
@@ -56,33 +56,6 @@ const alwaysEndsRun = (steps: unknown): boolean =>
  */
 export const alwaysReturnsWorkflowOutput = (definition: unknown): boolean =>
   isRecord(definition) && alwaysEndsRun(definition.steps);
-
-/** Whether a step or list of steps (or one nested in them) might complete the run. */
-export const containsCompletingOutputStep = (steps: unknown): boolean => {
-  let found = false;
-  visitSteps(steps, (child) => {
-    found = found || isCompletingOutputStep(child);
-  });
-  return found;
-};
-
-/**
- * Returns the `workflow.output` or `workflow.fail` step that every run of a workflow reaches
- * unless it fails first: an unconditional top-level one, with no step before it that might
- * complete the run. Undefined otherwise.
- */
-export const getFinalEndStep = (definition: unknown): Record<string, unknown> | undefined => {
-  const steps = isRecord(definition) && Array.isArray(definition.steps) ? definition.steps : [];
-  for (const step of steps.filter(isRecord)) {
-    if ((step.type === 'workflow.output' || step.type === 'workflow.fail') && !hasCondition(step)) {
-      return step;
-    }
-    if (containsCompletingOutputStep(step)) {
-      return undefined;
-    }
-  }
-  return undefined;
-};
 
 /**
  * Returns the output names a workflow's completing `workflow.output` steps set, including those in

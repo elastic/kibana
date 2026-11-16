@@ -18,11 +18,10 @@ import {
   collectWorkflowCallSites,
   findOutputsPassingThrough,
   findOutputUsages,
-  getWorkflowOnFailure,
   isTemplatedValue,
   isTextTemplate,
-  usesWorkflowOnFailure,
 } from './find_call_sites';
+import { failureEscapes, findAlwaysFailure, type StepFailures } from './run_outcomes';
 import type {
   CalledWorkflowImpact,
   CallSiteImpact,
@@ -53,7 +52,6 @@ import {
   isTypeWithin,
   typesOverlap,
 } from './workflow_contract';
-import { containsCompletingOutputStep, getFinalEndStep } from '../get_returned_output_names';
 
 /**
  * How many levels of callers-of-callers the analysis follows. Runs nest up to the configurable
@@ -623,70 +621,6 @@ const toChildFailsIssue = (stepName: string, failure: RunFailure): DraftIssue =>
 const getOutputs = (definition: unknown): unknown =>
   isRecord(definition) ? definition.outputs : undefined;
 
-/**
- * Whether a call fails its step, for the calls a check knows about. `hypothetically` runs a check
- * of steps that might never run, when the answer depends on what else is running.
- */
-type CallFails = ((callSite: WorkflowCallSite) => boolean) & {
-  hypothetically?: <T>(check: () => T) => T;
-};
-
-// Whether running `steps` as a fallback of `definition` fails every time: its end step fails, or
-// a call that always runs fails and nothing recovers it.
-const fallbackFails = (steps: unknown, definition: unknown, callFails: CallFails): boolean => {
-  const fallbackDefinition = { steps, outputs: getOutputs(definition) };
-  return (
-    findEndStepFailure(fallbackDefinition, callFails) !== undefined ||
-    collectWorkflowCallSites(fallbackDefinition).some(
-      (callSite) =>
-        !callSite.isConditional &&
-        callFails(callSite) &&
-        failureEscapes(callSite, definition, callFails)
-    )
-  );
-};
-
-/**
- * Whether a failure of the call fails the run: no `continue` covers it, and every fallback that
- * might complete the run fails every time itself.
- */
-const failureEscapes = (
-  callSite: WorkflowCallSite,
-  definition: unknown,
-  callFails: CallFails
-): boolean => {
-  if (!callSite.continuesOnFailure) {
-    return true;
-  }
-  const { recoveryFallbacks = [] } = callSite;
-  return (
-    recoveryFallbacks.length > 0 &&
-    recoveryFallbacks.every((steps) => fallbackFails(steps, definition, callFails))
-  );
-};
-
-// The end step sets the run's status itself, so no `on-failure` handler recovers its failure. But
-// when a step before it fails and the workflow-level handler applies to it, a fallback that
-// completes the run ends it first.
-const mayEndSuccessfullyBefore = (
-  definition: unknown,
-  endStep: unknown,
-  callFails: CallFails
-): boolean => {
-  const workflowOnFailure = getWorkflowOnFailure(definition);
-  const steps = isRecord(definition) && Array.isArray(definition.steps) ? definition.steps : [];
-  if (
-    !isRecord(workflowOnFailure) ||
-    !containsCompletingOutputStep(workflowOnFailure.fallback) ||
-    !usesWorkflowOnFailure(steps.slice(0, steps.indexOf(endStep)))
-  ) {
-    return false;
-  }
-  // The fallback runs only if one of those steps fails.
-  const check = () => !fallbackFails(workflowOnFailure.fallback, definition, callFails);
-  return callFails.hypothetically ? callFails.hypothetically(check) : check();
-};
-
 type OutputsValidator = ReturnType<typeof buildFieldsZodValidator>;
 
 const outputsValidatorCache = new WeakMap<object, OutputsValidator | null>();
@@ -713,51 +647,50 @@ const getOutputsValidator = (outputs: unknown): OutputsValidator | null => {
   return validator;
 };
 
-// The status a `workflow.output` or `workflow.fail` step ends the run with.
-const getEndStatus = (step: Record<string, unknown>): unknown =>
-  step.type === 'workflow.fail' ? 'failed' : step.status ?? 'completed';
-
 /**
- * Finds the end step every run reaches, when it fails the run: it ends it as failed or cancelled,
- * or its values fail the declared outputs.
+ * How a `workflow.output` step of `definition` (as compiled, so `workflow.fail` is one with status
+ * `failed`) ends the run: as failed or cancelled, or with values its declared outputs reject.
  */
-function findEndStepFailure(definition: unknown, callFails: CallFails): RunFailure | undefined {
-  const step = getFinalEndStep(definition);
-  if (!step || mayEndSuccessfullyBefore(definition, step, callFails)) {
-    return undefined;
-  }
-  const stepName = typeof step.name === 'string' ? step.name : '';
-  const status = getEndStatus(step);
-  if (status === 'failed' || status === 'cancelled') {
-    return { stepName, issue: stepIssue('runEndsUnsuccessfully', stepName, status) };
-  }
-  const validator = getOutputsValidator(getOutputs(definition));
-  if (!validator) {
-    return undefined;
-  }
-  const values = isRecord(step.with) ? step.with : {};
-  let issues: ValidationIssue[];
-  try {
-    const result = validator.safeParse(values);
-    issues = result.success ? [] : (result.error.issues as ValidationIssue[]);
-  } catch {
-    return undefined;
-  }
-  const [firstIssue] = issues.filter((issue) => isCertainIssue(issue, values));
-  if (!firstIssue) {
-    return undefined;
-  }
-  return {
-    stepName,
-    issue: {
-      kind: 'outputValueRejected',
-      severity: 'breaking',
+const getEndStepFailure =
+  (definition: unknown): StepFailures<RunFailure>['endStepFailure'] =>
+  (step) => {
+    const stepName = typeof step.name === 'string' ? step.name : '';
+    const { status = 'completed', with: values = {} } = step;
+    if (status === 'failed' || status === 'cancelled') {
+      return { stepName, issue: stepIssue('runEndsUnsuccessfully', stepName, status) };
+    }
+    if (status !== 'completed') {
+      return 'mayFail';
+    }
+    const validator = getOutputsValidator(getOutputs(definition));
+    if (!validator) {
+      return undefined;
+    }
+    if (!isRecord(values)) {
+      return 'mayFail';
+    }
+    let issues: ValidationIssue[];
+    try {
+      const result = validator.safeParse(values);
+      issues = result.success ? [] : (result.error.issues as ValidationIssue[]);
+    } catch {
+      return 'mayFail';
+    }
+    const firstIssue = issues.find((issue) => isCertainIssue(issue, values));
+    if (!firstIssue) {
+      return issues.length > 0 ? 'mayFail' : undefined;
+    }
+    return {
       stepName,
-      field: firstIssue.path.length > 0 ? String(firstIssue.path[0]) : '',
-      detail: describeIssue(firstIssue),
-    },
+      issue: {
+        kind: 'outputValueRejected',
+        severity: 'breaking',
+        stepName,
+        field: firstIssue.path.length > 0 ? String(firstIssue.path[0]) : '',
+        detail: describeIssue(firstIssue),
+      },
+    };
   };
-}
 
 // A called workflow that is off or invalid already fails the step; its own calls don't matter then.
 const getRunFailureIssues = (
@@ -861,11 +794,26 @@ const toEffect = (
   emptyOutputs: fails ? new Set() : findOutputsPassingThrough(definition, reads),
 });
 
+// The steps of `definition` known to fail: the calls `callFails`, and its failing end steps.
+const failingSteps = (
+  definition: unknown,
+  callFails: (callSite: WorkflowCallSite) => boolean
+): StepFailures<unknown> => ({
+  callFailure: (callSite) => callFails(callSite) || undefined,
+  endStepFailure: getEndStepFailure(definition),
+});
+
 // Calls to the broken workflow fail when they are one of `failing`; other calls aren't known to.
 const failsLike =
-  (failing: readonly WorkflowCallSite[]): CallFails =>
-  ({ workflowId, stepName }) =>
+  (failing: readonly WorkflowCallSite[]) =>
+  ({ workflowId, stepName }: WorkflowCallSite): boolean =>
     failing.some((site) => site.workflowId === workflowId && site.stepName === stepName);
+
+const callFailureEscapes = (
+  definition: unknown,
+  { stepName }: WorkflowCallSite,
+  callFails: (callSite: WorkflowCallSite) => boolean
+): boolean => failureEscapes(definition, stepName, failingSteps(definition, callFails));
 
 const getDirectCallerEffect = (
   parent: WorkflowLookupItem,
@@ -887,7 +835,7 @@ const getDirectCallerEffect = (
   const callFails = failsLike(failing);
   let fails = false;
   for (const callSite of failing) {
-    if (failureEscapes(callSite, parent.definition, callFails)) {
+    if (callFailureEscapes(parent.definition, callSite, callFails)) {
       fails = true;
     } else {
       reads.push({ stepName: callSite.stepName });
@@ -910,7 +858,7 @@ const getCallerEffect = (
   for (const callSite of waitingCallSites) {
     const { stepName } = callSite;
     if (effect.fails) {
-      if (failureEscapes(callSite, parent.definition, callFails)) {
+      if (callFailureEscapes(parent.definition, callSite, callFails)) {
         fails = true;
       } else {
         reads.push({ stepName });
@@ -1127,7 +1075,8 @@ const getContract = (workflow: WorkflowLookupItem): WorkflowContract => ({
   enabled: workflow.enabled && isRecord(workflow.definition),
 });
 
-// Returned while resolving a workflow whose own resolution is still in progress.
+// Returned for a called workflow that is already running further up (or taken to be, while
+// finding the workflows that fail), so a call to it nests runs.
 const IN_PROGRESS = 'inProgress';
 type RunFailureResolution = RunFailure | typeof IN_PROGRESS | undefined;
 
@@ -1171,105 +1120,97 @@ interface RunChecks {
   unchecked: Map<string, UncheckedCall>;
 }
 
+const isSameCall = (a: WorkflowCallSite, b: WorkflowCallSite): boolean =>
+  a.workflowId === b.workflowId && a.stepName === b.stepName;
+
 /**
- * Finds, for each of `workflows`, a step that makes every run of it fail: a waiting step that
- * always runs and runs a broken workflow, one that fails in turn, or one that loops back to a
- * workflow already running. Calls to workflows outside `workflows` can't be checked, since a
- * deleted workflow and one the user can't read look the same.
+ * Finds, for each of `workflows`, the failure that every run of it reaches first, when every run
+ * fails: no path through it completes, given the calls that fail (a waiting call to a broken
+ * workflow, or to one that fails every run in turn) and its `workflow.output` steps. Calls to
+ * workflows outside `workflows` can't be checked, since a deleted workflow and one the user can't
+ * read look the same.
  */
 const findRunFailures = (workflows: ReadonlyMap<string, WorkflowLookupItem>): RunChecks => {
-  const failures = new Map<string, RunFailure | undefined>();
-  const unchecked = new Map<string, UncheckedCall>();
-  const inProgress = new Set<string>();
-  // Set while checking steps that might never run. A workflow running further up isn't then known
-  // to run again, so meeting it is no cycle, and the results hold only for that check.
-  let hypotheticalFailures: Map<string, RunFailure | undefined> | undefined;
-  const hypothetically = <T>(check: () => T): T => {
-    if (hypotheticalFailures) {
-      return check();
-    }
-    hypotheticalFailures = new Map();
-    try {
-      return check();
-    } finally {
-      hypotheticalFailures = undefined;
-    }
-  };
-  const resolve = (workflowId: string, depth: number): RunFailureResolution => {
-    if (inProgress.has(workflowId)) {
-      return hypotheticalFailures ? undefined : IN_PROGRESS;
-    }
-    if (failures.has(workflowId)) {
-      return failures.get(workflowId);
-    }
-    if (hypotheticalFailures?.has(workflowId)) {
-      return hypotheticalFailures.get(workflowId);
-    }
-    const workflow = workflows.get(workflowId);
-    if (!workflow || depth > MAX_INDIRECT_DEPTH) {
-      return undefined;
-    }
-    inProgress.add(workflowId);
-    const getIssue = (callSite: WorkflowCallSite): DraftIssue | undefined =>
-      getCallFailure(
-        callSite,
-        workflow,
-        callSite.workflowId,
-        workflows.get(callSite.workflowId),
-        (id) => resolve(id, depth + 1)
-      );
-    const callFails: CallFails = Object.assign(
-      (callSite: WorkflowCallSite) => getIssue(callSite) !== undefined,
-      { hypothetically }
+  // `resolveFailure` tells whether a called workflow fails every run; `alsoFails` adds calls that
+  // are taken to fail.
+  const findFailure = (
+    workflow: WorkflowLookupItem,
+    resolveFailure: (workflowId: string) => RunFailureResolution,
+    alsoFails: (callSite: WorkflowCallSite) => boolean = () => false
+  ): RunFailure | undefined =>
+    findAlwaysFailure(workflow.definition, {
+      callFailure: (callSite) => {
+        const { workflowId: calledId, stepName } = callSite;
+        const called = workflows.get(calledId);
+        const issue =
+          getCallFailure(callSite, workflow, calledId, called, resolveFailure) ??
+          (alsoFails(callSite) ? stepIssue('childFails', stepName) : undefined);
+        return issue && { stepName, calledName: called?.name ?? calledId, issue };
+      },
+      endStepFailure: getEndStepFailure(workflow.definition),
+    });
+
+  // Starting from all of them, drop the workflows that might complete, until the rest each fail
+  // every run given that the others do. A run that keeps calling them fails, or nests runs until
+  // the depth limit fails it.
+  let failing = new Set(workflows.keys());
+  for (let changed = true; changed; ) {
+    const assumed = failing;
+    const stillFailing = [...assumed].filter(
+      (workflowId) =>
+        findFailure(workflows.get(workflowId) as WorkflowLookupItem, (calledId) =>
+          assumed.has(calledId) ? IN_PROGRESS : undefined
+        ) !== undefined
     );
-    // A call that always runs and always fails fails every run, unless something recovers it.
-    // Its fallbacks then run every time too.
-    const getCallRunFailure = (callSite: WorkflowCallSite): RunFailure | undefined => {
-      const { workflowId: calledId } = callSite;
-      const called = workflows.get(calledId);
-      const calledName = called?.name ?? calledId;
-      const issue = getIssue(callSite);
-      if (issue) {
-        return failureEscapes(callSite, workflow.definition, callFails)
-          ? { stepName: callSite.stepName, calledName, issue }
-          : undefined;
-      }
-      const isUnchecked = called
-        ? callSite.stepType === 'workflow.execute' && unchecked.has(calledId)
-        : calledId !== workflowId;
-      if (
-        isUnchecked &&
-        !hypotheticalFailures &&
-        !unchecked.has(workflowId) &&
-        hypothetically(() => failureEscapes(callSite, workflow.definition, callFails))
-      ) {
-        unchecked.set(workflowId, { from: callSite.stepName, to: calledName });
-      }
-      return undefined;
-    };
-    let failure = findEndStepFailure(workflow.definition, callFails);
-    // In step order, so that the failure is the first one a run reaches.
-    for (const callSite of collectWorkflowCallSites(workflow.definition)) {
-      if (failure) {
-        break;
-      }
-      if (!callSite.isConditional) {
-        failure = getCallRunFailure(callSite);
-      }
+    changed = stillFailing.length < assumed.size;
+    failing = new Set(stillFailing);
+  }
+
+  // A call to a workflow that is running further up is a loop of nested runs.
+  const failures = new Map<string, RunFailure | undefined>();
+  const running = new Set<string>();
+  const resolve = (workflowId: string): RunFailureResolution => {
+    if (running.has(workflowId)) {
+      return IN_PROGRESS;
     }
-    inProgress.delete(workflowId);
-    if (hypotheticalFailures) {
-      hypotheticalFailures.set(workflowId, failure);
-      return failure;
+    if (failing.has(workflowId) && !failures.has(workflowId)) {
+      running.add(workflowId);
+      failures.set(
+        workflowId,
+        findFailure(workflows.get(workflowId) as WorkflowLookupItem, resolve)
+      );
+      running.delete(workflowId);
     }
-    failures.set(workflowId, failure);
-    if (failure) {
-      unchecked.delete(workflowId);
-    }
-    return failure;
+    return failures.get(workflowId);
   };
-  for (const workflowId of workflows.keys()) {
-    resolve(workflowId, 1);
+  failing.forEach(resolve);
+
+  // A workflow that would fail every run if a call it makes to one that couldn't be checked failed.
+  const unchecked = new Map<string, UncheckedCall>();
+  const isUncheckedCall = (callerId: string, { workflowId, stepType }: WorkflowCallSite) =>
+    workflows.has(workflowId)
+      ? stepType === 'workflow.execute' && unchecked.has(workflowId)
+      : workflowId !== callerId;
+  for (let changed = true; changed; ) {
+    changed = false;
+    for (const [workflowId, workflow] of workflows) {
+      const uncheckedCall =
+        failing.has(workflowId) || unchecked.has(workflowId)
+          ? undefined
+          : collectWorkflowCallSites(workflow.definition).find(
+              (callSite) =>
+                isUncheckedCall(workflowId, callSite) &&
+                findFailure(workflow, resolve, (site) => isSameCall(site, callSite)) !== undefined
+            );
+      if (uncheckedCall) {
+        const { stepName, workflowId: calledId } = uncheckedCall;
+        unchecked.set(workflowId, {
+          from: stepName,
+          to: workflows.get(calledId)?.name ?? calledId,
+        });
+        changed = true;
+      }
+    }
   }
   return { failures, unchecked };
 };
@@ -1307,9 +1248,9 @@ export const analyzeRemovalImpact = (
   const indirectIds = new Set<string>();
   for (const { parent, callSites } of edgesByCaller.values()) {
     // Running a workflow that is off or gone fails the step, whether or not it waits.
-    const callFails: CallFails = ({ workflowId }) => removedIds.has(workflowId);
+    const callFails = ({ workflowId }: WorkflowCallSite) => removedIds.has(workflowId);
     const fails = callSites.some((callSite) =>
-      failureEscapes(callSite, parent.definition, callFails)
+      callFailureEscapes(parent.definition, callSite, callFails)
     );
     const reads = callSites.map(({ stepName }) => ({ stepName }));
     propagateUpstream(parent, toEffect(parent.definition, fails, reads), callerEdges, removedIds)

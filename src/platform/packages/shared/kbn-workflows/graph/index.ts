@@ -8,7 +8,6 @@
  */
 
 export {
-  allowsWorkflowLevelOnFailure,
   convertToWorkflowGraph,
   visitWaitForInputStep,
 } from './build_execution_graph/build_execution_graph';

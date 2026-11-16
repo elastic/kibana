@@ -157,31 +157,6 @@ describe('collectWorkflowCallSites', () => {
     ]);
   });
 
-  it('knows which calls might not run, as the engine decides', () => {
-    const conditional = (steps: unknown[]) =>
-      Object.fromEntries(
-        collectWorkflowCallSites({ steps }).map(({ stepName, isConditional }) => [
-          stepName,
-          isConditional,
-        ])
-      );
-
-    expect(
-      conditional([
-        { ...callStep('empty-if', {}), if: '' },
-        { name: 'loop', type: 'while', condition: 'false', steps: [callStep('first-pass', {})] },
-        { name: 'm', type: 'merge', steps: [callStep('in-merge', {})] },
-        { name: 'early', type: 'workflow.output', if: 'inputs.skip : true', with: {} },
-        callStep('after-early-end', {}),
-      ])
-    ).toEqual({
-      'empty-if': false,
-      'first-pass': false,
-      'in-merge': true,
-      'after-early-end': true,
-    });
-  });
-
   it('skips the malformed parts of a draft being typed', () => {
     expect(
       collectWorkflowCallSites({
@@ -193,167 +168,13 @@ describe('collectWorkflowCallSites', () => {
     ).toEqual(['b']);
   });
 
-  it('knows which calls an on-failure continue covers', () => {
-    const contained = (definition: unknown) =>
-      Object.fromEntries(
-        collectWorkflowCallSites(definition).map(({ stepName, continuesOnFailure }) => [
-          stepName,
-          continuesOnFailure,
-        ])
-      );
-
+  it('finds calls in the workflow-level fallback', () => {
     expect(
-      contained({
-        steps: [
-          callStep('plain', {}),
-          { ...callStep('own', {}), 'on-failure': { continue: true } },
-          { ...callStep('fallback-only', {}), 'on-failure': { fallback: [{ name: 'f' }] } },
-          {
-            name: 'wrap',
-            type: 'if',
-            'on-failure': { continue: true },
-            steps: [callStep('inside', {})],
-          },
-          {
-            name: 'loop',
-            type: 'foreach',
-            'iteration-on-failure': { continue: true },
-            steps: [callStep('iteration', {})],
-          },
-          {
-            name: 'fail-fast',
-            type: 'parallel',
-            branches: [
-              { name: 'a', steps: [callStep('fast-branch', {})] },
-              { name: 'b', steps: [{ name: 'noop', type: 'console', with: {} }] },
-            ],
-          },
-          {
-            name: 'settled',
-            type: 'parallel',
-            mode: 'settled',
-            branches: [
-              { name: 'a', steps: [callStep('settled-branch', {})] },
-              { name: 'b', steps: [{ name: 'noop', type: 'console', with: {} }] },
-            ],
-          },
-        ],
-      })
-    ).toEqual({
-      plain: false,
-      own: true,
-      'fallback-only': false,
-      inside: true,
-      iteration: true,
-      'fast-branch': false,
-      'settled-branch': true,
-    });
-    expect(
-      contained({ settings: { 'on-failure': { continue: true } }, steps: [callStep('any', {})] })
-    ).toEqual({ any: true });
-  });
-
-  it('knows a fallback that completes the run absorbs the failure, but not its own', () => {
-    const completes = (name: string) => ({ name, type: 'workflow.output', with: { ok: true } });
-    const contained = (definition: unknown) =>
-      Object.fromEntries(
-        collectWorkflowCallSites(definition).map(({ stepName, continuesOnFailure }) => [
-          stepName,
-          continuesOnFailure,
-        ])
-      );
-
-    expect(
-      contained({
-        steps: [
-          {
-            ...callStep('ends-in-fallback', {}),
-            'on-failure': { fallback: [callStep('in-fallback', {}), completes('done')] },
-          },
-          {
-            ...callStep('fails-in-fallback', {}),
-            'on-failure': {
-              fallback: [{ ...completes('cancel'), status: 'cancelled' }],
-            },
-          },
-        ],
-      })
-    ).toEqual({ 'ends-in-fallback': true, 'in-fallback': false, 'fails-in-fallback': false });
-    expect(
-      contained({
-        settings: { 'on-failure': { fallback: [callStep('handler', {}), completes('done')] } },
-        steps: [callStep('any', {})],
-      })
-    ).toEqual({ any: true, handler: false });
-  });
-
-  it('lets a step-level on-failure replace the workflow-level one, as the engine does', () => {
-    const contained = collectWorkflowCallSites({
-      settings: {
-        'on-failure': { continue: true, fallback: [callStep('workflow-fallback', {})] },
-      },
-      steps: [
-        { ...callStep('own-handler', {}), 'on-failure': { continue: false } },
-        {
-          ...callStep('risky', {}),
-          'on-failure': { fallback: [callStep('step-fallback', {})] },
-        },
-        { name: 'branch', type: 'if', condition: 'true', steps: [callStep('nested', {})] },
-      ],
-    }).map(({ stepName, continuesOnFailure }) => [stepName, continuesOnFailure]);
-
-    expect(Object.fromEntries(contained)).toEqual({
-      'own-handler': false,
-      risky: false,
-      // The workflow-level handler isn't applied inside fallbacks...
-      'step-fallback': false,
-      // ...but applies to steps nested in flow control, and covers its own fallback.
-      nested: true,
-      'workflow-fallback': true,
-    });
-  });
-
-  it('finds calls in the workflow-level fallback and knows which calls might not run', () => {
-    const callSites = collectWorkflowCallSites({
-      settings: { 'on-failure': { fallback: [callStep('on-workflow-failure', {})] } },
-      steps: [
-        callStep('always', {}),
-        { ...callStep('guarded', {}), if: 'inputs.run : true' },
-        {
-          name: 'branch',
-          type: 'if',
-          condition: 'true',
-          steps: [callStep('then', {})],
-          else: [callStep('otherwise', {})],
-        },
-        {
-          name: 'loop',
-          type: 'foreach',
-          foreach: '{{ inputs.items }}',
-          steps: [callStep('each', {})],
-        },
-        {
-          name: 'fan',
-          type: 'parallel',
-          branches: [{ name: 'one', steps: [callStep('branch', {})] }],
-        },
-        { ...callStep('risky', {}), 'on-failure': { fallback: [callStep('recover', {})] } },
-      ],
-    });
-
-    expect(
-      Object.fromEntries(callSites.map(({ stepName, isConditional }) => [stepName, isConditional]))
-    ).toEqual({
-      always: false,
-      guarded: true,
-      then: true,
-      otherwise: true,
-      each: true,
-      branch: false,
-      risky: false,
-      recover: true,
-      'on-workflow-failure': true,
-    });
+      collectWorkflowCallSites({
+        settings: { 'on-failure': { fallback: [callStep('on-workflow-failure', {})] } },
+        steps: [callStep('always', {})],
+      }).map(({ stepName }) => stepName)
+    ).toEqual(['always', 'on-workflow-failure']);
   });
 });
 

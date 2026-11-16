@@ -209,11 +209,73 @@ const FIXTURES: Record<string, Fixture> = {
     outputs: [{ name: 'n', type: 'number', required: true }],
     steps: [output('emit', { n: 'text' })],
   },
+  'a failing step that continues when a condition holds': {
+    steps: [failing('f', { 'on-failure': { continue: 'inputs.a : true' } })],
+  },
+  'a failing step in every switch case and the default': {
+    steps: [
+      {
+        name: 'sw',
+        type: 'switch',
+        expression: '{{ inputs.a }}',
+        cases: [{ match: true, steps: [failing('f')] }],
+        default: [failing('g')],
+      },
+    ],
+  },
+  'a failing step in every switch case, without a default': {
+    steps: [
+      {
+        name: 'sw',
+        type: 'switch',
+        expression: '{{ inputs.a }}',
+        cases: [{ match: true, steps: [failing('f')] }],
+      },
+    ],
+  },
+  'a failing parallel branch': {
+    steps: [
+      {
+        name: 'fan',
+        type: 'parallel',
+        branches: [
+          { name: 'one', steps: [failing('f')] },
+          { name: 'two', steps: [maybe('m')] },
+        ],
+      },
+    ],
+  },
+  'a failing parallel branch that settles': {
+    steps: [
+      {
+        name: 'fan',
+        type: 'parallel',
+        mode: 'settled',
+        branches: [
+          { name: 'one', steps: [failing('f')] },
+          { name: 'two', steps: [maybe('m')] },
+        ],
+      },
+    ],
+  },
+  'a fallback that leaves the loop': {
+    steps: [
+      {
+        name: 'loop',
+        type: 'foreach',
+        foreach: '[1, 2]',
+        steps: [failing('f', { 'on-failure': { fallback: [{ name: 'b', type: 'loop.break' }] } })],
+      },
+    ],
+  },
+  'a failing step in a nested fallback after a completing branch': {
+    steps: [
+      failing('f', {
+        'on-failure': { fallback: [ifA('i', [done], { else: [failing('g')] })] },
+      }),
+    ],
+  },
 };
-
-// Workflows that fail every run though the analysis doesn't tell: it treats every branch and loop
-// body as one that might not run.
-const KNOWN_MISSES = new Set(['a failing step in both branches', 'a failing step in a foreach']);
 
 const getStatus = (fixture: WorkflowRunFixture) =>
   fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id')
@@ -228,7 +290,7 @@ describe('dependents analysis parity with the engine', () => {
 
   it.each(Object.entries(FIXTURES))(
     'agrees on whether every run fails: %s',
-    async (name, fixture) => {
+    async (_name, fixture) => {
       const statuses: string[] = [];
       for (const failingMaybes of subsets(maybeStepNames(fixture))) {
         const workflowYaml = YAML.stringify(forEngine(fixture, new Set(failingMaybes)));
@@ -251,12 +313,9 @@ describe('dependents analysis parity with the engine', () => {
         analyzerFailsEveryRun: analyzerFailure !== undefined,
         engineStatuses: [...new Set(statuses)].sort(),
       }).toEqual({
-        analyzerFailsEveryRun: engineFailsEveryRun && !KNOWN_MISSES.has(name),
+        analyzerFailsEveryRun: engineFailsEveryRun,
         engineStatuses: [...new Set(statuses)].sort(),
       });
-      if (KNOWN_MISSES.has(name)) {
-        expect(engineFailsEveryRun).toBe(true);
-      }
     }
   );
 });

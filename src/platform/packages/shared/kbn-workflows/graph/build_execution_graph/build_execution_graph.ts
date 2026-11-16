@@ -93,10 +93,6 @@ const flowControlStepTypes = new Set([
 ]);
 const disallowedWorkflowLevelOnFailureSteps = new Set(['wait']);
 
-/** Whether the workflow-level `on-failure` can wrap a step of this type. */
-export const allowsWorkflowLevelOnFailure = (stepType: string): boolean =>
-  !flowControlStepTypes.has(stepType) && !disallowedWorkflowLevelOnFailureSteps.has(stepType);
-
 /** Context used during the graph construction to keep track of settings and avoid cycles */
 interface GraphBuildContext {
   /** Workflow settings to be used during nodes construction */
@@ -749,7 +745,11 @@ function handleWorkflowLevelOnFailure(
   context: GraphBuildContext
 ): WorkflowGraphType | null {
   const onFailureConfiguration = context.settings?.['on-failure'];
-  if (!allowsWorkflowLevelOnFailure(step.type) || !onFailureConfiguration) {
+  if (
+    flowControlStepTypes.has(step.type) ||
+    disallowedWorkflowLevelOnFailureSteps.has(step.type) ||
+    !onFailureConfiguration
+  ) {
     return null;
   }
 
