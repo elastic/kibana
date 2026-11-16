@@ -30,7 +30,8 @@ describe('installAssistantAgent', () => {
         name: 'Nightshift Assistant',
         description: expect.any(String),
         labels: ['observability', 'nightshift', 'sandbox'],
-        avatar_symbol: 'NA',
+        avatar_symbol: '🌙',
+        avatar_color: '#050D1A',
         access_control: { access_mode: AgentAccessControlMode.Public },
         configuration: {
           tools: [],
