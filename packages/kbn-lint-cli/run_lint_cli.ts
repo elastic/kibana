@@ -32,7 +32,8 @@ const ERRORS_ONLY_CONFIG = 'oxlint.fix.config.mjs';
 // repo across processes. Each process also pays a fixed config/plugin startup cost, so a few
 // multi-threaded shards are faster than one single-threaded shard per core. Two threads per
 // shard was faster on a 12-core laptop but slower on CI's 16-vCPU (8-core) agents.
-const THREADS_PER_SHARD = 4;
+// TEMPORARY: measure 8 shards x 2 threads on CI agents.
+const THREADS_PER_SHARD = 2;
 
 interface LintOptions {
   fix: boolean;
