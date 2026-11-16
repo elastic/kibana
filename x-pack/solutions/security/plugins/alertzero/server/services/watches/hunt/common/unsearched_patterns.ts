@@ -24,9 +24,9 @@ export const unsearchedPatterns = (
   const dropped = Array.from(new Set(scope.missing)).filter((entry) => !kept.has(entry));
   return dropped.filter((entry) => {
     const bare = stripBackingPrefix(entry);
-    const coveredByExclusion = !buildMatchesRequired(
-      scopeGuardPatterns([bare, ...exclusionEntries], crossProjectSearch)
-    )(bare);
-    return !coveredByExclusion;
+    // Still matched once the exclusions are applied means nothing excludes it.
+    return buildMatchesRequired(scopeGuardPatterns([bare, ...exclusionEntries], crossProjectSearch))(
+      bare
+    );
   });
 };

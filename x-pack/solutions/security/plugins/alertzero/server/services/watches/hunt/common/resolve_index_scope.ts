@@ -118,7 +118,8 @@ const boundReportMatches = (
  * and product are then matched deterministically against those datasets, and one
  * `_field_caps` call names the `actionable_indices`. Nothing here picks what Tier 1 may
  * read: Tier 1 searches the universe minus the local concrete names that resolved nothing.
- * The model matcher is not called here; it runs in stage 2, after Tier 1, only when the deterministic signals found nothing.
+ * The model matcher is not called here; it runs in stage 2, after Tier 1, only when the
+ * deterministic signals found nothing.
  *
  * `status` is `degraded` when `_field_caps` failed or a bounded list had to collapse.
  * The resolve is lenient about a concrete name the caller cannot read; a throw still blocks
@@ -139,7 +140,7 @@ export const resolveHuntScope = async ({
   spaceId: string;
   /** The space's default data view patterns, exclusions included. Caller-supplied. */
   indexPatterns: string[];
-  /** Default data view entries the caller removed by policy (dot-prefixed names), echoed as `policy_skipped`. */
+  /** Entries the caller removed by policy (dot-prefixed names), echoed as `policy_skipped`. */
   policySkippedPatterns?: string[];
   /** Cross-project search is on: an unqualified pattern resolving only on a linked project is not missing. */
   crossProjectSearch?: boolean;

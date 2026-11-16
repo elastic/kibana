@@ -38,6 +38,7 @@ import {
   ThreatIntelSupplyNotInstalledError,
   type ThreatIntelSupplyService,
 } from '../threat_intel_supply';
+import { isBlockedByPolicyOnly } from '../watches/hunt/common/partition_hunt_universe';
 import { getHuntAccountLabel } from '../watches/hunt/common/resolve_worker_index_coverage';
 import {
   readLatestFinishedSweepIndexScope,
@@ -578,7 +579,7 @@ export class WorkersService {
       if (scope.resolution === 'blocked:discovery_failed') {
         return `The sweep at ${sweptAt} running as ${account} could not resolve this space's default data view`;
       }
-      if ((scope.policy_skipped ?? []).length > 0 && scope.missing.length === 0) {
+      if (isBlockedByPolicyOnly(scope)) {
         return `The sweep at ${sweptAt} found only hidden or alerts indices in this space's default data view, which Hunt does not search`;
       }
       return `The sweep at ${sweptAt} running as ${account} could not see any index in this space's default data view`;

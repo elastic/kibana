@@ -5,7 +5,19 @@
  * 2.0.
  */
 
+import type { HuntScope } from '@kbn/alertzero-common';
 import { isDotPrefixedIndex, isIndexExclusion } from '../../../../../common/remote_cluster';
+
+/** Why a hunt refuses a data view whose every positive entry was skipped by policy. */
+export const NO_SEARCHABLE_PATTERN_MESSAGE =
+  'The default data view has no pattern this hunt may search: hidden and alerts indices are never searched.';
+
+/** The data view held only hidden or alerts indices, so policy alone left nothing to search. */
+export const isBlockedByPolicyOnly = ({
+  policy_skipped: policySkipped = [],
+  missing,
+}: Pick<HuntScope, 'policy_skipped' | 'missing'>): boolean =>
+  policySkipped.length > 0 && missing.length === 0;
 
 /** The default data view split into what a hunt may search and what policy skips. */
 export interface HuntUniverse {

@@ -11,6 +11,7 @@ import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INDEX_SCOPE_URL } from '../../../com
 import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_index_scope';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
+import { isBlockedByPolicyOnly } from '../../services/watches/hunt/common/partition_hunt_universe';
 import { unsearchedPatterns } from '../../services/watches/hunt/common/unsearched_patterns';
 import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
@@ -78,7 +79,7 @@ export const registerHuntIndexScopeRoute = ({
           if (scope.resolution === 'blocked:empty_universe') {
             // `blocked:discovery_failed` already warns inside `resolveHuntScope`.
             logger.warn(
-              policySkippedList.length > 0 && scope.missing.length === 0
+              isBlockedByPolicyOnly(scope)
                 ? `Hunt index scope for space ${spaceId} is ${
                     scope.resolution
                   }: the default data view names only hidden or alerts indices (${policySkippedList.join(

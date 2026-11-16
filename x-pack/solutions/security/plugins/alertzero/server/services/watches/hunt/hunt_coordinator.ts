@@ -31,6 +31,10 @@ import { generateRecommendations } from './common/build_recommendations';
 import { selectHuntCallModel } from './common/select_hunt_call_model';
 import { buildHuntHeadline, buildHuntNarrative, codeList } from './common/build_hunt_narrative';
 import { unsearchedPatterns } from './common/unsearched_patterns';
+import {
+  NO_SEARCHABLE_PATTERN_MESSAGE,
+  isBlockedByPolicyOnly,
+} from './common/partition_hunt_universe';
 import type { HuntNarrativeContext } from './common/build_hunt_narrative';
 import { isTier1SearchableIoc } from './tier1/attribute_hits';
 import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
@@ -83,7 +87,8 @@ export interface HuntCoordinatorParams {
   spaceId: string;
   /**
    * The hunt universe: the space's Security Solution default data view patterns,
-   * exclusions included. Tier 1 searches this list minus unresolved local names; the caller reads it from the
+   * exclusions included. Tier 1 searches this list minus unresolved local names; the caller reads
+   * it from the
    * `securitySolution:defaultIndex` setting.
    */
   indexPatterns: string[];
@@ -118,7 +123,8 @@ export interface HuntCoordinatorCoreResult {
   report_id?: string;
   run_id: string;
   /**
-   * What Tier 1 searched: the hunt universe, exclusions included; dot-prefixed names are never included.
+   * What Tier 1 searched: the hunt universe, exclusions included; dot-prefixed names are never
+   * included.
    * Empty when the scope was blocked, when resolution failed, or when the run stopped
    * before a scope existed.
    */
@@ -386,13 +392,12 @@ const buildArticleContext = (
 const blockedScopeGuidance = ({
   resolution,
   indexPatterns,
-  policySkipped,
-  missing,
+  policyOnly,
 }: {
   resolution: HuntScopeResolution;
   indexPatterns: string[];
-  policySkipped: string[];
-  missing: string[];
+  /** The data view held only hidden or alerts indices. */
+  policyOnly: boolean;
 }): { message: string; nextStep: string } => {
   const checked = indexPatterns.join(', ');
   if (resolution === 'blocked:discovery_failed') {
@@ -402,10 +407,9 @@ const blockedScopeGuidance = ({
         "Check Elasticsearch connectivity and the calling user's index privileges, then retry.",
     };
   }
-  if (policySkipped.length > 0 && missing.length === 0) {
+  if (policyOnly) {
     return {
-      message:
-        'The default data view has no pattern this hunt may search: hidden and alerts indices are never searched.',
+      message: NO_SEARCHABLE_PATTERN_MESSAGE,
       nextStep:
         'Add a pattern for the data to hunt to the `securitySolution:defaultIndex` setting.',
     };
@@ -787,8 +791,7 @@ const huntCoordinatorCore = async (
     const { message, nextStep } = blockedScopeGuidance({
       resolution: scope.resolution,
       indexPatterns,
-      policySkipped: scope.policy_skipped ?? [],
-      missing: scope.missing,
+      policyOnly: isBlockedByPolicyOnly(scope),
     });
     return {
       status: 'blocked',

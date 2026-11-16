@@ -85,12 +85,6 @@ interface SetupFixtures {
   esClient: EsClient;
 }
 
-interface TeardownFixtures {
-  apiServices: ApiServicesFixture;
-  apiClient: ApiClientFixture;
-  esClient: EsClient;
-}
-
 export interface BlockState {
   headers: Record<string, string>;
   prerequisites: HuntPrerequisites;
@@ -148,7 +142,7 @@ export const teardownBlock = async ({
   withLogsStream,
   state,
 }: {
-  fixtures: TeardownFixtures;
+  fixtures: Omit<SetupFixtures, 'samlAuth'>;
   names: BlockNames;
   withLogsStream: boolean;
   state: BlockState;

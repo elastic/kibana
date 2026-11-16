@@ -45,7 +45,7 @@ interface ResolveWorkerIndexCoverageParams {
   request: KibanaRequest;
   spaceId: string;
   indexPatterns: string[];
-  /** Default data view entries removed by policy (dot-prefixed names), reported as `policy_skipped`. */
+  /** Entries removed by policy (dot-prefixed names), reported as `policy_skipped`. */
   policySkippedPatterns?: string[];
   /** Cross-project search is on: an unqualified pattern resolving only on a linked project is not missing. */
   crossProjectSearch?: boolean;

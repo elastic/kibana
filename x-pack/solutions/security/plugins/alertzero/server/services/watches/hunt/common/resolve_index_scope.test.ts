@@ -385,76 +385,53 @@ describe('resolveHuntScope', () => {
 
   describe('policy_skipped', () => {
     const SKIPPED = ['.siem-signals-infosec-detections'];
-
-    it('echoes the skipped list on an ok scope and defaults to an empty one', async () => {
-      const { esClient } = createEsClient();
-
-      const withSkipped = await resolveHuntScope({
-        esClient,
+    const resolveWith = (
+      indexPatterns: string[],
+      env: ReturnType<typeof createEsClient>,
+      policySkippedPatterns?: string[]
+    ) =>
+      resolveHuntScope({
+        esClient: env.esClient,
         spaceId: SPACE_ID,
-        indexPatterns: ['logs-*'],
-        policySkippedPatterns: SKIPPED,
-      });
-      const without = await resolveHuntScope({
-        esClient,
-        spaceId: SPACE_ID,
-        indexPatterns: ['logs-*'],
+        indexPatterns,
+        policySkippedPatterns,
       });
 
-      expect(withSkipped.policy_skipped).toEqual(SKIPPED);
-      expect(without.policy_skipped).toEqual([]);
-    });
-
-    it('echoes it when the scope is blocked with no positive pattern, without a call', async () => {
-      const { esClient, resolveIndex } = createEsClient();
-
-      const scope = await resolveHuntScope({
-        esClient,
-        spaceId: SPACE_ID,
-        indexPatterns: ['-foo*'],
-        policySkippedPatterns: SKIPPED,
-      });
-
-      expect(scope.resolution).toBe('blocked:empty_universe');
-      expect(scope.policy_skipped).toEqual(SKIPPED);
-      expect(resolveIndex).not.toHaveBeenCalled();
-    });
-
-    it('echoes it when nothing resolves and when the resolve throws', async () => {
-      const empty = createEsClient({ resolved: resolveResponse({}) });
-      const emptyScope = await resolveHuntScope({
-        esClient: empty.esClient,
-        spaceId: SPACE_ID,
-        indexPatterns: ['logs-*'],
-        policySkippedPatterns: SKIPPED,
-      });
-      expect(emptyScope.policy_skipped).toEqual(SKIPPED);
-
-      const failing = createEsClient();
-      failing.resolveIndex.mockRejectedValue(new Error('denied'));
-      const failedScope = await resolveHuntScope({
-        esClient: failing.esClient,
-        spaceId: SPACE_ID,
-        indexPatterns: ['logs-*'],
-        policySkippedPatterns: SKIPPED,
-      });
-      expect(failedScope.resolution).toBe('blocked:discovery_failed');
-      expect(failedScope.policy_skipped).toEqual(SKIPPED);
+    it('echoes the skipped list, defaulting to an empty one', async () => {
+      expect((await resolveWith(['logs-*'], createEsClient(), SKIPPED)).policy_skipped).toEqual(
+        SKIPPED
+      );
+      expect((await resolveWith(['logs-*'], createEsClient())).policy_skipped).toEqual([]);
     });
 
     it('echoes it on a degraded scope', async () => {
-      const { esClient, fieldCapsFn } = createEsClient();
-      fieldCapsFn.mockRejectedValue(new Error('field caps failed'));
+      const env = createEsClient();
+      env.fieldCapsFn.mockRejectedValue(new Error('field caps failed'));
 
-      const scope = await resolveHuntScope({
-        esClient,
-        spaceId: SPACE_ID,
-        indexPatterns: ['logs-*'],
-        policySkippedPatterns: SKIPPED,
-      });
+      const scope = await resolveWith(['logs-*'], env, SKIPPED);
 
       expect(scope.status).toBe('degraded');
       expect(scope.policy_skipped).toEqual(SKIPPED);
+    });
+
+    it('echoes it on every blocked path', async () => {
+      const noPositive = createEsClient();
+      const noPositiveScope = await resolveWith(['-foo*'], noPositive, SKIPPED);
+      expect(noPositiveScope.policy_skipped).toEqual(SKIPPED);
+      expect(noPositive.resolveIndex).not.toHaveBeenCalled();
+
+      const empty = await resolveWith(
+        ['logs-*'],
+        createEsClient({ resolved: resolveResponse({}) }),
+        SKIPPED
+      );
+      expect(empty.policy_skipped).toEqual(SKIPPED);
+
+      const failing = createEsClient();
+      failing.resolveIndex.mockRejectedValue(new Error('denied'));
+      const failed = await resolveWith(['logs-*'], failing, SKIPPED);
+      expect(failed.resolution).toBe('blocked:discovery_failed');
+      expect(failed.policy_skipped).toEqual(SKIPPED);
     });
   });
 

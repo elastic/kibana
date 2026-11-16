@@ -14,6 +14,10 @@ import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_ind
 import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
+import {
+  NO_SEARCHABLE_PATTERN_MESSAGE,
+  isBlockedByPolicyOnly,
+} from '../../services/watches/hunt/common/partition_hunt_universe';
 import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 
@@ -80,13 +84,11 @@ export const registerHuntForThreatRoute = ({
             // exception handler. This standalone route has no chain to read a body field
             // from, so refusing outright is the more direct signal. See
             // elastic/security-team#19741.
-            const policyOnly =
-              (scope.policy_skipped ?? []).length > 0 && scope.missing.length === 0;
             return response.customError({
               statusCode: 409,
               body: {
-                message: policyOnly
-                  ? `Hunt scope is blocked (${scope.resolution}): the default data view has no pattern this hunt may search, because hidden and alerts indices are never searched`
+                message: isBlockedByPolicyOnly(scope)
+                  ? `Hunt scope is blocked (${scope.resolution}): ${NO_SEARCHABLE_PATTERN_MESSAGE}`
                   : `Hunt scope is blocked (${
                       scope.resolution
                     }): nothing in the default data view is visible to this hunt (checked: ${indexPatterns.join(

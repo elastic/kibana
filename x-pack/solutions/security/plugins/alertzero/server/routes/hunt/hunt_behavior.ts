@@ -15,6 +15,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { isIndexExclusion } from '../../../common/remote_cluster';
+import { NO_SEARCHABLE_PATTERN_MESSAGE } from '../../services/watches/hunt/common/partition_hunt_universe';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import { TIER2_MODEL_TIERS } from '../../services/watches/hunt/common/hunt_model_tiers';
 import {
@@ -71,10 +72,7 @@ export const registerHuntBehaviorRoute = ({
           if (!indexPatterns.some((pattern) => !isIndexExclusion(pattern))) {
             return response.customError({
               statusCode: 409,
-              body: {
-                message:
-                  'The default data view has no pattern this hunt may search: hidden and alerts indices are never searched.',
-              },
+              body: { message: NO_SEARCHABLE_PATTERN_MESSAGE },
             });
           }
           const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
