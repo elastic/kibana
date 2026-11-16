@@ -10,8 +10,8 @@
  * - `agent` runs investigations, their sandbox tools and their Agent Builder hooks.
  * - `automations` runs automation workflows, which start investigations.
  * - `detection` runs the detection engine. It is created through `ensureNightshiftServiceAccount`
- *   rather than `ensureNightshiftServiceAccounts`, and the Nightshift setup step needs its role
- *   as much as the other two: without it, setup fails and the prompt stays.
+ *   rather than `ensureNightshiftServiceAccounts`, so the investigations setup does not need its
+ *   role.
  */
 export type NightshiftServiceAccountKind = 'agent' | 'automations' | 'detection';
 

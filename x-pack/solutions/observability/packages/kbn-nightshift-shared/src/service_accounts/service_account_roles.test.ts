@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ensureNightshiftServiceAccountRoles } from './service_account_roles';
+import {
+  ensureNightshiftServiceAccountRoles,
+  NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES,
+} from './service_account_roles';
 
 describe('ensureNightshiftServiceAccountRoles', () => {
   const createClient = () => ({ security: { putRole: jest.fn().mockResolvedValue({}) } });
@@ -15,11 +18,9 @@ describe('ensureNightshiftServiceAccountRoles', () => {
 
     await ensureNightshiftServiceAccountRoles(esClient, { isServerless: false });
 
-    expect(esClient.security.putRole.mock.calls.map(([{ name }]) => name).sort()).toEqual([
-      'nightshift_agent',
-      'nightshift_automations',
-      'nightshift_detection',
-    ]);
+    expect(esClient.security.putRole.mock.calls.map(([{ name }]) => name).sort()).toEqual(
+      Object.keys(NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES).sort()
+    );
   });
 
   it('leaves Serverless, which has its own predefined roles, alone', async () => {

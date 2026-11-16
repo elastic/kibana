@@ -37,9 +37,7 @@ export class DetectionSetupService {
     @inject(CoreLogger) private readonly logger: Logger,
     @inject(PluginInitializer('env')) env: PluginInitializerContext['env']
   ) {
-    this.role = getNightshiftRoleName('detection', {
-      isServerless: env.packageInfo.buildFlavor === 'serverless',
-    });
+    this.role = getDetectionRoleName(env);
   }
 
   /**
@@ -271,3 +269,9 @@ export class DetectionSetupService {
     );
   }
 }
+
+/** The role the detection account must hold, named by the build flavor. */
+const getDetectionRoleName = (env: PluginInitializerContext['env']): string =>
+  getNightshiftRoleName('detection', {
+    isServerless: env.packageInfo.buildFlavor === 'serverless',
+  });

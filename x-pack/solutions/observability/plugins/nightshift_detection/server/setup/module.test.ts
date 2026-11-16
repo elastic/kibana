@@ -17,6 +17,7 @@ import { AvailabilityService } from '../lib/availability/availability_service';
 import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
 import { DetectionAccountService } from '../lib/service_account/detection_account';
 import { DetectionSetupService } from '../lib/service_account/setup_service';
+import { DETECTION_ENGINE_WORKLOAD_TYPE } from '../lib/service_account/workload';
 
 function createContainer() {
   const core = coreMock.createStart();
@@ -31,7 +32,7 @@ function createContainer() {
   container.bind(CoreStart('pricing')).toConstantValue(core.pricing);
   container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
   container.bind(CoreStart('security')).toConstantValue(core.security);
-  container.bind(CoreSetup('security')).toConstantValue(coreMock.createSetup().security);
+  container.bind(CoreSetup('security')).toConstantValue(coreSetup.security);
   container
     .bind(PluginInitializer('env'))
     .toConstantValue(coreMock.createPluginInitializerContext().env);
@@ -56,6 +57,10 @@ describe('module', () => {
 
     expect(coreSetup.pricing.registerProductFeatures).toHaveBeenCalledWith(
       NIGHTSHIFT_DETECTION_TIERED_FEATURES
+    );
+    // Without the registration, every `bindWorkload` of the engine is refused at runtime.
+    expect(coreSetup.security.serviceAccounts.registerWorkloadType).toHaveBeenCalledWith(
+      expect.objectContaining({ type: DETECTION_ENGINE_WORKLOAD_TYPE })
     );
     // Engine indices are written as kibana_system, never as the requesting user.
     expect(container.get(DetectionEngineSystemClient)).toBe(

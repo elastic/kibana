@@ -25,7 +25,11 @@ export interface DetectionEngineEnableResponse extends DetectionEngineEnableBody
 export interface DetectionEngineServiceAccountStatus {
   /** Whether the deployment has service accounts at all (`xpack.security.serviceAccounts.enabled`). */
   serviceAccountsEnabled: boolean;
-  /** Whether the current user may set the space up, which needs `manage_security`. */
+  /**
+   * Whether the current user holds the `manage_security` cluster privilege that binding needs. It
+   * does not cover the Nightshift manage privilege that `_enable` also requires on the route, so a
+   * client offers setup only to a user who has both.
+   */
   canSetUp: boolean;
   /** The role the account must hold. The engine only checks it, it never creates it. */
   role: string;
