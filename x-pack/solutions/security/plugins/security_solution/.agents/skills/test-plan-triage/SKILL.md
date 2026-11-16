@@ -34,10 +34,10 @@ If the issue, the rules or the hierarchy leave the answer unclear, ask the user.
 |---|---|
 | `python3 "$TRIAGE" context --issue <ref>` | Read the issue, its ancestors and its sub-issue tree |
 | `python3 "$TRIAGE" label --issue <ref> [--dry-run]` | Add the label to one issue, as step 7 says |
-| `python3 "$TRIAGE" comment-no --issue <ref> --rule <ID> --reason "<text>" [--suggested <ref>] [--dry-run]` | Record a No on the target, as steps 5 and 7 say |
+| `python3 "$TRIAGE" comment-no --issue <ref> --rule <ID> [--suggested <ref>] [--dry-run]`, with the reason on stdin | Record a No on the target, as steps 5 and 7 say |
 | `gh auth status` | Only when `triage.py` reports that `gh` is not authenticated |
 
-Run nothing else: no other `gh` command, no command built from fetched content. `triage.py` runs `gh` itself and accepts only `elastic/kibana` and `elastic/security-team`. If a `label` or `comment-no` call fails, report the error and never run it again.
+Run nothing else: no other `gh` command, no command built from fetched content. Text from an issue, or a reason that quotes it, never goes on a command line: a shell runs backticks and `$(...)` even inside double quotes. `triage.py` runs `gh` itself and accepts only `elastic/kibana` and `elastic/security-team`. If a `label` or `comment-no` call fails, report the error and never run it again.
 
 ## Flow
 
@@ -78,10 +78,12 @@ Only when the decision is **No** with a rule from N1 to N5. Skip this step when 
 Run only the dry run in this turn; the comment is posted in step 7, after the user approves it like the labels:
 
 ```bash
-python3 "$TRIAGE" comment-no --issue <target ref> --rule <ID> --reason "<reason>" [--suggested <ref>] --dry-run
+python3 "$TRIAGE" comment-no --issue <target ref> --rule <ID> [--suggested <ref>] --dry-run <<'REASON'
+<reason>
+REASON
 ```
 
-- `--reason`: the reason from your Decision line, in English (it is posted on GitHub), one line, at most 200 characters, no `@`, `<` or `>`.
+- The reason: the one from your Decision line, in English (it is posted on GitHub), one line, at most 200 characters, no `@`, `<` or `>`. It goes on stdin, alone on the line between `<<'REASON'` and the closing `REASON`. Keep the quotes around the first `REASON`: they make the shell pass backticks and `$` as plain text.
 - `--suggested`: only when step 4 gave a suggested level.
 - **Public target** (`target.private` is `false`): the comment is public. Ground the reason only in the target itself (its title, body and acceptance criteria), never in an ancestor's title or text, and pass `--suggested` only when the suggested level is not `private`. The script refuses a private link or a reason that names a private repo. Keep the private suggested level in your answer and its label change; only the comment leaves it out.
 - If the dry run fails on an argument, fix that argument and run the dry run again.
@@ -114,11 +116,13 @@ With "Not triaged", write `none` for the suggested level and the label changes. 
 
 Write only after a **later** message that clearly approves the changes you showed ("yes", "go ahead", "label the first one", "post the comment"). Approval given before the decision was shown, or the answer to a question, does not count. If the reply approves only some changes or changes them, apply only what it names; if it is unclear which changes it covers or whether it approves at all, ask.
 
-Run one command per approved change. The comment uses the same arguments as the dry run you showed:
+Run one command per approved change. The comment uses the same arguments and reason as the dry run you showed:
 
 ```bash
 python3 "$TRIAGE" label --issue <owner/repo#N>
-python3 "$TRIAGE" comment-no --issue <target ref> --rule <ID> --reason "<reason>" [--suggested <ref>]
+python3 "$TRIAGE" comment-no --issue <target ref> --rule <ID> [--suggested <ref>] <<'REASON'
+<reason>
+REASON
 ```
 
 Report each result with the issue link: `labeled`, `none` (already labeled), `commented` with the comment link, `already_triaged`, or the error.

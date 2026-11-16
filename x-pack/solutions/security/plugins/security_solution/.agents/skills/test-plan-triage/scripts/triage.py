@@ -5,11 +5,13 @@ Commands (JSON on stdout; exit 0 ok, 1 failure, 2 the agent must ask the user):
   context --issue <ref>             Read-only. The issue, every ancestor up to the root, and
                                     the descendant tree.
   label --issue <ref> [--dry-run]   Add `Needs Test Plan` to one open issue. Never retried.
-  comment-no --issue <ref> --rule <N1-N5> --reason <text> [--suggested <ref>] [--dry-run]
+  comment-no --issue <ref> --rule <N1-N5> [--suggested <ref>] [--dry-run] < reason
                                     Post one fixed-format comment saying the issue needs no
-                                    test plan. Never retried, never posted twice. On a public
-                                    issue, refuses a suggested level or a reason that points
-                                    to a private repo.
+                                    test plan. Never retried, never posted twice. The reason
+                                    is read from stdin, never from the command line, so the
+                                    shell does not expand text quoted from the issue. On a
+                                    public issue, refuses a suggested level or a reason that
+                                    points to a private repo.
 
 <ref> is a GitHub issue URL or `owner/repo#N`. Only elastic/kibana and
 elastic/security-team are accepted; elastic/security-team is private.
@@ -30,7 +32,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
-from typing import Any, Optional
+from typing import Any, Optional, TextIO
 
 ALLOWED_REPOS = ("elastic/kibana", "elastic/security-team")
 PRIVATE_REPOS = ("elastic/security-team",)
@@ -392,14 +394,21 @@ def no_plan_body(rule: str, reason: str, suggested: Optional[IssueRef], today: d
     return f"{NO_PLAN_MARKER}\n{line}\n\n_Decided on {today.isoformat()} with the `test-plan-triage` skill._"
 
 
+def read_reason(stream: TextIO) -> str:
+    """The reason comes on stdin because a shell expands backticks and `$(...)` even inside double quotes."""
+    if stream.isatty():
+        raise TriageError("pass the reason on stdin, in a heredoc with a quoted delimiter (<<'REASON')")
+    return stream.read()
+
+
 def _check_reason(reason: str) -> str:
     text = reason.strip().rstrip(".")
     if not text:
-        raise TriageError("--reason is empty")
+        raise TriageError("the reason on stdin is empty")
     if len(text) > REASON_LIMIT:
-        raise TriageError(f"--reason is longer than {REASON_LIMIT} characters")
+        raise TriageError(f"the reason is longer than {REASON_LIMIT} characters")
     if any(char in text for char in "\r\n@<>"):
-        raise TriageError("--reason must be one line with no '@', '<' or '>'")
+        raise TriageError("the reason must be one line with no '@', '<' or '>'")
     return text
 
 
@@ -413,7 +422,7 @@ def _check_public_comment(ref: IssueRef, reason: str, suggested: Optional[IssueR
             gate="private_link",
         )
     if any(repo.casefold() in reason.casefold() or repo.split("/")[1] in reason.casefold() for repo in PRIVATE_REPOS):
-        raise TriageError(f"{ref} is public; --reason must not name a private repo or its issues", gate="private_link")
+        raise TriageError(f"{ref} is public; the reason must not name a private repo or its issues", gate="private_link")
 
 
 def comment_no(
@@ -462,16 +471,19 @@ def build_parser() -> argparse.ArgumentParser:
     label_parser = commands.add_parser("label", help=f"add `{LABEL}` to one open issue")
     label_parser.add_argument("--issue", required=True, help="issue URL or owner/repo#N")
     label_parser.add_argument("--dry-run", action="store_true", help="report what would be written, write nothing")
-    comment_parser = commands.add_parser("comment-no", help="record on one open issue that it needs no test plan")
+    comment_parser = commands.add_parser(
+        "comment-no",
+        help="record on one open issue that it needs no test plan",
+        description=f"The reason is read from stdin: one line, at most {REASON_LIMIT} characters, no '@', '<' or '>'.",
+    )
     comment_parser.add_argument("--issue", required=True, help="issue URL or owner/repo#N")
     comment_parser.add_argument("--rule", required=True, help=f"the No rule that matched: {', '.join(NO_RULES)}")
-    comment_parser.add_argument("--reason", required=True, help=f"one line, at most {REASON_LIMIT} characters, no '@', '<' or '>'")
     comment_parser.add_argument("--suggested", help="the suggested level for a test plan, if there is one")
     comment_parser.add_argument("--dry-run", action="store_true", help="print the comment, post nothing")
     return parser
 
 
-def main(argv: Optional[list[str]] = None, gh: Optional[Gh] = None) -> int:
+def main(argv: Optional[list[str]] = None, gh: Optional[Gh] = None, stdin: Optional[TextIO] = None) -> int:
     try:
         args = build_parser().parse_args(argv)
         ref = parse_ref(args.issue)
@@ -482,7 +494,8 @@ def main(argv: Optional[list[str]] = None, gh: Optional[Gh] = None) -> int:
             result = label(client, ref, dry_run=args.dry_run)
         else:
             suggested = parse_ref(args.suggested) if args.suggested else None
-            result = comment_no(client, ref, rule=args.rule, reason=args.reason, suggested=suggested, dry_run=args.dry_run)
+            reason = read_reason(stdin or sys.stdin)
+            result = comment_no(client, ref, rule=args.rule, reason=reason, suggested=suggested, dry_run=args.dry_run)
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return EXIT_OK
     except TriageError as error:

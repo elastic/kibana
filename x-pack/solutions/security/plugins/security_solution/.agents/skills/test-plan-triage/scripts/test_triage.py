@@ -1,6 +1,7 @@
 import io
 import json
 import os
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -362,14 +363,30 @@ class MainTests(unittest.TestCase):
         self.assertEqual(code, triage.EXIT_ASK)
         self.assertEqual(payload["gate"], "repo_not_allowed")
 
+    def test_comment_no_has_no_reason_argument(self):
+        code, payload = self.run_main(["comment-no", "--issue", "elastic/kibana#1", "--rule", "N2", "--reason", "x"], gh=FakeGh({}))
+        self.assertEqual(code, triage.EXIT_FAIL)
+        self.assertIn("--reason", payload["error"])
+
+    def test_comment_no_refuses_a_terminal_as_stdin(self):
+        class Terminal(io.StringIO):
+            def isatty(self):
+                return True
+
+        out = io.StringIO()
+        with redirect_stdout(out):
+            code = triage.main(["comment-no", "--issue", "elastic/kibana#1", "--rule", "N2"], gh=FakeGh({}), stdin=Terminal())
+        self.assertEqual(code, triage.EXIT_FAIL)
+        self.assertIn("stdin", json.loads(out.getvalue())["error"])
+
 
 class StubCliTests(unittest.TestCase):
     """The evals stub and the real CLI agree on the API shapes."""
 
-    def run_cli(self, *args, extra_env=None):
+    def run_cli(self, *args, extra_env=None, stdin=None):
         env = {**os.environ, triage.GH_ENV: f"{sys.executable} {STUB}", **(extra_env or {})}
         completed = subprocess.run(
-            [sys.executable, str(SCRIPT_DIR / "triage.py"), *args], capture_output=True, text=True, env=env, check=False
+            [sys.executable, str(SCRIPT_DIR / "triage.py"), *args], input=stdin, capture_output=True, text=True, env=env, check=False
         )
         return completed.returncode, json.loads(completed.stdout)
 
@@ -396,12 +413,32 @@ class StubCliTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp) / "writes.log"
             code, payload = self.run_cli(
-                "comment-no", "--issue", "elastic/kibana#911401", "--rule", "N2", "--reason", "internal state refactor",
-                extra_env={triage.WRITE_LOG_ENV: str(log)},
+                "comment-no", "--issue", "elastic/kibana#911401", "--rule", "N2",
+                extra_env={triage.WRITE_LOG_ENV: str(log)}, stdin="internal state refactor\n",
             )
             self.assertEqual(code, 0, payload)
             self.assertTrue(payload["simulated"])
             self.assertEqual(log.read_text(encoding="utf-8"), "comment elastic/kibana#911401 rule=N2 suggested=none reason=internal state refactor\n")
+
+    def test_a_quoted_heredoc_passes_shell_syntax_in_the_reason_as_text(self):
+        reason = "adds a `touch expanded` row action $(touch expanded)"
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "writes.log"
+            script = (
+                f"{shlex.quote(sys.executable)} {shlex.quote(str(SCRIPT_DIR / 'triage.py'))} "
+                f"comment-no --issue elastic/kibana#911401 --rule N2 <<'REASON'\n{reason}\nREASON\n"
+            )
+            completed = subprocess.run(
+                ["bash", "-c", script],
+                cwd=tmp,
+                env={**os.environ, triage.GH_ENV: f"{sys.executable} {STUB}", triage.WRITE_LOG_ENV: str(log)},
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+            self.assertFalse((Path(tmp) / "expanded").exists())
+            self.assertIn(f"reason={reason}", log.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

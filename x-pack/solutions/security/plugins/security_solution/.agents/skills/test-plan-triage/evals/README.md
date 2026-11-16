@@ -116,3 +116,5 @@ All five failures are Claude's and all are in the answer's format; every write m
 - `s25` r1, `s29` r2 and `s32` r2 (held out): the answer proposed the label and waited, but the `RESULT` block listed it under `labeled` instead of `proposed_labels`.
 - `s12` r1: the **Suggested level** line said "none" and then named the unreadable parent, so the scorer read a suggested level.
 - `s5` r3: the **Decision** line was "Yes (S1):", so the scorer found no rule in it.
+
+After that round, `comment-no` stopped taking the reason as an argument and reads it from stdin, in a heredoc with a quoted delimiter, so a shell cannot expand backticks or `$(...)` quoted from an issue. The 10 scenarios whose answer is a No (`s2`, `s3`, `s4`, `s11`, `s14`, `s16`, `s31`, `s33`, `s34`, `s35`) were run again with the skill: 32/32 per model. The 18 approved comments in `s33` and `s34` logged the full reason.
