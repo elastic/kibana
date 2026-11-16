@@ -134,6 +134,28 @@ describe('withEvalsJudgeChildSpan', () => {
     expect(judge?.parentSpanContext?.spanId).toBe(parent?.spanContext().spanId);
   });
 
+  it('sets the inference beacon and keeps the judge span active so a model call nests under it', async () => {
+    const tracer = trace.getTracer('test');
+    let beacon: string | undefined;
+
+    await withEvalsJudgeChildSpan('conclusion_quality', async () => {
+      beacon = propagation
+        .getBaggage(context.active())
+        ?.getEntry(BAGGAGE_TRACKING_BEACON_KEY)?.value;
+      // Stands in for the model call: the inference client nests under the active span.
+      await tracer.startActiveSpan('chat model', async (chat) => {
+        chat.end();
+      });
+    });
+
+    const spans = exporter.getFinishedSpans();
+    const judge = spans.find(({ name }) => name === 'judge · conclusion_quality');
+    const chat = spans.find(({ name }) => name === 'chat model');
+    expect(beacon).toBe(BAGGAGE_TRACKING_BEACON_VALUE);
+    expect(chat?.spanContext().traceId).toBe(judge?.spanContext().traceId);
+    expect(chat?.parentSpanContext?.spanId).toBe(judge?.spanContext().spanId);
+  });
+
   it('records the error and rethrows', async () => {
     await expect(
       withEvalsJudgeChildSpan('conclusion_quality', async () => {

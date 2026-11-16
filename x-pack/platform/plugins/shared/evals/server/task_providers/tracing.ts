@@ -13,7 +13,11 @@ import {
   trace,
   type Span,
 } from '@opentelemetry/api';
-import { withInferenceContext } from '@kbn/inference-tracing';
+import {
+  BAGGAGE_TRACKING_BEACON_KEY,
+  BAGGAGE_TRACKING_BEACON_VALUE,
+  withInferenceContext,
+} from '@kbn/inference-tracing';
 
 /** OpenTelemetry's sentinel for "no valid trace" (a non-recording / no-op span). */
 const INVALID_TRACE_ID = '00000000000000000000000000000000';
@@ -120,6 +124,10 @@ export const withEvalsEvaluatorSpan = <T>(
  * active span, so the model's `chat <model>` span nests under a named judge in whatever trace
  * the caller is already building (for example the online-eval scoring span). Unlike
  * {@link withEvalsEvaluatorSpan}, it does not start a new trace.
+ *
+ * The inference tracking beacon is set on the judge span's context. A caller with no inference
+ * context would otherwise make the model call treat itself as a root, drop the judge span from
+ * its parent context and fork a separate `chat <model>` trace.
  */
 export const withEvalsJudgeChildSpan = <T>(
   evaluatorName: string,
@@ -130,7 +138,11 @@ export const withEvalsJudgeChildSpan = <T>(
     { attributes: { 'instrumentationScope.name': '@kbn/evals', 'evaluator.name': evaluatorName } },
     async (span: Span) => {
       try {
-        return await run();
+        const activeContext = context.active();
+        const baggage = (
+          propagation.getBaggage(activeContext) ?? propagation.createBaggage()
+        ).setEntry(BAGGAGE_TRACKING_BEACON_KEY, { value: BAGGAGE_TRACKING_BEACON_VALUE });
+        return await context.with(propagation.setBaggage(activeContext, baggage), run);
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: SpanStatusCode.ERROR });
