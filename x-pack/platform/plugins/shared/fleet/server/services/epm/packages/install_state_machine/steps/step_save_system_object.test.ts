@@ -625,7 +625,7 @@ describe('updateLatestExecutedState', () => {
   describe('es_index_patterns recompute for input packages', () => {
     const INPUT_OTEL_PACKAGE_INFO = {
       title: 'AWS CloudWatch (OpenTelemetry)',
-      name: 'aws_cloudwatch_input_otel',
+      name: 'aws_otel',
       version: '0.6.0',
       description: 'test',
       type: 'input',
@@ -653,9 +653,9 @@ describe('updateLatestExecutedState', () => {
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableOtelIntegrations: true } as any);
       soClient.get.mockResolvedValue({
-        id: 'aws_cloudwatch_input_otel',
+        id: 'aws_otel',
         attributes: {
-          name: 'aws_cloudwatch_input_otel',
+          name: 'aws_otel',
           version: '0.6.0',
           install_status: 'installed',
           package_assets: [],
@@ -688,7 +688,7 @@ describe('updateLatestExecutedState', () => {
         items: [
           {
             id: 'pp-1',
-            package: { name: 'aws_cloudwatch_input_otel', version: '0.6.0' },
+            package: { name: 'aws_otel', version: '0.6.0' },
             inputs: [
               {
                 type: 'otelcol',
@@ -696,7 +696,7 @@ describe('updateLatestExecutedState', () => {
                   {
                     data_stream: { type: 'metrics' },
                     vars: {
-                      'data_stream.dataset': { value: 'aws_cloudwatch_input_otel.aws.ec2' },
+                      'data_stream.dataset': { value: 'aws_otel.aws.ec2' },
                     },
                   },
                 ],
@@ -713,10 +713,10 @@ describe('updateLatestExecutedState', () => {
 
       expect(soClient.update).toHaveBeenCalledWith(
         PACKAGES_SAVED_OBJECT_TYPE,
-        'aws_cloudwatch_input_otel',
+        'aws_otel',
         expect.objectContaining({
           es_index_patterns: expect.objectContaining({
-            'aws_cloudwatch_input_otel.aws.ec2': 'metrics-aws_cloudwatch_input_otel.aws.ec2.otel-*',
+            'aws_otel.aws.ec2': 'metrics-aws_otel.aws.ec2.otel-*',
           }),
         }),
         expect.anything()
@@ -729,7 +729,7 @@ describe('updateLatestExecutedState', () => {
       await expect(runStep()).resolves.not.toThrow();
       expect(soClient.update).toHaveBeenCalledWith(
         PACKAGES_SAVED_OBJECT_TYPE,
-        'aws_cloudwatch_input_otel',
+        'aws_otel',
         expect.objectContaining({ es_index_patterns: expect.anything() }),
         expect.anything()
       );

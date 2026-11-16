@@ -208,10 +208,10 @@ describe('getServiceIndexPatterns', () => {
     });
 
     it('extracts dataset/type from varDefsByInput for OTel input packages', () => {
-      // aws_cloudwatch_input_otel entries store data_stream.dataset/type as var defaults.
+      // aws_otel entries store data_stream.dataset/type as var defaults.
       const entry = makeEntry({
         dataFormat: 'otel',
-        packageName: 'aws_cloudwatch_input_otel',
+        packageName: 'aws_otel',
         varDefsByDataStream: {
           ec2_otel: {
             type: 'metrics',
@@ -234,7 +234,7 @@ describe('getServiceIndexPatterns', () => {
     it('does not append .otel twice when the dataset already ends with it', () => {
       const entry = makeEntry({
         dataFormat: 'otel',
-        packageName: 'aws_cloudwatch_input_otel',
+        packageName: 'aws_otel',
         varDefsByDataStream: {
           ec2_otel: {
             type: 'metrics',
@@ -253,8 +253,8 @@ describe('getServiceIndexPatterns', () => {
     });
 
     it('falls back to logs-packageName.*-* for OTel entry with no ecfLogType and no varDefsByDataStream', () => {
-      const entry = makeEntry({ dataFormat: 'otel', packageName: 'aws_cloudwatch_input_otel' });
-      expect(getServiceIndexPatterns(entry)).toEqual(['logs-aws_cloudwatch_input_otel.*-*']);
+      const entry = makeEntry({ dataFormat: 'otel', packageName: 'aws_otel' });
+      expect(getServiceIndexPatterns(entry)).toEqual(['logs-aws_otel.*-*']);
     });
   });
 });

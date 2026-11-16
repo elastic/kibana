@@ -14,7 +14,7 @@ export const AWS_ONBOARDING_PACKAGE_NAMES: readonly string[] = [
   'aws_bedrock',
   'aws_bedrock_agentcore',
   'aws_billing',
-  'aws_cloudwatch_input_otel',
+  'aws_otel',
   'aws_logs',
   'aws_mq',
   'aws_securityhub',

@@ -11,7 +11,7 @@ import type { ServiceInstance, ServiceVars } from './use_service_settings';
 
 const otelService = {
   id: 'ec2',
-  packageName: 'aws_cloudwatch_input_otel',
+  packageName: 'aws_otel',
   dataStreams: ['ec2'],
   defaultEnabled: true,
   defaultEnabledInputs: ['otelcol'],

@@ -120,7 +120,7 @@ describe('buildIacIntegrations', () => {
     const otel = makeService({
       id: 'rds_otel',
       policyTemplate: 'aws.rds',
-      packageName: 'aws_cloudwatch_input_otel',
+      packageName: 'aws_otel',
       dataStreams: ['rds_otel'],
       inputs: ['aws/metrics'],
     });
@@ -129,7 +129,7 @@ describe('buildIacIntegrations', () => {
     expect(buildIacIntegrations([original(otel), original(rds)], {})).toEqual([
       { name: 'aws', policyTemplates: [{ name: 'rds', enabledInputs: ['aws/metrics'] }] },
       {
-        name: 'aws_cloudwatch_input_otel',
+        name: 'aws_otel',
         policyTemplates: [{ name: 'aws.rds', enabledInputs: ['aws/metrics'] }],
       },
     ]);
@@ -180,14 +180,14 @@ describe('buildIacIntegrations', () => {
     const service = makeService({
       id: 'ec2_otel',
       policyTemplate: 'aws.ec2',
-      packageName: 'aws_cloudwatch_input_otel',
+      packageName: 'aws_otel',
       dataStreams: ['ec2_otel'],
       inputs: ['aws/metrics'],
     });
 
     expect(buildIacIntegrations([original(service)], {})).toEqual([
       {
-        name: 'aws_cloudwatch_input_otel',
+        name: 'aws_otel',
         policyTemplates: [{ name: 'aws.ec2', enabledInputs: ['aws/metrics'] }],
       },
     ]);
@@ -315,7 +315,7 @@ describe('buildIacIntegrations ↔ Deploy parity', () => {
     const rdsOtel = makeService({
       id: 'rds_otel',
       policyTemplate: 'aws.rds',
-      packageName: 'aws_cloudwatch_input_otel',
+      packageName: 'aws_otel',
       dataStreams: ['rds_otel'],
       inputs: ['aws/metrics'],
     });

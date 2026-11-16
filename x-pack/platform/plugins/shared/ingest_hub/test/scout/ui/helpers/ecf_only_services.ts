@@ -64,7 +64,7 @@ export const MOCK_AWS_CLOUDWATCH_INPUT_OTEL_PACKAGE = {
 /** Serves both manifests, so the specs don't download the packages from the public registry. */
 export async function mockEcfOnlyServicePackages(page: ScoutPage): Promise<void> {
   await mockAwsPackage(page, MOCK_AWS_PACKAGE_ECF_ONLY_ALIASES);
-  await mockPackage(page, 'aws_cloudwatch_input_otel', MOCK_AWS_CLOUDWATCH_INPUT_OTEL_PACKAGE);
+  await mockPackage(page, 'aws_otel', MOCK_AWS_CLOUDWATCH_INPUT_OTEL_PACKAGE);
 }
 
 /** Keeps the ECF section from fetching the template version from S3. */

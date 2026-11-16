@@ -202,7 +202,7 @@ export function buildPackageInputs(
       const activeInputs = resolveActiveInputs(service, dsId, dsVars);
 
       // Fleet input key: <policyTemplateName>-<inputType>
-      // Use policyTemplate when present (e.g. aws_cloudwatch_input_otel entries where id !== PT name).
+      // Use policyTemplate when present (e.g. aws_otel entries where id !== PT name).
       const ptName = service.policyTemplate ?? service.id;
       const dsView = makeDsView(service, dsId);
       // Fleet stream key for input packages: <packageName>.<policyTemplateName>
@@ -330,7 +330,7 @@ export function buildPackageVars(
 ): Record<string, string | null | SecretRefValue> | undefined {
   const vars: Record<string, string | null | SecretRefValue> = {};
   if (globalRegion && pkgVarNames.has('default_region')) vars.default_region = globalRegion;
-  // 'region' (distinct from 'default_region') is a package-level var on aws_cloudwatch_input_otel
+  // 'region' (distinct from 'default_region') is a package-level var on aws_otel
   // today; ECS packages use 'default_region'. The pkgVarNames guard ensures it only fires when
   // the deployed package actually declares it.
   if (globalRegion && pkgVarNames.has('region')) vars.region = globalRegion;

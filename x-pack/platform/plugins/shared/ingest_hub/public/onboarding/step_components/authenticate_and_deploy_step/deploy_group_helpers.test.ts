@@ -349,7 +349,7 @@ describe('getSourcePolicyName', () => {
 describe('getCreateDatasetTemplates', () => {
   const otelService = {
     id: 'ec2',
-    packageName: 'aws_cloudwatch_input_otel',
+    packageName: 'aws_otel',
     dataStreams: ['ec2'],
     defaultEnabled: true,
     varDefsByDataStream: {

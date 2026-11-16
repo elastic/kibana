@@ -29,9 +29,9 @@ interface FakePackageInfo {
 
 /** An input package: one policy template declaring its single input as `input`, not `inputs`. */
 const CLOUDWATCH_INPUT_PACKAGE_INFO: FakePackageInfo = {
-  name: 'aws_cloudwatch_input_otel',
+  name: 'aws_otel',
   version: '0.3.0',
-  policy_templates: [{ name: 'aws_cloudwatch_input_otel', input: 'otelcol' }],
+  policy_templates: [{ name: 'aws_otel', input: 'otelcol' }],
 };
 
 const CSPM_PACKAGE_INFO: FakePackageInfo = {
@@ -167,29 +167,28 @@ describe('buildIacProvisionerIntegrations', () => {
 
     const resolved = await build([
       {
-        name: 'aws_cloudwatch_input_otel',
-        policyTemplates: [{ name: 'aws_cloudwatch_input_otel', enabledInputs: ['otelcol'] }],
+        name: 'aws_otel',
+        policyTemplates: [{ name: 'aws_otel', enabledInputs: ['otelcol'] }],
       },
     ]);
     expect(resolved).toEqual({
       integrations: [
         {
-          name: 'aws_cloudwatch_input_otel',
+          name: 'aws_otel',
           version: '0.3.0',
-          policyTemplates: [{ name: 'aws_cloudwatch_input_otel', enabledInputs: ['otelcol'] }],
+          policyTemplates: [{ name: 'aws_otel', enabledInputs: ['otelcol'] }],
         },
       ],
     });
 
     const rejected = await build([
       {
-        name: 'aws_cloudwatch_input_otel',
-        policyTemplates: [{ name: 'aws_cloudwatch_input_otel', enabledInputs: ['aws-cloudwatch'] }],
+        name: 'aws_otel',
+        policyTemplates: [{ name: 'aws_otel', enabledInputs: ['aws-cloudwatch'] }],
       },
     ]);
     expect(rejected).toEqual({
-      errorMessage:
-        'aws_cloudwatch_input_otel policy template aws_cloudwatch_input_otel has no inputs named aws-cloudwatch',
+      errorMessage: 'aws_otel policy template aws_otel has no inputs named aws-cloudwatch',
     });
   });
 

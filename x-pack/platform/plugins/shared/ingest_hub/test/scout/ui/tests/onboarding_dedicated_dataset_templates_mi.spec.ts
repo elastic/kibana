@@ -56,7 +56,7 @@ test.describe(
     useOnboardingFeatureFlag();
 
     test.beforeEach(async ({ browserAuth, page }) => {
-      await mockPackage(page, 'aws_cloudwatch_input_otel', MOCK_AWS_CLOUDWATCH_INPUT_OTEL_PACKAGE);
+      await mockPackage(page, 'aws_otel', MOCK_AWS_CLOUDWATCH_INPUT_OTEL_PACKAGE);
       await navigateToOnboardingStep(browserAuth, page, 'service-settings', {
         dataFormat: 'otel',
         selectedServiceIds: ['ec2_otel'],

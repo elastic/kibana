@@ -11,7 +11,7 @@ import type { PackagePolicyCreateBottomExtensionComponent } from '@kbn/fleet-plu
 
 /**
  * Returns a lazy-loaded Fleet "package-policy-create-bottom" extension component for the
- * `aws_cloudwatch_input_otel` integration. The component renders an ELB Logs toggle with
+ * `aws_otel` integration. The component renders an ELB Logs toggle with
  * an S3 bucket field and a "Launch Stack in AWS" button that deploys the EDOT Cloud Forwarder.
  *
  * The component is purely a UI affordance — it never mutates the package policy.

@@ -25,7 +25,7 @@ import type { EventTypeOpts } from '@elastic/ebt/client';
 export const AWS_ONBOARDING_TELEMETRY_STORAGE_KEY = 'aws_onboarding.telemetry';
 
 /** The package whose add-integration page the AWS quickstart routes to. */
-export const AWS_ONBOARDING_PACKAGE_NAME = 'aws_cloudwatch_input_otel';
+export const AWS_ONBOARDING_PACKAGE_NAME = 'aws_otel';
 
 export type AwsOnboardingDeployPath = 'agentless' | 'aws_cloudformation';
 
@@ -57,7 +57,7 @@ export const AWS_ONBOARDING_FLOW_ENTERED_EVENT: EventTypeOpts<FlowEnteredFields>
     package_version: {
       type: 'keyword',
       _meta: {
-        description: 'Version of the aws_cloudwatch_input_otel package the user was routed to.',
+        description: 'Version of the aws_otel package the user was routed to.',
       },
     },
   },

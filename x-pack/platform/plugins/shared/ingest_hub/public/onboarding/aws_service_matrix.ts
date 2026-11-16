@@ -507,70 +507,70 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws_logs',
   },
 
-  // ── aws_cloudwatch_input_otel package — OTel metrics (managed integration) ──
+  // ── aws_otel package — OTel metrics (managed integration) ──
   // Input package: signal type is declared on each policy template (pt.type = 'metrics').
   {
     id: 'ec2_otel',
     name: 'Amazon EC2',
     dataFormat: 'otel',
     policyTemplate: 'aws.ec2',
-    packageName: 'aws_cloudwatch_input_otel',
+    packageName: 'aws_otel',
   },
   {
     id: 'lambda_otel',
     name: 'AWS Lambda',
     dataFormat: 'otel',
     policyTemplate: 'aws.lambda',
-    packageName: 'aws_cloudwatch_input_otel',
+    packageName: 'aws_otel',
   },
   {
     id: 'rds_otel',
     name: 'Amazon RDS',
     dataFormat: 'otel',
     policyTemplate: 'aws.rds',
-    packageName: 'aws_cloudwatch_input_otel',
+    packageName: 'aws_otel',
   },
   {
     id: 'sqs_otel',
     name: 'Amazon SQS',
     dataFormat: 'otel',
     policyTemplate: 'aws.sqs',
-    packageName: 'aws_cloudwatch_input_otel',
+    packageName: 'aws_otel',
   },
   {
     id: 'elb_alb_otel',
     name: 'Application Load Balancer',
     dataFormat: 'otel',
     policyTemplate: 'aws.elb',
-    packageName: 'aws_cloudwatch_input_otel',
+    packageName: 'aws_otel',
   },
   {
     id: 'elb_clb_otel',
     name: 'Classic Load Balancer',
     dataFormat: 'otel',
     policyTemplate: 'aws.elb_classic',
-    packageName: 'aws_cloudwatch_input_otel',
+    packageName: 'aws_otel',
   },
   {
     id: 'elb_nlb_otel',
     name: 'Network Load Balancer',
     dataFormat: 'otel',
     policyTemplate: 'aws.elb_network',
-    packageName: 'aws_cloudwatch_input_otel',
+    packageName: 'aws_otel',
   },
   {
     id: 'elb_gwlb_otel',
     name: 'Gateway Load Balancer',
     dataFormat: 'otel',
     policyTemplate: 'aws.elb_gateway',
-    packageName: 'aws_cloudwatch_input_otel',
+    packageName: 'aws_otel',
   },
   {
     id: 'ecs_otel',
     name: 'Amazon ECS',
     dataFormat: 'otel',
     policyTemplate: 'aws.ecs',
-    packageName: 'aws_cloudwatch_input_otel',
+    packageName: 'aws_otel',
   },
 
   // ── aws_billing package — Cloud Financial Management ─────────────────────

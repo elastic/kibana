@@ -310,7 +310,7 @@ describe('AWS service matrix', () => {
     });
   });
 
-  describe('input package entries (aws_cloudwatch_input_otel)', () => {
+  describe('input package entries (aws_otel)', () => {
     const INPUT_PKG = {
       policy_templates: [
         {
@@ -335,10 +335,7 @@ describe('AWS service matrix', () => {
     };
 
     const EC2_OTEL_STATIC = AWS_SERVICES_STATIC.filter((e) => e.id === 'ec2_otel');
-    const EC2_OTEL_MATRIX = buildAwsServiceMatrix(
-      { aws_cloudwatch_input_otel: INPUT_PKG as any },
-      EC2_OTEL_STATIC
-    );
+    const EC2_OTEL_MATRIX = buildAwsServiceMatrix({ aws_otel: INPUT_PKG as any }, EC2_OTEL_STATIC);
     const ec2Otel = EC2_OTEL_MATRIX[0];
 
     it('uses a synthetic data stream keyed to the entry id', () => {
@@ -357,7 +354,7 @@ describe('AWS service matrix', () => {
       expect(ec2Otel.identityFederationSupported).toBe(false);
     });
 
-    describe('with an Identity Federation var_group option (aws_cloudwatch_input_otel >= 0.8.0)', () => {
+    describe('with an Identity Federation var_group option (aws_otel >= 0.8.0)', () => {
       const IDF_VAR_GROUPS = [
         {
           name: 'credential_type',
@@ -381,7 +378,7 @@ describe('AWS service matrix', () => {
 
       it('derives true from package-level var_groups', () => {
         const [entry] = buildAwsServiceMatrix(
-          { aws_cloudwatch_input_otel: { ...INPUT_PKG, var_groups: IDF_VAR_GROUPS } as any },
+          { aws_otel: { ...INPUT_PKG, var_groups: IDF_VAR_GROUPS } as any },
           EC2_OTEL_STATIC
         );
         expect(entry.identityFederationSupported).toBe(true);
@@ -392,10 +389,7 @@ describe('AWS service matrix', () => {
           ...INPUT_PKG,
           policy_templates: [{ ...INPUT_PKG.policy_templates[0], var_groups: IDF_VAR_GROUPS }],
         };
-        const [entry] = buildAwsServiceMatrix(
-          { aws_cloudwatch_input_otel: pkg as any },
-          EC2_OTEL_STATIC
-        );
+        const [entry] = buildAwsServiceMatrix({ aws_otel: pkg as any }, EC2_OTEL_STATIC);
         expect(entry.identityFederationSupported).toBe(true);
       });
 
@@ -407,7 +401,7 @@ describe('AWS service matrix', () => {
           },
         ];
         const [entry] = buildAwsServiceMatrix(
-          { aws_cloudwatch_input_otel: { ...INPUT_PKG, var_groups: keysOnly } as any },
+          { aws_otel: { ...INPUT_PKG, var_groups: keysOnly } as any },
           EC2_OTEL_STATIC
         );
         expect(entry.identityFederationSupported).toBe(false);
