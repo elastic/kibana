@@ -5,8 +5,7 @@
   },
   "include": [
     "common/**/*",
-    "server/**/*",
-    "scripts/**/*"
+    "server/**/*"
   ],
   "exclude": [
     "target/**/*"
@@ -23,13 +22,11 @@
     "@kbn/core-plugins-server",
     "@kbn/core-pricing-common",
     "@kbn/core-test-helpers-kbn-server",
-    "@kbn/dev-cli-runner",
     "@kbn/es-errors",
     "@kbn/es-mappings",
     "@kbn/licensing-plugin",
     "@kbn/nightshift-shared",
     "@kbn/nightshift-sources-plugin",
-    "@kbn/setup-node-env",
     "@kbn/spaces-plugin",
     "@kbn/workflows",
     "@kbn/workflows-extensions",

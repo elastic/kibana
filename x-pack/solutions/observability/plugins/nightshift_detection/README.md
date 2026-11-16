@@ -35,14 +35,9 @@ The engine runs a space as the deployment's `nightshift_detection` service accou
 creates the account: a user with the `manage_security` cluster privilege and the Nightshift manage
 privilege runs the setup, and the server only binds the space to the account it is given.
 
-```sh
-node x-pack/solutions/observability/plugins/nightshift_detection/scripts/enable.js --space default
-```
-
-The script finds the account by name (or creates it, and reuses it when it exists), then calls
-`POST /internal/nightshift/detection/service_account/_enable` for the space and prints the account
-id. Running it again gives the same id; another space reuses the account. Flags: `--space`,
-`--kibana-url`, `--username`, `--password` (defaults match the local dev stack) and `--serverless`.
+`POST /internal/nightshift/detection/service_account/_enable` with `{ "serviceAccountId": "<id>" }`
+binds the space to an existing account. Calling it again with the same id changes nothing; another
+space can reuse the account.
 
 Setting a space up also installs and enables its engine workflow, `system-nightshift-detection-engine-<space>`,
 bound to the same account. It runs every minute and calls `POST /internal/nightshift/detection/_tick`
