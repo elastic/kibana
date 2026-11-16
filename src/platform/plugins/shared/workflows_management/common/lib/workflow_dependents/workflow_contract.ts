@@ -19,8 +19,9 @@ import {
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { isRecord } from '@kbn/workflows-yaml';
 import { collectWorkflowOutputBlocks } from './find_call_sites';
+import { alwaysEndsInOutputStep } from './run_outcomes';
 import type { ContractChange, ContractField, WorkflowContract } from './types';
-import { alwaysReturnsWorkflowOutput, getReturnedOutputNames } from '../get_returned_output_names';
+import { getReturnedOutputNames } from '../get_returned_output_names';
 
 const describeType = ({ type }: JSONSchema7): string | undefined => {
   if (Array.isArray(type)) {
@@ -128,7 +129,7 @@ const buildWorkflowContract = (definition: unknown): WorkflowContract => {
     inputsSchema: inputsSchema?.properties || additionalInputs ? inputsSchema : undefined,
     rejectsUnknownInputs: inputsSchema?.additionalProperties === false,
     additionalInputs,
-    alwaysReturnsOutput: alwaysReturnsWorkflowOutput(definition),
+    alwaysReturnsOutput: alwaysEndsInOutputStep(definition),
     returnedOutputs,
   };
 

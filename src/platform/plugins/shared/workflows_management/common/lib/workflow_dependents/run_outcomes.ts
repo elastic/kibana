@@ -351,6 +351,48 @@ export const findAlwaysFailure = <Failure>(
   return regions ? evaluate(regions, steps).failure : undefined;
 };
 
+// Every step might fail, and `workflow.output` steps end the run as their status says.
+const UNKNOWN_STEPS: StepFailures<true> = {
+  callFailure: () => undefined,
+  endStepFailure: ({ status = 'completed' }) => {
+    if (status === 'completed') {
+      return undefined;
+    }
+    return status === 'failed' || status === 'cancelled' ? true : 'mayFail';
+  },
+};
+
+/**
+ * Whether every run of the workflow ends in a `workflow.output` (or `workflow.fail`) step, or
+ * fails. Otherwise a run can complete without one, and callers get its last step's output. False
+ * when the workflow doesn't compile into a graph whose every node is known here.
+ */
+export const alwaysEndsInOutputStep = (definition: unknown): boolean => {
+  const regions = getRegions(definition);
+  if (!regions) {
+    return false;
+  }
+  const { endings } = evaluate(regions, UNKNOWN_STEPS);
+  return [...endings].every((ending) => ending === 'completed' || FAILURES.has(ending));
+};
+
+const collectOutputSteps = (region: Region): Array<Record<string, unknown>> =>
+  region.children.flatMap((child) => {
+    if (isRegion(child)) {
+      return collectOutputSteps(child);
+    }
+    return child.node.type === 'workflow.output' ? [getConfiguration(child.node)] : [];
+  });
+
+/**
+ * The `workflow.output` steps the engine might run (`workflow.fail` compiles to one with status
+ * `failed`), including fallbacks; undefined when the workflow doesn't compile.
+ */
+export const getOutputSteps = (definition: unknown): Array<Record<string, unknown>> | undefined => {
+  const regions = getRegions(definition);
+  return regions ? collectOutputSteps(regions) : undefined;
+};
+
 // Whether a failure raised in `item` always fails the run: nothing it passes through on the way
 // out of the workflow might catch it.
 const errorEscapes = <Failure>(item: Region | Leaf, steps: StepFailures<Failure>): boolean => {

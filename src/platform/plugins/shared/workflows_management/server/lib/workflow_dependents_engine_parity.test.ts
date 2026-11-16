@@ -20,12 +20,19 @@ import { findRunFailure } from '../../common/lib/workflow_dependents/analyze_dep
  * step that may succeed or fail. The analyzer sees `FAIL` as a call to a turned-off workflow. The
  * engine runs every combination of `MAYBE` outcomes and of the boolean inputs `a` and `b`; the
  * workflow fails every run when all of those runs fail.
+ *
+ * A third placeholder, `CALL`, runs another fixture workflow. The analyzer sees a real call. The
+ * engine fixture can't run child workflows, so each one runs first, and its call then becomes a
+ * step that fails as its runs did: `FAIL` when they all failed, `MAYBE` when some did, and a
+ * passing step when none did (or the call doesn't wait for the run).
  */
 
 type Fixture = Record<string, unknown>;
 
 const failingStep = { type: 'slack', 'connector-id': FakeConnectors.constantlyFailing.name };
 const passingStep = { type: 'slack', 'connector-id': FakeConnectors.slack1.name };
+
+const PLACEHOLDERS = new Set(['FAIL', 'MAYBE', 'CALL']);
 
 const mapPlaceholders = (
   value: unknown,
@@ -40,7 +47,7 @@ const mapPlaceholders = (
   const record = Object.fromEntries(
     Object.entries(value).map(([key, child]) => [key, mapPlaceholders(child, replace)])
   );
-  return record.type === 'FAIL' || record.type === 'MAYBE' ? replace(record) : record;
+  return PLACEHOLDERS.has(String(record.type)) ? replace(record) : record;
 };
 
 const maybeStepNames = (fixture: Fixture): string[] => {
@@ -62,11 +69,32 @@ const forEngine = (fixture: Fixture, failingMaybes: ReadonlySet<string>): Fixtur
   })) as Fixture;
 
 const forAnalyzer = (fixture: Fixture): Fixture =>
-  mapPlaceholders(fixture, ({ type, ...step }) =>
-    type === 'FAIL'
+  mapPlaceholders(fixture, ({ type, to, async: isAsync, ...step }) => {
+    if (type === 'CALL') {
+      const stepType = isAsync ? 'workflow.executeAsync' : 'workflow.execute';
+      return { ...step, type: stepType, with: { 'workflow-id': to } };
+    }
+    return type === 'FAIL'
       ? { ...step, type: 'workflow.execute', with: { 'workflow-id': 'broken' } }
-      : { ...step, ...passingStep, with: { message: String(step.name) } }
-  ) as Fixture;
+      : { ...step, ...passingStep, with: { message: String(step.name) } };
+  }) as Fixture;
+
+type EngineVerdict = 'fails' | 'completes' | 'mixed';
+
+// A step that runs a workflow fails when that run doesn't complete; one that doesn't wait for it
+// only starts it.
+const substituteCalls = (fixture: Fixture, verdicts: Record<string, EngineVerdict>): Fixture =>
+  mapPlaceholders(fixture, (step) => {
+    const { type, to, async: isAsync, ...rest } = step;
+    if (type !== 'CALL') {
+      return step;
+    }
+    const verdict = isAsync ? 'completes' : verdicts[String(to)];
+    if (verdict === 'completes') {
+      return { ...rest, ...passingStep, with: { message: String(rest.name) } };
+    }
+    return { ...rest, type: verdict === 'fails' ? 'FAIL' : 'MAYBE' };
+  }) as Fixture;
 
 const subsets = <T>(items: readonly T[]): T[][] =>
   items.reduce<T[][]>((all, item) => [...all, ...all.map((subset) => [...subset, item])], [[]]);
@@ -277,12 +305,89 @@ const FIXTURES: Record<string, Fixture> = {
   },
 };
 
+// Workflows that run each other with `CALL` steps (`to`, and `async` for `workflow.executeAsync`).
+// The last one listed is the one checked.
+const CALL_FIXTURES: Record<string, Record<string, Fixture>> = {
+  'a call to a workflow that fails every run': {
+    child: { steps: [failing('f')] },
+    parent: { steps: [{ name: 'c', type: 'CALL', to: 'child' }] },
+  },
+  'a call to a workflow that ends every run failed': {
+    child: { steps: [maybe('m'), { name: 'stop', type: 'workflow.fail', with: {} }] },
+    parent: { steps: [{ name: 'c', type: 'CALL', to: 'child' }] },
+  },
+  'a call that continues, to a workflow that fails every run': {
+    child: { steps: [failing('f')] },
+    parent: { steps: [{ name: 'c', type: 'CALL', to: 'child', 'on-failure': { continue: true } }] },
+  },
+  'a call that starts, without waiting, a workflow that fails every run': {
+    child: { steps: [failing('f')] },
+    parent: { steps: [{ name: 'c', type: 'CALL', to: 'child', async: true }] },
+  },
+  'a call to a workflow that may fail': {
+    child: { steps: [maybe('m')] },
+    parent: { steps: [{ name: 'c', type: 'CALL', to: 'child' }] },
+  },
+  'a call to a workflow that fails only in one branch': {
+    child: { steps: [ifA('i', [failing('f')])] },
+    parent: { steps: [{ name: 'c', type: 'CALL', to: 'child' }] },
+  },
+  'a call to a workflow whose fallback completes the run': {
+    child: { steps: [failing('f', { 'on-failure': { fallback: [done] } })] },
+    parent: { steps: [{ name: 'c', type: 'CALL', to: 'child' }] },
+  },
+  'a chain of calls to a workflow that fails every run': {
+    grandchild: { steps: [failing('f')] },
+    child: { steps: [maybe('m'), { name: 'g', type: 'CALL', to: 'grandchild' }] },
+    parent: { steps: [ifA('i', [done]), { name: 'c', type: 'CALL', to: 'child' }] },
+  },
+  'a fallback that calls a workflow that fails every run': {
+    child: { steps: [failing('f')] },
+    parent: {
+      steps: [
+        maybe('m', {
+          'on-failure': { fallback: [{ name: 'c', type: 'CALL', to: 'child' }, done] },
+        }),
+        output('stop', {}, 'failed'),
+      ],
+    },
+  },
+};
+
 const getStatus = (fixture: WorkflowRunFixture) =>
   fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id')
     ?.status;
 
+const toVerdict = (statuses: readonly string[]): EngineVerdict => {
+  const failed = statuses.filter(
+    (status) => status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED
+  ).length;
+  if (failed === statuses.length) {
+    return 'fails';
+  }
+  return failed === 0 && statuses.every((status) => status === ExecutionStatus.COMPLETED)
+    ? 'completes'
+    : 'mixed';
+};
+
+const BROKEN = { id: 'broken', name: 'broken', enabled: false, definition: { steps: [] } };
+
 describe('dependents analysis parity with the engine', () => {
   let workflowRunFixture: WorkflowRunFixture;
+
+  // The statuses of every run of `fixture`: for each outcome of its `MAYBE` steps, and each input.
+  const runEverywhere = async (fixture: Fixture): Promise<string[]> => {
+    const statuses: string[] = [];
+    for (const failingMaybes of subsets(maybeStepNames(fixture))) {
+      const workflowYaml = YAML.stringify(forEngine(fixture, new Set(failingMaybes)));
+      for (const inputs of INPUTS) {
+        await workflowRunFixture.runWorkflow({ workflowYaml, inputs });
+        await workflowRunFixture.driveToTerminal();
+        statuses.push(String(getStatus(workflowRunFixture)));
+      }
+    }
+    return statuses;
+  };
 
   beforeEach(() => {
     workflowRunFixture = new WorkflowRunFixture();
@@ -291,30 +396,41 @@ describe('dependents analysis parity with the engine', () => {
   it.each(Object.entries(FIXTURES))(
     'agrees on whether every run fails: %s',
     async (_name, fixture) => {
-      const statuses: string[] = [];
-      for (const failingMaybes of subsets(maybeStepNames(fixture))) {
-        const workflowYaml = YAML.stringify(forEngine(fixture, new Set(failingMaybes)));
-        for (const inputs of INPUTS) {
-          await workflowRunFixture.runWorkflow({ workflowYaml, inputs });
-          await workflowRunFixture.driveToTerminal();
-          statuses.push(String(getStatus(workflowRunFixture)));
-        }
-      }
-      const engineFailsEveryRun = statuses.every(
-        (status) => status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED
-      );
-
+      const statuses = await runEverywhere(fixture);
       const analyzerFailure = findRunFailure(
         { id: 'w', name: 'w', enabled: true, definition: forAnalyzer(fixture) },
-        [{ id: 'broken', name: 'broken', enabled: false, definition: { steps: [] } }]
+        [BROKEN]
       );
 
       expect({
         analyzerFailsEveryRun: analyzerFailure !== undefined,
         engineStatuses: [...new Set(statuses)].sort(),
       }).toEqual({
-        analyzerFailsEveryRun: engineFailsEveryRun,
+        analyzerFailsEveryRun: toVerdict(statuses) === 'fails',
         engineStatuses: [...new Set(statuses)].sort(),
+      });
+    }
+  );
+
+  it.each(Object.entries(CALL_FIXTURES))(
+    'agrees on whether every run fails across workflows: %s',
+    async (_name, workflows) => {
+      const verdicts: Record<string, EngineVerdict> = {};
+      for (const [id, fixture] of Object.entries(workflows)) {
+        verdicts[id] = toVerdict(await runEverywhere(substituteCalls(fixture, verdicts)));
+      }
+      const items = Object.entries(workflows).map(([id, fixture]) => ({
+        id,
+        name: id,
+        enabled: true,
+        definition: forAnalyzer(fixture),
+      }));
+      const checked = items[items.length - 1];
+      const analyzerFailure = findRunFailure(checked, [...items.slice(0, -1), BROKEN]);
+
+      expect({ analyzerFailsEveryRun: analyzerFailure !== undefined, verdicts }).toEqual({
+        analyzerFailsEveryRun: verdicts[checked.id] === 'fails',
+        verdicts,
       });
     }
   );

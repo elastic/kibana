@@ -15,8 +15,11 @@ import { createWorkflowLiquidEngine, extractTemplateVariables } from '@kbn/workf
 import { parsePath } from '@kbn/workflows/common/utils/zod';
 import { isDynamicValue, isRecord } from '@kbn/workflows-yaml';
 import type { WorkflowCallSite, WorkflowExecuteStepType } from './types';
-import { isCompletingOutputStep } from '../get_returned_output_names';
 import { WORKFLOW_EXECUTE_TYPES, WORKFLOW_REFERENCE_KEY } from '../import';
+
+/** Whether a step is a `workflow.output` that completes the run; `failed` and `cancelled` fail the call. */
+export const isCompletingOutputStep = (step: Record<string, unknown>): boolean =>
+  step.type === 'workflow.output' && (step.status === undefined || step.status === 'completed');
 
 /** True for values rendered at runtime (`{{ }}`, `{% %}` or `${{ }}`), which cannot be checked statically. */
 export const isTemplatedValue = (value: unknown): boolean =>
