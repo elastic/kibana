@@ -311,7 +311,7 @@ groups:
 
       - setting: xpack.actions.inboundEvents.rateLimit.maxKeys
         description: |
-          Maximum number of rate-limit keys this process keeps. A new key is rejected when the map is full and no key has expired.
+          Maximum number of keys in each rate-limit map on this process. Failed authentications and authenticated requests each have their own map, and this limit applies to each one. The default of 10000 allows up to 20000 keys on the process. A new key is rejected when its map is full and no key in that map has expired.
         datatype: int
         default: 10000
         options:
@@ -326,7 +326,7 @@ groups:
 
       - setting: xpack.actions.inboundEvents.rateLimit.remoteAddress.limit
         description: |
-          Failed inbound-event authentications allowed from one socket address during `xpack.actions.inboundEvents.rateLimit.remoteAddress.window`. A successful request does not count. {{kib}} uses the socket address and does not read `X-Forwarded-For`.
+          Failed inbound-event authentications allowed for one socket address and one connector during `xpack.actions.inboundEvents.rateLimit.remoteAddress.window`. The key includes the space, the connector type, and the connector ID, so one address has a separate allowance for each connector. A successful request does not count. {{kib}} uses the socket address and does not read `X-Forwarded-For`.
         datatype: int
         default: 10
         options:
@@ -341,7 +341,7 @@ groups:
 
       - setting: xpack.actions.inboundEvents.rateLimit.remoteAddress.window
         description: |
-          Length of the failed-authentication window for one socket address. The time is a number and a unit (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, or `Y`).
+          Length of the failed-authentication window for one socket address and connector. The time is a positive integer and a unit (`s`, `m`, `h`, or `d`). For example, `30s`, `5m`, `1h`, or `1d`.
         datatype: string
         default: 1m
         applies_to:
@@ -369,7 +369,7 @@ groups:
 
       - setting: xpack.actions.inboundEvents.rateLimit.connector.window
         description: |
-          Length of the authenticated-request window for one connector. The time is a number and a unit (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, or `Y`).
+          Length of the authenticated-request window for one connector. The time is a positive integer and a unit (`s`, `m`, `h`, or `d`). For example, `30s`, `5m`, `1h`, or `1d`.
         datatype: string
         default: 1m
         applies_to:
