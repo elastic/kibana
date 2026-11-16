@@ -435,7 +435,7 @@ describe('renderDriftIssue', () => {
     expect(body).not.toContain('`search` passes');
     expect(body.indexOf('| `search` |')).toBeLessThan(body.indexOf('| `getItem` |'));
     expect(body).toContain(
-      '| `search` | `GET /items` | ❌ Fails against the latest spec: GET /items breaks the spec: limit must be <= 50 |'
+      '| `search` | `GET /items` | ❌ Fails against the latest spec: `GET /items` limit must be <= 50 |'
     );
     expect(body).toContain('| `getItem` | `GET /items/{id}` | ✅ Passes |');
     expect(body).toContain('<details><summary>2 spec changes</summary>');
@@ -664,6 +664,35 @@ describe('renderDriftIssue', () => {
       '| Pagination not declared | `GET /items` (`main`) | returns a collection, as it returns an array | Declare its `pagination` in `manifest.json`, or `"none"` |'
     );
     expect(body).toContain('| Other | — | something the renderer does not recognise | — |');
+  });
+
+  it.each([
+    [
+      'POST https://api.example.com/scan/ breaks the spec: Request body at /tags/0: String is too long (64 > 30).',
+      '`POST https://api.example.com/scan/` Request body at `/tags/0`: String is too long (`64` > `30`).',
+    ],
+    [
+      'GET /items/string/ matches no operation of any source; correct the spec in overlay.yaml, or add it to "unmatched" in manifest.json with a reason',
+      '`GET /items/string/` matches no operation of any source; correct the spec in `overlay.yaml`, or add it to `unmatched` in `manifest.json` with a reason',
+    ],
+    [
+      "has scope 'read' but sent POST https://example.com/_query; if the operation only queries, add it to the action's \"queries\" in fixtures.json, otherwise correct the scope",
+      "has scope `read` but sent `POST https://example.com/_query`; if the operation only queries, add it to the action's `queries` in `fixtures.json`, otherwise correct the scope",
+    ],
+  ])('quotes what a failure names in code spans: %s', (problem, quoted) => {
+    const { body } = renderDriftIssue(
+      {
+        ...drifted,
+        actions: drifted.actions?.map((action) =>
+          action.action === 'search' ? { ...action, latestProblems: [problem] } : action
+        ),
+      },
+      { owners: [] }
+    );
+
+    expect(body).toContain(
+      `| \`search\` | \`GET /items\` | ❌ Fails against the latest spec: ${quoted} |`
+    );
   });
 
   it('counts an unmatched action that fails against the latest spec as checked', () => {

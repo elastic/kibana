@@ -281,8 +281,56 @@ const issueLinksOf = (reason: string): string[] =>
     ([url, number]) => `[#${number}](${url})`
   );
 
+type Replacer = (match: string, ...groups: string[]) => string;
+
+// Applies `replace` to the text outside code spans only.
+const outsideCode = (text: string, pattern: RegExp, replace: Replacer): string =>
+  text
+    .split(/(`[^`]*`)/)
+    .map((part, index) =>
+      index % 2 === 1
+        ? part
+        : part.replace(pattern, (match, ...groups) => replace(match, ...groups))
+    )
+    .join('');
+
+const HTTP_METHOD = '(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)';
+
+// What a problem quotes, in code spans: the request, JSON pointers, the values compared, quoted
+// values, header names and the artifacts to fix.
+const PROBLEM_CODE_SPANS: ReadonlyArray<readonly [RegExp, Replacer]> = [
+  // `POST https://api.example.com/scan breaks the spec: …` names the request, then why.
+  [
+    new RegExp(`^(${HTTP_METHOD} \\S+) breaks the spec: `),
+    (_: string, request: string) => `${code(request)} `,
+  ],
+  [new RegExp(`\\b(${HTTP_METHOD} [^\\s;,]+)`, 'g'), (_: string, request: string) => code(request)],
+  [/\bat (\/[^\s:]*):/g, (_: string, pointer: string) => `at ${code(pointer)}:`],
+  [
+    /(-?\d+(?:\.\d+)?) (is (?:greater|less) than(?: or equal to)?) (-?\d+(?:\.\d+)?)/g,
+    (_: string, value: string, comparison: string, limit: string) =>
+      `${code(value)} ${comparison} ${code(limit)}`,
+  ],
+  [
+    /\((\d+) ([<>]=?) (\d+)\)/g,
+    (_: string, value: string, comparison: string, limit: string) =>
+      `(${code(value)} ${comparison} ${code(limit)})`,
+  ],
+  [/"([^"]+)"/g, (_: string, quoted: string) => code(quoted)],
+  [/'(\w+)'/g, (_: string, quoted: string) => code(quoted)],
+  [/\bexpected header (\S+)/g, (_: string, name: string) => `expected header ${code(name)}`],
+  [/\bexpected ([A-Z][\w-]*: \S+)/g, (_: string, header: string) => `expected ${code(header)}`],
+  [/\b(overlay\.yaml|manifest\.json|fixtures\.json)\b/g, (_: string, file: string) => code(file)],
+];
+
+const problemText = (problem: string): string =>
+  PROBLEM_CODE_SPANS.reduce(
+    (text, [pattern, replace]) => outsideCode(text, pattern, replace),
+    problem
+  );
+
 const firstProblem = (problems: readonly string[]): string =>
-  `${problems[0]}${
+  `${problemText(problems[0])}${
     problems.length > 1 ? ` (and ${plural(problems.length - 1, 'more problem')})` : ''
   }`;
 
