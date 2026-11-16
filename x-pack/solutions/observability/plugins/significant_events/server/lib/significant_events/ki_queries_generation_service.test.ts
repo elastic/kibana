@@ -9,6 +9,10 @@ import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
+import {
+  NightshiftModelBlockedError,
+  NightshiftModelNotFoundError,
+} from '@kbn/significant-events-schema';
 import type { EbtTelemetryClient } from '../telemetry/ebt';
 import {
   generateKIQueries,
@@ -91,6 +95,11 @@ describe('generateKIQueries', () => {
   });
 
   it('returns generated queries and reports telemetry', async () => {
+    const now = jest
+      .spyOn(Date, 'now')
+      .mockReturnValueOnce(100)
+      .mockReturnValueOnce(200)
+      .mockReturnValueOnce(260);
     const telemetry = {
       trackSignificantEventsQueriesGenerated: jest.fn(),
     } as unknown as EbtTelemetryClient;
@@ -148,9 +157,11 @@ describe('generateKIQueries', () => {
         source_id: 'source-1',
         input_tokens_used: 10,
         output_tokens_used: 20,
+        duration_ms: 60,
       }),
       expect.anything()
     );
+    now.mockRestore();
   });
 
   it('uses the canonical connector returned by model resolution', async () => {
@@ -251,17 +262,36 @@ describe('generateKIQueries', () => {
       );
     });
 
-    it('reports model resolution failures without an unresolved connector id', async () => {
+    it('reports an unknown requested model without an unresolved connector id', async () => {
       const telemetry = createFailureTelemetry();
-      const resolveModel = jest.fn().mockRejectedValue(new Error('model resolution failed'));
+      const resolveModel = jest
+        .fn()
+        .mockRejectedValue(new NightshiftModelNotFoundError('missing-model'));
 
       await expect(
         generate(telemetry, new AbortController().signal, { resolveModel })
-      ).rejects.toThrow('model resolution failed');
+      ).rejects.toThrow('Model "missing-model" was not found');
 
       const [[reported]] = telemetry.trackSignificantEventsQueriesGenerationFailed.mock.calls;
-      expect(reported).toEqual(expect.objectContaining({ error_code: 'internal_error' }));
+      expect(reported).toEqual(expect.objectContaining({ error_code: 'model_not_found' }));
       expect(reported).not.toHaveProperty('connector_id');
+      expect(executeKIQueryGenerationAgentMock).not.toHaveBeenCalled();
+    });
+
+    it('reports a model blocked by the default-connector setting', async () => {
+      const telemetry = createFailureTelemetry();
+      const resolveModel = jest
+        .fn()
+        .mockRejectedValue(new NightshiftModelBlockedError('blocked-model', 'default-model'));
+
+      await expect(
+        generate(telemetry, new AbortController().signal, { resolveModel })
+      ).rejects.toThrow('Default connector only');
+
+      expect(telemetry.trackSignificantEventsQueriesGenerationFailed).toHaveBeenCalledWith(
+        expect.objectContaining({ error_code: 'model_blocked' }),
+        expect.anything()
+      );
       expect(executeKIQueryGenerationAgentMock).not.toHaveBeenCalled();
     });
 

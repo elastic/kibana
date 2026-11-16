@@ -8,7 +8,11 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import type { SignificantEventsQueriesGenerationResult } from '@kbn/significant-events-schema';
+import {
+  NightshiftModelBlockedError,
+  NightshiftModelNotFoundError,
+  type SignificantEventsQueriesGenerationResult,
+} from '@kbn/significant-events-schema';
 import type {
   EbtTelemetryClient,
   KnowledgeIndicatorQueriesGenerationFailureCode,
@@ -42,6 +46,12 @@ const toGenerationFailureCode = (
   error: unknown,
   signal: AbortSignal
 ): KnowledgeIndicatorQueriesGenerationFailureCode => {
+  if (error instanceof NightshiftModelNotFoundError) {
+    return 'model_not_found';
+  }
+  if (error instanceof NightshiftModelBlockedError) {
+    return 'model_blocked';
+  }
   if (error instanceof KIQueryGenerationAgentError) {
     return error.reason;
   }
@@ -62,9 +72,9 @@ export async function generateKIQueries(
   } = params;
   const { kiClient, agentBuilder, resolveModel, request, logger, signal, telemetry } = deps;
 
-  const startedAt = Date.now();
+  const attemptStartedAt = Date.now();
   let resolvedConnectorId: string | undefined;
-  const { queries, tokensUsed, connectorId } = await (async () => {
+  const { queries, tokensUsed, connectorId, durationMs } = await (async () => {
     const canonicalConnectorId = await resolveModel(connectorIdOverride);
     resolvedConnectorId = canonicalConnectorId;
 
@@ -80,6 +90,7 @@ export async function generateKIQueries(
       esql: query.esql.query,
     }));
 
+    const agentStartedAt = Date.now();
     const result = await executeKIQueryGenerationAgent({
       agentBuilder,
       request,
@@ -91,7 +102,11 @@ export async function generateKIQueries(
       signal,
       logger: logger.get('significant_events_queries_generation'),
     });
-    return { ...result, connectorId: canonicalConnectorId };
+    return {
+      ...result,
+      connectorId: canonicalConnectorId,
+      durationMs: Date.now() - agentStartedAt,
+    };
   })().catch((error: unknown) => {
     try {
       telemetry.trackSignificantEventsQueriesGenerationFailed(
@@ -101,7 +116,7 @@ export async function generateKIQueries(
           error_code: toGenerationFailureCode(error, signal),
           ...(resolvedConnectorId !== undefined ? { connector_id: resolvedConnectorId } : {}),
           source_id: source.id,
-          duration_ms: Date.now() - startedAt,
+          duration_ms: Date.now() - attemptStartedAt,
         },
         request
       );
@@ -114,8 +129,6 @@ export async function generateKIQueries(
     }
     throw error;
   });
-  const durationMs = Date.now() - startedAt;
-
   telemetry.trackSignificantEventsQueriesGenerated(
     {
       workflow_execution_id: workflowExecutionId,

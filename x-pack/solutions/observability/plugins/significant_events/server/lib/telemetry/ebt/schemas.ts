@@ -1033,7 +1033,7 @@ const knowledgeIndicatorQueriesGenerationFailedSchema: RootSchema<KnowledgeIndic
       type: 'keyword',
       _meta: {
         description:
-          'Why this attempt failed: agent_did_not_finalize (the agent ended without a finalized validate_queries result), unexpected_source (it finalized for another source), aborted (the request was cancelled), or internal_error. The event is reported once per failed attempt and the queries generation workflow retries, so several can share a workflow_execution_id; the run failed only when no queries-generated event follows under that id',
+          'Why this attempt failed: agent_did_not_finalize (the agent ended without a finalized validate_queries result), unexpected_source (it finalized for another source), model_not_found, model_blocked, aborted (the request was cancelled), or internal_error. The event is reported once per failed attempt and the queries generation workflow retries, so several can share a workflow_execution_id; the run failed only when no queries-generated event follows under that id',
       },
     },
     connector_id: {
@@ -1053,7 +1053,8 @@ const knowledgeIndicatorQueriesGenerationFailedSchema: RootSchema<KnowledgeIndic
     duration_ms: {
       type: 'long',
       _meta: {
-        description: 'Time spent in the query generation agent before it failed, in milliseconds',
+        description:
+          'Wall-clock duration of the failed generation attempt, including model resolution and context loading, in milliseconds',
       },
     },
   };

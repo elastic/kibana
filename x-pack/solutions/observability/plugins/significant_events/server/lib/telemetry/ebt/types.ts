@@ -276,6 +276,8 @@ interface AgentToolFailedProps
 type KnowledgeIndicatorQueriesGenerationFailureCode =
   | 'agent_did_not_finalize'
   | 'unexpected_source'
+  | 'model_not_found'
+  | 'model_blocked'
   | 'aborted'
   | 'internal_error';
 
