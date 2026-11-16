@@ -50,6 +50,34 @@ Record the result in the PR description's `## Actions` section (see
 [reference/pr-validation-table.md](reference/pr-validation-table.md)), and start your report with it,
 so the user can change the set before the connector is tested.
 
+### Choose the inbound events
+
+Decide this in the same pass as the actions, before writing handlers. Add `events` when the vendor
+can POST a webhook, subscription, or callback that should start a workflow, open or update a case,
+or raise an alert. The user asking for bi-directional sync, response-ops style, or "the same
+connector for cases and alerts" means a dual spec, not a second connector and not a classic
+ActionType.
+
+If the invocation lists event keys, build those. Otherwise propose the set: one typed event per
+vendor occurrence a workflow, case, or alert will actually use (created, updated, resolved, a
+comment), and leave the rest of the vendor catalog out. Say which occurrences you are not modeling.
+A connector that only calls the vendor gets no `events`; say that explicitly in the report.
+
+Do not declare `events` on the first PR that introduces the connector type. Record the agreed event
+keys in that PR's description as the required follow-up. Add `events` only in the follow-up that also
+adds `'workflows'`, once the type is registered in every Production-NonCanary version (Step 2).
+
+`getConnectorEventTriggerDefinitions()` publishes a trigger for every definition without reading
+`supportedFeatureIds`, and `getAvailableConnectors()` includes event connector types even when
+`'workflows'` is absent. Keeping `['agentBuilder']` and writing the docs as "not available yet" does
+not hide the triggers. A workflow saved against the new event id breaks on a rollout or rollback node
+that does not have the type.
+
+An inbound-only connector uses the same split. The first PR registers the type with no `events`. The
+follow-up adds `events` and `supportedFeatureIds: ['workflows']` (see `.inboundWebhook`). An existing
+connector that is already on every Production-NonCanary version can take `events` in the PR that adds
+them.
+
 ### Research the vendor API before writing schemas or handlers
 
 For a custom (non-MCP) connector, do this before Step 2. Start from the vendor's own machine-readable
@@ -103,10 +131,15 @@ Serverless rollouts and rollbacks leave nodes on different Kibana versions for a
 referencing a connector type that a node does not have breaks on that node. So the first PR ships
 `supportedFeatureIds: ['agentBuilder']`.
 
-Do not put `'workflows'` or any other user-facing feature ID in the first PR. Those are added in a
-follow-up PR once the connector is registered in every Production-NonCanary version.
+Do not put `'workflows'` or any other user-facing feature ID in the first PR. Do not declare `events`
+either. Workflow triggers come from `events.definitions` with no `supportedFeatureIds` check, and the
+workflows connector list adds event connector types back in when `'workflows'` is missing, so the
+feature id does not gate them. Both land in the follow-up PR once the connector is registered in every
+Production-NonCanary version.
 
-Mention the required follow-up PR in the first PR's description so it is not forgotten.
+Mention the required follow-up PR, including the agreed event keys, in the first PR's description so
+it is not forgotten. When this invocation is that follow-up, or the connector type is already on every
+Production-NonCanary version, add `'workflows'` and `events` together.
 
 **MCP connectors**: Use [reference/mcp-connector-setup.md](reference/mcp-connector-setup.md) as the direct starting template for the spec — it has concrete, copy-ready examples with the correct `lazySchema`, `callToolJson`/`callToolContent`, and test-mock patterns already in place. Do not reverse-engineer from existing connectors.
 
@@ -123,13 +156,42 @@ Wrap the spec's `schema` and any inline action `input` the same way. `lazySchema
 schema until first use, so loading the connector registry does not build every connector's schemas at
 import time.
 
-**Keep `test.enabled: true`.** The scaffold generates `test: { enabled: true, handler: ... }` — don't
-drop `enabled` when you flesh out the handler body.
+**Keep `test.enabled: true` on a connector that calls the vendor.** The scaffold generates
+`test: { enabled: true, handler: ... }` — don't drop `enabled` when you flesh out the handler body.
+An inbound-only spec (`actions: {}`) keeps `enabled: false`. Test is an outbound call.
 
-**Do not add `events`.** Optional inbound `ConnectorSpec.events` is gated by
-`SPECS_ALLOWED_EVENTS` in `src/specs_allowed_events.ts`. Omit `events` unless the
-connector id is in that allowlist (connectors may eventually declare both `actions` and
-`events`). 
+**Add inbound `events` when the vendor pushes them, on the rollout-safe PR.** Bi-directional
+connectors — cases, alerting, and workflows that start from the vendor — use this same spec:
+outbound `actions` and inbound `events`. Follow [Inbound events](../../../README.md#inbound-events)
+in the package README and [Inbound events](reference/connector-patterns.md#inbound-events) here.
+Omit `events` when the connector never receives a webhook, subscription, or callback.
+
+On the first PR for a new connector type, do not add `events`, the allowlist entry, or the ingest
+section of the docs page. The event keys from [Choose the inbound events](#choose-the-inbound-events)
+go in the PR description as the follow-up. Build them when this invocation is that follow-up.
+
+1. Add `metadata.id` to `SPECS_ALLOWED_EVENTS` in `src/specs_allowed_events.ts` in the same change.
+   The contract test rejects `events` on an id that is not in the set.
+2. Put definitions and `handleEvents` in `{connector}/events.ts`. Schemas go in `types.ts` or
+   `event_schemas.ts`, each wrapped in `lazySchema()`. Assign the export to `events` on the spec,
+   next to `actions`. Do not spread it into `actions`.
+3. Keep the outbound `actions` on a dual connector. An inbound-only connector (nothing to call on
+   the vendor) uses `actions: {}` and `test.enabled: false`.
+4. One typed event per product event you can name and a workflow, case, or alert will use.
+   `eventId` is `buildEventId(metadata.id, definitionKey)`. `title` and `description` use
+   `i18n.translate`.
+5. `handleEvents` emits that id for a recognized body and `{ type: 'emit', events: [] }` otherwise.
+   A vendor handshake (URL verification, `validationToken`, a top-level `challenge`) returns
+   `{ type: 'http', httpResponse }` and does not emit. Use a vendor id as `correlationKey` when
+   the payload has one (max 128 characters); use a UUID only when it does not.
+6. Do not put `ingestTokenHash` on the schema. Do not read secrets in `handleEvents`. `events.headers`
+   lists only lowercase names, and never `authorization` or `cookie`. Do not log `rawBody` at info.
+7. Add `{connector}/events.test.ts` (Step 4). Document the ingest URL, the token, and an example
+   payload on the connector docs page (Step 5).
+
+Copy a shipped spoke: `servicenow_search/events.ts` for typed case events, `github/events.ts` for a
+header allowlist, `slack/events.ts` for several keys plus an HTTP ack on emit, `inbound_webhook.ts`
+for an opaque body. 
 
 Replace the placeholder icon with a proper brand icon. Do NOT generate an icon, use the official brand icon or tell the
 user you could not find one. Search for existing SVG/PNG files in:
@@ -192,6 +254,11 @@ skill: [
 Add tests following the existing examples:
 
 1. **Connector spec tests** — See `google_drive/google_drive.test.ts` or `slack/slack.test.ts` for the pattern.
+2. **Inbound event tests**, when the spec has `events` — `{connector}/events.test.ts`, following
+   `servicenow_search/events.test.ts` or `github/events.test.ts`. Assert the id is allowlisted, every
+   `eventId` equals `buildEventId`, a recognized body emits that id and passes `validateEmittedEvents`,
+   an unrecognized body emits nothing, and a handshake (if the vendor has one) returns `type: 'http'`
+   without emitting. Prefer the vendor id as `correlationKey` in the recognized case.
 
 You do not need to execute the tests — just create the files. You should, however, run
 `node scripts/eslint <path>` on every file you create or edit (including test files) before moving on.
@@ -384,7 +451,15 @@ Then, before treating the connector as done, re-read the whole diff once, end to
 - Handlers still typed with implicit `any` (missing the `input: XInput` annotation)
 - A Zod schema assigned to a variable (`const XSchema = z.…`), or a spec `schema` / inline action
   `input`, that is not wrapped in `lazySchema(() => ...)`
-- `test.enabled` missing or set to `false`
+- `test.enabled` missing or set to `false` on a connector that has outbound actions. An inbound-only
+  spec keeps `test.enabled: false`
+- `events` on the first PR for a new connector type. They belong in the follow-up that adds
+  `'workflows'`, once the type is on every Production-NonCanary version
+- `events` missing on that follow-up when the first PR recorded event keys, or `events` present
+  while `metadata.id` is absent from `SPECS_ALLOWED_EVENTS`
+- an `eventId` that is not `buildEventId(metadata.id, definitionKey)`, a payload with secrets, or
+  `events.headers` containing `authorization`, `cookie`, or a mixed-case name
+- `handleEvents` logging `rawBody` at info, or `ingestTokenHash` declared on the connector schema
 - Leftover schemas/constants from earlier iterations that are no longer referenced anywhere
 - Repeated calls to the same helper (e.g. building a base URL twice) that should be a single local variable
 - `z.record(z.string(), ...)` or `z.array(z.record(...))` keys without a `.max()` bound
@@ -460,6 +535,19 @@ This step requires documentation skills from https://github.com/elastic/elastic-
      every row after it renders as raw pipe-delimited text with no header of its own. When you add a note
      about an action, put it below the final row — then count the rendered rows against the number of
      actions to confirm the table is still contiguous.
+
+   The first PR for a new connector type has no `events`, so its page does not document an ingest URL.
+   The follow-up that adds `events` and `'workflows'` documents, in that same page:
+
+   - the ingest URL for this type id
+     (`POST {publicBaseUrl}/s/{spaceId}/api/actions/events/{connector_type_id}/{connector_id}`,
+     with no `/s/{spaceId}` in the `default` space)
+   - how the vendor sends the ingest token (`Authorization: Bearer` or `?token=`)
+   - one example body and the fields on the emitted event
+   - that Receive events is turned on per connector instance, and the token comes from rotate
+
+   An inbound-only connector documents them as available in Workflows, matching
+   `supportedFeatureIds: ['workflows']`, on that same follow-up.
 
 3. Run these skills on the new file and fix any issues:
    - `frontmatter-description` — generate the `description` frontmatter field

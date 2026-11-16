@@ -48,14 +48,7 @@ import {
 } from './lib/slack_app/saved_object';
 import { SlackAppService } from './lib/slack_app/service';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
-import {
-  consumeInvestigationRunQuota,
-  createRunQuotaInternalRepository,
-  dayKey,
-  resolveDailyWindow,
-  runQuotaLedgerSavedObjectType,
-  runQuotaSettingsSavedObjectType,
-} from './lib/run_quotas';
+import { runQuotaLedgerSavedObjectType, runQuotaSettingsSavedObjectType } from './lib/run_quotas';
 import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
@@ -183,25 +176,6 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(sourceKnowledgeStateSavedObjectType);
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
-
-    plugins.nightshiftInvestigations?.registerInvestigationQuota(async (trigger) => {
-      if (!this.server?.core) {
-        throw new Error('Significant Events start services are unavailable');
-      }
-      const result = await consumeInvestigationRunQuota({
-        internalRepository: createRunQuotaInternalRepository(this.server),
-        group: trigger === 'manual' ? 'manual_investigation' : 'investigation',
-        date: dayKey(resolveDailyWindow()),
-      });
-      if (result.allowed) {
-        return result;
-      }
-      return {
-        allowed: false,
-        deniedBy: result.deniedBy === 'total_investigation' ? 'all' : trigger,
-        limit: result.limit,
-      };
-    });
 
     core.dataStreams.registerDataStream(detectionsDataStream);
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);

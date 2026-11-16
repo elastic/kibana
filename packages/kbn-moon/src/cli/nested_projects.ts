@@ -14,7 +14,6 @@
  */
 export const NESTED_PROJECT_ANCESTORS_ALLOWLIST: readonly string[] = [
   'src/platform/packages/shared/kbn-esql-resource-browser',
-  'src/platform/plugins/private/interactive_setup',
   'src/platform/test',
   'x-pack/platform/plugins/shared/osquery',
   'x-pack/platform/test',
