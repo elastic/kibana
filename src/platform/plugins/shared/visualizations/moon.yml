@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/plugins/shared/visualizations
 dependsOn:
   - '@kbn/app-header'
+  - '@kbn/scout'
   - '@kbn/core'
   - '@kbn/charts-plugin'
   - '@kbn/data-plugin'
@@ -51,7 +52,6 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/safer-lodash-set'
   - '@kbn/shared-ux-page-analytics-no-data'
-  - '@kbn/content-management-table-list-view'
   - '@kbn/content-management-tabbed-table-list-view'
   - '@kbn/test-jest-helpers'
   - '@kbn/analytics'
@@ -68,7 +68,6 @@ dependsOn:
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/content-management-table-list-view-table'
   - '@kbn/content-management-tabbed-table-list-view'
-  - '@kbn/content-management-table-list-view'
   - '@kbn/serverless'
   - '@kbn/no-data-page-plugin'
   - '@kbn/logging'
@@ -94,16 +93,19 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/cps-utils'
   - '@kbn/std'
+  - '@kbn/visualizations-components'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks: {}

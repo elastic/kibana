@@ -18,6 +18,7 @@ import { getCombined } from '../helpers/get_combined';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
+import { handleModelRefusal } from '../helpers/handle_model_refusal';
 import type { AttackDiscoveryTemplateCompletion } from '../../../../../attack_discovery/graphs/template_completion';
 
 export const getGenerateNode = <T extends GraphInsightTypes>({
@@ -164,6 +165,8 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         unrefinedResults,
       };
     } catch (error) {
+      handleModelRefusal({ error, logger, nodeName: 'generate', state });
+
       const parsingError = `generate node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
       logger?.debug(

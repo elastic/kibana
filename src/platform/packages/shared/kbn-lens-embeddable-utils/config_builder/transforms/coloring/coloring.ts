@@ -241,7 +241,7 @@ export function getRangeValue(value?: number | null): number | null {
 export function fromColorByValueLensStateToAPI(
   config: PaletteOutput<CustomPaletteParams> | undefined,
   defaultBandCount?: number
-): ColorByValueType | undefined {
+): Exclude<ColorByValueType, { type: 'legacy_dynamic' }> | undefined {
   const colorParams = config?.params;
 
   if (!colorParams) return;

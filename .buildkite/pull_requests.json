@@ -170,6 +170,23 @@
     {
       "repoOwner": "elastic",
       "repoName": "kibana",
+      "pipelineSlug": "kibana-static-checks",
+      "enabled": true,
+      "allow_org_users": true,
+      "allowed_repo_permissions": ["admin", "write"],
+      "allowed_list": ["elastic-vault-github-plugin-prod[bot]"],
+      "set_commit_status": true,
+      "commit_status_context": "kibana-static-checks",
+      "build_on_commit": false,
+      "build_drafts": false,
+      "enable_trigger_checkbox": true,
+      "kibana_versions_check": true,
+      "build_on_comment": true,
+      "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:run)\\W+(?:static)\\W+(?:checks))$"
+    },
+    {
+      "repoOwner": "elastic",
+      "repoName": "kibana",
       "pipelineSlug": "kibana-renovate-helper",
       "skip_ci_labels": [],
       "enabled": true,

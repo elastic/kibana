@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { recursiveRecord } from '../shared/record_types';
 
 /**
@@ -64,6 +64,14 @@ const sourceSchema = z.strictObject({
   ...componentFields,
   path_template: z.string().max(2048).optional(),
 });
+
+export const streamsComponentValidationRequestSchema = lazySchema(() =>
+  z.discriminatedUnion('kind', [
+    z.strictObject({ kind: z.literal('source'), component: sourceSchema }),
+    z.strictObject({ kind: z.literal('processor'), component: componentBaseSchema }),
+    z.strictObject({ kind: z.literal('destination'), component: componentBaseSchema }),
+  ])
+);
 
 const identifierListSchema = z.array(streamsUnitIdentifierSchema).max(2000);
 
@@ -190,45 +198,57 @@ export const MAX_STREAMS_UNIT_STATS_COMPONENTS = 100;
  * Stats request. A component ref is a discriminated union on `kind`. Adding a kind is
  * adding a member.
  */
-export const streamsUnitStatsComponentRefSchema = z.discriminatedUnion('kind', [
-  z.strictObject({ kind: z.literal('destination'), id: streamsUnitIdentifierSchema }),
-  z.strictObject({ kind: z.literal('processor'), id: streamsUnitIdentifierSchema }),
-]);
+export const streamsUnitStatsComponentRefSchema = lazySchema(() =>
+  z.discriminatedUnion('kind', [
+    z.strictObject({ kind: z.literal('destination'), id: streamsUnitIdentifierSchema }),
+    z.strictObject({ kind: z.literal('processor'), id: streamsUnitIdentifierSchema }),
+    z.strictObject({ kind: z.literal('source'), id: streamsUnitIdentifierSchema }),
+  ])
+);
 
-export const streamsUnitStatsFilterSchema = z.strictObject({
-  /**
-   * Omit to read every config hash in the window, with no hash filter. The distributor
-   * generates a 64-character lowercase SHA-256 hex and only requires a non-empty value,
-   * so the 128 cap is headroom, not a format check.
-   */
-  config_hash: z.string().min(1).max(128).optional(),
-  /** Absolute range, ISO 8601. Both fields are required when present. */
-  time_range: z
-    .strictObject({ start: z.iso.datetime(), end: z.iso.datetime() })
-    .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {
-      message: 'time_range.start must be before time_range.end',
-    })
-    .optional(),
-});
+export const streamsUnitStatsFilterSchema = lazySchema(() =>
+  z.strictObject({
+    /**
+     * Omit to read every config hash in the window, with no hash filter. The distributor
+     * generates a 64-character lowercase SHA-256 hex and only requires a non-empty value,
+     * so the 128 cap is headroom, not a format check. Sources ignore it: their metrics come
+     * from the ingest collector, which has no config hash.
+     */
+    config_hash: z.string().min(1).max(128).optional(),
+    /**
+     * Absolute range, ISO 8601. Both fields are required when present. It applies to every
+     * component. A processor instance is a route position, so a range that spans a change of routes
+     * can mix routes: keep it short for processors.
+     */
+    time_range: z
+      .strictObject({ start: z.iso.datetime(), end: z.iso.datetime() })
+      .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {
+        message: 'time_range.start must be before time_range.end',
+      })
+      .optional(),
+  })
+);
 
-export const streamsUnitStatsRequestSchema = z.strictObject({
-  filter: streamsUnitStatsFilterSchema.optional(),
-  /**
-   * Lists the unit components to receive stats on, destinations and processors together, with
-   * no duplicates.
-   * - Omitted: every destination and processor in the unit. This fails with a 400 when the unit
-   *   has more than `MAX_STREAMS_UNIT_STATS_COMPONENTS` of them, so name the components instead.
-   * - An empty array: no components.
-   * - A list: only those components, and nothing from the rest of the unit.
-   */
-  components: z
-    .array(streamsUnitStatsComponentRefSchema)
-    .max(MAX_STREAMS_UNIT_STATS_COMPONENTS)
-    .refine((refs) => new Set(refs.map(({ kind, id }) => `${kind}:${id}`)).size === refs.length, {
-      message: 'components must not contain duplicates',
-    })
-    .optional(),
-});
+export const streamsUnitStatsRequestSchema = lazySchema(() =>
+  z.strictObject({
+    filter: streamsUnitStatsFilterSchema.optional(),
+    /**
+     * Lists the unit components to receive stats on, destinations, processors and sources together,
+     * with no duplicates.
+     * - Omitted: every destination, processor and source in the unit. This fails with a 400 when the
+     *   unit has more than `MAX_STREAMS_UNIT_STATS_COMPONENTS` of them, so name the components instead.
+     * - An empty array: no components.
+     * - A list: only those components, and nothing from the rest of the unit.
+     */
+    components: z
+      .array(streamsUnitStatsComponentRefSchema)
+      .max(MAX_STREAMS_UNIT_STATS_COMPONENTS)
+      .refine((refs) => new Set(refs.map(({ kind, id }) => `${kind}:${id}`)).size === refs.length, {
+        message: 'components must not contain duplicates',
+      })
+      .optional(),
+  })
+);
 
 export const streamsUnitStatsErrorSchema = z.object({
   code: z.string(),
@@ -262,8 +282,10 @@ export const streamsUnitStatsDestinationResultSchema = z.object({
   }),
 });
 
-export const streamsUnitStatsProcessorResultSchema = z.object({
-  error: streamsUnitStatsErrorSchema.optional(),
+export const streamsUnitStatsProcessorInstanceSchema = z.object({
+  pipeline_id: z.string(),
+  /** The position of the route in the pipeline, null for the processors of the pipeline itself. */
+  route_index: z.number().int().nonnegative().nullable(),
   processing_duration: z.object({ average: statsValueSchema }),
   events: z.object({
     incoming: z.object({
@@ -278,20 +300,52 @@ export const streamsUnitStatsProcessorResultSchema = z.object({
   }),
 });
 
-export const streamsUnitStatsMetaSchema = z.object({
-  window: z.object({ start: z.string(), end: z.string() }),
-  /** Config hash that the server filtered on. Absent when the request had no `config_hash`. */
-  config_hash: z.string().optional(),
+export const streamsUnitStatsProcessorResultSchema = z.object({
+  error: streamsUnitStatsErrorSchema.optional(),
+  /**
+   * Where the processor ran in the window, one entry per pipeline and route. Empty when it has no
+   * data. A route is identified by its position as the telemetry reports it, so when routes are
+   * added, removed or reordered a position can mean a different route in an older part of the
+   * window: an instance is only reliable within one unit version.
+   */
+  instances: z.array(streamsUnitStatsProcessorInstanceSchema),
 });
 
-export const streamsUnitStatsResponseSchema = z.object({
-  components: z.object({
-    /** Component references by their IDs. */
-    destinations: z.record(z.string(), streamsUnitStatsDestinationResultSchema),
-    processors: z.record(z.string(), streamsUnitStatsProcessorResultSchema),
-  }),
-  meta: streamsUnitStatsMetaSchema,
-});
+export const streamsUnitStatsSourceResultSchema = lazySchema(() =>
+  z.object({
+    error: streamsUnitStatsErrorSchema.optional(),
+    events: z.object({
+      /**
+       * Items the source accepted, per second: outcome "success". `value` is null when the source
+       * reported nothing in the window, and 0 when it reported only refused or failed items.
+       */
+      accepted: z.object({ rate: statsRateSchema }),
+    }),
+  })
+);
+
+export const streamsUnitStatsMetaSchema = lazySchema(() =>
+  z.object({
+    window: z.object({ start: z.string(), end: z.string() }),
+    /**
+     * Config hash that the server filtered on. Absent when the request had no `config_hash`. It
+     * applies to destinations and processors, not to sources.
+     */
+    config_hash: z.string().optional(),
+  })
+);
+
+export const streamsUnitStatsResponseSchema = lazySchema(() =>
+  z.object({
+    components: z.object({
+      /** Component references by their IDs. */
+      destinations: z.record(z.string(), streamsUnitStatsDestinationResultSchema),
+      processors: z.record(z.string(), streamsUnitStatsProcessorResultSchema),
+      sources: z.record(z.string(), streamsUnitStatsSourceResultSchema),
+    }),
+    meta: streamsUnitStatsMetaSchema,
+  })
+);
 
 export const collectUnitComponentIds = (unit: StreamsUnit.Configuration): string[] => {
   const components: ReadonlyArray<{ id?: unknown }> = [
@@ -336,9 +390,12 @@ export namespace StreamsUnit {
   export type StatsError = z.infer<typeof streamsUnitStatsErrorSchema>;
   export type StatsSeries = z.infer<typeof streamsUnitStatsSeriesSchema>;
   export type StatsDestinationResult = z.infer<typeof streamsUnitStatsDestinationResultSchema>;
+  export type StatsProcessorInstance = z.infer<typeof streamsUnitStatsProcessorInstanceSchema>;
   export type StatsProcessorResult = z.infer<typeof streamsUnitStatsProcessorResultSchema>;
+  export type StatsSourceResult = z.infer<typeof streamsUnitStatsSourceResultSchema>;
   export type StatsMeta = z.infer<typeof streamsUnitStatsMetaSchema>;
   export type StatsResponse = z.infer<typeof streamsUnitStatsResponseSchema>;
+  export type ComponentValidationRequest = z.infer<typeof streamsComponentValidationRequestSchema>;
   export interface ConfigurationSavedObjectAttributes {
     unit_id: Identifier;
     unit: Configuration;
@@ -346,5 +403,17 @@ export namespace StreamsUnit {
   }
   export interface UiMetadataSavedObjectAttributes {
     metadata: UiMetadata;
+  }
+  export type DiagnosticSeverity = 'error' | 'warning' | 'info';
+  /**
+   * A config-distributor finding, from `POST /v1/units/validate`, a rejected publish, or
+   * `POST /v1/components/validate`.
+   */
+  export interface Diagnostic {
+    severity: DiagnosticSeverity;
+    code: string;
+    message: string;
+    path?: string;
+    line?: number;
   }
 }

@@ -41,6 +41,25 @@ describe('registerDigitalExperienceFeature', () => {
     });
   });
 
+  it('grants setting up sessions only through a separate, all-spaces sub-feature privilege', () => {
+    const [sessions] = registerKibanaFeature.mock.calls[0][0].subFeatures;
+    expect(sessions.requireAllSpaces).toBe(true);
+    expect(sessions.privilegeGroups).toEqual([
+      {
+        groupType: 'independent',
+        privileges: [
+          expect.objectContaining({
+            id: 'manage_sessions',
+            // Not part of `all`: it must be granted explicitly.
+            includeIn: 'none',
+            api: ['manage_digital_experience_sessions'],
+            ui: ['manageSessions'],
+          }),
+        ],
+      },
+    ]);
+  });
+
   it('grants only show and the read API privilege to read', () => {
     expect(registerKibanaFeature.mock.calls[0][0].privileges.read).toEqual({
       app: ['digital_experience', 'kibana'],

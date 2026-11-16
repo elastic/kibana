@@ -10,6 +10,7 @@
 import type { WorkflowOutputStep } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowOutputGraphNode } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
@@ -143,14 +144,19 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
             (typeof outputValues.reason === 'string' && outputValues.reason) ||
             'Workflow terminated with failed status';
 
-          const failureError = new Error(errorMessage);
+          // A caller-chosen type reaches a parent's `steps.<name>.error.type`, so it can
+          // tell this failure apart from others (for example, one a retry cannot fix).
+          const failureError = new ExecutionError({
+            type: (typeof outputValues.type === 'string' && outputValues.type) || 'Error',
+            message: errorMessage,
+          });
 
           this.workflowLogger.logInfo(`Workflow failed with message: ${errorMessage}`, {
             event: { action: 'workflow-output-error-set', outcome: 'failure' },
             tags: ['workflow-output', 'error'],
             error: {
               message: errorMessage,
-              type: failureError.name,
+              type: failureError.type,
             },
           });
 

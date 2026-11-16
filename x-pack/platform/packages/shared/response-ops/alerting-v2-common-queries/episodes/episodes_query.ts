@@ -22,6 +22,11 @@ import {
   isSupportedEpisodeSeverity,
   normalizeEpisodeSeverity,
 } from './episode_severity';
+import {
+  EPISODE_SOURCE_FILTER_UNIVERSAL,
+  NATIVE_EPISODE_SOURCE,
+  isConnectorEpisodeSource,
+} from './episode_source';
 import { convertKqlToEsqlExpression } from './kql_to_esql';
 import { SERIES_ID_EVAL } from './series_id_eval';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
@@ -76,6 +81,11 @@ export interface EpisodesFilterState {
   severity?: string[] | null;
   /** Assignee UID — episodes whose last assignee matches this user profile UID */
   assigneeUid?: string;
+  /**
+   * Source values (OR). `v1` is Classic, `v2` is Universal, and any other
+   * value is a connector slug. Empty/undefined shows every source.
+   */
+  sources?: string[] | null;
 }
 
 export interface EpisodesSortState {
@@ -114,17 +124,25 @@ const resolveSortField = (sortField: string): string => {
   return sanitizeSortField(sortField);
 };
 
+/**
+ * Reduces the episode events to one row per episode: its latest event, with the
+ * episode-level stats.
+ */
 export const addEpisodeAggregation = (query: ComposerQuery) => {
   /* This will be simplified when the `$.alerting-episodes` ES|QL view works.
    * Matches `buildEpisodeDataRequest`.
    */
 
+  // A single rule run can write many events with the same timestamp for one
+  // episode, so matching on the latest timestamp can keep many rows. LIMIT 1 BY
+  // keeps one of them.
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
     .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", start_event_timestamp = MIN(@timestamp) WHERE \`episode.status\` == "pending" AND \`episode.status_count\` == 1, episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
-    .pipe`WHERE @timestamp == last_timestamp`;
+    .pipe`WHERE @timestamp == last_timestamp`
+    .pipe`LIMIT 1 BY episode.id`;
 };
 
 const addSeriesActionStats = (query: ComposerQuery) => {
@@ -201,11 +219,37 @@ const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
   query.pipe(`WHERE ${parts.join(' OR ')}`);
 };
 
+/** Native Universal rows: no connector `source` on the latest episode event. */
+const UNIVERSAL_SOURCE_PREDICATE = `source IS NULL OR source == "" OR source == ${escapeStringValue(
+  NATIVE_EPISODE_SOURCE
+)}`;
+
+const addSourceFilter = (query: ComposerQuery, sources: string[]) => {
+  const parts: string[] = [];
+  if (sources.includes(EPISODE_SOURCE_FILTER_UNIVERSAL)) {
+    parts.push(UNIVERSAL_SOURCE_PREDICATE);
+  }
+  const connectors = [...new Set(sources.filter(isConnectorEpisodeSource))];
+  if (connectors.length) {
+    const inList = connectors.map((source) => escapeStringValue(source)).join(', ');
+    parts.push(`source IN (${inList})`);
+  }
+  if (!parts.length) {
+    // Classic-only, or no value the v2 documents can match — exclude all v2 rows
+    query.pipe('WHERE false');
+    return;
+  }
+  query.pipe(`WHERE ${parts.join(' OR ')}`);
+};
+
 /**
  * Applies the filters that must run after the aggregations: they either read
  * columns the aggregations compute (tags, severity, assignee) or must only
- * narrow the aggregated rows (status and queryString). `ruleId` and `groupHash`
- * are applied before the aggregations by `buildEpisodesBaseQuery` instead.
+ * narrow the aggregated rows (status, source, and queryString). `source` is the
+ * value on the latest episode row (`WHERE @timestamp == last_timestamp`), not an
+ * earlier event.
+ * `ruleId` and `groupHash` are applied before the aggregations by
+ * `buildEpisodesBaseQuery` instead.
  */
 export const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
   const trimmedSearch = filterState.queryString?.trim();
@@ -223,6 +267,9 @@ export const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilt
   }
   if (filterState.assigneeUid) {
     query.where`last_assignee_uid == ${filterState.assigneeUid}`;
+  }
+  if (filterState.sources?.length) {
+    addSourceFilter(query, filterState.sources);
   }
 };
 

@@ -49,18 +49,24 @@ export interface TelemetryClient {
   fieldCaps(params: estypes.FieldCapsRequest): Promise<estypes.FieldCapsResponse>;
 }
 
-export async function getTelemetryClient({ core }: { core: CoreSetup }): Promise<TelemetryClient> {
+export async function getTelemetryClient({
+  core,
+  signal,
+}: {
+  core: CoreSetup;
+  signal: AbortSignal;
+}): Promise<TelemetryClient> {
   const [{ elasticsearch }] = await core.getStartServices();
   const esClient = elasticsearch.client;
 
   return {
     search: (params) =>
-      unwrapEsResponse(esClient.asInternalUser.search(params, { meta: true })) as any,
+      unwrapEsResponse(esClient.asInternalUser.search(params, { meta: true, signal })) as any,
     indicesStats: (params) =>
-      unwrapEsResponse(esClient.asInternalUser.indices.stats(params, { meta: true })),
+      unwrapEsResponse(esClient.asInternalUser.indices.stats(params, { meta: true, signal })),
     transportRequest: (params) =>
-      unwrapEsResponse(esClient.asInternalUser.transport.request(params, { meta: true })),
+      unwrapEsResponse(esClient.asInternalUser.transport.request(params, { meta: true, signal })),
     fieldCaps: (params) =>
-      unwrapEsResponse(esClient.asInternalUser.fieldCaps(params, { meta: true })),
+      unwrapEsResponse(esClient.asInternalUser.fieldCaps(params, { meta: true, signal })),
   };
 }

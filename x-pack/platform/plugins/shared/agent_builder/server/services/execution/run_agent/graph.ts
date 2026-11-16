@@ -21,7 +21,7 @@ import {
   createReasoningEvent,
   createToolCallMessage,
 } from '@kbn/agent-builder-genai-utils/langchain';
-import type { TodoStateManager, ToolManager } from '@kbn/agent-builder-server/runner';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import {
   ConversationRoundStepType,
   isSubagentRosterUpdatedStep,
@@ -51,10 +51,11 @@ import type { StateType, StateUpdate } from './state';
 import { StateAnnotation, toCurrentRun } from './state';
 import { processResearchResponse, processToolNodeResponse } from './response_processing';
 import { createAnswerAgentStructured } from './answer_agent_structured';
-import { countNonTodosSteps, stepUpdates, type RunStepUpdate } from './step_state';
+import { stepUpdates, type RunStepUpdate } from './step_state';
 import type { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import type { ToolExecutionBuffer } from './run_tracker';
 import type { SubagentTracker } from './subagent_tracker';
+import type { RunAttachmentEvents } from './run_attachment_events';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 
 // number of successive recoverable errors we try to recover from before throwing
@@ -73,7 +74,7 @@ export const createAgentGraph = ({
   backgroundExecutionService,
   subagentTracker,
   toolExecutionBuffer,
-  todoStateManager,
+  runAttachmentEvents,
   roundId,
   sessionId,
   cacheControl,
@@ -91,10 +92,9 @@ export const createAgentGraph = ({
   promptFactory: PromptFactory;
   backgroundExecutionService?: BackgroundExecutionService;
   subagentTracker?: SubagentTracker;
-  /** Buffer of out-of-band tool events (progress, todos writes) observed by the runner. */
+  /** Buffer of out-of-band tool progress events observed by the runner. */
   toolExecutionBuffer?: ToolExecutionBuffer;
-  /** Authoritative view of the todos written by the `todo_write` tool during this run. */
-  todoStateManager?: TodoStateManager;
+  runAttachmentEvents?: RunAttachmentEvents;
   roundId: string;
   /** Optional session ID forwarded to EIS for prompt-cache scoping. Non-EIS endpoints ignore it. */
   sessionId?: string;
@@ -118,13 +118,14 @@ export const createAgentGraph = ({
     return {};
   };
 
+  // The first pass of a run checks whatever its cycle, then every BACKGROUND_CHECK_CYCLE_INTERVAL
+  // cycles: a resume starts at the paused cycle, and a sub-agent that finished while the round
+  // waited on a prompt is reported by the run that answers it.
+  let firstPass = true;
   const checkBackgroundWork = async (state: StateType): Promise<StateUpdate> => {
-    // Only check at the beginning (cycle 0) and every BACKGROUND_CHECK_CYCLE_INTERVAL cycles
-    if (
-      !backgroundExecutionService ||
-      !backgroundExecutionService.hasPending() ||
-      (state.currentCycle > 0 && state.currentCycle % BACKGROUND_CHECK_CYCLE_INTERVAL !== 0)
-    ) {
+    const due = firstPass || state.currentCycle % BACKGROUND_CHECK_CYCLE_INTERVAL === 0;
+    firstPass = false;
+    if (!backgroundExecutionService?.hasPending() || !due) {
       return {};
     }
 
@@ -177,9 +178,7 @@ export const createAgentGraph = ({
     const retryUpdate = (error: AgentBuilderAgentExecutionError): StateUpdate => ({
       researchOutcome: { type: 'retry_error', error },
       errorCount: state.errorCount + 1,
-      retryNotices: [
-        { phase: 'research', afterNonTodosStepCount: countNonTodosSteps(state.steps), error },
-      ],
+      retryNotices: [{ phase: 'research', afterStepCount: state.steps.length, error }],
     });
 
     try {
@@ -310,14 +309,10 @@ export const createAgentGraph = ({
       );
     }
 
-    const writtenTodos = toolExecutionBuffer?.consumeTodosWrite();
-    if (writtenTodos !== undefined) {
-      // Prefer the manager's view (authoritative), fall back to the event payload.
-      const todos = todoStateManager?.get() ?? writtenTodos;
-      updates.push(stepUpdates.setTodos({ type: ConversationRoundStepType.updateTodos, todos }));
-    }
-
     const completed = new Set(processed.completedToolCallIds);
+    const attachmentEvents =
+      runAttachmentEvents?.drainToolCalls(outcome.toolCalls.map(({ toolCallId }) => toolCallId)) ??
+      [];
     return {
       steps: updates,
       toolRenderState: processed.renderState,
@@ -326,6 +321,7 @@ export const createAgentGraph = ({
         processed.prompts.length > 0
           ? { type: 'interrupted', prompts: processed.prompts }
           : { type: 'completed' },
+      attachmentEvents,
     };
   };
 

@@ -9,12 +9,16 @@ export {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES,
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
   CUSTOM_CONTENT_SCRIPT_PATTERN,
   CUSTOM_CONTENT_DEFAULT_HEIGHT,
   CUSTOM_CONTENT_MIN_HEIGHT,
   CUSTOM_CONTENT_MAX_HEIGHT,
+  CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
+  CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
 } from './constants';
 
 export {
@@ -22,8 +26,12 @@ export {
   customContentPanelUpdateSchema,
   readEsqlQuery,
   toEsqlQueryState,
-  resolveEsqlQueryEdit,
 } from './schema';
-export type { ResolvedEsqlQueryEdit, CustomContentState } from './schema';
+export type { CustomContentState } from './schema';
+export {
+  fitsEsqlQueriesTotalLength,
+  ESQL_QUERIES_TOTAL_LENGTH_MESSAGE,
+} from './esql_queries_total_length';
 
 export { stripMarkdownFences } from './strip_markdown_fences';
+export { CUSTOM_CONTENT_LIQUID_OPTIONS } from './liquid_options';

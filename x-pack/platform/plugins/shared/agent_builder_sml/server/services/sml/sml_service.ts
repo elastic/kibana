@@ -1014,31 +1014,32 @@ const resolveTypeIds = (text: string, registeredTypeIds: string[]): string[] => 
   return registeredTypeIds.filter((id) => id.toLowerCase().startsWith(lowered));
 };
 
+/** What a typed autocomplete query asks for. */
+export type SmlAutocompleteIntent =
+  | { kind: 'all' }
+  /** No slash typed yet: the text could be a type prefix or a title prefix. */
+  | { kind: 'either'; text: string }
+  | { kind: 'title'; titleTerm: string }
+  | { kind: 'type'; typeIds: string[]; titleTerm: string };
+
 /**
- * Build the autocomplete query. Results render as "type/title", so a slash splits
+ * Interpret the autocomplete query. Results render as "type/title", so a slash splits
  * the input: the left side must name a registered type, the right prefix-matches
  * the title. A slash that names no type is part of the title, e.g.
  * "sales/marketing".
  */
-const buildSmlAutocompleteQuery = (
+export const interpretAutocompleteQuery = (
   query: string,
   registeredTypeIds: string[]
-): Record<string, unknown> => {
+): SmlAutocompleteIntent => {
   const trimmed = query.trim();
   if (trimmed === '' || trimmed === '*') {
-    return { match_all: {} };
+    return { kind: 'all' };
   }
 
   const slashIdx = trimmed.indexOf('/');
-
-  // No slash typed yet: the text could be either half, so match against both.
   if (slashIdx === -1) {
-    return {
-      bool: {
-        should: [buildTitlePrefixClause(trimmed), buildTypePrefixClause(trimmed)],
-        minimum_should_match: 1,
-      },
-    };
+    return { kind: 'either', text: trimmed };
   }
 
   const typePart = trimmed.slice(0, slashIdx).trim();
@@ -1046,28 +1047,48 @@ const buildSmlAutocompleteQuery = (
 
   // A lone "/" carries no signal, thus, match everything
   if (typePart === '' && namePart === '') {
-    return { match_all: {} };
+    return { kind: 'all' };
   }
 
   if (typePart === '') {
-    return buildTitlePrefixClause(namePart);
+    return { kind: 'title', titleTerm: namePart };
   }
 
   const typeIds = resolveTypeIds(typePart, registeredTypeIds);
   if (typeIds.length === 0) {
-    return buildTitlePrefixClause(trimmed);
+    return { kind: 'title', titleTerm: trimmed };
   }
 
-  if (namePart === '') {
-    return { bool: { filter: [buildTypeTermsClause(typeIds)] } };
-  }
+  return { kind: 'type', typeIds, titleTerm: namePart };
+};
 
-  return {
-    bool: {
-      filter: [buildTypeTermsClause(typeIds)],
-      must: [buildTitlePrefixClause(namePart)],
-    },
-  };
+const buildSmlAutocompleteQuery = (
+  query: string,
+  registeredTypeIds: string[]
+): Record<string, unknown> => {
+  const intent = interpretAutocompleteQuery(query, registeredTypeIds);
+  switch (intent.kind) {
+    case 'all':
+      return { match_all: {} };
+    case 'either':
+      return {
+        bool: {
+          should: [buildTitlePrefixClause(intent.text), buildTypePrefixClause(intent.text)],
+          minimum_should_match: 1,
+        },
+      };
+    case 'title':
+      return buildTitlePrefixClause(intent.titleTerm);
+    case 'type':
+      return intent.titleTerm === ''
+        ? { bool: { filter: [buildTypeTermsClause(intent.typeIds)] } }
+        : {
+            bool: {
+              filter: [buildTypeTermsClause(intent.typeIds)],
+              must: [buildTitlePrefixClause(intent.titleTerm)],
+            },
+          };
+  }
 };
 
 /**

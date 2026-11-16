@@ -16,8 +16,9 @@ import {
   within,
 } from '@elastic/esql';
 import { getSettingsCompletionItems } from '../../definitions/utils/settings';
+import { startsWithSemicolon } from '../../definitions/utils/regex';
 import { SuggestionCategory } from '../../../..';
-import { semiColonCompleteItem, assignCompletionItem } from '../complete_items';
+import { headerAssignCompleteItem, headerSemiColonCompleteItem } from '../complete_items';
 import { type ICommandCallbacks, type ICommandContext, type ISuggestionItem } from '../types';
 import { getCompletionItemsBySettingName } from './utils';
 import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
@@ -35,14 +36,14 @@ export async function autocomplete(
   const settingLeftSide = isBinaryExpression(settingArg) ? settingArg.args[0] : null;
   const settingRightSide = isBinaryExpression(settingArg) ? settingArg.args[1] : null;
 
-  const hasSemicolonAtEnd = /^\s*;/.test(query.substring(cursorPosition || 0));
+  const hasSemicolonAtEnd = startsWithSemicolon(query.substring(cursorPosition || 0));
 
   if (!settingArg) {
     // settingLeftSide is not built until user types '=', so we need to check with regex if the leftside is present
     const hasSettingLeftSide = /SET\s+\S+\s+$/.test(innerText);
     // SET <setting> /
     if (hasSettingLeftSide) {
-      return [{ ...assignCompletionItem, detail: '' }];
+      return [headerAssignCompleteItem];
       // SET /
     } else {
       return getSettingsCompletionItems(callbacks?.isServerless);
@@ -102,12 +103,7 @@ export async function autocomplete(
 
   // SET <setting> = <value>/
   if (isBinaryExpression(settingArg) && !settingArg.incomplete && !hasSemicolonAtEnd) {
-    return [
-      {
-        ...semiColonCompleteItem,
-        text: ';\n', // Add a new line so the actual query starts in the line below.
-      },
-    ];
+    return [headerSemiColonCompleteItem];
   }
 
   return [];

@@ -10,6 +10,7 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { EuiButton } from '@elastic/eui';
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
@@ -71,6 +72,57 @@ describe('FlyoutTemplate footer', () => {
 
     expect(screen.getByTestId('primarySave')).toHaveAttribute('data-foo', 'primaryFoo');
     expect(screen.getByTestId('primaryContent')).toBeInTheDocument();
+  });
+
+  it.each([
+    { color: undefined, expected: 'primary' as const },
+    { color: 'primary' as const, expected: 'primary' as const },
+    { color: 'danger' as const, expected: 'danger' as const },
+  ])(
+    'renders PrimaryAction with the $expected color when color is $color',
+    ({ color, expected }) => {
+      renderTemplate(
+        <>
+          <EuiButton fill color={expected} data-test-subj="reference">
+            Reference
+          </EuiButton>
+          <FlyoutTemplate onClose={noop} session="never">
+            <FlyoutTemplate.Body>
+              <span>content</span>
+            </FlyoutTemplate.Body>
+            <FlyoutTemplate.Footer>
+              <FlyoutTemplate.Footer.PrimaryAction
+                label="Save"
+                onClick={noop}
+                color={color}
+                data-test-subj="primarySave"
+              />
+            </FlyoutTemplate.Footer>
+          </FlyoutTemplate>
+        </>
+      );
+
+      const { backgroundColor } = window.getComputedStyle(screen.getByTestId('reference'));
+      expect(backgroundColor).not.toBe('');
+      expect(screen.getByTestId('primarySave')).toHaveStyle({ backgroundColor });
+    }
+  );
+
+  it('renders danger and primary PrimaryActions with different colors', () => {
+    renderTemplate(
+      <>
+        <EuiButton fill color="primary" data-test-subj="primaryReference">
+          Primary
+        </EuiButton>
+        <EuiButton fill color="danger" data-test-subj="dangerReference">
+          Danger
+        </EuiButton>
+      </>
+    );
+
+    expect(window.getComputedStyle(screen.getByTestId('dangerReference')).backgroundColor).not.toBe(
+      window.getComputedStyle(screen.getByTestId('primaryReference')).backgroundColor
+    );
   });
 
   it('forwards a custom data attribute and an EuiButtonEmpty prop through SecondaryAction', () => {
@@ -169,6 +221,110 @@ describe('FlyoutTemplate footer', () => {
       expect(onClick).not.toHaveBeenCalled();
     }
   );
+
+  describe('AI-styled secondary action', () => {
+    it('renders the label, the AI icon, and the AI gradient, and forwards clicks', async () => {
+      const onClick = jest.fn();
+      renderTemplate(
+        <FlyoutTemplate onClose={noop} session="never" data-test-subj="withFooter">
+          <FlyoutTemplate.Body>
+            <span>content</span>
+          </FlyoutTemplate.Body>
+          <FlyoutTemplate.Footer>
+            <FlyoutTemplate.Footer.SecondaryAction
+              variant="ai"
+              iconType="productAgent"
+              label="Open chat"
+              onClick={onClick}
+              data-test-subj="openChat"
+            />
+            <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={noop} />
+          </FlyoutTemplate.Footer>
+        </FlyoutTemplate>
+      );
+
+      const button = screen.getByRole('button', { name: 'Open chat' });
+      expect(button).toHaveAttribute('data-test-subj', 'openChat');
+      expect(button.querySelector('[data-euiicon-type="productAgent"]')).toBeInTheDocument();
+      expect(screen.getByTestId('withFooterFooter').querySelector('linearGradient')).not.toBeNull();
+
+      const text = screen.getByTestId('withFooterFooter').textContent ?? '';
+      expect(text.indexOf('Open chat')).toBeLessThan(text.indexOf('Save'));
+
+      await userEvent.click(button);
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not apply AI styling without the variant', () => {
+      renderTemplate(
+        <FlyoutTemplate onClose={noop} session="never" data-test-subj="withFooter">
+          <FlyoutTemplate.Body>
+            <span>content</span>
+          </FlyoutTemplate.Body>
+          <FlyoutTemplate.Footer>
+            <FlyoutTemplate.Footer.SecondaryAction label="Discard" onClick={noop} />
+          </FlyoutTemplate.Footer>
+        </FlyoutTemplate>
+      );
+
+      expect(screen.getByTestId('withFooterFooter').querySelector('linearGradient')).toBeNull();
+    });
+
+    it('renders the footer when it is the only action', () => {
+      renderTemplate(
+        <FlyoutTemplate onClose={noop} session="never" data-test-subj="aiOnly">
+          <FlyoutTemplate.Body>
+            <span>content</span>
+          </FlyoutTemplate.Body>
+          <FlyoutTemplate.Footer>
+            <FlyoutTemplate.Footer.SecondaryAction
+              variant="ai"
+              iconType="productAgent"
+              label="Open chat"
+              onClick={noop}
+            />
+          </FlyoutTemplate.Footer>
+        </FlyoutTemplate>
+      );
+
+      expect(
+        within(screen.getByTestId('aiOnlyFooter')).getByRole('button', { name: 'Open chat' })
+      ).toBeInTheDocument();
+    });
+
+    it('keeps a disabled action with a tooltip hoverable through aria-disabled', async () => {
+      const onClick = jest.fn();
+      renderTemplate(
+        <FlyoutTemplate onClose={noop} session="never">
+          <FlyoutTemplate.Body>
+            <span>content</span>
+          </FlyoutTemplate.Body>
+          <FlyoutTemplate.Footer>
+            <FlyoutTemplate.Footer.SecondaryAction
+              variant="ai"
+              iconType="productAgent"
+              label="Open chat"
+              onClick={onClick}
+              isDisabled
+              tooltip="You need access to Agent Builder"
+            />
+          </FlyoutTemplate.Footer>
+        </FlyoutTemplate>
+      );
+
+      const button = screen.getByRole('button', { name: 'Open chat' });
+      expect(button).toHaveAttribute('aria-disabled', 'true');
+      expect(button).not.toBeDisabled();
+
+      await userEvent.hover(button.parentElement!);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'You need access to Agent Builder'
+      );
+
+      await userEvent.setup({ pointerEventsCheck: 0 }).click(button);
+      expect(onClick).not.toHaveBeenCalled();
+    });
+  });
 
   it('renders the menu trigger to the right of the secondary action', () => {
     renderTemplate(

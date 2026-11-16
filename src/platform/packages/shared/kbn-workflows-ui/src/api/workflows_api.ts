@@ -45,11 +45,13 @@ import type {
   GetExecutionParams,
   GetExecutionStepsParams,
   GetLibraryHealthResponse,
+  GetLinkedRulesResponse,
   GetSchemaParams,
   GetWorkflowExecutionsParams,
   GetWorkflowStepExecutionsParams,
   InstallTemplateResponse,
   MgetWorkflowsParams,
+  ReadableWorkflowIdsResponse,
   RestoreWorkflowVersionParams,
   RestoreWorkflowVersionResponseDto,
   ResumeExecutionParams,
@@ -348,11 +350,24 @@ export class WorkflowApi {
     });
   }
 
+  async getReadableWorkflowIds(): Promise<ReadableWorkflowIdsResponse> {
+    return this.http.get(`${INTERNAL_BASE}/readable_workflow_ids`, {
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
   async searchTriggerEvents(
     params: SearchTriggerEventLogParams
   ): Promise<SearchTriggerEventLogResult> {
     return this.http.post(`${INTERNAL_BASE}/trigger_events/_search`, {
       body: JSON.stringify(params),
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
+  async getLinkedRules(ids: string[]): Promise<GetLinkedRulesResponse> {
+    return this.http.post(`${INTERNAL_BASE}/_linked_rules`, {
+      body: JSON.stringify({ ids }),
       version: INTERNAL_API_VERSION,
     });
   }

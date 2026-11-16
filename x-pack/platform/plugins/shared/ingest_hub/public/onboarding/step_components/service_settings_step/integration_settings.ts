@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '@kbn/fleet-plugin/common';
+import {
+  CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+  PACKAGE_POLICY_CONDITION_MAX_LENGTH,
+  formatAgentConditionErrors,
+} from '@kbn/fleet-plugin/common';
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
 
@@ -51,11 +56,65 @@ export const getIntegrationNameError = (name: string): string | undefined => {
   }
 };
 
+/** Fleet's package policy condition limit. */
+export const MAX_CONDITION_LENGTH = PACKAGE_POLICY_CONDITION_MAX_LENGTH;
+
+/**
+ * Checks the condition as Fleet's Add integration form does, plus Fleet's API length limit. A blank
+ * one is no condition.
+ */
+export const getConditionErrors = (condition: string): string[] | undefined => {
+  if (condition.length > MAX_CONDITION_LENGTH) {
+    return [
+      i18n.translate('xpack.ingestHub.integrationSettings.condition.tooLongError', {
+        defaultMessage: 'The condition must be {max} characters or less.',
+        values: { max: MAX_CONDITION_LENGTH },
+      }),
+    ];
+  }
+  const errors = validateAgentConditionExpression(condition);
+  return errors.length ? formatAgentConditionErrors(errors) : undefined;
+};
+
 export const getDescriptionError = (description: string): string | undefined => {
   if (description.length > MAX_DESCRIPTION_LENGTH) {
     return i18n.translate('xpack.ingestHub.integrationSettings.description.tooLongError', {
       defaultMessage: 'The description must be {max} characters or less.',
       values: { max: MAX_DESCRIPTION_LENGTH },
+    });
+  }
+};
+
+/** The longest proxy URL, well within what Fleet stores for a setting of the onboarding record. */
+export const MAX_PROXY_URL_LENGTH = 1024;
+
+/** `http://` or `https://` followed by the start of a host (not another slash, a path or a space). */
+const PROXY_URL_PREFIX = /^https?:\/\/[^/?#\\\s]/i;
+
+/**
+ * The proxy URL is optional. When set, it must be written as an `http(s)://` URL with a host.
+ * The value is sent as typed, so the literal text is checked: `new URL()` alone also accepts
+ * `http:proxy.local:3128` or `http:/proxy.local:3128`, which it repairs but the agent receives
+ * unchanged.
+ */
+export const getProxyUrlError = (proxyUrl: string): string | undefined => {
+  const trimmed = proxyUrl.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.length > MAX_PROXY_URL_LENGTH) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.proxyUrl.tooLongError', {
+      defaultMessage: 'The proxy URL must be {max} characters or less.',
+      values: { max: MAX_PROXY_URL_LENGTH },
+    });
+  }
+  let hasHost = false;
+  try {
+    hasHost = PROXY_URL_PREFIX.test(trimmed) && new URL(trimmed).hostname !== '';
+  } catch {
+    // Reported below.
+  }
+  if (!hasHost) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.proxyUrl.invalidError', {
+      defaultMessage: 'Enter a valid proxy URL starting with http:// or https://.',
     });
   }
 };

@@ -2277,7 +2277,7 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test('should set authentication errors as user-error', async () => {
+  test('should set authentication errors as user-error and tag them auth-error', async () => {
     jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
       throw new errors.ResponseError({
         warnings: [],
@@ -2301,7 +2301,53 @@ describe('Task Runner', () => {
     expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
       `"Executing Rule default:test:1 has resulted in Error: Response Error"`
     );
-    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error']);
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error', 'auth-error']);
+  });
+
+  test('should tag authentication errors with user-key when the rule holds a user-supplied API key', async () => {
+    jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
+      throw new errors.ResponseError({
+        warnings: [],
+        meta: {} as never,
+        statusCode: 401,
+      });
+    });
+
+    const taskRunner = createTaskRunner();
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: { ...mockedRawRuleSO.attributes, apiKeyCreatedByUser: true },
+    });
+
+    await taskRunner.run();
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const loggerMeta = logger.error.mock.calls[0][1];
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error', 'auth-error', 'user-key']);
+  });
+
+  test('should tag a 401 thrown by the rule type executor with auth-error', async () => {
+    // The executor error reaches getState wrapped in an ErrorWithReason, unlike the
+    // getExecutorServices failures above, so this covers the unwrapping.
+    ruleType.executor.mockImplementation(async () => {
+      throw new errors.ResponseError({
+        warnings: [],
+        meta: {} as never,
+        statusCode: 401,
+      });
+    });
+
+    const taskRunner = createTaskRunner();
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    const runnerResult = await taskRunner.run();
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const loggerMeta = logger.error.mock.calls[0][1];
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error', 'auth-error']);
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
   });
 
   test('should set unexpected errors as framework-error', async () => {

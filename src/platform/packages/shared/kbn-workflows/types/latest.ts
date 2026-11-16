@@ -33,6 +33,7 @@ export type {
   WorkflowAccessControlUpdateResponseDto,
   WorkflowExecutionDto,
   WorkflowExecutionEngineModel,
+  WorkflowExecutionExecutedByUser,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
   WorkflowExecutionListItemDto,

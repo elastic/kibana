@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  ACTION_POLICY_ATTACHMENT_TYPE,
-  RULE_ATTACHMENT_TYPE,
-  type ActionPolicyAttachmentData,
-  type RuleAttachmentData,
-} from '@kbn/alerting-v2-schemas';
+import { ACTION_POLICY_ATTACHMENT_TYPE, RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { expect } from '@playwright/test';
 import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
@@ -23,8 +18,15 @@ import {
   WORKFLOW_GENERATION_TOOL_ID,
   WORKFLOW_YAML_ATTACHMENT_TYPE,
 } from '../../src/constants';
-import { assertActionPolicyWorkflowLiquid } from '../../src/assert_action_policy_workflow_liquid';
-import { getLatestAttachmentData } from '../../src/evaluators/expected_attachment';
+import {
+  assertActionPolicyWorkflowLinksAlertDetails,
+  assertActionPolicyWorkflowLiquid,
+} from '../../src/assert_action_policy_workflow_liquid';
+import {
+  assertNotificationDraftsComposed,
+  getNotificationDrafts,
+  requireDraft,
+} from '../../src/notification_drafts';
 
 evaluate.describe(
   'Alerting V2 rule-authoring skill - action policies (notifications)',
@@ -60,6 +62,7 @@ evaluate.describe(
                     'After the user accepts notifications, the assistant loads the action-policy-authoring skill to own workflow + action policy setup (rather than composing those from the rule-authoring skill alone).',
                     'The assistant does not claim that no email connector is configured — one exists in the environment and should be discovered (e.g. via platform.workflows.get_connectors).',
                     'The action policy uses per_alert grouping and on_status_change throttle.',
+                    "The notification workflow's message includes each alert's details link from the payload (`alert_url`), not a hand-built Kibana URL or the workflow execution link.",
                     'The final manage_action_policy call ends with a validate operation, and validation succeeds (after corrective retries if needed).',
                     'The assistant never claims the rule, workflow, or action policy has been saved or activated (describing them as prepared drafts is fine) — it directs the user to save them via the attachment action buttons, with the workflow saved before the action policy.',
                     'The assistant does not require the rule to be saved before the action policy, but reminds the user that the rule is still unsaved and that the policy will not match any alerts until the rule carrying its routing tag is saved.',
@@ -82,42 +85,46 @@ evaluate.describe(
                     WORKFLOW_YAML_ATTACHMENT_TYPE,
                     ACTION_POLICY_ATTACHMENT_TYPE,
                   ],
-                  expectAttachmentData: (attachments) => {
-                    const rule = getLatestAttachmentData<RuleAttachmentData>(
-                      attachments,
-                      RULE_ATTACHMENT_TYPE
-                    );
-                    const workflow = getLatestAttachmentData<{
-                      workflowId?: string;
-                      yaml?: string;
-                    }>(attachments, WORKFLOW_YAML_ATTACHMENT_TYPE);
-                    const actionPolicy = getLatestAttachmentData<ActionPolicyAttachmentData>(
-                      attachments,
-                      ACTION_POLICY_ATTACHMENT_TYPE
-                    );
-
-                    const ruleId = rule?.id;
-                    const workflowId = workflow?.workflowId;
-
-                    expect(ruleId).toEqual(expect.any(String));
-                    expect(workflowId).toEqual(expect.any(String));
-                    expect(workflow?.yaml).toEqual(expect.any(String));
-                    expect(actionPolicy).toBeDefined();
+                  expectAttachmentData: {
+                    draftsComposed: (attachments) => {
+                      assertNotificationDraftsComposed(getNotificationDrafts(attachments), {
+                        requireWorkflowYaml: true,
+                      });
+                    },
                     // The policy is linked to the rule only through a shared routing tag.
-                    const routingTags = rule?.metadata?.routing_tags ?? [];
-                    const matcherTags = actionPolicy!.matcher?.tags ?? [];
-                    expect(matcherTags.length).toBeGreaterThan(0);
-                    expect(routingTags).toEqual(expect.arrayContaining(matcherTags));
-                    expect(actionPolicy!.destinations).toEqual([
-                      { type: 'workflow', id: workflowId },
-                    ]);
-
-                    const { workflow: parsedWorkflow } = assertActionPolicyWorkflowLiquid(
-                      workflow?.yaml
-                    );
-                    expect(parsedWorkflow.triggers.map((trigger) => trigger.type)).toEqual([
-                      'manual',
-                    ]);
+                    routingTagLinked: (attachments) => {
+                      const { rule, actionPolicy } = getNotificationDrafts(attachments);
+                      const routingTags = requireDraft(rule, 'rule').metadata?.routing_tags ?? [];
+                      const matcherTags =
+                        requireDraft(actionPolicy, 'action policy').matcher?.tags ?? [];
+                      expect(matcherTags.length).toBeGreaterThan(0);
+                      expect(routingTags).toEqual(expect.arrayContaining(matcherTags));
+                    },
+                    policyTargetsWorkflow: (attachments) => {
+                      const { workflow, actionPolicy } = getNotificationDrafts(attachments);
+                      expect(requireDraft(actionPolicy, 'action policy').destinations).toEqual([
+                        { type: 'workflow', id: requireDraft(workflow, 'workflow').workflowId },
+                      ]);
+                    },
+                    workflowLiquidValid: (attachments) => {
+                      assertActionPolicyWorkflowLiquid(
+                        getNotificationDrafts(attachments).workflow?.yaml
+                      );
+                    },
+                    workflowManualTrigger: (attachments) => {
+                      const { workflow: parsedWorkflow } = assertActionPolicyWorkflowLiquid(
+                        getNotificationDrafts(attachments).workflow?.yaml
+                      );
+                      expect(parsedWorkflow.triggers.map((trigger) => trigger.type)).toEqual([
+                        'manual',
+                      ]);
+                    },
+                    workflowLinksAlertDetails: (attachments) => {
+                      const { workflow: parsedWorkflow } = assertActionPolicyWorkflowLiquid(
+                        getNotificationDrafts(attachments).workflow?.yaml
+                      );
+                      assertActionPolicyWorkflowLinksAlertDetails(parsedWorkflow);
+                    },
                   },
                 },
               },
@@ -155,6 +162,7 @@ evaluate.describe(
                     'The assistant does not add a routing tag to the rule and does not link the policy to it.',
                     'The assistant does not require the unsaved rule to be saved before the action policy can be created; it does not block or delay the policy on the rule.',
                     'The assistant never claims the workflow or action policy has been saved or activated (describing them as prepared drafts is fine), and directs the user to save the workflow before the action policy.',
+                    "The notification workflow's message includes each alert's details link from the payload (`alert_url`), not a hand-built Kibana URL or the workflow execution link.",
                     'The final manage_action_policy call ends with a validate operation, and validation succeeds (after corrective retries if needed).',
                   ],
                   expectedSkills: [
@@ -173,32 +181,41 @@ evaluate.describe(
                     WORKFLOW_YAML_ATTACHMENT_TYPE,
                     ACTION_POLICY_ATTACHMENT_TYPE,
                   ],
-                  expectAttachmentData: (attachments) => {
-                    const rule = getLatestAttachmentData<RuleAttachmentData>(
-                      attachments,
-                      RULE_ATTACHMENT_TYPE
-                    );
-                    const workflow = getLatestAttachmentData<{ workflowId?: string }>(
-                      attachments,
-                      WORKFLOW_YAML_ATTACHMENT_TYPE
-                    );
-                    const actionPolicy = getLatestAttachmentData<ActionPolicyAttachmentData>(
-                      attachments,
-                      ACTION_POLICY_ATTACHMENT_TYPE
-                    );
-
-                    const ruleId = rule?.id;
-                    const workflowId = workflow?.workflowId;
-
-                    expect(ruleId).toEqual(expect.any(String));
-                    expect(workflowId).toEqual(expect.any(String));
-                    expect(actionPolicy).toBeDefined();
-                    expect(actionPolicy!.matcher?.tags ?? []).toEqual([]);
-                    expect(actionPolicy!.matcher?.expression ?? null).toBeNull();
-                    expect(actionPolicy!.destinations).toEqual([
-                      { type: 'workflow', id: workflowId },
-                    ]);
-                    expect(rule?.metadata?.routing_tags ?? []).toEqual([]);
+                  expectAttachmentData: {
+                    draftsComposed: (attachments) => {
+                      assertNotificationDraftsComposed(getNotificationDrafts(attachments), {
+                        requireWorkflowYaml: false,
+                      });
+                    },
+                    policyIsCatchAll: (attachments) => {
+                      const { matcher } = requireDraft(
+                        getNotificationDrafts(attachments).actionPolicy,
+                        'action policy'
+                      );
+                      expect(matcher?.tags ?? []).toEqual([]);
+                      expect(matcher?.expression ?? null).toBeNull();
+                    },
+                    ruleNotTagged: (attachments) => {
+                      const rule = requireDraft(getNotificationDrafts(attachments).rule, 'rule');
+                      expect(rule.metadata?.routing_tags ?? []).toEqual([]);
+                    },
+                    policyTargetsWorkflow: (attachments) => {
+                      const { workflow, actionPolicy } = getNotificationDrafts(attachments);
+                      expect(requireDraft(actionPolicy, 'action policy').destinations).toEqual([
+                        { type: 'workflow', id: requireDraft(workflow, 'workflow').workflowId },
+                      ]);
+                    },
+                    workflowLiquidValid: (attachments) => {
+                      assertActionPolicyWorkflowLiquid(
+                        getNotificationDrafts(attachments).workflow?.yaml
+                      );
+                    },
+                    workflowLinksAlertDetails: (attachments) => {
+                      const { workflow: parsedWorkflow } = assertActionPolicyWorkflowLiquid(
+                        getNotificationDrafts(attachments).workflow?.yaml
+                      );
+                      assertActionPolicyWorkflowLinksAlertDetails(parsedWorkflow);
+                    },
                   },
                 },
               },

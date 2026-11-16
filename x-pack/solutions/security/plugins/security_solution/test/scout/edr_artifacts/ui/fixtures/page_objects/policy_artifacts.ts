@@ -187,25 +187,29 @@ export class PolicyArtifactsPage {
     await this.page.testSubj.locator(fields.description).fill(description);
   }
 
-  async fillCreateForm(kind: PolicyArtifactKind) {
+  /**
+   * Fills the create form with the type's default condition. `name` overrides
+   * the default title for suites that need a unique item per test.
+   */
+  async fillCreateForm(kind: PolicyArtifactKind, name?: string) {
     switch (kind) {
       case 'trustedApps':
-        await this.fillTrustedAppsForm();
+        await this.fillTrustedAppsForm(name);
         return;
       case 'eventFilters':
-        await this.fillEventFiltersForm();
+        await this.fillEventFiltersForm(name);
         return;
       case 'blocklists':
-        await this.fillBlocklistForm();
+        await this.fillBlocklistForm(name);
         return;
       case 'hostIsolationExceptions':
-        await this.fillHostIsolationExceptionsForm();
+        await this.fillHostIsolationExceptionsForm(name);
         return;
       case 'trustedDevices':
-        await this.fillTrustedDevicesForm();
+        await this.fillTrustedDevicesForm(name);
         return;
       case 'endpointExceptions':
-        await this.fillEndpointExceptionsForm();
+        await this.fillEndpointExceptionsForm(name);
     }
   }
 
@@ -220,10 +224,10 @@ export class PolicyArtifactsPage {
     await combo.setSelectedOptions([value], { timeout: 10_000 });
   }
 
-  private async fillTrustedAppsForm() {
+  private async fillTrustedAppsForm(name = 'Trusted application name') {
     await this.fillNameAndDescription(
       'trustedApps',
-      'Trusted application name',
+      name,
       'This is the trusted application description'
     );
     await this.page.testSubj
@@ -237,23 +241,15 @@ export class PolicyArtifactsPage {
       .fill(TRUSTED_APP_HASH.toUpperCase());
   }
 
-  private async fillEventFiltersForm() {
-    await this.fillNameAndDescription(
-      'eventFilters',
-      'Event filter name',
-      'This is the event filter description'
-    );
+  private async fillEventFiltersForm(name = 'Event filter name') {
+    await this.fillNameAndDescription('eventFilters', name, 'This is the event filter description');
     await this.fillComboBox('fieldAutocompleteComboBox', '@timestamp');
     await this.fillComboBox('valuesAutocompleteMatch', '1234', true);
     await this.page.testSubj.locator('eventFilters-form-description-input').click();
   }
 
-  private async fillBlocklistForm() {
-    await this.fillNameAndDescription(
-      'blocklists',
-      'Blocklist name',
-      'This is the blocklist description'
-    );
+  private async fillBlocklistForm(name = 'Blocklist name') {
+    await this.fillNameAndDescription('blocklists', name, 'This is the blocklist description');
     await this.blocklistFieldSelect.click();
     await this.page.testSubj.locator('blocklist-form-file.hash.*').click();
     await this.fillComboBox('blocklist-form-values-input', TRUSTED_APP_HASH.toUpperCase(), true);
@@ -341,19 +337,19 @@ export class PolicyArtifactsPage {
     await this.page.testSubj.locator('blocklist-form-name-input').click();
   }
 
-  private async fillHostIsolationExceptionsForm() {
+  private async fillHostIsolationExceptionsForm(name = 'Host Isolation exception name') {
     await this.fillNameAndDescription(
       'hostIsolationExceptions',
-      'Host Isolation exception name',
+      name,
       'This is the host isolation exception description'
     );
     await this.page.testSubj.locator('hostIsolationExceptions-form-ip-input').fill('1.1.1.1');
   }
 
-  private async fillTrustedDevicesForm() {
+  private async fillTrustedDevicesForm(name = 'Trusted device name') {
     await this.fillNameAndDescription(
       'trustedDevices',
-      'Trusted device name',
+      name,
       'This is the trusted device description'
     );
     // OS is an EuiComboBox; field is an EuiSuperSelect. Both render options in
@@ -365,10 +361,10 @@ export class PolicyArtifactsPage {
     await this.fillComboBox('trustedDevices-form-entry0valueField', 'test-host', true);
   }
 
-  private async fillEndpointExceptionsForm() {
+  private async fillEndpointExceptionsForm(name = 'Endpoint exception name') {
     await this.fillNameAndDescription(
       'endpointExceptions',
-      'Endpoint exception name',
+      name,
       'This is the endpoint exception description'
     );
     await this.fillComboBox('fieldAutocompleteComboBox', 'agent.version');

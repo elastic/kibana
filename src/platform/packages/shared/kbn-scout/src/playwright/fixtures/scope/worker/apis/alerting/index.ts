@@ -21,8 +21,8 @@ export interface CreateRuleParams {
     params: Record<string, any>;
     frequency?: {
       summary: boolean;
-      notifyWhen: string;
-      throttle?: string;
+      notify_when: string;
+      throttle?: string | null;
     };
   }>;
   tags?: string[];
@@ -48,8 +48,8 @@ export interface UpdateRuleParams {
     params: Record<string, any>;
     frequency?: {
       summary: boolean;
-      notifyWhen: string;
-      throttle?: string;
+      notify_when: string;
+      throttle?: string | null;
     };
   }>;
   tags?: string[];

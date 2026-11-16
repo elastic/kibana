@@ -47,12 +47,13 @@ data:
           key_file: /secrets/kafka/tls.key
           server_name_override: warpstream.warpstream.svc.cluster.local
     exporters:
-      elasticsearch:
-        endpoint: https://__TARGET_ID__.es.svc.cluster.local:9200
-        user: elastic_serverless
-        password: changeme
-        mapping:
-          mode: otel
+      # Same hop as the hosted index collector: the native OTLP endpoint keeps counters, their
+      # delta temporality and exponential histograms, which the stats queries sum.
+      otlphttp:
+        endpoint: https://__TARGET_ID__.es.svc.cluster.local:9200/_otlp
+        headers:
+          # The local dev user, elastic_serverless:changeme, base64 encoded.
+          Authorization: Basic ZWxhc3RpY19zZXJ2ZXJsZXNzOmNoYW5nZW1l
         tls:
           insecure_skip_verify: true
           server_name_override: host.docker.internal
@@ -63,7 +64,7 @@ data:
       pipelines:
         metrics:
           receivers: [kafka]
-          exporters: [elasticsearch]
+          exporters: [otlphttp]
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -89,6 +89,42 @@ describe('planSweep', () => {
     expect(plan.batches.map(({ ruleId }) => ruleId)).toEqual(['rule-a']);
   });
 
+  it('releases a dead claim on a verdicted alert without planning it again', async () => {
+    const verdicted = makeAlert({
+      tags: ['az:true_positive', 'az:triage_pending', 'az:triage_exec:does-not-exist'],
+    });
+    const { run, tagAlerts } = setup({ alerts: [verdicted], live: new Set(['exec-other']) });
+
+    const plan = await run();
+
+    expect(plan.batches).toEqual([]);
+    expect(tagAlerts).toHaveBeenCalledWith({
+      alertIds: [verdicted.id],
+      add: [],
+      remove: ['az:triage_pending', 'az:triage_exec:does-not-exist'],
+    });
+  });
+
+  it('keeps the claim on a verdicted alert whose batch is still live', async () => {
+    const verdicted = makeAlert({
+      tags: ['az:true_positive', 'az:triage_pending', 'az:triage_exec:exec-1'],
+    });
+    const { run, tagAlerts } = setup({ alerts: [verdicted], live: new Set(['exec-1']) });
+
+    await run();
+
+    expect(tagAlerts).not.toHaveBeenCalled();
+  });
+
+  it('keeps the claim on a verdicted alert when the live batches could not be read', async () => {
+    const verdicted = makeAlert({ tags: ['az:true_positive', 'az:triage_pending'] });
+    const { run, tagAlerts } = setup({ alerts: [verdicted], live: 'unreadable' });
+
+    await run();
+
+    expect(tagAlerts).not.toHaveBeenCalled();
+  });
+
   it('claims the planned alerts with the pending tag', async () => {
     const fresh = makeAlerts(2);
     const { run, tagAlerts } = setup({ alerts: fresh });

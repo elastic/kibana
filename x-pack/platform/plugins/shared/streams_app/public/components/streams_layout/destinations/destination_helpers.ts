@@ -11,7 +11,11 @@ import type { DestinationSignal } from './types';
 
 const MAX_DESTINATION_ID_LENGTH = 256;
 
-export type DestinationNameValidationError = 'required' | 'duplicate';
+export type DestinationNameValidationError =
+  | 'required'
+  | 'duplicate'
+  | 'tooLong'
+  | 'credentialConflict';
 
 const trimTrailingHyphens = (value: string): string => value.replace(/-+$/, '');
 

@@ -39,11 +39,22 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('platform.core.sml_attach');
   });
 
+  it('passes the dashboard attachment id as dashboardId', () => {
+    expect(skill.content).toContain('`dashboardId` accepts dashboard attachment ids');
+    expect(skill.content).toContain('pass the returned `data.attachment_id` as `dashboardId`');
+  });
+
   it('finds unnamed data in one broad index search without probing it', () => {
     expect(skill.content).toContain(
       'find it in one `platform.core.list_indices` call with a broad pattern around the topic (e.g. `*log*`, not `logs-*`)'
     );
     expect(skill.content).toContain('Do not query the data before generating');
+  });
+
+  it('treats by-reference panels as unknown content that can only be rearranged', () => {
+    expect(skill.content).toContain('by-reference panels (');
+    expect(skill.content).toContain('do not look it up with any tool or API');
+    expect(enhanceGuidance()).toContain('keep by-reference panels');
   });
 
   it('inlines the dashboard design guidance directly in the skill body', () => {

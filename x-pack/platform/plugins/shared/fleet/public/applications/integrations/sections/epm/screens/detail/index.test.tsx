@@ -7,7 +7,7 @@
 
 import React, { lazy, memo } from 'react';
 import { Route } from '@kbn/shared-ux-router';
-import { act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import type {
@@ -425,16 +425,20 @@ describe('When on integration detail', () => {
       });
 
       await render();
-    });
+    }, TESTS_TIMEOUT);
 
     afterEach(() => {
       // @ts-ignore
       lazyComponentWasRendered = undefined;
     });
 
-    it('should display "custom" tab in navigation', () => {
-      expect(renderResult.getByTestId('tab-custom'));
-    });
+    it(
+      'should display "custom" tab in navigation',
+      async () => {
+        expect(await renderResult.findByTestId('tab-custom')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
 
     it('should display custom content when tab is clicked', async () => {
       act(() => {
@@ -582,6 +586,199 @@ describe('When on integration detail', () => {
     });
   });
 
+  describe('and the package has nothing to configure on an agent', () => {
+    interface AssetOnlyOptions {
+      name?: string;
+      status?: 'installed' | 'not_installed';
+      dataStreams?: Array<{ name: string }>;
+      installSource?: string;
+    }
+
+    const buildAssetOnlyInfo = ({
+      name = 'corelight',
+      status = 'not_installed',
+      dataStreams = [],
+      installSource,
+    }: AssetOnlyOptions = {}) => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      return {
+        ...baseResponse,
+        item: {
+          ...baseResponse.item,
+          name,
+          title: name,
+          // narrowed so the spread keeps matching the not_installed variant of the package info type
+          status: status as 'not_installed',
+          policy_templates: [],
+          data_streams: dataStreams as any,
+          ...(installSource ? { installationInfo: { install_source: installSource } as any } : {}),
+        },
+      };
+    };
+
+    const renderAssetOnlyDetail = async (options: AssetOnlyOptions = {}) => {
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue(buildAssetOnlyInfo(options));
+
+      await render();
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    };
+
+    it(
+      'should show "Install assets" instead of "Add integration" for an integration with assets only',
+      async () => {
+        await renderAssetOnlyDetail();
+
+        const installButton = await renderResult.findByTestId('installAssetsHeaderButton');
+        expect(installButton).toHaveTextContent('Install corelight Assets');
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+        // the divider between the version and the button
+        expect(renderResult.getAllByTestId('headerDivider')).toHaveLength(1);
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep the README as the landing tab',
+      async () => {
+        await renderAssetOnlyDetail();
+
+        await renderResult.findByTestId('installAssetsHeaderButton');
+        expect(renderResult.getByTestId('tab-overview')).toHaveAttribute('aria-selected', 'true');
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should show "Install assets" for packages with data streams but no inputs, like awsfirehose',
+      async () => {
+        await renderAssetOnlyDetail({ name: 'awsfirehose', dataStreams: [{ name: 'logs' }] });
+
+        expect(await renderResult.findByTestId('installAssetsHeaderButton')).toHaveTextContent(
+          'Install awsfirehose Assets'
+        );
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should not show any header button once the package is installed',
+      async () => {
+        await renderAssetOnlyDetail({ status: 'installed' });
+
+        await renderResult.findByTestId('tab-overview');
+        expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should not show the install button, nor a dangling header divider, without the privilege to install',
+      async () => {
+        const { integrations } = testRenderer.startServices.authz;
+        const canInstallPackages = integrations.installPackages;
+        integrations.installPackages = false;
+        try {
+          await renderAssetOnlyDetail();
+
+          await renderResult.findByTestId('tab-overview');
+          expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
+          expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+          // only the version is left in the header, no empty slot with a divider next to it
+          expect(renderResult.queryByTestId('headerDivider')).toBeNull();
+        } finally {
+          integrations.installPackages = canInstallPackages;
+        }
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should install the assets without creating any policy, then remove the CTA',
+      async () => {
+        const { http, notifications } = testRenderer.startServices;
+        http.post.mockImplementation((async () => {
+          // the package info reflects the installation from now on
+          mockedApi.responseProvider.epmGetInfo.mockReturnValue(
+            buildAssetOnlyInfo({ status: 'installed' })
+          );
+          return { items: [], _meta: { install_source: 'registry' } };
+        }) as any);
+        await renderAssetOnlyDetail();
+
+        await act(async () => {
+          (await renderResult.findByTestId('installAssetsHeaderButton')).click();
+        });
+        await act(async () => {
+          (await renderResult.findByTestId('confirmModalConfirmButton')).click();
+        });
+
+        await waitFor(() =>
+          expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull()
+        );
+        // the package install is the only request sent: no agent policy, no package policy
+        expect(http.post).toHaveBeenCalledTimes(1);
+        expect(http.post).toHaveBeenCalledWith(
+          epmRouteService.getInstallPath('corelight', '0.3.7'),
+          expect.anything()
+        );
+        expect(notifications.toasts.addSuccess).toHaveBeenCalled();
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep the edit action for an uploaded package once its assets are installed',
+      async () => {
+        await renderAssetOnlyDetail({ status: 'installed', installSource: 'upload' });
+
+        expect(await renderResult.findByLabelText('Edit')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep the edit action next to the install button for an uploaded package',
+      async () => {
+        await renderAssetOnlyDetail({ installSource: 'upload' });
+
+        expect(await renderResult.findByTestId('installAssetsHeaderButton')).toBeInTheDocument();
+        expect(renderResult.getByLabelText('Edit')).toBeInTheDocument();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep "Add integration" for an integration with data streams',
+      async () => {
+        await renderAssetOnlyDetail({ name: 'okta', dataStreams: [{ name: 'system' }] });
+
+        expect(await renderResult.findByTestId('addIntegrationPolicyButton')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep "Add integration" for cribl, which has a custom UI',
+      async () => {
+        await renderAssetOnlyDetail({ name: 'cribl' });
+
+        expect(await renderResult.findByTestId('addIntegrationPolicyButton')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+  });
+
   describe('and the AWS onboarding flow is enabled', () => {
     const renderAwsDetail = async () => {
       const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
@@ -662,22 +859,28 @@ describe('When on integration detail', () => {
     beforeEach(async () => {
       testRenderer.mountHistory.push(policiesTabURLPath);
       await render();
-    });
+    }, TESTS_TIMEOUT);
 
-    it('should display policies list', () => {
-      const table = renderResult.getByTestId('integrationPolicyTable');
-      expect(table).not.toBeNull();
-    });
+    it(
+      'should display policies list',
+      async () => {
+        expect(await renderResult.findByTestId('integrationPolicyTable')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
 
-    it('should link to integration policy detail when an integration policy is clicked', async () => {
-      await mockedApi.waitForApi();
-      const firstPolicy = renderResult.getAllByTestId(
-        'integrationNameLink'
-      )[0] as HTMLAnchorElement;
-      expect(firstPolicy.href).toEqual(
-        'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
-      );
-    });
+    it(
+      'should link to integration policy detail when an integration policy is clicked',
+      async () => {
+        const [firstPolicy] = (await renderResult.findAllByTestId(
+          'integrationNameLink'
+        )) as HTMLAnchorElement[];
+        expect(firstPolicy.href).toEqual(
+          'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
+        );
+      },
+      TESTS_TIMEOUT
+    );
   });
 });
 

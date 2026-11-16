@@ -150,6 +150,7 @@ export const AlertsTableBulkActionMenu = ({
   const menuPanels = useMemo(() => {
     const selectedAlertItems = selectedIdsToTimelineItemMapper(alerts, rowSelection.keys());
     const selectedCount = isAllSelected ? totalItems : rowSelection.size;
+    const hasUnloadedSelection = isAllSelected && totalItems > alerts.length;
     const runAction = (item: BulkActionsConfig) => {
       closePopover();
       item.onClick?.(
@@ -164,7 +165,7 @@ export const AlertsTableBulkActionMenu = ({
     const mappedPanels = panels.map((panel) => {
       if (panel.items) {
         const toMenuItem = (item: BulkActionsConfig): EuiContextMenuPanelItemDescriptor => {
-          const isDisabledOnQuery = isAllSelected && item.disableOnQuery;
+          const isDisabledOnQuery = hasUnloadedSelection && item.disableOnQuery;
           const exceededLimit =
             item.selectionLimit !== undefined && selectedCount > item.selectionLimit.max
               ? item.selectionLimit
