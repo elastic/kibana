@@ -92,9 +92,17 @@ export const FlakyTestLatestRunSchema = FlakyTestBranchLatestRunSchema.extend({
 });
 export type FlakyTestLatestRun = z.infer<typeof FlakyTestLatestRunSchema>;
 
-/** Build counts of one test on one branch; the entry-level counts are the sum over branches. */
+/**
+ * Build counts of one test on one branch, breakages included; the entry-level counts are the sum
+ * over branches less the builds of its breakages.
+ */
 export const FlakyTestBranchStatsSchema = z.object({
   branch: z.string(),
+  /**
+   * The pipeline these counts are of, when it is judged on its own (not in `judgedTogether`);
+   * absent for the counts over the pipelines judged together. A branch can have one of each.
+   */
+  pipeline: z.optional(z.string()),
   builds: z.number().int(),
   failedBuilds: z.number().int(),
   /** `failedBuilds / builds` on this branch. */
@@ -122,6 +130,11 @@ export const FlakyTestTargetStatsSchema = z.object({
   mode: z.string(),
   /** Where the target ran: `local` or `cloud`. */
   type: z.string(),
+  /**
+   * The pipeline these counts are of, when it is judged on its own (not in `judgedTogether`);
+   * absent for the counts over the pipelines judged together.
+   */
+  pipeline: z.optional(z.string()),
   builds: z.number().int(),
   failedBuilds: z.number().int(),
   /** `failedBuilds / builds` on this target. */
@@ -141,6 +154,8 @@ export type FlakyTestTargetStats = z.infer<typeof FlakyTestTargetStatsSchema>;
  */
 export const FlakyTestFlakiestBranchSchema = z.object({
   branch: z.string(),
+  /** The pipeline it qualified in, when that pipeline is judged on its own. */
+  pipeline: z.optional(z.string()),
   builds: z.number().int(),
   failedBuilds: z.number().int(),
   /** `failedBuilds / builds` on this branch. */
@@ -175,9 +190,12 @@ export const FlakyTestEntrySchema = z.object({
   passes: z.number().int(),
   /** Executions that failed and then passed within the same run (Playwright retries only). */
   retryFlakes: z.number().int(),
-  /** Distinct Buildkite builds the test ran in. */
+  /**
+   * Distinct Buildkite builds the test ran in, less the builds of its breakages: failed builds in
+   * a row, too many to be chance, that a flaky test is kept despite.
+   */
   builds: z.number().int(),
-  /** Distinct Buildkite builds with at least one failed execution. */
+  /** Distinct Buildkite builds with at least one failed execution, less those of its breakages. */
   failedBuilds: z.number().int(),
   /** `failedBuilds / builds`. */
   buildFailRate: z.number(),
@@ -193,8 +211,9 @@ export const FlakyTestEntrySchema = z.object({
   firstFailedAt: z.coerce.date(),
   lastFailedAt: z.coerce.date(),
   /**
-   * The branch on which the test cleared the thresholds; the top-level rate above is diluted
-   * by the other branches. Absent in reports written before thresholds applied per branch.
+   * The branch on which the test cleared the thresholds, counted without its breakages; the
+   * top-level rate above is diluted by the other branches. Absent in reports written before
+   * thresholds applied per branch.
    */
   flakiestBranch: z.optional(FlakyTestFlakiestBranchSchema),
   /** Absent only if the test emitted no execution events in the window (should not happen). */
@@ -269,6 +288,13 @@ export type FlakyTestReportThresholds = z.infer<typeof FlakyTestReportThresholds
 export interface FlakyTestReportOptions {
   lookbackDays: number;
   pipelines: string[];
+  /**
+   * Pipelines of `pipelines` whose builds are judged together, per branch, as they run the same
+   * tests in the same environment. Every other pipeline is judged per branch on its own, such as
+   * those running the tests in another environment (FIPS mode, Elastic Cloud), so that the others'
+   * builds can't dilute them. Unset, every pipeline is judged together.
+   */
+  judgedTogether?: string[];
   branches: string[];
   frameworks: TestFramework[];
   /** Which lists to compute; tests of an omitted classification are dropped before decoration. */
@@ -304,6 +330,11 @@ export const FlakyTestReportSchema = z.object({
   }),
   scope: z.object({
     pipelines: z.array(z.string()),
+    /**
+     * Pipelines judged together (`FlakyTestReportOptions.judgedTogether`), the others each on
+     * their own; absent when every pipeline is judged together.
+     */
+    judgedTogether: z.optional(z.array(z.string())),
     /** Empty means no branch filter. */
     branches: z.array(z.string()),
     frameworks: z.array(TestFrameworkSchema),
@@ -321,8 +352,9 @@ export const FlakyTestReportSchema = z.object({
     totalConsistentlyFailing: z.number().int(),
     flakyByFramework: z.record(TestFrameworkSchema, z.number().int()),
     /**
-     * Flaky tests by the branch they qualified on (`flakiestBranch.branch`), largest count
-     * first. Empty in reports written before thresholds applied per branch.
+     * Flaky tests by the branch they qualified on (`flakiestBranch.branch`, `main in kibana-fips`
+     * for a pipeline judged on its own), largest count first. Empty in reports written before
+     * thresholds applied per branch.
      */
     flakyByBranch: z.record(z.string(), z.number().int()).default({}),
   }),

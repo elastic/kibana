@@ -9,15 +9,22 @@ import { AutoFollowPatternForm } from '../../app/components/auto_follow_pattern_
 import './mocks';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { AUTO_FOLLOW_PATTERN_EDIT, AUTO_FOLLOW_PATTERN_EDIT_NAME } from './helpers/constants';
+import { API_BASE_PATH } from '../../../common/constants';
+import { ccrStore } from '../../app/store';
+import {
+  AUTO_FOLLOW_PATTERN_DELETE,
+  AUTO_FOLLOW_PATTERN_SELECT_EDIT,
+} from '../../app/store/action_types';
 
 const { setup } = pageHelpers.autoFollowPatternEdit;
 const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;
 
 describe('Edit Auto-follow pattern', () => {
   let httpRequestsMockHelpers;
+  let httpSetup;
 
   beforeAll(() => {
-    ({ httpRequestsMockHelpers } = setupEnvironment());
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
   });
 
   describe('on component mount', () => {
@@ -67,6 +74,54 @@ describe('Edit Auto-follow pattern', () => {
       );
       expect(find('prefixInput').props().value).toBe('prefix_');
       expect(find('suffixInput').props().value).toBe('_suffix');
+    });
+  });
+
+  describe('when the auto-follow pattern has no follow index pattern', () => {
+    let find;
+    let component;
+    let actions;
+
+    beforeEach(async () => {
+      // The store is shared between tests, so drop the pattern loaded by the previous ones
+      ccrStore.dispatch({
+        type: `${AUTO_FOLLOW_PATTERN_DELETE}_SUCCESS`,
+        payload: { itemsDeleted: [AUTO_FOLLOW_PATTERN_EDIT_NAME] },
+      });
+      ccrStore.dispatch({ type: AUTO_FOLLOW_PATTERN_SELECT_EDIT, payload: null });
+
+      const { name, remoteCluster, leaderIndexPatterns } = AUTO_FOLLOW_PATTERN_EDIT;
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse([
+        { name: 'cluster-2', seeds: ['localhost:123'], isConnected: true },
+      ]);
+      httpRequestsMockHelpers.setGetAutoFollowPatternResponse(AUTO_FOLLOW_PATTERN_EDIT_NAME, {
+        name,
+        remoteCluster,
+        leaderIndexPatterns,
+      });
+      ({ component, find, actions } = setup());
+
+      await nextTick();
+      component.update();
+    });
+
+    test('should leave the prefix and suffix empty', () => {
+      expect(find('prefixInput').props().value).toBe('');
+      expect(find('suffixInput').props().value).toBe('');
+    });
+
+    test('should PUT a follow index pattern without "undefined" in it', async () => {
+      httpSetup.put.mockClear();
+
+      actions.clickSaveForm();
+      await nextTick();
+
+      const putEndpoint = `${API_BASE_PATH}/auto_follow_patterns/${AUTO_FOLLOW_PATTERN_EDIT_NAME}`;
+      const putCall = httpSetup.put.mock.calls.find(([path]) => path === putEndpoint);
+
+      expect(putCall).toBeDefined();
+      const body = JSON.parse(putCall[1].body);
+      expect(body.followIndexPattern).toBe('{{leader_index}}');
     });
   });
 
