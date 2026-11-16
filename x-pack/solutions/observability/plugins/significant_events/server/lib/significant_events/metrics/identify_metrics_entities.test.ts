@@ -384,7 +384,7 @@ describe('Kubernetes type KIs', () => {
           members: ['apps/named'],
         },
         {
-          'orchestrator.cluster.name': null,
+          'orchestrator.cluster.name': '',
           kind: 'deployment',
           scale: 1,
           members: ['apps/missing'],
@@ -414,7 +414,12 @@ describe('Kubernetes type KIs', () => {
         ),
         filter: {
           and: [
-            { not: { field: 'orchestrator.cluster.name', exists: true } },
+            {
+              or: [
+                { not: { field: 'orchestrator.cluster.name', exists: true } },
+                { field: 'orchestrator.cluster.name', eq: '' },
+              ],
+            },
             {
               or: [
                 { field: 'data_stream.dataset', eq: 'kubernetes.pod' },
@@ -427,10 +432,12 @@ describe('Kubernetes type KIs', () => {
       })
     );
     expect(missingCluster?.properties.list_query).toEqual(
-      expect.stringContaining('orchestrator.cluster.name IS NULL')
+      expect.stringContaining(
+        'AND (orchestrator.cluster.name IS NULL OR orchestrator.cluster.name == "")'
+      )
     );
     expect(missingCluster?.properties.list_query).not.toEqual(
-      expect.stringContaining('orchestrator.cluster.name ==')
+      expect.stringContaining('orchestrator.cluster.name == "cluster-a"')
     );
   });
 
