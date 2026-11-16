@@ -1907,6 +1907,35 @@ describe('WorkersService Hunt index coverage', () => {
       });
     });
 
+    it('says only hidden or alerts indices were found when the sweep skipped nothing else', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        ...blockedScope('blocked:empty_universe'),
+        missing: [],
+        policy_skipped: ['.siem-signals-x'],
+      });
+
+      const hunt = await huntOf(service);
+
+      expect(hunt).toMatchObject({
+        state: 'degraded',
+        stateReason: `The sweep at 2026-10-28 10:00 UTC found only hidden or alerts indices in this space's default data view, which Hunt does not search`,
+      });
+    });
+
+    it('keeps the could-not-see reason when skipped and missing entries are both present', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        ...blockedScope('blocked:empty_universe'),
+        missing: ['custom-1'],
+        policy_skipped: ['.siem-signals-x'],
+      });
+
+      const hunt = await huntOf(service);
+
+      expect(hunt?.stateReason).toContain('could not see any index');
+    });
+
     it('is degraded with the resolve reason after a blocked:discovery_failed sweep', async () => {
       const { service, mocks } = await setup();
       finishedSweep(mocks, blockedScope('blocked:discovery_failed'));

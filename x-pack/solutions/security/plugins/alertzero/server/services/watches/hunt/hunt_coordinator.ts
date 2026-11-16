@@ -86,6 +86,8 @@ export interface HuntCoordinatorParams {
    * `securitySolution:defaultIndex` setting.
    */
   indexPatterns: string[];
+  /** Default data view entries removed by policy (dot-prefixed names), echoed into the scope. */
+  policySkippedPatterns?: string[];
   /** Cross-project search is on: unqualified patterns in the universe reach linked projects. */
   crossProjectSearch?: boolean;
   text?: string;
@@ -383,9 +385,13 @@ const buildArticleContext = (
 const blockedScopeGuidance = ({
   resolution,
   indexPatterns,
+  policySkipped,
+  missing,
 }: {
   resolution: HuntScopeResolution;
   indexPatterns: string[];
+  policySkipped: string[];
+  missing: string[];
 }): { message: string; nextStep: string } => {
   const checked = indexPatterns.join(', ');
   if (resolution === 'blocked:discovery_failed') {
@@ -393,6 +399,14 @@ const blockedScopeGuidance = ({
       message: `Hunt scope resolution failed, so no index was searched (checked: ${checked}).`,
       nextStep:
         "Check Elasticsearch connectivity and the calling user's index privileges, then retry.",
+    };
+  }
+  if (policySkipped.length > 0 && missing.length === 0) {
+    return {
+      message:
+        'The default data view has no pattern this hunt may search: hidden and alerts indices are never searched.',
+      nextStep:
+        'Add a pattern for the data to hunt to the `securitySolution:defaultIndex` setting.',
     };
   }
   return {
@@ -584,6 +598,7 @@ const huntCoordinatorCore = async (
     text: callerText,
     run_id,
     indexPatterns,
+    policySkippedPatterns,
     crossProjectSearch = false,
     trigger,
   } = params;
@@ -718,6 +733,7 @@ const huntCoordinatorCore = async (
       esClient,
       spaceId,
       indexPatterns,
+      policySkippedPatterns,
       crossProjectSearch,
       report: scopeReport,
       logger,
@@ -770,6 +786,8 @@ const huntCoordinatorCore = async (
     const { message, nextStep } = blockedScopeGuidance({
       resolution: scope.resolution,
       indexPatterns,
+      policySkipped: scope.policy_skipped ?? [],
+      missing: scope.missing,
     });
     return {
       status: 'blocked',

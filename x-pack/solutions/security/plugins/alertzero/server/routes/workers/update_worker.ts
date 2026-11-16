@@ -124,7 +124,7 @@ export const registerUpdateWorkerRoute = ({
             request.body,
             getSpaceId(request),
             request,
-            () => resolveHuntUniverse(context, logger)
+            () => resolveHuntUniverse(context, logger).then(({ patterns }) => patterns)
           );
 
           switch (result.outcome) {

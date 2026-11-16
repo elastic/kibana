@@ -56,7 +56,10 @@ export const registerHuntForThreatRoute = ({
           const { iocs, techniques, time_range, size } = request.body;
           const spaceId = getSpaceId(request);
           const esClient = huntEsClient({ getClusterClient, request });
-          const indexPatterns = await resolveHuntUniverse(context, logger);
+          const { patterns: indexPatterns, policySkipped } = await resolveHuntUniverse(
+            context,
+            logger
+          );
 
           // `discovered` is the datasets stage 1 parsed for the report matcher; the wire
           // scope carries what they matched, not the list itself.
@@ -64,6 +67,7 @@ export const registerHuntForThreatRoute = ({
             esClient,
             spaceId,
             indexPatterns,
+            policySkippedPatterns: policySkipped,
             crossProjectSearch: isCpsEnabled(),
             logger,
           });
@@ -76,14 +80,18 @@ export const registerHuntForThreatRoute = ({
             // exception handler. This standalone route has no chain to read a body field
             // from, so refusing outright is the more direct signal. See
             // elastic/security-team#19741.
+            const policyOnly =
+              (scope.policy_skipped ?? []).length > 0 && scope.missing.length === 0;
             return response.customError({
               statusCode: 409,
               body: {
-                message: `Hunt scope is blocked (${
-                  scope.resolution
-                }): nothing in the default data view is visible to this hunt (checked: ${indexPatterns.join(
-                  ', '
-                )})`,
+                message: policyOnly
+                  ? `Hunt scope is blocked (${scope.resolution}): the default data view has no pattern this hunt may search, because hidden and alerts indices are never searched`
+                  : `Hunt scope is blocked (${
+                      scope.resolution
+                    }): nothing in the default data view is visible to this hunt (checked: ${indexPatterns.join(
+                      ', '
+                    )})`,
               },
             });
           }

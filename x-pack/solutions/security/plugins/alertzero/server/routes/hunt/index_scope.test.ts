@@ -249,4 +249,79 @@ describe('registerHuntIndexScopeRoute', () => {
       body: { message: 'Failed to resolve hunt index scope' },
     });
   });
+
+  describe('policy-skipped entries', () => {
+    const SETTING = ['logs-*', '.alerts-security.alerts-default'];
+
+    it('hands the filtered universe and the skipped list to resolveHuntScope', async () => {
+      const { handler, context } = makeDeps({ indexPatterns: SETTING });
+
+      await handler(
+        context,
+        httpServerMock.createKibanaRequest(),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(resolveHuntScopeMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          indexPatterns: ['logs-*'],
+          policySkippedPatterns: ['.alerts-security.alerts-default'],
+        })
+      );
+    });
+
+    it('logs one info line naming the skipped entries and nothing when none were skipped', async () => {
+      resolveHuntScopeMock.mockResolvedValue({
+        ...okScope,
+        policy_skipped: ['.alerts-security.alerts-default'],
+      });
+      const skipped = makeDeps({ indexPatterns: SETTING });
+      await skipped.handler(
+        skipped.context,
+        httpServerMock.createKibanaRequest(),
+        httpServerMock.createResponseFactory()
+      );
+      expect(skipped.logger.info).toHaveBeenCalledTimes(1);
+      expect(skipped.logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('.alerts-security.alerts-default')
+      );
+
+      resolveHuntScopeMock.mockResolvedValue({ ...okScope, policy_skipped: [] });
+      const none = makeDeps();
+      await none.handler(
+        none.context,
+        httpServerMock.createKibanaRequest(),
+        httpServerMock.createResponseFactory()
+      );
+      expect(none.logger.info).not.toHaveBeenCalled();
+      expect(none.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['only skipped entries', ['.siem-signals-x'], [], 'names only hidden or alerts indices'],
+      ['skipped and missing', ['.siem-signals-x'], ['custom-1'], 'the caller resolved none of'],
+      ['nothing skipped', [], ['custom-1'], 'the caller resolved none of'],
+    ])(
+      'warns with the matching text for a blocked scope with %s',
+      async (_label, policySkipped, missing, expected) => {
+        resolveHuntScopeMock.mockResolvedValue({
+          ...okScope,
+          status: 'blocked',
+          resolution: 'blocked:empty_universe',
+          index_patterns: [],
+          missing,
+          policy_skipped: policySkipped,
+        });
+        const { handler, context, logger } = makeDeps();
+
+        await handler(
+          context,
+          httpServerMock.createKibanaRequest(),
+          httpServerMock.createResponseFactory()
+        );
+
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(expected));
+      }
+    );
+  });
 });

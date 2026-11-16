@@ -20,12 +20,24 @@ export const HuntWorkerIndexCoverageResponse = lazySchema(() =>
   z
     .object({
       /**
-       * The positive patterns of the space's default data view.
+       * The positive patterns of the space's default data view, without the policy-skipped entries.
        */
       universe: z
         .array(z.string().max(512))
         .max(500)
-        .describe("The positive patterns of the space's default data view."),
+        .describe(
+          "The positive patterns of the space's default data view, without the policy-skipped entries."
+        ),
+      /**
+       * Default data view entries the hunt never searches because their index name is dot-prefixed (hidden or alerts indices).
+       */
+      policy_skipped: z
+        .array(z.string().max(512))
+        .max(500)
+        .optional()
+        .describe(
+          'Default data view entries the hunt never searches because their index name is dot-prefixed (hidden or alerts indices).'
+        ),
       /**
        * Patterns the caller can resolve and the worker's account cannot.
        */
@@ -42,7 +54,7 @@ export const HuntWorkerIndexCoverageResponse = lazySchema(() =>
         .describe('Patterns that resolve to nothing for the caller either.'),
       source: z.enum(['last_sweep', 'role', 'unavailable']),
       unavailable_reason: z
-        .enum(['role_unreadable', 'discovery_failed', 'caller_unreadable'])
+        .enum(['role_unreadable', 'discovery_failed', 'caller_unreadable', 'empty_universe'])
         .optional(),
       checked_at: z.string().max(64).nullable(),
       service_account_id: z.string().max(1024).nullable(),

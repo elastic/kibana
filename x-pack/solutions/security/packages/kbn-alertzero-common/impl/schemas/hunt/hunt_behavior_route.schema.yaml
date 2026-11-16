@@ -234,6 +234,8 @@ paths:
                       row in a required index. Independent of IOC Hunt.
         '400':
           description: No GenAI connector configured
+        '409':
+          description: The default data view has no pattern this hunt may search
         '503':
           description: The inference plugin is not available in this deployment
 components:

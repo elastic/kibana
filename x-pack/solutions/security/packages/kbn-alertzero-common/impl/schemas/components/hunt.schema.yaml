@@ -143,6 +143,13 @@ components:
           description: Universe patterns that resolved to nothing. Informational.
           items:
             type: string
+        policy_skipped:
+          type: array
+          description: >-
+            Default data view entries the hunt never searches because their index name is
+            dot-prefixed (hidden or alerts indices).
+          items:
+            type: string
         report_matches:
           type: array
           description: >-

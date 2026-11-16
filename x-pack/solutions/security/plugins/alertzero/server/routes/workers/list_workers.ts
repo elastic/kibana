@@ -44,7 +44,7 @@ export const registerListWorkersRoute = ({
       withAlertZeroEnabled(async (context, request, response) => {
         try {
           const listed = await getWorkersService().list(request, getSpaceId(request), () =>
-            resolveHuntUniverse(context, logger)
+            resolveHuntUniverse(context, logger).then(({ patterns }) => patterns)
           );
           const body: ListWorkersResponse = {
             ...listed,

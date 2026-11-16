@@ -41,7 +41,18 @@ paths:
                     items:
                       type: string
                       maxLength: 512
-                    description: The positive patterns of the space's default data view.
+                    description: >-
+                      The positive patterns of the space's default data view, without the
+                      policy-skipped entries.
+                  policy_skipped:
+                    type: array
+                    maxItems: 500
+                    items:
+                      type: string
+                      maxLength: 512
+                    description: >-
+                      Default data view entries the hunt never searches because their index name
+                      is dot-prefixed (hidden or alerts indices).
                   unreadable_by_worker:
                     type: array
                     maxItems: 500
@@ -61,7 +72,7 @@ paths:
                     enum: [last_sweep, role, unavailable]
                   unavailable_reason:
                     type: string
-                    enum: [role_unreadable, discovery_failed, caller_unreadable]
+                    enum: [role_unreadable, discovery_failed, caller_unreadable, empty_universe]
                   checked_at:
                     type: string
                     nullable: true

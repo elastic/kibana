@@ -44,6 +44,8 @@ interface ResolveWorkerIndexCoverageParams {
   request: KibanaRequest;
   spaceId: string;
   indexPatterns: string[];
+  /** Default data view entries removed by policy (dot-prefixed names), reported as `policy_skipped`. */
+  policySkippedPatterns?: string[];
   /** Cross-project search is on: an unqualified pattern resolving only on a linked project is not missing. */
   crossProjectSearch?: boolean;
   workflowId: string | null;
@@ -67,6 +69,7 @@ export const resolveWorkerIndexCoverage = async ({
   request,
   spaceId,
   indexPatterns,
+  policySkippedPatterns = [],
   crossProjectSearch = false,
   workflowId,
   serviceAccountId,
@@ -77,11 +80,24 @@ export const resolveWorkerIndexCoverage = async ({
   const universe = indexPatterns.filter((pattern) => !isIndexExclusion(pattern));
   const base = {
     universe,
+    policy_skipped: policySkippedPatterns,
     service_account_id: serviceAccountId,
     role_name: roleName,
     account_label: getHuntAccountLabel({ serviceAccountId }),
     is_serverless: isServerless,
   };
+
+  // An empty name list would resolve every index, so there is nothing to ask Elasticsearch.
+  if (universe.length === 0) {
+    return {
+      ...base,
+      unreadable_by_worker: [],
+      missing_for_everyone: [],
+      source: 'unavailable',
+      unavailable_reason: 'empty_universe',
+      checked_at: null,
+    };
+  }
 
   let missingForEveryone: string[];
   try {

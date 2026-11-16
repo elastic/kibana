@@ -381,4 +381,79 @@ describe('resolveHuntScope', () => {
     expect(scope.window).toEqual(window);
     expect(scope.row_limit).toBe(100);
   });
+
+  describe('policy_skipped', () => {
+    const SKIPPED = ['.siem-signals-infosec-detections'];
+
+    it('echoes the skipped list on an ok scope and defaults to an empty one', async () => {
+      const { esClient } = createEsClient();
+
+      const withSkipped = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: ['logs-*'],
+        policySkippedPatterns: SKIPPED,
+      });
+      const without = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: ['logs-*'],
+      });
+
+      expect(withSkipped.policy_skipped).toEqual(SKIPPED);
+      expect(without.policy_skipped).toEqual([]);
+    });
+
+    it('echoes it when the scope is blocked with no positive pattern, without a call', async () => {
+      const { esClient, resolveIndex } = createEsClient();
+
+      const scope = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: ['-foo*'],
+        policySkippedPatterns: SKIPPED,
+      });
+
+      expect(scope.resolution).toBe('blocked:empty_universe');
+      expect(scope.policy_skipped).toEqual(SKIPPED);
+      expect(resolveIndex).not.toHaveBeenCalled();
+    });
+
+    it('echoes it when nothing resolves and when the resolve throws', async () => {
+      const empty = createEsClient({ resolved: resolveResponse({}) });
+      const emptyScope = await resolveHuntScope({
+        esClient: empty.esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: ['logs-*'],
+        policySkippedPatterns: SKIPPED,
+      });
+      expect(emptyScope.policy_skipped).toEqual(SKIPPED);
+
+      const failing = createEsClient();
+      failing.resolveIndex.mockRejectedValue(new Error('denied'));
+      const failedScope = await resolveHuntScope({
+        esClient: failing.esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: ['logs-*'],
+        policySkippedPatterns: SKIPPED,
+      });
+      expect(failedScope.resolution).toBe('blocked:discovery_failed');
+      expect(failedScope.policy_skipped).toEqual(SKIPPED);
+    });
+
+    it('echoes it on a degraded scope', async () => {
+      const { esClient, fieldCapsFn } = createEsClient();
+      fieldCapsFn.mockRejectedValue(new Error('field caps failed'));
+
+      const scope = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: ['logs-*'],
+        policySkippedPatterns: SKIPPED,
+      });
+
+      expect(scope.status).toBe('degraded');
+      expect(scope.policy_skipped).toEqual(SKIPPED);
+    });
+  });
 });

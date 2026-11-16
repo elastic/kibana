@@ -128,6 +128,15 @@ export const HuntScope = lazySchema(() =>
       .array(z.string())
       .describe('Universe patterns that resolved to nothing. Informational.'),
     /**
+     * Default data view entries the hunt never searches because their index name is dot-prefixed (hidden or alerts indices).
+     */
+    policy_skipped: z
+      .array(z.string())
+      .optional()
+      .describe(
+        'Default data view entries the hunt never searches because their index name is dot-prefixed (hidden or alerts indices).'
+      ),
+    /**
      * `*`-suffixed patterns of datasets the report's vendor or product matched deterministically. Empty when no report was supplied or nothing matched.
      */
     report_matches: z

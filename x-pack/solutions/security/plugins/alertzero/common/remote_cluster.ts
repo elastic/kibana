@@ -44,6 +44,13 @@ export const stripBackingPrefix = (name: string): string =>
       : index
   );
 
+/**
+ * Whether a name is a hidden or alerts index: after the `<cluster>:` prefix and a data stream
+ * backing prefix are stripped, its index part starts with `.`.
+ */
+export const isDotPrefixedIndex = (name: string): boolean =>
+  splitRemoteCluster(stripBackingPrefix(name)).index.startsWith('.');
+
 export interface IndexScopeEntry extends RemoteClusterName {
   /** True for an exclusion; `index` then holds the excluded pattern without its `-`. */
   exclude: boolean;

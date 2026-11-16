@@ -351,4 +351,42 @@ describe('registerHuntBehaviorRoute', () => {
       body: { message: expect.stringContaining('LLM extraction failed') },
     });
   });
+
+  describe('policy-skipped default data view entries', () => {
+    const withSetting = (setting: string[]) => {
+      const deps = makeDeps();
+      const context = {
+        ...deps.context,
+        core: Promise.resolve({
+          uiSettings: { client: { get: jest.fn().mockResolvedValue(setting) } },
+        }),
+      };
+      return { ...deps, context };
+    };
+
+    it('leaves dot-prefixed entries out of the allowed indices', async () => {
+      const { handler, context } = withSetting(['logs-*', '.alerts-security.alerts-default']);
+
+      await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+      const allowed = huntBehaviorMock.mock.calls[0][2].allowed_indices ?? [];
+      expect(allowed).toContain('logs-*');
+      expect(allowed.join(',')).not.toContain('.alerts-security');
+    });
+
+    it('refuses with 409 before resolving any model when nothing searchable remains', async () => {
+      resolveScopedModelMock.mockResolvedValue({ ok: false, reason: 'no_connector' } as never);
+      const { handler, context } = withSetting(['.siem-signals-infosec-detections']);
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 409,
+        body: { message: expect.stringContaining('no pattern this hunt may search') },
+      });
+      expect(huntBehaviorMock).not.toHaveBeenCalled();
+      expect(resolveScopedModelMock).not.toHaveBeenCalled();
+    });
+  });
 });

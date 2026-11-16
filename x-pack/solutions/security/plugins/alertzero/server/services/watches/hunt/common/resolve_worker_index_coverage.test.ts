@@ -351,6 +351,41 @@ describe('resolveWorkerIndexCoverage', () => {
     });
   });
 
+  describe('policy-skipped entries', () => {
+    it('reports the skipped list on every branch', async () => {
+      const skipped = ['.siem-signals-infosec-detections'];
+
+      const role = await setup().run({ policySkippedPatterns: skipped });
+      expect(role.policy_skipped).toEqual(skipped);
+
+      const failing = setup({ callerResolves: new Error('boom') });
+      const failed = await failing.run({ policySkippedPatterns: skipped });
+      expect(failed.policy_skipped).toEqual(skipped);
+
+      const withDefault = await setup().run();
+      expect(withDefault.policy_skipped).toEqual([]);
+    });
+
+    it('returns before any Elasticsearch call when no positive entry is left', async () => {
+      const { esClient, run } = setup({ universe: ['-foo*'] });
+
+      const result = await run({ policySkippedPatterns: ['.alerts-x'] });
+
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({
+          universe: [],
+          unreadable_by_worker: [],
+          missing_for_everyone: [],
+          source: 'unavailable',
+          unavailable_reason: 'empty_universe',
+          checked_at: null,
+          policy_skipped: ['.alerts-x'],
+        })
+      );
+    });
+  });
+
   it('always sets the account fields', async () => {
     const { run } = setup({ role: null });
     await expect(run({ serviceAccountId: null, isServerless: true })).resolves.toMatchObject({

@@ -109,11 +109,14 @@ export const resolveHuntScope = async ({
   row_limit = DEFAULT_ROW_LIMIT,
   report,
   logger,
+  policySkippedPatterns = [],
 }: {
   esClient: ElasticsearchClient;
   spaceId: string;
   /** The space's default data view patterns, exclusions included. Caller-supplied. */
   indexPatterns: string[];
+  /** Default data view entries the caller removed by policy (dot-prefixed names), echoed as `policy_skipped`. */
+  policySkippedPatterns?: string[];
   /** Cross-project search is on: an unqualified pattern resolving only on a linked project is not missing. */
   crossProjectSearch?: boolean;
   window?: IndexScopeWindow;
@@ -133,6 +136,7 @@ export const resolveHuntScope = async ({
       resolution,
       index_patterns: [],
       missing,
+      policy_skipped: policySkippedPatterns,
       discovered: [],
       report_matches: [],
       actionable_indices: [],
@@ -192,6 +196,7 @@ export const resolveHuntScope = async ({
     resolution: 'universe',
     index_patterns: indexPatterns,
     missing,
+    policy_skipped: policySkippedPatterns,
     discovered,
     report_matches: reportMatches.patterns,
     actionable_indices: actionable.patterns,

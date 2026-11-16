@@ -224,6 +224,45 @@ describe('registerHuntForThreatRoute', () => {
     });
   });
 
+  it.each([
+    ['only skipped entries', ['.siem-signals-x'], [], 'no pattern this hunt may search'],
+    ['skipped and missing', ['.siem-signals-x'], ['custom-1'], 'nothing in the default data view'],
+    ['nothing skipped', [], ['custom-1'], 'nothing in the default data view'],
+  ])('words the 409 for a blocked scope with %s', async (_label, policySkipped, missing, text) => {
+    resolveHuntScopeMock.mockResolvedValue({
+      ...okScope,
+      status: 'blocked',
+      resolution: 'blocked:empty_universe',
+      index_patterns: [],
+      missing,
+      policy_skipped: policySkipped,
+    });
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 409,
+      body: { message: expect.stringContaining(text) },
+    });
+  });
+
+  it('hands the filtered universe and the skipped list to resolveHuntScope', async () => {
+    const { handler, context } = makeDeps({
+      indexPatterns: ['logs-*', '.alerts-security.alerts-default'],
+    });
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+    expect(resolveHuntScopeMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatterns: ['logs-*'],
+        policySkippedPatterns: ['.alerts-security.alerts-default'],
+      })
+    );
+  });
+
   it('omits internal grounding digests from the response body', async () => {
     huntForThreatMock.mockResolvedValue({
       ...tier1Result,

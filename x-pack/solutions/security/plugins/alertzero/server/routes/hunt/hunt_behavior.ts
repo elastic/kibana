@@ -14,6 +14,7 @@ import {
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
+import { isIndexExclusion } from '../../../common/remote_cluster';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import { TIER2_MODEL_TIERS } from '../../services/watches/hunt/common/hunt_model_tiers';
 import {
@@ -65,6 +66,17 @@ export const registerHuntBehaviorRoute = ({
       withAlertZeroEnabled(async (context, request, response) => {
         try {
           const core = await context.core;
+          // What the generated query may read: the same default data view Tier 1 searches.
+          const { patterns: indexPatterns } = await resolveHuntUniverse(context, logger);
+          if (!indexPatterns.some((pattern) => !isIndexExclusion(pattern))) {
+            return response.customError({
+              statusCode: 409,
+              body: {
+                message:
+                  'The default data view has no pattern this hunt may search: hidden and alerts indices are never searched.',
+              },
+            });
+          }
           const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
 
           // Resolved by tier, not the deployment default — see resolveScopedModel's doc for
@@ -119,8 +131,6 @@ export const registerHuntBehaviorRoute = ({
             article_context,
           } = request.body;
           const esClient = huntEsClient({ getClusterClient, request });
-          // What the generated query may read: the same default data view Tier 1 searches.
-          const indexPatterns = await resolveHuntUniverse(context, logger);
           const crossProjectSearch = isCpsEnabled();
 
           const body: HuntBehaviorResponse = await huntBehavior(

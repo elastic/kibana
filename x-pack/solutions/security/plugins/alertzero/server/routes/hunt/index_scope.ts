@@ -51,7 +51,10 @@ export const registerHuntIndexScopeRoute = ({
         try {
           const spaceId = getSpaceId(request);
           const esClient = huntEsClient({ getClusterClient, request });
-          const indexPatterns = await resolveHuntUniverse(context, logger);
+          const { patterns: indexPatterns, policySkipped } = await resolveHuntUniverse(
+            context,
+            logger
+          );
 
           // `discovered` is the datasets stage 1 parsed for the report matcher; the wire
           // scope carries what they matched, not the list itself.
@@ -59,15 +62,30 @@ export const registerHuntIndexScopeRoute = ({
             esClient,
             spaceId,
             indexPatterns,
+            policySkippedPatterns: policySkipped,
             crossProjectSearch: isCpsEnabled(),
             logger,
           });
+          const policySkippedList = scope.policy_skipped ?? [];
+          if (policySkippedList.length > 0) {
+            logger.info(
+              `Hunt index scope for space ${spaceId} does not search hidden or alerts indices: ${policySkippedList.join(
+                ', '
+              )}`
+            );
+          }
           if (scope.resolution === 'blocked:empty_universe') {
             // `blocked:discovery_failed` already warns inside `resolveHuntScope`.
             logger.warn(
-              `Hunt index scope for space ${spaceId} is ${
-                scope.resolution
-              }: the caller resolved none of ${scope.missing.join(', ')}`
+              policySkippedList.length > 0 && scope.missing.length === 0
+                ? `Hunt index scope for space ${spaceId} is ${
+                    scope.resolution
+                  }: the default data view names only hidden or alerts indices (${policySkippedList.join(
+                    ', '
+                  )})`
+                : `Hunt index scope for space ${spaceId} is ${
+                    scope.resolution
+                  }: the caller resolved none of ${scope.missing.join(', ')}`
             );
           }
           const body: HuntIndexScopeResponse = scope;

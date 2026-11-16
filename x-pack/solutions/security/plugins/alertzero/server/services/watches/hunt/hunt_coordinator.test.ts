@@ -1073,6 +1073,46 @@ describe('huntCoordinator', () => {
       );
     });
 
+    it.each([
+      ['only skipped entries', ['.siem-signals-x'], [], true],
+      ['skipped and missing', ['.siem-signals-x'], ['custom-1'], false],
+      ['nothing skipped', [], ['custom-1'], false],
+    ])('words a blocked scope with %s', async (_label, policySkipped, missing, policyCopy) => {
+      mockScope.mockResolvedValueOnce({
+        ...blockedScope('blocked:empty_universe'),
+        policy_skipped: policySkipped,
+        missing,
+      });
+      const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
+        spaceId: 'default',
+        indexPatterns: INDEX_PATTERNS,
+        trigger: 'scheduled',
+        run_id: 'run-policy-copy',
+      });
+
+      if (policyCopy) {
+        expect(result.message).toContain('no pattern this hunt may search');
+      } else {
+        expect(result.message).toContain('is visible to this hunt');
+      }
+    });
+
+    it('forwards the skipped list to scope resolution', async () => {
+      mockScope.mockClear();
+      mockScope.mockResolvedValueOnce(blockedScope('blocked:empty_universe'));
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
+        spaceId: 'default',
+        indexPatterns: INDEX_PATTERNS,
+        policySkippedPatterns: ['.alerts-x'],
+        trigger: 'scheduled',
+        run_id: 'run-forward-skipped',
+      });
+
+      expect(mockScope).toHaveBeenCalledWith(
+        expect.objectContaining({ policySkippedPatterns: ['.alerts-x'] })
+      );
+    });
+
     it('says resolution itself failed', async () => {
       const result = await runBlocked('blocked:discovery_failed');
 
