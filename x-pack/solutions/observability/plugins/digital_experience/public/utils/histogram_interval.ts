@@ -10,14 +10,16 @@ import { getAdjustedInterval } from '@kbn/charts-plugin/public';
 import type { HistogramInterval } from '../../common/types/applications';
 import type { QueriedRange } from './time_range_query';
 
-/** The interval of a chart without buckets, which shades nothing. */
-export const NO_BUCKETS_INTERVAL: HistogramInterval = { value: 1, unit: 's' };
-
-/** The x domain of a date histogram chart; `minInterval` is the length of its shortest bucket. */
+/** The x domain of a date histogram chart, with what its partial edge buckets are shaded by. */
 export interface TimeChartXDomain {
   min: number;
   max: number;
+  /** The length of the shortest bucket. */
   minInterval: number;
+  /** The queried range, which the edge buckets may cover only part of. */
+  range: QueriedRange;
+  /** Whether the chart draws bars, whose histogram mode spans each bucket. */
+  hasBars: boolean;
 }
 
 /**
@@ -26,22 +28,23 @@ export interface TimeChartXDomain {
  */
 export const getTimeChartXDomain = ({
   points,
-  interval: { value, unit },
+  interval,
   range,
   timeZone,
   hasBars,
 }: {
   /** The buckets, sorted by their start in epoch milliseconds. */
   points: ReadonlyArray<{ timestamp: number }>;
-  interval: HistogramInterval;
-  /** No domain until the range of the response is known. */
+  /** No domain until the interval and range of the response are known. */
+  interval: HistogramInterval | undefined;
   range: QueriedRange | undefined;
   timeZone: string;
   hasBars: boolean;
 }): TimeChartXDomain | undefined => {
-  if (!range || points.length === 0) {
+  if (!interval || !range || points.length === 0) {
     return undefined;
   }
+  const { value, unit } = interval;
   const keys = points.map(({ timestamp }) => {
     return timestamp;
   });
@@ -51,5 +54,7 @@ export const getTimeChartXDomain = ({
     min: Math.min(keys[0], range.start),
     max: hasBars ? maxKey : maxKey + nominalInterval,
     minInterval: unit === 's' ? nominalInterval : getAdjustedInterval(keys, value, unit, timeZone),
+    range,
+    hasBars,
   };
 };

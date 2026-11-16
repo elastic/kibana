@@ -8,29 +8,20 @@
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { Endzones } from '@kbn/charts-plugin/public';
-import type { QueriedRange } from '../utils/time_range_query';
 import type { TimeChartXDomain } from '../utils/histogram_interval';
 
-/** Shades the edge buckets that cover only part of `range`, as Lens's `XyEndzones` does. */
-export function PartialBucketsEndzones({
-  xDomain,
-  range,
-  histogramMode,
-}: {
-  xDomain: TimeChartXDomain | undefined;
-  range: QueriedRange | undefined;
-  /** Whether the chart draws bars, whose histogram mode spans each bucket. */
-  histogramMode: boolean;
-}) {
+/** Shades the edge buckets that cover only part of the queried range, as Lens's `XyEndzones` does. */
+export function PartialBucketsEndzones({ xDomain }: { xDomain: TimeChartXDomain | undefined }) {
   const { colorMode } = useEuiTheme();
 
-  if (!xDomain || !range) {
+  if (!xDomain) {
     return null;
   }
+  const { range, hasBars } = xDomain;
 
   return (
     <Endzones
-      isFullBin={!histogramMode}
+      isFullBin={!hasBars}
       isDarkMode={colorMode === 'DARK'}
       domainStart={range.start}
       domainEnd={range.end}

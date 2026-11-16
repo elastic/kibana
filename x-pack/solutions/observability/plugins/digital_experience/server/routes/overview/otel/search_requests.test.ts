@@ -11,8 +11,7 @@ const PARAMS = {
   serviceName: 'shop',
   start: 0,
   end: 60 * 60 * 1000,
-  interval: { value: 60, unit: 's' as const },
-  timeZone: 'America/New_York',
+  histogram: { interval: { value: 60, unit: 's' as const }, timeZone: 'America/New_York' },
 };
 
 const inEnvironmentOf = (request: ReturnType<typeof logsSearch>) =>

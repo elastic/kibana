@@ -70,8 +70,7 @@ const setup = ({
     start,
     end: NOW,
     environment: 'production',
-    interval: { value: 1, unit: 's' },
-    timeZone: 'UTC',
+    histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     signal,
   });
   return { result, esClient, taskManager, logger };
@@ -108,8 +107,7 @@ describe('getOtelApplicationsFromBestSource', () => {
       start: NOW - DAY_MS,
       end: NOW,
       environment: 'production',
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
   });
 
@@ -230,8 +228,7 @@ describe('getOtelApplicationsFromBestSource', () => {
       start: NOW - DAY_MS,
       end: NOW,
       environment: 'production',
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
       signal: undefined,
     });
   });

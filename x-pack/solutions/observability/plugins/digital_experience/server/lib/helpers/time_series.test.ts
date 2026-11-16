@@ -34,8 +34,7 @@ describe('dateHistogram', () => {
       dateHistogram({
         start: 0,
         end: HOUR,
-        interval: { value: 60, unit: 's' },
-        timeZone: TIME_ZONE,
+        histogram: { interval: { value: 60, unit: 's' }, timeZone: TIME_ZONE },
       })
     ).toEqual({
       date_histogram: {
@@ -52,8 +51,7 @@ describe('dateHistogram', () => {
     const { date_histogram: daily } = dateHistogram({
       start: 0,
       end: 90 * DAY,
-      interval: { value: 1, unit: 'd' },
-      timeZone: TIME_ZONE,
+      histogram: { interval: { value: 1, unit: 'd' }, timeZone: TIME_ZONE },
     });
 
     expect(daily).toMatchObject({ calendar_interval: '1d', time_zone: TIME_ZONE });
@@ -64,8 +62,7 @@ describe('dateHistogram', () => {
     const { date_histogram: histogram } = dateHistogram({
       start: 0,
       end: HOUR,
-      interval: { value: 60, unit: 's' },
-      timeZone: TIME_ZONE,
+      histogram: { interval: { value: 60, unit: 's' }, timeZone: TIME_ZONE },
       field: 'start_time',
     });
 

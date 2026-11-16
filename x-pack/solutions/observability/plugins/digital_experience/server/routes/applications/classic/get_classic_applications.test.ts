@@ -55,8 +55,7 @@ describe('getClassicApplications', () => {
         apmEventClient,
         start: 1,
         end: 2,
-        interval: { value: 1, unit: 's' },
-        timeZone: 'UTC',
+        histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
       })
     ).resolves.toEqual({
       applications: [
@@ -95,8 +94,7 @@ describe('getClassicApplications', () => {
       apmEventClient,
       start: 1,
       end: 2,
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     expect(httpRequests).toEqual({ count: 0, failedCount: 0, failedRatio: null });
@@ -109,8 +107,7 @@ describe('getClassicApplications', () => {
       apmEventClient,
       start: 10,
       end: 20,
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     const [, params] = search.mock.calls[0];
@@ -156,8 +153,7 @@ describe('getClassicApplications', () => {
       apmEventClient,
       start: 10,
       end: 20,
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     const [, params] = search.mock.calls[0];
@@ -182,8 +178,7 @@ describe('getClassicApplications', () => {
       apmEventClient,
       start: 10,
       end: 20,
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     const [, { aggs }] = search.mock.calls[0];
@@ -215,8 +210,7 @@ describe('getClassicApplications', () => {
       start: 10,
       end: 20,
       environment: 'production',
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     const [, { aggs }] = search.mock.calls[0];
@@ -236,8 +230,7 @@ describe('getClassicApplications', () => {
       apmEventClient,
       start: 1,
       end: 2,
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     expect(environments).toEqual(['production', 'ENVIRONMENT_NOT_DEFINED']);
@@ -251,8 +244,7 @@ describe('getClassicApplications', () => {
       start: 10,
       end: 20,
       environment: 'ENVIRONMENT_NOT_DEFINED',
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     expect(search.mock.calls[0][1].aggs.inEnvironment.filter).toEqual({
@@ -273,16 +265,14 @@ describe('getClassicApplications', () => {
       apmEventClient,
       start: 10,
       end: 20,
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
     await getClassicApplications({
       apmEventClient,
       start: 10,
       end: 20,
       environment: 'ENVIRONMENT_ALL',
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     expect(search.mock.calls.map(([, { aggs }]) => aggs.inEnvironment.filter)).toEqual([

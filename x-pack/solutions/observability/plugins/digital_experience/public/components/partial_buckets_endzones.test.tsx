@@ -34,22 +34,16 @@ const POINTS = [0, HOUR, 2 * HOUR].map((timestamp) => {
 
 const renderEndzones = (
   range: QueriedRange | undefined,
-  {
-    points = POINTS,
-    histogramMode = true,
-  }: { points?: typeof POINTS; histogramMode?: boolean } = {}
+  { points = POINTS, hasBars = true }: { points?: typeof POINTS; hasBars?: boolean } = {}
 ) => {
   const xDomain = getTimeChartXDomain({
     points,
     interval: { value: 3600, unit: 's' },
     range,
     timeZone: 'UTC',
-    hasBars: histogramMode,
+    hasBars,
   });
-  return render(
-    <PartialBucketsEndzones xDomain={xDomain} range={range} histogramMode={histogramMode} />,
-    { wrapper: EuiProvider }
-  );
+  return render(<PartialBucketsEndzones xDomain={xDomain} />, { wrapper: EuiProvider });
 };
 
 const lastShadedZones = () => {
@@ -81,7 +75,7 @@ describe('PartialBucketsEndzones', () => {
 
   it('shades whole edge buckets outside the domain of areas, as Lens does', () => {
     // `isFullBin` zones lie outside the domain, so an area chart draws nothing.
-    renderEndzones({ start: HOUR / 2, end: 2.5 * HOUR }, { histogramMode: false });
+    renderEndzones({ start: HOUR / 2, end: 2.5 * HOUR }, { hasBars: false });
 
     expect(lastShadedZones()).toEqual([
       { coordinates: { x1: 0 } },

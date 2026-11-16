@@ -29,22 +29,30 @@ export const getHistogramInterval = (start: number, end: number): HistogramInter
   return { value: Math.max(Math.round(interval?.asSeconds() ?? 0), 1), unit: 's' };
 };
 
+/** The buckets of a request's date histograms, built once per request for every search. */
+export interface HistogramParams {
+  /** Their width, from `getHistogramInterval`. */
+  interval: HistogramInterval;
+  /** The time zone they line up with: a moment-timezone name or a UTC offset. */
+  timeZone: string;
+}
+
 /**
- * Counts over the time range in buckets of `interval` lined up with `timeZone`, empty ones
- * included, so every source returns the same ones. The documents are bucketed by `field`, the
- * event time by default.
+ * Counts over the time range in buckets of `histogram`, empty ones included, so every source
+ * returns the same ones. The documents are bucketed by `field`, the event time by default.
  */
 export const dateHistogram = ({
   start,
   end,
-  interval: { value, unit },
-  timeZone,
+  histogram: {
+    interval: { value, unit },
+    timeZone,
+  },
   field = '@timestamp',
 }: {
   start: number;
   end: number;
-  interval: HistogramInterval;
-  timeZone: string;
+  histogram: HistogramParams;
   field?: string;
 }): { date_histogram: estypes.AggregationsDateHistogramAggregation } => {
   return {

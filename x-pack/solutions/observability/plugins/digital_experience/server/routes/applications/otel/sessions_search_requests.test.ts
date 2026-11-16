@@ -26,15 +26,23 @@ interface Aggregation {
 }
 
 const aggregationsOf = (environment?: string) =>
-  sessionsSearch({ start: START, end: END, environment, interval: INTERVAL, timeZone: TIME_ZONE })
-    .aggs as unknown as Record<string, Aggregation>;
+  sessionsSearch({
+    start: START,
+    end: END,
+    environment,
+    histogram: { interval: INTERVAL, timeZone: TIME_ZONE },
+  }).aggs as unknown as Record<string, Aggregation>;
 
 const inEnvironment = (environment?: string) => aggregationsOf(environment).inEnvironment;
 
 describe('sessionsSearch', () => {
   it('reads the sessions index without hits, failing rather than returning partial results', () => {
     expect(
-      sessionsSearch({ start: START, end: END, interval: INTERVAL, timeZone: TIME_ZONE })
+      sessionsSearch({
+        start: START,
+        end: END,
+        histogram: { interval: INTERVAL, timeZone: TIME_ZONE },
+      })
     ).toMatchObject({
       index: 'digital-experience-sessions-*',
       size: 0,
@@ -47,7 +55,11 @@ describe('sessionsSearch', () => {
   it('matches the sessions that overlap the time range, as the Sessions tab does', () => {
     const range = { start: new Date(START).toISOString(), end: new Date(END).toISOString() };
 
-    expect(sessionsSearch({ start: START, end: END, interval: INTERVAL, timeZone: TIME_ZONE }).query).toEqual({
+    expect(sessionsSearch({
+        start: START,
+        end: END,
+        histogram: { interval: INTERVAL, timeZone: TIME_ZONE },
+      }).query).toEqual({
       bool: { filter: sessionOverlapFilters(range) },
     });
     expect(sessionOverlapFilters(range)).toEqual([

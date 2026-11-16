@@ -17,7 +17,7 @@ const POINTS = [1_000, 2_000].map((timestamp) => {
 });
 
 describe('getTimeChartXDomain', () => {
-  it('has no domain without buckets or before the range is known', () => {
+  it('has no domain without buckets or before the interval and range are known', () => {
     const range = { start: 1_000, end: 3_000 };
 
     expect(
@@ -32,6 +32,15 @@ describe('getTimeChartXDomain', () => {
         hasBars: true,
       })
     ).toBeUndefined();
+    expect(
+      getTimeChartXDomain({
+        points: POINTS,
+        interval: undefined,
+        range,
+        timeZone: 'UTC',
+        hasBars: true,
+      })
+    ).toBeUndefined();
   });
 
   it.each([
@@ -40,15 +49,11 @@ describe('getTimeChartXDomain', () => {
     // Areas end at the last bucket's start, so the interval is added for its shading.
     [false, { min: 1_000, max: 3_000, minInterval: SECOND }],
   ])('spans the range up to its last bucket when hasBars is %s', (hasBars, xDomain) => {
+    const range = { start: 1_500, end: 2_500 };
+
     expect(
-      getTimeChartXDomain({
-        points: POINTS,
-        interval: SECONDS,
-        range: { start: 1_500, end: 2_500 },
-        timeZone: 'UTC',
-        hasBars,
-      })
-    ).toEqual(xDomain);
+      getTimeChartXDomain({ points: POINTS, interval: SECONDS, range, timeZone: 'UTC', hasBars })
+    ).toEqual({ ...xDomain, range, hasBars });
   });
 
   it('reaches the end of a range past the last bucket', () => {
@@ -60,7 +65,7 @@ describe('getTimeChartXDomain', () => {
         timeZone: 'UTC',
         hasBars: true,
       })
-    ).toEqual({ min: 1_000, max: 4_000, minInterval: SECOND });
+    ).toMatchObject({ min: 1_000, max: 4_000, minInterval: SECOND });
   });
 
   it('measures calendar buckets by the shortest one, February', () => {

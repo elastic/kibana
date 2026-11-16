@@ -71,8 +71,8 @@ export function PageLoadsChart({
   pageLoads: TimeSeriesPoint[];
   /** The sessions that started in each bucket, `null` when they are not counted. */
   sessions: TimeSeriesPoint[] | null;
-  /** The width of every bucket, the same for both metrics. */
-  interval: HistogramInterval;
+  /** The width of every bucket, the same for both metrics; `undefined` until the first response. */
+  interval: HistogramInterval | undefined;
   /** The queried time range; the edge buckets are shaded where they cover only part of it. */
   range: QueriedRange | undefined;
   isLoading: boolean;
@@ -145,7 +145,7 @@ export function PageLoadsChart({
             xDomain={xDomain}
           />
           <Tooltip headerFormatter={({ value }) => formatDate(value)} />
-          <PartialBucketsEndzones xDomain={xDomain} range={range} histogramMode />
+          <PartialBucketsEndzones xDomain={xDomain} />
           <Axis id="time" position={Position.Bottom} />
           <Axis id="count" position={Position.Left} gridLine={{ visible: true }} ticks={4} />
           <BarSeries

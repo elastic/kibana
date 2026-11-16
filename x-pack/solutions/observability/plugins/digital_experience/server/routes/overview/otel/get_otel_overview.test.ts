@@ -97,8 +97,7 @@ const PARAMS = {
   serviceName: 'shop',
   start: 10,
   end: 20,
-  interval: { value: 1, unit: 's' as const },
-  timeZone: 'UTC',
+  histogram: { interval: { value: 1, unit: 's' as const }, timeZone: 'UTC' },
 };
 
 describe('getOtelOverview', () => {

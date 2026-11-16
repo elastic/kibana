@@ -111,7 +111,9 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     await runHandler({ query: { start: START, end: END, timeZone: 'America/New_York' } });
 
     expect(mockedOtel).toHaveBeenCalledWith(
-      expect.objectContaining({ timeZone: 'America/New_York' })
+      expect.objectContaining({
+        histogram: expect.objectContaining({ timeZone: 'America/New_York' }),
+      })
     );
   });
 

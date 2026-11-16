@@ -70,8 +70,7 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
       filters: readOverviewFilters(filters),
       percentile,
       kuery: kueryToQuery(kuery),
-      interval: getHistogramInterval(start, end),
-      timeZone,
+      histogram: { interval: getHistogramInterval(start, end), timeZone },
       signal,
     });
   },

@@ -148,10 +148,14 @@ describe('GET /internal/digital_experience/applications', () => {
     }).result;
 
     expect(mockedOtel).toHaveBeenCalledWith(
-      expect.objectContaining({ timeZone: 'America/New_York' })
+      expect.objectContaining({
+        histogram: expect.objectContaining({ timeZone: 'America/New_York' }),
+      })
     );
     expect(mockedClassic).toHaveBeenCalledWith(
-      expect.objectContaining({ timeZone: 'America/New_York' })
+      expect.objectContaining({
+        histogram: expect.objectContaining({ timeZone: 'America/New_York' }),
+      })
     );
   });
 

@@ -138,11 +138,9 @@ function TrendChart({
   formatValue,
   chartType,
   xDomain,
-  range,
   onTimeRangeSelect,
 }: {
   points: OverviewTrendPoint[];
-  range: QueriedRange | undefined;
   metric: 'pageLoads' | 'loadTimePercentileMs';
   name: string;
   color: string;
@@ -176,7 +174,7 @@ function TrendChart({
         xDomain={xDomain}
       />
       <Tooltip headerFormatter={({ value }) => formatDate(value)} />
-      <PartialBucketsEndzones xDomain={xDomain} range={range} histogramMode={chartType === 'bar'} />
+      <PartialBucketsEndzones xDomain={xDomain} />
       <Axis id="time" position={Position.Bottom} style={HIDDEN_AXIS_LINES} />
       <Axis
         id={`${metric}Axis`}
@@ -268,8 +266,8 @@ export function OverviewTrends({
   onTimeRangeSelect,
 }: {
   points: OverviewTrendPoint[];
-  /** The width of every bucket. */
-  interval: HistogramInterval;
+  /** The width of every bucket; `undefined` until the first response. */
+  interval: HistogramInterval | undefined;
   /** The queried time range; the edge buckets are shaded where they cover only part of it. */
   range: QueriedRange | undefined;
   /** The page loads of the whole range, the sum of the points. */
@@ -303,7 +301,7 @@ export function OverviewTrends({
     hasBars: chartType === 'bar',
   });
 
-  const chartProps = { points, range, chartType, xDomain, onTimeRangeSelect };
+  const chartProps = { points, chartType, xDomain, onTimeRangeSelect };
 
   return (
     <EuiPanel

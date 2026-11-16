@@ -289,20 +289,4 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
 
     expect(response).toHaveStatusCode(400);
   });
-
-  apiTest('buckets in UTC without a time zone', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
-
-    const response = await apiClient.get(withQuery(APPLICATIONS_PATH, THIRTY_DAYS), {
-      headers: { ...COMMON_HEADERS, ...cookieHeader },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(200);
-    const { pageLoadsOverTime } = response.body as ApplicationsResponse;
-    expect(pageLoadsOverTime.otel.length).toBeGreaterThan(0);
-    expect(
-      pageLoadsOverTime.otel.every(({ timestamp }) => timestamp % (12 * 60 * 60 * 1000) === 0)
-    ).toBe(true);
-  });
 });

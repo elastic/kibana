@@ -114,8 +114,7 @@ describe('getOtelApplications', () => {
         esClient,
         start: 1,
         end: 2,
-        interval: { value: 1, unit: 's' },
-        timeZone: 'UTC',
+        histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
       })
     ).resolves.toEqual({
       applications: [
@@ -173,8 +172,7 @@ describe('getOtelApplications', () => {
       esClient,
       start: 10,
       end: 20,
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     const [[logsRequest]] = esClient.search.mock.calls;
@@ -201,8 +199,7 @@ describe('getOtelApplications', () => {
       esClient,
       start: 10,
       end: 20,
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     const indices = esClient.search.mock.calls.map(([request]) => request?.index);
@@ -225,8 +222,7 @@ describe('getOtelApplications', () => {
       esClient,
       start: 1,
       end: 2,
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     expect(environments).toEqual(['production', 'ENVIRONMENT_NOT_DEFINED']);
@@ -244,8 +240,7 @@ describe('getOtelApplications', () => {
       esClient,
       start: 1,
       end: 2,
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     expect(environments).toEqual(['production']);
@@ -258,8 +253,7 @@ describe('getOtelApplications', () => {
       esClient,
       start: 10,
       end: 20,
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     const [, [spansRequest]] = esClient.search.mock.calls;
@@ -280,8 +274,7 @@ describe('getOtelApplications', () => {
       esClient,
       start: 10,
       end: 20,
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     expect(esClient.search).toHaveBeenCalledTimes(1);
@@ -295,8 +288,7 @@ describe('getOtelApplications', () => {
       start: 10,
       end: 20,
       environment: 'ENVIRONMENT_NOT_DEFINED',
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     esClient.search.mock.calls.forEach(([request]) => {
@@ -327,8 +319,7 @@ describe('getOtelApplications', () => {
       start: 10,
       end: 20,
       environment: 'production',
-      interval: { value: 1, unit: 's' },
-      timeZone: 'UTC',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     esClient.search.mock.calls.forEach(([request]) => {
