@@ -31,6 +31,36 @@ export const isBreakpointSupportedStepType = (stepType: string | undefined): boo
   stepType.length > 0 &&
   (stepType === 'data.set' || !(BuiltInStepTypes as readonly string[]).includes(stepType));
 
+interface BreakpointLookupStep {
+  stepType: string;
+  parentStepId?: string;
+}
+
+/**
+ * True when a breakpoint can be set on the step. Steps nested in a `parallel` branch are excluded
+ * because the engine does not pause there.
+ */
+export const canSetBreakpointOnStep = (
+  step: BreakpointLookupStep | undefined,
+  steps: Readonly<Record<string, BreakpointLookupStep>> | undefined
+): boolean => {
+  if (!step || !isBreakpointSupportedStepType(step.stepType)) {
+    return false;
+  }
+  let parentStepId = step.parentStepId;
+  while (parentStepId) {
+    const parent = steps?.[parentStepId];
+    if (!parent) {
+      return true;
+    }
+    if (parent.stepType === 'parallel') {
+      return false;
+    }
+    parentStepId = parent.parentStepId;
+  }
+  return true;
+};
+
 /**
  * Marks the tooltip so the global hover overrides can size it compactly. Monaco's markdown
  * sanitizer strips `class`, so an allowed attribute (`data-code`, only read on `div`) is used.
@@ -81,7 +111,7 @@ export const useBreakpointDecorations = (
     const breakpointSet = new Set(breakpoints);
     const decorations: monaco.editor.IModelDeltaDecoration[] = [];
     for (const [stepId, stepInfo] of Object.entries(workflowLookup.steps)) {
-      if (isBreakpointSupportedStepType(stepInfo.stepType)) {
+      if (canSetBreakpointOnStep(stepInfo, workflowLookup.steps)) {
         const range = {
           startLineNumber: stepInfo.lineStart,
           startColumn: 1,
@@ -162,7 +192,7 @@ export const useBreakpointDecorations = (
         return;
       }
       const matchedStep = Object.values(steps).find(
-        (step) => step.lineStart === lineNumber && isBreakpointSupportedStepType(step.stepType)
+        (step) => step.lineStart === lineNumber && canSetBreakpointOnStep(step, steps)
       );
       if (matchedStep) {
         dispatch(toggleBreakpoint(matchedStep.stepId));

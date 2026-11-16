@@ -27,19 +27,18 @@ function applyMockOutputSchema(baseSchema: z.ZodSchema, node: GraphNodeUnion): z
     return baseSchema;
   }
   const inferredMock = inferZodType(mock.output);
+  // Mocks only apply to debug runs and may hold unrendered templates, so they must not narrow an open schema.
   if (baseSchema instanceof z.ZodUnknown || baseSchema instanceof z.ZodAny) {
-    return inferredMock;
+    return z.union([inferredMock, baseSchema]);
   }
   if (baseSchema instanceof z.ZodObject && inferredMock instanceof z.ZodObject) {
     const mergedShape: Record<string, z.ZodType> = { ...baseSchema.shape };
     for (const [key, mockFieldSchema] of Object.entries(inferredMock.shape)) {
       const existingField = mergedShape[key];
-      if (
-        !existingField ||
-        existingField instanceof z.ZodUnknown ||
-        existingField instanceof z.ZodAny
-      ) {
+      if (!existingField) {
         mergedShape[key] = mockFieldSchema as z.ZodType;
+      } else if (existingField instanceof z.ZodUnknown || existingField instanceof z.ZodAny) {
+        mergedShape[key] = z.union([mockFieldSchema as z.ZodType, existingField]);
       }
     }
     return z.object(mergedShape);

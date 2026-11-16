@@ -21,6 +21,7 @@ import {
 } from './errors';
 import type { ConnectorExecutor } from '../connector_executor';
 import { RESUME_INPUT_TAKEN_FOR_KEY } from '../repositories/resume_context_revert';
+import { getParallelBranchScopes } from '../workflow_context_manager/parallel_branch_scope';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
@@ -383,6 +384,11 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
         ? nodeConfig.name
         : undefined) ?? this.step.name;
     if (!debug.breakpoints.includes(stepName)) {
+      return false;
+    }
+    // Parallel branches are re-ticked on a timer, which would resume a breakpoint pause unattended.
+    const stackFrames = this.stepExecutionRuntime.scopeStack?.stackFrames ?? [];
+    if (getParallelBranchScopes(stackFrames).length > 0) {
       return false;
     }
     return this.stepExecutionRuntime.getCurrentStepState?.()?.breakpointHit !== true;

@@ -113,6 +113,7 @@ import type {
   WaitForInputListResult,
   WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
+import { ensureWorkflowServiceAccountMutationAuthorized } from '../services/workflow_service_account_binding';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
 
@@ -1096,11 +1097,13 @@ export class WorkflowsManagementApi {
     spaceId,
     request,
   }: TestWorkflowParams): Promise<string> {
+    const isDebugRun = debug?.enabled === true;
     if (workflowId) {
+      // Debug runs can rewrite step input at breakpoints, so they need the same access as editing.
       await this.assertWorkflowAccess(
         workflowId,
         spaceId,
-        workflowYaml ? 'edit' : 'execute',
+        workflowYaml || isDebugRun ? 'edit' : 'execute',
         request,
         { allowAdminOverride: false }
       );
@@ -1141,6 +1144,9 @@ export class WorkflowsManagementApi {
     }
 
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
+    if (isDebugRun && workflowJson.definition?.settings?.run_as) {
+      await this.assertBoundWorkflowDebugAuthorized(request);
+    }
     // A test run is still a top-level run: it holds the same concurrency slot and would
     // fail the same way on an inherited step. Unsaved drafts of delegated-identity-only
     // workflows reach the engine through this path, so gate it too.
@@ -1162,7 +1168,7 @@ export class WorkflowsManagementApi {
       spaceId,
       inputs: manualInputs,
       isUserInteractive: true,
-      ...(debug?.enabled ? { debug } : {}),
+      ...(isDebugRun ? { debug } : {}),
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
@@ -1445,12 +1451,15 @@ export class WorkflowsManagementApi {
     spaceId: string,
     operation: WorkflowAccessOperation,
     request: KibanaRequest
-  ): Promise<void> {
+  ): Promise<{
+    execution: WorkflowExecutionDto;
+    workflow: WorkflowDetailDto | null;
+  }> {
     const execution = await this.workflowsService.getWorkflowExecution(executionId, spaceId, {
       omitStepExecutions: true,
     });
     if (!execution) throw new WorkflowNotFoundError(executionId);
-    if (!execution.workflowId) return;
+    if (!execution.workflowId) return { execution, workflow: null };
     const workflow = await this.workflowsService.getWorkflow(execution.workflowId, spaceId, {
       includeDeleted: true,
     });
@@ -1458,6 +1467,15 @@ export class WorkflowsManagementApi {
       const access = await this.workflowsService.getAccessControl();
       await access.assertAccess(workflow, operation, request);
     }
+    return { execution, workflow };
+  }
+
+  /** Breakpoint input overrides on a bound workflow run as its service account. */
+  private async assertBoundWorkflowDebugAuthorized(request: KibanaRequest): Promise<void> {
+    await ensureWorkflowServiceAccountMutationAuthorized(
+      await this.workflowsService.getCoreStart(),
+      request
+    );
   }
 
   public async cancelWorkflowExecution(
@@ -1525,7 +1543,26 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { channel?: string; stepExecutionId?: string }
   ): Promise<ResumeWorkflowExecutionResponseDto> {
-    await this.assertExecutionAccess(executionId, spaceId, 'execute', request);
+    const { execution, workflow } = await this.assertExecutionAccess(
+      executionId,
+      spaceId,
+      'execute',
+      request
+    );
+    const debugContext = execution.context?.debug as { enabled?: boolean } | undefined;
+    const isDebugInputOverride =
+      execution.isTestRun === true &&
+      debugContext?.enabled === true &&
+      Object.keys(input).length > 0;
+    if (isDebugInputOverride) {
+      if (workflow) {
+        const access = await this.workflowsService.getAccessControl();
+        await access.assertAccess(workflow, 'edit', request);
+      }
+      if (execution.workflowDefinition?.settings?.run_as) {
+        await this.assertBoundWorkflowDebugAuthorized(request);
+      }
+    }
     const channel = options?.channel;
     let claimReleased: boolean | undefined;
     try {

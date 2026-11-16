@@ -592,6 +592,27 @@ describe('WorkflowExecuteModal', () => {
       expect(getByTestId('executeWorkflowButton')).toBeEnabled();
     });
 
+    it('does not auto-run a production replay when breakpoints are set and Debug is available', () => {
+      const mockOnDebugSubmit = jest.fn();
+      const { getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          hasBreakpoints={true}
+          definition={{
+            ...baseWorkflowDefinition,
+            triggers: [{ type: 'manual' }],
+          }}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+          onDebugSubmit={mockOnDebugSubmit}
+        />
+      );
+
+      expect(mockOnSubmit).not.toHaveBeenCalled();
+      expect(mockOnClose).not.toHaveBeenCalled();
+      expect(getByTestId('debugWorkflowButton')).toBeInTheDocument();
+    });
+
     it('does not auto-run when workflow has alert triggers', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal

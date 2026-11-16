@@ -7,7 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isBreakpointSupportedStepType } from './use_breakpoint_decorations';
+import {
+  canSetBreakpointOnStep,
+  isBreakpointSupportedStepType,
+} from './use_breakpoint_decorations';
+
+describe('canSetBreakpointOnStep', () => {
+  const steps = {
+    branches: { stepType: 'parallel' },
+    in_parallel: { stepType: 'http', parentStepId: 'branches' },
+    check: { stepType: 'if', parentStepId: 'branches' },
+    nested_in_parallel: { stepType: 'console', parentStepId: 'check' },
+    condition: { stepType: 'if' },
+    in_if: { stepType: 'http', parentStepId: 'condition' },
+  };
+
+  it('allows atomic steps outside parallel, including inside other containers', () => {
+    expect(canSetBreakpointOnStep(steps.in_if, steps)).toBe(true);
+  });
+
+  it('disallows steps nested at any depth inside a parallel branch', () => {
+    expect(canSetBreakpointOnStep(steps.in_parallel, steps)).toBe(false);
+    expect(canSetBreakpointOnStep(steps.nested_in_parallel, steps)).toBe(false);
+  });
+});
 
 describe('isBreakpointSupportedStepType', () => {
   it.each(['http', 'console', 'data.set', 'elasticsearch.search', 'kibana.createCase', 'ai.agent'])(

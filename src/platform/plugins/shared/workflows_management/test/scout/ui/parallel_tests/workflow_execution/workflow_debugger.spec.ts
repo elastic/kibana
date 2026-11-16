@@ -9,6 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { deleteTestExecutions } from '../../../api/fixtures/delete_test_executions';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import { EXECUTION_TIMEOUT } from '../../fixtures/constants';
@@ -36,7 +37,10 @@ test.describe('Workflow execution - Debugger UI', { tag: [...tags.stateful.class
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  test.afterAll(async ({ scoutSpace, apiServices }) => {
+  const executionIds: string[] = [];
+
+  test.afterAll(async ({ scoutSpace, apiServices, esClient }) => {
+    await deleteTestExecutions(esClient, scoutSpace.id, executionIds);
     await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 
@@ -61,6 +65,8 @@ test.describe('Workflow execution - Debugger UI', { tag: [...tags.stateful.class
         'waiting_for_input',
         EXECUTION_TIMEOUT
       );
+      const executionId = new URL(page.url()).searchParams.get('executionId');
+      if (executionId) executionIds.push(executionId);
       await expect(page.testSubj.locator('workflowStepTreeIterationTag-mocked')).toBeVisible();
       await expect(page.testSubj.locator('continueBreakpointButton')).toBeVisible();
     });

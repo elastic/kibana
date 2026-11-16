@@ -155,15 +155,12 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       return !hasAlertTrigger && !hasWorkflowInputFields(normalizedInputs);
     }, [definition, normalizedInputs]);
 
-    const shouldAutoRun = isAutoRunEligible && !(isTestRun && (hasBreakpoints || hasStepMocks));
+    const isDebugConfigured =
+      (isTestRun || Boolean(onDebugSubmit)) && (hasBreakpoints || hasStepMocks);
+    const shouldAutoRun = isAutoRunEligible && !isDebugConfigured;
 
     const [selectedTrigger, setSelectedTrigger] = useState<WorkflowTriggerTab>(() => {
-      if (
-        !initialExecutionId &&
-        isAutoRunEligible &&
-        isTestRun &&
-        (hasBreakpoints || hasStepMocks)
-      ) {
+      if (!initialExecutionId && isAutoRunEligible && isDebugConfigured) {
         return 'manual';
       }
       return resolveInitialSelectedTrigger(

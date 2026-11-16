@@ -185,7 +185,9 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
   }
 
   private setDurableStepState(durableStepState: DurableStepState): void {
+    // Keep sibling keys (e.g. debugger breakpoint flags) owned by the base node implementation.
     this.stepExecutionRuntime.setCurrentStepState({
+      ...this.stepExecutionRuntime.getCurrentStepState(),
       [DURABLE_STEP_STATE_KEY]: durableStepState,
     });
   }

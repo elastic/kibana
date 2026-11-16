@@ -8,6 +8,7 @@
  */
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
+import { getSchemaAtPath, getShape } from '@kbn/workflows/common/utils/zod';
 import { z } from '@kbn/zod/v4';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
 import { createMockWorkflowContextRegistry } from './registry.mock';
@@ -494,6 +495,45 @@ describe('getOutputSchemaForStepType', () => {
           respondedAt: '2026-08-25T15:06:54.847Z',
         }).success
       ).toBe(true);
+    });
+  });
+
+  describe('step mock output', () => {
+    const nodeWithMock = (stepType: string, output: unknown) => ({
+      id: 'test-id',
+      stepId: 'test-step-id',
+      stepType,
+      type: 'atomic' as const,
+      configuration: { mock: { output } },
+    });
+
+    it('enriches an open output schema with mock keys without narrowing it', () => {
+      mockConnectorsMap.set('elasticsearch.search', { type: 'elasticsearch.search' });
+
+      const result = getOutputSchemaForStepType(
+        registry,
+        nodeWithMock('elasticsearch.search', { verdict: 'critical' })
+      );
+
+      expect(Object.keys(getShape(result))).toEqual(['verdict']);
+      expect(getSchemaAtPath(result, 'verdict').schema).toBeInstanceOf(z.ZodString);
+      expect(getSchemaAtPath(result, 'field_from_real_connector').schema).not.toBeNull();
+    });
+
+    it('keeps typed connector fields and leaves open fields permissive', () => {
+      mockConnectorsMap.set('elasticsearch.search', {
+        type: 'elasticsearch.search',
+        outputSchema: z.object({ took: z.number(), data: z.unknown() }),
+      });
+
+      const result = getOutputSchemaForStepType(
+        registry,
+        nodeWithMock('elasticsearch.search', { took: 'not-a-number', data: { score: 96 } })
+      );
+
+      expect(getSchemaAtPath(result, 'took').schema).toBeInstanceOf(z.ZodNumber);
+      expect(getSchemaAtPath(result, 'data.score').schema).toBeInstanceOf(z.ZodNumber);
+      expect(getSchemaAtPath(result, 'data.other').schema).not.toBeNull();
     });
   });
 });

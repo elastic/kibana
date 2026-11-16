@@ -11,6 +11,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import { spaceTest } from '../../fixtures';
+import { deleteTestExecutions } from '../../fixtures/delete_test_executions';
 
 const DEBUGGER_MOCK_WORKFLOW_YAML = `
 name: Scout Debugger Mocks Workflow
@@ -79,8 +80,13 @@ spaceTest.describe(
   'Workflow debugger (mocks and breakpoints)',
   { tag: tags.deploymentAgnostic },
   () => {
-    spaceTest.afterAll(async ({ apiServices }) => {
+    const executionIds: string[] = [];
+
+    spaceTest.afterAll(async ({ apiServices, esClient, scoutSpace, config }) => {
       await apiServices.workflowsApi.deleteAll();
+      if (!config.serverless) {
+        await deleteTestExecutions(esClient, scoutSpace.id, executionIds);
+      }
     });
 
     spaceTest(
@@ -93,6 +99,7 @@ spaceTest.describe(
           inputs: { userId: 'alice-42' },
           debug: { enabled: true },
         });
+        executionIds.push(workflowExecutionId);
 
         const completed = await workflowsApi.waitForStatus({
           workflowExecutionId,
@@ -149,6 +156,7 @@ spaceTest.describe(
             breakpoints: ['step_two'],
           },
         });
+        executionIds.push(workflowExecutionId);
 
         const paused = await workflowsApi.waitForStatus({
           workflowExecutionId,

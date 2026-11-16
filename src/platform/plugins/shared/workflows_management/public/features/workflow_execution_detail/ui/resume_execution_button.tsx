@@ -273,7 +273,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
           size="s"
           iconType="pencil"
           onClick={openModal}
-          disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
+          disabled={!canExecuteWorkflow || isSubmitting || isSubmitted || !pausedStepInput}
           data-test-subj="editBreakpointInputButton"
         >
           <FormattedMessage

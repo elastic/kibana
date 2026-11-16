@@ -258,6 +258,43 @@ steps:
     expect(stepExecsFinal[1].output).toBe('Item 1: beta');
   });
 
+  it('does not pause on a breakpoint inside a parallel branch', async () => {
+    await workflowRunFixture.runWorkflow({
+      isTestRun: true,
+      debug: {
+        enabled: true,
+        breakpoints: ['branch_step'],
+      },
+      workflowYaml: `
+steps:
+  - name: fan_out
+    type: parallel
+    foreach:
+      - "alpha"
+      - "beta"
+    steps:
+      - name: branch_step
+        type: console
+        with:
+          message: "Item {{ foreach.item }}"
+`,
+    });
+
+    const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+      'fake_workflow_execution_id'
+    );
+    expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
+
+    const branchSteps = Array.from(
+      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+    ).filter((s) => s.stepId === 'branch_step');
+    expect(branchSteps).toHaveLength(2);
+    for (const branchStep of branchSteps) {
+      expect(branchStep.status).toBe(ExecutionStatus.COMPLETED);
+      expect(branchStep.state?.breakpointHit).toBeUndefined();
+    }
+  });
+
   it('pauses on a step nested inside an if branch and inside an on-failure.fallback block', async () => {
     await workflowRunFixture.runWorkflow({
       isTestRun: true,
