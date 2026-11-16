@@ -126,4 +126,26 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   expiredCalloutTitle: i18n.translate('xpack.proposals.approvalModal.expiredCallout', {
     defaultMessage: 'Expired and can no longer be applied',
   }),
+  /** Tooltip on Decline when `readOnly`. */
+  readOnlyDeclineReason: i18n.translate('xpack.proposals.approvalModal.readOnlyDeclineReason', {
+    defaultMessage: "You don't have permissions to decline proposals.",
+  }),
+  /** Tooltip on Approve when `readOnly`. */
+  readOnlyApproveReason: i18n.translate('xpack.proposals.approvalModal.readOnlyApproveReason', {
+    defaultMessage: "You don't have permissions to apply proposals.",
+  }),
+  /** Tooltip on Mark as applied when `readOnly`. */
+  readOnlyMarkAppliedReason: i18n.translate(
+    'xpack.proposals.approvalModal.readOnlyMarkAppliedReason',
+    {
+      defaultMessage: "You don't have permissions to mark proposals as applied.",
+    }
+  ),
+  /** Tooltip on Mark as not applied when `readOnly`. */
+  readOnlyMarkNotAppliedReason: i18n.translate(
+    'xpack.proposals.approvalModal.readOnlyMarkNotAppliedReason',
+    {
+      defaultMessage: "You don't have permissions to mark proposals as not applied.",
+    }
+  ),
 });

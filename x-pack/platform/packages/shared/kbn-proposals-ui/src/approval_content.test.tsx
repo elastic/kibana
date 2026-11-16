@@ -392,10 +392,35 @@ describe('ApprovalContent', () => {
       expect(screen.queryByTestId('approvalContent-reopen')).not.toBeInTheDocument();
     });
 
-    it('disables Mark as not applied when read-only', () => {
+    it('disables Mark as not applied when read-only', async () => {
       renderContent({ proposal: appliedTodo, onReopen: jest.fn(), readOnly: true });
 
       expect(screen.getByTestId('approvalContent-reopen')).toBeDisabled();
+      fireEvent.mouseOver(screen.getByTestId('approvalContent-reopen'));
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        "You don't have permissions to mark proposals as not applied."
+      );
+    });
+
+    it('explains read-only Mark as applied and Decline with matching tooltips', async () => {
+      renderContent({
+        proposal: todoProposal,
+        readOnly: true,
+        onDismiss: jest.fn(),
+      });
+
+      expect(screen.getByTestId('approvalContent-confirm')).toBeDisabled();
+      expect(screen.getByTestId('approvalContent-dismiss')).toBeDisabled();
+
+      fireEvent.mouseOver(screen.getByTestId('approvalContent-confirm'));
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        "You don't have permissions to mark proposals as applied."
+      );
+      fireEvent.mouseOut(screen.getByTestId('approvalContent-confirm'));
+      fireEvent.mouseOver(screen.getByTestId('approvalContent-dismiss'));
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        "You don't have permissions to decline proposals."
+      );
     });
 
     it('records the application through onApprove when Mark as applied is clicked', async () => {

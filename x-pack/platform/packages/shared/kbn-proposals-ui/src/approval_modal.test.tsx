@@ -53,7 +53,7 @@ describe('ApprovalModal', () => {
     jest.clearAllMocks();
   });
 
-  it('keeps proposal details readable but prevents decisions in read-only mode', () => {
+  it('keeps proposal details readable but prevents decisions in read-only mode', async () => {
     renderModal({ readOnly: true });
     expect(screen.getByText('Apply monitored exception')).toBeInTheDocument();
     expect(screen.getByTestId('approvalModal-confirm')).toBeDisabled();
@@ -62,6 +62,16 @@ describe('ApprovalModal', () => {
     fireEvent.click(screen.getByTestId('approvalModal-dismiss'));
     expect(baseProps.onConfirm).not.toHaveBeenCalled();
     expect(baseProps.onDismiss).not.toHaveBeenCalled();
+
+    fireEvent.mouseOver(screen.getByTestId('approvalModal-confirm'));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      "You don't have permissions to apply proposals."
+    );
+    fireEvent.mouseOut(screen.getByTestId('approvalModal-confirm'));
+    fireEvent.mouseOver(screen.getByTestId('approvalModal-dismiss'));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      "You don't have permissions to decline proposals."
+    );
   });
 
   it('prevents declining if the modal becomes read-only while the decline form is open', () => {

@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, type ReactElement, type ReactNode } from 'react';
 import { css } from '@emotion/react';
-import { EuiButton, EuiButtonEmpty, useEuiTheme, type EuiButtonColor } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiToolTip,
+  useEuiTheme,
+  type EuiButtonColor,
+} from '@elastic/eui';
 import type { ApprovalAction } from './types';
 
 interface ApprovalContentFooterProps {
@@ -16,6 +22,34 @@ interface ApprovalContentFooterProps {
   defaultButtonColor: EuiButtonColor;
   onPrimaryClick: (action: ApprovalAction) => void;
 }
+
+/**
+ * Disabled buttons do not receive pointer events, so the tooltip wraps a span.
+ */
+const withDisabledReasonTooltip = (
+  disabledReason: ReactNode | undefined,
+  control: ReactElement
+): ReactNode => {
+  if (disabledReason == null) {
+    return control;
+  }
+  return (
+    <EuiToolTip content={disabledReason} position="top">
+      {/*
+        Disabled controls do not receive pointer/keyboard events, so the
+        tooltip anchors on a focusable wrapper (EUI a11y requirement).
+      */}
+      <span
+        tabIndex={0}
+        css={css`
+          display: inline-block;
+        `}
+      >
+        {control}
+      </span>
+    </EuiToolTip>
+  );
+};
 
 /**
  * The Approve/Decline row. Rendered only while a decision is still pending: `ApprovalContent`
@@ -37,33 +71,39 @@ export const ApprovalContentFooter = memo<ApprovalContentFooterProps>(
       >
         {/* Secondaries first so the decision that commits something sits rightmost. */}
         {secondaryActions?.map((action, i) => (
-          <EuiButtonEmpty
-            key={i}
-            size="s"
-            color={action.color ?? 'primary'}
-            iconType={action.iconType}
-            isDisabled={action.isDisabled}
-            isLoading={action.isLoading}
-            onClick={action.onClick}
-            data-test-subj={action['data-test-subj']}
-          >
-            {action.label}
-          </EuiButtonEmpty>
+          <React.Fragment key={i}>
+            {withDisabledReasonTooltip(
+              action.isDisabled ? action.disabledReason : undefined,
+              <EuiButtonEmpty
+                size="s"
+                color={action.color ?? 'primary'}
+                iconType={action.iconType}
+                isDisabled={action.isDisabled}
+                isLoading={action.isLoading}
+                onClick={action.onClick}
+                data-test-subj={action['data-test-subj']}
+              >
+                {action.label}
+              </EuiButtonEmpty>
+            )}
+          </React.Fragment>
         ))}
-        {primaryAction && (
-          <EuiButton
-            fill={primaryAction.fill ?? true}
-            size="s"
-            color={primaryAction.color ?? defaultButtonColor}
-            iconType={primaryAction.iconType ?? 'play'}
-            isDisabled={primaryAction.isDisabled}
-            isLoading={primaryAction.isLoading}
-            onClick={() => onPrimaryClick(primaryAction)}
-            data-test-subj={primaryAction['data-test-subj']}
-          >
-            {primaryAction.label}
-          </EuiButton>
-        )}
+        {primaryAction &&
+          withDisabledReasonTooltip(
+            primaryAction.isDisabled ? primaryAction.disabledReason : undefined,
+            <EuiButton
+              fill={primaryAction.fill ?? true}
+              size="s"
+              color={primaryAction.color ?? defaultButtonColor}
+              iconType={primaryAction.iconType ?? 'play'}
+              isDisabled={primaryAction.isDisabled}
+              isLoading={primaryAction.isLoading}
+              onClick={() => onPrimaryClick(primaryAction)}
+              data-test-subj={primaryAction['data-test-subj']}
+            >
+              {primaryAction.label}
+            </EuiButton>
+          )}
       </div>
     );
   }

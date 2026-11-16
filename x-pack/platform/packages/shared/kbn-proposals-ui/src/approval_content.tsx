@@ -142,6 +142,15 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const tone = getProposalTone(proposal);
     const isTodo = isTodoProposal(proposal);
 
+    const readOnlyDeclineReason = readOnly
+      ? APPROVAL_MODAL_TRANSLATIONS.readOnlyDeclineReason
+      : undefined;
+    const readOnlyPrimaryReason = readOnly
+      ? isTodo
+        ? APPROVAL_MODAL_TRANSLATIONS.readOnlyMarkAppliedReason
+        : APPROVAL_MODAL_TRANSLATIONS.readOnlyApproveReason
+      : undefined;
+
     const primaryAction: ApprovalAction | undefined = onApprove
       ? {
           label: isTodo
@@ -151,6 +160,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           onClick: onApprove,
           color: 'primary',
           isDisabled: isReplaced || isExpired || readOnly,
+          disabledReason: readOnlyPrimaryReason,
           'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
         }
       : undefined;
@@ -190,6 +200,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             iconType: 'cross',
             onClick: declineConfirmAction,
             isDisabled: isDeclineDisabled || primaryAction?.isDisabled,
+            // Permission lock only — form validation (`isDeclineDisabled`) stays silent.
+            disabledReason: readOnlyDeclineReason,
             'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm-decline` : undefined,
           }
         : primaryAction;
@@ -214,6 +226,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
                     iconType: 'cross' as const,
                     onClick: startDeclining,
                     isDisabled: isReplaced || primaryAction?.isDisabled,
+                    disabledReason: readOnlyDeclineReason,
                     'data-test-subj': dataTestSubj ? `${dataTestSubj}-dismiss` : undefined,
                   },
                 ]
@@ -271,6 +284,9 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             color: 'primary',
             iconType: 'undo',
             isDisabled: readOnly,
+            disabledReason: readOnly
+              ? APPROVAL_MODAL_TRANSLATIONS.readOnlyMarkNotAppliedReason
+              : undefined,
             isLoading: isReopening,
             onClick: async () => {
               setActionError(undefined);
