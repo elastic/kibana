@@ -62,7 +62,11 @@ export const timeZoneShape = () => ({
     .refine((value) => UTC_OFFSET.test(value) || moment.tz.zone(value) !== null, {
       message: 'Unknown time zone',
     })
-    .transform((value) => ES_TIME_ZONE_OF[value] ?? value)
+    .transform((value) => {
+      // moment-timezone matches names in any case, Elasticsearch only in their own.
+      const name = moment.tz.zone(value)?.name ?? value;
+      return ES_TIME_ZONE_OF[name] ?? name;
+    })
     .default('UTC'),
 });
 

@@ -49,13 +49,23 @@ const at = (startMs: number, offsetMs: number) => new Date(startMs + offsetMs).t
 
 const sessionId = (index: number) => `dx-session-${String(index + 1).padStart(2, '0')}`;
 
+/** How long after the first session the one at `index` starts. */
+export const sessionStartOffsetMs = (index: number): number => {
+  return index * 4 * 60 * SECOND_MS;
+};
+
+/** The pages the session at `index` loads, one page load each. */
+export const sessionJourney = (index: number): string[] => {
+  return index === 0 ? [...DETAILED_SESSION.pages] : ['/', `/products/${index}`];
+};
+
 /** A summary as the summaries task writes it. */
 const summaryOf = (sessionsStartMs: number, index: number) => {
   const isDetailed = index === 0;
-  const startMs = index * 4 * 60 * SECOND_MS;
+  const startMs = sessionStartOffsetMs(index);
   const durationMs = isDetailed ? 150 * SECOND_MS : (index + 1) * 10 * SECOND_MS;
   const errorCount = index < SESSIONS_WITH_JS_ERRORS ? index + 1 : 0;
-  const journey = isDetailed ? [...DETAILED_SESSION.pages] : ['/', `/products/${index}`];
+  const journey = sessionJourney(index);
   const firefox = index % 3 === 2;
   const user = isDetailed ? DETAILED_SESSION.user : null;
   const userAgent = firefox
@@ -139,9 +149,12 @@ const RAW_EVENT_IDS = rawEventsOfDetailedSession(0).map((_, index) => rawEventId
 /**
  * Sets sessions up as the system user, then writes the mock summaries straight to the sessions
  * index. The summaries task never rewrites them: their raw events have no
- * `telemetry.sdk.language`, which it filters on.
+ * `telemetry.sdk.language`, which it filters on. Resolves to when the first session starts.
  */
-export const ingestSessionsData = async (esClient: EsClient, kbnClient: KbnClient) => {
+export const ingestSessionsData = async (
+  esClient: EsClient,
+  kbnClient: KbnClient
+): Promise<number> => {
   const sessionsStartMs = Date.now() - DAY_MS;
   await kbnClient.request({
     method: 'POST',
@@ -171,6 +184,7 @@ export const ingestSessionsData = async (esClient: EsClient, kbnClient: KbnClien
   if (errors && failure) {
     throw new Error(`Could not ingest the sessions data: ${JSON.stringify(failure)}`);
   }
+  return sessionsStartMs;
 };
 
 /** Removes the summaries task, which also invalidates its API key; a missing task is fine. */

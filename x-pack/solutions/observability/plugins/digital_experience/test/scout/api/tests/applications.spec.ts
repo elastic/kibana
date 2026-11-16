@@ -8,9 +8,10 @@
 import moment from 'moment-timezone';
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import type { ApplicationsResponse } from '../../../../common/types/applications';
+import type { ApplicationsResponse, TimeSeriesPoint } from '../../../../common/types/applications';
 import type { ApplicationOverviewResponse } from '../../../../common/types/overview';
 import { findApplication, testData } from '../fixtures';
+import { LOCAL_PAGE_LOADS, expectedCountsByKey } from '../../common/fixtures/time_zone_data';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
@@ -19,11 +20,28 @@ const isLocalMidnight = (timestamp: number) => localTime(timestamp).format('HH:m
 const isLocalMidnightOrNoon = (timestamp: number) =>
   ['00:00', '12:00'].includes(localTime(timestamp).format('HH:mm'));
 
+/** Every bucket counts the page loads of its local bucket in `pageLoadsByBucket`, the rest none. */
+const expectCounts = (
+  points: TimeSeriesPoint[],
+  pageLoadsByBucket: Readonly<Record<string, readonly string[]>>
+) => {
+  const expected = expectedCountsByKey(pageLoadsByBucket);
+  expect(
+    points.filter(({ timestamp }) => {
+      return expected.has(timestamp);
+    })
+  ).toHaveLength(expected.size);
+  for (const { timestamp, count } of points) {
+    expect(count).toBe(expected.get(timestamp) ?? 0);
+  }
+};
+
 const {
   ACROSS_DAYLIGHT_SAVING,
   NEW_YORK_TIME_ZONE,
   OVERVIEW_PATH,
   THIRTY_DAYS,
+  TIME_ZONE_ENVIRONMENT,
   withQuery,
   APM_ONLY_ROLE,
   APPLICATIONS_IN_TIME_RANGE_PATH,
@@ -199,38 +217,40 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
   });
 
   apiTest(
-    'buckets the page loads over time by 12 hours in the time zone',
+    'counts the page loads by 12 hours from local midnight and noon in the time zone',
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
       const response = await apiClient.get(
-        withQuery(APPLICATIONS_PATH, { ...THIRTY_DAYS, timeZone: NEW_YORK_TIME_ZONE }),
+        withQuery(APPLICATIONS_PATH, {
+          ...THIRTY_DAYS,
+          timeZone: NEW_YORK_TIME_ZONE,
+          environment: TIME_ZONE_ENVIRONMENT,
+        }),
         { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
       );
 
       expect(response).toHaveStatusCode(200);
-      const { applications, pageLoadsOverTime } = response.body as ApplicationsResponse;
+      const { pageLoadsOverTime } = response.body as ApplicationsResponse;
       expect(pageLoadsOverTime.interval).toStrictEqual({ value: 43200, unit: 's' });
-      expect(pageLoadsOverTime.otel.length).toBeGreaterThan(0);
       expect(
         pageLoadsOverTime.otel.every(({ timestamp }) => isLocalMidnightOrNoon(timestamp))
       ).toBe(true);
-
-      const bucketed = pageLoadsOverTime.otel.reduce((sum, { count }) => sum + count, 0);
-      const total = applications
-        .filter(({ source }) => source === 'otel')
-        .reduce((sum, { pageLoads }) => sum + pageLoads.count, 0);
-      expect(bucketed).toBe(total);
+      expectCounts(pageLoadsOverTime.otel, LOCAL_PAGE_LOADS.halfDays);
     }
   );
 
   apiTest(
-    'buckets the page loads over time by local days across a daylight saving change',
+    'counts the page loads by local days across a daylight saving change',
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
       const response = await apiClient.get(
-        withQuery(APPLICATIONS_PATH, { ...ACROSS_DAYLIGHT_SAVING, timeZone: NEW_YORK_TIME_ZONE }),
+        withQuery(APPLICATIONS_PATH, {
+          ...ACROSS_DAYLIGHT_SAVING,
+          timeZone: NEW_YORK_TIME_ZONE,
+          environment: TIME_ZONE_ENVIRONMENT,
+        }),
         { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
       );
 
@@ -240,13 +260,7 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
       expect(pageLoadsOverTime.otel.every(({ timestamp }) => isLocalMidnight(timestamp))).toBe(
         true
       );
-      // 2021-03-14 has 23 hours in New York.
-      const hours = pageLoadsOverTime.otel
-        .slice(1)
-        .map(
-          ({ timestamp }, index) => (timestamp - pageLoadsOverTime.otel[index].timestamp) / 36e5
-        );
-      expect(hours).toContain(23);
+      expectCounts(pageLoadsOverTime.otel, LOCAL_PAGE_LOADS.days);
     }
   );
 

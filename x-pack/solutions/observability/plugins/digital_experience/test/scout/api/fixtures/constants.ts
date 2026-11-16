@@ -37,7 +37,10 @@ export const APPLICATIONS_IN_TIME_RANGE_PATH = `${APPLICATIONS_PATH}?start=${TIM
 
 export const SESSIONS_ENABLE_PATH = 'internal/digital_experience/sessions/enable';
 
-export const NEW_YORK_TIME_ZONE = 'America/New_York';
+export {
+  TIME_ZONE as NEW_YORK_TIME_ZONE,
+  TIME_ZONE_ENVIRONMENT,
+} from '../../common/fixtures/time_zone_data';
 
 /** 30 days, which get 12-hour buckets; New York is UTC-5 in January. */
 export const THIRTY_DAYS = { start: '2021-01-01T05:00:00.000Z', end: '2021-01-31T05:00:00.000Z' };
@@ -51,8 +54,10 @@ export const ACROSS_DAYLIGHT_SAVING = {
 /** The path of a route over a range, with its query. */
 export const withQuery = (
   path: string,
-  { start, end, timeZone }: { start: string; end: string; timeZone?: string }
-) => `${path}?start=${start}&end=${end}${timeZone ? `&timeZone=${timeZone}` : ''}`;
+  query: { start: string; end: string; timeZone?: string; environment?: string }
+): string => {
+  return `${path}?${new URLSearchParams(query)}`;
+};
 
 /** The Overview route of `OTEL_APPS.shop`. */
 export const OVERVIEW_PATH = `${APPLICATIONS_PATH}/otel-shop/overview`;
