@@ -8,8 +8,8 @@
  */
 
 import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-server';
-import { VEGA_API_ENABLED_FLAG } from '../../common/constants';
+import { VEGA_AS_CODE_ENABLED_FLAG } from '../../common/constants';
 
 export const isVegaApiEnabled = (
   featureFlags: FeatureFlagsRequestHandlerContext
-): Promise<boolean> => featureFlags.getBooleanValue(VEGA_API_ENABLED_FLAG, false);
+): Promise<boolean> => featureFlags.getBooleanValue(VEGA_AS_CODE_ENABLED_FLAG, false);

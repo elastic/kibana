@@ -49,7 +49,6 @@ export const CorrelationsDetails = memo(
     const columns = useMemo(
       () =>
         getColumns({
-          scopeId: '',
           dataTestSubj: ATTACK_CORRELATIONS_TABLE_TEST_ID,
           onShowAlert,
         }),
