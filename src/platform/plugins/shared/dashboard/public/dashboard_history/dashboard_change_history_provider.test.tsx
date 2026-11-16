@@ -250,7 +250,7 @@ describe('DashboardChangeHistoryProvider', () => {
       requestCompareV2ToPrevious();
 
       await waitFor(() =>
-        expect(screen.getByTestId('dashboardCompareLoading')).toBeInTheDocument()
+        expect(screen.getByTestId('changeHistoryPreviewLoading')).toBeInTheDocument()
       );
       expectNoPreviewOrComparison();
       expect(screen.queryByTestId('dashboardCompareError')).not.toBeInTheDocument();
@@ -258,7 +258,7 @@ describe('DashboardChangeHistoryProvider', () => {
       resolveBaseline(toDetail('v1'));
 
       await waitFor(() => expect(screen.getByTestId('jsonComparison')).toBeInTheDocument());
-      expect(screen.queryByTestId('dashboardCompareLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('changeHistoryPreviewLoading')).not.toBeInTheDocument();
       expect(screen.queryByTestId('dashboardPreview')).not.toBeInTheDocument();
     });
 
@@ -269,13 +269,13 @@ describe('DashboardChangeHistoryProvider', () => {
       await renderOpenModal();
       requestCompareV2ToPrevious();
       await waitFor(() =>
-        expect(screen.getByTestId('dashboardCompareLoading')).toBeInTheDocument()
+        expect(screen.getByTestId('changeHistoryPreviewLoading')).toBeInTheDocument()
       );
 
       fireEvent.click(row('v3'));
 
       await expectDashboardPreview('v3');
-      expect(screen.queryByTestId('dashboardCompareLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('changeHistoryPreviewLoading')).not.toBeInTheDocument();
     });
 
     it('shows an error and keeps the dashboard preview unmounted when the comparison fails to load', async () => {
@@ -288,7 +288,7 @@ describe('DashboardChangeHistoryProvider', () => {
 
       await waitFor(() => expect(screen.getByTestId('dashboardCompareError')).toBeInTheDocument());
       expectNoPreviewOrComparison();
-      expect(screen.queryByTestId('dashboardCompareLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('changeHistoryPreviewLoading')).not.toBeInTheDocument();
     });
 
     it('returns to the rendered preview when a row is selected after the comparison failed', async () => {
