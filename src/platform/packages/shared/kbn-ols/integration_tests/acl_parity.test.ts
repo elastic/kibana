@@ -335,13 +335,16 @@ describe('ACLs in Elasticsearch', () => {
       }
     });
 
-    // The known gap that the README describes: for a number that isn't in its shortest form, the
-    // evaluator matches a principal whose ID is the parsed text, and the filter doesn't. No user or
-    // service account has such an ID, so access can't change. Closing the gap flips `filter` to
-    // `true` here.
-    it('disagrees only for a principal whose ID is the parsed number', async () => {
+    // The known gap that the README describes, in both directions: for a number that isn't in its
+    // shortest form, the evaluator matches a principal whose ID is the parsed text, and the filter
+    // matches one whose ID is the text the document used. No user or service account has either ID,
+    // so access can't change. Closing the gap makes the filter and the evaluator agree here.
+    it('disagrees only for a principal whose ID is the parsed or the written number', async () => {
       for (const { raw, parsed } of NUMBERS) {
-        const numericPrincipal: Principal = { type: 'user', id: parsed };
+        const principals = [
+          { id: parsed, filter: raw === parsed, evaluator: true },
+          { id: raw, filter: true, evaluator: raw === parsed },
+        ];
         for (const [doc, level] of [
           [`owner-${raw}`, 'manage'],
           [`entry-${raw}`, 'use'],
@@ -350,26 +353,29 @@ describe('ACLs in Elasticsearch', () => {
             index: NUMBERS_INDEX,
             id: doc,
           });
-          const found = await search(
-            NUMBERS_INDEX,
-            buildAclReadFilter({
+          for (const { id, ...expected } of principals) {
+            const principal: Principal = { type: 'user', id };
+            const found = await search(
+              NUMBERS_INDEX,
+              buildAclReadFilter({
+                policy: FIXTURE_POLICY,
+                principal,
+                level,
+                ordinarySpaces: ['space-a'],
+                recoverySpaces: [],
+              })
+            );
+            const evaluator = evaluateAcl({
               policy: FIXTURE_POLICY,
-              principal: numericPrincipal,
-              level,
-              ordinarySpaces: ['space-a'],
-              recoverySpaces: [],
-            })
-          );
-          const evaluator = evaluateAcl({
-            policy: FIXTURE_POLICY,
-            acl: normalizeAclSource(source),
-            principal: numericPrincipal,
-          }).operations.has(toOperation(level));
-          expect({ doc, filter: found.has(doc), evaluator }).toEqual({
-            doc,
-            filter: raw === parsed,
-            evaluator: true,
-          });
+              acl: normalizeAclSource(source),
+              principal,
+            }).operations.has(toOperation(level));
+            expect({ doc, id, filter: found.has(doc), evaluator }).toEqual({
+              doc,
+              id,
+              ...expected,
+            });
+          }
         }
       }
     });

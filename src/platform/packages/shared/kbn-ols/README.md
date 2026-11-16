@@ -169,7 +169,8 @@ values that Elasticsearch indexes for it. It returns `undefined` when no ACL fie
 
 Numbers have one limit. Elasticsearch indexes a number in a `keyword` field with the text that the document used, so
 `1.0` becomes `"1.0"`, and `1e2` becomes `"1e2"`. Kibana gets the source as parsed JSON, where both are numbers, so
-the reader returns `"1"` and `"100"`. A number in its shortest form, such as `1` or `42`, reads the same both ways.
+the reader returns `"1"` and `"100"`. For `1.0`, the filter matches a principal whose ID is `"1.0"`, and the
+evaluator matches one whose ID is `"1"`. A number in its shortest form, such as `1` or `42`, reads the same both ways.
 Kibana writes every keyword ACL value as a string, so only a direct write to the index can store such a number. User
 profile UIDs start with `u_`, service account IDs contain `/`, and no level or principal kind is a number. So this
 difference cannot change who gets access. A later principal kind whose IDs can be plain numbers, such as groups, has
