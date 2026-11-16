@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import {
+  MAX_ATTACHMENT_ID_LENGTH,
   MAX_OBSERVABLE_DESCRIPTION_LENGTH,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_VALUE_LENGTH,
@@ -22,9 +23,13 @@ const attachmentDataSchemaV2 = attachmentDataSchemaV1.extends({
   description: schema.maybe(
     schema.nullable(schema.string({ maxLength: MAX_OBSERVABLE_DESCRIPTION_LENGTH }))
   ),
+  legacyId: schema.maybe(schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH })),
 });
 
-/** Indexes the `observable` attachment fields so observables can be paged, sorted and filtered. */
+/**
+ * Indexes the `observable` attachment fields so observables can be paged, sorted and filtered.
+ * `legacyId` keeps the id an observable had on the case before it was migrated to an attachment.
+ */
 export const modelVersion2: SavedObjectsFullModelVersion = {
   changes: [
     {
@@ -35,6 +40,7 @@ export const modelVersion2: SavedObjectsFullModelVersion = {
             typeKey: observableKeyword,
             value: observableKeyword,
             description: observableKeyword,
+            legacyId: observableKeyword,
           },
         },
       },
