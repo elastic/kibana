@@ -48,8 +48,22 @@ else
 fi
 
 echo '--- Lint: oxlint'
-node scripts/lint.js --quiet $fix_flag
-oxlint_exit=$?
+# TEMPORARY: measure whether oxlint is limited by CPU, I/O or the shard layout on CI agents.
+echo "nproc=$(nproc)"; lscpu | grep -E '^(Model name|Thread|Core|Socket)' || true; free -m || true
+mkdir -p target
+vmstat -w 5 > target/oxlint_vmstat.txt 2>&1 &
+vmstat_pid=$!
+if [[ -x /usr/bin/time ]]; then
+  /usr/bin/time -v node scripts/lint.js --quiet $fix_flag 2> >(tee target/oxlint_time.txt >&2)
+  oxlint_exit=$?
+else
+  TIMEFORMAT='oxlint real=%R user=%U sys=%S'
+  time node scripts/lint.js --quiet $fix_flag
+  oxlint_exit=$?
+fi
+kill "$vmstat_pid" || true
+echo '--- oxlint vmstat (5s samples)'
+cat target/oxlint_vmstat.txt
 report_oxlint_crashes
 
 echo '--- Lint: prettier'
