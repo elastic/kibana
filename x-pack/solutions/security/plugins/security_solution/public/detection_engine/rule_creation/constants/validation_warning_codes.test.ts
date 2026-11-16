@@ -29,7 +29,7 @@ describe('ES|QL validation results on rule submit', () => {
     fetchEsqlQueryColumnsMock.mockReset();
   });
 
-  it('treats a query that drops _id as a non-blocking warning shown in the confirmation modal', async () => {
+  it('treats a query that drops _id as a non-blocking warning with an ES|QL Query message', async () => {
     fetchEsqlQueryColumnsMock.mockResolvedValue([{ id: 'agent.name' }]);
 
     const { errors, warnings } = await validateEsqlQueryField('from test* metadata _id | drop _id');

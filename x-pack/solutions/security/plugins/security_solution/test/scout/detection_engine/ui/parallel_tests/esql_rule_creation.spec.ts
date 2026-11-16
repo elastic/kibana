@@ -190,7 +190,8 @@ spaceTest.describe(
     );
 
     // Revived: effectively skipped in Cypress on main (describe.skip, issue #257365).
-    // The missing-data-source error is non-blocking and only the server can report it.
+    // An unknown index is a non-blocking ES|QL validation error (INVALID_ESQL), and only the
+    // server can report it.
     spaceTest(
       'shows confirmation modal about existing non-blocking validation errors',
       async ({ page, kbnUrl, scoutSpace, pageObjects }, testInfo) => {
