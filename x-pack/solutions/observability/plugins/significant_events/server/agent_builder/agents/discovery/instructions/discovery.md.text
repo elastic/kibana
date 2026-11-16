@@ -519,7 +519,8 @@ For each event candidate, decide from all signals that will appear in the final 
    neither is set from the other.
    - **Continuation.** With only `refutes` signals, keep the stored `severity`. With new `confirms`
      signals, the stored tier is the starting point: it stands unless a description contradicts
-     the evidence that set it, shows the failure ended, or the severity rules now give another tier.
+     the evidence that set it, or the severity rules now give another tier. Recovery alone never
+     lowers the stored tier: it changes status, not the impact the incident had.
    - **Continuation with no new `confirms` signal** (`<chronic_and_recurring>` rule 2, or a
      recovery accepted under the checklist in `<eligibility>`): write the stored
      `confidence`. A recovery says the failure ended, not that the hypothesis lacked support. A
