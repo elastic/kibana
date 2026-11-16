@@ -312,7 +312,9 @@ at `manage`, and a principal that can't even view the object is left out.
 
 Most fixtures use `FIXTURE_POLICY`, where entries grant only `use`. A few use `FIXTURE_POLICY_ALL_LEVELS`, where
 `view`, `use`, and `edit` all differ, to cover the rules that need several levels: duplicate entries, and the lowest
-of several allowed entry levels.
+of several allowed entry levels. Others use `FIXTURE_POLICY_MANAGE_ENTRIES`, where an entry can grant `manage`, to
+cover access management through an entry: a `manage` grant, the lowest level when an entry also stores `use`, a
+level the policy doesn't allow next to `manage`, and a grant that matches only one principal kind.
 
 The expectations are written by hand, and that's the point: they are the contract. Both the code that evaluates one
 object and the query that filters a search must produce exactly these answers, so a list can never show an object
