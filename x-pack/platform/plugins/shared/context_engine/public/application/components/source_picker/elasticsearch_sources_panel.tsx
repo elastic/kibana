@@ -5,84 +5,131 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiProgress } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { AggregateQuery } from '@kbn/es-query';
-import { getEbtProps } from '@kbn/ebt-click';
 import { ESQLLangEditor } from '@kbn/esql/public';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useId, useState } from 'react';
-import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
+import { useDebouncedValue } from '@kbn/react-hooks';
+import React, { useMemo, useState } from 'react';
+import { useIndices } from '../../hooks/use_indices';
 import { isIndexPickerSourceSelected } from '../../utils/sources';
-import { IndexMultiSelect } from './index_multi_select';
 import type { SelectedSource } from './types';
 
 const EDITOR_INLINE_MIN_HEIGHT = 180;
+const SEARCH_DEBOUNCE_MS = 300;
 
 const getEsqlQuery = (query: AggregateQuery): string => ('esql' in query ? query.esql : '');
+
+export type ElasticsearchSourceMode = 'index' | 'esql';
 
 interface ElasticsearchSourcesPanelProps {
   selectedSources: SelectedSource[];
   onAddIndex: (indexName: string) => void;
-  onAddEsql: (query: string) => void;
+  esqlQuery: string;
+  onEsqlQueryChange: (query: string) => void;
   disabled?: boolean;
+  mode?: ElasticsearchSourceMode;
 }
 
 export const ElasticsearchSourcesPanel = ({
   selectedSources,
   onAddIndex,
-  onAddEsql,
+  esqlQuery,
+  onEsqlQueryChange,
   disabled = false,
+  mode = 'index',
 }: ElasticsearchSourcesPanelProps) => {
-  const accordionId = useId();
-  const [esqlQuery, setEsqlQuery] = useState('');
-  const trimmedEsqlQuery = esqlQuery.trim();
-  const isIndexSelected = useCallback(
-    (indexName: string) => isIndexPickerSourceSelected(selectedSources, indexName),
-    [selectedSources]
+  const [searchValue, setSearchValue] = useState('');
+  const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
+  const [hasFocused, setHasFocused] = useState(false);
+
+  const { indexNames, isFetching } = useIndices({
+    search: debouncedSearch.trim(),
+    enabled: hasFocused,
+  });
+
+  const indexOptions = useMemo<EuiComboBoxOptionOption<string>[]>(
+    () =>
+      indexNames
+        .filter((name) => !isIndexPickerSourceSelected(selectedSources, name))
+        .map((name) => ({ label: name, value: name })),
+    [indexNames, selectedSources]
   );
-  const handleAddEsql = () => {
-    if (!trimmedEsqlQuery) {
+
+  const addIndexFromCombo = (indexName: string) => {
+    const trimmed = indexName.trim();
+    if (!trimmed) {
       return;
     }
-    onAddEsql(trimmedEsqlQuery);
-    setEsqlQuery('');
+    onAddIndex(trimmed);
+    setSearchValue('');
+  };
+
+  const handleIndexChange = (nextSelectedOptions: EuiComboBoxOptionOption<string>[]) => {
+    const picked = nextSelectedOptions[0]?.value;
+    if (picked) {
+      addIndexFromCombo(picked);
+    }
+  };
+
+  const handleFocus = () => {
+    setHasFocused(true);
   };
 
   return (
     <div data-test-subj="contextElasticsearchSourcesPanel">
-      <IndexMultiSelect
-        isIndexSelected={isIndexSelected}
-        onSelect={onAddIndex}
-        disabled={disabled}
+      <EuiProgress
+        size="xs"
+        color="accent"
+        css={{ visibility: isFetching ? 'visible' : 'hidden' }}
+        data-test-subj="contextIndexComboBoxLoadingBar"
       />
-
-      <EuiSpacer size="m" />
-
-      <EuiAccordion
-        id={accordionId}
-        data-test-subj="contextAdvancedEsqlAccordion"
-        buttonProps={{ 'data-test-subj': 'contextAdvancedEsqlAccordionButton' }}
-        buttonContent={
-          <FormattedMessage
-            id="xpack.contextEngine.sourcePicker.advancedEsqlAccordion"
-            defaultMessage="Advanced: ES|QL"
+      {mode === 'index' ? (
+        <EuiFormRow
+          fullWidth
+          label={
+            <FormattedMessage
+              id="xpack.contextEngine.sourcePicker.index.fieldLabel"
+              defaultMessage="Index, data stream or alias"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.contextEngine.sourcePicker.index.fieldHelp"
+              defaultMessage="Start typing to search, then select a match from the list."
+            />
+          }
+        >
+          <EuiComboBox
+            async
+            fullWidth
+            singleSelection={{ asPlainText: true }}
+            sortMatchesBy="startsWith"
+            selectedOptions={[]}
+            isClearable={false}
+            isDisabled={disabled}
+            aria-label={i18n.translate('xpack.contextEngine.sourcePicker.index.comboAriaLabel', {
+              defaultMessage: 'Select an index, data stream or alias',
+            })}
+            placeholder={i18n.translate('xpack.contextEngine.sourcePicker.index.comboPlaceholder', {
+              defaultMessage: 'e.g. logs-nginx',
+            })}
+            options={indexOptions}
+            onChange={handleIndexChange}
+            onSearchChange={setSearchValue}
+            onFocus={handleFocus}
+            data-test-subj="contextIndexComboBox"
           />
-        }
-        paddingSize="m"
-      >
+        </EuiFormRow>
+      ) : (
         <div data-test-subj="contextAdvancedEsqlEditor">
           <EuiFormRow fullWidth>
             <div css={{ minHeight: EDITOR_INLINE_MIN_HEIGHT }}>
               <ESQLLangEditor
                 query={{ esql: esqlQuery }}
-                onTextLangQueryChange={(next) => setEsqlQuery(getEsqlQuery(next))}
+                onTextLangQueryChange={(next) => onEsqlQueryChange(getEsqlQuery(next))}
                 onTextLangQuerySubmit={async () => {}}
                 editorIsInline
                 hasOutline
@@ -93,28 +140,8 @@ export const ElasticsearchSourcesPanel = ({
               />
             </div>
           </EuiFormRow>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType="plusCircle"
-                onClick={handleAddEsql}
-                isDisabled={!trimmedEsqlQuery || disabled}
-                data-test-subj="contextAddEsqlSourceButton"
-                {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
-                  action: CONTEXT_ENGINE_UI_EBT.action.sources.ADD_ESQL,
-                })}
-              >
-                <FormattedMessage
-                  id="xpack.contextEngine.sourcePicker.esql.addButton"
-                  defaultMessage="Add ES|QL source"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </div>
-      </EuiAccordion>
+      )}
     </div>
   );
 };

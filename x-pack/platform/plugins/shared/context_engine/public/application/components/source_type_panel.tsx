@@ -40,7 +40,7 @@ export const SourceTypePanel = ({
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiNotificationBadge data-test-subj="contextSourceTypePanelBadge">
+        <EuiNotificationBadge data-test-subj="contextSourceTypePanelBadge" color="subdued">
           {badgeCount}
         </EuiNotificationBadge>
       </EuiFlexItem>

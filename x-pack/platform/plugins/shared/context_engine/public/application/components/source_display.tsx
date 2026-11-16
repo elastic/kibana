@@ -25,6 +25,7 @@ export interface SourceDisplay {
 export interface SourceDisplayDeps {
   connectorNameById: Map<string, string>;
   connectorActionTypeById: Map<string, string>;
+  connectorTypeNameById: Map<string, string>;
 }
 
 type SourceDisplayFactory = (value: string, deps: SourceDisplayDeps) => SourceDisplay;
@@ -45,16 +46,18 @@ const SOURCE_DISPLAY: Record<SourceType, SourceDisplayFactory> = {
       ),
     };
   },
-  connector: (value, { connectorNameById, connectorActionTypeById }) => ({
+  connector: (value, { connectorNameById, connectorActionTypeById, connectorTypeNameById }) => ({
     icon: (
       <ConnectorTypeIcon
         actionTypeId={connectorActionTypeById.get(value)}
         size={ITEM_ROW_ICON_SIZE}
       />
     ),
-    typeLabel: i18n.translate('xpack.contextEngine.sourceType.connector', {
-      defaultMessage: 'Connector',
-    }),
+    typeLabel:
+      connectorTypeNameById.get(value) ??
+      i18n.translate('xpack.contextEngine.sourceType.connector', {
+        defaultMessage: 'Connector',
+      }),
     label: connectorNameById.get(value) ?? value,
   }),
 };
