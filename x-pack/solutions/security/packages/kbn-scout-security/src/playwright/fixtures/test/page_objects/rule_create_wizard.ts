@@ -136,8 +136,8 @@ export class RuleCreateWizardPage {
   /** Switches the Define step to the ES|QL rule type and waits for its Monaco editor to mount. */
   async selectEsqlRuleType(): Promise<void> {
     await this.esqlRuleTypeButton.click();
-    // The ES|QL editor bundle loads lazily on first switch, which outlasts 10 s on a cold project.
-    // EsqlEditor.waitReady() uses the default timeout, so wait for the mount here first.
+    // The ES|QL editor bundle loads lazily on first switch; on a cold project that can outlast
+    // EsqlEditor.waitReady()'s 30 s budget, so wait for the mount with the app-load budget first.
     await this.esqlQueryBar
       .getByTestId('ESQLEditor')
       .getByTestId('kibanaCodeEditor')
