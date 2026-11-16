@@ -16,6 +16,7 @@ import type {
 import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
 import {
   buildPackageInputs,
+  applyInputVars,
   buildPackageVars,
   disableUnselectedStreams,
   getPackageVarNames,
@@ -231,6 +232,16 @@ export async function deployGroup(
     undefined,
     connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs,
     getPolicyVarSettings(policySettings, 'managed_integration', pkgVarNames)
+  );
+  applyInputVars(inputs, pkgInfo, (inputVarNames) =>
+    buildPackageVars(
+      globalRegion,
+      staticKeys,
+      inputVarNames,
+      undefined,
+      connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs,
+      getPolicyVarSettings(policySettings, 'managed_integration', inputVarNames)
+    )
   );
 
   const createDatasetTemplates = getCreateDatasetTemplates(group, storedServiceVars);

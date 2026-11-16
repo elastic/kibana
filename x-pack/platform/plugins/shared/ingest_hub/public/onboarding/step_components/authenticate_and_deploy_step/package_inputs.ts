@@ -29,6 +29,8 @@ import type {
 
 export interface PackageInputEntry {
   enabled: boolean;
+  /** Input-level vars (region, credentials) of packages that declare them on the input. */
+  vars?: Record<string, string | null | SecretRefValue>;
   streams: Record<
     string,
     {
@@ -430,6 +432,50 @@ export function buildPackageVars(
     if (sessionTokenRef && pkgVarNames.has('session_token')) vars.session_token = sessionTokenRef;
   }
   return Object.keys(vars).length > 0 ? vars : undefined;
+}
+
+/**
+ * The var names each input of the package's policy templates declares, keyed like the inputs of
+ * the request (`<policyTemplate>-<input>`). Composable packages (e.g. aws_otel) keep region and
+ * credentials there instead of at package level.
+ */
+export function getInputVarNames(pkgInfo: unknown): Map<string, Set<string>> {
+  const templates =
+    (
+      pkgInfo as {
+        policy_templates?: Array<{
+          name?: string;
+          inputs?: Array<{ id?: string; type: string; vars?: Array<{ name: string }> }>;
+        }>;
+      }
+    )?.policy_templates ?? [];
+  const result = new Map<string, Set<string>>();
+  for (const template of templates) {
+    for (const input of template.inputs ?? []) {
+      if (!input.vars?.length) continue;
+      const inputKey = input.id ?? input.type;
+      const key = template.name ? `${template.name}-${inputKey}` : inputKey;
+      result.set(key, new Set(input.vars.map((v) => v.name)));
+    }
+  }
+  return result;
+}
+
+/**
+ * Sets the vars of every selected input that declares vars of its own, built from the var names
+ * that input declares. The package-level vars are built from `getPackageVarNames` as before.
+ */
+export function applyInputVars(
+  inputs: Record<string, PackageInputEntry>,
+  pkgInfo: unknown,
+  buildVars: (varNames: Set<string>) => PackageInputEntry['vars']
+): void {
+  for (const [key, varNames] of getInputVarNames(pkgInfo)) {
+    const entry = inputs[key];
+    if (!entry?.enabled) continue;
+    const vars = buildVars(varNames);
+    if (vars && Object.keys(vars).length > 0) entry.vars = vars;
+  }
 }
 
 export function getPackageVarNames(pkgInfo: { vars?: Array<{ name: string }> }): Set<string> {

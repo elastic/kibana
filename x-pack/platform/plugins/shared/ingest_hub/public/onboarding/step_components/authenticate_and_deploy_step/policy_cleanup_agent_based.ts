@@ -17,6 +17,7 @@ import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import {
   buildPackageInputs,
+  applyInputVars,
   buildPackageVars,
   disableUnselectedStreams,
   getPackageVarNames,
@@ -258,6 +259,16 @@ export async function updateAgentBasedPolicy(
     agentCredentials,
     authenticateAndDeployStep.existingSecretRefs ?? existingSecretRefs,
     getPolicyVarSettingsUpdate(policySettings, 'agent_based', pkgVarNames)
+  );
+  applyInputVars(inputs, pkgInfo, (inputVarNames) =>
+    buildPackageVars(
+      globalRegion,
+      staticKeys,
+      inputVarNames,
+      agentCredentials,
+      authenticateAndDeployStep.existingSecretRefs ?? existingSecretRefs,
+      getPolicyVarSettingsUpdate(policySettings, 'agent_based', inputVarNames)
+    )
   );
   // When new credentials are explicitly provided, use only the newly built vars — merging the
   // existing values would retain stale fields from the old credential method (e.g. access_key_id

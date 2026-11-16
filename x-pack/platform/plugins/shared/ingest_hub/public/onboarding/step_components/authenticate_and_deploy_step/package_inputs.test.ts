@@ -13,8 +13,10 @@ import {
   buildIacIntegrations,
   buildPackageInputs,
   buildPackageVars,
+  applyInputVars,
   buildStreamVars,
   disableUnselectedStreams,
+  getInputVarNames,
   toSOServiceVars,
 } from './package_inputs';
 
@@ -866,5 +868,76 @@ describe('composable package streams (aws_otel)', () => {
     };
     disableUnselectedStreams(inputs, pkgInfo);
     expect(inputs['aws-otelcol'].streams).toEqual({});
+  });
+});
+
+describe('input-level vars (aws_otel)', () => {
+  const pkgInfo = {
+    policy_templates: [
+      {
+        name: 'aws',
+        inputs: [
+          {
+            type: 'otelcol',
+            vars: [{ name: 'region' }, { name: 'access_key_id' }, { name: 'secret_access_key' }],
+          },
+        ],
+      },
+      { name: 'no_vars', inputs: [{ type: 'aws-s3' }] },
+    ],
+  };
+  const staticKeys = { access_key_id: 'AKIA', secret_access_key: 'secret' } as any;
+
+  it('lists the vars each input declares, keyed like the request inputs', () => {
+    const names = getInputVarNames(pkgInfo);
+    expect([...names.keys()]).toEqual(['aws-otelcol']);
+    expect([...names.get('aws-otelcol')!]).toEqual([
+      'region',
+      'access_key_id',
+      'secret_access_key',
+    ]);
+  });
+
+  it('sets the region and credentials on the selected input', () => {
+    const inputs: Record<string, PackageInputEntry> = {
+      'aws-otelcol': { enabled: true, streams: {} },
+    };
+    applyInputVars(inputs, pkgInfo, (names) => buildPackageVars('us-east-1', staticKeys, names));
+    expect(inputs['aws-otelcol'].vars).toEqual({
+      region: 'us-east-1',
+      access_key_id: 'AKIA',
+      secret_access_key: 'secret',
+    });
+  });
+
+  it('keeps a stored secret ref instead of a typed credential', () => {
+    const ref = { isSecretRef: true, id: 'secret-1' };
+    const inputs: Record<string, PackageInputEntry> = {
+      'aws-otelcol': { enabled: true, streams: {} },
+    };
+    applyInputVars(inputs, pkgInfo, (names) =>
+      buildPackageVars(
+        'us-east-1',
+        {} as any,
+        names,
+        undefined,
+        new Map([
+          ['access_key_id', ref],
+          ['secret_access_key', ref],
+        ])
+      )
+    );
+    expect(inputs['aws-otelcol'].vars).toMatchObject({
+      access_key_id: ref,
+      secret_access_key: ref,
+    });
+  });
+
+  it('leaves an input that is not selected without vars', () => {
+    const inputs: Record<string, PackageInputEntry> = {
+      'aws-otelcol': { enabled: false, streams: {} },
+    };
+    applyInputVars(inputs, pkgInfo, (names) => buildPackageVars('us-east-1', staticKeys, names));
+    expect(inputs['aws-otelcol'].vars).toBeUndefined();
   });
 });
