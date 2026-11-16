@@ -1535,20 +1535,15 @@ describe('RuleEventsClient', () => {
       expect(live.get('rule-A')?.[0].verifiedAt).toBe(expected);
     });
 
-    it.each([
-      [
-        'ages an unstamped signal from its evidence time',
-        '2026-10-19T10:00:00.000Z',
-        undefined,
-        'still_breaching',
-      ],
-      [
-        'absorbs an old unstamped signal after a fresh review',
-        '2026-10-18T06:00:00.000Z',
-        '2026-10-19T11:00:00.000Z',
-        'already_reviewed',
-      ],
-    ])('%s', async (_name, evidenceTo, reviewedAt, reason) => {
+    const classifyStoredSignal = async ({
+      evidenceTo,
+      collectedAt,
+      reviewedAt,
+    }: {
+      evidenceTo: string;
+      collectedAt?: string;
+      reviewedAt?: string;
+    }) => {
       const now = Date.parse('2026-10-19T12:00:00.000Z');
       const hourMs = 3_600_000;
       const bucketMs = 5 * 60_000;
@@ -1559,6 +1554,7 @@ describe('RuleEventsClient', () => {
           signals: [
             {
               ...detectionSignal({ ruleUuid: 'rule-A', verdict: 'confirms' }),
+              collected_at: collectedAt,
               evidence: {
                 esql_query: 'FROM $.a',
                 result: 'found',
@@ -1571,7 +1567,7 @@ describe('RuleEventsClient', () => {
       };
       const { client } = createClient(async () => sourceResponse([row]));
 
-      const output = await classifyBatch({
+      return classifyBatch({
         rows: [
           [
             'rule-A',
@@ -1597,6 +1593,23 @@ describe('RuleEventsClient', () => {
           series: { firstStart: now - counts.length * bucketMs, bucketMs, counts },
         }),
       });
+    };
+
+    it.each([
+      [
+        'ages an unstamped signal from its evidence time',
+        '2026-10-19T10:00:00.000Z',
+        undefined,
+        'still_breaching',
+      ],
+      [
+        'absorbs an old unstamped signal after a fresh review',
+        '2026-10-18T06:00:00.000Z',
+        '2026-10-19T11:00:00.000Z',
+        'already_reviewed',
+      ],
+    ])('%s', async (_name, evidenceTo, reviewedAt, reason) => {
+      const output = await classifyStoredSignal({ evidenceTo, reviewedAt });
 
       expect(output.batch).toEqual([]);
       expect(output.skips).toEqual([
@@ -1608,6 +1621,27 @@ describe('RuleEventsClient', () => {
           }),
         },
       ]);
+    });
+
+    it.each([
+      ['the evidence time is malformed', 'not-a-date', undefined, '2026-10-19T11:00:00.000Z'],
+      [
+        'the evidence time is in the future',
+        '2026-10-20T10:00:00.000Z',
+        undefined,
+        '2026-10-19T11:00:00.000Z',
+      ],
+      [
+        'a stale explicit timestamp takes precedence over fresh evidence',
+        '2026-10-19T10:00:00.000Z',
+        '2026-10-18T06:00:00.000Z',
+        undefined,
+      ],
+    ])('routes to the agent when %s', async (_name, evidenceTo, collectedAt, reviewedAt) => {
+      const output = await classifyStoredSignal({ evidenceTo, collectedAt, reviewedAt });
+
+      expect(output.skips).toEqual([]);
+      expect(output.batch).toMatchObject([{ classifier: { reason: 'series_too_old' } }]);
     });
 
     it('returns one entry per live series when a rule is a member of several', async () => {

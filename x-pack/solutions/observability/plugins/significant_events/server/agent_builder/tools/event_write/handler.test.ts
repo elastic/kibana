@@ -421,6 +421,21 @@ describe('eventsWriteBulkHandler — signal collection timestamps', () => {
     expect(writtenDocs()[0].signals?.[0].collected_at).toBe(expected);
   });
 
+  it('reuses signals that already have a timestamp or have no time to recover', async () => {
+    const stamped = { ...signal, collected_at: TS_EARLIER };
+    const unknown = makeDetectionSignal({ ruleUuid: 'rule-2', verdict: 'refutes' });
+
+    await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient(),
+      inputs: [{ ...baseInput, signals: [stamped, unknown] }],
+    });
+
+    const signals = writtenDocs()[0].signals;
+    expect(signals?.[0]).toBe(stamped);
+    expect(signals?.[1]).toBe(unknown);
+    expect(signals?.[1]).not.toHaveProperty('collected_at');
+  });
+
   it('fills timestamps on submitted and retained signals in a continuation', async () => {
     const stored = makeStoredEvent('event-1', {
       signals: [signal, makeDetectionSignal({ ruleUuid: 'rule-2' })],

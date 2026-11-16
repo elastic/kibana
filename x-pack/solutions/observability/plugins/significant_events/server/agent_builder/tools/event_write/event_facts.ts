@@ -13,6 +13,7 @@ import {
   type SignificantEvent,
 } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import { getSignalCollectedAt } from '../../../lib/significant_events/events/signal_collected_at';
 import {
   addsNewDetectionRules,
   extractRuleUuids,
@@ -197,10 +198,10 @@ export const computeEventFacts = ({
     isContinuation && !reopens
       ? mergeSignalsLatestPerRule(currentEpisode, candidate.input.signals ?? [], timestamp)
       : candidate.input.signals ?? []
-  ).map((signal) => ({
-    ...signal,
-    collected_at: signal.collected_at ?? signal.evidence?.time_range?.to,
-  }));
+  ).map((signal) => {
+    const collectedAt = getSignalCollectedAt(signal);
+    return collectedAt === signal.collected_at ? signal : { ...signal, collected_at: collectedAt };
+  });
 
   const episodeContext =
     isContinuation && !reopens

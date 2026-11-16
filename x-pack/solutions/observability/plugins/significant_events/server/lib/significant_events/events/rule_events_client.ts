@@ -77,6 +77,7 @@ import {
 } from './event_status_change_telemetry';
 import type { SignificantEventActor } from '../../telemetry/ebt';
 import { toRuleEvent } from './to_rule_event';
+import { getSignalCollectedAt } from './signal_collected_at';
 
 /** Alerting v2 rejects `activate` / `deactivate` of a superseded episode with this code; it is not exported by a package. */
 const ALERT_NOT_LATEST_CODE = 'ALERT_NOT_LATEST';
@@ -930,7 +931,7 @@ export class RuleEventsClient {
             verdict: signal.verdict,
             esqlQuery: signal.evidence?.esql_query,
             evidenceFound: signal.evidence?.result === 'found',
-            verifiedAt: signal.collected_at ?? signal.evidence?.time_range?.to,
+            verifiedAt: getSignalCollectedAt(signal),
             createdAt: row.created_at,
             sourceIds: event.source_ids,
             eventTitle: event.title,
