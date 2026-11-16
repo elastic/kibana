@@ -364,7 +364,7 @@ export class SearchInterceptor {
     const search = ({
       abortSignal = searchAbortController.getSignal(),
       pollLength,
-    }: Pick<ISearchOptions, 'abortSignal'> & { pollLength?: string } = {}) => {
+    }: Pick<ISearchOptions, 'abortSignal' | 'pollLength'> = {}) => {
       const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
         { isSearchStored: false },
         () => {},
@@ -567,22 +567,23 @@ export class SearchInterceptor {
    */
   private runSearch(
     { params, ...request }: IKibanaSearchRequest,
-    options?: ISearchOptions & { pollLength?: string }
+    options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
     const requestHash = params ? createRequestHashForBackgroundSearches(params) : undefined;
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
+    const pollLength = request.id
+      ? options?.pollLength
+        ? options.pollLength
+        : // don't set or override user-configured pollLength, it will be applied server-side
+        !this.deps.searchConfig.asyncSearch.pollLength && this.protocolSupportsMultiplexing
+        ? DEFAULT_MULTIPLEXING_POLL_LENGTH
+        : undefined
+      : undefined;
     const paramsToUse = request.id
       ? {
-          wait_for_completion_timeout: options?.pollLength
-            ? options.pollLength
-            : // don't set or override user-configured pollLength, it will be applied server-side
-            !this.deps.searchConfig.asyncSearch.pollLength && this.protocolSupportsMultiplexing
-            ? DEFAULT_MULTIPLEXING_POLL_LENGTH
-            : undefined,
-
           // FIXME: the dropNullColumns param shouldn't be needed during polling
           // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
           // at that point, exclude all params when request.id is defined (polling phase)
@@ -602,6 +603,8 @@ export class SearchInterceptor {
           body: JSON.stringify({
             ...{ ...request, params: paramsToUse },
             ...searchOptions,
+            // also sent as an option, because strategies wrapping others (e.g. Security's) rebuild `params`
+            pollLength,
             requestHash,
             stream:
               strategy === ESQL_ASYNC_SEARCH_STRATEGY ||

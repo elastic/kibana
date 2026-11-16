@@ -14,11 +14,17 @@ import { elasticModelDictionary } from '../const';
  * Retrieve the context window size for the default model of the given connector, if available.
  */
 export const getContextWindowSize = (connector: InferenceConnector): number | undefined => {
-  if (!connector.config) {
-    return undefined;
-  }
   if (connector.config?.contextWindowLength) {
     return connector.config.contextWindowLength;
+  }
+
+  const advertisedWindow = connector.metadata?.capabilities?.context_window?.max_input_tokens;
+  if (advertisedWindow && advertisedWindow > 0) {
+    return advertisedWindow;
+  }
+
+  if (!connector.config) {
+    return undefined;
   }
 
   const defaultModel = getConnectorDefaultModel(connector);

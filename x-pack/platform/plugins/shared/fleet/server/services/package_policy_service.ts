@@ -115,6 +115,11 @@ export interface PackagePolicyClient {
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
+    /**
+     * Pass to `agentPolicyService.bumpRevision` when bumping separately (`bumpRevision: false`).
+     * Treat a missing value as `false`.
+     */
+    agentVersionConditionsUnchanged?: boolean;
   }>;
 
   bulkUpdate(
@@ -129,6 +134,11 @@ export interface PackagePolicyClient {
       packagePolicy: NewPackagePolicyWithId;
       error: Error | SavedObjectError;
     }>;
+    /**
+     * Pass to `agentPolicyService.bumpRevision` when bumping separately (`bumpRevision: false`).
+     * Treat a missing value as `false`.
+     */
+    agentVersionConditionsUnchanged?: boolean;
   }>;
 
   bulkUpgrade(

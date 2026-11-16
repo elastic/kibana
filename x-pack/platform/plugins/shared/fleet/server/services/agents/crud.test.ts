@@ -807,6 +807,7 @@ describe('Agents CRUD test', () => {
         const query = searchMock.mock.calls.at(-1)[0].query;
         expect(query.bool.must_not).toEqual([
           buildPolicyBaseIdsWithFallbackEsFilter(agentlessPolicyIds),
+          { term: { unenrolled_reason: 'agentless' } },
         ]);
         // Verify the other filters (active + enrolled) are still applied via the filter branch.
         const filterStr = JSON.stringify(query.bool.filter);
@@ -858,6 +859,7 @@ describe('Agents CRUD test', () => {
         const query = searchMock.mock.calls.at(-1)[0].query;
         expect(query.bool.must_not).toEqual([
           buildPolicyBaseIdsWithFallbackEsFilter(crossSpacePolicyIds),
+          { term: { unenrolled_reason: 'agentless' } },
         ]);
       });
 
@@ -893,6 +895,26 @@ describe('Agents CRUD test', () => {
         const queryStr = JSON.stringify(searchMock.mock.calls.at(-1)[0].query);
         expect(queryStr).not.toContain('policy_base_id');
         expect(queryStr).not.toContain('policy_id');
+      });
+
+      it('excludes agents of deleted agentless policies by their unenrolled reason', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: false,
+          showInactive: false,
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.must_not).toEqual([{ term: { unenrolled_reason: 'agentless' } }]);
+      });
+
+      it('does not exclude agents by unenrolled reason when showing agentless agents', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: false,
+        });
+
+        const queryStr = JSON.stringify(searchMock.mock.calls.at(-1)[0].query);
+        expect(queryStr).not.toContain('unenrolled_reason');
       });
     });
   });

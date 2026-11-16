@@ -157,8 +157,8 @@ steps:
     label: 'Pick Test Group Run Order'
     key: pick_test_group_run_order
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2
-      diskSizeGb: 130
     timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'

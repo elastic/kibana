@@ -153,6 +153,37 @@ describe('message_utils', () => {
         failedStepNumber: undefined,
       });
     });
+
+    it('leaves timestamp empty for an unparseable ping time', () => {
+      const monitorInfo = {
+        '@timestamp': 'undefined',
+        monitor: {
+          id: monitorId,
+          name: monitorName,
+          type: 'http',
+        },
+        observer: {
+          geo: {
+            name: locationName,
+          },
+        },
+        url: {
+          full: monitorUrl,
+        },
+      } as unknown as OverviewPing;
+
+      const result = getMonitorSummary({
+        monitorInfo,
+        locationId: [locationId],
+        configId: monitorId,
+        tz,
+        dateFormat,
+        reason: 'down',
+      });
+
+      expect(result.timestamp).toBeUndefined();
+      expect(result.checkedAt).toBeUndefined();
+    });
   });
 
   describe('getReasonMessage', () => {

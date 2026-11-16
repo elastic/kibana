@@ -158,6 +158,7 @@ export {
   InferenceEndpointProvider,
   elasticModelIds,
   type EisInferenceEndpointMetadata,
+  type EisInferenceEndpointCapabilities,
   type CspRegion,
 } from './src/inference_endpoints';
 

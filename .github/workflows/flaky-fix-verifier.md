@@ -28,11 +28,10 @@ permissions:
   models: read
 
 # Activation rules:
-# - Manual runs always activate.
-# - `kickoff`: any PR is opened with (or labeled) `flaky-test-fixer`. Applying that
-#   label requires write access, so this is the gate — the PR author is not checked.
-#   NOTE: not checking the author is a temporary measure for testing; tighten it
-#   back (e.g. to the `kibanamachine` fixer identity) once the flow is validated.
+# - Every trigger requires an open, in-repository PR authored by kibanamachine
+#   (checked by check_pr_eligibility).
+# - Manual runs request verification subject to the same PR validation.
+# - `kickoff`: any PR is opened with (or labeled) `flaky-test-fixer`.
 # - `process_results`: the Flaky Test Runner posts its `## Flaky Test Runner Stats`
 #   comment on a PR we are actively validating (`flaky-fix-check:started`). The
 #   workflow removes `running` when it reaches a terminal verdict, so the label's
@@ -74,6 +73,7 @@ engine:
   model: opus
   max-turns: 120
   env:
+    BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
     ENABLE_PROMPT_CACHING_1H: '1'
@@ -110,6 +110,44 @@ checkout:
   fetch-depth: 2
 
 jobs:
+  activation:
+    needs: [check_pr_eligibility]
+  check_pr_eligibility:
+    needs: pre_activation
+    if: needs.pre_activation.outputs.activated == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      pr_number: ${{ steps.check.outputs.pr_number }}
+    steps:
+      # No checkout: validation must run before any PR code or agent tools.
+      - name: Check flaky fix PR eligibility
+        id: check
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PR_NUMBER: *pr_number
+        with:
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            if (!/^[1-9][0-9]*$/.test(process.env.PR_NUMBER ?? '') || !Number.isSafeInteger(prNumber)) {
+              throw new Error('A positive integer PR number is required.');
+            }
+
+            const { owner, repo } = context.repo;
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            if (pr.state !== 'open') {
+              throw new Error('The flaky fix verifier requires an open PR.');
+            }
+            if (pr.head.repo?.full_name !== `${owner}/${repo}`) {
+              throw new Error(`The flaky fix verifier requires a branch in ${owner}/${repo}.`);
+            }
+            if (pr.user.login !== 'kibanamachine') {
+              throw new Error('The flaky fix verifier requires a PR opened by kibanamachine.');
+            }
+
+            core.setOutput('pr_number', String(prNumber));
+            core.info(`PR #${prNumber} by ${pr.user.login} is eligible.`);
   prefetch_pr_context:
     permissions:
       contents: read
@@ -148,11 +186,10 @@ steps:
       fs.writeFileSync(path.join(dir, 'flaky-run-count.json'), `${JSON.stringify({ triggeredByBot })}\n`);
       console.log(`Flaky runs already triggered by kibanamachine: ${triggeredByBot}`);
       NODE
-  - name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
+  - name: Install Buildkite CLI
     env:
       BK_VERSION: 3.44.0
       BK_SHA256: 88867c0b983ad2afe1efc26f0df6b46b5673577c1aea95eba76992636fb9abe9
-      OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
     run: |
       set -euo pipefail
       tmp="$(mktemp -d)"
@@ -163,11 +200,21 @@ steps:
       install -d "${RUNNER_TEMP}/gh-aw/mcp-cli/bin"
       install -m 0755 "${tmp}/bk" "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk"
       "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk" --version
+  - name: Prepare Buildkite CLI authentication
+    id: buildkite_auth
+    env:
+      OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
+    run: |
+      set -euo pipefail
       if [ -z "${OPS_BUILDKITE_TOKEN:-}" ]; then
         echo "::error::OPS_BUILDKITE_TOKEN secret is not set" >&2
         exit 1
       fi
-      echo "BUILDKITE_API_TOKEN=${OPS_BUILDKITE_TOKEN}" >> "${GITHUB_ENV}"
+      # bk needs the token inside the agent sandbox. The compiler filters direct secret
+      # references in engine.env, so consumers use this explicit masked handoff.
+      # Do not export the token job-wide; the detector must not consume the output.
+      printf '::add-mask::%s\n' "$OPS_BUILDKITE_TOKEN"
+      printf 'token=%s\n' "$OPS_BUILDKITE_TOKEN" >> "$GITHUB_OUTPUT"
 
 safe-outputs:
   activation-comments: false
