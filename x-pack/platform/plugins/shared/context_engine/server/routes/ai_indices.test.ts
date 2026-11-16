@@ -1242,7 +1242,9 @@ describe('ai indices routes', () => {
       });
 
       expect(esEsqlQuery.mock.calls[1][0]).toEqual({
-        query: expect.stringContaining('MATCH(title, ?searchQuery, {"fuzziness":"AUTO"})'),
+        query: expect.stringContaining(
+          'MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2})'
+        ),
         params: [{ searchQuery: 'refund policy' }],
       });
     });
