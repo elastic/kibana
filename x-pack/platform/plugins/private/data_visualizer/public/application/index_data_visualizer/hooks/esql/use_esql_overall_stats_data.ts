@@ -11,7 +11,11 @@ import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { getStartEndParams } from '@kbn/esql-utils';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
+import {
+  useCancellableSearch,
+  type RequestCancellationManager,
+  type UseCancellableSearch,
+} from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/search-types';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
@@ -212,7 +216,8 @@ export const useESQLOverallStatsData = (
         totalCount?: number;
         timeRange?: TimeRange;
       }
-    | undefined
+    | undefined,
+  requestCancellationManager?: RequestCancellationManager
 ) => {
   const {
     services: {
@@ -226,7 +231,7 @@ export const useESQLOverallStatsData = (
   const previousError = useRef<Error | undefined>();
   const fetchGeneration = useRef(0);
 
-  const { runRequest, cancelRequest } = useCancellableSearch(data);
+  const { runRequest, cancelRequest } = useCancellableSearch(data, requestCancellationManager);
 
   // An aborted request resolves with `null` rather than throwing, so a superseded run resumes past its awaits and keeps writing state.
   const cancelOverallStatsRequest = useCallback(() => {
@@ -277,6 +282,12 @@ export const useESQLOverallStatsData = (
         const generation = fetchGeneration.current;
         const isStale = () => fetchGeneration.current !== generation;
 
+        // The panel was cancelled and no new load has started yet, don't start requests.
+        if (requestCancellationManager?.signal.aborted) {
+          setOverallStatsProgress({ isRunning: false, cancelled: true });
+          return;
+        }
+
         setOverallStatsProgress({
           ...getInitialProgress(),
           isRunning: true,
@@ -323,6 +334,13 @@ export const useESQLOverallStatsData = (
         )) as ESQLResponse | undefined;
         if (isStale()) return;
         setQueryHistoryStatus(false);
+
+        // `runRequest` resolves with `null` when the request was cancelled.
+        if (!columnsResp) {
+          setOverallStatsProgress({ isRunning: false, cancelled: true });
+          return;
+        }
+
         const columnInfo = columnsResp?.rawResponse
           ? columnsResp.rawResponse.all_columns ?? columnsResp.rawResponse.columns
           : [];
@@ -384,6 +402,11 @@ export const useESQLOverallStatsData = (
             onError,
             timeRange
           );
+
+          if (requestCancellationManager?.signal.aborted) {
+            setOverallStatsProgress({ isRunning: false, cancelled: true });
+            return;
+          }
 
           if (isStale()) return;
           totalCount = results.totalCount;
@@ -497,6 +520,11 @@ export const useESQLOverallStatsData = (
           setTableData({ exampleDocs });
         }
       } catch (error) {
+        if (error.name === 'AbortError') {
+          setOverallStatsProgress({ isRunning: false, cancelled: true });
+          setQueryHistoryStatus(false);
+          return;
+        }
         setOverallStatsProgress({
           loaded: 100,
           isRunning: false,
