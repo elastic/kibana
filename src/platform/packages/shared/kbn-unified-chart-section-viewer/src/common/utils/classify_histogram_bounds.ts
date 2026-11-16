@@ -19,9 +19,13 @@ const toFiniteNumber = (value: RawHistogramBound): number | undefined => {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 };
 
+// Scale through decimal text so a value already on a hundredth, such as 2.3, stays put.
+const toHundredths = (value: number, round: (scaled: number) => number): number =>
+  round(Number((value * 100).toFixed(8))) / 100;
+
 /**
- * Returns MIN/MAX when both values are finite and min is not greater than max.
- * A point (min === max) is kept. Missing, non-finite, or inverted bounds are undefined.
+ * Returns finite, ordered MIN/MAX rounded outward to hundredths, or undefined.
+ * A point already on a hundredth stays a point.
  */
 export const parseHistogramBounds = (
   rawMin: RawHistogramBound,
@@ -33,5 +37,5 @@ export const parseHistogramBounds = (
     return undefined;
   }
 
-  return { min, max };
+  return { min: toHundredths(min, Math.floor), max: toHundredths(max, Math.ceil) };
 };
