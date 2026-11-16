@@ -28,6 +28,7 @@ import type { GeneratedInputs, RejectedInput } from './generate_action_inputs';
 import { generateActionInputs } from './generate_action_inputs';
 import type { ManifestCall } from '../manifest';
 import { matchesPathTemplate } from '../manifest';
+import { matchedOperationOf } from '../matched_operation';
 import { errorMessage } from '../values';
 
 const SAFE_METHODS = new Set(['get', 'head', 'options']);
@@ -172,12 +173,15 @@ const uniqueSorted = <T>(items: readonly T[], keyOf: (item: T) => string): T[] =
 const isOperation = (
   { source, method, path }: { source?: string; method: string; path: string },
   matched: ContractCall['matched']
-): boolean =>
-  matched !== undefined &&
-  'method' in matched &&
-  (source === undefined || source === matched.source) &&
-  method.toLowerCase() === matched.method &&
-  path === matched.path;
+): boolean => {
+  const operation = matchedOperationOf(matched);
+  return (
+    operation !== undefined &&
+    (source === undefined || source === operation.source) &&
+    method.toLowerCase() === operation.method &&
+    path === operation.path
+  );
+};
 
 const isNamedOperation = (
   { source, name }: { source?: string; name: string },
@@ -390,10 +394,8 @@ export const recordActions = async ({
         for (const { request, matched, scopeViolations: violations = [] } of vendorCalls) {
           if (violations.length > 0) {
             // Named by operation, so the runs of one action report each shortfall once.
-            const operation =
-              matched && 'method' in matched
-                ? `${matched.method.toUpperCase()} ${matched.path}`
-                : request;
+            const named = matchedOperationOf(matched);
+            const operation = named ? `${named.method.toUpperCase()} ${named.path}` : request;
             findings.push({
               kind: 'insufficient-scope',
               action,
@@ -448,13 +450,13 @@ export const recordActions = async ({
           violations: requestViolations,
         });
       }
+      const named = matchedOperationOf(matched);
       if (
-        matched &&
-        'method' in matched &&
+        named &&
         responseViolations.length > 0 &&
         fixture.responses?.some((response) => isOperation(response, matched))
       ) {
-        const operation = `${matched.method.toUpperCase()} ${matched.path}`;
+        const operation = `${named.method.toUpperCase()} ${named.path}`;
         findings.push({
           kind: 'rejected-response',
           action,

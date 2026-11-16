@@ -512,3 +512,65 @@ describe('recordActions', () => {
     });
   });
 });
+
+describe('recordActions with a GraphQL spec', () => {
+  const GRAPHQL = 'https://api.example.com/graphql';
+  const sdl = `
+    type Query { boards(ids: [ID!], limit: Int): [Board!]! }
+    type Mutation { archiveItem(itemId: ID!, options: ArchiveOptions): Item }
+    input ArchiveOptions { reason: String, notify: Boolean }
+    type Board { id: ID!, name: String!, items: [Item!]! }
+    type Item { id: ID!, name: String! }
+  `;
+  const graphqlConnector: ConnectorSpec = {
+    ...connector,
+    auth: { types: ['none'] },
+    actions: {
+      listBoards: action(z.object({}), async ({ client }) => {
+        const { data } = await client.post(GRAPHQL, {
+          query: 'query Boards($ids: [ID!]) { all: boards(ids: $ids) { name items { id } } }',
+          variables: { ids: ['1'] },
+        });
+        return data.data.all.map(({ name }: { name: string }) => name);
+      }),
+      archiveItem: action(
+        z.object({}),
+        async ({ client }) =>
+          (
+            await client.post(GRAPHQL, {
+              query:
+                'mutation { archiveItem(itemId: "1", options: { reason: "done" }) { id name } }',
+            })
+          ).data.data.archiveItem,
+        'write'
+      ),
+    },
+  };
+
+  it('records the root fields the actions select, with their field use', async () => {
+    const recording = await recordActions({
+      connector: graphqlConnector,
+      specs: { api: { format: 'graphql', sdl, endpoints: [GRAPHQL] } },
+      trackFields: true,
+    });
+
+    expect(recording.operations).toEqual({
+      archiveItem: [{ source: 'api', method: 'mutation', path: 'archiveItem' }],
+      listBoards: [{ source: 'api', method: 'query', path: 'boards' }],
+    });
+    // A query is read-only, though it is sent with POST
+    expect(recording.findings).toEqual([]);
+    expect(recording.fieldUse?.listBoards['api QUERY boards']).toEqual({
+      read: ['items', 'items/name'],
+      copied: [],
+      returned: [],
+      sent: ['ids', 'ids/items'],
+    });
+    expect(recording.fieldUse?.archiveItem['api MUTATION archiveItem']).toEqual({
+      read: [],
+      copied: [],
+      returned: [''],
+      sent: ['itemId', 'options', 'options/reason'],
+    });
+  });
+});

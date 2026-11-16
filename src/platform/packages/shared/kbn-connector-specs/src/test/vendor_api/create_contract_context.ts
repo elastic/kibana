@@ -29,6 +29,8 @@ import type {
 import { getSchemaForAuthType } from '../../lib';
 import type { FieldUse } from './field_use';
 import { markReturned, recordSentFields, trackFieldUse } from './field_use';
+import { trackGraphQLFieldUse } from './graphql_field_use';
+import { isGraphQLOperation, matchedOperationOf } from './matched_operation';
 
 export interface ContractContextOptions extends EmulatorOptions {
   readonly connector: ConnectorSpec;
@@ -308,10 +310,20 @@ export const createContractContext = async ({
       return response;
     }
     // The operation this very request matched, recorded while it was in flight.
-    const matched =
-      response.request instanceof Request ? matchedOf.get(response.request) : undefined;
-    if (!matched || !('method' in matched)) {
+    const matched = matchedOperationOf(
+      response.request instanceof Request ? matchedOf.get(response.request) : undefined
+    );
+    if (!matched) {
       return response;
+    }
+    // A GraphQL response answers each root field the query selects, under its alias.
+    if (isGraphQLOperation(matched)) {
+      return {
+        ...response,
+        data: trackGraphQLFieldUse(response.data, parseJsonBody(response.config.data), (field) =>
+          trackFields({ ...field, source: matched.source })
+        ),
+      };
     }
     const use = trackFields(matched);
     recordSentFields(parseJsonBody(response.config.data), use);
