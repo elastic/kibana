@@ -136,15 +136,18 @@ export function createQueryKnowledgeIndicatorTool({
           logger,
           description: 'ki_query_create telemetry',
           track: () =>
-            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-              workflow_execution_id: workflowExecutionId,
-              ki_kind: 'query',
-              tool_id: 'ki_query_create',
-              success: true,
-              source_id: source.id,
-              space_id: request.spaceId,
-              knowledge_indicator_id: id,
-            }),
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ki_kind: 'query',
+                tool_id: 'ki_query_create',
+                success: true,
+                source_id: source.id,
+                space_id: request.spaceId,
+                knowledge_indicator_id: id,
+              },
+              request
+            ),
         });
 
         return {
@@ -177,15 +180,18 @@ export function createQueryKnowledgeIndicatorTool({
           logger,
           description: 'failed ki_query_create telemetry',
           track: () =>
-            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-              workflow_execution_id: workflowExecutionId,
-              ki_kind: 'query',
-              tool_id: 'ki_query_create',
-              success: false,
-              source_id: sourceId,
-              space_id: request.spaceId,
-              error_message: toTelemetryErrorMessage(failure, message),
-            }),
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ki_kind: 'query',
+                tool_id: 'ki_query_create',
+                success: false,
+                source_id: sourceId,
+                space_id: request.spaceId,
+                error_message: toTelemetryErrorMessage(failure, message),
+              },
+              request
+            ),
         });
 
         return {

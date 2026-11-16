@@ -139,7 +139,7 @@ export const AiIndexDetailPage = () => {
   const { summary, isLoading: isKiSummaryLoading } = useListKi({
     aiIndexId: aiIndex?.id,
     size: KI_SUMMARY_PAGE_SIZE,
-    lifecycleStatus: ['active'],
+    status: ['active'],
     enabled: aiIndex !== undefined,
     notifyOnError: true,
   });

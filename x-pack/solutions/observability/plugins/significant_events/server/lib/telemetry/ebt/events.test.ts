@@ -8,16 +8,45 @@
 import {
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
+  agentToolEventSearchEventType,
   agentToolEventStatusUpdateEventType,
   agentToolEventWriteEventType,
   agentToolFailedEventType,
+  agentToolKiIdentificationStartedEventType,
+  detectionScanEventType,
+  discoveryTriggeredEventType,
   eventStatusChangedEventType,
+  knowledgeIndicatorEventsGeneratedEventType,
+  knowledgeIndicatorFeaturesIdentifiedEventType,
   knowledgeIndicatorQueriesGenerationFailedEventType,
+  onboardingScheduledEventType,
 } from './events';
 
 const isOptional = (field: { _meta?: { optional?: boolean } }) => field._meta?.optional === true;
 
 describe('EBT event types', () => {
+  it.each([
+    agentBuilderKnowledgeIndicatorCreatedEventType,
+    agentToolEventCreateEventType,
+    agentToolEventSearchEventType,
+    agentToolEventStatusUpdateEventType,
+    agentToolEventWriteEventType,
+    agentToolFailedEventType,
+    agentToolKiIdentificationStartedEventType,
+    detectionScanEventType,
+    discoveryTriggeredEventType,
+    eventStatusChangedEventType,
+    knowledgeIndicatorEventsGeneratedEventType,
+    knowledgeIndicatorFeaturesIdentifiedEventType,
+    knowledgeIndicatorQueriesGenerationFailedEventType,
+    onboardingScheduledEventType,
+  ])('$eventType registers the CPS target context', ({ schema }) => {
+    expect(isOptional(schema.space_id)).toBe(false);
+    expect(isOptional(schema.target_cluster_scope)).toBe(true);
+    expect(isOptional(schema.target_cluster_ids)).toBe(true);
+    expect(isOptional(schema.target_cluster_ids_complete)).toBe(true);
+  });
+
   it.each([agentToolEventStatusUpdateEventType, eventStatusChangedEventType])(
     '$eventType requires the full alert identity on an event about an existing alert',
     ({ schema }) => {

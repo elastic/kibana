@@ -144,7 +144,8 @@ describe('ki_feature_similarity_search tool', () => {
     );
     expect(logger.error).not.toHaveBeenCalled();
     expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
-      expect.objectContaining({ error_code: 'forbidden', input_rejected: false, item_count: 1 })
+      expect.objectContaining({ error_code: 'forbidden', input_rejected: false, item_count: 1 }),
+      expect.anything()
     );
   });
 

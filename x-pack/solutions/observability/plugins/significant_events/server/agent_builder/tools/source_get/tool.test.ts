@@ -117,7 +117,8 @@ describe('source_get tool', () => {
         input_rejected: true,
         agent_id: expect.stringMatching(/^custom-[0-9a-f]{16}$/),
         unresolved_count: 1,
-      })
+      }),
+      expect.anything()
     );
   });
 });

@@ -103,11 +103,14 @@ export const createKiIdentificationStartTool = ({
         request,
       });
 
-      telemetry.trackAgentToolKiIdentificationStarted({
-        workflow_execution_id: workflowExecutionId,
-        success: true,
-        source_id: source.id,
-      });
+      telemetry.trackAgentToolKiIdentificationStarted(
+        {
+          workflow_execution_id: workflowExecutionId,
+          success: true,
+          source_id: source.id,
+        },
+        request
+      );
 
       return {
         results: [
@@ -120,12 +123,15 @@ export const createKiIdentificationStartTool = ({
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
 
-      telemetry.trackAgentToolKiIdentificationStarted({
-        workflow_execution_id: workflowExecutionId,
-        success: false,
-        source_id: sourceId,
-        error_message: toTelemetryErrorMessage(classifyToolFailure(err), message),
-      });
+      telemetry.trackAgentToolKiIdentificationStarted(
+        {
+          workflow_execution_id: workflowExecutionId,
+          success: false,
+          source_id: sourceId,
+          error_message: toTelemetryErrorMessage(classifyToolFailure(err), message),
+        },
+        request
+      );
 
       return {
         results: [

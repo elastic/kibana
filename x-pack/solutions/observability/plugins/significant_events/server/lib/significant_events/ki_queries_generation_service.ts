@@ -94,14 +94,17 @@ export async function generateKIQueries(
     return { ...result, connectorId: canonicalConnectorId };
   })().catch((error: unknown) => {
     try {
-      telemetry.trackSignificantEventsQueriesGenerationFailed({
-        workflow_execution_id: workflowExecutionId,
-        parent_workflow_execution_id: parentWorkflowExecutionId,
-        error_code: toGenerationFailureCode(error, signal),
-        ...(resolvedConnectorId !== undefined ? { connector_id: resolvedConnectorId } : {}),
-        source_id: source.id,
-        duration_ms: Date.now() - startedAt,
-      });
+      telemetry.trackSignificantEventsQueriesGenerationFailed(
+        {
+          workflow_execution_id: workflowExecutionId,
+          parent_workflow_execution_id: parentWorkflowExecutionId,
+          error_code: toGenerationFailureCode(error, signal),
+          ...(resolvedConnectorId !== undefined ? { connector_id: resolvedConnectorId } : {}),
+          source_id: source.id,
+          duration_ms: Date.now() - startedAt,
+        },
+        request
+      );
     } catch (telemetryError) {
       logger.warn(
         `Failed to track query generation failure: ${
@@ -113,17 +116,20 @@ export async function generateKIQueries(
   });
   const durationMs = Date.now() - startedAt;
 
-  telemetry.trackSignificantEventsQueriesGenerated({
-    workflow_execution_id: workflowExecutionId,
-    parent_workflow_execution_id: parentWorkflowExecutionId,
-    count: queries.length,
-    connector_id: connectorId,
-    source_id: source.id,
-    input_tokens_used: tokensUsed.prompt,
-    output_tokens_used: tokensUsed.completion,
-    cached_tokens_used: tokensUsed.cached ?? 0,
-    duration_ms: durationMs,
-  });
+  telemetry.trackSignificantEventsQueriesGenerated(
+    {
+      workflow_execution_id: workflowExecutionId,
+      parent_workflow_execution_id: parentWorkflowExecutionId,
+      count: queries.length,
+      connector_id: connectorId,
+      source_id: source.id,
+      input_tokens_used: tokensUsed.prompt,
+      output_tokens_used: tokensUsed.completion,
+      cached_tokens_used: tokensUsed.cached ?? 0,
+      duration_ms: durationMs,
+    },
+    request
+  );
 
   return { queries, tokensUsed, connectorId };
 }

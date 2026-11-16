@@ -222,18 +222,20 @@ describe('reportToolFailure', () => {
     });
 
     expect(telemetry.trackAgentToolFailed).toHaveBeenCalledTimes(1);
-    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith({
-      workflow_execution_id: 'discovery-run',
-      tool_id: TOOL_ID,
-      error_code: 'unresolved_feature_reference',
-      input_rejected: true,
-      space_id: 'space-a',
-      agent_id: 'significant-events.discovery',
-      tool_call_id: 'call-1',
-      status_code: undefined,
-      item_count: 5,
-      unresolved_count: 1,
-    });
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      {
+        workflow_execution_id: 'discovery-run',
+        tool_id: TOOL_ID,
+        error_code: 'unresolved_feature_reference',
+        input_rejected: true,
+        agent_id: 'significant-events.discovery',
+        tool_call_id: 'call-1',
+        status_code: undefined,
+        item_count: 5,
+        unresolved_count: 1,
+      },
+      expect.anything()
+    );
   });
 
   it('hashes the id of an agent this plugin does not own', () => {
@@ -243,7 +245,8 @@ describe('reportToolFailure', () => {
     });
 
     expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
-      expect.objectContaining({ agent_id: toCustomHashedId('acme-prod-oncall') })
+      expect.objectContaining({ agent_id: toCustomHashedId('acme-prod-oncall') }),
+      expect.anything()
     );
   });
 

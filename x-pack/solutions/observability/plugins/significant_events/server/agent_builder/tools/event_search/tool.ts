@@ -283,16 +283,19 @@ export function createSearchEventsTool({
           },
         });
 
-        telemetry.trackAgentToolEventSearch({
-          workflow_execution_id: workflowExecutionId,
-          success: true,
-          result_count: data.total,
-          has_query: query !== undefined,
-          has_source_filter: (slugs?.length ?? 0) > 0,
-          status_filter: toolParams.status,
-          view: data.view,
-          page: data.page,
-        });
+        telemetry.trackAgentToolEventSearch(
+          {
+            workflow_execution_id: workflowExecutionId,
+            success: true,
+            result_count: data.total,
+            has_query: query !== undefined,
+            has_source_filter: (slugs?.length ?? 0) > 0,
+            status_filter: toolParams.status,
+            view: data.view,
+            page: data.page,
+          },
+          request
+        );
 
         return {
           results: [
@@ -324,17 +327,20 @@ export function createSearchEventsTool({
           runContext: context.runContext,
         });
 
-        telemetry.trackAgentToolEventSearch({
-          workflow_execution_id: workflowExecutionId,
-          success: false,
-          result_count: 0,
-          has_query: query !== undefined,
-          has_source_filter: (toolParams.slugs?.length ?? 0) > 0,
-          status_filter: toolParams.status,
-          view: toolParams.view,
-          page: toolParams.page,
-          error_message: toTelemetryErrorMessage(failure, message),
-        });
+        telemetry.trackAgentToolEventSearch(
+          {
+            workflow_execution_id: workflowExecutionId,
+            success: false,
+            result_count: 0,
+            has_query: query !== undefined,
+            has_source_filter: (toolParams.slugs?.length ?? 0) > 0,
+            status_filter: toolParams.status,
+            view: toolParams.view,
+            page: toolParams.page,
+            error_message: toTelemetryErrorMessage(failure, message),
+          },
+          request
+        );
 
         return {
           results: [

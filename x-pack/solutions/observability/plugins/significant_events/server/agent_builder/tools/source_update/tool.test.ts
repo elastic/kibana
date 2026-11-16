@@ -218,7 +218,8 @@ describe('source_update tool', () => {
     );
     expect(telemetry.trackAgentToolFailed).toHaveBeenCalledTimes(1);
     expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
-      expect.objectContaining({ error_code: 'internal_error', input_rejected: false })
+      expect.objectContaining({ error_code: 'internal_error', input_rejected: false }),
+      expect.anything()
     );
   });
 

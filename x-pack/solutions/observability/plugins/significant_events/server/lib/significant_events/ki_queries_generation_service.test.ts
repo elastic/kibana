@@ -148,7 +148,8 @@ describe('generateKIQueries', () => {
         source_id: 'source-1',
         input_tokens_used: 10,
         output_tokens_used: 20,
-      })
+      }),
+      expect.anything()
     );
   });
 
@@ -210,14 +211,17 @@ describe('generateKIQueries', () => {
       await expect(generate(telemetry)).rejects.toBe(error);
 
       expect(telemetry.trackSignificantEventsQueriesGenerationFailed).toHaveBeenCalledTimes(1);
-      expect(telemetry.trackSignificantEventsQueriesGenerationFailed).toHaveBeenCalledWith({
-        workflow_execution_id: 'run-1',
-        parent_workflow_execution_id: 'onboarding-run-1',
-        error_code: 'agent_did_not_finalize',
-        connector_id: 'test-connector',
-        source_id: 'source-1',
-        duration_ms: expect.any(Number),
-      });
+      expect(telemetry.trackSignificantEventsQueriesGenerationFailed).toHaveBeenCalledWith(
+        {
+          workflow_execution_id: 'run-1',
+          parent_workflow_execution_id: 'onboarding-run-1',
+          error_code: 'agent_did_not_finalize',
+          connector_id: 'test-connector',
+          source_id: 'source-1',
+          duration_ms: expect.any(Number),
+        },
+        expect.anything()
+      );
       expect(telemetry.trackSignificantEventsQueriesGenerated).not.toHaveBeenCalled();
     });
 
@@ -230,7 +234,8 @@ describe('generateKIQueries', () => {
       await expect(generate(telemetry, controller.signal)).rejects.toThrow('Request was aborted');
 
       expect(telemetry.trackSignificantEventsQueriesGenerationFailed).toHaveBeenCalledWith(
-        expect.objectContaining({ error_code: 'aborted' })
+        expect.objectContaining({ error_code: 'aborted' }),
+        expect.anything()
       );
     });
 
@@ -241,7 +246,8 @@ describe('generateKIQueries', () => {
       await expect(generate(telemetry)).rejects.toThrow('connector timeout');
 
       expect(telemetry.trackSignificantEventsQueriesGenerationFailed).toHaveBeenCalledWith(
-        expect.objectContaining({ error_code: 'internal_error' })
+        expect.objectContaining({ error_code: 'internal_error' }),
+        expect.anything()
       );
     });
 
@@ -273,7 +279,8 @@ describe('generateKIQueries', () => {
         expect.objectContaining({
           error_code: 'internal_error',
           connector_id: 'test-connector',
-        })
+        }),
+        expect.anything()
       );
       expect(executeKIQueryGenerationAgentMock).not.toHaveBeenCalled();
     });

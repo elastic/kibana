@@ -789,7 +789,8 @@ describe('events_write tool', () => {
     );
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledTimes(2);
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenLastCalledWith(
-      expect.objectContaining({ success: false, written: false, error_message: 'busy' })
+      expect.objectContaining({ success: false, written: false, error_message: 'busy' }),
+      expect.anything()
     );
   });
 
@@ -809,7 +810,8 @@ describe('events_write tool', () => {
       })
     );
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
-      expect.objectContaining({ workflow_execution_id: 'discovery-run' })
+      expect.objectContaining({ workflow_execution_id: 'discovery-run' }),
+      expect.anything()
     );
   });
 
@@ -845,7 +847,8 @@ describe('events_write tool', () => {
     );
 
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
-      expect.objectContaining({ detection_workflow_execution_ids: ['run-1', 'run-2'] })
+      expect.objectContaining({ detection_workflow_execution_ids: ['run-1', 'run-2'] }),
+      expect.anything()
     );
   });
 
@@ -1017,11 +1020,13 @@ describe('events_write tool failure reporting', () => {
         input_rejected: true,
         item_count: 2,
         unresolved_count: 1,
-      })
+      }),
+      expect.anything()
     );
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledTimes(2);
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, error_message: 'unresolved_feature_reference' })
+      expect.objectContaining({ success: false, error_message: 'unresolved_feature_reference' }),
+      expect.anything()
     );
     expect(JSON.stringify(telemetry.trackAgentToolEventsWrite.mock.calls)).not.toContain(
       'topolvm-lvmvg-storage'

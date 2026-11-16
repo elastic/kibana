@@ -249,7 +249,8 @@ describe('ki_search tool', () => {
         input_rejected: true,
         status_code: 404,
         unresolved_count: 2,
-      })
+      }),
+      expect.anything()
     );
   });
 });

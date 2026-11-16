@@ -150,18 +150,20 @@ export const reportToolFailure = ({
     logger,
     description: `${toolId} failure telemetry`,
     track: () =>
-      telemetry.trackAgentToolFailed({
-        workflow_execution_id: getWorkflowExecutionIdFromRequest(request),
-        tool_id: toolId,
-        error_code: failure.code,
-        input_rejected: failure.inputRejected,
-        space_id: request.spaceId,
-        agent_id: getTelemetryAgentId(runContext),
-        tool_call_id: getToolCallId(runContext),
-        status_code: failure.statusCode,
-        item_count: itemCount,
-        unresolved_count: failure.unresolvedCount,
-      }),
+      telemetry.trackAgentToolFailed(
+        {
+          workflow_execution_id: getWorkflowExecutionIdFromRequest(request),
+          tool_id: toolId,
+          error_code: failure.code,
+          input_rejected: failure.inputRejected,
+          agent_id: getTelemetryAgentId(runContext),
+          tool_call_id: getToolCallId(runContext),
+          status_code: failure.statusCode,
+          item_count: itemCount,
+          unresolved_count: failure.unresolvedCount,
+        },
+        request
+      ),
   });
 
   return failure;

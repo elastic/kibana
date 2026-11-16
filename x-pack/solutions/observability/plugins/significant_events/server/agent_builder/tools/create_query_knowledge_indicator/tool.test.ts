@@ -288,7 +288,8 @@ describe('ki_query_create tool', () => {
 
     expect(queryClient.upsertQuery).not.toHaveBeenCalled();
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
-      expect.objectContaining({ ki_kind: 'query', success: false })
+      expect.objectContaining({ ki_kind: 'query', success: false }),
+      expect.anything()
     );
   });
 });

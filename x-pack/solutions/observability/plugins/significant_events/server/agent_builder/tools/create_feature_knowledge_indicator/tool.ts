@@ -127,15 +127,18 @@ export function createFeatureKnowledgeIndicatorTool({
           logger,
           description: 'ki_feature_create telemetry',
           track: () =>
-            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-              workflow_execution_id: workflowExecutionId,
-              ki_kind: 'feature',
-              tool_id: 'ki_feature_create',
-              success: true,
-              source_id: source.id,
-              space_id: request.spaceId,
-              knowledge_indicator_id: id,
-            }),
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ki_kind: 'feature',
+                tool_id: 'ki_feature_create',
+                success: true,
+                source_id: source.id,
+                space_id: request.spaceId,
+                knowledge_indicator_id: id,
+              },
+              request
+            ),
         });
 
         return {
@@ -168,15 +171,18 @@ export function createFeatureKnowledgeIndicatorTool({
           logger,
           description: 'failed ki_feature_create telemetry',
           track: () =>
-            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-              workflow_execution_id: workflowExecutionId,
-              ki_kind: 'feature',
-              tool_id: 'ki_feature_create',
-              success: false,
-              source_id: sourceId,
-              space_id: request.spaceId,
-              error_message: toTelemetryErrorMessage(failure, message),
-            }),
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ki_kind: 'feature',
+                tool_id: 'ki_feature_create',
+                success: false,
+                source_id: sourceId,
+                space_id: request.spaceId,
+                error_message: toTelemetryErrorMessage(failure, message),
+              },
+              request
+            ),
         });
 
         return {

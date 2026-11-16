@@ -138,7 +138,8 @@ describe('createKiIdentificationStartTool', () => {
     expect(managementApi.runWorkflow).not.toHaveBeenCalled();
     expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledTimes(1);
     expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, error_message: 'unknown_source' })
+      expect.objectContaining({ success: false, error_message: 'unknown_source' }),
+      expect.anything()
     );
     expect(result).toMatchObject({
       results: [
@@ -164,7 +165,8 @@ describe('createKiIdentificationStartTool', () => {
 
     expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledTimes(1);
     expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, error_message: 'version conflict' })
+      expect.objectContaining({ success: false, error_message: 'version conflict' }),
+      expect.anything()
     );
   });
 

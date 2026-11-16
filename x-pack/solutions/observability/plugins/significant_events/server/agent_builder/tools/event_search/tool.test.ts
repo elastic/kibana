@@ -153,16 +153,19 @@ describe('event_search tool', () => {
         ],
       })
     );
-    expect(telemetry.trackAgentToolEventSearch).toHaveBeenCalledWith({
-      workflow_execution_id: 'workflow-run-1',
-      success: true,
-      result_count: 1,
-      has_query: false,
-      has_source_filter: true,
-      status_filter: 'active',
-      view: 'compact',
-      page: 1,
-    });
+    expect(telemetry.trackAgentToolEventSearch).toHaveBeenCalledWith(
+      {
+        workflow_execution_id: 'workflow-run-1',
+        success: true,
+        result_count: 1,
+        has_query: false,
+        has_source_filter: true,
+        status_filter: 'active',
+        view: 'compact',
+        page: 1,
+      },
+      expect.anything()
+    );
     expect(searchEventsToolHandler).toHaveBeenCalledWith(
       expect.objectContaining({
         params: expect.objectContaining({
@@ -296,10 +299,12 @@ describe('event_search tool', () => {
         input_rejected: true,
         agent_id: FEATURE_IDENTIFICATION_AGENT_ID,
         unresolved_count: 1,
-      })
+      }),
+      expect.anything()
     );
     expect(telemetry.trackAgentToolEventSearch).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, error_message: 'unknown_source' })
+      expect.objectContaining({ success: false, error_message: 'unknown_source' }),
+      expect.anything()
     );
     expect(JSON.stringify(telemetry.trackAgentToolEventSearch.mock.calls)).not.toContain(
       'motel-ingest-collector'

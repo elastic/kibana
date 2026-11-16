@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
-import { MAX_RUN_LIMIT } from '@kbn/nightshift-shared';
+import { MAX_RUN_LIMIT, MIN_RUN_LIMIT } from '@kbn/nightshift-shared';
 import type {
   InvestigationQuotaGroup,
   InvestigationQuotaSettings,
@@ -33,9 +33,8 @@ export interface NightshiftInvestigationQuotaLedgerAttributes {
   count: number;
 }
 
-// `null` is an unlimited limit. A limit of 0 is not valid: it would deny every start.
 const limitSchema = schema.nullable(
-  schema.number({ min: 1, max: MAX_RUN_LIMIT, validate: validateInteger })
+  schema.number({ min: MIN_RUN_LIMIT, max: MAX_RUN_LIMIT, validate: validateInteger })
 );
 
 export const nightshiftInvestigationQuotaSettingsAttributesSchemaV1 = schema.object({

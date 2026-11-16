@@ -141,16 +141,19 @@ export function createEventTool({
           logger,
           description: 'event_create telemetry',
           track: () =>
-            telemetry.trackAgentToolEventCreate({
-              workflow_execution_id: workflowExecutionId,
-              ...alertCreationAttemptIdentity({
-                spaceId: request.spaceId,
-                eventId: data.event_id,
-                groupHash: data.group_hash,
-              }),
-              success: true,
-              source_ids: sourceIds,
-            }),
+            telemetry.trackAgentToolEventCreate(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ...alertCreationAttemptIdentity({
+                  spaceId: request.spaceId,
+                  eventId: data.event_id,
+                  groupHash: data.group_hash,
+                }),
+                success: true,
+                source_ids: sourceIds,
+              },
+              request
+            ),
         });
 
         return {
@@ -184,13 +187,16 @@ export function createEventTool({
           logger,
           description: 'failed event_create telemetry',
           track: () =>
-            telemetry.trackAgentToolEventCreate({
-              workflow_execution_id: workflowExecutionId,
-              ...alertCreationAttemptIdentity({ spaceId: request.spaceId }),
-              success: false,
-              source_ids: sourceIds,
-              error_message: toTelemetryErrorMessage(failure, rawMessage),
-            }),
+            telemetry.trackAgentToolEventCreate(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ...alertCreationAttemptIdentity({ spaceId: request.spaceId }),
+                success: false,
+                source_ids: sourceIds,
+                error_message: toTelemetryErrorMessage(failure, rawMessage),
+              },
+              request
+            ),
         });
         return {
           results: [
