@@ -47288,7 +47288,6 @@
     "xpack.nightshift.automations.timeRange.last90Days": "过去 90 天",
     "xpack.nightshift.automations.timeRange.today": "今天",
     "xpack.nightshift.automations.timeRange.yesterday": "昨天",
-    "xpack.nightshift.automations.toggleLabel": "{action} {name}",
     "xpack.nightshift.automations.triggerFilter": "触发",
     "xpack.nightshift.automations.updateError": "更新自动化失败",
     "xpack.nightshift.automations.updateSuccess": "自动化已更新",

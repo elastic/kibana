@@ -47189,7 +47189,6 @@
     "xpack.nightshift.automations.timeRange.last90Days": "Letzte 90 Tage",
     "xpack.nightshift.automations.timeRange.today": "Heute",
     "xpack.nightshift.automations.timeRange.yesterday": "Gestern",
-    "xpack.nightshift.automations.toggleLabel": "{action} {name}",
     "xpack.nightshift.automations.triggerFilter": "Trigger",
     "xpack.nightshift.automations.updateError": "Automatisierung konnte nicht aktualisiert werden",
     "xpack.nightshift.automations.updateSuccess": "Automatisierung aktualisiert",
