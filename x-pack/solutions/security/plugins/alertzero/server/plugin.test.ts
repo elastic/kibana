@@ -347,6 +347,49 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(registerAgentType).toHaveBeenCalled();
     });
 
+    const setupEnabled = (plugin: AlertZeroPlugin) =>
+      plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: {
+            registerManagedWorkflowOwner: jest.fn(),
+            registerStepDefinition: jest.fn(),
+          },
+          workflowsManagement: { management: {} },
+          proposals: {},
+          agenticInvestigations: {},
+          agentBuilder: {
+            skills: { register: jest.fn() },
+            tools: { register: jest.fn() },
+            attachments: { registerType: jest.fn() },
+            conversationTemplates: { register: jest.fn() },
+            conversations: { enableUpdatedTrigger: jest.fn() },
+          },
+        } as never
+      );
+
+    const routeDependencies = () => jest.mocked(registerRoutes).mock.calls[0][0];
+
+    it('hands routes a cluster-client getter that throws before start', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      setupEnabled(plugin);
+
+      expect(() => routeDependencies().getClusterClient()).toThrow(
+        'CoreStart is not available until the AlertZero plugin has started'
+      );
+    });
+
+    it('hands routes a cluster-client getter that returns the core start client after start', async () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      setupEnabled(plugin);
+      const coreStart = coreMock.createStart();
+
+      await plugin.start(coreStart, {} as never);
+
+      expect(routeDependencies().getClusterClient()).toBe(coreStart.elasticsearch.client);
+    });
+
     it('grants no agentic investigations or escalations API privileges with the feature', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const features = { registerKibanaFeature: jest.fn() };

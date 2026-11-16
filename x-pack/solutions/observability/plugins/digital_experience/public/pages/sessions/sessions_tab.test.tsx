@@ -42,22 +42,6 @@ const LIST_ENDPOINT = 'GET /internal/digital_experience/applications/{serviceNam
 
 const status = (overrides: Partial<SessionsStatus> = {}): SessionsStatus => ({
   installed: true,
-  health: 'healthy',
-  state: 'started',
-  installedVersion: 1,
-  currentVersion: 1,
-  needsUpdate: false,
-  autoUpdate: false,
-  apiKeyInvalid: false,
-  rebuilding: false,
-  reason: null,
-  lagSeconds: 30,
-  configured: { frequency: '1m', partitions: 1 },
-  installedPartitions: 1,
-  enabledBy: null,
-  enabledAt: null,
-  authorization: null,
-  transforms: [],
   ...overrides,
 });
 
@@ -87,7 +71,6 @@ const listResponse = (overrides: Partial<SessionListResponse> = {}): SessionList
   total: 1,
   page: 0,
   perPage: 25,
-  failedSummaries: 0,
   facets: {
     browsers: [{ key: 'Chrome', count: 8 }],
     os: [{ key: 'macOS', count: 5 }],
@@ -180,7 +163,7 @@ beforeEach(() => {
 describe('SessionsTab', () => {
   describe('when sessions are not set up', () => {
     it('lets a user with the Manage sessions privilege set them up, then lists the sessions', async () => {
-      respondWith({ sessionsStatus: status({ installed: false, health: 'missing' }) });
+      respondWith({ sessionsStatus: status({ installed: false }) });
       renderTab();
 
       fireEvent.click(await screen.findByTestId('digitalExperienceSessionsEnable'));
@@ -193,24 +176,24 @@ describe('SessionsTab', () => {
     });
 
     it('shows why setting them up failed', async () => {
-      respondWith({ sessionsStatus: status({ installed: false, health: 'missing' }) });
+      respondWith({ sessionsStatus: status({ installed: false }) });
       mockFetch.mockImplementation(async (endpoint: string) => {
         if (endpoint === ENABLE_ENDPOINT) {
-          throw new Error('Missing the manage_transform cluster privilege');
+          throw new Error('Missing the manage_index_templates cluster privilege');
         }
-        return status({ installed: false, health: 'missing' });
+        return status({ installed: false });
       });
       renderTab();
 
       fireEvent.click(await screen.findByTestId('digitalExperienceSessionsEnable'));
 
       expect(await screen.findByTestId('digitalExperienceSessionsEnableError')).toHaveTextContent(
-        'Missing the manage_transform cluster privilege'
+        'Missing the manage_index_templates cluster privilege'
       );
     });
 
     it('tells other users to ask an administrator, without a button', async () => {
-      respondWith({ sessionsStatus: status({ installed: false, health: 'missing' }) });
+      respondWith({ sessionsStatus: status({ installed: false }) });
       renderTab({ manageSessions: false });
 
       expect(await screen.findByTestId('digitalExperienceSessionsNotEnabled')).toHaveTextContent(
@@ -219,175 +202,6 @@ describe('SessionsTab', () => {
       expect(screen.queryByTestId('digitalExperienceSessionsEnable')).not.toBeInTheDocument();
       expect(listRequests()).toHaveLength(0);
     });
-  });
-
-  it('flags sessions that need an update above the list', async () => {
-    respondWith({ sessionsStatus: status({ needsUpdate: true, health: 'outdated' }) });
-    renderTab();
-
-    expect(await screen.findByTestId('digitalExperienceSessionsNeedUpdate')).toBeInTheDocument();
-    expect(screen.getByTestId('digitalExperienceSessionsUpdate')).toBeInTheDocument();
-    expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
-  });
-
-  it('says an update applies by itself when sessions run with a stored API key', async () => {
-    respondWith({
-      sessionsStatus: status({ needsUpdate: true, autoUpdate: true, health: 'outdated' }),
-    });
-    renderTab();
-
-    expect(await screen.findByTestId('digitalExperienceSessionsUpdating')).toHaveTextContent(
-      'They update automatically within a few minutes'
-    );
-    expect(screen.queryByTestId('digitalExperienceSessionsNeedUpdate')).not.toBeInTheDocument();
-  });
-
-  it('keeps the Update button for a pending update when granting a new key by itself fails', async () => {
-    respondWith({
-      sessionsStatus: status({ needsUpdate: true, apiKeyInvalid: true, health: 'outdated' }),
-    });
-    const respond = mockFetch.getMockImplementation();
-    mockFetch.mockImplementation(async (endpoint: string, ...rest: unknown[]) => {
-      if (endpoint === ENABLE_ENDPOINT) {
-        throw new Error('Could not enable sessions.');
-      }
-      return respond?.(endpoint, ...rest);
-    });
-    renderTab();
-
-    expect(await screen.findByTestId('digitalExperienceSessionsEnableError')).toHaveTextContent(
-      'Could not enable sessions.'
-    );
-    expect(screen.getByTestId('digitalExperienceSessionsNeedUpdate')).toHaveTextContent(
-      'new sessions may be missing or incomplete until they are updated'
-    );
-    expect(screen.getByTestId('digitalExperienceSessionsUpdate')).toBeInTheDocument();
-    // Once per visit: the failure doesn't retry in a loop.
-    expect(mockFetch.mock.calls.filter(([endpoint]) => endpoint === ENABLE_ENDPOINT)).toHaveLength(
-      1
-    );
-  });
-
-  it('quietly grants a new API key when a manager visits after the key was deleted', async () => {
-    respondWith({ sessionsStatus: status({ apiKeyInvalid: true }) });
-    renderTab();
-
-    await waitFor(() =>
-      expect(
-        mockFetch.mock.calls.filter(([endpoint]) => endpoint === ENABLE_ENDPOINT)
-      ).toHaveLength(1)
-    );
-    // Sessions keep updating with a deleted key, so there is nothing to warn about.
-    expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
-    expect(screen.queryByTestId('digitalExperienceSessionsNeedUpdate')).not.toBeInTheDocument();
-  });
-
-  it('never grants a key for users who cannot set sessions up', async () => {
-    respondWith({ sessionsStatus: status({ apiKeyInvalid: true }) });
-    renderTab({ manageSessions: false });
-
-    expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
-    expect(mockFetch.mock.calls.some(([endpoint]) => endpoint === ENABLE_ENDPOINT)).toBe(false);
-  });
-
-  it('warns when sessions were set up by a newer Kibana, which this one cannot update', async () => {
-    respondWith({
-      sessionsStatus: status({
-        installedVersion: 2,
-        currentVersion: 1,
-        reason: 'Sessions transforms are from version 2; upgrade Kibana to manage them.',
-      }),
-    });
-    renderTab();
-
-    expect(await screen.findByTestId('digitalExperienceSessionsNewerVersion')).toHaveTextContent(
-      'upgrade Kibana to manage them'
-    );
-    expect(screen.queryByTestId('digitalExperienceSessionsUpdate')).not.toBeInTheDocument();
-  });
-
-  it('warns about a failing transform before saying an update applies by itself', async () => {
-    respondWith({
-      sessionsStatus: status({
-        needsUpdate: true,
-        autoUpdate: true,
-        health: 'degraded',
-        reason: 'Transform failed: out of memory',
-      }),
-    });
-    renderTab();
-
-    expect(await screen.findByTestId('digitalExperienceSessionsDegraded')).toHaveTextContent(
-      'Transform failed: out of memory'
-    );
-    expect(screen.queryByTestId('digitalExperienceSessionsUpdating')).not.toBeInTheDocument();
-  });
-
-  it('shows why granting a new key by itself failed, even with nothing else to report', async () => {
-    respondWith({ sessionsStatus: status({ apiKeyInvalid: true }) });
-    const respond = mockFetch.getMockImplementation();
-    mockFetch.mockImplementation(async (endpoint: string, ...rest: unknown[]) => {
-      if (endpoint === ENABLE_ENDPOINT) {
-        // As Kibana's HTTP client fails: the status text as the message, the route's in the body.
-        throw Object.assign(new Error('Forbidden'), {
-          body: { statusCode: 403, message: 'Missing privileges: cluster:manage_transform' },
-        });
-      }
-      return respond?.(endpoint, ...rest);
-    });
-    renderTab();
-
-    expect(await screen.findByTestId('digitalExperienceSessionsEnableError')).toHaveTextContent(
-      'Missing privileges: cluster:manage_transform'
-    );
-  });
-
-  it('checks the status again while sessions rebuild, without hiding the list', async () => {
-    const setIntervalSpy = jest.spyOn(window, 'setInterval');
-    respondWith({ sessionsStatus: status({ rebuilding: true }) });
-    renderTab();
-    expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
-    const statusFetches = () =>
-      mockFetch.mock.calls.filter(([endpoint]) => endpoint === STATUS_ENDPOINT).length;
-    const [poll] = setIntervalSpy.mock.calls.find(([, delay]) => delay === 30_000) ?? [];
-    expect(poll).toBeDefined();
-
-    respondWith({ sessionsStatus: status({ rebuilding: false }) });
-    await act(async () => (poll as () => void)());
-
-    await waitFor(() => expect(statusFetches()).toBe(2));
-    expect(screen.getByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
-    setIntervalSpy.mockRestore();
-  });
-
-  it('lists the sessions again once an automatic update finishes, even if its rebuild went unseen', async () => {
-    const setIntervalSpy = jest.spyOn(window, 'setInterval');
-    respondWith({ sessionsStatus: status({ needsUpdate: true, autoUpdate: true }) });
-    renderTab();
-    expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
-    const listFetches = () =>
-      mockFetch.mock.calls.filter(([endpoint]) => endpoint === LIST_ENDPOINT).length;
-    const fetchedBefore = listFetches();
-    const [poll] = setIntervalSpy.mock.calls.find(([, delay]) => delay === 30_000) ?? [];
-    expect(poll).toBeDefined();
-
-    // The update and its first checkpoint both finished since the last check.
-    respondWith({ sessionsStatus: status() });
-    await act(async () => (poll as () => void)());
-
-    await waitFor(() => expect(listFetches()).toBe(fetchedBefore + 1));
-    setIntervalSpy.mockRestore();
-  });
-
-  it('shows a failing transform with its reason', async () => {
-    respondWith({
-      sessionsStatus: status({ health: 'degraded', reason: 'Transform failed: out of memory' }),
-    });
-    renderTab();
-
-    expect(await screen.findByTestId('digitalExperienceSessionsDegraded')).toHaveTextContent(
-      'Transform failed: out of memory'
-    );
   });
 
   it('retries a failed status check', async () => {
@@ -651,19 +465,6 @@ describe('SessionsTab', () => {
     );
   });
 
-  it('says sessions are being built instead of showing none', async () => {
-    respondWith({
-      sessionsStatus: status({ rebuilding: true }),
-      list: listResponse({ sessions: [], total: 0 }),
-    });
-    renderTab();
-
-    expect(await screen.findByTestId('digitalExperienceSessionsRebuilding')).toHaveTextContent(
-      'Sessions are being built from up to 30 days of data'
-    );
-    expect(screen.queryByTestId('digitalExperienceSessionsEmpty')).not.toBeInTheDocument();
-  });
-
   it('offers to clear the filters when none match', async () => {
     respondWith({ list: listResponse({ sessions: [], total: 0 }) });
     const history = renderTab({ search: '&os=Linux' });
@@ -671,24 +472,6 @@ describe('SessionsTab', () => {
     fireEvent.click(await screen.findByTestId('digitalExperienceSessionsNoMatchesClear'));
 
     expect(searchParams(history).os).toBeUndefined();
-  });
-
-  it('flags sessions that could not be summarized', async () => {
-    respondWith({ list: listResponse({ failedSummaries: 3 }) });
-    renderTab();
-
-    expect(await screen.findByTestId('digitalExperienceSessionsFailedSummaries')).toHaveTextContent(
-      '3 sessions in this time range could not be summarized'
-    );
-  });
-
-  it('says sessions that could not be summarized cannot be checked for errors', async () => {
-    respondWith({ list: listResponse({ failedSummaries: 2 }) });
-    renderTab({ search: '&hasErrors=true' });
-
-    expect(await screen.findByTestId('digitalExperienceSessionsFailedSummaries')).toHaveTextContent(
-      'whether they had errors is unknown'
-    );
   });
 
   it('shows a failed list with a retry', async () => {

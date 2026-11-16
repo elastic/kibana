@@ -20,6 +20,7 @@ import { assertSignificantEventsAccess } from '../../../routes/utils/assert_sign
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { getSourceWriteConflictMetadata } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import {
   loadSourceCatalog,
   resolveSourcesBySlugOrId,
@@ -96,6 +97,7 @@ export function createFeatureKnowledgeIndicatorTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async ({ slug, expires_at, ...featureInput }, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       let sourceId = '';
       try {
         const scopedClients = await getScopedClients({
@@ -124,14 +126,18 @@ export function createFeatureKnowledgeIndicatorTool({
           logger,
           description: 'ki_feature_create telemetry',
           track: () =>
-            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-              ki_kind: 'feature',
-              tool_id: 'ki_feature_create',
-              success: true,
-              source_id: source.id,
-              space_id: request.spaceId,
-              knowledge_indicator_id: id,
-            }),
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ki_kind: 'feature',
+                tool_id: 'ki_feature_create',
+                success: true,
+                source_id: source.id,
+                space_id: request.spaceId,
+                knowledge_indicator_id: id,
+              },
+              request
+            ),
         });
 
         return {
@@ -161,15 +167,19 @@ export function createFeatureKnowledgeIndicatorTool({
           logger,
           description: 'failed ki_feature_create telemetry',
           track: () =>
-            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-              ki_kind: 'feature',
-              tool_id: 'ki_feature_create',
-              success: false,
-              source_id: sourceId,
-              space_id: request.spaceId,
-              knowledge_indicator_id: featureInput.id,
-              error_message: message,
-            }),
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ki_kind: 'feature',
+                tool_id: 'ki_feature_create',
+                success: false,
+                source_id: sourceId,
+                space_id: request.spaceId,
+                knowledge_indicator_id: featureInput.id,
+                error_message: message,
+              },
+              request
+            ),
         });
 
         return {
