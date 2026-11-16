@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { context, propagation } from '@opentelemetry/api';
+import { SpanStatusCode, context, propagation, trace } from '@opentelemetry/api';
+import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
 import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from '@kbn/inference-tracing';
-import { withEvalsEvaluatorSpan, withEvalsTaskSpan } from './tracing';
+import { withEvalsEvaluatorSpan, withEvalsJudgeChildSpan, withEvalsTaskSpan } from './tracing';
 
 describe('withEvalsTaskSpan', () => {
   let contextManager: AsyncHooksContextManager;
@@ -86,5 +87,61 @@ describe('withEvalsEvaluatorSpan', () => {
         throw new Error('judge failed');
       })
     ).rejects.toThrow('judge failed');
+  });
+});
+
+describe('withEvalsJudgeChildSpan', () => {
+  // `evalsTracer` binds to the first global provider it sees, so one provider serves every test.
+  const exporter = new tracing.InMemorySpanExporter();
+  let contextManager: AsyncHooksContextManager;
+
+  beforeAll(() => {
+    trace.setGlobalTracerProvider(
+      new tracing.BasicTracerProvider({
+        spanProcessors: [new tracing.SimpleSpanProcessor(exporter)],
+      })
+    );
+  });
+
+  beforeEach(() => {
+    exporter.reset();
+    contextManager = new AsyncHooksContextManager();
+    contextManager.enable();
+    context.setGlobalContextManager(contextManager);
+  });
+
+  afterEach(() => {
+    context.disable();
+  });
+
+  afterAll(() => {
+    trace.disable();
+  });
+
+  it('names the span after the judge and nests it under the active span', async () => {
+    const tracer = trace.getTracer('test');
+
+    await tracer.startActiveSpan('parent', async (parent) => {
+      await withEvalsJudgeChildSpan('conclusion_quality', async () => 'graded');
+      parent.end();
+    });
+
+    const spans = exporter.getFinishedSpans();
+    const parent = spans.find(({ name }) => name === 'parent');
+    const judge = spans.find(({ name }) => name === 'judge · conclusion_quality');
+    expect(judge?.attributes['evaluator.name']).toBe('conclusion_quality');
+    expect(judge?.spanContext().traceId).toBe(parent?.spanContext().traceId);
+    expect(judge?.parentSpanContext?.spanId).toBe(parent?.spanContext().spanId);
+  });
+
+  it('records the error and rethrows', async () => {
+    await expect(
+      withEvalsJudgeChildSpan('conclusion_quality', async () => {
+        throw new Error('judge failed');
+      })
+    ).rejects.toThrow('judge failed');
+
+    const [judge] = exporter.getFinishedSpans();
+    expect(judge.status.code).toBe(SpanStatusCode.ERROR);
   });
 });

@@ -114,3 +114,29 @@ export const withEvalsEvaluatorSpan = <T>(
     { 'evaluator.name': evaluatorName },
     run
   );
+
+/**
+ * Runs an LLM-as-a-judge evaluator inside a `judge · <evaluator>` span that is a child of the
+ * active span, so the model's `chat <model>` span nests under a named judge in whatever trace
+ * the caller is already building (for example the online-eval scoring span). Unlike
+ * {@link withEvalsEvaluatorSpan}, it does not start a new trace.
+ */
+export const withEvalsJudgeChildSpan = <T>(
+  evaluatorName: string,
+  run: () => Promise<T>
+): Promise<T> =>
+  evalsTracer.startActiveSpan(
+    `${JUDGE_SPAN_NAME_PREFIX}${evaluatorName}`,
+    { attributes: { 'instrumentationScope.name': '@kbn/evals', 'evaluator.name': evaluatorName } },
+    async (span: Span) => {
+      try {
+        return await run();
+      } catch (error) {
+        span.recordException(error as Error);
+        span.setStatus({ code: SpanStatusCode.ERROR });
+        throw error;
+      } finally {
+        span.end();
+      }
+    }
+  );
