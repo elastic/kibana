@@ -51,8 +51,10 @@ export class EuiContextMenuTestHarness {
 
   public async clickMenuItemAndWaitForClose(label: string | RegExp) {
     this.clickMenuItem(label);
+    // EuiPopoverPanel drops `data-popover-open` as soon as the close is committed, but keeps the
+    // panel mounted until its closing transition ends. Wait on the committed state, not the unmount.
     await waitFor(() => {
-      if (document.body.contains(this.#panelEl)) {
+      if (this.#panelEl.hasAttribute('data-popover-open')) {
         throw new Error('Expected context menu popover panel to close');
       }
     });
