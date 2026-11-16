@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-// Profiles mirror the Elasticsearch `_boost` API responses.
+export type BoostProfileType = 'indices' | 'data_streams';
 
+/** An index or data stream that a boost rule matches. */
+export interface BoostRuleMatch {
+  name: string;
+  isHidden: boolean;
+  /** Name of the higher-ranked rule that applies to this match instead. */
+  outrankedByRuleName?: string;
+
+// Profiles mirror the Elasticsearch `_boost` API responses.
 export interface BoostPeriod {
   min_boost: number;
   max_boost: number;
