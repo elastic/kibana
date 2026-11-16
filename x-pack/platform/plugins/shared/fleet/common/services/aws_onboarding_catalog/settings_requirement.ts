@@ -27,18 +27,31 @@ const CREDENTIAL_VAR_NAMES = new Set<CredentialVarName>([
 ]);
 
 const BULLET = /^\s*[-*+]\s+\S/;
-const NOTE_WORD = /\bnotes?\b/i;
+/** A "Note"/"Notes" heading, or a line that is only "Note:" with optional emphasis markers. */
+const NOTE_ANCHOR =
+  /^\s*(?:#{1,6}\s+[*_]*notes?[*_]*\s*:?|[*_]{0,3}notes?[*_]{0,3}\s*:?[*_]{0,3})\s*$/i;
+/** How far below the anchor the list may start, counting the anchor's next line as 1. */
+const MAX_LINES_TO_LIST = 2;
 
 /**
- * The first markdown bullet list that follows a heading or paragraph containing "Note", as the
- * original lines. Tolerant: returns undefined when there is no such list.
+ * The bullet list directly under a "Note"/"Notes" heading or "Note:" line, as the original lines.
+ * The list must start within two lines of the anchor; otherwise returns undefined.
  */
 export const extractReadmeNotes = (markdown: string): string | undefined => {
   const lines = markdown.split(/\r?\n/);
-  const noteLine = lines.findIndex((line) => NOTE_WORD.test(line) && !BULLET.test(line));
-  if (noteLine === -1) return undefined;
-
-  const start = lines.findIndex((line, index) => index > noteLine && BULLET.test(line));
+  let start = -1;
+  lines.some((line, anchor) => {
+    if (!NOTE_ANCHOR.test(line)) return false;
+    for (let offset = 1; offset <= MAX_LINES_TO_LIST; offset++) {
+      const candidate = lines[anchor + offset] ?? '';
+      if (BULLET.test(candidate)) {
+        start = anchor + offset;
+        return true;
+      }
+      if (candidate.trim() !== '') return false;
+    }
+    return false;
+  });
   if (start === -1) return undefined;
 
   const bullets: string[] = [];

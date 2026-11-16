@@ -6,6 +6,7 @@
  */
 
 import type { PackageInfo, RegistryVarsEntry } from '../../types';
+import { awsOnboardingSettingsRequirementSchema } from '../../workflows/steps/settings';
 
 import type { AwsServiceMatrixEntry, DataStreamInfo } from './aws_service_matrix';
 import {
@@ -159,6 +160,12 @@ describe('buildSettingsRequirement', () => {
     expect(dataStream(build(), 'ec2', 'ec2_logs').default_input).toBe('aws-cloudwatch');
   });
 
+  it('produces a requirement that parses against the contract schema', () => {
+    expect(() =>
+      awsOnboardingSettingsRequirementSchema.parse(build({ guardduty: '- n' }))
+    ).not.toThrow();
+  });
+
   it('builds a toggle for a metrics data stream', () => {
     const stream = dataStream(build(), 'ec2', 'ec2_metrics');
 
@@ -231,6 +238,19 @@ describe('extractReadmeNotes', () => {
       ].join('\n')
     );
     expect(extractReadmeNotes('# Title\n\n- a bullet but no heading\n')).toBeUndefined();
+  });
+
+  it('ignores a loose "note" in prose even when a later list exists', () => {
+    const readme =
+      '# Title\n\nPlease note that this is an intro.\n\n## Setup\n\n- Step one\n- Step two\n';
+
+    expect(extractReadmeNotes(readme)).toBeUndefined();
+  });
+
+  it('reads the list two lines under a Notes heading', () => {
+    expect(
+      extractReadmeNotes('# Title\n\n## Notes\n\n- First\n- Second\n\n## Setup\n\n- Step\n')
+    ).toBe('- First\n- Second');
   });
 });
 
