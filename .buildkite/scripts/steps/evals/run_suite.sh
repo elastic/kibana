@@ -243,6 +243,10 @@ EOF
       # most suite/model combinations through without per-suite special-casing.
       timeout_in_minutes="${EVAL_STEP_TIMEOUT_IN_MINUTES:-${EVAL_SUITE_STEP_TIMEOUT:-120}}"
 
+      # The reason is free-form prose going into a double-quoted YAML scalar: escape
+      # backslashes and quotes, and flatten newlines, or the pipeline upload fails.
+      eval_pin_baseline_reason_yaml="$(printf '%s' "${EVAL_PIN_BASELINE_REASON:-}" | tr '\r\n' '  ' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')"
+
       fanout_step_keys=()
       fanout_connector_ids=()
       # Each matrix row is one step, a JSON object { connectorId, shardId, specFiles }. shardId is ""
@@ -297,7 +301,7 @@ EOF
           EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
           EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
           EVAL_PIN_BASELINE: "${EVAL_PIN_BASELINE:-}"
-          EVAL_PIN_BASELINE_REASON: "${EVAL_PIN_BASELINE_REASON:-}"
+          EVAL_PIN_BASELINE_REASON: "${eval_pin_baseline_reason_yaml}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
@@ -724,6 +728,13 @@ pin_baseline() {
   fi
   if [[ -z "${EVAL_PROJECT:-}" ]]; then
     echo "EVAL_PIN_BASELINE=1 requires a per-connector step (EVAL_PROJECT); skipping pin."
+    return 0
+  fi
+  # Shards of one suite/model share a composite execution ID but run as independent
+  # steps, so a per-shard pin could publish a partial execution as the baseline (and a
+  # successful shard would pin even when a sibling shard failed).
+  if [[ -n "${EVAL_SHARD_ID:-}" ]]; then
+    echo "Baseline pinning is not supported for sharded suites; skipping pin for shard ${EVAL_SHARD_ID}."
     return 0
   fi
 

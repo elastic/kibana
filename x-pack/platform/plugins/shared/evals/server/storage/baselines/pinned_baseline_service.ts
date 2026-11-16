@@ -114,17 +114,31 @@ export class PinnedBaselineService {
     }));
 
     const client = await this.getClient();
+    // Bulk writes are not atomic, and `findLatest` selects whatever pointer exists: write
+    // the snapshot first and publish the pointer only once every score landed, so a
+    // partially-written pin never becomes the active baseline.
+    if (scoreDocuments.length > 0) {
+      await this.createDocuments(client, scoreDocuments, pointer.baseline_id);
+    }
+    await this.createDocuments(client, [pointerDocument], pointer.baseline_id);
+
+    return pointerToResponse(pointerDocument);
+  }
+
+  private async createDocuments<T extends { _id: string }>(
+    client: AnyIDataStreamClient,
+    documents: T[],
+    baselineId: string
+  ): Promise<void> {
     const response = await client.create({
-      documents: [pointerDocument, ...scoreDocuments],
+      documents,
       refresh: 'wait_for',
     });
 
     const conflicted = response.items.filter((item) => item.create?.status === 409).length;
     if (conflicted > 0) {
       // Already written by a retried pin with the same deterministic IDs.
-      this.logger.warn(
-        `${conflicted} baseline document(s) for ${pointer.baseline_id} already existed`
-      );
+      this.logger.warn(`${conflicted} baseline document(s) for ${baselineId} already existed`);
     }
     const failures = response.items.filter((item) => {
       const status = item.create?.status;
@@ -135,8 +149,6 @@ export class PinnedBaselineService {
         failures[0].create?.error?.reason ?? failures[0].create?.error?.type ?? 'unknown';
       throw new Error(`Failed to write ${failures.length} baseline document(s): ${reason}`);
     }
-
-    return pointerToResponse(pointerDocument);
   }
 
   async findLatest({

@@ -19,6 +19,10 @@ FANOUT_PIPELINE_FILE="$(mktemp -t kbn-evals-on-demand.XXXXXX.yml)"
 trap 'rm -f "$FANOUT_PIPELINE_FILE"' EXIT
 echo "steps:" >"$FANOUT_PIPELINE_FILE"
 
+# The reason is free-form prose going into a double-quoted YAML scalar: escape
+# backslashes and quotes, and flatten newlines, or the pipeline upload fails.
+eval_pin_baseline_reason_yaml="$(printf '%s' "${EVAL_PIN_BASELINE_REASON:-}" | tr '\r\n' '  ' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')"
+
 IFS=',' read -r -a requested_suites <<<"$EVAL_SUITE_ID"
 seen_suites=" "
 suite_count=0
@@ -49,7 +53,7 @@ for raw_suite in "${requested_suites[@]}"; do
       EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
       EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
       EVAL_PIN_BASELINE: "${EVAL_PIN_BASELINE:-}"
-      EVAL_PIN_BASELINE_REASON: "${EVAL_PIN_BASELINE_REASON:-}"
+      EVAL_PIN_BASELINE_REASON: "${eval_pin_baseline_reason_yaml}"
       KIBANA_BUILD_ID: "${KIBANA_BUILD_ID:-}"
     timeout_in_minutes: ${EVAL_STEP_TIMEOUT_IN_MINUTES:-120}
     agents:

@@ -21,7 +21,7 @@ export const pinBaselineCmd: Command<void> = {
   Pin an evaluation execution as the regression baseline for its suite and task model.
 
   The execution's scores are snapshotted into the pinned-baselines index on the
-  evaluations cluster (no retention), and the new pointer becomes the baseline that
+  evaluations cluster (365-day retention), and the new pointer becomes the baseline that
   "evals compare --baseline-pinned" resolves. Intended for the scheduled baseline
   pipeline; run it manually to bless a specific run after an intentional change.
 

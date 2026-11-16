@@ -72,6 +72,8 @@ export interface EvalSuiteMetadata {
   /**
    * When true, CI compares the suite's runs against the pinned baseline
    * (`evals compare --baseline-pinned`) instead of the latest run on main.
+   * Not supported together with `shards`: shards run as independent steps, so a
+   * per-shard pin could publish a partial execution as the baseline.
    */
   pinnedBaseline?: boolean;
   shards?: EvalSuiteShard[];

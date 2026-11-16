@@ -9,8 +9,7 @@ import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
-import { compareScores, pairScores } from '@kbn/evals-common';
-import type { EvaluationScoreDocument } from '@kbn/evals-common';
+import { compareScores, pairScores, resolveJudgeModelIds } from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
@@ -21,30 +20,6 @@ import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
 
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
-
-/**
- * The judge model a run's LLM evaluators scored with: the dominant
- * `evaluator.model.id` across LLM-kind scores. Mirrors the attribution the pin
- * route records on the baseline pointer.
- */
-const resolveJudgeModelId = (scores: EvaluationScoreDocument[]): string | undefined => {
-  const counts = new Map<string, number>();
-  for (const score of scores) {
-    const modelId = score.evaluator.kind === 'llm' ? score.evaluator.model?.id : undefined;
-    if (modelId) {
-      counts.set(modelId, (counts.get(modelId) ?? 0) + 1);
-    }
-  }
-  let winner: string | undefined;
-  let winnerCount = 0;
-  for (const [modelId, count] of counts) {
-    if (count > winnerCount) {
-      winner = modelId;
-      winnerCount = count;
-    }
-  }
-  return winner;
-};
 
 export const compareCmd: Command<void> = {
   name: 'compare',
@@ -195,11 +170,17 @@ export const compareCmd: Command<void> = {
 
       const pinned = await evalsClient.findLatestPinnedBaseline({ suiteId, taskModelId });
       if (!pinned) {
-        log.warning(
-          `No pinned baseline found for suite ${suiteId}${
-            taskModelId ? ` and model ${taskModelId}` : ''
-          }. Seed one with: node scripts/evals pin-baseline --suite ${suiteId} --execution-id <id>`
-        );
+        const message =
+          `No pinned baseline found for suite \`${suiteId}\`${
+            taskModelId ? ` and model \`${taskModelId}\`` : ''
+          }. ` +
+          `Seed one from a green run on main: \`node scripts/evals pin-baseline --suite ${suiteId} --execution-id <id>\``;
+        log.warning(message);
+        if (format === 'markdown' && outputPath) {
+          // The PR comment is built from this file; an empty file would mean no comment
+          // at all, hiding that the comparison was skipped.
+          Fs.appendFileSync(outputPath, `### ℹ️ No pinned baseline\n\n${message}\n\n`);
+        }
         return;
       }
 
@@ -332,14 +313,20 @@ export const compareCmd: Command<void> = {
     ]);
 
     // Scores from different judges are not comparable: refuse the comparison instead of
-    // gating on garbage. The dominant LLM-evaluator model identifies each side's judge.
+    // gating on garbage. The pin route rejects mixed-judge executions, so the baseline
+    // side is a single judge; the target side must be that same single judge.
     if (pinnedJudgeModelId) {
-      const targetJudgeModelId = resolveJudgeModelId(targetExperimentScores);
-      if (targetJudgeModelId && targetJudgeModelId !== pinnedJudgeModelId) {
+      const targetJudgeModelIds = resolveJudgeModelIds(targetExperimentScores);
+      const mismatch =
+        targetJudgeModelIds.length > 1 ||
+        (targetJudgeModelIds.length === 1 && targetJudgeModelIds[0] !== pinnedJudgeModelId);
+      if (mismatch) {
         const message =
           `Judge mismatch: the pinned baseline was scored by "${pinnedJudgeModelId}" but this run ` +
-          `was scored by "${targetJudgeModelId}". The comparison is invalid — re-run with the pinned ` +
-          `judge, or pin a new baseline under the new judge.`;
+          `was scored by "${targetJudgeModelIds.join(
+            '", "'
+          )}". The comparison is invalid — re-run ` +
+          `with the pinned judge, or pin a new baseline under the new judge.`;
         log.error(message);
         if (format === 'markdown' && outputPath) {
           Fs.appendFileSync(
@@ -407,15 +394,18 @@ export const compareCmd: Command<void> = {
 
     if (format === 'markdown') {
       const effectiveKibanaUrl = kibanaUrl ?? evaluationsKbnUrl;
-      const comparePageUrl = effectiveKibanaUrl
-        ? buildExecutionCompareUrl({
-            kibanaUrl: effectiveKibanaUrl,
-            spaceId: spaceIds?.[0],
-            baselineExecutionId: baselineExperimentId,
-            targetExecutionId: targetExperimentId,
-          })
-        : undefined;
-      if (effectiveKibanaUrl && !comparePageUrl) {
+      // The UI comparison page reads live scores only: a pinned baseline's execution may
+      // have aged out of the scores retention, so the link would 404. Omit it.
+      const comparePageUrl =
+        effectiveKibanaUrl && !pinnedBaselineId
+          ? buildExecutionCompareUrl({
+              kibanaUrl: effectiveKibanaUrl,
+              spaceId: spaceIds?.[0],
+              baselineExecutionId: baselineExperimentId,
+              targetExecutionId: targetExperimentId,
+            })
+          : undefined;
+      if (effectiveKibanaUrl && !pinnedBaselineId && !comparePageUrl) {
         log.warning('Invalid Kibana URL for compare page link.');
       }
 

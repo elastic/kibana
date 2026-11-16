@@ -67,7 +67,7 @@ export const EvaluationIndices = {
   DATASET_EXAMPLES: `${EVALUATION_INDEX_PREFIX}-dataset-examples`,
   EVALUATORS: `${EVALUATION_INDEX_PREFIX}-evaluators`,
   // Pinned regression baselines: score snapshots + pointer docs that must outlive the
-  // 90-day retention on the scores data stream (no retention configured).
+  // 90-day retention on the scores data stream (365-day retention on this stream).
   PINNED_BASELINES: `${EVALUATION_INDEX_PREFIX}-pinned-baselines`,
 } as const;
 

@@ -9,7 +9,7 @@ import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AnyIDataStreamClient } from '@kbn/data-streams';
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
-import { EvaluationIndices } from '@kbn/evals-common';
+import { EvaluationIndices, buildSpaceFilter } from '@kbn/evals-common';
 import { PinnedBaselineService } from './pinned_baseline_service';
 
 const createDataStreamsMock = () => {
@@ -73,7 +73,7 @@ const getPointer = () => ({
 });
 
 describe('PinnedBaselineService', () => {
-  it('pin writes one pointer and the snapshotted scores with deterministic ids', async () => {
+  it('pin writes the snapshotted scores first and publishes the pointer last', async () => {
     const logger = loggingSystemMock.createLogger();
     const { coreDataStreams, initializeClient, create } = createDataStreamsMock();
     const captured: Array<{ _id: string } & Record<string, unknown>> = [];
@@ -94,9 +94,12 @@ describe('PinnedBaselineService', () => {
     });
 
     expect(initializeClient).toHaveBeenCalledWith(EvaluationIndices.PINNED_BASELINES);
+    expect(create).toHaveBeenCalledTimes(2);
     expect(create).toHaveBeenCalledWith({ documents: expect.any(Array), refresh: 'wait_for' });
-    expect(captured.map(({ _id }) => _id)).toEqual(['baseline-1', 'baseline-1:score-doc-1']);
-    expect(captured[0]).toMatchObject({
+    // Scores land before the pointer: an interrupted pin must never leave a pointer
+    // referencing a partial snapshot.
+    expect(captured.map(({ _id }) => _id)).toEqual(['baseline-1:score-doc-1', 'baseline-1']);
+    expect(captured[1]).toMatchObject({
       doc_kind: 'pointer',
       space_ids: ['default'],
       baseline: {
@@ -110,7 +113,7 @@ describe('PinnedBaselineService', () => {
       },
       task: { model: { id: 'gpt-5' } },
     });
-    expect(captured[1]).toMatchObject({
+    expect(captured[0]).toMatchObject({
       doc_kind: 'score',
       baseline: { id: 'baseline-1' },
       evaluator: { name: 'correctness' },
@@ -128,10 +131,10 @@ describe('PinnedBaselineService', () => {
     const { coreDataStreams, create } = createDataStreamsMock();
     const service = new PinnedBaselineService(logger, coreDataStreams);
 
-    create.mockResolvedValueOnce({
+    create.mockImplementation(async ({ documents }: { documents: Array<{ _id: string }> }) => ({
       errors: false,
-      items: [{ create: { status: 409 } }, { create: { status: 409 } }],
-    });
+      items: documents.map(() => ({ create: { status: 409 } })),
+    }));
     await expect(
       service.pin({
         pointer: getPointer(),
@@ -140,6 +143,7 @@ describe('PinnedBaselineService', () => {
       })
     ).resolves.toMatchObject({ baseline_id: 'baseline-1' });
 
+    create.mockReset();
     create.mockResolvedValueOnce({
       errors: true,
       items: [{ create: { status: 400, error: { reason: 'mapping failure' } } }],
@@ -151,6 +155,31 @@ describe('PinnedBaselineService', () => {
         spaceIds: ['default'],
       })
     ).rejects.toThrow('mapping failure');
+  });
+
+  it('pin does not publish the pointer when a snapshot score write fails', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, create } = createDataStreamsMock();
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+
+    create.mockResolvedValueOnce({
+      errors: true,
+      items: [{ create: { status: 400, error: { reason: 'mapping failure' } } }],
+    });
+
+    await expect(
+      service.pin({
+        pointer: getPointer(),
+        scores: [{ id: 'score-doc-1', document: getScoreDocument() }],
+        spaceIds: ['default'],
+      })
+    ).rejects.toThrow('mapping failure');
+
+    expect(create).toHaveBeenCalledTimes(1);
+    const writtenIds = (
+      create.mock.calls[0][0] as { documents: Array<{ _id: string }> }
+    ).documents.map(({ _id }) => _id);
+    expect(writtenIds).toEqual(['baseline-1:score-doc-1']);
   });
 
   it('findLatest queries pointer docs by suite/model/space and maps the hit', async () => {
@@ -197,6 +226,8 @@ describe('PinnedBaselineService', () => {
         { term: { doc_kind: 'pointer' } },
         { term: { 'baseline.suite_id': 'suite-1' } },
         { term: { 'task.model.id': 'gpt-5' } },
+        // Space isolation: pointers from other Spaces must never be selected.
+        buildSpaceFilter('default'),
       ])
     );
     expect(searchRequest.sort).toEqual([{ 'baseline.pinned_at': { order: 'desc' } }]);
@@ -244,6 +275,8 @@ describe('PinnedBaselineService', () => {
       expect.arrayContaining([
         { term: { doc_kind: 'score' } },
         { term: { 'baseline.id': 'baseline-1' } },
+        // Space isolation: snapshot scores from other Spaces must never be returned.
+        buildSpaceFilter('default'),
       ])
     );
     expect(scores).toHaveLength(1);

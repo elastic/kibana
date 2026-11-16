@@ -13,6 +13,7 @@ import {
   buildExperimentFilterQuery,
   SCORES_SORT_ORDER,
   PinEvaluationBaselineRequestBody,
+  resolveJudgeModelIds,
 } from '@kbn/evals-common';
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -21,29 +22,7 @@ import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { UNBOUNDED_SCORE_FIELDS } from '../utils/score_source_fields';
 
-/**
- * The judge model the run's LLM evaluators scored with: the dominant
- * `evaluator.model.id` across LLM-kind scores (ties broken by count). A baseline is only
- * comparable to runs judged by the same model, so the pointer records it.
- */
-const resolveJudgeModelId = (scores: EvaluationScoreDocument[]): string | undefined => {
-  const counts = new Map<string, number>();
-  for (const score of scores) {
-    const modelId = score.evaluator.kind === 'llm' ? score.evaluator.model?.id : undefined;
-    if (modelId) {
-      counts.set(modelId, (counts.get(modelId) ?? 0) + 1);
-    }
-  }
-  let winner: string | undefined;
-  let winnerCount = 0;
-  for (const [modelId, count] of counts) {
-    if (count > winnerCount) {
-      winner = modelId;
-      winnerCount = count;
-    }
-  }
-  return winner;
-};
+export const MAX_PINNABLE_SCORES = 10000;
 
 export const registerPinBaselineRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
   router.versioned
@@ -82,12 +61,28 @@ export const registerPinBaselineRoute = ({ router, logger, getSpaceId }: RouteDe
               spaceId,
             }),
             sort: SCORES_SORT_ORDER,
-            size: 10000,
+            size: MAX_PINNABLE_SCORES,
+            track_total_hits: true,
             // The same fields the compare flow reads scores without; keeps the snapshot small.
             _source_excludes: UNBOUNDED_SCORE_FIELDS,
           });
 
           const hits = searchResponse.hits?.hits ?? [];
+
+          // A truncated snapshot would silently lose the overflow forever once the source
+          // scores age out of retention, so refuse to pin instead.
+          const rawTotal = searchResponse.hits?.total;
+          const totalScores = typeof rawTotal === 'number' ? rawTotal : rawTotal?.value;
+          if (totalScores != null && totalScores > hits.length) {
+            return response.badRequest({
+              body: {
+                message:
+                  `Execution "${executionId}" has ${totalScores} scores, more than the ` +
+                  `${MAX_PINNABLE_SCORES} a baseline snapshot can hold. Pin a run with fewer ` +
+                  `scores (e.g. fewer repetitions).`,
+              },
+            });
+          }
           const scores = hits.flatMap((hit) =>
             hit._id != null && hit._source != null
               ? [{ id: hit._id, document: hit._source as unknown as EvaluationScoreDocument }]
@@ -103,13 +98,27 @@ export const registerPinBaselineRoute = ({ router, logger, getSpaceId }: RouteDe
           }
 
           const scoreDocuments = scores.map(({ document }) => document);
+
+          // A baseline is only comparable to runs scored by one and the same judge, so a
+          // mixed-judge execution cannot serve as one.
+          const judgeModelIds = resolveJudgeModelIds(scoreDocuments);
+          if (judgeModelIds.length > 1) {
+            return response.badRequest({
+              body: {
+                message:
+                  `Execution "${executionId}" was scored by multiple judge models ` +
+                  `(${judgeModelIds.join(', ')}); a pinned baseline requires a single judge.`,
+              },
+            });
+          }
+
           const baseline = await evalsContext.pinnedBaselineService.pin({
             pointer: {
               baseline_id: randomUUID(),
               suite_id: suiteId,
               execution_id: executionId,
               task_model: scoreDocuments[0].task.model,
-              judge_model_id: resolveJudgeModelId(scoreDocuments) ?? null,
+              judge_model_id: judgeModelIds[0] ?? null,
               git_branch: scoreDocuments[0].metadata?.git?.branch ?? null,
               git_commit_sha: scoreDocuments[0].metadata?.git?.commit_sha ?? null,
               pinned_by: pinnedBy ?? null,

@@ -350,46 +350,30 @@ export class EvalsClient {
     suiteId: string;
     taskModelId?: string;
   }): Promise<PinnedBaseline | undefined> {
-    try {
-      const response = await this.kbnClient.request({
-        path: this.path(EVALS_BASELINES_LATEST_URL),
-        method: 'GET',
-        query: {
-          suite_id: suiteId,
-          ...(taskModelId && { model_id: taskModelId }),
-        },
-        headers: VERSIONED_HEADERS,
-      });
-      const { baseline } = GetLatestPinnedBaselineResponse.parse(getResponseData(response));
-      return baseline ?? undefined;
-    } catch (error: unknown) {
-      this.log.error(
-        `Failed to find pinned baseline for suite ${suiteId}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      return undefined;
-    }
+    // Errors (routes not deployed, auth, 5xx) must propagate: swallowing them would make
+    // a broken lookup indistinguishable from the genuine "nothing pinned yet" null.
+    const response = await this.kbnClient.request({
+      path: this.path(EVALS_BASELINES_LATEST_URL),
+      method: 'GET',
+      query: {
+        suite_id: suiteId,
+        ...(taskModelId && { model_id: taskModelId }),
+      },
+      headers: VERSIONED_HEADERS,
+    });
+    const { baseline } = GetLatestPinnedBaselineResponse.parse(getResponseData(response));
+    return baseline ?? undefined;
   }
 
   async getPinnedBaselineScores(baselineId: string): Promise<EvaluationScoreDocument[]> {
-    try {
-      const response = await this.kbnClient.request({
-        path: this.path(
-          EVALS_BASELINE_SCORES_URL.replace('{baselineId}', encodeURIComponent(baselineId))
-        ),
-        method: 'GET',
-        headers: VERSIONED_HEADERS,
-      });
-      return GetPinnedBaselineScoresResponse.parse(getResponseData(response)).scores;
-    } catch (error: unknown) {
-      this.log.error(
-        `Failed to retrieve scores for pinned baseline ${baselineId}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      return [];
-    }
+    const response = await this.kbnClient.request({
+      path: this.path(
+        EVALS_BASELINE_SCORES_URL.replace('{baselineId}', encodeURIComponent(baselineId))
+      ),
+      method: 'GET',
+      headers: VERSIONED_HEADERS,
+    });
+    return GetPinnedBaselineScoresResponse.parse(getResponseData(response)).scores;
   }
 
   /** Reads complete per-example score evidence from the run's home Space. */
