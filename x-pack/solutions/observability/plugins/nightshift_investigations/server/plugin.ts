@@ -440,11 +440,12 @@ export class NightshiftInvestigationsPlugin
         });
       }
       plugins.agentBuilder.tools.register(createTimeConverterTool());
+      const sandboxToolAvailability = createSandboxToolAvailability({
+        getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
+      });
       plugins.agentBuilder.tools.register({
         ...createSlackReadTool({ getActions: () => this.actionsStart }),
-        availability: createSandboxToolAvailability({
-          getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
-        }),
+        availability: sandboxToolAvailability,
       });
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
@@ -479,16 +480,13 @@ export class NightshiftInvestigationsPlugin
           }),
           logger: outputRedactionLogger,
         };
-        const availability = createSandboxToolAvailability({
-          getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
-        });
         const { agentBuilder } = plugins;
         const registerSandboxTool = <TSchema extends ZodObject>(
           tool: BuiltinToolDefinition<TSchema>
         ) =>
           agentBuilder.tools.register({
             ...withSandboxOutputRedaction(tool, redaction),
-            availability,
+            availability: sandboxToolAvailability,
           });
 
         registerSandboxTool(
@@ -585,6 +583,8 @@ export class NightshiftInvestigationsPlugin
             isPaused: isOnlineEvalsPaused,
             shouldIncludeExplanations,
             telemetry,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
           })
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
@@ -720,6 +720,7 @@ export class NightshiftInvestigationsPlugin
             getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
+            telemetry,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(

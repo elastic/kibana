@@ -18,6 +18,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import {
   AreaSeries,
   Axis,
@@ -86,6 +87,12 @@ const labels = {
   }),
   trigger: i18n.translate('xpack.nightshift.automations.detail.trigger', {
     defaultMessage: 'Trigger',
+  }),
+  runsLoadErrorMessage: i18n.translate('xpack.nightshift.automations.detail.runsLoadErrorMessage', {
+    defaultMessage: 'Some runs could not be loaded.',
+  }),
+  runsRetryButton: i18n.translate('xpack.nightshift.automations.detail.runsRetryButton', {
+    defaultMessage: 'Retry',
   }),
 };
 
@@ -300,7 +307,10 @@ export const RunStatusIndicator = ({ status }: { status: RunStatus }) => {
 
 export const RunHistory = ({
   runs,
+  runCounts,
   isLoading,
+  isError = false,
+  onRetry,
   startedAfter,
   startedBefore,
   rangeLabel,
@@ -309,7 +319,10 @@ export const RunHistory = ({
   onSelect,
 }: {
   runs: Run[];
+  runCounts?: Record<RunStatus, number>;
   isLoading: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
   startedAfter: string;
   startedBefore: string;
   rangeLabel: string;
@@ -327,21 +340,40 @@ export const RunHistory = ({
   const timersRef = useRef<number[]>([]);
   useEffect(() => () => timersRef.current.forEach((id) => window.clearTimeout(id)), []);
 
+  const loadError = isError && (
+    <KbnWarningCallout
+      announceOnMount
+      size="s"
+      title={labels.runsLoadErrorMessage}
+      css={{ marginBlockEnd: euiTheme.size.base }}
+      actionProps={{
+        primary: {
+          children: labels.runsRetryButton,
+          onClick: onRetry,
+          'data-test-subj': 'automationRunsRetryButton',
+        },
+      }}
+    />
+  );
+
   if (isLoading) return <EuiLoadingSpinner size="l" />;
   if (!runs.length)
     return (
-      <EuiEmptyPrompt
-        titleSize="xs"
-        title={
-          <h3>
-            {i18n.translate('xpack.nightshift.automations.detail.noRuns', {
-              defaultMessage: 'No runs in the {range}',
-              values: { range: rangeLabel.toLowerCase() },
-            })}
-          </h3>
-        }
-        body={<p>{labels.noRunsBody}</p>}
-      />
+      <>
+        {loadError}
+        <EuiEmptyPrompt
+          titleSize="xs"
+          title={
+            <h3>
+              {i18n.translate('xpack.nightshift.automations.detail.noRuns', {
+                defaultMessage: 'No runs in the {range}',
+                values: { range: rangeLabel.toLowerCase() },
+              })}
+            </h3>
+          }
+          body={<p>{labels.noRunsBody}</p>}
+        />
+      </>
     );
 
   const startMs = Date.parse(startedAfter);
@@ -350,7 +382,7 @@ export const RunHistory = ({
   const visibleRuns = filter ? runs.filter(({ status }) => status === filter) : runs;
   const counts = STATUSES.map((status) => ({
     status,
-    count: runs.filter((run) => run.status === status).length,
+    count: runCounts ? runCounts[status] : runs.filter((run) => run.status === status).length,
   })).filter(({ count, status }) => count > 0 || status === filter);
   const baseline = toBuckets(runs, startMs, endMs, bucketMs);
   const buckets = toBuckets(visibleRuns, startMs, endMs, bucketMs);
@@ -364,7 +396,7 @@ export const RunHistory = ({
     day,
     runs: visibleRuns.filter((run) => dayStart(run) === day),
   }));
-  const startedRuns = runs.filter(({ status }) => status !== 'skipped').length;
+  const startedRuns = runCounts && runCounts.succeeded + runCounts.running + runCounts.failed;
 
   const handlePointerUpdate = (event: PointerEvent) =>
     setHoveredBucketMs(
@@ -424,12 +456,14 @@ export const RunHistory = ({
           </EuiFlexItem>
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued" css={{ whiteSpace: 'nowrap' }}>
-              {i18n.translate('xpack.nightshift.automations.detail.runsSummary', {
-                defaultMessage: '{count, plural, one {# run} other {# runs}} · {range}',
-                values: { count: startedRuns, range: rangeLabel },
-              })}
-            </EuiText>
+            {startedRuns !== undefined && (
+              <EuiText size="s" color="subdued" css={{ whiteSpace: 'nowrap' }}>
+                {i18n.translate('xpack.nightshift.automations.detail.runsSummary', {
+                  defaultMessage: '{count, plural, one {# run} other {# runs}} · {range}',
+                  values: { count: startedRuns, range: rangeLabel },
+                })}
+              </EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
         <div
@@ -503,6 +537,7 @@ export const RunHistory = ({
           padding-block: ${euiTheme.size.l} ${euiTheme.size.s};
         `}
       >
+        {loadError}
         {!visibleRuns.length ? (
           <EuiText size="s" color="subdued">
             {labels.noFilteredRuns}

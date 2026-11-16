@@ -209,6 +209,10 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     });
   });
 
+  it('does not report a causal-check telemetry event on an initial round', () => {
+    expect(fixture.telemetry.reportDecisionTreeCausalCheck).not.toHaveBeenCalled();
+  });
+
   it('forwards optimizer opened_ids and applied_writes into score_memory_online_evals', async () => {
     const evaluate = jest.fn().mockResolvedValue([
       {
@@ -302,6 +306,12 @@ describe('agent optimize workflow, a follow-up round', () => {
       treeCount: 1,
       turnKind: 'feedback_reinforcement',
       openedTreeIds: [],
+      verdict: {
+        isFeedback: true,
+        causalConfirmed: true,
+        causalSummary: 'Confirmed root cause.',
+        learning: 'Check connection pool metrics.',
+      },
     });
 
     await fixture.runOptimize(ELIGIBLE_ROUND_INPUTS);
@@ -318,6 +328,22 @@ describe('agent optimize workflow, a follow-up round', () => {
   it('offers the learning tools', () => {
     expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
     expect(fixture.agentRuns[0].agentParams.configurationOverrides).toBeDefined();
+  });
+
+  it('reports the follow-up causal-check telemetry event', () => {
+    expect(fixture.telemetry.reportDecisionTreeCausalCheck).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+        conversation_id: ELIGIBLE_ROUND_INPUTS.conversation_id,
+        round_id: ELIGIBLE_ROUND_INPUTS.round_id,
+        outcome: 'confirmed',
+        is_feedback: true,
+        causal_confirmed: true,
+        has_learning: true,
+        tree_count: 1,
+        opened_tree_count: 0,
+      })
+    );
   });
 });
 
