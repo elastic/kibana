@@ -82,8 +82,6 @@ export class UptimeSettingsPage {
   }
 
   getFormErrorText(text: string) {
-    // EuiFormRow gives each error the id `<rowId>-error-<index>`, the same
-    // message also shows in a page level callout
-    return this.page.locator('[id*="-error-"]', { hasText: text });
+    return this.page.getByText(text, { exact: true });
   }
 }
