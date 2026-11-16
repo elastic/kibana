@@ -49,8 +49,13 @@ export const sessionsPerQuery = (maxRows: number): number =>
  * ones are cheaper: at 137,000 changed sessions, one query took 0.6s against 13s for one per 5,000.
  */
 export const IDS_PER_QUERY = 100_000;
-/** More changed sessions than this, and the window is halved: a run must finish its windows. */
-export const MAX_SESSIONS_PER_WINDOW = 64 * SESSIONS_PER_QUERY;
+/**
+ * More changed sessions than this, and the window is halved: a run must finish its windows. Counted
+ * in the batches this cluster's rows allow, so a lowered row limit means smaller windows rather
+ * than many more queries per window.
+ */
+export const maxSessionsPerWindow = (maxRows: number): number => 64 * sessionsPerQuery(maxRows);
+export const MAX_SESSIONS_PER_WINDOW = maxSessionsPerWindow(ESQL_MAX_ROWS);
 export const MIN_WINDOW_MS = MINUTE_MS;
 export const MAX_WINDOW_MS = DAY_MS;
 /** The first window of a backfill; it then grows or shrinks with the sessions found. */
@@ -71,6 +76,12 @@ export interface SummarizeSessionsParams {
   windowMs: number;
   /** Starts no window after this much time, so the run ends before its timeout. */
   budgetMs: number;
+  /**
+   * Stops a window between rounds of summary queries after this much time, and ends the run with
+   * the window unfinished and halved: Task Manager drops the result of a run that outlasts its
+   * timeout, so the next would retry the same window without end.
+   */
+  timeLimitMs: number;
   /** Summary queries run at once, each with its own batch of sessions. */
   concurrency: number;
   logger: Logger;
@@ -240,7 +251,8 @@ const summarizeBatch = async (
 /**
  * Rebuilds the sessions of `ids` in batches whose rows fit an ES|QL response, `concurrency` at a
  * time; a batch that still fills one, as ids that several applications share have a row each, is
- * split in two. A failed batch fails the window once the others of its round are done.
+ * split in two. A failed batch fails the window once the others of its round are done. Starts no
+ * round after `stopAt`, and then reports the window unfinished.
  */
 const summarizeSessionIds = async (
   esClient: ElasticsearchClient,
@@ -249,11 +261,15 @@ const summarizeSessionIds = async (
   signal: AbortSignal,
   concurrency: number,
   logger: Logger,
-  maxRows: number
-): Promise<number> => {
+  maxRows: number,
+  stopAt: number
+): Promise<{ written: number; finished: boolean }> => {
   const batches = chunk(ids, sessionsPerQuery(maxRows));
   let written = 0;
   while (batches.length > 0) {
+    if (Date.now() >= stopAt) {
+      return { written, finished: false };
+    }
     const round = batches.splice(0, Math.max(1, concurrency));
     const results = await Promise.allSettled(
       round.map((batch) => summarizeBatch(esClient, window, batch, signal, logger, maxRows))
@@ -269,8 +285,14 @@ const summarizeSessionIds = async (
       }
     }
   }
-  return written;
+  return { written, finished: true };
 };
+
+/** Why a run stopped at a one-minute window it could not finish: there is nothing left to halve. */
+export const windowTooLargeMessage = (sessions: number, timeLimitMs: number): string =>
+  `The ${sessions} sessions changed in one minute take longer than ${Math.round(
+    timeLimitMs / 1000
+  )}s to summarize, the most a run can take, so the summaries cannot move past it. Raise xpack.digital_experience.sessions.concurrency, or the capacity of Elasticsearch.`;
 
 /**
  * Summarizes the sessions with events after the checkpoint, window by window, oldest first, until
@@ -285,13 +307,17 @@ export const summarizeSessions = async ({
   checkpoint,
   windowMs,
   budgetMs,
+  timeLimitMs,
   concurrency,
   logger,
   maxRows = ESQL_MAX_ROWS,
 }: SummarizeSessionsParams): Promise<SummarizeSessionsResult> => {
   const until = now - SESSIONS_SYNC_DELAY_SECONDS * 1000;
   const earliest = lookbackStart(now);
-  const deadline = Date.now() + budgetMs;
+  const started = Date.now();
+  const deadline = started + budgetMs;
+  const stopAt = started + timeLimitMs;
+  const maxSessions = maxSessionsPerWindow(maxRows);
   let from = Math.max(checkpoint ? Date.parse(checkpoint) : earliest, earliest);
   let size = Math.min(Math.max(windowMs, MIN_WINDOW_MS), MAX_WINDOW_MS);
   let sessions = 0;
@@ -300,12 +326,12 @@ export const summarizeSessions = async ({
     const to = Math.min(until, from + size);
     const window: ChangedWindow = { changedFrom: iso(from), changedTo: iso(to) };
     const changed = await countChangedSessions(esClient, window, signal);
-    if (changed > MAX_SESSIONS_PER_WINDOW && to - from > MIN_WINDOW_MS) {
+    if (changed > maxSessions && to - from > MIN_WINDOW_MS) {
       size = Math.max(MIN_WINDOW_MS, Math.floor((to - from) / 2));
     } else {
       if (changed > 0) {
         const ids = await changedSessionIds(esClient, window, changed, signal, maxRows);
-        sessions += await summarizeSessionIds(
+        const { written, finished } = await summarizeSessionIds(
           esClient,
           {
             changedTo: window.changedTo,
@@ -315,11 +341,26 @@ export const summarizeSessions = async ({
           signal,
           concurrency,
           logger,
-          maxRows
+          maxRows,
+          stopAt
         );
+        sessions += written;
+        if (!finished) {
+          if (to - from <= MIN_WINDOW_MS) {
+            throw new Error(windowTooLargeMessage(changed, timeLimitMs));
+          }
+          // The checkpoint stays, and the next run starts at once on half the window. The
+          // summaries this run wrote are rebuilt again, which only costs the work.
+          return {
+            checkpoint: iso(from),
+            windowMs: Math.max(MIN_WINDOW_MS, Math.floor((to - from) / 2)),
+            caughtUp: false,
+            sessions,
+          };
+        }
       }
       from = to;
-      if (changed < MAX_SESSIONS_PER_WINDOW / 4) {
+      if (changed < maxSessions / 4) {
         size = Math.min(MAX_WINDOW_MS, size * 2);
       }
     }

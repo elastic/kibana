@@ -15,6 +15,11 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 export const ESQL_DEFAULT_MAX_ROWS = 10_000;
 
 const TRUNCATION_SETTING = 'esql.query.result_truncation_max_size';
+/**
+ * Only the setting, from each of transient, persistent and the defaults: every run reads it, and
+ * the defaults alone are about 60 KB. Flat setting names hold dots, which a filter path escapes.
+ */
+const TRUNCATION_FILTER_PATH = `*.${TRUNCATION_SETTING.replaceAll('.', '\\.')}`;
 
 /**
  * The rows the cluster lets an ES|QL response hold, never more than the default: the summaries
@@ -32,7 +37,7 @@ export const esqlMaxRows = async (
   let settings;
   try {
     settings = await internalClient.cluster.getSettings(
-      { flat_settings: true, include_defaults: true },
+      { flat_settings: true, include_defaults: true, filter_path: TRUNCATION_FILTER_PATH },
       { signal }
     );
   } catch {

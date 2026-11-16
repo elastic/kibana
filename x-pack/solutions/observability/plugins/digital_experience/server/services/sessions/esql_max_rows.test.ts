@@ -29,7 +29,12 @@ describe('esqlMaxRows', () => {
 
     await expect(esqlMaxRows(client)).resolves.toBe(10_000);
     expect(client.cluster.getSettings).toHaveBeenCalledWith(
-      { flat_settings: true, include_defaults: true },
+      {
+        flat_settings: true,
+        include_defaults: true,
+        // The flat setting's dots escaped, so only it comes back.
+        filter_path: '*.esql\\.query\\.result_truncation_max_size',
+      },
       { signal: undefined }
     );
   });

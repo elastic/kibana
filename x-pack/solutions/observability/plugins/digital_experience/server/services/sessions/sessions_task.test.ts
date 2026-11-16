@@ -170,6 +170,7 @@ describe('runSessionsTask', () => {
         checkpoint: null,
         windowMs: INITIAL_WINDOW_MS,
         budgetMs: 45_000,
+        timeLimitMs: 240_000,
         concurrency: 2,
         logger,
         maxRows: ESQL_DEFAULT_MAX_ROWS,
@@ -401,18 +402,18 @@ describe('registerSessionsTask', () => {
   it('registers a task that a stuck query cannot hold for long', () => {
     const { definition } = setup();
 
-    // Registered with a concurrency of 3, so it claims more of a node than an ordinary task.
-    expect(definition).toEqual(expect.objectContaining({ timeout: '5m', cost: TaskCost.Large }));
+    // Registered with a concurrency of 3, about 150 MB of queries, so it claims an extra large share.
+    expect(definition).toEqual(
+      expect.objectContaining({ timeout: '5m', cost: TaskCost.ExtraLarge })
+    );
     expect(Object.keys(definition.stateSchemaByVersion ?? {})).toEqual(['1']);
   });
 
   it.each([
     [1, TaskCost.Normal],
-    [2, TaskCost.Normal],
-    [3, TaskCost.Large],
-    [4, TaskCost.Large],
-    [5, TaskCost.ExtraLarge],
-    [8, TaskCost.ExtraLarge],
+    [2, TaskCost.Large],
+    [3, TaskCost.ExtraLarge],
+    [4, TaskCost.ExtraLarge],
   ])('costs Task Manager more as the summary queries run %s at a time', (concurrency, cost) => {
     expect(taskCostOf(concurrency)).toBe(cost);
   });

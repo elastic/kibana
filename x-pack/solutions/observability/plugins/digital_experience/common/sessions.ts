@@ -25,9 +25,12 @@ export const SESSIONS_TASK_ID = 'digital_experience:sessions-summaries';
 
 /** How often the summaries task runs by default. */
 export const SESSIONS_DEFAULT_FREQUENCY = '1m';
-/** Summary queries the task runs at once by default, and at most. */
+/**
+ * Summary queries the task runs at once by default, and at most: each holds about 50 MB of Kibana
+ * memory, and four is the most Task Manager's largest task cost budgets for.
+ */
 export const SESSIONS_DEFAULT_CONCURRENCY = 2;
-export const SESSIONS_MAX_CONCURRENCY = 8;
+export const SESSIONS_MAX_CONCURRENCY = 4;
 /** Events this recent are left for the next run, as they may still be arriving. */
 export const SESSIONS_SYNC_DELAY_SECONDS = 60;
 /** Sessions are built from, and kept for, this many days of events. */

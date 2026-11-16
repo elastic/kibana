@@ -49,13 +49,13 @@ describe('digital_experience config', () => {
     expect(() => config.schema.validate({ sessions: { frequency } })).toThrow(/frequency/);
   });
 
-  it.each([1, 8])('accepts a summary query concurrency of %s', (concurrency) => {
+  it.each([1, 4])('accepts a summary query concurrency of %s', (concurrency) => {
     expect(config.schema.validate({ sessions: { concurrency } }).sessions.concurrency).toBe(
       concurrency
     );
   });
 
-  it.each([0, 9, 1.5])('rejects a summary query concurrency of %s', (concurrency) => {
+  it.each([0, 5, 1.5])('rejects a summary query concurrency of %s', (concurrency) => {
     expect(() => config.schema.validate({ sessions: { concurrency } })).toThrow(/concurrency/);
   });
 

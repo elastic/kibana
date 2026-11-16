@@ -239,10 +239,14 @@ Each run:
    each query aggregates the window once and returns the ids in 4,096 buckets of the SHA-256 of
    their `session.id`, a row each; more sessions take ranges of that hash. Querying ranges of 5,000
    instead made 28 queries for 137,000 sessions, 13s of Elasticsearch time against 0.6s. Hashing
-   keeps the ranges even whatever the ids look like (EDOT iOS writes them in uppercase). The task
-   relies on that default of
-   `esql.query.result_truncation_max_size`: a cluster that lowers it below 10,000 truncates the
-   responses without saying so, and the sessions past the cap are missing.
+   keeps the ranges even whatever the ids look like (EDOT iOS writes them in uppercase). ES|QL cuts
+   a response to `esql.query.result_truncation_max_size` rows without saying so, so each run reads
+   that setting, as the internal user, and works within it: fewer id buckets, summary batches of
+   half that many sessions, windows sized in those batches, and a batch whose rows still fill the
+   cap split in two. A cluster that refuses the read, as serverless does, keeps the default of
+   10,000, and a raised setting buys nothing, as the task never asks for more. What it can't split
+   is one session id whose applications alone fill the cap, which takes a cap below the number of
+   applications sharing an id.
 3. Rebuilds the sessions, 5,000 at a time, from their events of the last 24 hours, the longest a
    session lasts, with their ids as a literal `IN` list, which Elasticsearch looks up in the index:
    an `IN (subquery)` scanned the whole lookback. One query aggregates per session and page URL,
@@ -258,8 +262,14 @@ Each run:
 A run starts no window after 45 seconds, and runs again right away while it is behind. On the first
 run after sessions are enabled, it starts from 30 days ago, at the start of that day in UTC, so it
 catches up window by window, oldest first, and status reports `rebuilding` until it has. A window
-grows while it holds few sessions and halves when it holds more than 320,000, so a run always
-finishes the windows it starts. Failures are kept in the task's state, not thrown, so the next run
+grows while it holds few sessions and halves when it holds more than 64 batches (320,000 sessions
+at the default row limit). A window still running after 4 minutes stops between rounds of summary
+queries, a minute before the task's 5 minute timeout, as Task Manager drops the result of a run
+that outlasts it and the next run would retry the same window without end. The run then keeps its
+checkpoint and starts again at once on half the window; the summaries it already wrote are just
+rebuilt again. A one-minute window, the smallest, that still can't finish fails the run with an
+error that says so, as the summaries can't move past it until the task gets more concurrency or
+Elasticsearch more capacity. Failures are kept in the task's state, not thrown, so the next run
 retries from the same checkpoint, and status shows the error. A summary Elasticsearch refuses
 outright, such as one with a value longer than its mapping takes, is left out with a warning
 instead, so a single session can't hold up the window and everything behind it. Events that arrive later than the sync
@@ -358,7 +368,7 @@ sessions in 2.1 to 2.7 seconds a run against 7.2 to 9.6, and a 625,000 session b
 ```yaml
 xpack.digital_experience.sessions:
   frequency: 1m   # 1s–1h. Longer means fewer rebuilds of each active session: cheaper, but staler.
-  concurrency: 2  # 1–8 summary queries at once. More keeps up with busier sites, for more resources.
+  concurrency: 2  # 1–4 summary queries at once. More keeps up with busier sites, for more resources.
 ```
 
 - **`frequency`**: an active session is re-read and rewritten once per run. Going from `1m` to
@@ -369,9 +379,12 @@ xpack.digital_experience.sessions:
 - **`concurrency`**: a run rebuilds the changed sessions in queries of 5,000, this many at a time.
   At 75× the scale of the load tests each query took about 2 seconds, so one at a time needed more
   than the minute; each one more in flight costs Elasticsearch CPU and about 50 MB of Kibana memory
-  while a run is busy. It applies after a restart, which is also when the task's Task Manager cost
-  is set from it: an ordinary task up to the default, `Large` up to half the maximum and
-  `ExtraLarge` beyond, so a node budgets for the memory the queries actually hold.
+  while a run is busy. On two 32 vCPU Elasticsearch nodes at about 300,000 changed sessions a
+  minute, 4 took runs from about 106 to 77 seconds. It applies after a restart, which is also when
+  the task's Task Manager cost is set from it, so a node budgets for the memory the queries
+  actually hold: `Normal` for one, `Large` for the default two and `ExtraLarge` for three or four,
+  which Task Manager budgets about 50, 100 and 250 MB for. Four is the most that covers, so it is
+  the maximum.
 
 Status reports the summaries as lagging when their checkpoint is more than three runs plus the sync
 delay behind, and at least 5 minutes, once they have caught up; the task logs when a run starts

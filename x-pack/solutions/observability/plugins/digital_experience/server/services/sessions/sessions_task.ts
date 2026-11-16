@@ -15,8 +15,6 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import {
-  SESSIONS_DEFAULT_CONCURRENCY,
-  SESSIONS_MAX_CONCURRENCY,
   SESSIONS_TASK_ID,
   SESSIONS_TASK_TYPE,
   SESSIONS_VERSION,
@@ -33,6 +31,12 @@ import { INITIAL_WINDOW_MS, summarizeSessions } from './summarize_sessions';
 
 /** No window starts after this much of a run, so it ends well before its timeout. */
 const RUN_BUDGET_MS = 45 * 1000;
+/**
+ * A window stops between rounds of summary queries after this, a minute before the task's timeout:
+ * Task Manager drops the result of a run that outlasts it, so the next run would retry the same
+ * window without end.
+ */
+const RUN_TIME_LIMIT_MS = 4 * 60 * 1000;
 
 export const NO_API_KEY_MESSAGE =
   'The task has no API key, so it cannot read events. Enable sessions again to grant one.';
@@ -163,6 +167,7 @@ export const runSessionsTask = async ({
       checkpoint: rebuild ? null : state.checkpoint ?? null,
       windowMs: rebuild ? INITIAL_WINDOW_MS : state.windowMs ?? INITIAL_WINDOW_MS,
       budgetMs: RUN_BUDGET_MS,
+      timeLimitMs: RUN_TIME_LIMIT_MS,
       concurrency,
       logger,
       // Once a run: the setting only changes with the cluster, and every query of the run is
@@ -223,17 +228,24 @@ export const withConfiguredInterval = (
     ? result
     : { state: result.state, schedule: { interval: frequency } };
 
+/** Kibana memory each summary query in flight holds, about. */
+const MB_PER_SUMMARY_QUERY = 50;
+/** The most memory Task Manager budgets a task of each cost for, about. */
+const TASK_COST_MB: ReadonlyArray<[TaskCost, number]> = [
+  [TaskCost.Normal, 50],
+  [TaskCost.Large, 100],
+  [TaskCost.ExtraLarge, 250],
+];
+
 /**
- * What a run costs Task Manager, which budgets a node's capacity by it. Each summary query the
- * task runs at once holds about 50 MB, so the default concurrency is an ordinary task and the
- * supported maximum is the heaviest a node can claim. A task type's cost is fixed at
+ * What a run costs Task Manager, which budgets a node's capacity by it: the cheapest cost whose
+ * memory covers the summary queries in flight, so one is an ordinary task, the default of two a
+ * large one, and up to the maximum of four an extra large one. A task type's cost is fixed at
  * registration, so it follows the configured concurrency rather than a single run's.
  */
 export const taskCostOf = (concurrency: number): TaskCost => {
-  if (concurrency <= SESSIONS_DEFAULT_CONCURRENCY) {
-    return TaskCost.Normal;
-  }
-  return concurrency <= SESSIONS_MAX_CONCURRENCY / 2 ? TaskCost.Large : TaskCost.ExtraLarge;
+  const mb = concurrency * MB_PER_SUMMARY_QUERY;
+  return TASK_COST_MB.find(([, budget]) => mb <= budget)?.[0] ?? TaskCost.ExtraLarge;
 };
 
 /**
@@ -257,7 +269,8 @@ export const registerSessionsTask = ({
       title: 'Digital Experience session summaries',
       description:
         'Summarizes the RUM sessions with new events into the Digital Experience sessions index.',
-      // A run starts no window after 45s; this only stops one stuck on a query.
+      // A run starts no window after 45s and stops one after 4m; this only stops one stuck on a
+      // query.
       timeout: '5m',
       cost: taskCostOf(settings.concurrency),
       stateSchemaByVersion: { 1: { schema: stateSchemaV1, up: (state) => state } },

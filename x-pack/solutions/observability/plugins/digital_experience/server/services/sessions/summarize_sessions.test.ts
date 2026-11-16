@@ -17,7 +17,9 @@ import {
   ROWS_PER_TICK,
   SESSIONS_PER_QUERY,
   lookbackStart,
+  maxSessionsPerWindow,
   summarizeSessions,
+  windowTooLargeMessage,
 } from './summarize_sessions';
 import { toSessionDocuments } from './summary_documents';
 
@@ -95,6 +97,7 @@ const run = (esClient: ReturnType<typeof setUp>, overrides = {}) =>
     checkpoint: new Date(UNTIL - 2 * MINUTE).toISOString(),
     windowMs: INITIAL_WINDOW_MS,
     budgetMs: 45_000,
+    timeLimitMs: 240_000,
     concurrency: 2,
     logger,
     ...overrides,
@@ -180,6 +183,81 @@ describe('summarizeSessions', () => {
       new Date(UNTIL - HOUR).toISOString(),
       new Date(UNTIL - 30 * MINUTE).toISOString(),
     ]);
+  });
+
+  it('sizes windows by the batches the rows of this cluster allow', async () => {
+    const maxRows = 100;
+    const esClient = setUp({
+      changed: (params) => {
+        const from = Date.parse(String(paramOf(params, 'changed_from')));
+        const to = Date.parse(String(paramOf(params, 'changed_to')));
+        // Far below the default limit, so only a limit counted in the smaller batches halves it.
+        return to - from > 30 * MINUTE ? maxSessionsPerWindow(maxRows) + 1 : 2;
+      },
+    });
+
+    const progress = await run(esClient, {
+      checkpoint: new Date(UNTIL - HOUR).toISOString(),
+      maxRows,
+    });
+
+    expect(maxSessionsPerWindow(maxRows)).toBeLessThan(MAX_SESSIONS_PER_WINDOW);
+    expect(progress.caughtUp).toBe(true);
+    const windows = esClient.esql.query.mock.calls
+      .map(([{ query, params }]) => ({ query, params: params as estypes.EsqlNamedValue[] }))
+      .filter(({ query }) => query.includes('COUNT_DISTINCT'))
+      .map(({ params }) => paramOf(params, 'changed_to'));
+    expect(windows.slice(0, 2)).toEqual([
+      new Date(UNTIL).toISOString(),
+      new Date(UNTIL - 30 * MINUTE).toISOString(),
+    ]);
+  });
+
+  describe('time limit', () => {
+    const batches = 4;
+    const SUMMARY_MS = 61_000;
+    let now: number;
+    let nowSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      now = Date.parse('2026-11-11T12:00:00.000Z');
+      nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
+    });
+
+    afterEach(() => nowSpy.mockRestore());
+
+    /** Every summary query takes `SUMMARY_MS`, so two of them use up a two-minute limit. */
+    const slowSummaries = () =>
+      setUp({
+        changed: () => batches * SESSIONS_PER_QUERY,
+        ids: () => Array.from({ length: batches * SESSIONS_PER_QUERY }, (_, index) => `s${index}`),
+        summaryRows: () => [summaryRow('one')],
+        beforeSummary: async () => {
+          now += SUMMARY_MS;
+        },
+      });
+
+    it('stops a window between rounds, keeping its checkpoint and coming back with half of it', async () => {
+      const esClient = slowSummaries();
+      const checkpoint = new Date(UNTIL - 2 * MINUTE).toISOString();
+
+      const progress = await run(esClient, { checkpoint, concurrency: 1, timeLimitMs: 2 * MINUTE });
+
+      expect(progress).toEqual({ checkpoint, windowMs: MINUTE, caughtUp: false, sessions: 2 });
+      expect(esClient.bulk).toHaveBeenCalledTimes(2);
+    });
+
+    it('fails the run when even a one-minute window cannot finish in time', async () => {
+      const esClient = slowSummaries();
+
+      await expect(
+        run(esClient, {
+          checkpoint: new Date(UNTIL - MINUTE).toISOString(),
+          concurrency: 1,
+          timeLimitMs: 2 * MINUTE,
+        })
+      ).rejects.toThrow(windowTooLargeMessage(batches * SESSIONS_PER_QUERY, 2 * MINUTE));
+    });
   });
 
   it('fetches the changed ids in a query per IDS_PER_QUERY sessions', async () => {
