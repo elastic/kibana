@@ -40,19 +40,22 @@ export class WorkflowsAppPage {
   }
 
   /**
-   * Open the editor for a brand-new workflow. "Create workflow" opens the
-   * agentic-first landing; "Start manually" opens the blank editor.
+   * Open the editor for a brand-new workflow. With existing workflows, "Create workflow"
+   * opens the agentic-first landing; with none, the list page already shows that landing
+   * and hides the header button. "Start manually" opens the blank editor.
    */
   async gotoNewWorkflow(): Promise<void> {
     await this.page.gotoApp(WORKFLOWS_APP_ID);
-    await this.page.testSubj.waitForSelector('createWorkflowButton', {
-      state: 'visible',
-      timeout: APP_LOAD_TIMEOUT,
-    });
-    await this.page.testSubj.click('createWorkflowButton');
-    await this.page.testSubj.click('agenticFirstStartManuallyButton', {
-      timeout: APP_LOAD_TIMEOUT,
-    });
+    const createButton = this.page.testSubj.locator('createWorkflowButton');
+    const startManuallyButton = this.page.testSubj.locator('agenticFirstStartManuallyButton');
+    await Promise.race([
+      createButton.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT }),
+      startManuallyButton.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT }),
+    ]);
+    if (await createButton.isVisible()) {
+      await createButton.click();
+    }
+    await startManuallyButton.click({ timeout: APP_LOAD_TIMEOUT });
     await this.yamlEditor.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT });
   }
 
