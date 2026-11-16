@@ -10,19 +10,6 @@ import { DuplicateStrategyError } from './duplicate_strategy_error';
 import { DetectionStrategy } from './tokens';
 import type { IDetectionStrategy } from './types';
 
-const indexStrategiesById = (strategies: IDetectionStrategy[]): Map<string, IDetectionStrategy> => {
-  const duplicate = strategies.find(
-    ({ descriptor }, index) =>
-      strategies.findIndex((other) => other.descriptor.id === descriptor.id) !== index
-  );
-
-  if (duplicate) {
-    throw new DuplicateStrategyError(duplicate.descriptor.id);
-  }
-
-  return new Map(strategies.map((strategy) => [strategy.descriptor.id, strategy]));
-};
-
 /** The detection strategies bound in the container, by id. */
 @injectable()
 export class StrategyCatalog {
@@ -43,3 +30,16 @@ export class StrategyCatalog {
     return this.strategiesById.get(id);
   }
 }
+
+const indexStrategiesById = (strategies: IDetectionStrategy[]): Map<string, IDetectionStrategy> => {
+  const duplicate = strategies.find(
+    ({ descriptor }, index) =>
+      strategies.findIndex((other) => other.descriptor.id === descriptor.id) !== index
+  );
+
+  if (duplicate) {
+    throw new DuplicateStrategyError(duplicate.descriptor.id);
+  }
+
+  return new Map(strategies.map((strategy) => [strategy.descriptor.id, strategy]));
+};
