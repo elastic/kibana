@@ -600,7 +600,7 @@ describe('renderDriftIssue', () => {
             ],
           },
         },
-        actions: drifted.actions?.map((action) =>
+        actions: drifted.actions?.map((action): NonNullable<ConnectorDrift['actions']>[number] =>
           action.action === 'getItem'
             ? {
                 ...action,
