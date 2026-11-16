@@ -24,7 +24,8 @@ jest.mock('../entity_sources/entity_sources_service', () => ({
 describe('watchlist maintainer run', () => {
   const logger = loggingSystemMock.createLogger();
   const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
-  const getScopedClient = jest.fn();
+  const soClient = savedObjectsClientMock.create();
+  const getUnsafeInternalClient = jest.fn().mockReturnValue(soClient);
   const hasAtLeast = jest.fn();
 
   const getStartServices = jest.fn();
@@ -46,13 +47,13 @@ describe('watchlist maintainer run', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     hasAtLeast.mockReturnValue(true);
-    getScopedClient.mockReturnValue(savedObjectsClientMock.create());
+    getUnsafeInternalClient.mockReturnValue(soClient);
     internalEsClient.indices.exists.mockReset().mockResolvedValue(false);
     internalEsClient.indices.create.mockReset().mockResolvedValue({ acknowledged: true } as never);
     mockSyncAllWatchlists.mockResolvedValue(undefined);
     getStartServices.mockResolvedValue([
       {
-        savedObjects: { getScopedClient },
+        savedObjects: { getUnsafeInternalClient },
         elasticsearch: { client: { asInternalUser: internalEsClient } },
       },
       { licensing: { getLicense: async () => ({ hasAtLeast }) } },
