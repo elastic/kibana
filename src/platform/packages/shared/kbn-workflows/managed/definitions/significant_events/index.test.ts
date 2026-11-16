@@ -13,6 +13,7 @@ import {
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW,
 } from './knowledge_indicators';
+import { convertToWorkflowGraph } from '../../../graph';
 
 interface WorkflowJsonSchema {
   type?: string;
@@ -32,6 +33,7 @@ interface WorkflowStep {
   'connector-id'?: string;
   'connector-id-by-feature'?: string;
   'on-failure'?: { continue?: boolean };
+  timeout?: string;
   steps?: WorkflowStep[];
   with?: {
     path?: string;
@@ -39,6 +41,7 @@ interface WorkflowStep {
     written_rule_uuids?: string;
     inputs?: Record<string, string>;
     schema?: WorkflowJsonSchema;
+    message?: string;
   };
   foreach?: string;
 }
@@ -77,7 +80,7 @@ const featuresIdentification = parse(
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(29);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(30);
     expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
   });
 
@@ -121,8 +124,88 @@ describe('significant events persistence workflow contracts', () => {
     ).toBeUndefined();
   });
 
-  it('bootstraps per-space cleanup before discovery work', () => {
+  it('reports discovery completion before every exit and from the failure fallback', () => {
+    const isReport = (step: WorkflowStep | undefined) =>
+      step?.type === 'kibana.request' &&
+      step.with?.path?.endsWith('/internal/streams/significant_events/discovery/_completed') ===
+        true &&
+      step['on-failure']?.continue === true;
+    const exits: Array<[WorkflowStep | undefined, WorkflowStep]> = [];
+    const walk = (steps: WorkflowStep[]) =>
+      steps.forEach((step, index) => {
+        if (step.type === 'workflow.output') exits.push([steps[index - 1], step]);
+        if (step.steps) walk(step.steps);
+      });
+    walk(discovery.steps);
+
+    expect(exits.map(([, exit]) => exit.name)).toEqual([
+      'output_budget_denied',
+      'output_no_detections',
+      'output_result',
+    ]);
+    exits.forEach(([report]) => {
+      expect(isReport(report)).toBe(true);
+      expect(report?.with?.body).toMatchObject({
+        outcome: 'completed',
+        workflow_execution_id: '{{ execution.id }}',
+        parent_workflow_execution_id: '{{ parent.executionId }}',
+      });
+    });
+    expect(requireStep(discovery, 'report_discovery_completed').with?.body).toMatchObject({
+      has_work: true,
+    });
+
+    const { settings } = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as {
+      settings: { 'on-failure': { fallback: WorkflowStep[] } };
+    };
+    const [fallback] = settings['on-failure'].fallback;
+    expect(isReport(fallback)).toBe(true);
+    expect(fallback.with?.body).toMatchObject({
+      outcome: 'failed',
+      error_type: '{{ steps.run_discovery_agent.error.type }}',
+      parent_workflow_execution_id: '{{ parent.executionId }}',
+    });
+  });
+
+  it('times the discovery agent out before the workflow timeout, which ends a run unreported', () => {
+    const { settings } = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as {
+      settings: { timeout: string };
+    };
+    const agentTimeout = requireStep(discovery, 'run_discovery_agent').timeout;
+
+    expect(parseInt(agentTimeout ?? '', 10)).toBeLessThan(parseInt(settings.timeout, 10));
+  });
+
+  it('keeps the steps that fail a discovery run inside the workflow-level fallback', () => {
+    const graph = convertToWorkflowGraph(
+      parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as Parameters<
+        typeof convertToWorkflowGraph
+      >[0]
+    );
+
+    ['run_discovery_agent', 'get_written_rules_backlog'].forEach((name) =>
+      expect(graph.hasNode(`enterFallbackPath_${name}`)).toBe(true)
+    );
+  });
+
+  it('reports the start of every discovery run before anything else', () => {
     expect(discovery.steps[0]).toMatchObject({
+      name: 'report_discovery_started',
+      type: 'kibana.request',
+      with: {
+        path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_started',
+        body: {
+          workflow_execution_id: '{{ execution.id }}',
+          parent_workflow_execution_id: '{{ parent.executionId }}',
+        },
+      },
+      timeout: '10s',
+      'on-failure': { continue: true },
+    });
+  });
+
+  it('bootstraps per-space cleanup before discovery work', () => {
+    expect(discovery.steps[1]).toMatchObject({
       name: 'bootstrap_cleanup_workflow',
       type: 'kibana.request',
       with: {
@@ -163,6 +246,22 @@ describe('significant events persistence workflow contracts', () => {
     expect(
       requireStep(featuresIdentification, 'identify_inferred').with?.body?.parentWorkflowExecutionId
     ).toBe('${{ parent.executionId }}');
+  });
+
+  it('ends the features identification loop on its time budget without failing the run', () => {
+    const { settings } = parse(SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW.yaml) as {
+      settings: { timeout: string };
+    };
+    const loop = requireStep(featuresIdentification, 'identify_loop');
+
+    expect(parseInt(loop.timeout ?? '', 10)).toBeLessThan(parseInt(settings.timeout, 10));
+    expect(loop['on-failure']).toEqual({ continue: true });
+    expect(requireStep(featuresIdentification, 'check_all_failed').condition).toBe(
+      '${{ variables.hasSuccess == false and steps.prepare.output.hasDocuments != false }}'
+    );
+    expect(requireStep(featuresIdentification, 'all_failed').with?.message).toContain(
+      '{{ steps.identify_loop.error.message }}'
+    );
   });
 
   it('stamps discovery detections only from reported completed outcomes', () => {

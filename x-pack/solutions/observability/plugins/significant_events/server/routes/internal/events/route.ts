@@ -8,14 +8,15 @@
 import {
   significantEventStatusSchema,
   significantEventManualStatusSchema,
+  significantEventCloseReasonSchema,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   severitySchema,
   MAX_ID_LENGTH,
-  MAX_TEXT_LENGTH,
+  significantEventSchema,
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
@@ -23,6 +24,10 @@ import {
   cleanupStaleEvents,
   type CleanupStaleEventsResult,
 } from '../../../lib/significant_events/events/cleanup_stale_events';
+import {
+  DEFAULT_STALE_RECOVERING_AFTER_HOURS,
+  MAX_STALE_RECOVERING_AFTER_HOURS,
+} from '../../../lib/significant_events/events/constants';
 import type { DetectionClient } from '../../../lib/significant_events/detections';
 import {
   attachInvestigationState,
@@ -403,15 +408,18 @@ const eventsUpdateRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-    body: z.object({
-      status: significantEventManualStatusSchema,
-      assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().max(255),
+      }),
+      body: z.object({
+        status: significantEventManualStatusSchema,
+        close_reason: significantEventCloseReasonSchema.optional(),
+        assessment_note: significantEventSchema.shape.assessment_note,
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
@@ -420,6 +428,8 @@ const eventsUpdateRoute = createServerRoute({
     return (await getEventSearchClient()).updateEventStatus({
       eventId: params.path.id,
       change: StatusChange.byOperator(params.body.status),
+      actor: 'rest_api',
+      closeReason: params.body.close_reason,
       assessmentNote: params.body.assessment_note,
       workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
     });
@@ -431,20 +441,28 @@ const cleanupStaleEventsRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Close stale significant events',
-    description: 'Closes open significant events when none of their backing rules still exist.',
+    description: `Closes open significant events when none of their backing rules still exist, and closes events left recovering with no new version for longer than staleRecoveringAfterHours (${DEFAULT_STALE_RECOVERING_AFTER_HOURS} by default, 1 to ${MAX_STALE_RECOVERING_AFTER_HOURS}). The daily cleanup workflow calls it, so a timed-out event closes on its next run.`,
   },
   security: {
     authz: {
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z
-      .object({
-        candidateRuleIds: z.array(z.string().max(MAX_ID_LENGTH)).max(1000).optional(),
-      })
-      .nullish(),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z
+        .object({
+          candidateRuleIds: z.array(z.string().max(MAX_ID_LENGTH)).max(1000).optional(),
+          staleRecoveringAfterHours: z
+            .number()
+            .int()
+            .min(1)
+            .max(MAX_STALE_RECOVERING_AFTER_HOURS)
+            .optional(),
+        })
+        .nullish(),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -464,6 +482,8 @@ const cleanupStaleEventsRoute = createServerRoute({
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
       workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
+      staleRecoveringAfterHours:
+        params?.body?.staleRecoveringAfterHours ?? DEFAULT_STALE_RECOVERING_AFTER_HOURS,
     });
   },
 });

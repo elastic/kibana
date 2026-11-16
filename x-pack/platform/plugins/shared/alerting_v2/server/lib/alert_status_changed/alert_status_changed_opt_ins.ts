@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
+import type { AlertStatusChangedTriggerPayload } from '../../../common/workflows/triggers';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   LoggerServiceToken,
@@ -27,6 +28,8 @@ export interface AlertStatusChangedOptIn {
    * check that throws is logged and treated as false.
    */
   isEnabled: (request: KibanaRequest) => Promise<boolean>;
+  /** Receives persisted status changes when this opt-in is enabled. */
+  onStatusChanges?: (payloads: readonly AlertStatusChangedTriggerPayload[]) => Promise<void>;
 }
 
 /**
@@ -66,5 +69,44 @@ export class AlertStatusChangedOptIns {
     }
 
     return false;
+  }
+
+  public async getEnabled(request: KibanaRequest): Promise<AlertStatusChangedOptIn[]> {
+    const enabled: AlertStatusChangedOptIn[] = [];
+
+    for (const optIn of this.optIns) {
+      try {
+        if (await optIn.isEnabled(request)) {
+          enabled.push(optIn);
+        }
+      } catch (error) {
+        this.logger.warn({
+          message: 'An alert status changed opt-in check failed, treating it as disabled',
+          code: ALERTING_LOG_CODES.EVENTS_ALERT_STATUS_CHANGED_OPT_IN_FAILED,
+          error,
+        });
+      }
+    }
+
+    return enabled;
+  }
+
+  public async notify(
+    optIns: readonly AlertStatusChangedOptIn[],
+    payloads: readonly AlertStatusChangedTriggerPayload[]
+  ): Promise<void> {
+    await Promise.all(
+      optIns.map(async ({ onStatusChanges }) => {
+        try {
+          await onStatusChanges?.(payloads);
+        } catch (error) {
+          this.logger.warn({
+            message: 'An alert status changed opt-in callback failed',
+            code: ALERTING_LOG_CODES.EVENTS_ALERT_STATUS_CHANGED_OPT_IN_FAILED,
+            error,
+          });
+        }
+      })
+    );
   }
 }
