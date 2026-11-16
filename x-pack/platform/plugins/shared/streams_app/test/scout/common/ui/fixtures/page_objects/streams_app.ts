@@ -208,7 +208,12 @@ export class StreamsApp {
   }
 
   async gotoPartitioningTab(streamName: string, options?: Parameters<ScoutPage['gotoApp']>[1]) {
-    await this.gotoStreamManagementTab(streamName, 'partitioning', options);
+    await this.gotoStreamManagementTab(streamName, 'partitioning', {
+      readyWhen: this.page.testSubj.locator('streamsAppCurrentStreamPanel'),
+      // A cold Cloud bootstrap can outlast the default 30s app-ready budget.
+      readyTimeout: 45_000,
+      ...options,
+    });
   }
 
   async gotoDataRetentionTab(streamName: string) {
