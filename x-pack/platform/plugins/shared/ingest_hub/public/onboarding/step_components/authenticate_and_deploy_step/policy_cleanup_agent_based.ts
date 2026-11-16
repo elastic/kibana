@@ -15,7 +15,12 @@ import {
 import { getEffectiveNamespace } from '../../common/effective_namespace';
 import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
-import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
+import {
+  buildPackageInputs,
+  buildPackageVars,
+  disableUnselectedStreams,
+  getPackageVarNames,
+} from './package_inputs';
 import {
   detectSecretRefs,
   fetchPackagePolicySecretRefs,
@@ -241,6 +246,8 @@ export async function updateAgentBasedPolicy(
       if (!inputs[key]) inputs[key] = { enabled: false, streams: {} };
     }
   }
+
+  disableUnselectedStreams(inputs, pkgInfo);
 
   const { staticKeys } = authenticateAndDeployStep;
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });

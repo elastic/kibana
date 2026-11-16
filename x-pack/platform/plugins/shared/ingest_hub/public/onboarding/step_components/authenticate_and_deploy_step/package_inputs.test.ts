@@ -6,6 +6,7 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { PackageInputEntry } from './package_inputs';
 import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildDeployGroups } from './deploy_groups';
 import {
@@ -13,6 +14,7 @@ import {
   buildPackageInputs,
   buildPackageVars,
   buildStreamVars,
+  disableUnselectedStreams,
   toSOServiceVars,
 } from './package_inputs';
 
@@ -805,5 +807,64 @@ describe('buildStreamVars — package vars from the shared settings', () => {
     expect(buildStreamVars(notDeclaring, dsVars(), '', 'aws-s3', policyVars)).not.toHaveProperty(
       'proxy_url'
     );
+  });
+});
+
+describe('composable package streams (aws_otel)', () => {
+  const ec2 = makeService({
+    id: 'ec2_otel',
+    packageName: 'aws_otel',
+    policyTemplate: 'aws',
+    signalTypes: ['metrics'],
+    dataStreams: ['ec2'],
+    inputs: ['otelcol'],
+    defaultEnabledInputs: ['otelcol'],
+    varDefsByDataStream: {
+      ec2: {
+        inputs: ['otelcol'],
+        defaultEnabledInputs: ['otelcol'],
+        dataset: 'aws.ec2',
+        varDefsByInput: {},
+      },
+    },
+  });
+  const storedVars: Record<string, ServiceVars> = {
+    ec2_otel: {
+      enabledDataStreams: ['ec2'],
+      varsByDataStream: { ec2: { enabledInputs: ['otelcol'], varsByInput: { otelcol: {} } } },
+    },
+  };
+  const pkgInfo = {
+    policy_templates: [
+      {
+        name: 'aws',
+        data_streams: ['ec2', 'sqs'],
+        inputs: [{ type: 'otelcol' }],
+      },
+    ],
+    data_streams: [
+      { path: 'ec2', dataset: 'aws.ec2', streams: [{ input: 'otelcol' }] },
+      { path: 'sqs', dataset: 'aws.sqs', streams: [{ input: 'otelcol' }] },
+    ],
+  };
+
+  it('keys the stream by the dataset the data stream pins', () => {
+    const inputs = buildPackageInputs([ec2], storedVars, 'us-east-1');
+    expect(Object.keys(inputs['aws-otelcol'].streams)).toEqual(['aws.ec2']);
+  });
+
+  it('disables the sibling streams of the shared template that were not selected', () => {
+    const inputs = buildPackageInputs([ec2], storedVars, 'us-east-1');
+    disableUnselectedStreams(inputs, pkgInfo);
+    expect(inputs['aws-otelcol'].streams['aws.ec2'].enabled).toBe(true);
+    expect(inputs['aws-otelcol'].streams['aws.sqs']).toEqual({ enabled: false, vars: {} });
+  });
+
+  it('leaves inputs that are not selected untouched', () => {
+    const inputs: Record<string, PackageInputEntry> = {
+      'aws-otelcol': { enabled: false, streams: {} },
+    };
+    disableUnselectedStreams(inputs, pkgInfo);
+    expect(inputs['aws-otelcol'].streams).toEqual({});
   });
 });

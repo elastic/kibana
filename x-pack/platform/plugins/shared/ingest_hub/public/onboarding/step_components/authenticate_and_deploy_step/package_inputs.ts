@@ -212,9 +212,11 @@ export function buildPackageInputs(
       // isInputPackage: buildAwsServiceMatrix sets entry.id = pt.name for input-package PTs, so
       // dsId === service.id iff the service was built from a PT (not a standalone data stream).
       const isInputPackage = dsId === service.id && !!service.policyTemplate;
+      // Fleet keys simplified-policy streams by dataset, which a data stream may pin to a value
+      // other than its path (e.g. aws_otel's `ec2` stream writes to `aws.ec2`).
       const streamKey = isInputPackage
         ? `${service.packageName}.${ptName}`
-        : `${service.packageName}.${dsId}`;
+        : service.varDefsByDataStream?.[dsId]?.dataset ?? `${service.packageName}.${dsId}`;
 
       for (const inputType of activeInputs) {
         const inputKey = `${ptName}-${inputType}`;
@@ -243,6 +245,49 @@ export function buildPackageInputs(
   }
 
   return inputs;
+}
+
+interface PackageInfoStreams {
+  policy_templates?: Array<{
+    name?: string;
+    data_streams?: string[];
+    inputs?: Array<{ id?: string; type: string }>;
+  }>;
+  data_streams?: Array<{
+    path: string;
+    dataset?: string;
+    streams?: Array<{ input: string }>;
+  }>;
+}
+
+/**
+ * Explicitly disables the streams of a shared policy template that were not selected. Services of
+ * one template (e.g. aws_otel's `aws` template, one data stream per service) share an input key,
+ * and Fleet keeps the manifest default for every stream missing from the request, so an
+ * unselected default-enabled sibling would otherwise be collected too.
+ */
+export function disableUnselectedStreams(
+  inputs: Record<string, PackageInputEntry>,
+  pkgInfo: unknown
+): void {
+  const { policy_templates: templates = [], data_streams: dataStreams = [] } =
+    (pkgInfo as PackageInfoStreams) ?? {};
+  for (const template of templates) {
+    for (const input of template.inputs ?? []) {
+      const key = template.name ? `${template.name}-${input.id ?? input.type}` : input.type;
+      const entry = inputs[key];
+      if (!entry?.enabled) continue;
+      for (const dsPath of template.data_streams ?? []) {
+        const ds = dataStreams.find((d) => d.path === dsPath);
+        for (const stream of ds?.streams ?? []) {
+          const streamKey = ds?.dataset;
+          if (stream.input === input.type && streamKey && !entry.streams[streamKey]) {
+            entry.streams[streamKey] = { enabled: false, vars: {} };
+          }
+        }
+      }
+    }
+  }
 }
 
 /**
