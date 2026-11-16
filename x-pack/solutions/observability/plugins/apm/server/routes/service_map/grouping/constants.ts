@@ -52,7 +52,10 @@ export const INFERENCE_RESOLUTIONS = [4, 2, 1, 0.5, 0.25, 0.1] as const;
 export const READABLE_MIN_GROUPS = 7;
 /** More groups than this stop being readable as groups. */
 export const READABLE_MAX_GROUPS = 50;
-/** No group may hold more than this share of the services. */
+/**
+ * No group found from calls may hold more than this share of the services on the map, shared and
+ * not connected included.
+ */
 export const READABLE_MAX_LARGEST_GROUP_SHARE = 0.4;
 /** A group with at least this share of its calls inside it is self-contained. */
 export const SELF_CONTAINED_CALL_SHARE = 0.5;

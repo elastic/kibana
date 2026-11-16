@@ -7,7 +7,13 @@
 
 import type { ServiceMapGroup } from '@kbn/apm-types';
 import { groupServicesByCalls } from './group_services_by_calls';
-import { adjustedRandIndex, isConnected, shuffled, syntheticEstate } from './test_helpers';
+import {
+  adjustedRandIndex,
+  isConnected,
+  seededRandom,
+  shuffled,
+  syntheticEstate,
+} from './test_helpers';
 import type { SyntheticEstate } from './test_helpers';
 import type { ServiceCallStats } from './types';
 
@@ -140,6 +146,44 @@ describe('groupServicesByCalls', () => {
       expect(new Set(members.map((service) => groupOf.get(service)?.id))).toEqual(
         new Set([`calls:${members[0]}`])
       );
+    }
+  });
+
+  it('keeps a team whole when it is above 40% of the services grouped by calls, but not of the map', () => {
+    // A team of 50 next to 6 teams of 10, and 30 services with no calls: the team is 45% of the
+    // 110 services grouped by calls, but 36% of the 140 on the map.
+    const random = seededRandom(1);
+    const teams = [
+      Array.from({ length: 50 }, (_, member) => `big-${member}`),
+      ...Array.from({ length: 6 }, (_, team) =>
+        Array.from({ length: 10 }, (__, member) => `team${team}-${member}`)
+      ),
+    ];
+    const idle = Array.from({ length: 30 }, (_, index) => `idle-${index}`);
+    // each member calls 4 others of its team at random, and each team's first member calls the
+    // next team's
+    const calls = teams.flatMap((members, team) => [
+      ...members.flatMap((caller, position) =>
+        Array.from({ length: 4 }, () => {
+          const picked = Math.floor(random() * members.length);
+          const callee = members[picked === position ? (picked + 1) % members.length : picked];
+          return [caller, callee] as const;
+        })
+      ),
+      [members[0], teams[(team + 1) % teams.length][0]] as const,
+    ]);
+    const estate = syntheticEstate({
+      teams: 0,
+      servicesPerTeam: 0,
+      extraServices: [...teams.flat(), ...idle],
+      extraCalls: calls,
+    });
+    const { groupOf } = group(estate);
+
+    for (const members of teams) {
+      const groupsOfTeam = new Set(members.map((service) => groupOf.get(service)));
+      expect(groupsOfTeam.size).toBe(1);
+      expect([...groupsOfTeam][0]?.kind).toBe('calls');
     }
   });
 

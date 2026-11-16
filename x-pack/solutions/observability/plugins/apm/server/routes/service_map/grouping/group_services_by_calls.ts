@@ -41,6 +41,7 @@ export function groupServicesByCalls({
   const inferred = inferGroupsFromCalls({
     services: connected,
     edges: edgesBetween({ edges: restEdges, services: new Set(connected) }),
+    mapServiceCount: services.length,
   });
   const busiest = busiestServiceByGroup({ groups: inferred, stats });
 

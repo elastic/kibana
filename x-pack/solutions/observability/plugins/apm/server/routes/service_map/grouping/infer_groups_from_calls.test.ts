@@ -60,14 +60,14 @@ describe('inferGroupsFromCalls', () => {
       servicesPerTeam: 20,
       seed: 5,
     });
-    const groups = inferGroupsFromCalls({ services, edges });
+    const groups = inferGroupsFromCalls({ services, edges, mapServiceCount: services.length });
 
     expect(adjustedRandIndex({ services, truth: teamOf, found: groups })).toBeGreaterThan(0.9);
   });
 
   it(`splits teams too large to read, so no group has more than ${MAX_GROUP_SIZE} services`, () => {
     const { services, edges } = syntheticEstate({ teams: 12, servicesPerTeam: 220, seed: 3 });
-    const groups = inferGroupsFromCalls({ services, edges });
+    const groups = inferGroupsFromCalls({ services, edges, mapServiceCount: services.length });
 
     const sizes = membersByGroup(groups).map((members) => members.length);
     expect(Math.max(...sizes)).toBeLessThanOrEqual(MAX_GROUP_SIZE);
@@ -81,7 +81,7 @@ describe('inferGroupsFromCalls', () => {
     'keeps every group connected: $teams teams of $servicesPerTeam',
     ({ teams, servicesPerTeam, seed }) => {
       const { services, edges } = syntheticEstate({ teams, servicesPerTeam, seed });
-      const groups = inferGroupsFromCalls({ services, edges });
+      const groups = inferGroupsFromCalls({ services, edges, mapServiceCount: services.length });
 
       for (const members of membersByGroup(groups)) {
         expect(isConnected(members, edges)).toBe(true);
@@ -91,10 +91,14 @@ describe('inferGroupsFromCalls', () => {
 
   it('gives the same groups whatever order services and edges arrive in', () => {
     const { services, edges } = syntheticEstate({ teams: 12, servicesPerTeam: 220, seed: 3 });
-    const first = inferGroupsFromCalls({ services, edges });
+    const first = inferGroupsFromCalls({ services, edges, mapServiceCount: services.length });
 
     expect(
-      inferGroupsFromCalls({ services: shuffled(services, 1), edges: shuffled(edges, 2) })
+      inferGroupsFromCalls({
+        services: shuffled(services, 1),
+        edges: shuffled(edges, 2),
+        mapServiceCount: services.length,
+      })
     ).toEqual(first);
   });
 
@@ -108,7 +112,7 @@ describe('inferGroupsFromCalls', () => {
   ])(
     `keeps $shape as one group above ${MAX_GROUP_SIZE}, rather than breaking it into fragments`,
     ({ services, edges }) => {
-      const groups = inferGroupsFromCalls({ services, edges });
+      const groups = inferGroupsFromCalls({ services, edges, mapServiceCount: services.length });
 
       expect(new Set(groups.values()).size).toBe(1);
     }
@@ -127,7 +131,11 @@ describe('inferGroupsFromCalls', () => {
       .slice(1)
       .map((target, index) => ({ source: chain[index], target, weight: 1 }));
 
-    const groups = inferGroupsFromCalls({ services: [...chain, ...idle], edges });
+    const groups = inferGroupsFromCalls({
+      services: [...chain, ...idle],
+      edges,
+      mapServiceCount: chain.length + idle.length,
+    });
 
     expect(new Set(chain.map((service) => groups.get(service))).size).toBe(1);
     expect(new Set(idle.map((service) => groups.get(service))).size).toBe(idle.length);
@@ -138,7 +146,7 @@ describe('inferGroupsFromCalls', () => {
     // 30 teams of 20: the finest resolution finds them, so no coarser run is needed
     const { services, edges } = syntheticEstate({ teams: 30, servicesPerTeam: 20, seed: 5 });
 
-    inferGroupsFromCalls({ services, edges });
+    inferGroupsFromCalls({ services, edges, mapServiceCount: services.length });
 
     expect(resolutionsTried(services.length)).toEqual([4]);
   });
@@ -149,12 +157,14 @@ describe('inferGroupsFromCalls', () => {
     // sweep: 0.25 and 0.1 only merge further.
     const { services, edges } = syntheticEstate({ teams: 250, servicesPerTeam: 20, seed: 5 });
 
-    inferGroupsFromCalls({ services, edges });
+    inferGroupsFromCalls({ services, edges, mapServiceCount: services.length });
 
     expect(resolutionsTried(services.length)).toEqual([4, 2, 1, 0.5]);
   });
 
   it('groups nothing when given no services', () => {
-    expect(inferGroupsFromCalls({ services: [], edges: [] })).toEqual(new Map());
+    expect(inferGroupsFromCalls({ services: [], edges: [], mapServiceCount: 0 })).toEqual(
+      new Map()
+    );
   });
 });

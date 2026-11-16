@@ -46,6 +46,9 @@ interface Run {
  * largest group. Runs that break most services into tiny parts are never picked. Groups still too
  * large are then split on their own calls.
  *
+ * A readable run's largest group is measured against every service on the map, since the shared
+ * and not connected groups show on it too. The other checks only look at the services given.
+ *
  * The same calls always give the same groups, but a small change in the calls can move services
  * between groups, or change which resolution is picked. Keeping groups steady as calls change is
  * left for a later issue.
@@ -53,15 +56,18 @@ interface Run {
 export function inferGroupsFromCalls({
   services,
   edges,
+  mapServiceCount,
 }: {
   services: readonly string[];
   edges: readonly WeightedEdge[];
+  /** Every service on the map, shared and not connected included. */
+  mapServiceCount: number;
 }): Map<string, number> {
   if (services.length === 0) {
     return new Map();
   }
   const picked = pickRun({
-    serviceCount: services.length,
+    mapServiceCount,
     runAt: (resolution) =>
       measureRun({
         groups: absorbTinyGroups({
@@ -88,16 +94,16 @@ export function inferGroupsFromCalls({
  * Without a self-contained run, the pick is made among the runs computed.
  */
 function pickRun({
-  serviceCount,
+  mapServiceCount,
   runAt,
 }: {
-  serviceCount: number;
+  mapServiceCount: number;
   runAt: (resolution: number) => Run;
 }): Run {
   const finestFirst: Run[] = [];
   for (const resolution of INFERENCE_RESOLUTIONS) {
     const run = runAt(resolution);
-    if (isReadable({ run, serviceCount }) && isSelfContained(run)) {
+    if (isReadable({ run, mapServiceCount }) && isSelfContained(run)) {
       return run;
     }
     const withinLimitBefore = finestFirst.some(
@@ -121,7 +127,7 @@ function pickRun({
   // The readable run the calls fit best. Self-containment would favour the coarsest run, since
   // larger groups keep more calls inside almost by default; modularity discounts what chance gives.
   const [bestReadable] = eligible
-    .filter((run) => isReadable({ run, serviceCount }))
+    .filter((run) => isReadable({ run, mapServiceCount }))
     .sort(byModularity);
   if (bestReadable) {
     return bestReadable;
@@ -147,14 +153,14 @@ function isEligible({ inTinyParts }: Run): boolean {
   return inTinyParts <= MAX_TINY_PART_SHARE;
 }
 
-function isReadable({ run, serviceCount }: { run: Run; serviceCount: number }): boolean {
+function isReadable({ run, mapServiceCount }: { run: Run; mapServiceCount: number }): boolean {
   const { groupCount, largest } = run;
   return (
     isEligible(run) &&
     groupCount >= READABLE_MIN_GROUPS &&
     groupCount <= READABLE_MAX_GROUPS &&
     largest <= MAX_GROUP_SIZE &&
-    largest <= READABLE_MAX_LARGEST_GROUP_SHARE * serviceCount
+    largest <= READABLE_MAX_LARGEST_GROUP_SHARE * mapServiceCount
   );
 }
 
