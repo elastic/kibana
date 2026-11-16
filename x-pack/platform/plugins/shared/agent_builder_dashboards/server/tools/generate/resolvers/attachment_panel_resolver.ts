@@ -11,7 +11,7 @@ import {
   VISUALIZATION_ATTACHMENT_TYPE,
   getEffectiveRenderer,
   isCustomContentVisualization,
-  readCustomContentQueries,
+  readAttachmentQueries,
   type VisualizationAttachmentData,
 } from '@kbn/agent-builder-visualizations-common';
 import {
@@ -26,7 +26,7 @@ const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
 
   // Custom content stores markup rather than a chart config, so its panel config is rebuilt.
   if (isCustomContentVisualization(data)) {
-    const esqlQueries = readCustomContentQueries(data);
+    const esqlQueries = readAttachmentQueries(data);
     return {
       type,
       config: {

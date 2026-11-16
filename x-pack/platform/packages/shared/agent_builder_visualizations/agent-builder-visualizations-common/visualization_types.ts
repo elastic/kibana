@@ -45,7 +45,7 @@ interface CustomContentVisualizationAttachmentData extends VisualizationAttachme
   /**
    * The panel's ES|QL queries, in the order its template reads them: the first is `rows`, the others
    * `queries[1]`, `queries[2]`, ... None for a static panel. Attachments saved before a panel could
-   * have several hold a single string, so read it with `readCustomContentQueries`.
+   * have several hold a single string, so read it with `readAttachmentQueries`.
    */
   esql?: string[];
 }
@@ -78,6 +78,9 @@ export const toQueryList = (esql: string | readonly string[] | undefined): strin
   return typeof esql === 'string' ? [esql] : [...esql];
 };
 
-/** The ES|QL queries of an attachment, in the order its template reads them. */
-export const readCustomContentQueries = (data: VisualizationAttachmentData): string[] =>
+/**
+ * The ES|QL queries of any visualization attachment: a chart's one query, or a custom content
+ * panel's list in the order its template reads them.
+ */
+export const readAttachmentQueries = (data: VisualizationAttachmentData): string[] =>
   toQueryList(data.esql);

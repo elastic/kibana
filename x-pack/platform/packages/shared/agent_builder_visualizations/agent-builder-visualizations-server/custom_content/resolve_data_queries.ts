@@ -9,24 +9,23 @@ import {
   CUSTOM_CONTENT_MAX_ESQL_QUERIES,
   ESQL_QUERIES_TOTAL_LENGTH_MESSAGE,
   fitsEsqlQueriesTotalLength,
-  type CustomContentDataQuery,
+  type CustomContentQueryChanges,
 } from '@kbn/custom-content-common';
 
-export interface ResolveDataQueriesParams {
-  /** The panel's queries by position: the first is `rows` in the template, the n-th is `queries[n].rows`. */
-  dataQueries: readonly CustomContentDataQuery[];
+export interface GenerateDataQueryParams {
+  description: string;
+  index?: string;
+  /** The query stored at this position, to modify. */
+  storedQuery?: string;
+  /** How many queries the panel will have. */
+  queryCount: number;
+}
+
+export interface ResolveDataQueriesParams extends CustomContentQueryChanges {
   /** The queries the panel holds now, main query first. Empty for a new panel. */
   existingQueries: readonly string[];
-  /**
-   * Generates a query from a description. Receives the stored query at that position to modify, when
-   * there is one, and how many queries the panel will have.
-   */
-  generate: (
-    dataQuery: { description: string; index?: string },
-    storedQuery: string | undefined,
-    position: number,
-    queryCount: number
-  ) => Promise<string>;
+  /** Generates a query from a description. */
+  generate: (params: GenerateDataQueryParams) => Promise<string>;
 }
 
 export interface ResolvedDataQueries {
@@ -34,21 +33,36 @@ export interface ResolvedDataQueries {
   queries: string[];
   /** Per position: false when the stored query is untouched, so it is not sampled again. */
   changed: boolean[];
+  /** Whether the queries differ from the stored ones, in value or in number. */
+  hasChanges: boolean;
 }
 
 /**
- * Decides which ES|QL queries a custom content panel ends up with when a caller lists them by
- * position. A data query with `esql` replaces the query at its position, one with `description`
- * (re)generates it, seeded with the stored query so the parts the request does not change survive,
- * and an empty one keeps it. A position past the stored queries adds a query and needs one of the
- * two. Stored queries the list does not reach are kept: removing one would shift the `queries[n]`
- * every later one is read by, and the template with it.
+ * Decides which ES|QL queries a custom content panel ends up with. `removeAllQueries` leaves none.
+ * Without it and without `dataQueries` the stored queries are kept. Otherwise the caller lists the
+ * queries by position: a data query with `esql` replaces the query at its position, one with
+ * `description` (re)generates it, seeded with the stored query so the parts the request does not
+ * change survive, and an empty one keeps it. A position past the stored queries adds a query and
+ * needs one of the two. Stored queries the list does not reach are kept: removing one would shift
+ * the `queries[n]` every later one is read by, and the template with it.
  */
 export const resolveDataQueries = async ({
   dataQueries,
+  removeAllQueries,
   existingQueries,
   generate,
 }: ResolveDataQueriesParams): Promise<ResolvedDataQueries> => {
+  if (removeAllQueries) {
+    return { queries: [], changed: [], hasChanges: existingQueries.length > 0 };
+  }
+  if (!dataQueries) {
+    return {
+      queries: [...existingQueries],
+      changed: existingQueries.map(() => false),
+      hasChanges: false,
+    };
+  }
+
   const total = Math.max(dataQueries.length, existingQueries.length);
   if (total > CUSTOM_CONTENT_MAX_ESQL_QUERIES) {
     throw new Error(
@@ -70,12 +84,12 @@ export const resolveDataQueries = async ({
       const dataQuery = dataQueries[position];
       if (dataQuery?.esql?.trim()) return dataQuery.esql;
       if (dataQuery?.description?.trim()) {
-        return generate(
-          { description: dataQuery.description, index: dataQuery.index },
-          existing || undefined,
-          position,
-          total
-        );
+        return generate({
+          description: dataQuery.description,
+          index: dataQuery.index,
+          storedQuery: existing || undefined,
+          queryCount: total,
+        });
       }
       if (existing) return existing;
       throw new Error(
@@ -88,8 +102,10 @@ export const resolveDataQueries = async ({
 
   if (!fitsEsqlQueriesTotalLength(queries)) throw new Error(ESQL_QUERIES_TOTAL_LENGTH_MESSAGE);
 
+  const changed = queries.map((query, position) => query !== existingQueries[position]);
   return {
     queries,
-    changed: queries.map((query, position) => query !== existingQueries[position]),
+    changed,
+    hasChanges: changed.some(Boolean) || queries.length !== existingQueries.length,
   };
 };

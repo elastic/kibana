@@ -34,6 +34,7 @@ export type {
   CustomContentDataQueries,
   CustomContentQueryChanges,
 } from './schema';
+export { toEsqlQueryState } from './esql_query_state';
 export {
   fitsEsqlQueriesTotalLength,
   ESQL_QUERIES_TOTAL_LENGTH_MESSAGE,

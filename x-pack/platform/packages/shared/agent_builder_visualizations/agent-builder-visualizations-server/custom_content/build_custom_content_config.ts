@@ -12,7 +12,7 @@ import { createCustomContentTemplateResolver } from '@kbn/custom-content-server'
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Logger } from '@kbn/logging';
 import { generateCustomContentEsql } from '../shared/custom_content_esql';
-import { resolveDataQueries } from './resolve_data_queries';
+import { resolveDataQueries, type GenerateDataQueryParams } from './resolve_data_queries';
 
 type GenerateParams = Parameters<typeof generateCustomContentEsql>[0];
 
@@ -91,20 +91,18 @@ export const buildCustomContentConfig = async ({
 
   const existingQueries = existing?.esqlQueries ?? [];
 
-  const generateQuery = async (params: {
-    nlQuery: string;
-    index?: string;
-    /** The query stored at this position, to modify. */
-    storedQuery?: string;
-    /** How many queries the panel will have. */
-    queryCount: number;
-  }) => {
-    const storedQueries = params.storedQuery ? [params.storedQuery] : [];
+  const generateQuery = async ({
+    description,
+    index,
+    storedQuery,
+    queryCount,
+  }: GenerateDataQueryParams) => {
+    const storedQueries = storedQuery ? [storedQuery] : [];
     return generateCustomContentEsql({
-      nlQuery: params.nlQuery,
-      index: params.index,
+      nlQuery: description,
+      index,
       existingQueries: storedQueries,
-      queryCount: params.queryCount,
+      queryCount,
       esqlVariables: await getEsqlVariables(storedQueries, { anyVariable: true }),
       modelProvider,
       events,
@@ -114,24 +112,17 @@ export const buildCustomContentConfig = async ({
     });
   };
 
-  let esqlQueries: string[] = [...existingQueries];
-  // Per position: whether the query is new or changing, so it is sampled for the template.
-  let changedQueries: boolean[] = existingQueries.map(() => false);
-  if (removeAllQueries) {
-    esqlQueries = [];
-    changedQueries = [];
-  } else if (dataQueries) {
-    const resolved = await resolveDataQueries({
-      dataQueries,
-      existingQueries,
-      generate: ({ description, index }, storedQuery, _position, queryCount) =>
-        generateQuery({ nlQuery: description, index, storedQuery, queryCount }),
-    });
-    esqlQueries = resolved.queries;
-    changedQueries = resolved.changed;
-  }
-
-  const hasChanges = changedQueries.some(Boolean) || esqlQueries.length !== existingQueries.length;
+  // `changedQueries` is per position: whether the query is new or changing, so it is sampled.
+  const {
+    queries: esqlQueries,
+    changed: changedQueries,
+    hasChanges,
+  } = await resolveDataQueries({
+    dataQueries,
+    removeAllQueries,
+    existingQueries,
+    generate: generateQuery,
+  });
   if (existing && nlQuery === undefined && !hasChanges) {
     return { esqlQueries, template: existing.template ?? '' };
   }

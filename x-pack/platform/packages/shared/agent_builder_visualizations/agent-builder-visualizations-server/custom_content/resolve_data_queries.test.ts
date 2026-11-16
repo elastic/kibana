@@ -34,6 +34,36 @@ describe('resolveDataQueries', () => {
     expect(generate).not.toHaveBeenCalled();
   });
 
+  describe('without data queries', () => {
+    it('keeps every stored query and reports no change', async () => {
+      const result = await resolveDataQueries({
+        existingQueries: ['FROM a', 'FROM b'],
+        generate,
+      });
+
+      expect(result).toEqual({
+        queries: ['FROM a', 'FROM b'],
+        changed: [false, false],
+        hasChanges: false,
+      });
+      expect(generate).not.toHaveBeenCalled();
+    });
+
+    it('removes every query when asked to, which counts as a change only if there were any', async () => {
+      expect(
+        await resolveDataQueries({
+          removeAllQueries: true,
+          existingQueries: ['FROM a', 'FROM b'],
+          generate,
+        })
+      ).toEqual({ queries: [], changed: [], hasChanges: true });
+      expect(
+        await resolveDataQueries({ removeAllQueries: true, existingQueries: [], generate })
+      ).toEqual({ queries: [], changed: [], hasChanges: false });
+      expect(generate).not.toHaveBeenCalled();
+    });
+  });
+
   describe('a new panel', () => {
     it('generates a query from each description, by position', async () => {
       const { queries, changed } = await resolveDataQueries({
@@ -47,20 +77,18 @@ describe('resolveDataQueries', () => {
         'FROM generated | /* top hosts */ LIMIT 1',
       ]);
       expect(changed).toEqual([true, true]);
-      expect(generate).toHaveBeenNthCalledWith(
-        1,
-        { description: 'totals', index: 'logs' },
-        undefined,
-        0,
-        2
-      );
-      expect(generate).toHaveBeenNthCalledWith(
-        2,
-        { description: 'top hosts', index: undefined },
-        undefined,
-        1,
-        2
-      );
+      expect(generate).toHaveBeenNthCalledWith(1, {
+        description: 'totals',
+        index: 'logs',
+        storedQuery: undefined,
+        queryCount: 2,
+      });
+      expect(generate).toHaveBeenNthCalledWith(2, {
+        description: 'top hosts',
+        index: undefined,
+        storedQuery: undefined,
+        queryCount: 2,
+      });
     });
 
     it('uses a supplied query as it is and does not generate it', async () => {
@@ -154,12 +182,12 @@ describe('resolveDataQueries', () => {
       ]);
       expect(changed).toEqual([false, true, false]);
       expect(generate).toHaveBeenCalledTimes(1);
-      expect(generate).toHaveBeenCalledWith(
-        { description: 'top 10 hosts', index: undefined },
-        'FROM second',
-        1,
-        3
-      );
+      expect(generate).toHaveBeenCalledWith({
+        description: 'top 10 hosts',
+        index: undefined,
+        storedQuery: 'FROM second',
+        queryCount: 3,
+      });
     });
 
     it('replaces the query at a position with a supplied one', async () => {
@@ -192,12 +220,12 @@ describe('resolveDataQueries', () => {
       expect(queries).toHaveLength(4);
       expect(queries[3]).toContain('a fourth');
       expect(changed).toEqual([false, false, false, true]);
-      expect(generate).toHaveBeenCalledWith(
-        { description: 'a fourth', index: undefined },
-        undefined,
-        3,
-        4
-      );
+      expect(generate).toHaveBeenCalledWith({
+        description: 'a fourth',
+        index: undefined,
+        storedQuery: undefined,
+        queryCount: 4,
+      });
     });
 
     it('rejects a new position with nothing to build a query from', async () => {

@@ -63,6 +63,7 @@ import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
   CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
+  toEsqlQueryState,
 } from '@kbn/custom-content-common';
 import {
   CustomContentComponent,
@@ -206,7 +207,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
       ...timeRangeManager.getLatestState(),
-      esql_query: esqlQueries$.getValue().length ? [...esqlQueries$.getValue()] : undefined,
+      esql_query: toEsqlQueryState(esqlQueries$.getValue()),
       template: template$.getValue(),
     });
 

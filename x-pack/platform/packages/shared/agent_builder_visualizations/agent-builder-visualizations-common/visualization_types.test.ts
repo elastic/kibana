@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { readCustomContentQueries, toQueryList } from './visualization_types';
+import { readAttachmentQueries, toQueryList } from './visualization_types';
 
 describe('toQueryList', () => {
   it('reads a single string, as saved before a panel could have several, as one query', () => {
@@ -29,7 +29,7 @@ describe('toQueryList', () => {
   });
 });
 
-describe('readCustomContentQueries', () => {
+describe('readAttachmentQueries', () => {
   it('reads the queries of a custom content attachment, saved as a list or as a string', () => {
     const base = {
       renderer: 'custom_content' as const,
@@ -37,20 +37,20 @@ describe('readCustomContentQueries', () => {
       visualization: { template: 't' },
     };
 
-    expect(readCustomContentQueries({ ...base, esql: ['FROM a', 'FROM b'] })).toEqual([
+    expect(readAttachmentQueries({ ...base, esql: ['FROM a', 'FROM b'] })).toEqual([
       'FROM a',
       'FROM b',
     ]);
     expect(
-      readCustomContentQueries({ ...base, esql: 'FROM legacy' } as unknown as Parameters<
-        typeof readCustomContentQueries
+      readAttachmentQueries({ ...base, esql: 'FROM legacy' } as unknown as Parameters<
+        typeof readAttachmentQueries
       >[0])
     ).toEqual(['FROM legacy']);
   });
 
   it('reads the single query of a chart', () => {
     expect(
-      readCustomContentQueries({ renderer: 'lens', query: 'q', visualization: {}, esql: 'FROM a' })
+      readAttachmentQueries({ renderer: 'lens', query: 'q', visualization: {}, esql: 'FROM a' })
     ).toEqual(['FROM a']);
   });
 });

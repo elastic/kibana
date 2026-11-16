@@ -10,7 +10,7 @@ import {
   isCustomContentVisualization,
   type ChartVisualizationAttachmentData,
   type VisualizationAttachmentData,
-  readCustomContentQueries,
+  readAttachmentQueries,
 } from '@kbn/agent-builder-visualizations-common';
 import type {
   AttachmentResolveContext,
@@ -32,7 +32,7 @@ import { visualizationAttachmentDataSchema } from './visualization_schema';
  */
 /** What the model is told about the queries behind a visualization, one line each. */
 const describeQueries = (data: VisualizationAttachmentData): string[] => {
-  const queries = readCustomContentQueries(data);
+  const queries = readAttachmentQueries(data);
   // Custom content is the only renderer that can be static.
   if (queries.length === 0) return ['ES|QL: none (static content)'];
   if (queries.length === 1) return [`ES|QL: ${queries[0]}`];

@@ -117,7 +117,7 @@ export const useEditFlyoutState = ({
   }, []);
   const setQueryText = useCallback((id: number, text: string) => {
     draftVersionRef.current += 1;
-    dispatch({ type: 'SET_QUERY_TEXT', id, payload: text });
+    dispatch({ type: 'PATCH_QUERY', id, patch: { text } });
   }, []);
 
   const fetchQueryData = useCallback(
@@ -129,7 +129,11 @@ export const useEditFlyoutState = ({
       const controller = new AbortController();
       queryAbortRefs.current.set(id, controller);
 
-      dispatch({ type: 'FETCH_QUERY_START', id });
+      dispatch({
+        type: 'PATCH_QUERY',
+        id,
+        patch: { isDataLoading: true, esqlDataError: null, esqlData: null },
+      });
 
       try {
         const result = await fetchEsqlData(search, core.http, text, timeRange, controller.signal, {
@@ -141,19 +145,22 @@ export const useEditFlyoutState = ({
           esQueryConfig: getEsQueryConfig(core.uiSettings),
         });
         if (!controller.signal.aborted) {
-          dispatch({ type: 'FETCH_QUERY_SUCCESS', id, payload: result });
+          dispatch({ type: 'PATCH_QUERY', id, patch: { esqlData: result } });
         }
       } catch (err) {
         if (!controller.signal.aborted && !(err instanceof Error && err.name === 'AbortError')) {
           dispatch({
-            type: 'FETCH_QUERY_ERROR',
+            type: 'PATCH_QUERY',
             id,
-            payload: err instanceof Error ? err.message : String(err),
+            patch: {
+              esqlDataError: err instanceof Error ? err.message : String(err),
+              esqlData: null,
+            },
           });
         }
       } finally {
         if (!controller.signal.aborted) {
-          dispatch({ type: 'FETCH_QUERY_DONE', id });
+          dispatch({ type: 'PATCH_QUERY', id, patch: { isDataLoading: false } });
         }
       }
     },

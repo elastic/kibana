@@ -8,6 +8,7 @@
 import { buildCustomContentConfig } from '@kbn/agent-builder-visualizations-server';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
 import {
@@ -51,7 +52,7 @@ export const createCustomContentPanelResolver = ({
           type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
           config: {
             ...existing,
-            esql_query: esqlQueries.length ? esqlQueries : undefined,
+            esql_query: toEsqlQueryState(esqlQueries),
             template,
           },
         },

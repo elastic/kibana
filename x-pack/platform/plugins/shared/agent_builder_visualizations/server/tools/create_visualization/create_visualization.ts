@@ -16,7 +16,7 @@ import {
   VISUALIZATION_ATTACHMENT_TYPE,
   getEffectiveRenderer,
   isCustomContentVisualization,
-  readCustomContentQueries,
+  readAttachmentQueries,
   type VisualizationAttachmentData,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
@@ -378,7 +378,7 @@ Ground first: make sure the target index exists and every field you reference is
             ),
             removeAllQueries,
             existing: existingData && {
-              esqlQueries: readCustomContentQueries(existingData),
+              esqlQueries: readAttachmentQueries(existingData),
               template: existingTemplate,
             },
             timeRange: requestedTimeRange,
@@ -446,7 +446,7 @@ Ground first: make sure the target index exists and every field you reference is
           visualizationData.time_range = existingData.time_range;
         } else if (!existingData) {
           const timeRange = await selectDefaultTimeRange({
-            esqlQueries: readCustomContentQueries(visualizationData),
+            esqlQueries: readAttachmentQueries(visualizationData),
             esClient,
             logger,
           });

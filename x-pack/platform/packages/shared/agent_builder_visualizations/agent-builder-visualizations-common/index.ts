@@ -19,7 +19,7 @@ export type {
 export {
   getEffectiveRenderer,
   isCustomContentVisualization,
-  readCustomContentQueries,
+  readAttachmentQueries,
   toQueryList,
 } from './visualization_types';
 

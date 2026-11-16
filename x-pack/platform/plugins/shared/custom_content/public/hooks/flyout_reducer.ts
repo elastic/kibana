@@ -37,11 +37,8 @@ export interface FlyoutReducerState {
 export type FlyoutAction =
   | { type: 'ADD_QUERY' }
   | { type: 'REMOVE_QUERY'; id: number }
-  | { type: 'SET_QUERY_TEXT'; id: number; payload: string }
-  | { type: 'FETCH_QUERY_START'; id: number }
-  | { type: 'FETCH_QUERY_SUCCESS'; id: number; payload: EsqlDataResult }
-  | { type: 'FETCH_QUERY_ERROR'; id: number; payload: string }
-  | { type: 'FETCH_QUERY_DONE'; id: number }
+  /** Changes some fields of one query: its text, or the state of its data preview. */
+  | { type: 'PATCH_QUERY'; id: number; patch: Partial<Omit<DraftQuery, 'id'>> }
   | { type: 'SET_TEMPLATE'; payload: string }
   | { type: 'RENDER_START' }
   | { type: 'RENDER_DONE' }
@@ -74,20 +71,8 @@ export const flyoutReducer = (
         ...state,
         draftQueries: state.draftQueries.filter((draft) => draft.id !== action.id),
       };
-    case 'SET_QUERY_TEXT':
-      return updateQuery(state, action.id, { text: action.payload });
-    case 'FETCH_QUERY_START':
-      return updateQuery(state, action.id, {
-        isDataLoading: true,
-        esqlDataError: null,
-        esqlData: null,
-      });
-    case 'FETCH_QUERY_SUCCESS':
-      return updateQuery(state, action.id, { esqlData: action.payload });
-    case 'FETCH_QUERY_ERROR':
-      return updateQuery(state, action.id, { esqlDataError: action.payload, esqlData: null });
-    case 'FETCH_QUERY_DONE':
-      return updateQuery(state, action.id, { isDataLoading: false });
+    case 'PATCH_QUERY':
+      return updateQuery(state, action.id, action.patch);
     case 'SET_TEMPLATE':
       return { ...state, draftTemplate: action.payload };
     case 'RENDER_START':
