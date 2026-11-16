@@ -42,9 +42,16 @@ export class ObservabilityNavigation {
     this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
   }
 
-  /** `goto*` does not call `waitForLoad()` — sidenav may be absent (e.g. classic chrome); call `waitForLoad()` when interacting with nav. */
+  /**
+   * Opens Observability and waits for the solution nav.
+   * `readyWhen` resolves on `commit` instead of the browser `load` event, which stays
+   * pending while background requests (Fleet, ML) are still open on a busy serverless node.
+   */
   async goto() {
-    await this.page.gotoApp('observability');
+    await this.page.gotoApp('observability', {
+      readyWhen: this.primaryNav,
+      readyTimeout: OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
+    });
   }
 
   async gotoLanding() {

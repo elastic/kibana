@@ -183,6 +183,12 @@ test.describe(
       });
     });
 
+    // Login plus opening Observability does not fit in the default 60s when the
+    // node is slow. Fixture setup still uses that default.
+    test.beforeEach(() => {
+      test.setTimeout(120_000);
+    });
+
     test.afterAll(async ({ scoutSpace, kbnClient }) => {
       await unsetAlertingV2EnabledSetting(kbnClient);
       await scoutSpace.uiSettings.unset(ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID);
@@ -582,7 +588,12 @@ test.describe(
       pageObjects,
       kbnClient,
       scoutSpace,
+      config,
     }) => {
+      // `stackAlerts` is hidden in serverless Observability (`stackAlerts.hidden`),
+      // so the privilege cannot be granted and the Alerting panel never renders.
+      test.skip(Boolean(config.serverless), 'Stack Rules are hidden in serverless Observability');
+
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ stackAlerts: ['read'] }),
