@@ -154,17 +154,14 @@ describe('computeEventFacts', () => {
     signals,
     candidateOverrides,
     stored,
-    source,
   }: {
     signals: SignalEntry[];
     candidateOverrides?: Partial<EventsWriteInput>;
     stored?: SignificantEvent;
-    source?: 'discovery';
   }) => {
     return computeEventFacts({
       candidate: makeCandidate(signals, candidateOverrides, stored),
       timestamp: TS_NOW,
-      source,
     });
   };
 
@@ -207,6 +204,51 @@ describe('computeEventFacts', () => {
     );
   });
 
+  describe('confidence', () => {
+    const stored = makeStored([makeSignal()], { confidence: 0.6 });
+
+    it.each(['refutes', 'inconclusive', 'off_topic'] as const)(
+      'keeps the stored score on a continuation whose write carries only %s signals',
+      (verdict) => {
+        expect(
+          facts({
+            signals: [makeSignal({ verdict })],
+            candidateOverrides: { confidence: 0.9 },
+            stored,
+          }).confidence
+        ).toBe(0.6);
+      }
+    );
+
+    it('stores the submitted score on a continuation with a confirming signal', () => {
+      expect(
+        facts({ signals: [makeSignal()], candidateOverrides: { confidence: 0.9 }, stored })
+          .confidence
+      ).toBe(0.9);
+    });
+
+    it('stores the submitted score when a closed series reopens', () => {
+      const closed = makeStored([makeSignal()], { confidence: 0.6, status: 'inactive' });
+
+      expect(
+        facts({
+          signals: [makeSignal({ verdict: 'inconclusive' })],
+          candidateOverrides: { confidence: 0.9, status: 'active' },
+          stored: closed,
+        }).confidence
+      ).toBe(0.9);
+    });
+
+    it('stores the submitted score, unclamped, on a new event with no confirming signal', () => {
+      expect(
+        facts({
+          signals: [makeSignal({ verdict: 'inconclusive' })],
+          candidateOverrides: { event_id: undefined, confidence: 0.6 },
+        }).confidence
+      ).toBe(0.6);
+    });
+  });
+
   it('refuses signals without a proposed severity rather than guessing one', () => {
     expect(() =>
       facts({ signals: [makeSignal()], candidateOverrides: { severity: undefined } })
@@ -231,28 +273,5 @@ describe('computeEventFacts', () => {
     });
 
     expect(result.severity).toBe('medium');
-  });
-
-  describe('investigation lock', () => {
-    const investigated = (signals: SignalEntry[]) =>
-      makeStored(signals, {
-        severity: 'medium',
-        investigations: [
-          { workflow_execution_id: 'wf-1', started_at: TS_EARLIER, completed_at: TS_EARLIER },
-        ],
-      });
-
-    it('keeps the stored tier of a completed investigation over the proposal', () => {
-      const signal = makeSignal();
-
-      const result = facts({
-        signals: [signal],
-        candidateOverrides: { severity: 'high' },
-        stored: investigated([signal]),
-        source: 'discovery',
-      });
-
-      expect(result.severity).toBe('medium');
-    });
   });
 });

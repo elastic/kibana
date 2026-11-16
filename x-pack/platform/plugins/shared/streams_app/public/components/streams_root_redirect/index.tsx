@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
-import { RedirectTo } from '../redirect_to';
 import { StreamListView } from '../stream_list_view';
-import { DEFAULT_STREAMS_LAYOUT_TAB } from '../streams_layout/tabs';
+import { RedirectToDefaultLayoutTab } from '../streams_layout/redirect_to_default_layout_tab';
 import { StreamsNoAccessPrompt } from '../streams_no_access_prompt';
 
 /**
@@ -20,12 +19,7 @@ export function StreamsRootRedirect() {
   const { access } = useStreamsPrivileges();
 
   if (access.v2) {
-    return (
-      <RedirectTo
-        path="/new-experience/{tab}"
-        params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
-      />
-    );
+    return <RedirectToDefaultLayoutTab />;
   }
 
   if (access.legacy) {

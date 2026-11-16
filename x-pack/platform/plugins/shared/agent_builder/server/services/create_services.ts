@@ -139,6 +139,7 @@ export class ServiceManager {
     deploymentInfo,
     deductiveRegister,
     isomer,
+    getSmlTypeDefinition,
     cloud,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
@@ -294,6 +295,8 @@ export class ServiceManager {
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
       surfacesService: surfaces,
+      taskManager,
+      getExecutionService,
     });
 
     executionService = createAgentExecutionService({
@@ -307,6 +310,7 @@ export class ServiceManager {
       agentService: agents,
       runAgent: runner.runAgent,
       attachmentsService: attachments,
+      getSmlTypeDefinition,
       uiSettings,
       savedObjects,
       trackingService,

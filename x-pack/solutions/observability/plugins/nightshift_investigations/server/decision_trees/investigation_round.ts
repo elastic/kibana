@@ -148,12 +148,13 @@ const toRoundSteps = ({
   toolCalls,
   steps,
   rawSteps,
+  budget = { remainingChars: MAX_HISTORY_RESULT_CHARS },
 }: {
   toolCalls: InvestigationToolCall[];
   steps?: readonly InvestigationTranscriptStep[];
   rawSteps?: readonly ConversationRoundStep[];
+  budget?: { remainingChars: number };
 }): ConversationRoundStep[] => {
-  const budget = { remainingChars: MAX_HISTORY_RESULT_CHARS };
   const candidates = normalizeCandidateSteps({ rawSteps, steps });
 
   if (candidates && candidates.length > 0) {
@@ -240,6 +241,7 @@ export const buildInvestigationRound = ({
   steps,
   rawSteps,
   startedAt,
+  budget,
 }: {
   roundId: string;
   prompt: string;
@@ -248,11 +250,12 @@ export const buildInvestigationRound = ({
   steps?: readonly InvestigationTranscriptStep[];
   rawSteps?: readonly ConversationRoundStep[];
   startedAt: string;
+  budget?: { remainingChars: number };
 }): ConversationRound => ({
   id: roundId,
   status: ConversationRoundStatus.completed,
   input: { message: prompt },
-  steps: toRoundSteps({ toolCalls, steps, rawSteps }),
+  steps: toRoundSteps({ toolCalls, steps, rawSteps, budget }),
   response: { message: response },
   started_at: startedAt,
   time_to_first_token: 0,
@@ -260,15 +263,21 @@ export const buildInvestigationRound = ({
   model_usage: { connector_id: 'unknown', llm_calls: 0, input_tokens: 0, output_tokens: 0 },
 });
 
-/** An unpersisted conversation holding only the investigator's round, owned by `agentId`. */
+/**
+ * An unpersisted conversation holding the investigator's rounds in chronological order, owned by
+ * `agentId`. Including `earlierRounds` gives follow-up reinforcement turns the full investigation
+ * trajectory (matching Deductive's `conversation_history`).
+ */
 export const buildInvestigationConversation = ({
   conversationId,
   agentId,
+  earlierRounds = [],
   round,
   now,
 }: {
   conversationId: string;
   agentId: string;
+  earlierRounds?: readonly ConversationRound[];
   round: ConversationRound;
   now: string;
 }): Conversation => ({
@@ -278,5 +287,5 @@ export const buildInvestigationConversation = ({
   title: 'Nightshift decision tree reinforcement',
   created_at: now,
   updated_at: now,
-  rounds: [round],
+  rounds: [...earlierRounds, round],
 });

@@ -751,7 +751,8 @@ describe('JobsHealthService', () => {
     expect(mlClient.getDatafeedStats).toHaveBeenCalledWith({
       datafeed_id: 'test_datafeed_01,test_datafeed_02',
     });
-    expect(mlClient.getJobStats).toHaveBeenCalledTimes(1);
+    // Fetched separately by the datafeed check and the model memory check
+    expect(mlClient.getJobStats).toHaveBeenCalledTimes(2);
     expect(annotationService.getDelayedDataAnnotations).toHaveBeenCalledWith({
       jobIds: ['test_job_01', 'test_job_02'],
       earliestMs: 1487069268000,
@@ -873,5 +874,29 @@ describe('JobsHealthService', () => {
         },
       },
     ]);
+  });
+  test('splits datafeed and job stats requests so the request path stays within limits', async () => {
+    const jobIds = Array.from({ length: 300 }, (_, i) => `test_job_${String(i).padStart(3, '0')}`);
+
+    const result = await jobHealthService.getDatafeedsReport(jobIds);
+
+    expect(mlClient.getDatafeedStats.mock.calls.length).toBeGreaterThan(1);
+    expect(mlClient.getJobStats.mock.calls.length).toBeGreaterThan(1);
+
+    const requestedDatafeedIds = mlClient.getDatafeedStats.mock.calls.flatMap(([params]) => {
+      const datafeedIds = params!.datafeed_id as string;
+      expect(encodeURIComponent(datafeedIds).length).toBeLessThanOrEqual(3500);
+      return datafeedIds.split(',');
+    });
+    expect(requestedDatafeedIds).toEqual(jobIds.map((id) => id.replace('job', 'datafeed')));
+
+    const requestedJobIds = mlClient.getJobStats.mock.calls.flatMap(([params]) => {
+      const jobIdsBatch = params!.job_id as string;
+      expect(encodeURIComponent(jobIdsBatch).length).toBeLessThanOrEqual(3500);
+      return jobIdsBatch.split(',');
+    });
+    expect(requestedJobIds).toEqual(jobIds);
+
+    expect(result).toHaveLength(300);
   });
 });

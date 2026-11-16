@@ -9,9 +9,10 @@ import type { estypes } from '@elastic/elasticsearch';
 import { termQuery, termsQuery } from '@kbn/es-query';
 import { OTEL_EVENT_NAME } from '@kbn/apm-types';
 import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
-import { countOf, p75Of } from '../../../lib/helpers/aggregations';
+import { countOf, percentileOf } from '../../../lib/helpers/aggregations';
 import { dateHistogram } from '../../../lib/helpers/time_series';
-import type { OverviewFilters } from '../../../../common/overview_filters';
+import type { OverviewFilters, OverviewPercentile } from '../../../../common/overview_filters';
+import { DEFAULT_OVERVIEW_PERCENTILE } from '../../../../common/overview_filters';
 import {
   EVENT_EXCEPTION,
   EVENT_NAVIGATION_TIMING,
@@ -47,6 +48,10 @@ export interface OverviewSearchParams {
   environment?: string;
   /** Only the data of the selected browser, OS, device and country, and the page loads of the page. */
   filters?: OverviewFilters;
+  /** The percentile of the load time and its trend; 75 when left out. */
+  percentile?: OverviewPercentile;
+  /** Only the documents this query (the Overview's KQL, as a query) matches. */
+  kuery?: estypes.QueryDslQueryContainer;
 }
 
 /**
@@ -65,6 +70,8 @@ export const logsSearch = ({
   end,
   environment,
   filters = {},
+  percentile = DEFAULT_OVERVIEW_PERCENTILE,
+  kuery,
 }: OverviewSearchParams): estypes.SearchRequest => ({
   ...otelSearchDefaults(OTEL_LOGS_INDEX),
   runtime_mappings: filterRuntimeMappings(),
@@ -73,6 +80,7 @@ export const logsSearch = ({
       filter: [
         ...browserDocuments(start, end),
         ...serviceDocuments(serviceName),
+        ...(kuery ? [kuery] : []),
         // Only the events the metrics count.
         ...termsQuery(OTEL_EVENT_NAME, [EVENT_NAVIGATION_TIMING, EVENT_WEB_VITAL, EVENT_EXCEPTION]),
       ],
@@ -94,12 +102,12 @@ export const logsSearch = ({
           },
           aggs: {
             // Page loads without a load event are counted but left out of the percentile.
-            loadTime: p75Of(NAVIGATION_TIMING_LOAD_EVENT_END),
+            loadTime: percentileOf(NAVIGATION_TIMING_LOAD_EVENT_END, percentile),
             loadTimeSamples: countOf(NAVIGATION_TIMING_LOAD_EVENT_END),
             // The counts of the trend sum to the page loads, and both charts share its buckets.
             trend: {
               ...dateHistogram(start, end),
-              aggs: { loadTime: p75Of(NAVIGATION_TIMING_LOAD_EVENT_END) },
+              aggs: { loadTime: percentileOf(NAVIGATION_TIMING_LOAD_EVENT_END, percentile) },
             },
           },
         },
@@ -123,6 +131,7 @@ export const spansSearch = ({
   end,
   environment,
   filters = {},
+  kuery,
 }: OverviewSearchParams): estypes.SearchRequest => ({
   ...otelSearchDefaults(OTEL_TRACES_INDEX),
   runtime_mappings: filterRuntimeMappings(),
@@ -131,6 +140,7 @@ export const spansSearch = ({
       filter: [
         ...browserDocuments(start, end),
         ...serviceDocuments(serviceName),
+        ...(kuery ? [kuery] : []),
         ...httpRequestDocuments(),
       ],
     },
