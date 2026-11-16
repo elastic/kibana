@@ -8,6 +8,7 @@
  */
 
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import {
   cleanupDataGridTestState,
@@ -61,6 +62,7 @@ describe('DataGrid accessibility', () => {
   });
 
   it('keeps exactly one composite tab stop and restores it on re-entry', async () => {
+    const user = userEvent.setup();
     const { container } = renderGrid();
 
     const firstCell = screen.getByRole('gridcell', { name: 'Name 0' });
@@ -68,20 +70,17 @@ describe('DataGrid accessibility', () => {
     expect(firstCell.getAttribute('tabindex')).toBe('0');
     expect(screen.getByRole('grid').getAttribute('tabindex')).toBe('-1');
 
-    focusElement(firstCell);
-    fireEvent.keyDown(firstCell, { key: 'ArrowRight' });
+    await user.click(firstCell);
+    await user.keyboard('{ArrowRight}');
     const secondCell = await expectFocus('0');
     expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
     expect(secondCell.getAttribute('tabindex')).toBe('0');
 
     const outsideButton = document.createElement('button');
     document.body.append(outsideButton);
-    focusElement(outsideButton);
-    const restoredTabStop = container.querySelector<HTMLElement>('[tabindex="0"]');
-    if (!restoredTabStop) {
-      throw new Error('Expected the grid to retain a composite tab stop.');
-    }
-    focusElement(restoredTabStop);
+    await user.tab();
+    expect(document.activeElement).toBe(outsideButton);
+    await user.tab({ shift: true });
     expect(document.activeElement).toBe(secondCell);
     outsideButton.remove();
   });
