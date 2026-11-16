@@ -56,5 +56,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     // Uninstall tokens
     loadTestFile(require.resolve('./fleet_settings_privileges')); // ~ 1m
+    loadTestFile(require.resolve('./fleet_settings_response_fields'));
   });
 }
