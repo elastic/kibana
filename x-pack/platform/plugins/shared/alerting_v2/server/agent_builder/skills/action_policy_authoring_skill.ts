@@ -235,12 +235,11 @@ An action policy only requires its destination **workflows** to be saved first. 
 
 After rendering the attachments, remind the user to save the workflow before the action policy.
 
-Policies are linked to rules only by \`matcher.tags\`, matched against the rule's \`metadata.routing_tags\`. If a tag in the policy's \`matcher.tags\` is carried by a rule attachment in the conversation that is still unsaved, remind the user that the rule has not been saved yet. Explain that unless another saved rule already carries that routing tag, the policy will not match any alerts until the rule is saved. Do not search for or fetch other rules to check this.
+Policies are linked to rules only by \`matcher.tags\`, matched against the rule's \`metadata.routing_tags\`. If a tag in the policy's \`matcher.tags\` is carried by a rule attachment in the conversation that is still unsaved, remind the user that the rule has not been saved yet. Explain that unless another saved rule already carries that routing tag, the policy will not match any alerts until the rule is saved. Do not search for or fetch other rules to check this. Do not add this reminder for catch-all policies, for policies that route only by \`matcher.expression\`, or when the policy's tags are not on the unsaved rule.
+
 Before calling \`${
       ALERTING_TOOL_IDS.linkRuleAndActionPolicy
     }\` on a policy that is already saved and has no \`matcher.tags\`, explain to the user that linking narrows the policy to that rule and other rules will stop notifying through it once saved. For a saved catch-all (no \`matcher.expression\` either) it applies to every rule today; for a saved expression-only policy the KQL stays and the new tag restricts it to this rule. If the tool result has \`warnings\`, relay them.
-
-Do not add this reminder for catch-all policies, for policies that route only by \`matcher.expression\`, or when the policy's tags are not on the unsaved rule.
 
 ## Customization Hints
 
