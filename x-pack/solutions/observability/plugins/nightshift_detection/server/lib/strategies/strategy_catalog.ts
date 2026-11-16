@@ -6,7 +6,7 @@
  */
 
 import { injectable, multiInject, optional } from 'inversify';
-import { DuplicateStrategyError } from './duplicate_strategy_error';
+import { DuplicateStrategyError } from '../errors/duplicate_strategy_error';
 import { DetectionStrategy } from './detection_strategy';
 
 /** The detection strategies bound in the container, by id. */
