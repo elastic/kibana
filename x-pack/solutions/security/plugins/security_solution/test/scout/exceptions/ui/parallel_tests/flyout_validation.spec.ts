@@ -74,7 +74,7 @@ spaceTest.describe('Exceptions flyout builder', { tag: tags.stateful.classic }, 
 
     // The rule never runs and never gets exceptions. The exceptions tab therefore shows the
     // empty prompt that opens the flyout.
-    ({ id: ruleId } = await apiServices.detectionRule.createCustomQueryRule({
+    const rule = await apiServices.detectionRule.createCustomQueryRule({
       index: [sourceIndex],
       enabled: false,
       name: `Exceptions flyout builder ${scoutSpace.id}`,
@@ -84,8 +84,8 @@ spaceTest.describe('Exceptions flyout builder', { tag: tags.stateful.classic }, 
       severity: 'low',
       type: 'query',
       query: '*:*',
-      from: 'now-6m',
-    }));
+    });
+    ruleId = rule.id;
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects, kbnUrl, scoutSpace }) => {
