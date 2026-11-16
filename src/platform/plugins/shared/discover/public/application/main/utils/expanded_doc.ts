@@ -14,6 +14,7 @@ import {
   getAnySourceCommandFromESQLQuery,
   getIndexPatternFromESQLQuery,
   getSourceCommandFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
   hasTransformationalCommand,
 } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
@@ -71,9 +72,20 @@ export const getEsqlMissingMetadataExample = (esql: string): string => {
   return `${sourceCommand} ${indexPattern} METADATA _id, _index`;
 };
 
+/** Whether the ES|QL query's source command asks for the `_id` and `_index` metadata. */
+export const hasEsqlIdentityMetadata = (esql: string): boolean => {
+  // The printed source command alone: METADATA names are identifiers there, so a literal
+  // elsewhere in the query (a value containing "metadata", say) cannot fool the check.
+  const metadata = /\bMETADATA\b(.*)$/i.exec(getSourceCommandQueryFromESQLQuery(esql))?.[1];
+  return Boolean(metadata && /\b_id\b/i.test(metadata) && /\b_index\b/i.test(metadata));
+};
+
 /**
- * Determines whether a document is deep linkable. Transformational ES|QL rows cannot be reliably refetched,
- * and metadata is checked directly on the document instance because query edits do not change open rows.
+ * Determines whether a document is deep linkable. Transformational ES|QL rows cannot be reliably
+ * refetched, and restoring a reference refetches through the query itself, so the query must ask
+ * for the identity metadata - a record may carry `_id`/`_index` from elsewhere (a chart section's
+ * own lookup), which a query without METADATA could never resolve again. The document's own
+ * metadata is checked on the instance because query edits do not change open rows.
  */
 export const getExpandedDocLinkability = (
   query: Query | AggregateQuery | undefined,
@@ -89,6 +101,10 @@ export const getExpandedDocLinkability = (
 
   if (hasTransformationalCommand(query.esql)) {
     return ExpandedDocLinkability.EsqlTransformational;
+  }
+
+  if (!hasEsqlIdentityMetadata(query.esql)) {
+    return ExpandedDocLinkability.EsqlMissingMetadata;
   }
 
   return getExpandedDocRef(doc)

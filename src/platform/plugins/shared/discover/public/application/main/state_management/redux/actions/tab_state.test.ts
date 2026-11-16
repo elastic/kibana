@@ -971,6 +971,13 @@ describe('tab_state actions', () => {
         rowHeight: undefined,
       });
 
+      // A reference is only written when the query can refetch it: give it the metadata.
+      internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { query: { esql: 'FROM test-index METADATA _id, _index' } },
+        })
+      );
       const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
       internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
       expect(getCurrentTab().appState.expandedDoc).toEqual({
