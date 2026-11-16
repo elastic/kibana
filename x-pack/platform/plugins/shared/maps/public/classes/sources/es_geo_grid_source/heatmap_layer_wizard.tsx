@@ -26,7 +26,7 @@ export const heatmapLayerWizardConfig: LayerWizard = {
   }),
   icon: HeatmapLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: Partial<ESGeoGridSourceDescriptor>) => {
+    const onSourceConfigChange = (sourceConfig: Partial<ESGeoGridSourceDescriptor> | null) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;
