@@ -8,12 +8,28 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
-import { HydrateAlertDataStep, HYDRATION_MAX_RESPONSE_SIZE_BYTES } from './hydrate_alert_data_step';
+import {
+  HydrateAlertDataStep,
+  HYDRATION_MAX_RESPONSE_SIZE_BYTES,
+  HYDRATION_TICK_BUDGET_BYTES,
+} from './hydrate_alert_data_step';
 import { ESQL_QUERY_ROW_LIMIT } from '../queries';
+import type { SuppressedAlert } from '../state';
+import type { Alert } from '../types';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createAlert, createDispatcherPipelineState } from '../fixtures/test_utils';
 import { createAlertDataResponse } from '../fixtures/dispatcher';
+
+const queriedIds = ({ esql }: DeeplyMockedApi<ElasticsearchClient>): string[][] =>
+  esql.query.mock.calls.map(([{ query }]) =>
+    [...query.matchAll(/"(ep-\d+)"/g)].map(([, id]) => id)
+  );
+
+const responseTooLarge = () =>
+  new errors.RequestAbortedError(
+    'The content length (104872541) is bigger than the maximum allowed string (52428800)'
+  );
 
 describe('HydrateAlertDataStep', () => {
   it('is named hydrate_alert_data', () => {
@@ -276,16 +292,6 @@ describe('HydrateAlertDataStep', () => {
   });
 
   describe('when a response exceeds the size cap', () => {
-    const responseTooLarge = () =>
-      new errors.RequestAbortedError(
-        'The content length (104872541) is bigger than the maximum allowed string (52428800)'
-      );
-
-    const queriedIds = ({ esql }: DeeplyMockedApi<ElasticsearchClient>): string[][] =>
-      esql.query.mock.calls.map(([{ query }]) =>
-        [...query.matchAll(/"(ep-\d+)"/g)].map(([, id]) => id)
-      );
-
     it('halves the batch and retries until every alert is hydrated', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService, mockLogger } = createLoggerService();
@@ -387,6 +393,217 @@ describe('HydrateAlertDataStep', () => {
         `1 of 2 alerts have data larger than ${HYDRATION_MAX_RESPONSE_SIZE_BYTES} bytes; ` +
           'their data will be absent (first alert ids: ep-1)'
       );
+    });
+  });
+
+  describe('when the tick data budget is reached', () => {
+    // Past half the tick budget, so no further response is allowed to start.
+    const wideDataJson = `{"a":"${'x'.repeat(HYDRATION_TICK_BUDGET_BYTES / 2)}"}`;
+
+    const alertAt = (alertId: string, minute: number, series: string): Alert =>
+      createAlert({
+        alert_id: alertId,
+        rule_id: series,
+        last_event_timestamp: `2026-01-22T07:${minute}:00.000Z`,
+      });
+
+    const ids = (alerts: readonly Alert[] | undefined) =>
+      (alerts ?? []).map(({ alert_id: alertId }) => alertId);
+
+    it('defers the remaining series to the next tick and stops the scan before them', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      const { loggerService, mockLogger } = createLoggerService();
+      const step = new HydrateAlertDataStep(queryService);
+
+      const alerts = [
+        alertAt('ep-1', 21, 's1'),
+        alertAt('ep-2', 22, 's2'),
+        alertAt('ep-3', 23, 's3'),
+        alertAt('ep-4', 24, 's4'),
+      ];
+
+      mockEsClient.esql.query.mockRejectedValueOnce(responseTooLarge()).mockResolvedValueOnce(
+        createAlertDataResponse([
+          { alert_id: 'ep-1', data_json: wideDataJson },
+          { alert_id: 'ep-2', data_json: '{"b":2}' },
+        ])
+      );
+
+      const result = await step.execute(
+        createDispatcherPipelineState({ alerts, dispatchable: alerts }),
+        loggerService
+      );
+
+      expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') return;
+      expect(ids(result.data?.triage?.dispatchable)).toEqual(['ep-1', 'ep-2']);
+      expect(result.data?.triage?.dispatchable[1].data).toEqual({ b: 2 });
+      expect(result.data?.scan?.deferred).toBe(true);
+      expect(result.data?.scan?.truncated).toBe(true);
+      expect(ids(result.data?.scan?.alerts)).toEqual(['ep-1', 'ep-2']);
+      expect(result.data?.scan?.truncationEdge()?.toISOString()).toBe('2026-01-22T07:22:00.000Z');
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
+        labels: { code: 'HYDRATE_ALERT_DATA_STEP_TICK_BUDGET_REACHED' },
+      });
+    });
+
+    it('defers a series whole, dropping its hydrated and suppressed alerts', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      const { loggerService } = createLoggerService();
+      const step = new HydrateAlertDataStep(queryService);
+
+      const suppressed: SuppressedAlert = {
+        ...alertAt('ep-5', 22, 's2'),
+        reason: 'ack',
+        action_subtype: 'ack',
+      };
+      const dispatchable = [
+        alertAt('ep-1', 21, 's1'),
+        alertAt('ep-2', 23, 's2'),
+        alertAt('ep-3', 24, 's2'),
+        alertAt('ep-4', 25, 's3'),
+      ];
+      const scanAlerts = [dispatchable[0], suppressed, ...dispatchable.slice(1)];
+
+      mockEsClient.esql.query.mockRejectedValueOnce(responseTooLarge()).mockResolvedValueOnce(
+        createAlertDataResponse([
+          { alert_id: 'ep-1', data_json: wideDataJson },
+          { alert_id: 'ep-2', data_json: '{"b":2}' },
+        ])
+      );
+
+      const result = await step.execute(
+        createDispatcherPipelineState({
+          alerts: scanAlerts,
+          dispatchable,
+          suppressed: [suppressed],
+        }),
+        loggerService
+      );
+
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') return;
+      expect(ids(result.data?.triage?.dispatchable)).toEqual(['ep-1']);
+      expect(ids(result.data?.triage?.suppressed)).toEqual([]);
+      // Cut at the suppressed ep-5 (07:22), the oldest alert of a deferred series.
+      expect(ids(result.data?.scan?.alerts)).toEqual(['ep-1']);
+    });
+
+    it('hydrates first the series that owns the oldest scan alert, so the scan keeps an alert', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      const { loggerService } = createLoggerService();
+      const step = new HydrateAlertDataStep(queryService);
+
+      // s2's suppressed ep-5 is older than every dispatchable alert.
+      const suppressed: SuppressedAlert = {
+        ...alertAt('ep-5', 20, 's2'),
+        reason: 'ack',
+        action_subtype: 'ack',
+      };
+      const dispatchable = [
+        alertAt('ep-1', 21, 's1'),
+        alertAt('ep-2', 22, 's2'),
+        alertAt('ep-3', 23, 's3'),
+      ];
+      const scanAlerts = [suppressed, ...dispatchable];
+
+      mockEsClient.esql.query
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockResolvedValueOnce(
+          createAlertDataResponse([{ alert_id: 'ep-2', data_json: wideDataJson }])
+        );
+
+      const result = await step.execute(
+        createDispatcherPipelineState({
+          alerts: scanAlerts,
+          dispatchable,
+          suppressed: [suppressed],
+        }),
+        loggerService
+      );
+
+      expect(queriedIds(mockEsClient)).toEqual([
+        ['ep-2', 'ep-1', 'ep-3'],
+        ['ep-2', 'ep-1'],
+        ['ep-2'],
+      ]);
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') return;
+      expect(ids(result.data?.triage?.dispatchable)).toEqual(['ep-2']);
+      expect(ids(result.data?.triage?.suppressed)).toEqual(['ep-5']);
+      expect(ids(result.data?.scan?.alerts)).toEqual(['ep-5']);
+      expect(result.data?.scan?.truncationEdge()?.toISOString()).toBe('2026-01-22T07:20:00.000Z');
+    });
+
+    it('keeps alerts after the cut dispatchable but out of the scan', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      const { loggerService } = createLoggerService();
+      const step = new HydrateAlertDataStep(queryService);
+
+      // s1 holds the oldest and the newest alert, s2 sits between them.
+      const alerts = [
+        alertAt('ep-1', 21, 's1'),
+        alertAt('ep-2', 22, 's2'),
+        alertAt('ep-3', 23, 's1'),
+      ];
+
+      mockEsClient.esql.query.mockRejectedValueOnce(responseTooLarge()).mockResolvedValueOnce(
+        createAlertDataResponse([
+          { alert_id: 'ep-1', data_json: wideDataJson },
+          { alert_id: 'ep-3', data_json: '{"c":3}' },
+        ])
+      );
+
+      const result = await step.execute(
+        createDispatcherPipelineState({ alerts, dispatchable: alerts }),
+        loggerService
+      );
+
+      expect(queriedIds(mockEsClient)).toEqual([
+        ['ep-1', 'ep-3', 'ep-2'],
+        ['ep-1', 'ep-3'],
+      ]);
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') return;
+      expect(ids(result.data?.triage?.dispatchable)).toEqual(['ep-1', 'ep-3']);
+      expect(ids(result.data?.scan?.alerts)).toEqual(['ep-1']);
+    });
+
+    it('never defers the first series, so every tick makes progress', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      const { loggerService } = createLoggerService();
+      const step = new HydrateAlertDataStep(queryService);
+
+      const alerts = [
+        alertAt('ep-1', 21, 's1'),
+        alertAt('ep-2', 22, 's1'),
+        alertAt('ep-3', 23, 's1'),
+        alertAt('ep-4', 24, 's2'),
+      ];
+
+      mockEsClient.esql.query
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockResolvedValueOnce(
+          createAlertDataResponse([{ alert_id: 'ep-1', data_json: wideDataJson }])
+        )
+        .mockResolvedValueOnce(createAlertDataResponse([]));
+
+      const result = await step.execute(
+        createDispatcherPipelineState({ alerts, dispatchable: alerts }),
+        loggerService
+      );
+
+      expect(queriedIds(mockEsClient)).toEqual([
+        ['ep-1', 'ep-2', 'ep-3', 'ep-4'],
+        ['ep-1', 'ep-2'],
+        ['ep-3', 'ep-4'],
+      ]);
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') return;
+      expect(result.data?.scan).toBeUndefined();
+      expect(ids(result.data?.triage?.dispatchable)).toEqual(['ep-1', 'ep-2', 'ep-3', 'ep-4']);
     });
   });
 
