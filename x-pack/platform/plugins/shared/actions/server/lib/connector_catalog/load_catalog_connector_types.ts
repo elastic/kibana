@@ -23,20 +23,6 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-/** Compares dot separated numeric versions segment by segment. Missing segments count as 0. */
-const compareVersions = (a: string, b: string): number => {
-  const aSegments = a.split('.').map(Number);
-  const bSegments = b.split('.').map(Number);
-  const length = Math.max(aSegments.length, bSegments.length);
-  for (let index = 0; index < length; index++) {
-    const difference = (aSegments[index] ?? 0) - (bSegments[index] ?? 0);
-    if (difference !== 0) {
-      return difference;
-    }
-  }
-  return 0;
-};
-
 const parseManifestRows = (raw: string, logger: Logger): CatalogDefinitionRef[] => {
   let manifest: unknown;
   try {
@@ -66,18 +52,7 @@ const parseManifestRows = (raw: string, logger: Logger): CatalogDefinitionRef[] 
   });
 };
 
-const pickHighestVersions = (definitions: StoredCatalogDefinition[]): StoredCatalogDefinition[] => {
-  const highest = new Map<string, StoredCatalogDefinition>();
-  for (const definition of definitions) {
-    const current = highest.get(definition.connectorId);
-    if (!current || compareVersions(definition.version, current.version) > 0) {
-      highest.set(definition.connectorId, definition);
-    }
-  }
-  return [...highest.values()];
-};
-
-/** Registers 1 type per catalog id, built from the highest stored version. Returns the count. */
+/** Builds and attempts to register every stored catalog definition. Returns the registered count. */
 export const loadCatalogConnectorTypes = async ({
   storage,
   actionTypeRegistry,
@@ -108,7 +83,7 @@ export const loadCatalogConnectorTypes = async ({
   const definitions = await storage.getDefinitions(rows, { signal });
 
   let registered = 0;
-  for (const definition of pickHighestVersions(definitions)) {
+  for (const definition of definitions) {
     // A result that arrives after the timeout must not register anything.
     if (signal.aborted) {
       return registered;
