@@ -12,6 +12,9 @@ import systemPromptText from './system_prompt.text';
 
 export const TOOL_CALL_HEALTH_TOOL_NAME = 'score_tool_call_health';
 
+/** The longest reason the model is asked for; the judge trims longer ones. */
+export const MAX_REASON_CHARS = 100;
+
 const toolCallIssuesSchema = lazySchema(() =>
   z.array(z.object({ step: z.number(), reason: z.string() }))
 );
@@ -31,7 +34,11 @@ const issuesToolSchema = {
     type: 'object',
     properties: {
       step: { type: 'number', description: 'The number of the tool call, as in its heading.' },
-      reason: { type: 'string', description: 'One short sentence on what went wrong.' },
+      reason: {
+        type: 'string',
+        maxLength: MAX_REASON_CHARS,
+        description: `What went wrong, in at most ${MAX_REASON_CHARS} characters.`,
+      },
     },
     required: ['step', 'reason'],
   },

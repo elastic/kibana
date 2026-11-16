@@ -126,6 +126,17 @@ describe('nightshift_tool_call_health', () => {
     expect(toolCalls.length).toBeLessThan(3_000);
   });
 
+  it('trims a reason longer than the limit it asked for', async () => {
+    const prompt = judgeReturning({
+      failed_calls: [{ step: 1, reason: 'x'.repeat(500) }],
+      empty_calls: [],
+    });
+
+    const { scores } = await evaluate(prompt, [{ tool_id: 'platform.core.search', result: [] }]);
+
+    expect(scores[0].explanation).toBe(`call 1: ${'x'.repeat(100)}`);
+  });
+
   it('requires a user input and a final answer', () => {
     const { evidenceSchema } = toolCallHealthJudge;
 

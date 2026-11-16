@@ -30,3 +30,9 @@ A call is either FAILED or NO DATA, never both: if it failed, do not also list i
 - Calls you cannot assess because the result text is cut off. Judge only what is visible.
 
 Refer to calls by the number printed in their "Tool call N" heading.
+
+## Keep the answer short
+Write each reason in at most 100 characters, in plain words, and keep all the reasons together under
+1000 characters. When several calls fail for the same cause, give a few words for each ("same sandbox
+error") instead of repeating the detail. Still list every failed and every no-data call: the counts
+come from your lists.

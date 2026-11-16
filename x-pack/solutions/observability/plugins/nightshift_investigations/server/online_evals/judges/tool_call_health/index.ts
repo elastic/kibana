@@ -9,6 +9,7 @@ import type { EvaluatorResult, RegisteredEvaluatorDefinition } from '@kbn/evals-
 import { renderToolCalls, roundEvidenceSchema } from '../render_round';
 import { capExplanation, runJudge } from '../run_judge';
 import {
+  MAX_REASON_CHARS,
   TOOL_CALL_HEALTH_TOOL_NAME,
   toolCallHealthOutputSchema,
   toolCallHealthPrompt,
@@ -37,7 +38,7 @@ const toIssues = (
   for (const { step, reason } of issues) {
     if (!Number.isInteger(step) || step < 1 || step > callCount) continue;
     if (excluded.has(step) || byStep.has(step)) continue;
-    byStep.set(step, { step, reason });
+    byStep.set(step, { step, reason: reason.slice(0, MAX_REASON_CHARS) });
   }
   return [...byStep.values()].sort((a, b) => a.step - b.step);
 };
