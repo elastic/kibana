@@ -499,7 +499,7 @@ describe('runAfterExecutionWorkflows', () => {
       });
 
       it('sends the round trace id (latest one when merged) only when declared', async () => {
-        const { workflowApi, getInternalServices, getStartServices } = createDeps({
+        const { workflowApi, getInternalServices } = createDeps({
           definition: strictDefinition([...legacyInputNames, 'round_trace_id']),
         });
 
@@ -510,7 +510,6 @@ describe('runAfterExecutionWorkflows', () => {
           }),
           workflowApi,
           getInternalServices,
-          getStartServices,
           logger,
         });
 
