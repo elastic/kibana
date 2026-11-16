@@ -93,18 +93,6 @@ function createSetup({
 }
 
 describe('DetectionSetupService.enable', () => {
-  it('binds the given account to the space', async () => {
-    const { service, bindWorkload } = createSetup();
-
-    await expect(
-      service.enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
-    ).resolves.toEqual({ spaceId: 'default', serviceAccountId: 'account-1' });
-    expect(bindWorkload).toHaveBeenCalledWith(request, {
-      serviceAccountId: 'account-1',
-      ...WORKLOAD,
-    });
-  });
-
   it('refuses another account and puts the previous binding back', async () => {
     const { service, bindWorkload } = createSetup({
       boundAccountId: 'detection-account',

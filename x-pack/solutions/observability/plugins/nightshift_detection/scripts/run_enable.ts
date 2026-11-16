@@ -34,9 +34,13 @@ run(
   async ({ flags, log }) => {
     const spaceId = String(flags.space);
     const kibanaUrl = String(flags['kibana-url']).replace(/\/$/, '');
-    const authorization = `Basic ${Buffer.from(
-      `${String(flags.username)}:${String(flags.password)}`
-    ).toString('base64')}`;
+    // Local Serverless has no `elastic` user: its superuser is `elastic_serverless`.
+    const username = flags.username
+      ? String(flags.username)
+      : getDefaultUsername(Boolean(flags.serverless));
+    const authorization = `Basic ${Buffer.from(`${username}:${String(flags.password)}`).toString(
+      'base64'
+    )}`;
 
     const request = async <T>(
       path: string,
@@ -101,17 +105,20 @@ run(
       default: {
         space: 'default',
         'kibana-url': 'http://localhost:5601',
-        username: 'elastic',
         password: 'changeme',
         serverless: false,
       },
       help: `
         --space <id>          Space to set up (default: default)
         --kibana-url <url>    Kibana to call (default: http://localhost:5601)
-        --username <user>     User with manage_security (default: elastic)
+        --username <user>     User with manage_security (default: elastic, or elastic_serverless with --serverless)
         --password <pass>     Its password (default: changeme)
         --serverless          The deployment is Serverless, so the account holds the predefined role
       `,
     },
   }
 );
+
+function getDefaultUsername(isServerless: boolean): string {
+  return isServerless ? 'elastic_serverless' : 'elastic';
+}

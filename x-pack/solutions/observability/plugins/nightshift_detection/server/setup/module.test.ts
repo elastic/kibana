@@ -23,6 +23,7 @@ import { DetectionSignalStore } from '../lib/signals/signal_store';
 import { StateStore } from '../lib/state/state_store';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 import { InMemoryStateStore } from '../test_utils/in_memory_state_store';
+import { DETECTION_ENGINE_WORKLOAD_TYPE } from '../lib/service_account/workload';
 
 function createContainer() {
   const core = coreMock.createStart();
@@ -37,7 +38,7 @@ function createContainer() {
   container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
   container.bind(CoreStart('pricing')).toConstantValue(core.pricing);
   container.bind(CoreStart('security')).toConstantValue(core.security);
-  container.bind(CoreSetup('security')).toConstantValue(coreMock.createSetup().security);
+  container.bind(CoreSetup('security')).toConstantValue(coreSetup.security);
   container
     .bind(PluginInitializer('env'))
     .toConstantValue(coreMock.createPluginInitializerContext().env);
@@ -78,6 +79,10 @@ describe('module', () => {
 
     expect(coreSetup.pricing.registerProductFeatures).toHaveBeenCalledWith(
       NIGHTSHIFT_DETECTION_TIERED_FEATURES
+    );
+    // Without the registration, every `bindWorkload` of the engine is refused at runtime.
+    expect(coreSetup.security.serviceAccounts.registerWorkloadType).toHaveBeenCalledWith(
+      expect.objectContaining({ type: DETECTION_ENGINE_WORKLOAD_TYPE })
     );
     // Engine indices are written as kibana_system, never as the requesting user.
     expect(container.get(DetectionEngineSystemClient)).toBe(

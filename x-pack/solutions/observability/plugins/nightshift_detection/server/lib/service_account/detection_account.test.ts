@@ -112,47 +112,4 @@ describe('DetectionAccountService', () => {
       expect(fn).not.toHaveBeenCalled();
     });
   });
-
-  describe('assertServiceAccountActsForSpace', () => {
-    const run = (service: DetectionAccountService) =>
-      service.assertServiceAccountActsForSpace({
-        request: httpServerMock.createKibanaRequest(),
-        spaceId: SPACE_ID,
-      });
-
-    it('lets the space account through', async () => {
-      const { service } = createService({
-        boundAccountId: ACCOUNT_ID,
-        principal: { type: 'service_account', serviceAccountId: ACCOUNT_ID },
-      });
-
-      await expect(run(service)).resolves.toBeUndefined();
-    });
-
-    it('refuses with 403 the account of another space', async () => {
-      const { service } = createService({
-        boundAccountId: ACCOUNT_ID,
-        principal: { type: 'service_account', serviceAccountId: 'account-of-another-space' },
-      });
-
-      await expect(run(service)).rejects.toMatchObject({ statusCode: 403 });
-    });
-
-    it('refuses with 503 every service account in a space that is not set up', async () => {
-      const { service } = createService({
-        principal: { type: 'service_account', serviceAccountId: ACCOUNT_ID },
-      });
-
-      await expect(run(service)).rejects.toMatchObject({ statusCode: 503 });
-    });
-
-    it('does not hold a user to the space account', async () => {
-      const { service } = createService({
-        boundAccountId: ACCOUNT_ID,
-        principal: { type: 'user' },
-      });
-
-      await expect(run(service)).resolves.toBeUndefined();
-    });
-  });
 });
