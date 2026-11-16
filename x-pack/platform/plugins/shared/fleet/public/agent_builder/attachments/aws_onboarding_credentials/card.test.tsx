@@ -52,11 +52,20 @@ const renderCard = ({
 };
 
 // The shape Fleet's sendRequest returns on failure: the plain response body, not an Error.
+const EXPIRES_AT = '2026-11-16T10:30:00.000Z';
+const LAUNCH_URL = 'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?x=1';
+const launchResponse = (expiresAt: string) =>
+  ({
+    data: { quickCreateUrl: LAUNCH_URL, expiresAt, blueprint: { id: 'bootstrap', version: '1' } },
+    error: null,
+  } as never);
+
 const serverError = (message: string) => ({ statusCode: 502, error: 'Bad Gateway', message });
 
 describe('AwsOnboardingCredentialsCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(sendGetAwsOnboardingBootstrapLaunch).mockResolvedValue(launchResponse(EXPIRES_AT));
   });
 
   it('shows a pending status when credentials are not configured', async () => {
@@ -117,31 +126,49 @@ describe('AwsOnboardingCredentialsCard', () => {
       data: { configured: false },
       error: null,
     } as never);
-    jest.mocked(sendGetAwsOnboardingBootstrapLaunch).mockResolvedValue({
-      data: {
-        quickCreateUrl:
-          'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?x=1',
-        expiresAt: '2026-11-16T10:30:00.000Z',
-        blueprint: { id: 'bootstrap', version: '1' },
-      },
-      error: null,
-    } as never);
+    jest.mocked(sendGetAwsOnboardingBootstrapLaunch).mockResolvedValue(launchResponse(EXPIRES_AT));
     renderCard();
 
     // The anchor replaces the disabled button once the url arrives, so look it up again.
     await waitFor(() =>
       expect(screen.getByTestId('awsOnboardingCredentialsCardLaunch')).toHaveAttribute(
         'href',
-        'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?x=1'
+        LAUNCH_URL
       )
     );
     expect(screen.getByTestId('awsOnboardingCredentialsCardLaunch')).toHaveAttribute(
       'target',
       '_blank'
     );
+    // Same formatter and locale/timezone as the card, so the assertion holds on any machine.
+    const expectedTime = new Intl.DateTimeFormat('en', {
+      hour: 'numeric',
+      minute: 'numeric',
+    }).format(new Date(EXPIRES_AT));
     expect(screen.getByTestId('awsOnboardingCredentialsCardLaunchExpiry')).toHaveTextContent(
-      /Link expires at \S+/
+      `Link expires at ${expectedTime}`
     );
+  });
+
+  it('renders the launch link without an expiry line when expiresAt is invalid', async () => {
+    jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
+      data: { configured: false },
+      error: null,
+    } as never);
+    jest
+      .mocked(sendGetAwsOnboardingBootstrapLaunch)
+      .mockResolvedValue(launchResponse('not-a-date'));
+    renderCard();
+
+    await waitFor(() =>
+      expect(screen.getByTestId('awsOnboardingCredentialsCardLaunch')).toHaveAttribute(
+        'href',
+        LAUNCH_URL
+      )
+    );
+    expect(
+      screen.queryByTestId('awsOnboardingCredentialsCardLaunchExpiry')
+    ).not.toBeInTheDocument();
   });
 
   it('shows a warning with the server message when the launch url fails', async () => {

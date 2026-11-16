@@ -167,7 +167,7 @@ export const AwsOnboardingCredentialsCard: React.FC<{
                         defaultMessage: 'Launch in CloudFormation',
                       })}
                     </EuiButton>
-                    {launch.data && (
+                    {launch.data && !Number.isNaN(new Date(launch.data.expiresAt).getTime()) && (
                       <EuiText size="xs" data-test-subj="awsOnboardingCredentialsCardLaunchExpiry">
                         <FormattedMessage
                           id="xpack.fleet.awsOnboardingCredentialsCard.launchExpiry"
