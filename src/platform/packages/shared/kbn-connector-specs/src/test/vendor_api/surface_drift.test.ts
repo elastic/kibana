@@ -384,13 +384,13 @@ describe('renderDriftIssue', () => {
   it('says that paths moved into the server URL, why the check fails and how to fix it', () => {
     const { title, body } = renderDriftIssue(moved, { owners: [] });
 
-    expect(title).toBe('[Connectors][Validation] `.sentry`: 2 actions need attention');
+    expect(title).toBe('[Connectors][Validation] `.sentry`: 1 action needs attention');
     expect(body).toContain('> [!NOTE]');
     expect(body).toContain(
       "**Sentry's spec moved `/api/0` from its paths into its server URL. The connector most likely still works.**"
     );
     expect(body).toContain(
-      "1 action calls an endpoint missing from the current spec, so it isn't checked (see the table)."
+      "`listRules` calls an endpoint no spec describes, so it isn't checked (see the table)."
     );
     expect(body).toContain(
       '| **Server URL** | `https://{region}.sentry.io` → `https://{region}.sentry.io/api/0` |'
@@ -402,10 +402,10 @@ describe('renderDriftIssue', () => {
       '| `getIssue` | `GET /api/0/issues/{id}/` | ⚠️ Moved in the spec, same URL |'
     );
     expect(body).toContain(
-      '| `listRules` | `GET /api/0/rules/` | ⚠️ Endpoint is missing from current spec ([#296284](https://github.com/elastic/kibana/issues/296284), see below) |'
+      '| `listRules` | `GET /api/0/rules/` | ➖ Not checked: no spec describes the endpoint ([#296284](https://github.com/elastic/kibana/issues/296284), see below) |'
     );
     expect(body).toContain(
-      '⚠️ **Endpoint is missing from current spec** (`listRules`): the manifest records why: _Legacy endpoint, absent from the spec; see https://github.com/elastic/kibana/issues/296284_'
+      '➖ **Not in the spec** (`listRules`): the manifest records why: _Legacy endpoint, absent from the spec; see https://github.com/elastic/kibana/issues/296284_'
     );
     expect(body).toContain('### Why the check fails');
     expect(body).toContain('Correction 1 in [`overlay.yaml`]');
@@ -604,8 +604,8 @@ describe('renderDriftIssue', () => {
     );
   });
 
-  it('names the actions whose endpoints are missing from the current spec', () => {
-    const { body } = renderDriftIssue(
+  it('names the actions calling endpoints no spec describes, without counting them', () => {
+    const { title, body } = renderDriftIssue(
       {
         ...drifted,
         verdict: 'healthy',
@@ -620,13 +620,11 @@ describe('renderDriftIssue', () => {
       { owners: [] }
     );
 
+    expect(title).toBe('[Connectors][Validation] `.acme`: 1 problem needs attention');
+    expect(body).toContain('> **All 1 action works with the latest spec.**');
     expect(body).toContain(
-      '> **1 of 2 actions works with the latest spec. 1 action needs attention.**'
+      "> 1 spec correction in `overlay.yaml` no longer applies. `listRules` calls an endpoint no spec describes, so it isn't checked (see the table)."
     );
-    expect(body).toContain(
-      '> `listRules` calls an endpoint that is missing from the current spec. 1 spec correction in `overlay.yaml` no longer applies.'
-    );
-    expect(body).not.toContain('(see the table).');
   });
 
   it('says when the actions pass but the check found problems outside them, as a table', () => {

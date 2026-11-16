@@ -268,7 +268,7 @@ const ICONS: Record<Rank, string> = {
   'not-checked': '➖',
 };
 
-const MISSING_STATUS = 'Endpoint is missing from current spec';
+const NOT_IN_SPEC_STATUS = 'Not checked: no spec describes the endpoint';
 
 // The issues a recorded reason links to, as `[#123](url)`.
 const issueLinksOf = (reason: string): string[] =>
@@ -316,11 +316,12 @@ const statusOf = (
     };
   }
   if (!isChecked(action) && action.unmatched.length > 0) {
-    // Missing when the connector was recorded, and still missing, as the manifest acknowledges.
+    // Missing when the connector was recorded, as the manifest acknowledges with a reason; a
+    // new unmatched request is a problem of the run instead.
     const issues = [...new Set(action.unmatched.flatMap(({ reason }) => issueLinksOf(reason)))];
     return {
-      rank: 'attention',
-      text: `${MISSING_STATUS} (${[...issues, 'see below'].join(', ')})`,
+      rank: 'not-checked',
+      text: `${NOT_IN_SPEC_STATUS} (${[...issues, 'see below'].join(', ')})`,
     };
   }
   if (!isChecked(action)) {
@@ -461,13 +462,13 @@ interface Attention {
   readonly readers: readonly string[];
   /** Per kind of change to review, the actions it affects. */
   readonly byKind: ReadonlyMap<ReviewKind, ReadonlySet<string>>;
-  /** Actions whose endpoint is missing from the current spec. */
-  readonly missing: readonly string[];
+  /** Actions not checked, as the manifest records that no spec describes what they call. */
+  readonly notInSpec: readonly string[];
   /** Changes to review that affect no action, e.g. a removed shared schema. */
   readonly unattached: number;
   /** Every action that needs attention. */
   readonly actions: ReadonlySet<string>;
-  /** The actions that call the vendor, checked or not. */
+  /** The actions checked against the specs. */
   readonly total: number;
 }
 
@@ -485,22 +486,21 @@ const attentionOf = (
     item.actions.forEach((action) => named.add(action));
     byKind.set(item.kind, named);
   }
-  const missing = actions
+  const notInSpec = actions
     .filter((action) => !isChecked(action) && action.unmatched.length > 0)
     .map(({ action }) => action);
   return {
     failing,
     readers,
     byKind,
-    missing,
+    notInSpec,
     unattached: review.filter((item) => item.actions.length === 0).length,
     actions: new Set([
       ...failing.map(({ action }) => action),
       ...readers,
       ...[...byKind.values()].flatMap((named) => [...named]),
-      ...missing,
     ]),
-    total: actions.filter(isChecked).length + missing.length,
+    total: actions.filter(isChecked).length,
   };
 };
 
@@ -607,9 +607,21 @@ export const renderDriftIssue = (
   const overlayCausesMoves = movedOnly && serversCorrection !== undefined;
 
   // Summary
+  // Actions the manifest records as calling endpoints no spec describes, which aren't checked.
+  const { notInSpec } = attention;
+  const notInSpecNote =
+    notInSpec.length > 0
+      ? [
+          `${listed(notInSpec.map(code), MAX_NAMED_ACTIONS)} ${
+            notInSpec.length === 1 ? 'calls an endpoint' : 'call endpoints'
+          } no spec describes, so ${
+            notInSpec.length === 1 ? "it isn't" : "they aren't"
+          } checked (see the table).`,
+        ]
+      : [];
   // The note: how many actions work, which need attention and why, and what to do.
   const passingSummary = (extra: readonly string[]): string => {
-    const { missing, unattached, total } = attention;
+    const { unattached, total } = attention;
     const working = total - attention.actions.size;
     // A failing action is named for its failure only, not as passing with changes.
     const failed = new Set(attention.failing.map(({ action }) => action));
@@ -634,14 +646,6 @@ export const renderDriftIssue = (
       ...byKind
         .filter(([, named]) => named.size > 0)
         .map(([kind, named]) => sentence([...named], AFFECTED[kind])),
-      ...(missing.length > 0
-        ? [
-            sentence(missing, [
-              'calls an endpoint that is missing from the current spec',
-              'call endpoints that are missing from the current spec',
-            ]),
-          ]
-        : []),
       ...(unattached > 0
         ? [
             `${plural(unattached, 'other spec change')} ${
@@ -670,7 +674,7 @@ export const renderDriftIssue = (
           } attention.**`;
     return [
       headline,
-      reasons.length > 0 ? reasons.join(' ') : 'Its spec changed.',
+      [reasons.length > 0 ? reasons.join(' ') : 'Its spec changed.', ...notInSpecNote].join(' '),
       'Update the connector to ensure it will continue working.',
     ].join('\n\n');
   };
@@ -732,17 +736,9 @@ export const renderDriftIssue = (
       alert = 'NOTE';
       summary = passingSummary([]);
   }
-  // The note for passing actions names these already.
-  const missingEndpoints =
-    drift.verdict === 'healthy' || vendorDriftNote
-      ? []
-      : notChecked.filter(({ unmatched }) => unmatched.length > 0);
-  if (missingEndpoints.length > 0) {
-    summary += ` ${plural(missingEndpoints.length, 'action')} ${
-      missingEndpoints.length === 1 ? 'calls an endpoint' : 'call endpoints'
-    } missing from the current spec, so ${
-      missingEndpoints.length === 1 ? "it isn't" : "they aren't"
-    } checked (see the table).`;
+  // The note for passing actions has it already.
+  if (!(drift.verdict === 'healthy' || vendorDriftNote) && notInSpecNote.length > 0) {
+    summary += ` ${notInSpecNote.join(' ')}`;
   }
 
   // Facts
@@ -823,7 +819,7 @@ export const renderDriftIssue = (
   }
   for (const [reason, named] of reasons) {
     legend.push(
-      `${ICONS.attention} **${MISSING_STATUS}** (${named
+      `${ICONS['not-checked']} **Not in the spec** (${named
         .map(code)
         .join(', ')}): the manifest records why: _${reason}_`
     );
