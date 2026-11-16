@@ -1385,6 +1385,7 @@ x-pack/platform/test_plugins/spaces_api_integration/common/plugins/spaces_test_p
 x-pack/platform/test_plugins/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 x-pack/platform/test_plugins/usage_collection/application_usage_test @elastic/kibana-core
 x-pack/platform/test_plugins/usage_collection/stack_management_usage_test @elastic/kibana-core
+x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector @elastic/workflows-eng
 x-pack/solutions/observability/packages/alert-details @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/nightshift-sre-agent-team
@@ -3859,7 +3860,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/kbn-ui/_tooling @elastic/appex-sharedux
 /src/platform/test/functional/page_objects/share_page.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846648444
 /src/platform/test/accessibility/apps/kibana_overview_* @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files/cab99bce5ac2082fa77222beebe3b61ff836b94b#r1846659920
-/x-pack/platform/test/functional/services/sample_data @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200142#discussion_r1846512756
+/src/platform/test/functional/services/sample_data @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200142#discussion_r1846512756
 /src/platform/test/api_integration/apis/home/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077065
 /src/platform/test/functional/services/saved_objects_finder.ts @elastic/appex-sharedux
 /x-pack/platform/test/functional/services/user_menu.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
@@ -3895,6 +3896,7 @@ docs-dev/docset.yml                           @elastic/kibana-tech-leads
 docs-dev/index.md                             @elastic/kibana-tech-leads
 docs-dev/kbn-ui/                              @elastic/appex-sharedux
 docs-dev/chrome/                              @elastic/appex-sharedux
+docs-dev/event-bus/                           @elastic/kibana-core
 
 # Side navigation title glossary
 src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @elastic/ski-docs

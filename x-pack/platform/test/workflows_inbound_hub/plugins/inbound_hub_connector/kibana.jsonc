@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/workflows-inbound-hub-test-plugin",
+  "owner": "@elastic/workflows-eng",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "workflowsInboundHubTest",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": ["actions"]
+  }
+}
