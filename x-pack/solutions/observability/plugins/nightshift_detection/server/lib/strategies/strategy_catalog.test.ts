@@ -7,7 +7,7 @@
 
 import { Container } from 'inversify';
 import { TEST_STRATEGY_ID, createTestStrategy } from '../../test_utils/test_strategy';
-import { DuplicateStrategyError } from './duplicate_strategy_error';
+import { DuplicateStrategyError } from '../errors/duplicate_strategy_error';
 import { DetectionStrategy } from './detection_strategy';
 import { StrategyCatalog } from './strategy_catalog';
 
