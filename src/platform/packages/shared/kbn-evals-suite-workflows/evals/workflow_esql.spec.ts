@@ -112,10 +112,10 @@ const WORKFLOW_SCOPE =
   ' Build it as a workflow that runs the ES|QL query itself, not as an alerting rule. ' +
   'Use the existing Slack and email connectors, and create cases in Security.';
 
-// A scheduled query without a time window and LIMIT scans the whole index on every run; customers
-// report long-running ES|QL on broad patterns like logs-*.
+// A scheduled query without a time window scans the whole index on every run; customers report
+// long-running ES|QL on broad patterns like logs-*. Not LIMIT: after STATS it does not bound the scan.
 const BOUNDED_QUERY =
-  'Each ES|QL query filters @timestamp to a bounded window and ends with a LIMIT, so a scheduled run never scans the whole index.';
+  'Each ES|QL query filters @timestamp to a bounded window, so a scheduled run never scans the whole index.';
 
 const dataset: EvaluationDataset<WorkflowCreateExample> = {
   name: 'workflow-esql',
