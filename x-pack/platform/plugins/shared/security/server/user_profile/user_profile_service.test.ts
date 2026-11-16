@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type {
   SecurityActivateUserProfileResponse,
+  SecurityApiKey,
   SecurityGetUserProfileResponse,
   SecuritySuggestUserProfilesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -76,6 +77,7 @@ describe('UserProfileService', () => {
       Object {
         "activate": [Function],
         "bulkGet": [Function],
+        "getApiKeyProfileId": [Function],
         "getCurrent": [Function],
         "getCurrentProfileId": [Function],
         "suggest": [Function],
@@ -1650,6 +1652,72 @@ describe('UserProfileService', () => {
         ).not.toHaveBeenCalled();
         expect(securityTelemetry.recordGetCurrentProfileIdInvocation).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('#getApiKeyProfileId', () => {
+    const apiKeyRequest = () =>
+      httpServerMock.createKibanaRequest({
+        headers: { authorization: `ApiKey ${Buffer.from('key-id:key-secret').toString('base64')}` },
+      });
+    const getApiKey = () =>
+      mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey;
+
+    it('resolves the profile of the user who created a Stack key', async () => {
+      getApiKey().mockResolvedValue({
+        api_keys: [{ id: 'key-id', profile_uid: 'u_creator' } as SecurityApiKey],
+      });
+
+      await expect(
+        userProfileService.start(mockStartParams).getApiKeyProfileId(apiKeyRequest())
+      ).resolves.toBe('u_creator');
+      expect(getApiKey()).toHaveBeenCalledWith({ id: 'key-id', with_profile_uid: true });
+    });
+
+    it('resolves the profile of the user who created a UIAM key, through UIAM', async () => {
+      const mockUiam = uiamServiceMock.create();
+      mockUiam.getApiKeyCreator.mockResolvedValue({ type: 'user', user_id: 12345 });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_some-uiam-api-key' },
+      });
+
+      await expect(
+        userProfileService.start({ ...mockStartParams, uiam: mockUiam }).getApiKeyProfileId(request)
+      ).resolves.toBe(CLOUD_USER_PROFILE_ID);
+      expect(getApiKey()).not.toHaveBeenCalled();
+    });
+
+    it('resolves nothing for a request without an API key, without a lookup', async () => {
+      await expect(
+        userProfileService
+          .start(mockStartParams)
+          .getApiKeyProfileId(httpServerMock.createKibanaRequest())
+      ).resolves.toBeUndefined();
+      expect(getApiKey()).not.toHaveBeenCalled();
+    });
+
+    it.each([403, 404])(
+      'resolves nothing when the key cannot read itself (%s)',
+      async (statusCode) => {
+        getApiKey().mockRejectedValue(
+          new errors.ResponseError(securityMock.createApiResponse({ statusCode, body: {} }))
+        );
+
+        await expect(
+          userProfileService.start(mockStartParams).getApiKeyProfileId(apiKeyRequest())
+        ).resolves.toBeUndefined();
+      }
+    );
+
+    it('throws when the lookup fails for any other reason', async () => {
+      const failure = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 500, body: {} })
+      );
+      getApiKey().mockRejectedValue(failure);
+
+      await expect(
+        userProfileService.start(mockStartParams).getApiKeyProfileId(apiKeyRequest())
+      ).rejects.toBe(failure);
     });
   });
 

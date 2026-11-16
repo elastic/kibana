@@ -246,8 +246,15 @@ the policy.
 principal gets. A caller uses it to skip resolving the principal and checking recovery when the answer can't change.
 An invalid ACL never takes this shortcut, and an operation that the policy doesn't define is never permitted.
 
+`getOperationsAtAccess` lists the operations that an access permits under a policy, and access management at
+`manage`. It answers for any access, also one that the type doesn't let general access or entries take, so a caller
+can find the feature privileges that an access needs without building an ACL. The order of the access values stays
+inside the package.
+
 `toObjectDecision` turns a decision into the outcome of one operation: `allowed`, `forbidden` when the caller can view
-the object, and `not_found` when the caller can't, so that a denial never reveals that the object exists.
+the object, and `not_found` when the caller can't, so that a denial never reveals that the object exists. A service
+that refuses the operation throws an `ObjectAccessError` with the same code, and each storage or HTTP layer turns it
+into its own 404 or 403, as with `AclChangeError`.
 
 ## Changing an ACL
 
@@ -296,6 +303,12 @@ other refusal reveals something about the object, such as that it exists or alre
   checked again, so that one deleted recipient can't block the only way to repair the ACL. For the same reason, they
   don't count against `MAX_ACL_ENTRIES`: an ACL stored from outside Kibana can have more, and the new owner trims them
   with a replacement. An object without an ACL has nobody to transfer from, so it needs a claim instead.
+
+An `AclWarning` names access that a successful change stores but that its principal can't fully use yet. Its
+`target` is `entry` when an entry's principal lacks the feature privileges of the entry's access, and `owner` when a
+new owner lacks the privileges of the `edit` operation, which managing access and transfers need. The access applies
+as soon as the principal gets them. The package only defines the shape: the service that stores the change checks
+privileges and returns warnings.
 
 `readEditableAcl` reads an object's current access from its stored ACL into an `EditableAcl`, so that it can be shown,
 edited, or written back in the shapes Kibana writes. It keeps only what grants something. An entry with several IDs
