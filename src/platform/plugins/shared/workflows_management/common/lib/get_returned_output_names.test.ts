@@ -144,10 +144,27 @@ describe('getReturnedOutputNames', () => {
     expect(
       getReturnedOutputNames({
         steps: [
-          { name: 'emit', type: 'workflow.output', with: { severity: 'high' } },
-          { name: 'emit_all', type: 'workflow.output', with: '${{ steps.prev.output }}' },
+          {
+            name: 'check',
+            type: 'if',
+            condition: 'true',
+            steps: [{ name: 'emit', type: 'workflow.output', with: { severity: 'high' } }],
+            else: [{ name: 'emit_all', type: 'workflow.output', with: '${{ steps.prev.output }}' }],
+          },
         ],
       })
     ).toBeUndefined();
+  });
+
+  it('ignores workflow.output steps no run reaches', () => {
+    expect(
+      getReturnedOutputNames({
+        steps: [
+          { name: 'emit', type: 'workflow.output', with: { severity: 'high' } },
+          { name: 'emit_more', type: 'workflow.output', with: { severity: 'high', value: 1 } },
+          { name: 'emit_all', type: 'workflow.output', with: '${{ steps.prev.output }}' },
+        ],
+      })
+    ).toEqual(['severity']);
   });
 });

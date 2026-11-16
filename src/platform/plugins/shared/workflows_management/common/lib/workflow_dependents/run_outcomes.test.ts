@@ -9,7 +9,13 @@
 
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { collectWorkflowCallSites } from './find_call_sites';
-import { failureEscapes, findAlwaysFailure, type StepFailures } from './run_outcomes';
+import {
+  failureEscapes,
+  findAlwaysFailure,
+  getCompletingOutputBlocks,
+  type StepFailures,
+  UNSUPPORTED_RUN,
+} from './run_outcomes';
 
 const callStep = (name: string) => ({
   name,
@@ -121,7 +127,40 @@ describe('findAlwaysFailure', () => {
     expect(findAlwaysFailure(definition, onlyFailing('then'))).toBe('then');
   });
 
-  it('finds no failure in a workflow that does not compile', () => {
+  it('fails every run when a parallel branch ends the run failed', () => {
+    const fan = (extra: Record<string, unknown>) => ({
+      steps: [
+        {
+          name: 'fan',
+          type: 'parallel',
+          branches: [
+            { name: 'one', steps: [{ name: 'stop', type: 'workflow.fail', with: {} }] },
+            { name: 'two', steps: [callStep('other')] },
+          ],
+          ...extra,
+        },
+        completes('done'),
+      ],
+    });
+    expect(findAlwaysFailure(fan({}), onlyFailing('none'))).toBe('stop');
+    expect(findAlwaysFailure(fan({ mode: 'settled' }), onlyFailing('none'))).toBe('stop');
+  });
+
+  it('can’t tell for a parallel branch that completes the run', () => {
+    const definition = {
+      steps: [
+        {
+          name: 'fan',
+          type: 'parallel',
+          branches: [{ name: 'one', steps: [completes('early')] }],
+        },
+        callStep('after'),
+      ],
+    };
+    expect(findAlwaysFailure(definition, onlyFailing('after'))).toBe(UNSUPPORTED_RUN);
+  });
+
+  it('can’t tell for a workflow that does not compile', () => {
     const definition = {
       steps: [
         {
@@ -135,7 +174,7 @@ describe('findAlwaysFailure', () => {
         callStep('after'),
       ],
     };
-    expect(findAlwaysFailure(definition, onlyFailing('after'))).toBeUndefined();
+    expect(findAlwaysFailure(definition, onlyFailing('after'))).toBe(UNSUPPORTED_RUN);
   });
 
   describe('with graph nodes it does not know', () => {
@@ -163,8 +202,64 @@ describe('findAlwaysFailure', () => {
     it.each(['atomic-v2', 'enter-something'])('reaches no verdict past a %s node', (type) => {
       withExtraNode(type);
       const definition = { steps: [{ name: 'noop', type: 'console', with: {} }, callStep('last')] };
-      expect(findAlwaysFailure(definition, onlyFailing('last'))).toBeUndefined();
+      expect(findAlwaysFailure(definition, onlyFailing('last'))).toBe(UNSUPPORTED_RUN);
     });
+  });
+});
+
+describe('getCompletingOutputBlocks', () => {
+  const output = (name: string, values: Record<string, unknown>) => ({
+    name,
+    type: 'workflow.output',
+    with: values,
+  });
+
+  it('skips workflow.output steps no run reaches', () => {
+    expect(
+      getCompletingOutputBlocks({
+        steps: [output('first', { score: 1 }), output('second', { score: 1, value: 2 })],
+      })
+    ).toEqual([{ score: 1 }]);
+  });
+
+  it('keeps fallbacks that a failing step might run', () => {
+    expect(
+      getCompletingOutputBlocks({
+        settings: { 'on-failure': { fallback: [output('recover', { recovered: true })] } },
+        steps: [output('emit', { score: 1 })],
+      })
+    ).toEqual([{ score: 1 }, { recovered: true }]);
+  });
+
+  it('keeps every block when a run might reach steps it does not follow', () => {
+    expect(
+      getCompletingOutputBlocks({
+        steps: [
+          {
+            name: 'fan',
+            type: 'parallel',
+            branches: [{ name: 'one', steps: [output('early', { a: 1 })] }],
+          },
+          output('emit', { b: 1 }),
+        ],
+      })
+    ).toEqual([{ a: 1 }, { b: 1 }]);
+  });
+
+  it('keeps every block of a workflow that does not compile', () => {
+    expect(
+      getCompletingOutputBlocks({
+        steps: [
+          {
+            name: 'fan',
+            type: 'parallel',
+            branches: [{ name: 'one', steps: [{ ...callStep('nested'), if: 'inputs.a : true' }] }],
+          },
+          output('first', { a: 1 }),
+          output('second', { b: 1 }),
+        ],
+      })
+    ).toEqual([{ a: 1 }, { b: 1 }]);
   });
 });
 

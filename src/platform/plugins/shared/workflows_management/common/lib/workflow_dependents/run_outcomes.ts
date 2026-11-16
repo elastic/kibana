@@ -10,7 +10,12 @@
 import type { WorkflowYaml } from '@kbn/workflows';
 import { type GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { isRecord } from '@kbn/workflows-yaml';
-import { isTemplatedValue, toCallSite } from './find_call_sites';
+import {
+  collectWorkflowOutputBlocks,
+  isCompletingOutputStep,
+  isTemplatedValue,
+  toCallSite,
+} from './find_call_sites';
 import type { WorkflowCallSite } from './types';
 
 /**
@@ -34,6 +39,8 @@ interface Outcome<Failure> {
   endings: ReadonlySet<Ending>;
   /** When every ending fails the run: the failure each run through this part reaches first. */
   failure?: Failure;
+  /** Whether a run through this part might reach steps the analysis doesn't know how they end. */
+  unknown?: boolean;
 }
 
 /** What the analysis knows about the steps whose result it can tell. */
@@ -54,6 +61,8 @@ interface Region {
   node?: GraphNodeUnion;
   children: Array<Region | Leaf>;
   parent?: Region;
+  /** For a parallel step, the steps of each branch in the order they run. */
+  branches?: Leaf[][];
 }
 
 interface Leaf {
@@ -83,6 +92,40 @@ const closes = (exit: GraphNodeUnion, enter: GraphNodeUnion | undefined): boolea
   );
 };
 
+// Each branch of a parallel step is a line of steps from its start node to the exit node; branches
+// interleave in topological order. Undefined when the region isn't made of such lines.
+const toBranches = (graph: WorkflowGraph, region: Region): Leaf[][] | undefined => {
+  const leaves = new Map<string, Leaf>();
+  for (const child of region.children) {
+    if (isRegion(child)) {
+      return undefined;
+    }
+    leaves.set(child.node.id, child);
+  }
+  const branchStarts = getField(region.node, 'branches');
+  const startIds = Array.isArray(branchStarts)
+    ? branchStarts.map((branch: unknown) => (isRecord(branch) ? branch.startNodeId : undefined))
+    : [getField(region.node, 'branchStartNodeId')];
+  const exitId = getField(region.node, 'exitNodeId');
+  const branches: Leaf[][] = [];
+  const placed = new Set<Leaf>();
+  for (const startId of startIds) {
+    const branch: Leaf[] = [];
+    for (let nodeId = startId; nodeId !== exitId; ) {
+      const leaf = typeof nodeId === 'string' ? leaves.get(nodeId) : undefined;
+      const successors = leaf ? graph.getDirectSuccessors(leaf.node.id) : [];
+      if (!leaf || placed.has(leaf) || successors.length !== 1) {
+        return undefined;
+      }
+      placed.add(leaf);
+      branch.push(leaf);
+      nodeId = successors[0].id;
+    }
+    branches.push(branch);
+  }
+  return placed.size === leaves.size ? branches : undefined;
+};
+
 const toRegions = (graph: WorkflowGraph): Region | undefined => {
   const root: Region = { children: [] };
   let current = root;
@@ -95,6 +138,9 @@ const toRegions = (graph: WorkflowGraph): Region | undefined => {
     } else if (node.type.startsWith('exit-')) {
       if (!current.parent || !closes(node, current.node)) {
         return undefined;
+      }
+      if (node.type === 'exit-parallel') {
+        current.branches = toBranches(graph, current);
       }
       current = current.parent;
     } else {
@@ -126,15 +172,25 @@ const getRegions = (definition: unknown): Region | undefined => {
 const alwaysFails = (endings: ReadonlySet<Ending>): boolean =>
   endings.size > 0 && [...endings].every((ending) => FAILURES.has(ending));
 
-const toOutcome = <Failure>(endings: Iterable<Ending>, failure?: Failure): Outcome<Failure> => {
+// The outcome with `endings`, unknown when any of the outcomes it was made from is.
+const toOutcome = <Failure>(
+  endings: Iterable<Ending>,
+  failure?: Failure,
+  from: ReadonlyArray<Outcome<Failure>> = []
+): Outcome<Failure> => {
   const set = new Set(endings);
-  return alwaysFails(set) ? { endings: set, failure } : { endings: set };
+  const unknown = from.some((outcome) => outcome.unknown);
+  return {
+    endings: set,
+    ...(alwaysFails(set) ? { failure } : {}),
+    ...(unknown ? { unknown } : {}),
+  };
 };
 
 // Steps the analysis has nothing to say about run like any other: they might succeed or fail.
 const MIGHT_FAIL: Outcome<never> = { endings: new Set(['next', 'error']) };
 // Anything the analysis doesn't know might end any way, so it never decides a verdict.
-const UNKNOWN: Outcome<never> = { endings: new Set(ALL_ENDINGS) };
+const UNKNOWN: Outcome<never> = { endings: new Set(ALL_ENDINGS), unknown: true };
 
 const STEP_NODE_TYPES = new Set(['atomic', 'wait', 'waitForInput', 'waitForApproval', 'data.set']);
 
@@ -154,11 +210,12 @@ const evaluateLeaf = <Failure>(
     return failure ? toOutcome(['error'], failure) : MIGHT_FAIL;
   }
   if (node.type === 'workflow.output') {
+    // Rendering its values can fail the step before it ends the run.
     const failure = steps.endStepFailure(getConfiguration(node));
     if (failure === 'mayFail') {
-      return toOutcome(['completed', 'failed']);
+      return toOutcome(['completed', 'failed', 'error']);
     }
-    return failure ? toOutcome(['failed'], failure) : toOutcome(['completed']);
+    return failure ? toOutcome(['failed'], failure) : toOutcome(['completed', 'error']);
   }
   if (node.type === 'loop-break') {
     return toOutcome(['break']);
@@ -175,7 +232,7 @@ const evaluateSequence = <Failure>(
   steps: StepFailures<Failure>
 ): Outcome<Failure> => {
   const endings = new Set<Ending>(['next']);
-  let failure: Failure | undefined;
+  const outcomes: Array<Outcome<Failure>> = [];
   for (const item of items) {
     if (!endings.has('next')) {
       break;
@@ -184,9 +241,9 @@ const evaluateSequence = <Failure>(
     const outcome = evaluate(item, steps);
     endings.delete('next');
     outcome.endings.forEach((ending) => endings.add(ending));
-    failure = outcome.failure;
+    outcomes.push(outcome);
   }
-  return toOutcome(endings, failure);
+  return toOutcome(endings, outcomes[outcomes.length - 1]?.failure, outcomes);
 };
 
 // One of several branches runs; `next` stands for the branch taken when none of them matches.
@@ -203,7 +260,7 @@ const evaluateBranches = <Failure>(
   const hasFallbackBranch = children.some(({ node }) => node?.type === branchTypes[1]);
   const endings = new Set<Ending>(hasFallbackBranch ? [] : ['next']);
   outcomes.forEach((outcome) => outcome.endings.forEach((ending) => endings.add(ending)));
-  return toOutcome(endings, outcomes[0]?.failure);
+  return toOutcome(endings, outcomes[0]?.failure, outcomes);
 };
 
 // A failed step runs the fallback, then fails again unless the fallback ended the run itself.
@@ -222,10 +279,9 @@ const evaluateTryBlock = <Failure>(
   }
   const endings = new Set(normal.endings);
   endings.delete('error');
-  evaluate(fallbackPath, steps).endings.forEach((ending) =>
-    endings.add(ending === 'next' ? 'error' : ending)
-  );
-  return toOutcome(endings, normal.failure);
+  const fallback = evaluate(fallbackPath, steps);
+  fallback.endings.forEach((ending) => endings.add(ending === 'next' ? 'error' : ending));
+  return toOutcome(endings, normal.failure, [normal, fallback]);
 };
 
 // The engine reads a literal list directly, and parses a string that isn't a template.
@@ -257,30 +313,46 @@ const evaluateLoop = <Failure>(region: Region, steps: StepFailures<Failure>): Ou
   if (leavesIteration.length > 0 || mayNotRun) {
     endings.add('next');
   }
-  return toOutcome(endings, body.failure);
+  return toOutcome(endings, body.failure, [body]);
 };
 
-// Branches hold steps only. Unless the step waits for every branch to settle, a failed branch
-// fails it, and every named branch runs.
+const PARALLEL_BRANCH_ENDINGS: ReadonlySet<Ending> = new Set(['next', 'error', 'failed']);
+
+// Every named branch runs, unless an earlier failure stops the rest; the single body of a dynamic
+// step might run for no item. A failed step fails its branch, and the parallel step too unless it
+// waits for every branch to settle. A `workflow.output` step that fails the run fails it from any
+// branch; one that completes it (or a loop step) does something branches don't support yet.
 const evaluateParallel = <Failure>(
   region: Region,
   steps: StepFailures<Failure>
 ): Outcome<Failure> => {
-  const outcomes = region.children.map((child) =>
-    isRegion(child) ? UNKNOWN : evaluateLeaf(child.node, steps)
-  );
+  if (!region.branches) {
+    return UNKNOWN;
+  }
+  const outcomes = region.branches.map((branch) => evaluateSequence(branch, steps));
   if (
-    outcomes.some(({ endings }) => [...endings].some((ending) => !MIGHT_FAIL.endings.has(ending)))
+    outcomes.some(
+      ({ endings, unknown }) =>
+        unknown || [...endings].some((ending) => !PARALLEL_BRANCH_ENDINGS.has(ending))
+    )
   ) {
     return UNKNOWN;
   }
-  if (getConfiguration(region.node as GraphNodeUnion).mode === 'settled') {
-    return toOutcome(['next']);
+  const settles = getConfiguration(region.node as GraphNodeUnion).mode === 'settled';
+  const branchGoesOn = ({ endings }: Outcome<Failure>) =>
+    endings.has('next') || (settles && endings.has('error'));
+  const endings = new Set<Ending>();
+  if (!getField(region.node, 'branches') || outcomes.every(branchGoesOn)) {
+    endings.add('next');
   }
-  const failing = getField(region.node, 'branches')
-    ? outcomes.find(({ endings }) => alwaysFails(endings))
-    : undefined;
-  return failing ? toOutcome(['error'], failing.failure) : MIGHT_FAIL;
+  if (outcomes.some(({ endings: branchEndings }) => branchEndings.has('failed'))) {
+    endings.add('failed');
+  }
+  if (!settles && outcomes.some(({ endings: branchEndings }) => branchEndings.has('error'))) {
+    endings.add('error');
+  }
+  const failing = outcomes.find((outcome) => !branchGoesOn(outcome));
+  return toOutcome(endings, failing?.failure, outcomes);
 };
 
 // Regions whose own nodes don't change how their steps end.
@@ -320,7 +392,7 @@ function evaluate<Failure>(item: Region | Leaf, steps: StepFailures<Failure>): O
       if (getConfiguration(item.node as GraphNodeUnion).condition === true) {
         endings.delete('error');
       }
-      return toOutcome(endings, body.failure);
+      return toOutcome(endings, body.failure, [body]);
     }
     case 'enter-try-block':
       return evaluateTryBlock(item, steps);
@@ -338,17 +410,25 @@ function evaluate<Failure>(item: Region | Leaf, steps: StepFailures<Failure>): O
   }
 }
 
+/** Returned when the analysis can't tell whether every run of a workflow fails. */
+export const UNSUPPORTED_RUN = 'unsupported';
+
 /**
  * The failure every run of the workflow reaches first, when every run fails: given `steps`, no
- * path through its compiled graph completes. Undefined when a run might complete, or when the
- * workflow doesn't compile into a graph whose every node is known here.
+ * path through its compiled graph completes. Undefined when a run might complete, and
+ * `UNSUPPORTED_RUN` when the workflow doesn't compile, or a run might reach steps the analysis
+ * doesn't know how they end.
  */
 export const findAlwaysFailure = <Failure>(
   definition: unknown,
   steps: StepFailures<Failure>
-): Failure | undefined => {
+): Failure | typeof UNSUPPORTED_RUN | undefined => {
   const regions = getRegions(definition);
-  return regions ? evaluate(regions, steps).failure : undefined;
+  if (!regions) {
+    return UNSUPPORTED_RUN;
+  }
+  const { failure, unknown } = evaluate(regions, steps);
+  return failure ?? (unknown ? UNSUPPORTED_RUN : undefined);
 };
 
 // Every step might fail, and `workflow.output` steps end the run as their status says.
@@ -385,12 +465,39 @@ const collectOutputSteps = (region: Region): Array<Record<string, unknown>> =>
   });
 
 /**
- * The `workflow.output` steps the engine might run (`workflow.fail` compiles to one with status
- * `failed`), including fallbacks; undefined when the workflow doesn't compile.
+ * The `workflow.output` steps a run might reach (`workflow.fail` compiles to one with status
+ * `failed`), including fallbacks: all of them when a run might reach steps the analysis doesn't
+ * know how they end, and undefined when the workflow doesn't compile.
  */
 export const getOutputSteps = (definition: unknown): Array<Record<string, unknown>> | undefined => {
   const regions = getRegions(definition);
-  return regions ? collectOutputSteps(regions) : undefined;
+  if (!regions) {
+    return undefined;
+  }
+  const reached = new Set<Record<string, unknown>>();
+  const { unknown } = evaluate(regions, {
+    ...UNKNOWN_STEPS,
+    endStepFailure: (step) => {
+      reached.add(step);
+      return UNKNOWN_STEPS.endStepFailure(step);
+    },
+  });
+  return unknown ? collectOutputSteps(regions) : [...reached];
+};
+
+/**
+ * The `with` maps of the completing `workflow.output` steps a run might reach; of every one in the
+ * definition when the workflow doesn't compile.
+ */
+export const getCompletingOutputBlocks = (definition: unknown): Array<Record<string, unknown>> => {
+  const steps = getOutputSteps(definition);
+  if (!steps) {
+    return collectWorkflowOutputBlocks(definition);
+  }
+  return steps
+    .filter(isCompletingOutputStep)
+    .map(({ with: values }) => values)
+    .filter(isRecord);
 };
 
 // Whether a failure raised in `item` always fails the run: nothing it passes through on the way

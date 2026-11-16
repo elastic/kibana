@@ -155,7 +155,7 @@ const ChangesSection = ({
           size="s"
           title={i18n.translate('workflows.dependents.flyout.uncheckedTitle', {
             defaultMessage:
-              'None of the workflows that could be checked break, but {count, plural, one {# workflow computes its} other {# workflows compute their}} inputs while running and can’t be checked',
+              'None of the workflows that could be checked break, but {count, plural, one {# workflow} other {# workflows}} can’t be checked',
             values: { count: summary.unknown },
           })}
           data-test-subj="workflowDependentsUncheckedCallout"

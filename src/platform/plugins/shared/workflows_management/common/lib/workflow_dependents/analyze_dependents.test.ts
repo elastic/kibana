@@ -13,7 +13,7 @@ import {
   analyzeDependents,
   analyzeRemovalImpact,
   buildDependentsIndex,
-  findRunFailure,
+  checkRun,
   MAX_INDIRECT_DEPTH,
 } from './analyze_dependents';
 import {
@@ -21,7 +21,10 @@ import {
   findOutputsPassingThrough,
   findOutputUsages,
 } from './find_call_sites';
+import { getCompletingOutputBlocks } from './run_outcomes';
 import type { DependentsAnalysis, ImpactIssue, WorkflowLookupItem } from './types';
+
+const findRunFailure = (...args: Parameters<typeof checkRun>) => checkRun(...args).failure;
 
 jest.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => {
   const actual = jest.requireActual('@kbn/workflows/spec/lib/build_fields_zod_validator');
@@ -228,6 +231,29 @@ describe('findOutputUsages', () => {
     ]);
   });
 
+  it('finds reads in iteration-on-failure conditions', () => {
+    const definition = {
+      steps: [
+        { ...callStep('ctx', {}) },
+        {
+          name: 'each',
+          type: 'foreach',
+          foreach: '[1, 2]',
+          'iteration-on-failure': {
+            continue: 'steps.ctx.output.skip : *',
+            retry: { 'max-attempts': 2, condition: 'steps.ctx.output.retry : *' },
+          },
+          steps: [{ name: 'log', type: 'console', with: { message: 'hi' } }],
+        },
+      ],
+    };
+
+    expect(findOutputUsages(definition, 'ctx').map(({ field }) => field)).toEqual([
+      'skip',
+      'retry',
+    ]);
+  });
+
   it('reads KQL only where the engine evaluates a condition, not in step payloads', () => {
     const definition = {
       steps: [
@@ -329,10 +355,12 @@ describe('findOutputsPassingThrough', () => {
         },
       ],
     };
-    expect([
-      ...findOutputsPassingThrough(definition, [{ stepName: 'ctx', field: 'score' }]),
-    ]).toEqual(['risk', 'whole']);
-    expect([...findOutputsPassingThrough(definition, [{ stepName: 'ctx' }])].sort()).toEqual([
+    const blocks = getCompletingOutputBlocks(definition);
+    expect([...findOutputsPassingThrough(blocks, [{ stepName: 'ctx', field: 'score' }])]).toEqual([
+      'risk',
+      'whole',
+    ]);
+    expect([...findOutputsPassingThrough(blocks, [{ stepName: 'ctx' }])].sort()).toEqual([
       'label',
       'risk',
       'whole',
@@ -403,6 +431,59 @@ describe('analyzeDependents', () => {
     expect(statusById(analysis)).toMatchObject({ triage: 'safe', enrich: 'breaking' });
     expect(dependentOf(analysis, 'enrich')?.issues).toContainEqual(
       expect.objectContaining({ kind: 'unreturnedOutput', field: 'score' })
+    );
+  });
+
+  it('can’t vouch for callers that wait for a draft whose runs it can’t check', () => {
+    const draft = {
+      ...makeChild(),
+      steps: [
+        {
+          name: 'fan',
+          type: 'parallel',
+          branches: [
+            { name: 'one', steps: [{ name: 'early', type: 'workflow.output', with: {} }] },
+          ],
+        },
+        { name: 'emit', type: 'workflow.output', with: { severity: 'high', score: 9 } },
+      ],
+    };
+    const inputs = { inputs: { alert_id: 'a' } };
+    const waits = workflow('waits', [callStep('ctx', inputs)]);
+    const starts = workflow('starts', [callStep('bg', inputs, 'workflow.executeAsync')]);
+    const { unchecked } = checkRun({ ...childItem, definition: draft }, []);
+    const analysis = analyzeDependents({
+      index: buildDependentsIndex(CHILD_ID, [waits, starts]),
+      savedDefinition: makeChild(),
+      draftDefinition: draft,
+      draftUncheckedRun: unchecked,
+    });
+
+    expect(unchecked).toEqual({ reason: 'unsupportedSteps' });
+    expect(statusById(analysis)).toEqual({ waits: 'unknown', starts: 'safe' });
+    expect(dependentOf(analysis, 'waits')?.uncheckedRun).toEqual(unchecked);
+    expect(analysis.summary.unknown).toBe(1);
+  });
+
+  it('ignores outputs set by a workflow.output step no run reaches', () => {
+    const emitsAfter = (outputs?: Array<Record<string, unknown>>) => ({
+      ...makeChild(),
+      outputs,
+      steps: [
+        { name: 'emit', type: 'workflow.output', with: { severity: 'high' } },
+        { name: 'unreachable', type: 'workflow.output', with: { severity: 'high', score: 9 } },
+      ],
+    });
+    const declared = analyze(emitsAfter(makeChild().outputs));
+    const { outputs: _, ...undeclaredChild } = makeChild();
+    const inferred = analyzeWith(allWorkflows, emitsAfter(undefined), undeclaredChild);
+
+    expect(declared.contractChanges).toEqual([
+      expect.objectContaining({ kind: 'outputNoLongerReturned', field: 'score' }),
+    ]);
+    expect(statusById(declared).enrich).toBe('breaking');
+    expect(inferred.contractChanges).toContainEqual(
+      expect.objectContaining({ kind: 'outputRemoved', field: 'score' })
     );
   });
 
@@ -1519,12 +1600,69 @@ describe('analyzeCalledWorkflows', () => {
     );
 
     expect(
-      called.map(({ workflowId, status, uncheckedCall }) => [workflowId, status, uncheckedCall])
+      called.map(({ workflowId, status, uncheckedRun }) => [workflowId, status, uncheckedRun])
     ).toEqual([
-      ['middle', 'unknown', { from: 'next', to: 'deleted' }],
-      ['top', 'unknown', { from: 'm', to: 'middle' }],
+      ['middle', 'unknown', { reason: 'calledNotFound', from: 'next', to: 'deleted' }],
+      ['top', 'unknown', { reason: 'calledUnchecked', from: 'm', to: 'middle' }],
       ['sometimes', 'safe', undefined],
     ]);
+  });
+
+  it('can’t vouch for a child whose runs reach steps the analysis doesn’t follow', () => {
+    const completesBranch = workflow('completes-branch', [
+      {
+        name: 'fan',
+        type: 'parallel',
+        branches: [{ name: 'one', steps: [{ name: 'done', type: 'workflow.output', with: {} }] }],
+      },
+    ]);
+    const top = workflow('top', [callStep('c', {}, undefined, 'completes-branch')]);
+    const called = analyzeParent(
+      [callStep('t', {}, undefined, 'top'), callStep('c', {}, undefined, 'completes-branch')],
+      [top, completesBranch]
+    );
+
+    expect(
+      called.map(({ workflowId, status, uncheckedRun }) => [workflowId, status, uncheckedRun])
+    ).toEqual([
+      ['completes-branch', 'unknown', { reason: 'unsupportedSteps' }],
+      ['top', 'unknown', { reason: 'calledUnchecked', from: 'c', to: 'completes-branch' }],
+    ]);
+  });
+
+  it('fails a child whose parallel branch ends the run failed', () => {
+    const failsBranch = workflow('fails-branch', [
+      {
+        name: 'fan',
+        type: 'parallel',
+        branches: [
+          { name: 'one', steps: [{ name: 'stop', type: 'workflow.output', status: 'failed' }] },
+          { name: 'two', steps: [{ name: 'log', type: 'console', with: { message: 'hi' } }] },
+        ],
+      },
+    ]);
+    const [called] = analyzeParent([callStep('c', {}, undefined, 'fails-branch')], [failsBranch]);
+
+    expect(called.status).toBe('breaking');
+    expect(called.issues.map(({ kind }) => kind)).toEqual(['runEndsUnsuccessfully']);
+  });
+
+  it('explains failures along a long loop of calls without overflowing the stack', () => {
+    const size = 1000;
+    const id = (position: number) => `w${position}`;
+    const loop = Array.from({ length: size }, (_, position) =>
+      workflow(id(position), [callStep('next', {}, undefined, id((position + 1) % size))])
+    );
+    const called = analyzeParent(
+      loop.map((_, position) => callStep(`c${position}`, {}, undefined, id(position))),
+      loop
+    );
+
+    expect(called).toHaveLength(size);
+    expect(called.every(({ status }) => status === 'breaking')).toBe(true);
+    expect(new Set(called.flatMap(({ issues }) => issues.map(({ kind }) => kind)))).toEqual(
+      new Set(['callCycle'])
+    );
   });
 });
 

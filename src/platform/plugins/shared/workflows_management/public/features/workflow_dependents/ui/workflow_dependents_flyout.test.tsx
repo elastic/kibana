@@ -61,7 +61,7 @@ describe('WorkflowDependentsFlyout', () => {
     renderFlyout();
 
     expect(screen.getByTestId('workflowDependentsUncheckedCallout')).toHaveTextContent(
-      '1 workflow computes its inputs while running'
+      'but 1 workflow can’t be checked'
     );
     expect(screen.queryByTestId('workflowDependentsContractUnchanged')).not.toBeInTheDocument();
   });

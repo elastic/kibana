@@ -235,6 +235,7 @@ const getStepConditions = (step: Record<string, unknown>): unknown[] => [
   step.if,
   typeof step.type === 'string' && CONDITION_STEP_TYPES.has(step.type) ? step.condition : undefined,
   ...getOnFailureConditions(step['on-failure']),
+  ...getOnFailureConditions(step['iteration-on-failure']),
 ];
 
 const readsInConditions = (conditions: readonly unknown[]): VariableRead[] =>
@@ -283,15 +284,16 @@ export const findOutputUsages = (definition: unknown, stepName: string): OutputU
   stepName ? toOutputUsages(getDefinitionReads(definition), stepName) : [];
 
 /**
- * Returns the names of the workflow's own outputs (`workflow.output` keys) whose values read the
- * given step outputs without a fallback. A read with no `field` stands for every output of the step.
+ * Returns the names of a workflow's own outputs (keys of its `workflow.output` steps' `with` maps,
+ * `outputBlocks`) whose values read the given step outputs without a fallback. A read with no
+ * `field` stands for every output of the step.
  */
 export const findOutputsPassingThrough = (
-  definition: unknown,
+  outputBlocks: ReadonlyArray<Record<string, unknown>>,
   reads: ReadonlyArray<{ stepName: string; field?: string }>
 ): Set<string> => {
   const passedThrough = new Set<string>();
-  for (const block of collectWorkflowOutputBlocks(definition)) {
+  for (const block of outputBlocks) {
     for (const [outputName, value] of Object.entries(block)) {
       const valueReads = collectReads(value);
       const isAffected = reads.some(({ stepName, field }) =>

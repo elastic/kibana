@@ -54,6 +54,16 @@ export const useBreakingChangeConfirmation = (
   const modalTitleId = useGeneratedHtmlId();
   const [pending, setPending] = useState<(SaveImpact & { workflowName: string }) | null>(null);
   const resolveRef = useRef<(confirmed: boolean) => void>();
+  const isMountedRef = useRef(false);
+  // Leaving the editor cancels a save that is being checked or waiting for confirmation.
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      resolveRef.current?.(false);
+      resolveRef.current = undefined;
+    };
+  }, []);
 
   const getSaveImpact = useCallback(
     async (draftYaml: string | undefined): Promise<SaveImpact> => {
@@ -88,7 +98,7 @@ export const useBreakingChangeConfirmation = (
     async (draftYaml) => {
       const workflowId = selectWorkflowId(store.getState());
       const impact = await getSaveImpact(draftYaml);
-      if (selectWorkflowId(store.getState()) !== workflowId) {
+      if (!isMountedRef.current || selectWorkflowId(store.getState()) !== workflowId) {
         return false;
       }
       if (impact.breakingDependents.length === 0 && !impact.checkFailed) {

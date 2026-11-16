@@ -13,7 +13,7 @@ import { alwaysEndsInOutputStep, getOutputSteps } from './workflow_dependents/ru
 
 /**
  * Returns the output names a workflow's completing `workflow.output` steps set, including those in
- * fallbacks. Undefined when a run can complete without one (callers then get its last step's
+ * fallbacks, but not those no run can reach. Undefined when a run can complete without one (callers then get its last step's
  * output), or when one of them sets a computed value.
  */
 export const getReturnedOutputNames = (definition: unknown): string[] | undefined => {

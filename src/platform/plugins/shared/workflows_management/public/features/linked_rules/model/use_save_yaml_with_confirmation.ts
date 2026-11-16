@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useStore } from 'react-redux-v7';
 import type { Store } from 'redux-v4';
 import { parseDocument } from 'yaml';
@@ -32,7 +32,8 @@ const getDraftToSave = (state: RootState): string =>
 
 /**
  * Saves the YAML after confirming a disable, or else any change that breaks workflows calling this
- * one; resolves to false when the user cancels or opens another workflow before it saves.
+ * one; resolves to false when the user cancels, or opens another workflow or leaves the editor
+ * before it saves.
  */
 export const useSaveYamlWithConfirmation = (
   confirmDisable: ConfirmDisableWorkflows
@@ -40,10 +41,19 @@ export const useSaveYamlWithConfirmation = (
   const saveYaml = useSaveYaml();
   const store = useStore<RootState>();
   const confirmBreakingChange = useConfirmBreakingChange();
+  // The store outlives the editor, so leaving the editor has to stop a save still being checked.
+  const isMountedRef = useRef(false);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const confirmAndSave = useCallback(async () => {
     const workflowId = selectWorkflowId(store.getState());
-    const isStillOpen = () => selectWorkflowId(store.getState()) === workflowId;
+    const isStillOpen = () =>
+      isMountedRef.current && selectWorkflowId(store.getState()) === workflowId;
     // The draft can change while a check is pending, so check again until the checked draft is
     // the one being saved.
     let yamlString: string;

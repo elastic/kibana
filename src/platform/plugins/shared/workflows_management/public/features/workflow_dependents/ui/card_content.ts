@@ -16,7 +16,7 @@ import type {
   CallSiteImpact,
   DependentImpact,
   ImpactIssue,
-  ImpactStatus,
+  UncheckedRun,
   UpstreamImpact,
 } from '../../../../common/lib/workflow_dependents/types';
 
@@ -103,11 +103,32 @@ const getUsageDetails = (callSites: readonly CallSiteImpact[], childName: string
   ];
 };
 
+const getCallerUncheckedRunVerdict = (run: UncheckedRun, childName: string): string => {
+  switch (run.reason) {
+    case 'unsupportedSteps':
+      return i18n.translate('workflows.dependents.verdict.caller.unsupportedSteps', {
+        defaultMessage: 'Can’t check: some steps of {childName} can’t be checked before it runs',
+        values: { childName },
+      });
+    case 'calledNotFound':
+      return i18n.translate('workflows.dependents.verdict.caller.calledNotFound', {
+        defaultMessage:
+          'Can’t check: the step "{from}" of {childName} runs {to}, which wasn’t found or you can’t view',
+        values: { childName, from: run.from, to: run.to },
+      });
+    case 'calledUnchecked':
+      return i18n.translate('workflows.dependents.verdict.caller.calledUnchecked', {
+        defaultMessage:
+          'Can’t check: the step "{from}" of {childName} runs {to}, which can’t be checked',
+        values: { childName, from: run.from, to: run.to },
+      });
+  }
+};
+
 const getCallerVerdict = (
-  status: ImpactStatus,
+  { status, enabled, uncheckedRun }: DependentImpact,
   childName: string,
-  hasUnsavedChanges: boolean,
-  enabled: boolean
+  hasUnsavedChanges: boolean
 ): string => {
   if (!enabled && (status === 'breaking' || status === 'warning')) {
     return i18n.translate('workflows.dependents.verdict.caller.turnedOff', {
@@ -130,9 +151,11 @@ const getCallerVerdict = (
         defaultMessage: 'Already broken, and not because of your changes',
       });
     case 'unknown':
-      return i18n.translate('workflows.dependents.verdict.caller.unknown', {
-        defaultMessage: 'Can’t check: it computes its inputs while running',
-      });
+      return uncheckedRun
+        ? getCallerUncheckedRunVerdict(uncheckedRun, childName)
+        : i18n.translate('workflows.dependents.verdict.caller.unknown', {
+            defaultMessage: 'Can’t check: it computes its inputs while running',
+          });
     case 'safe':
       return hasUnsavedChanges
         ? i18n.translate('workflows.dependents.verdict.caller.safeWithChanges', {
@@ -212,7 +235,7 @@ export const getCallerCardContent = (
   childName: string,
   hasUnsavedChanges: boolean
 ): CardContent => {
-  const { workflowName, enabled, status, callSites, issues, upstream } = dependent;
+  const { workflowName, enabled, callSites, issues, upstream } = dependent;
   const hasManySteps = callSites.length > 1;
   const shownStatus = getShownStatus(dependent);
   return {
@@ -220,7 +243,7 @@ export const getCallerCardContent = (
     isTurnedOff: !enabled,
     status: shownStatus,
     statusLabel: getStatusLabel(shownStatus),
-    verdict: getCallerVerdict(status, childName, hasUnsavedChanges, enabled),
+    verdict: getCallerVerdict(dependent, childName, hasUnsavedChanges),
     problems: toProblems(
       issues.filter(({ isNew }) => isNew),
       childName,
@@ -236,6 +259,26 @@ export const getCallerCardContent = (
   };
 };
 
+const getCalledUncheckedRunVerdict = (run: UncheckedRun): string => {
+  switch (run.reason) {
+    case 'unsupportedSteps':
+      return i18n.translate('workflows.dependents.verdict.called.unsupportedSteps', {
+        defaultMessage: 'Can’t check: some of its steps can’t be checked before it runs',
+      });
+    case 'calledNotFound':
+      return i18n.translate('workflows.dependents.verdict.called.uncheckedCall', {
+        defaultMessage:
+          'Can’t check: its step "{from}" runs {to}, which wasn’t found or you can’t view',
+        values: { from: run.from, to: run.to },
+      });
+    case 'calledUnchecked':
+      return i18n.translate('workflows.dependents.verdict.called.calledUnchecked', {
+        defaultMessage: 'Can’t check: its step "{from}" runs {to}, which can’t be checked',
+        values: { from: run.from, to: run.to },
+      });
+  }
+};
+
 const getCalledVerdict = (called: CalledWorkflowImpact, childName: string): string => {
   switch (called.status) {
     case 'breaking':
@@ -248,12 +291,8 @@ const getCalledVerdict = (called: CalledWorkflowImpact, childName: string): stri
         defaultMessage: 'Might fail when it runs',
       });
     case 'unknown':
-      return called.uncheckedCall
-        ? i18n.translate('workflows.dependents.verdict.called.uncheckedCall', {
-            defaultMessage:
-              'Can’t check: its step "{from}" runs {to}, which wasn’t found or you can’t view',
-            values: { from: called.uncheckedCall.from, to: called.uncheckedCall.to },
-          })
+      return called.uncheckedRun
+        ? getCalledUncheckedRunVerdict(called.uncheckedRun)
         : i18n.translate('workflows.dependents.verdict.called.unknown', {
             defaultMessage: 'Can’t check: the inputs are computed while running',
           });

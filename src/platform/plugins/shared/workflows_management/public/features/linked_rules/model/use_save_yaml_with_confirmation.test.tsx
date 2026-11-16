@@ -49,6 +49,7 @@ const buildYaml = (enabled: boolean) =>
 describe('useSaveYamlWithConfirmation', () => {
   const confirmDisable = jest.fn();
   let store: ReturnType<typeof createMockStore>;
+  let unmount: () => void;
 
   const renderSaves = (
     yamlEnabledEdits: boolean[],
@@ -62,7 +63,7 @@ describe('useSaveYamlWithConfirmation', () => {
       useSaveYamlWithConfirmation(confirmDisable),
       useSaveYamlWithConfirmation(confirmDisable),
     ];
-    const { result } = renderHook(useSaves, {
+    const rendered = renderHook(useSaves, {
       wrapper: ({ children }) => (
         <TestWrapper store={store}>
           {confirmBreakingChange ? (
@@ -77,7 +78,8 @@ describe('useSaveYamlWithConfirmation', () => {
         </TestWrapper>
       ),
     });
-    return result.current;
+    unmount = rendered.unmount;
+    return rendered.result.current;
   };
   const renderSave = (...args: Parameters<typeof renderSaves>) => renderSaves(...args)[0];
 
@@ -196,6 +198,20 @@ describe('useSaveYamlWithConfirmation', () => {
 
     await expect(renderSave([true], confirmBreakingChange)()).resolves.toBe(false);
 
+    expect(mockSaveYaml).not.toHaveBeenCalled();
+  });
+
+  it('does not save when the editor closes while the check is pending', async () => {
+    let finishCheck: (confirmed: boolean) => void = () => {};
+    const confirmBreakingChange = jest.fn(
+      () => new Promise<boolean>((resolve) => (finishCheck = resolve))
+    );
+    const save = renderSave([true], confirmBreakingChange)();
+
+    unmount();
+    finishCheck(true);
+
+    await expect(save).resolves.toBe(false);
     expect(mockSaveYaml).not.toHaveBeenCalled();
   });
 

@@ -87,7 +87,7 @@ describe('useBreakingChangeConfirmation', () => {
     store = createMockStore();
     store.dispatch(setWorkflow(workflowDto('alert-context', 'Alert context')));
     store.dispatch(setYamlString(draftYaml));
-    render(
+    return render(
       <TestProvider services={services} store={store}>
         <Harness />
       </TestProvider>
@@ -219,5 +219,29 @@ describe('useBreakingChangeConfirmation', () => {
 
     await expect(confirmBreakingChange(draft)).resolves.toBe(false);
     expect(screen.queryByTestId('workflowBreakingChangeConfirmModal')).not.toBeInTheDocument();
+  });
+
+  it('cancels the save when the editor closes while the dialog is open', async () => {
+    (services.http.post as jest.Mock).mockResolvedValue(impact([caller({})]));
+    const { unmount } = renderWithDraft(`${SAVED_YAML}\n`);
+
+    const { confirmation } = await openConfirmation();
+    unmount();
+
+    await expect(confirmation).resolves.toBe(false);
+  });
+
+  it('cancels the save when the editor closes while its check runs', async () => {
+    let finishCheck: (response: WorkflowDependentsImpactResponse) => void = () => {};
+    (services.http.post as jest.Mock).mockImplementation(
+      () => new Promise((resolve) => (finishCheck = resolve))
+    );
+    const { unmount } = renderWithDraft(`${SAVED_YAML}\n`);
+
+    const confirmation = confirmBreakingChange(draft);
+    unmount();
+    finishCheck(impact([]));
+
+    await expect(confirmation).resolves.toBe(false);
   });
 });

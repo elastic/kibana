@@ -11,7 +11,7 @@ import YAML from 'yaml';
 import { ExecutionStatus } from '@kbn/workflows';
 import { FakeConnectors } from '@kbn/workflows-execution-engine/integration_tests/mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
-import { findRunFailure } from '../../common/lib/workflow_dependents/analyze_dependents';
+import { checkRun } from '../../common/lib/workflow_dependents/analyze_dependents';
 
 /*
  * Compares the dependents analysis's "fails every run" verdict with what the engine does.
@@ -286,6 +286,53 @@ const FIXTURES: Record<string, Fixture> = {
       },
     ],
   },
+  'a parallel branch that ends the run failed': {
+    steps: [
+      {
+        name: 'fan',
+        type: 'parallel',
+        branches: [
+          { name: 'one', steps: [output('stop', {}, 'failed')] },
+          { name: 'two', steps: [maybe('m')] },
+        ],
+      },
+    ],
+  },
+  'a parallel branch that ends the run failed, in a step that settles': {
+    steps: [
+      {
+        name: 'fan',
+        type: 'parallel',
+        mode: 'settled',
+        branches: [
+          { name: 'one', steps: [output('stop', {}, 'failed')] },
+          { name: 'two', steps: [failing('f')] },
+        ],
+      },
+    ],
+  },
+  'a parallel branch that ends the run failed after a step that may fail': {
+    steps: [
+      {
+        name: 'fan',
+        type: 'parallel',
+        branches: [
+          { name: 'one', steps: [maybe('m'), output('stop', {}, 'failed')] },
+          { name: 'two', steps: [maybe('n')] },
+        ],
+      },
+    ],
+  },
+  'a parallel branch that ends the run failed after a step that may fail, in a step that settles': {
+    steps: [
+      {
+        name: 'fan',
+        type: 'parallel',
+        mode: 'settled',
+        branches: [{ name: 'one', steps: [maybe('m'), output('stop', {}, 'failed')] }],
+      },
+    ],
+  },
   'a fallback that leaves the loop': {
     steps: [
       {
@@ -397,16 +444,18 @@ describe('dependents analysis parity with the engine', () => {
     'agrees on whether every run fails: %s',
     async (_name, fixture) => {
       const statuses = await runEverywhere(fixture);
-      const analyzerFailure = findRunFailure(
+      const { failure, unchecked } = checkRun(
         { id: 'w', name: 'w', enabled: true, definition: forAnalyzer(fixture) },
         [BROKEN]
       );
 
       expect({
-        analyzerFailsEveryRun: analyzerFailure !== undefined,
+        analyzerFailsEveryRun: failure !== undefined,
+        analyzerUnchecked: unchecked,
         engineStatuses: [...new Set(statuses)].sort(),
       }).toEqual({
         analyzerFailsEveryRun: toVerdict(statuses) === 'fails',
+        analyzerUnchecked: undefined,
         engineStatuses: [...new Set(statuses)].sort(),
       });
     }
@@ -426,10 +475,15 @@ describe('dependents analysis parity with the engine', () => {
         definition: forAnalyzer(fixture),
       }));
       const checked = items[items.length - 1];
-      const analyzerFailure = findRunFailure(checked, [...items.slice(0, -1), BROKEN]);
+      const { failure, unchecked } = checkRun(checked, [...items.slice(0, -1), BROKEN]);
 
-      expect({ analyzerFailsEveryRun: analyzerFailure !== undefined, verdicts }).toEqual({
+      expect({
+        analyzerFailsEveryRun: failure !== undefined,
+        analyzerUnchecked: unchecked,
+        verdicts,
+      }).toEqual({
         analyzerFailsEveryRun: verdicts[checked.id] === 'fails',
+        analyzerUnchecked: undefined,
         verdicts,
       });
     }

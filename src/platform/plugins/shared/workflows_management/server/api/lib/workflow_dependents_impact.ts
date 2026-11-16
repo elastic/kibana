@@ -14,7 +14,7 @@ import {
   analyzeDependents,
   analyzeRemovalImpact,
   buildDependentsIndex,
-  findRunFailure,
+  checkRun,
   MAX_INDIRECT_DEPTH,
 } from '../../../common/lib/workflow_dependents/analyze_dependents';
 import type { WorkflowDependentsImpactResponse } from '../../../common/lib/workflow_dependents/api';
@@ -137,11 +137,10 @@ export const analyzeWorkflowDependentsImpact = async ({
     collectCalledWorkflows(workflowId, draftDefinition, sharedLookup),
     collectCalledWorkflows(workflowId, savedDefinition, sharedLookup),
   ]);
-  const getRunFailure = (definition: unknown, called: readonly WorkflowLookupItem[]) =>
-    findRunFailure(
-      { id: workflowId, name: workflowId, enabled: true, definition, managed },
-      called
-    );
+  const getRunCheck = (definition: unknown, called: readonly WorkflowLookupItem[]) =>
+    checkRun({ id: workflowId, name: workflowId, enabled: true, definition, managed }, called);
+  // An invalid draft is stored without a definition, so it never runs.
+  const draftRun = isDraftValid ? getRunCheck(draftDefinition, calledWorkflows) : {};
 
   return {
     analysis: analyzeDependents({
@@ -149,9 +148,9 @@ export const analyzeWorkflowDependentsImpact = async ({
       savedDefinition,
       draftDefinition,
       isDraftValid,
-      savedRunFailure: getRunFailure(savedDefinition, calledBySaved),
-      // An invalid draft is stored without a definition, so it never runs.
-      draftRunFailure: isDraftValid ? getRunFailure(draftDefinition, calledWorkflows) : undefined,
+      savedRunFailure: getRunCheck(savedDefinition, calledBySaved).failure,
+      draftRunFailure: draftRun.failure,
+      draftUncheckedRun: draftRun.unchecked,
       managed,
     }),
     calledWorkflows: analyzeCalledWorkflows({
