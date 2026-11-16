@@ -7,7 +7,13 @@
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 import { EsqlEditor } from '@kbn/scout';
-import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
+import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
+import { expect } from '../../../../../ui';
+
+/** One attempt to pick options before the selection is retried. */
+const OPTION_ATTEMPT_TIMEOUT_MS = 5_000;
+
+type ComboBox = ReturnType<ScoutPage['components']['comboBox']>;
 
 /**
  * ES|QL rule form, shared by rule creation and rule editing: the ES|QL query bar and the alert
@@ -26,6 +32,7 @@ export class EsqlRuleFormPage {
   readonly suppressionDurationValue: Locator;
   readonly suppressionDurationUnit: Locator;
   readonly suppressPerRuleExecution: Locator;
+  readonly suppressPerTimePeriod: Locator;
   readonly suppressMissingFields: Locator;
   readonly doNotSuppressMissingFields: Locator;
 
@@ -43,6 +50,9 @@ export class EsqlRuleFormPage {
     this.suppressionDurationUnit = suppressionDuration.locator('[data-test-subj="timeType"]');
     this.suppressPerRuleExecution = suppressionDuration.getByRole('radio', {
       name: 'Per rule execution',
+    });
+    this.suppressPerTimePeriod = suppressionDuration.getByRole('radio', {
+      name: 'Per time period',
     });
     const missingFieldsOptions = this.page.testSubj.locator('suppressionMissingFieldsOptions');
     this.suppressMissingFields = missingFieldsOptions.getByRole('radio', {
@@ -79,30 +89,52 @@ export class EsqlRuleFormPage {
 
   /** Picks the field that provides the rule name in the "Rule name override" control. */
   async selectRuleNameOverride(fieldName: string): Promise<void> {
-    await this.page.components
-      .comboBox(
+    await this.selectOptionsOnceLoaded(
+      this.page.components.comboBox(
         'esqlAutocompleteComboBox',
         this.page.testSubj.locator('detectionEngineStepAboutRuleRuleNameOverrideForEsqlRuleType')
-      )
-      .setSelectedOptions([fieldName]);
+      ),
+      [fieldName]
+    );
   }
 
   /** Picks fields in "Custom highlighted fields". Its options come from the columns of the query. */
   async selectInvestigationFields(fieldNames: readonly string[]): Promise<void> {
-    await this.page.components
-      .comboBox(
+    await this.selectOptionsOnceLoaded(
+      this.page.components.comboBox(
         'input',
         this.page.testSubj.locator('detectionEngineStepAboutRuleInvestigationFields')
-      )
-      .setSelectedOptions([...fieldNames]);
+      ),
+      fieldNames
+    );
   }
 
-  /** The "Suppress alerts by" combo box; its options come from the columns of the query. */
+  /** The "Suppress alerts by" combo box; use it to read the saved selection. */
   suppressionFields() {
     return this.page.components.comboBox(
       'input',
       this.page.testSubj.locator('alertSuppressionInput')
     );
+  }
+
+  /** Picks the "Suppress alerts by" fields. Their options come from the columns of the query. */
+  async selectSuppressionFields(fieldNames: readonly string[]): Promise<void> {
+    await this.selectOptionsOnceLoaded(this.suppressionFields(), fieldNames);
+  }
+
+  /**
+   * Picks options of a combo box whose options come from the columns of the query. The control
+   * closes its dropdown when it starts loading those columns, which happens shortly after the
+   * query changes, so a single attempt can wait on a dropdown that is already closed. Picking is
+   * idempotent, so the whole selection is retried until the columns are loaded.
+   */
+  private async selectOptionsOnceLoaded(
+    comboBox: ComboBox,
+    fieldNames: readonly string[]
+  ): Promise<void> {
+    await expect(async () => {
+      await comboBox.setSelectedOptions([...fieldNames], { timeout: OPTION_ATTEMPT_TIMEOUT_MS });
+    }).toPass({ timeout: DATA_LOAD_TIMEOUT_MS });
   }
 
   async confirmSaveWithErrors(): Promise<void> {

@@ -69,9 +69,7 @@ spaceTest.describe(
         await spaceTest.step('edit the suppression settings and save', async () => {
           await esqlRuleForm.suppressPerRuleExecution.check();
           await esqlRuleForm.doNotSuppressMissingFields.check();
-          await esqlRuleForm
-            .suppressionFields()
-            .setSelectedOptions([SUPPRESS_BY_FIELD, ADDED_SUPPRESS_BY_FIELD]);
+          await esqlRuleForm.selectSuppressionFields([SUPPRESS_BY_FIELD, ADDED_SUPPRESS_BY_FIELD]);
           await ruleEditPage.save();
         });
 
@@ -102,7 +100,7 @@ spaceTest.describe(
         });
 
         await ruleEditPage.navigate(id);
-        await esqlRuleForm.suppressionFields().setSelectedOptions([SUPPRESS_BY_FIELD]);
+        await esqlRuleForm.selectSuppressionFields([SUPPRESS_BY_FIELD]);
         await ruleEditPage.save();
 
         const { definitionSection } = ruleDetailsPage;

@@ -58,8 +58,6 @@ import {
   EQL_QUERY_INPUT,
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
-  ESQL_QUERY_BAR,
-  ESQL_QUERY_BAR_INPUT_AREA,
   ESQL_TYPE,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
@@ -629,30 +627,6 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
 };
 
 /**
- * Pastes query into the ES|QL Monaco editor via a synthetic ClipboardEvent.
- * This avoids flakiness in the tests when typing in the ES|QL query bar.
- */
-export const fillEsqlQueryBar = (query: string) => {
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('exist').click({ force: true });
-
-  const selectAll = Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a';
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(`${selectAll}{del}`, { force: true });
-
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).then(($textarea) => {
-    const dataTransfer = new DataTransfer();
-    dataTransfer.setData('text/plain', query);
-    const pasteEvent = new ClipboardEvent('paste', {
-      clipboardData: dataTransfer,
-      bubbles: true,
-      cancelable: true,
-    });
-    $textarea[0].dispatchEvent(pasteEvent);
-  });
-
-  cy.get(ESQL_QUERY_BAR).contains(query);
-};
-
-/**
  * Fills in the indicator match rows for tests by giving it an optional rowNumber,
  * a indexField, a indicatorIndexField, and an optional validRows which indicates
  * which row is valid or not.
@@ -947,20 +921,6 @@ export const openSuppressionFieldsTooltipAndCheckLicense = () => {
   cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
   // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
   cy.get(TOOLTIP).contains('Platinum license');
-};
-
-/**
- * intercepts esql_async request that contains esqlQuery and adds alias to it
- */
-export const interceptEsqlQueryFieldsRequest = (
-  esqlQuery: string,
-  alias: string = 'esqlQueryFields'
-) => {
-  cy.intercept('POST', '/internal/search/esql_async', (req) => {
-    if (req.body?.params?.query?.includes?.(esqlQuery)) {
-      req.alias = alias;
-    }
-  });
 };
 
 export const selectDoesNotMatchOperator = (rowNumber: number = 0) => {

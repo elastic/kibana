@@ -21,6 +21,7 @@ const RULE_DESCRIPTION = 'The new rule description.';
 const RULE_TAGS = ['test', 'newRule'];
 const NAME_OVERRIDE_FIELD = 'test_id';
 const CUSTOM_ESQL_FIELD = '_custom_agent_name';
+const SUPPRESS_BY_FIELDS = [CUSTOM_ESQL_FIELD, 'agent.type'];
 
 spaceTest.describe(
   'ES|QL rule creation',
@@ -150,6 +151,54 @@ spaceTest.describe(
         await expect(
           ruleDetailsPage.detailValue(ruleDetailsPage.aboutSection, 'Custom highlighted fields')
         ).toHaveText(CUSTOM_ESQL_FIELD);
+      }
+    );
+
+    spaceTest(
+      'saves alert suppression by a custom ES|QL column and a regular column for a time period',
+      async ({ pageObjects, scoutSpace }) => {
+        const { esqlRuleForm, ruleCreateWizard, ruleDetailsPage } = pageObjects;
+        const { definitionSection } = ruleDetailsPage;
+        const query = [
+          `from ${esqlSourceIndexName(scoutSpace.id)} metadata _id, _version, _index`,
+          `eval ${CUSTOM_ESQL_FIELD} = agent.name`,
+        ].join(' | ');
+
+        await spaceTest.step('configure suppression on the define step', async () => {
+          await esqlRuleForm.setQuery(query);
+          await esqlRuleForm.selectSuppressionFields(SUPPRESS_BY_FIELDS);
+          await esqlRuleForm.suppressPerTimePeriod.check();
+          await esqlRuleForm.suppressionDurationValue.fill('2');
+          await esqlRuleForm.suppressionDurationUnit.selectOption('h');
+          await esqlRuleForm.continueFromDefineStep();
+        });
+
+        await spaceTest.step('the define step summary shows the suppression', async () => {
+          await expect(
+            ruleDetailsPage.detailValue(definitionSection, 'Suppress alerts by')
+          ).toHaveText(SUPPRESS_BY_FIELDS.join(''));
+          await expect(
+            ruleDetailsPage.detailValue(definitionSection, 'Suppress alerts for')
+          ).toHaveText('2h');
+        });
+
+        await spaceTest.step('finish the wizard', async () => {
+          await ruleCreateWizard.waitForAboutStepEnabled();
+          await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
+          await ruleCreateWizard.aboutRuleDescription.fill(RULE_DESCRIPTION);
+          await ruleCreateWizard.aboutContinue.click();
+          await ruleCreateWizard.scheduleContinue.click();
+          await ruleCreateWizard.createWithoutEnablingRule();
+        });
+
+        await spaceTest.step('the rule details show the saved suppression', async () => {
+          await expect(
+            ruleDetailsPage.detailValue(definitionSection, 'Suppress alerts by')
+          ).toHaveText(SUPPRESS_BY_FIELDS.join(''));
+          await expect(
+            ruleDetailsPage.detailValue(definitionSection, 'Suppress alerts for')
+          ).toHaveText('2h');
+        });
       }
     );
   }
