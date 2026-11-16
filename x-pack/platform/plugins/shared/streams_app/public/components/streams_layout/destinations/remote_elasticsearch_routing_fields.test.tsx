@@ -59,6 +59,35 @@ describe('RemoteElasticsearchRoutingFields', () => {
     expect(screen.getByRole('radio', { name: 'Auto (default)' })).toBeChecked();
     expect(screen.queryByTestId('streamsCreateDestinationCustomWritePatterns')).toBeNull();
     expect(screen.queryByTestId('streamsCreateDestinationIndex')).toBeNull();
+    expect(screen.queryByTestId('streamsCreateDestination-docs-index')).toBeNull();
+  });
+
+  it('keeps the docs index out of the shared name in both namings', async () => {
+    const { getValues } = renderRouting({ initial: { auto: false } });
+
+    await userEvent.type(screen.getByTestId('streamsCreateDestinationIndex'), 'shared-idx');
+    expect(screen.getByTestId('streamsCreateDestination-docs-index')).toHaveValue('');
+    await userEvent.type(
+      screen.getByTestId('streamsCreateDestination-docs-index'),
+      'accounting-2026'
+    );
+    await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
+
+    expect(screen.getByTestId('streamsCreateDestination-docs-index')).toHaveValue(
+      'accounting-2026'
+    );
+    expect(getValues().remoteElasticsearch).toMatchObject({
+      logsIndex: 'shared-idx',
+      metricsIndex: 'shared-idx',
+      tracesIndex: 'shared-idx',
+      docsIndex: 'accounting-2026',
+    });
+  });
+
+  it('shows the docs index error', () => {
+    renderRouting({ initial: { auto: false }, errors: { docsIndex: 'uppercase' } });
+
+    expect(screen.getByTestId('streamsCreateDestination-docs-index')).toBeInvalid();
   });
 
   it('writes one full index name to every signal, without a signal prefix', async () => {
@@ -104,6 +133,7 @@ describe('RemoteElasticsearchRoutingFields', () => {
     await userEvent.click(screen.getByRole('radio', { name: 'Fixed index per signal' }));
     await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
     await userEvent.type(screen.getByTestId('streamsCreateDestination-logs-index'), 'a');
+    await userEvent.type(screen.getByTestId('streamsCreateDestination-docs-index'), 'my-docs');
     await userEvent.click(screen.getByRole('radio', { name: 'Auto (default)' }));
 
     expect(getValues().remoteElasticsearch).toMatchObject({
@@ -112,6 +142,7 @@ describe('RemoteElasticsearchRoutingFields', () => {
       logsIndex: '',
       metricsIndex: '',
       tracesIndex: '',
+      docsIndex: '',
     });
   });
 

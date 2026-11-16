@@ -24,6 +24,7 @@ const app = (
   source,
   environments: [],
   pageLoads: { count: pageLoads },
+  sessions: null,
   webVitals: {
     lcp: { p75Ms: null, sampleCount: 0, ratings: null },
     inp: { p75Ms: null, sampleCount: 0, ratings: null },
@@ -39,8 +40,9 @@ const app = (
 const result = (
   applications: ApplicationSummary[],
   environments: string[] = [],
-  pageLoadsOverTime: TimeSeriesPoint[] = []
-) => ({ applications, environments, pageLoadsOverTime });
+  pageLoadsOverTime: TimeSeriesPoint[] = [],
+  sessionsOverTime: TimeSeriesPoint[] | null = null
+) => ({ applications, environments, pageLoadsOverTime, sessionsOverTime });
 
 describe('getApplications', () => {
   const logger = loggingSystemMock.createLogger();
@@ -124,6 +126,42 @@ describe('getApplications', () => {
     });
 
     expect(pageLoadsOverTime.classic).toEqual([]);
+  });
+
+  describe('sessions over time', () => {
+    const sessions = [{ timestamp: 0, count: 3 }];
+
+    it('returns the sessions of EDOT Browser when it read them from the sessions index', async () => {
+      const { sessionsOverTime } = await getApplications({
+        getOtelApplications: async () => result([], [], [], sessions),
+        getClassicApplications: async () => result([]),
+        logger,
+      });
+
+      expect(sessionsOverTime).toEqual(sessions);
+    });
+
+    it('returns none when EDOT Browser read the raw events, as Classic RUM has no sessions', async () => {
+      const { sessionsOverTime } = await getApplications({
+        getOtelApplications: async () => result([]),
+        getClassicApplications: async () => result([], [], [], sessions),
+        logger,
+      });
+
+      expect(sessionsOverTime).toBeNull();
+    });
+
+    it('returns none when EDOT Browser failed', async () => {
+      const { sessionsOverTime } = await getApplications({
+        getOtelApplications: async () => {
+          throw new Error('otel down');
+        },
+        getClassicApplications: async () => result([]),
+        logger,
+      });
+
+      expect(sessionsOverTime).toBeNull();
+    });
   });
 
   it('does not query Classic without a Classic fetcher (serverless)', async () => {

@@ -77,7 +77,11 @@ describe('WatchesSectionLayout', () => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
-        docLinks: { links: { siem: { guide: 'https://www.elastic.co/guide' } } },
+        docLinks: {
+          links: {
+            securitySolution: { alertZero: { watches: 'https://www.elastic.co/docs/watches' } },
+          },
+        },
       },
     } as never);
   });
@@ -118,12 +122,12 @@ describe('WatchesSectionLayout', () => {
   });
 
   // WatchesSectionLayout renders its own compact header; it must still pass the documentation link through.
-  it('passes the Security solution documentation link to the header', () => {
+  it('passes the Watches documentation link to the header', () => {
     renderShell();
 
     expect(screen.getByTestId('appHeader')).toHaveAttribute(
       'data-doc-link',
-      'https://www.elastic.co/guide'
+      'https://www.elastic.co/docs/watches'
     );
   });
 });

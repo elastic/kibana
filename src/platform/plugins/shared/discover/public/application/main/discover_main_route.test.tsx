@@ -18,10 +18,13 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import type { MainRouteProps } from './discover_main_route';
 import { DiscoverMainRoute } from './discover_main_route';
+import * as resolveEsqlSourceModule from './data_fetching/resolve_esql_source';
 import { MemoryRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { EsqlSource } from '@kbn/data-source';
 import type { DiscoverCustomizationService } from '../../customizations/customization_service';
 import { createCustomizationService } from '../../customizations/customization_service';
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
@@ -31,13 +34,14 @@ import type { RootProfileState } from '../../context_awareness';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { AppMountParameters } from '@kbn/core/public';
 import { DATASETS_ROUTE } from '@kbn/esql-types';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { clearESQLSourceInfoCache, ENABLE_ESQL } from '@kbn/esql-utils';
 import { DEFAULT_ESQL_QUERY_SETTING } from '@kbn/discover-utils';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import { DiscoverMainApp } from './components/single_tab_view/main_app';
 import {
   internalStateActions,
+  useAppStateSelector,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
@@ -123,6 +127,7 @@ const setupComponent = ({
   hasESQLDatasets = false,
   stateStorageContainer,
   dataViewList,
+  discoverSession,
 }: {
   hasESData?: boolean | Promise<boolean>;
   hasDataView?: boolean | Promise<boolean>;
@@ -131,6 +136,7 @@ const setupComponent = ({
   hasESQLDatasets?: boolean | Promise<boolean>;
   stateStorageContainer?: IKbnUrlStateStorage;
   dataViewList?: Promise<DataViewListItem[]>;
+  discoverSession?: DiscoverSession;
 } = {}) => {
   const props: MainRouteProps = {
     customizationCallbacks: [],
@@ -144,11 +150,22 @@ const setupComponent = ({
     services.dataViews.getIdsWithTitle = jest.fn(() => dataViewList);
   }
 
+  if (discoverSession) {
+    jest.mocked(services.discoverSessionService.get).mockResolvedValueOnce({
+      session: discoverSession,
+      warnings: [],
+    });
+  }
+
+  const initialEntry = discoverSession ? `/view/${discoverSession.id}` : '/';
+
   renderWithI18n(
-    <MemoryRouter>
-      <DiscoverTestProvider services={services}>
-        <DiscoverMainRoute {...props} />
-      </DiscoverTestProvider>
+    <MemoryRouter initialEntries={[initialEntry]}>
+      <Route path={['/view/:id', '/']}>
+        <DiscoverTestProvider services={services}>
+          <DiscoverMainRoute {...props} />
+        </DiscoverTestProvider>
+      </Route>
     </MemoryRouter>
   );
 };
@@ -171,6 +188,8 @@ const createUrlStateWithQuery = async (query: Query | AggregateQuery) => {
 
 describe('DiscoverMainRoute', () => {
   beforeEach(() => {
+    EsqlSource.clearCache();
+    clearESQLSourceInfoCache();
     mockCustomizationService = Promise.resolve(createCustomizationService());
     mockRootProfileState = defaultRootProfileState;
     jest
@@ -317,12 +336,43 @@ describe('DiscoverMainRoute', () => {
     }
   );
 
+  test('opens an ES|QL tab when data view availability becomes true while the ES data check is pending', async () => {
+    const stateStorageContainer = await createUrlStateWithQuery({ esql: 'ROW value = 1' });
+    const esData = Promise.withResolvers<boolean>();
+    const dataViews = Promise.withResolvers<boolean>();
+
+    setupComponent({
+      stateStorageContainer,
+      hasESData: esData.promise,
+      hasDataView: dataViews.promise,
+    });
+
+    await act(async () => {});
+
+    expect(screen.getByLabelText('Loading')).toBeVisible();
+    expect(DiscoverMainApp).not.toHaveBeenCalled();
+
+    await act(async () => {
+      dataViews.resolve(true);
+    });
+
+    const editor = await screen.findByTestId('discover-main-app');
+    expect(editor).toBeVisible();
+
+    await act(async () => {
+      esData.resolve(false);
+    });
+
+    expect(screen.getByTestId('discover-main-app')).toBe(editor);
+  });
+
   test('renders no data page when hasESData=false & hasDataView=false', async () => {
-    setupComponent({ hasESData: false, hasDataView: false });
+    const pendingCatalog = Promise.withResolvers<DataViewListItem[]>();
 
-    await waitForLoad();
+    setupComponent({ hasESData: false, hasDataView: false, dataViewList: pendingCatalog.promise });
 
-    expect(screen.getByTestId('kbnNoDataPage')).toBeVisible();
+    expect(await screen.findByTestId('kbnNoDataPage')).toBeVisible();
+    expect(DiscoverMainApp).not.toHaveBeenCalled();
   });
 
   test('renders no data page when a root profile contributes an ad hoc data view but there is no ES data', async () => {
@@ -419,73 +469,147 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
   });
 
-  test('keeps the app mounted when switching to Classic before the catalog loads', async () => {
-    const stateStorageContainer = await createUrlStateWithQuery({ esql: 'ROW value = 1' });
+  test('keeps the editor mounted and its draft when switching to classic while the catalog loads', async () => {
+    const initialQuery = 'ROW value = 1';
+    const draftQuery = 'ROW value = 2';
+    const stateStorageContainer = await createUrlStateWithQuery({ esql: initialQuery });
     const catalog = Promise.withResolvers<DataViewListItem[]>();
+
     jest.mocked(DiscoverMainApp).mockImplementation(function StatefulApp() {
       const dispatch = useInternalStateDispatch();
       const transition = useCurrentTabAction(internalStateActions.transitionFromESQLToDataView);
       const dataView = useCurrentDataView();
+      const query = useAppStateSelector((state) => state.query);
+      const mode = isOfAggregateQueryType(query) ? 'ES|QL' : 'Classic';
       const isLoading = useCurrentTabSelector((tab) => tab.isDataViewLoading);
 
       return (
         <div data-test-subj="discover-main-app">
-          <input aria-label="Draft query" defaultValue="keep this draft" />
+          <input aria-label="Draft query" defaultValue={initialQuery} />
           <button onClick={() => dispatch(transition({ dataView }))}>Switch to Classic</button>
+          <output>{mode}</output>
           <output>{isLoading ? 'Switching' : 'Ready'}</output>
         </div>
       );
     });
 
     setupComponent({ stateStorageContainer, dataViewList: catalog.promise });
-    await screen.findByTestId('discover-main-app');
-    const draft = screen.getByRole('textbox', { name: 'Draft query' });
 
+    const draft = await screen.findByRole('textbox', { name: 'Draft query' });
+    fireEvent.change(draft, { target: { value: draftQuery } });
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Classic' }));
 
-    expect(await screen.findByText('Switching')).toBeVisible();
+    await act(async () => {});
+
+    expect(screen.getByText('ES|QL')).toBeVisible();
+    expect(screen.getByText('Switching')).toBeVisible();
     expect(screen.getByRole('textbox', { name: 'Draft query' })).toBe(draft);
+    expect(draft).toHaveValue(draftQuery);
 
     await act(async () => {
       catalog.resolve([dataViewListItem]);
     });
 
-    expect(await screen.findByText('Ready')).toBeVisible();
+    expect(await screen.findByText('Classic')).toBeVisible();
+    expect(screen.getByText('Ready')).toBeVisible();
     expect(screen.getByRole('textbox', { name: 'Draft query' })).toBe(draft);
-    expect(draft).toHaveValue('keep this draft');
+    expect(draft).toHaveValue(draftQuery);
   });
 
-  test('shows the no-data page without mounting the editor when delayed checks find nothing', async () => {
-    const stateStorageContainer = await createUrlStateWithQuery({ esql: 'FROM logs-*' });
-    const esData = Promise.withResolvers<boolean>();
+  test('hides the tabs bar when the selected tab needs a data view in a session with multiple tabs', async () => {
     const dataViews = Promise.withResolvers<boolean>();
-    const datasets = Promise.withResolvers<boolean>();
-
-    setupComponent({
-      stateStorageContainer,
-      hasESData: esData.promise,
-      hasDataView: dataViews.promise,
-      hasESQLDatasets: datasets.promise,
+    const discoverSession = createDiscoverSessionMock({
+      id: 'multiple-tabs',
+      tabs: ['first-tab', 'second-tab'].map((id) => ({
+        id,
+        label: id,
+        sort: [],
+        columns: [],
+        grid: {},
+        hideChart: false,
+        hideTable: false,
+        isTextBasedQuery: false,
+        serializedSearchSource: { query: { language: 'kuery', query: '' } },
+      })),
     });
 
-    await act(async () => {});
+    setupComponent({ discoverSession, hasESData: true, hasDataView: dataViews.promise });
 
-    expect(screen.getByLabelText('Loading')).toBeVisible();
-    expect(DiscoverMainApp).not.toHaveBeenCalled();
-    expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('unifiedTabs_tabsBar')).toBeVisible();
+    expect(screen.getAllByRole('tab')).toHaveLength(2);
 
     await act(async () => {
-      esData.resolve(false);
       dataViews.resolve(false);
-      datasets.resolve(false);
     });
 
-    expect(await screen.findByTestId('kbnNoDataPage')).toBeVisible();
+    expect(await screen.findByTestId('noDataViewsPrompt')).toBeVisible();
+    expect(screen.queryByTestId('unifiedTabs_tabsBar')).not.toBeInTheDocument();
     expect(DiscoverMainApp).not.toHaveBeenCalled();
   });
 
-  test.each<Query | AggregateQuery>([{ language: 'kuery', query: '' }, { esql: 'ROW value = 1' }])(
-    'waits for data view availability before mounting tabs with query %j even if the catalog is ready',
+  test.each(['FROM logs-*', 'ROW value = 1'])(
+    'opens ES|QL query %s without waiting for data view availability or the catalog',
+    async (esql) => {
+      const stateStorageContainer = await createUrlStateWithQuery({ esql });
+      const dataViews = Promise.withResolvers<boolean>();
+      const catalog = Promise.withResolvers<DataViewListItem[]>();
+
+      setupComponent({
+        stateStorageContainer,
+        hasESData: true,
+        hasDataView: dataViews.promise,
+        dataViewList: catalog.promise,
+      });
+
+      const editor = await screen.findByTestId('discover-main-app');
+      expect(editor).toBeVisible();
+
+      await act(async () => {
+        dataViews.resolve(false);
+      });
+
+      expect(screen.getByTestId('discover-main-app')).toBe(editor);
+      expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
+    }
+  );
+
+  test.each(['FROM logs-*', 'ROW value = 1'])(
+    'shows the no-data page without resolving the schema when delayed checks find nothing for %s',
+    async (esql) => {
+      const stateStorageContainer = await createUrlStateWithQuery({ esql });
+      const availability = Promise.withResolvers<boolean>();
+      const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource');
+
+      try {
+        setupComponent({
+          stateStorageContainer,
+          hasESData: availability.promise,
+          hasDataView: availability.promise,
+          hasESQLDatasets: availability.promise,
+        });
+
+        await act(async () => {});
+
+        expect(screen.getByLabelText('Loading')).toBeVisible();
+        expect(DiscoverMainApp).not.toHaveBeenCalled();
+        expect(resolveSpy).not.toHaveBeenCalled();
+        expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
+
+        await act(async () => {
+          availability.resolve(false);
+        });
+
+        expect(await screen.findByTestId('kbnNoDataPage')).toBeVisible();
+        expect(DiscoverMainApp).not.toHaveBeenCalled();
+        expect(resolveSpy).not.toHaveBeenCalled();
+      } finally {
+        resolveSpy.mockRestore();
+      }
+    }
+  );
+
+  test.each<Query | AggregateQuery>([{ language: 'kuery', query: '' }, { esql: '' }])(
+    'waits for data view availability before opening query %j even if the catalog is ready',
     async (query) => {
       const stateStorageContainer = await createUrlStateWithQuery(query);
       const dataViews = Promise.withResolvers<boolean>();
@@ -499,7 +623,6 @@ describe('DiscoverMainRoute', () => {
       await act(async () => {});
 
       expect(screen.getByLabelText('Loading')).toBeVisible();
-      expect(screen.queryByRole('tab')).not.toBeInTheDocument();
       expect(screen.queryByTestId('noDataViewsPrompt')).not.toBeInTheDocument();
       expect(screen.queryByTestId('discover-main-app')).not.toBeInTheDocument();
 
@@ -533,11 +656,12 @@ describe('DiscoverMainRoute', () => {
   });
 
   test('renders no data view when hasESData=true & hasDataView=false', async () => {
-    setupComponent({ hasESData: true, hasDataView: false });
+    const pendingCatalog = Promise.withResolvers<DataViewListItem[]>();
 
-    await waitForLoad();
+    setupComponent({ hasESData: true, hasDataView: false, dataViewList: pendingCatalog.promise });
 
-    expect(screen.getByTestId('noDataViewsPrompt')).toBeVisible();
+    expect(await screen.findByTestId('noDataViewsPrompt')).toBeVisible();
+    expect(DiscoverMainApp).not.toHaveBeenCalled();
   });
 
   test('renders LoadingIndicator while customizations are loading', async () => {
@@ -558,7 +682,9 @@ describe('DiscoverMainRoute', () => {
   test('renders LoadingIndicator while root profile is loading', async () => {
     mockRootProfileState = { rootProfileLoading: true };
 
-    setupComponent({ hasESData: true, hasDataView: true });
+    await act(async () => {
+      setupComponent({ hasESData: true, hasDataView: true });
+    });
 
     expect(screen.getByLabelText('Loading')).toBeInTheDocument();
   });

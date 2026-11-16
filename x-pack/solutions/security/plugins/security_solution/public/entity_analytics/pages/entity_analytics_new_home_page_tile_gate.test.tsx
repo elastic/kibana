@@ -99,8 +99,14 @@ jest.mock('../components/home/entities_grid/components/entities_grid', () => ({
 jest.mock('../components/home/entities_grid/components/entities_groups', () => ({
   EntitiesGroups: () => null,
 }));
+const mockOpenEntityFlyout = jest.fn();
+const mockOpenEntityGraphView = jest.fn();
 jest.mock('../../flyout_v2/use_flyout_api', () => ({
-  useFlyoutApi: () => ({ openEntityFlyout: jest.fn(), openGraphFlyout: jest.fn() }),
+  useFlyoutApi: () => ({
+    openEntityFlyout: mockOpenEntityFlyout,
+    openEntityGraphView: mockOpenEntityGraphView,
+    openGraphFlyout: jest.fn(),
+  }),
 }));
 jest.mock('../../common/hooks/timeline/use_investigate_in_timeline', () => ({
   useInvestigateInTimeline: () => ({ investigateInTimeline: jest.fn() }),
@@ -1174,5 +1180,62 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
 
       expect(screen.getByTestId(CALLOUT)).toHaveTextContent('kibana.alert.severity');
     });
+  });
+});
+
+describe('EntityAnalyticsNewHomePage: the open entity graph row action', () => {
+  const SCOPE_ID = 'entity-analytics-new-entities-table-7d';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockPrivileges();
+    (useEntityStoreStatus as jest.Mock).mockReturnValue({
+      data: { status: 'running' },
+      isLoading: false,
+    });
+    mockTiles();
+  });
+
+  const getRowActions = () => {
+    const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+    return gridCalls[gridCalls.length - 1][0].rowActions;
+  };
+
+  it('opens the graph view from the entities grid entry point', () => {
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    getRowActions().onOpenEntityGraph({ 'entity.id': 'host:host-1', 'entity.name': 'host-1' });
+
+    expect(mockOpenEntityGraphView).toHaveBeenCalledTimes(1);
+    expect(mockOpenEntityGraphView).toHaveBeenCalledWith({
+      entityId: 'host:host-1',
+      entityName: 'host-1',
+      scopeId: SCOPE_ID,
+      entryPoint: 'entity_data_grid',
+      onShowEntity: expect.any(Function),
+    });
+  });
+
+  it('opens a related entity from the graph as an entity flyout, not as the grid entry point', () => {
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+    getRowActions().onOpenEntityGraph({ 'entity.id': 'host:host-1', 'entity.name': 'host-1' });
+
+    const [{ onShowEntity }] = mockOpenEntityGraphView.mock.calls[0];
+    onShowEntity({ engineType: 'user', entityId: 'user:u-1', entityName: 'u-1' });
+
+    expect(mockOpenEntityFlyout).toHaveBeenCalledWith({
+      engineType: 'user',
+      entityId: 'user:u-1',
+      entityName: 'u-1',
+      scopeId: SCOPE_ID,
+    });
+  });
+
+  it('opens nothing for a row without an entity id', () => {
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    getRowActions().onOpenEntityGraph({ 'entity.name': 'host-1' });
+
+    expect(mockOpenEntityGraphView).not.toHaveBeenCalled();
   });
 });

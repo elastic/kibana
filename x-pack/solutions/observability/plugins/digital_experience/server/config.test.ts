@@ -5,33 +5,34 @@
  * 2.0.
  */
 
+import { getDeprecationsFor } from '@kbn/core-test-helpers-deprecations-getters';
 import { config } from './config';
 
 describe('digital_experience config', () => {
-  const sessionsDefaults = { frequency: '1m', partitions: 1 };
-
-  it('is disabled by default', () => {
-    expect(config.schema.validate({})).toEqual({ enabled: false, sessions: sessionsDefaults });
+  it('has no settings', () => {
+    expect(config.schema.validate({})).toEqual({});
   });
 
-  it('can be enabled', () => {
-    expect(config.schema.validate({ enabled: true })).toEqual({
-      enabled: true,
-      sessions: sessionsDefaults,
+  it('no longer accepts an enabled key in the schema', () => {
+    expect(() => config.schema.validate({ enabled: true })).toThrow(/enabled/);
+  });
+
+  it('drops the deprecated enabled key with a warning', () => {
+    const { deprecations } = config;
+    if (!deprecations) {
+      throw new Error('The digital_experience config declares no deprecations');
+    }
+
+    const { levels, messages, migrated } = getDeprecationsFor({
+      provider: deprecations,
+      settings: { enabled: true },
+      path: 'xpack.digital_experience',
     });
-  });
 
-  it('accepts a sessions frequency and partition count', () => {
-    expect(
-      config.schema.validate({ sessions: { frequency: '5m', partitions: 4 } }).sessions
-    ).toEqual({ frequency: '5m', partitions: 4 });
-  });
-
-  it.each(['0m', '2h', '1d', '5 m', 'fast'])('rejects frequency %s', (frequency) => {
-    expect(() => config.schema.validate({ sessions: { frequency } })).toThrow(/frequency/);
-  });
-
-  it.each([0, 33, 1.5])('rejects %s partitions', (partitions) => {
-    expect(() => config.schema.validate({ sessions: { partitions } })).toThrow(/partitions/);
+    expect(migrated).not.toHaveProperty('xpack.digital_experience.enabled');
+    expect(levels).toEqual(['warning']);
+    expect(messages).toEqual([
+      'You no longer need to configure "xpack.digital_experience.enabled".',
+    ]);
   });
 });

@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useRef, useMemo, useEffect } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
@@ -38,7 +37,6 @@ import {
 interface VisualizationTableListProps {
   core: CoreStart;
   visualizations: VisualizationsStart;
-  contentManagement: ContentManagementPublicStart;
   embeddable: EmbeddableStart;
   parentProps: TableListTabParentProps;
 }
@@ -46,7 +44,6 @@ interface VisualizationTableListProps {
 export const VisualizationTableList = ({
   core,
   visualizations,
-  contentManagement,
   embeddable,
   parentProps,
 }: VisualizationTableListProps) => {
@@ -63,6 +60,8 @@ export const VisualizationTableList = ({
   const visualizeCapabilities = core.application.capabilities.visualize_v2;
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
   const closeNewVisModal = useRef(() => {});
+  const [refreshListBouncer, setRefreshListBouncer] = useState(false);
+  const refreshList = useCallback(() => setRefreshListBouncer((bouncer) => !bouncer), []);
 
   const createNewVis = useCallback(() => {
     firstValueFrom(core.application.currentAppId$)
@@ -93,6 +92,8 @@ export const VisualizationTableList = ({
     async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
       if (!('editApp' in editor || 'editUrl' in editor)) {
         await (editor as { onEdit: (id: string) => Promise<void> }).onEdit(id);
+        // The editor may have saved changes, so reload the list once it closes.
+        refreshList();
         return;
       }
 
@@ -118,7 +119,7 @@ export const VisualizationTableList = ({
 
       core.application.navigateToApp(targetApp, { path });
     },
-    [core.application, embeddable, getBreadcrumbs]
+    [core.application, embeddable, getBreadcrumbs, refreshList]
   );
 
   const fetchItems = useCallback(
@@ -185,12 +186,10 @@ export const VisualizationTableList = ({
   const deleteItems = useCallback(
     async (items: object[]) => {
       await Promise.all(
-        (items as VisualizeUserContent[]).map(async (item) => {
-          await contentManagement.client.delete({
-            contentTypeId: item.savedObjectType,
-            id: item.id,
-          });
-        })
+        // Goes through each type's own client, since not every type is a content management type.
+        (items as VisualizeUserContent[]).map(({ id, savedObjectType }) =>
+          visualizations.deleteVisualizationLibraryItem(id, savedObjectType)
+        )
       ).catch((error) => {
         core.notifications.toasts.addError(error, {
           title: i18n.translate('visualizationListing.visualizeListingDeleteErrorTitle', {
@@ -199,7 +198,7 @@ export const VisualizationTableList = ({
         });
       });
     },
-    [contentManagement, core.notifications.toasts]
+    [visualizations, core.notifications.toasts]
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
@@ -215,6 +214,7 @@ export const VisualizationTableList = ({
         findItems={fetchItems}
         deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
         editItem={visualizeCapabilities.save ? editItem : undefined}
+        refreshListBouncer={refreshListBouncer}
         contentEditor={{
           isReadonly: !visualizeCapabilities.save,
           onSave: onContentEditorSave,

@@ -94,14 +94,14 @@ export default ({ getService }: FtrProviderContext): void => {
           ignore_unavailable: true,
         });
         await entityStoreUtils.cleanEngines();
-        await cleanUpRiskScoreMaintainer({ log, es });
+        await cleanUpRiskScoreMaintainer({ log, es, supertest });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
       afterEach(async () => {
         await entityStoreUtils.cleanEngines();
-        await cleanUpRiskScoreMaintainer({ log, es });
+        await cleanUpRiskScoreMaintainer({ log, es, supertest });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });

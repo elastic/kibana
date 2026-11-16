@@ -10,7 +10,7 @@ requestBody:
               - id: 8853df00-ae2e-11ed-90af-09bb6422b258
                 instanceId: '*'
               - id: d077e940-1515-11ee-9c50-9d096392f520
-                instanceId: host.name:web-01
+                instanceId: web-01
 responses:
   '200':
     content:
@@ -33,7 +33,7 @@ responses:
                     good: 9976
                     total: 10000
                 - id: d077e940-1515-11ee-9c50-9d096392f520
-                  instanceId: host.name:web-01
+                  instanceId: web-01
                   error:
                     statusCode: 404
                     message: SLO [d077e940-1515-11ee-9c50-9d096392f520] not found
@@ -44,8 +44,24 @@ responses:
         schema:
           $ref: ../oas_error_schemas.yaml#/400_response
         examples:
-          badRequestExample:
-            summary: Bad request
+          badRequestBodyExample:
+            summary: Invalid request body
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: |-
+                [
+                  {
+                    "expected": "array",
+                    "code": "invalid_type",
+                    "path": [
+                      "requests"
+                    ],
+                    "message": "Invalid input: expected array, received string"
+                  }
+                ]
+          badRequestTooManyRequestsExample:
+            summary: More than 100 requests
             value:
               statusCode: 400
               error: Bad Request
@@ -62,7 +78,7 @@ responses:
             value:
               statusCode: 401
               error: Unauthorized
-              message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+              message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
   '403':
     description: Forbidden response
     content:
@@ -75,4 +91,4 @@ responses:
             value:
               statusCode: 403
               error: Forbidden
-              message: 'security_exception: action [slo_read] is unauthorized for user'
+              message: 'API [POST /api/observability/slos/_bulk_snapshot] is unauthorized for user, this action is granted by the Kibana privileges [slo_read]'

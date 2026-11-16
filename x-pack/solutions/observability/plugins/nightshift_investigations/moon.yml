@@ -80,6 +80,7 @@ dependsOn:
   - '@kbn/eval-kql'
   - '@kbn/rrule'
   - '@kbn/inference-tracing'
+  - '@kbn/core-logging-server-mocks'
   - '@kbn/lock-manager'
   - '@kbn/cloud-plugin'
   - '@kbn/connector-specs'
@@ -88,6 +89,10 @@ dependsOn:
   - '@kbn/isomer-plugin'
   - '@kbn/isomer-components'
   - '@kbn/core-security-server'
+  - '@kbn/evals'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/repo-info'
+  - '@kbn/setup-node-env'
 tags:
   - plugin
   - prod
