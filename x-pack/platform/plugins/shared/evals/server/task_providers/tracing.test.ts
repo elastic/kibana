@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import { SpanStatusCode, context, propagation, trace } from '@opentelemetry/api';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
+import { context, propagation } from '@opentelemetry/api';
 import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
-import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from '@kbn/inference-tracing';
+import {
+  BAGGAGE_TRACKING_BEACON_KEY,
+  BAGGAGE_TRACKING_BEACON_VALUE,
+  withActiveInferenceSpan,
+} from '@kbn/inference-tracing';
 import { withEvalsEvaluatorSpan, withEvalsJudgeChildSpan, withEvalsTaskSpan } from './tracing';
+
+jest.mock('@kbn/inference-tracing', () => ({
+  ...jest.requireActual('@kbn/inference-tracing'),
+  withActiveInferenceSpan: jest.fn((_name, _opts, cb) => cb()),
+}));
 
 describe('withEvalsTaskSpan', () => {
   let contextManager: AsyncHooksContextManager;
@@ -91,100 +99,24 @@ describe('withEvalsEvaluatorSpan', () => {
 });
 
 describe('withEvalsJudgeChildSpan', () => {
-  // `evalsTracer` binds to the first global provider it sees, so one provider serves every test.
-  const exporter = new tracing.InMemorySpanExporter();
-  const judgeParentBeacons: Array<string | undefined> = [];
-  const recordJudgeParentBeacon: tracing.SpanProcessor = {
-    onStart: (span, parentContext) => {
-      if (span.name.startsWith('judge · ')) {
-        judgeParentBeacons.push(
-          propagation.getBaggage(parentContext)?.getEntry(BAGGAGE_TRACKING_BEACON_KEY)?.value
-        );
-      }
-    },
-    onEnd: () => {},
-    forceFlush: async () => {},
-    shutdown: async () => {},
-  };
-  let contextManager: AsyncHooksContextManager;
+  it('runs the judge in an inference span named after the evaluator', async () => {
+    const run = jest.fn().mockResolvedValue('graded');
 
-  beforeAll(() => {
-    trace.setGlobalTracerProvider(
-      new tracing.BasicTracerProvider({
-        spanProcessors: [recordJudgeParentBeacon, new tracing.SimpleSpanProcessor(exporter)],
-      })
+    await expect(withEvalsJudgeChildSpan('conclusion_quality', run)).resolves.toBe('graded');
+
+    expect(withActiveInferenceSpan).toHaveBeenCalledWith(
+      'judge · conclusion_quality',
+      { attributes: { 'evaluator.name': 'conclusion_quality' } },
+      expect.any(Function)
     );
+    expect(run).toHaveBeenCalledTimes(1);
   });
 
-  beforeEach(() => {
-    exporter.reset();
-    judgeParentBeacons.length = 0;
-    contextManager = new AsyncHooksContextManager();
-    contextManager.enable();
-    context.setGlobalContextManager(contextManager);
-  });
-
-  afterEach(() => {
-    context.disable();
-  });
-
-  afterAll(() => {
-    trace.disable();
-  });
-
-  it('names the span after the judge and nests it under the active span', async () => {
-    const tracer = trace.getTracer('test');
-
-    await tracer.startActiveSpan('parent', async (parent) => {
-      await withEvalsJudgeChildSpan('conclusion_quality', async () => 'graded');
-      parent.end();
-    });
-
-    const spans = exporter.getFinishedSpans();
-    const parent = spans.find(({ name }) => name === 'parent');
-    const judge = spans.find(({ name }) => name === 'judge · conclusion_quality');
-    expect(judge?.attributes['evaluator.name']).toBe('conclusion_quality');
-    expect(judge?.spanContext().traceId).toBe(parent?.spanContext().traceId);
-    expect(judge?.parentSpanContext?.spanId).toBe(parent?.spanContext().spanId);
-  });
-
-  it('sets the inference beacon and keeps the judge span active so a model call nests under it', async () => {
-    const tracer = trace.getTracer('test');
-    let beacon: string | undefined;
-
-    await withEvalsJudgeChildSpan('conclusion_quality', async () => {
-      beacon = propagation
-        .getBaggage(context.active())
-        ?.getEntry(BAGGAGE_TRACKING_BEACON_KEY)?.value;
-      // Stands in for the model call: the inference client nests under the active span.
-      await tracer.startActiveSpan('chat model', async (chat) => {
-        chat.end();
-      });
-    });
-
-    const spans = exporter.getFinishedSpans();
-    const judge = spans.find(({ name }) => name === 'judge · conclusion_quality');
-    const chat = spans.find(({ name }) => name === 'chat model');
-    expect(beacon).toBe(BAGGAGE_TRACKING_BEACON_VALUE);
-    expect(chat?.spanContext().traceId).toBe(judge?.spanContext().traceId);
-    expect(chat?.parentSpanContext?.spanId).toBe(judge?.spanContext().spanId);
-  });
-
-  it('has the beacon in the judge span parent context when the span starts', async () => {
-    await withEvalsJudgeChildSpan('conclusion_quality', async () => 'graded');
-
-    // Inference span processors track a span only if its parent context holds the beacon at start.
-    expect(judgeParentBeacons).toEqual([BAGGAGE_TRACKING_BEACON_VALUE]);
-  });
-
-  it('records the error and rethrows', async () => {
+  it('propagates errors thrown by the judge', async () => {
     await expect(
       withEvalsJudgeChildSpan('conclusion_quality', async () => {
         throw new Error('judge failed');
       })
     ).rejects.toThrow('judge failed');
-
-    const [judge] = exporter.getFinishedSpans();
-    expect(judge.status.code).toBe(SpanStatusCode.ERROR);
   });
 });

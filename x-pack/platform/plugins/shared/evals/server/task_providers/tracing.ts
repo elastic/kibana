@@ -13,11 +13,7 @@ import {
   trace,
   type Span,
 } from '@opentelemetry/api';
-import {
-  BAGGAGE_TRACKING_BEACON_KEY,
-  BAGGAGE_TRACKING_BEACON_VALUE,
-  withInferenceContext,
-} from '@kbn/inference-tracing';
+import { withActiveInferenceSpan, withInferenceContext } from '@kbn/inference-tracing';
 
 /** OpenTelemetry's sentinel for "no valid trace" (a non-recording / no-op span). */
 const INVALID_TRACE_ID = '00000000000000000000000000000000';
@@ -125,37 +121,16 @@ export const withEvalsEvaluatorSpan = <T>(
  * the caller is already building (for example the online-eval scoring span). Unlike
  * {@link withEvalsEvaluatorSpan}, it does not start a new trace.
  *
- * The inference tracking beacon is set on the parent context before the span starts. A caller
- * with no inference context would otherwise make the model call treat itself as a root, drop the
- * judge span from its parent context and fork a separate `chat <model>` trace. Setting it only
- * after the span starts is not enough: inference span processors decide whether to track a span
- * from the beacon in its parent context at start, so the judge span would go untracked while the
- * model call keeps it as its parent.
+ * The span is an inference span, so it is exported wherever the model call is, including the
+ * Agent Builder trace data; a span from the global `@kbn/evals` tracer is not. It also sets the
+ * inference beacon, so the model call keeps the judge as its parent.
  */
 export const withEvalsJudgeChildSpan = <T>(
   evaluatorName: string,
   run: () => Promise<T>
-): Promise<T> => {
-  const activeContext = context.active();
-  const baggage = (propagation.getBaggage(activeContext) ?? propagation.createBaggage()).setEntry(
-    BAGGAGE_TRACKING_BEACON_KEY,
-    { value: BAGGAGE_TRACKING_BEACON_VALUE }
-  );
-
-  return evalsTracer.startActiveSpan(
+): Promise<T> =>
+  withActiveInferenceSpan(
     `${JUDGE_SPAN_NAME_PREFIX}${evaluatorName}`,
-    { attributes: { 'instrumentationScope.name': '@kbn/evals', 'evaluator.name': evaluatorName } },
-    propagation.setBaggage(activeContext, baggage),
-    async (span: Span) => {
-      try {
-        return await run();
-      } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: SpanStatusCode.ERROR });
-        throw error;
-      } finally {
-        span.end();
-      }
-    }
+    { attributes: { 'evaluator.name': evaluatorName } },
+    () => run()
   );
-};

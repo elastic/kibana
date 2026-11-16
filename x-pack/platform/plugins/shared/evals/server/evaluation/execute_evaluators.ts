@@ -266,9 +266,7 @@ export const executeEvaluators = async (
       // Only LLM judges make model calls; naming their span keeps the `chat <model>` rows
       // under each judge identifiable in the trace.
       const result = await withEvaluatorNameBaggage(definition.name, () =>
-        definition.kind === 'llm'
-          ? withEvalsJudgeChildSpan(definition.name, async () => evaluate())
-          : evaluate()
+        definition.kind === 'llm' ? withEvalsJudgeChildSpan(definition.name, evaluate) : evaluate()
       );
 
       if (result.notApplicable) {
