@@ -41,10 +41,11 @@ describe('hasNoResults of a field of an ES|QL source', () => {
     meta: { type: 'range', key: 'bytes', params: { gte: 1, lte: 5 } },
     query: { range: { bytes: { gte: 1, lte: 5 } } },
   } as unknown as Filter;
+  const field = { name: 'bytes', type: 'number' };
   const request = () => ({
     abortSignal: new AbortController().signal,
     dataSource: esqlSource,
-    esql: 'FROM logs-*\n| STATS BY bytes',
+    field,
     rangeFilter,
   });
   const column = { name: 'bytes', type: 'long' };

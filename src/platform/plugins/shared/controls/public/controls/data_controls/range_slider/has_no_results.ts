@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { FilterableSource } from '@kbn/data-source';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
@@ -66,7 +66,7 @@ export function hasNoResults$({
         return await hasNoResults({
           abortSignal: abortController.signal,
           dataSource,
-          esql: getEsqlSourceFieldQuery(dataSource, field),
+          field,
           rangeFilter,
           ...controlFetchContext,
           timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
@@ -96,7 +96,7 @@ export function hasNoResults$({
 export async function hasNoResults({
   abortSignal,
   dataSource,
-  esql,
+  field,
   filters,
   query,
   rangeFilter,
@@ -104,13 +104,13 @@ export async function hasNoResults({
 }: {
   abortSignal: AbortSignal;
   dataSource: FilterableSource;
-  /** The query that populates the control, for an ES|QL source */
-  esql?: string;
+  field?: FilterableField;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
   timeRange?: TimeRange;
 }): Promise<boolean> {
+  const esql = getEsqlSourceFieldQuery(dataSource, field);
   if (esql) {
     // The values of the query that are in the range: there are none when the range has no results
     const result = await getESQLSingleColumnValues({

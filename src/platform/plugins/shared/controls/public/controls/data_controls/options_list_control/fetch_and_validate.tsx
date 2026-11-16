@@ -99,16 +99,17 @@ export function fetchAndValidate$({
       ]) => {
         let built: ReturnType<typeof buildOptionsListFetchBody>;
         try {
-          // the query of the user is the one to run, when there is one
-          const sourceQuery =
+          // A field of an ES|QL source runs a generated query, like "Write a query" does. The query
+          // that the user writes is never replaced.
+          const generatedQuery =
             valuesSource === ControlValuesSource.ESQL
               ? undefined
               : getEsqlSourceFieldQuery(dataSources?.[0], field);
           built = buildOptionsListFetchBody({
-            valuesSource: sourceQuery
+            valuesSource: generatedQuery
               ? ControlValuesSource.ESQL
               : valuesSource ?? ControlValuesSource.FIELD,
-            esqlQuery: sourceQuery ?? esqlQuery,
+            esqlQuery: generatedQuery ?? esqlQuery,
             dataSources,
             field,
             fetchContext,
