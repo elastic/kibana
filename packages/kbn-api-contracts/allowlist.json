@@ -777,6 +777,14 @@
       "prUrl": "https://github.com/elastic/kibana/pull/300516"
     },
     {
+      "path": "/api/risk_score/engine/schedule_now",
+      "method": "all",
+      "reason": "Intentional removal of the risk engine schedule-now route. On a default 9.4 deployment this operation already returned 400 while Entity Store V2 was on. It was not marked deprecated, and it still ran if that setting was turned off. Approved in elastic/dev#3471.",
+      "approvedBy": "@elastic/security-entity-analytics",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/303438"
+    },
+    {
       "path": "/api/observability/slos",
       "method": "get",
       "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. settings.syncField is nullable in the SLO settings schema (`z.string().nullable().optional()`), so the stored definition and the response can already contain null; the hand-written spec did not document it.",

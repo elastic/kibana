@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { InvestigationSection } from './investigation_section';
@@ -77,6 +77,7 @@ const renderSection = ({
   error = null,
   onShowMore = jest.fn(),
   onRetry = jest.fn(),
+  isLoadingNewFilters = false,
 }: {
   isInitialLoading?: boolean;
   investigations?: InvestigationSummary[];
@@ -85,6 +86,7 @@ const renderSection = ({
   error?: Error | null;
   onShowMore?: () => void;
   onRetry?: () => void;
+  isLoadingNewFilters?: boolean;
 } = {}) =>
   render(
     <I18nProvider>
@@ -97,11 +99,46 @@ const renderSection = ({
         error={error}
         onShowMore={onShowMore}
         onRetry={onRetry}
+        isLoadingNewFilters={isLoadingNewFilters}
       />
     </I18nProvider>
   );
 
 describe('InvestigationSection', () => {
+  it('draws its own loading line, after a short delay, while new filters load', () => {
+    jest.useFakeTimers();
+    try {
+      renderSection({ investigations: [investigation], total: 1, isLoadingNewFilters: true });
+
+      expect(
+        screen.queryByTestId('nightshiftInvestigationSectionLoading-critical')
+      ).not.toBeInTheDocument();
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+      expect(
+        screen.getByTestId('nightshiftInvestigationSectionLoading-critical')
+      ).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('draws no loading line when nothing new is loading', () => {
+    jest.useFakeTimers();
+    try {
+      renderSection({ investigations: [investigation], total: 1 });
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+      expect(
+        screen.queryByTestId('nightshiftInvestigationSectionLoading-critical')
+      ).not.toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('shows a skeleton, and no count, while the section is still loading', () => {
     renderSection({ isInitialLoading: true });
 
