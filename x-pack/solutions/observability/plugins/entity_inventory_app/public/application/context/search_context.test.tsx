@@ -10,6 +10,7 @@ import { act, renderHook } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { EntityInventoryEntityCategory } from '../../types';
 import { DEFAULT_TIME_RANGE } from '../constants';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
 import { EntityInventorySearchProvider, useEntityInventorySearch } from './search_context';
@@ -30,6 +31,12 @@ const renderSearchHook = () => {
 const kuery = (query: string) => ({ language: 'kuery', query });
 
 describe('EntityInventorySearchProvider', () => {
+  let category: EntityInventoryEntityCategory = 'kubernetes';
+
+  beforeEach(() => {
+    category = 'kubernetes';
+  });
+
   it('exposes the default search state and the entity category', () => {
     const { result } = renderSearchHook();
 
@@ -37,6 +44,51 @@ describe('EntityInventorySearchProvider', () => {
     expect(result.current.query).toEqual(kuery(''));
     expect(result.current.filters).toEqual([]);
     expect(result.current.dateRange).toEqual(DEFAULT_TIME_RANGE);
+    expect(result.current.filterSelection).toEqual({ attributes: {} });
+  });
+
+  it('keeps the filter selection of the page', () => {
+    const { result } = renderSearchHook();
+
+    act(() => {
+      result.current.setFilterSelection({
+        type: 'k8s.pod',
+        attributes: { 'k8s.pod.phase': ['Running'] },
+      });
+    });
+
+    expect(result.current.filterSelection).toEqual({
+      type: 'k8s.pod',
+      attributes: { 'k8s.pod.phase': ['Running'] },
+    });
+  });
+
+  it('resets the filter selection every time the entity category changes', () => {
+    const core = coreMock.createStart();
+    const { result, rerender } = renderHook(() => useEntityInventorySearch(), {
+      wrapper: ({ children }: { children?: React.ReactNode }) => (
+        <KibanaContextProvider services={core}>
+          <EntityInventorySearchProvider entityCategory={category}>
+            {children}
+          </EntityInventorySearchProvider>
+        </KibanaContextProvider>
+      ),
+    });
+
+    act(() => {
+      result.current.setFilterSelection({ attributes: { 'os.type': ['linux'] } });
+    });
+    expect(result.current.filterSelection).toEqual({ attributes: { 'os.type': ['linux'] } });
+
+    category = 'hosts';
+    rerender();
+
+    expect(result.current.filterSelection).toEqual({ attributes: {} });
+
+    category = 'kubernetes';
+    rerender();
+
+    expect(result.current.filterSelection).toEqual({ attributes: {} });
   });
 
   it('commits a submission within the maximum time range as-is', () => {

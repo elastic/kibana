@@ -38,6 +38,7 @@ const DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
 
 export const WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION = {
   name: WORKFLOWS_EXECUTIONS_DATA_STREAM,
+  // Bumped to 2 to roll out the `executedByUser` mapping to existing write indices.
   version: 2,
   hidden: true,
   settings: {

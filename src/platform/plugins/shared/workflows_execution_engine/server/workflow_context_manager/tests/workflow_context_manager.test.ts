@@ -2248,6 +2248,25 @@ describe('WorkflowContextManager', () => {
       );
     });
 
+    it('lets KQL conditions see the additional context (e.g. the error of a failed step)', () => {
+      const { underTest } = createContainerWithGuess('s3');
+      const error = { type: 'NetworkError', message: 'boom' };
+      expect(
+        underTest.evaluateBooleanExpressionInContext('error.type: NetworkError', { error })
+      ).toBe(true);
+      expect(underTest.evaluateBooleanExpressionInContext('error.type: Other', { error })).toBe(
+        false
+      );
+      expect(
+        underTest.evaluateBooleanExpressionInContext(
+          'consts.secret: {{ inputs.guess }} and error.message: *',
+          {
+            error,
+          }
+        )
+      ).toBe(true);
+    });
+
     it('shows the interpolated value, not its internal token, in a syntax error', () => {
       const { underTest } = createContainerWithGuess('hello world');
       expect(() =>

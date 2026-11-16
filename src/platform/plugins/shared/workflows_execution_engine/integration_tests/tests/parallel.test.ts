@@ -27,24 +27,6 @@ const stepExecutionsFor = (fixture: WorkflowRunFixture, stepId: string) =>
 const stepOutput = <T>(fixture: WorkflowRunFixture, stepId: string): T =>
   stepExecutionsFor(fixture, stepId)[0]?.output as T;
 
-/**
- * Re-ticks a parked parallel workflow until it leaves WAITING (or the guard trips).
- * Each tick runs at the scheduled wake time. An immediate resume would re-enter a
- * parked `wait` before its `resumeAt` and must not be what completes it.
- */
-const driveToTerminal = async (fixture: WorkflowRunFixture, maxGuard = 10): Promise<void> => {
-  let guard = 0;
-  while (getExecution(fixture)?.status === ExecutionStatus.WAITING && guard < maxGuard) {
-    const resumeTask = fixture.taskManagerMock.schedule.mock.calls.at(-1)?.[0];
-    if (resumeTask?.runAt instanceof Date) {
-      await fixture.resumeWorkflowAtScheduledTime();
-    } else {
-      await fixture.resumeWorkflow();
-    }
-    guard += 1;
-  }
-};
-
 /** A poll step that never completes on its own; only `branch-timeout` ends it. */
 const neverCompletingPoll = createPollServerStepDefinition({
   id: 'integration.parallelNeverPoll',
@@ -210,7 +192,7 @@ steps:
 `;
       jest.clearAllMocks();
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
-      await driveToTerminal(workflowRunFixture);
+      await workflowRunFixture.driveToTerminal();
     });
 
     it('completes the workflow', () => {
@@ -252,7 +234,7 @@ steps:
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
       // The concurrency window only admits `max` branches per tick, so the step
       // parks in WAITING and re-ticks via resume until every branch has run.
-      await driveToTerminal(workflowRunFixture);
+      await workflowRunFixture.driveToTerminal();
     });
 
     it('completes the workflow', () => {
@@ -401,7 +383,7 @@ steps:
 `;
       jest.clearAllMocks();
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
-      await driveToTerminal(workflowRunFixture);
+      await workflowRunFixture.driveToTerminal();
     });
 
     it('completes the workflow', () => {
@@ -461,7 +443,7 @@ steps:
 `;
       jest.clearAllMocks();
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
-      await driveToTerminal(workflowRunFixture);
+      await workflowRunFixture.driveToTerminal();
     });
 
     it('completes the workflow', () => {
@@ -669,7 +651,7 @@ steps:
 `;
       jest.clearAllMocks();
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
-      await driveToTerminal(workflowRunFixture);
+      await workflowRunFixture.driveToTerminal();
     });
 
     it('completes the workflow (parallel contains the branch timeouts)', () => {
@@ -748,7 +730,7 @@ steps:
       beforeAll(async () => {
         // Drive resumes at each scheduled wake. A branch wait stays parked until
         // its own resumeAt, then the post-wait step runs.
-        await driveToTerminal(workflowRunFixture);
+        await workflowRunFixture.driveToTerminal();
       });
 
       it('completes the workflow', () => {
@@ -829,7 +811,7 @@ steps:
       });
 
       it('completes the long wait only once its own resumeAt is reached', async () => {
-        await driveToTerminal(workflowRunFixture);
+        await workflowRunFixture.driveToTerminal();
 
         expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
         const longWait = stepExecutionsFor(workflowRunFixture, 'pause').find((step) => {
@@ -875,7 +857,7 @@ steps:
 `;
       jest.clearAllMocks();
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
-      await driveToTerminal(workflowRunFixture);
+      await workflowRunFixture.driveToTerminal();
     });
 
     it('completes the workflow with both branches done', () => {
@@ -1084,7 +1066,7 @@ steps:
 `;
       jest.clearAllMocks();
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
-      await driveToTerminal(workflowRunFixture);
+      await workflowRunFixture.driveToTerminal();
     });
 
     it('completes the workflow', () => {
@@ -1177,7 +1159,7 @@ steps:
 `;
       jest.clearAllMocks();
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
-      await driveToTerminal(workflowRunFixture);
+      await workflowRunFixture.driveToTerminal();
     });
 
     it('completes the workflow', () => {
@@ -1227,7 +1209,7 @@ steps:
         workflowRunFixture = new WorkflowRunFixture();
         jest.clearAllMocks();
         await workflowRunFixture.runWorkflow({ workflowYaml: buildFailingYaml() });
-        await driveToTerminal(workflowRunFixture, 20);
+        await workflowRunFixture.driveToTerminal(20);
       });
 
       it('a branch failure fails the parallel step and the workflow (fail-fast)', () => {
@@ -1270,7 +1252,7 @@ steps:
         workflowRunFixture = new WorkflowRunFixture();
         jest.clearAllMocks();
         await workflowRunFixture.runWorkflow({ workflowYaml: buildFailingYaml('settled') });
-        await driveToTerminal(workflowRunFixture, 20);
+        await workflowRunFixture.driveToTerminal(20);
       });
 
       it('contains branch failures: the parallel step completes and the workflow continues', () => {
@@ -1423,7 +1405,7 @@ ${memoryStep}
       // full poll interval out. Advancing the clock to that deadline also carries it
       // past the branch's `branch-timeout`, which is what ends the branch.
       await workflowRunFixture.resumeWorkflowAtScheduledTime();
-      await driveToTerminal(workflowRunFixture, 20);
+      await workflowRunFixture.driveToTerminal(20);
     });
 
     it('completes the workflow (a timed-out branch must not fail it either)', () => {

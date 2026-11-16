@@ -51,8 +51,8 @@ describe('useFetchEpisodeActions', () => {
         last_ack_action: 'ack',
         last_assignee_uid: 'u-1',
         last_ack_actor: 'actor-1',
-        last_deactivate_action: 'deactivate',
-        last_deactivate_actor: 'actor-resolver',
+        last_lifecycle_action: 'deactivate',
+        last_lifecycle_actor: 'actor-resolver',
         last_tags: 'tag-a',
       },
     ];
@@ -93,8 +93,8 @@ describe('useFetchEpisodeActions', () => {
         last_ack_action: 'ack',
         last_assignee_uid: null,
         last_ack_actor: null,
-        last_deactivate_action: null,
-        last_deactivate_actor: null,
+        last_lifecycle_action: null,
+        last_lifecycle_actor: null,
       },
       {
         alert_id: 'dup',
@@ -103,8 +103,8 @@ describe('useFetchEpisodeActions', () => {
         last_ack_action: 'unack',
         last_assignee_uid: 'u-2',
         last_ack_actor: null,
-        last_deactivate_action: null,
-        last_deactivate_actor: null,
+        last_lifecycle_action: null,
+        last_lifecycle_actor: null,
       },
     ];
     fetchEpisodeActionsMock.mockResolvedValue(rows);

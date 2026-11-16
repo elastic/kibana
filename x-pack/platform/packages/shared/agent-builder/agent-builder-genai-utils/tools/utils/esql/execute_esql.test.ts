@@ -8,7 +8,11 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { MAX_ES_RESPONSE_SIZE_BYTES } from '../../constants';
-import { executeEsql } from './execute_esql';
+import {
+  executeEsql,
+  EsqlExecutionTimeoutError,
+  isEsqlExecutionTimeoutError,
+} from './execute_esql';
 
 describe('executeEsql', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -129,41 +133,38 @@ describe('executeEsql', () => {
   });
 
   describe('timeoutMs', () => {
-    let controller: AbortController;
-    let timeoutSpy: jest.SpyInstance;
+    const requestOptions = () => esClient.esql.query.mock.calls[0][1];
+
+    const abortDeadline = async () => {
+      await jest.advanceTimersByTimeAsync(5000);
+    };
 
     beforeEach(() => {
-      controller = new AbortController();
-      timeoutSpy = jest.spyOn(AbortSignal, 'timeout').mockReturnValue(controller.signal);
+      jest.useFakeTimers();
     });
 
     afterEach(() => {
-      timeoutSpy.mockRestore();
+      jest.useRealTimers();
     });
-
-    const requestOptions = () => esClient.esql.query.mock.calls[0][1];
 
     it('sends exactly the standard transport options when no deadline is set', async () => {
       await executeEsql({ query: 'FROM idx', esClient });
 
       expect(requestOptions()).toStrictEqual({ maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES });
-      expect(timeoutSpy).not.toHaveBeenCalled();
     });
 
-    it('sets a wall-clock deadline through a signal and disables retries', async () => {
+    it('sets a wall-clock deadline through a signal and keeps client retries enabled', async () => {
       await executeEsql({ query: 'FROM idx', timeoutMs: 5000, esClient });
 
-      expect(timeoutSpy).toHaveBeenCalledWith(5000);
       expect(requestOptions()).toStrictEqual({
         maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES,
-        maxRetries: 0,
-        signal: controller.signal,
+        signal: expect.any(AbortSignal),
       });
     });
 
     it('turns a deadline abort into an error that tells the agent not to re-run the query', async () => {
       esClient.esql.query.mockImplementation(async () => {
-        controller.abort();
+        await abortDeadline();
         throw new errors.RequestAbortedError('Request aborted');
       });
 
@@ -171,7 +172,8 @@ describe('executeEsql', () => {
         (e: Error) => e
       );
 
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(EsqlExecutionTimeoutError);
+      expect(isEsqlExecutionTimeoutError(error)).toBe(true);
       expect((error as Error).message).toContain('Stopped waiting for the ES|QL query after 5s');
       expect((error as Error).message).toContain('Do not re-run');
       expect((error as Error).message).toContain('narrow the time range');
@@ -186,6 +188,7 @@ describe('executeEsql', () => {
         (e: Error) => e
       );
 
+      expect(error).toBeInstanceOf(EsqlExecutionTimeoutError);
       expect((error as Error).message).toContain('Stopped waiting for the ES|QL query.');
       expect((error as Error).message).not.toContain(' after ');
       expect((error as Error).message).toContain('Do not re-run');
@@ -197,11 +200,12 @@ describe('executeEsql', () => {
       esClient.esql.query.mockRejectedValue(error);
 
       await expect(executeEsql({ query: 'FROM idx', esClient })).rejects.toBe(error);
+      expect(isEsqlExecutionTimeoutError(error)).toBe(false);
     });
 
     it('keeps a maximum-response-size abort a size error even when the deadline has aborted', async () => {
       esClient.esql.query.mockImplementation(async () => {
-        controller.abort();
+        await abortDeadline();
         throw new errors.RequestAbortedError(
           'The content length (9000) is bigger than the maximum allowed buffer (42)'
         );
@@ -215,7 +219,7 @@ describe('executeEsql', () => {
     it('rethrows an unrelated error unchanged even when the deadline has aborted', async () => {
       const error = new Error('verification_exception: unknown column [missing]');
       esClient.esql.query.mockImplementation(async () => {
-        controller.abort();
+        await abortDeadline();
         throw error;
       });
 

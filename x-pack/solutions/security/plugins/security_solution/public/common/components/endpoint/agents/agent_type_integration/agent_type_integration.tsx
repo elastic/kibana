@@ -55,7 +55,8 @@ export const AgentTypeIntegration = memo<AgentTypeIntegrationProps>(
       >
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size={textSize} data-test-subj={testId('label')}>
-            {INTEGRATION_SECTION_LABEL}&nbsp;
+            {INTEGRATION_SECTION_LABEL}
+            {'\u00a0'}
             <EuiIconTip
               content={
                 <FormattedMessage

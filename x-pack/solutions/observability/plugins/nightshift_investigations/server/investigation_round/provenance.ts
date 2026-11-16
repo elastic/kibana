@@ -14,7 +14,7 @@ export interface WriteProvenance {
 }
 
 export const APPLIED_WRITE_STORES = [
-  'cortex',
+  'wiki',
   'semantic_memory',
   'decision_tree',
   'decision_tree_learning',

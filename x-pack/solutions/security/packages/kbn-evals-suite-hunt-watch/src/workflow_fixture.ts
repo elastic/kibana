@@ -181,7 +181,7 @@ export const assertWorkflowInstalled = async ({
     } catch (err) {
       throw new Error(
         `"${workersUrl}" is not reachable. This suite does not enable AlertZero itself for this ` +
-          `check — the Scout config set must set "--xpack.alertzero.enabled=true". Original ` +
+          `check — the Scout config set must not set "--xpack.alertzero.enabled=false". Original ` +
           `error: ${errorMessage(err)}`
       );
     }

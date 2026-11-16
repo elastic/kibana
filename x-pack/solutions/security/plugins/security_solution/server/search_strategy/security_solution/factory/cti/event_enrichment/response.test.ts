@@ -8,6 +8,7 @@
 import {
   buildEventEnrichmentRequestOptionsMock,
   buildEventEnrichmentRawResponseMock,
+  buildTransformSourceExclusionMock,
 } from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
 import { parseEventEnrichmentResponse } from './response';
 import type { IEsSearchResponse } from '@kbn/search-types';
@@ -51,6 +52,7 @@ describe('parseEventEnrichmentResponse', () => {
               },
             },
           ],
+          must_not: [buildTransformSourceExclusionMock()],
           minimum_should_match: 1,
           should: [
             {
