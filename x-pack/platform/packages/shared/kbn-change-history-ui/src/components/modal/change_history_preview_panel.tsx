@@ -196,7 +196,6 @@ export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
             objectId,
             compareSpec,
             compareMode: activeCompareMode,
-            isLoadingCompareContext,
             diffTelemetry,
           })}
         </div>

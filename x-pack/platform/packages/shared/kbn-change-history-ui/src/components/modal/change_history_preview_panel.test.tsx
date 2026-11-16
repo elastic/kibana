@@ -120,7 +120,6 @@ describe('ChangeHistoryPreviewPanel', () => {
         change: currentChange,
         compareSpec: vsPreviousCompareSpec,
         objectId: TEST_OBJECT_ID,
-        isLoadingCompareContext: false,
       })
     );
   });
@@ -233,7 +232,7 @@ describe('ChangeHistoryPreviewPanel', () => {
       expect(mockUseChangeHistoryConfig().renderPreview).not.toHaveBeenCalled();
     });
 
-    it('does not report compare context as loading when no compare mode is active', () => {
+    it('renders the stale change preview without loading when no compare mode is active', () => {
       render(<ChangeHistoryPreviewPanel selectedChangeId="evt-previous" listItems={listItems} />, {
         wrapper: TestProvider,
       });
@@ -241,9 +240,8 @@ describe('ChangeHistoryPreviewPanel', () => {
       expect(mockUseChangeHistoryCompare).toHaveBeenLastCalledWith(
         expect.objectContaining({ selectedChange: undefined })
       );
-      expect(mockUseChangeHistoryConfig().renderPreview).toHaveBeenLastCalledWith(
-        expect.objectContaining({ isLoadingCompareContext: false })
-      );
+      expect(screen.queryByTestId('changeHistoryPreviewLoading')).not.toBeInTheDocument();
+      expect(mockUseChangeHistoryConfig().renderPreview).toHaveBeenCalled();
     });
   });
 });

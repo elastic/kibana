@@ -18,7 +18,6 @@ export type ChangeHistoryPreviewRenderFn<ExtendedProps extends object = {}> = (
     objectId: string;
     compareSpec?: ChangeHistoryCompareSpec;
     compareMode?: ChangeHistoryCompareMode; // the comparison the user asked for, if any
-    isLoadingCompareContext?: boolean;
     diffTelemetry?: ChangeHistoryDiffTelemetry;
   } & ExtendedProps
 ) => ReactNode;

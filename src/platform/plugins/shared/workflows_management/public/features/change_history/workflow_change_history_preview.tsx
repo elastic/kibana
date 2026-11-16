@@ -18,7 +18,6 @@ const getYamlFromChange = (change: Parameters<ChangeHistoryPreviewRenderFn>[0]['
 export const renderWorkflowChangeHistoryPreview: ChangeHistoryPreviewRenderFn = ({
   change,
   compareSpec,
-  isLoadingCompareContext,
   diffTelemetry,
 }) => {
   if (!compareSpec) {
@@ -27,10 +26,6 @@ export const renderWorkflowChangeHistoryPreview: ChangeHistoryPreviewRenderFn = 
 
   const baselineYaml = getYamlFromChange(compareSpec.baseline);
   const targetYaml = getYamlFromChange(compareSpec.target);
-
-  if (isLoadingCompareContext) {
-    return <WorkflowChangeHistoryMonacoPreview targetYaml={targetYaml} />;
-  }
 
   // Monaco diff: original (baseline) → modified (target), same as `git diff baseline target`.
   return (

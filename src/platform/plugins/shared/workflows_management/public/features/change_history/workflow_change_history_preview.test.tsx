@@ -73,7 +73,6 @@ jest.mock('@kbn/code-editor', () => {
   };
 });
 
-const mockCreateEditor = monaco.editor.create as jest.Mock;
 const mockCreateDiffEditor = monaco.editor.createDiffEditor as jest.Mock;
 
 const makeDetail = (yaml: string) => ({
@@ -142,23 +141,6 @@ describe('workflow change history preview', () => {
     expect(monaco.editor.createModel).toHaveBeenNthCalledWith(2, 'name: current\n', 'yaml');
     expect(screen.getByTestId('changeHistoryCompareIndicator')).toBeInTheDocument();
     expect(screen.getByText('Comparing with:')).toBeInTheDocument();
-  });
-
-  it('shows target yaml while compare context is loading', async () => {
-    await renderPreview({
-      objectId: 'workflow-1',
-      change: makeDetail('name: historical\n'),
-      compareSpec: {
-        comparisonType: 'vs_previous',
-        baseline: makeDetail('name: historical\n'),
-        target: makeDetail('name: current\n'),
-      },
-      isLoadingCompareContext: true,
-    });
-
-    expect(mockCreateEditor).toHaveBeenCalled();
-    expect(mockCreateDiffEditor).not.toHaveBeenCalled();
-    expect(monaco.editor.createModel).toHaveBeenCalledWith('name: current\n', 'yaml');
   });
 
   it('offers the YAML validation setting and keeps the popover open when toggling it', async () => {
