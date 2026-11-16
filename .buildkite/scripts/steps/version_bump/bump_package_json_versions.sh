@@ -28,7 +28,7 @@ fi
 git fetch origin $branch_to_merge_into
 git checkout -B "$branch_to_merge_into" "origin/$branch_to_merge_into"
 
-# Re-source after the checkout so the Node version matches the branches .node-version
+# Re-source after the checkout so the Node version matches the branches .nvmrc
 source .buildkite/scripts/common/setup_node.sh
 
 .buildkite/scripts/bootstrap.sh
