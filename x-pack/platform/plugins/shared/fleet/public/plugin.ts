@@ -58,6 +58,7 @@ import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/pu
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 
 import type { FleetAuthz } from '../common';
 import {
@@ -150,6 +151,7 @@ export interface FleetStartDeps {
   embeddable: EmbeddableStart;
   logsDataAccess: LogsDataAccessPluginStart;
   reporting?: ReportingStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
@@ -198,6 +200,32 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     setHttpClient(core.http);
 
     registerIacProvisionerTelemetryEvents(core.analytics);
+
+    // The start() lifecycle has no assembled start services (cloud comes from setup), so build
+    // them here the same way the app mounts do, then register the Agent Builder attachment UI.
+    void core
+      .getStartServices()
+      .then(async ([coreStartServices, startDepsServices, fleetStart]) => {
+        const { agentBuilder } = startDepsServices;
+        if (!agentBuilder) {
+          return;
+        }
+        const cloud =
+          deps.cloud && startDepsServices.cloud
+            ? { ...deps.cloud, ...startDepsServices.cloud }
+            : undefined;
+        const { registerFleetAgentBuilderAttachments } = await import('./agent_builder');
+        registerFleetAgentBuilderAttachments({
+          attachments: agentBuilder.attachments,
+          startServices: {
+            ...coreStartServices,
+            ...startDepsServices,
+            storage: this.storage,
+            cloud,
+            authz: fleetStart.authz,
+          },
+        });
+      });
 
     // Register Integrations app
     core.application.register({

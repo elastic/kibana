@@ -1,0 +1,115 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { of } from 'rxjs';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
+
+import type { AwsOnboardingCredentialsAttachmentData } from '../../../../common/agent_builder/aws_onboarding_credentials_attachment';
+import {
+  sendGetAwsOnboardingBootstrapTemplate,
+  sendGetAwsOnboardingCredentials,
+  sendGetAwsOnboardingVerify,
+} from '../../../hooks/use_request/aws_onboarding';
+
+import { AwsOnboardingCredentialsCard } from './card';
+
+jest.mock('../../../hooks/use_request/aws_onboarding');
+
+const mockToastsAddError = jest.fn();
+
+const startServices = {
+  featureFlags: { getBooleanValue$: () => of(true) },
+  cloud: { isCloudEnabled: true },
+  notifications: { toasts: { addError: mockToastsAddError, addSuccess: jest.fn() } },
+};
+
+const data: AwsOnboardingCredentialsAttachmentData = {
+  execution_id: 'exec-1',
+  region: 'eu-west-1',
+  status: 'pending',
+};
+
+const renderCard = () => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
+    <I18nProvider>
+      <KibanaContextProvider services={startServices}>
+        <QueryClientProvider client={queryClient}>
+          <AwsOnboardingCredentialsCard data={data} />
+        </QueryClientProvider>
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+};
+
+describe('AwsOnboardingCredentialsCard', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('shows the setup steps and a pending status when credentials are not configured', async () => {
+    jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
+      data: { configured: false },
+      error: null,
+    } as never);
+    renderCard();
+
+    expect(screen.getByTestId('awsOnboardingCredentialsCardDownload')).toBeInTheDocument();
+    expect(screen.getByTestId('awsOnboardingCredentialsCardConsoleLink')).toHaveAttribute(
+      'href',
+      expect.stringContaining('region=eu-west-1')
+    );
+    expect(await screen.findByTestId('awsOnboardingCredentialsCardStatus')).toHaveTextContent(
+      'pending'
+    );
+    expect(sendGetAwsOnboardingVerify).not.toHaveBeenCalled();
+  });
+
+  it('shows verified and the reply-done hint when the credentials query reports configured', async () => {
+    jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
+      data: { configured: true, mode: 'fully-managed' },
+      error: null,
+    } as never);
+    jest.mocked(sendGetAwsOnboardingVerify).mockResolvedValue({
+      data: {
+        accountId: '123456789012',
+        mode: 'fully-managed',
+        discovery: { ok: true },
+        provisioning: { ok: true },
+      },
+      error: null,
+    } as never);
+    renderCard();
+
+    await waitFor(() =>
+      expect(screen.getByTestId('awsOnboardingCredentialsCardStatus')).toHaveTextContent(
+        'verified for account 123456789012'
+      )
+    );
+    expect(screen.getByTestId('awsOnboardingCredentialsCardReplyDone')).toBeInTheDocument();
+  });
+
+  it('toasts when the template download fails', async () => {
+    jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
+      data: { configured: false },
+      error: null,
+    } as never);
+    jest
+      .mocked(sendGetAwsOnboardingBootstrapTemplate)
+      .mockResolvedValue({ data: null, error: new Error('boom') } as never);
+    renderCard();
+
+    await userEvent.click(screen.getByTestId('awsOnboardingCredentialsCardDownload'));
+
+    await waitFor(() => expect(mockToastsAddError).toHaveBeenCalledTimes(1));
+  });
+});
