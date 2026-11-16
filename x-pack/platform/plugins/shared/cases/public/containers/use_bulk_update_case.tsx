@@ -28,8 +28,8 @@ interface MutationArgs {
 }
 
 /**
- * Executes bulk case updates and retries once on version conflicts caused only by
- * system-managed field drift.
+ * Executes bulk case updates and rebases the request on version conflicts caused
+ * only by system-managed field drift, retrying until it converges.
  *
  * `cases` is the minimal patch payload sent to the API. `originalCases` is the
  * pre-update snapshot used to decide whether a 409 can be safely rebased with
