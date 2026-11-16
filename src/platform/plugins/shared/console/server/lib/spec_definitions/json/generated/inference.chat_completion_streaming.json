@@ -1,5 +1,5 @@
 {
-  "inference.non_streaming_chat_completion": {
+  "inference.chat_completion_streaming": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -95,9 +95,9 @@
       "POST"
     ],
     "patterns": [
-      "_inference/chat_completion/{inference_id}"
+      "_inference/chat_completion/{inference_id}/_stream"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-non-streaming-chat-completion",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-chat-completion-streaming",
     "availability": {
       "stack": true,
       "serverless": true
