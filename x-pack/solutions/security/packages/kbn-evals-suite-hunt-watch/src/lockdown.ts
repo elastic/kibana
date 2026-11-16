@@ -19,7 +19,9 @@ import { TI_REPORT_AWS_IAM_PREFIX, TI_REPORT_CANARY_ID } from './constants';
 
 /** Product surfaces the Worker's behavior is authored in, relative to the repo root. */
 export const LOCKDOWN_SCAN_PATHS = [
-  { dir: 'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt' },
+  {
+    dir: 'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/continuous_threat_hunt',
+  },
   { dir: 'x-pack/solutions/security/plugins/alertzero/server/services/watches/hunt' },
   { dir: 'x-pack/solutions/security/plugins/alertzero/server/routes/hunt' },
 ] as const;
