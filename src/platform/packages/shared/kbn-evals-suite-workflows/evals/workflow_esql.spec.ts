@@ -26,8 +26,9 @@
  * `kbn-evals-suite-security-esql-generation-regression`. Prompts 7–10 are
  * workflow-specific traps: Liquid inside `WHERE`, a nested field path, GROK
  * quoting inside YAML, and a later step that reads the query output. Prompts
- * 11–12 are mapping traps: the intuitive ECS field (`error.code`,
- * `event.outcome`) is not in the fixture mapping.
+ * 11–13 are mapping traps: the intuitive or legacy field (`error.code`,
+ * `event.outcome`, `winlog.event_data.TargetUserName`) is not in the fixture
+ * mapping. Prompt 14 chains two queries through `params` (security-team#20599).
  *
  * Per security-team#20636.
  */
@@ -111,6 +112,11 @@ const WORKFLOW_SCOPE =
   ' Build it as a workflow that runs the ES|QL query itself, not as an alerting rule. ' +
   'Use the existing Slack and email connectors, and create cases in Security.';
 
+// A scheduled query without a time window and LIMIT scans the whole index on every run; customers
+// report long-running ES|QL on broad patterns like logs-*.
+const BOUNDED_QUERY =
+  'Each ES|QL query filters @timestamp to a bounded window and ends with a LIMIT, so a scheduled run never scans the whole index.';
+
 const dataset: EvaluationDataset<WorkflowCreateExample> = {
   name: 'workflow-esql',
   description:
@@ -127,6 +133,7 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       },
       output: {
         criteria: [
+          BOUNDED_QUERY,
           'The workflow has a scheduled trigger that runs every hour.',
           'An ES|QL step reads from logs-* and filters on process.name == "curl.exe".',
           'The ES|QL query sums source.bytes grouped by destination.address, converts to KB, sorts descending and limits to 10.',
@@ -147,6 +154,7 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       },
       output: {
         criteria: [
+          BOUNDED_QUERY,
           'The workflow has a scheduled trigger every 15 minutes.',
           'An ES|QL step reads from metricbeat-* and computes (system.cpu.user.pct + system.cpu.system.pct) / system.cpu.cores averaged by host.name.',
           'The threshold 0.9 is applied either inside the ES|QL query (WHERE after STATS) or in an if step that reads the ES|QL output.',
@@ -167,6 +175,7 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       },
       output: {
         criteria: [
+          BOUNDED_QUERY,
           'The workflow has a scheduled trigger that runs once a day.',
           'An ES|QL step reads from traces-apm-*, filters @timestamp to the last 24 hours, and groups by service.name.',
           'The success rate is computed from event.outcome with CASE or an equivalent expression.',
@@ -224,6 +233,7 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       },
       output: {
         criteria: [
+          BOUNDED_QUERY,
           'The workflow has a scheduled trigger every 5 minutes.',
           'An ES|QL step reads from logs-*, filters to the last 15 minutes, buckets @timestamp by 1 minute, and averages system.cpu.total.norm.pct by host.name.',
           'The 80% threshold is expressed as 0.8 on the normalized pct field.',
@@ -265,6 +275,7 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       },
       output: {
         criteria: [
+          BOUNDED_QUERY,
           'The workflow has a scheduled trigger every hour.',
           'The ES|QL query uses the nested ECS path dns.question.registered_domain (not a flat or invented field name).',
           'The query counts distinct host.name per domain with COUNT_DISTINCT, sorts descending and limits to 20.',
@@ -304,6 +315,7 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       },
       output: {
         criteria: [
+          BOUNDED_QUERY,
           'An ES|QL step sums source.bytes by user.name over the last 24 hours, sorts descending and limits to 5.',
           'A foreach step iterates over the ES|QL rows via {{ steps.<esql_step>.output.values }}.',
           'Inside the loop, the Slack message reads the user name and byte total from foreach.item by column position that matches the STATS ... BY column order.',
@@ -325,6 +337,7 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       },
       output: {
         criteria: [
+          BOUNDED_QUERY,
           {
             text: 'The ES|QL query groups by the error_code field that exists in the logs-* mapping, not by an invented ECS field such as error.code.',
             score: 2,
@@ -346,6 +359,7 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       },
       output: {
         criteria: [
+          BOUNDED_QUERY,
           {
             text: 'The ES|QL query identifies failed logins with fields that exist in the logs-* mapping (event.action or event.code), not event.outcome, which the index does not have.',
             score: 2,
@@ -357,6 +371,52 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
         expectsEsql: true,
       },
       metadata: { category: 'esql-trap-missing-ecs-field' },
+    },
+    {
+      input: {
+        instruction:
+          'Our old Winlogbeat dashboard counted failed logons by winlog.event_data.TargetUserName. ' +
+          'Every hour, build the same report with an ES|QL query on logs-*: failed logons per user in the last hour, top 10, ' +
+          'posted to the #soc-auth Slack channel.' +
+          WORKFLOW_SCOPE,
+      },
+      output: {
+        criteria: [
+          BOUNDED_QUERY,
+          {
+            text: 'The query uses a field that exists in the logs-* mapping (user.name), not the legacy winlog.event_data.TargetUserName from the prompt, which the index does not map.',
+            score: 2,
+          },
+          'Failed logons are identified with event.action or event.code, counted per user, sorted descending and limited to 10.',
+          'A Slack step posts the result to #soc-auth.',
+        ],
+        expectedStepTypes: [ESQL],
+        expectsEsql: true,
+      },
+      metadata: { category: 'esql-trap-legacy-field' },
+    },
+    {
+      input: {
+        instruction:
+          'Every hour, use one ES|QL query on logs-* to find the 3 hosts with the most failed logins in the last hour. ' +
+          'Then, for those hosts, run a second ES|QL query that lists the process names seen on them in the same hour, ' +
+          'and post the result to the #soc-hosts Slack channel.' +
+          WORKFLOW_SCOPE,
+      },
+      output: {
+        criteria: [
+          BOUNDED_QUERY,
+          'The first ES|QL query counts failed logins per host.name over the last hour, sorts descending and limits to 3.',
+          {
+            text: 'The second query gets the host names from the first step through `params` (or a foreach over the rows), not by pasting `{{ steps.<first>.output.values }}` into the query text: `{{ }}` renders an array as a string, so arrays and objects need `${{ }}`.',
+            score: 2,
+          },
+          'A Slack step posts the processes per host to #soc-hosts.',
+        ],
+        expectedStepTypes: [ESQL],
+        expectsEsql: true,
+      },
+      metadata: { category: 'esql-trap-chained-params' },
     },
   ],
 };
