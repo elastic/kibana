@@ -8,6 +8,7 @@
 import { ENVIRONMENT_NOT_DEFINED_VALUE } from '@kbn/apm-types';
 import { getBucketSizeSeconds } from '../../../lib/helpers/time_series';
 import { MAX_APPLICATIONS_PER_SOURCE, MAX_ENVIRONMENTS_PER_APPLICATION } from '../constants';
+import { sessionOverlapFilters } from '../../sessions/list_sessions';
 import { sessionsSearch } from './sessions_search_requests';
 
 const START = Date.parse('2021-01-18T12:00:00.000Z');
@@ -41,15 +42,16 @@ describe('sessionsSearch', () => {
     });
   });
 
-  it('matches the sessions that overlap the time range', () => {
+  it('matches the sessions that overlap the time range, as the Sessions tab does', () => {
+    const range = { start: new Date(START).toISOString(), end: new Date(END).toISOString() };
+
     expect(sessionsSearch({ start: START, end: END }).query).toEqual({
-      bool: {
-        filter: [
-          { range: { start_time: { lte: END, format: 'epoch_millis' } } },
-          { range: { end_time: { gte: START, format: 'epoch_millis' } } },
-        ],
-      },
+      bool: { filter: sessionOverlapFilters(range) },
     });
+    expect(sessionOverlapFilters(range)).toEqual([
+      { range: { start_time: { lte: range.end } } },
+      { range: { end_time: { gte: range.start } } },
+    ]);
   });
 
   it('adds up the counts the session summaries keep, per application', () => {
@@ -70,6 +72,14 @@ describe('sessionsSearch', () => {
     });
   });
 
+  it('counts the sessions of each application that started in the time range', () => {
+    const { startedSessions } = inEnvironment().aggs.applications.aggs;
+
+    expect(startedSessions.filter).toEqual({
+      range: { start_time: { gte: new Date(START).toISOString() } },
+    });
+  });
+
   it('adds up the samples of each vital and takes the p75 of the sessions p75', () => {
     const { aggs } = inEnvironment().aggs.applications;
 
@@ -84,17 +94,29 @@ describe('sessionsSearch', () => {
     }
   });
 
-  it('charts the page loads by session start, in the buckets of the time range only', () => {
-    const { pageLoadsOverTime } = inEnvironment().aggs;
+  describe('over time', () => {
+    const { startedInRange } = inEnvironment().aggs;
 
-    expect(pageLoadsOverTime.date_histogram).toEqual({
-      field: 'start_time',
-      fixed_interval: `${getBucketSizeSeconds(START, END)}s`,
-      min_doc_count: 0,
-      extended_bounds: { min: START, max: END },
-      hard_bounds: { min: START, max: END },
+    it('buckets only the sessions that started in the time range', () => {
+      // The bounds of a histogram limit its buckets, not the sessions in a boundary bucket, so an
+      // overlapping session that started before the range in the first bucket needs a filter.
+      expect(startedInRange.filter).toEqual({
+        range: { start_time: { gte: new Date(START).toISOString() } },
+      });
     });
-    expect(pageLoadsOverTime.aggs).toEqual({ pageLoads: { sum: { field: 'page_load_count' } } });
+
+    it('charts the page loads by session start, in the buckets of the time range', () => {
+      const { pageLoadsOverTime } = startedInRange.aggs;
+
+      // The latest bucket is not bounded away: sessions that started in it are in the range.
+      expect(pageLoadsOverTime.date_histogram).toEqual({
+        field: 'start_time',
+        fixed_interval: `${getBucketSizeSeconds(START, END)}s`,
+        min_doc_count: 0,
+        extended_bounds: { min: START, max: END },
+      });
+      expect(pageLoadsOverTime.aggs).toEqual({ pageLoads: { sum: { field: 'page_load_count' } } });
+    });
   });
 
   describe('environment', () => {
