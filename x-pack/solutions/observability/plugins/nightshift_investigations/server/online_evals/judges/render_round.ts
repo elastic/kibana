@@ -41,11 +41,8 @@ const stringify = (value: unknown): string => {
   return typeof value === 'string' ? value : JSON.stringify(value);
 };
 
-/**
- * Renders the round as the transcript reference-free judges read: the user input, every tool
- * call with its arguments and result, and the agent's final answer.
- */
-export const renderRound = (round: EvidenceRound): string => {
+/** The round's tool calls as numbered sections, and how many were left out to fit the budget. */
+const renderToolCallSections = (round: EvidenceRound): { sections: string[]; omitted: number } => {
   const renderedSteps = round.steps.map((step, index) =>
     [
       `## Tool call ${index + 1}: ${step.tool_id ?? 'unknown tool'}`,
@@ -60,14 +57,35 @@ export const renderRound = (round: EvidenceRound): string => {
   const omittedMarker =
     omitted > 0 ? [`[${omitted} tool calls omitted here to fit the judge's context]`] : [];
 
-  return [
+  return {
+    sections: [
+      ...renderedSteps.slice(0, headEnd),
+      ...omittedMarker,
+      ...renderedSteps.slice(tailStart),
+    ],
+    omitted,
+  };
+};
+
+/**
+ * Renders only the round's tool calls, each with its arguments and result, for judges that
+ * audit how the tools were used. `omitted` counts the calls left out to fit the budget.
+ */
+export const renderToolCalls = (round: EvidenceRound): { text: string; omitted: number } => {
+  const { sections, omitted } = renderToolCallSections(round);
+  return { text: sections.join('\n\n'), omitted };
+};
+
+/**
+ * Renders the round as the transcript reference-free judges read: the user input, every tool
+ * call with its arguments and result, and the agent's final answer.
+ */
+export const renderRound = (round: EvidenceRound): string =>
+  [
     `## User\n${round.input.message}`,
-    ...renderedSteps.slice(0, headEnd),
-    ...omittedMarker,
-    ...renderedSteps.slice(tailStart),
+    ...renderToolCallSections(round).sections,
     `## Agent final answer\n${round.response.message}`,
   ].join('\n\n');
-};
 
 const toToolCallArguments = (value: unknown): ToolCallArguments => {
   const serialized = stringify(value);

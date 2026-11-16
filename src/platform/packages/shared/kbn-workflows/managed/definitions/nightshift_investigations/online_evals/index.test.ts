@@ -49,6 +49,7 @@ describe('nightshift online evals workflow', () => {
             { name: 'nightshift_rca_reward' },
             { name: 'nightshift_investigation_process' },
             { name: 'nightshift_conclusion_quality' },
+            { name: 'nightshift_tool_call_health' },
           ],
           entry_point: '${{ inputs.entry_point }}',
         }),
