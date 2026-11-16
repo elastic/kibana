@@ -13,13 +13,13 @@ import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { DetectionSetupService } from '../../lib/service_account/setup_service';
 import { BaseEngineRoute } from '../base_engine_route';
 import { EngineRouteContext } from '../engine_route_context';
-import { SERVICE_ACCOUNT_API_PATH } from './constants';
+import { DETECTION_ENGINE_API_PATH } from '../constants';
 
 /** Reports how the current space is set up: the account it runs as, and whether the user may set it up. */
 @injectable()
 export class GetServiceAccountStatusRoute extends BaseEngineRoute {
   static method = 'get' as const;
-  static path = SERVICE_ACCOUNT_API_PATH;
+  static path = `${DETECTION_ENGINE_API_PATH}/service_account`;
   static security: RouteSecurity = {
     authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] },
   };

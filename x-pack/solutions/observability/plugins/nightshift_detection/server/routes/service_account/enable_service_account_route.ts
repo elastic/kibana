@@ -15,7 +15,7 @@ import type { DetectionEngineEnableBody } from '../../../common/service_account'
 import { DetectionSetupService } from '../../lib/service_account/setup_service';
 import { BaseEngineRoute } from '../base_engine_route';
 import { EngineRouteContext } from '../engine_route_context';
-import { SERVICE_ACCOUNT_API_PATH } from './constants';
+import { DETECTION_ENGINE_API_PATH } from '../constants';
 
 // Ids are opaque: `kibana/<name>` on stateful, a generated id on Serverless.
 const SERVICE_ACCOUNT_ID_MAX_LENGTH = 1024;
@@ -24,7 +24,7 @@ const SERVICE_ACCOUNT_ID_MAX_LENGTH = 1024;
 @injectable()
 export class EnableServiceAccountRoute extends BaseEngineRoute<DetectionEngineEnableBody> {
   static method = 'post' as const;
-  static path = `${SERVICE_ACCOUNT_API_PATH}/_enable`;
+  static path = `${DETECTION_ENGINE_API_PATH}/service_account/_enable`;
   // The route needs the Nightshift manage privilege. Binding itself is authorized by Elasticsearch
   // against manage_security, a cluster privilege that route privileges cannot express, so the
   // setup service checks it as well.
