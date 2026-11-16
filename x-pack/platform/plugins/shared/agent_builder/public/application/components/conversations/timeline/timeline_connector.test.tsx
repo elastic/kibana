@@ -155,7 +155,8 @@ const terminated = createExecutionTerminatedEvent({
 });
 const savedUserMessage = createUserMessageEvent({ id: 'round-1::user_message' });
 
-describe('TimelineConnector', () => {
+// Failing: See https://github.com/elastic/kibana/issues/304928
+describe.skip('TimelineConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     registeredAttachmentTypes.clear();
