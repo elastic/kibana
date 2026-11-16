@@ -15,6 +15,7 @@ import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_INDEX_TYPES_MAP,
   type IndexMapping,
+  type IndexTypesMap,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type {
   BaseState,
@@ -1801,6 +1802,55 @@ describe('migrations v2 model', () => {
         // the aliases are already published, this migrator must not update them again
         expect(newState.versionIndexReadyActions).toEqual(Option.none);
       });
+
+      describe('if the migrator is involved in a relocation and source index matches target index', () => {
+        const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.left({
+          type: 'source_equals_target' as const,
+          index: '.kibana_7.11.0_001',
+        });
+        const relocatingState: SetSourceWriteBlockState = {
+          ...setWriteBlockState,
+          mustRelocateDocuments: true,
+          sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+          indexTypesMap: {
+            '.kibana': ['config', 'dashboard'],
+            '.kibana_analytics': ['lens', 'visualization'],
+          },
+        };
+        const withLiveLayout = (indexTypesMap: IndexTypesMap): SetSourceWriteBlockState => ({
+          ...relocatingState,
+          sourceIndexMappings: Option.some({
+            properties: {},
+            _meta: { indexTypesMap },
+          }) as Option.Some<IndexMapping>,
+        });
+
+        test('SET_SOURCE_WRITE_BLOCK -> FATAL if the live index layout still has types in a different index', () => {
+          const newState = model(
+            withLiveLayout({
+              '.kibana': ['config', 'dashboard', 'visualization'],
+              '.kibana_analytics': ['lens'],
+            }),
+            res
+          ) as FatalState;
+          expect(newState.controlState).toEqual('FATAL');
+          expect(newState.reason).toMatchInlineSnapshot(
+            `"The .kibana_7.11.0_001 index was already migrated to this version with a different saved object index layout. Types [visualization] would have to move to another index, which is not supported within the same Kibana version."`
+          );
+        });
+
+        test('SET_SOURCE_WRITE_BLOCK -> RELEASE_RELOCATION_WAIT_GROUPS if the live index layout only differs in added or removed types', () => {
+          // e.g. the instance that published the relocation had different plugins enabled
+          const newState = model(
+            withLiveLayout({
+              '.kibana': ['config', 'dashboard', 'removed-type'],
+              '.kibana_analytics': ['visualization'],
+            }),
+            res
+          );
+          expect(newState.controlState).toEqual('RELEASE_RELOCATION_WAIT_GROUPS');
+        });
+      });
     });
 
     describe('CALCULATE_EXCLUDE_FILTERS', () => {
@@ -2032,6 +2082,31 @@ describe('migrations v2 model', () => {
             expect(newState.versionIndexReadyActions).toEqual(Option.none);
           }
         );
+
+        test('CHECK_RELOCATION_COMPLETED -> FATAL if the live index layout still has types in a different index', () => {
+          const res: ResponseType<'CHECK_RELOCATION_COMPLETED'> = Either.right({
+            '.kibana_7.11.0_001': {
+              ...indexWithAliases('.kibana_7.11.0_001', ['.kibana', '.kibana_7.11.0'])[
+                '.kibana_7.11.0_001'
+              ],
+              mappings: {
+                properties: {},
+                _meta: { indexTypesMap: { '.kibana': ['dashboard', 'visualization'] } },
+              },
+            },
+          });
+          const newState = model(
+            {
+              ...stateWithSource,
+              indexTypesMap: { '.kibana': ['dashboard'], '.kibana_analytics': ['visualization'] },
+            },
+            res
+          ) as FatalState;
+          expect(newState.controlState).toEqual('FATAL');
+          expect(newState.reason).toMatchInlineSnapshot(
+            `"The .kibana_7.11.0_001 index was already migrated to this version with a different saved object index layout. Types [visualization] would have to move to another index, which is not supported within the same Kibana version."`
+          );
+        });
       });
 
       test('CHECK_RELOCATION_COMPLETED -> CHECK_RELOCATION_COMPLETED if the action fails with a retryable error', () => {

@@ -48,6 +48,8 @@ import {
   aliasVersion,
   REINDEX_TEMP_SUFFIX,
   getPrepareCompatibleMigrationStateProperties,
+  getPendingRelocations,
+  pendingRelocationsReason,
 } from './helpers';
 import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -803,6 +805,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       };
     } else if (isTypeof(res.left, 'source_equals_target')) {
       if (stateP.mustRelocateDocuments) {
+        const pendingRelocations = getPendingRelocations(
+          stateP.sourceIndexMappings.value,
+          stateP.indexTypesMap
+        );
+        if (pendingRelocations.length) {
+          // This version's index was created with another layout, e.g. by an earlier build
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: pendingRelocationsReason(stateP.sourceIndex.value, pendingRelocations),
+          };
+        }
         // Another instance already published the aliases of this relocation, which is
         // its last step. Sibling migrators of this instance may be waiting on us.
         return {
@@ -922,13 +936,23 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ? aliases.right[stateP.currentAlias]
           : undefined;
       if (liveIndex) {
+        const liveIndexMappings = res.right[liveIndex].mappings;
+        const pendingRelocations = getPendingRelocations(liveIndexMappings, stateP.indexTypesMap);
+        if (pendingRelocations.length) {
+          // This version's index was created with another layout, e.g. by an earlier build
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: pendingRelocationsReason(liveIndex, pendingRelocations),
+          };
+        }
         // Another instance finished the relocation. Copying now would write onto the live index.
         // The live index becomes our source, so that mapping checks compare against its mappings.
         return {
           ...stateP,
           controlState: 'RELEASE_RELOCATION_WAIT_GROUPS',
           sourceIndex: Option.some(liveIndex),
-          sourceIndexMappings: Option.some(res.right[liveIndex].mappings),
+          sourceIndexMappings: Option.some(liveIndexMappings),
           targetIndex: liveIndex,
           versionIndexReadyActions: Option.none,
         };
