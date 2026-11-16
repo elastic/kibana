@@ -4,6 +4,8 @@ UI plugin for the Observability entity inventory. Renders an entity-centric view
 
 The app requires the `entityInventory` server plugin: set both `xpack.entityInventory.enabled: true` and `xpack.entityInventoryApp.enabled: true`. With only `xpack.entityInventoryApp.enabled`, core disables the app at startup and logs that its `entityInventory` dependency is disabled.
 
+The time range picker is limited to the last 3 days. Set `xpack.entityInventoryApp.timeRangeLimit.disabled: true` to turn the limit off: the picker then has no minimum date and uses the `timepicker:quickRanges` quick ranges, and any valid submitted range is used as-is. An invalid range (bad datemath, or a start after the end) still keeps the previous range.
+
 ## Results table
 
 The app loads `GET /internal/entity_inventory/types` once per app mount (`EntityTypesProvider`, again on a reload or a retry, not on a page change). Each page renders one collapsible section per entity type of the page, in response order, titled by the type's `name`. Each section requests its own `_list` by type id and has its own loading, error and empty states; the header counts the listed entities, with a `+` when the list is truncated. The Hosts and Kubernetes pages list `host` and `k8s.deployment` today. All resources lists every type of the `types` response.
