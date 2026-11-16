@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { DetectionAccountService } from './detection_account';
@@ -16,9 +17,11 @@ type Principal = { type: 'user' } | { type: 'service_account'; serviceAccountId:
 
 function createService({
   boundAccountId,
+  bindingError,
   principal,
 }: {
   boundAccountId?: string;
+  bindingError?: Error;
   principal?: Principal;
 }) {
   const withScopedRequestForWorkload = jest.fn(
@@ -28,9 +31,12 @@ function createService({
   const security = {
     serviceAccounts: {
       isEnabled: () => true,
-      getWorkloadBinding: jest.fn(async () =>
-        boundAccountId ? { serviceAccountId: boundAccountId } : null
-      ),
+      getWorkloadBinding: jest.fn(async () => {
+        if (bindingError) {
+          throw bindingError;
+        }
+        return boundAccountId ? { serviceAccountId: boundAccountId } : null;
+      }),
       withScopedRequestForWorkload,
     },
     authc: { getPrincipal: () => principal },
@@ -46,6 +52,24 @@ describe('DetectionAccountService', () => {
   const fn = jest.fn(async (request: KibanaRequest) => request);
 
   beforeEach(() => fn.mockClear());
+
+  describe('getDetectionEngineAccountId', () => {
+    it('reads a binding that fails the integrity check (403) as not set up, so it can be replaced', async () => {
+      const { service } = createService({ bindingError: Boom.forbidden('integrity check failed') });
+
+      await expect(service.getDetectionEngineAccountId({ spaceId: SPACE_ID })).resolves.toBe(
+        undefined
+      );
+    });
+
+    it('rethrows any other failure', async () => {
+      const { service } = createService({ bindingError: Boom.badImplementation('boom') });
+
+      await expect(service.getDetectionEngineAccountId({ spaceId: SPACE_ID })).rejects.toThrow(
+        'boom'
+      );
+    });
+  });
 
   describe('asDetectionEngineAccount', () => {
     it('refuses with 503 when the space is not set up', async () => {
