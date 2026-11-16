@@ -80,7 +80,10 @@ const asKeyword = (value: unknown): string | undefined =>
     : undefined;
 
 /** The subject's snapshot, or the only alert the run carries. */
-export const triggeringAlertOf = (subjectId: string, alerts: unknown): unknown => {
+export const triggeringAlertOf = (
+  subjectId: string,
+  alerts: unknown
+): Record<string, unknown> | undefined => {
   if (!Array.isArray(alerts)) return undefined;
   const snapshots = alerts.filter(isPlainObject);
   return (
@@ -89,9 +92,11 @@ export const triggeringAlertOf = (subjectId: string, alerts: unknown): unknown =
   );
 };
 
-/** Untyped because stored subject snapshots are loose objects. */
-export const alertIdentityOf = (spaceId: string, snapshot: unknown): AlertIdentity => {
-  if (!isPlainObject(snapshot)) return {};
+export const alertIdentityOf = (
+  spaceId: string,
+  snapshot: Record<string, unknown> | undefined
+): AlertIdentity => {
+  if (!snapshot) return {};
 
   const source = asKeyword(snapshot.source);
   // Only v2 alerts have a source, and stored snapshots may predate `alert_version`.

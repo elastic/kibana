@@ -635,6 +635,7 @@ export class NightshiftInvestigationsClient {
                 origin: subject.type,
                 ...(automationId ? { automation_id: automationId } : {}),
                 skip_reason: 'deployment_quota',
+                event_id: significantEventIdOf(subject, alerts),
                 ...alertIdentity,
               });
             }

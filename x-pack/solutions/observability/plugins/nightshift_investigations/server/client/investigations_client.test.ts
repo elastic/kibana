@@ -893,6 +893,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       origin: 'significant_event',
       automation_id: 'a1',
       skip_reason: 'deployment_quota',
+      event_id: 'event-1',
     });
     expect(telemetry.reportInvestigationSkipped).toHaveBeenNthCalledWith(2, {
       trigger: 'manual',

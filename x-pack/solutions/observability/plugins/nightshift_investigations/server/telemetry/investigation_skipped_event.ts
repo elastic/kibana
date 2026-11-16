@@ -17,6 +17,7 @@ export interface InvestigationSkippedEvent extends AlertIdentity {
   origin: string;
   automation_id?: string;
   skip_reason: InvestigationSkipReason;
+  event_id?: string;
 }
 
 const investigationSkippedSchema: RootSchema<InvestigationSkippedEvent> = {
@@ -39,6 +40,14 @@ const investigationSkippedSchema: RootSchema<InvestigationSkippedEvent> = {
     type: 'keyword',
     _meta: {
       description: 'Why the investigation was skipped: deployment_quota or automation_daily_limit.',
+    },
+  },
+  event_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The significant event behind the skipped run: its subject, or the event whose alert triggered it.',
+      optional: true,
     },
   },
   ...alertIdentitySchema,

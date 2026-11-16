@@ -159,8 +159,12 @@ are absent when no alert triggered the run:
   Any other event about the same alert series must derive it with the same function.
 
 `trigger_type` on the started event separates automatic from manual runs. No alert title, message,
-tag, or other customer alert content is sent. Completion is not a Nightshift event: join
-`workflow_execution_id` to the Workflow Engine terminal telemetry.
+tag, or other customer alert content is sent. The skipped event also carries `event_id`, the
+Significant Event behind the run, whether it is the subject or the source of the triggering alert.
+
+Completion is reported by `nightshift-investigation-ended`: join the started event's
+`workflow_execution_id` to its `parent_workflow_execution_id`. A timed-out or cancelled run sends no
+ended event.
 
 ## Requirements
 

@@ -346,17 +346,26 @@ export const triggerInvestigationStepDefinition = (
           context.logger.info(
             `Skipped investigation of ${input.subject_type}/${subjectId} for automation ${input.automation_id}: daily limit of ${error.limit} reached`
           );
+          // Other subjects have no triggering alert: the client ignores any alerts they carry.
+          const alertIdentity =
+            input.subject_type === 'alert'
+              ? alertIdentityOf(
+                  spaceId,
+                  triggeringAlertOf(subjectId, alerts ?? input.context?.alerts)
+                )
+              : {};
+          const significantEventAlertId =
+            alertIdentity.source_kind === 'significant_events'
+              ? alertIdentity.fingerprint
+              : undefined;
           telemetry.reportInvestigationSkipped({
             trigger: 'automation',
             origin: input.subject_type,
             automation_id: input.automation_id,
             skip_reason: 'automation_daily_limit',
-            ...(input.subject_type === 'alert'
-              ? alertIdentityOf(
-                  spaceId,
-                  triggeringAlertOf(subjectId, alerts ?? input.context?.alerts)
-                )
-              : {}),
+            event_id:
+              input.subject_type === 'significant_event' ? subjectId : significantEventAlertId,
+            ...alertIdentity,
           });
           return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
         }
