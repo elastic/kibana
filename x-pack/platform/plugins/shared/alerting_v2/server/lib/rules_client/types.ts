@@ -72,7 +72,6 @@ export interface RotationCandidate {
 export interface CreateRuleParams {
   data: CreateRuleData;
   options?: {
-    id?: string;
     /** The rule template this rule is created from. */
     template?: { id: string };
     enabled?: boolean;
