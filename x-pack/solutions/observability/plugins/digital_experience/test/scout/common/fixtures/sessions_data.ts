@@ -11,6 +11,7 @@ import {
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
   SESSIONS_TASK_ID,
+  type SessionsStatus,
 } from '../../../../common/sessions';
 import { OTEL_APPS } from './constants';
 
@@ -191,13 +192,29 @@ export const ingestSessionsData = async (esClient: EsClient, kbnClient: KbnClien
   }
 };
 
-/** Runs the summaries task now instead of at its next interval. */
+/**
+ * Runs the summaries task now instead of at its next interval; a run already in progress counts.
+ * The route answers 200 with the error, so it is thrown here.
+ */
 export const runSessionsTask = async (kbnClient: KbnClient) => {
-  await kbnClient.request({
+  const { data } = await kbnClient.request<{ error?: string }>({
     method: 'POST',
     path: `/internal/ftr/task_manager/${encodeURIComponent(SESSIONS_TASK_ID)}/run_soon`,
     headers: { 'x-elastic-internal-origin': 'kibana' },
   });
+  if (data.error && !data.error.includes('as it is currently running')) {
+    throw new Error(`Could not run the summaries task: ${data.error}`);
+  }
+};
+
+/** Whether sessions are set up: the summaries task is scheduled, as the route reads it. */
+const areSessionsInstalled = async (kbnClient: KbnClient): Promise<boolean> => {
+  const { data } = await kbnClient.request<SessionsStatus>({
+    method: 'GET',
+    path: '/internal/digital_experience/sessions/status',
+    headers: { 'x-elastic-internal-origin': 'kibana' },
+  });
+  return data.installed;
 };
 
 /** Removes the summaries task, which also invalidates its API key; a missing task is fine. */
@@ -258,7 +275,7 @@ export const ingestOwnedSessions = async (
   kbnClient: KbnClient,
   sessions: OwnedSessions
 ): Promise<{ sessionsStartMs: number; setUpSessions: boolean }> => {
-  const setUpSessions = !(await esClient.indices.exists({ index: SESSIONS_INDEX }));
+  const setUpSessions = !(await areSessionsInstalled(kbnClient));
   if (setUpSessions) {
     await enableSessions(kbnClient);
   }

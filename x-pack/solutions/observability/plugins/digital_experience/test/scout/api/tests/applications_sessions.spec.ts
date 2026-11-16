@@ -33,6 +33,8 @@ const LAST_SESSION_IN_RANGE = 5;
 // Long enough for the summaries task to catch up and for the route's 30 s cache of its status.
 const SESSIONS_READABLE_TIMEOUT_MS = 75_000;
 const POLL_MS = 2_000;
+// The poll's budget, with room for the authentication and the assertions after it.
+const TEST_TIMEOUT_MS = 2 * SESSIONS_READABLE_TIMEOUT_MS;
 
 apiTest.describe(
   'Digital Experience applications API from the sessions index',
@@ -58,6 +60,7 @@ apiTest.describe(
     apiTest(
       'keeps the page loads and sessions of the last bucket when the range ends inside it',
       async ({ apiClient, kbnClient, samlAuth }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
         const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
         const sessionStarts = Array.from({ length: LAST_SESSION_IN_RANGE + 1 }, (_, index) => {
           return sessionsStartMs + sessionStartOffsetMs(index);
@@ -67,11 +70,11 @@ apiTest.describe(
 
         // The route reads the raw events, without `sessionsOverTime`, until the summaries task has
         // caught up since sessions were set up, and keeps that answer for 30 s.
+        await runSessionsTask(kbnClient);
         let body: ApplicationsResponse | undefined;
         await expect
           .poll(
             async () => {
-              await runSessionsTask(kbnClient);
               const response = await apiClient.get(
                 withQuery(APPLICATIONS_PATH, {
                   start: new Date(sessionsStartMs - 10 * 60 * 1000).toISOString(),
