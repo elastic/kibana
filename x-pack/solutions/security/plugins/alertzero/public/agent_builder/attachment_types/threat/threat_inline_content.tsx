@@ -354,6 +354,8 @@ const renderIocsSection = (
   for (const ioc of nonDenied) {
     if (
       isHuntEligibleIoc({
+        type: asString(ioc.type),
+        value: asString(ioc.value),
         tier: asString(ioc.tier),
         deferred_unreviewed: asBoolean(ioc.deferred_unreviewed),
       })

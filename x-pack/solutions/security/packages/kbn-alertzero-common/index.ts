@@ -282,7 +282,6 @@ export { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from './impl/hunt/usabl
 export {
   HUNT_ELIGIBLE_IOC_TIERS,
   isHuntEligibleIoc,
-  isNonRoutableHuntIoc,
   type HuntEligibleIocTier,
 } from './impl/hunt/hunt_eligible_ioc';
-export { isNonRoutableIPv4, isNonRoutableIPv6 } from './impl/ip_ranges';
+export { isNonRoutableIPv4, isNonRoutableIPv6, isNonRoutableIpIoc } from './impl/ip_ranges';

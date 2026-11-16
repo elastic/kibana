@@ -75,12 +75,34 @@ export const isNonRoutableIPv4 = (ip: string): boolean => {
 };
 
 /**
+ * Rewrites an IPv6 literal to the WHATWG canonical form (compressed, lowercase,
+ * no brackets, dotted IPv4 suffix converted to hex groups). Stored IOC values are
+ * not normalised by a URL parser the way SSRF targets are, so `0:0:0:0:0:0:0:1`
+ * and `[::1]` must reach the prefix tests below as `::1`. Only pure address
+ * characters are handed to the URL parser, so a value carrying URL syntax cannot
+ * parse into a different host. Anything else, or input the parser rejects (zone
+ * ids, garbage), is returned lowercased and unchanged.
+ */
+const canonicalIPv6 = (ip: string): string => {
+  const lower = ip.toLowerCase();
+  const bare = lower.startsWith('[') && lower.endsWith(']') ? lower.slice(1, -1) : lower;
+  if (!/^[0-9a-f:.]+$/.test(bare)) {
+    return bare;
+  }
+  try {
+    return new URL(`http://[${bare}]/`).hostname.slice(1, -1);
+  } catch {
+    return bare;
+  }
+};
+
+/**
  * True for IPv6 addresses that are not routable public space, including the
  * IPv4-mapped and IPv4-compatible forms that smuggle a restricted IPv4 address
- * through an IPv6 literal.
+ * through an IPv6 literal. Accepts expanded and bracketed spellings.
  */
 export const isNonRoutableIPv6 = (ip: string): boolean => {
-  const lower = ip.toLowerCase();
+  const lower = canonicalIPv6(ip);
 
   // loopback ::1 / unspecified ::
   if (lower === '::1' || lower === '::') return true;
@@ -155,5 +177,31 @@ export const isNonRoutableIPv6 = (ip: string): boolean => {
     return isNonRoutableIPv4(hexGroupsToDotted(embedded[2], embedded[3]));
   }
 
+  return false;
+};
+
+const IPV4_DOTTED = /^(?:\d{1,3}\.){3}\d{1,3}$/;
+
+/**
+ * True when a stored `ip` or `cidr` IOC value sits in non-routable space. A CIDR is
+ * judged by its network address, which is the same rule `extract_iocs` applies when
+ * it tiers a range. Other IOC types and unparseable values are never non-routable.
+ */
+export const isNonRoutableIpIoc = (ioc: { type?: unknown; value?: unknown }): boolean => {
+  if (typeof ioc.value !== 'string' || (ioc.type !== 'ip' && ioc.type !== 'cidr')) {
+    return false;
+  }
+  const raw = ioc.value.trim();
+  if (raw.length === 0) {
+    return false;
+  }
+  const slash = raw.indexOf('/');
+  const host = ioc.type === 'cidr' && slash !== -1 ? raw.slice(0, slash) : raw;
+  if (IPV4_DOTTED.test(host)) {
+    return isNonRoutableIPv4(host);
+  }
+  if (host.includes(':')) {
+    return isNonRoutableIPv6(host);
+  }
   return false;
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isHuntEligibleIoc, isNonRoutableHuntIoc } from './hunt_eligible_ioc';
+import { isHuntEligibleIoc } from './hunt_eligible_ioc';
 
 describe('isHuntEligibleIoc', () => {
   it.each([
@@ -40,6 +40,9 @@ describe('isHuntEligibleIoc', () => {
     ['link-local', { type: 'ip', value: '169.254.169.254', tier: 'contextual' }],
     ['private CIDR', { type: 'cidr', value: '192.168.0.0/16', tier: 'discriminating' }],
     ['IPv6 loopback', { type: 'ip', value: '::1', tier: 'uncertain' }],
+    ['IPv6 loopback written out in full', { type: 'ip', value: '0:0:0:0:0:0:0:1' }],
+    ['bracketed IPv6 loopback', { type: 'ip', value: '[::1]', tier: 'discriminating' }],
+    ['IPv6 unique-local CIDR', { type: 'cidr', value: 'fc00::/7', tier: 'contextual' }],
   ])('returns false for non-routable %s even when tier would otherwise qualify', (_label, ioc) => {
     expect(isHuntEligibleIoc(ioc)).toBe(false);
   });
@@ -52,20 +55,5 @@ describe('isHuntEligibleIoc', () => {
     expect(isHuntEligibleIoc({ type: 'ip', value: '198.51.100.20', tier: 'discriminating' })).toBe(
       true
     );
-  });
-});
-
-describe('isNonRoutableHuntIoc', () => {
-  it('returns false for non-ip types', () => {
-    expect(isNonRoutableHuntIoc({ type: 'domain', value: '127.0.0.1' })).toBe(false);
-    expect(isNonRoutableHuntIoc({ type: 'hash', value: 'a'.repeat(64) })).toBe(false);
-  });
-
-  it('returns true for a private CIDR network', () => {
-    expect(isNonRoutableHuntIoc({ type: 'cidr', value: '10.20.0.0/16' })).toBe(true);
-  });
-
-  it('returns false for a public CIDR network', () => {
-    expect(isNonRoutableHuntIoc({ type: 'cidr', value: '203.0.113.0/24' })).toBe(false);
   });
 });

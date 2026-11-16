@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNonRoutableIPv4, isNonRoutableIPv6 } from './ip_ranges';
+import { isNonRoutableIpIoc, isNonRoutableIPv4, isNonRoutableIPv6 } from './ip_ranges';
 
 describe('isNonRoutableIPv4', () => {
   it.each([
@@ -78,6 +78,18 @@ describe('isNonRoutableIPv6', () => {
     ['documentation 2001:db8::/32', '2001:db8::1'],
     ['benchmarking 2001:2::/48, third group compressed', '2001:2::1'],
     ['benchmarking 2001:2::/48, third group explicit', '2001:2:0:0:0:0:0:1'],
+    // Stored IOC values are not URL-normalised, so spelling variants must still match.
+    ['loopback written out in full', '0:0:0:0:0:0:0:1'],
+    ['loopback zero-padded', '0000:0000:0000:0000:0000:0000:0000:0001'],
+    ['unspecified written out in full', '0:0:0:0:0:0:0:0'],
+    ['bracketed loopback', '[::1]'],
+    ['uppercase link-local', 'FE80::1'],
+    ['link-local with zone id', 'fe80::1%eth0'],
+    ['IPv4-mapped metadata written out in full', '0:0:0:0:0:ffff:a9fe:a9fe'],
+    ['IPv4-mapped dotted metadata written out in full', '0:0:0:0:0:ffff:169.254.169.254'],
+    ['6to4 written out in full', '2002:0:0:0:0:0:0:0'],
+    // URL syntax in the value must not parse into a different host and flip the answer.
+    ['link-local with URL userinfo naming a public host', 'fe80::1]:80@[2606::1'],
   ])('treats %s as non-routable', (_label, ip) => {
     expect(isNonRoutableIPv6(ip)).toBe(true);
   });
@@ -103,5 +115,34 @@ describe('isNonRoutableIPv6', () => {
 
   it('maps a public IPv4 through the mapped form without flagging it', () => {
     expect(isNonRoutableIPv6('::ffff:93.184.216.34')).toBe(false);
+  });
+
+  it('leaves a public address routable when written out in full or bracketed', () => {
+    expect(isNonRoutableIPv6('2606:4700:4700:0:0:0:0:1111')).toBe(false);
+    expect(isNonRoutableIPv6('[2606:4700:4700::1111]')).toBe(false);
+  });
+});
+
+describe('isNonRoutableIpIoc', () => {
+  it('returns false for non-ip types', () => {
+    expect(isNonRoutableIpIoc({ type: 'domain', value: '127.0.0.1' })).toBe(false);
+    expect(isNonRoutableIpIoc({ type: 'hash', value: 'a'.repeat(64) })).toBe(false);
+  });
+
+  it('returns false for a missing, blank, or non-string value', () => {
+    expect(isNonRoutableIpIoc({ type: 'ip' })).toBe(false);
+    expect(isNonRoutableIpIoc({ type: 'ip', value: '   ' })).toBe(false);
+    expect(isNonRoutableIpIoc({ type: 'ip', value: 127 })).toBe(false);
+  });
+
+  it('judges a CIDR by its network address', () => {
+    expect(isNonRoutableIpIoc({ type: 'cidr', value: '10.20.0.0/16' })).toBe(true);
+    expect(isNonRoutableIpIoc({ type: 'cidr', value: '203.0.113.0/24' })).toBe(false);
+  });
+
+  it('classifies bare IPv4 and IPv6 values', () => {
+    expect(isNonRoutableIpIoc({ type: 'ip', value: '100.64.0.7' })).toBe(true);
+    expect(isNonRoutableIpIoc({ type: 'ip', value: '::1' })).toBe(true);
+    expect(isNonRoutableIpIoc({ type: 'ip', value: '203.0.113.10' })).toBe(false);
   });
 });

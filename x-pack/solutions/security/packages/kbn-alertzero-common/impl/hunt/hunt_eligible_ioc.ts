@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNonRoutableIPv4, isNonRoutableIPv6 } from '../ip_ranges';
+import { isNonRoutableIpIoc } from '../ip_ranges';
 
 /**
  * Which stored report IOCs a hunt may search.
@@ -29,31 +29,6 @@ export const HUNT_ELIGIBLE_IOC_TIERS = ['discriminating', 'contextual', 'uncerta
 
 export type HuntEligibleIocTier = (typeof HUNT_ELIGIBLE_IOC_TIERS)[number];
 
-const IPV4_DOTTED = /^(?:\d{1,3}\.){3}\d{1,3}$/;
-
-/**
- * True when an `ip` or `cidr` IOC value sits in non-routable space and must not
- * be hunted, regardless of stored tier.
- */
-export const isNonRoutableHuntIoc = (ioc: { type?: unknown; value?: unknown }): boolean => {
-  if (typeof ioc.value !== 'string' || (ioc.type !== 'ip' && ioc.type !== 'cidr')) {
-    return false;
-  }
-  const raw = ioc.value.trim();
-  if (raw.length === 0) {
-    return false;
-  }
-  const slash = raw.indexOf('/');
-  const host = ioc.type === 'cidr' && slash !== -1 ? raw.slice(0, slash) : raw;
-  if (IPV4_DOTTED.test(host)) {
-    return isNonRoutableIPv4(host);
-  }
-  if (host.includes(':')) {
-    return isNonRoutableIPv6(host);
-  }
-  return false;
-};
-
 export const isHuntEligibleIoc = (ioc: {
   type?: unknown;
   value?: unknown;
@@ -63,7 +38,7 @@ export const isHuntEligibleIoc = (ioc: {
   if (ioc.deferred_unreviewed === true) {
     return false;
   }
-  if (isNonRoutableHuntIoc(ioc)) {
+  if (isNonRoutableIpIoc(ioc)) {
     return false;
   }
   if (ioc.tier === undefined || ioc.tier === null || ioc.tier === '') {
