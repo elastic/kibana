@@ -171,7 +171,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
         }
         buttonProps={{
           css: {
-            '&:hover': {
+            '&:hover, &:focus, &:focus-visible': {
               textDecoration: 'none',
             },
           },
