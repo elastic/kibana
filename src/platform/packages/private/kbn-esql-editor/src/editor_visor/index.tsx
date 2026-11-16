@@ -220,6 +220,7 @@ function NlVisorActions({
 export interface QuickSearchVisorRestorableState {
   // Unset until the user picks a mode
   visorMode?: VisorMode;
+  nlValue?: string;
 }
 
 const { withRestorableState, useRestorableState } =
@@ -244,6 +245,8 @@ interface QuickSearchVisorPropsInternal {
   onKqlSubmitted?: () => void;
   // Insets the visor from an outlined editor so its controls do not sit on the border
   hasOutline?: boolean;
+  // Focuses the natural language input on mount; the host must disable the editor autofocus
+  autoFocus?: boolean;
 }
 
 // React.memo is applied inside the withRestorableState HOC (called below)
@@ -257,6 +260,7 @@ function QuickSearchVisorInternal({
   disableSubmitAction = false,
   onKqlSubmitted,
   hasOutline = false,
+  autoFocus = false,
 }: QuickSearchVisorPropsInternal) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, data, core } = kibana.services;
@@ -275,15 +279,16 @@ function QuickSearchVisorInternal({
     [core.analytics]
   );
 
+  const [nlValue = '', setNlValue] = useRestorableState('nlValue', '');
   const {
-    nlValue,
-    setNlValue,
     isNlLoading,
     hasConnector,
     onNlSubmit: submitNl,
     onStopGeneration,
   } = useNlGeneration({
     query,
+    nlValue,
+    setNlValue,
     onNlResult,
     onNlReject: focusNlInput,
     onUpdateAndSubmitQuery,
@@ -447,6 +452,7 @@ function QuickSearchVisorInternal({
           onChange={setNlValue}
           onSubmit={onNlSubmit}
           inputStyles={styles.nlInput}
+          autoFocus={autoFocus}
         />
       </div>
       <NlVisorActions

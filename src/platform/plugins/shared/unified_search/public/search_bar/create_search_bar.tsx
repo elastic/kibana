@@ -300,6 +300,7 @@ export function createSearchBar({
             nonKqlMode={props.nonKqlMode}
             customSubmitButton={props.customSubmitButton}
             dataViewPickerOverride={props.dataViewPickerOverride}
+            askAi={props.askAi}
             isClearable={props.isClearable}
             placeholder={props.placeholder}
             additionalQueryBarMenuItems={props.additionalQueryBarMenuItems}
@@ -317,6 +318,7 @@ export function createSearchBar({
             onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
             visorInitialState={props.visorInitialState}
             onVisorInitialStateChange={props.onVisorInitialStateChange}
+            autoFocusVisor={props.autoFocusVisor}
             hasDirtyState={props.hasDirtyState}
             esqlVariablesConfig={props.esqlVariablesConfig}
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}

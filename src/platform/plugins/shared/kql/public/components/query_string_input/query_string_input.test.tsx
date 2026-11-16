@@ -209,6 +209,19 @@ describe('QueryStringInput', () => {
     });
   });
 
+  it('Should render the append node inside the input', async () => {
+    render(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onSubmit: noop,
+        indexPatterns: [stubIndexPattern],
+        append: <button data-test-subj="appendedButton">Ask AI</button>,
+      })
+    );
+
+    expect(await screen.findByTestId('appendedButton')).toBeInTheDocument();
+  });
+
   it('Should call onSubmit when the user hits enter inside the query bar', async () => {
     const mockCallback = jest.fn();
 

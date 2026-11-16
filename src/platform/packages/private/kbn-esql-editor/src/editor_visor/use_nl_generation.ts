@@ -16,33 +16,17 @@ import { nlErrorMessage } from './visor_i18n';
 import type { ESQLEditorDeps, VisorNlResultHandler } from '../types';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
-const INFERENCE_CONNECTORS_ROUTE = '/internal/inference/connectors';
-
 let hasInferenceConnector: boolean | undefined;
-let inferenceConnectorRequest: Promise<boolean> | undefined;
 
-const loadHasInferenceConnector = (http: ESQLEditorDeps['core']['http']): Promise<boolean> => {
-  inferenceConnectorRequest ??= http
-    .get<{ connectors: unknown[] }>(INFERENCE_CONNECTORS_ROUTE)
-    .then((res) => {
-      hasInferenceConnector = res.connectors.length > 0;
-      return hasInferenceConnector;
-    })
-    .catch(() => {
-      hasInferenceConnector = false;
-      return false;
-    });
-  return inferenceConnectorRequest;
-};
-
-/** Drops the cached connector lookup so tests can change the result. */
+/** Drops the last known connector result so tests can change it. */
 export const clearInferenceConnectorCache = (): void => {
   hasInferenceConnector = undefined;
-  inferenceConnectorRequest = undefined;
 };
 
 interface UseNlGenerationParams {
   query: string;
+  nlValue: string;
+  setNlValue: (value: string) => void;
   onNlResult?: VisorNlResultHandler;
   onNlReject?: () => void;
   onUpdateAndSubmitQuery: (query: string) => void;
@@ -51,23 +35,25 @@ interface UseNlGenerationParams {
 
 export const useNlGeneration = ({
   query,
+  nlValue,
+  setNlValue,
   onNlResult,
   onNlReject,
   onUpdateAndSubmitQuery,
   telemetryService,
 }: UseNlGenerationParams) => {
-  const { core } = useKibana<ESQLEditorDeps>().services;
+  const { core, esql } = useKibana<ESQLEditorDeps>().services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
 
-  const [nlValue, setNlValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(hasInferenceConnector);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    if (!isNlToEsqlEnabled) return;
+    if (!isNlToEsqlEnabled || !esql) return;
     let cancelled = false;
-    loadHasInferenceConnector(core.http).then((available) => {
+    esql.hasInferenceConnector().then((available) => {
+      hasInferenceConnector = available;
       if (!cancelled) {
         setHasConnector(available);
       }
@@ -75,7 +61,7 @@ export const useNlGeneration = ({
     return () => {
       cancelled = true;
     };
-  }, [isNlToEsqlEnabled, core.http]);
+  }, [isNlToEsqlEnabled, esql]);
 
   const trackNlResult = useCallback(
     (
@@ -102,7 +88,7 @@ export const useNlGeneration = ({
     abortControllerRef.current = null;
     setIsNlLoading(false);
     setNlValue('');
-  }, []);
+  }, [setNlValue]);
 
   const onNlSubmit = useCallback(async () => {
     const trimmed = nlValue.trim();
@@ -155,6 +141,7 @@ export const useNlGeneration = ({
     }
   }, [
     nlValue,
+    setNlValue,
     isNlLoading,
     query,
     core.http,
@@ -165,5 +152,5 @@ export const useNlGeneration = ({
     trackNlResult,
   ]);
 
-  return { nlValue, setNlValue, isNlLoading, hasConnector, onNlSubmit, onStopGeneration };
+  return { isNlLoading, hasConnector, onNlSubmit, onStopGeneration };
 };

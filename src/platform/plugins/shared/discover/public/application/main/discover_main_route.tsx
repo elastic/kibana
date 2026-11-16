@@ -48,6 +48,7 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
 import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
+import { getTabsEnabled } from './utils/get_tabs_enabled';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -110,9 +111,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
-  const tabsEnabled =
-    !services.embeddableEditor.isByValueEditor() &&
-    customizationContext.displayMode === 'standalone';
+  const tabsEnabled = getTabsEnabled(services, customizationContext);
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [profileInitializationState, initializeProfile] = useAsyncFunction(

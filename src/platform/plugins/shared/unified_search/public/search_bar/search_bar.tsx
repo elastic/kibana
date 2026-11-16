@@ -78,6 +78,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   dataViewPickerOverride?: React.ReactNode;
+  askAi?: QueryBarTopRowProps['askAi'];
   screenTitle?: string;
   dataTestSubj?: string;
   // Togglers
@@ -201,6 +202,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
   visorInitialState?: QueryBarTopRowProps['visorInitialState'];
   onVisorInitialStateChange?: QueryBarTopRowProps['onVisorInitialStateChange'];
+  autoFocusVisor?: QueryBarTopRowProps['autoFocusVisor'];
 
   hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
@@ -852,6 +854,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
           dataViewPickerOverride={this.props.dataViewPickerOverride}
+          askAi={this.props.askAi}
           showSubmitButton={this.props.showSubmitButton}
           submitButtonStyle={this.props.submitButtonStyle}
           dataTestSubj={this.props.dataTestSubj}
@@ -884,6 +887,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onEsqlEditorInitialStateChange={this.props.onEsqlEditorInitialStateChange}
           visorInitialState={this.props.visorInitialState}
           onVisorInitialStateChange={this.props.onVisorInitialStateChange}
+          autoFocusVisor={this.props.autoFocusVisor}
           esqlVariablesConfig={this.props.esqlVariablesConfig}
           esqlQueryStats={this.props.esqlQueryStats}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}

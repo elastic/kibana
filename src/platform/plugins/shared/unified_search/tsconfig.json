@@ -52,6 +52,7 @@
     "@kbn/esql-utils",
     "@kbn/licensing-plugin",
     "@kbn/field-formats-common",
+    "@kbn/ui-ai-components",
   ],
   "exclude": ["target/**/*"]
 }

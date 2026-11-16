@@ -46,6 +46,8 @@ describe('Quick search visor', () => {
     kql: kqlMock,
     esql: {
       getLicense: jest.fn().mockResolvedValue(null),
+      hasEnterpriseLicense: jest.fn().mockResolvedValue(false),
+      hasInferenceConnector: jest.fn().mockResolvedValue(false),
     },
   };
 
@@ -68,9 +70,6 @@ describe('Quick search visor', () => {
           { name: 'test_index', hidden: false, type: 'index' },
           { name: 'logs', hidden: false, type: 'index' },
         ]);
-      }
-      if (url.includes('/internal/inference/connectors')) {
-        return Promise.resolve({ connectors: [{ connectorId: 'test-connector' }] });
       }
       return Promise.resolve([]);
     });
@@ -325,6 +324,8 @@ describe('Quick search visor', () => {
           hasAtLeast: jest.fn().mockReturnValue(true),
           getFeature: jest.fn().mockReturnValue({ isAvailable: false }),
         }),
+        hasEnterpriseLicense: jest.fn().mockResolvedValue(true),
+        hasInferenceConnector: jest.fn().mockResolvedValue(true),
       },
     };
 
@@ -346,6 +347,25 @@ describe('Quick search visor', () => {
       expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'false');
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
       expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-label', 'Filter your data');
+    });
+
+    it('should focus the natural language input on mount when autoFocus is set', async () => {
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props, autoFocus: true }));
+      await waitFor(() => expect(getByTestId('esqlVisorNLQueryInput')).toHaveFocus());
+    });
+
+    it('should restore the natural language prompt with the caret at the end', async () => {
+      const { getByTestId } = renderWithI18n(
+        renderWithEnterprise({
+          ...props,
+          autoFocus: true,
+          initialState: { nlValue: 'show me logs' },
+        })
+      );
+      await waitFor(() => expect(getByTestId('esqlVisorNLQueryInput')).toHaveFocus());
+      const nlInput = getByTestId('esqlVisorNLQueryInput') as HTMLTextAreaElement;
+      expect(nlInput).toHaveValue('show me logs');
+      expect(nlInput.selectionStart).toBe('show me logs'.length);
     });
 
     it('should switch to filter mode and back to natural language', async () => {

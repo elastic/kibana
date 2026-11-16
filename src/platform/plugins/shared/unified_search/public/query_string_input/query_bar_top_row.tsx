@@ -85,6 +85,8 @@ import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
 import { EsqlApproximationToggle } from './esql_approximation_toggle';
+import type { AskAiConfig } from './ask_ai_input';
+import { AskAiButton, AskAiInput } from './ask_ai_input';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
 import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
@@ -212,6 +214,10 @@ export type LegacyDatePickerProps = Pick<
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
   customSubmitButton?: any;
   dataViewPickerOverride?: ReactNode;
+  /**
+   * Shows an "Ask AI" button in the classic (KQL/Lucene) query input that switches it to a natural language input.
+   */
+  askAi?: AskAiConfig;
   dataTestSubj?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -289,6 +295,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    */
   visorInitialState?: QuickSearchVisorProps['initialState'];
   onVisorInitialStateChange?: QuickSearchVisorProps['onInitialStateChange'];
+  /**
+   * Focuses the ES|QL quick search visor's natural language input on mount instead of the editor.
+   */
+  autoFocusVisor?: boolean;
 
   /**
    * Optional configuration for ES|QL variables.
@@ -472,6 +482,27 @@ export const QueryBarTopRow = React.memo(
 
     const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
     const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
+    const [isAskAiMode, setIsAskAiMode] = useState(false);
+    const askAiButtonRef = useRef<HTMLButtonElement>(null);
+    const wasAskAiModeRef = useRef(false);
+    const { askAi } = props;
+
+    const onAskAiSubmit = useCallback(
+      (prompt: string) => {
+        askAi?.onSubmit(prompt);
+        setIsAskAiMode(false);
+      },
+      [askAi]
+    );
+
+    // Leaving Ask AI mode removes the focused input, so hand focus back to the button that opened it
+    useEffect(() => {
+      if (wasAskAiModeRef.current && !isAskAiMode) {
+        askAiButtonRef.current?.focus();
+      }
+      wasAskAiModeRef.current = isAskAiMode;
+    }, [isAskAiMode]);
+
     const [dateRangePickerSettings, setDateRangePickerSettings] = useState<DateRangePickerSettings>(
       {
         roundRelativeTime: false,
@@ -561,6 +592,15 @@ export const QueryBarTopRow = React.memo(
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
     const shouldRenderESQLUi = Boolean(showQueryInput && isQueryLangSelected);
+
+    // Ask AI mode can't outlive the classic query input it replaces
+    const canAskAi = Boolean(askAi) && !shouldRenderESQLUi;
+    useEffect(() => {
+      if (!canAskAi) {
+        setIsAskAiMode(false);
+      }
+    }, [canAskAi]);
+
     const isSubmitDisabled = Boolean(
       isDateRangeInvalid || props.isDisabled || props.disableSubmitAction
     );
@@ -1455,42 +1495,55 @@ export const QueryBarTopRow = React.memo(
       const filterButtonGroup = !renderFilterMenuOnly() && renderFilterButtonGroup();
       const queryInput = shouldRenderQueryInput() && (
         <EuiFlexItem data-test-subj="unifiedQueryInput">
-          <QueryStringInput
-            disableAutoFocus={props.disableAutoFocus}
-            indexPatterns={props.indexPatterns!}
-            query={props.query! as Query}
-            screenTitle={props.screenTitle}
-            onChange={onQueryChange}
-            onChangeQueryInputFocus={onChangeQueryInputFocus}
-            onSubmit={onInputSubmit}
-            persistedLog={persistedLog}
-            dataTestSubj={props.dataTestSubj}
-            placeholder={props.placeholder}
-            isClearable={props.isClearable}
-            iconType={props.iconType}
-            nonKqlMode={props.nonKqlMode}
-            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-            filtersForSuggestions={props.filtersForSuggestions}
-            disableLanguageSwitcher={true}
-            prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
-            size={props.suggestionsSize}
-            suggestionsAbstraction={props.suggestionsAbstraction}
-            isDisabled={props.isDisabled}
-            appName={appName}
-            submitOnBlur={props.submitOnBlur}
-            bubbleSubmitEvent={props.bubbleSubmitEvent}
-            deps={{
-              autocomplete: kql.autocomplete,
-              data,
-              storage,
-              usageCollection,
-              notifications,
-              docLinks,
-              http,
-              uiSettings,
-              dataViews,
-            }}
-          />
+          {askAi && isAskAiMode ? (
+            <AskAiInput
+              suggestedPrompts={askAi.suggestedPrompts}
+              onSubmit={onAskAiSubmit}
+              onClose={() => setIsAskAiMode(false)}
+            />
+          ) : (
+            <QueryStringInput
+              disableAutoFocus={props.disableAutoFocus}
+              indexPatterns={props.indexPatterns!}
+              query={props.query! as Query}
+              screenTitle={props.screenTitle}
+              onChange={onQueryChange}
+              onChangeQueryInputFocus={onChangeQueryInputFocus}
+              onSubmit={onInputSubmit}
+              persistedLog={persistedLog}
+              dataTestSubj={props.dataTestSubj}
+              placeholder={props.placeholder}
+              isClearable={props.isClearable}
+              iconType={props.iconType}
+              nonKqlMode={props.nonKqlMode}
+              timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+              filtersForSuggestions={props.filtersForSuggestions}
+              disableLanguageSwitcher={true}
+              prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
+              append={
+                askAi && !props.isDisabled ? (
+                  <AskAiButton buttonRef={askAiButtonRef} onClick={() => setIsAskAiMode(true)} />
+                ) : undefined
+              }
+              size={props.suggestionsSize}
+              suggestionsAbstraction={props.suggestionsAbstraction}
+              isDisabled={props.isDisabled}
+              appName={appName}
+              submitOnBlur={props.submitOnBlur}
+              bubbleSubmitEvent={props.bubbleSubmitEvent}
+              deps={{
+                autocomplete: kql.autocomplete,
+                data,
+                storage,
+                usageCollection,
+                notifications,
+                docLinks,
+                http,
+                uiSettings,
+                dataViews,
+              }}
+            />
+          )}
         </EuiFlexItem>
       );
       if (isQueryLangSelected || (!filterButtonGroup && !queryInput)) {
@@ -1550,6 +1603,7 @@ export const QueryBarTopRow = React.memo(
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             onVisorNlResultReady={onVisorNlResultReady}
             hasExternalVisor
+            disableAutoFocus={props.autoFocusVisor}
           />
         )
       );
@@ -1602,6 +1656,7 @@ export const QueryBarTopRow = React.memo(
                     onKqlSubmitted={focusEsqlEditor}
                     initialState={props.visorInitialState}
                     onInitialStateChange={props.onVisorInitialStateChange}
+                    autoFocus={props.autoFocusVisor}
                   />
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}

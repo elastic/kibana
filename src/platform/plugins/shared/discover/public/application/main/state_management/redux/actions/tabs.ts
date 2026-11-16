@@ -11,7 +11,9 @@ import { cloneDeep, differenceBy, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { DataViewSpec, QueryState } from '@kbn/data-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import { isEmptyEsqlQuery, isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public';
@@ -596,10 +598,23 @@ export const openInNewTab: InternalStateThunkActionCreator<
       searchSessionId?: string;
       dataViewSpec?: DataViewSpec;
       profileState?: ProfileStateMap;
+      skipInitialFetch?: boolean;
+      autoFocusVisor?: boolean;
+      uiState?: TabState['uiState'];
     }
   ],
   Promise<void>
-> = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec, profileState }) =>
+> = ({
+  tabLabel,
+  appState,
+  globalState,
+  searchSessionId,
+  dataViewSpec,
+  profileState,
+  skipInitialFetch,
+  autoFocusVisor,
+  uiState,
+}) =>
   function openInNewTabThunkFn(dispatch, getState) {
     const initialAppState = appState ? cloneDeep(appState) : {};
     const initialGlobalState = globalState ? cloneDeep(globalState) : {};
@@ -612,6 +627,9 @@ export const openInNewTab: InternalStateThunkActionCreator<
       appState: initialAppState,
       globalState: initialGlobalState,
       profileState: cloneDeep(profileState) ?? {},
+      skipInitialFetch,
+      autoFocusVisor,
+      uiState: { ...DEFAULT_TAB_STATE.uiState, ...uiState },
     };
 
     if (tabLabel) {
@@ -634,6 +652,33 @@ export const openInNewTab: InternalStateThunkActionCreator<
 
     return dispatch(
       updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
+    );
+  };
+
+/**
+ * Opens a new ES|QL tab with the given tab's query and filters, without running it, and the prompt pre-filled to ask in natural language
+ */
+export const openAskInEsqlTab: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataView: DataView; prompt: string }>],
+  Promise<void>
+> = ({ tabId, dataView, prompt }) =>
+  function openAskInEsqlTabThunkFn(dispatch, getState, { services }) {
+    const { appState, globalState } = selectTab(getState(), tabId);
+    const query = appState.query && isOfQueryType(appState.query) ? appState.query : undefined;
+    const filters = [...(appState.filters ?? []), ...(globalState.filters ?? [])];
+    const refreshInterval = globalState.refreshInterval ?? services.timefilter.getRefreshInterval();
+
+    return dispatch(
+      openInNewTab({
+        appState: { query: { esql: getInitialESQLQuery(dataView, query, filters) } },
+        globalState: {
+          timeRange: globalState.timeRange ?? services.timefilter.getTime(),
+          refreshInterval: { ...refreshInterval, pause: true },
+        },
+        skipInitialFetch: true,
+        autoFocusVisor: true,
+        uiState: { visor: { nlValue: prompt } },
+      })
     );
   };
 

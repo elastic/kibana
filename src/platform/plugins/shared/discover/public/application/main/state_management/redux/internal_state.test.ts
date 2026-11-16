@@ -174,6 +174,48 @@ describe('InternalStateStore', () => {
     });
   });
 
+  it('should open a new ES|QL tab to ask in natural language without changing the current tab', async () => {
+    const { store } = await setup();
+    const initialTabId = store.getState().tabs.unsafeCurrentId;
+    const query = { query: 'response:404', language: 'kuery' };
+    const filters = [
+      {
+        meta: { key: 'extension', params: { query: 'jpg' }, type: 'phrase' },
+        query: { match_phrase: { extension: 'jpg' } },
+      },
+    ];
+    const timeRange = { from: '2024-01-01T00:00:00.000Z', to: '2024-01-02T00:00:00.000Z' };
+    store.dispatch(
+      internalStateActions.updateAppState({ tabId: initialTabId, appState: { query, filters } })
+    );
+    store.dispatch(
+      internalStateActions.updateGlobalState({ tabId: initialTabId, globalState: { timeRange } })
+    );
+    const initialTab = selectTab(store.getState(), initialTabId);
+
+    await store.dispatch(
+      internalStateActions.openAskInEsqlTab({
+        tabId: initialTabId,
+        dataView: dataViewMock,
+        prompt: 'show me logs',
+      })
+    );
+
+    const { allIds, byId, unsafeCurrentId } = store.getState().tabs;
+    expect(allIds).toHaveLength(2);
+    expect(unsafeCurrentId).toBe(allIds[1]);
+    const newTab = byId[unsafeCurrentId];
+    expect(newTab.appState.query).toEqual({
+      esql: expect.stringMatching(/WHERE KQL\("""response:404"""\) AND `extension` : "jpg"/),
+    });
+    expect(newTab.globalState.timeRange).toEqual(timeRange);
+    expect(newTab.globalState.refreshInterval?.pause).toBe(true);
+    expect(newTab.skipInitialFetch).toBe(true);
+    expect(newTab.autoFocusVisor).toBe(true);
+    expect(newTab.uiState.visor).toEqual({ nlValue: 'show me logs' });
+    expect(selectTab(store.getState(), initialTabId).appState).toEqual(initialTab.appState);
+  });
+
   it('should copy tab UI state when duplicating a tab', async () => {
     const { store, runtimeStateManager } = await setup();
     const sourceTabId = store.getState().tabs.unsafeCurrentId;
