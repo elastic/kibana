@@ -21,7 +21,7 @@ import {
   useAutomationRunActivity,
   type Automation,
 } from '../../../../data/automations/use_automations';
-import { useRunQuotas } from '../../../../data/run_quotas/use_significant_events_run_quotas';
+import { useInvestigationQuotas } from '../../../../data/run_quotas/use_investigation_quotas';
 import {
   RUN_AUTOMATION_LABEL,
   getRunAutomationDisabledReason,
@@ -44,7 +44,7 @@ export const AutomationActions = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const activity = useAutomationRunActivity(automation, { enabled: isOpen });
-  const quotas = useRunQuotas({ enabled: isOpen, poll: isOpen });
+  const quotas = useInvestigationQuotas({ enabled: isOpen, poll: isOpen });
   const runDisabledReason =
     getRunAutomationDisabledReason(automation, activity) ?? getManualRunQuotaDisabledReason(quotas);
   const allActionsLabel = useEuiI18n('euiCollapsedItemActions.allActionsTooltip', 'All actions');
