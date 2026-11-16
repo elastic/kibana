@@ -125124,7 +125124,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-                description: Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                description: Color configuration for ES|QL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
               column:
                 description: Column to use
                 type: string
@@ -125207,7 +125207,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         column:
           description: Column to use
           type: string
@@ -125268,7 +125268,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -125346,7 +125346,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -125427,7 +125427,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
@@ -125504,7 +125504,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -125581,7 +125581,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -125661,7 +125661,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -125747,7 +125747,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -125828,7 +125828,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -125910,7 +125910,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -125992,7 +125992,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -126074,7 +126074,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -126156,7 +126156,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -126433,6 +126433,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
         drop_partial_intervals:
           description: When `true`, drops partial intervals from the results.
           type: boolean
@@ -126496,6 +126497,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
         filters:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_filterWithLabel'
@@ -126546,6 +126548,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the histogram.
           type: string
@@ -126609,6 +126612,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the range.
           type: string
@@ -126676,6 +126680,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
         excludes:
           additionalProperties: false
           type: object
@@ -128899,7 +128904,7 @@ components:
               type: object
               properties:
                 mode:
-                  description: Tick placement mode.
+                  description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                   enum:
                     - auto
                     - bands
@@ -129008,7 +129013,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -129094,7 +129099,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -129187,7 +129192,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -129282,7 +129287,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -129373,7 +129378,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -129464,7 +129469,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -129555,7 +129560,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -129646,7 +129651,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -135610,7 +135615,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -135693,7 +135698,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -135775,7 +135780,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -136016,7 +136021,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -136100,7 +136105,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -136184,7 +136189,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -136268,7 +136273,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -136352,7 +136357,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -139861,7 +139866,7 @@ components:
               type: object
               properties:
                 placement:
-                  description: Label placement relative to the secondary metric value (before or after).
+                  description: Label placement relative to the secondary metric value (before or after). Defaults to `before`. Ignored when the label is not visible.
                   enum:
                     - before
                     - after
@@ -146365,6 +146370,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -146672,6 +146678,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -146708,6 +146715,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -146747,6 +146755,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
@@ -146782,6 +146791,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -146817,6 +146827,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -146855,6 +146866,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -146899,6 +146911,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -146938,6 +146951,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -146978,6 +146992,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -147018,6 +147033,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -147058,6 +147074,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -147098,6 +147115,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -152563,6 +152581,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -152870,6 +152889,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -152906,6 +152926,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -152945,6 +152966,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
@@ -152980,6 +153002,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -153015,6 +153038,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -153053,6 +153077,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -153097,6 +153122,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -153136,6 +153162,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -153176,6 +153203,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -153216,6 +153244,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -153256,6 +153285,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -153296,6 +153326,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -155139,6 +155170,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -155452,6 +155484,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -155488,6 +155521,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -155527,6 +155561,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
@@ -155562,6 +155597,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -155597,6 +155633,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -155635,6 +155672,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -155679,6 +155717,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -155718,6 +155757,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -155758,6 +155798,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -155798,6 +155839,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -155838,6 +155880,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -155878,6 +155921,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -158197,6 +158241,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+                description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
               column:
                 description: Column to use
                 type: string
@@ -159812,6 +159857,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         field:
           description: Field to be used for the metric
           type: string
@@ -159854,6 +159900,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -159899,6 +159946,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         field:
           description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
@@ -159940,6 +159988,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -159981,6 +160030,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -160025,6 +160075,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         field:
           description: Field to be used for the metric
           type: string
@@ -160075,6 +160126,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -160120,6 +160172,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         field:
           description: Field to be used for the metric
           type: string
@@ -160166,6 +160219,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         field:
           description: Field to be used for the metric
           type: string
@@ -160212,6 +160266,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         field:
           description: Field to be used for the metric
           type: string
@@ -160258,6 +160313,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -160304,6 +160360,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.

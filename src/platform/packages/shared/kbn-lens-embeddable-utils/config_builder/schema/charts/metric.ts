@@ -18,7 +18,6 @@ import {
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
   DEFAULT_DENSITY,
   DEFAULT_SECONDARY_LABEL_VISIBLE,
-  DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
   DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
 } from '../../transforms/charts/metric/defaults';
@@ -350,9 +349,8 @@ const metricStylingSchema = schema.object(
               placementSchema({
                 meta: {
                   description:
-                    'Label placement relative to the secondary metric value (before or after).',
+                    'Label placement relative to the secondary metric value (before or after). Defaults to `before`. Ignored when the label is not visible.',
                 },
-                defaultValue: DEFAULT_SECONDARY_LABEL_PLACEMENT,
               })
             ),
           })
