@@ -389,6 +389,76 @@ describe('observables client', () => {
       });
     });
 
+    describe('metadata', () => {
+      const metadata = { verdict: 'malicious' };
+      const storedWithMetadata = () => {
+        const so = observableSO('10.0.0.1');
+        return {
+          ...so,
+          attributes: { ...so.attributes, data: { ...so.attributes.data, metadata } },
+        };
+      };
+      const createdData = () =>
+        (mockSOClient.bulkCreate.mock.calls[0][0][0].attributes as { data: { metadata?: object } })
+          .data;
+      const updatedData = () => (mockSOClient.update.mock.calls[0][2] as { data: object }).data;
+
+      beforeEach(() => {
+        mockSOClient.bulkGet.mockResolvedValue({ saved_objects: [storedWithMetadata()] });
+      });
+
+      it('does not send metadata in place when the request leaves it out, so it is kept', async () => {
+        await updateObservable(
+          caseSO.id,
+          observableSO('10.0.0.1').id,
+          { observable: { value: '10.0.0.1', description: 'new description' } },
+          mockClientArgs,
+          mockCasesClient
+        );
+
+        expect(updatedData()).not.toHaveProperty('metadata');
+      });
+
+      it.each([
+        ['replaces', { verdict: 'benign' }],
+        ['clears', null],
+      ])('%s the metadata in place', async (_, next) => {
+        await updateObservable(
+          caseSO.id,
+          observableSO('10.0.0.1').id,
+          { observable: { value: '10.0.0.1', description: null, metadata: next } },
+          mockClientArgs,
+          mockCasesClient
+        );
+
+        expect(updatedData()).toEqual(expect.objectContaining({ metadata: next }));
+      });
+
+      it('carries the metadata to the new observable when the value changes', async () => {
+        await updateObservable(
+          caseSO.id,
+          observableSO('10.0.0.1').id,
+          { observable: { value: '10.0.0.2', description: null } },
+          mockClientArgs,
+          mockCasesClient
+        );
+
+        expect(createdData().metadata).toEqual(metadata);
+      });
+
+      it('applies the requested metadata to the new observable when the value changes', async () => {
+        await updateObservable(
+          caseSO.id,
+          observableSO('10.0.0.1').id,
+          { observable: { value: '10.0.0.2', description: null, metadata: null } },
+          mockClientArgs,
+          mockCasesClient
+        );
+
+        expect(createdData()).not.toHaveProperty('metadata');
+      });
+    });
+
     it('keeps the original when the new value is already on the case', async () => {
       existingIds = new Set([observableSO('10.0.0.2').id]);
 

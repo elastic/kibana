@@ -8,16 +8,14 @@
 import type { KbnContext } from '../cases_generator/types';
 import type { LatencyStats } from './stats';
 
-export type Requester = <T>(
-  method: 'GET' | 'POST' | 'DELETE',
-  path: string,
-  body?: unknown
-) => Promise<T>;
+type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE';
+
+export type Requester = <T>(method: Method, path: string, body?: unknown) => Promise<T>;
 
 /** Sends Kibana requests as an internal origin, so internal routes accept them. */
 export const createRequester =
   ({ kbnClient, headers }: KbnContext): Requester =>
-  async <T>(method: 'GET' | 'POST' | 'DELETE', path: string, body?: unknown): Promise<T> => {
+  async <T>(method: Method, path: string, body?: unknown): Promise<T> => {
     const { data } = await kbnClient.request<T>({
       method,
       path,
@@ -32,6 +30,7 @@ export const createRequester =
 export const createProbeRule = (request: Requester, tag: string): Promise<{ id: string }> =>
   request<{ id: string }>('POST', '/api/alerting/rule', {
     name: `${tag} probe`,
+    tags: [tag],
     rule_type_id: '.index-threshold',
     consumer: 'stackAlerts',
     enabled: false,

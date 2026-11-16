@@ -7,6 +7,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import { OBSERVABLE_ATTACHMENT_TYPE } from '../../../../constants/attachments';
+import { ObservableMetadataSchema } from '../../observable/v1';
 import {
   MAX_OBSERVABLE_DESCRIPTION_LENGTH,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
@@ -20,6 +21,7 @@ export const ObservableAttachmentDataSchema = lazySchema(() =>
       typeKey: z.string().min(1).max(MAX_OBSERVABLE_TYPE_KEY_LENGTH),
       value: z.string().min(1).max(MAX_OBSERVABLE_VALUE_LENGTH),
       description: z.string().max(MAX_OBSERVABLE_DESCRIPTION_LENGTH).nullable(),
+      metadata: ObservableMetadataSchema.nullable().optional(),
     })
     .strict()
 );
