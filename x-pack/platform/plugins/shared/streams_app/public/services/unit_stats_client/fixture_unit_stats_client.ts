@@ -23,14 +23,56 @@ const META: StreamsUnit.StatsMeta = {
   window: { start: '2026-10-27T12:00:00.000Z', end: '2026-10-27T12:15:00.000Z' },
 };
 
+interface FailureClassFixture {
+  rate: number | null;
+  percentage: number | null;
+  breakdown?: Array<{
+    collection: string | null;
+    reason: string | null;
+    rate: number | null;
+    percentage: number | null;
+  }>;
+}
+
+const NO_FAILURE_CLASS: FailureClassFixture = { rate: null, percentage: null };
+
+/** A failure class as the API sends it. `unit` is what the destination type counts. */
+const failureClass = (
+  { rate, percentage, breakdown }: FailureClassFixture,
+  unit: string
+): StreamsUnit.StatsDestinationResult['events']['failed']['authentication'] => ({
+  rate: { value: rate, unit, time_unit: 's' },
+  percentage: percent(percentage),
+  ...(breakdown
+    ? {
+        breakdown: breakdown.map((cause) => ({
+          collection: cause.collection,
+          reason: cause.reason,
+          rate: { value: cause.rate, unit, time_unit: 's' },
+          percentage: percent(cause.percentage),
+        })),
+      }
+    : {}),
+});
+
 const destinationResult = ({
   eventsRate = null,
   eventsTotal = null,
   failedRate = null,
+  failedPercentage = null,
+  failedUnit = '{item}',
+  authentication = NO_FAILURE_CLASS,
+  authorization = NO_FAILURE_CLASS,
   latencyAverage = null,
   series = { bucketMs: 300000, points: [] },
   error,
-}: Partial<DestinationStatsView> & {
+}: Partial<Omit<DestinationStatsView, 'failed'>> & {
+  failedRate?: number | null;
+  failedPercentage?: number | null;
+  /** `{item}`, or `{request}` for a destination type that reports upload attempts, such as S3. */
+  failedUnit?: string;
+  authentication?: FailureClassFixture;
+  authorization?: FailureClassFixture;
   error?: StreamsUnit.StatsError;
 } = {}): StreamsUnit.StatsDestinationResult => ({
   ...(error ? { error } : {}),
@@ -41,12 +83,11 @@ const destinationResult = ({
       rate: perSecond(eventsRate),
       series: { bucket_ms: series.bucketMs, points: series.points },
     },
-    // The client does not read the failure classes yet, so they have no data here.
     failed: {
-      rate: perSecond(failedRate),
-      percentage: percent(null),
-      authentication: { rate: perSecond(null), percentage: percent(null) },
-      authorization: { rate: perSecond(null), percentage: percent(null) },
+      rate: { value: failedRate, unit: failedUnit, time_unit: 's' },
+      percentage: percent(failedPercentage),
+      authentication: failureClass(authentication, failedUnit),
+      authorization: failureClass(authorization, failedUnit),
     },
   },
 });
@@ -133,7 +174,10 @@ export type StatsFixtureScenario =
   | 'partial'
   | 'kindError'
   | 'unsupportedDestination'
-  | 'notFound';
+  | 'notFound'
+  | 'authFailures'
+  | 's3Failures'
+  | 'partialFailure';
 
 export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.StatsResponse> = {
   data: {
@@ -212,6 +256,82 @@ export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.S
           error: { code: 'not_found', reason: 'source otlp-staged is not in the unit' },
         }),
       },
+    },
+    meta: META,
+  },
+  // `es-dev` is refused, in items. A request-level 401 has no cause in the breakdown. A per-document
+  // 403 names the data stream and the error type. The percentages are shares of 4.2 items a second.
+  authFailures: {
+    components: {
+      destinations: {
+        'es-prod': DESTINATIONS_WITH_DATA['es-prod'],
+        'es-dev': destinationResult({
+          eventsRate: 4.2,
+          eventsTotal: 3780,
+          failedRate: 2.4,
+          failedPercentage: 57.1,
+          latencyAverage: 0.17,
+          authentication: { rate: 0.5, percentage: 11.9 },
+          authorization: {
+            rate: 1.9,
+            percentage: 45.2,
+            breakdown: [
+              {
+                collection: 'logs-generic.otel-default',
+                reason: 'security_exception',
+                rate: 1.9,
+                percentage: 45.2,
+              },
+            ],
+          },
+        }),
+      },
+      processors: {},
+      sources: {},
+    },
+    meta: META,
+  },
+  // An S3 destination counts upload attempts, so its failures are in requests while its incoming
+  // items stay in items. It has no collection, and its reason is the S3 error code.
+  s3Failures: {
+    components: {
+      destinations: {
+        's3-test': destinationResult({
+          eventsRate: 0.28,
+          eventsTotal: 100,
+          failedRate: 0.44,
+          failedPercentage: 100,
+          failedUnit: '{request}',
+          latencyAverage: 0.06,
+          authentication: {
+            rate: 0.44,
+            percentage: 100,
+            breakdown: [
+              { collection: null, reason: 'SignatureDoesNotMatch', rate: 0.44, percentage: 100 },
+            ],
+          },
+          authorization: { rate: 0, percentage: 0 },
+        }),
+      },
+      processors: {},
+      sources: {},
+    },
+    meta: META,
+  },
+  // A destination whose failure query failed has real values next to an error, and no failure rates.
+  partialFailure: {
+    components: {
+      destinations: {
+        'es-dev': destinationResult({
+          eventsRate: 4.2,
+          eventsTotal: 3780,
+          failedRate: 2.4,
+          latencyAverage: 0.17,
+          error: { code: 'error', reason: 'The stats query failed.' },
+        }),
+      },
+      processors: {},
+      sources: {},
     },
     meta: META,
   },

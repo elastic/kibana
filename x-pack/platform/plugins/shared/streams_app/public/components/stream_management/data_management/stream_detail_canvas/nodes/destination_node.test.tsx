@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider, type NodeProps } from '@xyflow/react';
+import { EMPTY_DESTINATION_FAILED } from '../../../../../services/unit_stats_client/map_stats_response';
 import { REMOTE_ELASTICSEARCH_TYPE } from '../../../../streams_layout/destinations/types';
 import type { DestinationNodeData, DestinationNode as DestinationNodeType } from '../types';
 import { DestinationNode } from './destination_node';
@@ -51,7 +52,7 @@ describe('DestinationNode', () => {
       stats: {
         eventsRate: 3700,
         eventsTotal: null,
-        failedRate: null,
+        failed: EMPTY_DESTINATION_FAILED,
         latencyAverage: 0.175,
         series: { bucketMs: 300000, points: [] },
       },
@@ -82,7 +83,7 @@ describe('DestinationNode', () => {
       stats: {
         eventsRate: 3700,
         eventsTotal: null,
-        failedRate: null,
+        failed: EMPTY_DESTINATION_FAILED,
         latencyAverage: 0.175,
         series: { bucketMs: 300000, points: [] },
       },
@@ -111,7 +112,7 @@ describe('DestinationNode', () => {
       stats: {
         eventsRate: 3700,
         eventsTotal: null,
-        failedRate: null,
+        failed: EMPTY_DESTINATION_FAILED,
         latencyAverage: 0.175,
         series: { bucketMs: 300000, points: [] },
       },

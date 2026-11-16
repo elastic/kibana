@@ -7,7 +7,10 @@
 
 import type { StreamsUnit } from '@kbn/streams-schema';
 import type {
+  DestinationFailedView,
   DestinationStatsView,
+  FailureClassView,
+  FailureRateView,
   MappedComponentStats,
   MappedStatsResponse,
   ProcessorStatsView,
@@ -19,10 +22,20 @@ const NOT_FOUND_ERROR_CODE = 'not_found';
 /** The code of an entry when its whole request failed. Component errors keep the server's code. */
 export const STATS_REQUEST_FAILED_ERROR_CODE = 'request_failed';
 
+// The unit of a rate with no value is a placeholder. Nothing may depend on it.
+const EMPTY_FAILURE_RATE: FailureRateView = { rate: null, unit: '{item}', percentage: null };
+
+/** A destination with no failure data: every rate and percentage is `null`, and no cause is listed. */
+export const EMPTY_DESTINATION_FAILED: DestinationFailedView = {
+  total: EMPTY_FAILURE_RATE,
+  authentication: { ...EMPTY_FAILURE_RATE, breakdown: [] },
+  authorization: { ...EMPTY_FAILURE_RATE, breakdown: [] },
+};
+
 const EMPTY_DESTINATION_STATS: DestinationStatsView = {
   eventsRate: null,
   eventsTotal: null,
-  failedRate: null,
+  failed: EMPTY_DESTINATION_FAILED,
   latencyAverage: null,
   series: { bucketMs: 0, points: [] },
 };
@@ -31,13 +44,37 @@ const EMPTY_PROCESSOR_STATS: ProcessorStatsView = { instances: [] };
 
 const EMPTY_SOURCE_STATS: SourceStatsView = { acceptedRate: null };
 
+type FailedResult = StreamsUnit.StatsDestinationResult['events']['failed'];
+
+const toFailureRateView = ({
+  rate,
+  percentage,
+}: Pick<FailedResult, 'rate' | 'percentage'>): FailureRateView => ({
+  rate: rate.value,
+  unit: rate.unit,
+  percentage: percentage.value,
+});
+
+const toFailureClassView = (failureClass: FailedResult['authentication']): FailureClassView => ({
+  ...toFailureRateView(failureClass),
+  breakdown: (failureClass.breakdown ?? []).map(({ collection, reason, rate, percentage }) => ({
+    collection,
+    reason,
+    ...toFailureRateView({ rate, percentage }),
+  })),
+});
+
 const toDestinationStats = ({
   events,
   latency,
 }: StreamsUnit.StatsDestinationResult): DestinationStatsView => ({
   eventsRate: events.incoming.rate.value,
   eventsTotal: events.incoming.total.value,
-  failedRate: events.failed.rate.value,
+  failed: {
+    total: toFailureRateView(events.failed),
+    authentication: toFailureClassView(events.failed.authentication),
+    authorization: toFailureClassView(events.failed.authorization),
+  },
   latencyAverage: latency.average.value,
   series: {
     bucketMs: events.incoming.series.bucket_ms,
@@ -62,10 +99,10 @@ const toSourceStats = ({ events }: StreamsUnit.StatsSourceResult): SourceStatsVi
 const hasDestinationData = ({
   eventsRate,
   eventsTotal,
-  failedRate,
+  failed,
   latencyAverage,
 }: DestinationStatsView): boolean =>
-  [eventsRate, eventsTotal, failedRate, latencyAverage].some((value) => value !== null);
+  [eventsRate, eventsTotal, failed.total.rate, latencyAverage].some((value) => value !== null);
 
 const hasProcessorData = ({ instances }: ProcessorStatsView): boolean => instances.length > 0;
 

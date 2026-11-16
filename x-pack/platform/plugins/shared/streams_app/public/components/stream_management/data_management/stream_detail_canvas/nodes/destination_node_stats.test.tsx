@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { EMPTY_DESTINATION_FAILED } from '../../../../../services/unit_stats_client/map_stats_response';
 import type { DestinationStatsView } from '../../../../../services/unit_stats_client/types';
 import type { StatsEntry } from '../../../../unit_stats/state_management/types';
 import { DestinationNodeStats } from './destination_node_stats';
@@ -23,7 +24,7 @@ const statsWith = ({
 }: Partial<Pick<DestinationStatsView, 'eventsRate' | 'latencyAverage'>>): DestinationStatsView => ({
   eventsRate,
   eventsTotal: null,
-  failedRate: null,
+  failed: EMPTY_DESTINATION_FAILED,
   latencyAverage,
   series: { bucketMs: 300000, points: [] },
 });
