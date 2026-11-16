@@ -16,9 +16,9 @@ import {
   Position,
   ScaleType,
   Settings,
+  timeFormatter,
   Tooltip,
 } from '@elastic/charts';
-import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
