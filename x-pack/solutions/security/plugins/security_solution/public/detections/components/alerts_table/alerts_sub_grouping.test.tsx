@@ -234,8 +234,7 @@ describe('GroupedSubLevelComponent', () => {
     );
 
     await waitFor(() => {
-      const groupingQuery = mockUseQueryAlerts.mock.calls.find(([args]) => args?.query)?.[0]
-        ?.query;
+      const groupingQuery = mockUseQueryAlerts.mock.calls.find(([args]) => args?.query)?.[0]?.query;
       expect(groupingQuery).toEqual(
         expect.objectContaining({
           query: expect.objectContaining({
