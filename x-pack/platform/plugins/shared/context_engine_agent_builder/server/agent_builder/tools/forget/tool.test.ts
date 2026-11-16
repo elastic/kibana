@@ -86,7 +86,7 @@ describe('forget tool', () => {
     update.mockResolvedValue({ result: 'updated' });
     get.mockResolvedValue({
       id: 'support',
-      memory_enabled: true,
+      dreaming: { enabled: true, facts: [{ type: 'preference' }] },
       dest: { type: 'index', value: 'ai-index-idx-support' },
     });
     search.mockResolvedValue({
@@ -190,7 +190,7 @@ describe('forget tool', () => {
   it('appends a tombstone revision for a data-stream-backed memory', async () => {
     get.mockResolvedValue({
       id: 'support',
-      memory_enabled: true,
+      dreaming: { enabled: true, facts: [{ type: 'preference' }] },
       dest: { type: 'data_stream', value: 'ai-index-ds-support' },
     });
     search.mockResolvedValue({
@@ -308,9 +308,10 @@ describe('forget tool', () => {
     });
   });
 
-  it('rejects an AI index that does not have memory enabled', async () => {
+  it('rejects a managed AI index registered with memory_enabled false', async () => {
     get.mockResolvedValue({
       id: 'support',
+      managed: true,
       memory_enabled: false,
       dest: { type: 'index', value: 'ai-index-idx-support' },
     });

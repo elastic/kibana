@@ -256,6 +256,8 @@ To clean existing data before generating new data, use the `--clean` option.
 
 **Note:** The `--clean` option only cleans APM indices tracked by the client. For custom indices (like heartbeat), scenarios may implement their own cleanup logic.
 
+The Synthetics scenarios create monitors in Kibana as well as documents, and `--clean` would delete every `synthetics-*` data stream. See [Cleaning up](./EXAMPLES.md#synthetics-scenarios) for how to remove only what they created.
+
 ### Date Math
 
 You can use date math expressions for time ranges (e.g., `now-24h`, `now-7d`).

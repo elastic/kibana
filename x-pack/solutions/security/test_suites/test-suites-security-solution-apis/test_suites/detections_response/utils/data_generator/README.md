@@ -96,10 +96,12 @@ Helper to generate and index documents for using in Kibana functional tests
 | index    | index where document will be added | `string`    |
 | log      | log client                         | `LogClient` |
 
-1. import and initialize factory
+1. Import and initialize the factory. This example uses the relative path from
+   [new_terms_max_response_size.ts](../../detection_engine/rule_execution_logic/new_terms_max_response_size/trial_license_complete_tier/new_terms_max_response_size.ts);
+   adjust it for tests in other directories.
 
    ```ts
-   import { dataGeneratorFactory } from '.';
+   import { dataGeneratorFactory } from '../../../../utils';
 
    const es = getService('es');
    const log = getService('log');
