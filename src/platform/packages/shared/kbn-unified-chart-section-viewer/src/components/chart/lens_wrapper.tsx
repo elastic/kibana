@@ -12,11 +12,13 @@ import { css } from '@emotion/react';
 import { ACTION_INSPECT_PANEL, EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
 import type { QuickActionIds } from '@kbn/embeddable-plugin/public';
 import { getRepresentativeQuery, EMPTY_KQL_QUERY } from '@kbn/lens-common';
+import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { resolveEsqlVariables } from './helpers/resolve_esql_variables';
 import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../../common/constants';
 import type { UnifiedMetricsGridProps } from '../../types';
+import { useOnChartLoaded } from '../../context/chart_loaded_context';
 
 const DEFAULT_QUICK_ACTION_VIEW: QuickActionIds = [
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -148,6 +150,20 @@ export function LensWrapper({
     [quickActionIds]
   );
 
+  const onChartLoaded = useOnChartLoaded();
+  const onLoad = useCallback<NonNullable<EmbeddableComponentProps['onLoad']>>(
+    (isLoading, adapters) => {
+      const hasRows = Object.values(adapters?.tables?.tables ?? {}).some(
+        ({ rows }) => rows.length > 0
+      );
+
+      if (!isLoading && hasRows) {
+        onChartLoaded?.();
+      }
+    },
+    [onChartLoaded]
+  );
+
   return (
     <div css={chartCss}>
       <EmbeddableRendererContext.Provider value={embeddableRendererContextValue}>
@@ -163,6 +179,7 @@ export function LensWrapper({
           onFilter={onFilter}
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
+          onLoad={onLoad}
         />
       </EmbeddableRendererContext.Provider>
     </div>

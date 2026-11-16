@@ -326,6 +326,10 @@ export interface ChartSectionProps {
    */
   setLensRequestAdapter?: (adapter: RequestAdapter | undefined) => void;
   /**
+   * Called when a chart in the section finished loading with data
+   */
+  onChartLoaded?: () => void;
+  /**
    * Indicates whether the current tab is selected/active.
    */
   isTabSelected: boolean;
