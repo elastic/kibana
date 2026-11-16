@@ -158,6 +158,9 @@ overrides:
   'nwsapi': '2.2.2'
   'react-focus-lock': '2.9.5'
   'react-focus-on': '3.9.1'
+  # @elastic/eui depends on refractor@3, which pins prismjs to ~1.27.0. Pin
+  # prismjs to 1.30.0. Remove this once EUI bumps refractor to v4.
+  'refractor>prismjs': '1.30.0'
   # vega@6.2.0 depends on its subtree via `~` ranges (e.g. vega-functions ~6.1.0);
   # vega-lite pulls newer copies, and pnpm fails to dedupe onto the shared line the
   # way yarn does, leaving two parallel Vega runtimes. A split runtime breaks the
