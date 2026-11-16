@@ -154,7 +154,9 @@ export const gatherMaintenance = async (
   }
 
   const changedFacts = new Map(
-    changed.kis.filter((ki) => kindOf(ki) === 'fact').map((ki) => [ki.id, ki])
+    [...changed.kis, ...citingDeleted.filter(isLiveItem)]
+      .filter((ki) => kindOf(ki) === 'fact')
+      .map((ki) => [ki.id, ki])
   );
   const factLinks = changedFacts.size
     ? await reader.citing([...changedFacts.keys()].map(kiUri), 'relationships')
@@ -176,7 +178,7 @@ export const gatherMaintenance = async (
             {
               entityId: to,
               permissions: changedFact.permissions,
-              cause: positionOf.get(from) ?? 0,
+              cause: positionOf.get(from) ?? causeOf.get(from) ?? 0,
             },
           ]
         : [];
@@ -236,7 +238,7 @@ export const gatherMaintenance = async (
             .filter((memory): memory is DreamedKi => memory !== undefined)
             .slice(0, MAX_MAINTENANCE_REMAINING_MEMORIES)
         : [];
-    if (verdict.verdict === 'rewrite' && remaining.length > 0) {
+    if (verdict.verdict === 'rewrite' && (remaining.length > 0 || kindOf(ki) === 'entity')) {
       rewrites.set(ki.id, {
         lost_source_ids: verdict.lostIds,
         remaining_memories: remaining.map(({ id, title, content }) => ({
@@ -339,7 +341,10 @@ export const gatherMaintenance = async (
   const liveLinks = links.filter(({ id }) => !brokenLinks.has(id));
 
   const reviewedIds = new Set(reviewed.map(({ id }) => id));
-  const fixedIds = new Set(fixes.map(({ id }) => id));
+  const unsettledIds = new Set([
+    ...[...fixes, ...needsReview].map(({ id }) => id),
+    ...rewrites.keys(),
+  ]);
   const aboutFactIdsOf = new Map<string, string[]>();
   for (const link of liveLinks) {
     if (link.relation === ABOUT_RELATIONSHIP_TYPE && reviewedIds.has(link.to)) {
@@ -355,7 +360,7 @@ export const gatherMaintenance = async (
         .filter(isLiveItem)
         .filter(
           (factKi) =>
-            !fixedIds.has(factKi.id) && samePermissions(factKi.permissions, entityPermissions)
+            !unsettledIds.has(factKi.id) && samePermissions(factKi.permissions, entityPermissions)
         )
         .sort(newestFirst)
         .slice(0, MAX_MAINTENANCE_ABOUT_FACTS)

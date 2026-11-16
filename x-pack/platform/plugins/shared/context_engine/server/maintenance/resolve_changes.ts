@@ -415,7 +415,9 @@ export const resolveMaintenanceChanges = (
     claimed.add(id);
     groups.push({
       item,
-      writes: [{ id, build: rewrite({ description, content }, []) }],
+      writes: [
+        { id, build: rewrite({ description, content }, reviewed.get(id)?.lost_source_ids ?? []) },
+      ],
       moves: [],
       tombstones: [],
       changes: [{ id, change: 'summarized', reason }],

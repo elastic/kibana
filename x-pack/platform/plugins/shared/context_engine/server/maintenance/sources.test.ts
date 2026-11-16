@@ -71,6 +71,19 @@ describe('sourceVerdictOf', () => {
     ).toBe('intact');
   });
 
+  it('summarizes again an entity that lost memories, even one that also came from traces', () => {
+    const entity = fact({
+      type: 'entity.person',
+      references: derivedFrom('ki://m-1', 'trace://abc'),
+    });
+
+    expect(sourceVerdictOf(entity, new Map([memory('m-1', true)]))).toEqual({
+      verdict: 'rewrite',
+      lostIds: ['m-1'],
+      remainingIds: [],
+    });
+  });
+
   it('leaves a person-edited item for review', () => {
     const edited = fact({
       attributes: { 'memory.edited_by': 'api://context_engine.ki.update' },

@@ -8,7 +8,7 @@
 import { MAX_KI_REFERENCES } from '../../common/step_types/ki';
 import { isKiDeleted } from '../ai_indices/ki_revision';
 import { isPersonEdited } from '../ai_indices/ki_write';
-import { citedMemoryIds, type DreamedKi } from '../dreaming/dreamed_ki';
+import { citedMemoryIds, kindOf, type DreamedKi } from '../dreaming/dreamed_ki';
 import { TRACE_ROUND_ID_PREFIX } from '../dreaming/ids';
 
 /** What maintenance does about the memories an item came from. */
@@ -49,13 +49,13 @@ export const sourceVerdictOf = (
       reason: `A person edited it, and ${lostIds.length} of the memories it came from were deleted.`,
     };
   }
-  if (citesTraces) {
+  if (citesTraces && kindOf(ki) !== 'entity') {
     return {
       verdict: 'needs_review',
       reason: `${lostIds.length} of the memories it came from were deleted, and it also came from agent conversations, which maintenance cannot read.`,
     };
   }
-  if (remainingIds.length > 0) {
+  if (remainingIds.length > 0 || citesTraces) {
     return { verdict: 'rewrite', lostIds, remainingIds };
   }
   if ((ki.references ?? []).length >= MAX_KI_REFERENCES) {

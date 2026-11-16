@@ -419,6 +419,30 @@ describe('resolveMaintenanceChanges', () => {
     expect(resolved.rejected).toEqual([{ item: 'summary of e-2', reason: 'a person edited it' }]);
   });
 
+  it('drops the memories an entity lost from its sources when it is summarized', () => {
+    const kis = [
+      entity('e-1', {
+        references: [
+          ...derivedFrom('m-1', 'm-2'),
+          { uri: 'trace://abc', relation: 'derived_from' },
+        ],
+      }),
+    ];
+
+    const resolved = resolve(
+      kis,
+      { summaries: [{ id: 'e-1', content: 'Bob runs on-call.', reason: 'm-1 deleted' }] },
+      { extra: { 'e-1': { lost_source_ids: ['m-1'] } } }
+    );
+
+    expect(build(resolved, kis)).toEqual(
+      expect.objectContaining({
+        content: 'Bob runs on-call.',
+        references: [...derivedFrom('m-2'), { uri: 'trace://abc', relation: 'derived_from' }],
+      })
+    );
+  });
+
   it('removes a relationship only when another links the same two items', () => {
     const knows = link('e-1', 'knows', 'e-2');
     const inverse = link('e-2', 'knows', 'e-1');

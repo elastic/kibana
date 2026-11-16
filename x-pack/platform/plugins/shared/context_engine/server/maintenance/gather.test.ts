@@ -235,28 +235,41 @@ describe('gatherMaintenance', () => {
     ]);
   });
 
-  it('never shows an entity a fact about it that this run tombstones', async () => {
+  it('summarizes an entity whose memories or facts lost sources, from the facts that kept theirs', async () => {
     const stored = [
       memory('m-1', { governance: deleted }),
       memory('m-2'),
+      memory('m-3', { governance: deleted }),
       fact('fact-lost'),
+      fact('fact-partial', { references: derivedFrom('m-3', 'm-2') }),
       fact('fact-kept', { references: derivedFrom('m-2') }),
-      entity('entity-a', { references: derivedFrom('m-2') }),
+      entity('entity-a', {
+        references: [...derivedFrom('m-1'), { uri: 'trace://abc', relation: 'derived_from' }],
+      }),
       relationship('fact-lost', 'about', 'entity-a'),
+      relationship('fact-partial', 'about', 'entity-a'),
       relationship('fact-kept', 'about', 'entity-a'),
     ];
 
     const output = await gatherMaintenance(
-      fakeReader(stored, { changed: [stored[0], stored[3]] }),
+      fakeReader(stored, { changed: [stored[0], stored[2]] }),
       options
     );
 
     expect(output.fixes).toEqual([
       { id: 'fact-lost', change: 'tombstoned', reason: 'Every memory it came from was deleted.' },
     ]);
+    expect(output.needs_review).toEqual([]);
     const [batch] = output.batches;
-    expect(batch.items.find(({ id }) => id === 'entity-a')?.about_fact_ids).toEqual(['fact-kept']);
-    expect(batch.about_facts).toEqual([]);
+    expect(batch.items.find(({ id }) => id === 'entity-a')).toEqual(
+      expect.objectContaining({
+        reasons: ['lost_sources', 'about_facts_changed'],
+        lost_source_ids: ['m-1'],
+        remaining_memories: [],
+        about_fact_ids: ['fact-kept'],
+      })
+    );
+    expect(batch.about_facts.map(({ id }) => id)).toEqual(['fact-kept']);
   });
 
   it('tombstones relationships that link a deleted item or differ in permissions from their ends', async () => {

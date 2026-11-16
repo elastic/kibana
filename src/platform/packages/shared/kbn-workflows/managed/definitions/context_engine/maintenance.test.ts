@@ -285,6 +285,9 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
       `RELATIONSHIPS (one per line, none when empty):\n${JSON.stringify(batch.relationships[0])}`
     );
     expect(rendered).toContain('person_edited true was edited by a person: never absorb it');
+    expect(rendered).toContain(
+      'An entity with lost_source_ids lost some of the memories it came from: sum up its FACTS ABOUT and remaining_memories only, not its own content.'
+    );
   });
 
   it('asks the model for each kind of change', () => {
