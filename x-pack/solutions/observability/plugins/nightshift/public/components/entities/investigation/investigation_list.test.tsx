@@ -27,6 +27,10 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
+jest.mock('./use_investigation_assignees', () => ({
+  useInvestigationAssignees: () => () => null,
+}));
+
 const investigation: InvestigationSummary = {
   id: 'investigation-1',
   title: 'Checkout errors',

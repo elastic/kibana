@@ -400,7 +400,7 @@ describe('Entity Nodes', () => {
           testSubject: 'test-toolbar-btn-show-actor',
         },
         {
-          iconType: 'eyeClosed',
+          iconType: 'eyeSlash',
           label: 'Hide actor',
           onClick: jest.fn(),
           testSubject: 'test-toolbar-btn-hide-actor',

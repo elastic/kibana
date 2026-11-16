@@ -10,9 +10,17 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import { Provider } from 'react-redux-v7';
 import type { Store } from 'redux-v4';
+import {
+  getCopyButton,
+  getFilterForValueButton,
+  getFilterOutValueButton,
+} from '@kbn/securitysolution-timeline-components';
+import type {
+  CopyProps,
+  FilterValueFnArgs,
+  HoverActionComponentProps,
+} from '@kbn/securitysolution-timeline-components';
 import type { AddToTimelineButtonProps } from './actions/add_to_timeline';
-import type { CopyProps } from './actions/copy';
-import type { FilterValueFnArgs, HoverActionComponentProps } from './actions/types';
 
 export interface HoverActionsConfig {
   getAddToTimelineButton: (
@@ -40,37 +48,10 @@ const getAddToTimelineButtonLazy = (store: Store, props: AddToTimelineButtonProp
   );
 };
 
-const CopyButtonLazy = React.lazy(() => import('./actions/copy'));
-const getCopyButtonLazy = (props: CopyProps) => {
-  return (
-    <React.Suspense fallback={<EuiLoadingSpinner />}>
-      <CopyButtonLazy {...props} />
-    </React.Suspense>
-  );
-};
-
-const FilterForValueButtonLazy = React.lazy(() => import('./actions/filter_for_value'));
-const getFilterForValueButtonLazy = (props: HoverActionComponentProps & FilterValueFnArgs) => {
-  return (
-    <React.Suspense fallback={<EuiLoadingSpinner />}>
-      <FilterForValueButtonLazy {...props} />
-    </React.Suspense>
-  );
-};
-
-const FilterOutValueButtonLazy = React.lazy(() => import('./actions/filter_out_value'));
-const getFilterOutValueButtonLazy = (props: HoverActionComponentProps & FilterValueFnArgs) => {
-  return (
-    <React.Suspense fallback={<EuiLoadingSpinner />}>
-      <FilterOutValueButtonLazy {...props} />
-    </React.Suspense>
-  );
-};
-
 export const getHoverActions = (store?: Store): HoverActionsConfig => ({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   getAddToTimelineButton: getAddToTimelineButtonLazy.bind(null, store!),
-  getCopyButton: getCopyButtonLazy,
-  getFilterForValueButton: getFilterForValueButtonLazy,
-  getFilterOutValueButton: getFilterOutValueButtonLazy,
+  getCopyButton,
+  getFilterForValueButton,
+  getFilterOutValueButton,
 });

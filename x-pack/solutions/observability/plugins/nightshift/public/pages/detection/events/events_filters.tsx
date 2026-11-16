@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSuperDatePicker,
   useEuiTheme,
 } from '@elastic/eui';
 import {
@@ -34,6 +33,7 @@ import {
 } from '../../../components/entities/significant_event/significant_event_status';
 import { FilterPopover } from '../../../components/ui/filter_popover';
 import { SIGNIFICANT_EVENT_SEVERITY } from '../../../components/ui/severity_badge';
+import { NightshiftTimeRangePicker } from '../../../components/ui/time_range_picker';
 import type { DetectionTimeRange } from '../use_detection_time_range';
 import {
   INVESTIGATION_LABEL,
@@ -86,13 +86,11 @@ export const EventsFilters = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiSuperDatePicker
-          compressed
-          width="auto"
-          showUpdateButton={false}
+        <NightshiftTimeRangePicker
           start={timeRange.from}
           end={timeRange.to}
-          onTimeChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
+          onChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
+          showRefreshButton
           data-test-subj="nightshiftDetectionEventsTimePicker"
         />
       </EuiFlexItem>

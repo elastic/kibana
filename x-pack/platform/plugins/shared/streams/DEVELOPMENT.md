@@ -17,10 +17,12 @@ Two layers of flags exist. **Kibana config** (`kibana.dev.yml`) is evaluated at 
 # Restart Kibana after changing it.
 xpack.streams.canvas.enabled: true
 
+# Required: unit PUT returns 503 without a distributor. The distributor Tilt
+# writes these to streams-config-distributor/.tilt/kibana/kibana.dev.yml.snippet.
 xpack.streams.distributor.url: "https://localhost:18443"
-xpack.streams.distributor.ssl.certificate: /tmp/certs/kibana.crt
-xpack.streams.distributor.ssl.key: /tmp/certs/kibana.key
-xpack.streams.distributor.ssl.certificateAuthorities: /tmp/certs/server-ca.crt
+xpack.streams.distributor.ssl.certificate: /path/to/streams-config-distributor/.tilt/kibana/client.crt
+xpack.streams.distributor.ssl.key: /path/to/streams-config-distributor/.tilt/kibana/client.key
+xpack.streams.distributor.ssl.certificateAuthorities: /path/to/streams-config-distributor/.tilt/kibana/ca.crt
 # Needed only to publish units with secrets. See "Credentials".
 xpack.streams.encryptionKey.path: /tmp/streams-encryption-key
 
@@ -28,12 +30,14 @@ uiSettings.overrides:
   observability:streamsEnableCanvas: true
 ```
 
+To run the distributor and the rest of the backend locally, follow [dev/full_dev_flow/README.md](./dev/full_dev_flow/README.md).
+
 `xpack.streams.canvas.enabled` and `observability:streamsEnableCanvas` are **not** interchangeable:
 
 | Flag | What it actually gates |
 | --- | --- |
 | `xpack.streams.canvas.enabled` | Saved object **registration** for `streams-configuration` and `streams-ui-metadata` ([Scenario B WIP](https://www.elastic.co/docs/extend/kibana/key-concepts/saved-objects/validate#saved-objects-wip-types-scenario-b)). |
-| `observability:streamsEnableCanvas` | Unit HTTP APIs (`GET`/`PUT`/`POST …/_reset` on `/internal/streams/unit/{id}`) and the Map UI. |
+| `observability:streamsEnableCanvas` | Unit HTTP APIs (`GET`/`PUT`/`POST …/_reset` on `/internal/streams/unit/{id}`), the component catalogue APIs (`GET /internal/streams/components`, `POST /internal/streams/components/_validate`) and the Map UI. |
 
 You need both on for a working local Map. If only the uiSetting is on, the APIs return 404-style "not enabled" or fail when writing because the types were never registered.
 
@@ -64,7 +68,7 @@ Important consequences:
 - v1 uses a single unit id: `default` (`STREAMS_DEFAULT_UNIT_ID`).
 - Unit PUT order: seal credentials → distributor validate → configuration SO → distributor publish → UI metadata. A validation failure writes nothing. A publish failure rolls back the configuration SO (including decrypted `secrets` and `sealed_credentials`).
 - `streams:republish-units` re-sends every stored unit every 30 minutes and re-seals after a key rotation. See "Republish and key rotation".
-- Without `xpack.streams.distributor.url`, validate and publish are no-ops.
+- Without `xpack.streams.distributor.url`, unit PUT fails with a 503 ("streams-config-distributor URL is not configured"). There is no offline mode.
 - PUT requires `xpack.encryptedSavedObjects.encryptionKey` (`canEncrypt`). Dev mode configures a static key automatically.
 
 ### Credentials
@@ -73,6 +77,8 @@ Plaintext secrets live in the configuration SO `secrets` map (`{ "<name>": "<val
 
 Names follow the unit identifier grammar (`^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`, at most 256 characters). The same name is the reference, the key in `secrets`, and the `credentials[].name` sent to the distributor. The UI convention is `<nodeId>-<field>` with `_` turned into `-`, for example `s3-archive-secret-access-key`. That convention can collide (`a-b` + `c` and `a` + `b_c` both give `a-b-c`), so the UI must check before saving. Two nodes that reference the same name share one secret. The S3 destination modal is the first client sender: it writes `{ credential: <id>-access-key-id }` and `{ credential: <id>-secret-access-key }` into the node and sends both plaintext values in `secrets` on the same PUT.
 
+The remote Elasticsearch destination modal does the same with one key: it writes `{ credential: <id>-api-key }` into the node and sends the user's key in `secrets`. Kibana never mints or revokes that key.
+
 A JSON envelope that stores a secret references it from the node and sends the value next to the unit:
 
 ```json
@@ -80,14 +86,14 @@ A JSON envelope that stores a secret references it from the node and sends the v
   "unit": {
     "destinations": [
       {
-        "id": "es-remote-1",
+        "id": "es-1",
         "type": "elasticsearch",
         "supported_telemetry": ["logs"],
-        "config": [{ "name": "api_key", "value": { "credential": "es-remote-1-api-key" } }]
+        "config": [{ "name": "api_key", "value": { "credential": "es-1-api-key" } }]
       }
     ]
   },
-  "secrets": { "es-remote-1-api-key": "<plaintext>" }
+  "secrets": { "es-1-api-key": "<plaintext>" }
 }
 ```
 
@@ -168,7 +174,7 @@ That deletes the configuration and UI metadata saved objects in the current spac
 | `application/json` | `{ unit, ui_metadata, secrets? }` envelope (Map / Dev Tools). |
 | `application/yaml` (also `text/yaml`, `application/x-yaml`) | The authored unit document itself (`sources` / `destinations` / `pipelines`). Do **not** wrap it in `{ unit: … }` and do **not** jsonify it first. YAML cannot set `ui_metadata` or `secrets`; stored map layout and secrets are kept (stale node metadata is still pruned). |
 
-A successful PUT returns `{ acknowledged: true }`. When config-distributor validate succeeds and includes compiled OpenTelemetry collector YAML, the response also has `compiled_config`. Without `xpack.streams.distributor.url`, validate is skipped and `compiled_config` is omitted. If the unit published but the canvas layout write failed, the response includes `ui_metadata_not_persisted: true`.
+A successful PUT returns `{ acknowledged: true }`. When config-distributor validate succeeds and includes compiled OpenTelemetry collector YAML, the response also has `compiled_config`. Without `xpack.streams.distributor.url`, the PUT fails with 503 and nothing is stored. If the unit published but the canvas layout write failed, the response includes `ui_metadata_not_persisted: true`.
 
 ### JSON envelope (Map)
 
@@ -294,9 +300,25 @@ curl -sS -X PUT "$KIBANA_URL/internal/streams/unit/default" \
   --data-binary @good-unit.yaml
 ```
 
-Unit writes require a running config-distributor. Validation calls `POST /v1/units/validate` ([ingest-dev#9430](https://github.com/elastic/ingest-dev/issues/9430)) and falls back to the pre-rename `POST /v1/validate` when the distributor answers 405. Invalid units return 400 with `{ valid: false, diagnostics }` and are not written. When `xpack.streams.distributor.url` is unset, Kibana logs an error, does not call the distributor, and does not store the unit (HTTP 503).
+Unit writes require a running config-distributor. Validation calls `POST /v1/units/validate` ([ingest-dev#9430](https://github.com/elastic/ingest-dev/issues/9430)) and falls back to the pre-rename `POST /v1/validate` when the distributor answers 405. Invalid units return 400 with `{ valid: false, diagnostics }` and are not written. When `xpack.streams.distributor.url` is unset, Kibana warns once at startup, does not call the distributor, and does not store the unit (HTTP 503).
 
-The distributor (via `transpiler.Compile()`) is the authority on whether a unit is valid. The unit HTTP routes do not schema-check the document. 
+The distributor (via `transpiler.Compile()`) is the authority on whether a unit is valid. The unit HTTP routes do not schema-check the document.
+
+Each `diagnostics[].path` is an RFC 6901 JSON Pointer into the document that was validated, for example `/pipelines/0` or `/processors/0/config/0` for a unit and `/config/0` for a single component. The transpiler currently reports no deeper than the config entry.
+
+## Component catalogue APIs
+
+The processing flyout builds its processor forms from the distributor's component catalogue. Both routes need `observability:streamsEnableCanvas`, the same privileges as the unit routes, and a running distributor; without `xpack.streams.distributor.url` they answer 503 and the flyout shows an error instead of a processor list.
+
+```
+GET  kbn:/internal/streams/components
+POST kbn:/internal/streams/components/_validate
+```
+
+- `GET /internal/streams/components` proxies `GET /v1/components`. The server keeps one in-memory copy per Kibana process, serves it for 60 s without asking, then revalidates it with the distributor's `ETag` (`If-None-Match`, 304); concurrent callers share one upstream request. The response carries the same ETag and `cache-control: private, max-age=60, stale-while-revalidate=86400`, so the browser reuses it for a minute and revalidates with Kibana after that (Hapi answers the 304). A distributor failure answers the cached copy with `x-streams-catalogue-stale: true`, `no-cache` and no ETag (a 304 on it after recovery would leave the stale marker in the browser's copy), and the distributor is retried once per 60 s window rather than on every request, so an unresponsive one does not cost a request timeout per flyout open; the flyout shows a warning with a retry, which bypasses the browser cache. Staleness after a distributor deploy is at most about two minutes. The browser refetches on every flyout open and keeps the last catalogue of the app session visible while that runs. A catalogue whose `schema_version` is not in `SUPPORTED_COMPONENT_CATALOGUE_SCHEMA_VERSIONS` (`@kbn/streams-schema`) puts the flyout into read-only mode with a warning; a processor type that is listed but has no usable definition is shown locked.
+- `POST /internal/streams/components/_validate` takes `{ kind: 'processor', component }` (JSON, bounded) and proxies `POST /v1/components/validate` as YAML. It answers `{ valid, diagnostics }`; the flyout calls it before committing a processor, highlights the fields the diagnostic pointers name, blocks the commit on errors, shows warnings from a valid check and commits only when the user continues, and commits with a notice when the distributor is unreachable (502/503/504).
+
+The local snapshot `streams_app/public/services/component_catalogue/catalogue_snapshot/components_v1.json` is a test, Storybook and Scout fixture only. Scout UI specs mock both routes through `streams_app/test/scout/common/ui/fixtures/component_catalogue_mocks.ts`.
 
 ## End-to-end testing
 

@@ -20,6 +20,7 @@ import type {
   CanExpandPanels,
   CanIndicateRelatedChildren,
   CanPinPanels,
+  CanSelectPanels,
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -170,6 +171,7 @@ export interface DashboardCreationOptions {
 export type DashboardApi = CanExpandPanels &
   CanIndicateRelatedChildren &
   CanPinPanels &
+  CanSelectPanels &
   HasSections &
   HasAppContext &
   HasExecutionContext &
@@ -231,6 +233,10 @@ export type DashboardApi = CanExpandPanels &
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     runInteractiveSave: (redirectTo?: DashboardRedirect) => Promise<{ id: string } | undefined>;
     runQuickSave: (options?: { restored?: boolean }) => Promise<void>;
+    /** Adds the given panels to the current selection */
+    addPanelsToSelection: (panelIds: string[]) => void;
+    /** Removes several panels from the layout in a single state update */
+    removePanels: (panelIds: string[]) => void;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;

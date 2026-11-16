@@ -8,7 +8,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, type MemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { EuiProvider } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -17,6 +17,7 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { AppChromeLayout } from './app_chrome_layout';
+import { useAppHeadingTitle } from './app_heading_title';
 
 const coreStartStub = {
   docLinks: { links: { siem: { guide: 'https://www.elastic.co/guide' } } },
@@ -122,5 +123,41 @@ describe('AppChromeLayout overflow', () => {
     unmount();
     renderAt('/watches');
     expect(screen.queryByTestId('appHeaderTitle')).not.toBeInTheDocument();
+  });
+});
+
+describe('AppChromeLayout heading title', () => {
+  const PageWithTitle: React.FC<{ title: string }> = ({ title }) => {
+    useAppHeadingTitle(title);
+    return null;
+  };
+
+  const layoutAt = (history: MemoryHistory, children: React.ReactNode) => (
+    <KibanaContextProvider services={coreStartStub}>
+      <MockChromeContextProvider chrome={makeChromeWithFeedback(jest.fn())}>
+        <EuiProvider>
+          <Router history={history}>
+            <AppChromeLayout>{children}</AppChromeLayout>
+          </Router>
+        </EuiProvider>
+      </MockChromeContextProvider>
+    </KibanaContextProvider>
+  );
+
+  it.each([
+    ['/', 'AlertZero'],
+    ['/escalations', 'Escalations'],
+  ])('titles %s with the route title by default', (path, title) => {
+    render(layoutAt(createMemoryHistory({ initialEntries: [path] }), null));
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent(title);
+  });
+
+  it('shows the title a page sets, and restores the route title when that page unmounts', () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    const { rerender } = render(layoutAt(history, <PageWithTitle title="Proposed actions" />));
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('Proposed actions');
+
+    rerender(layoutAt(history, null));
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('AlertZero');
   });
 });

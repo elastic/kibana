@@ -40,7 +40,7 @@ Personal API Key
 |--------|-------------|
 | `listIssues` | List error-tracking issues. Parameters: `status` (defaults to `active`), `assigneeId`, `assigneeType`, `dateFrom`, `dateTo`, `searchQuery`, `orderBy`, `orderDirection`, `limit`, `offset`. |
 | `getIssue` | Get a single error-tracking issue by ID. Parameters: `issueId` (required). |
-| `updateIssueStatus` | Move an issue to a new status (`active`, `resolved`, `archived`, `suppressed`, `pending_release`). Parameters: `issueId`, `status` (both required). |
+| `updateIssueStatus` | Move an issue to a new status (`active`, `resolved`, `suppressed`). Parameters: `issueId`, `status` (both required). |
 | `assignIssue` | Assign or reassign an issue to a user or role. Parameters: `issueId`, `assigneeId` (both required), `assigneeType`. |
 | `runQuery` | Run a HogQL query and return the result rows. Parameters: `query` (required), `name`. |
 | `updateFeatureFlag` | Toggle a feature flag active/inactive or change its rollout percentage. Parameters: `flagId` (required), `active`, `rolloutPercentage`. |

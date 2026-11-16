@@ -95,7 +95,7 @@ export const HUNT_BLOCKED_INDEX_PATTERN = 'logs-hunt-eval-nonexistent-*';
 export const TI_REPORT_AWS_IAM_PREFIX = 'ti-report-aws-iam';
 export const TI_REPORT_CANARY_ID = 'ti-report-hunt-eval-canary-01';
 export const TI_REPORT_MISSING_ID = 'ti-report-hunt-eval-missing-01';
-/** Suite-authored report carrying more IOCs than one hunt accepts; induces `partial`. */
+/** Suite-authored report carrying more IOCs than one hunt accepts; induces `retired_incomplete`. */
 export const TI_REPORT_IOC_DUMP_ID = 'ti-report-hunt-eval-ioc-dump-01';
 
 /**
@@ -152,7 +152,7 @@ export const HUNT_REPORT_IDS = {
   ],
   /** Hard `no-candidates`: an id that does not exist. Must complete with `not_found`. */
   missing: TI_REPORT_MISSING_ID,
-  /** Hard `partial`: suite-authored IOC dump over the per-hunt bound (`input_truncated`). */
+  /** Hard `retired_incomplete`: suite-authored IOC dump over the per-hunt bound (`input_truncated`). */
   iocDump: TI_REPORT_IOC_DUMP_ID,
   /**
    * Hard `failed`: a default-space copy of the clean report whose Investigation the suite locks

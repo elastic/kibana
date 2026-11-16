@@ -26,6 +26,7 @@ import {
   isReasoningEvent,
   isPromptRequestEvent,
   AgentExecutionMode,
+  createNonInteractiveConfig,
 } from '@kbn/agent-builder-common';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import {
@@ -170,6 +171,8 @@ export class KibanaAgentExecutor implements AgentExecutor {
         useTaskManager: !this.blocking,
         executionId: this.blocking ? undefined : taskId,
         abortSignal: this.abortSignal,
+        // A2A clients have no standard way to answer HITL prompts, so they are auto-declined.
+        interactive: createNonInteractiveConfig(),
         // Persisted so KibanaTaskStore can echo the same contextId back on `tasks/get` polls.
         metadata: { a2aContextId: contextId },
         params: {
@@ -482,6 +485,7 @@ export const translateAgentBuilderEvent = (
     ];
   }
 
+  // Not expected while A2A runs are non-interactive, kept as a fallback.
   if (isPromptRequestEvent(event)) {
     return [
       ...buildOpenArtifactCloses(ctx),

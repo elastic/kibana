@@ -42,6 +42,30 @@ const suggestUserProfilesBodySchema = lazySchema(() =>
 type SuggestUserProfilesBody = z.infer<typeof suggestUserProfilesBodySchema>;
 
 /**
+ * Maps security user profiles to the alerting v2 suggestion response: picks the
+ * safe user fields and, when present, the avatar — renaming the security
+ * service's `imageUrl` to the API contract's `image_url`.
+ */
+export const toSuggestUserProfilesResponse = (
+  profiles: UserProfile[]
+): z.infer<typeof suggestUserProfilesResponseSchema> =>
+  profiles.map(({ uid, user, data }) => ({
+    uid,
+    user: {
+      username: user.username,
+      full_name: user.full_name,
+      email: user.email,
+    },
+    ...(data?.avatar && {
+      avatar: {
+        initials: data.avatar.initials,
+        color: data.avatar.color,
+        image_url: data.avatar.imageUrl,
+      },
+    }),
+  }));
+
+/**
  *
  * There is no generic platform/browser endpoint for “suggest user profiles” that we can safely call directly.
  *
@@ -112,24 +136,6 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
       dataPath: 'avatar',
     });
 
-    const body = profiles.map(({ uid, user, data }) => {
-      return {
-        uid,
-        user: {
-          username: user.username,
-          full_name: user.full_name,
-          email: user.email,
-        },
-        ...(data?.avatar && {
-          avatar: {
-            initials: data.avatar.initials,
-            color: data.avatar.color,
-            image_url: data.avatar.imageUrl,
-          },
-        }),
-      };
-    });
-
-    return this.ctx.response.ok({ body });
+    return this.ctx.response.ok({ body: toSuggestUserProfilesResponse(profiles) });
   }
 }

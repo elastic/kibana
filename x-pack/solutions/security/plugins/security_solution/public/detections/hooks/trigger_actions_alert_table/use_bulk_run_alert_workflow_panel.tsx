@@ -49,7 +49,7 @@ interface BulkAlertWorkflowsPanelProps {
    * page, so the full selection has to be fetched before the run payload can be built.
    */
   isAllSelected: boolean;
-  searchAlertIds: SelectionIdSearchHandler;
+  searchAlertIds: SelectionIdSearchHandler | undefined;
   onClose: () => void;
 }
 

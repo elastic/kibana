@@ -106,7 +106,8 @@ describe('useConversation polling', () => {
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
-      cancelAllStreams: jest.fn(),
+      mutateAttach: jest.fn(),
+      detachAllStreams: jest.fn(),
     });
     mockUseStreamRecord.mockReturnValue({});
   });
@@ -205,7 +206,8 @@ describe('useConversation polling', () => {
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
-      cancelAllStreams: jest.fn(),
+      mutateAttach: jest.fn(),
+      detachAllStreams: jest.fn(),
     });
   };
 
@@ -287,7 +289,8 @@ describe('useConversationReadOnly', () => {
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
-      cancelAllStreams: jest.fn(),
+      mutateAttach: jest.fn(),
+      detachAllStreams: jest.fn(),
     });
 
   it('reports loading while an opened conversation is fetched for the first time', async () => {

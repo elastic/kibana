@@ -1,5 +1,5 @@
 {
-  "sha1": "4fba2813d2796407e11c6462ff54876da7e5e076",
+  "sha1": "c30ee13e9770f356ab160740a4bbfb4127e2603c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2838,6 +2838,38 @@
       }
     },
     {
+      "id": "fdf24ec1e8e4d94-85b5ee7bb75a166",
+      "title": "Match action policies API match: returns tag-matched and catch-all policies with their category for the rule routing tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/match_action_policies.spec.ts",
+        "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "fdf24ec1e8e4d94-402ba474af320f4",
+      "title": "Match action policies API match: returns only catch-all policies when the rule has no routing tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/match_action_policies.spec.ts",
+        "line": 76,
+        "column": 14
+      }
+    },
+    {
       "id": "fdf24ec1e8e4d94-0a1d1ad5e19389e",
       "title": "Match action policies API validation: rejects rule.tags (policies match on routing tags)",
       "expectedStatus": "passed",
@@ -2849,8 +2881,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/match_action_policies.spec.ts",
-        "line": 22,
-        "column": 21
+        "line": 100,
+        "column": 24
       }
     },
     {
@@ -2865,8 +2897,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/match_action_policies.spec.ts",
-        "line": 30,
-        "column": 42
+        "line": 120,
+        "column": 14
       }
     },
     {
@@ -2987,6 +3019,111 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
         "line": 200,
         "column": 67
+      }
+    },
+    {
+      "id": "69e4e2aac45ced5-1d257f321edb17a",
+      "title": "Send test notification API authorization: rejects users without action policy access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
+        "line": 84,
+        "column": 99
+      }
+    },
+    {
+      "id": "69e4e2aac45ced5-4ea24051f5eb13e",
+      "title": "Send test notification API authorization: a policy reader previews, but needs the workflow execute privilege to send",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
+        "line": 100,
+        "column": 32
+      }
+    },
+    {
+      "id": "69e4e2aac45ced5-144bbf541313055",
+      "title": "Send test notification API validation: rejects unbounded or unknown input",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
+        "line": 117,
+        "column": 13
+      }
+    },
+    {
+      "id": "69e4e2aac45ced5-8d306e3d48b0d5a",
+      "title": "Send test notification API rejects destinations that do not belong to the policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
+        "line": 162,
+        "column": 11
+      }
+    },
+    {
+      "id": "69e4e2aac45ced5-9af45b682f299c7",
+      "title": "Send test notification API returns 404 for an unknown action policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
+        "line": 186,
+        "column": 49
+      }
+    },
+    {
+      "id": "69e4e2aac45ced5-9363d40e275fa14",
+      "title": "Send test notification API sends a test notification for a policy whose matcher has a KQL expression",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
+        "line": 194,
+        "column": 11
+      }
+    },
+    {
+      "id": "69e4e2aac45ced5-dad54ba0e092553",
+      "title": "Send test notification API sends the previewed payload as a workflow test run, and writes no alert actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
+        "line": 213,
+        "column": 72
       }
     },
     {

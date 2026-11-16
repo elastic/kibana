@@ -10,8 +10,8 @@ import { parseRequestedIds } from './select_datasets';
 /** `NIGHTSHIFT_DATASETS` id for the file-driven investigation eval; every other id is a smoke dataset. */
 export const INVESTIGATION_DATASET_ID = 'trace-only';
 /**
- * `NIGHTSHIFT_DATASETS` id for the Nightshift assistant connector probes. Opt-in only: it needs a
- * remote telemetry connector, so unset and `all` never select it.
+ * `NIGHTSHIFT_DATASETS` id for the Nightshift assistant connector probes. Opt-in only: it needs an
+ * Elasticsearch connector, so unset and `all` never select it.
  */
 export const CONNECTOR_PROBE_DATASET_ID = 'connector-probe';
 
@@ -35,9 +35,9 @@ export const resolveEvalSelection = (
   const orca = env.EVAL_SHARD_ID === 'orcabench' || env.NIGHTSHIFT_DATASETS?.trim() === 'orcabench';
   if (orca) {
     if (!env.SANDBOX_API_KEY) throw new Error('ORCA investigations require SANDBOX_API_KEY');
-    if (!env.NIGHTSHIFT_ORCA_TELEMETRY) {
+    if (env.NIGHTSHIFT_CONNECTOR_SET !== 'orcabench') {
       throw new Error(
-        'ORCA investigations require a Scout server started with the ORCA telemetry hook'
+        'ORCA investigations require a Scout server started with the orcabench connector set'
       );
     }
     return {
@@ -50,9 +50,7 @@ export const resolveEvalSelection = (
     };
   }
   if (env.NIGHTSHIFT_DATASETS?.split(',').some((id) => id.trim() === 'orcabench')) {
-    throw new Error(
-      'Run orcabench on its own Scout server; it cannot share the current telemetry target'
-    );
+    throw new Error('Run orcabench on its own Scout server; it needs the orcabench connector set');
   }
   const requested =
     env.NIGHTSHIFT_DATASETS?.trim() ||

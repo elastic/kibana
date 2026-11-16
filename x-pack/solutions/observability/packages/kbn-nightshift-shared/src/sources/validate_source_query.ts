@@ -64,15 +64,48 @@ const DATE_MATH_BRACES = /\{(?:[^{}]|\{[^{}]*\})*\}/g;
 const NON_DATA_SELECTOR = /::(?!data$)/i;
 const BACKTICK_QUOTES = /^`(.*)`$/;
 
+// One index name of a quoted list: text without a comma. A comma only stays inside a well-formed
+// date-math name (`<logs-{now/d{yyyy,MM}}>`), within its braces. Braces anywhere else are plain
+// text, so a stray `}` or `{` cannot protect a comma and hide the name after it.
+const NAME_TOKEN = /(?:<(?:[^>{,]|\{(?:[^{}]|\{[^{}]*\})*\})*>|[^,])+/g;
+
+/** One index name of a source, with the cluster prefix the parser split off, if any. */
+interface ISourceName {
+  /** What the query wrote, including a cluster prefix and selector. */
+  name: string;
+  /** The index text. A quoted source keeps its cluster prefix in here. */
+  raw: string | undefined;
+  /** The cluster prefix the parser split off. */
+  prefix: string | undefined;
+  hasPrefix: boolean;
+}
+
+/**
+ * A quoted source (`"logs-a,logs-b-*"`) is one parser node, but ES|QL reads it as one index per
+ * comma. Each part is treated as its own name, so a prefix, exclusion or wildcard in one part
+ * cannot hide another part from the checks.
+ */
+const namesOf = (source: ESQLSource, name: string): ISourceName[] => {
+  const raw =
+    source.index?.valueUnquoted ?? (typeof source.name === 'string' ? source.name : undefined);
+  const prefix = source.prefix?.valueUnquoted;
+  const hasPrefix = source.prefix !== undefined;
+  if (raw === undefined || !raw.includes(',')) {
+    return [{ name, raw, prefix, hasPrefix }];
+  }
+  return (raw.match(NAME_TOKEN) ?? [])
+    .map((part) => part.trim())
+    .filter((part) => part !== '')
+    .map((part) => ({ name: part, raw: part, prefix, hasPrefix }));
+};
+
 /**
  * Index pattern with the cluster prefix removed. `remote:logs-*` is `logs-*`. A parsed prefix
  * is already split off the index; a quoted source (`"remote:*"`) is not, so the prefix is
  * stripped from the text either way. `::data` is a selector, not a cluster. Backticks are
  * identifier quotes, not part of the name.
  */
-const indexPatternOf = (source: ESQLSource): string | undefined => {
-  const raw =
-    source.index?.valueUnquoted ?? (typeof source.name === 'string' ? source.name : undefined);
+const indexPatternOf = ({ raw }: ISourceName): string | undefined => {
   if (raw === undefined) {
     return undefined;
   }
@@ -87,12 +120,14 @@ const indexPatternOf = (source: ESQLSource): string | undefined => {
  * `-logs-*`, `-cluster:*` and `cluster:-logs-*` drop indices. They are not targets, so they
  * do not pick a type and do not count as an unscoped wildcard.
  */
-const isExcludedIndex = (source: ESQLSource): boolean => {
-  const pattern = indexPatternOf(source);
-  const cluster = source.prefix?.valueUnquoted;
+const isExcludedIndex = (name: ISourceName): boolean => {
+  const pattern = indexPatternOf(name);
   return (
     (pattern !== undefined && pattern.startsWith('-')) ||
-    (cluster !== undefined && cluster.startsWith('-'))
+    (name.prefix !== undefined && name.prefix.startsWith('-')) ||
+    // A part split from a quoted list has no parsed prefix, so `-remote:*` shows its exclusion
+    // only in the text, before the cluster prefix is stripped.
+    (name.raw?.replace(BACKTICK_QUOTES, '$1').startsWith('-') ?? false)
   );
 };
 
@@ -105,15 +140,13 @@ interface TargetedIndex {
   remote: boolean;
 }
 
-const isRemoteIndex = (source: ESQLSource): boolean => {
-  const raw =
-    source.index?.valueUnquoted ?? (typeof source.name === 'string' ? source.name : undefined);
+const isRemoteIndex = ({ raw, hasPrefix }: ISourceName): boolean => {
   const unquoted = raw?.replace(BACKTICK_QUOTES, '$1') ?? '';
   // Date math can hold colons (`+01:00`), which are not a cluster prefix.
   const withoutDateMath = unquoted.startsWith('<')
     ? unquoted.replace(DATE_MATH_BRACES, '*')
     : unquoted;
-  return source.prefix !== undefined || CLUSTER_PREFIX.test(withoutDateMath);
+  return hasPrefix || CLUSTER_PREFIX.test(withoutDateMath);
 };
 
 const isIndexSource = (node: { type: string; sourceType?: string }): node is ESQLSource =>
@@ -121,14 +154,16 @@ const isIndexSource = (node: { type: string; sourceType?: string }): node is ESQ
 
 const targetedIndices = (command: ESQLCommand): TargetedIndex[] =>
   Walker.matchAll(command, { type: 'source', sourceType: 'index' }).flatMap((node) => {
-    if (!isIndexSource(node) || isExcludedIndex(node)) {
+    if (!isIndexSource(node) || typeof node.name !== 'string') {
       return [];
     }
-    const pattern = indexPatternOf(node);
-    if (pattern === undefined || typeof node.name !== 'string') {
-      return [];
-    }
-    return [{ name: node.name, pattern, remote: isRemoteIndex(node) }];
+    return namesOf(node, node.name).flatMap((entry) => {
+      const pattern = indexPatternOf(entry);
+      if (pattern === undefined || isExcludedIndex(entry)) {
+        return [];
+      }
+      return [{ name: entry.name, pattern, remote: isRemoteIndex(entry) }];
+    });
   });
 
 /**
@@ -304,14 +339,16 @@ const toPrivilegeName = (pattern: string): string => {
 export interface ISourceReadTargets {
   /** Local index patterns the source reads, without selectors. */
   indexPatterns: string[];
-  /** True when the source also reads another cluster, which a local privilege check cannot cover. */
+  /** True when the source also reads another cluster, whose access `has_privileges` cannot assess. */
   hasRemote: boolean;
 }
 
 /**
  * The index patterns a stored source query reads, for checking a caller's own privileges. Excluded
  * indices (`-logs-*`) are not targets. Throws when the query does not parse, so a caller can fail
- * closed instead of treating an unreadable query as readable.
+ * closed instead of treating an unreadable query as readable. It also throws when a name still
+ * holds a comma after splitting, because `has_privileges` would match that whole string against
+ * a role pattern instead of each index.
  */
 export const getSourceReadTargets = (esql: string): ISourceReadTargets => {
   const parsed = Parser.parse(esql);
@@ -325,12 +362,16 @@ export const getSourceReadTargets = (esql: string): ISourceReadTargets => {
     return { indexPatterns: [], hasRemote: false };
   }
   const targets = targetedIndices(firstCommand);
-  return {
-    indexPatterns: [
-      ...new Set(
-        targets.filter(({ remote }) => !remote).map(({ pattern }) => toPrivilegeName(pattern))
-      ),
-    ],
-    hasRemote: targets.some(({ remote }) => remote),
-  };
+  const indexPatterns = [
+    ...new Set(
+      targets
+        .filter(({ remote }) => !remote)
+        .map(({ pattern }) => toPrivilegeName(pattern))
+        .filter((name) => name !== '')
+    ),
+  ];
+  if (indexPatterns.some((name) => name.includes(','))) {
+    throw new Error('An index name could not be split into separate patterns');
+  }
+  return { indexPatterns, hasRemote: targets.some(({ remote }) => remote) };
 };

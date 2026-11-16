@@ -17,7 +17,6 @@ import { QueryClientProvider } from '@kbn/react-query';
 import type { SearchHomepageServicesContextDeps } from './types';
 import { HomepageRouter } from './router';
 import { UsageTrackerContextProvider } from './contexts/usage_tracker_context';
-import { GettingStartedRedirectGate } from './components/getting_started_redirect_gate';
 
 export const renderApp = async (
   core: CoreStart,
@@ -32,11 +31,9 @@ export const renderApp = async (
         <UsageTrackerContextProvider usageCollection={services.usageCollection}>
           <QueryClientProvider client={queryClient}>
             <I18nProvider>
-              <GettingStartedRedirectGate coreStart={core}>
-                <Router history={services.history}>
-                  <HomepageRouter />
-                </Router>
-              </GettingStartedRedirectGate>
+              <Router history={services.history}>
+                <HomepageRouter />
+              </Router>
             </I18nProvider>
           </QueryClientProvider>
         </UsageTrackerContextProvider>

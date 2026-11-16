@@ -8,7 +8,11 @@
 import { getPlaywrightTagsFor, type KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import { mockFinalAnswer, mockTitleGeneration } from '../../common/llm_mocks';
+import {
+  mockFinalAnswer,
+  mockTemplateGeneration,
+  mockTitleGeneration,
+} from '../../common/llm_mocks';
 import { mockUpdatePanelToolCall } from '../fixtures/llm_mocks';
 
 const DASHBOARD_ARCHIVE =
@@ -64,6 +68,7 @@ test.describe(
 
       mockTitleGeneration(llmProxy, 'Refine custom panel');
       mockUpdatePanelToolCall(llmProxy, 'ROW greeting = "refined"');
+      mockTemplateGeneration(llmProxy, '<p id="greeting">{{ rows[0]["greeting"].value }}</p>');
       mockFinalAnswer(llmProxy, 'I updated the panel.');
 
       await dashboard.clickPanelAction('embeddablePanelAction-editPanel');

@@ -86,11 +86,7 @@ export const AutomationsToolbar = ({
     [statusLabels.enabled]: <EuiIcon type="play" color="success" aria-hidden={true} />,
     [statusLabels.paused]: <EuiIcon type="pause" color="subdued" aria-hidden={true} />,
     [statusLabels.rateLimited]: (
-      <EuiIcon
-        type="hourglass"
-        color={euiTheme.colors.vis.euiColorVisWarning0}
-        aria-hidden={true}
-      />
+      <EuiIcon type="hourglass" color={euiTheme.colors.textWarning} aria-hidden={true} />
     ),
   };
   const from = pageIndex * pageSize + 1;

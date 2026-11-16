@@ -43,6 +43,7 @@ import {
   isIndexNotFoundError,
   pickLatestPerGroup,
   queryEsql,
+  resolveTimeBound,
 } from '../latest_source_query';
 import {
   SIGNIFICANT_EVENT_INVESTIGATION_STATES,
@@ -324,6 +325,8 @@ const applySort = (
   switch (sortField) {
     case 'created_at':
       return query.sort(['created_at', direction], ['@timestamp', 'DESC'], ['_id', 'ASC']);
+    case 'updated_at':
+      return query.sort(['@timestamp', direction], ['created_at', 'DESC'], ['_id', 'ASC']);
     case 'severity':
       return query.pipe`EVAL ${esql.col(SORT_RANK_COLUMN)} = CASE(${esql.col(
         'severity'
@@ -800,29 +803,36 @@ export class RuleEventsClient {
    * Reads, in one query, the live series (`active` or `recovering`) the requested rules are members
    * of, with each member's latest stored signal. A rule in none is absent from the map.
    *
-   * `from` bounds the read on a series' latest version, applied after `created_at` is computed over
-   * the whole lineage: bounding earlier would clip `created_at` and make an old series look young.
-   * A live series with no write since `from` is read as "not a live member", which sends its
-   * detections to the agent. Capped at MAX_DEDUP_SCAN_LIMIT series, newest first; a space with more
-   * can omit older ones, which callers must read the same way.
+   * `lookback` (ISO or date math) bounds which versions can establish membership, after
+   * `created_at` is computed over the full lineage; `from` bounds a series' latest version. A
+   * series outside either bound reads as "not a live member". Capped at MAX_DEDUP_SCAN_LIMIT live
+   * series, newest first.
    */
   async findLiveMemberships({
     ruleUuids,
+    lookback,
     from,
   }: {
     ruleUuids: string[];
-    from: string;
+    lookback?: string;
+    from?: string;
   }): Promise<Map<string, LiveRuleMembership[]>> {
     const live = new Map<string, LiveRuleMembership[]>();
     if (ruleUuids.length === 0) return live;
 
     const requested = new Set(ruleUuids);
-    const lineage = buildBaseQuery(this.clients.space)
-      .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`;
-    const query = applyTimeRange({
-      query: pickLatestPerGroup(lineage, GROUP_HASH_FIELD),
-      from,
-    }).where`${ruleUuidsIntersects(ruleUuids)}`;
+    const base = buildBaseQuery(this.clients.space);
+    const lookbackIso = lookback === undefined ? undefined : resolveTimeBound(lookback);
+    let lineage = base.pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(
+      GROUP_HASH_FIELD
+    )}`;
+    if (lookbackIso !== undefined) {
+      lineage = lineage.where`@timestamp >= TO_DATETIME(${{ lookbackIso }})`;
+    }
+    let query = applyTimeRange({ query: pickLatestPerGroup(lineage, GROUP_HASH_FIELD), from });
+    query = query.where`${eventStatus()} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map((status) =>
+      esql.str(status)
+    )})`.where`${ruleUuidsIntersects(ruleUuids)}`;
     const rows = await executeEsqlQuery<RuleEventSourceRowWithCreatedAt>({
       esClient: this.clients.esClient,
       query: withDataJsonProjection(query)

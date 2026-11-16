@@ -30,6 +30,7 @@ import {
 import type { DecisionTreeView, LearningRecord } from '@kbn/nightshift-decision-trees';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { DecisionTreeDetail, DecisionTreeStore } from '../../decision_trees/store';
+import type { AppliedWriteRecord, WriteProvenance } from '../../investigation_round';
 import {
   getConversationId,
   getScopedConversationId,
@@ -97,6 +98,8 @@ export const createSubmitOptimizerResultTool = ({
   getUsername,
   peekLearnings,
   drainLearnings,
+  getProvenance,
+  onAppliedWrite,
   logger,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
@@ -108,6 +111,8 @@ export const createSubmitOptimizerResultTool = ({
   peekLearnings?: (conversationId: string) => LearningRecord[];
   /** Takes and clears the learnings this conversation recorded this turn. */
   drainLearnings?: (conversationId: string) => LearningRecord[];
+  getProvenance?: (conversationId: string) => WriteProvenance | undefined;
+  onAppliedWrite?: (conversationId: string, write: AppliedWriteRecord) => void;
   logger: Logger;
 }): BuiltinToolDefinition<typeof submitSchema> => ({
   id: DECISION_TREE_SUBMIT_TOOL_ID,
@@ -157,6 +162,7 @@ export const createSubmitOptimizerResultTool = ({
 
     const store = getStore(context.esClient.asCurrentUser, context.request);
     const author = getUsername?.(context.request) || 'system';
+    const provenance = getProvenance?.(conversationId);
     // Peek until every submission is accepted. Draining first would drop this turn's learnings
     // when the agent has to fix a rejected file and call submit again.
     const turnLearnings = peekLearnings?.(conversationId) ?? [];
@@ -168,6 +174,10 @@ export const createSubmitOptimizerResultTool = ({
         author,
         summary: params.summary,
         learnings: turnLearnings,
+        provenance,
+        onAppliedWrite: onAppliedWrite
+          ? (write) => onAppliedWrite(conversationId, write)
+          : undefined,
       });
       drainLearnings?.(conversationId);
       return {
@@ -203,6 +213,10 @@ export const createSubmitOptimizerResultTool = ({
                 symptomSlugFromTreeId(learning.tree_id) ===
                   symptomSlugFromTreeId(submission.tree_id)
             ),
+            provenance,
+            onAppliedWrite: onAppliedWrite
+              ? (write) => onAppliedWrite(conversationId, write)
+              : undefined,
           })
         );
       } catch (error) {
@@ -269,6 +283,8 @@ const persistSubmission = async ({
   author,
   summary,
   learnings,
+  provenance,
+  onAppliedWrite,
 }: {
   submission: z.infer<typeof submissionSchema>;
   session: SandboxSession;
@@ -276,6 +292,8 @@ const persistSubmission = async ({
   author: string;
   summary: string;
   learnings: LearningRecord[];
+  provenance?: WriteProvenance;
+  onAppliedWrite?: (write: AppliedWriteRecord) => void;
 }): Promise<SubmissionOutcome> => {
   const { tree_id: treeId, file_path: filePath, evidence_gatherer_metadata: metadata } = submission;
 
@@ -337,7 +355,7 @@ const persistSubmission = async ({
   // Initial trees mark the path they walked with ✅ even without a confirmed root cause.
   // Only a newly taken edge on an existing tree is a causal reinforcement.
   const reinforced = hasNewlyTakenEdges(existing, newTree);
-  await store.commit({
+  const committed = await store.commit({
     treeId,
     markdown,
     tree: newTree,
@@ -346,6 +364,21 @@ const persistSubmission = async ({
     summary,
     learnings,
     evidenceGathererMetadata: metadata,
+    ...(provenance?.conversationId ? { conversationId: provenance.conversationId } : {}),
+    ...(provenance?.roundId ? { roundId: provenance.roundId } : {}),
+    ...(provenance?.workflowExecutionId
+      ? { workflowExecutionId: provenance.workflowExecutionId }
+      : {}),
+  });
+  onAppliedWrite?.({
+    store: 'decision_tree',
+    item_id: treeId,
+    action: existing ? (reinforced ? 'reinforce' : 'update') : 'create',
+    version: committed?.version ?? (existing ? existing.version + 1 : 1),
+    ...(existing ? { before_status: existing.status, before_content: existing.markdown } : {}),
+    after_status:
+      committed?.status ?? (reinforced ? 'established' : existing?.status ?? 'tentative'),
+    after_content: markdown,
   });
 
   return {
@@ -384,11 +417,15 @@ const persistLearningsWithoutEdits = async ({
   author,
   summary,
   learnings,
+  provenance,
+  onAppliedWrite,
 }: {
   store: DecisionTreeStore;
   author: string;
   summary: string;
   learnings: LearningRecord[];
+  provenance?: WriteProvenance;
+  onAppliedWrite?: (write: AppliedWriteRecord) => void;
 }): Promise<string[]> => {
   const byTree = new Map<string, LearningRecord[]>();
   for (const learning of learnings) {
@@ -411,7 +448,7 @@ const persistLearningsWithoutEdits = async ({
       treeId,
       existing.evidence_gatherer_metadata
     );
-    await store.commit({
+    const committed = await store.commit({
       treeId,
       markdown: existing.markdown,
       tree,
@@ -420,6 +457,21 @@ const persistLearningsWithoutEdits = async ({
       summary,
       learnings: treeLearnings,
       evidenceGathererMetadata: existing.evidence_gatherer_metadata,
+      ...(provenance?.conversationId ? { conversationId: provenance.conversationId } : {}),
+      ...(provenance?.roundId ? { roundId: provenance.roundId } : {}),
+      ...(provenance?.workflowExecutionId
+        ? { workflowExecutionId: provenance.workflowExecutionId }
+        : {}),
+    });
+    onAppliedWrite?.({
+      store: 'decision_tree',
+      item_id: treeId,
+      action: 'attach_learnings',
+      version: committed?.version ?? existing.version + 1,
+      before_status: existing.status,
+      after_status: committed?.status ?? existing.status,
+      before_content: existing.markdown,
+      after_content: existing.markdown,
     });
     attached.push(treeId);
   }

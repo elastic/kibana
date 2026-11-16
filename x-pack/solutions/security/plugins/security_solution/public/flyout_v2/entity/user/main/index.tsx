@@ -484,6 +484,7 @@ export const User: FC<UserProps> = memo(function User({
             onCriticalitySave={onCriticalitySave}
           />
         )}
+        {isGroupView && !tabs && <EuiSpacer size="l" />}
         {tabsNode}
         {tabs && <EuiSpacer size="l" />}
         {tabs && selectedTabId === TABLE_TAB_ID && observedUser.entityRecord ? (

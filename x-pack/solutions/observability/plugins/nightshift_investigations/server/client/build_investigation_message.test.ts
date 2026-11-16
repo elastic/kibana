@@ -407,6 +407,19 @@ describe('buildAlertRecoveredFollowUpMessage', () => {
     );
   });
 
+  it('names a rule-less alert by its id and leaves out the rule identifiers', () => {
+    const message = buildAlertRecoveredFollowUpMessage({
+      alertUuid: 'episode-1',
+      alertId: 'group-hash',
+      recoveredAt: '2026-08-24T12:15:30.000Z',
+    });
+
+    expect(message).toContain(
+      'Alert "episode-1" (UUID episode-1, instance "group-hash") transitioned to recovered at 2026-08-24T12:15:30.000Z.'
+    );
+    expect(message).not.toContain('rule undefined');
+  });
+
   it('asks the agent to use all available signals to reassess the root cause', () => {
     const message = buildAlertRecoveredFollowUpMessage(baseRecovery);
 

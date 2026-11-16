@@ -683,6 +683,30 @@ describe('InvestigationsQueryService', () => {
       expect(results.map(({ id }) => id).sort()).toEqual(['summary', 'title', 'verdict']);
     });
 
+    it('returns the assignees, leaving them out when nobody is assigned', async () => {
+      const { service } = setup({
+        searchResults: [
+          conversation('assigned', {
+            metadata: { status: 'open', assignees: ['uid-1', '', 'uid-2'] },
+            updated_at: '2026-01-03T00:00:00.000Z',
+          }),
+          conversation('cleared', {
+            metadata: { status: 'open', assignees: [] },
+            updated_at: '2026-01-02T00:00:00.000Z',
+          }),
+          conversation('never'),
+        ],
+      });
+
+      const { results } = await service.list(request, parseQuery());
+
+      expect(results.map(({ id, metadata }) => ({ id, metadata }))).toEqual([
+        { id: 'assigned', metadata: { status: 'open', assignees: ['uid-1', 'uid-2'] } },
+        { id: 'cleared', metadata: { status: 'open' } },
+        { id: 'never', metadata: { status: 'open' } },
+      ]);
+    });
+
     it('reports a title Agent Builder has not generated yet and never matches text against it', async () => {
       const { service } = setup({
         searchResults: [

@@ -7,6 +7,7 @@
 
 import type {
   AlertSubjectSnapshot,
+  InvestigationSubjectTriggerType,
   InvestigationSubjectType,
   SlackThreadSubject,
 } from '../../../common/subjects/subject';
@@ -17,6 +18,7 @@ export interface SubjectRowData {
   type: InvestigationSubjectType;
   id: string;
   summary?: string;
+  trigger_type?: InvestigationSubjectTriggerType;
   snapshot?: AlertSubjectSnapshot;
   slack?: SlackThreadSubject;
 }

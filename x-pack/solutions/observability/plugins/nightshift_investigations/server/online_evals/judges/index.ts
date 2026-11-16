@@ -6,7 +6,10 @@
  */
 
 import type { RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
+import { alertOutcomeRcaAccuracyJudge } from './alert_outcome_rca_accuracy';
 import { conclusionQualityJudge } from './conclusion_quality';
+import { cortexPageInfluenceJudge } from './cortex_page_influence';
+import { cortexPagesReadJudge } from './cortex_pages_read';
 import { investigationProcessJudge } from './investigation_process';
 import { rcaRewardJudge } from './rca_reward';
 
@@ -15,4 +18,15 @@ export const referenceFreeJudges: readonly RegisteredEvaluatorDefinition[] = [
   rcaRewardJudge,
   investigationProcessJudge,
   conclusionQualityJudge,
+];
+
+/** Reference-based judges ported from Deductive's alert-outcome scoring. */
+export const alertOutcomeJudges: readonly RegisteredEvaluatorDefinition[] = [
+  alertOutcomeRcaAccuracyJudge,
+];
+
+/** Judges of how an investigation used the Cortex pages it read. */
+export const cortexJudges: readonly RegisteredEvaluatorDefinition[] = [
+  cortexPagesReadJudge,
+  cortexPageInfluenceJudge,
 ];

@@ -138,6 +138,19 @@ describe('resolveFieldMeta', () => {
     const meta = resolveFieldMeta(service, 'aws-s3', 'tags');
     expect(meta?.multi).toBe(true);
   });
+
+  it('forces multi for ECF trigger vars only in the ECF view', () => {
+    const service = makeService({
+      varDefsByInput: {
+        'aws-cloudwatch': { log_group_arn: makeVarDef('log_group_arn', 'text') },
+      },
+    });
+    expect(resolveFieldMeta(service, 'aws-cloudwatch', 'log_group_arn')?.multi).toBe(false);
+    expect(
+      resolveFieldMeta({ ...service, settingsScope: 'ecf' }, 'aws-cloudwatch', 'log_group_arn')
+        ?.multi
+    ).toBe(true);
+  });
 });
 
 describe('toTyped / toDraft', () => {
@@ -324,14 +337,23 @@ describe('getMissingSourceGroup', () => {
     expect(getMissingSourceGroup(agentView, input, { [alt]: 'value' })).toBeUndefined();
   });
 
-  it('does not apply to the ECF view, to non ECF-capable services or to other inputs', () => {
+  it('does not apply to the ECF view or to other inputs', () => {
     expect(
       getMissingSourceGroup({ ...agentView, settingsScope: 'ecf' }, 'aws-s3', {})
     ).toBeUndefined();
-    expect(
-      getMissingSourceGroup({ ...agentView, ecfSettings: undefined }, 'aws-s3', {})
-    ).toBeUndefined();
     expect(getMissingSourceGroup(agentView, 'httpjson', {})).toBeUndefined();
+  });
+
+  it('applies to services without an ECF route (e.g. Amazon MQ, EC2 logs)', () => {
+    const agentOnly = { ...agentView, ecfSettings: undefined };
+    expect(getMissingSourceGroup(agentOnly, 'aws-cloudwatch', {})).toEqual([
+      'log_group_arn',
+      'log_group_name',
+      'log_group_name_prefix',
+    ]);
+    expect(
+      getMissingSourceGroup(agentOnly, 'aws-cloudwatch', { log_group_name_prefix: '/aws/x' })
+    ).toBeUndefined();
   });
 });
 

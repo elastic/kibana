@@ -390,8 +390,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    const startExecuteEvent = events[0];
-    const executeEvent = events[1];
+    const startExecuteEvent = events.find((event) => event?.event?.action === 'execute-start');
+    const executeEvent = events.find((event) => event?.event?.action === 'execute');
 
     const duration = executeEvent?.event?.duration;
     const executeEventStart = Date.parse(executeEvent?.event?.start || 'undefined');

@@ -19,6 +19,9 @@ export const STREAMS_METADATA_REFERENCE_NAME = 'streamsMetadata';
 /** V1 has a single authored unit; callers should use this id until multiple units exist. */
 export const STREAMS_DEFAULT_UNIT_ID = 'default';
 
+/** Max data stream names in one request to the POST variants of the bulk stats endpoints. */
+export const MAX_STATS_STREAM_NAMES = 1000;
+
 export const getStreamsUiMetadataSavedObjectId = (configurationSavedObjectId: string): string =>
   `${configurationSavedObjectId}-streams-ui-metadata`;
 

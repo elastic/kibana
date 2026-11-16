@@ -1,5 +1,5 @@
 {
-  "sha1": "86f09b9d67785b17e52a7699d8fb9ef8c3613f9c",
+  "sha1": "f41f68e6112f864a570c1dbd76866dd2c8c6b385",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -141,6 +141,46 @@
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_esql_no_data.spec.ts",
         "line": 36,
         "column": 33
+      }
+    },
+    {
+      "id": "8326f3dd704ad28-b14b5bf7ae0933a",
+      "title": "Dashboard filter bar shows panel data view fields on a dashboard with panels",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_filter_bar.spec.ts",
+        "line": 57,
+        "column": 23
+      }
+    },
+    {
+      "id": "8326f3dd704ad28-99ab7c4c0027dcd",
+      "title": "Dashboard filter bar filter pills",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_filter_bar.spec.ts",
+        "line": 62,
+        "column": 5
       }
     },
     {
@@ -412,6 +452,26 @@
       }
     },
     {
+      "id": "a0c057380922533-0bbeb210bf4018f",
+      "title": "Dashboard full screen mode full screen mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/full_screen_mode.spec.ts",
+        "line": 28,
+        "column": 46
+      }
+    },
+    {
       "id": "5e76aeeb49b5555-a908f3956402041",
       "title": "Controls migration smoke (8.0.0) imports and renders controls without regressions",
       "expectedStatus": "passed",
@@ -559,6 +619,26 @@
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_filtering.spec.ts",
         "line": 120,
         "column": 26
+      }
+    },
+    {
+      "id": "f9c87d04d4493ce-1ff5996367efbcd",
+      "title": "Panel multi-selection removes the selected panels in one step that can be undone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_multi_select.spec.ts",
+        "line": 33,
+        "column": 51
       }
     },
     {

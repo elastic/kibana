@@ -8,7 +8,7 @@
  */
 
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
-import { createAwsJsonService } from './aws_json';
+import { createAwsJsonService, isAwsJsonDocument, toAwsJsonDocument } from './aws_json';
 import type { SmithyModel } from '.';
 
 const NS = 'example.metrics';
@@ -117,6 +117,28 @@ describe('AWS JSON services from Smithy models', () => {
         requestViolations: [],
         responseViolations: [],
       },
+    ]);
+  });
+
+  it('serves the OpenAPI document of the model, as snapshots store it, the same way', async () => {
+    const document = JSON.parse(JSON.stringify(toAwsJsonDocument(model)));
+    const { fetch, calls } = createEmulatorFetch({ specs: { metrics: document } });
+
+    const response = await send(fetch, 'Metrics_20240101.GetMetricData', {
+      MetricName: 'CPUUtilization',
+      Period: 60,
+    });
+
+    expect(isAwsJsonDocument(document)).toBe(true);
+    expect(document['x-amz-json']).toEqual({
+      version: '1.0',
+      targetPrefix: 'Metrics_20240101',
+      endpointPrefix: 'metrics',
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ Values: [0], Timestamp: 0 });
+    expect(calls.map(({ matched, status }) => ({ matched, status }))).toEqual([
+      { matched: { method: 'post', path: '/GetMetricData', source: 'metrics' }, status: 200 },
     ]);
   });
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import type { LastUpdatedAtProps } from '../components';
-import { LastUpdatedAt } from '../components';
+import type { LastUpdatedAtProps } from '@kbn/securitysolution-timeline-components';
+import { LastUpdatedAt } from '@kbn/securitysolution-timeline-components';
 import { useAddToTimeline, useAddToTimelineSensor } from '../hooks/use_add_to_timeline';
 import { mockHoverActions } from './mock_hover_actions';
 

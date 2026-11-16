@@ -74,6 +74,8 @@ jest.mock('../server/cortex/register_cortex', () => ({
 
 jest.mock('../server/memory/register_memory', () => ({
   hydrateMemoryWorkspace: jest.fn(),
+  isMemoryOptimizeSkipped: jest.requireActual('../server/memory/register_memory')
+    .isMemoryOptimizeSkipped,
   runMemoryOptimize: jest.fn(),
 }));
 
@@ -136,6 +138,8 @@ export interface NightshiftWorkflowFixture {
   engine: WorkflowRunFixtureType;
   sandboxStart: jest.Mocked<SandboxPluginStart>;
   agentBuilder: { ensure: jest.Mock };
+  /** The saved rounds `prepare_turn` reads; none by default, so a round is a first round. */
+  setSavedRounds: (rounds: Array<{ id: string; steps: unknown[] }>) => void;
   agentRuns: AgentRun[];
   /** Makes the next agent run throw, as a broken reinforcement round would. */
   failAgentRun: (error: Error) => void;
@@ -194,9 +198,11 @@ const setHealthyBoundary = (): void => {
   });
   jest.mocked(runMemoryOptimize).mockResolvedValue(memoryOptimizeSummary);
   jest.mocked(prepareReinforcementTurn).mockResolvedValue({
+    skipped: false,
     message: 'reinforcement turn prompt',
     treeCount: 3,
     turnKind: 'initial_investigation',
+    openedTreeIds: [],
   });
 };
 
@@ -253,6 +259,16 @@ export const createNightshiftWorkflowFixture = ({
   });
   const ensureAgent = jest.fn().mockResolvedValue(undefined);
   const agentBuilder = { agents: { ensure: ensureAgent, runAgent } };
+  // Only `prepare_turn` gets a conversation client: the reinforce step's round loader would
+  // otherwise read these rounds instead of the hook's tool calls the assertions replay.
+  let savedRounds: Array<{ id: string; steps: unknown[] }> = [];
+  const conversationsAgentBuilder = {
+    conversations: {
+      getScopedClient: jest.fn(async () => ({
+        get: jest.fn(async (id: string) => ({ id, rounds: savedRounds })),
+      })),
+    },
+  };
   const telemetry = {
     reportSemanticMemoryMaterialized: jest.fn(),
     reportSemanticMemoryOptimized: jest.fn(),
@@ -300,7 +316,7 @@ export const createNightshiftWorkflowFixture = ({
       telemetry,
     }),
     decisionTreePrepareStepDefinition({
-      getTelemetryConnectorId: () => undefined,
+      getAgentBuilder: () => conversationsAgentBuilder as unknown as AgentBuilderPluginStart,
       logger,
       isEnabled: () => decisionTreesEnabled,
     }),
@@ -380,6 +396,9 @@ export const createNightshiftWorkflowFixture = ({
     engine,
     sandboxStart,
     agentBuilder: { ensure: ensureAgent },
+    setSavedRounds: (rounds) => {
+      savedRounds = rounds;
+    },
     agentRuns,
     failAgentRun: (error: Error) => {
       agentFailure = error;

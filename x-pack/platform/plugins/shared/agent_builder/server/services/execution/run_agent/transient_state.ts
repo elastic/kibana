@@ -83,8 +83,8 @@ export const mergeToolRenderState = (
 /** A recoverable model error surfaced to the model on the next turn, positioned among the steps. */
 export interface RetryNotice {
   phase: 'research' | 'answer';
-  /** Number of non-todos steps that existed when the error occurred; the notice renders after that many steps. */
-  afterNonTodosStepCount: number;
+  /** Number of steps that existed when the error occurred; the notice renders after that many steps. */
+  afterStepCount: number;
   error: AgentBuilderAgentExecutionError;
 }
 

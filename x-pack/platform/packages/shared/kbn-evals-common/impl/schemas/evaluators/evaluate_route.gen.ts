@@ -61,7 +61,15 @@ export type EvaluateResultScore = z.infer<typeof EvaluateResultScore>;
 
 export const EvaluateResultError = lazySchema(() =>
   z.object({
-    code: z.literal('evidence_unmet').optional(),
+    /**
+     * `evidence_unmet`: the round lacks the evidence the evaluator requires. `not_applicable`: the evaluator read the round and reported that it does not apply.
+     */
+    code: z
+      .enum(['evidence_unmet', 'not_applicable'])
+      .optional()
+      .describe(
+        '`evidence_unmet`: the round lacks the evidence the evaluator requires. `not_applicable`: the evaluator read the round and reported that it does not apply.'
+      ),
     message: z.string().max(8192),
   })
 );

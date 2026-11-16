@@ -23,10 +23,6 @@ import {
   type ExcludedFeatureSummary,
   type IgnoredFeature,
 } from '@kbn/nightshift-ai';
-import {
-  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
-  type SignificantEventsTuningConfig,
-} from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import {
   reconcileInferredFeatures,
@@ -148,11 +144,10 @@ export const buildKnownFeatureIds = (
 // Tuning params type (subset of SignificantEventsTuningConfig)
 // ---------------------------------------------------------------------------
 
-type IterationTuningParams = Partial<
-  Pick<SignificantEventsTuningConfig, 'max_excluded_features_in_prompt'>
-> & {
+interface IterationTuningParams {
+  maxExcludedFeaturesInPrompt: number;
   maxPreviouslyIdentifiedFeatures?: number;
-};
+}
 
 // ---------------------------------------------------------------------------
 // Telemetry
@@ -304,8 +299,7 @@ async function runInferredIteration({
   iteration,
 }: RunInferredIterationOptions): Promise<InferredIterationResult> {
   const {
-    max_excluded_features_in_prompt:
-      maxExcludedFeaturesInPrompt = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.max_excluded_features_in_prompt,
+    maxExcludedFeaturesInPrompt,
     maxPreviouslyIdentifiedFeatures = DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES,
   } = tuning;
 
@@ -413,7 +407,7 @@ export interface IdentifyInferredFeaturesOptions {
   filtersCapped: boolean;
   hasFilteredDocuments: boolean;
   iteration?: number;
-  tuning?: IterationTuningParams;
+  tuning: IterationTuningParams;
   trackFeaturesIdentified?: (data: FeaturesIdentifiedTelemetry) => void;
 }
 
@@ -440,7 +434,7 @@ export async function identifyInferredFeatures({
   filtersCapped,
   hasFilteredDocuments,
   iteration = 1,
-  tuning = {},
+  tuning,
   trackFeaturesIdentified,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
   if (!agentBuilder) {

@@ -25,8 +25,8 @@ const connected = {
   isComplete: true,
 };
 const mockUseAllRelayAppBindings = jest.fn();
-jest.mock('../../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
-  ...jest.requireActual('../../../../../settings/components/apps_section/use_relay_app_bindings'),
+jest.mock('../../../../../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => mockUseAllRelayAppBindings(),
 }));
 jest.mock('../../../../../hooks/use_kibana', () => ({

@@ -101,12 +101,12 @@ export const createSourceCreateTool = ({
   availability: createSignificantEventsAvailability({
     server,
     logger,
-    requireManagePrivilege: true,
+    requireSourceChangePrivilege: true,
   }),
   handler: async (toolParams, { request }) =>
     runSourceTool({
       action: 'create source',
-      privilege: 'manage',
+      privilege: 'changeSources',
       request,
       getScopedClients,
       server,

@@ -9,7 +9,6 @@ import { Subject } from 'rxjs';
 import {
   API_STATE_CHANGED_UI_EVENT,
   ChatEventType,
-  TODOS_UPDATED_UI_EVENT,
   type ApiStateChangedEventData,
   type ChatEvent,
 } from '@kbn/agent-builder-common';
@@ -84,7 +83,7 @@ describe('filterApiStateChanges', () => {
 
   it('ignores other tool UI events and other chat events', () => {
     const received = collect({ apis: [{ target: 'kibana', api: '*' }] }, [
-      toolUiEvent(TODOS_UPDATED_UI_EVENT, createAgentChange),
+      toolUiEvent('some_other_ui_event', createAgentChange),
       messageChunkEvent,
     ]);
 

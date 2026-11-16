@@ -65,6 +65,7 @@ jest.mock('@kbn/unified-data-table', () => ({
       () =>
         leftSide
   ),
+  getRowHeight: jest.fn(() => 3),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');

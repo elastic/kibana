@@ -20,6 +20,7 @@ import { DefaultCell } from './cells/default_cell';
 import { EntityNameCell } from './cells/entity_name_cell';
 import { EntityTypeCell } from './cells/entity_type_cell';
 import { GroupSizeCell } from './cells/group_size_cell';
+import { alignEndCss } from './cells/styles';
 import { RiskScoreChangeCell } from './cells/risk_score_change_cell';
 import { RiskScoreValueCell } from './cells/risk_score_value_cell';
 import { SourceCell } from './cells/source_cell';
@@ -70,6 +71,14 @@ export const EntityGridRowsContext = createContext<EntityGridRows>({
   isEnriching: false,
 });
 
+/** Columns whose loaded cell is right-aligned, so their placeholder is too. */
+const END_ALIGNED_COLUMNS: ReadonlySet<string> = new Set([
+  'group_size',
+  'risk_score_change',
+  'anomaly_count',
+  'case_count',
+]);
+
 /** Shaped like "—", so a cell holds still when its value arrives. */
 const cellLoadingPlaceholderCss = css`
   inline-size: 1em;
@@ -104,7 +113,11 @@ const renderKnownEntityCell = (
     case 'entity.name':
       return <EntityNameCell value={value} row={row} onEntityNameClick={onEntityNameClick} />;
     case 'group_size':
-      return <GroupSizeCell value={value} row={row} onGroupSizeClick={onGroupSizeClick} />;
+      return (
+        <div css={alignEndCss}>
+          <GroupSizeCell value={value} row={row} onGroupSizeClick={onGroupSizeClick} />
+        </div>
+      );
     case 'last_seen_alert':
     case '@timestamp':
     case 'entity.lifecycle.first_seen':
@@ -132,14 +145,16 @@ const renderKnownEntityCell = (
       );
     case 'anomaly_count':
       return (
-        <AnomalyCountCell
-          value={value}
-          row={row}
-          onAnomalyCountClick={opensFor(onAnomalyCountClick, ANOMALIES_FLYOUT_TYPES, row)}
-        />
+        <div css={alignEndCss}>
+          <AnomalyCountCell
+            value={value}
+            row={row}
+            onAnomalyCountClick={opensFor(onAnomalyCountClick, ANOMALIES_FLYOUT_TYPES, row)}
+          />
+        </div>
       );
     case 'case_count':
-      return value == null || value === 0 ? <>{'—'}</> : <>{String(value)}</>;
+      return <div css={alignEndCss}>{value == null || value === 0 ? '—' : String(value)}</div>;
     case 'entity.attributes.watchlists':
       return <WatchlistsCell value={value} watchlistNames={watchlistNames} />;
     case 'asset.criticality':
@@ -166,11 +181,16 @@ export const renderEntityCell = (
   // Enrichers set every field they own (null or 0 when empty), so `undefined` here
   // means "not loaded yet", not "no value". Show a placeholder rather than "—".
   if (isEnriching && value === undefined && ENRICHED_FIELDS.has(columnId)) {
-    return (
+    const placeholder = (
       <span
         css={[loadingPlaceholderCss, cellLoadingPlaceholderCss]}
         style={{ background: euiTheme.colors.lightShade }}
       />
+    );
+    return END_ALIGNED_COLUMNS.has(columnId) ? (
+      <div css={alignEndCss}>{placeholder}</div>
+    ) : (
+      placeholder
     );
   }
   if (!isGridColumnId(columnId)) {

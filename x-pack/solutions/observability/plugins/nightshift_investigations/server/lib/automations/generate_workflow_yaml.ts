@@ -17,6 +17,7 @@ import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolic
 export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 
 const ALERT_TRIGGER_TYPE = 'alerting.v1.alertStatusChanged';
+const ALERT_V2_TRIGGER_TYPE = 'alerting.alertStatusChanged';
 const SLACK_MESSAGE_TRIGGER_TYPE = 'slack2.message';
 const AUTOMATION_TIMEOUT_MARGIN_SECONDS = 60;
 
@@ -38,7 +39,7 @@ const SLACK_THREAD = {
   external_conversation_id: '{{ event.externalConversationId }}',
 };
 
-// See MAX_PROMPT_TEMPLATE_LENGTH: the template and this text share the step's message limit.
+// Bound trigger evidence independently from the operator's additional instructions.
 export const SLACK_MESSAGE_TEXT_LIMIT = 4000;
 
 const SLACK_MESSAGE_PROMPT = `Slack message from {{ event.botName | default: event.sender | default: event.botId }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: ${SLACK_MESSAGE_TEXT_LIMIT} }}`;
@@ -58,9 +59,11 @@ export function generateWorkflowYaml({
   automationId,
   automation,
   serviceAccountId,
+  universalAlerts = true,
 }: {
   automationId: string;
   automation: NightshiftAutomationAttributes;
+  universalAlerts?: boolean;
   /** The account the automation runs as (`settings.run_as`); unbound when omitted. */
   serviceAccountId?: string;
 }): string {
@@ -68,10 +71,17 @@ export function generateWorkflowYaml({
   const slackRows = automation.trigger.rows.filter(isSlackRow);
   const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
   const hasMultipleTriggers =
-    Number(alertRows.length > 0) + Number(slackRows.length > 0) + Number(Boolean(schedule)) > 1;
+    Number(alertRows.length > 0) * (universalAlerts ? 2 : 1) +
+      Number(slackRows.length > 0) +
+      Number(Boolean(schedule)) >
+    1;
   const alertWorkflow =
     alertRows.length > 0 || (slackRows.length === 0 && !schedule)
       ? generateAlertWorkflow(automationId, automation, alertRows, hasMultipleTriggers)
+      : undefined;
+  const alertV2Workflow =
+    universalAlerts && alertRows.length > 0
+      ? generateAlertV2Workflow(automationId, automation, alertRows)
       : undefined;
   const slackWorkflow =
     slackRows.length > 0
@@ -80,7 +90,7 @@ export function generateWorkflowYaml({
   const scheduledWorkflow = schedule
     ? generateScheduledWorkflow(automationId, automation, schedule)
     : undefined;
-  const workflowParts = [scheduledWorkflow, alertWorkflow, slackWorkflow].filter(
+  const workflowParts = [scheduledWorkflow, alertWorkflow, alertV2Workflow, slackWorkflow].filter(
     (part) => part !== undefined
   );
 
@@ -107,6 +117,7 @@ export function generateWorkflowYaml({
     },
     triggers: [
       ...(alertWorkflow?.triggers ?? []),
+      ...(alertV2Workflow?.triggers ?? []),
       ...(slackWorkflow?.triggers ?? []),
       ...(scheduledWorkflow?.triggers ?? []),
     ],
@@ -124,7 +135,7 @@ function generateAlertWorkflow(
   alertRows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>,
   hasMultipleTriggers: boolean
 ) {
-  const condition = buildCondition(alertRows);
+  const condition = buildCondition(alertRows, ALERT_STATUS_CONDITION);
   const notificationDestinations = buildNotificationDestinations(automationId, automation, 'alert');
 
   return {
@@ -150,7 +161,9 @@ function generateAlertWorkflow(
           summary: automation.name,
           trigger_type: 'automatic',
           ...(automation.execution.promptTemplate
-            ? { message: automation.execution.promptTemplate }
+            ? alertRows.length > 0
+              ? { instructions: automation.execution.promptTemplate }
+              : { message: automation.execution.promptTemplate }
             : {}),
           ...(automation.runtime.timeoutSeconds !== undefined
             ? { timeout_seconds: automation.runtime.timeoutSeconds }
@@ -164,7 +177,58 @@ function generateAlertWorkflow(
   };
 }
 
+function generateAlertV2Workflow(
+  automationId: string,
+  automation: NightshiftAutomationAttributes,
+  alertRows: AlertRow[]
+) {
+  const condition = buildCondition(alertRows, ALERT_V2_STATUS_CONDITION);
+  const notificationDestinations = buildNotificationDestinations(automationId, automation, 'alert');
+
+  return {
+    kind: 'alert_v2' as const,
+    triggers: [{ type: ALERT_V2_TRIGGER_TYPE, on: { condition } }],
+    steps: [
+      {
+        name: 'trigger_investigation_alert_v2',
+        type: 'nightshift.triggerInvestigation',
+        if: ALERT_ACTIVE_STEP_CONDITION,
+        with: {
+          automation_id: automationId,
+          subject_type: 'alert',
+          subject_id: '{{ event.alert.id }}',
+          title: '{{ event.rule.name | default: event.alert.id }}',
+          summary: automation.name,
+          trigger_type: 'automatic',
+          ...(automation.execution.promptTemplate
+            ? { instructions: automation.execution.promptTemplate }
+            : {}),
+          ...(automation.runtime.timeoutSeconds !== undefined
+            ? { timeout_seconds: automation.runtime.timeoutSeconds }
+            : {}),
+          ...(notificationDestinations ? { notificationDestinations } : {}),
+        },
+      },
+      RECOVERED_ALERT_V2_STEP,
+    ],
+  };
+}
+
 const ALERT_ACTIVE_STEP_CONDITION = "${{ event.alert.status == 'active' }}";
+
+const RECOVERED_ALERT_V2_STEP = {
+  name: 'follow_up_recovered_alert_v2',
+  type: 'nightshift.followUpRecoveredAlert',
+  if: "${{ event.alert.status == 'inactive' }}",
+  with: {
+    alert_uuid: '{{ event.alert.id }}',
+    alert_id: '{{ event.alert.groupHash }}',
+    recovered_at: '{{ event.timestamp }}',
+    rule_id: '${{ event.rule.id }}',
+    rule_name: '${{ event.rule.name }}',
+    rule_tags: '${{ event.rule.tags }}',
+  },
+};
 
 /**
  * Continues the open investigation that holds a recovered alert with the recovery brief, or does
@@ -235,7 +299,7 @@ function generateScheduledWorkflow(
           summary: automation.name,
           trigger_type: 'automatic',
           ...(automation.execution.promptTemplate
-            ? { message: automation.execution.promptTemplate }
+            ? { message: `Instructions:\n${automation.execution.promptTemplate}` }
             : {}),
           ...(schedule.scopeQuery ? { scope_query: schedule.scopeQuery } : {}),
           ...(automation.runtime.timeoutSeconds !== undefined
@@ -248,7 +312,7 @@ function generateScheduledWorkflow(
   };
 }
 
-type TriggerKind = 'alert' | 'slack' | 'schedule';
+type TriggerKind = 'alert' | 'alert_v2' | 'slack' | 'schedule';
 
 /**
  * One investigation per alert and per Slack message, so a new one does not cancel or drop the
@@ -256,7 +320,8 @@ type TriggerKind = 'alert' | 'slack' | 'schedule';
  * the activation's run is still in progress. Scheduled runs have no event payload and share one
  * concurrency key per automation.
  */
-const ALERT_CONCURRENCY_SUFFIX = '{{ event.alert.uuid }}-{{ event.alert.status }}';
+const ALERT_CONCURRENCY_SUFFIX =
+  '{{ event.alert.uuid }}{{ event.alert.id }}-{{ event.alert.status }}';
 const SLACK_CONCURRENCY_SUFFIX = '{{ event.channel }}-{{ event.messageId }}';
 
 function buildConcurrencyKey(
@@ -323,7 +388,8 @@ function generateSlackWorkflow(
           title: automation.name,
           summary: automation.name,
           trigger_type: 'automatic',
-          ...buildMessage(automation.execution.promptTemplate, true),
+          instructions: automation.execution.promptTemplate ?? '',
+          message: SLACK_MESSAGE_PROMPT,
           ...(automation.runtime.timeoutSeconds !== undefined
             ? { timeout_seconds: automation.runtime.timeoutSeconds }
             : {}),
@@ -373,23 +439,6 @@ function buildNotificationDestinations(
 
 function isSlackRow(row: NightshiftTriggerRow): row is SlackRow {
   return row.kind === 'slack';
-}
-
-/**
- * The prompt for the investigation. A Slack-triggered run has no alert data to compose a brief
- * from, so the message itself is appended to the prompt. The text is truncated to stay under the
- * investigation step's message limit.
- */
-function buildMessage(
-  promptTemplate: string | undefined,
-  includeSlackMessage: boolean
-): { message?: string } {
-  if (!includeSlackMessage) {
-    return promptTemplate ? { message: promptTemplate } : {};
-  }
-  return {
-    message: [promptTemplate, SLACK_MESSAGE_PROMPT].filter(Boolean).join('\n\n'),
-  };
 }
 
 /**
@@ -485,8 +534,8 @@ function kqlOneOf(field: string, values: string[]): string {
   return clauses.length === 1 ? clauses[0] : `(${clauses.join(' or ')})`;
 }
 
-function buildCondition(rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>): string {
-  const rowConditions = rows.map(buildRowCondition).filter(Boolean);
+function buildCondition(rows: AlertRow[], statusCondition: string): string {
+  const rowConditions = rows.map((row) => buildRowCondition(row, statusCondition)).filter(Boolean);
   if (rowConditions.length === 0) return '';
   if (rowConditions.length === 1) return rowConditions[0];
   return rowConditions.map((c) => `(${c})`).join(' OR ');
@@ -494,8 +543,11 @@ function buildCondition(rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert
 
 const ALERT_STATUS_CONDITION = '(event.alert.status: "active" OR event.alert.status: "recovered")';
 
-function buildRowCondition(row: Extract<NightshiftTriggerRow, { kind: 'alert' }>): string {
-  const parts: string[] = [ALERT_STATUS_CONDITION];
+const ALERT_V2_STATUS_CONDITION =
+  '((event.alert.status: "active" AND NOT event.alert.previousStatus: "recovering") OR event.alert.status: "inactive")';
+
+function buildRowCondition(row: AlertRow, statusCondition: string): string {
+  const parts: string[] = [statusCondition];
 
   if (row.ruleNamePattern) {
     parts.push(`event.rule.name: *${escapeKqlWildcardTerm(row.ruleNamePattern)}*`);

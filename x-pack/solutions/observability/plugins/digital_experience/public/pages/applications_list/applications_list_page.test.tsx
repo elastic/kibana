@@ -10,8 +10,9 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
-import { ApplicationsListPage, EDOT_BROWSER_DOCS_URL } from './applications_list_page';
+import { ApplicationsListPage } from './applications_list_page';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
+import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_router';
 import { digitalExperienceRouter } from '../../routes';

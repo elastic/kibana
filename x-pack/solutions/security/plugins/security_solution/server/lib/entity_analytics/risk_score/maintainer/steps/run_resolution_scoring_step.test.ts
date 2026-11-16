@@ -128,6 +128,49 @@ describe('runResolutionScoringStep', () => {
     });
   });
 
+  describe('entity store refresh', () => {
+    const run = (entityStoreRefresh?: false) =>
+      runResolutionScoringStep({
+        pageTimings: createPageStepTimings(),
+        esClient,
+        crudClient,
+        logger,
+        entityType: EntityType.host,
+        alertsIndex: '.alerts-security.alerts-default',
+        lookupIndex: '.entity_analytics.risk_score.lookup-default',
+        pageSize: 1000,
+        sampleSize: 1000,
+        now: '2026-01-01T00:00:00.000Z',
+        calculationRunId: 'run-1',
+        watchlistConfigs: new Map(),
+        idBasedRiskScoringEnabled: true,
+        writer: {} as unknown as RiskEngineDataWriter,
+        alertFilters: [],
+        ...(entityStoreRefresh === undefined ? {} : { entityStoreRefresh }),
+      });
+
+    beforeEach(() => {
+      jest
+        .mocked(calculateResolutionEntityScores)
+        .mockReturnValue(scorePages([[riskScoreServiceMock.createRiskScore()]]));
+    });
+
+    it('leaves the entity store refresh to its default unless asked otherwise', async () => {
+      await run();
+
+      expect(persistScoresToEntityStore).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(persistScoresToEntityStore).mock.calls[0][0].refresh).toBeUndefined();
+    });
+
+    it('forwards the entity store refresh option', async () => {
+      await run(false);
+
+      expect(persistScoresToEntityStore).toHaveBeenCalledWith(
+        expect.objectContaining({ refresh: false })
+      );
+    });
+  });
+
   describe('zero resolution scores', () => {
     const TARGET_ID = 'host:target-1';
     const OTHER_TARGET_ID = 'host:target-2';

@@ -11,8 +11,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationActionsSection } from './automation_actions_section';
 import type { SlackActionFormValues } from '../automation_form_values';
 
-jest.mock('../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
-  ...jest.requireActual('../../../../settings/components/apps_section/use_relay_app_bindings'),
+jest.mock('../../../../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
     bindings: [
       { channel: 'C1', displayName: 'alerts', status: 'bound_to_self' },
@@ -60,17 +60,8 @@ describe('AutomationActionsSection', () => {
     fireEvent.click(await screen.findByRole('option', { name: '#oncall' }));
     expect(onSlackActionChange).toHaveBeenLastCalledWith({ target: 'channel', destination: 'C2' });
 
-    fireEvent.change(screen.getByLabelText('Where to respond'), { target: { value: 'self' } });
-    expect(onSlackActionChange).toHaveBeenLastCalledWith({ target: 'self', destination: '' });
-    expect(screen.getByTestId('automationSlackDestination')).toHaveAttribute(
-      'placeholder',
-      'Search people…'
-    );
-
-    fireEvent.change(screen.getByTestId('automationSlackDestination'), {
-      target: { value: '@me' },
-    });
-    expect(onSlackActionChange).toHaveBeenLastCalledWith({ target: 'self', destination: '@me' });
+    expect(screen.queryByLabelText('Where to respond')).not.toBeInTheDocument();
+    expect(screen.queryByText('Direct message')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('automationRemoveSlackAction'));
     expect(onSlackActionChange).toHaveBeenLastCalledWith(undefined);

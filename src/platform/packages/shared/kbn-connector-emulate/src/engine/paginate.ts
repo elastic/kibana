@@ -498,8 +498,8 @@ export const withPagination = (
       })
     )
   );
-  return (operation, request) => {
-    const response = respond(operation, request);
+  return async (operation, request, context) => {
+    const response = await respond(operation, request, context);
     const options = paginated.get(operation);
     return options && response.statusCode < 300 ? paginate(options, request, response) : response;
   };

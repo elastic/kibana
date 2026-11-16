@@ -85,6 +85,7 @@ import {
   defaultFleetErrorHandler,
 } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
+import { assertOnboardingAccess } from '../../services/package_policies/onboarding_access';
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -767,6 +768,14 @@ export const deleteAgentPoliciesHandler: RequestHandler<
       throw new FleetError('To delete managed integrations, use the managed integrations API.');
     }
   }
+
+  // Deleting the agent policy deletes or detaches its package policies, which those managed by a
+  // cloud onboarding instance only allow from the onboarding flow. `force` does not bypass this.
+  const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
+    soClient,
+    request.body.agentPolicyId
+  );
+  assertOnboardingAccess(packagePolicies, undefined);
 
   const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
     soClient,

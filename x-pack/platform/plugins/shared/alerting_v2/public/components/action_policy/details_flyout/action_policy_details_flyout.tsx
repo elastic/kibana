@@ -113,16 +113,19 @@ export const ActionPolicyDetailsFlyout = ({
 
   const { panels: takeActionPanels, modal: takeActionModal } = useActionPolicyMenu({
     policy,
-    onEdit: handleEdit,
-    onClone,
-    onDelete,
-    onEnable,
-    onDisable,
-    onSnooze,
-    onCancelSnooze,
-    onUpdateApiKey,
+    ...(canWrite && {
+      onEdit: handleEdit,
+      onClone,
+      onDelete,
+      onEnable,
+      onDisable,
+      onSnooze,
+      onCancelSnooze,
+      onUpdateApiKey,
+    }),
     isStateLoading,
     isSnoozeLoading,
+    flyoutHistoryKey: HISTORY_KEY,
   });
 
   return (
@@ -339,16 +342,14 @@ export const ActionPolicyDetailsFlyout = ({
         </Body>
 
         <Footer>
-          {canWrite && (
-            <Footer.PrimaryActionMenu
-              label={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.takeAction', {
-                defaultMessage: 'Take action',
-              })}
-              aria-label={ACTION_POLICY_MENU_ARIA_LABEL}
-              panels={takeActionPanels}
-              data-test-subj="detailsFlyoutTakeActionButton"
-            />
-          )}
+          <Footer.PrimaryActionMenu
+            label={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.takeAction', {
+              defaultMessage: 'Take action',
+            })}
+            aria-label={ACTION_POLICY_MENU_ARIA_LABEL}
+            panels={takeActionPanels}
+            data-test-subj="detailsFlyoutTakeActionButton"
+          />
         </Footer>
       </FlyoutTemplate>
       {isAffectedRulesOpen && (
@@ -359,7 +360,7 @@ export const ActionPolicyDetailsFlyout = ({
           onClose={() => setIsAffectedRulesOpen(false)}
         />
       )}
-      {canWrite && takeActionModal}
+      {takeActionModal}
     </>
   );
 };

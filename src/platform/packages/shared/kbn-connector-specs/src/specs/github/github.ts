@@ -161,6 +161,11 @@ export const GithubConnector: ConnectorSpec = {
     fields: ['serverUrl'],
   },
 
+  sandbox: {
+    hosts: ['api.github.com', 'api.githubcopilot.com'],
+    hostsFromConfig: ['serverUrl'],
+  },
+
   events: githubEvents,
 
   actions: {

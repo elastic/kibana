@@ -195,18 +195,15 @@ describe('WorkflowCrudService', () => {
 
       await expect(
         service.getWorkflow('wf-1', 'default', { includeDeleted: true })
-      ).rejects.toThrow('Could not determine workflow access from an incomplete search.');
+      ).rejects.toThrow('Could not read workflow wf-1 from an incomplete search.');
       expect(client.search).toHaveBeenCalledWith(
         expect.objectContaining({ allow_partial_search_results: false })
       );
     });
 
     it('returns WorkflowDetailDto for existing workflow', async () => {
-      const source = makeSource();
       const { deps, client } = makeDeps();
-      client.search.mockResolvedValue({
-        hits: { hits: [{ _id: 'wf-1', _source: source }] },
-      });
+      client.search.mockResolvedValue({ hits: { hits: [occSearchHit('wf-1')] } });
 
       const service = new WorkflowCrudService(deps);
       const result = await service.getWorkflow('wf-1', 'default');
@@ -3914,6 +3911,40 @@ describe('bound workflow deletion errors', () => {
     expect(deleteDocuments).not.toHaveBeenCalled();
   });
 
+  it('rejects a plain delete of a bound workflow with an active execution', async () => {
+    const { service, request, deps, bindings, deleteDocuments } = setup();
+    jest
+      .mocked(deps.executionQueryService.getWorkflowExecutions)
+      .mockResolvedValue({ total: 1, results: [], page: 1, size: 1 });
+    await expect(service.deleteWorkflows(['bound'], 'default', {}, request)).rejects.toThrow(
+      'Cannot delete workflow with running executions: bound'
+    );
+    expect(deps.executionQueryService.getWorkflowExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowId: 'bound' }),
+      'default'
+    );
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+    expect(deleteDocuments).not.toHaveBeenCalled();
+  });
+
+  it('keeps a bound workflow with an active execution out of a bulk delete', async () => {
+    const { service, request, deps, bindings, deleteDocuments } = setup();
+    jest
+      .mocked(deps.executionQueryService.getWorkflowExecutions)
+      .mockResolvedValue({ total: 1, results: [], page: 1, size: 1 });
+    deleteDocuments
+      .mockReset()
+      .mockResolvedValue({ total: 1, deleted: 1, failures: [], successfulIds: ['ordinary'] });
+    await expect(
+      service.deleteWorkflows(['bound', 'ordinary'], 'default', {}, request)
+    ).resolves.toMatchObject({
+      deleted: 1,
+      successfulIds: ['ordinary'],
+      failures: [{ id: 'bound', error: expect.stringContaining('running executions') }],
+    });
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+  });
+
   it('preserves a concurrent winning binding and returns a typed deletion conflict', async () => {
     const { service, request, bindings, deleteDocuments } = setup();
     bindings.getWorkloadBinding
@@ -4436,11 +4467,13 @@ describe('managed orphan cleanup without a request', () => {
     });
   });
 
-  describe('disableManagedOrphan', () => {
+  describe('disableManagedWorkflowWithoutRequest', () => {
     it('disables a bound orphan with OCC without a request or binding change', async () => {
       const { core, bindings, client, service } = setup();
 
-      await service.disableManagedOrphan('system-orphan', 'default', ORPHAN);
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).resolves.toEqual(expect.objectContaining({ enabled: false }));
 
       expect(client.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -4460,12 +4493,127 @@ describe('managed orphan cleanup without a request', () => {
       expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
     });
 
+    it('reads only live workflows', async () => {
+      const { client, service } = setup();
+
+      await service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN);
+
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: expect.objectContaining({
+              must_not: expect.arrayContaining([{ exists: { field: 'deleted_at' } }]),
+            }),
+          },
+        })
+      );
+    });
+
+    it.each([
+      ['missing', null],
+      ['not managed', { managed: false }],
+      ['already off', { enabled: false }],
+    ] as const)('resolves to null without writing when the workflow is %s', async (_, changed) => {
+      const { client, source, service } = setup();
+      if (changed) {
+        Object.assign(source, changed);
+      } else {
+        client.search.mockResolvedValue({ hits: { hits: [] } });
+      }
+
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).resolves.toBeNull();
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    it('fails instead of resolving to null when the guarded read is incomplete', async () => {
+      const { client, service } = setup();
+      client.search.mockResolvedValue({ timed_out: true, hits: { hits: [] } });
+
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).rejects.toThrow('incomplete search');
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({ allow_partial_search_results: false })
+      );
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    it('switches a bound workflow off for its registered owner without a binding change', async () => {
+      const { bindings, client, source, service } = setup();
+      source.managedBy = 'ownerPlugin';
+      const owner = { managedBy: 'ownerPlugin', definitionId: 'system-orphan' };
+
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', owner)
+      ).resolves.toEqual(
+        expect.objectContaining({
+          enabled: false,
+          definition: expect.objectContaining({ settings: { run_as: 'account-a' } }),
+        })
+      );
+      expect(client.index).toHaveBeenCalledTimes(1);
+      expect(bindings.bindWorkload).not.toHaveBeenCalled();
+      expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+    });
+
+    // A lost OCC write re-reads the workflow; the re-read decides whether to write again.
+    const loseFirstWriteThenReread = (
+      { client, source }: ReturnType<typeof setup>,
+      reread: WorkflowProperties | null
+    ) => {
+      client.search
+        .mockResolvedValueOnce({
+          hits: { hits: [{ ...occSearchHit('system-orphan', undefined, 5, 1), _source: source }] },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: reread
+              ? [{ ...occSearchHit('system-orphan', undefined, 6, 1), _source: reread }]
+              : [],
+          },
+        });
+      client.index.mockRejectedValueOnce(Object.assign(new Error('conflict'), { statusCode: 409 }));
+    };
+
+    it('skips the write when the re-read finds the workflow already disabled', async () => {
+      const context = setup();
+      loseFirstWriteThenReread(context, { ...context.source, enabled: false });
+
+      await expect(
+        context.service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).resolves.toBeNull();
+      expect(context.client.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips the write when the re-read no longer finds the workflow because it was soft-deleted', async () => {
+      const context = setup();
+      // The live-only read filters out the tombstone, so the re-read comes back empty.
+      loseFirstWriteThenReread(context, null);
+
+      await expect(
+        context.service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).resolves.toBeNull();
+      expect(context.client.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuses the write when the re-read finds the workflow owned by someone else', async () => {
+      const context = setup();
+      loseFirstWriteThenReread(context, { ...context.source, managedBy: 'otherPlugin' });
+
+      await expect(
+        context.service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).rejects.toThrow('observed');
+      expect(context.client.index).toHaveBeenCalledTimes(1);
+    });
+
     it('refuses a workflow that no longer matches the sweep snapshot', async () => {
       const { client, source, service } = setup();
       source.managedBy = 'ownerPlugin';
 
       await expect(
-        service.disableManagedOrphan('system-orphan', 'default', ORPHAN)
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
       ).rejects.toThrow('observed');
       expect(client.index).not.toHaveBeenCalled();
     });

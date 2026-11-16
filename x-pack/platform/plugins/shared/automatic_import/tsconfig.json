@@ -65,5 +65,6 @@
     "@kbn/inference-common",
     "@kbn/shared-ux-ai-components",
     "@kbn/core-http-browser",
+    "@kbn/ui-callout",
   ]
 }

@@ -134,7 +134,7 @@ const InstancesSchema = (description: string) =>
 const OnboardingDeploymentIdParamSchema = schema.object({
   id: schema.string({
     maxLength: 255,
-    meta: { description: 'The saved object ID of the cloud onboarding deployment.' },
+    meta: { description: 'The saved object ID of the cloud onboarding instance.' },
   }),
 });
 

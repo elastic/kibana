@@ -397,10 +397,10 @@ export class ActionPolicyClient {
     const now = new Date().toISOString();
 
     const { attrs: existingPolicy, version: existingVersion } = await this.getExistingActionPolicy(
-      params.options.id
+      params.id
     );
 
-    const oldAuth = await this.getDecryptedAuth(params.options.id);
+    const oldAuth = await this.getDecryptedAuth(params.id);
 
     const merged = applyPatch(
       createActionPolicyDataSchema,
@@ -421,19 +421,19 @@ export class ActionPolicyClient {
 
     try {
       await this.writeActionPolicyAttrs({
-        id: params.options.id,
+        id: params.id,
         attrs: nextAttrs,
         version: existingVersion,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, params.options.id);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, params.id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, params.options.id);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, params.id);
 
     const policy = transformActionPolicySoAttributesToApiResponse({
-      id: params.options.id,
+      id: params.id,
       attributes: nextAttrs,
     });
     this.eventPublisher.emitActionPolicyUpdated(this.eventContext, [

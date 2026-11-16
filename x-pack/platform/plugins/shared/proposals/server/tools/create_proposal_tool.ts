@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type {
@@ -26,6 +26,7 @@ import {
   proposalOriginSchema,
 } from '@kbn/proposals-common';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
+import { createProposalCreator, DEFAULT_PROPOSAL_WAIT } from '../services/create_proposal';
 import type { ProposalsService } from '../services/proposals_service';
 
 export const createProposalToolSchema = z.object({
@@ -64,7 +65,7 @@ const DESCRIPTION =
   'The proposal card is added to the conversation for the analyst; returns the proposal id once it exists.';
 
 /** How long the tool waits for the gate workflow to create the proposal before it answers. */
-export const DEFAULT_PROPOSAL_WAIT = { timeoutMs: 5000, intervalMs: 500 } as const;
+export { DEFAULT_PROPOSAL_WAIT };
 
 export const PROPOSAL_PENDING_NOTE =
   'The proposal is being created; its card will appear in the conversation. Do not create it again.';
@@ -80,8 +81,6 @@ const getToolConversationId = ({ runContext }: Pick<ToolHandlerContext, 'runCont
 
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * `proposals.create`: an agent proposes an action without an action workflow, in the
@@ -105,28 +104,12 @@ export const createProposalTool = ({
   logger: Logger;
   wait?: { timeoutMs: number; intervalMs: number };
 }): BuiltinToolDefinition<typeof createProposalToolSchema> => {
-  const assertAvailable = async (request: KibanaRequest): Promise<void> => {
-    if (!getWorkflowsApi().isWorkflowsAvailable) {
-      throw new Error('Workflows are not available, so proposals cannot be created');
-    }
-    // In-process, so the route's `security.authz` does not apply.
-    await privileges.assertCanManage(request);
-  };
-
-  const waitForProposal = async (workflowExecutionId: string, spaceId: string) => {
-    const deadline = Date.now() + wait.timeoutMs;
-    do {
-      const proposal = await getProposalsService().findByWorkflowExecutionId(
-        workflowExecutionId,
-        spaceId
-      );
-      if (proposal) {
-        return proposal;
-      }
-      await sleep(wait.intervalMs);
-    } while (Date.now() < deadline);
-    return undefined;
-  };
+  const { create, assertAvailable } = createProposalCreator({
+    getProposalsService,
+    getWorkflowsApi,
+    privileges,
+    wait,
+  });
 
   return {
     id: PROPOSALS_CREATE_TOOL_ID,
@@ -178,25 +161,12 @@ export const createProposalTool = ({
       }
 
       try {
-        await assertAvailable(request);
-        const { workflowExecutionId } = await getWorkflowsApi().executeWorkflow({
-          workflowId: CREATE_PROPOSAL_WORKFLOW_ID,
-          spaceId,
+        const { workflowExecutionId, proposal } = await create({
           request,
-          inputs: {
-            conversationId,
-            title,
-            comment,
-            origin,
-            ...(impact !== undefined && { impact }),
-            ...(confidence !== undefined && { confidence }),
-            ...(category !== undefined && { category }),
-          },
-          // The gate parks on the analyst's decision; only its start is awaited.
-          waitForCompletion: false,
+          spaceId,
+          conversationId,
+          proposal: { title, comment, origin, impact, confidence, category },
         });
-
-        const proposal = await waitForProposal(workflowExecutionId, spaceId);
         if (!proposal) {
           return {
             results: [

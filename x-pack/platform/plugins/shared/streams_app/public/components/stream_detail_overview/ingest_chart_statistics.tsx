@@ -25,6 +25,16 @@ interface StatSeries {
   data: StatDataPoint[];
 }
 
+export interface IngestChartTotals {
+  /** Undefined when the value could not be loaded. */
+  docs?: number;
+  storageBytes?: number;
+  loading: boolean;
+  storageError?: boolean;
+}
+
+const UNKNOWN_STAT_VALUE = '-';
+
 export interface IngestChartStatisticsProps {
   allTimeseries: StatSeries[];
   /** Duration of each histogram bucket in milliseconds. */
@@ -40,6 +50,8 @@ export interface IngestChartStatisticsProps {
   isQueryStream: boolean;
   /** Draft streams have no backing data stream, so storage / total docs are not shown. */
   isDraft: boolean;
+  /** Precomputed totals for sources that span several streams; skips the per-stream fetches. */
+  totals?: IngestChartTotals;
 }
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -53,6 +65,7 @@ export function IngestChartStatistics({
   streamName,
   isQueryStream,
   isDraft,
+  totals,
 }: IngestChartStatisticsProps) {
   const {
     core: { uiSettings },
@@ -68,16 +81,17 @@ export function IngestChartStatistics({
   // Query and Draft streams are temporary in nature and don't have real backing indices.
   const showTotalDocs = !isQueryStream && !isDraft;
   const showStorageSize = !isQueryStream && !isDraft && !isServerless;
+  const hasTotals = totals !== undefined;
 
   const totalDocsFetch = useStreamsAppFetch(
     ({ signal }) =>
-      showTotalDocs
+      showTotalDocs && !hasTotals
         ? streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/total', {
             signal,
             params: { query: { stream: streamName } },
           })
         : Promise.resolve([]),
-    [showTotalDocs, streamName, streamsRepositoryClient]
+    [hasTotals, showTotalDocs, streamName, streamsRepositoryClient]
   );
 
   // Count docs for the equivalent period one week ago to compute trends.
@@ -96,13 +110,13 @@ export function IngestChartStatistics({
 
   const storeStatsFetch = useStreamsAppFetch(
     ({ signal }) =>
-      !isQueryStream && !isServerless
+      !isQueryStream && !isServerless && !hasTotals
         ? streamsRepositoryClient.fetch('GET /internal/streams/{name}/_store_stats', {
             signal,
             params: { path: { name: streamName } },
           })
         : Promise.resolve({ store_size_bytes: 0 }),
-    [isQueryStream, isServerless, streamName, streamsRepositoryClient]
+    [hasTotals, isQueryStream, isServerless, streamName, streamsRepositoryClient]
   );
 
   const { docsInRange, peakRateDocsSec, avgDocsPerDay } = useMemo(() => {
@@ -119,7 +133,19 @@ export function IngestChartStatistics({
     };
   }, [allTimeseries, intervalMs, timeStart, timeEnd]);
 
-  const totalDocs = totalDocsFetch.value?.find((s) => s.stream === streamName)?.count ?? 0;
+  const totalDocs = hasTotals
+    ? totals.docs
+    : totalDocsFetch.error
+    ? undefined
+    : totalDocsFetch.value?.find((s) => s.stream === streamName)?.count ?? 0;
+  const totalDocsLoading = hasTotals ? totals.loading : totalDocsFetch.loading;
+  const storageBytes = hasTotals
+    ? totals.storageBytes
+    : storeStatsFetch.error
+    ? undefined
+    : storeStatsFetch.value?.store_size_bytes ?? 0;
+  const storageLoading = hasTotals ? totals.loading : storeStatsFetch.loading;
+  const storageError = hasTotals ? totals.storageError : Boolean(storeStatsFetch.error);
 
   const previousDocsInRange = useMemo(() => {
     const result = previousPeriodFetch.value;
@@ -144,8 +170,10 @@ export function IngestChartStatistics({
               defaultMessage: 'Docs total',
             })}
             value={
-              totalDocsFetch.loading ? (
+              totalDocsLoading ? (
                 <EuiLoadingSpinner size="m" />
+              ) : totalDocs === undefined ? (
+                UNKNOWN_STAT_VALUE
               ) : (
                 formatNumber(totalDocs, '0,0')
               )
@@ -193,18 +221,31 @@ export function IngestChartStatistics({
               defaultMessage: 'Storage size',
             })}
             value={
-              storeStatsFetch.loading ? (
+              storageLoading ? (
                 <EuiLoadingSpinner size="m" />
+              ) : storageBytes === undefined ? (
+                UNKNOWN_STAT_VALUE
               ) : (
-                splitFormattedBytes(storeStatsFetch.value?.store_size_bytes ?? 0).value
+                splitFormattedBytes(storageBytes).value
               )
             }
             unit={
-              storeStatsFetch.loading
+              storageLoading || storageBytes === undefined
                 ? ''
-                : splitFormattedBytes(storeStatsFetch.value?.store_size_bytes ?? 0).unit
+                : splitFormattedBytes(storageBytes).unit
             }
-            subtitle={<TrendSubtitle trend={null} loading={storeStatsFetch.loading} />}
+            subtitle={
+              storageError ? (
+                <TrendSubtitle>
+                  {i18n.translate(
+                    'xpack.streams.ingestChartStatistics.storageSize.unavailableDescription',
+                    { defaultMessage: 'Unable to load storage size' }
+                  )}
+                </TrendSubtitle>
+              ) : (
+                <TrendSubtitle trend={null} loading={storageLoading} />
+              )
+            }
           />
         )}
       </EuiFlexGroup>

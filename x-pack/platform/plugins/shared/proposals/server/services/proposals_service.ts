@@ -200,8 +200,7 @@ export class ProposalsService {
     // caller always "wins" with an empty string, the action's own metadata is
     // never consulted, and the queue silently drops a proposal it cannot group.
     const category = blankToUndefined(params.category) ?? metadata?.category;
-    // A to-do is offered as "I've applied" alone, so approving one must not run anything: the
-    // click records work the analyst already did, and there is no Decline beside it.
+    // A to-do is carried out by the analyst, so approving must not run an action.
     if (actionWorkflowId !== undefined && category === PROPOSAL_CATEGORY_TODO) {
       throw new ProposalInvalidActionInputError(
         `A "${PROPOSAL_CATEGORY_TODO}" proposal is carried out by the analyst, so it cannot ` +
@@ -784,16 +783,9 @@ export class ProposalsService {
   }
 
   /**
-   * Re-offers a to-do proposal that was marked as applied, for the analyst who marked it by
-   * mistake: a successor carrying the same content is created pending, behind a gate of its own,
-   * and the original is pointed at it.
-   *
-   * The original keeps its decision. A decision is immutable and reaches the record only through
-   * the gate, and the original's gate has ended, so it cannot be undone in place. Superseding it
-   * instead leaves the chain saying what happened — applied, then re-opened — and the successor
-   * goes through the same gate as any proposal, so "I've applied" works on it again.
-   *
-   * Only for a to-do proposal: an action that ran cannot be un-run by relabelling it.
+   * Re-offers a marked-applied to-do after a mistaken mark: creates a pending successor
+   * behind a new gate and points the original at it. The original keeps its decision
+   * (immutable / gate already ended). To-dos only — an action that ran cannot be un-run.
    */
   async reopen(
     id: string,

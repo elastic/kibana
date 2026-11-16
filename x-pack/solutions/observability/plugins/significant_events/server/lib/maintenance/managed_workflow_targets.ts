@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
@@ -21,7 +21,6 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 
 /**
  * Global-scope workflows installed by `install_workflows` (always-on core set).
@@ -66,18 +65,6 @@ export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * Pre-per-space continuous onboarding workflows of the default space. Removed at startup and
- * dropped from recorded maintenance state.
- *
- * TODO: remove with the legacy default-space cleanup.
- * https://github.com/elastic/kibana/issues/294271
- */
-export const LEGACY_DEFAULT_SPACE_WORKFLOW_IDS: readonly string[] = [
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-];
-
-/**
  * Every workflow id that installers may create. Used by the drift test so a
  * new install target cannot land without also joining the maintenance sweep.
  */
@@ -92,23 +79,6 @@ export interface MaintenanceWorkflowTarget {
   id: string;
   spaceId: SpaceId;
 }
-
-/**
- * The pre-per-space KI sync document of the default space. Startup keeps it until
- * `${id}-default` is enabled, since it is the only thing reconciling the default space until
- * then, so Pause and Resume still cover it. Missing documents are a no-op for both.
- *
- * TODO: remove with the legacy default-space cleanup.
- * https://github.com/elastic/kibana/issues/294271
- */
-export const LEGACY_DEFAULT_SPACE_SYNC_TARGET: MaintenanceWorkflowTarget = {
-  id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-  spaceId: DEFAULT_SPACE_ID,
-};
-
-/** The legacy sync document only exists in the default space, so other spaces have none to cover. */
-const legacyTargetsFor = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =>
-  spaceIds.includes(DEFAULT_SPACE_ID) ? [LEGACY_DEFAULT_SPACE_SYNC_TARGET] : [];
 
 /** Per-space scheduled documents are installed as `${baseId}-${spaceId}`. */
 const scheduledTargetsFor = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =>
@@ -127,10 +97,8 @@ const scheduledTargetsFor = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =
  * `INVESTIGATION_COMPLETED`, just attaches a finished investigation to its event and starts
  * no new background work, so it is safe to leave enabled.
  */
-export const buildDisableTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] => [
-  ...legacyTargetsFor(spaceIds),
-  ...scheduledTargetsFor(spaceIds),
-];
+export const buildDisableTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =>
+  scheduledTargetsFor(spaceIds);
 
 /**
  * Targets whose in-flight executions are cancelled on pause.

@@ -9,6 +9,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { UserEvent } from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
@@ -21,7 +22,7 @@ export const getNewConsoleRegistrationMock = (
 ): ConsoleRegistrationInterface => {
   return {
     id: Math.random().toString(36),
-    PageTitleComponent: () => <>{'Test console'}</>,
+    pageTitle: 'Test console',
     meta: { about: 'for unit testing ' },
     consoleProps: {
       'data-test-subj': 'testRunningConsole',
@@ -75,7 +76,7 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
     },
 
     hideOpenedConsole: async () => {
-      await user.click(renderResult.getByTestId('consolePageOverlay-header-back-link'));
+      await user.click(renderResult.getByTestId(APP_HEADER_TEST_SUBJECTS.back));
 
       await waitFor(() => {
         expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();

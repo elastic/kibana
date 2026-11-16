@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiBadgeGroup,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,27 +20,35 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ActionButton, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
+import type {
+  ActionButton,
+  HeaderBadge,
+  HeaderColor,
+} from '@kbn/agent-builder-browser/attachments';
 import { i18n } from '@kbn/i18n';
 import type { IconType } from '@elastic/eui';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
-import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { AttachmentActions } from './attachment_actions';
+import { ATTACHMENT_INNER_RADIUS } from './attachment_card';
+import { useHeaderColorTokens } from './header_color';
 
 const PREVIEW_ONLY_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.previewOnly', {
   defaultMessage: 'Read-only preview',
 });
 
-const CLOSE_PREVIEW_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.closePreview', {
-  defaultMessage: 'Close preview',
+const PREVIEWING_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.previewing', {
+  defaultMessage: "You're previewing this",
 });
 
 const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.close', {
   defaultMessage: 'Close',
 });
 
-export const HEADER_HEIGHT = 72;
+/** Min height of the header when rendered inline in the conversation. */
+export const INLINE_HEADER_HEIGHT = 48;
+/** Min height of the header when rendered as the canvas flyout header. */
+export const CANVAS_HEADER_HEIGHT = 72;
 
 interface AttachmentHeaderProps {
   icon?: IconType;
@@ -50,14 +57,15 @@ interface AttachmentHeaderProps {
   subtitle?: string;
   /** Optional badges rendered alongside the title. */
   badges?: HeaderBadge[];
+  /** Optional color variant tinting the header background, border, title and icon. */
+  color?: HeaderColor;
   actionButtons?: ActionButton[];
   onClose?: () => void;
-  onClosePreview?: () => void;
   /**
    * Controls preview UI state from the parent.
    * - none: show regular action buttons
    * - preview_available: show "Preview Only" badge
-   * - previewing: show "Close preview" button and hide action buttons
+   * - previewing: show "You're previewing this" badge and hide action buttons
    */
   previewBadgeState?: 'none' | 'preview_available' | 'previewing';
   /** When true, uses canvas flyout corner radius (top-right only). */
@@ -73,21 +81,26 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   title,
   subtitle,
   badges,
+  color,
   actionButtons,
   onClose,
-  onClosePreview,
   previewBadgeState = 'none',
   isCanvas = false,
   isHeaderOnly = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const measureRef = useRef<HTMLDivElement | null>(null);
-  const { width: headerWidth } = useResizeObserver(measureRef.current);
+  const [measureElement, setMeasureElement] = useState<HTMLDivElement | null>(null);
+  const { width: headerWidth } = useResizeObserver(measureElement);
   const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
 
+  const colorTokens = useHeaderColorTokens(color);
+  const dividerColor = isCanvas && !color ? euiTheme.colors.borderBaseSubdued : colorTokens.divider;
+
   const textStyles = css`
-    font-weight: ${euiTheme.font.weight.semiBold};
+    color: ${colorTokens.text ?? euiTheme.colors.textHeading};
+    font-weight: ${euiTheme.font.weight.bold};
+    line-height: ${euiTheme.size.base};
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -102,8 +115,8 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   const headerBorderRadius = isCanvas
     ? `0 ${euiTheme.border.radius.small} 0 0`
     : isHeaderOnly
-    ? `${AB_PANEL_RADIUS}px`
-    : `${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px 0 0`;
+    ? `${ATTACHMENT_INNER_RADIUS}px`
+    : `${ATTACHMENT_INNER_RADIUS}px ${ATTACHMENT_INNER_RADIUS}px 0 0`;
 
   const headerStyles = css`
     position: relative;
@@ -111,11 +124,13 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     ${!isHeaderOnly
       ? `
       border-bottom: ${euiTheme.border.thin};
-      border-color: ${euiTheme.colors.borderBaseSubdued};
+      border-color: ${dividerColor};
     `
       : ''}
     border-radius: ${headerBorderRadius};
-    min-height: ${HEADER_HEIGHT}px;
+    min-height: ${isCanvas ? CANVAS_HEADER_HEIGHT : INLINE_HEADER_HEIGHT}px;
+    padding: ${isCanvas ? euiTheme.size.base : euiTheme.size.xs} ${euiTheme.size.s}
+      ${isCanvas ? euiTheme.size.base : euiTheme.size.xs} ${euiTheme.size.base};
   `;
 
   const badgeStyles = css`
@@ -135,8 +150,8 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   }
 
   return (
-    <div ref={measureRef} style={{ width: '100%' }}>
-      <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
+    <div ref={setMeasureElement} style={{ width: '100%' }}>
+      <EuiSplitPanel.Inner color={color ?? 'subdued'} css={headerStyles} paddingSize="none">
         {previewBadgeState === 'preview_available' && (
           <EuiBadge iconType="readOnly" css={badgeStyles}>
             {PREVIEW_ONLY_LABEL}
@@ -160,7 +175,12 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
             >
               {icon && (
                 <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-                  <EuiIcon type={icon} color="subdued" size="l" aria-hidden={true} />
+                  <EuiIcon
+                    type={icon}
+                    color={colorTokens.text ?? 'subdued'}
+                    size="m"
+                    aria-hidden={true}
+                  />
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
@@ -213,7 +233,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
           </EuiFlexItem>
           {/* End: action buttons + close button */}
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               {previewBadgeState !== 'previewing' && hasActionButtons && (
                 <EuiFlexItem grow={false}>
                   <AttachmentActions buttons={actionButtons} iconOnly={isCompact} />
@@ -221,9 +241,9 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
               )}
               {previewBadgeState === 'previewing' && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={onClosePreview}>
-                    {CLOSE_PREVIEW_LABEL}
-                  </EuiButtonEmpty>
+                  <EuiBadge iconType="eye" color="primary">
+                    {PREVIEWING_LABEL}
+                  </EuiBadge>
                 </EuiFlexItem>
               )}
               {onClose && (
@@ -233,7 +253,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
                       aria-label={CLOSE_BUTTON_ARIA_LABEL}
                       iconType="cross"
                       onClick={onClose}
-                      size="s"
+                      size="xs"
                       color="text"
                       {...getEbtProps({
                         element: AGENT_BUILDER_UI_EBT.element.pageContent,

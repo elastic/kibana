@@ -91,13 +91,12 @@ export const GraphView = memo(
       (
         params: Omit<
           GraphGroupedNodePreviewPanelProps,
-          'scopeId' | 'showLoadingState' | 'onShowDocument' | 'onShowEntity'
+          'showLoadingState' | 'onShowDocument' | 'onShowEntity'
         >
       ) =>
         open(
           <GraphGroupedNodePreviewPanel
             {...params}
-            scopeId={scopeId}
             onShowDocument={onShowDocument}
             onShowEntity={onShowEntity}
           />,
@@ -117,7 +116,7 @@ export const GraphView = memo(
           },
           FLYOUT_SESSION_KIND.INHERIT
         ),
-      [scopeId, onShowDocument, onShowEntity, defaultFlyoutProperties, historyKey, open]
+      [onShowDocument, onShowEntity, defaultFlyoutProperties, historyKey, open]
     );
 
     return (

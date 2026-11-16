@@ -31,12 +31,14 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common
 import { RETRY_BUTTON_LABEL } from '../../../common/messages';
 import type { SeverityDotColor } from '../../../common/severity';
 import { SEVERITY_DOT_COLOR } from '../../../common/severity';
+import { INVESTIGATIONS_PAGE_SIZE } from '../../../data/investigations/use_fetch_investigations';
 import type {
   InvestigationSectionId,
   InvestigationSectionState,
 } from '../../../data/investigations/use_investigation_sections';
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationCardActions } from './investigation_card_actions';
+import { useInvestigationAssignees } from './use_investigation_assignees';
 
 export interface InvestigationSectionProps {
   id: InvestigationSectionId;
@@ -302,6 +304,7 @@ const SectionRows = ({
 >): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
+  const renderAssignees = useInvestigationAssignees(investigations);
 
   return (
     <SectionBlock paddingSize="none">
@@ -336,7 +339,12 @@ const SectionRows = ({
                 investigation={investigation}
                 isSelected={investigation.id === selectedInvestigationId}
                 onClick={onInvestigationClick}
-                actions={<InvestigationCardActions investigation={investigation} />}
+                actions={
+                  <InvestigationCardActions
+                    investigation={investigation}
+                    assignees={renderAssignees(investigation)}
+                  />
+                }
               />
             )}
           </EuiFlexItem>
@@ -361,8 +369,8 @@ const ShowMoreButton = ({
         data-test-subj={`nightshiftInvestigationSectionShowMore-${id}`}
         // Six sections each render a "Show more", so the accessible name has to say which one.
         aria-label={i18n.translate('xpack.nightshift.investigations.sectionShowMoreAriaLabel', {
-          defaultMessage: 'Show more {sectionTitle} investigations',
-          values: { sectionTitle: title },
+          defaultMessage: 'Show {count} more {sectionTitle} investigations',
+          values: { count: INVESTIGATIONS_PAGE_SIZE, sectionTitle: title },
         })}
         isLoading={isLoadingMore}
         size="s"
@@ -373,7 +381,8 @@ const ShowMoreButton = ({
         })}
       >
         {i18n.translate('xpack.nightshift.investigations.showMoreButtonLabel', {
-          defaultMessage: 'Show more',
+          defaultMessage: 'Show {count} more',
+          values: { count: INVESTIGATIONS_PAGE_SIZE },
         })}
       </EuiButtonEmpty>
     </EuiFlexItem>

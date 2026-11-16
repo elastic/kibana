@@ -54,6 +54,7 @@ export const ProposalStatusBadge = ({
         iconType={badge?.iconType}
         label={badge?.label}
         isLoading={badge?.isLoading}
+        isDisabled={badge?.isDisabled}
       />
     </span>
   );

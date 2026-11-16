@@ -117,6 +117,19 @@ export async function resumeWorkflowExecutionExternallyWithInput(
     spaceId,
   });
 
+  if (stepExecution.stepType === 'waitForApproval') {
+    if (typeof input.approved !== 'boolean') {
+      throw new ExternalResumeError('approved boolean is required', 400, true);
+    }
+
+    return resumeWorkflowExecutionWithResolvedContext(workflowsService, {
+      stepExecutionId: stepExecution.id,
+      executionId,
+      spaceId,
+      input: { approved: input.approved },
+    });
+  }
+
   if (stepExecution.stepType !== 'waitForInput') {
     throw new ExternalResumeError(
       'This workflow step does not accept structured external input',

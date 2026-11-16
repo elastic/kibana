@@ -257,6 +257,16 @@ the dispatch payload schema. Without it, invalid field paths are only caught at 
 - Rule metadata: \`{{ inputs.payload.rules[alert.rule_id].name }}\`
 - Alert details link: \`{{ alert.alert_url }}\` (absolute URL; include it in every notification)
 
+### Test notifications (\`execution.isTestRun\`)
+
+\\"Send test notification\\" on an action policy runs its destination workflows as workflow
+test runs, with a payload of the same shape built from synthetic alerts and placeholder rules.
+Ids are prefixed with \`test-\`, and \`alert.alert_url\` points to an alert that does not exist.
+
+- Detect a test with \`{{ execution.isTestRun }}\` (\`true\` for test runs, \`false\` otherwise).
+- Guard steps that act on alerts or page people, for example
+  \`{% if execution.isTestRun %}[TEST] {% endif %}\` in a message, or an \`if\` step condition.
+
 ### \`data\` (dynamic query columns)
 
 \`data\` is the rule's ES|QL result row (each query row is written as \`data: rowDoc\`

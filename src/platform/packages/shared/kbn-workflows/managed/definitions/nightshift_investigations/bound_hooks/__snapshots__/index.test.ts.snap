@@ -96,6 +96,12 @@ Object {
                 "properties": Object {
                   "data": Object {
                     "properties": Object {
+                      "background_trace_id": Object {
+                        "type": "string",
+                      },
+                      "materialize_execution_id": Object {
+                        "type": "string",
+                      },
                       "recalled_ids": Object {
                         "items": Object {
                           "type": "string",
@@ -119,7 +125,7 @@ Object {
       "type": "manual",
     },
   ],
-  "version": 1,
+  "version": 2,
 }
 `;
 

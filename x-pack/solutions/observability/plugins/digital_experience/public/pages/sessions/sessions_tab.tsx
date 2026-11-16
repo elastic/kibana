@@ -27,6 +27,7 @@ import { getDateISORange } from '@kbn/timerange';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { ApplicationSource } from '../../../common/types/applications';
 import { canManageSessions } from '../../capabilities';
+import { ColumnSelector } from '../../components/column_selector';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { TimeRangePicker } from '../../components/time_range_picker';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../ebt_constants';
@@ -37,7 +38,8 @@ import { useEnvironment } from '../../hooks/use_environment';
 import { useFormatters } from '../../hooks/use_formatters';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { EDOT_BROWSER_DOCS_URL } from '../applications_list/applications_list_page';
+import { useVisibleColumns } from '../../hooks/use_visible_columns';
+import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { SessionsFilters } from './components/sessions_filters';
 import { SessionsKpis } from './components/sessions_kpis';
 import { EnableSessionsPrompt, SessionsStatusCallout } from './components/sessions_status_prompts';
@@ -47,11 +49,9 @@ import {
   SESSIONS_OPTIONAL_COLUMN_IDS,
   SessionsTable,
 } from './components/sessions_table';
-import { ColumnSelector } from '../applications_list/components/column_selector';
-import { useVisibleColumns } from '../applications_list/hooks/use_visible_columns';
-import { pickSessionsListQuery, useSessionsListQuery } from './hooks/use_sessions_list_query';
+import { useSessionsListQuery } from './hooks/use_sessions_list_query';
 import { useSessionsStatus } from './hooks/use_sessions_status';
-import { DURATION_BUCKETS } from './utils/sessions_list_query';
+import { DURATION_BUCKETS, pickSessionsListQuery } from '../../utils/sessions_list_query';
 
 /** The attribute EDOT Browser stamps on every span and log of a session. */
 const SESSION_ID_FIELD = 'session.id';

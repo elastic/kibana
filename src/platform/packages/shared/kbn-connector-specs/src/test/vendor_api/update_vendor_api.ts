@@ -36,6 +36,7 @@ import {
   MANIFEST,
   OVERLAY,
   readOptional,
+  SILENT_LOG,
   snapshotFile,
 } from './load_vendor_specs';
 import { parseSpecText } from './parse_spec_text';
@@ -211,7 +212,8 @@ export const updateVendorApi = async ({
     }
   }
 
-  const specs = applyOverlayToSources(raw, overlay, log);
+  const fetchedEverySource = loaded.size === Object.keys(raw).length;
+  const specs = applyOverlayToSources(raw, overlay, fetchedEverySource ? log : SILENT_LOG);
 
   log.info(
     `Recording ${Object.keys(connector.actions).length} actions of ${connector.metadata.id}`

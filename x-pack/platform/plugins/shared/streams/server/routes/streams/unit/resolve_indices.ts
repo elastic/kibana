@@ -9,6 +9,7 @@ import { notFound } from '@hapi/boom';
 import { isNotFoundError } from '@kbn/es-errors';
 import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import {
+  getUnitDestinationWritePatterns,
   isEnabledFailureStore,
   streamsUnitIdentifierSchema,
   type ClassicIngestStreamEffectiveLifecycle,
@@ -19,9 +20,9 @@ import {
   MAX_RESOLVE_INDEX_PATTERNS,
   collectResolvedDataStreamNames,
   collectResolvedIndexNames,
-  getUnitDestinationWritePatterns,
   matchesIndexPattern,
   type ResolvedDestinationIndex,
+  type ResolvedDestinationIndexHealth,
   type ResolveUnitIndicesResponse,
 } from '../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
@@ -47,6 +48,13 @@ const assertStreamsCanvasEnabled = async (uiSettingsClient: {
 };
 
 const uniquePatterns = (patterns: string[]): string[] => [...new Set(patterns)];
+
+const toResolvedIndexHealth = (
+  status: string | undefined
+): ResolvedDestinationIndexHealth | undefined => {
+  const health = status?.toLowerCase();
+  return health === 'green' || health === 'yellow' || health === 'red' ? health : undefined;
+};
 
 const chunkPatterns = (patterns: string[]): string[][] => {
   const chunks: string[][] = [];
@@ -132,6 +140,7 @@ export const resolveUnitIndicesRoute = createServerRoute({
     const names = [...resolvedNames];
     const lifecycleByName = new Map<string, ClassicIngestStreamEffectiveLifecycle>();
     const failureStoreEnabledByName = new Map<string, boolean>();
+    const healthByName = new Map<string, ResolvedDestinationIndexHealth>();
     const privilegesByName: Record<string, { read_failure_store: boolean }> =
       dataStreamNames.size > 0
         ? await streamsClient.getPrivilegesPerStream([...dataStreamNames])
@@ -162,6 +171,10 @@ export const resolveUnitIndicesRoute = createServerRoute({
           dataStream.name,
           isEnabledFailureStore(getFailureStore({ dataStream }))
         );
+        const health = toResolvedIndexHealth(dataStream.status);
+        if (health) {
+          healthByName.set(dataStream.name, health);
+        }
       }
     }
 
@@ -182,6 +195,7 @@ export const resolveUnitIndicesRoute = createServerRoute({
                           error: { message: 'Data stream not found' },
                         },
                         failure_store_enabled: failureStoreEnabledByName.get(name) ?? true,
+                        health: healthByName.get(name),
                         privileges: {
                           read_failure_store: privilegesByName[name]?.read_failure_store ?? false,
                         },

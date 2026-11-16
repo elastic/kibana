@@ -6,23 +6,35 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   DESTINATION_GRID_COLUMNS,
   DestinationsGrid,
   getDestinationSortableValue,
 } from './destinations_grid';
-import type { ElasticsearchDestinationViewModel, S3DestinationViewModel } from './types';
+import {
+  REMOTE_ELASTICSEARCH_TYPE,
+  type DestinationViewModel,
+  type ElasticsearchDestinationViewModel,
+  type RemoteElasticsearchDestinationViewModel,
+  type S3DestinationViewModel,
+} from './types';
 
-const mockUseDestinationIndexStats = jest.fn((_options: { enabled: boolean }) => ({}));
-jest.mock('./use_destination_index_stats', () => ({
-  useDestinationIndexStats: (options: { enabled: boolean }) =>
-    mockUseDestinationIndexStats(options),
-}));
-jest.mock('./destination_indices_table', () => ({
-  DestinationIndicesTable: () => null,
-}));
+const mockDestinationIndicesTable = jest.fn((_props: { destinationId: string }) => null);
+const mockIndicesTableMount = jest.fn((_destinationId: string) => undefined);
+jest.mock('./destination_indices_table', () => {
+  const { useEffect } = jest.requireActual<typeof import('react')>('react');
+  return {
+    DestinationIndicesTable: (props: { destinationId: string }) => {
+      const { destinationId } = props;
+      useEffect(() => {
+        mockIndicesTableMount(destinationId);
+      }, [destinationId]);
+      return mockDestinationIndicesTable(props);
+    },
+  };
+});
 
 const destination = (
   partial: Partial<ElasticsearchDestinationViewModel> = {}
@@ -32,6 +44,8 @@ const destination = (
   type: 'elasticsearch',
   signals: ['logs'],
   mode: 'auto',
+  indexBySignal: {},
+  writePatternsBySignal: {},
   ...partial,
 });
 
@@ -58,15 +72,29 @@ describe('DestinationsGrid', () => {
     prefix: 'otel/',
   };
 
-  const renderGrid = (
-    destinations: Array<ElasticsearchDestinationViewModel | S3DestinationViewModel>
-  ) =>
+  const remoteDestination = (
+    partial: Partial<RemoteElasticsearchDestinationViewModel> = {}
+  ): RemoteElasticsearchDestinationViewModel => ({
+    id: 'backup',
+    name: 'Backup',
+    type: REMOTE_ELASTICSEARCH_TYPE,
+    signals: ['logs', 'metrics', 'traces'],
+    endpoint: 'https://my-cluster.es.example.com:9243',
+    mode: 'auto',
+    indexBySignal: {},
+    ...partial,
+  });
+
+  const renderGrid = (destinations: DestinationViewModel[]) =>
     render(
       <DestinationsGrid
         status="ready"
         destinations={destinations}
-        resolvedIndicesByDestination={{}}
+        resolvedIndicesByDestination={new Map()}
         resolvedIndicesStatus="ready"
+        destinationDetailRefs={new Map()}
+        onShowDestinationDetail={jest.fn()}
+        onHideDestinationDetail={jest.fn()}
         hasActiveFilters={false}
         visibleColumns={DESTINATION_GRID_COLUMNS.map(({ id }) => id)}
         pagination={{ pageIndex: 0, pageSize: 10 }}
@@ -79,10 +107,12 @@ describe('DestinationsGrid', () => {
       />
     );
 
-  const isStatsEnabled = () => mockUseDestinationIndexStats.mock.lastCall?.[0].enabled;
+  const renderedIndexTableIds = () =>
+    mockDestinationIndicesTable.mock.calls.map(([{ destinationId }]) => destinationId);
 
   beforeEach(() => {
-    mockUseDestinationIndexStats.mockClear();
+    mockDestinationIndicesTable.mockClear();
+    mockIndicesTableMount.mockClear();
   });
 
   it('expands an S3 row to show its bucket, region, prefix and key status', async () => {
@@ -98,19 +128,93 @@ describe('DestinationsGrid', () => {
     expect(details.queryByRole('heading')).not.toBeInTheDocument();
   });
 
-  it('does not fetch index stats when only an S3 row is expanded', async () => {
+  it('does not render the indices table when only an S3 row is expanded', async () => {
     renderGrid([s3Destination, destination()]);
 
     await userEvent.click(screen.getByRole('button', { name: 'Expand details for Archive' }));
 
-    expect(isStatsEnabled()).toBe(false);
+    expect(renderedIndexTableIds()).toEqual([]);
   });
 
-  it('fetches index stats once an Elasticsearch row is expanded', async () => {
+  it('renders the indices table for an expanded Elasticsearch row', async () => {
     renderGrid([s3Destination, destination()]);
 
     await userEvent.click(screen.getByRole('button', { name: 'Expand indices for Prod logs' }));
 
-    expect(isStatsEnabled()).toBe(true);
+    await waitFor(() => expect(new Set(renderedIndexTableIds())).toEqual(new Set(['es-logs'])));
+  });
+
+  it('keeps an expanded row mounted when another row is expanded', async () => {
+    renderGrid([destination(), destination({ id: 'es-metrics', name: 'Prod metrics' })]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Expand indices for Prod logs' }));
+    await waitFor(() => expect(mockIndicesTableMount.mock.calls).toEqual([['es-logs']]));
+    await userEvent.click(screen.getByRole('button', { name: 'Expand indices for Prod metrics' }));
+
+    await waitFor(() =>
+      expect(mockIndicesTableMount.mock.calls).toEqual([['es-logs'], ['es-metrics']])
+    );
+  });
+
+  const getCell = (container: HTMLElement, columnId: string) => {
+    const cell = container.querySelector<HTMLElement>(
+      `[data-gridcell-column-id="${columnId}"][data-gridcell-row-index="0"]`
+    );
+    if (!cell) {
+      throw new Error(`No ${columnId} cell rendered`);
+    }
+    return cell;
+  };
+
+  it('shows a remote row as Remote Elasticsearch with no index count', () => {
+    const { container } = renderGrid([remoteDestination()]);
+
+    expect(
+      within(getCell(container, 'type')).getByText('Remote Elasticsearch')
+    ).toBeInTheDocument();
+    expect(within(getCell(container, 'indices')).getByText('-')).toBeInTheDocument();
+  });
+
+  it('does not render the indices table when only a remote row is expanded', async () => {
+    renderGrid([remoteDestination(), destination()]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Expand details for Backup' }));
+
+    expect(renderedIndexTableIds()).toEqual([]);
+  });
+
+  it('expands a remote Auto row to show its endpoint, routing and key status', async () => {
+    renderGrid([remoteDestination()]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Expand details for Backup' }));
+
+    const details = within(screen.getByTestId('streamsRemoteElasticsearchDestinationDetails'));
+    expect(details.getByText('https://my-cluster.es.example.com:9243')).toBeInTheDocument();
+    expect(details.getByText('Routing')).toBeInTheDocument();
+    expect(details.getByText('Auto (default)')).toBeInTheDocument();
+    expect(details.getByText('API key')).toBeInTheDocument();
+    expect(details.getByText('Configured')).toBeInTheDocument();
+    expect(details.queryByRole('heading')).not.toBeInTheDocument();
+  });
+
+  it('expands a remote Fixed row to show each signal and its index', async () => {
+    renderGrid([
+      remoteDestination({
+        signals: ['logs', 'traces'],
+        mode: 'static',
+        indexBySignal: { logs: 'remote-logs', traces: 'remote-traces' },
+      }),
+    ]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Expand details for Backup' }));
+
+    const details = within(screen.getByTestId('streamsRemoteElasticsearchDestinationDetails'));
+    expect(details.getByText('Fixed index per signal')).toBeInTheDocument();
+    expect(details.getByText('Logs')).toBeInTheDocument();
+    expect(details.getByText('remote-logs')).toBeInTheDocument();
+    expect(details.getByText('Traces')).toBeInTheDocument();
+    expect(details.getByText('remote-traces')).toBeInTheDocument();
+    expect(details.queryByText('Metrics')).not.toBeInTheDocument();
+    expect(details.queryByText('Auto (default)')).not.toBeInTheDocument();
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
 /**
@@ -38,19 +38,26 @@ const subjectSchema = z.object({
   id: z.string().describe('Identifier of the investigated entity.'),
 });
 
-const baseInvestigationSchema = z.object({
-  investigation_id: z
-    .string()
-    .describe('ID of the investigation, which is the id of its Agent Builder conversation.'),
-  status: z
-    .enum(EMITTED_INVESTIGATION_STATUSES)
-    .describe('Lifecycle status of the investigation at emit time.'),
-  subject: subjectSchema.describe('The entity this investigation is about.'),
-  trigger_type: z
-    .enum(INVESTIGATION_TRIGGER_TYPES)
-    .describe('What initiated the investigation: automatic or manual.'),
-  started_at: z.string().describe('When the investigation started (ISO 8601 timestamp).'),
-});
+const baseInvestigationSchema = lazySchema(() =>
+  z.object({
+    execution_id: z
+      .string()
+      .max(500)
+      .optional()
+      .describe('Original investigation workflow execution ID.'),
+    investigation_id: z
+      .string()
+      .describe('ID of the investigation, which is the id of its Agent Builder conversation.'),
+    status: z
+      .enum(EMITTED_INVESTIGATION_STATUSES)
+      .describe('Lifecycle status of the investigation at emit time.'),
+    subject: subjectSchema.describe('The entity this investigation is about.'),
+    trigger_type: z
+      .enum(INVESTIGATION_TRIGGER_TYPES)
+      .describe('What initiated the investigation: automatic or manual.'),
+    started_at: z.string().describe('When the investigation started (ISO 8601 timestamp).'),
+  })
+);
 
 export type InvestigationsTriggerBasePayload = z.infer<typeof baseInvestigationSchema>;
 

@@ -26,7 +26,10 @@ jest.mock('./lib/check_license', () => ({
   checkLicense: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock('./lib/get_user', () => ({
-  getAuthenticatedUser: jest.fn().mockResolvedValue('test-user'),
+  getAuthenticatedUser: jest.fn().mockResolvedValue({
+    executedBy: 'test-user',
+    user: { name: 'Test User', username: 'test-user' },
+  }),
 }));
 
 const mockBulkCreateWorkflowExecutions = jest.fn();

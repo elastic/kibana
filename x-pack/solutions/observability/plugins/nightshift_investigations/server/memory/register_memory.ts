@@ -110,7 +110,7 @@ export const loadRoundSteps = async ({
   logger: Logger;
   signal?: AbortSignal;
   retryDelaysMs?: readonly number[];
-}): Promise<TranscriptStep[] | undefined> => {
+}): Promise<{ steps?: TranscriptStep[]; unreadable: boolean }> => {
   const loaded = await loadInvestigationRound({
     agentBuilder,
     request,
@@ -121,10 +121,22 @@ export const loadRoundSteps = async ({
     signal,
     retryDelaysMs,
   });
-  return loaded.source === 'persisted_round'
-    ? stepsFromRound(loaded.rawSteps as Parameters<typeof stepsFromRound>[0])
-    : undefined;
+  return {
+    unreadable: loaded.source === 'conversation_unreadable',
+    ...(loaded.source === 'persisted_round'
+      ? { steps: stepsFromRound(loaded.rawSteps as Parameters<typeof stepsFromRound>[0]) }
+      : {}),
+  };
 };
+
+/** `runMemoryOptimize` left the round alone on purpose, which is not a failure. */
+export interface MemoryOptimizeSkipped {
+  skipped: 'conversation_unreadable';
+}
+
+export const isMemoryOptimizeSkipped = (
+  result: MemoryOptimizeSummary | MemoryOptimizeSkipped | undefined
+): result is MemoryOptimizeSkipped => result !== undefined && 'skipped' in result;
 
 export const runMemoryOptimize = async ({
   request,
@@ -168,7 +180,7 @@ export const runMemoryOptimize = async ({
   requestedConnectorId?: string;
   roundConnectorId?: string;
   interactionId: string;
-}): Promise<MemoryOptimizeSummary | undefined> => {
+}): Promise<MemoryOptimizeSummary | MemoryOptimizeSkipped | undefined> => {
   logger.debug(
     `Memory optimize wiring space=${spaceId} agent=${agentId} ` +
       `connector=${requestedConnectorId ?? '(none)'} round=${roundConnectorId ?? '(none)'} ` +
@@ -191,16 +203,28 @@ export const runMemoryOptimize = async ({
     return undefined;
   }
 
+  const loaded = await loadInvestigationRound({
+    agentBuilder: getAgentBuilder(),
+    request,
+    conversationId,
+    roundId,
+    roundIndex,
+    logger,
+    signal,
+  });
+  // Learning from a conversation this caller cannot read would mean learning from the hook's
+  // partial view of it, so the round is left alone instead.
+  if (loaded.source === 'conversation_unreadable') {
+    logger.info(
+      `Memory optimize skipped — conversation ${conversationId} is not readable by this caller`
+    );
+    return { skipped: 'conversation_unreadable' };
+  }
   const investigation =
-    (await loadRoundSteps({
-      agentBuilder: getAgentBuilder(),
-      request,
-      conversationId,
-      roundId,
-      roundIndex,
-      logger,
-      signal,
-    })) ?? stepsFromToolCalls(toolCalls);
+    loaded.source === 'persisted_round'
+      ? stepsFromRound(loaded.rawSteps as Parameters<typeof stepsFromRound>[0])
+      : stepsFromToolCalls(toolCalls);
+  const resolvedRoundId = loaded.roundId || roundId;
 
   const store = createMemoryStore({ esClient, logger, spaceId, signal });
   return optimizeMemory({
@@ -222,6 +246,8 @@ export const runMemoryOptimize = async ({
     investigation,
     agentId,
     conversationId,
+    roundId: resolvedRoundId,
+    workflowExecutionId: interactionId,
     logger,
     signal,
   });

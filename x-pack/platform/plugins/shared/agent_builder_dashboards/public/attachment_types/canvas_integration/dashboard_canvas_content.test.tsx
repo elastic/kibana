@@ -11,7 +11,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
-import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
+import { ActionButtonType, type ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -243,6 +243,15 @@ describe('DashboardCanvasAttachment', () => {
         expect.objectContaining({ label: 'Save' }),
       ])
     );
+  });
+
+  it('registers Save as the primary action and Edit in Dashboards as a secondary action', async () => {
+    const { registerActionButtons } = await renderDashboardCanvasAttachment();
+
+    expect(registerActionButtons).toHaveBeenCalledWith([
+      expect.objectContaining({ label: 'Save', type: ActionButtonType.PRIMARY }),
+      expect.objectContaining({ label: 'Edit in Dashboards', type: ActionButtonType.SECONDARY }),
+    ]);
   });
 
   it('registers disabled action buttons with an explanation when dashboard write access is unavailable', async () => {

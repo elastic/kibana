@@ -74,6 +74,7 @@ Client surface:
 
 - `install(id, options)` — no request required
 - `uninstall(id, options)` — no request required
+- `disable(id, options)` — no request required; switches the workflow off and changes nothing else (see [Disabling a managed workflow](#disabling-a-managed-workflow))
 - `getWorkflowStatus(id, options)` — no request required
 - `execute(request, id, options)` — **request required** (used for attribution and space context)
 
@@ -635,6 +636,20 @@ if (state?.templateValues) {
 ```
 
 Use `listInstalledWorkflowStates()` when the owner must inspect all of its installed instances across spaces, such as migrating versioned template values before calling `ready()`. These methods expose persisted managed-workflow state to the owner plugin only; they are not public HTTP workflow APIs.
+
+### Disabling a managed workflow
+
+`disable` switches one of the plugin's own managed workflows off without a request:
+
+```ts
+const disabled = await managed.disable(MY_WORKFLOW_ID, { spaceId: 'my-space' });
+```
+
+It takes the same identity options as `getWorkflowStatus` and changes nothing but `enabled`, so it also works on workflows bound to a service account (`settings.run_as`). Turning a bound workflow back on still requires a user with `manage_security`.
+
+> **Caveat:** a disable lasts only until the next managed update when the definition uses `enablement: 'enforced'`. That update re-applies `enabled` from the definition's YAML without a request, so it switches a disabled workflow back on, including a bound one. Use `enablement: 'restorable'` for a workflow that must stay off across updates.
+
+It resolves to `true` when this call switched the workflow off, and to `false` when the workflow is missing, deleted, not managed, already off, or Workflows is unavailable. The read that guards the write makes this decision, so a workflow switched off or deleted during the call also resolves to `false` and is not written. It throws for an unknown id or a workflow managed by another plugin or definition (`403`).
 
 ## 11) Executing managed workflows
 

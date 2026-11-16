@@ -13,13 +13,14 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { REACHES_BACK_COLUMN } from '../queries/history_reaches_back';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
+import { TILE_PROJECT_ROUTING } from './tile_project_routing';
+import type { TileDeltaFailure } from '../data';
 
 interface PreviousPeriodQueryOptions<T> {
   queryKey: string;
   query: string | null;
   enabled: boolean;
   parse: (raw: ESQLSearchResponse) => T;
-  localOnly?: boolean;
 }
 
 /**
@@ -31,7 +32,6 @@ const usePreviousPeriodQuery = <T>({
   query,
   enabled,
   parse,
-  localOnly = false,
 }: PreviousPeriodQueryOptions<T>): {
   data: T | undefined;
   isPending: boolean;
@@ -50,7 +50,7 @@ const usePreviousPeriodQuery = <T>({
             {
               abortSignal: tileSignal,
               strategy: 'esql_async',
-              ...(localOnly ? { projectRouting: '_alias:_origin' } : {}),
+              projectRouting: TILE_PROJECT_ROUTING,
             }
           )
         )
@@ -96,8 +96,6 @@ interface PreviousPeriodOptions<T> {
   /** True once the page's counts have loaded, the tile is not skipped and its count is above 0. */
   enabled: boolean;
   parse: (raw: ESQLSearchResponse) => T;
-  /** Run only against the local cluster, like the tile's count. */
-  localOnly?: boolean;
 }
 
 /**
@@ -113,7 +111,6 @@ export const usePreviousPeriod = <T>({
   previousQuery,
   enabled,
   parse,
-  localOnly,
 }: PreviousPeriodOptions<T>): {
   previous: T | undefined;
   /**
@@ -123,13 +120,14 @@ export const usePreviousPeriod = <T>({
   reachesBack: boolean | undefined;
   isHistoryMissing: boolean;
   isError: boolean;
+  /** Which part failed: the history check, or the previous-period query that follows it. */
+  failure: TileDeltaFailure | undefined;
 } => {
   const guard = usePreviousPeriodQuery({
     queryKey: `${guardKey}HistoryReachesBack`,
     query: guardQuery,
     enabled,
     parse: parseReachesBack,
-    localOnly,
   });
   const guardSettled = guard.data !== undefined && !guard.isPending;
   const hasHistory = guardSettled && guard.data === true;
@@ -139,7 +137,6 @@ export const usePreviousPeriod = <T>({
     query: previousQuery,
     enabled: enabled && hasHistory,
     parse,
-    localOnly,
   });
 
   const isError = guard.isError || previousPeriod.isError;
@@ -150,26 +147,28 @@ export const usePreviousPeriod = <T>({
     reachesBack: !guard.isError && guardSettled ? guard.data : undefined,
     isHistoryMissing: !isError && guardSettled && guard.data === false,
     isError,
+    failure: guard.isError ? 'history' : previousPeriod.isError ? 'delta' : undefined,
   };
 };
 
 /**
- * Whether a delta can still arrive, for the spinner: not for a skipped tile, a zero count (the pill
- * is hidden then), a query that can never run, a failed query, a history that is too short (the
- * tile says so instead) or a delta that is already known.
+ * Whether a delta can still arrive, for the skeleton: not for a skipped tile, a count that is not
+ * known (it failed, timed out or was skipped), a query that can never run, a failed query, a history
+ * that is too short (the tile says so instead) or a delta that is already known. A count of 0 is
+ * known: the tile still compares it with the previous period.
  */
 export const isDeltaStillComing = ({
   skip,
-  count,
+  hasCount,
   isUnavailable,
   isError,
   isHistoryMissing,
   hasDelta,
 }: {
   skip?: boolean;
-  count: number;
+  hasCount: boolean;
   isUnavailable: boolean;
   isError: boolean;
   isHistoryMissing: boolean;
   hasDelta: boolean;
-}): boolean => !skip && count > 0 && !isUnavailable && !isError && !isHistoryMissing && !hasDelta;
+}): boolean => !skip && hasCount && !isUnavailable && !isError && !isHistoryMissing && !hasDelta;

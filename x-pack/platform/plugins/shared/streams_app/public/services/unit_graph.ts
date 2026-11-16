@@ -126,6 +126,17 @@ export const isProcessingSlotEditable = (unit: Unit, ref: ProcessingNodeRef): bo
     : isPipelineSlotEditable(pipeline);
 };
 
+/** The processor ids of a slot, in order. A slot that does not exist has none. */
+export const getSlotProcessorIds = (unit: Unit, ref: ProcessingNodeRef): string[] => {
+  const pipeline = unit.unit.pipelines.find(({ id }) => id === ref.pipelineId);
+  if (!pipeline) {
+    return [];
+  }
+  return ref.kind === PROCESSING_SLOT_KIND.route
+    ? [...(readRoutes(pipeline.config)[ref.routeIndex]?.processors ?? [])]
+    : readEntryIds(pipeline.config, PIPELINE_ENTRY.processors);
+};
+
 interface Upstream {
   endpoint: UnitGraphEndpoint;
   forwarding: UnitEdgeForwarding;

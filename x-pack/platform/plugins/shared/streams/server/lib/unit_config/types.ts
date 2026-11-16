@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { StreamsUnit } from '@kbn/streams-schema';
+import type {
+  ComponentCatalogue,
+  ComponentValidationRequest,
+  ComponentValidationResult,
+  StreamsUnit,
+} from '@kbn/streams-schema';
 
 /**
  * One credential as the config-distributor `credentials[]` sidecar expects: the name a
@@ -93,6 +98,20 @@ export interface UnitConfigHooks {
    */
   prepareCredentials?: PrepareUnitCredentials;
 }
+
+export type ComponentCatalogueFetchResult =
+  | { notModified: true }
+  | { notModified: false; catalogue: ComponentCatalogue; etag?: string };
+
+export type FetchComponentCatalogue = (params: {
+  /** ETag of the catalogue the caller holds, sent as `If-None-Match`. */
+  etag?: string;
+  signal?: AbortSignal;
+}) => Promise<ComponentCatalogueFetchResult>;
+
+export type ValidateComponent = (
+  params: ComponentValidationRequest & { signal?: AbortSignal }
+) => Promise<ComponentValidationResult>;
 
 export type RepublishUnitOutcome =
   | 'republished'

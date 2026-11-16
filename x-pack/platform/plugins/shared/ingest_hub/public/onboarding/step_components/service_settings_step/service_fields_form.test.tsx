@@ -145,6 +145,7 @@ describe('ServiceFieldsForm — ECF single-DS multi-input trigger vars', () => {
     dataStreams: ['cloudtrail'],
     packageName: 'aws',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
+    settingsScope: 'ecf',
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn'],
     defaultEnabled: true,
@@ -290,6 +291,51 @@ describe('ServiceFieldsForm — agent-based "at least one source" hint', () => {
     expect(
       screen.queryByTestId('serviceSettingsFlyout-sourceRequiredHint')
     ).not.toBeInTheDocument();
+  });
+
+  it('names the source fields for a service without an ECF route', () => {
+    renderForm(
+      {
+        ...AGENT_VIEW,
+        deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+        ecfSettings: undefined,
+      },
+      { varsByDataStream: withBucket('') }
+    );
+    expect(screen.getByTestId('serviceSettingsFlyout-sourceRequiredHint')).toHaveTextContent(
+      'Provide at least one of: Bucket ARN, Queue URL.'
+    );
+  });
+
+  it('keeps the manifest help text and single-value field for trigger vars', () => {
+    (LazyPackagePolicyInputVarField as unknown as jest.Mock).mockClear();
+    const description = "Mandatory if the 'Collect logs via S3 Bucket' switch is on.";
+    const withDescription = {
+      'aws-s3': {
+        ...varDefsByInput['aws-s3'],
+        bucket_arn: { ...varDefsByInput['aws-s3'].bucket_arn, description },
+      },
+    };
+    renderForm(
+      {
+        ...AGENT_VIEW,
+        varDefsByInput: withDescription,
+        varDefsByDataStream: {
+          waf: {
+            ...AGENT_VIEW.varDefsByDataStream!.waf,
+            optionalConfig: ['bucket_arn', 'queue_url'],
+            varDefsByInput: withDescription,
+          },
+        },
+      },
+      { varsByDataStream: withBucket('') }
+    );
+    const bucketVar = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls
+      .map(([props]) => props.varDef)
+      .find((v: { name?: string }) => v.name === 'bucket_arn');
+
+    expect(bucketVar).toMatchObject({ description, required: false });
+    expect(bucketVar.multi).not.toBe(true);
   });
 
   it('shows no hint in the ECF view, which enforces the ARN as required instead', () => {

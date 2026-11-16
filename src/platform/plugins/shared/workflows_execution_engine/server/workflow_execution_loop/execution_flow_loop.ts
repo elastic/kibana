@@ -8,6 +8,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { yieldToEventLoop } from '@kbn/workflows/server';
 import { runNode } from './run_node';
 import type { WorkflowExecutionLoopParams } from './types';
 
@@ -16,6 +17,8 @@ import type { WorkflowExecutionLoopParams } from './types';
  */
 export async function executionFlowLoop(params: WorkflowExecutionLoopParams) {
   while (params.workflowExecutionCursor.isExecuting) {
+    // Steps with no I/O resolve without a macrotask, so a long chain of them would never release the event loop.
+    await yieldToEventLoop();
     await runNode(params);
     // Parked wait: keep currentNode for resume. Committing a stale undefined
     // nextNodeId would clear the cursor and persist a false COMPLETED.

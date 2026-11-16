@@ -32,7 +32,8 @@ interface SourceActionsColumnProps {
   onboardTooltip: string;
   onOnboard: (sourceId: string) => void;
   onStopOnboarding: (sourceId: string) => void | Promise<void>;
-  onDelete: (source: NightshiftSource) => void;
+  /** Left out for users who cannot change sources, which hides the delete button. */
+  onDelete?: (source: NightshiftSource) => void;
 }
 
 /**
@@ -113,17 +114,19 @@ export function SourceActionsColumn({
           </EuiToolTip>
         )}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={DELETE_SOURCE_ACTION_DESCRIPTION}>
-          <EuiButtonIcon
-            data-test-subj="significantEventsAppSourcesTableDeleteButton"
-            iconType="trash"
-            color="danger"
-            aria-label={DELETE_SOURCE_ACTION_LABEL}
-            onClick={() => onDelete(source)}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+      {onDelete && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={DELETE_SOURCE_ACTION_DESCRIPTION}>
+            <EuiButtonIcon
+              data-test-subj="significantEventsAppSourcesTableDeleteButton"
+              iconType="trash"
+              color="danger"
+              aria-label={DELETE_SOURCE_ACTION_LABEL}
+              onClick={() => onDelete(source)}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

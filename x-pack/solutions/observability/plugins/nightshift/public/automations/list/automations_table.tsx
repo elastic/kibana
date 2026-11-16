@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
-import { useToggleAutomation, type Automation } from '../hooks/use_automations';
+import { useToggleAutomation, type Automation } from '../../data/automations/use_automations';
 import type { RunCounts, RunCountStatus } from '../hooks/use_automation_usage';
 import type { AutomationFacets } from '../utils/filter_automations';
 import { AutomationAuthorCell } from './cells/author_cell';

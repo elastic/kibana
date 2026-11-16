@@ -454,6 +454,174 @@ describe('runPackageReport', () => {
     }
   );
 
+  describe('a run the hunt retired after a gap no rerun can close', () => {
+    const gaps = [
+      { reason: 'unknown_technique_id', detail: 'T9999', technique_id: 'T9999' },
+      { reason: 'input_truncated', detail: 'only a prefix was hunted' },
+    ];
+    const writeCoverageKis = jest.fn(async (subjects: CoverageSubject[]) => ({
+      written: subjects.map((subject) => ({ kiId: subject.kiId, subject: subject.reportId })),
+      skipped: [],
+    }));
+    const retiredRun = (
+      overrides: {
+        coverageGaps?: typeof gaps;
+        hasOpenProposal?: RunPackageReportDeps['hasOpenProposal'];
+      } = {}
+    ) =>
+      runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'retired_incomplete',
+        hasConfirmedHit: false,
+        attachments: [],
+        expectedSseCount: 0,
+        coordinator: { coverageGaps: 'coverageGaps' in overrides ? overrides.coverageGaps : gaps },
+        deps: deps({
+          writeCoverageKis,
+          ...(overrides.hasOpenProposal ? { hasOpenProposal: overrides.hasOpenProposal } : {}),
+        }),
+      });
+
+    beforeEach(() => writeCoverageKis.mockClear());
+
+    it('packages it as a settled dismissal that says part of the report was not searched', async () => {
+      const result = await retiredRun();
+
+      expect(result.status).toBe('packaged');
+      if (result.status !== 'packaged') return;
+      expect(result.dismiss).toBe(true);
+      expect(result.dismissHold).toBe('none');
+      expect(result.closureSummary).toContain('2 gaps left part of the report unsearched');
+      expect(result.closureSummary).toContain('retired without a full search');
+      expect(result.closureSummary).not.toContain('nothing in this environment matched');
+      // This string is the Investigation's own summary, so it names what was not searched.
+      expect(result.closureSummary).toContain(
+        'Not searched: T9999 (unknown technique id), input truncated.'
+      );
+      expect(result.coverage.written.length).toBeGreaterThan(0);
+    });
+
+    it('names what was not searched on the report-scoped KI and the Investigation summary', async () => {
+      await retiredRun();
+
+      const [subjects] = writeCoverageKis.mock.calls[0];
+      expect(subjects[0].threatSummary).toContain(
+        'Not searched by Hunt Watch (2 gaps): T9999 (unknown technique id), input truncated'
+      );
+      expect(subjects[0].content).toContain('Not searched by Hunt Watch');
+      expect(subjects[0].investigationSummary).toContain(
+        'no confirmed hits, but 2 gaps left part of the report unsearched'
+      );
+      expect(subjects[0].investigationSummary).toContain(
+        'Not searched: T9999 (unknown technique id)'
+      );
+    });
+
+    it.each([
+      ['omitted', undefined],
+      ['empty', []],
+    ])(
+      'writes count-less retired prose, not the clean prose, when the gaps are %s',
+      async (_label, coverageGaps) => {
+        const result = await retiredRun({ coverageGaps });
+
+        expect(result.status).toBe('packaged');
+        if (result.status !== 'packaged') return;
+        expect(result.dismiss).toBe(true);
+        expect(result.closureSummary).toContain('part of the report could not be searched');
+        expect(result.closureSummary).not.toContain('Not searched:');
+        expect(result.closureSummary).not.toMatch(/\d+ gaps?/);
+        expect(result.closureSummary).not.toContain('nothing in this environment matched');
+        const [subjects] = writeCoverageKis.mock.calls[0];
+        expect(subjects[0].investigationSummary).toContain('retired without a full search');
+        expect(subjects[0].threatSummary).not.toContain('Not searched by Hunt Watch');
+      }
+    );
+
+    it('still holds the dismissal for an open Proposal, and says why', async () => {
+      const result = await retiredRun({ hasOpenProposal: async () => true });
+
+      expect(result.status).toBe('packaged');
+      if (result.status !== 'packaged') return;
+      expect(result.dismiss).toBe(false);
+      expect(result.dismissHold).toBe('open_proposal');
+      expect(result.closureSummary).toContain('part of the report could not be searched');
+      expect(result.closureSummary).toContain('Leaving the Investigation open');
+      expect(result.coverage.written.length).toBeGreaterThan(0);
+    });
+
+    it('holds the dismissal when the Proposal lookup fails', async () => {
+      const result = await retiredRun({
+        hasOpenProposal: async () => {
+          throw new Error('search unavailable');
+        },
+      });
+
+      expect(result.status === 'packaged' && result.dismissHold).toBe('check_failed');
+      expect(result.status === 'packaged' && result.dismiss).toBe(false);
+    });
+
+    it('sends a confirmed hit through the SSE path, as it does for partial', async () => {
+      const result = await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'retired_incomplete',
+        hasConfirmedHit: true,
+        attachments: [sseAttachment({ hit: true, hostName: 'h1' })],
+        expectedSseCount: 1,
+        coordinator: { coverageGaps: gaps },
+        deps: deps({ writeCoverageKis }),
+      });
+
+      expect(result.status === 'packaged' && result.dismiss).toBe(false);
+      expect(result.status === 'packaged' && result.proposals.length).toBeGreaterThan(0);
+    });
+
+    it('does not name gaps on a successful run even if some arrive', async () => {
+      await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: false,
+        attachments: [],
+        expectedSseCount: 0,
+        coordinator: { coverageGaps: gaps },
+        deps: deps({ writeCoverageKis }),
+      });
+
+      const [subjects] = writeCoverageKis.mock.calls[0];
+      expect(subjects[0].threatSummary).not.toContain('Not searched');
+      expect(subjects[0].investigationSummary).toContain('Nothing in this environment matched');
+    });
+  });
+
+  it('says a partial run stays eligible for a later sweep, and leaves failed as it was', async () => {
+    const base = {
+      spaceId: 'default',
+      reportId,
+      investigationConversationId: conversationId,
+      runId,
+      hasConfirmedHit: false,
+      attachments: [],
+      expectedSseCount: 0,
+      deps: deps(),
+    };
+    const partial = await runPackageReport({ ...base, huntStatus: 'partial' });
+    const failed = await runPackageReport({ ...base, huntStatus: 'failed' });
+
+    expect(partial.status === 'run_incomplete' && partial.reason).toContain(
+      'the report stays eligible for a later sweep'
+    );
+    expect(failed.status === 'run_incomplete' && failed.reason).not.toContain('eligible');
+  });
+
   // Only reachable when the run said it confirmed a hit: the attachment should exist and
   // does not, so the sweep has to report itself partial rather than close the Investigation.
   it('returns run_incomplete when a confirmed hit has no current-run SSE', async () => {

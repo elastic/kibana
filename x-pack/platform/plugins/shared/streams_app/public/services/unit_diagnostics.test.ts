@@ -29,7 +29,7 @@ const fetchError = (diagnostics: object[]) =>
   });
 
 describe('getProcessingDiagnostics', () => {
-  it('traces schema violations by processor index and compiler errors by id', () => {
+  it('traces schema violations by the index in the message and compiler errors by the pointer', () => {
     expect(
       getProcessingDiagnostics(
         fetchError([
@@ -39,8 +39,11 @@ describe('getProcessingDiagnostics', () => {
               'processors.1.config.0.value.0.path: String length must be greater than or equal to 1',
             severity: 'error',
           },
-          { code: 'E027', message: 'invalid config', path: 'processors > add-fields-1' },
-          { code: 'E017', message: 'pipeline has no way out', path: 'pipelines > main' },
+          { code: 'E027', message: 'invalid config', path: '/processors/0/config/0' },
+          { code: 'E017', message: 'pipeline has no way out', path: '/pipelines/0' },
+          { code: 'E002', message: 'unknown processor', path: '/processors/5' },
+          { code: 'E016', message: 'pipeline references processors.1 twice', path: '/pipelines/0' },
+          { code: 'E099', message: 'see processors.0 for the conflicting field' },
         ]),
         savedUnit
       )
@@ -53,6 +56,13 @@ describe('getProcessingDiagnostics', () => {
       },
       { code: 'E027', message: 'invalid config', processorId: 'add-fields-1' },
       { code: 'E017', message: 'pipeline has no way out', processorId: undefined },
+      { code: 'E002', message: 'unknown processor', processorId: undefined },
+      { code: 'E016', message: 'pipeline references processors.1 twice', processorId: undefined },
+      {
+        code: 'E099',
+        message: 'see processors.0 for the conflicting field',
+        processorId: undefined,
+      },
     ]);
   });
 

@@ -9,7 +9,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
-import type { Automation } from '../../hooks/use_automations';
+import type { Automation } from '../../../data/automations/use_automations';
 import { getTriggerDisplay } from '../../utils/trigger_display';
 import { AutomationTags } from './tags_badge';
 

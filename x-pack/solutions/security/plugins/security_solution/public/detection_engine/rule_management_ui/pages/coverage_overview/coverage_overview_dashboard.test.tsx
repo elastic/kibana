@@ -66,14 +66,14 @@ describe('CoverageOverviewDashboard', () => {
       'true'
     );
     expect(screen.getByTestId('coverageOverviewFrameworkTab-enterprise')).toHaveTextContent(
-      'MITRE ATT&CK'
+      'MITRE ATT&CK®'
     );
     expect(screen.getByTestId('coverageOverviewFrameworkTab-atlas')).toHaveAttribute(
       'aria-selected',
       'false'
     );
     expect(screen.getByTestId('coverageOverviewFrameworkTab-atlas')).toHaveTextContent(
-      'MITRE ATLAS'
+      'MITRE ATLAS™'
     );
   });
 

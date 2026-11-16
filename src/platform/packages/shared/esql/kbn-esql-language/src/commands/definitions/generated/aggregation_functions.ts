@@ -6928,6 +6928,318 @@ const sparklineDefinition: FunctionDefinition = {
         },
         {
           name: 'from',
+          type: 'date',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
           type: 'text',
           optional: false,
           description: 'Start of the range. Can be a date or a date expressed as a string.',
@@ -6984,6 +7296,474 @@ const sparklineDefinition: FunctionDefinition = {
       params: [
         {
           name: 'aggregation',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
           type: 'long',
           optional: false,
           hint: {
@@ -7013,6 +7793,162 @@ const sparklineDefinition: FunctionDefinition = {
         {
           name: 'to',
           type: 'keyword',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'aggregation',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'aggregation',
+          },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description: 'Target number of buckets.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
           optional: false,
           description: 'End of the range. Can be a date or a date expressed as a string.',
         },

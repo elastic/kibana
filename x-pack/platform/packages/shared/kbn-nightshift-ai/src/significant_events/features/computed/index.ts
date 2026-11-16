@@ -6,7 +6,6 @@
  */
 
 import type { BaseFeature } from '@kbn/significant-events-schema';
-import { codeAnalysisGenerator } from './code_analysis';
 import { datasetAnalysisGenerator } from './dataset_analysis';
 import { errorLogsGenerator } from './error_logs';
 import { logPatternsGenerator } from './log_patterns';
@@ -46,7 +45,6 @@ const generators: ComputedFeatureGenerator[] = [
   logSamplesGenerator,
   logPatternsGenerator,
   errorLogsGenerator,
-  codeAnalysisGenerator,
 ];
 
 generators.forEach((generator) => registry.register(generator));

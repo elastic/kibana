@@ -63,7 +63,11 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
       return getUrlForApp(returnAppId, { path: returnPath });
     }
 
-    if (from === 'installed-integrations' || from === 'copy-from-installed-integrations') {
+    if (
+      from === 'installed-integrations' ||
+      from === 'copy-from-installed-integrations' ||
+      from === 'upgrade-from-installed-integrations'
+    ) {
       return `${getHref('integrations_installed', {})}?viewPolicies=${splitPkgKey(pkgkey).pkgName}`;
     }
 

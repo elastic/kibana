@@ -117,6 +117,10 @@ const SCENARIOS: Scenario[] = [
     changedFiles: ['x-pack/platform/plugins/shared/alerting/server/index.ts'],
   },
   {
+    name: 'alerting_v2 path',
+    changedFiles: ['x-pack/platform/plugins/shared/alerting_v2/server/index.ts'],
+  },
+  {
     name: 'response ops step definition path',
     changedFiles: ['.buildkite/pipeline-utils/step-library/steps/response_ops.ts'],
   },
@@ -278,6 +282,14 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'storybooks definition path',
     changedFiles: ['.buildkite/pipeline-utils/step-library/steps/storybooks.ts'],
+  },
+  {
+    name: 'kbn handlebars definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/kbn_handlebars.ts'],
+  },
+  {
+    name: 'prompt changes definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/prompt_changes.ts'],
   },
   { name: 'storybook toolchain package affected', affectedPackages: ['@kbn/storybook'] },
   {

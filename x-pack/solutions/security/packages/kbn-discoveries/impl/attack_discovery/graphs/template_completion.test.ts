@@ -7,9 +7,11 @@
 
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
+import { ModelRefusalError } from '@kbn/langchain/server';
 import {
   attackDiscoveryRefineTemplateRequest,
   createAttackDiscoveryTemplateCompletion,
+  resolveAttackDiscoveryTemplateCompletion,
 } from './template_completion';
 
 const chatComplete = jest.fn().mockResolvedValue({ content: '{}' });
@@ -19,6 +21,20 @@ const inferenceClient = { chatComplete } as unknown as InferenceClient;
 describe('createAttackDiscoveryTemplateCompletion', () => {
   beforeEach(() => {
     chatComplete.mockClear();
+  });
+
+  it('throws a ModelRefusalError when the response carries a content filter refusal', async () => {
+    chatComplete.mockResolvedValueOnce({
+      content: '',
+      refusal:
+        'The response was stopped by the provider content filter (finish_reason: content_filter).',
+    });
+    const complete = createAttackDiscoveryTemplateCompletion({
+      inferenceClient,
+      connectorId: 'daybreak',
+    });
+
+    await expect(complete({ alerts: ['a'], phase: 'generate' })).rejects.toThrow(ModelRefusalError);
   });
 
   it('clamps alerts and the partial JSON to the gateway schema', async () => {
@@ -52,6 +68,56 @@ describe('createAttackDiscoveryTemplateCompletion', () => {
     await complete({ alerts: ['alert'], phase: 'generate' });
 
     expect(chatComplete.mock.calls[0][0].timeout).toBe(600_000);
+  });
+});
+
+describe('createAttackDiscoveryTemplateCompletion telemetry', () => {
+  beforeEach(() => {
+    chatComplete.mockClear();
+  });
+
+  it('sends telemetryMetadata to chatComplete as connectorTelemetry', async () => {
+    const complete = createAttackDiscoveryTemplateCompletion({
+      inferenceClient,
+      connectorId: 'daybreak',
+      telemetryMetadata: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+    });
+
+    await complete({ alerts: ['alert'], phase: 'generate' });
+
+    expect(chatComplete.mock.calls[0][0].metadata).toEqual({
+      connectorTelemetry: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+    });
+  });
+
+  it('sends no metadata when telemetryMetadata is not set', async () => {
+    const complete = createAttackDiscoveryTemplateCompletion({
+      inferenceClient,
+      connectorId: 'daybreak',
+    });
+
+    await complete({ alerts: ['alert'], phase: 'generate' });
+
+    expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('metadata');
+  });
+
+  it('threads telemetryMetadata through resolveAttackDiscoveryTemplateCompletion', async () => {
+    const complete = await resolveAttackDiscoveryTemplateCompletion({
+      inferenceClient: {
+        chatComplete,
+        getConnectorById: jest
+          .fn()
+          .mockResolvedValue({ metadata: { capabilities: { templates: { policy: 'required' } } } }),
+      },
+      connectorId: 'daybreak',
+      telemetryMetadata: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+    });
+
+    await complete?.({ alerts: ['alert'], phase: 'generate' });
+
+    expect(chatComplete.mock.calls[0][0].metadata).toEqual({
+      connectorTelemetry: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+    });
   });
 });
 

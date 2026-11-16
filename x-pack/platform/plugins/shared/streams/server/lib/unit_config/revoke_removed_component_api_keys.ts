@@ -11,19 +11,23 @@ import { revokeComponentApiKeys } from './managed_api_keys';
 
 interface UnitComponentIds {
   sources?: Array<{ id?: string }>;
-  destinations?: Array<{ id?: string }>;
+  destinations?: Array<{ id?: string; type?: string }>;
 }
 
 const componentIds = (components: Array<{ id?: string }> | undefined): Set<string> =>
   new Set((components ?? []).flatMap((component) => (component.id ? [component.id] : [])));
 
+// Kibana mints API keys only for local Elasticsearch destinations.
+const keyMintedDestinationIds = (destinations: UnitComponentIds['destinations']): Set<string> =>
+  componentIds(destinations?.filter(({ type }) => type === 'elasticsearch'));
+
 const removedIds = (previous: Set<string>, next: Set<string>): string[] =>
   [...previous].filter((id) => !next.has(id));
 
 /**
- * After a unit persist succeeds, invalidate API keys for sources and destinations that are no
- * longer on the unit. `client` must be scoped to the current user (see `revokeComponentApiKeys`).
- * Resolves to whether some of those keys may still be active.
+ * After a unit persist succeeds, invalidate API keys for sources and local Elasticsearch
+ * destinations that are no longer on the unit. `client` must be scoped to the current user (see
+ * `revokeComponentApiKeys`). Resolves to whether some of those keys may still be active.
  */
 export const revokeRemovedComponentApiKeys = async ({
   client,
@@ -46,8 +50,8 @@ export const revokeRemovedComponentApiKeys = async ({
 
   const sourceIds = removedIds(componentIds(previousUnit.sources), componentIds(nextUnit.sources));
   const destinationIds = removedIds(
-    componentIds(previousUnit.destinations),
-    componentIds(nextUnit.destinations)
+    keyMintedDestinationIds(previousUnit.destinations),
+    keyMintedDestinationIds(nextUnit.destinations)
   );
 
   if (sourceIds.length === 0 && destinationIds.length === 0) {

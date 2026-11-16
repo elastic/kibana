@@ -107,7 +107,7 @@ export const RestoreList: React.FunctionComponent = () => {
     if (restores && restores.length === 0) {
       content = (
         <EuiPageTemplate.EmptyPrompt
-          iconType="managementApp"
+          iconType="gear"
           title={
             <h1 data-test-subj="noRestoredSnapshotsHeader">
               <FormattedMessage

@@ -29,9 +29,9 @@ import {
   useRelayAppBindings,
   useBindChannel,
   useUnbindChannel,
-} from './use_relay_app_bindings';
-import { ChannelLabel } from './channel_label';
-import { parseSlackChannelInput } from './parse_slack_channel_input';
+} from '../../../data/relay_apps/use_relay_app_bindings';
+import { ChannelLabel } from '../../../components/ui/channel_label';
+import { parseSlackChannelInput } from '../../../common/parse_slack_channel_input';
 
 interface SlackConnectionBindingsProps {
   canEdit: boolean;

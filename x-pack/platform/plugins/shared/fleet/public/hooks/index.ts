@@ -6,6 +6,7 @@
  */
 
 export * from './use_authz';
+export * from './use_automatic_import_authz';
 export * from './use_core';
 export * from './use_config';
 export * from './use_kibana_version';
@@ -45,3 +46,4 @@ export * from './use_upgrade_review_actions';
 export * from './use_iac_provisioner';
 export * from './use_restart_agent_action';
 export * from './use_kafka_auth_methods';
+export * from './use_onboarding_instance_url';

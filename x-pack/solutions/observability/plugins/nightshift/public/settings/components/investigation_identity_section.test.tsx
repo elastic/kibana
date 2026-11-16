@@ -9,6 +9,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { InvestigationIdentitySection } from './investigation_identity_section';
+import { useDeveloperMode } from '../../hooks/use_developer_mode';
+
+jest.mock('../../hooks/use_developer_mode');
+const mockUseDeveloperMode = useDeveloperMode as jest.MockedFunction<typeof useDeveloperMode>;
 
 let mockStatus: {
   isLoading: boolean;
@@ -17,8 +21,8 @@ let mockStatus: {
   refetch?: () => void;
 };
 
-jest.mock('../../service_account/use_investigator_service_account', () => ({
-  ...jest.requireActual('../../service_account/use_investigator_service_account'),
+jest.mock('../../data/service_accounts/use_investigator_service_account', () => ({
+  ...jest.requireActual('../../data/service_accounts/use_investigator_service_account'),
   useInvestigatorServiceAccount: () => mockStatus,
 }));
 
@@ -55,6 +59,30 @@ const renderSection = () =>
   );
 
 describe('InvestigationIdentitySection', () => {
+  beforeEach(() => {
+    mockUseDeveloperMode.mockReturnValue({
+      isDeveloperMode: true,
+      isSaving: false,
+      setDeveloperMode: jest.fn(),
+    });
+  });
+
+  it('hides the account details outside developer mode', () => {
+    mockUseDeveloperMode.mockReturnValue({
+      isDeveloperMode: false,
+      isSaving: false,
+      setDeveloperMode: jest.fn(),
+    });
+    mockStatus = status();
+    renderSection();
+
+    expect(screen.getByTestId('nightshiftServiceAccountOn')).toBeInTheDocument();
+    const section = screen.getByTestId('nightshiftInvestigationIdentitySection');
+    expect(section).not.toHaveTextContent('nightshift_agent');
+    expect(section).not.toHaveTextContent('_nightshift_agent');
+    expect(screen.queryByTestId('nightshiftServiceAccountOthers')).not.toBeInTheDocument();
+  });
+
   it('shows the account Nightshift runs as, without a way to turn it off', () => {
     mockStatus = status();
     renderSection();

@@ -19,6 +19,7 @@
 import { ExecutionStatus } from '@kbn/workflows';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../server/agents/investigation';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../server/agents/decision_tree_reinforcement';
+import { SANDBOX_VIEW_FILE_TOOL_ID } from '../server/tools/sandbox_bash/view_file_tool';
 import {
   createNightshiftWorkflowFixture,
   memoryOptimizeSummary,
@@ -157,6 +158,15 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     ]);
   });
 
+  // Nothing of the conversation is saved yet, so this round is the investigation's first.
+  it('prepares the round as a first round', () => {
+    expect(jest.mocked(prepareReinforcementTurn).mock.calls[0][0]).toMatchObject({
+      turnKind: 'initial_investigation',
+      investigationId: ELIGIBLE_ROUND_INPUTS.conversation_id,
+      earlierAccessedTreeIds: [],
+    });
+  });
+
   it('withholds the learning tools on an initial investigation', () => {
     expect(fixture.agentRuns[0].agentParams.configurationOverrides).toBeUndefined();
   });
@@ -200,6 +210,50 @@ describe('agent optimize workflow, an eligible investigator round', () => {
   });
 });
 
+describe('agent optimize workflow, a follow-up round', () => {
+  let fixture: NightshiftWorkflowFixture;
+
+  beforeAll(async () => {
+    fixture = createNightshiftWorkflowFixture();
+    fixture.setSavedRounds([
+      {
+        id: 'round-0',
+        steps: [
+          {
+            type: 'tool_call',
+            tool_call_id: 'read-tree',
+            tool_id: SANDBOX_VIEW_FILE_TOOL_ID,
+            params: { file_path: '/workspace/decision-trees/decision_tree_checkout-latency.md' },
+            results: [],
+          },
+        ],
+      },
+    ]);
+    jest.mocked(prepareReinforcementTurn).mockResolvedValue({
+      skipped: false,
+      message: 'reinforcement turn prompt',
+      treeCount: 1,
+      turnKind: 'feedback_reinforcement',
+      openedTreeIds: [],
+    });
+
+    await fixture.runOptimize(ELIGIBLE_ROUND_INPUTS);
+  });
+
+  it('prepares it on the trees the earlier rounds opened', () => {
+    expect(jest.mocked(prepareReinforcementTurn).mock.calls[0][0]).toMatchObject({
+      turnKind: 'feedback_reinforcement',
+      investigationId: ELIGIBLE_ROUND_INPUTS.conversation_id,
+      earlierAccessedTreeIds: ['symptom:checkout-latency'],
+    });
+  });
+
+  it('offers the learning tools', () => {
+    expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
+    expect(fixture.agentRuns[0].agentParams.configurationOverrides).toBeDefined();
+  });
+});
+
 describe('agent optimize workflow, rounds that must not reinforce', () => {
   // `prepare_turn` is the eligibility gate: it answers `skipped`, and both agent steps read that
   // answer. The workflow still installs with Cortex or Memory alone, so this runs on installs that
@@ -210,6 +264,11 @@ describe('agent optimize workflow, rounds that must not reinforce', () => {
       'the round came from another agent',
       { decisionTreesEnabled: true },
       { ...ELIGIBLE_ROUND_INPUTS, agent_id: 'significant-events.investigation' },
+    ],
+    [
+      'the round has no id to place it in its conversation',
+      { decisionTreesEnabled: true },
+      { ...ELIGIBLE_ROUND_INPUTS, round_id: undefined },
     ],
   ])('skips the whole reinforcement tail when %s', async (_case, options, inputs) => {
     const fixture = createNightshiftWorkflowFixture(options);

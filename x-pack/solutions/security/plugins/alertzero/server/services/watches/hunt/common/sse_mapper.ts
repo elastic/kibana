@@ -707,13 +707,13 @@ const buildChrome = ({
     // it it carries. `per_index` holds the required/optional split either way.
     evidenceFor.push(
       behavior
-        ? `Tier 1 matched ${huntResult.tier1.counts.total_hits} event(s) for this report in the hunt window, at least one in a required index; ${tier1RefCount} are referenced here (see hunt_result.tier1.per_index for the required/optional split).`
-        : `Tier 1 matched ${huntResult.tier1.counts.total_hits} event(s) in the hunt window, at least one in a required index (see hunt_result.tier1.per_index for the required/optional split).`
+        ? `IOC Hunt matched ${huntResult.tier1.counts.total_hits} event(s) for this report in the hunt window, at least one in a required index; ${tier1RefCount} are referenced here (see hunt_result.tier1.per_index for the required/optional split).`
+        : `IOC Hunt matched ${huntResult.tier1.counts.total_hits} event(s) in the hunt window, at least one in a required index (see hunt_result.tier1.per_index for the required/optional split).`
     );
   }
   if (huntResult.hit_sources.includes('tier2') && behavior?.execution?.hit) {
     evidenceFor.push(
-      `Tier 2 executed ${behavior.technique_id} with ${behavior.execution.row_count} required-index row(s).`
+      `Behavior Hunt executed ${behavior.technique_id} with ${behavior.execution.row_count} required-index row(s).`
     );
   }
   if (evidenceFor.length === 0 && huntResult.has_confirmed_hit) {
@@ -739,7 +739,7 @@ const buildChrome = ({
   );
   if (executedClean.length > 0) {
     evidenceAgainst.push(
-      `Tier 2 executed ${
+      `Behavior Hunt executed ${
         executedClean.length
       } proposed technique(s) with no required-index rows: ${executedClean
         .map((proposed) => proposed.technique_id)

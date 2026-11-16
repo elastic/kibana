@@ -7,6 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { Conversation } from '@kbn/agent-builder-common';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import {
   createTrajectoryEvaluator,
@@ -34,6 +35,7 @@ import {
 } from './evaluators/dashboard_rule_evaluators';
 import { dashboardRoutingEvaluator } from './evaluators/dashboard_routing';
 import { dashboardStructureEvaluator } from './evaluators/dashboard_structure';
+import { dashboardTimeRangeEvaluator } from './evaluators/dashboard_time_range';
 import {
   enhanceDefectResolutionEvaluator,
   enhanceModeComplianceEvaluator,
@@ -63,6 +65,7 @@ import type {
 export const SEEDED_DASHBOARD_ID = 'eval-seeded-dashboard';
 /** Id Discover gives the ES|QL results attachment it sends with the "AI Agent" action. */
 export const SEEDED_ESQL_RESULTS_ID = 'esql-query-results';
+const SCREEN_CONTEXT_ID = 'screen-context';
 
 // The converse turns surface their agent traces under `agentTraceIds`; the
 // framework trace-based evaluators read one `traceId`. Token counts, tool
@@ -157,6 +160,7 @@ export function createEvaluateDataset({
     const agentId = getStringMeta(metadata, 'agentId') ?? defaultAgentId;
     const seededDashboard = input?.dashboard;
     const seededResults = input?.esqlResults;
+    const screenContext = input?.screenContext;
     const attachments = [
       ...(seededDashboard
         ? [{ id: SEEDED_DASHBOARD_ID, type: DASHBOARD_ATTACHMENT_TYPE, data: seededDashboard }]
@@ -167,6 +171,15 @@ export function createEvaluateDataset({
               id: SEEDED_ESQL_RESULTS_ID,
               type: ESQL_QUERY_RESULTS_ATTACHMENT_TYPE,
               data: { ...seededResults },
+            },
+          ]
+        : []),
+      ...(screenContext
+        ? [
+            {
+              id: SCREEN_CONTEXT_ID,
+              type: AttachmentType.screenContext,
+              data: { ...screenContext },
             },
           ]
         : []),
@@ -226,6 +239,7 @@ export function createEvaluateDataset({
   const qualityEvaluators = [
     dashboardRoutingEvaluator,
     positiveOnly(dashboardStructureEvaluator),
+    positiveOnly(dashboardTimeRangeEvaluator),
     positiveOnly(dashboardLayoutRulesEvaluator),
     positiveOnly(dashboardCompositionOrderEvaluator),
     positiveOnly(dashboardTitlesEvaluator),

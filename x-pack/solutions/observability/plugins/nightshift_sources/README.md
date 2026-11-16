@@ -12,19 +12,19 @@ require it without creating a cycle.
 ## API
 
 All routes are internal (`x-elastic-internal-origin: kibana`, `elastic-api-version: 1`) and
-gated by the Nightshift feature privileges: reads need `read_nightshift`, writes need
-`manage_nightshift`. `configure_nightshift` is never required.
+gated by the Nightshift feature privileges: reads need `read_nightshift`, writes need both
+`manage_nightshift` and `configure_nightshift` (see [Access model](#access-model)).
 
 | Method | Path | Privilege | Notes |
 | --- | --- | --- | --- |
 | `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated catalog, sorted by title. Does not fetch views. `search` matches titles that contain every word, in any order, ignoring case; the last word may be a partial word. `ids` narrows the list to those sources; `search`, `enabled` and paging apply to them. |
-| `POST` | `/internal/nightshift/sources` | manage | Validates the query, derives `type`, writes the saved object, creates the view. Takes `enabled` (default `true`) to create the source switched off |
-| `POST` | `/internal/nightshift/sources/_validate` | manage | Runs the create checks on `{ esql }` without writing; answers `{ valid: true, type, index_exists }` or `{ valid: false, error }` |
+| `POST` | `/internal/nightshift/sources` | manage + configure | Validates the query, derives `type`, writes the saved object, creates the view. Takes `enabled` (default `true`) to create the source switched off |
+| `POST` | `/internal/nightshift/sources/_validate` | manage + configure | Runs the create checks on `{ esql }` without writing; answers `{ valid: true, type, index_exists }` or `{ valid: false, error }` for a structurally invalid query (a 400 on create). |
 | `GET` | `/internal/nightshift/sources/{sourceId}` | read | Source plus view health, including a `FROM <view> \| LIMIT 0` probe for `unresolvable` |
-| `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view. Does not take `enabled` |
-| `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the view (404 ignored), then the saved object. The engine knowledge of the source is cleaned up asynchronously; a failed cleanup is logged and retried by the sync sweep, which does not run while maintenance is paused |
-| `POST` | `/internal/nightshift/sources/{sourceId}/_enable` | manage | Flips `enabled` only |
-| `POST` | `/internal/nightshift/sources/{sourceId}/_disable` | manage | Flips `enabled` only |
+| `PUT` | `/internal/nightshift/sources/{sourceId}` | manage + configure | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view. Does not take `enabled` |
+| `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage + configure | Deletes the view (404 ignored), then the saved object. The engine knowledge of the source is cleaned up asynchronously; a failed cleanup is logged and retried by the sync sweep, which does not run while maintenance is paused |
+| `POST` | `/internal/nightshift/sources/{sourceId}/_enable` | manage + configure | Flips `enabled` only |
+| `POST` | `/internal/nightshift/sources/{sourceId}/_disable` | manage + configure | Flips `enabled` only |
 
 There is no `_repair` endpoint: a `PUT` with the current values recreates a missing view or
 overwrites a drifted one.
@@ -45,6 +45,11 @@ security extension authorizes each call against the Nightshift feature (`all` ca
 `nightshift-source`, `read` can read it) and emits the audit event. `configure_nightshift`
 does not include the type. `create` and `update` parse the same wire schemas as HTTP, so a
 blank title still 400s.
+
+The saved-object grant does not enforce the manage and configure gate: `all` can write the type
+without configure. The routes enforce the gate, and so do the Agent Builder source tools. A caller
+that writes through `getSourcesClient` on behalf of a user has to check
+`NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES` itself.
 
 `setup.onSourceChange(listener)` subscribes an engine to every committed write: `created`,
 `updated` (with `previous`, which covers `_enable` and `_disable`) and `deleted`, each with the
@@ -94,6 +99,41 @@ title-only PUT, or a repair that sends the stored query, skips that probe and ke
 type, so a vanished `WHERE` field cannot block rename or restoring a deleted view; GET reports
 `unresolvable` instead. A pattern that matches no index yet is accepted,
 which means field names in `WHERE` are only checked once data exists.
+
+## Access model
+
+Two switches decide what Nightshift reads, and both belong to the admin:
+
+1. **What engines read** is set by the role of the service account they run as, not by the author
+   of a source. A source's ES|QL view is read with the privileges of whoever queries it, so that
+   account needs read on every index a source names. Letting admins define that role is planned.
+2. **Who tells it what to read** is the privilege to change sources. Create, update, delete,
+   enable, disable and `_validate` need `manage_nightshift` and `configure_nightshift`, which the
+   Manage engines sub-feature grants and base privileges leave out. The Agent Builder tools that
+   create, update and delete sources check the same pair.
+
+Nightshift does not compare the author's index privileges with a source's query. A check made when
+the source is saved would freeze that user's access at that moment and could not see document or
+field level security, nested views, or indices created later. The gate sits on who may change
+sources instead, and it assumes a user holding it could grant themselves read on the data anyway.
+`configure_nightshift` is a Nightshift privilege, not `manage_security`, so it does not guarantee
+that. Admins should hand it out accordingly.
+
+Create still runs `<esql> | LIMIT 0` as the calling user, so an author who cannot run the query
+cannot save it. That is a syntax and field check, not an access control.
+
+Consequences to plan for:
+
+- The service account has no document or field level security. A source over an index that is
+  restricted that way is read in full.
+- A wildcard means whatever matches when engines read. `logs-*` includes `logs-restricted` the day
+  it is created.
+- Reads of a source's knowledge indicators still check the reader's own index privileges. Routes
+  and Agent Builder tools call `SourcesClient.assertReadable`, which answers 403 (or leaves the
+  source out) when the reader cannot read the source's local indices. Remote cluster targets are
+  trusted, not checked.
+- Significant events and detections derived from the source have no such check. Everyone with
+  Nightshift read in the space sees them, whatever their own access to the indices.
 
 ## Health
 

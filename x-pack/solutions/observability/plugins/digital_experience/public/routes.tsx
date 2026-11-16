@@ -16,7 +16,7 @@ import type { ApplicationTabId } from './pages/application_details/application_p
 import { ApplicationPage } from './pages/application_details/application_page';
 import { ApplicationsListPage } from './pages/applications_list/applications_list_page';
 import { SessionDetailPage } from './pages/session_detail/session_detail_page';
-import { sessionsListQueryRt } from './pages/sessions/utils/sessions_list_query';
+import { sessionsListQueryRt } from './utils/sessions_list_query';
 
 function ApplicationRoute({ tab }: { tab: ApplicationTabId }) {
   const {

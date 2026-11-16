@@ -74,4 +74,16 @@ describe('RunHistory skipped run summary', () => {
       )
     ).toBeInTheDocument();
   });
+
+  it('shows the failure reason of a failed run instead of the automation name', () => {
+    renderRunHistory({
+      id: 'run-2',
+      status: 'failed',
+      startedAt: '2026-01-01T12:00:00.000Z',
+      error: 'Model connector not found',
+    });
+
+    expect(screen.getByText('Model connector not found')).toBeInTheDocument();
+    expect(screen.queryByText('Alert triage')).not.toBeInTheDocument();
+  });
 });

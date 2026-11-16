@@ -9,7 +9,10 @@ import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_analytics/common';
 import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
-import { persistRiskScoresToEntityStore } from '../../persist_risk_scores_to_entity_store';
+import {
+  persistRiskScoresToEntityStore,
+  type EntityStoreRefresh,
+} from '../../persist_risk_scores_to_entity_store';
 import type { PageStepTimings } from '../instrumentation/page_timing_types';
 import type { ScopedLogger } from '../utils/with_log_context';
 
@@ -58,12 +61,14 @@ export const persistScoresToEntityStore = async ({
   entityType,
   scores,
   enabled,
+  refresh,
 }: {
   crudClient: EntityUpdateClient;
   logger: ScopedLogger;
   entityType: EntityType;
   scores: EntityRiskScoreRecord[];
   enabled: boolean;
+  refresh?: EntityStoreRefresh;
 }): Promise<{ docsWritten: number; errorsCount: number }> => {
   if (!enabled) {
     return { docsWritten: 0, errorsCount: 0 };
@@ -73,6 +78,7 @@ export const persistScoresToEntityStore = async ({
     crudClient,
     logger,
     scores: { [entityType]: scores },
+    refresh,
   });
   if (unexpectedErrors.length > 0) {
     logger.warn(

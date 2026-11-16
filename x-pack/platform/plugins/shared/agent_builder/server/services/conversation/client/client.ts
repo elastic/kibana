@@ -1578,8 +1578,7 @@ class ConversationClientImpl implements ConversationClient {
         }
 
         // validateMetadataUpdate throws with accumulated per-field errors if any key is invalid.
-        const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
-        validateMetadataUpdate(template.id, template.fields, updates, storedMetadata);
+        validateMetadataUpdate(template.id, template.fields, updates);
 
         const serialized = Object.fromEntries(
           Object.entries(updates).map(([k, v]) => {
@@ -1587,6 +1586,8 @@ class ConversationClientImpl implements ConversationClient {
             return [k, serializeMetadataValue(v as MetadataFieldValue, def.input_type)];
           })
         );
+
+        const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
 
         // Track which fields actually changed to suppress no-op trigger events.
         const metadata = { ...storedMetadata, ...serialized };

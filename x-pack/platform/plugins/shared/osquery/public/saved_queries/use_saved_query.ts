@@ -7,6 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 
+import { buildPath } from '@kbn/core-http-browser';
 import { API_VERSIONS } from '../../common/constants';
 import { PLUGIN_ID } from '../../common';
 import { useKibana } from '../common/lib/kibana';
@@ -38,7 +39,9 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
   >(
     [SAVED_QUERY_ID, { savedQueryId }],
     () =>
-      http.get(`/api/osquery/saved_queries/${savedQueryId}`, { version: API_VERSIONS.public.v1 }),
+      http.get(buildPath('/api/osquery/saved_queries/{savedQueryId}', { savedQueryId }), {
+        version: API_VERSIONS.public.v1,
+      }),
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,

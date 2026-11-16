@@ -408,9 +408,6 @@ export function ComposeDiscoverFlyout({
     wasChildOpenRef.current = uiState.childOpen;
   }, [uiState.childOpen]);
 
-  // Registered once here so providers persist across Sandbox open/close cycles.
-  useEsqlAutocomplete(baseServices);
-
   const [initialParsedState] = useState<BuilderState | null>(() => {
     if (!builderType || initialBuilderState !== undefined || !inlineResult.query) return null;
     return parseDiscoverQueryForBuilder(inlineResult.query);
@@ -758,6 +755,7 @@ export function ComposeDiscoverFlyout({
     http: baseServices.http,
     dataViews: baseServices.dataViews,
     search: baseServices.data.search.search,
+    projectRouting: baseServices.cps?.cpsManager?.getDefaultProjectRouting(),
   });
 
   /*
@@ -833,6 +831,10 @@ export function ComposeDiscoverFlyout({
    */
   const { onAlertEditorMount, onRecoveryEditorMount, onBaseEditorMount, onSingleEditorMount } =
     useSandboxEditorMounts({ baseQuery: sandboxQuery.base, services: baseServices });
+
+  // Registered once here so providers persist across Sandbox open/close cycles.
+  // The query being edited gives the sources lookup its project routing.
+  useEsqlAutocomplete(baseServices, uiState.childOpen ? sandboxQuery.base : watchedQuery?.base);
 
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;

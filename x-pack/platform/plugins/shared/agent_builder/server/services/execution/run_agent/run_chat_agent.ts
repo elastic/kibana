@@ -13,27 +13,22 @@ import type {
   AttachmentTimelineEvent,
   BrowserApiToolMetadata,
   ChatAgentEvent,
-  ConversationRoundStep,
   MetadataFieldValue,
   PreExecutionWorkflowStepData,
   RoundInput,
   SubagentEntry,
-  TodosStep,
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
   AgentExecutionMode,
-  ConversationRoundStepType,
   EventActorType,
-  carriedOverTodos,
   timelineExecutionId,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
-import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
-import type { ToolManager, TodoStateManager } from '@kbn/agent-builder-server/runner';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
 import {
   addRoundCompleteEvent,
@@ -136,7 +131,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     skillsStore,
     toolManager,
     experimentalFeatures,
-    todoStateManager,
     renderers,
     conversationClient,
     conversationAccess,
@@ -150,8 +144,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   ensureValidInput({ input: nextInput, timeline, allowResume: storesConversation });
 
   const pendingTurn = conversation && storesConversation ? getPendingTurn(conversation) : undefined;
-  // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
-  const initialTodos = todoStateManager.get();
   const conversationTimestamp = pendingTurn?.compatRound.started_at ?? startTime.toISOString();
 
   const roundId = providedRoundId ?? uuidv4();
@@ -216,7 +208,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
   // Holds what LangGraph does not: the seed, the latest streamed state (for persistence when the
-  // stream throws) and the out-of-band tool events (progress, todos writes) LangGraph never sees.
+  // stream throws) and the out-of-band tool progress events LangGraph never sees.
   const tracker = new RunTracker({ graphName: chatAgentGraphName });
 
   // ReplaySubject so events emitted before subscription (e.g. compaction) are
@@ -438,7 +430,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       backgroundExecutionService,
       subagentTracker,
       toolExecutionBuffer: tracker,
-      todoStateManager,
       runAttachmentEvents,
       roundId,
       sessionId: conversation?.id ?? executionId,
@@ -471,7 +462,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         compactionSummary,
         previousRound,
         preExecutionWorkflow,
-        initialTodos,
         initialAttachmentEvents: pendingTurn
           ? [
               ...inheritedAttachmentEvents(processedConversation.timeline, pendingTurn.id),
@@ -559,7 +549,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
             toolManager,
             compactionSummary: tracker.finalState().compactionSummary,
             backgroundExecutionService,
-            todoStateManager,
             subagents: subagentTracker.snapshot(),
           }),
         startTime,
@@ -624,45 +613,22 @@ const getConversationState = ({
   toolManager,
   backgroundExecutionService,
   compactionSummary,
-  todoStateManager,
   subagents,
 }: {
   promptManager: PromptManager;
   toolManager: ToolManager;
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
-  todoStateManager: TodoStateManager;
   subagents?: Record<string, SubagentEntry>;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
-  const todos = todoStateManager.get();
   return {
     prompt: promptManager.dump(),
     dynamic_tool_ids: toolManager.getDynamicToolIds(),
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
     ...(Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
-    ...(todos !== undefined ? { todos } : {}),
     ...(subagents && Object.keys(subagents).length > 0 ? { subagents } : {}),
   };
-};
-
-/**
- * The steps a fresh run starts with: the workflow bookkeeping, then the todos
- * carried over from the previous round (the trailing singleton the first `todo_write` replaces).
- */
-const buildPreExecutionSteps = ({
-  preExecutionWorkflow,
-  initialTodos,
-}: {
-  preExecutionWorkflow?: PreExecutionWorkflowStepData;
-  initialTodos?: TodoItem[];
-}): ConversationRoundStep[] => {
-  const carried = carriedOverTodos(initialTodos);
-  const carriedStep: TodosStep[] =
-    carried !== undefined
-      ? [{ type: ConversationRoundStepType.updateTodos, todos: carried, carried_over: true }]
-      : [];
-  return [...createPreExecutionSteps({ preExecutionWorkflow }), ...carriedStep];
 };
 
 const createInitializerCommand = ({
@@ -676,7 +642,6 @@ const createInitializerCommand = ({
   compactionSummary,
   previousRound,
   preExecutionWorkflow,
-  initialTodos,
   initialAttachmentEvents,
 }: {
   pendingTurn?: PendingTurn;
@@ -689,14 +654,10 @@ const createInitializerCommand = ({
   compactionSummary?: CompactionSummary;
   previousRound?: PreviousRoundInfo;
   preExecutionWorkflow?: PreExecutionWorkflowStepData;
-  initialTodos?: TodoItem[];
   initialAttachmentEvents: AttachmentTimelineEvent[];
 }): Command => {
   if (!pendingTurn) {
-    const preExecutionSteps = buildPreExecutionSteps({
-      preExecutionWorkflow,
-      initialTodos,
-    });
+    const preExecutionSteps = createPreExecutionSteps({ preExecutionWorkflow });
     tracker.seed({ steps: preExecutionSteps, compactionSummary });
     const update: StateUpdate = {
       cycleLimit,
@@ -718,7 +679,7 @@ const createInitializerCommand = ({
     promptManager.delete(id);
   }
   // The graph starts from the inherited steps; they are excluded from the resume execution's
-  // persisted steps. The paused turn already carries its relevant-skills and todos steps.
+  // persisted steps. The paused turn already carries its relevant-skills step.
   tracker.seed({
     steps: init.steps,
     toolRenderState: init.toolRenderState,

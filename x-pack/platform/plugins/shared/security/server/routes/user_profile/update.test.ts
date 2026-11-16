@@ -6,7 +6,7 @@
  */
 
 import type { ObjectType } from '@kbn/config-schema';
-import type { RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { I18nServiceSetup, RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -36,9 +36,11 @@ describe('Update profile routes', () => {
   let session: jest.Mocked<PublicMethodsOf<Session>>;
   let userProfileService: jest.Mocked<UserProfileServiceStartInternal>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
+  let i18n: jest.Mocked<I18nServiceSetup>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
+    i18n = routeParamsMock.i18n as jest.Mocked<I18nServiceSetup>;
 
     session = sessionMock.create();
     routeParamsMock.getSession.mockReturnValue(session);
@@ -443,6 +445,57 @@ describe('Update profile routes', () => {
       ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
 
       expect(userProfileService.update).toHaveBeenCalledTimes(1);
+    });
+
+    describe('locale', () => {
+      beforeEach(() => {
+        session.get.mockResolvedValue({
+          error: null,
+          value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+        });
+        authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+      });
+
+      const updateLocale = (locale: string) =>
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({ body: { userSettings: { locale } } }),
+          kibanaResponseFactory
+        );
+
+      it('accepts a locale listed in `i18n.locales`.', async () => {
+        i18n.getLocales.mockReturnValue(['en', 'fr-FR']);
+
+        await expect(updateLocale('fr-FR')).resolves.toEqual(
+          expect.objectContaining({ status: 200 })
+        );
+      });
+
+      it('rejects a locale not listed in `i18n.locales`.', async () => {
+        i18n.getLocales.mockReturnValue(['en']);
+
+        await expect(updateLocale('de-DE')).resolves.toEqual(
+          expect.objectContaining({ status: 400 })
+        );
+        expect(userProfileService.update).not.toHaveBeenCalled();
+      });
+
+      it('accepts the default locale when `i18n.locales` is empty.', async () => {
+        i18n.getLocales.mockReturnValue([]);
+        i18n.getLocale.mockReturnValue('en');
+
+        await expect(updateLocale('en')).resolves.toEqual(expect.objectContaining({ status: 200 }));
+      });
+
+      it('rejects other locales when `i18n.locales` is empty.', async () => {
+        i18n.getLocales.mockReturnValue([]);
+        i18n.getLocale.mockReturnValue('en');
+
+        await expect(updateLocale('de-DE')).resolves.toEqual(
+          expect.objectContaining({ status: 400 })
+        );
+        expect(userProfileService.update).not.toHaveBeenCalled();
+      });
     });
   });
 });

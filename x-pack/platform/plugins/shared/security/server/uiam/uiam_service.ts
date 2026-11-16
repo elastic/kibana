@@ -327,8 +327,11 @@ export interface UiamServicePublic {
    * UIAM authorizes the exchange against the service account's `assumable_by` policy.
    *
    * @param serviceAccountId The ID of the service account to exchange a token for.
+   * @returns The token, and its lifetime as an ISO-8601 duration when UIAM reports one.
    */
-  exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }>;
+  exchangeServiceAccountToken(
+    serviceAccountId: string
+  ): Promise<{ token: string; expires_in?: string }>;
 
   /**
    * Authenticates to UIAM as Kibana itself, using only the mTLS client certificate, and returns
@@ -967,7 +970,9 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.exchangeServiceAccountToken}.
    */
-  async exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }> {
+  async exchangeServiceAccountToken(
+    serviceAccountId: string
+  ): Promise<{ token: string; expires_in?: string }> {
     this.#logger.debug(
       `Attempting to exchange service account [id=${serviceAccountId}] for an ephemeral token.`
     );
@@ -977,7 +982,7 @@ export class UiamService implements UiamServicePublic {
       // The certificate identifies Kibana's project for the account's assumable_by policy.
       dispatcher: this.#dispatcher,
     };
-    let response: { token: string };
+    let response: { token: string; expires_in?: string };
     try {
       response = await UiamService.#parseUiamResponse(
         await fetch(

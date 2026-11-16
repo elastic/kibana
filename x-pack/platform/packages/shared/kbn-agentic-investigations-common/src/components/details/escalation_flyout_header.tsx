@@ -69,7 +69,7 @@ export const EscalationFlyoutHeader = ({
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
-              id="xpack.alertzero.escalationFlyout.header.since"
+              id="xpack.agenticInvestigations.escalationFlyout.header.since"
               defaultMessage="Since {time} ({relative})"
               values={{
                 time: <FormattedTime value={createdAt} />,

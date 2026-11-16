@@ -41,7 +41,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
       alreadyNotified = [],
       policies = PolicyCatalog.empty(),
       triage = AlertTriage.empty(),
-      input,
+      input: { startedAt, signal },
     } = state;
     const { dispatchable } = triage;
 
@@ -57,14 +57,15 @@ export class ApplyThrottlingStep implements DispatcherStep {
     const lastNotifiedMap = await this.fetchLastNotifiedTimestamps(
       groups,
       policies,
-      input.startedAt
+      startedAt,
+      signal
     );
 
     const { dispatch, throttled } = applyThrottling(
       groups,
       policies,
       lastNotifiedMap,
-      input.startedAt,
+      startedAt,
       logger
     );
 
@@ -81,7 +82,8 @@ export class ApplyThrottlingStep implements DispatcherStep {
   private async fetchLastNotifiedTimestamps(
     groups: readonly ActionGroup[],
     policies: PolicyCatalog,
-    startedAt: Date
+    startedAt: Date,
+    signal: AbortSignal
   ): Promise<Map<ActionGroupId, LastNotifiedInfo>> {
     const lookups = groups.flatMap(({ id, policyId }) => {
       const policy = policies.get(policyId);
@@ -104,7 +106,9 @@ export class ApplyThrottlingStep implements DispatcherStep {
         }))
     );
     const responses = await Promise.all(
-      requests.map((request) => this.queryService.executeQueryRows<LastNotifiedRecord>(request))
+      requests.map((request) =>
+        this.queryService.executeQueryRows<LastNotifiedRecord>({ ...request, abortSignal: signal })
+      )
     );
     const records = responses.flat();
 

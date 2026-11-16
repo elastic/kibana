@@ -13,6 +13,8 @@ import {
   classifyInvestigationRun,
   type OnlineEvalsRoundClassification,
 } from '../online_evals/classify_round';
+import { OnlineEvalsStepError, reportOnlineEvalsStepFailure } from '../online_evals/step_failure';
+import type { NightshiftTelemetryClient } from '../telemetry';
 
 const inputSchema = lazySchema(() =>
   z.object({
@@ -38,6 +40,7 @@ const skipReasonSchema = lazySchema(() =>
     'follow_up_not_scored',
     'recovery_verdict_unavailable',
     'recovery_unresolved',
+    'classification_failed',
   ])
 );
 
@@ -67,23 +70,29 @@ const getRoundSkipReason = ({
   return undefined;
 };
 
+const skip = (skipReason: SkipReason) => ({
+  output: { should_score: false, skip_reason: skipReason },
+});
+
 export const classifyOnlineEvalsRoundStepDefinition = ({
   getAgentBuilder,
   isEvalsAvailable,
   isPaused,
+  telemetry,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   /** Whether the evals plugin is loaded; it is an optional dependency. */
   isEvalsAvailable: () => boolean;
   /** The `nightshift.onlineEvals.paused` kill switch. */
   isPaused: () => boolean;
+  telemetry: NightshiftTelemetryClient;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.onlineEvals.classifyRound',
     label: 'Classify an Investigation Round for Online Evals',
     category: StepCategory.Ai,
     description:
-      'Decides whether the round this investigation run created has anything to score: an initial round, or an alert recovery with a resolved verdict. Makes no LLM call.',
+      'Decides whether the round this investigation run created has anything to score: an initial round, or an alert recovery with a resolved verdict. Makes no LLM call, and never fails: a failure is reported as telemetry and the round is not scored.',
     inputSchema,
     outputSchema: z.object({
       should_score: z.boolean().describe('Whether to start the scoring workflow for this round.'),
@@ -99,11 +108,6 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
       skip_reason: skipReasonSchema.optional().describe('Why the round is not scored.'),
     }),
     handler: async (context) => {
-      const input = inputSchema.parse(context.input);
-      const skip = (skipReason: SkipReason) => ({
-        output: { should_score: false, skip_reason: skipReason },
-      });
-
       if (!isEvalsAvailable()) {
         return skip('evals_unavailable');
       }
@@ -111,34 +115,49 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
         return skip('paused');
       }
 
-      const agentBuilder = getAgentBuilder();
-      if (!agentBuilder) {
-        throw new Error('Agent Builder is not available, so the investigation cannot be read');
+      try {
+        const input = inputSchema.parse(context.input);
+        const agentBuilder = getAgentBuilder();
+        if (!agentBuilder) {
+          throw new OnlineEvalsStepError(
+            'agent_builder_unavailable',
+            'Agent Builder is not available, so the investigation cannot be read'
+          );
+        }
+        const { rounds } = await agentBuilder.conversations
+          .getScopedClient({ request: context.contextManager.getFakeRequest() })
+          .then((conversations) => conversations.get(input.investigation_id))
+          .catch((error) => {
+            throw new OnlineEvalsStepError(
+              'investigation_unavailable',
+              error instanceof Error ? error.message : String(error)
+            );
+          });
+
+        const classification = classifyInvestigationRun({
+          rounds: rounds.map(({ id, started_at: startedAt }) => ({ id, started_at: startedAt })),
+          followUp: input.follow_up || undefined,
+          runStartedAt: input.investigation_started_at,
+        });
+        if (!classification) {
+          return skip('no_round');
+        }
+
+        const { roundKind, roundId, recoveryVerdict } = classification;
+        const roundOutput = {
+          round_kind: roundKind,
+          round_id: roundId,
+          ...(recoveryVerdict ? { recovery_verdict: recoveryVerdict } : {}),
+        };
+
+        const skipReason = getRoundSkipReason(classification);
+        return skipReason
+          ? { output: { should_score: false, ...roundOutput, skip_reason: skipReason } }
+          : { output: { should_score: true, ...roundOutput } };
+      } catch (error) {
+        // Runs inside the investigation workflow, so a failure here must never fail the investigation.
+        reportOnlineEvalsStepFailure({ step: 'classify_round', error, context, telemetry });
+        return skip('classification_failed');
       }
-      const conversations = await agentBuilder.conversations.getScopedClient({
-        request: context.contextManager.getFakeRequest(),
-      });
-      const { rounds } = await conversations.get(input.investigation_id);
-
-      const classification = classifyInvestigationRun({
-        rounds: rounds.map(({ id, started_at: startedAt }) => ({ id, started_at: startedAt })),
-        followUp: input.follow_up || undefined,
-        runStartedAt: input.investigation_started_at,
-      });
-      if (!classification) {
-        return skip('no_round');
-      }
-
-      const { roundKind, roundId, recoveryVerdict } = classification;
-      const roundOutput = {
-        round_kind: roundKind,
-        round_id: roundId,
-        ...(recoveryVerdict ? { recovery_verdict: recoveryVerdict } : {}),
-      };
-
-      const skipReason = getRoundSkipReason(classification);
-      return skipReason
-        ? { output: { should_score: false, ...roundOutput, skip_reason: skipReason } }
-        : { output: { should_score: true, ...roundOutput } };
     },
   });
