@@ -19,6 +19,15 @@ import {
 } from './translations';
 import type { WatchlistItem, WatchlistOption } from './types';
 import { useGetWatchlists } from '../../api/hooks/use_get_watchlists';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
+
+const WATCHLIST_FILTER_LIST_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'watchlist_filter_list'
+);
 
 interface WatchlistFilterProps {
   onChangeSelectedId?: (id: string | undefined, name: string | undefined) => void;
@@ -29,7 +38,9 @@ export const WatchlistFilter = ({
   onChangeSelectedId,
   selectedId: propSelectedId,
 }: WatchlistFilterProps) => {
-  const { data: watchlists, isLoading } = useGetWatchlists();
+  const { data: watchlists, isLoading } = useGetWatchlists({
+    executionContext: WATCHLIST_FILTER_LIST_CONTEXT,
+  });
 
   const [internalSelectedId, setInternalSelectedId] = useState<string | undefined>();
   const currentSelectedId = propSelectedId !== undefined ? propSelectedId : internalSelectedId;

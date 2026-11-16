@@ -33,6 +33,15 @@ import {
   getUnionWatchlistIds,
   isEntityGroupView,
 } from '../entity_store_group_utils';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+
+const ENTITY_SUMMARY_WATCHLISTS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'entity_summary_watchlists'
+);
 
 const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.grid.watchlistsOverflowTitle',
@@ -248,7 +257,9 @@ const AssetCriticalityCell = memo(
 AssetCriticalityCell.displayName = 'AssetCriticalityCell';
 
 const WatchlistsCell = memo(({ watchlistIds }: { watchlistIds: string[] }) => {
-  const { data: watchlistsData } = useGetWatchlists();
+  const { data: watchlistsData } = useGetWatchlists({
+    executionContext: ENTITY_SUMMARY_WATCHLISTS_CONTEXT,
+  });
 
   const watchlistNamesById = useMemo(() => {
     const map = new Map<string, string>();

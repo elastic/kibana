@@ -32,6 +32,10 @@ const PUM_RISK_LEVEL_PANEL_CONTEXT = buildExecutionContext(
   EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
   'pum_risk_level_panel'
 );
+const PUM_RISK_LEVEL_PANEL_STATUS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pum_risk_level_panel_status'
+);
 
 export const useRiskLevelsPrivilegedUserQuery = ({
   skip,
@@ -51,7 +55,7 @@ export const useRiskLevelsPrivilegedUserQuery = ({
     data: riskEngineStatus,
     isFetching: isStatusLoading,
     refetch: refetchEngineStatus,
-  } = useRiskEngineStatus();
+  } = useRiskEngineStatus({}, { executionContext: PUM_RISK_LEVEL_PANEL_STATUS_CONTEXT });
 
   const {
     isRefetching,

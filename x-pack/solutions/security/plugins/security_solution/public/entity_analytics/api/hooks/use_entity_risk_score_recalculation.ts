@@ -7,6 +7,7 @@
 
 import { useCallback } from 'react';
 import { useQueryClient } from '@kbn/react-query';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { Refetch } from '../../../common/types';
 import { useEntityRiskScores, type EntityRiskScoresState } from './use_entity_risk_scores';
@@ -37,6 +38,11 @@ interface UseEntityRiskScoreRecalculationParams<T extends EntityType> {
    * new entity analytics page flag is on. Defaults to false.
    */
   isGroupView?: boolean;
+  /**
+   * Optional Kibana execution context forwarded to {@link useEntityRiskScores} so slow logs and
+   * APM traces can attribute the risk score queries to the calling panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }
 
 interface UseEntityRiskScoreRecalculationResult<T extends EntityType> {
@@ -65,8 +71,12 @@ export const useEntityRiskScoreRecalculation = <T extends EntityType>({
   riskScoreState,
   onRecalculation,
   isGroupView = false,
+  executionContext,
 }: UseEntityRiskScoreRecalculationParams<T>): UseEntityRiskScoreRecalculationResult<T> => {
-  const entityRiskScores = useEntityRiskScores(entityType, entityId, { isGroupView });
+  const entityRiskScores = useEntityRiskScores(entityType, entityId, {
+    isGroupView,
+    executionContext,
+  });
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const queryClient = useQueryClient();
 

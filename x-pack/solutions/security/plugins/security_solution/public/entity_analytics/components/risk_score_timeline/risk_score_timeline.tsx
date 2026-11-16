@@ -47,6 +47,15 @@ import { RISK_LEVEL_RANGES } from '../../../../common/entity_analytics/risk_engi
 import { DEFAULT_DATE_FORMAT, DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { useRiskScoreHistory } from '../../api/hooks/use_risk_score_history';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
+
+const RISK_INPUTS_TIMELINE_HISTORY_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'risk_inputs_timeline_history'
+);
 
 export interface RiskScoreTimelineProps {
   entityType: EntityType;
@@ -91,6 +100,7 @@ export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
     from,
     to,
     scoreType,
+    executionContext: RISK_INPUTS_TIMELINE_HISTORY_CONTEXT,
   });
 
   const entries = useMemo(() => data?.entries ?? [], [data?.entries]);
