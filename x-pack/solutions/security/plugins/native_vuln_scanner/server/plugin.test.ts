@@ -11,6 +11,8 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { NativeVulnScannerPlugin } from './plugin';
+import type { NativeVulnScannerSetupDeps, NativeVulnScannerStartDeps } from './types';
+import { registerRoutes } from './routes/register_routes';
 import { ensureFindingsIndex } from './lib/findings';
 import { OSQUERY_PACK_SO_TYPE } from './lib/inventory';
 import { ensureSummaryIndex } from './lib/summary';
@@ -23,6 +25,12 @@ jest.mock('./lib/summary', () => ({ ensureSummaryIndex: jest.fn() }));
 jest.mock('./managed_workflows/install', () => ({ installWorkflows: jest.fn() }));
 jest.mock('./managed_workflows/register_owner', () => ({ registerOwner: jest.fn() }));
 jest.mock('./workflows/step_types', () => ({ registerNativeVulnScannerSteps: jest.fn() }));
+jest.mock('./routes/register_routes', () => ({ registerRoutes: jest.fn() }));
+
+const registerRoutesMock = registerRoutes as jest.MockedFunction<typeof registerRoutes>;
+const workflowsManagement = {
+  management: {},
+} as unknown as NativeVulnScannerSetupDeps['workflowsManagement'];
 
 const ensureFindingsMock = ensureFindingsIndex as jest.MockedFunction<typeof ensureFindingsIndex>;
 const ensureSummaryMock = ensureSummaryIndex as jest.MockedFunction<typeof ensureSummaryIndex>;
@@ -37,13 +45,14 @@ const startPlugin = async (enabled: boolean) => {
   const plugin = new NativeVulnScannerPlugin(context);
   const coreSetup = coreMock.createSetup();
   const workflowsSetup = workflowsExtensionsMock.createSetup();
-  plugin.setup(coreSetup, { workflowsExtensions: workflowsSetup });
+  plugin.setup(coreSetup, { workflowsExtensions: workflowsSetup, workflowsManagement });
   const core = coreMock.createStart();
   const workflowsStart = workflowsExtensionsMock.createStart();
   const licensing = licensingMock.createStart();
+  const fleet = {} as NativeVulnScannerStartDeps['fleet'];
   coreSetup.getStartServices.mockResolvedValue([
     core,
-    { workflowsExtensions: workflowsStart, licensing },
+    { workflowsExtensions: workflowsStart, licensing, fleet },
     {},
   ]);
   plugin.start(core, { workflowsExtensions: workflowsStart, licensing });
@@ -51,6 +60,7 @@ const startPlugin = async (enabled: boolean) => {
   return {
     coreSetup,
     licensing,
+    fleet,
     core,
     workflowsSetup,
     workflowsStart,
@@ -126,8 +136,31 @@ describe('NativeVulnScannerPlugin', () => {
     expect(licensing.getLicense).toHaveBeenCalledTimes(1);
   });
 
+  it('registers the onboarding routes with lazily resolved services when enabled', async () => {
+    const { coreSetup, core, fleet } = await startPlugin(true);
+    expect(registerRoutesMock).toHaveBeenCalledTimes(1);
+    expect(coreSetup.http.createRouter).toHaveBeenCalled();
+    const { getServices } = registerRoutesMock.mock.calls[0][0];
+
+    const services = await getServices();
+
+    expect(services.fleet).toBe(fleet);
+    expect(services.workflows).toBe(workflowsManagement.management);
+    expect(services.es).toBe(core.elasticsearch.client.asInternalUser);
+    expect(core.savedObjects.createInternalRepository).toHaveBeenCalledWith([OSQUERY_PACK_SO_TYPE]);
+  });
+
+  it('gates the routes on the licensing start contract', async () => {
+    const { licensing } = await startPlugin(true);
+    const current = licenseMock.createLicense({ license: { type: 'enterprise' } });
+    licensing.getLicense.mockResolvedValue(current);
+    const { getLicense } = registerRoutesMock.mock.calls[0][0];
+    expect(await getLicense()).toBe(current);
+  });
+
   it('touches nothing when disabled', async () => {
     await startPlugin(false);
+    expect(registerRoutesMock).not.toHaveBeenCalled();
     expect(registerOwnerMock).not.toHaveBeenCalled();
     expect(registerStepsMock).not.toHaveBeenCalled();
     expect(ensureFindingsMock).not.toHaveBeenCalled();

@@ -11,6 +11,6 @@
     "server": true,
     "configPath": ["xpack", "nativeVulnScanner"],
     "requiredPlugins": ["licensing", "workflowsExtensions", "workflowsManagement"],
-    "optionalPlugins": []
+    "optionalPlugins": ["fleet", "security"]
   }
 }

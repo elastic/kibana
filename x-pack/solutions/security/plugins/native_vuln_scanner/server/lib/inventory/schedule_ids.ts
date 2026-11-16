@@ -6,12 +6,13 @@
  */
 
 import type { ISavedObjectsRepository } from '@kbn/core/server';
+import { INVENTORY_PACK_NAME } from '../../../common/inventory/pack_body';
 import type { InventoryQueryKind } from './queries';
 import { KIND_BY_QUERY_ID } from './queries';
 
 /** Saved object type of osquery packs (owned by the osquery plugin). */
 export const OSQUERY_PACK_SO_TYPE = 'osquery-pack';
-export const INVENTORY_PACK_NAME = 'software-inventory';
+export { INVENTORY_PACK_NAME };
 
 /** Separator osquery puts between space id and pack name in pack keys. */
 const PACK_KEY_SEPARATOR = '--';

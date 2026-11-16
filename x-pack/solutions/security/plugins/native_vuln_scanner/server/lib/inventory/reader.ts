@@ -11,6 +11,7 @@ import type { SortCombinations, SortResults } from '@elastic/elasticsearch/lib/a
 import type { InventoryQueryKind } from './queries';
 import { KIND_BY_QUERY_ID } from './queries';
 import type { AgentInventoryRows, OsqueryRow } from './normalize';
+import { inventoryResultsQuery } from './result_filter';
 
 export const OSQUERY_RESULTS_INDEX = 'logs-osquery_manager.result-*';
 
@@ -176,32 +177,7 @@ export async function* readAgentInventories(
             'action_data.space_id',
             'osquery',
           ],
-          query: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [
-                      { terms: { schedule_id: [...kindById.keys()] } },
-                      {
-                        bool: {
-                          filter: [
-                            { terms: { 'action_data.id': [...KIND_BY_QUERY_ID.keys()] } },
-                            { term: { 'action_data.space_id': DEFAULT_SPACE_ID } },
-                          ],
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-                { range: { '@timestamp': { gte: since } } },
-                { exists: { field: 'agent.id' } },
-              ],
-              // A differential run reports only changes, which would read as a partial inventory.
-              must_not: [{ terms: { 'osquery_meta.action': ['added', 'removed'] } }],
-            },
-          },
+          query: inventoryResultsQuery([...kindById.keys()], since),
         },
         { signal }
       );

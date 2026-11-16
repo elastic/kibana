@@ -18,6 +18,7 @@ import { OSQUERY_PACK_SO_TYPE } from './lib/inventory';
 import { ensureSummaryIndex } from './lib/summary';
 import { installWorkflows } from './managed_workflows/install';
 import { registerOwner } from './managed_workflows/register_owner';
+import { registerRoutes } from './routes/register_routes';
 import { registerNativeVulnScannerSteps } from './workflows/step_types';
 import type {
   NativeVulnScannerServerSetup,
@@ -45,7 +46,7 @@ export class NativeVulnScannerPlugin
 
   public setup(
     core: CoreSetup<NativeVulnScannerStartDeps>,
-    { workflowsExtensions }: NativeVulnScannerSetupDeps
+    { workflowsExtensions, workflowsManagement }: NativeVulnScannerSetupDeps
   ): NativeVulnScannerServerSetup {
     if (!this.config.enabled) return {};
     registerOwner({ workflowsExtensions });
@@ -59,6 +60,24 @@ export class NativeVulnScannerPlugin
         const [coreStart] = await core.getStartServices();
         return {
           // Origin-only under CPS: osquery results and the findings index live in this project.
+          es: coreStart.elasticsearch.client.asInternalUser,
+          packRepository: coreStart.savedObjects.createInternalRepository([OSQUERY_PACK_SO_TYPE]),
+        };
+      },
+    });
+    registerRoutes({
+      router: core.http.createRouter(),
+      logger: this.logger.get('routes'),
+      getLicense: async () => {
+        const [, { licensing }] = await core.getStartServices();
+        return licensing.getLicense();
+      },
+      getServices: async () => {
+        const [coreStart, { fleet }] = await core.getStartServices();
+        return {
+          fleet,
+          workflows: workflowsManagement.management,
+          // Origin-only under CPS: the run summary and osquery results live in this project.
           es: coreStart.elasticsearch.client.asInternalUser,
           packRepository: coreStart.savedObjects.createInternalRepository([OSQUERY_PACK_SO_TYPE]),
         };

@@ -18,6 +18,9 @@
     "@kbn/workflows-extensions",
     "@kbn/zod",
     "@kbn/licensing-plugin",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/workflows-management-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/security-plugin",
   ]
 }
