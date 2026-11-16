@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import {
   BreadcrumbsContextProvider,
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { rememberClassicTabOrigin } from '../../hooks/use_streams_home_link';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
-import { StreamsTourProvider } from '../streams_tour';
 import { streamsAppRouter } from '../../routes/config';
 import type { StreamsAppStartDependencies } from '../../types';
 import type { StreamsAppServices } from '../../services/types';
@@ -39,6 +39,9 @@ export function AppRoot({
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
 
+  // Leaving Streams resets the Classic tab origin.
+  useEffect(() => () => rememberClassicTabOrigin(), []);
+
   const context = {
     appParams: appMountParameters,
     core: coreStart,
@@ -51,24 +54,22 @@ export function AppRoot({
 
   return (
     <StreamsAppContextProvider context={context}>
-      <StreamsTourProvider>
-        <QueryClientProvider client={queryClient}>
-          {/* @ts-expect-error upgrade typescript v5.4.5 */}
-          <RouterProvider history={history} router={streamsAppRouter}>
-            <UpdateExecutionContextOnRouteChange>
-              <DateRangeRedirect>
-                <PerformanceContextProvider>
-                  <KbnUrlStateStorageFromRouterProvider>
-                    <BreadcrumbsContextProvider>
-                      <RouteRenderer />
-                    </BreadcrumbsContextProvider>
-                  </KbnUrlStateStorageFromRouterProvider>
-                </PerformanceContextProvider>
-              </DateRangeRedirect>
-            </UpdateExecutionContextOnRouteChange>
-          </RouterProvider>
-        </QueryClientProvider>
-      </StreamsTourProvider>
+      <QueryClientProvider client={queryClient}>
+        {/* @ts-expect-error upgrade typescript v5.4.5 */}
+        <RouterProvider history={history} router={streamsAppRouter}>
+          <UpdateExecutionContextOnRouteChange>
+            <DateRangeRedirect>
+              <PerformanceContextProvider>
+                <KbnUrlStateStorageFromRouterProvider>
+                  <BreadcrumbsContextProvider>
+                    <RouteRenderer />
+                  </BreadcrumbsContextProvider>
+                </KbnUrlStateStorageFromRouterProvider>
+              </PerformanceContextProvider>
+            </DateRangeRedirect>
+          </UpdateExecutionContextOnRouteChange>
+        </RouterProvider>
+      </QueryClientProvider>
     </StreamsAppContextProvider>
   );
 }

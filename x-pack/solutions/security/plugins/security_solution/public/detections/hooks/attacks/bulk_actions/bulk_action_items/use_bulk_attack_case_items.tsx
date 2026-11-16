@@ -31,7 +31,7 @@ export interface UseBulkAttackCaseItemsProps {
   closePopover?: () => void;
   /** Source of the action for telemetry */
   telemetrySource?: AttacksActionTelemetrySource;
-  /** Posted as `security.attack` attachments instead of markdown when `attackAttachmentsEnabled`. */
+  /** Posted as `security.attack` attachments instead of markdown while the `attackAttachments` flag is on. */
   attacksToAttach?: ReadonlyArray<Omit<AttackToAttach, 'alertsIndex'>>;
 }
 
@@ -57,9 +57,9 @@ export const useBulkAttackCaseItems = ({
   );
 
   const onAddToCaseSuccess = useCallback(
-    (theCase: CaseUI, isNewCase: boolean) => {
+    (theCase: CaseUI, isNewCase: boolean, createdAttachments?: CaseUI['comments']) => {
       // Not raised while building the payload, which the case selector does on every render.
-      attackCaseAttachments?.onAttached(theCase);
+      attackCaseAttachments?.onAttached(theCase, createdAttachments);
 
       if (telemetrySource) {
         telemetry.reportEvent(AttacksEventTypes.ActionAddedToCase, {
@@ -71,10 +71,16 @@ export const useBulkAttackCaseItems = ({
     [attackCaseAttachments, telemetry, telemetrySource]
   );
 
+  const onNoAttachmentsAdded = useCallback(
+    (theCase: CaseUI) => attackCaseAttachments?.onAttached(theCase),
+    [attackCaseAttachments]
+  );
+
   const { onAddToCase, disabled } = useAddToCase({
     canUserCreateAndReadCases,
     onClick: onCasesAdd,
     onSuccess: onAddToCaseSuccess,
+    onNoAttachmentsAdded,
     title,
   });
 

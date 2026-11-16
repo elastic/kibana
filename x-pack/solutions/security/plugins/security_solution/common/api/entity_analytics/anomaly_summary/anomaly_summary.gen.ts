@@ -16,6 +16,8 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { EntityViewMode } from '../common/common.gen';
+
 export const AnomalyScoreRange = lazySchema(() =>
   z.object({
     /**
@@ -35,17 +37,9 @@ export const AnomalyScoreRange = lazySchema(() =>
 );
 export type AnomalyScoreRange = z.infer<typeof AnomalyScoreRange>;
 
-/**
- * Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group).
- */
-export const AnomalyEntityMode = lazySchema(() => z.enum(['single', 'resolved']));
-export type AnomalyEntityMode = z.infer<typeof AnomalyEntityMode>;
-export type AnomalyEntityModeEnum = typeof AnomalyEntityMode.enum;
-export const AnomalyEntityModeEnum = AnomalyEntityMode.enum;
-
 export const AnomalySummaryRequestBody = lazySchema(() =>
   z.object({
-    mode: AnomalyEntityMode.optional().default('single'),
+    mode: EntityViewMode.optional().default('single'),
     /**
      * Page number (1-indexed)
      */
@@ -236,7 +230,7 @@ export type AnomalySummaryResponse = z.infer<typeof AnomalySummaryResponse>;
 
 export const AnomalyOverviewRequestBody = lazySchema(() =>
   z.object({
-    mode: AnomalyEntityMode.optional().default('single'),
+    mode: EntityViewMode.optional().default('single'),
     /**
      * Start time as epoch milliseconds; defaults to now-30d when omitted
      */

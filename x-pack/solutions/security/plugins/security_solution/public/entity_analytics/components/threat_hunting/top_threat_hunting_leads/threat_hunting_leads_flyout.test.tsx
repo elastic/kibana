@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { ThreatHuntingLeadsFlyout } from './threat_hunting_leads_flyout';
 import type { HuntingLead } from './types';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 
@@ -22,20 +23,10 @@ jest.mock('../../../api/api', () => ({
   useEntityAnalyticsRoutes: jest.fn(),
 }));
 
-const mockOpenFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openFlyout: mockOpenFlyout,
-  }),
-}));
-
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => false,
-}));
-
+const mockOpenEntityFlyout = jest.fn();
 jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
   useFlyoutApi: () => ({
-    openEntityFlyout: jest.fn(),
+    openEntityFlyout: mockOpenEntityFlyout,
   }),
 }));
 
@@ -224,17 +215,14 @@ describe('ThreatHuntingLeadsFlyout', () => {
 
     fireEvent.click(screen.getByTestId('leadEntityBadge-jsmith'));
 
-    expect(mockOpenFlyout).toHaveBeenCalledTimes(1);
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: {
-        id: 'user-panel',
-        params: {
-          userName: 'jsmith',
-          entityId: 'user:jsmith',
-          contextID: 'entity-analytics-threat-hunting-leads',
-          scopeId: 'entity-analytics-threat-hunting-leads',
-        },
-      },
+    expect(mockOpenEntityFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenEntityFlyout).toHaveBeenCalledWith({
+      engineType: 'user',
+      entityName: 'jsmith',
+      origin: FLYOUT_ORIGIN.THREAT_HUNTING_LEADS,
+      entityId: 'user:jsmith',
+      contextID: 'entity-analytics-threat-hunting-leads',
+      scopeId: 'entity-analytics-threat-hunting-leads',
     });
     expect(onSelectLead).not.toHaveBeenCalled();
   });

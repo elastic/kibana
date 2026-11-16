@@ -41,12 +41,17 @@ export const createMockConfig = (): ConfigType => {
     entityAnalytics: {
       riskEngine: {
         alertSampleSizePerShard: DEFAULT_ALERT_SAMPLE_SIZE,
+        esqlProfiling: true,
+        esqlProfilingInterval: 20,
       },
       assetCriticality: {
         csvUpload: {
           errorRetries: 3,
           maxBulkRequestBodySizeBytes: 10_485_760,
         },
+      },
+      alertEntityIdBackfill: {
+        enabled: true,
       },
       entityStore: {
         frequency: duration('1m'),

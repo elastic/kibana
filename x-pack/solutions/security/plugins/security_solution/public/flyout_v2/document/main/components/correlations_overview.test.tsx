@@ -24,13 +24,13 @@ import {
 import { useShowRelatedAlertsByAncestry } from '../../tools/correlations/hooks/use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../tools/correlations/hooks/use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from '../../tools/correlations/hooks/use_show_related_alerts_by_session';
+import { useShowRelatedAttacks } from '../../tools/correlations/hooks/use_show_related_attacks';
 import { useShowRelatedCases } from '../../tools/correlations/hooks/use_show_related_cases';
 import { useShowSuppressedAlerts } from '../../tools/correlations/hooks/use_show_suppressed_alerts';
 import { useFetchRelatedAlertsByAncestry } from '../hooks/use_fetch_related_alerts_by_ancestry';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../hooks/use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedAlertsBySession } from '../hooks/use_fetch_related_alerts_by_session';
 import { useFetchRelatedCases } from '../hooks/use_fetch_related_cases';
-import { useNavigateToLeftPanel } from '../../../../flyout/document_details/shared/hooks/use_navigate_to_left_panel';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
@@ -42,13 +42,13 @@ import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/
 jest.mock('../../tools/correlations/hooks/use_show_related_alerts_by_ancestry');
 jest.mock('../../tools/correlations/hooks/use_show_related_alerts_by_same_source_event');
 jest.mock('../../tools/correlations/hooks/use_show_related_alerts_by_session');
+jest.mock('../../tools/correlations/hooks/use_show_related_attacks');
 jest.mock('../../tools/correlations/hooks/use_show_related_cases');
 jest.mock('../../tools/correlations/hooks/use_show_suppressed_alerts');
 jest.mock('../hooks/use_fetch_related_alerts_by_session');
 jest.mock('../hooks/use_fetch_related_alerts_by_ancestry');
 jest.mock('../hooks/use_fetch_related_alerts_by_same_source_event');
 jest.mock('../hooks/use_fetch_related_cases');
-jest.mock('../../../../flyout/document_details/shared/hooks/use_navigate_to_left_panel');
 
 const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(CORRELATIONS_TEST_ID);
 const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(CORRELATIONS_TEST_ID);
@@ -118,12 +118,12 @@ describe('<CorrelationsOverview />', () => {
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: false, originalEventId });
     jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false });
+    jest.mocked(useShowRelatedAttacks).mockReturnValue({ show: false, attackIds: [] });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
     jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
     });
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
   });
 
   it('should render wrapper component', () => {
@@ -198,6 +198,7 @@ describe('<CorrelationsOverview />', () => {
     jest
       .mocked(useShowRelatedAlertsBySession)
       .mockReturnValue({ show: false, entityId: 'entityId' });
+    jest.mocked(useShowRelatedAttacks).mockReturnValue({ show: false, attackIds: [] });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
     jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 

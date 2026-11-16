@@ -9,6 +9,7 @@
 
 import SLACK_THREAD_WORKFLOW_YAML from './slack_thread_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { removeRunAs } from '../render_bound_yaml';
 
 export const NIGHTSHIFT_SLACK_THREAD_WORKFLOW_ID = 'system-nightshift-slack-thread';
 
@@ -17,7 +18,7 @@ export const NIGHTSHIFT_SLACK_THREAD_WORKFLOW = {
   pluginId: 'nightshiftInvestigations',
   version: 1,
   billable: false,
-  yaml: SLACK_THREAD_WORKFLOW_YAML,
+  yaml: removeRunAs(SLACK_THREAD_WORKFLOW_YAML),
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

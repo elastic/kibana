@@ -32,6 +32,7 @@ interface ListKiTableRow extends KiListItem {
 interface ListKiTableProps {
   aiIndexId: string;
   kis: KiListItem[];
+  isRefetching?: boolean;
 }
 
 const toTableRow = (ki: KiListItem): ListKiTableRow => ({
@@ -39,7 +40,7 @@ const toTableRow = (ki: KiListItem): ListKiTableRow => ({
   rowKey: `${ki.index}:${ki.id}`,
 });
 
-export const ListKiTable = ({ aiIndexId, kis }: ListKiTableProps) => {
+export const ListKiTable = ({ aiIndexId, kis, isRefetching = false }: ListKiTableProps) => {
   const { navigateToContextEngine } = useNavigation();
   const prefetchKi = usePrefetchKi(aiIndexId);
 
@@ -112,6 +113,7 @@ export const ListKiTable = ({ aiIndexId, kis }: ListKiTableProps) => {
       items={items}
       itemId="rowKey"
       columns={columns}
+      loading={isRefetching}
       rowProps={(ki) => {
         const title = getKiDisplayTitle(ki.title);
         return {

@@ -25,6 +25,7 @@ import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
 } from '../../../../rules_client/lib';
 import {
   retryIfBulkOperationConflicts,
@@ -108,29 +109,35 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
     ),
   ]);
 
-  const deletedRules = rules.map(({ id, attributes, references }) => {
-    // TODO (http-versioning): alertTypeId should never be null, but we need to
-    // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
-    // when we are doing the bulk delete and this should fix itself
-    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
-      attributes as RawRule,
-      {
-        id,
-        logger: context.logger,
-        ruleType,
-        references,
-      },
-      (connectorId: string) => actionsClient.isSystemAction(connectorId)
-    );
+  const deletedRules = await withSpan(
+    { name: 'bulkDeleteRules.toRuleDomain', type: 'rules' },
+    async () =>
+      rules.map(({ id, attributes, references }) => {
+        // TODO (http-versioning): alertTypeId should never be null, but we need to
+        // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
+        // when we are doing the bulk delete and this should fix itself
+        const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+        const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
+          attributes as RawRule,
+          {
+            id,
+            logger: context.logger,
+            ruleType,
+            references,
+          },
+          (connectorId: string) => actionsClient.isSystemAction(connectorId)
+        );
 
-    try {
-      ruleDomainSchema.validate(ruleDomain);
-    } catch (e) {
-      context.logger.warn(`Error validating bulk deleted rule domain object for id: ${id}, ${e}`);
-    }
-    return ruleDomain;
-  });
+        try {
+          ruleDomainSchema.validate(ruleDomain);
+        } catch (e) {
+          context.logger.warn(
+            `Error validating bulk deleted rule domain object for id: ${id}, ${e}`
+          );
+        }
+        return ruleDomain;
+      })
+  );
 
   // // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
   const deletedPublicRules = deletedRules.map((rule: RuleDomain<Params>) => {
@@ -199,6 +206,7 @@ const bulkDeleteWithOCC = async (
   );
 
   const rulesToDelete: Array<SavedObject<RawRule>> = [];
+  const migratedRuleIds = new Set<string>();
   const apiKeyToRuleIdMapping: Record<string, string> = {};
   const uiamApiKeyToRuleIdMapping: Record<string, string> = {};
   const taskIdToRuleIdMapping: Record<string, string> = {};
@@ -208,11 +216,13 @@ const bulkDeleteWithOCC = async (
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
-        await bulkMigrateLegacyActions({
+        // the deleted rules are returned with their legacy actions
+        const migratedIds = await bulkMigrateLegacyActions({
           context,
           rules: response.saved_objects,
           skipActionsValidation: true,
         });
+        migratedIds.forEach((id) => migratedRuleIds.add(id));
         for (const rule of response.saved_objects) {
           const { apiKey, apiKeyCreatedByUser, uiamApiKey } = rule.attributes;
 
@@ -291,6 +301,12 @@ const bulkDeleteWithOCC = async (
     }
   });
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
+
+  // Legacy actions are deleted only once the rules are deleted
+  await deleteLegacyActionsForRules(
+    context,
+    deletedRuleIds.filter((id) => migratedRuleIds.has(id))
+  );
 
   if (deletedRuleIds.length > 0) {
     try {

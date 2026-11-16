@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JSONSchema7 } from 'json-schema';
+import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 import type { Document } from 'yaml';
 import { parseDocument } from 'yaml';
 import {
@@ -462,8 +462,37 @@ function applyDefaultFromSchema(
   return undefined;
 }
 
+const hasPropertyDefault = (
+  propertySchema: JSONSchema7Definition | undefined,
+  rootSchema: JsonModelSchemaType
+): boolean => {
+  if (!propertySchema || typeof propertySchema !== 'object') {
+    return false;
+  }
+  const resolvedSchema = propertySchema.$ref
+    ? resolveRef(propertySchema.$ref, rootSchema) ?? propertySchema
+    : propertySchema;
+  return resolvedSchema.default !== undefined;
+};
+
+/**
+ * Drops top-level inputs with a default from `required`, so plain JSON Schema validators
+ * (e.g. Monaco) accept omitting them the same way applyInputDefaults fills them in.
+ */
+export function omitRequiredWithDefaults(schema: JsonModelSchemaType): JsonModelSchemaType {
+  const { required, properties } = schema as JSONSchema7;
+  if (!required || !properties) {
+    return schema;
+  }
+  return {
+    ...schema,
+    required: required.filter((key) => !hasPropertyDefault(properties[key], schema)),
+  } as JsonModelSchemaType;
+}
+
 /**
  * Applies default values from JSON Schema to workflow inputs
+ * Keep in sync with omitRequiredWithDefaults when changing which inputs receive defaults.
  * @param inputs - The actual input values provided (may be partial or undefined)
  * @param inputsSchema - The normalized JSON Schema inputs definition
  * @returns The inputs with defaults applied

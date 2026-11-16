@@ -60,7 +60,10 @@ export function getValueColumns(
   }
   if (isAPIReferenceLineLayer(layer)) {
     return [
-      ...layer.thresholds.map((t, index) => getValueColumn(`referenceLine${index}`, t, 'number')),
+      ...layer.thresholds.map((threshold, index) => {
+        const columnId = getAccessorNameForXY(layer, i, REFERENCE_LINE_ACCESSOR_PREFIX, index);
+        return getValueColumn(columnId, threshold, 'number');
+      }),
     ];
   }
   const xColumnType =

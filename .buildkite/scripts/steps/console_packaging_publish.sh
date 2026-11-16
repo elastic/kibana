@@ -164,7 +164,7 @@ EOF
 PKG_MANIFEST="$TARGET_DIR/package.json"
 
 report_step "Publishing $(basename "$TARBALL") → $NPM_REGISTRY"
-npm publish "$TARBALL" --tag latest --userconfig "$NPMRC" || {
+npm publish "$TARBALL" --tag main --userconfig "$NPMRC" || {
   publish_rc=$?
   if npm view "$(node -p "require('$PKG_MANIFEST').name")@$(node -p "require('$PKG_MANIFEST').version")" \
        --userconfig "$NPMRC" >/dev/null 2>&1; then

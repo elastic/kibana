@@ -8,12 +8,12 @@
 import * as Rx from 'rxjs';
 import type { Dispatcher } from 'undici';
 import type { Logger } from '@kbn/logging';
-import type { RenderServiceRetryClass } from '@kbn/reporting-common';
 import {
   RenderCapacityTimeoutError,
   RenderFailedError,
   RenderRequestRejectedError,
   RenderServiceError,
+  RenderServiceRetryClass,
   RenderServiceSaturatedError,
   RenderServiceUnavailableError,
 } from '@kbn/reporting-common';
@@ -101,12 +101,12 @@ function describeFailure(response: Response, body: RenderPageErrorBody | undefin
 }
 
 const ERRORS_BY_CLASS: Record<
-  Exclude<RenderServiceRetryClass, 'capacity'>,
+  Exclude<RenderServiceRetryClass, RenderServiceRetryClass.CAPACITY>,
   new (details?: string) => Error
 > = {
-  unavailable: RenderServiceUnavailableError,
-  render_failure: RenderFailedError,
-  unrecoverable: RenderRequestRejectedError,
+  [RenderServiceRetryClass.UNAVAILABLE]: RenderServiceUnavailableError,
+  [RenderServiceRetryClass.RENDER_FAILURE]: RenderFailedError,
+  [RenderServiceRetryClass.UNRECOVERABLE]: RenderRequestRejectedError,
 };
 
 /** Undici's own message for any network failure is just "fetch failed"; the cause says which. */
@@ -188,7 +188,7 @@ async function postWithRetry(
       body
     );
 
-    if (retryClass !== 'capacity') {
+    if (retryClass !== RenderServiceRetryClass.CAPACITY) {
       // Only a 5xx with a phase means the service took a slot.
       if (response.status >= 500 && body?.phase) {
         pageRenderTelemetry.recordCapacityWait((sentAt - waitStartedAt) / 1000);

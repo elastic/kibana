@@ -22,27 +22,43 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiSplitPanel,
-  EuiSwitch,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { isEqual, omit, pick } from 'lodash';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { getConnectorIcon } from '../../utils/connector_display';
-import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
+import type {
+  InferenceFeatureResponse as InferenceFeatureConfig,
+  ReasoningEffortLevel,
+} from '../../../common/types';
 import { useConnectors } from '../../hooks/use_connectors';
-import type { EndpointDeprecationInfo } from '../../types';
+import { useRegionAvailableEndpoints } from '../../hooks/use_region_available_endpoints';
+import { useSupportedEffortLevels } from '../../hooks/use_supported_effort_levels';
+import type { EndpointDeprecationInfo, EndpointEfforts } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
 import { DisableRecommendedModelsModal } from './disable_recommended_models_modal';
+import { EffortBadge } from './effort_badge';
+import { ADD_EFFORT_CLASS_NAME } from './add_effort_badge';
+import { ReasoningEffortPopover } from './reasoning_effort_popover';
+import { RecommendedDefaultsSwitch } from './recommended_defaults_switch';
 import { ResetDefaultsModal } from './reset_defaults_modal';
+import { SettingTitle } from './setting_title';
 
 const COLLAPSED_COUNT = 5;
+const NO_EFFORT_LEVELS: ReasoningEffortLevel[] = [];
+
+const endpointRowStyles = css`
+  &:hover .${ADD_EFFORT_CLASS_NAME} {
+    opacity: 1;
+  }
+`;
 
 const arraysEqual = (a: string[], b: string[]) =>
   a.length === b.length && a.every((v, i) => v === b[i]);
@@ -53,12 +69,17 @@ interface SubFeatureCardProps {
   endpointIds: string[];
   effectiveRecommendedEndpoints: string[];
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
+  efforts: EndpointEfforts;
+  effectiveRecommendedEfforts: EndpointEfforts;
+  onEffortsChange: (featureId: string, newEfforts: EndpointEfforts) => void;
   invalidEndpointIds: Set<string>;
   deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
   hasSavedObject: boolean;
   isFeatureDirty: boolean;
   globalDefaultId: string;
   canManage?: boolean;
+  /** Bumped by the page each time unsaved changes are discarded; clears the sticky custom-mode flag. */
+  discardVersion?: number;
 }
 
 export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
@@ -67,15 +88,20 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   endpointIds,
   effectiveRecommendedEndpoints,
   onEndpointsChange,
+  efforts,
+  effectiveRecommendedEfforts,
+  onEffortsChange,
   invalidEndpointIds,
   deprecatedEndpointsMap,
   hasSavedObject,
   isFeatureDirty,
   globalDefaultId,
   canManage = true,
+  discardVersion = 0,
 }) => {
   const { data: connectors = [] } = useConnectors();
   const { features: registeredFeatures } = useRegisteredFeatures();
+  const supportedEffortLevels = useSupportedEffortLevels();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [isDisableModalOpen, setIsDisableModalOpen] = useState(false);
@@ -84,13 +110,37 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   // Sticky session flag: the editable list is seeded with the recommended endpoints, so without this
   // the toggle would snap back to ON immediately after the user confirms "Turn off recommended defaults".
   const [hasOptedIntoCustomMode, setHasOptedIntoCustomMode] = useState(false);
+  useEffect(() => {
+    // Discarding restores the saved assignments, so the card must also leave custom mode.
+    setHasOptedIntoCustomMode(false);
+  }, [discardVersion]);
   const listRef = useRef<HTMLDivElement>(null);
   const { isTechPreview, isBeta } = feature;
 
-  const useRecommendedDefaults = useMemo(
-    () => !hasOptedIntoCustomMode && arraysEqual(endpointIds, effectiveRecommendedEndpoints),
-    [hasOptedIntoCustomMode, endpointIds, effectiveRecommendedEndpoints]
+  const { regionDeniedEndpointIds, availableEndpointIds } =
+    useRegionAvailableEndpoints(endpointIds);
+  const availableRecommendedEndpointIds = useMemo(
+    () =>
+      effectiveRecommendedEndpoints.filter(
+        (endpointId) => !regionDeniedEndpointIds.has(endpointId)
+      ),
+    [effectiveRecommendedEndpoints, regionDeniedEndpointIds]
   );
+  const hasAvailableRecommendedEndpoints = availableRecommendedEndpointIds.length > 0;
+
+  const matchesRecommendedDefaults = useMemo(() => {
+    const matchesRecommendedEndpoints = arraysEqual(endpointIds, effectiveRecommendedEndpoints);
+    const matchesRecommendedSelection =
+      matchesRecommendedEndpoints && isEqual(efforts, effectiveRecommendedEfforts);
+    return !hasOptedIntoCustomMode && matchesRecommendedSelection;
+  }, [
+    hasOptedIntoCustomMode,
+    endpointIds,
+    effectiveRecommendedEndpoints,
+    efforts,
+    effectiveRecommendedEfforts,
+  ]);
+  const isUsingRecommendedDefaults = hasAvailableRecommendedEndpoints && matchesRecommendedDefaults;
 
   useEffect(() => {
     const el = listRef.current;
@@ -98,7 +148,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     const ro = new ResizeObserver(([entry]) => setListWidth(entry.contentRect.width));
     ro.observe(el);
     return () => ro.disconnect();
-  }, [useRecommendedDefaults]);
+  }, [isUsingRecommendedDefaults]);
 
   const endpointDisplayMap = useMemo(
     () =>
@@ -118,13 +168,18 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     (f) => f.featureId !== featureId && f.parentFeatureId !== undefined
   );
 
-  const hasOverflow = endpointIds.length > COLLAPSED_COUNT;
-  const visibleEndpoints = isExpanded ? endpointIds : endpointIds.slice(0, COLLAPSED_COUNT);
-  const hiddenCount = endpointIds.length - COLLAPSED_COUNT;
+  const hasOverflow = availableEndpointIds.length > COLLAPSED_COUNT;
+  const visibleEndpoints = isExpanded
+    ? availableEndpointIds
+    : availableEndpointIds.slice(0, COLLAPSED_COUNT);
+  const hiddenCount = availableEndpointIds.length - COLLAPSED_COUNT;
   const canAddMore =
-    !feature.maxNumberOfEndpoints || endpointIds.length < feature.maxNumberOfEndpoints;
+    !feature.maxNumberOfEndpoints || availableEndpointIds.length < feature.maxNumberOfEndpoints;
 
-  const showGlobalDefaultRow = !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL;
+  const isGlobalDefaultAvailable =
+    globalDefaultId !== NO_DEFAULT_MODEL && !regionDeniedEndpointIds.has(globalDefaultId);
+  const showGlobalDefaultRow = !hasSavedObject && isGlobalDefaultAvailable;
+  const hasAssignedRows = availableEndpointIds.length > 0 || showGlobalDefaultRow;
   const { icon: globalDefaultIcon = 'processor', label: globalDefaultLabel = globalDefaultId } =
     endpointDisplayMap.get(globalDefaultId) ?? {};
   const globalDefaultDeprecationInfo =
@@ -136,17 +191,17 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     (index: number) => {
       onEndpointsChange(
         featureId,
-        endpointIds.filter((_, i) => i !== index)
+        availableEndpointIds.filter((_, i) => i !== index)
       );
     },
-    [endpointIds, featureId, onEndpointsChange]
+    [availableEndpointIds, featureId, onEndpointsChange]
   );
 
   const handleAdd = useCallback(
     (endpointId: string) => {
-      onEndpointsChange(featureId, [...endpointIds, endpointId]);
+      onEndpointsChange(featureId, [...availableEndpointIds, endpointId]);
     },
-    [endpointIds, featureId, onEndpointsChange]
+    [availableEndpointIds, featureId, onEndpointsChange]
   );
 
   const handleDragEnd = useCallback(
@@ -160,46 +215,64 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
       if (destination && source.index !== destination.index) {
         onEndpointsChange(
           featureId,
-          euiDragDropReorder(endpointIds, source.index, destination.index)
+          euiDragDropReorder(availableEndpointIds, source.index, destination.index)
         );
       }
     },
-    [endpointIds, featureId, onEndpointsChange]
+    [availableEndpointIds, featureId, onEndpointsChange]
   );
 
   const handleCopyApply = useCallback(
     (selectedFeatureIds: string[]) => {
       for (const targetId of selectedFeatureIds) {
-        onEndpointsChange(targetId, [...endpointIds]);
+        onEndpointsChange(targetId, [...availableEndpointIds]);
+        onEffortsChange(targetId, pick(efforts, availableEndpointIds));
       }
     },
-    [endpointIds, onEndpointsChange]
+    [availableEndpointIds, efforts, onEndpointsChange, onEffortsChange]
+  );
+
+  const handleEffortChange = useCallback(
+    (endpointId: string, effort?: ReasoningEffortLevel) => {
+      onEffortsChange(
+        featureId,
+        effort === undefined ? omit(efforts, endpointId) : { ...efforts, [endpointId]: effort }
+      );
+    },
+    [efforts, featureId, onEffortsChange]
   );
 
   const handleToggleRecommendedDefaults = useCallback(
     (checked: boolean) => {
       if (checked) {
-        if (!useRecommendedDefaults) {
+        if (!isUsingRecommendedDefaults) {
           setIsResetModalOpen(true);
         }
         return;
       }
       setIsDisableModalOpen(true);
     },
-    [useRecommendedDefaults]
+    [isUsingRecommendedDefaults]
   );
 
   const confirmResetToDefaults = useCallback(() => {
     setHasOptedIntoCustomMode(false);
     onEndpointsChange(featureId, [...effectiveRecommendedEndpoints]);
+    onEffortsChange(featureId, { ...effectiveRecommendedEfforts });
     setIsResetModalOpen(false);
-  }, [featureId, effectiveRecommendedEndpoints, onEndpointsChange]);
+  }, [
+    featureId,
+    effectiveRecommendedEndpoints,
+    effectiveRecommendedEfforts,
+    onEndpointsChange,
+    onEffortsChange,
+  ]);
 
   const confirmDisableRecommendedDefaults = useCallback(() => {
     setHasOptedIntoCustomMode(true);
-    onEndpointsChange(featureId, [...effectiveRecommendedEndpoints]);
+    onEndpointsChange(featureId, [...availableRecommendedEndpointIds]);
     setIsDisableModalOpen(false);
-  }, [featureId, effectiveRecommendedEndpoints, onEndpointsChange]);
+  }, [featureId, availableRecommendedEndpointIds, onEndpointsChange]);
 
   const showAddModelPopover = canManage && (!hasOverflow || isExpanded) && canAddMore;
   const showCopyToButton = canManage && (!hasOverflow || isExpanded) && hasOtherSubFeatures;
@@ -219,9 +292,12 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
         >
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h4>{feature.featureName}</h4>
-              </EuiTitle>
+              <SettingTitle
+                heading="h4"
+                data-test-subj={`subFeatureCardTitle-${featureId}`}
+                isUnsaved={isFeatureDirty}
+                title={feature.featureName}
+              />
             </EuiFlexItem>
             {(isTechPreview || isBeta) && (
               <EuiFlexItem grow={false}>
@@ -249,15 +325,12 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             <p>{feature.featureDescription}</p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiSwitch
-            data-test-subj={`useRecommendedDefaultsToggle-${featureId}`}
-            label={i18n.translate(
-              'xpack.searchInferenceEndpoints.settings.useRecommendedDefaults.label',
-              { defaultMessage: 'Use recommended defaults' }
-            )}
-            checked={useRecommendedDefaults}
-            onChange={(e) => handleToggleRecommendedDefaults(e.target.checked)}
-            disabled={!canManage}
+          <RecommendedDefaultsSwitch
+            featureId={featureId}
+            checked={isUsingRecommendedDefaults}
+            hasAvailableRecommendedEndpoints={hasAvailableRecommendedEndpoints}
+            canManage={canManage}
+            onChange={handleToggleRecommendedDefaults}
           />
         </EuiFlexItem>
 
@@ -276,10 +349,11 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             </EuiText>
             <EuiSpacer size="s" />
 
-            {useRecommendedDefaults ? (
+            {isUsingRecommendedDefaults ? (
               <RecommendedEndpointsList
                 featureId={featureId}
-                endpointIds={endpointIds}
+                endpointIds={availableEndpointIds}
+                efforts={efforts}
                 endpointDisplayMap={endpointDisplayMap}
                 invalidEndpointIds={invalidEndpointIds}
                 deprecatedEndpointsMap={deprecatedEndpointsMap}
@@ -298,7 +372,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             ) : (
               <EuiDragDropContext onDragEnd={handleDragEnd}>
                 <div ref={listRef}>
-                  <EuiSplitPanel.Outer hasBorder>
+                  <EuiSplitPanel.Outer hasBorder={hasAssignedRows}>
                     {showGlobalDefaultRow && globalDefaultId && (
                       <GlobalDefaultLockedRow
                         featureId={featureId}
@@ -323,10 +397,15 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                               endpointDisplayMap.get(endpointId) ?? {};
                             const isInvalid = invalidEndpointIds.has(endpointId);
                             const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
+                            const supportedLevels = supportedEffortLevels.get(endpointId);
+                            const effort = efforts[endpointId];
+                            const showEffortControl =
+                              supportedLevels !== undefined || effort !== undefined;
                             return (
                               <div>
                                 <EuiSplitPanel.Inner
                                   paddingSize="s"
+                                  css={endpointRowStyles}
                                   data-test-subj={`endpoint-row-${endpointId}`}
                                 >
                                   <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -403,6 +482,25 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                         metadata={deprecationInfo.metadata}
                                       />
                                     )}
+                                    {showEffortControl && (
+                                      <EuiFlexItem grow={false}>
+                                        {canManage ? (
+                                          <ReasoningEffortPopover
+                                            endpointId={endpointId}
+                                            label={label}
+                                            effort={effort}
+                                            supportedLevels={supportedLevels ?? NO_EFFORT_LEVELS}
+                                            onChange={(newEffort) =>
+                                              handleEffortChange(endpointId, newEffort)
+                                            }
+                                          />
+                                        ) : (
+                                          effort !== undefined && (
+                                            <EffortBadge endpointId={endpointId} effort={effort} />
+                                          )
+                                        )}
+                                      </EuiFlexItem>
+                                    )}
                                     {canManage && (
                                       <EuiFlexItem grow={false}>
                                         <EuiToolTip
@@ -425,7 +523,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                             size="s"
                                             color="text"
                                             onClick={() => handleRemove(index)}
-                                            isDisabled={endpointIds.length <= 1}
+                                            isDisabled={availableEndpointIds.length <= 1}
                                             data-test-subj={`remove-endpoint-${endpointId}`}
                                           />
                                         </EuiToolTip>
@@ -443,11 +541,25 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                       ))}
                     </EuiDroppable>
                   </EuiSplitPanel.Outer>
+                  {!hasAssignedRows && (
+                    <EuiText
+                      size="s"
+                      color="subdued"
+                      data-test-subj={`no-models-available-${featureId}`}
+                    >
+                      <p>
+                        {i18n.translate(
+                          'xpack.searchInferenceEndpoints.settings.assignedModels.noModelsAvailable',
+                          { defaultMessage: 'No models available' }
+                        )}
+                      </p>
+                    </EuiText>
+                  )}
                 </div>
               </EuiDragDropContext>
             )}
 
-            {!useRecommendedDefaults && (
+            {!isUsingRecommendedDefaults && (
               <>
                 <EuiSpacer size="xs" />
                 <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
@@ -470,10 +582,11 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                   {showAddModelPopover && (
                     <EuiFlexItem grow={false}>
                       <AddModelPopover
-                        existingEndpointIds={endpointIds}
+                        existingEndpointIds={availableEndpointIds}
                         onAdd={handleAdd}
                         taskType={feature.taskType}
                         panelWidth={listWidth}
+                        allowTemplateRequiredModels={feature.allowTemplateRequiredModels}
                       />
                     </EuiFlexItem>
                   )}
@@ -484,6 +597,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                         size="s"
                         color="text"
                         onClick={() => setIsCopyModalOpen(true)}
+                        isDisabled={availableEndpointIds.length === 0}
                         data-test-subj={`copy-to-${featureId}`}
                       >
                         {i18n.translate('xpack.searchInferenceEndpoints.settings.copyTo.button', {
@@ -504,6 +618,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
           sourceFeatureName={feature.featureName}
           currentFeatureId={featureId}
           taskType={feature.taskType}
+          allowTemplateRequiredModels={feature.allowTemplateRequiredModels}
           onApply={handleCopyApply}
           onClose={() => setIsCopyModalOpen(false)}
         />
@@ -600,6 +715,7 @@ const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
 interface RecommendedEndpointsListProps {
   featureId: string;
   endpointIds: string[];
+  efforts: EndpointEfforts;
   endpointDisplayMap: Map<string, { icon: string; label: string }>;
   invalidEndpointIds: Set<string>;
   deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
@@ -615,6 +731,7 @@ interface RecommendedEndpointsListProps {
 const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
   featureId,
   endpointIds,
+  efforts,
   endpointDisplayMap,
   invalidEndpointIds,
   deprecatedEndpointsMap,
@@ -636,6 +753,7 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
         const { icon = 'processor', label = endpointId } = endpointDisplayMap.get(endpointId) ?? {};
         const isInvalid = invalidEndpointIds.has(endpointId);
         const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
+        const effort = efforts[endpointId];
         return (
           <div key={endpointId}>
             <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`endpoint-row-${endpointId}`}>
@@ -671,6 +789,11 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
                     status={deprecationInfo.status}
                     metadata={deprecationInfo.metadata}
                   />
+                )}
+                {effort !== undefined && (
+                  <EuiFlexItem grow={false}>
+                    <EffortBadge endpointId={endpointId} effort={effort} />
+                  </EuiFlexItem>
                 )}
               </EuiFlexGroup>
             </EuiSplitPanel.Inner>

@@ -17,16 +17,21 @@ import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import type { TemplateBody } from '@kbn/workflows-library';
-import { TemplateDetail, useLibraryEnabled } from '@kbn/workflows-ui';
+import {
+  isTemplateNotFoundError,
+  TemplateDetail,
+  useLibraryEnabled,
+  useTemplate,
+} from '@kbn/workflows-ui';
+import { TemplateNotFoundPage } from './template_not_found_page';
 import { PLUGIN_ID } from '../../../common';
 import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
-const libraryBreadcrumbLabel = i18n.translate(
-  'workflowsManagement.libraryTemplatePage.libraryBreadcrumb',
-  { defaultMessage: 'Template Library' }
-);
+const libraryBreadcrumbLabel = i18n.translate('workflows.libraryTemplatePage.libraryBreadcrumb', {
+  defaultMessage: 'Template library',
+});
 
 type LibraryTemplateDetailPageProps = RouteComponentProps<{ slug: string }>;
 
@@ -36,7 +41,7 @@ interface TemplateBreadcrumb {
 }
 
 /**
- * Workflow Template Library template detail page (`/app/workflows/library/:slug`).
+ * Workflow Template library template detail page (`/app/workflows/library/:slug`).
  * Fills the available height like the workflow editor so the read-only preview
  * grows with the viewport. The route is always registered (see `routes.tsx`);
  * this page redirects to the workflows list when the library is disabled.
@@ -77,11 +82,24 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
     setWorkflowsBreadcrumbs(breadcrumbs);
   }, [setWorkflowsBreadcrumbs, breadcrumbs]);
 
+  const onBackToLibrary = useCallback(() => {
+    void application.navigateToUrl(libraryBack.href);
+  }, [application, libraryBack.href]);
+
   // The library is a tech preview gated behind a global uiSetting
   // This will be removed once the library is fully released
   const isLibraryEnabled = useLibraryEnabled();
+
+  // Shares the query (and its cache entry) with `TemplateDetail`; read here so
+  // a missing slug replaces the whole page rather than rendering inside it.
+  const { error: templateError } = useTemplate(isLibraryEnabled ? slug : undefined);
+
   if (!isLibraryEnabled) {
     return <Redirect to="/" />;
+  }
+
+  if (isTemplateNotFoundError(templateError)) {
+    return <TemplateNotFoundPage onBackToLibrary={onBackToLibrary} />;
   }
 
   return (

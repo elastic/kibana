@@ -14,6 +14,8 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { ScopedRunnerRunInternalToolParams } from '@kbn/agent-builder-server/runner';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ConfirmationStatus, AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import type { CreateScopedRunnerDepsMock, MockedTool, ToolRegistryMock } from '../../../test_utils';
 import {
@@ -254,6 +256,37 @@ describe('runTool', () => {
         runContext: expect.objectContaining({ runId: runnerManager.context.runId }),
       })
     );
+  });
+
+  it('records attachment changes made by the tool handler under its tool call id', async () => {
+    const attachmentStateManager = createAttachmentStateManager([], {
+      getTypeDefinition: () =>
+        ({
+          id: 'text',
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        } as unknown as AttachmentTypeDefinition),
+    });
+    const manager = new RunnerManager({ ...runnerDeps, attachmentStateManager });
+
+    toolHandler.mockImplementation(async (_params, context) => {
+      await context.attachments.add({ type: 'text', data: 'hello', description: 'Test' });
+      return { results: [] };
+    });
+
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-42',
+        source: 'agent',
+      },
+      parentManager: manager,
+    });
+
+    expect(attachmentStateManager.drainChanges()).toEqual([
+      expect.objectContaining({ kind: 'added', tool_call_id: 'call-42' }),
+    ]);
   });
 
   it('passes the run context (including agent stack) to the tool handler', async () => {

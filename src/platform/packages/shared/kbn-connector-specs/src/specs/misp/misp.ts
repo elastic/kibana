@@ -146,7 +146,7 @@ export const Misp: ConnectorSpec = {
   metadata: {
     id: '.misp',
     displayName: 'MISP',
-    description: i18n.translate('core.kibanaConnectorSpecs.misp.metadata.description', {
+    description: i18n.translate('connectorSpecs.misp.metadata.description', {
       defaultMessage:
         'Search MISP attributes and events, check indicators and warninglists, and write sightings, events, attributes, and tags back to a self-hosted MISP instance',
     }),
@@ -162,27 +162,24 @@ export const Misp: ConnectorSpec = {
         isRecommended: true,
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.misp.auth.apiKey.label', {
+          label: i18n.translate('connectorSpecs.misp.auth.apiKey.label', {
             defaultMessage: 'Automation API key',
           }),
           meta: {
             apiKey: {
-              label: i18n.translate('core.kibanaConnectorSpecs.misp.auth.apiKey.apiKeyLabel', {
+              label: i18n.translate('connectorSpecs.misp.auth.apiKey.apiKeyLabel', {
                 defaultMessage: 'API key',
               }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.misp.auth.apiKey.helpText', {
+              helpText: i18n.translate('connectorSpecs.misp.auth.apiKey.helpText', {
                 defaultMessage:
-                  'MISP automation key sent as Authorization: <key> (no Bearer prefix). Create it under Administration → List Auth Keys. Use verification mode "none" for the self-signed TLS common on local MISP instances.',
+                  'MISP automation key sent as Authorization: \'<key>\' (no Bearer prefix). Create it under Administration → List Auth Keys. Use verification mode "none" for the self-signed TLS common on local MISP instances.',
               }),
             },
             verificationMode: {
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.misp.auth.verificationMode.helpText',
-                {
-                  defaultMessage:
-                    'How to verify the MISP TLS certificate. Use "none" for self-signed Docker/dev instances, "full" when the instance presents a publicly trusted certificate.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.misp.auth.verificationMode.helpText', {
+                defaultMessage:
+                  'How to verify the MISP TLS certificate. Use "none" for self-signed Docker/dev instances, "full" when the instance presents a publicly trusted certificate.',
+              }),
             },
           },
         },
@@ -195,10 +192,10 @@ export const Misp: ConnectorSpec = {
       url: UISchemas.url('https://misp.example.com')
         .describe('MISP instance base URL')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.misp.config.url.label', {
+          label: i18n.translate('connectorSpecs.misp.config.url.label', {
             defaultMessage: 'MISP URL',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.misp.config.url.helpText', {
+          helpText: i18n.translate('connectorSpecs.misp.config.url.helpText', {
             defaultMessage:
               'Base URL of your MISP instance, for example https://misp.example.com or https://localhost. Do not include a trailing slash or /attributes path.',
           }),

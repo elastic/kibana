@@ -180,16 +180,11 @@ components:
           maximum: 100
           description: Maximum record_score (exclusive); omit for an unbounded upper end
 
-    AnomalyEntityMode:
-      type: string
-      enum: [single, resolved]
-      description: Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group).
-
     AnomalySummaryRequestBody:
       type: object
       properties:
         mode:
-          $ref: '#/components/schemas/AnomalyEntityMode'
+          $ref: '../common/common.schema.yaml#/components/schemas/EntityViewMode'
           default: single
         page:
           type: integer
@@ -391,7 +386,7 @@ components:
       type: object
       properties:
         mode:
-          $ref: '#/components/schemas/AnomalyEntityMode'
+          $ref: '../common/common.schema.yaml#/components/schemas/EntityViewMode'
           default: single
         from:
           type: integer

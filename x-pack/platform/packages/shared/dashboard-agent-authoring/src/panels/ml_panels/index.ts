@@ -14,7 +14,7 @@ import {
   anomalySwimLaneViewBySchema,
 } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { singleMetricViewerEmbeddableStateSchema } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { defineConfigPanelKind } from '../panel_kind';
 
 /**
@@ -33,51 +33,45 @@ import { defineConfigPanelKind } from '../panel_kind';
  * open-ended `{ min }` range.
  */
 
-const panelIdSchema = z.string().max(256);
-
 // ─── Anomaly Charts ───────────────────────────────────────────────────────────
 
-export const anomalyChartsPanelConfigSchema = z.object({
-  ...anomalyChartsEmbeddableStateSchema.shape,
-  // Agent-facing number plus the embeddable array form (e.g. forwarded attachments).
-  severity_threshold: z
-    .union([
-      z
-        .number()
-        .min(0)
-        .max(100)
-        .describe(
-          'Minimum anomaly score (0–100) to display. Omit to show all scores. Typical values: 25 (minor+), 50 (major+), 75 (critical only).'
-        ),
-      z.array(severityThresholdSchema).max(5),
-    ])
-    .optional()
-    .describe(
-      'Minimum anomaly score to display. A number N means scores >= N. An array of { min, max? } ranges is also accepted (for example from an ML chart attachment).'
+export const anomalyChartsPanelConfigSchema = lazySchema(() =>
+  z.object({
+    ...anomalyChartsEmbeddableStateSchema.shape,
+    // Agent-facing number plus the embeddable array form (e.g. forwarded attachments).
+    severity_threshold: z
+      .union([
+        z
+          .number()
+          .min(0)
+          .max(100)
+          .describe(
+            'Minimum anomaly score (0–100) to display. Omit to show all scores. Typical values: 25 (minor+), 50 (major+), 75 (critical only).'
+          ),
+        z.array(severityThresholdSchema).max(5),
+      ])
+      .optional()
+      .describe(
+        'Minimum anomaly score to display. A number N means scores >= N. An array of { min, max? } ranges is also accepted (for example from an ML chart attachment).'
+      ),
+  })
+);
+
+export const anomalyChartsPanelContentSchema = lazySchema(() =>
+  z.object({
+    source: z.literal('config'),
+    type: z.literal('ml_anomaly_charts'),
+    config: anomalyChartsPanelConfigSchema.describe(
+      'Anomaly charts panel configuration. Provide job_ids obtained from prior ML tool results or conversation context. On an existing panel, fully replaces its config.'
     ),
-});
-
-const anomalyChartsPanelConfigInputSchema = z.object({
-  source: z.literal('config'),
-  type: z.literal('ml_anomaly_charts'),
-  config: anomalyChartsPanelConfigSchema.describe(
-    'Anomaly charts panel configuration. Provide job_ids obtained from prior ML tool results or conversation context.'
-  ),
-});
-
-export const editAnomalyChartsPanelConfigInputSchema = anomalyChartsPanelConfigInputSchema.extend({
-  panelId: panelIdSchema.describe('Existing anomaly charts panel id to update.'),
-  config: anomalyChartsPanelConfigSchema.describe(
-    'New anomaly charts configuration. Fully replaces the existing config.'
-  ),
-});
+  })
+);
 
 export const anomalyChartsPanelKind = defineConfigPanelKind({
   type: 'ml_anomaly_charts',
   embeddableType: 'ml_anomaly_charts',
   label: 'anomaly charts',
-  addInputSchema: anomalyChartsPanelConfigInputSchema,
-  editInputSchema: editAnomalyChartsPanelConfigInputSchema,
+  contentSchema: anomalyChartsPanelContentSchema,
   toEmbeddableConfig: (config) => {
     const { severity_threshold: severityThreshold, ...rest } = config;
     const normalizedThreshold =
@@ -99,27 +93,21 @@ export const anomalySwimlaneConfigSchema = z.discriminatedUnion('swimlane_type',
   anomalySwimlaneViewByConfigSchema,
 ]);
 
-const anomalySwimlaneConfigInputSchema = z.object({
-  source: z.literal('config'),
-  type: z.literal('ml_anomaly_swimlane'),
-  config: anomalySwimlaneConfigSchema.describe(
-    'Anomaly swim lane configuration. Use swimlane_type "overall" for a cross-job summary, or "viewBy" with a view_by field to break out by entity.'
-  ),
-});
-
-export const editAnomalySwimlaneConfigInputSchema = anomalySwimlaneConfigInputSchema.extend({
-  panelId: panelIdSchema.describe('Existing anomaly swim lane panel id to update.'),
-  config: anomalySwimlaneConfigSchema.describe(
-    'New anomaly swim lane configuration. Fully replaces the existing config.'
-  ),
-});
+export const anomalySwimlanePanelContentSchema = lazySchema(() =>
+  z.object({
+    source: z.literal('config'),
+    type: z.literal('ml_anomaly_swimlane'),
+    config: anomalySwimlaneConfigSchema.describe(
+      'Anomaly swim lane configuration. Use swimlane_type "overall" for a cross-job summary, or "viewBy" with a view_by field to break out by entity. On an existing panel, fully replaces its config.'
+    ),
+  })
+);
 
 export const anomalySwimlanePanelKind = defineConfigPanelKind({
   type: 'ml_anomaly_swimlane',
   embeddableType: 'ml_anomaly_swimlane',
   label: 'anomaly swim lane',
-  addInputSchema: anomalySwimlaneConfigInputSchema,
-  editInputSchema: editAnomalySwimlaneConfigInputSchema,
+  contentSchema: anomalySwimlanePanelContentSchema,
 });
 
 // ─── Single Metric Viewer ─────────────────────────────────────────────────────
@@ -134,25 +122,19 @@ export const singleMetricViewerConfigSchema = singleMetricViewerEmbeddableStateS
     ),
 });
 
-const singleMetricViewerConfigInputSchema = z.object({
-  source: z.literal('config'),
-  type: z.literal('ml_single_metric_viewer'),
-  config: singleMetricViewerConfigSchema.describe(
-    'Single metric viewer configuration. job_ids must contain exactly one job ID. Set selected_entities only when the job has partition/by/over fields and the user wants a specific entity.'
-  ),
-});
-
-export const editSingleMetricViewerConfigInputSchema = singleMetricViewerConfigInputSchema.extend({
-  panelId: panelIdSchema.describe('Existing single metric viewer panel id to update.'),
-  config: singleMetricViewerConfigSchema.describe(
-    'New single metric viewer configuration. Fully replaces the existing config.'
-  ),
-});
+export const singleMetricViewerPanelContentSchema = lazySchema(() =>
+  z.object({
+    source: z.literal('config'),
+    type: z.literal('ml_single_metric_viewer'),
+    config: singleMetricViewerConfigSchema.describe(
+      'Single metric viewer configuration. job_ids must contain exactly one job ID. Set selected_entities only when the job has partition/by/over fields and the user wants a specific entity. On an existing panel, fully replaces its config.'
+    ),
+  })
+);
 
 export const singleMetricViewerPanelKind = defineConfigPanelKind({
   type: 'ml_single_metric_viewer',
   embeddableType: 'ml_single_metric_viewer',
   label: 'single metric viewer',
-  addInputSchema: singleMetricViewerConfigInputSchema,
-  editInputSchema: editSingleMetricViewerConfigInputSchema,
+  contentSchema: singleMetricViewerPanelContentSchema,
 });

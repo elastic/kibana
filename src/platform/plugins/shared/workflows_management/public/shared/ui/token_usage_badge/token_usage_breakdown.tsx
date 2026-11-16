@@ -70,7 +70,7 @@ export const TokenUsageBreakdown = React.memo<TokenUsageBreakdownProps>(
           css={{ fontWeight: euiTheme.font.weight.medium, marginBottom: euiTheme.size.xs }}
           data-test-subj={`${dataTestSubj}-heading`}
         >
-          {i18n.translate('workflowsManagement.tokenUsage.breakdownHeading', {
+          {i18n.translate('workflows.tokenUsage.breakdownHeading', {
             defaultMessage: 'Token usage',
           })}
         </EuiText>
@@ -101,7 +101,7 @@ export const TokenUsageBreakdown = React.memo<TokenUsageBreakdownProps>(
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs">
-                      {i18n.translate('workflowsManagement.tokenUsage.inputLabel', {
+                      {i18n.translate('workflows.tokenUsage.inputLabel', {
                         defaultMessage: 'Input',
                       })}
                     </EuiText>
@@ -110,7 +110,7 @@ export const TokenUsageBreakdown = React.memo<TokenUsageBreakdownProps>(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">
-                  {i18n.translate('workflowsManagement.tokenUsage.inputValue', {
+                  {i18n.translate('workflows.tokenUsage.inputValue', {
                     defaultMessage: '{n} tokens ({pct}%)',
                     values: {
                       n: fullNumberFormatter.format(usage.inputTokens),
@@ -144,7 +144,7 @@ export const TokenUsageBreakdown = React.memo<TokenUsageBreakdownProps>(
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs">
-                      {i18n.translate('workflowsManagement.tokenUsage.outputLabel', {
+                      {i18n.translate('workflows.tokenUsage.outputLabel', {
                         defaultMessage: 'Output',
                       })}
                     </EuiText>
@@ -153,7 +153,7 @@ export const TokenUsageBreakdown = React.memo<TokenUsageBreakdownProps>(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">
-                  {i18n.translate('workflowsManagement.tokenUsage.outputValue', {
+                  {i18n.translate('workflows.tokenUsage.outputValue', {
                     defaultMessage: '{n} tokens ({pct}%)',
                     values: {
                       n: fullNumberFormatter.format(usage.outputTokens),
@@ -185,7 +185,7 @@ export const TokenUsageBreakdown = React.memo<TokenUsageBreakdownProps>(
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
               <strong>
-                {i18n.translate('workflowsManagement.tokenUsage.totalLabel', {
+                {i18n.translate('workflows.tokenUsage.totalLabel', {
                   defaultMessage: 'Total',
                 })}
               </strong>
@@ -194,7 +194,7 @@ export const TokenUsageBreakdown = React.memo<TokenUsageBreakdownProps>(
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
               <strong>
-                {i18n.translate('workflowsManagement.tokenUsage.totalValue', {
+                {i18n.translate('workflows.tokenUsage.totalValue', {
                   defaultMessage: '{n} tokens',
                   values: { n: fullNumberFormatter.format(usage.totalTokens) },
                 })}
@@ -237,7 +237,7 @@ export const TokenUsageBreakdown = React.memo<TokenUsageBreakdownProps>(
             css={{ marginTop: euiTheme.size.xs }}
             data-test-subj={`${dataTestSubj}-footer`}
           >
-            {i18n.translate('workflowsManagement.tokenUsage.modelCalls', {
+            {i18n.translate('workflows.tokenUsage.modelCalls', {
               defaultMessage: '{count} model calls',
               values: { count: callCount },
             })}

@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { RenderCapacityTimeoutError, RenderServiceError } from '@kbn/reporting-common';
-import type { RenderRetryAction, RenderRetryReason } from './reporting_telemetry';
+import {
+  RenderCapacityTimeoutError,
+  RenderRetryAction,
+  RenderRetryReason,
+  RenderServiceError,
+  RenderServiceRetryClass,
+} from '@kbn/reporting-common';
 
 /**
  * The between-runs half of the page-render-service retry ladder; `retry_ladder.ts` in the
@@ -31,13 +36,13 @@ export interface RenderRetryState {
 
 export type RenderRetryDecision =
   | {
-      action: Extract<RenderRetryAction, 'hand_back' | 'reschedule'>;
+      action: RenderRetryAction.HAND_BACK | RenderRetryAction.RESCHEDULE;
       reason: RenderRetryReason;
       runAt: Date;
       // Task Manager stores state as a plain record.
       state: RenderRetryState & Record<string, unknown>;
     }
-  | { action: Extract<RenderRetryAction, 'fail'>; reason: RenderRetryReason };
+  | { action: RenderRetryAction.FAIL; reason: RenderRetryReason };
 
 /** Undefined for errors not from page-render-service, which keep reporting's usual handling. */
 export function decideRenderRetry(
@@ -56,41 +61,44 @@ export function decideRenderRetry(
   const { unavailableRuns = 0, waitingSince } = state ?? {};
   const waiting = waitingSince === undefined ? {} : { waitingSince };
   switch (error.retryClass) {
-    case 'capacity':
+    case RenderServiceRetryClass.CAPACITY:
       // Task Manager picks it straight back up, and the next run waits again.
       return {
-        action: 'hand_back',
-        reason: 'saturated',
+        action: RenderRetryAction.HAND_BACK,
+        reason: RenderRetryReason.SATURATED,
         runAt: new Date(now),
         state: { unavailableRuns, queued: true, ...waiting },
       };
-    case 'unavailable':
+    case RenderServiceRetryClass.UNAVAILABLE:
       if (unavailableRuns + 1 >= MAX_UNAVAILABLE_RUNS) {
-        return { action: 'fail', reason: 'unavailable' };
+        return { action: RenderRetryAction.FAIL, reason: RenderRetryReason.UNAVAILABLE };
       }
       return {
-        action: 'reschedule',
-        reason: 'unavailable',
+        action: RenderRetryAction.RESCHEDULE,
+        reason: RenderRetryReason.UNAVAILABLE,
         runAt: later(),
         state: { unavailableRuns: unavailableRuns + 1, queued: true, ...waiting },
       };
-    case 'render_failure': {
+    case RenderServiceRetryClass.RENDER_FAILURE: {
       if (attempts >= maxAttempts) {
-        return { action: 'fail', reason: 'render_failure' };
+        return { action: RenderRetryAction.FAIL, reason: RenderRetryReason.RENDER_FAILURE };
       }
       const runAt = later();
       return {
-        action: 'reschedule',
-        reason: 'render_failure',
+        action: RenderRetryAction.RESCHEDULE,
+        reason: RenderRetryReason.RENDER_FAILURE,
         runAt,
         // The next render's wait for a slot starts here.
         state: { unavailableRuns, queued: false, waitingSince: runAt.getTime() },
       };
     }
-    case 'unrecoverable':
+    case RenderServiceRetryClass.UNRECOVERABLE:
       return {
-        action: 'fail',
-        reason: error instanceof RenderCapacityTimeoutError ? 'saturated' : 'rejected',
+        action: RenderRetryAction.FAIL,
+        reason:
+          error instanceof RenderCapacityTimeoutError
+            ? RenderRetryReason.SATURATED
+            : RenderRetryReason.REJECTED,
       };
   }
 }

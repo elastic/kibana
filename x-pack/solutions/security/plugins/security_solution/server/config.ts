@@ -186,12 +186,27 @@ export const configSchema = schema.object({
   entityAnalytics: schema.object({
     riskEngine: schema.object({
       alertSampleSizePerShard: schema.number({ defaultValue: DEFAULT_ALERT_SAMPLE_SIZE }),
+      esqlProfiling: schema.boolean({ defaultValue: true }),
+      esqlProfilingInterval: schema.number({
+        defaultValue: 20,
+        min: 1,
+        max: Number.MAX_SAFE_INTEGER,
+        validate: (value) =>
+          Number.isInteger(value) ? undefined : 'Expected a whole number of pages',
+      }),
     }),
     assetCriticality: schema.object({
       csvUpload: schema.object({
         errorRetries: schema.number({ defaultValue: 1 }),
         maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
       }),
+    }),
+    alertEntityIdBackfill: schema.object({
+      /**
+       * Kill switch for the one-off task that stamps `kibana.alert.entity.id` onto alerts written
+       * before the field existed.
+       */
+      enabled: schema.boolean({ defaultValue: true }),
     }),
     entityStore: schema.object({
       syncDelay: schema.duration({ defaultValue: '60s' }),

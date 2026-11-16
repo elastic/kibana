@@ -17,18 +17,9 @@ import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 export const createAiNavigationTree = (
   core: CoreStart,
   chatExperience: AIChatExperience = AIChatExperience.Classic,
-  workflowsUiEnabled: boolean = false,
-  showAgentBuilderNavAtTop: boolean = false
+  workflowsUiEnabled: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
-    ...(chatExperience === AIChatExperience.Agent && showAgentBuilderNavAtTop
-      ? [
-          {
-            icon: 'productAgent',
-            link: 'agent_builder' as AppDeepLinkId,
-          },
-        ]
-      : []),
     {
       id: SecurityPageName.alertSummary,
       link: securityLink(SecurityPageName.alertSummary),
@@ -79,8 +70,7 @@ export const createAiNavigationTree = (
           link: 'discover' as AppDeepLinkId,
           icon: 'productDiscover',
         },
-        // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
-        ...(chatExperience === AIChatExperience.Agent && !showAgentBuilderNavAtTop
+        ...(chatExperience === AIChatExperience.Agent
           ? [
               {
                 icon: 'productAgent',

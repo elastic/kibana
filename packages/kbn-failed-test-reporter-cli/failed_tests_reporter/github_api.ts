@@ -32,11 +32,17 @@ export type GithubIssueState = 'open' | 'closed';
 export interface GithubIssue {
   html_url: string;
   number: number;
+  /** What `duplicate_issue_id` takes to point another issue at this one */
+  id: number;
   node_id: string;
   title: string;
   labels: unknown[];
   body: string;
   state: GithubIssueState;
+  /** When the issue was last closed; null while it is open. */
+  closed_at?: string | null;
+  /** `completed`, `not_planned`, `duplicate` or `reopened`; null when never closed. */
+  state_reason?: string | null;
 }
 
 export interface ListIssuesOptions {
@@ -65,6 +71,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  */
 export interface GithubIssueMini {
   number: GithubIssue['number'];
+  id: GithubIssue['id'];
   body: GithubIssue['body'];
   html_url: GithubIssue['html_url'];
   node_id: GithubIssue['node_id'];
@@ -178,6 +185,48 @@ export class GithubApi {
       },
       undefined
     );
+  }
+
+  /** Replace the body of an issue and, when given, set its state; nothing else changes. */
+  async editIssue(
+    issueNumber: number,
+    { body, state }: { body: string; state?: GithubIssueState }
+  ) {
+    await this.request(
+      {
+        method: 'PATCH',
+        url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}`),
+        data: { body, ...(state ? { state } : {}) },
+      },
+      undefined
+    );
+  }
+
+  /**
+   * Close an issue as a duplicate of the issue with id `duplicateOf`: GitHub links the two, and
+   * notifies whoever follows the closed one, without a comment.
+   */
+  async closeAsDuplicate(issueNumber: number, duplicateOf: number) {
+    await this.request(
+      {
+        method: 'PATCH',
+        url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}`),
+        data: { state: 'closed', state_reason: 'duplicate', duplicate_issue_id: duplicateOf },
+      },
+      undefined
+    );
+  }
+
+  /** The issue as GitHub has it right now; undefined in dry-run mode, where nothing is fetched. */
+  async getIssue(issueNumber: number): Promise<GithubIssueMini | undefined> {
+    const resp = await this.request<GithubIssueMini | undefined>(
+      {
+        method: 'GET',
+        url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}`),
+      },
+      undefined
+    );
+    return resp.data ? { ...resp.data, body: resp.data.body ?? '' } : undefined;
   }
 
   /**
@@ -296,6 +345,7 @@ export class GithubApi {
       {
         body,
         number: 999,
+        id: 999,
         html_url: 'https://dryrun',
         node_id: 'adflksdjf',
       }

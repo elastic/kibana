@@ -23,8 +23,20 @@ const getLabel = (
     return (
       <FormattedMessage
         id="xpack.cases.caseView.userActions.bulkAttachmentsRemovedUnknownTypeLabel"
-        defaultMessage="removed {count, plural, one {# attachment} other {# attachments}}"
+        defaultMessage="removed {count, plural, one {# item} other {# items}}"
         values={{ count }}
+      />
+    );
+  }
+
+  const registeredType = unifiedAttachmentTypeRegistry.get(attachmentType);
+  const countLabel = registeredType.getCountLabel?.({ count });
+  if (countLabel != null) {
+    return (
+      <FormattedMessage
+        id="xpack.cases.caseView.userActions.bulkAttachmentsRemovedCountLabel"
+        defaultMessage="removed {attachments}"
+        values={{ attachments: countLabel }}
       />
     );
   }
@@ -32,8 +44,8 @@ const getLabel = (
   return (
     <FormattedMessage
       id="xpack.cases.caseView.userActions.bulkAttachmentsRemovedLabel"
-      defaultMessage="removed {count, plural, one {# attachment} other {# attachments}} from {section}"
-      values={{ count, section: unifiedAttachmentTypeRegistry.get(attachmentType).getLabel() }}
+      defaultMessage="removed {count, plural, one {# item} other {# items}} from {section}"
+      values={{ count, section: registeredType.getLabel() }}
     />
   );
 };

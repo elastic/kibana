@@ -11,19 +11,42 @@ import {
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
 } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { isBoom, serverUnavailable } from '@hapi/boom';
+import pRetry, { AbortError } from 'p-retry';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { NightshiftSettingsLocator } from '../../common/locators';
+import { notifyInvestigationQuotaReached } from '../lib/notifications/notify_investigation_quota_reached';
 import {
   DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
   investigationNotificationDestinationsSchema,
+  MAX_KEYWORD_LENGTH,
+  toSlackThreadSubjectId,
 } from '../../common';
-import type { GetAutomationsSoClient, GetInvestigationsClient } from '../routes/types';
+import type {
+  GetAlertsClient,
+  GetAutomationsSoClient,
+  GetEpisodeLookup,
+  GetInvestigationsClient,
+} from '../routes/types';
+import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
+import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
+import {
+  isScheduleOnlyAutomation,
+  MANUAL_AUTOMATION_TRIGGER_SOURCE,
+} from '../../common/automation_run';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../lib/automations/types';
-import { consumeAutomationBudget } from '../lib/automations/automation_budget';
+import { createAutomationBudget } from '../lib/automations/automation_budget';
+import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
+import type { AutomationBudget } from '../types';
+import type { NightshiftTelemetryClient } from '../telemetry';
 
 const inputSchema = lazySchema(() =>
   z.object({
@@ -38,14 +61,16 @@ const inputSchema = lazySchema(() =>
     subject_type: z
       .enum(INVESTIGATION_SUBJECT_TYPES)
       .describe(
-        'The type of entity being investigated. Use "manual" when the prompt is the whole subject, for example a Slack message.'
+        'The type of entity being investigated. Use "manual" when the prompt is the whole subject, and "slack_thread" when it is a Slack thread, which slack_thread then names.'
       ),
     subject_id: z
       .string()
       .min(1)
       .max(MAX_ID_LENGTH)
       .optional()
-      .describe('The subject ID; optional for a manual question'),
+      .describe(
+        'The subject ID; optional for a manual question, and not accepted for a Slack thread, whose ID comes from slack_thread'
+      ),
     title: z
       .string()
       .min(1)
@@ -69,6 +94,13 @@ const inputSchema = lazySchema(() =>
       .max(MAX_TEXT_LENGTH)
       .optional()
       .describe('Caller-supplied prompt for the investigation agent'),
+    instructions: z
+      .string()
+      .max(MAX_AUTOMATION_INSTRUCTIONS_LENGTH)
+      .optional()
+      .describe(
+        'Additional operator guidance for this investigation round; empty means no additional guidance'
+      ),
     source_ids: z
       .array(z.string().max(MAX_ID_LENGTH))
       .max(MAX_ARRAY_LENGTH)
@@ -89,7 +121,7 @@ const inputSchema = lazySchema(() =>
       .record(z.string(), z.unknown())
       .optional()
       .describe(
-        'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
+        'Additional context to pass to the investigation workflow. When subject_type is "alert" and no "alerts" array is given, the alert is looked up by subject_id (classic or universal). Otherwise this must carry an "alerts" array of alert snapshots.'
       ),
     notificationDestinations: investigationNotificationDestinationsSchema
       .optional()
@@ -102,6 +134,13 @@ const inputSchema = lazySchema(() =>
         workspace: z.string().min(1).max(128),
         channel: z.string().min(1).max(256),
         thread_ts: z.string().min(1).max(64),
+        external_conversation_id: z
+          .string()
+          .max(MAX_KEYWORD_LENGTH)
+          .optional()
+          .describe(
+            "The Relay's key for the thread. When empty, the same key is built from the thread's ids."
+          ),
       })
       .optional()
       .describe(
@@ -110,24 +149,91 @@ const inputSchema = lazySchema(() =>
   })
 );
 
+const ALERT_VISIBILITY_RETRY_OPTIONS = { retries: 4, factor: 1, minTimeout: 500 } as const;
+
+const resolveAlerts = async ({
+  subjectId,
+  request,
+  spaceId,
+  getAlertsClient,
+  getEpisodeLookup,
+}: {
+  subjectId: string;
+  request: KibanaRequest;
+  spaceId: string;
+  getAlertsClient: GetAlertsClient;
+  getEpisodeLookup: GetEpisodeLookup;
+}) => {
+  const alertsClient = await getAlertsClient(request);
+  if (!alertsClient) {
+    throw serverUnavailable('Alert lookup is unavailable');
+  }
+  const episodeLookup = getEpisodeLookup(request, spaceId);
+  return pRetry(async () => {
+    try {
+      return await fetchInvestigationAlertSnapshots({
+        alertsClient,
+        alertIds: [subjectId],
+        ...episodeLookup,
+      });
+    } catch (error) {
+      if (isBoom(error, 404)) throw error;
+      throw new AbortError(error instanceof Error ? error : String(error));
+    }
+  }, ALERT_VISIBILITY_RETRY_OPTIONS);
+};
+
+const nonEmptyString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
+
+const toSubjectId = ({
+  subject_type: subjectType,
+  subject_id: subjectId,
+  slack_thread: slackThread,
+  message,
+}: z.infer<typeof inputSchema>): string => {
+  if (subjectType === 'slack_thread') {
+    if (!slackThread) throw new Error('Slack thread investigations require slack_thread.');
+    if (subjectId) {
+      throw new Error('Slack thread investigations take their subject ID from slack_thread.');
+    }
+    if (!message?.trim()) throw new Error('Slack thread investigations require a message.');
+    return toSlackThreadSubjectId(slackThread);
+  }
+  if (subjectType === 'manual') {
+    if (!message?.trim()) throw new Error('Manual investigations require a message.');
+    return subjectId ?? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID;
+  }
+  if (!subjectId) {
+    throw new Error('Alert and significant event investigations require a subject ID.');
+  }
+  return subjectId;
+};
+
 export const triggerInvestigationStepDefinition = (
   getInvestigationsClient: GetInvestigationsClient,
-  getAutomationsSoClient: GetAutomationsSoClient
+  getAutomationsSoClient: GetAutomationsSoClient,
+  getAlertsClient: GetAlertsClient,
+  getEpisodeLookup: GetEpisodeLookup,
+  getActions: () => ActionsPluginStart | undefined,
+  settingsLocator: NightshiftSettingsLocator,
+  telemetry: NightshiftTelemetryClient
 ) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
     label: 'Trigger Nightshift Investigation',
     category: StepCategory.Ai,
     description:
-      'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking, or skip_reason when the automation daily limit is reached.',
+      'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking, or skip_reason when the automation daily limit or the deployment-wide investigation limit is reached.',
     inputSchema,
     outputSchema: z.object({
+      execution_id: z.string().optional(),
       investigation_id: z
         .string()
         .optional()
         .describe('The investigation (Agent Builder conversation) the start created or continued'),
       skip_reason: z
-        .literal('daily_limit')
+        .enum(['daily_limit', 'investigation_limit'])
         .optional()
         .describe('Why the investigation was not dispatched'),
       daily_limit: z
@@ -141,48 +247,135 @@ export const triggerInvestigationStepDefinition = (
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
-      const { workflow } = context.contextManager.getContext();
+      const { workflow, kibanaUrl, execution } = context.contextManager.getContext();
       const spaceId = workflow.spaceId;
       const input = inputSchema.parse(context.input);
-      if (input.subject_type === 'manual') {
-        if (!input.message?.trim()) throw new Error('Manual investigations require a message.');
-      } else if (!input.subject_id) {
-        throw new Error('Alert and significant event investigations require a subject ID.');
-      }
+      let automationBudget: AutomationBudget | undefined;
+      let isManualAutomationRun = false;
       if (input.automation_id) {
         const soClient = getAutomationsSoClient(request, spaceId);
-        const automation = await soClient.get<NightshiftAutomationAttributes>(
+        const { attributes: automation } = await soClient.get<NightshiftAutomationAttributes>(
           NIGHTSHIFT_AUTOMATION_SO_TYPE,
           input.automation_id
         );
-        if (automation.attributes.workflowId !== workflow.id) {
+        if (automation.workflowId !== workflow.id) {
           throw new Error('The automation does not belong to this workflow.');
         }
-        const dailyLimit = automation.attributes.runtime.dailyDispatchLimit;
-        const allowed = await consumeAutomationBudget(soClient, input.automation_id, dailyLimit);
-        if (!allowed) {
-          return { output: { skip_reason: 'daily_limit' as const, daily_limit: dailyLimit } };
+        // Public workflow inputs and metadata cannot grant manual accounting.
+        isManualAutomationRun = execution.triggeredBy === MANUAL_AUTOMATION_TRIGGER_SOURCE;
+        if (isManualAutomationRun && !isScheduleOnlyAutomation(automation)) {
+          throw new Error(
+            'Only automations with a schedule trigger and no other triggers can be run manually.'
+          );
+        }
+        if (!isManualAutomationRun) {
+          automationBudget = createAutomationBudget(
+            soClient,
+            input.automation_id,
+            automation.runtime.dailyDispatchLimit
+          );
         }
       }
+      if (isManualAutomationRun && input.subject_type !== 'manual') {
+        throw new Error('Manual automation runs require a manual question subject.');
+      }
+      const subjectId = toSubjectId(input);
       const client = getInvestigationsClient(request, spaceId);
-      const result = await client.start({
-        subject: {
-          type: input.subject_type,
-          id: input.subject_id ?? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
-          summary: input.summary,
-        },
-        title: input.title,
-        trigger_type: input.trigger_type ?? 'automatic',
-        message: input.message,
-        source_ids: input.source_ids,
-        context:
-          input.scope_query && input.subject_type === 'manual'
-            ? { ...input.context, scope_query: input.scope_query }
-            : input.context,
-        timeout_seconds: input.timeout_seconds,
-        notificationDestinations: input.notificationDestinations,
-        slack_thread: input.slack_thread,
-      });
-      return { output: result };
+      const alerts =
+        input.subject_type === 'alert' && !input.context?.alerts
+          ? await resolveAlerts({
+              subjectId,
+              request,
+              spaceId,
+              getAlertsClient,
+              getEpisodeLookup,
+            })
+          : undefined;
+      const significantEventData = alerts?.flatMap((snapshot) =>
+        snapshot.alert_version === 'v2' &&
+        snapshot.source === SIGNIFICANT_EVENTS_ALERT_SOURCE &&
+        snapshot.data
+          ? [snapshot.data]
+          : []
+      )[0];
+      const alertTitle = nonEmptyString(significantEventData?.title)?.slice(0, MAX_TITLE_LENGTH);
+      const sourceWorkflowExecutionId = nonEmptyString(
+        significantEventData?.workflow_execution_id
+      )?.slice(0, MAX_ID_LENGTH);
+      const title =
+        input.title && input.title !== subjectId ? input.title : alertTitle ?? input.title;
+      try {
+        const result = await client.start(
+          {
+            subject: {
+              type: input.subject_type,
+              id: isManualAutomationRun ? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID : subjectId,
+              summary: input.summary,
+            },
+            title,
+            trigger_type: isManualAutomationRun ? 'manual' : input.trigger_type ?? 'automatic',
+            message: input.message,
+            instructions:
+              input.instructions ??
+              (input.automation_id && input.subject_type === 'alert' ? input.message : undefined),
+            source_ids: input.source_ids,
+            context: alerts
+              ? {
+                  alerts,
+                  ...(sourceWorkflowExecutionId
+                    ? { source_workflow_execution_id: sourceWorkflowExecutionId }
+                    : {}),
+                }
+              : input.scope_query && input.subject_type === 'manual'
+              ? { ...input.context, scope_query: input.scope_query }
+              : input.context,
+            timeout_seconds: input.timeout_seconds,
+            notificationDestinations: input.notificationDestinations,
+            slack_thread: input.slack_thread,
+          },
+          {
+            automationBudget,
+            automationId: input.automation_id,
+            // A Slack thread subject means a Slack message started the run.
+            entryPoint: input.subject_type === 'slack_thread' ? 'slack' : 'automation',
+          }
+        );
+        return { output: result };
+      } catch (error) {
+        if (error instanceof AutomationDailyLimitReachedError) {
+          context.logger.info(
+            `Skipped investigation of ${input.subject_type}/${subjectId} for automation ${input.automation_id}: daily limit of ${error.limit} reached`
+          );
+          telemetry.reportInvestigationSkipped({
+            trigger: 'automation',
+            origin: input.subject_type,
+            automation_id: input.automation_id,
+            skip_reason: 'automation_daily_limit',
+          });
+          return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
+        }
+        if (error instanceof InvestigationQuotaDeniedError) {
+          context.logger.info(
+            `Skipped investigation of ${input.subject_type}/${subjectId}: ${error.message}`
+          );
+          if (input.slack_thread) {
+            await notifyInvestigationQuotaReached({
+              getSoClient: () => getAutomationsSoClient(request, spaceId),
+              getActions,
+              deniedBy: error.deniedBy,
+              request,
+              spaceId,
+              slackThread: input.slack_thread,
+              settingsLocator,
+              kibanaUrl,
+              limit: error.limit,
+              signal: context.abortSignal,
+              logger: context.logger,
+            });
+          }
+          return { output: { skip_reason: 'investigation_limit' as const } };
+        }
+        throw error;
+      }
     },
   });

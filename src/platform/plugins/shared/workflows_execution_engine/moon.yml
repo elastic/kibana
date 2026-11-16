@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/es-mappings'
   - '@kbn/workflows-extensions'
   - '@kbn/licensing-plugin'
+  - '@kbn/lock-manager'
   - '@kbn/usage-api-plugin'
   - '@kbn/logging-mocks'
   - '@kbn/std'
@@ -54,6 +55,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - index.ts
@@ -64,6 +66,4 @@ fileGroups:
     - .storybook/**/*
     - integration_tests/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

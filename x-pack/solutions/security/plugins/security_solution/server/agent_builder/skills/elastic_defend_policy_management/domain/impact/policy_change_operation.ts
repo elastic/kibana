@@ -143,6 +143,8 @@ export type CustomYaraSignaturesEligibilityReason =
   | 'endpoint_custom_yara_signatures_disabled'
   | 'custom_yara_signatures_experimental_disabled';
 
+export type AiDataCollectionEligibilityReason = 'ai_data_collection_experimental_disabled';
+
 export type RegistryCredentialHardeningEligibilityReason =
   | 'endpoint_registry_credential_hardening_disabled'
   | 'registry_credential_hardening_experimental_disabled';
@@ -157,6 +159,8 @@ export interface EligibilityContext {
   readonly deviceControlReason: DeviceControlEligibilityReason;
   readonly customYaraSignaturesStripped: PolicyConfig;
   readonly customYaraSignaturesReason: CustomYaraSignaturesEligibilityReason;
+  readonly aiDataCollectionStripped: PolicyConfig;
+  readonly aiDataCollectionReason: AiDataCollectionEligibilityReason;
   readonly linuxRansomwareStripped: PolicyConfig;
   readonly registryCredentialHardeningStripped: PolicyConfig;
   readonly registryCredentialHardeningReason: RegistryCredentialHardeningEligibilityReason;

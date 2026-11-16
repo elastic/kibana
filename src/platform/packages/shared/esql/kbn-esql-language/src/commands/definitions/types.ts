@@ -228,6 +228,7 @@ export enum PromQLFunctionDefinitionTypes {
   TIME = 'time',
   HISTOGRAM = 'histogram',
   METADATA = 'metadata',
+  RESULT_ORDERING = 'result_ordering',
 }
 
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';

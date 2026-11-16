@@ -15,6 +15,7 @@ import type {
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
@@ -75,4 +76,14 @@ export interface WorkflowValidationDeps {
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
   getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
   getCoreStart: () => CoreStart;
+  licensing: LicensingPluginStart;
+  logger: Logger;
+  /** Reads the workflows with these ids that the request may see, for their outputs. */
+  getWorkflowsForOutputs: (
+    ids: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ) => Promise<Array<{ id: string; name?: string; definition?: unknown }>>;
+  /** `workflowsManagement.pages.enabled`. Without it, `type: page` fails like an unknown trigger. */
+  pagesEnabled: boolean;
 }

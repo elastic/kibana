@@ -15,13 +15,11 @@ export async function plugin(initializerContext: PluginInitializerContext) {
   return new NightshiftInvestigationsPlugin(initializerContext);
 }
 
-export type {
-  NightshiftInvestigationsServerSetup,
-  NightshiftInvestigationsServerStart,
-} from './types';
+export type { NightshiftInvestigationsServerStart } from './types';
 
 export {
   alertSnapshotSchema,
+  NIGHTSHIFT_ASSISTANT_AGENT_ID,
   NIGHTSHIFT_INVESTIGATION_AGENT_ID,
   type AlertSnapshot,
 } from '../common';

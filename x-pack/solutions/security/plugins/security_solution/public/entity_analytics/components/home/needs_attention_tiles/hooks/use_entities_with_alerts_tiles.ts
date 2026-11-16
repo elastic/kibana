@@ -6,12 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
-import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { runEsqlQuery } from '../../queries/run_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
@@ -21,7 +19,9 @@ import {
   type EntityFilters,
   type TimeRange,
 } from '../../entities_grid/common';
+import { isMissingIndexError } from '../../is_missing_index_error';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
+import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 
 interface AlertBasedTilesResult {
   severeAlertsCount: number;
@@ -102,50 +102,61 @@ export const useAlertBasedTiles = ({
 
   const {
     data: queryResult,
-    isLoading,
+    isInitialLoading: isLoading,
     isFetching,
     error,
   } = useQuery<AlertBasedTilesResult, SecurityAppError>(
     ['alertBasedTiles', query],
     async ({ signal }) => {
       if (!query) return EMPTY_RESULT;
-      const raw = await lastValueFrom(
-        data.search.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
+      const raw = await runWithTileTimeout(signal, (tileSignal) =>
+        runEsqlQuery(
+          data.search,
+          query,
+          { id: 'needs_attention_tile_alerts_count', meta: { timeRange } },
+          tileSignal
+        )
       );
-      return parseAlertBasedTilesResponse(raw.rawResponse as unknown as ESQLSearchResponse);
+      return parseAlertBasedTilesResponse(raw);
     },
     {
       enabled: isEnabled && Boolean(query),
       keepPreviousData: true,
       ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: retryUnlessTimedOut,
     }
   );
 
-  const filteredError = (error as SecurityAppError | undefined)?.message?.includes('Unknown index')
-    ? undefined
-    : (error as SecurityAppError | undefined);
+  // A space that has never run a detection rule has no alerts index: the tiles say so, like the
+  // risk tiles do without a risk score index.
+  const isMissingIndex = isMissingIndexError(error);
+  const filteredError = isMissingIndex ? undefined : error;
 
-  useErrorToast(
-    i18n.translate('xpack.securitySolution.entityAnalytics.home.alertBasedTiles.queryError', {
-      defaultMessage: 'There was an error loading entity alert data',
-    }),
-    filteredError ?? indexError
-  );
+  // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
+  // timed-out refetch does not leave the last count on show as if it were current.
+  const isTimedOut = isTileQueryTimeout(error) || isTileQueryTimeout(indexError);
+  const shownResult = isTimedOut ? undefined : queryResult;
 
   return {
-    severeAlertsCount: queryResult?.severeAlertsCount ?? 0,
+    severeAlertsCount: shownResult?.severeAlertsCount ?? 0,
+    // True only when the count query returned a result. A skipped, failed, timed-out or no-access
+    // count is not a genuine 0, so the tile must not show `count` (0) for it.
+    hasCount: shownResult !== undefined && !error && !indexError,
     severeAlertsEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : queryResult?.severeAlertsEntityIds ?? EMPTY_ENTITY_IDS,
-    watchlistedCount: queryResult?.watchlistedCount ?? 0,
+      : shownResult?.severeAlertsEntityIds ?? EMPTY_ENTITY_IDS,
+    watchlistedCount: shownResult?.watchlistedCount ?? 0,
     watchlistedEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : queryResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
-    isLoading: isIndexLoading || isLoading || isFetching,
+      : shownResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
+    // A query that can never run (no index, failed inputs) is not loading: react-query reports a
+    // disabled query with no data as loading for ever.
+    isLoading: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
+    isMissingIndex,
     error: filteredError ?? indexError,
+    isTimedOut,
   };
 };

@@ -117,3 +117,7 @@ actions:
         description: Discover documentation
         url: https://www.elastic.co/docs/explore-analyze/discover
       x-displayName: Discover sessions
+  # Heatmap drawing stays behind observability.metricsHeatmapsEnabled, so the public spec only documents lnsXY.
+  - target: "$..histogram_visualization.enum[?(@ == 'lnsHeatmap')]"
+    description: Hide the experimental heatmap visualization
+    remove: true

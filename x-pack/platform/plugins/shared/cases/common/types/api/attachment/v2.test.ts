@@ -5,34 +5,40 @@
  * 2.0.
  */
 
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { MAX_BULK_CREATE_ATTACHMENTS } from '../../../constants';
+import { MAX_BULK_CREATE_ATTACHMENTS, MAX_BULK_GET_ATTACHMENTS } from '../../../constants';
+import { parseErrors } from '../../../test_helpers/zod_schema_test_utils';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../constants/attachments';
 import { AttachmentType } from '../../domain/attachment/v1';
-import { BulkCreateUnifiedAttachmentsRequestSchema } from '../../api_zod/attachment/v2';
-import { BulkCreateUnifiedAttachmentsRequestRt, UnifiedAttachmentsFindQueryParamsRt } from './v2';
+import {
+  BulkCreateUnifiedAttachmentsRequestSchema,
+  BulkGetUnifiedAttachmentsRequestSchema,
+  UnifiedAttachmentsFindQueryParamsSchema,
+} from './v2';
 
-describe('UnifiedAttachmentsFindQueryParamsRt', () => {
+describe('UnifiedAttachmentsFindQueryParamsSchema', () => {
   it('accepts an omitted type (every attachment type)', () => {
-    expect(UnifiedAttachmentsFindQueryParamsRt.decode({})._tag).toBe('Right');
+    expect(UnifiedAttachmentsFindQueryParamsSchema.safeParse({}).success).toBe(true);
   });
 
   it('accepts a single type string', () => {
-    expect(UnifiedAttachmentsFindQueryParamsRt.decode({ type: 'comment' })._tag).toBe('Right');
+    expect(UnifiedAttachmentsFindQueryParamsSchema.safeParse({ type: 'comment' }).success).toBe(
+      true
+    );
   });
 
   it('accepts a non-empty type array', () => {
     expect(
-      UnifiedAttachmentsFindQueryParamsRt.decode({ type: ['comment', 'security.alert'] })._tag
-    ).toBe('Right');
+      UnifiedAttachmentsFindQueryParamsSchema.safeParse({ type: ['comment', 'security.alert'] })
+        .success
+    ).toBe(true);
   });
 
   it('rejects an empty type array', () => {
-    expect(UnifiedAttachmentsFindQueryParamsRt.decode({ type: [] })._tag).toBe('Left');
+    expect(UnifiedAttachmentsFindQueryParamsSchema.safeParse({ type: [] }).success).toBe(false);
   });
 });
 
-describe('BulkCreateUnifiedAttachmentsRequestRt', () => {
+describe('BulkCreateUnifiedAttachmentsRequestSchema', () => {
   const unifiedComment = {
     type: COMMENT_ATTACHMENT_TYPE,
     data: { content: 'Solve this fast!' },
@@ -45,52 +51,43 @@ describe('BulkCreateUnifiedAttachmentsRequestRt', () => {
   };
 
   it('accepts an empty array', () => {
-    expect(PathReporter.report(BulkCreateUnifiedAttachmentsRequestRt.decode([]))).toStrictEqual([
-      'No errors!',
-    ]);
+    expect(BulkCreateUnifiedAttachmentsRequestSchema.safeParse([]).success).toBe(true);
   });
 
   it(`accepts ${MAX_BULK_CREATE_ATTACHMENTS} attachments`, () => {
     const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS).fill(unifiedComment);
 
-    expect(
-      PathReporter.report(BulkCreateUnifiedAttachmentsRequestRt.decode(attachments))
-    ).toStrictEqual(['No errors!']);
+    expect(BulkCreateUnifiedAttachmentsRequestSchema.safeParse(attachments).success).toBe(true);
   });
 
   it(`rejects more than ${MAX_BULK_CREATE_ATTACHMENTS} attachments`, () => {
     const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(unifiedComment);
 
-    expect(
-      PathReporter.report(BulkCreateUnifiedAttachmentsRequestRt.decode(attachments))
-    ).toContain(
-      `The length of the field attachments is too long. Array must be of length <= ${MAX_BULK_CREATE_ATTACHMENTS}.`
-    );
-  });
-
-  it('rejects a legacy comment payload', () => {
-    expect(BulkCreateUnifiedAttachmentsRequestRt.decode([legacyComment])._tag).toBe('Left');
-  });
-
-  it('zod: accepts an empty array', () => {
-    expect(BulkCreateUnifiedAttachmentsRequestSchema.safeParse([]).success).toBe(true);
-  });
-
-  it(`zod: accepts ${MAX_BULK_CREATE_ATTACHMENTS} attachments`, () => {
-    const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS).fill(unifiedComment);
-
-    expect(BulkCreateUnifiedAttachmentsRequestSchema.safeParse(attachments).success).toBe(true);
-  });
-
-  it(`zod: rejects more than ${MAX_BULK_CREATE_ATTACHMENTS} attachments`, () => {
-    const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(unifiedComment);
-
     expect(BulkCreateUnifiedAttachmentsRequestSchema.safeParse(attachments).success).toBe(false);
   });
 
-  it('zod: rejects a legacy comment payload', () => {
+  it('rejects a legacy comment payload', () => {
     expect(BulkCreateUnifiedAttachmentsRequestSchema.safeParse([legacyComment]).success).toBe(
       false
+    );
+  });
+});
+
+describe('BulkGetUnifiedAttachmentsRequestSchema', () => {
+  it('accepts a single id', () => {
+    expect(BulkGetUnifiedAttachmentsRequestSchema.safeParse({ ids: ['a'] }).success).toBe(true);
+  });
+
+  it('rejects an empty ids array', () => {
+    expect(parseErrors(BulkGetUnifiedAttachmentsRequestSchema, { ids: [] })).toContain(
+      'The length of the field ids is too short. Array must be of length >= 1.'
+    );
+  });
+
+  it(`rejects more than MAX_BULK_GET_ATTACHMENTS (${MAX_BULK_GET_ATTACHMENTS}) ids`, () => {
+    const ids = Array(MAX_BULK_GET_ATTACHMENTS + 1).fill('id');
+    expect(parseErrors(BulkGetUnifiedAttachmentsRequestSchema, { ids })).toContain(
+      `The length of the field ids is too long. Array must be of length <= ${MAX_BULK_GET_ATTACHMENTS}.`
     );
   });
 });

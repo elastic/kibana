@@ -8,6 +8,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { createHash } from 'crypto';
 import tls from 'tls';
 
 import { checkEsNodesVersion } from '@kbn/core/server';
@@ -33,6 +34,38 @@ const mockCheckEsNodesVersion = checkEsNodesVersion as jest.MockedFunction<
 
 function mockCompatibility(isCompatible: boolean, message?: string) {
   mockCheckEsNodesVersion.mockResolvedValue({ isCompatible, message } as NodesVersionCompatibility);
+}
+
+const sha256hex = (buffer: Buffer) => createHash('sha256').update(buffer).digest('hex');
+
+function createCaFixture(der: Buffer) {
+  return {
+    httpCa: der.toString('base64'),
+    caFingerprint: ElasticsearchService.formatFingerprint(sha256hex(der)),
+  };
+}
+
+function mockPeerCertificate(der: Buffer, { selfIssued = true } = {}) {
+  const cert = {
+    raw: der,
+    fingerprint256: ElasticsearchService.formatFingerprint(sha256hex(der)),
+  } as tls.DetailedPeerCertificate;
+  if (selfIssued) {
+    cert.issuerCertificate = cert;
+  }
+
+  const socket = {
+    once: jest.fn((event, fn) => {
+      if (event === 'secureConnect') {
+        fn();
+      }
+    }),
+    getPeerCertificate: jest.fn().mockReturnValue(cert),
+    setTimeout: jest.fn(),
+    destroy: jest.fn(),
+  };
+  tlsConnectMock.mockReturnValue(socket as unknown as tls.TLSSocket);
+  return socket;
 }
 
 describe('ElasticsearchService', () => {
@@ -327,6 +360,14 @@ describe('ElasticsearchService', () => {
     });
 
     describe('#enroll()', () => {
+      const caDer = Buffer.from('some-ca-der');
+      const { httpCa, caFingerprint } = createCaFixture(caDer);
+      let mockSocket: ReturnType<typeof mockPeerCertificate>;
+      beforeEach(() => {
+        tlsConnectMock.mockReset();
+        mockSocket = mockPeerCertificate(caDer);
+      });
+
       it('fails if enroll call fails', async () => {
         const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
         mockScopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
@@ -337,7 +378,7 @@ describe('ElasticsearchService', () => {
         mockEnrollClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
         await expect(
-          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1'], caFingerprint: 'DE:AD:BE:EF' })
+          setupContract.enroll({ apiKey: 'apiKey', hosts: ['https://host1:9200'], caFingerprint })
         ).rejects.toMatchInlineSnapshot(`[ResponseError: {"message":"oh no"}]`);
 
         expect(mockEnrollClient.asScoped).toHaveBeenCalledTimes(1);
@@ -358,8 +399,8 @@ describe('ElasticsearchService', () => {
         await expect(
           setupContract.enroll({
             apiKey: 'apiKey',
-            hosts: ['host1', 'host2'],
-            caFingerprint: 'DE:AD:BE:EF',
+            hosts: ['https://host1:9200', 'https://host2:9200'],
+            caFingerprint,
           })
         ).rejects.toMatchInlineSnapshot(`[Error: Unable to connect to any of the provided hosts.]`);
 
@@ -372,7 +413,7 @@ describe('ElasticsearchService', () => {
         mockEnrollScopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
           interactiveSetupMock.createApiResponse({
             statusCode: 200,
-            body: { token: { name: 'some-name', value: 'some-value' }, http_ca: 'some-ca' },
+            body: { token: { name: 'some-name', value: 'some-value' }, http_ca: httpCa },
           })
         );
         mockEnrollClient.asScoped.mockReturnValue(mockEnrollScopedClusterClient);
@@ -384,7 +425,7 @@ describe('ElasticsearchService', () => {
         );
 
         await expect(
-          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1'], caFingerprint: 'DE:AD:BE:EF' })
+          setupContract.enroll({ apiKey: 'apiKey', hosts: ['https://host1:9200'], caFingerprint })
         ).rejects.toMatchInlineSnapshot(`[ResponseError: {"message":"oh no"}]`);
 
         expect(mockEnrollClient.asScoped).toHaveBeenCalledTimes(1);
@@ -400,10 +441,7 @@ describe('ElasticsearchService', () => {
         mockEnrollScopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
           interactiveSetupMock.createApiResponse({
             statusCode: 200,
-            body: {
-              token: { name: 'some-name', value: 'some-value' },
-              http_ca: '\n\nsome weird-ca_with\n content\n\n',
-            },
+            body: { token: { name: 'some-name', value: 'some-value' }, http_ca: httpCa },
           })
         );
         mockEnrollClient.asScoped.mockReturnValue(mockEnrollScopedClusterClient);
@@ -417,8 +455,8 @@ describe('ElasticsearchService', () => {
         await expect(
           setupContract.enroll({
             apiKey: 'apiKey',
-            hosts: ['host1', 'host2'],
-            caFingerprint: 'DE:AD:BE:EF',
+            hosts: ['https://host1:9200', 'https://host2:9200'],
+            caFingerprint,
           })
         ).rejects.toMatchInlineSnapshot(`[CompatibilityError: Oh no!]`);
 
@@ -427,8 +465,121 @@ describe('ElasticsearchService', () => {
         expect(mockAuthenticateClient.close).toHaveBeenCalledTimes(1);
       });
 
+      it('skips the host if the presented certificate chain does not end with a self-signed certificate', async () => {
+        mockPeerCertificate(caDer, { selfIssued: false });
+
+        await expect(
+          setupContract.enroll({ apiKey: 'apiKey', hosts: ['https://host1:9200'], caFingerprint })
+        ).rejects.toMatchInlineSnapshot(`[Error: Unable to connect to any of the provided hosts.]`);
+
+        expect(mockElasticsearchPreboot.createClient).not.toHaveBeenCalledWith(
+          'enroll',
+          expect.anything()
+        );
+      });
+
+      it('skips the host if the presented CA certificate does not match the fingerprint', async () => {
+        mockPeerCertificate(Buffer.from('other-ca-der'));
+
+        await expect(
+          setupContract.enroll({ apiKey: 'apiKey', hosts: ['https://host1:9200'], caFingerprint })
+        ).rejects.toMatchInlineSnapshot(`[Error: Unable to connect to any of the provided hosts.]`);
+
+        expect(mockElasticsearchPreboot.createClient).not.toHaveBeenCalledWith(
+          'enroll',
+          expect.anything()
+        );
+      });
+
+      it('skips the host if the peer certificate cannot be fetched', async () => {
+        tlsConnectMock.mockReturnValue({
+          once: jest.fn((event, fn) => {
+            if (event === 'error') {
+              fn(new Error('some-message'));
+            }
+          }),
+          setTimeout: jest.fn(),
+        } as unknown as tls.TLSSocket);
+
+        await expect(
+          setupContract.enroll({ apiKey: 'apiKey', hosts: ['https://host1:9200'], caFingerprint })
+        ).rejects.toMatchInlineSnapshot(`[Error: Unable to connect to any of the provided hosts.]`);
+
+        expect(mockElasticsearchPreboot.createClient).not.toHaveBeenCalledWith(
+          'enroll',
+          expect.anything()
+        );
+      });
+
+      it('fails if the CA certificate returned by Elasticsearch does not match the fingerprint', async () => {
+        const mockEnrollScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        mockEnrollScopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({
+            statusCode: 200,
+            body: {
+              token: { name: 'some-name', value: 'some-value' },
+              http_ca: Buffer.from('other-ca-der').toString('base64'),
+            },
+          })
+        );
+        mockEnrollClient.asScoped.mockReturnValue(mockEnrollScopedClusterClient);
+
+        await expect(
+          setupContract.enroll({
+            apiKey: 'apiKey',
+            hosts: ['https://host1:9200', 'https://host2:9200'],
+            caFingerprint,
+          })
+        ).rejects.toMatchInlineSnapshot(
+          `[Error: The CA certificate returned by Elasticsearch does not match the enrollment token.]`
+        );
+
+        expect(mockElasticsearchPreboot.createClient).not.toHaveBeenCalledWith(
+          'authenticate',
+          expect.anything()
+        );
+        expect(mockEnrollClient.close).toHaveBeenCalledTimes(1);
+      });
+
+      it('fetches the CA certificate from the host with a timeout', async () => {
+        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        mockScopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
+          new errors.ConnectionError(
+            'some-message',
+            interactiveSetupMock.createApiResponse({ body: {} })
+          )
+        );
+        mockEnrollClient.asScoped.mockReturnValue(mockScopedClusterClient);
+
+        await expect(
+          setupContract.enroll({
+            apiKey: 'apiKey',
+            hosts: ['https://host1:9200', 'https://[::1]:9201'],
+            caFingerprint,
+          })
+        ).rejects.toMatchInlineSnapshot(`[Error: Unable to connect to any of the provided hosts.]`);
+
+        expect(tlsConnectMock).toHaveBeenCalledTimes(2);
+        expect(tlsConnectMock).toHaveBeenNthCalledWith(1, {
+          host: 'host1',
+          port: 9200,
+          rejectUnauthorized: false,
+        });
+        expect(tlsConnectMock).toHaveBeenNthCalledWith(2, {
+          host: '::1',
+          port: 9201,
+          rejectUnauthorized: false,
+        });
+        expect(mockSocket.setTimeout).toHaveBeenCalledWith(30000);
+      });
+
       it('iterates through all provided hosts until find an accessible one', async () => {
         mockElasticsearchPreboot.createClient.mockClear();
+
+        const weirdHttpCa = '\n\nsome weird-ca_with\n content\n\n';
+        const weirdCaDer = Buffer.from(weirdHttpCa, 'base64');
+        const { caFingerprint: weirdCaFingerprint } = createCaFixture(weirdCaDer);
+        mockPeerCertificate(weirdCaDer);
 
         const mockHostOneEnrollScopedClusterClient =
           elasticsearchServiceMock.createScopedClusterClient();
@@ -446,7 +597,7 @@ describe('ElasticsearchService', () => {
             statusCode: 200,
             body: {
               token: { name: 'some-name', value: 'some-value' },
-              http_ca: '\n\nsome weird-ca_with\n content\n\n',
+              http_ca: weirdHttpCa,
             },
           })
         );
@@ -469,16 +620,19 @@ some weird+ca/with
 
 -----END CERTIFICATE-----
 `;
+        const expectedPinnedCa = ElasticsearchService.createPemCertificate(
+          weirdCaDer.toString('base64')
+        );
 
         await expect(
           setupContract.enroll({
             apiKey: 'apiKey',
-            hosts: ['host1', 'host2'],
-            caFingerprint: 'DE:AD:BE:EF',
+            hosts: ['https://host1:9200', 'https://host2:9200'],
+            caFingerprint: weirdCaFingerprint,
           })
         ).resolves.toEqual({
           caCert: expectedCa,
-          host: 'host2',
+          host: 'https://host2:9200',
           serviceAccountToken: {
             name: 'some-name',
             value: 'some-value',
@@ -488,18 +642,18 @@ some weird+ca/with
         // Check that we created clients with the right parameters
         expect(mockElasticsearchPreboot.createClient).toHaveBeenCalledTimes(3);
         expect(mockElasticsearchPreboot.createClient).toHaveBeenCalledWith('enroll', {
-          caFingerprint: 'DE:AD:BE:EF',
-          hosts: ['host1'],
-          ssl: { verificationMode: 'none' },
+          caFingerprint: weirdCaFingerprint,
+          hosts: ['https://host1:9200'],
+          ssl: { certificateAuthorities: [expectedPinnedCa] },
         });
         expect(mockElasticsearchPreboot.createClient).toHaveBeenCalledWith('enroll', {
-          caFingerprint: 'DE:AD:BE:EF',
-          hosts: ['host2'],
-          ssl: { verificationMode: 'none' },
+          caFingerprint: weirdCaFingerprint,
+          hosts: ['https://host2:9200'],
+          ssl: { certificateAuthorities: [expectedPinnedCa] },
         });
         expect(mockElasticsearchPreboot.createClient).toHaveBeenCalledWith('authenticate', {
-          caFingerprint: 'DE:AD:BE:EF',
-          hosts: ['host2'],
+          caFingerprint: weirdCaFingerprint,
+          hosts: ['https://host2:9200'],
           serviceAccountToken: 'some-value',
           ssl: { certificateAuthorities: [expectedCa] },
         });

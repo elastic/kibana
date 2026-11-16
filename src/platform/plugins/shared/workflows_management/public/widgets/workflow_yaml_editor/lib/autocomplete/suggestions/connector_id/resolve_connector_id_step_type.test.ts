@@ -20,6 +20,7 @@ describe('resolveConnectorIdStepType', () => {
     stepId: 'request-approval',
     propInfos: {},
     stepYamlNode: {} as StepInfo['stepYamlNode'],
+    path: ['steps', 0],
     lineStart: 1,
     lineEnd: 5,
   };

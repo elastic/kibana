@@ -59,7 +59,9 @@ type ArtifactViewFlyoutRenderProps = {
   labels?: ArtifactViewFlyoutProps['labels'];
   allowCardEditAction?: boolean;
   allowCardDeleteAction?: boolean;
+  showComments?: boolean;
   onTakeAction?: ArtifactViewFlyoutTakeAction;
+  policyAssignmentInfoTooltip?: string;
 } & (
   | {
       showEnabledSwitch?: false;
@@ -129,6 +131,8 @@ describe('ArtifactViewFlyout', () => {
           ? { allowCardDeleteAction: props.allowCardDeleteAction }
           : {}),
         ...(props.onTakeAction ? { onTakeAction: props.onTakeAction } : {}),
+        policyAssignmentInfoTooltip: props.policyAssignmentInfoTooltip,
+        ...(props.showComments !== undefined ? { showComments: props.showComments } : {}),
         allowCardEditAction: props.allowCardEditAction ?? true,
       };
 
@@ -169,6 +173,17 @@ describe('ArtifactViewFlyout', () => {
     expect(renderResult.getByTestId('viewFlyout-policyAssignment-global')).toHaveTextContent(
       'Applied globally.'
     );
+    expect(
+      renderResult.queryByTestId('viewFlyout-policyAssignmentInfoTooltip')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the policy assignment info tooltip when policyAssignmentInfoTooltip is set', async () => {
+    render({ policyAssignmentInfoTooltip: 'Some assignment info' });
+
+    fireEvent.mouseOver(renderResult.getByTestId('viewFlyout-policyAssignmentInfoTooltip'));
+
+    expect(await renderResult.findByText('Some assignment info')).toBeInTheDocument();
   });
 
   it('shows the enabled switch before Updated by when showEnabledSwitch is true', () => {
@@ -368,15 +383,84 @@ describe('ArtifactViewFlyout', () => {
     expect(policy).not.toHaveAttribute('href');
   });
 
-  it('shows the policy id when the policy is not in the policies map', () => {
+  it('shows the policy id as not accessible when the policy is not in the policies map', async () => {
     item.tags = [buildPerPolicyTag('policy-unknown')];
     useGetArtifactMock.mockReturnValue({ data: item, error: null, refetch: refetchArtifact });
 
     render();
 
-    expect(
-      renderResult.getByTestId('viewFlyout-policyAssignment-policy-policy-unknown')
-    ).toHaveTextContent('policy-unknown');
+    const policy = renderResult.getByTestId('viewFlyout-policyAssignment-policy-policy-unknown');
+    expect(policy).toHaveTextContent('policy-unknown');
+    expect(policy).not.toHaveAttribute('href');
+    expect(policy.style.color).not.toBe('');
+
+    fireEvent.mouseOver(policy);
+
+    await waitFor(() => {
+      expect(
+        renderResult.getByText('Policy is not accessible from the current space')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('does not show the policy as not accessible while policies are loading', () => {
+    item.tags = [buildPerPolicyTag('policy-1')];
+    useGetArtifactMock.mockReturnValue({ data: item, error: null, refetch: refetchArtifact });
+    useArtifactAssignedPoliciesMock.mockReturnValue({ policies: {}, isLoading: true });
+
+    render();
+
+    const policy = renderResult.getByTestId('viewFlyout-policyAssignment-policy-policy-1');
+    expect(policy).toHaveTextContent('policy-1');
+    expect(policy.style.color).toBe('');
+  });
+
+  describe('comments', () => {
+    it('does not show comments by default', () => {
+      render();
+
+      expect(renderResult.queryByTestId('viewFlyout-commentsTitle')).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId('viewFlyout-comments-list')).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId('viewFlyout-comments-none')).not.toBeInTheDocument();
+    });
+
+    it('shows an empty value when showComments is true and there are no comments', () => {
+      item.comments = [];
+      useGetArtifactMock.mockReturnValue({ data: item, error: null, refetch: refetchArtifact });
+
+      render({ showComments: true });
+
+      expect(renderResult.getByTestId('viewFlyout-commentsTitle')).toHaveTextContent('Comments');
+      expect(renderResult.getByTestId('viewFlyout-comments-none')).toHaveTextContent(
+        getEmptyValue()
+      );
+    });
+
+    it('lists the comments when showComments is true', () => {
+      item.comments = [
+        {
+          id: 'comment-1',
+          comment: 'First comment',
+          created_at: '2025-12-01T10:00:00.000Z',
+          created_by: 'jane.doe',
+        },
+        {
+          id: 'comment-2',
+          comment: 'Second comment',
+          created_at: '2025-12-02T10:00:00.000Z',
+          created_by: 'john.doe',
+        },
+      ];
+      useGetArtifactMock.mockReturnValue({ data: item, error: null, refetch: refetchArtifact });
+
+      render({ showComments: true });
+
+      const list = renderResult.getByTestId('viewFlyout-comments-list');
+      expect(list).toHaveTextContent('First comment');
+      expect(list).toHaveTextContent('jane.doe');
+      expect(list).toHaveTextContent('Second comment');
+      expect(list).toHaveTextContent('john.doe');
+    });
   });
 
   it('opens edit and delete from the take action menu', () => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DummyRuleMap } from 'oxlint';
+import type { DummyRuleMap, OxlintOverride } from 'oxlint';
 
 export const typescriptRules: DummyRuleMap = {
   '@typescript-eslint/explicit-member-accessibility': [
@@ -35,122 +35,16 @@ export const typescriptRules: DummyRuleMap = {
   '@typescript-eslint/adjacent-overload-signatures': 'error',
   // '@typescript-eslint/array-type': 'error',
   '@typescript-eslint/consistent-type-assertions': 'error',
-  // '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
-  // '@typescript-eslint/consistent-type-imports': [
-  //   'error',
-  //   {
-  //     'prefer': 'type-imports',
-  //     'disallowTypeAnnotations': false,
-  //     'fixStyle': 'separate-type-imports'
-  //   }
-  // ],
-  // '@typescript-eslint/member-ordering': [
-  //   'error',
-  //   {
-  //     'default': ['public-static-field', 'static-field', 'instance-field']
-  //   }
-  // ],
-  // '@typescript-eslint/naming-convention': [
-  //   'error',
-  //   {
-  //     'selector': 'default',
-  //     'format': ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
-  //     'leadingUnderscore': 'allowSingleOrDouble',
-  //     'trailingUnderscore': 'allowSingleOrDouble'
-  //   },
-  //   {
-  //     'selector': 'classMethod',
-  //     'filter': {
-  //       'regex': '^UNSAFE_',
-  //       'match': true
-  //     },
-  //     'prefix': ['UNSAFE_'],
-  //     'format': ['camelCase']
-  //   },
-  //   {
-  //     'selector': 'variable',
-  //     'format': [
-  //       'camelCase',
-  //       'UPPER_CASE', // e.g. const SOMETHING = ...
-  //       'PascalCase' // e.g. React.FunctionComponent =
-  //     ],
-  //     'leadingUnderscore': 'allowSingleOrDouble',
-  //     'trailingUnderscore': 'allowSingleOrDouble'
-  //   },
-  //   {
-  //     'selector': 'variable',
-  //     'modifiers': ['destructured'],
-  //     'format': [
-  //       'camelCase',
-  //       'snake_case', // e.g. properties from ES response objects
-  //       'UPPER_CASE', // e.g. const SOMETHING = ...
-  //       'PascalCase' // e.g. React.FunctionComponent =
-  //     ],
-  //     'leadingUnderscore': 'allowSingleOrDouble',
-  //     'trailingUnderscore': 'allowSingleOrDouble'
-  //   },
-  //   {
-  //     'selector': 'parameter',
-  //     'format': ['camelCase', 'PascalCase', 'snake_case'],
-  //     'leadingUnderscore': 'allowSingleOrDouble',
-  //     'trailingUnderscore': 'allowSingleOrDouble'
-  //   },
-  //   {
-  //     'selector': 'function',
-  //     'format': [
-  //       'camelCase',
-  //       'PascalCase' // React.FunctionComponent =
-  //     ],
-  //     'leadingUnderscore': 'allowSingleOrDouble',
-  //     'trailingUnderscore': 'allowSingleOrDouble'
-  //   },
-  //   {
-  //     'selector': 'typeLike',
-  //     'format': ['PascalCase', 'UPPER_CASE'],
-  //     'leadingUnderscore': 'allow',
-  //     'trailingUnderscore': 'allow'
-  //   },
-  //   {
-  //     'selector': 'enum',
-  //     'format': ['PascalCase', 'UPPER_CASE', 'camelCase']
-  //   },
-  //   // https://typescript-eslint.io/rules/naming-convention/#ignore-properties-that-require-quotes
-  //   // restore check behavior before https://github.com/typescript-eslint/typescript-eslint/pull/4582
-  //   {
-  //     'selector': [
-  //       'classProperty',
-  //       'objectLiteralProperty',
-  //       'typeProperty',
-  //       'classMethod',
-  //       'objectLiteralMethod',
-  //       'typeMethod',
-  //       'accessor',
-  //       'enumMember'
-  //     ],
-  //     'format': null,
-  //     'modifiers': ['requiresQuotes']
-  //   }
-  // ],
   '@typescript-eslint/no-empty-interface': 'error',
   // '@typescript-eslint/no-empty-object-type': 'off',
   '@typescript-eslint/no-extra-non-null-assertion': 'error',
   '@typescript-eslint/no-misused-new': 'error',
   '@typescript-eslint/no-namespace': 'error',
-  // '@typescript-eslint/no-shadow': 'error',
   // '@typescript-eslint/no-undef': 'error',
   // '@typescript-eslint/no-unsafe-function-type': 'error',
-  // '@typescript-eslint/no-unused-expressions': ['error', { 'allowTaggedTemplates': true }],
   // '@typescript-eslint/no-var-requires': 'error',
   // '@typescript-eslint/no-wrapper-object-types': 'error',
   '@typescript-eslint/prefer-function-type': 'error',
-  // '@typescript-eslint/triple-slash-reference': [
-  //   'error',
-  //   {
-  //     'path': 'never',
-  //     'types': 'never',
-  //     'lib': 'never'
-  //   }
-  // ],
   '@typescript-eslint/unified-signatures': 'error',
   // 'ban/ban': [
   //   2,
@@ -161,3 +55,135 @@ export const typescriptRules: DummyRuleMap = {
   //   { 'name': ['testErrorsAndWarnings', 'only'], 'message': 'No exclusive tests.' }
   // ],
 };
+
+/** `@kbn/eslint-config`'s TypeScript-only rules. */
+export const typescriptOverrides: OxlintOverride[] = [
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          disallowTypeAnnotations: false,
+          fixStyle: 'separate-type-imports',
+        },
+      ],
+      '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+      '@typescript-eslint/no-shadow': 'error',
+      '@typescript-eslint/triple-slash-reference': [
+        'error',
+        { path: 'never', types: 'never', lib: 'never' },
+      ],
+      '@kbn/compat/typescript-member-ordering': [
+        'error',
+        { default: ['public-static-field', 'static-field', 'instance-field'] },
+      ],
+      '@kbn/compat/typescript-naming-convention': [
+        'error',
+        {
+          selector: 'default',
+          format: ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
+          leadingUnderscore: 'allowSingleOrDouble',
+          trailingUnderscore: 'allowSingleOrDouble',
+        },
+        {
+          selector: 'classMethod',
+          filter: { regex: '^UNSAFE_', match: true },
+          prefix: ['UNSAFE_'],
+          format: ['camelCase'],
+        },
+        {
+          selector: 'variable',
+          format: [
+            'camelCase',
+            'UPPER_CASE', // e.g. const SOMETHING = ...
+            'PascalCase', // e.g. React.FunctionComponent =
+          ],
+          leadingUnderscore: 'allowSingleOrDouble',
+          trailingUnderscore: 'allowSingleOrDouble',
+        },
+        {
+          selector: 'variable',
+          modifiers: ['destructured'],
+          format: [
+            'camelCase',
+            'snake_case', // e.g. properties from ES response objects
+            'UPPER_CASE', // e.g. const SOMETHING = ...
+            'PascalCase', // e.g. React.FunctionComponent =
+          ],
+          leadingUnderscore: 'allowSingleOrDouble',
+          trailingUnderscore: 'allowSingleOrDouble',
+        },
+        {
+          selector: 'parameter',
+          format: ['camelCase', 'PascalCase', 'snake_case'],
+          leadingUnderscore: 'allowSingleOrDouble',
+          trailingUnderscore: 'allowSingleOrDouble',
+        },
+        {
+          selector: 'function',
+          format: [
+            'camelCase',
+            'PascalCase', // React.FunctionComponent =
+          ],
+          leadingUnderscore: 'allowSingleOrDouble',
+          trailingUnderscore: 'allowSingleOrDouble',
+        },
+        {
+          selector: 'typeLike',
+          format: ['PascalCase', 'UPPER_CASE'],
+          leadingUnderscore: 'allow',
+          trailingUnderscore: 'allow',
+        },
+        {
+          selector: 'enum',
+          format: ['PascalCase', 'UPPER_CASE', 'camelCase'],
+        },
+        // https://typescript-eslint.io/rules/naming-convention/#ignore-properties-that-require-quotes
+        // restore check behavior before https://github.com/typescript-eslint/typescript-eslint/pull/4582
+        {
+          selector: [
+            'classProperty',
+            'objectLiteralProperty',
+            'typeProperty',
+            'classMethod',
+            'objectLiteralMethod',
+            'typeMethod',
+            'accessor',
+            'enumMember',
+          ],
+          format: null,
+          modifiers: ['requiresQuotes'],
+        },
+      ],
+      '@kbn/compat/import-order': [
+        'error',
+        { groups: [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']] },
+      ],
+      '@kbn/compat/eslint-no-restricted-syntax': [
+        'error',
+        {
+          selector: 'TSEnumDeclaration[const=true]',
+          message: 'Do not use `const` with enum declarations',
+        },
+      ],
+      '@kbn/compat/eslint-no-undef-init': 'error',
+      '@kbn/compat/eslint-spaced-comment': ['error', 'always', { exceptions: ['/'] }],
+      eqeqeq: ['error', 'always', { null: 'ignore' }],
+      'max-classes-per-file': ['error', 1],
+      'no-bitwise': 'error',
+      'no-console': 'error',
+      'no-throw-literal': 'error',
+      'no-unsafe-finally': 'error',
+      'no-unsanitized/property': 'error',
+      '@typescript-eslint/no-unused-expressions': ['error', { allowTaggedTemplates: true }],
+      'no-var': 'error',
+      'object-shorthand': 'error',
+      'one-var': ['error', 'never'],
+      'prefer-const': 'error',
+      'prefer-rest-params': 'error',
+      radix: 'error',
+    },
+  },
+];

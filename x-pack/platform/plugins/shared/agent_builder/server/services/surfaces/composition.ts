@@ -21,12 +21,11 @@ import {
 import type {
   AttachmentSurfaceCompositionContext,
   SurfaceComposition,
-  SurfaceNode,
-  MarkdownNode,
 } from '@kbn/agent-builder-server/attachments';
+import type { ComponentsNode } from '@kbn/isomer-components';
+import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
-import { isomerRuntime } from './pack';
 
 const { tagName, attributes } = renderAttachmentElement;
 
@@ -40,7 +39,7 @@ interface AttachmentNode extends RenderAttachmentElementAttributes {
 }
 
 /** The response message split into its markdown and its attachment tags, in order. */
-type MessageNode = SurfaceNode | AttachmentNode;
+type MessageNode = ComponentsNode | AttachmentNode;
 
 /**
  * Splits a message into nodes with {@link splitAuthoredMarkdown}: its markdown becomes `markdown`
@@ -71,14 +70,14 @@ const toMessageNodes = (message: string): MessageNode[] =>
 
 /**
  * Keeps the `title` and `subtitle` of an attachment's composition, which would otherwise be lost
- * when its body is spliced into the message: they become a `markdown` node, with the title in bold
- * and the subtitle in italics, placed before the body. Returns nothing when the mapping sets
- * neither, so it's `toSurfaceComposition` that decides whether an attachment has a heading.
+ * when its body is spliced into the message: the title becomes a `header` and the subtitle a
+ * `context` line, placed before the body. Returns nothing when the mapping sets neither, so it's
+ * `toSurfaceComposition` that decides whether an attachment has a heading.
  */
-const toHeadingNode = ({ title, subtitle }: SurfaceComposition): MarkdownNode[] => {
-  const heading = [title && `**${title}**`, subtitle && `_${subtitle}_`].filter(Boolean).join('\n');
-  return heading ? [{ type: 'markdown', text: heading }] : [];
-};
+const toHeadingNodes = ({ title, subtitle }: SurfaceComposition): ComponentsNode[] => [
+  ...(title ? [{ type: 'header' as const, text: title, level: 2 as const }] : []),
+  ...(subtitle ? [{ type: 'context' as const, items: [{ text: subtitle }] }] : []),
+];
 
 /**
  * Replaces an attachment node with what its type's `toSurfaceComposition` returns. Attachments
@@ -93,13 +92,15 @@ const resolveAttachmentNode = async (
     attachmentsService,
     context,
     logger,
+    runtime,
   }: {
     attachments: VersionedAttachment[];
     attachmentsService: AttachmentServiceStart;
     context: AttachmentSurfaceCompositionContext;
     logger: Logger;
+    runtime: KibanaIsomerRuntime;
   }
-): Promise<SurfaceNode[]> => {
+): Promise<ComponentsNode[]> => {
   const attachment = attachments.find(({ id }) => id === node.attachmentId);
 
   if (!attachment) {
@@ -138,7 +139,8 @@ const resolveAttachmentNode = async (
       context
     );
 
-    const { valid, errors } = isomerRuntime.validate(composition);
+    const nodes = [...toHeadingNodes(composition), ...composition.body];
+    const { valid, errors } = runtime.validate({ type: 'view', body: nodes });
 
     if (!valid) {
       const reasons = errors.map(formatValidationError).join('; ');
@@ -150,7 +152,7 @@ const resolveAttachmentNode = async (
       return [];
     }
 
-    return [...toHeadingNode(composition), ...composition.body];
+    return nodes;
   } catch (error) {
     logger.warn(
       `Leaving out attachment "${attachment.id}": its toSurfaceComposition failed: ${error.message}`
@@ -171,17 +173,19 @@ export const buildComposition = async ({
   attachmentsService,
   context,
   logger,
+  runtime,
 }: {
   round: ConversationRound;
   attachments: VersionedAttachment[];
   attachmentsService: AttachmentServiceStart;
   context: AttachmentSurfaceCompositionContext;
   logger: Logger;
+  runtime: KibanaIsomerRuntime;
 }): Promise<SurfaceComposition> => {
   const nodes = await Promise.all(
-    toMessageNodes(response.message).map((node): Promise<SurfaceNode[]> | SurfaceNode[] =>
+    toMessageNodes(response.message).map((node): Promise<ComponentsNode[]> | ComponentsNode[] =>
       node.type === 'attachment'
-        ? resolveAttachmentNode(node, { attachments, attachmentsService, context, logger })
+        ? resolveAttachmentNode(node, { attachments, attachmentsService, context, logger, runtime })
         : [node]
     )
   );

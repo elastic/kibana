@@ -6,27 +6,32 @@
  */
 
 import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
-import type { AppHeaderBadge, AppHeaderTab } from '@kbn/app-header';
+import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
+import type { AppMenuItemType } from '@kbn/app-menu';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
+import { Redirect, useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import {
   AiIndexCreatedCallout,
   AutomationsPanel,
+  ConnectAgentPanel,
   DescriptionPanel,
+  DreamingPanel,
   LockedSectionPanel,
-  MemoryPanel,
   SignalsPanel,
   SourcesPanel,
-  TracesPanel,
 } from '../components/ai_index_detail';
+import { buildAiIndexOnboardingPrompt } from '../components/ai_index_detail/onboarding_prompt';
 import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
+import { useAiIndexDestLinks } from '../hooks/use_ai_index_dest_links';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
+import { useKibanaUrl } from '../hooks/use_kibana_url';
 import { useListKi } from '../hooks/use_list_ki';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
@@ -41,7 +46,9 @@ import {
 import {
   CONTEXT_ENGINE_PATHS,
   getAiIndexDetailPath,
+  getAiIndexSourcesPath,
   getAiIndexKnowledgeIndicatorsPath,
+  getAiIndexSettingsPath,
 } from '../paths';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
 
@@ -53,6 +60,10 @@ const overviewTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.
   defaultMessage: 'Overview',
 });
 
+const sourcesTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.sources', {
+  defaultMessage: 'Sources',
+});
+
 const knowledgeIndicatorsTabLabel = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators',
   {
@@ -60,12 +71,27 @@ const knowledgeIndicatorsTabLabel = i18n.translate(
   }
 );
 
+const settingsTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.settings', {
+  defaultMessage: 'Settings',
+});
+
 const automationsLockedAriaLabel = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.lockedAriaLabel',
   {
-    defaultMessage: 'Automations locked. Add a source above to unlock automations.',
+    defaultMessage: 'Automations locked. Add a source in the Sources tab to unlock automations.',
   }
 );
+
+const editBackingIndexMenuLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.listKi.editBackingIndexMenuLabel',
+  {
+    defaultMessage: 'Edit backing index',
+  }
+);
+
+const discoverLinkLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.discoverLink', {
+  defaultMessage: 'Open in Discover',
+});
 
 const signalsLockedAriaLabel = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.signals.lockedAriaLabel',
@@ -79,16 +105,21 @@ export const AiIndexDetailPage = () => {
   const location = useLocation<AiIndexCreatedLocationState | undefined>();
   const history = useHistory<AiIndexCreatedLocationState | undefined>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
+  const { discoverHref, indexManagementHref } = useAiIndexDestLinks(aiIndex?.dest);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const isMemoryEnabled = useMemoryEnabled();
+  const isSourcesTab =
+    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSources, exact: true }) !== null;
   const isKnowledgeIndicatorsTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators, exact: true }) !== null;
+  const isSettingsTab =
+    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSettings, exact: true }) !== null;
+  const showSettingsTab = isMemoryEnabled;
   const resolvedAiIndexId = aiIndex?.id ?? id ?? '';
 
   const [showCreatedCallout, setShowCreatedCallout] = useState(
     () => location.state?.aiIndexCreated === true
   );
-
   // Hide the callout as soon as the user adds a source.
   useEffect(() => {
     if (showCreatedCallout && aiIndex && aiIndex.sources.length > 0) {
@@ -108,6 +139,7 @@ export const AiIndexDetailPage = () => {
   const { summary, isLoading: isKiSummaryLoading } = useListKi({
     aiIndexId: aiIndex?.id,
     size: KI_SUMMARY_PAGE_SIZE,
+    lifecycleStatus: ['active'],
     enabled: aiIndex !== undefined,
     notifyOnError: true,
   });
@@ -116,13 +148,33 @@ export const AiIndexDetailPage = () => {
   const hasKnowledgeIndicators = hasLoadedKiSummary && summary.total > 0;
   const showKnowledgeIndicatorsTabInHeader = isKnowledgeIndicatorsTab || hasKnowledgeIndicators;
 
-  const { hideEditControls, showAutomationsPanel, showSignalsSection, showSignalsPanel } =
-    useAiIndexOverviewSections({
-      aiIndex,
-      isLoading,
-    });
+  const {
+    hideEditControls,
+    showOnboardingPanel,
+    showAutomationsPanel,
+    showSignalsSection,
+    showSignalsPanel,
+  } = useAiIndexOverviewSections({
+    aiIndex,
+    isLoading,
+    hasKnowledgeIndicators,
+    isKnowledgeIndicatorsLoading: isKiSummaryLoading,
+  });
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
+  const sources = useMemo(() => aiIndex?.sources ?? [], [aiIndex?.sources]);
+
+  const { kibanaUrl } = useKibanaUrl();
+  const onboardingPrompt = useMemo(() => {
+    if (!showOnboardingPanel) {
+      return '';
+    }
+    return buildAiIndexOnboardingPrompt({
+      aiIndexId: resolvedAiIndexId,
+      aiIndexDest: aiIndex?.dest.value ?? '',
+      kibanaUrl,
+    });
+  }, [aiIndex?.dest.value, kibanaUrl, resolvedAiIndexId, showOnboardingPanel]);
 
   useContextEngineBreadcrumbs(pageTitle ? [{ text: pageTitle }] : []);
 
@@ -140,6 +192,47 @@ export const AiIndexDetailPage = () => {
     [aiIndex?.managed]
   );
 
+  const headerMenu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (!isKnowledgeIndicatorsTab || !aiIndex) {
+      return undefined;
+    }
+
+    const items: AppMenuItemType[] = [];
+
+    if (indexManagementHref !== undefined) {
+      items.push({
+        id: 'contextListKiBackingIndex',
+        label: editBackingIndexMenuLabel,
+        iconType: 'index',
+        href: indexManagementHref,
+        overflow: true,
+        testId: 'contextListKiPanelDestLink',
+        ebt: { action: CONTEXT_ENGINE_UI_EBT.action.listKi.DEST_LINK },
+      });
+    }
+
+    const primaryActionItem =
+      discoverHref === undefined
+        ? undefined
+        : {
+            id: 'contextListKiDiscover',
+            label: discoverLinkLabel,
+            iconType: 'discoverApp',
+            href: discoverHref,
+            testId: 'contextListKiDiscoverLink',
+            ebt: { action: CONTEXT_ENGINE_UI_EBT.action.listKi.DISCOVER_LINK },
+          };
+
+    if (primaryActionItem === undefined && items.length === 0) {
+      return undefined;
+    }
+
+    return {
+      primaryActionItem,
+      items,
+    };
+  }, [aiIndex, discoverHref, indexManagementHref, isKnowledgeIndicatorsTab]);
+
   const headerTabs = useMemo<AppHeaderTab[] | undefined>(() => {
     if (error) {
       return undefined;
@@ -148,18 +241,25 @@ export const AiIndexDetailPage = () => {
     const overviewTab: AppHeaderTab = {
       id: 'overview',
       label: overviewTabLabel,
-      isSelected: showKnowledgeIndicatorsTabInHeader ? !isKnowledgeIndicatorsTab : true,
+      isSelected: !isSourcesTab && !isKnowledgeIndicatorsTab && !isSettingsTab,
       onClick: () => navigateToContextEngine(getAiIndexDetailPath(resolvedAiIndexId)),
       'data-test-subj': 'contextAiIndexDetailTab-overview',
     };
 
-    if (!showKnowledgeIndicatorsTabInHeader) {
-      return [overviewTab];
-    }
-
-    return [
+    const tabs: AppHeaderTab[] = [
       overviewTab,
       {
+        id: 'sources',
+        label: sourcesTabLabel,
+        isSelected: isSourcesTab,
+        onClick: () => navigateToContextEngine(getAiIndexSourcesPath(resolvedAiIndexId)),
+        badge: sources.length,
+        'data-test-subj': 'contextAiIndexDetailTab-sources',
+      },
+    ];
+
+    if (showKnowledgeIndicatorsTabInHeader) {
+      tabs.push({
         id: 'knowledge_indicators',
         label: knowledgeIndicatorsTabLabel,
         isSelected: isKnowledgeIndicatorsTab,
@@ -167,51 +267,62 @@ export const AiIndexDetailPage = () => {
           navigateToContextEngine(getAiIndexKnowledgeIndicatorsPath(resolvedAiIndexId)),
         badge: hasKnowledgeIndicators ? summary.total : undefined,
         'data-test-subj': 'contextAiIndexDetailTab-knowledge_indicators',
-      },
-    ];
+      });
+    }
+
+    if (showSettingsTab) {
+      tabs.push({
+        id: 'settings',
+        label: settingsTabLabel,
+        isSelected: isSettingsTab,
+        onClick: () => navigateToContextEngine(getAiIndexSettingsPath(resolvedAiIndexId)),
+        'data-test-subj': 'contextAiIndexDetailTab-settings',
+      });
+    }
+
+    return tabs;
   }, [
     error,
     hasKnowledgeIndicators,
     isKnowledgeIndicatorsTab,
+    isSettingsTab,
+    isSourcesTab,
     navigateToContextEngine,
     resolvedAiIndexId,
     showKnowledgeIndicatorsTabInHeader,
+    showSettingsTab,
+    sources.length,
     summary.total,
   ]);
+
+  const sourcesPanel = (
+    <SourcesPanel
+      isLoading={isLoading}
+      aiIndex={aiIndex}
+      onSaved={refetch}
+      isManaged={hideEditControls}
+    />
+  );
 
   const overviewTabContent = (
     <>
       {showCreatedCallout && (
         <AiIndexCreatedCallout
           onDismiss={() => setShowCreatedCallout(false)}
-          showMemory={isMemoryEnabled && aiIndex?.memory_enabled === true}
+          showMemory={isMemoryEnabled}
         />
+      )}
+      {showOnboardingPanel && (
+        <>
+          <ConnectAgentPanel prompt={onboardingPrompt} />
+          <EuiSpacer size="m" />
+        </>
       )}
       <DescriptionPanel
         isLoading={isLoading}
         aiIndex={aiIndex}
         onSaved={refetch}
         isManaged={!!aiIndex?.managed}
-      />
-      {isMemoryEnabled && (
-        <>
-          <EuiSpacer size="m" />
-          <MemoryPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
-        </>
-      )}
-      <EuiSpacer size="m" />
-      <TracesPanel
-        isLoading={isLoading}
-        aiIndex={aiIndex}
-        onSaved={refetch}
-        isManaged={!!aiIndex?.managed}
-      />
-      <EuiSpacer size="m" />
-      <SourcesPanel
-        isLoading={isLoading}
-        aiIndex={aiIndex}
-        onSaved={refetch}
-        isManaged={hideEditControls}
       />
       <EuiSpacer size="m" />
       {showAutomationsPanel ? (
@@ -234,7 +345,7 @@ export const AiIndexDetailPage = () => {
           description={
             <FormattedMessage
               id="xpack.contextEngine.aiIndexDetail.automations.lockedBody"
-              defaultMessage="Add a source above to unlock automations."
+              defaultMessage="Add a source in the Sources tab to unlock automations."
             />
           }
         />
@@ -281,8 +392,18 @@ export const AiIndexDetailPage = () => {
     />
   ) : (
     <Routes>
+      <Route path={CONTEXT_ENGINE_PATHS.detailSources} exact>
+        {sourcesPanel}
+      </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators} exact>
-        {aiIndex ? <ListKiPanel aiIndex={aiIndex} /> : null}
+        {aiIndex ? <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} /> : null}
+      </Route>
+      <Route path={CONTEXT_ENGINE_PATHS.detailSettings} exact>
+        {!isMemoryEnabled ? (
+          <Redirect to={getAiIndexDetailPath(resolvedAiIndexId)} />
+        ) : aiIndex ? (
+          <DreamingPanel aiIndex={aiIndex} />
+        ) : null}
       </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detail} exact>
         {overviewTabContent}
@@ -300,6 +421,7 @@ export const AiIndexDetailPage = () => {
           navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
         }}
         pageTitle={pageTitle}
+        menu={headerMenu}
         badges={headerBadges}
         tabs={headerTabs}
       />

@@ -133,7 +133,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('finds page title', async () => {
-          const title = await testSubjects.getVisibleText('header-page-title');
+          const title = await testSubjects.getVisibleText('appHeaderTitle');
           expect(title).to.equal('Endpoints');
         });
 

@@ -12,12 +12,7 @@ import {
   metrics,
   ValueType,
 } from '@opentelemetry/api';
-
-/** Why a page-render-service request did not produce a report. */
-export type RenderRetryReason = 'saturated' | 'unavailable' | 'render_failure' | 'rejected';
-
-/** `hand_back` runs again at once, `reschedule` after a pause, and `fail` ends the report. */
-export type RenderRetryAction = 'hand_back' | 'reschedule' | 'fail';
+import type { RenderRetryAction, RenderRetryReason } from '@kbn/reporting-common';
 
 /** The delivery targets — 95% within 4 minutes, 99% within 10 — are bucket boundaries. */
 const DELIVERY_SECONDS_BUCKETS = [

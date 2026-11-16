@@ -12,6 +12,7 @@ import {
 } from '../../../../../../common/endpoint/models/policy_config';
 import {
   ensureOnlyEventCollectionIsAllowed,
+  removeAiDataCollection,
   removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxRansomware,
@@ -29,6 +30,7 @@ export interface BuildEligibilityContextInput {
   readonly trustedDevicesExperimental: boolean;
   readonly endpointCustomYaraSignatures: boolean;
   readonly customYaraSignaturesExperimental: boolean;
+  readonly aiDataCollectionExperimental: boolean;
   readonly linuxRansomwareProtection: boolean;
   readonly endpointRegistryCredentialHardening: boolean;
   readonly registryCredentialHardeningExperimental: boolean;
@@ -44,6 +46,7 @@ export const buildEligibilityContext = ({
   trustedDevicesExperimental,
   endpointCustomYaraSignatures,
   customYaraSignaturesExperimental,
+  aiDataCollectionExperimental,
   linuxRansomwareProtection,
   endpointRegistryCredentialHardening,
   registryCredentialHardeningExperimental,
@@ -74,6 +77,10 @@ export const buildEligibilityContext = ({
     customYaraSignaturesReason: endpointCustomYaraSignatures
       ? 'custom_yara_signatures_experimental_disabled'
       : 'endpoint_custom_yara_signatures_disabled',
+    aiDataCollectionStripped: aiDataCollectionExperimental
+      ? proposedConfig
+      : removeAiDataCollection(proposedConfig),
+    aiDataCollectionReason: 'ai_data_collection_experimental_disabled',
     linuxRansomwareStripped: linuxRansomwareProtection
       ? proposedConfig
       : removeLinuxRansomware(proposedConfig),

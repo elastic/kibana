@@ -28,8 +28,10 @@ export {
   apiServicesFixture,
   apiClientFixture,
   coreWorkerFixtures,
+  defaultRolesFixture,
   esArchiverFixture,
   networkFixture,
+  requestAuthFixture,
   createPlaywrightConfig,
   createLazyPageObject,
   extendPlaywrightPage,
@@ -66,6 +68,7 @@ export {
 export type {
   ScoutPlaywrightOptions,
   ScoutTestOptions,
+  GotoAppOptions,
   ScoutPage,
   PageObjects,
   ScoutTestFixtures,
@@ -81,6 +84,7 @@ export type {
   ApiClientOptions,
   ApiClientResponse,
   BrowserAuthFixture,
+  DefaultRolesFixture,
   NetworkFixture,
   RequestAuthFixture,
   SamlAuth,
@@ -114,6 +118,7 @@ export type { Locator, CDPSession } from 'playwright/test';
 // Locator helpers used by plugin page objects
 export { resolveSelector } from './src/playwright/utils';
 export type { SelectorInput } from './src/playwright/utils';
+export { findImportedSavedObjectId } from './src/playwright/utils';
 
 // Config-set constants — exported so test files can import instead of redeclaring.
 export { AUDIT_LOG_PATH } from './src/servers/configs/config_sets/security_audit/shared';

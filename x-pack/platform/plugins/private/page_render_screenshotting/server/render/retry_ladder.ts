@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RenderServiceRetryClass } from '@kbn/reporting-common';
+import { RenderServiceRetryClass } from '@kbn/reporting-common';
 import type { RenderPageErrorBody } from './types';
 
 /**
@@ -59,18 +59,20 @@ export function classifyResponse(
   body: RenderPageErrorBody | undefined
 ): RenderServiceRetryClass {
   if (status === 429 || (status === 503 && rejection === 'draining')) {
-    return 'capacity';
+    return RenderServiceRetryClass.CAPACITY;
   }
   if (status >= 400 && status < 500) {
     // Bad payload, failed caller authentication, or an oversized body.
-    return 'unrecoverable';
+    return RenderServiceRetryClass.UNRECOVERABLE;
   }
   if (body?.phase) {
     // The service's own render failure. A page Kibana refused to serve will not load next time.
     return status === 502 && (body.documentStatus === 401 || body.documentStatus === 403)
-      ? 'unrecoverable'
-      : 'render_failure';
+      ? RenderServiceRetryClass.UNRECOVERABLE
+      : RenderServiceRetryClass.RENDER_FAILURE;
   }
   // No service error body: a proxy or the network in front of the service.
-  return status === 502 || status === 503 || status === 504 ? 'unavailable' : 'render_failure';
+  return status === 502 || status === 503 || status === 504
+    ? RenderServiceRetryClass.UNAVAILABLE
+    : RenderServiceRetryClass.RENDER_FAILURE;
 }

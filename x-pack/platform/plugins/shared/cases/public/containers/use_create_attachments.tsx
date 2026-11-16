@@ -29,9 +29,9 @@ export const useCreateAttachments = () => {
         owner: request.caseOwner,
       }));
 
-      // The io-ts `BulkCreateUnifiedAttachmentsRequest` types `data`/`metadata`
-      // through io-ts's `JsonValue`, which doesn't structurally accept the
-      // Zod-derived `Record<string, unknown>` shapes used by the new SO
+      // The `BulkCreateUnifiedAttachmentsRequest` type declares `data`/`metadata`
+      // as `JsonValue`, which doesn't structurally accept the
+      // `Record<string, unknown>` shapes used by the new SO
       // attachment payloads (dashboard `data.config`, map `data.attributes`,
       // etc.). Both contracts describe the same runtime JSON; this cast just
       // bridges the two type systems at the wire boundary. Server-side

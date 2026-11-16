@@ -9,7 +9,7 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { useDispatch } from 'react-redux-v7';
-import { WrappedHelper } from '../../../utils/testing';
+import { HookWrapper } from '../../../utils/testing/hook_helpers';
 import { setOverviewPageStateAction } from '../../../state';
 import { useSyncOverviewDateRange } from './use_sync_overview_date_range';
 
@@ -35,7 +35,7 @@ describe('useSyncOverviewDateRange', () => {
   const renderForUrl = (url: string) => {
     const history = createMemoryHistory({ initialEntries: [url] });
     const wrapper = ({ children }: React.PropsWithChildren) => (
-      <WrappedHelper history={history}>{children as React.ReactElement}</WrappedHelper>
+      <HookWrapper history={history}>{children as React.ReactElement}</HookWrapper>
     );
     const result = renderHook(() => useSyncOverviewDateRange(), { wrapper });
     return { ...result, history };

@@ -52,6 +52,7 @@
     "@kbn/security-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-components-field-row",
+    "@kbn/management-settings-hooks",
     "@kbn/deeplinks-observability",
     "@kbn/react-kibana-context-render",
     "@kbn/apm-data-access-plugin",

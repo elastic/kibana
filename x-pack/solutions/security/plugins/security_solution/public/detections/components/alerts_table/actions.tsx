@@ -34,7 +34,7 @@ import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-type
 import { lastValueFrom } from 'rxjs';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
-import type { TimelineEventsDetailsRequestOptionsInput } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsRequestOptionsInput } from '@kbn/securitysolution-timeline-search-strategy';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,

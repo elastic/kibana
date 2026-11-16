@@ -19,7 +19,7 @@ module.exports = {
   // Node's native undici `fetch` with no CORS enforcement. This is the same preset used
   // by the identical `createRootWithCorePlugins({}, { oss: false })` boot in
   // x-pack/platform/plugins/shared/encrypted_saved_objects/jest.integration.config.js.
-  preset: '@kbn/test/jest_integration_node',
+  preset: '@kbn/jest/jest_integration_node',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/src/platform/packages/private/kbn-workflow-step-schema-cli/integration_tests'],
   forceExit: true,

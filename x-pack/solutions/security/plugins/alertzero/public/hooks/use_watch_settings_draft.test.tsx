@@ -6,6 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
@@ -20,6 +21,10 @@ import { useUpdateWorker } from './use_workers_api';
 
 jest.mock('./use_workers_api');
 jest.mock('../service_accounts/ensure_worker_service_accounts');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
+
+const mockUseKibana = jest.mocked(useKibana);
+const addDanger = jest.fn();
 
 const mockUseUpdateWorker = jest.mocked(useUpdateWorker);
 const mockEnsureWorkerServiceAccounts = jest.mocked(ensureWorkerServiceAccounts);
@@ -77,6 +82,9 @@ describe('useWatchSettingsDraft', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseUpdateWorker.mockReturnValue({ mutateAsync } as never);
+    mockUseKibana.mockReturnValue({
+      services: { notifications: { toasts: { addDanger } } },
+    } as never);
     mockEnsureWorkerServiceAccounts.mockImplementation(
       async (_http, _serviceAccounts, workerIds) =>
         new Map(
@@ -165,6 +173,11 @@ describe('useWatchSettingsDraft', () => {
         enabled: true,
         dirty: true,
         error: 'Forbidden',
+      });
+      expect(addDanger).toHaveBeenCalledTimes(1);
+      expect(addDanger).toHaveBeenCalledWith({
+        title: "Some Worker changes weren't saved",
+        text: "AlertZero couldn't set up their service accounts. Rule Coverage: Forbidden.",
       });
     });
 
@@ -522,6 +535,126 @@ describe('useWatchSettingsDraft', () => {
         analysisWindowDays: 7,
       });
       expect(mutateAsync).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('a save that finishes after discard', () => {
+    /** Starts a save whose single write stays pending until the returned settle function runs. */
+    const startPendingSave = (worker: Worker) => {
+      let settle: (outcome: { worker: Worker } | Error) => void = () => {};
+      mutateAsync.mockImplementationOnce(
+        () =>
+          new Promise((resolvePromise, rejectPromise) => {
+            settle = (outcome) =>
+              outcome instanceof Error ? rejectPromise(outcome) : resolvePromise(outcome);
+          })
+      );
+      const rendered = renderHook(() => useWatchSettingsDraft([worker]));
+      act(() => {
+        rendered.result.current.updateEnabled(worker, true);
+      });
+      let saving: Promise<Worker[]> = Promise.resolve([]);
+      act(() => {
+        saving = rendered.result.current.save();
+      });
+      return {
+        ...rendered,
+        saving,
+        settle: (outcome: { worker: Worker } | Error) => settle(outcome),
+      };
+    };
+
+    it('leaves no error and no saving state behind when the write fails', async () => {
+      const { result, saving, settle } = startPendingSave(ruleCoverage);
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(result.current.isSaving).toBe(true);
+
+      act(() => {
+        result.current.discard();
+      });
+      expect(result.current.isSaving).toBe(false);
+
+      await act(async () => {
+        settle(new Error('Worker settings are temporarily unavailable; try again'));
+        await saving;
+      });
+
+      expect(result.current.isSaving).toBe(false);
+      expect(result.current.resolve(ruleCoverage)).toMatchObject({
+        enabled: false,
+        dirty: false,
+        error: undefined,
+      });
+    });
+
+    it('still reports a failed account setup, through a toast only', async () => {
+      let settleAccounts: (
+        accounts: Awaited<ReturnType<typeof ensureWorkerServiceAccounts>>
+      ) => void = () => {};
+      mockEnsureWorkerServiceAccounts.mockImplementationOnce(
+        () =>
+          new Promise((resolvePromise) => {
+            settleAccounts = resolvePromise;
+          })
+      );
+      const { result } = renderHook(() => useWatchSettingsDraft([unboundRuleCoverage]));
+      act(() => {
+        result.current.updateEnabled(unboundRuleCoverage, true);
+      });
+      let saving: Promise<Worker[]> = Promise.resolve([]);
+      act(() => {
+        saving = result.current.save();
+      });
+
+      act(() => {
+        result.current.discard();
+      });
+      await act(async () => {
+        settleAccounts(
+          new Map([
+            [
+              SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+              { ok: false as const, error: 'Forbidden' },
+            ],
+          ])
+        );
+        await saving;
+      });
+
+      expect(mutateAsync).not.toHaveBeenCalled();
+      expect(addDanger).toHaveBeenCalledWith({
+        title: "Some Worker changes weren't saved",
+        text: "AlertZero couldn't set up their service accounts. Rule Coverage: Forbidden.",
+      });
+      expect(result.current.resolve(unboundRuleCoverage)).toMatchObject({
+        enabled: false,
+        dirty: false,
+        error: undefined,
+      });
+    });
+
+    it('keeps an edit made after discard when the earlier write succeeds', async () => {
+      const { result, saving, settle } = startPendingSave(ruleCoverage);
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      act(() => {
+        result.current.discard();
+        result.current.updateSettings(ruleCoverage, { autonomy: 'assisted' });
+      });
+      await act(async () => {
+        settle({ worker: { ...ruleCoverage, enabled: true } });
+        await saving;
+      });
+
+      expect(result.current.isSaving).toBe(false);
+      expect(result.current.resolve(ruleCoverage)).toMatchObject({
+        settings: { autonomy: 'assisted' },
+        dirty: true,
+      });
     });
   });
 });

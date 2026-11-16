@@ -172,7 +172,7 @@ describe('processCompletionChunks', () => {
     ]);
   });
 
-  it('counts Converse cache read/write tokens in the prompt total and exposes cache reads as cached', async () => {
+  it('counts Converse cache read/write tokens in the prompt total and exposes them as cached and cacheWrite', async () => {
     const chunks: ConverseCompletionChunk[] = [
       {
         type: 'metadata',
@@ -194,7 +194,7 @@ describe('processCompletionChunks', () => {
     ).toEqual([
       {
         type: 'chatCompletionTokenCount',
-        tokens: { completion: 2, prompt: 35, total: 37, cached: 30 },
+        tokens: { completion: 2, prompt: 35, total: 37, cached: 30, cacheWrite: 4 },
       },
     ]);
   });

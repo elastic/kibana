@@ -303,49 +303,10 @@ describe('createDatasetTool', () => {
     expect(result.data.message).toContain(evalsDatasetTools.upsertDataset);
   });
 
-  it('asks the user to confirm before creating', async () => {
+  it('does not require confirmation before creating', () => {
     const { deps } = createDeps();
-    const confirmation = await confirmationOf(createDatasetTool(deps), input);
 
-    expect(confirmation).toEqual({
-      title: 'Create evaluation dataset?',
-      message: [
-        'This creates a dataset in the current space.',
-        [
-          '- **Name:** `bank`',
-          '- **Description:** `Banking questions`',
-          '- **Tags:** _none_',
-          '- **Maturity:** _not set_',
-          '- **Examples:** 1',
-        ].join('\n'),
-        '**First examples:**\n\n1. Input: `{"q":"hi"}`\n   Expected output: `{"a":"hello"}`',
-      ].join('\n\n'),
-      confirm_text: 'Create dataset',
-      cancel_text: 'Cancel',
-    });
-  });
-
-  it('previews only the first examples and flags missing expected outputs', async () => {
-    const { deps } = createDeps();
-    const examples = Array.from({ length: 5 }, (_, index) => ({ input: { q: index } }));
-    const confirmation = await confirmationOf(createDatasetTool(deps), { ...input, examples });
-
-    expect(confirmation?.message).toContain('3. Input: `{"q":2}`');
-    expect(confirmation?.message).not.toContain('{"q":3}');
-    expect(confirmation?.message).toContain('…and 2 more.');
-    expect(confirmation?.message).toContain('**5 example(s) have no expected output.**');
-  });
-
-  it('shows caller-supplied values verbatim rather than as markdown', async () => {
-    const { deps } = createDeps();
-    const confirmation = await confirmationOf(createDatasetTool(deps), {
-      ...input,
-      description: 'See `code` and\n[a link](https://example.com)',
-    });
-
-    expect(confirmation?.message).toContain(
-      "- **Description:** `See 'code' and [a link](https://example.com)`"
-    );
+    expect(createDatasetTool(deps).confirmation).toBeUndefined();
   });
 
   it('refuses callers without the manage privilege', async () => {

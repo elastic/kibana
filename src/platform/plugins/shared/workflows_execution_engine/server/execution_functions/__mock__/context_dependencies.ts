@@ -26,7 +26,6 @@ export const mockContextDependencies = () => ({
     eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
     maxWorkflowDepth: 10,
     logging: { console: false },
-    http: { allowedHosts: ['*'] },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb
     eviction: {
       minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb
