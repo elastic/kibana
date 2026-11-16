@@ -177,7 +177,7 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByTestId('ruleSummaryArtifacts')).toBeInTheDocument();
     expect(within(screen.getByTestId('ruleSummaryArtifacts')).getByRole('button')).toHaveAttribute(
       'aria-expanded',
-      'false'
+      'true'
     );
     expect(screen.queryByTestId('ruleSummaryActionPolicies')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockRuleConditions')).toHaveAttribute('data-variant', 'summary');

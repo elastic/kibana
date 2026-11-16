@@ -82,7 +82,7 @@ describe('RuleSummaryArtifactsSection', () => {
     expect(mockCanRead).toHaveBeenCalledWith('actionPolicies');
     expect(within(screen.getByTestId('ruleSummaryArtifacts')).getByRole('button')).toHaveAttribute(
       'aria-expanded',
-      'false'
+      'true'
     );
   });
 
