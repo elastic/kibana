@@ -23833,7 +23833,6 @@ paths:
                           value: ai-index-ds-customer-support
                         id: customer_support
                         managed: false
-                        memory_enabled: true
                         sources:
                           - type: esql
                             value: FROM support-cases | LIMIT 100
@@ -23967,9 +23966,6 @@ paths:
                         managed:
                           description: Whether the AI Index is managed by a plugin and therefore immutable.
                           type: boolean
-                        memory_enabled:
-                          description: Whether this AI Index accepts memory writes.
-                          type: boolean
                         sources:
                           description: Additional sources that provide context for the AI Index.
                           items:
@@ -24016,7 +24012,6 @@ paths:
                       required:
                         - id
                         - managed
-                        - memory_enabled
                         - date_created
                         - date_modified
                         - dest
@@ -24294,7 +24289,8 @@ paths:
                   minLength: 1
                   type: string
                 memory_enabled:
-                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  deprecated: true
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted. Deprecated and ignored in Serverless and in Elastic 9.7 and later.
                   type: boolean
                 sources:
                   default: []
@@ -25005,7 +25001,6 @@ paths:
                       value: ai-index-ds-customer-support
                     id: customer_support
                     managed: false
-                    memory_enabled: true
                     sources:
                       - type: esql
                         value: FROM support-cases | LIMIT 100
@@ -25138,9 +25133,6 @@ paths:
                   managed:
                     description: Whether the AI Index is managed by a plugin and therefore immutable.
                     type: boolean
-                  memory_enabled:
-                    description: Whether this AI Index accepts memory writes.
-                    type: boolean
                   sources:
                     description: Additional sources that provide context for the AI Index.
                     items:
@@ -25187,7 +25179,6 @@ paths:
                 required:
                   - id
                   - managed
-                  - memory_enabled
                   - date_created
                   - date_modified
                   - dest
@@ -25438,7 +25429,8 @@ paths:
                   required:
                     - enabled
                 memory_enabled:
-                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  deprecated: true
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted. Deprecated and ignored in Serverless and in Elastic 9.7 and later.
                   type: boolean
                 sources:
                   default: []
@@ -50616,10 +50608,16 @@ paths:
                           type: object
                         policySettings:
                           additionalProperties:
+                            anyOf:
+                              - maxLength: 10000
+                                type: string
+                              - items:
+                                  maxLength: 256
+                                  type: string
+                                maxItems: 100
+                                type: array
                             default: null
-                            maxLength: 10000
                             nullable: true
-                            type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                           type: object
                           x-state: Experimental; added in 9.7.0
@@ -50922,10 +50920,16 @@ paths:
                   type: array
                 policySettings:
                   additionalProperties:
+                    anyOf:
+                      - maxLength: 10000
+                        type: string
+                      - items:
+                          maxLength: 256
+                          type: string
+                        maxItems: 100
+                        type: array
                     default: null
-                    maxLength: 10000
                     nullable: true
-                    type: string
                   description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                   type: object
                   x-state: Experimental; added in 9.7.0
@@ -51236,10 +51240,16 @@ paths:
                         type: object
                       policySettings:
                         additionalProperties:
+                          anyOf:
+                            - maxLength: 10000
+                              type: string
+                            - items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
                           default: null
-                          maxLength: 10000
                           nullable: true
-                          type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                         type: object
                         x-state: Experimental; added in 9.7.0
@@ -51689,10 +51699,16 @@ paths:
                         type: object
                       policySettings:
                         additionalProperties:
+                          anyOf:
+                            - maxLength: 10000
+                              type: string
+                            - items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
                           default: null
-                          maxLength: 10000
                           nullable: true
-                          type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                         type: object
                         x-state: Experimental; added in 9.7.0
@@ -52038,10 +52054,16 @@ paths:
                   type: object
                 policySettings:
                   additionalProperties:
+                    anyOf:
+                      - maxLength: 10000
+                        type: string
+                      - items:
+                          maxLength: 256
+                          type: string
+                        maxItems: 100
+                        type: array
                     default: null
-                    maxLength: 10000
                     nullable: true
-                    type: string
                   description: Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.
                   type: object
                   x-state: Experimental; added in 9.7.0
@@ -52309,10 +52331,16 @@ paths:
                         type: object
                       policySettings:
                         additionalProperties:
+                          anyOf:
+                            - maxLength: 10000
+                              type: string
+                            - items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
                           default: null
-                          maxLength: 10000
                           nullable: true
-                          type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                         type: object
                         x-state: Experimental; added in 9.7.0
@@ -52689,10 +52717,16 @@ paths:
                           type: object
                         policySettings:
                           additionalProperties:
+                            anyOf:
+                              - maxLength: 10000
+                                type: string
+                              - items:
+                                  maxLength: 256
+                                  type: string
+                                maxItems: 100
+                                type: array
                             default: null
-                            maxLength: 10000
                             nullable: true
-                            type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                           type: object
                           x-state: Experimental; added in 9.7.0
@@ -212652,12 +212686,22 @@ components:
                   example: true
                   type: boolean
                 path:
-                  description: The full file path to retrieve from the endpoint.
+                  description: The full file path to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both.
                   maxLength: 4096
                   minLength: 1
                   type: string
-              required:
-                - path
+                paths:
+                  description: The list of file paths to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both. Valid for the Elastic Defend Endpoint agent type only, and requires an Endpoint that supports the `get_file_multi_path` capability.
+                  example:
+                    - /var/log/syslog
+                    - /var/log/auth.log
+                  items:
+                    maxLength: 4096
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  minItems: 1
+                  type: array
           required:
             - parameters
     Security_Endpoint_Management_API_GetProcessesRouteRequestBody:

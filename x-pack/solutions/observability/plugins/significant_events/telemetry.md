@@ -20,12 +20,6 @@ tools it calls report no `workflow_execution_id`. Standalone operations continue
 remains the feature-identification operation ID and equals `workflow_execution_id` when a workflow
 invokes the operation.
 
-On `agent-tool-event-investigation-attach`, `workflow_execution_id` identifies the workflow that
-invoked the tool and `investigation_id` identifies the attached investigation (its Agent Builder
-conversation). Before this release, `workflow_execution_id` on that event held the attached
-investigation ID. The meaning changed rather than gaining an alias, so split historical rows on the
-release that shipped `investigation_id`.
-
 ## How the pipeline connects
 
 The pipeline is not one execution tree. Its stages run as independent root workflows and hand work
@@ -59,9 +53,6 @@ runs. Reusing one execution ID would conflate distinct runs. Thread the pipeline
 4. Join an investigation to the run that wrote the alert version it was triggered for through
    `source_workflow_execution_id`, and to the significant event through `event_id`. The discovery
    run that created the event is the earliest `events-write` row with that `event_id`.
-5. Use `investigation_id` to join attachment events to
-   `nightshift-investigation-started.investigation_id`. This identifies the investigation, not one
-   of its Workflow Engine runs.
 
 An alert automation resolves the alert it was triggered for, and when the alert is a significant
 event the Nightshift trigger step reads `workflow_execution_id` from the alert event `data` and
@@ -92,7 +83,6 @@ Significant Events event types below drop their `significant-events-` prefix.
 | `nightshift-investigation-started` | Run that wrote the triggering alert version | `source_workflow_execution_id` = that run's `workflow_execution_id` |
 | `nightshift-investigation-started` | Significant event | `event_id` |
 | `nightshift-investigation-started` | Discovery run that created the event | `event_id` = earliest `events-write.event_id`, then its `workflow_execution_id` |
-| `agent-tool-event-investigation-attach` | Investigation | `investigation_id` = `nightshift-investigation-started.investigation_id` |
 | Detection or discovery | Onboarding | `source_id` / `source_ids` only; KIs are shared across onboarding runs |
 
 `parent_workflow_execution_id` joins to `onboarding-scheduled.workflow_execution_id` only for
@@ -114,9 +104,7 @@ the triggers do not. Trigger payloads are not exported as EBT; use
 
 Each `.rule-events` version stores, in `workflow_execution_id`, the execution of the workflow that
 wrote it. A standalone write (UI, interactive agent) clears the prior producer ID; a
-workflow-driven write, including stale-event cleanup, replaces it. Attaching an investigation
-stamps the attaching workflow's execution; the investigation's own ID lives only in
-`investigations[]`.
+workflow-driven write, including stale-event cleanup, replaces it.
 
 ## Tracing an investigation back to its detections
 
