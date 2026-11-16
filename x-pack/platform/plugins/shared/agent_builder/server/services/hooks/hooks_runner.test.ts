@@ -560,16 +560,24 @@ describe('createHooksRunner', () => {
     await run(HookLifecycle.beforeAgent, contextWithSignal);
     expect(receivedSignal).toBe(controller.signal);
   });
-  describe('non-blocking hooks with a bound service account', () => {
+  describe('non-blocking hooks that require a service-account request', () => {
     const boundContext = {
       ...baseContext,
       agentId: 'agent-1',
       runAs: 'sa-1',
     };
     const serviceAccountRequest = { id: 'service-account-request' } as unknown as KibanaRequest;
-    const nonBlockingHook = (handler: (ctx: BeforeAgentHookContext) => Promise<void>) =>
+    const nonBlockingHook = (
+      handler: (ctx: BeforeAgentHookContext) => Promise<void>,
+      requiresServiceAccountRequest = true
+    ) =>
       [
-        { id: 'nb', mode: HookExecutionMode.nonBlocking, handler },
+        {
+          id: 'nb',
+          mode: HookExecutionMode.nonBlocking,
+          requiresServiceAccountRequest,
+          handler,
+        },
       ] as unknown as HookRegistration<HookLifecycle>[];
 
     it('gives the hook a service-account request that lasts until the hook settles', async () => {
@@ -601,6 +609,24 @@ describe('createHooksRunner', () => {
       );
       expect(seen).toEqual([serviceAccountRequest, false]);
       expect(released).toBe(true);
+    });
+
+    it('keeps the execution request, and mints nothing, for a hook that does not ask for one', async () => {
+      const seen: unknown[] = [];
+      const withAgentServiceAccountRequest = jest.fn();
+      const { run } = createRunner({
+        withAgentServiceAccountRequest,
+        getHooksForLifecycle: () =>
+          nonBlockingHook(async (ctx) => {
+            seen.push(ctx.request);
+          }, false),
+      });
+
+      await run(HookLifecycle.beforeAgent, boundContext);
+      await flushEventLoop();
+
+      expect(withAgentServiceAccountRequest).not.toHaveBeenCalled();
+      expect(seen).toEqual([boundContext.request]);
     });
 
     it('keeps the execution request when the execution did not run as a service account', async () => {
