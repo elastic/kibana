@@ -124,7 +124,7 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
       .spyOn(tracing, 'withNightshiftBackgroundSpan')
       .mockImplementation((_options, fn) => fn(undefined));
     const evaluate = jest.fn().mockResolvedValue([okResult('conclusion_quality')]);
-    const { run } = setup({ evaluate, rounds: [{ ...ROUND, trace_id: [roundTraceId, 'other'] }] });
+    const { run } = setup({ evaluate, rounds: [{ ...ROUND, trace_id: ['other', roundTraceId] }] });
 
     await run();
 

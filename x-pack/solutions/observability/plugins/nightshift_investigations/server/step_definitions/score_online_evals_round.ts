@@ -281,7 +281,9 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
           getAgentBuilder,
           request,
         });
-        const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
+        // A round resumed after human-in-the-loop has one trace per execution; the latest is the
+        // one whose response the user sees.
+        const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id.at(-1) : round.trace_id;
         const judgeConnectorId = await resolveJudge(resolveJudgeConnectorId, request);
         // Joins the round's trace so the judges show up in the conversation trace flyout.
         const { results, failedEvaluators } = await withNightshiftBackgroundSpan(
