@@ -219,3 +219,27 @@ export const BULK_DELETE_MESSAGE = (count: number) =>
     defaultMessage:
       'Are you sure you want to delete {count, plural, one {this observable} other {these observables}}?',
   });
+
+export const OBSERVABLES_PAGE_RANGE = (start: number, end: number, total: number) =>
+  i18n.translate('xpack.cases.caseView.observables.pageRange', {
+    values: { start, end, total },
+    defaultMessage: '{start}–{end} of {total}',
+  });
+
+export const OBSERVABLES_PREVIOUS_PAGE = i18n.translate(
+  'xpack.cases.caseView.observables.previousPage',
+  {
+    defaultMessage: 'Previous page',
+  }
+);
+
+export const OBSERVABLES_NEXT_PAGE = i18n.translate('xpack.cases.caseView.observables.nextPage', {
+  defaultMessage: 'Next page',
+});
+
+export const OBSERVABLES_ROWS_PER_PAGE = i18n.translate(
+  'xpack.cases.caseView.observables.rowsPerPage',
+  {
+    defaultMessage: 'Rows per page',
+  }
+);

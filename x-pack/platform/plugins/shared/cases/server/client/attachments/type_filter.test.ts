@@ -6,12 +6,25 @@
  */
 
 import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { buildAttachmentTypeFilter } from './type_filter';
+import { buildAttachmentTypeFilter, excludeObservablesFilter } from './type_filter';
 
 describe('buildAttachmentTypeFilter', () => {
-  it('returns undefined when types is undefined or empty', () => {
-    expect(buildAttachmentTypeFilter(undefined)).toBeUndefined();
-    expect(buildAttachmentTypeFilter([])).toBeUndefined();
+  it('excludes observables when types is undefined or empty', () => {
+    const expected = JSON.stringify(excludeObservablesFilter());
+
+    expect(JSON.stringify(buildAttachmentTypeFilter(undefined))).toEqual(expected);
+    expect(JSON.stringify(buildAttachmentTypeFilter([]))).toEqual(expected);
+    expect(expected).toContain('"not"');
+    expect(expected).toContain('cases-attachments.attributes.type');
+    expect(expected).toContain('"observable"');
+  });
+
+  it('matches observables when they are asked for by type', () => {
+    const filter = JSON.stringify(buildAttachmentTypeFilter(['observable']));
+
+    expect(filter).toContain('cases-attachments.attributes.type');
+    expect(filter).toContain('"observable"');
+    expect(filter).not.toContain('"not"');
   });
 
   it('maps a unified alert type to leftover `alert` rows of the matching owner prefix', () => {

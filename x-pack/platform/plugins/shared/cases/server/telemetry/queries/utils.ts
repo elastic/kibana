@@ -33,7 +33,8 @@ import type {
   AlertBuckets,
   ObservablesAggregationResult,
   ObservablesTelemetry,
-  TotalWithMaxObservablesAggregationResult,
+  ObservablesTelemetryAggregationResult,
+  CasesWithMaxObservablesAggregationResult,
 } from '../types';
 import type { AttachmentsByTypeRaw } from './attachments_by_type';
 import { buildAttachmentFramework } from './attachments_by_type';
@@ -218,19 +219,13 @@ export const getObservablesTotalsByType = (
   return result;
 };
 
+/** Number of cases holding at least `MAX_OBSERVABLES_PER_CASE` observables. */
 export const getTotalWithMaxObservables = (
-  totalWithMaxObservablesAgg?: TotalWithMaxObservablesAggregationResult['buckets']
-): number => {
-  if (!totalWithMaxObservablesAgg || totalWithMaxObservablesAgg.length === 0) {
-    return 0;
-  }
-
-  // Sum doc_count for all buckets where key (total_observables value) >= 50
-  return totalWithMaxObservablesAgg.reduce((sum, bucket) => {
-    const key = typeof bucket.key === 'number' ? bucket.key : Number(bucket.key);
-    return key >= MAX_OBSERVABLES_PER_CASE ? sum + (bucket.doc_count ?? 0) : sum;
-  }, 0);
-};
+  casesWithMaxObservablesAgg?: CasesWithMaxObservablesAggregationResult
+): number =>
+  casesWithMaxObservablesAgg?.byCase.buckets.filter(
+    ({ doc_count: count }) => count >= MAX_OBSERVABLES_PER_CASE
+  ).length ?? 0;
 
 interface MaxCounterAggs {
   maxCounter: { value: number | null };
@@ -363,12 +358,14 @@ export const getBucketFromAggregation = ({
 
 export const getSolutionValues = ({
   caseAggregations,
+  observablesAggregations,
   attachmentsByType,
   filesAggregations,
   totalWithAlertsByOwner,
   owner,
 }: {
   caseAggregations?: CaseAggregationResult;
+  observablesAggregations?: ObservablesTelemetryAggregationResult;
   attachmentsByType?: AttachmentsByTypeRaw;
   filesAggregations?: FileAttachmentAggregationResults;
   totalWithAlertsByOwner?: Record<Owner, number>;
@@ -405,9 +402,9 @@ export const getSolutionValues = ({
       filesAggregations: fileAttachmentsForOwner,
       totalCasesForOwner,
     }),
-    observables: getObservablesTotalsByType(caseAggregations?.[owner]?.observables),
+    observables: getObservablesTotalsByType(observablesAggregations?.[owner]?.observables),
     totalWithMaxObservables: getTotalWithMaxObservables(
-      caseAggregations?.[owner]?.totalWithMaxObservables?.buckets ?? []
+      observablesAggregations?.[owner]?.casesWithMaxObservables
     ),
     totalWithAlerts: totalWithAlertsByOwner?.[owner] ?? 0,
     assignees: {

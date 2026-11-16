@@ -25,6 +25,8 @@ export const INDICATOR_ATTACHMENT_TYPE = 'security.indicator';
 export const SECURITY_ENTITY_ATTACHMENT_TYPE = 'security.entity';
 export const SECURITY_TIMELINE_ATTACHMENT_TYPE = 'security.timeline';
 export const SECURITY_ATTACK_ATTACHMENT_TYPE = 'security.attack';
+// One saved object per case observable; written only through the observables client.
+export const OBSERVABLE_ATTACHMENT_TYPE = 'observable';
 
 export const ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE = 'ml.anomaly_swimlane';
 export const ML_ANOMALY_CHARTS_ATTACHMENT_TYPE = 'ml.anomaly_charts';

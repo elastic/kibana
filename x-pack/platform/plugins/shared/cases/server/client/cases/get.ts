@@ -51,6 +51,7 @@ import {
 } from '../../common/utils';
 import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
 import { enrichCasesWithFieldLabels } from './utils';
+import { getObservablesSummary, withObservablesSummary } from './observables_storage';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { getOwnersFilter } from '../../authorization/utils';
@@ -435,9 +436,12 @@ export const get = async (
     });
 
     if (!includeComments) {
-      const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
-        caseIds: [theCase.id],
-      });
+      const [commentStats, observablesSummaries] = await Promise.all([
+        attachmentService.getter.getCaseAttatchmentStats({
+          caseIds: [theCase.id],
+        }),
+        getObservablesSummary([theCase.id], clientArgs),
+      ]);
       const flattenedCase = flattenCaseSavedObject({
         savedObject: theCase,
         ...(commentStats.has(theCase.id)
@@ -449,17 +453,23 @@ export const get = async (
           : {}),
       });
       return decodeOrThrowZod(CaseSchema)(
-        await enrichCaseWithFieldLabels(flattenedCase, clientArgs)
+        await enrichCaseWithFieldLabels(
+          withObservablesSummary(flattenedCase, observablesSummaries),
+          clientArgs
+        )
       );
     }
 
-    const theComments = (await caseService.getAllCaseComments({
-      id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
-    })) as SavedObjectsFindResponse<AttachmentAttributes>;
+    const [theComments, observablesSummaries] = await Promise.all([
+      caseService.getAllCaseComments({
+        id,
+        options: {
+          sortField: 'created_at',
+          sortOrder: 'asc',
+        },
+      }) as Promise<SavedObjectsFindResponse<AttachmentAttributes>>,
+      getObservablesSummary([theCase.id], clientArgs),
+    ]);
 
     const res = flattenCaseSavedObject({
       savedObject: theCase,
@@ -469,7 +479,9 @@ export const get = async (
       totalEvents: countEventsForID({ comments: theComments }),
     });
 
-    return decodeOrThrowZod(CaseSchema)(await enrichCaseWithFieldLabels(res, clientArgs));
+    return decodeOrThrowZod(CaseSchema)(
+      await enrichCaseWithFieldLabels(withObservablesSummary(res, observablesSummaries), clientArgs)
+    );
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
@@ -513,20 +525,26 @@ export const resolve = async (
     });
 
     if (!includeComments) {
-      const flattenedCase = flattenCaseSavedObject({ savedObject: resolvedSavedObject });
+      const flattenedCase = withObservablesSummary(
+        flattenCaseSavedObject({ savedObject: resolvedSavedObject }),
+        await getObservablesSummary([resolvedSavedObject.id], clientArgs)
+      );
       return decodeOrThrowZod(CaseResolveResponseSchema)({
         ...resolveData,
         case: await enrichCaseWithFieldLabels(flattenedCase, clientArgs),
       });
     }
 
-    const theComments = (await caseService.getAllCaseComments({
-      id: resolvedSavedObject.id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
-    })) as SavedObjectsFindResponse<AttachmentAttributes>;
+    const [theComments, observablesSummaries] = await Promise.all([
+      caseService.getAllCaseComments({
+        id: resolvedSavedObject.id,
+        options: {
+          sortField: 'created_at',
+          sortOrder: 'asc',
+        },
+      }) as Promise<SavedObjectsFindResponse<AttachmentAttributes>>,
+      getObservablesSummary([resolvedSavedObject.id], clientArgs),
+    ]);
 
     const flattenedCase = flattenCaseSavedObject({
       savedObject: resolvedSavedObject,
@@ -538,7 +556,10 @@ export const resolve = async (
 
     const res = {
       ...resolveData,
-      case: await enrichCaseWithFieldLabels(flattenedCase, clientArgs),
+      case: await enrichCaseWithFieldLabels(
+        withObservablesSummary(flattenedCase, observablesSummaries),
+        clientArgs
+      ),
     };
 
     return decodeOrThrowZod(CaseResolveResponseSchema)(res);
