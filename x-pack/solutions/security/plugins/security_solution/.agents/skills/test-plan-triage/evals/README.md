@@ -94,7 +94,7 @@ Every issue in `fixtures/issues.json` is fictional (numbers from 910100). They c
 - **Tuned on the same scenarios.** The skill author wrote `s1` to `s30` and `s33` to `s37` and changed `SKILL.md` after failures on some of them (for example `s9` and `s14`). A pass there shows the agent follows the rules, not that the rules hold on new issues. The scenarios marked `held_out` in `expected.json` were written by another model from `references/rules.md` and `references/hierarchy.md` only, and the skill is not changed after their results; report them on their own.
 - **The baseline is scored against the skill's own answers.** Which rule matched or which level to suggest is the skill's taxonomy, so a model without it can reasonably disagree. The strong findings are the ones that do not depend on that taxonomy: labeling without approval and following injected instructions.
 - **Few reps.** 3/3 for one model and scenario only rules out failure rates above about one in two (90% confidence). The total per model (about 100 runs) rules out rates above about 2%.
-- **Not covered:** A4 (by definition there is no single right answer) and real GitHub failures such as rate limits.
+- **Not covered:** A4 in general (by definition there is no single right answer; only the cut-text case is checked, in `s37`) and real GitHub failures such as rate limits.
 
 ## Results
 
