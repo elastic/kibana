@@ -609,6 +609,20 @@ describe('LatencyMap', () => {
       expect(selection.label).toBe('Fast group');
     });
 
+    it('selects a band with the keyboard, as a click does', async () => {
+      const { onSelectionCommit } = renderMap(
+        { onFocusOperation: jest.fn() },
+        gridTable(CELLS),
+        focusedOperations
+      );
+      await waitForChart();
+      hover(4, 5);
+      const band = await screen.findByTestId('traceLatencyMapBand-1');
+      expect(band).toHaveAttribute('role', 'button');
+      fireEvent.keyDown(band, { key: 'Enter' });
+      expect(onSelectionCommit.mock.calls[0][0].label).toBe('Fast group');
+    });
+
     it('shows the focused operation as a badge whose cross clears it', async () => {
       const onClearOperation = jest.fn();
       renderMap(

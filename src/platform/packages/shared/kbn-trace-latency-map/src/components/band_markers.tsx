@@ -111,7 +111,11 @@ export function BandMarkers({
     <svg
       width={width}
       height={height}
-      aria-hidden="true"
+      role="group"
+      aria-label={i18n.translate('traceLatencyMap.band.groupsLabel', {
+        defaultMessage: 'Duration groups of {service} {operation}',
+        values: { service: operation.service, operation: operation.name },
+      })}
       css={css`
         position: absolute;
         inset: 0;
@@ -125,22 +129,34 @@ export function BandMarkers({
         const top = geometry.edgeToY(band.highRow + 1);
         const bottom = geometry.edgeToY(band.lowRow);
         const middle = labelYs[index];
+        const select = () =>
+          onSelectBand(
+            band,
+            i18n.translate('traceLatencyMap.band.groupSelectionLabel', {
+              defaultMessage: '{name} group',
+              values: { name },
+            })
+          );
         return (
           <g
             key={band.lowRow}
             pointerEvents="all"
+            role="button"
+            tabIndex={0}
+            aria-label={getBandTooltip(band, name, operation)}
             css={css`
               cursor: pointer;
+              &:focus-visible {
+                outline: ${euiTheme.focus.width} solid ${euiTheme.colors.primary};
+              }
             `}
-            onClick={() =>
-              onSelectBand(
-                band,
-                i18n.translate('traceLatencyMap.band.groupSelectionLabel', {
-                  defaultMessage: '{name} group',
-                  values: { name },
-                })
-              )
-            }
+            onClick={select}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                select();
+              }
+            }}
             {...{ [OVERLAY_CONTROL_ATTRIBUTE]: '' }}
             data-test-subj={`traceLatencyMapBand-${index + 1}`}
           >
@@ -159,7 +175,13 @@ export function BandMarkers({
               })}
             </text>
             <text x={x + 8} y={middle + 9} fontSize={9} fill={colors.axisText}>
-              {formatDuration(band.minDuration)}-{formatDuration(band.maxDuration)}
+              {i18n.translate('traceLatencyMap.band.rangeLabel', {
+                defaultMessage: '{minDuration}-{maxDuration}',
+                values: {
+                  minDuration: formatDuration(band.minDuration),
+                  maxDuration: formatDuration(band.maxDuration),
+                },
+              })}
             </text>
           </g>
         );

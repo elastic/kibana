@@ -146,6 +146,28 @@ describe('useLatencyGrid', () => {
         return gridTable([[1, 2, 7, 3]]);
       });
 
+    it('starts the histograms beside the grid query, not behind it', async () => {
+      let releaseGrid: (table: ESQLSearchResponse) => void = () => {};
+      const kinds: string[] = [];
+      const runEsql = jest.fn((query: string): Promise<ESQLSearchResponse> => {
+        if (query.includes('PERCENTILE')) return Promise.resolve(statsTable(100));
+        if (isOperationsQuery(query)) {
+          kinds.push('operations');
+          return Promise.resolve(operationsTable);
+        }
+        kinds.push('grid');
+        return new Promise((resolve) => (releaseGrid = resolve));
+      });
+      const { result } = renderHook(() =>
+        useLatencyGrid({ source, runEsql, targetBins: 60, loadOperations: true })
+      );
+      // The histogram query is asked while the grid query is still in flight.
+      await waitFor(() => expect([...kinds].sort()).toEqual(['grid', 'operations']));
+      expect(result.current.grid).toBeUndefined();
+      releaseGrid(gridTable([[1, 2, 7, 3]]));
+      await waitFor(() => expect(result.current.operations).toHaveLength(1));
+    });
+
     it('loads the histograms after the grid, and not at all without the feature', async () => {
       const runEsql = createOperationsRunner();
       const { result } = renderHook(() =>
@@ -182,18 +204,28 @@ describe('useLatencyGrid', () => {
       expect(runEsql.mock.calls.filter(([query]) => isOperationsQuery(query))).toHaveLength(1);
     });
 
-    it('only loses the bands when the histogram query fails, never the grid', async () => {
+    it('only loses the bands when the histogram query fails, and retries on the next load', async () => {
+      let failures = 0;
       const runEsql = jest.fn(async (query: string) => {
         if (query.includes('PERCENTILE')) return statsTable(100);
-        if (isOperationsQuery(query)) throw new Error('boom');
+        if (isOperationsQuery(query)) {
+          if (failures++ === 0) throw new Error('boom');
+          return operationsTable;
+        }
         return gridTable([[1, 2, 7, 3]]);
       });
-      const { result } = renderHook(() =>
-        useLatencyGrid({ source, runEsql, targetBins: 60, loadOperations: true })
+      const { result, rerender } = renderHook(
+        (props: { targetBins: number }) =>
+          useLatencyGrid({ source, runEsql, loadOperations: true, ...props }),
+        { initialProps: { targetBins: 60 } }
       );
       await waitFor(() => expect(result.current.operations).toEqual([]));
       expect(result.current.grid?.cells.size).toBe(1);
       expect(result.current.error).toBeUndefined();
+
+      // A transient failure is not cached as "no bands": the next load asks again.
+      rerender({ targetBins: 120 });
+      await waitFor(() => expect(result.current.operations).toHaveLength(1));
     });
   });
 

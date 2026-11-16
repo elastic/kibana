@@ -104,6 +104,23 @@ export function useLatencyGrid({
         };
       }
       const sampling = getMapSampling(stats);
+      // Started beside the grid queries - the histograms need only the statistics. On a
+      // failure the map just loses its bands, and nothing is cached, so the next load
+      // retries after a transient error; an aborted run is discarded with the rest.
+      const operationsPromise =
+        loadOperations && operationsCache.current?.key !== sourceKey
+          ? run(buildOperationHistogramQuery(stableSource, stats, sampling)).then(
+              (table) => {
+                const operations = parseOperationHistograms(
+                  table,
+                  sampling ? 1 / sampling.probability : 1
+                );
+                operationsCache.current = { key: sourceKey, operations };
+                return operations;
+              },
+              () => undefined
+            )
+          : undefined;
       let grid = createEmptyGrid(timeGrid.bins);
       if (sampling) {
         const [exact, sampled] = getMapQueryParts(sampling);
@@ -130,22 +147,12 @@ export function useLatencyGrid({
         loadedSource: stableSource,
       };
       if (!loadOperations) return gridState;
-      if (operationsCache.current?.key === sourceKey) {
-        return { ...gridState, operations: operationsCache.current.operations };
+      if (!operationsPromise) {
+        return { ...gridState, operations: operationsCache.current?.operations ?? [] };
       }
-      // The map shows while the histograms load; the bands join it when they arrive.
+      // The map shows while the histograms finish; the bands join it when they arrive.
       if (!controller.signal.aborted) setState(gridState);
-      let operations: OperationHistogram[];
-      try {
-        const table = await run(buildOperationHistogramQuery(stableSource, stats, sampling));
-        operations = parseOperationHistograms(table, sampling ? 1 / sampling.probability : 1);
-      } catch (error) {
-        if (controller.signal.aborted || isAbort(error)) throw error;
-        // Without the histograms the map only loses its bands, never the grid.
-        operations = [];
-      }
-      operationsCache.current = { key: sourceKey, operations };
-      return { ...gridState, operations };
+      return { ...gridState, operations: (await operationsPromise) ?? [] };
     })().then(
       (next) => {
         if (!controller.signal.aborted) setState(next);
