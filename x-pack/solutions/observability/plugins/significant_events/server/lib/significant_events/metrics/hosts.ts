@@ -57,7 +57,7 @@ ${HOST_NODE_NAME_EVAL}
 | STATS docs = COUNT(*), last_seen = MAX(@timestamp), os = VALUES(host.os.name),
         cloud_provider = VALUES(cloud.provider)
   BY entity_type, concept_cluster, member
-| STATS scale = COUNT(*), activity = SUM(docs), last_seen = MAX(last_seen),
+| STATS member_count = COUNT(*), activity = SUM(docs), last_seen = MAX(last_seen),
         members = TOP(member, 50, "asc"), os = VALUES(os),
         cloud_provider = VALUES(cloud_provider)
   BY entity_type, concept_cluster
@@ -73,7 +73,7 @@ export const foldHostRows = (
   for (const row of rows) {
     const entityType = row.entity_type;
     const members = stringsOf(row.members).slice(0, 50);
-    const scale = typeof row.scale === 'number' ? row.scale : 0;
+    const memberCount = typeof row.member_count === 'number' ? row.member_count : 0;
     if (entityType === 'host') {
       const id = `hosts:${sourceId}`;
       const title = 'Hosts';
@@ -89,7 +89,7 @@ export const foldHostRows = (
         description: buildInfrastructureConceptDescription({
           concept: 'hosts',
           scope: sourceId,
-          scale,
+          memberCount,
           breakdownFields: ['host.name'],
           members,
         }),
@@ -103,7 +103,7 @@ export const foldHostRows = (
         properties: {
           breakdown: ['host.name'],
           entity_store_type: 'host',
-          scale,
+          member_count: memberCount,
           members,
           list_query: buildConceptListQuery({
             sourceQuery,
@@ -146,7 +146,7 @@ export const foldHostRows = (
       description: buildInfrastructureConceptDescription({
         concept: 'nodes',
         scope: cluster ?? sourceId,
-        scale,
+        memberCount,
         breakdownFields: ['kubernetes.node.name'],
         members,
         clusterMissing: cluster === undefined,
@@ -155,7 +155,7 @@ export const foldHostRows = (
       properties: {
         breakdown: ['kubernetes.node.name'],
         entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.node,
-        scale,
+        member_count: memberCount,
         members,
         list_query: buildConceptListQuery({
           sourceQuery,

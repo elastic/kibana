@@ -25,7 +25,7 @@ const datasetColumns = [
 const workloadColumns = [
   { name: 'orchestrator.cluster.name', type: 'keyword' },
   { name: 'kind', type: 'keyword' },
-  { name: 'scale', type: 'long' },
+  { name: 'member_count', type: 'long' },
   { name: 'activity', type: 'long' },
   { name: 'last_seen', type: 'date' },
   { name: 'members', type: 'keyword' },
@@ -33,7 +33,7 @@ const workloadColumns = [
 
 const nodeColumns = [
   { name: 'orchestrator.cluster.name', type: 'keyword' },
-  { name: 'scale', type: 'long' },
+  { name: 'member_count', type: 'long' },
   { name: 'activity', type: 'long' },
   { name: 'last_seen', type: 'date' },
   { name: 'members', type: 'keyword' },
@@ -43,7 +43,7 @@ const nodeColumns = [
 
 const namespaceColumns = [
   { name: 'orchestrator.cluster.name', type: 'keyword' },
-  { name: 'scale', type: 'long' },
+  { name: 'member_count', type: 'long' },
   { name: 'activity', type: 'long' },
   { name: 'last_seen', type: 'date' },
   { name: 'members', type: 'keyword' },
@@ -52,7 +52,7 @@ const namespaceColumns = [
 const hostColumns = [
   { name: 'entity_type', type: 'keyword' },
   { name: 'concept_cluster', type: 'keyword' },
-  { name: 'scale', type: 'long' },
+  { name: 'member_count', type: 'long' },
   { name: 'activity', type: 'long' },
   { name: 'last_seen', type: 'date' },
   { name: 'members', type: 'keyword' },
@@ -61,7 +61,7 @@ const hostColumns = [
 ];
 
 const serviceColumns = [
-  { name: 'scale', type: 'long' },
+  { name: 'member_count', type: 'long' },
   { name: 'activity', type: 'long' },
   { name: 'last_seen', type: 'date' },
   { name: 'members', type: 'keyword' },
@@ -123,18 +123,18 @@ describe('getDatasetFamily', () => {
 });
 
 describe('buildInfrastructureConceptDescription', () => {
-  it('uses the exact scale and truncates members within the schema limit', () => {
+  it('uses the exact member count and truncates members within the schema limit', () => {
     const exact = buildInfrastructureConceptDescription({
       concept: 'nodes',
       scope: 'cluster-a',
-      scale: 188,
+      memberCount: 188,
       breakdownFields: ['kubernetes.node.name'],
       members: ['node-a'],
     });
     const truncated = buildInfrastructureConceptDescription({
       concept: 'deployments',
       scope: 'cluster-a',
-      scale: 1000,
+      memberCount: 1000,
       breakdownFields: ['kubernetes.namespace', 'kubernetes.deployment.name'],
       members: Array.from({ length: 50 }, (_, index) => `${index}-${'x'.repeat(500)}`),
     });
@@ -157,35 +157,35 @@ describe('Kubernetes type KIs', () => {
         {
           'orchestrator.cluster.name': 'cluster-a',
           kind: 'deployment',
-          scale: 60,
+          member_count: 60,
           activity: 100,
           members: deploymentMembers,
         },
         {
           'orchestrator.cluster.name': 'cluster-b',
           kind: 'deployment',
-          scale: 1,
+          member_count: 1,
           activity: 1,
           members: ['apps/api'],
         },
         {
           'orchestrator.cluster.name': 'cluster-a',
           kind: 'cronjob',
-          scale: 1,
+          member_count: 1,
           activity: 1,
           members: ['ops/nightly-derived'],
         },
         {
           'orchestrator.cluster.name': 'cluster-a',
           kind: 'statefulset',
-          scale: 1,
+          member_count: 1,
           activity: 1,
           members: ['apps/database'],
         },
         {
           'orchestrator.cluster.name': 'cluster-a',
           kind: 'daemonset',
-          scale: 1,
+          member_count: 1,
           activity: 1,
           members: ['ops/agent'],
         },
@@ -210,7 +210,7 @@ describe('Kubernetes type KIs', () => {
         properties: expect.objectContaining({
           breakdown: ['kubernetes.namespace', 'kubernetes.deployment.name'],
           entity_store_type: 'k8s.deployment',
-          scale: 60,
+          member_count: 60,
           members: deploymentMembers,
           origin: 'metrics',
           key_row: 'ecs.k8s_workload',
@@ -312,7 +312,7 @@ describe('Kubernetes type KIs', () => {
       [
         {
           'orchestrator.cluster.name': 'cluster-a',
-          scale: 2,
+          member_count: 2,
           members: ['node-a', 'node-b'],
           os: ['Linux'],
           cloud_provider: ['gcp'],
@@ -324,7 +324,7 @@ describe('Kubernetes type KIs', () => {
       [
         {
           'orchestrator.cluster.name': 'cluster-a',
-          scale: 2,
+          member_count: 2,
           members: ['apps', 'kube-system'],
         },
       ],
@@ -349,7 +349,7 @@ describe('Kubernetes type KIs', () => {
         },
         properties: expect.objectContaining({
           entity_store_type: 'k8s.node',
-          scale: 2,
+          member_count: 2,
         }),
       })
     );
@@ -371,7 +371,7 @@ describe('Kubernetes type KIs', () => {
         },
         properties: expect.objectContaining({
           entity_store_type: 'k8s.namespace',
-          scale: 2,
+          member_count: 2,
         }),
       })
     );
@@ -391,13 +391,13 @@ describe('Kubernetes type KIs', () => {
         {
           'orchestrator.cluster.name': 'cluster-a',
           kind: 'deployment',
-          scale: 1,
+          member_count: 1,
           members: ['apps/named'],
         },
         {
           'orchestrator.cluster.name': null,
           kind: 'deployment',
-          scale: 1,
+          member_count: 1,
           members: ['apps/missing'],
         },
       ],
@@ -451,13 +451,13 @@ describe('Kubernetes type KIs', () => {
         {
           'orchestrator.cluster.name': 'x'.repeat(300),
           kind: 'deployment',
-          scale: 1,
+          member_count: 1,
           members: ['apps/api'],
         },
         {
           'orchestrator.cluster.name': 'cluster-a',
           kind: 'deployment',
-          scale: 1,
+          member_count: 1,
           members: ['apps/api'],
         },
       ],
@@ -478,7 +478,7 @@ describe('host type KIs', () => {
         {
           entity_type: 'host',
           concept_cluster: '',
-          scale: 1,
+          member_count: 1,
           members: ['router-a'],
           os: ['Linux'],
           cloud_provider: [],
@@ -504,7 +504,7 @@ describe('host type KIs', () => {
         {
           entity_type: 'host',
           concept_cluster: '',
-          scale: 52,
+          member_count: 52,
           members: standaloneMembers,
           os: ['Linux'],
           cloud_provider: ['aws', 'gcp'],
@@ -512,7 +512,7 @@ describe('host type KIs', () => {
         {
           entity_type: 'node',
           concept_cluster: 'cluster-a',
-          scale: 1,
+          member_count: 1,
           members: ['node-x'],
           os: ['Wolfi'],
           cloud_provider: ['gcp'],
@@ -524,7 +524,7 @@ describe('host type KIs', () => {
       [
         {
           'orchestrator.cluster.name': 'cluster-a',
-          scale: 1,
+          member_count: 1,
           members: ['node-x'],
           os: [],
           cloud_provider: [],
@@ -559,7 +559,7 @@ describe('host type KIs', () => {
         properties: expect.objectContaining({
           breakdown: ['host.name'],
           entity_store_type: 'host',
-          scale: 52,
+          member_count: 52,
           members: standaloneMembers,
           host_summary: {
             os: ['Linux'],
@@ -618,7 +618,7 @@ describe('service type KIs', () => {
     const feature = foldServiceRows(
       [
         {
-          scale: 2,
+          member_count: 2,
           members: ['checkout', 'payments'],
           environments: ['production', 'staging'],
         },
@@ -649,7 +649,7 @@ describe('service type KIs', () => {
         properties: expect.objectContaining({
           breakdown: ['service.name'],
           entity_store_type: 'service',
-          scale: 2,
+          member_count: 2,
           members: ['checkout', 'payments'],
           environments: ['production', 'staging'],
         }),
@@ -745,7 +745,7 @@ describe('identifyMetricsEntities', () => {
         subtype: 'k8s.node',
         properties: expect.objectContaining({
           members: ['node-a', 'node-b'],
-          scale: 2,
+          member_count: 2,
           key_row: 'metrics.hosts',
         }),
       })
@@ -819,7 +819,7 @@ describe('identifyMetricsEntities', () => {
     expect(features.some(({ id }) => id.startsWith('k8s.cluster:'))).toBe(false);
     expect(
       features.every(({ properties }) =>
-        ['breakdown', 'entity_store_type', 'list_query', 'members', 'scale'].every(
+        ['breakdown', 'entity_store_type', 'list_query', 'members', 'member_count'].every(
           (property) => property in properties
         )
       )

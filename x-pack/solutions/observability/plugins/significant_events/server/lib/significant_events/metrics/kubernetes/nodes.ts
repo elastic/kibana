@@ -38,7 +38,7 @@ export const buildNodeQuery = (sourceQuery: string): string => `${sourceQuery}
 | STATS activity = COUNT(*), last_seen = MAX(@timestamp),
         os = VALUES(host.os.name), cloud_provider = VALUES(cloud.provider)
   BY orchestrator.cluster.name, kubernetes.node.name
-| STATS scale = COUNT(*), activity = SUM(activity), last_seen = MAX(last_seen),
+| STATS member_count = COUNT(*), activity = SUM(activity), last_seen = MAX(last_seen),
         members = TOP(kubernetes.node.name, 50, "asc"),
         os = VALUES(os), cloud_provider = VALUES(cloud_provider)
   BY orchestrator.cluster.name
@@ -54,7 +54,7 @@ export const foldNodeRows = (
     string,
     {
       cluster?: string;
-      scale: number;
+      memberCount: number;
       members: string[];
       os: Set<string>;
       cloudProviders: Set<string>;
@@ -66,13 +66,15 @@ export const foldNodeRows = (
     const clusterKey = cluster === undefined ? 'source' : `cluster:${cluster}`;
     const concept = conceptsByCluster.get(clusterKey) ?? {
       cluster,
-      scale: 0,
+      memberCount: 0,
       members: [],
       os: new Set<string>(),
       cloudProviders: new Set<string>(),
     };
-    concept.scale =
-      typeof row.scale === 'number' ? Math.max(concept.scale, row.scale) : concept.scale;
+    concept.memberCount =
+      typeof row.member_count === 'number'
+        ? Math.max(concept.memberCount, row.member_count)
+        : concept.memberCount;
     // The description lists at most 50 members before directing readers to the live query.
     concept.members = stringsOf(row.members).slice(0, 50);
     stringsOf(row.os).forEach((value) => concept.os.add(value));
@@ -102,7 +104,7 @@ export const foldNodeRows = (
         description: buildInfrastructureConceptDescription({
           concept: 'nodes',
           scope: cluster ?? sourceId,
-          scale: concept.scale,
+          memberCount: concept.memberCount,
           breakdownFields: ['kubernetes.node.name'],
           members,
           clusterMissing: cluster === undefined,
@@ -114,7 +116,7 @@ export const foldNodeRows = (
         properties: {
           breakdown: ['kubernetes.node.name'],
           entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.node,
-          scale: concept.scale,
+          member_count: concept.memberCount,
           members,
           list_query: buildConceptListQuery({
             sourceQuery,

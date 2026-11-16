@@ -32,14 +32,14 @@ const getClusterCondition = (clusterScope: ClusterScope): string => {
 export const buildInfrastructureConceptDescription = ({
   concept,
   scope,
-  scale,
+  memberCount,
   breakdownFields,
   members,
   clusterMissing = false,
 }: {
   concept: InfrastructureConcept;
   scope: string;
-  scale: number;
+  memberCount: number;
   breakdownFields: readonly string[];
   members: readonly string[];
   clusterMissing?: boolean;
@@ -62,7 +62,7 @@ export const buildInfrastructureConceptDescription = ({
     }
   })();
   const sentences = [
-    `${meaning}; this source has ${scale} ${concept}.`,
+    `${meaning}; this source has ${memberCount} ${concept}.`,
     `Break them down by ${breakdownFields.join(' and ')}; properties.list_query lists them live.`,
   ];
 
@@ -72,7 +72,7 @@ export const buildInfrastructureConceptDescription = ({
   const includedMembers: string[] = [];
   for (const member of members) {
     const nextMembers = [...includedMembers, member];
-    const remaining = Math.max(0, scale - nextMembers.length);
+    const remaining = Math.max(0, memberCount - nextMembers.length);
     const suffix = remaining > 0 ? `, and ${remaining} more.` : '.';
     if (`${descriptionPrefix}${nextMembers.join(', ')}${suffix}`.length > descriptionLimit) {
       break;
@@ -80,7 +80,7 @@ export const buildInfrastructureConceptDescription = ({
     includedMembers.push(member);
   }
 
-  const remaining = Math.max(0, scale - includedMembers.length);
+  const remaining = Math.max(0, memberCount - includedMembers.length);
   if (includedMembers.length === 0) {
     return `${descriptionPrefix}${remaining} more.`;
   }

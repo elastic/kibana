@@ -38,7 +38,7 @@ export const buildNamespaceQuery = (sourceQuery: string): string => `${sourceQue
 | WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""
 | STATS activity = COUNT(*), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.namespace
-| STATS scale = COUNT(*), activity = SUM(activity), last_seen = MAX(last_seen),
+| STATS member_count = COUNT(*), activity = SUM(activity), last_seen = MAX(last_seen),
         members = TOP(kubernetes.namespace, 50, "asc")
   BY orchestrator.cluster.name
 | SORT activity DESC
@@ -51,7 +51,7 @@ export const foldNamespaceRows = (
   const droppedRows = createDroppedRows();
   const conceptsByCluster = new Map<
     string,
-    { cluster?: string; scale: number; members: string[] }
+    { cluster?: string; memberCount: number; members: string[] }
   >();
   for (const row of rows) {
     const clusterValue = row['orchestrator.cluster.name'];
@@ -59,11 +59,13 @@ export const foldNamespaceRows = (
     const clusterKey = cluster === undefined ? 'source' : `cluster:${cluster}`;
     const concept = conceptsByCluster.get(clusterKey) ?? {
       cluster,
-      scale: 0,
+      memberCount: 0,
       members: [],
     };
-    concept.scale =
-      typeof row.scale === 'number' ? Math.max(concept.scale, row.scale) : concept.scale;
+    concept.memberCount =
+      typeof row.member_count === 'number'
+        ? Math.max(concept.memberCount, row.member_count)
+        : concept.memberCount;
     // The description lists at most 50 members before directing readers to the live query.
     concept.members = stringsOf(row.members).slice(0, 50);
     conceptsByCluster.set(clusterKey, concept);
@@ -91,7 +93,7 @@ export const foldNamespaceRows = (
         description: buildInfrastructureConceptDescription({
           concept: 'namespaces',
           scope: cluster ?? sourceId,
-          scale: concept.scale,
+          memberCount: concept.memberCount,
           breakdownFields: ['kubernetes.namespace'],
           members,
           clusterMissing: cluster === undefined,
@@ -103,7 +105,7 @@ export const foldNamespaceRows = (
         properties: {
           breakdown: ['kubernetes.namespace'],
           entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.namespace,
-          scale: concept.scale,
+          member_count: concept.memberCount,
           members,
           list_query: buildConceptListQuery({
             sourceQuery,

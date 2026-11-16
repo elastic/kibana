@@ -125,7 +125,7 @@ ${WORKLOAD_OWNER_DERIVATION}
 | WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""
 | STATS replicas = COUNT_DISTINCT(kubernetes.pod.uid), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.namespace, kind, workload
-| STATS scale = COUNT(*), activity = SUM(replicas), last_seen = MAX(last_seen),
+| STATS member_count = COUNT(*), activity = SUM(replicas), last_seen = MAX(last_seen),
         members = TOP(CONCAT(kubernetes.namespace, "/", workload), 50, "asc")
   BY orchestrator.cluster.name, kind
 | SORT activity DESC
@@ -177,7 +177,7 @@ export const foldWorkloadRows = (
       return [];
     }
     const members = stringsOf(row.members).slice(0, 50);
-    const scale = typeof row.scale === 'number' ? row.scale : 0;
+    const memberCount = typeof row.member_count === 'number' ? row.member_count : 0;
     const entityStoreType = getKubernetesEntityStoreType(kind);
     return [
       {
@@ -188,7 +188,7 @@ export const foldWorkloadRows = (
         description: buildInfrastructureConceptDescription({
           concept: plural,
           scope,
-          scale,
+          memberCount,
           breakdownFields: ['kubernetes.namespace', ownerField],
           members,
           clusterMissing: cluster === undefined,
@@ -201,7 +201,7 @@ export const foldWorkloadRows = (
         properties: {
           breakdown: ['kubernetes.namespace', ownerField],
           entity_store_type: entityStoreType,
-          scale,
+          member_count: memberCount,
           members,
           list_query: buildWorkloadListQuery({ sourceQuery, clusterScope, kind }),
           origin: 'metrics',

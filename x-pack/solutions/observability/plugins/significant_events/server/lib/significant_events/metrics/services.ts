@@ -45,10 +45,10 @@ export const buildServiceQuery = (sourceQuery: string): string => `${sourceQuery
 | STATS last_seen = MAX(@timestamp), environments = VALUES(environment),
         docs = COUNT(*)
   BY service.name
-| STATS scale = COUNT(*), activity = SUM(docs), last_seen = MAX(last_seen),
+| STATS member_count = COUNT(*), activity = SUM(docs), last_seen = MAX(last_seen),
         members = TOP(service.name, 50, "asc"),
         environments = VALUES(environments)
-| WHERE scale > 0
+| WHERE member_count > 0
 | SORT activity DESC
 | LIMIT ${ENTITY_QUERY_LIMIT}`;
 
@@ -78,7 +78,7 @@ export const foldServiceRows = (
   }
 
   const members = stringsOf(row.members).slice(0, 50);
-  const scale = typeof row.scale === 'number' ? row.scale : 0;
+  const memberCount = typeof row.member_count === 'number' ? row.member_count : 0;
   const features: FeatureUpsert[] = [
     {
       type: 'entity',
@@ -88,7 +88,7 @@ export const foldServiceRows = (
       description: buildInfrastructureConceptDescription({
         concept: 'services',
         scope: sourceId,
-        scale,
+        memberCount,
         breakdownFields: ['service.name'],
         members,
       }),
@@ -99,7 +99,7 @@ export const foldServiceRows = (
       properties: {
         breakdown: ['service.name'],
         entity_store_type: 'service',
-        scale,
+        member_count: memberCount,
         members,
         list_query: buildConceptListQuery({
           sourceQuery,
