@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import {
-  ENDPOINT_EVENT_INDICES_MAX_LENGTH,
-  ENDPOINT_EVENTS_INDEX,
-  endpointEventIndices,
-} from './endpoint_event_indices';
+import { REMOTE_INDEX_TARGETS_MAX_LENGTH, remoteIndexTargets } from './remote_index_targets';
 
-describe('endpointEventIndices', () => {
+const ENDPOINT_EVENTS_INDEX = 'logs-endpoint.events.*';
+const ENDPOINT_EVENT_INDICES_MAX_LENGTH = REMOTE_INDEX_TARGETS_MAX_LENGTH;
+
+// The Attack Discovery check reads one pattern: every case below is the single-target contract.
+const endpointEventIndices = (patterns: readonly string[]): string =>
+  remoteIndexTargets(patterns, [ENDPOINT_EVENTS_INDEX]).index;
+
+describe('remoteIndexTargets with one local pattern', () => {
   it('adds one endpoint pattern per cluster alias in the data view', () => {
     expect(
       endpointEventIndices(['remote_a:logs-aws.cloudtrail*', 'remote_*:logs-*', 'logs-*'])
@@ -153,5 +156,92 @@ describe('endpointEventIndices', () => {
       ENDPOINT_EVENT_INDICES_MAX_LENGTH
     );
     expect(endpointEventIndices(patterns).startsWith(ENDPOINT_EVENTS_INDEX)).toBe(true);
+  });
+});
+
+describe('remoteIndexTargets with several local patterns', () => {
+  const PROCESS = 'logs-endpoint.events.process-*';
+  const NETWORK = 'logs-endpoint.events.network-*';
+
+  it('adds every local pattern for each cluster alias', () => {
+    expect(remoteIndexTargets(['remote_a:logs-*', 'logs-*'], [PROCESS, NETWORK])).toEqual({
+      index: `${PROCESS},${NETWORK},remote_a:${PROCESS},remote_a:${NETWORK}`,
+      clusters: ['remote_a'],
+    });
+  });
+
+  it('stays local, with no clusters, when the data view names none', () => {
+    expect(remoteIndexTargets(['logs-*', 'filebeat-*'], [PROCESS, NETWORK])).toEqual({
+      index: `${PROCESS},${NETWORK}`,
+      clusters: [],
+    });
+  });
+
+  it('names each searched cluster once, in data view order', () => {
+    expect(
+      remoteIndexTargets(['remote_b:logs-*', 'remote_a:logs-*', 'remote_b:filebeat-*'], [PROCESS])
+        .clusters
+    ).toEqual(['remote_b', 'remote_a']);
+  });
+
+  it('drops only the pattern a remote exclusion covers', () => {
+    expect(
+      remoteIndexTargets(['remote_a:logs-*', `-remote_a:${PROCESS}`], [PROCESS, NETWORK])
+    ).toEqual({
+      index: `${PROCESS},${NETWORK},remote_a:${NETWORK},-remote_a:${PROCESS}`,
+      clusters: ['remote_a'],
+    });
+  });
+
+  it('reports no cluster when an exclusion covers every pattern', () => {
+    expect(
+      remoteIndexTargets(
+        ['remote_a:logs-*', '-remote_a:logs-endpoint.events.*'],
+        [PROCESS, NETWORK]
+      )
+    ).toEqual({
+      index: `${PROCESS},${NETWORK},-remote_a:${PROCESS},-remote_a:${NETWORK}`,
+      clusters: [],
+    });
+  });
+
+  it('ignores an exclusion that matches none of the local patterns', () => {
+    expect(
+      remoteIndexTargets(['remote_a:logs-*', '-remote_a:filebeat-*'], [PROCESS, NETWORK]).index
+    ).toBe(`${PROCESS},${NETWORK},remote_a:${PROCESS},remote_a:${NETWORK}`);
+  });
+
+  it('keeps the unrelated pattern of a cluster when an exclusion for the other does not fit', () => {
+    const exclusions = Array.from(
+      { length: 120 },
+      (_, index) =>
+        `-remote_a:logs-endpoint.events.network-${String(index).padStart(3, '0')}${'n'.repeat(30)}*`
+    );
+    const { index, clusters } = remoteIndexTargets(
+      ['remote_a:logs-*', 'remote_b:logs-*', ...exclusions],
+      [PROCESS, NETWORK]
+    );
+    const parts = index.split(',');
+
+    expect(index.length).toBeLessThanOrEqual(REMOTE_INDEX_TARGETS_MAX_LENGTH);
+    expect(parts).toContain(`remote_a:${PROCESS}`);
+    expect(parts).not.toContain(`remote_a:${NETWORK}`);
+    expect(parts).toContain(`remote_b:${NETWORK}`);
+    expect(clusters).toEqual(['remote_a', 'remote_b']);
+  });
+
+  it('keeps the whole target under the length cap with several patterns', () => {
+    const patterns = Array.from({ length: 200 }, (_, i) => `cluster${i}:logs-*`);
+    const { index, clusters } = remoteIndexTargets(patterns, [PROCESS, NETWORK]);
+
+    expect(index.length).toBeLessThanOrEqual(REMOTE_INDEX_TARGETS_MAX_LENGTH);
+    expect(index.startsWith(`${PROCESS},${NETWORK}`)).toBe(true);
+    expect(clusters.length).toBeLessThan(200);
+  });
+
+  it('ignores duplicate or empty local patterns', () => {
+    expect(remoteIndexTargets(['remote_a:logs-*'], [PROCESS, '', PROCESS]).index).toBe(
+      `${PROCESS},remote_a:${PROCESS}`
+    );
   });
 });

@@ -7,11 +7,8 @@
 
 import { parseIndexScopeEntry } from './remote_cluster';
 
-/** Elastic Defend events the FP/TP check reads. Local, and on each remote alias. */
-export const ENDPOINT_EVENTS_INDEX = 'logs-endpoint.events.*';
-
-/** Bound for the comma-separated target returned to the search step. */
-export const ENDPOINT_EVENT_INDICES_MAX_LENGTH = 4096;
+/** Bound for the comma-separated target returned to a search step. */
+export const REMOTE_INDEX_TARGETS_MAX_LENGTH = 4096;
 
 const MAX_PATTERNS = 200;
 const MAX_PATTERN_LENGTH = 1024;
@@ -56,13 +53,6 @@ const globsOverlap = (left: string, right: string): boolean => {
 };
 
 /**
- * True when every index matching `logs-endpoint.events.*` also matches `pattern`.
- * `logs-*` does. `logs-endpoint.events.network-*` does not.
- */
-const coversAllEndpointEvents = (pattern: string): boolean =>
-  globMatches(pattern, ENDPOINT_EVENTS_INDEX);
-
-/**
  * A concrete cluster is covered when the exclusion glob matches it. A wildcard
  * cluster is covered only by that same pattern, so `remote_*` is not dropped
  * because one concrete cluster under it was excluded.
@@ -73,7 +63,7 @@ const exclusionCoversCluster = (exclusionCluster: string, candidate: string): bo
     : globMatches(exclusionCluster, candidate);
 
 const fits = (targets: readonly string[], next: string): boolean =>
-  `${targets.join(',')},${next}`.length <= ENDPOINT_EVENT_INDICES_MAX_LENGTH;
+  `${targets.join(',')},${next}`.length <= REMOTE_INDEX_TARGETS_MAX_LENGTH;
 
 /**
  * Whether a positive cluster pattern would still search the excluded cluster.
@@ -88,30 +78,42 @@ const positiveWouldSearch = (positiveCluster: string, exclusionCluster: string):
   return exclusionCoversCluster(exclusionCluster, positiveCluster);
 };
 
-interface EndpointExclusion {
+interface RemoteExclusion {
   cluster: string;
-  /** Pattern after `-cluster:`. Full covers use the endpoint pattern; narrower ones stay as written. */
+  /** Pattern after `-cluster:`. Full covers use the local target; narrower ones stay as written. */
   index: string;
+  /** True when the exclusion matches every index the local target `index` matches. */
   coversAll: boolean;
 }
 
+export interface RemoteIndexTargets {
+  /** Comma-separated search target: the local patterns, then one entry per cluster and pattern. */
+  index: string;
+  /** The cluster aliases the target searches, as written in the data view. */
+  clusters: string[];
+}
+
 /**
- * Search target for the FP/TP raw-event check. Always the local endpoint pattern.
- * Each positive cluster alias in the space's default data view adds
- * `{alias}:logs-endpoint.events.*`. A remote exclusion that covers every endpoint
- * event does not add that alias; it is rewritten as `-cluster:logs-endpoint.events.*`
- * so a wildcard include cannot search that cluster. A narrower exclusion is passed
- * through as `-cluster:<index>` and the cluster stays in the search. An exclusion
- * that does not fit in the target takes its positive pattern back out, so the
- * search cannot read events the space excluded. Local exclusions, and ES|QL mode
- * prefixes (`_any:`, `_remote:`, `_coordinator:`), add nothing. The data view's own
- * streams are not searched: this check only reads endpoint fields.
+ * Search target for a read of `localTargets` that also reaches the remote clusters the space's
+ * default data view names. Always the local patterns first. Each positive cluster alias in the
+ * data view adds `{alias}:{pattern}` for every local pattern. A remote exclusion that covers
+ * every index a pattern matches does not add that alias for the pattern; it is rewritten as
+ * `-cluster:{pattern}` so a wildcard include cannot search that cluster. A narrower exclusion is
+ * passed through as `-cluster:<index>` and the cluster stays in the search. An exclusion that
+ * does not fit in the target takes its positive patterns back out, so the search cannot read
+ * events the space excluded. Local exclusions, and ES|QL mode prefixes (`_any:`, `_remote:`,
+ * `_coordinator:`), add nothing. The data view's own streams are not searched: a caller reads only
+ * the patterns it names.
  */
-export const endpointEventIndices = (patterns: readonly string[]): string => {
-  const targets = [ENDPOINT_EVENTS_INDEX];
+export const remoteIndexTargets = (
+  dataViewPatterns: readonly string[],
+  localTargets: readonly string[]
+): RemoteIndexTargets => {
+  const locals = [...new Set(localTargets.filter((target) => target.length > 0))];
+  const result: string[] = [...locals];
   const included = new Set<string>();
-  const excluded: EndpointExclusion[] = [];
-  const list = Array.isArray(patterns) ? patterns.slice(0, MAX_PATTERNS) : [];
+  const excluded: RemoteExclusion[] = [];
+  const list = Array.isArray(dataViewPatterns) ? dataViewPatterns.slice(0, MAX_PATTERNS) : [];
 
   for (const raw of list) {
     if (typeof raw !== 'string') continue;
@@ -122,42 +124,59 @@ export const endpointEventIndices = (patterns: readonly string[]): string => {
     if (cluster === undefined || cluster.startsWith('_') || !CLUSTER_ALIAS.test(cluster)) continue;
 
     // A positive entry names a cluster the space searches, whatever stream it names.
-    // An exclusion is kept only when it can match an endpoint event.
-    if (exclude) {
-      if (!globsOverlap(index, ENDPOINT_EVENTS_INDEX)) continue;
-      const coversAll = coversAllEndpointEvents(index);
-      const emitted = coversAll ? ENDPOINT_EVENTS_INDEX : index;
+    // An exclusion is kept only for the local patterns it can match.
+    if (!exclude) {
+      included.add(cluster);
+      continue;
+    }
+    for (const target of locals) {
+      if (!globsOverlap(index, target)) continue;
+      const coversAll = globMatches(index, target);
+      const emitted = coversAll ? target : index;
       if (!excluded.some((item) => item.cluster === cluster && item.index === emitted)) {
         excluded.push({ cluster, index: emitted, coversAll });
       }
-      continue;
     }
-    if (included.has(cluster)) continue;
-    included.add(cluster);
   }
 
   for (const cluster of included) {
-    const fullyExcluded = excluded.some(
-      (exclusion) => exclusion.coversAll && exclusionCoversCluster(exclusion.cluster, cluster)
-    );
-    const next = `${cluster}:${ENDPOINT_EVENTS_INDEX}`;
-    if (fullyExcluded || !fits(targets, next)) continue;
-    targets.push(next);
+    for (const target of locals) {
+      const fullyExcluded = excluded.some(
+        (exclusion) =>
+          exclusion.coversAll &&
+          exclusion.index === target &&
+          exclusionCoversCluster(exclusion.cluster, cluster)
+      );
+      const next = `${cluster}:${target}`;
+      if (fullyExcluded || !fits(result, next)) continue;
+      result.push(next);
+    }
   }
   for (const exclusion of excluded) {
     const next = `-${exclusion.cluster}:${exclusion.index}`;
-    if (fits(targets, next)) {
-      targets.push(next);
+    if (fits(result, next)) {
+      result.push(next);
       continue;
     }
-    for (let index = targets.length - 1; index >= 1; index--) {
-      const target = targets[index];
-      if (target.startsWith('-') || !target.includes(':')) continue;
-      const cluster = target.slice(0, target.indexOf(':'));
-      if (positiveWouldSearch(cluster, exclusion.cluster)) targets.splice(index, 1);
+    for (let position = result.length - 1; position >= locals.length; position--) {
+      const entry = result[position];
+      if (entry.startsWith('-')) continue;
+      const separator = entry.indexOf(':');
+      const cluster = entry.slice(0, separator);
+      const target = entry.slice(separator + 1);
+      if (
+        positiveWouldSearch(cluster, exclusion.cluster) &&
+        globsOverlap(target, exclusion.index)
+      ) {
+        result.splice(position, 1);
+      }
     }
-    if (fits(targets, next)) targets.push(next);
+    if (fits(result, next)) result.push(next);
   }
 
-  return targets.join(',');
+  const clusters = new Set<string>();
+  for (const entry of result.slice(locals.length)) {
+    if (!entry.startsWith('-')) clusters.add(entry.slice(0, entry.indexOf(':')));
+  }
+  return { index: result.join(','), clusters: [...clusters] };
 };

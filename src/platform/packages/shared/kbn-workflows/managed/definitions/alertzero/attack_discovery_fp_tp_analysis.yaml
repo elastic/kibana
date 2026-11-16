@@ -304,7 +304,10 @@ steps:
   # The space's Security default data view names the remote clusters whose
   # endpoint events this check should read. A failed read keeps the local pattern.
   - name: resolve_endpoint_event_index
-    type: alertzero.attackDiscovery.endpointEventIndex
+    type: alertzero.resolveRemoteIndexTargets
+    with:
+      patterns:
+        - "{{ consts.endpoint_events_index }}"
     on-failure:
       continue: true
 

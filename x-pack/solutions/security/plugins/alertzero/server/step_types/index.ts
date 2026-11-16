@@ -19,8 +19,8 @@ import {
   getTriageRetagProposalAlertsStepDefinition,
   getTriageTagPatternKeysStepDefinition,
 } from './alert_triage/alert_triage_steps';
-import { getEndpointEventIndexStepDefinition } from './endpoint_event_index';
 import { getPackageReportStepDefinition } from './package_report';
+import { getRemoteIndexTargetsStepDefinition } from './remote_index_targets';
 import { getResolveProposalsStepDefinition } from './resolve_proposals';
 import {
   getSummarizeInvestigationStepDefinition,
@@ -94,7 +94,7 @@ export const registerStepDefinitions = ({
     })
   );
   workflowsExtensions.registerStepDefinition(
-    getEndpointEventIndexStepDefinition({ getCoreStart, logger })
+    getRemoteIndexTargetsStepDefinition({ getCoreStart, logger })
   );
   workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
   workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());

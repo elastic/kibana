@@ -738,8 +738,11 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
     it('searches endpoint events on the clusters named by the space data view', () => {
       expect(stepIn('resolve_endpoint_event_index')?.type).toBe(
-        'alertzero.attackDiscovery.endpointEventIndex'
+        'alertzero.resolveRemoteIndexTargets'
       );
+      expect(stepIn('resolve_endpoint_event_index')?.with?.patterns).toEqual([
+        '{{ consts.endpoint_events_index }}',
+      ]);
       expect(stepIn('resolve_endpoint_event_index')?.['on-failure']?.continue).toBe(true);
       for (const name of ['load_events_by_host_id', 'load_events_by_host_name'] as const) {
         expect(stepIn(name)?.with?.index).toBe(
