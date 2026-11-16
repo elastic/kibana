@@ -21,6 +21,8 @@ export interface ContractRequest {
   readonly query: Readonly<Record<string, string | string[]>>;
   readonly headers: Readonly<Record<string, string>>;
   readonly body?: unknown;
+  /** Set once the request is routed to an OpenAPI operation, decoded. */
+  readonly pathParameters?: Readonly<Record<string, string>>;
 }
 
 export interface ContractResponse {
@@ -31,11 +33,26 @@ export interface ContractResponse {
 
 export type RouteResult = OperationMatch | OperationMismatch;
 
+export interface ResponderContext {
+  /**
+   * State kept for the emulator's run, until `reset()`. A responder keeps its entries under keys
+   * of its own, such as a symbol, so several responders can share it.
+   */
+  readonly state: Map<unknown, unknown>;
+  /**
+   * The default chain's answer: the operation's fixture, else its first conforming recording,
+   * else an example or a sample of its schema, paged for paginated operations. Each call gets
+   * its own copy, which the responder is free to change.
+   */
+  readonly next: () => Promise<ContractResponse>;
+}
+
 /** Produces the mock's answer to a valid request. */
 export type Responder = (
   operation: ContractOperation,
-  request: ContractRequest
-) => ContractResponse;
+  request: ContractRequest,
+  context: ResponderContext
+) => ContractResponse | Promise<ContractResponse>;
 
 /**
  * A vendor operation that has no method and path of its own, because a protocol sends every
@@ -73,8 +90,10 @@ export interface ContractProtocolOptions {
 export interface ContractProtocol {
   /** The `origin` and `pathname` of each URL it answers, without a trailing slash. */
   readonly endpoints: readonly string[];
-  /** The names of the operations the spec declares, such as `query boards`. */
-  readonly operations: ReadonlySet<string>;
+  /** Every operation the spec declares, named as `ProtocolExchange.operations` names them. */
+  readonly operations: readonly NamedOperation[];
+  /** The operations a fixture or recording can answer, such as `query boards`, by name. */
+  readonly answerable: ReadonlySet<string>;
   /** Recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
   handle(request: ContractRequest): Promise<ProtocolExchange>;

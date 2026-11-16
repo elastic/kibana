@@ -13,9 +13,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiSuperDatePicker,
   EuiText,
 } from '@elastic/eui';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
@@ -29,6 +29,7 @@ import {
   setNightshiftRuleIdParam,
 } from '../../../common/url_params';
 import { RuleFlyout } from '../../../components/entities/rule/rule_flyout';
+import { NightshiftTimeRangePicker } from '../../../components/ui/time_range_picker';
 import type { DetectionRule } from '../../../data/rules/use_detection_rules';
 import { useDetectionRuleById, useDetectionRules } from '../../../data/rules/use_detection_rules';
 import { useRulesDemote } from '../../../data/rules/use_rules_demote';
@@ -42,37 +43,68 @@ import {
   CLEAR_SEARCH_LABEL,
   CLEAR_SELECTION_LABEL,
   DELETE_SELECTED_LABEL,
+  DETECTION_SCOPE_HELP_TEXT,
   ERROR_MESSAGE,
   ERROR_TITLE,
   NOT_FOUND_TITLE,
   NO_RULES_BODY,
   NO_RULES_TITLE,
   NO_SEARCH_RESULTS,
+  NO_ENTITY_RESULTS,
   RETRY_LABEL,
   SEARCH_PLACEHOLDER,
 } from './translations';
 
+// Its own param, so the Rules search and the Events search both survive tab switches.
+const RULES_SEARCH_QUERY_PARAM = 'rulesSearch';
+
 export const RulesTab = ({
   timeRange,
   onTimeRangeChange,
+  entities,
+  unassigned,
 }: {
   timeRange: DetectionTimeRange;
   onTimeRangeChange: (range: DetectionTimeRange) => void;
+  entities: string[];
+  unassigned: boolean;
 }): React.ReactElement => {
   const history = useHistory();
   const location = useLocation();
-  const { application, notifications } = useKibana().services;
+  const { application, notifications, cps } = useKibana().services;
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
-  const rulesQuery = useDetectionRules(timeRange);
+  const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
+  const rulesQuery = useDetectionRules(timeRange, { entities, unassigned });
+  const hasEntityFilter = entities.length > 0 || unassigned;
   const { demoteRules, isPending } = useRulesDemote({});
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(
+    () => new URLSearchParams(location.search).get(RULES_SEARCH_QUERY_PARAM) ?? ''
+  );
+  // Back/Forward restores that entry's search.
+  useEffect(
+    () =>
+      history.listen((nextLocation, action) => {
+        if (action !== 'POP') return;
+        setSearch(new URLSearchParams(nextLocation.search).get(RULES_SEARCH_QUERY_PARAM) ?? '');
+      }),
+    [history]
+  );
+  // The search filters in the browser, so the URL is written at once: a tab switch can't lose it.
+  const updateSearch = (value: string) => {
+    setSearch(value);
+    const params = new URLSearchParams(history.location.search);
+    if (value.trim()) params.set(RULES_SEARCH_QUERY_PARAM, value);
+    else params.delete(RULES_SEARCH_QUERY_PARAM);
+    history.replace({ ...history.location, search: `?${params.toString()}` });
+  };
   const [selected, setSelected] = useState<DetectionRule[]>([]);
   const [pendingDelete, setPendingDelete] = useState<DetectionRule[]>();
   const openLinks = useRef(new Map<string, HTMLAnchorElement | HTMLButtonElement | null>());
   const ruleId = getNightshiftRuleIdFromSearch(location.search);
   const loadedRule = rulesQuery.rules.find(({ query }) => query.id === ruleId);
-  // A deep link can point past the loaded first page; look that rule up on its own.
-  const needsLookup = Boolean(ruleId) && !loadedRule && rulesQuery.isTruncated;
+  // A deep link can point past the loaded first page or outside the entity selection; look that
+  // rule up on its own.
+  const needsLookup = Boolean(ruleId) && !loadedRule && (rulesQuery.isTruncated || hasEntityFilter);
   const ruleLookup = useDetectionRuleById(timeRange, ruleId, needsLookup);
   const activeRule = loadedRule ?? (needsLookup ? ruleLookup.rule : undefined);
   const filteredRules = useMemo(() => {
@@ -121,7 +153,7 @@ export const RulesTab = ({
 
   useEffect(() => {
     setSelected([]);
-  }, [search, timeRange.from, timeRange.to]);
+  }, [search, timeRange.from, timeRange.to, entities, unassigned]);
 
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const handleClose = () => {
@@ -144,6 +176,14 @@ export const RulesTab = ({
 
   return (
     <>
+      {isCpsMultiProject ? (
+        <>
+          <EuiText size="xs" color="subdued" data-test-subj="nightshiftDetectionRulesScopeHelpText">
+            <p>{DETECTION_SCOPE_HELP_TEXT}</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiFieldSearch
@@ -151,20 +191,18 @@ export const RulesTab = ({
             fullWidth
             isClearable
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => updateSearch(event.target.value)}
             aria-label={SEARCH_PLACEHOLDER}
             placeholder={SEARCH_PLACEHOLDER}
             data-test-subj="nightshiftDetectionRulesSearch"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker
-            compressed
-            width="auto"
-            showUpdateButton={false}
+          <NightshiftTimeRangePicker
             start={timeRange.from}
             end={timeRange.to}
-            onTimeChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
+            onChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
+            showRefreshButton
             data-test-subj="nightshiftDetectionRulesTimePicker"
           />
         </EuiFlexItem>
@@ -184,7 +222,7 @@ export const RulesTab = ({
             },
           }}
         />
-      ) : rulesQuery.hasData && rulesQuery.total === 0 ? (
+      ) : rulesQuery.hasData && rulesQuery.total === 0 && !hasEntityFilter ? (
         <EuiEmptyPrompt
           iconType="magnify"
           title={<h2>{NO_RULES_TITLE}</h2>}
@@ -267,18 +305,22 @@ export const RulesTab = ({
           {rulesQuery.hasData && filteredRules.length === 0 ? (
             <EuiEmptyPrompt
               iconType="magnify"
-              title={<h2>{NO_SEARCH_RESULTS}</h2>}
+              title={
+                <h2>{!search.trim() && hasEntityFilter ? NO_ENTITY_RESULTS : NO_SEARCH_RESULTS}</h2>
+              }
               actions={
-                <EuiButton
-                  data-test-subj="nightshiftRulesTabButton"
-                  onClick={() => setSearch('')}
-                  {...getEbtProps({
-                    action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_RULES_SEARCH,
-                    element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_RULES_TABLE,
-                  })}
-                >
-                  {CLEAR_SEARCH_LABEL}
-                </EuiButton>
+                search.trim() ? (
+                  <EuiButton
+                    data-test-subj="nightshiftRulesTabButton"
+                    onClick={() => updateSearch('')}
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_RULES_SEARCH,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_RULES_TABLE,
+                    })}
+                  >
+                    {CLEAR_SEARCH_LABEL}
+                  </EuiButton>
+                ) : undefined
               }
             />
           ) : (

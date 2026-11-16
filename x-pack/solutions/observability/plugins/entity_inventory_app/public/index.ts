@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { PluginInitializer } from '@kbn/core/public';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { EntityInventoryAppPlugin } from './plugin';
 import type {
+  EntityInventoryAppPublicConfig,
   EntityInventoryAppPublicSetup,
   EntityInventoryAppPublicStart,
   EntityInventoryAppSetupDependencies,
@@ -15,11 +16,11 @@ import type {
 } from './types';
 
 export type { EntityInventoryAppPublicSetup, EntityInventoryAppPublicStart };
-export { INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY } from '../common/ui_settings_keys';
 
 export const plugin: PluginInitializer<
   EntityInventoryAppPublicSetup,
   EntityInventoryAppPublicStart,
   EntityInventoryAppSetupDependencies,
   EntityInventoryAppStartDependencies
-> = () => new EntityInventoryAppPlugin();
+> = (initializerContext: PluginInitializerContext<EntityInventoryAppPublicConfig>) =>
+  new EntityInventoryAppPlugin(initializerContext);

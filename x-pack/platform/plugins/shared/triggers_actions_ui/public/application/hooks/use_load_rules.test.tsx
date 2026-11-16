@@ -500,4 +500,38 @@ describe('useLoadRules', () => {
       await waitFor(() => expect(result.current.hasData).toBeFalsy());
     });
   });
+
+  describe('Transformation errors', () => {
+    it('hasData should be true, if there are no rules but there are transformation errors', async () => {
+      const errors = [{ message: 'Unable to transform rule', rule: { id: '1', name: 'bad rule' } }];
+      loadRulesWithKueryFilter.mockResolvedValue({ ...MOCK_RULE_DATA, data: [], errors });
+      const params = {
+        page: {
+          index: 0,
+          size: 25,
+        },
+        filters: {
+          searchText: '',
+          types: [],
+          actionTypes: [],
+          ruleExecutionStatuses: [],
+          ruleParams: {},
+          ruleLastRunOutcomes: [],
+          ruleStatuses: [],
+          tags: [],
+        },
+        onPage: () => {},
+        enabled: true,
+        sort: { field: 'name', direction: 'asc' },
+      };
+
+      const { result } = renderHook(() => useLoadRules(params), {
+        wrapper,
+      });
+
+      await waitFor(() => expect(result.current.hasData).toBe(true));
+      expect(result.current.rulesState.data).toEqual([]);
+      expect(result.current.rulesState.errors).toEqual(errors);
+    });
+  });
 });

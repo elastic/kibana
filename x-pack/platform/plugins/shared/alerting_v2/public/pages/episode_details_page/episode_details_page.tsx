@@ -21,7 +21,7 @@ import {
   useEuiMinBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
-import { AppHeader } from '@kbn/app-header';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -30,6 +30,7 @@ import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
+import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import {
   getGroupAction,
@@ -57,20 +58,16 @@ import { useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AlertEpisodeTimelineSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_section';
 import { useAlertAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import {
+  canOpenDiscover,
+  getDiscoverHrefForAlertEventsHistory,
+  getDiscoverHrefForRuleAndAlertTimestamp,
+} from '@kbn/alerting-v2-episodes-ui/utils/discover_href_for_alert';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { useAlertingLocators } from '../../application/locator_context';
 import type { AlertsKibanaServices } from '../../alerts_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
-import {
-  canOpenDiscover,
-  getDiscoverHrefForAlertEventsHistory,
-  getDiscoverHrefForRuleAndAlertTimestamp,
-} from '../../utils/discover_href_for_alert';
-import {
-  filterAlertActionsByPrivilege,
-  ALERT_ACTIONS_PRIVILEGE,
-} from '../../utils/filter_alert_actions_by_privilege';
 import { getEpisodeHeaderBadges } from './utils/get_episode_header_badges';
 import { getEpisodeHeaderMenu } from './utils/get_episode_header_menu';
 import {
@@ -84,9 +81,20 @@ interface EpisodeRouteParams {
   episodeId: string;
 }
 
+export interface EpisodeDetailsPageProps {
+  /** A stable host hook supplying additional declarative header items for the current episode. */
+  useAdditionalEpisodeDetailsHeaderMenuItems?: (
+    episode: AlertEpisode | undefined
+  ) => NonNullable<AppHeaderMenu['items']>;
+}
+
+const useEmptyHeaderMenuItems = (): NonNullable<AppHeaderMenu['items']> => [];
+
 type EpisodeDetailsSidebarPanel = 'episode_details' | 'runbook';
 
-export function EpisodeDetailsPage() {
+export function EpisodeDetailsPage({
+  useAdditionalEpisodeDetailsHeaderMenuItems = useEmptyHeaderMenuItems,
+}: EpisodeDetailsPageProps = {}) {
   const { euiTheme } = useEuiTheme();
   const { episodeId } = useParams<EpisodeRouteParams>();
   const [sidebarPanel, setSidebarPanel] = useState<EpisodeDetailsSidebarPanel>('episode_details');
@@ -95,9 +103,7 @@ export function EpisodeDetailsPage() {
   const { services } = useKibana<AlertsKibanaServices>();
   const { episodesLocators, rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
-  const alertsCapability = useService(UserCapabilities).canWrite('alerts')
-    ? ALERT_ACTIONS_PRIVILEGE.all
-    : ALERT_ACTIONS_PRIVILEGE.read;
+  const canWriteAlerts = useService(UserCapabilities).canWrite('alerts');
   const { data, http, spaces } = services;
 
   const largeMediaQuery = useEuiMinBreakpoint('m');
@@ -222,47 +228,45 @@ export function EpisodeDetailsPage() {
 
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
-      filterAlertActionsByPrivilege(
-        createEpisodeActions({
-          http: services.http,
-          overlays: services.overlays,
-          notifications: services.notifications,
-          rendering: services.rendering,
-          application: services.application,
-          userProfile: services.userProfile,
-          docLinks: services.docLinks,
-          expressions: services.expressions,
-          spaces: services.spaces,
-          queryClient,
-          isRuleAvailable: (selectedRuleId) =>
-            isRuleLoaded(ruleState) && ruleState.rule.id === selectedRuleId,
-          getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
-            getDiscoverHrefForRuleAndAlertTimestamp({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-              ruleEsql: showRuleDependentUi ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
-              alertIsoTimestamp: ts,
-            }),
-          getAlertEventsHistoryHref: ({ episodeId: selectedEpisodeId, episodeStart, spaceId }) =>
-            getDiscoverHrefForAlertEventsHistory({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-              episodeId: selectedEpisodeId,
-              episodeStart,
-              spaceId,
-            }),
-          isAlertEventsHistoryAvailable: () =>
-            canOpenDiscover({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-            }),
-        }),
-        alertsCapability
-      ),
-    [services, queryClient, showRuleDependentUi, ruleState, alertsCapability]
+      createEpisodeActions({
+        http: services.http,
+        overlays: services.overlays,
+        notifications: services.notifications,
+        rendering: services.rendering,
+        application: services.application,
+        userProfile: services.userProfile,
+        docLinks: services.docLinks,
+        expressions: services.expressions,
+        spaces: services.spaces,
+        queryClient,
+        canWriteNativeEpisodes: canWriteAlerts,
+        isRuleAvailable: (selectedRuleId) =>
+          isRuleLoaded(ruleState) && ruleState.rule.id === selectedRuleId,
+        getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
+          getDiscoverHrefForRuleAndAlertTimestamp({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            ruleEsql: showRuleDependentUi ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
+            alertIsoTimestamp: ts,
+          }),
+        getAlertEventsHistoryHref: ({ episodeId: selectedEpisodeId, episodeStart, spaceId }) =>
+          getDiscoverHrefForAlertEventsHistory({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            episodeId: selectedEpisodeId,
+            episodeStart,
+            spaceId,
+          }),
+        isAlertEventsHistoryAvailable: () =>
+          canOpenDiscover({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+          }),
+      }),
+    [services, queryClient, showRuleDependentUi, ruleState, canWriteAlerts]
   );
 
   const applicableActions = useMemo(() => {
@@ -299,15 +303,15 @@ export function EpisodeDetailsPage() {
     [episode, episodeAction, groupAction, isFlapping]
   );
 
-  const headerMenu = useMemo(
-    () =>
-      getEpisodeHeaderMenu({
-        actions: applicableActions,
-        episode,
-        onSuccess: invalidateEpisodeQueries,
-      }),
-    [applicableActions, episode, invalidateEpisodeQueries]
-  );
+  const additionalHeaderMenuItems = useAdditionalEpisodeDetailsHeaderMenuItems(episode);
+  const headerMenu = useMemo(() => {
+    const menu = getEpisodeHeaderMenu({
+      actions: applicableActions,
+      episode,
+      onSuccess: invalidateEpisodeQueries,
+    });
+    return { ...menu, items: [...additionalHeaderMenuItems, ...(menu.items ?? [])] };
+  }, [applicableActions, episode, invalidateEpisodeQueries, additionalHeaderMenuItems]);
 
   const episodesListHref = episodesLocators.useUrl({});
   const getRuleDetailsHref = useCallback(

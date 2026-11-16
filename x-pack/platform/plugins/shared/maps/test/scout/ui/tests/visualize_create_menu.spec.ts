@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRole } from '@kbn/scout';
-import { test } from '@kbn/scout';
+import { tags, test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 const KBN_ARCHIVE = 'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json';
@@ -34,8 +34,7 @@ const getRole = (mapsPrivilege?: 'all' | 'read'): KibanaRole => ({
   },
 });
 
-// custom-role login is not supported in ECH yet, so this suite runs on local stateful only.
-test.describe('Maps - visualize create menu', { tag: '@local-stateful-classic' }, () => {
+test.describe('Maps - visualize create menu', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
     await esArchiver.loadIfNeeded(ES_ARCHIVE_LOGSTASH);
     // Visualize redirects to the "no data" page unless a data view exists.

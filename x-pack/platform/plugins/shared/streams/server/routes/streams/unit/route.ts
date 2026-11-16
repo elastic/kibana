@@ -8,11 +8,15 @@
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_V2_API_PRIVILEGES } from '../../../../common/constants';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
+import { isApiKeyOfRemovedComponent } from '../../../lib/unit_config/unit_api_keys';
+import type { RemoteDestinationUnverified } from '../../../lib/unit_config/types';
 import { createServerRoute } from '../../create_server_route';
 import { assertStreamsCanvasEnabled } from './assert_streams_canvas_enabled';
+import { indexMetadataRoute } from './index_metadata';
 import { assertUnitPutEnvelope, parseUnitPutBody } from './parse_unit_put_body';
+import { resolveUnitIndicesRoute } from './resolve_indices';
 import { unitStatsRoutes } from './stats_route';
 
 const UNIT_PUT_MAX_BYTES = 1_048_576;
@@ -30,7 +34,7 @@ export const getStreamsUnitRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.read],
     },
   },
   params: unitPathSchema,
@@ -40,12 +44,12 @@ export const getStreamsUnitRoute = createServerRoute({
     getScopedClients,
     logger,
   }): Promise<StreamsUnit.GetResponse> => {
-    const { soClient, uiSettingsClient } = await getScopedClients({ request });
+    const { unitSoClient, uiSettingsClient } = await getScopedClients({ request });
 
     await assertStreamsCanvasEnabled(uiSettingsClient);
 
     const streamsUnitService = new StreamsUnitService({
-      soClient,
+      soClient: unitSoClient,
       logger,
     });
 
@@ -76,7 +80,7 @@ export const putStreamsUnitRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -94,9 +98,20 @@ export const putStreamsUnitRoute = createServerRoute({
     getScopedClients,
     logger,
     unitConfigHooks,
-  }): Promise<{ acknowledged: true; compiled_config?: string }> => {
-    const { soClient, uiSettingsClient, encryptedSavedObjectsClient, canEncrypt } =
-      await getScopedClients({ request });
+  }): Promise<{
+    acknowledged: true;
+    compiled_config?: string;
+    api_keys_may_remain?: true;
+    ui_metadata_not_persisted?: true;
+    remote_destinations_unverified?: RemoteDestinationUnverified[];
+  }> => {
+    const {
+      unitSoClient,
+      uiSettingsClient,
+      encryptedSavedObjectsClient,
+      canEncrypt,
+      invalidateApiKeysAsInternalUser,
+    } = await getScopedClients({ request });
 
     await assertStreamsCanvasEnabled(uiSettingsClient);
 
@@ -108,25 +123,49 @@ export const putStreamsUnitRoute = createServerRoute({
     const { ui_metadata: uiMetadata, secrets } = assertUnitPutEnvelope(parsed);
 
     const streamsUnitService = new StreamsUnitService({
-      soClient,
+      soClient: unitSoClient,
       logger,
       validateUnit: unitConfigHooks.validate,
       publishUnit: unitConfigHooks.publish,
       prepareCredentials: unitConfigHooks.prepareCredentials,
       encryptedSavedObjectsClient,
       canEncrypt,
+      invalidateApiKeys: invalidateApiKeysAsInternalUser,
+      probeRemoteDestination: unitConfigHooks.probeRemoteDestination,
     });
 
-    const { compiled_config: compiledConfig } = await streamsUnitService.upsertUnit({
+    let apiKeysMayRemain = false;
+    const {
+      compiled_config: compiledConfig,
+      ui_metadata_not_persisted: uiMetadataNotPersisted,
+      remote_destinations_unverified: remoteDestinationsUnverified,
+    } = await streamsUnitService.upsertUnit({
       unitId: params.path.id,
       unit: parsed.unit,
       ui_metadata: uiMetadata,
       secrets,
+      onPublished: async (previousUnit) => {
+        try {
+          ({ apiKeysMayRemain } = await streamsUnitService.revokeApiKeys(
+            params.path.id,
+            isApiKeyOfRemovedComponent(parsed.unit, { previousUnit })
+          ));
+        } catch (error) {
+          // The unit is already published; report the leftover keys instead of failing the PUT.
+          logger.error(`Failed to revoke API keys of removed Streams components: ${error}`);
+          apiKeysMayRemain = true;
+        }
+      },
     });
 
     return {
       acknowledged: true,
       ...(compiledConfig !== undefined ? { compiled_config: compiledConfig } : {}),
+      ...(apiKeysMayRemain ? { api_keys_may_remain: true } : {}),
+      ...(uiMetadataNotPersisted ? { ui_metadata_not_persisted: true } : {}),
+      ...(remoteDestinationsUnverified
+        ? { remote_destinations_unverified: remoteDestinationsUnverified }
+        : {}),
     };
   },
 });
@@ -141,7 +180,7 @@ export const resetStreamsUnitRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
   params: unitPathSchema,
@@ -150,19 +189,23 @@ export const resetStreamsUnitRoute = createServerRoute({
     request,
     getScopedClients,
     logger,
-  }): Promise<{ acknowledged: true }> => {
-    const { soClient, uiSettingsClient } = await getScopedClients({ request });
+  }): Promise<{ acknowledged: true; api_keys_may_remain?: true }> => {
+    const { unitSoClient, uiSettingsClient, invalidateApiKeysAsInternalUser } =
+      await getScopedClients({ request });
 
     await assertStreamsCanvasEnabled(uiSettingsClient);
 
     const streamsUnitService = new StreamsUnitService({
-      soClient,
+      soClient: unitSoClient,
       logger,
+      invalidateApiKeys: invalidateApiKeysAsInternalUser,
     });
+
+    const { apiKeysMayRemain } = await streamsUnitService.revokeApiKeys(params.path.id, () => true);
 
     await streamsUnitService.resetUnit(params.path.id);
 
-    return { acknowledged: true };
+    return { acknowledged: true, ...(apiKeysMayRemain ? { api_keys_may_remain: true } : {}) };
   },
 });
 
@@ -170,5 +213,7 @@ export const unitRoutes = {
   ...getStreamsUnitRoute,
   ...putStreamsUnitRoute,
   ...resetStreamsUnitRoute,
+  ...resolveUnitIndicesRoute,
+  ...indexMetadataRoute,
   ...unitStatsRoutes,
 };

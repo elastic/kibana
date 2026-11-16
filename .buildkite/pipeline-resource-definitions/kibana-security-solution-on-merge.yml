@@ -26,7 +26,7 @@ spec:
         SCOUT_REPORTER_ENABLED: 'true'
         SCOUT_TEST_RUN_SCOPE: 'security-solution-on-merge'
       allow_rebuilds: true
-      branch_configuration: main 9.5 9.4 8.19
+      branch_configuration: main 9.5 8.19
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/security_solution_on_merge.yml

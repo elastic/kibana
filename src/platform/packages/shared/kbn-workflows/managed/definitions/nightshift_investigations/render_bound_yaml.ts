@@ -25,3 +25,11 @@ export const renderRunAs = (yaml: string, serviceAccountId: string): string => {
     (_line, prefix: string) => `${prefix}${JSON.stringify(serviceAccountId)}`
   );
 };
+
+/** Removes the `run_as: __SERVICE_ACCOUNT_ID__` line, for the unbound copy of a bound workflow. */
+export const removeRunAs = (yaml: string): string => {
+  if (!RUN_AS_TOKEN_LINE.test(yaml)) {
+    throw new Error(`The workflow YAML has no "run_as: ${SERVICE_ACCOUNT_ID_TOKEN}" setting`);
+  }
+  return yaml.replace(new RegExp(`${RUN_AS_TOKEN_LINE.source}\\n`, 'm'), '');
+};

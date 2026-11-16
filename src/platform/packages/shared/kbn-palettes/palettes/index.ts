@@ -82,4 +82,5 @@ export {
   elasticLineOptimizedPalette,
   elasticLineOptimizedExtendedPalette,
 } from './categorical';
+export { getLegacyKbnPalettes } from './legacy';
 export * from './get_kbn_palettes';

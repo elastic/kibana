@@ -7,56 +7,53 @@
 
 import { UserActionTypes } from '../action/v1';
 import {
-  ExtendedFieldsRt,
-  ExtendedFieldsUserActionPayloadRt,
-  ExtendedFieldsUserActionRt,
+  ExtendedFieldsSchema,
+  ExtendedFieldsUserActionPayloadSchema,
+  ExtendedFieldsUserActionSchema,
 } from './v1';
 
 describe('ExtendedFields', () => {
-  describe('ExtendedFieldsRt', () => {
+  describe('ExtendedFieldsSchema', () => {
     it('accepts a record of string to string', () => {
-      expect(ExtendedFieldsRt.decode({ risk_score: 'high', severity: 'medium' })).toStrictEqual({
-        _tag: 'Right',
-        right: { risk_score: 'high', severity: 'medium' },
-      });
+      const result = ExtendedFieldsSchema.safeParse({ risk_score: 'high', severity: 'medium' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ risk_score: 'high', severity: 'medium' });
     });
 
     it('rejects a record with non-string values', () => {
-      const result = ExtendedFieldsRt.decode({ risk_score: 42 });
-      expect(result._tag).toBe('Left');
+      const result = ExtendedFieldsSchema.safeParse({ risk_score: 42 });
+      expect(result.success).toBe(false);
     });
 
     it('accepts an empty record', () => {
-      expect(ExtendedFieldsRt.decode({})).toStrictEqual({
-        _tag: 'Right',
-        right: {},
-      });
+      const result = ExtendedFieldsSchema.safeParse({});
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({});
     });
   });
 
-  describe('ExtendedFieldsUserActionPayloadRt', () => {
+  describe('ExtendedFieldsUserActionPayloadSchema', () => {
     const defaultRequest = {
       extended_fields: { risk_score: 'high' },
     };
 
     it('has expected attributes in request', () => {
-      expect(ExtendedFieldsUserActionPayloadRt.decode(defaultRequest)).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = ExtendedFieldsUserActionPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      expect(
-        ExtendedFieldsUserActionPayloadRt.decode({ ...defaultRequest, foo: 'bar' })
-      ).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
+    it('strips unknown fields', () => {
+      const result = ExtendedFieldsUserActionPayloadSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
       });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('ExtendedFieldsUserActionRt', () => {
+  describe('ExtendedFieldsUserActionSchema', () => {
     const defaultRequest = {
       type: UserActionTypes.extended_fields,
       payload: {
@@ -65,29 +62,25 @@ describe('ExtendedFields', () => {
     };
 
     it('has expected attributes in request', () => {
-      expect(ExtendedFieldsUserActionRt.decode(defaultRequest)).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = ExtendedFieldsUserActionSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      expect(ExtendedFieldsUserActionRt.decode({ ...defaultRequest, foo: 'bar' })).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = ExtendedFieldsUserActionSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from payload', () => {
-      expect(
-        ExtendedFieldsUserActionRt.decode({
-          ...defaultRequest,
-          payload: { ...defaultRequest.payload, foo: 'bar' },
-        })
-      ).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
+    it('strips unknown fields from payload', () => {
+      const result = ExtendedFieldsUserActionSchema.safeParse({
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, foo: 'bar' },
       });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });

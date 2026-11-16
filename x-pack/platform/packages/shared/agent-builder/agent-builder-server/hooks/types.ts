@@ -25,6 +25,11 @@ interface AgentHookContextBase {
   request: KibanaRequest;
   abortSignal?: AbortSignal;
   agentId?: string;
+  /**
+   * Service account the execution runs as. A hook resolving the agent passes it to the agent
+   * registry, since the account holds no access to the agent of its own.
+   */
+  runAs?: string;
 }
 
 export interface BeforeAgentHookContext extends AgentHookContextBase {

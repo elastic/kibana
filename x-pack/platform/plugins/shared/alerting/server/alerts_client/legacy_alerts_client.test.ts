@@ -580,6 +580,24 @@ describe('Legacy Alerts Client', () => {
     expect(alertsClient.isTrackedAlert('3')).toBe(false);
   });
 
+  test('getRawTrackedActiveAlert() should return the state entry of an alert that was active in a previous execution', async () => {
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    await alertsClient.initializeExecution(defaultExecutionOpts);
+    expect(alertsClient.getRawTrackedActiveAlert('1')).toEqual({
+      state: { foo: 'bar' },
+      meta: expect.objectContaining({ uuid: 'abc', flappingHistory: [false, false] }),
+    });
+    expect(alertsClient.getRawTrackedActiveAlert('3')).toBeUndefined();
+  });
+
   test('determineFlappingAlerts() should call determineFlappingAlerts', async () => {
     (determineFlappingAlerts as jest.Mock).mockReturnValue({
       newAlerts: {},

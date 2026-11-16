@@ -145,7 +145,7 @@ describe.skip('ALL - Live Query Workflow', { tags: ['@ess', '@serverless'] }, ()
       it('opens query details from history', () => {
         cy.get('[aria-label="Details"]').first().should('be.visible').click();
         cy.getBySel('appHeaderBack');
-        cy.contains('select * from users;');
+        cy.getBySel('appHeaderTitle').should('contain', 'select * from users;');
       });
     }
   );

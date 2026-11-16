@@ -24,6 +24,8 @@ export interface ProposalItem extends ProposalWithMetadata {
    * conversation redirect, which resolves the agent itself.
    */
   conversationAgentId?: string;
+  /** Status of the investigation, from conversation metadata. Absent when unset or unreadable. */
+  conversationStatus?: 'open' | 'closed';
   /**
    * User ids assigned to the investigation, from conversation metadata. Always an array —
    * empty when unset or the conversation is unreadable — so callers need no fallback.

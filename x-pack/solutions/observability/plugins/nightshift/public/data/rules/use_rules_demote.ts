@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { DETECTION_OVERVIEW_QUERY_KEY, DISCOVERY_QUERIES_QUERY_KEY } from '../query_keys';
+import {
+  DETECTION_ENTITIES_QUERY_KEY,
+  DETECTION_OVERVIEW_QUERY_KEY,
+  DISCOVERY_QUERIES_QUERY_KEY,
+} from '../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import { useQueriesApi } from './use_queries_api';
 
@@ -44,6 +48,7 @@ export function useRulesDemote({ onSuccess }: UseRulesDemoteParams) {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: DETECTION_OVERVIEW_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: DETECTION_ENTITIES_QUERY_KEY }),
       ]);
     },
   });

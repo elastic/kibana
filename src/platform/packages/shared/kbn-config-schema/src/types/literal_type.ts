@@ -14,7 +14,7 @@ export class LiteralType<T> extends Type<T> {
   private expectedValue: T;
 
   constructor(value: T) {
-    super(internals.any().valid(value));
+    super(() => internals.any().valid(value));
     this.expectedValue = value;
   }
 

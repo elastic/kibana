@@ -8,8 +8,18 @@
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+/** The AlertZero pages that have their own documentation, keyed by `docLinks.links.securitySolution.alertZero`. */
+export type AlertZeroDocumentationPage =
+  | 'overview'
+  | 'setUp'
+  | 'proposedActions'
+  | 'escalations'
+  | 'watches';
+
 /** Documentation link for the header overflow menu; the header renders the Feedback entry itself. */
-export const useAlertZeroDocumentationLink = (): string | undefined => {
+export const useAlertZeroDocumentationLink = (
+  page: AlertZeroDocumentationPage
+): string | undefined => {
   const { services } = useKibana<CoreStart>();
-  return services.docLinks?.links.siem.guide;
+  return services.docLinks?.links.securitySolution.alertZero[page];
 };

@@ -11,6 +11,7 @@ import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INDEX_SCOPE_URL } from '../../../com
 import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_index_scope';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
+import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 
 export { HUNT_INDEX_SCOPE_URL };
@@ -21,7 +22,13 @@ export { HUNT_INDEX_SCOPE_URL };
  * Distinct from Security Solution threat-intel readiness and SIEM Readiness; those stay
  * as-is and must not import this (one-way dependency rule).
  */
-export const registerHuntIndexScopeRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
+export const registerHuntIndexScopeRoute = ({
+  router,
+  logger,
+  getSpaceId,
+  getClusterClient,
+  isCpsEnabled,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: HUNT_INDEX_SCOPE_URL,
@@ -43,7 +50,7 @@ export const registerHuntIndexScopeRoute = ({ router, logger, getSpaceId }: Rout
       withAlertZeroEnabled(async (context, request, response) => {
         try {
           const spaceId = getSpaceId(request);
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const esClient = huntEsClient({ getClusterClient, request });
           const indexPatterns = await resolveHuntUniverse(context, logger);
 
           // `discovered` is the datasets stage 1 parsed for the report matcher; the wire
@@ -52,8 +59,17 @@ export const registerHuntIndexScopeRoute = ({ router, logger, getSpaceId }: Rout
             esClient,
             spaceId,
             indexPatterns,
+            crossProjectSearch: isCpsEnabled(),
             logger,
           });
+          if (scope.resolution === 'blocked:empty_universe') {
+            // `blocked:discovery_failed` already warns inside `resolveHuntScope`.
+            logger.warn(
+              `Hunt index scope for space ${spaceId} is ${
+                scope.resolution
+              }: the caller resolved none of ${scope.missing.join(', ')}`
+            );
+          }
           const body: HuntIndexScopeResponse = scope;
 
           return response.ok({ body });

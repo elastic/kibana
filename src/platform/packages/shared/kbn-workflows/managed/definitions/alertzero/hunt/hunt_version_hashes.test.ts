@@ -20,8 +20,8 @@ function createContentFingerprint(content: string): string {
 }
 
 /**
- * What the platform's `yamlTemplate` hash cannot see but the render depends on: the imported YAML
- * and the settings defaults the Hunt renderer fills stored values from.
+ * What AlertZero bumps the Hunt Worker's `version` for: the imported YAML and the settings
+ * defaults the Hunt renderer fills stored values from.
  */
 const renderInputs = (importedYaml: string, defaults: unknown): string =>
   `${importedYaml}\n${JSON.stringify(defaults)}`;
@@ -35,6 +35,6 @@ describe('Hunt Watch version hashes', () => {
           CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS
         )
       )}`
-    ).toBe('5:d4ec990c');
+    ).toBe('8:914430fe');
   });
 });
