@@ -32,6 +32,7 @@ import type {
 import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
+import { BuilderTypeRegistry, registerBuiltinBuilderTypes } from '../builder_types';
 import type { CreateRulesClientOptions } from './types';
 import { createRuleChangesHistoryClientMock } from '../rule_changes_history/rule_changes_history_client.mock';
 import { RulesClient } from './rules_client';
@@ -103,6 +104,7 @@ describe('RulesClient', () => {
   let ruleEventPublisher: RuleEventPublisher;
   let artifactTypeRegistry: ArtifactTypeRegistry;
   let ruleChangesHistoryClient: ReturnType<typeof createRuleChangesHistoryClientMock>;
+  let builderTypeRegistry: BuilderTypeRegistry;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -114,6 +116,8 @@ describe('RulesClient', () => {
     rulesSavedObjectService = createRulesSavedObjectServiceMock();
     artifactTypeRegistry = new ArtifactTypeRegistry();
     registerBuiltinArtifactTypes(artifactTypeRegistry);
+    builderTypeRegistry = new BuilderTypeRegistry();
+    registerBuiltinBuilderTypes(builderTypeRegistry);
     ({ publisher: ruleEventPublisher } = createRuleEventPublisher());
     ruleChangesHistoryClient = createRuleChangesHistoryClientMock();
     jest.spyOn(ruleEventPublisher, 'emitRuleCreated');
@@ -184,7 +188,8 @@ describe('RulesClient', () => {
       loggerService,
       artifactTypeRegistry,
       { actor: 'user', options: rulesClientOptions },
-      ruleChangesHistoryClient
+      ruleChangesHistoryClient,
+      builderTypeRegistry
     );
   }
 
@@ -229,6 +234,44 @@ describe('RulesClient', () => {
           updated_at: '2025-01-01T00:00:00.000Z',
         })
       );
+    });
+
+    it('rejects an unknown builder type', async () => {
+      const client = createClient();
+
+      await expect(
+        client.createRule({
+          data: {
+            ...baseCreateData,
+            metadata: { name: 'rule-1', builder: { type: 'not-a-builder' } },
+          },
+        })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        data: { code: ALERTING_ERROR_CODES.BUILDER_TYPE_UNKNOWN },
+      });
+      expect(rulesSavedObjectService.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('stores a registered builder type', async () => {
+      const client = createClient();
+
+      await client.createRule({
+        data: {
+          ...baseCreateData,
+          id: 'threshold-rule',
+          metadata: { name: 'rule-1', builder: { type: 'threshold' } },
+        },
+      });
+
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: 'threshold-rule',
+          attrs: expect.objectContaining({
+            metadata: expect.objectContaining({ builder_type: 'threshold' }),
+          }),
+        }),
+      ]);
     });
 
     it('stores the server-provided template without returning it', async () => {
@@ -555,6 +598,53 @@ describe('RulesClient', () => {
       expect(res.items).toHaveLength(2);
       expect(res.errors).toEqual([]);
       expect(res.items.map((rule) => rule.id)).toEqual(['rule-a', 'rule-b']);
+    });
+
+    it('fails only the items with an unknown builder type and persists the registered ones', async () => {
+      const client = createClient();
+      mockBulkCreateEcho();
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
+
+      const res = await client.bulkCreateRules({
+        items: [
+          {
+            ...baseCreateData,
+            id: 'rule-known',
+            metadata: { name: 'known', builder: { type: 'threshold' } },
+          },
+          {
+            ...baseCreateData,
+            id: 'rule-unknown',
+            metadata: { name: 'unknown', builder: { type: 'not-a-builder' } },
+          },
+        ],
+      });
+
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: 'rule-known',
+          attrs: expect.objectContaining({
+            metadata: expect.objectContaining({ builder_type: 'threshold' }),
+          }),
+        }),
+      ]);
+      expect(taskManager.bulkSchedule).toHaveBeenCalledWith(
+        [expect.objectContaining({ params: expect.objectContaining({ ruleId: 'rule-known' }) })],
+        expect.anything()
+      );
+      expect(res.items.map((rule) => rule.id)).toEqual(['rule-known']);
+      expect(res.errors).toEqual([
+        expect.objectContaining({
+          index: 1,
+          id: 'rule-unknown',
+          error: expect.objectContaining({
+            code: ALERTING_ERROR_CODES.BUILDER_TYPE_UNKNOWN,
+            details: { builder_type: 'not-a-builder' },
+          }),
+        }),
+      ]);
     });
 
     it('maps saved object attributes from the service into the API response', async () => {
@@ -1063,6 +1153,58 @@ describe('RulesClient', () => {
       });
 
       expect(res.metadata.description).toBe('New description');
+    });
+
+    it('rejects a name-only update of an unregistered builder type', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        attributes: {
+          ...baseSoAttrs,
+          metadata: { ...baseSoAttrs.metadata, builder_type: 'not-a-builder' },
+        },
+        version: 'WzEsMV0=',
+        id: 'rule-id-unknown-builder',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-unknown-builder',
+          data: { metadata: { description: 'Rename only' } },
+        })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        data: { code: ALERTING_ERROR_CODES.BUILDER_TYPE_UNKNOWN },
+      });
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('allows an update that clears the builder type', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        attributes: {
+          ...baseSoAttrs,
+          metadata: { ...baseSoAttrs.metadata, builder_type: 'threshold' },
+        },
+        version: 'WzEsMV0=',
+        id: 'rule-id-clear-builder',
+      });
+      rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-clear-builder' });
+
+      await client.updateRule({
+        id: 'rule-id-clear-builder',
+        data: { metadata: { builder: null } },
+      });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'rule-id-clear-builder',
+          attrs: expect.objectContaining({
+            metadata: expect.not.objectContaining({ builder_type: 'threshold' }),
+          }),
+        })
+      );
     });
 
     it('keeps an imported artifact reference on an update that does not touch artifacts', async () => {
@@ -1738,6 +1880,34 @@ describe('RulesClient', () => {
           references: [],
         });
         expect(res.created).toBe(false);
+      });
+
+      it('rejects an unknown builder type without updating or scheduling', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+
+        await expect(
+          client.upsertRule({
+            id: 'rule-id-1',
+            data: {
+              ...baseCreateData,
+              metadata: { name: 'rule-1', builder: { type: 'not-a-builder' } },
+            },
+          })
+        ).rejects.toMatchObject({
+          isBoom: true,
+          data: { code: ALERTING_ERROR_CODES.BUILDER_TYPE_UNKNOWN },
+        });
+
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+        expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
       });
 
       it('keeps the existing template', async () => {

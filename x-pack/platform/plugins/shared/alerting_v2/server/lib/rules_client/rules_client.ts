@@ -44,6 +44,7 @@ import {
   injectArtifactReferences,
   rebuildArtifactReferences,
 } from '../artifact_types';
+import { BuilderTypeRegistry } from '../builder_types';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   getInvalidRuleDataMessage,
@@ -245,7 +246,8 @@ export class RulesClient {
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
     @inject(RulesClientEventOriginToken) eventOrigin: RulesClientEventOrigin,
     @inject(RuleChangesHistoryClientToken)
-    private readonly ruleChangesHistoryClient: RuleChangesHistoryClientContract
+    private readonly ruleChangesHistoryClient: RuleChangesHistoryClientContract,
+    @inject(BuilderTypeRegistry) private readonly builderTypeRegistry: BuilderTypeRegistry
   ) {
     this.eventContext = {
       request,
@@ -267,6 +269,19 @@ export class RulesClient {
    */
   private getNextVersion(current?: number): number {
     return (current ?? 0) + 1;
+  }
+
+  private assertBuilderType(builderType: string | undefined): void {
+    if (!builderType) {
+      return;
+    }
+
+    if (!this.builderTypeRegistry.get(builderType)) {
+      throw Boom.badRequest(`Unknown rule builder type "${builderType}".`, {
+        code: ALERTING_ERROR_CODES.BUILDER_TYPE_UNKNOWN,
+        details: { builder_type: builderType },
+      });
+    }
   }
 
   /**
@@ -688,6 +703,7 @@ export class RulesClient {
   @withApm
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const { id, ...data } = this.parseRuleData(createRuleDataSchema, params.data, 'create');
+    this.assertBuilderType(data.metadata.builder?.type);
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
@@ -748,6 +764,7 @@ export class RulesClient {
       const { id, enabled, ...data } = item;
       const position: BulkCreateItemPosition = { index, ...(id ? { id } : {}) };
       try {
+        this.assertBuilderType(data.metadata.builder?.type);
         const rule = this.prepareRuleForCreate({
           data,
           id,
@@ -843,6 +860,8 @@ export class RulesClient {
       updatedAt: nowIso,
       version: this.getNextVersion(existingAttrs.version),
     });
+
+    this.assertBuilderType(nextAttrs.metadata.builder_type);
 
     validateMergedRuleAttributes(id, nextAttrs);
 
@@ -2011,6 +2030,8 @@ export class RulesClient {
       version: this.getNextVersion(existingAttrs.version),
       template: existingAttrs.metadata.template,
     });
+
+    this.assertBuilderType(nextAttrs.metadata.builder_type);
 
     await this.validateSchedule([
       {
