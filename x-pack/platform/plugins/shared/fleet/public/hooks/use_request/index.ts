@@ -29,3 +29,4 @@ export * from './spaces';
 export * from './iac_provisioner';
 export * from './provisioning_callback';
 export * from './cloud_connector';
+export * from './aws_onboarding';
