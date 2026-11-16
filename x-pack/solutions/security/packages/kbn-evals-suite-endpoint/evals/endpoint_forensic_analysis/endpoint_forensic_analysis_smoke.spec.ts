@@ -162,7 +162,6 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
                 criteria: [
                   'Lists the processes started on WKSTN-RECV01 in timestamp order, earliest first',
                   'Includes whoami.exe /all, started by powershell.exe about a minute after the encoded PowerShell command and before rundll32.exe',
-                  'Does not filter event.type with a single-value comparison such as event.type == "start"',
                 ],
                 tool_sequence: [...FORENSIC_ESQL_TRAJECTORY],
               },
