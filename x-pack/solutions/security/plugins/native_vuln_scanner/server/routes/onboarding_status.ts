@@ -44,7 +44,6 @@ export const registerOnboardingStatusRoute = ({
               request,
               soClient: core.savedObjects.client,
               esInternal: es,
-              esCurrentUser: core.elasticsearch.client.asCurrentUser,
               packRepository,
               agentPolicyService: fleet.agentPolicyService,
               agentClient: fleet.agentService.asScoped(request),

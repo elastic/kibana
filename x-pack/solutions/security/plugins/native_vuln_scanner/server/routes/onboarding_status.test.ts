@@ -52,7 +52,6 @@ describe('GET onboarding status', () => {
     const status = { license: 'ok', policies: [] };
     collect.mockResolvedValue(status as never);
     const soClient = savedObjectsClientMock.create();
-    const asCurrentUser = {};
     const es = services.es;
     const { handler } = setupRoute(registerOnboardingStatusRoute, 'get', {
       services: services as never,
@@ -63,7 +62,6 @@ describe('GET onboarding status', () => {
     await handler(
       createContext({
         savedObjects: { client: soClient },
-        elasticsearch: { client: { asCurrentUser } },
       }),
       request,
       response
@@ -75,7 +73,6 @@ describe('GET onboarding status', () => {
         request,
         soClient,
         esInternal: es,
-        esCurrentUser: asCurrentUser,
         agentPolicyService: services.fleet.agentPolicyService,
       })
     );

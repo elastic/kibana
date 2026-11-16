@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -37,7 +36,6 @@ interface Scenario {
   workflow?: { enabled: boolean } | null;
   runningExecutions?: number;
   agentsError?: Error;
-  resultsError?: Error;
 }
 
 const setup = ({
@@ -50,7 +48,6 @@ const setup = ({
   workflow = null,
   runningExecutions = 0,
   agentsError,
-  resultsError,
 }: Scenario = {}) => {
   const request = httpServerMock.createKibanaRequest();
   const soClient = savedObjectsClientMock.create();
@@ -75,19 +72,12 @@ const setup = ({
   const packRepository = savedObjectsRepositoryMock.create();
   packRepository.find.mockResolvedValue({ saved_objects: [], total: 0, per_page: 100, page: 1 });
 
-  // The summary index is read as the internal user, the osquery result indices as the caller.
+  // The internal user reads both the run summary and the aggregate-only osquery results.
   const esInternal = elasticsearchServiceMock.createElasticsearchClient();
-  esInternal.search.mockResolvedValue({
-    hits: { hits: lastScan ? [{ _source: lastScan }] : [] },
-  } as never);
-  const esCurrentUser = elasticsearchServiceMock.createElasticsearchClient();
-  if (resultsError) {
-    esCurrentUser.search.mockRejectedValue(resultsError);
-  } else {
-    esCurrentUser.search.mockResolvedValue({
-      aggregations: { reporting: { buckets: reportingAgentIds.map((key) => ({ key })) } },
-    } as never);
-  }
+  esInternal.search.mockImplementation((async (params: { index?: string }) =>
+    params.index === 'logs-osquery_manager.result-*'
+      ? { aggregations: { reporting: { buckets: reportingAgentIds.map((key) => ({ key })) } } }
+      : { hits: { hits: lastScan ? [{ _source: lastScan }] : [] } }) as never);
 
   const agentPolicyService = createMockAgentPolicyService();
   agentPolicyService.list.mockResolvedValue({
@@ -116,13 +106,12 @@ const setup = ({
     request,
     soClient,
     esInternal,
-    esCurrentUser,
     packRepository,
     agentPolicyService,
     agentClient,
     workflows,
   };
-  return { deps, esInternal, esCurrentUser, soClient, agentPolicyService, agentClient, workflows };
+  return { deps, esInternal, soClient, agentPolicyService, agentClient, workflows };
 };
 
 const SCAN = {
@@ -265,7 +254,7 @@ describe('collectOnboardingStatus', () => {
     });
     const status = await collectOnboardingStatus(deps);
     expect(status.policies.map(({ id }) => id)).toEqual(['ok']);
-    expect(status.needs_osquery_integration).toEqual([
+    expect(status.needsOsqueryIntegration).toEqual([
       { id: 'none', name: 'None' },
       { id: 'old', name: 'Old' },
     ]);
@@ -297,24 +286,26 @@ describe('collectOnboardingStatus', () => {
   });
 
   it('does not search results when there are no agents', async () => {
-    const { deps, esCurrentUser } = setup({ policies: [createPolicy({ id: 'p' })] });
+    const { deps, esInternal } = setup({ policies: [createPolicy({ id: 'p' })] });
     const status = await collectOnboardingStatus(deps);
     expect(status.agentsTruncated).toBe(false);
-    expect(esCurrentUser.search).not.toHaveBeenCalled();
+    expect(esInternal.search).not.toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'logs-osquery_manager.result-*' })
+    );
   });
 
-  it('reads results as the caller and the summary as the internal user', async () => {
-    const { deps, esInternal, esCurrentUser } = setup({
+  it('reads the results and the summary as the internal user', async () => {
+    const { deps, esInternal } = setup({
       policies: [createPolicy({ id: 'p', agentInternal: OSQUERY_PINNED_YAML })],
       packPolicyIds: ['p'],
       agents: [{ id: 'a1', policy_id: 'p', status: 'online' }],
       reportingAgentIds: ['a1'],
     });
     await collectOnboardingStatus(deps);
-    expect(esCurrentUser.search).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-osquery_manager.result-*' })
+    expect(esInternal.search).toHaveBeenCalledTimes(2);
+    expect(esInternal.search).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'logs-osquery_manager.result-*', size: 0 })
     );
-    expect(esInternal.search).toHaveBeenCalledTimes(1);
     expect(esInternal.search).toHaveBeenCalledWith(
       expect.objectContaining({ index: expect.stringContaining('native-vuln-scanner') })
     );
@@ -329,8 +320,8 @@ describe('collectOnboardingStatus', () => {
     });
     const status = await collectOnboardingStatus(deps);
     expect(status.policies.map(({ id }) => id)).toEqual(['ok']);
-    expect(status.agentless_policies).toEqual([{ id: 'agentless', name: 'Agentless' }]);
-    expect(status.needs_osquery_integration).toEqual([]);
+    expect(status.agentlessPolicies).toEqual([{ id: 'agentless', name: 'Agentless' }]);
+    expect(status.needsOsqueryIntegration).toEqual([]);
     expect(agentClient.listAgents).toHaveBeenCalledWith(
       expect.objectContaining({ kuery: 'policy_id:("ok")' })
     );
@@ -346,7 +337,7 @@ describe('collectOnboardingStatus', () => {
     };
 
     it('degrades to null agent data instead of failing when Fleet denies the agent list', async () => {
-      const { deps, esCurrentUser } = setup({
+      const { deps, esInternal } = setup({
         ...configured,
         agentsError: new FleetUnauthorizedError('no agents read'),
         lastScan: SCAN,
@@ -365,7 +356,9 @@ describe('collectOnboardingStatus', () => {
         { id: 'p', state: 'pending_inventory', agents: null, reportingInventory: null },
         { id: 'q', state: 'not_configured', agents: null, reportingInventory: null },
       ]);
-      expect(esCurrentUser.search).not.toHaveBeenCalled();
+      expect(esInternal.search).not.toHaveBeenCalledWith(
+        expect.objectContaining({ index: 'logs-osquery_manager.result-*' })
+      );
     });
 
     it('reports agentsVisible when the agent list is readable', async () => {
@@ -376,41 +369,6 @@ describe('collectOnboardingStatus', () => {
     it('propagates any other agent list error', async () => {
       const { deps } = setup({ ...configured, agentsError: new Error('fleet down') });
       await expect(collectOnboardingStatus(deps)).rejects.toThrow('fleet down');
-    });
-  });
-
-  describe('without read access to the osquery results', () => {
-    const configured = {
-      policies: [createPolicy({ id: 'p', agentInternal: OSQUERY_PINNED_YAML })],
-      packPolicyIds: ['p'],
-      agents: [{ id: 'a1', policy_id: 'p', status: 'online' }],
-    };
-    const responseError = (statusCode: number, type: string) =>
-      new errors.ResponseError({
-        statusCode,
-        body: { error: { type, reason: 'denied' } },
-        headers: {},
-        warnings: [],
-        meta: {} as never,
-      });
-
-    it.each([
-      ['a 403', responseError(403, 'other')],
-      ['a security_exception', responseError(400, 'security_exception')],
-    ])('degrades reportingInventory to null on %s', async (_, resultsError) => {
-      const { deps } = setup({ ...configured, resultsError });
-      const status = await collectOnboardingStatus(deps);
-      expect(status.agentsVisible).toBe(true);
-      expect(status.policies[0]).toMatchObject({
-        state: 'pending_inventory',
-        agents: { total: 1, online: 1 },
-        reportingInventory: null,
-      });
-    });
-
-    it('propagates any other search error', async () => {
-      const { deps } = setup({ ...configured, resultsError: responseError(500, 'boom') });
-      await expect(collectOnboardingStatus(deps)).rejects.toThrow();
     });
   });
 });

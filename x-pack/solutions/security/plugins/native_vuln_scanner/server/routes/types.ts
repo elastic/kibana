@@ -22,8 +22,8 @@ export interface RouteServices {
   fleet?: FleetStartContract;
   workflows: WorkflowsManagementApi;
   /**
-   * Internal user, for the plugin-owned run summary index only; never used for Fleet writes.
-   * Osquery result indices are read as the caller (`context.core.elasticsearch.client`).
+   * Internal user, for the run summary index and the aggregate-only osquery results read; never
+   * used for Fleet writes.
    */
   es: ElasticsearchClient;
   packRepository: ISavedObjectsRepository;

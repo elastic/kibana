@@ -77,7 +77,7 @@ export class NativeVulnScannerPlugin
         return {
           fleet,
           workflows: workflowsManagement.management,
-          // Origin-only under CPS: the run summary and osquery results live in this project.
+          // Origin-only under CPS: the run summary and osquery results live in this project (read by the internal user).
           es: coreStart.elasticsearch.client.asInternalUser,
           packRepository: coreStart.savedObjects.createInternalRepository([OSQUERY_PACK_SO_TYPE]),
         };

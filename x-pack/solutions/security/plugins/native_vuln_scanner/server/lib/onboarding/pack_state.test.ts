@@ -103,9 +103,86 @@ describe('inspectInventoryPack', () => {
     expect(differences).toEqual([
       { code: 'query_platform_differs', queryId: first.id },
       { code: 'query_not_snapshot', queryId: second.id },
-      { code: 'query_not_snapshot', queryId: third.id },
       { code: 'query_disabled', queryId: third.id },
     ]);
+  });
+
+  describe('snapshot mode, resolved the way osquery does', () => {
+    // osquery persists snapshot mode as no key. The other queries pin snapshot explicitly so a
+    // pack-level default only changes the query under test.
+    const [noKey, ...others] = Object.values(INVENTORY_PACK_BODY.queries).map(
+      ({ snapshot, ...query }, index) =>
+        index === 0 ? query : { ...query, result_type: 'snapshot' }
+    );
+    const first = noKey;
+    const inspectWith = (query: Record<string, unknown>, pack: Record<string, unknown> = {}) =>
+      inspectInventoryPack(findReturns([packObject({ ...pack, queries: [query, ...others] })]));
+
+    it('treats an absent snapshot key as a snapshot, since osquery stores snapshot mode as no key', async () => {
+      expect((await inspectWith(noKey)).state).toBe('ok');
+    });
+
+    it('reports a query with no key as differing when the pack defaults to differential', async () => {
+      const { differences } = await inspectWith(noKey, { result_type: 'differential' });
+      expect(differences).toEqual([{ code: 'query_not_snapshot', queryId: first.id }]);
+    });
+
+    it('lets a query result_type win over the pack default', async () => {
+      expect(
+        (await inspectWith({ ...noKey, result_type: 'snapshot' }, { result_type: 'differential' }))
+          .state
+      ).toBe('ok');
+      expect((await inspectWith({ ...noKey, result_type: 'differential' })).state).toBe('differs');
+    });
+
+    it('does not treat a legacy snapshot: true as a choice, so a differential pack default applies', async () => {
+      const { differences } = await inspectWith(
+        { ...noKey, snapshot: true },
+        { result_type: 'differential' }
+      );
+      expect(differences).toEqual([{ code: 'query_not_snapshot', queryId: first.id }]);
+    });
+
+    it('lets a legacy snapshot: false win over a snapshot pack default', async () => {
+      expect(
+        (await inspectWith({ ...noKey, snapshot: false }, { result_type: 'snapshot' })).state
+      ).toBe('differs');
+      expect((await inspectWith({ ...noKey, snapshot: false, removed: false })).state).toBe(
+        'differs'
+      );
+    });
+  });
+
+  describe('platform, resolved the way osquery does', () => {
+    const [first, ...others] = Object.values(INVENTORY_PACK_BODY.queries);
+    const { platform, ...noPlatform } = first;
+    const inspectWith = (query: Record<string, unknown>, pack: Record<string, unknown> = {}) =>
+      inspectInventoryPack(findReturns([packObject({ ...pack, queries: [query, ...others] })]));
+
+    it('inherits the pack platform when the query has none', async () => {
+      expect((await inspectWith(noPlatform, { platform: 'linux' })).state).toBe('ok');
+      expect(
+        (await inspectWith({ ...noPlatform, platform: ' ' }, { platform: 'linux' })).state
+      ).toBe('ok');
+    });
+
+    it('treats an all-OS query platform as unrestricted and inherits the pack platform', async () => {
+      const allOs = { ...noPlatform, platform: 'darwin, windows,linux' };
+      expect((await inspectWith(allOs, { platform: 'linux' })).state).toBe('ok');
+    });
+
+    it('reports a query with no platform when the pack has none either', async () => {
+      const { differences } = await inspectWith(noPlatform);
+      expect(differences).toEqual([{ code: 'query_platform_differs', queryId: first.id }]);
+    });
+
+    it('lets a restrictive query platform win over the pack platform', async () => {
+      const { differences } = await inspectWith(
+        { ...noPlatform, platform: 'darwin' },
+        { platform: 'linux' }
+      );
+      expect(differences).toEqual([{ code: 'query_platform_differs', queryId: first.id }]);
+    });
   });
 
   it('treats an osquery-saved pack with extra fields as ok', async () => {

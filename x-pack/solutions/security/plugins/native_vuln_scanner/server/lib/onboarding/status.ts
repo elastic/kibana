@@ -13,7 +13,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { isResponseError } from '@kbn/es-errors';
 import type { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { FleetUnauthorizedError } from '@kbn/fleet-plugin/server';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
@@ -58,7 +57,7 @@ export interface PolicyStatus {
   runtimePinned: boolean;
   /** Null when the caller cannot read Fleet agents. */
   agents: { total: number; online: number } | null;
-  /** Null when agents or osquery results are not readable by the caller. */
+  /** Null when agents are not readable by the caller. */
   reportingInventory: number | null;
   state: PolicyOnboardingState;
 }
@@ -68,9 +67,9 @@ export interface OnboardingStatus {
   pack: PackInspection;
   policies: PolicyStatus[];
   /** Policies without a usable osquery_manager integration. */
-  needs_osquery_integration: Array<{ id: string; name: string }>;
+  needsOsqueryIntegration: Array<{ id: string; name: string }>;
   /** Agentless policies: they cannot run osquerybeat, so they are never onboarded. */
-  agentless_policies: Array<{ id: string; name: string }>;
+  agentlessPolicies: Array<{ id: string; name: string }>;
   lastScan: SummaryDoc | null;
   schedule: { installed: boolean; enabled: boolean };
   scanRunning: boolean;
@@ -84,10 +83,8 @@ export interface OnboardingDeps {
   request: KibanaRequest;
   /** Request-scoped: policies and packs are read as the caller. */
   soClient: SavedObjectsClientContract;
-  /** Origin-only under CPS: the run summary lives in this project. Internal user. */
+  /** Internal user: the run summary and the aggregate-only osquery results read. Origin-only under CPS. */
   esInternal: ElasticsearchClient;
-  /** Reads the osquery result indices as the caller; the internal user has no privileges on them. */
-  esCurrentUser: ElasticsearchClient;
   packRepository: ISavedObjectsRepository;
   agentPolicyService: Pick<AgentPolicyServiceInterface, 'list'>;
   agentClient: Pick<AgentClient, 'listAgents'>;
@@ -151,47 +148,39 @@ const listAgents = async (
   return { agents, truncated };
 };
 
-const isForbidden = (error: unknown): boolean =>
-  isResponseError(error) &&
-  (error.statusCode === 403 || error.body?.error?.type === 'security_exception');
-
 /**
- * Agents (of the given ones) that sent an inventory result within the reporting window, or null
- * when the caller cannot read the osquery result indices.
+ * Agents (of the given ones) that sent an inventory result within the reporting window.
+ * Read with the internal user: kibana_system can read `logs-osquery_manager.result-*`, only
+ * per-agent counts are returned, and access is gated by `fleet-agent-policies-read`.
  */
 const findReportingAgentIds = async (
-  { esCurrentUser, packRepository }: Pick<OnboardingDeps, 'esCurrentUser' | 'packRepository'>,
+  { esInternal, packRepository }: Pick<OnboardingDeps, 'esInternal' | 'packRepository'>,
   agentIds: readonly string[]
-): Promise<Set<string> | null> => {
+): Promise<Set<string>> => {
   if (agentIds.length === 0) return new Set();
   const scheduleIds = Object.values(await findInventoryScheduleIds(packRepository)).flat();
   const reporting = new Set<string>();
-  try {
-    for (const batch of chunk(agentIds, 1000)) {
-      const response = await esCurrentUser.search<
-        unknown,
-        { reporting: { buckets: Array<{ key: string }> } }
-      >({
-        index: OSQUERY_RESULTS_INDEX,
-        ignore_unavailable: true,
-        size: 0,
-        track_total_hits: false,
-        query: {
-          bool: {
-            // The same filters as the scan's reader: scheduled and live results both count.
-            filter: [
-              inventoryResultsQuery(scheduleIds, REPORTING_WINDOW),
-              { terms: { 'agent.id': batch } },
-            ],
-          },
+  for (const batch of chunk(agentIds, 1000)) {
+    const response = await esInternal.search<
+      unknown,
+      { reporting: { buckets: Array<{ key: string }> } }
+    >({
+      index: OSQUERY_RESULTS_INDEX,
+      ignore_unavailable: true,
+      size: 0,
+      track_total_hits: false,
+      query: {
+        bool: {
+          // The same filters as the scan's reader: scheduled and live results both count.
+          filter: [
+            inventoryResultsQuery(scheduleIds, REPORTING_WINDOW),
+            { terms: { 'agent.id': batch } },
+          ],
         },
-        aggs: { reporting: { terms: { field: 'agent.id', size: batch.length } } },
-      });
-      for (const { key } of response.aggregations?.reporting.buckets ?? []) reporting.add(key);
-    }
-  } catch (error) {
-    if (isForbidden(error)) return null;
-    throw error;
+      },
+      aggs: { reporting: { terms: { field: 'agent.id', size: batch.length } } },
+    });
+    for (const { key } of response.aggregations?.reporting.buckets ?? []) reporting.add(key);
   }
   return reporting;
 };
@@ -290,10 +279,10 @@ export const collectOnboardingStatus = async (deps: OnboardingDeps): Promise<Onb
     license: 'ok',
     pack,
     policies,
-    needs_osquery_integration: items
+    needsOsqueryIntegration: items
       .filter((policy) => !policy.supports_agentless && !hasUsableOsqueryManager(policy))
       .map(({ id, name }) => ({ id, name })),
-    agentless_policies: agentless.map(({ id, name }) => ({ id, name })),
+    agentlessPolicies: agentless.map(({ id, name }) => ({ id, name })),
     lastScan,
     schedule: { installed: workflow !== null, enabled: workflow?.enabled === true },
     scanRunning,

@@ -21,7 +21,6 @@
     "@kbn/licensing-types",
     "@kbn/workflows-management-plugin",
     "@kbn/fleet-plugin",
-    "@kbn/es-errors",
     "@kbn/core-http-server-mocks"
   ]
 }

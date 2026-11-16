@@ -27,6 +27,7 @@ interface StoredPackQuery {
   query?: string;
   platform?: string;
   snapshot?: boolean;
+  removed?: boolean;
   result_type?: string;
   enabled?: boolean;
 }
@@ -35,6 +36,8 @@ interface StoredPack {
   name?: string;
   enabled?: boolean;
   interval?: number;
+  platform?: string;
+  result_type?: string;
   queries?: StoredPackQuery[];
 }
 
@@ -78,11 +81,37 @@ const samePlatforms = (stored: string | undefined, expected: string): boolean =>
   return left.size === right.size && [...left].every((token) => right.has(token));
 };
 
+const ALL_PLATFORMS = ['linux', 'windows', 'darwin'];
+
+/** Mirrors osquery's `isEmptyOrAllPlatforms`: no restriction when empty or naming every OS. */
+const isEmptyOrAllPlatforms = (value: string | undefined): boolean => {
+  if (value === undefined) return true;
+  const tokens = parsePlatformTokens(value);
+  return (
+    tokens.size === 0 ||
+    (tokens.size === ALL_PLATFORMS.length && ALL_PLATFORMS.every((os) => tokens.has(os)))
+  );
+};
+
+/** Mirrors osquery's `resolveEffectiveQueryExecution`: the query's own restriction, else the pack's. */
+const effectivePlatform = (query: StoredPackQuery, pack: StoredPack): string | undefined =>
+  (isEmptyOrAllPlatforms(query.platform) ? undefined : query.platform) ?? pack.platform;
+
 /**
- * osquery stores a snapshot query as `snapshot: true` or, from its own UI, `result_type: 'snapshot'`.
+ * Mirrors osquery's effective result type: the query's `result_type`, else the differential mode
+ * its legacy `{ snapshot: false, removed }` pair encodes (`snapshot: true` or absent is not a
+ * deliberate choice), else the pack's `result_type`, else snapshot. osquery stores snapshot mode
+ * as no key at all, so an absent key is a snapshot unless the pack says otherwise.
  */
-const isSnapshot = ({ snapshot, result_type: resultType }: StoredPackQuery): boolean =>
-  snapshot === true || resultType === 'snapshot';
+const effectiveResultType = (query: StoredPackQuery, pack: StoredPack): string => {
+  const legacy =
+    query.snapshot === false
+      ? query.removed === false
+        ? 'differential_added_only'
+        : 'differential'
+      : undefined;
+  return query.result_type ?? legacy ?? pack.result_type ?? 'snapshot';
+};
 
 /**
  * Compares only the fields this plugin owns (SQL, platform, snapshot, enabled and the pack-level
@@ -106,10 +135,11 @@ const compareQueries = (pack: StoredPack): PackDifference[] => {
       continue;
     }
     if (actual.query !== expected.query) differences.push({ code: 'query_sql_differs', queryId });
-    if (!samePlatforms(actual.platform, expected.platform)) {
+    if (!samePlatforms(effectivePlatform(actual, pack), expected.platform)) {
       differences.push({ code: 'query_platform_differs', queryId });
     }
-    if (!isSnapshot(actual)) differences.push({ code: 'query_not_snapshot', queryId });
+    if (effectiveResultType(actual, pack) !== 'snapshot')
+      differences.push({ code: 'query_not_snapshot', queryId });
     if (actual.enabled === false) differences.push({ code: 'query_disabled', queryId });
   }
   return differences;
