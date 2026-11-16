@@ -5,35 +5,15 @@
  * 2.0.
  */
 
-import { ToolResultType } from '@kbn/agent-builder-common';
 import { isRecord } from '../dashboard_panels';
 import { GENERATE_DASHBOARD_TOOL_ID } from '../extract_dashboard';
 import { type Check, scoreChecks, skippedResult } from '../evaluator_utils';
+import { getFileReadPath } from '../skill_selection_evaluators';
 import type { DashboardAgentEvaluator } from '../types';
 
 export const PANEL_CONFIG_REFERENCE_EVALUATOR_NAME = 'Dashboard Panel Config Reference';
 
-const FILE_READ_TOOL_IDS: ReadonlySet<unknown> = new Set(['read_file', 'filestore.read']);
-
 type Step = Record<string, unknown>;
-
-/** The path of a read that returned content, so a failed or empty read does not count. */
-const getReadPath = (step: Step): string | undefined => {
-  if (step.type !== 'tool_call' || !FILE_READ_TOOL_IDS.has(step.tool_id)) {
-    return undefined;
-  }
-  const { results } = step;
-  const returnedContent =
-    Array.isArray(results) &&
-    results.length > 0 &&
-    !results.some((result) => isRecord(result) && result.type === ToolResultType.error);
-  if (!returnedContent) {
-    return undefined;
-  }
-  return isRecord(step.params) && typeof step.params.path === 'string'
-    ? step.params.path
-    : undefined;
-};
 
 const getWrittenPanelTypes = (step: Step): string[] => {
   if (step.type !== 'tool_call' || step.tool_id !== GENERATE_DASHBOARD_TOOL_ID) {
@@ -63,7 +43,7 @@ const checkReferenceReadFirst = (steps: Step[], type: string): Check => {
   const referenceSuffix = `panel_configs/${type}.md`;
   const readGroups: Array<string | undefined> = [];
   for (const step of steps) {
-    if (getReadPath(step)?.endsWith(referenceSuffix)) {
+    if (getFileReadPath(step, { requireContent: true })?.endsWith(referenceSuffix)) {
       readGroups.push(getGroupId(step));
     }
     if (getWrittenPanelTypes(step).includes(type)) {

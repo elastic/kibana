@@ -12,6 +12,7 @@ import {
   createPanelContentResolver,
   getConfigPanelReferences,
   getEditableEmbeddableTypes,
+  getInlinePanelKindGuidance,
   getPanelTypeSelection,
   upsertPanelContentSchema,
 } from '.';
@@ -129,6 +130,12 @@ describe('referenced config panel kinds', () => {
     });
   });
 
+  const configReferenceFields = {
+    ml_anomaly_charts: ['max_series_to_plot'],
+    ml_anomaly_swimlane: ['swimlane_type', 'per_page'],
+    ml_single_metric_viewer: ['selected_detector_index'],
+  };
+
   it('publishes one reference per kind with its guidance, usage and config JSON Schema', () => {
     const references = getConfigPanelReferences();
 
@@ -144,6 +151,15 @@ describe('referenced config panel kinds', () => {
       const jsonSchema = JSON.parse(json);
       expect(jsonSchema).not.toHaveProperty('$schema');
       expect(json).toContain('"job_ids"');
+      Object.entries(configReferenceFields).forEach(([otherType, fields]) => {
+        fields.forEach((field) => {
+          if (otherType === type) {
+            expect(json).toContain(`"${field}"`);
+          } else {
+            expect(json).not.toContain(`"${field}"`);
+          }
+        });
+      });
     });
   });
 });
@@ -184,6 +200,20 @@ describe('createPanelContentResolver', () => {
     );
     expect(executors.custom_content).toHaveBeenCalledWith(request);
     expect(executors.lens).not.toHaveBeenCalled();
+  });
+});
+
+describe('getInlinePanelKindGuidance', () => {
+  it('lists the guidance of every inline panel kind', () => {
+    expect(getInlinePanelKindGuidance()).toMatchInlineSnapshot(`
+      "## Custom Content Panels
+
+      A custom content panel with live data does not need a query from you. Always set \`hasData\` when you create one, since there is no default: \`hasData: true\` (and \`index\` when you know it) and the server generates the query from \`query\`, then samples its schema before generating the template. \`hasData: false\` makes a static panel with no query — use that for banners, legends and notes, and never invent a query for them. Do not write the query yourself; pass \`esql\` only when the user supplied one verbatim. If the server cannot generate a query, the panel fails with an error naming the reason — fix the \`index\` or the description and retry rather than proceeding.
+
+      To create one, set \`query\` to a concise description of what to display; the HTML template is generated server-side from it.
+
+      To edit one, list its id in \`panels\` with \`source: \\"request\\"\`, \`renderer: \\"custom_content\\"\`. Set \`query\` to the requested change; layout, copy and style edits (colors, sizes, wording) keep the current query. An edit that needs different data, such as \\"also show the average bytes\\", a new grouping or filter, or another time window, also needs \`regenerateESQL: true\`: without it the stored query is kept and the new data can never appear. The server then regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template."
+    `);
   });
 });
 
