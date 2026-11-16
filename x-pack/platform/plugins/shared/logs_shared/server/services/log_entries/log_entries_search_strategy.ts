@@ -15,6 +15,7 @@ import type {
   IEsSearchRequest,
 } from '@kbn/search-types';
 import type { ISearchStrategy, PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type {
   LogColumn,
   LogEntry,
@@ -35,6 +36,7 @@ import type {
   LogEntriesSearchResponsePayload,
 } from '../../../common/search_strategies/log_entries/log_entries';
 import {
+  LOG_ENTRIES_MAX_COLUMNS,
   logEntriesSearchRequestParamsRT,
   logEntriesSearchResponsePayloadRT,
 } from '../../../common/search_strategies/log_entries/log_entries';
@@ -68,11 +70,18 @@ export const logEntriesSearchStrategyProvider = ({
   return {
     search: (rawRequest, options, dependencies) =>
       defer(() => {
-        const request = decodeOrThrow(asyncRequestRT)(rawRequest);
+        const request = decodeOrThrow(asyncRequestRT, createBadRequestError)(rawRequest);
 
         const resolvedLogView$ = defer(() =>
           logViews.getScopedClient(dependencies.request).getResolvedLogView(request.params.logView)
         ).pipe(take(1), shareReplay(1));
+
+        // Bounded here rather than in the request codec because, without `params.columns`, the
+        // columns come from the log view, which can be supplied inline in the request body.
+        const columns$ = resolvedLogView$.pipe(
+          map(({ columns }) => getBoundedColumns(request.params.columns ?? columns)),
+          shareReplay(1)
+        );
 
         const messageFormattingRules$ = defer(() =>
           resolvedLogView$.pipe(
@@ -88,10 +97,11 @@ export const logEntriesSearchStrategyProvider = ({
         const initialRequest$ = of(request).pipe(
           filter(asyncInitialRequestRT.is),
           concatMap(({ params }) =>
-            forkJoin([resolvedLogView$, messageFormattingRules$]).pipe(
+            forkJoin([resolvedLogView$, columns$, messageFormattingRules$]).pipe(
               map(
                 ([
-                  { indices, timestampField, tiebreakerField, columns, runtimeMappings },
+                  { indices, timestampField, tiebreakerField, runtimeMappings },
+                  columns,
                   messageFormattingRules,
                 ]): IEsSearchRequest => {
                   return {
@@ -103,7 +113,7 @@ export const logEntriesSearchStrategyProvider = ({
                       params.size + 1,
                       timestampField,
                       tiebreakerField,
-                      getRequiredFields(params.columns ?? columns, messageFormattingRules),
+                      getRequiredFields(columns, messageFormattingRules),
                       runtimeMappings,
                       params.query,
                       params.highlightPhrase
@@ -129,13 +139,13 @@ export const logEntriesSearchStrategyProvider = ({
           )
         );
 
-        return combineLatest([searchResponse$, resolvedLogView$, messageFormattingRules$]).pipe(
-          map(([esResponse, { columns }, messageFormattingRules]) => {
+        return combineLatest([searchResponse$, columns$, messageFormattingRules$]).pipe(
+          map(([esResponse, columns, messageFormattingRules]) => {
             const rawResponse = decodeOrThrow(getLogEntriesResponseRT)(esResponse.rawResponse);
 
             const entries = rawResponse.hits.hits
               .slice(0, request.params.size)
-              .map(getLogEntryFromHit(request.params.columns ?? columns, messageFormattingRules));
+              .map(getLogEntryFromHit(columns, messageFormattingRules));
 
             const sortDirection = getSortDirection(pickRequestCursor(request.params));
 
@@ -254,6 +264,19 @@ function getResponseCursors(entries: LogEntry[]) {
 
   return { topCursor, bottomCursor };
 }
+
+// Every entry in the response allocates one object per column, so the count must be bounded
+// before any hit is mapped (see LOG_ENTRIES_MAX_COLUMNS).
+const getBoundedColumns = (columns: LogViewColumnConfiguration[]): LogViewColumnConfiguration[] => {
+  if (columns.length > LOG_ENTRIES_MAX_COLUMNS) {
+    throw createBadRequestError(
+      `Expected at most ${LOG_ENTRIES_MAX_COLUMNS} columns, got ${columns.length}`
+    );
+  }
+  return columns;
+};
+
+const createBadRequestError = (message: string): KbnServerError => new KbnServerError(message, 400);
 
 const VIEW_IN_CONTEXT_FIELDS = ['log.file.path', 'host.name', 'container.id'];
 
