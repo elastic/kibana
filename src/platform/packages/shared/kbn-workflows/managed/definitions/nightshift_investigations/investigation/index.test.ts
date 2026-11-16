@@ -81,8 +81,6 @@ describe('Nightshift investigation workflow', () => {
       'persist_investigation_started',
       'emit_investigation_started',
       'notify_started',
-      'list_investigation_sources',
-      'resolve_investigation_sources',
       'investigate',
       'emit_investigation_completed',
       'notify_completed',
@@ -198,10 +196,7 @@ describe('Nightshift investigation workflow', () => {
     const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
       requireStep('investigate').with?.message ?? '',
       {
-        inputs: { message, context, source_ids: ['s1'] },
-        variables: {
-          investigation_sources: [{ slug: 'logs', id: 's1', view_name: 'logs-view' }],
-        },
+        inputs: { message, context },
       }
     );
     expect(rendered.startsWith(message)).toBe(true);
@@ -214,10 +209,6 @@ describe('Nightshift investigation workflow', () => {
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });
-  });
-
-  it('loads every requested source on one page', () => {
-    expect(requireStep('list_investigation_sources').with?.path).toContain('per_page=100&');
   });
 
   it('passes WorkflowSchema normalization', () => {
@@ -303,10 +294,7 @@ describe('Nightshift investigation workflow', () => {
   });
 
   it('addresses the investigation by its id rather than the run', () => {
-    // The source lookup lists sources by id and never touches the investigation document.
-    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request').filter(
-      ({ name }) => name !== 'list_investigation_sources'
-    );
+    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request');
 
     for (const { with: params } of requestSteps) {
       expect(params?.path).toContain('{{ inputs.investigation_id | default: execution.id }}');
