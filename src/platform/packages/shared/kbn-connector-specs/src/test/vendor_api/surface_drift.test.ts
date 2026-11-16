@@ -477,7 +477,7 @@ describe('renderDriftIssue', () => {
     };
     const { title, body } = renderDriftIssue(passing, { owners: [] });
 
-    expect(title).toBe('[Connector validation] .acme: actions pass, 1 spec change to review');
+    expect(title).toBe('[Connector validation] .acme: 1 action passes, 1 action needs attention');
     expect(body).toContain(
       '> **1 of 2 actions works with the latest spec. 1 action needs attention.**\n>\n> `search` passes but calls a deprecated endpoint.\n>\n> Update the connector to ensure it will continue working.'
     );
@@ -521,7 +521,7 @@ describe('renderDriftIssue', () => {
     };
     const { title, body } = renderDriftIssue(passing, { owners: [] });
 
-    expect(title).toBe('[Connector validation] .acme: actions pass, 1 field they read changed');
+    expect(title).toBe('[Connector validation] .acme: 1 action passes, 1 action needs attention');
     expect(body).toContain('`search` passes but reads fields that changed.');
     expect(body).toContain(
       '| `search` | `GET /items` | ⚠️ Passes, but fields it reads changed: `items/state` (new values: locked) |'

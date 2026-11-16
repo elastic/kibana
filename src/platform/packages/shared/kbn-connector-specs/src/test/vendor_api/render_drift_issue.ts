@@ -340,10 +340,53 @@ const specChanges = (drift: ConnectorDrift): string[] => {
   ];
 };
 
+/** Which actions need attention when the actions pass, and why. */
+interface Attention {
+  /** Actions that read a response field that changed. */
+  readonly readers: readonly string[];
+  /** Per kind of change to review, the actions it affects. */
+  readonly byKind: ReadonlyMap<ReviewKind, ReadonlySet<string>>;
+  /** Actions whose endpoint is missing from the current spec. */
+  readonly missing: readonly string[];
+  /** Changes to review that affect no action, e.g. a removed shared schema. */
+  readonly unattached: number;
+  /** Every action that needs attention. */
+  readonly actions: ReadonlySet<string>;
+  /** The actions that call the vendor, checked or not. */
+  readonly total: number;
+}
+
+const attentionOf = (actions: readonly ActionDrift[], review: readonly ReviewItem[]): Attention => {
+  const readers = actions
+    .filter(({ fieldChanges = [] }) => fieldChanges.length > 0)
+    .map(({ action }) => action);
+  const byKind = new Map<ReviewKind, Set<string>>();
+  for (const item of review) {
+    const named = byKind.get(item.kind) ?? new Set<string>();
+    item.actions.forEach((action) => named.add(action));
+    byKind.set(item.kind, named);
+  }
+  const missing = actions
+    .filter((action) => !isChecked(action) && action.unmatched.length > 0)
+    .map(({ action }) => action);
+  return {
+    readers,
+    byKind,
+    missing,
+    unattached: review.filter((item) => item.actions.length === 0).length,
+    actions: new Set([
+      ...readers,
+      ...[...byKind.values()].flatMap((named) => [...named]),
+      ...missing,
+    ]),
+    total: actions.filter(isChecked).length + missing.length,
+  };
+};
+
 const titleOf = (
   drift: ConnectorDrift,
   statuses: ReadonlyMap<string, ActionStatus>,
-  reviewCount: number
+  attention: Attention
 ): string => {
   const count = (predicate: (status: ActionStatus) => boolean) =>
     [...statuses.values()].filter(predicate).length;
@@ -384,19 +427,19 @@ const titleOf = (
       }
       break;
     default: {
-      const fieldChanges = (drift.actions ?? []).flatMap(({ fieldChanges: own = [] }) => own);
-      const fields = new Set(fieldChanges.map(({ operation, field }) => `${operation} ${field}`));
+      // e.g. `2 actions pass, 5 actions need attention`
+      const needing = attention.actions.size;
+      const passing = attention.total - needing;
+      const stale = (drift.staleCorrections ?? []).length;
+      const passes = `${plural(passing, 'action')} ${passing === 1 ? 'passes' : 'pass'}`;
       headline =
-        fields.size > 0
-          ? `actions pass, ${plural(fields.size, 'field')} they read changed`
-          : reviewCount > 0
-          ? `actions pass, ${plural(reviewCount, 'spec change')} to review`
-          : (drift.staleCorrections ?? []).length > 0
-          ? `actions pass, ${plural(
-              drift.staleCorrections?.length ?? 0,
-              'spec correction'
-            )} no longer apply`
-          : 'actions pass, vendor spec changed';
+        needing > 0
+          ? `${passes}, ${plural(needing, 'action')} ${needing === 1 ? 'needs' : 'need'} attention`
+          : stale > 0
+          ? `${passes}, ${plural(stale, 'spec correction')} no longer ${
+              stale === 1 ? 'applies' : 'apply'
+            }`
+          : `${passes}, vendor spec changed`;
     }
   }
   return `[Connector validation] ${drift.connector}: ${headline}`;
@@ -456,6 +499,8 @@ export const renderDriftIssue = (
   const statuses = new Map(
     actions.map((action) => [action.action, statusOf(action, changesOf, reviewOf)])
   );
+  // Counted once, for the title and the summary of an issue whose actions pass.
+  const attention = attentionOf(actions, review);
 
   const checked = actions.filter(isChecked);
   const notChecked = actions.filter((action) => !isChecked(action));
@@ -534,26 +579,8 @@ export const renderDriftIssue = (
     default: {
       alert = 'NOTE';
       // Which actions need attention, and why: one sentence per reason.
-      const readers = actions
-        .filter(({ fieldChanges = [] }) => fieldChanges.length > 0)
-        .map(({ action }) => action);
-      const byKind = new Map<ReviewKind, Set<string>>();
-      for (const item of review) {
-        const named = byKind.get(item.kind) ?? new Set<string>();
-        item.actions.forEach((action) => named.add(action));
-        byKind.set(item.kind, named);
-      }
-      const missing = notChecked
-        .filter(({ unmatched }) => unmatched.length > 0)
-        .map(({ action }) => action);
-      const unattached = review.filter((item) => item.actions.length === 0).length;
-      const attention = new Set([
-        ...readers,
-        ...[...byKind.values()].flatMap((named) => [...named]),
-        ...missing,
-      ]);
-      const total = checked.length + missing.length;
-      const working = total - attention.size;
+      const { readers, byKind, missing, unattached, total } = attention;
+      const working = total - attention.actions.size;
       // The actions are the point of these sentences, so more of them are named.
       const sentence = (named: readonly string[], [one, many]: readonly [string, string]) =>
         `${listed(named.map(code), MAX_NAMED_ACTIONS)} ${named.length === 1 ? one : many}.`;
@@ -593,14 +620,14 @@ export const renderDriftIssue = (
           : []),
       ];
       const headline =
-        attention.size === 0
+        attention.actions.size === 0
           ? `**All ${plural(total, 'action')} ${
               total === 1 ? 'works' : 'work'
             } with the latest spec.**`
           : `**${working} of ${plural(total, 'action')} ${
               working === 1 ? 'works' : 'work'
-            } with the latest spec. ${plural(attention.size, 'action')} ${
-              attention.size === 1 ? 'needs' : 'need'
+            } with the latest spec. ${plural(attention.actions.size, 'action')} ${
+              attention.actions.size === 1 ? 'needs' : 'need'
             } attention.**`;
       summary = [
         headline,
@@ -871,7 +898,7 @@ export const renderDriftIssue = (
   ].join('\n');
 
   return {
-    title: titleOf(drift, statuses, review.length),
+    title: titleOf(drift, statuses, attention),
     body:
       body.length > MAX_BODY_LENGTH
         ? `${body.slice(
