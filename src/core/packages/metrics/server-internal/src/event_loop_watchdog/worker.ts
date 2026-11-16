@@ -43,7 +43,10 @@ export interface WatchdogWorkerDeps {
   nowUs?: () => number;
   heapUsed?: () => number;
   createSession?: () => InspectorSession;
-  /** Repo root that profile locations are made relative to; defaults to `REPO_ROOT`. Not in `workerData`: the worker resolves `REPO_ROOT` itself. */
+  /**
+   * Repo root that profile locations are made relative to; defaults to `REPO_ROOT`. Not in
+   * `workerData`: the worker resolves `REPO_ROOT` itself.
+   */
   root?: string;
 }
 
@@ -284,7 +287,7 @@ export const runWatchdogWorker = (
           (profile.timeDeltas?.[0] ?? 0) +
           (blockEndedAt - (requestedAt + profilerStartMs)) * 1000
         : undefined;
-    let summary;
+    let summary: ProfileSummary;
     try {
       summary = summarizeProfile(profile, { root, inBlockUntilUs });
     } catch (error) {
