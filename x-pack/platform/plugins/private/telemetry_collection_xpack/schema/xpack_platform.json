@@ -13963,6 +13963,24 @@
             "description": "The maximum number of the concurrent user sessions (0 if not configured)."
           }
         },
+        "sessionCookieSecure": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if session cookies are set with the Secure attribute (configured explicitly, or enabled automatically because Kibana serves TLS)."
+          }
+        },
+        "sessionCookieSameSite": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The SameSite attribute configured for session cookies (`Strict`, `Lax` or `None`), or `not_configured` when the setting is not set."
+          }
+        },
+        "sessionCookieNameCustomized": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the session cookie name differs from the default."
+          }
+        },
         "anonymousCredentialType": {
           "type": "keyword",
           "_meta": {
