@@ -86,6 +86,9 @@ export const registerFindingsRecorder = ({
     hooks: {
       [HookLifecycle.afterExecution]: {
         mode: HookExecutionMode.nonBlocking,
+        // The pass runs after the execution returned, when the execution's own request no longer
+        // authenticates, so it needs the runner's service-account request.
+        requiresServiceAccountRequest: true,
         handler: async (context) => {
           const {
             agentId,

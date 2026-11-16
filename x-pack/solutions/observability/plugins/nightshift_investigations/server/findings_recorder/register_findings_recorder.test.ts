@@ -152,6 +152,7 @@ describe('registerFindingsRecorder', () => {
     const [bundle] = register.mock.calls[0];
     expect(bundle.hooks[HookLifecycle.afterExecution]).toMatchObject({
       mode: HookExecutionMode.nonBlocking,
+      requiresServiceAccountRequest: true,
     });
   });
 
