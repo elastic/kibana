@@ -7,6 +7,7 @@
 
 import type { CoreStart, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import Boom from '@hapi/boom';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { DetectionAccountService } from './detection_account';
 import { DetectionSetupService } from './setup_service';
@@ -17,13 +18,20 @@ const WORKLOAD = { workloadType: 'detection_engine', workloadId: 'detection_engi
 function createSetup({
   roleCount = 1,
   boundAccountId,
-  accountSummary = { name: 'nightshift_detection', enabled: true },
+  accountSummary = { name: 'nightshift_detection', enabled: true, assumable: true },
+  summaryError,
+  canManageSecurity = true,
+  spaceExists = true,
   onSummaryRead,
 }: {
   roleCount?: number;
   boundAccountId?: string;
   /** What core knows of the bound account. */
-  accountSummary?: { name: string; enabled: boolean };
+  accountSummary?: { name: string; enabled: boolean; assumable: boolean };
+  /** Makes core fail to read the account, as UIAM does when it refuses Kibana's identity. */
+  summaryError?: Error;
+  canManageSecurity?: boolean;
+  spaceExists?: boolean;
   /** Runs when the bound account is read, to act as a concurrent `_enable` call. */
   onSummaryRead?: () => void;
 } = {}) {
@@ -46,6 +54,9 @@ function createSetup({
       ),
       getWorkloadServiceAccountSummary: jest.fn(async () => {
         onSummaryRead?.();
+        if (summaryError) {
+          throw summaryError;
+        }
         return currentAccountId ? { id: currentAccountId, ...accountSummary } : null;
       }),
     },
@@ -55,7 +66,7 @@ function createSetup({
       asScoped: () => ({
         asCurrentUser: {
           security: {
-            hasPrivileges: jest.fn(async () => ({ has_all_requested: true })),
+            hasPrivileges: jest.fn(async () => ({ has_all_requested: canManageSecurity })),
             queryRole: jest.fn(async () => ({ total: roleCount })),
           },
         },
@@ -63,7 +74,13 @@ function createSetup({
     },
   } as unknown as CoreStart['elasticsearch'];
   const spaces = {
-    spacesService: { createSpacesClient: () => ({ get: jest.fn().mockResolvedValue({}) }) },
+    spacesService: {
+      createSpacesClient: () => ({
+        get: spaceExists
+          ? jest.fn().mockResolvedValue({})
+          : jest.fn().mockRejectedValue(Boom.notFound('no such space')),
+      }),
+    },
   } as unknown as SpacesPluginStart;
   const env = { packageInfo: { buildFlavor: 'serverless' } } as PluginInitializerContext['env'];
   const logger: Logger = loggingSystemMock.createLogger();
@@ -86,10 +103,72 @@ function createSetup({
 }
 
 describe('DetectionSetupService.enable', () => {
+  it('binds the space to the account, and binds it again with the same id without undoing it', async () => {
+    const { service, unbindWorkload } = createSetup();
+
+    const first = await service.enable({
+      request,
+      spaceId: 'default',
+      serviceAccountId: 'account-1',
+    });
+    const second = await service.enable({
+      request,
+      spaceId: 'default',
+      serviceAccountId: 'account-1',
+    });
+
+    expect(first).toEqual({ spaceId: 'default', serviceAccountId: 'account-1' });
+    expect(second).toEqual(first);
+    expect(unbindWorkload).not.toHaveBeenCalled();
+  });
+
+  it('refuses with 403 a user without manage_security, binding nothing', async () => {
+    const { service, bindWorkload } = createSetup({ canManageSecurity: false });
+
+    await expect(
+      service.enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
+    ).rejects.toMatchObject({ statusCode: 403 });
+    expect(bindWorkload).not.toHaveBeenCalled();
+  });
+
+  it('refuses with 404 a space that does not exist, binding nothing', async () => {
+    const { service, bindWorkload } = createSetup({ spaceExists: false });
+
+    await expect(
+      service.enable({ request, spaceId: 'missing', serviceAccountId: 'account-1' })
+    ).rejects.toMatchObject({ statusCode: 404 });
+    expect(bindWorkload).not.toHaveBeenCalled();
+  });
+
+  it('keeps the binding when UIAM refuses to let Kibana read the account, as the local UIAM does', async () => {
+    const { service, unbindWorkload } = createSetup({
+      summaryError: Boom.forbidden('not for this project'),
+    });
+
+    await expect(
+      service.enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
+    ).resolves.toEqual({ spaceId: 'default', serviceAccountId: 'account-1' });
+    expect(unbindWorkload).not.toHaveBeenCalled();
+  });
+
+  it('refuses an account Kibana holds no credential for, and unbinds the space again', async () => {
+    const { service, unbindWorkload } = createSetup({
+      accountSummary: { name: 'nightshift_detection', enabled: true, assumable: false },
+    });
+
+    await expect(
+      service.enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: expect.stringContaining('no credential'),
+    });
+    expect(unbindWorkload).toHaveBeenCalledWith(request, WORKLOAD);
+  });
+
   it('refuses another account and puts the previous binding back', async () => {
     const { service, bindWorkload } = createSetup({
       boundAccountId: 'detection-account',
-      accountSummary: { name: 'nightshift_agent', enabled: true },
+      accountSummary: { name: 'nightshift_agent', enabled: true, assumable: true },
     });
 
     await expect(
@@ -106,7 +185,7 @@ describe('DetectionSetupService.enable', () => {
 
   it('unbinds the space again when no account was bound before', async () => {
     const { service, unbindWorkload } = createSetup({
-      accountSummary: { name: 'nightshift_agent', enabled: true },
+      accountSummary: { name: 'nightshift_agent', enabled: true, assumable: true },
     });
 
     await expect(
@@ -135,5 +214,18 @@ describe('DetectionSetupService.enable', () => {
       message: expect.stringContaining('[_nightshift_detection]'),
     });
     expect(bindWorkload).not.toHaveBeenCalled();
+  });
+});
+
+describe('DetectionSetupService.getStatus', () => {
+  it('reports the account the space runs as, the role it needs and whether the user may set it up', async () => {
+    const { service } = createSetup({ boundAccountId: 'account-1' });
+
+    await expect(service.getStatus({ request, spaceId: 'default' })).resolves.toEqual({
+      serviceAccountsEnabled: true,
+      canSetUp: true,
+      role: '_nightshift_detection',
+      serviceAccountId: 'account-1',
+    });
   });
 });
