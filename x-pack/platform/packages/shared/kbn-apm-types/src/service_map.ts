@@ -65,24 +65,29 @@ export interface ServiceMapRawResponse {
 
 /** What a service map grouping strategy groups services by. */
 export type ServiceGroupingSource =
-  | 'serviceGroups'
+  | 'savedGroups'
   | 'service.namespace'
   | 'kubernetes.namespace'
   | 'namePrefix'
   | 'calls';
 
+/** A source that groups services sharing one value. */
+export type AttributeGroupingSource = Exclude<ServiceGroupingSource, 'savedGroups' | 'calls'>;
+
 /** A saved service group the service matches. */
-export interface ServiceGroupMapGroup {
-  id: string;
+export interface SavedGroupServiceMapGroup {
+  /** The saved group's id, after `savedGroups:`. It survives renames; the name is in `name`. */
+  id: `savedGroups:${string}`;
   kind: 'savedGroup';
   name: string;
 }
 
 /** Services sharing the value of an attribute. */
 export interface AttributeServiceMapGroup {
-  id: string;
+  /** The attribute, then its value: `service.namespace:checkout`. */
+  id: `${AttributeGroupingSource}:${string}`;
   kind: 'attribute';
-  attribute: Exclude<ServiceGroupingSource, 'serviceGroups' | 'calls'>;
+  attribute: AttributeGroupingSource;
   value: string;
 }
 
@@ -112,8 +117,12 @@ export interface NotConnectedServiceMapGroup {
   kind: 'notConnected';
 }
 
+/**
+ * A group of services on the map. Ids are the source and a value, `<source>:<value>`, or `shared`
+ * and `notConnected`, so groups of different kinds never share one, even within a strategy.
+ */
 export type ServiceMapGroup =
-  | ServiceGroupMapGroup
+  | SavedGroupServiceMapGroup
   | AttributeServiceMapGroup
   | CallsServiceMapGroup
   | SharedServiceMapGroup
