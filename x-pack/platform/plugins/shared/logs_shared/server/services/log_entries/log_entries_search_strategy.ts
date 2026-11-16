@@ -89,9 +89,11 @@ export const logEntriesSearchStrategyProvider = ({
           )
         ).pipe(take(1), shareReplay(1));
 
+        // Waits for `columns$` like the initial request does, so a polling request with too many
+        // columns is rejected before it reaches Elasticsearch.
         const recoveredRequest$ = of(request).pipe(
           filter(asyncRecoveredRequestRT.is),
-          map(({ id: { esRequestId } }) => ({ id: esRequestId }))
+          concatMap(({ id: { esRequestId } }) => columns$.pipe(map(() => ({ id: esRequestId }))))
         );
 
         const initialRequest$ = of(request).pipe(

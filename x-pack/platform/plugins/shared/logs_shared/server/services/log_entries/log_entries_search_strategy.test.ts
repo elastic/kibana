@@ -327,6 +327,27 @@ describe('LogEntries search strategy', () => {
       expect(esSearchStrategyMock.search).not.toHaveBeenCalled();
     });
 
+    it('rejects polling requests with more columns than allowed', async () => {
+      const { esSearchStrategyMock, logEntriesSearchStrategy } = setup();
+
+      await expect(
+        lastValueFrom(
+          logEntriesSearchStrategy.search(
+            {
+              id: logEntriesSearchRequestStateRT.encode({ esRequestId: 'ASYNC_REQUEST_ID' }),
+              params: { ...baseParams, columns: tooManyColumns },
+            },
+            {},
+            createSearchStrategyDependenciesMock()
+          )
+        )
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message: expect.stringContaining(`Expected at most ${LOG_ENTRIES_MAX_COLUMNS} columns`),
+      });
+      expect(esSearchStrategyMock.search).not.toHaveBeenCalled();
+    });
+
     it('accepts requests at the limits', async () => {
       const { esSearchStrategyMock, logEntriesSearchStrategy } = setup();
 
