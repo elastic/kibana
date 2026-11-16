@@ -99,7 +99,15 @@ export const runPersonaRubricJudge = async ({
       finalToolChoice: { function: 'grade' } as ToolChoice<'grade'>,
       maxRetries: 3,
       toolCallbacks: {
-        grade: async (toolCall) => ({ response: toolCall.function.arguments }),
+        // Throwing makes executeUntilValid hand the error back to the judge and retry.
+        grade: async (toolCall) => {
+          if (!parseScore(toolCall.function.arguments)) {
+            throw new Error(
+              `score must be an integer between ${PERSONA_RUBRIC_MIN_SCORE} and ${PERSONA_RUBRIC_MAX_SCORE}`
+            );
+          }
+          return { response: toolCall.function.arguments };
+        },
       },
     });
 

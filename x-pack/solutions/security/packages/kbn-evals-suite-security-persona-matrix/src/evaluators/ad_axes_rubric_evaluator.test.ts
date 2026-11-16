@@ -95,6 +95,27 @@ describe('AdAxesRubric', () => {
     expect(executeUntilValidMock).toHaveBeenCalledTimes(1);
   });
 
+  it('returns unavailable without calling the judge when even one discovery exceeds the size cap', async () => {
+    const result = await run({ insights: [{ body: 'x'.repeat(AD_AXES_MAX_SUBMISSION_CHARS) }] });
+    expect(result).toMatchObject({ score: null, label: 'unavailable' });
+    expect(result.explanation).toContain('Even one discovery exceeds');
+    expect(executeUntilValidMock).not.toHaveBeenCalled();
+  });
+
+  it('makes the grade callback throw on an invalid verdict so the judge is asked to retry', async () => {
+    executeUntilValidMock.mockResolvedValue(verdict(goodArgs));
+    await run({ insights: [{}] });
+    const { toolCallbacks } = executeUntilValidMock.mock.calls[0][0] as unknown as {
+      toolCallbacks: { grade: (call: unknown) => Promise<{ response: unknown }> };
+    };
+    const grade = (args: unknown) =>
+      toolCallbacks.grade({ function: { name: 'grade', arguments: args } });
+    await expect(grade(goodArgs)).resolves.toEqual({ response: goodArgs });
+    await expect(grade({ ...goodArgs, coverage: 11 })).rejects.toThrow();
+    await expect(grade({ ...goodArgs, overall: undefined })).rejects.toThrow();
+    await expect(grade('garbage')).rejects.toThrow();
+  });
+
   it('forwards getModel', () => {
     const getModel = jest.fn();
     expect(
@@ -133,5 +154,25 @@ describe('toSubmission', () => {
     expect(kept.length).toBeGreaterThan(0);
     expect(kept.length).toBeLessThan(insights.length);
     expect(truncationNote).toContain(`${insights.length - kept.length} of ${insights.length}`);
+  });
+
+  it('matches a brute-force drop-until-it-fits cut, including nested and odd values', () => {
+    const big = 'y'.repeat(AD_AXES_MAX_SUBMISSION_CHARS / 4);
+    const insights = [
+      { body: big, nested: { a: [1, 2, { b: 'line\nbreak' }] } },
+      { body: big },
+      undefined,
+      { body: big, list: ['é', '"quoted"'] },
+      { body: big },
+      { body: big },
+    ];
+    let expected = insights;
+    const serialize = (items: unknown[]) => JSON.stringify({ attackDiscoveries: items }, null, 2);
+    while (serialize(expected).length > AD_AXES_MAX_SUBMISSION_CHARS && expected.length > 0) {
+      expected = expected.slice(0, -1);
+    }
+    const { submission, keptCount } = toSubmission(insights);
+    expect(keptCount).toBe(expected.length);
+    expect(submission).toBe(serialize(expected));
   });
 });

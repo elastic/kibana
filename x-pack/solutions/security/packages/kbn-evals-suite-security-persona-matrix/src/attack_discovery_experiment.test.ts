@@ -38,6 +38,21 @@ const evaluationInferenceClient = {} as Parameters<
 >[0]['evaluationInferenceClient'];
 
 describe('Chrysalis AD experiment', () => {
+  const originalFlag = process.env[PERSONA_RUBRIC_JUDGE_ENV];
+
+  // The exact-list assertion below must not depend on the operator's shell.
+  beforeEach(() => {
+    delete process.env[PERSONA_RUBRIC_JUDGE_ENV];
+  });
+
+  afterEach(() => {
+    if (originalFlag === undefined) {
+      delete process.env[PERSONA_RUBRIC_JUDGE_ENV];
+    } else {
+      process.env[PERSONA_RUBRIC_JUDGE_ENV] = originalFlag;
+    }
+  });
+
   it('keeps the dataset name the matrix reports under', () => {
     expect(CHRYSALIS_AD_DATASET_NAME).toBe('Attack Discovery Chrysalis kill-chains (generate API)');
   });

@@ -1328,11 +1328,19 @@ describe('createEvaluatePersonaMatrixDataset PersonaRubric flag', () => {
     }
   });
 
-  const runWith = async ({ client }: { client: BoundInferenceClient | undefined }) => {
+  const runWith = async ({
+    client,
+    log = buildLog(),
+    example = baseExample,
+  }: {
+    client: BoundInferenceClient | undefined;
+    log?: ToolingLog;
+    example?: PersonaMatrixExample;
+  }) => {
     let taskResult: Record<string, unknown> | undefined;
     const runExperiment = jest.fn(async (_experiment: unknown, _evaluators: Evaluator[]) => {
       const { task } = _experiment as { task: (example: unknown) => Promise<unknown> };
-      taskResult = (await task(toDatasetExample(baseExample))) as Record<string, unknown>;
+      taskResult = (await task(toDatasetExample(example))) as Record<string, unknown>;
     });
     const analysis = () => ({ evaluate: jest.fn(async () => ({ metadata: { ok: true } })) });
     const evaluateDataset = createEvaluatePersonaMatrixDataset({
@@ -1353,10 +1361,10 @@ describe('createEvaluatePersonaMatrixDataset PersonaRubric flag', () => {
       executorClient: { runExperiment },
       traceEsClient: {} as EsClient,
       fetch: jest.fn(),
-      log: buildLog(),
+      log,
       evaluationInferenceClient: client,
     } as unknown as Parameters<typeof createEvaluatePersonaMatrixDataset>[0]);
-    await evaluateDataset({ dataset: { name: 'd', description: 'd', examples: [baseExample] } });
+    await evaluateDataset({ dataset: { name: 'd', description: 'd', examples: [example] } });
     const evaluatorNames = (runExperiment.mock.calls[0][1] as Evaluator[]).map(({ name }) => name);
     return { evaluatorNames, taskResult: taskResult! };
   };
@@ -1390,6 +1398,24 @@ describe('createEvaluatePersonaMatrixDataset PersonaRubric flag', () => {
     };
     expect(input.expectedTools).toContain('security.alerts');
     expect(input.expectedTools).not.toContain('(none listed');
+  });
+
+  it('logs a PersonaRubric rejection and keeps the example', async () => {
+    process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
+    const log = buildLog();
+    // runPersonaRubricJudge swallows judge errors; a throwing logger is a way to reject the slot.
+    (log.warning as jest.Mock).mockImplementation(() => {
+      throw new Error('logger exploded');
+    });
+    const { taskResult } = await runWith({
+      client,
+      log,
+      example: { ...baseExample, category: 'not-a-category' } as PersonaMatrixExample,
+    });
+    expect(log.error).toHaveBeenCalledWith(
+      expect.stringContaining('PersonaRubric failed for example "example-a": logger exploded')
+    );
+    expect(taskResult).not.toHaveProperty('personaRubricAnalysis');
   });
 
   it('skips the judge when the flag is on but no client is available', async () => {

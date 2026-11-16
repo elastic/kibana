@@ -231,6 +231,11 @@ export const buildPersonaRubricInput = ({
         )
         .join('\n')
     : '(no tool calls)';
+  // The answer is what gets graded: cut the trace to make room for it, never the other way round.
+  const answerSection = `\n\nFinal answer:\n${truncate(
+    answer || '(empty)',
+    PERSONA_RUBRIC_MAX_SUBMISSION_CHARS / 2
+  )}`;
   const toolsRow = formatPersonaToolsRow(category);
   if (!toolsRow) {
     throw new Error(`No persona rubric tools row for category "${category}"`);
@@ -245,9 +250,9 @@ export const buildPersonaRubricInput = ({
     attachment: attachment
       ? `Attachment supplied with the prompt:\n${truncate(attachment, MAX_ATTACHMENT_CHARS)}`
       : '',
-    submission: truncate(
-      `Tool calls, in order:\n${trace}\n\nFinal answer:\n${answer || '(empty)'}`,
-      PERSONA_RUBRIC_MAX_SUBMISSION_CHARS
-    ),
+    submission: `${truncate(
+      `Tool calls, in order:\n${trace}`,
+      PERSONA_RUBRIC_MAX_SUBMISSION_CHARS - answerSection.length
+    )}${answerSection}`,
   };
 };

@@ -979,6 +979,7 @@ export function createEvaluatePersonaMatrixDataset({
             ['CorrectnessAnalysis', correctnessSettled],
             ['GroundednessAnalysis', groundednessSettled],
             ['Criteria', criteriaSettled],
+            ['PersonaRubric', rubricResult],
           ] as const) {
             if (settled.status === 'rejected') {
               const reason = settled.reason;

@@ -19,6 +19,7 @@ import {
   buildPersonaRubricInput,
   formatPersonaToolsRow,
   PERSONA_RUBRIC_GROUND_TRUTH,
+  PERSONA_RUBRIC_MAX_SUBMISSION_CHARS,
   PERSONA_RUBRIC_TOOLS_BY_CATEGORY,
 } from './persona_rubric_prompt';
 import { buildOutput, toolCall } from '../__fixtures__/task_output_builders';
@@ -108,6 +109,28 @@ describe('PersonaRubric prompt assembly', () => {
     expect(submission).toContain('params: {"a":1}');
     expect(submission).toContain('result: {"hit":true}');
     expect(submission.indexOf('2. second.tool')).toBeLessThan(submission.indexOf('final text'));
+  });
+
+  it('keeps the final answer when a huge trace overflows the submission budget', () => {
+    const { submission } = buildPersonaRubricInput({
+      category: 'alert-analysis',
+      answer: 'the verdict END_ANSWER',
+      toolCalls: [{ tool_id: 'big.tool', params: {}, results: 'z'.repeat(500_000) }],
+    });
+    expect(submission.length).toBeLessThanOrEqual(PERSONA_RUBRIC_MAX_SUBMISSION_CHARS);
+    expect(submission).toContain('1. big.tool');
+    expect(submission.endsWith('Final answer:\nthe verdict END_ANSWER')).toBe(true);
+  });
+
+  it('caps an oversized answer at half the budget and still leaves room for the trace', () => {
+    const { submission } = buildPersonaRubricInput({
+      category: 'alert-analysis',
+      answer: 'a'.repeat(600_000),
+      toolCalls: [{ tool_id: 'big.tool', params: {}, results: 'z'.repeat(500_000) }],
+    });
+    expect(submission.length).toBeLessThanOrEqual(PERSONA_RUBRIC_MAX_SUBMISSION_CHARS);
+    expect(submission).toContain('Final answer:\naaaa');
+    expect(submission).toContain('1. big.tool');
   });
 
   it('marks an empty trace explicitly and ships a non-empty ground truth', () => {
@@ -222,6 +245,23 @@ describe('runPersonaRubricJudge', () => {
     const call = executeUntilValidMock.mock.calls[0][0] as { input: { submission: string } };
     expect(call.input.submission).toContain('END_MARKER');
     expect(call.input.submission).toContain(JSON.stringify(results));
+  });
+
+  it('makes the grade callback throw on an invalid score so the judge is asked to retry', async () => {
+    executeUntilValidMock.mockResolvedValue(verdict({ score: 9 }));
+    await run(withTools);
+    const { toolCallbacks } = executeUntilValidMock.mock.calls[0][0] as unknown as {
+      toolCallbacks: { grade: (call: unknown) => Promise<{ response: unknown }> };
+    };
+    const grade = (args: unknown) =>
+      toolCallbacks.grade({ function: { name: 'grade', arguments: args } });
+    await expect(grade({ score: 7, explanation: 'ok' })).resolves.toEqual({
+      response: { score: 7, explanation: 'ok' },
+    });
+    await expect(grade({ score: 11 })).rejects.toThrow();
+    await expect(grade({ score: 0 })).rejects.toThrow();
+    await expect(grade({ score: 'high' })).rejects.toThrow();
+    await expect(grade(undefined)).rejects.toThrow();
   });
 
   it('returns unavailable when the judge returns no tool call', async () => {

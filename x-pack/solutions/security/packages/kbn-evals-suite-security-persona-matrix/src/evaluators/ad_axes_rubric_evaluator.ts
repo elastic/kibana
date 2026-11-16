@@ -37,23 +37,47 @@ const normalizeScore = (value: unknown): number | undefined => {
 const serializeInsights = (insights: unknown[]): string =>
   JSON.stringify({ attackDiscoveries: insights }, null, 2);
 
+// Framing of `serializeInsights` around a non-empty list, so a prefix's length can be summed.
+const LIST_HEAD = '{\n  "attackDiscoveries": [\n';
+const LIST_TAIL = '\n  ]\n}';
+const ITEM_SEPARATOR = ',\n';
+
+/** Length of one insight as it appears inside the pretty-printed list (indented four spaces). */
+const serializedItemLength = (insight: unknown): number =>
+  4 + (JSON.stringify(insight, null, 2) ?? 'null').replace(/\n/g, '\n    ').length;
+
 /**
  * Serializes the insights for the judge. When the JSON would exceed the cap,
  * whole trailing insights are dropped (never a sliced JSON document) and the
- * note tells the judge how many were omitted.
+ * note tells the judge how many were omitted. `keptCount` is 0 when even the
+ * first insight does not fit.
  */
 export const toSubmission = (
   insights: unknown[]
-): { submission: string; truncationNote: string } => {
-  let kept = insights;
-  let submission = serializeInsights(kept);
-  while (submission.length > AD_AXES_MAX_SUBMISSION_CHARS && kept.length > 0) {
-    kept = kept.slice(0, -1);
-    submission = serializeInsights(kept);
+): { submission: string; truncationNote: string; keptCount: number } => {
+  let keptCount = insights.length;
+  let submission = serializeInsights(insights);
+  if (submission.length > AD_AXES_MAX_SUBMISSION_CHARS) {
+    let total = LIST_HEAD.length + LIST_TAIL.length;
+    keptCount = 0;
+    for (const insight of insights) {
+      const next =
+        total + serializedItemLength(insight) + (keptCount > 0 ? ITEM_SEPARATOR.length : 0);
+      if (next > AD_AXES_MAX_SUBMISSION_CHARS) break;
+      total = next;
+      keptCount++;
+    }
+    submission = serializeInsights(insights.slice(0, keptCount));
+    // Guard against a length estimate that disagrees with the real serialization.
+    while (submission.length > AD_AXES_MAX_SUBMISSION_CHARS && keptCount > 0) {
+      keptCount--;
+      submission = serializeInsights(insights.slice(0, keptCount));
+    }
   }
-  const omitted = insights.length - kept.length;
+  const omitted = insights.length - keptCount;
   return {
     submission,
+    keptCount,
     truncationNote:
       omitted > 0
         ? `[truncated: ${omitted} of ${insights.length} discoveries omitted to fit the size limit; do not penalize the missing ones as absent from the model's output.]\n\n`
@@ -84,15 +108,36 @@ export const createAdAxesRubricEvaluator = ({
       return unavailable('Attack Discovery task did not produce insights.');
     }
 
+    const { keptCount, ...input } = toSubmission(insights);
+    if (insights.length > 0 && keptCount === 0) {
+      return unavailable(
+        `Even one discovery exceeds the ${AD_AXES_MAX_SUBMISSION_CHARS}-character size cap, so there is nothing the judge could grade.`
+      );
+    }
+
     try {
       const response = await executeUntilValid({
         prompt: AdAxesRubricPrompt,
         inferenceClient,
-        input: toSubmission(insights),
+        input,
         finalToolChoice: { function: 'grade' } as ToolChoice<'grade'>,
         maxRetries: 3,
         toolCallbacks: {
-          grade: async (toolCall) => ({ response: toolCall.function.arguments }),
+          // Throwing makes executeUntilValid hand the error back to the judge and retry.
+          grade: async (toolCall) => {
+            const args = toolCall.function.arguments;
+            if (
+              !isRecord(args) ||
+              [args.overall, ...AXES.map((axis) => args[axis])].some(
+                (v) => normalizeScore(v) === undefined
+              )
+            ) {
+              throw new Error(
+                `overall and every axis score must be a number between ${AD_AXES_MIN_SCORE} and ${AD_AXES_MAX_SCORE}`
+              );
+            }
+            return { response: args };
+          },
         },
       });
 
