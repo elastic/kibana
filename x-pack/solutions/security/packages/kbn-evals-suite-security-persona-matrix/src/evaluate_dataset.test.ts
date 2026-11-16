@@ -13,6 +13,7 @@ import type { DefaultEvaluators, EvalsExecutorClient, Evaluator, TaskOutput } fr
 import {
   PERSONA_RUBRIC_EVALUATOR_NAME,
   PERSONA_RUBRIC_JUDGE_ENV,
+  runPersonaRubricJudge,
 } from './evaluators/persona_rubric_evaluator';
 import { EICAR_TRAP_EVALUATOR_NAME } from './evaluators/eicar_trap_evaluator';
 import { RUBRIC_CAP_NO_TOOL_CALL_EVALUATOR_NAME } from './evaluators/rubric_cap_no_tool_call_evaluator';
@@ -42,6 +43,13 @@ jest.mock('@kbn/inference-prompt-utils', () => ({
   ...jest.requireActual('@kbn/inference-prompt-utils'),
   executeUntilValid: jest.fn(),
 }));
+
+jest.mock('./evaluators/persona_rubric_evaluator', () => {
+  const actual = jest.requireActual('./evaluators/persona_rubric_evaluator');
+  return { ...actual, runPersonaRubricJudge: jest.fn(actual.runPersonaRubricJudge) };
+});
+
+const runPersonaRubricJudgeMock = jest.mocked(runPersonaRubricJudge);
 
 const baseExample: PersonaMatrixExample = {
   id: 'example-a',
@@ -1403,7 +1411,20 @@ describe('createEvaluatePersonaMatrixDataset PersonaRubric flag', () => {
   it('logs a PersonaRubric rejection and keeps the example', async () => {
     process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
     const log = buildLog();
-    // runPersonaRubricJudge swallows judge errors; a throwing logger is a way to reject the slot.
+    // runPersonaRubricJudge is contractually non-throwing, so the slot can only reject if that
+    // contract is broken (or the span wrapper fails); the caller must still keep the example.
+    runPersonaRubricJudgeMock.mockRejectedValueOnce(new Error('judge module exploded'));
+    const { taskResult } = await runWith({ client, log });
+    expect(log.error).toHaveBeenCalledWith(
+      expect.stringContaining('PersonaRubric failed for example "example-a": judge module exploded')
+    );
+    expect(taskResult).not.toHaveProperty('personaRubricAnalysis');
+    expect(taskResult).toHaveProperty('correctnessAnalysis');
+  });
+
+  it('logs an unavailable PersonaRubric verdict and keeps the example, even if the logger throws', async () => {
+    process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
+    const log = buildLog();
     (log.warning as jest.Mock).mockImplementation(() => {
       throw new Error('logger exploded');
     });
@@ -1412,10 +1433,9 @@ describe('createEvaluatePersonaMatrixDataset PersonaRubric flag', () => {
       log,
       example: { ...baseExample, category: 'not-a-category' } as PersonaMatrixExample,
     });
-    expect(log.error).toHaveBeenCalledWith(
-      expect.stringContaining('PersonaRubric failed for example "example-a": logger exploded')
-    );
-    expect(taskResult).not.toHaveProperty('personaRubricAnalysis');
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('PersonaRubric skipped'));
+    expect(log.error).not.toHaveBeenCalledWith(expect.stringContaining('PersonaRubric failed'));
+    expect(taskResult).toHaveProperty('correctnessAnalysis');
   });
 
   it('skips the judge when the flag is on but no client is available', async () => {

@@ -15,7 +15,12 @@ import {
   AD_AXES_MIN_SCORE,
   AdAxesRubricPrompt,
 } from './ad_axes_rubric_prompt';
-import { InvalidVerdictError, JUDGE_MAX_RETRIES } from './judge_retry';
+import {
+  describeJudgeFailure,
+  InvalidVerdictError,
+  JUDGE_MAX_RETRIES,
+  warnSafely,
+} from './judge_retry';
 import { isRecord } from './task_output_helpers';
 
 export const AD_AXES_RUBRIC_EVALUATOR_NAME = 'AdAxesRubric';
@@ -168,8 +173,8 @@ export const createAdAxesRubricEvaluator = ({
         metadata: { coverage, accuracy, correlation, actionability, overall },
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      log?.warning(`[persona-matrix] ${AD_AXES_RUBRIC_EVALUATOR_NAME} judge failed: ${message}`);
+      const message = describeJudgeFailure(error);
+      warnSafely(log, `[persona-matrix] ${AD_AXES_RUBRIC_EVALUATOR_NAME} judge failed: ${message}`);
       return unavailable(`Judge call failed: ${message}`.slice(0, 1000));
     }
   },

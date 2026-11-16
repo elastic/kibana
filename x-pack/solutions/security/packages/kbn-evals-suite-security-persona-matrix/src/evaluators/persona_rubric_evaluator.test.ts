@@ -287,6 +287,9 @@ describe('runPersonaRubricJudge', () => {
       const { prompt, result } = await runAgainstFakeJudge({ score: 11 });
       expect(prompt).toHaveBeenCalledTimes(2);
       expect(result).toMatchObject({ score: null, label: 'unavailable' });
+      expect(result.explanation).toContain('in 2 attempts');
+      expect(result.explanation).toContain('last rejection: score must be an integer between');
+      expect(result.explanation).not.toContain('1 attempts');
     });
 
     it('tells the judge why its verdict was rejected on the retry', async () => {
@@ -302,6 +305,22 @@ describe('runPersonaRubricJudge', () => {
       expect(prompt).toHaveBeenCalledTimes(1);
       expect(result).toMatchObject({ score: 0.8 });
     });
+  });
+
+  it('returns unavailable instead of throwing when the logger throws on an unknown category', async () => {
+    const log = {
+      warning: jest.fn(() => {
+        throw new Error('logger exploded');
+      }),
+    } as unknown as ToolingLog;
+    const result = await runPersonaRubricJudge({
+      inferenceClient: {} as BoundInferenceClient,
+      category: 'not-a-category',
+      judgeOutput: withTools,
+      log,
+    });
+    expect(log.warning).toHaveBeenCalled();
+    expect(result).toMatchObject({ score: null, label: 'unavailable' });
   });
 
   it('returns unavailable when the judge returns no tool call', async () => {

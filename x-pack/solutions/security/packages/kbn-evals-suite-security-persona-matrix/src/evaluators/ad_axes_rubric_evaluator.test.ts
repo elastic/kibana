@@ -142,6 +142,11 @@ describe('AdAxesRubric', () => {
       const { prompt, result } = await runAgainstFakeJudge({ ...goodArgs, coverage: 11 });
       expect(prompt).toHaveBeenCalledTimes(2);
       expect(result).toMatchObject({ score: null, label: 'unavailable' });
+      expect(result.explanation).toContain('in 2 attempts');
+      expect(result.explanation).toContain(
+        'last rejection: overall and every axis score must be a number between'
+      );
+      expect(result.explanation).not.toContain('1 attempts');
     });
 
     it('tells the judge why its verdict was rejected on the retry', async () => {

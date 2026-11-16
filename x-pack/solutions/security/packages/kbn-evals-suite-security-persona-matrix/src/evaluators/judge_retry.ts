@@ -14,6 +14,35 @@
  */
 export const JUDGE_MAX_RETRIES = 0;
 
+const messageOf = (value: unknown): string =>
+  value instanceof Error ? value.message : String(value);
+
+/**
+ * `executeUntilValid` words its give-up AggregateError as "in ${maxRetries + 1} attempts", which
+ * undercounts by one (see above). Rebuilds it with the real call count and the judge's last
+ * rejection reason; any other error keeps its own message.
+ */
+export const describeJudgeFailure = (error: unknown): string => {
+  if (!(error instanceof AggregateError)) return messageOf(error);
+  const lastRejection = error.errors[error.errors.length - 1];
+  const calls = JUDGE_MAX_RETRIES + 2;
+  return `LLM could not complete task successfully in ${calls} attempts${
+    error.errors.length ? `; last rejection: ${messageOf(lastRejection)}` : ''
+  }`;
+};
+
+/** Logs a warning without letting a failing logger break a judge that promises not to throw. */
+export const warnSafely = (
+  log: { warning: (message: string) => void } | undefined,
+  message: string
+) => {
+  try {
+    log?.warning(message);
+  } catch {
+    // a broken logger must not turn a graceful "unavailable" into a rejected judge
+  }
+};
+
 /**
  * `executeUntilValid` forwards a rejected `grade` callback to the judge as
  * `{ error: <thrown value> }`, and the OpenAI adapter `JSON.stringify`s that. A plain `Error`

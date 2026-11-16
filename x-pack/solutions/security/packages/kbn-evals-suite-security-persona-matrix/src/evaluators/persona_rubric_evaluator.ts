@@ -16,7 +16,12 @@ import {
   PersonaRubricPrompt,
   resolvePersonaToolsRow,
 } from './persona_rubric_prompt';
-import { InvalidVerdictError, JUDGE_MAX_RETRIES } from './judge_retry';
+import {
+  describeJudgeFailure,
+  InvalidVerdictError,
+  JUDGE_MAX_RETRIES,
+  warnSafely,
+} from './judge_retry';
 import { NO_TOOL_CALL_RUBRIC_CAP } from './rubric_cap_no_tool_call_evaluator';
 import { getAnswerText, getSteps, isRecord } from './task_output_helpers';
 
@@ -81,7 +86,7 @@ export const runPersonaRubricJudge = async ({
     const reason = `Example category ${
       category ? `"${category}"` : '(missing)'
     } has no persona rubric tools row.`;
-    log?.warning(`[persona-matrix] PersonaRubric skipped: ${reason}`);
+    warnSafely(log, `[persona-matrix] PersonaRubric skipped: ${reason}`);
     return unavailable(reason);
   }
   const toolCalls = getToolCallsWithResults(judgeOutput);
@@ -132,8 +137,8 @@ export const runPersonaRubricJudge = async ({
       },
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    log?.warning(`[persona-matrix] PersonaRubric judge failed: ${message}`);
+    const message = describeJudgeFailure(error);
+    warnSafely(log, `[persona-matrix] PersonaRubric judge failed: ${message}`);
     return unavailable(`Judge call failed: ${message}`.slice(0, 1000));
   }
 };
