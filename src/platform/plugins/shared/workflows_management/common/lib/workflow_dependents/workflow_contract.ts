@@ -22,6 +22,9 @@ import { alwaysEndsInOutputStep, getCompletingOutputBlocks } from './run_outcome
 import type { ContractChange, ContractField, WorkflowContract } from './types';
 import { getReturnedOutputNames } from '../get_returned_output_names';
 
+/** Reads a field only when `record` has it itself, so names like `constructor` aren't inherited. */
+export const getOwn = <T>(record: Readonly<Record<string, T>>, key: string): T | undefined =>
+  Object.hasOwn(record, key) ? record[key] : undefined;
 const describeType = ({ type }: JSONSchema7): string | undefined => {
   if (Array.isArray(type)) {
     return type.every((item) => typeof item === 'string') ? type.join(' | ') : undefined;
@@ -55,7 +58,7 @@ const toFields = (
       name,
       type: describeType(property),
       required: required.has(name),
-      hasDefault: defaults ? defaults[name] !== undefined : property.default !== undefined,
+      hasDefault: defaults ? getOwn(defaults, name) !== undefined : property.default !== undefined,
       enumValues: property.enum,
       schema: property,
     };
@@ -257,7 +260,7 @@ const diffInputField = (savedField: ContractField, draftField: ContractField): C
 const diffInputs = (saved: WorkflowContract, draft: WorkflowContract): ContractChange[] => {
   const changes: ContractChange[] = [];
   for (const [name, draftField] of Object.entries(draft.inputs)) {
-    const savedField = saved.inputs[name];
+    const savedField = getOwn(saved.inputs, name);
     if (savedField) {
       changes.push(...diffInputField(savedField, draftField));
     } else {
@@ -272,7 +275,7 @@ const diffInputs = (saved: WorkflowContract, draft: WorkflowContract): ContractC
     }
   }
   for (const name of Object.keys(saved.inputs)) {
-    if (!draft.inputs[name]) {
+    if (!getOwn(draft.inputs, name)) {
       changes.push({
         kind: 'inputRemoved',
         field: name,
@@ -301,7 +304,7 @@ const diffOutputs = (saved: WorkflowContract, draft: WorkflowContract): Contract
   const savedUnreturned = new Set(saved.unreturnedOutputs);
   const draftUnreturned = new Set(draft.unreturnedOutputs);
   for (const [name, draftField] of Object.entries(draft.outputs)) {
-    const savedField = saved.outputs[name];
+    const savedField = getOwn(saved.outputs, name);
     if (savedField && !savedUnreturned.has(name) && draftUnreturned.has(name)) {
       changes.push({ kind: 'outputNoLongerReturned', field: name, severity: 'breaking' });
     }
@@ -324,7 +327,7 @@ const diffOutputs = (saved: WorkflowContract, draft: WorkflowContract): Contract
     }
   }
   for (const name of Object.keys(saved.outputs)) {
-    if (!draft.outputs[name]) {
+    if (!getOwn(draft.outputs, name)) {
       changes.push({
         kind: 'outputRemoved',
         field: name,

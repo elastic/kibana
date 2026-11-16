@@ -215,6 +215,21 @@ describe('useSaveYamlWithConfirmation', () => {
     expect(mockSaveYaml).not.toHaveBeenCalled();
   });
 
+  it('lets another editor on the same store save after one closes with its check unsettled', async () => {
+    confirmDisable.mockReturnValueOnce(new Promise<boolean>(() => {}));
+    renderSave([false])();
+    const sharedStore = store;
+    unmount();
+
+    const { result } = renderHook(() => useSaveYamlWithConfirmation(confirmDisable), {
+      wrapper: ({ children }) => <TestWrapper store={sharedStore}>{children}</TestWrapper>,
+    });
+    confirmDisable.mockResolvedValueOnce(true);
+
+    await expect(result.current()).resolves.toBe(true);
+    expect(mockSaveYaml).toHaveBeenCalledTimes(1);
+  });
+
   it('checks and saves the draft with pending AI proposals accepted', async () => {
     const proposedYaml = `${buildYaml(
       true

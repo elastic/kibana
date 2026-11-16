@@ -582,6 +582,33 @@ describe('analyzeDependents', () => {
     ).toEqual(['undeclaredOutput:warning']);
   });
 
+  it('ignores outputs inside a loop over an empty list', () => {
+    const reader = workflow('reader', [
+      callStep('ctx', { inputs: { alert_id: 'a' } }),
+      { name: 'log', type: 'console', with: { m: '{{ steps.ctx.output.value }}' } },
+    ]);
+    const undeclared = (emit: Record<string, unknown>) => ({
+      ...makeChild(),
+      outputs: undefined,
+      steps: [
+        {
+          name: 'never',
+          type: 'foreach',
+          foreach: '[]',
+          steps: [{ name: 'early', type: 'workflow.output', with: { value: 1 } }],
+        },
+        { name: 'emit', type: 'workflow.output', with: emit },
+      ],
+    });
+
+    expect(
+      kinds(
+        dependentOf(analyzeWith([reader], undeclared({}), undeclared({ value: 1 })), 'reader')
+          ?.issues
+      )
+    ).toEqual(['removedOutput:breaking']);
+  });
+
   it('only warns when the removed output is read with a default value', () => {
     const reader = workflow('reader', [
       callStep('ctx', { inputs: { alert_id: 'a' } }),
@@ -681,6 +708,61 @@ describe('analyzeDependents', () => {
     expect(statusById(analysis).enrich).toBe('warning');
     expect(analysis.contractChanges).toEqual([
       expect.objectContaining({ kind: 'inputRemoved', field: 'depth', severity: 'warning' }),
+    ]);
+  });
+
+  it('does not mistake built-in object properties for declared fields', () => {
+    const reader = workflow('reader', [
+      callStep('ctx', { inputs: { alert_id: 'a', constructor: 'x' } }),
+      {
+        name: 'log',
+        type: 'console',
+        with: { m: '{{ steps.ctx.output.constructor }} {{ steps.ctx.output.toString }}' },
+      },
+    ]);
+    const strict = {
+      ...makeChild(),
+      triggers: [],
+      inputs: { properties: {}, additionalProperties: false },
+    };
+
+    expect(kinds(dependentOf(analyzeWith([reader], makeChild()), 'reader')?.issues)).toEqual([
+      'unknownInput:warning',
+      'removedOutput:breaking',
+      'removedOutput:breaking',
+    ]);
+    expect(
+      dependentOf(analyzeWith([reader], strict), 'reader')?.issues.filter(
+        ({ kind }) => kind === 'unknownInput'
+      )
+    ).toEqual([
+      expect.objectContaining({ field: 'alert_id', severity: 'breaking' }),
+      expect.objectContaining({ field: 'constructor', severity: 'breaking' }),
+    ]);
+    const declaresConstructor = makeChild({
+      outputs: [...makeChild().outputs, { name: 'constructor', type: 'string' }],
+      emit: { severity: 'high', score: 9, constructor: 'x' },
+    });
+    expect(analyzeWith([reader], makeChild(), declaresConstructor).contractChanges).toEqual([
+      expect.objectContaining({
+        kind: 'outputRemoved',
+        field: 'constructor',
+        severity: 'breaking',
+      }),
+    ]);
+  });
+
+  it('treats a reference to a built-in property of consts as a missing constant', () => {
+    const caller = workflow(
+      'caller',
+      [callStep('ctx', { inputs: { alert_id: '${{ consts.toString }}' } })],
+      {
+        consts: {},
+      }
+    );
+
+    expect(kinds(dependentOf(analyzeWith([caller], makeChild()), 'caller')?.issues)).toEqual([
+      'missingRequiredInput:breaking',
     ]);
   });
 

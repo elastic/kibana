@@ -22,9 +22,15 @@ import {
 import { getActiveProposalContent } from '../../ai_integration';
 import { useConfirmBreakingChange } from '../../workflow_dependents/model/workflow_dependents_context';
 
-// Stores with a save being checked or sent. The header and the editor each save through their own
-// hook, and the checks run before the save marks itself in progress.
-const savingStores = new WeakSet<Store>();
+// The save being checked or sent for each store. The header and the editor each save through their
+// own hook, and the checks run before the save marks itself in progress.
+const savingStores = new WeakMap<Store, symbol>();
+
+const releaseSave = (store: Store, save: symbol): void => {
+  if (savingStores.get(store) === save) {
+    savingStores.delete(store);
+  }
+};
 
 // What saving persists: the draft with any pending AI proposals accepted.
 const getDraftToSave = (state: RootState): string =>
@@ -43,44 +49,63 @@ export const useSaveYamlWithConfirmation = (
   const confirmBreakingChange = useConfirmBreakingChange();
   // The store outlives the editor, so leaving the editor has to stop a save still being checked.
   const isMountedRef = useRef(false);
+  // A save this hook is still checking, which leaving the editor lets others start again, even if
+  // a confirmation never settles.
+  const checkingSaveRef = useRef<symbol>();
   useEffect(() => {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-    };
-  }, []);
-
-  const confirmAndSave = useCallback(async () => {
-    const workflowId = selectWorkflowId(store.getState());
-    const isStillOpen = () =>
-      isMountedRef.current && selectWorkflowId(store.getState()) === workflowId;
-    // The draft can change while a check is pending, so check again until the checked draft is
-    // the one being saved.
-    let yamlString: string;
-    do {
-      yamlString = getDraftToSave(store.getState());
-      const workflow = selectWorkflow(store.getState());
-      const disables =
-        workflow?.enabled && yamlString && parseDocument(yamlString).get('enabled') === false;
-      // Disabling stops every caller, and the disable dialog already lists them.
-      const confirmed = disables
-        ? await confirmDisable([workflow.id])
-        : !confirmBreakingChange || (await confirmBreakingChange(yamlString));
-      if (!confirmed || !isStillOpen()) {
-        return false;
+      if (checkingSaveRef.current) {
+        releaseSave(store, checkingSaveRef.current);
+        checkingSaveRef.current = undefined;
       }
-    } while (getDraftToSave(store.getState()) !== yamlString);
-    await saveYaml({ id: workflowId, yamlString });
-    return true;
-  }, [confirmBreakingChange, confirmDisable, saveYaml, store]);
+    };
+  }, [store]);
+
+  const confirmAndSave = useCallback(
+    async (onSend: () => void) => {
+      const workflowId = selectWorkflowId(store.getState());
+      const isStillOpen = () =>
+        isMountedRef.current && selectWorkflowId(store.getState()) === workflowId;
+      // The draft can change while a check is pending, so check again until the checked draft is
+      // the one being saved.
+      let yamlString: string;
+      do {
+        yamlString = getDraftToSave(store.getState());
+        const workflow = selectWorkflow(store.getState());
+        const disables =
+          workflow?.enabled && yamlString && parseDocument(yamlString).get('enabled') === false;
+        // Disabling stops every caller, and the disable dialog already lists them.
+        const confirmed = disables
+          ? await confirmDisable([workflow.id])
+          : !confirmBreakingChange || (await confirmBreakingChange(yamlString));
+        if (!confirmed || !isStillOpen()) {
+          return false;
+        }
+      } while (getDraftToSave(store.getState()) !== yamlString);
+      onSend();
+      await saveYaml({ id: workflowId, yamlString });
+      return true;
+    },
+    [confirmBreakingChange, confirmDisable, saveYaml, store]
+  );
 
   return useCallback(() => {
     if (savingStores.has(store)) {
       return Promise.resolve(false);
     }
-    savingStores.add(store);
-    return confirmAndSave().finally(() => {
-      savingStores.delete(store);
+    const save = Symbol('save');
+    savingStores.set(store, save);
+    checkingSaveRef.current = save;
+    const stopChecking = () => {
+      if (checkingSaveRef.current === save) {
+        checkingSaveRef.current = undefined;
+      }
+    };
+    return confirmAndSave(stopChecking).finally(() => {
+      stopChecking();
+      releaseSave(store, save);
     });
   }, [confirmAndSave, store]);
 };

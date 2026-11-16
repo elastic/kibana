@@ -233,6 +233,24 @@ const FIXTURES: Record<string, Fixture> = {
       output('stop', {}, 'failed'),
     ],
   },
+  'an end step that fails the run but fails to render first, with a workflow-level fallback': {
+    settings: { 'on-failure': { fallback: [done] } },
+    steps: [output('stop', { message: '{{ "%" | url_decode }}' }, 'failed')],
+  },
+  'an end step that fails to render, with a workflow-level fallback': {
+    settings: { 'on-failure': { fallback: [done] } },
+    steps: [output('emit', { message: '{{ "%" | url_decode }}' })],
+  },
+  'an end step whose outputs are rejected, with a workflow-level fallback': {
+    outputs: [{ name: 'n', type: 'number', required: true }],
+    settings: { 'on-failure': { fallback: [output('recover', { n: 1 })] } },
+    steps: [output('emit', { n: 'text' })],
+  },
+  'an end step that fails the run with outputs it rejects, with a workflow-level fallback': {
+    outputs: [{ name: 'n', type: 'number', required: true }],
+    settings: { 'on-failure': { fallback: [output('recover', { n: 1 })] } },
+    steps: [output('stop', { n: 'text' }, 'failed')],
+  },
   'an end step whose outputs are rejected': {
     outputs: [{ name: 'n', type: 'number', required: true }],
     steps: [output('emit', { n: 'text' })],

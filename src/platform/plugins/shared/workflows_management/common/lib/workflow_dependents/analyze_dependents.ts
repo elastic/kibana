@@ -52,6 +52,7 @@ import {
   diffWorkflowContracts,
   extractInputFields,
   extractWorkflowContract,
+  getOwn,
   hasConstraintsBeyondType,
   hasSchemaDetailChange,
   isFieldNarrowed,
@@ -151,7 +152,7 @@ const parseReference = (value: unknown): { scope: string; name: string } | undef
 const resolveConsts = (value: unknown, consts: CallerScope['consts']): unknown => {
   const reference = parseReference(value);
   if (reference?.scope === 'consts') {
-    return consts[reference.name];
+    return getOwn(consts, reference.name);
   }
   if (Array.isArray(value)) {
     return value.map((item) => resolveConsts(item, consts));
@@ -180,7 +181,7 @@ interface ValidationIssue {
 const getAtPath = (value: unknown, path: readonly PropertyKey[]): unknown =>
   path.reduce<unknown>(
     (node, key) =>
-      isRecord(node) || Array.isArray(node)
+      (isRecord(node) || Array.isArray(node)) && Object.hasOwn(node, key)
         ? (node as Record<PropertyKey, unknown>)[key]
         : undefined,
     value
@@ -296,7 +297,7 @@ const checkInputValue = (
 ): { issue?: DraftIssue; isUnknown: boolean } => {
   const reference = parseReference(rawValue);
   if (reference?.scope === 'inputs') {
-    return checkReferencedInput(stepName, name, scope.inputs[reference.name], field);
+    return checkReferencedInput(stepName, name, getOwn(scope.inputs, reference.name), field);
   }
   const value = resolveConsts(rawValue, scope.consts);
   if (isTextTemplate(value)) {
@@ -399,7 +400,7 @@ const getInputField = (
   contract: WorkflowContract | undefined,
   name: string
 ): ContractField | undefined => {
-  const declared = contract?.inputs[name];
+  const declared = contract && getOwn(contract.inputs, name);
   if (declared) {
     return declared;
   }
@@ -437,10 +438,10 @@ const evaluateInputs = (
     } else {
       // Runs fill in the default for a `null` value as they do for an omitted input.
       const resolved = resolveConsts(value, scope.consts);
-      const isOmitted =
-        resolved === undefined || (resolved === null && defaults[name] !== undefined);
+      const defaultValue = getOwn(defaults, name);
+      const isOmitted = resolved === undefined || (resolved === null && defaultValue !== undefined);
       const check = isOmitted
-        ? { issue: checkOmittedInput(stepName, field, defaults[name], contract), isUnknown: false }
+        ? { issue: checkOmittedInput(stepName, field, defaultValue, contract), isUnknown: false }
         : checkInputValue(stepName, name, value, field, contract, scope);
       issue =
         check.issue ??
@@ -461,8 +462,8 @@ const evaluateInputs = (
 
   // Runs fill in defaults for omitted inputs, then validate them like the ones that were sent.
   for (const field of Object.values(contract.inputs)) {
-    if (!(field.name in provided)) {
-      const issue = checkOmittedInput(stepName, field, defaults[field.name], contract);
+    if (!Object.hasOwn(provided, field.name)) {
+      const issue = checkOmittedInput(stepName, field, getOwn(defaults, field.name), contract);
       if (issue) {
         issues.push(issue);
         rows.push({
@@ -494,7 +495,7 @@ const evaluateOutputs = (
   const { stepName } = callSite;
   for (const { field, hasFallback } of findOutputUsages(parentDefinition, stepName)) {
     let issue: DraftIssue | undefined;
-    const contractField = field ? contract.outputs[field] : undefined;
+    const contractField = field ? getOwn(contract.outputs, field) : undefined;
     // A `| default:` filter replaces a missing value, so the caller keeps working.
     const lossSeverity = hasFallback ? 'warning' : 'breaking';
     if (field && !contract.alwaysReturnsOutput) {
@@ -510,7 +511,7 @@ const evaluateOutputs = (
     } else if (field && contract.unreturnedOutputs.includes(field)) {
       issue = { kind: 'unreturnedOutput', severity: lossSeverity, stepName, field };
     } else if (field && contractField) {
-      const previousType = previousContract?.outputs[field]?.type;
+      const previousType = previousContract && getOwn(previousContract.outputs, field)?.type;
       if (previousType && !isTypeWithin(contractField.type, previousType)) {
         issue = {
           kind: 'outputTypeChanged',

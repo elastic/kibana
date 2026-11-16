@@ -8,7 +8,7 @@
  */
 
 import { EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 import type { GetLinkedRulesResponse } from '@kbn/workflows-ui';
@@ -44,6 +44,16 @@ export const useDisableWorkflowsConfirmation = (): {
   const modalTitleId = useGeneratedHtmlId();
   const [pending, setPending] = useState<PendingConfirmation | null>(null);
   const resolveRef = useRef<(confirmed: boolean) => void>();
+  const isMountedRef = useRef(false);
+  // Unmounting cancels a disable that is being checked or waiting for confirmation.
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      resolveRef.current?.(false);
+      resolveRef.current = undefined;
+    };
+  }, []);
 
   const confirmDisable = useCallback<ConfirmDisableWorkflows>(
     async (workflowIds) => {
@@ -57,6 +67,9 @@ export const useDisableWorkflowsConfirmation = (): {
           () => ({ callers: undefined, isCallersError: true })
         ),
       ]);
+      if (!isMountedRef.current) {
+        return false;
+      }
       const hasLinkedRules = !(result.data?.total === 0 && result.data.hiddenTotal === 0);
       if (!hasLinkedRules && !hasRemovalImpact(callers.callers) && !callers.isCallersError) {
         return true;

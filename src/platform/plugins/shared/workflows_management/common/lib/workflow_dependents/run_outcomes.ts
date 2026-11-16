@@ -200,6 +200,17 @@ const isStepNode = ({ type }: GraphNodeUnion): boolean =>
 const isCallNode = ({ type }: GraphNodeUnion): boolean =>
   type === 'workflow.execute' || type === 'workflow.executeAsync';
 
+// Whether rendering `value` runs a template; the engine passes anything else through unchanged.
+const hasTemplates = (value: unknown): boolean => {
+  if (Array.isArray(value)) {
+    return value.some(hasTemplates);
+  }
+  if (isRecord(value)) {
+    return Object.values(value).some(hasTemplates);
+  }
+  return isTemplatedValue(value);
+};
+
 const evaluateLeaf = <Failure>(
   node: GraphNodeUnion,
   steps: StepFailures<Failure>
@@ -210,12 +221,17 @@ const evaluateLeaf = <Failure>(
     return failure ? toOutcome(['error'], failure) : MIGHT_FAIL;
   }
   if (node.type === 'workflow.output') {
-    // Rendering its values can fail the step before it ends the run.
-    const failure = steps.endStepFailure(getConfiguration(node));
+    const configuration = getConfiguration(node);
+    const failure = steps.endStepFailure(configuration);
+    // Rendering templated values can fail the step, which `on-failure` handlers catch, before it
+    // ends the run.
+    const renderEndings: Ending[] = hasTemplates(configuration.with) ? ['error'] : [];
     if (failure === 'mayFail') {
-      return toOutcome(['completed', 'failed', 'error']);
+      return toOutcome(['completed', 'failed', ...renderEndings]);
     }
-    return failure ? toOutcome(['failed'], failure) : toOutcome(['completed', 'error']);
+    return failure
+      ? toOutcome(['failed', ...renderEndings], failure)
+      : toOutcome(['completed', ...renderEndings]);
   }
   if (node.type === 'loop-break') {
     return toOutcome(['break']);
@@ -284,32 +300,39 @@ const evaluateTryBlock = <Failure>(
   return toOutcome(endings, normal.failure, [normal, fallback]);
 };
 
-// The engine reads a literal list directly, and parses a string that isn't a template.
-const alwaysIterates = (items: unknown): boolean => {
+// The number of items a `foreach` loop goes over, when known before the run: the engine reads a
+// literal list directly, and parses a string that isn't a template.
+const countLiteralItems = (items: unknown): number | undefined => {
   if (Array.isArray(items)) {
-    return items.length > 0;
+    return items.length;
   }
   if (typeof items !== 'string' || isTemplatedValue(items)) {
-    return false;
+    return undefined;
   }
   try {
     const parsed: unknown = JSON.parse(items);
-    return Array.isArray(parsed) && parsed.length > 0;
+    return Array.isArray(parsed) ? parsed.length : undefined;
   } catch {
-    return false;
+    return undefined;
   }
 };
 
 // Iterations that end or leave early go on to the next one, or past the loop. A `while` loop runs
 // its steps before checking its condition.
 const evaluateLoop = <Failure>(region: Region, steps: StepFailures<Failure>): Outcome<Failure> => {
+  const itemCount =
+    region.node?.type === 'enter-foreach'
+      ? countLiteralItems(getConfiguration(region.node).foreach)
+      : 1;
+  if (itemCount === 0) {
+    return toOutcome(['next']);
+  }
   const body = evaluateSequence(region.children, steps);
   const endings = new Set(body.endings);
   const leavesIteration = (['next', 'break', 'continue'] as const).filter((ending) =>
     endings.delete(ending)
   );
-  const mayNotRun =
-    region.node?.type === 'enter-foreach' && !alwaysIterates(getConfiguration(region.node).foreach);
+  const mayNotRun = itemCount === undefined;
   if (leavesIteration.length > 0 || mayNotRun) {
     endings.add('next');
   }

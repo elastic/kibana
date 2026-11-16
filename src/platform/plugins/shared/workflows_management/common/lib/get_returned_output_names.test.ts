@@ -72,7 +72,9 @@ describe('getReturnedOutputNames', () => {
           fallback: [{ name: 'recover', type: 'workflow.output', with: fallbackWith }],
         },
       },
-      steps: [{ name: 'emit', type: 'workflow.output', with: { severity: 'high' } }],
+      steps: [
+        { name: 'emit', type: 'workflow.output', with: { severity: '{{ inputs.severity }}' } },
+      ],
     });
     expect(getReturnedOutputNames(withFallback({ recovery: true }))).toEqual([
       'severity',

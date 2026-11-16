@@ -23,6 +23,7 @@ const noCallers: WorkflowRemovalImpactResponse = { callers: [], indirect: 0 };
 describe('useDisableWorkflowsConfirmation', () => {
   let confirmDisable: ConfirmDisableWorkflows;
   let services: ReturnType<typeof createStartServicesMock>;
+  let unmount: () => void;
 
   const Harness = () => {
     const hook = useDisableWorkflowsConfirmation();
@@ -56,11 +57,39 @@ describe('useDisableWorkflowsConfirmation', () => {
     (services.application.getUrlForApp as jest.Mock).mockImplementation(
       (appId: string, { path }: { path: string }) => `/app/${appId}/${path.replace(/^\//, '')}`
     );
-    render(
+    ({ unmount } = render(
       <TestProvider services={services}>
         <Harness />
       </TestProvider>
-    );
+    ));
+  });
+
+  const rulesToConfirm = {
+    linkedRules: Promise.resolve({
+      total: 1,
+      hiddenTotal: 0,
+      rules: [{ id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' }],
+    }),
+  };
+
+  it('resolves to false when the dialog closes with the page', async () => {
+    mockResponses(rulesToConfirm);
+
+    const { confirmation } = await openConfirmation();
+    unmount();
+
+    await expect(confirmation).resolves.toBe(false);
+  });
+
+  it('resolves to false when the page closes while the check runs', async () => {
+    let finishCheck: (rules: unknown) => void = () => {};
+    mockResponses({ linkedRules: new Promise((resolve) => (finishCheck = resolve)) });
+
+    const confirmation = confirmDisable(['wf-1']);
+    unmount();
+    finishCheck(await rulesToConfirm.linkedRules);
+
+    await expect(confirmation).resolves.toBe(false);
   });
 
   it('resolves to true without a prompt when nothing runs the workflows', async () => {

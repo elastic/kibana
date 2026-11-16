@@ -226,9 +226,29 @@ describe('getCompletingOutputBlocks', () => {
     expect(
       getCompletingOutputBlocks({
         settings: { 'on-failure': { fallback: [output('recover', { recovered: true })] } },
-        steps: [output('emit', { score: 1 })],
+        steps: [output('emit', { score: '${{ inputs.score }}' })],
       })
-    ).toEqual([{ score: 1 }, { recovered: true }]);
+    ).toEqual([{ score: '${{ inputs.score }}' }, { recovered: true }]);
+  });
+
+  it('skips fallbacks behind an output step whose values have nothing to render', () => {
+    expect(
+      getCompletingOutputBlocks({
+        settings: { 'on-failure': { fallback: [output('recover', { recovered: true })] } },
+        steps: [output('emit', { score: 1, nested: [{ label: 'plain' }] })],
+      })
+    ).toEqual([{ score: 1, nested: [{ label: 'plain' }] }]);
+  });
+
+  it.each([[[]], ['[]']])('skips the steps of a loop over %j', (items) => {
+    expect(
+      getCompletingOutputBlocks({
+        steps: [
+          { name: 'loop', type: 'foreach', foreach: items, steps: [output('early', { a: 1 })] },
+          output('emit', { b: 1 }),
+        ],
+      })
+    ).toEqual([{ b: 1 }]);
   });
 
   it('keeps every block when a run might reach steps it does not follow', () => {
