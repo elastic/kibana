@@ -28,7 +28,7 @@ interface SearchParams {
 export interface SLODefinitionRepository {
   create(slo: SLODefinition): Promise<SLODefinition>;
   update(slo: SLODefinition): Promise<SLODefinition>;
-  findAllByIds(ids: string[]): Promise<SLODefinition[]>;
+  findAllByIds(ids: string[], options?: { namespace?: string }): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
   deleteById(id: string, options?: { ignoreNotFound?: boolean }): Promise<void>;
   search({ search, pagination, filters }: SearchParams): Promise<Paginated<SLODefinition>>;
@@ -103,7 +103,10 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
     await this.soClient.delete(SO_SLO_TYPE, response.saved_objects[0].id);
   }
 
-  async findAllByIds(ids: string[]): Promise<SLODefinition[]> {
+  async findAllByIds(
+    ids: string[],
+    { namespace }: { namespace?: string } = {}
+  ): Promise<SLODefinition[]> {
     if (ids.length === 0) return [];
 
     const response = await this.soClient.find<StoredSLODefinition>({
@@ -111,6 +114,7 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       page: 1,
       perPage: ids.length,
       filter: `slo.attributes.id:(${ids.join(' or ')})`,
+      ...(namespace && { namespaces: [namespace] }),
     });
 
     return response.saved_objects.map((so) => this.toSLO(so)).filter(this.isSLO);
