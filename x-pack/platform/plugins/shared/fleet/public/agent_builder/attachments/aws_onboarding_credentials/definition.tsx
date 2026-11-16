@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -21,8 +22,13 @@ import type {
 } from '../../../../common/agent_builder/aws_onboarding_credentials_attachment';
 import type { FleetStartServices } from '../../../plugin';
 
-import { AwsOnboardingCredentialsCard } from './card';
-import { AwsOnboardingCredentialsForm } from './form';
+// The card and form pull in the hooks and callouts; load them only when an attachment renders.
+const LazyCard = React.lazy(() =>
+  import('./card').then((module) => ({ default: module.AwsOnboardingCredentialsCard }))
+);
+const LazyForm = React.lazy(() =>
+  import('./form').then((module) => ({ default: module.AwsOnboardingCredentialsForm }))
+);
 
 export type AwsOnboardingCredentialsAttachment = Attachment<
   typeof AWS_ONBOARDING_CREDENTIALS_ATTACHMENT_TYPE,
@@ -53,12 +59,16 @@ export const createAwsOnboardingCredentialsAttachmentDefinition = (
   canvasWidth: '560px',
   renderInlineContent: ({ attachment }) => (
     <Providers startServices={startServices}>
-      <AwsOnboardingCredentialsCard data={attachment.data} />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <LazyCard data={attachment.data} />
+      </Suspense>
     </Providers>
   ),
   renderCanvasContent: ({ attachment }, { closeCanvas }) => (
     <Providers startServices={startServices}>
-      <AwsOnboardingCredentialsForm region={attachment.data.region} onSaved={closeCanvas} />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <LazyForm region={attachment.data.region} onSaved={closeCanvas} />
+      </Suspense>
     </Providers>
   ),
   getActionButtons: ({ isCanvas, openCanvas }) =>

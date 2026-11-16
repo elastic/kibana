@@ -225,6 +225,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
             authz: fleetStart.authz,
           },
         });
+      })
+      .catch(() => {
+        this.logger.error('Failed to register the Agent Builder attachments.');
       });
 
     // Register Integrations app

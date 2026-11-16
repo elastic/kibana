@@ -26,11 +26,11 @@ jest.mock('../../../hooks/use_request/aws_onboarding');
 
 const mockToastsAddError = jest.fn();
 
-const startServices = {
-  featureFlags: { getBooleanValue$: () => of(true) },
+const createStartServices = (flagEnabled: boolean) => ({
+  featureFlags: { getBooleanValue$: () => of(flagEnabled) },
   cloud: { isCloudEnabled: true },
   notifications: { toasts: { addError: mockToastsAddError, addSuccess: jest.fn() } },
-};
+});
 
 const data: AwsOnboardingCredentialsAttachmentData = {
   execution_id: 'exec-1',
@@ -38,13 +38,16 @@ const data: AwsOnboardingCredentialsAttachmentData = {
   status: 'pending',
 };
 
-const renderCard = () => {
+const renderCard = ({
+  flagEnabled = true,
+  attachmentData = data,
+}: { flagEnabled?: boolean; attachmentData?: AwsOnboardingCredentialsAttachmentData } = {}) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <I18nProvider>
-      <KibanaContextProvider services={startServices}>
+      <KibanaContextProvider services={createStartServices(flagEnabled)}>
         <QueryClientProvider client={queryClient}>
-          <AwsOnboardingCredentialsCard data={data} />
+          <AwsOnboardingCredentialsCard data={attachmentData} />
         </QueryClientProvider>
       </KibanaContextProvider>
     </I18nProvider>
@@ -69,7 +72,7 @@ describe('AwsOnboardingCredentialsCard', () => {
       expect.stringContaining('region=eu-west-1')
     );
     expect(await screen.findByTestId('awsOnboardingCredentialsCardStatus')).toHaveTextContent(
-      'pending'
+      'Status: pending'
     );
     expect(sendGetAwsOnboardingVerify).not.toHaveBeenCalled();
   });
@@ -111,5 +114,18 @@ describe('AwsOnboardingCredentialsCard', () => {
     await userEvent.click(screen.getByTestId('awsOnboardingCredentialsCardDownload'));
 
     await waitFor(() => expect(mockToastsAddError).toHaveBeenCalledTimes(1));
+  });
+
+  it('trusts the attachment status when onboarding is not enabled, without inventing an account', async () => {
+    renderCard({ flagEnabled: false, attachmentData: { ...data, status: 'verified' } });
+
+    expect(screen.getByTestId('awsOnboardingCredentialsCardStatus')).toHaveTextContent(
+      'Status: access verified'
+    );
+    expect(screen.getByTestId('awsOnboardingCredentialsCardStatus')).not.toHaveTextContent(
+      'undefined'
+    );
+    expect(screen.getByTestId('awsOnboardingCredentialsCardReplyDone')).toBeInTheDocument();
+    expect(sendGetAwsOnboardingCredentials).not.toHaveBeenCalled();
   });
 });

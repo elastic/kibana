@@ -44,7 +44,11 @@ const useCardStatus = (data: AwsOnboardingCredentialsAttachmentData): CardStatus
 
   if (!isEnabled) {
     // Without the live credentials state, trust what the agent recorded on the attachment.
-    return { kind: data.status === 'verify_failed' ? 'failed' : data.status, error: data.error };
+    return {
+      kind: data.status === 'verify_failed' ? 'failed' : data.status,
+      accountId: data.account_id,
+      error: data.error,
+    };
   }
   if (!isConfigured) {
     return { kind: 'pending' };
@@ -62,6 +66,32 @@ const useCardStatus = (data: AwsOnboardingCredentialsAttachmentData): CardStatus
     return { kind: 'failed', error: failure.error };
   }
   return { kind: 'verified', accountId };
+};
+
+const getStatusText = ({ kind, accountId }: CardStatus): string => {
+  switch (kind) {
+    case 'verified':
+      return accountId
+        ? i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.statusVerified', {
+            defaultMessage: 'Status: verified for account {accountId}',
+            values: { accountId },
+          })
+        : i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.statusVerifiedNoAccount', {
+            defaultMessage: 'Status: access verified',
+          });
+    case 'configured':
+      return i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.statusConfigured', {
+        defaultMessage: 'Status: configured',
+      });
+    case 'failed':
+      return i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.statusFailed', {
+        defaultMessage: 'Status: verification failed',
+      });
+    default:
+      return i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.statusPending', {
+        defaultMessage: 'Status: pending',
+      });
+  }
 };
 
 export const AwsOnboardingCredentialsCard: React.FC<{
@@ -82,16 +112,7 @@ export const AwsOnboardingCredentialsCard: React.FC<{
     }
   }, [notifications.toasts]);
 
-  const statusText =
-    status.kind === 'verified'
-      ? i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.statusVerified', {
-          defaultMessage: 'Status: verified for account {accountId}',
-          values: { accountId: status.accountId },
-        })
-      : i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.status', {
-          defaultMessage: 'Status: {status}',
-          values: { status: status.kind === 'failed' ? 'verification failed' : status.kind },
-        });
+  const statusText = getStatusText(status);
 
   return (
     <>
