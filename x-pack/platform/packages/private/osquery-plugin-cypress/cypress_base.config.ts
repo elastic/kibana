@@ -27,7 +27,7 @@ export const getCypressBaseConfig = (
     {
       reporter: '../../../../../node_modules/cypress-multi-reporters',
       reporterOptions: {
-        configFile: './cypress/reporter_config.json',
+        configFile: './reporter_config.json',
       },
 
       defaultCommandTimeout: 60000,
@@ -58,7 +58,8 @@ export const getCypressBaseConfig = (
       },
 
       e2e: {
-        specPattern: './cypress/e2e/**/*.cy.ts',
+        specPattern: './e2e/**/*.cy.ts',
+        supportFile: './support/e2e.ts',
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
         setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
