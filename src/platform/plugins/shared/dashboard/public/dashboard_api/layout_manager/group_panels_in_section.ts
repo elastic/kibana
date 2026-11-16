@@ -8,6 +8,8 @@
  */
 
 import type { DashboardSection } from '@kbn/as-code-dashboard-schema';
+import { PlacementStrategy } from '@kbn/embeddable-plugin/public';
+import { runPanelPlacementStrategy } from '../../panel_placement';
 import type { DashboardLayout } from './types';
 
 /** Returns the row right below every panel and section, where a new section can be added */
@@ -22,9 +24,7 @@ export const getLayoutBottomRow = ({ panels, sections }: DashboardLayout): numbe
 
 /**
  * Moves the given grid panels into a new expanded section at the bottom of the layout.
- * The panels are grouped by source: each section, and each run of top-level panels between two
- * section headers. Panels keep their arrangement relative to the others from the same source, and
- * the sources are stacked in the order they appear in the dashboard.
+ * The panels are packed into the section top-left first, in the order they appear in the dashboard.
  * Returns `undefined` when none of the IDs belong to a grid panel.
  */
 export const groupPanelsInSection = (
@@ -36,45 +36,21 @@ export const groupPanelsInSection = (
   const panelIdsToMove = panelIds.filter((id) => Object.hasOwn(panels, id));
   if (!panelIdsToMove.length) return;
 
-  // top-level panels share the dashboard's rows with the section headers
-  const sectionRows = Object.values(sections).map(({ grid }) => grid.y);
-  const panelIdsBySource = new Map<string, { ids: string[]; dashboardRow?: number }>();
-  panelIdsToMove.forEach((id) => {
-    const { sectionId, y } = panels[id].grid;
-    const sourceKey = sectionId
-      ? `section-${sectionId}`
-      : `topLevel-${sectionRows.filter((row) => row < y).length}`;
-    const source = panelIdsBySource.get(sourceKey) ?? {
-      ids: [],
-      dashboardRow: sectionId ? sections[sectionId].grid.y : undefined,
-    };
-    source.ids.push(id);
-    panelIdsBySource.set(sourceKey, source);
+  // Top-level panels share the dashboard's rows with the section headers, while panels in a
+  // section are positioned relative to their section; so a section's panels sort at its header row
+  const getDashboardOrder = (id: string) => {
+    const { sectionId, y, x } = panels[id].grid;
+    return [sectionId ? sections[sectionId].grid.y : y, y, x];
+  };
+  const sortedPanelIds = [...panelIdsToMove].sort((idA, idB) => {
+    const orderA = getDashboardOrder(idA);
+    const orderB = getDashboardOrder(idB);
+    const index = orderA.findIndex((value, i) => value !== orderB[i]);
+    return index === -1 ? 0 : orderA[index] - orderB[index];
   });
 
-  const sources = [...panelIdsBySource.values()].map(({ ids, dashboardRow }) => {
-    const minY = Math.min(...ids.map((id) => panels[id].grid.y));
-    const maxY = Math.max(...ids.map((id) => panels[id].grid.y + panels[id].grid.h));
-    return { ids, minY, height: maxY - minY, dashboardRow: dashboardRow ?? minY };
-  });
-  sources.sort((sourceA, sourceB) => sourceA.dashboardRow - sourceB.dashboardRow);
-
-  const movedPanels: DashboardLayout['panels'] = {};
-  let rowOffset = 0;
-  sources.forEach(({ ids, minY, height }) => {
-    ids.forEach((id) => {
-      const { grid, ...panel } = panels[id];
-      movedPanels[id] = {
-        ...panel,
-        grid: { ...grid, y: grid.y - minY + rowOffset, sectionId: newSection.id },
-      };
-    });
-    rowOffset += height;
-  });
-
-  return {
+  const layoutWithSection: DashboardLayout = {
     ...layout,
-    panels: { ...panels, ...movedPanels },
     sections: {
       ...sections,
       [newSection.id]: {
@@ -84,4 +60,12 @@ export const groupPanelsInSection = (
       },
     },
   };
+
+  return sortedPanelIds.reduce((currentLayout, id) => {
+    const { type, grid } = panels[id];
+    return runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
+      currentLayout,
+      newPanel: { uuid: id, type, grid: { w: grid.w, h: grid.h, sectionId: newSection.id } },
+    });
+  }, layoutWithSection);
 };

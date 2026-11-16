@@ -42,36 +42,35 @@ describe('groupPanelsInSection', () => {
     });
   });
 
-  test('keeps the arrangement of top-level panels relative to each other', () => {
-    const result = groupPanelsInSection(layout, ['panelB', 'panelC'], newSection);
+  test('packs panels top-left in dashboard order', () => {
+    // selection order does not matter: panelB (row 0), panelC (row 4), then section1 (row 8),
+    // then panelF (row 9)
+    const result = groupPanelsInSection(
+      layout,
+      ['panelF', 'panelE', 'panelC', 'panelB'],
+      newSection
+    );
 
+    // panelB moves from column 24 to the left edge, so no horizontal gap is left
     expect(result?.panels.panelB).toEqual({
       type: 'lens',
-      grid: { x: 24, y: 0, w: 24, h: 4, sectionId: 'newSection' },
+      grid: { x: 0, y: 0, w: 24, h: 4, sectionId: 'newSection' },
     });
     expect(result?.panels.panelC).toEqual({
       type: 'lens',
-      grid: { x: 0, y: 4, w: 12, h: 4, sectionId: 'newSection' },
+      grid: { x: 24, y: 0, w: 12, h: 4, sectionId: 'newSection' },
+    });
+    expect(result?.panels.panelE).toEqual({
+      type: 'lens',
+      grid: { x: 36, y: 0, w: 12, h: 2, sectionId: 'newSection' },
+    });
+    // the first row is full, so panelF fills the space below the shorter panelE
+    expect(result?.panels.panelF).toEqual({
+      type: 'lens',
+      grid: { x: 36, y: 2, w: 12, h: 4, sectionId: 'newSection' },
     });
     // panels that are not grouped are left untouched
     expect(result?.panels.panelA).toBe(layout.panels.panelA);
     expect(result?.panels.panelD).toBe(layout.panels.panelD);
-  });
-
-  test('stacks panels from each source in the order the sources appear in the dashboard', () => {
-    // selection order does not matter: section1 (row 8) comes before panelF (row 9)
-    const result = groupPanelsInSection(
-      layout,
-      ['panelF', 'panelE', 'panelA', 'panelD'],
-      newSection
-    );
-
-    // top-level panels above section1 come first
-    expect(result?.panels.panelA.grid).toMatchObject({ y: 0, sectionId: 'newSection' });
-    // then the panels from section1 (5 rows high), below panelA (4 rows high)
-    expect(result?.panels.panelD.grid).toMatchObject({ y: 4, sectionId: 'newSection' });
-    expect(result?.panels.panelE.grid).toMatchObject({ y: 7, sectionId: 'newSection' });
-    // then the top-level panel below section1
-    expect(result?.panels.panelF.grid).toMatchObject({ y: 9, sectionId: 'newSection' });
   });
 });

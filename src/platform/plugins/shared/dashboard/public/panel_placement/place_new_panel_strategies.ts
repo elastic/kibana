@@ -84,7 +84,10 @@ export const runPanelPlacementStrategy = (
           ...currentLayout,
           panels: {
             ...currentPanels,
-            [newPanel.uuid]: { type: newPanel.type, grid: { x: 0, y: 0, w: width, h: height } },
+            [newPanel.uuid]: {
+              type: newPanel.type,
+              grid: { x: 0, y: 0, w: width, h: height, ...(sectionId && { sectionId }) },
+            },
           },
         };
       }
@@ -133,7 +136,10 @@ export const runPanelPlacementStrategy = (
                     ...currentLayout,
                     panels: {
                       ...currentPanels,
-                      [newPanel.uuid]: { type: newPanel.type, grid: { x, y, w: width, h: height } },
+                      [newPanel.uuid]: {
+                        type: newPanel.type,
+                        grid: { x, y, w: width, h: height, ...(sectionId && { sectionId }) },
+                      },
                     },
                   };
                 } else if (grid[h][w] === 1) {
@@ -149,7 +155,10 @@ export const runPanelPlacementStrategy = (
         ...currentLayout,
         panels: {
           ...currentPanels,
-          [newPanel.uuid]: { type: newPanel.type, grid: { x: 0, y: maxY, w: width, h: height } },
+          [newPanel.uuid]: {
+            type: newPanel.type,
+            grid: { x: 0, y: maxY, w: width, h: height, ...(sectionId && { sectionId }) },
+          },
         },
       };
     default:
