@@ -11,6 +11,8 @@ import type { ContractCall, OpenApiDocument, Violation } from '@kbn/connector-em
 import type { ActionDefinition, ConnectorSpec } from '../../connector_spec';
 import type { ContractContext, ContractContextOptions } from '../create_contract_context';
 import { createContractContext } from '../create_contract_context';
+import type { FieldUse } from '../field_use';
+import { createFieldUse } from '../field_use';
 import type { ActionFixture, QueryOperation, VendorApiFixtures } from './fixtures';
 import { toResponseFixtures } from './fixtures';
 import type { GeneratedInputs, RejectedInput } from './generate_action_inputs';
@@ -21,10 +23,19 @@ import { matchesPathTemplate } from './manifest';
 const SAFE_METHODS = new Set(['get', 'head', 'options']);
 
 export interface RecordActionsOptions
-  extends Omit<ContractContextOptions, 'specs' | 'fixtures' | 'recordings'> {
+  extends Omit<ContractContextOptions, 'specs' | 'fixtures' | 'recordings' | 'trackFields'> {
   /** The vendor specs by source name, as in the manifest's `sources`. */
   readonly specs: Readonly<Record<string, OpenApiDocument>>;
   readonly fixtures?: VendorApiFixtures;
+  /** Records which response fields each action reads, copies and returns. */
+  readonly trackFields?: boolean;
+}
+
+/** `FieldUse` with sorted lists, as stored in reports. */
+export interface RecordedFieldUse {
+  readonly read: readonly string[];
+  readonly copied: readonly string[];
+  readonly returned: readonly string[];
 }
 
 export interface RequestedPath {
@@ -80,7 +91,30 @@ export interface ActionsRecording {
   /** Per action, the requests that matched no operation, sorted by path and method. */
   readonly unmatched: Record<string, RequestedPath[]>;
   readonly findings: RecordingFinding[];
+  /**
+   * With `trackFields`: per action, what it did with the responses of each operation, by
+   * `source METHOD /path`.
+   */
+  readonly fieldUse?: Record<string, Record<string, RecordedFieldUse>>;
+  /**
+   * With `trackFields`: actions that only worked without tracking (it wraps response bodies in
+   * proxies, which e.g. `structuredClone` refuses), so their field use is incomplete.
+   */
+  readonly untracked?: string[];
 }
+
+/** How field use is keyed: `source METHOD /path`. */
+export const fieldUseKey = ({
+  source,
+  method,
+  path,
+}: {
+  readonly source?: string;
+  readonly method: string;
+  readonly path: string;
+}): string => `${source ?? ''} ${method.toUpperCase()} ${path}`;
+
+const sortedList = (values: Set<string>): string[] => [...values].sort();
 
 const toRequestedPath = ({ request }: ContractCall): RequestedPath => {
   const [method, url] = request.split(' ');
@@ -171,8 +205,22 @@ export const recordActions = async ({
   config,
   authType,
   checkScopes = 'report',
+  trackFields = false,
   ...contextOptions
 }: RecordActionsOptions): Promise<ActionsRecording> => {
+  const fieldUse = new Map<string, Map<string, FieldUse>>();
+  const untracked = new Set<string>();
+  const fieldUseOf = (
+    action: string,
+    operation: { readonly source?: string; readonly method: string; readonly path: string }
+  ): FieldUse => {
+    const byOperation = fieldUse.get(action) ?? new Map<string, FieldUse>();
+    fieldUse.set(action, byOperation);
+    const key = fieldUseKey(operation);
+    const use = byOperation.get(key) ?? createFieldUse();
+    byOperation.set(key, use);
+    return use;
+  };
   const connectorConfig = config ?? (await sampleConfig(connector));
   const validateConfig = async (candidate: Record<string, unknown>, subject: string) => {
     const result = await connector.schema?.safeParseAsync(candidate);
@@ -210,9 +258,8 @@ export const recordActions = async ({
       const errors: string[] = [];
       let worked = false;
       for (const input of inputs) {
-        let context: ContractContext;
-        try {
-          context = await createContractContext({
+        const contextFor = (tracked: boolean) =>
+          createContractContext({
             ...contextOptions,
             checkScopes,
             connector,
@@ -220,17 +267,36 @@ export const recordActions = async ({
             config: { ...connectorConfig, ...fixture.config },
             specs,
             fixtures: toResponseFixtures(fixture.responses),
+            ...(tracked ? { trackFields: (operation) => fieldUseOf(action, operation) } : {}),
           });
+        let context: ContractContext;
+        try {
+          context = await contextFor(trackFields);
         } catch (error) {
           brokenAuthTypes.set(id, errorMessage(error));
           break;
         }
-        const { mock, runAction } = context;
+        let { mock } = context;
         try {
-          await runAction(action, input);
+          await context.runAction(action, input);
           worked = true;
         } catch (error) {
-          errors.push(errorMessage(error));
+          // A run that only fails with tracking is recorded without it, as an untracked action.
+          const plain = trackFields
+            ? await contextFor(false)
+                .then(async (retry) => {
+                  await retry.runAction(action, input);
+                  return retry;
+                })
+                .catch(() => undefined)
+            : undefined;
+          if (plain) {
+            untracked.add(action);
+            mock = plain.mock;
+            worked = true;
+          } else {
+            errors.push(errorMessage(error));
+          }
         }
         // Token requests authenticate the run; they aren't vendor operations the action calls.
         const vendorCalls = mock.calls.filter(({ token }) => !token);
@@ -340,6 +406,26 @@ export const recordActions = async ({
   return {
     operations,
     unmatched,
+    ...(trackFields
+      ? {
+          fieldUse: Object.fromEntries(
+            [...fieldUse].map(([action, byOperation]) => [
+              action,
+              Object.fromEntries(
+                [...byOperation].map(([key, use]) => [
+                  key,
+                  {
+                    read: sortedList(use.read),
+                    copied: sortedList(use.copied),
+                    returned: sortedList(use.returned),
+                  },
+                ])
+              ),
+            ])
+          ),
+          untracked: [...untracked].sort(),
+        }
+      : {}),
     findings: [...new Map(findings.map((finding) => [JSON.stringify(finding), finding])).values()],
   };
 };

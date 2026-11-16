@@ -14,8 +14,10 @@ import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-emulate';
 import type { ConnectorSpec } from '../../connector_spec';
 import { loadVendorSpec } from './load_vendor_spec';
 import { MANIFEST, OVERLAY, readOptional, snapshotFile } from './load_vendor_specs';
+import { compareFields } from './compare_fields';
 import type { OperationLocation } from './locate_operation';
 import { locateOperation, serverUrls } from './locate_operation';
+import type { RecordedFieldUse } from './record_actions';
 import type { VendorApiManifest } from './manifest';
 import { parseManifest } from './manifest';
 import { parseSpecText } from './parse_spec_text';
@@ -70,6 +72,23 @@ export interface ActionDrift {
   readonly snapshotProblems: readonly string[];
   /** Problems recording it against the latest specs; undefined when those didn't load. */
   readonly latestProblems?: readonly string[];
+  /**
+   * What it did with the responses of each operation it calls, by `source METHOD /path`, across
+   * the runs against the committed snapshot and the latest spec.
+   */
+  readonly fieldUse?: Readonly<Record<string, RecordedFieldUse>>;
+  /** Whether field use was recorded for every run; false when tracking had to be left off. */
+  readonly tracked?: boolean;
+  /** Response fields it reads whose schema differs between the snapshot and the latest spec. */
+  readonly fieldChanges?: readonly ActionFieldChange[];
+}
+
+/** A changed response field an action reads. */
+export interface ActionFieldChange {
+  /** `METHOD /path`, as in the committed manifest. */
+  readonly operation: string;
+  readonly field: string;
+  readonly changes: readonly string[];
 }
 
 /** An overlay action that matches nothing in the latest specs. */
@@ -187,16 +206,29 @@ const verdictOf = (
     ? 'vendor-drift'
     : 'healthy';
 
+// With the actions passing against the latest spec, a breaking request change is harmless (the
+// requests still validate), and so is a breaking response change if no field the actions read
+// changed. That needs field use recorded for every action that calls the vendor.
+const fieldUseCoversChanges = (drift: Omit<ConnectorDrift, 'outcome'>): boolean =>
+  drift.verdict === 'healthy' &&
+  drift.actions !== undefined &&
+  drift.actions.every(
+    ({ operations, tracked, fieldChanges = [] }) =>
+      operations.length === 0 || (tracked === true && fieldChanges.length === 0)
+  );
+
 const outcomeOf = (drift: Omit<ConnectorDrift, 'outcome'>): DriftOutcome => {
   const sources = Object.values(drift.sources);
+  const covered = fieldUseCoversChanges(drift);
+  const needsAttention = ({ kind, id }: SpecChange): boolean =>
+    kind !== 'non-breaking' && !(covered && kind === 'breaking' && /^(request|response)-/.test(id));
   const needsIssue =
     drift.verdict !== 'healthy' ||
     drift.overlayFindings.length > 0 ||
     sources.some(
       ({ status, changes }) =>
         status === 'unreachable' ||
-        (status === 'changed' &&
-          (changes === undefined || changes.some(({ kind }) => kind !== 'non-breaking')))
+        (status === 'changed' && (changes === undefined || changes.some(needsAttention)))
     );
   if (needsIssue) {
     return 'issue';
@@ -237,6 +269,7 @@ const compareWithLatest = async ({
       connector,
       directory: copy,
       refresh: true,
+      trackFields: true,
       fetchText,
       now,
       log: {
@@ -327,6 +360,7 @@ export const detectDrift = async ({
     connector,
     directory,
     check: true,
+    trackFields: true,
     fetchText: offline,
     now,
     log: quiet,
@@ -387,6 +421,7 @@ export const detectDrift = async ({
           manifest,
           snapshotResult,
           latestResult: latest?.result,
+          snapshotSpecs: snapshotResult?.specs,
           latestSpecs,
         })
       ),
@@ -402,35 +437,92 @@ export const detectDrift = async ({
   return { ...drift, outcome: outcomeOf(drift) };
 };
 
+const mergeFieldUse = (
+  ...uses: ReadonlyArray<Readonly<Record<string, RecordedFieldUse>> | undefined>
+): Record<string, RecordedFieldUse> => {
+  const merged: Record<string, { read: Set<string>; copied: Set<string>; returned: Set<string> }> =
+    {};
+  for (const byOperation of uses) {
+    for (const [key, use] of Object.entries(byOperation ?? {})) {
+      const entry = (merged[key] ??= { read: new Set(), copied: new Set(), returned: new Set() });
+      use.read.forEach((field) => entry.read.add(field));
+      use.copied.forEach((field) => entry.copied.add(field));
+      use.returned.forEach((field) => entry.returned.add(field));
+    }
+  }
+  return Object.fromEntries(
+    Object.entries(merged).map(([key, { read, copied, returned }]) => [
+      key,
+      { read: [...read].sort(), copied: [...copied].sort(), returned: [...returned].sort() },
+    ])
+  );
+};
+
 const describeAction = ({
   action,
   manifest,
   snapshotResult,
   latestResult,
+  snapshotSpecs,
   latestSpecs,
 }: {
   readonly action: string;
   readonly manifest: VendorApiManifest;
   readonly snapshotResult?: UpdateVendorApiResult;
   readonly latestResult?: UpdateVendorApiResult;
+  readonly snapshotSpecs?: Readonly<Record<string, OpenApiDocument>>;
   readonly latestSpecs?: Readonly<Record<string, OpenApiDocument>>;
-}): ActionDrift => ({
-  action,
-  operations: (manifest.operations[action] ?? []).map(({ source, method, path: opPath }) => {
+}): ActionDrift => {
+  const operations = (manifest.operations[action] ?? []).map(({ source, method, path: opPath }) => {
     const document = latestSpecs?.[source];
     return {
       source,
+      method,
+      path: opPath,
       operation: `${method.toUpperCase()} ${opPath}`,
       ...(document ? { latest: locateOperation(document, opPath, method) } : {}),
     };
-  }),
-  unmatched: (manifest.unmatched?.[action] ?? []).map(({ method, path: requestPath, reason }) => ({
-    operation: `${method.toUpperCase()} ${requestPath}`,
-    reason,
-  })),
-  snapshotProblems: snapshotResult?.problemsByAction[action] ?? [],
-  ...(latestResult ? { latestProblems: latestResult.problemsByAction[action] ?? [] } : {}),
-});
+  });
+  const recorded = [snapshotResult, latestResult].filter(
+    (result): result is UpdateVendorApiResult => result?.fieldUse !== undefined
+  );
+  const fieldUse = mergeFieldUse(...recorded.map((result) => result.fieldUse?.[action]));
+  const tracked =
+    recorded.length > 0 && recorded.every((result) => !result.untracked?.includes(action));
+  // Where the operation still is in the latest spec, the fields it reads are compared.
+  const fieldChanges = operations.flatMap(({ source, method, path: opPath, operation, latest }) => {
+    const [before, after] = [snapshotSpecs?.[source], latestSpecs?.[source]];
+    const fields = fieldUse[`${source} ${operation}`]?.read ?? [];
+    if (!before || !after || fields.length === 0 || latest?.status === 'missing') {
+      return [];
+    }
+    return compareFields({
+      before,
+      after,
+      method,
+      path: opPath,
+      latestPath: latest?.status === 'moved' ? latest.path : opPath,
+      fields,
+    }).map(({ field, changes }) => ({ operation, field, changes }));
+  });
+  return {
+    action,
+    operations: operations.map(({ source, operation, latest }) => ({
+      source,
+      operation,
+      ...(latest ? { latest } : {}),
+    })),
+    unmatched: (manifest.unmatched?.[action] ?? []).map(
+      ({ method, path: requestPath, reason }) => ({
+        operation: `${method.toUpperCase()} ${requestPath}`,
+        reason,
+      })
+    ),
+    snapshotProblems: snapshotResult?.problemsByAction[action] ?? [],
+    ...(latestResult ? { latestProblems: latestResult.problemsByAction[action] ?? [] } : {}),
+    ...(recorded.length > 0 ? { fieldUse, tracked, fieldChanges } : {}),
+  };
+};
 
 // `$.paths['/items/{id}'].put…` targets the path `/items/{id}`.
 const TARGET_PATH = /^\$\.paths\[['"]([^'"]+)['"]\]/;

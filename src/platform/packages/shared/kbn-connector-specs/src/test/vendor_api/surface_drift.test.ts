@@ -441,12 +441,52 @@ describe('renderDriftIssue', () => {
     };
     const { title, body } = renderDriftIssue(passing, { owners: [] });
 
-    expect(title).toBe(
-      '[Connector validation] .acme: vendor spec changed (1 breaking or deprecation change)'
-    );
+    expect(title).toBe('[Connector validation] .acme: actions pass, 1 spec change to review');
     expect(body).toContain(
       '| `search` | `GET /items` | ⚠️ Passes, but its operations changed: `request-parameter-max-decreased` |'
     );
+  });
+
+  it('lists the changed fields that passing actions read, and those that read none', () => {
+    const passing: ConnectorDrift = {
+      ...drifted,
+      verdict: 'healthy',
+      latestProblems: [],
+      actions: [
+        {
+          ...(drifted.actions?.[0] as NonNullable<ConnectorDrift['actions']>[number]),
+          latestProblems: [],
+          tracked: true,
+          fieldUse: { 'main GET /items': { read: ['items/state'], copied: [], returned: [] } },
+          fieldChanges: [
+            { operation: 'GET /items', field: 'items/state', changes: ['new values: locked'] },
+          ],
+        },
+        {
+          action: 'listAll',
+          operations: [{ source: 'main', operation: 'GET /items', latest: { status: 'present' } }],
+          unmatched: [],
+          snapshotProblems: [],
+          latestProblems: [],
+          tracked: true,
+          fieldUse: { 'main GET /items': { read: [], copied: [], returned: [''] } },
+          fieldChanges: [],
+        },
+      ],
+    };
+    const { title, body } = renderDriftIssue(passing, { owners: [] });
+
+    expect(title).toBe('[Connector validation] .acme: actions pass, 1 field they read changed');
+    expect(body).toContain(
+      '**The connector still works against the latest spec: all 2 checked actions of `.acme` pass.** Its spec has 1 field the actions read changed (see the table).'
+    );
+    expect(body).toContain(
+      '| `search` | `GET /items` | ⚠️ Passes, but fields it reads changed: `items/state` (new values: locked) |'
+    );
+    expect(body).toContain(
+      '| `listAll` | `GET /items` | ✅ Passes · fields it reads unchanged; returns response fields as they are |'
+    );
+    expect(body).toContain('| `search` | `GET /items` | `items/state` | new values: locked |');
   });
 
   it('says when the actions pass but the check found problems outside them', () => {

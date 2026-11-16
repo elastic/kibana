@@ -133,6 +133,27 @@ const statusOf = (
   const notable = [
     ...new Set(changes.filter(({ kind }) => kind !== 'non-breaking').map(({ id }) => id)),
   ];
+  const fieldChanges = action.fieldChanges ?? [];
+  if (fieldChanges.length > 0) {
+    return {
+      rank: 'attention',
+      text: `Passes, but fields it reads changed: ${listed(
+        fieldChanges.map(({ field, changes: what }) => `${code(field)} (${what.join(', ')})`)
+      )}`,
+    };
+  }
+  if (notable.length > 0 && action.tracked) {
+    // Its operations changed, but none of the fields it reads did.
+    const passesThrough = Object.values(action.fieldUse ?? {}).some(
+      ({ copied, returned }) => copied.length > 0 || returned.length > 0
+    );
+    return {
+      rank: 'passes',
+      text: `Passes · fields it reads unchanged${
+        passesThrough ? '; returns response fields as they are' : ''
+      }`,
+    };
+  }
   if (notable.length > 0) {
     return {
       rank: 'attention',
@@ -257,13 +278,21 @@ const titleOf = (
           : `${plural(failing, 'action')} ${fails(failing)} the drift check`;
       }
       break;
-    default:
+    default: {
+      const fieldChanges = (drift.actions ?? []).flatMap(({ fieldChanges: own = [] }) => own);
+      const fields = new Set(fieldChanges.map(({ operation, field }) => `${operation} ${field}`));
       headline =
-        notableCount > 0
-          ? `vendor spec changed (${plural(notableCount, 'breaking or deprecation change')})`
+        fields.size > 0
+          ? `actions pass, ${plural(fields.size, 'field')} they read changed`
+          : notableCount > 0
+          ? `actions pass, ${plural(notableCount, 'spec change')} to review`
           : (drift.staleCorrections ?? []).length > 0
-          ? `${plural(drift.staleCorrections?.length ?? 0, 'spec correction')} no longer apply`
-          : 'vendor spec changed';
+          ? `actions pass, ${plural(
+              drift.staleCorrections?.length ?? 0,
+              'spec correction'
+            )} no longer apply`
+          : 'actions pass, vendor spec changed';
+    }
   }
   return `[Connector validation] ${drift.connector}: ${headline}`;
 };
@@ -380,17 +409,23 @@ export const renderDriftIssue = (
       break;
     default: {
       alert = 'NOTE';
+      const changedFields = actions.flatMap(({ fieldChanges = [] }) => fieldChanges);
       const parts = [
-        ...(notableCount > 0 ? [plural(notableCount, 'breaking or deprecation change')] : []),
+        ...(changedFields.length > 0
+          ? [`${plural(changedFields.length, 'field')} the actions read changed (see the table)`]
+          : notableCount > 0
+          ? [`${plural(notableCount, 'change')} that could affect it`]
+          : []),
         ...(stale.length > 0
           ? [`${plural(stale.length, 'spec correction')} that no longer apply`]
           : []),
       ];
-      summary = `**All ${plural(checked.length, 'checked action')} of \`${
-        drift.connector
-      }\` pass against the latest spec, but it changed:** ${
-        parts.length > 0 ? listed(parts) : 'see below'
-      }.`;
+      summary = `**The connector still works against the latest spec: all ${plural(
+        checked.length,
+        'checked action'
+      )} of \`${drift.connector}\` pass.** Its spec has ${
+        parts.length > 0 ? listed(parts) : 'changed'
+      }. Review them before refreshing the artifacts.`;
     }
   }
   if (notChecked.length > 0) {
@@ -497,6 +532,26 @@ export const renderDriftIssue = (
       ]
     : [];
 
+  const changedFields = actions.flatMap(({ action, fieldChanges = [] }) =>
+    fieldChanges.map((change) => ({ action, ...change }))
+  );
+  const fieldsSection =
+    changedFields.length > 0
+      ? [
+          '### Changed fields the actions read',
+          '',
+          'The fields each action reads from the responses, recorded while the check ran it, compared between the committed snapshot and the latest spec.',
+          '',
+          '| Action | Operation | Field | Change |',
+          '|---|---|---|---|',
+          ...changedFields.map(
+            ({ action, operation, field, changes: what }) =>
+              `| ${code(action)} | ${code(operation)} | ${code(field)} | ${cell(what.join('; '))} |`
+          ),
+          '',
+        ]
+      : [];
+
   const corrections = stale.length
     ? [
         '### Spec corrections that no longer apply',
@@ -571,6 +626,7 @@ export const renderDriftIssue = (
         ]
       : []),
     ...why,
+    ...fieldsSection,
     ...corrections,
     ...(unattributed.length > 0
       ? [

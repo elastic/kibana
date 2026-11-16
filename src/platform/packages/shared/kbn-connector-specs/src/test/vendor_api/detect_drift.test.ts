@@ -135,6 +135,9 @@ describe('detectDrift', () => {
           unmatched: [],
           snapshotProblems: [],
           latestProblems: [],
+          fieldUse: { 'main GET /items': { read: [], copied: [], returned: [''] } },
+          tracked: true,
+          fieldChanges: [],
         },
       ],
       otherProblems: { snapshot: [], latest: [] },
@@ -189,7 +192,7 @@ describe('detectDrift', () => {
     ]);
     expect(drift.operationsChanged).toBe(true);
     expect(drift).toEqual(expect.objectContaining({ verdict: 'vendor-drift', outcome: 'issue' }));
-    expect(drift.actions).toEqual([
+    expect(drift.actions).toMatchObject([
       {
         action: 'getItems',
         operations: [{ source: 'main', operation: 'GET /items', latest: { status: 'missing' } }],
@@ -260,6 +263,58 @@ actions:
         latest: { status: 'moved', path: '/items', serverPath: '/v1' },
       },
     ]);
+  });
+
+  it('opens an issue when a response field an action reads changed', async () => {
+    const reader: ConnectorSpec = {
+      ...connector,
+      actions: {
+        getName: {
+          scope: 'read',
+          input: z.object({}),
+          handler: async ({ client }) => {
+            const { data } = await client.get(`${BASE}/items`);
+            return { name: data.name };
+          },
+        },
+      },
+    };
+    const readerDirectory = path.join(directory, 'reader');
+    await fs.mkdir(readerDirectory);
+    await updateVendorApi({
+      connector: reader,
+      directory: readerDirectory,
+      sources: { main: SPEC_URL },
+      fetchText: async (url) => documents[url],
+      now: () => new Date('2026-10-07T12:00:00.000Z'),
+      log: { info: () => {}, warning: () => {} },
+    });
+    documents[SPEC_URL] = specYaml({ itemProperties: '{ name: { type: integer } }' });
+    diffEntries = [entry('response-property-type-changed', 3)];
+
+    const drift = await detect({ connector: reader, directory: readerDirectory });
+
+    expect(drift.verdict).toBe('healthy');
+    expect(drift.actions?.[0]).toMatchObject({
+      fieldUse: { 'main GET /items': { read: ['name'] } },
+      tracked: true,
+      fieldChanges: [{ operation: 'GET /items', field: 'name', changes: ['type string → number'] }],
+    });
+    expect(drift.outcome).toBe('issue');
+  });
+
+  it('proposes a refresh for a breaking response change to fields no action reads', async () => {
+    documents[SPEC_URL] = specYaml({ itemProperties: '{ name: { type: integer } }' });
+    diffEntries = [entry('response-property-type-changed', 3)];
+
+    const drift = await detect();
+
+    expect(drift.actions?.[0]).toMatchObject({
+      fieldUse: { 'main GET /items': { read: [], returned: [''] } },
+      tracked: true,
+      fieldChanges: [],
+    });
+    expect(drift).toMatchObject({ verdict: 'healthy', outcome: 'refresh' });
   });
 
   it('opens an issue for deprecations, though the actions still pass', async () => {

@@ -41,7 +41,7 @@ import {
 import { parseSpecText } from './parse_spec_text';
 import { projectSpec } from './project_spec';
 import { assessPagination } from './propose_pagination';
-import type { RecordingFinding } from './record_actions';
+import type { ActionsRecording, RecordingFinding } from './record_actions';
 import { recordActions } from './record_actions';
 import { toStableJson } from './stable_json';
 
@@ -64,6 +64,8 @@ export interface UpdateVendorApiOptions {
   readonly refresh?: boolean;
   /** Reports what would change instead of writing it. */
   readonly check?: boolean;
+  /** Records which response fields each action reads, copies and returns. */
+  readonly trackFields?: boolean;
   readonly fetchText: (url: string) => Promise<string>;
   /** When the document `fetchText` returned for a URL was fetched, if not just now. */
   readonly fetchedAt?: (url: string) => Date | undefined;
@@ -87,6 +89,9 @@ export interface UpdateVendorApiResult {
    * assessed when every source was fetched, as a snapshot lacks what the connector doesn't call.
    */
   readonly staleOverlayActions: readonly number[];
+  /** With `trackFields`, as `recordActions` reports them. */
+  readonly fieldUse?: ActionsRecording['fieldUse'];
+  readonly untracked?: ActionsRecording['untracked'];
 }
 
 const listSnapshots = async (directory: string): Promise<string[]> => {
@@ -161,6 +166,7 @@ export const updateVendorApi = async ({
   pages: pageFlags = {},
   refresh = false,
   check = false,
+  trackFields = false,
   fetchText,
   fetchedAt: fetchedAtOf,
   now,
@@ -245,7 +251,7 @@ export const updateVendorApi = async ({
   log.info(
     `Recording ${Object.keys(connector.actions).length} actions of ${connector.metadata.id}`
   );
-  const recording = await recordActions({ connector, specs, fixtures });
+  const recording = await recordActions({ connector, specs, fixtures, trackFields });
   // Each generated input reports its own findings, which are often the same.
   const problems = new Set<string>();
   const problemsByAction = new Map<string, Set<string>>();
@@ -390,5 +396,7 @@ export const updateVendorApi = async ({
     otherProblems: [...otherProblems],
     specs: raw,
     staleOverlayActions,
+    ...(recording.fieldUse ? { fieldUse: recording.fieldUse } : {}),
+    ...(recording.untracked ? { untracked: recording.untracked } : {}),
   };
 };
