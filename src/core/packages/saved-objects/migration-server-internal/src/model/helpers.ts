@@ -15,8 +15,10 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import * as Either from 'fp-ts/lib/Either';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMapping, IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
 import type { AliasAction, FetchIndexResponse } from '../actions';
+import { calculateTypeStatuses } from '../kibana_migrator_utils';
+import { TypeStatus } from '../kibana_migrator_constants';
 import type { BulkIndexOperationTuple } from './create_batches';
 import type {
   BaseState,
@@ -121,6 +123,29 @@ export function versionMigrationCompleted(
   aliases: Aliases
 ): boolean {
   return aliases[currentAlias] != null && aliases[currentAlias] === aliases[versionAlias];
+}
+
+/**
+ * Lists the types that an index's mappings place in a different index than the
+ * desired layout, i.e. the relocations that index does not reflect yet.
+ */
+export function getPendingRelocations(
+  indexMappings: IndexMapping,
+  desiredIndexTypesMap: IndexTypesMap
+): string[] {
+  const currentIndexTypesMap = indexMappings._meta?.indexTypesMap;
+  if (!currentIndexTypesMap) {
+    return [];
+  }
+  return Object.entries(calculateTypeStatuses(currentIndexTypesMap, desiredIndexTypesMap))
+    .filter(([, { status }]) => status === TypeStatus.Moved)
+    .map(([type]) => type);
+}
+
+export function pendingRelocationsReason(index: string, types: string[]): string {
+  return `The ${index} index was already migrated to this version with a different saved object index layout. Types [${types.join(
+    ', '
+  )}] would have to move to another index, which is not supported within the same Kibana version.`;
 }
 
 export function indexBelongsToLaterVersion(kibanaVersion: string, indexName?: string): boolean {
