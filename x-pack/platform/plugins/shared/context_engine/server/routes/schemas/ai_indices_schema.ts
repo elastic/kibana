@@ -373,7 +373,7 @@ export const listKisQuerySchema = schema.object({
     defaultValue: DEFAULT_KI_LIST_SORT,
     meta: {
       description:
-        'Sort order. `updated` is newest first, `title` is A to Z (case-insensitive, KIs without a title last). Always applies, also when `query` is set.',
+        'Sort order. `updated` is newest first, `title` is A to Z (case-insensitive, KIs without a title last). When `query` is set, results rank by best match first and `sort` only breaks ties.',
     },
   }),
   query: schema.maybe(
