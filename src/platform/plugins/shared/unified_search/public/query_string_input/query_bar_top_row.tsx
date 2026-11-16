@@ -84,6 +84,7 @@ import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
 import { EsqlApproximationToggle } from './esql_approximation_toggle';
+import { CachedResultsAge } from './cached_results_age';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
 import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
@@ -130,6 +131,26 @@ export const strings = {
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchWithUpdatedQueryAriaLabel', {
       defaultMessage: 'Search with updated query',
     }),
+  getCachedResultsLabel: (loadedAt: string, isSearch: boolean) => {
+    const seconds = Math.max(0, moment().diff(loadedAt, 'seconds'));
+    const loadedAgo =
+      seconds < 60
+        ? i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cachedResultsSecondsAgo', {
+            defaultMessage: '{seconds, plural, one {# second ago} other {# seconds ago}}',
+            values: { seconds },
+          })
+        : moment(loadedAt).fromNow();
+
+    return isSearch
+      ? i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cachedResultsSearchLabel', {
+          defaultMessage: 'Updated {loadedAgo}. Search to load the latest data.',
+          values: { loadedAgo },
+        })
+      : i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cachedResultsRefreshLabel', {
+          defaultMessage: 'Updated {loadedAgo}. Refresh to load the latest data.',
+          values: { loadedAgo },
+        });
+  },
   getDisabledDatePickerLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
       defaultMessage: 'All time',
@@ -321,6 +342,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    */
   enableCreateView?: ESQLEditorProps['enableCreateView'];
   useBackgroundSearchButton?: boolean;
+  /**
+   * ISO time when the shown results were loaded, set while they are replayed from a client-side cache.
+   * The submit button then signals that the data may be stale.
+   */
+  cachedResultsLoadedAt?: string;
   /**
    * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
    * to opt out and keep the legacy EuiSuperDatePicker. The new picker is shown
@@ -1197,6 +1223,18 @@ export const QueryBarTopRow = React.memo(
     }
 
     const getSubmitButtonProps = () => {
+      if (props.cachedResultsLoadedAt && !props.isDirty) {
+        return {
+          icon: 'clockCounter' as const,
+          text: shouldRenderESQLUi
+            ? strings.getSearchButtonLabel()
+            : strings.getRefreshButtonLabel(),
+          ariaLabel: strings.getCachedResultsLabel(props.cachedResultsLoadedAt, shouldRenderESQLUi),
+          color: 'warning' as const,
+          fill: false,
+        };
+      }
+
       if (shouldRenderESQLUi) {
         return {
           icon: undefined,
@@ -1240,7 +1278,15 @@ export const QueryBarTopRow = React.memo(
         color: buttonColor,
         fill: buttonFill,
       } = getSubmitButtonProps();
-      const submitTooltip = buttonAriaLabel;
+      const submitTooltip =
+        props.cachedResultsLoadedAt && !props.isDirty ? (
+          <CachedResultsAge
+            loadedAt={props.cachedResultsLoadedAt}
+            getLabel={(loadedAt) => strings.getCachedResultsLabel(loadedAt, shouldRenderESQLUi)}
+          />
+        ) : (
+          buttonAriaLabel
+        );
       const splitButton = (
         <EuiSplitButton color={buttonColor} fill={buttonFill} size="s">
           <EuiSplitButton.ActionPrimary
