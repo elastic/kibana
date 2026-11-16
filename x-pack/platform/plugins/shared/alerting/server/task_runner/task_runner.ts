@@ -479,8 +479,15 @@ export class TaskRunner<
       throw error;
     }
 
+    // Get alerts affected by maintenance windows here,
+    // so we can have the maintenance windows on in-memory alerts before scheduling actions
+    const alertsToUpdateWithMaintenanceWindows =
+      await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
+
     // Saved as task state if a later step fails, so it matches the alert documents written above.
     // Copied before actions are scheduled, so alerts whose actions fail to enqueue notify again.
+    // Copied after scoped maintenance windows are added to new alerts, which only happens in the
+    // run that creates them, so the next run still suppresses their actions.
     // Recovered alerts keep their previous entry, so the next run recovers them again.
     // The rest of the state, such as the rule type state, stays at the previous run, so the next
     // run evaluates the same data again instead of skipping the data of this run.
@@ -502,11 +509,6 @@ export class TaskRunner<
         alertRecoveredInstances,
       });
     }
-
-    // Get alerts affected by maintenance windows here,
-    // so we can have the maintenance windows on in-memory alerts before scheduling actions
-    const alertsToUpdateWithMaintenanceWindows =
-      await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
     const alertAsDataByInstanceId = new Map<string, Record<string, unknown>>();
     for (const instance of activeInstances) {

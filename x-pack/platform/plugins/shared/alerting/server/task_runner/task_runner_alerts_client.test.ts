@@ -7,6 +7,7 @@
 
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type {
   RuleExecutorOptions,
   RuleTypeParams,
@@ -73,6 +74,7 @@ import { AlertsService } from '../alerts_service';
 import { ReplaySubject, Subject } from 'rxjs';
 import type { IAlertsClient } from '../alerts_client/types';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
+import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from '../alerts_client/lib/get_summarized_alerts_query';
 import {
   TIMESTAMP,
   EVENT_ACTION,
@@ -1511,10 +1513,28 @@ describe('Task Runner', () => {
           });
         };
 
+        const getOngoingAlert = ({ activeCount = 1 }: { activeCount?: number } = {}) => ({
+          meta: {
+            uuid: 'uuid-2',
+            flappingHistory: [true],
+            maintenanceWindowIds: [],
+            lastScheduledActions: { group: 'default', date: DATE_1970_5_MIN },
+            activeCount,
+          },
+          state: { start: DATE_1970_5_MIN, duration: '0' },
+        });
+
         const runRule = async ({
           previousState = previousRunState,
-          reportAlert = true,
-        }: { previousState?: ConcreteTaskInstance['state']; reportAlert?: boolean } = {}) => {
+          reportedAlertIds = ['1'],
+          alertDelay,
+          maintenanceWindows = [],
+        }: {
+          previousState?: ConcreteTaskInstance['state'];
+          reportedAlertIds?: string[];
+          alertDelay?: Rule['alertDelay'];
+          maintenanceWindows?: MaintenanceWindow[];
+        } = {}) => {
           const alertsService = new AlertsService({
             logger,
             pluginStop$: new ReplaySubject(1),
@@ -1530,7 +1550,7 @@ describe('Task Runner', () => {
             .mockResolvedValue({ result: true });
 
           maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
-            maintenanceWindows: [],
+            maintenanceWindows,
             maintenanceWindowsWithoutScopedQueryIds: [],
           });
           taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
@@ -1548,8 +1568,8 @@ describe('Task Runner', () => {
               string,
               RuleAlertData
             >) => {
-              if (reportAlert) {
-                executorServices.alertsClient?.report({ id: '1', actionGroup: 'default' });
+              for (const id of reportedAlertIds) {
+                executorServices.alertsClient?.report({ id, actionGroup: 'default' });
               }
               return { state: { evaluated: 'this run' } };
             }
@@ -1559,7 +1579,7 @@ describe('Task Runner', () => {
             taskInstance: { ...mockedTaskInstance, state: previousState },
             context: { ...taskRunnerFactoryInitializerParams, alertsService },
           });
-          mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+          mockGetAlertFromRaw.mockReturnValue({ ...mockedRuleTypeSavedObject, alertDelay } as Rule);
           encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
           const result = await taskRunner.run();
@@ -1632,7 +1652,7 @@ describe('Task Runner', () => {
 
           const { state, taskRunError } = await runRule({
             previousState: { ...previousRunState, alertInstances: { '1': getPreviousAlert() } },
-            reportAlert: false,
+            reportedAlertIds: [],
           });
 
           expect(clusterClient.bulk).toHaveBeenCalledWith(
@@ -1656,7 +1676,7 @@ describe('Task Runner', () => {
           mockAlertDocument('active');
           actionsClient.bulkEnqueueExecution.mockRejectedValueOnce(new Error('enqueue failed'));
 
-          const { state: failedRunState, taskRunError } = await runRule({ reportAlert: false });
+          const { state: failedRunState, taskRunError } = await runRule({ reportedAlertIds: [] });
 
           expect(clusterClient.bulk).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -1685,12 +1705,141 @@ describe('Task Runner', () => {
 
           mockAlertDocument('recovered');
           actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({ errors: false, items: [] });
-          const { state } = await runRule({ previousState: failedRunState, reportAlert: false });
+          const { state } = await runRule({ previousState: failedRunState, reportedAlertIds: [] });
 
           expect(actionsClient.bulkEnqueueExecution).toHaveBeenLastCalledWith([
             expect.objectContaining({ id: '2' }),
           ]);
           expect(state.alertInstances).toEqual({});
+        });
+
+        test('should keep the scoped maintenance windows of a new alert when enqueueing actions fails', async () => {
+          clusterClient.msearch.mockResolvedValueOnce({
+            took: 10,
+            responses: [
+              {
+                took: 10,
+                timed_out: false,
+                _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+                hits: {
+                  total: { relation: 'eq', value: 1 },
+                  hits: [
+                    {
+                      _index: '.internal.alerts-test.alerts-default-000001',
+                      fields: {
+                        [ALERT_UUID]: [RULE_EXECUTION_UUID],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['scoped-mw'],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          });
+          actionsClient.bulkEnqueueExecution.mockRejectedValueOnce(new Error('enqueue failed'));
+
+          const { state, taskRunError } = await runRule({
+            previousState: { ...previousRunState, alertInstances: { '2': getOngoingAlert() } },
+            reportedAlertIds: ['1', '2'],
+            maintenanceWindows: [
+              getMockMaintenanceWindow({
+                id: 'scoped-mw',
+                title: 'Scoped maintenance window',
+                status: MaintenanceWindowStatus.Running,
+                scope: {
+                  alerting: {
+                    enabled: true,
+                    kql: 'kibana.alert.instance.id: 1',
+                    dsl: '{"match":{"kibana.alert.instance.id":"1"}}',
+                  },
+                },
+              }),
+            ],
+          });
+
+          expect(clusterClient.msearch).toHaveBeenCalledTimes(1);
+          expect(taskRunError?.message).toBe('enqueue failed');
+          expect(state.alertInstances?.['1'].meta).toEqual(
+            expect.objectContaining({
+              uuid: RULE_EXECUTION_UUID,
+              maintenanceWindowIds: ['scoped-mw'],
+              maintenanceWindowNames: ['Scoped maintenance window'],
+            })
+          );
+        });
+
+        test('should keep a flapping alert that is waiting to recover active when enqueueing actions fails', async () => {
+          mockAlertDocument('active');
+          actionsClient.bulkEnqueueExecution.mockRejectedValueOnce(new Error('enqueue failed'));
+
+          const { state, taskRunError } = await runRule({
+            previousState: {
+              ...previousRunState,
+              alertInstances: {
+                '1': {
+                  meta: {
+                    uuid: 'uuid-1',
+                    flapping: true,
+                    flappingHistory: [true, true, true, true],
+                    maintenanceWindowIds: [],
+                    lastScheduledActions: { group: 'default', date: DATE_1970_5_MIN },
+                    activeCount: 1,
+                    pendingRecoveredCount: 0,
+                  },
+                  state: { start: DATE_1970_5_MIN, duration: '0' },
+                },
+                '2': getOngoingAlert(),
+              },
+            },
+            reportedAlertIds: ['2'],
+          });
+
+          expect(clusterClient.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({
+              body: expect.arrayContaining([
+                expect.objectContaining({ index: expect.objectContaining({ _id: 'uuid-1' }) }),
+                expect.objectContaining({
+                  [ALERT_UUID]: 'uuid-1',
+                  [ALERT_STATUS]: 'active',
+                  [ALERT_FLAPPING]: true,
+                  [ALERT_PENDING_RECOVERED_COUNT]: 1,
+                }),
+              ]),
+            })
+          );
+          expect(taskRunError?.message).toBe('enqueue failed');
+          expect(state).toEqual({
+            ...previousRunState,
+            alertInstances: {
+              '1': {
+                state: expect.any(Object),
+                meta: expect.objectContaining({
+                  uuid: 'uuid-1',
+                  flapping: true,
+                  pendingRecoveredCount: 1,
+                }),
+              },
+              '2': expect.any(Object),
+            },
+            alertRecoveredInstances: {},
+          });
+        });
+
+        test('should keep the active count of an alert that has not reached the alert delay when enqueueing actions fails', async () => {
+          actionsClient.bulkEnqueueExecution.mockRejectedValueOnce(new Error('enqueue failed'));
+
+          const { state, taskRunError } = await runRule({
+            previousState: {
+              ...previousRunState,
+              alertInstances: { '2': getOngoingAlert({ activeCount: 3 }) },
+            },
+            reportedAlertIds: ['1', '2'],
+            alertDelay: { active: 3 },
+          });
+
+          expect(taskRunError?.message).toBe('enqueue failed');
+          expect(state.alertInstances?.['1'].meta?.activeCount).toBe(1);
+          expect(state.alertInstances?.['2'].meta?.activeCount).toBe(4);
         });
 
         test('should finish the run with a warning when updating the persisted alerts fails', async () => {
