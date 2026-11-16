@@ -81,7 +81,7 @@ export class UptimeSettingsPage {
     return this.page.testSubj.locator('default-connectors-input-loaded').locator('input');
   }
 
-  getFormErrorText() {
-    return this.page.locator('.euiFormErrorText');
+  getFormErrorText(text: string) {
+    return this.page.getByText(text, { exact: true });
   }
 }
