@@ -15,7 +15,6 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   EqlRuleCreateProps,
-  EsqlRuleCreateProps,
   MachineLearningRuleCreateProps,
   NewTermsRuleCreateProps,
   QueryRuleCreateProps,
@@ -102,7 +101,6 @@ import {
   RULE_INDICES,
   RULE_NAME_INPUT,
   RULE_NAME_OVERRIDE,
-  RULE_NAME_OVERRIDE_FOR_ESQL,
   RULE_TIMESTAMP_OVERRIDE,
   RULES_CREATION_FORM,
   RULES_CREATION_PREVIEW_BUTTON,
@@ -439,12 +437,6 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
   getAboutContinueButton().should('exist').click({ force: true });
 };
 
-export const fillOverrideEsqlRuleName = (value: string) => {
-  cy.get(RULE_NAME_OVERRIDE_FOR_ESQL).within(() => {
-    cy.get(COMBO_BOX_INPUT).type(`${value}{enter}`);
-  });
-};
-
 // called after import rule from saved timeline
 // if alerts index is created, it is included in the timeline
 // to be consistent in multiple test runs, remove it if it's there
@@ -658,26 +650,6 @@ export const fillEsqlQueryBar = (query: string) => {
   });
 
   cy.get(ESQL_QUERY_BAR).contains(query);
-};
-
-export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
-  cy.get(ESQL_QUERY_BAR).contains('ES|QL query');
-  fillEsqlQueryBar(rule.query);
-
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
-};
-
-/**
- * fills only required(name, description) and specific to ES|QL(rule name override) fields on about page
- */
-export const fillAboutSpecificEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
-  fillRuleName(rule.name);
-  fillDescription(rule.description);
-
-  expandAdvancedSettings();
-  // this field defined to be returned in rule query
-  fillOverrideEsqlRuleName(rule.rule_name_override ?? '');
-  getAboutContinueButton().click();
 };
 
 /**
