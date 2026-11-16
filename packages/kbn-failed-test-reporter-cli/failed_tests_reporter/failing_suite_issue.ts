@@ -1,0 +1,293 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import Path from 'path';
+import type { BuildRun, TestFramework } from '@kbn/scout-reporting';
+import {
+  FLAKY_TEST_SUITE_METADATA_PREFIX,
+  SKIP_TIP,
+  suiteIssueTitle,
+  type FlakySuiteIssueMetadata,
+} from '../flaky_test_issues/issue_body';
+import {
+  CATEGORY_LABELS,
+  codeBlock,
+  formatFullFailureMessage,
+  FRAMEWORK_LABELS,
+  inlineCode,
+  KIBANA_BLOB_URL,
+  plural,
+  table,
+  targetEnvironment,
+  testDashboardUrl,
+} from '../flaky_test_issues/markdown';
+import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
+
+const KIBANA_COMPARE_URL = 'https://github.com/elastic/kibana/compare';
+
+/** A test of a failing suite: what the issue lists it as and matches it on. */
+export interface FailingTest {
+  testId: string;
+  /** The describe blocks and the title, as the framework names the test. */
+  title: string;
+  /** What the test failed with in the job that found the break. */
+  errorMessage?: string;
+}
+
+/** A Scout target the suite failed on, as the test events record it. */
+export interface FailingTarget {
+  mode: string;
+  type: string;
+}
+
+/**
+ * A test file whose tests failed every attempt of the latest builds of one pipeline and branch
+ * after passing before: a break rather than flakiness.
+ */
+export interface FailingSuite {
+  filePath: string;
+  framework: TestFramework;
+  /**
+   * Title of the describe block every failing test is in; absent when they span several or the
+   * framework reports none, the issue is then about the whole file.
+   */
+  suiteTitle?: string;
+  configPath?: string;
+  /** What the config runs (`ui-test`, `api-test`, ...), when the events record it. */
+  configCategory?: string;
+  targets: FailingTarget[];
+  owners: string[];
+  tests: FailingTest[];
+  /** The builds of the streak, oldest first. */
+  failingBuilds: BuildRun[];
+  /** The last build in which the tests passed, when it is on record. */
+  lastPassingBuild?: BuildRun;
+}
+
+export interface FailingSuiteIssueContext {
+  pipeline: string;
+  branch: string;
+  /** Numbers of issues that mention the suite's file or are about some of its tests. */
+  relatedIssues?: number[];
+  /** When the issue is filed, recorded as the break's first post on its pipeline and branch. */
+  postedAt?: Date;
+}
+
+/**
+ * When a break of the suite was last posted on the issue, by `<pipeline> <branch>`: the body that
+ * filed it, then each comment of the consistent failure check. Kept in the `flaky-test-suite`
+ * metadata, which the daily flaky report merges into rather than replaces.
+ */
+export type FailingPostedAt = Record<string, string>;
+
+/** The suite metadata a failing suite issue records, the fields a break knows. */
+export type FailingSuiteIssueMetadata = Pick<
+  FlakySuiteIssueMetadata,
+  | 'suite.filePath'
+  | 'suite.title'
+  | 'suite.framework'
+  | 'suite.testIds'
+  | 'suite.branches'
+  | 'suite.pipelines'
+> & { 'failing.postedAt'?: FailingPostedAt };
+
+/** The key of a pipeline and branch in `failing.postedAt`. */
+export const postedAtKey = ({
+  pipeline,
+  branch,
+}: Pick<FailingSuiteIssueContext, 'pipeline' | 'branch'>) => `${pipeline} ${branch}`;
+
+/** `failing.postedAt` of an issue body, empty when it records none. */
+export const failingPostedAt = (body: string): FailingPostedAt => {
+  const value: unknown = getIssueMetadata(
+    body,
+    'failing.postedAt',
+    undefined,
+    FLAKY_TEST_SUITE_METADATA_PREFIX
+  );
+  if (typeof value !== 'object' || value === null) {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(value).filter((entry): entry is [string, string] => typeof entry[1] === 'string')
+  );
+};
+
+/** `Failing Scout UI suite: Discover ES|QL mode`, or the file name without a suite title. */
+export const failingSuiteIssueTitle = (suite: FailingSuite): string =>
+  suiteIssueTitle('Failing', suite);
+
+/**
+ * The same `flaky-test-suite` metadata as a flaky suite issue carries, so ci-stats, the failed
+ * test reporter and `/skip` treat the issue as tracking the suite's tests on this branch.
+ */
+export const failingSuiteIssueMetadata = (
+  suite: FailingSuite,
+  { pipeline, branch, postedAt }: FailingSuiteIssueContext
+): FailingSuiteIssueMetadata => ({
+  'suite.filePath': suite.filePath,
+  ...(suite.suiteTitle ? { 'suite.title': suite.suiteTitle } : {}),
+  'suite.framework': suite.framework,
+  'suite.testIds': suite.tests.map((test) => test.testId),
+  'suite.branches': [branch],
+  'suite.pipelines': [pipeline],
+  ...(postedAt
+    ? { 'failing.postedAt': { [postedAtKey({ pipeline, branch })]: postedAt.toISOString() } }
+    : {}),
+});
+
+const blobLink = (repoRelativePath: string): string =>
+  `[${inlineCode(repoRelativePath)}](${KIBANA_BLOB_URL}/${repoRelativePath})`;
+
+const buildLink = ({ build, buildUrl }: BuildRun): string =>
+  buildUrl ? `[#${build}](${buildUrl})` : `#${build}`;
+
+/**
+ * `` `kibana-on-merge` builds [#123](…) and [#124](…) ``, or, for a longer streak,
+ * `` the last 4 `kibana-on-merge` builds ([#121](…) to [#124](…)) ``.
+ */
+const describeBuilds = (
+  builds: readonly BuildRun[],
+  { pipeline }: FailingSuiteIssueContext
+): string => {
+  const first = buildLink(builds[0]);
+  const last = buildLink(builds[builds.length - 1]);
+  return builds.length > 2
+    ? `the last ${builds.length} ${inlineCode(pipeline)} builds (${first} to ${last})`
+    : `${inlineCode(pipeline)} builds ${first} and ${last}`;
+};
+
+/** `[abc1234...def5678](…/compare/abc1234…...def5678…)`, when both commits are known. */
+const compareLink = (from: BuildRun, to: BuildRun): string | undefined =>
+  from.commit && to.commit
+    ? `[${inlineCode(`${from.commit.slice(0, 7)}...${to.commit.slice(0, 7)}`)}]` +
+      `(${KIBANA_COMPARE_URL}/${from.commit}...${to.commit})`
+    : undefined;
+
+/**
+ * Where the tests are consistently failing (`` on `main`, in `kibana-on-merge` builds … ``), the
+ * last build they passed in and the commits in between.
+ */
+const breakDetails = (suite: FailingSuite, ctx: FailingSuiteIssueContext) => {
+  const { failingBuilds, lastPassingBuild } = suite;
+  return {
+    where: `on ${inlineCode(ctx.branch)}, in ${describeBuilds(failingBuilds, ctx)}`,
+    before: lastPassingBuild
+      ? `after passing in ${buildLink(lastPassingBuild)}`
+      : 'with no earlier passing run on record',
+    compare: lastPassingBuild ? compareLink(lastPassingBuild, failingBuilds[0]) : undefined,
+  };
+};
+
+/**
+ * What happened, in one callout: how many tests, where, in which builds, since when, and the
+ * commits between the last pass and the first failure when both are known.
+ */
+const opening = (suite: FailingSuite, ctx: FailingSuiteIssueContext): string => {
+  const file = `[${inlineCode(Path.basename(suite.filePath))}](${KIBANA_BLOB_URL}/${
+    suite.filePath
+  })`;
+  const { where, before, compare } = breakDetails(suite, ctx);
+  const cause = compare
+    ? `; the changes between the last passing and the first failing build are ${compare}.`
+    : '.';
+  const count = suite.tests.length;
+  return (
+    '> [!IMPORTANT]\n' +
+    `> ${plural(count, 'test')} in ${file} ${count === 1 ? 'is' : 'are'} consistently failing ` +
+    `${where}, ${before}. This looks like a break rather than a flaky test${cause}`
+  );
+};
+
+const testsList = (suite: FailingSuite): string =>
+  [
+    'Consistently failing tests:',
+    ...suite.tests.map(
+      (test) => `- ${inlineCode(test.title)} · [history](${testDashboardUrl(test.testId)})`
+    ),
+  ].join('\n');
+
+const suiteDetails = (suite: FailingSuite): string => {
+  const category = suite.configCategory ? CATEGORY_LABELS[suite.configCategory] : undefined;
+  const targets = suite.targets.map(
+    (target) => `${inlineCode(target.mode)} · ${targetEnvironment(target)}`
+  );
+  const rows: string[][] = [
+    ['**Framework**', FRAMEWORK_LABELS[suite.framework].long],
+    ...(category ? [['**Category**', `${category} test`]] : []),
+    ['**File**', blobLink(suite.filePath)],
+    ...(suite.configPath ? [['**Config**', blobLink(suite.configPath)]] : []),
+    ...(targets.length > 0
+      ? [[`**${targets.length > 1 ? 'Targets' : 'Target'}**`, targets.join(', ')]]
+      : []),
+    ['**Owners**', suite.owners.length > 0 ? suite.owners.map(inlineCode).join(', ') : '-'],
+  ];
+  return table(['Field', 'Value'], rows);
+};
+
+/** The error of the first test that has one, from the job that found the break. */
+const lastFailure = (suite: FailingSuite): string | undefined => {
+  const test = suite.tests.find(({ errorMessage }) => errorMessage?.trim());
+  if (!test?.errorMessage) {
+    return undefined;
+  }
+  const lead =
+    suite.tests.length > 1 ? `Last failure of ${inlineCode(test.title)}:` : 'Last failure:';
+  return `${lead}\n\n${codeBlock(formatFullFailureMessage(test.errorMessage))}`;
+};
+
+const relatedIssues = ({ relatedIssues: numbers }: FailingSuiteIssueContext): string | undefined =>
+  numbers && numbers.length > 0
+    ? `Possibly related: ${numbers.map((number) => `#${number}`).join(', ')}.`
+    : undefined;
+
+/** `` `a` ``, `` `a` and `b` `` or `` `a`, `b` and `c` ``. */
+const listOf = (items: readonly string[]): string =>
+  items.length > 1 ? `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}` : items[0];
+
+/**
+ * The comment on an issue that already tracks the suite, when the check finds its tests failing
+ * every attempt: which tests, in which builds of the pipeline and branch, since when, and the
+ * commits between the last pass and the first failure. The red circle tells it apart from the
+ * daily report's flaky comments at a glance.
+ */
+export const renderFailingSuiteComment = (
+  suite: FailingSuite,
+  ctx: FailingSuiteIssueContext
+): string => {
+  const { where, before, compare } = breakDetails(suite, ctx);
+  const tests = suite.tests.map((test) => inlineCode(test.title));
+  const lead =
+    tests.length === 1
+      ? `${tests[0]} is consistently failing ${where}, ${before}`
+      : `${plural(tests.length, 'test')} are consistently failing ${where}, ${before}: ${listOf(
+          tests
+        )}`;
+  return `🔴 ${lead}.${compare ? ` Changes in between: ${compare}.` : ''}`;
+};
+
+/** Full issue body for a new failing suite issue, including the hidden metadata. */
+export const renderFailingSuiteIssueBody = (
+  suite: FailingSuite,
+  ctx: FailingSuiteIssueContext
+): string =>
+  updateIssueMetadata(
+    [
+      opening(suite, ctx),
+      testsList(suite),
+      suiteDetails(suite),
+      lastFailure(suite),
+      relatedIssues(ctx),
+      SKIP_TIP,
+    ]
+      .filter((section) => section !== undefined)
+      .join('\n\n'),
+    failingSuiteIssueMetadata(suite, ctx),
+    FLAKY_TEST_SUITE_METADATA_PREFIX
+  );

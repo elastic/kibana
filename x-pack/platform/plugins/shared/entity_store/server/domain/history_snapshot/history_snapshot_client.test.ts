@@ -63,6 +63,9 @@ function createMockTaskManager() {
       errors: [],
     }),
     runSoon: jest.fn().mockResolvedValue({ id: 'entity_store:v2:history_snapshot_task:default' }),
+    ensureScheduled: jest
+      .fn()
+      .mockResolvedValue({ id: 'entity_store:v2:history_snapshot_task:default' }),
   };
 }
 
@@ -102,6 +105,66 @@ describe('HistorySnapshotClient', () => {
     mockTaskManager = createMockTaskManager();
     mockResolveLatestEntitiesIndexName.mockResolvedValue('.entities.v2.latest.default-00001');
     client = createClient();
+  });
+
+  describe('updateConfig', () => {
+    it('persists interval and retention and reschedules the task', async () => {
+      await client.updateConfig(request, { frequency: '12h', retentionDays: 90 });
+
+      expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
+        historySnapshot: { frequency: '12h', retentionDays: 90 },
+      });
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: taskId,
+          taskType: 'entity_store:v2:history_snapshot_task',
+          schedule: { interval: '12h' },
+          state: { namespace },
+          params: {},
+        }),
+        { request }
+      );
+    });
+
+    it('persists retention without rescheduling when the interval is omitted', async () => {
+      await client.updateConfig(request, { retentionDays: 15 });
+
+      expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
+        historySnapshot: { retentionDays: 15 },
+      });
+      expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();
+    });
+
+    it('persists interval and reschedules when retention is omitted', async () => {
+      await client.updateConfig(request, { frequency: '6h' });
+
+      expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
+        historySnapshot: { frequency: '6h' },
+      });
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: taskId,
+          schedule: { interval: '6h' },
+        }),
+        { request }
+      );
+    });
+
+    it('does nothing when no params are passed', async () => {
+      await client.updateConfig(request, {});
+
+      expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
+      expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();
+    });
+
+    it('does not reschedule when persisting the config fails', async () => {
+      mockGlobalStateClient.update.mockRejectedValueOnce(new Error('not found'));
+
+      await expect(
+        client.updateConfig(request, { frequency: '2h', retentionDays: 10 })
+      ).rejects.toThrow('not found');
+      expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();
+    });
   });
 
   describe('runHistorySnapshot', () => {
@@ -156,10 +219,7 @@ describe('HistorySnapshotClient', () => {
         })
       );
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
-        historySnapshot: expect.objectContaining({
-          lastExecutionTimestamp: expect.any(String),
-          lastError: undefined,
-        }),
+        historySnapshot: { lastExecutionTimestamp: expect.any(String), lastError: null },
       });
       expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -195,10 +255,7 @@ describe('HistorySnapshotClient', () => {
       }
       expect(mockUpdateByQueryWithScript).not.toHaveBeenCalled();
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
-        historySnapshot: expect.objectContaining({
-          lastExecutionTimestamp: expect.any(String),
-          lastError: undefined,
-        }),
+        historySnapshot: { lastExecutionTimestamp: expect.any(String), lastError: null },
       });
       expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
     });
@@ -323,6 +380,33 @@ describe('HistorySnapshotClient', () => {
         }),
       });
       expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
+    });
+
+    it('passes configured retentionDays to cleanup on a full reindex+reset run', async () => {
+      // Exercises the complete success path (docs present → reindex → reset) with a
+      // non-default retentionDays so a regression that always uses the default is caught.
+      mockCreateIndex.mockResolvedValue(undefined);
+      mockReindex.mockResolvedValue({
+        created: 5,
+        updated: 0,
+        versionConflicts: 0,
+        total: 5,
+        failures: [],
+      });
+      mockUpdateByQueryWithScript.mockResolvedValue({ updated: 5, total: 5 });
+      mockGlobalStateClient.findOrThrow.mockResolvedValue({
+        ...mockGlobalStateStarted,
+        historySnapshot: { ...mockGlobalStateStarted.historySnapshot, retentionDays: 90 },
+      });
+
+      const result = await client.runHistorySnapshot();
+
+      expect(result.ok).toBe(true);
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledWith(
+        expect.objectContaining({
+          retentionDays: 90,
+        })
+      );
     });
 
     it('calls deleteExpiredHistorySnapshots with configured retentionDays when set in global state', async () => {

@@ -1,0 +1,62 @@
+{
+  "operations": {
+    "getPage": [
+      {
+        "method": "get",
+        "path": "/pages/{id}",
+        "source": "v2"
+      }
+    ],
+    "getSpace": [
+      {
+        "method": "get",
+        "path": "/spaces/{id}",
+        "source": "v2"
+      }
+    ],
+    "listPages": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results"
+          },
+          "style": "link"
+        },
+        "path": "/pages",
+        "source": "v2"
+      }
+    ],
+    "listSpaces": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results"
+          },
+          "style": "link"
+        },
+        "path": "/spaces",
+        "source": "v2"
+      }
+    ]
+  },
+  "sources": {
+    "v2": {
+      "apiVersion": "2.0.0",
+      "fetchedAt": "2026-10-07T20:20:30.853Z",
+      "format": "openapi",
+      "url": "https://dac-static.atlassian.com/cloud/confluence/openapi-v2.v3.json"
+    }
+  }
+}

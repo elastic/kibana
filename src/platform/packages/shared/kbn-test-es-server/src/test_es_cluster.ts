@@ -285,6 +285,7 @@ export function createTestEsCluster<
           password: config.password,
           basePath: config.basePath,
           esArgs: config.esArgs,
+          resources: config.resources,
         }));
       } else if (esFrom === 'snapshot') {
         ({ installPath, disableEsTmpDir } = await firstNode.installSnapshot(config));
@@ -317,6 +318,7 @@ export function createTestEsCluster<
           clean,
           background: true,
           files,
+          secureFiles,
           ssl,
           kill: true, // likely don't need this but avoids any issues where the ESS cluster wasn't cleaned up
           waitForReady: true,

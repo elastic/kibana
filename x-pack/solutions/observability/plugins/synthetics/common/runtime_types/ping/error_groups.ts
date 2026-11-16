@@ -6,21 +6,13 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
-import {
+import type {
   ErrorGroupItemType,
   ErrorGroupHistogramBucketType,
   ErrorGroupPatternType,
   ErrorGroupType,
   ErrorGroupsResponseType,
-} from '../zod/ping';
-
-export {
-  ErrorGroupItemType,
-  ErrorGroupHistogramBucketType,
-  ErrorGroupPatternType,
-  ErrorGroupType,
-  ErrorGroupsResponseType,
-};
+} from '../schemas/ping';
 
 export type ErrorGroupItem = SchemaOutput<typeof ErrorGroupItemType>;
 export type ErrorGroupHistogramBucket = SchemaOutput<typeof ErrorGroupHistogramBucketType>;

@@ -16,11 +16,14 @@ import { lintFiles } from './lint_files';
 jest.mock('execa', () => jest.fn());
 jest.mock('./constants', () => ({
   LINT_LOG_PREFIX: '[oxlint]',
-  OXLINT_CONFIG_PATH: '.oxlintrc.json',
+  OXLINT_CONFIG_PATH: 'oxlint.config.mjs',
+  OXLINT_FIX_CONFIG_PATH: 'oxlint.fix.config.mjs',
   oxlintBinPath: '/bin/oxlint',
 }));
+jest.mock('fs/promises', () => ({ ...jest.requireActual('fs/promises'), readFile: jest.fn() }));
 
 const mockExeca = jest.requireMock('execa') as jest.Mock;
+const mockReadFile = jest.requireMock('fs/promises').readFile as jest.Mock;
 
 interface FakeRun {
   exitCode: number;
@@ -57,6 +60,7 @@ describe('oxlint lintFiles', () => {
 
   beforeEach(() => {
     mockExeca.mockReset();
+    mockReadFile.mockReset();
   });
 
   it('passes explicit relative paths and no --fix by default', async () => {
@@ -68,7 +72,7 @@ describe('oxlint lintFiles', () => {
     expect(passedArgs(0)).toEqual([
       '/bin/oxlint',
       '--config',
-      '.oxlintrc.json',
+      'oxlint.config.mjs',
       '--format',
       'json',
       'src/a.ts',
@@ -93,27 +97,11 @@ describe('oxlint lintFiles', () => {
     expect(passedArgs(0)).toEqual([
       '/bin/oxlint',
       '--config',
-      '.oxlintrc.json',
+      'oxlint.config.mjs',
       '--format',
       'json',
       'src/dev/file.ts',
     ]);
-  });
-
-  it('runs oxlint without paths for a full-repo scope and forwards --fix', async () => {
-    respondWith({ exitCode: 0, numberOfFiles: 5000 });
-
-    const result = await lintFiles(log, files, { fix: true, fullRepo: true });
-
-    expect(passedArgs(0)).toEqual([
-      '/bin/oxlint',
-      '--config',
-      '.oxlintrc.json',
-      '--format',
-      'json',
-      '--fix',
-    ]);
-    expect(result.lintedFileCount).toBe(5000);
   });
 
   it('reports failed files once, sorted, and counts warnings', async () => {
@@ -195,7 +183,7 @@ describe('oxlint lintFiles', () => {
     expect(passedArgs(1)).toEqual([
       '/bin/oxlint',
       '--config',
-      '.oxlintrc.json',
+      'oxlint.config.mjs',
       '--format',
       'json',
       'src/f4000.ts',
@@ -215,5 +203,55 @@ describe('oxlint lintFiles', () => {
     );
 
     await expect(lintFiles(log, many)).rejects.toThrow('[oxlint] exited with 2:\nparser crashed');
+  });
+
+  it('fixes only files with errors, with the errors-only config, until they stop changing', async () => {
+    respondWith(
+      // errors-only scan
+      {
+        exitCode: 1,
+        numberOfFiles: 5000,
+        diagnostics: [{ filename: 'src/a.ts', severity: 'error' }],
+      },
+      // two fix passes: the first changes the file, the second does not
+      { exitCode: 0 },
+      { exitCode: 0 },
+      // report with the full config
+      {
+        exitCode: 0,
+        numberOfFiles: 5000,
+        diagnostics: [{ filename: 'src/b.ts', severity: 'warning' }],
+      }
+    );
+    mockReadFile
+      .mockResolvedValueOnce('no header')
+      .mockResolvedValueOnce('header')
+      .mockResolvedValueOnce('header')
+      .mockResolvedValueOnce('header');
+
+    const result = await lintFiles(log, files, { fix: true, fullRepo: true });
+
+    const fixConfig = ['/bin/oxlint', '--config', 'oxlint.fix.config.mjs', '--format', 'json'];
+    expect(mockExeca).toHaveBeenCalledTimes(4);
+    expect(passedArgs(0)).toEqual(fixConfig);
+    expect(passedArgs(1)).toEqual([...fixConfig, '--fix', 'src/a.ts']);
+    expect(passedArgs(2)).toEqual([...fixConfig, '--fix', 'src/a.ts']);
+    expect(passedArgs(3)).toEqual([
+      '/bin/oxlint',
+      '--config',
+      'oxlint.config.mjs',
+      '--format',
+      'json',
+    ]);
+    expect(result).toEqual({ failedFiles: [], lintedFileCount: 5000, warningCount: 1 });
+  });
+
+  it('does not run --fix when no file has errors', async () => {
+    respondWith({ exitCode: 0, numberOfFiles: 2 }, { exitCode: 0, numberOfFiles: 2 });
+
+    await lintFiles(log, files, { fix: true });
+
+    expect(mockExeca).toHaveBeenCalledTimes(2);
+    expect(mockExeca.mock.calls.flatMap(([, args]) => args)).not.toContain('--fix');
   });
 });

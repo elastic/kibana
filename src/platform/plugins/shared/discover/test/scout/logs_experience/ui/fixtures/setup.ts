@@ -44,10 +44,10 @@ export async function setupLogsExperience(
 }
 
 /**
- * Create a saved Discover session on the metric-shaped index and return its id. Profile resolution
- * keys off the index pattern, not the data view name, and `synth-metrics*` matches none of the
- * allowed log base patterns — so this is the negative case for anything gated on the logs data
- * source profile.
+ * Create a saved Discover session on a non-logs index pattern (the metric-shaped one by default)
+ * and return its id. Profile resolution keys off the index pattern, not the data view name, and
+ * neither non-logs pattern matches the allowed log base patterns — so this is the negative case for
+ * anything gated on the logs data source profile.
  *
  * The title is suffixed with the space id so parallel workers never collide. Open the result by id
  * (`discover.goto({ savedSearchId })`) rather than through the "Open search" flyout.
@@ -55,7 +55,8 @@ export async function setupLogsExperience(
 export async function createNonLogsDiscoverSession(
   apiServices: ScoutParallelWorkerFixtures['apiServices'],
   spaceId: string,
-  title: string
+  title: string,
+  indexPattern: string = LOGS.NON_LOGS_DATA_VIEW
 ): Promise<string> {
   return apiServices.discover.create(
     {
@@ -66,9 +67,9 @@ export async function createNonLogsDiscoverSession(
           label: 'Untitled',
           data_source: {
             type: 'data_view_spec',
-            index_pattern: LOGS.NON_LOGS_DATA_VIEW,
+            index_pattern: indexPattern,
             time_field: '@timestamp',
-            name: LOGS.NON_LOGS_DATA_VIEW,
+            name: indexPattern,
           },
         },
       ],
@@ -89,12 +90,18 @@ export async function deleteLogsExperienceData(esClient: EsClient) {
       name: [
         `logs-${LOGS.SYNTH_LOGS_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}`,
         `logs-${LOGS.SYNTH_DOCVIEWER_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}`,
+        `logs-${LOGS.SYNTH_NO_MESSAGE_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}`,
+        `logs-${LOGS.SYNTH_CONTEXT_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}`,
+        `logs-${LOGS.SYNTH_FETCH_MORE_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}`,
       ].join(','),
     },
     { ignore: [404] }
   );
 
-  await esClient.indices.delete({ index: LOGS.NON_LOGS_INDEX, ignore_unavailable: true });
+  await esClient.indices.delete({
+    index: [LOGS.NON_LOGS_INDEX, LOGS.NON_LOGS_FIELDS_INDEX, LOGS.NO_LOG_LEVEL_INDEX].join(','),
+    ignore_unavailable: true,
+  });
 }
 
 export async function teardownLogsExperience(

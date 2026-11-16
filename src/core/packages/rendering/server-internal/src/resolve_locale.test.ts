@@ -42,6 +42,7 @@ const baseArgs = (overrides: Partial<ResolveLocaleArgs> = {}): ResolveLocaleArgs
   translationHashes: { en: 'h1', 'fr-FR': 'h2', 'ja-JP': 'h3' },
   serverBasePath: '',
   allowLocaleCookie: true,
+  detectBrowserLocale: true,
   ...overrides,
 });
 
@@ -267,6 +268,83 @@ describe('resolveLocale', () => {
         })
       );
       expect(result.locale).toBe('en');
+    });
+  });
+
+  describe('detectBrowserLocale', () => {
+    it('ignores Accept-Language and falls back to the en default when false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          detectBrowserLocale: false,
+          request: buildRequest({ acceptLanguage: 'ja-JP,en;q=0.5' }),
+        })
+      );
+      expect(result.locale).toBe('en');
+      expect(result.source).toBe('default');
+      expect(result.setCookieHeader).toContain(`${KBN_LOCALE_COOKIE_NAME}=en`);
+    });
+
+    it('still reports browserPreferredLocale for telemetry when false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          detectBrowserLocale: false,
+          request: buildRequest({ acceptLanguage: 'ja-JP,en;q=0.5' }),
+        })
+      );
+      expect(result.browserPreferredLocale).toBe('ja-JP');
+    });
+
+    it('still respects the user profile locale when false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          detectBrowserLocale: false,
+          userSettingLocale: 'fr-FR',
+          request: buildRequest({ acceptLanguage: 'ja-JP' }),
+        })
+      );
+      expect(result.locale).toBe('fr-FR');
+      expect(result.source).toBe('profile');
+    });
+
+    it('still respects the KBN_LOCALE cookie when false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          detectBrowserLocale: false,
+          request: buildRequest({
+            cookie: `${KBN_LOCALE_COOKIE_NAME}=fr-FR`,
+            acceptLanguage: 'ja-JP',
+          }),
+        })
+      );
+      expect(result.locale).toBe('fr-FR');
+      expect(result.source).toBe('cookie');
+    });
+
+    it('still respects an explicitly configured defaultLocale when false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          detectBrowserLocale: false,
+          configLocale: 'fr-FR',
+          request: buildRequest({ acceptLanguage: 'ja-JP' }),
+        })
+      );
+      expect(result.locale).toBe('fr-FR');
+      expect(result.source).toBe('config');
+    });
+
+    it('ignores Accept-Language when both detectBrowserLocale and allowLocaleCookie are false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          detectBrowserLocale: false,
+          allowLocaleCookie: false,
+          request: buildRequest({
+            cookie: `${KBN_LOCALE_COOKIE_NAME}=fr-FR`,
+            acceptLanguage: 'ja-JP',
+          }),
+        })
+      );
+      expect(result.locale).toBe('en');
+      expect(result.source).toBe('default');
     });
   });
 

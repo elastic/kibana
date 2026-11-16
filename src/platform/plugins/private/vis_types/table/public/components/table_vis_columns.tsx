@@ -36,7 +36,8 @@ export const createGridColumns = (
   formattedColumns: FormattedColumns,
   columnsWidth: TableVisUiState['colWidth'],
   fireEvent: IInterpreterRenderHandlers['event'],
-  closeCellPopover?: Function
+  closeCellPopover?: Function,
+  isInteractive: boolean = true
 ) => {
   const onFilterClick = (data: FilterCellData, negate: boolean) => {
     fireEvent({
@@ -140,22 +141,25 @@ export const createGridColumns = (
       id: col.id,
       display: col.name,
       displayAsText: col.name,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-        showSortAsc: {
-          label: i18n.translate('visTypeTable.sort.ascLabel', {
-            defaultMessage: 'Sort asc',
-          }),
-        },
-        showSortDesc: {
-          label: i18n.translate('visTypeTable.sort.descLabel', {
-            defaultMessage: 'Sort desc',
-          }),
-        },
-      },
-      cellActions,
+      actions: isInteractive
+        ? {
+            showHide: false,
+            showMoveLeft: false,
+            showMoveRight: false,
+            showSortAsc: {
+              label: i18n.translate('visTypeTable.sort.ascLabel', {
+                defaultMessage: 'Sort asc',
+              }),
+            },
+            showSortDesc: {
+              label: i18n.translate('visTypeTable.sort.descLabel', {
+                defaultMessage: 'Sort desc',
+              }),
+            },
+          }
+        : false,
+      cellActions: isInteractive ? cellActions : undefined,
+      isResizable: isInteractive,
     };
 
     if (initialWidth) {

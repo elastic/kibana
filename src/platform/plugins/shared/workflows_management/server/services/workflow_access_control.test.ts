@@ -7,11 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { errors } from '@elastic/elasticsearch';
+import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { InvalidAccessControlError } from '@kbn/entity-access-control';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
-import { assertWorkflowOperation, WorkflowAccessControlService } from './workflow_access_control';
+import {
+  assertWorkflowOperation,
+  EPHEMERAL_WORKFLOW_ID,
+  INTERNAL_TEST_WORKFLOW_ID,
+  WorkflowAccessControlService,
+} from './workflow_access_control';
 import { WorkflowAccessDeniedError } from './workflow_access_denied_error';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
@@ -34,19 +41,32 @@ const makeDocument = (): WorkflowProperties => ({
 });
 
 describe('WorkflowAccessControlService', () => {
-  const request = httpServerMock.createKibanaRequest();
+  let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let core: ReturnType<typeof coreMock.createStart>;
   let document: WorkflowProperties;
   let service: WorkflowAccessControlService;
   let crud: ConstructorParameters<typeof WorkflowAccessControlService>[1];
   let authz: ReturnType<typeof securityMock.createStart>['authz'];
   const atSpace = jest.fn();
+  const globally = jest.fn();
 
   beforeEach(() => {
+    request = httpServerMock.createKibanaRequest();
     core = coreMock.createStart();
     core.userProfile.getCurrentProfileId.mockResolvedValue('owner');
     document = makeDocument();
     authz = securityMock.createStart().authz;
+    globally.mockReset().mockImplementation(async () => ({
+      hasAllRequested:
+        core.security.authc.getCurrentUser(request)?.roles.includes('superuser') ?? false,
+      username: 'user',
+      privileges: { kibana: [], elasticsearch: { cluster: {}, index: {} } },
+    }));
+    authz.checkPrivilegesWithRequest.mockReturnValue({
+      globally,
+      atSpace: jest.fn(),
+      atSpaces: jest.fn(),
+    });
     jest.spyOn(authz.actions.api, 'get').mockImplementation((subject: string) => `api:${subject}`);
     atSpace.mockReset().mockResolvedValue({ hasPrivilegeUids: ['reader'] });
     authz.checkUserProfilesPrivileges.mockReturnValue({ atSpace });
@@ -62,6 +82,293 @@ describe('WorkflowAccessControlService', () => {
       }),
     };
     service = new WorkflowAccessControlService(core, crud, authz);
+  });
+
+  describe('audit logging', () => {
+    it.each(['read', 'edit', 'execute', 'manage'] as const)(
+      'records denied %s access',
+      async (operation) => {
+        core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+        await expect(
+          service.assertAccess({ ...document, id: 'id' }, operation, request)
+        ).rejects.toBeInstanceOf(WorkflowNotFoundError);
+        expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: expect.stringContaining(`"operation":"${operation}"`),
+            event: expect.objectContaining({
+              action: 'workflow_access_control_denied',
+              outcome: 'failure',
+            }),
+            kibana: { space_id: 'default' },
+          })
+        );
+      }
+    );
+
+    it('does not audit DTO mapping for hidden documents', async () => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+      const result = await service.toDto(document, request);
+      expect(result.permissions.read).toBe(false);
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
+    });
+
+    it('does not audit search filters or mapped rows for an administrator', async () => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue('admin');
+      jest
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: ['superuser'] }));
+      expect(await service.readFilter(request)).toEqual({ match_all: {} });
+      expect(await service.executionFilter('default', request)).toEqual({ match_all: {} });
+      for (let index = 0; index < 100; index++) {
+        const result = await service.toDto({ ...document, id: String(index) }, request);
+        expect(result.permissions.read).toBe(true);
+      }
+      expect(globally).toHaveBeenCalledTimes(1);
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
+    });
+
+    it('does not report an override for an administrator who created an ownerless workflow', async () => {
+      jest.spyOn(core.security.authc, 'getCurrentUser').mockReturnValue(
+        securityServiceMock.createMockAuthenticatedUser({
+          username: 'alice',
+          roles: ['superuser'],
+        })
+      );
+      await service.assertAccess(
+        { ...document, id: 'legacy', owner_id: undefined, access_control: undefined },
+        'manage',
+        request
+      );
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
+    });
+
+    it('does not label the managed-workflow restriction as an ACL denial', async () => {
+      document.managed = true;
+      await expect(
+        service.update('id', 'default', { access_mode: 'private' }, request)
+      ).rejects.toThrow(WorkflowAccessDeniedError);
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
+    });
+
+    it('can suppress override events for user suggestions', async () => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue('admin');
+      jest
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: ['superuser'] }));
+      await service.assertAccess({ ...document, id: 'id' }, 'manage', request, {
+        auditOverride: false,
+      });
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
+      await service.assertAccess({ ...document, id: 'id' }, 'manage', request);
+      expect(core.security.audit.asScoped(request).log).toHaveBeenCalledTimes(1);
+    });
+
+    it('still records a denial when override auditing is suppressed', async () => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+      await expect(
+        service.assertAccess({ ...document, id: 'id' }, 'manage', request, { auditOverride: false })
+      ).rejects.toThrow(WorkflowNotFoundError);
+      expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'workflow_access_control_denied' }),
+        })
+      );
+    });
+
+    it('records the stored grant change and preserves the owner', async () => {
+      await service.update(
+        'id',
+        'default',
+        {
+          access_mode: 'private',
+          entries: [{ type: 'user', id: 'reader', role: 'viewer' }],
+        },
+        request
+      );
+      const audit = core.security.audit.asScoped(request).log;
+      expect(audit).toHaveBeenCalledTimes(2);
+      expect(audit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'workflow_access_control_update',
+            outcome: 'success',
+          }),
+        })
+      );
+      expect(jest.mocked(audit).mock.calls[0][0]?.message).toContain('"entry_count":1');
+      expect(jest.mocked(audit).mock.calls[1][0]?.message).toContain(
+        '"user_id":"reader","previous_role":null,"role":"viewer"'
+      );
+    });
+
+    it('does not report an access change when storage rejects the write', async () => {
+      jest
+        .mocked(crud.writeWorkflowDocumentWithOcc)
+        .mockRejectedValue(new WorkflowConflictError('conflict', 'id'));
+      await expect(
+        service.update('id', 'default', { access_mode: 'public' }, request)
+      ).rejects.toThrow('conflict');
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
+    });
+
+    it.each([false, true])(
+      'records an override only when the admin needs it (owner=%s)',
+      async (isOwner) => {
+        core.userProfile.getCurrentProfileId.mockResolvedValue(isOwner ? 'owner' : 'admin');
+        jest
+          .spyOn(core.security.authc, 'getCurrentUser')
+          .mockReturnValue(
+            securityServiceMock.createMockAuthenticatedUser({ roles: ['superuser'] })
+          );
+        await service.assertAccess({ ...document, id: 'id' }, 'manage', request);
+        const audit = core.security.audit.asScoped(request).log;
+        expect(audit).toHaveBeenCalledTimes(isOwner ? 0 : 1);
+        if (!isOwner)
+          expect(audit).toHaveBeenCalledWith(
+            expect.objectContaining({
+              event: expect.objectContaining({
+                action: 'workflow_access_control_admin_override',
+                outcome: 'success',
+              }),
+            })
+          );
+      }
+    );
+  });
+
+  describe('administrator override', () => {
+    beforeEach(() => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue('admin');
+      jest
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: ['superuser'] }));
+    });
+
+    it('exposes private workflows, their ACL, and history to an administrator', async () => {
+      const result = await service.toDto(document, request);
+      expect(result.owner_id).toBe('owner');
+      expect(result.access_control).toEqual(document.access_control);
+      expect(result.permissions).toEqual({ read: true, execute: false, edit: false, manage: true });
+      expect(await service.readFilter(request)).toEqual({ match_all: {} });
+      expect(await service.executionFilter('default', request)).toEqual({ match_all: {} });
+      expect(core.elasticsearch.client.asInternalUser.openPointInTime).not.toHaveBeenCalled();
+    });
+
+    it('does not use the override for execution or draft tests', async () => {
+      await expect(
+        service.assertAccess({ ...document, id: 'id' }, 'edit', request)
+      ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+      await expect(
+        service.assertAccess({ ...document, id: 'id' }, 'execute', request)
+      ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+      await expect(
+        service.assertAccess({ ...document, id: 'id' }, 'edit', request, {
+          allowAdminOverride: false,
+        })
+      ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+    });
+
+    it('changes access without replacing the owner or dropping the admin grant', async () => {
+      atSpace.mockResolvedValue({ hasPrivilegeUids: ['admin', 'reader'] });
+      const result = await service.update(
+        'id',
+        'default',
+        {
+          access_mode: 'private',
+          entries: [
+            { type: 'user', id: 'owner', role: 'viewer' },
+            { type: 'user', id: 'admin', role: 'editor' },
+            { type: 'user', id: 'reader', role: 'viewer' },
+          ],
+        },
+        request
+      );
+      expect(result.owner_id).toBe('owner');
+      expect(result.access_control?.entries.map(({ id }) => id)).toEqual(['admin', 'reader']);
+      expect(authz.checkUserProfilesPrivileges).toHaveBeenCalledWith(new Set(['admin']));
+      expect(authz.checkUserProfilesPrivileges).not.toHaveBeenCalledWith(new Set(['owner']));
+    });
+
+    it('can recover an owned workflow without a current profile', async () => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue(null);
+      await expect(
+        service.update('id', 'default', { access_mode: 'public' }, request)
+      ).resolves.toMatchObject({
+        owner_id: 'owner',
+        access_control: { access_mode: 'public' },
+      });
+    });
+
+    it('claims an ownerless legacy workflow', async () => {
+      delete document.owner_id;
+      delete document.access_control;
+      await expect(
+        service.update('id', 'default', { access_mode: 'private' }, request)
+      ).resolves.toMatchObject({
+        owner_id: 'admin',
+        access_control: { access_mode: 'private' },
+      });
+    });
+
+    it.each([undefined, { access_mode: 'public' as const, entries: [] }])(
+      'leaves a public workflow ownerless and preserves creator access',
+      async (accessControl) => {
+        delete document.owner_id;
+        document.access_control = accessControl;
+        const result = await service.update('id', 'default', { access_mode: 'public' }, request);
+        expect(result.owner_id).toBeUndefined();
+        expect(document.owner_id).toBeUndefined();
+        jest
+          .spyOn(core.security.authc, 'getCurrentUser')
+          .mockReturnValue(
+            securityServiceMock.createMockAuthenticatedUser({ username: 'alice', roles: [] })
+          );
+        core.userProfile.getCurrentProfileId.mockResolvedValue('alice-profile');
+        const creatorRequest = httpServerMock.createKibanaRequest();
+        expect((await service.permissions(document, creatorRequest)).manage).toBe(true);
+        const claimed = await service.update(
+          'id',
+          'default',
+          { access_mode: 'private' },
+          creatorRequest
+        );
+        expect(claimed.owner_id).toBe('alice-profile');
+      }
+    );
+
+    it('still rejects new grants without recipient RBAC', async () => {
+      atSpace.mockResolvedValue({ hasPrivilegeUids: [] });
+      await expect(
+        service.update(
+          'id',
+          'default',
+          {
+            access_mode: 'private',
+            entries: [{ type: 'user', id: 'reader', role: 'viewer' }],
+          },
+          request
+        )
+      ).rejects.toBeInstanceOf(InvalidAccessControlError);
+      expect(crud.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
+    });
+
+    it('does not change managed workflow sharing', async () => {
+      document.managed = true;
+      await expect(
+        service.update('id', 'default', { access_mode: 'public' }, request)
+      ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+      expect(crud.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
+    });
+
+    it('does not apply the override to a read without caller context', async () => {
+      expect(await service.permissions(document)).toEqual({
+        read: false,
+        execute: false,
+        edit: false,
+        manage: false,
+      });
+    });
   });
 
   it.each(['public', 'private'] as const)(
@@ -129,12 +436,13 @@ describe('WorkflowAccessControlService', () => {
     expect(document.owner_id).toBe('owner');
   });
 
-  it('returns only access metadata from the stored workflow', async () => {
+  it('returns access metadata and current permissions from the stored workflow', async () => {
     document.version = 7;
     const result = await service.update('id', 'default', { access_mode: 'public' }, request);
     expect(result).toEqual({
       owner_id: 'owner',
       access_control: document.access_control,
+      permissions: { read: true, execute: true, edit: true, manage: true },
       lastUpdatedAt: document.updated_at,
       lastUpdatedBy: document.lastUpdatedBy,
       version: 7,
@@ -375,7 +683,9 @@ describe('WorkflowAccessControlService', () => {
     async (operation) => {
       document.access_control = { access_mode: 'public', entries: [] };
       core.userProfile.getCurrentProfileId.mockResolvedValue(null);
-      await expect(service.assertAccess(document, operation, request)).resolves.toBeUndefined();
+      await expect(
+        service.assertAccess({ ...document, id: 'id' }, operation, request)
+      ).resolves.toBeUndefined();
       expect(() => assertWorkflowOperation(document, operation, undefined)).not.toThrow();
     }
   );
@@ -384,7 +694,7 @@ describe('WorkflowAccessControlService', () => {
     core.userProfile.getCurrentProfileId.mockResolvedValue(null);
     await expect(
       service.update('id', 'default', { access_mode: 'public', entries: [] }, request)
-    ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+    ).rejects.toBeInstanceOf(WorkflowNotFoundError);
   });
 
   it('allows only the owner to manage public workflow access', () => {
@@ -409,7 +719,41 @@ describe('WorkflowAccessControlService', () => {
     document.owner_id = 'different-owner';
     await expect(
       service.update('id', 'default', { access_mode: 'public', entries: [] }, request)
-    ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+    ).rejects.toBeInstanceOf(WorkflowNotFoundError);
+  });
+
+  describe('hidden workflows', () => {
+    it.each(['read', 'edit', 'execute', 'manage'] as const)(
+      'answers a non-member %s like an unknown workflow',
+      async (operation) => {
+        core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+        await expect(
+          service.assertAccess({ ...document, id: 'id' }, operation, request)
+        ).rejects.toThrow(new WorkflowNotFoundError('id'));
+      }
+    );
+
+    it.each(['edit', 'execute', 'manage'] as const)(
+      'keeps denying a viewer %s access with a forbidden error',
+      async (operation) => {
+        document.access_control = {
+          access_mode: 'private',
+          entries: [{ type: 'user', id: 'viewer', role: 'viewer', added_at: '2026-09-10' }],
+        };
+        core.userProfile.getCurrentProfileId.mockResolvedValue('viewer');
+        await expect(
+          service.assertAccess({ ...document, id: 'id' }, operation, request)
+        ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+      }
+    );
+
+    it('answers a non-member access update like an unknown workflow', async () => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+      await expect(
+        service.update('id', 'default', { access_mode: 'public', entries: [] }, request)
+      ).rejects.toThrow(new WorkflowNotFoundError('id'));
+      expect(crud.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
+    });
   });
 
   it('does not use a missing profile as system access', () => {
@@ -515,12 +859,126 @@ describe('WorkflowAccessControlService', () => {
       });
       expect(client.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          _source: ['owner_id', 'access_control'],
+          _source: ['owner_id', 'access_control', 'managed'],
           query: { terms: { spaceId: ['default', '*'] } },
         })
       );
     }
   );
+
+  describe('readableWorkflowIds', () => {
+    const searchResponse = (hits: Array<{ id: string; source: object }>) => ({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: {
+        hits: hits.map(({ id, source }) => ({ _index: 'workflows', _id: id, _source: source })),
+      },
+    });
+
+    beforeEach(() => {
+      jest.mocked(core.elasticsearch.client.asInternalUser.openPointInTime).mockResolvedValue({
+        id: 'pit',
+        _shards: { total: 1, successful: 1, failed: 0 },
+      });
+    });
+
+    const includeManaged = { includeManaged: true };
+
+    it('lists the readable workflows and the unsaved-run ids when some are hidden', async () => {
+      jest.mocked(core.elasticsearch.client.asInternalUser.search).mockResolvedValue(
+        searchResponse([
+          { id: 'legacy', source: {} },
+          { id: 'public', source: { access_control: { access_mode: 'public', entries: [] } } },
+          { id: 'hidden', source: { ...document, owner_id: 'another-owner' } },
+        ])
+      );
+
+      await expect(
+        service.readableWorkflowIds('default', request, includeManaged)
+      ).resolves.toEqual(['legacy', 'public', EPHEMERAL_WORKFLOW_ID, INTERNAL_TEST_WORKFLOW_ID]);
+    });
+
+    it.each([
+      { includeManaged: false, expected: ['legacy'] },
+      { includeManaged: true, expected: ['legacy', 'managed'] },
+    ])(
+      'lists managed workflows only with managed access: includeManaged=$includeManaged',
+      async ({ includeManaged: allowed, expected }) => {
+        jest.mocked(core.elasticsearch.client.asInternalUser.search).mockResolvedValue(
+          searchResponse([
+            { id: 'legacy', source: {} },
+            { id: 'managed', source: { managed: true } },
+            { id: 'hidden', source: { ...document, owner_id: 'another-owner' } },
+          ])
+        );
+
+        await expect(
+          service.readableWorkflowIds('default', request, { includeManaged: allowed })
+        ).resolves.toEqual([...expected, EPHEMERAL_WORKFLOW_ID, INTERNAL_TEST_WORKFLOW_ID]);
+      }
+    );
+
+    it('does not scope when no workflow is hidden', async () => {
+      jest
+        .mocked(core.elasticsearch.client.asInternalUser.search)
+        .mockResolvedValue(searchResponse([{ id: 'legacy', source: {} }]));
+
+      await expect(
+        service.readableWorkflowIds('default', request, includeManaged)
+      ).resolves.toBeUndefined();
+    });
+
+    it('does not scope an administrator', async () => {
+      jest
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: ['superuser'] }));
+
+      await expect(
+        service.readableWorkflowIds('default', request, includeManaged)
+      ).resolves.toBeUndefined();
+      expect(core.elasticsearch.client.asInternalUser.openPointInTime).not.toHaveBeenCalled();
+    });
+
+    it('does not scope without a workflows index', async () => {
+      jest.mocked(core.elasticsearch.client.asInternalUser.openPointInTime).mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception' } },
+          headers: {},
+          warnings: [],
+          meta: {} as any,
+        })
+      );
+
+      await expect(
+        service.readableWorkflowIds('default', request, includeManaged)
+      ).resolves.toBeUndefined();
+    });
+
+    it('fails past the readable workflow limit instead of dropping the scope', async () => {
+      const readable = Array.from({ length: 10001 }, (_, index) => ({
+        id: `workflow-${index}`,
+        source: {},
+      }));
+      const hidden = { id: 'hidden', source: { ...document, owner_id: 'another-owner' } };
+      jest
+        .mocked(core.elasticsearch.client.asInternalUser.search)
+        .mockImplementation(async (searchRequest) => {
+          const offset = searchRequest?.search_after ? Number(searchRequest.search_after[0]) : 0;
+          const hits = [...readable, hidden].slice(offset, offset + 1000);
+          const response = searchResponse(hits);
+          response.hits.hits.forEach((hit, index) => {
+            Object.assign(hit, { sort: [offset + index + 1] });
+          });
+          return response;
+        });
+
+      await expect(service.readableWorkflowIds('default', request, includeManaged)).rejects.toThrow(
+        'Too many readable workflows to scope the execution filters.'
+      );
+    });
+  });
 
   it.each([
     { timedOut: true, failedShards: 0 },

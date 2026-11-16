@@ -8,6 +8,10 @@
 import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
 import type { EntityStoreEuidApi, EntityType } from '@kbn/entity-store/public';
+import {
+  combineEntityGroupFilters,
+  getEntityGroupRecords,
+} from '../../flyout/entity_details/shared/entity_store_group_utils';
 
 /**
  * Picks host / user / service / generic from flattened identity field keys for CSP/EUID queries.
@@ -96,12 +100,17 @@ export interface BuildEuidCspPreviewOptionsContext {
    * (e.g. `host.name` / `user.name` from the panel when the entity store record is absent).
    */
   legacyIdentityFields?: Record<string, string | undefined>;
+  /**
+   * Resolution-group aliases of the primary document (entity-store records). When present, the
+   * EUID filter matches findings of any record in the group (primary or alias).
+   */
+  aliasRecords?: readonly unknown[];
 }
 
 /**
  * Builds {@link UseCspOptions} for CSP preview hooks from entity-store EUID filters when the
- * document yields an EUID filter; otherwise falls back to term filters on `user.name` /
- * `host.name` (and `service.name` for service entities).
+ * document (or any alias record) yields an EUID filter; otherwise falls back to term filters on
+ * `user.name` / `host.name` (and `service.name` for service entities).
  */
 export const buildEuidCspPreviewOptions = (
   entityType: EntityType,
@@ -109,12 +118,14 @@ export const buildEuidCspPreviewOptions = (
   euidApi: EntityStoreEuidApi | null,
   context: BuildEuidCspPreviewOptionsContext = {}
 ): UseCspOptions => {
-  const { legacyIdentityFields } = context;
+  const { legacyIdentityFields, aliasRecords } = context;
 
   if (euidApi?.euid) {
-    const euidEntityFilter = euidApi.euid.dsl.getEuidFilterBasedOnDocument(
-      entityType,
-      identityDocument
+    const { dsl } = euidApi.euid;
+    const euidEntityFilter = combineEntityGroupFilters(
+      getEntityGroupRecords(identityDocument, aliasRecords),
+      (document) =>
+        dsl.getEuidFilterBasedOnDocument(euidApi.getBuiltInEntityDefinition(entityType), document)
     );
     if (euidEntityFilter != null) {
       return {

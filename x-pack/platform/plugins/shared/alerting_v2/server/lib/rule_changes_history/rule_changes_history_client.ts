@@ -25,7 +25,6 @@ export interface ListRuleChangesArgs {
 }
 
 export interface GetRuleChangeArgs {
-  ruleId: string;
   eventId: string;
 }
 
@@ -78,32 +77,22 @@ export class RuleChangesHistoryClient implements RuleChangesHistoryClientContrac
     };
   }
 
-  public async getRuleChange({
-    ruleId,
-    eventId,
-  }: GetRuleChangeArgs): Promise<RuleChangeHistoryDetail> {
+  public async getRuleChange({ eventId }: GetRuleChangeArgs): Promise<RuleChangeHistoryDetail> {
     this.assertInitialized();
 
-    // `eventId` is a UUID and already unique; `ruleId` is only needed because
-    // `getHistory` is the sole read API and always filters on an object id.
-    const { items } = await this.changeHistory.getHistory(
-      this.spaceId,
-      RULE_CHANGES_HISTORY_OBJECT_TYPE,
-      ruleId,
-      {
-        additionalFilters: [{ term: { 'event.id': eventId } }],
-        size: 1,
-      }
-    );
+    // `eventId` is a UUID and already unique across objects and types, so the
+    // rule id is read from the document rather than supplied by the caller.
+    const document = await this.changeHistory.getEvent(this.spaceId, eventId);
 
-    const document = items[0];
-    if (!document) {
-      throw Boom.notFound(`Rule change with event id "${eventId}" not found for rule "${ruleId}"`, {
+    // Other object types may share the module and dataset; they are not rule changes.
+    if (!document || document.object.type !== RULE_CHANGES_HISTORY_OBJECT_TYPE) {
+      throw Boom.notFound(`Rule change with event id "${eventId}" not found`, {
         code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
-        details: { rule_id: ruleId, event_id: eventId },
+        details: { event_id: eventId },
       });
     }
 
+    const ruleId = document.object.id;
     const [previous, newest] = await Promise.all([
       this.fetchPrevious(ruleId, document),
       this.fetchNewest(ruleId),

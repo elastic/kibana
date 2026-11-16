@@ -16,30 +16,32 @@ import { decode } from '../test_helpers/codec_agnostic';
 import { asCases, describeCodecCases } from '../test_helpers/codec_cases';
 import {
   CodeEditorMode,
-  CodeEditorModeCodec,
   FormMonitorType,
-  FormMonitorTypeCodec,
   KerberosAuthType,
-  KerberosAuthTypeCodec,
   Mode,
+  MonitorTypeEnum,
+  ResponseBodyIndexPolicy,
+  ScheduleUnit,
+  ScreenshotOption,
+  SourceType,
+  TLSVersion,
+  VerificationMode,
+} from './monitor_configs';
+import {
+  CodeEditorModeCodec,
+  FormMonitorTypeCodec,
+  KerberosAuthTypeCodec,
   ModeCodec,
   MonitorTypeCodec,
-  MonitorTypeEnum,
   RequestBodyCheckCodec,
-  ResponseBodyIndexPolicy,
   ResponseBodyIndexPolicyCodec,
   ResponseCheckJSONCodec,
-  ScheduleUnit,
   ScheduleUnitCodec,
-  ScreenshotOption,
   ScreenshotOptionCodec,
-  SourceType,
   SourceTypeCodec,
-  TLSVersion,
   TLSVersionCodec,
-  VerificationMode,
   VerificationModeCodec,
-} from './monitor_configs';
+} from '../schemas/monitor_configs';
 
 /** Values no enum should ever accept, exercised against every codec. */
 const universallyInvalid: unknown[] = ['', 'definitely-not-a-member', 42, null, undefined, {}, []];

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CoreStart, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
@@ -20,9 +20,11 @@ import { getWorkflowExecutionsTracking } from '../pipeline_data/helpers/get_work
 
 const ROUTE_PATH = '/internal/attack_discovery/executions/{execution_id}/tracking';
 
-const GetExecutionTrackingRequestParams = z.object({
-  execution_id: z.string().max(1024),
-});
+const GetExecutionTrackingRequestParams = lazySchema(() =>
+  z.object({
+    execution_id: z.string().max(1024),
+  })
+);
 
 export interface ExecutionTrackingWorkflow {
   workflow_id: string;

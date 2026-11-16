@@ -17,8 +17,8 @@ export function ServiceOverviewServiceMapSection() {
     query: { environment, kuery, rangeFrom, rangeTo, latencyAggregationType },
   } = useApmParams('/services/{serviceName}/overview');
 
-  // Seed the service flyout with the page's filters so its charts match the
-  // service overview charts exactly.
+  // Chart filters only. The flyout copies the embeddable's resolved start/end
+  // when it opens and keeps that window across Refresh.
   const flyoutOptions = useMemo(
     () => ({
       transactionType,

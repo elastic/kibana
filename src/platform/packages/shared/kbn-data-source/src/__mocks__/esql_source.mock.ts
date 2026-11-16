@@ -10,6 +10,9 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EsqlSource } from '../sources/esql_source';
 import type { Column } from '../types';
+import { registerEsqlSourceInDataViewsCache } from '../cache_adapter';
+import { buildFilterableFieldSpecs } from '../filterable_fields';
+import { createMockDataViewsService } from './data_views_service.mock';
 
 type LooseColumn = Omit<Column, 'type'> & { type: string };
 
@@ -27,12 +30,20 @@ export const createMockEsqlSource = (
     name: 'mock',
     timeFieldName,
     projectRouting: undefined,
-    datasetKey: `esql:mock:${timeFieldName ?? ''}:`,
+    datasetId: `esql-mock-${timeFieldName ?? ''}`,
     references: [],
     fields: [],
     resultColumns,
     getColumns: () => columns as Column[],
     getColumn: (name: string) => columns.find((c) => c.name === name) as Column | undefined,
+    getFilterableFields: async () => columns as Column[],
+    toFilterableSource: async () => ({
+      id: `esql-mock-${timeFieldName ?? ''}`,
+      title: 'mock',
+      timeFieldName,
+      fields: Object.values(buildFilterableFieldSpecs(columns as Column[], timeFieldName)),
+      isTimeBased: () => !!timeFieldName,
+    }),
     isTimeBased: () => !!timeFieldName,
     isPersisted: () => false,
     isRollup: () => false,
@@ -46,4 +57,16 @@ export const createMockEsqlSource = (
     }),
   } as unknown as EsqlSource;
   return mock;
+};
+
+/** A mock `EsqlSource` with its DataView shim registered, shaped like `resolveEsqlSource`'s result. */
+export const createResolvedMockEsqlSource = async (
+  ...args: Parameters<typeof createMockEsqlSource>
+) => {
+  const esqlSource = createMockEsqlSource(...args);
+  const dataView = await registerEsqlSourceInDataViewsCache(
+    createMockDataViewsService(),
+    esqlSource
+  );
+  return { esqlSource, dataView };
 };

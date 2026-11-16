@@ -50,10 +50,6 @@ const feedbackRegistry: FeedbackRegistry = new Map([
   // The app root and every deep link each register their own nav link id, so all of them must
   // map to the AlertZero questions (ids: x-pack/solutions/security/plugins/alertzero/public/deep_links.ts).
   ['alertzero', alertZeroLoader],
-  ['alertzero:alerts', alertZeroLoader],
-  ['alertzero:attacks', alertZeroLoader],
-  ['alertzero:threat_hunt', alertZeroLoader],
-  ['alertzero:streams', alertZeroLoader],
   ['alertzero:escalations', alertZeroLoader],
   ['alertzero:watches', alertZeroLoader],
   [

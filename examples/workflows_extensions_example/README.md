@@ -137,7 +137,7 @@ steps:
 
 - **`system-` prefix** is reserved for managed workflow IDs; user-created workflows cannot use it.
 - **`yamlTemplate(values)`** enables install-time parameterization; `values` are persisted and reused on upgrades.
-- **`versionStrategy: 'auto'`** means the platform re-installs the workflow on startup when the template changes.
+- **`versionStrategy: 'auto'`** means the platform re-installs the workflow on startup when its rendered YAML changes.
 - **`enablement: 'restorable'`** preserves user-toggled enabled state across managed updates.
 - **`spaceId`** is mandatory — use `'*'` (the global space constant) for workflows visible from every space.
 
@@ -152,8 +152,8 @@ Create the account first with `POST /internal/security/service_account`, for exa
 `serviceAccountId`; role names must exist on the target deployment and allow the workflow's
 steps. Creation requires explicit roles on both UIAM and Elasticsearch backends.
 
-With this example plugin and `xpack.security.serviceAccounts.enabled` enabled, the following
-internal endpoints use the authenticated request's space:
+With this example plugin loaded and `xpack.security.serviceAccounts.enabled` set to `true` (the
+default outside serverless), the following internal endpoints use the authenticated request's space:
 
 - `POST /internal/workflows_extensions_example/managed_service_account/{id}` with
   `{ "serviceAccountId": "<existing SA ID>" }` installs or updates the instance.

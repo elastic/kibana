@@ -268,6 +268,8 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
           counterAggregation: 'max',
           gaugeAggregation: 'min',
           histogramPercentile: 'p99',
+          gridSortField: 'recency',
+          gridSortDirection: 'desc',
         },
       },
     },
@@ -344,6 +346,8 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       counter_aggregation: 'max',
       gauge_aggregation: 'min',
       histogram_percentile: 'p99',
+      grid_sort_field: 'recency',
+      grid_sort_direction: 'desc',
       sort: [
         {
           name: 'transaction.id',
@@ -352,7 +356,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       ],
       column_order: [],
       row_height: 1,
-      sample_size: 100,
       rows_per_page: 25,
       header_row_height: 1,
       density: DataGridDensity.COMPACT,
@@ -366,9 +369,7 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       },
       hide_chart: false,
       hide_table: false,
-      hide_aggregated_preview: false,
       breakdown_field: 'transaction.id',
-      chart_interval: 'h',
       time_range: {
         from: 'now/d',
         to: 'now/d',

@@ -6,10 +6,14 @@
  */
 
 import { describeCodecCases } from '../test_helpers/codec_cases';
-import { GetPingsParamsType, PingStateType, PingType, PingsResponseType } from './ping';
-import { ErrorGroupsResponseType } from './error_groups';
-import { ErrorStatsType } from './error_stats';
+
 import {
+  GetPingsParamsType,
+  PingStateType,
+  PingType,
+  PingsResponseType,
+  ErrorGroupsResponseType,
+  ErrorStatsType,
   FullScreenshotType,
   JourneyStepType,
   RefResultType,
@@ -17,7 +21,7 @@ import {
   ScreenshotImageBlobType,
   ScreenshotRefImageDataType,
   SyntheticsJourneyApiResponseType,
-} from './synthetics';
+} from '../schemas/ping';
 
 const observer = {
   name: 'us-central',

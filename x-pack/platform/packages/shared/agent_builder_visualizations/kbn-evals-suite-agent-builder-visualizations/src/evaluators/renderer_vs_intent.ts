@@ -7,6 +7,7 @@
 
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { ExtractedVisualization } from '../extract_visualization';
+import { skippedResult } from '../evaluator_utils';
 
 export const RENDERER_VS_INTENT_EVALUATOR_NAME = 'Renderer vs Intent';
 
@@ -35,11 +36,7 @@ export function createRendererVsIntentEvaluator<
     evaluate: async ({ output, expected }): Promise<EvaluationResult> => {
       const expectedRenderer = expectedRendererExtractor(expected);
       if (!expectedRenderer) {
-        return {
-          score: 1,
-          label: 'skipped',
-          explanation: 'No expected renderer declared for this example.',
-        };
+        return skippedResult('No expected renderer declared for this example.');
       }
 
       let visualizations: ExtractedVisualization[];

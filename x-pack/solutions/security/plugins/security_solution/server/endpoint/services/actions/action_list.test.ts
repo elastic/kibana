@@ -14,13 +14,17 @@ import type {
 } from '../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { getActionList, getActionListByStatus } from './action_list';
+import { getAgentHostNamesWithIds } from './utils';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import {
   applyActionListEsSearchMock,
   createActionRequestsEsSearchResultsMock,
   createActionResponsesEsSearchResultsMock,
 } from './mocks';
-import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../endpoint_app_context_services';
 import { createMockEndpointAppContextService } from '../../mocks';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
@@ -174,6 +178,103 @@ describe('action list services', () => {
         pageSize: 10,
         total: 1,
       });
+    });
+
+    it('resolves linked-project hostnames from the scoped metadata index under CPS without dropping origin names', async () => {
+      const agentIds = ['agent-a', 'agent-b', 'agent-x'];
+      actionRequests = createActionRequestsEsSearchResultsMock(agentIds);
+      actionResponses = createActionResponsesEsSearchResultsMock(agentIds);
+      applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
+
+      const getHostMetadataList = jest.fn().mockResolvedValue({
+        data: [
+          {
+            metadata: {
+              agent: { id: 'agent-x' },
+              elastic: { agent: { id: 'agent-x' } },
+              host: { hostname: 'linked-host-x' },
+            },
+          },
+        ],
+        total: 1,
+      });
+      (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+        getHostMetadataList,
+      });
+      const scoped = {
+        isCpsRead: () => true,
+        getEsClient: () => esClient,
+      } as unknown as ScopedEndpointServices;
+
+      const result = await getActionList({
+        endpointService: endpointAppContextService,
+        spaceId: 'default',
+        page: 1,
+        pageSize: 10,
+        scoped,
+      });
+
+      expect(getHostMetadataList).toHaveBeenCalledWith(
+        expect.objectContaining({ kuery: 'united.agent.agent.id: ("agent-x")' }),
+        scoped
+      );
+      expect(result.data[0].hosts).toEqual({
+        'agent-a': { name: 'Host-agent-a' },
+        'agent-b': { name: 'Host-agent-b' },
+        'agent-x': { name: 'linked-host-x' },
+      });
+    });
+
+    it('looks up each unresolved linked-project agent once, however many actions repeat it', async () => {
+      // One agent with many history entries must not fan out into repeated batches.
+      const repeatedAgentIds = Array.from({ length: 1200 }, () => 'agent-x');
+      const getAgentHostNames = jest.fn().mockResolvedValue({ data: [], total: 0 });
+      (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+        getHostMetadataList: getAgentHostNames,
+      });
+      const scoped = {
+        isCpsRead: () => true,
+        getEsClient: () => esClient,
+      } as unknown as ScopedEndpointServices;
+
+      const hosts = await getAgentHostNamesWithIds({
+        endpointService: endpointAppContextService,
+        spaceId: 'default',
+        agentIds: [...repeatedAgentIds, 'agent-y', 'agent-x', 'agent-y'],
+        scoped,
+      });
+
+      expect(getAgentHostNames).toHaveBeenCalledTimes(1);
+      expect(getAgentHostNames).toHaveBeenCalledWith(
+        { page: 0, pageSize: 2, kuery: 'united.agent.agent.id: ("agent-x" OR "agent-y")' },
+        scoped
+      );
+      expect(hosts).toEqual({ 'agent-x': '', 'agent-y': '' });
+    });
+
+    it('does not query the metadata index for the list when the read is origin-only', async () => {
+      const agentIds = ['agent-a', 'agent-b', 'agent-x'];
+      actionRequests = createActionRequestsEsSearchResultsMock(agentIds);
+      actionResponses = createActionResponsesEsSearchResultsMock(agentIds);
+      applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
+      const getHostMetadataList = jest.fn();
+      (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+        getHostMetadataList,
+      });
+
+      const result = await getActionList({
+        endpointService: endpointAppContextService,
+        spaceId: 'default',
+        page: 1,
+        pageSize: 10,
+        scoped: {
+          isCpsRead: () => false,
+          getEsClient: () => esClient,
+        } as unknown as ScopedEndpointServices,
+      });
+
+      expect(getHostMetadataList).not.toHaveBeenCalled();
+      expect(result.data[0].hosts['agent-x']).toEqual({ name: '' });
     });
 
     it('should return expected output for multiple agent ids', async () => {

@@ -86,9 +86,9 @@ describe('createServiceMapContextAttachmentDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns "graphApp"', () => {
+    it('returns "cluster"', () => {
       const definition = createServiceMapContextAttachmentDefinition();
-      expect(definition.getIcon()).toBe('graphApp');
+      expect(definition.getIcon()).toBe('cluster');
     });
   });
 });

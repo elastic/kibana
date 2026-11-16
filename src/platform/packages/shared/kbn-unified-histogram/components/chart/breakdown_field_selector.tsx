@@ -18,7 +18,8 @@ import {
 } from '@kbn/field-utils';
 import { css } from '@emotion/react';
 import { isESQLColumnGroupable } from '@kbn/esql-utils';
-import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { i18n } from '@kbn/i18n';
@@ -81,36 +82,45 @@ const FieldNameTruncate = ({ text }: { text: string }) => (
 );
 
 export interface BreakdownFieldSelectorProps {
-  dataView: DataView;
+  dataSource: DataSource;
   breakdown: UnifiedHistogramBreakdownContext;
+  /** Restricts the dropdown to this list. Omit it to use the source's own columns. */
   esqlColumns?: DatatableColumn[];
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   recommendedFields?: ReadonlyArray<string>;
   fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
-const mapToDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]) => {
+const toBreakdownFields = (columns: readonly DatatableColumn[]) =>
+  // filter out unsupported field types and counter time series metrics
+  columns
+    .filter(isESQLColumnGroupable)
+    .map((column) => new DataViewField(convertDatatableColumnToDataViewFieldSpec(column)));
+
+const mapToDropdownFields = (dataSource: DataSource, esqlColumns?: DatatableColumn[]) => {
   if (esqlColumns) {
-    return (
-      // filter out unsupported field types and counter time series metrics
-      esqlColumns
-        .filter(isESQLColumnGroupable)
-        .map((column) => new DataViewField(convertDatatableColumnToDataViewFieldSpec(column)))
-    );
+    return toBreakdownFields(esqlColumns);
   }
 
-  return dataView.fields.filter(fieldSupportsBreakdown);
+  if (dataSource.kind === 'esql') {
+    return toBreakdownFields(dataSource.resultColumns);
+  }
+
+  return dataSource.getDataView().fields.filter(fieldSupportsBreakdown);
 };
 
 export const BreakdownFieldSelector = ({
-  dataView,
+  dataSource,
   breakdown,
   esqlColumns,
   onBreakdownFieldChange,
   recommendedFields,
   fieldsMetadata,
 }: BreakdownFieldSelectorProps) => {
-  const fields = useMemo(() => mapToDropdownFields(dataView, esqlColumns), [dataView, esqlColumns]);
+  const fields = useMemo(
+    () => mapToDropdownFields(dataSource, esqlColumns),
+    [dataSource, esqlColumns]
+  );
   const fieldNames = useMemo(() => fields.map((f) => f.name), [fields]);
   const ecsFieldNames = useEcsFieldNames(fieldNames, fieldsMetadata);
 

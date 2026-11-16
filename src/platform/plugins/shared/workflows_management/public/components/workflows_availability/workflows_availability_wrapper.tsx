@@ -64,7 +64,7 @@ const LicenseAccessDenied = React.memo(() => {
     () => [
       <EuiButton fill href={'https://www.elastic.co/subscriptions'} target="_blank">
         <FormattedMessage
-          id="platform.plugins.shared.workflows_management.ui.upgradeLicense.subscriptionPlansButton"
+          id="workflows.ui.upgradeLicense.subscriptionPlansButton"
           defaultMessage="Subscription plans"
         />
         <EuiIcon type="external" aria-hidden={true} />
@@ -78,7 +78,7 @@ const LicenseAccessDenied = React.memo(() => {
         href={application.getUrlForApp('management', { deepLinkId: 'license_management' })}
       >
         <FormattedMessage
-          id="platform.plugins.shared.workflows_management.ui.upgradeLicense.manageLicenseButton"
+          id="workflows.ui.upgradeLicense.manageLicenseButton"
           defaultMessage="Manage your license"
         />
       </EuiButtonEmpty>,
@@ -89,14 +89,12 @@ const LicenseAccessDenied = React.memo(() => {
   return (
     <AccessDenied
       data-test-subj="workflowsLicenseAccessDenied"
-      title={i18n.translate(
-        'platform.plugins.shared.workflows_management.ui.upgradeLicense.title',
-        { defaultMessage: 'Upgrade your license' }
-      )}
-      description={i18n.translate(
-        'platform.plugins.shared.workflows_management.ui.upgradeLicense.description',
-        { defaultMessage: 'You need to upgrade your license to use Workflows.' }
-      )}
+      title={i18n.translate('workflows.ui.upgradeLicense.title', {
+        defaultMessage: 'Upgrade your license',
+      })}
+      description={i18n.translate('workflows.ui.upgradeLicense.description', {
+        defaultMessage: 'You need to upgrade your license to use Workflows.',
+      })}
       actions={actions}
       footer={<LicenseFooter />}
     />
@@ -117,7 +115,7 @@ const LicenseFooter = React.memo(() => (
       <EuiText color="subdued" textAlign="center" size="xs">
         <p css={{ marginBlock: 0 }}>
           <FormattedMessage
-            id="platform.plugins.shared.workflows_management.ui.upgradeLicense.footer"
+            id="workflows.ui.upgradeLicense.footer"
             defaultMessage="License required:"
           />
         </p>
@@ -126,7 +124,7 @@ const LicenseFooter = React.memo(() => (
     <EuiFlexItem grow={false}>
       <EuiBadge color="hollow">
         <FormattedMessage
-          id="platform.plugins.shared.workflows_management.ui.upgradeLicense.footer.badge"
+          id="workflows.ui.upgradeLicense.footer.badge"
           defaultMessage="Enterprise"
         />
       </EuiBadge>
@@ -160,7 +158,7 @@ const ServerlessTierAccessDenied = React.memo<{
       return [
         <EuiButton fill href={billingUrl} target="_blank">
           <FormattedMessage
-            id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.manageSubscriptionButton"
+            id="workflows.ui.unavailableInServerlessTier.manageSubscriptionButton"
             defaultMessage="Manage subscription"
           />
           <EuiIcon type="external" aria-hidden={true} />
@@ -171,7 +169,7 @@ const ServerlessTierAccessDenied = React.memo<{
     return [
       <EuiText color="subdued" textAlign="center" size="s">
         <FormattedMessage
-          id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.contactAdmin"
+          id="workflows.ui.unavailableInServerlessTier.contactAdmin"
           defaultMessage="Contact your administrator to upgrade your subscription."
         />
       </EuiText>,
@@ -181,17 +179,13 @@ const ServerlessTierAccessDenied = React.memo<{
   return (
     <AccessDenied
       data-test-subj="workflowsServerlessTierAccessDenied"
-      title={i18n.translate(
-        'platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.title',
-        { defaultMessage: 'Upgrade your subscription' }
-      )}
-      description={i18n.translate(
-        'platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.description',
-        {
-          defaultMessage:
-            'You need to upgrade your serverless project subscription to use Workflows.',
-        }
-      )}
+      title={i18n.translate('workflows.ui.unavailableInServerlessTier.title', {
+        defaultMessage: 'Upgrade your subscription',
+      })}
+      description={i18n.translate('workflows.ui.unavailableInServerlessTier.description', {
+        defaultMessage:
+          'You need to upgrade your serverless project subscription to use Workflows.',
+      })}
       actions={actions}
       footer={<ServerlessTierFooter requiredProducts={requiredProducts} />}
     />
@@ -215,7 +209,7 @@ const ServerlessTierFooter = React.memo<{
         <EuiText color="subdued" textAlign="center" size="xs">
           <p css={{ marginBlock: 0 }}>
             <FormattedMessage
-              id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.requiredProducts"
+              id="workflows.ui.unavailableInServerlessTier.requiredProducts"
               defaultMessage="To use Workflows, you need to upgrade your subscription to {count, plural, one {the following product tier} other {one of the following product tiers}}:"
               values={{ count: requiredProducts.length }}
             />

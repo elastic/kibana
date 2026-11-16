@@ -16,16 +16,18 @@ import type {
   ExecutionTerminatedEvent,
   PromptResponseEvent,
   RoundInput,
-  UserMessageEvent,
+  MessageEvent,
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
+  isMessageEvent,
   ZERO_MODEL_USAGE,
   answeredPromptRequestIds,
   interruptionOfTerminal,
   isExecutionTerminalEvent,
+  isTimelineEvent,
   isToolCallStep,
   parseExecutionId,
 } from '@kbn/agent-builder-common';
@@ -55,8 +57,12 @@ interface ExecutionPartial {
  * Reconstructs rounds from a timeline. Every terminated execution — with an outcome, failed or
  * aborted — forms a partial; a round is its executions folded in order. A pause is consumed as
  * soon as a `prompt_response` answers it, however the resume ended.
+ *
+ * Only timeline events take part in the fold; activity and custom events are excluded by class,
+ * whatever their `execution_id`.
  */
-export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[] => {
+export const eventsToRounds = (allEvents: ConversationEvent[]): ConversationRound[] => {
+  const events: ConversationEvent[] = allEvents.filter(isTimelineEvent);
   const byId = new Map(events.map((event) => [event.id, event]));
   // `prompt_response` events carry no execution_id, so the join is computed once over everything.
   const answered = answeredPromptRequestIds(events);
@@ -84,7 +90,7 @@ export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[]
     const trigger = triggerId ? byId.get(triggerId) : undefined;
 
     // exec_0 is triggered by a user_message; a resume execution by a prompt_response.
-    const isInitial = trigger?.type === TimelineEventType.userMessage;
+    const isInitial = trigger !== undefined && isMessageEvent(trigger);
     const isResume = trigger?.type === TimelineEventType.promptResponse;
     if (!isInitial && !isResume) {
       continue;
@@ -105,7 +111,7 @@ export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[]
     const steps =
       stepEvents.length > 0 ? stepsFromEvents(stepEvents) : terminated?.data.steps ?? [];
 
-    const userMessage = isInitial ? (trigger as UserMessageEvent) : undefined;
+    const userMessage = isInitial ? (trigger as MessageEvent) : undefined;
     const resumeInput = isResume ? (trigger as PromptResponseEvent).data.input : undefined;
     const startedEvent = group.find((event) => event.type === TimelineEventType.executionStarted);
     const round: ConversationRound = {
@@ -220,11 +226,11 @@ const stepsFromEvents = (events: ExecutionStepEvent[]): ConversationRoundStep[] 
     .map((event) => event.data.step);
 };
 
-const toRoundInput = (userMessage: UserMessageEvent): RoundInput => userMessage.data;
+const toRoundInput = (userMessage: MessageEvent): RoundInput => userMessage.data;
 
-/** Round authorship carried by a `user_message` actor. */
+/** Round authorship carried by a message actor; an agent carries none. */
 export const authorAndOrigin = (
-  userMessage: UserMessageEvent
+  userMessage: MessageEvent
 ): Pick<ConversationRound, 'author' | 'origin'> => {
   const { actor } = userMessage;
   // Only user/external actors carry round authorship; origin is present for external actors only.
@@ -235,6 +241,7 @@ export const authorAndOrigin = (
     id: actor.id,
     ...(actor.username ? { username: actor.username } : {}),
     ...(actor.full_name ? { full_name: actor.full_name } : {}),
+    ...(actor.principal_type ? { type: actor.principal_type } : {}),
   };
   return { author, ...(actor.origin ? { origin: actor.origin } : {}) };
 };

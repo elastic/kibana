@@ -58,7 +58,6 @@ describe('palette previews', () => {
           nlQuery: 'Change the palette to Cool',
           esqlQuery: existingConfig.data_source.query,
           chartType: SupportedChartType.Gauge,
-          schema: {},
           existingConfig: JSON.stringify(existingConfig),
           parsedExistingConfig: existingConfig,
         })

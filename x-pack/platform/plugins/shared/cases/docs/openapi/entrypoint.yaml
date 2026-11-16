@@ -45,6 +45,10 @@ paths:
     $ref: 'paths/api@cases@{caseid}@fields.yaml'
   '/api/cases/{caseId}/alerts':
     $ref: 'paths/api@cases@{caseid}@alerts.yaml'
+  '/api/cases/{caseId}/attachments':
+    $ref: 'paths/api@cases@{caseid}@attachments.yaml'
+  '/api/cases/{caseId}/attachments/{attachmentId}':
+    $ref: 'paths/api@cases@{caseid}@attachments@{attachmentid}.yaml'
   '/api/cases/{caseId}/comments':
     $ref: 'paths/api@cases@{caseid}@comments.yaml'
   '/api/cases/{caseId}/comments/_find':

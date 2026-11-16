@@ -12,7 +12,6 @@ import React from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { AiIndexCard } from './ai_index_card';
-import { AI_INDEX_TYPE_LABEL } from './labels';
 
 const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'my-ai-index',
@@ -59,22 +58,6 @@ describe('AiIndexCard', () => {
     expect(screen.getByTestId('contextAiIndexCard')).toBeInTheDocument();
   });
 
-  it.each([
-    ['index', 'index' as const],
-    ['data_stream', 'data_stream' as const],
-  ])('renders the type label for dest type %s', (_label, destType) => {
-    renderAiIndexCard(
-      buildAiIndex({
-        id: 'typed-index',
-        dest: { type: destType, value: 'backing-store' },
-      })
-    );
-
-    expect(screen.getByTestId('contextAiIndexCardType')).toHaveTextContent(
-      AI_INDEX_TYPE_LABEL[destType]
-    );
-  });
-
   // `1fr` grid tracks size to the card's min-content width, so an unbreakable id stretches the grid.
   it('keeps a long id breakable and clamped to one line', () => {
     const id = 'a'.repeat(256);
@@ -104,10 +87,20 @@ describe('AiIndexCard', () => {
     );
   });
 
-  it('omits the description block when there is no description', () => {
-    renderAiIndexCard(buildAiIndex({ description: undefined }));
+  it('reserves two lines of description space for user indexes without a description', () => {
+    renderAiIndexCard(buildAiIndex({ description: undefined, managed: false }));
 
-    expect(screen.queryByTestId('contextAiIndexCardDescription')).not.toBeInTheDocument();
+    const description = screen.getByTestId('contextAiIndexCardDescription');
+    expect(description).toHaveTextContent('');
+    expect(description).toHaveStyle({ minHeight: '2lh' });
+  });
+
+  it('reserves five lines of description space for managed indexes without a description', () => {
+    renderAiIndexCard(buildAiIndex({ description: undefined, managed: true }));
+
+    const description = screen.getByTestId('contextAiIndexCardDescription');
+    expect(description).toHaveTextContent('');
+    expect(description).toHaveStyle({ minHeight: '5lh' });
   });
 
   describe('source and automation counts', () => {
@@ -147,17 +140,46 @@ describe('AiIndexCard', () => {
   });
 
   it('shows the managed badge and hides the updated footer when managed is true', () => {
-    renderAiIndexCard(buildAiIndex({ managed: true }));
+    renderAiIndexCard(
+      buildAiIndex({
+        managed: true,
+        sources: [{ type: 'esql', value: 'FROM logs' }],
+        automations: [{ type: 'workflow', value: 'workflow-1' }],
+      })
+    );
 
     expect(screen.getByTestId('contextAiIndexCardManaged')).toHaveTextContent('Managed');
     expect(screen.queryByTestId('contextAiIndexCardUpdated')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexCardSources')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexCardAutomations')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexCardType')).not.toBeInTheDocument();
   });
 
   it('shows the updated footer and no managed badge when managed is false', () => {
-    renderAiIndexCard(buildAiIndex({ managed: false }));
+    renderAiIndexCard(
+      buildAiIndex({
+        managed: false,
+        automations: [{ type: 'workflow', value: 'workflow-1' }],
+      })
+    );
 
-    expect(screen.getByTestId('contextAiIndexCardUpdated')).toHaveTextContent('Updated');
+    expect(screen.getByTestId('contextAiIndexCardUpdated')).toHaveTextContent(/^Updated /);
     expect(screen.queryByTestId('contextAiIndexCardManaged')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexCardNeedsSetup')).not.toBeInTheDocument();
+  });
+
+  it('shows the needs setup badge when there are no automations on a user index', () => {
+    renderAiIndexCard(buildAiIndex({ managed: false, automations: [] }));
+
+    expect(screen.getByTestId('contextAiIndexCardNeedsSetup')).toHaveTextContent('Needs setup');
+    expect(screen.queryByTestId('contextAiIndexCardManaged')).not.toBeInTheDocument();
+  });
+
+  it('does not show the needs setup badge on managed indices', () => {
+    renderAiIndexCard(buildAiIndex({ managed: true, automations: [] }));
+
+    expect(screen.getByTestId('contextAiIndexCardManaged')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexCardNeedsSetup')).not.toBeInTheDocument();
   });
 
   it('calls onDeleteClick when the delete action is selected', () => {

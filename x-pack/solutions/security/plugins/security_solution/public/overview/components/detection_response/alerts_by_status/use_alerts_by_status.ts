@@ -19,6 +19,10 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { useUiSetting } from '../../../../common/lib/kibana';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  combineEntityGroupFilters,
+  getEntityGroupRecords,
+} from '../../../../flyout/entity_details/shared/entity_store_group_utils';
 import type { AlertsByStatusAgg, AlertsByStatusResponse, ParsedAlertsData } from './types';
 import {
   STATUS_CRITICAL_LABEL,
@@ -42,12 +46,15 @@ export const ENTITY_ID_FIELD = 'entity.id';
 /** Stable empty map so callers passing inline `{}` do not invalidate query memoization every render. */
 const EMPTY_IDENTITY_FIELDS: Record<string, string> = {};
 
-const toStoreEntityType = (type: string | undefined): 'host' | 'user' | undefined => {
+const toStoreEntityType = (type: string | undefined): 'host' | 'user' | 'service' | undefined => {
   if (type === EntityType.host || type === 'host') {
     return 'host';
   }
   if (type === EntityType.user || type === 'user') {
     return 'user';
+  }
+  if (type === EntityType.service || type === 'service') {
+    return 'service';
   }
   return undefined;
 };
@@ -142,6 +149,11 @@ export interface UseAlertsByStatusProps {
   identityFields: Record<string, string>;
   entityType?: string;
   entityRecord?: EntityStoreRecord | null;
+  /**
+   * Resolution-group aliases of the entity record. When present (Entity Store v2), alerts of any
+   * record in the group (target or alias) are counted.
+   */
+  aliasRecords?: readonly EntityStoreRecord[];
   additionalFilters?: ESBoolQuery[];
   from: string;
   to: string;
@@ -165,6 +177,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
   from,
   runtimeMappings,
   entityRecord: entityRecordInput,
+  aliasRecords,
 }) => {
   const dispatch = useDispatch();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
@@ -192,10 +205,16 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
   const euidApi = useEntityStoreEuidApi();
   const entityFilters = useMemo(() => {
     if (entityStoreV2Enabled && euidApi?.euid && (entityRecord || entityRecordInput)) {
-      // Use the entity record to generate a DSL query fragment
-      const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(
-        storeEntityType ?? 'generic',
-        entityRecord ?? entityRecordInput
+      // Use the entity record(s) to generate a DSL query fragment; in the resolution-group view the
+      // target's and aliases' filters are OR-ed together.
+      const { dsl } = euidApi.euid;
+      const filter = combineEntityGroupFilters(
+        getEntityGroupRecords(entityRecord ?? entityRecordInput, aliasRecords),
+        (record) =>
+          dsl.getEuidFilterBasedOnDocument(
+            euidApi.getBuiltInEntityDefinition(storeEntityType ?? 'generic'),
+            record
+          )
       );
       return filter != null ? [filter] : [];
     }
@@ -205,9 +224,10 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       : [];
   }, [
     entityStoreV2Enabled,
-    euidApi?.euid,
+    euidApi,
     entityRecord,
     entityRecordInput,
+    aliasRecords,
     identityFieldsStable,
     storeEntityType,
   ]);

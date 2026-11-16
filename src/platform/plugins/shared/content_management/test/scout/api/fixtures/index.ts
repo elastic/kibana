@@ -12,6 +12,8 @@ import { apiTest as baseApiTest } from '@kbn/scout';
 
 export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
 
+export { FavoritesCleanup } from './favorites_cleanup';
+
 export {
   DASHBOARD_API_PATH,
   DASHBOARD_HEADERS,

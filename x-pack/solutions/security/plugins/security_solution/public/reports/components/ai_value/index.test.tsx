@@ -19,7 +19,7 @@ import { AIValueReportLayout } from './ai_value_report_layout';
 import { SAMPLE_VALUE_METRICS, SAMPLE_VALUE_METRICS_COMPARE } from './sample_data';
 import type { StartServices } from '../../../types';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
-import { useIsAlertsAndAttacksAlignmentEnabled } from '../../../common/hooks/use_is_alerts_and_attacks_alignment_enabled';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSecuritySolutionLinkProps } from '../../../common/components/links';
 
 jest.mock('../../../common/lib/kibana', () => ({
@@ -53,9 +53,15 @@ jest.mock('../../../common/components/links', () => ({
   })),
 }));
 
-jest.mock('../../../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => ({
-  useIsAlertsAndAttacksAlignmentEnabled: jest.fn(),
+jest.mock('../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
 }));
+
+const mockAlignmentEnabled = (enabled: boolean) => {
+  (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+    (feature: string) => feature === 'enableAlertsAndAttacksAlignment' && enabled
+  );
+};
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseValueMetrics = useValueMetrics as jest.MockedFunction<typeof useValueMetrics>;
@@ -121,7 +127,7 @@ describe('AIValueReport', () => {
     ));
     useAIValueExportContextMock.mockReturnValue(undefined);
     mockUseKibana.mockReturnValue(createMockKibanaServices());
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(false);
+    mockAlignmentEnabled(false);
 
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: ['alert-1', 'alert-2'],
@@ -204,8 +210,8 @@ describe('AIValueReport', () => {
     expect(defaultProps.setIsSampleMode).toHaveBeenCalledWith(true);
   });
 
-  it('renders the sample layout with Attacks link when the advanced setting is enabled', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
+  it('renders the sample layout with Attacks link when alerts and attacks alignment is enabled', () => {
+    mockAlignmentEnabled(true);
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: [],
       hasNoCurrentDiscoveries: true,

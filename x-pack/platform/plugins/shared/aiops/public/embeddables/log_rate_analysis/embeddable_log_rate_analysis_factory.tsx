@@ -35,6 +35,8 @@ import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysi
 import type { LogRateAnalysisEmbeddableApi } from './types';
 import { EmbeddableLogRateAnalysisUserInput } from './log_rate_analysis_config_input';
 import { canUseAiops } from '../../capabilities';
+import { normalizeStoredPanelTitle } from '../normalize_stored_panel_title';
+import { getLogRateAnalysisDefaultTitle } from './default_title';
 
 export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
 
@@ -51,7 +53,13 @@ export const getLogRateAnalysisEmbeddableFactory = (
       canUseAiops(coreStart, true);
       const runtimeState = initialState;
       const timeRangeManager = initializeTimeRangeManager(initialState);
-      const titleManager = initializeTitleManager(initialState);
+      const titleManager = initializeTitleManager({
+        ...initialState,
+        title: normalizeStoredPanelTitle(initialState.title),
+      });
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(
+        getLogRateAnalysisDefaultTitle()
+      );
 
       const { logRateAnalysisControlsApi, serializeLogRateAnalysisChartState } =
         initializeLogRateAnalysisControls(runtimeState);
@@ -59,7 +67,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
+      const dataSources$ = new BehaviorSubject<DataView[] | undefined>([
         await pluginStart.data.dataViews.get(runtimeState.data_view_id),
       ]);
 
@@ -87,15 +95,20 @@ export const getLogRateAnalysisEmbeddableFactory = (
           ...titleComparators,
         }),
         applySerializedState: (nextState) => {
-          titleManager.reinitializeState(nextState);
-          timeRangeManager.reinitializeState(nextState);
-          logRateAnalysisControlsApi.updateUserInput(nextState);
+          const normalizedState = {
+            ...nextState,
+            title: normalizeStoredPanelTitle(nextState.title),
+          };
+          titleManager.reinitializeState(normalizedState);
+          timeRangeManager.reinitializeState(normalizedState);
+          logRateAnalysisControlsApi.updateUserInput(normalizedState);
         },
       });
 
       const api = finalizeApi({
         ...timeRangeManager.api,
         ...titleManager.api,
+        defaultTitle$,
         ...stateApi,
         ...logRateAnalysisControlsApi,
         getTypeDisplayName: () =>
@@ -135,7 +148,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
         },
         dataLoading$,
         blockingError$,
-        dataViews$,
+        dataSources$,
       });
 
       const LogRateAnalysisEmbeddableWrapper = getLogRateAnalysisEmbeddableWrapperComponent(
@@ -144,7 +157,9 @@ export const getLogRateAnalysisEmbeddableFactory = (
       );
 
       const onLoading = (v: boolean) => dataLoading$.next(v);
-      const onRenderComplete = () => dataLoading$.next(false);
+      const onRenderComplete = () => {
+        dataLoading$.next(false);
+      };
       const onError = (error: Error) => blockingError$.next(error);
 
       return {
@@ -191,6 +206,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
               onError={onError}
               embeddingOrigin={embeddingOrigin}
               lastReloadRequestTime={lastReloadRequestTime}
+              parentApi={parentApi}
             />
           );
         },

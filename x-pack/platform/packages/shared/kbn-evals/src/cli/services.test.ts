@@ -8,7 +8,25 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
-import { edotEnvHash, isEdotStale, scoutEnvHash } from './services';
+import { execFileSync } from 'child_process';
+import { SERVERLESS_SECRETS_DIR } from '@kbn/es';
+import { ToolingLog } from '@kbn/tooling-log';
+import {
+  connectorsHash,
+  edotEnvHash,
+  isEdotStale,
+  isScoutStale,
+  scoutEnvHash,
+  startService,
+  stopService,
+} from './services';
+
+jest.mock('child_process', () => ({
+  ...jest.requireActual('child_process'),
+  execFileSync: jest.fn(),
+}));
+
+const execFileSyncMock = execFileSync as jest.MockedFunction<typeof execFileSync>;
 
 const LOCAL_ES = 'http://elastic:changeme@localhost:9200';
 const CLOUD_ES = 'https://kbn-evals-serverless.es.us-central1.gcp.elastic.cloud';
@@ -97,5 +115,230 @@ describe('scoutEnvHash', () => {
     expect(scoutEnvHash({ ...base, B: 'k', A: 'h' })).toBe(
       scoutEnvHash({ ...base, A: 'h', B: 'k' })
     );
+  });
+});
+
+describe('isScoutStale', () => {
+  let repoRoot: string;
+  const serverless = { arch: 'serverless', domain: 'observability_complete' } as const;
+
+  beforeEach(() => {
+    repoRoot = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-evals-services-'));
+  });
+
+  afterEach(() => {
+    Fs.rmSync(repoRoot, { recursive: true, force: true });
+  });
+
+  const writeScoutState = (entry: Record<string, unknown>) => {
+    const dir = Path.join(repoRoot, 'target/evals');
+    Fs.mkdirSync(dir, { recursive: true });
+    Fs.writeFileSync(
+      Path.join(dir, 'services.json'),
+      JSON.stringify({
+        scout: {
+          pid: process.pid,
+          logFile: 'target/evals/scout.log',
+          startedAt: new Date().toISOString(),
+          connectorsHash: connectorsHash(),
+          envHash: scoutEnvHash({}),
+          ...entry,
+        },
+      })
+    );
+  };
+
+  it('treats a Scout started before arch/domain were recorded as stateful/classic', () => {
+    writeScoutState({});
+
+    expect(isScoutStale(repoRoot, undefined, {})).toEqual({ stale: false });
+    expect(isScoutStale(repoRoot, undefined, {}, serverless)).toEqual({
+      stale: true,
+      reason:
+        'Scout arch/domain changed (running: stateful/classic, requested: serverless/observability_complete)',
+    });
+  });
+
+  it('reuses a Scout already running on the requested arch/domain', () => {
+    writeScoutState({ scoutArch: 'serverless', scoutDomain: 'observability_complete' });
+
+    expect(isScoutStale(repoRoot, undefined, {}, serverless)).toEqual({ stale: false });
+  });
+
+  it('restarts a serverless Scout when stateful is requested', () => {
+    writeScoutState({ scoutArch: 'serverless', scoutDomain: 'observability_complete' });
+
+    expect(isScoutStale(repoRoot, undefined, {}).stale).toBe(true);
+  });
+
+  it('restarts a Scout whose suite scoutHook output changed, without naming the values', () => {
+    writeScoutState({ envHash: scoutEnvHash({ SUITE_API_KEY: 'started-key' }) });
+
+    expect(isScoutStale(repoRoot, undefined, { SUITE_API_KEY: 'SECRET_ROTATED_KEY' })).toEqual({
+      stale: true,
+      reason: "TRACING_EXPORTERS, GCS_CREDENTIALS or the suite's scoutHook output changed",
+    });
+  });
+});
+
+describe('startService', () => {
+  let repoRoot: string;
+
+  beforeEach(() => {
+    repoRoot = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-evals-services-'));
+  });
+
+  afterEach(() => {
+    Fs.rmSync(repoRoot, { recursive: true, force: true });
+  });
+
+  it('persists only a hash of the env a service was started with', () => {
+    const env = { SUITE_API_KEY: 'SECRET_SUITE_KEY', GCS_CREDENTIALS: 'SECRET_GCS_JSON' };
+
+    startService(repoRoot, 'scout', process.execPath, ['-e', ''], new ToolingLog(), {
+      envHash: scoutEnvHash(env),
+      env,
+    });
+
+    const state = Fs.readFileSync(Path.join(repoRoot, 'target/evals/services.json'), 'utf8');
+    expect(JSON.parse(state).scout.envHash).toBe(scoutEnvHash(env));
+    expect(state).not.toContain('SECRET');
+  });
+});
+
+describe('stopService (scout)', () => {
+  const log = new ToolingLog();
+  let repoRoot: string;
+  let rmSyncSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    repoRoot = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-evals-services-'));
+    const realRmSync = Fs.rmSync;
+    rmSyncSpy = jest
+      .spyOn(Fs, 'rmSync')
+      .mockImplementation((path, options) =>
+        path === SERVERLESS_SECRETS_DIR ? undefined : realRmSync(path, options)
+      );
+  });
+
+  afterEach(() => {
+    Fs.rmSync(repoRoot, { recursive: true, force: true });
+    rmSyncSpy.mockRestore();
+    execFileSyncMock.mockReset();
+  });
+
+  const writeScoutState = (entry: Record<string, unknown>) => {
+    const dir = Path.join(repoRoot, 'target/evals');
+    Fs.mkdirSync(dir, { recursive: true });
+    Fs.writeFileSync(
+      Path.join(dir, 'services.json'),
+      JSON.stringify({
+        scout: {
+          pid: DEAD_PID,
+          logFile: 'target/evals/scout.log',
+          startedAt: new Date().toISOString(),
+          ...entry,
+        },
+      })
+    );
+  };
+
+  const SERVERLESS_IMAGE = 'docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified';
+  const STATEFUL_IMAGE = 'docker.elastic.co/elasticsearch/elasticsearch:9.3.0-SNAPSHOT';
+  const UIAM_IMAGE = 'docker.elastic.co/kibana-ci/uiam:latest-verified';
+
+  const mockDocker = ({
+    containers,
+    psFails = false,
+    rmFails = false,
+  }: {
+    containers: Array<[name: string, image: string]>;
+    psFails?: boolean;
+    rmFails?: boolean;
+  }) => {
+    execFileSyncMock.mockImplementation((_command, args) => {
+      if (args?.[0] === 'ps') {
+        if (psFails) throw new Error('Cannot connect to the Docker daemon');
+        return containers.map((container) => container.join('\t')).join('\n') + '\n';
+      }
+      if (args?.[0] === 'rm' && rmFails) throw new Error('Cannot connect to the Docker daemon');
+      return '';
+    });
+  };
+
+  const dockerRmCalls = () => execFileSyncMock.mock.calls.filter(([, args]) => args?.[0] === 'rm');
+
+  const secretsRemoved = () =>
+    rmSyncSpy.mock.calls.some(([path]) => path === SERVERLESS_SECRETS_DIR);
+
+  it('removes the serverless containers and secrets left by a serverless Scout', async () => {
+    writeScoutState({ scoutArch: 'serverless', scoutDomain: 'observability_complete' });
+    mockDocker({
+      containers: [
+        ['es01', SERVERLESS_IMAGE],
+        ['es02', SERVERLESS_IMAGE],
+        ['uiam-cosmosdb', 'docker.elastic.co/kibana-ci/uiam-azure-cosmos-emulator:latest-verified'],
+        ['uiam', UIAM_IMAGE],
+      ],
+    });
+
+    await stopService(repoRoot, 'scout', log);
+
+    expect(dockerRmCalls()).toEqual([
+      ['docker', ['rm', '--force', 'es01', 'es02', 'uiam-cosmosdb', 'uiam'], expect.anything()],
+    ]);
+    expect(secretsRemoved()).toBe(true);
+  });
+
+  it('removes serverless containers orphaned after Scout is no longer tracked', async () => {
+    mockDocker({
+      containers: [
+        ['es01', SERVERLESS_IMAGE],
+        ['uiam', UIAM_IMAGE],
+      ],
+    });
+
+    await stopService(repoRoot, 'scout', log);
+
+    expect(dockerRmCalls()).toEqual([
+      ['docker', ['rm', '--force', 'es01', 'uiam'], expect.anything()],
+    ]);
+  });
+
+  it('leaves a stateful es01 started by `es docker` alone', async () => {
+    mockDocker({ containers: [['es01', STATEFUL_IMAGE]] });
+
+    await stopService(repoRoot, 'scout', log);
+
+    expect(dockerRmCalls()).toEqual([]);
+  });
+
+  it('leaves serverless containers alone when the tracked Scout is stateful', async () => {
+    writeScoutState({ scoutArch: 'stateful', scoutDomain: 'classic' });
+    mockDocker({ containers: [['es01', SERVERLESS_IMAGE]] });
+
+    await stopService(repoRoot, 'scout', log);
+
+    expect(execFileSyncMock).not.toHaveBeenCalled();
+    expect(secretsRemoved()).toBe(false);
+  });
+
+  it('keeps the secrets while the containers could not be listed', async () => {
+    writeScoutState({ scoutArch: 'serverless', scoutDomain: 'observability_complete' });
+    mockDocker({ containers: [], psFails: true });
+
+    await stopService(repoRoot, 'scout', log);
+
+    expect(dockerRmCalls()).toEqual([]);
+    expect(secretsRemoved()).toBe(false);
+  });
+
+  it('keeps the secrets while the containers could not be removed', async () => {
+    writeScoutState({ scoutArch: 'serverless', scoutDomain: 'observability_complete' });
+    mockDocker({ containers: [['es01', SERVERLESS_IMAGE]], rmFails: true });
+
+    await stopService(repoRoot, 'scout', log);
+
+    expect(secretsRemoved()).toBe(false);
   });
 });

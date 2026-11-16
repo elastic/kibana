@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type {
-  ElasticsearchCapabilities,
-  ElasticsearchClient,
-} from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
+import type { BuildFlavor } from '@kbn/config';
 import type { IRouter, Logger } from '@kbn/core/server';
+import type { CreateProfilingEsClient } from '@kbn/profiling-data-access-plugin/server';
 import type { ProfilingConfig } from '..';
 import type {
   ProfilingPluginSetupDeps,
@@ -18,11 +16,12 @@ import type {
   ProfilingRequestHandlerContext,
   TelemetryUsageCounter,
 } from '../types';
-import type { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { registerTopNFunctionsAPMTransactionsRoute } from './apm';
 import { registerFlameChartSearchRoute } from './flamechart';
 import { registerTopNFunctionsSearchRoute } from './functions';
-import { registerSetupRoute } from './setup/route';
+import { registerSetupRoute } from './universal_profiling/setup/route';
+import { registerStatusRoute } from './status/route';
+import { registerSchemasRoute } from './schemas/route';
 import { registerStorageExplorerRoute } from './storage_explorer/route';
 import {
   registerTraceEventsTopNContainersSearchRoute,
@@ -41,14 +40,12 @@ export interface RouteRegisterParameters {
     setup: ProfilingPluginSetupDeps;
     config: ProfilingConfig;
     stackVersion: string;
+    buildFlavor: BuildFlavor;
     telemetryUsageCounter?: TelemetryUsageCounter;
     esCapabilities: ElasticsearchCapabilities;
   };
   services: {
-    createProfilingEsClient: (params: {
-      request: KibanaRequest;
-      esClient: ElasticsearchClient;
-    }) => ProfilingESClient;
+    createProfilingEsClient: CreateProfilingEsClient;
   };
 }
 
@@ -66,6 +63,10 @@ export function registerRoutes(params: RouteRegisterParameters) {
   // Setup of Profiling resources, automates the configuration of Universal Profiling
   // and will show instructions on how to add data
   registerSetupRoute(params);
+  // Profiling status across the OTel and Universal Profiling schemas
+  registerStatusRoute(params);
+  // Schemas with profiling data for a given time range and query
+  registerSchemasRoute(params);
   registerStorageExplorerRoute(params);
   registerTopNFunctionsAPMTransactionsRoute(params);
 }

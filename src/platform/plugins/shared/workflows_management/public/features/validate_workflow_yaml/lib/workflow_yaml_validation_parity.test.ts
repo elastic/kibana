@@ -39,6 +39,7 @@ export const WORKFLOW_YAML_VALIDATION_PARITY_FIXTURE = [
 
 const testValidationContext: WorkflowYamlValidationContext = {
   registry: emptyRegistry,
+  isManaged: false,
   connectorTypes: { status: 'ready', value: {} },
   connectorsManagementUrl: 'http://test/connectors',
   workflows: { workflows: {}, totalWorkflows: 0 },

@@ -8,7 +8,7 @@ import { promises as Fs } from 'fs';
 import Path from 'path';
 import os from 'os';
 import { noop } from 'lodash';
-import simpleGit, { ResetMode } from 'simple-git';
+import { simpleGit, ResetMode } from 'simple-git';
 import { createDirIfNotExists } from './file_utils';
 
 class GitCheckoutError extends Error {

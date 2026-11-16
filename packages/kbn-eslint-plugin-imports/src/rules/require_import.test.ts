@@ -8,7 +8,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { RequireImportRule } from './require_import';
+import { rules } from '../..';
 import dedent from 'dedent';
 
 const fmt = (str: TemplateStringsArray) => dedent(str) + '\n';
@@ -44,7 +44,7 @@ const babelTester = [
 
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
-    tester.run('@kbn/imports/require_import', RequireImportRule, {
+    tester.run('@kbn/imports/require_import', rules.require_import, {
       valid: [
         {
           options: ['mocha'],

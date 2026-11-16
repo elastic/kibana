@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiBetaBadge, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiBetaBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+} from '@elastic/eui';
 import { connectorsTechPreviewBadgeProps, labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -16,13 +23,18 @@ import connectorsIllustration from '../overview/assets/handshake.svg';
 
 export interface ConnectorsCustomizeEmptyStateProps {
   canEditAgent: boolean;
+  hasAllPrivileges: boolean;
   onAddFromLibrary: () => void;
+  onCreateNew: () => void;
 }
 
 export const ConnectorsCustomizeEmptyState: React.FC<ConnectorsCustomizeEmptyStateProps> = ({
   canEditAgent,
+  hasAllPrivileges,
   onAddFromLibrary,
+  onCreateNew,
 }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { createAgentBuilderUrl } = useNavigation();
   const { docLinksService } = useAgentBuilderServices();
 
@@ -36,16 +48,52 @@ export const ConnectorsCustomizeEmptyState: React.FC<ConnectorsCustomizeEmptySta
       learnMoreHref={docLinksService.agentBuilderConnectors}
       learnMoreSuffix={labels.agentConnectors.emptyStateLearnMoreSuffix}
       primaryAction={
-        canEditAgent ? (
-          <EuiButton
-            data-test-subj="agentConnectorsCustomizeEmptyStateAddButton"
-            fill
-            iconType="plusCircle"
-            iconSide="left"
-            onClick={onAddFromLibrary}
+        hasAllPrivileges && canEditAgent ? (
+          <EuiPopover
+            aria-label={labels.connectors.addConnectorPopoverLabel}
+            button={
+              <EuiButton
+                data-test-subj="agentConnectorsCustomizeEmptyStateAddButton"
+                fill
+                iconType="plusCircle"
+                iconSide="left"
+                onClick={() => setIsMenuOpen((prev) => !prev)}
+              >
+                {labels.agentConnectors.emptyStateAddButton}
+              </EuiButton>
+            }
+            isOpen={isMenuOpen}
+            closePopover={() => setIsMenuOpen(false)}
+            anchorPosition="downLeft"
+            panelPaddingSize="none"
           >
-            {labels.agentConnectors.emptyStateAddButton}
-          </EuiButton>
+            <EuiContextMenuPanel
+              items={[
+                <EuiContextMenuItem
+                  key="from-library"
+                  icon="download"
+                  data-test-subj="agentConnectorsAddFromLibraryMenuItem"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onAddFromLibrary();
+                  }}
+                >
+                  {labels.connectors.fromLibraryMenuItem}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key="create-new"
+                  icon="plusCircle"
+                  data-test-subj="agentConnectorsCreateNewMenuItem"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onCreateNew();
+                  }}
+                >
+                  {labels.connectors.createNewMenuItem}
+                </EuiContextMenuItem>,
+              ]}
+            />
+          </EuiPopover>
         ) : undefined
       }
       secondaryAction={

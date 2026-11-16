@@ -13,6 +13,10 @@ import { UnmappedFieldsStrategy } from '../commands/registry/types';
 import { type ESQLColumnData, type ESQLPolicy } from '../commands/registry/types';
 import { getCurrentQueryAvailableColumns, getFieldsFromES } from './helpers';
 import { getUnmappedFieldsStrategy } from '../commands/definitions/utils/settings';
+import {
+  getNamedSubqueries,
+  type NamedSubquery,
+} from '../commands/definitions/utils/named_subqueries';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
@@ -42,6 +46,9 @@ export class QueryColumns {
    * NULLIFY, not mapped columns are treated as null.
    */
   private unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT;
+
+  /** LET bindings that FROM sources can reference. */
+  private readonly namedSubqueries: readonly NamedSubquery[];
 
   /**
    * Retrieves from cache the columns for a given query, ignoring case.
@@ -95,6 +102,7 @@ export class QueryColumns {
     }
   ) {
     this.unmappedFieldsStrategy = getUnmappedFieldsStrategy(query.header);
+    this.namedSubqueries = getNamedSubqueries(query.header);
   }
 
   /**
@@ -205,7 +213,8 @@ export class QueryColumns {
         getPolicies,
         this.resourceRetriever?.getTimeseriesIndices ?? (async () => ({ indices: [] })),
         this.originalQueryText,
-        this.unmappedFieldsStrategy
+        this.unmappedFieldsStrategy,
+        this.namedSubqueries
       );
     }
 
@@ -236,7 +245,8 @@ export class QueryColumns {
       getPolicies,
       this.resourceRetriever?.getTimeseriesIndices ?? (async () => ({ indices: [] })),
       this.originalQueryText,
-      this.unmappedFieldsStrategy
+      this.unmappedFieldsStrategy,
+      this.namedSubqueries
     );
 
     return availableFields;

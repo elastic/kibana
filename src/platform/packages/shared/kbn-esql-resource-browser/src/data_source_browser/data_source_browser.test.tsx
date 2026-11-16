@@ -50,15 +50,19 @@ const mockViews = (result: EsqlViewsResult) => {
 
 const http = {};
 
+const canReadViewsCapabilities = { esqlViews: { read: true } };
+
 const renderBrowser = ({
   onSelect = jest.fn(),
   esql,
+  capabilities = canReadViewsCapabilities,
 }: {
   onSelect?: jest.Mock;
   esql?: { enrichViews?: (views: EsqlView[]) => Promise<EsqlView[]> };
+  capabilities?: Record<string, Record<string, boolean>>;
 } = {}) => {
   render(
-    <KibanaContextProvider services={{ core: { http, application: { capabilities: {} } }, esql }}>
+    <KibanaContextProvider services={{ core: { http, application: { capabilities } }, esql }}>
       <DataSourceBrowser
         isOpen
         isTimeseries={false}
@@ -104,6 +108,26 @@ describe('DataSourceBrowser views', () => {
     ).toBeInTheDocument();
     expect(getResourceList().getByRole('option', { name: /latency_view/ })).toBeInTheDocument();
     expect(getResourceList().getByRole('option', { name: /logs-\*/ })).toBeInTheDocument();
+  });
+
+  it.each([
+    ['the read capability is denied', { esqlViews: { read: false } }],
+    ['the ES|QL views feature is not registered', {}],
+  ])('hides the View category and skips the request when %s', async (_, capabilities) => {
+    renderBrowser({ capabilities });
+
+    expect(await getResourceList().findByRole('option', { name: /logs-\*/ })).toBeInTheDocument();
+    expect(
+      getResourceList().queryByRole('option', { name: /errors_view/ })
+    ).not.toBeInTheDocument();
+    expect(getViewsMock).not.toHaveBeenCalled();
+
+    await userEvent.click(
+      screen.getByRole('button', { name: DATA_SOURCE_BROWSER_I18N_KEYS.filterTitle })
+    );
+    expect(
+      screen.queryByRole('option', { name: (name: string) => name.startsWith('View') })
+    ).not.toBeInTheDocument();
   });
 
   it('refreshes the shared views cache the editor validates against', async () => {
@@ -170,6 +194,38 @@ describe('DataSourceBrowser views', () => {
 
     await userEvent.click(await getResourceList().findByRole('option', { name: /errors_view/ }));
 
-    expect(onSelect).toHaveBeenCalledWith('errors_view', DataSourceSelectionChange.Add);
+    expect(onSelect).toHaveBeenCalledWith('errors_view', DataSourceSelectionChange.Add, {
+      isView: true,
+    });
+  });
+
+  it('still reports a view as a view when an enricher rewrites its type', async () => {
+    // Streams rewrites a view's type to the backing stream's, so `type` cannot identify a view.
+    const { onSelect } = renderBrowser({
+      esql: {
+        enrichViews: jest.fn(async (enriched: EsqlView[]) =>
+          enriched.map((view) => ({ ...view, type: SOURCES_TYPES.QUERY_STREAM }))
+        ),
+      },
+    });
+
+    const view = await getResourceList().findByRole('option', { name: /errors_view/ });
+    expect(view).toHaveTextContent('Stream');
+
+    await userEvent.click(view);
+
+    expect(onSelect).toHaveBeenCalledWith('errors_view', DataSourceSelectionChange.Add, {
+      isView: true,
+    });
+  });
+
+  it('does not report a plain index as a view', async () => {
+    const { onSelect } = renderBrowser();
+
+    await userEvent.click(await getResourceList().findByRole('option', { name: /logs-\*/ }));
+
+    expect(onSelect).toHaveBeenCalledWith('logs-*', DataSourceSelectionChange.Add, {
+      isView: false,
+    });
   });
 });

@@ -129,6 +129,28 @@ describe('createNewAPIKeySet', () => {
     );
   });
 
+  test('accepts a UIAM-only result', async () => {
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      uiamResult: { id: '456', name: '456', api_key: 'def' },
+    });
+    const apiKey = await createNewAPIKeySet(rulesClientParams, {
+      id: attributes.alertTypeId,
+      ruleName: attributes.name,
+      username,
+      profileUid,
+      shouldUpdateApiKey: true,
+    });
+    expect(apiKey).toEqual({
+      apiKey: null,
+      apiKeyCreatedByUser: false,
+      apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
+      uiamApiKey: 'NDU2OmRlZg==',
+      uiamApiKeyExternal: false,
+    });
+  });
+
   test('forwards refresh to createAPIKey when provided', async () => {
     rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,

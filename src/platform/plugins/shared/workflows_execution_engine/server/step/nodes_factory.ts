@@ -99,6 +99,7 @@ import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/st
 import type { StepIoService } from '../workflow_context_manager/step_io_service';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
@@ -110,7 +111,8 @@ export class NodesFactory {
     private workflowGraph: WorkflowRuntimeGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private dependencies: ContextDependencies,
-    private stepIoService: StepIoService
+    private stepIoService: StepIoService,
+    private workflowExecutionState: Pick<WorkflowExecutionState, 'getStepExecutionsByStepId'>
   ) {}
 
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
@@ -132,7 +134,7 @@ export class NodesFactory {
         node as ElasticsearchGraphNode,
         stepExecutionRuntime,
         this.workflowRuntime,
-        this.workflowLogger
+        stepExecutionRuntime.stepLogger
       );
     }
 
@@ -145,7 +147,7 @@ export class NodesFactory {
         node as KibanaGraphNode,
         stepExecutionRuntime,
         this.workflowRuntime,
-        this.workflowLogger
+        stepExecutionRuntime.stepLogger
       );
     }
 
@@ -159,7 +161,7 @@ export class NodesFactory {
         node,
         stepExecutionRuntime,
         this.workflowRuntime,
-        this.workflowLogger
+        stepExecutionRuntime.stepLogger
       );
     }
 
@@ -178,7 +180,7 @@ export class NodesFactory {
           stepExecutionRuntime,
           this.connectorExecutor,
           this.workflowRuntime,
-          this.workflowLogger
+          stepExecutionRuntime.stepLogger
         );
       }
     }
@@ -242,7 +244,8 @@ export class NodesFactory {
           stepLogger,
           this.stepExecutionRuntimeFactory,
           this,
-          this.workflowGraph
+          this.workflowGraph,
+          this.workflowExecutionState
         );
       case 'exit-parallel':
         return new ExitParallelNodeImpl(this.workflowRuntime);
@@ -434,7 +437,7 @@ export class NodesFactory {
           workflowsExecutionEngine: this.dependencies.workflowsExecutionEngine,
           workflowExecutionRepository: this.dependencies.workflowExecutionRepository,
           stepExecutionRepository: this.dependencies.stepExecutionRepository,
-          workflowLogger: this.workflowLogger,
+          workflowLogger: stepExecutionRuntime.stepLogger,
           config: this.dependencies.config,
         });
       case 'workflow.output':

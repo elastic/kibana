@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -23,7 +23,9 @@ import {
   SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
 } from './tool_ids';
 
-const schema = z.object({}).describe('No parameters. Lists stats for every rule migration.');
+const schema = lazySchema(() =>
+  z.object({}).describe('No parameters. Lists stats for every rule migration.')
+);
 
 /**
  * Lists task-progress stats for **all** SIEM rule migrations available to the current user.

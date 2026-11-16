@@ -12,6 +12,7 @@ import React from 'react';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
+import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
@@ -24,10 +25,18 @@ import {
 } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
+import {
+  useYamlValidation,
+  type UseYamlValidationResult,
+} from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
+import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { createMockWorkflowExecutionDto } from '../../../shared/test_utils/mock_workflow_factories';
 import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_item_provider';
+import { MINIMAP_RESERVE_PX } from '../styles/constants';
+
+let mockYamlEditorOptions: { scrollbar?: { vertical?: string } } | undefined;
 
 // Mock the YamlEditor component to avoid Monaco complexity in tests.
 // Uses createMockMonacoEditor (which includes getVisibleRanges, onDid* listeners,
@@ -41,6 +50,7 @@ jest.mock('../../../shared/ui/yaml_editor', () => {
   const { createElement } = require('react');
   return {
     YamlEditor: ({ value, onChange, editorDidMount, options }: any) => {
+      mockYamlEditorOptions = options;
       return createElement(
         'div',
         { 'data-testid': 'yaml-editor' },
@@ -67,11 +77,11 @@ jest.mock('../../../shared/ui/yaml_editor', () => {
 
 // Mock the validation hook
 jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', () => ({
-  useYamlValidation: () => ({
+  useYamlValidation: jest.fn(() => ({
     error: null,
     isLoading: false,
     validationResults: [],
-  }),
+  })),
 }));
 
 // Mock the UnsavedChangesPrompt
@@ -112,6 +122,7 @@ const mockFieldFormatsStart = fieldFormatsServiceMock.createStartContract();
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: jest.fn(() => ({
     services: {
+      security: { serviceAccounts: { isEnabled: jest.fn(() => false) } },
       http: {},
       notifications: {
         toasts: {
@@ -184,7 +195,6 @@ jest.mock('../styles/use_workflow_editor_styles', () => ({
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(),
-  useWorkflowsMonacoTheme: jest.fn(),
 }));
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
@@ -255,25 +265,31 @@ jest.mock('./hooks/use_agent_builder_integration', () => ({
   })),
 }));
 
-jest.mock('@kbn/monaco', () => ({
-  monaco: {
-    editor: {
-      setModelMarkers: jest.fn(),
-      registerCommand: jest.fn().mockReturnValue({
-        dispose: jest.fn(),
-      }),
+jest.mock('@kbn/monaco', () => {
+  const actual = jest.requireActual('@kbn/monaco');
+
+  return {
+    ...actual,
+    monaco: {
+      editor: {
+        ...actual.monaco.editor,
+        setModelMarkers: jest.fn(),
+        registerCommand: jest.fn().mockReturnValue({
+          dispose: jest.fn(),
+        }),
+      },
+      languages: {
+        registerCompletionItemProvider: jest.fn().mockReturnValue({
+          dispose: jest.fn(),
+        }),
+        registerCodeActionProvider: jest.fn().mockReturnValue({
+          dispose: jest.fn(),
+        }),
+      },
     },
-    languages: {
-      registerCompletionItemProvider: jest.fn().mockReturnValue({
-        dispose: jest.fn(),
-      }),
-      registerCodeActionProvider: jest.fn().mockReturnValue({
-        dispose: jest.fn(),
-      }),
-    },
-  },
-  YAML_LANG_ID: 'yaml',
-}));
+    initializeSupportedLanguages: jest.fn(),
+  };
+});
 
 describe('WorkflowYAMLEditor', () => {
   const defaultProps: WorkflowYAMLEditorProps = {
@@ -303,6 +319,11 @@ describe('WorkflowYAMLEditor', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useYamlValidation).mockReturnValue({
+      error: null,
+      isLoading: false,
+      validationResults: [],
+    });
     capturedKeyboardHandlers = {};
     mockCloseActionsPopover = undefined;
     defaultProps.editorRef.current = null;
@@ -311,6 +332,40 @@ describe('WorkflowYAMLEditor', () => {
     mockUseSaveYaml.mockReturnValue(mockSaveYaml);
     mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
     mockUseParams.mockReturnValue({ id: 'test-123' });
+    mockYamlEditorOptions = undefined;
+  });
+
+  describe('experimental step minimap', () => {
+    const renderWithExperimentalFeatures = async (enabled: boolean) => {
+      const services = createStartServicesMock();
+      services.settings.client.get.mockImplementation(
+        (key: string) => key === WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID && enabled
+      );
+      const result = render(<WorkflowYAMLEditor {...defaultProps} />, {
+        wrapper: getTestProvider({ services }),
+      });
+      await waitFor(() => {
+        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      });
+      const editorContainer = document.querySelector('[data-testid="yaml-editor"]')?.parentElement;
+      return { ...result, editorContainer: editorContainer as HTMLElement };
+    };
+
+    it('mounts the minimap, reserves space for it and hides the Monaco scrollbar when enabled', async () => {
+      const { getByTestId, editorContainer } = await renderWithExperimentalFeatures(true);
+
+      expect(getByTestId('workflowYamlEditorMinimapContainer')).toBeInTheDocument();
+      expect(getComputedStyle(editorContainer).paddingRight).toBe(`${MINIMAP_RESERVE_PX}px`);
+      expect(mockYamlEditorOptions?.scrollbar?.vertical).toBe('hidden');
+    });
+
+    it('keeps the minimap, its reserved space and the Monaco scrollbar off when disabled', async () => {
+      const { queryByTestId, editorContainer } = await renderWithExperimentalFeatures(false);
+
+      expect(queryByTestId('workflowYamlEditorMinimapContainer')).not.toBeInTheDocument();
+      expect(getComputedStyle(editorContainer).paddingRight).not.toBe(`${MINIMAP_RESERVE_PX}px`);
+      expect(mockYamlEditorOptions?.scrollbar?.vertical).not.toBe('hidden');
+    });
   });
 
   it('renders without crashing', async () => {
@@ -417,10 +472,10 @@ describe('WorkflowYAMLEditor', () => {
     });
   });
 
-  it('renders workflow YAML as read-only on the executions tab without a selection', async () => {
+  it('keeps workflow YAML editable on the executions tab without a selection', async () => {
     const store = createMockStore();
     store.dispatch(setWorkflow(mockWorkflow));
-    store.dispatch(setActiveTab('executions'));
+    store.dispatch(setActiveTab('workflow'));
 
     renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store, ['/?tab=executions']);
 
@@ -428,8 +483,40 @@ describe('WorkflowYAMLEditor', () => {
       const textarea = document.querySelector(
         '[data-testid="yaml-textarea"]'
       ) as HTMLTextAreaElement;
-      expect(textarea.readOnly).toBe(true);
+      expect(textarea.readOnly).toBe(false);
     });
+  });
+
+  it('keeps saved workflow validation errors when an execution is opened', async () => {
+    jest.mocked(useYamlValidation).mockReturnValue({
+      error: null,
+      isLoading: false,
+      validationResults: [
+        {
+          severity: 'error',
+        } as UseYamlValidationResult['validationResults'][number],
+      ],
+    });
+    const store = createMockStore();
+    store.dispatch(setWorkflow(mockWorkflow));
+    store.dispatch(setActiveTab('workflow'));
+
+    const view = renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+    await waitFor(() => {
+      expect(store.getState().detail.hasYamlSchemaValidationErrors).toBe(true);
+    });
+
+    jest.mocked(useYamlValidation).mockReturnValue({
+      error: null,
+      isLoading: false,
+      validationResults: [],
+    });
+    act(() => {
+      store.dispatch(setActiveTab('executions'));
+      view.rerender(<WorkflowYAMLEditor {...defaultProps} />);
+    });
+
+    expect(store.getState().detail.hasYamlSchemaValidationErrors).toBe(true);
   });
 
   it('keeps cached execution YAML read-only while the selection is cleared', async () => {

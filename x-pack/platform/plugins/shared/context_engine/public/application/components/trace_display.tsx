@@ -44,7 +44,7 @@ const IndexTraceDisplay = ({ value }: { value: string }) => {
   return (
     <ItemRow
       label={value}
-      icon={<ItemRowIcon iconType="listBullet" />}
+      icon={<ItemRowIcon iconType="chartWaterfall" />}
       badge={
         <EuiBadge color="hollow" data-test-subj="contextSourceTypeBadge">
           {typeLabel}

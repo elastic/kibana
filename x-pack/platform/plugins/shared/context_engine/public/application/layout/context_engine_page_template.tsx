@@ -9,23 +9,17 @@ import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-templat
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useKibana } from '../hooks/use_kibana';
 
-interface ContextEnginePageTemplateProps extends Partial<KibanaPageTemplateProps> {
-  breadcrumbPageName?: string;
-}
+type ContextEnginePageTemplateProps = Partial<KibanaPageTemplateProps>;
 
 export const ContextEnginePageTemplate = ({
-  breadcrumbPageName,
   children,
   ...props
 }: ContextEnginePageTemplateProps) => {
   const {
     services: { history, appChrome },
   } = useKibana();
-
-  useContextEngineBreadcrumbs(breadcrumbPageName);
 
   return (
     <KibanaPageTemplate

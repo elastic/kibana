@@ -235,12 +235,6 @@ export const getAllTimelines = () =>
     url: 'api/timelines?page_size=100&page_index=1&sort_field=updated&sort_order=desc&timeline_type=default',
   });
 
-const getAllCustomTimelineTemplates = () =>
-  rootRequest<GetTimelinesResponse>({
-    method: 'GET',
-    url: 'api/timelines?page_size=100&page_index=1&sort_field=updated&sort_order=desc&timeline_type=template&status=active',
-  });
-
 export const deleteTimelines = () => {
   getAllTimelines().then(($timelines) => {
     const savedObjectIds = $timelines.body.timeline.map((timeline) => timeline.savedObjectId);
@@ -268,22 +262,5 @@ export const deleteTimelineDiscoverSessions = () => {
         failOnStatusCode: false,
       });
     });
-  });
-};
-
-export const deleteTimelineTemplates = () => {
-  getAllCustomTimelineTemplates().then(($timelines) => {
-    const savedObjectIds = $timelines.body.timeline
-      .map((timeline) => timeline.savedObjectId)
-      .filter((id): id is string => id != null);
-    if (savedObjectIds.length > 0) {
-      rootRequest({
-        method: 'DELETE',
-        url: 'api/timeline',
-        body: {
-          savedObjectIds,
-        },
-      });
-    }
   });
 };

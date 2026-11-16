@@ -112,6 +112,10 @@ test.describe(
         await inventoryPage.goToTime(DATE_WITH_POD_DATA);
         await inventoryPage.showPods();
         await expect(inventoryPage.inventorySwitcherButton).toContainText('Kubernetes Pods');
+        // Pods are schema-aware like Hosts: wait for ECS-only hydration before asserting tiles.
+        await expect(inventoryPage.schemaSelect).toContainText('Elastic System Integration', {
+          timeout: EXTENDED_TIMEOUT,
+        });
 
         const waffleNode = await inventoryPage.getWaffleNode(POD_NAME);
         await expect(waffleNode.container).toBeVisible();
@@ -138,6 +142,9 @@ test.describe(
         await inventoryPage.goToTime(DATE_WITH_POD_DATA);
         await inventoryPage.showPods();
         await expect(inventoryPage.inventorySwitcherButton).toContainText('Kubernetes Pods');
+        await expect(inventoryPage.schemaSelect).toContainText('Elastic System Integration', {
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
 
       await test.step('open pod waffle context menu', async () => {

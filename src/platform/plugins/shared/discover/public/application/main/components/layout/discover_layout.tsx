@@ -24,15 +24,13 @@ import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { DataViewType, type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
-import {
-  ErrorCallout,
-  SHOW_FIELD_STATISTICS,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '@kbn/discover-utils';
+import { type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
+import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import { ErrorCallout } from '@kbn/discover-utils/components';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { SOURCE_COLUMN, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { AddOtherFilterHandler } from '@kbn/unified-field-list';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -58,10 +56,13 @@ import { SavedSearchURLConflictCallout } from '../../../../components/saved_sear
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
+import { EsqlErrorHelp } from '../../../../components/common/esql_error_help';
+import { useHasEnterpriseLicense } from '../../../../components/common/use_has_enterprise_license';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useRegisterDiscoverEsqlFeedback } from '../../hooks/use_register_discover_esql_feedback';
 import {
   internalStateActions,
+  useCurrentDataSource,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
@@ -100,11 +101,13 @@ export function DiscoverLayout() {
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
     fieldsMetadata,
+    licensing,
   } = useDiscoverServices();
   const customizationContext = useDiscoverCustomizationContext();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
   const globalQueryState = data.query.getState();
@@ -129,6 +132,7 @@ export function DiscoverLayout() {
     }
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
+  const currentDataSource = useCurrentDataSource();
   const dataView = useCurrentDataView();
   const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
@@ -146,9 +150,10 @@ export function DiscoverLayout() {
   // in a non time based way using the regular _search API, since the internal
   // representation of those documents does not have the time field that _field_caps
   // reports us.
-  const isTimeBased = useMemo(() => {
-    return dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
-  }, [dataView]);
+  const isTimeBased = useMemo(
+    () => !currentDataSource.isRollup() && currentDataSource.isTimeBased(),
+    [currentDataSource]
+  );
 
   const resultState = useMemo(
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
@@ -166,6 +171,8 @@ export function DiscoverLayout() {
     columns: currentColumns,
     onAddColumn,
     onRemoveColumn,
+    onRemoveColumns,
+    onMoveColumn,
   } = useColumns({
     capabilities,
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
@@ -198,6 +205,29 @@ export function DiscoverLayout() {
     [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
+  const onRemoveColumnsWithTracking = useCallback(
+    (columnNames: string[]) => {
+      const removedColumnNames = onRemoveColumns(columnNames);
+      void scopedEBTManager.trackDataTableClearSelectedFields({
+        fieldNames: removedColumnNames,
+        fieldsMetadata,
+      });
+    },
+    [onRemoveColumns, scopedEBTManager, fieldsMetadata]
+  );
+
+  const onMoveSidebarColumn = useCallback(
+    (columnName: string, sidebarTargetIndex: number) => {
+      // the sidebar columns exclude `_source`, so map the target position back to the actual columns
+      const targetIndex = currentColumns.indexOf(sidebarColumns[sidebarTargetIndex]);
+      if (targetIndex === -1) {
+        return;
+      }
+      onMoveColumn(columnName, targetIndex);
+    },
+    [currentColumns, sidebarColumns, onMoveColumn]
+  );
+
   // The assistant is getting the state from the url correctly
   // expect from the index pattern where we have only the dataview id
   useEffect(() => {
@@ -215,13 +245,19 @@ export function DiscoverLayout() {
     },
     [addFilter, dispatch]
   );
+  const onAddOtherFilter = useCallback<AddOtherFilterHandler>(
+    (field, terms, { negate }) => {
+      dispatch(addFilter({ field, value: terms, mode: negate ? '-' : '+', otherBucket: true }));
+    },
+    [addFilter, dispatch]
+  );
 
   const canSetBreakdownField = useMemo(
     () =>
       isOfAggregateQueryType(query)
-        ? dataView?.isTimeBased() && !hasTransformationalCommand(query.esql)
+        ? currentDataSource.isTimeBased() && !hasTransformationalCommand(query.esql)
         : true,
-    [dataView, query]
+    [currentDataSource, query]
   );
 
   const onAddBreakdownField = useCallback(
@@ -380,6 +416,37 @@ export function DiscoverLayout() {
     return `${TABS_BAR_HEIGHT + 1}px`;
   }, [customizationContext.displayMode, euiTheme.size.xxl, isProjectChromeStyle]);
 
+  const hasEnterpriseLicense = useHasEnterpriseLicense(licensing);
+  const connectorsUrl = core.application.capabilities.management?.insightsAndAlerting
+    ?.triggersActionsConnectors
+    ? core.application.getUrlForApp('management', {
+        deepLinkId: 'triggersActionsConnectors',
+        path: '/connectors',
+      })
+    : undefined;
+  const errorAiHelp =
+    dataState.error && isEsqlMode && isOfAggregateQueryType(query) && hasEnterpriseLicense ? (
+      <EsqlErrorHelp
+        http={core.http}
+        query={query.esql}
+        errorMessage={dataState.error.message}
+        connectorsUrl={connectorsUrl}
+        onApplyQuery={(esql) => dispatch(updateESQLQuery({ queryOrUpdater: esql }))}
+      />
+    ) : undefined;
+  const errorCallout = dataState.error ? (
+    <ErrorCallout
+      title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
+        defaultMessage: 'Unable to retrieve search results',
+      })}
+      error={dataState.error}
+      isEsqlMode={isEsqlMode}
+      showErrorDialog={({ title, error }) => core.notifications.showErrorDialog({ title, error })}
+      esqlReferenceHref={docLinks.links.query.queryESQL}
+      aiHelp={errorAiHelp}
+    />
+  ) : undefined;
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -425,10 +492,13 @@ export function DiscoverLayout() {
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onAddFilter}
+                onAddOtherFilter={onAddOtherFilter}
                 onChangeDataView={onChangeDataView}
                 onDataViewCreated={onDataViewCreated}
                 onFieldEdited={onFieldEdited}
+                onMoveField={onMoveSidebarColumn}
                 onRemoveField={onRemoveColumnWithTracking}
+                onRemoveFields={onRemoveColumnsWithTracking}
                 selectedDataView={dataView}
                 sidebarToggleState$={sidebarToggleState$}
                 trackUiMetric={trackUiMetric}
@@ -442,20 +512,11 @@ export function DiscoverLayout() {
                       <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
                     </div>
                     {dataState.error ? (
-                      <ErrorCallout
-                        title={i18n.translate(
-                          'discover.noResults.searchExamples.noResultsErrorTitle',
-                          {
-                            defaultMessage: 'Unable to retrieve search results',
-                          }
-                        )}
-                        error={dataState.error}
-                        isEsqlMode={isEsqlMode}
-                        showErrorDialog={({ title, error }) =>
-                          core.notifications.showErrorDialog({ title, error })
-                        }
-                        esqlReferenceHref={docLinks.links.query.queryESQL}
-                      />
+                      errorAiHelp ? (
+                        <div css={styles.errorContainer}>{errorCallout}</div>
+                      ) : (
+                        errorCallout
+                      )
                     ) : (
                       <DiscoverNoResults
                         isTimeBased={isTimeBased}
@@ -523,6 +584,11 @@ const componentStyles = {
     flexDirection: 'column',
     height: '100%',
   }),
+  errorContainer: css({
+    overflowY: 'auto',
+    flex: '1 1 auto',
+    minHeight: 0,
+  }),
   dscPageContent: css({
     position: 'relative',
     overflow: 'hidden',
@@ -532,6 +598,7 @@ const componentStyles = {
     width: 'auto',
     height: 'auto',
     alignSelf: 'center',
+    maxWidth: '100%',
     marginTop: 'auto',
     marginBottom: 'auto',
     flexGrow: 0,

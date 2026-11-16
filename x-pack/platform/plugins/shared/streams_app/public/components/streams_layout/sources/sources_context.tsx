@@ -9,21 +9,20 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useActorRef, useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { useUnitId } from '../../../hooks/use_unit_id';
 import type { SourceApiKeyGenerationDeps } from './source_api_keys';
 import { createSourceEnvironmentLoader, type SourceEnvironmentLoader } from './source_environment';
 import type { SourceApiKeyPrivileges } from './source_api_keys';
-import type { RevealedApiKey, SourceStatus, SourceType, SourceViewModel } from './types';
-import {
-  getSourceViewModels,
-  type SourceNameValidationError,
-  type SourcesActorRef,
-} from './state_machines/sources_state_machine';
+import type { SourceCreationFormData } from './source_form';
+import type { RevealedApiKey, SourceType, SourceViewModel } from './types';
+import { getSourceViewModels, type SourcesActorRef } from './state_machines/sources_state_machine';
 import {
   sourcesTableStateMachine,
   type SourcesTablePagination,
   type SourcesTableSortingColumn,
 } from './state_machines/sources_table_state_machine';
-import { createUnitRepository } from '../../../services/unit_repository';
+import { createUnitRepository, type Unit } from '../../../services/unit_repository';
 
 export interface SourcesController {
   sources: SourceViewModel[];
@@ -32,19 +31,15 @@ export interface SourcesController {
   selectedSources: SourceViewModel[];
   isCreateModalOpen: boolean;
   isRefreshingUnit: boolean;
-  sourceType: SourceType;
+  /** The unit new sources are validated against. */
+  unitDefinition: Unit;
   availableSourceTypes: SourceType[];
-  sourceName: string;
-  sourceNameError?: SourceNameValidationError;
-  canCreateSource: boolean;
+  isUnitSaving: boolean;
   createdSource?: SourceViewModel;
-  unconfiguredNodeIds: string[];
   refreshUnit: () => void;
-  createSource: () => void;
-  setCreateSourceType: (sourceType: SourceType) => void;
-  setCreateSourceName: (sourceName: string) => void;
-  validateCreateSourceName: () => void;
+  createSource: (formData: SourceCreationFormData) => void;
   deleteSource: (sourceId: string) => void;
+  deleteSources: (sourceIds: string[]) => void;
   generateApiKey: (sourceId: string) => void;
   revealedApiKey?: RevealedApiKey;
   apiKeyPrivileges?: SourceApiKeyPrivileges;
@@ -57,7 +52,7 @@ export interface SourcesController {
   deleteApiKey: (sourceId: string, apiKeyId: string) => void;
   setQuery: (query: string) => void;
   setSelectedSources: (sources: SourceViewModel[]) => void;
-  openCreateModal: (associatedUnconfiguredNodeId?: string) => void;
+  openCreateModal: () => void;
   closeCreateModal: () => void;
   openSourceFlyout: (sourceId: string) => void;
   closeSourceFlyout: () => void;
@@ -65,14 +60,12 @@ export interface SourcesController {
 
 export interface SourcesTableController extends SourcesController {
   selectedTypes: SourceType[];
-  selectedStatuses: SourceStatus[];
   sortingColumns: SourcesTableSortingColumn[];
   pagination: SourcesTablePagination;
   visibleColumnIds: string[];
   isLoadingUnit: boolean;
   isUnitUnavailable: boolean;
   setSelectedTypes: (types: SourceType[]) => void;
-  setSelectedStatuses: (statuses: SourceStatus[]) => void;
   setSortingColumns: (columns: SourcesTableSortingColumn[]) => void;
   setPagination: (pagination: SourcesTablePagination) => void;
   setVisibleColumnIds: (columnIds: string[]) => void;
@@ -98,14 +91,17 @@ export const useSourcesTable = (): SourcesTableController => {
       start: { streams },
     },
   } = useKibana();
+  const unitId = useUnitId();
   const apiKeyGenerationDeps = useSourceApiKeyGenerationDeps();
   const loadSourceEnvironment = useSourceEnvironmentLoader();
   const unitDefinitionRepository = useMemo(
     () =>
       createUnitRepository({
         streamsRepositoryClient: streams.streamsRepositoryClient,
+        unitId,
+        toasts,
       }),
-    [streams.streamsRepositoryClient]
+    [streams.streamsRepositoryClient, toasts, unitId]
   );
   const tableActorRef = useActorRef(sourcesTableStateMachine, {
     input: {
@@ -121,7 +117,6 @@ export const useSourcesTable = (): SourcesTableController => {
   const selectedSourceIds = useSelector(tableActorRef, (state) => state.context.selectedSourceIds);
   const isRefreshingUnit = useSelector(tableActorRef, (state) => state.matches('reloading'));
   const selectedTypes = useSelector(tableActorRef, (state) => state.context.selectedTypes);
-  const selectedStatuses = useSelector(tableActorRef, (state) => state.context.selectedStatuses);
   const sortingColumns = useSelector(tableActorRef, (state) => state.context.sortingColumns);
   const pagination = useSelector(tableActorRef, (state) => state.context.pagination);
   const visibleColumnIds = useSelector(tableActorRef, (state) => state.context.visibleColumnIds);
@@ -156,7 +151,6 @@ export const useSourcesTable = (): SourcesTableController => {
     () => ({
       ...sourcesController,
       selectedTypes,
-      selectedStatuses,
       sortingColumns,
       pagination,
       visibleColumnIds,
@@ -164,8 +158,6 @@ export const useSourcesTable = (): SourcesTableController => {
       isUnitUnavailable,
       setSelectedTypes: (sourceTypes: SourceType[]) =>
         tableActorRef.send({ type: 'filters.types.change', sourceTypes }),
-      setSelectedStatuses: (statuses: SourceStatus[]) =>
-        tableActorRef.send({ type: 'filters.statuses.change', statuses }),
       setSortingColumns: (columns: SourcesTableSortingColumn[]) =>
         tableActorRef.send({ type: 'sorting.change', columns }),
       setPagination: (nextPagination: SourcesTablePagination) =>
@@ -177,7 +169,6 @@ export const useSourcesTable = (): SourcesTableController => {
       isLoadingUnit,
       isUnitUnavailable,
       pagination,
-      selectedStatuses,
       selectedTypes,
       sortingColumns,
       sourcesController,
@@ -193,12 +184,18 @@ export const useSourceApiKeyGenerationDeps = (): SourceApiKeyGenerationDeps => {
       start: { streams },
     },
   } = useKibana();
+  const {
+    v2: { manage: canManage },
+  } = useStreamsPrivileges();
+  const unitId = useUnitId();
 
   return useMemo(
     () => ({
       streamsRepositoryClient: streams.streamsRepositoryClient,
+      unitId,
+      canManage,
     }),
-    [streams.streamsRepositoryClient]
+    [canManage, streams.streamsRepositoryClient, unitId]
   );
 };
 
@@ -237,15 +234,11 @@ export const useSources = ({
   const revealedApiKey = useSelector(sourcesActorRef, (state) => state.context.revealedApiKey);
   const apiKeyPrivileges = useSelector(sourcesActorRef, (state) => state.context.apiKeyPrivileges);
   const apiKeyError = useSelector(sourcesActorRef, (state) => state.context.apiKeyError?.message);
-  const creationContext = useSelector(sourcesActorRef, (state) => state.context.creationContext);
-  const unconfiguredNodeIds = useSelector(
+  const createdSource = useSelector(
     sourcesActorRef,
-    (state) => state.context.unconfiguredNodeIds
+    (state) => state.context.creationContext?.createdSource
   );
-  const sourceType = creationContext?.formData.sourceType ?? 'async_bulk';
-  const sourceName = creationContext?.formData.sourceName ?? '';
-  const sourceNameError = creationContext?.formErrors.sourceName;
-  const createdSource = creationContext?.createdSource;
+  const unitDefinition = useSelector(sourcesActorRef, (state) => state.context.unitDefinition);
   const availableSourceTypes = useSelector(
     sourcesActorRef,
     (state) => state.context.availableSourceTypes
@@ -275,14 +268,9 @@ export const useSources = ({
     sourcesActorRef,
     (state) => !state.matches({ configuring: 'idle' })
   );
-  const canCreateSource = useSelector(sourcesActorRef, (state) => {
-    const creation = state.context.creationContext;
-    return Boolean(
-      creation?.formData.sourceName.trim() &&
-        !creation.formErrors.sourceName &&
-        state.context.availableSourceTypes.includes(creation.formData.sourceType)
-    );
-  });
+  const isUnitSaving = useSelector(sourcesActorRef, (state) =>
+    state.matches({ unitSave: 'saving' })
+  );
   const query = tableState?.query ?? '';
   const selectedSourceIds = useMemo(
     () => tableState?.selectedSourceIds ?? [],
@@ -293,35 +281,21 @@ export const useSources = ({
   const sourceViews = useSelector(sourcesActorRef, (state) => getSourceViewModels(state.context));
 
   const createSource = useCallback(
-    () => sourcesActorRef.send({ type: 'source.create' }),
-    [sourcesActorRef]
-  );
-
-  const setCreateSourceType = useCallback(
-    (nextSourceType: SourceType) =>
-      sourcesActorRef.send({ type: 'sourceType.select', sourceType: nextSourceType }),
-    [sourcesActorRef]
-  );
-
-  const setCreateSourceName = useCallback(
-    (nextSourceName: string) =>
-      sourcesActorRef.send({ type: 'sourceName.change', sourceName: nextSourceName }),
-    [sourcesActorRef]
-  );
-
-  const validateCreateSourceName = useCallback(
-    () => sourcesActorRef.send({ type: 'sourceName.blur' }),
+    (formData: SourceCreationFormData) => sourcesActorRef.send({ type: 'source.create', formData }),
     [sourcesActorRef]
   );
 
   const openCreateModal = useCallback(
-    (associatedUnconfiguredNodeId?: string) =>
-      sourcesActorRef.send({ type: 'modal.openCreate', associatedUnconfiguredNodeId }),
+    () => sourcesActorRef.send({ type: 'modal.openCreate' }),
     [sourcesActorRef]
   );
 
   const deleteSource = useCallback(
     (sourceId: string) => sourcesActorRef.send({ type: 'source.delete', sourceId }),
+    [sourcesActorRef]
+  );
+  const deleteSources = useCallback(
+    (sourceIds: string[]) => sourcesActorRef.send({ type: 'source.deleteMany', sourceIds }),
     [sourcesActorRef]
   );
 
@@ -349,21 +323,16 @@ export const useSources = ({
       selectedSources: sourceViews.filter(({ id }) => selectedSourceIds.includes(id)),
       isCreateModalOpen,
       isRefreshingUnit,
-      sourceType,
+      unitDefinition,
       availableSourceTypes,
-      sourceName,
-      sourceNameError,
-      canCreateSource,
+      isUnitSaving,
       createdSource,
-      unconfiguredNodeIds,
       refreshUnit: () => {
         tableState?.refreshUnit();
       },
       createSource,
-      setCreateSourceType,
-      setCreateSourceName,
-      validateCreateSourceName,
       deleteSource,
+      deleteSources,
       generateApiKey,
       revealedApiKey,
       apiKeyPrivileges,
@@ -389,11 +358,12 @@ export const useSources = ({
     }),
     [
       availableSourceTypes,
-      canCreateSource,
+      isUnitSaving,
       createSource,
       createdSource,
       deleteApiKey,
       deleteSource,
+      deleteSources,
       generateApiKey,
       isGeneratingApiKey,
       isLoadingApiKeys,
@@ -409,16 +379,10 @@ export const useSources = ({
       query,
       selectedSourceId,
       selectedSourceIds,
-      setCreateSourceName,
-      setCreateSourceType,
-      sourceName,
-      sourceNameError,
-      sourceType,
       sourceViews,
       sourcesActorRef,
       tableState,
-      unconfiguredNodeIds,
-      validateCreateSourceName,
+      unitDefinition,
     ]
   );
 };

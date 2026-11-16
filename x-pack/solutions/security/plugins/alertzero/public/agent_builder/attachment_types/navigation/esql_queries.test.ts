@@ -10,8 +10,8 @@ import {
   buildEntityLookupEsql,
   buildEventLookupEsql,
   buildEventsLookupEsql,
-  buildThreatReportLookupEsql,
   getAlertsIndex,
+  buildIocMatchEsql,
 } from './esql_queries';
 
 describe('esql_queries', () => {
@@ -96,6 +96,106 @@ describe('esql_queries', () => {
     expect(buildAlertsLookupEsql({ alerts: [], spaceId: 'soc' })).toBeUndefined();
   });
 
+  it('folds case for hash and domain IOC pivots, matching Tier 1, and not for others', () => {
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-endpoint.events.process-default'],
+        field: 'process.hash.sha256',
+        value: 'ABCDEF0123',
+        iocType: 'hash',
+      })
+    ).toBe(
+      'FROM "logs-endpoint.events.process-default" | WHERE MV_CONTAINS(TO_LOWER(process.hash.sha256), "abcdef0123")'
+    );
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-dns-default'],
+        field: 'dns.question.name',
+        value: 'Evil.Example',
+        iocType: 'domain',
+      })
+    ).toBe(
+      'FROM "logs-dns-default" | WHERE MV_CONTAINS(TO_LOWER(dns.question.name), "evil.example")'
+    );
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-*'],
+        field: 'url.full',
+        value: 'https://Evil.Example/A',
+        iocType: 'url',
+      })
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_STRING(url.full), "https://Evil.Example/A")');
+    expect(buildIocMatchEsql({ indices: [], field: 'url.full', value: 'x' })).toBeUndefined();
+  });
+
+  it('pivots IOC matches with a multivalue-aware predicate, comparing ip IOCs as ip', () => {
+    // Tier 1 term queries hit any element of `host.ip` / `related.ip`; scalar `==` would
+    // be null on that cell and open Discover with no rows for a confirmed match.
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-*'],
+        field: 'related.ip',
+        value: '203.0.113.77',
+        iocType: 'ip',
+      })
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(related.ip), "203.0.113.77"::ip)');
+    // An untyped value that parses as an address still compares as ip: `MV_CONTAINS` needs
+    // matching types, and an `ip` column against a keyword literal fails verification. The
+    // literal is the canonical spelling, which the `::ip` cast always accepts.
+    expect(
+      buildIocMatchEsql({ indices: ['logs-*'], field: 'source.ip', value: '2001:DB8::1' })
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(source.ip), "2001:db8:0:0:0:0:0:1"::ip)');
+  });
+
+  it('casts a canonical literal, never the stored spelling, since a null literal matches every row', () => {
+    // `"[::1]"::ip`, `"fe80::1%eth0"::ip` and `"010.0.0.1"::ip` are null or lossy in ES|QL.
+    expect(buildIocMatchEsql({ indices: ['logs-*'], field: 'source.ip', value: '[::1]' })).toBe(
+      'FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(source.ip), "0:0:0:0:0:0:0:1"::ip)'
+    );
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-*'],
+        field: 'source.ip',
+        value: 'fe80::1%eth0',
+        iocType: 'ip',
+      })
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(source.ip), "fe80:0:0:0:0:0:0:1"::ip)');
+    expect(buildIocMatchEsql({ indices: ['logs-*'], field: 'source.ip', value: '010.0.0.1' })).toBe(
+      'FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(source.ip), "10.0.0.1"::ip)'
+    );
+  });
+
+  it('never casts an unparseable ip value, since a null literal would match every row', () => {
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-*'],
+        field: 'source.ip',
+        value: 'not-an-ip',
+        iocType: 'ip',
+      })
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_STRING(source.ip), "not-an-ip")');
+  });
+
+  it('skips the pivot for a CIDR ip IOC, since no single-value predicate can match a range', () => {
+    // Tier 1's term query on an `ip` field accepts CIDR, so `10.0.0.0/8` can be a confirmed
+    // match; `"10.0.0.0/8"::ip` is null and `CIDR_MATCH` is null on multivalued cells.
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-*'],
+        field: 'source.ip',
+        value: '10.0.0.0/8',
+        iocType: 'ip',
+      })
+    ).toBeUndefined();
+    expect(
+      buildIocMatchEsql({ indices: ['logs-*'], field: 'source.ip', value: '2001:db8::/32' })
+    ).toBeUndefined();
+    // A slash that does not follow an address is not a range (a url path, say).
+    expect(
+      buildIocMatchEsql({ indices: ['logs-*'], field: 'url.path', value: 'evil/8', iocType: 'url' })
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_STRING(url.path), "evil/8")');
+  });
+
   it('builds entity lookup ES|QL on the exact ECS field', () => {
     expect(buildEntityLookupEsql({ field: 'host.name', value: 'web-01' })).toBe(
       'FROM "logs-*" | WHERE host.name == "web-01"'
@@ -105,21 +205,5 @@ describe('esql_queries', () => {
     ).toBe('FROM "logs-aws.*" | WHERE user.name == "a\\"b"');
     expect(buildEntityLookupEsql({ field: 'host.name', value: '  ' })).toBeUndefined();
     expect(buildEntityLookupEsql({ field: '  ', value: 'web-01' })).toBeUndefined();
-  });
-
-  it('builds threat report lookup ES|QL scoped to the current space and global sentinel', () => {
-    expect(buildThreatReportLookupEsql({ reportId: 'default:fp1', spaceId: 'soc' })).toBe(
-      'FROM ".kibana-threat-reports*" METADATA _id | WHERE _id IN ("default:fp1") AND ' +
-        'space_id IN ("soc", "*")'
-    );
-  });
-
-  it('escapes quotes and backslashes in the report id and space id', () => {
-    // Both values reach a double-quoted ES|QL literal, and the report id comes from an
-    // attachment payload, so an unescaped quote would let it break out of the literal.
-    expect(buildThreatReportLookupEsql({ reportId: 'r"1\\x', spaceId: 'sp"ace' })).toBe(
-      'FROM ".kibana-threat-reports*" METADATA _id | WHERE _id IN ("r\\"1\\\\x") AND ' +
-        'space_id IN ("sp\\"ace", "*")'
-    );
   });
 });

@@ -14,10 +14,12 @@ import { capitalize, uniqBy } from 'lodash';
 import {
   ToolType,
   apiTargets,
+  applyAgentApprovals,
   isApiAutoApproved,
   isRoundCompleteEvent,
   internalTools,
   SELF_AGENT_ID,
+  ChatTriggerMode,
   SubagentExecutionMode,
   SubagentMode,
   toAutoApprovedApis,
@@ -26,6 +28,7 @@ import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_
 import { findUnknownApis, formatUnknownApis } from '@kbn/agent-builder-common/apis/known_apis';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type {
+  AgentApprovals,
   ApiTarget,
   AssistantResponse,
   AutoApprovedApi,
@@ -34,6 +37,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type {
   InternalBuiltinToolDefinition,
+  ModelSource,
   SubAgentExecutor,
   ToolPromptManager,
 } from '@kbn/agent-builder-server';
@@ -43,10 +47,12 @@ import { partitionDestructiveApis } from '../api';
 import type { ResolvedSubagent } from '../../../agents/utils/resolve_allowed_subagents';
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
+import { selectSubagentModelSource } from '../utils/select_subagent_model_source';
+import { triggerModeSchema } from '../utils/trigger_mode_schema';
 
 export const SubAgentToolName = internalTools.runSubagent;
 
-const BASE_TOOL_DESCRIPTION = `Start a sub-agent to perform a specific task.
+const INTRO_DESCRIPTION = `Start a sub-agent to perform a specific task.
 
 Delegate a complex sub-task to another agent execution. Pick the target from \`agent_id\`; each option corresponds to a peer agent you're allowed to invoke.
 
@@ -68,7 +74,9 @@ Brief the agent like a smart colleague who just walked into the room — it hasn
 - The agent's outputs should generally be trusted
 
 - If the user specifies that they want you to run agents "in parallel", you MUST send a single message with multiple ${SubAgentToolName} tool use content blocks. For example, if you need to launch both a build-validator agent and a test-runner agent in parallel, send a single message with both tool calls.
+`;
 
+const PERSISTENT_AND_BACKGROUND_DESCRIPTION = `
 - **Foreground vs background**:
   - Use foreground (default) when you need the agent's results before you can proceed — e.g., research agents whose findings inform your next steps.
   - Use background when you have genuinely independent work to do in parallel.
@@ -87,15 +95,28 @@ Brief the agent like a smart colleague who just walked into the room — it hasn
   - Assume that the execution isn't completed until you see a notification about it.
   - In particular, do **not** use the platform.core.get_workflow_execution_status tool to check the status.
   - Users will **not** be automatically notified when the execution complete. You have to inform them about it.
+`;
 
+const TRANSIENT_ONLY_DESCRIPTION = `
+- This execution does not persist anything, so only transient, foreground sub-agents are available: leave \`mode\` and \`run_in_background\` unset.
+- Persistent sub-agents listed in the conversation history cannot be reached from this execution.
+`;
+
+const destructiveApiDescription = (transientOnly: boolean) => `
 ## Destructive API access
 
-A sub-agent has no user of its own to confirm anything, so every destructive \`${internalTools.executeApi}\` call it attempts is refused unless you grant it here.
+A sub-agent has no user of its own to confirm anything, so every destructive \`${
+  internalTools.executeApi
+}\` call it attempts is refused unless you grant it here.
 
 - Only pass \`auto_approved_apis\` when the task you are delegating genuinely has to mutate state. A read-only task needs no grant, and a read-only API is dropped from one: the sub-agent can already call it.
 - Each entry is an exact identifier (\`indices.create\`), a namespace wildcard (\`indices.*\`), or \`*\` for every API on that backend. Grant the narrowest set that lets the task finish: \`indices.*\` includes \`indices.delete\`, and \`*\` lets the sub-agent perform any destructive operation the user could, unattended.
 - The user is asked once, for the whole grant, before the sub-agent starts. If they deny it, the sub-agent still runs but without destructive access — report that back rather than re-requesting the same grant.
-- The grant covers only this delegation. A later \`${internalTools.sendMessageToAgent}\` to a persistent sub-agent does not inherit it.
+- The grant covers only this delegation.${
+  transientOnly
+    ? ''
+    : ` A later \`${internalTools.sendMessageToAgent}\` to a persistent sub-agent does not inherit it.`
+}
 `;
 
 /**
@@ -108,9 +129,12 @@ const orderAllowedWithSelfFirst = (list: ResolvedSubagent[]): ResolvedSubagent[]
 };
 
 /** Builds the tool description with the per-id allowlist enumeration on top. */
-const buildToolDescription = (allowed: ResolvedSubagent[]): string => {
+const buildToolDescription = (allowed: ResolvedSubagent[], transientOnly: boolean): string => {
   const lines = allowed.map((a) => `- ${a.id}: ${a.description}`).join('\n');
-  return `${BASE_TOOL_DESCRIPTION}\nAvailable sub-agents:\n${lines}\n`;
+  const modes = transientOnly ? TRANSIENT_ONLY_DESCRIPTION : PERSISTENT_AND_BACKGROUND_DESCRIPTION;
+  return `${INTRO_DESCRIPTION}${modes}${destructiveApiDescription(
+    transientOnly
+  )}\nAvailable sub-agents:\n${lines}\n`;
 };
 
 /**
@@ -179,15 +203,19 @@ const formatGrantedApis = (apis: readonly AutoApprovedApi[]): string =>
 const resolveSubagentApiGrant = async ({
   requested,
   interactivity,
+  subagentApprovals,
   prompts,
   promptId,
   agentId,
+  discoveryEnabled,
 }: {
   requested: AutoApprovedApi[];
   interactivity: InteractivityConfig;
+  subagentApprovals?: AgentApprovals;
   prompts: ToolPromptManager;
   promptId: string;
   agentId: string;
+  discoveryEnabled: boolean;
 }): Promise<SubagentApiGrant> => {
   const unknownApis = findUnknownApis(requested);
   if (unknownApis.length > 0) {
@@ -195,7 +223,11 @@ const resolveSubagentApiGrant = async ({
       status: 'unknown_apis',
       message:
         `Unknown auto_approved_apis: ${formatUnknownApis(unknownApis)}. Each entry must name an ` +
-        `API that exists on its target. Use the ${internalTools.discoverApis} tool to find the identifier.`,
+        `API that exists on its target. ` +
+        (discoveryEnabled
+          ? `Use the ${internalTools.discoverApis} tool to find the identifier.`
+          : `Do not retry with another identifier unless a skill or the user gave it to you. ` +
+            `Otherwise, leave it out of auto_approved_apis.`),
     };
   }
 
@@ -213,8 +245,9 @@ const resolveSubagentApiGrant = async ({
     return settled('not_required');
   }
 
+  const coveredGrant = applyAgentApprovals({ interactivity, approvals: subagentApprovals });
   const pending = destructive.filter(
-    ({ target, api }) => !isApiAutoApproved({ interactivity, target, api })
+    ({ target, api }) => !isApiAutoApproved({ interactivity: coveredGrant, target, api })
   );
   if (pending.length === 0) {
     return settled('granted');
@@ -278,20 +311,24 @@ export const createSubagentTool = ({
   ownerAgentId,
   allowedSubagents,
   executionId: parentExecutionId,
-  connectorId,
+  parentModel,
   subAgentExecutor,
   abortSignal,
   backgroundExecutionService,
   parentConversationId,
   subagentTracker,
   conversationExists,
+  transientOnly = false,
+  discoveryEnabled = false,
+  backgroundWakeEnabled = false,
 }: {
   /** Id of the agent currently executing (the "owner") */
   ownerAgentId: string;
   /** Resolved, access-filtered allowlist of subagents. */
   allowedSubagents: ResolvedSubagent[];
   executionId: string;
-  connectorId?: string;
+  /** Model source the parent run was asked to run on, inherited by its sub-agents. */
+  parentModel?: ModelSource;
   subAgentExecutor: SubAgentExecutor;
   abortSignal?: AbortSignal;
   backgroundExecutionService?: BackgroundExecutionService;
@@ -301,12 +338,27 @@ export const createSubagentTool = ({
   subagentTracker?: SubagentTracker;
   /** Existence probe for stale-entry recovery. */
   conversationExists?: (id: string) => Promise<boolean>;
+  /**
+   * Set for a run that persists nothing: a persistent sub-agent creates a child conversation and a
+   * background one reports through conversation state, neither of which that run keeps.
+   */
+  transientOnly?: boolean;
+  /** Whether the `discover_apis` tool is available, so errors can point the model at it. */
+  discoveryEnabled?: boolean;
+  /** Whether a finished background sub-agent wakes the parent, which `trigger_mode` steers. */
+  backgroundWakeEnabled?: boolean;
 }) => {
   const orderedAllowed = orderAllowedWithSelfFirst(allowedSubagents);
   const allowedIds = orderedAllowed.map((a) => a.id) as [string, ...string[]];
   const allowedIdsSet = new Set(allowedIds);
+  const inferenceFeatureIdBySubagent = new Map(
+    orderedAllowed.map(({ id, inferenceFeatureId }) => [id, inferenceFeatureId])
+  );
+  const approvalsBySubagentId = new Map(
+    orderedAllowed.map((subagent) => [subagent.id, subagent.approvals])
+  );
 
-  const schema = z.object({
+  const baseSchema = z.object({
     agent_id: z
       .enum(allowedIds)
       .describe(
@@ -356,9 +408,14 @@ export const createSubagentTool = ({
       ),
   });
 
+  const schema = backgroundWakeEnabled
+    ? baseSchema.extend({ trigger_mode: triggerModeSchema })
+    : baseSchema;
+  type SubagentToolParams = z.infer<typeof baseSchema> & { trigger_mode?: ChatTriggerMode };
+
   const tool: InternalBuiltinToolDefinition<typeof schema> = {
     id: SubAgentToolName,
-    description: buildToolDescription(orderedAllowed),
+    description: buildToolDescription(orderedAllowed, transientOnly),
     type: ToolType.builtin,
     schema,
     tags: ['subagent'],
@@ -368,17 +425,28 @@ export const createSubagentTool = ({
         description,
         prompt,
         run_in_background = false,
-        effort = 'medium',
+        trigger_mode,
+        effort = EffortLevels.medium,
         mode,
         name,
         auto_approved_apis: autoApprovedApisByTarget,
-      },
+      }: SubagentToolParams,
       { events, modelProvider, prompts, interactivity, callContext }
     ) => {
       // Defense-in-depth: reject an off-enum agent_id even though Zod should already have filtered it.
       if (!allowedIdsSet.has(agent_id)) {
         return {
           results: [createErrorResult(`Agent id "${agent_id}" is not in this agent's allowlist.`)],
+        };
+      }
+
+      if (transientOnly && (mode === SubagentMode.persistent || run_in_background)) {
+        return {
+          results: [
+            createErrorResult(
+              'Persistent and background sub-agents are not available in this execution, which does not persist anything. Run a transient, foreground sub-agent instead.'
+            ),
+          ],
         };
       }
 
@@ -403,9 +471,11 @@ export const createSubagentTool = ({
         const grant = await resolveSubagentApiGrant({
           requested: requestedApis,
           interactivity,
+          subagentApprovals: approvalsBySubagentId.get(agent_id),
           prompts,
           promptId: `${SubAgentToolName}.${callContext.toolCallId}.auto_approved_apis`,
           agentId: subagentLabel,
+          discoveryEnabled,
         });
 
         if (grant.status === 'unknown_apis') {
@@ -427,10 +497,12 @@ export const createSubagentTool = ({
       };
 
       try {
-        const subAgentModel = await modelProvider.selectModel({
+        const modelSource = await selectSubagentModelSource({
+          modelProvider,
+          parentModel,
           effortLevel: effort as EffortLevel,
+          inferenceFeatureId: inferenceFeatureIdBySubagent.get(agent_id),
         });
-        const selectedConnectorId = subAgentModel.connector.connectorId;
         if (isPersistent) {
           const finalName = name ?? 'subagent';
 
@@ -482,9 +554,17 @@ export const createSubagentTool = ({
             subagentPurpose: description,
             conversationId: newChildId,
             prompt: fullPrompt,
-            connectorId: selectedConnectorId,
+            modelSource,
             ...(autoApprovedApis ? { autoApprovedApis } : {}),
-            ...(run_in_background ? {} : { abortSignal }),
+            ...(run_in_background
+              ? {
+                  background: {
+                    ...(backgroundWakeEnabled
+                      ? { parentTriggerMode: trigger_mode ?? ChatTriggerMode.Always }
+                      : {}),
+                  },
+                }
+              : { abortSignal }),
           });
 
           // Store the entry with the sentinel-shaped agent_id (not the
@@ -502,13 +582,16 @@ export const createSubagentTool = ({
           });
 
           if (run_in_background) {
-            backgroundExecutionService?.registerExecution(executionId);
+            backgroundExecutionService?.registerExecution(executionId, resolvedAgentId);
             return {
               results: [
                 createOtherResult({
                   agent_execution_id: executionId,
                   mode: SubagentExecutionMode.background,
                   status: 'queued',
+                  ...(backgroundWakeEnabled
+                    ? { trigger_mode: trigger_mode ?? ChatTriggerMode.Always }
+                    : {}),
                   ...grantReport,
                 }),
               ],
@@ -538,12 +621,20 @@ export const createSubagentTool = ({
         // Transient path.
         const { executionId, events$ } = await subAgentExecutor.executeSubAgent({
           agentId: resolvedAgentId,
-          connectorId: selectedConnectorId,
+          modelSource,
           parentExecutionId,
           prompt: fullPrompt,
           ...(autoApprovedApis ? { autoApprovedApis } : {}),
           // background agents should continue running even if main execution completes
-          ...(run_in_background ? {} : { abortSignal }),
+          ...(run_in_background
+            ? {
+                background: {
+                  ...(backgroundWakeEnabled
+                    ? { parentTriggerMode: trigger_mode ?? ChatTriggerMode.Always }
+                    : {}),
+                },
+              }
+            : { abortSignal }),
         });
 
         events.reportProgress(`Sub-agent execution ${executionId} started`, {
@@ -554,7 +645,7 @@ export const createSubagentTool = ({
         });
 
         if (run_in_background) {
-          backgroundExecutionService?.registerExecution(executionId);
+          backgroundExecutionService?.registerExecution(executionId, resolvedAgentId);
 
           return {
             results: [
@@ -562,6 +653,9 @@ export const createSubagentTool = ({
                 agent_execution_id: executionId,
                 mode: SubagentExecutionMode.background,
                 status: 'queued',
+                ...(backgroundWakeEnabled
+                  ? { trigger_mode: trigger_mode ?? ChatTriggerMode.Always }
+                  : {}),
                 ...grantReport,
               }),
             ],

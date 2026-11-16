@@ -19,6 +19,38 @@ export const runColumnExistenceValidationSuite = (setup: Setup) => {
       ]);
     });
 
+    it('knows the columns a HIGHLIGHT without a query reuses from a full-text WHERE', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors(
+        'FROM index | WHERE MATCH(textField, "x") | HIGHLIGHT | KEEP highlight_textField',
+        []
+      );
+    });
+
+    it('knows the HIGHLIGHT columns of a QSTR WHERE after its text columns are removed', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors(
+        'FROM index | WHERE QSTR("x") | KEEP integerField | EVAL label = TO_STRING(integerField) | HIGHLIGHT | KEEP highlight_label',
+        []
+      );
+    });
+
+    it('reports a HIGHLIGHT column whose WHERE has no full-text condition to reuse', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors(
+        'FROM index | WHERE keywordField == "x" | HIGHLIGHT | KEEP highlight_keywordField',
+        ['Unknown column "highlight_keywordField"']
+      );
+    });
+
+    it('reports a HIGHLIGHT column whose WHERE is cut off by a STATS', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors(
+        'FROM index | WHERE MATCH(textField, "x") | STATS COUNT(*) BY textField | HIGHLIGHT | KEEP highlight_textField',
+        ['Unknown column "highlight_textField"']
+      );
+    });
+
     it('treats FORK branches separately', async () => {
       const { expectErrors } = await setup();
       await expectErrors('FROM index | FORK (DROP keywordField) (KEEP keywordField)', []);

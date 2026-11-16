@@ -68,6 +68,35 @@ describe('AlertZeroPageHeader', () => {
     expect(heading()).toContain('Looking into your data...');
   });
 
+  it('should render the subtitle under the heading when given', () => {
+    setup({ eventCount: 0, subtitle: 'Some detail' });
+
+    expect(screen.getByTestId('alertZeroPageHeaderSubtitle')).toHaveTextContent('Some detail');
+  });
+
+  describe('overrides', () => {
+    it('should replace the time-of-day greeting with the greeting prop', () => {
+      setup({ eventCount: 1, greeting: 'Hello there!' });
+
+      expect(heading()).toContain('Hello there!');
+      expect(heading()).not.toMatch(/Good (morning|afternoon|evening)!/);
+    });
+
+    it('should replace the queue-derived title with the title prop', () => {
+      setup({ eventCount: 3, title: 'Custom title' });
+
+      expect(heading()).toContain('Custom title');
+      expect(heading()).not.toContain('3 actions need you');
+    });
+
+    it('should keep the derived title and greeting when no overrides are given', () => {
+      setup({ eventCount: 3 });
+
+      expect(heading()).toContain('3 actions need you');
+      expect(heading()).toMatch(/Good (morning|afternoon|evening)!/);
+    });
+  });
+
   /**
    * The greeting reads the hour out of `Intl`, whose 0–23 output is not a given:
    * `hour12: false` resolved to the 1–24 cycle for `en-US` on engines shipped

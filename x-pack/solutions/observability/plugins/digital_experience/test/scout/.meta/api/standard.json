@@ -1,0 +1,26 @@
+{
+  "sha1": "15282078656f5d0181127d831d0c20c6f05576e7",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "352c90281147e6e-f03351dd205bca6",
+      "title": "Digital Experience disabled by default does not register the feature",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_disabled.spec.ts",
+        "line": 12,
+        "column": 17
+      }
+    }
+  ]
+}

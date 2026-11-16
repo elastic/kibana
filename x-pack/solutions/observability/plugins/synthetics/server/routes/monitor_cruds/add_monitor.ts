@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
 import { z } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
@@ -21,6 +22,7 @@ import {
 import { InvalidMaintenanceWindowError } from '../../synthetics_service/maintenance_windows/resolve_maintenance_windows';
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
+import { InvalidNamespaceError } from './add_monitor/invalid_namespace_error';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { ConfigKey } from '../../../common/runtime_types';
 import type { MonitorFields } from '../../../common/runtime_types';
@@ -32,24 +34,37 @@ import {
   assertCanPerformMonitorBulkActionInAllSpaces,
   validateMonitorPrivateLocationSpaces,
 } from './monitor_locations_utils';
+import { isSecretConnectionsEnabled } from '../../config';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
+  options: {
+    summary: 'Create a monitor',
+    description:
+      'Create a new monitor with the specified attributes.\nA monitor can be one of the following types: HTTP, TCP, ICMP, or Browser.\nThe required and default fields may vary based on the monitor type.\n\nYou must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'post-synthetic-monitors',
+    oasOperationObject: () => path.join(__dirname, 'examples/post_monitor.yaml'),
+  },
   validate: {},
   validation: {
     request: {
       body: createMonitorRequestBody,
       query: z.strictObject({
-        id: optionalRouteId,
-        preserve_namespace: queryBoolean.optional(),
-        gettingStarted: queryBoolean.optional(),
-        internal: queryBoolean.optional().default(false),
+        id: optionalRouteId.describe('A custom ID for the new monitor. Generated if omitted.'),
+        preserve_namespace: queryBoolean
+          .optional()
+          .describe(
+            'If `true`, store the `namespace` exactly as sent, skipping the space-derived fallback. If `false` or omitted, an explicit `namespace` is still stored as sent; only an omitted `namespace` is derived from the space ID.'
+          ),
+        gettingStarted: queryBoolean.optional().describe('For internal use only.'),
+        internal: queryBoolean.optional().default(false).describe('For internal use only.'),
         // primarily used for testing purposes, to specify the type of saved object
         savedObjectType: z
           .enum([syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle])
           .optional()
-          .default(syntheticsMonitorSavedObjectType),
+          .default(syntheticsMonitorSavedObjectType)
+          .describe('For internal use only.'),
       }),
     },
   },
@@ -93,9 +108,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       const maintenanceWindowRefs = formattedConfig?.[ConfigKey.MAINTENANCE_WINDOWS];
       const maintenanceWindows = maintenanceWindowRefs?.length
-        ? (await routeContext.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
-            spaceId
-          )) ?? []
+        ? (await routeContext.syntheticsMonitorClient.getMaintenanceWindows(spaceId)) ?? []
         : [];
 
       const monitorWithDefaults = await addMonitorAPI.normalizeMonitor(
@@ -108,7 +121,8 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       const validationResult = validateMonitor(
         monitorWithDefaults,
         spaceId,
-        server.cloud?.isServerlessEnabled
+        server.cloud?.isServerlessEnabled,
+        isSecretConnectionsEnabled(server.config)
       );
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
@@ -188,7 +202,8 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       if (
         error instanceof InvalidLocationError ||
         error instanceof InvalidScheduleError ||
-        error instanceof InvalidMaintenanceWindowError
+        error instanceof InvalidMaintenanceWindowError ||
+        error instanceof InvalidNamespaceError
       ) {
         return response.badRequest({ body: { message: error.message } });
       }

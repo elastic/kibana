@@ -23,60 +23,56 @@ export const discoverSessionApiEmbeddableOverridesSchema = z
       }),
     column_settings: z.record(z.string(), columnSettingsEntrySchema).optional().meta({
       description:
-        'Per-column presentation overrides (e.g. widths) keyed by field name. When set, merges with the source configuration for the referenced session or inline tab.',
+        'Per-column settings keyed by field name, such as width. When set, merges with the source configuration for the referenced session or inline tab.',
     }),
     sort: z.array(sortSchema).max(100).optional().meta({
       description:
         'Sort configuration (field and direction) for the data table. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
     }),
     density: z
-      .union([
-        z.literal(DataGridDensity.COMPACT),
-        z.literal(DataGridDensity.EXPANDED),
-        z.literal(DataGridDensity.NORMAL),
-      ])
+      .enum([DataGridDensity.COMPACT, DataGridDensity.EXPANDED, DataGridDensity.NORMAL])
       .optional()
       .meta({
         description:
-          'Discover display option: controls table row spacing (`compact`, `expanded`, or `normal`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+          'The table row spacing. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
       }),
     header_row_height: z
       .union([z.number().min(1).max(5), z.literal('auto')])
       .optional()
       .meta({
         description:
-          'Discover display option: controls table header row height (number 1–5 or `auto`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+          'The table header row height, as a number of lines, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
       }),
     row_height: z
       .union([z.number().min(1).max(20), z.literal('auto')])
       .optional()
       .meta({
         description:
-          'Discover display option: controls table data row height (number 1–20 or `auto`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:rowHeightOption".',
+          'The table data row height, as a number of lines, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:rowHeightOption` advanced setting.',
       }),
     rows_per_page: z.number().min(1).max(10000).optional().meta({
       description:
-        'Number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleRowsPerPage".',
+        'The number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleRowsPerPage` advanced setting.',
     }),
     sample_size: z.number().min(10).max(10000).optional().meta({
       description:
-        'Discover display option: controls how many documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".',
+        'The number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleSize` advanced setting.',
     }),
     documents_display_mode: documentsDisplayModeSchema.meta({
       description:
-        'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.',
+        'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.',
     }),
     hide_nulls: z.boolean().optional().meta({
       description:
-        'Discover display option: controls whether fields with null values are hidden in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+        'When `true`, fields with null values are hidden in the JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
     }),
     wrap_lines: z.boolean().optional().meta({
       description:
-        'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+        'When `true`, long values wrap in the JSON document view. When `false`, they are truncated to a single line. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
     }),
     default_rendered_nodes: z.number().min(10).max(200).optional().meta({
       description:
-        'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+        'The number of nodes each JSON cell renders by default in the JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
     }),
   })
   .strict()

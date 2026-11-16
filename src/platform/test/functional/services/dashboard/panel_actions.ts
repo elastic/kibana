@@ -8,6 +8,7 @@
  */
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import expect from '@kbn/expect';
 import { asyncMap } from '@kbn/std';
 import { FtrService } from '../../ftr_provider_context';
 
@@ -267,8 +268,11 @@ export class DashboardPanelActionsService extends FtrService {
   async saveToLibrary(newTitle = '', oldTitle = '') {
     this.log.debug(`saveToLibraryByTitle(${newTitle},${oldTitle})`);
     await this.clickPanelActionByTitle(SAVE_TO_LIBRARY_TEST_SUBJ, oldTitle);
-    await this.testSubjects.setValue('savedObjectTitle', newTitle, {
-      clearWithKeyboard: true,
+    await this.retry.try(async () => {
+      await this.testSubjects.setValue('savedObjectTitle', newTitle, {
+        clearWithKeyboard: true,
+      });
+      expect(await this.testSubjects.getAttribute('savedObjectTitle', 'value')).to.be(newTitle);
     });
     await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
     await this.testSubjects.existOrFail('addPanelToLibrarySuccess');

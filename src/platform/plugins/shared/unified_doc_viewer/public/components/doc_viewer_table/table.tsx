@@ -79,6 +79,8 @@ interface ItemsEntry {
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
+// Minimum height of the whole table tab (filters + grid), so the grid stays usable on short viewports
+const MIN_TABLE_HEIGHT = 400;
 
 // we keep writing to localStorage for pinned fields custom here (instead of useRestorableLocalStorage)
 // to keep backward compatibility
@@ -106,7 +108,7 @@ const savePinnedFieldsToStorage = (newFields: string[], dataViewId: string, stor
 
 const InternalDocViewerTable = ({
   columns,
-  columnsMeta,
+  dataSource,
   hit,
   dataView,
   textBasedHits,
@@ -199,10 +201,10 @@ const InternalDocViewerTable = ({
         dataView,
         fieldFormats,
         isPinned,
-        columnsMeta,
+        dataSource,
       });
     },
-    [dataView, hit, columnsMeta, flattened, fieldFormats]
+    [dataView, hit, dataSource, flattened, fieldFormats]
   );
 
   const fieldsFromColumns = useMemo(
@@ -224,10 +226,9 @@ const InternalDocViewerTable = ({
         dataView,
         canPrependTimeFieldColumn(
           columns,
-          dataView.timeFieldName,
-          columnsMeta,
-          !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-          isEsqlMode
+          dataView,
+          dataSource,
+          !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)
         )
       );
     }
@@ -245,8 +246,7 @@ const InternalDocViewerTable = ({
     mapping,
     dataView,
     columns,
-    columnsMeta,
-    isEsqlMode,
+    dataSource,
     uiSettings,
   ]);
 
@@ -319,9 +319,17 @@ const InternalDocViewerTable = ({
     [setShowOnlySelectedFields]
   );
 
-  const containerHeight = containerRef
-    ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM)
+  const heightOffset = decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM;
+  const availableHeight = containerRef
+    ? getTabContentAvailableHeight(containerRef, heightOffset)
     : 0;
+  // An offset larger than the viewport can't be a real margin: callers use it to opt out of the
+  // fixed height (the resulting negative CSS height is ignored) and let their parent size the table.
+  const fillsParent = heightOffset > window.innerHeight;
+  // Otherwise keep a usable minimum so the grid doesn't collapse on short viewports (e.g. 400% zoom);
+  // the flyout body scrolls when the content exceeds the available height.
+  const containerHeight =
+    containerRef && !fillsParent ? Math.max(availableHeight, MIN_TABLE_HEIGHT) : availableHeight;
 
   return (
     <EuiFlexGroup

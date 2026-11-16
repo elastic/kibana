@@ -97,6 +97,25 @@ describe('preflight_checks', () => {
           ],
         });
 
+      it('takes standard input instead of prompt responses when the run cannot resume', () => {
+        const conversation = createConversationAwaitingPrompt('prompt-123');
+
+        expect(() =>
+          ensureValidInput({
+            input: { message: 'Summarize this conversation' },
+            timeline: roundsToEvents(conversation),
+            allowResume: false,
+          })
+        ).not.toThrow();
+        expect(() =>
+          ensureValidInput({
+            input: {},
+            timeline: roundsToEvents(conversation),
+            allowResume: false,
+          })
+        ).toThrow(/No standard input was provided to continue the conversation/);
+      });
+
       it('should not throw when prompt response matches pending prompt ID', () => {
         const conversation = createConversationAwaitingPrompt('prompt-123');
         const input: ConverseInput = {

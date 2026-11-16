@@ -90,7 +90,8 @@
       "cps",
       "searchInferenceEndpoints",
       "esql",
-      "alertzero"
+      "alertzero",
+      "agenticInvestigations"
     ],
     "requiredBundles": [
       "esUiShared",

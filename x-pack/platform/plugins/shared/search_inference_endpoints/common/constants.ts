@@ -28,8 +28,6 @@ export enum ROUTE_VERSIONS {
   v1 = '1',
 }
 
-export const DYNAMIC_CONNECTORS_POLLING_START_DELAY = 5000; // 5 seconds
-
 export const NO_DEFAULT_MODEL = 'NO_DEFAULT_MODEL';
 
 export const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';

@@ -19,8 +19,8 @@ source "$KIBANA_DIR/.buildkite/scripts/common/setup_node.sh"
 
 echo "--- baking pnpm cache into $PNPM_CACHE_DIR (pnpm $(pnpm --version))"
 
-# Install the dependencies and skip the webpack bundles.
-CI=true pnpm kbn bootstrap --no-prebuilt
+# Install dependencies. Bootstrap does not build shared frontend bundles.
+CI=true pnpm kbn bootstrap
 
 tar -cf - node_modules | zstd -T0 -o node_modules.tar.zst
 

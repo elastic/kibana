@@ -1,0 +1,19 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["server/**/*", "test/scout*/**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-security-server",
+    "@kbn/config-schema",
+    "@kbn/entity-store",
+    "@kbn/es-types",
+    "@kbn/logging-mocks",
+    "@kbn/scout-oblt",
+    "@kbn/server-route-repository",
+    "@kbn/zod"
+  ]
+}

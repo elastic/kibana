@@ -15,6 +15,7 @@ import {
   SAVED_QUERY_DROPDOWN_SELECT,
   TABLE_ROWS,
 } from '../../screens/packs';
+import { selectPackPolicy } from '../../tasks/packs';
 import {
   cleanupPack,
   cleanupAgentPolicy,
@@ -211,7 +212,7 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       cy.getBySel('globalLoadingIndicator').should('not.exist');
 
       cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
-      cy.getBySel('policyIdsComboBox').type(`${policyName} {downArrow}{enter}`);
+      selectPackPolicy(policyName);
 
       cy.getBySel(ADD_QUERY_BUTTON).click();
       cy.getBySel('globalLoadingIndicator').should('not.exist');

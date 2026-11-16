@@ -33,7 +33,7 @@ import type {
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { DataSourceService } from '@kbn/data-source';
 import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -65,7 +65,9 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
@@ -77,9 +79,15 @@ import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
+  SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY,
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
+import {
+  createDiscoverSessionClient,
+  createDiscoverSessionService,
+  type DiscoverSessionService,
+} from './session';
 
 /**
  * Location state of internal Discover history instance
@@ -114,6 +122,7 @@ export interface DiscoverServices {
   data: DataPublicPluginStart;
   discoverShared: DiscoverSharedPublicStart;
   discoverFeatureFlags: DiscoverFeatureFlags;
+  discoverSessionService: DiscoverSessionService;
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
   history: History<HistoryLocationState>;
@@ -125,6 +134,7 @@ export interface DiscoverServices {
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
+  dataSourceService: DataSourceService;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string; version: string };
   navigation: NavigationPublicPluginStart;
@@ -147,11 +157,11 @@ export interface DiscoverServices {
   locator: DiscoverAppLocator;
   contextLocator: DiscoverContextAppLocator;
   singleDocLocator: DiscoverSingleDocLocator;
-  expressions: ExpressionsStart;
   charts: ChartsPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
   savedSearch: SavedSearchPublicPluginStart;
+  searchSessionsManagement?: SearchSessionsManagementPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   lens: LensPublicStart;
   uiActions: UiActionsStart;
@@ -164,6 +174,7 @@ export interface DiscoverServices {
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
   cps?: CPSPluginStart;
+  licensing?: LicensingPluginStart;
   embeddableEditor: EmbeddableEditorService;
   logger: Logger;
   feedback?: DiscoverStartPlugins['feedback'];
@@ -214,6 +225,11 @@ export const buildServices = ({
 }): DiscoverServices => {
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
+  const discoverSessionService = createDiscoverSessionService({
+    apiClient: createDiscoverSessionClient(core.http),
+    legacyClient: plugins.savedSearch,
+    useHttpApi: readBooleanFlag(core, SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY, true),
+  });
 
   return {
     agentBuilder: plugins.agentBuilder,
@@ -229,10 +245,11 @@ export const buildServices = ({
     data: plugins.data,
     dataVisualizer: plugins.dataVisualizer,
     discoverShared: plugins.discoverShared,
+    discoverSessionService,
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: () =>
         readBooleanFlag(core, CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
-      getIsEsqlDefault: () => readBooleanFlag(core, IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
+      getIsEsqlDefault: () => readBooleanFlag(core, IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, true),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
@@ -246,6 +263,7 @@ export const buildServices = ({
     initialTabStateService: new InitialTabStateService(),
     setHeaderActionMenu,
     dataViews: plugins.data.dataViews,
+    dataSourceService: new DataSourceService(plugins.data.dataViews),
     inspector: plugins.inspector,
     metadata: {
       branch: context.env.packageInfo.branch,
@@ -270,11 +288,11 @@ export const buildServices = ({
     locator,
     contextLocator,
     singleDocLocator,
-    expressions: plugins.expressions,
     charts: plugins.charts,
     savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
     savedObjectsManagement: plugins.savedObjectsManagement,
     savedSearch: plugins.savedSearch,
+    searchSessionsManagement: plugins.searchSessionsManagement,
     unifiedSearch: plugins.unifiedSearch,
     lens: plugins.lens,
     uiActions: plugins.uiActions,
@@ -287,6 +305,7 @@ export const buildServices = ({
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
     cps: plugins.cps,
+    licensing: plugins.licensing,
     embeddableEditor: new EmbeddableEditorService(
       plugins.embeddable.getStateTransfer(),
       core.application

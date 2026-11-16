@@ -1,0 +1,140 @@
+# Response schemas shared by the `oasOperationObject` example files.
+# Request schemas are generated from the routes' Zod validation.
+monitorWarning:
+  title: Monitor warning
+  type: object
+  properties:
+    monitorId:
+      type: string
+      description: The monitor ID associated with the warning.
+    message:
+      type: string
+      description: A human-readable warning message.
+    publicLocationIds:
+      type: array
+      items:
+        type: string
+      description: The public location IDs associated with the warning.
+monitorResponse:
+  title: Monitor response
+  type: object
+  additionalProperties: true
+  properties:
+    warnings:
+      type: array
+      description: An optional array of warnings about the monitor configuration.
+      items:
+        $ref: '#/monitorWarning'
+getParameterResponse:
+  title: Get parameter response
+  type: object
+  properties:
+    description:
+      type: string
+      description: >
+        The description of the parameter.
+        It is included in the response if the user has read-only permissions to the Synthetics app.
+    id:
+      type: string
+      description: The unique identifier of the parameter.
+    key:
+      type: string
+      description: The key of the parameter.
+    namespaces:
+      type: array
+      items:
+        type: string
+      description: >
+        The namespaces associated with the parameter.
+        It is included in the response if the user has read-only permissions to the Synthetics app.
+    tags:
+      type: array
+      items:
+        type: string
+      description: >
+        An array of tags associated with the parameter.
+        It is included in the response if the user has read-only permissions to the Synthetics app.
+    value:
+      type: string
+      description: >
+        The value associated with the parameter.
+        It will be included in the response if the user has write permissions.
+postParameterResponse:
+  title: Post parameter response
+  type: object
+  properties:
+    description:
+      type: string
+      description: A description of the parameter.
+    id:
+      type: string
+      description: The unique identifier for the parameter.
+    key:
+      type: string
+      description: The parameter key.
+    share_across_spaces:
+      type: boolean
+      description: Indicates whether the parameter is shared across spaces.
+    tags:
+      type: array
+      items:
+        type: string
+      description: An array of tags associated with the parameter.
+    value:
+      type: string
+      description: The value associated with the parameter.
+getPrivateLocation:
+  title: Private location
+  type: object
+  additionalProperties: true
+  properties:
+    agentPolicyId:
+      type: string
+      description: The ID of the agent policy associated with the private location.
+    geo:
+      type: object
+      description: Geographic coordinates (WGS84) for the location.
+      required:
+        - lat
+        - lon
+      properties:
+        lat:
+          type: number
+          description: The latitude of the location.
+        lon:
+          type: number
+          description: The longitude of the location.
+    id:
+      type: string
+      description: The unique identifier of the private location.
+    isInvalid:
+      type: boolean
+      description: >
+        Indicates whether the location is invalid.
+        If `true`, the location is invalid, which means the agent policy associated with the location is deleted.
+    label:
+      type: string
+      description: A label for the private location.
+    namespace:
+      type: string
+      description: The namespace of the location, which is the same as the namespace of the agent policy associated with the location.
+    spaces:
+      type: array
+      items:
+        type: string
+      description: The space IDs where the private location is available.
+    tags:
+      type: array
+      items:
+        type: string
+      description: An array of tags to categorize the private location.
+deleteResult:
+  title: Delete result
+  type: object
+  properties:
+    id:
+      type: string
+      description: The unique identifier of the deleted object.
+    deleted:
+      type: boolean
+      description: If `true`, the object was deleted. If `false`, it was not deleted.

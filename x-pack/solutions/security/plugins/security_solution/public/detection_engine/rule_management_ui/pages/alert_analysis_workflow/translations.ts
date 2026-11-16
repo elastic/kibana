@@ -113,6 +113,27 @@ export const CREATE_CONVERSATION_HIDDEN_LABEL = i18n.translate(
   }
 );
 
+export const USE_PROMPT_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.usePromptAriaLabel',
+  {
+    defaultMessage: 'Use a prompt instead of an agent to classify alerts',
+  }
+);
+
+export const USE_PROMPT_HIDDEN_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.usePromptHiddenLabel',
+  {
+    defaultMessage: 'Use a prompt instead of an agent to classify alerts',
+  }
+);
+
+export const NOT_USED_WITH_PROMPT_HELP = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.notUsedWithPromptHelp',
+  {
+    defaultMessage: 'Not used while alerts are classified with a prompt.',
+  }
+);
+
 export const AUTO_CLOSE_ENABLED_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.autoCloseEnabledAriaLabel',
   {
@@ -138,6 +159,41 @@ export const MAX_THRESHOLD_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.maxThresholdAriaLabel',
   {
     defaultMessage: 'Auto-close maximum confidence score',
+  }
+);
+
+export const DEPRECATION_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutTitle',
+  {
+    defaultMessage: 'This feature will be moved in an upcoming release',
+  }
+);
+
+export const DEPRECATION_CALLOUT_BODY = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutBody',
+  {
+    defaultMessage: 'The alert analysis workflow is being merged into the AlertZero Triage Worker.',
+  }
+);
+
+export const DEPRECATION_CALLOUT_LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutLearnMore',
+  {
+    defaultMessage: 'Learn about AlertZero here.',
+  }
+);
+
+export const DEPRECATION_CALLOUT_ENABLE_ALERTZERO = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutEnableAlertZero',
+  {
+    defaultMessage: 'Enable and explore AlertZero',
+  }
+);
+
+export const DEPRECATION_CALLOUT_ADJUST_TRIAGE_WORKER = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutAdjustTriageWorker',
+  {
+    defaultMessage: 'Adjust your AlertZero Triage Worker settings',
   }
 );
 

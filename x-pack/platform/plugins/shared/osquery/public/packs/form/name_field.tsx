@@ -35,6 +35,11 @@ const NameFieldComponent: React.FC<NameFieldProps> = ({ euiFieldProps }) => {
 
   const hasError = useMemo(() => !!error?.message, [error?.message]);
 
+  // The pack form shares `{ isDisabled }` across its fields, which suits the combo
+  // boxes. EuiFieldText takes `disabled` instead and would forward `isDisabled` to
+  // the DOM, so hand it to EuiFormRow, which disables both the label and the input.
+  const { isDisabled, ...fieldProps } = euiFieldProps ?? {};
+
   return (
     <EuiFormRow
       label={i18n.translate('xpack.osquery.pack.form.nameFieldLabel', {
@@ -42,6 +47,7 @@ const NameFieldComponent: React.FC<NameFieldProps> = ({ euiFieldProps }) => {
       })}
       error={error?.message}
       isInvalid={hasError}
+      isDisabled={Boolean(isDisabled)}
       fullWidth
     >
       <EuiFieldText
@@ -51,7 +57,7 @@ const NameFieldComponent: React.FC<NameFieldProps> = ({ euiFieldProps }) => {
         name={fieldName}
         fullWidth
         data-test-subj="input"
-        {...euiFieldProps}
+        {...fieldProps}
       />
     </EuiFormRow>
   );

@@ -77,7 +77,6 @@ describe('AdvancedSettingsForm', () => {
 
     expect(getByTestId('syntheticsAdvancedSettingsClusterPrivilegeCallout')).toBeInTheDocument();
     expect(getByTestId('syntheticsRebalanceShardsEnabledSwitch')).toBeDisabled();
-    expect(getByTestId('syntheticsSyncIntervalField')).toBeDisabled();
     expect(getByTestId('syntheticsAdvancedSettingsApplyButton')).toBeDisabled();
 
     fireEvent.mouseOver(getByTestId('syntheticsRebalanceShardsEnabledSwitch'));

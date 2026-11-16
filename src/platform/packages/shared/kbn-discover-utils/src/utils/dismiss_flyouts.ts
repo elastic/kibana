@@ -67,31 +67,3 @@ export const dismissFlyouts = (
 export const dismissAllFlyoutsExceptFor = (excludedFlyout: DiscoverFlyouts) => {
   dismissFlyouts(AllDiscoverFlyouts, excludedFlyout);
 };
-
-const isAnyFlyoutOpenExceptFor = (excludedFlyout: DiscoverFlyouts): boolean =>
-  AllDiscoverFlyouts.some(
-    (flyout) =>
-      flyout !== excludedFlyout && document.querySelector(FlyoutRootSelectors[flyout]) !== null
-  );
-
-/** Dismisses the other Discover flyouts, then opens this one once they have unmounted. */
-export const openAfterDismissingOtherFlyouts = (
-  excludedFlyout: DiscoverFlyouts,
-  open: () => void
-): void => {
-  dismissAllFlyoutsExceptFor(excludedFlyout);
-
-  // A dismissed flyout is still mounted until the next render, so this reads as open right after
-  // `dismissAllFlyoutsExceptFor` and tells us whether we have to wait for it to go away.
-  if (!isAnyFlyoutOpenExceptFor(excludedFlyout)) {
-    open();
-    return;
-  }
-
-  // Push flyouts share one inline offset on the app scroll container, which EUI captures on mount
-  // and restores on unmount, so mounting on top of a closing flyout captures the outgoing offset.
-  // Flyouts mounted via React state unmount on the next render (before the first frame); flyouts
-  // mounted via the overlay service (Inspector, ES|QL controls) unmount asynchronously in a
-  // microtask. Two frames give both paths time to clear before the new flyout mount
-  requestAnimationFrame(() => requestAnimationFrame(open));
-};

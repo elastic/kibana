@@ -29,11 +29,13 @@ dependsOn:
   - '@kbn/mock-idp-utils'
   - '@kbn/es'
   - '@kbn/test-es-server'
+  - '@kbn/workflows-yaml'
 tags:
   - plugin
   - prod
   - group-platform
   - private
+  - scout-tests
 fileGroups:
   src:
     - index.ts

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -52,6 +53,9 @@ apiTest.describe(
   'Agent Builder - converse callback API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
+    // Executions outlive the suite, so fixed keys would replay a previous run's executions.
+    const testRunId = randomUUID();
+
     let adminCredentials: RoleApiCredentials;
     let adminInteractiveCookieHeader: Record<string, string>;
     let llmProxy: LlmProxy;
@@ -175,7 +179,7 @@ apiTest.describe(
         body: {
           input: 'Hello callback Agent Builder',
           connector_id: connectorId,
-          execution_idempotency_key: 'Ev-callback-success',
+          execution_idempotency_key: `Ev-callback-success-${testRunId}`,
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-success',
@@ -220,10 +224,127 @@ apiTest.describe(
       const roundComplete = getRoundCompleteEvent(callbackRequests);
       expect(roundComplete.data.round.response.message).toBe(mockedLlmResponse);
 
+      // Slack rounds carry the response message rendered as Block Kit.
+      const surfacePayload = roundComplete.surface_payload;
+      expect(surfacePayload?.text).toBe(mockedLlmResponse);
+      expect(surfacePayload?.blocks).toStrictEqual([
+        {
+          type: 'rich_text',
+          elements: [
+            { type: 'rich_text_section', elements: [{ type: 'text', text: mockedLlmResponse }] },
+          ],
+        },
+      ]);
+
       const conversationId = getConversationId(callbackRequests);
       expect(conversationId.length).toBeGreaterThan(0);
       expect(accepted.conversation_id).toBe(conversationId);
     });
+
+    apiTest(
+      'retries round_complete after the Retry-After delay when the receiver answers 429',
+      async ({ apiClient }) => {
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          title: 'Retry-After Conversation Title',
+          response: 'Retry-After LLM response',
+        });
+
+        callbackServer.respondOnceWith(
+          ({ url, body }) =>
+            url === '/callback?token=retry-after' &&
+            isRoundCompleteEventPayload(body as ChatCallbackResponse),
+          { status: 429, headers: { 'Retry-After': '1' } }
+        );
+
+        const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
+          headers: internalHeaders(),
+          body: {
+            input: 'Hello Retry-After',
+            connector_id: connectorId,
+            execution_idempotency_key: `Ev-callback-retry-after-${testRunId}`,
+            origin: {
+              type: ConversationOriginType.Slack,
+              external_conversation_id: 'team:T123/channel:C123/thread:callback-retry-after',
+            },
+            callback: {
+              url: `${callbackServerUrl}/callback?token=retry-after`,
+            },
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(202);
+
+        const accepted = response.body as ChatCallbackAcceptedResponse;
+        conversationIds.add(accepted.conversation_id);
+
+        const throttledRequests = await collectCompletedRoundRequests();
+        const retriedRequests = await collectCompletedRoundRequests();
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        // The retried round_complete is the only request after the throttled one.
+        expect(retriedRequests).toHaveLength(1);
+
+        const throttled = throttledRequests[throttledRequests.length - 1];
+        const [retried] = retriedRequests;
+        const throttledPayload = throttled.body as ChatCallbackEventResponse;
+        const retriedPayload = retried.body as ChatCallbackEventResponse;
+
+        expect(retriedPayload.idempotency_key).toBe(accepted.execution_id);
+        expect(throttledPayload.idempotency_key).toBe(accepted.execution_id);
+        expect(retried.receivedAtMs - throttled.receivedAtMs).toBeGreaterThanOrEqual(1000);
+      }
+    );
+
+    apiTest(
+      'renders the Slack surface payload with attachments in place',
+      async ({ apiClient }) => {
+        const attachmentContent = 'Attached callback note';
+        const mockedLlmResponse =
+          'Here is the note:\n\n<render_attachment id="callback-note" />\n\nAnything else?';
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          title: 'Callback Attachment Title',
+          response: mockedLlmResponse,
+        });
+
+        const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
+          headers: internalHeaders(),
+          body: {
+            input: 'Hello callback attachments',
+            connector_id: connectorId,
+            execution_idempotency_key: `Ev-callback-attachments-${testRunId}`,
+            attachments: [
+              { id: 'callback-note', type: 'text', data: { content: attachmentContent } },
+            ],
+            origin: {
+              type: ConversationOriginType.Slack,
+              external_conversation_id: 'team:T123/channel:C123/thread:callback-attachments',
+            },
+            callback: {
+              url: `${callbackServerUrl}/callback?token=attachments`,
+            },
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(202);
+        conversationIds.add((response.body as ChatCallbackAcceptedResponse).conversation_id);
+
+        const callbackRequests = await collectCompletedRoundRequests();
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        const roundComplete = getRoundCompleteEvent(callbackRequests);
+        expect(roundComplete.data.round.response.message).toBe(mockedLlmResponse);
+
+        const blocks = JSON.stringify(roundComplete.surface_payload?.blocks);
+        expect(blocks).toContain('Here is the note:');
+        expect(blocks).toContain(attachmentContent);
+        expect(blocks).toContain('Anything else?');
+        expect(blocks).not.toContain('render_attachment');
+      }
+    );
 
     apiTest(
       'stores callback origin authorship on list and get conversation responses',
@@ -246,7 +367,7 @@ apiTest.describe(
           body: {
             input: 'Hello from Slack',
             connector_id: connectorId,
-            execution_idempotency_key: 'Ev-callback-authorship',
+            execution_idempotency_key: `Ev-callback-authorship-${testRunId}`,
             access_control: {
               access_mode: ConversationAccessControlMode.Public,
             },
@@ -333,7 +454,7 @@ apiTest.describe(
         body: {
           input: 'Hello callback failure',
           connector_id: connectorId,
-          execution_idempotency_key: 'Ev-callback-failure',
+          execution_idempotency_key: `Ev-callback-failure-${testRunId}`,
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-failure',
@@ -369,7 +490,7 @@ apiTest.describe(
         body: {
           input: 'Hello callback abort',
           connector_id: connectorId,
-          execution_idempotency_key: 'Ev-callback-abort',
+          execution_idempotency_key: `Ev-callback-abort-${testRunId}`,
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-abort',
@@ -411,7 +532,7 @@ apiTest.describe(
     apiTest(
       'returns the existing execution for a replayed idempotency key',
       async ({ apiClient }) => {
-        const executionIdempotencyKey = 'Ev-callback-replay';
+        const executionIdempotencyKey = `Ev-callback-replay-${testRunId}`;
         // Without conversation_id or origin, only the stored execution knows the conversation.
         const requestBody = {
           input: 'Hello idempotent callback',
@@ -450,7 +571,8 @@ apiTest.describe(
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
           expect(getExecutionId(firstRequests)).toBe(executionId);
-          expect(getRoundCompleteEvent(firstRequests)).toBeDefined();
+          // Rounds without an origin get no surface payload.
+          expect(getRoundCompleteEvent(firstRequests).surface_payload).toBeUndefined();
           expect(getConversationId(firstRequests)).toBe(conversationId);
         });
 
@@ -495,7 +617,7 @@ apiTest.describe(
         const requestBody = {
           input: 'Hello concurrent idempotent callback',
           connector_id: connectorId,
-          execution_idempotency_key: 'Ev-callback-concurrent',
+          execution_idempotency_key: `Ev-callback-concurrent-${testRunId}`,
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-concurrency',
@@ -549,7 +671,7 @@ apiTest.describe(
     apiTest(
       'schedules separate executions for the same key on different origins',
       async ({ apiClient }) => {
-        const executionIdempotencyKey = 'Ev-callback-cross-origin';
+        const executionIdempotencyKey = `Ev-callback-cross-origin-${testRunId}`;
         const executionIds: string[] = [];
 
         for (const thread of ['cross-origin-a', 'cross-origin-b']) {
@@ -605,7 +727,7 @@ apiTest.describe(
           response: 'Execution id precedence response',
         });
 
-        const executionId = '5c48249e-28e9-4711-b9c8-0a09a1a35c02';
+        const executionId = randomUUID();
 
         const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
           headers: internalHeaders(),
@@ -613,7 +735,7 @@ apiTest.describe(
             input: 'Hello execution id precedence callback',
             connector_id: connectorId,
             execution_id: executionId,
-            execution_idempotency_key: 'Ev-callback-precedence',
+            execution_idempotency_key: `Ev-callback-precedence-${testRunId}`,
             origin: {
               type: ConversationOriginType.Slack,
               external_conversation_id: 'team:T123/channel:C123/thread:callback-precedence',
@@ -659,7 +781,7 @@ apiTest.describe(
           body: {
             input: 'Start callback thread',
             connector_id: connectorId,
-            execution_idempotency_key: 'Ev-callback-continuation-first',
+            execution_idempotency_key: `Ev-callback-continuation-first-${testRunId}`,
             origin,
             callback: {
               url: `${callbackServerUrl}/callback?token=continuation-first`,
@@ -694,7 +816,7 @@ apiTest.describe(
           body: {
             input: 'Continue callback thread',
             connector_id: connectorId,
-            execution_idempotency_key: 'Ev-callback-continuation-second',
+            execution_idempotency_key: `Ev-callback-continuation-second-${testRunId}`,
             origin,
             callback: {
               url: `${callbackServerUrl}/callback?token=continuation-second`,

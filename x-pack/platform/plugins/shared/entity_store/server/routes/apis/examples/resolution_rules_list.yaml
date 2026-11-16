@@ -11,7 +11,7 @@ responses:
               rules:
                 - id: email_exact_match
                   kind: same_field
-                  description: Links user entities that share the same email address, compared case-insensitively, across identity providers. Disable if shared mailboxes or role accounts produce false links.
+                  description: Links user entities that share the same email address, compared case-insensitively, across identity providers. Several `local` users with that email (one per user name per host) are linked too. Unlinked users in the same identity provider that share an address are left unlinked. Disable if shared mailboxes or role accounts produce false links.
                   managed: true
                   enabled: true
                 - id: windows_sid_bridge

@@ -6,13 +6,16 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import copy from 'copy-to-clipboard';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { createExecutionTerminatedEvent } from '../items/execution_terminated_event.factory';
 import { ResponseActions } from './response_actions';
 import { useToasts } from '../../../../hooks/use_toasts';
+
+const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: EuiProvider });
 
 jest.mock('copy-to-clipboard');
 
@@ -30,6 +33,10 @@ jest.mock('../../../../hooks/use_conversation', () => ({
 
 jest.mock('../../../../context/conversation/use_conversation_id', () => ({
   useConversationId: () => undefined,
+}));
+
+jest.mock('../../../../context/conversation/conversation_context', () => ({
+  useConversationContext: () => ({ isEmbeddedContext: false }),
 }));
 
 const copyMock = copy as jest.MockedFunction<typeof copy>;

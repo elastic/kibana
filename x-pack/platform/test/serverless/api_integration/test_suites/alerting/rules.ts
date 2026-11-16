@@ -22,32 +22,49 @@ export default function ({ getService }: FtrProviderContext) {
   let roleAdmin: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
-  // Failing: See https://github.com/elastic/kibana/issues/251764
-  describe.skip('Alerting rules', function () {
+  describe('Alerting rules', function () {
     // Timeout of 360000ms exceeded
     this.tags(['failsOnMKI']);
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
-    let connectorId: string;
-    let ruleId: string;
+    let connectorId = '';
+    let ruleId = '';
+    let alertActionIndex: string;
+    let testIndex = 0;
 
     before(async () => {
       roleAdmin = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
+      await esDeleteAllIndices([`${ALERT_ACTION_INDEX}-*`]);
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAdmin);
     });
 
+    beforeEach(async () => {
+      alertActionIndex = `${ALERT_ACTION_INDEX}-${testIndex++}`;
+      // The .index connector needs a target, and document polling sorts by date.
+      await esClient.indices.create({
+        index: alertActionIndex,
+        mappings: { properties: { date: { type: 'date' } } },
+      });
+    });
+
     afterEach(async () => {
-      await supertest.delete(`/api/actions/connector/${connectorId}`).set(internalReqHeader);
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
+      if (ruleId) {
+        await alertingApi.helpers.disableRule({ roleAuthc: roleAdmin, ruleId });
+        await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
+      }
+      if (connectorId) {
+        await supertest.delete(`/api/actions/connector/${connectorId}`).set(internalReqHeader);
+      }
+      ruleId = '';
+      connectorId = '';
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         conflicts: 'proceed',
         query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
       });
-      await esDeleteAllIndices([ALERT_ACTION_INDEX]);
     });
 
     it('should schedule task, run rule and schedule actions when appropriate', async () => {
@@ -56,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       const createdConnector = await alertingApi.helpers.createIndexConnector({
         roleAuthc: roleAdmin,
         name: 'Index Connector: Alerting API test',
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
 
@@ -108,10 +125,9 @@ export default function ({ getService }: FtrProviderContext) {
       // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
       const resp = await alertingApi.helpers.waitForDocumentInIndex({
         esClient,
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
         ruleId,
         retryOptions: {
-          retryCount: 12,
           retryDelay: 2000,
         },
       });
@@ -154,7 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
       const createdConnector = await alertingApi.helpers.createIndexConnector({
         roleAuthc: roleAdmin,
         name: 'Index Connector: Alerting API test',
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
 
@@ -206,9 +222,9 @@ export default function ({ getService }: FtrProviderContext) {
       // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
       const resp = await alertingApi.helpers.waitForDocumentInIndex({
         esClient,
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
         ruleId,
-        retryOptions: { retryDelay: 800, retryCount: 10 },
+        retryOptions: { retryDelay: 800 },
       });
       expect(resp.hits.hits.length).to.be(1);
 
@@ -248,7 +264,7 @@ export default function ({ getService }: FtrProviderContext) {
       // make sure alert info passed to executor is correct
       const resp2 = await alertingApi.helpers.waitForDocumentInIndex({
         esClient,
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
         ruleId,
         num: 2,
       });
@@ -327,7 +343,7 @@ export default function ({ getService }: FtrProviderContext) {
       const createdConnector = await alertingApi.helpers.createIndexConnector({
         roleAuthc: roleAdmin,
         name: 'Index Connector: Alerting API test',
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
 
@@ -396,7 +412,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Ensure actions only executed once
       const resp = await alertingApi.helpers.waitForDocumentInIndex({
         esClient,
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
         ruleId,
       });
       expect(resp.hits.hits.length).to.be(1);
@@ -408,7 +424,7 @@ export default function ({ getService }: FtrProviderContext) {
       const createdConnector = await alertingApi.helpers.createIndexConnector({
         roleAuthc: roleAdmin,
         name: 'Index Connector: Alerting API test',
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
 
@@ -481,7 +497,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Ensure actions only executed once
       const resp = await alertingApi.helpers.waitForDocumentInIndex({
         esClient,
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
         ruleId,
       });
       expect(resp.hits.hits.length).to.be(1);
@@ -493,7 +509,7 @@ export default function ({ getService }: FtrProviderContext) {
       const createdConnector = await alertingApi.helpers.createIndexConnector({
         roleAuthc: roleAdmin,
         name: 'Index Connector: Alerting API test',
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
 
@@ -571,7 +587,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Wait for the action to index a document
       const resp = await alertingApi.helpers.waiting.waitForDocumentInIndex({
         esClient,
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
         ruleId,
       });
       expect(resp.hits.hits.length).to.be(1);
@@ -611,7 +627,6 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         num: 2,
         retryOptions: {
-          retryCount: 12,
           retryDelay: 2000,
         },
       });
@@ -631,7 +646,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Ensure only 2 actions are executed
       const resp2 = await alertingApi.helpers.waitForDocumentInIndex({
         esClient,
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
         ruleId,
         num: 2,
       });
@@ -640,12 +655,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`shouldn't schedule actions when alert is muted`, async () => {
       const testStart = new Date();
-      await alertingApi.helpers.waiting.createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
 
       const createdConnector = await alertingApi.helpers.createIndexConnector({
         roleAuthc: roleAdmin,
         name: 'Index Connector: Alerting API test',
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
 
@@ -729,7 +743,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Should not have executed any action
       const resp2 = await alertingApi.helpers.waiting.getDocumentsInIndex({
         esClient,
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
         ruleId,
       });
       expect(resp2.hits.hits.length).to.be(0);
@@ -737,12 +751,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`shouldn't schedule actions when alert instance is muted`, async () => {
       const testStart = new Date();
-      await alertingApi.helpers.waiting.createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
 
       const createdConnector = await alertingApi.helpers.createIndexConnector({
         roleAuthc: roleAdmin,
         name: 'Index Connector: Alerting API test',
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
 
@@ -827,7 +840,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Should not have executed any action
       const resp2 = await alertingApi.helpers.waiting.getDocumentsInIndex({
         esClient,
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
         ruleId,
       });
       expect(resp2.hits.hits.length).to.be(0);
@@ -837,7 +850,7 @@ export default function ({ getService }: FtrProviderContext) {
       const createdConnector = await alertingApi.helpers.createIndexConnector({
         roleAuthc: roleAdmin,
         name: 'Index Connector: Alerting API test',
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
 
@@ -911,7 +924,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Should have one document indexed by the action
       const resp = await alertingApi.helpers.waitForDocumentInIndex({
         esClient,
-        indexName: ALERT_ACTION_INDEX,
+        indexName: alertActionIndex,
         ruleId,
       });
       expect(resp.hits.hits.length).to.be(1);

@@ -156,10 +156,11 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await retry.try(
           async () => await testSubjects.click('serverlessSearchDeleteConnectorModalActionButton')
         );
-        await testSubjects.exists('confirmModalBodyText');
-        expect(await testSubjects.getVisibleText('confirmModalBodyText')).to.be(
-          'This action cannot be undone. Please type my-connector to confirm.\nConnector name'
-        );
+        await retry.try(async () => {
+          expect(await testSubjects.getVisibleText('confirmModalBodyText')).to.be(
+            'This action cannot be undone. Please type my-connector to confirm.\nConnector name'
+          );
+        });
       },
       async setSearchBarValue(value: string) {
         await testSubjects.setValue('serverlessSearchConnectorsTableSearchBar', value);

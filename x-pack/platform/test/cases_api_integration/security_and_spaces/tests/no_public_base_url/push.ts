@@ -10,13 +10,13 @@ import type { RecordingServiceNowSimulator } from '../../../../alerting_api_inte
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 import { arraysToEqual } from '../../../common/lib/validation';
 import {
-  postCommentUserReq,
-  postCommentAlertReq,
-  postCommentAlertMultipleIdsReq,
-  postCommentActionsReq,
-  postCommentActionsReleaseReq,
-  postExternalReferenceESReq,
-  persistableStateAttachment,
+  postUnifiedCommentReq,
+  postUnifiedAlertReq,
+  postUnifiedAlertMultipleIdsReq,
+  postUnifiedActionsReq,
+  postUnifiedActionsReleaseReq,
+  postUnifiedIndicatorReq,
+  postUnifiedLensReq,
 } from '../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -89,13 +89,13 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: [
-            postCommentUserReq,
-            postCommentAlertReq,
-            postCommentAlertMultipleIdsReq,
-            postCommentActionsReq,
-            postCommentActionsReleaseReq,
-            postExternalReferenceESReq,
-            persistableStateAttachment,
+            postUnifiedCommentReq,
+            postUnifiedAlertReq,
+            postUnifiedAlertMultipleIdsReq,
+            postUnifiedActionsReq,
+            postUnifiedActionsReleaseReq,
+            postUnifiedIndicatorReq,
+            postUnifiedLensReq,
           ],
         });
 
@@ -117,7 +117,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const allWorkNotes: string[] = allCommentRequests.map((request) => request.work_notes);
         const expectedNotes = [
           'This is a cool comment\n\nAdded by elastic.',
-          'Elastic Alerts attached to the case: 3',
+          'Elastic Alerts attached to the case: 3 added (3 total)',
         ];
 
         /**

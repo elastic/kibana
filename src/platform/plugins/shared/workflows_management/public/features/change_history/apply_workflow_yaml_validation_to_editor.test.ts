@@ -33,6 +33,7 @@ const emptyRegistry = createMockWorkflowContextRegistry();
 
 const testValidationContext: WorkflowYamlValidationContext = {
   registry: emptyRegistry,
+  isManaged: false,
   connectorTypes: { status: 'ready', value: {} },
   connectorsManagementUrl: 'http://test/connectors',
   workflows: { workflows: {}, totalWorkflows: 0 },

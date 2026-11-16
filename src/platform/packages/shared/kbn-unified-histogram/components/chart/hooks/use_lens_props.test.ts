@@ -11,6 +11,7 @@ import { act, renderHook } from '@testing-library/react';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { UnifiedHistogramFetchParams, UnifiedHistogramFetch$ } from '../../../types';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
+import { EsqlSource } from '@kbn/data-source';
 import { getLensVisMock } from '../../../__mocks__/lens_vis';
 import { getFetchParamsMock, getFetch$Mock } from '../../../__mocks__/fetch_params';
 import { useLensProps } from './use_lens_props';
@@ -26,8 +27,7 @@ describe('useLensProps', () => {
       filters: fetchParams.filters,
       query: fetchParams.query,
       columns: [],
-      isPlainRecord: fetchParams.isESQLQuery,
-      dataView: fetchParams.dataView,
+      dataView: dataViewWithTimefieldMock,
       timeInterval: fetchParams.timeInterval,
       breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
     });
@@ -49,13 +49,20 @@ describe('useLensProps', () => {
   it('should return lens props for text based languages', async () => {
     const fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
     const onLoad = jest.fn();
-    const query = { esql: 'FROM logs* | WHERE ??field >= ?otherVar' };
+    const esql = 'FROM logs* | WHERE ??field >= ?otherVar';
+    const query = { esql };
     const esqlVariables: ESQLControlVariable[] = [
       { key: 'field', value: 'variableColumn', type: ESQLVariableType.FIELDS },
       { key: 'otherVar', value: 'someOtherValue', type: ESQLVariableType.VALUES },
     ];
+    EsqlSource.clearCache();
     const fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock({
       query,
+      dataSource: await EsqlSource.create({
+        query: esql,
+        timeFieldName: '@timestamp',
+        esqlVariables,
+      }),
       esqlVariables,
       relativeTimeRange: { from: '2025-09-30T22:00:00.000Z', to: '2025-10-31T13:16:54.878Z' },
     });
@@ -63,8 +70,7 @@ describe('useLensProps', () => {
       filters: fetchParams.filters,
       query: fetchParams.query,
       columns: [],
-      isPlainRecord: fetchParams.isESQLQuery,
-      dataView: fetchParams.dataView,
+      dataView: dataViewWithTimefieldMock,
       timeInterval: 'auto',
       breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
     });
@@ -91,8 +97,7 @@ describe('useLensProps', () => {
       filters: fetchParams.filters,
       query: fetchParams.query,
       columns: [],
-      isPlainRecord: fetchParams.isESQLQuery,
-      dataView: fetchParams.dataView,
+      dataView: dataViewWithTimefieldMock,
       timeInterval: 'auto',
       breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
     });

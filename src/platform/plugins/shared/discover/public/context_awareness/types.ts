@@ -8,6 +8,7 @@
  */
 
 import type { DataView, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
@@ -190,6 +191,11 @@ export interface RowIndicatorExtensionParams {
    * The current data view
    */
   dataView: DataView;
+  /**
+   * The current data source. Prefer this over `dataView` for column presence
+   * (ES|QL shims may only expose a time field on the DataView).
+   */
+  dataSource?: DataSource;
 }
 
 /**

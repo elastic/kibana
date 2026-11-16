@@ -25,10 +25,14 @@ import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import { emitWorkflowIdentityFailureEvent } from '../lib/emit_workflow_identity_failure_event';
 import { hasWorkflowAccess } from '../lib/has_workflow_access';
+import { toWorkflowIdentityTaskError } from '../lib/workflow_identity_task_error';
 import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { withWorkflowExecutionIdentity } from '../service_account_execution';
+import {
+  getExecutionServiceAccountId,
+  withWorkflowExecutionIdentity,
+} from '../service_account_execution';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
@@ -106,6 +110,7 @@ async function runWorkflowWithRequest({
     workflowExecutionState,
     stepIoService,
     workflowLogger,
+    eventQueue,
     nodesFactory,
     workflowExecutionGraph,
     workflowTaskManager,
@@ -134,12 +139,11 @@ async function runWorkflowWithRequest({
     execution.isTestRun && execution.isEphemeral !== false ? 'edit' : 'execute';
   if (
     currentWorkflow &&
-    !(await hasWorkflowAccess(
-      currentWorkflow,
-      fakeRequest,
-      dependencies.coreStart,
-      requiredPermission
-    ))
+    !(await hasWorkflowAccess(currentWorkflow, fakeRequest, dependencies.coreStart, {
+      id: execution.workflowId,
+      spaceId,
+      operation: requiredPermission,
+    }))
   ) {
     await workflowExecutionRepository.updateWorkflowExecution({
       id: workflowRunId,
@@ -241,6 +245,7 @@ async function runWorkflowWithRequest({
       stepIoService,
       workflowExecutionRepository,
       workflowLogger,
+      eventQueue,
       nodesFactory,
       workflowExecutionGraph,
       esClient,
@@ -309,7 +314,7 @@ export const runWorkflow = async (
       }
     );
   } catch (error) {
-    if (!enteredExecution && execution.workflowDefinition?.settings?.run_as) {
+    if (!enteredExecution && getExecutionServiceAccountId(execution)) {
       const executionError = {
         type: 'ServiceAccountExecutionError',
         message: error instanceof Error ? error.message : String(error),
@@ -318,7 +323,7 @@ export const runWorkflow = async (
         ...params,
         error: executionError,
       });
-      if (!failedExecution) throw error;
+      if (!failedExecution) throw toWorkflowIdentityTaskError(error);
       if (failedExecution.status === ExecutionStatus.FAILED) {
         await emitWorkflowIdentityFailureEvent({
           execution: failedExecution,
@@ -333,6 +338,7 @@ export const runWorkflow = async (
         workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
         cloudSetup: params.dependencies.cloudSetup,
       });
+      throw toWorkflowIdentityTaskError(error);
     }
     throw error;
   }

@@ -34,7 +34,7 @@ jest.mock('../../../quickstart_flows/shared/empty_prompt', () => ({
   ),
 }));
 
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
     onPageRefreshStart: jest.fn(),
@@ -107,10 +107,13 @@ describe('HostWindowsOtelPage', () => {
     expect(screen.getByTestId('otelInstallStep')).toBeInTheDocument();
   });
 
-  it('wires the pre-existing-data probe with the otel_host flow id', () => {
+  it('scopes the pre-existing-data probe to windows so other hosts cannot end the session', () => {
     usePreExistingDataCheckMock.mockClear();
     renderWindowsOtelPage();
-    expect(usePreExistingDataCheckMock).toHaveBeenCalledWith({ flow: 'otel_host' });
+    expect(usePreExistingDataCheckMock).toHaveBeenCalledWith({
+      flow: 'otel_host',
+      osType: 'windows',
+    });
   });
 
   it('reports onboardingFlowType=otel_logs to the window-blur and time-window detection hooks', () => {

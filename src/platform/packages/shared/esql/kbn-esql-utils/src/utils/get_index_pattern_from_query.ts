@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Parser, isSubQuery } from '@elastic/esql';
+import { BasicPrettyPrinter, isSource, isSubQuery, synth } from '@elastic/esql';
 import { esqlCommandRegistry, getIndexFromPromQLParams } from '@kbn/esql-language';
 import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
+import { parseEsqlCached } from './parse_esql_cached';
 
 const INDEX_SOURCE_COMMANDS = new Set(['FROM', 'TS']);
 const ALL_SOURCE_COMMANDS = new Set(
@@ -74,7 +75,7 @@ export function getIndexPatternsFromESQLQuery(esql?: string): ESQLIndexPatterns 
     return { indexPattern: '', indexPatternWithoutRemoteClusterPrefix: '' };
   }
 
-  const { root } = Parser.parse(esql);
+  const { root } = parseEsqlCached(esql);
   const indexSources = getIndexSources(root.commands);
   const promqlSources = getPromQLSources(root.commands);
 
@@ -116,12 +117,57 @@ export function getSourceCommandFromESQLQuery(
     return '';
   }
 
-  const { root } = Parser.parse(esql);
+  const { root } = parseEsqlCached(esql);
   const sourceCommand = root.commands.find(({ name }) =>
     supportedSourceCommands.has(name.toUpperCase())
   );
 
   return sourceCommand?.name.toUpperCase() ?? '';
+}
+
+// A DSL filter applies to every source's documents before a subquery's own commands,
+// so a subquery contributes the fields of its source command.
+const reduceSubqueriesToSource = (command: ESQLCommand): ESQLCommand => ({
+  ...command,
+  args: command.args.map((arg) => {
+    if (!isSubQuery(arg)) {
+      return arg;
+    }
+    const [subquerySource] = arg.child.commands;
+    return {
+      ...arg,
+      child: {
+        ...arg.child,
+        commands: subquerySource ? [reduceSubqueriesToSource(subquerySource)] : [],
+      },
+    };
+  }),
+});
+
+/**
+ * Returns the FROM or TS command alone (with METADATA, and each subquery reduced to its source
+ * command), whose columns are the schema of the queried dataset; for PROMQL, `FROM <index>` of
+ * its index parameter. `SET project_routing` is left out, so the text matches the ES|QL editor's
+ * fields query; pass the routing separately. Empty string if there is no such command.
+ */
+export function getSourceCommandQueryFromESQLQuery(esql: string | undefined): string {
+  if (!esql?.trim()) {
+    return '';
+  }
+
+  const { root } = parseEsqlCached(esql);
+  const sourceCommand = root.commands.find(({ name }) =>
+    INDEX_SOURCE_COMMANDS.has(name.toUpperCase())
+  );
+
+  if (sourceCommand) {
+    // Nothing to describe yet, e.g. `FROM ` while typing.
+    const hasSources = sourceCommand.args.some((arg) => isSource(arg) || isSubQuery(arg));
+    return hasSources ? BasicPrettyPrinter.command(reduceSubqueriesToSource(sourceCommand)) : '';
+  }
+
+  const [promqlIndex] = getPromQLSources(root.commands);
+  return promqlIndex ? synth.cmd`FROM ${promqlIndex}`.toString() : '';
 }
 
 /**

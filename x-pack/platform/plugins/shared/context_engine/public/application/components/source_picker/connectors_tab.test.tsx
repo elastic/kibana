@@ -63,6 +63,7 @@ interface RenderConnectorsTabOptions {
   selectedConnectorIds?: string[];
   onToggle?: jest.Mock;
   canCreateConnector?: boolean;
+  canReadConnectors?: boolean;
   connectorsResponse?: typeof RAW_CONNECTORS | Error;
   typesResponse?: typeof SUPPORTED_TYPES | Error;
 }
@@ -71,6 +72,7 @@ const renderConnectorsTab = ({
   selectedConnectorIds = [],
   onToggle = jest.fn(),
   canCreateConnector = true,
+  canReadConnectors = true,
   connectorsResponse = RAW_CONNECTORS,
   typesResponse = SUPPORTED_TYPES,
 }: RenderConnectorsTabOptions = {}) => {
@@ -80,6 +82,7 @@ const renderConnectorsTab = ({
     actions: {
       ...coreStart.application.capabilities.actions,
       save: canCreateConnector,
+      show: canReadConnectors,
     },
   };
 
@@ -200,6 +203,23 @@ describe('ConnectorsTab', () => {
         expect.objectContaining({ signal: expect.any(AbortSignal) })
       )
     );
+  });
+
+  it('disables the combo and shows a privilege callout when the user cannot read connectors', () => {
+    const { services } = renderConnectorsTab({
+      canReadConnectors: false,
+      canCreateConnector: false,
+    });
+
+    expect(screen.getByTestId('contextConnectorsMissingReadPrivilegeCallout')).toHaveTextContent(
+      'You need Actions and Connectors read access to search and select connectors.'
+    );
+    expect(
+      within(screen.getByTestId('contextConnectorComboBox')).getByRole('combobox')
+    ).toBeDisabled();
+    expect(screen.queryByTestId('contextConnectorsEmpty')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextConnectorsError')).not.toBeInTheDocument();
+    expect(services.http.get).not.toHaveBeenCalled();
   });
 
   it('renders error prompt when loading failed', async () => {

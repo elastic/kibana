@@ -6,19 +6,7 @@
  */
 
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
-import type { CompactedConversation } from './conversation_compactor';
 import { createPreExecutionSteps } from './round_steps';
-
-const compactionResult = {
-  compactionTriggered: true,
-  summary: { summarized_round_count: 2 },
-  tokensBefore: 100,
-  tokensAfter: 20,
-} as CompactedConversation;
-
-const relevantSkillsSelection = {
-  skills: [{ id: 'skill-1', name: 'Skill', path: '/skill', description: 'A skill' }],
-};
 
 describe('createPreExecutionSteps', () => {
   it('creates no workflow step when neither context field is present', () => {
@@ -49,20 +37,6 @@ describe('createPreExecutionSteps', () => {
         type: ConversationRoundStepType.preExecutionWorkflow,
         ...preExecutionWorkflow,
       },
-    ]);
-  });
-
-  it('orders compaction, workflow context, then relevant skills', () => {
-    const steps = createPreExecutionSteps({
-      compactionResult,
-      preExecutionWorkflow: { model_context: 'model context' },
-      relevantSkillsSelection,
-    });
-
-    expect(steps.map((step) => step.type)).toEqual([
-      ConversationRoundStepType.compaction,
-      ConversationRoundStepType.preExecutionWorkflow,
-      ConversationRoundStepType.relevantSkills,
     ]);
   });
 });

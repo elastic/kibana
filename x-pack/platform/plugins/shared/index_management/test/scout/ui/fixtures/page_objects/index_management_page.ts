@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 export class AbstractPageObject {
@@ -26,8 +26,18 @@ const commonPrefix = (values: string[]) => {
 };
 
 export class IndexManagement extends AbstractPageObject {
+  constructor(page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    super(page);
+  }
+
   async goto() {
-    await this.page.gotoApp('management/data/index_management');
+    // `gotoApp` resolves on the browser `load` event
+    // The load even occurs earlier so its less likely that goto will timeout.
+    await this.page.goto(this.kbnUrl.app('management/data/index_management'), {
+      waitUntil: 'commit',
+    });
+    // the indices table below is the readiness gate.
+    await expect(this.page.testSubj.locator('indexTable')).toBeVisible({ timeout: 30_000 });
   }
 
   async sectionHeadingText() {

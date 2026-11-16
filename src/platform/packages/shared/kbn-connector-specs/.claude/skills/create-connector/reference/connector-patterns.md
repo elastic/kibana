@@ -11,8 +11,11 @@ kbn-connector-specs/src/specs/
 ├── all_specs.ts                # Registration file - ADD YOUR SPEC HERE
 ├── slack/
 │   ├── slack.ts                # Connector spec
+│   ├── events.ts               # Inbound events (vendor → Kibana)
+│   ├── events.test.ts
 │   ├── slack.test.ts           # Tests
 │   ├── types.ts                # Zod schemas and inferred types
+│   ├── constants.ts            # Event keys and buildEventId results
 │   └── icon/
 │       └── index.tsx           # Brand icon component
 ├── github/
@@ -25,9 +28,38 @@ kbn-connector-specs/src/specs/
     ├── {your_connector}.ts
     ├── {your_connector}.test.ts
     ├── types.ts
+    ├── {helper}.ts             # Optional: helpers moved out of the spec file
+    ├── {helper}.test.ts
+    ├── events.ts               # When the vendor pushes webhooks; omit otherwise
+    ├── events.test.ts
     └── icon/
         └── index.tsx
 ```
+
+### Keep the spec file under 500 lines
+
+`{your_connector}.ts` should read as a table of contents: metadata, auth, config schema, and the
+actions, each with a short handler. Aim for under 500 lines, and treat 1000 as a limit you must not
+exceed. When the file grows past 500, move code into sibling files in the connector directory, named
+for what they hold:
+
+- request plumbing (base URL, auth headers, error mapping, pagination and polling loops) — e.g.
+  `client.ts`
+- response shaping and other pure transformations (mapping vendor objects to the returned shape,
+  building a payload) — e.g. `format.ts`, or a name for the domain, like `gmail/mime.ts`
+- token or credential exchanges — e.g. `azure_monitor/azure_ad_token.ts`
+- constants shared by several of those files — `constants.ts`
+- a group of related actions whose handlers stay long even after that, as an exported object of action
+  definitions spread into `actions` in the spec file
+- inbound events, when the vendor pushes them — `events.ts`, assigned to `events` on the spec (see
+  [Inbound events](#inbound-events)). This file is not an action group. `slack/events.ts` is the
+  inbound spoke for `.slack2`
+
+Handlers call those functions; they do not re-implement them. Keep one function per job, shared by
+every action that needs it, rather than one copy per handler. Each helper file gets its own
+`{helper}.test.ts` for its edge cases (see `gmail/mime.test.ts`); the spec's test file keeps testing
+the actions end to end. Helper files follow the same rules as the spec: no Node built-ins, typed
+inputs, and schemas stay in `types.ts`.
 
 ## Scaffold Generator
 
@@ -50,7 +82,7 @@ After running the generator, fill in the TODO placeholders.
 
 ```typescript
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import { SearchInputSchema, GetItemInputSchema } from './types';
 import type { SearchInput, GetItemInput } from './types';
@@ -59,7 +91,7 @@ export const YourConnector: ConnectorSpec = {
   metadata: {
     id: '.your_connector',           // MUST start with a dot
     displayName: 'Your Connector',
-    description: i18n.translate('core.kibanaConnectorSpecs.yourConnector.metadata.description', {
+    description: i18n.translate('connectorSpecs.yourConnector.metadata.description', {
       defaultMessage: 'Search items, list collections, and retrieve details from Your Service',
     }),
     minimumLicense: 'enterprise',
@@ -73,9 +105,11 @@ export const YourConnector: ConnectorSpec = {
     types: [{ type: 'bearer' }],     // or 'api_key_header', 'oauth_client_credentials'
   },
 
-  schema: z.object({
-    // Config fields (optional — only if the connector needs user-configured settings)
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      // Config fields (optional — only if the connector needs user-configured settings)
+    })
+  ),
 
   actions: {
     search: {
@@ -126,6 +160,62 @@ export const YourConnector: ConnectorSpec = {
 };
 ```
 
+## Inbound events
+
+Add `events` when the vendor POSTs webhooks, subscriptions, or callbacks that should start something in kibana. That is the same spec as the outbound actions: a
+bi-directional connector does not get a second type, and it does not get a classic ActionType.
+The package README's [Inbound events](../../../../README.md#inbound-events) section is the contract.
+This section is the file layout.
+
+Omit `events` when the connector only calls the vendor. On the first PR for a new connector type, omit
+them even when the vendor pushes webhooks. Triggers are registered from `events.definitions` without
+reading `supportedFeatureIds`, and the workflows connector list includes event types that do not
+declare `'workflows'`. Add this file in the follow-up that adds `'workflows'`, once the type is
+registered in every Production-NonCanary version. Record the event keys in the first PR's description.
+
+```
+{connector}/
+├── events.ts            # ConnectorSpecEvents: definitions + handleEvents
+├── events.test.ts
+├── constants.ts         # EVENT_KEY and buildEventId(metadata.id, key)
+└── types.ts             # event payload schemas, or event_schemas.ts when types.ts is already large
+```
+
+Assign the export on the spec. Do not spread it into `actions`:
+
+```typescript
+import { myConnectorEvents } from './events';
+
+export const MyConnector: ConnectorSpec = {
+  // metadata, auth, schema, actions, test ...
+  events: myConnectorEvents,
+};
+```
+
+Rules the contract tests enforce:
+
+- `metadata.id` is in `SPECS_ALLOWED_EVENTS` (`src/specs_allowed_events.ts`)
+- each `eventId` equals `buildEventId(metadata.id, definitionKey)` (`.github` + `issues` → `github.issues`)
+- `events.headers` are lowercase and are not `authorization` or `cookie`
+
+`handleEvents` returns one of:
+
+- `{ type: 'emit', events: [...] }` for a body you recognized. `correlationKey` is a vendor id when
+  the payload has one, otherwise a UUID. Payload keys stay within 32, and the payload must satisfy
+  that definition's `eventSchema`.
+- `{ type: 'emit', events: [] }` for a body you do not model.
+- `{ type: 'http', httpResponse: { status, body?, headers? } }` for a handshake, with no emit.
+  Response headers may only be `content-type` and `cache-control`.
+- an emit plus `httpResponse` when the vendor requires a response and the events must still be
+  scheduled.
+
+`handleEvents` sees `rawBody`, `config` without secrets, and only the headers you listed. It does
+not see the ingest token or connector secrets. Do not declare `ingestTokenHash`; the factory injects
+it. Do not log `rawBody` at info.
+
+An inbound-only connector (`.inboundWebhook`) uses `actions: {}` and `test.enabled: false`. A dual
+connector keeps its actions and `test.enabled: true`.
+
 ## Input Schemas & Types
 
 Define Zod schemas and inferred types in a separate `types.ts` file alongside the connector spec. This keeps schemas as the single source of truth for both runtime validation and TypeScript types.
@@ -133,17 +223,21 @@ Define Zod schemas and inferred types in a separate `types.ts` file alongside th
 **Path**: `src/platform/packages/shared/kbn-connector-specs/src/specs/<name>/types.ts`
 
 ```typescript
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const SearchInputSchema = z.object({
-  query: z.string().describe('Search query string'),
-  limit: z.number().optional().describe('Maximum results (default: 20)'),
-});
+export const SearchInputSchema = lazySchema(() =>
+  z.object({
+    query: z.string().max(1000).describe('Search query string'),
+    limit: z.number().optional().describe('Maximum results (default: 20)'),
+  })
+);
 export type SearchInput = z.infer<typeof SearchInputSchema>;
 
-export const GetItemInputSchema = z.object({
-  id: z.string().describe('The item ID'),
-});
+export const GetItemInputSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(255).describe('The item ID'),
+  })
+);
 export type GetItemInput = z.infer<typeof GetItemInputSchema>;
 ```
 
@@ -152,12 +246,23 @@ This pattern (used by ServiceNow, Slack, GitHub connectors):
 - Keeps the main connector file focused on handler logic
 - Gives handlers full autocomplete without inline `as` casts
 
+**Every Zod schema assigned to a variable is wrapped in `lazySchema()`** — not only the exported
+input schemas, but module-level helpers too:
+
+```typescript
+const IpAddressSchema = lazySchema(() => z.union([z.ipv4(), z.ipv6()]));
+```
+
+`lazySchema` defers building the schema until first use, so loading the connector registry does not
+build every connector's schemas at import time. The spec's `schema` and any inline action `input` are
+wrapped the same way.
+
 ## MCP-Native Connector Pattern
 
 For connectors backed by an MCP server. Uses `withMcpClient` from `lib/mcp` to wrap MCP tool calls as typed actions.
 
 ```typescript
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import { withMcpClient } from '../../lib/mcp/with_mcp_client';
 import { UISchemas } from '../../connector_spec_ui';
@@ -178,20 +283,24 @@ export const YourMcpConnector: ConnectorSpec = {
     types: [{ type: 'bearer' }],
   },
 
-  schema: z.object({
-    serverUrl: UISchemas.url('https://mcp.example.com/mcp/')
-      .describe('MCP server URL')
-      .meta({ label: 'Server URL' }),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      serverUrl: UISchemas.url('https://mcp.example.com/mcp/')
+        .describe('MCP server URL')
+        .meta({ label: 'Server URL' }),
+    })
+  ),
 
   actions: {
     search: {
       isTool: true,
       scope: 'read',
       description: 'Search Your Service by keyword using the underlying MCP tool.',
-      input: z.object({
-        query: z.string().describe('Keyword or natural-language search query'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          query: z.string().max(1000).describe('Keyword or natural-language search query'),
+        })
+      ),
       handler: withMcpClient(async (client, input) => {
         return client.callTool({ name: 'your_search', arguments: input });
       }),
@@ -201,7 +310,7 @@ export const YourMcpConnector: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description: 'List all MCP tools exposed by the server. Useful for dynamic discovery.',
-      input: z.object({}),
+      input: lazySchema(() => z.object({})),
       handler: withMcpClient(async (client) => {
         return client.listTools();
       }),
@@ -210,10 +319,12 @@ export const YourMcpConnector: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description: 'Call any MCP tool by name with arbitrary arguments. Use listTools first to discover available tools.',
-      input: z.object({
-        name: z.string().describe('The MCP tool name (from listTools)'),
-        arguments: z.record(z.unknown()).optional().describe('Tool arguments as a key/value map'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          name: z.string().min(1).max(200).describe('The MCP tool name (from listTools)'),
+          arguments: z.record(z.string().max(200), z.unknown()).optional().describe('Tool arguments as a key/value map'),
+        })
+      ),
       handler: withMcpClient(async (client, input) => {
         return client.callTool(input);
       }),
@@ -344,62 +455,119 @@ The remaining three details apply to a **URL** continuation:
 - Cap the number of pages followed, and report the cap in the result (e.g. `truncated: true`) so an agent
   narrows its query rather than treating a capped list as complete.
 
+**Give every list action the same treatment.** Once one list action follows its continuation, check the
+others in the same file. A list action that can return `hasMore: true` with no way to request the next
+page is the same bug: the Bitbucket connector fixed `listCommits` and shipped `listCommitBuildStatuses`
+without a cursor, so an agent checking statuses before a merge saw only the first page.
+
+**Confirm the continuation kind from a live response, not only from the docs.** Vendors document one
+endpoint's pagination and use another shape elsewhere. Log a real `next` value for each list endpoint
+during live testing and decide URL versus cursor from what it contains.
+
+### Never request a URL taken from a response or from the caller without checking it
+
+The origin check above is not specific to pagination. Any URL the connector did not build itself and then
+requests with `ctx.client` sends the connector's credentials to whatever host it names. That covers:
+
+- **Async operation polling**: a `Location`, `Azure-AsyncOperation`, or `Operation-Location` header, or
+  an operation `selfLink` in a response body. The AKS `runCommand` poller followed `Location` unchecked
+  with the OAuth client, whose default `Authorization` header goes with every request.
+- **Caller-supplied cursors that are full URLs**: a `nextCursor` returned to the agent and passed back as
+  input is caller-controlled. Checking the host is not enough: the Bitbucket `listCommits` cursor passed
+  an `api.bitbucket.org` check while naming another workspace's repository, so the connector's
+  credentials read commits outside its configured workspace.
+
+Resolve the URL against `ctx.client.getUri()` and check the origin, as above. For a caller-supplied URL,
+also check that its path is the endpoint this action calls, for the configured tenant (workspace,
+project, subscription) and the requested resource. Where the vendor's `next` link carries an opaque
+token (`?cursor=...`, `?after=...`), prefer extracting that token and returning only the token to the
+agent. The connector then rebuilds the request from its own path, and the caller never supplies a URL.
+
+### Retry and poll only on transient statuses
+
+A poll or retry loop that swallows every error turns a permanent failure into a timeout. The AKS
+`runCommand` poller ignored every `GET` error, so a 403 on the operation-result endpoint surfaced as
+"timed out after 60 seconds" instead of the missing permission. Retry only what can succeed on a
+second try (a short-lived 404 while an operation is created, 429, 5xx); rethrow 400, 401, and 403
+immediately with the vendor's message.
+
+The same applies to friendly error explanations. A 401 means the credential was rejected; a 403 means it
+was accepted but lacks a permission or scope. Do not give both the same explanation: the Bitbucket
+connectivity test called every bearer 401 "expected for a repository-scoped token", which told a user
+with an expired token that it still worked.
+
+## Handler Context
+
+`ctx.config` holds the connector's non-secret config fields. `ctx.secrets` holds the auth fields,
+**including the `authType` discriminator** for a connector with more than one auth type. Branch on
+`ctx.secrets?.authType`, as `slack.ts` does. The Bitbucket connector read `ctx.config.authType`, which is
+always undefined, and its test passed because it put `authType` in `config` too. Build test contexts in
+the same shape the executor does: config fields in `config`, auth fields and `authType` in `secrets`.
+
+## Action Outputs
+
+### A returned handle must carry everything the follow-up action needs
+
+When an action returns something an agent is expected to pass to another action (an operation ID, a job
+ID, a pipeline UUID, a discovered resource), include every input that follow-up call needs, especially
+any value that overrides a connector default: project, subscription, region, workspace. The GKE
+connector returned `operationId` and `location` but not `projectId`. An agent polling an operation
+started in a non-default project with only those two values polled the default project instead.
+
+The reverse applies to discovery actions. If an action lists subscriptions, projects, or workspaces, the
+actions that operate inside one must accept it as an input override. The AKS connector's
+`listSubscriptions` returned IDs that no other action accepted, since each read the subscription only from
+config, so discovery led nowhere without a user editing the connector.
+
+### Do not present a computed value as a vendor fact
+
+Return what the vendor returned. If a field is derived (a count multiplied by zones, a status inferred
+from two others), name it as what it is (`totalNodeCountEstimate`) and say in its description when it is
+wrong, or leave it out. The GKE connector returned `initialNodeCount × zones` as `totalNodeCount`, which
+is wrong for any autoscaled pool, and a capacity-remediation agent would act on it.
+
+### Build derived blocks from every alternative field
+
+When an output block depends on one of several alternative vendor fields (an IP endpoint or a DNS
+endpoint; a legacy ID or a new one), build it when *any* of them is present. The GKE connector's
+Kubernetes connector hand-off was gated on the IP `endpoint` alone, so DNS-only clusters lost the whole
+block even though the DNS URL was already read.
+
 ## Schema UI Configuration
 
 Schema config fields define the "Connector settings" section of the creation form. Every field in the `schema` object **must** have `.meta()` with at least a `label`, or the field will render as an unlabeled input.
 
 ```typescript
-schema: z.object({
-  instanceUrl: z
-    .string()
-    .url()
-    .describe('ServiceNow instance URL')
-    .meta({
-      label: 'Instance URL',           // REQUIRED - displayed as the field label
-      widget: 'text',                   // Widget type (text, password, select, etc.)
-      placeholder: 'https://your-instance.service-now.com',
-    }),
-}),
+schema: lazySchema(() =>
+  z.object({
+    instanceUrl: z
+      .string()
+      .url()
+      .describe('ServiceNow instance URL')
+      .meta({
+        label: 'Instance URL',           // REQUIRED - displayed as the field label
+        widget: 'text',                   // Widget type (text, password, select, etc.)
+        placeholder: 'https://your-instance.service-now.com',
+      }),
+  })
+),
 ```
 
 Available `.meta()` options: `label`, `widget`, `placeholder`, `helpText`, `hidden`, `sensitive`, `disabled`, `order`.
 
-**There is no widget for `z.number()` config fields — use a regex-validated string instead.** The
-form-generator's widget registry only has `text`, `password`, `select`, `formFieldset`, `hidden`, `object`,
-and `fileUpload`; there is no numeric widget. A config field typed `z.number()` (e.g. `z.int()`)
-throws `Error: No widget found for schema type: ZodNumberFormat. Please specify a widget in the schema
-metadata.` when the connector creation form renders it — and since this is a runtime UI error, not a type
-or lint error, it won't be caught by `node scripts/type_check` or unit tests. If a config value is
-conceptually numeric (an account ID, a port, a numeric tenant ID), define it as a `.regex()`-validated
-string with the `text` widget instead, and coerce it to a number in the handler where the underlying API
-needs a real number:
+**Config fields must use a type the form-generator has a widget for.** The widget registry
+(`x-pack/platform/packages/shared/response-ops/form-generator/src/widgets/registry.ts`) picks a widget
+from the field's Zod type: strings, numbers (`z.number()`, `z.int()`), enums, objects, discriminated
+unions, literals, and URLs. Any other type in the connector-level `config` schema — a `z.boolean()`, a
+`z.array()`, a `z.record()` — throws `Error: No widget found for schema type: ... Please specify a
+widget in the schema metadata.` when the creation form renders it. It is a runtime UI error, so type
+check and unit tests do not catch it. Use a supported type, or set `widget` in `.meta()` explicitly.
 
-```typescript
-schema: z.object({
-  accountId: z
-    .string()
-    .min(1)
-    .max(20)
-    .regex(/^\d+$/, 'Must be a numeric account ID.')
-    .describe('Numeric account ID this connector manages.')
-    .meta({ widget: 'text', label: 'Account ID', placeholder: '1234567' }),
-}),
-```
-
-```typescript
-const getAccountId = (ctx: ActionContext): number => {
-  const raw = ctx.config?.accountId as string | undefined;
-  const accountId = Number(raw);
-  if (!raw || Number.isNaN(accountId)) {
-    throw new Error('Connector is missing the required accountId configuration field.');
-  }
-  return accountId;
-};
-```
+A numeric config field is fine: the MySQL connector's `port` is a `z.number().int()` rendered by the
+number widget.
 
 This only applies to **connector-level `config` fields** (rendered by the form-generator). Action `input`
-schemas are never rendered as a form — `z.number()` is fine there since it's Agent Builder/Workflows that
-supplies the value, not a human typing into a UI widget.
+schemas are never rendered as a form.
 
 **ICU-unsafe characters in translated help text**: `metadata.description` and any `helpText`/label string
 that goes through `i18n.translate()` is parsed as an ICU message. A literal `<placeholder>` (e.g.
@@ -413,11 +581,13 @@ For URL fields, use the `UISchemas.url()` helper from `connector_spec_ui.ts`:
 ```typescript
 import { UISchemas } from '../../connector_spec_ui';
 
-schema: z.object({
-  apiUrl: UISchemas.url('https://api.example.com')
-    .describe('API endpoint URL')
-    .meta({ label: 'API URL' }),
-}),
+schema: lazySchema(() =>
+  z.object({
+    apiUrl: UISchemas.url('https://api.example.com')
+      .describe('API endpoint URL')
+      .meta({ label: 'API URL' }),
+  })
+),
 ```
 
 ## OAuth Auth Configuration
@@ -609,6 +779,11 @@ Set `isTool: true` on actions that should be discoverable by AI agents in Agent 
 
 Set `isTool: false` (or omit it) for actions that exist for completeness but should not be invoked by an agent autonomously — for example, destructive operations, admin-only actions, or low-level helpers that are only useful as building blocks for other actions.
 
+On a first-PR connector with `supportedFeatureIds: ['agentBuilder']`, an `isTool: false` action is not
+reachable from any UI: agents cannot see it and workflows are not enabled yet. It can only be called
+through the `_execute` API. Say so on the docs page rather than listing it alongside the agent actions,
+as the GKE docs did for `createCluster` and `deleteCluster`.
+
 ### `scope` — classifying side effects for every `isTool: true` action
 
 Every `isTool: true` action **must** include an explicit `scope` field. This is an advisory signal to the LLM and orchestration layer about what side effects the action may have — it does not enforce access control at runtime.
@@ -626,6 +801,11 @@ whose name reads like a read can still mutate: `listSyncFunctionTriggers` is a `
 re-synchronizes an app's deployed trigger metadata, so it is `'destroy'`, not `'read'`. Go through every
 action and ask what the request *does* to the service; a `list`/`get`/`sync` prefix on a `POST` or
 `PATCH` is a signal to re-check, not a reason to trust the name.
+
+A `create`/`post`/`set` prefix is not evidence of `'write'` either. A call that writes under a
+caller-chosen key and replaces whatever is already stored there is an overwrite, so it is `'destroy'`.
+Bitbucket's `createCommitBuildStatus` replaces the previous status with the same `key`, which can turn
+a failing merge gate green; it shipped as `'write'` and had to be reclassified.
 
 **When live testing disproves a vendor's documented behaviour, fix every place that encoded the old
 assumption.** Correcting only the `description` leaves the `scope`, the test mock, the auth `helpText`,
@@ -690,12 +870,16 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
   `z.string()`. Apply the same `.max(200)`-style bound to the key type: `z.record(z.string().max(200), z.unknown())`.
   This also applies to string keys inside `z.array(z.record(...))`.
 - **Bound the collection size too, not just the string lengths inside it** — a `z.array()` needs `.max(N)`
-  on the array itself (e.g. `z.array(z.string().max(64)).max(50)` for a list of IDs), and a `z.record()`
+  on the array itself, and a `z.record()`
   needs an entry-count cap via `.refine()` since Zod has no built-in one:
   `z.record(z.string().max(100), z.string().max(200)).refine((v) => Object.keys(v).length <= 50, { message: '...' })`.
   Bounding only the elements' string length still leaves an unbounded *number* of elements/entries as a DoS
   vector, and if the array is later joined into a query string, an oversized array also risks an oversized
   upstream request.
+  Take `N` from the vendor's documented limit (an OpenAPI `maxItems`, an API reference limit, a server
+  constant) and name the constant after it. When the vendor documents none, pick a bound above any
+  realistic valid request and say so in a comment. Do not pick a round number below what the vendor
+  accepts: a `.max(100)` on a list the API takes 250 of rejects valid requests.
 - **Bound a free-form JSON body by its serialized size** — a field typed `z.unknown()`/`z.any()` (a
   request body forwarded verbatim to the service) has no shape to constrain, but it still gets allocated
   and serialized on the Kibana server. Bound it in a `.refine()` that serializes the value, and reject a
@@ -730,15 +914,19 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
   never exercise the encoding path.
 
 ```typescript
-export const SearchInputSchema = z.object({
-  query: z.string().describe('Keyword or natural-language search query'),
-  limit: z.number().optional().describe('Maximum results to return (1–100, default 20)'),
-  state: z.string().optional().describe('Filter by state: "new", "in_progress", or "resolved"'),
-});
+export const SearchInputSchema = lazySchema(() =>
+  z.object({
+    query: z.string().max(1000).describe('Keyword or natural-language search query'),
+    limit: z.number().optional().describe('Maximum results to return (1–100, default 20)'),
+    state: z.string().max(50).optional().describe('Filter by state: "new", "in_progress", or "resolved"'),
+  })
+);
 
-export const GetItemInputSchema = z.object({
-  id: z.string().describe('The item sys_id, returned by the search action'),
-});
+export const GetItemInputSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(255).describe('The item sys_id, returned by the search action'),
+  })
+);
 ```
 
 ### `skill` property
@@ -760,6 +948,16 @@ skill: [
 ```
 
 **ServiceNow** (`src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow/`) and **Slack** (`src/platform/packages/shared/kbn-connector-specs/src/specs/slack/`) are the reference connectors for these patterns.
+
+**Trace every recipe to the code.** For each step in a `skill` pattern, name the action that performs
+it and the output field it reads, and confirm both exist. The Bitbucket skill told agents to confirm
+build statuses "via `getPullRequest`", whose output has no status fields, so an agent following the
+merge recipe could not check the policy it was told to check.
+
+**Check that every state an action can create has a way out.** If an action can put a resource into a
+state (draft, stopped, paused, locked), either another action takes it out of that state, or the
+`skill` text says the vendor UI is needed. The Bitbucket connector could create a draft pull request
+but not mark it ready, and a draft cannot be merged.
 
 ## `metadata.description` Quality
 

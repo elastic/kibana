@@ -24,35 +24,36 @@ export interface ServiceAccountPrincipal {
 }
 
 /**
- * Removes the given Elasticsearch service accounts, their Kibana-minted tokens, and the credential
- * saved objects Kibana wrote for them. Throws when anything is left behind: these accounts are
- * cluster-scoped and some hold `superuser`, so a leak has to fail the suite instead of scrolling
- * past in the log.
+ * Removes the given Elasticsearch service accounts, their Kibana-minted tokens, any other tokens
+ * the test minted by name, and the credential saved objects Kibana wrote for them. Throws when
+ * anything is left behind: these accounts are cluster-scoped and some hold `superuser`, so a leak
+ * has to fail the suite instead of scrolling past in the log.
  */
 export const deleteServiceAccounts = async (
   esClient: Client,
   config: ScoutTestConfig,
-  principals: ServiceAccountPrincipal[]
+  principals: ServiceAccountPrincipal[],
+  { tokenNames = [] }: { tokenNames?: string[] } = {}
 ): Promise<void> => {
   const failures: string[] = [];
 
   for (const { namespace, name } of principals) {
-    // Token first, then the account, the same order `EsServiceAccounts.rollback` uses: a forced
-    // account delete can leave the token behind, and a lingering token blocks recreating the name
+    // Tokens first, then the account, the same order `EsServiceAccounts.rollback` uses: a forced
+    // account delete can leave tokens behind, and a lingering token blocks recreating the name
     // on the next run. A 404 is the expected answer for a name a failing test registered but
     // never got created.
-    try {
-      await esClient.transport.request(
-        {
-          method: 'DELETE',
-          path: `/_security/service/${namespace}/${name}/credential/token/${ES_SERVICE_ACCOUNT_TOKEN_NAME}`,
-        },
-        { ignore: [404] }
-      );
-    } catch (err) {
-      failures.push(
-        `service account token [${namespace}/${name}/${ES_SERVICE_ACCOUNT_TOKEN_NAME}]: ${err.message}`
-      );
+    for (const tokenName of [ES_SERVICE_ACCOUNT_TOKEN_NAME, ...tokenNames]) {
+      try {
+        await esClient.transport.request(
+          {
+            method: 'DELETE',
+            path: `/_security/service/${namespace}/${name}/credential/token/${tokenName}`,
+          },
+          { ignore: [404] }
+        );
+      } catch (err) {
+        failures.push(`service account token [${namespace}/${name}/${tokenName}]: ${err.message}`);
+      }
     }
 
     try {

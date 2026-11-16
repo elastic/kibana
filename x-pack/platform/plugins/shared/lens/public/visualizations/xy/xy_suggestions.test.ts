@@ -637,6 +637,76 @@ describe('xy_suggestions', () => {
     `);
   });
 
+  test.each(['textBased', 'formBased'])(
+    'defaults a new %s XY chart legend to bottom list',
+    (datasourceId) => {
+      const [suggestion] = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('price'), dateCol('date')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: [],
+        datasourceId,
+      });
+
+      expect(suggestion.state.legend).toEqual({
+        isVisible: true,
+        position: 'bottom',
+        layout: 'list',
+      });
+    }
+  );
+
+  test('uses the default legend for a new XY chart', () => {
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+      datasourceId: 'textBased',
+      defaultOverrides: { legend: { isVisible: true, position: 'right' } },
+    });
+
+    expect(suggestion.state.legend).toEqual({ isVisible: true, position: 'right' });
+  });
+
+  test('keeps the current legend over the default legend', () => {
+    const currentState: XYVisualizationState = {
+      legend: { isVisible: false, position: 'left' },
+      valueLabels: 'hide',
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'bar',
+          xAccessor: 'date',
+          accessors: ['price'],
+        },
+      ],
+    };
+
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+      datasourceId: 'textBased',
+      defaultOverrides: { legend: { isVisible: true, position: 'right' } },
+    });
+
+    expect(suggestion.state.legend).toEqual({ isVisible: false, position: 'left' });
+  });
+
   test('suggests a split x y chart with date on x', () => {
     const [suggestion, ...rest] = getSuggestions({
       table: {
@@ -1686,6 +1756,55 @@ describe('xy_suggestions', () => {
 
       expect(suggestions).toHaveLength(1);
       expect(suggestions[0].state.preferredSeriesType).toBe('bar_stacked');
+    });
+  });
+
+  describe('areaFill', () => {
+    const bytesOverTimeTable: TableSuggestion = {
+      isMultiRow: true,
+      columns: [numCol('bytes'), dateCol('date')],
+      layerId: 'first',
+      changeType: 'unchanged',
+    };
+
+    const getAreaSuggestion = (areaFill?: XYVisualizationState['areaFill']) =>
+      getSuggestions({
+        table: bytesOverTimeTable,
+        keptLayerIds: ['first'],
+        subVisualizationId: 'area',
+        state: {
+          legend: { isVisible: true, position: 'bottom' },
+          valueLabels: 'hide',
+          preferredSeriesType: 'bar',
+          areaFill,
+          layers: [
+            {
+              layerId: 'first',
+              layerType: LayerTypes.DATA,
+              seriesType: 'bar',
+              xAccessor: 'date',
+              accessors: ['bytes'],
+            },
+          ],
+        },
+      }).find(({ state }) => getVisualizationSubtypeId(state) === 'area');
+
+    test('applies the default areaFill when suggesting area from a chart without one', () => {
+      expect(getAreaSuggestion()?.state.areaFill).toBe('gradient');
+    });
+
+    test('keeps the current chart areaFill when suggesting area', () => {
+      expect(getAreaSuggestion('solid')?.state.areaFill).toBe('solid');
+    });
+
+    test('does not add an areaFill to non-area suggestions', () => {
+      const [suggestion] = getSuggestions({
+        table: bytesOverTimeTable,
+        keptLayerIds: [],
+      });
+
+      expect(getVisualizationSubtypeId(suggestion.state)).toBe('bar_stacked');
+      expect(suggestion.state.areaFill).toBeUndefined();
     });
   });
 

@@ -51,6 +51,9 @@ export const createProposalStepInputSchema = z.object({
   expiresIn: optionalStepInput(z.string()).describe(
     'How long the analyst has to decide, as a duration like `24h`. Resolved to an absolute deadline at creation.'
   ),
+  proposalId: optionalStepInput(z.uuid()).describe(
+    'The id to create the proposal under, instead of a random one, for a caller that derives it from what it is proposing. An id that already exists fails the step with a conflict and creates nothing. Omit for a proposal that is always new.'
+  ),
 });
 
 export const createProposalStepOutputSchema = z.object({

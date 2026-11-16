@@ -46,7 +46,7 @@ describe('ArtifactEnabledSwitch', () => {
   let setArtifactEnabled: jest.MockedFunction<
     ReturnType<typeof _useWithArtifactEnableDisable>['setArtifactEnabled']
   >;
-  let onSuccess: jest.Mock;
+  let onRefresh: jest.Mock;
   let item: ExceptionListItemSchema;
   let apiClient: ExceptionsListApiClient;
   let defaultProps: ArtifactEnabledSwitchProps;
@@ -57,7 +57,7 @@ describe('ArtifactEnabledSwitch', () => {
     });
 
     const mockedContext = createAppRootMockRenderer();
-    onSuccess = jest.fn();
+    onRefresh = jest.fn();
     item = generator.generate({
       name: 'YARA rule one',
       tags: [GLOBAL_ARTIFACT_TAG],
@@ -72,7 +72,7 @@ describe('ArtifactEnabledSwitch', () => {
       item,
       apiClient,
       labels: artifactListPageLabels,
-      onSuccess,
+      onRefresh,
       'data-test-subj': 'enabledSwitch',
     };
 
@@ -115,7 +115,7 @@ describe('ArtifactEnabledSwitch', () => {
 
     expect(setArtifactEnabled).toHaveBeenCalledWith(true);
     await waitFor(() => {
-      expect(onSuccess).toHaveBeenCalled();
+      expect(onRefresh).toHaveBeenCalled();
     });
   });
 
@@ -126,11 +126,11 @@ describe('ArtifactEnabledSwitch', () => {
 
     expect(setArtifactEnabled).toHaveBeenCalledWith(false);
     await waitFor(() => {
-      expect(onSuccess).toHaveBeenCalled();
+      expect(onRefresh).toHaveBeenCalled();
     });
   });
 
-  it('does not call onSuccess when the update fails', async () => {
+  it('does not refresh when the update fails', async () => {
     setArtifactEnabled.mockRejectedValue(new Error('update failed'));
     render();
 
@@ -139,7 +139,18 @@ describe('ArtifactEnabledSwitch', () => {
     await waitFor(() => {
       expect(setArtifactEnabled).toHaveBeenCalled();
     });
-    expect(onSuccess).not.toHaveBeenCalled();
+    expect(onRefresh).not.toHaveBeenCalled();
+  });
+
+  it('refreshes when the update fails with a conflict', async () => {
+    setArtifactEnabled.mockRejectedValue({ response: { status: 409 }, message: 'conflict' });
+    render();
+
+    fireEvent.click(renderResult.getByTestId('enabledSwitch'));
+
+    await waitFor(() => {
+      expect(onRefresh).toHaveBeenCalled();
+    });
   });
 
   it('disables the switch when read-only', () => {
@@ -171,9 +182,9 @@ describe('ArtifactEnabledSwitch', () => {
     expect(setArtifactEnabled).not.toHaveBeenCalled();
   });
 
-  it('keeps the switch busy until onSuccess settles', async () => {
+  it('keeps the switch busy until onRefresh settles', async () => {
     let resolveSuccess: (() => void) | undefined;
-    onSuccess.mockReturnValue(
+    onRefresh.mockReturnValue(
       new Promise<void>((resolve) => {
         resolveSuccess = resolve;
       })
@@ -183,7 +194,7 @@ describe('ArtifactEnabledSwitch', () => {
     fireEvent.click(renderResult.getByTestId('enabledSwitch'));
 
     await waitFor(() => {
-      expect(onSuccess).toHaveBeenCalled();
+      expect(onRefresh).toHaveBeenCalled();
       expect(renderResult.getByTestId('enabledSwitch-loading')).toBeInTheDocument();
     });
 

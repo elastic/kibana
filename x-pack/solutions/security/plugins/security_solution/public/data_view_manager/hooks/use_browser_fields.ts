@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildBrowserFields } from '../utils/build_browser_fields';
 

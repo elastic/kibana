@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { getEmitterWorkflowExecutionIdFromRequest } from '@kbn/workflows-extensions/server';
 import {
-  DEFAULT_INVESTIGATION_TRIGGER_TYPE,
   EMITTED_INVESTIGATION_STATUSES,
   INVESTIGATION_COMPLETED_TRIGGER_ID,
   INVESTIGATION_FAILED_TRIGGER_ID,
@@ -44,23 +44,32 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
       return { accepted: false };
     }
 
-    // Identity comes from the execution document, never from the request body, so a caller
-    // cannot emit lifecycle events attributed to a subject it made up.
-    const execution = await getInvestigationsClient(request)
-      .get(params.path.id)
+    // Identity comes from the investigation's recorded subjects, never from the request body, so
+    // a caller cannot emit lifecycle events attributed to a subject it made up.
+    const client = getInvestigationsClient(request);
+    const lifecycleSubject = await client
+      .getLifecycleSubject(params.path.id)
       .catch(rethrowInvestigationClientError);
 
-    const { subject, trigger_type, started_at: startedAt } = execution;
-    if (!subject) {
-      // Runs without an entity (bare manual workflow runs) have nothing to attribute the
+    if (!lifecycleSubject) {
+      // An investigation without a subject (a bare workflow run) has nothing to attribute the
       // event to, so no lifecycle event is emitted.
       return { accepted: false };
     }
+    const executionId = request.isInternalApiRequest
+      ? getEmitterWorkflowExecutionIdFromRequest(request)
+      : undefined;
+    const correlation = executionId
+      ? await client.getLifecycleCorrelation(params.path.id, executionId)
+      : {};
     const base = {
       investigation_id: params.path.id,
-      subject,
-      trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
-      started_at: startedAt ?? new Date().toISOString(),
+      workflow_execution_id: executionId,
+      execution_id: executionId,
+      ...correlation,
+      subject: lifecycleSubject.subject,
+      trigger_type: lifecycleSubject.triggerType,
+      started_at: lifecycleSubject.startedAt,
     };
 
     switch (params.body.status) {

@@ -22,4 +22,6 @@ export type {
 
 export type { SourcesClient } from './lib/sources_client';
 
+export type { SourceChangeEvent, SourceChangeListener } from './lib/source_change_emitter';
+
 export type { NightshiftSourcesRouteRepository } from './routes';

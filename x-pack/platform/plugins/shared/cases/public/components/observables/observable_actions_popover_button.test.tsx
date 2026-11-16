@@ -20,9 +20,12 @@ import { mockCase } from '../../containers/mock';
 import { usePostObservable } from '../../containers/use_post_observables';
 import { useDeleteObservable } from '../../containers/use_delete_observables';
 import { OBSERVABLE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 
 jest.mock('../../containers/use_post_observables');
 jest.mock('../../containers/use_delete_observables');
+jest.mock('../../containers/configure/use_get_case_configuration');
 
 jest.mock('../workflows/use_cases_workflow_executor', () => ({
   useCasesWorkflowExecutor: jest.fn().mockReturnValue(jest.fn()),
@@ -72,6 +75,11 @@ describe('ObservableActionsPopoverButton', () => {
       '../workflows/use_cases_workflow_executor'
     );
     (useCasesWorkflowExecutor as jest.Mock).mockReturnValue(jest.fn());
+    jest
+      .mocked(useGetCaseConfiguration)
+      .mockReturnValue(
+        useCaseConfigureResponse as unknown as ReturnType<typeof useGetCaseConfiguration>
+      );
   });
 
   it('renders observable actions popover button correctly', async () => {

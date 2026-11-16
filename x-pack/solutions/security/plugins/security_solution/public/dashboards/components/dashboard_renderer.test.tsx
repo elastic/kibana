@@ -77,6 +77,14 @@ describe('DashboardRenderer', () => {
     );
   });
 
+  it('publishes its dashboard as the Dashboard app client API', () => {
+    render(<DashboardRenderer {...props} />, { wrapper: TestProviders });
+
+    expect(
+      (DashboardContainerRenderer as unknown as jest.Mock).mock.calls[0][0].publishAsAppClientApi
+    ).toBe(true);
+  });
+
   it('does not render when No Read Permission', () => {
     const testProps = {
       ...props,

@@ -13,6 +13,7 @@ import type {
   ESQLControlVariable,
   ESQLSourceResult,
   ESQLFieldWithMetadata,
+  ESQLFullTextMatch,
   ESQLCallbacks,
   EsqlView,
   EsqlDataset,
@@ -21,6 +22,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation, ESQLProperNode } from '@elastic/esql/types';
 import type { SupportedDataType } from '../definitions/types';
+import type { NamedSubquery } from '../definitions/utils/named_subqueries';
 import type { EditorExtensions } from './options/recommended_queries';
 import type { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
 import type { ReplacementRangeStrategy } from '../../language/autocomplete/utils/prefix_range';
@@ -142,6 +144,7 @@ export interface ESQLUserDefinedColumn {
   userDefined: true;
   location: ESQLLocation; // TODO should this be optional?
   isUnmappedField?: boolean;
+  fullTextMatch?: ESQLFullTextMatch;
 }
 
 export type ESQLColumnData = ESQLUserDefinedColumn | ESQLFieldWithMetadata;
@@ -226,6 +229,8 @@ export interface ICommandContext {
   isFieldsBrowserEnabled?: boolean;
   unmappedFieldsStrategy?: UnmappedFieldsStrategy;
   isTimeseriesSource?: boolean;
+  /** LET bindings that the sources of the current pipeline can reference. */
+  namedSubqueries?: readonly NamedSubquery[];
 }
 /**
  * This is a list of locations within an ES|QL query.
@@ -344,6 +349,12 @@ export enum Location {
    * In the HIGHLIGHT command query expression (before ON)
    */
   HIGHLIGHT_QUERY = 'highlight_query',
+
+  /**
+   * In the HIGHLIGHT command `ON` field list. Only used to give that list its own suggestion
+   * ordering, which the sorting context keys per option.
+   */
+  HIGHLIGHT_ON = 'highlight_on',
 
   /**
    * In the DENSE_VECTOR command field list

@@ -6,12 +6,14 @@
  */
 
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
+import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
 import { attachImpactStepInputSchema } from '../../../common/impact/step_types/attach_impact_step';
 import type { ImpactService } from '../services/impact_service';
-import type { ImpactPrivilegesChecker } from '../services/check_impact_privileges';
-import { ImpactConflictError, ImpactForbiddenError, ImpactNotFoundError } from '../services/errors';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
+import { ImpactConflictError, ImpactNotFoundError } from '../services/errors';
+import { InvestigationsForbiddenError } from '../../investigations/services/investigations_forbidden_error';
 import { getAttachImpactStepDefinition } from './attach_impact_step';
 import { getGetImpactStepDefinition } from './get_impact_step';
 
@@ -26,7 +28,7 @@ const resolvedUser = {
 };
 const resolveUser = jest.fn().mockResolvedValue(resolvedUser);
 
-const allowAll = (): jest.Mocked<ImpactPrivilegesChecker> => ({
+const allowAll = (): jest.Mocked<InvestigationsPrivilegesChecker> => ({
   assertCanManage: jest.fn().mockResolvedValue(undefined),
   assertCanRead: jest.fn().mockResolvedValue(undefined),
 });
@@ -141,7 +143,7 @@ describe('investigations.attachImpact step', () => {
   it('should assert manage before writing anything', async () => {
     const attach = jest.fn();
     const privileges = allowAll();
-    privileges.assertCanManage.mockRejectedValue(new ImpactForbiddenError('nope'));
+    privileges.assertCanManage.mockRejectedValue(new InvestigationsForbiddenError('nope'));
     const { definition } = createDefinition(attach, privileges);
 
     await expect(
@@ -201,6 +203,7 @@ describe('investigations.attachImpact step', () => {
       type: 'investigation_impact',
       origin: 'impact-1',
       data: impact,
+      hidden: true,
     });
   });
 
@@ -229,11 +232,35 @@ describe('investigations.getImpact step', () => {
     jest.clearAllMocks();
   });
 
-  const getDefinition = (getByConversationId: jest.Mock, privileges = allowAll()) =>
+  const getDefinition = (
+    getByConversationId: jest.Mock,
+    privileges = allowAll(),
+    readableIds: string[] | undefined = undefined
+  ) =>
     getGetImpactStepDefinition({
       getImpactService: () => ({ getByConversationId } as unknown as ImpactService),
       privileges,
+      getConversationClient: async () =>
+        ({
+          bulkGet: async (ids: string[]) =>
+            new Map(
+              ids
+                .filter((id) => readableIds === undefined || readableIds.includes(id))
+                .map((id) => [id, { id }])
+            ),
+        } as unknown as ConversationPublicClient),
     });
+
+  it('should report a conversation the workflow identity cannot read as not found', async () => {
+    const getByConversationId = jest.fn();
+
+    await expect(
+      getDefinition(getByConversationId, allowAll(), []).handler(
+        createContext({ conversationId: 'someone-elses-private' })
+      )
+    ).rejects.toMatchObject({ type: 'NotFoundError' });
+    expect(getByConversationId).not.toHaveBeenCalled();
+  });
 
   it('should return the fields a workflow can branch on', async () => {
     const entities = [{ id: 'host-1', name: 'fin-dc-01' }];
@@ -273,7 +300,7 @@ describe('investigations.getImpact step', () => {
   it('should fail the step when the reader lacks the privilege', async () => {
     const getByConversationId = jest.fn();
     const privileges = allowAll();
-    privileges.assertCanRead.mockRejectedValue(new ImpactForbiddenError('nope'));
+    privileges.assertCanRead.mockRejectedValue(new InvestigationsForbiddenError('nope'));
 
     await expect(
       getDefinition(getByConversationId, privileges).handler(

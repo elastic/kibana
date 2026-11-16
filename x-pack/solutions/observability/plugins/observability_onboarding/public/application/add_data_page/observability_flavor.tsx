@@ -10,7 +10,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
 import type { ObservabilityOnboardingAppServices } from '../..';
-import type { CuratedCategory, MiniTile } from '../add_data_grid';
+import type { CuratedCategory, CuratedTile, MiniTile } from '../add_data_grid';
 import { VariantCountBadge } from '../add_data_grid';
 import type { LogoIconProps } from '../shared/logo_icon';
 import { LogoIcon } from '../shared/logo_icon';
@@ -21,6 +21,7 @@ import { IS_INGEST_HUB_ONBOARDING_ENABLED } from '../../../common/feature_flags'
 import { INTEGRATION_TILES } from './integration_tiles';
 import { INTEGRATION_MINI_TILES } from './integration_mini_tiles';
 import { useCollectionCards } from './use_collection_cards';
+import { useTrackTileClick } from './use_track_tile_click';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 
 const tileIcon = (logo: LogoIconProps['logo'], color: LogoIconProps['color']) => (
@@ -40,6 +41,7 @@ export const useObservabilityCuratedCategories = ({
   onOpenCollection: (groupId: string) => void;
 }): CuratedCategory[] => {
   const history = useHistory();
+  const trackTileClick = useTrackTileClick();
   const { euiTheme, colorMode } = useEuiTheme();
   const collections = useCollectionCards();
   const {
@@ -121,8 +123,9 @@ export const useObservabilityCuratedCategories = ({
       label: category.label,
       tiles: category.tiles.map((tile) => {
         const resolvedLogo = colorMode === 'DARK' ? tile.darkLogo ?? tile.logo : tile.logo;
-        const navigation =
-          collectionNavigation(tile.collectionGroup) ??
+        const chooserNavigation = collectionNavigation(tile.collectionGroup);
+        const navigation: Pick<CuratedTile, 'href' | 'onClick' | 'badge'> =
+          chooserNavigation ??
           (tile.route
             ? reactRouterNavigate(history, tile.route)
             : tile.eprPackage
@@ -136,6 +139,14 @@ export const useObservabilityCuratedCategories = ({
           icon: tileIcon(resolvedLogo, euiTheme.colors.backgroundBaseSubdued),
           'data-test-subj': `observabilityOnboardingIntegrationTile-${tile.id}`,
           ...navigation,
+          onClick: trackTileClick(
+            {
+              tile_id: tile.id,
+              surface: 'tile',
+              collection_id: chooserNavigation ? tile.collectionGroup : undefined,
+            },
+            navigation.onClick
+          ),
         };
       }),
     }));
@@ -150,6 +161,7 @@ export const useObservabilityCuratedCategories = ({
     metricsOnboardingEnabled,
     collections,
     onOpenCollection,
+    trackTileClick,
   ]);
 };
 
@@ -159,6 +171,7 @@ export const useObservabilityMiniTiles = ({
   onOpenCollection: (groupId: string) => void;
 }): MiniTile[] => {
   const history = useHistory();
+  const trackTileClick = useTrackTileClick();
   const { euiTheme } = useEuiTheme();
   const {
     services: {
@@ -201,7 +214,7 @@ export const useObservabilityMiniTiles = ({
             path: `/detail/${tile.eprPackage}/overview`,
           })
         : undefined;
-      const navigation =
+      const navigation: Pick<MiniTile, 'href' | 'onClick' | 'badge'> =
         collectionGroup && collection
           ? {
               onClick: () => onOpenCollection(collectionGroup),
@@ -219,6 +232,14 @@ export const useObservabilityMiniTiles = ({
         icon: tileIcon(tile.logo, euiTheme.colors.backgroundBaseSubdued),
         'data-test-subj': `observabilityOnboardingIntegrationMiniTile-${tile.id}`,
         ...navigation,
+        onClick: trackTileClick(
+          {
+            tile_id: tile.id,
+            surface: 'mini_tile',
+            collection_id: collection ? collectionGroup : undefined,
+          },
+          navigation.onClick
+        ),
       };
     });
   }, [
@@ -230,5 +251,6 @@ export const useObservabilityMiniTiles = ({
     metricsOnboardingEnabled,
     collections,
     onOpenCollection,
+    trackTileClick,
   ]);
 };

@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERTZERO_FEATURE_ID } from '../../common/constants';
 
-/** True when the current user can mutate AlertZero worker settings and enablement. */
+/** True when the current user has the AlertZero All privilege. */
 export const useCanWriteAlertZero = (): boolean => {
   const { services } = useKibana<CoreStart>();
   return services.application.capabilities[ALERTZERO_FEATURE_ID]?.write === true;

@@ -33,6 +33,7 @@ interface ExceptionItemCommentsProps {
   initialIsOpen?: boolean;
   newCommentOnChange: (value: string) => void;
   setCommentError: (errorExists: boolean) => void;
+  isDisabled?: boolean;
 }
 
 export const ExceptionItemComments = memo(function ExceptionItemComments({
@@ -42,6 +43,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
   initialIsOpen = false,
   newCommentOnChange,
   setCommentError,
+  isDisabled = false,
 }: ExceptionItemCommentsProps) {
   const [errorExists, setErrorExists] = useState(false);
   const [shouldShowComments, setShouldShowComments] = useState(false);
@@ -135,6 +137,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
               fullWidth
               error={i18n.COMMENT_MAX_LENGTH_ERROR(MAX_COMMENT_LENGTH)}
               isInvalid={errorExists}
+              isDisabled={isDisabled}
             >
               <EuiTextArea
                 isInvalid={errorExists}
@@ -143,6 +146,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
                 value={newCommentValue}
                 onChange={handleOnChange}
                 fullWidth={true}
+                disabled={isDisabled}
                 data-test-subj="newExceptionItemCommentTextArea"
               />
             </EuiFormRow>

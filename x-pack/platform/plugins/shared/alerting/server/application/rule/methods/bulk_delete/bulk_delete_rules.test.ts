@@ -28,15 +28,32 @@ import {
   enabledRuleForBulkOpsWithActions2WithUiam,
 } from '../../../../rules_client/tests/test_helpers';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
 import type { AlertsService } from '../../../../alerts_service';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import { softDeleteGapsByQuery } from '../../../../lib/rule_gaps/soft_delete_gaps_by_query';
+import { RulesNotFoundError } from '../../../../rules_client/lib/rules_not_found_error';
+import type { RegistryRuleType } from '../../../../rule_type_registry';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => ({
+  bulkMigrateLegacyActions: jest.fn(),
+}));
+
+jest.mock(
+  '../../../../rules_client/lib/siem_legacy_actions/transform_and_delete_legacy_actions',
+  () => ({
+    deleteLegacyActionsForRules: jest.fn(),
+  })
+);
 
 jest.mock('../../../../lib/rule_gaps/soft_delete_gaps_by_query', () => ({
   softDeleteGapsByQuery: jest.fn(),
@@ -71,13 +88,13 @@ const {
   alertsService: mockAlertsService as unknown as AlertsService,
 });
 
-const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
+const getBulkOperationStatusErrorResponse = (statusCode: number, message = 'UPS') => ({
   id: 'id2',
   type: RULE_SAVED_OBJECT_TYPE,
   success: false,
   error: {
     error: '',
-    message: 'UPS',
+    message,
     statusCode,
   },
 });
@@ -85,6 +102,7 @@ const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
 beforeEach(() => {
   jest.clearAllMocks();
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
+  (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
 });
 
 setGlobalDate();
@@ -210,6 +228,34 @@ describe('bulkDelete', () => {
       errors: [],
       total: 2,
       taskIdsFailedToBeDeleted: [],
+    });
+  });
+
+  describe('legacy SIEM actions', () => {
+    test('migrates the legacy actions in memory so the deleted rules are returned with them', async () => {
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(bulkMigrateLegacyActions).toHaveBeenCalledWith(
+        expect.objectContaining({ skipActionsValidation: true })
+      );
+    });
+
+    test('deletes the legacy actions only for the migrated rules that were deleted', async () => {
+      (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['id1', 'id2']);
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          getBulkOperationStatusErrorResponse(500),
+          { id: 'id3', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['id1']);
+      expect(
+        (unsecuredSavedObjectsClient.bulkDelete as jest.Mock).mock.invocationCallOrder[0]
+      ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
     });
   });
 
@@ -387,6 +433,28 @@ describe('bulkDelete', () => {
     expect(result).toStrictEqual({
       rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps3],
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 500 }],
+      total: 2,
+      taskIdsFailedToBeDeleted: [],
+    });
+  });
+
+  test('should try to delete rules, two successful and one with 404 error', async () => {
+    const ruleNotFoundMessage = 'Saved object [alert/id2] not found';
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        getBulkOperationStatusErrorResponse(404, ruleNotFoundMessage),
+        { id: 'id3', type: RULE_SAVED_OBJECT_TYPE, success: true },
+      ],
+    });
+
+    const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+    expect(result).toStrictEqual({
+      rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps3],
+      errors: [
+        { message: ruleNotFoundMessage, rule: { id: 'id2', name: 'fakeName' }, status: 404 },
+      ],
       total: 2,
       taskIdsFailedToBeDeleted: [],
     });
@@ -572,7 +640,7 @@ describe('bulkDelete', () => {
       saved_objects: [],
       per_page: 0,
       page: 0,
-      total: 2,
+      total: 0,
     });
 
     await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrow(
@@ -798,6 +866,107 @@ describe('bulkDelete', () => {
 
       expect(toKqlExpression(encryptedFindFilter)).toMatchInlineSnapshot(
         `"(alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar))"`
+      );
+    });
+  });
+
+  describe('rules not found or not visible', () => {
+    const noBucketsResponse = {
+      aggregations: { alertTypeId: { buckets: [] } },
+      saved_objects: [],
+      per_page: 0,
+      page: 0,
+      total: 0,
+    };
+
+    const internalRuleType: RegistryRuleType = {
+      id: 'test.internal-rule-type',
+      name: 'Internal',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      category: 'test',
+      producer: 'alerts',
+      solution: 'stack',
+      enabledInLicense: true,
+      hasAlertsMappings: false,
+      validLegacyConsumers: [],
+      internallyManaged: true,
+    };
+
+    beforeEach(() => {
+      ruleTypeRegistry.list.mockReturnValue(new Map([[internalRuleType.id, internalRuleType]]));
+      authorization.getFindAuthorizationFilter.mockResolvedValue({
+        filter: nodeBuilder.is('alert.attributes.consumer', 'bar'),
+        ensureRuleTypeIsAuthorized() {},
+      });
+    });
+
+    test('should throw RulesNotVisibleError if the rules exist but the user is not allowed to delete them', async () => {
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce(noBucketsResponse)
+        .mockResolvedValueOnce({ ...noBucketsResponse, total: 1 });
+
+      await expect(rulesClient.bulkDeleteRules({ ids: ['id1'] })).rejects.toMatchObject({
+        name: 'RulesNotVisibleError',
+        message: 'No rules found for bulk delete',
+        output: { statusCode: 400 },
+      });
+    });
+
+    test('should check rule existence without the authorization filter', async () => {
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce(noBucketsResponse)
+        .mockResolvedValueOnce(noBucketsResponse);
+
+      await expect(
+        rulesClient.bulkDeleteRules({ filter: 'alert.attributes.tags: "APM"' })
+      ).rejects.toThrow(RulesNotFoundError);
+
+      const [authorizedCountCall, baseCountCall] = unsecuredSavedObjectsClient.find.mock.calls;
+
+      expect(toKqlExpression(authorizedCountCall[0].filter)).toMatchInlineSnapshot(
+        `"((alert.attributes.tags: \\"APM\\" AND alert.attributes.consumer: bar) AND NOT alert.attributes.alertTypeId: test.internal-rule-type)"`
+      );
+      expect(toKqlExpression(baseCountCall[0].filter)).toMatchInlineSnapshot(
+        `"(alert.attributes.tags: \\"APM\\" AND NOT alert.attributes.alertTypeId: test.internal-rule-type)"`
+      );
+    });
+
+    test('should check rule existence by ids without the authorization filter', async () => {
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce(noBucketsResponse)
+        .mockResolvedValueOnce(noBucketsResponse);
+
+      await expect(rulesClient.bulkDeleteRules({ ids: ['id1', 'id2'] })).rejects.toThrow(
+        RulesNotFoundError
+      );
+
+      const [, baseCountCall] = unsecuredSavedObjectsClient.find.mock.calls;
+
+      expect(toKqlExpression(baseCountCall[0].filter)).toMatchInlineSnapshot(
+        `"((alert.id: alert\\\\:id1 OR alert.id: alert\\\\:id2) AND NOT alert.attributes.alertTypeId: test.internal-rule-type)"`
+      );
+    });
+
+    test('should check rule existence with only the user filter if ignoreInternalRuleTypes is false', async () => {
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce(noBucketsResponse)
+        .mockResolvedValueOnce(noBucketsResponse);
+
+      await expect(
+        rulesClient.bulkDeleteRules({
+          filter: 'alert.attributes.tags: "APM"',
+          ignoreInternalRuleTypes: false,
+        })
+      ).rejects.toThrow(RulesNotFoundError);
+
+      const [, baseCountCall] = unsecuredSavedObjectsClient.find.mock.calls;
+
+      expect(toKqlExpression(baseCountCall[0].filter)).toMatchInlineSnapshot(
+        `"alert.attributes.tags: \\"APM\\""`
       );
     });
   });

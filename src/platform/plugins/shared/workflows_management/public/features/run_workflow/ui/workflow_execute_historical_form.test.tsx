@@ -30,23 +30,28 @@ jest.mock('../../../shared/ui/use_formatted_date', () => ({
   useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
 }));
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({
-    value,
-    onChange,
-    dataTestSubj,
-  }: {
-    value: string;
-    onChange: (v: string) => void;
-    dataTestSubj: string;
-  }) => (
-    <textarea
-      data-test-subj={dataTestSubj}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
-  ),
-}));
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...actual,
+    CodeEditor: ({
+      value,
+      onChange,
+      dataTestSubj,
+    }: {
+      value: string;
+      onChange: (v: string) => void;
+      dataTestSubj: string;
+    }) => (
+      <textarea
+        data-test-subj={dataTestSubj}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    ),
+  };
+});
 
 const renderWithProviders = (component: React.ReactElement) => {
   return render(component, { wrapper: I18nProvider });

@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/shared/kbn-workflows-ui'],
   setupFilesAfterEnv: ['<rootDir>/src/platform/packages/shared/kbn-workflows-ui/setup_tests.ts'],

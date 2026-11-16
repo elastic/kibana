@@ -239,6 +239,21 @@ describe('getEcsResponseLog', () => {
       `);
     });
 
+    test('redacts x-client-authentication headers by default', () => {
+      const req = createMockHapiRequest({
+        headers: { 'x-client-authentication': 'ae3fda37-xxx', 'user-agent': 'world' },
+        response: { headers: { 'content-length': '123' } },
+      });
+      const result = getEcsResponseLog(req, logger);
+      // @ts-expect-error ECS custom field
+      expect(result.meta.http.request.headers).toMatchInlineSnapshot(`
+        Object {
+          "user-agent": "world",
+          "x-client-authentication": "[REDACTED]",
+        }
+      `);
+    });
+
     test('redacts the UIAM internal-caller attestation header by default', () => {
       const req = createMockHapiRequest({
         headers: {
@@ -253,6 +268,21 @@ describe('getEcsResponseLog', () => {
         Object {
           "user-agent": "world",
           "x-kbn-uiam-internal-caller-attestation": "[REDACTED]",
+        }
+      `);
+    });
+
+    test('redacts the x-elastic-callback-token header by default', () => {
+      const req = createMockHapiRequest({
+        headers: { 'x-elastic-callback-token': 'ae3fda37-xxx', 'user-agent': 'world' },
+        response: { headers: { 'content-length': '123' } },
+      });
+      const result = getEcsResponseLog(req, logger);
+      // @ts-expect-error ECS custom field
+      expect(result.meta.http.request.headers).toMatchInlineSnapshot(`
+        Object {
+          "user-agent": "world",
+          "x-elastic-callback-token": "[REDACTED]",
         }
       `);
     });

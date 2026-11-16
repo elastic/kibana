@@ -16,6 +16,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('../test_suites/search_query_rules/search_query_rules_overview'));
     loadTestFile(require.resolve('../test_suites/search_synonyms/search_synonyms_overview'));
     loadTestFile(require.resolve('../test_suites/search_synonyms/search_synonym_detail'));
-    loadTestFile(require.resolve('../test_suites/console_notebooks'));
   });
 }

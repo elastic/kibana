@@ -14,22 +14,10 @@
  *   version: 1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
-import { HuntTechnology, ResolvedIndexScope } from '../components/hunt.gen';
+import { HuntScope } from '../components/hunt.gen';
 
-export const HuntIndexScopeRequestQuery = lazySchema(() =>
-  z.object({
-    /**
-     * Limit the index-scope check to a single technology
-     */
-    technology: HuntTechnology.optional().describe(
-      'Limit the index-scope check to a single technology'
-    ),
-  })
-);
-export type HuntIndexScopeRequestQuery = z.infer<typeof HuntIndexScopeRequestQuery>;
-export type HuntIndexScopeRequestQueryInput = z.input<typeof HuntIndexScopeRequestQuery>;
-
-export const HuntIndexScopeResponse = lazySchema(() => z.array(ResolvedIndexScope));
+export const HuntIndexScopeResponse = lazySchema(() => HuntScope);
 export type HuntIndexScopeResponse = z.infer<typeof HuntIndexScopeResponse>;

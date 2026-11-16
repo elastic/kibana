@@ -13,6 +13,7 @@ import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
 import {
   validateAllMappingsInModelVersion,
   validateNewModelVersionSchemas,
+  validateUpdateSchemaContinuity,
   validateModelVersionNumbers,
   validateNoIndexOrEnabledFalseInAllMappings,
   getLatestModelVersion,
@@ -36,7 +37,6 @@ export function validateChangesNewType({ to, registeredType }: ValidateChangesNe
       typeName: name,
       message: `New SO type '${name}' cannot define legacy 'migrations'.`,
       fixHint: `Remove the 'migrations' property and define a model version '1' instead.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 
@@ -47,7 +47,6 @@ export function validateChangesNewType({ to, registeredType }: ValidateChangesNe
       typeName: name,
       message: `New SO type '${name}' must define the first model version '1'.`,
       fixHint: `Add a 'modelVersions' map with key '1' that defines 'create' and 'forwardCompatibility' schemas.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 
@@ -59,6 +58,9 @@ export function validateChangesNewType({ to, registeredType }: ValidateChangesNe
 
   // check that the last modelVersion has schemas and that schemas have both create and forwardCompatibility defined
   validateNewModelVersionSchemas(name, getLatestModelVersion(to));
+
+  // check that once a model version defines an update schema, all later model versions do too
+  validateUpdateSchemaContinuity(name, registeredType);
 
   // validate that all mapping fields are present in the latest model version schema
   validateAllMappingsInModelVersion(name, to, registeredType);

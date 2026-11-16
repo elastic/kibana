@@ -9,8 +9,8 @@
 
 import { writeFileSync, mkdirSync } from 'fs';
 import Path, { dirname } from 'path';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { withTimeout } from '@kbn/std';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Suite, Test } from './fake_mocha_types';
 import type { Providers } from './lib';
@@ -408,31 +408,11 @@ export class FunctionalTestRunner {
     }
 
     const timeoutMs = this.config.get('mochaOpts.abortCleanupTimeout');
-    let timedOut = false;
     const cleanup = lifecycle.cleanup.trigger();
-    // The timer stays ref'd (default) so it can hold the event loop open long enough to
-    // bound a hung cleanup handler. If `cleanup` wins the race we abort the timer in the
-    // `finally` so it doesn't keep the loop alive for the remaining `timeoutMs` — otherwise
-    // an embedder that awaits `run()` without a hard `process.exit()` would have its exit
-    // delayed by up to `timeoutMs`.
-    const cancelTimeout = new AbortController();
-    try {
-      await Promise.race([
-        cleanup,
-        setTimeoutAsync(timeoutMs, undefined, { signal: cancelTimeout.signal }).then(
-          () => {
-            timedOut = true;
-          },
-          () => {
-            // timer was cancelled because cleanup finished first; ignore the AbortError
-          }
-        ),
-      ]);
-    } finally {
-      cancelTimeout.abort();
-    }
-
-    if (timedOut) {
+    // `withTimeout` clears its timer when cleanup finishes first, so a resolved cleanup
+    // does not leave a timer holding the event loop open for the remaining `timeoutMs`.
+    const outcome = await withTimeout({ promise: cleanup, timeoutMs });
+    if (outcome.timedout) {
       this.log.warning(`cleanup did not finish within ${timeoutMs}ms of aborting, moving on`);
       void cleanup.catch(() => {});
     }

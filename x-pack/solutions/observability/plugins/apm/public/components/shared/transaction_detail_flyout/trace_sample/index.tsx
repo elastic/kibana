@@ -186,7 +186,7 @@ export function TransactionDetailFlyoutTraceSample() {
         ) : (
           <EuiFlexItem grow={false}>
             <TransactionSummary
-              errorCount={unifiedWaterfallFetchResult.errors.length}
+              errorCount={unifiedWaterfallFetchResult.totalErrors}
               totalDuration={unifiedRootTransactionDuration}
               transaction={entryTransaction}
             />

@@ -10,8 +10,10 @@ import type {
   ScoutPage,
   SecurityPageObjects,
   SecurityParallelTestFixtures,
+  SecurityParallelWorkerFixtures,
 } from '@kbn/scout-security';
 import type { PolicyData } from '../../../../../common/endpoint/types';
+import { EndpointArtifactItemTracker } from './endpoint_artifact_items';
 import {
   createScoutEndpointPolicy,
   deleteScoutEndpointPolicy,
@@ -20,10 +22,16 @@ import {
 import { extendPageObjects } from './page_objects';
 import type { ArtifactTabPageObjects } from './page_objects';
 
-export type { PolicyArtifactKind, BlocklistOperator } from './page_objects';
+export type { PolicyArtifactKind, BlocklistOperator, BlocklistMatchField } from './page_objects';
 
 export interface ArtifactTabTestFixtures extends SecurityParallelTestFixtures {
   pageObjects: ArtifactTabPageObjects;
+  /**
+   * Items this test creates on an agnostic artifact list. Deleted by
+   * `item_id` after the test, whether it passed, failed, or was skipped
+   * mid-run, so nothing another spec file created is touched.
+   */
+  endpointArtifactItems: EndpointArtifactItemTracker;
 }
 
 export interface ArtifactTabWorkerFixtures {
@@ -58,6 +66,14 @@ export const spaceTest = baseSpaceTest.extend<ArtifactTabTestFixtures, ArtifactT
     use: (pageObjects: ArtifactTabPageObjects) => Promise<void>
   ) => {
     await use(extendPageObjects(pageObjects, page));
+  },
+  endpointArtifactItems: async (
+    { apiServices }: { apiServices: SecurityParallelWorkerFixtures['apiServices'] },
+    use: (tracker: EndpointArtifactItemTracker) => Promise<void>
+  ) => {
+    const tracker = new EndpointArtifactItemTracker(apiServices.endpointArtifacts);
+    await use(tracker);
+    await tracker.cleanup();
   },
   endpointPolicy: [
     async ({ kbnClient, scoutSpace, log }, use) => {

@@ -37,6 +37,7 @@ export const transformEsqlToolToFormData = (tool: EsqlToolDefinition): EsqlToolF
         defaultValue,
       })
     ),
+    includeFrozen: tool.configuration.include_frozen ?? false,
     type: ToolType.esql,
   };
 };
@@ -72,6 +73,7 @@ export const transformFormDataToEsqlTool = (data: EsqlToolFormData): EsqlToolDef
           paramsMap[param.name] = paramConfig;
           return paramsMap;
         }, {} as Record<string, EsqlToolParam>),
+      include_frozen: data.includeFrozen,
     },
     type: ToolType.esql,
     tags: data.labels,

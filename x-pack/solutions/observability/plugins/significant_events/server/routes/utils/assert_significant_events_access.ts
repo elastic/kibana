@@ -69,11 +69,10 @@ const pluginRequirements = Object.fromEntries(
 /**
  * The single source of truth for everything that must be true for significant
  * events to work. Keying by reason makes this exhaustive: TypeScript errors if
- * any `SignificantEventsUnavailableReason` lacks a check here. The declaration
- * order is the evaluation order: it only decides which reason surfaces first
- * when several are unmet, so the Technical Preview feature flag is checked first
- * as the outermost gate, then the project type, then cheaper / more-likely-to-fail
- * gates (pricing tier, license) before plugin presence.
+ * any requirement lacks a check here. The declaration order is the evaluation order:
+ * it only decides which reason surfaces first when several are unmet, so the Technical Preview
+ * feature flag is checked first as the outermost gate, then the project type, then cheaper /
+ * more-likely-to-fail gates (pricing tier, license) before plugin presence.
  */
 const significantEventsRequirements: Record<SignificantEventsUnavailableReason, RequirementCheck> =
   {
@@ -93,12 +92,15 @@ const significantEventsRequirements: Record<SignificantEventsUnavailableReason, 
         : new FeatureNotEnabledError(
             'Significant events is not available on the current pricing tier.'
           ),
-    license: async ({ licensing }) =>
-      (await licensing.getLicense()).hasAtLeast('enterprise')
+    // `hasAtLeast` only compares the license type, so an expired license needs the activity check.
+    license: async ({ licensing }) => {
+      const license = await licensing.getLicense();
+      return license.isActive && license.hasAtLeast('enterprise')
         ? undefined
         : new FeatureNotEnabledError(
             'An Enterprise license or higher is required to use significant events.'
-          ),
+          );
+    },
     ...pluginRequirements,
   };
 

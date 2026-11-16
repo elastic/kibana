@@ -46,7 +46,7 @@ const mockWorkflowExecutionLoop = workflowExecutionLoop as jest.MockedFunction<
 const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
 
 describe('resumeWorkflow', () => {
-  it('finalizes pending steps before publishing an identity failure', async () => {
+  it.each([false, true])('finalizes identity failure (inherited: %s)', async (inherited) => {
     jest.clearAllMocks();
     const dependencies = mockContextDependencies();
     jest.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
@@ -74,13 +74,22 @@ describe('resumeWorkflow', () => {
       workflowId: 'workflow',
       spaceId: 'default',
       status: ExecutionStatus.WAITING_FOR_INPUT,
+      effectiveIdentity: inherited
+        ? {
+            type: 'service_account',
+            id: 'account-a',
+            inheritedFrom: {
+              workloadId: 'root-parent',
+            },
+          }
+        : undefined,
       workflowDefinition: {
         version: '1',
         name: 'Identity test',
         enabled: true,
         triggers: [{ type: 'manual' }],
         steps: [],
-        settings: { run_as: 'account-a' },
+        settings: inherited ? undefined : { run_as: 'account-a' },
       },
     });
     const execution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -209,7 +218,7 @@ describe('resumeWorkflow', () => {
         signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        config: { logging: { console: false } } as never,
         fakeRequest,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository: mockWorkflowExecutionRepositoryForResume as any,
@@ -363,7 +372,7 @@ describe('resumeWorkflow', () => {
         signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        config: { logging: { console: false } } as never,
         fakeRequest,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository: mockWorkflowExecutionRepositoryForResume as any,
@@ -402,7 +411,7 @@ describe('resumeWorkflow', () => {
         signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        config: { logging: { console: false } } as never,
         fakeRequest,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository: mockWorkflowExecutionRepositoryForResume as any,
@@ -411,6 +420,82 @@ describe('resumeWorkflow', () => {
 
       expect(resume).not.toHaveBeenCalled();
       expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+    });
+
+    describe('a stored HITL response', () => {
+      const stamp = { resumedBy: 'analyst', resumedAt: '2026-10-20T16:00:48.350Z' };
+      const resumeWith = async (context: Record<string, unknown>, taken: boolean) => {
+        const resume = jest.fn().mockResolvedValue(undefined);
+        mockSetupDependencies.mockResolvedValue({
+          workflowRuntime: { resume, ...nonFailedRuntimeMethods() },
+          stepExecutionRuntimeFactory: {},
+          workflowExecutionState: {
+            getWorkflowExecution: () => ({
+              status: ExecutionStatus.WAITING_FOR_INPUT,
+              context: { resumeInput: { approved: true }, ...context },
+            }),
+          },
+          workflowLogger: {},
+          nodesFactory: {},
+          workflowExecutionGraph: {},
+          esClient: {},
+          workflowTaskManager: {},
+          workflowExecutionRepository: {
+            getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
+          },
+        } as never);
+        const workflowExecutionRepository = {
+          ...mockWorkflowExecutionRepositoryForResume,
+          tryTakeResumeInput: jest.fn().mockResolvedValue(taken),
+        };
+
+        const result = await resumeWorkflow({
+          workflowRunId,
+          spaceId,
+          signal: new AbortController().signal,
+          dependencies,
+          logger: logger as Logger,
+          config: { logging: { console: false } } as never,
+          fakeRequest,
+          workflowsExecutionEngine: mockWorkflowExecutionEngine,
+          workflowExecutionRepository: workflowExecutionRepository as any,
+          stepExecutionRepository: mockStepExecutionRepositoryForResume,
+        });
+        return {
+          result,
+          resume,
+          tryTakeResumeInput: workflowExecutionRepository.tryTakeResumeInput,
+        };
+      };
+
+      it('is marked as taken before the workflow resumes', async () => {
+        const { resume, tryTakeResumeInput } = await resumeWith(stamp, true);
+
+        expect(tryTakeResumeInput).toHaveBeenCalledWith({
+          workflowExecutionId: workflowRunId,
+          spaceId,
+          ...stamp,
+        });
+        expect(resume).toHaveBeenCalledTimes(1);
+        expect(mockWorkflowExecutionLoop).toHaveBeenCalledTimes(1);
+      });
+
+      it('is not applied when it was taken back, and the run is retried shortly', async () => {
+        const before = Date.now();
+
+        const { result, resume } = await resumeWith(stamp, false);
+
+        expect(result.retryAt?.getTime()).toBeGreaterThanOrEqual(before + 1_000);
+        expect(resume).not.toHaveBeenCalled();
+        expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+      });
+
+      it('is applied as before when it carries no stamp', async () => {
+        const { resume, tryTakeResumeInput } = await resumeWith({}, false);
+
+        expect(tryTakeResumeInput).not.toHaveBeenCalled();
+        expect(resume).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('runs resume when status is RUNNING (e.g. mid-loop)', async () => {
@@ -442,7 +527,7 @@ describe('resumeWorkflow', () => {
         signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        config: { logging: { console: false } } as never,
         fakeRequest,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository: mockWorkflowExecutionRepositoryForResume as any,
@@ -738,7 +823,7 @@ describe('resumeWorkflow', () => {
           spaceId,
           signal: new AbortController().signal,
           logger: logger as Logger,
-          config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
+          config: { logging: { console: false } } as any,
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineEmit,
@@ -794,7 +879,7 @@ describe('resumeWorkflow', () => {
           spaceId,
           signal: new AbortController().signal,
           logger: logger as Logger,
-          config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
+          config: { logging: { console: false } } as any,
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineEmit,

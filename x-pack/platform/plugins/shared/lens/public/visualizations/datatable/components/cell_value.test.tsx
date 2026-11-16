@@ -99,11 +99,13 @@ describe('datatable cell renderer', () => {
     columnConfig,
     formatters = defaultFormatters,
     isDarkMode = false,
+    isInteractive = true,
     fitRowToContent,
   }: {
     columnConfig: ColumnConfig;
     formatters?: Record<string, FieldFormat>;
     isDarkMode?: boolean;
+    isInteractive?: boolean;
     fitRowToContent?: boolean;
   }) =>
     createGridCell(
@@ -113,6 +115,7 @@ describe('datatable cell renderer', () => {
       isDarkMode,
       cellColorFnMock,
       paletteServiceMock,
+      isInteractive,
       fitRowToContent
     );
 
@@ -182,6 +185,24 @@ describe('datatable cell renderer', () => {
       });
       renderCell({ cellRenderer });
       expect(screen.getByText('formatted 123')).toHaveClass('lnsTableCell--multiline');
+    });
+
+    it('passes isInteractive to the formatter so it can suppress live content (e.g. links) when false', () => {
+      const convertToReact = jest.fn((x: unknown, options?: { isInteractive?: boolean }) =>
+        options?.isInteractive === false ? `inert ${x}` : `link ${x}`
+      );
+      const formatter = {
+        convertToText: (x: unknown) => `formatted ${x}`,
+        convertToReact,
+      } as unknown as FieldFormat;
+      const cellRenderer = makeCellRenderer({
+        columnConfig: { columns: [], sortingColumnId: '', sortingDirection: 'none' },
+        formatters: { a: formatter },
+        isInteractive: false,
+      });
+      renderCell({ cellRenderer });
+      expect(convertToReact).toHaveBeenCalledWith(123, { isInteractive: false });
+      expect(screen.getByText('inert 123')).toBeInTheDocument();
     });
   });
 

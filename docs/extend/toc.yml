@@ -161,6 +161,7 @@ toc:
           - file: debugging.md
           - file: logging.md
           - file: scout-best-practices.md
+          - file: scout-auth.md
           - file: fixtures.md
           - file: page-objects.md
           - file: api-services.md

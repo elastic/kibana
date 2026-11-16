@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import styled from '@emotion/styled';
 
 import { EuiCallOut, EuiCheckbox, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
@@ -14,7 +14,9 @@ import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import type { Status } from '../../../../../../common/api/detection_engine';
+import type { AlertClosingReason } from '../../../../../../common/types';
 import { entryHasNonEcsType, shouldDisableBulkClose } from './utils';
+import { ClosingReasonSelect } from './closing_reason_select';
 import * as i18n from './translations';
 import type { AlertData } from '../../../utils/types';
 
@@ -48,10 +50,12 @@ interface ExceptionsFlyoutAlertsActionsComponentProps {
    * couldn't be resolved against the rule's source indices.
    */
   hasUntypedRuntimeFields?: boolean;
+  closeAlertsReason?: AlertClosingReason;
   onUpdateBulkCloseIndex: (arg: string[] | undefined) => void;
   onBulkCloseCheckboxChange: (arg: boolean) => void;
   onSingleAlertCloseCheckboxChange?: (arg: boolean) => void;
   onDisableBulkClose: (arg: boolean) => void;
+  onCloseAlertsReasonChange?: (reason?: AlertClosingReason) => void;
 }
 
 const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
@@ -70,14 +74,24 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
   isSignalIndexPatternLoading,
   signalIndexPatterns,
   hasUntypedRuntimeFields = false,
+  closeAlertsReason,
   onDisableBulkClose,
   onUpdateBulkCloseIndex,
   onBulkCloseCheckboxChange,
   onSingleAlertCloseCheckboxChange,
+  onCloseAlertsReasonChange,
 }): JSX.Element => {
+  const sectionRef = useRef<HTMLElement>(null);
+  // Set when the user checks a close option. This section sits at the bottom of
+  // the flyout body, so the reason select and callout it reveals render below
+  // the fold unless we scroll them into view once they're rendered.
+  const shouldScrollIntoViewRef = useRef(false);
+
   const handleBulkCloseCheckbox = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
-      onBulkCloseCheckboxChange(event.currentTarget.checked);
+      const { checked } = event.currentTarget;
+      shouldScrollIntoViewRef.current = checked;
+      onBulkCloseCheckboxChange(checked);
     },
     [onBulkCloseCheckboxChange]
   );
@@ -85,7 +99,9 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
   const handleCloseSingleAlertCheckbox = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
       if (onSingleAlertCloseCheckboxChange != null) {
-        onSingleAlertCloseCheckboxChange(event.currentTarget.checked);
+        const { checked } = event.currentTarget;
+        shouldScrollIntoViewRef.current = checked;
+        onSingleAlertCloseCheckboxChange(checked);
       }
     },
     [onSingleAlertCloseCheckboxChange]
@@ -105,6 +121,16 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
     onDisableBulkClose(shouldDisableBulkClose({ items: exceptionListItems }));
   }, [onDisableBulkClose, exceptionListItems]);
 
+  const willCloseAlerts = shouldCloseSingleAlert === true || shouldBulkCloseAlert;
+
+  // A reason is only meaningful when alerts are actually being closed, so drop
+  // any previous selection once the user unchecks both close options.
+  useEffect((): void => {
+    if (!willCloseAlerts && closeAlertsReason != null && onCloseAlertsReasonChange != null) {
+      onCloseAlertsReasonChange(undefined);
+    }
+  }, [willCloseAlerts, closeAlertsReason, onCloseAlertsReasonChange]);
+
   // Exception entries referencing fields not on the alerts index — typically
   // runtime or non-ECS fields defined on the rule's source indices. Bulk-close
   // still proceeds for those (server resolves via runtime-field synthesis),
@@ -117,8 +143,16 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
     [shouldBulkCloseAlert, isSignalIndexPatternLoading, exceptionListItems, signalIndexPatterns]
   );
 
+  useEffect((): void => {
+    if (!shouldScrollIntoViewRef.current) {
+      return;
+    }
+    shouldScrollIntoViewRef.current = false;
+    sectionRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [shouldCloseSingleAlert, shouldBulkCloseAlert]);
+
   return (
-    <FlyoutCheckboxesSection>
+    <FlyoutCheckboxesSection ref={sectionRef}>
       <SectionHeader size="xs">
         <h3>{i18n.CLOSE_ALERTS_SECTION_TITLE}</h3>
       </SectionHeader>
@@ -145,6 +179,13 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
           disabled={disableBulkClose || isSignalIndexLoading || isAlertDataLoading}
         />
       </EuiFormRow>
+      {willCloseAlerts && onCloseAlertsReasonChange != null && (
+        <ClosingReasonSelect
+          value={closeAlertsReason}
+          disabled={isSignalIndexLoading || isAlertDataLoading}
+          onChange={onCloseAlertsReasonChange}
+        />
+      )}
       {showRuntimeFieldWarning && (
         <>
           <EuiSpacer size="s" />

@@ -9,6 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { TimelineTypeEnum } from '../../../common/api/timeline';
 import { SecurityAppHeader } from '../../common/components/app_header';
+import { useKibana } from '../../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { StatefulOpenTimeline } from '../components/open_timeline';
@@ -25,6 +26,9 @@ export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
 export const TimelinesPage = React.memo(() => {
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
+  const {
+    services: { docLinks },
+  } = useKibana();
 
   const { dataView, status } = useDataView(PageScope.default);
   const indicesExist = dataView?.hasMatchedIndices();
@@ -55,7 +59,12 @@ export const TimelinesPage = React.memo(() => {
     <SecurityRoutePageWrapper pageName={SecurityPageName.timelines}>
       {indicesExist ? (
         <SecuritySolutionPageWrapper>
-          <SecurityAppHeader title={i18n.PAGE_TITLE} menu={menu} spacing="largeBleed" />
+          <SecurityAppHeader
+            title={i18n.PAGE_TITLE}
+            menu={menu}
+            spacing="largeBleed"
+            docLink={docLinks.links.siem.timelinesPage}
+          />
 
           <StatefulOpenTimeline
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}

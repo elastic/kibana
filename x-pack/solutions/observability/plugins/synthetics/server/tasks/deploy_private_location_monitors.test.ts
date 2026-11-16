@@ -19,10 +19,8 @@ const mockEncryptedSo = mockEncryptedSO();
 const mockLogger = loggerMock.create();
 
 const mockSyntheticsMonitorClient: any = {
-  syntheticsService: {
-    getSyntheticsParams: jest.fn().mockResolvedValue({}),
-    getMaintenanceWindows: jest.fn().mockResolvedValue([]),
-  },
+  getSyntheticsParams: jest.fn().mockResolvedValue({}),
+  getMaintenanceWindows: jest.fn().mockResolvedValue([]),
 };
 
 const mockServerSetup = {
@@ -94,15 +92,17 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
     id,
     type: 'synthetics-monitor',
     namespaces: ['space1'],
-    attributes: {},
+    attributes: { maintenance_windows: ['mw-gone', 'mw-keep'] },
   });
 
   const buildDeployer = ({
     pages,
     editMonitors,
+    scheduleRevisionBumps = jest.fn().mockResolvedValue(undefined),
   }: {
     pages: string[][];
     editMonitors: jest.Mock;
+    scheduleRevisionBumps?: jest.Mock;
   }) => {
     const close = jest.fn().mockResolvedValue(undefined);
     // one finder per maintenance window; monitor ids are unique per finder because
@@ -130,7 +130,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
 
     const deployer = new DeployPrivateLocationMonitors(serverSetup, {
       ...mockSyntheticsMonitorClient,
-      privateLocationAPI: { editMonitors },
+      privateLocationAPI: { editMonitors, scheduleRevisionBumps },
     } as any);
 
     // keep the test focused on the failed-create control flow, not on monitor formatting
@@ -142,7 +142,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
       .spyOn(deployer, 'parseLocations')
       .mockReturnValue({ privateLocations, publicLocations: [] } as any);
 
-    return { deployer, close, editMonitors };
+    return { deployer, close, editMonitors, scheduleRevisionBumps };
   };
 
   const withFailedCreates = { failedUpdates: [], failedCreates: [{ packagePolicy: { id: 'p1' } }] };
@@ -254,6 +254,108 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
       expect(mockSoClient.bulkUpdate).toHaveBeenCalled();
     });
 
+    it('bumps agent policies once for the whole sync, not once per page', async () => {
+      const editMonitors = jest.fn().mockResolvedValue(withoutFailures);
+      const { deployer, scheduleRevisionBumps } = buildDeployer({
+        pages: [['m1'], ['m2'], ['m3']],
+        editMonitors,
+      });
+
+      await syncForMws(deployer, ['mw-1', 'mw-2']);
+
+      expect(editMonitors).toHaveBeenCalledTimes(6);
+      // every page writes into the one shared collection...
+      const sharedBumps = editMonitors.mock.calls[0][4];
+      expect(sharedBumps).toBeInstanceOf(Set);
+      editMonitors.mock.calls.forEach((call) => expect(call[4]).toBe(sharedBumps));
+      // ...which is bumped once, after the last page
+      expect(scheduleRevisionBumps).toHaveBeenCalledTimes(1);
+      expect(scheduleRevisionBumps).toHaveBeenCalledWith(sharedBumps);
+      expect(scheduleRevisionBumps.mock.invocationCallOrder[0]).toBeGreaterThan(
+        editMonitors.mock.invocationCallOrder[5]
+      );
+    });
+
+    it('still bumps agent policies already written when a later page throws', async () => {
+      const editMonitors = jest
+        .fn()
+        .mockResolvedValueOnce(withoutFailures)
+        .mockRejectedValueOnce(new Error('boom'));
+      const { deployer, scheduleRevisionBumps } = buildDeployer({
+        pages: [['m1'], ['m2']],
+        editMonitors,
+      });
+
+      await expect(syncForMws(deployer, ['mw-1'])).rejects.toThrow('boom');
+
+      expect(scheduleRevisionBumps).toHaveBeenCalledTimes(1);
+    });
+
+    it('surfaces a failed bump so the task reports the sync as failed', async () => {
+      const editMonitors = jest.fn().mockResolvedValue(withoutFailures);
+      const { deployer } = buildDeployer({
+        pages: [['m1']],
+        editMonitors,
+        scheduleRevisionBumps: jest.fn().mockRejectedValue(new Error('fleet down')),
+      });
+
+      await expect(syncForMws(deployer, ['mw-1'])).rejects.toThrow('fleet down');
+    });
+
+    describe('deleted maintenance windows', () => {
+      const syncMissing = (deployer: DeployPrivateLocationMonitors) =>
+        deployer.syncPackagePoliciesForMws({
+          allPrivateLocations: privateLocations,
+          missingMWIds: ['mw-gone'],
+          soClient: mockSoClient as any,
+          maintenanceWindows: [],
+        });
+
+      it('keeps the reference on monitors until the bump has succeeded', async () => {
+        const editMonitors = jest.fn().mockResolvedValue(withoutFailures);
+        const { deployer, scheduleRevisionBumps } = buildDeployer({
+          pages: [['m1'], ['m2']],
+          editMonitors,
+        });
+
+        await syncMissing(deployer);
+
+        expect(mockSoClient.bulkUpdate).toHaveBeenCalledTimes(2);
+        mockSoClient.bulkUpdate.mock.invocationCallOrder.forEach((order) =>
+          expect(order).toBeGreaterThan(scheduleRevisionBumps.mock.invocationCallOrder[0])
+        );
+      });
+
+      it('does not strip the reference when the bump fails, so the next run retries it', async () => {
+        const editMonitors = jest.fn().mockResolvedValue(withoutFailures);
+        const { deployer } = buildDeployer({
+          pages: [['m1']],
+          editMonitors,
+          scheduleRevisionBumps: jest.fn().mockRejectedValue(new Error('fleet down')),
+        });
+
+        await expect(syncMissing(deployer)).rejects.toThrow('fleet down');
+
+        expect(mockSoClient.bulkUpdate).not.toHaveBeenCalled();
+      });
+
+      it('removes only the deleted window from each monitor', async () => {
+        const editMonitors = jest.fn().mockResolvedValue(withoutFailures);
+        const { deployer } = buildDeployer({ pages: [['m1']], editMonitors });
+
+        await syncMissing(deployer);
+
+        expect(mockSoClient.bulkUpdate).toHaveBeenCalledWith([
+          {
+            id: 'm1-0',
+            type: 'synthetics-monitor',
+            namespace: 'space1',
+            attributes: { maintenance_windows: ['mw-keep'] },
+          },
+        ]);
+      });
+    });
+
     it('logs the failed creates so they are still visible', async () => {
       const editMonitors = jest.fn().mockResolvedValue(withFailedCreates);
       const { deployer } = buildDeployer({ pages: [['m1']], editMonitors });
@@ -262,6 +364,59 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to create policies during sync')
+      );
+    });
+
+    it('logs failed updates with the policy, monitor and error, without failing the sync', async () => {
+      const editMonitors = jest.fn().mockResolvedValue({
+        failedUpdates: [
+          {
+            packagePolicy: { id: 'p1' },
+            config: { id: 'm1-0' },
+            error: new Error('policy update rejected'),
+          },
+        ],
+        failedCreates: [],
+      });
+      const { deployer } = buildDeployer({ pages: [['m1'], ['m2']], editMonitors });
+
+      await syncForMws(deployer, ['mw-1']);
+
+      expect(editMonitors).toHaveBeenCalledTimes(2);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          '"policyId":"p1","monitorId":"m1-0","error":"policy update rejected"'
+        )
+      );
+    });
+  });
+
+  describe('syncAllPackagePolicies failed updates', () => {
+    it('logs them without reporting them as failed creates', async () => {
+      const editMonitors = jest.fn().mockResolvedValue({
+        failedUpdates: [
+          { packagePolicy: { id: 'p1' }, error: new Error('policy update rejected') },
+        ],
+        failedCreates: [],
+      });
+      const { deployer } = buildDeployer({ pages: [], editMonitors });
+
+      jest.spyOn(deployer, 'getAllMonitorConfigs').mockResolvedValue({
+        configsBySpaces: { space1: [{ id: 'm1' }] },
+        monitorSpaceIds: new Set(['space1']),
+        paramsBySpace: {},
+        maintenanceWindows: [],
+      } as any);
+
+      await expect(
+        deployer.syncAllPackagePolicies({
+          allPrivateLocations: privateLocations,
+          soClient: mockSoClient as any,
+          encryptedSavedObjects: mockEncryptedSo,
+        })
+      ).resolves.toEqual({ failedCreatesBySpace: [] });
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update 1 policies during sync for space space1')
       );
     });
   });

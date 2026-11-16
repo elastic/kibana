@@ -41,6 +41,7 @@ export const columnsAfter = (
         type: oldColumn.type,
         location: asRenamePair.args[1].location,
         userDefined: true,
+        ...(oldColumn.fullTextMatch && { fullTextMatch: oldColumn.fullTextMatch }),
       };
     }
 
@@ -54,6 +55,7 @@ export const columnsAfter = (
         type: oldColumn.type,
         location: assignRenamePair.args[0].location,
         userDefined: true,
+        ...(oldColumn.fullTextMatch && { fullTextMatch: oldColumn.fullTextMatch }),
       };
     }
 

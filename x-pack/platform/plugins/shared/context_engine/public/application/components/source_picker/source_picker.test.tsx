@@ -64,11 +64,21 @@ const INDEX_MATCHES = [
 const createServices = ({
   indices = INDEX_MATCHES,
   indicesError,
+  canReadConnectors = true,
 }: {
   indices?: MatchedItem[];
   indicesError?: Error;
+  canReadConnectors?: boolean;
 } = {}) => {
   const services = coreMock.createStart();
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    actions: {
+      ...services.application.capabilities.actions,
+      show: canReadConnectors,
+      save: canReadConnectors,
+    },
+  };
   const data = dataPluginMock.createStartContract();
   data.dataViews.getIndices = indicesError
     ? jest.fn().mockRejectedValue(indicesError)
@@ -119,10 +129,6 @@ const addEsqlSource = async (query: string) => {
   fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
 };
 
-const openConnectorsTab = () => {
-  fireEvent.click(screen.getByTestId('contextSourcePickerTab-connectors'));
-};
-
 const waitForConnectorQueries = async (queryClient: QueryClient) => {
   await waitFor(() => {
     const typesQuery = queryClient.getQueryState(contextEngineQueryKeys.connectors.types());
@@ -170,10 +176,13 @@ describe('SourcePicker', () => {
     jest.clearAllMocks();
   });
 
-  it('selects the Elasticsearch data tab by default with index picker visible', () => {
+  it('renders both Elasticsearch data and Connectors sections on mount', () => {
     renderWithProviders(<Harness />);
 
-    expect(screen.getByTestId('contextElasticsearchSourcesTab')).toBeInTheDocument();
+    expect(screen.getByTestId('contextElasticsearchDataPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextElasticsearchSourcesPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextConnectorsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextConnectorsTab')).toBeInTheDocument();
     expect(screen.getByTestId('contextIndexComboBox')).toBeInTheDocument();
     expect(screen.getByTestId('contextAdvancedEsqlAccordion')).toBeInTheDocument();
     expect(screen.getByTestId('mockEsqlEditor')).not.toBeVisible();
@@ -239,7 +248,7 @@ describe('SourcePicker', () => {
     expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
   });
 
-  it('does not fetch connectors or indices on mount when only the Elasticsearch data tab is shown', () => {
+  it('does not fetch connectors or indices on mount', () => {
     const { services } = renderWithProviders(<Harness />);
 
     expect(services.http.get).not.toHaveBeenCalled();
@@ -249,7 +258,6 @@ describe('SourcePicker', () => {
   it('lists only the data-retrieval connectors in the connectors tab', async () => {
     const { services, queryClient } = renderWithProviders(<Harness />);
 
-    openConnectorsTab();
     await openConnectorOptions(services, queryClient);
 
     expect(getConnectorOptionByName('Google Drive')).toHaveTextContent('Google Drive');
@@ -261,7 +269,6 @@ describe('SourcePicker', () => {
   it('adds a connector as a source when selected', async () => {
     const { services, queryClient } = renderWithProviders(<Harness />);
 
-    openConnectorsTab();
     await openConnectorOptions(services, queryClient);
     fireEvent.click(getConnectorOptionByName('Google Drive'));
 
@@ -290,13 +297,32 @@ describe('SourcePicker', () => {
     );
   });
 
+  it('does not fetch connectors for restored connector sources without Actions read', () => {
+    const { services } = renderWithProviders(
+      <Harness
+        initialSources={[
+          {
+            type: 'connector',
+            id: 'connector-github',
+            label: 'connector-github',
+            value: 'connector-github',
+          },
+        ]}
+      />,
+      createServices({ canReadConnectors: false })
+    );
+
+    expect(services.http.get).not.toHaveBeenCalled();
+    expect(screen.getByTestId('contextSelectedSource-connector-0')).toHaveTextContent(
+      'connector-github'
+    );
+  });
+
   it('shows an error prompt in the connectors tab when the connector request fails', async () => {
     const services = createServices();
     services.http.get.mockRejectedValue(new Error('Network error'));
 
     renderWithProviders(<Harness />, services);
-
-    openConnectorsTab();
 
     const comboBox = await screen.findByTestId('contextConnectorComboBox');
     fireEvent.focus(within(comboBox).getByRole('combobox'));

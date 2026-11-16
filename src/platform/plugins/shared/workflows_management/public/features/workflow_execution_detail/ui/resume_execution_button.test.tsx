@@ -105,6 +105,12 @@ describe('ResumeExecutionButton', () => {
       expect(screen.getByTestId('waitForInputCallout')).toBeInTheDocument();
     });
 
+    it('renders the "Provide action" button without a callout in button appearance', () => {
+      renderComponent({ appearance: 'button' });
+      expect(screen.queryByTestId('waitForInputCallout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('provideActionButton')).toBeInTheDocument();
+    });
+
     it('renders the "Provide action" button', () => {
       renderComponent();
       expect(screen.getByTestId('provideActionButton')).toBeInTheDocument();
@@ -427,6 +433,15 @@ describe('ResumeExecutionButton', () => {
       expect(screen.getByTestId('approveActionButton')).toHaveTextContent('Approve');
       expect(screen.getByTestId('rejectActionButton')).toHaveTextContent('Decline');
       expect(screen.queryByTestId('provideActionButton')).not.toBeInTheDocument();
+    });
+
+    it('renders a markdown message inside the scroll region, with the actions outside it', () => {
+      renderComponent({ ...approvalProps, resumeMessage: '**Approve** this' });
+      const message = screen.getByTestId('waitForApprovalMessage');
+      expect(message.querySelector('strong')).toHaveTextContent('Approve');
+      expect(message).toHaveTextContent('Approve this');
+      expect(message).not.toContainElement(screen.getByTestId('approveActionButton'));
+      expect(message).not.toContainElement(screen.getByTestId('rejectActionButton'));
     });
 
     it('submits approved=true when Approve is clicked', async () => {

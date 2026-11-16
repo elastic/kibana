@@ -90,7 +90,7 @@ describe('createConversationEventTypeRegistry', () => {
     (type) => {
       const registry = createConversationEventTypeRegistry();
       expect(() => registry.register({ type, payloadSchema: z.object({}) })).toThrow(
-        'is a built-in timeline event type'
+        'is a built-in event type'
       );
     }
   );

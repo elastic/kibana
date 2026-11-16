@@ -190,6 +190,21 @@
                 "applications": []
               }
             },
+            "profile": {
+              "write": {
+                "applications": []
+              }
+            },
+            "role": {
+              "manage": {
+                "indices": [
+                  {
+                    "names": [],
+                    "privileges": []
+                  }
+                ]
+              }
+            },
             "data_source": [
               {
                 "names": [],

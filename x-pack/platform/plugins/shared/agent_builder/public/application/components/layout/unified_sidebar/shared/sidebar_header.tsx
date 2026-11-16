@@ -60,15 +60,19 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   const history = useHistory();
   const { navigateToAgentBuilderUrl } = useNavigation();
 
+  // Vertical padding matches the compact app header beside it, so both rows share one height.
   const headerStyles = css`
     gap: ${euiTheme.size.s};
-    padding: ${euiTheme.size.base};
-    padding-left: ${euiTheme.size.l};
+    padding: ${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.l};
     flex-grow: 0;
   `;
 
+  const headingColorStyles = css`
+    color: ${euiTheme.colors.textHeading};
+  `;
+
   const condensedHeaderStyles = css`
-    padding: ${euiTheme.size.base} 0;
+    padding: ${euiTheme.size.s} 0;
     flex-grow: 0;
     align-items: center;
   `;
@@ -88,6 +92,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               aria-label={labels.toggleSidebar}
               aria-expanded={false}
               color="text"
+              css={headingColorStyles}
               size="s"
               onClick={onToggleCondensed}
               {...getEbtProps({
@@ -137,6 +142,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               size="s"
               flush="both"
               color="text"
+              css={headingColorStyles}
               onClick={() => {
                 history.push(appPaths.agent.root({ agentId: getLastAgentId() }));
               }}
@@ -158,6 +164,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 aria-label={labels.toggleSidebar}
                 aria-expanded={true}
                 color="text"
+                css={headingColorStyles}
                 size="s"
                 onClick={onToggleCondensed}
                 {...getEbtProps({

@@ -108,8 +108,7 @@ const fireAlertsAndStopRule = async ({
 
 // Alert trigger tests run on Security and Observability (and ESS), but NOT on Elasticsearch/Search.
 // Security uses the detection engine API; Observability uses the generic alerting API.
-// Failing: See https://github.com/elastic/kibana/issues/252959
-test.describe.skip(
+test.describe(
   'Workflow execution - Alert triggers',
   {
     tag: [
@@ -338,6 +337,13 @@ test.describe.skip(
       const toggleSwitch = pageObjects.workflowList.getWorkflowStateToggle(disabledWorkflowName);
       await expect(toggleSwitch).toBeChecked();
       await toggleSwitch.click();
+      await page.testSubj.waitForSelector('workflowsDisableConfirmationModal', {
+        state: 'visible',
+      });
+      await expect(
+        page.testSubj.locator('workflowLinkedRulesCallout').getByRole('link')
+      ).toHaveCount(1);
+      await page.testSubj.click('confirmModalConfirmButton');
       await expect(toggleSwitch).not.toBeChecked();
 
       // Trigger alerts — the rule will fire both actions, but only the canary should execute

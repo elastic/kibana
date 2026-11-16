@@ -353,6 +353,50 @@ export default ({ getService }: FtrProviderContext): void => {
       await fetchRule(ruleId).expect(404);
     });
 
+    it('should delete existing rules and report missing ids as skipped when deleting by ids', async () => {
+      const ruleA = await createRule(supertest, log, getSimpleRule('rule-a'));
+      const ruleB = await createRule(supertest, log, getSimpleRule('rule-b'));
+      const missingId = uuidV4();
+
+      const { body } = await postBulkAction()
+        .send({ ids: [ruleA.id, missingId, ruleB.id], action: BulkActionTypeEnum.delete })
+        .expect(200);
+
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 1, succeeded: 2, total: 3 });
+      expect(body.attributes.results.deleted.map(({ id }: { id: string }) => id).sort()).toEqual(
+        [ruleA.id, ruleB.id].sort()
+      );
+      expect(body.attributes.results.skipped).toEqual([
+        { id: missingId, skip_reason: 'RULE_NOT_FOUND' },
+      ]);
+
+      // Check that the existing rules were deleted
+      await fetchRule('rule-a').expect(404);
+      await fetchRule('rule-b').expect(404);
+    });
+
+    it('should report missing ids as skipped and not delete existing rules in dry run delete', async () => {
+      const rule = await createRule(supertest, log, getSimpleRule('rule-dry-run'));
+      const missingId = uuidV4();
+
+      const { body } = await postBulkAction()
+        .query({ dry_run: true })
+        .send({ ids: [rule.id, missingId], action: BulkActionTypeEnum.delete })
+        .expect(200);
+
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 1, succeeded: 1, total: 2 });
+      // dry_run mode shouldn't return any rules in results
+      expect(body.attributes.results).toEqual({
+        updated: [],
+        created: [],
+        deleted: [],
+        skipped: [],
+      });
+
+      // Check that the existing rule wasn't deleted
+      await fetchRule('rule-dry-run').expect(200);
+    });
+
     it('should soft-delete gaps when deleting rules', async () => {
       const ruleId = 'ruleId';
       const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));

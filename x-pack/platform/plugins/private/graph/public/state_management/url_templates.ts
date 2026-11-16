@@ -10,9 +10,8 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { i18n } from '@kbn/i18n';
 import { modifyUrl } from '@kbn/std';
 import rison from '@kbn/rison';
-import { takeEvery } from 'redux-saga/effects';
 import { format, parse } from 'url';
-import type { GraphState, GraphStoreDependencies } from './store';
+import type { GraphState, GraphStoreDependencies, StartGraphListening } from './store';
 import type { UrlTemplate } from '../types';
 import { reset } from './global';
 import type { IndexpatternDatasource } from './datasource';
@@ -111,19 +110,22 @@ export const urlTemplatesReducer = (addBasePath: (url: string) => string) =>
 export const templatesSelector = (state: GraphState) => state.urlTemplates;
 
 /**
- * Saga making sure the templates are always synced up to the scope.
+ * Listener making sure the templates are always synced up to the scope.
  *
  * Won't be necessary once the side bar is moved to redux
  */
-export const syncTemplatesSaga = ({ notifyReact }: GraphStoreDependencies) => {
-  function* syncTemplates() {
-    notifyReact();
-  }
-
-  return function* () {
-    yield takeEvery(
-      matchesOne(loadTemplates, saveTemplate, removeTemplate, requestDatasource, setDatasource),
-      syncTemplates
-    );
-  };
+export const registerUrlTemplatesListeners = (
+  startListening: StartGraphListening,
+  { notifyReact }: GraphStoreDependencies
+) => {
+  startListening({
+    predicate: matchesOne(
+      loadTemplates,
+      saveTemplate,
+      removeTemplate,
+      requestDatasource,
+      setDatasource
+    ),
+    effect: () => notifyReact(),
+  });
 };

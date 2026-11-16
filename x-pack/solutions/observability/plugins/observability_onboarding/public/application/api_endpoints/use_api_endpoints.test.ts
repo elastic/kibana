@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
@@ -46,6 +47,7 @@ interface Options {
   elasticsearchUrl?: string;
   managedOtlpServiceUrl?: string;
   status?: FETCH_STATUS;
+  errorStatusCode?: number;
 }
 
 const setup = ({
@@ -56,6 +58,7 @@ const setup = ({
   elasticsearchUrl = 'https://es.example.com',
   managedOtlpServiceUrl = '',
   status = FETCH_STATUS.SUCCESS,
+  errorStatusCode,
 }: Options = {}) => {
   mockUseManagedOtlpServiceAvailability.mockReturnValue(isManagedOtlpServiceAvailable);
   mockUseKibana.mockReturnValue({
@@ -77,6 +80,9 @@ const setup = ({
   mockUseFetcher.mockReturnValue({
     data: { elasticsearchUrl, managedOtlpServiceUrl },
     status,
+    error: errorStatusCode
+      ? ({ response: { status: errorStatusCode } } as unknown as IHttpFetchError<ResponseErrorBody>)
+      : undefined,
     refetch: jest.fn(),
   });
 
@@ -247,6 +253,20 @@ describe('useApiEndpoints', () => {
     const { result } = setup({ status: FETCH_STATUS.LOADING });
 
     expect(result.current.isLoading).toBe(true);
+  });
+
+  it('reports a 403 as missing privileges rather than a failed request', () => {
+    const { result } = setup({ status: FETCH_STATUS.FAILURE, errorStatusCode: 403 });
+
+    expect(result.current.isForbidden).toBe(true);
+    expect(result.current.isError).toBe(false);
+  });
+
+  it('reports other failures as a failed request', () => {
+    const { result } = setup({ status: FETCH_STATUS.FAILURE, errorStatusCode: 500 });
+
+    expect(result.current.isError).toBe(true);
+    expect(result.current.isForbidden).toBe(false);
   });
 
   it('resolves Supabase for the OpenTelemetry tab and both vendors for the popover when managed OTLP is available', () => {

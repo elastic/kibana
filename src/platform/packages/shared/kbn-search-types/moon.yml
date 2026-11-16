@@ -20,7 +20,10 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/data-views-plugin'
   - '@kbn/es-query'
+  - '@kbn/expressions-plugin'
   - '@kbn/es-types'
+  - '@kbn/esql-types'
+  - '@kbn/inspector-plugin'
 tags:
   - shared-common
   - package
@@ -34,6 +37,4 @@ fileGroups:
     - src/**/*
     - __mocks__/**/*.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

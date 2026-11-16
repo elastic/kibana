@@ -11,8 +11,14 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 import { SORT_DEFAULT_ORDER_SETTING, getSortArray } from '@kbn/discover-utils';
-import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  type PublishingSubject,
+  type ViewMode,
+  type FetchContext,
+} from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
@@ -20,6 +26,7 @@ import type {
   DataGridDensity,
   JsonModeSettings,
   DocumentsDisplayMode,
+  UnifiedDataTableQueryContext,
 } from '@kbn/unified-data-table';
 import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -31,7 +38,7 @@ import {
   DISCOVER_CELL_ACTIONS_TRIGGER_ID,
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { isOfQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { buildDatatableFromTextBasedGrid } from '../../utils/build_datatable_from_text_based_grid';
@@ -42,10 +49,12 @@ import { DiscoverGridEmbeddable, type InlineEditing } from './saved_search_grid'
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import { showTimeFieldColumn } from '../../utils/show_time_field_column';
-import { useAdditionalCellActions } from '../../context_awareness';
+import { useAdditionalCellActions, useProfileAccessor } from '../../context_awareness';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
 import { replaceColumnsWithVariableDriven } from '../utils/replace_columns_with_variable_driven';
+import { getEmbeddableDisplayColumns } from '../utils/get_embeddable_display_columns';
+import { getDataGridRenderMode } from '../utils/get_data_grid_render_mode';
 import type { DiscoverAppLocatorParams } from '../../../common';
 import { getExpandedDocLinkability } from '../../application/main/utils/expanded_doc';
 import { getExpandedDocLocatorParams } from '../utils/get_discover_locator_params';
@@ -59,8 +68,10 @@ interface SavedSearchEmbeddableComponentProps {
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
     abortSignal$: BehaviorSubject<AbortSignal | undefined>;
+    viewMode$: PublishingSubject<ViewMode>;
   };
   dataView: DataView;
+  esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
   onAddFilter?: DocViewFilterFn;
   enableDocumentViewer: boolean;
   inlineEditing: InlineEditing;
@@ -69,6 +80,11 @@ interface SavedSearchEmbeddableComponentProps {
   initialDocViewerTabId: string | undefined;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   stateManager: SearchEmbeddableStateManager;
+  documentViewerFlyoutType?: 'push' | 'overlay';
+  autoApplyDiscoverColumnDefaults?: boolean;
+  wrapToolbar?: boolean;
+  showKeyboardShortcuts?: boolean;
+  showSortSelector?: boolean;
 }
 
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
@@ -76,6 +92,7 @@ const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
 export function SearchEmbeddableGridComponent({
   api,
   dataView,
+  esqlSource$,
   onAddFilter,
   enableDocumentViewer,
   inlineEditing,
@@ -84,6 +101,11 @@ export function SearchEmbeddableGridComponent({
   initialDocViewerTabId,
   setExpandedDoc,
   stateManager,
+  documentViewerFlyoutType,
+  autoApplyDiscoverColumnDefaults = false,
+  wrapToolbar = true,
+  showKeyboardShortcuts,
+  showSortSelector,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
   const parentApi = api.parentApi;
@@ -93,8 +115,12 @@ export function SearchEmbeddableGridComponent({
     : undefined;
 
   const [emptyEsqlVariables$] = useState(() => new BehaviorSubject(undefined));
+  const [emptyEsqlSource$] = useState(() => new BehaviorSubject<EsqlSource | undefined>(undefined));
+
+  const kbnDataSource = useObservable(esqlSource$ ?? emptyEsqlSource$, undefined);
 
   const [
+    viewMode,
     loading,
     savedSearch,
     savedSearchId,
@@ -104,7 +130,7 @@ export function SearchEmbeddableGridComponent({
     fetchContext,
     rows,
     totalHitCount,
-    columnsMeta,
+    resultDataSource,
     grid,
     panelTitle,
     panelDescription,
@@ -113,6 +139,7 @@ export function SearchEmbeddableGridComponent({
     esqlVariables,
     abortSignal,
   ] = useBatchedPublishingSubjects(
+    api.viewMode$,
     api.dataLoading$,
     api.savedSearch$,
     api.savedObjectId$,
@@ -122,7 +149,7 @@ export function SearchEmbeddableGridComponent({
     api.fetchContext$,
     stateManager.rows,
     stateManager.totalHitCount,
-    stateManager.columnsMeta,
+    stateManager.resultDataSource,
     stateManager.grid,
     api.title$,
     api.description$,
@@ -138,20 +165,59 @@ export function SearchEmbeddableGridComponent({
   const savedSearchFilters = apiFilters;
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
+  const renderMode = getDataGridRenderMode(viewMode);
 
   const sort = useMemo(
     () => getSortArray(savedSearch.sort ?? [], dataView, isEsql),
     [dataView, isEsql, savedSearch.sort]
   );
 
+  const getDefaultAppState = useProfileAccessor('getDefaultAppState');
+  const displayColumnsState = useMemo(() => {
+    const defaultAppState = getDefaultAppState(() => ({}))({ dataView });
+    return getEmbeddableDisplayColumns({
+      autoApplyDiscoverColumnDefaults,
+      persistedColumns: savedSearch.columns,
+      profileColumns: defaultAppState.columns,
+      dataView,
+      isEsql,
+      esql: isOfAggregateQueryType(savedSearchQuery) ? savedSearchQuery.esql : undefined,
+      esqlResultColumnNames: resultDataSource
+        ? resultDataSource.getColumns().map(({ name }) => name)
+        : undefined,
+    });
+  }, [
+    autoApplyDiscoverColumnDefaults,
+    dataView,
+    getDefaultAppState,
+    isEsql,
+    resultDataSource,
+    savedSearch.columns,
+    savedSearchQuery,
+  ]);
+
   const originalColumns = useMemo(() => {
     return replaceColumnsWithVariableDriven(
-      savedSearch.columns,
-      columnsMeta,
+      displayColumnsState.columns,
+      resultDataSource,
       esqlVariables,
       isEsql
     );
-  }, [columnsMeta, isEsql, esqlVariables, savedSearch.columns]);
+  }, [displayColumnsState.columns, esqlVariables, isEsql, resultDataSource]);
+
+  const displayGrid = useMemo(() => {
+    if (!displayColumnsState.grid?.columns) {
+      return grid;
+    }
+
+    return {
+      ...grid,
+      columns: {
+        ...displayColumnsState.grid.columns,
+        ...grid?.columns,
+      },
+    };
+  }, [displayColumnsState.grid, grid]);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities: discoverServices.capabilities,
@@ -171,6 +237,8 @@ export function SearchEmbeddableGridComponent({
     },
     columns: originalColumns,
     sort,
+    // Persist only stored grid settings so profile-derived widths stay display-only
+    // unless the user resizes a column (handled by onResize).
     settings: grid,
   });
 
@@ -319,11 +387,23 @@ export function SearchEmbeddableGridComponent({
     [discoverServices.uiSettings, savedSearchQuery]
   );
 
+  // The effective search scope of the panel: its own query and filters, plus the dashboard's.
+  const queryContext = useMemo<UnifiedDataTableQueryContext>(
+    () => ({
+      query: savedSearchQuery,
+      filters: [...(savedSearchFilters ?? []), ...(fetchContext?.filters ?? [])],
+      filterQuery:
+        fetchContext?.query && isOfQueryType(fetchContext.query) ? fetchContext.query : undefined,
+      timeRange,
+    }),
+    [fetchContext?.filters, fetchContext?.query, savedSearchFilters, savedSearchQuery, timeRange]
+  );
+
   const searchContext = useMemo(() => {
     if (!isEsql) {
       return undefined;
     }
-    const table = buildDatatableFromTextBasedGrid({ rows, columnsMeta });
+    const table = buildDatatableFromTextBasedGrid({ rows, resultDataSource });
     if (!table || !savedSearchQuery) {
       return undefined;
     }
@@ -343,7 +423,7 @@ export function SearchEmbeddableGridComponent({
     };
   }, [
     abortSignal,
-    columnsMeta,
+    resultDataSource,
     esqlVariables,
     fetchContext,
     isEsql,
@@ -358,15 +438,17 @@ export function SearchEmbeddableGridComponent({
       onUpdateSampleSize={isEsql ? undefined : onStateEditedProps.onUpdateSampleSize}
       columns={columns}
       dataView={dataView}
+      dataSource={resultDataSource ?? kbnDataSource}
       interceptedWarnings={interceptedWarnings}
       onFilter={onAddFilter}
+      queryContext={queryContext}
       rows={rows}
       rowsPerPageState={savedSearch.rowsPerPage ?? defaults.rowsPerPage}
       sampleSizeState={fetchedSampleSize}
       searchDescription={panelDescription || savedSearchDescription}
       sort={sort}
       totalHitCount={totalHitCount}
-      settings={savedSearch.grid}
+      settings={displayGrid}
       ariaLabelledBy={'documentsAriaLabel'}
       cellActionsTriggerId={
         isInSecuritySolution
@@ -375,12 +457,10 @@ export function SearchEmbeddableGridComponent({
       }
       cellActionsMetadata={isInSecuritySolution ? undefined : cellActionsMetadata}
       cellActionsHandling={isInSecuritySolution ? 'replace' : 'append'}
-      columnsMeta={columnsMeta}
       configHeaderRowHeight={defaults.headerRowHeight}
       configRowHeight={defaults.rowHeight}
       headerRowHeightState={savedSearch.headerRowHeight}
       rowHeightState={savedSearch.rowHeight}
-      isPlainRecord={isEsql}
       loadingState={Boolean(loading) ? DataLoadingState.loading : DataLoadingState.loaded}
       maxAllowedSampleSize={getMaxAllowedSampleSize(discoverServices.uiSettings)}
       query={savedSearchQuery}
@@ -400,8 +480,13 @@ export function SearchEmbeddableGridComponent({
       initialDocViewerTabId={initialDocViewerTabId}
       docViewerRef={docViewerRef}
       setExpandedDoc={setExpandedDoc}
+      documentViewerFlyoutType={documentViewerFlyoutType}
+      wrapToolbar={wrapToolbar}
+      showKeyboardShortcuts={showKeyboardShortcuts}
+      showSortSelector={showSortSelector}
       searchContext={searchContext}
       flyoutMenuTrailingActions={flyoutMenuTrailingActions}
+      renderMode={renderMode}
     />
   );
 }

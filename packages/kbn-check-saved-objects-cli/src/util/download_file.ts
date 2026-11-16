@@ -7,29 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createWriteStream, unlinkSync } from 'fs';
+import { createWriteStream } from 'fs';
+import { rm } from 'fs/promises';
 import https from 'https';
+import { pipeline } from 'stream/promises';
 
-export function downloadFile(url: string, outputPath: string) {
-  return new Promise((res, rej) => {
-    https
-      .get(url, (response) => {
-        if (response.statusCode !== 200) {
-          rej(response.statusMessage);
-        } else {
-          const file = createWriteStream(outputPath);
+export async function downloadFile(url: string, outputPath: string): Promise<void> {
+  try {
+    await new Promise<void>((resolve, reject) => {
+      https
+        .get(url, (response) => {
+          if (response.statusCode !== 200) {
+            response.resume();
+            reject(new Error(`HTTP ${response.statusCode} ${response.statusMessage ?? ''}`.trim()));
+            return;
+          }
 
-          response.pipe(file);
-
-          file.on('finish', () => {
-            file.close();
-            res(undefined);
-          });
-        }
-      })
-      .on('error', (err) => {
-        unlinkSync(outputPath);
-        rej(err);
-      });
-  });
+          pipeline(response, createWriteStream(outputPath)).then(resolve, reject);
+        })
+        .on('error', reject);
+    });
+  } catch (error) {
+    await rm(outputPath, { force: true });
+    throw new Error(
+      `Failed to download Saved Objects snapshot from ${url}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+      { cause: error }
+    );
+  }
 }

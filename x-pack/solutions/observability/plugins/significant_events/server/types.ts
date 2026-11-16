@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/server';
-import type {
-  NightshiftInvestigationsServerSetup,
-  NightshiftInvestigationsServerStart,
-} from '@kbn/nightshift-investigations-plugin/server';
+import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type {
@@ -30,6 +27,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CPSServerSetup } from '@kbn/cps/server';
 import type {
   FieldsMetadataServerSetup,
   FieldsMetadataServerStart,
@@ -41,9 +39,9 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type {
-  SearchInferenceEndpointsPluginSetup,
-  SearchInferenceEndpointsPluginStart,
-} from '@kbn/search-inference-endpoints/server';
+  NightshiftSourcesServerSetup,
+  NightshiftSourcesServerStart,
+} from '@kbn/nightshift-sources-plugin/server';
 
 export interface SignificantEventsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
@@ -59,11 +57,10 @@ export interface SignificantEventsPluginSetupDependencies {
   alertingVTwo: void;
   fieldsMetadata: FieldsMetadataServerSetup;
   cloud?: CloudSetup;
+  cps?: CPSServerSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
-  streams: StreamsPluginSetup;
-  nightshiftInvestigations?: NightshiftInvestigationsServerSetup;
+  nightshiftSources: NightshiftSourcesServerSetup;
 }
 
 export interface SignificantEventsPluginStartDependencies {
@@ -78,10 +75,10 @@ export interface SignificantEventsPluginStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   agentBuilderSml?: AgentBuilderSmlPluginStart;
   spaces?: SpacesPluginStart;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
-  streams: StreamsPluginStart;
+  nightshiftSources: NightshiftSourcesServerStart;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
+  agenticInvestigations?: AgenticInvestigationsPluginStart;
 }
 
 export interface SignificantEventsServer {
@@ -93,7 +90,6 @@ export interface SignificantEventsServer {
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
   isServerless: boolean;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginStart;
@@ -104,4 +100,6 @@ export interface SignificantEventsServer {
   /** Singleton client for the Relay service, owned by the Actions plugin. */
   relayClient?: RelayClientContract;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
+  /** Reads investigations (status of the ones a significant event lists). */
+  agenticInvestigations?: AgenticInvestigationsPluginStart;
 }

@@ -21,7 +21,6 @@ describe('Lens flyout', () => {
   const updaterFn = jest.fn();
   beforeEach(() => {
     store = makeConfigureStore(mockStoreDeps(), undefined, updatingMiddleware(updaterFn));
-    store.dispatch = jest.fn(store.dispatch);
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -32,6 +31,18 @@ describe('Lens flyout', () => {
       expect(updaterFn).not.toHaveBeenCalled();
     });
 
+    test('updater is not run without an active datasource', () => {
+      store.dispatch(setState({ activeDatasourceId: null }));
+      expect(updaterFn).not.toHaveBeenCalled();
+    });
+
+    test('updater is not run without an active visualization', () => {
+      store.dispatch(
+        setState({ visualization: { activeId: null, state: null, selectedLayerId: null } })
+      );
+      expect(updaterFn).not.toHaveBeenCalled();
+    });
+
     test('updater is run if modifies visualization or datasource state', () => {
       store.dispatch(
         updateDatasourceState({
@@ -39,10 +50,18 @@ describe('Lens flyout', () => {
           newDatasourceState: 'newDatasourceState',
         })
       );
-      expect(updaterFn).toHaveBeenCalledWith('newDatasourceState', null, 'testVis', 'textBased', {
-        formBased: { isLoading: true, state: null },
-        textBased: { isLoading: false, state: 'newDatasourceState' },
-      });
+      expect(updaterFn).toHaveBeenCalledWith(
+        'newDatasourceState',
+        null,
+        'testVis',
+        'textBased',
+        {
+          formBased: { isLoading: true, state: null },
+          textBased: { isLoading: false, state: 'newDatasourceState' },
+        },
+        // session ad hoc data views
+        {}
+      );
       store.dispatch(
         updateVisualizationState({ visualizationId: 'testVis', newState: 'newVisState' })
       );
@@ -54,7 +73,45 @@ describe('Lens flyout', () => {
         {
           formBased: { isLoading: true, state: null },
           textBased: { isLoading: false, state: 'newDatasourceState' },
-        }
+        },
+        // session ad hoc data views
+        {}
+      );
+    });
+
+    test('updater is run when a non-active datasource state changes', () => {
+      store.dispatch(
+        setState({
+          datasourceStates: {
+            formBased: { state: 'referenceLineState', isLoading: false },
+            textBased: { state: 'esqlState', isLoading: false },
+          },
+          visualization: {
+            state: 'visualizationState',
+            activeId: 'testVis',
+            selectedLayerId: null,
+          },
+        })
+      );
+      updaterFn.mockClear();
+
+      store.dispatch(
+        updateDatasourceState({
+          datasourceId: 'formBased',
+          newDatasourceState: 'updatedReferenceLineState',
+        })
+      );
+
+      expect(updaterFn).toHaveBeenCalledWith(
+        'esqlState',
+        'visualizationState',
+        'testVis',
+        'textBased',
+        {
+          formBased: { isLoading: false, state: 'updatedReferenceLineState' },
+          textBased: { isLoading: false, state: 'esqlState' },
+        },
+        {}
       );
     });
 

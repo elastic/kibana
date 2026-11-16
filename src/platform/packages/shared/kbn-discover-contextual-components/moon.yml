@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/data-view-utils'
   - '@kbn/react-kibana-context-theme'
+  - '@kbn/data-source'
 tags:
   - shared-browser
   - package
@@ -45,6 +46,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

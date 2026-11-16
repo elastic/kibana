@@ -13,9 +13,6 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/dat
 import { TestProviders } from '../../../../common/mock';
 import { SEARCH_BAR_TEST_ID, SearchBarSection } from './search_bar_section';
 
-jest.mock('../../../../common/components/filters_global', () => ({
-  FiltersGlobal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
 jest.mock('../../../../common/components/search_bar', () => ({
   // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
   SiemSearchBar: () => <div data-test-subj={'attacks-page-search-bar'} />,

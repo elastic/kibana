@@ -30,7 +30,7 @@ spaceTest.describe(
       await browserAuth.loginWithCustomRole(LOOKUP_INDEX_EDITOR_ROLE);
       await pageObjects.discover.goto({ queryMode: 'esql' });
       await pageObjects.discover.waitUntilTabIsLoaded();
-      await pageObjects.discover.codeEditor.waitCodeEditorReady('ESQLEditor');
+      await pageObjects.esqlEditor.waitReady();
     });
 
     spaceTest.afterEach(async ({ esClient, scoutSpace }) => {
@@ -47,16 +47,14 @@ spaceTest.describe(
     spaceTest(
       'shows a closed-index warning instead of the create/edit actions',
       async ({ pageObjects, scoutSpace }) => {
-        const { discover } = pageObjects;
+        const { esqlEditor } = pageObjects;
         const indexName = getIndexName(scoutSpace.id);
 
-        await discover.codeEditor.setCodeEditorValue(
-          `from logstash-* | LOOKUP JOIN ${indexName} ON customer_id`
-        );
+        await esqlEditor.setQuery(`from logstash-* | LOOKUP JOIN ${indexName} ON customer_id`);
 
-        await expect(discover.codeEditor.getDecoration('lookupIndexClosedBadge')).toBeVisible();
-        await expect(discover.codeEditor.getDecoration('lookupIndexAddBadge')).toHaveCount(0);
-        await expect(discover.codeEditor.getDecoration('lookupIndexEditBadge')).toHaveCount(0);
+        await expect(esqlEditor.getDecoration('lookupIndexClosedBadge')).toBeVisible();
+        await expect(esqlEditor.getDecoration('lookupIndexAddBadge')).toHaveCount(0);
+        await expect(esqlEditor.getDecoration('lookupIndexEditBadge')).toHaveCount(0);
       }
     );
   }

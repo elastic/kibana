@@ -18,6 +18,7 @@ import type {
   UnmappedFieldsStrategy,
 } from './types';
 import type { ESQLMessage } from '../definitions/types';
+import type { NamedSubquery } from '../definitions/utils/named_subqueries';
 
 /**
  * Interface defining the methods that each ES|QL command should register.
@@ -31,13 +32,16 @@ export interface ICommandMethods<TContext = ICommandContext> {
    * @param command The parsed Abstract Syntax Tree for deeper semantic validation.
    * @param ast The full Abstract Syntax Tree of the ESQL query.
    * @param context Additional context needed for validation (e.g., available fields).
+   * @param callbacks Optional callbacks for resolving data that requires asynchronous lookups.
+   * @param query The ESQL query string, used to recover the source text of nodes when needed.
    * @returns Return an array of validation errors/warnings.
    */
   validate?: (
     command: ESQLAstAllCommands,
     ast: ESQLCommand[],
     context?: TContext,
-    callbacks?: ICommandCallbacks
+    callbacks?: ICommandCallbacks,
+    query?: string
   ) => ESQLMessage[];
 
   /**
@@ -96,9 +100,10 @@ export interface ICommandMetadata {
   type?: 'source' | 'header' | 'processing'; // Optional property to classify the command type
   isTimeseries?: boolean; // Optional property to indicate if the command is a timeseries source command
   requiresTimeseriesSource?: boolean; // Optional property to indicate the command is only available when the source command is TS
-  hiddenAfterCommands?: string[]; // Optional list of command names; this command is not suggested when any of them appear anywhere in the pipeline
+  hiddenAfterCommands?: string[]; // Optional list of command names; this command is not suggested when any of them appear before the cursor, in the pipeline or in the query header
   subquerySource?: boolean; // Optional property to indicate if the command can start a subquery expression.
   hiddenWhenQueryContainsSubqueries?: boolean; // Optional property to hide the command when the query contains subqueries.
+  docPreserving?: boolean; // Optional property to indicate each output row still maps to one input document, so a full-text WHERE before it can be reused by HIGHLIGHT.
 }
 
 /**
@@ -164,6 +169,12 @@ export interface IAdditionalFields {
   fromEnrich: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromFrom: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromPromql?: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
+  /** True when the pipeline source command is TS, so STATS output typing can apply implicit aggregates. */
+  isTimeseriesSource?: boolean;
+  /** LET bindings that FROM sources of the current pipeline can reference. */
+  namedSubqueries?: readonly NamedSubquery[];
+  /** Columns of the LET bindings already resolved in the current column computation. */
+  namedSubqueryColumns?: Map<NamedSubquery, Promise<ESQLColumnData[]>>;
 }
 
 /**

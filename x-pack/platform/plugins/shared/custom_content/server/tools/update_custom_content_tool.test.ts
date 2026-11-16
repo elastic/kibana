@@ -12,11 +12,12 @@ import {
 } from '@kbn/agent-builder-common/tools/tool_result';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../../common/panel_context_attachment';
+import { CUSTOM_CONTENT_UPDATED_UI_EVENT } from '../../common/ui_events';
 import { createUpdateCustomContentTool } from './update_custom_content_tool';
 
-const mockResolver = jest.fn();
-jest.mock('@kbn/custom-content-server', () => ({
-  createCustomContentTemplateResolver: jest.fn(() => mockResolver),
+const mockBuild = jest.fn();
+jest.mock('@kbn/agent-builder-visualizations-server', () => ({
+  buildCustomContentConfig: (params: unknown) => mockBuild(params),
 }));
 
 const makeAttachment = (data: Record<string, unknown>) => ({
@@ -31,21 +32,30 @@ const makeContext = (attachmentData?: Record<string, unknown>) => {
   // `attachments.update` resolves the new versioned attachment; the tool reads `current_version`
   // off it so the agent can address that exact version in its render tag.
   const update = jest.fn().mockResolvedValue({ ...attachment, current_version: 2 });
+  const sendUiEvent = jest.fn();
   return {
     attachments: {
       getAll: jest.fn().mockReturnValue(attachment ? [attachment] : []),
       update,
     },
+    events: { sendUiEvent },
     logger: { warn: jest.fn(), error: jest.fn() },
     esClient: {},
     modelProvider: {},
     update,
+    sendUiEvent,
     attachment,
   };
 };
 
 const callHandler = async (
-  params: { embeddable_id?: string; prompt?: string; esqlQuery?: string | null },
+  params: {
+    embeddable_id?: string;
+    prompt?: string;
+    esqlQuery?: string | null;
+    regenerateEsql?: boolean;
+    index?: string;
+  },
   attachmentData?: Record<string, unknown>
 ) => {
   const tool = createUpdateCustomContentTool();
@@ -60,7 +70,11 @@ const callHandler = async (
 describe('createUpdateCustomContentTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockResolver.mockResolvedValue({ template: '<div>generated</div>', height: 320 });
+    mockBuild.mockResolvedValue({
+      esqlQueries: ['FROM logs'],
+      template: '<div>generated</div>',
+      height: 320,
+    });
   });
 
   describe('missing attachment', () => {
@@ -93,7 +107,7 @@ describe('createUpdateCustomContentTool handler', () => {
     });
   });
 
-  describe('prompt path', () => {
+  describe('building the panel', () => {
     const existing = {
       panel_template: '<p>old</p>',
       esql_query: 'FROM logs',
@@ -101,78 +115,127 @@ describe('createUpdateCustomContentTool handler', () => {
       embeddable_id: 'p1',
     };
 
-    it('calls resolver and stores generated template', async () => {
-      const { ctx } = await callHandler({ embeddable_id: 'p1', prompt: 'Show KPIs' }, existing);
-      expect(mockResolver).toHaveBeenCalledWith(expect.objectContaining({ prompt: 'Show KPIs' }));
-      expect(ctx.update).toHaveBeenCalledWith(
+    it('hands the prompt and the stored query and template to the builder', async () => {
+      await callHandler({ embeddable_id: 'p1', prompt: 'Show KPIs', index: 'logs-*' }, existing);
+
+      expect(mockBuild).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nlQuery: 'Show KPIs',
+          index: 'logs-*',
+          esql: undefined,
+          regenerateESQL: undefined,
+          existing: { esqlQueries: ['FROM logs'], template: '<p>old</p>' },
+        })
+      );
+    });
+
+    it('hands the additional queries of the panel to the builder, to keep through the edit', async () => {
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Restyle' },
+        { ...existing, additional_esql_queries: ['FROM metrics', 'FROM traces'] }
+      );
+
+      expect(mockBuild).toHaveBeenCalledWith(
+        expect.objectContaining({
+          existing: expect.objectContaining({
+            esqlQueries: ['FROM logs', 'FROM metrics', 'FROM traces'],
+          }),
+        })
+      );
+    });
+
+    it('stores the additional queries the builder keeps, and none when it returns none', async () => {
+      mockBuild.mockResolvedValueOnce({
+        esqlQueries: ['FROM logs', 'FROM metrics'],
+        template: '<div>kept</div>',
+        height: 320,
+      });
+      const kept = await callHandler({ embeddable_id: 'p1', prompt: 'Restyle' }, existing);
+
+      expect(kept.ctx.update).toHaveBeenCalledWith(
         'att-1',
         expect.objectContaining({
-          data: expect.objectContaining({ panel_template: '<div>generated</div>' }),
+          data: expect.objectContaining({ additional_esql_queries: ['FROM metrics'] }),
         }),
         ATTACHMENT_REF_ACTOR.agent
       );
-    });
-
-    it('does not sample esqlQuery when only prompt is provided (style change)', async () => {
-      await callHandler({ embeddable_id: 'p1', prompt: 'Make colors more vivid' }, existing);
-      expect(mockResolver).toHaveBeenCalledWith(expect.objectContaining({ esqlQuery: undefined }));
-    });
-
-    it('passes existing template as context to the resolver', async () => {
-      await callHandler({ embeddable_id: 'p1', prompt: 'Make colors more vivid' }, existing);
-      expect(mockResolver).toHaveBeenCalledWith(
-        expect.objectContaining({ existingTemplate: '<p>old</p>' })
+      expect(kept.ctx.sendUiEvent).toHaveBeenCalledWith(
+        CUSTOM_CONTENT_UPDATED_UI_EVENT,
+        expect.objectContaining({
+          data: expect.objectContaining({ additional_esql_queries: ['FROM metrics'] }),
+        })
       );
+
+      const none = await callHandler({ embeddable_id: 'p1', prompt: 'Restyle' }, existing);
+      const [, { data }] = none.ctx.update.mock.calls[0];
+      expect(data).not.toHaveProperty('additional_esql_queries');
     });
 
-    it('samples esqlQuery when query is also changing', async () => {
-      await callHandler(
-        { embeddable_id: 'p1', prompt: 'Show revenue by region', esqlQuery: 'FROM metrics' },
-        existing
-      );
-      expect(mockResolver).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: 'FROM metrics' })
-      );
-    });
+    it('stores the template and the query the builder returns', async () => {
+      mockBuild.mockResolvedValue({
+        esqlQueries: ['FROM logs | STATS count = COUNT(*) BY host'],
+        template: '<div>generated</div>',
+        height: 320,
+      });
 
-    it('returns error when resolver throws', async () => {
-      mockResolver.mockRejectedValue(new Error('LLM failure'));
-      const { results } = await callHandler({ embeddable_id: 'p1', prompt: 'Show KPIs' }, existing);
-      expect(results[0].type).toBe(ToolResultType.error);
-      const result = results[0] as ToolResult;
-      if (!isErrorResult(result)) throw new Error('Expected error result');
-      expect(result.data.message).toMatch(/LLM failure/);
-    });
-  });
+      const { ctx } = await callHandler({ embeddable_id: 'p1', prompt: 'Show KPIs' }, existing);
 
-  describe('query-only path', () => {
-    const existing = {
-      panel_template: '<p>old</p>',
-      esql_query: 'FROM logs',
-      panel_title: 'My Panel',
-      embeddable_id: 'p1',
-    };
-
-    it('updates esqlQuery and preserves existing template when no prompt', async () => {
-      const { ctx } = await callHandler(
-        { embeddable_id: 'p1', esqlQuery: 'FROM metrics' },
-        existing
-      );
-      expect(mockResolver).not.toHaveBeenCalled();
       expect(ctx.update).toHaveBeenCalledWith(
         'att-1',
         expect.objectContaining({
           data: expect.objectContaining({
-            panel_template: '<p>old</p>',
-            esql_query: 'FROM metrics',
+            panel_template: '<div>generated</div>',
+            esql_query: 'FROM logs | STATS count = COUNT(*) BY host',
           }),
         }),
         ATTACHMENT_REF_ACTOR.agent
       );
     });
 
-    it('clears esqlQuery when null is passed', async () => {
+    it('forwards regenerateEsql and a supplied query', async () => {
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Also show the error count', regenerateEsql: true },
+        existing
+      );
+      await callHandler({ embeddable_id: 'p1', esqlQuery: 'FROM metrics-*' }, existing);
+
+      expect(mockBuild).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ regenerateESQL: true })
+      );
+      expect(mockBuild).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ nlQuery: undefined, esql: 'FROM metrics-*' })
+      );
+    });
+
+    it('lets the builder read the control values the panel was sent with', async () => {
+      const esqlVariables = [{ key: 'host', value: 'web-1', type: 'values' }];
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Show hits for the selected host' },
+        { ...existing, esql_variables: esqlVariables }
+      );
+
+      const { resolveEsqlVariables } = mockBuild.mock.calls[0][0];
+      expect(await resolveEsqlVariables(['FROM logs'])).toEqual(esqlVariables);
+    });
+
+    it('gives the builder no control values when the panel was sent with none', async () => {
+      await callHandler({ embeddable_id: 'p1', prompt: 'Show KPIs' }, existing);
+
+      expect(mockBuild.mock.calls[0][0].resolveEsqlVariables).toBeUndefined();
+    });
+
+    it('forwards esqlQuery: null, which removes the query, and stores none', async () => {
+      mockBuild.mockResolvedValue({
+        esqlQueries: [],
+        template: '<p>static</p>',
+        height: 200,
+      });
+
       const { ctx } = await callHandler({ embeddable_id: 'p1', esqlQuery: null }, existing);
+
+      expect(mockBuild).toHaveBeenCalledWith(expect.objectContaining({ esql: null }));
       expect(ctx.update).toHaveBeenCalledWith(
         'att-1',
         expect.objectContaining({
@@ -180,6 +243,37 @@ describe('createUpdateCustomContentTool handler', () => {
         }),
         ATTACHMENT_REF_ACTOR.agent
       );
+    });
+
+    it('passes no template when the panel has none stored', async () => {
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Show KPIs' },
+        {
+          panel_template: '',
+          embeddable_id: 'p1',
+        }
+      );
+
+      expect(mockBuild).toHaveBeenCalledWith(
+        expect.objectContaining({ existing: { esqlQueries: [], template: undefined } })
+      );
+    });
+
+    it('returns an error with the message and stores nothing when the builder fails', async () => {
+      mockBuild.mockRejectedValue(
+        new Error('Could not generate an ES|QL query for this panel: no suitable index')
+      );
+
+      const { results, ctx } = await callHandler(
+        { embeddable_id: 'p1', prompt: 'Show hosts', regenerateEsql: true },
+        existing
+      );
+
+      const result = results[0] as ToolResult;
+      if (!isErrorResult(result)) throw new Error('Expected error result');
+      expect(result.data.message).toContain('Could not generate an ES|QL query');
+      expect(result.data.message).toContain('no suitable index');
+      expect(ctx.update).not.toHaveBeenCalled();
     });
   });
 
@@ -228,6 +322,17 @@ describe('createUpdateCustomContentTool handler', () => {
       );
     });
 
+    it('sends a custom content updated UI event with the new panel data', async () => {
+      const { ctx } = await callHandler({ embeddable_id: 'p1', prompt: 'Show KPIs' }, existing);
+      expect(ctx.sendUiEvent).toHaveBeenCalledWith(CUSTOM_CONTENT_UPDATED_UI_EVENT, {
+        attachmentId: 'att-1',
+        data: expect.objectContaining({
+          panel_template: '<div>generated</div>',
+          embeddable_id: 'p1',
+        }),
+      });
+    });
+
     it('omits the version when the update produced no new one', async () => {
       const tool = createUpdateCustomContentTool();
       const ctx = makeContext(existing);
@@ -244,6 +349,7 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(ret.results[0].data).toEqual(
         expect.objectContaining({ attachment_id: 'att-1', version: undefined })
       );
+      expect(ctx.sendUiEvent).not.toHaveBeenCalled();
     });
   });
 
@@ -274,6 +380,7 @@ describe('createUpdateCustomContentTool handler', () => {
       const update = jest.fn().mockResolvedValue({ ...panelB, current_version: 2 });
       const ctx = {
         attachments: { getAll: jest.fn().mockReturnValue([panelA, panelB]), update },
+        events: { sendUiEvent: jest.fn() },
         logger: { warn: jest.fn(), error: jest.fn() },
         esClient: {},
         modelProvider: {},

@@ -18,7 +18,11 @@ import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import { getAgentPolicySavedObjectType } from '../agent_policy';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
-import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
+import {
+  AGENTLESS_UNENROLLED_REASON,
+  ALL_SPACES_ID,
+  SO_SEARCH_LIMIT,
+} from '../../../common/constants';
 import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
 import {
@@ -47,11 +51,32 @@ import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
+
 export const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
 export const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
 
 export const includeUnenrolled = (kuery?: string) =>
   kuery?.toLowerCase().includes('status:*') || kuery?.toLowerCase().includes('status:unenrolled');
+
+/**
+ * Whether the kuery filters on the `status` field, which only exists as a runtime field. Parsed from the
+ * KQL with the same prefixes removed as in the query (`fleet-agents.status`), so that `status : inactive` is
+ * found too. Falls back to a text search for a kuery that does not parse.
+ */
+function kueryReferencesStatusField(kuery?: string): boolean {
+  if (!kuery) {
+    return false;
+  }
+  const referencesStatus = (node?: KueryNode): boolean =>
+    node?.type === 'function' &&
+    ((node.arguments?.[0]?.type === 'literal' && node.arguments[0].value === 'status') ||
+      (node.arguments ?? []).some(referencesStatus));
+  try {
+    return referencesStatus(fromKueryExpression(removeSOAttributes(kuery)));
+  } catch (error) {
+    return kuery.toLowerCase().includes('status:');
+  }
+}
 
 export function _joinFilters(
   filters: Array<string | undefined | KueryNode>
@@ -341,7 +366,7 @@ export async function getAgentsByKuery(
 
   // Status kuery (`status:inactive`, `status:unenrolled`, …) is only queryable with the
   // runtime field. Force it on when the caller already referenced `status`.
-  const kueryReferencesStatus = Boolean(kuery?.toLowerCase().includes('status:'));
+  const kueryReferencesStatus = kueryReferencesStatusField(kuery);
   const shouldIncludeStatusRuntimeField =
     includeStatusRuntimeField || getStatusSummary || kueryReferencesStatus;
 
@@ -426,11 +451,15 @@ export async function getAgentsByKuery(
       sort,
       query: (() => {
         const baseQuery = kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
-        if (!agentlessExcludeFilter) return baseQuery;
+        if (showAgentless !== false) return baseQuery;
+        // Agents of already deleted agentless policies are not matched by the policy id filter.
         return {
           bool: {
             ...(baseQuery ? { filter: [baseQuery] } : {}),
-            must_not: [agentlessExcludeFilter],
+            must_not: [
+              ...(agentlessExcludeFilter ? [agentlessExcludeFilter] : []),
+              { term: { unenrolled_reason: AGENTLESS_UNENROLLED_REASON } },
+            ],
           },
         };
       })(),
@@ -561,6 +590,15 @@ export async function fetchAllAgentsByKuery(
     _source?: estypes.SearchRequest['_source'];
     /** Overrides the ES `fields` param. Defaults to all runtime field keys. */
     fetchFields?: string[];
+    /**
+     * When false, skip the agent-status runtime field and the inactivity-timeout SO scan it
+     * requires. Defaults to true. Forced on when the kuery references `status`.
+     *
+     * Opting out replaces the `NOT status:inactive` filter of `showInactive: false` with the
+     * stored `active:true` filter, so agents that are inactive by timeout are no longer excluded
+     * (unenrolled agents are). `Agent.status` is not populated.
+     */
+    includeStatusRuntimeField?: boolean;
   }
 ): Promise<AsyncIterable<Agent[]>> {
   const {
@@ -570,19 +608,22 @@ export async function fetchAllAgentsByKuery(
     sortOrder = 'desc',
     spaceId,
     showInactive = true,
+    includeStatusRuntimeField = true,
   } = options;
+  const shouldIncludeStatusRuntimeField =
+    includeStatusRuntimeField || kueryReferencesStatusField(kuery);
 
   const filters = await getSpaceAwarenessFilterForAgents(spaceId);
   if (kuery && kuery !== '') {
     filters.push(kuery);
   }
   if (showInactive === false) {
-    filters.push(ACTIVE_AGENT_CONDITION);
+    filters.push(shouldIncludeStatusRuntimeField ? ACTIVE_AGENT_CONDITION : 'active:true');
   }
   const kueryNode = _joinFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const runtimeFields = {
-    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...(shouldIncludeStatusRuntimeField ? await buildAgentStatusRuntimeField(soClient) : {}),
     ...(appContextService.getExperimentalFeatures().enableOpAMP
       ? PIPELINE_CONFIG_RUNTIME_FIELD
       : {}),
@@ -606,7 +647,9 @@ export async function fetchAllAgentsByKuery(
         ...query,
       },
       resultsMapper: (data): Agent[] => {
-        return data.hits.hits.map((hit) => searchHitToAgent(hit));
+        return data.hits.hits.map((hit) =>
+          searchHitToAgent(hit, { requireStatusRuntimeField: shouldIncludeStatusRuntimeField })
+        );
       },
     });
   } catch (err) {

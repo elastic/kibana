@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import { of } from 'rxjs';
 import type { ISearchGeneric, IKibanaSearchResponse } from '@kbn/search-types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -13,6 +14,7 @@ import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getStartEndParams,
   getNamedParams,
+  getEsqlSearchParams,
   getESQLQueryColumnsRaw,
   getESQLQueryColumns,
   getESQLResults,
@@ -88,6 +90,30 @@ describe('run query helpers', () => {
       expect(params).toHaveLength(2);
       expect(params[0]).toHaveProperty('_tstart');
       expect(params[1]).toHaveProperty('_tend');
+    });
+
+    it('should return the geo precision params only when given and used', () => {
+      const geotileQuery = 'FROM foo | STATS BY ST_GEOTILE(location, ?_geotile_precision)';
+      const geohexQuery = 'FROM foo | STATS BY ST_GEOHEX(location, ?_geohex_precision)';
+      const geohashQuery = 'FROM foo | STATS BY ST_GEOHASH(location, ?_geohash_precision)';
+      const geoPrecision = { zoom: 4.5 };
+      expect(getNamedParams(geotileQuery, undefined, [], geoPrecision)).toEqual([
+        { _geotile_precision: 8 },
+      ]);
+      expect(getNamedParams(geohexQuery, undefined, [], geoPrecision)).toEqual([
+        { _geohex_precision: 4 },
+      ]);
+      expect(getNamedParams(geohashQuery, undefined, [], geoPrecision)).toEqual([
+        { _geohash_precision: 3 },
+      ]);
+      expect(
+        getNamedParams(geotileQuery, undefined, [], {
+          ...geoPrecision,
+          resolution: GRID_RESOLUTION.COARSE,
+        })
+      ).toEqual([{ _geotile_precision: 7 }]);
+      expect(getNamedParams(geotileQuery)).toEqual([]);
+      expect(getNamedParams('FROM foo', undefined, [], geoPrecision)).toEqual([]);
     });
 
     it('should return only the variables used in the query', () => {
@@ -243,6 +269,31 @@ describe('run query helpers', () => {
       );
     });
 
+    it('getESQLQueryColumnsRaw binds the geo precision params so the column lookup is valid', async () => {
+      search.mockReturnValue(
+        of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
+      );
+
+      await getESQLQueryColumnsRaw({
+        esqlQuery:
+          'FROM foo | STATS BY ST_GEOTILE(location, ?_geotile_precision), ST_GEOHEX(location, ?_geohex_precision), ST_GEOHASH(location, ?_geohash_precision)',
+        search,
+      });
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            params: [
+              { _geotile_precision: 3 },
+              { _geohex_precision: 2 },
+              { _geohash_precision: 1 },
+            ],
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
     it('getESQLQueryColumnsRaw requests column_metadata when includeColumnMetadata is true', async () => {
       search.mockReturnValue(
         of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
@@ -326,5 +377,84 @@ describe('run query helpers', () => {
 
       expect(columns[0].meta.esMeta).toEqual({ approximation: true });
     });
+  });
+
+  describe('getESQLQueryColumnsRaw project routing', () => {
+    const mockSearch: jest.MockedFunction<ISearchGeneric> = jest.fn();
+
+    beforeEach(() => {
+      mockSearch.mockReset();
+      mockSearch.mockReturnValue(
+        of({
+          isRunning: false,
+          rawResponse: { columns: [], values: [] },
+        } as unknown as IKibanaSearchResponse<ESQLSearchResponse>)
+      );
+    });
+
+    it('forwards the project routing to the search options', async () => {
+      await getESQLQueryColumnsRaw({
+        esqlQuery: 'FROM foo',
+        search: mockSearch,
+        projectRouting: '_alias:*',
+      });
+
+      expect(mockSearch).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ projectRouting: '_alias:*' })
+      );
+    });
+
+    it('does not set a project routing by default', async () => {
+      await getESQLQueryColumnsRaw({ esqlQuery: 'FROM foo', search: mockSearch });
+
+      expect(mockSearch).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.not.objectContaining({ projectRouting: expect.anything() })
+      );
+    });
+  });
+});
+
+describe('getEsqlSearchParams', () => {
+  const query = 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend';
+  const timeRange = { from: '2024-01-01T00:00:00.000Z', to: '2024-01-02T00:00:00.000Z' };
+
+  it('returns only the query when nothing else applies', () => {
+    expect(getEsqlSearchParams({ esqlQuery: 'FROM logs' })).toEqual({ query: 'FROM logs' });
+  });
+
+  it('adds the filter, the named params, the time zone and the column metadata setting', () => {
+    const filter = { bool: { filter: [] } };
+
+    const params = getEsqlSearchParams({
+      esqlQuery: query,
+      filter,
+      timeRange,
+      timezone: 'UTC',
+      includeColumnMetadata: true,
+      dropNullColumns: true,
+    });
+
+    expect(params).toEqual({
+      filter,
+      query,
+      dropNullColumns: true,
+      params: getNamedParams(query, timeRange),
+      time_zone: 'UTC',
+      settings: { column_metadata: true },
+    });
+  });
+
+  it('only includes the named params the query uses', () => {
+    const params = getEsqlSearchParams({
+      esqlQuery: 'FROM logs | WHERE host == ?host',
+      variables: [
+        { key: 'host', value: 'a', type: ESQLVariableType.VALUES },
+        { key: 'unused', value: 'b', type: ESQLVariableType.VALUES },
+      ],
+    });
+
+    expect(params.params).toEqual([{ host: 'a' }]);
   });
 });

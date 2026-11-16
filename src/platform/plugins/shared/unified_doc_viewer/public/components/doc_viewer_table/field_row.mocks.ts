@@ -20,7 +20,7 @@ export const buildFieldRowMock = (args: Partial<ConstructorParameters<typeof Fie
     dataView: buildDataViewMock({}),
     fieldFormats: fieldFormatsMock,
     isPinned: false,
-    columnsMeta: undefined,
+    dataSource: undefined,
   };
 
   return new FieldRow({

@@ -10,24 +10,21 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import { useCanReadConnectors } from '../../hooks/use_can_read_connectors';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useSourcesEditor } from '../../hooks/use_sources_editor';
-import { toSourceType } from '../../utils/sources';
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
-import { AiIndexDetailPanelEmptyPrompt } from './ai_index_detail_panel_empty_prompt';
+import { SourceRows } from './source_rows';
 import { SourcePicker } from '../source_picker';
-import { getSourceDisplay } from '../source_display';
-import { SourceRow } from '../source_row';
+import { SourceTypePanel } from '../source_type_panel';
 
 interface SourcesPanelProps {
   isLoading: boolean;
@@ -38,102 +35,93 @@ interface SourcesPanelProps {
 
 export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: SourcesPanelProps) => {
   const sources = useMemo(() => aiIndex?.sources ?? [], [aiIndex?.sources]);
-  const { startEditing, editing } = useSourcesEditor({ aiIndex, onSaved });
-  const isEditingActive = editing !== undefined && !editing.isSaving;
-  const hasSources = sources.length > 0;
+  const { selectedSources, setSelectedSources, hasChanges, isSaving, save, cancel } =
+    useSourcesEditor({ aiIndex: isManaged ? undefined : aiIndex, onSaved });
 
-  const hasConnectorSources = useMemo(
-    () => sources.some((source) => source.type === 'connector'),
+  const esqlSources = useMemo(() => sources.filter((source) => source.type === 'esql'), [sources]);
+  const connectorSources = useMemo(
+    () => sources.filter((source) => source.type === 'connector'),
     [sources]
   );
+
+  const canReadConnectors = useCanReadConnectors();
   const { connectorNameById, connectorActionTypeById } = useDataConnectors({
-    enabled: hasConnectorSources && !isEditingActive,
+    enabled: isManaged && connectorSources.length > 0 && canReadConnectors,
   });
 
-  const isSaving = editing?.isSaving ?? false;
-
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="contextSourcesPanel">
-      <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
-        {/* minWidth: 0 keeps the description from running underneath the actions column */}
-        <EuiFlexItem css={{ minWidth: 0 }}>
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.sources.title"
-                defaultMessage="Sources"
-              />
-            </h2>
-          </EuiTitle>
-          <AiIndexDetailPanelDescription>
-            {!isLoading && !hasSources ? (
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.sources.descriptionEmpty"
-                defaultMessage="Add the data that automations should analyze when generating Knowledge Indicators."
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.sources.description"
-                defaultMessage="Data that automations should analyze when generating Knowledge Indicators."
-              />
-            )}
-          </AiIndexDetailPanelDescription>
-        </EuiFlexItem>
-        {!isEditingActive && !isManaged && !isLoading && aiIndex !== undefined && (
-          <EuiFlexItem grow={false}>
-            {hasSources ? (
-              <EuiButtonEmpty
-                size="s"
-                iconType="pencil"
-                onClick={startEditing}
-                isLoading={isSaving}
-                data-test-subj="contextEditSourcesButton"
-                {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
-                  action: CONTEXT_ENGINE_UI_EBT.action.sources.EDIT,
-                })}
-              >
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.sources.editButton"
-                  defaultMessage="Edit"
-                />
-              </EuiButtonEmpty>
-            ) : (
-              <EuiButtonEmpty
-                size="s"
-                iconType="plusCircle"
-                onClick={startEditing}
-                isLoading={isSaving}
-                data-test-subj="contextAddSourcesButton"
-                {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
-                  action: CONTEXT_ENGINE_UI_EBT.action.sources.EDIT,
-                })}
-              >
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.sources.addButton"
-                  defaultMessage="Add sources"
-                />
-              </EuiButtonEmpty>
-            )}
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+    <div data-test-subj="contextSourcesPanel">
+      <AiIndexDetailPanelDescription>
+        <FormattedMessage
+          id="xpack.contextEngine.aiIndexDetail.sources.description"
+          defaultMessage="Data that automations should analyze when generating Knowledge Indicators."
+        />
+      </AiIndexDetailPanelDescription>
       <EuiSpacer size="m" />
-      {isLoading ? (
-        <EuiSkeletonText lines={2} data-test-subj="contextAiIndexSourcesLoading" />
-      ) : isEditingActive ? (
+      {isLoading && <EuiSkeletonText lines={2} data-test-subj="contextAiIndexSourcesLoading" />}
+      {!isLoading && isManaged && (
+        <>
+          <SourceTypePanel
+            title={
+              <FormattedMessage
+                id="xpack.contextEngine.sourcePicker.tabs.elasticsearch"
+                defaultMessage="Elasticsearch data"
+              />
+            }
+            badgeCount={esqlSources.length}
+            data-test-subj="contextElasticsearchDataPanel"
+          >
+            <SourceRows
+              sources={esqlSources}
+              connectorNameById={connectorNameById}
+              connectorActionTypeById={connectorActionTypeById}
+              emptyMessage={
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.sources.elasticsearchDataEmpty"
+                  defaultMessage="No Elasticsearch data sources."
+                />
+              }
+            />
+          </SourceTypePanel>
+          <EuiSpacer size="m" />
+          <SourceTypePanel
+            title={
+              <FormattedMessage
+                id="xpack.contextEngine.sourcePicker.tabs.connectors"
+                defaultMessage="Connectors"
+              />
+            }
+            badgeCount={connectorSources.length}
+            data-test-subj="contextConnectorsPanel"
+          >
+            <SourceRows
+              sources={connectorSources}
+              connectorNameById={connectorNameById}
+              connectorActionTypeById={connectorActionTypeById}
+              emptyMessage={
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.sources.connectorsEmpty"
+                  defaultMessage="No connectors."
+                />
+              }
+            />
+          </SourceTypePanel>
+        </>
+      )}
+      {!isLoading && !isManaged && (
         <div data-test-subj="contextEditSourcesInlineEditor">
           <SourcePicker
-            selectedSources={editing.selectedSources}
-            onChange={editing.setSelectedSources}
+            selectedSources={selectedSources}
+            onChange={setSelectedSources}
+            disabled={isSaving}
           />
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
-                onClick={editing.cancel}
+                onClick={cancel}
+                isDisabled={!hasChanges || isSaving}
                 data-test-subj="contextEditSourcesCancelButton"
                 {...getEbtProps({
                   element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
@@ -150,9 +138,9 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
               <EuiButton
                 fill
                 size="s"
-                onClick={editing.save}
-                isLoading={editing.isSaving}
-                isDisabled={!editing.hasChanges}
+                onClick={save}
+                isLoading={isSaving}
+                isDisabled={!hasChanges || isSaving}
                 data-test-subj="contextEditSourcesDoneButton"
                 {...getEbtProps({
                   element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
@@ -167,47 +155,7 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
-      ) : sources.length === 0 ? (
-        <AiIndexDetailPanelEmptyPrompt
-          iconType="tablePlus"
-          dataTestSubj="contextAiIndexSourcesEmpty"
-          title={
-            isManaged ? (
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.sources.emptyManaged"
-                defaultMessage="This AI index has no sources."
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.sources.empty"
-                defaultMessage="No sources yet"
-              />
-            )
-          }
-        />
-      ) : (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {sources.map((source) => {
-            const { label, typeLabel, icon, content } = getSourceDisplay(
-              toSourceType(source.type),
-              source.value,
-              { connectorNameById, connectorActionTypeById }
-            );
-            return (
-              <EuiFlexItem key={`${source.type}-${source.value}`}>
-                <SourceRow
-                  label={label}
-                  typeLabel={typeLabel}
-                  icon={icon}
-                  data-test-subj="contextAiIndexSourceRow"
-                >
-                  {content}
-                </SourceRow>
-              </EuiFlexItem>
-            );
-          })}
-        </EuiFlexGroup>
       )}
-    </EuiPanel>
+    </div>
   );
 };
