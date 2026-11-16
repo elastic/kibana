@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/alerting-v2-schemas'
   - '@kbn/cloud-plugin'
-  - '@kbn/dev-cli-runner'
   - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/core-di'
@@ -30,7 +29,6 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/nightshift-shared'
   - '@kbn/spaces-plugin'
-  - '@kbn/setup-node-env'
 tags:
   - plugin
   - prod
@@ -41,6 +39,5 @@ fileGroups:
   src:
     - common/**/*
     - server/**/*
-    - scripts/**/*
     - '!target/**/*'
 tasks: {}

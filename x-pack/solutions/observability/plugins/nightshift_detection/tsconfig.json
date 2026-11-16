@@ -3,12 +3,11 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*", "scripts/**/*"],
+  "include": ["common/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/alerting-v2-schemas",
     "@kbn/cloud-plugin",
-    "@kbn/dev-cli-runner",
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/core-di",
@@ -18,7 +17,6 @@
     "@kbn/core-http-server",
     "@kbn/licensing-plugin",
     "@kbn/nightshift-shared",
-    "@kbn/spaces-plugin",
-    "@kbn/setup-node-env"
+    "@kbn/spaces-plugin"
   ]
 }
