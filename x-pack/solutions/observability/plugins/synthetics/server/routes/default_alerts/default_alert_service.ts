@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
@@ -149,13 +151,14 @@ export class DefaultRuleService {
     };
   }
 
-  async updateStatusRule(enabled?: boolean) {
+  async updateStatusRule(enabled?: boolean, previousDefaultConnectors?: string[]) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
       return this.upsertDefaultRule(
         SYNTHETICS_STATUS_RULE,
         `Synthetics status internal rule`,
-        minimumRuleInterval
+        minimumRuleInterval,
+        previousDefaultConnectors
       );
     } else {
       const rulesClient = await (await this.context.alerting)?.getRulesClient();
@@ -165,13 +168,14 @@ export class DefaultRuleService {
     }
   }
 
-  async updateTlsRule(enabled?: boolean) {
+  async updateTlsRule(enabled?: boolean, previousDefaultConnectors?: string[]) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
       return this.upsertDefaultRule(
         SYNTHETICS_TLS_RULE,
         `Synthetics internal TLS rule`,
-        minimumRuleInterval
+        minimumRuleInterval,
+        previousDefaultConnectors
       );
     } else {
       const rulesClient = await (await this.context.alerting)?.getRulesClient();
@@ -181,14 +185,31 @@ export class DefaultRuleService {
     }
   }
 
-  async upsertDefaultRule(ruleType: DefaultRuleType, name: string, interval: string) {
+  async upsertDefaultRule(
+    ruleType: DefaultRuleType,
+    name: string,
+    interval: string,
+    previousDefaultConnectors?: string[]
+  ) {
     const rulesClient = await (await this.context.alerting)?.getRulesClient();
 
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
       const currentIntervalInMs = parseDuration(alert.schedule.interval);
       const minimumIntervalInMs = parseDuration(interval);
-      const actions = await this.getAlertActions(ruleType);
+      const settings = await this.getSettings();
+      const settingsManagedConnectorIds = new Set([
+        ...(previousDefaultConnectors ?? []),
+        ...(settings?.defaultConnectors ?? []),
+      ]);
+      // Only settings-managed connectors are rebuilt; actions users added on the rule are kept.
+      const userAddedActions = alert.actions
+        .filter(
+          (action): action is RuleAction =>
+            'group' in action && !settingsManagedConnectorIds.has(action.id)
+        )
+        .map((action) => omit(action, 'actionTypeId'));
+      const actions = [...userAddedActions, ...(await this.getAlertActions(ruleType))];
       const {
         actions: actionsFromRules = [],
         systemActions = [],

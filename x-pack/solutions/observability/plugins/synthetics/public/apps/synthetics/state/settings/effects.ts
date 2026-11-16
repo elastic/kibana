@@ -69,7 +69,11 @@ export function* setDynamicSettingsEffect() {
           JSON.stringify(prevAlertSettings) !== JSON.stringify(nextAlertSettings);
 
         if (alertSettingsChanged) {
-          yield put(updateDefaultAlertingAction.get());
+          yield put(
+            updateDefaultAlertingAction.get({
+              previousDefaultConnectors: prevSettings?.defaultConnectors,
+            })
+          );
         }
 
         yield put(setDynamicSettingsAction.success(action.payload));

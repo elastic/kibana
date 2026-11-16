@@ -69,18 +69,21 @@ describe('setDynamicSettingsEffect', () => {
     expect(gen.next().done).toBe(true);
   });
 
-  it('refreshes default alert rules when alerting fields change', () => {
+  it('refreshes default alert rules with the previous default connectors when alerting fields change', () => {
+    const previousSettings: DynamicSettings = { ...savedSettings, defaultConnectors: ['old-id'] };
     const payload: DynamicSettings = {
-      ...savedSettings,
+      ...previousSettings,
       certAgeThreshold: 365,
     };
     const gen = getSetDynamicSettingsWorker()(setDynamicSettingsAction.get(payload));
 
     expect(gen.next().value).toEqual(select(selectDynamicSettings));
-    expect(gen.next({ settings: savedSettings }).value).toEqual(
+    expect(gen.next({ settings: previousSettings }).value).toEqual(
       call(setDynamicSettings, { settings: payload })
     );
-    expect(gen.next().value).toEqual(put(updateDefaultAlertingAction.get()));
+    expect(gen.next().value).toEqual(
+      put(updateDefaultAlertingAction.get({ previousDefaultConnectors: ['old-id'] }))
+    );
     expect(gen.next().value).toEqual(put(setDynamicSettingsAction.success(payload)));
     expect(gen.next().done).toBe(true);
   });

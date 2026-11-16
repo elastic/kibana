@@ -26,9 +26,14 @@ export const enableDefaultAlertingSilentlyAction = createAsyncAction<void, DEFAU
   'enableDefaultAlertingSilentlyAction'
 );
 
-export const updateDefaultAlertingAction = createAsyncAction<void, DEFAULT_ALERT_RESPONSE>(
-  'updateDefaultAlertingAction'
-);
+export interface UpdateDefaultAlertingPayload {
+  previousDefaultConnectors?: string[];
+}
+
+export const updateDefaultAlertingAction = createAsyncAction<
+  UpdateDefaultAlertingPayload | void,
+  DEFAULT_ALERT_RESPONSE
+>('updateDefaultAlertingAction');
 
 export const inspectStatusRuleAction = createAsyncAction<
   StatusRuleParamsProps['ruleParams'],
