@@ -61,7 +61,7 @@ export const parseLocalDevSecret = (value: unknown, vaultPath: string): SandboxC
   return { ...parseSandboxUrl(sandbox.url), apiKey: sandbox.apiKey };
 };
 
-/** Reads the `nightshiftOrcaEs` block of the general evals secret. */
+/** Reads the `nightshiftOrcaEs` block of the Nightshift evals secret. */
 export const parseOrcaSecret = (value: unknown, vaultPath: string): OrcaConnection => {
   const orca = isRecord(value) ? value.nightshiftOrcaEs : undefined;
   if (!isRecord(orca) || !nonEmptyString(orca.url) || !nonEmptyString(orca.apiKey)) {

@@ -23134,7 +23134,6 @@ paths:
                           value: ai-index-ds-customer-support
                         id: customer_support
                         managed: false
-                        memory_enabled: true
                         sources:
                           - type: esql
                             value: FROM support-cases | LIMIT 100
@@ -23268,9 +23267,6 @@ paths:
                         managed:
                           description: Whether the AI Index is managed by a plugin and therefore immutable.
                           type: boolean
-                        memory_enabled:
-                          description: Whether this AI Index accepts memory writes.
-                          type: boolean
                         sources:
                           description: Additional sources that provide context for the AI Index.
                           items:
@@ -23317,7 +23313,6 @@ paths:
                       required:
                         - id
                         - managed
-                        - memory_enabled
                         - date_created
                         - date_modified
                         - dest
@@ -23595,7 +23590,8 @@ paths:
                   minLength: 1
                   type: string
                 memory_enabled:
-                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  deprecated: true
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted. Deprecated and ignored in Serverless and in Elastic 9.7 and later.
                   type: boolean
                 sources:
                   default: []
@@ -24306,7 +24302,6 @@ paths:
                       value: ai-index-ds-customer-support
                     id: customer_support
                     managed: false
-                    memory_enabled: true
                     sources:
                       - type: esql
                         value: FROM support-cases | LIMIT 100
@@ -24439,9 +24434,6 @@ paths:
                   managed:
                     description: Whether the AI Index is managed by a plugin and therefore immutable.
                     type: boolean
-                  memory_enabled:
-                    description: Whether this AI Index accepts memory writes.
-                    type: boolean
                   sources:
                     description: Additional sources that provide context for the AI Index.
                     items:
@@ -24488,7 +24480,6 @@ paths:
                 required:
                   - id
                   - managed
-                  - memory_enabled
                   - date_created
                   - date_modified
                   - dest
@@ -24739,7 +24730,8 @@ paths:
                   required:
                     - enabled
                 memory_enabled:
-                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  deprecated: true
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted. Deprecated and ignored in Serverless and in Elastic 9.7 and later.
                   type: boolean
                 sources:
                   default: []
@@ -204450,12 +204442,22 @@ components:
                   example: true
                   type: boolean
                 path:
-                  description: The full file path to retrieve from the endpoint.
+                  description: The full file path to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both.
                   maxLength: 4096
                   minLength: 1
                   type: string
-              required:
-                - path
+                paths:
+                  description: The list of file paths to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both. Valid for the Elastic Defend Endpoint agent type only, and requires an Endpoint that supports the `get_file_multi_path` capability.
+                  example:
+                    - /var/log/syslog
+                    - /var/log/auth.log
+                  items:
+                    maxLength: 4096
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  minItems: 1
+                  type: array
           required:
             - parameters
     Security_Endpoint_Management_API_GetProcessesRouteRequestBody:
