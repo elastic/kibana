@@ -19,6 +19,7 @@ import type {
   ProcessorStatsView,
   SourceStatsView,
   StatsWindow,
+  UnitStatsClient,
 } from '../../../services/unit_stats_client/types';
 import { createUnitStatsClient } from '../../../services/unit_stats_client/unit_stats_client';
 import { getSlotStats, type SlotStats } from './get_slot_stats';
@@ -87,6 +88,11 @@ export interface StatsManagerProviderProps {
   pollIntervalMs?: number;
   /** The shared time state. Omit it for a view without a picker, such as the Map. */
   timeState$?: Observable<unknown>;
+  /**
+   * Where the stats come from. Omit it for the real client of the unit. Stories and tests pass one
+   * that answers from fixtures.
+   */
+  client?: UnitStatsClient;
 }
 
 /**
@@ -98,6 +104,7 @@ export const StatsManagerProvider = ({
   getWindow = getDefaultWindow,
   pollIntervalMs,
   timeState$ = NEVER,
+  client,
   children,
 }: React.PropsWithChildren<StatsManagerProviderProps>) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
@@ -106,11 +113,11 @@ export const StatsManagerProvider = ({
     () =>
       statsManagerMachine.provide(
         createStatsManagerImplementations({
-          client: createUnitStatsClient({ streamsRepositoryClient, unitId }),
+          client: client ?? createUnitStatsClient({ streamsRepositoryClient, unitId }),
           timeState$,
         })
       ),
-    [streamsRepositoryClient, unitId, timeState$]
+    [client, streamsRepositoryClient, unitId, timeState$]
   );
 
   return (
