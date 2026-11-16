@@ -384,6 +384,14 @@ export const RUN_WORKFLOW_SELECTION_TOO_LARGE = (maxItems: number) =>
 export const RUN_WORKFLOW_SELECTION_FAILED = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.workflow.selectionFailed',
   {
-    defaultMessage: 'Could not load the selected alerts. Try again.',
+    defaultMessage: 'Could not load the selected items. Try again.',
+  }
+);
+
+export const RUN_WORKFLOW_SELECT_ALL_UNSUPPORTED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.selectAllUnsupported',
+  {
+    defaultMessage:
+      "A workflow can't run on all items in this table at once. Select items on the current page instead.",
   }
 );

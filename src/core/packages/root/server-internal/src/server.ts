@@ -27,7 +27,7 @@ import { PrebootService } from '@kbn/core-preboot-server-internal';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import { HttpService } from '@kbn/core-http-server-internal';
 import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal';
-import { MetricsService } from '@kbn/core-metrics-server-internal';
+import { EventLoopWatchdogService, MetricsService } from '@kbn/core-metrics-server-internal';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
@@ -99,6 +99,7 @@ export class Server {
   private readonly environment: EnvironmentService;
   private readonly node: NodeService;
   private readonly metrics: MetricsService;
+  private readonly eventLoopWatchdog: EventLoopWatchdogService;
   private readonly httpRateLimiter: HttpRateLimiterService;
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
@@ -129,6 +130,8 @@ export class Server {
   private discoveredPlugins?: DiscoveredPlugins;
   private readonly logger: LoggerFactory;
   private nodeRoles?: NodeRoles;
+  private nodeRoleNames?: readonly string[];
+  private readonly serviceVersion: string;
 
   private readonly uptimePerStep: Partial<UptimeSteps> = {};
 
@@ -139,12 +142,12 @@ export class Server {
   ) {
     const constructorStartUptime = performance.now();
 
-    const serviceVersion =
+    this.serviceVersion =
       env.packageInfo.buildFlavor === 'serverless'
         ? env.packageInfo.buildShaShort
         : env.packageInfo.version;
     this.loggingSystem.setGlobalContext({
-      service: { version: serviceVersion, type: 'kibana', state: 'initializing' },
+      service: { version: this.serviceVersion, type: 'kibana', state: 'initializing' },
     });
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
@@ -165,6 +168,7 @@ export class Server {
     this.environment = new EnvironmentService(core);
     this.node = new NodeService(core);
     this.metrics = new MetricsService(core);
+    this.eventLoopWatchdog = new EventLoopWatchdogService(core);
     this.status = new StatusService(core);
     this.coreApp = new CoreAppsService(core);
     this.httpRateLimiter = new HttpRateLimiterService();
@@ -230,6 +234,7 @@ export class Server {
     });
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
     this.nodeRoles = nodePreboot.roles;
+    this.nodeRoleNames = nodePreboot.roleNames;
 
     // Apply the `disableLazyZodSchemas` / `disableLazyConfigSchemas` static overrides before plugin
     // discovery so that schemas evaluated at plugin-module-load time observe them.
@@ -251,21 +256,25 @@ export class Server {
     const uiSettingsPreboot = await this.uiSettings.preboot();
     const loggingPreboot = this.logging.preboot({ loggingSystem: this.loggingSystem });
 
+    const { uiPlugins, pluginTree, pluginPaths } = this.discoveredPlugins.preboot;
+
+    const contextServicePreboot = this.context.preboot({
+      pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
+    });
+    const docLinksPreboot = this.docLinks.setup();
+
+    // The preboot HTTP server always starts, so probes can reach Kibana while it boots (e.g. waiting for ES or running migrations).
+    // When preboot is disabled, it only serves 503 responses (including `/api/status`) and the ELU history API.
+    const httpPreboot = await this.http.preboot({
+      context: contextServicePreboot,
+      docLinks: docLinksPreboot,
+    });
+    await this.status.preboot({ http: httpPreboot });
+    await this.metrics.preboot({ http: httpPreboot });
+
     let corePreboot: InternalCorePreboot | undefined;
 
     if (!disablePreboot) {
-      const { uiPlugins, pluginTree, pluginPaths } = this.discoveredPlugins.preboot;
-
-      const contextServicePreboot = this.context.preboot({
-        pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
-      });
-      const docLinksPreboot = this.docLinks.setup();
-
-      const httpPreboot = await this.http.preboot({
-        context: contextServicePreboot,
-        docLinks: docLinksPreboot,
-      });
-
       // setup i18n prior to any other service, to have translations ready
       const i18nPreboot = await this.i18n.preboot({ http: httpPreboot, pluginPaths });
 
@@ -274,8 +283,6 @@ export class Server {
       this.capabilities.preboot({ http: httpPreboot });
 
       const elasticsearchServicePreboot = await this.elasticsearch.preboot();
-
-      await this.status.preboot({ http: httpPreboot });
 
       const renderingPreboot = await this.rendering.preboot({
         http: httpPreboot,
@@ -438,10 +445,20 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
+    if (!this.nodeRoleNames) {
+      throw new Error('Node roles are only known after preboot');
+    }
+    await this.eventLoopWatchdog.setup({
+      status: statusSetup,
+      nodeRoles: this.nodeRoleNames,
+      serviceVersion: this.serviceVersion,
+    });
+
     const customBrandingSetup = this.customBranding.setup();
     const userSettingsServiceSetup = this.userSettingsService.setup();
     const featureFlagsSetup = this.featureFlags.setup({
       http: httpSetup,
+      savedObjects: savedObjectsSetup,
     });
 
     const renderingSetup = await this.rendering.setup({
@@ -647,7 +664,8 @@ export class Server {
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
 
-    const featureFlagsStart = this.featureFlags.start();
+    const featureFlagsStart = this.featureFlags.start({ savedObjects: savedObjectsStart });
+    this.eventLoopWatchdog.start({ featureFlags: featureFlagsStart });
     const pubsubStart = this.pubsub.start();
 
     const pricingStart = this.pricing.start();
@@ -707,6 +725,7 @@ export class Server {
     await this.uiSettings.stop();
     await this.rendering.stop();
     await this.metrics.stop();
+    await this.eventLoopWatchdog.stop();
     await this.status.stop();
     await this.logging.stop();
     await this.customBranding.stop();

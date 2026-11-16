@@ -179,7 +179,7 @@ export async function resolveDispatchTarget(
           : {}),
         message: resolved.truncated
           ? `More endpoints match the hostname "${hostName}" than could be examined, so it cannot be resolved to a single host. Ask the analyst to identify the target by agent ID, then call this tool again with that agentId.`
-          : `Multiple online endpoints share the hostname "${hostName}". Ask the analyst to identify the target by agent ID, then call this tool again with that agentId — a write action must not guess.`,
+          : `Multiple endpoints share the hostname "${hostName}". Ask the analyst to identify the target by agent ID, then call this tool again with that agentId — a write action must not guess.`,
       },
     };
   }

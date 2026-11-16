@@ -11,9 +11,9 @@ import type { EvalsSetupDependencies } from './types';
 import { EvalsPublicPlugin } from './plugin';
 
 describe('EvalsPublicPlugin', () => {
-  const createPlugin = (enabled: boolean) =>
+  const createPlugin = (enabled: boolean, mode: 'runtime' | 'full' = 'full') =>
     new EvalsPublicPlugin({
-      config: { get: () => ({ enabled }) },
+      config: { get: () => ({ enabled, mode }) },
     } as unknown as PluginInitializerContext);
 
   const createManagementMock = () => {
@@ -104,6 +104,19 @@ describe('EvalsPublicPlugin', () => {
 
     plugin.setup(createCoreSetupMock(), { workflowsExtensions });
 
+    expect(workflowsExtensions.registerStepDefinition).not.toHaveBeenCalled();
+  });
+
+  it('registers no app, management entry or Workflows steps in runtime mode', () => {
+    const plugin = createPlugin(true, 'runtime');
+    const coreSetup = createCoreSetupMock();
+    const management = createManagementMock();
+    const workflowsExtensions = createWorkflowsExtensionsMock();
+
+    plugin.setup(coreSetup, { management, workflowsExtensions });
+
+    expect(coreSetup.application.register).not.toHaveBeenCalled();
+    expect(management.sections.section.ai.registerApp).not.toHaveBeenCalled();
     expect(workflowsExtensions.registerStepDefinition).not.toHaveBeenCalled();
   });
 });

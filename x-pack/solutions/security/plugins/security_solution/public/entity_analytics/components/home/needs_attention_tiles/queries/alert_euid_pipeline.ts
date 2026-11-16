@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { indentForkBranch } from '../../entities_grid/queries/esql';
-import {
-  buildPerTypeEuidEvals,
-  evalGuardedTypedEuids,
-} from '../../entities_grid/queries/euid_pipeline';
+import { buildAlertEntityRows } from '../../queries/alert_entity_rows';
 
 /**
  * Returns ES|QL pipeline stages that resolve entity.id for alert documents.
@@ -57,36 +53,17 @@ export const buildAlertEuidPipeline = (
   bucketExpression?: string,
   { alertBranchCondition, extraBranch }: AlertEuidPipelineOptions = {}
 ): string[] => {
-  const keepColumns = bucketExpression ? `${KEEP_COLUMNS}, @timestamp` : KEEP_COLUMNS;
-  const guard = alertBranchCondition ? [`(${alertBranchCondition})`] : [];
-  const derivedSteps = [
-    `WHERE ${[...guard, '`kibana.alert.entity.id` IS NULL'].join(' AND ')}`,
-    ...buildPerTypeEuidEvals(),
-    evalGuardedTypedEuids('_ea_entity_id'),
-    `| KEEP ${keepColumns}`,
-  ];
-
-  const fork = [
-    '| FORK (',
-    `    WHERE ${[...guard, '`kibana.alert.entity.id` IS NOT NULL'].join(' AND ')}`,
-    '    | EVAL _ea_entity_id = `kibana.alert.entity.id`',
-    `    | KEEP ${keepColumns}`,
-    '  )',
-    '  (',
-    indentForkBranch(derivedSteps.join('\n')),
-    '  )',
-    ...(extraBranch ? ['  (', indentForkBranch(extraBranch.steps.join('\n')), '  )'] : []),
-  ].join('\n');
-
   const aggregations = [
     'has_severe_alert = MAX(is_severe_alert)',
     ...(extraBranch ? ['has_alert = MAX(is_alert_row)', ...extraBranch.aggregations] : []),
   ];
 
   return [
-    fork,
-    '| MV_EXPAND _ea_entity_id',
-    '| WHERE _ea_entity_id IS NOT NULL',
+    ...buildAlertEntityRows({
+      keepColumns: bucketExpression ? `${KEEP_COLUMNS}, @timestamp` : KEEP_COLUMNS,
+      guard: alertBranchCondition,
+      extraBranches: extraBranch ? [extraBranch.steps] : [],
+    }),
     '| EVAL is_severe_alert = `kibana.alert.severity` IN ("high", "critical")',
     // Rows of the other source have no severity, so they are not alerts.
     ...(extraBranch ? ['| EVAL is_alert_row = `kibana.alert.severity` IS NOT NULL'] : []),

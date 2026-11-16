@@ -165,11 +165,24 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
   }
 
   /**
-   * Updates user profile data of the current user.
+   * Updates user profile data of the current user, posting only `data` so stored fields are not
+   * re-validated.
    * @param data Application data to be written (merged with existing data).
    */
   public partialUpdate<D extends Partial<UserProfileData>>(data: D) {
-    const updated = merge({}, this._userProfile$.getValue(), data);
-    return this.update(updated);
+    const previous = this._userProfile$.getValue();
+    const updated = merge({}, previous, data);
+    this._userProfile$.next(updated);
+
+    return this.http
+      .post('/internal/security/user_profile/_data', { body: JSON.stringify(data) })
+      .then(() => {
+        this._cache.clear();
+        this.internalDataUpdates$.next(updated);
+      })
+      .catch((err) => {
+        this._userProfile$.next(previous);
+        return Promise.reject(err);
+      });
   }
 }

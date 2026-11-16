@@ -73,7 +73,7 @@ steps:
 `;
     }
 
-    describe.each([undefined, true, '${{error.type == "Error"}}'])(
+    describe.each([undefined, true, '${{error.type == "Error"}}', '"error.type: Error"'])(
       'performs retries when condition is %s',
       (conditionTestCase) => {
         beforeAll(async () => {
@@ -220,7 +220,7 @@ steps:
       }
     );
 
-    describe.each(['${{error.type == "SomeOtherError"}}', '${{false}}'])(
+    describe.each(['${{error.type == "SomeOtherError"}}', '${{false}}', '"error.type: Other"'])(
       'does not perform retries when condition is %s',
       (conditionTestCase) => {
         beforeAll(async () => {

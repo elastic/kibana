@@ -26,16 +26,21 @@ import { coreServices, embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { isDashboardLayoutPanel } from '../dashboard_api/layout_manager/types';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
-import type { CopyToDashboardAPI } from './copy_to_dashboard_action';
+import type { CopyToDashboardParentApi } from './copy_to_dashboard_action';
 
 interface CopyToDashboardModalProps {
-  api: CopyToDashboardAPI;
+  parentApi: CopyToDashboardParentApi;
+  panelIds: readonly string[];
   closeModal: () => void;
 }
 
 const DashboardPicker = withSuspense(LazyDashboardPicker);
 
-export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalProps) {
+export function CopyToDashboardModal({
+  parentApi,
+  panelIds,
+  closeModal,
+}: CopyToDashboardModalProps) {
   const stateTransfer = useMemo(() => embeddableService.getStateTransfer(), []);
   const { createNew: canCreateNew, showWriteControls: canEditExisting } = useMemo(
     () => getDashboardCapabilities(),
@@ -47,32 +52,35 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
     null
   );
 
-  const dashboardId = api.parentApi.savedObjectId$.value;
+  const dashboardId = parentApi.savedObjectId$.value;
 
   const onSubmit = useCallback(() => {
-    let panelToCopy;
-    try {
-      panelToCopy = api.parentApi.getDashboardPanelFromId(api.uuid);
-      // TODO When we implement the ability to duplicate pinned panels,
-      // we should handle copying panels that don't have a `grid` defined
-      if (!isDashboardLayoutPanel(panelToCopy)) throw new Error();
-    } catch {
-      coreServices.notifications.toasts.addDanger({
-        title: dashboardCopyToDashboardActionStrings.getPanelNotFoundError(api.uuid),
-        'data-test-subj': 'copyToDashboardPanelNotFound',
-      });
-      closeModal();
-      return;
-    }
+    const state: EmbeddablePackageState[] = [];
+    for (const panelId of panelIds) {
+      let panelToCopy;
+      try {
+        panelToCopy = parentApi.getDashboardPanelFromId(panelId);
+        // TODO When we implement the ability to duplicate pinned panels,
+        // we should handle copying panels that don't have a `grid` defined
+        if (!isDashboardLayoutPanel(panelToCopy)) throw new Error();
+      } catch {
+        coreServices.notifications.toasts.addDanger({
+          title: dashboardCopyToDashboardActionStrings.getPanelNotFoundError(panelId),
+          'data-test-subj': 'copyToDashboardPanelNotFound',
+        });
+        closeModal();
+        return;
+      }
 
-    const state: EmbeddablePackageState = {
-      type: panelToCopy.type,
-      serializedState: panelToCopy.serializedState,
-      size: {
-        width: panelToCopy.grid.w,
-        height: panelToCopy.grid.h,
-      },
-    };
+      state.push({
+        type: panelToCopy.type,
+        serializedState: panelToCopy.serializedState,
+        size: {
+          width: panelToCopy.grid.w,
+          height: panelToCopy.grid.h,
+        },
+      });
+    }
 
     const path =
       dashboardOption === 'existing' && selectedDashboard
@@ -81,10 +89,10 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
 
     closeModal();
     stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
-      state: [state],
+      state,
       path,
     });
-  }, [api, dashboardOption, selectedDashboard, closeModal, stateTransfer]);
+  }, [parentApi, panelIds, dashboardOption, selectedDashboard, closeModal, stateTransfer]);
 
   const titleId = 'copyToDashboardTitle';
   const descriptionId = 'copyToDashboardDescription';

@@ -69,3 +69,55 @@ describe('getSecretConnectionConfigs', () => {
     expect(createPointInTimeFinderDecryptedAsInternalUser).not.toHaveBeenCalled();
   });
 });
+
+describe('getSecretConnectionConfigs allowed hosts', () => {
+  const deliver = async (allowedMonitorHosts?: string[]) => {
+    const server = {
+      logger: loggerMock.create(),
+      config: { secretConnections: { allowedHosts: ['*'] } },
+      encryptedSavedObjects: {
+        getClient: () => ({
+          createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+            async *find() {
+              yield {
+                saved_objects: [
+                  {
+                    attributes: {
+                      name: 'prod',
+                      type: 'hashicorp_vault',
+                      config: {
+                        address: 'https://vault.example.com',
+                        authMethod: 'token',
+                        allowedMonitorHosts,
+                      },
+                      secrets: { token: 't' },
+                    },
+                  },
+                ],
+              };
+            },
+            close: jest.fn().mockResolvedValue(undefined),
+          }),
+        }),
+      },
+    } as unknown as SyntheticsServerSetup;
+    const [config] = await getSecretConnectionConfigs(server, 'default');
+    return config;
+  };
+
+  it('sends the allowed monitor hosts as allowed_hosts', async () => {
+    expect(await deliver(['api.example.com', '10.0.0.1'])).toEqual(
+      expect.objectContaining({ allowed_hosts: ['api.example.com', '10.0.0.1'] })
+    );
+  });
+
+  it.each([
+    ['omitted', undefined],
+    ['empty', []],
+  ])(
+    'leaves allowed_hosts out when the list is %s, since Heartbeat reads a missing list as any host',
+    async (_name, hosts) => {
+      expect(await deliver(hosts)).not.toHaveProperty('allowed_hosts');
+    }
+  );
+});

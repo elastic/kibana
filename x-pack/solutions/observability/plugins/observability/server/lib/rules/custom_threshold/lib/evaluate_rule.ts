@@ -10,6 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewBase, EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
+import { getFlattenGrouping } from '@kbn/alerting-rule-utils';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import type {
   CustomMetricExpressionParams,
@@ -58,7 +59,8 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   esQueryConfig: EsQueryConfig,
   runtimeMappings?: estypes.MappingRuntimeFields,
   lastPeriodEnd?: number,
-  missingGroups: MissingGroupsRecord[] = []
+  missingGroups: MissingGroupsRecord[] = [],
+  scheduleInterval?: number
 ): Promise<CriterionEvaluationResult[]> => {
   const { criteria, groupBy, searchConfiguration } = params;
 
@@ -74,7 +76,8 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         intervalAsMS,
         timeframe,
         lastPeriodEnd,
-        isRateAggregation
+        isRateAggregation,
+        scheduleInterval
       );
 
       const currentValues = await getData(
@@ -116,6 +119,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
             trigger: false,
             warn: false,
             bucketKey: missingGroup.bucketKey,
+            flattenGrouping: getFlattenGrouping({ groupBy, bucketKey: missingGroup.bucketKey }),
           };
         }
       }

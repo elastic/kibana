@@ -161,7 +161,11 @@ export type {
   CreateCloudOnboardingDeploymentRequest,
   UpdateCloudOnboardingDeploymentRequest,
 } from '../common/types/rest_spec/cloud_onboarding_deployment';
-export { sendGetPackageInfoByKey, sendGetPackageInfoByKeyForRq } from './hooks/use_request/epm';
+export {
+  sendGetPackageInfoByKey,
+  sendGetPackageInfoByKeyForRq,
+  sendUpdatePackage,
+} from './hooks/use_request/epm';
 export {
   sendUpdatePackagePolicy,
   sendDeletePackagePolicy,
@@ -178,6 +182,12 @@ export type {
 export { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../common/types/rest_spec/iac_provisioner';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
+export { useOutputs } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/hooks';
+export { useGetOutputs } from './hooks/use_request/outputs';
+export { PackagePolicyOutputSelect } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_output_select';
+export type { PackagePolicyOutputSelectProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_output_select';
+export { PackagePolicyConditionField } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_condition_field';
+export type { PackagePolicyConditionFieldProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_condition_field';
 
 // Cloud Connector Setup - lazy loaded component for external plugins
 export const LazyCloudConnectorSetup = lazy(() =>

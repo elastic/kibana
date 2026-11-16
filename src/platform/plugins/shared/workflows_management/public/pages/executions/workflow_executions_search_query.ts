@@ -40,6 +40,21 @@ const filterToKqlClause = (filter: Filter): string | undefined => {
     }
     case 'exists':
       return `${prefix}${key}: *`;
+    case 'range': {
+      const range = (params ?? {}) as Record<string, unknown>;
+      const operators = [
+        ['gte', '>='],
+        ['gt', '>'],
+        ['lte', '<='],
+        ['lt', '<'],
+      ] as const;
+      const conditions = operators
+        .filter(([name]) => range[name] != null)
+        .map(([name, operator]) => `${key} ${operator} ${escapeKqlValue(String(range[name]))}`);
+      if (!conditions.length) return undefined;
+      const joined = conditions.join(' and ');
+      return negate ? `NOT (${joined})` : joined;
+    }
     default: {
       // OptionsListControl single-select: buildPhraseFilter does not set meta.type,
       // so fall back to the raw query.match_phrase value.
@@ -53,6 +68,10 @@ const filterToKqlClause = (filter: Filter): string | undefined => {
     }
   }
 };
+
+/** Returns true when the filter is active but cannot be sent to the executions API. */
+export const isUnsupportedFilter = (filter: Filter): boolean =>
+  !filter.meta.disabled && filterToKqlClause(filter) === undefined;
 
 export const filtersToKql = (filters: Filter[]): string => {
   const clauses = filters

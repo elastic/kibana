@@ -10,7 +10,7 @@ import { EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find, getOr } from 'lodash/fp';
 import type { Alert } from '@kbn/alerting-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/securitysolution-timeline-common';
 import { useKibana } from '../../../common/lib/kibana';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';

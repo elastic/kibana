@@ -8,7 +8,11 @@
 import {
   decodeRouteParam,
   getAiIndexDetailPath,
+  getAiIndexSourcesPath,
   getAiIndexKnowledgeIndicatorsPath,
+  getAiIndexSettingsPath,
+  getAiIndexDreamingTemplatePath,
+  getViewKiDocumentPath,
   getViewKiPath,
 } from './paths';
 
@@ -18,10 +22,30 @@ describe('getAiIndexDetailPath', () => {
   });
 });
 
+describe('getAiIndexSourcesPath', () => {
+  it('builds the sources tab path', () => {
+    expect(getAiIndexSourcesPath('my-ai-index')).toBe('/ai_index/my-ai-index/sources');
+  });
+});
+
 describe('getAiIndexKnowledgeIndicatorsPath', () => {
   it('builds the knowledge indicators tab path', () => {
     expect(getAiIndexKnowledgeIndicatorsPath('my-ai-index')).toBe(
       '/ai_index/my-ai-index/knowledge_indicators'
+    );
+  });
+});
+
+describe('getAiIndexSettingsPath', () => {
+  it('builds the settings tab path', () => {
+    expect(getAiIndexSettingsPath('my-ai-index')).toBe('/ai_index/my-ai-index/settings');
+  });
+});
+
+describe('getAiIndexDreamingTemplatePath', () => {
+  it('builds the dreaming setup path', () => {
+    expect(getAiIndexDreamingTemplatePath('my-ai-index')).toBe(
+      '/ai_index/my-ai-index/dreaming_template'
     );
   });
 });
@@ -35,6 +59,14 @@ describe('getViewKiPath', () => {
     expect(
       getViewKiPath('quick-test', 'quick-test-metadata-2/traces-agent_builder.otel-default')
     ).toBe('/ai_index/quick-test/ki/quick-test-metadata-2%2Ftraces-agent_builder.otel-default');
+  });
+});
+
+describe('getViewKiDocumentPath', () => {
+  it('appends /document to the view KI path', () => {
+    expect(getViewKiDocumentPath('my-ai-index', 'ki-1')).toBe(
+      '/ai_index/my-ai-index/ki/ki-1/document'
+    );
   });
 });
 

@@ -6,7 +6,7 @@
  */
 
 import { MARKDOWN_EMBEDDABLE_TYPE, markdownStateSchema } from '@kbn/dashboard-markdown-schemas';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { defineConfigPanelKind } from '../panel_kind';
 
 /**
@@ -26,17 +26,20 @@ const markdownPanelConfigSchema = markdownStateSchema.extend({
  * The markdown variant of `config`-source panel content, discriminated by
  * `type: 'markdown'`.
  */
-const markdownPanelContentSchema = z.object({
-  source: z.literal('config'),
-  type: z.literal('markdown'),
-  config: markdownPanelConfigSchema.describe(
-    'Markdown panel config (e.g. { content }). On an existing panel, fully replaces its config.'
-  ),
-});
+const markdownPanelContentSchema = lazySchema(() =>
+  z.object({
+    source: z.literal('config'),
+    type: z.literal('markdown'),
+    config: markdownPanelConfigSchema.describe(
+      'Markdown panel config (e.g. { content }). On an existing panel, fully replaces its config.'
+    ),
+  })
+);
 
 export const markdownPanelKind = defineConfigPanelKind({
   type: 'markdown',
   embeddableType: MARKDOWN_EMBEDDABLE_TYPE,
   label: 'markdown',
+  selection: { priority: 3, whenToUse: 'static text, links, or notes with no data.' },
   contentSchema: markdownPanelContentSchema,
 });

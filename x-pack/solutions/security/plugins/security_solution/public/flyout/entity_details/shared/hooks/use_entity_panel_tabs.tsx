@@ -20,10 +20,15 @@ export const TABLE_TAB_ID = 'table';
 interface UseEntityPanelTabsParams {
   /** The entity store record (used to determine if tabs should show) */
   entityRecord: EntityStoreRecord | null | undefined;
+  /**
+   * True when the flyout shows a resolution group. The Table tab would only list the target's own
+   * stored document, which disagrees with the aggregated header and Overview, so no tabs render.
+   */
+  isGroupView?: boolean;
 }
 
 interface UseEntityPanelTabsResult {
-  /** Tab definitions. Null when entity is not in the store (no tabs should render). */
+  /** Tab definitions. Null when entity is not in the store or in group view (no tabs should render). */
   tabs: EntityPanelTabType[] | null;
   /** Currently selected tab ID */
   selectedTabId: string;
@@ -33,11 +38,12 @@ interface UseEntityPanelTabsResult {
 
 export const useEntityPanelTabs = ({
   entityRecord,
+  isGroupView = false,
 }: UseEntityPanelTabsParams): UseEntityPanelTabsResult => {
   const [selectedTabId, setSelectedTabId] = useState<string>(OVERVIEW_TAB_ID);
 
   const tabs = useMemo<EntityPanelTabType[] | null>(() => {
-    if (!entityRecord) {
+    if (!entityRecord || isGroupView) {
       return null;
     }
 
@@ -63,7 +69,7 @@ export const useEntityPanelTabs = ({
         ),
       },
     ];
-  }, [entityRecord]);
+  }, [entityRecord, isGroupView]);
 
   return { tabs, selectedTabId, setSelectedTabId };
 };

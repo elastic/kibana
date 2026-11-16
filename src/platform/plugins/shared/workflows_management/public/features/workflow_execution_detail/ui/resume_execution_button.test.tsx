@@ -105,6 +105,12 @@ describe('ResumeExecutionButton', () => {
       expect(screen.getByTestId('waitForInputCallout')).toBeInTheDocument();
     });
 
+    it('renders the "Provide action" button without a callout in button appearance', () => {
+      renderComponent({ appearance: 'button' });
+      expect(screen.queryByTestId('waitForInputCallout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('provideActionButton')).toBeInTheDocument();
+    });
+
     it('renders the "Provide action" button', () => {
       renderComponent();
       expect(screen.getByTestId('provideActionButton')).toBeInTheDocument();

@@ -86,6 +86,8 @@ export const openAIAdapter: InferenceConnectorAdapter = {
               tool_choice: toolChoiceToOpenAI(toolChoice, {
                 connector,
                 tools: toolsForRequest,
+                modelId: modelName ?? connector.config?.defaultModel,
+                logger,
               }),
               tools: openAiTools,
             }

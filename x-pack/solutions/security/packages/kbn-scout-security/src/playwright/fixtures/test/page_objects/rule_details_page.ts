@@ -33,7 +33,7 @@ export class RuleDetailsPage {
   readonly investigateInTimelineButtons: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.header = this.page.testSubj.locator('header-page-title');
+    this.header = this.page.testSubj.locator('appHeaderTitle');
     this.aboutSection = this.page.testSubj.locator('aboutRule');
     this.definitionSection = this.page.testSubj.locator('definitionRule');
     this.scheduleSection = this.page.testSubj.locator('schedule');
@@ -44,10 +44,10 @@ export class RuleDetailsPage {
       'investigationFieldsPropertyValueItem'
     );
     this.alertsTab = this.page.testSubj.locator('navigation-alerts');
-    this.actionsMenuButton = this.page.testSubj.locator('rules-details-popover-button-icon');
+    this.actionsMenuButton = this.page.testSubj.locator('app-menu-overflow-button');
     this.duplicateMenuItem = this.page.testSubj.locator('rules-details-duplicate-rule');
     this.confirmModalButton = this.page.testSubj.locator('confirmModalConfirmButton');
-    this.backToRuleDetailsLink = this.page.testSubj.locator('ruleEditBackToRuleDetails');
+    this.backToRuleDetailsLink = this.page.testSubj.locator('appHeaderBack');
     this.alertsCount = this.page.testSubj.locator('toolbar-alerts-count');
     this.alertRuleNameCells = this.page.testSubj.locator('formatted-field-kibana.alert.rule.name');
     this.alertSeverityCells = this.page.testSubj.locator('formatted-field-kibana.alert.severity');
