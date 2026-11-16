@@ -379,10 +379,10 @@ export function createEventsWriteTool({
       is born only from evidence that points to an error (a confirms signal or an off_topic row);
       healthy or empty evidence is not written.
       Signals and topology are merged with prior versions. \`severity\` is your verdict under
-      its field contract, decided from the merged confirming signals; the writer stores it as given
-      (an inactive event is low) and returns the stored tier. No-op if the stored severity and
-      status are unchanged (written: false, reason: unchanged_outcome). When no new rule UUIDs are introduced, title and
-      symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
+      its field contract, decided from the merged evidence. The response reports the tier actually
+      stored. No-op if the stored severity and status are unchanged (written: false, reason:
+      unchanged_outcome). When no new rule UUIDs are introduced, title and symptom_hypothesis are
+      frozen to the stored values and narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. When the item has confirmed rules, scans all
       currently-active events for one that confirms every submitted confirmed rule and shares at

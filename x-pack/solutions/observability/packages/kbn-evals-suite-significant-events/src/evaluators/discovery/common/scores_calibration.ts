@@ -40,7 +40,12 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'weak_signals_low_severity',
-    text: 'Unconfirmed signals — no confirmed failure evidence — should not claim high criticality. Recovery of an established incident preserves its stored severity even when its current signals are healthy; that is not an unconfirmed incident. Neither change-point shape nor raw alert volume is a severity signal: a high volume of log lines is not impact by itself. A rule that fired few times is not lowered for that alone, and a failure confirmed on a user-critical path is rated on the evidence the severity rules name for its tier, not on how many detections fired.',
+    text: 'Weak or unconfirmed signals alone do not justify high criticality. Neither change-point shape nor raw alert volume is a severity signal: a high volume of log lines is not impact by itself. A rule that fired few times is not lowered for that alone, and a failure confirmed on a user-critical path is rated on the evidence the severity rules name for its tier, not on how many detections fired.',
+    score: 1,
+  },
+  {
+    id: 'recovery_preserves_incident_severity',
+    text: 'For an established incident that is recovering or inactive, assess compliance with the recovery rule in the severity field contract above. Compare against the supplied prior severity; do not infer a prior tier when none is supplied.',
     score: 1,
   },
   {
