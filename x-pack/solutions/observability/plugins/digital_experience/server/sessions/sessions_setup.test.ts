@@ -206,15 +206,12 @@ describe('sessions setup', () => {
       expect(asSecondaryAuthUser.indices.putIndexTemplate).not.toHaveBeenCalled();
     });
 
-    // Setups enabled before the browser prefix have a template of this name on
-    // `digital-experience-sessions-*`. Keeping the name lets Elasticsearch replace it instead of
-    // refusing a second template whose patterns overlap it at the same priority.
-    it('puts the template under its earlier name, on the browser indices only', async () => {
+    it('puts the browser template on the browser indices only', async () => {
       await enableSessions(enableArgs());
 
       expect(esClient.asCurrentUser.indices.putIndexTemplate).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: 'digital-experience-sessions',
+          name: 'digital-experience-sessions-browser',
           index_patterns: ['digital-experience-sessions-browser-*'],
         })
       );

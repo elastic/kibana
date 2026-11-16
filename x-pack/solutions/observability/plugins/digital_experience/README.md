@@ -226,8 +226,9 @@ transform keep their transforms and index: delete the `digital-experience-sessio
 hand.
 
 Setups that enabled sessions before the index was named `digital-experience-sessions-browser-<version>`
-keep an unused `digital-experience-sessions-1` index, which can be deleted. Enabling again replaces
-their index template, which keeps its name, `digital-experience-sessions`.
+keep an unused `digital-experience-sessions-1` index, which can be deleted. Delete their old
+`digital-experience-sessions` index template before enabling sessions again, so it does not conflict
+with the new `digital-experience-sessions-browser` template.
 
 The document also holds what the applications list counts, so the list can read it instead of the
 raw events: the environment, `page_load_count` (`browser.navigation_timing` events),
