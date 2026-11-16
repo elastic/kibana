@@ -11,7 +11,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { VisualizationContainer } from '@kbn/visualizations-common';
+import { VisualizationContainer } from '@kbn/visualizations-components';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { VegaVisualizationDependencies } from './plugin';
 import { reportVegaRender } from './lib/vega_render_telemetry';

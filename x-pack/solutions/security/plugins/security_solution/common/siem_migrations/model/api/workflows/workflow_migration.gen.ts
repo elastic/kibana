@@ -26,6 +26,28 @@ import {
 } from '../../workflow_migration.gen';
 import { TinesStoryExport } from '../../vendor/workflows/tines.gen';
 
+export const CreateTinesWorkflowMigrationWorkflowsRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
+export type CreateTinesWorkflowMigrationWorkflowsRequestParams = z.infer<
+  typeof CreateTinesWorkflowMigrationWorkflowsRequestParams
+>;
+export type CreateTinesWorkflowMigrationWorkflowsRequestParamsInput = z.input<
+  typeof CreateTinesWorkflowMigrationWorkflowsRequestParams
+>;
+
+export const CreateTinesWorkflowMigrationWorkflowsRequestBody = lazySchema(() =>
+  z.array(TinesStoryExport).max(1000)
+);
+export type CreateTinesWorkflowMigrationWorkflowsRequestBody = z.infer<
+  typeof CreateTinesWorkflowMigrationWorkflowsRequestBody
+>;
+export type CreateTinesWorkflowMigrationWorkflowsRequestBodyInput = z.input<
+  typeof CreateTinesWorkflowMigrationWorkflowsRequestBody
+>;
+
 export const CreateWorkflowMigrationRequestBody = lazySchema(() =>
   z.object({
     /**
@@ -48,28 +70,6 @@ export const CreateWorkflowMigrationResponse = lazySchema(() =>
   })
 );
 export type CreateWorkflowMigrationResponse = z.infer<typeof CreateWorkflowMigrationResponse>;
-
-export const CreateWorkflowMigrationWorkflowsRequestParams = lazySchema(() =>
-  z.object({
-    migration_id: NonEmptyString,
-  })
-);
-export type CreateWorkflowMigrationWorkflowsRequestParams = z.infer<
-  typeof CreateWorkflowMigrationWorkflowsRequestParams
->;
-export type CreateWorkflowMigrationWorkflowsRequestParamsInput = z.input<
-  typeof CreateWorkflowMigrationWorkflowsRequestParams
->;
-
-export const CreateWorkflowMigrationWorkflowsRequestBody = lazySchema(() =>
-  z.array(TinesStoryExport).max(1000)
-);
-export type CreateWorkflowMigrationWorkflowsRequestBody = z.infer<
-  typeof CreateWorkflowMigrationWorkflowsRequestBody
->;
-export type CreateWorkflowMigrationWorkflowsRequestBodyInput = z.input<
-  typeof CreateWorkflowMigrationWorkflowsRequestBody
->;
 
 export const DeleteWorkflowMigrationRequestParams = lazySchema(() =>
   z.object({

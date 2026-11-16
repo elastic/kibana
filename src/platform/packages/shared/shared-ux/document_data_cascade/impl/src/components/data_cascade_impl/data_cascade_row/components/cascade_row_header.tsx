@@ -154,6 +154,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
         alignItems="center"
         justifyContent="spaceBetween"
         css={flexHelper}
+        responsive={false}
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
