@@ -15,6 +15,7 @@ import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { ENTITY_KEY_TABLE } from './entity_key_table';
 import { getDatasetFamily } from './entity_rows/helpers';
 import {
+  createDroppedRows,
   ENTITY_QUERY_LIMIT,
   type DroppedMetricsEntityRows,
   type EsqlCell,
@@ -56,12 +57,6 @@ export interface IdentifyMetricsEntitiesResult {
     totalMs: number;
   };
 }
-
-const createDroppedRows = (): DroppedMetricsEntityRows => ({
-  nullNodeName: 0,
-  nullCluster: 0,
-  idTooLong: 0,
-});
 
 const isEsqlScalar = (value: ESQLSearchResponse['values'][number][number]): value is EsqlScalar =>
   typeof value === 'string' ||
@@ -245,8 +240,6 @@ export const identifyMetricsEntities = async ({
     });
     features.push(...folded.features);
     droppedIncompleteRowsCount += folded.droppedIncompleteRowsCount;
-    droppedRows.nullNodeName += folded.droppedRows.nullNodeName;
-    droppedRows.nullCluster += folded.droppedRows.nullCluster;
     droppedRows.idTooLong += folded.droppedRows.idTooLong;
   }
 

@@ -16,8 +16,6 @@ export type EsqlRow = Readonly<Record<string, EsqlCell>>;
 export const ENTITY_QUERY_LIMIT = 501;
 
 export interface DroppedMetricsEntityRows {
-  nullNodeName: number;
-  nullCluster: number;
   idTooLong: number;
 }
 
@@ -51,10 +49,8 @@ export interface EntityKeyRow {
 }
 
 export const createDroppedRows = (): DroppedMetricsEntityRows => ({
-  nullNodeName: 0,
-  nullCluster: 0,
   idTooLong: 0,
 });
 
 export const droppedRowsCount = (droppedRows: DroppedMetricsEntityRows): number =>
-  droppedRows.nullNodeName + droppedRows.nullCluster + droppedRows.idTooLong;
+  droppedRows.idTooLong;
