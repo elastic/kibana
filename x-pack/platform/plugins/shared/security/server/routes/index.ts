@@ -13,6 +13,7 @@ import type {
   HttpResources,
   I18nServiceSetup,
   IBasePath,
+  KibanaRequest,
   Logger,
 } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
@@ -42,6 +43,7 @@ import type { AnalyticsServiceSetup } from '../analytics';
 import type { AnonymousAccessServiceStart } from '../anonymous_access';
 import type { InternalAuthenticationServiceStart } from '../authentication';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
+import type { OlsService } from '../authorization/ols/ols_service';
 import type { ConfigType } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { ServiceAccountsServiceStart } from '../service_accounts';
@@ -70,6 +72,8 @@ export interface RouteDefinitionParams {
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
   /** `null` when service accounts are not enabled for this deployment. */
   getServiceAccountsService: () => ServiceAccountsServiceStart | null;
+  getOlsService: () => OlsService;
+  getSpaceId: (request: KibanaRequest) => string;
   serverlessProjectId: string | undefined;
   serverlessProjectType: KibanaSolution | undefined;
   analyticsService: AnalyticsServiceSetup;

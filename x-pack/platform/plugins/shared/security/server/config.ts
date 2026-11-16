@@ -338,6 +338,14 @@ export const ConfigSchema = schema.object({
     }),
   }),
 
+  authz: schema.object({
+    // Object-level security (OLS). Disabling it restores the behavior from before OLS for adopted types,
+    // including objects with stored ACLs, which are kept for re-enabling.
+    ols: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
+  }),
+
   // Setting only allowed in the Serverless offering
   ui: offeringBasedSchema({
     serverless: schema.object({
