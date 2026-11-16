@@ -9,21 +9,45 @@
 
 import React, { createRef } from 'react';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { DataGridApi, DataGridCommandResult } from './data_grid_api';
+import { createDataGridColumnHelper } from './data_grid_column';
+import type { TestRow } from './data_grid.test.helpers';
 import {
   cleanupDataGridTestState,
   columns,
+  columnsWithLinks,
   expectFocus,
   focusVisibleTestHarness,
   focusElement,
+  getCompositeTabStops,
   renderGrid,
+  renderGridBetweenButtons,
   resetDataGridTestState,
   rows,
   runFocusCommand,
   TestDataGrid,
   virtualizerTestHarness,
 } from './data_grid.test.helpers';
+
+const columnHelper = createDataGridColumnHelper<TestRow>();
+const createContentColumns = (renderContent: (rowId: string) => React.ReactNode) => [
+  columns[0],
+  columnHelper.accessor({
+    id: 'content',
+    header: 'Content',
+    getValue: (row) => row.id,
+    getTextValue: ({ value }) => value,
+    renderCell: ({ value }) => renderContent(value),
+  }),
+];
+const columnsWithTwoLinks = createContentColumns((rowId) => (
+  <>
+    <a href={`https://example.com/${rowId}/first`}>{`First ${rowId}`}</a>{' '}
+    <a href={`https://example.com/${rowId}/second`}>{`Second ${rowId}`}</a>
+  </>
+));
 
 describe('DataGrid keyboard and logical focus', () => {
   beforeEach(resetDataGridTestState);
@@ -324,7 +348,7 @@ describe('DataGrid keyboard and logical focus', () => {
       await apiRef.current?.scrollToCell({ rowId: 'row-50', columnId: 'name' });
     });
     expect(screen.queryByRole('gridcell', { name: 'Name 1' })).toBeNull();
-    expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+    expect(getCompositeTabStops(container)).toHaveLength(1);
     expect(screen.getByRole('grid').getAttribute('tabindex')).toBe('0');
 
     await act(async () => {
@@ -444,7 +468,7 @@ describe('DataGrid keyboard and logical focus', () => {
     await waitFor(() => expect(document.activeElement).toBe(grid));
     expect(grid.getAttribute('aria-rowcount')).toBe('1');
     expect(grid.getAttribute('tabindex')).toBe('0');
-    expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+    expect(getCompositeTabStops(container)).toHaveLength(1);
     await waitFor(() =>
       expect(screen.getByRole('status').textContent).toContain('No rows remain in the grid.')
     );
@@ -459,6 +483,252 @@ describe('DataGrid keyboard and logical focus', () => {
 
     await expectFocus('Name 0');
     expect(grid.getAttribute('tabindex')).toBe('-1');
-    expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+    expect(getCompositeTabStops(container)).toHaveLength(1);
+  });
+
+  // JSDOM cannot prove native Tab order. user-event emulates sequential focus navigation, continuing
+  // from whichever element holds focus after keydown, like browsers do. Real-browser coverage of the
+  // guards lands with the DocViewer adapter's Scout tests.
+  describe('Tab guards', () => {
+    let focusedElements: Element[] = [];
+    const recordFocusedElement = ({ target }: FocusEvent) => {
+      if (target instanceof Element) {
+        focusedElements.push(target);
+      }
+    };
+    const getFocusedLinks = () =>
+      focusedElements.filter((element) => element instanceof HTMLAnchorElement);
+
+    beforeEach(() => {
+      focusedElements = [];
+      document.addEventListener('focusin', recordFocusedElement);
+    });
+
+    afterEach(() => {
+      document.removeEventListener('focusin', recordFocusedElement);
+    });
+
+    it('redirects focus entering through either guard to the logical active cell', async () => {
+      const user = userEvent.setup();
+      const { before, after } = renderGridBetweenButtons();
+
+      await user.tab();
+      expect(before).toHaveFocus();
+      await user.tab();
+      await expectFocus('Name 0');
+
+      await user.keyboard('{ArrowDown}');
+      await expectFocus('Name 1');
+      await user.click(after);
+      await user.tab({ shift: true });
+      await expectFocus('Name 1');
+    });
+
+    it('hands Tab and Shift+Tab to the guards, so focus leaves the grid past links in cells', async () => {
+      const user = userEvent.setup();
+      const { before, after } = renderGridBetweenButtons({ gridColumns: columnsWithLinks });
+      expect(screen.getAllByRole('link')).toHaveLength(3);
+
+      await user.tab();
+      await user.tab();
+      await expectFocus('Name 0');
+      await user.tab();
+      expect(after).toHaveFocus();
+
+      await user.tab({ shift: true });
+      await expectFocus('Name 0');
+      await user.tab({ shift: true });
+      expect(before).toHaveFocus();
+
+      expect(getFocusedLinks()).toEqual([]);
+    });
+
+    it('never focuses a link rendered inside the active cell', async () => {
+      const user = userEvent.setup();
+      const { before, after } = renderGridBetweenButtons({ gridColumns: columnsWithLinks });
+      const linkCellName = 'Open row-0';
+
+      await user.tab();
+      await user.tab();
+      await user.keyboard('{End}');
+      const linkCell = await expectFocus(linkCellName);
+      expect(screen.getByRole('link', { name: linkCellName })).toBeVisible();
+      expect(linkCell).toContainElement(screen.getByRole('link', { name: linkCellName }));
+
+      await user.tab();
+      expect(after).toHaveFocus();
+      await user.tab({ shift: true });
+      await expectFocus(linkCellName);
+      await user.tab({ shift: true });
+      expect(before).toHaveFocus();
+
+      expect(getFocusedLinks()).toEqual([]);
+    });
+
+    it.each([
+      { entry: 'Tab', startButtonName: 'Before grid', shift: false },
+      { entry: 'Shift+Tab', startButtonName: 'After grid', shift: true },
+    ])(
+      'mounts and focuses a virtualized-away active row on $entry entry',
+      async ({ startButtonName, shift }) => {
+        const user = userEvent.setup();
+        const apiRef = createRef<DataGridApi>();
+        renderGridBetweenButtons({ apiRef });
+
+        await user.tab();
+        await user.tab();
+        await user.keyboard('{ArrowDown}');
+        await expectFocus('Name 1');
+        await user.click(screen.getByRole('button', { name: startButtonName }));
+        await act(async () => {
+          await apiRef.current?.scrollToCell({ rowId: 'row-50', columnId: 'name' });
+        });
+        expect(screen.queryByRole('gridcell', { name: 'Name 1' })).toBeNull();
+
+        await user.tab({ shift });
+
+        await expectFocus('Name 1');
+        expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(1, 'auto');
+      }
+    );
+
+    it('uses the empty grid as the only tab stop between the guards', async () => {
+      const user = userEvent.setup();
+      const { before, after } = renderGridBetweenButtons({ gridRows: [] });
+      const grid = screen.getByRole('grid', { name: 'Example data' });
+
+      await user.tab();
+      await user.tab();
+      expect(grid).toHaveFocus();
+      await user.tab();
+      expect(after).toHaveFocus();
+
+      await user.tab({ shift: true });
+      expect(grid).toHaveFocus();
+      await user.tab({ shift: true });
+      expect(before).toHaveFocus();
+    });
+  });
+
+  describe('cell content', () => {
+    let openedLinks: string[] = [];
+    // Records link activation and stops JSDOM from attempting navigation.
+    const recordLinkClick = (event: MouseEvent) => {
+      if (event.target instanceof HTMLAnchorElement) {
+        openedLinks.push(event.target.href);
+        event.preventDefault();
+      }
+    };
+
+    beforeEach(() => {
+      openedLinks = [];
+      document.addEventListener('click', recordLinkClick);
+    });
+
+    afterEach(() => {
+      document.removeEventListener('click', recordLinkClick);
+    });
+
+    it('moves focus to the link on Enter, so that a second Enter opens it', async () => {
+      const user = userEvent.setup();
+      renderGridBetweenButtons({ gridColumns: columnsWithLinks });
+
+      await user.tab();
+      await user.tab();
+      await user.keyboard('{End}');
+      await expectFocus('Open row-0');
+
+      await user.keyboard('{Enter}');
+      expect(screen.getByRole('link', { name: 'Open row-0' })).toHaveFocus();
+      expect(openedLinks).toEqual([]);
+
+      await user.keyboard('{Enter}');
+      expect(openedLinks).toEqual(['https://example.com/row-0']);
+    });
+
+    it('keeps focus on a cell without focusable content on Enter', async () => {
+      const user = userEvent.setup();
+      renderGridBetweenButtons({ gridColumns: columnsWithLinks });
+
+      await user.tab();
+      await user.tab();
+      await user.keyboard('{Enter}');
+
+      await expectFocus('Name 0');
+    });
+
+    it('wraps Tab inside the cell content and returns to the cell on Escape', async () => {
+      const user = userEvent.setup();
+      const { after } = renderGridBetweenButtons({ gridColumns: columnsWithTwoLinks });
+      const firstLink = screen.getByRole('link', { name: 'First row-0' });
+      const secondLink = screen.getByRole('link', { name: 'Second row-0' });
+
+      await user.tab();
+      await user.tab();
+      await user.keyboard('{ArrowRight}');
+      await expectFocus('First row-0 Second row-0');
+      await user.keyboard('{Enter}');
+      expect(firstLink).toHaveFocus();
+
+      await user.tab();
+      expect(secondLink).toHaveFocus();
+      await user.tab();
+      expect(firstLink).toHaveFocus();
+      await user.tab({ shift: true });
+      expect(secondLink).toHaveFocus();
+
+      await user.keyboard('{Escape}');
+      await expectFocus('First row-0 Second row-0');
+      await user.tab();
+      expect(after).toHaveFocus();
+    });
+
+    it('activates the cell that owns a clicked link', async () => {
+      const user = userEvent.setup();
+      const { after } = renderGridBetweenButtons({ gridColumns: columnsWithLinks });
+
+      await user.click(screen.getByRole('link', { name: 'Open row-1' }));
+      expect(openedLinks).toEqual(['https://example.com/row-1']);
+
+      await user.click(after);
+      await user.tab({ shift: true });
+      await expectFocus('Open row-1');
+    });
+
+    it('moves focus to a details summary on Enter', async () => {
+      const user = userEvent.setup();
+      renderGridBetweenButtons({
+        gridColumns: createContentColumns((rowId) => (
+          <details>
+            <summary>{`More about ${rowId}`}</summary>
+            Details
+          </details>
+        )),
+      });
+
+      await user.tab();
+      await user.tab();
+      await user.keyboard('{End}{Enter}');
+
+      expect(screen.getByText('More about row-0')).toHaveFocus();
+    });
+
+    it('skips content that opts out with a negative tabindex on Enter', async () => {
+      const user = userEvent.setup();
+      renderGridBetweenButtons({
+        gridColumns: createContentColumns((rowId) => (
+          <>
+            <a href={`https://example.com/${rowId}`} tabIndex={-1}>{`Skipped ${rowId}`}</a>{' '}
+            <button type="button">{`Inspect ${rowId}`}</button>
+          </>
+        )),
+      });
+
+      await user.tab();
+      await user.tab();
+      await user.keyboard('{End}{Enter}');
+
+      expect(screen.getByRole('button', { name: 'Inspect row-0' })).toHaveFocus();
+    });
   });
 });

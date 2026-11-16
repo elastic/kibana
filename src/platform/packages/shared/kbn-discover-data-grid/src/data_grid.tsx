@@ -83,6 +83,8 @@ export const DataGrid = <TRow extends object>({
 
   const styles = useEuiMemoizedStyles(getDataGridStyles);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const startTabGuardRef = useRef<HTMLSpanElement>(null);
+  const endTabGuardRef = useRef<HTMLSpanElement>(null);
   const [headerRowGroupElement, setHeaderRowGroupElement] = useState<HTMLDivElement | null>(null);
   const { height: headerHeight } = useResizeObserver(headerRowGroupElement);
   const {
@@ -204,9 +206,43 @@ export const DataGrid = <TRow extends object>({
     [columnIds, focus, rowIds]
   );
 
+  // Redirects focus entering through a Tab guard to the logical tab stop. A guard focused by the Tab
+  // hand-off below keeps focus so that the browser's default Tab continues from it.
+  const onTabGuardFocus = useCallback(
+    ({ relatedTarget }: React.FocusEvent<HTMLSpanElement>) => {
+      if (relatedTarget && scrollContainerRef.current?.contains(relatedTarget)) {
+        return;
+      }
+      if (focus.activeCell) {
+        void focus.focusCell(focus.activeCell);
+        return;
+      }
+      scrollContainerRef.current?.focus();
+    },
+    [focus]
+  );
+
+  // Hands Tab and Shift+Tab to the matching guard, so that focusables rendered inside cells are
+  // never Tab stops. Tab already handled inside a cell's content, and events from consumer portals,
+  // are left alone.
+  const onGridKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    const { key, shiftKey, target, currentTarget } = event;
+    if (
+      key !== keys.TAB ||
+      event.defaultPrevented ||
+      !(target instanceof Node) ||
+      !currentTarget.contains(target)
+    ) {
+      return;
+    }
+    const guard = shiftKey ? startTabGuardRef.current : endTabGuardRef.current;
+    guard?.focus({ preventScroll: true });
+  }, []);
+
   return (
     <>
       <OverrideCopiedTabularContent>
+        <span ref={startTabGuardRef} tabIndex={0} css={styles.tabGuard} onFocus={onTabGuardFocus} />
         <div
           ref={scrollContainerRef}
           role="grid"
@@ -218,11 +254,7 @@ export const DataGrid = <TRow extends object>({
           css={styles.grid}
           style={{ blockSize: height, scrollPaddingBlockStart: headerHeight }}
           onFocus={onGridFocus}
-          onKeyDownCapture={(event) => {
-            if (event.key === keys.TAB) {
-              focus.releaseFocusOwnership();
-            }
-          }}
+          onKeyDown={onGridKeyDown}
         >
           <div ref={setHeaderRowGroupElement} role="rowgroup" css={styles.headerRowGroup}>
             {headerGroups.map((headerGroup, headerGroupIndex) => (
@@ -312,6 +344,7 @@ export const DataGrid = <TRow extends object>({
             })}
           </div>
         </div>
+        <span ref={endTabGuardRef} tabIndex={0} css={styles.tabGuard} onFocus={onTabGuardFocus} />
       </OverrideCopiedTabularContent>
       {liveRegion}
     </>

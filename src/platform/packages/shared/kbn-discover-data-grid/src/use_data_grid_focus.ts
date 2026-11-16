@@ -43,7 +43,6 @@ interface UseDataGridFocusResult {
   readonly focusCell: DataGridApi['focusCell'];
   readonly registerCell: (address: DataGridCellAddress, element: HTMLDivElement | null) => void;
   readonly activateFocusedCell: (address: DataGridCellAddress) => void;
-  readonly releaseFocusOwnership: () => void;
 }
 
 const completedResult: DataGridCommandResult = { status: 'completed' };
@@ -388,8 +387,8 @@ export const useDataGridFocus = ({
       releaseFocusOwnership();
     };
 
-    document.addEventListener('focusin', onDocumentFocusIn);
-    return () => document.removeEventListener('focusin', onDocumentFocusIn);
+    document.addEventListener('focusin', onDocumentFocusIn, true);
+    return () => document.removeEventListener('focusin', onDocumentFocusIn, true);
   }, [gridRef, releaseFocusOwnership]);
 
   const api = useMemo<DataGridApi>(() => ({ focusCell, scrollToCell }), [focusCell, scrollToCell]);
@@ -400,6 +399,5 @@ export const useDataGridFocus = ({
     focusCell,
     registerCell,
     activateFocusedCell,
-    releaseFocusOwnership,
   };
 };

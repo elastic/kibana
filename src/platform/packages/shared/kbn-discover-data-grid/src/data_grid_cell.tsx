@@ -10,7 +10,8 @@
 import React, { useCallback, useMemo } from 'react';
 import type { ClipboardEvent, KeyboardEvent } from 'react';
 import type { SerializedStyles } from '@emotion/react';
-import { tabularCopyMarkers } from '@elastic/eui';
+import { keys, tabularCopyMarkers } from '@elastic/eui';
+import { tabbable } from 'tabbable';
 
 import type { DataGridCellAddress, DataGridCommandResult } from './data_grid_api';
 import type { DataGridColumn } from './data_grid_column';
@@ -40,6 +41,18 @@ const hasExplicitTextSelection = (): boolean => {
   return Boolean(selection && !selection.isCollapsed && selection.toString().length > 0);
 };
 
+// Returns the tab stop after (or before) the one holding the target, wrapping around the cell.
+const getWrappedTabStop = (
+  tabStops: ReadonlyArray<HTMLElement | SVGElement>,
+  target: Node,
+  backwards: boolean
+): HTMLElement | SVGElement => {
+  const currentIndex = tabStops.findIndex((tabStop) => tabStop.contains(target));
+  const start = currentIndex >= 0 ? currentIndex : backwards ? 0 : -1;
+  const step = backwards ? -1 : 1;
+  return tabStops[(start + step + tabStops.length) % tabStops.length];
+};
+
 export const DataGridCell = <TRow extends object>({
   address,
   row,
@@ -64,12 +77,9 @@ export const DataGridCell = <TRow extends object>({
     (element: HTMLDivElement | null) => registerCell(stableAddress, element),
     [registerCell, stableAddress]
   );
+  // Focus on the cell or inside its content, such as a clicked link, makes it the active cell.
   const onFocus = useCallback(
-    (event: React.FocusEvent<HTMLDivElement>) => {
-      if (event.target === event.currentTarget) {
-        activateFocusedCell(stableAddress);
-      }
-    },
+    () => activateFocusedCell(stableAddress),
     [activateFocusedCell, stableAddress]
   );
 
@@ -91,9 +101,47 @@ export const DataGridCell = <TRow extends object>({
     },
     [announceCopyFailure, announceCopySuccess, textValue]
   );
+  // Inside the content, Escape returns to the cell and Tab wraps among the cell's tab stops.
+  // Unhandled keys, and Tab in content without tab stops, are left to the grid and browser.
+  const onContentKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      const { key, shiftKey, target, currentTarget: cellElement } = event;
+      if (event.defaultPrevented || !(target instanceof Node) || !cellElement.contains(target)) {
+        return;
+      }
+
+      if (key === keys.ESCAPE) {
+        event.preventDefault();
+        void focusCell(stableAddress);
+        return;
+      }
+      if (key !== keys.TAB) {
+        return;
+      }
+      const tabStops = tabbable(cellElement);
+      if (tabStops.length === 0) {
+        return;
+      }
+      event.preventDefault();
+      getWrappedTabStop(tabStops, target, shiftKey).focus();
+    },
+    [focusCell, stableAddress]
+  );
+
   const onKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       if (event.target !== event.currentTarget) {
+        onContentKeyDown(event);
+        return;
+      }
+
+      // Enter moves focus into the content, so that a second Enter activates a link natively.
+      if (event.key === keys.ENTER) {
+        const [firstTabStop] = tabbable(event.currentTarget);
+        if (firstTabStop) {
+          event.preventDefault();
+          firstTabStop.focus();
+        }
         return;
       }
 
@@ -112,7 +160,7 @@ export const DataGridCell = <TRow extends object>({
         void focusCell(navigationIntent.target);
       }
     },
-    [columnIds, focusCell, rowIds, stableAddress]
+    [columnIds, focusCell, onContentKeyDown, rowIds, stableAddress]
   );
 
   return (
@@ -121,7 +169,6 @@ export const DataGridCell = <TRow extends object>({
       role="gridcell"
       tabIndex={isActive ? 0 : -1}
       aria-colindex={columnIndex + 1}
-      aria-label={textValue}
       css={cellStyles}
       onFocus={onFocus}
       onCopy={onCopy}

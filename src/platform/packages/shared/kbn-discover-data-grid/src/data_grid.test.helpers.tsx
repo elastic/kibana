@@ -43,6 +43,16 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('tabbable', () => {
+  const actual = jest.requireActual<typeof import('tabbable')>('tabbable');
+  // JSDOM has no layout, so tabbable's default display check would treat every element as hidden.
+  return {
+    ...actual,
+    tabbable: (...[container, options]: Parameters<typeof actual.tabbable>) =>
+      actual.tabbable(container, { ...options, displayCheck: 'none' }),
+  };
+});
+
 jest.mock('@tanstack/react-table', () => {
   const actual =
     jest.requireActual<typeof import('@tanstack/react-table')>('@tanstack/react-table');
@@ -182,6 +192,17 @@ export const columns = [
     renderCell: ({ value }) => value.toLocaleString(),
   }),
 ];
+// The link text differs from the text value, so tests can tell the accessible name from the copied value.
+export const columnsWithLinks = [
+  ...columns,
+  columnHelper.accessor({
+    id: 'link',
+    header: 'Link',
+    getValue: (row) => `https://example.com/${row.id}`,
+    getTextValue: ({ value }) => value,
+    renderCell: ({ value, rowId }) => <a href={value}>{`Open ${rowId}`}</a>,
+  }),
+];
 export const columnsWithAriaLabel = [
   columnHelper.accessor({
     id: 'name',
@@ -230,11 +251,33 @@ export const TestDataGrid = ({
 
 export const renderGrid = (props: TestDataGridProps = {}) => render(<TestDataGrid {...props} />);
 
+export const renderGridBetweenButtons = (props: TestDataGridProps = {}) => {
+  render(
+    <>
+      <button type="button">Before grid</button>
+      <TestDataGrid {...props} />
+      <button type="button">After grid</button>
+    </>
+  );
+  return {
+    before: screen.getByRole('button', { name: 'Before grid' }),
+    after: screen.getByRole('button', { name: 'After grid' }),
+  };
+};
+
 export const expectFocus = async (accessibleName: string): Promise<HTMLElement> => {
   const cell = await screen.findByRole('gridcell', { name: accessibleName });
   await waitFor(() => expect(document.activeElement).toBe(cell));
   return cell;
 };
+
+// The Tab guards are tab stops outside the grid, so composite tab stops are counted inside it.
+export const getCompositeTabStops = (container: HTMLElement): HTMLElement[] =>
+  Array.from(
+    container.querySelectorAll<HTMLElement>(
+      '[role="grid"][tabindex="0"], [role="grid"] [tabindex="0"]'
+    )
+  );
 
 export const focusElement = (element: HTMLElement): void => {
   act(() => element.focus());

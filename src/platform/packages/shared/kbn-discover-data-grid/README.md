@@ -76,9 +76,13 @@ Row virtualization is enabled by default. Its estimated height and overscan can 
 `virtualization.rows`; omitting those options uses the package defaults.
 
 Each column must provide a `getTextValue` callback. It returns the canonical plain-text cell value
-used as the default accessible name and focused-cell clipboard value. It should match the visible
-data semantically and is deliberately separate from `renderCell`, so visual React content never has
-to be inspected or converted back into text.
+copied from a focused cell when there is no text selection. It should match the visible data
+semantically and is deliberately separate from `renderCell`, so visual React content never has to be
+inspected or converted back into text.
+
+Cells take their accessible name from their rendered content, so links, images, and other semantics
+in `renderCell` output stay exposed to assistive technology. Content without visible text, such as an
+icon, must provide its own accessible name.
 
 ## Keyboard and focus behavior
 
@@ -89,9 +93,24 @@ are not part of the keyboard navigation plane.
 - Arrow keys move one cell without wrapping.
 - Home and End move to the first and last cell in the current row.
 - Ctrl/Cmd+Home and Ctrl/Cmd+End move to the first and last body cell.
+- Enter moves focus to the first focusable element in the active cell's content.
+  Cells without focusable content ignore Enter.
+- While focus is inside a cell's content, Tab and Shift+Tab wrap among that cell's focusable
+  elements, and Escape returns focus to the cell. The grid looks these elements up when a key needs
+  them and never rewrites their `tabindex`.
 - The browser's copy command copies the column-provided text value unless the user has an explicit
   text selection. Multi-cell text selections are copied as tab-separated columns and
   newline-separated rows, matching EUIDataGrid.
+
+The grid stays a single Tab stop even when read-only cell content contains incidental focusables,
+such as links rendered by a field formatter. Those elements are never Tab stops: keyboard users reach
+them with Enter, and they stay clickable and reachable through screen-reader link navigation.
+
+- Visually hidden focus guards before and after the grid catch Tab and Shift+Tab entry and move focus
+  to the logical active cell. If virtualization removed that cell's row, the grid mounts and scrolls
+  to it first.
+- Tab and Shift+Tab from a cell, or from an empty grid, hand focus to the matching guard, and the
+  browser's default Tab continues from there, past the grid.
 
 Consumers that need semantic control can pass `apiRef` and call `focusCell` or `scrollToCell` with a
 stable `{ rowId, columnId }` address. Commands return explicit completed, failed, or cancelled

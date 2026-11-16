@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 
 import {
   cleanupDataGridTestState,
   columnsWithAriaLabel,
+  columnsWithLinks,
   expectFocus,
   focusElement,
+  getCompositeTabStops,
   renderGrid,
   resetDataGridTestState,
 } from './data_grid.test.helpers';
@@ -60,24 +62,36 @@ describe('DataGrid accessibility', () => {
     expect(header.getAttribute('aria-label')).toBe('Full name');
   });
 
+  it('names cells from their rendered content so nested links stay exposed', () => {
+    renderGrid({ gridColumns: columnsWithLinks });
+
+    const cell = screen.getByRole('gridcell', { name: 'Open row-0' });
+    expect(within(cell).getByRole('link', { name: 'Open row-0' })).toBeVisible();
+
+    // user-event's copy() dispatches nothing without a text selection.
+    const setData = jest.fn();
+    fireEvent.copy(cell, { clipboardData: { setData } });
+    expect(setData).toHaveBeenCalledWith('text/plain', 'https://example.com/row-0');
+  });
+
   it('keeps exactly one composite tab stop and restores it on re-entry', async () => {
     const { container } = renderGrid();
 
     const firstCell = screen.getByRole('gridcell', { name: 'Name 0' });
-    expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+    expect(getCompositeTabStops(container)).toHaveLength(1);
     expect(firstCell.getAttribute('tabindex')).toBe('0');
     expect(screen.getByRole('grid').getAttribute('tabindex')).toBe('-1');
 
     focusElement(firstCell);
     fireEvent.keyDown(firstCell, { key: 'ArrowRight' });
     const secondCell = await expectFocus('0');
-    expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+    expect(getCompositeTabStops(container)).toHaveLength(1);
     expect(secondCell.getAttribute('tabindex')).toBe('0');
 
     const outsideButton = document.createElement('button');
     document.body.append(outsideButton);
     focusElement(outsideButton);
-    const restoredTabStop = container.querySelector<HTMLElement>('[tabindex="0"]');
+    const [restoredTabStop] = getCompositeTabStops(container);
     if (!restoredTabStop) {
       throw new Error('Expected the grid to retain a composite tab stop.');
     }
@@ -90,12 +104,12 @@ describe('DataGrid accessibility', () => {
     const { container } = renderGrid({ gridRows: [] });
     const grid = screen.getByRole('grid');
     expect(grid.getAttribute('tabindex')).toBe('0');
-    expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+    expect(getCompositeTabStops(container)).toHaveLength(1);
     focusElement(grid);
     expect(document.activeElement).toBe(grid);
   });
 
-  it('copies the accessible cell value when no text is selected', async () => {
+  it('copies the column text value when no text is selected', async () => {
     renderGrid();
     const cell = screen.getByRole('gridcell', { name: '0' });
     focusElement(cell);
