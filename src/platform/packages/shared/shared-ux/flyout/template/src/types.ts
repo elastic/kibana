@@ -224,8 +224,8 @@ type FlyoutFooterSecondaryActionCommonProps = Omit<
   FlyoutFooterActionBaseProps;
 
 /**
- * Icons the AI-styled secondary action accepts. `addToChat` is left out because `AiButtonEmpty`
- * replaces the button's text with its own label for that icon, which would override `label`.
+ * Icons an AI-styled secondary action can take while the caller supplies `label`.
+ * `addToChat` is a separate variant: `AiButtonEmpty` supplies the shared Add to chat label.
  */
 export type FlyoutFooterAiActionIconType = Exclude<AiButtonIconType, 'addToChat'>;
 
@@ -236,6 +236,14 @@ export type FlyoutFooterSecondaryActionProps =
       /** Renders the action with AI styling, for an action that hands off to an AI agent or chat. */
       variant: 'ai';
       iconType?: FlyoutFooterAiActionIconType;
+    })
+  | (Omit<FlyoutFooterSecondaryActionCommonProps, 'iconType' | 'label'> & {
+      /**
+       * Renders an Add to chat action. `AiButtonEmpty` supplies the shared label and sparkles icon,
+       * so `label` is not accepted.
+       */
+      variant: 'ai';
+      iconType: 'addToChat';
     });
 
 type WithStringName<T> = T extends { name: ReactNode } ? Omit<T, 'name'> & { name: string } : T;

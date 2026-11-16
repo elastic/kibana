@@ -47,7 +47,13 @@ Set `variant="ai"` on `SecondaryAction` for an action that hands off to an AI ag
 </FlyoutTemplate.Footer>
 ```
 
-It takes the same props as the default variant, except that `iconType` is limited to the AI icons: `productAgent`, `sparkles`, `aiAssistantLogo`, and `inspect`. `addToChat` is not accepted, because `AiButtonEmpty` replaces the button's text with its own label for that icon, which would override `label`.
+It takes the same props as the default variant, except that `iconType` is limited to the AI icons: `productAgent`, `sparkles`, `aiAssistantLogo`, and `inspect`.
+
+`iconType="addToChat"` is a separate variant. `AiButtonEmpty` supplies the shared Add to chat label and sparkles icon, so `label` is not accepted.
+
+```tsx
+<FlyoutTemplate.Footer.SecondaryAction variant="ai" iconType="addToChat" onClick={onAddToChat} />
+```
 
 ## Primary action menu
 

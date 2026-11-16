@@ -6,7 +6,14 @@
  */
 
 import http from 'http';
-import getPort, { portNumbers } from 'get-port';
+import getPort from 'get-port';
+
+// `get-port` exports this helper, but its package map hides the named export from TypeScript.
+function* portNumbers(from: number, to: number): Iterable<number> {
+  for (let port = from; port <= to; port++) {
+    yield port;
+  }
+}
 
 interface McpTool {
   name: string;
