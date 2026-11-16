@@ -1336,6 +1336,7 @@ describe('ComposeDiscoverFlyout', () => {
         stepTitle: 'Custom',
         createDefaultState: () => ({ marker: 'custom-default' }),
         renderStep: () => null,
+        parseState: () => null,
       });
 
       renderFlyout({

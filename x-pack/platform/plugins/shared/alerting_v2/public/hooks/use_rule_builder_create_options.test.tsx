@@ -29,6 +29,7 @@ const earlierBuilder = {
   },
   createDefaultState: () => ({}),
   renderStep: () => null,
+  parseState: () => null,
 };
 
 const laterBuilder = {
@@ -44,6 +45,7 @@ const laterBuilder = {
   },
   createDefaultState: () => ({}),
   renderStep: () => null,
+  parseState: () => null,
 };
 
 describe('useRuleBuilderCreateOptions', () => {

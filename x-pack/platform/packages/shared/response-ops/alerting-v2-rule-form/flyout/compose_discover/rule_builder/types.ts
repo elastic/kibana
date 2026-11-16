@@ -57,5 +57,5 @@ export interface RuleBuilderDefinition<TState = BuilderState> {
   renderStep: (props: RuleBuilderStepProps<TState>) => React.ReactNode;
   renderRecoveryStep?: (props: RuleBuilderRecoveryStepProps<TState>) => React.ReactNode;
   validate?: (state: ComposeDiscoverState, builderState?: TState) => boolean;
-  parseState?: (query: string, recoveryQuery?: string) => TState | null;
+  parseState: (query: string, recoveryQuery?: string) => TState | null;
 }

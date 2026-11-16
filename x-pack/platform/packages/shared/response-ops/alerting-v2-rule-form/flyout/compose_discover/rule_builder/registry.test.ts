@@ -46,6 +46,7 @@ describe('RuleBuilderRegistry', () => {
         stepTitle: 'Empty',
         createDefaultState: () => ({}),
         renderStep: () => null,
+        parseState: () => null,
       })
     ).toThrow(/non-empty/);
 
@@ -62,6 +63,7 @@ describe('RuleBuilderRegistry', () => {
       },
       createDefaultState: () => ({}),
       renderStep: () => null,
+      parseState: () => null,
     });
 
     expect(registry.getCreateOptions().map((option) => option.type)).toEqual([
@@ -74,6 +76,7 @@ describe('RuleBuilderRegistry', () => {
         stepTitle: 'Again',
         createDefaultState: () => ({}),
         renderStep: () => null,
+        parseState: () => null,
       })
     ).toThrow(/already registered/);
   });
@@ -85,6 +88,7 @@ describe('RuleBuilderRegistry', () => {
       stepTitle: 'Scoped',
       createDefaultState: () => ({}),
       renderStep: () => null,
+      parseState: () => null,
     });
 
     expect(registry.has('scoped-builder')).toBe(true);

@@ -21,10 +21,7 @@ const tryParseBuilderState = (
   recoveryQuery?: string
 ): BuilderState | null => {
   const definition = ruleBuilderRegistry.get(type);
-  if (definition?.parseState) {
-    return definition.parseState(query, recoveryQuery);
-  }
-  return null;
+  return definition ? definition.parseState(query, recoveryQuery) : null;
 };
 
 interface UseBuilderToEsqlTransitionOptions {

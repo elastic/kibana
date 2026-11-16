@@ -23,6 +23,7 @@ const definition = {
   stepTitle: 'Logs',
   createDefaultState: () => ({}),
   renderStep: () => null,
+  parseState: () => null,
 };
 
 const createRegistry = (): jest.Mocked<RuleBuilderRegistryContract> => ({
