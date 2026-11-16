@@ -27,7 +27,7 @@ function getGroupHash({
 }
 
 /** A wrapped reading, or the note that says why it was dropped. */
-export type TWrapReadingResult =
+export type WrapReadingResult =
   | { dropped: false; signal: DetectionSignal }
   | { dropped: true; note: string };
 
@@ -40,14 +40,16 @@ export type TWrapReadingResult =
 export function wrapReading({
   reading,
   strategyId,
+  strategyVersion,
   spaceId,
   scheduledMinute,
 }: {
   reading: DetectionSignalReading;
   strategyId: string;
+  strategyVersion: number;
   spaceId: string;
   scheduledMinute: number;
-}): TWrapReadingResult {
+}): WrapReadingResult {
   const { status, ...data } = reading;
 
   const parsed = detectionSignalSchema.safeParse({
@@ -61,7 +63,7 @@ export function wrapReading({
     source: DETECTION_SIGNAL_SOURCE,
     type: 'signal',
     space_id: spaceId,
-    data: { ...data, strategy: strategyId },
+    data: { ...data, strategy: strategyId, strategy_version: strategyVersion },
   });
 
   if (!parsed.success) {

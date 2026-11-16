@@ -17,7 +17,7 @@ import {
 } from '../../../common/detection_signal';
 import { DetectionEngineSystemClient } from '../engine/es_client_tokens';
 import type { DetectionSignalReading } from '../strategies/types';
-import type { IDetectionSignalStore, IWriteSignalsResult } from './signal_store';
+import type { DetectionSignalStore, WriteSignalsResult } from './signal_store';
 
 const RETENTION = '30d';
 const INGEST_PIPELINE_ID = `${DETECTION_SIGNALS_FALLBACK_STREAM}-ingest-timestamp`;
@@ -57,7 +57,7 @@ function isAlreadyExistsError(error: unknown): boolean {
  * upgrades the lifecycle or final pipeline of a stream that already exists.
  */
 @injectable()
-export class FallbackSignalStore implements IDetectionSignalStore {
+export class FallbackSignalStore implements DetectionSignalStore {
   private ready: Promise<void> | undefined;
 
   constructor(
@@ -87,7 +87,7 @@ export class FallbackSignalStore implements IDetectionSignalStore {
    * Writes the signals in one bulk call and reports the ones the stream rejected. A signal that
    * already exists (HTTP 409) was written by an earlier attempt, so it counts as written.
    */
-  public async write(signals: DetectionSignal[]): Promise<IWriteSignalsResult> {
+  public async write(signals: DetectionSignal[]): Promise<WriteSignalsResult> {
     if (signals.length === 0) {
       return { written: 0, failures: [] };
     }
@@ -98,7 +98,7 @@ export class FallbackSignalStore implements IDetectionSignalStore {
       operations: signals.flatMap((signal) => [{ create: { _id: getSignalId(signal) } }, signal]),
     });
 
-    const failures: IWriteSignalsResult['failures'] = [];
+    const failures: WriteSignalsResult['failures'] = [];
     response.items.forEach((item, index) => {
       const error = item.create?.error;
       if (error && item.create?.status !== 409) {
@@ -179,7 +179,12 @@ export class FallbackSignalStore implements IDetectionSignalStore {
         continue;
       }
 
-      const { strategy: _strategy, triage: _triage, ...reading } = parsed.data.data;
+      const {
+        strategy: _strategy,
+        strategy_version: _strategyVersion,
+        triage: _triage,
+        ...reading
+      } = parsed.data.data;
       const readings = history.get(reading.fingerprint) ?? [];
       readings.push({ status: parsed.data.status, ...reading });
       history.set(reading.fingerprint, readings);
