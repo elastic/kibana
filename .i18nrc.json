@@ -176,7 +176,10 @@
     "sse": [
       "src/platform/packages/shared/kbn-sse-utils"
     ],
-    "coloring": "src/platform/packages/shared/kbn-coloring/src",
+    "coloring": [
+      "src/platform/packages/shared/kbn-coloring/src",
+      "src/platform/packages/shared/kbn-coloring-components"
+    ],
     "languageDocumentation": "src/platform/packages/private/kbn-language-documentation/src",
     "esql": "src/platform/plugins/shared/esql",
     "esqlDataGrid": "src/platform/plugins/shared/esql_datagrid",
@@ -243,7 +246,10 @@
     "navigationCustomizationComponents": "src/platform/packages/shared/navigation-customization-components",
     "savedSearchComponent": "src/platform/packages/shared/kbn-saved-search-component",
     "visualizationListing": "src/platform/plugins/shared/visualization_listing",
-    "visualizationsCommon": "src/platform/packages/shared/kbn-visualizations-common",
+    "visualizationsCommon": [
+      "src/platform/packages/shared/kbn-visualizations-common",
+      "src/platform/packages/shared/kbn-visualizations-components"
+    ],
     "workflows": [
       "src/platform/packages/shared/kbn-workflows",
       "src/platform/packages/shared/kbn-workflows-library",

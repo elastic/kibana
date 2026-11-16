@@ -174,7 +174,7 @@ export const createOnboardingClient = ({
         await installAssistantAgent({ agentBuilder, spaceId, availability: agentAvailability });
       }
       await ensureFailureSweep?.(request, spaceId);
-      logger.info(`Enabled Nightshift in space "${spaceId}": investigation agent installed`);
+      logger.info(`Enabled nightshift in space "${spaceId}": investigation agent installed`);
 
       try {
         if (!actions || !elasticsearch) {

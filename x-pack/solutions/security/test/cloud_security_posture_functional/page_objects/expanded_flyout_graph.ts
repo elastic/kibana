@@ -22,8 +22,8 @@ const {
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
-  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
-  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
+  GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
+  GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_CONTROL_FIT_TO_VIEW_TEST_ID,
@@ -135,7 +135,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   /**
    * Finds toolbar buttons belonging to a specific node, matching any of the given test subjects.
    *
-   * Label nodes render their toolbar via a ReactFlow NodeToolbar portal
+   * Event nodes render their toolbar via a ReactFlow NodeToolbar portal
    * (`.react-flow__node-toolbar[data-id="..."]`).
    * Entity nodes render their toolbar as an absolutely-positioned div inside the node element
    * (`.react-flow__node[data-id="..."]`) — no portal is used.
@@ -232,7 +232,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   async showEventsOfSameAction(nodeId: string): Promise<void> {
     await this.clickOnNodeToolbarItem(
       nodeId,
-      GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
+      GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
     );
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
@@ -240,7 +240,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   async showEventOrAlertDetails(nodeId: string): Promise<void> {
     await this.clickOnNodeToolbarItem(
       nodeId,
-      GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
+      GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
     );
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
@@ -248,7 +248,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   async hideEventsOfSameAction(nodeId: string): Promise<void> {
     await this.clickOnNodeToolbarItem(
       nodeId,
-      GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
+      GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
     );
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }

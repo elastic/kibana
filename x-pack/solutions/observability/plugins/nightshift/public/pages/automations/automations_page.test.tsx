@@ -15,6 +15,7 @@ import {
   useAutomationRunsInRange,
   useAutomationRunActivity,
   useAutomationsRunsInRange,
+  useAutomationsRunCounts,
   useCreateAutomation,
   useCurrentUsername,
   useDeleteAutomation,
@@ -23,15 +24,23 @@ import {
   useToggleAutomation,
   useUpdateAutomation,
 } from '../../data/automations/use_automations';
-import { useRunQuotas } from '../../data/run_quotas/use_significant_events_run_quotas';
+import { useInvestigationQuotas } from '../../data/run_quotas/use_investigation_quotas';
 import { useKibana } from '../../hooks/use_kibana';
 import type { Automation } from '../../data/automations/use_automations';
 
 jest.mock('../../data/automations/use_automations', () => ({
   AUTOMATIONS_LOAD_ERROR_TITLE: 'Failed to load automations',
   useAutomationRunsInRange: jest.fn(),
+  useAutomationDetail: () => ({
+    data: { isWorkflowMissing: false },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
+  useRepairAutomation: () => ({ mutate: jest.fn(), isLoading: false }),
   useAutomationRunActivity: jest.fn(),
   useAutomationsRunsInRange: jest.fn(),
+  useAutomationsRunCounts: jest.fn(),
   useCreateAutomation: jest.fn(),
   useCurrentUsername: jest.fn(),
   useDeleteAutomation: jest.fn(),
@@ -46,8 +55,8 @@ let mockServiceAccount: { data?: Record<string, unknown> } = {};
 jest.mock('../../data/service_accounts/use_investigator_service_account', () => ({
   useInvestigatorServiceAccount: () => mockServiceAccount,
 }));
-jest.mock('../../data/run_quotas/use_significant_events_run_quotas', () => ({
-  useRunQuotas: jest.fn(),
+jest.mock('../../data/run_quotas/use_investigation_quotas', () => ({
+  useInvestigationQuotas: jest.fn(),
 }));
 jest.mock('../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 jest.mock('../../data/relay_apps/use_relay_app_bindings', () => ({
@@ -65,13 +74,14 @@ jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
 
 const mockUseAutomationRunsInRange = useAutomationRunsInRange as jest.Mock;
 const mockUseAutomationsRunsInRange = useAutomationsRunsInRange as jest.Mock;
+const mockUseAutomationsRunCounts = useAutomationsRunCounts as jest.Mock;
 const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
 const mockUseCurrentUsername = useCurrentUsername as jest.Mock;
 const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
 const mockUseFetchAutomations = useFetchAutomations as jest.Mock;
 const mockUseToggleAutomation = useToggleAutomation as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
-const mockUseRunQuotas = useRunQuotas as jest.Mock;
+const mockUseInvestigationQuotas = useInvestigationQuotas as jest.Mock;
 
 const uiSettingsValues: Record<string, string> = {
   'dateFormat:tz': 'Browser',
@@ -106,11 +116,9 @@ describe('AutomationsPage', () => {
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
-    mockUseRunQuotas.mockReturnValue({ data: undefined, refetch: jest.fn() });
-    mockUseAutomationRunsInRange.mockReturnValue({
-      data: { runs: [], total: 0, usedToday: 0 },
-      isInitialLoading: false,
-    });
+    mockUseAutomationsRunCounts.mockReturnValue(undefined);
+    mockUseInvestigationQuotas.mockReturnValue({ data: undefined, refetch: jest.fn() });
+    mockUseAutomationRunsInRange.mockReturnValue({ runs: [], isLoading: false });
     mockUseCreateAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
     mockUseCurrentUsername.mockReturnValue('Daniel Hughes');
     mockUseDeleteAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
@@ -226,12 +234,21 @@ describe('AutomationsPage', () => {
         },
         isInitialLoading: false,
       });
-      mockUseRunQuotas.mockReturnValue({
+      mockUseInvestigationQuotas.mockReturnValue({
         data: {
           enabled: true,
-          investigationLimitsEnabled: true,
-          limits: { investigation: 0, manual_investigation: 0, total_investigation: 0, [group]: 1 },
-          counts: { investigation: 0, manual_investigation: 0, total_investigation: 0, [group]: 1 },
+          limits: {
+            automatic_investigation: null,
+            manual_investigation: null,
+            total_investigation: null,
+            [group]: 1,
+          },
+          counts: {
+            automatic_investigation: 0,
+            manual_investigation: 0,
+            total_investigation: 0,
+            [group]: 1,
+          },
           window: {
             start: '2040-01-01T00:00:00.000Z',
             resetsAt: '2040-01-02T00:00:00.000Z',
@@ -260,9 +277,9 @@ describe('AutomationsPage', () => {
   );
 
   it.each([
-    { investigationLimitsEnabled: true, manualLimit: 1, manualCount: 0 },
-    { investigationLimitsEnabled: true, manualLimit: 0, manualCount: 20 },
-    { investigationLimitsEnabled: false, manualLimit: 1, manualCount: 20 },
+    { enabled: true, manualLimit: 1, manualCount: 0 },
+    { enabled: true, manualLimit: null, manualCount: 20 },
+    { enabled: false, manualLimit: 1, manualCount: 20 },
   ])(
     'keeps Run available for automatic-only limits, unlimited or disabled manual quotas: %j',
     (settings) => {
@@ -285,17 +302,16 @@ describe('AutomationsPage', () => {
         isInitialLoading: false,
       });
       mockUseAutomationsRunsInRange.mockReturnValue([{ data: { runs: [], usedToday: 100 } }]);
-      mockUseRunQuotas.mockReturnValue({
+      mockUseInvestigationQuotas.mockReturnValue({
         data: {
-          enabled: true,
-          investigationLimitsEnabled: settings.investigationLimitsEnabled,
+          enabled: settings.enabled,
           limits: {
-            investigation: 1,
+            automatic_investigation: 1,
             manual_investigation: settings.manualLimit,
-            total_investigation: 0,
+            total_investigation: null,
           },
           counts: {
-            investigation: 1,
+            automatic_investigation: 1,
             manual_investigation: settings.manualCount,
             total_investigation: 20,
           },
@@ -549,28 +565,15 @@ describe('AutomationsPage', () => {
       deleteMutate.mockClear();
       toggleMutate.mockClear();
       mockUseFetchAutomations.mockReturnValue({ data: { automations }, isInitialLoading: false });
-      mockUseAutomationsRunsInRange.mockImplementation((ids: string[], startedAfter: string) =>
-        ids.map((id) => ({
-          data: {
-            total: startedAfter === todayStart.toISOString() ? totals[id].today : totals[id].range,
-            usedToday: totals[id].today,
-            runs:
-              id === 'triage'
-                ? [
-                    ...Array(25).fill({ status: 'succeeded' }),
-                    ...Array(3).fill({ status: 'skipped' }),
-                  ]
-                : [],
-          },
-        }))
+      mockUseAutomationsRunsInRange.mockImplementation((ids: string[]) =>
+        ids.map((id) => ({ data: { usedToday: totals[id].today } }))
       );
-      mockUseAutomationRunsInRange.mockImplementation((id: string) => ({
-        data: {
-          total: totals[id].range,
-          usedToday: totals[id].today,
-          runs: [{ status: 'completed', startedAt: new Date().toISOString() }],
-        },
-        isInitialLoading: false,
+      mockUseAutomationsRunCounts.mockReturnValue({
+        triage: { succeeded: 25, running: 0, failed: 0, skipped: 3 },
+      });
+      mockUseAutomationRunsInRange.mockImplementation(() => ({
+        runs: [{ status: 'completed', startedAt: new Date().toISOString() }],
+        isLoading: false,
       }));
       mockUseCreateAutomation.mockReturnValue({ mutate: createMutate, isLoading: false });
       mockUseDeleteAutomation.mockReturnValue({ mutate: deleteMutate, isLoading: false });
@@ -734,8 +737,12 @@ describe('AutomationsPage', () => {
     });
 
     it('shows only the global callout when automations are also rate limited', () => {
-      mockUseRunQuotas.mockReturnValue({
-        data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: 3 } },
+      mockUseInvestigationQuotas.mockReturnValue({
+        data: {
+          enabled: true,
+          limits: { automatic_investigation: 3 },
+          counts: { automatic_investigation: 3 },
+        },
       });
       renderPage();
 
@@ -744,7 +751,7 @@ describe('AutomationsPage', () => {
     });
 
     it('hides the global callout and keeps the page working when the limit cannot be loaded', () => {
-      mockUseRunQuotas.mockReturnValue({
+      mockUseInvestigationQuotas.mockReturnValue({
         data: undefined,
         error: new Error('Forbidden'),
         refetch: jest.fn(),
@@ -758,14 +765,18 @@ describe('AutomationsPage', () => {
 
     it('shows the paused callout only when the global investigation limit is reached', () => {
       const quotas = (used: number) => ({
-        data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: used } },
+        data: {
+          enabled: true,
+          limits: { automatic_investigation: 3 },
+          counts: { automatic_investigation: used },
+        },
       });
-      mockUseRunQuotas.mockReturnValue(quotas(2));
+      mockUseInvestigationQuotas.mockReturnValue(quotas(2));
       const { unmount } = renderPage();
       expect(screen.queryByTestId('automationsGlobalLimitBanner')).not.toBeInTheDocument();
       unmount();
 
-      mockUseRunQuotas.mockReturnValue(quotas(3));
+      mockUseInvestigationQuotas.mockReturnValue(quotas(3));
       renderPage();
       expect(screen.getByTestId('automationsGlobalLimitBanner')).toBeInTheDocument();
     });
@@ -774,17 +785,17 @@ describe('AutomationsPage', () => {
       const quotas = (canManage: boolean) => ({
         data: {
           enabled: true,
-          limits: { investigation: 3 },
-          counts: { investigation: 3 },
+          limits: { automatic_investigation: 3 },
+          counts: { automatic_investigation: 3 },
           canManage,
         },
       });
-      mockUseRunQuotas.mockReturnValue(quotas(false));
+      mockUseInvestigationQuotas.mockReturnValue(quotas(false));
       const { unmount } = renderPage();
       expect(screen.queryByTestId('automationsGlobalLimitSettingsLink')).not.toBeInTheDocument();
       unmount();
 
-      mockUseRunQuotas.mockReturnValue(quotas(true));
+      mockUseInvestigationQuotas.mockReturnValue(quotas(true));
       renderPage();
       expect(screen.getByTestId('automationsGlobalLimitSettingsLink')).toHaveAttribute(
         'href',

@@ -1,0 +1,28 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "test/**/*",
+    ".storybook/**/*",
+    "../../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/config-schema",
+    "@kbn/features-plugin",
+    "@kbn/management-plugin",
+    "@kbn/app-header",
+    "@kbn/scout",
+    "@kbn/storybook",
+    "@kbn/kibana-react-plugin"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

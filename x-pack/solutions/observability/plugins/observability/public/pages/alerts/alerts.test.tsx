@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/maintenance-windows-plugin/common';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
@@ -71,7 +71,7 @@ jest.mock('../../utils/kibana_react', () => ({
 
 const useLocationMock = useLocation as jest.Mock;
 
-jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/ebt-tools/react');
 
 const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });

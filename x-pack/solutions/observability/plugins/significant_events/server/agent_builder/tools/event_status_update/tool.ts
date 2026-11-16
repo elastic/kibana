@@ -13,11 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { lazySchema } from '@kbn/zod/v4';
 import {
   significantEventManualStatusSchema,
+  significantEventCloseReasonSchema,
   significantEventSchema,
 } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -37,6 +39,7 @@ export const eventStatusUpdateSchema = lazySchema(() =>
     })
     .extend({
       status: significantEventManualStatusSchema,
+      close_reason: significantEventCloseReasonSchema.optional(),
       event_id: significantEventSchema.shape.event_id.describe(
         'The event_id of the existing significant event to update.'
       ),
@@ -78,6 +81,7 @@ export function createEventStatusUpdateTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       try {
         const { getEventSearchClient, licensing } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing });
@@ -87,22 +91,31 @@ export function createEventStatusUpdateTool({
           eventSearchClient: await getEventSearchClient(),
           eventId: toolParams.event_id,
           status: toolParams.status,
+          closeReason: toolParams.close_reason,
           assessmentNote: toolParams.assessment_note,
+          workflowExecutionId,
         });
 
         trackTelemetryBestEffort({
           logger,
           description: 'event_status_update telemetry',
           track: () =>
-            telemetry.trackAgentToolEventStatusUpdate({
-              ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
-              success:
-                data.updated === 1 ||
-                data.reason === 'already_in_state' ||
-                data.reason === 'not_a_breach',
-              event_id: toolParams.event_id,
-              status: toolParams.status,
-            }),
+            telemetry.trackAgentToolEventStatusUpdate(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ...existingAlertIdentity({
+                  eventId: toolParams.event_id,
+                  spaceId: request.spaceId,
+                }),
+                success:
+                  data.updated === 1 ||
+                  data.reason === 'already_in_state' ||
+                  data.reason === 'not_a_breach',
+                event_id: toolParams.event_id,
+                status: toolParams.status,
+              },
+              request
+            ),
         });
 
         return { results: [{ type: ToolResultType.other, data }] };
@@ -113,13 +126,20 @@ export function createEventStatusUpdateTool({
           logger,
           description: 'failed event_status_update telemetry',
           track: () =>
-            telemetry.trackAgentToolEventStatusUpdate({
-              ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
-              success: false,
-              event_id: toolParams.event_id,
-              status: toolParams.status,
-              error_message: message,
-            }),
+            telemetry.trackAgentToolEventStatusUpdate(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ...existingAlertIdentity({
+                  eventId: toolParams.event_id,
+                  spaceId: request.spaceId,
+                }),
+                success: false,
+                event_id: toolParams.event_id,
+                status: toolParams.status,
+                error_message: message,
+              },
+              request
+            ),
         });
         return {
           results: [

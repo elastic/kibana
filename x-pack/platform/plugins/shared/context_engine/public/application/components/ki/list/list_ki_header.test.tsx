@@ -64,9 +64,7 @@ describe('ListKiHeader', () => {
 
   it('requests active KIs by default', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
-    expect(mockUseListKi).toHaveBeenLastCalledWith(
-      expect.objectContaining({ lifecycleStatus: ['active'] })
-    );
+    expect(mockUseListKi).toHaveBeenLastCalledWith(expect.objectContaining({ status: ['active'] }));
   });
 
   it('requests a type filter when a type is selected', () => {
@@ -80,7 +78,7 @@ describe('ListKiHeader', () => {
     fireEvent.click(screen.getByTestId('contextListKiStatusFilters'));
     fireEvent.click(screen.getByTestId('contextListKiStatusFilter-deleted'));
     expect(mockUseListKi).toHaveBeenLastCalledWith(
-      expect.objectContaining({ lifecycleStatus: ['deleted'] })
+      expect.objectContaining({ status: ['deleted'] })
     );
   });
 

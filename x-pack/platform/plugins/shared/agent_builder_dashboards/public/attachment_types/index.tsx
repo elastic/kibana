@@ -10,7 +10,7 @@ import { combineLatest, EMPTY, from, switchMap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import type { ChromeStart } from '@kbn/core/public';
+import type { ChromeStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
@@ -59,6 +59,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   dashboardPlugin,
   canWriteDashboards,
   draftAttachmentId,
+  toasts,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   chrome: ChromeStart;
@@ -68,6 +69,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   dashboardPlugin: DashboardStart;
   canWriteDashboards: boolean;
   draftAttachmentId: IdGenerator;
+  toasts: NotificationsStart['toasts'];
 }): (() => void) => {
   let dashboardApi: DashboardApi | undefined;
   const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
@@ -104,6 +106,9 @@ export const registerDashboardAttachmentUiDefinition = ({
                 createDashboardAppIntegration$({
                   agentBuilder,
                   api,
+                  canWriteDashboards,
+                  dashboardLocator,
+                  toasts,
                   draftAttachmentId,
                   checkSavedDashboardExist,
                   getUpdateOrigin: (attachmentId) => updateOriginByAttachmentId.get(attachmentId),
@@ -163,6 +168,7 @@ export const registerDashboardAttachmentUiDefinition = ({
               canWriteDashboards,
               isSidebar,
               dashboardLocator,
+              toasts,
               checkSavedDashboardExist,
               openCanvas,
             });
