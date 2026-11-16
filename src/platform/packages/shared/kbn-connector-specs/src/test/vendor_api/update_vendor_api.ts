@@ -31,18 +31,17 @@ import {
 } from './manifest';
 import type { VendorApiLog } from './load_vendor_specs';
 import {
-  applyOverlayToSources,
+  applyOverlayWithFindings,
   FIXTURES,
   MANIFEST,
   OVERLAY,
   readOptional,
-  SILENT_LOG,
   snapshotFile,
 } from './load_vendor_specs';
 import { parseSpecText } from './parse_spec_text';
 import { projectSpec } from './project_spec';
 import { assessPagination } from './propose_pagination';
-import type { RecordingFinding } from './record_actions';
+import type { ActionsRecording, RecordingFinding } from './record_actions';
 import { recordActions } from './record_actions';
 import { toStableJson } from './stable_json';
 
@@ -65,6 +64,8 @@ export interface UpdateVendorApiOptions {
   readonly refresh?: boolean;
   /** Reports what would change instead of writing it. */
   readonly check?: boolean;
+  /** Records which response fields each action reads, copies and returns. */
+  readonly trackFields?: boolean;
   readonly fetchText: (url: string) => Promise<string>;
   /** When the document `fetchText` returned for a URL was fetched, if not just now. */
   readonly fetchedAt?: (url: string) => Date | undefined;
@@ -77,6 +78,20 @@ export interface UpdateVendorApiResult {
   readonly changed: readonly string[];
   /** What makes the artifacts untrustworthy; the script fails when there are any. */
   readonly problems: readonly string[];
+  /** The `problems` of each action, without the action's name in front. */
+  readonly problemsByAction: Readonly<Record<string, readonly string[]>>;
+  /** The `problems` that concern no single action, e.g. a missing pagination declaration. */
+  readonly otherProblems: readonly string[];
+  /** The specs the actions were recorded against, by source, without the overlay. */
+  readonly specs: Readonly<Record<string, OpenApiDocument>>;
+  /**
+   * The zero-based indexes of the overlay actions that match nothing in any source; only
+   * assessed when every source was fetched, as a snapshot lacks what the connector doesn't call.
+   */
+  readonly staleOverlayActions: readonly number[];
+  /** With `trackFields`, as `recordActions` reports them. */
+  readonly fieldUse?: ActionsRecording['fieldUse'];
+  readonly untracked?: ActionsRecording['untracked'];
 }
 
 const listSnapshots = async (directory: string): Promise<string[]> => {
@@ -151,6 +166,7 @@ export const updateVendorApi = async ({
   pages: pageFlags = {},
   refresh = false,
   check = false,
+  trackFields = false,
   fetchText,
   fetchedAt: fetchedAtOf,
   now,
@@ -222,17 +238,42 @@ export const updateVendorApi = async ({
   }
 
   const fetchedEverySource = loaded.size === Object.keys(raw).length;
-  const specs = applyOverlayToSources(raw, overlay, fetchedEverySource ? log : SILENT_LOG);
+  const { specs, unmatchedActions } = applyOverlayWithFindings(raw, overlay);
+  // A snapshot only has the operations the connector calls, so an overlay action matching
+  // nothing there may still be needed.
+  const staleOverlayActions = fetchedEverySource ? unmatchedActions : [];
+  for (const index of staleOverlayActions) {
+    log.warning(
+      `${OVERLAY} action ${index} matches nothing in any source; the vendor may have fixed it`
+    );
+  }
 
   log.info(
     `Recording ${Object.keys(connector.actions).length} actions of ${connector.metadata.id}`
   );
-  const recording = await recordActions({ connector, specs, fixtures });
+  const recording = await recordActions({ connector, specs, fixtures, trackFields });
   // Each generated input reports its own findings, which are often the same.
   const problems = new Set<string>();
+  const problemsByAction = new Map<string, Set<string>>();
+  const otherProblems = new Set<string>();
+  const addProblem = (text: string, action?: string) => {
+    problems.add(text);
+    if (action === undefined) {
+      otherProblems.add(text);
+      return;
+    }
+    const prefix = `${action}: `;
+    const own = problemsByAction.get(action) ?? new Set<string>();
+    own.add(text.startsWith(prefix) ? text.slice(prefix.length) : text);
+    problemsByAction.set(action, own);
+  };
   const warnings = new Set<string>();
   for (const finding of recording.findings) {
-    (isProblem(finding) ? problems : warnings).add(describeFinding(finding));
+    if (isProblem(finding)) {
+      addProblem(describeFinding(finding), 'action' in finding ? finding.action : undefined);
+    } else {
+      warnings.add(describeFinding(finding));
+    }
   }
 
   const operationKey = ({ source, method, path: operationPath }: ManifestOperation) =>
@@ -257,7 +298,7 @@ export const updateVendorApi = async ({
         `${key}: proposed "pagination" from ${proposed.basis} in ${MANIFEST}; review it`
       );
     } else if (assessment.listLike) {
-      problems.add(
+      addProblem(
         `${key} looks like it returns a collection, as ${assessment.reason}; declare its "pagination" in ${MANIFEST}, or "none" if it returns everything at once`
       );
     }
@@ -287,8 +328,9 @@ export const updateVendorApi = async ({
         }
       } else {
         const refreshHint = fetchAll ? '' : '; if it is new to the connector, rerun with --refresh';
-        problems.add(
-          `${action}: ${method.toUpperCase()} ${requestPath} matches no operation of any source; correct the spec in ${OVERLAY}, or add it to "unmatched" in ${MANIFEST} with a reason${refreshHint}`
+        addProblem(
+          `${action}: ${method.toUpperCase()} ${requestPath} matches no operation of any source; correct the spec in ${OVERLAY}, or add it to "unmatched" in ${MANIFEST} with a reason${refreshHint}`,
+          action
         );
       }
     }
@@ -345,5 +387,16 @@ export const updateVendorApi = async ({
       }
     }
   }
-  return { changed, problems: [...problems] };
+  return {
+    changed,
+    problems: [...problems],
+    problemsByAction: Object.fromEntries(
+      [...problemsByAction].map(([action, own]) => [action, [...own]])
+    ),
+    otherProblems: [...otherProblems],
+    specs: raw,
+    staleOverlayActions,
+    ...(recording.fieldUse ? { fieldUse: recording.fieldUse } : {}),
+    ...(recording.untracked ? { untracked: recording.untracked } : {}),
+  };
 };

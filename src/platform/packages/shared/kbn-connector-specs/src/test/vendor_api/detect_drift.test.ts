@@ -110,15 +110,38 @@ describe('detectDrift', () => {
   });
 
   it('reports nothing to do while the spec is unchanged', async () => {
-    expect(await detect()).toEqual({
+    expect(await detect({ folder: 'src/specs/example' })).toEqual({
       connector: '.example',
-      sources: { main: { status: 'unchanged' } },
+      sources: {
+        main: {
+          status: 'unchanged',
+          url: SPEC_URL,
+          servers: { snapshot: [BASE], latest: [BASE] },
+        },
+      },
       operationsChanged: false,
       snapshotProblems: [],
       latestProblems: [],
       verdict: 'healthy',
       overlayFindings: [],
       outcome: 'none',
+      displayName: 'Example',
+      folder: 'src/specs/example',
+      checkedAt: '2026-10-23T12:00:00.000Z',
+      actions: [
+        {
+          action: 'getItems',
+          operations: [{ source: 'main', operation: 'GET /items', latest: { status: 'present' } }],
+          unmatched: [],
+          snapshotProblems: [],
+          latestProblems: [],
+          fieldUse: { 'main GET /items': { read: [], copied: [], returned: [''] } },
+          tracked: true,
+          fieldChanges: [],
+        },
+      ],
+      otherProblems: { snapshot: [], latest: [] },
+      staleCorrections: [],
     });
     expect(diff).not.toHaveBeenCalled();
   });
@@ -135,25 +158,23 @@ describe('detectDrift', () => {
     });
     diffEntries = [entry('response-optional-property-added', 1)];
 
-    expect(await detect()).toEqual(
-      expect.objectContaining({
-        sources: {
-          main: {
-            status: 'changed',
-            changes: [
-              {
-                kind: 'non-breaking',
-                id: 'response-optional-property-added',
-                text: 'response-optional-property-added',
-                operation: 'GET /items',
-              },
-            ],
-          },
+    expect(await detect()).toMatchObject({
+      sources: {
+        main: {
+          status: 'changed',
+          changes: [
+            {
+              kind: 'non-breaking',
+              id: 'response-optional-property-added',
+              text: 'response-optional-property-added',
+              operation: 'GET /items',
+            },
+          ],
         },
-        verdict: 'healthy',
-        outcome: 'refresh',
-      })
-    );
+      },
+      verdict: 'healthy',
+      outcome: 'refresh',
+    });
   });
 
   it('reports vendor drift when an action fails against the latest spec only', async () => {
@@ -171,6 +192,129 @@ describe('detectDrift', () => {
     ]);
     expect(drift.operationsChanged).toBe(true);
     expect(drift).toEqual(expect.objectContaining({ verdict: 'vendor-drift', outcome: 'issue' }));
+    expect(drift.actions).toMatchObject([
+      {
+        action: 'getItems',
+        operations: [{ source: 'main', operation: 'GET /items', latest: { status: 'missing' } }],
+        unmatched: [],
+        snapshotProblems: [],
+        latestProblems: [expect.stringMatching(/^GET \/items matches no operation of any source/)],
+      },
+    ]);
+  });
+
+  it('finds operations whose path prefix moved into the server URL, and the correction that hides it', async () => {
+    const versioned: ConnectorSpec = {
+      ...connector,
+      actions: {
+        getItems: {
+          scope: 'read',
+          input: z.object({}),
+          handler: async ({ client }) => (await client.get(`${BASE}/v1/items`)).data,
+        },
+      },
+    };
+    const versionedDirectory = path.join(directory, 'versioned');
+    await fs.mkdir(versionedDirectory);
+    documents[SPEC_URL] = specYaml({ itemsPath: '/v1/items' });
+    await updateVendorApi({
+      connector: versioned,
+      directory: versionedDirectory,
+      sources: { main: SPEC_URL },
+      fetchText: async (url) => documents[url],
+      now: () => new Date('2026-10-07T12:00:00.000Z'),
+      log: { info: () => {}, warning: () => {} },
+    });
+    // Corrections like Sentry's: match any host, and fix the operation
+    await fs.writeFile(
+      path.join(versionedDirectory, 'overlay.yaml'),
+      `overlay: 1.0.0
+info: { title: Corrections, version: '1' }
+actions:
+  - target: $.servers
+    description: Self-hosted instances serve the API too
+    remove: true
+  - target: "$.paths['/v1/items'].get"
+    description: The vendor documents no error responses
+    update: { responses: { '404': { description: Not found } } }
+`
+    );
+    documents[SPEC_URL] = specYaml({ itemsPath: '/items' }).replace(
+      `servers: [{ url: '${BASE}' }]`,
+      `servers: [{ url: '${BASE}/v1' }]`
+    );
+
+    const drift = await detect({ connector: versioned, directory: versionedDirectory });
+
+    expect(drift.verdict).toBe('vendor-drift');
+    expect(drift.actions?.[0].operations).toEqual([
+      {
+        source: 'main',
+        operation: 'GET /v1/items',
+        latest: { status: 'moved', path: '/items', serverPath: '/v1' },
+      },
+    ]);
+    expect(drift.sources.main.servers).toEqual({ snapshot: [BASE], latest: [`${BASE}/v1`] });
+    expect(drift.serversCorrection).toBe(0);
+    expect(drift.staleCorrections).toEqual([
+      {
+        index: 1,
+        target: "$.paths['/v1/items'].get",
+        latest: { status: 'moved', path: '/items', serverPath: '/v1' },
+      },
+    ]);
+  });
+
+  it('opens an issue when a response field an action reads changed', async () => {
+    const reader: ConnectorSpec = {
+      ...connector,
+      actions: {
+        getName: {
+          scope: 'read',
+          input: z.object({}),
+          handler: async ({ client }) => {
+            const { data } = await client.get(`${BASE}/items`);
+            return { name: data.name };
+          },
+        },
+      },
+    };
+    const readerDirectory = path.join(directory, 'reader');
+    await fs.mkdir(readerDirectory);
+    await updateVendorApi({
+      connector: reader,
+      directory: readerDirectory,
+      sources: { main: SPEC_URL },
+      fetchText: async (url) => documents[url],
+      now: () => new Date('2026-10-07T12:00:00.000Z'),
+      log: { info: () => {}, warning: () => {} },
+    });
+    documents[SPEC_URL] = specYaml({ itemProperties: '{ name: { type: integer } }' });
+    diffEntries = [entry('response-property-type-changed', 3)];
+
+    const drift = await detect({ connector: reader, directory: readerDirectory });
+
+    expect(drift.verdict).toBe('healthy');
+    expect(drift.actions?.[0]).toMatchObject({
+      fieldUse: { 'main GET /items': { read: ['name'] } },
+      tracked: true,
+      fieldChanges: [{ operation: 'GET /items', field: 'name', changes: ['type string → number'] }],
+    });
+    expect(drift.outcome).toBe('issue');
+  });
+
+  it('proposes a refresh for a breaking response change to fields no action reads', async () => {
+    documents[SPEC_URL] = specYaml({ itemProperties: '{ name: { type: integer } }' });
+    diffEntries = [entry('response-property-type-changed', 3)];
+
+    const drift = await detect();
+
+    expect(drift.actions?.[0]).toMatchObject({
+      fieldUse: { 'main GET /items': { read: [], returned: [''] } },
+      tracked: true,
+      fieldChanges: [],
+    });
+    expect(drift).toMatchObject({ verdict: 'healthy', outcome: 'refresh' });
   });
 
   it('opens an issue for deprecations, though the actions still pass', async () => {
@@ -187,13 +331,13 @@ describe('detectDrift', () => {
   it('opens an issue when the latest spec does not load', async () => {
     delete documents[SPEC_URL];
 
-    expect(await detect()).toEqual(
-      expect.objectContaining({
-        sources: { main: { status: 'unreachable', error: expect.stringContaining('404') } },
-        verdict: 'unknown',
-        outcome: 'issue',
-      })
-    );
+    expect(await detect()).toMatchObject({
+      sources: {
+        main: { status: 'unreachable', error: expect.stringContaining('404'), url: SPEC_URL },
+      },
+      verdict: 'unknown',
+      outcome: 'issue',
+    });
   });
 
   it('loads a Markdown reference by its format and pages', async () => {
@@ -228,13 +372,11 @@ describe('detectDrift', () => {
       log: { info: () => {}, warning: () => {} },
     });
 
-    expect(await detect({ directory: markdownDirectory })).toEqual(
-      expect.objectContaining({
-        sources: { main: { status: 'unchanged' } },
-        verdict: 'healthy',
-        outcome: 'none',
-      })
-    );
+    expect(await detect({ directory: markdownDirectory })).toMatchObject({
+      sources: { main: { status: 'unchanged' } },
+      verdict: 'healthy',
+      outcome: 'none',
+    });
   });
 
   it('reports a Kibana-side regression when actions fail against the snapshots', async () => {
@@ -266,9 +408,10 @@ describe('detectDrift', () => {
     });
     diffEntries = undefined;
 
-    expect(await detect()).toEqual(
-      expect.objectContaining({ sources: { main: { status: 'changed' } }, outcome: 'issue' })
-    );
+    expect(await detect()).toMatchObject({
+      sources: { main: { status: 'changed' } },
+      outcome: 'issue',
+    });
   });
 
   it('reports overlay actions that no longer match the latest spec', async () => {

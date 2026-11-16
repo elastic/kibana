@@ -32,6 +32,7 @@ const drifted: ConnectorDrift = {
   sources: {
     main: {
       status: 'changed',
+      url: 'https://specs.example.com/openapi.json',
       changes: [
         {
           kind: 'breaking',
@@ -43,9 +44,30 @@ const drifted: ConnectorDrift = {
       ],
     },
   },
-  latestProblems: ['search: GET /items: limit must be <= 50'],
+  latestProblems: ['search: GET /items breaks the spec: limit must be <= 50'],
   verdict: 'vendor-drift',
   outcome: 'issue',
+  displayName: 'Acme',
+  folder: 'src/specs/acme',
+  checkedAt: '2026-11-16T06:00:00.000Z',
+  actions: [
+    {
+      action: 'search',
+      operations: [{ source: 'main', operation: 'GET /items', latest: { status: 'present' } }],
+      unmatched: [],
+      snapshotProblems: [],
+      latestProblems: ['GET /items breaks the spec: limit must be <= 50'],
+    },
+    {
+      action: 'getItem',
+      operations: [{ source: 'main', operation: 'GET /items/{id}', latest: { status: 'present' } }],
+      unmatched: [],
+      snapshotProblems: [],
+      latestProblems: [],
+    },
+  ],
+  otherProblems: { snapshot: [], latest: [] },
+  staleCorrections: [],
 };
 
 const refreshable: ConnectorDrift = {
@@ -67,8 +89,14 @@ const createTracker = (initial: DriftIssue[] = []) => {
   const comments: Array<[number, string]> = [];
   const tracker: IssueTracker = {
     list: jest.fn(async () => issues),
-    create: jest.fn(async ({ body }) => {
-      const issue: DriftIssue = { number: 100 + issues.length, state: 'open', body, url: 'url' };
+    create: jest.fn(async ({ title, body }) => {
+      const issue: DriftIssue = {
+        number: 100 + issues.length,
+        state: 'open',
+        title,
+        body,
+        url: 'url',
+      };
       issues.push(issue);
       return issue;
     }),
@@ -103,7 +131,10 @@ const surface = (
 const issueOf = (drift: ConnectorDrift, number: number, state: 'open' | 'closed'): DriftIssue => ({
   number,
   state,
-  body: renderDriftIssue(drift, ['elastic/response-ops']).body,
+  ...renderDriftIssue(drift, {
+    owners: ['elastic/response-ops'],
+    buildUrl: 'https://buildkite.com/build/1',
+  }),
   url: `url/${number}`,
 });
 
@@ -117,11 +148,12 @@ describe('surfaceDrift', () => {
     ]);
     expect(tracker.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: '[Connector validation] Vendor API drift in .acme',
+        title: '[Connector validation] .acme: 1 action fails the drift check',
         labels: [DRIFT_ISSUE_LABEL],
       })
     );
     expect(issues[0].body).toContain('cc @elastic/response-ops');
+    expect(issues[0].body).toContain('([build](https://buildkite.com/build/1))');
   });
 
   it('files no duplicate on the next run with the same findings', async () => {
@@ -134,14 +166,31 @@ describe('surfaceDrift', () => {
     expect(tracker.update).not.toHaveBeenCalled();
   });
 
-  it('updates the open issue and comments when the findings change', async () => {
+  it('updates the open issue, its title included, and comments when the findings change', async () => {
     const { tracker, issues, comments } = createTracker([issueOf(drifted, 7, 'open')]);
-    const changed: ConnectorDrift = { ...drifted, latestProblems: ['another problem'] };
+    const changed: ConnectorDrift = {
+      ...drifted,
+      actions: drifted.actions?.map((action) => ({
+        ...action,
+        latestProblems: ['another problem'],
+      })),
+    };
     const { actions } = await surface([changed], tracker);
 
     expect(actions[0]).toMatchObject({ action: 'updated', issue: { number: 7 } });
     expect(issues[0].body).toContain('another problem');
+    expect(issues[0].title).toBe('[Connector validation] .acme: 2 actions fail the drift check');
     expect(comments).toEqual([[7, expect.stringContaining('https://buildkite.com/build/1')]]);
+  });
+
+  it('updates the issue when only its title differs', async () => {
+    const { tracker, issues } = createTracker([
+      { ...issueOf(drifted, 7, 'open'), title: '[Connector validation] Vendor API drift in .acme' },
+    ]);
+    const { actions } = await surface([drifted], tracker);
+
+    expect(actions[0].action).toBe('updated');
+    expect(issues[0].title).toBe('[Connector validation] .acme: 1 action fails the drift check');
   });
 
   it('reopens a closed issue when the connector drifts again', async () => {
@@ -198,7 +247,7 @@ describe('surfaceDrift', () => {
 
   it('ignores labelled issues without a marker and closed issues of removed connectors', async () => {
     const { tracker } = createTracker([
-      { number: 3, state: 'open', body: 'Filed by hand', url: 'url' },
+      { number: 3, state: 'open', title: 'By hand', body: 'Filed by hand', url: 'url' },
       issueOf({ ...drifted, connector: '.removed' }, 7, 'closed'),
     ]);
     const { actions } = await surface([], tracker);
@@ -208,9 +257,7 @@ describe('surfaceDrift', () => {
   });
 
   it('leaves the issues of other connectors alone', async () => {
-    const { tracker } = createTracker([
-      { number: 3, state: 'open', body: renderDriftIssue(refreshable, []).body, url: 'url' },
-    ]);
+    const { tracker } = createTracker([issueOf(refreshable, 3, 'open')]);
     const { actions } = await surface([healthy], tracker);
 
     expect(actions[0].action).toBe('none');
@@ -261,19 +308,211 @@ describe('surfaceDrift', () => {
   });
 });
 
-describe('renderDriftIssue', () => {
-  it('reports the two-mock result, the classified changes and how to reproduce', () => {
-    const { body } = renderDriftIssue(drifted, []);
+// Sentry's spec moved `/api/0` from its paths into its server URL, which an overlay correction
+// of the servers hides from the check.
+const moved: ConnectorDrift = {
+  connector: '.sentry',
+  displayName: 'Sentry',
+  folder: 'src/specs/sentry',
+  checkedAt: '2026-11-16T06:00:00.000Z',
+  sources: {
+    v0: {
+      status: 'changed',
+      url: 'https://example.com/sentry.json',
+      servers: {
+        snapshot: ['https://{region}.sentry.io'],
+        latest: ['https://{region}.sentry.io/api/0'],
+      },
+      changes: [
+        {
+          kind: 'breaking',
+          id: 'api-path-removed-without-deprecation',
+          text: 'API path removed without deprecation',
+          operation: 'GET /api/0/issues/{id}/',
+        },
+      ],
+    },
+  },
+  operationsChanged: true,
+  snapshotProblems: [],
+  latestProblems: ['getIssue: GET /api/0/issues/string/ matches no operation of any source'],
+  verdict: 'vendor-drift',
+  overlayFindings: ['overlay.yaml action 1 matches nothing in any source'],
+  outcome: 'issue',
+  actions: [
+    {
+      action: 'getIssue',
+      operations: [
+        {
+          source: 'v0',
+          operation: 'GET /api/0/issues/{id}/',
+          latest: { status: 'moved', path: '/issues/{id}/', serverPath: '/api/0' },
+        },
+      ],
+      unmatched: [],
+      snapshotProblems: [],
+      latestProblems: [
+        'GET /api/0/issues/string/ matches no operation of any source; correct the spec in overlay.yaml',
+      ],
+    },
+    {
+      action: 'listRules',
+      operations: [],
+      unmatched: [
+        { operation: 'GET /api/0/rules/', reason: 'Legacy endpoint, absent from the spec' },
+      ],
+      snapshotProblems: [],
+      latestProblems: [],
+    },
+  ],
+  otherProblems: { snapshot: [], latest: [] },
+  staleCorrections: [
+    {
+      index: 1,
+      target: "$.paths['/api/0/issues/{id}/'].put.requestBody",
+      latest: { status: 'moved', path: '/issues/{id}/', serverPath: '/api/0' },
+    },
+  ],
+  serversCorrection: 0,
+};
 
-    expect(body).toContain('**Two-mock result:** vendor drift');
+describe('renderDriftIssue', () => {
+  it('says that paths moved into the server URL, why the check fails and how to fix it', () => {
+    const { title, body } = renderDriftIssue(moved, { owners: [] });
+
+    expect(title).toBe(
+      '[Connector validation] .sentry: spec paths moved into the server URL, 1 action fails the drift check'
+    );
+    expect(body).toContain('> [!NOTE]');
+    expect(body).toContain(
+      "**Sentry's spec moved `/api/0` from its paths into its server URL. The connector most likely still works.**"
+    );
+    expect(body).toContain("1 action isn't checked (see the table).");
+    expect(body).toContain(
+      '| **Server URL** | `https://{region}.sentry.io` → `https://{region}.sentry.io/api/0` |'
+    );
+    expect(body).toContain(
+      '[Committed snapshot](https://github.com/elastic/kibana/blob/main/src/specs/sentry/vendor_api/snapshots/v0.openapi.json)'
+    );
+    expect(body).toContain(
+      '| `getIssue` | `GET /api/0/issues/{id}/` | ⚠️ Moved in the spec, same URL |'
+    );
+    expect(body).toContain(
+      '| `listRules` | `GET /api/0/rules/` | ➖ Not checked: not in the spec (see below) |'
+    );
+    expect(body).toContain('the manifest records why: _Legacy endpoint, absent from the spec_');
+    expect(body).toContain('### Why the check fails');
+    expect(body).toContain('Correction 1 in [`overlay.yaml`]');
+    expect(body).toContain(
+      '| 2 | `PUT /api/0/issues/{id}/`: `requestBody` | Moved to `/issues/{id}/` |'
+    );
+    expect(body).toContain(
+      '1. In `overlay.yaml`, keep the `/api/0` base path when correction 1 changes the servers, and point correction 2 at the moved paths.'
+    );
+    // Moves stand in for the generated request paths, which say nothing to a reader
+    expect(body).not.toContain('string/');
+    expect(body).not.toContain('cc ');
+  });
+
+  it('lists failing actions first, quoting their problem, and the changes to the spec', () => {
+    const { body } = renderDriftIssue(drifted, { owners: [] });
+
+    expect(body).toContain('> [!WARNING]');
+    expect(body).toContain('**1 of 2 checked actions of `.acme` fail against the latest spec.**');
+    expect(body.indexOf('| `search` |')).toBeLessThan(body.indexOf('| `getItem` |'));
+    expect(body).toContain(
+      '| `search` | `GET /items` | ❌ Fails against the latest spec: GET /items breaks the spec: limit must be <= 50 |'
+    );
+    expect(body).toContain('| `getItem` | `GET /items/{id}` | ✅ Passes |');
     expect(body).toContain(
       '- `GET /items`: decreased the max of `limit` to 50 (`request-parameter-max-decreased`)'
     );
-    expect(body).toContain('<details><summary>1 non-breaking change(s)</summary>');
-    expect(body).toContain('- search: GET /items: limit must be <= 50');
+    expect(body).toContain('<details><summary>1 non-breaking change</summary>');
     expect(body).toContain('node scripts/connector_vendor_api --drift --connector acme');
-    expect(body).toContain('`/update-connector acme <this issue>`');
-    expect(body).not.toContain('cc ');
+    expect(body).toContain('`/update-connector acme <link to this issue>`');
+  });
+
+  it('flags actions that pass but whose operations changed', () => {
+    const passing: ConnectorDrift = {
+      ...drifted,
+      verdict: 'healthy',
+      latestProblems: [],
+      actions: drifted.actions?.map((action) => ({ ...action, latestProblems: [] })),
+    };
+    const { title, body } = renderDriftIssue(passing, { owners: [] });
+
+    expect(title).toBe('[Connector validation] .acme: actions pass, 1 spec change to review');
+    expect(body).toContain(
+      '| `search` | `GET /items` | ⚠️ Passes, but its operations changed: `request-parameter-max-decreased` |'
+    );
+  });
+
+  it('lists the changed fields that passing actions read, and those that read none', () => {
+    const passing: ConnectorDrift = {
+      ...drifted,
+      verdict: 'healthy',
+      latestProblems: [],
+      actions: [
+        {
+          ...(drifted.actions?.[0] as NonNullable<ConnectorDrift['actions']>[number]),
+          latestProblems: [],
+          tracked: true,
+          fieldUse: { 'main GET /items': { read: ['items/state'], copied: [], returned: [] } },
+          fieldChanges: [
+            { operation: 'GET /items', field: 'items/state', changes: ['new values: locked'] },
+          ],
+        },
+        {
+          action: 'listAll',
+          operations: [{ source: 'main', operation: 'GET /items', latest: { status: 'present' } }],
+          unmatched: [],
+          snapshotProblems: [],
+          latestProblems: [],
+          tracked: true,
+          fieldUse: { 'main GET /items': { read: [], copied: [], returned: [''] } },
+          fieldChanges: [],
+        },
+      ],
+    };
+    const { title, body } = renderDriftIssue(passing, { owners: [] });
+
+    expect(title).toBe('[Connector validation] .acme: actions pass, 1 field they read changed');
+    expect(body).toContain(
+      '**The connector still works against the latest spec: all 2 checked actions of `.acme` pass.** Its spec has 1 field the actions read changed (see the table).'
+    );
+    expect(body).toContain(
+      '| `search` | `GET /items` | ⚠️ Passes, but fields it reads changed: `items/state` (new values: locked) |'
+    );
+    expect(body).toContain(
+      '| `listAll` | `GET /items` | ✅ Passes · fields it reads unchanged; returns response fields as they are |'
+    );
+    expect(body).toContain('| `search` | `GET /items` | `items/state` | new values: locked |');
+  });
+
+  it('says when the actions pass but the check found problems outside them', () => {
+    const { title, body } = renderDriftIssue(
+      {
+        ...drifted,
+        actions: drifted.actions?.map((action) => ({ ...action, latestProblems: [] })),
+        otherProblems: {
+          snapshot: [],
+          latest: [
+            'Auth type bearer: 1 schema(s) are invalid:\n  POST /items: $ref does not resolve',
+          ],
+        },
+      },
+      { owners: [] }
+    );
+
+    expect(title).toBe(
+      '[Connector validation] .acme: the latest spec fails the drift check (1 problem outside the actions)'
+    );
+    expect(body).toContain(
+      '**Every checked action of `.acme` passes against the latest spec, but the check found 1 problem outside the actions**'
+    );
+    expect(body).toContain(
+      '- Auth type bearer: 1 schema(s) are invalid:\n    POST /items: $ref does not resolve'
+    );
   });
 
   it('reports unreachable sources and caps long change lists', () => {
@@ -282,20 +521,33 @@ describe('renderDriftIssue', () => {
       id: 'api-removed',
       text: `removed ${index}`,
     }));
-    const { body } = renderDriftIssue(
+    const { title, body } = renderDriftIssue(
       {
         ...drifted,
+        verdict: 'unknown',
         sources: {
           main: { status: 'changed', changes: many },
           extra: { status: 'unreachable', error: '404 Not Found' },
         },
       },
-      []
+      { owners: [] }
     );
 
+    expect(title).toBe("[Connector validation] .acme: a latest vendor spec couldn't be loaded");
     expect(body).toContain('- …and 10 more');
     expect(body).toContain('#### `extra`: unreachable');
-    expect(body).toContain('`404 Not Found`');
+    expect(body).toContain('| **Vendor spec `extra`** | Latest (unreachable: `404 Not Found`)');
+  });
+
+  it('renders a report from before the per-action fields', () => {
+    const { title, body } = renderDriftIssue(
+      { ...healthy, verdict: 'vendor-drift', latestProblems: ['search: limit must be <= 50'] },
+      { owners: ['elastic/response-ops'] }
+    );
+
+    expect(title).toBe('[Connector validation] .acme: vendor drift');
+    expect(body).toContain('- search: limit must be <= 50');
+    expect(body).toContain('cc @elastic/response-ops');
   });
 });
 

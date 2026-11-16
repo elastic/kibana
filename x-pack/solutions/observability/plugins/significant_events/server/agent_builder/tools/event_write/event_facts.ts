@@ -128,21 +128,22 @@ export const hasEventWorthySignal = (
   (signals ?? []).some(({ verdict }) => verdict === 'confirms' || verdict === 'off_topic');
 
 /**
- * The agent decides the tier under the `severity` field contract; the writer stores it. An inactive
- * event is `low`, so is one where no signal confirms anything, and a signal-less write (chat
- * create) keeps its explicit severity, or `low` when it gave none.
+ * Recovery and closure keep the incident's stored severity. Other writes use the agent's tier
+ * when supported by signals; a signal-less chat create keeps its explicit tier or defaults to low.
  */
 const decideSeverity = ({
   proposed,
+  storedSeverity,
   status,
   signals,
 }: {
   proposed: Severity | undefined;
+  storedSeverity: Severity | undefined;
   status: SignificantEvent['status'];
   signals: SignificantEvent['signals'];
 }): Severity => {
-  if (status === 'inactive') {
-    return 'low';
+  if (storedSeverity !== undefined && (status === 'recovering' || status === 'inactive')) {
+    return storedSeverity;
   }
   if ((signals ?? []).length === 0) {
     return proposed ?? 'low';
@@ -176,7 +177,7 @@ export const loadHistory = async ({
 
 /**
  * Merges this candidate's signals and topology with its prior versions (continuation only), then
- * takes the agent's proposed severity and floors an inactive event to low — the facts shared by
+ * preserves the stored severity during recovery and closure — the facts shared by
  * the no-op check and the final document, derived once per candidate so the two cannot disagree.
  */
 export const computeEventFacts = ({
@@ -209,7 +210,12 @@ export const computeEventFacts = ({
 
   const { status } = candidate;
 
-  const severity = decideSeverity({ proposed: candidate.input.severity, status, signals });
+  const severity = decideSeverity({
+    proposed: candidate.input.severity,
+    storedSeverity: latest?.severity,
+    status,
+    signals,
+  });
 
   // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to prevent identity hijack
   // A rule that now confirms what the event stored as unconfirmed changes what the event is about:

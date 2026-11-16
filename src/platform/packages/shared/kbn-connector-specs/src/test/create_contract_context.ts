@@ -22,6 +22,8 @@ import type {
   NormalizedAuthType,
 } from '../connector_spec';
 import { getSchemaForAuthType } from '../lib';
+import type { FieldUse } from './field_use';
+import { markReturned, trackFieldUse } from './field_use';
 
 export interface ContractContextOptions extends EmulatorOptions {
   readonly connector: ConnectorSpec;
@@ -30,6 +32,15 @@ export interface ContractContextOptions extends EmulatorOptions {
   /** Secrets for the auth type; fields left out get placeholders the auth schema accepts. */
   readonly secrets?: Readonly<Record<string, unknown>>;
   readonly config?: Readonly<Record<string, unknown>>;
+  /**
+   * Records what the handlers do with the response bodies: returns where to record the use of an
+   * operation's responses, by its source, method (lowercase) and path template.
+   */
+  readonly trackFields?: (operation: {
+    readonly source?: string;
+    readonly method: string;
+    readonly path: string;
+  }) => FieldUse;
 }
 
 export interface ContractContext {
@@ -220,6 +231,7 @@ export const createContractContext = async ({
   authType,
   secrets = {},
   config = {},
+  trackFields,
   ...mockOptions
 }: ContractContextOptions): Promise<ContractContext> => {
   const mock = createEmulatorFetch(mockOptions);
@@ -252,11 +264,25 @@ export const createContractContext = async ({
     }
     return requestConfig;
   });
-  client.interceptors.response.use((response) =>
-    streamed.has(response.config)
-      ? { ...response, data: Readable.from([Buffer.from(response.data)]) }
-      : response
-  );
+  client.interceptors.response.use((response) => {
+    if (streamed.has(response.config)) {
+      return { ...response, data: Readable.from([Buffer.from(response.data)]) };
+    }
+    if (!trackFields) {
+      return response;
+    }
+    // The mock records each request as `METHOD url`, without the query string.
+    const request = `${(response.config.method ?? 'get').toUpperCase()} ${
+      client.getUri(response.config).split('?')[0]
+    }`;
+    const call = [...mock.calls]
+      .reverse()
+      .find(({ request: called, matched }) => called === request && matched && 'method' in matched);
+    const matched = call?.matched;
+    return matched && 'method' in matched
+      ? { ...response, data: trackFieldUse(response.data, trackFields(matched)) }
+      : response;
+  });
   for (const [name, value] of Object.entries(connector.auth?.headers ?? {})) {
     client.defaults.headers.common[name] = value;
   }
@@ -282,7 +308,11 @@ export const createContractContext = async ({
       throw new Error(`${connector.metadata.id} has no action ${name}`);
     }
     const parsed = await action.input.parseAsync(input);
-    return withoutGlobalFetch(() => action.handler(ctx, parsed));
+    const result = await withoutGlobalFetch(() => action.handler(ctx, parsed));
+    if (trackFields) {
+      markReturned(result);
+    }
+    return result;
   };
 
   return { ctx, mock, runAction };
