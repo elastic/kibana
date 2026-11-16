@@ -77,16 +77,13 @@ describe('assertActionPolicyLinkable', () => {
       'policy-att'
     );
 
-    expect(warnings).toEqual([
-      expect.stringContaining('combined with that expression with AND'),
-    ]);
+    expect(warnings).toEqual([expect.stringContaining('combined with that expression with AND')]);
     expect(warnings[0]).not.toContain('applies to every alert rule');
   });
 
   it('does not warn about an unsaved expression-only draft', () => {
     expect(
-      assertActionPolicyLinkable(draft({ expression: 'severity: critical' }), 'policy-att')
-        .warnings
+      assertActionPolicyLinkable(draft({ expression: 'severity: critical' }), 'policy-att').warnings
     ).toEqual([]);
   });
 });
