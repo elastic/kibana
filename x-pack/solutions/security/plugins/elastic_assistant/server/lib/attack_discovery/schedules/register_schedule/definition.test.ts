@@ -26,7 +26,6 @@ describe('getAttackDiscoveryScheduleType', () => {
 
   it('should return schedule type definition', async () => {
     const scheduleType = getAttackDiscoveryScheduleType({
-      getInternalEsClient: jest.fn(),
       getInference: () => undefined,
       getWorkflowExecutorFactory: () => undefined,
       logger: mockLogger,

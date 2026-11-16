@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
@@ -23,7 +23,6 @@ import type { AttackDiscoveryWorkflowExecutorFactory } from '../../../../types';
 import { attackDiscoveryScheduleExecutor } from './executor';
 
 export interface GetAttackDiscoveryScheduleParams {
-  getInternalEsClient: () => Promise<ElasticsearchClient>;
   getInference: () => InferenceServerStart | undefined;
   getWorkflowExecutorFactory: () => AttackDiscoveryWorkflowExecutorFactory | undefined;
   logger: Logger;
@@ -32,7 +31,6 @@ export interface GetAttackDiscoveryScheduleParams {
 }
 
 export const getAttackDiscoveryScheduleType = ({
-  getInternalEsClient,
   getInference,
   getWorkflowExecutorFactory,
   logger,
@@ -71,7 +69,6 @@ export const getAttackDiscoveryScheduleType = ({
     alerts: ATTACK_DISCOVERY_ALERTS_AAD_CONFIG,
     executor: async (options: AttackDiscoveryExecutorOptions) => {
       return attackDiscoveryScheduleExecutor({
-        getInternalEsClient,
         getInference,
         getWorkflowExecutorFactory,
         options,
