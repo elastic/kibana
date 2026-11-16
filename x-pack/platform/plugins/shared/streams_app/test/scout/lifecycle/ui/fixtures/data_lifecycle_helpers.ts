@@ -9,6 +9,13 @@ import { type ApiServicesFixture, type EsClient, type Locator, type ScoutPage } 
 import { expect } from '@kbn/scout/ui';
 import { omit } from 'lodash';
 
+// The lifecycle flyouts below only close once a Streams `PUT /_ingest` write resolves. That write
+// takes the cluster-wide `streams/apply_changes` lock and fans out to several Elasticsearch calls,
+// so on Cloud it runs past Scout's 10s default expect timeout (sibling Streams writes were measured
+// at 6.8s and 10.2s there, see `enable_wired_streams_flow.spec.ts`). Well under the 90s Cloud test
+// timeout.
+const STREAMS_WRITE_CLOSE_TIMEOUT = 30_000;
+
 export const RETENTION_TEST_IDS = {
   // Entry points (lifecycle summary header actions)
   editLifecycleMethodButton: 'dataLifecycleSummaryEditLifecycleMethod',
@@ -220,7 +227,9 @@ export async function saveRetentionChanges(
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout).waitFor({ state: 'hidden' });
+  await page
+    .getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout)
+    .waitFor({ state: 'hidden', timeout: STREAMS_WRITE_CLOSE_TIMEOUT });
 
   if (waitForIlmStats) {
     await waitForLifecycleSummaryStatsSettled(page);
@@ -410,7 +419,7 @@ export async function setCustomRetention(
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await flyout.waitFor({ state: 'hidden' });
+  await flyout.waitFor({ state: 'hidden', timeout: STREAMS_WRITE_CLOSE_TIMEOUT });
 }
 
 /**
@@ -432,7 +441,7 @@ export async function removeDeletePhase(
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await flyout.waitFor({ state: 'hidden' });
+  await flyout.waitFor({ state: 'hidden', timeout: STREAMS_WRITE_CLOSE_TIMEOUT });
 }
 
 /**
@@ -486,7 +495,9 @@ export async function applyFailedLifecycleFlyout(
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await expect(page.getByTestId(RETENTION_TEST_IDS.failedLifecycleFlyout)).toBeHidden();
+  await expect(page.getByTestId(RETENTION_TEST_IDS.failedLifecycleFlyout)).toBeHidden({
+    timeout: STREAMS_WRITE_CLOSE_TIMEOUT,
+  });
 }
 
 /**
@@ -557,7 +568,7 @@ export async function setFailureStoreRetention(
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await expect(flyout).toBeHidden();
+  await expect(flyout).toBeHidden({ timeout: STREAMS_WRITE_CLOSE_TIMEOUT });
 }
 
 /**
