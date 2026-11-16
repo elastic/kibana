@@ -528,6 +528,33 @@ describe('generateBodyParams', () => {
     });
   });
 
+  it('returns __scope_link to GLOBAL.aggregations for a dictionary of AggregationContainer', () => {
+    const aggregationContainer: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'AggregationContainer', namespace: '_types.aggregations' },
+      properties: [getMockProperty({ propertyName: 'terms' })],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [aggregationContainer] };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'aggregations',
+        type: {
+          kind: 'dictionary_of',
+          key: { kind: 'instance_of', type: { name: 'string', namespace: '_builtins' } },
+          value: {
+            kind: 'instance_of',
+            type: { name: 'AggregationContainer', namespace: '_types.aggregations' },
+          },
+          singleKey: false,
+        },
+      }),
+    ]);
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      aggregations: { __scope_link: 'GLOBAL.aggregations' },
+    });
+  });
+
   it('WHEN QueryContainer has another namespace SHOULD generate its declared properties', () => {
     const queryContainer: SpecificationTypes.Interface = {
       kind: 'interface',
