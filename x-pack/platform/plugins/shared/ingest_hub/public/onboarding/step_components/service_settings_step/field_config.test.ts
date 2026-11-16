@@ -14,6 +14,7 @@ import {
   resolveVarGroupSelections,
   shouldDefaultCollectS3Logs,
   getRegionFieldName,
+  offersDatasetTemplates,
   getRequiredTextFields,
   getFlyoutFields,
   resolveFieldMeta,
@@ -517,5 +518,45 @@ describe('S3 collection mode (collect_s3_logs)', () => {
         'queue_url',
       ]);
     });
+  });
+});
+
+describe('offersDatasetTemplates', () => {
+  const service = {
+    varDefsByInput: {
+      otelcol: {
+        'data_stream.dataset': makeVarDef('data_stream.dataset', 'text', { default: 'aws.ec2' }),
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+
+  it('is true for the manifest default, as Fleet offers it for any input package dataset', () => {
+    expect(offersDatasetTemplates(service, 'otelcol', { 'data_stream.dataset': 'aws.ec2' })).toBe(
+      true
+    );
+  });
+
+  it('is true for a dataset not entered yet, which the form shows as the manifest default', () => {
+    expect(offersDatasetTemplates(service, 'otelcol', undefined)).toBe(true);
+    expect(offersDatasetTemplates(service, 'otelcol', {})).toBe(true);
+  });
+
+  it('is true for a custom dataset', () => {
+    expect(offersDatasetTemplates(service, 'otelcol', { 'data_stream.dataset': 'aws.prod' })).toBe(
+      true
+    );
+  });
+
+  it('is false for the generic dataset and an empty one', () => {
+    expect(offersDatasetTemplates(service, 'otelcol', { 'data_stream.dataset': 'generic' })).toBe(
+      false
+    );
+    expect(offersDatasetTemplates(service, 'otelcol', { 'data_stream.dataset': '  ' })).toBe(false);
+  });
+
+  it('is false for a service without a dataset var', () => {
+    expect(
+      offersDatasetTemplates({} as AwsServiceMatrixEntry, 'otelcol', { 'data_stream.dataset': 'x' })
+    ).toBe(false);
   });
 });

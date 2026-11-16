@@ -23,7 +23,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { EisModelStatus } from '../common/types';
+import type { EisModelStatus, ReasoningEffortLevel } from '../common/types';
 
 export * from '../common/types';
 
@@ -93,6 +93,9 @@ export interface EndpointDeprecationInfo {
   status: EisModelStatus;
   metadata: EisInferenceEndpointMetadata;
 }
+
+/** Reasoning effort per endpoint id within one feature. */
+export type EndpointEfforts = Record<string, ReasoningEffortLevel>;
 
 /** Ordered list of EIS geo codes for display in the region picker. */
 export const GEO_ORDER = ['apac', 'eu', 'us', 'other'] as const;

@@ -22,7 +22,7 @@ export const storybookAliases = {
   cloud_security_posture_graph:
     'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/.storybook',
   cloud: 'src/platform/packages/shared/cloud/.storybook',
-  coloring: 'src/platform/packages/shared/kbn-coloring/.storybook',
+  coloring: 'src/platform/packages/shared/kbn-coloring-components/.storybook',
   content_management:
     'src/platform/packages/shared/content-management/kbn-content-management-storybook',
   context_switcher_components:

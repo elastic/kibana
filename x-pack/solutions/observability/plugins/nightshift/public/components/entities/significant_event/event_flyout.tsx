@@ -164,6 +164,8 @@ export function EventFlyout({
   const { euiTheme } = useEuiTheme();
   const { agentBuilder, application, focusedSignificantEventService, http } = useKibana().services;
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
+  // Closing an event is an Alerting v2 alert action, which needs Alerts `all` on top of Nightshift.
+  const canCloseEvent = application.capabilities.alerting_v2_alerts?.all === true;
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
   const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
@@ -370,7 +372,7 @@ export function EventFlyout({
         }),
       });
     }
-    if (canManage && isNeedsActionStatus(event.status)) {
+    if (canManage && canCloseEvent && isNeedsActionStatus(event.status)) {
       items.push(
         { isSeparator: true },
         {
@@ -393,6 +395,7 @@ export function EventFlyout({
     canInvestigate,
     isAvailabilityLoading,
     canManage,
+    canCloseEvent,
     conversationId,
     event.episode_id,
     event.event_id,
