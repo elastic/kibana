@@ -204,6 +204,7 @@ export class EngineRunner {
               this.signalStore.readHistory({
                 spaceId,
                 strategy: strategyId,
+                strategyVersion: strategy.descriptor.version,
                 fingerprints,
                 from: historyFrom,
                 to: historyTo,

@@ -57,7 +57,9 @@ export function wrapReading({
     group_hash: getGroupHash({
       spaceId,
       source: DETECTION_SIGNAL_SOURCE,
-      fingerprint: reading.fingerprint,
+      // A fingerprint is unique within its strategy only, so another strategy watching the same
+      // thing must not land in the same series.
+      fingerprint: `${strategyId}:${reading.fingerprint}`,
     }),
     status,
     source: DETECTION_SIGNAL_SOURCE,

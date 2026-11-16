@@ -57,6 +57,21 @@ describe('planWindows', () => {
     ]);
   });
 
+  it('opens the first window of a strategy on a cadence boundary when the cadence does not divide a run', () => {
+    const everyThreeMinutes = createStrategy({ id: 'every_three_minutes', cadence: 3 });
+    const threeMinutesMs = 3 * MINUTE_MS;
+
+    const [window] = planWindows({
+      strategies: [everyThreeMinutes],
+      watermarks: new Map(),
+      now: NOW,
+    });
+
+    expect(window.from % threeMinutesMs).toBe(0);
+    expect(window.to % threeMinutesMs).toBe(0);
+    expect(window.to - window.from).toBeGreaterThanOrEqual(threeMinutesMs);
+  });
+
   it('runs a one-minute strategy every minute and a five-minute one every fifth', () => {
     const strategies = [EVERY_MINUTE, EVERY_FIVE_MINUTES];
     const watermarks: Record<string, number> = {

@@ -22,13 +22,17 @@ export interface DetectionSignalStore {
   write(signals: DetectionSignal[]): Promise<WriteSignalsResult>;
 
   /**
-   * The readings of one strategy in one space for the given series, whose bucket starts in
-   * `[from, to)` (epoch milliseconds), grouped by fingerprint, oldest first. Filtered on the
-   * bucket start, never on `@timestamp`, because a reading is written after its bucket ends.
+   * The readings of one strategy at one version in one space for the given series, whose bucket
+   * starts in `[from, to)` (epoch milliseconds), grouped by fingerprint, oldest first. Readings of
+   * another version are left out: a version is bumped when what a reading means changes, so they
+   * are not a baseline. Filtered on the bucket start, never on `@timestamp`, because a reading is
+   * written after its bucket ends. A reading stored twice, after a rollover, is returned once.
+   * When more than a read can return match, the newest are kept.
    */
   readHistory(params: {
     spaceId: string;
     strategy: string;
+    strategyVersion: number;
     fingerprints: string[];
     from: number;
     to: number;
