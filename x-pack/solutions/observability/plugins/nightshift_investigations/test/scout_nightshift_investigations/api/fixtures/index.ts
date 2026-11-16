@@ -58,6 +58,7 @@ export {
 } from './service_account';
 export { disableInvestigationRunLimits } from './run_quotas';
 export { getCustomContext, putCustomContext, replaceCustomContext } from './custom_context';
+export { getInvestigationQuotas, putInvestigationQuotas } from './investigation_quotas';
 export {
   archiveMemoryPage,
   deleteMemories,

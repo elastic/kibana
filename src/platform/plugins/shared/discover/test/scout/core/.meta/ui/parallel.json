@@ -1,5 +1,5 @@
 {
-  "sha1": "f55ec5a411f1c207a915001af55d59a2bbc4dd57",
+  "sha1": "832d5f6dac0c2a41d030553158be37642ed999b7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -96,7 +96,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_interactions.spec.ts",
-        "line": 36,
+        "line": 37,
         "column": 66
       }
     },
@@ -122,8 +122,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_state_restoration.spec.ts",
-        "line": 55,
-        "column": 13
+        "line": 50,
+        "column": 7
       }
     },
     {
