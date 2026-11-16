@@ -27,8 +27,8 @@ function isEditingFromDashboard(
   return isVizApp && hasOriginatingApp;
 }
 
-const PERFORMANCE_TITLE = i18n.translate('xpack.serverlessSearch.nav.performance', {
-  defaultMessage: 'Performance',
+const MONITOR_PERFORMANCE_TITLE = i18n.translate('xpack.serverlessSearch.nav.monitorPerformance', {
+  defaultMessage: 'Monitor performance',
 });
 const ALERTS_AND_INSIGHTS_TITLE = i18n.translate(
   'xpack.serverlessSearch.nav.mngt.alertsAndInsights',
@@ -248,15 +248,6 @@ export function createNavigationTree({
                 id: 'cloudLinkBilling',
                 cloudLink: 'billingAndSub',
               },
-              ...(showPerformanceLink
-                ? [
-                    {
-                      id: 'cloudLinkDeployment',
-                      cloudLink: 'deployment' as const,
-                      title: PERFORMANCE_TITLE,
-                    },
-                  ]
-                : []),
               {
                 cloudLink: 'userAndRoles',
               },
@@ -277,6 +268,15 @@ export function createNavigationTree({
             title: PROJECT_PERFORMANCE_TITLE,
             breadcrumbStatus: 'hidden',
             children: [
+              ...(showPerformanceLink
+                ? [
+                    {
+                      id: 'cloudLinkDeployment',
+                      cloudLink: 'deployment' as const,
+                      title: MONITOR_PERFORMANCE_TITLE,
+                    },
+                  ]
+                : []),
               {
                 link: 'management:queryActivity',
                 breadcrumbStatus: 'hidden',

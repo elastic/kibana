@@ -20,7 +20,7 @@ interface ApprovalContentFooterProps {
 /**
  * The Approve/Decline row. Rendered only while a decision is still pending: `ApprovalContent`
  * itself decides whether to mount this at all — a decided or transient state names its actor in
- * the header caption instead, so there is nothing left here to show.
+ * the outcome banner instead, so there is nothing left here to show.
  */
 export const ApprovalContentFooter = memo<ApprovalContentFooterProps>(
   ({ secondaryActions, primaryAction, defaultButtonColor, onPrimaryClick }) => {

@@ -53,7 +53,7 @@ import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_
 import { fetchData } from './tab_state';
 import { initializeAndSync, stopSyncing } from './tab_sync';
 import { applyInlineDataViewLoadState } from './apply_inline_data_view_load_state';
-import { loadDataViewList } from './data_views';
+import { loadDataViewList, loadDataViewListOnce } from './data_views';
 import { clearOutdatedTabUrlState } from '../../utils/cleanup_url_state';
 import { showSessionWarnings } from '../../../../../session';
 
@@ -69,6 +69,7 @@ export const setTabs: InternalStateThunkActionCreator<
       getCascadedDocumentsStateManager,
       getContextAwarenessToolkit,
       services,
+      searchSessionManager,
     }
   ) {
     const previousState = getState();
@@ -100,6 +101,12 @@ export const setTabs: InternalStateThunkActionCreator<
       justRemovedTabs.push(newRecentlyClosedTab);
 
       dispatch(disconnectTab({ tabId: tab.id }));
+
+      // Only tabs closed by the user lose their cache. Opening or saving a Discover session
+      // swaps the tabs instead, and reopening that session brings the same tabs back.
+      if (!params.updatedDiscoverSession) {
+        searchSessionManager.forgetTab(tab.id);
+      }
     }
 
     // Wait to delete runtime state until after all removed tabs
@@ -463,7 +470,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
       existingUserId === undefined ? getUserId() : existingUserId,
       existingSpaceId === undefined ? getSpaceId() : existingSpaceId,
       loadPersistedDiscoverSession(),
-      dispatch(loadDataViewList()),
+      dispatch(loadDataViewListOnce()),
     ]);
 
     const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;

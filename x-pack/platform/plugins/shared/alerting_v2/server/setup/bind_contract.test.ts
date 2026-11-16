@@ -13,12 +13,16 @@ import { CoreStart, Request } from '@kbn/core-di-server';
 import { RulesClient } from '../lib/rules_client';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
+import { AlertActionsClient } from '../lib/alert_actions_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
+import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { InternalRulesClient } from '../lib/internal_rules_client';
 import type { AlertingServerSetup, AlertingServerStart } from '../types';
 import { bindContract } from './bind_contract';
 import { asSpaceId } from '@kbn/core-spaces-common';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { createLoggerService } from '../lib/services/logger_service/logger_service.mock';
 
 const AlertingStartToken = Start as ServiceToken<AlertingServerStart>;
 const AlertingSetupToken = Setup as ServiceToken<AlertingServerSetup>;
@@ -29,11 +33,12 @@ describe('bindContract', () => {
   let mockRulesClient: Partial<RulesClient>;
   let mockActionPolicyClient: Partial<ActionPolicyClient>;
   let mockAlertEventsClient: Partial<AlertEventsClient>;
+  let mockAlertActionsClient: Partial<AlertActionsClient>;
   let fork: jest.Mock;
   let mockInternalRulesClient: Partial<InternalRulesClient>;
 
   beforeEach(() => {
-    container = new Container();
+    container = new Container({ defaultScope: 'Singleton' });
     scope = new Container();
     mockRulesClient = {
       getRule: jest.fn(),
@@ -43,14 +48,19 @@ describe('bindContract', () => {
     mockAlertEventsClient = { createAlertEvent: jest.fn() };
     scope.bind(RulesClient).toConstantValue(mockRulesClient as RulesClient);
     scope.bind(ActionPolicyClient).toConstantValue(mockActionPolicyClient as ActionPolicyClient);
+    mockAlertActionsClient = { createEpisodeAction: jest.fn() };
     scope.bind(AlertEventsClient).toConstantValue(mockAlertEventsClient as AlertEventsClient);
+    scope.bind(AlertActionsClient).toConstantValue(mockAlertActionsClient as AlertActionsClient);
 
     fork = jest.fn(() => scope);
     container.bind(CoreStart('injection')).toConstantValue({
       fork,
       getContainer: jest.fn(() => container),
     } as never);
-    container.bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
+    container.bind(ArtifactTypeRegistry).toSelf();
+    container
+      .bind(AlertStatusChangedOptIns)
+      .toConstantValue(new AlertStatusChangedOptIns(createLoggerService().loggerService));
     mockInternalRulesClient = { bulkDisableRules: jest.fn() };
     container
       .bind(InternalRulesClient)
@@ -59,11 +69,24 @@ describe('bindContract', () => {
     container.load(new ContainerModule((options) => bindContract(options)));
   });
 
-  it('exposes registerArtifactType on the setup contract', () => {
+  it('exposes registerArtifactType and enableAlertStatusChanged on the setup contract', () => {
     const setup = container.get(AlertingSetupToken);
     expect(setup).toEqual({
       registerArtifactType: expect.any(Function),
+      enableAlertStatusChanged: expect.any(Function),
     });
+  });
+
+  it('registers the opt-in passed to enableAlertStatusChanged', async () => {
+    const setup = container.get(AlertingSetupToken);
+    const optIns = container.get(AlertStatusChangedOptIns);
+    const request = httpServerMock.createKibanaRequest();
+    const isEnabled = jest.fn().mockResolvedValue(true);
+
+    setup.enableAlertStatusChanged({ isEnabled });
+
+    await expect(optIns.isEnabled(request)).resolves.toBe(true);
+    expect(isEnabled).toHaveBeenCalledWith(request);
   });
 
   it('exposes all client factories on the start contract', () => {
@@ -75,6 +98,7 @@ describe('bindContract', () => {
       getActionPolicyClientWithRequest: expect.any(Function),
       getActionPolicyClientWithRequestInSpace: expect.any(Function),
       getAlertEventsClientWithRequest: expect.any(Function),
+      getAlertActionsClientWithRequest: expect.any(Function),
     });
   });
 
@@ -132,6 +156,17 @@ describe('bindContract', () => {
     const client = await start.getAlertEventsClientWithRequest(fakeRequest);
 
     expect(client).toBe(mockAlertEventsClient);
+    expect(fork).toHaveBeenCalledTimes(1);
+    expect(scope.get(Request)).toBe(fakeRequest);
+  });
+
+  it('returns the alertActionsClient resolved with the request when getAlertActionsClientWithRequest is called', async () => {
+    const fakeRequest = { headers: {} } as unknown as KibanaRequest;
+    const start = container.get(AlertingStartToken);
+
+    const client = await start.getAlertActionsClientWithRequest(fakeRequest);
+
+    expect(client).toBe(mockAlertActionsClient);
     expect(fork).toHaveBeenCalledTimes(1);
     expect(scope.get(Request)).toBe(fakeRequest);
   });

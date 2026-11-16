@@ -42,6 +42,9 @@ triggers:
           properties:
             alertIds:
               type: array
+              # Grouped proposals grow by revision. `revise()` validates the merged input against
+              # this schema, so the limit also makes the server refuse an oversized revision.
+              maxItems: 1000
               items:
                 type: string
               description: Alert _id values to close.
@@ -62,6 +65,28 @@ outputs:
   - name: alert_ids
     type: array
 steps:
+  # An analyst can close the proposal's alerts before approving it. Those alerts are counted here and
+  # left out of the close below, so closed_count reports only the alerts this action closed. The
+  # update script already leaves a closed alert's reason, user and time alone; skipping them in the
+  # close query only avoids a needless write per closed alert and the version conflicts it can cause.
+  - name: count_already_closed
+    type: elasticsearch.search
+    with:
+      index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+      size: 0
+      track_total_hits: true
+      query:
+        bool:
+          filter:
+            - terms:
+                _id: "${{ inputs.actionInput.alertIds }}"
+            - term:
+                kibana.alert.workflow_status: closed
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+
   # Close the alerts. `conflicts: proceed` prevents one alert whose mapping
   # changed mid-request from aborting the close for the entire batch.
   # `reason: false_positive` is the cross-Watch contract: rule_tuning_worker.yaml
@@ -82,6 +107,9 @@ steps:
           filter:
             terms:
               _id: "${{ inputs.actionInput.alertIds }}"
+          must_not:
+            term:
+              kibana.alert.workflow_status: closed
 
   # `conflicts: proceed` lets close_alerts finish without throwing even when it
   # updates fewer alerts than requested (including zero) — e.g. version conflicts
@@ -89,16 +117,37 @@ steps:
   # whether its execute step (execute_as_approver / execute_as_worker) errored,
   # not closed_count, so an incomplete close
   # would otherwise be reported as a full success and the Investigation closed
-  # while some alerts remain open. Fail loud instead so that check catches it.
+  # while some alerts remain open. Read the end state back instead of trusting the
+  # update's `updated`: a retried close or an analyst closing an alert mid-run
+  # changes `updated` but not whether every requested alert is closed. Counting
+  # closed ids (not open ones) also catches a requested alert that no longer exists.
+  - name: verify_close
+    type: elasticsearch.search
+    with:
+      index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+      size: 0
+      track_total_hits: true
+      query:
+        bool:
+          filter:
+            - terms:
+                _id: "${{ inputs.actionInput.alertIds }}"
+            - term:
+                kibana.alert.workflow_status: closed
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+
   - name: fail_incomplete_close
     type: workflow.fail
-    if: "${{ steps.close_alerts.output.updated != inputs.actionInput.alertIds.size }}"
+    if: "${{ steps.verify_close.output.hits.total.value != inputs.actionInput.alertIds.size }}"
     with:
       message: >-
-        Closed {{ steps.close_alerts.output.updated }} of
-        {{ inputs.actionInput.alertIds.size }} requested alert(s) as false
-        positive; the rest were not updated (conflicts: proceed skips
-        version conflicts and no-ops instead of aborting the batch).
+        Only {{ steps.verify_close.output.hits.total.value }} of
+        {{ inputs.actionInput.alertIds.size }} requested alert(s) are closed
+        after the close ({{ steps.count_already_closed.output.hits.total.value }}
+        were already closed before it); the rest are still open or no longer exist.
 
   # Emit a structured result so the caller (Worker or gate) can verify the
   # close landed. `workflow.execute` declares its output as unknown, so the
@@ -108,5 +157,9 @@ steps:
     type: workflow.output
     status: completed
     with:
+      # What the close step updated. It skips alerts that are already closed, so an analyst's earlier
+      # closure is not credited here. shortcut: after a retry that follows a partial close this
+      # undercounts, because the retry skips the alerts the first attempt closed; the completeness
+      # check reads the end state, so it is not affected.
       closed_count: "${{ steps.close_alerts.output.updated }}"
       alert_ids: "${{ inputs.actionInput.alertIds }}"

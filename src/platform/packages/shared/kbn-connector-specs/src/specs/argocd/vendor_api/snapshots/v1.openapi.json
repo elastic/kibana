@@ -1,0 +1,3595 @@
+{
+  "components": {
+    "schemas": {
+      "applicationApplicationSyncRequest": {
+        "properties": {
+          "appNamespace": {
+            "type": "string"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "infos": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1Info"
+            },
+            "type": "array"
+          },
+          "manifests": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "project": {
+            "type": "string"
+          },
+          "prune": {
+            "type": "boolean"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1SyncOperationResource"
+            },
+            "type": "array"
+          },
+          "retryStrategy": {
+            "$ref": "#/components/schemas/v1alpha1RetryStrategy"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "revisions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sourcePositions": {
+            "items": {
+              "format": "int64",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/v1alpha1SyncStrategy"
+          },
+          "syncOptions": {
+            "$ref": "#/components/schemas/applicationSyncOptions"
+          }
+        },
+        "title": "ApplicationSyncRequest is a request to apply the config state to live state",
+        "type": "object"
+      },
+      "applicationLogEntry": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "podName": {
+            "type": "string"
+          },
+          "timeStamp": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "timeStampStr": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "applicationSyncOptions": {
+        "properties": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "applicationv1alpha1EnvEntry": {
+        "properties": {
+          "name": {
+            "title": "Name is the name of the variable, usually expressed in uppercase",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value is the value of the variable",
+            "type": "string"
+          }
+        },
+        "title": "EnvEntry represents an entry in the application's environment",
+        "type": "object"
+      },
+      "applicationv1alpha1ResourceStatus": {
+        "properties": {
+          "group": {
+            "type": "string"
+          },
+          "health": {
+            "$ref": "#/components/schemas/v1alpha1HealthStatus"
+          },
+          "hook": {
+            "type": "boolean"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "requiresDeletionConfirmation": {
+            "type": "boolean"
+          },
+          "requiresPruning": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "syncWave": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "eventsEvent": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "eventTime": {
+            "$ref": "#/components/schemas/v1MicroTime"
+          },
+          "firstTimestamp": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "involvedObject": {
+            "$ref": "#/components/schemas/eventsObjectReference"
+          },
+          "lastTimestamp": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "message": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v1ObjectMeta"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "related": {
+            "$ref": "#/components/schemas/eventsObjectReference"
+          },
+          "reportingComponent": {
+            "type": "string"
+          },
+          "reportingInstance": {
+            "type": "string"
+          },
+          "series": {
+            "$ref": "#/components/schemas/eventsEventSeries"
+          },
+          "source": {
+            "$ref": "#/components/schemas/eventsEventSource"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "eventsEventList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/eventsEvent"
+            },
+            "type": "array"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v1ListMeta"
+          }
+        },
+        "type": "object"
+      },
+      "eventsEventSeries": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "lastObservedTime": {
+            "$ref": "#/components/schemas/v1MicroTime"
+          }
+        },
+        "type": "object"
+      },
+      "eventsEventSource": {
+        "properties": {
+          "component": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "eventsObjectReference": {
+        "properties": {
+          "apiVersion": {
+            "type": "string"
+          },
+          "fieldPath": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "resourceVersion": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "intstrIntOrString": {
+        "properties": {
+          "intVal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "strVal": {
+            "type": "string"
+          },
+          "type": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "IntOrString is a type that can hold an int32 or a string.  When used in\nJSON or YAML marshalling and unmarshalling, it produces or consumes the\ninner type.  This allows you to have, for example, a JSON field that can\naccept a name or number.\nTODO: Rename to Int32OrString",
+        "type": "object"
+      },
+      "projectDetailedProjectsResponse": {
+        "properties": {
+          "clusters": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1Cluster"
+            },
+            "type": "array"
+          },
+          "globalProjects": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1AppProject"
+            },
+            "type": "array"
+          },
+          "project": {
+            "$ref": "#/components/schemas/v1alpha1AppProject"
+          },
+          "repositories": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1Repository"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "protobufAny": {
+        "properties": {
+          "type_url": {
+            "type": "string"
+          },
+          "value": {
+            "format": "byte",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "runtimeError": {
+        "properties": {
+          "code": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/protobufAny"
+            },
+            "type": "array"
+          },
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "runtimeRawExtension": {
+        "properties": {
+          "raw": {
+            "format": "byte",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "runtimeStreamError": {
+        "properties": {
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/protobufAny"
+            },
+            "type": "array"
+          },
+          "grpc_code": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "http_code": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "http_status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1FieldsV1": {
+        "properties": {
+          "Raw": {
+            "format": "byte",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1GroupKind": {
+        "properties": {
+          "group": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          }
+        },
+        "title": "GroupKind specifies a Group and a Kind, but does not force a version.  This is useful for identifying\nconcepts during lookup stages without having partially valid types",
+        "type": "object"
+      },
+      "v1ListMeta": {
+        "properties": {
+          "continue": {
+            "type": "string"
+          },
+          "remainingItemCount": {
+            "format": "int64",
+            "title": "remainingItemCount is the number of subsequent items in the list which are not included in this\nlist response. If the list request contained label or field selectors, then the number of\nremaining items is unknown and the field will be left unset and omitted during serialization.\nIf the list is complete (either because it is not chunking or because this is the last chunk),\nthen there are no more remaining items and this field will be left unset and omitted during\nserialization.\nServers older than v1.15 do not set this field.\nThe intended use of the remainingItemCount is *estimating* the size of a collection. Clients\nshould not rely on the remainingItemCount to be set or to be exact.\n+optional",
+            "type": "integer"
+          },
+          "resourceVersion": {
+            "title": "String that identifies the server's internal version of this object that\ncan be used by clients to determine when objects have changed.\nValue must be treated as opaque by clients and passed unmodified back to the server.\nPopulated by the system.\nRead-only.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency\n+optional",
+            "type": "string"
+          },
+          "selfLink": {
+            "title": "Deprecated: selfLink is a legacy read-only field that is no longer populated by the system.\n+optional",
+            "type": "string"
+          },
+          "shardInfo": {
+            "$ref": "#/components/schemas/v1ShardInfo"
+          }
+        },
+        "type": "object"
+      },
+      "v1LoadBalancerIngress": {
+        "properties": {
+          "hostname": {
+            "title": "Hostname is set for load-balancer ingress points that are DNS based\n(typically AWS load-balancers)\n+optional",
+            "type": "string"
+          },
+          "ip": {
+            "title": "IP is set for load-balancer ingress points that are IP based\n(typically GCE or OpenStack load-balancers)\n+optional",
+            "type": "string"
+          },
+          "ipMode": {
+            "title": "IPMode specifies how the load-balancer IP behaves, and may only be specified when the ip field is specified.\nSetting this to \"VIP\" indicates that traffic is delivered to the node with\nthe destination set to the load-balancer's IP and port.\nSetting this to \"Proxy\" indicates that traffic is delivered to the node or pod with\nthe destination set to the node's IP and node port or the pod's IP and port.\nService implementations may use this information to adjust traffic routing.\n+optional",
+            "type": "string"
+          },
+          "ports": {
+            "items": {
+              "$ref": "#/components/schemas/v1PortStatus"
+            },
+            "title": "Ports is a list of records of service ports\nIf used, every port defined in the service should have an entry in it\n+listType=atomic\n+optional",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "v1ManagedFieldsEntry": {
+        "properties": {
+          "apiVersion": {
+            "type": "string"
+          },
+          "fieldsType": {
+            "title": "FieldsType is the discriminator for the different fields format and version.\nThere is currently only one possible value: \"FieldsV1\"",
+            "type": "string"
+          },
+          "fieldsV1": {
+            "$ref": "#/components/schemas/v1FieldsV1"
+          },
+          "manager": {
+            "type": "string"
+          },
+          "operation": {
+            "title": "Operation is the type of operation which lead to this ManagedFieldsEntry being created.\nThe only valid values for this field are 'Apply' and 'Update'.\n+k8s:alpha(since: \"1.37\")=+k8s:required",
+            "type": "string"
+          },
+          "subresource": {
+            "type": "string"
+          },
+          "time": {
+            "$ref": "#/components/schemas/v1Time"
+          }
+        },
+        "type": "object"
+      },
+      "v1MicroTime": {
+        "properties": {
+          "nanos": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "seconds": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "v1NodeSwapStatus": {
+        "properties": {
+          "capacity": {
+            "format": "int64",
+            "title": "Total amount of swap memory in bytes.\n+optional",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "v1NodeSystemInfo": {
+        "properties": {
+          "architecture": {
+            "title": "The Architecture reported by the node",
+            "type": "string"
+          },
+          "bootID": {
+            "type": "string"
+          },
+          "containerRuntimeVersion": {
+            "type": "string"
+          },
+          "kernelVersion": {
+            "type": "string"
+          },
+          "kubeProxyVersion": {
+            "type": "string"
+          },
+          "kubeletVersion": {
+            "type": "string"
+          },
+          "machineID": {
+            "title": "MachineID reported by the node. For unique machine identification\nin the cluster this field is preferred. Learn more from man(5)\nmachine-id: http://man7.org/linux/man-pages/man5/machine-id.5.html",
+            "type": "string"
+          },
+          "operatingSystem": {
+            "title": "The Operating System reported by the node",
+            "type": "string"
+          },
+          "osImage": {
+            "type": "string"
+          },
+          "runningInUserNamespace": {
+            "title": "Whether the node is running in a user namespace.\n+featureGate=KubeletInUserNamespace\n+optional",
+            "type": "boolean"
+          },
+          "swap": {
+            "$ref": "#/components/schemas/v1NodeSwapStatus"
+          },
+          "systemUUID": {
+            "title": "SystemUUID reported by the node. For unique machine identification\nMachineID is preferred. This field is specific to Red Hat hosts\nhttps://access.redhat.com/documentation/en-us/red_hat_subscription_management/1/html/rhsm/uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1ObjectMeta": {
+        "properties": {
+          "annotations": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Annotations is an unstructured key value map stored with a resource that may be\nset by external tools to store and retrieve arbitrary metadata. They are not\nqueryable and should be preserved when modifying objects.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations\n+optional",
+            "type": "object"
+          },
+          "creationTimestamp": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "deletionGracePeriodSeconds": {
+            "format": "int64",
+            "title": "Number of seconds allowed for this object to gracefully terminate before\nit will be removed from the system. Only set when deletionTimestamp is also set.\nMay only be shortened.\nRead-only.\n+optional\n+k8s:alpha(since: \"1.37\")=+k8s:optional\n+k8s:alpha(since: \"1.37\")=+k8s:immutable",
+            "type": "integer"
+          },
+          "deletionTimestamp": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Must be empty before the object is deleted from the registry. Each entry\nis an identifier for the responsible component that will remove the entry\nfrom the list. If the deletionTimestamp of the object is non-nil, entries\nin this list can only be removed.\nFinalizers may be processed and removed in any order.  Order is NOT enforced\nbecause it introduces significant risk of stuck finalizers.\nfinalizers is a shared field, any actor with permission can reorder it.\nIf the finalizer list is processed in order, then this can lead to a situation\nin which the component responsible for the first finalizer in the list is\nwaiting for a signal (field value, external system, or other) produced by a\ncomponent responsible for a finalizer later in the list, resulting in a deadlock.\nWithout enforced ordering finalizers are free to order amongst themselves and\nare not vulnerable to ordering changes in the list.\n+optional\n+patchStrategy=merge\n+listType=set",
+            "type": "array"
+          },
+          "generateName": {
+            "type": "string"
+          },
+          "generation": {
+            "format": "int64",
+            "title": "A sequence number representing a specific generation of the desired state.\nPopulated by the system. Read-only.\n+optional\n+k8s:alpha(since: \"1.37\")=+k8s:optional\n+k8s:alpha(since: \"1.37\")=+k8s:minimum=0",
+            "type": "integer"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Map of string keys and values that can be used to organize and categorize\n(scope and select) objects. May match selectors of replication controllers\nand services.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels\n+optional",
+            "type": "object"
+          },
+          "managedFields": {
+            "items": {
+              "$ref": "#/components/schemas/v1ManagedFieldsEntry"
+            },
+            "type": "array"
+          },
+          "name": {
+            "title": "Name must be unique within a namespace. Is required when creating resources, although\nsome resources may allow a client to request the generation of an appropriate name\nautomatically. Name is primarily intended for creation idempotence and configuration\ndefinition.\nCannot be updated.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names\n+optional",
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "ownerReferences": {
+            "items": {
+              "$ref": "#/components/schemas/v1OwnerReference"
+            },
+            "title": "List of objects depended by this object. If ALL objects in the list have\nbeen deleted, this object will be garbage collected. If this object is managed by a controller,\nthen an entry in this list will point to this controller, with the controller field set to true.\nThere cannot be more than one managing controller.\n+optional\n+patchMergeKey=uid\n+patchStrategy=merge\n+listType=map\n+listMapKey=uid\n+k8s:alpha(since:\"1.37\")=+k8s:optional",
+            "type": "array"
+          },
+          "resourceVersion": {
+            "type": "string"
+          },
+          "selfLink": {
+            "title": "Deprecated: selfLink is a legacy read-only field that is no longer populated by the system.\n+optional",
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1OwnerReference": {
+        "properties": {
+          "apiVersion": {
+            "title": "API version of the referent.\n+k8s:alpha(since:\"1.37\")=+k8s:required",
+            "type": "string"
+          },
+          "blockOwnerDeletion": {
+            "title": "If true, AND if the owner has the \"foregroundDeletion\" finalizer, then\nthe owner cannot be deleted from the key-value store until this\nreference is removed.\nSee https://kubernetes.io/docs/concepts/architecture/garbage-collection/#foreground-deletion\nfor how the garbage collector interacts with this field and enforces the foreground deletion.\nDefaults to false.\nTo set this field, a user needs \"delete\" permission of the owner,\notherwise 422 (Unprocessable Entity) will be returned.\n+optional",
+            "type": "boolean"
+          },
+          "controller": {
+            "title": "If true, this reference points to the managing controller.\n+optional",
+            "type": "boolean"
+          },
+          "kind": {
+            "title": "Kind of the referent.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds\n+k8s:alpha(since:\"1.37\")=+k8s:required",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names\n+k8s:alpha(since:\"1.37\")=+k8s:required",
+            "type": "string"
+          },
+          "uid": {
+            "title": "UID of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids\n+k8s:alpha(since:\"1.37\")=+k8s:required",
+            "type": "string"
+          }
+        },
+        "title": "OwnerReference contains enough information to let you identify an owning\nobject. An owning object must be in the same namespace as the dependent, or\nbe cluster-scoped, so there is no namespace field.\n+structType=atomic",
+        "type": "object"
+      },
+      "v1PortStatus": {
+        "properties": {
+          "error": {
+            "title": "Error is to record the problem with the service port\nThe format of the error shall comply with the following rules:\n- built-in error values shall be specified in this file and those shall use\n  CamelCase names\n- cloud provider specific error values must have names that comply with the\n  format foo.example.com/CamelCase.\n---\nThe regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)\n+optional\n+kubebuilder:validation:Required\n+kubebuilder:validation:Pattern=`^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$`\n+kubebuilder:validation:MaxLength=316",
+            "type": "string"
+          },
+          "port": {
+            "format": "int32",
+            "title": "Port is the port number of the service port of which status is recorded here",
+            "type": "integer"
+          },
+          "protocol": {
+            "title": "Protocol is the protocol of the service port of which status is recorded here\nThe supported values are: \"TCP\", \"UDP\", \"SCTP\"",
+            "type": "string"
+          }
+        },
+        "title": "PortStatus represents the error condition of a service port",
+        "type": "object"
+      },
+      "v1ShardInfo": {
+        "properties": {
+          "selector": {
+            "title": "selector is the shard selector string from the request, echoed back so clients\ncan verify which shard they received and merge responses from multiple shards.\n+required",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1Time": {
+        "format": "date-time",
+        "type": "string"
+      },
+      "v1alpha1AWSAuthConfig": {
+        "properties": {
+          "clusterName": {
+            "title": "ClusterName contains AWS cluster name",
+            "type": "string"
+          },
+          "profile": {
+            "type": "string"
+          },
+          "roleARN": {
+            "type": "string"
+          }
+        },
+        "title": "AWSAuthConfig is an AWS IAM authentication configuration",
+        "type": "object"
+      },
+      "v1alpha1AppHealthStatus": {
+        "properties": {
+          "lastTransitionTime": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "message": {
+            "title": "Message is a human-readable informational message describing the health status",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status holds the status code of the application",
+            "type": "string"
+          }
+        },
+        "title": "AppHealthStatus contains information about the currently observed health state of an application",
+        "type": "object"
+      },
+      "v1alpha1AppProject": {
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/v1ObjectMeta"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/v1alpha1AppProjectSpec"
+          },
+          "status": {
+            "$ref": "#/components/schemas/v1alpha1AppProjectStatus"
+          }
+        },
+        "title": "AppProject provides a logical grouping of applications, providing controls for:\n* where the apps may deploy to (cluster whitelist)\n* what may be deployed (repository whitelist, resource whitelist/blacklist)\n* who can access these applications (roles, OIDC group claims bindings)\n* and what they can do (RBAC policies)\n* automation access to these roles (JWT tokens)\n+genclient\n+genclient:noStatus\n+k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object\n+kubebuilder:resource:path=appprojects,shortName=appproj;appprojs",
+        "type": "object"
+      },
+      "v1alpha1AppProjectSpec": {
+        "properties": {
+          "clusterResourceBlacklist": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ClusterResourceRestrictionItem"
+            },
+            "title": "ClusterResourceBlacklist contains list of blacklisted cluster level resources",
+            "type": "array"
+          },
+          "clusterResourceWhitelist": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ClusterResourceRestrictionItem"
+            },
+            "title": "ClusterResourceWhitelist contains list of whitelisted cluster level resources",
+            "type": "array"
+          },
+          "description": {
+            "title": "Description contains optional project description\n+kubebuilder:validation:MaxLength=255",
+            "type": "string"
+          },
+          "destinationServiceAccounts": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ApplicationDestinationServiceAccount"
+            },
+            "type": "array"
+          },
+          "destinations": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ApplicationDestination"
+            },
+            "title": "Destinations contains list of destinations available for deployment",
+            "type": "array"
+          },
+          "namespaceResourceBlacklist": {
+            "items": {
+              "$ref": "#/components/schemas/v1GroupKind"
+            },
+            "title": "NamespaceResourceBlacklist contains list of blacklisted namespace level resources",
+            "type": "array"
+          },
+          "namespaceResourceWhitelist": {
+            "items": {
+              "$ref": "#/components/schemas/v1GroupKind"
+            },
+            "title": "NamespaceResourceWhitelist contains list of whitelisted namespace level resources",
+            "type": "array"
+          },
+          "orphanedResources": {
+            "$ref": "#/components/schemas/v1alpha1OrphanedResourcesMonitorSettings"
+          },
+          "permitOnlyProjectScopedClusters": {
+            "title": "PermitOnlyProjectScopedClusters determines whether destinations can only reference clusters which are project-scoped",
+            "type": "boolean"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ProjectRole"
+            },
+            "title": "Roles are user defined RBAC roles associated with this project",
+            "type": "array"
+          },
+          "signatureKeys": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1SignatureKey"
+            },
+            "title": "SignatureKeys contains a list of PGP key IDs that commits in Git must be signed with in order to be allowed for sync",
+            "type": "array"
+          },
+          "sourceIntegrity": {
+            "$ref": "#/components/schemas/v1alpha1SourceIntegrity"
+          },
+          "sourceNamespaces": {
+            "items": {
+              "type": "string"
+            },
+            "title": "SourceNamespaces defines the namespaces application resources are allowed to be created in",
+            "type": "array"
+          },
+          "sourceRepos": {
+            "items": {
+              "type": "string"
+            },
+            "title": "SourceRepos contains list of repository URLs which can be used for deployment",
+            "type": "array"
+          },
+          "syncWindows": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1InlineSyncWindow"
+            },
+            "title": "SyncWindows controls when syncs can be run for apps in this project",
+            "type": "array"
+          }
+        },
+        "title": "AppProjectSpec is the specification of an AppProject",
+        "type": "object"
+      },
+      "v1alpha1AppProjectStatus": {
+        "properties": {
+          "jwtTokensByRole": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/v1alpha1JWTTokens"
+            },
+            "title": "JWTTokensByRole contains a list of JWT tokens issued for a given role",
+            "type": "object"
+          }
+        },
+        "title": "AppProjectStatus contains status information for AppProject CRs",
+        "type": "object"
+      },
+      "v1alpha1Application": {
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/v1ObjectMeta"
+          },
+          "operation": {
+            "$ref": "#/components/schemas/v1alpha1Operation"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSpec"
+          },
+          "status": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationStatus"
+          }
+        },
+        "title": "Application is a definition of Application resource.\n+genclient\n+genclient:noStatus\n+k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object\n+kubebuilder:resource:path=applications,shortName=app;apps\n+kubebuilder:printcolumn:name=\"Sync Status\",type=string,JSONPath=`.status.sync.status`\n+kubebuilder:printcolumn:name=\"Health Status\",type=string,JSONPath=`.status.health.status`\n+kubebuilder:printcolumn:name=\"Revision\",type=string,JSONPath=`.status.sync.revision`,priority=10\n+kubebuilder:printcolumn:name=\"Project\",type=string,JSONPath=`.spec.project`,priority=10",
+        "type": "object"
+      },
+      "v1alpha1ApplicationCondition": {
+        "properties": {
+          "lastTransitionTime": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "message": {
+            "title": "Message contains human-readable message indicating details about condition",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type is an application condition type",
+            "type": "string"
+          }
+        },
+        "title": "ApplicationCondition contains details about an application condition, which is usually an error or warning",
+        "type": "object"
+      },
+      "v1alpha1ApplicationDestination": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "title": "Namespace specifies the target namespace for the application's resources.\nThe namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace",
+            "type": "string"
+          },
+          "server": {
+            "type": "string"
+          }
+        },
+        "title": "ApplicationDestination holds information about the application's destination",
+        "type": "object"
+      },
+      "v1alpha1ApplicationDestinationServiceAccount": {
+        "properties": {
+          "defaultServiceAccount": {
+            "title": "DefaultServiceAccount to be used for impersonation during the sync operation",
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "server": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1ApplicationList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1Application"
+            },
+            "type": "array"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v1ListMeta"
+          }
+        },
+        "title": "ApplicationList is list of Application resources\n+k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object",
+        "type": "object"
+      },
+      "v1alpha1ApplicationSource": {
+        "properties": {
+          "chart": {
+            "type": "string"
+          },
+          "directory": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSourceDirectory"
+          },
+          "helm": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSourceHelm"
+          },
+          "kustomize": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSourceKustomize"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "plugin": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSourcePlugin"
+          },
+          "ref": {
+            "type": "string"
+          },
+          "repoURL": {
+            "title": "RepoURL is the URL to the repository (Git or Helm) that contains the application manifests",
+            "type": "string"
+          },
+          "tagPrefix": {
+            "type": "string"
+          },
+          "targetRevision": {
+            "type": "string"
+          }
+        },
+        "title": "ApplicationSource contains all required information about the source of an application",
+        "type": "object"
+      },
+      "v1alpha1ApplicationSourceDirectory": {
+        "properties": {
+          "disableExtensionFilter": {
+            "type": "boolean"
+          },
+          "exclude": {
+            "title": "Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation",
+            "type": "string"
+          },
+          "include": {
+            "title": "Include contains a glob pattern to match paths against that should be explicitly included during manifest generation",
+            "type": "string"
+          },
+          "jsonnet": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSourceJsonnet"
+          },
+          "recurse": {
+            "title": "Recurse specifies whether to scan a directory recursively for manifests",
+            "type": "boolean"
+          }
+        },
+        "title": "ApplicationSourceDirectory holds options for applications of type plain YAML or Jsonnet",
+        "type": "object"
+      },
+      "v1alpha1ApplicationSourceHelm": {
+        "properties": {
+          "apiVersions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "fileParameters": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1HelmFileParameter"
+            },
+            "title": "FileParameters are file parameters to the helm template",
+            "type": "array"
+          },
+          "ignoreMissingValueFiles": {
+            "title": "IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values",
+            "type": "boolean"
+          },
+          "kubeVersion": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "parameters": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1HelmParameter"
+            },
+            "title": "Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation",
+            "type": "array"
+          },
+          "passCredentials": {
+            "title": "PassCredentials pass credentials to all domains (Helm's --pass-credentials)",
+            "type": "boolean"
+          },
+          "releaseName": {
+            "title": "ReleaseName is the Helm release name to use. If omitted it will use the application name",
+            "type": "string"
+          },
+          "skipCrds": {
+            "title": "SkipCrds skips custom resource definition installation step (Helm's --skip-crds)",
+            "type": "boolean"
+          },
+          "skipSchemaValidation": {
+            "title": "SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)",
+            "type": "boolean"
+          },
+          "skipTests": {
+            "type": "boolean"
+          },
+          "valueFiles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "ValuesFiles is a list of Helm value files to use when generating a template",
+            "type": "array"
+          },
+          "values": {
+            "title": "Values specifies Helm values to be passed to helm template, typically defined as a block. ValuesObject takes precedence over Values, so use one or the other.\n+patchStrategy=replace",
+            "type": "string"
+          },
+          "valuesObject": {
+            "$ref": "#/components/schemas/runtimeRawExtension"
+          },
+          "version": {
+            "title": "Version is the Helm version to use for templating (\"3\")",
+            "type": "string"
+          }
+        },
+        "title": "ApplicationSourceHelm holds helm specific options\n+protobuf.options.(gogoproto.goproto_stringer)=false",
+        "type": "object"
+      },
+      "v1alpha1ApplicationSourceJsonnet": {
+        "properties": {
+          "extVars": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1JsonnetVar"
+            },
+            "title": "ExtVars is a list of Jsonnet External Variables",
+            "type": "array"
+          },
+          "libs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Additional library search dirs",
+            "type": "array"
+          },
+          "tlas": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1JsonnetVar"
+            },
+            "title": "TLAS is a list of Jsonnet Top-level Arguments",
+            "type": "array"
+          }
+        },
+        "title": "ApplicationSourceJsonnet holds options specific to applications of type Jsonnet",
+        "type": "object"
+      },
+      "v1alpha1ApplicationSourceKustomize": {
+        "properties": {
+          "apiVersions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "commonAnnotations": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "CommonAnnotations is a list of additional annotations to add to rendered manifests",
+            "type": "object"
+          },
+          "commonAnnotationsEnvsubst": {
+            "title": "CommonAnnotationsEnvsubst specifies whether to apply env variables substitution for annotation values",
+            "type": "boolean"
+          },
+          "commonLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "CommonLabels is a list of additional labels to add to rendered manifests",
+            "type": "object"
+          },
+          "components": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Components specifies a list of kustomize components to add to the kustomization before building",
+            "type": "array"
+          },
+          "forceCommonAnnotations": {
+            "title": "ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps",
+            "type": "boolean"
+          },
+          "forceCommonLabels": {
+            "title": "ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps",
+            "type": "boolean"
+          },
+          "ignoreMissingComponents": {
+            "title": "IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not appending them to kustomization file",
+            "type": "boolean"
+          },
+          "images": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Images is a list of Kustomize image override specifications",
+            "type": "array"
+          },
+          "kubeVersion": {
+            "type": "string"
+          },
+          "labelIncludeTemplates": {
+            "title": "LabelIncludeTemplates specifies whether to apply common labels to resource templates or not",
+            "type": "boolean"
+          },
+          "labelWithoutSelector": {
+            "title": "LabelWithoutSelector specifies whether to apply common labels to resource selectors or not",
+            "type": "boolean"
+          },
+          "namePrefix": {
+            "title": "NamePrefix overrides the namePrefix in the kustomization.yaml for Kustomize apps",
+            "type": "string"
+          },
+          "nameSuffix": {
+            "title": "NameSuffix overrides the nameSuffix in the kustomization.yaml for Kustomize apps",
+            "type": "string"
+          },
+          "namespace": {
+            "title": "Namespace sets the namespace that Kustomize adds to all resources",
+            "type": "string"
+          },
+          "patches": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1KustomizePatch"
+            },
+            "title": "Patches is a list of Kustomize patches",
+            "type": "array"
+          },
+          "replicas": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1KustomizeReplica"
+            },
+            "title": "Replicas is a list of Kustomize Replicas override specifications",
+            "type": "array"
+          },
+          "version": {
+            "title": "Version controls which version of Kustomize to use for rendering manifests",
+            "type": "string"
+          }
+        },
+        "title": "ApplicationSourceKustomize holds options specific to an Application source specific to Kustomize",
+        "type": "object"
+      },
+      "v1alpha1ApplicationSourcePlugin": {
+        "properties": {
+          "env": {
+            "items": {
+              "$ref": "#/components/schemas/applicationv1alpha1EnvEntry"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parameters": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ApplicationSourcePluginParameter"
+            },
+            "type": "array"
+          }
+        },
+        "title": "ApplicationSourcePlugin holds options specific to config management plugins",
+        "type": "object"
+      },
+      "v1alpha1ApplicationSourcePluginParameter": {
+        "properties": {
+          "array": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "map": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          },
+          "string": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1ApplicationSpec": {
+        "properties": {
+          "destination": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationDestination"
+          },
+          "ignoreDifferences": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ResourceIgnoreDifferences"
+            },
+            "title": "IgnoreDifferences is a list of resources and their fields which should be ignored during comparison",
+            "type": "array"
+          },
+          "info": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1Info"
+            },
+            "title": "Info contains a list of information (URLs, email addresses, and plain text) that relates to the application",
+            "type": "array"
+          },
+          "project": {
+            "type": "string"
+          },
+          "revisionHistoryLimit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "source": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSource"
+          },
+          "sourceHydrator": {
+            "$ref": "#/components/schemas/v1alpha1SourceHydrator"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ApplicationSource"
+            },
+            "title": "Sources is a reference to the location of the application's manifests or chart",
+            "type": "array"
+          },
+          "syncPolicy": {
+            "$ref": "#/components/schemas/v1alpha1SyncPolicy"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1ApplicationStatus": {
+        "properties": {
+          "conditions": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ApplicationCondition"
+            },
+            "title": "Conditions is a list of currently observed application conditions",
+            "type": "array"
+          },
+          "controllerNamespace": {
+            "title": "ControllerNamespace indicates the namespace in which the application controller is located",
+            "type": "string"
+          },
+          "health": {
+            "$ref": "#/components/schemas/v1alpha1AppHealthStatus"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1RevisionHistory"
+            },
+            "title": "History contains information about the application's sync history",
+            "type": "array"
+          },
+          "observedAt": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "operationState": {
+            "$ref": "#/components/schemas/v1alpha1OperationState"
+          },
+          "reconciledAt": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "resourceHealthSource": {
+            "title": "ResourceHealthSource indicates where the resource health status is stored: inline if not set or appTree",
+            "type": "string"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/components/schemas/applicationv1alpha1ResourceStatus"
+            },
+            "title": "Resources is a list of Kubernetes resources managed by this application",
+            "type": "array"
+          },
+          "sourceHydrator": {
+            "$ref": "#/components/schemas/v1alpha1SourceHydratorStatus"
+          },
+          "sourceType": {
+            "title": "SourceType specifies the type of this application",
+            "type": "string"
+          },
+          "sourceTypes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "SourceTypes specifies the type of the sources included in the application",
+            "type": "array"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSummary"
+          },
+          "sync": {
+            "$ref": "#/components/schemas/v1alpha1SyncStatus"
+          }
+        },
+        "title": "ApplicationStatus contains status information for the application",
+        "type": "object"
+      },
+      "v1alpha1ApplicationSummary": {
+        "properties": {
+          "externalURLs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "images": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "isAppOfApps": {
+            "type": "boolean"
+          }
+        },
+        "title": "ApplicationSummary contains information about URLs and container images used by an application",
+        "type": "object"
+      },
+      "v1alpha1ApplicationTree": {
+        "properties": {
+          "hosts": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1HostInfo"
+            },
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ResourceNode"
+            },
+            "type": "array"
+          },
+          "orphanedNodes": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ResourceNode"
+            },
+            "type": "array"
+          },
+          "shardsCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1Backoff": {
+        "properties": {
+          "duration": {
+            "title": "Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. \"2m\", \"1h\")",
+            "type": "string"
+          },
+          "factor": {
+            "format": "int64",
+            "title": "Factor is a factor to multiply the base duration after each failed retry",
+            "type": "integer"
+          },
+          "maxDuration": {
+            "title": "MaxDuration is the maximum amount of time allowed for the backoff strategy",
+            "type": "string"
+          }
+        },
+        "title": "Backoff is the backoff strategy to use on subsequent retries for failing syncs",
+        "type": "object"
+      },
+      "v1alpha1Cluster": {
+        "properties": {
+          "annotations": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Annotations for cluster secret metadata",
+            "type": "object"
+          },
+          "clusterResources": {
+            "type": "boolean"
+          },
+          "config": {
+            "$ref": "#/components/schemas/v1alpha1ClusterConfig"
+          },
+          "configHash": {
+            "format": "uint64",
+            "title": "ConfigHash is an opaque value which tracks changes to the desired configuration of a Cluster",
+            "type": "string"
+          },
+          "connectionState": {
+            "$ref": "#/components/schemas/v1alpha1ConnectionState"
+          },
+          "info": {
+            "$ref": "#/components/schemas/v1alpha1ClusterInfo"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Labels for cluster secret metadata",
+            "type": "object"
+          },
+          "name": {
+            "title": "Name of the cluster. If omitted, will use the server address",
+            "type": "string"
+          },
+          "namespaces": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "project": {
+            "title": "Reference between project and cluster that allow you automatically to be added as item inside Destinations project entity",
+            "type": "string"
+          },
+          "refreshRequestedAt": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "server": {
+            "title": "Server is the API server URL of the Kubernetes cluster",
+            "type": "string"
+          },
+          "serverVersion": {
+            "title": "Deprecated: use Info.ServerVersion field instead.\nThe server version",
+            "type": "string"
+          },
+          "shard": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "Cluster is the definition of a cluster resource",
+        "type": "object"
+      },
+      "v1alpha1ClusterCacheInfo": {
+        "properties": {
+          "apisCount": {
+            "format": "int64",
+            "title": "APIsCount holds number of observed Kubernetes API count",
+            "type": "integer"
+          },
+          "lastCacheSyncTime": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "resourcesCount": {
+            "format": "int64",
+            "title": "ResourcesCount holds number of observed Kubernetes resources",
+            "type": "integer"
+          }
+        },
+        "title": "ClusterCacheInfo contains information about the cluster cache",
+        "type": "object"
+      },
+      "v1alpha1ClusterConfig": {
+        "properties": {
+          "awsAuthConfig": {
+            "$ref": "#/components/schemas/v1alpha1AWSAuthConfig"
+          },
+          "bearerToken": {
+            "type": "string"
+          },
+          "burst": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "disableCompression": {
+            "type": "boolean"
+          },
+          "execProviderConfig": {
+            "$ref": "#/components/schemas/v1alpha1ExecProviderConfig"
+          },
+          "password": {
+            "type": "string"
+          },
+          "proxyUrl": {
+            "title": "ProxyURL is the URL to the proxy to be used for all requests send to the server",
+            "type": "string"
+          },
+          "qps": {
+            "format": "float",
+            "type": "number"
+          },
+          "tlsClientConfig": {
+            "$ref": "#/components/schemas/v1alpha1TLSClientConfig"
+          },
+          "username": {
+            "title": "Server requires Basic authentication",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1ClusterInfo": {
+        "properties": {
+          "apiVersions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "APIVersions contains list of API versions supported by the cluster",
+            "type": "array"
+          },
+          "applicationsCount": {
+            "format": "int64",
+            "title": "ApplicationsCount is the number of applications managed by Argo CD on the cluster",
+            "type": "integer"
+          },
+          "cacheInfo": {
+            "$ref": "#/components/schemas/v1alpha1ClusterCacheInfo"
+          },
+          "connectionState": {
+            "$ref": "#/components/schemas/v1alpha1ConnectionState"
+          },
+          "serverVersion": {
+            "title": "ServerVersion contains information about the Kubernetes version of the cluster",
+            "type": "string"
+          }
+        },
+        "title": "ClusterInfo contains information about the cluster",
+        "type": "object"
+      },
+      "v1alpha1ClusterList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1Cluster"
+            },
+            "type": "array"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v1ListMeta"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1ClusterResourceRestrictionItem": {
+        "properties": {
+          "group": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "title": "ClusterResourceRestrictionItem is a cluster resource that is restricted by the project's whitelist or blacklist",
+        "type": "object"
+      },
+      "v1alpha1ComparedTo": {
+        "properties": {
+          "destination": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationDestination"
+          },
+          "ignoreDifferences": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ResourceIgnoreDifferences"
+            },
+            "title": "IgnoreDifferences is a reference to the application's ignored differences used for comparison",
+            "type": "array"
+          },
+          "source": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSource"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ApplicationSource"
+            },
+            "title": "Sources is a reference to the application's multiple sources used for comparison",
+            "type": "array"
+          }
+        },
+        "title": "ComparedTo contains application source and target which was used for resources comparison",
+        "type": "object"
+      },
+      "v1alpha1ConnectionState": {
+        "properties": {
+          "attemptedAt": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "message": {
+            "title": "Message contains human readable information about the connection status",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status contains the current status indicator for the connection",
+            "type": "string"
+          }
+        },
+        "title": "ConnectionState contains information about remote resource connection state, currently used for clusters and repositories",
+        "type": "object"
+      },
+      "v1alpha1DrySource": {
+        "properties": {
+          "directory": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSourceDirectory"
+          },
+          "helm": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSourceHelm"
+          },
+          "kustomize": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSourceKustomize"
+          },
+          "path": {
+            "title": "Path is a directory path within the Git repository where the manifests are located",
+            "type": "string"
+          },
+          "plugin": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSourcePlugin"
+          },
+          "repoURL": {
+            "title": "RepoURL is the URL to the git repository that contains the application manifests",
+            "type": "string"
+          },
+          "targetRevision": {
+            "title": "TargetRevision defines the revision of the source to hydrate",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1ExecProviderConfig": {
+        "properties": {
+          "apiVersion": {
+            "title": "Preferred input version of the ExecInfo",
+            "type": "string"
+          },
+          "args": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Arguments to pass to the command when executing it",
+            "type": "array"
+          },
+          "command": {
+            "title": "Command to execute",
+            "type": "string"
+          },
+          "config": {
+            "$ref": "#/components/schemas/runtimeRawExtension"
+          },
+          "env": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Env defines additional environment variables to expose to the process",
+            "type": "object"
+          },
+          "installHint": {
+            "title": "This text is shown to the user when the executable doesn't seem to be present",
+            "type": "string"
+          },
+          "provideClusterInfo": {
+            "title": "ProvideClusterInfo determines whether or not to provide cluster information,\nwhich could potentially contain very large CA data, to this exec plugin as a\npart of the KUBERNETES_EXEC_INFO environment variable.\nComment mirrored from k8s.io/client-go/tools/clientcmd/api.ExecConfig.ProvideClusterInfo",
+            "type": "boolean"
+          }
+        },
+        "title": "ExecProviderConfig is config used to call an external command to perform cluster authentication\nSee: https://godoc.org/k8s.io/client-go/tools/clientcmd/api#ExecConfig",
+        "type": "object"
+      },
+      "v1alpha1HealthStatus": {
+        "properties": {
+          "lastTransitionTime": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "message": {
+            "title": "Message is a human-readable informational message describing the health status",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status holds the status code of the resource",
+            "type": "string"
+          }
+        },
+        "title": "HealthStatus contains information about the currently observed health state of a resource",
+        "type": "object"
+      },
+      "v1alpha1HelmFileParameter": {
+        "properties": {
+          "name": {
+            "title": "Name is the name of the Helm parameter",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path is the path to the file containing the values for the Helm parameter",
+            "type": "string"
+          }
+        },
+        "title": "HelmFileParameter is a file parameter that's passed to helm template during manifest generation",
+        "type": "object"
+      },
+      "v1alpha1HelmParameter": {
+        "properties": {
+          "forceString": {
+            "title": "ForceString determines whether to tell Helm to interpret booleans and numbers as strings",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name is the name of the Helm parameter",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value is the value for the Helm parameter",
+            "type": "string"
+          }
+        },
+        "title": "HelmParameter is a parameter that's passed to helm template during manifest generation",
+        "type": "object"
+      },
+      "v1alpha1HostInfo": {
+        "properties": {
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          },
+          "resourcesInfo": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1HostResourceInfo"
+            },
+            "type": "array"
+          },
+          "systemInfo": {
+            "$ref": "#/components/schemas/v1NodeSystemInfo"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1HostResourceInfo": {
+        "properties": {
+          "capacity": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "requestedByApp": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "requestedByNeighbors": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resourceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1HydrateOperation": {
+        "properties": {
+          "drySHA": {
+            "title": "DrySHA holds the resolved revision (sha) of the dry source as of the most recent reconciliation",
+            "type": "string"
+          },
+          "finishedAt": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "hydratedSHA": {
+            "title": "HydratedSHA holds the resolved revision (sha) of the hydrated source as of the most recent reconciliation",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message contains a message describing the current status of the hydrate operation",
+            "type": "string"
+          },
+          "phase": {
+            "title": "Phase indicates the status of the hydrate operation",
+            "type": "string"
+          },
+          "sourceHydrator": {
+            "$ref": "#/components/schemas/v1alpha1SourceHydrator"
+          },
+          "startedAt": {
+            "$ref": "#/components/schemas/v1Time"
+          }
+        },
+        "title": "HydrateOperation contains information about the most recent hydrate operation",
+        "type": "object"
+      },
+      "v1alpha1HydrateTo": {
+        "properties": {
+          "targetBranch": {
+            "title": "TargetBranch is the branch to which hydrated manifests should be committed",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1Info": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1InfoItem": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "title": "InfoItem contains arbitrary, human readable information about an application",
+        "type": "object"
+      },
+      "v1alpha1InlineSyncWindow": {
+        "properties": {
+          "andOperator": {
+            "title": "UseAndOperator use AND operator for matching applications, namespaces and clusters instead of the default OR operator",
+            "type": "boolean"
+          },
+          "applications": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Applications contains a list of applications that the window will apply to",
+            "type": "array"
+          },
+          "clusters": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Clusters contains a list of clusters that the window will apply to",
+            "type": "array"
+          },
+          "description": {
+            "title": "Description of the sync that will be applied to the schedule, can be used to add any information such as a ticket number for example",
+            "type": "string"
+          },
+          "duration": {
+            "title": "Duration is the amount of time the sync window will be open",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind defines if the window allows or blocks syncs",
+            "type": "string"
+          },
+          "manualSync": {
+            "title": "ManualSync enables manual syncs when they would otherwise be blocked",
+            "type": "boolean"
+          },
+          "namespaces": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Namespaces contains a list of namespaces that the window will apply to",
+            "type": "array"
+          },
+          "schedule": {
+            "title": "Schedule is the time the window will begin, specified in cron format",
+            "type": "string"
+          },
+          "syncOverrun": {
+            "title": "SyncOverrun allows ongoing syncs to continue in two scenarios:\nFor deny windows: allows syncs that started before the deny window became active to continue running\nFor allow windows: allows syncs that started during the allow window to continue after the window ends",
+            "type": "boolean"
+          },
+          "timeZone": {
+            "title": "TimeZone of the sync that will be applied to the schedule",
+            "type": "string"
+          }
+        },
+        "title": "InlineSyncWindow contains the kind, time, duration and attributes that are used to assign the syncWindows to apps",
+        "type": "object"
+      },
+      "v1alpha1JWTToken": {
+        "properties": {
+          "exp": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "iat": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "title": "JWTToken holds the issuedAt and expiresAt values of a token",
+        "type": "object"
+      },
+      "v1alpha1JWTTokens": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1JWTToken"
+            },
+            "type": "array"
+          }
+        },
+        "title": "JWTTokens represents a list of JWT tokens",
+        "type": "object"
+      },
+      "v1alpha1JsonnetVar": {
+        "properties": {
+          "code": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "title": "JsonnetVar represents a variable to be passed to jsonnet during manifest generation",
+        "type": "object"
+      },
+      "v1alpha1KustomizeGvk": {
+        "properties": {
+          "group": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1KustomizePatch": {
+        "properties": {
+          "options": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object"
+          },
+          "patch": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/components/schemas/v1alpha1KustomizeSelector"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1KustomizeReplica": {
+        "properties": {
+          "count": {
+            "$ref": "#/components/schemas/intstrIntOrString"
+          },
+          "name": {
+            "title": "Name of Deployment or StatefulSet",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1KustomizeResId": {
+        "properties": {
+          "gvk": {
+            "$ref": "#/components/schemas/v1alpha1KustomizeGvk"
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1KustomizeSelector": {
+        "properties": {
+          "annotationSelector": {
+            "type": "string"
+          },
+          "labelSelector": {
+            "type": "string"
+          },
+          "resId": {
+            "$ref": "#/components/schemas/v1alpha1KustomizeResId"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1ManagedNamespaceMetadata": {
+        "properties": {
+          "annotations": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1Operation": {
+        "properties": {
+          "info": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1Info"
+            },
+            "title": "Info is a list of informational items for this operation",
+            "type": "array"
+          },
+          "initiatedBy": {
+            "$ref": "#/components/schemas/v1alpha1OperationInitiator"
+          },
+          "retry": {
+            "$ref": "#/components/schemas/v1alpha1RetryStrategy"
+          },
+          "sync": {
+            "$ref": "#/components/schemas/v1alpha1SyncOperation"
+          }
+        },
+        "title": "Operation contains information about a requested or running operation",
+        "type": "object"
+      },
+      "v1alpha1OperationInitiator": {
+        "properties": {
+          "automated": {
+            "type": "boolean"
+          },
+          "username": {
+            "title": "Username contains the name of a user who started operation",
+            "type": "string"
+          }
+        },
+        "title": "OperationInitiator contains information about the initiator of an operation",
+        "type": "object"
+      },
+      "v1alpha1OperationState": {
+        "properties": {
+          "finishedAt": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "message": {
+            "type": "string"
+          },
+          "operation": {
+            "$ref": "#/components/schemas/v1alpha1Operation"
+          },
+          "phase": {
+            "title": "Phase is the current phase of the operation",
+            "type": "string"
+          },
+          "retryCount": {
+            "format": "int64",
+            "title": "RetryCount contains time of operation retries",
+            "type": "integer"
+          },
+          "startedAt": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "syncResult": {
+            "$ref": "#/components/schemas/v1alpha1SyncOperationResult"
+          }
+        },
+        "title": "OperationState contains information about state of a running operation",
+        "type": "object"
+      },
+      "v1alpha1OrphanedResourceKey": {
+        "properties": {
+          "group": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "title": "OrphanedResourceKey is a reference to a resource to be ignored from",
+        "type": "object"
+      },
+      "v1alpha1OrphanedResourcesMonitorSettings": {
+        "properties": {
+          "ignore": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1OrphanedResourceKey"
+            },
+            "title": "Ignore contains a list of resources that are to be excluded from orphaned resources monitoring",
+            "type": "array"
+          },
+          "warn": {
+            "title": "Warn indicates if warning condition should be created for apps which have orphaned resources",
+            "type": "boolean"
+          }
+        },
+        "title": "OrphanedResourcesMonitorSettings holds settings of orphaned resources monitoring",
+        "type": "object"
+      },
+      "v1alpha1ProjectRole": {
+        "properties": {
+          "description": {
+            "title": "Description is a description of the role",
+            "type": "string"
+          },
+          "groups": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Groups are a list of OIDC group claims bound to this role",
+            "type": "array"
+          },
+          "jwtTokens": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1JWTToken"
+            },
+            "title": "JWTTokens are a list of generated JWT tokens bound to this role",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name is a name for this role",
+            "type": "string"
+          },
+          "policies": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Policies Stores a list of casbin formatted strings that define access policies for the role in the project",
+            "type": "array"
+          }
+        },
+        "title": "ProjectRole represents a role that has access to a project",
+        "type": "object"
+      },
+      "v1alpha1Repository": {
+        "properties": {
+          "azureActiveDirectoryEndpoint": {
+            "title": "AzureActiveDirectoryEndpoint specifies the Azure Active Directory endpoint used for Service Principal authentication. If empty will default to https://login.microsoftonline.com",
+            "type": "string"
+          },
+          "azureServicePrincipalClientId": {
+            "title": "AzureServicePrincipalClientId specifies the client ID of the Azure Service Principal used to access the repo",
+            "type": "string"
+          },
+          "azureServicePrincipalClientSecret": {
+            "title": "AzureServicePrincipalClientSecret specifies the client secret of the Azure Service Principal used to access the repo",
+            "type": "string"
+          },
+          "azureServicePrincipalTenantId": {
+            "title": "AzureServicePrincipalTenantId specifies the tenant ID of the Azure Service Principal used to access the repo",
+            "type": "string"
+          },
+          "bearerToken": {
+            "title": "BearerToken contains the bearer token used for Git BitBucket Data Center auth at the repo server",
+            "type": "string"
+          },
+          "connectionState": {
+            "$ref": "#/components/schemas/v1alpha1ConnectionState"
+          },
+          "depth": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "enableLfs": {
+            "type": "boolean"
+          },
+          "enableOCI": {
+            "title": "EnableOCI specifies whether helm-oci support should be enabled for this repo",
+            "type": "boolean"
+          },
+          "forceHttpBasicAuth": {
+            "title": "ForceHttpBasicAuth specifies whether Argo CD should attempt to force basic auth for HTTP connections",
+            "type": "boolean"
+          },
+          "gcpServiceAccountKey": {
+            "title": "GCPServiceAccountKey specifies the service account key in JSON format to be used for getting credentials to Google Cloud Source repos",
+            "type": "string"
+          },
+          "githubAppEnterpriseBaseUrl": {
+            "title": "GithubAppEnterpriseBaseURL specifies the base URL of GitHub Enterprise installation. If empty will default to https://api.github.com",
+            "type": "string"
+          },
+          "githubAppID": {
+            "format": "int64",
+            "title": "GithubAppId specifies the ID of the GitHub app used to access the repo",
+            "type": "integer"
+          },
+          "githubAppInstallationID": {
+            "format": "int64",
+            "title": "GithubAppInstallationId specifies the installation ID of the GitHub App used to access the repo",
+            "type": "integer"
+          },
+          "githubAppPrivateKey": {
+            "title": "Github App Private Key PEM data",
+            "type": "string"
+          },
+          "inheritedCreds": {
+            "title": "Whether credentials were inherited from a credential set",
+            "type": "boolean"
+          },
+          "insecure": {
+            "title": "Insecure specifies whether the connection to the repository ignores any errors when verifying TLS certificates or SSH host keys",
+            "type": "boolean"
+          },
+          "insecureIgnoreHostKey": {
+            "title": "InsecureIgnoreHostKey should not be used anymore, Insecure is favoured\nUsed only for Git repos",
+            "type": "boolean"
+          },
+          "insecureOCIForceHttp": {
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name specifies a name to be used for this repo. Only used with Helm repos",
+            "type": "string"
+          },
+          "noProxy": {
+            "title": "NoProxy specifies a list of targets where the proxy isn't used, applies only in cases where the proxy is applied",
+            "type": "string"
+          },
+          "password": {
+            "title": "Password contains the password or PAT used for authenticating at the remote repository",
+            "type": "string"
+          },
+          "project": {
+            "title": "Reference between project and repository that allows it to be automatically added as an item inside SourceRepos project entity",
+            "type": "string"
+          },
+          "proxy": {
+            "title": "Proxy specifies the HTTP/HTTPS proxy used to access the repo",
+            "type": "string"
+          },
+          "repo": {
+            "title": "Repo contains the URL to the remote repository",
+            "type": "string"
+          },
+          "sshPrivateKey": {
+            "type": "string"
+          },
+          "tlsClientCertData": {
+            "title": "TLSClientCertData contains a certificate in PEM format for authenticating at the repo server",
+            "type": "string"
+          },
+          "tlsClientCertKey": {
+            "title": "TLSClientCertKey contains a private key in PEM format for authenticating at the repo server",
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "useAzureWorkloadIdentity": {
+            "title": "UseAzureWorkloadIdentity specifies whether to use Azure Workload Identity for authentication",
+            "type": "boolean"
+          },
+          "username": {
+            "title": "Username contains the user name used for authenticating at the remote repository",
+            "type": "string"
+          },
+          "webhookManifestCacheWarmDisabled": {
+            "type": "boolean"
+          }
+        },
+        "title": "Repository is a repository holding application configurations",
+        "type": "object"
+      },
+      "v1alpha1ResourceIgnoreDifferences": {
+        "properties": {
+          "group": {
+            "type": "string"
+          },
+          "jqPathExpressions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "jsonPointers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "managedFieldsManagers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "ManagedFieldsManagers is a list of trusted managers. Fields mutated by those managers will take precedence over the\ndesired state defined in the SCM and won't be displayed in diffs",
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1ResourceNetworkingInfo": {
+        "properties": {
+          "externalURLs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ingress": {
+            "items": {
+              "$ref": "#/components/schemas/v1LoadBalancerIngress"
+            },
+            "type": "array"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "targetLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "targetRefs": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ResourceRef"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1ResourceNode": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/v1alpha1ResourceRef"
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "health": {
+            "$ref": "#/components/schemas/v1alpha1HealthStatus"
+          },
+          "images": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "info": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1InfoItem"
+            },
+            "type": "array"
+          },
+          "networkingInfo": {
+            "$ref": "#/components/schemas/v1alpha1ResourceNetworkingInfo"
+          },
+          "parentRefs": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ResourceRef"
+            },
+            "type": "array"
+          },
+          "resourceVersion": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1ResourceRef": {
+        "properties": {
+          "group": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "title": "ResourceRef includes fields which uniquely identify a resource",
+        "type": "object"
+      },
+      "v1alpha1ResourceResult": {
+        "properties": {
+          "group": {
+            "title": "Group specifies the API group of the resource",
+            "type": "string"
+          },
+          "hookPhase": {
+            "type": "string"
+          },
+          "hookType": {
+            "title": "HookType specifies the type of the hook. Empty for non-hook resources",
+            "type": "string"
+          },
+          "images": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Images contains the images related to the ResourceResult",
+            "type": "array"
+          },
+          "kind": {
+            "title": "Kind specifies the API kind of the resource",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message contains an informational or error message for the last sync OR operation",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name specifies the name of the resource",
+            "type": "string"
+          },
+          "namespace": {
+            "title": "Namespace specifies the target namespace of the resource",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status holds the final result of the sync. Will be empty if the resources is yet to be applied/pruned and is always zero-value for hooks",
+            "type": "string"
+          },
+          "syncPhase": {
+            "title": "SyncPhase indicates the particular phase of the sync that this result was acquired in",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version specifies the API version of the resource",
+            "type": "string"
+          }
+        },
+        "title": "ResourceResult holds the operation result details of a specific resource",
+        "type": "object"
+      },
+      "v1alpha1RetryStrategy": {
+        "properties": {
+          "backoff": {
+            "$ref": "#/components/schemas/v1alpha1Backoff"
+          },
+          "limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "refresh": {
+            "title": "Refresh indicates if the latest revision should be used on retry instead of the initial one (default: false)",
+            "type": "boolean"
+          }
+        },
+        "title": "RetryStrategy contains information about the strategy to apply when a sync failed",
+        "type": "object"
+      },
+      "v1alpha1RevisionHistory": {
+        "properties": {
+          "deployStartedAt": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "deployedAt": {
+            "$ref": "#/components/schemas/v1Time"
+          },
+          "id": {
+            "format": "int64",
+            "title": "ID is an auto incrementing identifier of the RevisionHistory",
+            "type": "integer"
+          },
+          "initiatedBy": {
+            "$ref": "#/components/schemas/v1alpha1OperationInitiator"
+          },
+          "revision": {
+            "title": "Revision holds the revision the sync was performed against",
+            "type": "string"
+          },
+          "revisions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Revisions holds the revision of each source in sources field the sync was performed against",
+            "type": "array"
+          },
+          "source": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSource"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ApplicationSource"
+            },
+            "title": "Sources is a reference to the application sources used for the sync operation",
+            "type": "array"
+          }
+        },
+        "title": "RevisionHistory contains history information about a previous sync",
+        "type": "object"
+      },
+      "v1alpha1SignatureKey": {
+        "properties": {
+          "keyID": {
+            "title": "The ID of the key in hexadecimal notation",
+            "type": "string"
+          }
+        },
+        "title": "SignatureKey is the specification of a key required to verify commit signatures with",
+        "type": "object"
+      },
+      "v1alpha1SourceHydrator": {
+        "properties": {
+          "drySource": {
+            "$ref": "#/components/schemas/v1alpha1DrySource"
+          },
+          "hydrateTo": {
+            "$ref": "#/components/schemas/v1alpha1HydrateTo"
+          },
+          "syncSource": {
+            "$ref": "#/components/schemas/v1alpha1SyncSource"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1SourceHydratorStatus": {
+        "properties": {
+          "currentOperation": {
+            "$ref": "#/components/schemas/v1alpha1HydrateOperation"
+          },
+          "lastComparedDryRevision": {
+            "type": "string"
+          },
+          "lastSuccessfulOperation": {
+            "$ref": "#/components/schemas/v1alpha1SuccessfulHydrateOperation"
+          }
+        },
+        "title": "SourceHydratorStatus contains information about the current state of source hydration",
+        "type": "object"
+      },
+      "v1alpha1SourceIntegrity": {
+        "properties": {
+          "git": {
+            "$ref": "#/components/schemas/v1alpha1SourceIntegrityGit"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1SourceIntegrityGit": {
+        "properties": {
+          "policies": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1SourceIntegrityGitPolicy"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1SourceIntegrityGitPolicy": {
+        "properties": {
+          "gpg": {
+            "$ref": "#/components/schemas/v1alpha1SourceIntegrityGitPolicyGPG"
+          },
+          "repos": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1SourceIntegrityGitPolicyRepo"
+            },
+            "title": "List of repository criteria restricting repositories the policy will apply to",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1SourceIntegrityGitPolicyGPG": {
+        "properties": {
+          "keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "mode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1SourceIntegrityGitPolicyRepo": {
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1SuccessfulHydrateOperation": {
+        "properties": {
+          "drySHA": {
+            "title": "DrySHA holds the resolved revision (sha) of the dry source as of the most recent reconciliation",
+            "type": "string"
+          },
+          "hydratedSHA": {
+            "title": "HydratedSHA holds the resolved revision (sha) of the hydrated source as of the most recent reconciliation",
+            "type": "string"
+          },
+          "sourceHydrator": {
+            "$ref": "#/components/schemas/v1alpha1SourceHydrator"
+          }
+        },
+        "title": "SuccessfulHydrateOperation contains information about the most recent successful hydrate operation",
+        "type": "object"
+      },
+      "v1alpha1SyncOperation": {
+        "properties": {
+          "autoHealAttemptsCount": {
+            "format": "int64",
+            "title": "SelfHealAttemptsCount contains the number of auto-heal attempts",
+            "type": "integer"
+          },
+          "dryRun": {
+            "title": "DryRun specifies to perform a `kubectl apply --dry-run` without actually performing the sync",
+            "type": "boolean"
+          },
+          "manifests": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Manifests is an optional field that overrides sync source with a local directory for development",
+            "type": "array"
+          },
+          "prune": {
+            "title": "Prune specifies to delete resources from the cluster that are no longer tracked in git",
+            "type": "boolean"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1SyncOperationResource"
+            },
+            "title": "Resources describes which resources shall be part of the sync",
+            "type": "array"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "revisions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "source": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSource"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ApplicationSource"
+            },
+            "title": "Sources overrides the source definition set in the application.\nThis is typically set in a Rollback operation and is nil during a Sync operation",
+            "type": "array"
+          },
+          "syncOptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "SyncOptions provide per-sync sync-options, e.g. Validate=false",
+            "type": "array"
+          },
+          "syncStrategy": {
+            "$ref": "#/components/schemas/v1alpha1SyncStrategy"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1SyncOperationResource": {
+        "properties": {
+          "group": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1SyncOperationResult": {
+        "properties": {
+          "managedNamespaceMetadata": {
+            "$ref": "#/components/schemas/v1alpha1ManagedNamespaceMetadata"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ResourceResult"
+            },
+            "title": "Resources contains a list of sync result items for each individual resource in a sync operation",
+            "type": "array"
+          },
+          "revision": {
+            "title": "Revision holds the revision this sync operation was performed to",
+            "type": "string"
+          },
+          "revisions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Revisions holds the revision this sync operation was performed for respective indexed source in sources field",
+            "type": "array"
+          },
+          "source": {
+            "$ref": "#/components/schemas/v1alpha1ApplicationSource"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/v1alpha1ApplicationSource"
+            },
+            "title": "Source records the application source information of the sync, used for comparing auto-sync",
+            "type": "array"
+          }
+        },
+        "title": "SyncOperationResult represent result of sync operation",
+        "type": "object"
+      },
+      "v1alpha1SyncPolicy": {
+        "properties": {
+          "automated": {
+            "$ref": "#/components/schemas/v1alpha1SyncPolicyAutomated"
+          },
+          "managedNamespaceMetadata": {
+            "$ref": "#/components/schemas/v1alpha1ManagedNamespaceMetadata"
+          },
+          "retry": {
+            "$ref": "#/components/schemas/v1alpha1RetryStrategy"
+          },
+          "syncOptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Options allow you to specify whole app sync-options",
+            "type": "array"
+          }
+        },
+        "title": "SyncPolicy controls when a sync will be performed in response to updates in git",
+        "type": "object"
+      },
+      "v1alpha1SyncPolicyAutomated": {
+        "properties": {
+          "allowEmpty": {
+            "title": "AllowEmpty allows apps have zero live resources (default: false)",
+            "type": "boolean"
+          },
+          "enabled": {
+            "title": "Enable allows apps to explicitly control automated sync",
+            "type": "boolean"
+          },
+          "prune": {
+            "title": "Prune specifies whether to delete resources from the cluster that are not found in the sources anymore as part of automated sync (default: false)",
+            "type": "boolean"
+          },
+          "selfHeal": {
+            "title": "SelfHeal specifies whether to revert resources back to their desired state upon modification in the cluster (default: false)",
+            "type": "boolean"
+          }
+        },
+        "title": "SyncPolicyAutomated controls the behavior of an automated sync",
+        "type": "object"
+      },
+      "v1alpha1SyncSource": {
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "repoURL": {
+            "type": "string"
+          },
+          "targetBranch": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1SyncStatus": {
+        "properties": {
+          "comparedTo": {
+            "$ref": "#/components/schemas/v1alpha1ComparedTo"
+          },
+          "revision": {
+            "title": "Revision contains information about the revision the comparison has been performed to",
+            "type": "string"
+          },
+          "revisions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Revisions contains information about the revisions of multiple sources the comparison has been performed to",
+            "type": "array"
+          },
+          "status": {
+            "title": "Status is the sync state of the comparison",
+            "type": "string"
+          }
+        },
+        "title": "SyncStatus contains information about the currently observed live and desired states of an application",
+        "type": "object"
+      },
+      "v1alpha1SyncStrategy": {
+        "properties": {
+          "apply": {
+            "$ref": "#/components/schemas/v1alpha1SyncStrategyApply"
+          },
+          "hook": {
+            "$ref": "#/components/schemas/v1alpha1SyncStrategyHook"
+          }
+        },
+        "title": "SyncStrategy controls the manner in which a sync is performed",
+        "type": "object"
+      },
+      "v1alpha1SyncStrategyApply": {
+        "properties": {
+          "force": {
+            "type": "boolean"
+          }
+        },
+        "title": "SyncStrategyApply uses `kubectl apply` to perform the apply",
+        "type": "object"
+      },
+      "v1alpha1SyncStrategyHook": {
+        "properties": {
+          "syncStrategyApply": {
+            "$ref": "#/components/schemas/v1alpha1SyncStrategyApply"
+          }
+        },
+        "type": "object"
+      },
+      "v1alpha1TLSClientConfig": {
+        "properties": {
+          "caData": {
+            "format": "byte",
+            "title": "CAData holds PEM-encoded bytes (typically read from a root certificates bundle).\nCAData takes precedence over CAFile",
+            "type": "string"
+          },
+          "certData": {
+            "format": "byte",
+            "title": "CertData holds PEM-encoded bytes (typically read from a client certificate file).\nCertData takes precedence over CertFile",
+            "type": "string"
+          },
+          "insecure": {
+            "type": "boolean"
+          },
+          "keyData": {
+            "format": "byte",
+            "title": "KeyData holds PEM-encoded bytes (typically read from a client certificate key file).\nKeyData takes precedence over KeyFile",
+            "type": "string"
+          },
+          "serverName": {
+            "type": "string"
+          }
+        },
+        "title": "TLSClientConfig contains settings to enable transport layer security",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Consolidate Services"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/applications": {
+      "get": {
+        "operationId": "ApplicationService_List",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "refresh",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "projects",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "resourceVersion",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "selector",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "repo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appNamespace",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "project",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "names",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v1alpha1ApplicationList"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/{applicationName}/resource-tree": {
+      "get": {
+        "operationId": "ApplicationService_ResourceTree",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "applicationName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "namespace",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "version",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "group",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appNamespace",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "project",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v1alpha1ApplicationTree"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/{name}": {
+      "get": {
+        "operationId": "ApplicationService_Get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "refresh",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "projects",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "resourceVersion",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "selector",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "repo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appNamespace",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "project",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "names",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v1alpha1Application"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/{name}/events": {
+      "get": {
+        "operationId": "ApplicationService_ListResourceEvents",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resourceNamespace",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resourceName",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resourceUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appNamespace",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "project",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/eventsEventList"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/{name}/pods/{podName}/logs": {
+      "get": {
+        "operationId": "ApplicationService_PodLogs",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "podName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "namespace",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "container",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sinceSeconds",
+            "schema": {
+              "format": "int64",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sinceTime.seconds",
+            "schema": {
+              "format": "int64",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sinceTime.nanos",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tailLines",
+            "schema": {
+              "format": "int64",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "follow",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "untilTime",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "group",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resourceName",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "previous",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appNamespace",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "project",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "matchCase",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "$ref": "#/components/schemas/runtimeStreamError"
+                    },
+                    "result": {
+                      "$ref": "#/components/schemas/applicationLogEntry"
+                    }
+                  },
+                  "title": "Stream result of applicationLogEntry",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/{name}/sync": {
+      "post": {
+        "operationId": "ApplicationService_Sync",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/applicationApplicationSyncRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v1alpha1Application"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/clusters": {
+      "get": {
+        "operationId": "ClusterService_List",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "server",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "id.type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "id.value",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v1alpha1ClusterList"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{name}/detailed": {
+      "get": {
+        "operationId": "ProjectService_GetDetailedProject",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/projectDetailedProjectsResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ]
+}

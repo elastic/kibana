@@ -12,9 +12,16 @@ import type { CoreStart } from '@kbn/core/public';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DATA_STREAM_API_ROUTES, isValidDataStreamIndexPattern } from '@kbn/fleet-plugin/common';
-import type { ServiceChipState } from '../../onboarding_flow_context';
+import { useGetOutputs } from '@kbn/fleet-plugin/public';
+import type { DetectAndReviewStepState, ServiceChipState } from '../../onboarding_flow_context';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
+import {
+  deploysAsPolicy,
+  getEcfStackNamespace,
+  getEffectiveNamespace,
+} from '../../common/effective_namespace';
+import { getPolicySettings } from '../../common/policy_settings';
 import { getServiceIndexPatterns } from '../../common/service_index_patterns';
 import type { HasDataResponse } from '../../../../common/core/detection_api';
 import {
@@ -54,15 +61,22 @@ function batchPatterns(patterns: string[]): string[] {
   return batches;
 }
 
-// The index patterns of one instance, in its own namespace. Instances that cannot use the Fleet
+// The index patterns of one instance, in its effective namespace. Instances that cannot use the Fleet
 // agent data API are detected through these.
 function getInstancePatterns(
   entry: AwsServiceMatrixEntry,
   instanceId: string,
-  serviceSettings: ServiceSettingsPersistedState
+  serviceSettings: ServiceSettingsPersistedState,
+  deploymentMethod: DeploymentMethod | undefined,
+  ecfStacks: DetectAndReviewStepState['ecfStacks']
 ): string[] {
-  const { serviceVars = {} } = serviceSettings;
-  return getServiceIndexPatterns(entry, serviceVars[instanceId]?.namespace);
+  const { serviceVars = {}, namespace } = serviceSettings;
+  // An ECF service lands in the namespace its stack was launched with, which only follows the
+  // setting once the stack is updated. The OTel and CrowdStrike stacks have none.
+  const effectiveNamespace = deploysAsPolicy(entry, deploymentMethod)
+    ? getEffectiveNamespace(instanceId, serviceVars, namespace)
+    : getEcfStackNamespace(entry, ecfStacks);
+  return getServiceIndexPatterns(entry, effectiveNamespace);
 }
 
 /** The Fleet agent behind a service tile — the worst instance when a service is duplicated. */
@@ -79,21 +93,46 @@ export interface ServiceDataDetectionResult {
   /** Services deployed through Fleet. ECF services have none and show no agent badge. */
   agentInfoByServiceId: Record<string, ServiceAgentInfo>;
   receivingCount: number;
+  /** Services whose data goes to an output outside the local cluster and cannot be detected. */
+  unverifiedCount: number;
   totalCount: number;
   isTimedOut: boolean;
 }
 
 export function useServiceDataDetection(): ServiceDataDetectionResult {
   const { services } = useKibana<CoreStart>();
-  const { servicesStep, detectAndReviewStep, awsServicesMap, updateDetectAndReviewStep } =
-    useOnboardingFlow();
+  const {
+    servicesStep,
+    detectAndReviewStep,
+    awsServicesMap,
+    deploymentMethod,
+    updateDetectAndReviewStep,
+  } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
-  const { serviceStatuses, deployErrors, policyIdsByInstance = {} } = detectAndReviewStep;
+  const {
+    serviceStatuses,
+    deployErrors,
+    policyIdsByInstance = {},
+    ecfStacks,
+  } = detectAndReviewStep;
   const [storedSettings] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
     DEFAULT_SERVICE_SETTINGS
   );
   const serviceSettings = storedSettings ?? DEFAULT_SERVICE_SETTINGS;
+
+  // The data check reads the local cluster. Policies sending to a remote Elasticsearch cluster
+  // never show up there, so they cannot be verified. Other non-Elasticsearch outputs (Logstash,
+  // Kafka, OTLP) are intermediaries that may forward into this very cluster, so their data is still
+  // checked. An output that is not known (still loading, or deleted) is checked as before.
+  const { data: outputsData } = useGetOutputs();
+  const outputId = deploymentMethod
+    ? getPolicySettings(serviceSettings.policySettings, deploymentMethod).output_id
+    : undefined;
+  const outputType = outputId
+    ? outputsData?.items.find(({ id }) => id === outputId)?.type
+    : undefined;
+  const isDataVerifiable = outputType !== 'remote_elasticsearch';
 
   // Compute once on mount so the window doesn't reset on re-renders.
   const startRef = useRef<string>(new Date(Date.now() - LOOKBACK_MS).toISOString());
@@ -149,11 +188,21 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
       const entry = awsServicesMap?.get(serviceId);
       if (!entry) continue;
       for (const instanceId of instanceIds.filter(isPatternInstance)) {
-        byId.set(instanceId, getInstancePatterns(entry, instanceId, serviceSettings));
+        byId.set(
+          instanceId,
+          getInstancePatterns(entry, instanceId, serviceSettings, deploymentMethod, ecfStacks)
+        );
       }
     }
     return byId;
-  }, [instanceIdsByServiceId, awsServicesMap, serviceSettings, isPatternInstance]);
+  }, [
+    instanceIdsByServiceId,
+    awsServicesMap,
+    serviceSettings,
+    isPatternInstance,
+    deploymentMethod,
+    ecfStacks,
+  ]);
 
   const allPatterns = useMemo(() => {
     const patterns = new Set<string>();
@@ -205,10 +254,13 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
         agentHealth: agentSummary?.health,
         hasData,
         isTimedOut,
+        isDataVerifiable,
+        hasLiveAgent,
       });
     }
     return result;
   }, [
+    isDataVerifiable,
     instances,
     summaryByInstanceId,
     hasDataByInstanceId,
@@ -221,11 +273,14 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     isTimedOut,
   ]);
 
-  // Settled once every instance is effectively receiving. Evaluated on the effective states, so an
-  // agent that goes unhealthy after a saved "receiving" turns polling back on.
+  // Settled once every instance is effectively receiving, or cannot be checked. Evaluated on the
+  // effective states, so an agent that goes unhealthy after a saved "receiving" turns polling back
+  // on.
   useEffect(() => {
     const states = Object.values(instanceStates);
-    setIsSettled(states.length > 0 && states.every((state) => state === 'receiving'));
+    setIsSettled(
+      states.length > 0 && states.every((state) => state === 'receiving' || state === 'unverified')
+    );
   }, [instanceStates]);
 
   // Step 4 shows one tile per service, so a duplicated service folds its instances together.
@@ -280,10 +335,16 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     [statusByInstanceId]
   );
 
+  const unverifiedCount = useMemo(
+    () => Object.values(statusByInstanceId).filter((s) => s === 'unverified').length,
+    [statusByInstanceId]
+  );
+
   return {
     statusByInstanceId,
     agentInfoByServiceId,
     receivingCount,
+    unverifiedCount,
     totalCount: selectedServiceIds.length,
     isTimedOut,
   };

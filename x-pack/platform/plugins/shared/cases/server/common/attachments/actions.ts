@@ -30,7 +30,7 @@ import { externalReferenceAttachmentTransformer } from './external_reference';
  *
  * Kept in sync (by hand) with the first literal of `RESPONSE_ACTION_AGENT_TYPE` in
  * `x-pack/solutions/security/plugins/security_solution/common/endpoint/service/response_actions/constants.ts`,
- * which the server-side `EndpointAttachmentMetadataRt` validator uses.
+ * which the server-side `EndpointAttachmentMetadataSchema` validator uses.
  */
 const DEFAULT_LEGACY_AGENT_TYPE = 'endpoint' as const;
 

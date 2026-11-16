@@ -275,6 +275,145 @@ describe('Agentless Agent service', () => {
     );
   });
 
+  it('should include deployment_id and elasticsearch_cluster_id for ECH', async () => {
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      deploymentId: 'mocked-deployment-id',
+      elasticsearchClusterId: 'mocked-es-cluster-id',
+    } as any);
+    jest
+      .spyOn(appContextService, 'getKibanaVersion')
+      .mockReturnValue('mocked-kibana-version-infinite');
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-fleet-enrollment-policy-id',
+          api_key: 'mocked-fleet-enrollment-api-key',
+        },
+      ],
+    } as any);
+
+    await agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+      id: 'mocked-agentless-agent-policy-id',
+      name: 'agentless agent policy',
+      namespace: 'default',
+      fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+      data_output_id: 'mock-fleet-default-output',
+      supports_agentless: true,
+    } as AgentPolicy);
+
+    expect(axios).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          policy_id: 'mocked-agentless-agent-policy-id',
+          stack_version: 'mocked-kibana-version-infinite',
+          deployment_id: 'mocked-deployment-id',
+          elasticsearch_cluster_id: 'mocked-es-cluster-id',
+        }),
+        method: 'POST',
+        url: 'http://api.agentless.com/api/v1/ess/deployments',
+      })
+    );
+  });
+
+  it('should not include deployment_id and elasticsearch_cluster_id for serverless', async () => {
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: true,
+      deploymentId: 'mocked-deployment-id',
+      elasticsearchClusterId: 'mocked-es-cluster-id',
+    } as any);
+    jest
+      .spyOn(appContextService, 'getKibanaVersion')
+      .mockReturnValue('mocked-kibana-version-infinite');
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-fleet-enrollment-policy-id',
+          api_key: 'mocked-fleet-enrollment-api-key',
+        },
+      ],
+    } as any);
+
+    await agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+      id: 'mocked-agentless-agent-policy-id',
+      name: 'agentless agent policy',
+      namespace: 'default',
+      fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+      data_output_id: 'mock-fleet-default-output',
+      supports_agentless: true,
+    } as AgentPolicy);
+
+    expect(axios).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({ deployment_id: expect.anything() }),
+      })
+    );
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({ elasticsearch_cluster_id: expect.anything() }),
+      })
+    );
+  });
+
   it('should create agentless agent for serverless', async () => {
     jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
     const soClient = getAgentPolicyCreateMock();
@@ -877,6 +1016,51 @@ describe('Agentless Agent service', () => {
         method: 'PUT',
         data: {
           stack_version: '8.18.0',
+        },
+        url: 'http://api.agentless.com/api/v1/ess/deployments/mocked-agentless-agent-policy-id',
+      })
+    );
+  });
+
+  it('should include deployment_id and elasticsearch_cluster_id when upgrading agentless agent for ESS', async () => {
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('8.18.0');
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      deploymentId: 'mocked-deployment-id',
+      elasticsearchClusterId: 'mocked-es-cluster-id',
+    } as any);
+
+    await agentlessAgentService.upgradeAgentlessDeployment('mocked-agentless-agent-policy-id');
+
+    expect(axios).toHaveBeenCalledTimes(1);
+
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.anything(),
+        httpsAgent: expect.anything(),
+        method: 'PUT',
+        data: {
+          stack_version: '8.18.0',
+          deployment_id: 'mocked-deployment-id',
+          elasticsearch_cluster_id: 'mocked-es-cluster-id',
         },
         url: 'http://api.agentless.com/api/v1/ess/deployments/mocked-agentless-agent-policy-id',
       })

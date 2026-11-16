@@ -104,6 +104,7 @@ describe('KibanaActionStepImpl', () => {
     };
     contextManager = {
       renderValueAccordingToContext: jest.fn((value) => value),
+      renderObjectAccordingToContextAsync: jest.fn(async (value) => value),
       getWorkflowSpaceId: jest.fn().mockReturnValue('default'),
       callKibanaApi: jest.fn().mockResolvedValue({
         status: 200,
@@ -1081,6 +1082,22 @@ describe('KibanaActionStepImpl', () => {
       );
       expect(contextManager.callKibanaApi).toHaveBeenCalled();
       expect(global.fetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getInput', () => {
+    it('renders `with` with the async renderer', async () => {
+      const withValue = { method: 'GET', path: '/api/{{ inputs.id }}' };
+      contextManager.renderObjectAccordingToContextAsync.mockResolvedValue({
+        method: 'GET',
+        path: '/api/1',
+      });
+
+      await expect(createStep(withValue).getInput()).resolves.toEqual({
+        method: 'GET',
+        path: '/api/1',
+      });
+      expect(contextManager.renderObjectAccordingToContextAsync).toHaveBeenCalledWith(withValue);
     });
   });
 });

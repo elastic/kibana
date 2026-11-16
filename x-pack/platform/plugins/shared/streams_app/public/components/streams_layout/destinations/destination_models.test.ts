@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import type { StreamsUnit } from '@kbn/streams-schema';
+import { getSignalTargetsWritePatterns, type StreamsUnit } from '@kbn/streams-schema';
 import { getDestinationNameValidationError } from './destination_helpers';
+import { EMPTY_ELASTICSEARCH_DESTINATION_FORM } from './types';
 import {
   composeStaticIndex,
   composeStaticIndexesForAll,
   createUnitDestination,
-  haveStaticIndexRemaindersDiverged,
   getConfiguredDestinations,
-  getDestinationCreateSpecs,
-  getDestinationWritePatterns,
+  getDestinationCreateSpec,
+  getDestinationIndices,
   getStaticIndexRemainder,
+  toS3DestinationViewModel,
   validateAutoWritePattern,
+  validateDocsWritePattern,
+  validateFreeFormIndexName,
   validateStaticSignalIndex,
   withUnitDestinations,
 } from './destination_models';
+import { createS3UnitDestination } from './s3_destination_models';
 
 const storedUnit: StreamsUnit.GetResponse = {
   unit: {
@@ -48,8 +52,8 @@ describe('destination models', () => {
         type: 'elasticsearch',
         signals: ['logs'],
         mode: 'static',
-        index: 'logs-prod-default',
-        indexPatterns: undefined,
+        indexBySignal: { logs: 'logs-prod-default' },
+        writePatternsBySignal: {},
       },
     ]);
   });
@@ -61,7 +65,8 @@ describe('destination models', () => {
         id: 'logs-nginx-default',
         name: 'logs-nginx-default',
         signals: ['logs'],
-        index: 'logs-nginx-default',
+        indexBySignal: { logs: 'logs-nginx-default' },
+        writePatternsBySignal: {},
       }),
     ]);
 
@@ -74,7 +79,7 @@ describe('destination models', () => {
         name: 'logs-nginx-default',
         type: 'elasticsearch',
         supported_telemetry: ['logs'],
-        config: [{ name: 'index', value: 'logs-nginx-default' }],
+        config: [{ name: 'index', telemetry: ['logs'], value: 'logs-nginx-default' }],
       },
     ]);
   });
@@ -103,52 +108,60 @@ describe('destination models', () => {
     ).toBeUndefined();
   });
 
-  it('stores an unscoped index for a single signal and a plaintext api_key', () => {
+  it('stores a telemetry-scoped index per signal, a description, and an API key reference', () => {
     expect(
       createUnitDestination({
-        id: 'es-logs',
-        name: 'Logs',
-        signals: ['logs'],
-        index: 'logs-app-default',
-        apiKey: 'encoded-key',
+        id: 'es-app',
+        name: 'App',
+        description: ' Application data ',
+        signals: ['logs', 'traces'],
+        indexBySignal: { logs: 'logs-app-default', traces: 'traces-app-default' },
+        writePatternsBySignal: {},
+        apiKeyCredential: 'es-app-api-key',
       })
     ).toEqual({
-      id: 'es-logs',
-      name: 'Logs',
+      id: 'es-app',
+      name: 'App',
+      description: 'Application data',
       type: 'elasticsearch',
-      supported_telemetry: ['logs'],
+      supported_telemetry: ['logs', 'traces'],
       config: [
-        { name: 'index', value: 'logs-app-default' },
-        { name: 'api_key', value: 'encoded-key' },
+        { name: 'index', telemetry: ['logs'], value: 'logs-app-default' },
+        { name: 'index', telemetry: ['traces'], value: 'traces-app-default' },
+        { name: 'api_key', value: { credential: 'es-app-api-key' } },
       ],
     });
   });
 
-  it('omits index and index_patterns on a full-auto destination', () => {
+  it('omits index and write_patterns on a full-auto destination', () => {
     expect(
       createUnitDestination({
         id: 'es-auto',
         name: 'Auto',
+        description: '',
         signals: ['logs', 'metrics', 'traces'],
-        apiKey: 'encoded-key',
+        indexBySignal: {},
+        writePatternsBySignal: {},
+        apiKeyCredential: 'es-auto-api-key',
       })
     ).toEqual({
       id: 'es-auto',
       name: 'Auto',
       type: 'elasticsearch',
       supported_telemetry: ['logs', 'metrics', 'traces'],
-      config: [{ name: 'api_key', value: 'encoded-key' }],
+      config: [{ name: 'api_key', value: { credential: 'es-auto-api-key' } }],
     });
   });
 
-  it('stores user write targets on index_patterns for one auto destination', () => {
+  it('stores custom auto write patterns as telemetry-scoped write_patterns', () => {
     expect(
       createUnitDestination({
         id: 'es-billing',
         name: 'Billing',
         signals: ['logs', 'metrics'],
-        patterns: ['logs-billing-*', 'metrics-billing-*'],
-        apiKey: 'encoded-key',
+        indexBySignal: {},
+        writePatternsBySignal: { logs: ['logs-billing-*'], metrics: ['metrics-billing-*'] },
+        apiKeyCredential: 'es-billing-api-key',
       })
     ).toEqual({
       id: 'es-billing',
@@ -156,74 +169,172 @@ describe('destination models', () => {
       type: 'elasticsearch',
       supported_telemetry: ['logs', 'metrics'],
       config: [
-        { name: 'index_patterns', value: ['logs-billing-*', 'metrics-billing-*'] },
-        { name: 'api_key', value: 'encoded-key' },
+        { name: 'write_patterns', telemetry: ['logs'], value: ['logs-billing-*'] },
+        { name: 'write_patterns', telemetry: ['metrics'], value: ['metrics-billing-*'] },
+        { name: 'api_key', value: { credential: 'es-billing-api-key' } },
       ],
     });
   });
 
-  it('creates one auto destination, with index_patterns only when write targets are filled', () => {
+  it('builds one destination spec from the form', () => {
+    expect(getDestinationCreateSpec(EMPTY_ELASTICSEARCH_DESTINATION_FORM)).toEqual({
+      signals: ['logs', 'metrics', 'traces', 'docs'],
+      indexBySignal: {},
+      writePatternsBySignal: {},
+    });
     expect(
-      getDestinationCreateSpecs({
-        auto: true,
-        logsIndex: '',
-        metricsIndex: '',
-        tracesIndex: '',
-      })
-    ).toEqual([{ signals: ['logs', 'metrics', 'traces'] }]);
-    expect(
-      getDestinationCreateSpecs({
-        auto: true,
+      getDestinationCreateSpec({
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+        useCustomWritePatterns: true,
+        customSignals: ['metrics', 'logs'],
         logsIndex: 'logs-billing-*',
         metricsIndex: 'metrics-billing-*',
-        tracesIndex: '',
+        tracesIndex: 'traces-ignored-*',
       })
-    ).toEqual([
-      {
-        signals: ['logs', 'metrics'],
-        patterns: ['logs-billing-*', 'metrics-billing-*'],
-      },
-    ]);
+    ).toEqual({
+      signals: ['logs', 'metrics'],
+      indexBySignal: {},
+      writePatternsBySignal: { logs: ['logs-billing-*'], metrics: ['metrics-billing-*'] },
+    });
     expect(
-      getDestinationCreateSpecs({
+      getDestinationCreateSpec({
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
         logsIndex: 'logs-app-default',
-        metricsIndex: '',
         tracesIndex: 'traces-app-default',
       })
-    ).toEqual([
-      { signals: ['logs'], index: 'logs-app-default' },
-      { signals: ['traces'], index: 'traces-app-default' },
+    ).toEqual({
+      signals: ['logs', 'traces'],
+      indexBySignal: { logs: 'logs-app-default', traces: 'traces-app-default' },
+      writePatternsBySignal: {},
+    });
+  });
+
+  it('builds docs targets from the form', () => {
+    expect(
+      getDestinationCreateSpec({
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+        useCustomWritePatterns: true,
+        customSignals: ['logs', 'docs'],
+        logsIndex: 'logs-billing-*',
+        docsWritePatterns: ['logs-orders-*', 'metrics-orders-*'],
+      })
+    ).toEqual({
+      signals: ['logs', 'docs'],
+      indexBySignal: {},
+      writePatternsBySignal: {
+        logs: ['logs-billing-*'],
+        docs: ['logs-orders-*', 'metrics-orders-*'],
+      },
+    });
+    expect(
+      getDestinationCreateSpec({
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+        auto: false,
+        ...composeStaticIndexesForAll('billing-default'),
+        docsIndex: 'accounting-2026',
+      })
+    ).toEqual({
+      signals: ['logs', 'metrics', 'traces', 'docs'],
+      indexBySignal: {
+        logs: 'logs-billing-default',
+        metrics: 'metrics-billing-default',
+        traces: 'traces-billing-default',
+        docs: 'accounting-2026',
+      },
+      writePatternsBySignal: {},
+    });
+    expect(
+      getDestinationCreateSpec({
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+        auto: false,
+        docsIndex: 'accounting-2026',
+      })
+    ).toEqual({
+      signals: ['docs'],
+      indexBySignal: { docs: 'accounting-2026' },
+      writePatternsBySignal: {},
+    });
+  });
+
+  it('reads telemetry-scoped config, preferring a scoped entry over an unscoped one', () => {
+    const [destination] = getConfiguredDestinations({
+      ...storedUnit,
+      unit: {
+        ...storedUnit.unit,
+        destinations: [
+          {
+            id: 'es-mixed',
+            name: 'Mixed',
+            description: 'Mixed routing',
+            type: 'elasticsearch',
+            supported_telemetry: ['logs', 'metrics', 'traces'],
+            config: [
+              { name: 'index', value: 'logs-shared-default' },
+              { name: 'index', telemetry: ['metrics'], value: 'metrics-app-default' },
+              { name: 'write_patterns', telemetry: ['traces'], value: ['traces-billing-*'] },
+            ],
+          },
+        ],
+      },
+    });
+
+    expect(destination).toEqual({
+      id: 'es-mixed',
+      name: 'Mixed',
+      description: 'Mixed routing',
+      type: 'elasticsearch',
+      signals: ['logs', 'metrics', 'traces'],
+      mode: 'static',
+      indexBySignal: {
+        logs: 'logs-shared-default',
+        metrics: 'metrics-app-default',
+        traces: 'logs-shared-default',
+      },
+      writePatternsBySignal: { traces: ['traces-billing-*'] },
+    });
+    if (destination.type !== 'elasticsearch') {
+      throw new Error('Expected an Elasticsearch destination');
+    }
+    expect(getDestinationIndices(destination)).toEqual([
+      'logs-shared-default',
+      'metrics-app-default',
+    ]);
+    // A static index is where documents go, so it wins over write_patterns of the same signal.
+    expect(getSignalTargetsWritePatterns(destination)).toEqual([
+      'logs-shared-default',
+      'metrics-app-default',
     ]);
   });
 
-  it('reads stored index_patterns onto auto destinations', () => {
-    expect(
-      getConfiguredDestinations({
-        ...storedUnit,
-        unit: {
-          ...storedUnit.unit,
-          destinations: [
-            {
-              id: 'es-billing',
-              name: 'Billing',
-              type: 'elasticsearch',
-              supported_telemetry: ['logs', 'metrics', 'traces'],
-              config: [{ name: 'index_patterns', value: ['logs-billing-*', 'metrics-billing-*'] }],
-            },
-          ],
-        },
-      })
-    ).toEqual([
-      {
-        id: 'es-billing',
-        name: 'Billing',
-        type: 'elasticsearch',
-        signals: ['logs', 'metrics', 'traces'],
-        mode: 'auto',
-        index: undefined,
-        indexPatterns: ['logs-billing-*', 'metrics-billing-*'],
+  it('resolves each signal of an API-written mix of index and write_patterns', () => {
+    const [destination] = getConfiguredDestinations({
+      ...storedUnit,
+      unit: {
+        ...storedUnit.unit,
+        destinations: [
+          {
+            id: 'es-api',
+            name: 'API',
+            type: 'elasticsearch',
+            supported_telemetry: ['logs', 'metrics', 'traces'],
+            config: [
+              { name: 'index', telemetry: ['logs'], value: 'logs-app.otel-default' },
+              { name: 'write_patterns', telemetry: ['logs'], value: ['logs-app.otel-*'] },
+              { name: 'write_patterns', telemetry: ['metrics'], value: ['metrics-app-*'] },
+            ],
+          },
+        ],
       },
+    });
+    if (destination.type !== 'elasticsearch') {
+      throw new Error('Expected an Elasticsearch destination');
+    }
+    expect(destination.mode).toBe('static');
+    expect(getSignalTargetsWritePatterns(destination)).toEqual([
+      'logs-app.otel-default',
+      'metrics-app-*',
+      'traces-*-*',
     ]);
   });
 
@@ -247,43 +358,29 @@ describe('destination models', () => {
       {
         id: 'es-auto',
         name: 'Auto logs',
+        description: undefined,
         type: 'elasticsearch',
         signals: ['logs'],
         mode: 'auto',
-        index: undefined,
-        indexPatterns: undefined,
+        indexBySignal: {},
+        writePatternsBySignal: {},
       },
     ]);
-    expect(getDestinationWritePatterns(destinations[0])).toEqual(['logs-*-*']);
+    const [destination] = destinations;
+    if (destination.type !== 'elasticsearch') {
+      throw new Error('Expected an Elasticsearch destination');
+    }
+    expect(getSignalTargetsWritePatterns(destination)).toEqual(['logs-*-*']);
   });
 
-  it('expands every auto signal into a write pattern', () => {
+  it('resolves write patterns per signal from write_patterns, then index, then auto', () => {
     expect(
-      getDestinationWritePatterns({
+      getSignalTargetsWritePatterns({
         signals: ['logs', 'metrics', 'traces'],
-        mode: 'auto',
+        indexBySignal: { metrics: 'metrics-app-default' },
+        writePatternsBySignal: { logs: ['logs-billing-*'] },
       })
-    ).toEqual(['logs-*-*', 'metrics-*-*', 'traces-*-*']);
-  });
-
-  it('uses stored index_patterns for an auto destination write scope', () => {
-    expect(
-      getDestinationWritePatterns({
-        signals: ['logs', 'metrics', 'traces'],
-        mode: 'auto',
-        indexPatterns: ['logs-billing-*', 'metrics-billing-*'],
-      })
-    ).toEqual(['logs-billing-*', 'metrics-billing-*']);
-  });
-
-  it('expands only the configured static index for write-scope listing', () => {
-    expect(
-      getDestinationWritePatterns({
-        signals: ['logs'],
-        mode: 'static',
-        index: 'logs-app-default',
-      })
-    ).toEqual(['logs-app-default']);
+    ).toEqual(['logs-billing-*', 'metrics-app-default', 'traces-*-*']);
   });
 
   it('composes a shared remainder onto every signal for All', () => {
@@ -295,27 +392,6 @@ describe('destination models', () => {
       metricsIndex: 'metrics-app-default',
       tracesIndex: 'traces-app-default',
     });
-    expect(
-      haveStaticIndexRemaindersDiverged({
-        logsIndex: 'logs-app-default',
-        metricsIndex: 'metrics-app-default',
-        tracesIndex: 'traces-app-default',
-      })
-    ).toBe(false);
-    expect(
-      haveStaticIndexRemaindersDiverged({
-        logsIndex: '',
-        metricsIndex: '',
-        tracesIndex: '',
-      })
-    ).toBe(false);
-    expect(
-      haveStaticIndexRemaindersDiverged({
-        logsIndex: 'logs-app-default',
-        metricsIndex: '',
-        tracesIndex: '',
-      })
-    ).toBe(true);
   });
 
   it('rejects templated names and indexes that do not match the signal pattern', () => {
@@ -348,5 +424,126 @@ describe('destination models', () => {
     expect(validateAutoWritePattern('logs', 'logs-billing-prod-*')).toBe('signalPattern');
     expect(validateAutoWritePattern('logs', 'Logs-billing-*')).toBe('uppercase');
     expect(validateAutoWritePattern('logs', 'logs-billing,prod-*')).toBe('invalidCharacter');
+  });
+
+  it('rejects an auto write pattern over 255 UTF-8 bytes', () => {
+    expect(validateAutoWritePattern('logs', `logs-${'a'.repeat(248)}-*`)).toBeUndefined();
+    expect(validateAutoWritePattern('logs', `logs-${'a'.repeat(249)}-*`)).toBe('tooLong');
+    expect(validateAutoWritePattern('logs', `logs-${'é'.repeat(124)}-*`)).toBeUndefined();
+    expect(validateAutoWritePattern('logs', `logs-${'é'.repeat(124)}a-*`)).toBe('tooLong');
+  });
+});
+
+describe('docs targets', () => {
+  it('accepts any valid static name as a docs index', () => {
+    expect(validateFreeFormIndexName('accounting-2026')).toBeUndefined();
+    expect(validateFreeFormIndexName('logs-orders')).toBeUndefined();
+    expect(validateFreeFormIndexName('  ')).toBeUndefined();
+  });
+
+  it('rejects docs index names the transpiler rejects', () => {
+    expect(validateFreeFormIndexName('acc-{{x}}')).toBe('template');
+    expect(validateFreeFormIndexName('acc-${x}')).toBe('template');
+    expect(validateFreeFormIndexName('acc*')).toBe('invalidCharacter');
+    expect(validateFreeFormIndexName('acc\tx')).toBe('invalidCharacter');
+    expect(validateFreeFormIndexName('acc\u0007x')).toBe('invalidCharacter');
+    expect(validateFreeFormIndexName('Accounting')).toBe('uppercase');
+    expect(validateFreeFormIndexName('_acc')).toBe('invalidName');
+    expect(validateFreeFormIndexName('..')).toBe('invalidName');
+    expect(validateFreeFormIndexName('a'.repeat(256))).toBe('invalidName');
+  });
+
+  it('rejects a docs index that starts with a dot', () => {
+    expect(validateFreeFormIndexName('.accounting')).toBe('invalidName');
+  });
+
+  it('accepts docs write patterns under the three prefixes', () => {
+    expect(validateDocsWritePattern('logs-orders-*')).toBeUndefined();
+    expect(validateDocsWritePattern('metrics-*')).toBeUndefined();
+    expect(validateDocsWritePattern(' traces-x ')).toBeUndefined();
+  });
+
+  it('rejects docs write patterns outside the prefixes or with invalid input', () => {
+    expect(validateDocsWritePattern('accounting-*')).toBe('docsPrefix');
+    expect(validateDocsWritePattern('logs*')).toBe('docsPrefix');
+    expect(validateDocsWritePattern('Logs-orders-*')).toBe('uppercase');
+    expect(validateDocsWritePattern('logs-a b')).toBe('invalidCharacter');
+    expect(validateDocsWritePattern('logs-a\u0007')).toBe('invalidCharacter');
+    expect(validateDocsWritePattern('logs-{{x}}')).toBe('template');
+  });
+
+  it('rejects a docs write pattern over 255 UTF-8 bytes', () => {
+    expect(validateDocsWritePattern(`logs-${'a'.repeat(250)}`)).toBeUndefined();
+    expect(validateDocsWritePattern(`logs-${'a'.repeat(251)}`)).toBe('tooLong');
+    expect(validateDocsWritePattern(`logs-${'é'.repeat(124)}a*`)).toBeUndefined();
+    expect(validateDocsWritePattern(`logs-${'é'.repeat(125)}*`)).toBe('tooLong');
+  });
+});
+
+describe('S3', () => {
+  const s3Input = {
+    id: 's3-archive',
+    name: 'S3 archive',
+    region: 'eu-west-1',
+    bucket: 'demo-bucket',
+    prefix: '',
+  };
+
+  it('builds an S3 node with credential references and no prefix entry when empty', () => {
+    expect(createS3UnitDestination(s3Input)).toEqual({
+      id: 's3-archive',
+      name: 'S3 archive',
+      type: 's3',
+      supported_telemetry: ['logs', 'metrics', 'traces', 'docs'],
+      config: [
+        { name: 'bucket', value: 'demo-bucket' },
+        { name: 'region', value: 'eu-west-1' },
+        { name: 'access_key_id', value: { credential: 's3-archive-access-key-id' } },
+        { name: 'secret_access_key', value: { credential: 's3-archive-secret-access-key' } },
+      ],
+    });
+  });
+
+  it.each([
+    [
+      'credential references',
+      { credential: 's3-archive-access-key-id' },
+      { credential: 's3-archive-secret-access-key' },
+    ],
+    ['plain strings', 'AKIAEXAMPLE', 'wJalrXUtnFEMI'],
+  ])('maps a stored S3 node with %s without exposing keys', (_, accessKeyId, secretAccessKey) => {
+    const unit = withUnitDestinations(storedUnit, [
+      {
+        id: 's3-archive',
+        name: 'S3 archive',
+        type: 's3',
+        supported_telemetry: ['logs', 'metrics', 'traces'],
+        config: [
+          { name: 'bucket', value: 'demo-bucket' },
+          { name: 'region', value: 'eu-west-1' },
+          { name: 'access_key_id', value: accessKeyId },
+          { name: 'secret_access_key', value: secretAccessKey },
+        ],
+      },
+    ]);
+    const [viewModel] = getConfiguredDestinations(unit);
+    expect(viewModel).toEqual({
+      id: 's3-archive',
+      name: 'S3 archive',
+      type: 's3',
+      signals: ['logs', 'metrics', 'traces'],
+      bucket: 'demo-bucket',
+      region: 'eu-west-1',
+      prefix: undefined,
+    });
+    const serialized = JSON.stringify(viewModel);
+    expect(serialized).not.toContain('access-key');
+    expect(serialized).not.toContain('AKIAEXAMPLE');
+    expect(serialized).not.toContain('wJalrXUtnFEMI');
+  });
+
+  it('round-trips a prefix through the S3 node', () => {
+    const node = createS3UnitDestination({ ...s3Input, prefix: 'archive/' });
+    expect(toS3DestinationViewModel(node).prefix).toBe('archive/');
   });
 });

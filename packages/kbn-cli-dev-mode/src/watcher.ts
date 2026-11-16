@@ -13,7 +13,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { RepoSourceClassifier } from '@kbn/repo-source-classifier';
 import { ImportResolver } from '@kbn/import-resolver';
 import { makeMatcher } from '@kbn/picomatcher';
-import Path from 'path';
 
 import type { Log } from './log';
 
@@ -28,7 +27,6 @@ const packageMatcher = makeMatcher([
  */
 const nonPackageMatcher = makeMatcher(['plugins/**/server/**/*']);
 const staticFileMatcher = makeMatcher(['plugins/**/kibana.json', 'config/**/*.yml']);
-const OPTIMIZER_RESTART_DEBOUNCE_MS = 1000;
 
 export interface Options {
   enabled: boolean;
@@ -43,7 +41,6 @@ export class Watcher {
   private readonly repoRoot: string;
   private readonly classifier: RepoSourceClassifier;
   private readonly restart$ = new Rx.Subject<void>();
-  private readonly restartOptimizer$ = new Rx.Subject<void>();
   private readonly resolver: ImportResolver;
 
   constructor(options: Options) {
@@ -55,8 +52,6 @@ export class Watcher {
   }
 
   run$ = new Rx.Observable((subscriber) => {
-    const optimizerRestartSignal$ = new Rx.Subject<string>();
-
     if (!this.enabled) {
       this.restart$.complete();
       subscriber.complete();
@@ -67,23 +62,6 @@ export class Watcher {
       this.log.warn(`restarting server`, `due to changes in ${repoRel}`);
       this.restart$.next();
     };
-
-    const fireOptimizer = (repoRel: string) => {
-      optimizerRestartSignal$.next(repoRel);
-    };
-
-    subscriber.add(
-      optimizerRestartSignal$
-        .pipe(Rx.debounceTime(OPTIMIZER_RESTART_DEBOUNCE_MS))
-        .subscribe((repoRel) => {
-          this.log.warn(`restarting optimizer`, `due to changes in ${repoRel}`);
-          this.restartOptimizer$.next();
-        })
-    );
-
-    subscriber.add(() => {
-      optimizerRestartSignal$.complete();
-    });
 
     Pw.subscribe(
       this.repoRoot,
@@ -162,43 +140,13 @@ export class Watcher {
       }
     );
 
-    const sharedDepsDir = Path.resolve(
-      this.repoRoot,
-      'target/build/src/platform/packages/private/kbn-ui-shared-deps-npm/shared_built_assets'
-    );
-    const manifestName = 'kbn-ui-shared-deps-npm-manifest.json';
-
-    // check for shared dependencies manifest update and restart Optimizer
-    Pw.subscribe(sharedDepsDir, (err, events) => {
-      if (err) return;
-
-      const isManifestChanged = events.some(
-        (e) =>
-          Path.basename(e.path) === manifestName && (e.type === 'update' || e.type === 'create')
-      );
-
-      if (isManifestChanged) {
-        fireOptimizer(Path.relative(this.repoRoot, Path.join(sharedDepsDir, manifestName)));
-      }
-    }).then(
-      (sub) => subscriber.add(() => sub.unsubscribe()),
-      () => {
-        // ignore errors, file might not exist
-      }
-    );
-
     // complete state subjects when run$ completes
     subscriber.add(() => {
       this.restart$.complete();
-      this.restartOptimizer$.complete();
     });
   });
 
   serverShouldRestart$() {
     return this.restart$.asObservable();
-  }
-
-  optimizerShouldRestart$() {
-    return this.restartOptimizer$.asObservable();
   }
 }

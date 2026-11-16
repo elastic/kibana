@@ -30,7 +30,6 @@ export interface RunKIQueryGenerationAgentParams {
   sourceSlug: string;
   connectorId: string;
   existingQueries?: ExistingQuerySummary[];
-  groundingContext?: string;
 }
 
 export interface RunKIQueryGenerationAgentResult {
@@ -49,12 +48,10 @@ export const buildKIQueryGenerationEvalUserMessage = ({
   target,
   sourceSlug,
   existingQueries,
-  groundingContext,
 }: {
   target: AnalysisTarget;
   sourceSlug: string;
   existingQueries?: ExistingQuerySummary[];
-  groundingContext?: string;
 }): string =>
   [
     buildKIQueryGenerationUserMessage(
@@ -62,10 +59,7 @@ export const buildKIQueryGenerationEvalUserMessage = ({
       existingQueries
     ),
     QUERY_INTENT_EVAL_INSTRUCTIONS,
-    groundingContext,
-  ]
-    .filter((part): part is string => Boolean(part))
-    .join('\n\n');
+  ].join('\n\n');
 
 /** Adapts Agent Builder tool events to the legacy evaluator telemetry shape. */
 export const computeToolUsage = (steps: ConverseStep[]): SignificantEventsToolUsage => {
@@ -249,7 +243,6 @@ export async function runKIQueryGenerationAgent({
   sourceSlug,
   connectorId,
   existingQueries,
-  groundingContext,
 }: RunKIQueryGenerationAgentParams): Promise<RunKIQueryGenerationAgentResult> {
   const agentBuilderClient = createAgentBuilderClient({ fetch, log, connectorId });
   const conversation = await agentBuilderClient.createConversation({
@@ -260,7 +253,6 @@ export async function runKIQueryGenerationAgent({
     target,
     sourceSlug,
     existingQueries,
-    groundingContext,
   });
   const result = await agentBuilderClient.converse({
     agentId: KI_QUERY_GENERATION_AGENT_ID,

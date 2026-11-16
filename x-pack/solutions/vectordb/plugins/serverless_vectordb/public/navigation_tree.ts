@@ -99,6 +99,7 @@ export function createNavigationTree({
           {
             children: [
               { link: 'management:index_management', breadcrumbStatus: 'hidden' },
+              { link: 'management:search_boost', breadcrumbStatus: 'hidden', badgeType: 'new' },
               { link: 'management:data_federation', breadcrumbStatus: 'hidden' },
               { link: 'management:esql_views', breadcrumbStatus: 'hidden' },
             ],
@@ -164,15 +165,6 @@ export function createNavigationTree({
                 cloudLink: 'billingAndSub',
               },
               {
-                id: 'cloudLinkDeployment',
-                cloudLink: 'deployment',
-                title: MONITOR_PERFORMANCE_TITLE,
-              },
-              {
-                id: 'cloudLinkSearchPower',
-                cloudLink: 'searchPower',
-              },
-              {
                 cloudLink: 'userAndRoles',
               },
             ],
@@ -192,6 +184,15 @@ export function createNavigationTree({
             title: PROJECT_PERFORMANCE_TITLE,
             breadcrumbStatus: 'hidden',
             children: [
+              {
+                id: 'cloudLinkDeployment',
+                cloudLink: 'deployment',
+                title: MONITOR_PERFORMANCE_TITLE,
+              },
+              {
+                id: 'cloudLinkSearchPower',
+                cloudLink: 'searchPower',
+              },
               {
                 link: 'management:queryActivity',
                 breadcrumbStatus: 'hidden',

@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import type {
