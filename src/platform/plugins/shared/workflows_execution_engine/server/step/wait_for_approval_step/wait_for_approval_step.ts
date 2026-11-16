@@ -13,8 +13,6 @@ import {
   DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
   HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY,
-  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
-  HITL_TOKEN_HASH_INPUT_FIELD,
   isHitlExternalResumeEnabled,
   WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
 } from '@kbn/workflows';
@@ -35,6 +33,7 @@ import type { CancellableNode, NodeImplementation } from '../node_implementation
 import {
   invalidateHitlExternalResumeTokenIfPresent,
   mintHitlExternalResumeToken,
+  persistHitlExternalResumeToken,
 } from '../wait_for_input_step/hitl_external_resume_helpers';
 import {
   getResolvedDynamicTimeout,
@@ -111,6 +110,8 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       schema: WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
     };
 
+    this.stepExecutionRuntime.setInput(stepInput);
+
     const channels = withConfig?.channels;
     if (
       hasExternalHitlChannels(channels) &&
@@ -127,10 +128,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
         execution,
         timeout: dynamicTimeout,
       });
-
-      stepInput[HITL_TOKEN_HASH_INPUT_FIELD] = resumeToken.tokenHash;
-      stepInput[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD] = resumeToken.expiresAt;
-      this.stepExecutionRuntime.setInput(stepInput);
+      persistHitlExternalResumeToken(this.stepExecutionRuntime, resumeToken, stepInput);
 
       await this.sendExternalNotifications({
         channels,
@@ -142,8 +140,6 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
         spaceId,
       });
     }
-
-    this.stepExecutionRuntime.setInput(stepInput);
 
     this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for approval`, {
       event: { action: 'hitl:waiting' },

@@ -6,6 +6,7 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
   DatasourceMap,
   DatasourceStates,
@@ -51,6 +52,122 @@ describe('lens shared logic', () => {
     it('persists the chart-scoped KQL/Lucene filter', () => {
       const kqlQuery = { query: 'bytes > 100', language: 'kuery' };
       expect(buildDoc(kqlQuery)?.state.query).toEqual(kqlQuery);
+    });
+  });
+
+  describe('#mergeToNewDoc ES|QL ad hoc data views', () => {
+    const esqlSpec: DataViewSpec = {
+      id: 'esql-id',
+      title: 'logs-*',
+      type: 'esql',
+      timeFieldName: '@timestamp',
+    };
+    const esqlReference = {
+      type: 'index-pattern',
+      id: 'esql-id',
+      name: 'textBasedLanguages-datasource-layer-layer1',
+    };
+    const textBasedState = {
+      layers: {
+        layer1: {
+          index: 'esql-id',
+          query: { esql: 'FROM logs-*' },
+          columns: [],
+          timeField: '@timestamp',
+        },
+      },
+    };
+
+    const merge = ({
+      adHocDataViews,
+      extraDatasourceReferences = [],
+      visualizationReferences = [],
+    }: {
+      adHocDataViews: Record<string, DataViewSpec>;
+      extraDatasourceReferences?: Array<{ type: string; id: string; name: string }>;
+      visualizationReferences?: Array<{ type: string; id: string; name: string }>;
+    }) => {
+      const textBased = createMockDatasource('textBased');
+      textBased.getPersistableState.mockImplementation((state) => ({
+        state,
+        references: [esqlReference],
+      }));
+      const formBased = createMockDatasource('formBased');
+      formBased.getPersistableState.mockImplementation((state) => ({
+        state,
+        references: extraDatasourceReferences,
+      }));
+      const testVis = createMockVisualization('testVis');
+      testVis.getPersistableState = jest.fn((state) => ({
+        state,
+        references: visualizationReferences,
+      }));
+
+      return mergeToNewDoc(
+        undefined,
+        { activeId: 'testVis', state: {}, selectedLayerId: null },
+        {
+          textBased: { isLoading: false, state: textBasedState },
+          formBased: { isLoading: false, state: { layers: {} } },
+        } as DatasourceStates,
+        undefined,
+        [],
+        'textBased',
+        adHocDataViews,
+        {
+          datasourceMap: { textBased, formBased } as unknown as DatasourceMap,
+          visualizationMap: { testVis } as unknown as VisualizationMap,
+          extractFilterReferences: jest.fn(() => ({ state: [], references: [] })),
+        }
+      );
+    };
+
+    it('does not persist the spec of an ES|QL layer, and keeps its reference internal', () => {
+      const doc = merge({ adHocDataViews: { 'esql-id': esqlSpec } });
+
+      expect(doc?.state.adHocDataViews).toEqual({});
+      expect(doc?.state.internalReferences).toEqual([esqlReference]);
+      expect(doc?.references).toEqual([]);
+    });
+
+    it('persists the spec when a form-based layer uses the same data view', () => {
+      const doc = merge({
+        adHocDataViews: { 'esql-id': esqlSpec },
+        extraDatasourceReferences: [
+          { type: 'index-pattern', id: 'esql-id', name: 'indexpattern-datasource-layer-ref' },
+        ],
+      });
+
+      expect(doc?.state.adHocDataViews).toEqual({ 'esql-id': esqlSpec });
+    });
+
+    it('persists the spec when the visualization references the same data view', () => {
+      const doc = merge({
+        adHocDataViews: { 'esql-id': esqlSpec },
+        visualizationReferences: [
+          { type: 'index-pattern', id: 'esql-id', name: 'xy-visualization-layer-annotations' },
+        ],
+      });
+
+      expect(doc?.state.adHocDataViews).toEqual({ 'esql-id': esqlSpec });
+    });
+
+    it('persists the ad hoc data views that are not ES|QL layers', () => {
+      const formBasedSpec: DataViewSpec = { id: 'ad-hoc-form-based', title: 'metrics-*' };
+
+      const doc = merge({
+        adHocDataViews: { 'esql-id': esqlSpec, 'ad-hoc-form-based': formBasedSpec },
+      });
+
+      expect(doc?.state.adHocDataViews).toEqual({ 'ad-hoc-form-based': formBasedSpec });
+    });
+
+    it('treats the layer as the source of truth when the spec time field differs', () => {
+      const staleSpec = { ...esqlSpec, timeFieldName: 'event.ingested' };
+
+      const doc = merge({ adHocDataViews: { 'esql-id': staleSpec } });
+
+      expect(doc?.state.adHocDataViews).toEqual({});
     });
   });
 

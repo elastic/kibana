@@ -125,6 +125,49 @@ describe('PublishAlertStatusChangesStep', () => {
       ]);
     });
 
+    it.each<{ severities: Array<AlertEventSeverity | undefined>; expected: AlertEventSeverity }>([
+      { severities: ['critical', 'info', undefined], expected: 'critical' },
+      { severities: [undefined, 'info', 'critical'], expected: 'critical' },
+      { severities: ['low', undefined, 'info'], expected: 'low' },
+    ])(
+      'reports the highest stored severity regardless of row order: $severities',
+      async ({ severities, expected }) => {
+        const changed = transition();
+        const state = createRulePipelineState({
+          rule,
+          alertStatusTransitions: [changed],
+          storedAlertEvents: severities.map((severity) => ({ ...storedEvent(changed), severity })),
+        });
+
+        await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+        expect(publisher.publishAlertStatusChanges).toHaveBeenCalledWith([
+          expect.objectContaining({
+            alert: expect.objectContaining({
+              severity: expected,
+            }),
+          }),
+        ]);
+      }
+    );
+
+    it('does not revise severity when a later batch has a higher value', async () => {
+      const changed = transition();
+      await collectStreamResults(
+        step.executeStream(
+          createPipelineStream([
+            stateWithSeverity(changed, 'low'),
+            stateWithSeverity(changed, 'critical'),
+          ])
+        )
+      );
+
+      expect(publisher.publishAlertStatusChanges).toHaveBeenCalledTimes(1);
+      expect(publisher.publishAlertStatusChanges).toHaveBeenCalledWith([
+        expect.objectContaining({ alert: expect.objectContaining({ severity: 'low' }) }),
+      ]);
+    });
+
     it('reports null for an inactive alert even when its stored event carries a severity', async () => {
       const state = stateWithSeverity(transition({ status: 'inactive' }), 'high');
 

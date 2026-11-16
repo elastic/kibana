@@ -119,6 +119,24 @@ describe('findUnattachedToolIds', () => {
     ).resolves.toEqual([]);
   });
 
+  it('reads the agent the run converses with, not always the default agent', async () => {
+    const kbnClient = makeAgentClient([{ tool_ids: ['create.case'] }]);
+    await expect(
+      findUnattachedToolIds(kbnClient, ['create.case'], 'chrysalis-hunting-agent')
+    ).resolves.toEqual([]);
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({ path: '/api/agent_builder/agents/chrysalis-hunting-agent' })
+    );
+  });
+
+  it('encodes the agent id as a single path segment', async () => {
+    const kbnClient = makeAgentClient([]);
+    await findUnattachedToolIds(kbnClient, ['create.case'], 'team/agent?x=1');
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({ path: '/api/agent_builder/agents/team%2Fagent%3Fx%3D1' })
+    );
+  });
+
   it('flattens tool_ids across multiple selection entries', async () => {
     const kbnClient = makeAgentClient([
       { tool_ids: ['virustotal_lookup'] },
@@ -162,5 +180,64 @@ describe('assertPersonaMatrixToolsRegistered', () => {
         ],
       })
     ).rejects.toThrow('security.search_entities');
+  });
+});
+
+describe('assertPersonaMatrixToolsRegistered for the parity agent', () => {
+  const log = { info: jest.fn() } as unknown as Parameters<
+    typeof assertPersonaMatrixToolsRegistered
+  >[0]['log'];
+  const PARITY_TOOLS = [
+    'vt.hash.lookup',
+    'check.on.call.schedule',
+    'get.time',
+    'create.case',
+    'create.channel',
+  ];
+  const examples = [{ metadata: { expectedTools: ['virustotal_lookup', 'on_call_lookup'] } }];
+
+  // Registry lists the parity tools only; the agent carries the same five.
+  const makeParityKbnClient = (attached: string[] = PARITY_TOOLS) =>
+    ({
+      request: jest.fn(async ({ path }: { path: string }) =>
+        path === '/api/agent_builder/tools'
+          ? { data: { results: PARITY_TOOLS.map((id) => ({ id })) } }
+          : { data: { configuration: { tools: [{ tool_ids: attached }] } } }
+      ),
+    } as unknown as KbnClient);
+
+  it('maps the seeded lookup tool ids to their parity equivalents', async () => {
+    await expect(
+      assertPersonaMatrixToolsRegistered({
+        kbnClient: makeParityKbnClient(),
+        log,
+        examples,
+        agentId: 'chrysalis-hunting-agent',
+        profile: 'chrysalis-parity',
+      })
+    ).resolves.toBeUndefined();
+  });
+
+  it('still rejects the unmapped ids under the default profile', async () => {
+    await expect(
+      assertPersonaMatrixToolsRegistered({
+        kbnClient: makeParityKbnClient(),
+        log,
+        examples,
+        agentId: 'chrysalis-hunting-agent',
+      })
+    ).rejects.toThrow('virustotal_lookup');
+  });
+
+  it('fails when the parity agent does not carry a mapped tool', async () => {
+    await expect(
+      assertPersonaMatrixToolsRegistered({
+        kbnClient: makeParityKbnClient(['get.time']),
+        log,
+        examples,
+        agentId: 'chrysalis-hunting-agent',
+        profile: 'chrysalis-parity',
+      })
+    ).rejects.toThrow('vt.hash.lookup');
   });
 });

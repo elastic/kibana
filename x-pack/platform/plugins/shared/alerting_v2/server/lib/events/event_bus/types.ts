@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { createToken } from '@kbn/core-di';
-
 /**
  * A domain event published on the in-process bus.
  *
@@ -70,27 +68,10 @@ export type EventBusHandlerArgs<TEvent, TContext> = TContext extends void
 export interface EventBus<TEvent extends DomainEvent = DomainEvent, TContext = void> {
   publish<E extends TEvent>(event: E, ...rest: EventBusContextRest<TContext>): void;
 
-  subscribe<E extends TEvent>(
-    type: E['type'],
-    handler: (...args: EventBusHandlerArgs<E, TContext>) => Promise<void> | void
+  subscribe<K extends TEvent['type']>(
+    type: K,
+    handler: (
+      ...args: EventBusHandlerArgs<Extract<TEvent, { type: K }>, TContext>
+    ) => Promise<void> | void
   ): Subscription;
 }
-
-/**
- * Component that registers handlers on the bus during plugin setup.
- *
- * Subscribers are bound via Inversify multi-binding to
- * {@link EventBusSubscriberToken} and attached once during `OnSetup`.
- */
-export interface EventBusSubscriber<TEvent extends DomainEvent = DomainEvent, TContext = void> {
-  attach(bus: EventBus<TEvent, TContext>): void;
-}
-
-/**
- * Multi-binding token: every subscriber that wants to attach to the bus
- * registers itself under this token. `bind_on_setup` retrieves the full
- * list and attaches each one.
- */
-export const EventBusSubscriberToken = createToken<EventBusSubscriber>(
-  'alerting_v2.EventBusSubscriber'
-);

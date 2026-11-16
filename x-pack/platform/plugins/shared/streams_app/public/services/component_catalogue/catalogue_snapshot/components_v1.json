@@ -61,6 +61,30 @@
   "metadata": {
     "schema_version": "v1",
     "enum_sets": {
+      "component.statuses": {
+        "options": [
+          {
+            "value": "stable",
+            "label": "Stable",
+            "description": "Ready for production use. It is actively supported, and breaking changes are not expected."
+          },
+          {
+            "value": "beta",
+            "label": "Beta",
+            "description": "Usable, but it may still change. Bugs are triaged and fixed, and breaking changes come with notice."
+          },
+          {
+            "value": "experimental",
+            "label": "Experimental",
+            "description": "Recently added and still evolving. It is supported on a best-effort basis and may change in the future."
+          },
+          {
+            "value": "deprecated",
+            "label": "Deprecated",
+            "description": "Being phased out. Only critical bugs are fixed, and it will be removed on a stated date. Do not use it in new pipelines."
+          }
+        ]
+      },
       "ottl.contexts": {
         "options": [
           {

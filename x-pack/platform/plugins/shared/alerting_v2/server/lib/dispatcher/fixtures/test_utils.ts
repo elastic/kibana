@@ -217,6 +217,7 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
     spaceId: 'default',
     name: 'Test rule',
     routingTags: [],
+    groupingFields: [],
     ...overrides,
   };
 }

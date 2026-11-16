@@ -13,8 +13,10 @@ export interface RuleSelection {
   ruleTags: string[];
 }
 
-export const matchedTags = (rule: CatalogRule, { ruleTags }: RuleSelection) =>
-  rule.tags.filter((tag) => ruleTags.includes(tag));
+export const matchedTags = (
+  rule: Pick<CatalogRule, 'name' | 'tags'>,
+  { ruleTags }: RuleSelection
+) => rule.tags.filter((tag) => ruleTags.includes(tag));
 
 export const resolveRuleNames = (catalog: CatalogRule[], selection: RuleSelection) => [
   ...new Set([

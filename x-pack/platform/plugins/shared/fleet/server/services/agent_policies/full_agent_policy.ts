@@ -1114,6 +1114,10 @@ export function getBinarySourceSettings(
     sources: downloadSources.map((ds) => ds.host),
   };
 
+  if (typeof primarySource?.reserve_diskspace === 'boolean') {
+    config.reserve_diskspace = { enabled: primarySource.reserve_diskspace };
+  }
+
   if (primarySource?.ssl) {
     config.ssl = {
       ...(primarySource.ssl?.certificate_authorities && {
