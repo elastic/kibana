@@ -40,6 +40,33 @@ const queryStringInputStyles = {
         },
         '> .euiFormControlLayoutIcons': {
           maxHeight: euiTheme.size.xxl,
+          // Icons are siblings of EuiTextArea's FormControlLayout wrapper, not of the
+          // <textarea> itself — keep them above the field so the clear gutter can cover
+          // glyphs that paint into the padding box (elastic/kibana#106963).
+          zIndex: euiTheme.levels.flyout,
+        },
+        // Opaque gutter behind the clear control. EuiTextArea wraps the <textarea> in
+        // EuiFormControlLayout, so a direct-child :has(> .kbnQueryBar__textarea--) never
+        // matches; target the icons group that actually contains the clear button instead.
+        // paddingRight alone cannot keep unbroken / nowrap glyphs from painting under the ×
+        // because textarea overflow clips at the padding edge.
+        //
+        // Inset the scrim by the field border on the trailing / block edges so it covers
+        // glyph paint without painting over the input border (review feedback on #289442).
+        '> .euiFormControlLayoutIcons:has(.euiFormControlLayoutClearButton)': {
+          backgroundColor: euiTheme.components.forms.background,
+          // Match the clearable paddingRight affordance (xxl).
+          width: euiTheme.size.xxl,
+          justifyContent: 'center',
+          // Stay inside the border — previous flush `insetInlineEnd: 0` covered it.
+          insetInlineEnd: euiTheme.border.width.thin,
+          top: euiTheme.border.width.thin,
+          bottom: euiTheme.border.width.thin,
+          height: 'auto',
+          maxHeight: 'none',
+          // Match EUI form control radius, stepped in by the border so corners align.
+          borderStartEndRadius: `calc(${euiTheme.border.radius.small} - ${euiTheme.border.width.thin})`,
+          borderEndEndRadius: `calc(${euiTheme.border.radius.small} - ${euiTheme.border.width.thin})`,
         },
       },
       '.kbnQueryBar__textarea': {
@@ -55,7 +82,9 @@ const queryStringInputStyles = {
         margin: 0,
 
         '&.kbnQueryBar__textarea--isClearable': {
-          paddingRight: euiTheme.size.xxl, // Account for clear button
+          // Keeps the caret/selection out of the clear control; does NOT by itself
+          // stop glyph paint under the × (padding-box overflow clip — see wrap scrim).
+          paddingRight: euiTheme.size.xxl,
         },
 
         '&:not(.kbnQueryBar__textarea--autoHeight)': {
@@ -71,15 +100,6 @@ const queryStringInputStyles = {
           whiteSpace: `pre-wrap`,
           maxHeight: `calc(35vh - 100px)`,
           minHeight: euiTheme.size.xl,
-        },
-
-        '~.euiFormControlLayoutIcons': {
-          // By default form control layout icon is vertically centered, but our textarea
-          // can expand to be multi-line, so we position it with padding that matches
-          // the parent textarea padding
-          zIndex: euiTheme.levels.flyout,
-          top: euiTheme.size.m,
-          bottom: 'unset',
         },
 
         '&.kbnQueryBar__textarea--withPrepend': {
