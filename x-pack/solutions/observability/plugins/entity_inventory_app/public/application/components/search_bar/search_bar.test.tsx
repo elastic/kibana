@@ -16,6 +16,7 @@ import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { EntityInventoryEntityCategory } from '../../../types';
 import { ENTITY_INVENTORY_APP_NAME, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../../constants';
+import { createPublicConfigMock } from '../../../mocks';
 import { EntityInventorySearchProvider } from '../../context/search_context';
 import { QUICK_RANGES } from './quick_ranges';
 import { MAX_TIME_RANGE_HINT, SEARCH_BAR_PLACEHOLDERS } from '../../translations';
@@ -48,12 +49,16 @@ const lastSearchBarProps = (): StatefulSearchBarProps => {
   return calls[calls.length - 1][0];
 };
 
-const renderSearchBar = (entityCategory: EntityInventoryEntityCategory = 'all') => {
+const renderSearchBar = (
+  entityCategory: EntityInventoryEntityCategory = 'all',
+  { timeRangeLimitDisabled = false } = {}
+) => {
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   unifiedSearch.ui.SearchBar = MockSearchBar;
+  const config = createPublicConfigMock({ timeRangeLimitDisabled });
 
   return render(
-    <KibanaContextProvider services={{ ...coreMock.createStart(), unifiedSearch }}>
+    <KibanaContextProvider services={{ ...coreMock.createStart(), unifiedSearch, config }}>
       <EntityInventorySearchProvider entityCategory={entityCategory}>
         <EntityInventorySearchBar />
       </EntityInventorySearchProvider>
@@ -108,6 +113,22 @@ describe('EntityInventorySearchBar', () => {
 
     expect(Math.abs(moment(minDate).diff(expectedMinDate))).toBeLessThan(5000);
     expect(commonlyUsedRanges).toEqual(QUICK_RANGES);
+  });
+
+  it('does not limit the date picker when the time range limit is disabled', () => {
+    renderSearchBar('all', { timeRangeLimitDisabled: true });
+
+    expect(lastSearchBarProps().legacyDatePickerProps).toBeUndefined();
+    expect(screen.queryByTestId('entityInventoryMaxTimeRangeHint')).toBeNull();
+  });
+
+  it('keeps an over-limit submission when the time range limit is disabled', () => {
+    renderSearchBar('all', { timeRangeLimitDisabled: true });
+
+    fireEvent.click(screen.getByTestId('mockSearchBarPick7d'));
+
+    expect(lastSearchBarProps().dateRangeFrom).toBe('now-7d');
+    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute('data-picker-from', 'now-7d');
   });
 
   it.each(['all', 'hosts', 'kubernetes'] as const)(

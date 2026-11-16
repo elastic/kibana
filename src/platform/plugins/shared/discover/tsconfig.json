@@ -144,6 +144,7 @@
     "@kbn/as-code-shared-transforms",
     "@kbn/as-code-utils",
     "@kbn/scout",
+    "@kbn/content-list-scout",
     "@kbn/scout-synthtrace",
     "@kbn/synthtrace-client",
     "@kbn/agent-builder-server",

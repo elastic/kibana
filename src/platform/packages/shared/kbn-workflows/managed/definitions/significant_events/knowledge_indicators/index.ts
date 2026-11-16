@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import CONTINUOUS_ONBOARDING_YAML from './continuous_onboarding.yaml';
-import FEATURES_IDENTIFICATION_YAML from './features_identification.yaml';
-import ONBOARDING_YAML from './onboarding.yaml';
-import QUERIES_GENERATION_YAML from './queries_generation.yaml';
-import SOURCE_RECONCILIATION_YAML from './source_reconciliation.yaml';
-import SYNC_YAML from './sync.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 
 export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID =
   'system-streams-ki-features-identification';
@@ -50,7 +45,9 @@ export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW = {
   pluginId: 'significantEvents',
   version: 6,
   billable: false,
-  yaml: FEATURES_IDENTIFICATION_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'features_identification.yaml');
+  },
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -59,7 +56,9 @@ export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW = {
   pluginId: 'significantEvents',
   version: 4,
   billable: false,
-  yaml: QUERIES_GENERATION_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'queries_generation.yaml');
+  },
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -68,7 +67,9 @@ export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
   pluginId: 'significantEvents',
   version: 9,
   billable: false,
-  yaml: ONBOARDING_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'onboarding.yaml');
+  },
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -77,7 +78,9 @@ export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW = {
   pluginId: 'significantEvents',
   version: 4,
   billable: false,
-  yaml: CONTINUOUS_ONBOARDING_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'continuous_onboarding.yaml');
+  },
   management: SIGNIFICANT_EVENTS_KI_PER_SPACE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -88,7 +91,9 @@ export const SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW = {
   pluginId: 'significantEvents',
   version: 2,
   billable: false,
-  yaml: SYNC_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'sync.yaml');
+  },
   management: SIGNIFICANT_EVENTS_KI_PER_SPACE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -102,6 +107,8 @@ export const SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW = {
   pluginId: 'significantEvents',
   version: 1,
   billable: false,
-  yaml: SOURCE_RECONCILIATION_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'source_reconciliation.yaml');
+  },
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;

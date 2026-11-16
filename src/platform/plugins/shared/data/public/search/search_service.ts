@@ -241,6 +241,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       {
         getEsQueryConfig: async () => getEsQueryConfig(uiSettings),
         getRequestPreference: () => getEsPreference(uiSettings.get.bind(uiSettings)),
+        getLocale: () => i18n.getLocale(),
       }
     );
 
