@@ -59,10 +59,8 @@ export class EuiComboBoxTestHarness {
     // `within(container).queryByRole('combobox')` won't find "self", only descendants.
     if (container.getAttribute('role') === 'combobox') return container;
 
-    // `*ByRole` resolves every candidate's accessibility tree, which walks ancestor
-    // `getComputedStyle` calls and costs hundreds of milliseconds per lookup in jsdom. EuiComboBox
-    // renders `role="combobox"` and `aria-expanded` on the input it tags as `comboBoxSearchInput`,
-    // so resolve that element directly and keep the role query for non-EUI markup.
+    // EuiComboBox renders `role="combobox"` and `aria-expanded` on the input it tags as `comboBoxSearchInput`,
+    // so resolve that element directly if possible
     const searchInput = container.querySelector<HTMLElement>(
       '[data-test-subj="comboBoxSearchInput"]'
     );
