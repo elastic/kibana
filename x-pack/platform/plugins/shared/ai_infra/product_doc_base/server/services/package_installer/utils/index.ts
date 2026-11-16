@@ -8,6 +8,7 @@
 export { downloadToDisk, checkArtifactAvailable, ArtifactNotFoundError } from './download';
 export {
   resolveArtifactsFolderPath,
+  isInArtifactsFolder,
   removeArtifactFile,
   logArtifactsFolderUsage,
   purgeArtifactsFolder,

@@ -121,9 +121,6 @@ const management = {
   enablement: 'restorable',
 } as const;
 
-// The definition hash of a template is the hash of its function source, which does not change
-// when the hook's inputs do. Bump `version` whenever a hook's trigger block changes; the
-// `bound_hooks` test pins each version to the hook's triggers to catch that.
 export const NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
@@ -142,7 +139,7 @@ export const NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW = {
 export const NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 2,
+  version: 3,
   billable: false,
   yamlTemplate: ({ serviceAccountId }: NightshiftBoundHookTemplateValues) =>
     renderBoundHookYaml({

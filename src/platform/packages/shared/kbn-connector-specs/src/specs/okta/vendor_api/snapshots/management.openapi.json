@@ -1,0 +1,2810 @@
+{
+  "components": {
+    "parameters": {
+      "OktaResponse": {
+        "in": "header",
+        "name": "Content-Type",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "pathGroupId": {
+        "in": "path",
+        "name": "groupId",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "pathId": {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "pathUserId": {
+        "in": "path",
+        "name": "userId",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "queryAfter": {
+        "in": "query",
+        "name": "after",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "querySortOrder": {
+        "in": "query",
+        "name": "sortOrder",
+        "schema": {
+          "default": "asc",
+          "type": "string"
+        }
+      },
+      "queryUserExpand": {
+        "in": "query",
+        "name": "expand",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "ErrorAccessDenied403": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ErrorApiValidationFailed400": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ErrorMissingRequiredParameter400": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ErrorResourceNotFound404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ErrorTooManyRequests429": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "AuthenticationProvider": {
+        "properties": {
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/AuthenticationProviderType"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "AuthenticationProviderType": {
+        "enum": [
+          "ACTIVE_DIRECTORY",
+          "FEDERATION",
+          "IMPORT",
+          "LDAP",
+          "OKTA",
+          "SOCIAL"
+        ],
+        "readOnly": true,
+        "type": "string"
+      },
+      "DigestAlgorithm": {
+        "enum": [
+          "SHA256_HMAC",
+          "SHA512_HMAC"
+        ],
+        "type": "string"
+      },
+      "Error": {
+        "properties": {
+          "errorCauses": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorCause"
+            },
+            "type": "array"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "errorId": {
+            "type": "string"
+          },
+          "errorLink": {
+            "type": "string"
+          },
+          "errorSummary": {
+            "type": "string"
+          }
+        },
+        "title": "Error",
+        "type": "object"
+      },
+      "ErrorCause": {
+        "properties": {
+          "errorSummary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Group": {
+        "properties": {
+          "_embedded": {
+            "properties": {
+              "app": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "signOnMode": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "stats": {
+                "properties": {
+                  "appsCount": {
+                    "format": "int32",
+                    "type": "integer"
+                  },
+                  "groupPushMappingsCount": {
+                    "format": "int32",
+                    "type": "integer"
+                  },
+                  "hasAdminPrivlege": {
+                    "type": "boolean"
+                  },
+                  "usersCount": {
+                    "format": "int32",
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "_links": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LinksSelf"
+              },
+              {
+                "properties": {
+                  "apps": {
+                    "$ref": "#/components/schemas/HrefObject"
+                  },
+                  "logo": {
+                    "items": {
+                      "$ref": "#/components/schemas/HrefObject"
+                    },
+                    "type": "array"
+                  },
+                  "source": {
+                    "$ref": "#/components/schemas/HrefObject"
+                  },
+                  "users": {
+                    "$ref": "#/components/schemas/HrefObject"
+                  }
+                }
+              }
+            ]
+          },
+          "created": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "lastMembershipUpdated": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "lastUpdated": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "objectClass": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/GroupProfile"
+          },
+          "type": {
+            "$ref": "#/components/schemas/GroupType"
+          }
+        },
+        "type": "object"
+      },
+      "GroupProfile": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/OktaUserGroupProfile"
+          },
+          {
+            "$ref": "#/components/schemas/OktaActiveDirectoryGroupProfile"
+          }
+        ]
+      },
+      "GroupType": {
+        "enum": [
+          "APP_GROUP",
+          "BUILT_IN",
+          "OKTA_GROUP"
+        ],
+        "type": "string"
+      },
+      "HrefHints": {
+        "properties": {
+          "allow": {
+            "items": {
+              "$ref": "#/components/schemas/HttpMethod"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "HrefObject": {
+        "additionalProperties": true,
+        "properties": {
+          "hints": {
+            "$ref": "#/components/schemas/HrefHints",
+            "readOnly": true
+          },
+          "href": {
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "templated": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "href"
+        ],
+        "title": "Link Object",
+        "type": "object"
+      },
+      "HrefObjectSelfLink": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HrefObject"
+          },
+          {}
+        ]
+      },
+      "HttpMethod": {
+        "enum": [
+          "DELETE",
+          "GET",
+          "POST",
+          "PUT"
+        ],
+        "type": "string"
+      },
+      "LinksActivate": {
+        "properties": {
+          "activate": {
+            "allOf": [
+              {},
+              {
+                "$ref": "#/components/schemas/HrefObject"
+              }
+            ]
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LinksCancel": {
+        "properties": {
+          "cancel": {
+            "allOf": [
+              {},
+              {
+                "$ref": "#/components/schemas/HrefObject"
+              }
+            ]
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LinksDeactivate": {
+        "properties": {
+          "deactivate": {
+            "allOf": [
+              {},
+              {
+                "$ref": "#/components/schemas/HrefObject"
+              }
+            ]
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LinksEnroll": {
+        "properties": {
+          "enroll": {
+            "allOf": [
+              {},
+              {
+                "$ref": "#/components/schemas/HrefObject"
+              }
+            ]
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LinksFactor": {
+        "properties": {
+          "factor": {
+            "allOf": [
+              {},
+              {
+                "$ref": "#/components/schemas/HrefObject"
+              }
+            ]
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LinksPoll": {
+        "properties": {
+          "poll": {
+            "allOf": [
+              {},
+              {
+                "$ref": "#/components/schemas/HrefObject"
+              }
+            ]
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LinksQrcode": {
+        "properties": {
+          "qrcode": {
+            "allOf": [
+              {},
+              {
+                "$ref": "#/components/schemas/HrefObject"
+              }
+            ]
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LinksQuestions": {
+        "properties": {
+          "question": {
+            "allOf": [
+              {},
+              {
+                "$ref": "#/components/schemas/HrefObject"
+              }
+            ]
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LinksResend": {
+        "properties": {
+          "resend": {
+            "allOf": [
+              {},
+              {
+                "$ref": "#/components/schemas/HrefObject"
+              }
+            ]
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LinksSelf": {
+        "properties": {
+          "self": {
+            "$ref": "#/components/schemas/HrefObjectSelfLink"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LinksSend": {
+        "properties": {
+          "send": {
+            "allOf": [
+              {},
+              {
+                "$ref": "#/components/schemas/HrefObject"
+              }
+            ]
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LinksUserFactors": {
+        "properties": {
+          "user": {
+            "allOf": [
+              {},
+              {
+                "$ref": "#/components/schemas/HrefObject"
+              }
+            ]
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LinksVerify": {
+        "properties": {
+          "verify": {
+            "allOf": [
+              {},
+              {
+                "$ref": "#/components/schemas/HrefObject"
+              }
+            ]
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LogActor": {
+        "properties": {
+          "alternateId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "detailEntry": {
+            "additionalProperties": true,
+            "readOnly": true,
+            "type": "object"
+          },
+          "displayName": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogAuthenticationContext": {
+        "properties": {
+          "authenticationProvider": {
+            "$ref": "#/components/schemas/LogAuthenticationProvider"
+          },
+          "authenticationStep": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "credentialProvider": {
+            "$ref": "#/components/schemas/LogCredentialProvider"
+          },
+          "credentialType": {
+            "$ref": "#/components/schemas/LogCredentialType"
+          },
+          "externalSessionId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "interface": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "issuer": {
+            "$ref": "#/components/schemas/LogIssuer"
+          }
+        },
+        "type": "object"
+      },
+      "LogAuthenticationProvider": {
+        "enum": [
+          "ACTIVE_DIRECTORY",
+          "FACTOR_PROVIDER",
+          "FEDERATION",
+          "LDAP",
+          "OKTA_AUTHENTICATION_PROVIDER",
+          "SOCIAL"
+        ],
+        "type": "string"
+      },
+      "LogBotProtection": {
+        "nullable": true,
+        "properties": {
+          "level": {
+            "enum": [
+              "NONE",
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ],
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LogClient": {
+        "properties": {
+          "device": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "geographicalContext": {
+            "$ref": "#/components/schemas/LogGeographicalContext"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "ipAddress": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "userAgent": {
+            "$ref": "#/components/schemas/LogUserAgent"
+          },
+          "zone": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogCredentialProvider": {
+        "enum": [
+          "DUO",
+          "GOOGLE",
+          "OKTA_AUTHENTICATION_PROVIDER",
+          "OKTA_CREDENTIAL_PROVIDER",
+          "RSA",
+          "SYMANTEC",
+          "YUBIKEY"
+        ],
+        "type": "string"
+      },
+      "LogCredentialType": {
+        "enum": [
+          "ASSERTION",
+          "CERTIFICATE",
+          "DEVICE_UDID",
+          "EMAIL",
+          "IWA",
+          "JWT",
+          "OAuth 2.0",
+          "OKTA_CLIENT_SESSION",
+          "OTP",
+          "PASSWORD",
+          "PRE_SHARED_SYMMETRIC_KEY",
+          "SMS"
+        ],
+        "type": "string"
+      },
+      "LogDebugContext": {
+        "properties": {
+          "debugData": {
+            "additionalProperties": true,
+            "readOnly": true,
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "LogEvent": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/LogActor"
+          },
+          "authenticationContext": {
+            "$ref": "#/components/schemas/LogAuthenticationContext"
+          },
+          "client": {
+            "$ref": "#/components/schemas/LogClient"
+          },
+          "debugContext": {
+            "$ref": "#/components/schemas/LogDebugContext"
+          },
+          "displayMessage": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "eventType": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "legacyEventType": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/LogOutcome"
+          },
+          "published": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "request": {
+            "$ref": "#/components/schemas/LogRequest"
+          },
+          "securityContext": {
+            "$ref": "#/components/schemas/LogSecurityContext"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/LogSeverity"
+          },
+          "target": {
+            "items": {
+              "$ref": "#/components/schemas/LogTarget"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/LogTransaction"
+          },
+          "uuid": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "version": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogGeographicalContext": {
+        "properties": {
+          "city": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "country": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "geolocation": {
+            "$ref": "#/components/schemas/LogGeolocation"
+          },
+          "postalCode": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "state": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogGeolocation": {
+        "properties": {
+          "lat": {
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          },
+          "lon": {
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "LogIpAddress": {
+        "properties": {
+          "geographicalContext": {
+            "$ref": "#/components/schemas/LogGeographicalContext"
+          },
+          "ip": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "ipDetails": {
+            "$ref": "#/components/schemas/LogIpDetails"
+          },
+          "source": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "version": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogIpDetails": {
+        "nullable": true,
+        "properties": {
+          "asNumber": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "asOrg": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "domain": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "ipServiceCategories": {
+            "items": {
+              "$ref": "#/components/schemas/LogIpServiceCategory"
+            },
+            "nullable": true,
+            "readOnly": true,
+            "type": "array"
+          },
+          "isp": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LogIpServiceCategory": {
+        "properties": {
+          "isAnonymous": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "operator": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "VPN",
+              "Proxy",
+              "Tor",
+              "Residential Proxy",
+              "Blockchain VPN"
+            ],
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogIssuer": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogOutcome": {
+        "properties": {
+          "reason": {
+            "maxLength": 255,
+            "minLength": 1,
+            "readOnly": true,
+            "type": "string"
+          },
+          "result": {
+            "enum": [
+              "SUCCESS",
+              "FAILURE",
+              "SKIPPED",
+              "ALLOW",
+              "DENY",
+              "CHALLENGE",
+              "UNKNOWN",
+              "RATE_LIMIT",
+              "DEFERRED",
+              "SCHEDULED",
+              "ABANDONED",
+              "UNANSWERED"
+            ],
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogRequest": {
+        "properties": {
+          "ipChain": {
+            "items": {
+              "$ref": "#/components/schemas/LogIpAddress"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LogRisk": {
+        "nullable": true,
+        "properties": {
+          "detectionName": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "issuer": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "level": {
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ],
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "previousLevel": {
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ],
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "LogSecurityContext": {
+        "properties": {
+          "asNumber": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "asOrg": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "botProtection": {
+            "$ref": "#/components/schemas/LogBotProtection"
+          },
+          "domain": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "ipDetails": {
+            "$ref": "#/components/schemas/LogIpDetails"
+          },
+          "isProxy": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "isp": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "risk": {
+            "$ref": "#/components/schemas/LogRisk"
+          },
+          "userBehaviors": {
+            "items": {
+              "$ref": "#/components/schemas/LogUserBehavior"
+            },
+            "nullable": true,
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LogSeverity": {
+        "enum": [
+          "DEBUG",
+          "ERROR",
+          "INFO",
+          "WARN"
+        ],
+        "type": "string"
+      },
+      "LogTarget": {
+        "properties": {
+          "alternateId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "changeDetails": {
+            "properties": {
+              "from": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "to": {
+                "additionalProperties": true,
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "detailEntry": {
+            "additionalProperties": true,
+            "readOnly": true,
+            "type": "object"
+          },
+          "displayName": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogTransaction": {
+        "properties": {
+          "detail": {
+            "additionalProperties": true,
+            "readOnly": true,
+            "type": "object"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogUserAgent": {
+        "properties": {
+          "browser": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "os": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "rawUserAgent": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogUserBehavior": {
+        "properties": {
+          "id": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "result": {
+            "enum": [
+              "UNKNOWN",
+              "POSITIVE",
+              "NEGATIVE",
+              "BAD_REQUEST"
+            ],
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OktaActiveDirectoryGroupProfile": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "dn": {
+            "type": "string"
+          },
+          "externalId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "samAccountName": {
+            "type": "string"
+          },
+          "windowsDomainQualifiedName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OktaUserGroupProfile": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PasswordCredential": {
+        "properties": {
+          "hash": {
+            "$ref": "#/components/schemas/PasswordCredentialHash"
+          },
+          "hook": {
+            "$ref": "#/components/schemas/PasswordCredentialHook"
+          },
+          "value": {
+            "format": "password",
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "type": "object"
+      },
+      "PasswordCredentialHash": {
+        "properties": {
+          "algorithm": {
+            "$ref": "#/components/schemas/PasswordCredentialHashAlgorithm"
+          },
+          "digestAlgorithm": {
+            "$ref": "#/components/schemas/DigestAlgorithm"
+          },
+          "iterationCount": {
+            "type": "integer"
+          },
+          "keySize": {
+            "type": "integer"
+          },
+          "salt": {
+            "type": "string"
+          },
+          "saltOrder": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "workFactor": {
+            "maximum": 20,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PasswordCredentialHashAlgorithm": {
+        "enum": [
+          "BCRYPT",
+          "MD5",
+          "PBKDF2",
+          "SHA-1",
+          "SHA-256",
+          "SHA-512"
+        ],
+        "type": "string"
+      },
+      "PasswordCredentialHook": {
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RecoveryQuestionCredential": {
+        "properties": {
+          "answer": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "string",
+            "writeOnly": true
+          },
+          "question": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ResetPasswordToken": {
+        "properties": {
+          "resetPasswordUrl": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "User": {
+        "properties": {
+          "_embedded": {
+            "additionalProperties": {
+              "properties": {},
+              "type": "object"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "_links": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LinksSelf"
+              },
+              {
+                "properties": {
+                  "activate": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "changePassword": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "changeRecoveryQuestion": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "deactivate": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "expirePassword": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "forgotPassword": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "reactivate": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "resetFactors": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "resetPassword": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "self": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "suspend": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "type": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "unlock": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  },
+                  "unsuspend": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/HrefObject"
+                      }
+                    ]
+                  }
+                },
+                "type": "object"
+              },
+              {
+                "readOnly": true
+              }
+            ]
+          },
+          "activated": {
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "created": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "credentials": {
+            "$ref": "#/components/schemas/UserCredentials"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "lastLogin": {
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "lastUpdated": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "passwordChanged": {
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UserProfile"
+          },
+          "realmId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/UserStatus"
+          },
+          "statusChanged": {
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "transitioningToStatus": {
+            "enum": [
+              "ACTIVE",
+              "DEPROVISIONED",
+              "PROVISIONED"
+            ],
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "UserActivationToken": {
+        "properties": {
+          "activationToken": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "activationUrl": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UserBlock": {
+        "properties": {
+          "appliesTo": {
+            "enum": [
+              "ANY_DEVICES",
+              "UNKNOWN_DEVICES"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "DEVICE_BASED"
+            ],
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UserCredentials": {
+        "properties": {
+          "password": {
+            "$ref": "#/components/schemas/PasswordCredential"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/AuthenticationProvider"
+          },
+          "recovery_question": {
+            "$ref": "#/components/schemas/RecoveryQuestionCredential"
+          }
+        },
+        "type": "object"
+      },
+      "UserFactor": {
+        "discriminator": {
+          "mapping": {
+            "call": "#/components/schemas/UserFactorCall",
+            "email": "#/components/schemas/UserFactorEmail",
+            "push": "#/components/schemas/UserFactorPush",
+            "question": "#/components/schemas/UserFactorSecurityQuestion",
+            "sms": "#/components/schemas/UserFactorSMS",
+            "token": "#/components/schemas/UserFactorToken",
+            "token:hardware": "#/components/schemas/UserFactorTokenHardware",
+            "token:hotp": "#/components/schemas/UserFactorTokenHOTP",
+            "token:software:totp": "#/components/schemas/UserFactorTokenSoftwareTOTP",
+            "u2f": "#/components/schemas/UserFactorU2F",
+            "web": "#/components/schemas/UserFactorWeb",
+            "webauthn": "#/components/schemas/UserFactorWebAuthn"
+          },
+          "propertyName": "factorType"
+        },
+        "properties": {
+          "_embedded": {
+            "additionalProperties": {
+              "properties": {},
+              "type": "object"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "_links": {
+            "$ref": "#/components/schemas/UserFactorLinks"
+          },
+          "created": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "factorType": {
+            "$ref": "#/components/schemas/UserFactorType"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "lastUpdated": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "profile": {
+            "type": "object"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/UserFactorStatus"
+          },
+          "vendorName": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UserFactorLinks": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/LinksActivate"
+          },
+          {
+            "$ref": "#/components/schemas/LinksCancel"
+          },
+          {
+            "$ref": "#/components/schemas/LinksDeactivate"
+          },
+          {
+            "$ref": "#/components/schemas/LinksEnroll"
+          },
+          {
+            "$ref": "#/components/schemas/LinksFactor"
+          },
+          {
+            "$ref": "#/components/schemas/LinksPoll"
+          },
+          {
+            "$ref": "#/components/schemas/LinksQrcode"
+          },
+          {
+            "$ref": "#/components/schemas/LinksQuestions"
+          },
+          {
+            "$ref": "#/components/schemas/LinksResend"
+          },
+          {
+            "$ref": "#/components/schemas/LinksSend"
+          },
+          {
+            "$ref": "#/components/schemas/LinksSelf"
+          },
+          {
+            "$ref": "#/components/schemas/LinksUserFactors"
+          },
+          {
+            "$ref": "#/components/schemas/LinksVerify"
+          }
+        ],
+        "readOnly": true
+      },
+      "UserFactorStatus": {
+        "enum": [
+          "ACTIVE",
+          "DISABLED",
+          "ENROLLED",
+          "EXPIRED",
+          "INACTIVE",
+          "NOT_SETUP",
+          "PENDING_ACTIVATION"
+        ],
+        "readOnly": true,
+        "type": "string"
+      },
+      "UserFactorType": {
+        "enum": [
+          "call",
+          "email",
+          "push",
+          "question",
+          "signed_nonce",
+          "sms",
+          "token",
+          "token:hardware",
+          "token:hotp",
+          "token:software:totp",
+          "u2f",
+          "web",
+          "webauthn"
+        ],
+        "type": "string"
+      },
+      "UserGetSingleton": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          },
+          {
+            "properties": {
+              "_embedded": {
+                "properties": {
+                  "blocks": {
+                    "items": {
+                      "$ref": "#/components/schemas/UserBlock"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "UserProfile": {
+        "additionalProperties": true,
+        "properties": {
+          "city": {
+            "maxLength": 128,
+            "nullable": true,
+            "type": "string"
+          },
+          "costCenter": {
+            "nullable": true,
+            "type": "string"
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "nullable": true,
+            "type": "string"
+          },
+          "department": {
+            "type": "string"
+          },
+          "displayName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "division": {
+            "nullable": true,
+            "type": "string"
+          },
+          "email": {
+            "format": "email",
+            "maxLength": 100,
+            "minLength": 5,
+            "type": "string"
+          },
+          "employeeNumber": {
+            "type": "string"
+          },
+          "firstName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "nullable": true,
+            "type": "string"
+          },
+          "honorificPrefix": {
+            "nullable": true,
+            "type": "string"
+          },
+          "honorificSuffix": {
+            "nullable": true,
+            "type": "string"
+          },
+          "lastName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "nullable": true,
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "login": {
+            "maxLength": 100,
+            "minLength": 5,
+            "type": "string"
+          },
+          "manager": {
+            "nullable": true,
+            "type": "string"
+          },
+          "managerId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "middleName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mobilePhone": {
+            "maxLength": 100,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "nickName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "organization": {
+            "nullable": true,
+            "type": "string"
+          },
+          "postalAddress": {
+            "maxLength": 4096,
+            "nullable": true,
+            "type": "string"
+          },
+          "preferredLanguage": {
+            "nullable": true,
+            "type": "string"
+          },
+          "primaryPhone": {
+            "maxLength": 100,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "profileUrl": {
+            "nullable": true,
+            "type": "string"
+          },
+          "secondEmail": {
+            "format": "email",
+            "maxLength": 100,
+            "nullable": true,
+            "type": "string"
+          },
+          "state": {
+            "maxLength": 128,
+            "nullable": true,
+            "type": "string"
+          },
+          "streetAddress": {
+            "maxLength": 1024,
+            "nullable": true,
+            "type": "string"
+          },
+          "timezone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "userType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "zipCode": {
+            "maxLength": 50,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UserStatus": {
+        "enum": [
+          "ACTIVE",
+          "DEPROVISIONED",
+          "LOCKED_OUT",
+          "PASSWORD_EXPIRED",
+          "PROVISIONED",
+          "RECOVERY",
+          "STAGED",
+          "SUSPENDED"
+        ],
+        "readOnly": true,
+        "type": "string"
+      },
+      "tempPassword": {
+        "properties": {
+          "tempPassword": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/oauth2/v1/authorize",
+            "scopes": {
+              "okta.agentPools.manage": "Allows the app to create and manage agent pools in your Okta organization",
+              "okta.agentPools.read": "Allows the app to read agent pools in your Okta organization",
+              "okta.apiTokens.manage": "Allows the app to manage API Tokens in your Okta organization",
+              "okta.apiTokens.read": "Allows the app to read API Tokens in your Okta organization",
+              "okta.appGrants.manage": "Allows the app to create and manage grants in your Okta organization",
+              "okta.appGrants.read": "Allows the app to read grants in your Okta organization",
+              "okta.apps.interclientTrust.manage": "Allows the app to manage trusted relationship for native to web SSO",
+              "okta.apps.interclientTrust.read": "Allows the app to read configured trusted relationship for native to web SSO",
+              "okta.apps.manage": "Allows the app to create and manage Apps in your Okta organization",
+              "okta.apps.read": "Allows the app to read information about Apps in your Okta organization",
+              "okta.authenticators.manage": "Allows the app to manage all authenticators. For example, enrollments or resets.",
+              "okta.authenticators.read": "Allows the app to read org authenticators information",
+              "okta.authorizationServers.manage": "Allows the app to create and manage Authorization Servers in your Okta organization",
+              "okta.authorizationServers.read": "Allows the app to read information about Authorization Servers in your Okta organization",
+              "okta.behaviors.manage": "Allows the app to create and manage behavior detection rules in your Okta organization",
+              "okta.behaviors.read": "Allows the app to read behavior detection rules in your Okta org",
+              "okta.botProtection.manage": "Allows the app to manage bot protection configuration in your Okta org",
+              "okta.botProtection.read": "Allows the app to read bot protection configuration in your Okta org",
+              "okta.brands.manage": "Allows the app to create and manage Brands and Themes in your Okta organization",
+              "okta.brands.read": "Allows the app to read information about Brands and Themes in your Okta organization",
+              "okta.captchas.manage": "Allows the app to create and manage CAPTCHAs in your Okta organization",
+              "okta.captchas.read": "Allows the app to read information about CAPTCHAs in your Okta organization",
+              "okta.customTelephonyProvider.manage": "Allows the app to create and manage custom telephony provider credentials",
+              "okta.customTelephonyProvider.read": "Allows the app to read custom telephony provider credentials",
+              "okta.deviceAssurance.manage": "Allows the app to manage device assurances",
+              "okta.deviceAssurance.read": "Allows the app to read device assurances",
+              "okta.deviceIntegrations.manage": "Allows the app to manage device integrations",
+              "okta.deviceIntegrations.read": "Allows the app to read device integrations",
+              "okta.devicePostureChecks.manage": "Allows the app to manage device posture checks",
+              "okta.devicePostureChecks.read": "Allows the app to read device posture checks",
+              "okta.devices.manage": "Allows the app to manage device status transitions and delete a device",
+              "okta.devices.read": "Allows the app to read the existing device's profile and search devices",
+              "okta.directories.groups.manage": "Allows the app to manage AD/LDAP groups for your Okta organization",
+              "okta.directories.groups.read": "Allows the app to read AD/LDAP groups for your Okta organization",
+              "okta.domains.manage": "Allows the app to manage custom Domains for your Okta organization",
+              "okta.domains.read": "Allows the app to read information about custom Domains for your Okta organization",
+              "okta.dr.manage": "Allows the app to manage disaster recovery",
+              "okta.dr.read": "Allows the app to read the disaster recovery status",
+              "okta.emailDomains.manage": "Allows the app to manage Email Domains for your Okta organization",
+              "okta.emailDomains.read": "Allows the app to read information about Email Domains for your Okta organization",
+              "okta.emailServers.manage": "Allows the app to manage Email Servers for your Okta organization",
+              "okta.emailServers.read": "Allows the app to read information about Email Servers for your Okta organization",
+              "okta.eventHooks.manage": "Allows the app to create and manage Event Hooks in your Okta organization",
+              "okta.eventHooks.read": "Allows the app to read information about Event Hooks in your Okta organization",
+              "okta.features.manage": "Allows the app to create and manage Features in your Okta organization",
+              "okta.features.read": "Allows the app to read information about Features in your Okta organization",
+              "okta.groups.manage": "Allows the app to create and manage groups in your Okta organization",
+              "okta.groups.read": "Allows the app to read information about groups and their members in your Okta organization",
+              "okta.identitySources.manage": "Allows the custom identity sources to manage user entities in your Okta organization",
+              "okta.identitySources.read": "Allows to read session information for custom identity sources in your Okta organization",
+              "okta.idps.manage": "Allows the app to create and manage Identity Providers in your Okta organization",
+              "okta.idps.read": "Allows the app to read information about Identity Providers in your Okta organization",
+              "okta.inlineHooks.manage": "Allows the app to create and manage Inline Hooks in your Okta organization",
+              "okta.inlineHooks.read": "Allows the app to read information about Inline Hooks in your Okta organization",
+              "okta.linkedObjects.manage": "Allows the app to manage linked object definitions in your Okta organization",
+              "okta.linkedObjects.read": "Allows the app to read linked object definitions in your Okta organization",
+              "okta.logStreams.manage": "Allows the app to create and manage log streams in your Okta organization",
+              "okta.logStreams.read": "Allows the app to read information about log streams in your Okta organization",
+              "okta.logs.read": "Allows the app to read information about System Log entries in your Okta organization",
+              "okta.networkZones.manage": "Allows the app to create and manage Network Zones in your Okta organization",
+              "okta.networkZones.read": "Allows the app to read Network Zones in your Okta organization",
+              "okta.oauthIntegrations.manage": "Allows the app to create and manage API service Integration instances in your Okta organization",
+              "okta.oauthIntegrations.read": "Allows the app to read API service Integration instances in your Okta organization",
+              "okta.orgs.manage": "Allows the app to manage organization-specific details for your Okta organization",
+              "okta.orgs.read": "Allows the app to read organization-specific details about your Okta organization",
+              "okta.policies.manage": "Allows the app to manage policies in your Okta organization",
+              "okta.policies.read": "Allows the app to read information about policies in your Okta organization",
+              "okta.principalRateLimits.manage": "Allows the app to create and manage Principal Rate Limits in your Okta organization",
+              "okta.principalRateLimits.read": "Allows the app to read information about Principal Rate Limits in your Okta organization",
+              "okta.profileMappings.manage": "Allows the app to manage user profile mappings in your Okta organization",
+              "okta.profileMappings.read": "Allows the app to read user profile mappings in your Okta organization",
+              "okta.pushProviders.manage": "Allows the app to create and manage push notification providers such as APNs and FCM",
+              "okta.pushProviders.read": "Allows the app to read push notification providers such as APNs and FCM",
+              "okta.rateLimits.manage": "Allows the app to create and manage rate limits in your Okta organization",
+              "okta.rateLimits.read": "Allows the app to read information about rate limits in your Okta organization",
+              "okta.realmAssignments.manage": "Allows a user to manage realm assignments",
+              "okta.realmAssignments.read": "Allows a user to read realm assignments",
+              "okta.realms.manage": "Allows the app to create new realms and to manage their details",
+              "okta.realms.read": "Allows the app to read the existing realms and their details",
+              "okta.roles.manage": "Allows the app to manage administrative role assignments for users in your Okta organization. Delegated admins with this permission can only manage user credential fields and not the credential values themselves.",
+              "okta.roles.read": "Allows the app to read administrative role assignments for users in your Okta organization. Delegated admins with this permission can only read user credential fields and not the credential values themselves.",
+              "okta.schemas.manage": "Allows the app to create and manage Schemas in your Okta organization",
+              "okta.schemas.read": "Allows the app to read information about Schemas in your Okta organization",
+              "okta.securityEventsProviders.manage": "Allows the app to create and manage Security Events Providers in your Okta organization",
+              "okta.securityEventsProviders.read": "Allows the app to read information about Security Events Providers in your Okta organization",
+              "okta.serviceAccounts.manage": "Allows the app to manage service accounts in your Okta organization",
+              "okta.serviceAccounts.okta.manage": "Allows the app to manage Okta managed user accounts in your Okta org",
+              "okta.serviceAccounts.okta.read": "Allows the app to read Okta managed user accounts in your Okta org",
+              "okta.serviceAccounts.read": "Allows the app to read service accounts in your Okta organization",
+              "okta.sessions.manage": "Allows the app to manage all sessions in your Okta organization",
+              "okta.sessions.read": "Allows the app to read all sessions in your Okta organization",
+              "okta.templates.manage": "Allows the app to manage all custom templates in your Okta organization",
+              "okta.templates.read": "Allows the app to read all custom templates in your Okta organization",
+              "okta.threatInsights.manage": "Allows the app to manage all ThreatInsight configurations in your Okta organization",
+              "okta.threatInsights.read": "Allows the app to read all ThreatInsight configurations in your Okta organization",
+              "okta.trustedOrigins.manage": "Allows the app to manage all Trusted Origins in your Okta organization",
+              "okta.trustedOrigins.read": "Allows the app to read all Trusted Origins in your Okta organization",
+              "okta.uischemas.manage": "Allows the app to manage all the UI Schemas in your Okta organization",
+              "okta.uischemas.read": "Allows the app to read all the UI Schemas in your Okta organization",
+              "okta.userRisk.manage": "Allows the app to manage a user's risk in your Okta org",
+              "okta.userRisk.read": "Allows the app to read a user's risk in your Okta org",
+              "okta.userTypes.manage": "Allows the app to manage user types in your Okta org",
+              "okta.userTypes.read": "Allows the app to read user types in your Okta org",
+              "okta.users.manage": "Allows the app to create new users and to manage all users' profile and credentials information",
+              "okta.users.read": "Allows the app to read the existing users' profiles and credentials",
+              "ssf.manage": "Allows the app to create and manage Shared Signals Framework (SSF) in your Okta organization",
+              "ssf.read": "Allows the app to read information about Shared Signals Framework (SSF) in your Okta organization"
+            },
+            "tokenUrl": "/oauth2/v1/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Okta Admin Management API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/groups/{groupId}/users/{userId}": {
+      "delete": {
+        "operationId": "unassignUserFromGroup",
+        "responses": {
+          "204": {
+            "content": {}
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResourceNotFound404"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.groups.manage"
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathGroupId"
+        },
+        {
+          "$ref": "#/components/parameters/pathUserId"
+        }
+      ],
+      "put": {
+        "operationId": "assignUserToGroup",
+        "responses": {
+          "204": {
+            "content": {}
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResourceNotFound404"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.groups.manage"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/logs": {
+      "get": {
+        "operationId": "listLogEvents",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "since",
+            "schema": {
+              "default": "7 days prior to until",
+              "format": "ISO 8601 compliant timestamp",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "until",
+            "schema": {
+              "default": "current time",
+              "format": "ISO 8601 compliant timestamp",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "format": "Opaque token",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "format": "SCIM Filter expression",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "format": "URL encoded string. Max length is 40 characters per keyword, with a maximum of 10 keyword filters per query (before encoding)",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 100,
+              "format": "Integer between 0 and 1000",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "default": "ASCENDING",
+              "enum": [
+                "ASCENDING",
+                "DESCENDING"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LogEvent"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorApiValidationFailed400"
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.logs.read"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "operationId": "listUsers",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OktaResponse"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/queryAfter"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 200,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/querySortOrder"
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.users.read"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{id}": {
+      "get": {
+        "operationId": "getUser",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OktaResponse"
+          },
+          {
+            "$ref": "#/components/parameters/queryUserExpand"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserGetSingleton"
+                }
+              }
+            },
+            "headers": {
+              "Etag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.users.read"
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathId"
+        }
+      ]
+    },
+    "/api/v1/users/{id}/groups": {
+      "get": {
+        "operationId": "listUserGroups",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Group"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResourceNotFound404"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.users.read"
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathId"
+        }
+      ]
+    },
+    "/api/v1/users/{id}/lifecycle/activate": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathId"
+        }
+      ],
+      "post": {
+        "operationId": "activateUser",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sendEmail",
+            "required": false,
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserActivationToken"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResourceNotFound404"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.users.manage"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{id}/lifecycle/deactivate": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathId"
+        }
+      ],
+      "post": {
+        "operationId": "deactivateUser",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sendEmail",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Prefer",
+            "required": false,
+            "schema": {
+              "enum": [
+                "respond-async"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {}
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResourceNotFound404"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.users.manage"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{id}/lifecycle/expire_password": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathId"
+        }
+      ],
+      "post": {
+        "operationId": "expirePassword",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResourceNotFound404"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.users.manage"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{id}/lifecycle/expire_password_with_temp_password": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathId"
+        }
+      ],
+      "post": {
+        "operationId": "expirePasswordWithTempPassword",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "revokeSessions",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tempPassword"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResourceNotFound404"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.users.manage"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{id}/lifecycle/reset_factors": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathId"
+        }
+      ],
+      "post": {
+        "operationId": "resetFactors",
+        "responses": {
+          "200": {
+            "content": {}
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResourceNotFound404"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.users.manage"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{id}/lifecycle/reset_password": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathId"
+        }
+      ],
+      "post": {
+        "operationId": "resetPassword",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sendEmail",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "revokeSessions",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPasswordToken"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResourceNotFound404"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.users.manage"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{id}/lifecycle/suspend": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathId"
+        }
+      ],
+      "post": {
+        "operationId": "suspendUser",
+        "responses": {
+          "200": {
+            "content": {}
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorMissingRequiredParameter400"
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResourceNotFound404"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.users.manage"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{id}/lifecycle/unsuspend": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathId"
+        }
+      ],
+      "post": {
+        "operationId": "unsuspendUser",
+        "responses": {
+          "200": {
+            "content": {}
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorMissingRequiredParameter400"
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResourceNotFound404"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.users.manage"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{userId}/factors": {
+      "get": {
+        "operationId": "listFactors",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserFactor"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResourceNotFound404"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.users.read"
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathUserId"
+        }
+      ]
+    },
+    "/api/v1/users/{userId}/sessions": {
+      "delete": {
+        "operationId": "revokeUserSessions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "oauthTokens",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "forgetDevices",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "content": {}
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorAccessDenied403"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResourceNotFound404"
+          },
+          "429": {
+            "$ref": "#/components/responses/ErrorTooManyRequests429"
+          }
+        },
+        "security": [
+          {
+            "apiToken": []
+          },
+          {
+            "oauth2": [
+              "okta.users.manage"
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathUserId"
+        }
+      ]
+    }
+  },
+  "servers": [
+    {
+      "url": "https://{yourOktaDomain}",
+      "variables": {
+        "yourOktaDomain": {
+          "default": "subdomain.okta.com"
+        }
+      }
+    }
+  ]
+}

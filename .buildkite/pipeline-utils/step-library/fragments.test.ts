@@ -33,13 +33,17 @@ describe('pull_request fragments', () => {
       (fragment) => [fragment.name, fragment] as const
     );
 
-  it.each(table(false))('%s', matchesSnapshot);
+  const unported = table(false);
+  if (unported.length > 0) {
+    it.each(unported)('%s', matchesSnapshot);
+  }
   (skipPorted ? it.skip : it).each(table(true))('%s', matchesSnapshot);
 
   it('registers every YAML fragment that still exists', () => {
     const dir = path.join(root, '.buildkite/pipelines/pull_request');
-    const onDisk = fs
-      .readdirSync(dir, { recursive: true, encoding: 'utf8' })
+    const onDisk = (
+      fs.existsSync(dir) ? fs.readdirSync(dir, { recursive: true, encoding: 'utf8' }) : []
+    )
       .filter((file) => file.endsWith('.yml'))
       .map((file) => `.buildkite/pipelines/pull_request/${file}`);
     const registered = FRAGMENTS.map((fragment) => fragment.yamlPath);

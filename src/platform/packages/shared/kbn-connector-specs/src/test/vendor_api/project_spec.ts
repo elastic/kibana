@@ -8,7 +8,7 @@
  */
 
 import type { OpenApiDocument } from '@kbn/connector-emulate';
-import { convertSwagger2 } from '@kbn/connector-emulate';
+import { AWS_JSON_EXTENSION, convertSwagger2 } from '@kbn/connector-emulate';
 import type { JsonObject } from './json_pointer';
 import {
   forEachRef,
@@ -167,6 +167,11 @@ export const projectSpec = (
   const msPaths = pickPaths(document, operations, 'x-ms-paths');
   if (Object.keys(msPaths).length > 0) {
     projected['x-ms-paths'] = normalizeSpecNode(msPaths, true);
+  }
+  // Converted awsJson models are served by `X-Amz-Target`, which this marks.
+  const awsJson = document[AWS_JSON_EXTENSION];
+  if (awsJson !== undefined) {
+    projected[AWS_JSON_EXTENSION] = awsJson;
   }
 
   const kept = new Set<string>();

@@ -15,8 +15,6 @@ import {
 } from '../../../../../timelines/components/field_renderers/default_renderer';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import type { BasicEntityData, EntityTableColumns, EntityTableLinkRenderer } from './types';
-import { isFlyoutLink } from '../../../../shared/utils/link_utils';
-import { PreviewLink } from '../../../../shared/components/preview_link';
 
 export const getEntityTableColumns = <T extends BasicEntityData>(
   contextID: string,
@@ -63,10 +61,6 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
             <EntityLink field={field} value={value}>
               {value}
             </EntityLink>
-          );
-        } else if (values && isFlyoutLink({ field, scopeId })) {
-          renderValue = (value: string) => (
-            <PreviewLink field={field} value={value} entityId={data.entityId} scopeId={scopeId} />
           );
         } else {
           renderValue = renderField;

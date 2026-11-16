@@ -8,7 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { getConnectorSpec } from '../../..';
+import { getConnectorSpec, getSandboxHosts } from '../../..';
 import { NewRelic } from './new_relic';
 import {
   NewRelicCreateDeploymentMarkerInputSchema,
@@ -58,10 +58,18 @@ describe('NewRelic', () => {
     expect(types).toContain('api_key_header');
   });
 
-  it('marks the api_key_header auth type as sandbox capable', () => {
+  it('does not mark the api_key_header auth type as sandbox capable', () => {
     const types = NewRelic.auth?.types ?? [];
     expect(types).toEqual([
-      expect.objectContaining({ type: 'api_key_header', supportsSandbox: true }),
+      expect.objectContaining({ type: 'api_key_header', supportsSandbox: false }),
+    ]);
+  });
+
+  it('declares every regional API host as a sandbox host', () => {
+    expect(getSandboxHosts(NewRelic.sandbox, { region: 'eu' })).toEqual([
+      'api.newrelic.com',
+      'api.eu.newrelic.com',
+      'api.jp.newrelic.com',
     ]);
   });
 

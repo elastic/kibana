@@ -19,10 +19,9 @@ import type { InternalApplicationStart } from '@kbn/core-application-browser-int
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { Logger } from '@kbn/logging';
-import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal-types';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 
 import { DocTitleService } from './services/doc_title';
@@ -34,7 +33,7 @@ import { createChromeState } from './state';
 import {
   handleBodyClasses,
   handleEuiFullScreenChanges,
-  handleSystemColorModeChange,
+  syncColorMode,
   showCspWarningIfNeeded,
   setupAppChangeHandler,
 } from './side_effects';
@@ -58,10 +57,10 @@ export interface StartDeps {
   injectedMetadata: InternalInjectedMetadataStart;
   getNotifications: () => Promise<NotificationsStart>;
   customBranding: CustomBrandingStart;
-  i18n: I18nStart;
-  theme: ThemeServiceStart;
+  theme: InternalThemeServiceStart;
   userProfile: UserProfileService;
   uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
 }
 
 /** @internal */
@@ -100,10 +99,10 @@ export class ChromeService {
     injectedMetadata,
     getNotifications,
     customBranding,
-    i18n,
     theme,
     userProfile,
     uiSettings,
+    settings,
   }: StartDeps): Promise<InternalChromeStart> {
     // 1. Create all chrome state
     const state = createChromeState({
@@ -123,12 +122,14 @@ export class ChromeService {
       setIsVisible: state.visibility.setIsVisible,
       stop$: this.stop$,
     });
-    handleSystemColorModeChange({
-      getNotifications,
-      coreStart: { i18n, theme, userProfile },
-      stop$: this.stop$,
-      http,
+    syncColorMode({
+      theme,
+      injectedMetadata,
+      userProfile,
       uiSettings,
+      settings,
+      http,
+      stop$: this.stop$,
       logger: this.logger,
     });
 

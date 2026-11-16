@@ -93,6 +93,7 @@ export type {
 
 // Workflow context schema (variable/step/foreach context used by validation and autocomplete)
 export type {
+  CalledWorkflowOutputs,
   RegisteredStepOutput,
   WorkflowContextRegistry,
 } from './common/validation/context/registry';

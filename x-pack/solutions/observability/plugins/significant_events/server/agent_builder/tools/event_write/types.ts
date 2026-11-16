@@ -6,6 +6,7 @@
  */
 
 import type { Severity, SignificantEvent } from '@kbn/significant-events-schema';
+import type { StatusChange } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
 import { createBulkWriteOutcomeUnknownError, type CompactBulkError } from '../bulk_write';
 import type { SeriesHead } from '../../../lib/significant_events/events/rule_events_client';
 
@@ -37,7 +38,7 @@ export type EventsWriteInput = Pick<
     reopen_deactivated?: boolean;
   };
 
-export interface EventsWriteResult {
+interface EventsWriteResultBase {
   index: number;
   event_id: string;
   status: SignificantEvent['status'];
@@ -47,6 +48,17 @@ export interface EventsWriteResult {
   narrative_preserved?: true;
   severity: Severity;
 }
+
+export interface EventsWriteCreatedResult extends EventsWriteResultBase {
+  created: true;
+  group_hash: string;
+}
+
+export interface EventsWriteUpdatedResult extends EventsWriteResultBase {
+  created: false;
+}
+
+export type EventsWriteResult = EventsWriteCreatedResult | EventsWriteUpdatedResult;
 
 export interface EventsWriteDuplicateResult {
   index: number;
@@ -91,6 +103,7 @@ export interface EventsWriteNoOpResult {
 export interface EventsWriteFailureResult {
   index: number;
   event_id: string;
+  existing_event_id?: string;
   /** Absent: a rejected item never reached the lifecycle. */
   status?: SignificantEvent['status'];
   written: false;
@@ -131,7 +144,11 @@ export type LoadedCandidate = WriteCandidate & {
 };
 
 /** A loaded candidate whose status is decided: by the lifecycle, or the caller's own. */
-export type ResolvedWriteCandidate = LoadedCandidate & { status: SignificantEvent['status'] };
+export type ResolvedWriteCandidate = LoadedCandidate & {
+  status: SignificantEvent['status'];
+  /** The lifecycle change that decided `status`; absent when the caller owns it. */
+  change?: StatusChange;
+};
 
 export type EventsWriteBulkResult =
   | EventsWriteResult
@@ -139,6 +156,11 @@ export type EventsWriteBulkResult =
   | EventsWriteHeldResult
   | EventsWriteNoOpResult
   | EventsWriteFailureResult;
+
+export type WriteOutcome =
+  | { error: CompactBulkError }
+  | { error?: undefined; created: true; groupHash: string }
+  | { error?: undefined; created: false };
 
 export type BulkResults = Array<EventsWriteBulkResult | undefined>;
 

@@ -223,7 +223,7 @@ describe('getActionOptions', () => {
 
     expect(flowControlGroup).toBeDefined();
     if (flowControlGroup && 'options' in flowControlGroup) {
-      expect(flowControlGroup.options).toHaveLength(11);
+      expect(flowControlGroup.options).toHaveLength(13);
       const labels = flowControlGroup.options.map((opt) => opt.label);
       expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b)));
       expect(flowControlGroup.options.map((opt) => opt.id).sort()).toEqual(
@@ -239,6 +239,8 @@ describe('getActionOptions', () => {
           'while',
           'workflow.execute',
           'workflow.executeAsync',
+          'workflow.fail',
+          'workflow.output',
         ].sort()
       );
     }

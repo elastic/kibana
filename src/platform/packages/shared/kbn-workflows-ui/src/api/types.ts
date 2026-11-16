@@ -210,6 +210,19 @@ export interface SearchTriggerEventLogResult {
   size: number;
 }
 
+export interface LinkedRule {
+  id: string;
+  name: string;
+  ruleTypeId: string;
+}
+
+export interface GetLinkedRulesResponse {
+  total: number;
+  /** Linked rules in the space that the user cannot read. */
+  hiddenTotal: number;
+  rules: LinkedRule[];
+}
+
 export interface RestoreWorkflowVersionParams {
   signal?: AbortSignal;
 }

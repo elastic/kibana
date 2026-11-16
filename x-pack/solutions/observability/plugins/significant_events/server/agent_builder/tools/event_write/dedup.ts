@@ -164,13 +164,25 @@ export const fetchInactiveEventsForReuse = async ({
 };
 
 /**
+ * The rules an event holds for matching a candidate. A candidate with confirmed rules compares only
+ * confirmed rules, except against a closed series that holds none: a series closed while recovering
+ * stores only `refutes` verdicts, so it holds every rule it ended with, and a recurrence of any of
+ * them must still reopen it.
+ */
+const heldRuleUuids = (candidate: DedupCandidate, ev: SignificantEvent): string[] => {
+  const confirmed = extractRuleUuids(confirmedSignals(ev.signals));
+  const holdsNoConfirmed = ev.status === ALERT_EPISODE_STATUS.INACTIVE && confirmed.length === 0;
+  return candidate.confirmedOnly && !holdsNoConfirmed ? confirmed : extractRuleUuids(ev.signals);
+};
+
+/**
  * Returns true when the candidate's dedup rule set is entirely contained in the event's rule set,
  * the event has one of `statuses`, and at least one source id is shared — meaning this detection
  * is already tracked (by a live event) or recurs a series that has closed (by an inactive one).
  *
- * Candidates with confirmed rules compare only confirmed rules on both sides. Candidates without
- * confirmed rules retain all-verdict subset matching. A new identity rule not present in the event
- * still produces a new event.
+ * Candidates with confirmed rules compare only confirmed rules against a live event (see
+ * `heldRuleUuids`). Candidates without confirmed rules retain all-verdict subset matching. A new
+ * identity rule not present in the event still produces a new event.
  *
  * Empty-rule candidates only match empty-rule events to avoid false-matching any event on source
  * overlap alone.
@@ -190,9 +202,7 @@ const isCoveredByEvent = (
   const sourcesOverlap = (ev.source_ids ?? []).some((s) => candidateSourceSet.has(s));
   if (!sourcesOverlap) return false;
 
-  const eventRuleUuids = extractRuleUuids(
-    candidate.confirmedOnly ? confirmedSignals(ev.signals) : ev.signals
-  );
+  const eventRuleUuids = heldRuleUuids(candidate, ev);
   if (candidate.ruleUuids.length === 0) return eventRuleUuids.length === 0;
 
   const eventRuleSet = new Set(eventRuleUuids);
@@ -258,7 +268,8 @@ interface CoveringSeries {
 /**
  * The closed series that cover a dedup candidate, newest first: they share a source with it and
  * hold every one of its confirmed rules (the coverage rule live dedup uses, applied to inactive
- * series). It expects `series` already paired with their latest episode (see `seriesWithHeads`).
+ * series; see `heldRuleUuids` for which rules a closed series holds). It expects `series` already
+ * paired with their latest episode (see `seriesWithHeads`).
  */
 const coveringInactiveSeries = ({
   candidate,
@@ -272,9 +283,7 @@ const coveringInactiveSeries = ({
   return series
     .filter(({ event }) => isCoveredByEvent(candidate, event, [ALERT_EPISODE_STATUS.INACTIVE]))
     .map(({ event, head }) => {
-      const heldRules = new Set(
-        extractRuleUuids(candidate.confirmedOnly ? confirmedSignals(event.signals) : event.signals)
-      );
+      const heldRules = new Set(heldRuleUuids(candidate, event));
       return { event, head, extraRules: heldRules.size - new Set(candidate.ruleUuids).size };
     });
 };

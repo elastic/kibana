@@ -9,7 +9,10 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 import { ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION, SO_SEARCH_LIMIT } from '../../constants';
 
-import { SimplifiedCreatePackagePolicyRequestBodySchema } from '../models/package_policy_schema';
+import {
+  OnboardingDeploymentIdQuerySchema,
+  SimplifiedCreatePackagePolicyRequestBodySchema,
+} from '../models/package_policy_schema';
 import {
   AgentlessPolicySchema,
   AgentlessPolicyResponseSchema,
@@ -149,6 +152,9 @@ export const UpdateAgentlessPolicyRequestSchema = {
   //    templates; `packagePolicyService.update` has no equivalent option, so the
   //    service never forwards it on update.
   body: CreateAgentlessPolicyRequestSchema.body,
+  query: schema.object({
+    onboarding_deployment_id: OnboardingDeploymentIdQuerySchema,
+  }),
 };
 
 export const DeleteAgentlessPolicyRequestSchema = {
@@ -161,6 +167,7 @@ export const DeleteAgentlessPolicyRequestSchema = {
         },
       })
     ),
+    onboarding_deployment_id: OnboardingDeploymentIdQuerySchema,
   }),
   params: schema.object({
     policyId: schema.string({
@@ -213,6 +220,7 @@ export type NewAgentlessPolicy = CreateAgentlessPolicyRequest['body'];
  */
 export interface UpdateAgentlessPolicyRequest {
   params: TypeOf<typeof UpdateAgentlessPolicyRequestSchema.params>;
+  query?: TypeOf<typeof UpdateAgentlessPolicyRequestSchema.query>;
   body: TypeOf<typeof UpdateAgentlessPolicyRequestSchema.body>;
 }
 

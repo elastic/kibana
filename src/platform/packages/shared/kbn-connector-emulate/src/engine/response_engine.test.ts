@@ -105,4 +105,163 @@ describe('createResponseEngine', () => {
 
     expect(await getBody({ recordings })).toEqual({ id: 5 });
   });
+
+  describe('matching requests', () => {
+    const users = {
+      ...spec,
+      paths: {
+        '/users': {
+          post: {
+            operationId: 'createUser',
+            requestBody: { content: { 'application/json': { schema: user } } },
+            responses: {
+              '201': { description: 'created', content: { 'application/json': { schema: user } } },
+              '409': { description: 'exists' },
+            },
+          },
+        },
+        '/users/{id}': {
+          get: {
+            ...spec.paths['/users/{id}'].get,
+            parameters: [
+              ...spec.paths['/users/{id}'].get.parameters,
+              { name: 'fields', in: 'query', schema: { type: 'string' } },
+            ],
+          },
+        },
+      },
+    };
+    const fixture = (
+      when: ResponseFixture['when'],
+      body: unknown,
+      status = 200
+    ): ResponseFixture => ({
+      operation: getUser,
+      ...(when === undefined ? {} : { when }),
+      response: { status, body },
+    });
+    const get = async (options: Parameters<typeof createEmulatorFetch>[0], url: string) => {
+      const response = await createEmulatorFetch(options).fetch(`https://api.example.com${url}`);
+      return { status: response.status, body: await response.json() };
+    };
+
+    it('answers each request with the fixture whose when it matches', async () => {
+      const fixtures = [
+        fixture({ path: { id: '1' } }, { id: 1, name: 'Ada' }),
+        fixture({ path: { id: '2' } }, { id: 2, name: 'Grace' }),
+        fixture(undefined, { id: 0, name: 'Anyone' }),
+      ];
+
+      expect((await get({ specs: [users], fixtures }, '/users/2')).body).toEqual({
+        id: 2,
+        name: 'Grace',
+      });
+      expect((await get({ specs: [users], fixtures }, '/users/9')).body).toEqual({
+        id: 0,
+        name: 'Anyone',
+      });
+      expect(
+        (await get({ specs: [users], fixtures: fixtures.slice(0, 2) }, '/users/9')).body
+      ).toEqual({ id: 0, name: 'string' });
+    });
+
+    it('prefers the fixture that checks the most values', async () => {
+      const fixtures = [
+        fixture({ path: { id: '7' } }, { id: 7, name: 'by id' }),
+        fixture(
+          { path: { id: '7' }, query: { fields: 'name' } },
+          { id: 7, name: 'by id and query' }
+        ),
+      ];
+
+      expect((await get({ specs: [users], fixtures }, '/users/7?fields=name')).body.name).toBe(
+        'by id and query'
+      );
+      expect((await get({ specs: [users], fixtures }, '/users/7')).body.name).toBe('by id');
+    });
+
+    it('serves error fixtures for some requests, such as a 404 for an unknown id', async () => {
+      const fixtures = [fixture({ path: { id: '404' } }, { message: 'Not found' }, 404)];
+
+      expect(await get({ specs: [users], fixtures }, '/users/404')).toEqual({
+        status: 404,
+        body: { message: 'Not found' },
+      });
+      expect((await get({ specs: [users], fixtures }, '/users/1')).status).toBe(200);
+    });
+
+    it('matches the fields of the body a fixture names, ignoring the others', async () => {
+      const { fetch } = createEmulatorFetch({
+        specs: [users],
+        fixtures: [
+          {
+            operation: { method: 'POST', path: '/users' },
+            when: { body: { name: 'Ada' } },
+            response: { status: 409 },
+          },
+        ],
+      });
+      const create = (body: unknown) =>
+        fetch('https://api.example.com/users', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+
+      expect((await create({ id: 1, name: 'Ada' })).status).toBe(409);
+      expect((await create({ id: 2, name: 'Grace' })).status).toBe(201);
+    });
+
+    it('replays the recording of the same request, else the first recording', async () => {
+      const recordings: Recording[] = [
+        {
+          exchanges: [1, 2].map((id) => ({
+            operation: getUser,
+            request: { pathParameters: { id: String(id) } },
+            response: { status: 200, body: { id, name: `user ${id}` } },
+          })),
+        },
+      ];
+
+      expect((await get({ specs: [users], recordings }, '/users/2')).body).toEqual({
+        id: 2,
+        name: 'user 2',
+      });
+      expect((await get({ specs: [users], recordings }, '/users/9')).body).toEqual({
+        id: 1,
+        name: 'user 1',
+      });
+    });
+
+    it('rejects fixtures whose when names a path parameter the operation lacks', () => {
+      const { rejectedResponses } = createEmulatorFetch({
+        specs: [users],
+        fixtures: [fixture({ path: { userId: '1' } }, { id: 1 })],
+      });
+
+      expect(rejectedResponses).toEqual([
+        {
+          source: 'fixture',
+          operation: 'GET /users/{id}',
+          violations: [expect.objectContaining({ path: ['when', 'path', 'userId'], code: 'when' })],
+        },
+      ]);
+    });
+
+    it('gives responders the path parameters of the request', async () => {
+      const { body } = await get(
+        {
+          specs: [users],
+          respond: (_operation, { pathParameters = {} }) => ({
+            statusCode: 200,
+            headers: { 'content-type': 'application/json' },
+            body: { id: Number(pathParameters.id) },
+          }),
+        },
+        '/users/42'
+      );
+
+      expect(body).toEqual({ id: 42 });
+    });
+  });
 });

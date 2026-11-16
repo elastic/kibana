@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { UrlServiceError } from '../error';
+
 /**
  * This function escapes reserved characters as listed here:
  * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters
@@ -21,6 +23,6 @@ export const escapeSearchReservedChars = (str: string) => {
 export const validateSlug = (slug: string) => {
   const regex = /^[a-zA-Z0-9\.\-\_]{3,255}$/;
   if (!regex.test(slug)) {
-    throw new Error(`Invalid [slug = ${slug}].`);
+    throw new UrlServiceError(`Invalid [slug = ${slug}].`, 'INVALID_SLUG');
   }
 };
