@@ -140,6 +140,23 @@ describe('getBaseMappings', () => {
             },
           },
         },
+        acl: {
+          dynamic: 'false',
+          properties: {
+            version: { type: 'integer', coerce: false },
+            owner: { properties: { type: { type: 'keyword' }, id: { type: 'keyword' } } },
+            general_access: { type: 'keyword' },
+            entries: {
+              type: 'nested',
+              properties: {
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
+                access: { type: 'keyword' },
+                added_at: { type: 'date' },
+              },
+            },
+          },
+        },
       },
     });
   });

@@ -15,7 +15,7 @@ describe('getDefaultSecurityImplementation', () => {
   let implementation: CoreSecurityDelegateContract;
 
   beforeEach(() => {
-    implementation = getDefaultSecurityImplementation();
+    implementation = getDefaultSecurityImplementation({ getAccessPolicy: () => undefined });
   });
 
   describe('authc.getCurrentUser', () => {
@@ -88,6 +88,13 @@ describe('getDefaultSecurityImplementation', () => {
       await expect(
         (implementation.serviceAccounts[method] as () => Promise<unknown>)()
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+    });
+  });
+
+  describe('authz.ols', () => {
+    // A missing delegate must not read as deliberately disabled OLS, so the default is never `null`.
+    it('is a fail-closed service', () => {
+      expect(implementation.authz.ols).not.toBeNull();
     });
   });
 

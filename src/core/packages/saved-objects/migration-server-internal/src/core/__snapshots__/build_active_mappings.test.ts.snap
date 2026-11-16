@@ -15,6 +15,45 @@ Object {
         },
       },
     },
+    "acl": Object {
+      "dynamic": "false",
+      "properties": Object {
+        "entries": Object {
+          "properties": Object {
+            "access": Object {
+              "type": "keyword",
+            },
+            "added_at": Object {
+              "type": "date",
+            },
+            "id": Object {
+              "type": "keyword",
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+          },
+          "type": "nested",
+        },
+        "general_access": Object {
+          "type": "keyword",
+        },
+        "owner": Object {
+          "properties": Object {
+            "id": Object {
+              "type": "keyword",
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+          },
+        },
+        "version": Object {
+          "coerce": false,
+          "type": "integer",
+        },
+      },
+    },
     "bbb": Object {
       "type": "long",
     },
@@ -78,6 +117,45 @@ Object {
       "properties": Object {
         "owner": Object {
           "type": "keyword",
+        },
+      },
+    },
+    "acl": Object {
+      "dynamic": "false",
+      "properties": Object {
+        "entries": Object {
+          "properties": Object {
+            "access": Object {
+              "type": "keyword",
+            },
+            "added_at": Object {
+              "type": "date",
+            },
+            "id": Object {
+              "type": "keyword",
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+          },
+          "type": "nested",
+        },
+        "general_access": Object {
+          "type": "keyword",
+        },
+        "owner": Object {
+          "properties": Object {
+            "id": Object {
+              "type": "keyword",
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+          },
+        },
+        "version": Object {
+          "coerce": false,
+          "type": "integer",
         },
       },
     },
