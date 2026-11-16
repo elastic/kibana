@@ -14,13 +14,17 @@ interface Doc {
   /** Scheduled run: the schedule id. */
   schedule?: string;
   /** Live run: the query id (`action_data.id`), the action id and the space it ran in. */
-  live?: { queryId: string; action: string; space?: string };
+  live?: { queryId: string; action?: string; space?: string };
   /** Seconds since epoch: `osquery_meta.unix_time` of a scheduled run, `@timestamp` of a live one. */
   time: number;
   row: Record<string, unknown>;
 }
 
-const live = (queryId: string, action: string, space = 'default') => ({ queryId, action, space });
+const live = (queryId: string, action: string | undefined, space = 'default') => ({
+  queryId,
+  action,
+  space,
+});
 
 const SCHEDULES = {
   deb_packages: ['deb-new', 'pack_inventory_deb'],
@@ -264,6 +268,41 @@ describe('readAgentInventories', () => {
       expect(agent.rpm).toEqual([{ name: 'new-a' }, { name: 'new-b' }]);
     });
 
+    it('keeps only the newest run when many older runs of both shapes interleave with it', async () => {
+      const results: Doc[] = [];
+      for (let i = 0; i < 20; i++) {
+        results.push(
+          { agent: 'rhel', live: live(RPM, `live-${i}`), time: 1000 + i, row: { name: `l${i}` } },
+          { agent: 'rhel', schedule: 'rpm-sched', time: 2000 + i, row: { name: `s${i}` } }
+        );
+        // The newest run (scheduled, time 5000) trickles in between the older ones.
+        if (i % 7 === 0) {
+          results.push({
+            agent: 'rhel',
+            schedule: 'rpm-sched',
+            time: 5000,
+            row: { name: `newest-${i}` },
+          });
+        }
+      }
+      const [agent] = await read(results);
+      expect(agent.rpm).toEqual([
+        { name: 'newest-0' },
+        { name: 'newest-7' },
+        { name: 'newest-14' },
+      ]);
+    });
+
+    it('lets a newer run displace a partly read older one', async () => {
+      const [agent] = await read([
+        { agent: 'rhel', live: live(RPM, 'old'), time: 1000, row: { name: 'old-a' } },
+        { agent: 'rhel', live: live(RPM, 'old'), time: 1000, row: { name: 'old-b' } },
+        { agent: 'rhel', live: live(RPM, 'new'), time: 2000, row: { name: 'new-a' } },
+        { agent: 'rhel', live: live(RPM, 'old'), time: 1000, row: { name: 'old-c' } },
+      ]);
+      expect(agent.rpm).toEqual([{ name: 'new-a' }]);
+    });
+
     it('ignores a live result of an unknown query', async () => {
       const agents = await read([
         { agent: 'rhel', live: live('some_other_query', 'x'), time: 1000, row: { name: 'noise' } },
@@ -275,6 +314,13 @@ describe('readAgentInventories', () => {
       const agents = await read([
         { agent: 'rhel', live: live(OS, 'x', 'other-space'), time: 1000, row: { platform: 'x' } },
         { agent: 'rhel', live: { queryId: OS, action: 'y' }, time: 1001, row: { platform: 'y' } },
+      ]);
+      expect(agents).toEqual([]);
+    });
+
+    it('ignores a live result without an action id', async () => {
+      const agents = await read([
+        { agent: 'rhel', live: live(OS, undefined), time: 1000, row: { platform: 'x' } },
       ]);
       expect(agents).toEqual([]);
     });

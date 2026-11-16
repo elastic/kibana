@@ -12,19 +12,23 @@ import { NativeVulnScannerPlugin } from './plugin';
 import { ensureFindingsIndex } from './lib/findings';
 import { OSQUERY_PACK_SO_TYPE } from './lib/inventory';
 import { ensureSummaryIndex } from './lib/summary';
-import { installWorkflows } from './managed_workflows/install';
+import { installWorkflows, uninstallWorkflows } from './managed_workflows/install';
 import { registerOwner } from './managed_workflows/register_owner';
 import { registerNativeVulnScannerSteps } from './workflows/step_types';
 
 jest.mock('./lib/findings', () => ({ ensureFindingsIndex: jest.fn() }));
 jest.mock('./lib/summary', () => ({ ensureSummaryIndex: jest.fn() }));
-jest.mock('./managed_workflows/install', () => ({ installWorkflows: jest.fn() }));
+jest.mock('./managed_workflows/install', () => ({
+  installWorkflows: jest.fn(),
+  uninstallWorkflows: jest.fn(),
+}));
 jest.mock('./managed_workflows/register_owner', () => ({ registerOwner: jest.fn() }));
 jest.mock('./workflows/step_types', () => ({ registerNativeVulnScannerSteps: jest.fn() }));
 
 const ensureFindingsMock = ensureFindingsIndex as jest.MockedFunction<typeof ensureFindingsIndex>;
 const ensureSummaryMock = ensureSummaryIndex as jest.MockedFunction<typeof ensureSummaryIndex>;
 const installMock = installWorkflows as jest.MockedFunction<typeof installWorkflows>;
+const uninstallMock = uninstallWorkflows as jest.MockedFunction<typeof uninstallWorkflows>;
 const registerOwnerMock = registerOwner as jest.MockedFunction<typeof registerOwner>;
 const registerStepsMock = registerNativeVulnScannerSteps as jest.MockedFunction<
   typeof registerNativeVulnScannerSteps
@@ -55,6 +59,7 @@ describe('NativeVulnScannerPlugin', () => {
     ensureFindingsMock.mockResolvedValue();
     ensureSummaryMock.mockResolvedValue();
     installMock.mockResolvedValue({ failedIds: [] });
+    uninstallMock.mockResolvedValue();
   });
 
   it('sets up both indices as the internal user when enabled', async () => {
@@ -107,13 +112,32 @@ describe('NativeVulnScannerPlugin', () => {
     expect(deps.packRepository).toBe(createInternalRepository.mock.results[0].value);
   });
 
-  it('touches nothing when disabled', async () => {
+  it('registers no steps and creates no indices when disabled', async () => {
     await startPlugin(false);
-    expect(registerOwnerMock).not.toHaveBeenCalled();
     expect(registerStepsMock).not.toHaveBeenCalled();
     expect(ensureFindingsMock).not.toHaveBeenCalled();
     expect(ensureSummaryMock).not.toHaveBeenCalled();
     expect(installMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps the owner registered and uninstalls the workflow when disabled', async () => {
+    const { workflowsSetup, workflowsStart } = await startPlugin(false);
+    expect(registerOwnerMock).toHaveBeenCalledWith({ workflowsExtensions: workflowsSetup });
+    expect(uninstallMock).toHaveBeenCalledTimes(1);
+    expect(uninstallMock).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowsExtensions: workflowsStart })
+    );
+  });
+
+  it('logs instead of failing start when the uninstall throws while disabled', async () => {
+    uninstallMock.mockRejectedValue(new Error('no client'));
+    const { logger } = await startPlugin(false);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no client'));
+  });
+
+  it('does not uninstall the workflow when enabled', async () => {
+    await startPlugin(true);
+    expect(uninstallMock).not.toHaveBeenCalled();
   });
 
   it('logs instead of failing start when the findings index setup fails', async () => {

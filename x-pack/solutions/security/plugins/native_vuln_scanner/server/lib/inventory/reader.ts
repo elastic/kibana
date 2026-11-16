@@ -54,6 +54,7 @@ const SORT: SortCombinations[] = [
 ];
 
 interface Run {
+  key: string;
   /** Epoch ms: the scheduled run's start, or the newest row of a live run. */
   time: number;
   rows: OsqueryRow[];
@@ -64,7 +65,10 @@ const toMillis = (value: number | string | undefined): number => {
   return Number.isFinite(millis) ? millis : 0;
 };
 
-/** Identifies the run a result belongs to and when it happened; `undefined` for a foreign space. */
+/**
+ * Identifies the run a result belongs to and when it happened; `undefined` for a foreign space or
+ * a live doc without `action_id`.
+ */
 const describeRun = (source: ResultSource): { key: string; time: number } | undefined => {
   const timestamp = toMillis(source['@timestamp']);
   if (source.schedule_id) {
@@ -74,40 +78,34 @@ const describeRun = (source: ResultSource): { key: string; time: number } | unde
       time: unixTime === undefined ? timestamp : Number(unixTime) * 1000 || timestamp,
     };
   }
-  if (source.action_data?.space_id !== DEFAULT_SPACE_ID) return undefined;
-  return { key: `live:${source.action_id ?? ''}`, time: timestamp };
+  if (!source.action_id || source.action_data?.space_id !== DEFAULT_SPACE_ID) return undefined;
+  return { key: `live:${source.action_id}`, time: timestamp };
 };
 
 class AgentAccumulator {
-  private readonly runsByKind = new Map<InventoryQueryKind, Map<string, Run>>();
+  /**
+   * Only the newest run per query is held, whichever shape or schedule id produced it; an older
+   * run is dropped as its rows arrive. Ties keep the first seen.
+   */
+  private readonly bestByKind = new Map<InventoryQueryKind, Run>();
   private hostName?: string;
 
   constructor(public readonly agentId: string) {}
 
   add(kind: InventoryQueryKind, source: ResultSource, run: { key: string; time: number }): void {
     this.hostName ??= source.host?.name ?? source.host?.hostname;
-    let runs = this.runsByKind.get(kind);
-    if (!runs) this.runsByKind.set(kind, (runs = new Map()));
-    const existing = runs.get(run.key);
-    if (existing) {
-      existing.rows.push(source.osquery ?? {});
-      existing.time = Math.max(existing.time, run.time);
-    } else {
-      runs.set(run.key, { time: run.time, rows: [source.osquery ?? {}] });
+    const row = source.osquery ?? {};
+    const best = this.bestByKind.get(kind);
+    if (!best || run.time > best.time) {
+      this.bestByKind.set(kind, { key: run.key, time: run.time, rows: [row] });
+    } else if (best.key === run.key) {
+      best.rows.push(row);
+      best.time = Math.max(best.time, run.time);
     }
-  }
-
-  /** The newest run of a query, whichever shape or schedule id produced it; ties keep the first seen. */
-  private newestRows(kind: InventoryQueryKind): OsqueryRow[] | undefined {
-    let newest: Run | undefined;
-    for (const run of this.runsByKind.get(kind)?.values() ?? []) {
-      if (!newest || run.time > newest.time) newest = run;
-    }
-    return newest?.rows;
   }
 
   build(): AgentInventoryRows {
-    const rowsByKind = { get: (kind: InventoryQueryKind) => this.newestRows(kind) };
+    const rowsByKind = { get: (kind: InventoryQueryKind) => this.bestByKind.get(kind)?.rows };
     return {
       agentId: this.agentId,
       hostName: this.hostName,

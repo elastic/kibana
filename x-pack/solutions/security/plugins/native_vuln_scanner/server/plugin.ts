@@ -16,7 +16,7 @@ import type { NativeVulnScannerConfig } from './config';
 import { ensureFindingsIndex } from './lib/findings';
 import { OSQUERY_PACK_SO_TYPE } from './lib/inventory';
 import { ensureSummaryIndex } from './lib/summary';
-import { installWorkflows } from './managed_workflows/install';
+import { installWorkflows, uninstallWorkflows } from './managed_workflows/install';
 import { registerOwner } from './managed_workflows/register_owner';
 import { registerNativeVulnScannerSteps } from './workflows/step_types';
 import type {
@@ -47,8 +47,9 @@ export class NativeVulnScannerPlugin
     core: CoreSetup<NativeVulnScannerStartDeps>,
     { workflowsExtensions }: NativeVulnScannerSetupDeps
   ): NativeVulnScannerServerSetup {
-    if (!this.config.enabled) return {};
+    // Registered even when disabled: the owner must exist for `start()` to uninstall the workflow.
     registerOwner({ workflowsExtensions });
+    if (!this.config.enabled) return {};
     registerNativeVulnScannerSteps(workflowsExtensions, {
       logger: this.logger.get('scan'),
       getScanDeps: async () => {
@@ -67,7 +68,14 @@ export class NativeVulnScannerPlugin
     core: CoreStart,
     { workflowsExtensions }: NativeVulnScannerStartDeps
   ): NativeVulnScannerServerStart {
-    if (!this.config.enabled) return {};
+    if (!this.config.enabled) {
+      // A scan workflow installed while the plugin was on must not outlive it. Best effort: a
+      // failure here is logged and never blocks Kibana from starting.
+      uninstallWorkflows({ logger: this.logger, workflowsExtensions }).catch((error: Error) => {
+        this.logger.warn(`Failed to remove the vulnerability scan workflow: ${error.message}`);
+      });
+      return {};
+    }
     this.setUp(core, workflowsExtensions).catch((error: Error) => {
       this.logger.error(`Failed to set up the vulnerability scanner: ${error.message}`);
     });

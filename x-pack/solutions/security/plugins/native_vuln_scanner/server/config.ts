@@ -10,8 +10,8 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 export const configSchema = schema.object({
   /**
-   * Off by default while the scanner is experimental. When false the plugin registers nothing:
-   * no steps, no managed workflow, no indices.
+   * Off by default while the scanner is experimental. When false the plugin registers no
+   * steps and creates no indices, and it removes the managed workflow if an earlier run installed it.
    */
   enabled: schema.boolean({ defaultValue: false }),
 });
