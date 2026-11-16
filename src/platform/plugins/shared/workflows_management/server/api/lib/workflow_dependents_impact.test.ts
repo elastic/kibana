@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { InvalidYamlSyntaxError } from '@kbn/workflows-yaml';
 import type { WorkflowDependentsLookup } from './workflow_dependents_impact';
 import {
   analyzeWorkflowDependentsImpact,
@@ -277,7 +276,7 @@ describe('analyzeWorkflowDependentsImpact', () => {
     expect(analysis.summary).toMatchObject({ breaking: 0, indirectBreaking: 0 });
   });
 
-  it('grades the workflows the draft runs, including failures further down', async () => {
+  it('grades the workflows the draft runs', async () => {
     const parentDraft = { name: 'parent', steps: [runs('child', {}), runs('middle', {})] };
     const middle = workflow('middle', [runs('child', {})]);
 
@@ -294,103 +293,26 @@ describe('analyzeWorkflowDependentsImpact', () => {
         status: 'breaking',
         issues: [expect.objectContaining({ kind: 'missingRequiredInput', field: 'alert_id' })],
       }),
-      expect.objectContaining({
-        workflowId: 'middle',
-        status: 'breaking',
-        issues: [expect.objectContaining({ kind: 'childFails', to: 'child' })],
-      }),
+      expect.objectContaining({ workflowId: 'middle', status: 'safe', issues: [] }),
     ]);
   });
 
-  describe('when the draft fails every run without changing its inputs or outputs', () => {
-    const childItem = { ...workflow('child', []), definition: savedChild };
-    const savedMiddle = { name: 'middle', steps: [runs('child')] };
-    const draftMiddle = { name: 'middle', steps: [runs('child', {})] };
-    const waiting = workflow('waiting', [runs('middle', {})]);
-    const background = workflow('background', [
-      { ...runs('middle', {}), type: 'workflow.executeAsync' },
+  it('describes a draft that doesn’t parse as one saved invalid, which runs nothing', async () => {
+    const { analysis, calledWorkflows } = await analyzeWorkflowDependentsImpact({
+      workflowId: 'child',
+      savedDefinition: savedChild,
+      draftDefinition: parseDraftDefinition('steps: ['),
+      isDraftValid: false,
+      lookup: createLookup([workflow('direct', [runs('child')])], [], [workflow('leaf', [])]),
+    });
+
+    expect(analysis.dependents).toEqual([
+      expect.objectContaining({
+        status: 'breaking',
+        issues: [expect.objectContaining({ kind: 'childInvalid' })],
+      }),
     ]);
-    const top = workflow('top', [runs('waiting', {})]);
-
-    it('breaks the callers that wait for it, and the ones further up', async () => {
-      const { analysis } = await analyzeWorkflowDependentsImpact({
-        workflowId: 'middle',
-        savedDefinition: savedMiddle,
-        draftDefinition: draftMiddle,
-        lookup: createLookup([waiting, background, top], [], [childItem]),
-      });
-
-      expect(analysis.contractChanges).toEqual([]);
-      expect(analysis.dependents).toEqual([
-        expect.objectContaining({
-          workflowId: 'waiting',
-          status: 'breaking',
-          issues: [
-            expect.objectContaining({
-              kind: 'childFails',
-              stepName: 'run-middle',
-              from: 'run-child',
-              to: 'child',
-              isNew: true,
-            }),
-          ],
-          upstream: [expect.objectContaining({ workflowId: 'top', effect: 'fails' })],
-        }),
-        expect.objectContaining({ workflowId: 'background', status: 'safe', issues: [] }),
-      ]);
-      expect(analysis.summary).toMatchObject({ breaking: 1, indirectBreaking: 1 });
-    });
-
-    it('breaks them when every run returns an output value the declared outputs reject', async () => {
-      const returning = (severity: unknown, emitExtra = {}) => ({
-        name: 'middle',
-        outputs: [{ name: 'severity', type: 'string' }],
-        steps: [{ name: 'emit', type: 'workflow.output', with: { severity }, ...emitExtra }],
-      });
-      const analyze = async (draft: unknown) =>
-        (
-          await analyzeWorkflowDependentsImpact({
-            workflowId: 'middle',
-            savedDefinition: returning('high'),
-            draftDefinition: draft,
-            lookup: createLookup([waiting, background]),
-          })
-        ).analysis;
-
-      const analysis = await analyze(returning([1]));
-      expect(analysis.contractChanges).toEqual([]);
-      expect(analysis.dependents).toEqual([
-        expect.objectContaining({
-          workflowId: 'waiting',
-          status: 'breaking',
-          issues: [
-            expect.objectContaining({
-              kind: 'outputValueRejected',
-              stepName: 'run-middle',
-              from: 'emit',
-              field: 'severity',
-            }),
-          ],
-        }),
-        expect.objectContaining({ workflowId: 'background', status: 'safe' }),
-      ]);
-      // Only a step every run reaches fails every run, and only values known before running count.
-      expect((await analyze(returning([1], { if: 'inputs.go : true' }))).summary.breaking).toBe(0);
-      expect((await analyze(returning('${{ steps.x.output }}'))).summary.breaking).toBe(0);
-    });
-
-    it('marks the callers as already broken when the saved version fails the same way', async () => {
-      const { analysis } = await analyzeWorkflowDependentsImpact({
-        workflowId: 'middle',
-        savedDefinition: draftMiddle,
-        draftDefinition: draftMiddle,
-        lookup: createLookup([waiting], [], [childItem]),
-      });
-
-      expect(analysis.dependents).toEqual([
-        expect.objectContaining({ workflowId: 'waiting', status: 'alreadyBroken' }),
-      ]);
-    });
+    expect(calledWorkflows).toEqual([]);
   });
 });
 
@@ -406,8 +328,8 @@ describe('analyzeWorkflowRemovalImpact', () => {
 });
 
 describe('parseDraftDefinition', () => {
-  it('rejects YAML with syntax errors', () => {
-    expect(() => parseDraftDefinition('name: [unclosed')).toThrow(InvalidYamlSyntaxError);
+  it('has no definition for YAML with syntax errors', () => {
+    expect(parseDraftDefinition('name: [unclosed')).toBeNull();
     expect(parseDraftDefinition('name: ok')).toEqual({ name: 'ok' });
   });
 });

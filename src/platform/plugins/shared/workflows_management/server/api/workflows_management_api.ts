@@ -693,7 +693,7 @@ export class WorkflowsManagementApi {
     return analyzeWorkflowDependentsImpact({
       workflowId: id,
       savedDefinition,
-      draftDefinition: draft?.definition ?? savedDefinition,
+      draftDefinition: draft ? draft.definition : savedDefinition,
       isDraftValid: draft?.isValid ?? true,
       managed: workflow.managed === true,
       lookup: await this.getDependentsLookup(spaceId, request, allowManagedWorkflowRead),
@@ -701,7 +701,7 @@ export class WorkflowsManagementApi {
   }
 
   // What saving `yaml` would store. Invalid YAML is stored without a definition, so the parsed
-  // YAML stands in to describe the calls; syntax errors throw.
+  // YAML stands in to describe the calls; YAML that doesn't parse runs nothing.
   private async getDraftDefinition(
     yaml: string,
     workflow: { id: string; enabled: boolean },

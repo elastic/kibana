@@ -95,30 +95,6 @@ export const getIssueMessage = (
         defaultMessage: '{childName} has errors, so it’s saved turned off and running it fails',
         values: { childName },
       });
-    case 'childFails':
-      return i18n.translate('workflows.dependents.issue.childFails', {
-        defaultMessage:
-          '{childName} fails every time it runs: its step "{from}" runs {to}, which is broken',
-        values: { childName, from, to },
-      });
-    case 'outputValueRejected':
-      return i18n.translate('workflows.dependents.issue.outputValueRejected', {
-        defaultMessage:
-          '{childName} fails every time it runs: its step "{from}" returns a value for "{field}" that its declared outputs don’t allow: {detail}',
-        values: { childName, from, field, detail },
-      });
-    case 'runEndsUnsuccessfully':
-      return i18n.translate('workflows.dependents.issue.runEndsUnsuccessfully', {
-        defaultMessage:
-          '{childName} fails every time it runs: its step "{from}" always ends the run as {status, select, cancelled {cancelled} other {failed}}',
-        values: { childName, from, status: field },
-      });
-    case 'callCycle':
-      return i18n.translate('workflows.dependents.issue.callCycle', {
-        defaultMessage:
-          'Running {childName} leads back to a workflow that is already running, so the runs keep nesting until they reach the depth limit and fail',
-        values: { childName },
-      });
     case 'selfCall':
       return i18n.translate('workflows.dependents.issue.selfCall', {
         defaultMessage: 'Runs itself, which isn’t allowed, so this step always fails',

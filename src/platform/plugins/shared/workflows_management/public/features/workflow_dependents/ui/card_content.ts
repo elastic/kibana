@@ -16,7 +16,6 @@ import type {
   CallSiteImpact,
   DependentImpact,
   ImpactIssue,
-  UncheckedRun,
   UpstreamImpact,
 } from '../../../../common/lib/workflow_dependents/types';
 
@@ -103,30 +102,8 @@ const getUsageDetails = (callSites: readonly CallSiteImpact[], childName: string
   ];
 };
 
-const getCallerUncheckedRunVerdict = (run: UncheckedRun, childName: string): string => {
-  switch (run.reason) {
-    case 'unsupportedSteps':
-      return i18n.translate('workflows.dependents.verdict.caller.unsupportedSteps', {
-        defaultMessage: 'Can’t check: some steps of {childName} can’t be checked before it runs',
-        values: { childName },
-      });
-    case 'calledNotFound':
-      return i18n.translate('workflows.dependents.verdict.caller.calledNotFound', {
-        defaultMessage:
-          'Can’t check: the step "{from}" of {childName} runs {to}, which wasn’t found or you can’t view',
-        values: { childName, from: run.from, to: run.to },
-      });
-    case 'calledUnchecked':
-      return i18n.translate('workflows.dependents.verdict.caller.calledUnchecked', {
-        defaultMessage:
-          'Can’t check: the step "{from}" of {childName} runs {to}, which can’t be checked',
-        values: { childName, from: run.from, to: run.to },
-      });
-  }
-};
-
 const getCallerVerdict = (
-  { status, enabled, uncheckedRun }: DependentImpact,
+  { status, enabled }: DependentImpact,
   childName: string,
   hasUnsavedChanges: boolean
 ): string => {
@@ -151,11 +128,9 @@ const getCallerVerdict = (
         defaultMessage: 'Already broken, and not because of your changes',
       });
     case 'unknown':
-      return uncheckedRun
-        ? getCallerUncheckedRunVerdict(uncheckedRun, childName)
-        : i18n.translate('workflows.dependents.verdict.caller.unknown', {
-            defaultMessage: 'Can’t check: it computes its inputs while running',
-          });
+      return i18n.translate('workflows.dependents.verdict.caller.unknown', {
+        defaultMessage: 'Can’t check: it computes its inputs while running',
+      });
     case 'safe':
       return hasUnsavedChanges
         ? i18n.translate('workflows.dependents.verdict.caller.safeWithChanges', {
@@ -259,26 +234,6 @@ export const getCallerCardContent = (
   };
 };
 
-const getCalledUncheckedRunVerdict = (run: UncheckedRun): string => {
-  switch (run.reason) {
-    case 'unsupportedSteps':
-      return i18n.translate('workflows.dependents.verdict.called.unsupportedSteps', {
-        defaultMessage: 'Can’t check: some of its steps can’t be checked before it runs',
-      });
-    case 'calledNotFound':
-      return i18n.translate('workflows.dependents.verdict.called.uncheckedCall', {
-        defaultMessage:
-          'Can’t check: its step "{from}" runs {to}, which wasn’t found or you can’t view',
-        values: { from: run.from, to: run.to },
-      });
-    case 'calledUnchecked':
-      return i18n.translate('workflows.dependents.verdict.called.calledUnchecked', {
-        defaultMessage: 'Can’t check: its step "{from}" runs {to}, which can’t be checked',
-        values: { from: run.from, to: run.to },
-      });
-  }
-};
-
 const getCalledVerdict = (called: CalledWorkflowImpact, childName: string): string => {
   switch (called.status) {
     case 'breaking':
@@ -291,11 +246,9 @@ const getCalledVerdict = (called: CalledWorkflowImpact, childName: string): stri
         defaultMessage: 'Might fail when it runs',
       });
     case 'unknown':
-      return called.uncheckedRun
-        ? getCalledUncheckedRunVerdict(called.uncheckedRun)
-        : i18n.translate('workflows.dependents.verdict.called.unknown', {
-            defaultMessage: 'Can’t check: the inputs are computed while running',
-          });
+      return i18n.translate('workflows.dependents.verdict.called.unknown', {
+        defaultMessage: 'Can’t check: the inputs are computed while running',
+      });
     case 'safe':
       return i18n.translate('workflows.dependents.verdict.called.safe', {
         defaultMessage: 'Works: it sends what {childName} needs and only uses outputs it returns',

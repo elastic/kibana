@@ -8,13 +8,11 @@
  */
 
 import { parseDocument } from 'yaml';
-import { InvalidYamlSyntaxError } from '@kbn/workflows-yaml';
 import {
   analyzeCalledWorkflows,
   analyzeDependents,
   analyzeRemovalImpact,
   buildDependentsIndex,
-  checkRun,
   MAX_INDIRECT_DEPTH,
 } from '../../../common/lib/workflow_dependents/analyze_dependents';
 import type { WorkflowDependentsImpactResponse } from '../../../common/lib/workflow_dependents/api';
@@ -32,13 +30,10 @@ export interface WorkflowDependentsLookup {
   getWorkflowsByIds: (workflowIds: string[]) => Promise<WorkflowLookupItem[]>;
 }
 
-/** Parses draft YAML into the plain definition the analysis reads. */
+/** Parses draft YAML into the plain definition the analysis reads; null when it doesn't parse. */
 export const parseDraftDefinition = (yaml: string): unknown => {
   const document = parseDocument(yaml);
-  if (document.errors.length > 0) {
-    throw new InvalidYamlSyntaxError(document.errors[0].message);
-  }
-  return document.toJS();
+  return document.errors.length > 0 ? null : document.toJS();
 };
 
 /** Collects every workflow that runs any of `workflowIds`, directly or through other workflows. */
@@ -89,30 +84,6 @@ export const collectCalledWorkflows = async (
   return [...found.values()];
 };
 
-// Reads each workflow once, however many walks ask for it.
-const withSharedWorkflowReads = (lookup: WorkflowDependentsLookup): WorkflowDependentsLookup => {
-  const reads = new Map<string, Promise<WorkflowLookupItem | undefined>>();
-  return {
-    ...lookup,
-    getWorkflowsByIds: async (ids) => {
-      const unread = ids.filter((id) => !reads.has(id));
-      if (unread.length > 0) {
-        const byId = lookup
-          .getWorkflowsByIds(unread)
-          .then((workflows) => new Map(workflows.map((workflow) => [workflow.id, workflow])));
-        unread.forEach((id) =>
-          reads.set(
-            id,
-            byId.then((workflows) => workflows.get(id))
-          )
-        );
-      }
-      const workflows = await Promise.all(ids.map((id) => reads.get(id)));
-      return workflows.filter((workflow): workflow is WorkflowLookupItem => workflow !== undefined);
-    },
-  };
-};
-
 /** Grades the workflows that run a workflow, and the ones it runs, against its draft. */
 export const analyzeWorkflowDependentsImpact = async ({
   workflowId,
@@ -131,16 +102,10 @@ export const analyzeWorkflowDependentsImpact = async ({
   managed?: boolean;
   lookup: WorkflowDependentsLookup;
 }): Promise<WorkflowDependentsImpactResponse> => {
-  const sharedLookup = withSharedWorkflowReads(lookup);
-  const [callers, calledWorkflows, calledBySaved] = await Promise.all([
+  const [callers, calledWorkflows] = await Promise.all([
     collectCallers([workflowId], lookup),
-    collectCalledWorkflows(workflowId, draftDefinition, sharedLookup),
-    collectCalledWorkflows(workflowId, savedDefinition, sharedLookup),
+    collectCalledWorkflows(workflowId, draftDefinition, lookup),
   ]);
-  const getRunCheck = (definition: unknown, called: readonly WorkflowLookupItem[]) =>
-    checkRun({ id: workflowId, name: workflowId, enabled: true, definition, managed }, called);
-  // An invalid draft is stored without a definition, so it never runs.
-  const draftRun = isDraftValid ? getRunCheck(draftDefinition, calledWorkflows) : {};
 
   return {
     analysis: analyzeDependents({
@@ -148,9 +113,6 @@ export const analyzeWorkflowDependentsImpact = async ({
       savedDefinition,
       draftDefinition,
       isDraftValid,
-      savedRunFailure: getRunCheck(savedDefinition, calledBySaved).failure,
-      draftRunFailure: draftRun.failure,
-      draftUncheckedRun: draftRun.unchecked,
       managed,
     }),
     calledWorkflows: analyzeCalledWorkflows({

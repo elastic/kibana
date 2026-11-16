@@ -91,6 +91,67 @@ const walkDefinitionSteps = (definition: unknown, visit: StepVisitor): void => {
   walkSteps(isRecord(onFailure) ? onFailure.fallback : undefined, visit);
 };
 
+// Whether an `on-failure` block can keep a failure from failing the run: `continue` (unless it is
+// `false`) or a `fallback`.
+const canRecover = (onFailure: unknown): boolean =>
+  isRecord(onFailure) &&
+  ((onFailure.continue !== undefined && onFailure.continue !== false) ||
+    onFailure.fallback !== undefined);
+
+// A step whose handlers cover the steps it holds, and itself.
+const coversFailures = (step: Record<string, unknown>): boolean =>
+  canRecover(step['on-failure']) ||
+  canRecover(step['iteration-on-failure']) ||
+  (step.type === 'parallel' && step.mode === 'settled');
+
+const hasOwnOnFailure = (step: Record<string, unknown>): boolean =>
+  step['on-failure'] !== undefined;
+
+const isFallbackGroup = (pathSuffix: string): boolean => pathSuffix.endsWith('.fallback');
+
+// Whether `stepName` is in `steps`, under a handler that might recover from its failure. The
+// workflow-level handler applies to each step without its own `on-failure`, outside fallbacks.
+const findCoverage = (
+  steps: unknown,
+  stepName: string,
+  covered: boolean,
+  workflowCovers: boolean
+): boolean | undefined => {
+  if (!Array.isArray(steps)) {
+    return undefined;
+  }
+  for (const step of steps.filter(isWorkflowStep)) {
+    const coveredHere = covered || coversFailures(step);
+    if (step.name === stepName) {
+      return coveredHere || (workflowCovers && !hasOwnOnFailure(step));
+    }
+    for (const { pathSuffix, steps: nestedSteps } of getNestedStepGroups(step)) {
+      // A step's handlers don't cover the steps of its own fallback.
+      const found = isFallbackGroup(pathSuffix)
+        ? findCoverage(nestedSteps, stepName, covered, false)
+        : findCoverage(nestedSteps, stepName, coveredHere, workflowCovers);
+      if (found !== undefined) {
+        return found;
+      }
+    }
+  }
+  return undefined;
+};
+
+/**
+ * Whether a failure of step `stepName` might not fail the run: an `on-failure` handler on it, on a
+ * step that holds it, or on the workflow could recover from it. Read from the YAML, so it doesn't
+ * tell whether the handler does.
+ */
+export const mayRecoverFromFailure = (definition: unknown, stepName: string): boolean => {
+  const onFailure = getWorkflowOnFailure(definition);
+  return (
+    findCoverage(getSteps(definition), stepName, false, canRecover(onFailure)) ??
+    findCoverage(isRecord(onFailure) ? onFailure.fallback : undefined, stepName, false, false) ??
+    false
+  );
+};
+
 /** Returns every static `workflow.execute` / `workflow.executeAsync` call in a workflow definition. */
 export const collectWorkflowCallSites = (definition: unknown): WorkflowCallSite[] => {
   const callSites: WorkflowCallSite[] = [];

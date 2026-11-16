@@ -102,14 +102,6 @@ export type ImpactIssueKind =
   | 'childManaged'
   | 'childDisabled'
   | 'childInvalid'
-  /** The called workflow fails every run: its step `from` runs `to`, which is broken. */
-  | 'childFails'
-  /** Every run fails: the called workflow always runs, and leads back to one already running. */
-  | 'callCycle'
-  /** The called workflow fails every run: its `workflow.output` step `from` sets `field` to a value its declared outputs reject. */
-  | 'outputValueRejected'
-  /** The called workflow fails every run: its step `from` always ends the run with status `field`. */
-  | 'runEndsUnsuccessfully'
   | 'selfCall'
   | 'missingRequiredInput'
   | 'unknownInput'
@@ -198,22 +190,7 @@ export interface DependentImpact {
   issues: ImpactIssue[];
   /** Enabled workflows further up the chain that fail or lose data because this one breaks. */
   upstream: UpstreamImpact[];
-  /**
-   * Why an otherwise working caller is `unknown`: whether every run of the draft, which it waits
-   * for, fails can't be checked.
-   */
-  uncheckedRun?: UncheckedRun;
 }
-
-/** Why the analysis can't tell whether every run of a workflow fails. */
-export type UncheckedRun =
-  /** Its steps run in a way the analysis doesn't follow, such as completing a parallel branch. */
-  | { reason: 'unsupportedSteps' }
-  /**
-   * Its step `from` always runs `to`, which wasn't found (deleted, or not readable), or whose own
-   * runs can't be checked in turn.
-   */
-  | { reason: 'calledNotFound' | 'calledUnchecked'; from: string; to: string };
 
 export interface CalledWorkflowImpact {
   workflowId: string;
@@ -223,8 +200,6 @@ export interface CalledWorkflowImpact {
   callSites: CallSiteImpact[];
   issues: ImpactIssue[];
   contract?: WorkflowContract;
-  /** Why an otherwise working workflow is `unknown`: whether its runs fail can't be checked. */
-  uncheckedRun?: UncheckedRun;
 }
 
 export interface DependentsSummary {
@@ -232,10 +207,7 @@ export interface DependentsSummary {
   /** Enabled direct callers only: a disabled caller doesn't run, so saving can't break a run of it. */
   breaking: number;
   warning: number;
-  /**
-   * Enabled direct callers that can't be checked: they compute their inputs while running, or
-   * whether the draft's runs fail can't be checked.
-   */
+  /** Enabled direct callers that can't be checked, because they compute their inputs while running. */
   unknown: number;
   /** Distinct enabled indirect callers that fail or lose data because a direct caller breaks. */
   indirectBreaking: number;

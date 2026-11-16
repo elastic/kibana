@@ -13,18 +13,16 @@ import {
   analyzeDependents,
   analyzeRemovalImpact,
   buildDependentsIndex,
-  checkRun,
   MAX_INDIRECT_DEPTH,
 } from './analyze_dependents';
 import {
   collectWorkflowCallSites,
+  collectWorkflowOutputBlocks,
   findOutputsPassingThrough,
   findOutputUsages,
+  mayRecoverFromFailure,
 } from './find_call_sites';
-import { getCompletingOutputBlocks } from './run_outcomes';
 import type { DependentsAnalysis, ImpactIssue, WorkflowLookupItem } from './types';
-
-const findRunFailure = (...args: Parameters<typeof checkRun>) => checkRun(...args).failure;
 
 jest.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => {
   const actual = jest.requireActual('@kbn/workflows/spec/lib/build_fields_zod_validator');
@@ -338,6 +336,86 @@ describe('findOutputUsages', () => {
   });
 });
 
+describe('mayRecoverFromFailure', () => {
+  const run = (name: string, extra: Record<string, unknown> = {}) => ({
+    ...callStep(name, {}),
+    ...extra,
+  });
+
+  it('reads the step’s own on-failure', () => {
+    const definition = {
+      steps: [
+        run('plain'),
+        run('continues', { 'on-failure': { continue: true } }),
+        run('maybe-continues', { 'on-failure': { continue: 'inputs.lenient : true' } }),
+        run('strict', { 'on-failure': { continue: false } }),
+        run('falls-back', { 'on-failure': { fallback: [{ name: 'log', type: 'console' }] } }),
+        run('retries', { 'on-failure': { retry: { 'max-attempts': 2 } } }),
+      ],
+    };
+    const recovers = (stepName: string) => mayRecoverFromFailure(definition, stepName);
+
+    expect(recovers('plain')).toBe(false);
+    expect(recovers('continues')).toBe(true);
+    expect(recovers('maybe-continues')).toBe(true);
+    expect(recovers('strict')).toBe(false);
+    expect(recovers('falls-back')).toBe(true);
+    expect(recovers('retries')).toBe(false);
+    expect(recovers('missing')).toBe(false);
+  });
+
+  it('reads the handlers of the steps that hold it, but not for their own fallback', () => {
+    const definition = {
+      steps: [
+        {
+          name: 'guarded',
+          type: 'if',
+          condition: 'true',
+          'on-failure': { fallback: [run('in-fallback')] },
+          steps: [run('inside')],
+        },
+        {
+          name: 'loop',
+          type: 'foreach',
+          foreach: '[1]',
+          'iteration-on-failure': { continue: true },
+          steps: [run('iteration')],
+        },
+        {
+          name: 'fan',
+          type: 'parallel',
+          mode: 'settled',
+          branches: [{ name: 'one', steps: [run('branch')] }],
+        },
+        {
+          name: 'fail-fast',
+          type: 'parallel',
+          branches: [{ name: 'one', steps: [run('fast-branch')] }],
+        },
+      ],
+    };
+    const recovers = (stepName: string) => mayRecoverFromFailure(definition, stepName);
+
+    expect(recovers('inside')).toBe(true);
+    expect(recovers('in-fallback')).toBe(false);
+    expect(recovers('iteration')).toBe(true);
+    expect(recovers('branch')).toBe(true);
+    expect(recovers('fast-branch')).toBe(false);
+  });
+
+  it('applies the workflow-level handler to steps without their own, outside its fallback', () => {
+    const definition = {
+      settings: { 'on-failure': { continue: true, fallback: [run('in-fallback')] } },
+      steps: [run('plain'), run('strict', { 'on-failure': { continue: false } })],
+    };
+    const recovers = (stepName: string) => mayRecoverFromFailure(definition, stepName);
+
+    expect(recovers('plain')).toBe(true);
+    expect(recovers('strict')).toBe(false);
+    expect(recovers('in-fallback')).toBe(false);
+  });
+});
+
 describe('findOutputsPassingThrough', () => {
   it('returns the workflow outputs whose values come from the given step outputs', () => {
     const definition = {
@@ -355,7 +433,7 @@ describe('findOutputsPassingThrough', () => {
         },
       ],
     };
-    const blocks = getCompletingOutputBlocks(definition);
+    const blocks = collectWorkflowOutputBlocks(definition);
     expect([...findOutputsPassingThrough(blocks, [{ stepName: 'ctx', field: 'score' }])]).toEqual([
       'risk',
       'whole',
@@ -431,59 +509,6 @@ describe('analyzeDependents', () => {
     expect(statusById(analysis)).toMatchObject({ triage: 'safe', enrich: 'breaking' });
     expect(dependentOf(analysis, 'enrich')?.issues).toContainEqual(
       expect.objectContaining({ kind: 'unreturnedOutput', field: 'score' })
-    );
-  });
-
-  it('can’t vouch for callers that wait for a draft whose runs it can’t check', () => {
-    const draft = {
-      ...makeChild(),
-      steps: [
-        {
-          name: 'fan',
-          type: 'parallel',
-          branches: [
-            { name: 'one', steps: [{ name: 'early', type: 'workflow.output', with: {} }] },
-          ],
-        },
-        { name: 'emit', type: 'workflow.output', with: { severity: 'high', score: 9 } },
-      ],
-    };
-    const inputs = { inputs: { alert_id: 'a' } };
-    const waits = workflow('waits', [callStep('ctx', inputs)]);
-    const starts = workflow('starts', [callStep('bg', inputs, 'workflow.executeAsync')]);
-    const { unchecked } = checkRun({ ...childItem, definition: draft }, []);
-    const analysis = analyzeDependents({
-      index: buildDependentsIndex(CHILD_ID, [waits, starts]),
-      savedDefinition: makeChild(),
-      draftDefinition: draft,
-      draftUncheckedRun: unchecked,
-    });
-
-    expect(unchecked).toEqual({ reason: 'unsupportedSteps' });
-    expect(statusById(analysis)).toEqual({ waits: 'unknown', starts: 'safe' });
-    expect(dependentOf(analysis, 'waits')?.uncheckedRun).toEqual(unchecked);
-    expect(analysis.summary.unknown).toBe(1);
-  });
-
-  it('ignores outputs set by a workflow.output step no run reaches', () => {
-    const emitsAfter = (outputs?: Array<Record<string, unknown>>) => ({
-      ...makeChild(),
-      outputs,
-      steps: [
-        { name: 'emit', type: 'workflow.output', with: { severity: 'high' } },
-        { name: 'unreachable', type: 'workflow.output', with: { severity: 'high', score: 9 } },
-      ],
-    });
-    const declared = analyze(emitsAfter(makeChild().outputs));
-    const { outputs: _, ...undeclaredChild } = makeChild();
-    const inferred = analyzeWith(allWorkflows, emitsAfter(undefined), undeclaredChild);
-
-    expect(declared.contractChanges).toEqual([
-      expect.objectContaining({ kind: 'outputNoLongerReturned', field: 'score' }),
-    ]);
-    expect(statusById(declared).enrich).toBe('breaking');
-    expect(inferred.contractChanges).toContainEqual(
-      expect.objectContaining({ kind: 'outputRemoved', field: 'score' })
     );
   });
 
@@ -580,33 +605,6 @@ describe('analyzeDependents', () => {
         dependentOf(analyzeWith([reader], computed, undeclared({ value: 1 })), 'reader')?.issues
       )
     ).toEqual(['undeclaredOutput:warning']);
-  });
-
-  it('ignores outputs inside a loop over an empty list', () => {
-    const reader = workflow('reader', [
-      callStep('ctx', { inputs: { alert_id: 'a' } }),
-      { name: 'log', type: 'console', with: { m: '{{ steps.ctx.output.value }}' } },
-    ]);
-    const undeclared = (emit: Record<string, unknown>) => ({
-      ...makeChild(),
-      outputs: undefined,
-      steps: [
-        {
-          name: 'never',
-          type: 'foreach',
-          foreach: '[]',
-          steps: [{ name: 'early', type: 'workflow.output', with: { value: 1 } }],
-        },
-        { name: 'emit', type: 'workflow.output', with: emit },
-      ],
-    });
-
-    expect(
-      kinds(
-        dependentOf(analyzeWith([reader], undeclared({}), undeclared({ value: 1 })), 'reader')
-          ?.issues
-      )
-    ).toEqual(['removedOutput:breaking']);
   });
 
   it('only warns when the removed output is read with a default value', () => {
@@ -1207,32 +1205,6 @@ describe('analyzeDependents', () => {
 
       expect(statusById(analysis).triage).toBe('alreadyBroken');
     });
-
-    it('breaks the callers that wait for a draft that always ends the run unsuccessfully', () => {
-      const draft = {
-        ...makeChild(),
-        steps: [
-          { name: 'skip', type: 'workflow.fail', if: 'inputs.depth > 1' },
-          { name: 'stop', type: 'workflow.output', status: 'cancelled', with: {} },
-        ],
-      };
-      const analysis = analyzeDependents({
-        index,
-        savedDefinition: makeChild(),
-        draftDefinition: draft,
-        draftRunFailure: findRunFailure({ ...childItem, definition: draft }, []),
-      });
-
-      expect(kinds(dependentOf(analysis, 'triage')?.issues)).toEqual([
-        'runEndsUnsuccessfully:breaking',
-      ]);
-      expect(dependentOf(analysis, 'triage')?.issues[0]).toMatchObject({
-        from: 'stop',
-        field: 'cancelled',
-      });
-      expect(statusById(analysis).fanout).not.toBe('breaking');
-      expect(analysis.summary.indirectBreaking).toBe(1);
-    });
   });
 
   describe('managed workflows', () => {
@@ -1305,20 +1277,6 @@ describe('analyzeCalledWorkflows', () => {
       expect.objectContaining({ kind: 'missingRequiredInput', field: 'alert_id' }),
       expect.objectContaining({ kind: 'removedOutput', field: 'summary' }),
     ]);
-  });
-
-  it('names the first failing step a run reaches', () => {
-    const disabled = { ...childItem, id: 'disabled', name: 'disabled', enabled: false };
-    const failure = findRunFailure(
-      workflow('parent', [
-        callStep('s1', { inputs: { alert_id: 'a' } }),
-        callStep('s2', {}, undefined, 'disabled'),
-        callStep('s3', { inputs: {} }),
-      ]),
-      [childItem, disabled]
-    );
-
-    expect(failure).toMatchObject({ stepName: 's2', issue: { kind: 'childDisabled' } });
   });
 
   it('fills in defaults for null values, as runs do', () => {
@@ -1409,235 +1367,6 @@ describe('analyzeCalledWorkflows', () => {
     ]);
   });
 
-  it('flags a child that fails because a workflow it runs is broken', () => {
-    const middle = workflow('middle', [callStep('ctx', { inputs: {} })]);
-    const tolerant = workflow('tolerant', [
-      { ...callStep('ctx', { inputs: {} }), 'on-failure': { continue: true } },
-    ]);
-    const called = analyzeParent(
-      [
-        callStep('m', {}, undefined, 'middle'),
-        callStep('t', {}, undefined, 'tolerant'),
-        callStep('bg', {}, 'workflow.executeAsync', 'middle'),
-      ],
-      [middle, tolerant, childItem]
-    );
-
-    expect(called.map(({ workflowId, issues }) => [workflowId, kinds(issues)])).toEqual([
-      ['middle', ['childFails:breaking']],
-      ['tolerant', []],
-    ]);
-    expect(called[0].issues[0]).toMatchObject({ stepName: 'm', from: 'ctx', to: 'Alert context' });
-  });
-
-  it('flags a child whose runs always end in outputs its declared outputs reject', () => {
-    const rejects = {
-      ...childItem,
-      definition: makeChild({ emit: { severity: ['high'], score: 9 } }),
-    };
-    const endsEarlier = {
-      ...rejects,
-      id: 'ends-earlier',
-      definition: {
-        ...rejects.definition,
-        steps: [
-          { name: 'early', type: 'workflow.output', if: 'inputs.depth > 1', with: { score: 1 } },
-          ...rejects.definition.steps,
-        ],
-      },
-    };
-    const called = analyzeParent(
-      [
-        callStep('ctx', { inputs: { alert_id: 'a' } }),
-        callStep('other', { inputs: { alert_id: 'a' } }, undefined, 'ends-earlier'),
-      ],
-      [rejects, endsEarlier]
-    );
-
-    expect(called.map(({ workflowId, issues }) => [workflowId, kinds(issues)])).toEqual([
-      [CHILD_ID, ['outputValueRejected:breaking']],
-      ['ends-earlier', []],
-    ]);
-    expect(called[0].issues[0]).toMatchObject({ stepName: 'ctx', from: 'emit', field: 'severity' });
-  });
-
-  it('flags an end step that sets the run status, which no failure handler recovers', () => {
-    const outputs = [{ name: 'score', type: 'number' }];
-    const rejected = { name: 'emit', type: 'workflow.output', with: { score: 'high' } };
-    const failed = { name: 'stop', type: 'workflow.output', status: 'failed', with: {} };
-    const completes = { name: 'done', type: 'workflow.output', with: { score: 1 } };
-    const failureOf = (definition: Record<string, unknown>) =>
-      findRunFailure({ id: 'w', name: 'w', enabled: true, definition }, [])?.issue.kind;
-
-    expect(
-      failureOf({ outputs, settings: { 'on-failure': { continue: true } }, steps: [rejected] })
-    ).toBe('outputValueRejected');
-    expect(
-      failureOf({ outputs, steps: [{ ...rejected, 'on-failure': { fallback: [completes] } }] })
-    ).toBe('outputValueRejected');
-    expect(failureOf({ settings: { 'on-failure': { continue: true } }, steps: [failed] })).toBe(
-      'runEndsUnsuccessfully'
-    );
-    expect(
-      failureOf({
-        settings: { 'on-failure': { fallback: [completes] } },
-        steps: [{ name: 'stop', type: 'workflow.fail', with: { message: 'not ready' } }],
-      })
-    ).toBe('runEndsUnsuccessfully');
-    // A step before it can fail, and then the workflow-level fallback ends the run successfully.
-    expect(
-      failureOf({
-        outputs,
-        settings: { 'on-failure': { fallback: [completes] } },
-        steps: [{ name: 'log', type: 'console', with: { message: 'hi' } }, rejected],
-      })
-    ).toBeUndefined();
-    expect(
-      failureOf({
-        settings: { 'on-failure': { fallback: [completes] } },
-        steps: [
-          { name: 'if', type: 'if', condition: 'true', steps: [{ name: 'log', type: 'console' }] },
-          failed,
-        ],
-      })
-    ).toBeUndefined();
-    // Steps before it that never run the workflow-level fallback, or one that can't succeed.
-    expect(
-      failureOf({
-        settings: { 'on-failure': { fallback: [completes] } },
-        steps: [{ name: 'pause', type: 'wait', with: { duration: '1s' } }, failed],
-      })
-    ).toBe('runEndsUnsuccessfully');
-    expect(
-      failureOf({
-        settings: { 'on-failure': { fallback: [completes] } },
-        steps: [
-          { name: 'log', type: 'console', 'on-failure': { retry: { 'max-attempts': 2 } } },
-          failed,
-        ],
-      })
-    ).toBe('runEndsUnsuccessfully');
-    expect(
-      failureOf({
-        outputs,
-        settings: { 'on-failure': { fallback: [{ ...completes, with: { score: 'high' } }] } },
-        steps: [{ name: 'log', type: 'console' }, failed],
-      })
-    ).toBe('runEndsUnsuccessfully');
-  });
-
-  it('does not count failing calls a completed run never reaches as failing every run', () => {
-    const disabled = { ...childItem, id: 'disabled', name: 'disabled', enabled: false };
-    const done = { name: 'done', type: 'workflow.output', with: {} };
-    const failureOf = (steps: unknown[]) => findRunFailure(workflow('parent', steps), [disabled]);
-
-    expect(
-      failureOf([
-        { ...callStep('s1', {}, undefined, 'disabled'), 'on-failure': { fallback: [done] } },
-      ])
-    ).toBeUndefined();
-    expect(failureOf([done, callStep('s1', {}, undefined, 'disabled')])).toBeUndefined();
-    expect(
-      failureOf([
-        {
-          name: 'loop',
-          type: 'while',
-          condition: 'true',
-          steps: [
-            {
-              name: 'stop',
-              type: 'if',
-              condition: 'inputs.done',
-              steps: [{ name: 'b', type: 'loop.break' }],
-            },
-            callStep('s1', {}, undefined, 'disabled'),
-          ],
-        },
-      ])
-    ).toBeUndefined();
-  });
-
-  it('does not count a loop through a fallback that never runs as a cycle', () => {
-    const b = workflow('b', [{ name: 'log', type: 'console', with: {} }]);
-    const a = workflow('a', [
-      {
-        ...callStep('run-b', {}, undefined, 'b'),
-        'on-failure': {
-          fallback: [
-            callStep('run-c', {}, undefined, 'c'),
-            { name: 'done', type: 'workflow.output' },
-          ],
-        },
-      },
-    ]);
-    const c = workflow('c', [callStep('run-a', {}, undefined, 'a')]);
-
-    expect(findRunFailure(c, [a, b])).toBeUndefined();
-    expect(findRunFailure(c, [b, a])).toBeUndefined();
-    expect(findRunFailure(a, [c, b])).toBeUndefined();
-  });
-
-  it('counts a failing call whose fallback fails every run as failing every run', () => {
-    const disabled = { ...childItem, id: 'disabled', name: 'disabled', enabled: false };
-    const failing = (fallback: unknown[], extra = {}) =>
-      findRunFailure(
-        workflow(
-          'parent',
-          [{ ...callStep('s1', {}, undefined, 'disabled'), 'on-failure': { fallback } }],
-          extra
-        ),
-        [disabled]
-      )?.stepName;
-    const done = { name: 'done', type: 'workflow.output', with: { score: 1 } };
-
-    expect(failing([callStep('notify', {}, undefined, 'disabled'), done])).toBe('s1');
-    expect(
-      failing([{ ...done, with: { score: 'high' } }], {
-        outputs: [{ name: 'score', type: 'number' }],
-      })
-    ).toBe('s1');
-    expect(
-      failing([{ ...callStep('notify', {}, undefined, 'disabled'), if: 'inputs.notify' }, done])
-    ).toBeUndefined();
-  });
-
-  it('flags a child whose runs always end as failed or cancelled', () => {
-    const fails = {
-      ...childItem,
-      definition: {
-        ...childItem.definition,
-        steps: [{ name: 'stop', type: 'workflow.fail', with: { message: 'not ready' } }],
-      },
-    };
-    const failsSometimes = {
-      ...fails,
-      id: 'fails-sometimes',
-      definition: {
-        ...fails.definition,
-        steps: [{ ...fails.definition.steps[0], if: 'inputs.depth > 1' }],
-      },
-    };
-    const callsFailing = workflow('calls-failing', [
-      callStep('ctx', { inputs: { alert_id: 'a' } }),
-    ]);
-    const called = analyzeParent(
-      [
-        callStep('ctx', { inputs: { alert_id: 'a' } }),
-        callStep('maybe', { inputs: { alert_id: 'a' } }, undefined, 'fails-sometimes'),
-        callStep('up', {}, undefined, 'calls-failing'),
-        callStep('bg', { inputs: { alert_id: 'a' } }, 'workflow.executeAsync'),
-      ],
-      [fails, failsSometimes, callsFailing]
-    );
-
-    expect(called.map(({ workflowId, issues }) => [workflowId, kinds(issues)])).toEqual([
-      [CHILD_ID, ['runEndsUnsuccessfully:breaking']],
-      ['calls-failing', ['childFails:breaking']],
-      ['fails-sometimes', []],
-    ]);
-    expect(called[0].issues[0]).toMatchObject({ stepName: 'ctx', from: 'stop', field: 'failed' });
-  });
-
   it('flags a managed child, which only a managed workflow can run', () => {
     const managedChild = { ...childItem, managed: true };
     const middle = workflow('middle', [callStep('ctx', { inputs: { alert_id: 'a' } })]);
@@ -1650,7 +1379,7 @@ describe('analyzeCalledWorkflows', () => {
     const called = analyzeParent(steps, [managedChild, middle]);
     expect(called.map(({ workflowId, issues }) => [workflowId, kinds(issues)])).toEqual([
       [CHILD_ID, ['childManaged:breaking', 'childManaged:breaking']],
-      ['middle', ['childFails:breaking']],
+      ['middle', []],
     ]);
 
     const fromManaged = analyzeCalledWorkflows({
@@ -1660,123 +1389,8 @@ describe('analyzeCalledWorkflows', () => {
       managed: true,
     });
     expect(fromManaged.map(({ workflowId, status }) => [workflowId, status])).toEqual([
-      ['middle', 'breaking'],
       [CHILD_ID, 'safe'],
-    ]);
-  });
-
-  it('can’t vouch for a child that always runs a workflow that wasn’t found', () => {
-    const middle = workflow('middle', [callStep('next', {}, undefined, 'deleted')]);
-    const top = workflow('top', [callStep('m', {}, undefined, 'middle')]);
-    const sometimes = workflow('sometimes', [
-      { ...callStep('next', {}, undefined, 'deleted'), if: 'inputs.go : true' },
-    ]);
-    const called = analyzeParent(
-      [
-        callStep('t', {}, undefined, 'top'),
-        callStep('m', {}, undefined, 'middle'),
-        callStep('s', {}, undefined, 'sometimes'),
-        callStep('bg', {}, 'workflow.executeAsync', 'top'),
-      ],
-      [top, middle, sometimes]
-    );
-
-    expect(
-      called.map(({ workflowId, status, uncheckedRun }) => [workflowId, status, uncheckedRun])
-    ).toEqual([
-      ['middle', 'unknown', { reason: 'calledNotFound', from: 'next', to: 'deleted' }],
-      ['top', 'unknown', { reason: 'calledUnchecked', from: 'm', to: 'middle' }],
-      ['sometimes', 'safe', undefined],
-    ]);
-  });
-
-  it('can’t vouch for a child whose runs reach steps the analysis doesn’t follow', () => {
-    const completesBranch = workflow('completes-branch', [
-      {
-        name: 'fan',
-        type: 'parallel',
-        branches: [{ name: 'one', steps: [{ name: 'done', type: 'workflow.output', with: {} }] }],
-      },
-    ]);
-    const top = workflow('top', [callStep('c', {}, undefined, 'completes-branch')]);
-    const called = analyzeParent(
-      [callStep('t', {}, undefined, 'top'), callStep('c', {}, undefined, 'completes-branch')],
-      [top, completesBranch]
-    );
-
-    expect(
-      called.map(({ workflowId, status, uncheckedRun }) => [workflowId, status, uncheckedRun])
-    ).toEqual([
-      ['completes-branch', 'unknown', { reason: 'unsupportedSteps' }],
-      ['top', 'unknown', { reason: 'calledUnchecked', from: 'c', to: 'completes-branch' }],
-    ]);
-  });
-
-  it('fails a child whose parallel branch ends the run failed', () => {
-    const failsBranch = workflow('fails-branch', [
-      {
-        name: 'fan',
-        type: 'parallel',
-        branches: [
-          { name: 'one', steps: [{ name: 'stop', type: 'workflow.output', status: 'failed' }] },
-          { name: 'two', steps: [{ name: 'log', type: 'console', with: { message: 'hi' } }] },
-        ],
-      },
-    ]);
-    const [called] = analyzeParent([callStep('c', {}, undefined, 'fails-branch')], [failsBranch]);
-
-    expect(called.status).toBe('breaking');
-    expect(called.issues.map(({ kind }) => kind)).toEqual(['runEndsUnsuccessfully']);
-  });
-
-  it('explains failures along a long loop of calls without overflowing the stack', () => {
-    const size = 1000;
-    const id = (position: number) => `w${position}`;
-    const loop = Array.from({ length: size }, (_, position) =>
-      workflow(id(position), [callStep('next', {}, undefined, id((position + 1) % size))])
-    );
-    const called = analyzeParent(
-      loop.map((_, position) => callStep(`c${position}`, {}, undefined, id(position))),
-      loop
-    );
-
-    expect(called).toHaveLength(size);
-    expect(called.every(({ status }) => status === 'breaking')).toBe(true);
-    expect(new Set(called.flatMap(({ issues }) => issues.map(({ kind }) => kind)))).toEqual(
-      new Set(['callCycle'])
-    );
-  });
-});
-
-describe('analyzeCalledWorkflows cycles', () => {
-  it('flags calls that always lead back to a running workflow, but not loops that can stop', () => {
-    const loopsBack = workflow('loops-back', [callStep('back', {}, undefined, 'parent')]);
-    const viaMiddle = workflow('via-middle', [callStep('next', {}, undefined, 'loops-back')]);
-    const guarded = workflow('guarded', [
-      { ...callStep('back', {}, undefined, 'parent'), if: 'inputs.again : true' },
-    ]);
-    const background = workflow('background', [
-      callStep('back', {}, 'workflow.executeAsync', 'parent'),
-    ]);
-    const called = analyzeCalledWorkflows({
-      workflowId: 'parent',
-      definition: {
-        name: 'Parent',
-        steps: [
-          callStep('l', {}, undefined, 'loops-back'),
-          callStep('v', {}, undefined, 'via-middle'),
-          callStep('g', {}, undefined, 'guarded'),
-          callStep('b', {}, undefined, 'background'),
-        ],
-      },
-      workflows: [loopsBack, viaMiddle, guarded, background],
-    });
-
-    expect(called.map(({ workflowId, issues }) => [workflowId, kinds(issues)])).toEqual([
-      ['loops-back', ['callCycle:breaking']],
-      ['via-middle', ['callCycle:breaking']],
-      ['background', []],
-      ['guarded', []],
+      ['middle', 'safe'],
     ]);
   });
 });
@@ -1803,30 +1417,25 @@ describe('analyzeRemovalImpact', () => {
     expect(analyzeRemovalImpact([CHILD_ID], [strictStep, top]).indirect).toBe(1);
   });
 
-  it('fails callers further up when a fallback that would complete the run fails itself', () => {
-    const outputs = [{ name: 'score', type: 'number', required: true }];
-    const rejected = { name: 'emit', type: 'workflow.output', with: { score: 'high' } };
-    const parent = workflow(
-      'parent',
-      [
-        {
-          ...callStep('ctx', { inputs: { alert_id: 'a' } }),
-          'on-failure': { fallback: [rejected] },
-        },
-        { name: 'done', type: 'workflow.output', with: { score: 1 } },
-      ],
-      { outputs }
-    );
-    const grandparent = workflow('grandparent', [callStep('run', {}, undefined, 'parent')]);
-    const saveIndex = buildDependentsIndex(CHILD_ID, [parent, grandparent, childItem]);
-    const saved = analyzeDependents({
-      index: saveIndex,
-      savedDefinition: makeChild(),
-      draftDefinition: { ...makeChild(), enabled: false },
-    });
+  it('takes a caller that might recover to keep running without the step’s outputs', () => {
+    const recovering = workflow('recovering', [
+      {
+        ...callStep('ctx', { inputs: { alert_id: 'a' } }),
+        'on-failure': { fallback: [{ name: 'log', type: 'console' }] },
+      },
+      {
+        name: 'emit',
+        type: 'workflow.output',
+        with: { severity: '${{ steps.ctx.output.severity }}' },
+      },
+    ]);
+    const reads = workflow('reads', [
+      callStep('run', {}, undefined, 'recovering'),
+      { name: 'log', type: 'console', with: { m: '{{ steps.run.output.severity }}' } },
+    ]);
+    const ignores = workflow('ignores', [callStep('run', {}, undefined, 'recovering')]);
 
-    expect(analyzeRemovalImpact([CHILD_ID], [parent, grandparent]).indirect).toBe(1);
-    expect(saved.summary.indirectBreaking).toBe(1);
+    expect(analyzeRemovalImpact([CHILD_ID], [recovering, reads, ignores]).indirect).toBe(1);
   });
 
   it('ignores calls between workflows that are removed together', () => {
