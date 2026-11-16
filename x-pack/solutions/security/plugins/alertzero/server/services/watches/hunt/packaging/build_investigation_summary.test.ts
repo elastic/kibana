@@ -67,6 +67,17 @@ describe('buildInvestigationSummary', () => {
     );
   });
 
+  it('names gaps when a confirmed hit still retired without a full search', () => {
+    const unsearched = dedupeCoverageGaps([
+      { reason: 'index_not_searched', detail: 'logs-hidden-*' },
+    ]);
+    const summary = buildInvestigationSummary({ state: state(), decided, unsearched });
+    expect(summary).toContain(
+      '1 gap left part of the report unsearched; the report is retired without a full search'
+    );
+    expect(summary).toContain('Not searched: logs-hidden-* (index not searched)');
+  });
+
   it('names the corroborated technique with its name', () => {
     expect(buildInvestigationSummary({ state: state(), decided })).toContain(
       'Techniques corroborated: Cloud Accounts (T1078.004)'

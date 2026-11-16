@@ -564,7 +564,7 @@ describe('runPackageReport', () => {
       expect(result.status === 'packaged' && result.dismiss).toBe(false);
     });
 
-    it('sends a confirmed hit through the SSE path, as it does for partial', async () => {
+    it('sends a confirmed hit through the SSE path and names the gaps', async () => {
       const result = await runPackageReport({
         spaceId: 'default',
         reportId,
@@ -580,6 +580,11 @@ describe('runPackageReport', () => {
 
       expect(result.status === 'packaged' && result.dismiss).toBe(false);
       expect(result.status === 'packaged' && result.proposals.length).toBeGreaterThan(0);
+      const [subjects] = writeCoverageKis.mock.calls[0];
+      expect(subjects[0].investigationSummary).toContain(
+        'left part of the report unsearched; the report is retired without a full search'
+      );
+      expect(subjects[0].investigationSummary).toContain('Not searched:');
     });
 
     it('does not name gaps on a successful run even if some arrive', async () => {

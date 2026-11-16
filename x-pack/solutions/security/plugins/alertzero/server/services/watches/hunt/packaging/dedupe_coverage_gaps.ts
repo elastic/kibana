@@ -80,8 +80,9 @@ export const gapCountPhrase = ({ gaps, atLeast }: DedupedCoverageGaps): string =
   `${atLeast ? 'at least ' : ''}${gaps.length} ${gaps.length === 1 ? 'gap' : 'gaps'}`;
 
 /**
- * One gap as prose. `detail` is only worth showing for an unknown technique id, where it can be
- * the only thing that names what was missed; for every other reason the phrase says enough.
+ * One gap as prose. `detail` is shown when it is the only thing that names what was missed:
+ * an unknown technique id, or an index this hunt never searched. For every other reason the
+ * phrase says enough.
  */
 export const describeGap = ({
   reason,
@@ -89,7 +90,9 @@ export const describeGap = ({
   technique_id: techniqueId,
 }: PackageReportCoverageGap) => {
   const phrase = reasonPhrase(reason);
-  const subject = techniqueId ?? (reason === 'unknown_technique_id' ? detail : undefined);
+  const subject =
+    techniqueId ??
+    (reason === 'unknown_technique_id' || reason === 'index_not_searched' ? detail : undefined);
   return subject ? `${subject} (${phrase})` : phrase;
 };
 

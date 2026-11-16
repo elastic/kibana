@@ -59,7 +59,7 @@ export const packageReportInputSchema = lazySchema(() =>
     huntStatus: z
       .enum(['success', 'partial', 'retired_incomplete', 'failed'])
       .describe(
-        "Hunt child's result status: `success` when the run covered what it was asked to, `partial` when a tier could not finish and a later sweep will hunt the report again, `retired_incomplete` when the hunt stamped the report after a gap no rerun can close (the absence of a hit is a settled result, but not a clean verdict), `failed` when the coordinator call failed or was skipped."
+        "Hunt child's result status: `success` when the run covered what it was asked to, `partial` when a tier could not finish and a later sweep will hunt the report again, `retired_incomplete` when the hunt stamped the report after a gap no rerun can close (settled, but not a clean verdict, whether or not there was a hit), `failed` when the coordinator call failed or was skipped."
       ),
     hasConfirmedHit: z
       .boolean()

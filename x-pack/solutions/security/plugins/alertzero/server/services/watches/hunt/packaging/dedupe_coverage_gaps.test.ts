@@ -98,6 +98,17 @@ describe('describeGap', () => {
     );
   });
 
+  it('keeps the detail for index_not_searched so the coverage line names the index', () => {
+    expect(
+      describeGap({
+        reason: 'index_not_searched',
+        detail: 'The default data view names `custom-edr-1`, which this hunt could not resolve.',
+      })
+    ).toBe(
+      'The default data view names `custom-edr-1`, which this hunt could not resolve. (index not searched)'
+    );
+  });
+
   it('falls back to the raw reason for one it does not know', () => {
     expect(describeGap({ reason: 'brand_new_reason', detail: 'x' })).toBe('brand new reason');
   });

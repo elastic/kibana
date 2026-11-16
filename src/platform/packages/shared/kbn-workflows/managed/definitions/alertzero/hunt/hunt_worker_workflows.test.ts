@@ -748,8 +748,11 @@ describe('Hunt Watch worker chain', () => {
       );
     });
 
-    it('stays partial for an incomplete_final run with a confirmed hit, which packages through the SSE path', () => {
-      expect(status(incompleteFinal(true))).toBe('partial');
+    it('is retired_incomplete for a settled incomplete_final run with a confirmed hit', () => {
+      expect(status(incompleteFinal(true))).toBe('retired_incomplete');
+      expect(reason(incompleteFinal(true))).toContain(
+        'retired without having been fully searched; its executed searches are recorded'
+      );
     });
 
     it('stays partial, quoting the error, when the evidence write failed and the gate was not stamped', () => {
@@ -1579,8 +1582,28 @@ describe('Hunt Watch worker: a retired_incomplete hunt', () => {
     expect(message).toContain(
       '### Hunt Watch run completed: the report is retired without a full search'
     );
+    expect(message).toContain('no confirmed hits, but part of the report could not be searched');
     expect(message).toContain('The report will not be swept again on its own');
     expect(message).toContain('Closed this Investigation as benign.');
+  });
+
+  it('names a confirmed hit when the retired run packaged one', () => {
+    const message = conclusion({
+      steps: {
+        ...retiredContext('retired_incomplete').steps,
+        hunt: {
+          output: {
+            ...retiredContext('retired_incomplete').steps.hunt.output,
+            hit: true,
+            headline: 'Confirmed hit',
+          },
+        },
+      },
+    });
+    expect(message).toContain(
+      'confirmed hit(s) were packaged, but part of the report could not be searched'
+    );
+    expect(message).not.toContain('no confirmed hits, but');
   });
 
   // Whether the Investigation summary names the gaps depends on packaging having closed it, which

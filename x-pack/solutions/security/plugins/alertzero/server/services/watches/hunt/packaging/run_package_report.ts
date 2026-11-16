@@ -359,6 +359,12 @@ export const runPackageReport = async ({
       });
   const { proposals, converged, alreadyOpenCount, mintSuppression } = resolved;
 
+  // A confirmed hit still reaches here when the hunt retired the report
+  // (`incomplete_final` stamped the gate). Name the gaps on the report-scoped subject and in
+  // the Investigation summary so the SSE path does not look like a clean full search.
+  const unsearched =
+    huntStatus === 'retired_incomplete' ? dedupeCoverageGaps(coordinator.coverageGaps) : undefined;
+
   const subjects = deriveCoverageSubjects({
     spaceId,
     state: {
@@ -371,9 +377,11 @@ export const runPackageReport = async ({
         dismissHold,
         converged,
         alreadyOpen: alreadyOpenCount,
+        unsearched,
       }),
       coordinator,
       reportContext,
+      unsearched,
     },
     investigationConversationId,
   });

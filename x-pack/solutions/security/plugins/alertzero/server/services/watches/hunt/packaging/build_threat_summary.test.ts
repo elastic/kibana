@@ -32,6 +32,18 @@ describe('buildThreatSummary unsearched line', () => {
     expect(summary).toContain('Sign-in watch bulletin');
   });
 
+  it('adds one line after a confirmed-hit story', () => {
+    const summary = buildThreatSummary({
+      hasConfirmedHit: true,
+      hypothesis: 'Suspicious sign-in from a new ASN',
+      unsearched: gapsOf(1),
+    });
+    expect(summary.split('\n').at(-1)).toBe(
+      'Not searched by Hunt Watch (1 gap): T9000 (unknown technique id)'
+    );
+    expect(summary).toContain('Suspicious sign-in from a new ASN');
+  });
+
   it('is unchanged without gaps', () => {
     const withoutGaps = buildThreatSummary({ hasConfirmedHit: false, report });
     expect(buildThreatSummary({ hasConfirmedHit: false, report, unsearched: gapsOf(0) })).toBe(
