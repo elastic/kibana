@@ -16,8 +16,10 @@ const STALE_AFTER_MS = 2 * 60_000;
 const RETRY_INTERVAL_MS = 1_000;
 
 /**
- * Serializes this suite's metadata seeding so two workers cannot force-stop the shared transform.
- * Remove this once current-time seeds no longer call stopMetadataTransforms.
+ * Serializes this suite's metadata seeding, and the waits that need the shared metadata transform
+ * running, so one worker cannot force-stop that transform while another seeds or waits on it.
+ * Not reentrant: `fn` must not take the lock again. Remove this once current-time seeds no longer
+ * call stopMetadataTransforms.
  */
 export const withMetadataTransformLock = async <T>(fn: () => Promise<T>): Promise<T> => {
   const token = await acquireLock();

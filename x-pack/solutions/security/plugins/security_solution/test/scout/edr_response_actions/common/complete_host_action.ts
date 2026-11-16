@@ -23,6 +23,7 @@ import {
   sendFleetActionResponse,
 } from '../../../../scripts/endpoint/common/response_actions';
 import { createSystemIndicesEsClient } from '../ui/fixtures/system_indices_es_client';
+import { withMetadataTransformLock } from './with_metadata_transform_lock';
 
 interface AgentStatusResponse {
   data: Record<string, { isolated: boolean }>;
@@ -209,21 +210,28 @@ export const deleteGetFileUploads = async ({
   }
 };
 
-/**
- * Waits until agent status reports the isolation flag written by `completeHostAction`.
- * The metadata transform has to pick up the new document before the flyout can show it.
- */
-export const waitForHostIsolation = async ({
-  kbnClient,
-  spaceId,
-  agentId,
-  isolated,
-}: {
+interface HostIsolationWaitParams {
   kbnClient: KbnClient;
   spaceId: string;
   agentId: string;
   isolated: boolean;
-}): Promise<void> => {
+}
+
+/**
+ * Waits until agent status reports the isolation flag written by `completeHostAction`.
+ * The metadata transform has to pick up the new document before the flyout can show it.
+ * The poll holds the metadata-transform lock, so another worker's host seed cannot
+ * force-stop that transform while it waits; the 60s budget starts once the lock is held.
+ */
+export const waitForHostIsolation = (params: HostIsolationWaitParams): Promise<void> =>
+  withMetadataTransformLock(() => pollHostIsolation(params));
+
+const pollHostIsolation = async ({
+  kbnClient,
+  spaceId,
+  agentId,
+  isolated,
+}: HostIsolationWaitParams): Promise<void> => {
   const deadline = Date.now() + 60_000;
   const pathPrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
   const path = `${pathPrefix}${AGENT_STATUS_ROUTE}?agentIds=${encodeURIComponent(
