@@ -8,18 +8,19 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import type { AggregatedOperator } from './query_profile_model';
+import type { AggregatedOperator } from './types';
 
-export type OperatorCategory = 'exchange' | 'source' | 'filter' | 'aggregate' | 'compute' | 'other';
-
-const OPERATOR_CATEGORIES: readonly OperatorCategory[] = [
+/** The kinds of work that the CPU breakdown tells apart, in the order they are shown. */
+const OPERATOR_CATEGORIES = [
   'source',
   'filter',
   'compute',
   'aggregate',
   'exchange',
   'other',
-];
+] as const;
+
+export type OperatorCategory = (typeof OPERATOR_CATEGORIES)[number];
 
 export interface CpuBreakdownEntry {
   category: OperatorCategory;

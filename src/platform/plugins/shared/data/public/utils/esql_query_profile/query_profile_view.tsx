@@ -28,7 +28,7 @@ import { getConnectorsUrl } from '@kbn/esql-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { Adapters, Request } from '@kbn/inspector-plugin/public';
 import type { ISearchStart } from '../../search';
-import type { QueryProfileView as QueryProfileViewModel } from './query_profile_model';
+import type { QueryProfileView as QueryProfileViewModel } from './types';
 import { ByCommandTab, hasCommandBreakdown } from './by_command_tab';
 import { esqlRequestLabels } from './esql_request_label';
 import { listEsqlInspectorRequests } from './esql_inspector_requests';

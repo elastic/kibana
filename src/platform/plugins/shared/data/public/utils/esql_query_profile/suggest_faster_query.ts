@@ -12,7 +12,7 @@ import type { OptimizeQueryResponse } from '@kbn/esql-types';
 import { OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
 import { isNoAiConnectorError } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import type { QueryProfileView } from './query_profile_model';
+import type { QueryProfileView } from './types';
 import { buildProfileContext } from './profile_prompt_context';
 import { readErrorMessage } from './read_error_message';
 

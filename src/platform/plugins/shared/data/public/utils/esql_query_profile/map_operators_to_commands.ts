@@ -8,7 +8,7 @@
  */
 
 import { commandNames, sourceCommandNames } from '@elastic/esql-definitions';
-import type { AggregatedOperator } from './query_profile_model';
+import type { AggregatedOperator } from './types';
 import { shareOf } from './aggregate_esql_profile';
 import type { QueryCommand } from './query_commands';
 

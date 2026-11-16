@@ -18,7 +18,7 @@ import type {
   TimelineOperator,
   TimelineSleep,
   TimeSpan,
-} from './query_profile_model';
+} from './types';
 import { PHASE_NANOS_FIELDS, PLANNING_PHASE_IDS, PROCESS_NANOS_FIELD } from './profile_schema';
 import { isRecord } from './json_helpers';
 

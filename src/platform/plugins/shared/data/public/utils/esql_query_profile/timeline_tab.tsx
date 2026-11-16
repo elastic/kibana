@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { QueryProfileView, TimelineDriver, TimelineOperator } from './query_profile_model';
+import type { QueryProfileView, TimelineDriver, TimelineOperator } from './types';
 import { operatorCategory, useOperatorCategoryColors } from './operator_category';
 import { computeTicks } from './timeline_ticks';
 import { formatCount, formatDurationMillis } from './profile_format';

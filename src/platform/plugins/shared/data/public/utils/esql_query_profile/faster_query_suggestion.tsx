@@ -24,7 +24,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchStart } from '../../search';
-import type { QueryProfileView } from './query_profile_model';
+import type { QueryProfileView } from './types';
 import { compareResults } from './compare_results';
 import type { ResultsVerdict } from './compare_results';
 import { loadEsqlQueryProfile } from './load_esql_query_profile';

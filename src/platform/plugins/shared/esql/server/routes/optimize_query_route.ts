@@ -15,7 +15,7 @@ import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/ser
 import type { OptimizeQueryResponse } from '@kbn/esql-types';
 import { NO_AI_CONNECTOR_ERROR_CODE, OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
 import type { EsqlServerPluginStart } from '../types';
-import { createScopedModel, resolveConnectorId } from './helpers';
+import { resolveConnectorId } from './helpers';
 
 const OptimizeQuerySchema = lazySchema(() =>
   z
@@ -133,8 +133,12 @@ export const registerOptimizeQueryRoute = (
           });
         }
 
-        const model = await createScopedModel({ inference, request, connectorId });
-        const result = await model.chatModel
+        const chatModel = await inference.getChatModel({
+          request,
+          connectorId,
+          chatModelOptions: {},
+        });
+        const result = await chatModel
           .withStructuredOutput(OptimizeQuerySchema, { name: 'suggest_faster_query' })
           // The UI aborts its request when the profile changes, so the model stops with it.
           .invoke(buildMessages(queryString, profileContext), {

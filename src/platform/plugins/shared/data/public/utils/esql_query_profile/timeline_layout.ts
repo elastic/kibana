@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryProfileTimeline, TimelineDriver, TimeSpan } from './query_profile_model';
+import type { QueryProfileTimeline, TimelineDriver, TimeSpan } from './types';
 
 /** The kinds of driver in the order a query runs them. Any other kind is listed after these. */
 const GROUP_ORDER = ['data', 'node_reduce', 'final'];

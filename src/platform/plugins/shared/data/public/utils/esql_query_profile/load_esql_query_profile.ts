@@ -12,7 +12,7 @@ import type { ESQLSearchParams } from '@kbn/es-types';
 import type { IEsqlSearchParams } from '@kbn/search-types';
 import type { ISearchStart } from '../../search';
 import { aggregateEsqlProfile } from './aggregate_esql_profile';
-import type { QueryProfileView } from './query_profile_model';
+import type { QueryProfileView } from './types';
 import { summarizeResults } from './compare_results';
 import { isRecord } from './json_helpers';
 

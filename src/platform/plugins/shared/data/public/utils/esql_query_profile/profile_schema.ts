@@ -9,7 +9,7 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import { esqlProfileResponseSchema } from '@elastic/esql-definitions/profile-schema';
-import type { PlanningPhaseId } from './query_profile_model';
+import type { PlanningPhaseId } from './types';
 
 /*
  * Things the profile view needs to know about the profile that Elasticsearch describes in its

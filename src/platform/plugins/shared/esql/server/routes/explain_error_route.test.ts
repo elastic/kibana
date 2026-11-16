@@ -16,10 +16,10 @@ import type { EsqlServerPluginStart } from '../types';
 
 jest.mock('./helpers', () => ({
   resolveConnectorId: jest.fn(),
-  createScopedModel: jest.fn(),
 }));
 
-const { resolveConnectorId, createScopedModel } = jest.requireMock('./helpers');
+const { resolveConnectorId } = jest.requireMock('./helpers');
+const getChatModel = jest.fn();
 
 function buildMocks({ deployment }: { deployment?: DeploymentInfo } = {}) {
   const handler = jest.fn();
@@ -34,7 +34,7 @@ function buildMocks({ deployment }: { deployment?: DeploymentInfo } = {}) {
     forbidden: jest.fn((r) => ({ status: 403, ...r })),
     customError: jest.fn((r) => ({ status: r?.statusCode ?? 500, ...r })),
   };
-  const getStartServices = jest.fn().mockResolvedValue([{}, { inference: {} }]);
+  const getStartServices = jest.fn().mockResolvedValue([{}, { inference: { getChatModel } }]);
   const context = { logger: { get: () => ({ error: jest.fn() }) } };
 
   registerExplainErrorRoute(
@@ -62,9 +62,7 @@ function buildMocks({ deployment }: { deployment?: DeploymentInfo } = {}) {
 
 const modelReturning = (result: unknown) => {
   const invoke = jest.fn().mockResolvedValue(result);
-  createScopedModel.mockResolvedValue({
-    chatModel: { withStructuredOutput: jest.fn(() => ({ invoke })) },
-  });
+  getChatModel.mockResolvedValue({ withStructuredOutput: jest.fn(() => ({ invoke })) });
   return invoke;
 };
 
@@ -141,9 +139,7 @@ describe('registerExplainErrorRoute', () => {
   it('answers forbidden for a license error', async () => {
     const { handler, requestHandlerContext, request, response } = buildMocks();
     resolveConnectorId.mockResolvedValue('connector-1');
-    createScopedModel.mockRejectedValue(
-      Object.assign(new Error('no license'), { reason: 'license_x' })
-    );
+    getChatModel.mockRejectedValue(Object.assign(new Error('no license'), { reason: 'license_x' }));
 
     await handler(requestHandlerContext, request, response);
 

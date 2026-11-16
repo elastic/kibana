@@ -15,10 +15,10 @@ import type { EsqlServerPluginStart } from '../types';
 
 jest.mock('./helpers', () => ({
   resolveConnectorId: jest.fn(),
-  createScopedModel: jest.fn(),
 }));
 
-const { resolveConnectorId, createScopedModel } = jest.requireMock('./helpers');
+const { resolveConnectorId } = jest.requireMock('./helpers');
+const getChatModel = jest.fn();
 
 function buildMocks() {
   const handler = jest.fn();
@@ -33,7 +33,7 @@ function buildMocks() {
     forbidden: jest.fn((r) => ({ status: 403, ...r })),
     customError: jest.fn((r) => ({ status: r?.statusCode ?? 500, ...r })),
   };
-  const getStartServices = jest.fn().mockResolvedValue([{}, { inference: {} }]);
+  const getStartServices = jest.fn().mockResolvedValue([{}, { inference: { getChatModel } }]);
   const context = { logger: { get: () => ({ error: jest.fn() }) } };
 
   registerOptimizeQueryRoute(
@@ -57,9 +57,7 @@ function buildMocks() {
 
 const modelReturning = (result: unknown) => {
   const invoke = jest.fn().mockResolvedValue(result);
-  createScopedModel.mockResolvedValue({
-    chatModel: { withStructuredOutput: jest.fn(() => ({ invoke })) },
-  });
+  getChatModel.mockResolvedValue({ withStructuredOutput: jest.fn(() => ({ invoke })) });
   return invoke;
 };
 
@@ -86,7 +84,7 @@ describe('registerOptimizeQueryRoute', () => {
     expect(response.badRequest).toHaveBeenCalledWith({
       body: expect.objectContaining({ attributes: { code: NO_AI_CONNECTOR_ERROR_CODE } }),
     });
-    expect(createScopedModel).not.toHaveBeenCalled();
+    expect(getChatModel).not.toHaveBeenCalled();
   });
 
   it('returns the rewritten query and the reason', async () => {
@@ -142,13 +140,13 @@ describe('registerOptimizeQueryRoute', () => {
   it('returns 403 for a license failure and 500 for other failures', async () => {
     const { handler, requestHandlerContext, request, response } = buildMocks();
     resolveConnectorId.mockResolvedValue('connector-1');
-    createScopedModel.mockRejectedValueOnce(
+    getChatModel.mockRejectedValueOnce(
       Object.assign(new Error('license_expired'), { reason: 'license_expired' })
     );
     await handler(requestHandlerContext, request, response);
     expect(response.forbidden).toHaveBeenCalled();
 
-    createScopedModel.mockRejectedValueOnce(new Error('boom'));
+    getChatModel.mockRejectedValueOnce(new Error('boom'));
     await handler(requestHandlerContext, request, response);
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
   });

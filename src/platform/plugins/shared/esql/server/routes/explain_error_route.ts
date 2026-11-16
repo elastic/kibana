@@ -16,7 +16,7 @@ import { EXPLAIN_ERROR_ROUTE, NO_AI_CONNECTOR_ERROR_CODE } from '@kbn/esql-types
 import type { DeploymentInfo } from '../deployment_info';
 import { describeDeployment } from '../deployment_info';
 import type { EsqlServerPluginStart } from '../types';
-import { createScopedModel, resolveConnectorId } from './helpers';
+import { resolveConnectorId } from './helpers';
 
 const ExplainErrorSchema = lazySchema(() =>
   z
@@ -142,8 +142,12 @@ export const registerExplainErrorRoute = (
           });
         }
 
-        const model = await createScopedModel({ inference, request, connectorId });
-        const result = await model.chatModel
+        const chatModel = await inference.getChatModel({
+          request,
+          connectorId,
+          chatModelOptions: {},
+        });
+        const result = await chatModel
           .withStructuredOutput(ExplainErrorSchema, { name: 'explain_esql_error' })
           .invoke(buildMessages(queryString, errorMessage, deployment), {
             signal: getRequestAbortedSignal(request.events.aborted$),

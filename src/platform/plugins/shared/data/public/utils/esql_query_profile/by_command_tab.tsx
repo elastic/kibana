@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import { EuiSpacer, EuiText, EuiToolTip, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { QueryProfileView } from './query_profile_model';
+import type { QueryProfileView } from './types';
 import { mapOperatorsToCommands } from './map_operators_to_commands';
 import type { CommandHeat } from './map_operators_to_commands';
 import { splitQueryCommands } from './query_commands';
