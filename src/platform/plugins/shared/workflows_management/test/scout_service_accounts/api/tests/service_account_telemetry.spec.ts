@@ -62,11 +62,7 @@ apiTest.describe(
       const execution = await wait(apiClient, await run(apiClient, id));
       expect(execution.effectiveIdentity).toBeUndefined();
 
-      const properties = await getCompletedEventProperties(
-        apiClient,
-        sessionHeaders,
-        execution.id
-      );
+      const properties = await getCompletedEventProperties(apiClient, sessionHeaders, execution.id);
       expect(properties.runAs).toBe('user');
       expect(properties.runAsInherited).toBeUndefined();
     });
