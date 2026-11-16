@@ -149,6 +149,11 @@ describe('Navigation Plugin', () => {
   describe('initNavigation()', () => {
     it('records nav-tree links against ownerPluginId', async () => {
       const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockResolvedValue({
+        username: 'test-user',
+      });
+
       const navigationTree$ = of({ body: [] });
       const { initNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
 
