@@ -14,6 +14,8 @@ import {
   ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
   ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
@@ -22,6 +24,7 @@ import { AD_WORKFLOW_IDS, installStatic } from './install_static';
 const createMockLifecycleClient = () => ({
   execute: jest.fn().mockResolvedValue('mock-execution-id'),
   install: jest.fn().mockResolvedValue(undefined),
+  installMany: jest.fn().mockResolvedValue({ failed: [] }),
   ready: jest.fn().mockResolvedValue(undefined),
   uninstall: jest.fn().mockResolvedValue(undefined),
 });
@@ -32,6 +35,12 @@ const createMockWorkflowsExtensionsStart = (lifecycleClient = createMockLifecycl
   } as unknown as WorkflowsExtensionsServerPluginStart);
 
 describe('installStatic', () => {
+  let logger: MockedLogger;
+
+  beforeEach(() => {
+    logger = loggerMock.create();
+  });
+
   // Guards against reintroducing the legacy, non-prefixed workflow-id duplicates
   // that previously lived in `@kbn/discoveries` and collided (same constant
   // names, different values) with the canonical ids. `@kbn/workflows/managed` is
@@ -49,53 +58,39 @@ describe('installStatic', () => {
       const lifecycleClient = createMockLifecycleClient();
       const workflowsExtensions = createMockWorkflowsExtensionsStart(lifecycleClient);
 
-      await installStatic({ enabled: true, workflowsExtensions });
+      await installStatic({ enabled: true, logger, workflowsExtensions });
 
       expect(workflowsExtensions.initManagedWorkflowsClient).toHaveBeenCalledTimes(1);
       expect(workflowsExtensions.initManagedWorkflowsClient).toHaveBeenCalledWith('discoveries');
     });
 
-    it('installs all 7 AD workflow IDs with GLOBAL_WORKFLOW_SPACE_ID', async () => {
+    it('installs all 7 AD workflow IDs with GLOBAL_WORKFLOW_SPACE_ID in one batch', async () => {
       const lifecycleClient = createMockLifecycleClient();
       const workflowsExtensions = createMockWorkflowsExtensionsStart(lifecycleClient);
 
-      await installStatic({ enabled: true, workflowsExtensions });
+      await installStatic({ enabled: true, logger, workflowsExtensions });
 
-      expect(lifecycleClient.install).toHaveBeenCalledTimes(7);
-      expect(lifecycleClient.install).toHaveBeenCalledWith(
-        ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
-        { spaceId: GLOBAL_WORKFLOW_SPACE_ID }
+      expect(lifecycleClient.installMany).toHaveBeenCalledTimes(1);
+      expect(lifecycleClient.installMany).toHaveBeenCalledWith(
+        [
+          ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
+          ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
+          ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+          ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
+          ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
+          ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
+          ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+        ].map((id) => ({ id, spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
       );
-      expect(lifecycleClient.install).toHaveBeenCalledWith(
-        ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
-        { spaceId: GLOBAL_WORKFLOW_SPACE_ID }
-      );
-      expect(lifecycleClient.install).toHaveBeenCalledWith(ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
-      expect(lifecycleClient.install).toHaveBeenCalledWith(
-        ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
-        { spaceId: GLOBAL_WORKFLOW_SPACE_ID }
-      );
-      expect(lifecycleClient.install).toHaveBeenCalledWith(
-        ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
-        { spaceId: GLOBAL_WORKFLOW_SPACE_ID }
-      );
-      expect(lifecycleClient.install).toHaveBeenCalledWith(
-        ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
-        { spaceId: GLOBAL_WORKFLOW_SPACE_ID }
-      );
-      expect(lifecycleClient.install).toHaveBeenCalledWith(
-        ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
-        { spaceId: GLOBAL_WORKFLOW_SPACE_ID }
-      );
+      expect(lifecycleClient.install).not.toHaveBeenCalled();
     });
 
-    it('calls ready() exactly once after all 7 installs', async () => {
+    it('calls ready() exactly once after the batch install', async () => {
       const callOrder: string[] = [];
       const lifecycleClient = {
-        install: jest.fn().mockImplementation(async () => {
-          callOrder.push('install');
+        installMany: jest.fn().mockImplementation(async () => {
+          callOrder.push('installMany');
+          return { failed: [] };
         }),
         ready: jest.fn().mockImplementation(async () => {
           callOrder.push('ready');
@@ -105,55 +100,51 @@ describe('installStatic', () => {
         initManagedWorkflowsClient: jest.fn().mockResolvedValue(lifecycleClient),
       } as unknown as WorkflowsExtensionsServerPluginStart;
 
-      await installStatic({ enabled: true, workflowsExtensions });
+      await installStatic({ enabled: true, logger, workflowsExtensions });
 
       expect(lifecycleClient.ready).toHaveBeenCalledTimes(1);
-      expect(callOrder).toEqual([
-        'install',
-        'install',
-        'install',
-        'install',
-        'install',
-        'install',
-        'install',
-        'ready',
-      ]);
+      expect(callOrder).toEqual(['installMany', 'ready']);
     });
 
     it('returns { failedIds: [] } when all installs succeed', async () => {
       const workflowsExtensions = createMockWorkflowsExtensionsStart();
 
-      const result = await installStatic({ enabled: true, workflowsExtensions });
+      const result = await installStatic({ enabled: true, logger, workflowsExtensions });
 
       expect(result).toEqual({ failedIds: [] });
     });
 
-    it('returns failed IDs without throwing when individual installs fail', async () => {
+    it('returns the failed IDs and still calls ready() when individual installs fail', async () => {
       const failingId = ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID;
       const lifecycleClient = createMockLifecycleClient();
-      lifecycleClient.install.mockImplementation(async (id: string) => {
-        if (id === failingId) throw new Error('install failed');
+      lifecycleClient.installMany.mockResolvedValue({
+        failed: [
+          { id: failingId, spaceId: GLOBAL_WORKFLOW_SPACE_ID, error: new Error('install failed') },
+        ],
       });
       const workflowsExtensions = createMockWorkflowsExtensionsStart(lifecycleClient);
 
-      const result = await installStatic({ enabled: true, workflowsExtensions });
+      const result = await installStatic({ enabled: true, logger, workflowsExtensions });
 
       expect(result.failedIds).toEqual([failingId]);
-      expect(lifecycleClient.install).toHaveBeenCalledTimes(7);
+      expect(lifecycleClient.ready).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        `discoveries: Failed to install managed workflow "${failingId}": install failed`
+      );
     });
 
-    it('continues installing remaining workflows after a failure', async () => {
-      const failingId = ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID;
+    it('reports every ID as failed without throwing when the batch install fails', async () => {
       const lifecycleClient = createMockLifecycleClient();
-      lifecycleClient.install.mockImplementation(async (id: string) => {
-        if (id === failingId) throw new Error('install failed');
-      });
+      lifecycleClient.installMany.mockRejectedValue(new Error('search failed'));
       const workflowsExtensions = createMockWorkflowsExtensionsStart(lifecycleClient);
 
-      await installStatic({ enabled: true, workflowsExtensions });
+      const result = await installStatic({ enabled: true, logger, workflowsExtensions });
 
-      expect(lifecycleClient.install).toHaveBeenCalledTimes(7);
+      expect(result.failedIds).toEqual([...AD_WORKFLOW_IDS]);
       expect(lifecycleClient.ready).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        'discoveries: Failed to install managed workflows: search failed'
+      );
     });
   });
 
@@ -161,7 +152,7 @@ describe('installStatic', () => {
     it('does not initialise the managed workflows client', async () => {
       const workflowsExtensions = createMockWorkflowsExtensionsStart();
 
-      await installStatic({ enabled: false, workflowsExtensions });
+      await installStatic({ enabled: false, logger, workflowsExtensions });
 
       expect(workflowsExtensions.initManagedWorkflowsClient).not.toHaveBeenCalled();
     });
@@ -170,16 +161,16 @@ describe('installStatic', () => {
       const lifecycleClient = createMockLifecycleClient();
       const workflowsExtensions = createMockWorkflowsExtensionsStart(lifecycleClient);
 
-      await installStatic({ enabled: false, workflowsExtensions });
+      await installStatic({ enabled: false, logger, workflowsExtensions });
 
-      expect(lifecycleClient.install).not.toHaveBeenCalled();
+      expect(lifecycleClient.installMany).not.toHaveBeenCalled();
     });
 
     it('does not call ready()', async () => {
       const lifecycleClient = createMockLifecycleClient();
       const workflowsExtensions = createMockWorkflowsExtensionsStart(lifecycleClient);
 
-      await installStatic({ enabled: false, workflowsExtensions });
+      await installStatic({ enabled: false, logger, workflowsExtensions });
 
       expect(lifecycleClient.ready).not.toHaveBeenCalled();
     });
@@ -187,7 +178,7 @@ describe('installStatic', () => {
     it('returns { failedIds: [] } without attempting installation', async () => {
       const workflowsExtensions = createMockWorkflowsExtensionsStart();
 
-      const result = await installStatic({ enabled: false, workflowsExtensions });
+      const result = await installStatic({ enabled: false, logger, workflowsExtensions });
 
       expect(result).toEqual({ failedIds: [] });
     });

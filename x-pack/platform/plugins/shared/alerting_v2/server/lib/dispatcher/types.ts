@@ -51,7 +51,7 @@ export interface SuppressionRow {
   alert_id: string | null;
   should_suppress: boolean;
   last_ack_action?: string | null;
-  last_deactivate_action?: string | null;
+  last_lifecycle_action?: string | null;
   last_snooze_action?: string | null;
 }
 
@@ -63,7 +63,7 @@ export type AlertSuppressionRow = Omit<SuppressionRow, 'alert_id' | 'last_snooze
 /** Row of the series suppressions query: snooze state of a series, so it carries no `alert_id`. */
 export type SeriesSuppressionRow = Omit<
   SuppressionRow,
-  'alert_id' | 'last_ack_action' | 'last_deactivate_action'
+  'alert_id' | 'last_ack_action' | 'last_lifecycle_action'
 >;
 
 export interface DispatcherExecutionParams {

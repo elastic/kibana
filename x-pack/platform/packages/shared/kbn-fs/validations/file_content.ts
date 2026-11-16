@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { Stream } from 'stream';
+import { sanitizeSvg } from '@kbn/content-sanitization';
 import type { WriteFileContent } from '../types';
-import { sanitizeSvg } from '../sanitizations/svg';
 import { validateFileSize } from './file_size';
 
 import { validateMimeType } from './file_mimetype';

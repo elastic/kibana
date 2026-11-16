@@ -1,5 +1,5 @@
 {
-  "sha1": "7eb4eea8af34b4f1dfc6d4ad0f0ea9ddb17c6b71",
+  "sha1": "f4a5e2b3cdd32be7303f8e8d05254a07ddfc4235",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -465,6 +465,19 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/lens_choropleth_chart.spec.ts",
         "line": 44,
         "column": 80
+      }
+    },
+    {
+      "id": "b27cbcb714f00fb-8c915524ac2618a",
+      "title": "Maps managed content requires a copy when saving a managed map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/managed_content.spec.ts",
+        "line": 27,
+        "column": 28
       }
     },
     {

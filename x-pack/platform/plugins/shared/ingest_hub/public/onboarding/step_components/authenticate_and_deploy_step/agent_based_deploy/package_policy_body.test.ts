@@ -218,3 +218,127 @@ describe('buildGroupPackagePolicy — output', () => {
     expect(await buildWithOutput('')).not.toHaveProperty('output_id');
   });
 });
+
+describe('buildGroupPackagePolicy — condition', () => {
+  const buildWithCondition = (condition?: string) =>
+    buildGroupPackagePolicy(group, pkgInfo, {
+      namespace: '',
+      globalRegion: 'us-east-1',
+      storedServiceVars: withInputs(['aws-s3']),
+      authenticateAndDeployStep: {},
+      pkgVersion: '1.0.0',
+      policySettings: { condition },
+    } as BuildPackagePolicyOpts);
+
+  it('sends the condition', async () => {
+    expect((await buildWithCondition('${host.platform} == "linux"')).condition).toBe(
+      '${host.platform} == "linux"'
+    );
+  });
+
+  it('leaves a blank condition out', async () => {
+    expect(await buildWithCondition(undefined)).not.toHaveProperty('condition');
+    expect(await buildWithCondition('  ')).not.toHaveProperty('condition');
+  });
+});
+
+describe('buildGroupPackagePolicy — proxy URL', () => {
+  const buildWithProxy = (proxyUrl: string | undefined, declared = true) =>
+    buildGroupPackagePolicy(
+      group,
+      { ...pkgInfo, vars: declared ? [{ name: 'proxy_url' }] : [] } as PkgInfo,
+      {
+        namespace: '',
+        globalRegion: '',
+        storedServiceVars: withInputs(['aws-s3']),
+        authenticateAndDeployStep: {},
+        pkgVersion: '1.0.0',
+        policySettings: { proxy_url: proxyUrl },
+      } as BuildPackagePolicyOpts
+    );
+
+  it('sends the proxy as a package var, not a top-level field', async () => {
+    const body = await buildWithProxy('http://proxy:3128');
+    expect(body.vars).toEqual({ proxy_url: 'http://proxy:3128' });
+    expect(body).not.toHaveProperty('proxy_url');
+  });
+
+  it('leaves it out when empty or when the package does not declare the var', async () => {
+    expect((await buildWithProxy('')).vars).toBeUndefined();
+    expect((await buildWithProxy(undefined)).vars).toBeUndefined();
+    expect((await buildWithProxy('http://proxy:3128', false)).vars).toBeUndefined();
+  });
+});
+
+describe('buildGroupPackagePolicy — dedicated index template for a custom dataset', () => {
+  const withDatasetVar = {
+    ...guardduty,
+    varDefsByInput: {
+      'aws-s3': {
+        'data_stream.dataset': {
+          name: 'data_stream.dataset',
+          type: 'text',
+          default: 'aws.guardduty',
+        },
+      },
+    },
+    varDefsByDataStream: {
+      guardduty: {
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        varDefsByInput: {
+          'aws-s3': {
+            'data_stream.dataset': {
+              name: 'data_stream.dataset',
+              type: 'text',
+              default: 'aws.guardduty',
+            },
+          },
+        },
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+  const datasetGroup: DeployGroup = {
+    ...group,
+    members: [{ ...group.members[0], service: withDatasetVar }],
+  };
+  const buildWithDataset = (dataset: string, createDatasetTemplates?: boolean) =>
+    buildGroupPackagePolicy(datasetGroup, pkgInfo, {
+      namespace: '',
+      globalRegion: 'us-east-1',
+      storedServiceVars: {
+        guardduty: {
+          enabledDataStreams: ['guardduty'],
+          varsByDataStream: {
+            guardduty: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { 'data_stream.dataset': dataset } },
+            },
+          },
+          ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
+        },
+      },
+      authenticateAndDeployStep: {},
+      pkgVersion: '1.0.0',
+    } as BuildPackagePolicyOpts);
+
+  it('asks Fleet not to create the template when the user opted out', async () => {
+    expect(await buildWithDataset('aws.prod', false)).toHaveProperty(
+      'create_dataset_templates',
+      false
+    );
+  });
+
+  it('says so when the template is on, which is the default', async () => {
+    expect(await buildWithDataset('aws.prod')).toHaveProperty('create_dataset_templates', true);
+  });
+
+  it('leaves the flag out for the generic dataset, where Fleet shows no switch', async () => {
+    expect(await buildWithDataset('generic', false)).not.toHaveProperty('create_dataset_templates');
+  });
+
+  it('never sends the choice as a package var', async () => {
+    const body = await buildWithDataset('aws.prod', false);
+    expect(JSON.stringify(body.inputs)).not.toContain('createDatasetTemplates');
+  });
+});
