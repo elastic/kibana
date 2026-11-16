@@ -1427,6 +1427,7 @@
     "@kbn/workflows-extensions-example": "workspace:*",
     "@kbn/workflows-library": "workspace:*",
     "@kbn/workflows-management-plugin": "workspace:*",
+    "@kbn/workflows-topics": "workspace:*",
     "@kbn/workflows-ui": "workspace:*",
     "@kbn/workflows-yaml": "workspace:*",
     "@kbn/xstate-utils": "workspace:*",
