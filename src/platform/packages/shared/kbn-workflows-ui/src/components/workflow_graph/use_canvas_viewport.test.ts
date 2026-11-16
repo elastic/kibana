@@ -12,14 +12,10 @@ import type { InternalNode, Node, ReactFlowInstance } from '@xyflow/react';
 import { useCanvasViewport } from './use_canvas_viewport';
 import { INITIAL_ZOOM } from './viewport_framing';
 
-// The canvas is measured (the store knows its size) from the start. Whether React Flow reports
-// the nodes as initialized is the part a test must control: in the app it stays false until a
-// later node update, which is how the home frame used to fire on the first node click.
+// The canvas is measured (the store knows its size) from the start; a test can resize it.
 const mockStore = { width: 1000, height: 800 };
-let mockNodesInitialized = false;
 jest.mock('@xyflow/react', () => ({
   useStore: (selector: (state: typeof mockStore) => number) => selector(mockStore),
-  useNodesInitialized: () => mockNodesInitialized,
 }));
 
 const NODE_WIDTH = 300;
@@ -81,7 +77,8 @@ const focusTarget = (zoom: number) => ({
 
 describe('useCanvasViewport', () => {
   beforeEach(() => {
-    mockNodesInitialized = false;
+    mockStore.width = 1000;
+    mockStore.height = 800;
   });
 
   it('frames the home view once the canvas is measured, without waiting for nodes to report as initialized', () => {
@@ -124,12 +121,17 @@ describe('useCanvasViewport', () => {
     rerender(clicked);
     const callsAfterClick = instance.setCenter.mock.calls.length;
 
-    // React Flow reporting the nodes as initialized (it does so on the first node update) must not
-    // re-apply the home frame over the zoom and position the user chose.
-    mockNodesInitialized = true;
-    rerender(clicked);
+    // The canvas changing size or gaining a node afterwards is what used to re-apply the home frame
+    // over the zoom and position the user chose. It must not now.
+    mockStore.width = 1200;
+    rerender({
+      ...clicked,
+      nodes: [...nodes, makeNode({ id: 'added', position: { x: 0, y: 2000 } })],
+    });
 
     expect(instance.setCenter.mock.calls.slice(callsAfterClick)).toEqual([]);
+    expect(instance.fitView).not.toHaveBeenCalled();
+    expect(instance.fitBounds).not.toHaveBeenCalled();
   });
 
   it('opens centred on the node that is already selected when the page loads with one', () => {

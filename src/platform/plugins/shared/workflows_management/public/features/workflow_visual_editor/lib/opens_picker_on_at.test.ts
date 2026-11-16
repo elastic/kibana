@@ -7,6 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** A non-null object that is not an array: what a YAML mapping reads as. */
-export const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+import { opensPickerOnAt } from './opens_picker_on_at';
+
+describe('opensPickerOnAt', () => {
+  it.each([
+    ['esql', false],
+    ['json', false],
+    ['json-liquid', false],
+    ['kuery', true],
+    ['plaintext', true],
+    [undefined, true],
+  ])('for %s is %s', (language, expected) => {
+    expect(opensPickerOnAt(language)).toBe(expected);
+  });
+});

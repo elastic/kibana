@@ -50,22 +50,36 @@ const definitionWith = (container: Record<string, unknown>): WorkflowYaml =>
     ],
   } as unknown as WorkflowYaml);
 
-const renderPanel = (workflowDefinition: WorkflowYaml) =>
-  render(
+const renderPanel = (
+  workflowDefinition: WorkflowYaml,
+  extra: Partial<React.ComponentProps<typeof StepConfigPanel>> = {}
+) => {
+  const onClose = jest.fn();
+  const panel = (props: Partial<React.ComponentProps<typeof StepConfigPanel>>) => (
     <Provider store={createMockStore()}>
       <I18nProvider>
         <StepConfigPanel
           mode="edit"
           stepType="console"
+          stepName="me"
           initialFragment={FRAGMENT}
           connectors={[]}
           workflowDefinition={workflowDefinition}
-          onClose={jest.fn()}
+          onClose={onClose}
           onRevert={jest.fn()}
+          {...extra}
+          {...props}
         />
       </I18nProvider>
     </Provider>
   );
+  const view = render(panel({}));
+  return {
+    onClose,
+    change: (props: Partial<React.ComponentProps<typeof StepConfigPanel>>) =>
+      view.rerender(panel(props)),
+  };
+};
 
 const renameTo = (name: string) => {
   fireEvent.click(screen.getByTestId('workflowStepConfigPanelTitle'));
@@ -116,5 +130,36 @@ describe('StepConfigPanel step name uniqueness', () => {
     renameTo('dup');
     expect(screen.queryByTestId('workflowStepConfigPanelNameError')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('dup');
+  });
+
+  describe('closing the panel', () => {
+    it('closes after a refused rename: nothing was applied, so there is nothing to keep', () => {
+      const { onClose } = renderPanel(definitionWith({ steps: [dupStep] }));
+      renameTo('dup');
+      expect(screen.getByTestId('workflowStepConfigPanelNameError')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("asks before closing on a draft that takes another step's name, which is never written", () => {
+      const { onClose, change } = renderPanel(definitionWith({ steps: [dupStep] }));
+      change({ syncedFragment: { fragment: 'name: dup\ntype: console\nwith:\n  message: hi\n' } });
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
+
+      expect(screen.getByTestId('workflowStepConfigPanelDiscardModal')).toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it("closes without asking when the name is the step's own", () => {
+      const { onClose, change } = renderPanel(definitionWith({ steps: [dupStep] }));
+      change({ syncedFragment: { fragment: 'name: me\ntype: console\nwith:\n  message: bye\n' } });
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 });

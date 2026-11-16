@@ -7,9 +7,59 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isMap, parseDocument } from 'yaml';
+import isEqual from 'lodash/isEqual';
+import { type Document, isMap, isNode, isSeq, parseDocument, type YAMLSeq } from 'yaml';
+import { isRecord } from '@kbn/workflows-yaml';
 import type { StepFormField } from './step_form_schema';
 import { isEmptyFieldValue } from './step_form_schema';
+
+const plainValue = (doc: Document, item: unknown): unknown =>
+  isNode(item) ? item.toJS(doc) : item;
+
+/** The index whose removal turns `previous` into `next`, when that is the only difference. */
+const removedIndex = (
+  previous: readonly unknown[],
+  next: readonly unknown[]
+): number | undefined => {
+  if (next.length !== previous.length - 1) return undefined;
+  const index = previous.findIndex((item, i) => i === next.length || !isEqual(item, next[i]));
+  const rest = previous.filter((_, i) => i !== index);
+  return isEqual(rest, next) ? index : undefined;
+};
+
+/**
+ * Brings an existing sequence to `next` by changing only what differs, so the items that stay —
+ * with their comments, anchors and flow style — keep their nodes. A whole-array `setIn` would
+ * rebuild every item from plain values and drop all of that.
+ */
+const syncSequence = (doc: Document, seq: YAMLSeq, next: readonly unknown[]): void => {
+  const previous = seq.items.map((item) => plainValue(doc, item));
+  const removed = removedIndex(previous, next);
+  if (removed !== undefined) {
+    seq.delete(removed);
+    return;
+  }
+  next.forEach((value, index) => {
+    if (index >= previous.length) {
+      seq.add(doc.createNode(value));
+      return;
+    }
+    if (isEqual(previous[index], value)) return;
+    const item = seq.items[index];
+    const before = previous[index];
+    if (isMap(item) && isRecord(before) && isRecord(value)) {
+      Object.keys(before).forEach((key) => {
+        if (!(key in value)) item.delete(key);
+      });
+      Object.entries(value).forEach(([key, entry]) => {
+        if (!isEqual(before[key], entry)) item.set(key, doc.createNode(entry));
+      });
+      return;
+    }
+    seq.set(index, doc.createNode(value));
+  });
+  seq.items.splice(next.length);
+};
 
 /**
  * Writes one form-owned key back into the fragment. Only that key changes —
@@ -22,7 +72,8 @@ export const writeFragmentValue = (
   indent: number
 ): string => {
   const doc = parseDocument(fragment);
-  if (!isMap(doc.contents)) return fragment;
+  // A document with errors cannot be stringified, so there is nothing to write back into.
+  if (doc.errors.length > 0 || !isMap(doc.contents)) return fragment;
   const path = [...field.path];
   // An empty string is the expression-mode sentinel for boolean/number fields —
   // don't delete it; keep the key so the UI stays in expression mode, unless the field opts out (`deleteWhenEmpty`).
@@ -34,16 +85,9 @@ export const writeFragmentValue = (
       doc.deleteIn(path);
     }
   } else {
-    doc.setIn(path, value);
+    const current = doc.getIn(path, true);
+    if (isSeq(current) && Array.isArray(value)) syncSequence(doc, current, value);
+    else doc.setIn(path, value);
   }
   return doc.toString({ indent, lineWidth: 0 });
-};
-
-/** The indent the text already uses (its first indented line), so a write keeps the style. */
-export const detectIndent = (yaml: string): number => {
-  for (const line of yaml.split('\n')) {
-    const match = line.match(/^( +)\S/);
-    if (match) return match[1].length;
-  }
-  return 2;
 };

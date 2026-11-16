@@ -24,6 +24,7 @@ const field = (value: Record<string, unknown>) => (
     <KeyValueField
       value={value}
       onChange={jest.fn()}
+      onDraftErrorChange={jest.fn()}
       catalog={catalog}
       fieldLabel="Variable"
       addLabel="Add variable"

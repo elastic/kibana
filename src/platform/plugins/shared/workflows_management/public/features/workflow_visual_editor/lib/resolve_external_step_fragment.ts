@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEqual } from 'lodash';
-import { parseDocument } from 'yaml';
+import { isStepFragmentDirty, parseStepFragment } from './parse_step_fragment';
 import { getStepFragment } from './yaml_mutations';
 
 /**
@@ -33,6 +32,9 @@ export const resolveExternalStepFragment = ({
   if (editorYaml === lastAppliedYaml || lastAppliedFragment === null) return undefined;
   const live = getStepFragment(editorYaml, stepName);
   if (live === undefined) return undefined;
-  const sameStep = isEqual(parseDocument(live).toJS(), parseDocument(lastAppliedFragment).toJS());
-  return sameStep ? undefined : live;
+  const changed = isStepFragmentDirty(
+    parseStepFragment(live),
+    parseStepFragment(lastAppliedFragment)
+  );
+  return changed ? live : undefined;
 };

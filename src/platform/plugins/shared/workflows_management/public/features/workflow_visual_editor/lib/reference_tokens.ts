@@ -54,10 +54,6 @@ export interface FindReferenceTokensOptions {
 const OPEN = '{{';
 const CLOSE = '}}';
 
-/** What a list or record is called to the user. */
-export const containerName = (iconType: string): string =>
-  iconType === 'array' ? 'list' : 'record';
-
 const hoverFor = ({
   form,
   typeLabel,
@@ -74,8 +70,8 @@ const hoverFor = ({
   if (isContainerInSentence) {
     return i18n.translate('workflows.stepConfigPanel.referenceToken.containerInSentence', {
       defaultMessage:
-        "A {type} can't go inside a sentence as it is. Insert it as JSON text to show what's in it.",
-      values: { type: containerName(iconType) },
+        "A {type, select, array {list} other {record}} can't go inside a sentence as it is. Insert it as JSON text to show what's in it.",
+      values: { type: iconType },
     });
   }
   if (isValueFormInSentence) {

@@ -90,6 +90,7 @@ export function ReferenceTextInput({
   testSubj,
   warnContainersInSentence,
   language,
+  onEditRequest,
 }: {
   readonly bind: ReferenceCapableBind;
   readonly catalog: DataReferenceCatalog;
@@ -103,6 +104,11 @@ export function ReferenceTextInput({
   readonly warnContainersInSentence: boolean;
   /** Reflected as `data-language` so the field's kind stays inspectable. */
   readonly language?: string;
+  /**
+   * When set, the field is a preview: a click, Enter or Space calls this instead of mounting the
+   * editor. For a value the single-line editor cannot hold as it is.
+   */
+  readonly onEditRequest?: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const { fontSize } = useEuiFontSize('xs');
@@ -131,6 +137,11 @@ export function ReferenceTextInput({
     setIsEditing(true);
   }, []);
 
+  const requestEdit = (pending: Pending) => {
+    if (onEditRequest) onEditRequest();
+    else startEditing(pending);
+  };
+
   const stopEditing = useCallback(() => {
     setIsEditing(false);
     releaseEditor();
@@ -151,7 +162,7 @@ export function ReferenceTextInput({
     if (target.closest('button, a')) return;
     const chip = target.closest<HTMLElement>('[data-ref-start]');
     if (chip) {
-      startEditing({
+      requestEdit({
         kind: 'token',
         start: Number(chip.dataset.refStart),
         end: Number(chip.dataset.refEnd),
@@ -162,7 +173,7 @@ export function ReferenceTextInput({
     const run = position
       ? (position.node.parentElement ?? undefined)?.closest<HTMLElement>('[data-run-offset]')
       : undefined;
-    startEditing(
+    requestEdit(
       position && run
         ? { kind: 'caret', offset: Number(run.dataset.runOffset) + position.offset }
         : { kind: 'end' }
@@ -238,10 +249,13 @@ export function ReferenceTextInput({
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          startEditing({ kind: 'end' });
+          requestEdit({ kind: 'end' });
         }
       }}
-      onFocus={() => startEditing({ kind: 'end' })}
+      // A preview must not act on focus: the panel that closes returns focus here.
+      onFocus={() => {
+        if (!onEditRequest) startEditing({ kind: 'end' });
+      }}
       css={{
         flex: '1 1 auto',
         minWidth: 0,
@@ -275,10 +289,6 @@ export function ReferenceTextInput({
         minWidth: 0,
         // Line up with the read view's text.
         paddingInlineStart: euiTheme.size.s,
-        // Transparent so the field box (border, background) shows through.
-        '.monaco-editor, .monaco-editor-background, .monaco-editor .margin': {
-          backgroundColor: 'transparent',
-        },
         ...chipCss,
       }}
       data-mode="edit"
@@ -286,6 +296,8 @@ export function ReferenceTextInput({
       <CodeEditor
         languageId="plaintext"
         chromeOverrides={workflowsEditorChromeOverrides}
+        // Transparent so the field box (border, background) shows through.
+        transparentBackground
         value={value}
         onChange={(text, event) => {
           const single = text.replace(/\r?\n/g, ' ');
@@ -307,7 +319,15 @@ export function ReferenceTextInput({
     <>
       <div css={boxCss}>
         {isEditing ? editView : readView}
-        <div css={{ paddingInlineEnd: euiTheme.size.xs, flex: '0 0 auto' }}>{appendControls}</div>
+        {/* Pressing a control must not take focus from the editor: it would blur and unmount, and the
+            picker would lose the caret it inserts at. */}
+        <div
+          role="presentation"
+          onMouseDown={(event) => event.preventDefault()}
+          css={{ paddingInlineEnd: euiTheme.size.xs, flex: '0 0 auto' }}
+        >
+          {appendControls}
+        </div>
       </div>
       {warning ? (
         <ContainerInSentenceCallout

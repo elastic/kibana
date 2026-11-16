@@ -48,6 +48,14 @@ const connectors = [
     summary: 'Sample',
     description: null,
   } as unknown as ConnectorContractUnion,
+  {
+    type: 'other',
+    hasConnectorId: false,
+    paramsSchema: z.object({ label: z.string() }),
+    outputSchema: z.unknown(),
+    summary: 'Other',
+    description: null,
+  } as unknown as ConnectorContractUnion,
 ];
 
 const FRAGMENT = 'name: sample\ntype: sample\nwith:\n  text: hello\n  count: 5\n';
@@ -98,6 +106,17 @@ describe('StepConfigPanel with the step changed from outside (undo, YAML tab)', 
     sync('name: sample\ntype: sample\nwith:\n  text: from undo\n  count: 9\n');
     expect(activate(field('text'))).toHaveValue('from undo');
     expect(screen.getByTestId(field('count'))).toHaveValue(9);
+  });
+
+  it('shows the form of the type the step now has when its type was changed', () => {
+    const { sync } = renderPanel();
+    expect(screen.getByTestId(field('text'))).toBeInTheDocument();
+
+    sync('name: sample\ntype: other\nwith:\n  label: renamed\n');
+
+    expect(screen.queryByTestId(field('text'))).not.toBeInTheDocument();
+    expect(activate(field('label'))).toHaveValue('renamed');
+    expect(screen.getByTestId('workflowStepConfigPanelTypeSubtitle')).toHaveTextContent('other');
   });
 
   it('builds the next edit on the changed step, so a field the user did not touch is not reverted', () => {

@@ -365,7 +365,10 @@ describe('StepConfigPanel', () => {
     });
 
     it('shows the id of a type the catalog does not know', () => {
-      renderPanel({ stepType: 'acme.doSomethingOdd' });
+      renderPanel({
+        stepType: 'acme.doSomethingOdd',
+        initialFragment: 'name: notify\ntype: acme.doSomethingOdd\n',
+      });
       expect(subtitle()).toHaveTextContent(/^acme\.doSomethingOdd$/);
     });
 
@@ -851,17 +854,19 @@ with:
 
   it('hides Error handling for fallback steps', () => {
     const { unmount } = render(
-      <I18nProvider>
-        <StepConfigPanel
-          mode="edit"
-          stepType="slack"
-          initialFragment="name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n"
-          connectors={connectors}
-          onClose={jest.fn()}
-          onRevert={jest.fn()}
-          isFallbackStep
-        />
-      </I18nProvider>
+      <Provider store={createMockStore()}>
+        <I18nProvider>
+          <StepConfigPanel
+            mode="edit"
+            stepType="slack"
+            initialFragment={'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n'}
+            connectors={connectors}
+            onClose={jest.fn()}
+            onRevert={jest.fn()}
+            isFallbackStep
+          />
+        </I18nProvider>
+      </Provider>
     );
     expandSettingsAccordion();
     expect(screen.queryByTestId('workflowStepConfigErrorHandlingSection')).not.toBeInTheDocument();
@@ -1976,12 +1981,18 @@ with:
         ['1.10', 'flag: "1.10"\n'],
         ['1e3', 'flag: "1e3"\n'],
         ['12345678901234567890', 'flag: "12345678901234567890"\n'],
-        ['{{x}}', 'flag: "{{x}}"\n'],
         ['[a]', 'flag: "[a]"\n'],
         ['#c', 'flag: "#c"\n'],
-        ['{{ x }}', 'flag: "{{ x }}"\n'],
         ['[1.0]', 'flag: "[1.0]"\n'],
       ])('%s stays text', (word, line) => {
+        expect(typeValue(word)).toContain(line);
+      });
+
+      // A whole reference keeps its type, so on blur it is written in the value form.
+      it.each([
+        ['{{x}}', 'flag: ${{ x }}\n'],
+        ['{{ x }}', 'flag: ${{ x }}\n'],
+      ])('%s is written as a value reference', (word, line) => {
         expect(typeValue(word)).toContain(line);
       });
 
@@ -2119,6 +2130,8 @@ with:
         initialFragment: `name: l\ntype: lister\nwith:${withBlock}\n`,
       });
     const lastFragment = (spy: jest.Mock) => spy.mock.calls[spy.mock.calls.length - 1][0] as string;
+    const savedTags = (spy: jest.Mock): unknown =>
+      parseDocument(lastFragment(spy)).toJS().with.tags;
     const searchInput = (testId: string) =>
       within(screen.getByTestId(testId)).getByTestId('comboBoxSearchInput');
     const addTag = (testId: string, text: string) => {
@@ -2143,8 +2156,7 @@ with:
       const { onFragmentChange } = renderLister('\n  tags: [a, b]');
       const field = 'workflowStepConfigField-with.tags';
       fireEvent.keyDown(searchInput(field), { key: 'Backspace' });
-      expect(lastFragment(onFragmentChange)).toMatch(/tags:\s*\n\s+- a/);
-      expect(lastFragment(onFragmentChange)).not.toMatch(/tags: a/);
+      expect(savedTags(onFragmentChange)).toEqual(['a']);
     });
 
     it('offers only the fixed choices for an enum list', () => {
@@ -2234,7 +2246,7 @@ with:
         const { onFragmentChange } = renderEntries('\n  tags: [a, b]');
         pickEntry('tags', '{{ consts.owner }}');
         const saved = lastFragment(onFragmentChange);
-        expect(saved).toMatch(/- a\n\s+- b\n\s+- "\{\{ consts\.owner \}\}"/);
+        expect(savedTags(onFragmentChange)).toEqual(['a', 'b', '{{ consts.owner }}']);
         expect(saved).not.toContain('${{');
         expect(within(screen.getByTestId(testId('tags'))).getByText('consts.owner')).toBeVisible();
         expect(screen.getByTestId(`${testId('tags')}-source-fixed`)).toHaveAttribute(
@@ -2246,7 +2258,7 @@ with:
       it('adds a reference of unknown type as an entry too', () => {
         const { onFragmentChange } = renderEntries('\n  tags: [a]');
         pickEntry('tags', '{{ inputs.unknown }}');
-        expect(lastFragment(onFragmentChange)).toMatch(/- a\n\s+- "\{\{ inputs\.unknown \}\}"/);
+        expect(savedTags(onFragmentChange)).toEqual(['a', '{{ inputs.unknown }}']);
       });
 
       it('does not add an entry that is already there', () => {
@@ -2344,7 +2356,7 @@ with:
           '{{ consts.owner }}'
         );
         const saved = lastFragment(onFragmentChange);
-        expect(saved).toMatch(/- a\n\s+- b\n\s+- "\{\{ consts\.owner \}\}"/);
+        expect(savedTags(onFragmentChange)).toEqual(['a', 'b', '{{ consts.owner }}']);
         expect(saved).not.toContain('${{');
         // Back on the entries, where the reference reads as a pill.
         expect(within(screen.getByTestId(testId)).getByText('consts.owner')).toBeInTheDocument();

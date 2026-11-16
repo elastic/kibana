@@ -164,15 +164,21 @@ const HIDDEN_KEYS = new Set(['pretty', 'human', 'error_trace', 'source', 'filter
 
 const isRequired = (schema: z.ZodType): boolean => !schema.safeParse(undefined).success;
 
-/** Prefer schema meta title/label; otherwise prettify the key. */
-const resolveFieldLabel = (key: string, schema: z.ZodType): string => {
+/**
+ * The label a schema's meta asks for. `label` is for the form alone; `title` is also what the
+ * YAML editor shows on hover, so a label that is only about the form should not use it.
+ */
+const readMetaLabel = (schema: z.ZodType): string | undefined => {
   const meta = readFieldMeta(schema);
-  if (meta) {
-    if (typeof meta.title === 'string' && meta.title.trim()) return meta.title.trim();
-    if (typeof meta.label === 'string' && meta.label.trim()) return meta.label.trim();
-  }
-  return prettifyFieldKey(key);
+  const found = [meta?.title, meta?.label].find(
+    (value): value is string => typeof value === 'string' && value.trim() !== ''
+  );
+  return found?.trim();
 };
+
+/** Prefer schema meta title/label; otherwise prettify the key. */
+const resolveFieldLabel = (key: string, schema: z.ZodType): string =>
+  readMetaLabel(schema) ?? prettifyFieldKey(key);
 
 const readFieldMeta = (schema: z.ZodType): Record<string, unknown> | undefined => {
   const readMeta = (s: z.ZodType): Record<string, unknown> | undefined => {
@@ -544,8 +550,7 @@ const buildVariants = (
 
   return grouped.map((group, index): FormVariant => {
     const [first] = group;
-    const meta = readFieldMeta(first);
-    const title = typeof meta?.title === 'string' && meta.title.trim() ? meta.title : undefined;
+    const title = readMetaLabel(first);
     const variantSchema =
       group.length === 1 ? first : z.union(group as [z.ZodType, z.ZodType, ...z.ZodType[]]);
 
@@ -627,7 +632,7 @@ const fieldsFromObject = (
     basePath[0] === 'with'
   ) {
     const label =
-      (readFieldMeta(schema)?.title as string | undefined) ??
+      readMetaLabel(schema) ??
       i18n.translate('workflows.stepConfigPanel.recordWithLabel', { defaultMessage: 'Fields' });
     const required = isRequired(schema);
     const variants = buildVariants(stepType, 'with', schema, basePath, required);
@@ -650,7 +655,7 @@ const fieldsFromObject = (
       key: 'with',
       path: basePath,
       label:
-        (readFieldMeta(schema)?.title as string | undefined) ??
+        readMetaLabel(schema) ??
         i18n.translate('workflows.stepConfigPanel.recordWithLabel', { defaultMessage: 'Fields' }),
       description: describe(schema),
       required: isRequired(schema),

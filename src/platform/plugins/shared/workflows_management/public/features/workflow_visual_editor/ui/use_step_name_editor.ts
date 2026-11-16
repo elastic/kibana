@@ -92,6 +92,7 @@ export const useStepNameEditor = ({
 
   /** For a panel handed a new step: leave editing and drop the error. */
   const reset = useCallback(() => {
+    isEditingRef.current = false;
     setIsEditing(false);
     setError(undefined);
   }, []);

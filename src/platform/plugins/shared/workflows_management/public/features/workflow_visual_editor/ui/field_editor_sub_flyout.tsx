@@ -34,6 +34,7 @@ import type { ReferenceSelectionBridge } from './reference_capable_field';
 import { ContainerInSentenceCallout } from './reference_container_callout';
 import { caretAfterChange, useReferenceEditor } from './use_reference_editor';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
+import { opensPickerOnAt } from '../lib/opens_picker_on_at';
 import { insertTokenAsJsonText } from '../lib/reference_tokens';
 import { tokenForInsert } from '../lib/reference_value';
 import type { StepFieldLanguage } from '../lib/step_form_schema';
@@ -120,6 +121,7 @@ export function FieldEditorSubFlyout({
   // `{` is syntax in JSON and KQL, so only free text gets the `{` trigger and the "list inside a
   // sentence" warning (same rule as the inline fields).
   const isFreeText = language === undefined || language === 'plaintext';
+  const opensAtPicker = opensPickerOnAt(language);
   const { chipCss, editor, captureEditor, warning, dismissWarning } = useReferenceEditor({
     text: draft,
     catalog,
@@ -240,10 +242,6 @@ export function FieldEditorSubFlyout({
     }`,
     borderRadius: euiTheme.border.radius.small,
     background: euiTheme.colors.backgroundBaseSubdued,
-    // Transparent so the box (border, background) shows through.
-    '.monaco-editor, .monaco-editor-background, .monaco-editor .margin': {
-      backgroundColor: 'transparent',
-    },
     ...chipCss,
   } as const;
   const editorPaddingPx = parseInt(String(euiTheme.size.m), 10) || 12;
@@ -422,14 +420,22 @@ export function FieldEditorSubFlyout({
                 data-test-subj="workflowFieldEditorSubFlyoutValueDescription"
                 css={{ '& kbd': keyChipCss }}
               >
-                <FormattedMessage
-                  id="workflows.fieldEditorSubFlyout.valueDescription"
-                  defaultMessage="Drag a reference in, or type {at} / {braces}"
-                  values={{
-                    at: <kbd>@</kbd>,
-                    braces: <kbd>{'{{'}</kbd>,
-                  }}
-                />
+                {opensAtPicker ? (
+                  <FormattedMessage
+                    id="workflows.fieldEditorSubFlyout.valueDescription"
+                    defaultMessage="Drag a reference in, or type {at} / {braces}"
+                    values={{
+                      at: <kbd>@</kbd>,
+                      braces: <kbd>{'{{'}</kbd>,
+                    }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="workflows.fieldEditorSubFlyout.valueDescriptionBraces"
+                    defaultMessage="Drag a reference in, or type {braces}"
+                    values={{ braces: <kbd>{'{{'}</kbd> }}
+                  />
+                )}
               </EuiText>
             </div>
 
@@ -453,6 +459,7 @@ export function FieldEditorSubFlyout({
                 onChange={applyDraft}
                 fillHeight
                 openOnBrace={isFreeText}
+                openOnAt={opensAtPicker}
                 valueFormWhenWhole={valueFormWhenWhole}
               >
                 {({ appendControls, reportChange, registerSelection, teachingPlaceholder }) => (
@@ -479,6 +486,8 @@ export function FieldEditorSubFlyout({
                       <CodeEditor
                         languageId={monacoLanguageFor(language)}
                         chromeOverrides={workflowsEditorChromeOverrides}
+                        // Transparent so the box (border, background) shows through.
+                        transparentBackground
                         value={draft}
                         onChange={(text, event) => {
                           reportChange(text, caretAfterChange(text, event));

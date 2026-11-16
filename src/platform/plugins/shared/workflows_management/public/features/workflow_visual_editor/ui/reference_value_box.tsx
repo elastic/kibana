@@ -17,10 +17,10 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useStableCallback } from '@kbn/react-hooks';
 import { isReferenceValue } from '@kbn/workflows-yaml';
 import { DataReferencePicker } from './data_reference_picker';
 import { ReferenceChip } from './reference_chip';
-import { useStableCallback } from './use_stable_callback';
 import {
   clearActiveDataReferenceInsertTarget,
   setActiveDataReferenceInsertTarget,

@@ -1341,6 +1341,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
               <StepConfigPanel
                 mode={panel.origin}
                 stepType={panel.stepType}
+                stepName={panel.stepName}
                 actionLabel={panel.actionLabel}
                 initialFragment={panel.fragment}
                 syncedFragment={

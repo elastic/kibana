@@ -102,6 +102,16 @@ describe('isStructuralFragmentChange', () => {
       expect(isStructuralFragmentChange(SET_STEP, 'name: [unclosed')).toBe(true);
     });
 
+    it('is structural when a fragment is an alias fan-out that cannot be read', () => {
+      const fanOut = `name: x\na: &a [1, 2, 3]\nb: &b [${Array(10)
+        .fill('*a')
+        .join(', ')}]\nc: &c [${Array(10).fill('*b').join(', ')}]\nd: [${Array(10)
+        .fill('*c')
+        .join(', ')}]\n`;
+      expect(isStructuralFragmentChange(SET_STEP, fanOut)).toBe(true);
+      expect(isStructuralFragmentChange(fanOut, SET_STEP)).toBe(true);
+    });
+
     it('is structural when a fragment is not a map', () => {
       expect(isStructuralFragmentChange(SET_STEP, '- just\n- a list\n')).toBe(true);
       expect(isStructuralFragmentChange('plain text', SET_STEP)).toBe(true);

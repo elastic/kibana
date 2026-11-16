@@ -69,6 +69,15 @@ describe('resolveExternalStepFragment', () => {
     });
   });
 
+  it('reports a step that became an alias fan-out, which cannot be read as data', () => {
+    const fanOut = `type: console\na: &a [1, 2, 3]\nb: &b [${Array(10)
+      .fill('*a')
+      .join(', ')}]\nc: &c [${Array(10).fill('*b').join(', ')}]\nd: [${Array(10)
+      .fill('*c')
+      .join(', ')}]`;
+    expect(resolve(yamlWith(fanOut))).toContain('d: [');
+  });
+
   it('ignores a change of comments or key order, which is not a change of the step', () => {
     const reordered = yamlWith('with:\n  count: 5 # five\n  message: hi\ntype: console');
     expect(resolve(reordered)).toBeUndefined();

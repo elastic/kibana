@@ -24,7 +24,8 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { stringify as stringifyYaml } from 'yaml';
 import { i18n } from '@kbn/i18n';
-import { isReferenceValue } from '@kbn/workflows-yaml';
+import { MAP_DIRECTIVE } from '@kbn/workflows-extensions/common';
+import { isRecord, isReferenceValue } from '@kbn/workflows-yaml';
 import { CodeField } from './code_field';
 import { ConnectorIdField } from './connector_id_field';
 import { KeyValueField } from './key_value_field';
@@ -41,8 +42,8 @@ import {
   formatDataReferenceToken,
   formatValueReferenceToken,
 } from '../lib/build_data_reference_catalog';
-import { containsMapDirective, MAP_DIRECTIVE_KEY } from '../lib/contains_map_directive';
-import { fromTags, isTagValue, toTags } from '../lib/list_value';
+import { containsMapDirective } from '../lib/contains_map_directive';
+import { asJsonField, fromTags, isTagValue, toTags } from '../lib/list_value';
 import type { ReferenceForm } from '../lib/reference_value';
 import {
   isContainerReference,
@@ -85,7 +86,7 @@ function YamlOnlyValue({
       <EuiText size="xs" color="subdued" data-test-subj={`${testSubj}-yamlHint`}>
         {i18n.translate('workflows.stepConfigPanel.keyValue.yamlOnlyHint', {
           defaultMessage: 'Uses {directive}, which the form cannot edit. Edit it in the YAML tab.',
-          values: { directive: MAP_DIRECTIVE_KEY },
+          values: { directive: MAP_DIRECTIVE },
         })}
       </EuiText>
     </>
@@ -148,6 +149,11 @@ export function StepFieldRow({
     setJsonDraftError(error);
     onDraftErrorChangeRef.current(error);
   }, []);
+  // The key/value rows show their own errors beside the row; the panel only needs to know.
+  const reportDraftError = useCallback(
+    (error: string | undefined) => onDraftErrorChangeRef.current(error),
+    []
+  );
 
   const optionalLabel = i18n.translate('workflows.stepConfigPanel.optional', {
     defaultMessage: 'Optional',
@@ -427,7 +433,7 @@ export function StepFieldRow({
     const switchHelpText = [description, helpText].filter(Boolean).join(' ');
     return (
       <div
-        className="euiFormRow workflowStepConfigFieldRow"
+        className="workflowStepConfigFieldRow"
         css={{
           display: 'flex',
           flexDirection: 'column',
@@ -493,8 +499,7 @@ export function StepFieldRow({
     <div className="workflowStepConfigFieldRow">{child}</div>
   );
 
-  const codeField: StepFormField =
-    field.kind === 'list' ? { ...field, kind: 'code', language: 'json' } : field;
+  const codeField: StepFormField = field.kind === 'list' ? asJsonField(field) : field;
 
   switch (field.kind === 'list' && !listIsTags ? 'code' : field.kind) {
     case 'list':
@@ -635,6 +640,7 @@ export function StepFieldRow({
           <KeyValueField
             value={value}
             onChange={onChange}
+            onDraftErrorChange={reportDraftError}
             catalog={referenceCatalog}
             fieldLabel={field.label}
             addLabel={
@@ -694,11 +700,10 @@ export function StepFieldRow({
         </StepValidatedFormRow>
       );
     case 'parallel-branches': {
-      interface BranchItem {
-        name?: unknown;
-        steps: unknown[];
-      }
-      const branchesArray = Array.isArray(value) ? (value as BranchItem[]) : [];
+      // A branch that is not a mapping stands for an empty one, so the positions still line up.
+      const branchesArray = Array.isArray(value)
+        ? value.map((branch): Record<string, unknown> => (isRecord(branch) ? branch : {}))
+        : [];
       const addBranchLabel = i18n.translate(
         'workflows.stepConfigPanel.parallelBranches.addBranch',
         {
@@ -727,7 +732,10 @@ export function StepFieldRow({
                   compressed
                   fullWidth
                   value={branch.name !== undefined ? String(branch.name) : ''}
-                  placeholder={`branch ${idx + 1}`}
+                  placeholder={i18n.translate(
+                    'workflows.stepConfigPanel.parallelBranches.branchPlaceholder',
+                    { defaultMessage: 'branch {number}', values: { number: idx + 1 } }
+                  )}
                   isInvalid={isInvalid}
                   onChange={(e) => {
                     const next = [...branchesArray];

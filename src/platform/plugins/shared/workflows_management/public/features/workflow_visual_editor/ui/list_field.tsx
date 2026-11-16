@@ -12,8 +12,8 @@ import { EuiButtonIcon, EuiComboBox, EuiToolTip, useEuiTheme } from '@elastic/eu
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
+import { useStableCallback } from '@kbn/react-hooks';
 import { DataReferencePicker } from './data_reference_picker';
-import { useStableCallback } from './use_stable_callback';
 import {
   clearActiveDataReferenceInsertTarget,
   setActiveDataReferenceInsertTarget,

@@ -192,5 +192,18 @@ describe('useStepNameEditor', () => {
       expect(result.current.isEditing).toBe(false);
       expect(result.current.error).toBeUndefined();
     });
+
+    it('clears the editing flag, so a refused name does not block closing the next step', () => {
+      const { result } = setup();
+      act(() => result.current.begin());
+      act(() => result.current.changeDraft(''));
+      act(() => result.current.commit());
+      // The refused commit leaves the edit open.
+      expect(result.current.isEditingRef.current).toBe(true);
+
+      act(() => result.current.reset());
+
+      expect(result.current.isEditingRef.current).toBe(false);
+    });
   });
 });

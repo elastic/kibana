@@ -24,21 +24,28 @@ jest.mock('@kbn/code-editor', () =>
 
 const catalog: DataReferenceCatalog = { groups: [] };
 
-const bind = (value: string): ReferenceCapableBind =>
+const bind = (
+  value: string,
+  appendControls: React.ReactElement | null = null
+): ReferenceCapableBind =>
   ({
     value,
     isOpen: false,
     teachingPlaceholder: 'Type',
-    appendControls: null,
+    appendControls,
     reportChange: () => undefined,
     openPickerAtRange: () => undefined,
     registerSelection: () => undefined,
   } as unknown as ReferenceCapableBind);
 
-const renderInput = (onBlur: () => void, value: string) => (
+const renderInput = (
+  onBlur: () => void,
+  value: string,
+  appendControls: React.ReactElement | null = null
+) => (
   <I18nProvider>
     <ReferenceTextInput
-      bind={bind(value)}
+      bind={bind(value, appendControls)}
       catalog={catalog}
       ariaLabel="Value"
       isInvalid={false}
@@ -62,5 +69,23 @@ describe('ReferenceTextInput', () => {
     fireEvent.blur(screen.getByTestId('field'));
     expect(latest).toHaveBeenCalledTimes(1);
     expect(first).not.toHaveBeenCalled();
+  });
+
+  it('keeps focus in the editor when a control beside it is pressed, so its caret survives for the picker', () => {
+    render(
+      renderInput(
+        jest.fn(),
+        'abc def',
+        <button type="button" data-test-subj="insert">
+          {'insert'}
+        </button>
+      )
+    );
+    fireEvent.focusIn(screen.getByTestId('field'));
+
+    // A mousedown nobody cancels moves focus to the button: the editor blurs and goes away.
+    const focusMoves = fireEvent.mouseDown(screen.getByTestId('insert'));
+
+    expect(focusMoves).toBe(false);
   });
 });

@@ -10,8 +10,8 @@
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useStableCallback } from '@kbn/react-hooks';
 import { DataReferencePicker } from './data_reference_picker';
-import { useStableCallback } from './use_stable_callback';
 import {
   clearActiveDataReferenceInsertTarget,
   setActiveDataReferenceInsertTarget,
@@ -62,6 +62,7 @@ export function ReferenceCapableField({
   onExpand,
   fillHeight = false,
   openOnBrace = false,
+  openOnAt = true,
   valueFormWhenWhole = false,
   children,
   'data-test-subj': dataTestSubj = 'workflowStepConfigDataReference',
@@ -78,6 +79,8 @@ export function ReferenceCapableField({
    * `{` is syntax.
    */
   readonly openOnBrace?: boolean;
+  /** Open the picker on a typed `@` (the default); see `opensPickerOnAt`. `{{` always opens it. */
+  readonly openOnAt?: boolean;
   /**
    * A reference that fills the whole field is inserted in the value form (`${{ }}`) instead of
    * the text form; a field that already holds text keeps the text form. For `if` / `while`
@@ -103,8 +106,13 @@ export function ReferenceCapableField({
         defaultMessage: 'Type {brace} to insert data',
         values: { brace: '{' },
       })
-    : i18n.translate('workflows.stepConfigPanel.typeAtToInsert', {
+    : openOnAt
+    ? i18n.translate('workflows.stepConfigPanel.typeAtToInsert', {
         defaultMessage: 'Type @ to insert data',
+      })
+    : i18n.translate('workflows.stepConfigPanel.typeBracesToInsert', {
+        defaultMessage: 'Type {braces} to insert data',
+        values: { braces: '{{' },
       });
 
   const focusAndSetCaret = useCallback((offset: number) => {
@@ -186,11 +194,11 @@ export function ReferenceCapableField({
       const before = next.slice(0, caret);
       if (before.endsWith('{{')) {
         openPicker({ start: caret - 2, end: caret });
-      } else if (before.endsWith('@') || (openOnBrace && before.endsWith('{'))) {
+      } else if ((openOnAt && before.endsWith('@')) || (openOnBrace && before.endsWith('{'))) {
         openPicker({ start: caret - 1, end: caret });
       }
     },
-    [onChange, openOnBrace, openPicker]
+    [onChange, openOnAt, openOnBrace, openPicker]
   );
 
   const togglePicker = useCallback(() => {

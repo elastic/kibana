@@ -257,13 +257,13 @@ export const MaxIterationsObjectSchema = lazySchema(() =>
       limit: z.number().int().positive(),
       'on-limit': z.enum(['continue', 'fail']),
     })
-    .meta({ title: 'Limit + behavior' })
+    .meta({ label: 'Limit + behavior' })
 );
 
 // The engine reads loop caps exactly as typed, so the form must not offer references for them.
 export const MaxIterationsSchema = lazySchema(() =>
   z
-    .union([z.number().int().positive().meta({ title: 'Number' }), MaxIterationsObjectSchema])
+    .union([z.number().int().positive().meta({ label: 'Number' }), MaxIterationsObjectSchema])
     .meta({ templatable: false })
 );
 export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
@@ -631,7 +631,7 @@ export const DataSetStepInputSchema = lazySchema(() =>
     .describe(
       'Key-value pairs where keys are variable names and values are the data to store. Values support Liquid expressions. Access via {{ variables.key_name }}'
     )
-    .meta({ title: 'Variables' })
+    .meta({ label: 'Variables' })
 );
 export const DataSetStepSchema = BaseStepSchema.extend({
   type: z.literal('data.set').describe('Set variables in the workflow context'),

@@ -8,7 +8,7 @@
  */
 
 import { parseDocument } from 'yaml';
-import { detectIndent, writeFragmentValue } from './fragment_yaml';
+import { writeFragmentValue } from './fragment_yaml';
 import type { StepFormField } from './step_form_schema';
 
 const field = (path: readonly string[], overrides: Partial<StepFormField> = {}): StepFormField => ({
@@ -29,18 +29,6 @@ with:
   message: hi
   count: 5
 `;
-
-describe('detectIndent', () => {
-  it.each([
-    ['two spaces', 'a:\n  b: 1\n', 2],
-    ['four spaces', 'a:\n    b: 1\n', 4],
-    ['the first indented line, whichever later ones do', 'a:\n   b: 1\n  c: 2\n', 3],
-    ['nothing indented', 'a: 1\nb: 2\n', 2],
-    ['an empty text', '', 2],
-  ])('is read from %s', (_label, yaml, expected) => {
-    expect(detectIndent(yaml)).toBe(expected);
-  });
-});
 
 describe('writeFragmentValue', () => {
   describe('setting a value', () => {
@@ -136,6 +124,94 @@ describe('writeFragmentValue', () => {
       ['nothing', ''],
     ])('is returned as it was for %s', (_label, text) => {
       expect(writeFragmentValue(text, field(['with', 'x']), 'y', 2)).toBe(text);
+    });
+  });
+
+  describe('a list that is already there', () => {
+    const PARALLEL = `name: par
+type: parallel
+branches:
+  - name: a # keep a
+    steps:
+      - name: s1 # keep s1
+        type: console
+        with:
+          message: hi
+  - name: b
+    steps:
+      - name: s2
+        type: console
+        # keep s2 comment
+        with:
+          message: yo
+`;
+    const branches = field(['branches'], { kind: 'parallel-branches' });
+    const current = () => toJs(PARALLEL).branches as Array<Record<string, unknown>>;
+    const write = (next: unknown[]) => writeFragmentValue(PARALLEL, branches, next, 2);
+
+    it('keeps the comments of every step when one branch is renamed', () => {
+      const [first, second] = current();
+      const out = write([{ ...first, name: 'alpha' }, second]);
+
+      expect(toJs(out).branches[0].name).toBe('alpha');
+      expect(out).toContain('# keep s1');
+      expect(out).toContain('# keep s2 comment');
+      expect(toJs(out).branches[1]).toEqual(second);
+    });
+
+    it('keeps the comments of the branches that stay when one is deleted', () => {
+      const [, second] = current();
+      const out = write([second]);
+
+      expect(toJs(out).branches).toEqual([second]);
+      expect(out).toContain('# keep s2 comment');
+      expect(out).not.toContain('keep s1');
+    });
+
+    it('keeps the existing branches, as they were written, when one is added', () => {
+      const out = write([...current(), { name: 'c', steps: [] }]);
+
+      expect(toJs(out).branches).toHaveLength(3);
+      expect(toJs(out).branches[2]).toEqual({ name: 'c', steps: [] });
+      expect(out).toContain('# keep s1');
+      expect(out).toContain('# keep s2 comment');
+    });
+
+    it('drops a key the new value no longer has, and writes one it gained', () => {
+      const [first, second] = current();
+      const { steps, ...withoutSteps } = first as { steps: unknown };
+      const out = write([{ ...withoutSteps, extra: 1 }, second]);
+
+      expect(toJs(out).branches[0]).toEqual({ name: 'a', extra: 1 });
+      expect(steps).toBeDefined();
+    });
+
+    it('leaves the text as it was when the value did not change', () => {
+      expect(write(current())).toBe(PARALLEL);
+    });
+
+    it('empties a list the field requires, which keeps its key', () => {
+      const required = field(['branches'], { kind: 'parallel-branches', required: true });
+      expect(toJs(writeFragmentValue(PARALLEL, required, [], 2)).branches).toEqual([]);
+    });
+
+    it('keeps the flow style of a short list when one item changes', () => {
+      const out = writeFragmentValue(
+        'name: x\ntags: [a, b, c]\n',
+        field(['tags'], { kind: 'list' }),
+        ['a', 'z', 'c'],
+        2
+      );
+      expect(out).toMatch(/tags: \[\s*a, z, c\s*\]/);
+    });
+  });
+
+  describe('a fragment with YAML errors', () => {
+    const BROKEN = 'name: a\ntype: x\nwith: {a: 1\n';
+
+    it('is returned as it was, because a document with errors cannot be written back', () => {
+      expect(writeFragmentValue(BROKEN, field(['name']), 'b', 2)).toBe(BROKEN);
+      expect(writeFragmentValue(BROKEN, field(['timeout']), '30s', 2)).toBe(BROKEN);
     });
   });
 });

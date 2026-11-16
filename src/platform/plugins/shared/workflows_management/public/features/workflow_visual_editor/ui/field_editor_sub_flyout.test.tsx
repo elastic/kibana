@@ -123,6 +123,14 @@ describe('FieldEditorSubFlyout', () => {
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 
+  it('teaches both @ and {{ for plain text, where @ is not part of the language', () => {
+    renderFlyout({ value: 'hi' });
+
+    expect(screen.getByTestId('workflowFieldEditorSubFlyoutValueDescription')).toHaveTextContent(
+      'Drag a reference in, or type @ / {{'
+    );
+  });
+
   it('loads the field value and accepts typing with live write-through', () => {
     const { onChange } = renderFlyout({
       fieldLabel: 'Connector',
@@ -131,8 +139,9 @@ describe('FieldEditorSubFlyout', () => {
     });
 
     expect(screen.getByTestId('workflowFieldEditorSubFlyoutValueLabel')).toHaveTextContent('Value');
+    // `@` is part of the language in JSON (`"@timestamp"`), so only {{ opens the picker.
     expect(screen.getByTestId('workflowFieldEditorSubFlyoutValueDescription')).toHaveTextContent(
-      'Drag a reference in, or type @ / {{'
+      'Drag a reference in, or type {{'
     );
 
     const editor = screen.getByTestId('workflowFieldEditorSubFlyoutTextarea');

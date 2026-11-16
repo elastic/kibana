@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isRecord } from '@kbn/workflows-yaml';
 import { ReferenceCapableField } from './reference_capable_field';
 import { ReferenceTextInput } from './reference_text_input';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { coerceSingleWord } from '../lib/coerce_single_word';
-import { isPlainObject } from '../lib/is_plain_object';
 import { normalizeReferenceForm } from '../lib/reference_value';
 
 interface Row {
@@ -42,6 +42,12 @@ export interface KeyValueFieldProps {
   /** The stored map; anything else is treated as empty. */
   readonly value: unknown;
   readonly onChange: (next: Record<string, unknown>) => void;
+  /**
+   * What keeps the rows from being written as typed, or `undefined` once nothing does: a JSON cell
+   * that does not parse, a repeated name, a value without a name. The panel asks before closing
+   * on it, as those rows would be lost.
+   */
+  readonly onDraftErrorChange: (error: string | undefined) => void;
   readonly catalog: DataReferenceCatalog;
   readonly fieldLabel: string;
   /** Label of the add button, e.g. "Add variable". */
@@ -59,19 +65,24 @@ export interface KeyValueFieldProps {
   readonly renderJsonValue: (props: KeyValueJsonCellProps) => React.ReactElement;
 }
 
-const toRecord = (value: unknown): Record<string, unknown> => (isPlainObject(value) ? value : {});
+const toRecord = (value: unknown): Record<string, unknown> => (isRecord(value) ? value : {});
 
 /** The map the rows stand for: rows without a name, and repeats of a name, are not written. */
 const toRecordFromRows = (rows: readonly Row[]): Record<string, unknown> => {
   const seen = new Set<string>();
-  const record: Record<string, unknown> = {};
+  const entries: Array<[string, unknown]> = [];
   rows.forEach(({ key, value }) => {
     if (key === '' || seen.has(key)) return;
     seen.add(key);
-    record[key] = value;
+    entries.push([key, value]);
   });
-  return record;
+  // Not `record[key] = value`: a row named `__proto__` would set the prototype and vanish.
+  return Object.fromEntries(entries);
 };
+
+/** A row with a value but no name: it is not written, so closing would lose it. */
+const isUnnamedWithValue = ({ key, value }: Row): boolean =>
+  key === '' && value !== undefined && value !== '';
 
 /**
  * A name that was already a row keeps that row's id, so when the map changes from outside the
@@ -225,6 +236,7 @@ const KeyValueRow = React.memo(function KeyValueRow({
 export function KeyValueField({
   value,
   onChange,
+  onDraftErrorChange,
   catalog,
   fieldLabel,
   addLabel,
@@ -289,10 +301,10 @@ export function KeyValueField({
       value: typedValuesRef.current ? coerceSingleWord(normalized) : normalized,
     });
   }, []);
-  const onRemove = useCallback(
-    (id: number) => updateRef.current(rowsRef.current.filter((other) => other.id !== id)),
-    []
-  );
+  const onRemove = useCallback((id: number) => {
+    setJsonErrors(({ [id]: removed, ...rest }) => rest);
+    updateRef.current(rowsRef.current.filter((other) => other.id !== id));
+  }, []);
   const onJsonErrorChange = useCallback(
     (id: number, draftError: string | undefined) =>
       setJsonErrors((current) => ({ ...current, [id]: draftError })),
@@ -305,6 +317,22 @@ export function KeyValueField({
     if (key !== '' && seenKeys.has(key)) duplicateIds.add(id);
     seenKeys.add(key);
   });
+
+  const draftError =
+    Object.values(jsonErrors).find((error) => error !== undefined) ??
+    (duplicateIds.size > 0
+      ? i18n.translate('workflows.stepConfigPanel.keyValue.duplicateNames', {
+          defaultMessage: 'Names must be unique',
+        })
+      : undefined) ??
+    (rows.some(isUnnamedWithValue)
+      ? i18n.translate('workflows.stepConfigPanel.keyValue.nameRequired', {
+          defaultMessage: 'Name every entry that has a value',
+        })
+      : undefined);
+  useEffect(() => {
+    onDraftErrorChange(draftError);
+  }, [draftError, onDraftErrorChange]);
 
   const nameLabel = i18n.translate('workflows.stepConfigPanel.keyValue.nameLabel', {
     defaultMessage: '{field} name',

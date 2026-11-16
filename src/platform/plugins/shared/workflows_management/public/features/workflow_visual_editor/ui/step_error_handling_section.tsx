@@ -17,9 +17,10 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isMap, parseDocument, type YAMLMap } from 'yaml';
 import { i18n } from '@kbn/i18n';
+import { isRecord } from '@kbn/workflows-yaml';
 import { parseStepFragment } from '../lib/parse_step_fragment';
 
 export interface FallbackStepChip {
@@ -40,9 +41,6 @@ export interface StepErrorHandlingSectionProps {
 const DEFAULT_MAX_ATTEMPTS = 3;
 const DEFAULT_DELAY = '5s';
 
-const isObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
 const readOnFailure = (
   onFailure: unknown
 ): {
@@ -53,7 +51,7 @@ const readOnFailure = (
   fallbacks: FallbackStepChip[];
   configured: boolean;
 } => {
-  const js = isObject(onFailure) ? onFailure : undefined;
+  const js = isRecord(onFailure) ? onFailure : undefined;
   if (!js) {
     return {
       retryEnabled: false,
@@ -118,6 +116,16 @@ const mutateOnFailure = (
 };
 
 /**
+ * What the user is typing into a field whose stored value is always valid: the text may be empty or
+ * half-written for a while. The stored value comes back when the field is left, or changes elsewhere.
+ */
+const useTypedText = (stored: string) => {
+  const [typed, setTyped] = useState(stored);
+  useEffect(() => setTyped(stored), [stored]);
+  return { typed, setTyped, restore: () => setTyped(stored) };
+};
+
+/**
  * Form controls for step `on-failure` retry / continue. Fallback creation and
  * removal live on the canvas only.
  */
@@ -132,6 +140,8 @@ export function StepErrorHandlingSection({
   const retrySwitchId = useGeneratedHtmlId({ prefix: 'workflowStepErrorRetry' });
   const continueSwitchId = useGeneratedHtmlId({ prefix: 'workflowStepErrorContinue' });
   const state = useMemo(() => readOnFailure(onFailureValue), [onFailureValue]);
+  const maxAttemptsText = useTypedText(String(state.maxAttempts));
+  const delayText = useTypedText(state.delay);
 
   const setRetryEnabled = useCallback(
     (enabled: boolean) => {
@@ -176,8 +186,7 @@ export function StepErrorHandlingSection({
           if (!isMap(onFailure)) return;
           const retry = onFailure.get('retry');
           if (!isMap(retry)) return;
-          if (value.trim().length === 0) retry.set('delay', DEFAULT_DELAY);
-          else retry.set('delay', value);
+          retry.set('delay', value);
         })
       );
     },
@@ -271,11 +280,15 @@ export function StepErrorHandlingSection({
                   compressed
                   fullWidth
                   min={1}
-                  value={state.maxAttempts}
+                  value={maxAttemptsText.typed}
                   onChange={(e) => {
+                    maxAttemptsText.setTyped(e.target.value);
                     const next = Number(e.target.value);
-                    if (Number.isFinite(next) && next >= 1) setMaxAttempts(Math.floor(next));
+                    if (e.target.value !== '' && Number.isFinite(next) && next >= 1) {
+                      setMaxAttempts(Math.floor(next));
+                    }
                   }}
+                  onBlur={maxAttemptsText.restore}
                   data-test-subj="workflowStepConfigErrorMaxAttempts"
                 />
               </EuiFormRow>
@@ -291,8 +304,12 @@ export function StepErrorHandlingSection({
                 <EuiFieldText
                   compressed
                   fullWidth
-                  value={state.delay}
-                  onChange={(e) => setDelay(e.target.value)}
+                  value={delayText.typed}
+                  onChange={(e) => {
+                    delayText.setTyped(e.target.value);
+                    if (e.target.value.trim() !== '') setDelay(e.target.value);
+                  }}
+                  onBlur={delayText.restore}
                   data-test-subj="workflowStepConfigErrorDelay"
                 />
               </EuiFormRow>

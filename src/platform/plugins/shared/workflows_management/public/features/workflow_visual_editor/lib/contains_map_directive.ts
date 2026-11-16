@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** The reserved key of `data.map` that turns a nested field into an array (`MAP_DIRECTIVE`). */
-export const MAP_DIRECTIVE_KEY = '$map';
+import { MAP_DIRECTIVE } from '@kbn/workflows-extensions/common';
 
 /** True when the value has a `$map` key, at any depth, in an object or inside a list. */
 export const containsMapDirective = (value: unknown): boolean => {
   if (Array.isArray(value)) return value.some(containsMapDirective);
   if (value === null || typeof value !== 'object') return false;
   return Object.entries(value).some(
-    ([key, entry]) => key === MAP_DIRECTIVE_KEY || containsMapDirective(entry)
+    ([key, entry]) => key === MAP_DIRECTIVE || containsMapDirective(entry)
   );
 };

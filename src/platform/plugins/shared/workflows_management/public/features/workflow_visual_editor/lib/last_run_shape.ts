@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isPlainObject } from './is_plain_object';
+import { isRecord } from '@kbn/workflows-yaml';
 
 export interface StepOutputReference {
   readonly stepName: string;
@@ -32,7 +32,7 @@ const resolvePath = (output: unknown, path: readonly string[]): { value: unknown
     if (Array.isArray(current) && /^\d+$/.test(segment)) {
       if (Number(segment) >= current.length) return undefined;
       current = current[Number(segment)];
-    } else if (isPlainObject(current) && Object.hasOwn(current, segment)) {
+    } else if (isRecord(current) && Object.hasOwn(current, segment)) {
       current = current[segment];
     } else {
       return undefined;
@@ -58,7 +58,7 @@ export const describeLastRunShape = (
       values: { count: value.length },
     });
   }
-  if (isPlainObject(value)) {
+  if (isRecord(value)) {
     return i18n.translate('workflows.stepConfigPanel.lastRunShape.record', {
       defaultMessage: 'record, {count, plural, one {# field} other {# fields}}',
       values: { count: Object.keys(value).length },

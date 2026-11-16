@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isPlainObject } from './is_plain_object';
+import { isRecord } from '@kbn/workflows-yaml';
 import type { FormVariant } from './step_form_schema';
 
 const hasDiscriminator = (variant: FormVariant, value: Record<string, unknown>): boolean =>
@@ -23,7 +23,7 @@ const hasDiscriminator = (variant: FormVariant, value: Record<string, unknown>):
 export const inferVariant = (variants: readonly FormVariant[], value: unknown): FormVariant => {
   const accepted = variants.find((variant) => variant.schema.safeParse(value).success);
   if (accepted) return accepted;
-  if (isPlainObject(value)) {
+  if (isRecord(value)) {
     const marked = variants.find((variant) => hasDiscriminator(variant, value));
     if (marked) return marked;
     const overlap = (variant: FormVariant) =>
@@ -45,6 +45,6 @@ export const blankVariantValue = (variant: FormVariant): Record<string, unknown>
 
 /** A value that is only a variant's own discriminator has not been filled in yet: nothing to replace. */
 export const isBlankVariantValue = (variants: readonly FormVariant[], value: unknown): boolean =>
-  isPlainObject(value) &&
+  isRecord(value) &&
   Object.keys(value).length === 1 &&
   variants.some((variant) => hasDiscriminator(variant, value));

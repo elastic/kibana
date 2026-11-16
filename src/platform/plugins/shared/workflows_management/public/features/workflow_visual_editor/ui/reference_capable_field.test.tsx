@@ -39,9 +39,11 @@ const catalog: DataReferenceCatalog = { groups: [] };
 function Harness({
   initialValue = 'hello',
   valueFormWhenWhole,
+  openOnAt,
 }: {
   initialValue?: string;
   valueFormWhenWhole?: boolean;
+  openOnAt?: boolean;
 }) {
   const [value, setValue] = useState(initialValue);
   return (
@@ -51,9 +53,17 @@ function Harness({
         value={value}
         onChange={setValue}
         valueFormWhenWhole={valueFormWhenWhole}
+        openOnAt={openOnAt}
       >
-        {({ value: textValue, reportChange, attachInputRef, togglePicker }) => (
+        {({
+          value: textValue,
+          reportChange,
+          attachInputRef,
+          togglePicker,
+          teachingPlaceholder,
+        }) => (
           <>
+            <span data-test-subj="placeholder">{teachingPlaceholder}</span>
             <input
               data-test-subj="field"
               value={textValue}
@@ -119,5 +129,38 @@ describe('ReferenceCapableField value form when the pick fills the field', () =>
 
   it('keeps the text form when the option is off', () => {
     expect(insertedText('', 0)).toBe('{{ event.a }}');
+  });
+});
+
+describe('ReferenceCapableField typed triggers', () => {
+  const type = (text: string) =>
+    fireEvent.change(screen.getByTestId('field'), {
+      target: { value: text, selectionStart: text.length },
+    });
+
+  it('opens the picker on a typed @', () => {
+    render(<Harness initialValue="" />);
+    type('mail @');
+    expect(screen.getByTestId('mockInsert')).toBeInTheDocument();
+    expect(screen.getByTestId('placeholder')).toHaveTextContent('Type @ to insert data');
+  });
+
+  describe('where @ is part of the language', () => {
+    it('leaves a typed @ alone, so @timestamp can be typed', () => {
+      render(<Harness initialValue="" openOnAt={false} />);
+      type('FROM logs | SORT @');
+      expect(screen.queryByTestId('mockInsert')).not.toBeInTheDocument();
+    });
+
+    it('still opens the picker on a typed {{', () => {
+      render(<Harness initialValue="" openOnAt={false} />);
+      type('FROM logs | WHERE a == {{');
+      expect(screen.getByTestId('mockInsert')).toBeInTheDocument();
+    });
+
+    it('teaches {{ instead of @', () => {
+      render(<Harness initialValue="" openOnAt={false} />);
+      expect(screen.getByTestId('placeholder')).toHaveTextContent('Type {{ to insert data');
+    });
   });
 });

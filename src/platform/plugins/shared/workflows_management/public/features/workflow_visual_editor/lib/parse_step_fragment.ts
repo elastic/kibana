@@ -8,8 +8,8 @@
  */
 
 import { isEqual } from 'lodash';
-import { isMap, parseDocument } from 'yaml';
-import { isPlainObject } from './is_plain_object';
+import { type Document, isMap, parseDocument } from 'yaml';
+import { isRecord } from '@kbn/workflows-yaml';
 import { readPath } from './step_form_schema';
 
 /** A step YAML fragment, parsed once: everything the panel reads from it comes from here. */
@@ -32,16 +32,26 @@ export interface ParsedStepFragment {
   readonly read: (path: readonly string[]) => unknown;
 }
 
+/** `toJS` throws on an alias fan-out (yaml's resource-exhaustion guard) that parses without errors. */
+const toData = (doc: Document): { data: unknown; error?: string } => {
+  try {
+    return { data: doc.toJS() };
+  } catch (e) {
+    return { data: undefined, error: e instanceof Error ? e.message : String(e) };
+  }
+};
+
 export const parseStepFragment = (text: string): ParsedStepFragment => {
   const doc = parseDocument(text);
-  const hasErrors = doc.errors.length > 0;
-  const data: unknown = doc.toJS();
-  const mapping = isMap(doc.contents) && isPlainObject(data) ? data : undefined;
+  const { data, error: dataError } = toData(doc);
+  const error = doc.errors[0]?.message ?? dataError;
+  const hasErrors = error !== undefined;
+  const mapping = isMap(doc.contents) && isRecord(data) ? data : undefined;
   const valid = !hasErrors && mapping !== undefined;
   return {
     text,
     hasErrors,
-    error: doc.errors[0]?.message,
+    error,
     data,
     valid,
     js: valid ? mapping : undefined,

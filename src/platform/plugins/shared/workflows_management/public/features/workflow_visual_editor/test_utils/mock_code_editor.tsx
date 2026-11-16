@@ -16,8 +16,27 @@ type Editor = monaco.editor.IStandaloneCodeEditor;
 
 export interface MockCodeEditorChange {
   readonly rangeOffset: number;
+  /** How many characters of the old text the change replaces, as in a Monaco change event. */
+  readonly rangeLength: number;
   readonly text: string;
 }
+
+/**
+ * The change that turns `previous` into `next`, as Monaco reports it: where it starts, how much it
+ * replaces, and what goes there. An edit ends at the caret (typing, a delete and a paste all
+ * leave it there), so what follows the caret is unchanged and only the text before it is compared.
+ */
+export const changeBetween = (
+  previous: string,
+  next: string,
+  caret: number = next.length
+): MockCodeEditorChange => {
+  const previousEnd = Math.max(0, previous.length - (next.length - caret));
+  const limit = Math.min(previousEnd, caret);
+  let start = 0;
+  while (start < limit && previous[start] === next[start]) start++;
+  return { rangeOffset: start, rangeLength: previousEnd - start, text: next.slice(start, caret) };
+};
 
 export interface MockCodeEditorProps {
   readonly value: string;
@@ -110,7 +129,7 @@ const MockCodeEditor = ({
         });
         const to = offsetAt(current, { lineNumber: range.endLineNumber, column: range.endColumn });
         latest.current.onChange?.(`${current.slice(0, from)}${text}${current.slice(to)}`, {
-          changes: [{ rangeOffset: from, text }],
+          changes: [{ rangeOffset: from, rangeLength: to - from, text }],
         });
       },
       createDecorationsCollection: (
@@ -141,14 +160,7 @@ const MockCodeEditor = ({
       onChange={(event) => {
         const next = event.target.value;
         const caret = event.target.selectionStart ?? next.length;
-        onChange?.(next, {
-          changes: [
-            {
-              rangeOffset: caret - (next.length - value.length),
-              text: next.slice(Math.max(0, caret - 1), caret),
-            },
-          ],
-        });
+        onChange?.(next, { changes: [changeBetween(value, next, caret)] });
       }}
     />
   );

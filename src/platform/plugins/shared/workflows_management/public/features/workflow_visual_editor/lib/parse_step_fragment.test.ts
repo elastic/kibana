@@ -20,7 +20,28 @@ with:
     - b
 `;
 
+/** No YAML error, but `toJS` refuses it: each anchor fans out ten times over the last. */
+const ALIAS_FAN_OUT = [
+  'name: notify',
+  'type: slack',
+  'a: &a [x, x, x, x, x, x, x, x, x, x]',
+  `b: &b [${Array(10).fill('*a').join(', ')}]`,
+  `c: &c [${Array(10).fill('*b').join(', ')}]`,
+  `d: [${Array(10).fill('*c').join(', ')}]`,
+].join('\n');
+
 describe('parseStepFragment', () => {
+  describe('an alias fan-out that toJS refuses', () => {
+    it('is reported as a YAML error, not thrown', () => {
+      const parsed = parseStepFragment(ALIAS_FAN_OUT);
+      expect(parsed.hasErrors).toBe(true);
+      expect(parsed.valid).toBe(false);
+      expect(parsed.error).toMatch(/alias/i);
+      expect(parsed.js).toBeUndefined();
+      expect(parsed.read(['name'])).toBeUndefined();
+    });
+  });
+
   describe('a valid step mapping', () => {
     const parsed = parseStepFragment(STEP);
 

@@ -12,7 +12,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { ReferenceToken } from '../lib/reference_tokens';
-import { containerName } from '../lib/reference_tokens';
 
 /** Warns that a list or record can't sit inside a sentence, with a one-click JSON-text fix. */
 export function ContainerInSentenceCallout({
@@ -32,8 +31,9 @@ export function ContainerInSentenceCallout({
       size="s"
       announceOnMount={false}
       title={i18n.translate('workflows.stepConfigPanel.referenceCallout.title', {
-        defaultMessage: "A {type} can't go inside a sentence as it is",
-        values: { type: containerName(token.iconType) },
+        defaultMessage:
+          "A {type, select, array {list} other {record}} can't go inside a sentence as it is",
+        values: { type: token.iconType },
       })}
       text={i18n.translate('workflows.stepConfigPanel.referenceCallout.body', {
         defaultMessage: "Insert it as JSON text to show what's in it.",

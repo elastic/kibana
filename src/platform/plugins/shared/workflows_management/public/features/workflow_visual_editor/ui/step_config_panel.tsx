@@ -22,7 +22,8 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { isEqual } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { YAML_LANG_ID } from '@kbn/monaco';
@@ -34,7 +35,7 @@ import {
   stepSupportsErrorHandlingSettings,
   workflowsEditorChromeOverrides,
 } from '@kbn/workflows-ui';
-import { isReferenceValue } from '@kbn/workflows-yaml';
+import { detectIndent, isReferenceValue } from '@kbn/workflows-yaml';
 import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
 import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
@@ -48,8 +49,9 @@ import { resolveCatalogDisplayName } from '../../../shared/utils/catalog_display
 import type { StepScopeSchemas } from '../lib/build_data_reference_catalog';
 import { buildDataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { collectStepNames } from '../lib/collect_step_names';
-import { detectIndent, writeFragmentValue } from '../lib/fragment_yaml';
+import { writeFragmentValue } from '../lib/fragment_yaml';
 import { isInParallelBody } from '../lib/is_in_parallel_body';
+import { asJsonField, isTagValue } from '../lib/list_value';
 import { isStepFragmentDirty } from '../lib/parse_step_fragment';
 import {
   fieldId,
@@ -59,6 +61,16 @@ import {
 } from '../lib/step_form_schema';
 
 ensureWorkflowGraphEuiIcons();
+
+/** True when `draft` is JSON for `value`; an empty draft, `null`, `[]` and `{}` all stand for no value. */
+const isJsonDraftOf = (draft: string, value: unknown): boolean => {
+  try {
+    const drafted: unknown = draft.trim() === '' ? undefined : JSON.parse(draft);
+    return isEqual(drafted, value) || (isEmptyFieldValue(drafted) && isEmptyFieldValue(value));
+  } catch {
+    return false;
+  }
+};
 
 /**
  * Where the step the panel is editing came from — every edit live-applies to
@@ -71,6 +83,11 @@ export type StepConfigPanelMode = 'insert' | 'edit';
 export interface StepConfigPanelProps {
   readonly mode: StepConfigPanelMode;
   readonly stepType: string;
+  /**
+   * The name the step has in the workflow now. A draft that gives it another step's name is never
+   * written, so the panel asks before closing on one.
+   */
+  readonly stepName?: string;
   /**
    * Catalog display name from the Actions menu (e.g. "HTTP Request"). Used for
    * the subtitle (and as the title fallback when the step has no name yet).
@@ -176,7 +193,8 @@ export function resetStepConfigPanelSessionStateForTests(): void {
 
 export function StepConfigPanel({
   mode,
-  stepType,
+  stepType: openedStepType,
+  stepName,
   actionLabel,
   initialFragment,
   connectors,
@@ -203,6 +221,11 @@ export function StepConfigPanel({
   // The fragment is parsed once here; every read below goes through it.
   const parsed = useStepFragment(fragment);
   const initialParsed = useStepFragment(initialFragment);
+  // The type the YAML says: the YAML tab or an undo can change it under the panel, and the form,
+  // icon and settings follow it.
+  const typeInYaml = parsed.read(['type']);
+  const stepType =
+    typeof typeInYaml === 'string' && typeInYaml !== '' ? typeInYaml : openedStepType;
 
   const siblingStepNames = useMemo(
     () => collectStepNames(workflowDefinition?.steps),
@@ -219,7 +242,7 @@ export function StepConfigPanel({
       [indent]
     ),
   });
-  const { reset: resetNameEditor } = nameEditor;
+  const { reset: resetNameEditor, revert: revertNameEditor, error: nameError } = nameEditor;
 
   const [settingsOpen, setSettingsOpen] = useState(settingsAccordionOpenForPage);
   /** Field currently open in the expanded editor (depth ≤ 2). */
@@ -300,9 +323,15 @@ export function StepConfigPanel({
     [indent]
   );
 
+  // The JSON the user last typed in the expanded editor. The step holds the value it parses to, which
+  // reads back re-formatted; the editor keeps the typed text for as long as it says that value.
+  const typedExpandedJsonRef = useRef<string | undefined>(undefined);
+
   const expandedFieldValue = useMemo(() => {
     if (!expandedField) return '';
     const raw = parsed.read(expandedField.path);
+    const typed = typedExpandedJsonRef.current;
+    if (typed !== undefined && isJsonDraftOf(typed, raw)) return typed;
     if (raw === undefined || raw === null) return '';
     // Like the Data box, which hides a typed value kept while the switch sits on Data.
     if (
@@ -332,6 +361,7 @@ export function StepConfigPanel({
         return;
       }
       if (expandedField.kind === 'code' && expandedField.language === 'json') {
+        typedExpandedJsonRef.current = next;
         if (next.trim() === '') {
           handleFieldChange(expandedField, undefined);
           return;
@@ -348,9 +378,15 @@ export function StepConfigPanel({
     [expandedField, handleFieldChange]
   );
 
-  const handleExpandField = useCallback((field: StepFormField) => {
-    setExpandedField(field);
-  }, []);
+  const handleExpandField = useCallback(
+    (field: StepFormField) => {
+      typedExpandedJsonRef.current = undefined;
+      // A list that is not tags is a JSON editor in its row, so it is one when expanded too.
+      const isJsonList = field.kind === 'list' && !isTagValue(parsed.read(field.path));
+      setExpandedField(isJsonList ? asJsonField(field) : field);
+    },
+    [parsed]
+  );
 
   const handleFieldEditorBack = useCallback(() => {
     setExpandedField(null);
@@ -368,10 +404,14 @@ export function StepConfigPanel({
   // a draft with blocking errors (empty name, unparseable mid-edit value, or
   // invalid YAML) is never written. Block only those — not advisory field
   // validation, which can still be applied.
+  const nameTaken =
+    stepName !== undefined &&
+    committedStepName !== stepName &&
+    siblingStepNames.has(committedStepName);
   const hasBlockingDraftErrors = useMemo(() => {
-    if (draftErrors.size > 0) return true;
+    if (draftErrors.size > 0 || nameTaken) return true;
     return isEmptyFieldValue(committedStepName);
-  }, [draftErrors, committedStepName]);
+  }, [draftErrors, nameTaken, committedStepName]);
 
   const canApplyDraft = parsed.valid && !hasBlockingDraftErrors;
   const isDirty = useMemo(
@@ -385,14 +425,18 @@ export function StepConfigPanel({
   // Skipped while the step-name editor is active (Escape there reverts the
   // name instead).
   const attemptClose = useCallback(() => {
-    if (nameEditor.isEditingRef.current) return;
+    if (nameEditor.isEditingRef.current) {
+      // A refused name (empty, taken) was never written, so closing loses nothing: drop the edit.
+      if (!nameError) return;
+      revertNameEditor();
+    }
     if (!canApplyDraft) {
       setShowValidation(true);
       setShowDiscardConfirm(true);
       return;
     }
     onClose();
-  }, [canApplyDraft, onClose, nameEditor.isEditingRef]);
+  }, [canApplyDraft, onClose, nameEditor.isEditingRef, nameError, revertNameEditor]);
 
   const handleKeepEditing = useCallback(() => {
     setShowDiscardConfirm(false);
@@ -590,72 +634,76 @@ export function StepConfigPanel({
                   </EuiText>
                 )}
 
-                <EuiHorizontalRule margin="m" />
+                {parsed.valid ? (
+                  <>
+                    <EuiHorizontalRule margin="m" />
 
-                <EuiAccordion
-                  id={settingsAccordionId}
-                  forceState={settingsOpen ? 'open' : 'closed'}
-                  onToggle={handleSettingsToggle}
-                  paddingSize="none"
-                  buttonContent={
-                    <EuiTitle size="xxs">
-                      <h4>
-                        {i18n.translate('workflows.stepConfigPanel.settingsAccordion', {
-                          defaultMessage: 'Advanced',
-                        })}
-                      </h4>
-                    </EuiTitle>
-                  }
-                  data-test-subj="workflowStepConfigPanelAccordion-settings"
-                >
-                  <div
-                    data-test-subj="workflowStepConfigPanelSettings"
-                    css={{ paddingTop: euiTheme.size.m }}
-                  >
-                    {stepCondition
-                      ? renderStepSetting(
-                          'workflowStepConfigConditionSection',
-                          i18n.translate('workflows.stepConfigPanel.conditionTitle', {
-                            defaultMessage: 'Conditional execution',
-                          }),
-                          stepCondition
-                        )
-                      : null}
-                    {stepTimeout
-                      ? renderStepSetting(
-                          'workflowStepConfigTimeoutSection',
-                          i18n.translate('workflows.stepConfigPanel.timeoutTitle', {
-                            defaultMessage: 'Timeout',
-                          }),
-                          stepTimeout
-                        )
-                      : null}
-                    {showSettings ? (
-                      <div data-test-subj="workflowStepConfigErrorHandlingSection">
-                        <EuiTitle size="xxs" css={{ marginBlockEnd: euiTheme.size.s }}>
-                          <h5>
-                            {i18n.translate('workflows.stepConfigPanel.errorHandlingTitle', {
-                              defaultMessage: 'Error handling',
+                    <EuiAccordion
+                      id={settingsAccordionId}
+                      forceState={settingsOpen ? 'open' : 'closed'}
+                      onToggle={handleSettingsToggle}
+                      paddingSize="none"
+                      buttonContent={
+                        <EuiTitle size="xxs">
+                          <h4>
+                            {i18n.translate('workflows.stepConfigPanel.settingsAccordion', {
+                              defaultMessage: 'Advanced',
                             })}
-                          </h5>
+                          </h4>
                         </EuiTitle>
-                        <StepErrorHandlingSection
-                          fragment={fragment}
-                          onFailureValue={parsed.read(['on-failure'])}
-                          indent={indent}
-                          onFragmentChange={setFragment}
-                          isLoop={LoopStepTypes.some((type) => type === stepType)}
-                        />
+                      }
+                      data-test-subj="workflowStepConfigPanelAccordion-settings"
+                    >
+                      <div
+                        data-test-subj="workflowStepConfigPanelSettings"
+                        css={{ paddingTop: euiTheme.size.m }}
+                      >
+                        {stepCondition
+                          ? renderStepSetting(
+                              'workflowStepConfigConditionSection',
+                              i18n.translate('workflows.stepConfigPanel.conditionTitle', {
+                                defaultMessage: 'Conditional execution',
+                              }),
+                              stepCondition
+                            )
+                          : null}
+                        {stepTimeout
+                          ? renderStepSetting(
+                              'workflowStepConfigTimeoutSection',
+                              i18n.translate('workflows.stepConfigPanel.timeoutTitle', {
+                                defaultMessage: 'Timeout',
+                              }),
+                              stepTimeout
+                            )
+                          : null}
+                        {showSettings ? (
+                          <div data-test-subj="workflowStepConfigErrorHandlingSection">
+                            <EuiTitle size="xxs" css={{ marginBlockEnd: euiTheme.size.s }}>
+                              <h5>
+                                {i18n.translate('workflows.stepConfigPanel.errorHandlingTitle', {
+                                  defaultMessage: 'Error handling',
+                                })}
+                              </h5>
+                            </EuiTitle>
+                            <StepErrorHandlingSection
+                              fragment={fragment}
+                              onFailureValue={parsed.read(['on-failure'])}
+                              indent={indent}
+                              onFragmentChange={setFragment}
+                              isLoop={LoopStepTypes.some((type) => type === stepType)}
+                            />
+                          </div>
+                        ) : (
+                          <EuiText size="s" color="subdued">
+                            {i18n.translate('workflows.stepConfigPanel.settingsUnavailable', {
+                              defaultMessage: 'Error handling is not available for this step.',
+                            })}
+                          </EuiText>
+                        )}
                       </div>
-                    ) : (
-                      <EuiText size="s" color="subdued">
-                        {i18n.translate('workflows.stepConfigPanel.settingsUnavailable', {
-                          defaultMessage: 'Error handling is not available for this step.',
-                        })}
-                      </EuiText>
-                    )}
-                  </div>
-                </EuiAccordion>
+                    </EuiAccordion>
+                  </>
+                ) : null}
               </div>
             </div>
           )}

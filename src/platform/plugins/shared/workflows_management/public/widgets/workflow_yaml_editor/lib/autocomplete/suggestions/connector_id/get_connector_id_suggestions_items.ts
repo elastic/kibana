@@ -111,10 +111,16 @@ export function getConnectorInstancesForType(
 const getConnectorDisplayName = (instance: ConnectorInstance): string => {
   let connectorName = instance.name;
   if (instance.isDeprecated) {
-    connectorName += ' (deprecated)';
+    connectorName = i18n.translate('workflows.connectorIdSuggestions.deprecatedConnector', {
+      defaultMessage: '{name} (deprecated)',
+      values: { name: connectorName },
+    });
   }
   if (instance.isPreconfigured) {
-    connectorName += ' (preconfigured)';
+    connectorName = i18n.translate('workflows.connectorIdSuggestions.preconfiguredConnector', {
+      defaultMessage: '{name} (preconfigured)',
+      values: { name: connectorName },
+    });
   }
   return connectorName;
 };

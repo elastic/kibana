@@ -11,6 +11,7 @@ import { EuiFieldText, EuiIcon, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import { useStableCallback } from '@kbn/react-hooks';
 import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import { createMonacoSelectionBridge } from './create_monaco_selection_bridge';
 import { monacoLanguageFor } from './monaco_language';
@@ -18,8 +19,8 @@ import { ReferenceCapableField } from './reference_capable_field';
 import { ContainerInSentenceCallout } from './reference_container_callout';
 import { ReferenceTextInput } from './reference_text_input';
 import { caretAfterChange, useReferenceEditor } from './use_reference_editor';
-import { useStableCallback } from './use_stable_callback';
 import type { buildDataReferenceCatalog } from '../lib/build_data_reference_catalog';
+import { opensPickerOnAt } from '../lib/opens_picker_on_at';
 import { insertTokenAsJsonText } from '../lib/reference_tokens';
 import { type StepFormField } from '../lib/step_form_schema';
 
@@ -27,6 +28,26 @@ const CODE_EDITOR_HEIGHT = 160;
 
 /** Flatten newlines / runs of whitespace for single-line Inputs display only. */
 const collapseWhitespaceForDisplay = (text: string): string => text.replace(/\s+/g, ' ');
+
+const canonicalJson = (text: string): string | undefined => {
+  try {
+    return JSON.stringify(JSON.parse(text));
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Whether the collapsed text, written back, still says what `text` says. JSON may lose the
+ * whitespace between its tokens, but not inside a string.
+ */
+const survivesCollapse = (text: string, isJson: boolean): boolean => {
+  const collapsed = collapseWhitespaceForDisplay(text);
+  if (collapsed === text) return true;
+  if (!isJson) return false;
+  const original = canonicalJson(text);
+  return original !== undefined && original === canonicalJson(collapsed);
+};
 
 /**
  * Templatable code-shaped Inputs field. Inline UI is always a single-line
@@ -75,8 +96,13 @@ export function CodeField({
     return String(value);
   }, [value, isJson, isJsonLiquid]);
 
-  // Inline Inputs show a whitespace-collapsed string; the document keeps the
-  // original until the user edits (or expands and edits in the sub-flyout).
+  // Inline Inputs show a whitespace-collapsed string. Where writing that back would change the
+  // value (a multi-line text, a JSON string with runs of spaces), the field is a preview that
+  // opens the expanded editor instead, so no edit rewrites what the user did not touch.
+  const editsInExpanded = useMemo(
+    () => !usesInlineMonaco && onExpand !== undefined && !survivesCollapse(external, isJson),
+    [usesInlineMonaco, onExpand, external, isJson]
+  );
   const [draft, setDraft] = useState(() =>
     usesInlineMonaco ? external : collapseWhitespaceForDisplay(external)
   );
@@ -84,9 +110,15 @@ export function CodeField({
   // The parent hands a new `onDraftErrorChange` on every render; only a new value resets the draft.
   const clearDraftError = useStableCallback(() => onDraftErrorChange(undefined));
   useEffect(() => {
-    setDraft(usesInlineMonaco ? external : collapseWhitespaceForDisplay(external));
+    setDraft((typed) => {
+      if (usesInlineMonaco) return external;
+      // The parent echoes valid JSON back re-formatted; keep what the user typed, not the echo.
+      const typedJson = isJson ? canonicalJson(typed) : undefined;
+      if (typedJson !== undefined && typedJson === canonicalJson(external)) return typed;
+      return collapseWhitespaceForDisplay(external);
+    });
     clearDraftError();
-  }, [external, usesInlineMonaco, clearDraftError]);
+  }, [external, usesInlineMonaco, isJson, clearDraftError]);
 
   const {
     chipCss,
@@ -141,6 +173,15 @@ export function CodeField({
     [isJson, jsonParseError, onChange, onDraftErrorChange]
   );
 
+  // A preview has no editor, so only the picker writes here, and it appends to the shown text:
+  // append to the original instead of to its collapsed copy.
+  const appendToOriginal = useCallback(
+    (next: string) => {
+      if (next.startsWith(draft)) applyDraft(external + next.slice(draft.length));
+    },
+    [applyDraft, draft, external]
+  );
+
   // TODO(slice7): ES|QL keeps its specialized editor — no single-line collapse.
   if (usesInlineMonaco) {
     return (
@@ -149,6 +190,7 @@ export function CodeField({
         value={draft}
         onChange={applyDraft}
         onExpand={onExpand}
+        openOnAt={opensPickerOnAt(field.language)}
         valueFormWhenWhole={field.valueFormWhenWhole}
       >
         {({ teachingPlaceholder, appendControls, reportChange, registerSelection }) => (
@@ -243,7 +285,12 @@ export function CodeField({
         fullWidth
         isInvalid={isInvalid}
         value={draft}
+        readOnly={editsInExpanded}
         onChange={(e) => applyDraft(e.target.value)}
+        onClick={editsInExpanded ? onExpand : undefined}
+        onKeyDown={(e) => {
+          if (editsInExpanded && e.key === 'Enter') onExpand?.();
+        }}
         onBlur={onBlur}
         append={<EuiIcon type="lock" aria-hidden />}
         data-test-subj={testSubj}
@@ -256,9 +303,10 @@ export function CodeField({
     <ReferenceCapableField
       catalog={catalog}
       value={draft}
-      onChange={applyDraft}
+      onChange={editsInExpanded ? appendToOriginal : applyDraft}
       onExpand={onExpand}
       openOnBrace={field.language === 'plaintext'}
+      openOnAt={opensPickerOnAt(field.language)}
       valueFormWhenWhole={field.valueFormWhenWhole}
     >
       {(bind) => (
@@ -272,6 +320,7 @@ export function CodeField({
           testSubj={testSubj}
           warnContainersInSentence={field.language === 'plaintext'}
           language={field.language}
+          onEditRequest={editsInExpanded ? onExpand : undefined}
         />
       )}
     </ReferenceCapableField>
