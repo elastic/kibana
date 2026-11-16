@@ -18,39 +18,39 @@ export interface Box {
   height: number;
 }
 
-export interface SavedPinnedControl {
+export interface SavedPinnedPanel {
   width?: string;
   grow?: boolean;
   config: { title?: string };
 }
 
-/** The flex panel (list item) that wraps the control with the given title. */
-export const getControlPanel = (page: ScoutPage, title: string): Locator =>
+/** The flex panel (list item) that wraps the pinned panel with the given title. */
+export const getPinnedPanel = (page: ScoutPage, title: string): Locator =>
   page.getByRole('listitem').filter({
     has: page.testSubj.locator('control-frame'),
     hasText: title,
   });
 
-/** The rendered bounding box of a control panel; throws when it is not rendered. */
-export const getControlPanelBox = async (panel: Locator): Promise<Box> => {
+/** The rendered bounding box of a pinned panel; throws when it is not rendered. */
+export const getPinnedPanelBox = async (panel: Locator): Promise<Box> => {
   const box = await panel.boundingBox();
-  if (!box) throw new Error('The control panel is not rendered');
+  if (!box) throw new Error('The pinned panel is not rendered');
   return box;
 };
 
 /**
- * Drags the resize handle of a control panel horizontally with the real mouse, so the browser's
+ * Drags the resize handle of a pinned panel horizontally with the real mouse, so the browser's
  * own flex layout (growth, wrapping, handle position) decides the geometry that gets committed.
  * The pointer moves in steps so that the layout reflows between events, like a real drag.
  */
-export const dragControlResizeHandle = async (
+export const dragPinnedPanelResizeHandle = async (
   page: ScoutPage,
   panel: Locator,
   deltaX: number
 ): Promise<void> => {
   const handle = panel.getByRole('button', { name: 'Resize panel' });
   await handle.waitFor({ state: 'visible' });
-  const handleBox = await getControlPanelBox(handle);
+  const handleBox = await getPinnedPanelBox(handle);
 
   const startX = handleBox.x + handleBox.width / 2;
   const startY = handleBox.y + handleBox.height / 2;
@@ -64,13 +64,13 @@ export const dragControlResizeHandle = async (
   await page.mouse.up();
 };
 
-/** Reads the pinned controls that are persisted for a dashboard through the dashboard API. */
-export const getSavedPinnedControls = async (
+/** Reads the pinned panels that are persisted for a dashboard through the dashboard API. */
+export const getSavedPinnedPanels = async (
   kbnClient: KbnClient,
   spaceId: string,
   dashboardId: string
-): Promise<SavedPinnedControl[]> => {
-  const response = await kbnClient.request<{ data: { pinned_panels?: SavedPinnedControl[] } }>({
+): Promise<SavedPinnedPanel[]> => {
+  const response = await kbnClient.request<{ data: { pinned_panels?: SavedPinnedPanel[] } }>({
     method: 'GET',
     path: `/s/${spaceId}/${DASHBOARD_API_PATH}/${dashboardId}`,
     headers: { 'elastic-api-version': DASHBOARD_API_VERSION },
