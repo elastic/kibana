@@ -10,7 +10,12 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ChatEventType, ToolType } from '@kbn/agent-builder-common';
 import type { ExecutableTool } from '@kbn/agent-builder-server';
 import { toDynamicToolEvent } from '@kbn/agent-builder-server/runner';
-import { createToolIdMappings, toolToLangchain, sanitizeToolId } from './tools';
+import {
+  createToolIdMappings,
+  renderDynamicToolDefinition,
+  toolToLangchain,
+  sanitizeToolId,
+} from './tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const createTool = (
@@ -49,7 +54,7 @@ describe('toolToLangchain', () => {
     expect(toolKeys.sort()).toEqual(['foo']);
   });
 
-  it('adds reasoning param when specified', async () => {
+  it('adds the intent param when specified', async () => {
     const tool = createTool('toolA', {
       description: 'desc',
       getSchema: () => z.object({ foo: z.string() }),
@@ -59,11 +64,67 @@ describe('toolToLangchain', () => {
       tool,
       toolId: tool.id,
       logger,
-      addReasoningParam: true,
+      addIntentParam: true,
     });
 
-    const toolKeys = Object.keys((langchainTool.schema as any).shape);
-    expect(toolKeys.sort()).toEqual(['_reasoning', 'foo']);
+    const shape = (langchainTool.schema as any).shape;
+    expect(Object.keys(shape).sort()).toEqual(['_intent', 'foo']);
+    expect(shape._intent.description).toBe(
+      'Clear, concise description of what you are doing by calling this tool'
+    );
+    expect(shape._intent.isOptional()).toBe(true);
+  });
+
+  it('keeps the strictness of the tool schema when adding the intent param', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ foo: z.string() }).strict(),
+    });
+
+    const langchainTool = await toolToLangchain({
+      tool,
+      toolId: tool.id,
+      logger,
+      addIntentParam: true,
+    });
+
+    await expect(
+      langchainTool.invoke({ foo: 'a', _intent: 'Doing a', unknown: 'b' })
+    ).rejects.toThrow();
+    expect(tool.execute).not.toHaveBeenCalled();
+  });
+
+  it('does not add the intent param by default', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ foo: z.string() }),
+    });
+
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger });
+
+    expect(Object.keys((langchainTool.schema as any).shape)).toEqual(['foo']);
+  });
+
+  it('strips _intent before calling the tool handler', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ hello: z.string() }),
+      execute: jest
+        .fn()
+        .mockResolvedValue({ results: [{ type: ToolResultType.other, data: 'foo' }] }),
+    });
+
+    const langchainTool = await toolToLangchain({
+      tool,
+      toolId: tool.id,
+      logger,
+      addIntentParam: true,
+    });
+    await langchainTool.invoke({ hello: 'world', _intent: 'Saying hello' });
+
+    expect(tool.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ toolParams: { hello: 'world' } })
+    );
   });
 
   it('wraps the tool handler', async () => {
@@ -245,5 +306,59 @@ describe('sanitizeToolId', () => {
   it('removes forbidden characters', () => {
     expect(sanitizeToolId('test+()')).toEqual('test');
     expect(sanitizeToolId('a&b^c')).toEqual('abc');
+  });
+});
+
+describe('renderDynamicToolDefinition', () => {
+  it('renders the id, description and the input JSON schema', async () => {
+    const tool = createTool('platform.core.cases', {
+      description: 'Description of platform.core.cases',
+      getSchema: () =>
+        z.object({
+          query: z.string().describe('The search query'),
+          limit: z.number().optional(),
+        }),
+    });
+
+    const definition = await renderDynamicToolDefinition(tool);
+
+    expect(definition).toEqual({
+      tool_id: 'platform.core.cases',
+      description: 'Description of platform.core.cases',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'The search query' },
+          limit: { type: 'number' },
+        },
+        required: ['query'],
+      },
+    });
+  });
+
+  it('uses the same description as the native binding', async () => {
+    const tool = createTool('a', {
+      description: 'Description of a',
+      configuration: { index: 'logs-*' },
+      getLlmDescription: ({ description, config }) =>
+        `${description} (configured for ${(config as { index: string }).index})`,
+    });
+
+    const definition = await renderDynamicToolDefinition(tool);
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger });
+
+    expect(definition.description).toBe('Description of a (configured for logs-*)');
+    expect(definition.description).toBe(langchainTool.description);
+  });
+
+  it('awaits an async schema', async () => {
+    const tool = createTool('a', {
+      getSchema: async () => z.object({ flag: z.boolean() }),
+    });
+
+    const definition = await renderDynamicToolDefinition(tool);
+
+    expect(definition.parameters.properties).toEqual({ flag: { type: 'boolean' } });
+    expect(definition.parameters.required).toEqual(['flag']);
   });
 });

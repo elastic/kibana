@@ -49,6 +49,7 @@ export type ColorStylePropertyDescriptor = z.output<typeof colorSchema>;
 
 export type CategoryColorStop = z.output<typeof categoryColorStop>;
 export type OrdinalColorStop = z.output<typeof ordinalColorStop>;
+export type StopValue = OrdinalColorStop['stop'] | CategoryColorStop['stop'];
 
 export type IconDynamicOptions = z.output<typeof iconDynamicOptions>;
 export type IconStaticOptions = z.output<typeof iconStaticOptions>;

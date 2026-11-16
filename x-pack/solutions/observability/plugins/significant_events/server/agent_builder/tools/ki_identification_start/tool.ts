@@ -14,6 +14,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { NIGHTSHIFT_SOURCES_APP_PATH } from '../../../../common/constants';
@@ -65,15 +66,15 @@ export const createKiIdentificationStartTool = ({
   id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    Start Knowledge Indicator (KI) identification for a Nightshift source as a background task.
+    Start Knowledge Indicator (KI) identification for a nightshift source as a background task.
 
     This tool schedules the KI identification background task and returns immediately with a
-    Kibana path to the Nightshift Sources page, where each source's onboarding status shows progress.
+    Kibana path to the nightshift Sources page, where each source's onboarding status shows progress.
 
     Use this tool to:
     - Kick off KI identification for an enabled source
     - Run feature identification and query generation steps in a background task
-    - Get a direct Kibana path to track background task progress on the Nightshift Sources page
+    - Get a direct Kibana path to track background task progress on the nightshift Sources page
 
     Returns:
     - On success: \`{ slug, title, view_name, kibanaPath: "${NIGHTSHIFT_SOURCES_APP_PATH}" }\`
@@ -81,6 +82,7 @@ export const createKiIdentificationStartTool = ({
   `,
   schema: onboardingStartSchema,
   handler: async ({ slug, steps, connectors }, { request }) => {
+    const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
     let sourceId = '';
     try {
       await assertCanManageSignificantEvents({ request, server });
@@ -101,6 +103,7 @@ export const createKiIdentificationStartTool = ({
       });
 
       telemetry.trackAgentToolKiIdentificationStarted({
+        workflow_execution_id: workflowExecutionId,
         success: true,
         source_id: source.id,
       });
@@ -117,6 +120,7 @@ export const createKiIdentificationStartTool = ({
       const message = err instanceof Error ? err.message : String(err);
 
       telemetry.trackAgentToolKiIdentificationStarted({
+        workflow_execution_id: workflowExecutionId,
         success: false,
         source_id: sourceId,
         error_message: message,

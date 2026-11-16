@@ -73,7 +73,7 @@ const workflow = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml) as {
 describe('Nightshift investigation workflow', () => {
   it('records the investigation through the agent tools rather than persist steps', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
-    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(5);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(6);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
       'resolve_model',
@@ -186,6 +186,25 @@ describe('Nightshift investigation workflow', () => {
       ).toHaveLength(10000);
       expect(engine.parseAndRenderSync(fallback[0].with.reason, {})).toBe('Investigation failed');
     }
+  });
+
+  // Nightshift tells an alert-recovery round from a user's message by how the message opens
+  // (`isAlertRecoveryRound`), so nothing may come before the caller's message.
+  it.each([
+    ['an alert recovery', { source: 'alert', follow_up: 'alert_recovered' }],
+    ['a user follow-up', { source: 'slack' }],
+  ])("opens the agent's message with the caller's message on %s", (_case, context) => {
+    const message = 'An alert in this investigation has recovered. Evidence follows.';
+    const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+      requireStep('investigate').with?.message ?? '',
+      {
+        inputs: { message, context, source_ids: ['s1'] },
+        variables: {
+          investigation_sources: [{ slug: 'logs', id: 's1', view_name: 'logs-view' }],
+        },
+      }
+    );
+    expect(rendered.startsWith(message)).toBe(true);
   });
 
   it('attributes agent calls to Nightshift under the shared investigation id', () => {
@@ -365,16 +384,5 @@ describe('Nightshift investigation workflow', () => {
 
   it('knows nothing about Slack', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/slack/i);
-  });
-});
-
-it('accepts a telemetry target independently of the model and keeps the single investigator', () => {
-  expect(investigation.triggers[0].inputs.properties.telemetry_target).toMatchObject({
-    type: 'string',
-    maxLength: 64,
-  });
-  expect(requireStep('investigate')).toMatchObject({
-    'agent-id': 'nightshift.investigation',
-    'connector-id': '{{ steps.resolve_model.output.connector_id }}',
   });
 });

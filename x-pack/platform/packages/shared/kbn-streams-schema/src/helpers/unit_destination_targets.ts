@@ -9,14 +9,20 @@ import type { StreamsUnit } from '../models/unit';
 
 export type UnitDestination = NonNullable<StreamsUnit.Configuration['destinations']>[number];
 
-export const UNIT_DESTINATION_SIGNALS = ['logs', 'metrics', 'traces'] as const;
+export const UNIT_DESTINATION_SIGNALS = ['logs', 'metrics', 'traces', 'docs'] as const;
 export type UnitDestinationSignal = (typeof UNIT_DESTINATION_SIGNALS)[number];
 
-/** Write pattern of a signal that has neither a static `index` nor `write_patterns`. */
-export const AUTO_WRITE_PATTERN_BY_SIGNAL: Readonly<Record<UnitDestinationSignal, string>> = {
-  logs: 'logs-*-*',
-  metrics: 'metrics-*-*',
-  traces: 'traces-*-*',
+/**
+ * Write patterns of a signal with neither a static `index` nor `write_patterns`. Docs keep the
+ * request's `_index`, which the managed bulk receiver limits to these prefixes.
+ */
+export const AUTO_WRITE_PATTERNS_BY_SIGNAL: Readonly<
+  Record<UnitDestinationSignal, readonly string[]>
+> = {
+  logs: ['logs-*-*'],
+  metrics: ['metrics-*-*'],
+  traces: ['traces-*-*'],
+  docs: ['logs-*', 'metrics-*', 'traces-*'],
 };
 
 /** Per-signal targets of an Elasticsearch destination. */
@@ -69,7 +75,7 @@ const readConfigPatterns = (
   );
 };
 
-/** Supported OTLP signals. Other signals, such as `docs`, have no write targets yet. */
+/** Drops signals with no write targets, such as `profiles`. */
 export const readUnitDestinationSignals = (destination: UnitDestination): UnitDestinationSignal[] =>
   destination.supported_telemetry.filter(isUnitDestinationSignal);
 
@@ -109,7 +115,7 @@ export const getSignalTargetsWritePatterns = ({
         return [index];
       }
       const writePatterns = writePatternsBySignal[signal];
-      return writePatterns?.length ? writePatterns : [AUTO_WRITE_PATTERN_BY_SIGNAL[signal]];
+      return writePatterns?.length ? writePatterns : AUTO_WRITE_PATTERNS_BY_SIGNAL[signal];
     })
   ),
 ];

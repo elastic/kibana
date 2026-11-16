@@ -31,6 +31,7 @@ import type {
 import { RISK_SCORE_PERFORMANCE_EVENT } from '../../entity_analytics/risk_score/maintainer/instrumentation/events';
 import { ENTITY_ANALYTICS_EVENTS } from './events/entity_analytics';
 import { SIEM_MIGRATIONS_EVENTS } from './events/siem_migrations';
+import { ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_RUN_EVENT } from './events/endpoint_configuration_troubleshooting';
 import type {
   RuleBulkUpgradeTelemetry,
   RuleUpgradeTelemetry,
@@ -2721,6 +2722,7 @@ export const events = [
   ENDPOINT_WORKFLOW_INSIGHTS_SCAN_TRIGGERED_EVENT,
   ENDPOINT_WORKFLOW_INSIGHTS_CREATED_EVENT,
   ENDPOINT_WORKFLOW_INSIGHTS_DISMISSED_EVENT,
+  ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_RUN_EVENT,
   ANALYZER_CROSS_PROJECT_RENDER_EVENT,
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,

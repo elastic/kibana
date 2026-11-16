@@ -9,6 +9,8 @@ export {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES,
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
   CUSTOM_CONTENT_SCRIPT_PATTERN,
@@ -26,12 +28,10 @@ export {
   toEsqlQueryState,
 } from './schema';
 export type { CustomContentState } from './schema';
-
-export { resolveCustomContentQuery } from './resolve_custom_content_query';
-export type {
-  ResolveCustomContentQueryParams,
-  ResolvedCustomContentQuery,
-} from './resolve_custom_content_query';
+export {
+  fitsEsqlQueriesTotalLength,
+  ESQL_QUERIES_TOTAL_LENGTH_MESSAGE,
+} from './esql_queries_total_length';
 
 export { stripMarkdownFences } from './strip_markdown_fences';
 export { CUSTOM_CONTENT_LIQUID_OPTIONS } from './liquid_options';

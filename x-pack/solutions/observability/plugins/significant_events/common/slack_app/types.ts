@@ -87,6 +87,18 @@ export interface SlackAppBindingsResponse {
   nextCursor?: string;
 }
 
+export interface SlackAvailableChannel {
+  channel: string;
+  /** Channel name, without the leading `#`. */
+  displayName: string;
+}
+
+export interface SlackAppAvailableChannelsResponse {
+  channels: SlackAvailableChannel[];
+  /** True when the Relay stopped listing early, so some channels are missing. */
+  truncated: boolean;
+}
+
 /** Response from the per-channel bind route. */
 export interface SlackAppBindChannelResponse {
   status: 'bound';

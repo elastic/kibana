@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '../../../helpers/test_helper';
+import { coreStartMock, render } from '../../../helpers/test_helper';
 import { SettingsTab } from './settings_tab';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -49,6 +49,7 @@ describe('SettingsTab', () => {
           basePath: { prepend: prependMock },
         },
         productDocBase: undefined,
+        settings: coreStartMock.settings,
         notifications: {
           toasts: {
             add: jest.fn(),

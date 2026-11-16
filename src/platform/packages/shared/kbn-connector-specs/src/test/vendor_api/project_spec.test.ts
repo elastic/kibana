@@ -308,4 +308,23 @@ describe('projectSpec', () => {
     });
     expect(loadContractOperations(projected)).toHaveLength(1);
   });
+
+  it('keeps the marker of converted awsJson services, which the mock serves by X-Amz-Target', () => {
+    const awsJson = {
+      openapi: '3.0.3',
+      info: { title: 'Metrics', version: '1' },
+      servers: [{ url: 'https://monitoring.us-east-1.amazonaws.com' }],
+      paths: {
+        '/GetMetricData': { post: { responses: { '200': ok({ type: 'object' }) } } },
+        '/ListMetrics': { post: { responses: { '200': ok({ type: 'object' }) } } },
+      },
+      'x-amz-json': { version: '1.0', targetPrefix: 'Metrics', endpointPrefix: 'monitoring' },
+    };
+
+    const projected = projectSpec(awsJson, [{ method: 'post', path: '/GetMetricData' }]);
+
+    expect(projected['x-amz-json']).toEqual(awsJson['x-amz-json']);
+    expect(Object.keys(projected.paths as object)).toEqual(['/GetMetricData']);
+    expect(loadContractOperations(projected)).toHaveLength(1);
+  });
 });

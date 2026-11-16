@@ -94,8 +94,9 @@ describe('ImportDashboardJsonFlyout', () => {
 
     await pickFile(VALID_FILE);
 
+    const warningsCallout = await screen.findByTestId('importDashboardJsonWarnings');
     expect(
-      await screen.findByText(/1 item removed from the imported dashboard/)
+      within(warningsCallout).getByText(/1 item removed from the imported dashboard/)
     ).toBeInTheDocument();
   });
 
@@ -116,6 +117,6 @@ describe('ImportDashboardJsonFlyout', () => {
         'button'
       )
     );
-    expect(screen.getAllByText('[request body]: bad title')[0]).toBeInTheDocument();
+    expect(screen.getByText('[request body]: bad title')).toBeInTheDocument();
   });
 });

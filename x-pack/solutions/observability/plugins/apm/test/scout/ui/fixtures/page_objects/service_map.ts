@@ -283,6 +283,11 @@ export class ServiceMapPage {
     return this.getServiceNodeRoot(serviceName).getByTestId('serviceMapNodeAlertsBadge');
   }
 
+  /** Compact requests / failure / latency line under the service circle when node stats are on. */
+  getServiceNodeStats(serviceName: string) {
+    return this.getServiceNodeRoot(serviceName).getByTestId('serviceMapNodeStats');
+  }
+
   async waitForNodeToLoad(nodeId: string) {
     await this.getNodeById(nodeId).waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }

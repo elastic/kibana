@@ -6,6 +6,6 @@
  */
 
 export {
-  endpointForensicAnalysisSkill,
+  createEndpointForensicAnalysisSkill,
   ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
 } from './endpoint_forensic_analysis_skill';

@@ -7,7 +7,7 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import type { AiIndexHttpItem, AiIndexSource } from '../../../common/http_api/ai_indices';
+import type { AiIndexItem, AiIndexSource } from '../../../common/http_api/ai_indices';
 import type { AiIndexService } from '../../ai_indices/service';
 import { validateConnectorSources } from '../../ai_indices/validate_connector_sources';
 import { ApplyImprovementError } from './errors';
@@ -25,7 +25,7 @@ const request = httpServerMock.createKibanaRequest();
 const esqlSource: AiIndexSource = { type: 'esql', value: 'FROM logs-*' };
 const connectorSource: AiIndexSource = { type: 'connector', value: 'connector-1' };
 
-const aiIndex = (sources: AiIndexSource[]): AiIndexHttpItem => ({
+const aiIndex = (sources: AiIndexSource[]): AiIndexItem => ({
   id: 'support',
   description: 'Support knowledge',
   managed: false,

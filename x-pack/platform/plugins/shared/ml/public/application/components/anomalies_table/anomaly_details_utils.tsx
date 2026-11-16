@@ -25,8 +25,8 @@ import {
   type MlAnomaliesTableRecord,
   type MlAnomalyRecordDoc,
   ML_JOB_AGGREGATION,
-  useSeverityColor,
 } from '@kbn/ml-anomaly-utils';
+import { useSeverityColor } from '@kbn/ml-anomaly-utils/use_severity_color';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import type { EntityCellFilter } from '../entity_cell';
 import { EntityCell } from '../entity_cell';

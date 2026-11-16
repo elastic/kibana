@@ -48,6 +48,7 @@ function renderTableRowActions({
       onReassignClick={jest.fn()}
       onRequestDiagnosticsClick={jest.fn()}
       onUnenrollClick={jest.fn()}
+      onForceUnenrollClick={jest.fn()}
       onUpgradeClick={jest.fn()}
       onGetUninstallCommandClick={jest.fn()}
       onMigrateAgentClick={jest.fn()}
@@ -845,6 +846,7 @@ describe('TableRowActions', () => {
           onReassignClick={jest.fn()}
           onRequestDiagnosticsClick={jest.fn()}
           onUnenrollClick={jest.fn()}
+          onForceUnenrollClick={jest.fn()}
           onUpgradeClick={jest.fn()}
           onGetUninstallCommandClick={jest.fn()}
           onMigrateAgentClick={jest.fn()}

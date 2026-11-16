@@ -58,6 +58,10 @@ export interface AttackDiscovery {
 export interface AttackDiscoveryAgentBuilderExpected extends Record<string, unknown> {
   expectedToolPath: string[];
   expectedWorkflowStages: string[];
+  // Stages that must NOT appear. `expectedWorkflowStages: []` asserts nothing,
+  // so this is the only way to express "the pipeline must not have run past
+  // retrieval" (e.g. an example that seeds no alerts).
+  forbiddenWorkflowStages?: string[];
   // Count-expectation contract (see workflow_evidence_evaluator.ts): a number
   // asserts equality. `null` means don't-care for retrieved but ASSERTS `null`
   // for passed — so an ABSENT key is the only way to leave the passed count

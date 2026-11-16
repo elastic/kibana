@@ -1405,7 +1405,9 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
 
     expect(rendered).toContain('handed to the closure review');
     expect(rendered).toContain('A human decision is required.');
-    expect(rendered).toContain('The outcome is posted here');
+    // An approval posts no outcome comment, so the hand-off must not promise one.
+    expect(rendered).toContain('This Investigation is closed when it is decided.');
+    expect(rendered).not.toContain('outcome is posted');
   });
 });
 

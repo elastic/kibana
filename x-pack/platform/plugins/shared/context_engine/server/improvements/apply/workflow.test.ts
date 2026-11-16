@@ -31,7 +31,7 @@ const createAiIndexService = () =>
   ({
     assertCanAcceptAutomation: jest.fn().mockResolvedValue(undefined),
     addAutomation: jest.fn().mockResolvedValue('attached'),
-    removeAutomation: jest.fn().mockResolvedValue('detached'),
+    removeAutomation: jest.fn().mockResolvedValue('removed'),
   } as unknown as jest.Mocked<AiIndexService>);
 
 const yaml = 'name: Nightly refresh\nsteps: []\n';

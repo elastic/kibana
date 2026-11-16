@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
@@ -15,8 +14,7 @@ import {
 } from '../../common/constants';
 import type { AiIndexFeedbackAnalysis } from '../../common/http_api/ai_indices';
 import { parseIntervalMinutes } from '../../common/validation';
-
-const SPACE_HASH_LENGTH = 16;
+import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
 
 /**
  * The workflows management calls this plugin makes, declared structurally rather than imported:
@@ -101,14 +99,11 @@ export const createFeedbackAnalysisScheduleService = ({
 }): FeedbackAnalysisScheduleService => {
   const log = logger.get('feedback_analysis_schedule');
 
-  const workflowIdSuffixFor = (aiIndexId: string, spaceId: string) =>
-    `${aiIndexId}-${createHash('sha256')
-      .update(spaceId)
-      .digest('hex')
-      .slice(0, SPACE_HASH_LENGTH)}`;
-
   const workflowDocumentIdFor = (aiIndexId: string, spaceId: string) =>
-    `${CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID}-${workflowIdSuffixFor(aiIndexId, spaceId)}`;
+    `${CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(
+      aiIndexId,
+      spaceId
+    )}`;
 
   const wasDropped = async (executionId: string, spaceId: string): Promise<boolean> => {
     if (!workflowsManagement) {
@@ -135,7 +130,7 @@ export const createFeedbackAnalysisScheduleService = ({
     const client = await getManagedWorkflowsClient();
     await client.uninstall(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
       spaceId,
-      workflowIdSuffix: workflowIdSuffixFor(aiIndexId, spaceId),
+      workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),
     });
   };
 
@@ -161,7 +156,7 @@ export const createFeedbackAnalysisScheduleService = ({
       const client = await getManagedWorkflowsClient();
       await client.install(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
         spaceId,
-        workflowIdSuffix: workflowIdSuffixFor(aiIndexId, spaceId),
+        workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),
         values: {
           aiIndexId,
           intervalMinutes,
@@ -193,7 +188,7 @@ export const createFeedbackAnalysisScheduleService = ({
         CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
         {
           spaceId,
-          workflowIdSuffix: workflowIdSuffixFor(aiIndexId, spaceId),
+          workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),
           triggeredBy: 'manual',
         }
       );
