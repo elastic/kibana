@@ -29,9 +29,10 @@ const LINTABLE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.cjs', '.mjs
 const ERRORS_ONLY_CONFIG = 'oxlint.fix.config.mjs';
 
 // JS plugin rules run on a single JS thread per oxlint process, so a full-repo run splits the
-// repo across processes. Each process also pays a fixed config/plugin startup cost, so a few
-// multi-threaded shards are faster than one single-threaded shard per core.
-const THREADS_PER_SHARD = 4;
+// repo across processes. Each process also pays a fixed config/plugin startup cost, so one
+// single-threaded shard per core is slower than a few shards; two threads per shard was
+// fastest on a 12-core machine (four: 184s, two: 132s, one: 153s).
+const THREADS_PER_SHARD = 2;
 
 interface LintOptions {
   fix: boolean;
