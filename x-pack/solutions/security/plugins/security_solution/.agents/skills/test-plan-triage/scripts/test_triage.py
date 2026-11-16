@@ -113,6 +113,7 @@ class ContextTests(unittest.TestCase):
         result = triage.context(FakeGh(issues), triage.IssueRef("elastic/kibana", 1))
         self.assertEqual(result["ancestors"][0]["ref"], "elastic/security-team#2")
         self.assertTrue(result["ancestors"][0]["allowed_repo"])
+        self.assertEqual((result["target"]["private"], result["ancestors"][0]["private"]), (False, True))
 
     def test_unreadable_parent_is_marked_and_stops_the_walk(self):
         issues = {
@@ -277,7 +278,7 @@ class CommentNoTests(unittest.TestCase):
             with mock.patch.dict(os.environ, {triage.WRITE_LOG_ENV: str(log)}):
                 self.comment(gh, suggested=self.parent)
                 self.comment(gh, dry_run=True)
-            self.assertEqual(log.read_text(encoding="utf-8"), "comment elastic/kibana#1 rule=N4 suggested=elastic/kibana#2\n")
+            self.assertEqual(log.read_text(encoding="utf-8"), "comment elastic/kibana#1 rule=N4 suggested=elastic/kibana#2 reason=one control of the editor\n")
         self.assertEqual(gh.posts(), [])
 
     def test_only_no_rules_are_accepted(self):
@@ -297,6 +298,26 @@ class CommentNoTests(unittest.TestCase):
     def test_suggested_level_cannot_be_the_issue(self):
         with self.assertRaises(triage.TriageError):
             self.comment(FakeGh({}), suggested=self.ref)
+
+    def test_public_issue_never_points_to_a_private_repo(self):
+        private = triage.IssueRef("elastic/security-team", 2)
+        cases = (
+            {"suggested": private},
+            {"reason": "a slice of elastic/security-team#2"},
+            {"reason": "covered by the Security-Team epic"},
+        )
+        for kwargs in cases:
+            gh = FakeGh({"elastic/kibana#1": api_issue("elastic/kibana", 1)})
+            with self.assertRaises(triage.TriageError) as raised:
+                self.comment(gh, **kwargs)
+            self.assertEqual((raised.exception.exit_code, raised.exception.gate), (triage.EXIT_FAIL, "private_link"))
+            self.assertEqual(gh.calls, [])
+
+    def test_private_issue_may_point_to_a_private_repo(self):
+        self.ref = triage.IssueRef("elastic/security-team", 1)
+        gh = FakeGh({"elastic/security-team#1": api_issue("elastic/security-team", 1)})
+        result = self.comment(gh, suggested=triage.IssueRef("elastic/security-team", 2), dry_run=True)
+        self.assertIn("(https://github.com/elastic/security-team/issues/2)", result["body"])
 
     def test_closed_issues_and_pull_requests_get_no_comment(self):
         for issue in (api_issue("elastic/kibana", 1, state="closed"), api_issue("elastic/kibana", 1, pr=True)):
@@ -380,7 +401,7 @@ class StubCliTests(unittest.TestCase):
             )
             self.assertEqual(code, 0, payload)
             self.assertTrue(payload["simulated"])
-            self.assertEqual(log.read_text(encoding="utf-8"), "comment elastic/kibana#911401 rule=N2 suggested=none\n")
+            self.assertEqual(log.read_text(encoding="utf-8"), "comment elastic/kibana#911401 rule=N2 suggested=none reason=internal state refactor\n")
 
 
 if __name__ == "__main__":

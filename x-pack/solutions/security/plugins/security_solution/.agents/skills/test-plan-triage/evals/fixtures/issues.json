@@ -569,5 +569,59 @@
     "labels": ["Feature:Entity analytics"],
     "body": "Add a `calculation_source` field to the risk history index mapping and populate it on every newly written record.\n\nAcceptance criteria:\n- Store the source on new history records.\n- Backfill the field for existing retained records.\n- Preserve the value when records are migrated to the new index generation.",
     "parent": "elastic/kibana#914012"
+  },
+  "elastic/security-team#915000": {
+    "title": "[Endpoint] FY27 roadmap",
+    "type": "Epic",
+    "labels": ["Team:Defend Workflows"],
+    "body": "Everything the Defend Workflows team plans for FY27. Each child is tracked on its own."
+  },
+  "elastic/security-team#915001": {
+    "title": "[Endpoint] Project Larkspur: host isolation exceptions",
+    "type": "Epic",
+    "labels": ["Team:Defend Workflows"],
+    "body": "Project Larkspur lets admins exempt selected hosts from isolation: an exceptions list in the host isolation page, an `Exempt` row action, a badge on exempt hosts and a 409 from the isolate API for them. Not announced yet.",
+    "parent": "elastic/security-team#915000"
+  },
+  "elastic/kibana#915002": {
+    "title": "[Endpoint] Add the exceptions list to the host isolation page",
+    "type": "Task",
+    "labels": ["Team:Defend Workflows"],
+    "body": "New tab in the host isolation page that lists exempt hosts with search, sorting and a remove action.\n\n## Acceptance criteria\n- The list shows the host name, the user who exempted it and the date.\n- Removing a host asks for confirmation.\n- The tab is hidden without the isolation privilege.\n- The isolate action is disabled for hosts in the list.",
+    "parent": "elastic/security-team#915001"
+  },
+  "elastic/kibana#915003": {
+    "title": "[Endpoint] Show a tooltip on the exempt badge in the hosts table",
+    "type": "Task",
+    "labels": ["Team:Defend Workflows"],
+    "body": "Add a tooltip to the `Exempt` badge in the hosts table that explains why the host cannot be isolated.\n\n## Acceptance criteria\n- Hovering or focusing the badge shows the tooltip.\n- The tooltip text links to the isolation docs.",
+    "parent": "elastic/security-team#915001"
+  },
+  "elastic/kibana#915100": {
+    "title": "[Investigations] Meta Task: tasks before GA",
+    "type": "Task",
+    "labels": ["Team:Threat Hunting:Investigations"],
+    "body": "Tracking everything left before the timeline revamp goes GA."
+  },
+  "elastic/kibana#915101": {
+    "title": "[Investigations] EQL queries in timeline notes",
+    "type": "Task",
+    "labels": ["Team:Threat Hunting:Investigations"],
+    "body": "Let users attach an EQL query to a note and run it from the note.",
+    "parent": "elastic/kibana#915100"
+  },
+  "elastic/kibana#915102": {
+    "title": "[Investigations] Export pinned events to CSV",
+    "type": "Task",
+    "labels": ["Team:Threat Hunting:Investigations"],
+    "body": "Add an export action to the pinned events tab that downloads the pinned events as CSV.",
+    "parent": "elastic/kibana#915100"
+  },
+  "elastic/kibana#915103": {
+    "title": "[Investigations] Show the note count on the timeline Notes tab",
+    "type": "Task",
+    "labels": ["Team:Threat Hunting:Investigations"],
+    "body": "Add a counter badge to the `Notes` tab in timeline.\n\n## Acceptance criteria\n- The badge shows the number of notes on the timeline.\n- The badge is hidden when there are no notes.",
+    "parent": "elastic/kibana#915100"
   }
 }

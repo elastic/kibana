@@ -6,8 +6,9 @@
 **Suggested level for a test plan:** [elastic/kibana#911000](https://github.com/elastic/kibana/issues/911000) — one functionality: the live query history; its plan covers this issue
 **Proposed label changes:**
 - add `Needs Test Plan` to [elastic/kibana#911000](https://github.com/elastic/kibana/issues/911000)
+**Proposed comment:** none — the decision is Yes, not a No
 
-Reply "yes" to apply the label changes above, or tell me which ones to apply.)
+Reply "yes" to apply the changes above, or tell me which ones to apply.)
 
 The user's new message is:
 no, put it on 911002 itself instead. the epic is going to get split, leave it alone

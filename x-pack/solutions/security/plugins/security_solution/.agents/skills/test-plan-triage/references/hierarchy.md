@@ -24,6 +24,7 @@ An entry with `unreadable: true` is a parent the user's `gh` cannot read (privat
    - An ancestor with `has_label: true` is reported as "already labeled", with no label change.
    - An ancestor with `has_test_plan: true` is reported as "test plan already published".
    - An ancestor with `allowed_repo: false` cannot be labeled; mention it and suggest nothing there.
+   - An ancestor with `private: true` can be the suggested level, but when the target is not private, the No comment must not link or describe it (SKILL.md step 5).
 5. Never suggest or label descendants of the target.
 
 ## What goes in the answer
@@ -33,7 +34,7 @@ An entry with `unreadable: true` is a parent the user's `gh` cannot read (privat
 | Yes | none | the target |
 | Yes | an ancestor | only the ancestor; say its plan covers the target, so labeling both would make two overlapping plans |
 | No (N4) | an ancestor | only the ancestor |
-| No (N4) | none (the parent is already an umbrella or not a functionality) | none; say the slice has no level to attach to and ask whether the target should get its own plan after all |
+| A small slice with no suggested level (the parent is already an umbrella, not a functionality, closed or unreadable) | none | none; this is A2, not N4: answer Need your input, record nothing, and ask whether the target gets its own plan or is covered elsewhere |
 | No (N3, the issue is the testing work) | an ancestor | only the ancestor: the plan belongs to the work being tested |
 | No (N1, N2, N5) | any | none; a bug, a chore or a flag says nothing about whether its parent needs a plan |
 | Need your input | any | none until the question is answered |

@@ -26,8 +26,8 @@ Apply the rules **in this order** and stop at the first one that matches. Quote 
 
 | ID | Matches when | Decision |
 |---|---|---|
-| N4 | The issue has a parent, and it is one small element of a feature the ancestors describe: one field, one control, one part of a header, styling or copy. Usually three acceptance criteria or fewer and no flow of its own. | No. Suggest a level with `hierarchy.md`. |
-| A2 | Same smallness, but the issue has **no** parent | Need your input: ask whether this change gets its own plan or is covered elsewhere |
+| N4 | The issue has a parent, and it is one small element of a feature the ancestors describe: one field, one control, one part of a header, styling or copy. Usually three acceptance criteria or fewer and no flow of its own. `hierarchy.md` must give a suggested level; if it gives none, it is A2. | No. Suggest a level with `hierarchy.md`. |
+| A2 | Same smallness, but the issue has **no** parent, or no ancestor that is one functionality (`hierarchy.md` gives no suggested level: the parent is an umbrella, not a functionality, closed or unreadable) | Need your input: ask whether this change gets its own plan or is covered elsewhere |
 | — | Otherwise | Yes, with the S rule that matched |
 
 **Not a slice:** a sub-issue with its own entry point and end-to-end flow (for example a new row action that opens a panel, runs something and confirms it), or one that changes stored data. These are a Yes even under a parent.
@@ -48,6 +48,7 @@ Apply the rules **in this order** and stop at the first one that matches. Quote 
 | Bulk assign beyond the 100-alert page limit | S3 | Yes |
 | "Show severity in the flyout header", 2 ACs, five levels down an epic | N4 | No, suggest an ancestor |
 | "Link the attack name to the schedule flyout", 2 ACs, no parent | A2 | Ask |
+| One tooltip, 2 ACs, whose only parent is a "Tasks before GA" Meta Task | A2 | Ask |
 | Epic with a vague body whose sub-issues are parts of one feature | S1 | Yes |
 | Epic whose sub-issues are only bugs and tests | N1 / N2 | No |
 | "Tasks before GA" Meta Task with notes, pinned events and EQL sub-issues | A5 | Ask which one |

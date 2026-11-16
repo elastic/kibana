@@ -7,10 +7,12 @@ Commands (JSON on stdout; exit 0 ok, 1 failure, 2 the agent must ask the user):
   label --issue <ref> [--dry-run]   Add `Needs Test Plan` to one open issue. Never retried.
   comment-no --issue <ref> --rule <N1-N5> --reason <text> [--suggested <ref>] [--dry-run]
                                     Post one fixed-format comment saying the issue needs no
-                                    test plan. Never retried, never posted twice.
+                                    test plan. Never retried, never posted twice. On a public
+                                    issue, refuses a suggested level or a reason that points
+                                    to a private repo.
 
 <ref> is a GitHub issue URL or `owner/repo#N`. Only elastic/kibana and
-elastic/security-team are accepted.
+elastic/security-team are accepted; elastic/security-team is private.
 
 TEST_PLAN_TRIAGE_GH replaces `gh` with another command (the evals stub). While it is set,
 `label` and `comment-no` never write: they report what they would write and, if
@@ -31,6 +33,7 @@ from datetime import date, datetime, timezone
 from typing import Any, Optional
 
 ALLOWED_REPOS = ("elastic/kibana", "elastic/security-team")
+PRIVATE_REPOS = ("elastic/security-team",)
 LABEL = "Needs Test Plan"
 # Written by test-plan-generator (scripts/publish_test_plan.sh); if you change it, change both skills.
 TEST_PLAN_MARKER = "<!-- test-plan-generated -->"
@@ -205,6 +208,7 @@ def summarize(issue: dict, *, body_limit: Optional[int]) -> dict:
         "is_pull_request": bool(issue.get("pull_request")),
         "sub_issues_total": (issue.get("sub_issues_summary") or {}).get("total", 0),
         "allowed_repo": repo in ALLOWED_REPOS,
+        "private": repo in PRIVATE_REPOS,
     }
     if body_limit is not None:
         body, truncated = _excerpt(issue.get("body"), body_limit)
@@ -399,6 +403,19 @@ def _check_reason(reason: str) -> str:
     return text
 
 
+def _check_public_comment(ref: IssueRef, reason: str, suggested: Optional[IssueRef]) -> None:
+    """A comment on a public issue must not link to or name a private repo."""
+    if ref.repo in PRIVATE_REPOS:
+        return
+    if suggested and suggested.repo in PRIVATE_REPOS:
+        raise TriageError(
+            f"{ref} is public and {suggested} is private; drop --suggested so the comment does not link a private issue",
+            gate="private_link",
+        )
+    if any(repo.casefold() in reason.casefold() or repo.split("/")[1] in reason.casefold() for repo in PRIVATE_REPOS):
+        raise TriageError(f"{ref} is public; --reason must not name a private repo or its issues", gate="private_link")
+
+
 def comment_no(
     gh: Gh, ref: IssueRef, *, rule: str, reason: str, suggested: Optional[IssueRef], dry_run: bool, today: Optional[date] = None
 ) -> dict:
@@ -408,6 +425,7 @@ def comment_no(
     text = _check_reason(reason)
     if suggested == ref:
         raise TriageError("--suggested must be an ancestor, not the issue itself")
+    _check_public_comment(ref, text, suggested)
     issue = _open_issue(gh, ref, "commented on")
     url = issue.get("html_url")
     if _has_label(issue):
@@ -423,7 +441,7 @@ def comment_no(
         if gh.eval_mode:
             result["simulated"] = True
             if not dry_run:
-                _log_simulated_write(f"comment {ref} rule={rule_id} suggested={suggested or 'none'}")
+                _log_simulated_write(f"comment {ref} rule={rule_id} suggested={suggested or 'none'} reason={text}")
         return result
     posted = gh.add_comment(ref, body)
     if not posted.get("html_url"):

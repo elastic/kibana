@@ -6,9 +6,9 @@
 **Suggested level for a test plan:** [elastic/kibana#912300](https://github.com/elastic/kibana/issues/912300) — one functionality: case templates; its plan covers this issue
 **Proposed label changes:**
 - add `Needs Test Plan` to [elastic/kibana#912300](https://github.com/elastic/kibana/issues/912300)
-**Recorded on the issue:** none — the decision is Yes, not a No
+**Proposed comment:** none — the decision is Yes, not a No
 
-Reply "yes" to apply the label changes above, or tell me which ones to apply.)
+Reply "yes" to apply the changes above, or tell me which ones to apply.)
 
 The user's new message is:
 go ahead

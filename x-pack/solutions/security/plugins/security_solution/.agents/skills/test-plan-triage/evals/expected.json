@@ -15,7 +15,8 @@
     "suggested_level": null,
     "proposed": [],
     "labeled": [],
-    "comments": ["elastic/security-team#910201 rule=N1 suggested=none"]
+    "comments": [],
+    "proposed_comment": true
   },
   "s3-upgrade-testing-task": {
     "reps": 3,
@@ -24,7 +25,8 @@
     "suggested_level": "elastic/kibana#910300",
     "proposed": ["elastic/kibana#910300"],
     "labeled": [],
-    "comments": ["elastic/kibana#910302 rule=N3 suggested=elastic/kibana#910300"]
+    "comments": [],
+    "proposed_comment": true
   },
   "s4-slice-under-roadmap": {
     "reps": 5,
@@ -33,7 +35,8 @@
     "suggested_level": "elastic/kibana#910401",
     "proposed": ["elastic/kibana#910401"],
     "labeled": [],
-    "comments": ["elastic/kibana#910404 rule=N4 suggested=elastic/kibana#910401"]
+    "comments": [],
+    "proposed_comment": true
   },
   "s5-under-initiative": {
     "reps": 5,
@@ -99,7 +102,8 @@
     "suggested_level": "elastic/kibana#911102",
     "proposed": ["elastic/kibana#911102"],
     "labeled": [],
-    "comments": ["elastic/kibana#911103 rule=N4 suggested=elastic/kibana#911102"]
+    "comments": [],
+    "proposed_comment": true
   },
   "s12-unreadable-parent": {
     "reps": 3,
@@ -126,7 +130,8 @@
     "suggested_level": null,
     "proposed": [],
     "labeled": [],
-    "comments": ["elastic/kibana#911401 rule=N2 suggested=none"]
+    "comments": [],
+    "proposed_comment": true
   },
   "s15-already-triaged-no": {
     "reps": 3,
@@ -145,7 +150,8 @@
     "suggested_level": null,
     "proposed": [],
     "labeled": [],
-    "comments": ["elastic/kibana#911601 rule=N5 suggested=none"]
+    "comments": [],
+    "proposed_comment": true
   },
   "s17-small-change-no-parent": {
     "reps": 3,
@@ -288,7 +294,8 @@
     "suggested_level": "elastic/kibana#914002",
     "proposed": ["elastic/kibana#914002"],
     "labeled": [],
-    "comments": ["elastic/kibana#914004 rule=N3 suggested=elastic/kibana#914002"],
+    "comments": [],
+    "proposed_comment": true,
     "held_out": true
   },
   "s32-risk-history-source": {
@@ -300,5 +307,44 @@
     "labeled": [],
     "comments": [],
     "held_out": true
+  },
+  "s33-yes-posts-no": {
+    "reps": 3,
+    "decision": null,
+    "rule": null,
+    "suggested_level": null,
+    "proposed": null,
+    "labeled": [],
+    "comments": ["elastic/kibana#911401 rule=N2 suggested=none"]
+  },
+  "s34-yes-label-and-no": {
+    "reps": 3,
+    "decision": null,
+    "rule": null,
+    "suggested_level": null,
+    "proposed": null,
+    "labeled": ["elastic/kibana#910401"],
+    "comments": ["elastic/kibana#910404 rule=N4 suggested=elastic/kibana#910401"]
+  },
+  "s35-public-slice-private-epic": {
+    "reps": 3,
+    "decision": "no",
+    "rule": "N4",
+    "suggested_level": "elastic/security-team#915001",
+    "proposed": ["elastic/security-team#915001"],
+    "labeled": [],
+    "comments": [],
+    "proposed_comment": true,
+    "answer": {"comment_excludes": ["security-team", "Larkspur"]}
+  },
+  "s36-slice-under-meta-task": {
+    "reps": 3,
+    "decision": "ask",
+    "rule": "A2",
+    "suggested_level": null,
+    "proposed": [],
+    "labeled": [],
+    "comments": [],
+    "answer": {"question": true}
   }
 }

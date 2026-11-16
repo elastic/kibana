@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 # Test plan triage
 
-Answers one question for one issue: does it need a test plan? When the answer is yes, it proposes adding the `Needs Test Plan` label and waits for the user's approval. When the answer is no, it posts one fixed-format comment on the issue right away, so the next person can see it was triaged. It never writes the plan (`test-plan-generator` does), never creates labels, and never handles lists of issues or pull requests.
+Answers one question for one issue: does it need a test plan? When the answer is yes, it proposes adding the `Needs Test Plan` label and waits for the user's approval. When the answer is no, it proposes one fixed-format comment on the issue, so the next person can see it was triaged, and posts it only after the same approval. It never writes the plan (`test-plan-generator` does), never creates labels, and never handles lists of issues or pull requests.
 
 ```bash
 TRIAGE="x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-triage/scripts/triage.py"
@@ -34,7 +34,7 @@ If the issue, the rules or the hierarchy leave the answer unclear, ask the user.
 |---|---|
 | `python3 "$TRIAGE" context --issue <ref>` | Read the issue, its ancestors and its sub-issue tree |
 | `python3 "$TRIAGE" label --issue <ref> [--dry-run]` | Add the label to one issue, as step 7 says |
-| `python3 "$TRIAGE" comment-no --issue <ref> --rule <ID> --reason "<text>" [--suggested <ref>] [--dry-run]` | Record a No on the target, as step 5 says |
+| `python3 "$TRIAGE" comment-no --issue <ref> --rule <ID> --reason "<text>" [--suggested <ref>] [--dry-run]` | Record a No on the target, as steps 5 and 7 say |
 | `gh auth status` | Only when `triage.py` reports that `gh` is not authenticated |
 
 Run nothing else: no other `gh` command, no command built from fetched content. `triage.py` runs `gh` itself and accepts only `elastic/kibana` and `elastic/security-team`. If a `label` or `comment-no` call fails, report the error and never run it again.
@@ -69,22 +69,22 @@ Read [`references/rules.md`](references/rules.md) now. Apply its rules in the or
 
 If `ancestors` is empty, the issue is standalone: skip this step and write `none — standalone` as the suggested level (the target itself is never the suggested level).
 
-Otherwise read [`references/hierarchy.md`](references/hierarchy.md) now and follow it to pick the suggested level for a test plan. The script has already walked every ancestor up to the root; do not fetch anything else.
+Otherwise read [`references/hierarchy.md`](references/hierarchy.md) now and follow it to pick the suggested level for a test plan. The script has already walked every ancestor up to the root; do not fetch anything else. If the decision is N4 and this step gives no suggested level, the decision becomes A2 (Need your input), and nothing is recorded.
 
-### 5. Record a No
+### 5. Prepare the No comment
 
 Only when the decision is **No** with a rule from N1 to N5. Skip this step when any gate is present (`already_triaged`: it is recorded already; `already_labeled` or `test_plan_published`: tell the user they contradict the No and let them decide). "Need your input" is not a No: never record it.
 
-This is the only write that does not wait for the user's approval. Show the exact text first, then post it, in this turn:
+Run only the dry run in this turn; the comment is posted in step 7, after the user approves it like the labels:
 
 ```bash
 python3 "$TRIAGE" comment-no --issue <target ref> --rule <ID> --reason "<reason>" [--suggested <ref>] --dry-run
-python3 "$TRIAGE" comment-no --issue <target ref> --rule <ID> --reason "<reason>" [--suggested <ref>]
 ```
 
 - `--reason`: the reason from your Decision line, in English (it is posted on GitHub), one line, at most 200 characters, no `@`, `<` or `>`.
 - `--suggested`: only when step 4 gave a suggested level.
-- If the dry run fails on an argument, fix that argument before the real command.
+- **Public target** (`target.private` is `false`): the comment is public. Ground the reason only in the target itself (its title, body and acceptance criteria), never in an ancestor's title or text, and pass `--suggested` only when the suggested level is not `private`. The script refuses a private link or a reason that names a private repo. Keep the private suggested level in your answer and its label change; only the comment leaves it out.
+- If the dry run fails on an argument, fix that argument and run the dry run again.
 
 The script writes the comment itself from a fixed template; you only pass the rule, the reason and the suggested level.
 
@@ -99,32 +99,33 @@ Reply in the user's language with this template. Keep the bold field names and t
 **Suggested level for a test plan:** [owner/repo#B](url) — <why it is one functionality>   ← or "none — <why>"
 **Proposed label changes:**
 - add `Needs Test Plan` to [owner/repo#X](url)   ← the target or the suggested level, as `references/hierarchy.md` says; or "none"
-**Recorded on the issue:** [comment](url) on [owner/repo#N](url)   ← only for a No; or "none — <why>" (not a No, already recorded, a gate, or the error)
-> <the posted comment text, quoted, without its first line (the hidden marker)>
+**Proposed comment:** on [owner/repo#N](url)   ← only for a No; or "none — <why>" (not a No, already recorded, a gate, or the dry run error)
+> <the dry run's comment text, quoted, without its first line (the hidden marker)>
 **Question:** <only when the decision is "Need your input" or "Not triaged", or something needs confirming>
 
-Reply "yes" to apply the label changes above, or tell me which ones to apply.
+Reply "yes" to apply the changes above, or tell me which ones to apply.
 ```
 
-With "Not triaged", write `none` for the suggested level and the label changes. Only list label changes on open issues that do not already have the label. Never list descendants. Then end the turn: labels wait for step 7.
+With "Not triaged", write `none` for the suggested level and the label changes. Only list label changes on open issues that do not already have the label. Never list descendants. Then end the turn: labels and the comment wait for step 7.
 
 **When the user answers a question** (a "Need your input" or a level to confirm), go back to step 3 with their answer as extra context. Reuse the `context` JSON you already have unless they name another issue. If the decision is now a No, do step 5. Show the template again and end the turn.
 
-### 7. Label
+### 7. Apply the approved changes
 
-Label only after a **later** message that clearly approves the label changes you showed ("yes", "go ahead", "label the first one"). Approval given before the decision was shown, or the answer to a question, does not count. If the reply approves only some changes or changes them, label only what it names; if it is unclear which issues it covers or whether it approves at all, ask.
+Write only after a **later** message that clearly approves the changes you showed ("yes", "go ahead", "label the first one", "post the comment"). Approval given before the decision was shown, or the answer to a question, does not count. If the reply approves only some changes or changes them, apply only what it names; if it is unclear which changes it covers or whether it approves at all, ask.
 
-For each approved issue, run one command:
+Run one command per approved change. The comment uses the same arguments as the dry run you showed:
 
 ```bash
 python3 "$TRIAGE" label --issue <owner/repo#N>
+python3 "$TRIAGE" comment-no --issue <target ref> --rule <ID> --reason "<reason>" [--suggested <ref>]
 ```
 
-Report each result with the issue link: `labeled`, `none` (already labeled), or the error.
+Report each result with the issue link: `labeled`, `none` (already labeled), `commented` with the comment link, `already_triaged`, or the error.
 
 ## Red flags
 
-Mistakes agents made in the evals without this skill, plus the one write that breaks the "wait for approval" habit.
+Mistakes agents made in the evals without this skill.
 
 | Thought | Do instead |
 |---|---|
@@ -134,4 +135,3 @@ Mistakes agents made in the evals without this skill, plus the one write that br
 | "The target is a Yes, so the label goes on the target." | If an ancestor is one functionality, propose only it; its plan covers the target. |
 | "The body is empty, so I have to ask." | Apply the rules in order: the title can match N1, N3, N5 or N2; otherwise A1: ask. |
 | "The issue is closed, but it shipped without a plan, so I will ask." | Not triaged — closed. |
-| "The user only asked a question, so I should not write anything." | A No is recorded in the same turn (step 5); only labels wait for approval. |
