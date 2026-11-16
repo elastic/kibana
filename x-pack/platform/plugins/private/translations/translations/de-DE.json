@@ -25984,8 +25984,6 @@
     "xpack.contextEngine.sourcePicker.connectors.fieldLabel": "Konnektor",
     "xpack.contextEngine.sourcePicker.connectors.missingReadPrivilege": "Sie benötigen Lesezugriff auf Actions und Connectors, um Connectoren zu suchen und auszuwählen.",
     "xpack.contextEngine.sourcePicker.esql.addButton": "ES|QL-Quelle hinzufügen",
-    "xpack.contextEngine.sourcePicker.index.comboAriaLabel": "Wählen Sie einen Index, einen Datenstream oder einen Alias aus",
-    "xpack.contextEngine.sourcePicker.index.comboPlaceholder": "z. B. logs-nginx",
     "xpack.contextEngine.sourcePicker.index.fieldHelp": "Beginnen Sie mit der Eingabe, um zu suchen, und wählen Sie anschließend einen Treffer aus der Liste aus.",
     "xpack.contextEngine.sourcePicker.index.fieldLabel": "Index, Datenstream oder Alias",
     "xpack.contextEngine.sourcePicker.tabs.connectors": "Konnektoren",

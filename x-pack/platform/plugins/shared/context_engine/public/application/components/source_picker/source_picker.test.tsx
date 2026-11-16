@@ -157,12 +157,7 @@ const openConnectorOptions = async (
 const getConnectorOptionByName = (name: string) => screen.getByRole('option', { name });
 
 const selectIndexSource = async (indexName: string) => {
-  const comboBox = screen.getByTestId('contextIndexComboBox');
-  const input = within(comboBox).getByRole('combobox');
-
-  fireEvent.focus(input);
-  fireEvent.click(input);
-  fireEvent.click(await screen.findByText(indexName));
+  fireEvent.click(await screen.findByTestId(`contextIndexOption-${indexName}`));
 };
 
 describe('SourcePicker', () => {
@@ -183,7 +178,7 @@ describe('SourcePicker', () => {
     expect(screen.getByTestId('contextElasticsearchSourcesPanel')).toBeInTheDocument();
     expect(screen.getByTestId('contextConnectorsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('contextConnectorsTab')).toBeInTheDocument();
-    expect(screen.getByTestId('contextIndexComboBox')).toBeInTheDocument();
+    expect(screen.getByTestId('contextIndexSelectable')).toBeInTheDocument();
     expect(screen.getByTestId('contextAdvancedEsqlAccordion')).toBeInTheDocument();
     expect(screen.getByTestId('mockEsqlEditor')).not.toBeVisible();
   });
@@ -197,20 +192,44 @@ describe('SourcePicker', () => {
     expect(row).toHaveTextContent('FROM logs-*');
   });
 
-  it('does not add a duplicate index source', async () => {
+  it('adds several indices at once and keeps them checked', async () => {
     renderWithProviders(<Harness />);
 
     await selectIndexSource('logs-*');
-    expect(screen.getAllByTestId('contextSelectedSource-esql-0')).toHaveLength(1);
+    await selectIndexSource('metrics-*');
 
-    const comboBox = screen.getByTestId('contextIndexComboBox');
-    const input = within(comboBox).getByRole('combobox');
-    fireEvent.focus(input);
-    fireEvent.click(input);
+    expect(screen.getAllByTestId(/^contextSelectedSource-esql-/)).toHaveLength(2);
+    expect(screen.getByTestId('contextIndexOption-logs-*')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('contextIndexOption-metrics-*')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
 
-    const listbox = await screen.findByRole('listbox');
-    expect(within(listbox).queryByText('logs-*')).not.toBeInTheDocument();
-    expect(within(listbox).getByText('metrics-*')).toBeInTheDocument();
+  it('removes the index source when its option is unchecked', async () => {
+    renderWithProviders(<Harness />);
+
+    await selectIndexSource('logs-*');
+    expect(screen.getByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
+
+    await selectIndexSource('logs-*');
+
+    expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
+  });
+
+  it('shows an index as checked when it is already selected as a simple FROM source', async () => {
+    renderWithProviders(
+      <Harness
+        initialSources={[
+          { type: 'esql', id: 'FROM logs-*', label: 'FROM logs-*', value: 'FROM logs-*' },
+        ]}
+      />
+    );
+
+    expect(await screen.findByTestId('contextIndexOption-logs-*')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
   });
 
   it('adds a raw ES|QL query as a source from the advanced accordion', async () => {
@@ -248,11 +267,12 @@ describe('SourcePicker', () => {
     expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
   });
 
-  it('does not fetch connectors or indices on mount', () => {
+  it('lists indices on mount without fetching connectors', async () => {
     const { services } = renderWithProviders(<Harness />);
 
+    await screen.findByTestId('contextIndexOption-logs-*');
     expect(services.http.get).not.toHaveBeenCalled();
-    expect(services.data.dataViews.getIndices).not.toHaveBeenCalled();
+    expect(services.data.dataViews.getIndices).toHaveBeenCalled();
   });
 
   it('lists only the data-retrieval connectors in the connectors tab', async () => {
