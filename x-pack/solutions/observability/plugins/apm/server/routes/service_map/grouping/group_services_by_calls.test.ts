@@ -196,8 +196,10 @@ describe('groupServicesByCalls', () => {
 
     expect(new Set(strategy.groups.map(({ kind }) => kind))).toEqual(new Set(['calls']));
     for (const members of teams) {
-      expect(new Set(members.map((service) => groupOf.get(service)?.id))).toEqual(
-        new Set([`calls:${members[0]}`])
+      // team<n>-gateway names the group, team<n>-1 is first by name
+      const [gateway, firstByName] = members;
+      expect(new Set(members.map((service) => groupOf.get(service)))).toEqual(
+        new Set([{ id: `calls:${firstByName}`, kind: 'calls', busiestService: gateway }])
       );
     }
   });
@@ -238,38 +240,54 @@ describe('groupServicesByCalls', () => {
     expect(new Set(strategy.groups.map(({ kind }) => kind))).toEqual(new Set(['calls']));
   });
 
-  it('names each group found from calls after its busiest service, ties broken by name', () => {
-    // A clique of 4 on a map of 100: each member is called by 3, under a quarter of the map, and
-    // has too few neighbours to be shared, so the clique is grouped as one. The rest have no calls.
+  /**
+   * A clique of 4 on a map of 100: each member is called by 3, under a quarter of the map, and has
+   * too few neighbours to be shared, so the clique is grouped as one. The rest have no calls.
+   */
+  function cliqueOnMapOf100(traffic: Record<'a' | 'b' | 'c' | 'd', number>) {
     const idle = Array.from({ length: 96 }, (_, index) => `idle-${index}`);
-    const services = ['a', 'b', 'c', 'd', ...idle];
-    const edges = [
-      { source: 'a', target: 'b', weight: 1 },
-      { source: 'a', target: 'c', weight: 1 },
-      { source: 'a', target: 'd', weight: 1 },
-      { source: 'b', target: 'c', weight: 1 },
-      { source: 'b', target: 'd', weight: 1 },
-      { source: 'c', target: 'd', weight: 1 },
-    ];
-    const stats = new Map<string, ServiceCallStats>([
-      ['a', { callers: 3, neighbours: 3, traffic: 1 }],
-      ['b', { callers: 3, neighbours: 3, traffic: 5 }],
-      ['c', { callers: 3, neighbours: 3, traffic: 5 }],
-      ['d', { callers: 3, neighbours: 3, traffic: 2 }],
-      ...idle.map((service): [string, ServiceCallStats] => [
-        service,
-        { callers: 0, neighbours: 0, traffic: 0 },
+    const clique = ['a', 'b', 'c', 'd'] as const;
+    return {
+      idle,
+      services: [...clique, ...idle],
+      edges: clique.flatMap((source, index) =>
+        clique.slice(index + 1).map((target) => ({ source, target, weight: 1 }))
+      ),
+      stats: new Map<string, ServiceCallStats>([
+        ...clique.map((service): [string, ServiceCallStats] => [
+          service,
+          { callers: 3, neighbours: 3, traffic: traffic[service] },
+        ]),
+        ...idle.map((service): [string, ServiceCallStats] => [
+          service,
+          { callers: 0, neighbours: 0, traffic: 0 },
+        ]),
       ]),
-    ]);
+    };
+  }
 
-    expect(groupServicesByCalls({ services, edges, stats })).toEqual({
+  it('ids each group found from calls by its first service by name, and names it after its busiest, ties broken by name', () => {
+    const clique = cliqueOnMapOf100({ a: 1, b: 5, c: 5, d: 2 });
+
+    expect(groupServicesByCalls(clique)).toEqual({
       source: 'calls',
       groups: [
-        { id: 'calls:b', kind: 'calls', busiestService: 'b' },
+        { id: 'calls:a', kind: 'calls', busiestService: 'b' },
         { id: 'notConnected', kind: 'notConnected' },
       ],
-      assignment: [0, 0, 0, 0, ...idle.map(() => 1)],
+      assignment: [0, 0, 0, 0, ...clique.idle.map(() => 1)],
     });
+  });
+
+  it('keeps the id of a group whose members stay the same when another becomes the busiest', () => {
+    const before = cliqueOnMapOf100({ a: 1, b: 5, c: 5, d: 2 });
+    const after = cliqueOnMapOf100({ a: 1, b: 5, c: 5, d: 9 });
+
+    const [groupBefore] = groupServicesByCalls(before).groups;
+    const [groupAfter] = groupServicesByCalls(after).groups;
+
+    expect(groupBefore).toEqual({ id: 'calls:a', kind: 'calls', busiestService: 'b' });
+    expect(groupAfter).toEqual({ id: 'calls:a', kind: 'calls', busiestService: 'd' });
   });
 
   it('names every group found from calls after its member with the most calls', () => {

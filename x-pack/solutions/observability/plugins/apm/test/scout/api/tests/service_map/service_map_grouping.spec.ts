@@ -100,7 +100,8 @@ apiTest.describe(
         callsGroups.map(({ id }) => membersByGroupId[id]).sort((a, b) => a[0].localeCompare(b[0]))
       ).toStrictEqual(SERVICE_MAP_GROUPING_TEAMS.map(sorted));
       for (const { id, busiestService } of callsGroups) {
-        expect(id).toBe(`calls:${busiestService}`);
+        // members are sorted, so the first is the one the id is built from
+        expect(id).toBe(`calls:${membersByGroupId[id][0]}`);
         expect(membersByGroupId[id]).toContain(busiestService);
       }
     });

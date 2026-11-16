@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ServiceGroupingStrategy, ServiceMapGroup } from '@kbn/apm-types';
+import type {
+  CallsServiceMapGroup,
+  ServiceGroupingStrategy,
+  ServiceMapGroup,
+} from '@kbn/apm-types';
 import { NOT_CONNECTED_GROUP_ID, SHARED_GROUP_ID } from './constants';
 import { findNotConnected } from './find_not_connected';
 import { findSharedServices } from './find_shared_services';
@@ -15,8 +19,9 @@ import { compareNames, edgesBetween } from './utils';
 
 /**
  * A group for every service, from the calls between them: shared services first, then the ones
- * not connected to the rest, then groups inferred from the calls of the others, each named after
- * its busiest service.
+ * not connected to the rest, then groups inferred from the calls of the others. Each of those is
+ * known by its first service by name, which stays the same while its members do, whatever their
+ * calls, and named after its busiest service.
  *
  * `assignment[i]` is the index in `groups` of `services[i]`, so the caller owns the order of
  * `services`, shared by every grouping strategy. `edges` and `stats` must come from
@@ -43,6 +48,7 @@ export function groupServicesByCalls({
     edges: edgesBetween({ edges: restEdges, services: new Set(connected) }),
     mapServiceCount: services.length,
   });
+  const first = firstServiceByGroup({ groups: inferred });
   const busiest = busiestServiceByGroup({ groups: inferred, stats });
 
   const groupByService = new Map<string, ServiceMapGroup>();
@@ -52,7 +58,13 @@ export function groupServicesByCalls({
   );
   for (const [service, group] of inferred) {
     const busiestService = busiest.get(group) ?? service;
-    groupByService.set(service, { id: `calls:${busiestService}`, kind: 'calls', busiestService });
+    const firstService = first.get(group) ?? service;
+    const callsGroup: CallsServiceMapGroup = {
+      id: `calls:${firstService}`,
+      kind: 'calls',
+      busiestService,
+    };
+    groupByService.set(service, callsGroup);
   }
 
   // groups in the order their first service appears
@@ -74,6 +86,22 @@ export function groupServicesByCalls({
   });
 
   return { source: 'calls', groups, assignment };
+}
+
+/** The service whose name sorts first in each group. */
+function firstServiceByGroup({
+  groups,
+}: {
+  groups: ReadonlyMap<string, number>;
+}): Map<number, string> {
+  const first = new Map<number, string>();
+  for (const [service, group] of groups) {
+    const current = first.get(group);
+    if (current === undefined || compareNames(service, current) < 0) {
+      first.set(group, service);
+    }
+  }
+  return first;
 }
 
 /** The service with the most calls made and received in each group, ties broken by name. */

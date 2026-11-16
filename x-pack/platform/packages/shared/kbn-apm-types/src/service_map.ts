@@ -88,20 +88,27 @@ export interface AttributeServiceMapGroup {
 
 /** Services that call each other a lot, named after the busiest of them. */
 export interface CallsServiceMapGroup {
-  id: string;
+  /**
+   * The member whose name sorts first, after `calls:`. It stays the same while the members do,
+   * whatever their calls. Not stable across requests in general: it changes when that member
+   * leaves the group or one whose name sorts earlier joins. Can hold any character a service
+   * name can.
+   */
+  id: `calls:${string}`;
   kind: 'calls';
+  /** The member with the most calls made and received, ties broken by name: the group's label. */
   busiestService: string;
 }
 
 /** Services called by a large share of the estate, or connected to far more services than most. */
 export interface SharedServiceMapGroup {
-  id: string;
+  id: 'shared';
   kind: 'shared';
 }
 
 /** Services with no calls, or in a small piece of the call graph cut off from the rest. */
 export interface NotConnectedServiceMapGroup {
-  id: string;
+  id: 'notConnected';
   kind: 'notConnected';
 }
 
