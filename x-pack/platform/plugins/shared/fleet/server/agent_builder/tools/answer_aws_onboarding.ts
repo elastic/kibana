@@ -9,7 +9,9 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { toWorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
 
 import { checkOnboardingAccess, getOnboardingExecution } from './common';
 import type { AwsOnboardingToolDeps } from './common';
@@ -30,9 +32,19 @@ const answerSchema = lazySchema(() =>
   })
 );
 
+const DEFAULT_SETTLE_INTERVAL_MS = 1000;
+const DEFAULT_SETTLE_TIMEOUT_MS = 15000;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const createAnswerAwsOnboardingTool = ({
   workflowApi,
-}: AwsOnboardingToolDeps): BuiltinSkillBoundedTool<typeof answerSchema> => ({
+  settleIntervalMs = DEFAULT_SETTLE_INTERVAL_MS,
+  settleTimeoutMs = DEFAULT_SETTLE_TIMEOUT_MS,
+}: AwsOnboardingToolDeps & {
+  settleIntervalMs?: number;
+  settleTimeoutMs?: number;
+}): BuiltinSkillBoundedTool<typeof answerSchema> => ({
   id: 'answer_aws_onboarding',
   type: ToolType.builtin,
   description:
@@ -83,9 +95,43 @@ export const createAnswerAwsOnboardingTool = ({
       };
     }
 
-    const after = await getOnboardingExecution({ workflowApi, executionId, spaceId, request });
+    // The resume call returns before the engine has processed it, so wait until the answered step
+    // has left the waiting state; otherwise the next state read would still show the old pause.
+    const hasSettled = (execution: WorkflowExecutionDto) =>
+      execution.status !== ExecutionStatus.WAITING_FOR_INPUT ||
+      execution.stepExecutions.find((step) => step.id === waitingStep.id)?.status !==
+        ExecutionStatus.WAITING_FOR_INPUT;
+
+    const deadline = Date.now() + settleTimeoutMs;
+    let after = await getOnboardingExecution({ workflowApi, executionId, spaceId, request });
+    while ('execution' in after && !hasSettled(after.execution) && Date.now() < deadline) {
+      await sleep(settleIntervalMs);
+      after = await getOnboardingExecution({ workflowApi, executionId, spaceId, request });
+    }
+    if ('error' in after) {
+      return { results: [after.error] };
+    }
+
+    const { execution } = after;
+    const nextWaiting = execution.stepExecutions.find(
+      (step) => step.status === ExecutionStatus.WAITING_FOR_INPUT
+    );
+    const { waiting_input: waitingInput } = toWorkflowExecutionState(execution, executionId);
     return {
-      results: ['error' in after ? after.error : otherResult({ status: after.execution.status })],
+      results: [
+        otherResult({
+          status: execution.status,
+          ...(nextWaiting &&
+            waitingInput && {
+              waiting: {
+                step_name: nextWaiting.stepId,
+                message: waitingInput.message,
+                schema: waitingInput.schema,
+              },
+            }),
+          ...(!hasSettled(execution) && { settling: true }),
+        }),
+      ],
     };
   },
 });

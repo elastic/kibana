@@ -33,6 +33,7 @@ describe('answer_aws_onboarding', () => {
       getWorkflowExecution: jest.fn().mockResolvedValue({
         status: 'running',
         workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
+        workflowDefinition: { name: 'AWS Agentless Onboarding', steps: [] },
         stepExecutions: [
           { id: 'step-exec-1', stepId: 'approve_values', status: 'waiting_for_input' },
         ],
@@ -97,5 +98,74 @@ describe('answer_aws_onboarding', () => {
     expect(results[0].type).toBe('error');
     expect(JSON.stringify(results[0])).toContain('ask_stack');
     expect(workflowApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  describe('settling after the resume', () => {
+    const definition = {
+      name: 'AWS Agentless Onboarding',
+      steps: [
+        { name: 'ask_credentials', type: 'waitForInput', with: { message: 'Credentials?' } },
+        { name: 'ask_discover', type: 'waitForInput', with: { message: 'Discover now?' } },
+      ],
+    };
+    const waitingOn = (stepId: string, id: string) => ({
+      id,
+      stepId,
+      globalExecutionIndex: 1,
+      scopeStack: [],
+      status: 'waiting_for_input',
+    });
+    const execution = (stepExecutions: unknown[]) => ({
+      status: 'waiting_for_input',
+      workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
+      workflowDefinition: definition,
+      stepExecutions,
+    });
+    const answer = (workflowApi: unknown, timeoutMs: number) =>
+      createAnswerAwsOnboardingTool({
+        workflowApi: workflowApi as any,
+        settleIntervalMs: 0,
+        settleTimeoutMs: timeoutMs,
+      }).handler({ execution_id: 'exec-1', step_name: 'ask_credentials', answer: { done: true } }, {
+        request,
+        spaceId: 'default',
+      } as any) as unknown as Promise<{ results: Array<{ data: Record<string, any> }> }>;
+
+    it('polls until the answered step completes and returns the next pause', async () => {
+      const first = execution([waitingOn('ask_credentials', 'se-1')]);
+      const settled = execution([
+        { ...waitingOn('ask_credentials', 'se-1'), status: 'completed' },
+        { ...waitingOn('ask_discover', 'se-2'), globalExecutionIndex: 2 },
+      ]);
+      const workflowApi = {
+        resumeWorkflowExecution: jest.fn().mockResolvedValue({}),
+        getWorkflowExecution: jest
+          .fn()
+          .mockResolvedValueOnce(first)
+          .mockResolvedValueOnce(first)
+          .mockResolvedValueOnce(settled),
+      };
+
+      const { results } = await answer(workflowApi, 5000);
+
+      expect(workflowApi.getWorkflowExecution).toHaveBeenCalledTimes(3);
+      expect(results[0].data.waiting).toEqual(
+        expect.objectContaining({ step_name: 'ask_discover', message: 'Discover now?' })
+      );
+      expect(results[0].data).not.toHaveProperty('settling');
+    });
+
+    it('reports settling with the last-seen pause when the engine has not moved by the bound', async () => {
+      const stuck = execution([waitingOn('ask_credentials', 'se-1')]);
+      const workflowApi = {
+        resumeWorkflowExecution: jest.fn().mockResolvedValue({}),
+        getWorkflowExecution: jest.fn().mockResolvedValue(stuck),
+      };
+
+      const { results } = await answer(workflowApi, 20);
+
+      expect(results[0].data.settling).toBe(true);
+      expect(results[0].data.waiting.step_name).toBe('ask_credentials');
+    });
   });
 });
