@@ -7,12 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazySchema, z } from '@kbn/zod/v4';
-import {
-  MAX_ARRAY_LENGTH,
-  MAX_ID_LENGTH,
-  MAX_TEXT_LENGTH,
-  MAX_TITLE_LENGTH,
-} from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
 import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../automation_limits';
@@ -75,16 +70,6 @@ export const triggerInvestigationStepInputSchema = lazySchema(() =>
       .describe(
         'Additional operator guidance for this investigation round; empty means no additional guidance'
       ),
-    source_ids: z
-      .array(z.string().max(MAX_ID_LENGTH))
-      .max(MAX_ARRAY_LENGTH)
-      .optional()
-      .describe('Nightshift source ids to scope the investigation'),
-    scope_query: z
-      .string()
-      .max(MAX_TEXT_LENGTH)
-      .optional()
-      .describe('Query scope guidance for a manual investigation; not an enforced access filter'),
     timeout_seconds: z
       .number()
       .int()
