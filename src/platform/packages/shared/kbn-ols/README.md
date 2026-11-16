@@ -101,6 +101,11 @@ An ACL is in one of three states (`AclState`):
 - `invalid`: the ACL is damaged, for example it has an unsupported version or no owner, and grants no ordinary
   access at all.
 
+The `acl` field has the Elasticsearch mapping `ACL_MAPPING`, and every rule in this README assumes it. It indexes
+or rejects every stored value: it sets no `ignore_above` and no `ignore_malformed`, and `version` doesn't coerce. It
+ignores keys it doesn't define, and maps `entries` as `nested`, so that one entry's kind, ID, and level always match
+together.
+
 ## Reading a stored ACL
 
 These are the rules for reading a stored ACL, and the fixture table follows them. Each rule has to hold both when
@@ -312,3 +317,7 @@ The expectations are written by hand, and that's the point: they are the contrac
 object and the query that filters a search must produce exactly these answers, so a list can never show an object
 that opening it would deny. When you add a shape, decide its expected access from the rules above, not from what any
 implementation returns.
+
+The fixtures are checked against a real Elasticsearch with `ACL_MAPPING`: each shape is accepted or rejected as the
+fixture says, and both the filter and the evaluator, on the source that Elasticsearch returns, grant exactly the
+expected access.
