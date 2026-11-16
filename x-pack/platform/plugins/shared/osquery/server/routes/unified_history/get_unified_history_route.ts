@@ -169,7 +169,9 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               integrationNamespaces =
                 osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
 
-              logger.debug(`Retrieved integration namespaces: ${JSON.stringify(namespaceMap)}`);
+              logger.debug(
+                () => `Retrieved integration namespaces: ${JSON.stringify(namespaceMap)}`
+              );
             } catch (err) {
               logger.warn(`Failed to resolve integration namespaces: ${(err as Error).message}`);
             }
