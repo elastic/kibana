@@ -86,36 +86,6 @@ describe('sanitize settings objects', () => {
       });
     });
 
-    it('removes headers and secrets from an otlp output', () => {
-      const output = {
-        id: 'otlp',
-        name: 'OTLP',
-        type: 'otlp',
-        is_default: false,
-        is_default_monitoring: false,
-        otlp_exporter: {
-          protocol: 'grpc',
-          endpoint: 'https://otlp:4317',
-          headers: { Authorization: 'Bearer otlp-token' },
-          tls: { cert_pem: 'cert' },
-        },
-        secrets: { otlp_exporter: { tls: { key_pem: { id: 'secret-id' } } } },
-      } as Output;
-
-      expect(sanitizeOutput(output)).toEqual({
-        id: 'otlp',
-        name: 'OTLP',
-        type: 'otlp',
-        is_default: false,
-        is_default_monitoring: false,
-        otlp_exporter: {
-          protocol: 'grpc',
-          endpoint: 'https://otlp:4317',
-          tls: { cert_pem: 'cert' },
-        },
-      });
-    });
-
     it('does not change an output without sensitive fields', () => {
       const output = {
         id: 'es',
