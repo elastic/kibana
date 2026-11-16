@@ -26,7 +26,7 @@ jest.mock('../../services/app_context', () => ({
 
 const packageInfoWithReadmes = {
   ...awsPackageInfoFixture,
-  policy_templates: awsPackageInfoFixture.policy_templates.map((template) => ({
+  policy_templates: (awsPackageInfoFixture.policy_templates ?? []).map((template) => ({
     ...template,
     readme: `/package/aws/8.1.2/docs/${template.name}.md`,
   })),
