@@ -230,7 +230,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     );
   });
 
-  it('should call `findDocuments` with the correct arguments', async () => {
+  it('should read the anonymization fields with the internal user client, not `asCurrentUser`', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
@@ -243,12 +243,15 @@ describe('attackDiscoveryScheduleExecutor', () => {
     });
 
     expect(findDocuments).toHaveBeenCalledWith({
-      esClient: services.scopedClusterClient.asCurrentUser,
+      esClient: services.scopedClusterClient.asInternalUser,
       page: 1,
       perPage: 1000,
       index: '.kibana-elastic-ai-assistant-anonymization-fields-test-space',
       logger: mockLogger,
     });
+    expect(findDocuments).not.toHaveBeenCalledWith(
+      expect.objectContaining({ esClient: services.scopedClusterClient.asCurrentUser })
+    );
   });
 
   it('should call `generateAttackDiscoveries` with the correct arguments', async () => {
