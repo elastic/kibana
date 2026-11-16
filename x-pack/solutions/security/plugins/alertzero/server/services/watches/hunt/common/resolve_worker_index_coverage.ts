@@ -18,6 +18,7 @@ import {
   readLatestFinishedSweepIndexScope,
   sweepEvaluatedUniverse,
 } from './read_last_sweep_index_scope';
+import { HUNT_RESOLVE_INDEX_OPTIONS } from './hunt_resolve_index_options';
 import { readWorkerRole, uncoveredPatterns } from './role_pattern_coverage';
 import { unresolvedPatterns } from './resolve_index_scope';
 
@@ -104,8 +105,7 @@ export const resolveWorkerIndexCoverage = async ({
     // Same options as `resolveHuntScope`, so the caller's `missing` and the sweep's agree.
     const resolved = await esClient.indices.resolveIndex({
       name: indexPatterns,
-      allow_no_indices: true,
-      expand_wildcards: ['open'],
+      ...HUNT_RESOLVE_INDEX_OPTIONS,
     });
     missingForEveryone = unresolvedPatterns(universe, resolved, crossProjectSearch);
   } catch (err) {

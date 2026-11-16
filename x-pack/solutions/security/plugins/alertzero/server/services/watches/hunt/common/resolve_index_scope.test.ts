@@ -68,7 +68,7 @@ describe('resolveHuntScope', () => {
 
     expect(scope.resolution).toBe('universe');
     expect(scope.status).toBe('ok');
-    // Tier 1 searches the list as given, exclusion kept.
+    // Tier 1 searches the whole list, exclusion kept.
     expect(scope.index_patterns).toEqual(UNIVERSE);
     expect(scope.missing).toEqual([]);
     expect(scope.discovered.map((dataset) => dataset.dataset)).toEqual([
@@ -80,6 +80,7 @@ describe('resolveHuntScope', () => {
       name: UNIVERSE,
       allow_no_indices: true,
       expand_wildcards: ['open'],
+      ignore_unavailable: true,
     });
   });
 
@@ -201,7 +202,7 @@ describe('resolveHuntScope', () => {
     });
   });
 
-  it('never searches alerts: the universe is exactly what the caller supplied', async () => {
+  it('never searches alerts: the universe is the list the caller passed', async () => {
     const { esClient } = createEsClient();
 
     const scope = await resolveHuntScope({
@@ -454,6 +455,131 @@ describe('resolveHuntScope', () => {
 
       expect(scope.status).toBe('degraded');
       expect(scope.policy_skipped).toEqual(SKIPPED);
+    });
+  });
+
+  describe('lenient resolve and pruning', () => {
+    const run = (
+      indexPatterns: string[],
+      resolved: ReturnType<typeof resolveResponse>,
+      extra: { crossProjectSearch?: boolean } = {}
+    ) => {
+      const env = createEsClient({ resolved });
+      return {
+        ...env,
+        scope: resolveHuntScope({
+          esClient: env.esClient,
+          spaceId: SPACE_ID,
+          indexPatterns,
+          ...extra,
+        }),
+      };
+    };
+
+    it('drops an unresolved local concrete name from the searched list and keeps it in missing', async () => {
+      const { scope, fieldCapsFn } = run(
+        ['logs-*', 'custom-edr-1'],
+        resolveResponse({ dataStreams: ['logs-okta.system-default'] })
+      );
+      const result = await scope;
+
+      expect(result.status).toBe('ok');
+      expect(result.index_patterns).toEqual(['logs-*']);
+      expect(result.missing).toEqual(['custom-edr-1']);
+      expect(fieldCapsFn).toHaveBeenCalledWith(expect.objectContaining({ index: ['logs-*'] }));
+    });
+
+    it('keeps an unresolved wildcard in index_patterns and in missing', async () => {
+      const result = await run(
+        ['logs-*', 'winlogbeat-*'],
+        resolveResponse({ dataStreams: ['logs-okta.system-default'] })
+      ).scope;
+
+      expect(result.index_patterns).toEqual(['logs-*', 'winlogbeat-*']);
+      expect(result.missing).toEqual(['winlogbeat-*']);
+    });
+
+    it('does not report a resolving .ds- backing entry missing, and does not drop it', async () => {
+      const backing = '.ds-logs-okta.system-default-2026.09.30-000001';
+      const result = await run(
+        ['logs-*', backing],
+        resolveResponse({ dataStreams: ['logs-okta.system-default'] })
+      ).scope;
+
+      expect(result.missing).toEqual([]);
+      expect(result.index_patterns).toEqual(['logs-*', backing]);
+    });
+
+    it.each([
+      'remote:custom-1',
+      '*:custom-1',
+      '<logs-{now/d}>',
+      '<logs-{now/d{yyyy.MM.dd|+12:00}}>',
+      'logs-*::failures',
+      'custom-1,custom-2',
+    ])('never drops %s', async (entry) => {
+      const result = await run(
+        ['logs-*', entry],
+        resolveResponse({ dataStreams: ['logs-okta.system-default'] })
+      ).scope;
+
+      expect(result.index_patterns).toContain(entry);
+    });
+
+    it('under cross-project search keeps a name resolved only on a linked project and drops one resolved nowhere', async () => {
+      const result = await run(
+        ['logs-*', 'custom-1', 'custom-2'],
+        resolveResponse({
+          dataStreams: ['logs-okta.system-default'],
+          indices: ['linked:custom-1'],
+        }),
+        { crossProjectSearch: true }
+      ).scope;
+
+      expect(result.index_patterns).toEqual(['logs-*', 'custom-1']);
+      expect(result.missing).toEqual(['custom-2']);
+    });
+
+    it('removes every duplicate of a dropped name', async () => {
+      const result = await run(
+        ['logs-*', 'custom-1', 'custom-1'],
+        resolveResponse({ dataStreams: ['logs-okta.system-default'] })
+      ).scope;
+
+      expect(result.index_patterns).toEqual(['logs-*']);
+    });
+
+    it('is blocked:empty_universe when only unresolved local concrete names would remain', async () => {
+      const result = await run(['custom-1', '-foo*'], resolveResponse({ indices: ['unrelated-1'] }))
+        .scope;
+
+      expect(result.resolution).toBe('blocked:empty_universe');
+      expect(result.missing).toEqual(['custom-1']);
+    });
+
+    it.each([['no_such_remote_cluster_exception'], ['no_matching_project_exception']])(
+      'is blocked:discovery_failed when the resolve throws %s',
+      async (type) => {
+        const env = createEsClient();
+        env.resolveIndex.mockRejectedValue(Object.assign(new Error(type), { name: type }));
+
+        const result = await resolveHuntScope({
+          esClient: env.esClient,
+          spaceId: SPACE_ID,
+          indexPatterns: ['logs-*', 'remote:logs-*'],
+        });
+
+        expect(result.resolution).toBe('blocked:discovery_failed');
+      }
+    );
+
+    it('keeps exclusions through the pruning', async () => {
+      const result = await run(
+        ['logs-*', 'custom-1', '-logs-foo*'],
+        resolveResponse({ dataStreams: ['logs-okta.system-default'] })
+      ).scope;
+
+      expect(result.index_patterns).toEqual(['logs-*', '-logs-foo*']);
     });
   });
 });

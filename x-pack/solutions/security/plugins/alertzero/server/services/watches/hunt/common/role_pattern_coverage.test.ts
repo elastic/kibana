@@ -84,6 +84,12 @@ describe('uncoveredPatterns', () => {
   it('reports a local pattern the role does not cover', () => {
     expect(uncovered(['logs-*', 'custom-edr-*'])).toEqual(['custom-edr-*']);
   });
+
+  it('compares a data stream backing index without its .ds- prefix', () => {
+    expect(
+      uncovered(['.ds-logs-okta.system-default-2026.09.30-000001', '.ds-custom-edr-1-2026-000001'])
+    ).toEqual(['.ds-custom-edr-1-2026-000001']);
+  });
 });
 
 describe('readWorkerRole', () => {

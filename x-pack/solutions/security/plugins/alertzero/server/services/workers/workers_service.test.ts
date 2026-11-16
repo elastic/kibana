@@ -1936,6 +1936,25 @@ describe('WorkersService Hunt index coverage', () => {
       expect(hunt?.stateReason).toContain('could not see any index');
     });
 
+    it('is not degraded by a sweep that hunted with skipped names', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        status: 'ok',
+        resolution: 'universe',
+        index_patterns: ['logs-*'],
+        missing: ['custom-edr-1'],
+        policy_skipped: ['.siem-signals-x'],
+        report_matches: [],
+        actionable_indices: [],
+        window: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-31T00:00:00.000Z' },
+        row_limit: 25,
+      });
+
+      const hunt = await huntOf(service);
+
+      expect(hunt?.state).not.toBe('degraded');
+    });
+
     it('is degraded with the resolve reason after a blocked:discovery_failed sweep', async () => {
       const { service, mocks } = await setup();
       finishedSweep(mocks, blockedScope('blocked:discovery_failed'));

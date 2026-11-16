@@ -46,16 +46,24 @@ export const HuntWorkerIndexCoverageResponse = lazySchema(() =>
         .max(500)
         .describe("Patterns the caller can resolve and the worker's account cannot."),
       /**
-       * Patterns that resolve to nothing for the caller either.
+       * Patterns that resolve to nothing for the caller: not found, or not readable by the caller.
        */
       missing_for_everyone: z
         .array(z.string().max(512))
         .max(500)
-        .describe('Patterns that resolve to nothing for the caller either.'),
+        .describe(
+          'Patterns that resolve to nothing for the caller: not found, or not readable by the caller.'
+        ),
       source: z.enum(['last_sweep', 'role', 'unavailable']),
+      /**
+       * Why `source` is `unavailable`. `caller_unreadable`: the caller may not resolve indices at all. `empty_universe`: the default data view has no pattern a hunt may search.
+       */
       unavailable_reason: z
         .enum(['role_unreadable', 'discovery_failed', 'caller_unreadable', 'empty_universe'])
-        .optional(),
+        .optional()
+        .describe(
+          'Why `source` is `unavailable`. `caller_unreadable`: the caller may not resolve indices at all. `empty_universe`: the default data view has no pattern a hunt may search.'
+        ),
       checked_at: z.string().max(64).nullable(),
       service_account_id: z.string().max(1024).nullable(),
       role_name: z.string().max(256),

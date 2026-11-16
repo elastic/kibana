@@ -8,8 +8,13 @@
 import type { IndicesResolveIndexResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { HuntScope, HuntScopeResolution, IndexScopeWindow } from '@kbn/alertzero-common';
-import { isIndexExclusion } from '../../../../../common/remote_cluster';
+import {
+  isIndexExclusion,
+  parseIndexScopeEntry,
+  stripBackingPrefix,
+} from '../../../../../common/remote_cluster';
 import { classifyActionableIndices } from './classify_actionable_indices';
+import { HUNT_RESOLVE_INDEX_OPTIONS } from './hunt_resolve_index_options';
 import { discoverHuntDatasets } from './discover_hunt_datasets';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
 import { scopeGuardPatterns } from './cps_scope';
@@ -27,7 +32,7 @@ const DEFAULT_ROW_LIMIT = 25;
 /**
  * The wire `HuntScope` plus the datasets stage 1 discovered, which stay server-side.
  * Stage 1 of hunt scoping: it runs before Tier 1 and reads only the caller's universe,
- * never an alerts index or a seed list.
+ * never a seed list.
  */
 export interface ResolvedHuntScope extends HuntScope {
   /** Datasets discovered inside the universe (data streams only). */
@@ -57,7 +62,25 @@ export const unresolvedPatterns = (
   ];
   return patterns.filter(
     (pattern) =>
-      !names.some(buildMatchesRequired(scopeGuardPatterns([pattern], crossProjectSearch)))
+      !names.some(
+        buildMatchesRequired(scopeGuardPatterns([stripBackingPrefix(pattern)], crossProjectSearch))
+      )
+  );
+};
+
+/**
+ * Whether an unresolved entry may leave the searched list: a local concrete name. Wildcards,
+ * remote-qualified names, date math, selectors and comma lists stay, because a miss for one of
+ * those does not show the name is unreadable (a remote that is down resolves nothing too).
+ */
+const isPrunableConcreteName = (entry: string): boolean => {
+  const { cluster, index } = parseIndexScopeEntry(entry);
+  return (
+    cluster === undefined &&
+    !index.includes('*') &&
+    !entry.startsWith('<') &&
+    !entry.includes('::') &&
+    !entry.includes(',')
   );
 };
 
@@ -94,11 +117,12 @@ const boundReportMatches = (
  * (`missing`), and which data streams discovery parses into datasets. The report's vendor
  * and product are then matched deterministically against those datasets, and one
  * `_field_caps` call names the `actionable_indices`. Nothing here picks what Tier 1 may
- * read: Tier 1 searches the universe as given. The model matcher is not called here; it
- * runs in stage 2, after Tier 1, only when the deterministic signals found nothing.
+ * read: Tier 1 searches the universe minus the local concrete names that resolved nothing.
+ * The model matcher is not called here; it runs in stage 2, after Tier 1, only when the deterministic signals found nothing.
  *
  * `status` is `degraded` when `_field_caps` failed or a bounded list had to collapse.
- * `_resolve/index` failing blocks (fail closed).
+ * The resolve is lenient about a concrete name the caller cannot read; a throw still blocks
+ * (fail closed).
  */
 export const resolveHuntScope = async ({
   esClient,
@@ -152,8 +176,7 @@ export const resolveHuntScope = async ({
   try {
     resolved = await esClient.indices.resolveIndex({
       name: indexPatterns,
-      allow_no_indices: true,
-      expand_wildcards: ['open'],
+      ...HUNT_RESOLVE_INDEX_OPTIONS,
     });
   } catch (err) {
     logger?.warn(
@@ -173,9 +196,19 @@ export const resolveHuntScope = async ({
     return blocked('blocked:empty_universe', missing);
   }
 
+  // Hand downstream only what can be searched: a local concrete name that resolved nothing
+  // is dropped from the list (it stays in `missing`), so no search names an index nobody read.
+  const dropped = new Set(
+    missing.filter((entry) => !isIndexExclusion(entry) && isPrunableConcreteName(entry))
+  );
+  const searched = indexPatterns.filter((pattern) => !dropped.has(pattern));
+  if (!searched.some((pattern) => !isIndexExclusion(pattern))) {
+    return blocked('blocked:empty_universe', missing);
+  }
+
   const discovered = await discoverHuntDatasets({
     esClient,
-    patterns: indexPatterns,
+    patterns: searched,
     logger,
     resolved,
   });
@@ -185,7 +218,11 @@ export const resolveHuntScope = async ({
     product: report?.product,
   });
   const reportMatches = boundReportMatches(matches, logger);
-  const actionable = await classifyActionableIndices({ esClient, indexPatterns, logger });
+  const actionable = await classifyActionableIndices({
+    esClient,
+    indexPatterns: searched,
+    logger,
+  });
 
   const degraded = actionable.degraded || reportMatches.collapsed;
   logger?.info(
@@ -194,7 +231,7 @@ export const resolveHuntScope = async ({
   return {
     status: degraded ? 'degraded' : 'ok',
     resolution: 'universe',
-    index_patterns: indexPatterns,
+    index_patterns: searched,
     missing,
     policy_skipped: policySkippedPatterns,
     discovered,

@@ -202,6 +202,7 @@ describe('discoverHuntDatasets', () => {
       name: ['logs-*'],
       allow_no_indices: true,
       expand_wildcards: ['open'],
+      ignore_unavailable: true,
     });
   });
 

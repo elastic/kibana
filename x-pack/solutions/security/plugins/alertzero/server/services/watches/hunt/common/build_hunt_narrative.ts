@@ -44,7 +44,7 @@ const listOf = (items: string[], max = MAX_LISTED): string => {
   return `${shown.slice(0, -1).join(', ')} and ${shown[shown.length - 1]}`;
 };
 
-const codeList = (items: string[], max = MAX_LISTED): string => listOf(items.map(code), max);
+export const codeList = (items: string[], max = MAX_LISTED): string => listOf(items.map(code), max);
 
 const describeIocs = (iocs: HuntIoc[]): string => {
   const byType = new Map<string, string[]>();

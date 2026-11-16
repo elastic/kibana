@@ -3289,4 +3289,81 @@ describe('huntCoordinator', () => {
       expect(result.excluded_report_iocs).toBeUndefined();
     });
   });
+
+  describe('a name the scope dropped from the search', () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    const droppedScope = (names: string[]) => ({
+      ...okScope,
+      index_patterns: ['logs-*'],
+      missing: names,
+    });
+    const run = (extra: Record<string, unknown>, models: HuntModels | Record<string, never>) =>
+      huntCoordinator({ esClient, reportsEsClient: esClient }, models, logger, {
+        spaceId: 'default',
+        indexPatterns: INDEX_PATTERNS,
+        trigger: 'scheduled',
+        run_id: 'run-dropped',
+        iocs: [{ type: 'ip', value: '203.0.113.10' }],
+        ...extra,
+      });
+    const expectRecorded = (
+      result: Awaited<ReturnType<typeof run>>,
+      completeness: 'incomplete_final' | 'incomplete_retryable' = 'incomplete_final'
+    ) => {
+      expect(result.completeness).toBe(completeness);
+      expect(result.incomplete?.filter(({ reason }) => reason === 'index_not_searched')).toEqual([
+        {
+          reason: 'index_not_searched',
+          detail:
+            'The default data view names `custom-edr-1`, which this hunt could not resolve (not readable, or not found), so the hunt never searched there.',
+        },
+      ]);
+      expect(result.index_patterns).toEqual(['logs-*']);
+      expect(result.narrative).toContain('Coverage: incomplete');
+      expect(result.narrative).toContain('custom-edr-1');
+    };
+
+    it('records the gap on the tier1_only shape', async () => {
+      mockScope.mockResolvedValueOnce(droppedScope(['custom-edr-1']));
+      const result = await run({ tier2_when: 'on_hits' }, {});
+      expect(result.status).toBe('tier1_only');
+      expectRecorded(result);
+    });
+
+    it('records the gap on the tier2_only_skipped shape', async () => {
+      mockScope.mockResolvedValueOnce(droppedScope(['custom-edr-1']));
+      const result = await run({ tier2_when: 'always' }, allTiers({} as ScopedModel));
+      expect(result.status).toBe('tier2_only_skipped');
+      // This path carries a retryable gap of its own (no report text), which wins.
+      expectRecorded(result, 'incomplete_retryable');
+    });
+
+    it('records the gap on the tier1_and_tier2 shape', async () => {
+      mockScope.mockResolvedValueOnce(droppedScope(['custom-edr-1']));
+      const result = await run(
+        { tier2_when: 'always', text: 'report text' },
+        allTiers({} as ScopedModel)
+      );
+      expect(result.status).toBe('tier1_and_tier2');
+      expectRecorded(result);
+    });
+
+    it('words the detail for two names and caps it at ten names', async () => {
+      mockScope.mockResolvedValueOnce(droppedScope(['a-1', 'b-1']));
+      const two = await run({ tier2_when: 'on_hits' }, {});
+      expect(two.incomplete?.[0].detail).toContain('`a-1` and `b-1`');
+
+      const twelve = Array.from({ length: 12 }, (_value, index) => `idx-${index}`);
+      mockScope.mockResolvedValueOnce(droppedScope(twelve));
+      const many = await run({ tier2_when: 'on_hits' }, {});
+      expect(many.incomplete?.[0].detail).toContain('`idx-9` and 2 more');
+      expect(many.incomplete?.[0].detail).not.toContain('idx-10');
+    });
+
+    it('adds no such gap when nothing was dropped', async () => {
+      const result = await run({ tier2_when: 'on_hits' }, {});
+      expect(result.completeness).toBe('complete');
+      expect(result.incomplete ?? []).toEqual([]);
+    });
+  });
 });

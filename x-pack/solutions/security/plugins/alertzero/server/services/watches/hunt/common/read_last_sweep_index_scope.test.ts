@@ -171,4 +171,44 @@ describe('sweepEvaluatedUniverse', () => {
     expect(sweepEvaluatedUniverse(ok, ['logs-*', '-logs-y*'])).toBe(true);
     expect(sweepEvaluatedUniverse(ok, ['other-*'])).toBe(false);
   });
+
+  describe('a sweep that dropped a name from the search', () => {
+    const pruned = {
+      ...scope,
+      status: 'ok',
+      resolution: 'universe',
+      index_patterns: ['logs-*'],
+      missing: ['custom-edr-1'],
+    } as unknown as HuntScope;
+
+    it('counts the dropped name as evaluated', () => {
+      expect(sweepEvaluatedUniverse(pruned, ['logs-*', 'custom-edr-1'])).toBe(true);
+    });
+
+    it('does not match a universe missing one live pattern', () => {
+      expect(sweepEvaluatedUniverse(pruned, ['logs-*', 'custom-edr-1', 'extra-*'])).toBe(false);
+    });
+
+    it('matches a universe with a duplicated entry', () => {
+      expect(sweepEvaluatedUniverse(pruned, ['logs-*', 'logs-*', 'custom-edr-1'])).toBe(true);
+    });
+
+    it('does not match a pre-change unblocked scope with a dot-prefixed index pattern', () => {
+      const dotted = {
+        ...pruned,
+        index_patterns: ['logs-*', '.alerts-x'],
+        missing: [],
+      } as HuntScope;
+      expect(sweepEvaluatedUniverse(dotted, ['logs-*'])).toBe(false);
+    });
+
+    it('does not match a pre-change blocked scope with a dot-prefixed missing entry', () => {
+      const dotted = { ...blocked, missing: ['.alerts-x'] } as HuntScope;
+      expect(sweepEvaluatedUniverse(dotted, ['logs-*'])).toBe(false);
+    });
+
+    it('matches a pre-change unblocked scope without dot entries', () => {
+      expect(sweepEvaluatedUniverse(ok, ['logs-*'])).toBe(true);
+    });
+  });
 });

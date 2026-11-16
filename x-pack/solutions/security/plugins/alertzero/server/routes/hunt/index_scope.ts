@@ -11,6 +11,7 @@ import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INDEX_SCOPE_URL } from '../../../com
 import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_index_scope';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
+import { unsearchedPatterns } from '../../services/watches/hunt/common/unsearched_patterns';
 import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 
@@ -87,6 +88,18 @@ export const registerHuntIndexScopeRoute = ({
                     scope.resolution
                   }: the caller resolved none of ${scope.missing.join(', ')}`
             );
+          }
+          if (scope.status !== 'blocked') {
+            const unsearched = unsearchedPatterns(scope, isCpsEnabled());
+            if (unsearched.length > 0) {
+              logger.warn(
+                `Hunt index scope for space ${spaceId} left ${
+                  unsearched.length
+                } default data view name(s) out of the search because the caller could not resolve them (not readable, or not found): ${unsearched.join(
+                  ', '
+                )}`
+              );
+            }
           }
           const body: HuntIndexScopeResponse = scope;
 

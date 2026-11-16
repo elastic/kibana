@@ -113,17 +113,18 @@ export const readLatestFinishedSweepIndexScope = async ({
 
 /**
  * Whether a sweep's gate evaluated exactly the patterns of `universe` (exclusions ignored), so
- * its answer still describes the space's current default data view. A blocked sweep evaluated
- * what it reported missing; an unblocked one evaluated its resolved patterns. A
- * `blocked:discovery_failed` sweep records no patterns at all, so it cannot be compared and
- * counts as current: the failure is the signal until the next sweep replaces it.
+ * its answer still describes the space's current default data view. What a sweep evaluated is
+ * the positive entries it searched plus the ones it reported missing (a name it dropped from the
+ * search stays in `missing`), compared as sets. A `blocked:discovery_failed` sweep records no
+ * patterns at all, so it cannot be compared and counts as current: the failure is the signal
+ * until the next sweep replaces it.
  */
 export const sweepEvaluatedUniverse = (scope: HuntScope, universe: string[]): boolean => {
   if (scope.resolution === 'blocked:discovery_failed') return true;
-  const positive = universe.filter((pattern) => !isIndexExclusion(pattern));
-  const evaluated =
-    scope.status === 'blocked'
-      ? scope.missing
-      : scope.index_patterns.filter((pattern) => !isIndexExclusion(pattern));
-  return evaluated.length === positive.length && evaluated.every((p) => positive.includes(p));
+  const positive = new Set(universe.filter((pattern) => !isIndexExclusion(pattern)));
+  const evaluated = new Set([
+    ...scope.index_patterns.filter((pattern) => !isIndexExclusion(pattern)),
+    ...scope.missing,
+  ]);
+  return evaluated.size === positive.size && [...evaluated].every((p) => positive.has(p));
 };

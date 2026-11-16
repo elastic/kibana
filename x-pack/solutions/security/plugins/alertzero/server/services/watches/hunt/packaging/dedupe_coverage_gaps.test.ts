@@ -39,6 +39,10 @@ describe('dedupeCoverageGaps', () => {
     ]);
   });
 
+  it('names an index_not_searched gap with its phrase', () => {
+    expect(GAP_REASON_PHRASES.index_not_searched).toBe('index not searched');
+  });
+
   it('treats an absent input as no gaps', () => {
     expect(dedupeCoverageGaps(undefined)).toEqual({ gaps: [], atLeast: false });
   });

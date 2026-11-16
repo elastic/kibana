@@ -31,6 +31,7 @@ export const GAP_REASON_PHRASES: Record<HuntIncompleteReason, string> = {
   nothing_searched: 'nothing searchable',
   input_truncated: 'input truncated',
   extraction_pending: 'extraction pending',
+  index_not_searched: 'index not searched',
 };
 
 const isKnownReason = (reason: string): reason is HuntIncompleteReason =>

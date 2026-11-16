@@ -29,7 +29,8 @@ import { needsModelDatasetMatch, resolveTier2Targets } from './common/resolve_ti
 import type { Tier2TargetSource } from './common/resolve_tier2_targets';
 import { generateRecommendations } from './common/build_recommendations';
 import { selectHuntCallModel } from './common/select_hunt_call_model';
-import { buildHuntHeadline, buildHuntNarrative } from './common/build_hunt_narrative';
+import { buildHuntHeadline, buildHuntNarrative, codeList } from './common/build_hunt_narrative';
+import { unsearchedPatterns } from './common/unsearched_patterns';
 import type { HuntNarrativeContext } from './common/build_hunt_narrative';
 import { isTier1SearchableIoc } from './tier1/attribute_hits';
 import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
@@ -82,7 +83,7 @@ export interface HuntCoordinatorParams {
   spaceId: string;
   /**
    * The hunt universe: the space's Security Solution default data view patterns,
-   * exclusions included. Tier 1 searches exactly this list; the caller reads it from the
+   * exclusions included. Tier 1 searches this list minus unresolved local names; the caller reads it from the
    * `securitySolution:defaultIndex` setting.
    */
   indexPatterns: string[];
@@ -117,7 +118,7 @@ export interface HuntCoordinatorCoreResult {
   report_id?: string;
   run_id: string;
   /**
-   * What Tier 1 searched: the hunt universe, exclusions included, never an alerts index.
+   * What Tier 1 searched: the hunt universe, exclusions included; dot-prefixed names are never included.
    * Empty when the scope was blocked, when resolution failed, or when the run stopped
    * before a scope existed.
    */
@@ -822,6 +823,22 @@ const huntCoordinatorCore = async (
     };
   }
 
+  // Names the scope dropped from the search: the run never looked there, so it is not a clean
+  // search, and the same data view reproduces it. One final gap carries them.
+  const unsearched = unsearchedPatterns(scope, crossProjectSearch);
+  const scopeGaps: HuntIncompleteness[] =
+    unsearched.length > 0
+      ? [
+          {
+            reason: 'index_not_searched',
+            detail: `The default data view names ${codeList(
+              unsearched,
+              10
+            )}, which this hunt could not resolve (not readable, or not found), so the hunt never searched there.`,
+          },
+        ]
+      : [];
+
   const tier1Raw = await huntForThreat(esClient, {
     scope: {
       search_patterns: scope.index_patterns,
@@ -843,6 +860,7 @@ const huntCoordinatorCore = async (
   // applies to every return below, whether or not Tier 2 ran.
   const runGaps = (readReportText: boolean) => [
     ...inputGaps(readReportText),
+    ...scopeGaps,
     ...(tier1Raw.incomplete ?? []),
   ];
 
@@ -926,7 +944,7 @@ const huntCoordinatorCore = async (
     // already has): on this path it's the only place `nothing_searched` and a
     // requested-but-unavailable Tier 2 reach the wire at all, since `next_step` here
     // is a fixed string rather than one assembled from the gaps.
-    const coordinatorOwnGaps = [...inputGaps(readReportText), ...skipGaps];
+    const coordinatorOwnGaps = [...inputGaps(readReportText), ...scopeGaps, ...skipGaps];
     return {
       status: 'tier1_only',
       report_id: reportId,
@@ -979,7 +997,7 @@ const huntCoordinatorCore = async (
     });
     const noTextGaps = [...runGaps(false), ...skipGaps];
     const completeness = huntCompletenessOf(noTextGaps);
-    const coordinatorOwnGaps = [...inputGaps(false), ...skipGaps];
+    const coordinatorOwnGaps = [...inputGaps(false), ...scopeGaps, ...skipGaps];
     return {
       status: 'tier2_only_skipped',
       report_id: reportId,
@@ -1132,7 +1150,7 @@ const huntCoordinatorCore = async (
   const gaps = [...runGaps(true), ...tier2Gaps, ...ownGaps];
   // The coordinator's own gaps, not a copy of `tier1.incomplete` / `tier2.incomplete`
   // (the caller already has both of those).
-  const coordinatorOwnGaps = [...inputGaps(true), ...ownGaps];
+  const coordinatorOwnGaps = [...inputGaps(true), ...scopeGaps, ...ownGaps];
   // Both tiers ran, so `completed_successfully` is no longer a hardcoded `true`: it
   // follows the gaps each tier reported. A deterministic gap still retires the report,
   // because re-running reproduces it exactly and would re-spend the generation budget

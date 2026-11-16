@@ -6,7 +6,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isIndexExclusion, splitRemoteCluster } from '../../../../../common/remote_cluster';
+import {
+  isIndexExclusion,
+  splitRemoteCluster,
+  stripBackingPrefix,
+} from '../../../../../common/remote_cluster';
 import { statusCodeOf } from '../../../../lib/es_error';
 import { compileGlob } from './index_glob';
 
@@ -58,7 +62,7 @@ export const uncoveredPatterns = ({
 }): string[] =>
   patterns.filter((pattern) => {
     if (isIndexExclusion(pattern)) return false;
-    const { cluster, index } = splitRemoteCluster(pattern);
+    const { cluster, index } = splitRemoteCluster(stripBackingPrefix(pattern));
     if (index.includes('::')) return true;
     if (isServerless || cluster === undefined) return !coveredByLocal(role, index);
     return !role.remoteIndices.some(

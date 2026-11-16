@@ -324,4 +324,36 @@ describe('registerHuntIndexScopeRoute', () => {
       }
     );
   });
+
+  describe('names dropped from the search', () => {
+    const warnedWith = async (scope: Partial<ResolvedHuntScope>) => {
+      resolveHuntScopeMock.mockResolvedValue({ ...okScope, ...scope });
+      const { handler, context, logger } = makeDeps();
+      await handler(
+        context,
+        httpServerMock.createKibanaRequest(),
+        httpServerMock.createResponseFactory()
+      );
+      return logger.warn as jest.Mock;
+    };
+
+    it('warns once with the names for a scope that dropped one', async () => {
+      const warn = await warnedWith({ index_patterns: ['logs-*'], missing: ['custom-edr-1'] });
+
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('left 1 default data view name(s) out of the search')
+      );
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('custom-edr-1'));
+    });
+
+    it('does not warn for an unresolved wildcard that stayed in the search', async () => {
+      const warn = await warnedWith({
+        index_patterns: ['logs-*', 'winlogbeat-*'],
+        missing: ['winlogbeat-*'],
+      });
+
+      expect(warn).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { joinRemoteCluster, splitRemoteCluster } from '../../../../../common/remote_cluster';
+import { HUNT_RESOLVE_INDEX_OPTIONS } from './hunt_resolve_index_options';
 
 export interface DiscoveredDataset {
   /** Searchable glob for Tier 1/2, e.g. 'logs-okta.system-*' */
@@ -124,8 +125,7 @@ export const discoverHuntDatasets = async ({
       resolved ??
       (await esClient.indices.resolveIndex({
         name: patterns,
-        allow_no_indices: true,
-        expand_wildcards: ['open'],
+        ...HUNT_RESOLVE_INDEX_OPTIONS,
       }));
     dataStreamNames = response.data_streams
       .map((stream) => stream.name)
