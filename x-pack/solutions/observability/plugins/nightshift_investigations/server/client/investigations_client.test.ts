@@ -14,6 +14,7 @@ import {
   createConversationAlreadyExistsError,
   createConversationNotFoundError,
   DEFAULT_CONVERSATION_TITLE,
+  ZERO_MODEL_USAGE,
 } from '@kbn/agent-builder-common';
 import {
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
@@ -2971,6 +2972,133 @@ describe('NightshiftInvestigationsClient.getLifecycleCorrelation()', () => {
 
     await expect(makeClient().getLifecycleCorrelation('inv-1', 'exec-1')).resolves.toEqual({});
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('store unavailable'));
+  });
+});
+
+describe('NightshiftInvestigationsClient.reportRunEnded()', () => {
+  const telemetry = { reportInvestigationEnded: jest.fn() };
+  const usage = (inputTokens: number) => ({
+    connector_id: 'eis-claude',
+    model: 'claude-sonnet',
+    llm_calls: 3,
+    input_tokens: inputTokens,
+    output_tokens: 200,
+    cached_input_tokens: 50,
+    reasoning_tokens: 20,
+  });
+
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-11-12T10:05:00Z'));
+    telemetry.reportInvestigationEnded.mockReset();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('reports the run with its duration and the usage of the round it ran', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-2',
+      spaceId: SPACE_ID,
+      workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      status: ExecutionStatus.RUNNING,
+      effectiveIdentity: INVESTIGATOR_IDENTITY,
+      startedAt: '2026-11-12T10:00:00Z',
+      context: {
+        // The entry point's run, whose id the started event carries.
+        parentWorkflowExecutionId: 'entry-point-exec-1',
+        inputs: {
+          investigation_id: 'inv-1',
+          context: {
+            is_follow_up: true,
+            trigger_type: 'automatic',
+            entry_point: 'automation',
+            source: 'alert',
+            nightshift_automation_id: 'automation-1',
+          },
+        },
+      },
+    });
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: BOUND_WORKFLOW_ID,
+      definition: BOUND_DEFINITION,
+    });
+    // The earlier round belongs to the previous run; the last is a chat message sent afterwards.
+    conversations.get.mockResolvedValueOnce({
+      rounds: [
+        { started_at: '2026-11-12T09:00:00Z', model_usage: usage(9_000) },
+        { started_at: '2026-11-12T10:00:02Z', model_usage: usage(1_000) },
+        { started_at: '2026-11-12T10:04:00Z', model_usage: usage(5_000) },
+      ],
+    });
+
+    await makeClient({ telemetry: telemetry as never }).reportRunEnded(
+      'inv-1',
+      'exec-2',
+      'completed'
+    );
+
+    expect(telemetry.reportInvestigationEnded).toHaveBeenCalledWith({
+      investigation_id: 'inv-1',
+      workflow_execution_id: 'exec-2',
+      parent_workflow_execution_id: 'entry-point-exec-1',
+      outcome: 'completed',
+      duration_ms: 300_000,
+      trigger_type: 'automatic',
+      entry_point: 'automation',
+      subject_type: 'alert',
+      is_follow_up: true,
+      automation_id: 'automation-1',
+      ...usage(1_000),
+    });
+  });
+
+  it('describes a Slack reply from its conversation and leaves unknown usage off', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-2',
+      spaceId: SPACE_ID,
+      workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      status: ExecutionStatus.RUNNING,
+      effectiveIdentity: INVESTIGATOR_IDENTITY,
+      startedAt: '2026-11-12T10:00:00Z',
+      // The Slack thread workflow starts the run itself, with nothing but its entry point.
+      context: { inputs: { investigation_id: 'inv-1', context: { entry_point: 'slack' } } },
+    });
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: BOUND_WORKFLOW_ID,
+      definition: BOUND_DEFINITION,
+    });
+    conversations.get.mockResolvedValueOnce({
+      rounds: [
+        { started_at: '2026-11-12T09:00:00Z', model_usage: usage(9_000) },
+        // An interrupted round: Agent Builder gives it the "usage unknown" sentinel.
+        { started_at: '2026-11-12T10:00:02Z', model_usage: ZERO_MODEL_USAGE },
+      ],
+    });
+
+    await makeClient({ telemetry: telemetry as never }).reportRunEnded('inv-1', 'exec-2', 'failed');
+
+    expect(telemetry.reportInvestigationEnded).toHaveBeenCalledWith({
+      investigation_id: 'inv-1',
+      workflow_execution_id: 'exec-2',
+      outcome: 'failed',
+      duration_ms: 300_000,
+      entry_point: 'slack',
+      subject_type: 'slack_thread',
+      is_follow_up: true,
+    });
+  });
+
+  it('still reports the outcome when the run cannot be read', async () => {
+    mockManagement.getWorkflowExecution.mockRejectedValue(new Error('store unavailable'));
+
+    await makeClient({ telemetry: telemetry as never }).reportRunEnded('inv-1', 'exec-2', 'failed');
+
+    expect(telemetry.reportInvestigationEnded).toHaveBeenCalledWith({
+      investigation_id: 'inv-1',
+      workflow_execution_id: 'exec-2',
+      outcome: 'failed',
+    });
   });
 });
 

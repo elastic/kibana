@@ -7,6 +7,7 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from './conversations';
 import type {
@@ -234,6 +235,8 @@ export interface RuntimeStart {
   createModelProvider: (opts: {
     request: KibanaRequest;
     defaultConnectorId?: string;
+    /** Usage attribution of the provider's LLM calls; defaults to Agent Builder's own. */
+    telemetryMetadata?: ConnectorTelemetryMetadata;
   }) => ModelProvider;
 }
 

@@ -8,6 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { useSelector } from 'react-redux-v7';
 import { WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG } from '@kbn/workflows';
 import { useWorkflowYamlValidationContext } from './use_workflow_yaml_validation_context';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -56,5 +57,36 @@ describe('useWorkflowYamlValidationContext', () => {
     useBooleanValue.mockReturnValue(false);
     rerender();
     expect(result.current.warnIgnoredKibanaFetcher).toBe(false);
+  });
+
+  it('gives variable validation the outputs of the loaded workflows', () => {
+    jest.mocked(useSelector).mockReturnValue({
+      status: 'loading',
+      totalWorkflows: 1,
+      workflows: {
+        'alert-context': {
+          id: 'alert-context',
+          name: 'Alert context',
+          outputs: [{ name: 'severity', type: 'string' }],
+          returnedOutputNames: ['severity'],
+        },
+      },
+    });
+    jest.mocked(useKibana).mockReturnValue({
+      services: {
+        application: { getUrlForApp: jest.fn(() => 'https://example.test') },
+        workflowsExtensions: {},
+        featureFlags: { useBooleanValue: jest.fn().mockReturnValue(true) },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+
+    const { result } = renderHook(() => useWorkflowYamlValidationContext());
+
+    expect(result.current.registry.getCalledWorkflowOutputs?.('alert-context')).toEqual({
+      name: 'Alert context',
+      outputs: [{ name: 'severity', type: 'string' }],
+      returnedOutputNames: ['severity'],
+    });
+    expect(result.current.registry.getCalledWorkflowOutputs?.('missing')).toBeUndefined();
   });
 });
