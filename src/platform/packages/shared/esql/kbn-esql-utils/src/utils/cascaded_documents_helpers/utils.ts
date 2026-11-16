@@ -12,7 +12,7 @@ import { type DataView } from '@kbn/data-views-plugin/public';
 import { Builder, isFunctionExpression, mutate } from '@elastic/esql';
 import type { EsqlQuery } from '@elastic/esql';
 import type { ESQLFunction, ESQLCommand, ESQLLiteral } from '@elastic/esql/types';
-import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
+import type { FieldSummary } from '@kbn/esql-language';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getFieldDefinitionFromArg, type Terminal } from '../esql_fields_utils';
 import {

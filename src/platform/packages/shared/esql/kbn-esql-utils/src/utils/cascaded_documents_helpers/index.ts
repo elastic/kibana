@@ -34,7 +34,7 @@ import type {
 } from '@elastic/esql/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
+import type { FieldSummary } from '@kbn/esql-language';
 import { getUsedFields, getFieldTerminals, getFieldDefinitionFromArg } from '../esql_fields_utils';
 import { extractCategorizeTokens } from '../extract_categorize_tokens';
 import { getOperator } from '../append_to_query/utils';
