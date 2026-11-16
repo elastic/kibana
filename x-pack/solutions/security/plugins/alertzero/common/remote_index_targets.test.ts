@@ -315,3 +315,81 @@ describe('remoteIndexTargets with a data view it cannot read in full', () => {
     expect(remoteIndexTargets(['logs-*', 'filebeat-*'], [E]).incomplete).toBe(false);
   });
 });
+
+describe('remoteIndexTargets and the length cap', () => {
+  const E = 'logs-endpoint.events.*';
+  const narrowExclusions = (cluster: string, count: number) =>
+    Array.from(
+      { length: count },
+      (_, index) =>
+        `-${cluster}:logs-endpoint.events.network-${String(index).padStart(3, '0')}${'n'.repeat(
+          30
+        )}*`
+    );
+
+  it('is incomplete when an include does not fit', () => {
+    const patterns = Array.from({ length: 200 }, (_, i) => `cluster${i}:logs-*`);
+    const { index, clusters, incomplete } = remoteIndexTargets(patterns, [E]);
+
+    expect(index.length).toBeLessThanOrEqual(REMOTE_INDEX_TARGETS_MAX_LENGTH);
+    expect(clusters.length).toBeLessThan(200);
+    expect(incomplete).toBe(true);
+  });
+
+  it('is incomplete when an include is taken back out so its exclusion fits', () => {
+    const { clusters, incomplete } = remoteIndexTargets(
+      ['remote_a:logs-*', 'remote_b:logs-*', ...narrowExclusions('remote_a', 120)],
+      [E]
+    );
+
+    expect(clusters).toEqual(['remote_b']);
+    expect(incomplete).toBe(true);
+  });
+
+  it('is incomplete when a wildcard include is taken back out so its exclusion fits', () => {
+    const { incomplete } = remoteIndexTargets(
+      ['*:logs-*', 'remote_b:logs-*', ...narrowExclusions('remote_a*', 120)],
+      [E]
+    );
+
+    expect(incomplete).toBe(true);
+  });
+
+  it('is incomplete when one of several local patterns cannot be added for a cluster', () => {
+    const PROCESS = 'logs-endpoint.events.process-*';
+    const NETWORK = 'logs-endpoint.events.network-*';
+    const patterns = Array.from({ length: 80 }, (_, i) => `cluster_number_${i}:logs-*`);
+    const { index, incomplete } = remoteIndexTargets(patterns, [PROCESS, NETWORK]);
+
+    expect(index.length).toBeLessThanOrEqual(REMOTE_INDEX_TARGETS_MAX_LENGTH);
+    expect(incomplete).toBe(true);
+  });
+
+  it('keeps the URL-encoded target inside the Elasticsearch request-line limit', () => {
+    // The search step encodes the target into the path, and Elasticsearch rejects a line over 4096.
+    const longAliases = Array.from({ length: 200 }, (_, i) => `fake_cluster_number_${i}:logs-*`);
+    const shortAliases = Array.from({ length: 200 }, (_, i) => `c${i}:logs-*`);
+
+    for (const patterns of [longAliases, shortAliases]) {
+      const { index, incomplete } = remoteIndexTargets(patterns, [E]);
+
+      expect(encodeURIComponent(index).length).toBeLessThanOrEqual(3900);
+      expect(incomplete).toBe(true);
+    }
+  });
+
+  it('is complete when a cluster is dropped only because the data view excludes it', () => {
+    expect(remoteIndexTargets(['remote_a:logs-*', '-remote_a:*'], [E])).toEqual({
+      index: E,
+      clusters: [],
+      incomplete: false,
+    });
+  });
+
+  it('is complete when every include and exclusion fits', () => {
+    expect(
+      remoteIndexTargets(['remote_a:logs-*', '-remote_a:logs-endpoint.events.network-*'], [E])
+        .incomplete
+    ).toBe(false);
+  });
+});

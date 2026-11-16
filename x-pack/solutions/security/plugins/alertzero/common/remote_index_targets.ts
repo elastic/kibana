@@ -10,6 +10,15 @@ import { parseIndexScopeEntry } from './remote_cluster';
 /** Bound for the comma-separated target returned to a search step. */
 export const REMOTE_INDEX_TARGETS_MAX_LENGTH = 4096;
 
+/**
+ * The longest target, URL-encoded, that a search can carry. The search step encodes the target into
+ * the request path, so every `,` and `:` takes three characters. Elasticsearch rejects a request
+ * line over 4096 characters with `too_long_http_line_exception`, and that line also holds the
+ * method, `/_search`, and the query string, about 80 characters. A target past the limit fails the
+ * whole search, which hides the clusters that would have fit.
+ */
+const MAX_ENCODED_TARGET_LENGTH = 3900;
+
 const MAX_PATTERNS = 200;
 const MAX_PATTERN_LENGTH = 1024;
 
@@ -63,7 +72,7 @@ const exclusionCoversCluster = (exclusionCluster: string, candidate: string): bo
     : globMatches(exclusionCluster, candidate);
 
 const fits = (targets: readonly string[], next: string): boolean =>
-  `${targets.join(',')},${next}`.length <= REMOTE_INDEX_TARGETS_MAX_LENGTH;
+  encodeURIComponent(`${targets.join(',')},${next}`).length <= MAX_ENCODED_TARGET_LENGTH;
 
 /**
  * Whether a positive cluster pattern would still search the excluded cluster.
@@ -92,10 +101,11 @@ export interface RemoteIndexTargets {
   /** The cluster aliases the target searches, as written in the data view. */
   clusters: string[];
   /**
-   * True when the target is the local patterns only because the data view could not be used in
-   * full: it is not a list, it is longer than the helper reads, or an entry is longer than the
-   * helper reads. Remote clusters the data view names may then be missing from the search, which
-   * is not the same as a data view that names none.
+   * True when the target leaves out remote clusters or patterns the data view names. Either the
+   * data view could not be used in full (it is not a list, it is longer than the helper reads, or an
+   * entry is longer than the helper reads) and the target is the local patterns only, or the length
+   * cap dropped an include, or took one back out to fit its exclusion. A cluster the data view
+   * excludes is not missing. A data view that names no cluster is complete.
    */
   incomplete: boolean;
 }
@@ -124,7 +134,9 @@ export interface RemoteIndexTargets {
  * A data view the helper cannot read in full searches the local patterns only and is reported as
  * `incomplete`. Dropping the tail of a long list, or one over-long entry, could drop an exclusion
  * while keeping the wildcard include it was meant to limit, so the search would read a cluster the
- * space excluded.
+ * space excluded. A target that hits the length cap is also `incomplete`: an include that does not
+ * fit is left out, and an include is taken back out when its exclusion does not fit. Events on
+ * those clusters are not read, which a caller must not mistake for a complete read.
  */
 export const remoteIndexTargets = (
   dataViewPatterns: readonly string[],
@@ -134,6 +146,7 @@ export const remoteIndexTargets = (
   const result: string[] = [...locals];
   const included = new Set<string>();
   const excluded: RemoteExclusion[] = [];
+  let leftOut = false;
   const localOnly = (): RemoteIndexTargets => ({
     index: locals.join(','),
     clusters: [],
@@ -178,7 +191,11 @@ export const remoteIndexTargets = (
           exclusionCoversCluster(exclusion.cluster, cluster)
       );
       const next = `${cluster}:${target}`;
-      if (fullyExcluded || !fits(result, next)) continue;
+      if (fullyExcluded) continue;
+      if (!fits(result, next)) {
+        leftOut = true;
+        continue;
+      }
       result.push(next);
     }
   }
@@ -210,6 +227,7 @@ export const remoteIndexTargets = (
         globsOverlap(target, exclusion.index)
       ) {
         result.splice(position, 1);
+        leftOut = true;
       }
     }
     if (fits(result, next)) result.push(next);
@@ -219,5 +237,5 @@ export const remoteIndexTargets = (
   for (const entry of result.slice(locals.length)) {
     if (!entry.startsWith('-')) clusters.add(entry.slice(0, entry.indexOf(':')));
   }
-  return { index: result.join(','), clusters: [...clusters], incomplete: false };
+  return { index: result.join(','), clusters: [...clusters], incomplete: leftOut };
 };

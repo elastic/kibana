@@ -47,7 +47,7 @@ const outputSchema = lazySchema(() =>
     incomplete: z
       .boolean()
       .describe(
-        'True when the target is the local patterns only because the data view could not be read or used in full, so remote clusters it names may be missing. False for a data view that names none.'
+        'True when the target leaves out remote clusters or patterns the data view names: the data view could not be read or used in full, or the length cap dropped some. False for a data view that names none, or whose clusters are all searched or excluded.'
       ),
   })
 );
