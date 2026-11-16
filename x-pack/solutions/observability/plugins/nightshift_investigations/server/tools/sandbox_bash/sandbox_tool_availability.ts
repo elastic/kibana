@@ -19,11 +19,6 @@ import {
 const unavailable = (reason: string): ToolAvailabilityResult => ({ status: 'unavailable', reason });
 
 /**
- * Hides a sandbox tool from agents, and blocks running it, unless the `nightshift.enabled` flag is
- * on and the user has the Nightshift manage privilege in the current space. Evaluated per request
- * because the privilege check depends on the user.
- */
-/**
  * Whether the user behind a request may use the sandbox: the request targets the space Nightshift
  * runs in, Nightshift is enabled and, when privileges apply, the user holds the Nightshift manage
  * privilege in that space. The sandbox tools and everything else that reads a workspace on a
@@ -67,11 +62,41 @@ export const checkSandboxAccess = async ({
     : unavailable('Nightshift tools require the nightshift manage privilege in this space.');
 };
 
+/** How long one request reuses its access result; bounds how late a privilege change applies. */
+export const SANDBOX_ACCESS_CACHE_TTL_MS = 60_000;
+
+interface CachedAccess {
+  result: Promise<ToolAvailabilityResult>;
+  expiresAt: number;
+}
+
+/**
+ * Hides a sandbox tool from agents, and blocks running it, unless {@link checkSandboxAccess}
+ * allows the request. Agent Builder checks each tool's availability separately and drops a tool
+ * whose check takes over 2s, so tools sharing this config reuse one check per request and space
+ * instead of each running its own privilege call on every tool listing.
+ */
 export const createSandboxToolAvailability = ({
   getDeps,
+  now = Date.now,
 }: {
   getDeps: () => { featureFlags?: FeatureFlagsStart; security?: SecurityPluginStart };
-}): ToolAvailabilityConfig => ({
-  cacheMode: 'none',
-  handler: async ({ request, spaceId }) => checkSandboxAccess({ request, spaceId, ...getDeps() }),
-});
+  now?: () => number;
+}): ToolAvailabilityConfig => {
+  const cache = new WeakMap<KibanaRequest, Map<string, CachedAccess>>();
+  return {
+    cacheMode: 'none',
+    handler: ({ request, spaceId }) => {
+      const bySpace = cache.get(request) ?? new Map<string, CachedAccess>();
+      cache.set(request, bySpace);
+      const cached = bySpace.get(spaceId);
+      if (cached && cached.expiresAt > now()) {
+        return cached.result;
+      }
+      const result = checkSandboxAccess({ request, spaceId, ...getDeps() });
+      bySpace.set(spaceId, { result, expiresAt: now() + SANDBOX_ACCESS_CACHE_TTL_MS });
+      result.catch(() => bySpace.delete(spaceId));
+      return result;
+    },
+  };
+};

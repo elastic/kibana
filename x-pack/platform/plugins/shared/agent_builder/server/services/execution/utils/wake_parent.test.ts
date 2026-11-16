@@ -195,9 +195,30 @@ describe('wakeParent', () => {
 
     await expect(wake()).resolves.toBe('woken');
     expect(maybeExecuteAgent.mock.calls[0][0]).not.toHaveProperty('interactive');
-    for (const key of Object.keys(chosenForParent)) {
+    for (const key of [...Object.keys(chosenForParent), 'inferenceFeatureId']) {
       expect(maybeExecuteAgent.mock.calls[0][0].params).not.toHaveProperty(key);
     }
+  });
+
+  it('keeps the inference feature the run that spawned the child was started on', async () => {
+    const { connectorId, ...chosenWithoutConnector } = chosenForParent;
+    get = executionById({
+      ...parentRun,
+      agentParams: {
+        conversationId: 'conversation-1',
+        nextInput: { message: 'start' },
+        ...chosenWithoutConnector,
+        inferenceFeatureId: 'my_feature',
+      },
+    } as unknown as AgentExecution);
+
+    await expect(wake()).resolves.toBe('woken');
+
+    const { params } = maybeExecuteAgent.mock.calls[0][0];
+    expect(params).toEqual(
+      expect.objectContaining({ ...chosenWithoutConnector, inferenceFeatureId: 'my_feature' })
+    );
+    expect(params).not.toHaveProperty('connectorId');
   });
 
   it('leaves the message for the next run when the sub-agent asked for never', async () => {
