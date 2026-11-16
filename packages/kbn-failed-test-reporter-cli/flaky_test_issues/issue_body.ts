@@ -492,18 +492,25 @@ const branchStatus = (worst: BuildCounts, flaky: boolean, skip?: BranchSkip): Br
   return worst.failedBuilds > 0 ? 'failing' : 'clean';
 };
 
+const BRANCH_STATUS_EMOJI: Readonly<Record<BranchStatus, string>> = {
+  flaky: '🔴',
+  failing: '🟠',
+  skipped: '⏭️',
+  clean: '✅',
+};
+
 const branchStatusLabel = (status: BranchStatus, skip?: BranchSkip): string => {
   switch (status) {
     case 'flaky':
-      return '🔴 Flaky';
+      return 'Flaky';
     case 'failing':
-      return '🟠 Some failures';
+      return 'Some failures';
     case 'skipped':
       return skip?.lastRanAt
-        ? `⏭️ Skipped, last ran ${formatDay(skip.lastRanAt)}`
-        : '⏭️ Skipped in every run';
+        ? `Skipped, last ran ${formatDay(skip.lastRanAt)}`
+        : 'Skipped in every run';
     case 'clean':
-      return '✅ No failures';
+      return 'No failures';
   }
 };
 
@@ -554,7 +561,7 @@ const statusByBranch = (suite: FlakySuite, { thresholds }: FlakyTestReport): str
   const rows = branches
     .sort((a, b) => BRANCH_STATUSES.indexOf(a.status) - BRANCH_STATUSES.indexOf(b.status))
     .map(({ row, skip, status }) => [
-      formatScope(row.worst),
+      `${BRANCH_STATUS_EMOJI[status]} ${formatScope(row.worst)}`,
       branchStatusLabel(status, skip),
       ...failuresCells(row),
     ]);

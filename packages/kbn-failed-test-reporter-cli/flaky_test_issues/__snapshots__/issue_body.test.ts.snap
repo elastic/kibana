@@ -51,9 +51,9 @@ Hit by *reverts breakdown, interval, and visibility on a saved session* · seen 
 
 | Branch | Status | Failed builds | Sample failure |
 |---|---|---|---|
-| \`main\` | 🔴 Flaky | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
-| \`9.2\` | 🔴 Flaky | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |
-| \`9.1\` | ✅ No failures | 0 / 58 |  |
+| 🔴 \`main\` | Flaky | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| 🔴 \`9.2\` | Flaky | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |
+| ✅ \`9.1\` | No failures | 0 / 58 |  |
 
 #### Status by Target
 
@@ -101,7 +101,7 @@ Seen on \`kibana-on-merge\` (40) and \`kibana-pull-request\` (9) · \`main\`, 1 
 
 | Branch | Status | Failed builds | Sample failure |
 |---|---|---|---|
-| \`main\` | 🔴 Flaky | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| 🔴 \`main\` | Flaky | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
 
 #### Status by Target
 

@@ -319,9 +319,9 @@ describe('renderFlakySuiteIssueBody', () => {
         '',
         '| Branch | Status | Failed builds | Sample failure |',
         '|---|---|---|---|',
-        '| `main` | 🔴 Flaky | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
-        '| `9.2` | 🔴 Flaky | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |',
-        '| `9.1` | ✅ No failures | 0 / 58 |  |',
+        '| 🔴 `main` | Flaky | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
+        '| 🔴 `9.2` | Flaky | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |',
+        '| ✅ `9.1` | No failures | 0 / 58 |  |',
       ].join('\n')
     );
   });
@@ -378,11 +378,11 @@ describe('renderFlakySuiteIssueBody', () => {
       [
         '| Branch | Status | Failed builds | Sample failure |',
         '|---|---|---|---|',
-        '| `9.5` | 🔴 Flaky | 3 / 100 (**3%**) | 2026-09-08 10:00 UTC |',
-        '| `9.3` | 🟠 Some failures | 2 / 5 (**40%**) | 2026-09-04 10:00 UTC |',
-        '| `main` | ⏭️ Skipped, last ran 7 Sep | 8 / 100 (**8%**) | 2026-09-05 10:00 UTC |',
-        '| `9.4` | ⏭️ Skipped in every run | 0 / 0 |  |',
-        '| `8.19` | ✅ No failures | 0 / 40 |  |',
+        '| 🔴 `9.5` | Flaky | 3 / 100 (**3%**) | 2026-09-08 10:00 UTC |',
+        '| 🟠 `9.3` | Some failures | 2 / 5 (**40%**) | 2026-09-04 10:00 UTC |',
+        '| ⏭️ `main` | Skipped, last ran 7 Sep | 8 / 100 (**8%**) | 2026-09-05 10:00 UTC |',
+        '| ⏭️ `9.4` | Skipped in every run | 0 / 0 |  |',
+        '| ✅ `8.19` | No failures | 0 / 40 |  |',
       ].join('\n')
     );
   });
@@ -405,7 +405,7 @@ describe('renderFlakySuiteIssueBody', () => {
     const body = renderFlakySuiteIssueBody(suite, { report });
 
     expect(body).toContain('| another test | **`main` 6%&nbsp;(3&nbsp;/&nbsp;50)** |');
-    expect(body).toContain('| `main` | 🔴 Flaky | 4 / 200 (**2%**) |  |');
+    expect(body).toContain('| 🔴 `main` | Flaky | 4 / 200 (**2%**) |  |');
   });
 
   it('dates a failure without a recorded build, for reports written before it was', () => {
@@ -424,7 +424,7 @@ describe('renderFlakySuiteIssueBody', () => {
     ]);
     const [suite] = groupIntoSuites(report.flaky, report.files);
     expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
-      '| `main` | 🔴 Flaky | 2 / 10 (**20%**) | 2026-09-09 06:12 UTC |'
+      '| 🔴 `main` | Flaky | 2 / 10 (**20%**) | 2026-09-09 06:12 UTC |'
     );
   });
 
@@ -1167,8 +1167,8 @@ describe('a suite flaky only in a pipeline judged on its own', () => {
     const body = renderFlakySuiteIssueBody(suite, { report });
 
     expect(body).toContain('**`main` in `kibana-fips` 29%&nbsp;(4&nbsp;/&nbsp;14)**');
-    expect(body).toContain('| `main` in `kibana-fips` | 🔴 Flaky | 4 / 14');
-    expect(body).toContain('| `main` | 🟠 Some failures | 1 / 509');
+    expect(body).toContain('| 🔴 `main` in `kibana-fips` | Flaky | 4 / 14');
+    expect(body).toContain('| 🟠 `main` | Some failures | 1 / 509');
     expect(readFlakySuiteIssueMetadata(body)?.['suite.branches']).toEqual(['main']);
   });
 
