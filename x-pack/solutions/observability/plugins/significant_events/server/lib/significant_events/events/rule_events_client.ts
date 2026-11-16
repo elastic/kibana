@@ -930,7 +930,7 @@ export class RuleEventsClient {
             verdict: signal.verdict,
             esqlQuery: signal.evidence?.esql_query,
             evidenceFound: signal.evidence?.result === 'found',
-            verifiedAt: signal.collected_at,
+            verifiedAt: signal.collected_at ?? signal.evidence?.time_range?.to,
             createdAt: row.created_at,
             sourceIds: event.source_ids,
             eventTitle: event.title,

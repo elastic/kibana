@@ -193,10 +193,14 @@ export const computeEventFacts = ({
 
   // A closed series that reopens starts a new episode: its stored signals belong to the closed one.
   const reopens = isContinuation && !isLiveStatus(latest?.status) && isLiveStatus(candidate.status);
-  const signals =
+  const signals = (
     isContinuation && !reopens
       ? mergeSignalsLatestPerRule(currentEpisode, candidate.input.signals ?? [], timestamp)
-      : candidate.input.signals ?? [];
+      : candidate.input.signals ?? []
+  ).map((signal) => ({
+    ...signal,
+    collected_at: signal.collected_at ?? signal.evidence?.time_range?.to,
+  }));
 
   const episodeContext =
     isContinuation && !reopens

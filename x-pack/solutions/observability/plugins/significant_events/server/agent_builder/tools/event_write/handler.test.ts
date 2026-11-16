@@ -397,6 +397,68 @@ describe('eventsWriteBulkHandler', () => {
   });
 });
 
+describe('eventsWriteBulkHandler — signal collection timestamps', () => {
+  const timeRange = { from: TS_EARLIER, to: '2024-01-01T01:00:00.000Z' };
+  const signal: DetectionSignal = {
+    ...makeDetectionSignal({ ruleUuid: 'rule-1' }),
+    evidence: { esql_query: 'FROM logs.checkout', result: 'found', time_range: timeRange },
+  };
+
+  it.each([
+    ['fills a missing timestamp from evidence', signal, timeRange.to],
+    ['preserves an explicit timestamp', { ...signal, collected_at: TS_EARLIER }, TS_EARLIER],
+    [
+      'leaves the timestamp unknown without a time range',
+      makeDetectionSignal({ ruleUuid: 'rule-1' }),
+      undefined,
+    ],
+  ])('%s on a new event', async (_name, submitted, expected) => {
+    await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient(),
+      inputs: [{ ...baseInput, signals: [submitted] }],
+    });
+
+    expect(writtenDocs()[0].signals?.[0].collected_at).toBe(expected);
+  });
+
+  it('fills timestamps on submitted and retained signals in a continuation', async () => {
+    const stored = makeStoredEvent('event-1', {
+      signals: [signal, makeDetectionSignal({ ruleUuid: 'rule-2' })],
+    });
+    const refutingSignal: DetectionSignal = {
+      ...signal,
+      verdict: 'refutes',
+      metadata: { ...signal.metadata, rule_uuid: 'rule-2' },
+    };
+
+    await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient({
+        findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+      }),
+      inputs: [{ ...baseInput, event_id: stored.event_id, signals: [refutingSignal] }],
+    });
+
+    expect(writtenDocs()[0].signals).toEqual([
+      { ...signal, collected_at: timeRange.to },
+      { ...refutingSignal, collected_at: timeRange.to },
+    ]);
+  });
+
+  it('does not write a new version just to fill a timestamp', async () => {
+    const stored = makeStoredEvent('event-1', { signals: [signal] });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient({
+        findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+      }),
+      inputs: [{ ...baseInput, event_id: stored.event_id, signals: [signal] }],
+    });
+
+    expect(result).toMatchObject({ written: false, reason: 'unchanged_outcome' });
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+});
+
 describe('eventsWriteBulkHandler — dedup mode', () => {
   const dedupInput: EventsWriteInput = {
     ...baseInput,
