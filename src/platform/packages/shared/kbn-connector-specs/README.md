@@ -16,6 +16,80 @@ The `@kbn/connector-specs` package provides a simplified, declarative way to def
 - **Policy-Based Configuration**: Built-in support for rate limiting, retry policies, pagination, and more
 - **Inbound events**: The same spec can receive vendor webhooks (`events`) and call the vendor (`actions`)
 
+## Stack compatibility mode
+
+`stackCompat` lets a legacy sub-action connector run through `createConnectorTypeFromSpec` without changing saved objects or the public connector-type payload.
+
+Use it only for connectors that today register through `registerSubActionConnectorType`. MCP is not migrated by this layer.
+
+### Fields
+
+| Field | Required | What it does |
+| --- | --- | --- |
+| `configSchema` | yes | Legacy config schema, used as-is. No `authType` or `selectedActions` is added. |
+| `secretsSchema` | yes | Legacy secrets schema, used as-is. Not wrapped in an auth-type union. |
+| `allowedHostsKeys` | no | Config fields checked with the legacy URL allow-list validator. Kept off the schema so the public JSON schema does not change. |
+| `getAuthHeaders` | no | Auth headers for a pooled native client, built from legacy config and secrets. Absent means `{}`. |
+| `isUserError` | no | Return `true` to rethrow the handler error as a user task-run error. Otherwise the raw error is rethrown. |
+
+### What is preserved
+
+- Same connector id, name, license, and feature ids.
+- `source: 'stack'`. Create and update do not write `config.authType`.
+- Config and secrets schemas used as-is.
+- Loose params schema (`subAction` string, `subActionParams` object, default `{}`).
+- Unknown sub-action text: `Sub action "<name>" is not registered. Connector id: ... Connector name: ... Connector type: ...`.
+- Per-action `input` failures throw `Request validation failed (...)` with a user error source.
+- Handler errors are rethrown raw, unless `isUserError` returns true.
+- `ActionType.spec` stays unset. `getSpec()` stays undefined, so the internal spec route stays 404.
+- Not testable. Not sandbox capable. No `description`, `isExperimental`, or `globalAuthHeaders`.
+- Framework auth is not read from `secrets.authType`. Axios auth is `none`. Relay is unset. The client lease is `shared`.
+
+### Forbidden combinations
+
+`stackCompat` cannot be combined with `auth`, `schema`, `test.enabled`, `events`, `signingKey`, or `sandbox`. Registration throws.
+
+### Not covered
+
+This layer does not replace:
+
+- `renderParameterTemplates`
+- `preSaveHook`, `postSaveHook`, `postDeleteHook`
+- `getKibanaPrivileges`
+- `isSystemActionType`
+- `subFeature`
+- `isDeprecated`
+- custom config or secrets validators other than the URL allow-list
+- classic connectors that are not sub-action connectors
+- the connector UI
+
+### How to register
+
+Do not add a compat spec to `all_specs.ts`. That path registers spec connectors, not stack connectors.
+
+Register it from the owning plugin, in place of `registerSubActionConnectorType`:
+
+```typescript
+import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
+
+actions.registerType(createConnectorTypeFromSpec(spec, actions));
+```
+
+### Rollout checklist
+
+Each connector that adopts `stackCompat` needs its own intermediate-release assessment. This layer alone registers nothing.
+
+Before replacing a legacy registration:
+
+- Keep the same connector type id.
+- Keep identical config, secrets, and params JSON schemas.
+- Keep `source: 'stack'` so create and update do not write `config.authType`.
+- Keep the UI writer unchanged.
+- Add no new persisted field.
+- Keep the legacy executor on N-1.
+- Run an intermediate-release assessment for that connector.
+- Update `integration_tests/mocks/connector_types` if the registered type list changes.
+
 ## Quick Start (Recommended): Build a Connector with AI
 
 This package includes Agent Skills that automate the full connector development lifecycle.

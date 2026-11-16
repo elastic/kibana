@@ -6,7 +6,7 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { generateParamsSchema } from './generate_params_schema';
+import { generateCompatParamsSchema, generateParamsSchema } from './generate_params_schema';
 import { z } from '@kbn/zod/v4';
 
 describe('generateParamsSchema', () => {
@@ -184,5 +184,54 @@ describe('generateParamsSchema', () => {
         })
       ).toThrow(/unknown|Unrecognized/);
     });
+  });
+});
+
+describe('generateCompatParamsSchema', () => {
+  it('accepts any subAction string', () => {
+    const result = generateCompatParamsSchema();
+
+    expect(result.schema.parse({ subAction: 'doThing', subActionParams: { name: 'x' } })).toEqual({
+      subAction: 'doThing',
+      subActionParams: { name: 'x' },
+    });
+    expect(result.schema.parse({ subAction: 'not-registered', subActionParams: {} })).toEqual({
+      subAction: 'not-registered',
+      subActionParams: {},
+    });
+  });
+
+  it('defaults subActionParams to an empty object', () => {
+    const result = generateCompatParamsSchema();
+
+    expect(result.schema.parse({ subAction: 'doThing' })).toEqual({
+      subAction: 'doThing',
+      subActionParams: {},
+    });
+  });
+
+  it('keeps unknown subActionParams keys', () => {
+    const result = generateCompatParamsSchema();
+
+    expect(
+      result.schema.parse({
+        subAction: 'doThing',
+        subActionParams: { name: 'x', extra: true },
+      })
+    ).toEqual({
+      subAction: 'doThing',
+      subActionParams: { name: 'x', extra: true },
+    });
+  });
+
+  it('rejects non-object subActionParams', () => {
+    const result = generateCompatParamsSchema();
+
+    expect(() =>
+      result.schema.parse({ subAction: 'doThing', subActionParams: 'not-an-object' })
+    ).toThrow();
+    expect(() =>
+      result.schema.parse({ subAction: 'doThing', subActionParams: ['nope'] })
+    ).toThrow();
   });
 });

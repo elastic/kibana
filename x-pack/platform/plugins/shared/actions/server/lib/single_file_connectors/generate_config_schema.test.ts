@@ -7,7 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { generateConfigSchema } from './generate_config_schema';
+import { generateCompatConfigSchema, generateConfigSchema } from './generate_config_schema';
+import { urlAllowListValidator } from '../../sub_action_framework/helpers';
 import { actionsConfigMock } from '../../actions_config.mock';
 
 const mockConfigUtils = actionsConfigMock.create();
@@ -229,5 +230,79 @@ describe('generateConfigSchema', () => {
         'https://not-allowed.example.com/webhook'
       );
     });
+  });
+});
+
+describe('generateCompatConfigSchema', () => {
+  const messageOf = (run: () => void): string => {
+    try {
+      run();
+    } catch (err) {
+      return err instanceof Error ? err.message : String(err);
+    }
+    throw new Error('expected a throw');
+  };
+
+  it('uses the schema as-is and does not add authType or selectedActions', () => {
+    const result = generateCompatConfigSchema(z.object({ url: z.string() }));
+
+    expect(result.schema.parse({ url: 'https://example.com' })).toEqual({
+      url: 'https://example.com',
+    });
+    expect(
+      result.schema.parse({
+        url: 'https://example.com',
+        authType: 'basic',
+        selectedActions: ['doThing'],
+      })
+    ).toEqual({ url: 'https://example.com' });
+  });
+
+  it('follows the given schema for unknown keys', () => {
+    const loose = generateCompatConfigSchema(z.object({ url: z.string() }));
+    const strict = generateCompatConfigSchema(z.object({ url: z.string() }).strict());
+
+    expect(loose.schema.parse({ url: 'https://example.com', extra: true })).toEqual({
+      url: 'https://example.com',
+    });
+    expect(() => strict.schema.parse({ url: 'https://example.com', extra: true })).toThrow(
+      /extra|Unrecognized/
+    );
+  });
+
+  it('checks allowedHostsKeys with the legacy URL validator', () => {
+    const result = generateCompatConfigSchema(z.object({ url: z.string() }), ['url']);
+
+    result.customValidator!({ url: 'https://service.example.com/api' }, validatorServices);
+
+    expect(mockConfigUtils.ensureUriAllowed).toHaveBeenCalledWith(
+      'https://service.example.com/api'
+    );
+  });
+
+  it('rejection text equals urlAllowListValidator output', () => {
+    mockConfigUtils.ensureUriAllowed.mockImplementation(() => {
+      throw new Error('target url is not present in allowedHosts');
+    });
+
+    const config = { url: 'https://not-allowed.example.com' };
+    const result = generateCompatConfigSchema(z.object({ url: z.string() }), ['url']);
+
+    expect(messageOf(() => result.customValidator!(config, validatorServices))).toBe(
+      messageOf(() => urlAllowListValidator('url')(config, validatorServices))
+    );
+  });
+
+  it('is a no-op when no allowedHostsKeys are set', () => {
+    mockConfigUtils.ensureUriAllowed.mockImplementation(() => {
+      throw new Error('should not run');
+    });
+
+    const result = generateCompatConfigSchema(z.object({ url: z.string() }));
+
+    expect(() =>
+      result.customValidator!({ url: 'https://example.com' }, validatorServices)
+    ).not.toThrow();
+    expect(mockConfigUtils.ensureUriAllowed).not.toHaveBeenCalled();
   });
 });

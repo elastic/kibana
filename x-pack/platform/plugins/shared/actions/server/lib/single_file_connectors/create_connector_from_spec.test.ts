@@ -838,4 +838,140 @@ describe('createConnectorTypeFromSpec', () => {
       );
     });
   });
+
+  describe('stackCompat', () => {
+    const stackCompat = {
+      configSchema: z4.object({ url: z4.string() }),
+      secretsSchema: z4.object({ token: z4.string() }),
+    };
+
+    const createCompatSpec = (overrides: Partial<ConnectorSpec> = {}): ConnectorSpec =>
+      createMockSpec({
+        metadata: {
+          id: 'compat-connector',
+          displayName: 'Compat Connector',
+          description: 'must not leak',
+          minimumLicense: 'gold',
+          supportedFeatureIds: ['alerting', 'cases'],
+          isTechnicalPreview: true,
+        },
+        schema: undefined,
+        auth: undefined,
+        actions: {
+          doThing: {
+            scope: 'write',
+            input: z4.object({ name: z4.string() }),
+            handler: jest.fn(),
+          },
+        },
+        test: { handler: jest.fn(), enabled: false },
+        stackCompat,
+        ...overrides,
+      });
+
+    const createRegistry = () =>
+      new ActionTypeRegistry({
+        licensing: { featureUsage: { register: jest.fn() } },
+        taskManager: { registerTaskDefinitions: jest.fn() },
+        taskRunnerFactory: { create: jest.fn() },
+        actionsConfigUtils: mockActionsConfigUtils,
+        licenseState: {
+          ensureLicenseForActionType() {},
+          isLicenseValidForActionType: () => ({ isValid: true }),
+        },
+        inMemoryConnectors: [],
+      } as unknown as ActionTypeRegistryOpts);
+
+    it('registers a stack type and omits spec-only public fields', () => {
+      const spec = createCompatSpec();
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+      expect(connectorType.source).toBe(ACTION_TYPE_SOURCES.stack);
+      expect(connectorType.spec).toBeUndefined();
+      expect(connectorType.isTestable).toBe(false);
+      expect(connectorType.sandboxSupportedAuthTypes).toEqual([]);
+      expect(connectorType.getSandboxHosts).toBeUndefined();
+      expect(connectorType.description).toBeUndefined();
+      expect(connectorType.isExperimental).toBeUndefined();
+      expect(connectorType.globalAuthHeaders).toBeUndefined();
+      expect(connectorType.id).toBe('compat-connector');
+      expect(connectorType.name).toBe('Compat Connector');
+    });
+
+    it('is not exposed as a spec type by the registry', () => {
+      const spec = createCompatSpec();
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+      const registry = createRegistry();
+      registry.register(connectorType);
+
+      expect(registry.getSpec(spec.metadata.id)).toBeUndefined();
+      expect(registry.isSpecActionType(spec.metadata.id)).toBe(false);
+      expect(registry.list()[0].source).toBe(ACTION_TYPE_SOURCES.stack);
+    });
+
+    it('validates legacy config, secrets, and loose params', () => {
+      const connectorType = createConnectorTypeFromSpec(createCompatSpec(), mockActionsPlugin);
+      const services = { configurationUtilities: mockActionsConfigUtils };
+
+      expect(validateConfig(connectorType, { url: 'https://example.com' }, services)).toEqual({
+        url: 'https://example.com',
+      });
+      expect(
+        validateConfig(
+          connectorType,
+          { url: 'https://example.com', authType: 'basic', selectedActions: ['doThing'] },
+          services
+        )
+      ).toEqual({ url: 'https://example.com' });
+      expect(validateSecrets(connectorType, { token: 'abc' }, services)).toEqual({ token: 'abc' });
+      expect(
+        validateSecrets(connectorType, { token: 'abc', authType: 'bearer' }, services)
+      ).toEqual({ token: 'abc' });
+      expect(
+        validateParams(
+          connectorType,
+          { subAction: 'doThing', subActionParams: { name: 'x', extra: true } },
+          services
+        )
+      ).toEqual({
+        subAction: 'doThing',
+        subActionParams: { name: 'x', extra: true },
+      });
+      expect(validateParams(connectorType, { subAction: 'anything' }, services)).toEqual({
+        subAction: 'anything',
+        subActionParams: {},
+      });
+    });
+
+    it.each([
+      ['test.enabled', { test: { handler: jest.fn(), enabled: true } }],
+      ['auth', { auth: { types: ['none'] } }],
+      ['schema', { schema: z4.object({ url: z4.string() }) }],
+      [
+        'events',
+        {
+          events: {
+            definitions: {
+              received: {
+                eventId: 'test.received',
+                title: 'Received',
+                description: 'Inbound event',
+                eventSchema: z4.object({ body: z4.unknown() }),
+              },
+            },
+            handleEvents: async () => ({ type: 'emit' as const, events: [] }),
+          },
+        },
+      ],
+      ['signingKey', { signingKey: { jwtType: 'test' } }],
+      ['sandbox', { sandbox: { hosts: ['example.com'] } }],
+    ] as const)('throws when stackCompat is combined with %s', (_label, overrides) => {
+      expect(() =>
+        createConnectorTypeFromSpec(
+          createCompatSpec(overrides as Partial<ConnectorSpec>),
+          mockActionsPlugin
+        )
+      ).toThrow(/cannot combine stackCompat/);
+    });
+  });
 });
