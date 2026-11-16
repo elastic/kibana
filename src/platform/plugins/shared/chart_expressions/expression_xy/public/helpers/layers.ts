@@ -17,7 +17,7 @@ import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common'
 import {
   getAccessorByDimension,
   getColumnByAccessor,
-  sortRowsByRangeLowerBound,
+  getRangeLowerBound,
 } from '@kbn/chart-expressions-common';
 import type {
   CommonXYDataLayerConfig,
@@ -77,10 +77,9 @@ export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
   );
 }
 
-// An ordinal x-axis shows its values in row order, which ES|QL doesn't guarantee for number ranges
-// TODO remove once elastic-charts can sort ordinal x values with a comparator,
-// like https://github.com/elastic/elastic-charts/issues/2782 for the heatmap
-export function sortLayerRowsByXRange<T extends CommonXYLayerConfig>(layer: T): T {
+// Number range buckets (e.g. ES|QL BUCKET over a histogram field) are drawn as a histogram of their
+// lower bounds, the tooltip shows the full range
+export function toXRangeLowerBounds<T extends CommonXYLayerConfig>(layer: T): T {
   if (!isDataLayer(layer) || !layer.xAccessor) {
     return layer;
   }
@@ -88,8 +87,14 @@ export function sortLayerRowsByXRange<T extends CommonXYLayerConfig>(layer: T): 
   if (xColumn?.meta.type !== 'number_range') {
     return layer;
   }
-  const rows = sortRowsByRangeLowerBound(layer.table.rows, xColumn, 'asc');
-  return { ...layer, table: { ...layer.table, rows } };
+  const rows = layer.table.rows.map((row) => ({
+    ...row,
+    [xColumn.id]: row[xColumn.id] == null ? row[xColumn.id] : getRangeLowerBound(row[xColumn.id]),
+  }));
+  const columns = layer.table.columns.map((column) =>
+    column === xColumn ? { ...column, meta: { ...column.meta, params: { id: 'number' } } } : column
+  );
+  return { ...layer, table: { ...layer.table, columns, rows } };
 }
 
 const getAccessorWithFieldFormat = (

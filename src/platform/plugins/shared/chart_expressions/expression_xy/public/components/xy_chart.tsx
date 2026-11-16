@@ -45,6 +45,7 @@ import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { useKbnPalettes } from '@kbn/palettes-components';
 import { ESQL_TABLE_TYPE, MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -97,7 +98,7 @@ import {
   getLayersTitles,
   isReferenceLineDecorationConfig,
   getFilteredLayers,
-  sortLayerRowsByXRange,
+  toXRangeLowerBounds,
   getReferenceLayers,
   isDataLayer,
   getAxesConfiguration,
@@ -259,7 +260,7 @@ export function XYChart({
   const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
   const filteredLayers = useMemo(
-    () => getFilteredLayers(layers).map(sortLayerRowsByXRange),
+    () => getFilteredLayers(layers).map(toXRangeLowerBounds),
     [layers]
   );
   const layersById = filteredLayers.reduce<Record<string, CommonXYLayerConfig>>(
@@ -440,6 +441,16 @@ export function XYChart({
     xAxisColumn && formattedDatatables[dataLayers[0]?.layerId]?.formattedColumns[xAxisColumn.id]
       ? String(value)
       : String(xAxisFormatter.convertToText(value));
+
+  // Number range buckets are drawn as their lower bounds, the tooltip shows the full range
+  // Clicks and tooltip actions are disabled for them, they can't map the lower bound back to its row
+  const isXRange = xAxisColumn?.meta.type === 'number_range';
+  const tooltipXLabelRenderer = (value: unknown): string =>
+    isXRange && typeof value === 'number' && minInterval
+      ? formatFactory({ id: FIELD_FORMAT_IDS.NUMBER_RANGE }).convertToText(
+          `${value}..${value + minInterval}`
+        )
+      : safeXAccessorLabelRenderer(value);
 
   const yAxesConfiguration = getAxesConfiguration(
     dataLayers,
@@ -895,7 +906,7 @@ export function XYChart({
                   ? ({ value }) => (
                       <TooltipHeader
                         value={value}
-                        formatter={safeXAccessorLabelRenderer}
+                        formatter={tooltipXLabelRenderer}
                         xDomain={rawXDomain}
                       />
                     )
@@ -911,7 +922,7 @@ export function XYChart({
                 formatFactory,
                 isEsqlMode,
                 canCreateAlerts,
-                interactive && !args.detailedTooltip,
+                interactive && !args.detailedTooltip && !isXRange,
                 args.axisFormatPolicies
               )}
               customTooltip={
@@ -1009,7 +1020,7 @@ export function XYChart({
               xDomain={xDomain}
               // enable brushing only for time charts, for both ES|QL and DSL queries
               onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
-              onElementClick={interactive ? clickHandler : undefined}
+              onElementClick={interactive && !isXRange ? clickHandler : undefined}
               onAnnotationClick={interactive ? annotationClickHandler : undefined}
               legendAction={
                 interactive

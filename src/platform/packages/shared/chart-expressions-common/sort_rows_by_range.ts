@@ -10,7 +10,7 @@
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 
 // ES|QL returns number ranges (e.g. double_range) as "500.0..550.0"
-const getLowerBound = (value: unknown) => Number(String(value).split('..')[0]);
+export const getRangeLowerBound = (value: unknown) => Number(String(value).split('..')[0]);
 
 /**
  * Sorts rows by the lower bound of a number range column.
@@ -26,8 +26,8 @@ export const sortRowsByRangeLowerBound = (
     return rows;
   }
   return rows.toSorted((a, b) => {
-    const aBound = getLowerBound(a[column.id]);
-    const bBound = getLowerBound(b[column.id]);
+    const aBound = getRangeLowerBound(a[column.id]);
+    const bBound = getRangeLowerBound(b[column.id]);
     return direction === 'asc' ? aBound - bBound : bBound - aBound;
   });
 };

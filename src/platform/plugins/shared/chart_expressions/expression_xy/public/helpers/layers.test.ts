@@ -9,10 +9,10 @@
 
 import type { DataLayerConfig } from '../../common';
 import { sampleLayer } from '../../common/test_utils';
-import { sortLayerRowsByXRange } from './layers';
+import { toXRangeLowerBounds } from './layers';
 
-describe('sortLayerRowsByXRange', () => {
-  it('should sort the rows by the lower bound of a range x-axis', () => {
+describe('toXRangeLowerBounds', () => {
+  it('should replace a range x-axis with its lower bounds', () => {
     const layer: DataLayerConfig = {
       ...sampleLayer,
       xAccessor: 'bucket',
@@ -33,14 +33,14 @@ describe('sortLayerRowsByXRange', () => {
       },
     };
 
-    expect(sortLayerRowsByXRange(layer).table.rows).toEqual([
-      { bucket: '0.0..500.0', count: 5 },
-      { bucket: '500.0..1000.0', count: 3 },
-      { bucket: '1000.0..1500.0', count: 1 },
+    expect(toXRangeLowerBounds(layer).table.rows).toEqual([
+      { bucket: 500, count: 3 },
+      { bucket: 0, count: 5 },
+      { bucket: 1000, count: 1 },
     ]);
   });
 
   it('should keep the layer as it is for other x-axis types', () => {
-    expect(sortLayerRowsByXRange(sampleLayer)).toBe(sampleLayer);
+    expect(toXRangeLowerBounds(sampleLayer)).toBe(sampleLayer);
   });
 });
