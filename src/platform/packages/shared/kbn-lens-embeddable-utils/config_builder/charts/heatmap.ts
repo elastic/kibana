@@ -9,8 +9,12 @@
 
 import type {
   FormBasedPersistedState,
+  GenericIndexPatternColumn,
   HeatmapPalette,
   HeatmapVisualizationState,
+  RangeIndexPatternColumn,
+  TermsIndexPatternColumn,
+  ValueFormatConfig,
 } from '@kbn/lens-common';
 import { LENS_HEATMAP_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -92,25 +96,79 @@ function buildFormulaLayer(
 
   if (layer.breakdown) {
     const columnName = getAccessorName('y');
-    const breakdownColumn = getBreakdownColumn({
-      options: layer.breakdown,
-      dataView,
-    });
+    const breakdownColumn = withBreakdownFormat(
+      getBreakdownColumn({
+        options: layer.breakdown,
+        dataView,
+      }),
+      toBreakdownFormat(layer.breakdownFormat)
+    );
     addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
   }
 
   return defaultLayer;
 }
 
-function hasFormatParams(columnFormat: NonNullable<LensHeatmapConfig['breakdownFormat']>) {
-  return (
-    columnFormat.format &&
-    (columnFormat.suffix ||
-      columnFormat.compactValues ||
-      columnFormat.decimals ||
-      columnFormat.fromUnit ||
-      columnFormat.toUnit)
-  );
+function toBreakdownFormat(
+  columnFormat: LensHeatmapConfig['breakdownFormat']
+): ValueFormatConfig | undefined {
+  if (!columnFormat?.format) {
+    return;
+  }
+
+  const { decimals, compactValues, suffix, fromUnit, toUnit } = columnFormat;
+  const hasDecimals = typeof decimals === 'number';
+  const hasCompact = typeof compactValues === 'boolean';
+  const params = {
+    ...(hasDecimals ? { decimals } : {}),
+    ...(hasCompact ? { compact: compactValues } : {}),
+    ...(suffix ? { suffix } : {}),
+    ...(fromUnit ? { fromUnit } : {}),
+    ...(toUnit ? { toUnit } : {}),
+  };
+
+  if (Object.keys(params).length === 0) {
+    return { id: columnFormat.format };
+  }
+
+  // ValueFormatConfig requires decimals whenever params are present.
+  return {
+    id: columnFormat.format,
+    params: {
+      decimals: hasDecimals ? decimals : 0,
+      ...params,
+    },
+  };
+}
+
+function withBreakdownFormat(
+  column: GenericIndexPatternColumn,
+  format: ValueFormatConfig | undefined
+): GenericIndexPatternColumn {
+  if (!format) {
+    return column;
+  }
+  if (column.operationType === 'range') {
+    const rangeColumn = column as RangeIndexPatternColumn;
+    return {
+      ...rangeColumn,
+      params: {
+        ...rangeColumn.params,
+        format,
+      },
+    };
+  }
+  if (column.operationType === 'terms') {
+    const termsColumn = column as TermsIndexPatternColumn;
+    return {
+      ...termsColumn,
+      params: {
+        ...termsColumn.params,
+        format,
+      },
+    };
+  }
+  return column;
 }
 
 function getValueColumns(layer: LensHeatmapConfig) {
@@ -120,20 +178,7 @@ function getValueColumns(layer: LensHeatmapConfig) {
   if (typeof layer.xAxis !== 'string') {
     throw new Error('xAxis must be a field name when not using index source');
   }
-  const { breakdownFormat } = layer;
-  const format =
-    breakdownFormat && hasFormatParams(breakdownFormat)
-      ? {
-          id: breakdownFormat.format as string,
-          params: {
-            compact: breakdownFormat.compactValues,
-            decimals: breakdownFormat.decimals ?? 0,
-            suffix: breakdownFormat.suffix,
-            fromUnit: breakdownFormat.fromUnit,
-            toUnit: breakdownFormat.toUnit,
-          },
-        }
-      : undefined;
+  const format = toBreakdownFormat(layer.breakdownFormat);
   return [
     ...(layer.breakdown
       ? [
