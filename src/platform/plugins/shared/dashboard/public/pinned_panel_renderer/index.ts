@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DashboardControlsRenderer } from './dashboard_controls_renderer';
+export { DashboardPinnedPanelsRenderer } from './dashboard_pinned_panels_renderer';

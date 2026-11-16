@@ -17,7 +17,6 @@ import { EsqlControlType } from '@kbn/esql-types';
 
 export const mockControlState: ControlPanelsState<OptionsListESQLControlState> = {
   panel1: {
-    ...DEFAULT_PINNED_CONTROL_STATE,
     ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
     type: 'esqlControl',
     available_options: ['bar', 'baz'],

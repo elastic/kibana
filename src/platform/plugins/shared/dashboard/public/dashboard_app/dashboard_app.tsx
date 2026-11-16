@@ -10,6 +10,8 @@
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { css } from '@emotion/react';
+
 import type { History } from 'history';
 import React, { useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -181,7 +183,15 @@ export function DashboardApp({
   return showNoDataPage ? (
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
   ) : (
-    <>
+    <div
+      css={css({
+        '&:has(.kbnFlexPanel--active) *': {
+          // disable pointer events and user select on drag + resize
+          userSelect: 'none',
+          pointerEvents: 'none',
+        },
+      })}
+    >
       {dashboardApi && dashboardInternalApi && (
         <>
           <DashboardTabTitleSetter dashboardApi={dashboardApi} />
@@ -214,6 +224,6 @@ export function DashboardApp({
         showPlainSpinner={showPlainSpinner}
         getCreationOptions={getCreationOptions}
       />
-    </>
+    </div>
   );
 }

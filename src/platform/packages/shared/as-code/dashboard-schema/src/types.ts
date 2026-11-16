@@ -9,7 +9,11 @@
 
 import type { z } from '@kbn/zod';
 import type { getControlsGroupSchema } from '@kbn/controls-schemas';
-import type { getDashboardDataSchema, getPanelSchema } from './schemas/dashboard_data';
+import type {
+  getDashboardDataSchema,
+  getPanelSchema,
+  getPinnedPanelSchema,
+} from './schemas/dashboard_data';
 import type { optionsSchema, panelGridSchema, getSectionSchema } from './schemas';
 
 /** Input type for the Dashboard API request body (before parsing). Panels are loosely typed since they depend on registered embeddable schemas. */
@@ -34,8 +38,12 @@ export type DashboardState = z.output<ReturnType<typeof getDashboardDataSchema>>
 /** The complete state of a dashboard (input shape — fields with defaults are optional). */
 export type DashboardStateInput = z.input<ReturnType<typeof getDashboardDataSchema>>;
 
-export type DashboardPinnedPanelsState = z.output<ReturnType<typeof getControlsGroupSchema>>;
+export type DashboardPinnedPanelsState = z.output<
+  ReturnType<typeof getDashboardDataSchema>
+>['pinned_panels'];
 /** The input shape of pinned panels state (fields with defaults are optional). */
-export type DashboardPinnedPanelsStateInput = z.input<ReturnType<typeof getControlsGroupSchema>>;
+export type DashboardPinnedPanelsStateInput = z.input<
+  ReturnType<typeof getDashboardDataSchema>
+>['pinned_panels'];
 export type DashboardPinnedPanel = DashboardPinnedPanelsState[number];
 export type DashboardPinnedPanelInput = NonNullable<DashboardPinnedPanelsStateInput>[number];

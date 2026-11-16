@@ -29,7 +29,7 @@ export const GridHeightSmoother = React.memo(
         gridLayoutStateManager.gridDimensions$,
         gridLayoutStateManager.activePanelEvent$,
       ]).subscribe(([dimensions, activePanel]) => {
-        if (!smoothHeightRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
+        if (!smoothHeightRef.current || gridLayoutStateManager.expandedPanelId$?.getValue()) return;
 
         if (!activePanel) {
           smoothHeightRef.current.style.minHeight = `${dimensions.height}px`;

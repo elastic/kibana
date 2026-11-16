@@ -40,7 +40,7 @@ import { coreServices, uiActionsService } from '../services/kibana_services';
 import { Dashboard404Page } from './dashboard_404';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { GlobalPrintStyles } from './print_styles';
-import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
+import { DashboardPinnedPanelsRenderer } from '../pinned_panel_renderer';
 
 /**
  * Props for the {@link DashboardRenderer} component.
@@ -239,7 +239,7 @@ export function DashboardRenderer({
           <KibanaContextProvider services={{ uiActions: uiActionsService }}>
             <DashboardContext.Provider value={dashboard.api}>
               <DashboardInternalContext.Provider value={dashboard.internalApi}>
-                {dashboard.showControlGroup && <DashboardControlsRenderer />}
+                {dashboard.showControlGroup && <DashboardPinnedPanelsRenderer />}
                 <DashboardViewport />
               </DashboardInternalContext.Provider>
             </DashboardContext.Provider>

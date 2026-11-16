@@ -142,7 +142,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
     /**
      * This subscription adds and/or removes the necessary class name for expanded panel styling
      */
-    const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
+    const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$?.subscribe(
       (expandedPanelId) => {
         const panel = panel$.getValue();
         if (!panel) return;
@@ -168,7 +168,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
 
     return () => {
       activePanelStyleSubscription.unsubscribe();
-      expandedPanelSubscription.unsubscribe();
+      expandedPanelSubscription?.unsubscribe();
       sectionIdSubscription.unsubscribe();
     };
   }, [panel$, gridLayoutStateManager, euiTheme.levels.modal]);

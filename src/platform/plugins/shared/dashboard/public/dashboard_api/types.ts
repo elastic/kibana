@@ -12,6 +12,7 @@ import type { TimeSlice } from '@kbn/controls-schemas';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { FlexLayoutData } from '@kbn/grid-layout';
 import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable, PublishesESQLVariables } from '@kbn/esql-types';
 import type { GridLayoutData } from '@kbn/grid-layout';
@@ -293,6 +294,7 @@ export type DashboardInternalApi = ReturnType<
 >['internalApi'] &
   ReturnType<typeof startTrackingHistory<DashboardState>>['api'] & {
     gridLayout$: BehaviorSubject<GridLayoutData>;
+    pinnedLayout$: BehaviorSubject<FlexLayoutData>;
     serializeLayout: () => Pick<DashboardState, 'panels' | 'pinned_panels'>;
     isSectionCollapsed: (sectionId?: string) => boolean;
     dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;

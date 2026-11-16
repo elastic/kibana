@@ -21,18 +21,24 @@ import {
   EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
-import type { ControlWidth } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import { apiCanLockHoverActions } from '@kbn/presentation-publishing';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ACTION_EDIT_CONTROL_DISPLAY_SETTINGS } from '../constants';
 import type { PinnableControlApi } from './types';
+import {
+  CONTROL_WIDTH_LARGE,
+  CONTROL_WIDTH_MEDIUM,
+  CONTROL_WIDTH_SMALL,
+} from '@kbn/controls-constants';
 
 interface Props {
   api: PinnableControlApi;
   displayName: string;
   iconType: string;
 }
+
+const mapping = { small: 224, medium: 400, large: 800 };
 
 export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayName, iconType }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -46,7 +52,7 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
     [api, isPopoverOpen]
   );
 
-  const [width, setWidth] = useState<ControlWidth>(initialState.width as ControlWidth);
+  const [width, setWidth] = useState<number>(initialState.width);
   const [grow, setGrow] = useState<boolean>(initialState.grow);
 
   const onClose = useCallback(() => {
@@ -96,8 +102,16 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
         <EuiButtonGroup
           legend={strings.minimumWidth}
           options={widthOptions}
-          idSelected={width}
-          onChange={(newWidth) => setWidth(newWidth as ControlWidth)}
+          idSelected={
+            width === 224
+              ? (CONTROL_WIDTH_SMALL as string)
+              : width === 400
+              ? (CONTROL_WIDTH_MEDIUM as string)
+              : width === 800
+              ? (CONTROL_WIDTH_LARGE as string)
+              : undefined
+          }
+          onChange={(newWidth) => setWidth(mapping[newWidth as keyof typeof mapping])}
           type="single"
           isFullWidth
         />
@@ -117,7 +131,7 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
               size="s"
               onClick={() => {
                 onClose();
-                setWidth(initialState.width as ControlWidth);
+                setWidth(initialState.width);
                 setGrow(initialState.grow);
               }}
             >
@@ -161,7 +175,7 @@ const strings = {
 
 const widthOptions = [
   {
-    id: `small`,
+    id: 'small',
     label: i18n.translate(
       'controls.controlGroup.floatingActions.editDisplaySettings.minimumWidth.small',
       {

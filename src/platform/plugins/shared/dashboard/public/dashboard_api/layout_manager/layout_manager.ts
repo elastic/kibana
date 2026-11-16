@@ -54,9 +54,8 @@ import {
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 import type { MaybePromise } from '@kbn/utility-types';
-
-import type { DashboardPanel } from '@kbn/as-code-dashboard-schema';
-import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardPanel, DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { FlexLayoutData } from '@kbn/grid-layout';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/constants';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
@@ -84,7 +83,6 @@ import {
   type DashboardLayoutPanel,
   type DashboardPinnablePanel,
 } from './types';
-
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
   initialPanels: DashboardState['panels'],
@@ -104,6 +102,7 @@ export function initializeLayoutManager(
 
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
+  const pinnedLayout$ = new BehaviorSubject(transformPinnedPanelsToGridLayout(initialLayout));
   const panelResizeSettings$: Observable<{ [panelType: string]: LayoutConstraints }> = layout$.pipe(
     map(({ panels }) => {
       return [...new Set(Object.values(panels).map((panel) => panel.type))];
@@ -126,6 +125,7 @@ export function initializeLayoutManager(
   const gridLayoutSubscription = combineLatest([layout$, panelResizeSettings$]).subscribe(
     ([layout, panelResizeSettings]) => {
       gridLayout$.next(transformDashboardLayoutToGridLayout(layout, panelResizeSettings));
+      pinnedLayout$.next(transformPinnedPanelsToGridLayout(layout));
     }
   );
 
@@ -454,7 +454,7 @@ export function initializeLayoutManager(
     newPinnedPanels[uuid] = {
       type: panelToPin.type as PinnedControlLayoutState['type'],
       order: panelToPin.order ?? Object.keys(newPinnedPanels).length,
-      width: panelToPin.width ?? DEFAULT_PINNED_CONTROL_STATE.width,
+      width: panelToPin.width ?? 224,
       grow: panelToPin.grow ?? DEFAULT_PINNED_CONTROL_STATE.grow,
     };
     const newPanels = { ...layout$.getValue().panels };
@@ -469,8 +469,11 @@ export function initializeLayoutManager(
     prevLayoutState?: Partial<PinnedControlLayoutState>
   ) => {
     const { serializedState } = panelPackage;
-    const { grow, width, ...panelState } =
-      (serializedState as PinnedControlLayoutState) ?? DEFAULT_PINNED_CONTROL_STATE;
+    const {
+      grow,
+      width = 224,
+      ...panelState
+    } = (serializedState as PinnedControlLayoutState) ?? DEFAULT_PINNED_CONTROL_STATE;
     const newPanelUuid = createPanel({ ...panelPackage, serializedState: panelState });
     const layoutState = {
       ...(serializedState ? { grow, width } : {}),
@@ -535,6 +538,7 @@ export function initializeLayoutManager(
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
+      pinnedLayout$,
       childrenLoading$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
@@ -743,6 +747,27 @@ function getClonedPanelTitle(panelTitles: string[], rawTitle: string) {
     ? baseTitle + ` (${clonedTag})`
     : baseTitle + ` (${clonedTag} ${similarBaseTitlesCount + 1})`;
 }
+
+const transformPinnedPanelsToGridLayout = (layout: DashboardLayout) => {
+  const newLayout: FlexLayoutData = {};
+  Object.keys(layout.pinnedPanels).forEach((panelId, index) => {
+    const panel = layout.pinnedPanels[panelId];
+    const basePanel = {
+      id: panelId,
+      grow: panel.grow ?? false,
+      order: panel.order ?? index,
+      width: panel.width,
+    };
+    newLayout[panelId] = {
+      ...basePanel,
+      type: 'panel',
+      resizeOptions: {
+        minWidth: 224,
+      },
+    };
+  });
+  return newLayout;
+};
 
 /** Renumbers the pinned panels' `order` from 0 so removed panels leave no gaps */
 const reorderPinnedPanels = (
