@@ -130,6 +130,8 @@ export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 export const INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/_bulk_delete` as const;
+export const INTERNAL_CASE_OBSERVABLES_EXTRACT_URL =
+  `${INTERNAL_CASE_OBSERVABLES_URL}/_extract` as const;
 export const INTERNAL_CASE_WORKFLOW_RUN_URL =
   `${CASES_INTERNAL_URL}/workflows/{workflow_id}/run` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
@@ -575,6 +577,13 @@ export const CASES_TEMPLATE_CLEARED_EVENT_TYPE = 'cases_template_cleared' as con
  * method call across all callers; they do not report removed counts or UI delete scope.
  */
 export const CASES_OBSERVABLES_DELETED_EVENT_TYPE = 'cases_observables_deleted' as const;
+
+/**
+ * One event per completed "Extract observables" click in the UI, whatever the outcome. The
+ * server-side usage counter `extract_observables` counts every client method call from the UI, the
+ * API and workflows. It cannot tell the UI apart, so this event gives the UI-triggered count.
+ */
+export const CASES_OBSERVABLES_EXTRACTED_EVENT_TYPE = 'cases_observables_extracted' as const;
 
 /**
  * Field Library management events. One confirmed UI write each, never a total — see

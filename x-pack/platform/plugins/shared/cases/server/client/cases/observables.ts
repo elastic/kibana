@@ -40,7 +40,7 @@ import {
 import { processObservables } from './utils';
 import { emitObservablesAddedEvent } from './trigger_utils';
 
-const ensureUpdateAuthorized = async (
+export const ensureUpdateAuthorized = async (
   authorization: PublicMethodsOf<Authorization>,
   theCase: CaseSavedObjectTransformed
 ) => {

@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_OBSERVABLES_PER_CASE,
   MIN_BULK_DELETE_OBSERVABLE_IDS,
   OBSERVABLE_ID_MAX_LENGTH,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema } from '../../../schema';
+import { CaseSchema } from '../../domain/case/v1';
 import { CaseObservableBaseSchema } from '../../domain/observable/v1';
 
 export const ObservablePostSchema = CaseObservableBaseSchema;
@@ -49,9 +50,25 @@ export const BulkDeleteObservablesRequestSchema = z.object({
   }),
 });
 
+export const ExtractObservablesStatusSchema = lazySchema(() =>
+  z.enum(['extracted', 'no_new_observables', 'cap_reached', 'alerts_not_found'])
+);
+
+export const ExtractObservablesResponseSchema = lazySchema(() =>
+  z.object({
+    case: CaseSchema,
+    status: ExtractObservablesStatusSchema,
+    newObservablesCount: z.number().int().min(0),
+    alertsRequested: z.number().int().min(0),
+    alertsFound: z.number().int().min(0),
+  })
+);
+
 export type ObservablePost = z.infer<typeof ObservablePostSchema>;
 export type ObservablePatch = z.infer<typeof ObservablePatchSchema>;
 export type AddObservableRequest = z.infer<typeof AddObservableRequestSchema>;
 export type UpdateObservableRequest = z.infer<typeof UpdateObservableRequestSchema>;
 export type BulkAddObservablesRequest = z.infer<typeof BulkAddObservablesRequestSchema>;
 export type BulkDeleteObservablesRequest = z.infer<typeof BulkDeleteObservablesRequestSchema>;
+export type ExtractObservablesStatus = z.infer<typeof ExtractObservablesStatusSchema>;
+export type ExtractObservablesResponse = z.infer<typeof ExtractObservablesResponseSchema>;
