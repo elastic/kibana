@@ -122,6 +122,7 @@ ${WORKLOAD_OWNER_DERIVATION}
 | WHERE kind IN ("deployment", "statefulset", "daemonset", "cronjob")
     AND workload IS NOT NULL
     AND kubernetes.namespace IS NOT NULL
+| WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""
 | STATS replicas = COUNT_DISTINCT(kubernetes.pod.uid), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.namespace, kind, workload
 | STATS scale = COUNT(*), activity = SUM(replicas), last_seen = MAX(last_seen),
@@ -162,8 +163,7 @@ export const foldWorkloadRows = (
       return [];
     }
     const clusterValue = row['orchestrator.cluster.name'];
-    const cluster =
-      typeof clusterValue === 'string' && clusterValue.length > 0 ? clusterValue : undefined;
+    const cluster = typeof clusterValue === 'string' ? clusterValue : undefined;
     const clusterScope: Exclude<ClusterScope, undefined> =
       cluster === undefined ? { missing: true } : { name: cluster };
     const scope = cluster ?? sourceId;

@@ -44,14 +44,7 @@ const getClusterConditions = (clusterScope: ClusterScope): Condition[] => {
   if ('name' in clusterScope) {
     return [{ field: 'orchestrator.cluster.name', eq: clusterScope.name }];
   }
-  return [
-    {
-      or: [
-        { not: { field: 'orchestrator.cluster.name', exists: true } },
-        { field: 'orchestrator.cluster.name', eq: '' },
-      ],
-    },
-  ];
+  return [{ not: { field: 'orchestrator.cluster.name', exists: true } }];
 };
 
 export const buildScopedFilter = (

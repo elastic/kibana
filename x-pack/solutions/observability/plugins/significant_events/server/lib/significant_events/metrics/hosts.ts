@@ -47,6 +47,7 @@ export const buildHostQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
     AND ${HOST_DATASET_CONDITION}
     AND host.name IS NOT NULL
+| WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""
 ${HOST_NODE_NAME_EVAL}
 | EVAL entity_type = CASE(node_name IS NULL, "host", "node"),
        concept_cluster = CASE(node_name IS NULL, "", orchestrator.cluster.name),
@@ -124,8 +125,7 @@ export const foldHostRows = (
       continue;
     }
     const clusterValue = row.concept_cluster;
-    const cluster =
-      typeof clusterValue === 'string' && clusterValue.length > 0 ? clusterValue : undefined;
+    const cluster = typeof clusterValue === 'string' ? clusterValue : undefined;
     const clusterScope: Exclude<ClusterScope, undefined> =
       cluster === undefined ? { missing: true } : { name: cluster };
     const id = `k8s.nodes:${cluster ?? sourceId}`;

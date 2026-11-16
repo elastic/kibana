@@ -35,6 +35,7 @@ export const buildNamespaceQuery = (sourceQuery: string): string => `${sourceQue
     AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_POD_DATASETS)})
     AND kubernetes.pod.uid IS NOT NULL
     AND kubernetes.namespace IS NOT NULL
+| WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""
 | STATS activity = COUNT(*), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.namespace
 | STATS scale = COUNT(*), activity = SUM(activity), last_seen = MAX(last_seen),
@@ -54,8 +55,7 @@ export const foldNamespaceRows = (
   >();
   for (const row of rows) {
     const clusterValue = row['orchestrator.cluster.name'];
-    const cluster =
-      typeof clusterValue === 'string' && clusterValue.length > 0 ? clusterValue : undefined;
+    const cluster = typeof clusterValue === 'string' ? clusterValue : undefined;
     const clusterKey = cluster === undefined ? 'source' : `cluster:${cluster}`;
     const concept = conceptsByCluster.get(clusterKey) ?? {
       cluster,

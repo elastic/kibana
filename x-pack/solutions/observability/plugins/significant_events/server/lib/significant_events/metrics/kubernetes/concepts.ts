@@ -26,7 +26,7 @@ const getClusterCondition = (clusterScope: ClusterScope): string => {
   if ('name' in clusterScope) {
     return `AND orchestrator.cluster.name == ${quoteEsqlString(clusterScope.name)}\n    `;
   }
-  return 'AND (orchestrator.cluster.name IS NULL OR orchestrator.cluster.name == "")\n    ';
+  return 'AND orchestrator.cluster.name IS NULL\n    ';
 };
 
 export const buildInfrastructureConceptDescription = ({

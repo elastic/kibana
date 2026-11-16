@@ -300,6 +300,9 @@ describe('Kubernetes type KIs', () => {
     expect(workloadQuery).toContain(
       'members = TOP(CONCAT(kubernetes.namespace, "/", workload), 50, "asc")'
     );
+    expect(workloadQuery).toContain(
+      '| WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""'
+    );
     expect(workloadQuery).toContain('BY orchestrator.cluster.name, kind');
     expect(workloadQuery).toMatch(/\| SORT activity DESC\n\| LIMIT 501$/);
   });
@@ -372,6 +375,14 @@ describe('Kubernetes type KIs', () => {
         }),
       })
     );
+    for (const keyRowId of ['ecs.k8s_nodes', 'ecs.k8s_namespaces']) {
+      const query =
+        ENTITY_KEY_TABLE.find(({ id }) => id === keyRowId)?.buildQuery(foldContext.sourceQuery) ??
+        '';
+      expect(query).toContain(
+        '| WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""'
+      );
+    }
   });
 
   it('separates named-cluster and missing-cluster workloads', () => {
@@ -384,7 +395,7 @@ describe('Kubernetes type KIs', () => {
           members: ['apps/named'],
         },
         {
-          'orchestrator.cluster.name': '',
+          'orchestrator.cluster.name': null,
           kind: 'deployment',
           scale: 1,
           members: ['apps/missing'],
@@ -414,12 +425,7 @@ describe('Kubernetes type KIs', () => {
         ),
         filter: {
           and: [
-            {
-              or: [
-                { not: { field: 'orchestrator.cluster.name', exists: true } },
-                { field: 'orchestrator.cluster.name', eq: '' },
-              ],
-            },
+            { not: { field: 'orchestrator.cluster.name', exists: true } },
             {
               or: [
                 { field: 'data_stream.dataset', eq: 'kubernetes.pod' },
@@ -432,9 +438,7 @@ describe('Kubernetes type KIs', () => {
       })
     );
     expect(missingCluster?.properties.list_query).toEqual(
-      expect.stringContaining(
-        'AND (orchestrator.cluster.name IS NULL OR orchestrator.cluster.name == "")'
-      )
+      expect.stringContaining('AND orchestrator.cluster.name IS NULL')
     );
     expect(missingCluster?.properties.list_query).not.toEqual(
       expect.stringContaining('orchestrator.cluster.name == "cluster-a"')
@@ -572,6 +576,13 @@ describe('host type KIs', () => {
       or: [nodeFeatures[0].filter, hostNodeFeature?.filter],
     });
     expect(byId.has('host:node-x')).toBe(false);
+    const hostQuery =
+      ENTITY_KEY_TABLE.find(({ id }) => id === 'metrics.hosts')?.buildQuery(
+        foldContext.sourceQuery
+      ) ?? '';
+    expect(hostQuery).toContain(
+      '| WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""'
+    );
   });
 });
 
@@ -860,9 +871,7 @@ describe('identifyMetricsEntities', () => {
       },
       {
         columns: workloadColumns,
-        values: [
-          ['cluster-a', 'deployment', 1, 3, '2026-11-10T12:00:00.000Z', ['payments/checkout']],
-        ],
+        values: [[null, 'deployment', 1, 3, '2026-11-10T12:00:00.000Z', ['payments/checkout']]],
       },
       { columns: namespaceColumns, values: [] },
       {
@@ -891,11 +900,13 @@ describe('identifyMetricsEntities', () => {
         uncoveredDatasetsCount: 0,
       })
     );
-    expect(getWrittenFeatures(harness.bulk).map(({ id }) => id)).toEqual([
+    const writtenFeatures = getWrittenFeatures(harness.bulk);
+    expect(writtenFeatures.map(({ id }) => id)).toEqual([
       'hosts:mixed-metrics',
       'services:mixed-metrics',
-      'k8s.deployments:cluster-a',
+      'k8s.deployments:mixed-metrics',
     ]);
+    expect(writtenFeatures.every(({ filter }) => isConditionComplete(filter))).toBe(true);
   });
 
   it('matches OTel Kubernetes rows without counting object-level datasets as uncovered', async () => {

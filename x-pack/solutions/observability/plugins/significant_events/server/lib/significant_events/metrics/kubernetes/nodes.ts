@@ -34,6 +34,7 @@ export const buildNodeQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
     AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_NODE_DATASETS)})
     AND kubernetes.node.name IS NOT NULL
+| WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""
 | STATS activity = COUNT(*), last_seen = MAX(@timestamp),
         os = VALUES(host.os.name), cloud_provider = VALUES(cloud.provider)
   BY orchestrator.cluster.name, kubernetes.node.name
@@ -61,8 +62,7 @@ export const foldNodeRows = (
   >();
   for (const row of rows) {
     const clusterValue = row['orchestrator.cluster.name'];
-    const cluster =
-      typeof clusterValue === 'string' && clusterValue.length > 0 ? clusterValue : undefined;
+    const cluster = typeof clusterValue === 'string' ? clusterValue : undefined;
     const clusterKey = cluster === undefined ? 'source' : `cluster:${cluster}`;
     const concept = conceptsByCluster.get(clusterKey) ?? {
       cluster,
