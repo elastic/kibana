@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isHuntEligibleIoc } from './hunt_eligible_ioc';
+import { isHuntEligibleIoc, isNonRoutableHuntIoc } from './hunt_eligible_ioc';
 
 describe('isHuntEligibleIoc', () => {
   it.each([
@@ -28,5 +28,44 @@ describe('isHuntEligibleIoc', () => {
 
   it('returns false when deferred_unreviewed is true even for a promotable tier', () => {
     expect(isHuntEligibleIoc({ tier: 'discriminating', deferred_unreviewed: true })).toBe(false);
+  });
+
+  it.each([
+    ['loopback with no tier', { type: 'ip', value: '127.0.0.1' }],
+    [
+      'loopback with discriminating tier',
+      { type: 'ip', value: '127.0.0.1', tier: 'discriminating' },
+    ],
+    ['RFC1918 with uncertain tier', { type: 'ip', value: '10.0.0.1', tier: 'uncertain' }],
+    ['link-local', { type: 'ip', value: '169.254.169.254', tier: 'contextual' }],
+    ['private CIDR', { type: 'cidr', value: '192.168.0.0/16', tier: 'discriminating' }],
+    ['IPv6 loopback', { type: 'ip', value: '::1', tier: 'uncertain' }],
+  ])('returns false for non-routable %s even when tier would otherwise qualify', (_label, ioc) => {
+    expect(isHuntEligibleIoc(ioc)).toBe(false);
+  });
+
+  it('returns true for a public IP with a missing tier', () => {
+    expect(isHuntEligibleIoc({ type: 'ip', value: '203.0.113.10' })).toBe(true);
+  });
+
+  it('returns true for a public IP with a promotable tier', () => {
+    expect(isHuntEligibleIoc({ type: 'ip', value: '198.51.100.20', tier: 'discriminating' })).toBe(
+      true
+    );
+  });
+});
+
+describe('isNonRoutableHuntIoc', () => {
+  it('returns false for non-ip types', () => {
+    expect(isNonRoutableHuntIoc({ type: 'domain', value: '127.0.0.1' })).toBe(false);
+    expect(isNonRoutableHuntIoc({ type: 'hash', value: 'a'.repeat(64) })).toBe(false);
+  });
+
+  it('returns true for a private CIDR network', () => {
+    expect(isNonRoutableHuntIoc({ type: 'cidr', value: '10.20.0.0/16' })).toBe(true);
+  });
+
+  it('returns false for a public CIDR network', () => {
+    expect(isNonRoutableHuntIoc({ type: 'cidr', value: '203.0.113.0/24' })).toBe(false);
   });
 });
