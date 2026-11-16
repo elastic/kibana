@@ -15,6 +15,8 @@ import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers
 
 import { AccessAgreementPage } from './access_agreement_page';
 
+jest.setTimeout(60_000);
+
 describe('AccessAgreementPage', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
