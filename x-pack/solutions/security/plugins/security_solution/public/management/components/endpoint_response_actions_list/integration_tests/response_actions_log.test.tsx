@@ -586,6 +586,62 @@ describe('Response actions history', () => {
       expect(expandedButtons).toEqual([1, 3, 5]);
     });
 
+    describe('and when used in the page view (details are kept in the URL)', () => {
+      let actionList: Awaited<ReturnType<typeof getActionListMock>>;
+
+      const getActionIdOnRow = (rowIndex: number): string => actionList.data[rowIndex].id;
+
+      beforeEach(async () => {
+        actionList = await getActionListMock({ actionCount: 13 });
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data: actionList,
+        });
+      });
+
+      it('should add `withOutputs` to the URL when a row is expanded and remove it when collapsed', async () => {
+        render({ isFlyout: false });
+        const { getAllByTestId, getByTestId, queryByTestId } = renderResult;
+        const secondRowId = getActionIdOnRow(1);
+
+        await user.click(getAllByTestId(`${testPrefix}-expand-button`)[1]);
+
+        expect(getByTestId(`${testPrefix}-details-tray`)).toBeTruthy();
+        expect(new URLSearchParams(history.location.search).get('withOutputs')).toEqual(
+          secondRowId
+        );
+
+        await user.click(getAllByTestId(`${testPrefix}-expand-button`)[1]);
+
+        expect(queryByTestId(`${testPrefix}-details-tray`)).toBeNull();
+        expect(new URLSearchParams(history.location.search).has('withOutputs')).toBe(false);
+      });
+
+      it('should show the row as expanded when the page loads with `withOutputs` in the URL', () => {
+        const fourthRowId = getActionIdOnRow(3);
+        reactTestingLibrary.act(() => {
+          history.push(`${MANAGEMENT_PATH}/response_actions_history?withOutputs=${fourthRowId}`);
+        });
+
+        render({ isFlyout: false });
+        const { getAllByTestId } = renderResult;
+
+        expect(getAllByTestId(`${testPrefix}-details-tray`)).toHaveLength(1);
+        const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+        expect(expandButtons[3].getAttribute('aria-label')).toEqual('Collapse');
+        expect(expandButtons[0].getAttribute('aria-label')).toEqual('Expand');
+      });
+
+      it('should not touch the URL when used in the flyout', async () => {
+        render({ isFlyout: true });
+        const { getAllByTestId } = renderResult;
+
+        await user.click(getAllByTestId(`${testPrefix}-expand-button`)[1]);
+
+        expect(history.location.search).not.toContain('withOutputs');
+      });
+    });
+
     it('should contain relevant details in each expanded row', async () => {
       render();
       const { getAllByTestId } = renderResult;
