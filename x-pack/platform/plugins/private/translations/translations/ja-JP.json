@@ -49551,7 +49551,6 @@
     "xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocButtonLabel": "アンインストール",
     "xpack.observabilityAiAssistantManagement.settingsTab.h3.searchConnectorIndexPatternLabel": "検索コネクターインデックスパターン",
     "xpack.observabilityAiAssistantManagement.span.expandRowLabel": "行を展開",
-    "xpack.observabilityAlerting.actions.investigateDisplayName": "調査",
     "xpack.observabilityAlerting.appTitle": "アラート",
     "xpack.observabilityAlerting.breadcrumbs.alerting": "アラート",
     "xpack.observabilityAlerting.breadcrumbs.observability": "Observability",

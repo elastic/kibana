@@ -49566,7 +49566,6 @@
     "xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocButtonLabel": "Desinstalar",
     "xpack.observabilityAiAssistantManagement.settingsTab.h3.searchConnectorIndexPatternLabel": "Padrão de indexação do conector de busca",
     "xpack.observabilityAiAssistantManagement.span.expandRowLabel": "Expandir linha",
-    "xpack.observabilityAlerting.actions.investigateDisplayName": "Investigar",
     "xpack.observabilityAlerting.appTitle": "Alertas",
     "xpack.observabilityAlerting.breadcrumbs.alerting": "Alertas",
     "xpack.observabilityAlerting.breadcrumbs.observability": "Observabilidade",

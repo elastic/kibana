@@ -49433,7 +49433,6 @@
     "xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocButtonLabel": "Deinstallieren",
     "xpack.observabilityAiAssistantManagement.settingsTab.h3.searchConnectorIndexPatternLabel": "Indexmuster für Search-Connectors",
     "xpack.observabilityAiAssistantManagement.span.expandRowLabel": "Zeile erweitern",
-    "xpack.observabilityAlerting.actions.investigateDisplayName": "Untersuchen",
     "xpack.observabilityAlerting.appTitle": "Alerting",
     "xpack.observabilityAlerting.breadcrumbs.alerting": "Alerting",
     "xpack.observabilityAlerting.breadcrumbs.observability": "Observability",
