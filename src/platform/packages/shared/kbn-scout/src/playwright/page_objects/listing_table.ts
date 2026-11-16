@@ -25,7 +25,7 @@ export class ListingTable {
   }
 
   async getAllItemsNames(): Promise<string[]> {
-    const links = this.table.locator(`${euiSelectors.basicTable.ROW_SELECTOR} .euiLink`);
+    const links = this.table.locator(euiSelectors.basicTable.ROW_SELECTOR).getByRole('link');
     return links.allTextContents();
   }
 
