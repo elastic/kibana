@@ -42,7 +42,8 @@ export const installAssistantAgent = async ({
       name: ASSISTANT_AGENT_NAME,
       description: ASSISTANT_AGENT_DESCRIPTION,
       labels: ['observability', 'nightshift', 'sandbox'],
-      avatar_symbol: 'NA',
+      avatar_symbol: '🌙',
+      avatar_color: '#050D1A',
       access_control: { access_mode: AgentAccessControlMode.Public },
       configuration: {
         tools: [],
