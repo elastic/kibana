@@ -1620,13 +1620,26 @@ describe('prepareMessages', () => {
       expect(result.some((msg) => String(msg.content).includes('<dynamic_tools>'))).toBe(false);
     });
 
-    it('renders no notice without a compaction summary', async () => {
+    it('renders the notice ahead of the history without a compaction summary', async () => {
       const result = await prepareMessages({
         conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
         dynamicToolDefinitions: [definition],
       });
 
-      expect(result.some((msg) => String(msg.content).includes('<dynamic_tools>'))).toBe(false);
+      // definitions notice + nextInput user
+      expect(result).toHaveLength(2);
+      expect(isHumanMessage(result[0])).toBe(true);
+      expect(result[0].content).toContain('<dynamic_tools>');
+      expect(result[0].content).toContain(JSON.stringify(definition));
+    });
+
+    it('renders no notice without a summary nor definitions', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
+        dynamicToolDefinitions: [],
+      });
+
+      expect(result).toHaveLength(1);
     });
   });
 });

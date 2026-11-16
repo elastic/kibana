@@ -118,8 +118,14 @@ export const renderVisibleContext = async (
   const view = buildContextView({ conversation, run, conversationTimestamp }, deps);
   // the answer agent has no tools, so it should not get dynamic tool definitions
   const notices = noticeRendererFor(conversation, { withToolDefinitions: phase === 'research' });
-  const dynamicToolDefinitions =
-    phase === 'research' ? run.compactionSummary?.dynamic_tools : undefined;
+  // The notice carries the summary's snapshot, then the bound tools no event announces that the
+  // snapshot does not already carry (a summary stored before bound tools were dynamic lacks them).
+  const snapshot = run.compactionSummary?.dynamic_tools ?? [];
+  const carried = new Set(snapshot.map((definition) => definition.tool_id));
+  const unannounced = (conversation.unannouncedBoundToolDefinitions ?? []).filter(
+    (definition) => !carried.has(definition.tool_id)
+  );
+  const dynamicToolDefinitions = phase === 'research' ? [...snapshot, ...unannounced] : undefined;
   const history = await prepareMessages({
     conversation,
     roundResultTransformer: view.historyTransformer,

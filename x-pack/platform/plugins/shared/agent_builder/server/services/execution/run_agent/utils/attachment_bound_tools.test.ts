@@ -383,4 +383,54 @@ describe('AttachmentBoundTools', () => {
       expect(registeredIds(toolManager)).toEqual(['bound.tool']);
     });
   });
+
+  describe('unannouncedDefinitions', () => {
+    it('renders the definitions of the active attachments no event announces', async () => {
+      const { boundTools } = setup();
+
+      const definitions = await boundTools.unannouncedDefinitions([]);
+
+      // a-1 is at version 2
+      expect(definitions).toEqual([
+        expect.objectContaining({ tool_id: 'bound.tool', description: 'for second' }),
+      ]);
+    });
+
+    it('leaves out an attachment an event announces at its current version', async () => {
+      const { boundTools } = setup();
+      const updated = createEvent(TimelineEventType.attachmentUpdated, {
+        previous_version: 1,
+        current_version: 2,
+        render_inline: true,
+      });
+
+      expect(await boundTools.unannouncedDefinitions([updated])).toEqual([]);
+    });
+
+    it('keeps an attachment only announced at an older version', async () => {
+      const { boundTools } = setup();
+
+      const definitions = await boundTools.unannouncedDefinitions([addedEvent(1)]);
+
+      expect(definitions.map((definition) => definition.description)).toEqual(['for second']);
+    });
+
+    it('leaves out an attachment that binds no tools', async () => {
+      const { service, format } = createAttachmentsService();
+      format.mockResolvedValue({ getBoundedTools: async () => [] });
+      const { boundTools } = setup({ service });
+
+      expect(await boundTools.unannouncedDefinitions([])).toEqual([]);
+    });
+
+    it('reuses the definitions prepare rendered', async () => {
+      const { service, format } = createAttachmentsService();
+      const { boundTools } = setup({ service });
+      await boundTools.prepare([addedEvent(2)]);
+
+      await boundTools.unannouncedDefinitions([]);
+
+      expect(format).toHaveBeenCalledTimes(1);
+    });
+  });
 });

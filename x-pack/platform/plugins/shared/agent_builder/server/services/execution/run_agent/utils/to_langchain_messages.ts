@@ -108,8 +108,10 @@ export interface ConversationToLangchainOptions {
    */
   compactionSummary?: CompactionSummary;
   /**
-   * Definitions of the dynamic tools still available, re-injected after the compaction summary
-   * since it hides the tool results that first carried them. Ignored without a summary.
+   * Definitions of the dynamic tools nothing in the history carries: after a compaction summary,
+   * the tools still available, since the summary hides the tool results that first carried them;
+   * without one, the tools bound to attachments no event announces. Rendered as a notice ahead of
+   * the history.
    */
   dynamicToolDefinitions?: DynamicToolDefinition[];
   /** What the summary leaves visible (see `resolveVisibility`); everything by default. */
@@ -153,6 +155,8 @@ export const prepareMessages = async ({
         dynamicToolDefinitions
       )
     );
+  } else if (dynamicToolDefinitions && dynamicToolDefinitions.length > 0) {
+    messages.push(createUserMessage(formatDynamicToolsNotice(dynamicToolDefinitions)));
   }
 
   const visibleEntries = entries.slice(visibility.hiddenEntryCount);

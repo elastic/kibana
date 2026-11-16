@@ -69,6 +69,12 @@ export interface ProcessedConversation {
    * chat agent run; absent on the paths that do not render attachment events.
    */
   boundToolDefinitions?: (event: AttachmentTimelineEvent) => DynamicToolDefinition[] | undefined;
+  /**
+   * The definitions of the tools bound to active attachments no event announces, so no event
+   * renders them: the attachments of a conversation stored before attachment events existed.
+   * Rendered in a notice ahead of the history.
+   */
+  unannouncedBoundToolDefinitions?: DynamicToolDefinition[];
   /** Where each resume's input attachments render: `prompt_response` id → the items its pause waited on. */
   resumeAnchors?: ResumeAnchors;
   attachmentStateManager: AttachmentStateManager;

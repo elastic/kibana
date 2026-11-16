@@ -457,6 +457,49 @@ describe('renderVisibleContext', () => {
       expect(text(messages)).toContain('SUMMARY_TEXT');
       expect(text(messages)).not.toContain('<dynamic_tools>');
     });
+
+    it('renders the unannounced bound tools ahead of the history without a summary', async () => {
+      const messages = await renderVisibleContext(
+        {
+          conversation: {
+            ...conversation(twoRoundTimeline()),
+            unannouncedBoundToolDefinitions: [definition('legacy-bound')],
+          },
+          run: run([]),
+          phase: 'research',
+        },
+        deps()
+      );
+      const rendered = text(messages);
+
+      expect(rendered.indexOf('<dynamic_tools>')).toBeLessThan(rendered.indexOf('FIRST_INPUT'));
+      expect(rendered).toContain('legacy-bound description');
+    });
+
+    it('adds the unannounced bound tools the summary snapshot does not carry', async () => {
+      const messages = await renderVisibleContext(
+        {
+          conversation: {
+            ...conversation(twoRoundTimeline()),
+            unannouncedBoundToolDefinitions: [
+              { ...definition('dynamic-1'), description: 'rendered again' },
+              definition('legacy-bound'),
+            ],
+          },
+          run: runWithSnapshot([definition('dynamic-1')]),
+          phase: 'research',
+        },
+        deps()
+      );
+      const rendered = text(messages);
+
+      // one notice: the snapshot's definition, then the one it lacks
+      expect((rendered.match(/<dynamic_tools>/g) ?? []).length).toBe(1);
+      expect(rendered.indexOf('dynamic-1 description')).toBeLessThan(
+        rendered.indexOf('legacy-bound description')
+      );
+      expect(rendered).not.toContain('rendered again');
+    });
   });
 });
 

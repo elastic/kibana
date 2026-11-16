@@ -73,6 +73,23 @@ const announcedVersion = (event: AttachmentTimelineEvent): number | undefined =>
 
 const versionKey = (attachmentId: string, version: number): string => `${attachmentId}@${version}`;
 
+/** The attachment versions the events announce, by key. */
+const announcedVersions = (
+  events: readonly AttachmentTimelineEvent[]
+): Map<string, { attachmentId: string; version: number }> => {
+  const announced = new Map<string, { attachmentId: string; version: number }>();
+  for (const event of events) {
+    const version = announcedVersion(event);
+    if (version !== undefined) {
+      announced.set(versionKey(event.data.attachment_id, version), {
+        attachmentId: event.data.attachment_id,
+        version,
+      });
+    }
+  }
+  return announced;
+};
+
 export interface AttachmentBoundToolsOptions {
   attachmentStateManager: AttachmentStateManager;
   attachmentsService: AttachmentsService;
@@ -106,21 +123,11 @@ export class AttachmentBoundTools {
 
   /** Resolves the definitions of the events that carry them; call before rendering the events. */
   async prepare(events: readonly AttachmentTimelineEvent[]): Promise<void> {
-    const pending = new Map<string, { attachmentId: string; version: number }>();
-    for (const event of events) {
-      const version = announcedVersion(event);
-      if (version === undefined) {
-        continue;
-      }
-      const key = versionKey(event.data.attachment_id, version);
-      if (!this.definitions.has(key)) {
-        pending.set(key, { attachmentId: event.data.attachment_id, version });
-      }
-    }
+    const announcedAttachmentVersions = announcedVersions(events).values();
     await Promise.all(
-      [...pending].map(async ([key, { attachmentId, version }]) => {
-        this.definitions.set(key, await this.render(attachmentId, version));
-      })
+      announcedAttachmentVersions.map(({ attachmentId, version }) =>
+        this.resolveVersionDefinitions(attachmentId, version)
+      )
     );
   }
 
@@ -130,6 +137,42 @@ export class AttachmentBoundTools {
     return version === undefined
       ? undefined
       : this.definitions.get(versionKey(event.data.attachment_id, version));
+  }
+
+  /**
+   * The definitions of the tools bound to the active attachments that no event in `events`
+   * announces at their current version. A conversation stored before attachment events existed
+   * carries its attachments on its messages, with no event to render their definitions after.
+   */
+  async unannouncedDefinitions(
+    events: readonly AttachmentTimelineEvent[]
+  ): Promise<DynamicToolDefinition[]> {
+    const announced = announcedVersions(events);
+    const unannounced = this.options.attachmentStateManager
+      .getActive()
+      .filter(
+        (attachment) => !announced.has(versionKey(attachment.id, attachment.current_version))
+      );
+    const definitions = await Promise.all(
+      unannounced.map((attachment) =>
+        this.resolveVersionDefinitions(attachment.id, attachment.current_version)
+      )
+    );
+    return definitions.flatMap((rendered) => rendered ?? []);
+  }
+
+  private async resolveVersionDefinitions(
+    attachmentId: string,
+    version: number
+  ): Promise<DynamicToolDefinition[] | undefined> {
+    const key = versionKey(attachmentId, version);
+    if (!this.definitions.has(key)) {
+      const definition = await this.render(attachmentId, version);
+      if (definition) {
+        this.definitions.set(key, definition);
+      }
+    }
+    return this.definitions.get(key);
   }
 
   /** Registers the tools bound to the active attachments and removes the ones no longer bound. */

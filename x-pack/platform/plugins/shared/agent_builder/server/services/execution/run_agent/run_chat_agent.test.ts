@@ -83,6 +83,7 @@ jest.mock('./utils/image_resolver', () => ({
 const mockAttachmentBoundTools = {
   prepare: jest.fn(),
   get: jest.fn(),
+  unannouncedDefinitions: jest.fn().mockResolvedValue([]),
   sync: jest.fn(),
 };
 jest.mock('./utils/attachment_bound_tools', () => ({
@@ -1802,6 +1803,20 @@ describe('runDefaultAgentMode attachment bound tools', () => {
     expect(prepare.mock.invocationCallOrder[0]).toBeLessThan(
       createPromptFactoryMock.mock.invocationCallOrder[0]
     );
+  });
+
+  it('carries the definitions of the attachments no event announces', async () => {
+    const timelineEvent = attachmentEventFixture({ id: 'att' });
+    const legacyDefinition: DynamicToolDefinition = { ...definition, tool_id: 'legacy.bound' };
+    mockAttachmentBoundTools.unannouncedDefinitions.mockResolvedValueOnce([legacyDefinition]);
+
+    const { processedConversation } = await run({ timeline: [timelineEvent] });
+
+    expect(mockAttachmentBoundTools.unannouncedDefinitions).toHaveBeenCalledWith([
+      timelineEvent,
+      expect.objectContaining({ data: expect.objectContaining({ source: 'chat_input' }) }),
+    ]);
+    expect(processedConversation.unannouncedBoundToolDefinitions).toEqual([legacyDefinition]);
   });
 
   it('syncs the bound tools into the registry after the restored dynamic tools', async () => {

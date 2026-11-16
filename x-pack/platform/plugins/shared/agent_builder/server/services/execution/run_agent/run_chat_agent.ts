@@ -24,6 +24,7 @@ import {
   AgentExecutionMode,
   EventActorType,
   parseExecutionId,
+  isAttachmentEvent,
   platformCoreTools,
   unreadSettledSteerIds,
 } from '@kbn/agent-builder-common';
@@ -337,6 +338,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     ...chatInputEvents,
   ]);
   processedConversation.boundToolDefinitions = (event) => attachmentBoundTools.get(event);
+  // A conversation stored before attachment events existed carries its attachments on its
+  // messages: no event renders their definitions, so a notice ahead of the history does.
+  processedConversation.unannouncedBoundToolDefinitions =
+    await attachmentBoundTools.unannouncedDefinitions([
+      ...processedConversation.timeline.filter(isAttachmentEvent),
+      ...chatInputEvents,
+    ]);
 
   // Started before the tool setup so a 'first' hook overlaps it, as the skill selection below does.
   const cycleHooks = new CycleHookRuntime({
