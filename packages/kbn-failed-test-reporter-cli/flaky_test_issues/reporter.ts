@@ -36,6 +36,14 @@ import {
   type IssueMatch,
   type MatchedIssue,
 } from './match_issues';
+import {
+  distinctIssues,
+  closeReplacedIssues,
+  isOpenPerTestIssue,
+  replacedIssuesByTest,
+  listReplacedIssues,
+  withPreviouslyTracked,
+} from './replace_per_test_issues';
 import { isPullRequestRef } from './markdown';
 import { isSkippedTest, skippedBranches } from './skipped';
 import { groupIntoSuites, type FlakySuite } from './suites';
@@ -86,6 +94,13 @@ export interface ReportFlakySuiteIssuesOptions {
    * comment) before it can get another comment. Failures in between are covered by the next one.
    */
   commentCooldownDays: number;
+  /**
+   * Replace the open per-test issues of `githubRepo` with suite issues, once CI no longer updates
+   * them: they stop counting as tracking their test, and those about a suite's flaky tests are
+   * closed as duplicates of the suite's issue once it is filed or refreshed, a refresh naming them
+   * in a comment right away. Issues labelled `skipped-test` are left open.
+   */
+  replacePerTestIssues: boolean;
   dryRun: boolean;
 }
 
@@ -102,10 +117,11 @@ export type SkipReason =
   /** The suite has no issue, but this run already created `maxNewIssues`. */
   | 'max-new-issues'
   /**
-   * Every test of the suite has an issue in `githubRepo`: a per-test issue about it, or an issue
-   * about the suite or its file, open or closed after the test last failed. A single test without
-   * one gets the suite its issue. A suite issue of its own is refreshed instead, unless it already
-   * has this report, or is closed and the suite has not failed since.
+   * Every test of the suite has an issue in `githubRepo`: a per-test issue about it (an open one
+   * only when not replacing them), or an issue about the suite or its file, open or closed
+   * after the test last failed. A single test without one gets the suite its issue. A suite issue
+   * of its own is refreshed instead, unless it already has this report, or is closed and the suite
+   * has not failed since.
    */
   | 'tracked'
   /** Same, for the tracking repository. */
@@ -126,9 +142,20 @@ export type FlakySuiteAction = SuiteRef &
         issue: IssueRef;
         /** Closed issues about its tests that no longer counted (`isSuperseded`). */
         supersedes?: IssueRef[];
+        /** Per-test issues about its tests closed as its duplicates (`replacePerTestIssues`). */
+        replaced?: IssueRef[];
       }
-    /** The suite's own issue recorded this report; `commented` with its numbers on new failures. */
-    | { action: 'updated'; issue: IssueRef; commented: boolean; reopened: boolean }
+    /**
+     * The suite's own issue recorded this report; `commented` with its numbers on new failures, or
+     * to name the per-test issues it replaced.
+     */
+    | {
+        action: 'updated';
+        issue: IssueRef;
+        commented: boolean;
+        reopened: boolean;
+        replaced?: IssueRef[];
+      }
     | { action: 'skipped'; reason: SkipReason; issue?: IssueRef; match?: IssueMatch }
     | { action: 'failed'; attempted: 'create' | 'update'; error: string; issue?: IssueRef }
   );
@@ -239,26 +266,36 @@ const isSuperseded = (matched: MatchedIssue, test: FlakySuite): boolean => {
 interface Coverage {
   /**
    * The issue standing in for the suite when every one of its tests has one in the index: an
-   * issue about the suite or its file covers them all, a per-test issue only its own test.
-   * Undefined as soon as a test has none, that test deserves the suite issue.
+   * issue about the suite or its file covers them all, a per-test issue only its own test, unless
+   * it is replaced. Undefined as soon as a test has none, that test deserves the suite issue.
    */
   tracked?: MatchedIssue;
   /** Issues about one of the tests that no longer count (`isSuperseded`), strongest first. */
   superseded: MatchedIssue[];
+  /** The numbers of `superseded`, by the id of the test each is about. */
+  supersededByTest: Map<string, number[]>;
 }
 
-const coverage = (suite: FlakySuite, index: IssueIndex): Coverage => {
+const coverage = (suite: FlakySuite, index: IssueIndex, replacing: boolean): Coverage => {
   const covering: MatchedIssue[] = [];
   const superseded = new Map<number, MatchedIssue>();
+  const supersededByTest = new Map<string, number[]>();
   let uncovered = false;
   for (const test of suite.tests) {
     const single = { ...suite, tests: [test] };
     const counting = findMatchingIssues(single, candidateIssues(single, index)).filter(
       (matched) => {
+        if (replacing && isOpenPerTestIssue(matched)) {
+          return false;
+        }
         if (!isTracking(matched) || !isSuperseded(matched, single)) {
           return true;
         }
         superseded.set(matched.issue.number, matched);
+        supersededByTest.set(test.testId, [
+          ...(supersededByTest.get(test.testId) ?? []),
+          matched.issue.number,
+        ]);
         return false;
       }
     );
@@ -273,6 +310,7 @@ const coverage = (suite: FlakySuite, index: IssueIndex): Coverage => {
   return {
     ...(uncovered ? {} : { tracked: strongestTracking(distinct.sort(compareMatches)) }),
     superseded: [...superseded.values()].sort(compareMatches),
+    supersededByTest,
   };
 };
 
@@ -398,9 +436,11 @@ export const issueLabels = (suite: Pick<FlakySuite, 'owners'>, githubRepo: strin
  * its tests has an issue, in `githubRepo` or in the tracking repository, open or closed after the
  * test last failed: an issue about the suite or its file covers them all, a per-test issue only
  * its own test. Issues about some of the tests, or merely mentioning the file, are linked from
- * the new issue instead, and so are the closed ones it takes over from. With `updateIssues`, a
- * suite tracked by its own issue in `githubRepo` has that issue refreshed. A failed write is
- * recorded and the run goes on with the next suite.
+ * the new issue instead, and so are the closed ones it replaces. With `updateIssues`, a
+ * suite tracked by its own issue in `githubRepo` has that issue refreshed. With
+ * `replacePerTestIssues`, the open per-test issues of `githubRepo` don't count, and are closed as
+ * duplicates of the suite's issue once it is filed or refreshed. A failed write is recorded and
+ * the run goes on with the next suite.
  */
 export const reportFlakySuiteIssues = async (
   options: ReportFlakySuiteIssuesOptions
@@ -415,6 +455,7 @@ export const reportFlakySuiteIssues = async (
     omitSkippedTests,
     updateIssues,
     commentCooldownDays,
+    replacePerTestIssues,
     dryRun,
   } = options;
   const omitted = omitSkippedTests ? report.flaky.filter(isSkippedTest) : [];
@@ -449,7 +490,8 @@ export const reportFlakySuiteIssues = async (
     const fetched = await fetchFailedTestIssues(upstream, closedSince, log);
     const upstreamIndex = indexIssues(fetched.issues.map(describeIssue));
     tracking = { repo: upstream.repo, open: fetched.open, closed: fetched.closed };
-    trackedUpstream = (suite) => coverage(suite, upstreamIndex).tracked;
+    // never written to, so its per-test issues can't be replaced and keep counting
+    trackedUpstream = (suite) => coverage(suite, upstreamIndex, false).tracked;
   }
 
   const actions: FlakySuiteAction[] = [];
@@ -469,8 +511,37 @@ export const reportFlakySuiteIssues = async (
     record({ action: 'skipped', ...suiteRef(suite), reason: 'all-tests-skipped' });
   }
 
-  /** The superseded issues are linked as such, the other matches as possibly related. */
-  const create = async (suite: FlakySuite, related: MatchedIssue[], superseded: MatchedIssue[]) => {
+  /** The open per-test issues the suite's issue replaces, by test, when replacing them. */
+  const perTestIssuesOf = (suite: FlakySuite): Map<string, GithubIssue[]> =>
+    replacePerTestIssues ? replacedIssuesByTest(suite, index) : new Map();
+
+  const issuesOf = (byTest: Map<string, GithubIssue[]>): GithubIssue[] =>
+    distinctIssues([...byTest.values()].flat());
+
+  /** Closes the issues as duplicates of the suite's issue; those closed, for its action. */
+  const closeReplaced = async (
+    suiteIssue: { number: number; id: number },
+    perTest: readonly GithubIssue[]
+  ): Promise<{ replaced?: IssueRef[] }> => {
+    const replaced = await closeReplacedIssues({
+      github,
+      log,
+      dryRun,
+      issues: perTest,
+      suiteIssue,
+    });
+    return replaced.length > 0 ? { replaced: replaced.map((issue) => issueRef(issue)) } : {};
+  };
+
+  /**
+   * The superseded and replaced issues are named next to their test as previously tracking the
+   * suite, the other matches linked as possibly related.
+   */
+  const create = async (
+    suite: FlakySuite,
+    related: MatchedIssue[],
+    { superseded, supersededByTest }: Pick<Coverage, 'superseded' | 'supersededByTest'>
+  ) => {
     const ref = suiteRef(suite);
     if (counts.created >= maxNewIssues) {
       log.info(`skip, ${maxNewIssues} issues already created this run: ${describeSuite(suite)}`);
@@ -478,20 +549,32 @@ export const reportFlakySuiteIssues = async (
       return;
     }
     const title = flakySuiteIssueTitle(suite);
-    const supersededNumbers = superseded.map(({ issue }) => issue.number);
+    const perTest = perTestIssuesOf(suite);
+    const replacing = issuesOf(perTest);
+    const previousIssues = new Map<string, number[]>();
+    for (const { testId } of suite.tests) {
+      const numbers = new Set([
+        ...(supersededByTest.get(testId) ?? []),
+        ...(perTest.get(testId) ?? []).map(({ number }) => number),
+      ]);
+      if (numbers.size > 0) {
+        previousIssues.set(testId, [...numbers]);
+      }
+    }
+    const previousNumbers = [...new Set([...previousIssues.values()].flat())];
     const body = renderFlakySuiteIssueBody(suite, {
       report,
       relatedIssues: related
         .map(({ issue }) => issue.number)
-        .filter((number) => !supersededNumbers.includes(number)),
-      supersededIssues: supersededNumbers,
+        .filter((number) => !previousNumbers.includes(number)),
+      previousIssues,
     });
     try {
       const created = await github.createIssue(title, body, issueLabels(suite, githubRepo));
       log.info(
         `created #${created.number} ${created.html_url}: ${describeSuite(suite)}` +
-          (superseded.length > 0
-            ? ` (previously tracked in ${supersededNumbers.map((n) => `#${n}`).join(', ')})`
+          (previousNumbers.length > 0
+            ? ` (previously tracked in ${previousNumbers.map((n) => `#${n}`).join(', ')})`
             : '')
       );
       // Later suites of this run match against it too, an untitled suite's issue covers its file
@@ -503,6 +586,7 @@ export const reportFlakySuiteIssues = async (
         ...(superseded.length > 0
           ? { supersedes: superseded.map(({ issue }) => issueRef(issue)) }
           : {}),
+        ...(await closeReplaced(created, replacing)),
       });
     } catch (error) {
       log.error(`failed to create an issue for ${describeSuite(suite)}: ${errorMessage(error)}`);
@@ -514,36 +598,52 @@ export const reportFlakySuiteIssues = async (
    * Metadata first. The body's text stays as filed, this report's numbers go in the
    * comment. A comment that then fails is not retried: the metadata already records it, so the
    * next qualifying report comments instead. Recording it after the comment would take another
-   * edit, and a failure there would mean a duplicate comment rather than a missed one.
+   * edit, and a failure there would mean a duplicate comment rather than a missed one. The
+   * per-test issues of the suites refreshed join the body's "Previously tracked in" line, and the
+   * comment names them, posted for them even when none is due. They are closed last, in favor of
+   * the issue as now open: one left open by a comment that failed is named by the next run.
    */
   const update = async (
     suite: FlakySuite,
     issue: GithubIssue,
-    { previous, comment, reopen }: Refresh,
+    { previous, comment: due, reopen }: Refresh,
     members: readonly FlakySuite[] = [suite]
   ) => {
     const recordEach = (action: (ref: SuiteRef) => FlakySuiteAction) =>
       members.forEach((member) => record(action(suiteRef(member))));
-    const body = refreshFlakySuiteIssueMetadata(issue.body, suite, { report, previous, comment });
+    const replacing = members.map((member) => issuesOf(perTestIssuesOf(member)));
+    const replaced = distinctIssues(replacing.flat()).map(({ number }) => number);
+    const comment = due || replaced.length > 0;
+    const body = refreshFlakySuiteIssueMetadata(listReplacedIssues(issue.body, replaced), suite, {
+      report,
+      previous,
+      comment,
+    });
     try {
       await github.editIssue(issue.number, { body, ...(reopen ? { state: 'open' } : {}) });
       if (comment) {
         await github.addIssueComment(
           issue.number,
-          renderFlakySuiteIssueComment(suite, { report, reopened: reopen, previous })
+          withPreviouslyTracked(
+            renderFlakySuiteIssueComment(suite, { report, reopened: reopen, previous }),
+            replaced
+          )
         );
       }
       log.info(
         `${reopen ? 'reopened' : 'updated'} #${issue.number}${comment ? ' with a comment' : ''}: ` +
           describeSuite(suite)
       );
-      recordEach((ref) => ({
-        action: 'updated',
-        ...ref,
-        issue: { ...issueRef(issue), state: 'open' },
-        commented: comment,
-        reopened: reopen,
-      }));
+      for (const [position, member] of members.entries()) {
+        record({
+          action: 'updated',
+          ...suiteRef(member),
+          issue: { ...issueRef(issue), state: 'open' },
+          commented: comment,
+          reopened: reopen,
+          ...(await closeReplaced(issue, replacing[position])),
+        });
+      }
     } catch (error) {
       log.error(
         `failed to update #${issue.number} for ${describeSuite(suite)}: ${errorMessage(error)}`
@@ -577,7 +677,7 @@ export const reportFlakySuiteIssues = async (
     }
     const ref = suiteRef(suite);
     const matches = findMatchingIssues(suite, candidateIssues(suite, index));
-    const { tracked, superseded } = coverage(suite, index);
+    const { tracked, ...supersededIssues } = coverage(suite, index, replacePerTestIssues);
     const own = updateIssues ? refreshedIssue(suite, matches) : undefined;
     if (own) {
       const members = isWholeFileIssue(own.issue) ? suitesSharing(suite, own.issue) : [suite];
@@ -614,7 +714,7 @@ export const reportFlakySuiteIssues = async (
       continue;
     }
     // Issues that merely mention the file are not about the suite; they are linked, not updated
-    await create(suite, matches, superseded);
+    await create(suite, matches, supersededIssues);
   }
 
   return {
