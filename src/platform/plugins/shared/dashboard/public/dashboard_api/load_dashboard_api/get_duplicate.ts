@@ -20,7 +20,7 @@ export interface CachedPanel {
 
 export type PanelsCache = Map<string, CachedPanel[]>;
 
-/** Returns the existing grid, section, or pinned panel that the incoming embeddable duplicates, if any. */
+/** Returns the existing grid or pinned panel that the incoming embeddable duplicates, if any. */
 export const getDuplicate = async (
   embeddable: EmbeddablePackageState,
   initialState: Pick<DashboardState, 'panels' | 'pinned_panels'>,
@@ -40,10 +40,11 @@ export const getDuplicate = async (
 
     let panels = cache.get(type);
     if (!panels) {
+      // Incoming panels are placed at the top level, so panels scoped to a section are not valid duplicate targets.
       panels = [
         ...(initialState.pinned_panels ?? []),
         ...(initialState.panels ?? []).flatMap((widget) =>
-          isDashboardSection(widget) ? widget.panels : [widget]
+          isDashboardSection(widget) ? [] : [widget]
         ),
       ]
         .filter((panel) => panel.type === type)
