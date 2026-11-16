@@ -19,13 +19,13 @@ import { Graph, type GraphProps } from '../graph/graph';
 import {
   GRAPH_ID,
   GRAPH_ENTITY_NODE_ID,
-  GRAPH_LABEL_NODE_ID,
+  GRAPH_EVENT_NODE_ID,
   GRAPH_RELATIONSHIP_NODE_ID,
   GRAPH_STACK_NODE_ID,
   GRAPH_EDGE_ID,
   GRAPH_MINIMAP_ID,
   GRAPH_MINIMAP_ENTITY_NODE_ID,
-  GRAPH_MINIMAP_LABEL_NODE_ID,
+  GRAPH_MINIMAP_EVENT_NODE_ID,
   GRAPH_MINIMAP_RELATIONSHIP_NODE_ID,
   GRAPH_MINIMAP_UNKNOWN_NODE_ID,
 } from '../test_ids';
@@ -214,7 +214,7 @@ describe('Minimap integrated with Graph', () => {
     await waitFor(() => {
       // Check Graph has expected nodes
       // 5 entity nodes: A, B, C, D, E
-      // 3 label nodes: IndividualLabel, StackedLabel1, StackedLabel2
+      // 3 event nodes: IndividualLabel, StackedLabel1, StackedLabel2
       // 2 relationship nodes: Owns, Communicates_with
       // 1 stack node: Stack(StackedLabel1, StackedLabel2)
       // 12 edges:
@@ -227,8 +227,8 @@ describe('Minimap integrated with Graph', () => {
       //   A->Communicates_with, Communicates_with->E
       const graphEntityNodes = screen.getAllByTestId(GRAPH_ENTITY_NODE_ID);
       expect(graphEntityNodes).toHaveLength(5);
-      const graphLabelNodes = screen.getAllByTestId(GRAPH_LABEL_NODE_ID);
-      expect(graphLabelNodes).toHaveLength(3);
+      const graphEventNodes = screen.getAllByTestId(GRAPH_EVENT_NODE_ID);
+      expect(graphEventNodes).toHaveLength(3);
       const graphRelationshipNodes = screen.getAllByTestId(GRAPH_RELATIONSHIP_NODE_ID);
       expect(graphRelationshipNodes).toHaveLength(2);
       const graphStackNodes = screen.getAllByTestId(GRAPH_STACK_NODE_ID);
@@ -241,15 +241,15 @@ describe('Minimap integrated with Graph', () => {
       const minimapEntityNodes = screen.getAllByTestId(GRAPH_MINIMAP_ENTITY_NODE_ID);
       expect(minimapEntityNodes).toHaveLength(graphEntityNodes.length); // 5
 
-      const minimapLabelNodes = screen.getAllByTestId(GRAPH_MINIMAP_LABEL_NODE_ID);
-      expect(minimapLabelNodes).toHaveLength(graphLabelNodes.length); // 3
+      const minimapEventNodes = screen.getAllByTestId(GRAPH_MINIMAP_EVENT_NODE_ID);
+      expect(minimapEventNodes).toHaveLength(graphEventNodes.length); // 3
 
       const minimapRelationshipNodes = screen.getAllByTestId(GRAPH_MINIMAP_RELATIONSHIP_NODE_ID);
       expect(minimapRelationshipNodes).toHaveLength(graphRelationshipNodes.length); // 2
 
       const minimap = screen.getByTestId(GRAPH_MINIMAP_ID);
       const totalMinimapNodes =
-        minimapEntityNodes.length + minimapLabelNodes.length + minimapRelationshipNodes.length;
+        minimapEntityNodes.length + minimapEventNodes.length + minimapRelationshipNodes.length;
       expect(totalMinimapNodes).toBe(10); // 5 entity + 3 label + 2 relationship
       expect(minimap?.querySelector('svg')?.querySelectorAll('title')).toHaveLength(1);
       expect(minimap?.querySelector('svg')?.querySelectorAll('path')).toHaveLength(1);
@@ -260,12 +260,12 @@ describe('Minimap integrated with Graph', () => {
     });
   });
 
-  it('should render unknown-type nodes with fallback shape', async () => {
+  it('should render unknown-type nodes with fallback kind', async () => {
     renderGraph({
       nodes: [
         {
           id: 'unknown',
-          shape: 'unknown' as unknown as NodeViewModel['shape'],
+          kind: 'unknown' as unknown as NodeViewModel['kind'],
           color: 'primary',
         },
       ] as NodeViewModel[],
@@ -289,7 +289,7 @@ describe('Minimap integrated with Graph', () => {
 
     await waitFor(() => {
       const minimapEntityNodes = screen.getAllByTestId(GRAPH_MINIMAP_ENTITY_NODE_ID);
-      const minimapLabelNodes = screen.getAllByTestId(GRAPH_MINIMAP_LABEL_NODE_ID);
+      const minimapEventNodes = screen.getAllByTestId(GRAPH_MINIMAP_EVENT_NODE_ID);
       const minimapRelationshipNodes = screen.getAllByTestId(GRAPH_MINIMAP_RELATIONSHIP_NODE_ID);
 
       // Verify Minimap entity nodes have the correct dimensions (but scaled down)
@@ -301,16 +301,16 @@ describe('Minimap integrated with Graph', () => {
         )
       ).toBe(true);
 
-      // Verify Minimap label nodes have the correct dimensions (but scaled down)
+      // Verify Minimap event nodes have the correct dimensions (but scaled down)
       expect(
-        minimapLabelNodes.every(
+        minimapEventNodes.every(
           (node) =>
             node.getAttribute('width') === NODE_LABEL_WIDTH.toString() &&
             node.getAttribute('height') === NODE_LABEL_HEIGHT.toString()
         )
       ).toBe(true);
 
-      // Verify Minimap relationship nodes have the same dimensions as label nodes
+      // Verify Minimap relationship nodes have the same dimensions as event nodes
       expect(
         minimapRelationshipNodes.every(
           (node) =>

@@ -6,7 +6,7 @@
  */
 
 import type { ESQLColumn } from '@kbn/es-types';
-import type { ESQLValue, InventoryRow } from './types';
+import type { ESQLValue, InventoryRow } from '../../../common';
 
 export const esqlResultsToRows = (columns: ESQLColumn[], values: ESQLValue[][]): InventoryRow[] =>
   values.map((cells) => Object.fromEntries(columns.map(({ name }, index) => [name, cells[index]])));

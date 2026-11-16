@@ -105,6 +105,8 @@ steps:
       evaluator_set: reference_based
       evaluators:
         - name: nightshift_alert_outcome_rca_accuracy
+        - name: nightshift_alert_outcome_benign_classification
+        - name: nightshift_alert_outcome_rca_reporting_gap
       investigation_started_at: '{{ inputs.investigation_started_at }}'
       investigation_ended_at: '${{ inputs.investigation_ended_at }}'
       investigation_execution_id: '${{ inputs.investigation_execution_id }}'

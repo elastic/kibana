@@ -8,8 +8,10 @@
  */
 
 import { createHash } from 'node:crypto';
+import { setImmediate as yieldToEventLoop } from 'node:timers/promises';
 import pMap from 'p-map';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { DEFAULT_RETRY_DELAY_MS, delayMs, isElasticsearchWriteConflict } from '@kbn/occ';
 import { requiresDelegatedIdentity, toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
@@ -23,29 +25,101 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
+  ManagedWorkflowInstallFailure,
+  ManagedWorkflowInstallManyResult,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallManyItem,
   ManagedWorkflowServiceInstallOptions,
   ManagedWorkflowStatus,
   ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import { updateYamlField } from '@kbn/workflows-yaml';
+import { updateYamlField, WorkflowConflictError } from '@kbn/workflows-yaml';
+import {
+  MANAGED_INSTALL_BULK_MAX_BYTES,
+  MANAGED_INSTALL_BULK_MAX_DOCUMENTS,
+} from './managed_install_limits';
 import type { WorkflowCrudService } from './workflow_crud_service';
-import type { ManagedWorkflowOrphan } from './workflow_occ_types';
-import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
+import type {
+  ManagedWorkflowOrphan,
+  VersionedWorkflowDocument,
+  WorkflowDocumentBulkWriteResult,
+} from './workflow_occ_types';
+import {
+  WorkflowChangeHistoryAction,
+  type WorkflowChangeHistoryActionType,
+} from '../../common/lib/workflow_change_history/constants';
 import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
 import { WorkflowRequiresDelegatedIdentityError } from '../api/workflow_requires_delegated_identity_error';
+import { chunkByCountAndBytes } from '../lib/chunk_by_count_and_bytes';
 import { applyWorkflowVersion } from '../lib/workflow_version';
 import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
+/** Wait before retrying writes Elasticsearch rejected as too busy, times the attempt number. */
+const MANAGED_INSTALL_REJECTED_RETRY_DELAY_MS = 1000;
 const ORPHAN_DELETE_CONCURRENCY = 10;
+const MAX_ORPHAN_DELETE_RETRIES = 2;
 
 const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
 };
+
+const hasTemplateValues = (
+  values: ManagedWorkflowTemplateValues | null | undefined
+): values is ManagedWorkflowTemplateValues => values != null && Object.keys(values).length > 0;
+
+const toError = (error: unknown): Error =>
+  error instanceof Error ? error : new Error(String(error));
+
+type ManagedInstallPlan =
+  | { action: 'skip' }
+  | {
+      action: 'create';
+      yaml: string;
+      managedTemplateValues: ManagedWorkflowTemplateValues | null;
+      definitionHash: string;
+    }
+  | {
+      action: 'update';
+      yaml: string;
+      managedTemplateValues: ManagedWorkflowTemplateValues | null;
+      definitionHash: string;
+      stored: VersionedWorkflowDocument;
+    };
+
+/** A batch item resolved to its definition, workflow document and space. */
+interface ManagedInstallTarget {
+  id: ManagedWorkflowId;
+  definition: ManagedWorkflowDefinition;
+  workflowDocumentId: string;
+  spaceId: string;
+  values?: ManagedWorkflowTemplateValues;
+}
+
+/** A workflow to write again: it lost a concurrent write, or Elasticsearch rejected it as too busy. */
+interface ManagedInstallRetry {
+  target: ManagedInstallTarget;
+  /** Set when Elasticsearch rejected the write (429); unset after a conflict. */
+  rejection?: Error;
+}
+
+interface ManagedInstallWrite {
+  target: ManagedInstallTarget;
+  document: WorkflowProperties;
+  /** The stored document an update replaces; undefined for a create. */
+  stored?: VersionedWorkflowDocument;
+}
+
+/** What one batch install did, for its summary log line. */
+interface ManagedInstallStats {
+  created: number;
+  updated: number;
+  skipped: number;
+  bulkRequests: number;
+}
 
 interface ManagedWorkflowsServiceDeps {
   crudService: WorkflowCrudService;
@@ -53,6 +127,8 @@ interface ManagedWorkflowsServiceDeps {
   logger: Logger;
   /** When true, abort before primary ES writes (plugin stop mid-install). */
   isStopping?: () => boolean;
+  /** Wait before a batch install retries, for conflicts and rejections alike. Tests set it to 0. */
+  retryDelayMs?: number;
   audit?: Pick<
     WorkflowManagementAuditLog,
     'logWorkflowCreated' | 'logWorkflowUpdated' | 'logWorkflowDeleted'
@@ -213,7 +289,6 @@ export class ManagedWorkflowsService {
 
     const isStartupWindow = !this.readyPluginIds.has(registeredPluginId);
     const now = new Date();
-    const definitionHash = this.computeManagedDefinitionHash(definition);
     const existingDocument = await this.deps.crudService.getWorkflowDocumentWithVersion(
       workflowDocumentId,
       spaceId
@@ -230,13 +305,21 @@ export class ManagedWorkflowsService {
       );
       return;
     }
-    const { yaml, managedTemplateValues } = this.resolveManagedWorkflowYaml({
+    const plan = this.planManagedInstall({
+      id,
       definition,
+      workflowDocumentId,
       values: options.values,
-      existingTemplateValues: existing?.managedTemplateValues,
+      stored: existingDocument ?? undefined,
+      isStartupWindow,
     });
 
-    if (!existing) {
+    if (plan.action === 'skip') {
+      return;
+    }
+
+    const { yaml, managedTemplateValues, definitionHash } = plan;
+    if (plan.action === 'create') {
       if (this.shouldAbortManagedWrite(`install create '${id}'`)) {
         // Never wrote — untrack so a *complete* later pass can orphan-clean; mark incomplete
         // so ready() this boot does not delete other still-desired docs.
@@ -244,7 +327,7 @@ export class ManagedWorkflowsService {
         this.markInstallIncomplete(registeredPluginId);
         return;
       }
-      const document = await this.prepareManagedWorkflowDocument({
+      const documentWithVersion = await this.buildManagedInstallDocument({
         definition,
         workflowDocumentId,
         yaml,
@@ -253,7 +336,6 @@ export class ManagedWorkflowsService {
         spaceId,
         now,
       });
-      const documentWithVersion = applyWorkflowVersion(document, undefined);
       if (this.shouldAbortManagedWrite(`install create '${id}'`)) {
         this.untrackInstall(registeredPluginId, workflowDocumentId, spaceId);
         this.markInstallIncomplete(registeredPluginId);
@@ -282,29 +364,8 @@ export class ManagedWorkflowsService {
       return;
     }
 
-    if (!existing.managed) {
-      throw new Error(
-        `Cannot install managed workflow '${id}' as '${workflowDocumentId}' because a user workflow with the same id already exists`
-      );
-    }
-
-    // For unchanged definitions, preserve the current document as-is.
-    // Enforced enablement is reapplied only when a managed update is installed.
-    if (
-      existing.definitionHash === definitionHash &&
-      existing.managedVersion === definition.version
-    ) {
-      if (this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)) {
-        return;
-      }
-    }
-
-    if (definition.management.versionStrategy === 'on_adopt' && isStartupWindow) {
-      return;
-    }
-
-    const enabled = definition.management.enablement === 'enforced' ? undefined : existing.enabled;
-    const document = await this.prepareManagedWorkflowDocument({
+    const { stored } = plan;
+    const documentWithVersion = await this.buildManagedInstallDocument({
       definition,
       workflowDocumentId,
       yaml,
@@ -312,10 +373,8 @@ export class ManagedWorkflowsService {
       definitionHash,
       spaceId,
       now,
-      enabled,
-      createdAt: existing.created_at,
+      existing: stored.source,
     });
-    const documentWithVersion = applyWorkflowVersion(document, existing);
     if (this.shouldAbortManagedWrite(`install update '${id}'`)) {
       // Keep track so orphan cleanup (if it ran) would preserve working v1; mark incomplete
       // so ready() skips destructive orphan deletes and we retry the upgrade later.
@@ -331,8 +390,8 @@ export class ManagedWorkflowsService {
         // Only registered code upgrades may reuse an existing delegation without a user request.
         ...(!request &&
         definition.management.versionStrategy === 'auto' &&
-        existing.definition?.settings?.run_as &&
-        this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)
+        stored.source.definition?.settings?.run_as &&
+        this.areTemplateValuesEqual(stored.source.managedTemplateValues, managedTemplateValues)
           ? {
               managedWorkflowUpgrade: {
                 pluginId: registeredPluginId,
@@ -340,11 +399,11 @@ export class ManagedWorkflowsService {
               },
             }
           : {}),
-        ifSeqNo: existingDocument.seqNo,
-        ifPrimaryTerm: existingDocument.primaryTerm,
+        ifSeqNo: stored.seqNo,
+        ifPrimaryTerm: stored.primaryTerm,
       }
     );
-    if (savedDocument.version !== existing.version) {
+    if (savedDocument.version !== stored.source.version) {
       await this.deps.crudService.logWorkflowChangesAfterWrite({
         workflows: [{ id: workflowDocumentId, document: savedDocument }],
         action: WorkflowChangeHistoryAction.workflowUpdate,
@@ -360,6 +419,404 @@ export class ManagedWorkflowsService {
       spaceId,
       reason: 'reinstall',
     });
+  }
+
+  /**
+   * Installs or updates static managed workflows in one pass: one read, then `_bulk` writes in
+   * bounded chunks, one chunk at a time, each with one refresh. Follows the same rules as
+   * {@link installManagedWorkflow}. A failed item is reported and does not stop the others; the
+   * call rejects only when the first read fails.
+   */
+  public async bulkInstallManagedWorkflows(
+    items: readonly ManagedWorkflowServiceInstallManyItem[],
+    registeredPluginId: string
+  ): Promise<ManagedWorkflowInstallManyResult> {
+    const failed: ManagedWorkflowInstallFailure[] = [];
+    const targets = this.resolveManagedInstallTargets(items, registeredPluginId, failed);
+    if (targets.length === 0) {
+      return { failed };
+    }
+
+    if (this.shouldAbortManagedWrite(`install of ${targets.length} workflow(s)`)) {
+      this.markInstallIncomplete(registeredPluginId);
+      return { failed };
+    }
+
+    for (const { id, workflowDocumentId, spaceId } of targets) {
+      this.trackInstall(registeredPluginId, id, workflowDocumentId, spaceId);
+    }
+
+    const isStartupWindow = !this.readyPluginIds.has(registeredPluginId);
+    const now = new Date();
+    const stats: ManagedInstallStats = { created: 0, updated: 0, skipped: 0, bulkRequests: 0 };
+    let pending: ManagedInstallRetry[] = targets.map((target) => ({ target }));
+    for (let attempt = 0; pending.length > 0; attempt++) {
+      if (attempt > 0) {
+        if (attempt > MAX_MANAGED_INSTALL_RETRIES) {
+          failed.push(
+            ...pending.map(({ target, rejection }) =>
+              this.toInstallFailure(target, this.toRetriesExhaustedError(target, rejection))
+            )
+          );
+          break;
+        }
+        const rejected = pending.filter(({ rejection }) => rejection).length;
+        this.logger.debug(
+          `Managed workflows: retrying install of ${pending.length} workflow(s) after ` +
+            `${
+              pending.length - rejected
+            } concurrent update conflict(s) and ${rejected} rejection(s) by Elasticsearch`
+        );
+        await delayMs(
+          this.deps.retryDelayMs ??
+            (rejected > 0
+              ? MANAGED_INSTALL_REJECTED_RETRY_DELAY_MS * attempt
+              : DEFAULT_RETRY_DELAY_MS)
+        );
+      }
+
+      const pendingTargets = pending.map(({ target }) => target);
+      let storedById: Map<string, VersionedWorkflowDocument>;
+      try {
+        storedById = await this.deps.crudService.getWorkflowDocumentsWithVersionByIds(
+          pendingTargets.map(({ workflowDocumentId }) => workflowDocumentId)
+        );
+      } catch (error) {
+        if (attempt === 0) {
+          throw error;
+        }
+        failed.push(...pendingTargets.map((target) => this.toInstallFailure(target, error)));
+        break;
+      }
+
+      const writes = await this.prepareManagedInstallWrites({
+        targets: pendingTargets,
+        storedById,
+        isStartupWindow,
+        now,
+        failed,
+        stats,
+      });
+      const { retries, aborted } = await this.writeManagedInstallChunks({
+        writes,
+        registeredPluginId,
+        now,
+        failed,
+        stats,
+      });
+      if (aborted) {
+        break;
+      }
+      pending = retries;
+    }
+
+    this.logger.debug(
+      `Managed workflows: installed ${items.length} workflow(s) for plugin '${registeredPluginId}': ` +
+        `${stats.created} created, ${stats.updated} updated, ${stats.skipped} unchanged or deferred, ` +
+        `${failed.length} failed, with ${stats.bulkRequests} bulk request(s) in ${
+          Date.now() - now.getTime()
+        } ms`
+    );
+    return { failed };
+  }
+
+  private resolveManagedInstallTargets(
+    items: readonly ManagedWorkflowServiceInstallManyItem[],
+    registeredPluginId: string,
+    failed: ManagedWorkflowInstallFailure[]
+  ): ManagedInstallTarget[] {
+    const targets: ManagedInstallTarget[] = [];
+    const workflowDocumentIds = new Set<string>();
+    for (const item of items) {
+      try {
+        const { definition, workflowDocumentId, spaceId } = this.resolveOwnedManagedWorkflow(
+          item.id,
+          item,
+          registeredPluginId
+        );
+        if (definition.management.lifecycle !== 'static') {
+          throw new Error(
+            `Managed workflow '${item.id}' is dynamic. Install it with install(), one workflow at a time.`
+          );
+        }
+        // Workflow ids are unique across spaces, so a second write to the same id would conflict.
+        if (workflowDocumentIds.has(workflowDocumentId)) {
+          throw new Error(
+            `Managed workflow '${item.id}' as '${workflowDocumentId}' appears more than once in the batch`
+          );
+        }
+        workflowDocumentIds.add(workflowDocumentId);
+        targets.push({
+          id: item.id,
+          definition,
+          workflowDocumentId,
+          spaceId,
+          values: item.values,
+        });
+      } catch (error) {
+        failed.push({ id: item.id, spaceId: item.spaceId, error: toError(error) });
+      }
+    }
+    return targets;
+  }
+
+  /** Builds the documents that changed, yielding to the event loop after each one. */
+  private async prepareManagedInstallWrites({
+    targets,
+    storedById,
+    isStartupWindow,
+    now,
+    failed,
+    stats,
+  }: {
+    targets: readonly ManagedInstallTarget[];
+    storedById: ReadonlyMap<string, VersionedWorkflowDocument>;
+    isStartupWindow: boolean;
+    now: Date;
+    failed: ManagedWorkflowInstallFailure[];
+    stats: ManagedInstallStats;
+  }): Promise<ManagedInstallWrite[]> {
+    const writes: ManagedInstallWrite[] = [];
+    for (const target of targets) {
+      try {
+        const write = await this.prepareManagedInstallWrite({
+          target,
+          stored: storedById.get(target.workflowDocumentId),
+          isStartupWindow,
+          now,
+        });
+        if (write) {
+          writes.push(write);
+          await yieldToEventLoop();
+        } else {
+          stats.skipped++;
+        }
+      } catch (error) {
+        failed.push(this.toInstallFailure(target, error));
+      }
+    }
+    return writes;
+  }
+
+  private async prepareManagedInstallWrite({
+    target,
+    stored,
+    isStartupWindow,
+    now,
+  }: {
+    target: ManagedInstallTarget;
+    stored: VersionedWorkflowDocument | undefined;
+    isStartupWindow: boolean;
+    now: Date;
+  }): Promise<ManagedInstallWrite | undefined> {
+    const { id, definition, workflowDocumentId, spaceId, values } = target;
+    // The read covers all spaces and deleted documents; install() only sees live ones in its space.
+    if (stored && stored.source.spaceId !== spaceId) {
+      throw new Error(
+        `Cannot install managed workflow '${id}' as '${workflowDocumentId}' because a workflow with the same id exists in space '${stored.source.spaceId}'`
+      );
+    }
+    if (stored?.source.deleted_at != null) {
+      throw new Error(
+        `Cannot install managed workflow '${id}' as '${workflowDocumentId}' because a deleted workflow with the same id is still stored`
+      );
+    }
+
+    const plan = this.planManagedInstall({
+      id,
+      definition,
+      workflowDocumentId,
+      values,
+      stored,
+      isStartupWindow,
+    });
+    if (plan.action === 'skip') {
+      return undefined;
+    }
+
+    const previous = plan.action === 'update' ? plan.stored : undefined;
+    const document = await this.buildManagedInstallDocument({
+      definition,
+      workflowDocumentId,
+      yaml: plan.yaml,
+      managedTemplateValues: plan.managedTemplateValues,
+      definitionHash: plan.definitionHash,
+      spaceId,
+      now,
+      existing: previous?.source,
+    });
+    // Static workflows install without a user request, and a binding can only change with one.
+    // This is the main guard, with a clear error per workflow. The check in
+    // bulkWriteWorkflowDocuments is a backstop.
+    if (document.definition?.settings?.run_as || previous?.source.definition?.settings?.run_as) {
+      throw new Error(
+        `Managed workflow '${id}' as '${workflowDocumentId}' is bound to a service account (settings.run_as). Static workflows cannot be bound, because a binding needs a user request.`
+      );
+    }
+    return { target, document, stored: previous };
+  }
+
+  /**
+   * Writes one chunk at a time. Returns the workflows to write again, and whether Kibana started
+   * stopping before every chunk was written.
+   */
+  private async writeManagedInstallChunks({
+    writes,
+    registeredPluginId,
+    now,
+    failed,
+    stats,
+  }: {
+    writes: readonly ManagedInstallWrite[];
+    registeredPluginId: string;
+    now: Date;
+    failed: ManagedWorkflowInstallFailure[];
+    stats: ManagedInstallStats;
+  }): Promise<{ retries: ManagedInstallRetry[]; aborted: boolean }> {
+    const chunks = chunkByCountAndBytes(writes, {
+      maxCount: MANAGED_INSTALL_BULK_MAX_DOCUMENTS,
+      maxBytes: MANAGED_INSTALL_BULK_MAX_BYTES,
+      getBytes: ({ document }) => Buffer.byteLength(JSON.stringify(document)),
+    });
+    const retries: ManagedInstallRetry[] = [];
+
+    for (const [chunkIndex, chunk] of chunks.entries()) {
+      if (this.shouldAbortManagedWrite(`install of ${chunk.length} workflow(s)`)) {
+        // Same as install(): untrack creates that never ran, keep updates tracked, and mark the
+        // pass incomplete so ready() skips orphan cleanup this boot.
+        for (const { target, stored } of chunks.slice(chunkIndex).flat()) {
+          if (!stored) {
+            this.untrackInstall(registeredPluginId, target.workflowDocumentId, target.spaceId);
+          }
+        }
+        this.markInstallIncomplete(registeredPluginId);
+        return { retries, aborted: true };
+      }
+
+      await this.writeManagedInstallChunk({ chunk, now, failed, retries, stats });
+    }
+
+    return { retries, aborted: false };
+  }
+
+  /** Writes one chunk with one `_bulk` request. A failed request fails only this chunk's workflows. */
+  private async writeManagedInstallChunk({
+    chunk,
+    now,
+    failed,
+    retries,
+    stats,
+  }: {
+    chunk: readonly ManagedInstallWrite[];
+    now: Date;
+    failed: ManagedWorkflowInstallFailure[];
+    retries: ManagedInstallRetry[];
+    stats: ManagedInstallStats;
+  }): Promise<void> {
+    let results: WorkflowDocumentBulkWriteResult[];
+    stats.bulkRequests++;
+    try {
+      results = await this.deps.crudService.bulkWriteWorkflowDocuments(
+        chunk.map(({ target, document, stored }) => ({
+          id: target.workflowDocumentId,
+          document,
+          previous: stored,
+        }))
+      );
+    } catch (error) {
+      failed.push(...chunk.map(({ target }) => this.toInstallFailure(target, error)));
+      return;
+    }
+
+    const written: ManagedInstallWrite[] = [];
+    for (const [index, write] of chunk.entries()) {
+      const result = results[index];
+      if (result.status === 'written') {
+        written.push(write);
+        if (write.stored) {
+          stats.updated++;
+        } else {
+          stats.created++;
+        }
+      } else if (result.status === 'conflict') {
+        retries.push({ target: write.target });
+      } else if (result.status === 'rejected') {
+        retries.push({ target: write.target, rejection: result.error });
+      } else {
+        failed.push(this.toInstallFailure(write.target, result.error));
+      }
+    }
+    await this.recordManagedInstallWrites(written, now);
+  }
+
+  /** Logs change history once per space for the chunk, and audits each workflow as install() does. */
+  private async recordManagedInstallWrites(
+    written: readonly ManagedInstallWrite[],
+    now: Date
+  ): Promise<void> {
+    const historyBySpace = new Map<string, Array<{ id: string; document: WorkflowProperties }>>();
+    const historyActionById = new Map<string, WorkflowChangeHistoryActionType>();
+
+    for (const { target, document, stored } of written) {
+      const { definition, workflowDocumentId, spaceId } = target;
+      if (!stored || document.version !== stored.source.version) {
+        const workflows = historyBySpace.get(spaceId) ?? [];
+        workflows.push({ id: workflowDocumentId, document });
+        historyBySpace.set(spaceId, workflows);
+        historyActionById.set(
+          workflowDocumentId,
+          stored
+            ? WorkflowChangeHistoryAction.workflowUpdate
+            : WorkflowChangeHistoryAction.workflowInstall
+        );
+      }
+
+      const auditEvent = {
+        id: workflowDocumentId,
+        managed: true,
+        originalWorkflowId: definition.id,
+        ownerPlugin: definition.pluginId,
+        spaceId,
+      };
+      if (stored) {
+        this.deps.audit?.logWorkflowUpdated(undefined, { ...auditEvent, reason: 'reinstall' });
+      } else {
+        this.deps.audit?.logWorkflowCreated(undefined, { ...auditEvent, reason: 'install' });
+      }
+    }
+
+    for (const [spaceId, workflows] of historyBySpace) {
+      await this.deps.crudService.logWorkflowChangesAfterWrite({
+        workflows,
+        getAction: (workflowId) =>
+          historyActionById.get(workflowId) ?? WorkflowChangeHistoryAction.workflowUpdate,
+        spaceId,
+        timestamp: now,
+      });
+    }
+  }
+
+  private toInstallFailure(
+    { id, workflowDocumentId, spaceId }: ManagedInstallTarget,
+    error: unknown
+  ): ManagedWorkflowInstallFailure {
+    return { id, workflowId: workflowDocumentId, spaceId, error: toError(error) };
+  }
+
+  private toRetriesExhaustedError(
+    { workflowDocumentId }: ManagedInstallTarget,
+    rejection: Error | undefined
+  ): Error {
+    const attempts = MAX_MANAGED_INSTALL_RETRIES + 1;
+    if (rejection) {
+      return new Error(
+        `Elasticsearch rejected the write of workflow '${workflowDocumentId}' as too many requests after ${attempts} attempts: ${rejection.message}`
+      );
+    }
+    return new WorkflowConflictError(
+      `Workflow with id '${workflowDocumentId}' kept conflicting with concurrent updates after ${attempts} attempts.`,
+      workflowDocumentId
+    );
   }
 
   public async uninstallManagedWorkflow(
@@ -450,7 +907,6 @@ export class ManagedWorkflowsService {
       options,
       registeredPluginId
     );
-    const registryHash = this.computeManagedDefinitionHash(definition);
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
       workflowDocumentId,
       spaceId,
@@ -459,7 +915,6 @@ export class ManagedWorkflowsService {
         includeGlobal: true,
       }
     );
-
     if (!existing || existing.deleted_at) {
       return this.createManagedWorkflowStatusReport({
         status: 'missing',
@@ -467,9 +922,14 @@ export class ManagedWorkflowsService {
         definitionId: id,
         spaceId,
         definition,
-        registryHash,
+        registryHash: this.computeRegistryHash({ definition, storedTemplateValues: null }),
       });
     }
+
+    const registryHash = this.computeRegistryHash({
+      definition,
+      storedTemplateValues: existing.managedTemplateValues,
+    });
 
     if (existing.managed !== true) {
       return this.createManagedWorkflowStatusReport({
@@ -491,6 +951,7 @@ export class ManagedWorkflowsService {
     } else if (!existing.enabled) {
       status = 'disabled';
     } else if (
+      registryHash === null ||
       storedHash !== registryHash ||
       storedVersion !== definition.version ||
       existing.originManagedWorkflowId !== definition.id
@@ -733,13 +1194,24 @@ export class ManagedWorkflowsService {
       definitionId: source.originManagedWorkflowId ?? null,
     };
     let deleted = false;
-    try {
-      deleted = await this.deps.crudService.deleteManagedOrphan(workflowId, spaceId, orphan);
-    } catch (error) {
-      this.logger.error(
-        `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}'`,
-        { error }
-      );
+    for (let attempt = 0; attempt <= MAX_ORPHAN_DELETE_RETRIES; attempt++) {
+      try {
+        deleted = await this.deps.crudService.deleteManagedOrphan(workflowId, spaceId, orphan);
+        break;
+      } catch (error) {
+        // Another Kibana instance can write the same orphan concurrently at startup.
+        const isWriteConflict =
+          !(error instanceof WorkflowConflictError) && isElasticsearchWriteConflict(error);
+        if (!isWriteConflict || attempt === MAX_ORPHAN_DELETE_RETRIES) {
+          const message = `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}'`;
+          if (isWriteConflict) {
+            this.logger.warn(`${message} after concurrent update conflicts`, { error });
+          } else {
+            this.logger.error(message, { error });
+          }
+          break;
+        }
+      }
     }
 
     if (deleted) {
@@ -800,7 +1272,7 @@ export class ManagedWorkflowsService {
     definitionId: ManagedWorkflowId;
     spaceId: string;
     definition: ManagedWorkflowDefinition;
-    registryHash: string;
+    registryHash: string | null;
     existing?: WorkflowProperties;
   }): ManagedWorkflowStatusReport {
     const {
@@ -827,6 +1299,85 @@ export class ManagedWorkflowsService {
       storedHash: existing?.definitionHash ?? null,
       registryHash,
     };
+  }
+
+  /** Decides whether an install creates, updates or keeps the stored document. */
+  private planManagedInstall({
+    id,
+    definition,
+    workflowDocumentId,
+    values,
+    stored,
+    isStartupWindow,
+  }: {
+    id: ManagedWorkflowId;
+    definition: ManagedWorkflowDefinition;
+    workflowDocumentId: string;
+    values?: ManagedWorkflowTemplateValues;
+    stored?: VersionedWorkflowDocument;
+    isStartupWindow: boolean;
+  }): ManagedInstallPlan {
+    const { yaml, managedTemplateValues } = this.resolveManagedWorkflowYaml({
+      definition,
+      values,
+      existingTemplateValues: stored?.source.managedTemplateValues,
+    });
+    // The hash of the YAML this install renders, so a template's hash follows its values.
+    const definitionHash = computeDefinitionHash(yaml);
+
+    if (!stored) {
+      return { action: 'create', yaml, managedTemplateValues, definitionHash };
+    }
+
+    const { source: existing } = stored;
+    if (!existing.managed) {
+      throw new Error(
+        `Cannot install managed workflow '${id}' as '${workflowDocumentId}' because a user workflow with the same id already exists`
+      );
+    }
+
+    // For unchanged definitions, preserve the current document as-is.
+    // Enforced enablement is reapplied only when a managed update is installed.
+    if (
+      existing.definitionHash === definitionHash &&
+      existing.managedVersion === definition.version &&
+      this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)
+    ) {
+      return { action: 'skip' };
+    }
+
+    if (definition.management.versionStrategy === 'on_adopt' && isStartupWindow) {
+      return { action: 'skip' };
+    }
+
+    return { action: 'update', yaml, managedTemplateValues, definitionHash, stored };
+  }
+
+  /** Builds the versioned document an install writes, keeping `enabled` and `created_at` on update. */
+  private async buildManagedInstallDocument({
+    existing,
+    ...params
+  }: {
+    definition: ManagedWorkflowDefinition;
+    workflowDocumentId: string;
+    yaml: string;
+    managedTemplateValues: ManagedWorkflowTemplateValues | null;
+    definitionHash: string;
+    spaceId: string;
+    now: Date;
+    existing?: WorkflowProperties;
+  }): Promise<WorkflowProperties> {
+    const document = await this.prepareManagedWorkflowDocument({
+      ...params,
+      ...(existing
+        ? {
+            enabled:
+              params.definition.management.enablement === 'enforced' ? undefined : existing.enabled,
+            createdAt: existing.created_at,
+          }
+        : {}),
+    });
+    return applyWorkflowVersion(document, existing);
   }
 
   private async prepareManagedWorkflowDocument(params: {
@@ -952,7 +1503,7 @@ export class ManagedWorkflowsService {
 
     if (definition.yamlTemplate) {
       const templateValues = values ?? existingTemplateValues;
-      if (!templateValues || Object.keys(templateValues).length === 0) {
+      if (!hasTemplateValues(templateValues)) {
         throw new Error(
           `Managed workflow '${definition.id}' uses yamlTemplate but no template values were provided and none are persisted`
         );
@@ -981,16 +1532,37 @@ export class ManagedWorkflowsService {
     };
   }
 
-  private computeManagedDefinitionHash(definition: ManagedWorkflowDefinition): string {
-    if (definition.yamlTemplate) {
-      return computeDefinitionHash(definition.yamlTemplate.toString());
+  /**
+   * The hash an up-to-date document holds: of the definition's `yaml`, or of its `yamlTemplate`
+   * rendered with the document's stored values. `null` for a template with no stored values or
+   * whose render throws for them.
+   */
+  private computeRegistryHash({
+    definition,
+    storedTemplateValues,
+  }: {
+    definition: ManagedWorkflowDefinition;
+    storedTemplateValues: ManagedWorkflowTemplateValues | null | undefined;
+  }): string | null {
+    if (!definition.yamlTemplate) {
+      return computeDefinitionHash(this.resolveManagedWorkflowYaml({ definition }).yaml);
     }
-    if (!definition.yaml) {
-      throw new Error(
-        `Managed workflow '${definition.id}' must define either yaml or yamlTemplate`
+    if (!hasTemplateValues(storedTemplateValues)) {
+      return null;
+    }
+    try {
+      const { yaml } = this.resolveManagedWorkflowYaml({
+        definition,
+        existingTemplateValues: storedTemplateValues,
+      });
+      return computeDefinitionHash(yaml);
+    } catch (error) {
+      this.logger.warn(
+        `Managed workflows: could not render '${definition.id}' with its stored values`,
+        { error }
       );
+      return null;
     }
-    return computeDefinitionHash(definition.yaml);
   }
 
   private areTemplateValuesEqual(

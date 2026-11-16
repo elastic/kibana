@@ -112,7 +112,7 @@ describe('useListKiPanel', () => {
     });
 
     expect(result.current.size).toBe(DEFAULT_KI_PAGE_SIZE);
-    expect(listKiQuery()).toEqual(expect.objectContaining({ lifecycleStatus: ['deleted'] }));
+    expect(listKiQuery()).toEqual(expect.objectContaining({ status: ['deleted'] }));
   });
 
   it('caps loadMore at MAX_KI_PAGE_SIZE', () => {

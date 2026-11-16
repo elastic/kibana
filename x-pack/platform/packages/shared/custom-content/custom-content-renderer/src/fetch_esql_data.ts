@@ -40,6 +40,10 @@ export interface FetchEsqlOptions {
   esqlVariables?: ESQLControlVariable[];
   /** Records the request so the panel's Inspect action can show it. */
   requestAdapter?: RequestAdapter;
+  /** Leaves the adapter's earlier requests in place, for a caller that fetches several queries at once. */
+  keepRequests?: boolean;
+  /** Names the request in the Inspect action, to tell it from the others when several are fetched at once. */
+  requestTitle?: string;
 }
 
 const INSPECTOR_REQUEST_TITLE = i18n.translate('xpack.customContent.inspector.requestTitle', {
@@ -74,17 +78,15 @@ export async function fetchEsqlData(
     esQueryConfig,
     esqlVariables,
     requestAdapter,
+    keepRequests,
+    requestTitle = INSPECTOR_REQUEST_TITLE,
   } = options ?? {};
 
   // One request per fetch, so the Requests view shows the latest query instead of a growing list.
-  requestAdapter?.reset();
+  if (!keepRequests) requestAdapter?.reset();
   const startTime = Date.now();
   const logRequest = () =>
-    requestAdapter?.start(
-      INSPECTOR_REQUEST_TITLE,
-      { description: INSPECTOR_REQUEST_DESCRIPTION },
-      startTime
-    );
+    requestAdapter?.start(requestTitle, { description: INSPECTOR_REQUEST_DESCRIPTION }, startTime);
 
   let timeRangeFilter: { range: Record<string, unknown> } | undefined;
   if (timeRange) {

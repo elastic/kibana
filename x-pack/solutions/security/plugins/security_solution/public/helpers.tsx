@@ -23,12 +23,14 @@ import {
   APP_UI_ID,
   CASES_FEATURE_ID,
   CASES_PATH,
+  CONFIGURATIONS_PATH,
   COVERAGE_OVERVIEW_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
   MANAGE_PATH,
   RULES_ADD_PATH,
   RULES_CHANGES_HISTORY_PATH,
+  RULES_CREATE_PATH,
   RULES_PATH,
   THREAT_INTELLIGENCE_PATH,
   ONBOARDING_PATH,
@@ -221,6 +223,26 @@ export const isRuleChangesHistoryPath = (pathname: string): boolean =>
   });
 
 /**
+ * Matches the Create new rule page, whose app header owns the page actions.
+ */
+export const isRuleCreationPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: RULES_CREATE_PATH,
+    exact: true,
+    strict: false,
+  });
+
+/**
+ * Matches the Edit rule settings page, whose app header owns the page actions.
+ */
+export const isRuleEditPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: `${RULES_PATH}/id/:detailName/edit`,
+    exact: true,
+    strict: false,
+  });
+
+/**
  * Matches the Rules page tabs (installed, monitoring, updates), whose app header owns the page actions.
  */
 export const isRulesManagementPath = (pathname: string): boolean =>
@@ -250,6 +272,15 @@ export const isCoverageOverviewPath = (pathname: string): boolean =>
 export const isCloudSecurityPosturePath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: CLOUD_SECURITY_POSTURE_BASE_PATH,
+    strict: false,
+  });
+
+/**
+ * Matches the Configurations page, whose app header owns the page actions.
+ */
+export const isConfigurationsPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: CONFIGURATIONS_PATH,
     strict: false,
   });
 
@@ -299,10 +330,13 @@ export const isPageWithAppHeaderPath = (pathname: string): boolean =>
     isRuleChangesHistoryPath,
     isRulesManagementPath,
     isRulesAddPath,
+    isRuleCreationPath,
+    isRuleEditPath,
     isRuleDetailsPath,
     isCoverageOverviewPath,
     isExceptionsPath,
     isCloudSecurityPosturePath,
+    isConfigurationsPath,
     isEndpointManagementPath,
     isManageLandingPath,
   ].some((matchesPath) => matchesPath(pathname));

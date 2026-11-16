@@ -17,6 +17,7 @@ import { RulesClientOptionsToken } from '../lib/rules_client/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
+import { AlertActionsClient } from '../lib/alert_actions_client';
 import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { InternalRulesClient } from '../lib/internal_rules_client';
@@ -26,6 +27,7 @@ import type {
   RulesClientApi,
   InternalRulesClientApi,
   ActionPolicyClientApi,
+  AlertActionsClientApi,
   AlertEventsClientApi,
 } from '../types';
 
@@ -97,6 +99,9 @@ const createStartContract = (
     },
     async getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi> {
       return buildScope(request).get(AlertEventsClient);
+    },
+    async getAlertActionsClientWithRequest(request: KibanaRequest): Promise<AlertActionsClientApi> {
+      return buildScope(request).get(AlertActionsClient);
     },
   };
 };
