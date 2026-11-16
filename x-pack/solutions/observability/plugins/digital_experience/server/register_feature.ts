@@ -16,6 +16,7 @@ import {
   MANAGE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID,
 } from '../common/feature';
 import { SAVED_VIEW_TYPE } from '../common/saved_views';
+import { SESSIONS_INDEX_PATTERN } from '../common/sessions';
 
 /** The saved object type of the share plugin's short URLs. */
 const SHORT_URL_TYPE = 'url';
@@ -54,13 +55,14 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
         name: i18n.translate('xpack.digitalExperience.featureRegistry.sessionsSubFeatureName', {
           defaultMessage: 'Sessions',
         }),
-        // The sessions index serves every space, so only grant this in all spaces.
+        // The summaries task and index serve every space, so only grant this in all spaces.
         requireAllSpaces: true,
         privilegesTooltip: i18n.translate(
           'xpack.digitalExperience.featureRegistry.sessionsSubFeatureTooltip',
           {
             defaultMessage:
-              'Requires "*" (All spaces). Users also need the Elasticsearch privilege to manage index templates.',
+              'Requires "*" (All spaces). Users also need to read the OTel logs and traces in full, and to write the {sessionsIndex} indices.',
+            values: { sessionsIndex: SESSIONS_INDEX_PATTERN },
           }
         ),
         privilegeGroups: [
@@ -71,10 +73,10 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
                 id: MANAGE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID,
                 name: i18n.translate(
                   'xpack.digitalExperience.featureRegistry.manageSessionsPrivilegeName',
-                  { defaultMessage: 'Set up and update session summaries' }
+                  { defaultMessage: 'Set up session summaries' }
                 ),
-                // Never granted with `all`: sessions are set up with this user's data access, for
-                // everyone who reads sessions.
+                // Never granted with `all`: setting sessions up runs the summaries task with this
+                // user's data access, for everyone who reads sessions.
                 includeIn: 'none',
                 api: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
                 ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.manageSessions],

@@ -54,7 +54,7 @@ describe('ApplicationsSummaryPanel', () => {
 
     expect(stat('sessions')).toHaveTextContent('—');
     fireEvent.mouseOver(screen.getByText('Sessions'));
-    expect(await screen.findByText(/Counted from the session summaries/)).toBeInTheDocument();
+    expect(await screen.findByText(/from their session summaries/)).toBeInTheDocument();
   });
 
   it('shows a dash for the rates without page loads or requests', () => {
