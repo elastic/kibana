@@ -108,6 +108,23 @@ steps:
         required:
           - services
 
+  - name: settings_requirement
+    type: fleet.awsOnboardingSettingsRequirement
+    with:
+      services: "${{ steps.select_services.output.response.services }}"
+      region: "{{ steps.select_services.output.response.region | default: inputs.region | default: steps.discover.output.region }}"
+
+  - name: ask_settings
+    type: waitForInput
+    with:
+      message: "Set the collection method and required values for each selected service (see the settings card), then reply with the settings."
+      schema:
+        properties:
+          services:
+            type: object
+        required:
+          - services
+
   - name: ask_resolve
     type: waitForApproval
     with:
@@ -131,6 +148,7 @@ steps:
       account_id: "${{ steps.discover.output.account_id }}"
       run_suffix: "{{ execution.id | slice: 0, 8 }}"
       namespace: "${{ inputs.namespace }}"
+      settings: "${{ steps.ask_settings.output.response }}"
 
   - name: approve_values
     type: waitForApproval

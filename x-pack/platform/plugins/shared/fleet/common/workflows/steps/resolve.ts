@@ -10,6 +10,8 @@ import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { awsOnboardingSettingsAnswerSchema } from './settings';
+
 export const AwsOnboardingResolveStepTypeId = 'fleet.awsOnboardingResolve';
 
 export const awsOnboardingResolveInputSchema = lazySchema(() =>
@@ -20,6 +22,8 @@ export const awsOnboardingResolveInputSchema = lazySchema(() =>
     account_id: z.string().optional(),
     /** Short per-run suffix that keeps policy and connector names unique across runs. */
     run_suffix: z.string().optional(),
+    /** The per-service collection settings the user answered in the settings pause. */
+    settings: awsOnboardingSettingsAnswerSchema.optional(),
   })
 );
 
