@@ -280,11 +280,13 @@ catches up window by window, oldest first, and status reports `rebuilding` until
 grows while it holds few sessions and halves when it holds more than 64 batches (320,000 sessions
 at the default row limit). A window still running after 4 minutes stops between rounds of summary
 queries, a minute before the task's 5 minute timeout, as Task Manager drops the result of a run
-that outlasts it and the next run would retry the same window without end. The run then keeps its
-checkpoint and starts again at once on half the window; the summaries it already wrote are just
-rebuilt again. A one-minute window, the smallest, that still can't finish fails the run with an
-error that says so, as the summaries can't move past it until the task gets more concurrency or
-Elasticsearch more capacity. Failures are kept in the task's state, not thrown, so the next run
+that outlasts it and the next run would retry the same window without end. The run keeps the
+windows it finished and its checkpoint, and the next one starts at once: on the same window when
+the run reached it after others, with the whole limit this time, and on half of it when it was the
+run's first; the summaries already written are just rebuilt again. A one-minute window, the
+smallest, that still can't finish in a run of its own fails the run with an error that says so, as
+the summaries can't move past it until the task gets more concurrency or Elasticsearch more
+capacity. Failures are kept in the task's state, not thrown, so the next run
 retries from the same checkpoint, and status shows the error. A summary Elasticsearch refuses
 outright, such as one with a value longer than its mapping takes, is left out with a warning
 instead, so a single session can't hold up the window and everything behind it. Events that arrive later than the sync

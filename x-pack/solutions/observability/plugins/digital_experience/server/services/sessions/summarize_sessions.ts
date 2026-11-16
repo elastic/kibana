@@ -319,6 +319,7 @@ export const summarizeSessions = async ({
   const stopAt = started + timeLimitMs;
   const maxSessions = maxSessionsPerWindow(maxRows);
   let from = Math.max(checkpoint ? Date.parse(checkpoint) : earliest, earliest);
+  const runFrom = from;
   let size = Math.min(Math.max(windowMs, MIN_WINDOW_MS), MAX_WINDOW_MS);
   let sessions = 0;
 
@@ -346,6 +347,16 @@ export const summarizeSessions = async ({
         );
         sessions += written;
         if (!finished) {
+          // A window the run reached after others had only part of the time limit: the windows
+          // before it stay done, and the next run starts on it with all of the limit.
+          if (from !== runFrom) {
+            return {
+              checkpoint: iso(from),
+              windowMs: Math.max(MIN_WINDOW_MS, to - from),
+              caughtUp: false,
+              sessions,
+            };
+          }
           if (to - from <= MIN_WINDOW_MS) {
             throw new Error(windowTooLargeMessage(changed, timeLimitMs));
           }

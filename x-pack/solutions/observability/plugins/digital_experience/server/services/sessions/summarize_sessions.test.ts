@@ -247,6 +247,41 @@ describe('summarizeSessions', () => {
       expect(esClient.bulk).toHaveBeenCalledTimes(2);
     });
 
+    it('keeps the windows it finished and leaves a later one to the next run, with all of the limit', async () => {
+      const first = new Date(UNTIL - 2 * MINUTE).toISOString();
+      const isFirst = (params: estypes.EsqlNamedValue[]) =>
+        paramOf(params, 'changed_from') === first;
+      const esClient = setUp({
+        // The first window is one quick batch; the next has four slow ones.
+        changed: (params) => (isFirst(params) ? 1 : batches * SESSIONS_PER_QUERY),
+        ids: (params) =>
+          isFirst(params)
+            ? ['a']
+            : Array.from({ length: batches * SESSIONS_PER_QUERY }, (_, index) => `s${index}`),
+        summaryRows: () => [summaryRow('one')],
+        beforeSummary: async () => {
+          now += SUMMARY_MS;
+        },
+      });
+
+      const progress = await run(esClient, {
+        checkpoint: first,
+        windowMs: MINUTE,
+        concurrency: 1,
+        budgetMs: 2 * MINUTE,
+        timeLimitMs: 3 * MINUTE,
+      });
+
+      // The second window reached the limit after two batches, without failing the run: its
+      // checkpoint is where the first window ended, and it keeps its size for a fresh run.
+      expect(progress).toEqual({
+        checkpoint: new Date(UNTIL - MINUTE).toISOString(),
+        windowMs: MINUTE,
+        caughtUp: false,
+        sessions: 3,
+      });
+    });
+
     it('fails the run when even a one-minute window cannot finish in time', async () => {
       const esClient = slowSummaries();
 
