@@ -96,7 +96,7 @@ const getPanelsById = (widgets: Widgets): Map<string, AttachmentPanel> =>
       .map((panel) => [panel.id, panel])
   );
 
-/** The grid height of every custom content panel of the dashboard that has a declared content height. */
+/** The grid height of every panel of the dashboard that has a declared content height. */
 const getHeightRowsById = (
   { panels, options }: DashboardAttachmentData,
   heightHints: readonly PanelHeightHint[]
@@ -107,7 +107,7 @@ const getHeightRowsById = (
   return new Map(
     heightHints.flatMap(({ panelId, heightPx }): Array<[string, number]> => {
       const panel = panelsById.get(panelId);
-      if (panel?.type !== CUSTOM_CONTENT_EMBEDDABLE_TYPE) {
+      if (!panel) {
         return [];
       }
       const hasTitleBar =

@@ -405,11 +405,23 @@ describe('arrangeDashboardLayout', () => {
       expect(getSentPanels()[0]).toEqual(expect.objectContaining({ heightRows: 18 }));
     });
 
-    it('ignores a height declared for a panel that is not custom content', async () => {
+    it('sizes any panel that declared a height', async () => {
       await arrangeDashboardLayout({
         originalPanels: originalDashboardData.panels,
         dashboardData: originalDashboardData,
         heightHints: [{ panelId: 'existing', heightPx: 352 }],
+        arrangeLayout,
+        logger,
+      });
+
+      expect(getSentPanels()[0]).toEqual(expect.objectContaining({ id: 'p1', heightRows: 14 }));
+    });
+
+    it('ignores a height declared for a panel that is not in the dashboard', async () => {
+      await arrangeDashboardLayout({
+        originalPanels: originalDashboardData.panels,
+        dashboardData: originalDashboardData,
+        heightHints: [{ panelId: 'removed', heightPx: 352 }],
         arrangeLayout,
         logger,
       });

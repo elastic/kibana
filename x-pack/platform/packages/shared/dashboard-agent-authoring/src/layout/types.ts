@@ -34,7 +34,7 @@ export interface LayoutPanel extends LayoutPanelKind {
    * call, since its grid was sized for the old content.
    */
   textChanged?: true;
-  /** The grid height a custom content panel needs, from the height its content declared. */
+  /** The grid height a panel needs, from the height its content declared. */
   heightRows?: number;
   /** The text of a markdown panel, or the config of a custom content panel, to size it by. */
   content?: string;
