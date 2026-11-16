@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 
 /**
  * Detection rule edit page (`/app/security/rules/id/<id>/edit`) and its save flow.
@@ -29,7 +30,7 @@ export class RuleEditPage {
 
   async navigate(ruleId: string): Promise<void> {
     await this.page.gotoApp(`security/rules/id/${ruleId}/edit`);
-    await this.saveButton.waitFor({ state: 'visible' });
+    await this.saveButton.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 
   async save(): Promise<void> {

@@ -76,6 +76,9 @@ export class EsqlRuleFormPage {
     await this.ruleTypeCard.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
     await this.ruleTypeCard.click();
     await this.esqlEditor.waitReady();
+    // "Continue" stays disabled until the data view of the form has settled. The query bar is
+    // disabled while it loads, so a query set before that is not kept by the form.
+    await expect(this.defineContinue).toBeEnabled({ timeout: APP_LOAD_TIMEOUT_MS });
   }
 
   /** Replaces the query of the ES|QL editor. */
