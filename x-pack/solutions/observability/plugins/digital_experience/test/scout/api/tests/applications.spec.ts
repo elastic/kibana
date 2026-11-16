@@ -20,12 +20,10 @@ const isLocalMidnight = (timestamp: number) => localTime(timestamp).format('HH:m
 const isLocalMidnightOrNoon = (timestamp: number) =>
   ['00:00', '12:00'].includes(localTime(timestamp).format('HH:mm'));
 
-/** Every bucket counts the page loads of its local bucket in `pageLoadsByBucket`, the rest none. */
-const expectCounts = (
-  points: TimeSeriesPoint[],
-  pageLoadsByBucket: Readonly<Record<string, readonly string[]>>
-) => {
-  const expected = expectedCountsByKey(pageLoadsByBucket);
+const HALF_DAY_MS = 12 * 60 * 60 * 1000;
+
+/** Every bucket counts the page loads `expected` has for its key, the rest none. */
+const expectCounts = (points: TimeSeriesPoint[], expected: Map<number, number>) => {
   expect(
     points.filter(({ timestamp }) => {
       return expected.has(timestamp);
@@ -220,27 +218,48 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
     {
       buckets: '12 hours from local midnight and noon in the time zone',
       range: THIRTY_DAYS,
+      timeZone: NEW_YORK_TIME_ZONE,
       interval: { value: 43200, unit: 's' },
       isBucketStart: isLocalMidnightOrNoon,
-      pageLoadsByBucket: LOCAL_PAGE_LOADS.halfDays,
+      expectedCounts: expectedCountsByKey(LOCAL_PAGE_LOADS.halfDays),
     },
     {
       buckets: 'local days across a daylight saving change',
       range: ACROSS_DAYLIGHT_SAVING,
+      timeZone: NEW_YORK_TIME_ZONE,
       interval: { value: 1, unit: 'd' },
       isBucketStart: isLocalMidnight,
-      pageLoadsByBucket: LOCAL_PAGE_LOADS.days,
+      expectedCounts: expectedCountsByKey(LOCAL_PAGE_LOADS.days),
     },
-  ] as const;
+    {
+      // The same page loads as the first case, split 2 + 1 at UTC noon instead of 1 + 2.
+      buckets: '12 hours from UTC midnight and noon without a time zone',
+      range: THIRTY_DAYS,
+      timeZone: undefined,
+      interval: { value: 43200, unit: 's' },
+      isBucketStart: (timestamp: number) => timestamp % HALF_DAY_MS === 0,
+      expectedCounts: new Map([
+        [Date.parse('2021-01-10T12:00:00.000Z'), 2],
+        [Date.parse('2021-01-11T00:00:00.000Z'), 1],
+      ]),
+    },
+  ];
 
-  for (const { buckets, range, interval, isBucketStart, pageLoadsByBucket } of TIME_ZONE_CASES) {
+  for (const {
+    buckets,
+    range,
+    timeZone,
+    interval,
+    isBucketStart,
+    expectedCounts,
+  } of TIME_ZONE_CASES) {
     apiTest(`counts the page loads by ${buckets}`, async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
       const response = await apiClient.get(
         withQuery(APPLICATIONS_PATH, {
           ...range,
-          timeZone: NEW_YORK_TIME_ZONE,
+          ...(timeZone ? { timeZone } : {}),
           environment: TIME_ZONE_ENVIRONMENT,
         }),
         { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
@@ -254,7 +273,7 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
         end: Date.parse(range.end),
       });
       expect(pageLoadsOverTime.otel.every(({ timestamp }) => isBucketStart(timestamp))).toBe(true);
-      expectCounts(pageLoadsOverTime.otel, pageLoadsByBucket);
+      expectCounts(pageLoadsOverTime.otel, expectedCounts);
     });
   }
 
