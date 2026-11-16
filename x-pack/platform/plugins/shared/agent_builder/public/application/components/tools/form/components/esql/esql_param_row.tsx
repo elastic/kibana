@@ -264,12 +264,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
           )}
         />
       </EuiTableRowCell>
-      <EuiTableRowCell
-        align="center"
-        mobileOptions={{
-          header: i18nMessages.optionalParamLabel,
-        }}
-      >
+      <EuiTableRowCell align="center">
         <Controller
           control={control}
           name={`params.${index}.optional`}
