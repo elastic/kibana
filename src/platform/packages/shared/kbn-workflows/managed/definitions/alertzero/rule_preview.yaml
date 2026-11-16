@@ -159,13 +159,18 @@ steps:
   - name: collect_errors
     type: data.set
     with:
+      # Every simulated run reports the same failure again, so each distinct error is
+      # listed once.
       error_text: |-
+        {%- assign found = '' | split: ',' -%}
         {%- for log in steps.preview_rule.output.logs -%}
-        {%- for err in log.errors -%}{{ err }}; {% endfor -%}
+        {%- assign found = found | concat: log.errors -%}
         {%- for warn in log.warnings -%}
-        {%- if warn contains 'Unable to find matching' -%}{{ warn }}; {% endif -%}
+        {%- if warn contains 'Unable to find matching' -%}{%- assign found = found | concat: warn -%}{%- endif -%}
         {%- endfor -%}
         {%- endfor -%}
+        {%- assign found = found | uniq -%}
+        {%- for err in found -%}{{ err }}; {% endfor -%}
       # 'true' when an invocation stopped at the rule's max_signals: the count is
       # then a floor, not the number of alerts the rule would have produced.
       limit_reached: |-
@@ -217,12 +222,15 @@ steps:
     type: data.set
     with:
       error_text: |-
+        {%- assign found = '' | split: ',' -%}
         {%- for log in steps.preview_proposed.output.logs -%}
-        {%- for err in log.errors -%}{{ err }}; {% endfor -%}
+        {%- assign found = found | concat: log.errors -%}
         {%- for warn in log.warnings -%}
-        {%- if warn contains 'Unable to find matching' -%}{{ warn }}; {% endif -%}
+        {%- if warn contains 'Unable to find matching' -%}{%- assign found = found | concat: warn -%}{%- endif -%}
         {%- endfor -%}
         {%- endfor -%}
+        {%- assign found = found | uniq -%}
+        {%- for err in found -%}{{ err }}; {% endfor -%}
       limit_reached: |-
         {%- assign hit = false -%}
         {%- for log in steps.preview_proposed.output.logs -%}
