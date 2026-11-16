@@ -9,11 +9,12 @@ import {
   CloudFormationClient,
   CreateStackCommand,
   DeleteStackCommand,
+  DescribeStackEventsCommand,
   DescribeStacksCommand,
   GetTemplateSummaryCommand,
   UpdateStackCommand,
 } from '@aws-sdk/client-cloudformation';
-import type { Parameter, Stack } from '@aws-sdk/client-cloudformation';
+import type { Parameter, Stack, StackEvent } from '@aws-sdk/client-cloudformation';
 
 import type { AwsSessionCredentials } from './sts';
 
@@ -113,6 +114,12 @@ export class AwsCloudFormationClient {
       }
       throw error;
     }
+  }
+
+  /** First page only (newest first), which is enough to find what failed a recent create. */
+  public async describeStackEvents(stackArn: string): Promise<StackEvent[]> {
+    const result = await this.client.send(new DescribeStackEventsCommand({ StackName: stackArn }));
+    return result.StackEvents ?? [];
   }
 }
 

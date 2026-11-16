@@ -250,6 +250,41 @@ export class AwsOnboardingStackService {
     return started ? 'deletion_started' : 'skipped';
   }
 
+  /**
+   * The stack-level reason is empty once a failed create has rolled back and been deleted, so
+   * name the earliest failed resource instead: later failures are usually its rollback.
+   */
+  private async findFailedResourceReason(
+    client: AwsCloudFormationClient,
+    stackArn: string,
+    stackName: string | undefined
+  ): Promise<string | undefined> {
+    try {
+      const events = await client.describeStackEvents(stackArn);
+      // Events are newest first, so the last match is the earliest failure.
+      const failed = events
+        .filter(
+          (event) =>
+            event.ResourceStatus?.endsWith('_FAILED') &&
+            event.ResourceType !== 'AWS::CloudFormation::Stack' &&
+            event.LogicalResourceId !== stackName
+        )
+        .pop();
+      return failed?.ResourceStatusReason
+        ? `${failed.LogicalResourceId}: ${failed.ResourceStatusReason}`
+        : undefined;
+    } catch (error) {
+      appContextService
+        .getLogger()
+        .warn(
+          `Could not read the CloudFormation stack events: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      return undefined;
+    }
+  }
+
   public async status(stackArn: string): Promise<GetAwsOnboardingStackResponse> {
     const { client } = await this.getClient('status');
     const stack = await client.describeStack(stackArn);
@@ -265,10 +300,15 @@ export class AwsOnboardingStackService {
               ?.OutputValue,
           }
         : undefined;
+    const reason =
+      status === 'failed'
+        ? (await this.findFailedResourceReason(client, stackArn, stack.StackName)) ??
+          stack.StackStatusReason
+        : stack.StackStatusReason;
     return {
       status,
       stackStatus: stack.StackStatus,
-      reason: stack.StackStatusReason,
+      reason,
       ...(outputs ? { outputs } : {}),
     };
   }

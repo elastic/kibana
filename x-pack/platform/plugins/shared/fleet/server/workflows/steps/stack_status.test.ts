@@ -31,6 +31,7 @@ jest.mock('../../services/iac_provisioner_integrations', () => ({}));
 jest.mock('../../services/utils/iac_provisioner', () => ({}));
 
 const describeStack = jest.fn();
+const describeStackEvents = jest.fn();
 
 describe('awsOnboardingStackStatusStepDefinition', () => {
   beforeEach(() => {
@@ -40,7 +41,11 @@ describe('awsOnboardingStackStatusStepDefinition', () => {
       stackNamePrefix: 'elastic',
     });
     (assumeOnboardingRole as jest.Mock).mockResolvedValue({});
-    (AwsCloudFormationClient as unknown as jest.Mock).mockImplementation(() => ({ describeStack }));
+    (AwsCloudFormationClient as unknown as jest.Mock).mockImplementation(() => ({
+      describeStack,
+      describeStackEvents,
+    }));
+    describeStackEvents.mockResolvedValue([]);
   });
 
   const run = () =>
