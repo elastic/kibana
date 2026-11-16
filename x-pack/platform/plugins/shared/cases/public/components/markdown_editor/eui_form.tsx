@@ -5,124 +5,38 @@
  * 2.0.
  */
 
-import React, { forwardRef, useMemo } from 'react';
-import { css } from '@emotion/react';
-import type { EuiMarkdownEditorProps } from '@elastic/eui';
-import {
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import React, { forwardRef } from 'react';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import * as i18n from '../../common/translations';
-import { CommentEditorContext } from './context';
-import { useMarkdownSessionStorage } from './use_markdown_session_storage';
-import { type MarkdownEditorRef } from './types';
-import { CommentEditor } from './comment_editor';
+import type { MarkdownEditorLayoutProps } from './markdown_editor_layout';
+import { MarkdownEditorLayout } from './markdown_editor_layout';
+import type { MarkdownEditorRef } from './types';
 
-type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
-  id: string;
+type MarkdownEditorFormProps = Omit<
+  MarkdownEditorLayoutProps,
+  'control' | 'label' | 'labelAppend' | 'helpText' | 'isInvalid' | 'errorMessage'
+> & {
   field: FieldHook<string>;
-  dataTestSubj: string;
-  idAria: string;
-  isDisabled?: boolean;
-  bottomRightContent?: React.ReactNode;
-  caseTitle?: string;
-  caseId?: string;
-  caseTags?: string[];
-  draftStorageKey?: string;
-  disabledUiPlugins?: string[];
-  initialValue?: string;
 };
 
+/** hook_form_lib adapter of the markdown editor; new forms should use `MarkdownField`. */
 export const MarkdownEditorForm = React.memo(
-  forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(
-    (
-      {
-        id,
-        field,
-        dataTestSubj,
-        idAria,
-        bottomRightContent,
-        caseTitle,
-        caseTags,
-        caseId,
-        draftStorageKey,
-        disabledUiPlugins,
-        initialValue,
-      },
-      ref
-    ) => {
-      const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-      const { hasConflicts } = useMarkdownSessionStorage({
-        field,
-        sessionKey: draftStorageKey ?? '',
-        initialValue,
-      });
-      const { euiTheme } = useEuiTheme();
+  forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(({ field, ...props }, ref) => {
+    const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-      const conflictWarningText = i18n.VERSION_CONFLICT_WARNING(
-        id === 'description' ? id : 'comment'
-      );
-
-      const commentEditorContextValue = useMemo(
-        () => ({
-          editorId: id,
-          value: field.value,
-          caseTitle,
-          caseTags,
-        }),
-        [id, field.value, caseTitle, caseTags]
-      );
-
-      return (
-        <CommentEditorContext.Provider value={commentEditorContextValue}>
-          <EuiFormRow
-            data-test-subj={dataTestSubj}
-            describedByIds={idAria ? [idAria] : undefined}
-            fullWidth
-            error={errorMessage}
-            helpText={field.helpText}
-            isInvalid={isInvalid}
-            label={field.label}
-            labelAppend={field.labelAppend}
-          >
-            <CommentEditor
-              ariaLabel={idAria}
-              data-test-subj={`${dataTestSubj}-markdown-editor`}
-              editorId={id}
-              disabledUiPlugins={disabledUiPlugins}
-              field={field}
-              caseId={caseId}
-              ref={ref}
-              onChange={field.setValue}
-              value={field.value}
-            />
-          </EuiFormRow>
-          {bottomRightContent && (
-            <EuiFlexGroup
-              css={css`
-                padding: ${euiTheme.size.m} 0;
-              `}
-              justifyContent={'flexEnd'}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiText color="danger" size="s">
-                  {hasConflicts && conflictWarningText}
-                </EuiText>
-                <EuiSpacer size="s" />
-                {bottomRightContent}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </CommentEditorContext.Provider>
-      );
-    }
-  )
+    return (
+      <MarkdownEditorLayout
+        {...props}
+        ref={ref}
+        control={field}
+        label={field.label}
+        labelAppend={field.labelAppend}
+        helpText={field.helpText}
+        isInvalid={isInvalid}
+        errorMessage={errorMessage}
+      />
+    );
+  })
 );
 
 MarkdownEditorForm.displayName = 'MarkdownEditorForm';
