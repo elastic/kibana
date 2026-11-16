@@ -233,19 +233,23 @@ describe('loadCatalogConnectorTypes', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('.declarative-a'));
   });
 
-  it('builds 1 type from the higher version when 2 versions are stored', async () => {
+  it.each([
+    ['1.0.0', '2.0.0'],
+    ['2.0.0', '1.0.0'],
+  ])('builds both stored versions in order: %s, %s', async (firstVersion, secondVersion) => {
     const buildType = jest.fn((definition: StoredCatalogDefinition) =>
       buildTypeFromStoredSpec(definition, actions)
     );
+    const definitions = [
+      createDefinition('.declarative-a', firstVersion),
+      createDefinition('.declarative-a', secondVersion),
+    ];
     const storage = createStorage({
       manifest: createManifest([
-        { id: '.declarative-a', version: '1.1.0' },
-        { id: '.declarative-a', version: '1.2.0' },
+        { id: '.declarative-a', version: firstVersion },
+        { id: '.declarative-a', version: secondVersion },
       ]),
-      definitions: [
-        createDefinition('.declarative-a', '1.1.0'),
-        createDefinition('.declarative-a', '1.2.0'),
-      ],
+      definitions,
     });
 
     await expect(
@@ -258,58 +262,29 @@ describe('loadCatalogConnectorTypes', () => {
       })
     ).resolves.toBe(1);
 
-    expect(buildType).toHaveBeenCalledTimes(1);
-    expect(buildType.mock.calls[0][0].version).toBe('1.2.0');
+    expect(buildType).toHaveBeenCalledTimes(2);
+    expect(buildType).toHaveBeenNthCalledWith(1, definitions[0]);
+    expect(buildType).toHaveBeenNthCalledWith(2, definitions[1]);
+    expect(registry.has('.declarative-a')).toBe(true);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('already registered'));
   });
 
-  it('compares versions numerically by segment', async () => {
-    const buildType = jest.fn((definition: StoredCatalogDefinition) =>
-      buildTypeFromStoredSpec(definition, actions)
-    );
+  it('continues to another stored version when a version fails to build', async () => {
     const storage = createStorage({
       manifest: createManifest([
-        { id: '.declarative-a', version: '1.9.0' },
-        { id: '.declarative-a', version: '1.10.0' },
-        { id: '.declarative-b', version: '1.9' },
-        { id: '.declarative-b', version: '1.10' },
-      ]),
-      definitions: [
-        createDefinition('.declarative-a', '1.9.0'),
-        createDefinition('.declarative-a', '1.10.0'),
-        createDefinition('.declarative-b', '1.9'),
-        createDefinition('.declarative-b', '1.10'),
-      ],
-    });
-
-    await loadCatalogConnectorTypes({
-      storage,
-      actionTypeRegistry: registry,
-      buildType,
-      logger,
-      signal: new AbortController().signal,
-    });
-
-    expect(buildType.mock.calls.map(([definition]) => definition.version).sort()).toEqual([
-      '1.10',
-      '1.10.0',
-    ]);
-  });
-
-  it('does not fall back to a lower version when the highest fails to build', async () => {
-    const storage = createStorage({
-      manifest: createManifest([
-        { id: '.declarative-a', version: '1.0.0' },
         { id: '.declarative-a', version: '2.0.0' },
+        { id: '.declarative-a', version: '1.0.0' },
       ]),
       definitions: [
-        createDefinition('.declarative-a', '1.0.0'),
         createDefinition('.declarative-a', '2.0.0', 'id: [unclosed'),
+        createDefinition('.declarative-a', '1.0.0'),
       ],
     });
 
-    await expect(load(storage)).resolves.toBe(0);
+    await expect(load(storage)).resolves.toBe(1);
 
-    expect(registry.has('.declarative-a')).toBe(false);
+    expect(registry.has('.declarative-a')).toBe(true);
     expect(logger.warn).toHaveBeenCalledTimes(1);
   });
 
