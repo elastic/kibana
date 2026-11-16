@@ -1,5 +1,5 @@
 {
-  "sha1": "bf662a2faadf5b32b2061dc4cbdef654a5c15590",
+  "sha1": "982b0fb17eda124d370e7a0eb3a3c3698fbbc89b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1104,8 +1104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 41,
-        "column": 30
+        "line": 51,
+        "column": 5
       }
     },
     {
@@ -1120,8 +1120,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 57,
-        "column": 24
+        "line": 64,
+        "column": 14
       }
     },
     {
@@ -1136,8 +1136,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 67,
-        "column": 14
+        "line": 73,
+        "column": 7
       }
     },
     {
@@ -1152,8 +1152,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 84,
-        "column": 14
+        "line": 92,
+        "column": 13
       }
     },
     {
@@ -1314,6 +1314,88 @@
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
         "line": 139,
         "column": 24
+      }
+    },
+    {
+      "id": "c61891d8be06d17-9eafd6649519629",
+      "title": "Entity Store update API key API tests Should move the task API keys to the user making the request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/update_api_key.spec.ts",
+        "line": 135,
+        "column": 85
+      }
+    },
+    {
+      "id": "c61891d8be06d17-f95a8dc0f01bca9",
+      "title": "Entity Store update API key API tests Should give the tasks their own keys when the caller authenticates with an API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/update_api_key.spec.ts",
+        "line": 179,
+        "column": 12
+      }
+    },
+    {
+      "id": "c61891d8be06d17-c6c50fe6b2d757e",
+      "title": "Entity Store update API key API tests Should not change anything when the user lacks the privileges to install",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/update_api_key.spec.ts",
+        "line": 193,
+        "column": 23
+      }
+    },
+    {
+      "id": "c61891d8be06d17-2d87a56d70b4393",
+      "title": "Entity Store update API key API tests Should not change anything when the user cannot read the extra sources the store extracts from",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/update_api_key.spec.ts",
+        "line": 213,
+        "column": 16
+      }
+    },
+    {
+      "id": "c61891d8be06d17-2f099a85d926ef8",
+      "title": "Entity Store update API key API tests Should do nothing when the Entity Store is not installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/update_api_key.spec.ts",
+        "line": 254,
+        "column": 9
       }
     }
   ]

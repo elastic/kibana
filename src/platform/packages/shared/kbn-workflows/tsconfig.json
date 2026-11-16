@@ -16,7 +16,9 @@
     "@kbn/human-readable-id",
     "@kbn/std",
     "@kbn/core-user-profile-common",
-    "@kbn/core-user-settings-types"
+    "@kbn/core-user-settings-types",
+    "@kbn/picomatcher",
+    "@kbn/repo-packages"
   ],
   "exclude": ["target/**/*"]
 }

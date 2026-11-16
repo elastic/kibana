@@ -14,7 +14,7 @@ const testDataSetup = logRateAnalysisTestData[0];
 const testDataPanel = {
   type: 'testData',
   suiteSuffix: 'with multi metric job',
-  panelTitle: `AIOps log rate analysis for ${testDataSetup.sourceIndexOrSavedSearch}`,
+  panelTitle: 'Log rate analysis',
   dashboardTitle: `AIOps log rate analysis for ${
     testDataSetup.sourceIndexOrSavedSearch
   } ${Date.now()}`,

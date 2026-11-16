@@ -11,7 +11,7 @@ import type { ManagedWorker, WorkerLoggingConfig } from '@kbn/core-threads-serve
 import { createManagedWorker } from '@kbn/core-threads-server-internal';
 import type { Logger } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
-import type { Phase, WatchdogWorkerData } from './types';
+import type { Phase, WatchdogProfilingData, WatchdogWorkerData } from './types';
 import {
   HEARTBEAT_INTERVAL_MS,
   SLOT_COUNT,
@@ -29,6 +29,7 @@ export interface EventLoopWatchdogParams {
   thresholdsMs: Readonly<Record<Phase, number>>;
   statsIntervalMs: number;
   logging: WorkerLoggingConfig;
+  profiling: WatchdogProfilingData;
   /** Overrides the worker entry, for tests. */
   workerEntry?: string;
 }
@@ -40,6 +41,8 @@ export class EventLoopWatchdog {
   private stopping?: Promise<void>;
   private shared?: BigInt64Array;
   private runningSinceUs = 0;
+  private profilingEnabled = false;
+  private profilingLoggedOn = false;
 
   constructor(private readonly params: EventLoopWatchdogParams) {}
 
@@ -50,7 +53,7 @@ export class EventLoopWatchdog {
     if (this.stopping) {
       throw new Error('Cannot start the event loop watchdog while it is stopping');
     }
-    const { logger, thresholdsMs, statsIntervalMs, logging, workerEntry } = this.params;
+    const { logger, thresholdsMs, statsIntervalMs, logging, profiling, workerEntry } = this.params;
     // Resolve first: if it throws, no heartbeat timer is left behind.
     const entry = workerEntry ?? require.resolve('./worker');
     const shared = new BigInt64Array(
@@ -60,6 +63,7 @@ export class EventLoopWatchdog {
     Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs()));
     Atomics.store(shared, Slot.runningSince, BigInt(this.runningSinceUs));
     this.shared = shared;
+    this.writeProfilingSlot();
     this.heartbeatTimer = setInterval(
       () => Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs())),
       HEARTBEAT_INTERVAL_MS
@@ -71,6 +75,7 @@ export class EventLoopWatchdog {
       thresholdsMs,
       statsIntervalMs,
       logging,
+      profiling,
     };
     this.worker = createManagedWorker<WatchdogWorkerData>({
       name: WATCHDOG_WORKER_NAME,
@@ -88,9 +93,8 @@ export class EventLoopWatchdog {
       onExhausted: () => this.clearHeartbeat(),
     });
     this.worker.start();
-    logger.info(
-      `Event loop watchdog started (block threshold ${thresholdsMs.running}ms, ${thresholdsMs.starting}ms while starting)`
-    );
+    logger.info('Event loop watchdog started');
+    this.logProfiling();
     this.warnIfSilent();
   }
 
@@ -131,6 +135,31 @@ export class EventLoopWatchdog {
     }
   }
 
+  /**
+   * Updates the profiling flag for the running worker. The setting is retained when the worker
+   * stops and applied if it starts again.
+   */
+  public setProfiling(enabled: boolean): void {
+    this.profilingEnabled = enabled;
+    this.writeProfilingSlot();
+    this.logProfiling();
+  }
+
+  private writeProfilingSlot(): void {
+    if (this.shared) {
+      Atomics.store(this.shared, Slot.profiling, this.profilingEnabled ? 1n : 0n);
+    }
+  }
+
+  /** Logs whether a running worker can profile, not what the flags ask for. */
+  private logProfiling(): void {
+    const on = this.shared !== undefined && this.profilingEnabled;
+    if (on !== this.profilingLoggedOn) {
+      this.profilingLoggedOn = on;
+      this.params.logger.info(`Event loop watchdog profiling ${on ? 'on' : 'off'} for this node`);
+    }
+  }
+
   public stop(): Promise<void> {
     if (this.stopping) {
       return this.stopping;
@@ -141,6 +170,7 @@ export class EventLoopWatchdog {
     }
     this.worker = undefined;
     this.shared = undefined;
+    this.logProfiling();
     this.clearHeartbeat();
     this.stopping = worker
       .stop()

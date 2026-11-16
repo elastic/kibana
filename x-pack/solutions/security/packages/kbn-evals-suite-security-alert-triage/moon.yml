@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/agent-builder-common'
   - '@kbn/core'
-  - '@kbn/security-evals-matrix'
 tags:
   - functional-tests
   - package

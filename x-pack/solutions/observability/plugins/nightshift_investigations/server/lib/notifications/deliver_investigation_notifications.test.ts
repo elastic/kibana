@@ -10,7 +10,7 @@ import type { InvestigationNotificationDestination } from '../../../common';
 import type { NotifiableInvestigation, NotificationExecution } from './notification_delivery';
 import type { NotificationPhase } from './notification_routing';
 import { deliverInvestigationNotifications } from './deliver_investigation_notifications';
-import { createRoutingTestContext } from './notification_routing.mock';
+import { createRoutingTestContext, getTestIsomerRuntime } from './notification_routing.mock';
 
 const destination = {
   type: 'slack',
@@ -50,6 +50,7 @@ const setup = (spaceId = 'default') => {
       investigationUrl: 'https://kibana.example/app/nightshift',
       routingClient: context.client,
       getExecute,
+      getIsomerRuntime: getTestIsomerRuntime,
       signal: controller.signal,
       logger,
     });

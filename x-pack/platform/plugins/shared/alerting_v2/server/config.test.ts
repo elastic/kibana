@@ -136,22 +136,24 @@ describe('alerting_v2 config schema', () => {
   describe('getQueryRowLimit', () => {
     it('uses min(alerts.max, NON_STREAMING_MAX_ROWS) for the json response format', () => {
       const config = configSchema.validate({});
-      expect(getQueryRowLimit(config, formatByName('json'))).toBe(NON_STREAMING_MAX_ROWS);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('json'))).toBe(
+        NON_STREAMING_MAX_ROWS
+      );
     });
 
     it('uses alerts.max for the arrow response format', () => {
       const config = configSchema.validate({});
-      expect(getQueryRowLimit(config, formatByName('arrow'))).toBe(10000);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('arrow'))).toBe(10000);
     });
 
     it('honors a lower alerts.max on the json response format', () => {
       const config = configSchema.validate({ rules: { run: { alerts: { max: 500 } } } });
-      expect(getQueryRowLimit(config, formatByName('json'))).toBe(500);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('json'))).toBe(500);
     });
 
     it('honors a lower alerts.max on the arrow response format', () => {
       const config = configSchema.validate({ rules: { run: { alerts: { max: 500 } } } });
-      expect(getQueryRowLimit(config, formatByName('arrow'))).toBe(500);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('arrow'))).toBe(500);
     });
   });
 

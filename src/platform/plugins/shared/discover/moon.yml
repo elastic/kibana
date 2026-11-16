@@ -130,6 +130,7 @@ dependsOn:
   - '@kbn/shared-ux-document-data-cascade'
   - '@kbn/zod'
   - '@kbn/cps'
+  - '@kbn/licensing-plugin'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-chrome-app-menu'

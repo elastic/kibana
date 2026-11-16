@@ -147,7 +147,7 @@ When reviewing deprecation PRs, focus on what startup validation does NOT catch:
 
 For concrete code covering all deprecation scenarios (rename, split, sub-feature extraction, consolidation, alerting/cases), read the test plugin:
 
-`x-pack/platform/test/security_api_integration/plugins/features_provider/server/index.ts`
+`x-pack/platform/test_plugins/security_api_integration/plugins/features_provider/server/index.ts`
 
 For real-world deprecations (discover, dashboard, visualize, maps):
 

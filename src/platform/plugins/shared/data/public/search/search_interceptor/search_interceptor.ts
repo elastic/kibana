@@ -111,7 +111,6 @@ export interface SearchInterceptorDeps {
   getCPSManager?: () => ICPSManager | undefined;
 }
 
-const MAX_CACHE_ITEMS = 50;
 const MAX_CACHE_SIZE_MB = 10;
 
 const DEFAULT_MULTIPLEXING_POLL_LENGTH = '30s';
@@ -119,10 +118,7 @@ const DEFAULT_MULTIPLEXING_POLL_LENGTH = '30s';
 export class SearchInterceptor {
   private uiSettingsSubs: Subscription[] = [];
   private searchTimeout: number;
-  private readonly responseCache: SearchResponseCache = new SearchResponseCache(
-    MAX_CACHE_ITEMS,
-    MAX_CACHE_SIZE_MB
-  );
+  private readonly responseCache: SearchResponseCache = new SearchResponseCache(MAX_CACHE_SIZE_MB);
   private protocolSupportsMultiplexing: boolean = false;
   private performanceObserver?: PerformanceObserver;
   private readonly activeAsyncSearches = new Map<string, string>(); // id -> strategy
@@ -364,7 +360,7 @@ export class SearchInterceptor {
     const search = ({
       abortSignal = searchAbortController.getSignal(),
       pollLength,
-    }: Pick<ISearchOptions, 'abortSignal'> & { pollLength?: string } = {}) => {
+    }: Pick<ISearchOptions, 'abortSignal' | 'pollLength'> = {}) => {
       const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
         { isSearchStored: false },
         () => {},
@@ -568,22 +564,23 @@ export class SearchInterceptor {
    */
   private runSearch(
     { params, ...request }: IKibanaSearchRequest,
-    options?: ISearchOptions & { pollLength?: string }
+    options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
     const requestHash = params ? createRequestHashForBackgroundSearches(params) : undefined;
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
+    const pollLength = request.id
+      ? options?.pollLength
+        ? options.pollLength
+        : // don't set or override user-configured pollLength, it will be applied server-side
+        !this.deps.searchConfig.asyncSearch.pollLength && this.protocolSupportsMultiplexing
+        ? DEFAULT_MULTIPLEXING_POLL_LENGTH
+        : undefined
+      : undefined;
     const paramsToUse = request.id
       ? {
-          wait_for_completion_timeout: options?.pollLength
-            ? options.pollLength
-            : // don't set or override user-configured pollLength, it will be applied server-side
-            !this.deps.searchConfig.asyncSearch.pollLength && this.protocolSupportsMultiplexing
-            ? DEFAULT_MULTIPLEXING_POLL_LENGTH
-            : undefined,
-
           // FIXME: the dropNullColumns param shouldn't be needed during polling
           // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
           // at that point, exclude all params when request.id is defined (polling phase)
@@ -603,6 +600,8 @@ export class SearchInterceptor {
           body: JSON.stringify({
             ...{ ...request, params: paramsToUse },
             ...searchOptions,
+            // also sent as an option, because strategies wrapping others (e.g. Security's) rebuild `params`
+            pollLength,
             requestHash,
             stream:
               strategy === ESQL_ASYNC_SEARCH_STRATEGY ||
@@ -682,8 +681,8 @@ export class SearchInterceptor {
    * If requestHash is defined, tries to return them first from cache.
    */
   private getSearchResponse$(request: IKibanaSearchRequest, options: IAsyncSearchOptions) {
-    const { requestHash } = options;
-    const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
+    const { requestHash, sessionId } = options;
+    const sessionOptions = this.deps.session.getSearchOptions(sessionId);
     const cached =
       requestHash && !sessionOptions?.isRestore ? this.responseCache.get(requestHash) : undefined; // don't use cache if restoring a session
 
@@ -695,10 +694,11 @@ export class SearchInterceptor {
     searchAbortController.addAbortSignal(options.abortSignal ?? new AbortController().signal);
     const response$ = cached?.response$ || this.runSearch$(request, options, searchAbortController);
 
-    if (requestHash && !this.responseCache.has(requestHash)) {
+    if (requestHash && sessionId && !this.responseCache.has(requestHash)) {
       this.responseCache.set(requestHash, {
         response$,
         searchAbortController,
+        groupId: sessionId,
       });
     }
 
@@ -706,6 +706,16 @@ export class SearchInterceptor {
       response$,
       searchAbortController,
     };
+  }
+
+  /** Checks whether the session has completed responses available for replay. */
+  public hasResponseCacheForSession(sessionId: string): boolean {
+    return this.responseCache.hasCompletedResponses(sessionId);
+  }
+
+  /** Evicts a session's cached responses without canceling active searches. */
+  public evictResponseCacheForSession(sessionId: string): void {
+    this.responseCache.evictGroup(sessionId);
   }
 
   /**
