@@ -28,7 +28,7 @@ import type {
 import { CONTAINER_STEP_TYPES, DEFAULT_NODE_STYLE } from './types';
 import { visitStepChildSlots } from './walk_step_tree';
 import { getTriggerName } from '../common/get_trigger_name';
-import type { IfStep, MergeStep, ParallelStep, SwitchStep, WorkflowYaml } from '../spec/schema';
+import type { IfStep, ParallelStep, SwitchStep, WorkflowYaml } from '../spec/schema';
 
 /** Resolves the label drawn on a trigger node. Defaults to {@link getTriggerName}. */
 export type GetTriggerLabel = (triggerType: string) => string;
@@ -247,7 +247,6 @@ function transformInternal(
     // Block structure of this step, filled in by the arm that handles its type.
     let containerBody: StructureSequence | undefined;
     let forkBranches: StructureBranch[] | undefined;
-    let attached: StructureSequence | undefined;
     const lanes: StructureLane[] = [];
 
     // Record the back-pointer from this node id to its source step.  Both
@@ -559,23 +558,6 @@ function transformInternal(
 
       forkBranches = switchBranches;
       if (branchExits.length > 0) exitIds = dedupeIds(branchExits);
-    } else if (step.type === 'merge') {
-      const mergeStep = step as MergeStep;
-      const childSteps = (mergeStep.steps as Step[]) ?? [];
-      const inner = transformInternal([], childSteps, ids, ctx);
-      attached = inner.items;
-      Object.assign(nodeRefs, inner.nodeRefs);
-      nodes.push(...inner.nodes);
-      bypassLaneNodes.push(...inner.bypassLaneNodes);
-      edges.push(...inner.edges);
-      failureEdges.push(...inner.failureEdges);
-      foreachGroups.push(...inner.foreachGroups);
-      fallbackLanes.push(...inner.fallbackLanes);
-      const firstId = inner.nodes[0]?.id;
-      if (firstId) {
-        edges.push({ id: `${id}:${firstId}`, source: id, target: firstId });
-      }
-      // Single contained body — exit from the wrapping step.
     }
 
     // ── fallback lane (on-failure.fallback) ──────────────────────────────
@@ -689,7 +671,7 @@ function transformInternal(
     } else if (forkBranches && forkBranches.length > 0) {
       items.push({ kind: 'fork', id, branches: forkBranches, lanes });
     } else {
-      items.push({ kind: 'step', id, lanes, ...(attached ? { attached } : {}) });
+      items.push({ kind: 'step', id, lanes });
     }
 
     prevExitIds = exitIds;

@@ -15,7 +15,6 @@ export const MonochromeIcons = new Set([
   'if',
   'foreach',
   'parallel',
-  'merge',
   'wait',
   'workflow.execute',
   'workflow.executeAsync',

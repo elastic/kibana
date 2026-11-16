@@ -463,7 +463,6 @@ describe('getStepIconType and getIconBase64 consistency', () => {
     'if',
     'wait',
     'waitForInput',
-    'merge',
     'loop.break',
     'loop.continue',
     'workflow.execute',

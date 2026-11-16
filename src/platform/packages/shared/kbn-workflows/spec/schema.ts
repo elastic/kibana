@@ -1180,33 +1180,6 @@ export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = fa
   return applyParallelModeRefinement(schema);
 };
 
-export const MergeStepConfigSchema = z.object({
-  sources: z
-    .array(z.string())
-    .describe('References to branch or step names whose results to merge'),
-  steps: z.array(BaseStepSchema).describe('Steps to execute after merging'),
-});
-export const MergeStepSchema = BaseStepSchema.extend({
-  type: z
-    .literal('merge')
-    .describe('Merge results from parallel branches and continue with subsequent steps'),
-  ...MergeStepConfigSchema.shape,
-});
-export type MergeStep = z.infer<typeof MergeStepSchema>;
-
-export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
-  const schema = MergeStepSchema.extend({
-    steps: z.array(stepSchema), // steps to run after merge
-  });
-
-  if (loose) {
-    // make all fields optional, but require type to be present for discriminated union
-    return schema.partial().required({ type: true });
-  }
-
-  return schema;
-};
-
 export const LoopBreakStepSchema = BaseStepSchema.extend({
   type: z
     .literal('loop.break')
@@ -1356,7 +1329,6 @@ const StepSchema = z.lazy(() =>
     ElasticsearchStepSchema,
     KibanaStepSchema,
     ParallelStepSchema,
-    MergeStepSchema,
     WorkflowExecuteStepSchema,
     WorkflowExecuteAsyncStepSchema,
     WorkflowOutputStepSchema,
@@ -1379,7 +1351,6 @@ export const BuiltInStepTypes = [
   IfStepSchema.shape.type.value,
   SwitchStepSchema.shape.type.value,
   ParallelStepObjectSchema.shape.type.value,
-  MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
   WaitForInputStepSchema.shape.type.value,
