@@ -251,6 +251,10 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
   },
   {
+    id: 'eks',
+    packageName: 'aws',
+  },
+  {
     id: 'emr',
     packageName: 'aws',
   },
