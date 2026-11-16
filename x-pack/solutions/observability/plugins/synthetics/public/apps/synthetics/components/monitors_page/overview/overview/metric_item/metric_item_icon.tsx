@@ -243,7 +243,8 @@ export const MetricItemIcon = ({
               aria-label={i18n.translate(
                 'xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl',
                 {
-                  defaultMessage: 'Monitor url',
+                  defaultMessage: 'Monitor url: {url}',
+                  values: { url: monitor.urls },
                 }
               )}
             />
