@@ -181,11 +181,15 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
       const [classicAlerts, hasUniversalRules] = await Promise.all([
         getObservabilityAlerts({ http }).catch(() => undefined),
         shouldCheckUniversalRules
-          ? hasUniversalAlertingRules({ http }).catch(() => false)
+          ? hasUniversalAlertingRules({ http }).catch(() => undefined)
           : Promise.resolve(false),
       ]);
 
-      if (!classicAlerts && !hasUniversalRules) {
+      const hasData = (classicAlerts?.length ?? 0) > 0 || hasUniversalRules === true;
+      const isUnknown =
+        !hasData && (classicAlerts === undefined || hasUniversalRules === undefined);
+
+      if (isUnknown) {
         setHasDataMap((prevState) => ({
           ...prevState,
           [ALERT_APP]: {
@@ -199,7 +203,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
       setHasDataMap((prevState) => ({
         ...prevState,
         [ALERT_APP]: {
-          hasData: (classicAlerts?.length ?? 0) > 0 || hasUniversalRules,
+          hasData,
           status: FETCH_STATUS.SUCCESS,
         },
       }));
