@@ -9,6 +9,7 @@ import { notFound } from '@hapi/boom';
 import { isNotFoundError } from '@kbn/es-errors';
 import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import {
+  getUnitDestinationWritePatterns,
   isEnabledFailureStore,
   streamsUnitIdentifierSchema,
   type ClassicIngestStreamEffectiveLifecycle,
@@ -19,12 +20,12 @@ import {
   MAX_RESOLVE_INDEX_PATTERNS,
   collectResolvedDataStreamNames,
   collectResolvedIndexNames,
-  getUnitDestinationWritePatterns,
   matchesIndexPattern,
   type ResolvedDestinationIndex,
+  type ResolvedDestinationIndexHealth,
   type ResolveUnitIndicesResponse,
 } from '../../../../common';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_V2_API_PRIVILEGES } from '../../../../common/constants';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
 import { getDataStreamLifecycle, getFailureStore } from '../../../lib/streams/stream_crud';
 import { processAsyncInChunks } from '../../../utils/process_async_in_chunks';
@@ -48,6 +49,13 @@ const assertStreamsCanvasEnabled = async (uiSettingsClient: {
 
 const uniquePatterns = (patterns: string[]): string[] => [...new Set(patterns)];
 
+const toResolvedIndexHealth = (
+  status: string | undefined
+): ResolvedDestinationIndexHealth | undefined => {
+  const health = status?.toLowerCase();
+  return health === 'green' || health === 'yellow' || health === 'red' ? health : undefined;
+};
+
 const chunkPatterns = (patterns: string[]): string[][] => {
   const chunks: string[][] = [];
   for (let index = 0; index < patterns.length; index += MAX_RESOLVE_INDEX_PATTERNS) {
@@ -66,7 +74,7 @@ export const resolveUnitIndicesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.read],
     },
   },
   params: unitPathSchema,
@@ -76,7 +84,7 @@ export const resolveUnitIndicesRoute = createServerRoute({
     getScopedClients,
     logger,
   }): Promise<ResolveUnitIndicesResponse> => {
-    const { soClient, uiSettingsClient, scopedClusterClient, streamsClient } =
+    const { unitSoClient, uiSettingsClient, scopedClusterClient, streamsClient } =
       await getScopedClients({
         request,
       });
@@ -84,7 +92,7 @@ export const resolveUnitIndicesRoute = createServerRoute({
     await assertStreamsCanvasEnabled(uiSettingsClient);
 
     const streamsUnitService = new StreamsUnitService({
-      soClient,
+      soClient: unitSoClient,
       logger,
     });
 
@@ -132,6 +140,7 @@ export const resolveUnitIndicesRoute = createServerRoute({
     const names = [...resolvedNames];
     const lifecycleByName = new Map<string, ClassicIngestStreamEffectiveLifecycle>();
     const failureStoreEnabledByName = new Map<string, boolean>();
+    const healthByName = new Map<string, ResolvedDestinationIndexHealth>();
     const privilegesByName: Record<string, { read_failure_store: boolean }> =
       dataStreamNames.size > 0
         ? await streamsClient.getPrivilegesPerStream([...dataStreamNames])
@@ -162,6 +171,10 @@ export const resolveUnitIndicesRoute = createServerRoute({
           dataStream.name,
           isEnabledFailureStore(getFailureStore({ dataStream }))
         );
+        const health = toResolvedIndexHealth(dataStream.status);
+        if (health) {
+          healthByName.set(dataStream.name, health);
+        }
       }
     }
 
@@ -182,6 +195,7 @@ export const resolveUnitIndicesRoute = createServerRoute({
                           error: { message: 'Data stream not found' },
                         },
                         failure_store_enabled: failureStoreEnabledByName.get(name) ?? true,
+                        health: healthByName.get(name),
                         privileges: {
                           read_failure_store: privilegesByName[name]?.read_failure_store ?? false,
                         },

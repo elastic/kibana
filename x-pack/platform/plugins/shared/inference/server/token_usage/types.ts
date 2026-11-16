@@ -9,6 +9,7 @@ import type { ChatCompletionTokenCount, Model } from '@kbn/inference-common';
 
 export interface TokenUsageContext {
   connectorId: string;
+  spaceId: string;
   featureId?: string;
   parentFeatureId?: string;
   modelId?: string;
@@ -19,6 +20,7 @@ export interface TokenUsageContext {
 
 export interface TokenUsageContextInput {
   connectorId: string;
+  spaceId: string;
   model?: Partial<Model>;
   modelName?: string;
   featureId?: string;
@@ -27,12 +29,14 @@ export interface TokenUsageContextInput {
 
 export const buildTokenUsageContext = ({
   connectorId,
+  spaceId,
   model,
   modelName,
   featureId,
   parentFeatureId,
 }: TokenUsageContextInput): TokenUsageContext => ({
   connectorId,
+  spaceId,
   modelId: modelName ?? model?.id,
   modelCreator: model?.creator ?? model?.provider,
   provider: model?.platform ?? 'unknown',
@@ -49,6 +53,7 @@ export interface TokenUsageDocument {
     thinking_tokens?: number;
     total_tokens: number;
     cached_tokens?: number;
+    cache_write_tokens?: number;
   };
   model: {
     model_id?: string;
@@ -58,6 +63,7 @@ export interface TokenUsageDocument {
   };
   inference: {
     connector_id: string;
+    space_id: string;
     feature_id?: string;
     parent_feature_id?: string;
   };
@@ -80,6 +86,7 @@ export const mapTokenCountToDocument = ({
       ...(tokens.thinking !== undefined ? { thinking_tokens: tokens.thinking } : {}),
       total_tokens: tokens.total,
       ...(tokens.cached !== undefined ? { cached_tokens: tokens.cached } : {}),
+      ...(tokens.cacheWrite !== undefined ? { cache_write_tokens: tokens.cacheWrite } : {}),
     },
     model: {
       model_id: model ?? context.modelId,
@@ -89,6 +96,7 @@ export const mapTokenCountToDocument = ({
     },
     inference: {
       connector_id: context.connectorId,
+      space_id: context.spaceId,
       feature_id: context.featureId,
       parent_feature_id: context.parentFeatureId,
     },

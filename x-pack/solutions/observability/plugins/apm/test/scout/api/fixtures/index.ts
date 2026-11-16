@@ -11,3 +11,12 @@ import { synthtraceFixture } from '@kbn/scout-synthtrace';
 export const apiTest = mergeTests(baseApiTest, synthtraceFixture);
 
 export { testData } from '../../shared';
+export {
+  serviceMapStats,
+  SERVICE_MAP_STATS_BACKEND,
+  SERVICE_MAP_STATS_DATA,
+  SERVICE_MAP_STATS_END_DATE,
+  SERVICE_MAP_STATS_FRONTEND,
+  SERVICE_MAP_STATS_START_DATE,
+  SERVICE_MAP_STATS_WORKER,
+} from './synthtrace/service_map_stats';

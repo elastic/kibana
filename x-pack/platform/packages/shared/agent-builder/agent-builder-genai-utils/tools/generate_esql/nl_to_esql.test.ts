@@ -47,7 +47,7 @@ import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
-import { generateEsql } from './nl_to_esql';
+import { generateEsql, DEFAULT_EXECUTION_TIMEOUT_MS } from './nl_to_esql';
 
 const mockDocBase = { getDocumentation: jest.fn().mockReturnValue({}) };
 const mockGraphOutput = {
@@ -141,6 +141,26 @@ describe('generateEsql — doc-prefetch orchestration', () => {
     await generateEsql({ ...base, execute: 'schema' });
     expect(mockGraphInvoke).toHaveBeenCalledWith(
       expect.objectContaining({ execute: 'schema' }),
+      expect.anything()
+    );
+  });
+
+  it('bounds query execution to 30s by default and forwards an explicit executionTimeoutMs', async () => {
+    const { model } = createMockModel();
+    const logger = { debug: jest.fn() } as unknown as Logger;
+    const esClient = {} as ElasticsearchClient;
+    const base = { nlQuery: 'count log lines', index: 'logs-test', model, esClient, logger };
+
+    await generateEsql(base);
+    expect(mockGraphInvoke).toHaveBeenCalledWith(
+      expect.objectContaining({ executionTimeoutMs: DEFAULT_EXECUTION_TIMEOUT_MS }),
+      expect.anything()
+    );
+    expect(DEFAULT_EXECUTION_TIMEOUT_MS).toBe(30_000);
+
+    await generateEsql({ ...base, executionTimeoutMs: 5_000 });
+    expect(mockGraphInvoke).toHaveBeenCalledWith(
+      expect.objectContaining({ executionTimeoutMs: 5_000 }),
       expect.anything()
     );
   });

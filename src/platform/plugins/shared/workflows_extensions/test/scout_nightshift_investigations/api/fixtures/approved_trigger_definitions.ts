@@ -95,6 +95,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: 'ca5a31feffb0b5b8d9df7cac46938cba39f26bbe2322d2f2becc80ad325cb76b',
   },
   {
+    id: 'alerting.alertStatusChanged',
+    schemaHash: '0840e1303c7b027c3a3830ca0f6ec4a1695eaf35eb7e4567855f51ad11c8ce29',
+  },
+  {
     id: 'alerting.ruleCreated',
     schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
@@ -228,15 +232,15 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'nightshift-investigations.completed',
-    schemaHash: '45751406a08db8725fd09651f83294e104cba5fc442d2855def0dee678abb5b0',
+    schemaHash: 'a6b68ad87d83616892d0932b99a4035aa3442ae2df9bc5ab2c05d2efe68fc049',
   },
   {
     id: 'nightshift-investigations.failed',
-    schemaHash: 'd3e858523a3b105f3f15ba199f5020ec9665c70a4857a8f7b024c4764dffea5b',
+    schemaHash: '496cc04f19c16868bf3a14be917fd06c33d8651a79e788ef5f3b4205b66b88d6',
   },
   {
     id: 'nightshift-investigations.started',
-    schemaHash: '3530efdfc8f92f51cd0f93eee863f033e5a9d6621b81e43fbfd197838424c00b',
+    schemaHash: '718a4b1f28b06f194600c1e0847b7f520703f63afe222f2386cdb5fca1db1c14',
   },
   {
     id: 'security.alertAssigneesChanged',
@@ -329,6 +333,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   {
     id: 'slack2.reaction_added',
     schemaHash: 'ce7a24e2c6e45cfa3c306789223a3d619a7ce10dfcb1e688ccd1e830eba14933',
+  },
+  {
+    id: 'slack2.slash_command',
+    schemaHash: 'c9bf4583cec52b8f1608cd007df09e4535088ee372bf0cae3d7ee4fabad19d9d',
   },
   {
     id: 'slack2.team_join',

@@ -141,6 +141,18 @@ const importsRules: DummyRuleMap = {
       },
     ],
   ],
+  '@kbn/imports/restricted_redux_imports': [
+    'warn',
+    {
+      paths: ['redux', 'redux-v4'].map((name) => ({
+        name,
+        importNames: ['createStore', 'legacy_createStore'],
+        message: 'Prefer configureStore from the matching Redux Toolkit package.',
+      })),
+    },
+  ],
+  '@kbn/imports/no_redux_toolkit_middleware_spread': 'warn',
+  '@kbn/imports/no_redux_toolkit_state_reassignment': 'warn',
   '@kbn/imports/no_unresolvable_imports': 'error',
   '@kbn/imports/uniform_imports': 'error',
   '@kbn/imports/no_unused_imports': 'error',
@@ -148,7 +160,6 @@ const importsRules: DummyRuleMap = {
   '@kbn/imports/no_group_crossing_manifests': 'error',
   '@kbn/imports/no_group_crossing_imports': 'error',
   '@kbn/imports/no_direct_handlebars_import': 'error',
-  '@kbn/imports/no_direct_monaco_import': 'warn',
   '@kbn/imports/no_undeclared_plugin_target': 'error',
 };
 
@@ -292,11 +303,11 @@ export const importsOverrides: OxlintOverride[] = [
     },
   },
   {
-    // ESLint fixes the generated API client bundles with this rule and `import/no-duplicates` in one
-    // pass, as the OpenAPI generator expects. See the matching override in `.eslintrc.js`.
+    // The OpenAPI generator writes these API client bundles with duplicate and unused imports and
+    // relies on this rule and `import/no-duplicates` to clean them up.
     files: ['x-pack/solutions/security/packages/test-api-clients/{supertest,scout}/*.gen.ts'],
     rules: {
-      '@kbn/imports/no_unused_imports': 'off',
+      '@kbn/imports/no_unused_imports': 'error',
     },
   },
 ];

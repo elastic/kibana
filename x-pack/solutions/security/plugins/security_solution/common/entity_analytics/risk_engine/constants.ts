@@ -6,16 +6,11 @@
  */
 import { INTERNAL_RISK_SCORE_URL, PUBLIC_RISK_SCORE_URL } from '../risk_score/constants';
 export const RISK_ENGINE_URL = `${INTERNAL_RISK_SCORE_URL}/engine` as const;
-export const RISK_ENGINE_STATUS_URL = `${RISK_ENGINE_URL}/status` as const;
-export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init` as const;
-export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable` as const;
-export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable` as const;
 export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges` as const;
 export const RISK_ENGINE_SETTINGS_URL = `${RISK_ENGINE_URL}/settings` as const;
 
 // Public Risk Score routes
 export const PUBLIC_RISK_ENGINE_URL = `${PUBLIC_RISK_SCORE_URL}/engine` as const;
-export const RISK_ENGINE_SCHEDULE_NOW_URL = `${RISK_ENGINE_URL}/schedule_now` as const;
 export const RISK_ENGINE_CLEANUP_URL = `${PUBLIC_RISK_ENGINE_URL}/dangerously_delete_data` as const;
 export const RISK_ENGINE_CONFIGURE_SO_URL =
   `${PUBLIC_RISK_ENGINE_URL}/saved_object/configure` as const;

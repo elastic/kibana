@@ -122,6 +122,14 @@ const createSilentLog = () => {
   return { log, captured };
 };
 
+const writeCaptured = (captured: string[]) => {
+  if (captured.length === 0) return;
+  writeln('');
+  for (const msg of captured) {
+    for (const l of msg.split('\n')) writeln(`    ${l}`);
+  }
+};
+
 // ── Header ──────────────────────────────────────────────────────────────────
 
 const formatHeader = (baseContext: ValidationBaseContext) => {
@@ -392,10 +400,7 @@ run(
           progress.writeResult(line('oxlint', '—', 'no files changed'));
         } else if (result.failedFiles.length > 0) {
           progress.writeResult(line('oxlint', '✗', 'failed', progress.elapsed()));
-          if (captured.length > 0) {
-            writeln('');
-            for (const msg of captured) writeln(`    ${msg}`);
-          }
+          writeCaptured(captured);
           writeln(`    $ node scripts/lint ${result.failedFiles.join(' ')}`);
           writeln('');
           errors.push(new Error('oxlint failed'));
@@ -410,6 +415,7 @@ run(
               progress.elapsed()
             )
           );
+          if (result.warningCount > 0) writeCaptured(captured);
         }
       } catch (error) {
         progress.writeResult(line('oxlint', '✗', 'failed', progress.elapsed()));
@@ -432,10 +438,7 @@ run(
           progress.writeResult(line('lint', '—', 'no files changed'));
         } else if (result.failedFiles.length > 0) {
           progress.writeResult(line('lint', '✗', 'failed', progress.elapsed()));
-          if (captured.length > 0) {
-            writeln('');
-            for (const msg of captured) writeln(`    ${msg}`);
-          }
+          writeCaptured(captured);
           writeln(`    $ node scripts/eslint ${result.failedFiles.join(' ')}`);
           writeln('');
           errors.push(new Error('eslint failed'));
@@ -456,6 +459,7 @@ run(
               progress.elapsed()
             )
           );
+          if (result.warningCount > 0) writeCaptured(captured);
           if (verbose && result.fixedFiles.length > 0) {
             for (const file of result.fixedFiles) {
               writeln(`         fixed: ${file}`);

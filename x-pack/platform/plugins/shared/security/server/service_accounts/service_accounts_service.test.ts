@@ -61,6 +61,7 @@ describe('ServiceAccountsService', () => {
       encryptedSavedObjects,
       canEncrypt: true,
       getCurrentUserProfileId: jest.fn().mockResolvedValue(null),
+      getUserProfiles: jest.fn().mockResolvedValue([]),
       getSpaceId: jest.fn().mockReturnValue('default'),
       workloadTypes: securityServiceMock.createDelegateHandle().serviceAccounts,
       ...overrides,

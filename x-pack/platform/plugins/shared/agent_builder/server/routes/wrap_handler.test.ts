@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { createInternalError } from '@kbn/agent-builder-common';
+import { createConversationBusyError, createInternalError } from '@kbn/agent-builder-common';
 import { createInferenceRequestError, createInferenceProviderError } from '@kbn/inference-common';
 import { getHandlerWrapper } from './wrap_handler';
 
@@ -92,8 +92,38 @@ describe('getHandlerWrapper', () => {
     expect(result.status).toBe(418);
     expect(result.payload).toMatchObject({
       message: 'boom',
-      attributes: { trace_id: 'trace-1' },
+      attributes: { code: 'internalError', trace_id: 'trace-1' },
     });
+  });
+
+  it('logs a conversationBusy refusal at debug and returns the active execution id', async () => {
+    const handler = wrapHandler(async () => {
+      throw createConversationBusyError({
+        conversationId: 'conversation-1',
+        activeExecutionId: 'exec-1',
+      });
+    });
+
+    const result: any = await handler(createCtx(), req, kibanaResponseFactory);
+
+    expect(result.status).toBe(409);
+    expect(result.payload).toEqual({
+      message: 'Conversation conversation-1 already has an execution in progress',
+      attributes: { code: 'conversationBusy', trace_id: undefined, active_execution_id: 'exec-1' },
+    });
+    expect(logger.debug).toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs other AgentBuilderErrors as errors', async () => {
+    const handler = wrapHandler(async () => {
+      throw createInternalError('boom');
+    });
+
+    await handler(createCtx(), req, kibanaResponseFactory);
+
+    expect(logger.error).toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('propagates the status of an InferenceTaskRequestError (e.g. 404 from connector lookup)', async () => {
@@ -128,7 +158,7 @@ describe('getHandlerWrapper', () => {
     const result: any = await handler(createCtx(), req, kibanaResponseFactory);
 
     expect(result.status).toBe(500);
-    expect(result.payload).toMatchObject({ message: 'something went wrong' });
+    expect(result.payload).toEqual({ message: 'something went wrong' });
   });
 
   it('falls back to 500 for an inference error with status outside 4xx/5xx', async () => {
@@ -139,6 +169,7 @@ describe('getHandlerWrapper', () => {
     const result: any = await handler(createCtx(), req, kibanaResponseFactory);
 
     expect(result.status).toBe(500);
+    expect(result.payload).toEqual({ message: 'not really an error' });
   });
 
   it('propagates the status of a 4xx Boom error', async () => {

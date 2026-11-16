@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useFilesContext } from '@kbn/shared-ux-file-context';
+import { useHasFilesContext } from '@kbn/shared-ux-file-context';
 import React, { forwardRef } from 'react';
 import { type MarkdownValueControl, type MarkdownEditorRef, type EditorBaseProps } from './types';
 import { PastableMarkdownEditor } from './pastable_editor';
@@ -23,17 +23,6 @@ interface Props extends EditorBaseProps {
   [key: string]: unknown;
 }
 
-/**
- * It is not guaranteed that downstream consumers of cases will have
- * defined a files context. This hook tests if the context is defined.
- */
-function useHasFilesContext(): boolean {
-  try {
-    return !!useFilesContext();
-  } catch {
-    return false;
-  }
-}
 /**
  * Returns the correct editor (with or without file-paste support) based on the
  * presence of the FilesContext and a `caseId`.

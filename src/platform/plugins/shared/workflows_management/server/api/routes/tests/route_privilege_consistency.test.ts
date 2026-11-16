@@ -672,6 +672,7 @@ describe('Route privilege/ES-operation consistency', () => {
     });
 
     const mockRouter = {
+      get: jest.fn(),
       put: jest.fn(),
       post: jest.fn(),
       versioned: {

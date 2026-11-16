@@ -9,9 +9,15 @@
 
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { coreMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import {
   ExecutionStatus,
   type WorkflowDetailDto,
@@ -33,7 +39,10 @@ import {
 } from './external_resume/external_resume_service';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import { ManagedWorkflowReadForbiddenError } from './managed_workflow_read_error';
 import { preprocessTriggerInputs } from './routes/executions/utils/preprocess_trigger_inputs';
+import { WorkflowForbiddenError } from './workflow_forbidden_error';
+import { WorkflowRequiresDelegatedIdentityError } from './workflow_requires_delegated_identity_error';
 import {
   type AlertPreprocessingContext,
   type SmlIndexAttachmentFn,
@@ -263,6 +272,29 @@ describe('WorkflowsManagementApi', () => {
       ).rejects.toBeInstanceOf(WorkflowNotFoundError);
 
       expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('rejects managed workflow history without managed workflow read access', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({ ...workflow, managed: true });
+
+      await expect(
+        api.getHistoryForWorkflow(workflow.id, 'default', { request: mockRequest })
+      ).rejects.toBeInstanceOf(ManagedWorkflowReadForbiddenError);
+
+      expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('returns managed workflow history with managed workflow read access', async () => {
+      const historyResponse = { page: 1, perPage: 20, total: 0, items: [] };
+      mockWorkflowsService.getWorkflow.mockResolvedValue({ ...workflow, managed: true });
+      mockWorkflowsService.getHistoryForWorkflow.mockResolvedValue(historyResponse);
+
+      await expect(
+        api.getHistoryForWorkflow(workflow.id, 'default', {
+          request: mockRequest,
+          allowManagedWorkflowRead: true,
+        })
+      ).resolves.toBe(historyResponse);
     });
 
     it.each(['edit', 'execute'] as const)(
@@ -980,6 +1012,39 @@ steps:
         expect(engine.executeWorkflow).not.toHaveBeenCalled();
       });
 
+      it('refuses a delegated-identity-only workflow before creating a test execution', async () => {
+        // The detail editor's Run button tests unsaved drafts through this path; a draft
+        // whose every path inherits would hold the same concurrency slot and fail the
+        // same way a saved manual run does.
+        mockWorkflowsService.validateWorkflow.mockResolvedValue({
+          valid: true,
+          diagnostics: [],
+          parsedWorkflow: {
+            name: 'Delegated draft',
+            enabled: true,
+            steps: [
+              {
+                name: 'child',
+                type: 'workflow.execute',
+                with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+              },
+            ],
+          } as any,
+        });
+
+        await expect(
+          api.testWorkflow({
+            workflowYaml: 'name: Delegated draft',
+            inputs,
+            spaceId,
+            request: mockRequest,
+          })
+        ).rejects.toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+
+        const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
+        expect(engine.executeWorkflow).not.toHaveBeenCalled();
+      });
+
       it('should separate event from manual inputs when executing workflow', async () => {
         const complexInputs = {
           event: { type: 'test-event', data: { foo: 'bar' } },
@@ -1307,6 +1372,60 @@ steps:
     });
   });
 
+  describe('loadAlertDocuments', () => {
+    const index = '.alerts-security.alerts-default';
+    let elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
+    let scopedClusterClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+
+    beforeEach(() => {
+      scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      scopedClusterClient.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [{ _id: 'a1', _index: index, _source: { 'kibana.alert.uuid': 'a1' } }] },
+      });
+      elasticsearch = elasticsearchServiceMock.createStart();
+      elasticsearch.client.asScoped.mockReturnValue(scopedClusterClient);
+      mockWorkflowsService.getCoreStart = jest
+        .fn()
+        .mockResolvedValue({ ...coreMock.createStart(), elasticsearch });
+    });
+
+    it('reads as the user behind the request and formats with the registered rule types', async () => {
+      const formatAlert = jest.fn((alert: Record<string, unknown>) => ({ ...alert, signal: {} }));
+      mockWorkflowsService.getPluginsStart = jest.fn().mockResolvedValue({
+        alerting: { listTypes: () => new Map([[QUERY_RULE_TYPE_ID, { alerts: { formatAlert } }]]) },
+      });
+
+      const result = await api.loadAlertDocuments({
+        alerts: { ids: ['a1'], index },
+        request: mockRequest,
+      });
+
+      expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(mockRequest);
+      expect(scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
+      expect(formatAlert).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        alerts: [{ _id: 'a1', _index: index, kibana: { alert: { uuid: 'a1' } }, signal: {} }],
+        missingIds: [],
+      });
+    });
+
+    it('loads unformatted documents when the alerting plugin is unavailable', async () => {
+      mockWorkflowsService.getPluginsStart = jest.fn().mockResolvedValue({});
+
+      const result = await api.loadAlertDocuments({
+        alerts: { ids: ['a1'], index },
+        request: mockRequest,
+      });
+
+      expect(result.alerts).toEqual([
+        { _id: 'a1', _index: index, kibana: { alert: { uuid: 'a1' } } },
+      ]);
+    });
+  });
+
   describe('runWorkflowWithAlertPreprocessing', () => {
     it('preprocesses alert inputs with the request context before starting the workflow', async () => {
       const workflow = {
@@ -1446,6 +1565,94 @@ steps:
       );
       expect(result).toEqual({ workflowExecutionId: 'test-exec-id' });
     });
+
+    it('refuses to run a workflow whose every path inherits a parent service account', async () => {
+      // Regression (elastic/kibana#297266): the managed Attack Discovery runner. It must be
+      // refused before any execution is created — a doomed run cancels the scheduled one.
+      const workflow = {
+        id: 'system-security-attack-discovery-worker',
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        definition: {
+          version: '1',
+          name: 'Attack Discovery Runner',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'run_generation',
+              type: 'workflow.execute',
+              with: {
+                'workflow-id': 'system-security-attack-discovery-batched-generation',
+                'run-as-mode': 'inherit',
+              },
+            },
+          ],
+        },
+        yaml: 'name: Attack Discovery Runner',
+      } as WorkflowExecutionEngineModel;
+
+      const error = await api
+        .runWorkflowWithAlertPreprocessing({
+          workflow,
+          spaceId: 'default',
+          inputs: {},
+          request: mockRequest,
+          preprocessingContext: {} as AlertPreprocessingContext,
+        })
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+      expect(error).toBeInstanceOf(WorkflowForbiddenError);
+      expect((error as Error).message).toMatch(
+        /delegates its execution identity to a parent workflow/
+      );
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('does not refuse a workflow whose only inherit is conditional, even on the Run path', async () => {
+      // The gate inside runWorkflow only refuses workflows that always need delegation.
+      // A conditional inherit may never execute standalone.
+      const conditionalInheritDefinition = {
+        version: '1',
+        name: 'Conditionally delegating',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [
+          {
+            name: 'route',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'child',
+                type: 'workflow.execute',
+                with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+              },
+            ],
+            else: [],
+          },
+        ],
+      } as unknown as NonNullable<WorkflowExecutionEngineModel['definition']>;
+      const workflow = {
+        id: 'conditionally-delegating',
+        name: 'Conditionally delegating',
+        enabled: true,
+        definition: conditionalInheritDefinition,
+        yaml: 'name: Conditionally delegating',
+      } as WorkflowExecutionEngineModel;
+      mockPreprocessTriggerInputs.mockResolvedValue({});
+
+      await api.runWorkflowWithAlertPreprocessing({
+        workflow,
+        spaceId: 'default',
+        inputs: {},
+        request: mockRequest,
+        preprocessingContext: {} as AlertPreprocessingContext,
+      });
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('executeWorkflow', () => {
@@ -1541,6 +1748,117 @@ steps:
         'default',
         { includeOutput: true }
       );
+    });
+
+    it('runs a workflow whose only inherit is conditional (server-side caller, not gated)', async () => {
+      // Regression (Libra P2): shape of the proposals `system-create-proposal` workflow —
+      // an `inherit` step in if/else inside a while loop. A standalone run may complete
+      // without ever executing it, so the predicate never refuses it — including on the
+      // `executeWorkflow` path, where the gate inside `runWorkflow` now also applies.
+      const definition = {
+        version: '1' as const,
+        name: 'Create proposal shape',
+        enabled: true,
+        triggers: [{ type: 'manual' as const }],
+        steps: [
+          {
+            name: 'decision_loop',
+            type: 'while',
+            condition: 'true',
+            steps: [
+              {
+                name: 'approve_with_action',
+                type: 'if',
+                condition: 'true',
+                steps: [
+                  {
+                    name: 'execute_by_approval_mode',
+                    type: 'if',
+                    condition: 'true',
+                    steps: [],
+                    else: [
+                      {
+                        name: 'execute_as_worker',
+                        type: 'workflow.execute',
+                        with: { 'workflow-id': 'worker', 'run-as-mode': 'inherit' },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'system-create-proposal',
+        name: 'Create proposal shape',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Create proposal shape',
+        definition,
+      } as any);
+
+      // Capture rejection immediately so a regression fails the assertion below instead of
+      // surfacing as an unhandled rejection while fake timers advance.
+      const outcome = await runWithTimers(
+        api
+          .executeWorkflow({
+            workflowId: 'system-create-proposal',
+            inputs: {},
+            spaceId: 'default',
+            request: mockRequest,
+            waitForCompletion: false,
+          })
+          .catch((e: unknown) => e)
+      );
+
+      expect(outcome).not.toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+      expect(outcome).toEqual(expect.objectContaining({ workflowExecutionId: 'test-exec-id' }));
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuses a delegated-identity-only workflow on the executeWorkflow path too', async () => {
+      // executeWorkflow funnels into runWorkflow, which enforces the standalone gate —
+      // a doomed direct start through an agent tool must be refused like any other.
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'system-security-attack-discovery-worker',
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Attack Discovery Runner',
+        definition: {
+          version: '1',
+          name: 'Attack Discovery Runner',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'run_generation',
+              type: 'workflow.execute',
+              with: {
+                'workflow-id': 'system-security-attack-discovery-batched-generation',
+                'run-as-mode': 'inherit',
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const outcome = await runWithTimers(
+        api
+          .executeWorkflow({
+            workflowId: 'system-security-attack-discovery-worker',
+            inputs: {},
+            spaceId: 'default',
+            request: mockRequest,
+            waitForCompletion: false,
+          })
+          .catch((e: unknown) => e)
+      );
+
+      expect(outcome).toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
     });
 
     it('executes an inline workflow as ephemeral without forcing test-run semantics', async () => {
@@ -2565,6 +2883,38 @@ steps:
       const [, passedContext] = (engine.scheduleWorkflow as jest.Mock).mock.calls[0];
       expect(passedContext.metadata).toEqual(scheduleMeta);
     });
+
+    it('refuses a delegated-identity-only workflow before the engine schedules it', async () => {
+      const workflow = {
+        id: 'system-security-attack-discovery-worker',
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        definition: {
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'run_generation',
+              type: 'workflow.execute',
+              with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+            },
+          ],
+        },
+        yaml: 'name: Attack Discovery Runner',
+      };
+
+      await expect(
+        api.scheduleWorkflow(
+          workflow as any,
+          'default',
+          { event: { alerts: [{}] } },
+          mockRequest,
+          'alert'
+        )
+      ).rejects.toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+
+      const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
+      expect(engine.scheduleWorkflow).not.toHaveBeenCalled();
+    });
   });
 
   describe('bulkScheduleWorkflow', () => {
@@ -2698,6 +3048,70 @@ steps:
       );
 
       expect(result).toBe(engineResults);
+    });
+
+    it('returns a per-item error for a delegated-identity workflow and still schedules the rest', async () => {
+      const delegated = {
+        id: 'system-security-attack-discovery-worker',
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        definition: {
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'run_generation',
+              type: 'workflow.execute',
+              with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+            },
+          ],
+        },
+        yaml: 'name: Attack Discovery Runner',
+      };
+      const engineResults = [{ status: 'scheduled' as const, workflowExecutionId: 'exec-ok' }];
+      mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue(engineResults);
+
+      const result = await api.bulkScheduleWorkflow(
+        [
+          { workflow: delegated as any, spaceId: 'default', inputs: {}, triggeredBy: 'alert' },
+          { workflow: workflowA as any, spaceId: 'default', inputs: {}, triggeredBy: 'alert' },
+        ],
+        mockRequest
+      );
+
+      expect(result[0]).toEqual({
+        status: 'error',
+        error: { message: expect.stringContaining('cannot be run standalone') },
+      });
+      expect(result[1]).toEqual(engineResults[0]);
+      const [passedItems] = mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mock.calls[0];
+      expect(passedItems).toHaveLength(1);
+      expect(passedItems[0].workflow).toBe(workflowA);
+    });
+
+    it('does not call the engine when every item requires a delegated identity', async () => {
+      const delegated = {
+        id: 'system-security-attack-discovery-worker',
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        definition: {
+          steps: [
+            {
+              name: 'run_generation',
+              type: 'workflow.execute',
+              with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+            },
+          ],
+        },
+        yaml: 'name: Attack Discovery Runner',
+      };
+
+      const result = await api.bulkScheduleWorkflow(
+        [{ workflow: delegated as any, spaceId: 'default', inputs: {}, triggeredBy: 'alert' }],
+        mockRequest
+      );
+
+      expect(mockWorkflowsExecutionEngine.bulkScheduleWorkflow).not.toHaveBeenCalled();
+      expect(result[0]?.status).toBe('error');
     });
   });
 

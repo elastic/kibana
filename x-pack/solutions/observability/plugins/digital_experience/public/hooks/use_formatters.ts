@@ -19,7 +19,7 @@ export interface Formatters {
   formatPercent: (share: number) => string;
   /** An absolute date, with the `dateFormat` and `dateFormat:tz` advanced settings. */
   formatDate: (date: string | number) => string;
-  /** The `dateFormat:tz` advanced setting for charts; `local` when it follows the browser. */
+  /** The `dateFormat:tz` advanced setting, as an IANA time zone (the browser's for `Browser`). */
   timeZone: string;
 }
 
@@ -37,13 +37,14 @@ export const useFormatters = (): Formatters => {
     );
     const dateFormat = uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT);
     const kibanaTimeZone = uiSettings.get<string>(UI_SETTINGS.DATEFORMAT_TZ);
-    const timeZone = !kibanaTimeZone || kibanaTimeZone === 'Browser' ? 'local' : kibanaTimeZone;
+    // Elastic Charts only accepts IANA names, so `Browser` becomes the browser's own time zone.
+    const timeZone =
+      !kibanaTimeZone || kibanaTimeZone === 'Browser' ? moment.tz.guess() : kibanaTimeZone;
 
     return {
       formatNumber: (value) => numeral(value).format(numberPattern),
       formatPercent: (share) => numeral(share).format(percentPattern),
-      formatDate: (date) =>
-        (timeZone === 'local' ? moment(date) : moment(date).tz(timeZone)).format(dateFormat),
+      formatDate: (date) => moment(date).tz(timeZone).format(dateFormat),
       timeZone,
     };
   }, [uiSettings]);

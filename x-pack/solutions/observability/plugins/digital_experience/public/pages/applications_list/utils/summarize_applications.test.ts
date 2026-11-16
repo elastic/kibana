@@ -6,7 +6,11 @@
  */
 
 import type { ApplicationSummary } from '../../../../common/types/applications';
-import { pageLoadsOfSources, summarizeApplications } from './summarize_applications';
+import {
+  pageLoadsOfSources,
+  sessionsOfSource,
+  summarizeApplications,
+} from './summarize_applications';
 
 const noVital = { sampleCount: 0, ratings: null };
 
@@ -20,11 +24,13 @@ const app = ({
   lcp = null as number | null,
   inp = null as number | null,
   cls = null as number | null,
+  sessions = null as number | null,
 } = {}): ApplicationSummary => ({
   serviceName,
   source,
   environments: [],
   pageLoads: { count: pageLoads },
+  sessions: sessions === null ? null : { count: sessions },
   webVitals: {
     lcp: { p75Ms: lcp, ...noVital },
     inp: { p75Ms: inp, ...noVital },
@@ -58,6 +64,44 @@ describe('summarizeApplications', () => {
     expect(summary.pageLoads).toBe(501);
   });
 
+  describe('sessions', () => {
+    it('adds up the sessions of the EDOT Browser applications', () => {
+      expect(
+        summarizeApplications([
+          app({ serviceName: 'shop', sessions: 1200 }),
+          app({ serviceName: 'docs', sessions: 34 }),
+        ]).sessions
+      ).toBe(1234);
+    });
+
+    it('leaves Classic RUM applications out, as they have no sessions', () => {
+      expect(
+        summarizeApplications([
+          app({ serviceName: 'shop', source: 'otel', sessions: 7 }),
+          app({ serviceName: 'shop', source: 'classic' }),
+        ]).sessions
+      ).toBe(7);
+    });
+
+    it('has no total when an EDOT Browser application was read from the raw events', () => {
+      expect(
+        summarizeApplications([
+          app({ serviceName: 'shop', sessions: 7 }),
+          app({ serviceName: 'docs', sessions: null }),
+        ]).sessions
+      ).toBeNull();
+    });
+
+    it('has no total without an EDOT Browser application', () => {
+      expect(summarizeApplications([]).sessions).toBeNull();
+      expect(summarizeApplications([app({ source: 'classic' })]).sessions).toBeNull();
+    });
+
+    it('is zero for applications that have no sessions in the range', () => {
+      expect(summarizeApplications([app({ sessions: 0 })]).sessions).toBe(0);
+    });
+  });
+
   it('computes the error rate and the failed HTTP share over all the applications', () => {
     const summary = summarizeApplications([
       app({ pageLoads: 10, jsErrors: 5, requests: 10, failed: 1 }),
@@ -86,6 +130,23 @@ describe('summarizeApplications', () => {
         app({ serviceName: 'e' }),
       ]).poorCoreWebVitals
     ).toBe(3);
+  });
+});
+
+describe('sessionsOfSource', () => {
+  const sessionsOverTime = [{ timestamp: 0, count: 4 }];
+
+  it('returns the sessions with all sources or EDOT Browser selected', () => {
+    expect(sessionsOfSource(sessionsOverTime, undefined)).toBe(sessionsOverTime);
+    expect(sessionsOfSource(sessionsOverTime, 'otel')).toBe(sessionsOverTime);
+  });
+
+  it('has none for Classic RUM, which has no sessions', () => {
+    expect(sessionsOfSource(sessionsOverTime, 'classic')).toBeNull();
+  });
+
+  it('has none when they were not counted', () => {
+    expect(sessionsOfSource(null, undefined)).toBeNull();
   });
 });
 

@@ -8,7 +8,8 @@
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { RequestAdapter, apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
@@ -30,6 +31,7 @@ const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.Mocked
 
 let capturedComponentProps:
   | {
+      esqlQueries?: readonly string[];
       isGenerating?: boolean;
       requestAdapter?: unknown;
       onGenerateWithChat?: () => void;
@@ -39,7 +41,7 @@ let capturedComponentProps:
 
 jest.mock('@kbn/custom-content-renderer', () => ({
   CustomContentComponent: (props: {
-    esqlQuery: string | undefined;
+    esqlQueries: readonly string[];
     savedTemplate: string | undefined;
     generationVersion: number;
     timeRange: { from: string; to: string } | undefined;
@@ -53,7 +55,7 @@ jest.mock('@kbn/custom-content-renderer', () => ({
     return (
       <div
         data-test-subj="mockCustomContentComponent"
-        data-esql-query={props.esqlQuery ?? ''}
+        data-esql-query={props.esqlQueries[0] ?? ''}
         data-saved-template={props.savedTemplate ?? ''}
         data-generation-version={props.generationVersion}
         data-time-range={props.timeRange ? `${props.timeRange.from}/${props.timeRange.to}` : ''}
@@ -69,6 +71,7 @@ let capturedFlyoutProps:
       onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
       onClose: () => void;
       onGenerateWithChat?: (template: string, esqlQuery: string | undefined) => void;
+      esqlQueries?: readonly string[];
     }
   | undefined;
 
@@ -118,6 +121,12 @@ const mockTelemetry = {
 };
 
 jest.mock('./telemetry', () => ({ getTelemetry: () => mockTelemetry }));
+
+const mockGetESQLAdHocDataview = jest.fn();
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLAdHocDataview: (...args: unknown[]) => mockGetESQLAdHocDataview(...args),
+}));
 
 jest.mock('./services', () => ({
   getServices: () => ({
@@ -209,6 +218,181 @@ describe('customContentEmbeddableFactory', () => {
       expect(readEsqlQuery(embeddable.api.serializeState())).toBe(
         'FROM metrics | STATS avg = AVG(value)'
       );
+    });
+  });
+
+  describe('a saved query that is empty', () => {
+    const queriesOf = (embeddable: Awaited<ReturnType<typeof buildEmbeddable>>['embeddable']) => ({
+      saved: embeddable.api.serializeState().esql_query,
+      published: embeddable.api.esql$.getValue(),
+      inspectable: Boolean(embeddable.api.getInspectorAdapters?.()),
+    });
+
+    it.each([[['']], [['', 'FROM b']]])(
+      'is a panel with no query, as saved %j, so it renders static and publishes nothing',
+      async (esql_query) => {
+        const { embeddable } = await buildEmbeddable({ ...baseState, esql_query });
+
+        expect(queriesOf(embeddable)).toEqual({
+          saved: undefined,
+          published: [],
+          inspectable: false,
+        });
+      }
+    );
+
+    it('is dropped when saved state is applied later, with the queries that came after it', async () => {
+      const { embeddable } = await buildEmbeddable({ ...baseState, esql_query: ['FROM a'] });
+
+      act(() => embeddable.api.applySerializedState({ ...baseState, esql_query: ['', 'FROM b'] }));
+
+      expect(queriesOf(embeddable)).toEqual({
+        saved: undefined,
+        published: [],
+        inspectable: false,
+      });
+    });
+  });
+
+  describe('data views', () => {
+    // One fake data view per index and time field, like the real ad-hoc ones (their id is made of
+    // both): `FROM logs | …` is the data view of `logs`, and a query that uses `?_tstart` on
+    // `sale_date` gives it that time field.
+    const indexOf = (query: string) => query.replace(/^FROM (\S+).*$/, '$1');
+    const timeFieldOf = (query: string) => (query.includes('?_tstart') ? 'sale_date' : undefined);
+    const titles = (embeddable: { api: { dataSources$: { getValue: () => unknown } } }) =>
+      ((embeddable.api.dataSources$.getValue() as DataView[] | undefined) ?? []).map((dataView) =>
+        dataView.getIndexPattern()
+      );
+
+    beforeEach(() => {
+      mockGetESQLAdHocDataview.mockReset();
+      mockGetESQLAdHocDataview.mockImplementation(async ({ query }: { query: string }) => {
+        if (query.startsWith('FROM broken')) throw new Error('cannot resolve');
+        const timeFieldName = timeFieldOf(query);
+        return {
+          id: [indexOf(query), timeFieldName].filter(Boolean).join('-'),
+          timeFieldName,
+          getIndexPattern: () => indexOf(query),
+        };
+      });
+    });
+
+    // The dashboard uses these for the filter bar's field suggestions and to decide whether to
+    // offer its time picker, and every query is fetched with the dashboard's time range.
+    it('publishes a data view for every query, not only the main one', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM logs | LIMIT 1', 'FROM metrics | LIMIT 1', 'FROM traces | LIMIT 1'],
+      });
+
+      await waitFor(() => expect(titles(embeddable)).toEqual(['logs', 'metrics', 'traces']));
+    });
+
+    it('publishes a data view once when several queries read the same index', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM logs | STATS a = COUNT(*)', 'FROM logs | STATS b = COUNT(*) BY host'],
+      });
+
+      await waitFor(() => expect(titles(embeddable)).toEqual(['logs']));
+    });
+
+    // A time field is what makes the dashboard offer its time picker, so a data view that has one
+    // must not be dropped because another query on the same index has none.
+    it('publishes both data views when queries on one index resolve different time fields', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: [
+          'FROM sales | STATS total = COUNT(*)',
+          'FROM sales | WHERE sale_date >= ?_tstart | STATS total = COUNT(*)',
+        ],
+      });
+
+      await waitFor(() => expect(titles(embeddable)).toEqual(['sales', 'sales']));
+      const timeFields = (embeddable.api.dataSources$.getValue() as DataView[]).map(
+        ({ timeFieldName }) => timeFieldName
+      );
+      expect(timeFields).toEqual([undefined, 'sale_date']);
+    });
+
+    it('keeps the data views of the other queries when one cannot be resolved', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM broken | LIMIT 1', 'FROM metrics | LIMIT 1'],
+      });
+
+      await waitFor(() => expect(titles(embeddable)).toEqual(['metrics']));
+    });
+
+    it('publishes none when the panel has no query', async () => {
+      const { embeddable } = await buildEmbeddable({ ...baseState, esql_query: undefined });
+
+      await act(async () => {});
+      expect(embeddable.api.dataSources$.getValue()).toBeUndefined();
+      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+    });
+
+    it('follows the additional queries when they change', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await waitFor(() => expect(titles(embeddable)).toEqual(['logs']));
+
+      act(() => {
+        embeddable.api.applySerializedState({
+          ...baseState,
+          esql_query: ['FROM logs | LIMIT 1', 'FROM metrics | LIMIT 1'],
+        });
+      });
+      await waitFor(() => expect(titles(embeddable)).toEqual(['logs', 'metrics']));
+    });
+
+    it('does not resolve the data views again when nothing about the queries changed', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM logs | LIMIT 1', 'FROM metrics | LIMIT 1'],
+      });
+      await waitFor(() => expect(titles(embeddable)).toEqual(['logs', 'metrics']));
+      const calls = mockGetESQLAdHocDataview.mock.calls.length;
+
+      act(() => {
+        embeddable.api.applySerializedState({
+          ...baseState,
+          esql_query: ['FROM logs | LIMIT 1', 'FROM metrics | LIMIT 1'],
+        });
+      });
+      await act(async () => {});
+
+      expect(mockGetESQLAdHocDataview).toHaveBeenCalledTimes(calls);
+    });
+  });
+
+  describe('additional queries', () => {
+    const multiQueryState = {
+      ...baseState,
+      esql_query: ['FROM logs | STATS count = COUNT(*)', 'FROM metrics | LIMIT 5'],
+    };
+
+    it('round-trips every query through serializeState', async () => {
+      const { embeddable } = await buildEmbeddable(multiQueryState);
+      expect(embeddable.api.serializeState().esql_query).toEqual(multiQueryState.esql_query);
+    });
+
+    it('hands the queries after the first to the renderer', async () => {
+      const { embeddable } = await buildEmbeddable(multiQueryState);
+      await act(async () => render(<embeddable.Component />));
+
+      expect(capturedComponentProps?.esqlQueries).toEqual([
+        'FROM logs | STATS count = COUNT(*)',
+        'FROM metrics | LIMIT 5',
+      ]);
+    });
+
+    it('follows the last saved state on reset', async () => {
+      const { embeddable } = await buildEmbeddable(multiQueryState);
+      act(() => {
+        embeddable.api.applySerializedState(baseState);
+      });
+      expect(embeddable.api.serializeState().esql_query).toEqual(baseState.esql_query);
     });
   });
 
@@ -520,6 +704,96 @@ describe('customContentEmbeddableFactory', () => {
       expect(openChat).toHaveBeenCalledWith(expect.objectContaining({ newConversation: true }));
     });
 
+    // The editor does not change the other queries yet, so a refine must not lose them: the agent
+    // hands back whatever the attachment carried.
+    it('gives the flyout the additional queries of the panel, so its preview can fetch them', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM a', 'FROM b', 'FROM c'],
+      });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit());
+      await renderFlyoutContent();
+
+      expect(capturedFlyoutProps?.esqlQueries).toEqual(['FROM a', 'FROM b', 'FROM c']);
+    });
+
+    it('publishes every query of the panel, so a control finds the panel by any of them', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM a | WHERE x == ?host', 'FROM b | WHERE y == ?region'],
+      });
+
+      expect(embeddable.api.esql$.getValue()).toEqual([
+        { esql: 'FROM a | WHERE x == ?host' },
+        { esql: 'FROM b | WHERE y == ?region' },
+      ]);
+    });
+
+    it('removes the additional queries with the main one, so a query added later does not bring them back', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM a', 'FROM b'],
+      });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit());
+      await renderFlyoutContent();
+      await act(async () => capturedFlyoutProps!.onSave(undefined, '<div>static</div>'));
+      expect(embeddable.api.serializeState().esql_query).toBeUndefined();
+
+      await act(async () => embeddable.api.onEdit());
+      await renderFlyoutContent();
+      await act(async () => capturedFlyoutProps!.onSave('FROM c', '<div>dynamic</div>'));
+
+      expect(embeddable.api.serializeState().esql_query).toEqual(['FROM c']);
+    });
+
+    it('hands the flyout the same list of queries when an update leaves them as they were', async () => {
+      const state = { ...baseState, esql_query: ['FROM a', 'FROM b'] };
+      const { embeddable } = await buildEmbeddable(state);
+      await act(async () => render(<embeddable.Component />));
+      const openedWith = async () => {
+        await act(async () => embeddable.api.onEdit());
+        await renderFlyoutContent();
+        return capturedFlyoutProps?.esqlQueries;
+      };
+
+      const before = await openedWith();
+      act(() => embeddable.api.applySerializedState({ ...state }));
+      const after = await openedWith();
+
+      expect(before).toEqual(['FROM a', 'FROM b']);
+      expect(after).toBe(before);
+    });
+
+    it('sends the additional queries of the panel to the chat', async () => {
+      const openChat = jest.fn();
+      mockAgentBuilder = {
+        openChat,
+        events: {
+          ui: { activeConversation$: new BehaviorSubject(null) },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM a', 'FROM b', 'FROM c'],
+      });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit());
+      await renderFlyoutContent();
+
+      await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('draft', 'FROM a'));
+
+      expect(openChat.mock.calls[0][0].attachments[0].data).toMatchObject({
+        esql_query: 'FROM a',
+        additional_esql_queries: ['FROM b', 'FROM c'],
+      });
+    });
+
     it('clicking "Generate with chat" from the flyout on a new panel does not remove it', async () => {
       const removePanel = jest.fn();
       const openChat = jest.fn();
@@ -549,7 +823,8 @@ describe('customContentEmbeddableFactory', () => {
     const buildUpdateEvent = (
       embeddableId: string,
       panelTemplate: string,
-      customEvent: string = CUSTOM_CONTENT_UPDATED_UI_EVENT
+      customEvent: string = CUSTOM_CONTENT_UPDATED_UI_EVENT,
+      queries: { esql_query?: string; additional_esql_queries?: string[] } = {}
     ) => ({
       type: ChatEventType.toolUi,
       data: {
@@ -558,7 +833,7 @@ describe('customContentEmbeddableFactory', () => {
         custom_event: customEvent,
         data: {
           attachmentId: 'att-1',
-          data: { panel_template: panelTemplate, embeddable_id: embeddableId },
+          data: { panel_template: panelTemplate, embeddable_id: embeddableId, ...queries },
         },
       },
     });
@@ -588,7 +863,7 @@ describe('customContentEmbeddableFactory', () => {
           events.forEach((event) => chatEvents$.next(event));
           await flush();
         });
-      return { embeddable, emit, activeConversation$, getChatEvents$ };
+      return { embeddable, emit, activeConversation$, getChatEvents$, openChat };
     };
 
     const expectGenerating = (isGenerating: boolean) =>
@@ -614,6 +889,103 @@ describe('customContentEmbeddableFactory', () => {
         hasEsqlQuery: false,
         templateSizeBytes: '<p>mine</p>'.length,
       });
+      expectGenerating(false);
+    });
+
+    it('applies the queries of an update, including the additional ones', async () => {
+      const { embeddable, emit } = await renderGeneratingPanel();
+
+      await emit(
+        buildUpdateEvent('test-uuid', '<p>mine</p>', CUSTOM_CONTENT_UPDATED_UI_EVENT, {
+          esql_query: 'FROM a',
+          additional_esql_queries: ['FROM b'],
+        })
+      );
+
+      expect(embeddable.api.serializeState().esql_query).toEqual(['FROM a', 'FROM b']);
+    });
+
+    it('ignores additional queries that come without a main query, and does not keep them for later', async () => {
+      const { embeddable, emit } = await renderGeneratingPanel();
+
+      await emit(
+        buildUpdateEvent('test-uuid', '<p>static</p>', CUSTOM_CONTENT_UPDATED_UI_EVENT, {
+          additional_esql_queries: ['FROM b'],
+        })
+      );
+      expect(embeddable.api.serializeState().esql_query).toBeUndefined();
+
+      // A query added later in the editor must not bring the ignored ones back.
+      await act(async () => embeddable.api.onEdit());
+      await renderFlyoutContent();
+      await act(async () => capturedFlyoutProps!.onSave('FROM a', '<div>dynamic</div>'));
+
+      expect(embeddable.api.serializeState().esql_query).toEqual(['FROM a']);
+    });
+
+    it('clears the additional queries when the update carries none', async () => {
+      const { embeddable, emit } = await renderGeneratingPanel();
+      act(() => {
+        embeddable.api.applySerializedState({ ...baseState, esql_query: ['FROM a', 'FROM b'] });
+      });
+
+      await emit(
+        buildUpdateEvent('test-uuid', '<p>mine</p>', CUSTOM_CONTENT_UPDATED_UI_EVENT, {
+          esql_query: 'FROM a',
+        })
+      );
+
+      expect(embeddable.api.serializeState().esql_query).toEqual(['FROM a']);
+    });
+
+    const buildToolCallEvent = (toolId: string, params: Record<string, unknown>) => ({
+      type: 'tool_call',
+      data: { tool_call_id: 'tool-call-2', tool_id: toolId, params },
+    });
+
+    it('does not show the generating state again when a later message is submitted', async () => {
+      const { emit, openChat } = await renderGeneratingPanel();
+      await emit({ type: TimelineEventType.executionTerminated, execution_id: 'e1', data: {} });
+      expectGenerating(false);
+
+      await act(async () => {
+        openChat.mock.calls[0][0].onSubmit();
+        await flush();
+      });
+
+      expectGenerating(false);
+    });
+
+    it.each([
+      ['the update tool', 'custom_content_update_panel', { embeddable_id: 'test-uuid' }],
+      [
+        'the dashboard tool',
+        'platform.dashboard.generate_dashboard',
+        { panels: [{ id: 'other-uuid' }, { id: 'test-uuid' }] },
+      ],
+    ])('shows the generating state when %s targets this panel', async (_, toolId, params) => {
+      const { emit } = await renderGeneratingPanel();
+      await emit({ type: TimelineEventType.executionTerminated, execution_id: 'e1', data: {} });
+      expectGenerating(false);
+
+      await emit(buildToolCallEvent(toolId, params));
+
+      expectGenerating(true);
+    });
+
+    it.each([
+      ['the update tool', 'custom_content_update_panel', { embeddable_id: 'other-uuid' }],
+      [
+        'the dashboard tool',
+        'platform.dashboard.generate_dashboard',
+        { panels: [{ id: 'other-uuid' }] },
+      ],
+    ])('ignores %s calls that target another panel', async (_, toolId, params) => {
+      const { emit } = await renderGeneratingPanel();
+      await emit({ type: TimelineEventType.executionTerminated, execution_id: 'e1', data: {} });
+
+      await emit(buildToolCallEvent(toolId, params));
+
       expectGenerating(false);
     });
 

@@ -22,6 +22,7 @@ import type {
   AttackDiscoveryApiService,
   CorrelationsApiService,
   PrevalenceApiService,
+  ThreatIntelligenceApiService,
   AnalyzerApiService,
   NetworkApiService,
   HostApiService,
@@ -38,6 +39,7 @@ export interface SecurityApiServicesFixture extends ApiServicesFixture {
   attackDiscovery: AttackDiscoveryApiService;
   correlations: CorrelationsApiService;
   prevalence: PrevalenceApiService;
+  threatIntelligence: ThreatIntelligenceApiService;
   analyzer: AnalyzerApiService;
   network: NetworkApiService;
   host: HostApiService;
