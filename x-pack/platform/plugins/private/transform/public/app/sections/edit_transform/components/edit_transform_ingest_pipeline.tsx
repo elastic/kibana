@@ -68,7 +68,7 @@ export const EditTransformIngestPipeline: FC = () => {
                   }
                 )}
                 fullWidth
-                isClearable={false}
+                isClearable={Boolean(value)}
                 singleSelection={{ asPlainText: true }}
                 options={ingestPipelineNames.map((label: string) => ({ label }))}
                 selectedOptions={value ? [{ label: value }] : []}
