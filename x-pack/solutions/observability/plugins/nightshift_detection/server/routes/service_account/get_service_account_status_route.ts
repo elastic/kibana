@@ -6,15 +6,13 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import { PluginStart } from '@kbn/core-di';
-import { Request, Response } from '@kbn/core-di-server';
+import { Request } from '@kbn/core-di-server';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { AvailabilityService } from '../lib/availability/availability_service';
-import { DetectionSetupService } from '../lib/service_account/setup_service';
-import { BaseEngineRoute } from './base_engine_route';
+import { DetectionSetupService } from '../../lib/service_account/setup_service';
+import { BaseEngineRoute } from '../base_engine_route';
+import { EngineRouteContext } from '../engine_route_context';
 import { SERVICE_ACCOUNT_API_PATH } from './constants';
 
 /** Reports how the current space is set up: the account it runs as, and whether the user may set it up. */
@@ -34,13 +32,11 @@ export class GetServiceAccountStatusRoute extends BaseEngineRoute {
   static validate = false as const;
 
   constructor(
+    @inject(EngineRouteContext) ctx: EngineRouteContext,
     @inject(Request) request: KibanaRequest,
-    @inject(Response) response: KibanaResponseFactory,
-    @inject(AvailabilityService) availability: AvailabilityService,
-    @inject(PluginStart<SpacesPluginStart>('spaces')) spaces: SpacesPluginStart,
     @inject(DetectionSetupService) private readonly setup: DetectionSetupService
   ) {
-    super(request, response, availability, spaces);
+    super(ctx, request);
   }
 
   protected async execute(): Promise<IKibanaResponse> {
@@ -49,6 +45,6 @@ export class GetServiceAccountStatusRoute extends BaseEngineRoute {
       spaceId: this.getSpaceId(),
     });
 
-    return this.response.ok({ body: status });
+    return this.ctx.response.ok({ body: status });
   }
 }

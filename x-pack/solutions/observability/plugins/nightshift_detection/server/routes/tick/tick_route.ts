@@ -7,18 +7,16 @@
 
 import { schema } from '@kbn/config-schema';
 import { inject, injectable } from 'inversify';
-import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import { PluginStart } from '@kbn/core-di';
-import { Request, Response } from '@kbn/core-di-server';
+import { Request } from '@kbn/core-di-server';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { DetectionEngineTickBody } from '../../common/tick';
-import { AvailabilityService } from '../lib/availability/availability_service';
-import { TickService } from '../lib/engine/tick_service';
-import { DetectionAccountService } from '../lib/service_account/detection_account';
-import { BaseEngineRoute } from './base_engine_route';
-import { DETECTION_ENGINE_API_PATH } from './constants';
+import type { DetectionEngineTickBody } from '../../../common/tick';
+import { TickService } from '../../lib/engine/tick_service';
+import { DetectionAccountService } from '../../lib/service_account/detection_account';
+import { BaseEngineRoute } from '../base_engine_route';
+import { DETECTION_ENGINE_API_PATH } from '../constants';
+import { EngineRouteContext } from '../engine_route_context';
 
 /**
  * A tick can run for as long as the engine's budget and the workflow's timeout, which is longer
@@ -48,14 +46,12 @@ export class TickRoute extends BaseEngineRoute<DetectionEngineTickBody> {
   };
 
   constructor(
+    @inject(EngineRouteContext) ctx: EngineRouteContext,
     @inject(Request) request: KibanaRequest<unknown, unknown, DetectionEngineTickBody>,
-    @inject(Response) response: KibanaResponseFactory,
-    @inject(AvailabilityService) availability: AvailabilityService,
-    @inject(PluginStart<SpacesPluginStart>('spaces')) spaces: SpacesPluginStart,
     @inject(DetectionAccountService) private readonly account: DetectionAccountService,
     @inject(TickService) private readonly tick: TickService
   ) {
-    super(request, response, availability, spaces);
+    super(ctx, request);
   }
 
   protected async execute(): Promise<IKibanaResponse> {
@@ -83,7 +79,7 @@ export class TickRoute extends BaseEngineRoute<DetectionEngineTickBody> {
           }),
       });
 
-      return this.response.ok({ body: result });
+      return this.ctx.response.ok({ body: result });
     } finally {
       subscription.unsubscribe();
     }
