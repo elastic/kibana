@@ -11,15 +11,6 @@ import type { OxlintConfig } from 'oxlint';
 
 type Rules = NonNullable<OxlintConfig['rules']>;
 
-/**
- * The whole-repo run in `@kbn/lint-cli` lints in two passes, chosen with the `OXLINT_PASS`
- * environment variable. Oxlint's native import plugin keeps every module's import and export
- * records in memory, most of a shard's memory, while the JS plugins keep each shard's single JS
- * thread busy. Splitting them lets the JS plugin pass run more shards without running out of
- * memory. Without `OXLINT_PASS` (editors, scoped runs) the config runs every rule at once.
- */
-export type OxlintPass = 'without-import-plugin' | 'import-plugin';
-
 const isImportPluginRule = (name: string) => name.startsWith('import/');
 
 const filterRules = (config: OxlintConfig, keep: (name: string) => boolean): OxlintConfig => {
@@ -32,7 +23,13 @@ const filterRules = (config: OxlintConfig, keep: (name: string) => boolean): Oxl
   };
 };
 
-/** Returns the part of `config` that `pass` runs, or all of it when `pass` is unset. */
+/**
+ * Returns the part of `config` that the `OXLINT_PASS` value `pass` runs. The whole-repo run in
+ * `@kbn/lint-cli` lints in two passes: oxlint's native import plugin keeps every module's import
+ * and export records in memory, most of a shard's memory, while the JS plugins keep each shard's
+ * single JS thread busy, so splitting them lets the JS plugin pass run more shards. Without a pass
+ * (editors, scoped runs) every rule runs at once.
+ */
 export const forPass = (config: OxlintConfig, pass: string | undefined): OxlintConfig => {
   switch (pass) {
     case undefined:

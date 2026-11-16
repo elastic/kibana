@@ -163,7 +163,7 @@ const CRASH_SIGNALS: Record<string, true> = {
   SIGILL: true,
 };
 
-async function runOxlintShard(pass: string, args: string[]) {
+async function runOxlintShard(pass: (typeof PASSES)[number]['pass'], args: string[]) {
   for (let attempt = 1; ; attempt++) {
     const result = await execa('oxlint', args, {
       cwd: REPO_ROOT,
