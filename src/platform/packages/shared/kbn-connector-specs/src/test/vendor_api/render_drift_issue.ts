@@ -581,7 +581,10 @@ interface Attention {
   readonly readers: readonly string[];
   /** Per kind of change to review, the actions it affects. */
   readonly byKind: ReadonlyMap<ReviewKind, ReadonlySet<string>>;
-  /** Actions not checked, as the manifest records that no spec describes what they call. */
+  /**
+   * Actions not checked, as the manifest records that no spec describes what they call. They need
+   * attention in an issue opened for another reason, but don't open one themselves.
+   */
   readonly notInSpec: readonly string[];
   /** Changes to review that affect no action, e.g. a removed shared schema. */
   readonly unattached: number;
@@ -618,8 +621,9 @@ const attentionOf = (
       ...failing.map(({ action }) => action),
       ...readers,
       ...[...byKind.values()].flatMap((named) => [...named]),
+      ...notInSpec,
     ]),
-    total: actions.filter(isChecked).length,
+    total: actions.filter(isChecked).length + notInSpec.length,
   };
 };
 

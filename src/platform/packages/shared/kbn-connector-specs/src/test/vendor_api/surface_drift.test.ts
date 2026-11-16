@@ -384,7 +384,7 @@ describe('renderDriftIssue', () => {
   it('says that paths moved into the server URL, why the check fails and how to fix it', () => {
     const { title, body } = renderDriftIssue(moved, { owners: [] });
 
-    expect(title).toBe('[Connectors][Validation] `.sentry`: 1 action needs attention');
+    expect(title).toBe('[Connectors][Validation] `.sentry`: 2 actions need attention');
     // oasdiff reports the moved path as removed
     expect(body).toContain(
       '| `GET /api/0/issues/{id}/` | Moved, same URL | `getIssue` | API path removed without deprecation (`api-path-removed-without-deprecation`) |'
@@ -647,7 +647,7 @@ describe('renderDriftIssue', () => {
     );
   });
 
-  it('names the actions calling endpoints no spec describes, without counting them', () => {
+  it('counts the actions calling endpoints no spec describes, in an issue opened for another reason', () => {
     const { title, body } = renderDriftIssue(
       {
         ...drifted,
@@ -663,8 +663,10 @@ describe('renderDriftIssue', () => {
       { owners: [] }
     );
 
-    expect(title).toBe('[Connectors][Validation] `.acme`: 1 problem needs attention');
-    expect(body).toContain('> **All 1 action works with the latest spec.**');
+    expect(title).toBe('[Connectors][Validation] `.acme`: 1 action needs attention');
+    expect(body).toContain(
+      '> **1 of 2 actions works with the latest spec. 1 action needs attention.**'
+    );
     expect(body).toContain(
       "> 1 spec correction in `overlay.yaml` no longer applies. `listRules` calls an endpoint no spec describes, so it isn't checked (see the table)."
     );
@@ -759,9 +761,9 @@ describe('renderDriftIssue', () => {
       { owners: [] }
     );
 
-    expect(title).toBe('[Connectors][Validation] `.acme`: 1 action needs attention');
+    expect(title).toBe('[Connectors][Validation] `.acme`: 2 actions need attention');
     expect(body).toContain(
-      '> **1 of 2 actions works with the latest spec. 1 action needs attention.**'
+      '> **1 of 3 actions works with the latest spec. 2 actions need attention.**'
     );
     expect(body).toContain(
       "> `scan` fails against the latest vendor spec. 1 other spec change needs review (see the table). `quota` calls an endpoint no spec describes, so it isn't checked (see the table)."
