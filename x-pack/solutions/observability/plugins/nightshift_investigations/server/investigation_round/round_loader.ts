@@ -423,7 +423,8 @@ export const loadInvestigationRound = async ({
           const rawRoundSteps = round.steps as unknown as RawRoundStep[];
           const steps = stepsFromRound(rawRoundSteps);
           const roundToolCalls = toolCallsFromRoundSteps(rawRoundSteps);
-          const traceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
+          // A round resumed after human-in-the-loop has one trace per execution; use the latest.
+          const traceId = Array.isArray(round.trace_id) ? round.trace_id.at(-1) : round.trace_id;
           const previousUserMessage =
             resolvedIndex > 0 ? conversation.rounds[resolvedIndex - 1]?.input?.message : undefined;
           const previousAssistantMessage =

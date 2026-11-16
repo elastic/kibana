@@ -280,7 +280,7 @@ describe('decisionTreeReinforceStepDefinition', () => {
       rounds: [
         {
           id: 'round-1',
-          trace_id: [roundTraceId, 'other-trace'],
+          trace_id: ['other-trace', roundTraceId],
           input: { message: 'Why is checkout slow?' },
           response: { message: 'Connection pool exhausted.' },
           steps: [],
