@@ -109,11 +109,28 @@ export const riskEngineCleanupRoute = (
 
           try {
             const alias = `risk-score.risk-score-${namespace}`;
+            const entityIndex = getEntitiesAlias(ENTITY_LATEST, namespace);
+            const entityWrite = await currentUserEsClient.security.hasPrivileges({
+              index: [{ names: [entityIndex], privileges: ['write'] }],
+            });
+            if (!entityWrite.has_all_requested) {
+              addError(new Error(`Missing write privilege for entity index "${entityIndex}"`));
+              return failureResponse();
+            }
+
+            // Stop scoring before deleting data. An in-flight run can otherwise write
+            // scores back, or recreate the risk-score name as a plain index after the
+            // data stream and template are gone.
+            await plugins.taskManager
+              .removeIfExists(`${RISK_SCORE_MAINTAINER_ID}:${namespace}`)
+              .catch(addError);
+            if (errors.length > 0) {
+              return failureResponse();
+            }
+
             // The privilege check grants read/write, not delete_index. Delete the caller's
-            // risk-score data and lookup index as that user so a missing delete privilege
-            // fails before the saved object or the maintainer task is removed.
-            // The risk-score name is a data stream until tearDown runs, and the index
-            // delete API rejects a data stream name.
+            // risk-score data and lookup index as that user. The risk-score name is a data
+            // stream, and the index delete API rejects a data stream name.
             await currentUserEsClient.indices
               .deleteDataStream({ name: alias }, { ignore: [404] })
               .catch(addError);
@@ -131,8 +148,8 @@ export const riskEngineCleanupRoute = (
             }
 
             const clearEntityRisk = () =>
-              core.elasticsearch.client.asInternalUser.updateByQuery({
-                index: getEntitiesAlias(ENTITY_LATEST, namespace),
+              currentUserEsClient.updateByQuery({
+                index: entityIndex,
                 ignore_unavailable: true,
                 conflicts: 'proceed',
                 refresh: true,
@@ -147,22 +164,31 @@ export const riskEngineCleanupRoute = (
                 },
                 script: { lang: 'painless', source: CLEAR_ENTITY_RISK_SCRIPT },
               });
+            const incompleteClear = (
+              result: Awaited<ReturnType<typeof clearEntityRisk>> | undefined
+            ) =>
+              result != null &&
+              ((result.version_conflicts ?? 0) > 0 ||
+                (result.failures?.length ?? 0) > 0 ||
+                result.timed_out === true);
             let clearResult = await clearEntityRisk().catch((error: unknown) => {
               addError(error);
               return undefined;
             });
-            if ((clearResult?.version_conflicts ?? 0) > 0) {
+            if (incompleteClear(clearResult)) {
               clearResult = await clearEntityRisk().catch((error: unknown) => {
                 addError(error);
                 return undefined;
               });
             }
-            if ((clearResult?.version_conflicts ?? 0) > 0) {
-              addError(
-                new Error(
-                  `${clearResult?.version_conflicts} entity documents still have risk fields after a retry`
-                )
-              );
+            if (incompleteClear(clearResult) && clearResult != null) {
+              const failureCount = clearResult.failures?.length ?? 0;
+              const message = clearResult.timed_out
+                ? 'Clearing entity risk fields timed out'
+                : failureCount > 0
+                ? `${failureCount} entity risk updates failed`
+                : `${clearResult.version_conflicts} entity documents still have risk fields after a retry`;
+              addError(new Error(message));
             }
             if (errors.length > 0) {
               return failureResponse();
@@ -174,9 +200,6 @@ export const riskEngineCleanupRoute = (
               savedObjectsClient: core.savedObjects.client,
               namespace,
             }).catch(addError);
-            await plugins.taskManager
-              .removeIfExists(`${RISK_SCORE_MAINTAINER_ID}:${namespace}`)
-              .catch(addError);
 
             if (errors.length > 0) {
               return failureResponse();
