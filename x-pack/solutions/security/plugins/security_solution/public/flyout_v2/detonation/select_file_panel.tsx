@@ -21,11 +21,15 @@ export interface DetonateFileOption extends DetonateSample {
   description: string;
   /** Label of the badge shown on the right, when the file has one. */
   badge?: string;
+  /** EUI badge color for the badge. Defaults to a neutral hollow badge. */
+  badgeColor?: string;
 }
 
 interface DetonateSelectFilePanelProps {
   files: DetonateFileOption[];
   onContinue: (file: DetonateFileOption) => void;
+  /** Shows a spinner on the Continue button and disables the panel while submitting. */
+  isSubmitting?: boolean;
 }
 
 type FileSelectableOption = EuiSelectableOption;
@@ -42,7 +46,7 @@ const toOption = (file: DetonateFileOption): FileSelectableOption => ({
   label: file.fileName,
   data: { file },
   append: file.badge ? (
-    <EuiBadge color="hollow" data-test-subj={`detonateFileBadge-${file.id}`}>
+    <EuiBadge color={file.badgeColor ?? 'hollow'} data-test-subj={`detonateFileBadge-${file.id}`}>
       {file.badge}
     </EuiBadge>
   ) : undefined,
@@ -53,7 +57,7 @@ const toOption = (file: DetonateFileOption): FileSelectableOption => ({
  * modal opens. Shaped like the "Select workflow" panel: search, option list, primary button.
  */
 export const DetonateSelectFilePanel = memo(
-  ({ files, onContinue }: DetonateSelectFilePanelProps) => {
+  ({ files, onContinue, isSubmitting = false }: DetonateSelectFilePanelProps) => {
     const initialOptions = useMemo(() => files.map(toOption), [files]);
     const [options, setOptions] = useState<FileSelectableOption[]>(initialOptions);
 
@@ -102,7 +106,8 @@ export const DetonateSelectFilePanel = memo(
           <EuiButton
             fill
             fullWidth
-            isDisabled={!selected}
+            isDisabled={!selected || isSubmitting}
+            isLoading={isSubmitting}
             onClick={handleContinue}
             data-test-subj="detonateSelectFileContinue"
           >

@@ -12,6 +12,7 @@ import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HelpMenu } from '../../common/components/help_menu';
 import { getScopeFromPath } from '../../data_view_manager/utils/paths';
 import { GlobalHeader } from './global_header';
+import { FlowVariantSelect } from '../../flyout_v2/detonation/flow_variant_select';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 import { useUrlState } from '../../common/hooks/use_url_state';
 import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_title';
@@ -69,6 +70,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
       <ConsoleManager>
         <>
           <GlobalHeader />
+          <FlowVariantSelect />
           <DragDropContextWrapper browserFields={browserFields}>{children}</DragDropContextWrapper>
           <HelpMenu />
           <TopValuesPopover />

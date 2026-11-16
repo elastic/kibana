@@ -25,6 +25,7 @@ import {
   CASES_PATH,
   CONFIGURATIONS_PATH,
   COVERAGE_OVERVIEW_PATH,
+  DETONATE_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
   MANAGE_PATH,
@@ -269,6 +270,13 @@ export const isCoverageOverviewPath = (pathname: string): boolean =>
     strict: false,
   });
 
+export const isDetonatePath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: DETONATE_PATH,
+    exact: true,
+    strict: false,
+  });
+
 export const isCloudSecurityPosturePath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: CLOUD_SECURITY_POSTURE_BASE_PATH,
@@ -334,6 +342,7 @@ export const isPageWithAppHeaderPath = (pathname: string): boolean =>
     isRuleEditPath,
     isRuleDetailsPath,
     isCoverageOverviewPath,
+    isDetonatePath,
     isExceptionsPath,
     isCloudSecurityPosturePath,
     isConfigurationsPath,

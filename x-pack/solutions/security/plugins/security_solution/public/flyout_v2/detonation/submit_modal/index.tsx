@@ -31,8 +31,6 @@ import * as i18n from './translations';
 
 export const DETONATE_SUBMIT_MODAL_TEST_ID = 'detonateSubmitModal';
 
-type SampleSource = 'alert' | 'upload' | 'url';
-
 export interface DetonateSample {
   /** File name from the alert, when known. */
   fileName: string;
@@ -44,21 +42,25 @@ export interface DetonateSample {
   isDetonated?: boolean;
 }
 
+type SampleSource = 'upload' | 'url';
+
+const SOURCE_OPTIONS = [
+  { id: 'upload', label: i18n.SOURCE_UPLOAD },
+  { id: 'url', label: i18n.SOURCE_URL },
+];
+
 export interface DetonateSubmitModalProps {
-  /** Sample details read from the alert, used to prefill the form. */
-  sample: DetonateSample;
+  /**
+   * Sample details read from the alert, used to prefill the form. When omitted, the modal is
+   * standalone and lets the user upload a file or enter a URL instead.
+   */
+  sample?: DetonateSample;
   onClose: () => void;
   /** Called when the form is submitted. */
   onSubmit: () => void;
   /** Called when the user wants to see the existing analysis of the file. */
-  onSeeAnalysis: () => void;
+  onSeeAnalysis?: () => void;
 }
-
-const SOURCE_OPTIONS = [
-  { id: 'alert', label: i18n.SOURCE_ALERT_FILE },
-  { id: 'upload', label: i18n.SOURCE_UPLOAD },
-  { id: 'url', label: i18n.SOURCE_URL },
-];
 
 /**
  * Modal to submit a sample for detonation. Prototype: nothing is sent anywhere, submitting just
@@ -67,16 +69,15 @@ const SOURCE_OPTIONS = [
 export const DetonateSubmitModal = memo(
   ({ sample, onClose, onSubmit, onSeeAnalysis }: DetonateSubmitModalProps) => {
     const modalTitleId = useGeneratedHtmlId({ prefix: 'detonateSubmitModalTitle' });
-    const [source, setSource] = useState<SampleSource>('alert');
+    const [attachToCase, setAttachToCase] = useState(true);
+    const [source, setSource] = useState<SampleSource>('upload');
     const [url, setUrl] = useState('');
     const [hasFile, setHasFile] = useState(false);
-    const [attachToCase, setAttachToCase] = useState(true);
 
     const isValid = useMemo(() => {
-      if (source === 'url') return url.trim().length > 0;
-      if (source === 'upload') return hasFile;
-      return true;
-    }, [source, url, hasFile]);
+      if (sample) return true;
+      return source === 'url' ? url.trim().length > 0 : hasFile;
+    }, [sample, source, url, hasFile]);
 
     const handleSubmit = useCallback(
       (event: React.FormEvent) => {
@@ -104,19 +105,7 @@ export const DetonateSubmitModal = memo(
           </EuiText>
           <EuiSpacer size="m" />
           <EuiForm component="form" id="detonateSubmitForm" onSubmit={handleSubmit}>
-            <EuiFormRow label={i18n.SAMPLE_SOURCE} fullWidth>
-              <EuiButtonGroup
-                legend={i18n.SAMPLE_SOURCE}
-                options={SOURCE_OPTIONS}
-                idSelected={source}
-                onChange={(id) => setSource(id as SampleSource)}
-                buttonSize="compressed"
-                isFullWidth
-                data-test-subj="detonateSampleSource"
-              />
-            </EuiFormRow>
-            <EuiSpacer size="m" />
-            {source === 'alert' && (
+            {sample ? (
               <EuiPanel hasBorder hasShadow={false} paddingSize="m">
                 <EuiDescriptionList
                   type="column"
@@ -146,7 +135,7 @@ export const DetonateSubmitModal = memo(
                       actionProps={{
                         primary: {
                           children: i18n.SEE_ANALYSIS,
-                          onClick: onSeeAnalysis,
+                          onClick: onSeeAnalysis ?? onClose,
                           'data-test-subj': 'detonateSeeAnalysis',
                         },
                       }}
@@ -155,29 +144,42 @@ export const DetonateSubmitModal = memo(
                   </>
                 )}
               </EuiPanel>
+            ) : (
+              <>
+                <EuiFormRow label={i18n.SAMPLE_SOURCE} fullWidth>
+                  <EuiButtonGroup
+                    legend={i18n.SAMPLE_SOURCE}
+                    options={SOURCE_OPTIONS}
+                    idSelected={source}
+                    onChange={(id) => setSource(id as SampleSource)}
+                    buttonSize="compressed"
+                    isFullWidth
+                    data-test-subj="detonateSampleSource"
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="m" />
+                {source === 'upload' ? (
+                  <EuiFormRow fullWidth>
+                    <EuiFilePicker
+                      fullWidth
+                      initialPromptText={i18n.UPLOAD_PROMPT}
+                      onChange={(files) => setHasFile(Boolean(files && files.length > 0))}
+                      data-test-subj="detonateFilePicker"
+                    />
+                  </EuiFormRow>
+                ) : (
+                  <EuiFormRow label={i18n.URL_LABEL} fullWidth>
+                    <EuiFieldText
+                      fullWidth
+                      placeholder={i18n.URL_PLACEHOLDER}
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      data-test-subj="detonateSampleUrl"
+                    />
+                  </EuiFormRow>
+                )}
+              </>
             )}
-            {source === 'upload' && (
-              <EuiFormRow fullWidth>
-                <EuiFilePicker
-                  fullWidth
-                  initialPromptText={i18n.UPLOAD_PROMPT}
-                  onChange={(files) => setHasFile(Boolean(files && files.length > 0))}
-                  data-test-subj="detonateFilePicker"
-                />
-              </EuiFormRow>
-            )}
-            {source === 'url' && (
-              <EuiFormRow label={i18n.URL_LABEL} fullWidth>
-                <EuiFieldText
-                  fullWidth
-                  placeholder={i18n.URL_PLACEHOLDER}
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  data-test-subj="detonateSampleUrl"
-                />
-              </EuiFormRow>
-            )}
-            <EuiSpacer size="m" />
             <EuiSpacer size="m" />
             <EuiSwitch
               label={i18n.ATTACH_TO_CASE}

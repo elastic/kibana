@@ -16,4 +16,4 @@ export const PANEL_TITLE = t('title', 'Select a file to detonate');
 export const SEARCH_PLACEHOLDER = t('searchPlaceholder', 'Select a file');
 export const CONTINUE = t('continue', 'Continue');
 export const NO_FILES = t('noFiles', 'No files match');
-export const BADGE_DETONATED = t('badgeDetonated', 'Detonated');
+export const BADGE_DETONATED = t('badgeDetonated', 'Detonated: Malicious');

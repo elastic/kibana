@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -36,6 +37,7 @@ import { AddExceptionFlyoutWrapper } from '../../../../detections/components/ale
 import { getOsqueryActionItem } from '../../../../detections/components/osquery/osquery_action_item';
 import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery_flyout';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
+import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
@@ -51,6 +53,12 @@ import {
   DetonateSelectFilePanel,
 } from '../../../detonation/select_file_panel';
 import * as detonateFileI18n from '../../../detonation/select_file_translations';
+import { useFlowVariant } from '../../../detonation/flow_variant';
+import { addPendingDetonation } from '../../../detonation/pending_detonations';
+import {
+  DETONATION_SUBMITTED_TITLE,
+  DetonationSubmittedToastContent,
+} from '../../../detonation/submitted_toast';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { ActionMenu, getActionGroups } from './action_menu';
 
@@ -220,6 +228,44 @@ export const TakeActionButton = memo(
     // Prototype: "Detonate" opens a submit modal; submitting opens a fake detonation report flyout.
     const { openDetonationFlyoutAsChild } = useFlyoutApi();
     const [detonateSample, setDetonateSample] = useState<DetonateSample | null>(null);
+    const flowVariant = useFlowVariant();
+    const kibanaServices = useKibana().services;
+    const [isDetonateSubmitting, setIsDetonateSubmitting] = useState(false);
+    const detonateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(
+      () => () => {
+        if (detonateTimeoutRef.current) clearTimeout(detonateTimeoutRef.current);
+      },
+      []
+    );
+
+    // "Flow toast": no modal. Spin briefly, then confirm with a toast linking to the Detonate page.
+    const submitDetonationWithToast = useCallback(
+      (file: Pick<DetonateFileOption, 'fileName' | 'hostName'>) => {
+        setIsDetonateSubmitting(true);
+        detonateTimeoutRef.current = setTimeout(() => {
+          setIsDetonateSubmitting(false);
+          closePopoverHandler();
+          // The detonation keeps running after the toast: the Detonate page shows it as a pending row.
+          addPendingDetonation(file);
+          const { notifications, application } = kibanaServices;
+          const toast = notifications.toasts.addSuccess({
+            title: DETONATION_SUBMITTED_TITLE,
+            text: toMountPoint(
+              <DetonationSubmittedToastContent
+                onView={() => {
+                  notifications.toasts.remove(toast);
+                  application.navigateToApp(APP_UI_ID, { deepLinkId: SecurityPageName.detonate });
+                }}
+              />,
+              kibanaServices
+            ),
+            toastLifeTimeMs: 15000,
+          });
+        }, 2000);
+      },
+      [closePopoverHandler, kibanaServices]
+    );
     const hostName = (getFieldValue(hit, 'host.name') as string | undefined) ?? '-';
     const detonateFiles = useMemo<DetonateFileOption[]>(
       () => [
@@ -235,6 +281,7 @@ export const TakeActionButton = memo(
           hostName,
           description: 'File on the host that triggered this alert',
           badge: detonateFileI18n.BADGE_DETONATED,
+          badgeColor: 'danger',
           isDetonated: true,
         },
         {
@@ -274,15 +321,26 @@ export const TakeActionButton = memo(
           content: (
             <DetonateSelectFilePanel
               files={detonateFiles}
+              isSubmitting={isDetonateSubmitting}
               onContinue={(file) => {
-                closePopoverHandler();
-                setDetonateSample(file);
+                if (flowVariant === 'toast') {
+                  submitDetonationWithToast(file);
+                } else {
+                  closePopoverHandler();
+                  setDetonateSample(file);
+                }
               }}
             />
           ),
         },
       ],
-      [detonateFiles, closePopoverHandler]
+      [
+        detonateFiles,
+        closePopoverHandler,
+        flowVariant,
+        isDetonateSubmitting,
+        submitDetonationWithToast,
+      ]
     );
     const handleDetonateSubmit = useCallback(() => {
       setDetonateSample(null);

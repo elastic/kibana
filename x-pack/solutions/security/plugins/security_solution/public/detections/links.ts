@@ -17,9 +17,10 @@ import {
   ALERTS_PATH,
   ATTACK_DISCOVERY_FEATURE_ID,
   ATTACKS_PATH,
+  DETONATE_PATH,
   SecurityPageName,
 } from '../../common/constants';
-import { ALERT_SUMMARY, ALERTS, ATTACKS } from '../app/translations';
+import { ALERT_SUMMARY, ALERTS, ATTACKS, DETONATE } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import { IconAlerts } from '../common/icons/alerts';
 import { IconAttacks } from '../common/icons/attacks';
@@ -65,6 +66,22 @@ const attacksSubLink: LinkItem = {
   landingIcon: IconAttacks,
 };
 
+const detonateSubLink: LinkItem = {
+  capabilities: [[ALERTS_UI_READ_PRIVILEGE, ALERTS_UI_DETECTIONS_PRIVILEGE]],
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.detonate', {
+      defaultMessage: 'Detonate',
+    }),
+  ],
+  id: SecurityPageName.detonate,
+  path: DETONATE_PATH,
+  title: DETONATE,
+  description: i18n.translate('xpack.securitySolution.appLinks.detonate.description', {
+    defaultMessage:
+      'Run suspicious files in an isolated sandbox and review their behavior reports.',
+  }),
+};
+
 export const alertDetectionsLinks: LinkItem = {
   id: SecurityPageName.alertDetections,
   title: i18n.translate('xpack.securitySolution.appLinks.alertDetections.title', {
@@ -81,14 +98,14 @@ export const alertDetectionsLinks: LinkItem = {
       defaultMessage: 'Detections',
     }),
   ],
-  links: [attacksSubLink, alertsSubLink],
+  links: [attacksSubLink, alertsSubLink, detonateSubLink],
   skipUrlState: true,
   categories: [
     {
       label: i18n.translate('xpack.securitySolution.appLinks.category.views', {
         defaultMessage: 'Views',
       }),
-      linkIds: [SecurityPageName.attacks, SecurityPageName.alerts],
+      linkIds: [SecurityPageName.attacks, SecurityPageName.alerts, SecurityPageName.detonate],
     },
   ],
 };

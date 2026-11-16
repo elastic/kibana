@@ -26,6 +26,11 @@ export interface OpenDetonationFlyoutParams {
 
 export interface DetonationFlyoutApi {
   /**
+   * Opens the detonation report flyout as a new, top-level flyout (fresh session). Use this from
+   * outside any flyout, e.g. the Detonate page.
+   */
+  openDetonationFlyout: (params?: OpenDetonationFlyoutParams) => void;
+  /**
    * Opens the detonation report flyout as a child of the currently open flyout (nested in its
    * history stack, so the back button returns to it). Prototype: not persisted in the URL.
    */
@@ -37,7 +42,7 @@ export interface DetonationFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useDetonationFlyoutApi = (): DetonationFlyoutApi => {
-  const { historyKey } = useFlyoutSessionContext();
+  const { historyKey, session: sessionMode } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const openFlyout = useOpenFlyout();
 
@@ -59,5 +64,26 @@ export const useDetonationFlyoutApi = (): DetonationFlyoutApi => {
     [openFlyout, defaultDocumentFlyoutProperties, historyKey]
   );
 
-  return useMemo(() => ({ openDetonationFlyoutAsChild }), [openDetonationFlyoutAsChild]);
+  const openDetonationFlyout = useCallback(
+    ({ skipDetonation = false }: OpenDetonationFlyoutParams = {}) => {
+      const properties: OverlaySystemFlyoutOpenOptions = {
+        ...defaultDocumentFlyoutProperties,
+        historyKey,
+        session: sessionMode,
+        title: DETONATION_REPORT_TITLE,
+      };
+      openFlyout(
+        <DetonationReport skipDetonation={skipDetonation} />,
+        properties,
+        undefined,
+        sessionMode
+      );
+    },
+    [openFlyout, defaultDocumentFlyoutProperties, historyKey, sessionMode]
+  );
+
+  return useMemo(
+    () => ({ openDetonationFlyout, openDetonationFlyoutAsChild }),
+    [openDetonationFlyout, openDetonationFlyoutAsChild]
+  );
 };

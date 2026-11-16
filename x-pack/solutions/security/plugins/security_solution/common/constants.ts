@@ -113,6 +113,7 @@ export const DETECTIONS_PATH = '/detections' as const;
 // Investigate possibility of using `detections` instead
 export const ALERTS_PATH = '/alerts' as const;
 export const ATTACKS_PATH = '/attacks' as const;
+export const DETONATE_PATH = '/detonate' as const;
 export const ALERT_DETECTIONS = '/alert_detections' as const;
 
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;

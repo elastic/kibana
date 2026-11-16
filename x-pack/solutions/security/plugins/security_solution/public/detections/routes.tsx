@@ -9,12 +9,14 @@ import React from 'react';
 import type { RouteComponentProps, RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { AlertSummaryContainer } from './pages/alert_summary';
+import { DetonateContainer } from './pages/detonate';
 import {
   ALERT_DETECTIONS,
   ALERT_SUMMARY_PATH,
   ALERTS_PATH,
   ATTACKS_PATH,
   DETECTIONS_PATH,
+  DETONATE_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
@@ -62,6 +64,10 @@ export const routes: RouteProps[] = [
   {
     path: ATTACKS_PATH,
     component: withSecurityRoutePageWrapper(AttacksRoutes, SecurityPageName.attacks),
+  },
+  {
+    path: DETONATE_PATH,
+    component: withSecurityRoutePageWrapper(DetonateContainer, SecurityPageName.detonate),
   },
   {
     path: ALERT_DETECTIONS,

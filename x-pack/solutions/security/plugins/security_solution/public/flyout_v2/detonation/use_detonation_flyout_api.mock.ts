@@ -11,5 +11,6 @@ import type { DetonationFlyoutApi } from './use_detonation_flyout_api';
  * Returns a `useDetonationFlyoutApi` return value with every method stubbed as a `jest.fn()`.
  */
 export const createDetonationFlyoutApiMock = (): jest.Mocked<DetonationFlyoutApi> => ({
+  openDetonationFlyout: jest.fn(),
   openDetonationFlyoutAsChild: jest.fn(),
 });

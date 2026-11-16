@@ -17,16 +17,9 @@ export const MODAL_DESCRIPTION = t(
   'description',
   'Run the sample in an isolated sandbox and get a behavior report with a verdict. This runs on Elastic Defend as part of the Complete Detection suite.'
 );
-export const SAMPLE_SOURCE = t('sampleSource', 'Sample');
-export const SOURCE_ALERT_FILE = t('sourceAlertFile', 'File from this alert');
-export const SOURCE_UPLOAD = t('sourceUpload', 'Upload a file');
-export const SOURCE_URL = t('sourceUrl', 'URL');
 export const FILE_NAME = t('fileName', 'File name');
 export const SHA_256 = t('sha256', 'SHA-256');
 export const HOST = t('host', 'Host');
-export const UPLOAD_PROMPT = t('uploadPrompt', 'Select or drag and drop a file');
-export const URL_LABEL = t('urlLabel', 'Sample URL');
-export const URL_PLACEHOLDER = t('urlPlaceholder', 'https://example.com/sample.exe');
 export const ATTACH_TO_CASE = t('attachToCase', 'Attach the report to a case');
 export const SUBMIT_DISCLAIMER = t(
   'disclaimer',
@@ -43,3 +36,9 @@ export const ALREADY_DETONATED_TEXT = t(
   'There is an existing malware analysis for this file.'
 );
 export const SEE_ANALYSIS = t('seeAnalysis', 'See analysis');
+export const SAMPLE_SOURCE = t('sampleSource', 'Sample');
+export const SOURCE_UPLOAD = t('sourceUpload', 'Upload a file');
+export const SOURCE_URL = t('sourceUrl', 'URL');
+export const UPLOAD_PROMPT = t('uploadPrompt', 'Select or drag and drop a file');
+export const URL_LABEL = t('urlLabel', 'Sample URL');
+export const URL_PLACEHOLDER = t('urlPlaceholder', 'https://example.com/sample.exe');
