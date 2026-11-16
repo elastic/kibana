@@ -6,7 +6,7 @@
  */
 
 /** What one strategy did in a tick. */
-export interface IStrategyRunResult {
+export interface StrategyRunResult {
   id: string;
   /** The window the strategy covered, `[from, to)` in epoch milliseconds. */
   from: number;
@@ -20,7 +20,7 @@ export interface IStrategyRunResult {
 }
 
 /** What a tick did. */
-export type TTickResult =
-  | { run_id: string; status: 'completed'; strategies: IStrategyRunResult[] }
+export type TickResult =
+  | { run_id: string; status: 'completed'; strategies: StrategyRunResult[] }
   | { run_id: string; status: 'busy'; held_by: string; strategies: [] }
   | { run_id: string; status: 'unavailable'; strategies: [] };
