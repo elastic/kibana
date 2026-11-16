@@ -113,6 +113,7 @@ import {
   withUnitSources,
 } from '../../../streams_layout/sources/source_models';
 import { CreateSourceModal } from '../../../streams_layout/sources/create_source_modal';
+import { useAddSourceFlow } from '../../../streams_layout/sources/use_add_source_flow';
 import { SourceDetailsFlyout } from '../../../streams_layout/sources/source_details_flyout';
 import { useDestinations } from '../../../streams_layout/destinations/destinations_context';
 import { CreateDestinationModal } from '../../../streams_layout/destinations/create_destination_modal';
@@ -264,6 +265,7 @@ function StreamsCanvasInner() {
     closeCreateModal,
     openSourceFlyout,
     closeSourceFlyout,
+    availableSourceTypes,
   } = sourcesController;
   const {
     destinations,
@@ -812,9 +814,17 @@ function StreamsCanvasInner() {
     redo();
   }, [canRedo, isSaving, redo]);
 
+  // POC (elastic/ingest-dev#10466): the Map's "Add source" entry points open the same chooser as
+  // the Sources tab, so the integrations catalogue is reachable from both.
+  const { openAddSource, addSourceModals } = useAddSourceFlow({
+    availableSourceTypes,
+    openCreateModal,
+    enabled: !readOnly,
+  });
+
   const addSource = useCallback(() => {
-    openCreateModal();
-  }, [openCreateModal]);
+    openAddSource();
+  }, [openAddSource]);
 
   const addDestination = useCallback(() => {
     openCreateDestinationModal();
@@ -1031,6 +1041,7 @@ function StreamsCanvasInner() {
                   readOnly={readOnly}
                 />
               )}
+              {addSourceModals}
               {!readOnly && isCreateModalOpen && (
                 <CreateSourceModal sources={sourcesController} onClose={closeCreateModal} />
               )}
