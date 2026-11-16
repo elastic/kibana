@@ -114,7 +114,7 @@ export const workflowRunEmbeddableSchema = lazySchema(() =>
         }),
       graph_layout: workflowRunGraphLayoutSchema.optional().meta({
         description:
-          'Direction of the workflow graph drawn in the panel. `auto` (the default) lays it out horizontally in a wide panel and vertically in a tall one.',
+          'Direction of the workflow graph drawn in the panel. `auto` (the default) picks the direction that draws the graph largest in the panel.',
       }),
     })
     .strict()

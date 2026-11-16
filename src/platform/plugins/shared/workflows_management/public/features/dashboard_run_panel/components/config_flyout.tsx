@@ -268,16 +268,39 @@ const MappingRow = ({ descriptor, draft, controls, onChange }: MappingRowProps) 
   );
 };
 
+const GRAPH_LAYOUT_LABELS: Record<WorkflowRunGraphLayout, string> = {
+  auto: CONFIG_MESSAGES.graphLayoutAuto,
+  horizontal: CONFIG_MESSAGES.graphLayoutHorizontal,
+  vertical: CONFIG_MESSAGES.graphLayoutVertical,
+};
+
+const GRAPH_LAYOUTS: readonly WorkflowRunGraphLayout[] = ['auto', 'horizontal', 'vertical'];
+
+interface GraphLayoutPickerProps {
+  value: WorkflowRunGraphLayout;
+  onChange: (layout: WorkflowRunGraphLayout) => void;
+}
+
+const GraphLayoutPicker = ({ value, onChange }: GraphLayoutPickerProps): React.JSX.Element => {
+  // Button group option ids become DOM ids, so they need to be unique on the page.
+  const idPrefix = useGeneratedHtmlId({ prefix: 'workflowRunGraphLayout' });
+  const toId = (layout: WorkflowRunGraphLayout) => `${idPrefix}-${layout}`;
+  return (
+    <EuiButtonGroup
+      legend={CONFIG_MESSAGES.graphLayout}
+      options={GRAPH_LAYOUTS.map((layout) => ({
+        id: toId(layout),
+        label: GRAPH_LAYOUT_LABELS[layout],
+      }))}
+      idSelected={toId(value)}
+      onChange={(id) => onChange(GRAPH_LAYOUTS.find((layout) => toId(layout) === id) ?? 'auto')}
+      buttonSize="compressed"
+      data-test-subj="workflowRunPanelGraphLayout"
+    />
+  );
+};
+
 /** Flyout for choosing the workflow a panel runs and where each of its inputs comes from. */
-const GRAPH_LAYOUT_OPTIONS: Array<{ id: WorkflowRunGraphLayout; label: string }> = [
-  { id: 'auto', label: CONFIG_MESSAGES.graphLayoutAuto },
-  { id: 'horizontal', label: CONFIG_MESSAGES.graphLayoutHorizontal },
-  { id: 'vertical', label: CONFIG_MESSAGES.graphLayoutVertical },
-];
-
-const toGraphLayout = (id: string): WorkflowRunGraphLayout =>
-  GRAPH_LAYOUT_OPTIONS.find((option) => option.id === id)?.id ?? 'auto';
-
 export const ConfigFlyout = ({
   http,
   ariaLabelledBy,
@@ -365,14 +388,7 @@ export const ConfigFlyout = ({
           hasChildLabel={false}
           fullWidth
         >
-          <EuiButtonGroup
-            legend={CONFIG_MESSAGES.graphLayout}
-            options={GRAPH_LAYOUT_OPTIONS}
-            idSelected={graphLayout}
-            onChange={(id) => setGraphLayout(toGraphLayout(id))}
-            buttonSize="compressed"
-            data-test-subj="workflowRunPanelGraphLayout"
-          />
+          <GraphLayoutPicker value={graphLayout} onChange={setGraphLayout} />
         </EuiFormRow>
 
         {workflowId && (
@@ -411,7 +427,9 @@ export const ConfigFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel}>{CONFIG_MESSAGES.cancel}</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={onCancel} data-test-subj="workflowRunPanelCancel">
+              {CONFIG_MESSAGES.cancel}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton

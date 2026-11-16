@@ -14,6 +14,11 @@ export const PANEL_DISPLAY_NAME = i18n.translate('workflows.dashboardRunPanel.di
   defaultMessage: 'Run workflow',
 });
 
+export const ADD_PANEL_GROUP_DISPLAY_NAME = i18n.translate(
+  'workflows.dashboardRunPanel.addPanelGroup',
+  { defaultMessage: 'Automations' }
+);
+
 export const PANEL_TYPE_DISPLAY_NAME = i18n.translate(
   'workflows.dashboardRunPanel.typeDisplayName',
   { defaultMessage: 'workflow' }
@@ -116,9 +121,6 @@ export const CONFIRM_MESSAGES = {
   issuesTitle: i18n.translate('workflows.dashboardRunPanel.confirm.issuesTitle', {
     defaultMessage: 'Some values could not be read from the dashboard',
   }),
-  invalidJson: i18n.translate('workflows.dashboardRunPanel.confirm.invalidJson', {
-    defaultMessage: 'Enter valid JSON',
-  }),
 };
 
 export const SOURCE_LABELS = {
@@ -166,7 +168,7 @@ export const CONFIG_MESSAGES = {
   }),
   graphLayoutHelp: i18n.translate('workflows.dashboardRunPanel.config.graphLayoutHelp', {
     defaultMessage:
-      'Direction of the workflow graph shown in the panel. Auto follows the panel shape.',
+      'Direction of the workflow graph shown in the panel. Auto picks the one that shows the graph largest.',
   }),
   graphLayoutAuto: i18n.translate('workflows.dashboardRunPanel.config.graphLayoutAuto', {
     defaultMessage: 'Auto',
@@ -209,8 +211,5 @@ export const CONFIG_MESSAGES = {
   save: i18n.translate('workflows.dashboardRunPanel.config.save', { defaultMessage: 'Save' }),
   cancel: i18n.translate('workflows.dashboardRunPanel.config.cancel', {
     defaultMessage: 'Cancel',
-  }),
-  chooseControl: i18n.translate('workflows.dashboardRunPanel.config.chooseControl', {
-    defaultMessage: 'Choose a control',
   }),
 };

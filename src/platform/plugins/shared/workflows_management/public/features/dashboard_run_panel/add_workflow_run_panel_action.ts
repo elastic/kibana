@@ -8,19 +8,26 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsPresentableGroup } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { openConfigFlyout } from './open_config_flyout';
-import { PANEL_DISPLAY_NAME } from './translations';
+import { ADD_PANEL_GROUP_DISPLAY_NAME, PANEL_DISPLAY_NAME } from './translations';
 import {
   ADD_WORKFLOW_RUN_PANEL_ACTION_ID,
   WORKFLOW_RUN_EMBEDDABLE_TYPE,
 } from '../../../common/dashboard_run_panel/constants';
 import type { WorkflowRunEmbeddableState } from '../../../server/dashboard_run_panel/schema';
+
+const ADD_PANEL_AUTOMATION_GROUP: UiActionsPresentableGroup = {
+  id: 'automations',
+  getDisplayName: () => ADD_PANEL_GROUP_DISPLAY_NAME,
+  getIconType: () => 'workflow',
+  order: 0,
+};
 
 export const getAddWorkflowRunPanelAction = (
   core: CoreStart,
@@ -29,7 +36,7 @@ export const getAddWorkflowRunPanelAction = (
   id: ADD_WORKFLOW_RUN_PANEL_ACTION_ID,
   getIconType: () => 'play',
   order: 10,
-  grouping: [ADD_PANEL_OTHER_GROUP],
+  grouping: [ADD_PANEL_AUTOMATION_GROUP],
   getDisplayName: () => PANEL_DISPLAY_NAME,
   isCompatible: async ({ embeddable: parentApi }) =>
     isFlagEnabled() &&

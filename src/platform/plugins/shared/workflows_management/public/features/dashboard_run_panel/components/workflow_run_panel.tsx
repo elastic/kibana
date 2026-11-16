@@ -58,6 +58,8 @@ export interface WorkflowRunPanelProps {
   buttonLabel: string | undefined;
   mappings: readonly WorkflowRunInputMapping[];
   graphLayout: WorkflowRunGraphLayout | undefined;
+  /** Keeps an `auto` graph in its current direction, e.g. while a dashboard flyout narrows the panel. */
+  holdGraphDirection: boolean;
   fetchContext: FetchContext;
 }
 
@@ -149,6 +151,7 @@ export const WorkflowRunPanel = ({
   buttonLabel,
   mappings,
   graphLayout,
+  holdGraphDirection,
   fetchContext,
 }: WorkflowRunPanelProps): React.JSX.Element => {
   const { euiTheme } = useEuiTheme();
@@ -288,6 +291,7 @@ export const WorkflowRunPanel = ({
             isYamlValid={workflow.valid}
             stepExecutions={lastRun.data?.stepExecutions}
             layout={graphLayout}
+            holdDirection={holdGraphDirection}
           />
         )}
         {blockedReason && (

@@ -22,6 +22,7 @@ import {
 import { QueryClientProvider } from '@kbn/react-query';
 import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowRunPanel } from './components/workflow_run_panel';
+import { apiPublishesHasOverlays } from './lib/publishes_has_overlays';
 import { openConfigFlyout } from './open_config_flyout';
 import { PANEL_TYPE_DISPLAY_NAME } from './translations';
 import type { WorkflowRunEmbeddableApi, WorkflowRunPanelConfig } from './types';
@@ -53,6 +54,9 @@ export const getWorkflowRunEmbeddableFactory = (
     const buttonLabel$ = new BehaviorSubject(initialState.button_label);
     const inputMappings$ = new BehaviorSubject(initialState.input_mappings);
     const graphLayout$ = new BehaviorSubject(initialState.graph_layout);
+    const parentHasOverlays$ = apiPublishesHasOverlays(parentApi)
+      ? parentApi.hasOverlays$
+      : new BehaviorSubject(false);
 
     const applyConfig = (config: WorkflowRunPanelConfig) => {
       workflowId$.next(config.workflow_id);
@@ -117,12 +121,14 @@ export const getWorkflowRunEmbeddableFactory = (
     return {
       api,
       Component: () => {
-        const [workflowId, buttonLabel, inputMappings, graphLayout] = useBatchedPublishingSubjects(
-          workflowId$,
-          buttonLabel$,
-          inputMappings$,
-          graphLayout$
-        );
+        const [workflowId, buttonLabel, inputMappings, graphLayout, parentHasOverlays] =
+          useBatchedPublishingSubjects(
+            workflowId$,
+            buttonLabel$,
+            inputMappings$,
+            graphLayout$,
+            parentHasOverlays$
+          );
         const fetchContext = useFetchContext(api);
         return (
           <KibanaContextProvider services={services}>
@@ -135,6 +141,7 @@ export const getWorkflowRunEmbeddableFactory = (
                 buttonLabel={buttonLabel}
                 mappings={inputMappings ?? NO_MAPPINGS}
                 graphLayout={graphLayout}
+                holdGraphDirection={parentHasOverlays}
                 fetchContext={fetchContext}
               />
             </QueryClientProvider>
