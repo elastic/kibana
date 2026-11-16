@@ -470,5 +470,44 @@ describe('Connector Model Versions', () => {
 
       expect(migrated.attributes.config).toEqual({ url: 'https://example.com' });
     });
+
+    it('drops config.ingestTokenHash from the 10.6.0 action fixtures', () => {
+      const migrator = createModelVersionTestMigrator({
+        type: {
+          name: ACTION_SAVED_OBJECT_TYPE,
+          hidden: true,
+          namespaceType: 'multiple-isolated',
+          mappings: actionMappings,
+          modelVersions: versions,
+        },
+      });
+      const fixturePath = join(
+        __dirname,
+        '../../../../../../../../packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/action/10.6.0.json'
+      );
+      const fixture = JSON.parse(readFileSync(fixturePath, 'utf8')) as {
+        '10.5.0': Array<Record<string, unknown>>;
+        '10.6.0': Array<Record<string, unknown>>;
+      };
+
+      expect(fixture['10.5.0']).toHaveLength(fixture['10.6.0'].length);
+      fixture['10.5.0'].forEach((previous, index) => {
+        expect(rawConnectorSchemaV5.validate(previous)).toEqual(previous);
+        const migrated = migrator.migrate<Record<string, unknown>, Record<string, unknown>>({
+          document: {
+            id: `fixture-${index}`,
+            type: ACTION_SAVED_OBJECT_TYPE,
+            attributes: previous,
+            references: [],
+          },
+          fromVersion: 5,
+          toVersion: 6,
+        });
+        expect(migrated.attributes).toEqual(fixture['10.6.0'][index]);
+        expect(rawConnectorSchemaV5.validate(fixture['10.6.0'][index])).toEqual(
+          fixture['10.6.0'][index]
+        );
+      });
+    });
   });
 });
