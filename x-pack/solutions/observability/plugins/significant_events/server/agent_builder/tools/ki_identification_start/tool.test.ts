@@ -20,6 +20,10 @@ describe('createKiIdentificationStartTool', () => {
     trackAgentToolKiIdentificationStarted: jest.fn(),
   };
 
+  beforeEach(() => {
+    telemetry.trackAgentToolKiIdentificationStarted.mockClear();
+  });
+
   const setup = ({
     featurePrivilege = 'all',
   }: { featurePrivilege?: NightshiftFeaturePrivilege } = {}) => {
@@ -121,6 +125,47 @@ describe('createKiIdentificationStartTool', () => {
       expect(data.message).toContain('Failed to start KI identification background task');
       expect(data.operation).toBe('ki_identification_start');
     }
+  });
+
+  it('reports an unknown source by its cause, without the slug, and still names it to the agent', async () => {
+    const { tool, context, managementApi } = setup();
+
+    const result = await tool.handler(
+      { slug: 'motel-ingest-collector', steps: [KIsOnboardingStep.FeaturesIdentification] },
+      context
+    );
+
+    expect(managementApi.runWorkflow).not.toHaveBeenCalled();
+    expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledTimes(1);
+    expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error_message: 'unknown_source' })
+    );
+    expect(result).toMatchObject({
+      results: [
+        {
+          type: 'error',
+          data: {
+            message:
+              'Failed to start KI identification background task for "motel-ingest-collector": Source not found in this space: motel-ingest-collector',
+          },
+        },
+      ],
+    });
+  });
+
+  it('keeps the message of a failure the caller did not cause', async () => {
+    const { tool, context, managementApi } = setup();
+    managementApi.runWorkflow.mockRejectedValueOnce(new Error('version conflict'));
+
+    await tool.handler(
+      { slug: 'logs.nginx', steps: [KIsOnboardingStep.FeaturesIdentification] },
+      context
+    );
+
+    expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledTimes(1);
+    expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error_message: 'version conflict' })
+    );
   });
 
   it('does not let a Nightshift reader start onboarding', async () => {

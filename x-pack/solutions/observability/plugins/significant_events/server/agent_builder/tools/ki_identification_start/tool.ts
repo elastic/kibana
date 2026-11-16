@@ -27,6 +27,7 @@ import {
   resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
+import { classifyToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { startKiIdentificationToolHandler } from './handler';
 import type { GetScopedClients } from '../../../routes/types';
 
@@ -123,7 +124,7 @@ export const createKiIdentificationStartTool = ({
         workflow_execution_id: workflowExecutionId,
         success: false,
         source_id: sourceId,
-        error_message: message,
+        error_message: toTelemetryErrorMessage(classifyToolFailure(err), message),
       });
 
       return {
