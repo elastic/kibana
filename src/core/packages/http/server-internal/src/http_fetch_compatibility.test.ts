@@ -8,6 +8,6 @@
  */
 
 it('verify that we use exactly the same `undici` version at both the application and runtime levels', async () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   expect(process.versions.undici).toEqual(require('undici/package.json').version);
 });

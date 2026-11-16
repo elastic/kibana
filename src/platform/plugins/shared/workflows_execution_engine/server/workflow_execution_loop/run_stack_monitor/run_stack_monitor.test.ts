@@ -23,9 +23,9 @@ jest.mock('../../utils', () => ({
   },
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { processNodeStackMonitoring } = require('./process_node_stack_monitoring');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { abortableTimeout, TimeoutAbortedError } = require('../../utils');
 
 describe('runStackMonitor', () => {

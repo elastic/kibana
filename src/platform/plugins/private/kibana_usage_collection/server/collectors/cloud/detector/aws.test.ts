@@ -13,9 +13,9 @@ jest.mock('fs/promises');
 import type { AWSResponse } from './aws';
 import { AWSCloudService } from './aws';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const fetchMock = require('node-fetch') as jest.Mock;
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { readFile } = require('fs/promises') as { readFile: jest.Mock };
 
 describe('AWS', () => {
