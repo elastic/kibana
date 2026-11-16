@@ -110,6 +110,16 @@ export const GithubConnector: ConnectorSpec = {
   auth: {
     types: [
       {
+        type: 'bearer',
+        supportsSandbox: true,
+        defaults: {},
+        overrides: {
+          label: i18n.translate('connectorSpecs.github.auth.bearer.label', {
+            defaultMessage: 'Personal Access Token (PAT)',
+          }),
+        },
+      },
+      {
         type: 'oauth_authorization_code',
         supportsSandbox: true,
         defaults: {
@@ -123,16 +133,6 @@ export const GithubConnector: ConnectorSpec = {
             tokenUrl: { hidden: true },
             scope: { hidden: true },
           },
-        },
-      },
-      {
-        type: 'bearer',
-        supportsSandbox: true,
-        defaults: {},
-        overrides: {
-          label: i18n.translate('connectorSpecs.github.auth.bearer.label', {
-            defaultMessage: 'Personal Access Token (PAT)',
-          }),
         },
       },
     ],

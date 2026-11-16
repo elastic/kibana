@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod/v4';
 import type { ActionContext } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { getSandboxHosts } from '../../get_sandbox_hosts';
@@ -68,6 +69,17 @@ describe('GithubConnector', () => {
   });
 
   describe('auth', () => {
+    it('places PAT first in the generated auth options so it is the default selection', () => {
+      const schema = generateSecretsSchemaFromSpec(GithubConnector.auth);
+
+      expect(z.toJSONSchema(schema)).toMatchObject({
+        oneOf: [
+          { properties: { authType: { const: 'bearer' } } },
+          { properties: { authType: { const: 'oauth_authorization_code' } } },
+        ],
+      });
+    });
+
     it('supports bearer auth labeled as Personal Access Token (PAT)', () => {
       const bearerType = GithubConnector.auth?.types.find(
         (t) => typeof t === 'object' && t.type === 'bearer'
