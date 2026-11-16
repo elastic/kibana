@@ -14,7 +14,7 @@ import type {
   SpecChange,
   StaleCorrection,
 } from './detect_drift';
-import { changeNeedsReview } from './detect_drift';
+import { reviewOfChange } from './detect_drift';
 import { OVERLAY, snapshotFile } from './load_vendor_specs';
 
 /** What kind of change a reviewer looks at, from its `oasdiff` rule. */
@@ -544,23 +544,15 @@ export const renderDriftIssue = (
   }
   const changesOf = (source: string, operation: string) =>
     changesByOperation.get(`${source} ${operation}`) ?? [];
-  // The spec changes that keep the issue open, with the actions that call their operation.
-  const needsReview = changeNeedsReview(drift);
-  const callers = (source: string, operation: string): string[] =>
-    actions
-      .filter(({ operations }) =>
-        operations.some(
-          (candidate) => candidate.source === source && candidate.operation === operation
-        )
-      )
-      .map(({ action }) => action);
+  // The spec changes that keep the issue open, with the actions that need to review them.
+  const reviewersOf = reviewOfChange(drift);
   const review: ReviewItem[] = Object.entries(drift.sources).flatMap(([source, { changes = [] }]) =>
-    changes.filter(needsReview).map((change) => ({
-      kind: reviewKindOf(change.id),
-      source,
-      change,
-      actions: change.operation ? callers(source, change.operation) : [],
-    }))
+    changes.flatMap((change) => {
+      const { needsReview, actions: reviewers } = reviewersOf(source, change);
+      return needsReview
+        ? [{ kind: reviewKindOf(change.id), source, change, actions: [...reviewers] }]
+        : [];
+    })
   );
   const reviewOf = (source: string, operation: string) =>
     review.filter((item) => item.source === source && item.change.operation === operation);

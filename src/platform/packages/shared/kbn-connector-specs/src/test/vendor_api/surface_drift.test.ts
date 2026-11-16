@@ -495,6 +495,44 @@ describe('renderDriftIssue', () => {
     );
   });
 
+  it('counts only the actions that need a look, though another action fails', () => {
+    const { title, body } = renderDriftIssue(
+      {
+        ...drifted,
+        sources: {
+          main: {
+            status: 'changed',
+            changes: [
+              ...(drifted.sources.main.changes ?? []),
+              {
+                kind: 'breaking',
+                id: 'request-property-max-length-decreased',
+                text: 'decreased the max length of `id`',
+                operation: 'GET /items/{id}',
+              },
+              {
+                kind: 'breaking',
+                id: 'response-property-type-changed',
+                text: 'changed the type of `title`',
+                operation: 'GET /items/{id}',
+              },
+            ],
+          },
+        },
+        actions: drifted.actions?.map((action) => ({ ...action, tracked: true })),
+      },
+      { owners: [] }
+    );
+
+    expect(title).toBe('[Connectors][Validation] `.acme`: 1 action needs attention');
+    expect(body).toContain(
+      '> **1 of 2 actions works with the latest spec. 1 action needs attention.**\n>\n> `search` fails against the latest vendor spec.\n>\n> Update the connector to ensure it will continue working.'
+    );
+    // `getItem` passes, which verifies the request change, and doesn't read `title`
+    expect(body).not.toMatch(/^\| `GET \/items\/\{id\}` \| [^|]+ \| `getItem` \|/m);
+    expect(body).toContain('| ✅ Passes · fields it reads unchanged |');
+  });
+
   it('lists the changed fields that passing actions read, and those that read none', () => {
     const passing: ConnectorDrift = {
       ...drifted,

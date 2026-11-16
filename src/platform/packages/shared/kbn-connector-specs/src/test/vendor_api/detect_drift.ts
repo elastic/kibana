@@ -217,36 +217,64 @@ const fieldUseComplete = (drift: Omit<ConnectorDrift, 'outcome'>): boolean =>
   drift.actions !== undefined &&
   drift.actions.every(({ operations, tracked }) => operations.length === 0 || tracked === true);
 
+const verifiedBy = ({ kind, id }: SpecChange, passes: boolean, fieldsCompared: boolean): boolean =>
+  kind === 'non-breaking' ||
+  (kind === 'breaking' &&
+    ((passes && VERIFIED_BY_RUNNING.test(id)) ||
+      (fieldsCompared && VERIFIED_BY_FIELD_USE.test(id))));
+
+const passesBoth = ({ snapshotProblems, latestProblems }: ActionDrift): boolean =>
+  snapshotProblems.length === 0 && latestProblems !== undefined && latestProblems.length === 0;
+
 /**
- * Whether a spec change needs a person to review it: deprecations and sunsets always, and a
- * breaking change unless the actions passing against the latest spec verifies it.
+ * Per spec change, the actions calling its operation that need to review it, and whether it
+ * needs review at all. Deprecations and sunsets always do; a breaking change does for each caller
+ * whose passing against the latest spec doesn't verify it. A change no action calls needs review
+ * unless every action passing verifies it.
  */
-export const changeNeedsReview = (
+export const reviewOfChange = (
   drift: Omit<ConnectorDrift, 'outcome'>
-): ((change: SpecChange) => boolean) => {
+): ((
+  source: string,
+  change: SpecChange
+) => { readonly needsReview: boolean; readonly actions: readonly string[] }) => {
+  const actions = drift.actions ?? [];
   const passes = drift.verdict === 'healthy';
   const fieldsCompared = passes && fieldUseComplete(drift);
-  return ({ kind, id }) =>
-    kind !== 'non-breaking' &&
-    !(
-      kind === 'breaking' &&
-      ((passes && VERIFIED_BY_RUNNING.test(id)) ||
-        (fieldsCompared && VERIFIED_BY_FIELD_USE.test(id)))
-    );
+  return (source, change) => {
+    const callers = change.operation
+      ? actions.filter(({ operations }) =>
+          operations.some(
+            (candidate) => candidate.source === source && candidate.operation === change.operation
+          )
+        )
+      : [];
+    if (callers.length === 0) {
+      return { needsReview: !verifiedBy(change, passes, fieldsCompared), actions: [] };
+    }
+    const reviewers = callers
+      .filter(
+        (action) =>
+          !verifiedBy(change, passesBoth(action), passesBoth(action) && action.tracked === true)
+      )
+      .map(({ action }) => action);
+    return { needsReview: reviewers.length > 0, actions: reviewers };
+  };
 };
 
 const outcomeOf = (drift: Omit<ConnectorDrift, 'outcome'>): DriftOutcome => {
-  const sources = Object.values(drift.sources);
-  const needsReview = changeNeedsReview(drift);
+  const review = reviewOfChange(drift);
   const needsIssue =
     drift.verdict !== 'healthy' ||
     drift.overlayFindings.length > 0 ||
     (drift.actions ?? []).some(({ fieldChanges = [] }) => fieldChanges.length > 0) ||
-    sources.some(
-      ({ status, changes }) =>
+    Object.entries(drift.sources).some(
+      ([source, { status, changes }]) =>
         status === 'unreachable' ||
-        (status === 'changed' && (changes === undefined || changes.some(needsReview)))
+        (status === 'changed' &&
+          (changes === undefined || changes.some((change) => review(source, change).needsReview)))
     );
+  const sources = Object.values(drift.sources);
   if (needsIssue) {
     return 'issue';
   }

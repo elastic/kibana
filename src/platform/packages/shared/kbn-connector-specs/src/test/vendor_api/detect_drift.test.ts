@@ -12,8 +12,8 @@ import os from 'os';
 import path from 'path';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-import type { DetectDriftOptions } from './detect_drift';
-import { classifyChange, detectDrift } from './detect_drift';
+import type { ActionDrift, ConnectorDrift, DetectDriftOptions, SpecChange } from './detect_drift';
+import { classifyChange, detectDrift, reviewOfChange } from './detect_drift';
 import type { OasdiffEntry } from './run_oasdiff';
 import { updateVendorApi } from './update_vendor_api';
 
@@ -474,5 +474,78 @@ describe('classifyChange', () => {
     ['api-path-removed-before-sunset', 3, 'breaking'],
   ])('classifies %s (level %i) as %s', (id, level, kind) => {
     expect(classifyChange(entry(id, level))).toBe(kind);
+  });
+});
+
+describe('reviewOfChange', () => {
+  const action = (name: string, operation: string, overrides: Partial<ActionDrift> = {}) => ({
+    action: name,
+    operations: [{ source: 'main', operation, latest: { status: 'present' as const } }],
+    unmatched: [],
+    snapshotProblems: [],
+    latestProblems: [],
+    tracked: true,
+    ...overrides,
+  });
+  // `scrape` fails against the latest spec; the others pass.
+  const drift: Omit<ConnectorDrift, 'outcome'> = {
+    connector: '.acme',
+    sources: { main: { status: 'changed' } },
+    operationsChanged: false,
+    snapshotProblems: [],
+    latestProblems: ['scrape: POST /scrape breaks the spec'],
+    verdict: 'vendor-drift',
+    overlayFindings: [],
+    actions: [
+      action('scrape', 'POST /scrape', { latestProblems: ['POST /scrape breaks the spec'] }),
+      action('crawl', 'POST /crawl'),
+      action('search', 'POST /search', { tracked: false }),
+    ],
+  };
+  const change = (id: string, operation?: string): SpecChange => ({
+    kind: classifyChange(entry(id, id.includes('deprecated') ? 1 : 3)),
+    id,
+    text: id,
+    ...(operation ? { operation } : {}),
+  });
+  const review = reviewOfChange(drift);
+
+  it('leaves out callers whose passing verifies a request change, though another action fails', () => {
+    expect(review('main', change('request-parameter-max-decreased', 'POST /crawl'))).toEqual({
+      needsReview: false,
+      actions: [],
+    });
+    expect(review('main', change('request-parameter-max-decreased', 'POST /scrape'))).toEqual({
+      needsReview: true,
+      actions: ['scrape'],
+    });
+  });
+
+  it('verifies response changes by field use only for the callers it was tracked for', () => {
+    expect(review('main', change('response-property-type-changed', 'POST /crawl'))).toEqual({
+      needsReview: false,
+      actions: [],
+    });
+    expect(review('main', change('response-property-type-changed', 'POST /search'))).toEqual({
+      needsReview: true,
+      actions: ['search'],
+    });
+  });
+
+  it('always reviews deprecations, and changes no action calls unless every action passes', () => {
+    expect(review('main', change('endpoint-deprecated', 'POST /crawl'))).toEqual({
+      needsReview: true,
+      actions: ['crawl'],
+    });
+    expect(review('main', change('request-parameter-max-decreased', 'POST /other'))).toEqual({
+      needsReview: true,
+      actions: [],
+    });
+    expect(
+      reviewOfChange({ ...drift, verdict: 'healthy', actions: drift.actions?.slice(1, 2) })(
+        'main',
+        change('request-parameter-max-decreased', 'POST /other')
+      )
+    ).toEqual({ needsReview: false, actions: [] });
   });
 });
