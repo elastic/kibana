@@ -10,8 +10,8 @@ import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import { inject, injectable } from 'inversify';
 import { DetectionEngineSystemClient } from '../engine/es_client_tokens';
 import { StateIndex, STATE_INDEX_NAME } from './state_index';
-import { StateConflictError } from './state_conflict_error';
-import { StateVersionMissingError } from './state_version_missing_error';
+import { StateConflictError } from '../errors/state_conflict_error';
+import { StateVersionMissingError } from '../errors/state_version_missing_error';
 import type { StateDocuments, StateVersion, StateKind } from './state_kinds';
 import type { StateStore, VersionedState } from './state_store';
 
