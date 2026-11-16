@@ -49,8 +49,12 @@ function isAlreadyExistsError(error: unknown): boolean {
  * is `flattened`, so the bucket start is read from `_source` by a runtime field, the approach of
  * the metric series reader in `significant_events`.
  *
- * The stream is installed here and not registered with Core, because Core installs registered
- * streams during its own start, where an Elasticsearch error would stop Kibana.
+ * The stream is installed here, with the system client, and not through `@kbn/data-streams`, for
+ * two reasons. The package is private to the platform group, so a solutions plugin cannot import
+ * it. The Core route (`core.dataStreams.registerDataStream`) is reachable, but Core installs
+ * registered streams during its own start, where an Elasticsearch error would stop Kibana, and
+ * the engine must not fail to start because of its signal store. The cost is that nothing here
+ * upgrades the lifecycle or final pipeline of a stream that already exists.
  */
 @injectable()
 export class FallbackSignalStore implements IDetectionSignalStore {
