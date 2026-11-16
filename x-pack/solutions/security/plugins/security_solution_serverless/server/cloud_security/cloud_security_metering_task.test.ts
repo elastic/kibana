@@ -19,7 +19,15 @@ import type { ServerlessSecurityConfig } from '../config';
 import type { MeteringCallbackInput } from '../types';
 
 import type { ProductTier } from '../../common/product';
-import { CLOUD_SECURITY_TASK_TYPE, CSPM, KSPM, CNVM, BILLABLE_ASSETS_CONFIG } from './constants';
+import {
+  CLOUD_SECURITY_TASK_TYPE,
+  CSPM,
+  KSPM,
+  CNVM,
+  BILLABLE_ASSETS_CONFIG,
+  METERING_CONFIGS,
+} from './constants';
+import type { CloudSecuritySolutions } from './types';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -358,33 +366,79 @@ describe('cloudSecurityMetringCallback', () => {
     expect(mockEsClient.search).not.toHaveBeenCalled();
   });
 
+  const allEnabled = {
+    cspm: { enabled: true },
+    kspm: { enabled: true },
+    cnvm: { enabled: true },
+  };
+
+  const buildConfig = (cloudSecurityMetering: typeof allEnabled): ServerlessSecurityConfig =>
+    ({
+      productTypes: [{ product_line: 'cloud', product_tier: 'complete' }],
+      cloudSecurityMetering,
+    } as unknown as ServerlessSecurityConfig);
+
+  const getExistenceCheckArgs = (cloudSecuritySolution: CloudSecuritySolutions) => [
+    {
+      index: METERING_CONFIGS[cloudSecuritySolution].index,
+      size: 1,
+      _source: false,
+      query: getSearchQueryByCloudSecuritySolution(cloudSecuritySolution),
+    },
+    { ignore: [404] },
+  ];
+
+  const allSolutions: CloudSecuritySolutions[] = [CSPM, KSPM, CNVM];
+
   it('should collect usage for CSPM, KSPM and CNVM', async () => {
     mockEsClient.search.mockResolvedValue({
       hits: { hits: [] },
     } as never);
 
-    await cloudSecurityMetringCallback(
-      buildInput({
-        productTypes: [{ product_line: 'cloud', product_tier: 'complete' }],
-        cloudSecurityMetering: { cspm: { enabled: true } },
-      } as unknown as ServerlessSecurityConfig)
-    );
+    await cloudSecurityMetringCallback(buildInput(buildConfig(allEnabled)));
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(3);
   });
 
-  it('should skip CSPM usage when CSPM metering is disabled', async () => {
-    mockEsClient.search.mockResolvedValue({
-      hits: { hits: [] },
-    } as never);
+  it.each([
+    { name: 'CSPM', configKey: 'cspm', solution: CSPM },
+    { name: 'KSPM', configKey: 'kspm', solution: KSPM },
+    { name: 'CNVM', configKey: 'cnvm', solution: CNVM },
+  ] as const)(
+    'should skip $name usage when $name metering is disabled',
+    async ({ configKey, solution }) => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [] },
+      } as never);
 
-    await cloudSecurityMetringCallback(
-      buildInput({
-        productTypes: [{ product_line: 'cloud', product_tier: 'complete' }],
-        cloudSecurityMetering: { cspm: { enabled: false } },
-      } as unknown as ServerlessSecurityConfig)
+      await cloudSecurityMetringCallback(
+        buildInput(buildConfig({ ...allEnabled, [configKey]: { enabled: false } }))
+      );
+
+      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+      expect(mockEsClient.search).not.toHaveBeenCalledWith(...getExistenceCheckArgs(solution));
+      allSolutions
+        .filter((meteredSolution) => meteredSolution !== solution)
+        .forEach((meteredSolution) => {
+          expect(mockEsClient.search).toHaveBeenCalledWith(
+            ...getExistenceCheckArgs(meteredSolution)
+          );
+        });
+    }
+  );
+
+  it('should return no records without searching when metering is disabled for all solutions', async () => {
+    const result = await cloudSecurityMetringCallback(
+      buildInput(
+        buildConfig({
+          cspm: { enabled: false },
+          kspm: { enabled: false },
+          cnvm: { enabled: false },
+        })
+      )
     );
 
-    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+    expect(result).toEqual({ records: [] });
+    expect(mockEsClient.search).not.toHaveBeenCalled();
   });
 });
