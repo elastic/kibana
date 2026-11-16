@@ -232,7 +232,8 @@ export class DetectionSetupService {
 
   // Core cannot look an account up before binding it, so the binding is read back: its summary
   // is empty when the account does not exist. The account must be the one `nightshift_detection`
-  // that holds the detection role, which is what the setup step finds or creates by name. Binding
+  // that Kibana can run as. The role is not checked: core's summary does not carry it, and the setup
+  // step creates the account with it by name. Binding
   // any other account would leave every later run failing with an opaque token exchange error, so
   // the call is refused and `enable` puts the space back as it was.
   private async assertBoundAccountIsDetectionAccount({
@@ -271,16 +272,30 @@ export class DetectionSetupService {
       return;
     }
 
-    if (summary?.name === expectedName && summary.enabled) {
+    if (summary?.name === expectedName && summary.enabled && summary.assumable) {
       return;
     }
 
+    if (summary === null) {
+      throw new EngineHttpError(
+        `Service account [${serviceAccountId}] does not exist. Use the id of the [${expectedName}] account.`,
+        400
+      );
+    }
+
+    // On stateful, an account created outside Kibana has no credential stored here, so every run as
+    // it would fail even though its name and state look right.
+    if (summary.name === expectedName && summary.enabled) {
+      throw new EngineHttpError(
+        `Service account [${serviceAccountId}] is [${expectedName}], but Kibana holds no credential to run as it. Create the account through the Kibana service accounts API and use its id.`,
+        400
+      );
+    }
+
     throw new EngineHttpError(
-      summary === null
-        ? `Service account [${serviceAccountId}] does not exist. Use the id of the [${expectedName}] account.`
-        : `Service account [${serviceAccountId}] is [${summary.name}]${
-            summary.enabled ? '' : ' and disabled'
-          }, not an enabled [${expectedName}] account. Use the id of the [${expectedName}] account.`,
+      `Service account [${serviceAccountId}] is [${summary.name}]${
+        summary.enabled ? '' : ' and disabled'
+      }, not an enabled [${expectedName}] account. Use the id of the [${expectedName}] account.`,
       400
     );
   }
