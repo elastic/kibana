@@ -61,7 +61,8 @@ export interface CreateHooksRunnerDeps {
   /**
    * Runs `fn` with a request authenticated as the service account the agent is bound to. The
    * credential lasts until `fn` settles. Without it, a non-blocking hook keeps the execution's own
-   * request, which can no longer authenticate once the execution has returned.
+   * request, which can no longer authenticate once the execution has returned. Only hooks that set
+   * `requiresServiceAccountRequest` get it.
    */
   withAgentServiceAccountRequest?: <T>(
     params: { agentId: string; runAs: string; request: KibanaRequest },
@@ -136,8 +137,8 @@ export function createHooksRunner(deps: CreateHooksRunnerDeps): HooksServiceStar
 
   /**
    * A non-blocking hook runs after the execution has returned, so the execution's request may no
-   * longer authenticate. When the execution ran as a bound service account, the hook gets a request
-   * for that account instead, valid until the hook settles.
+   * longer authenticate. When the hook asks for it and the execution ran as a bound service account,
+   * the hook gets a request for that account instead, valid until the hook settles.
    */
   const runWithOwnRequest = <E extends HookLifecycle, R>(
     context: HookContext<E>,
@@ -161,7 +162,11 @@ export function createHooksRunner(deps: CreateHooksRunnerDeps): HooksServiceStar
     for (const hook of hooks) {
       // Fire-and-forget. Must never throw to the caller.
       Promise.resolve()
-        .then(() => runWithOwnRequest(context, (ctx) => hook.handler(ctx)))
+        .then(() =>
+          'requiresServiceAccountRequest' in hook && hook.requiresServiceAccountRequest
+            ? runWithOwnRequest(context, (ctx) => hook.handler(ctx))
+            : hook.handler(context)
+        )
         .catch((err) => {
           const normalized = normalizeHookError(lifecycle, hook, err);
           logger.error(`Non-blocking hook "${hook.id}" failed: ${normalized.message}`);
