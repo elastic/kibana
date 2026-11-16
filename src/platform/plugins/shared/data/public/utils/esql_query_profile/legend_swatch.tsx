@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 
@@ -16,7 +17,7 @@ export const LegendSwatch = ({
   colorCss,
   label,
 }: {
-  colorCss: ReturnType<typeof css>;
+  colorCss: SerializedStyles;
   label: string;
 }) => {
   const { euiTheme } = useEuiTheme();

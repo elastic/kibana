@@ -8,6 +8,7 @@
  */
 
 import type { AggregatedOperator } from './aggregate_esql_profile';
+import { shareOf } from './aggregate_esql_profile';
 import type { QueryCommand } from './query_commands';
 
 export interface CommandHeat {
@@ -42,6 +43,12 @@ export interface QueryHeat {
 const SOURCE_COMMANDS = ['FROM', 'TS', 'ROW', 'SHOW', 'EXPLAIN'];
 const normalize = (name: string): string => name.toLowerCase().replace(/[^a-z]/g, '');
 
+/** Whether an operator reads the data, which is what the first command of a query does. */
+const isSourceOperator = (title: string): boolean => {
+  const name = normalize(title);
+  return name.includes('lucene') || name.includes('reader') || name.includes('source');
+};
+
 /** The command names an operator can stand for, from most to least specific. */
 function candidateCommandNames(title: string): string[] {
   const name = normalize(title);
@@ -49,7 +56,7 @@ function candidateCommandNames(title: string): string[] {
   if (name.includes('exchange') || name === 'output') {
     return [];
   }
-  if (name.includes('lucene') || name.includes('reader') || name.includes('source')) {
+  if (isSourceOperator(title)) {
     return SOURCE_COMMANDS;
   }
   if (name.includes('filter')) {
@@ -70,7 +77,8 @@ function candidateCommandNames(title: string): string[] {
   if (name.includes('eval')) {
     return ['EVAL'];
   }
-  if (name.includes('join')) {
+  // A LOOKUP JOIN runs as a StreamingLookupOperator. Enrich has its own operators.
+  if (name.includes('join') || (name.includes('lookup') && !name.includes('enrich'))) {
     return ['LOOKUP', 'JOIN'];
   }
   // Other operators are named after their command, such as Enrich, Dissect, Grok or MvExpand.
@@ -123,6 +131,25 @@ function driverScopes(
   return scopeOf;
 }
 
+/** Whether a command is in the query that a driver belongs to. */
+const isInScope = (entry: Entry, scope: Scope): boolean =>
+  scope.kind === 'flat' ||
+  (scope.kind === 'main' && entry.subquery === undefined) ||
+  (scope.kind === 'subquery' && entry.subquery === scope.index);
+
+/** Whether an operator that can stand for these command names can stand for this command. */
+const standsFor = (candidates: string[], command: QueryCommand): boolean =>
+  candidates.includes(command.name) || candidates.includes(normalize(command.name).toUpperCase());
+
+/** The CPU time found for one command, while the operators are being attributed. */
+interface CommandAccumulator {
+  entry: Entry;
+  exactNanos: number;
+  sharedNanos: number;
+  /** CPU time by short operator name. */
+  operatorNanos: Map<string, number>;
+}
+
 /**
  * Attributes operator CPU time to the commands of a query. The planner pushes filters into the
  * search, splits aggregations and adds its own steps, so this is a best effort: operators that
@@ -141,10 +168,12 @@ export function mapOperatorsToCommands(
         )
       : [{ command }]
   );
-
-  const exact = entries.map(() => 0);
-  const shared = entries.map(() => 0);
-  const names = entries.map(() => new Map<string, number>());
+  const accumulators: CommandAccumulator[] = entries.map((entry) => ({
+    entry,
+    exactNanos: 0,
+    sharedNanos: 0,
+    operatorNanos: new Map(),
+  }));
   let unattributedNanos = 0;
 
   const instances = operators
@@ -167,50 +196,45 @@ export function mapOperatorsToCommands(
 
   instances.forEach((instance) => {
     const scope = scopeOf(instance.driverIndex);
-    const pool = entries.flatMap((entry, index) =>
-      scope.kind === 'flat' ||
-      (scope.kind === 'main' && entry.subquery === undefined) ||
-      (scope.kind === 'subquery' && entry.subquery === scope.index)
-        ? [index]
-        : []
-    );
     const candidates = candidateCommandNames(instance.title);
-    const matching = pool.filter((index) => {
-      const name = entries[index].command.name;
-      return candidates.includes(name) || candidates.includes(normalize(name).toUpperCase());
-    });
+    const matching = accumulators.filter(
+      ({ entry }) => isInScope(entry, scope) && standsFor(candidates, entry.command)
+    );
 
     if (matching.length === 0) {
       unattributedNanos += instance.nanos;
       return;
     }
     // A source operator belongs to the first command of its query, which is the one that reads data.
-    const targets = candidates === SOURCE_COMMANDS ? [matching[0]] : matching;
+    const targets = isSourceOperator(instance.title) ? [matching[0]] : matching;
     const isShared = targets.length > 1;
-    targets.forEach((index) => {
+    targets.forEach((target) => {
       if (isShared) {
-        shared[index] += instance.nanos;
+        target.sharedNanos += instance.nanos;
       } else {
-        exact[index] += instance.nanos;
+        target.exactNanos += instance.nanos;
       }
-      names[index].set(instance.title, (names[index].get(instance.title) ?? 0) + instance.nanos);
+      target.operatorNanos.set(
+        instance.title,
+        (target.operatorNanos.get(instance.title) ?? 0) + instance.nanos
+      );
     });
   });
 
   return {
-    commands: entries.map((entry, index) => ({
+    commands: accumulators.map(({ entry, exactNanos, sharedNanos, operatorNanos }) => ({
       command: entry.command,
       subquery: entry.subquery,
-      nanos: exact[index],
-      sharedNanos: shared[index],
-      share: total > 0 ? (exact[index] + shared[index]) / total : 0,
-      isApproximate: shared[index] > 0,
-      operators: [...names[index].entries()]
+      nanos: exactNanos,
+      sharedNanos,
+      share: shareOf(exactNanos + sharedNanos, total),
+      isApproximate: sharedNanos > 0,
+      operators: [...operatorNanos.entries()]
         .sort((left, right) => right[1] - left[1])
         .map(([title]) => title),
     })),
     unattributedNanos,
-    unattributedShare: total > 0 ? unattributedNanos / total : 0,
+    unattributedShare: shareOf(unattributedNanos, total),
     hasSubqueries: owner !== undefined,
   };
 }

@@ -9,22 +9,19 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import { esqlProfileResponseSchema } from '@elastic/esql-definitions/profile-schema';
-import {
-  PHASE_NANOS_FIELDS,
-  PLANNING_PHASE_IDS,
-  PROCESS_NANOS_FIELD,
-} from './aggregate_esql_profile';
+import { PHASE_NANOS_FIELDS, PROCESS_NANOS_FIELD } from './aggregate_esql_profile';
 
 /**
- * The profile is read by field name, and the types only check the names above the operators. These
- * tests hold the rest against the schema that Elasticsearch publishes for the profile. When one
+ * The profile types come from the schema, so the names above the operators are checked when the code
+ * compiles. The `status` of an operator is read by name without types, so these tests hold those
+ * names against the schema that Elasticsearch publishes for the profile. When one
  * fails after the package is updated, Elasticsearch changed or added a field: decide whether the
  * profile view should read it, then update the readers.
  */
 
 const schema = esqlProfileResponseSchema as unknown as JSONSchema7;
 
-/** The object behind a property, whose schema is either the object or the object or null. */
+/** The object behind a property, whose schema is the object itself or a choice of it and null. */
 const objectOf = (node: JSONSchema7 | boolean | undefined): JSONSchema7 => {
   if (!node || typeof node === 'boolean') {
     return {};
@@ -75,36 +72,5 @@ describe('the ES|QL profile schema and the profile readers', () => {
       []
     );
     expect(['rows_received', 'rows_emitted'].filter((f) => !reported.has(f))).toEqual([]);
-  });
-
-  it('has the profile, driver, sleep and plan fields the view reads', () => {
-    const top = propertiesOf(schema);
-    const sleeps = propertiesOf(propertiesOf(driver).sleeps);
-    const sleepItem = propertiesOf(objectOf(sleeps.first).items as JSONSchema7);
-    const plan = propertiesOf(objectOf(top.plans).items as JSONSchema7);
-
-    expect(
-      ['query', 'planning', 'drivers', 'plans', ...PLANNING_PHASE_IDS].filter((f) => !(f in top))
-    ).toEqual([]);
-    expect(Object.keys(propertiesOf(top.query))).toEqual(
-      expect.arrayContaining(['took_millis', 'start_millis', 'stop_millis'])
-    );
-    expect(Object.keys(propertiesOf(driver))).toEqual(
-      expect.arrayContaining([
-        'description',
-        'node_name',
-        'operators',
-        'sleeps',
-        'start_millis',
-        'stop_millis',
-        'took_nanos',
-        'cpu_nanos',
-      ])
-    );
-    expect(Object.keys(sleeps)).toEqual(expect.arrayContaining(['counts', 'first', 'last']));
-    expect(Object.keys(sleepItem)).toEqual(
-      expect.arrayContaining(['reason', 'sleep_millis', 'wake_millis'])
-    );
-    expect(Object.keys(plan)).toEqual(expect.arrayContaining(['description', 'node_name', 'plan']));
   });
 });

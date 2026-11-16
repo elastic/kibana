@@ -74,11 +74,9 @@ const useSummaryStyles = () => {
 const DurationSummary = ({ view }: { view: QueryProfileView }) => {
   const styles = useSummaryStyles();
   const { queryTookMillis, planningTookMillis, executionTookMillis } = view;
-  const hasSplit =
-    planningTookMillis !== undefined &&
-    executionTookMillis !== undefined &&
-    planningTookMillis + executionTookMillis > 0;
   const total = (planningTookMillis ?? 0) + (executionTookMillis ?? 0);
+  const hasSplit =
+    planningTookMillis !== undefined && executionTookMillis !== undefined && total > 0;
 
   return (
     <div data-test-subj="esqlQueryProfileDuration">

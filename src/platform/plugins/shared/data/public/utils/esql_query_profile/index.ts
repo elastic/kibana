@@ -13,6 +13,7 @@ import type { InspectorViewDescription } from '@kbn/inspector-plugin/public';
 import type { ISearchStart } from '../../search';
 import { hasEsqlInspectorRequest } from './esql_inspector_requests';
 import { getQueryProfileViewComponent } from './query_profile_view_wrapper';
+
 /** Inspector view that re-runs a logged ES|QL request with `profile: true`. */
 export const getEsqlQueryProfileViewDescription = (
   getStartServices: () => { search: ISearchStart; http: HttpStart }

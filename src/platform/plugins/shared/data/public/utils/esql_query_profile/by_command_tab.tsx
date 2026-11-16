@@ -21,6 +21,8 @@ import { formatShare } from './profile_format';
 const HOT_SHARE = 0.5;
 const WARM_SHARE = 0.25;
 const MAX_COMMAND_LENGTH = 90;
+/** Time in steps that belong to no command is only mentioned when it is at least this share. */
+const MIN_UNATTRIBUTED_SHARE = 0.01;
 
 const oneLine = (text: string): string => text.replace(/\s+/g, ' ').trim();
 
@@ -44,6 +46,14 @@ const CommandRow = ({ entry, isNested }: { entry: CommandHeat; isNested: boolean
       ? euiTheme.colors.warning
       : euiTheme.colors.primary;
   const share = `${entry.isApproximate ? '~' : ''}${formatShare(entry.share)}`;
+  const note =
+    entry.operators.length > 0
+      ? entry.operators.join(', ')
+      : isPushedIntoRead
+      ? i18n.translate('data.inspector.queryProfile.pushedIntoReadNote', {
+          defaultMessage: 'No operator of its own. It was likely pushed into the search.',
+        })
+      : undefined;
   const small = `${euiTheme.font.scale.xs * euiTheme.base}px`;
 
   const styles = {
@@ -96,15 +106,7 @@ const CommandRow = ({ entry, isNested }: { entry: CommandHeat; isNested: boolean
           data-test-subj="esqlQueryProfileCommandBar"
         />
       </div>
-      {entry.operators.length > 0 ? (
-        <div css={styles.note}>{entry.operators.join(', ')}</div>
-      ) : isPushedIntoRead ? (
-        <div css={styles.note}>
-          {i18n.translate('data.inspector.queryProfile.pushedIntoReadNote', {
-            defaultMessage: 'No operator of its own. It was likely pushed into the search.',
-          })}
-        </div>
-      ) : null}
+      {note ? <div css={styles.note}>{note}</div> : null}
     </div>
   );
 };
@@ -154,7 +156,7 @@ export const ByCommandTab = ({ view, query }: { view: QueryProfileView; query: s
           <CommandRow entry={entry} isNested={heat.hasSubqueries && entry.subquery !== undefined} />
         </React.Fragment>
       ))}
-      {heat.unattributedShare >= 0.01 ? (
+      {heat.unattributedShare >= MIN_UNATTRIBUTED_SHARE ? (
         <>
           <EuiSpacer size="s" />
           <EuiText size="xs" color="subdued" data-test-subj="esqlQueryProfileUnattributed">

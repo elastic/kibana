@@ -9,8 +9,9 @@
 
 import type { EsqlProfileDriver, EsqlProfilePlan, EsqlQueryProfile } from '@kbn/es-types';
 import type { QueryResultsSummary } from './compare_results';
+import { isRecord } from './json_helpers';
 
-export const PLANNING_PHASE_IDS = [
+const PLANNING_PHASE_IDS = [
   'parsing',
   'view_resolution',
   'dataset_resolution',
@@ -88,6 +89,8 @@ export interface TimelineDriver {
   cpuNanos?: number;
   /** Recorded waits inside this driver's span, in start order. */
   sleeps: TimelineSleep[];
+  /** Time spent in the recorded waits. ES records only some of them, so this can be too low. */
+  waitedMillis: number;
   /** Every wait ES counted. It can exceed `sleeps.length` because ES only records a few. */
   sleepCount: number;
   operators: TimelineOperator[];
@@ -211,17 +214,46 @@ function readPipelineIndex(drivers: EsqlProfileDriver[]): Map<string, number> {
   const index = new Map<string, number>();
 
   ordered.forEach((driver) => {
-    (driver.operators ?? []).forEach((entry) => {
-      if (!entry || typeof entry.operator !== 'string' || entry.operator.length === 0) {
-        return;
-      }
-      if (!index.has(entry.operator)) {
-        index.set(entry.operator, index.size);
+    readOperatorReadings(driver).forEach(({ operator }) => {
+      if (!index.has(operator)) {
+        index.set(operator, index.size);
       }
     });
   });
 
   return index;
+}
+
+/** What one operator of a driver reported, with its time and rows read out of its status. */
+interface OperatorReading {
+  operator: string;
+  processNanos: number;
+  /** False when this operator type reports no time at all, which is not the same as 0 ms. */
+  timeReported: boolean;
+  rowsReceived: number;
+  rowsEmitted: number;
+  rawStatus: Record<string, unknown>;
+}
+
+/** The operators of a driver in its own order. An entry without a name is skipped. */
+function readOperatorReadings(driver: EsqlProfileDriver): OperatorReading[] {
+  return (driver.operators ?? []).flatMap((entry) => {
+    if (!entry || typeof entry.operator !== 'string' || entry.operator.length === 0) {
+      return [];
+    }
+    const status = isRecord(entry.status) ? entry.status : {};
+    const reportedNanos = readOperatorNanos(status);
+    return [
+      {
+        operator: entry.operator,
+        processNanos: reportedNanos ?? 0,
+        timeReported: reportedNanos !== undefined,
+        rowsReceived: readFinite(status.rows_received) ?? 0,
+        rowsEmitted: readFinite(status.rows_emitted) ?? 0,
+        rawStatus: status,
+      },
+    ];
+  });
 }
 
 /**
@@ -240,11 +272,11 @@ export const PHASE_NANOS_FIELDS: readonly string[] = [
 ];
 
 function readOperatorNanos(status: Record<string, unknown>): number | undefined {
-  const processNanos = readNumber(status, PROCESS_NANOS_FIELD);
+  const processNanos = readFinite(status[PROCESS_NANOS_FIELD]);
   if (processNanos !== undefined) {
     return processNanos;
   }
-  const phases = PHASE_NANOS_FIELDS.flatMap((field) => readNumber(status, field) ?? []);
+  const phases = PHASE_NANOS_FIELDS.flatMap((field) => readFinite(status[field]) ?? []);
   return phases.length > 0 ? phases.reduce((sum, nanos) => sum + nanos, 0) : undefined;
 }
 
@@ -256,39 +288,27 @@ function aggregateOperators(
 
   drivers.forEach((driver, index) => {
     const label = driverLabel(driver.description, driver.node_name, index);
-    (driver.operators ?? []).forEach((entry) => {
-      if (!entry || typeof entry.operator !== 'string' || entry.operator.length === 0) {
-        return;
-      }
-      const status = isRecord(entry.status) ? entry.status : {};
-      const current: OperatorAccumulator = byOperator.get(entry.operator) ?? {
-        operator: entry.operator,
+    readOperatorReadings(driver).forEach(({ operator, ...reading }) => {
+      const current: OperatorAccumulator = byOperator.get(operator) ?? {
+        operator,
         processNanos: 0,
         timeReported: false,
         rowsReceived: 0,
         rowsEmitted: 0,
         drivers: [],
       };
-      const reportedNanos = readOperatorNanos(status);
-      const processNanos = reportedNanos ?? 0;
-      const rowsReceived = readNumber(status, 'rows_received') ?? 0;
-      const rowsEmitted = readNumber(status, 'rows_emitted') ?? 0;
 
-      current.processNanos += processNanos;
-      current.timeReported = current.timeReported || reportedNanos !== undefined;
-      current.rowsReceived += rowsReceived;
-      current.rowsEmitted += rowsEmitted;
+      current.processNanos += reading.processNanos;
+      current.timeReported = current.timeReported || reading.timeReported;
+      current.rowsReceived += reading.rowsReceived;
+      current.rowsEmitted += reading.rowsEmitted;
       current.drivers.push({
         driverIndex: index,
         description: driver.description ?? '',
         label,
-        processNanos,
-        timeReported: reportedNanos !== undefined,
-        rowsReceived,
-        rowsEmitted,
-        rawStatus: status,
+        ...reading,
       });
-      byOperator.set(entry.operator, current);
+      byOperator.set(operator, current);
     });
   });
 
@@ -323,7 +343,7 @@ function toAggregatedOperator(
     detail,
     processNanos: operator.processNanos,
     timeReported: operator.timeReported,
-    share: totalProcessNanos > 0 ? operator.processNanos / totalProcessNanos : 0,
+    share: shareOf(operator.processNanos, totalProcessNanos),
     pipelineIndex,
     rowsReceived: operator.rowsReceived,
     rowsEmitted: operator.rowsEmitted,
@@ -341,6 +361,7 @@ function readTimeline(
     if (!clock) {
       return [];
     }
+    const sleeps = readSleeps(driver, clock);
 
     return [
       {
@@ -351,7 +372,11 @@ function readTimeline(
         ...clock,
         tookNanos: readFinite(driver.took_nanos),
         cpuNanos: readFinite(driver.cpu_nanos),
-        sleeps: readSleeps(driver, clock),
+        sleeps,
+        waitedMillis: sleeps.reduce(
+          (sum, sleep) => sum + (sleep.stopMillis - sleep.startMillis),
+          0
+        ),
         sleepCount: countSleeps(driver),
         operators: readDriverOperators(driver),
       },
@@ -404,34 +429,19 @@ function countSleeps(driver: EsqlProfileDriver): number {
 
 /** Operators stay in the driver's own order. Share is of this driver only. */
 function readDriverOperators(driver: EsqlProfileDriver): TimelineOperator[] {
-  const operators = (driver.operators ?? []).flatMap((entry) => {
-    if (!entry || typeof entry.operator !== 'string' || entry.operator.length === 0) {
-      return [];
-    }
-    const status = isRecord(entry.status) ? entry.status : {};
-    const reportedNanos = readOperatorNanos(status);
-    return [
-      {
-        operator: entry.operator,
-        processNanos: reportedNanos ?? 0,
-        timeReported: reportedNanos !== undefined,
-        rowsReceived: readNumber(status, 'rows_received') ?? 0,
-        rowsEmitted: readNumber(status, 'rows_emitted') ?? 0,
-        rawStatus: status,
-      },
-    ];
-  });
-  const totalProcessNanos = operators.reduce((sum, operator) => sum + operator.processNanos, 0);
+  const readings = readOperatorReadings(driver);
+  const totalProcessNanos = readings.reduce((sum, reading) => sum + reading.processNanos, 0);
 
-  return operators.map((operator) => {
-    const { title, detail } = formatOperatorLabel(operator.operator);
-    return {
-      ...operator,
-      title,
-      detail,
-      share: totalProcessNanos > 0 ? operator.processNanos / totalProcessNanos : 0,
-    };
-  });
+  return readings.map((reading) => ({
+    ...reading,
+    ...formatOperatorLabel(reading.operator),
+    share: shareOf(reading.processNanos, totalProcessNanos),
+  }));
+}
+
+/** A part of a total, from 0 to 1, with no total meaning no share. */
+export function shareOf(nanos: number, totalNanos: number): number {
+  return totalNanos > 0 ? nanos / totalNanos : 0;
 }
 
 function readClock(
@@ -446,7 +456,7 @@ function readClock(
   return { startMillis, stopMillis };
 }
 
-function readFinite(value: number | undefined): number | undefined {
+function readFinite(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 }
 
@@ -457,13 +467,4 @@ function driverLabel(
 ): string {
   const parts = [description, nodeName].filter((part): part is string => Boolean(part));
   return parts.length > 0 ? parts.join(' · ') : String(index + 1);
-}
-
-function readNumber(status: Record<string, unknown>, key: string): number | undefined {
-  const value = status[key];
-  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }

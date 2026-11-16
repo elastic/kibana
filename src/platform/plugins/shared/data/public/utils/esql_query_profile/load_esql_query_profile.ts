@@ -13,10 +13,7 @@ import type { IEsqlSearchParams } from '@kbn/search-types';
 import type { ISearchStart } from '../../search';
 import { aggregateEsqlProfile, type QueryProfileView } from './aggregate_esql_profile';
 import { summarizeResults } from './compare_results';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-}
+import { isRecord } from './json_helpers';
 
 /** Re-runs a logged ES|QL request with `profile: true` and returns the view model. */
 export async function loadEsqlQueryProfile({

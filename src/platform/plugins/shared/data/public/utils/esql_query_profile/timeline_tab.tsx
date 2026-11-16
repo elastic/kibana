@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import { css } from '@emotion/react';
+import type { SerializedStyles } from '@emotion/react';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -17,315 +17,27 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  PlanningPhaseId,
-  QueryProfileTimeline,
-  QueryProfileView,
-  TimelineDriver,
-  TimelineOperator,
-  TimelineSleep,
-} from './aggregate_esql_profile';
+import type { QueryProfileView, TimelineDriver, TimelineOperator } from './aggregate_esql_profile';
 import { operatorCategory, useOperatorCategoryColors } from './operator_category';
 import { computeTicks } from './timeline_ticks';
-import { formatCount, formatDurationMillis, formatShare } from './profile_format';
+import { formatCount, formatDurationMillis } from './profile_format';
 import { LegendSwatch } from './legend_swatch';
+import {
+  groupLabel,
+  operatorShareLabel,
+  operatorTimeLabel,
+  planningLabel,
+  planningPhaseLabel,
+} from './timeline_labels';
+import type { LaneBox } from './timeline_layout';
+import { fullDomain, groupDrivers, laneBox, spanMillis } from './timeline_layout';
+import { useTimelineStyles } from './timeline_styles';
 
-const GROUP_ORDER = ['data', 'node_reduce', 'final'];
-
-type Selection = { kind: 'planning' } | { kind: 'driver'; driverId: string };
-
-interface LaneBox {
-  left: number;
-  width: number;
-}
-
-const planningLabel = () =>
-  i18n.translate('data.inspector.queryProfile.planningLaneLabel', { defaultMessage: 'Planning' });
-
-const groupLabel = (description: string): string => {
-  switch (description) {
-    case 'data':
-      return i18n.translate('data.inspector.queryProfile.dataDriversLabel', {
-        defaultMessage: 'Data',
-      });
-    case 'node_reduce':
-      return i18n.translate('data.inspector.queryProfile.nodeReduceDriversLabel', {
-        defaultMessage: 'Node reduce',
-      });
-    case 'final':
-      return i18n.translate('data.inspector.queryProfile.finalDriversLabel', {
-        defaultMessage: 'Final',
-      });
-    case '':
-      return i18n.translate('data.inspector.queryProfile.otherDriversLabel', {
-        defaultMessage: 'Other',
-      });
-    default:
-      return description;
-  }
-};
-
-const planningPhaseLabel = (id: PlanningPhaseId): string => {
-  switch (id) {
-    case 'parsing':
-      return i18n.translate('data.inspector.queryProfile.phaseParsingLabel', {
-        defaultMessage: 'Parsing',
-      });
-    case 'view_resolution':
-      return i18n.translate('data.inspector.queryProfile.phaseViewResolutionLabel', {
-        defaultMessage: 'View resolution',
-      });
-    case 'dataset_resolution':
-      return i18n.translate('data.inspector.queryProfile.phaseDatasetResolutionLabel', {
-        defaultMessage: 'Dataset resolution',
-      });
-    case 'preanalysis':
-      return i18n.translate('data.inspector.queryProfile.phasePreanalysisLabel', {
-        defaultMessage: 'Pre-analysis',
-      });
-    case 'indices_resolution':
-      return i18n.translate('data.inspector.queryProfile.phaseIndicesResolutionLabel', {
-        defaultMessage: 'Index resolution',
-      });
-    case 'enrich_resolution':
-      return i18n.translate('data.inspector.queryProfile.phaseEnrichResolutionLabel', {
-        defaultMessage: 'Enrich resolution',
-      });
-    case 'inference_resolution':
-      return i18n.translate('data.inspector.queryProfile.phaseInferenceResolutionLabel', {
-        defaultMessage: 'Inference resolution',
-      });
-    case 'analysis':
-      return i18n.translate('data.inspector.queryProfile.phaseAnalysisLabel', {
-        defaultMessage: 'Analysis',
-      });
-  }
-};
-
-const operatorTimeLabel = (operator: TimelineOperator): string =>
-  operator.timeReported ? formatDurationMillis(operator.processNanos / 1e6) : '–';
-
-const operatorShareLabel = (operator: TimelineOperator): string =>
-  operator.timeReported ? formatShare(operator.share) : '–';
-
-const fullDomain = (
-  timeline: QueryProfileTimeline
-): { startMillis: number; stopMillis: number } => {
-  const spans = [...(timeline.planning ? [timeline.planning] : []), ...timeline.drivers];
-  return {
-    startMillis: Math.min(...spans.map((span) => span.startMillis)),
-    stopMillis: Math.max(...spans.map((span) => span.stopMillis)),
-  };
-};
-
-/** Places a span on a track as percentages. Very short spans stay visible. */
-const laneBox = (
-  startMillis: number,
-  stopMillis: number,
-  domain: { startMillis: number; stopMillis: number }
-): LaneBox => {
-  const length = domain.stopMillis - domain.startMillis;
-  if (length <= 0) {
-    return { left: 0, width: 100 };
-  }
-  const width = Math.min(100, Math.max(((stopMillis - startMillis) / length) * 100, 1.5));
-  const left = Math.min(
-    Math.max(((startMillis - domain.startMillis) / length) * 100, 0),
-    100 - width
-  );
-  return { left, width };
-};
-
-const groupDrivers = (drivers: TimelineDriver[]): Array<[string, TimelineDriver[]]> => {
-  const groups = new Map<string, TimelineDriver[]>();
-  drivers.forEach((driver) => {
-    groups.set(driver.description, [...(groups.get(driver.description) ?? []), driver]);
-  });
-  const known = GROUP_ORDER.filter((description) => groups.has(description));
-  const rest = [...groups.keys()].filter((description) => !GROUP_ORDER.includes(description));
-  return [...known, ...rest].map((description) => [description, groups.get(description) ?? []]);
-};
-
-const useTimelineStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  const small = `${euiTheme.font.scale.xs * euiTheme.base}px`;
-  const labelColumn = `minmax(${euiTheme.base * 8}px, ${euiTheme.base * 12}px) 1fr`;
-
-  return {
-    lanes: css`
-      max-height: ${euiTheme.base * 22}px;
-      overflow-y: auto;
-    `,
-    ruler: css`
-      position: sticky;
-      top: 0;
-      z-index: ${euiTheme.levels.content};
-      display: grid;
-      grid-template-columns: ${labelColumn};
-      gap: ${euiTheme.size.s};
-      padding: ${euiTheme.size.xs};
-      background: ${euiTheme.colors.backgroundBasePlain};
-    `,
-    rulerTrack: css`
-      position: relative;
-      height: ${euiTheme.size.base};
-      border-bottom: ${euiTheme.border.thin};
-    `,
-    rulerTick: css`
-      position: absolute;
-      top: 0;
-      color: ${euiTheme.colors.textSubdued};
-      font-size: ${small};
-      font-variant-numeric: tabular-nums;
-      line-height: 1.4;
-      white-space: nowrap;
-    `,
-    groupLabel: css`
-      margin: ${euiTheme.size.s} 0 ${euiTheme.size.xs};
-    `,
-    lane: css`
-      display: grid;
-      grid-template-columns: ${labelColumn};
-      align-items: center;
-      gap: ${euiTheme.size.s};
-      width: 100%;
-      margin-bottom: ${euiTheme.size.xs};
-      padding: ${euiTheme.size.xs};
-      text-align: start;
-      color: inherit;
-      background: transparent;
-      border: none;
-      border-radius: ${euiTheme.border.radius.medium};
-      cursor: pointer;
-
-      &:hover,
-      &[aria-pressed='true'] {
-        background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-      }
-    `,
-    laneLabel: css`
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: ${euiTheme.size.s};
-      min-width: 0;
-      font-size: ${small};
-      line-height: 1.4;
-    `,
-    laneName: css`
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    `,
-    laneTime: css`
-      flex-shrink: 0;
-      color: ${euiTheme.colors.textSubdued};
-      font-variant-numeric: tabular-nums;
-    `,
-    laneTrack: css`
-      position: relative;
-      height: ${euiTheme.size.m};
-      overflow: hidden;
-      background: ${euiTheme.colors.backgroundBaseFormsControlDisabled};
-      border-radius: ${euiTheme.border.radius.medium};
-    `,
-    laneBar: css`
-      position: absolute;
-      top: 0;
-      bottom: 0;
-    `,
-    laneBarSelected: css`
-      box-shadow: inset 0 0 0 2px ${euiTheme.colors.text};
-    `,
-    laneWait: css`
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      opacity: 0.85;
-      pointer-events: none;
-      background: repeating-linear-gradient(
-        135deg,
-        ${euiTheme.colors.backgroundBasePlain},
-        ${euiTheme.colors.backgroundBasePlain} 3px,
-        transparent 3px,
-        transparent 6px
-      );
-    `,
-    waitSwatch: css`
-      background: repeating-linear-gradient(
-        135deg,
-        ${euiTheme.colors.lightShade},
-        ${euiTheme.colors.lightShade} 2px,
-        ${euiTheme.colors.backgroundBasePlain} 2px,
-        ${euiTheme.colors.backgroundBasePlain} 4px
-      );
-    `,
-    planningColor: css`
-      background: ${euiTheme.colors.warning};
-    `,
-    groupColor: (description: string) =>
-      css`
-        background: ${description === 'node_reduce'
-          ? euiTheme.colors.vis.euiColorVis3
-          : description === 'final'
-          ? euiTheme.colors.vis.euiColorVis5
-          : euiTheme.colors.primary};
-      `,
-    strip: css`
-      display: flex;
-      gap: ${euiTheme.size.xs};
-      overflow-x: auto;
-    `,
-    stripAnchor: css`
-      display: flex;
-      flex-basis: 0;
-      min-width: ${euiTheme.base * 6}px;
-    `,
-    stripStep: css`
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      gap: ${euiTheme.size.xs};
-      padding: ${euiTheme.size.s};
-      text-align: start;
-      color: inherit;
-      background: transparent;
-      border: none;
-      border-radius: ${euiTheme.border.radius.medium};
-      cursor: pointer;
-
-      &:hover,
-      &[aria-expanded='true'] {
-        background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-      }
-    `,
-    stripTitle: css`
-      overflow: hidden;
-      font-weight: ${euiTheme.font.weight.bold};
-      font-size: ${euiTheme.font.scale.s * euiTheme.base}px;
-      line-height: 1.4;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    `,
-    stripShare: css`
-      display: flex;
-      align-items: center;
-      gap: ${euiTheme.size.xs};
-      color: ${euiTheme.colors.textSubdued};
-      font-size: ${small};
-      font-variant-numeric: tabular-nums;
-      line-height: 1.4;
-    `,
-    stripBar: css`
-      height: ${euiTheme.size.s};
-      border-radius: ${euiTheme.border.radius.medium};
-    `,
-  };
-};
+/** The id of the selected lane. Drivers use their own id, which is never this one. */
+const PLANNING_LANE_ID = 'planning';
 
 const TimeRuler = ({ durationMillis }: { durationMillis: number }) => {
   const styles = useTimelineStyles();
@@ -368,10 +80,6 @@ const LaneTooltip = ({
   durationMillis: number;
   driver?: TimelineDriver;
 }) => {
-  const waitedMillis = (driver?.sleeps ?? []).reduce(
-    (sum: number, sleep: TimelineSleep) => sum + (sleep.stopMillis - sleep.startMillis),
-    0
-  );
   const reasons = [...new Set((driver?.sleeps ?? []).map((sleep) => sleep.reason).filter(Boolean))];
   const hasUnrecordedWaits = driver ? driver.sleepCount > driver.sleeps.length : false;
 
@@ -398,15 +106,13 @@ const LaneTooltip = ({
       {driver && driver.sleeps.length > 0 ? (
         <div>
           {i18n.translate('data.inspector.queryProfile.laneTooltipWaiting', {
-            defaultMessage: 'Waiting {atLeast}{time}{reasons}',
+            defaultMessage:
+              '{isLowerBound, select, true {Waiting at least {time}} other {Waiting {time}}}{hasReasons, select, true { ({reasons})} other {}}',
             values: {
-              atLeast: hasUnrecordedWaits
-                ? i18n.translate('data.inspector.queryProfile.laneTooltipAtLeast', {
-                    defaultMessage: 'at least ',
-                  })
-                : '',
-              time: formatDurationMillis(waitedMillis),
-              reasons: reasons.length > 0 ? ` (${reasons.join(', ')})` : '',
+              isLowerBound: hasUnrecordedWaits,
+              time: formatDurationMillis(driver.waitedMillis),
+              hasReasons: reasons.length > 0,
+              reasons: reasons.join(', '),
             },
           })}
         </div>
@@ -431,7 +137,7 @@ const Lane = ({
   tooltip: React.ReactNode;
   box: LaneBox;
   waits?: LaneBox[];
-  colorCss: ReturnType<typeof css>;
+  colorCss: SerializedStyles;
   isSelected: boolean;
   onClick: () => void;
   testSubject?: string;
@@ -494,11 +200,48 @@ const OperatorDetails = ({
   </div>
 );
 
+const HOT_DRIVER_SHARE = 0.25;
+const HOT_QUERY_SHARE = 0.05;
+const VERY_HOT_DRIVER_SHARE = 0.5;
+
 /** An operator is hot when it is a large part of its driver and a real part of the whole query. */
 const isHotOperator = (operator: TimelineOperator, totalOperatorNanos: number): boolean =>
-  operator.share >= 0.25 &&
+  operator.share >= HOT_DRIVER_SHARE &&
   totalOperatorNanos > 0 &&
-  operator.processNanos / totalOperatorNanos >= 0.05;
+  operator.processNanos / totalOperatorNanos >= HOT_QUERY_SHARE;
+
+const OperatorTooltip = ({
+  operator,
+  time,
+  share,
+}: {
+  operator: TimelineOperator;
+  time: string;
+  share: string;
+}) => (
+  <>
+    <strong>{operator.operator}</strong>
+    <div>
+      {operator.timeReported
+        ? i18n.translate('data.inspector.queryProfile.stripTooltipTiming', {
+            defaultMessage: '{time} CPU, {share} of this driver',
+            values: { time, share },
+          })
+        : i18n.translate('data.inspector.queryProfile.stripTooltipNoTime', {
+            defaultMessage: 'This operator does not report time',
+          })}
+    </div>
+    <div>
+      {i18n.translate('data.inspector.queryProfile.stripTooltipRows', {
+        defaultMessage: '{rowsIn} in, {rowsOut} out',
+        values: {
+          rowsIn: formatCount(operator.rowsReceived),
+          rowsOut: formatCount(operator.rowsEmitted),
+        },
+      })}
+    </div>
+  </>
+);
 
 const DriverOperators = ({
   driver,
@@ -551,30 +294,7 @@ const DriverOperators = ({
                   css: styles.stripAnchor,
                   style: { flexGrow: Math.max(operator.share * 100, 1) },
                 }}
-                content={
-                  <>
-                    <strong>{operator.operator}</strong>
-                    <div>
-                      {operator.timeReported
-                        ? i18n.translate('data.inspector.queryProfile.stripTooltipTiming', {
-                            defaultMessage: '{time} CPU, {share} of this driver',
-                            values: { time, share },
-                          })
-                        : i18n.translate('data.inspector.queryProfile.stripTooltipNoTime', {
-                            defaultMessage: 'This operator does not report time',
-                          })}
-                    </div>
-                    <div>
-                      {i18n.translate('data.inspector.queryProfile.stripTooltipRows', {
-                        defaultMessage: '{rowsIn} in, {rowsOut} out',
-                        values: {
-                          rowsIn: formatCount(operator.rowsReceived),
-                          rowsOut: formatCount(operator.rowsEmitted),
-                        },
-                      })}
-                    </div>
-                  </>
-                }
+                content={<OperatorTooltip operator={operator} time={time} share={share} />}
               >
                 <button
                   type="button"
@@ -597,7 +317,7 @@ const DriverOperators = ({
                       <EuiIcon
                         type="thermometer"
                         size="s"
-                        color={operator.share >= 0.5 ? 'danger' : 'warning'}
+                        color={operator.share >= VERY_HOT_DRIVER_SHARE ? 'danger' : 'warning'}
                         aria-hidden="true"
                       />
                     ) : null}
@@ -651,7 +371,7 @@ const PlanningPhases = ({ view }: { view: QueryProfileView }) => (
 /** Every driver as a lane on one clock. Select a lane to see its operators or planning phases. */
 export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
   const styles = useTimelineStyles();
-  const [selection, setSelection] = useState<Selection | undefined>();
+  const [selectedLaneId, setSelectedLaneId] = useState<string | undefined>();
   const { timeline } = view;
   const domain = fullDomain(timeline);
   const origin = domain.startMillis;
@@ -660,38 +380,29 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
     (sum, operator) => sum + operator.processNanos,
     0
   );
-  const selectedDriver =
-    selection?.kind === 'driver'
-      ? timeline.drivers.find((driver) => driver.id === selection.driverId)
-      : undefined;
-  const toggle = (next: Selection) =>
-    setSelection((current) =>
-      current?.kind === next.kind &&
-      (next.kind === 'planning' ||
-        (current.kind === 'driver' && current.driverId === next.driverId))
-        ? undefined
-        : next
-    );
+  const selectedDriver = timeline.drivers.find((driver) => driver.id === selectedLaneId);
+  const toggle = (laneId: string) =>
+    setSelectedLaneId((current) => (current === laneId ? undefined : laneId));
 
   return (
     <div data-test-subj="esqlQueryProfileTimeline">
       <div css={styles.lanes}>
-        <TimeRuler durationMillis={domain.stopMillis - domain.startMillis} />
+        <TimeRuler durationMillis={spanMillis(domain)} />
         {timeline.planning ? (
           <Lane
             label={planningLabel()}
-            durationMillis={timeline.planning.stopMillis - timeline.planning.startMillis}
+            durationMillis={spanMillis(timeline.planning)}
             tooltip={
               <LaneTooltip
                 name={planningLabel()}
                 startMillis={timeline.planning.startMillis - origin}
-                durationMillis={timeline.planning.stopMillis - timeline.planning.startMillis}
+                durationMillis={spanMillis(timeline.planning)}
               />
             }
             box={laneBox(timeline.planning.startMillis, timeline.planning.stopMillis, domain)}
             colorCss={styles.planningColor}
-            isSelected={selection?.kind === 'planning'}
-            onClick={() => toggle({ kind: 'planning' })}
+            isSelected={selectedLaneId === PLANNING_LANE_ID}
+            onClick={() => toggle(PLANNING_LANE_ID)}
             testSubject="esqlQueryProfilePlanningLane"
           />
         ) : null}
@@ -704,12 +415,12 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
               <Lane
                 key={driver.id}
                 label={driver.nodeName || driver.label}
-                durationMillis={driver.stopMillis - driver.startMillis}
+                durationMillis={spanMillis(driver)}
                 tooltip={
                   <LaneTooltip
                     name={driver.label}
                     startMillis={driver.startMillis - origin}
-                    durationMillis={driver.stopMillis - driver.startMillis}
+                    durationMillis={spanMillis(driver)}
                     driver={driver}
                   />
                 }
@@ -718,8 +429,8 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
                   laneBox(sleep.startMillis, sleep.stopMillis, domain)
                 )}
                 colorCss={styles.groupColor(driver.description)}
-                isSelected={selection?.kind === 'driver' && selection.driverId === driver.id}
-                onClick={() => toggle({ kind: 'driver', driverId: driver.id })}
+                isSelected={selectedLaneId === driver.id}
+                onClick={() => toggle(driver.id)}
               />
             ))}
           </div>
@@ -747,7 +458,7 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
           totalOperatorNanos={totalOperatorNanos}
         />
       ) : null}
-      {selection?.kind === 'planning' ? <PlanningPhases view={view} /> : null}
+      {selectedLaneId === PLANNING_LANE_ID ? <PlanningPhases view={view} /> : null}
     </div>
   );
 };

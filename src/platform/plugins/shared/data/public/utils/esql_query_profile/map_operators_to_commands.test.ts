@@ -107,6 +107,27 @@ describe('mapOperatorsToCommands', () => {
     expect(heat.commands[2].nanos).toBe(6_000_000);
   });
 
+  it('matches commands that the parser names with a space or a subtype, such as INLINE STATS', () => {
+    const commands = splitQueryCommands(
+      'FROM logs | INLINE STATS c = COUNT(*) BY a | LOOKUP JOIN idx ON a'
+    );
+    const heat = mapOperatorsToCommands(
+      commands,
+      operators([
+        ['HashAggregationOperator[mode=INITIAL]', { hash_nanos: 6_000_000 }],
+        ['StreamingLookupOperator[index=idx]', { process_nanos: 4_000_000 }],
+      ])
+    );
+
+    expect(heat.commands.map(({ command }) => command.name)).toEqual([
+      'FROM',
+      'INLINE STATS',
+      'JOIN',
+    ]);
+    expect(heat.commands[1].nanos).toBe(6_000_000);
+    expect(heat.commands[2].nanos).toBe(4_000_000);
+  });
+
   it('returns zero shares when nothing reports a time', () => {
     const heat = mapOperatorsToCommands(
       splitQueryCommands('FROM logs'),
@@ -212,7 +233,7 @@ describe('mapOperatorsToCommands with subqueries', () => {
     expect(heat.commands.at(-1)?.nanos).toBe(4_000_000);
   });
 
-  it('keeps a query without subqueries exactly as before, whatever the drivers are called', () => {
+  it('ignores the driver names for a query without subqueries', () => {
     const plain = splitQueryCommands('FROM logs | STATS c = COUNT(*) BY a | SORT c DESC');
     const heat = mapOperatorsToCommands(plain, labeled);
 

@@ -8,20 +8,17 @@
  */
 
 import type { Request } from '@kbn/inspector-plugin/public';
+import { readRequestQuery } from './json_helpers';
 
 const SNIPPET_LENGTH = 72;
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-}
-
 function querySnippet(request: Request): string | undefined {
-  const json = request.json;
-  if (!isRecord(json) || typeof json.query !== 'string') {
+  const query = readRequestQuery(request.json);
+  if (query === undefined) {
     return undefined;
   }
 
-  const singleLine = json.query.replace(/\s+/g, ' ').trim();
+  const singleLine = query.replace(/\s+/g, ' ').trim();
   if (!singleLine) {
     return undefined;
   }

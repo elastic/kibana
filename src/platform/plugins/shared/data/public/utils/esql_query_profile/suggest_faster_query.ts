@@ -19,11 +19,13 @@ export interface FasterQuerySuggestion {
   reason: string;
 }
 
+// Only an available answer is kept. HttpStart outlives a visit to Discover, so a user who sets up a
+// connector after seeing "unavailable" must not stay stuck on that answer.
 const availability = new WeakMap<object, Promise<boolean>>();
 
 /**
  * Tells whether an AI connector is available, so the action can be hidden when it is not.
- * The answer is kept per http service, so the server is asked once per page.
+ * A positive answer is kept per http service, so the server is asked once per page for it.
  */
 export function checkFasterQueryAvailable(http: Pick<HttpStart, 'get'>): Promise<boolean> {
   const known = availability.get(http);
@@ -34,7 +36,13 @@ export function checkFasterQueryAvailable(http: Pick<HttpStart, 'get'>): Promise
   const request = http
     .get<{ available?: boolean }>(OPTIMIZE_QUERY_ROUTE)
     .then((response) => response.available === true)
-    .catch(() => false);
+    .catch(() => false)
+    .then((isAvailable) => {
+      if (!isAvailable) {
+        availability.delete(http);
+      }
+      return isAvailable;
+    });
   availability.set(http, request);
   return request;
 }

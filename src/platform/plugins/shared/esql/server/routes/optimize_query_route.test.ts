@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Subject } from 'rxjs';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
 import { registerOptimizeQueryRoute } from './optimize_query_route';
@@ -19,7 +20,7 @@ jest.mock('./helpers', () => ({
 
 const { resolveConnectorId, createScopedModel } = jest.requireMock('./helpers');
 
-function buildMocks() {
+function buildMocks({ hasEnterpriseLicense = true }: { hasEnterpriseLicense?: boolean } = {}) {
   const handler = jest.fn();
   const availabilityHandler = jest.fn();
   const router = {
@@ -42,7 +43,8 @@ function buildMocks() {
   registerOptimizeQueryRoute(
     router as unknown as IRouter,
     getStartServices as unknown as CoreSetup<EsqlServerPluginStart>['getStartServices'],
-    context as unknown as PluginInitializerContext
+    context as unknown as PluginInitializerContext,
+    async () => hasEnterpriseLicense
   );
 
   return {
@@ -54,6 +56,7 @@ function buildMocks() {
     request: {
       body: { queryString: 'FROM logs | WHERE x > 1', profileContext: 'profile text' },
       headers: {},
+      events: { aborted$: new Subject<void>() },
     },
   };
 }
@@ -98,12 +101,15 @@ describe('registerOptimizeQueryRoute', () => {
     });
   });
 
-  it('registers a POST handler at the optimize path with bounded input', () => {
+  it('rejects a query or a profile that is too long', () => {
     const { router } = buildMocks();
-    expect(router.post).toHaveBeenCalledWith(
-      expect.objectContaining({ path: OPTIMIZE_QUERY_ROUTE }),
-      expect.any(Function)
-    );
+    const [{ path, validate }] = router.post.mock.calls[0];
+    const { body } = validate as { body: { validate: (value: unknown) => unknown } };
+
+    expect(path).toBe(OPTIMIZE_QUERY_ROUTE);
+    expect(() => body.validate({ queryString: 'x'.repeat(50_001), profileContext: 'p' })).toThrow();
+    expect(() => body.validate({ queryString: 'q', profileContext: 'p'.repeat(60_001) })).toThrow();
+    expect(() => body.validate({ queryString: 'q', profileContext: 'p' })).not.toThrow();
   });
 
   it('returns 400 when no connector is configured', async () => {
@@ -190,5 +196,45 @@ describe('registerOptimizeQueryRoute', () => {
     createScopedModel.mockRejectedValueOnce(new Error('boom'));
     await handler(requestHandlerContext, request, response);
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+  });
+
+  it('stops the model when the request is aborted', async () => {
+    const { handler, requestHandlerContext, request, response } = buildMocks();
+    resolveConnectorId.mockResolvedValue('connector-1');
+    const invoke = modelReturning({ canImprove: false, query: '', reason: 'Already efficient.' });
+
+    await handler(requestHandlerContext, request, response);
+    const { signal } = invoke.mock.calls[0][1] as { signal: AbortSignal };
+    expect(signal.aborted).toBe(false);
+
+    request.events.aborted$.next();
+    request.events.aborted$.complete();
+    expect(signal.aborted).toBe(true);
+  });
+
+  describe('license', () => {
+    it('reports unavailable without an enterprise license, even with a connector', async () => {
+      const { availabilityHandler, requestHandlerContext, request, response } = buildMocks({
+        hasEnterpriseLicense: false,
+      });
+      resolveConnectorId.mockResolvedValue('connector-1');
+
+      await availabilityHandler(requestHandlerContext, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({ body: { available: false } });
+      expect(resolveConnectorId).not.toHaveBeenCalled();
+    });
+
+    it('refuses to suggest without an enterprise license, without calling the model', async () => {
+      const { handler, requestHandlerContext, request, response } = buildMocks({
+        hasEnterpriseLicense: false,
+      });
+      resolveConnectorId.mockResolvedValue('connector-1');
+
+      await handler(requestHandlerContext, request, response);
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(createScopedModel).not.toHaveBeenCalled();
+    });
   });
 });

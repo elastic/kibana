@@ -8,9 +8,7 @@
  */
 
 import type { Adapters, Request } from '@kbn/inspector-plugin/public';
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+import { isRecord } from './json_helpers';
 
 /**
  * True when an inspector request is the body logged by the ES|QL expression.

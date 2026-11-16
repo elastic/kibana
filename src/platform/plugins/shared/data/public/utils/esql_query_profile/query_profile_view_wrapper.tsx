@@ -19,11 +19,7 @@ const QueryProfileView = lazy(() =>
 /** Returns the lazy panel registered as the Query profile inspector view. */
 export const getQueryProfileViewComponent =
   (getStartServices: () => { search: ISearchStart; http: HttpStart }) =>
-  (props: InspectorViewProps) =>
-    (
-      <QueryProfileView
-        adapters={props.adapters}
-        search={getStartServices().search}
-        http={getStartServices().http}
-      />
-    );
+  ({ adapters }: InspectorViewProps) => {
+    const { search, http } = getStartServices();
+    return <QueryProfileView adapters={adapters} search={search} http={http} />;
+  };

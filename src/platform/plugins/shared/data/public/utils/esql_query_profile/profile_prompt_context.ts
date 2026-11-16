@@ -17,7 +17,7 @@ const MAX_PLANS = 2;
 const MAX_PLAN_LENGTH = 8_000;
 const MAX_DETAIL_LENGTH = 300;
 
-const millis = (nanos: number): string => `${(nanos / 1e6).toFixed(nanos >= 1e7 ? 0 : 2)} ms`;
+const formatMillis = (nanos: number): string => `${(nanos / 1e6).toFixed(nanos >= 1e7 ? 0 : 2)} ms`;
 
 const truncate = (text: string, length: number): string =>
   text.length > length ? `${text.slice(0, length)}…` : text;
@@ -48,7 +48,7 @@ export function buildProfileContext(view: QueryProfileView): string {
     timed.forEach((operator) => {
       const detail = operator.detail ? ` ${truncate(operator.detail, MAX_DETAIL_LENGTH)}` : '';
       lines.push(
-        `- ${operator.title}${detail}: ${millis(operator.processNanos)} (${Math.round(
+        `- ${operator.title}${detail}: ${formatMillis(operator.processNanos)} (${Math.round(
           operator.share * 100
         )}%), ${operator.rowsReceived} rows in, ${operator.rowsEmitted} rows out`
       );
@@ -59,12 +59,10 @@ export function buildProfileContext(view: QueryProfileView): string {
   if (drivers.length > 0) {
     lines.push('', 'Drivers:');
     drivers.forEach((driver) => {
-      const waited = driver.sleeps.reduce(
-        (sum, sleep) => sum + (sleep.stopMillis - sleep.startMillis),
-        0
-      );
       lines.push(
-        `- ${driver.label}: ran ${driver.stopMillis - driver.startMillis} ms, waited ${waited} ms`
+        `- ${driver.label}: ran ${driver.stopMillis - driver.startMillis} ms, waited ${
+          driver.waitedMillis
+        } ms`
       );
     });
   }

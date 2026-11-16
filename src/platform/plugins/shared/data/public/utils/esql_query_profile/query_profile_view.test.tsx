@@ -89,6 +89,13 @@ const logRequest = (
   request.ok({ json: {} });
 };
 
+/** Logs one ES|QL request, as Discover does, and renders the profile view for it. */
+const renderProfileOf = (query: string, search: Pick<ISearchStart, 'esql'>) => {
+  const requests = new RequestAdapter();
+  logRequest(requests, 'Documents', { query, include_execution_metadata: true });
+  return renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+};
+
 describe('getEsqlQueryProfileViewDescription', () => {
   const view = getEsqlQueryProfileViewDescription(() => ({
     search: {} as ISearchStart,
@@ -156,10 +163,7 @@ describe('QueryProfileView', () => {
   });
 
   it('breaks the CPU time down by kind of work', async () => {
-    const requests = new RequestAdapter();
-    logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
-
-    renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+    renderProfileOf(QUERY, search);
 
     const breakdown = await screen.findByTestId('esqlQueryProfileCpuBreakdown');
     expect(breakdown).toHaveTextContent('CPU time by kind of work');
@@ -171,10 +175,7 @@ describe('QueryProfileView', () => {
     const failing = {
       esql: jest.fn().mockRejectedValue(new Error('boom')),
     } as unknown as Pick<ISearchStart, 'esql'>;
-    const requests = new RequestAdapter();
-    logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
-
-    renderView(<QueryProfileView adapters={{ requests }} search={failing} />);
+    renderProfileOf(QUERY, failing);
 
     expect(await screen.findByText('Unable to profile this query')).toBeInTheDocument();
     expect(screen.getByText('boom')).toBeInTheDocument();
@@ -200,10 +201,7 @@ describe('QueryProfileView', () => {
   });
 
   it('profiles again on request', async () => {
-    const requests = new RequestAdapter();
-    logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
-
-    renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+    renderProfileOf(QUERY, search);
     await screen.findByTestId('esqlQueryProfileDuration');
     await userEvent.click(screen.getByTestId('esqlQueryProfileRunAgain'));
 
@@ -212,9 +210,7 @@ describe('QueryProfileView', () => {
 
   describe('timeline', () => {
     const open = async () => {
-      const requests = new RequestAdapter();
-      logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
-      renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+      renderProfileOf(QUERY, search);
       return screen.findByTestId('esqlQueryProfileTimeline');
     };
 
@@ -228,6 +224,15 @@ describe('QueryProfileView', () => {
       expect(screen.getByTestId('esqlQueryProfileRuler')).toBeInTheDocument();
       expect(screen.getAllByTestId('esqlQueryProfileLaneWait')).toHaveLength(1);
       expect(screen.getByText(/Waiting, for example for another driver/)).toBeInTheDocument();
+    });
+
+    it('says how long a driver waited when its lane is pointed at', async () => {
+      await open();
+      const [, finalLane] = screen.getAllByTestId('esqlQueryProfileLane');
+
+      await userEvent.hover(finalLane);
+
+      expect(await screen.findByText('Waiting 1.1 s (exchange empty)')).toBeInTheDocument();
     });
 
     it('shows the operators of a driver when its lane is selected, and hides them again', async () => {
@@ -274,12 +279,7 @@ describe('QueryProfileView', () => {
     });
 
     it('says so when the profile has no timing for drivers', async () => {
-      const requests = new RequestAdapter();
-      logRequest(requests, 'Documents', {
-        query: 'FROM untimed',
-        include_execution_metadata: true,
-      });
-      renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+      renderProfileOf('FROM untimed', search);
 
       expect(
         await screen.findByText('This profile did not include timing for individual drivers.')
@@ -289,9 +289,7 @@ describe('QueryProfileView', () => {
 
   describe('by command', () => {
     it('shows each command of the query with its share of the CPU time', async () => {
-      const requests = new RequestAdapter();
-      logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
-      renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+      renderProfileOf(QUERY, search);
 
       await userEvent.click(await screen.findByTestId('esqlQueryProfileByCommandTab'));
 
@@ -306,9 +304,7 @@ describe('QueryProfileView', () => {
     });
 
     it('goes back to the timeline', async () => {
-      const requests = new RequestAdapter();
-      logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
-      renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+      renderProfileOf(QUERY, search);
 
       await userEvent.click(await screen.findByTestId('esqlQueryProfileByCommandTab'));
       await userEvent.click(screen.getByTestId('esqlQueryProfileTimelineTab'));
@@ -318,12 +314,7 @@ describe('QueryProfileView', () => {
     });
 
     it('has no tab when no operator can be matched to a command', async () => {
-      const requests = new RequestAdapter();
-      logRequest(requests, 'Documents', {
-        query: 'FROM untimed',
-        include_execution_metadata: true,
-      });
-      renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+      renderProfileOf('FROM untimed', search);
 
       await screen.findByTestId('esqlQueryProfileDuration');
       expect(screen.queryByTestId('esqlQueryProfileByCommandTab')).not.toBeInTheDocument();
@@ -470,13 +461,11 @@ describe('QueryProfileView faster query suggestion', () => {
   });
 
   it('does not offer the suggestion without an http service', async () => {
-    const requests = new RequestAdapter();
-    logRequest(requests, 'Documents', { query: ORIGINAL, include_execution_metadata: true });
     const search = {
       esql: jest.fn(async () => ({ rawResponse: { profile: slowProfile } })),
     } as unknown as Pick<ISearchStart, 'esql'>;
 
-    renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+    renderProfileOf(ORIGINAL, search);
 
     await screen.findByTestId('esqlQueryProfileDuration');
     expect(screen.queryByTestId('esqlQueryProfileSuggest')).not.toBeInTheDocument();

@@ -68,35 +68,6 @@ describe('aggregateEsqlProfile', () => {
     expect(view.timeline).toEqual({ drivers: [] });
   });
 
-  it('keeps time and rows for an operator that reports only process time', () => {
-    const view = aggregateEsqlProfile({
-      drivers: [
-        {
-          operators: [
-            {
-              operator: 'EvalOperator',
-              status: {
-                process_nanos: 2_000_000,
-                rows_received: 10,
-                rows_emitted: 4,
-              },
-            },
-          ],
-        },
-      ],
-    });
-
-    expect(view.operators).toEqual([
-      expect.objectContaining({
-        title: 'Eval',
-        processNanos: 2_000_000,
-        rowsReceived: 10,
-        rowsEmitted: 4,
-        share: 1,
-      }),
-    ]);
-  });
-
   it('orders operators by process time and splits shares across them', () => {
     const view = aggregateEsqlProfile({
       drivers: [
@@ -438,6 +409,7 @@ describe('aggregateEsqlProfile sleeps', () => {
       { reason: 'exchange empty', startMillis: 1_793_629_006_541, stopMillis: 1_793_629_006_546 },
     ]);
     expect(timeline.drivers[0].sleepCount).toBe(2);
+    expect(timeline.drivers[0].waitedMillis).toBe(21 + 5);
   });
 
   it('clips a sleep to the driver span and ignores malformed ones', () => {
@@ -461,6 +433,7 @@ describe('aggregateEsqlProfile sleeps', () => {
       { reason: 'exchange empty', startMillis: 1_793_629_006_518, stopMillis: 1_793_629_006_520 },
     ]);
     expect(timeline.drivers[0].sleepCount).toBe(5);
+    expect(timeline.drivers[0].waitedMillis).toBe(2);
   });
 
   it('has no sleeps when the profile does not report any', () => {

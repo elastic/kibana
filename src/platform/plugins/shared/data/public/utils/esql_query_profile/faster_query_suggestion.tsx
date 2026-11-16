@@ -77,6 +77,39 @@ function Busy({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Says in words how the results of the suggestion compare with the original's. */
+const describeVerdict = (verdict: ResultsVerdict): string => {
+  switch (verdict.kind) {
+    case 'same':
+      return verdict.sameOrder
+        ? i18n.translate('data.inspector.queryProfile.sameResultsLabel', {
+            defaultMessage: 'Same results: {rowCount, plural, one {# row} other {# rows}}.',
+            values: { rowCount: verdict.rowCount },
+          })
+        : i18n.translate('data.inspector.queryProfile.sameResultsOtherOrderLabel', {
+            defaultMessage:
+              'Same results: {rowCount, plural, one {# row} other {# rows}}, in a different order.',
+            values: { rowCount: verdict.rowCount },
+          });
+    case 'differentColumns':
+      return i18n.translate('data.inspector.queryProfile.differentColumnsLabel', {
+        defaultMessage:
+          'The columns differ from the original query, so this is not an equivalent query.',
+      });
+    case 'differentRowCount':
+      return i18n.translate('data.inspector.queryProfile.differentRowCountLabel', {
+        defaultMessage:
+          'It returns {current, plural, one {# row} other {# rows}} and the original returned {baseline}. This is not an equivalent query.',
+        values: { current: verdict.current, baseline: verdict.baseline },
+      });
+    case 'differentRows':
+      return i18n.translate('data.inspector.queryProfile.differentRowsLabel', {
+        defaultMessage:
+          'The number of rows matches but the values differ. Without a SORT, rows beyond the limit can vary between runs, otherwise this is not an equivalent query.',
+      });
+  }
+};
+
 function ResultsCheck({ verdict }: { verdict: ResultsVerdict | undefined }) {
   if (!verdict) {
     return (
@@ -89,41 +122,13 @@ function ResultsCheck({ verdict }: { verdict: ResultsVerdict | undefined }) {
     );
   }
 
-  const text =
-    verdict.kind === 'same'
-      ? verdict.sameOrder
-        ? i18n.translate('data.inspector.queryProfile.sameResultsLabel', {
-            defaultMessage: 'Same results: {rowCount, plural, one {# row} other {# rows}}.',
-            values: { rowCount: verdict.rowCount },
-          })
-        : i18n.translate('data.inspector.queryProfile.sameResultsOtherOrderLabel', {
-            defaultMessage:
-              'Same results: {rowCount, plural, one {# row} other {# rows}}, in a different order.',
-            values: { rowCount: verdict.rowCount },
-          })
-      : verdict.kind === 'differentColumns'
-      ? i18n.translate('data.inspector.queryProfile.differentColumnsLabel', {
-          defaultMessage:
-            'The columns differ from the original query, so this is not an equivalent query.',
-        })
-      : verdict.kind === 'differentRowCount'
-      ? i18n.translate('data.inspector.queryProfile.differentRowCountLabel', {
-          defaultMessage:
-            'It returns {current, plural, one {# row} other {# rows}} and the original returned {baseline}. This is not an equivalent query.',
-          values: { current: verdict.current, baseline: verdict.baseline },
-        })
-      : i18n.translate('data.inspector.queryProfile.differentRowsLabel', {
-          defaultMessage:
-            'The number of rows matches but the values differ. Without a SORT, rows beyond the limit can vary between runs, otherwise this is not an equivalent query.',
-        });
-
   return (
     <EuiText
       size="xs"
       color={verdict.kind === 'same' ? 'success' : 'danger'}
       data-test-subj="esqlQueryProfileResultsCheck"
     >
-      <strong>{text}</strong>
+      <strong>{describeVerdict(verdict)}</strong>
     </EuiText>
   );
 }
@@ -147,16 +152,149 @@ function TimeComparison({
       <p>
         <FormattedMessage
           id="data.inspector.queryProfile.timeComparisonDescription"
-          defaultMessage="Original {before}, suggestion {after}{change}"
+          defaultMessage="Original {before}, suggestion {after}{hasChange, select, true { ({change})} other {}}"
           values={{
             before: formatDurationMillis(before),
             after: formatDurationMillis(after),
-            change: before > 0 ? ` (${formatChange((after - before) / before)})` : '',
+            hasChange: before > 0,
+            change: before > 0 ? formatChange((after - before) / before) : '',
           }}
         />
       </p>
     </EuiText>
   );
+}
+
+type SuggestedStage = Extract<Stage, { kind: 'suggested' | 'profiling' | 'compared' }>;
+
+interface SuggestionBodyProps {
+  stage: Stage;
+  originalView: QueryProfileView;
+  onProfile: (query: string, reason: string) => void;
+  onDismiss: () => void;
+}
+
+/** The suggested query and why it should be faster, then what can be done with it. */
+function SuggestedQuery({
+  stage,
+  originalView,
+  onProfile,
+  onDismiss,
+}: Omit<SuggestionBodyProps, 'stage'> & { stage: SuggestedStage }) {
+  return (
+    <>
+      <EuiCodeBlock language="esql" fontSize="s" paddingSize="s" isCopyable>
+        {stage.query}
+      </EuiCodeBlock>
+      <EuiSpacer size="xs" />
+      <EuiText size="xs" color="subdued">
+        <p data-test-subj="esqlQueryProfileSuggestionReason">{stage.reason}</p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      {stage.kind === 'suggested' && (
+        <>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="data.inspector.queryProfile.suggestionNotRunDescription"
+              defaultMessage="This query has not been run. The AI can be wrong, so check that it returns the same results."
+            />
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="left"
+                iconType="play"
+                onClick={() => onProfile(stage.query, stage.reason)}
+                data-test-subj="esqlQueryProfileProfileSuggestion"
+              >
+                <FormattedMessage
+                  id="data.inspector.queryProfile.profileSuggestionButtonLabel"
+                  defaultMessage="Profile this suggestion"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <DismissButton onClick={onDismiss} isAlone={false} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+      {stage.kind === 'profiling' && (
+        <Busy>
+          <FormattedMessage
+            id="data.inspector.queryProfile.profilingSuggestionDescription"
+            defaultMessage="Running the suggested query with profiling."
+          />
+        </Busy>
+      )}
+      {stage.kind === 'compared' && (
+        <>
+          <ResultsCheck verdict={compareResults(originalView.results, stage.view.results)} />
+          <EuiSpacer size="m" />
+          <TimeComparison original={originalView} suggested={stage.view} />
+          <EuiSpacer size="s" />
+          <DismissButton onClick={onDismiss} />
+        </>
+      )}
+    </>
+  );
+}
+
+/** What the panel shows for each stage of asking for, and then checking, a suggestion. */
+function SuggestionBody({ stage, originalView, onProfile, onDismiss }: SuggestionBodyProps) {
+  switch (stage.kind) {
+    case 'idle':
+      return null;
+    case 'suggesting':
+      return (
+        <Busy>
+          <FormattedMessage
+            id="data.inspector.queryProfile.suggestingDescription"
+            defaultMessage="Asking the AI for a faster version of this query."
+          />
+        </Busy>
+      );
+    case 'error':
+      return (
+        <>
+          <KbnDangerCallout
+            announceOnMount
+            title={i18n.translate('data.inspector.queryProfile.suggestionErrorTitle', {
+              defaultMessage: 'Unable to suggest a faster query',
+            })}
+            text={<p>{stage.message}</p>}
+          />
+          <EuiSpacer size="s" />
+          <DismissButton onClick={onDismiss} />
+        </>
+      );
+    case 'noSuggestion':
+      return (
+        <>
+          <EuiText size="xs" data-test-subj="esqlQueryProfileNoSuggestion">
+            <p>
+              <FormattedMessage
+                id="data.inspector.queryProfile.noSuggestionDescription"
+                defaultMessage="No safe improvement found. {reason}"
+                values={{ reason: stage.reason }}
+              />
+            </p>
+          </EuiText>
+          <DismissButton onClick={onDismiss} />
+        </>
+      );
+    default:
+      return (
+        <SuggestedQuery
+          stage={stage}
+          originalView={originalView}
+          onProfile={onProfile}
+          onDismiss={onDismiss}
+        />
+      );
+  }
 }
 
 /**
@@ -307,95 +445,12 @@ export function FasterQuerySuggestion({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        {stage.kind === 'suggesting' ? (
-          <Busy>
-            <FormattedMessage
-              id="data.inspector.queryProfile.suggestingDescription"
-              defaultMessage="Asking the AI for a faster version of this query."
-            />
-          </Busy>
-        ) : stage.kind === 'error' ? (
-          <>
-            <KbnDangerCallout
-              announceOnMount
-              title={i18n.translate('data.inspector.queryProfile.suggestionErrorTitle', {
-                defaultMessage: 'Unable to suggest a faster query',
-              })}
-              text={<p>{stage.message}</p>}
-            />
-            <EuiSpacer size="s" />
-            <DismissButton onClick={dismiss} />
-          </>
-        ) : stage.kind === 'noSuggestion' ? (
-          <>
-            <EuiText size="xs" data-test-subj="esqlQueryProfileNoSuggestion">
-              <p>
-                <FormattedMessage
-                  id="data.inspector.queryProfile.noSuggestionDescription"
-                  defaultMessage="No safe improvement found. {reason}"
-                  values={{ reason: stage.reason }}
-                />
-              </p>
-            </EuiText>
-            <DismissButton onClick={dismiss} />
-          </>
-        ) : (
-          <>
-            <EuiCodeBlock language="esql" fontSize="s" paddingSize="s" isCopyable>
-              {stage.query}
-            </EuiCodeBlock>
-            <EuiSpacer size="xs" />
-            <EuiText size="xs" color="subdued">
-              <p data-test-subj="esqlQueryProfileSuggestionReason">{stage.reason}</p>
-            </EuiText>
-            <EuiSpacer size="s" />
-            {stage.kind === 'suggested' ? (
-              <>
-                <EuiText size="xs" color="subdued">
-                  <FormattedMessage
-                    id="data.inspector.queryProfile.suggestionNotRunDescription"
-                    defaultMessage="This query has not been run. The AI can be wrong, so check that it returns the same results."
-                  />
-                </EuiText>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="s" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      size="xs"
-                      flush="left"
-                      iconType="play"
-                      onClick={() => profileSuggestion(stage.query, stage.reason)}
-                      data-test-subj="esqlQueryProfileProfileSuggestion"
-                    >
-                      <FormattedMessage
-                        id="data.inspector.queryProfile.profileSuggestionButtonLabel"
-                        defaultMessage="Profile this suggestion"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <DismissButton onClick={dismiss} isAlone={false} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            ) : stage.kind === 'profiling' ? (
-              <Busy>
-                <FormattedMessage
-                  id="data.inspector.queryProfile.profilingSuggestionDescription"
-                  defaultMessage="Running the suggested query with profiling."
-                />
-              </Busy>
-            ) : (
-              <>
-                <ResultsCheck verdict={compareResults(originalView.results, stage.view.results)} />
-                <EuiSpacer size="m" />
-                <TimeComparison original={originalView} suggested={stage.view} />
-                <EuiSpacer size="s" />
-                <DismissButton onClick={dismiss} />
-              </>
-            )}
-          </>
-        )}
+        <SuggestionBody
+          stage={stage}
+          originalView={originalView}
+          onProfile={profileSuggestion}
+          onDismiss={dismiss}
+        />
       </EuiPanel>
       <EuiSpacer size="m" />
     </>

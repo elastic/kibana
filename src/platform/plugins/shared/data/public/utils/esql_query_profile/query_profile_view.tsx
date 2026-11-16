@@ -33,18 +33,14 @@ import { listEsqlInspectorRequests } from './esql_inspector_requests';
 import { FasterQuerySuggestion } from './faster_query_suggestion';
 import { loadEsqlQueryProfile } from './load_esql_query_profile';
 import { ProfileSummary } from './profile_summary';
+import { readRequestQuery } from './json_helpers';
 import { TimelineTab } from './timeline_tab';
 
 type TabId = 'timeline' | 'byCommand';
 
-const readQuery = (request: Request | undefined): string | undefined => {
-  const json: unknown = request?.json;
-  if (!json || typeof json !== 'object' || !('query' in json)) {
-    return undefined;
-  }
-  const { query } = json as { query?: unknown };
-  return typeof query === 'string' && query.length > 0 ? query : undefined;
-};
+/** The query of a logged request, or nothing when it has none or an empty one. */
+const readQuery = (request: Request | undefined): string | undefined =>
+  readRequestQuery(request?.json) || undefined;
 
 const completedRequestTime = (request: Request | undefined): string | undefined => {
   const value = request?.stats?.queryTime?.value;
@@ -161,6 +157,89 @@ const RequestPicker = ({
   );
 };
 
+const ProfileLoading = () => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="esqlQueryProfileLoading">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="m" />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiText size="s">
+        <FormattedMessage
+          id="data.inspector.queryProfile.loadingDescription"
+          defaultMessage="Running the query with profiling."
+        />
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+/** The timeline and by-command tabs, or a note when the profile has nothing to show in them. */
+const ProfileDetails = ({
+  view,
+  query,
+  activeTab,
+  showByCommand,
+  requestId,
+  onTabChange,
+}: {
+  view: QueryProfileViewModel;
+  query?: string;
+  activeTab: TabId;
+  showByCommand: boolean;
+  requestId?: string;
+  onTabChange: (tab: TabId) => void;
+}) => {
+  if (!view.hasTimeline && !showByCommand) {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiText size="s" color="subdued">
+          <p>
+            <FormattedMessage
+              id="data.inspector.queryProfile.noTimelineDescription"
+              defaultMessage="This profile did not include timing for individual drivers."
+            />
+          </p>
+        </EuiText>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiTabs size="s" bottomBorder>
+        <EuiTab
+          isSelected={activeTab === 'timeline'}
+          onClick={() => onTabChange('timeline')}
+          data-test-subj="esqlQueryProfileTimelineTab"
+        >
+          {i18n.translate('data.inspector.queryProfile.timelineTabLabel', {
+            defaultMessage: 'Timeline',
+          })}
+        </EuiTab>
+        {showByCommand ? (
+          <EuiTab
+            isSelected={activeTab === 'byCommand'}
+            onClick={() => onTabChange('byCommand')}
+            data-test-subj="esqlQueryProfileByCommandTab"
+          >
+            {i18n.translate('data.inspector.queryProfile.byCommandTabLabel', {
+              defaultMessage: 'By command',
+            })}
+          </EuiTab>
+        ) : null}
+      </EuiTabs>
+      <EuiSpacer size="m" />
+      {activeTab === 'byCommand' && query ? (
+        <ByCommandTab view={view} query={query} />
+      ) : view.hasTimeline ? (
+        <TimelineTab key={requestId} view={view} />
+      ) : null}
+    </>
+  );
+};
+
 /** Re-runs a logged ES|QL request with profiling and shows where the time went. */
 export const QueryProfileView = ({
   adapters,
@@ -240,19 +319,7 @@ export const QueryProfileView = ({
           text={<p>{error}</p>}
         />
       ) : loading || !view ? (
-        <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="esqlQueryProfileLoading">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
-              <FormattedMessage
-                id="data.inspector.queryProfile.loadingDescription"
-                defaultMessage="Running the query with profiling."
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <ProfileLoading />
       ) : (
         <>
           <ProfileSummary view={view} />
@@ -268,51 +335,14 @@ export const QueryProfileView = ({
               />
             </>
           ) : null}
-          {view.hasTimeline || showByCommand ? (
-            <>
-              <EuiSpacer size="m" />
-              <EuiTabs size="s" bottomBorder>
-                <EuiTab
-                  isSelected={activeTab === 'timeline'}
-                  onClick={() => setTab('timeline')}
-                  data-test-subj="esqlQueryProfileTimelineTab"
-                >
-                  {i18n.translate('data.inspector.queryProfile.timelineTabLabel', {
-                    defaultMessage: 'Timeline',
-                  })}
-                </EuiTab>
-                {showByCommand ? (
-                  <EuiTab
-                    isSelected={activeTab === 'byCommand'}
-                    onClick={() => setTab('byCommand')}
-                    data-test-subj="esqlQueryProfileByCommandTab"
-                  >
-                    {i18n.translate('data.inspector.queryProfile.byCommandTabLabel', {
-                      defaultMessage: 'By command',
-                    })}
-                  </EuiTab>
-                ) : null}
-              </EuiTabs>
-              <EuiSpacer size="m" />
-              {activeTab === 'byCommand' && query ? (
-                <ByCommandTab view={view} query={query} />
-              ) : view.hasTimeline ? (
-                <TimelineTab key={selected?.id} view={view} />
-              ) : null}
-            </>
-          ) : (
-            <>
-              <EuiSpacer size="m" />
-              <EuiText size="s" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="data.inspector.queryProfile.noTimelineDescription"
-                    defaultMessage="This profile did not include timing for individual drivers."
-                  />
-                </p>
-              </EuiText>
-            </>
-          )}
+          <ProfileDetails
+            view={view}
+            query={query}
+            activeTab={activeTab}
+            showByCommand={showByCommand}
+            requestId={selected?.id}
+            onTabChange={setTab}
+          />
         </>
       )}
     </div>

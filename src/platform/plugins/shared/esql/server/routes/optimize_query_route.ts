@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
@@ -92,9 +93,11 @@ const normalize = (query: string): string => query.replace(/\s+/g, ' ').trim();
 export const registerOptimizeQueryRoute = (
   router: IRouter,
   getStartServices: CoreSetup<EsqlServerPluginStart>['getStartServices'],
-  context: PluginInitializerContext
+  context: PluginInitializerContext,
+  hasEnterpriseLicense: () => Promise<boolean>
 ) => {
-  // A cheap check, with no model call, so the UI can hide the action when no AI connector exists.
+  // A cheap check, with no model call, so the UI can hide the action when it cannot be used: there
+  // is no enterprise license, or no AI connector.
   router.get(
     {
       path: OPTIMIZE_QUERY_ROUTE,
@@ -108,6 +111,9 @@ export const registerOptimizeQueryRoute = (
     },
     async (_requestHandlerContext, request, response) => {
       try {
+        if (!(await hasEnterpriseLicense())) {
+          return response.ok({ body: { available: false } });
+        }
         const [, { inference, searchInferenceEndpoints }] = await getStartServices();
         const connectorId = await resolveConnectorId({
           inference,
@@ -141,6 +147,11 @@ export const registerOptimizeQueryRoute = (
       const logger = context.logger.get();
       try {
         const { queryString, profileContext } = request.body;
+        if (!(await hasEnterpriseLicense())) {
+          return response.forbidden({
+            body: { message: 'Suggesting a faster query needs an enterprise license.' },
+          });
+        }
         const [, { inference, searchInferenceEndpoints }] = await getStartServices();
 
         const connectorId = await resolveConnectorId({
@@ -165,7 +176,10 @@ export const registerOptimizeQueryRoute = (
         });
         const result = await model.chatModel
           .withStructuredOutput(OptimizeQuerySchema, { name: 'suggest_faster_query' })
-          .invoke(buildMessages(queryString, profileContext));
+          // The UI aborts its request when the profile changes, so the model stops with it.
+          .invoke(buildMessages(queryString, profileContext), {
+            signal: getRequestAbortedSignal(request.events.aborted$),
+          });
 
         const suggestion = result.query.trim();
         const isUsable =

@@ -1,0 +1,69 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { QueryProfileTimeline, TimelineDriver } from './aggregate_esql_profile';
+
+/** The kinds of driver in the order a query runs them. Any other kind is listed after these. */
+const GROUP_ORDER = ['data', 'node_reduce', 'final'];
+
+/** The narrowest a span is drawn, as a percentage of the track, so a very short one stays visible. */
+const MIN_LANE_WIDTH_PERCENT = 1.5;
+
+/** Where a span sits on a track, as percentages of the track. */
+export interface LaneBox {
+  left: number;
+  width: number;
+}
+
+/** How long a span of the timeline lasted. */
+export const spanMillis = (span: { startMillis: number; stopMillis: number }): number =>
+  span.stopMillis - span.startMillis;
+
+/** The time range that holds planning and every driver. */
+export const fullDomain = (
+  timeline: QueryProfileTimeline
+): { startMillis: number; stopMillis: number } => {
+  const spans = [...(timeline.planning ? [timeline.planning] : []), ...timeline.drivers];
+  return {
+    startMillis: Math.min(...spans.map((span) => span.startMillis)),
+    stopMillis: Math.max(...spans.map((span) => span.stopMillis)),
+  };
+};
+
+/** Places a span on a track as percentages. */
+export const laneBox = (
+  startMillis: number,
+  stopMillis: number,
+  domain: { startMillis: number; stopMillis: number }
+): LaneBox => {
+  const length = domain.stopMillis - domain.startMillis;
+  if (length <= 0) {
+    return { left: 0, width: 100 };
+  }
+  const width = Math.min(
+    100,
+    Math.max(((stopMillis - startMillis) / length) * 100, MIN_LANE_WIDTH_PERCENT)
+  );
+  const left = Math.min(
+    Math.max(((startMillis - domain.startMillis) / length) * 100, 0),
+    100 - width
+  );
+  return { left, width };
+};
+
+/** Groups drivers by what they do, in the order a query runs them. */
+export const groupDrivers = (drivers: TimelineDriver[]): Array<[string, TimelineDriver[]]> => {
+  const groups = new Map<string, TimelineDriver[]>();
+  drivers.forEach((driver) => {
+    groups.set(driver.description, [...(groups.get(driver.description) ?? []), driver]);
+  });
+  const known = GROUP_ORDER.filter((description) => groups.has(description));
+  const rest = [...groups.keys()].filter((description) => !GROUP_ORDER.includes(description));
+  return [...known, ...rest].map((description) => [description, groups.get(description) ?? []]);
+};
