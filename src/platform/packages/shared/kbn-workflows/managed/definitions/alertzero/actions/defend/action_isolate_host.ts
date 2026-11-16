@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ACTION_ISOLATE_HOST_YAML from './action_isolate_host.yaml';
 import type { ManagedWorkflowDefinition } from '../../../../types';
+import { readManagedWorkflowYaml } from '../../../read_managed_workflow_yaml';
 import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
@@ -22,5 +22,7 @@ export const ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW = {
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 5,
-  yaml: ACTION_ISOLATE_HOST_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'action_isolate_host.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

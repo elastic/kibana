@@ -11,6 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { CreateAutomationFlyout } from './create_automation_flyout';
 import { useCreateAutomation } from '../../../../data/automations/use_automations';
 
+jest.mock('../../../../hooks/use_kibana', () => ({
+  useKibana: () => ({ services: { application: { getUrlForApp: () => '' } } }),
+}));
+
 jest.mock('../../../../data/automations/use_automations', () => ({
   useCreateAutomation: jest.fn(),
 }));
