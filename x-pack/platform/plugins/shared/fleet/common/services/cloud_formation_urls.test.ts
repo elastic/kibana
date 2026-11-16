@@ -35,12 +35,12 @@ describe('setQuickCreateStackName', () => {
       setQuickCreateStackParams(
         setQuickCreateStackName(
           getQuickCreateUrl('https://bucket/x?sig=1'),
-          'elastic-onboarding-bootstrap'
+          'elastic-bootstrap-onboarding'
         ),
         { ManagementMode: 'fully-managed' }
       )
     ).toBe(
-      'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fbucket%2Fx%3Fsig%3D1&stackName=elastic-onboarding-bootstrap&param_ManagementMode=fully-managed'
+      'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fbucket%2Fx%3Fsig%3D1&stackName=elastic-bootstrap-onboarding&param_ManagementMode=fully-managed'
     );
   });
 });

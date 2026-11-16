@@ -73,7 +73,7 @@ export const createSubmitSettingsHandler =
     }
   };
 
-const BOOTSTRAP_STACK_NAME = 'elastic-onboarding-bootstrap';
+const BOOTSTRAP_STACK_NAME = 'elastic-bootstrap-onboarding';
 
 const notEnabled = (response: KibanaResponseFactory) =>
   response.notFound({ body: { message: 'Managed AWS onboarding is not enabled' } });

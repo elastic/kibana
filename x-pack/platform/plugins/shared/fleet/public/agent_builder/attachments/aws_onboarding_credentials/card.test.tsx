@@ -8,14 +8,13 @@
 import React from 'react';
 import { of } from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import type { AwsOnboardingCredentialsAttachmentData } from '../../../../common/agent_builder/aws_onboarding_credentials_attachment';
 import {
-  sendGetAwsOnboardingBootstrapTemplate,
+  sendGetAwsOnboardingBootstrapLaunch,
   sendGetAwsOnboardingCredentials,
   sendGetAwsOnboardingVerify,
 } from '../../../hooks/use_request/aws_onboarding';
@@ -24,12 +23,10 @@ import { AwsOnboardingCredentialsCard } from './card';
 
 jest.mock('../../../hooks/use_request/aws_onboarding');
 
-const mockToastsAddError = jest.fn();
-
 const createStartServices = (flagEnabled: boolean) => ({
   featureFlags: { getBooleanValue$: () => of(flagEnabled) },
   cloud: { isCloudEnabled: true },
-  notifications: { toasts: { addError: mockToastsAddError, addSuccess: jest.fn() } },
+  notifications: { toasts: { addError: jest.fn(), addSuccess: jest.fn() } },
 });
 
 const data: AwsOnboardingCredentialsAttachmentData = {
@@ -62,18 +59,13 @@ describe('AwsOnboardingCredentialsCard', () => {
     jest.clearAllMocks();
   });
 
-  it('shows the setup steps and a pending status when credentials are not configured', async () => {
+  it('shows a pending status when credentials are not configured', async () => {
     jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
       data: { configured: false },
       error: null,
     } as never);
     renderCard();
 
-    expect(screen.getByTestId('awsOnboardingCredentialsCardDownload')).toBeInTheDocument();
-    expect(screen.getByTestId('awsOnboardingCredentialsCardConsoleLink')).toHaveAttribute(
-      'href',
-      expect.stringContaining('region=eu-west-1')
-    );
     expect(await screen.findByTestId('awsOnboardingCredentialsCardStatus')).toHaveTextContent(
       'Status: pending'
     );
@@ -120,24 +112,73 @@ describe('AwsOnboardingCredentialsCard', () => {
     );
   });
 
-  it('toasts when the template download fails', async () => {
+  it('shows the launch link with its expiry when the launch url loads', async () => {
     jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
       data: { configured: false },
       error: null,
     } as never);
-    jest.mocked(sendGetAwsOnboardingBootstrapTemplate).mockResolvedValue({
-      data: null,
-      error: serverError('Bootstrap template unavailable'),
+    jest.mocked(sendGetAwsOnboardingBootstrapLaunch).mockResolvedValue({
+      data: {
+        quickCreateUrl:
+          'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?x=1',
+        expiresAt: '2026-11-16T10:30:00.000Z',
+        blueprint: { id: 'bootstrap', version: '1' },
+      },
+      error: null,
     } as never);
     renderCard();
 
-    await userEvent.click(screen.getByTestId('awsOnboardingCredentialsCardDownload'));
-
-    await waitFor(() => expect(mockToastsAddError).toHaveBeenCalledTimes(1));
-    expect(mockToastsAddError).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'Bootstrap template unavailable' }),
-      expect.anything()
+    // The anchor replaces the disabled button once the url arrives, so look it up again.
+    await waitFor(() =>
+      expect(screen.getByTestId('awsOnboardingCredentialsCardLaunch')).toHaveAttribute(
+        'href',
+        'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?x=1'
+      )
     );
+    expect(screen.getByTestId('awsOnboardingCredentialsCardLaunch')).toHaveAttribute(
+      'target',
+      '_blank'
+    );
+    expect(screen.getByTestId('awsOnboardingCredentialsCardLaunchExpiry')).toHaveTextContent(
+      /Link expires at \S+/
+    );
+  });
+
+  it('shows a warning with the server message when the launch url fails', async () => {
+    jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
+      data: { configured: false },
+      error: null,
+    } as never);
+    jest.mocked(sendGetAwsOnboardingBootstrapLaunch).mockResolvedValue({
+      data: null,
+      error: { statusCode: 503, message: 'The IaC Provisioner is not available' },
+    } as never);
+    renderCard();
+
+    expect(await screen.findByTestId('awsOnboardingCredentialsCardLaunchError')).toHaveTextContent(
+      'The IaC Provisioner is not available'
+    );
+    expect(screen.queryByTestId('awsOnboardingCredentialsCardLaunch')).not.toBeInTheDocument();
+  });
+
+  it('does not request a launch url once credentials are configured', async () => {
+    jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
+      data: { configured: true, mode: 'fully-managed' },
+      error: null,
+    } as never);
+    jest.mocked(sendGetAwsOnboardingVerify).mockResolvedValue({
+      data: {
+        accountId: '1',
+        mode: 'fully-managed',
+        discovery: { ok: true },
+        provisioning: { ok: true },
+      },
+      error: null,
+    } as never);
+    renderCard();
+
+    await waitFor(() => expect(sendGetAwsOnboardingVerify).toHaveBeenCalled());
+    expect(sendGetAwsOnboardingBootstrapLaunch).not.toHaveBeenCalled();
   });
 
   it('trusts the attachment status when onboarding is not enabled, without inventing an account', async () => {

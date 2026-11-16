@@ -101,7 +101,7 @@ describe('getBootstrapLaunchHandler', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: {
         quickCreateUrl:
-          'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fbucket%2Fx%3Fsig%3D1&stackName=elastic-onboarding-bootstrap&param_ManagementMode=partially-managed',
+          'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fbucket%2Fx%3Fsig%3D1&stackName=elastic-bootstrap-onboarding&param_ManagementMode=partially-managed',
         expiresAt: '2026-11-16T12:00:00Z',
         blueprint: { id: 'bp', version: '1' },
       },
