@@ -15,12 +15,14 @@ import {
   scoreCanaryTripped,
   scoreEvidenceHonesty,
   scoreHitConsistency,
+  scoreInvestigationStatus,
   scoreOutcome,
   scoreProposalConvergence,
   scoreProposalPresence,
   scoreSseAttachment,
   scoreStageProgression,
   scoreTier1Status,
+  scoreTier2Execution,
 } from './code_scores';
 
 const REPORT_ID = 'r1';
@@ -660,5 +662,100 @@ describe('scoreStageProgression', () => {
         })
       ).score
     ).toBe(0);
+  });
+
+  it('names an incomplete_retryable hunt in an otherwise passing run', () => {
+    const result = scoreStageProgression(
+      buildExpected({ tier1Status: 'no_environment_hits' }),
+      buildArtifacts({
+        coordinator: { completeness: 'incomplete_retryable', completed_successfully: false },
+        stages: {
+          find_or_create_investigation: completed('2026-01-01T00:00:00Z'),
+          hunt: completed('2026-01-01T00:01:00Z'),
+          package_report: completed('2026-01-01T00:02:00Z'),
+          write_run_conclusion: completed('2026-01-01T00:03:00Z'),
+        },
+      })
+    );
+    expect(result.score).toBe(1);
+    expect(result.explanation).toMatch(/incomplete_retryable/);
+  });
+});
+
+describe('deferred verdict', () => {
+  const hitRow = (): HuntExpected =>
+    buildExpected(
+      {
+        hasConfirmedHit: true,
+        tier1Status: 'no_environment_hits',
+        tier2Executed: true,
+        pendingProposals: { min: 1 },
+        evidenceWritten: true,
+        sseAttachment: true,
+        investigationStatus: 'open',
+      },
+      { outcome: ['completed'] }
+    );
+
+  const retryable = (coordinator: Record<string, unknown> = {}) =>
+    buildArtifacts({
+      outcome: 'partial',
+      incompleteStage: 'hunt',
+      hunt: { status: 'partial', hit: false, behaviors: [] },
+      coordinator: {
+        completeness: 'incomplete_retryable',
+        completed_successfully: false,
+        has_confirmed_hit: false,
+        retryable_reasons: ['quote_ungrounded'],
+        ...coordinator,
+      },
+      reportDoc: {},
+      conversation: { id: 'c', metadata: { status: 'open' } },
+    });
+
+  it('returns N/A for the verdict checks once Outcome Label has scored the retryable stop', () => {
+    const expected = hitRow();
+    const artifacts = retryable();
+    expect(scoreOutcome(expected, artifacts).score).toBe(0);
+    for (const scorer of [
+      scoreHitConsistency,
+      scoreTier2Execution,
+      scoreSseAttachment,
+      scoreProposalPresence,
+      scoreInvestigationStatus,
+    ]) {
+      const result = scorer(expected, artifacts);
+      expect(result.label).toBe('N/A');
+      expect(result.explanation).toContain('quote_ungrounded');
+    }
+  });
+
+  it('scores evidence by the write rule on a deferred verdict', () => {
+    expect(scoreEvidenceHonesty(hitRow(), retryable()).score).toBe(1);
+    expect(
+      scoreEvidenceHonesty(
+        hitRow(),
+        buildArtifacts({
+          ...retryable().reports[REPORT_ID],
+          reportDoc: { evidence: [{ last_hunted_at: '2026-01-01T12:00:00.000Z' }] },
+        })
+      ).score
+    ).toBe(0);
+  });
+
+  it('still scores the verdict checks when the row accepts partial', () => {
+    const expected = hitRow();
+    expected.outcome = ['completed', 'partial'];
+    expect(scoreHitConsistency(expected, retryable()).score).toBe(0);
+  });
+
+  it('still scores the verdict checks when a retryable run carries a confirmed hit', () => {
+    expect(scoreSseAttachment(hitRow(), retryable({ has_confirmed_hit: true })).score).toBe(0);
+  });
+
+  it('still scores the verdict checks on a completed run', () => {
+    const artifacts = retryable();
+    artifacts.reports[REPORT_ID].outcome = 'completed';
+    expect(scoreHitConsistency(hitRow(), artifacts).score).toBe(0);
   });
 });

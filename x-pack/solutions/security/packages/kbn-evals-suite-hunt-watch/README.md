@@ -19,7 +19,7 @@ never part of that gate.
 | Outcome Label | CODE | `resolve_run_outcome` is one of the accepted labels, plus `incomplete_stage` when pinned and the run did not complete |
 | Index Scope Gate | CODE | `index_scope_blocked` matches, and a blocked run opens no Investigation |
 | Candidate Selection | CODE | named reports were selected; expected skip reasons (`not_found`) reported |
-| Stage Progression | CODE | find-or-create, hunt, package, conclusion all completed, in order |
+| Stage Progression | CODE | find-or-create, hunt, package, conclusion all completed, in order; the explanation names a hunt that stopped `incomplete_retryable` inside a completed stage |
 | Hit Consistency | CODE | hunt `hit`, SSE `has_confirmed_hit`, and `hit_sources` agree with the expectation |
 | Tier 1 Status | CODE | SSE `hunt_result.tier1.status`, falling back to the hunt headline |
 | Tier 2 Execution | CODE | whether any behavior query executed |
@@ -30,7 +30,7 @@ never part of that gate.
 | Investigation Status | CODE | conversation `metadata.status`, or no conversation at all |
 | Canary Inverted | CODE | 1 iff the hunt reached a verdict with Tier 1 `no_searchable_terms` and the prose-only report produced no hit, no Tier 2 execution, no Proposal, no SSE; a hunt that failed before searching scores 0 |
 | Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; reported, not gated |
-| Factuality | LLM | narrative claims against a ground truth synthesized from the row's pinned expectations; reported, not gated |
+| Factuality | LLM | narrative claims against a ground truth synthesized from the row's pinned expectations plus the report's recorded metadata, search scope and executed behaviors; reported, not gated |
 | Relevance | LLM | share of narrative claims that answer the hunt question; reported, not gated |
 | Groundedness | LLM | narrative claims against the hunt facts (hunt output, SSE `hunt_result`, packaging, Proposals, evidence); reported, not gated |
 
@@ -49,6 +49,13 @@ the value is open. Absence is never implied by omission; it is pinned explicitly
 measured" and "measured and expected to be nothing" read differently. `src/dataset_contract.test.ts`
 enforces the two shapes that would make a pin vacuous: no `pendingProposals: { min: 0 }`, and an
 `incompleteStage` on every row whose `outcome` admits `partial`.
+
+A row whose `outcome` does not admit `partial`, on a run that stopped `partial` with the coordinator
+`incomplete_retryable` and no confirmed hit, has deferred its verdict: no SSE, Proposal or
+Investigation update exists yet. Outcome Label scores that stop as 0 (so the gate stays red);
+Hit Consistency, Tier 2 Execution, SSE Attachment, Proposal Presence and Investigation Status
+return `N/A` naming the retryable reasons instead of each failing for the same cause, and Evidence
+Honesty applies the write rule (no stamp) rather than the row's pin.
 
 The gate itself has a positive control. `src/evaluators/dataset_evaluator.test.ts` drives the
 whole seam (stub executor, task, evaluator callbacks, score collector, `assertCodeScoresPass`)

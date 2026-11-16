@@ -11,7 +11,7 @@ import {
   createQuantitativeGroundednessEvaluator,
 } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { HuntArtifacts, HuntReportArtifacts } from '../collect';
+import type { HuntArtifacts, HuntBehaviorOutput, HuntReportArtifacts } from '../collect';
 import type { HuntExpected, HuntReportExpectation, HuntWatchExample } from '../types';
 import { errorMessage } from '../kibana_api';
 
@@ -75,10 +75,72 @@ const describeReport = (report: HuntReportExpectation): string => {
     );
   }
   lines.push(describeProposals(report.pendingProposals));
-  if (report.investigationStatus && report.investigationStatus !== 'none') {
+  if (report.investigationStatus === 'closed' && !report.hasConfirmedHit) {
+    lines.push('No confirmed hit, so packaging closes the Investigation as benign.');
+  } else if (report.investigationStatus && report.investigationStatus !== 'none') {
     lines.push(`Investigation left ${report.investigationStatus}.`);
   }
   return lines.join(' ');
+};
+
+const asRecord = (value: unknown): Record<string, unknown> | undefined =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
+
+const asString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
+
+const asStrings = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
+
+const describeBehavior = ({ technique_name: name, execution }: HuntBehaviorOutput): string => {
+  const label = name ?? 'unnamed behavior';
+  if (!execution?.executed) return `${label} not executed`;
+  return `${label} executed, ${execution.row_count ?? 0} row(s)`;
+};
+
+/**
+ * The report's own metadata, the scope the run searched and the behaviors it executed. The
+ * narrative quotes these, and without them every accurate quote reads as NOT_IN_GROUND_TRUTH,
+ * which caps Factuality on a correct narrative. They are recorded facts, not expectations: the
+ * pinned verdict lines above still decide whether the narrative's conclusion is right.
+ */
+const describeReportFacts = (actual: HuntReportArtifacts): string[] => {
+  const doc = actual.reportDoc;
+  if (!doc) return [];
+  const content = asRecord(doc.content);
+  const source = asRecord(doc.source);
+  const severity = asRecord(doc.severity);
+  const extracted = asRecord(doc.extracted);
+  const recordedIocs = Array.isArray(extracted?.iocs) ? extracted.iocs : undefined;
+  const iocs = (recordedIocs ?? []).map(asRecord).flatMap((ioc) => {
+    const value = asString(ioc?.value);
+    return value ? [`${asString(ioc?.type) ?? 'indicator'} ${value}`] : [];
+  });
+  const techniques = asStrings(asRecord(extracted?.ttps)?.techniques);
+  const timeRange = asRecord(asRecord(actual.coordinator?.tier1)?.time_range);
+  const from = asString(timeRange?.from);
+  const to = asString(timeRange?.to);
+  const indices = asStrings(actual.coordinator?.index_patterns);
+  const targets = asStrings(actual.coordinator?.tier2_targets);
+  const behaviors = (actual.hunt?.behaviors ?? []).map(describeBehavior);
+
+  const facts = [
+    asString(content?.title) && `title "${content?.title}"`,
+    asString(source?.name) && `source "${source?.name}"`,
+    asString(content?.published_at) && `published ${content?.published_at}`,
+    asString(severity?.level) && `source severity ${severity?.level}`,
+    iocs.length > 0
+      ? `indicators (${iocs.length}): ${iocs.join(', ')}`
+      : recordedIocs?.length === 0 && 'no indicators',
+    techniques.length > 0 && `ATT&CK techniques: ${techniques.join(', ')}`,
+    from && to && `hunt window ${from} to ${to}`,
+    indices.length > 0 && `IOC Hunt indices: ${indices.join(', ')}`,
+    targets.length > 0 && `Behavior Hunt targets: ${targets.join(', ')}`,
+    behaviors.length > 0 && `Behavior Hunt behaviors: ${behaviors.join(', ')}`,
+  ].filter((fact): fact is string => typeof fact === 'string');
+  return facts.length > 0 ? [`Report ${actual.reportId} facts: ${facts.join('; ')}.`] : [];
 };
 
 export const buildJudgeQuestion = ({ spaceId, reportIds }: HuntWatchExample['input']): string =>
@@ -100,11 +162,17 @@ const describeOutcome = (expected: HuntWatchExample['output']['expected']): stri
   ];
 };
 
-export const buildGroundTruth = ({ expected, criteria }: HuntWatchExample['output']): string =>
+export const buildGroundTruth = (
+  { expected, criteria }: HuntWatchExample['output'],
+  artifacts?: HuntArtifacts
+): string =>
   [
     'The hunt runs IOC Hunt first, then Behavior Hunt, then records a verdict.',
     ...describeOutcome(expected),
-    ...expected.reports.map(describeReport),
+    ...expected.reports.flatMap((report) => {
+      const actual = artifacts?.reports[report.reportId];
+      return [describeReport(report), ...(actual ? describeReportFacts(actual) : [])];
+    }),
     ...(criteria.length > 0 ? ['The narrative must also satisfy:', ...criteria] : []),
   ].join('\n');
 
@@ -239,7 +307,7 @@ export const runJudgeAnalyses = async ({
       messages: [{ message: narrative }],
       steps: buildToolCallHistory(artifacts, kibanaUrl),
     },
-    expected: { expected: buildGroundTruth(example.output) },
+    expected: { expected: buildGroundTruth(example.output, artifacts) },
     metadata: undefined,
   };
   const [correctness, groundedness] = await Promise.allSettled([

@@ -107,6 +107,67 @@ describe('judge_analysis', () => {
     );
   });
 
+  it('states that a closed no-hit Investigation was closed as benign', () => {
+    expect(buildGroundTruth(buildOutput({ investigationStatus: 'closed' }))).toContain(
+      'packaging closes the Investigation as benign'
+    );
+  });
+
+  it('adds the report metadata, search scope and behaviors the narrative quotes', () => {
+    const groundTruth = buildGroundTruth(
+      buildOutput(),
+      buildArtifacts({
+        reportDoc: {
+          content: { title: 'Advisory: password spray', published_at: '2026-06-30T00:00:00Z' },
+          source: { name: 'Advisory feed', type: 'rss' },
+          severity: { level: 'medium', score: 40 },
+          extracted: {
+            iocs: [{ type: 'ip', value: '203.0.113.60' }],
+            ttps: { techniques: ['T1110.003'] },
+          },
+        },
+        coordinator: {
+          index_patterns: ['logs-*'],
+          tier2_targets: ['logs-aws.cloudtrail-*'],
+          tier1: { time_range: { from: '2026-10-01T00:00:00Z', to: '2026-11-01T00:00:00Z' } },
+        },
+        hunt: {
+          behaviors: [
+            { technique_name: 'Password Spraying', execution: { executed: true, row_count: 0 } },
+          ],
+        },
+      })
+    );
+    for (const fact of [
+      'title "Advisory: password spray"',
+      'source "Advisory feed"',
+      'published 2026-06-30T00:00:00Z',
+      'source severity medium',
+      'indicators (1): ip 203.0.113.60',
+      'ATT&CK techniques: T1110.003',
+      'hunt window 2026-10-01T00:00:00Z to 2026-11-01T00:00:00Z',
+      'IOC Hunt indices: logs-*',
+      'Behavior Hunt targets: logs-aws.cloudtrail-*',
+      'Password Spraying executed, 0 row(s)',
+    ]) {
+      expect(groundTruth).toContain(fact);
+    }
+  });
+
+  it('states no indicators only when the report recorded an empty indicator list', () => {
+    const withReport = (reportDoc: Record<string, unknown>) =>
+      buildGroundTruth(buildOutput(), buildArtifacts({ reportDoc }));
+    expect(withReport({ content: { title: 'A' }, extracted: { iocs: [] } })).toContain(
+      'no indicators'
+    );
+    expect(withReport({ content: { title: 'A' } })).not.toContain('no indicators');
+    expect(withReport({})).not.toContain('facts:');
+  });
+
+  it('adds no report facts when the report doc was not collected', () => {
+    expect(buildGroundTruth(buildOutput(), buildArtifacts())).not.toContain('facts:');
+  });
+
   it('builds one tool call per available hunt fact', () => {
     const artifacts = buildArtifacts({
       hunt: { status: 'success', hit: false },

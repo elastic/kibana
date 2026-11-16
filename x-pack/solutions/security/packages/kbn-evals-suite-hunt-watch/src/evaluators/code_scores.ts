@@ -99,6 +99,54 @@ export const resolveTier1Status = (actual: HuntReportArtifacts): HuntTier1Status
   return undefined;
 };
 
+/**
+ * A row that does not accept `partial`, on a run that deferred its verdict: the coordinator
+ * stopped `incomplete_retryable` without a hit, so the report stays eligible and nothing
+ * downstream of the verdict exists yet. Outcome Label already scores that stop as 0; the checks
+ * that read the verdict's consequences return N/A instead of failing again for the same cause.
+ */
+const deferredVerdict = (
+  expected: HuntExpected,
+  actual: HuntReportArtifacts
+): CodeScore | undefined => {
+  if (!expected.outcome || expected.outcome.includes('partial')) return undefined;
+  if (actual.outcome !== 'partial') return undefined;
+  if (actual.coordinator?.completeness !== 'incomplete_retryable') return undefined;
+  if (actual.coordinator?.has_confirmed_hit === true) return undefined;
+  const reasons = Array.isArray(actual.coordinator?.retryable_reasons)
+    ? actual.coordinator.retryable_reasons.join(', ')
+    : '';
+  return notApplicable(
+    `verdict deferred: run stopped incomplete_retryable${reasons ? ` (${reasons})` : ''} at the ${
+      actual.incompleteStage ?? 'unknown'
+    } stage; Outcome Label scores the stop`
+  );
+};
+
+/** `reportScores` for checks that only mean something once the hunt reached a verdict. */
+const verdictScores = (
+  expected: HuntExpected,
+  artifacts: HuntArtifacts,
+  check: (expected: HuntReportExpectation, actual: HuntReportArtifacts) => CodeScore,
+  emptyExplanation: string
+): CodeScore => {
+  // When every report deferred, say why instead of folding to the generic empty explanation.
+  const deferred = expected.reports.flatMap(({ reportId }) => {
+    const actual = artifacts.reports[reportId];
+    const result = actual && deferredVerdict(expected, actual);
+    return result ? [`${reportId}: ${result.explanation}`] : [];
+  });
+  if (deferred.length > 0 && deferred.length === expected.reports.length) {
+    return notApplicable(deferred.join('; '));
+  }
+  return reportScores(
+    expected,
+    artifacts,
+    (report, actual) => deferredVerdict(expected, actual) ?? check(report, actual),
+    emptyExplanation
+  );
+};
+
 const tier2Executed = (actual: HuntReportArtifacts): boolean | undefined => {
   if (!actual.hunt) return undefined;
   return (actual.hunt.behaviors ?? []).some((b) => b.execution?.executed === true);
@@ -222,13 +270,17 @@ export const scoreStageProgression = (
       }
       const starts = STAGE_ORDER.map((id) => Date.parse(actual.stages[id].startedAt ?? ''));
       const inOrder = starts.every((t, i) => i === 0 || t >= starts[i - 1]);
-      return inOrder ? pass('all stages ran in order') : fail('stages ran out of order');
+      if (!inOrder) return fail('stages ran out of order');
+      // Each stage step completes even when the hunt inside it stopped early, so name that here.
+      return actual.coordinator?.completeness === 'incomplete_retryable'
+        ? pass('all stages ran in order; the hunt stopped incomplete_retryable')
+        : pass('all stages ran in order');
     },
     'no hunted reports'
   );
 
 export const scoreHitConsistency = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore =>
-  reportScores(
+  verdictScores(
     expected,
     artifacts,
     (report, actual) => {
@@ -273,7 +325,7 @@ export const scoreTier1Status = (expected: HuntExpected, artifacts: HuntArtifact
   );
 
 export const scoreTier2Execution = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore =>
-  reportScores(
+  verdictScores(
     expected,
     artifacts,
     (report, actual) => {
@@ -288,7 +340,7 @@ export const scoreTier2Execution = (expected: HuntExpected, artifacts: HuntArtif
   );
 
 export const scoreSseAttachment = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore =>
-  reportScores(
+  verdictScores(
     expected,
     artifacts,
     (report, actual) => {
@@ -353,8 +405,10 @@ export const scoreEvidenceHonesty = (expected: HuntExpected, artifacts: HuntArti
         typeof actual.coordinator?.completeness === 'string'
           ? actual.coordinator.completeness
           : 'absent';
+      // A deferred verdict must leave the report unstamped whatever the row pins, so it is
+      // scored by the write rule rather than skipped.
       const want =
-        report.evidenceWritten === 'iff_completed_successfully'
+        report.evidenceWritten === 'iff_completed_successfully' || deferredVerdict(expected, actual)
           ? stampExpected
           : report.evidenceWritten;
       const context = `coordinator ${completeness}, hunt ${actual.hunt?.status}, outcome ${actual.outcome}`;
@@ -369,7 +423,7 @@ export const scoreProposalPresence = (
   expected: HuntExpected,
   artifacts: HuntArtifacts
 ): CodeScore =>
-  reportScores(
+  verdictScores(
     expected,
     artifacts,
     (report, actual) => {
@@ -405,7 +459,7 @@ export const scoreInvestigationStatus = (
   expected: HuntExpected,
   artifacts: HuntArtifacts
 ): CodeScore =>
-  reportScores(
+  verdictScores(
     expected,
     artifacts,
     (report, actual) => {
