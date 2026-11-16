@@ -129,7 +129,13 @@ describe('IndexSelectorModal', () => {
     fireEvent.click(screen.getByText('Update privileged users'));
 
     waitFor(() => {
-      expect(mockUpdatePrivMonMonitoredIndices).toHaveBeenCalledWith('edit-id', 'index1');
+      expect(mockUpdatePrivMonMonitoredIndices).toHaveBeenCalledWith('edit-id', 'index1', {
+        child: {
+          type: 'security_solution',
+          name: 'entity_analytics:privileged_user_monitoring',
+          id: 'pum_monitored_indices_update',
+        },
+      });
       expect(onImportMock).toHaveBeenCalledWith(0);
     });
   });

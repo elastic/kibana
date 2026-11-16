@@ -11,6 +11,10 @@ import { useQueryClient } from '@kbn/react-query';
 import { parse } from 'papaparse';
 import { useFormatBytes } from '../../../../../common/components/formatted_bytes';
 import { useEntityAnalyticsRoutes } from '../../../../api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
 import { validateFile } from './validations';
 import { REQUIRED_HEADERS } from './constants';
 import type { CsvUploadStatus, ValidatedFile, UploadWatchlistCsvResponse } from './types';
@@ -28,6 +32,11 @@ interface UseWatchlistCsvUploadReturn {
   onUpload: () => void;
   onReset: () => void;
 }
+
+const WATCHLIST_CSV_UPLOAD_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.WATCHLISTS,
+  'watchlist_csv_upload'
+);
 
 export const useWatchlistCsvUpload = ({
   watchlistId,
@@ -153,7 +162,11 @@ export const useWatchlistCsvUpload = ({
     setError(undefined);
 
     try {
-      const result = await uploadWatchlistCsv(watchlistId, validatedFile.file);
+      const result = await uploadWatchlistCsv(
+        watchlistId,
+        validatedFile.file,
+        WATCHLIST_CSV_UPLOAD_CONTEXT
+      );
       await queryClient.invalidateQueries({ queryKey: ['watchlists-management-table'] });
       setUploadResponse(result);
       setStatus('success');

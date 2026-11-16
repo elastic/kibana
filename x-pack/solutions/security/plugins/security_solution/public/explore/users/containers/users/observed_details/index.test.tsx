@@ -81,6 +81,24 @@ describe('useUserDetails', () => {
     );
   });
 
+  it('labels the search with the execution context the caller passes', () => {
+    const executionContext = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:entity_details_flyout',
+        id: 'user_observed_details',
+      },
+    };
+
+    renderHook(() => useObservedUserDetails({ ...defaultProps, executionContext }), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({ executionContext })
+    );
+  });
+
   it('does not run search when skip = true', () => {
     const props = {
       ...defaultProps,

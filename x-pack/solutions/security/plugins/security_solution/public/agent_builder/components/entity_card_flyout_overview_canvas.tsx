@@ -78,6 +78,10 @@ import {
 import { useEntityAnalyticsAgentNavigation } from '../attachment_types/entity_analytics_agent_navigation_context';
 import type { RiskScoreState } from '../../entity_analytics/api/hooks/use_risk_score';
 import { entityAttachmentQueryClient } from '../attachment_types/entity_attachment/query_client';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../common/utils/execution_context';
 
 const AGENT_BUILDER_ENTITY_CARD_SCOPE = 'agent-builder-entity-card';
 
@@ -89,6 +93,59 @@ const AGENT_BUILDER_ENTITY_CARD_SCOPE = 'agent-builder-entity-card';
 const AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID = `agentBuilder${HOST_PANEL_RISK_SCORE_QUERY_ID}`;
 const AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID = `agentBuilder${USER_PANEL_RISK_SCORE_QUERY_ID}`;
 const AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID = `agentBuilder${SERVICE_PANEL_RISK_SCORE_QUERY_ID}`;
+
+/**
+ * The Preview canvas renders the entity flyout overview outside the flyout, so its requests are
+ * labelled with the flyout page and an `agent_builder_` prefix.
+ */
+const AGENT_BUILDER_HOST_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'agent_builder_host_entity_from_store'
+);
+const AGENT_BUILDER_HOST_RISK_SCORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'agent_builder_host_risk_score'
+);
+const AGENT_BUILDER_HOST_RISK_SCORES_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'agent_builder_host_risk_scores'
+);
+const AGENT_BUILDER_HOST_OBSERVED_DETAILS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'agent_builder_host_observed_details'
+);
+const AGENT_BUILDER_USER_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'agent_builder_user_entity_from_store'
+);
+const AGENT_BUILDER_USER_RISK_SCORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'agent_builder_user_risk_score'
+);
+const AGENT_BUILDER_USER_RISK_SCORES_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'agent_builder_user_risk_scores'
+);
+const AGENT_BUILDER_USER_OBSERVED_DETAILS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'agent_builder_user_observed_details'
+);
+const AGENT_BUILDER_USER_MANAGED_DETAILS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'agent_builder_user_managed_details'
+);
+const AGENT_BUILDER_SERVICE_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'agent_builder_service_entity_from_store'
+);
+const AGENT_BUILDER_SERVICE_RISK_SCORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'agent_builder_service_risk_score'
+);
+const AGENT_BUILDER_SERVICE_RISK_SCORES_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'agent_builder_service_risk_scores'
+);
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
@@ -216,6 +273,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     identityFields: hostStoreIdentityFields,
     entityType: 'host',
     skip: isInitializing,
+    executionContext: AGENT_BUILDER_HOST_ENTITY_FROM_STORE_CONTEXT,
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -234,7 +292,12 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     [hostName]
   );
 
-  const observedHost = useObservedHost(hostName, scopeId, entityFromStoreResult);
+  const observedHost = useObservedHost(
+    hostName,
+    scopeId,
+    entityFromStoreResult,
+    AGENT_BUILDER_HOST_OBSERVED_DETAILS_CONTEXT
+  );
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.host,
@@ -242,6 +305,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: !!observedHost?.entityRecord,
+    executionContext: AGENT_BUILDER_HOST_RISK_SCORE_CONTEXT,
   });
 
   const { inspect, refetch, loading } = riskScoreState;
@@ -257,6 +321,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
       entityFromStoreResult,
       riskScoreState,
       onRecalculation,
+      executionContext: AGENT_BUILDER_HOST_RISK_SCORES_CONTEXT,
     });
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
@@ -471,6 +536,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     identityFields: userStoreIdentityFields,
     entityType: 'user',
     skip: isInitializing,
+    executionContext: AGENT_BUILDER_USER_ENTITY_FROM_STORE_CONTEXT,
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -488,7 +554,12 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
-  const observedUser = useObservedUser(userName, scopeId, entityFromStoreResult);
+  const observedUser = useObservedUser(
+    userName,
+    scopeId,
+    entityFromStoreResult,
+    AGENT_BUILDER_USER_OBSERVED_DETAILS_CONTEXT
+  );
 
   const panelDisplayEntityId = observedUser.entityRecord?.entity?.id;
 
@@ -498,10 +569,13 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: !!observedUser?.entityRecord,
+    executionContext: AGENT_BUILDER_USER_RISK_SCORE_CONTEXT,
   });
 
   const { inspect, loading } = riskScoreState;
-  const managedUser = useManagedUser();
+  const managedUser = useManagedUser({
+    executionContext: AGENT_BUILDER_USER_MANAGED_DETAILS_CONTEXT,
+  });
 
   const onRecalculation = useCallback(() => entityAttachmentQueryClient.invalidateQueries(), []);
 
@@ -514,6 +588,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
       entityFromStoreResult,
       riskScoreState,
       onRecalculation,
+      executionContext: AGENT_BUILDER_USER_RISK_SCORES_CONTEXT,
     });
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
@@ -723,6 +798,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     identityFields: serviceStoreIdentityFields,
     entityType: 'service',
     skip: isInitializing,
+    executionContext: AGENT_BUILDER_SERVICE_ENTITY_FROM_STORE_CONTEXT,
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -750,6 +826,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: !!observedService?.entityRecord,
+    executionContext: AGENT_BUILDER_SERVICE_RISK_SCORE_CONTEXT,
   });
 
   const { inspect, refetch, loading } = riskScoreState;
@@ -765,6 +842,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
       entityFromStoreResult,
       riskScoreState,
       onRecalculation,
+      executionContext: AGENT_BUILDER_SERVICE_RISK_SCORES_CONTEXT,
     });
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {

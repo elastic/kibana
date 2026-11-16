@@ -36,6 +36,16 @@ jest.mock('../../../common/lib/kibana', () => ({
 
 const mockOnSuccess = jest.fn();
 
+const UPDATE_OPTIONS = {
+  context: {
+    child: {
+      type: 'security_solution',
+      name: 'entity_analytics:asset_criticality',
+      id: 'asset_criticality_update',
+    },
+  },
+};
+
 const hostRecord: Entity = {
   entity: { id: 'host-123' },
   asset: { criticality: 'high_impact' },
@@ -67,7 +77,8 @@ describe('useUpdateAssetCriticality', () => {
             asset: { criticality: 'high_impact' },
           },
           force: true,
-        })
+        }),
+        UPDATE_OPTIONS
       );
       expect(mockOnSuccess).toHaveBeenCalledTimes(1);
     });
@@ -153,7 +164,8 @@ describe('useUpdateAssetCriticality', () => {
             entity: { id: 'host-456' },
             asset: { criticality: null },
           },
-        })
+        }),
+        UPDATE_OPTIONS
       );
       expect(mockOnSuccess).toHaveBeenCalledTimes(1);
     });
@@ -184,7 +196,8 @@ describe('useUpdateAssetCriticality', () => {
             asset: { criticality: 'high_impact' },
           },
           force: true,
-        })
+        }),
+        UPDATE_OPTIONS
       );
       expect(mockOnSuccess).toHaveBeenCalledTimes(1);
     });
@@ -203,7 +216,8 @@ describe('useUpdateAssetCriticality', () => {
         mockHttp,
         expect.objectContaining({
           body: expect.objectContaining({ asset: { criticality: null } }),
-        })
+        }),
+        UPDATE_OPTIONS
       );
       expect(mockOnSuccess).toHaveBeenCalledTimes(1);
     });

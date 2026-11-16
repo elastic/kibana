@@ -11,6 +11,10 @@ import React, { useCallback, useReducer } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../../common/lib/telemetry';
 import { useEntityAnalyticsRoutes } from '../../../../api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
 import { INITIAL_STATE, reducer } from './reducer';
 import { useFileValidation, useNavigationSteps } from './hooks';
 import type { OnCompleteParams } from './types';
@@ -18,6 +22,11 @@ import { isErrorStep, isFilePickerStep, isValidationStep } from './helpers';
 import { PrivilegedUserMonitoringFilePickerStep } from './components/file_picker_step';
 import { PrivilegedUserMonitoringValidationStep } from './components/validation_step';
 import { PrivilegedUserMonitoringErrorStep } from './components/error_step';
+
+const PUM_USERS_CSV_UPLOAD_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pum_users_csv_upload'
+);
 
 interface PrivilegedUsersFileUploaderProps {
   onFileUploaded: (userCount: number) => void;
@@ -113,7 +122,8 @@ export const PrivilegedUsersFileUploader: React.FC<PrivilegedUsersFileUploaderPr
       try {
         const result = await uploadPrivilegedUserMonitoringFile(
           state.validatedFile.validLines.text,
-          state.validatedFile.name
+          state.validatedFile.name,
+          PUM_USERS_CSV_UPLOAD_CONTEXT
         );
 
         if (result.stats.failedOperations > 0) {

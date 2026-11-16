@@ -21,6 +21,18 @@ const WATCHLIST_UPDATE_CONTEXT = buildExecutionContext(
   EA_EXECUTION_CONTEXT_NAMES.WATCHLISTS,
   'watchlist_update'
 );
+const WATCHLIST_ENTITY_SOURCE_UPDATE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.WATCHLISTS,
+  'watchlist_entity_source_update'
+);
+const WATCHLIST_ENTITY_SOURCE_CREATE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.WATCHLISTS,
+  'watchlist_entity_source_create'
+);
+const WATCHLIST_ENTITY_SOURCE_DELETE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.WATCHLISTS,
+  'watchlist_entity_source_delete'
+);
 
 export interface UseUpdateWatchlistOptions {
   watchlistId?: string;
@@ -77,22 +89,31 @@ export const useUpdateWatchlist = ({
 
           if (sameTypeId) {
             // Same type exists → update in place
-            await updateWatchlistEntitySource({
-              watchlistId,
-              entitySourceId: sameTypeId,
-              body: sourceBody,
-            });
+            await updateWatchlistEntitySource(
+              {
+                watchlistId,
+                entitySourceId: sameTypeId,
+                body: sourceBody,
+              },
+              WATCHLIST_ENTITY_SOURCE_UPDATE_CONTEXT
+            );
           } else {
             // Type changed → delete old source first
             if (otherTypeId) {
-              await deleteWatchlistEntitySource({ watchlistId, entitySourceId: otherTypeId });
+              await deleteWatchlistEntitySource(
+                { watchlistId, entitySourceId: otherTypeId },
+                WATCHLIST_ENTITY_SOURCE_DELETE_CONTEXT
+              );
               deletedIds.add(otherTypeId);
             }
             // Create new source
-            await createWatchlistEntitySource({
-              watchlistId,
-              body: { type: sourceType, ...sourceBody },
-            });
+            await createWatchlistEntitySource(
+              {
+                watchlistId,
+                body: { type: sourceType, ...sourceBody },
+              },
+              WATCHLIST_ENTITY_SOURCE_CREATE_CONTEXT
+            );
           }
         }
       }
@@ -104,7 +125,10 @@ export const useUpdateWatchlist = ({
         const processedTypes = new Set<string>(watchlist.entitySources.map((s) => s.type));
         for (const [type, id] of Object.entries(ruleBasedSourceIds)) {
           if (id && !deletedIds.has(id) && !processedTypes.has(type)) {
-            await deleteWatchlistEntitySource({ watchlistId, entitySourceId: id });
+            await deleteWatchlistEntitySource(
+              { watchlistId, entitySourceId: id },
+              WATCHLIST_ENTITY_SOURCE_DELETE_CONTEXT
+            );
           }
         }
       }

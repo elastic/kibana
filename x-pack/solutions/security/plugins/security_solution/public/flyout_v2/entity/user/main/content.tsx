@@ -36,6 +36,15 @@ import {
   EMPTY_ANOMALY_OVERVIEW,
 } from '../../../../entity_analytics/components/anomalies/anomalies_section';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+
+const USER_ANOMALY_OVERVIEW_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'user_anomaly_overview'
+);
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -160,6 +169,7 @@ export const Content = ({
     from: flyoutTimeRangeMs?.from,
     to: flyoutTimeRangeMs?.to,
     enabled: loadAnomalies,
+    executionContext: USER_ANOMALY_OVERVIEW_CONTEXT,
   });
 
   const userName =

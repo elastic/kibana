@@ -52,6 +52,13 @@ jest.mock('../../../../common/components/query_bar', () => ({
 
 const WATCHLIST_ID = 'watchlist-1';
 const SOURCE_ID = 'source-1';
+const REAUTHORIZE_CONTEXT = {
+  child: {
+    type: 'security_solution',
+    name: 'entity_analytics:watchlists',
+    id: 'watchlist_entity_source_reauthorize',
+  },
+};
 
 const MISSING_API_KEY_TITLE = 'Sync paused — re-authorization required';
 const MISSING_API_KEY_DESCRIPTION =
@@ -150,11 +157,14 @@ describe('RuleBasedSourceInput — index source API key', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Re-authorize' }));
 
       await waitFor(() => expect(mockUpdateWatchlistEntitySource).toHaveBeenCalledTimes(1));
-      expect(mockUpdateWatchlistEntitySource).toHaveBeenCalledWith({
-        watchlistId: WATCHLIST_ID,
-        entitySourceId: SOURCE_ID,
-        body: { type: 'index' },
-      });
+      expect(mockUpdateWatchlistEntitySource).toHaveBeenCalledWith(
+        {
+          watchlistId: WATCHLIST_ID,
+          entitySourceId: SOURCE_ID,
+          body: { type: 'index' },
+        },
+        REAUTHORIZE_CONTEXT
+      );
       expect(mockAddError).not.toHaveBeenCalled();
     });
   });
@@ -190,11 +200,14 @@ describe('RuleBasedSourceInput — index source API key', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Re-authorize' }));
 
     await waitFor(() => expect(screen.queryByText(MISSING_API_KEY_TITLE)).not.toBeInTheDocument());
-    expect(mockUpdateWatchlistEntitySource).toHaveBeenCalledWith({
-      watchlistId: WATCHLIST_ID,
-      entitySourceId: SOURCE_ID,
-      body: { type: 'index' },
-    });
+    expect(mockUpdateWatchlistEntitySource).toHaveBeenCalledWith(
+      {
+        watchlistId: WATCHLIST_ID,
+        entitySourceId: SOURCE_ID,
+        body: { type: 'index' },
+      },
+      REAUTHORIZE_CONTEXT
+    );
     expect(mockListWatchlistEntitySources).toHaveBeenCalledTimes(2);
     expect(mockListWatchlistEntitySources).toHaveBeenLastCalledWith(
       expect.objectContaining({ watchlistId: WATCHLIST_ID })

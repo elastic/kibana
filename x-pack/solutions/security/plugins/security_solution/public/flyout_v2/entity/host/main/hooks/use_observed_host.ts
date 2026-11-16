@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import deepmerge from 'deepmerge';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import type { inputsModel } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
@@ -42,10 +43,15 @@ export type ObservedHostResult = Omit<ObservedEntityData<HostItem>, 'anomalies'>
   refetchObservedDetails?: inputsModel.Refetch;
 };
 
+/**
+ * `executionContext` labels the observed-host search with the calling surface. When omitted, the
+ * search keeps the hosts page context that `useHostDetails` applies by default.
+ */
 export const useObservedHost = (
   hostName: string,
   scopeId: string,
-  entityFromStore?: EntityFromStoreResult<HostItem> | null
+  entityFromStore?: EntityFromStoreResult<HostItem> | null,
+  executionContext?: KibanaExecutionContext
 ): ObservedHostResult => {
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
@@ -84,6 +90,7 @@ export const useObservedHost = (
       id: HOST_PANEL_RISK_SCORE_QUERY_ID,
       skip: isInitializing,
       startDate: from,
+      executionContext,
     });
 
   useQueryInspector({

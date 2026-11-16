@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import deepmerge from 'deepmerge';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { type inputsModel, inputsSelectors } from '../../../../../common/store';
 import { useObservedUserDetails } from '../../../../../explore/users/containers/users/observed_details';
@@ -41,10 +42,15 @@ export type ObservedUserResult = Omit<ObservedEntityData<UserItem>, 'anomalies'>
   refetchObservedDetails?: inputsModel.Refetch;
 };
 
+/**
+ * `executionContext` labels the observed-user search with the calling surface. When omitted, the
+ * search keeps the users page context that `useObservedUserDetails` applies by default.
+ */
 export const useObservedUser = (
   userName: string,
   scopeId: string,
-  entityFromStore?: EntityFromStoreResult<UserItem> | null
+  entityFromStore?: EntityFromStoreResult<UserItem> | null,
+  executionContext?: KibanaExecutionContext
 ): ObservedUserResult => {
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
@@ -83,6 +89,7 @@ export const useObservedUser = (
       indexNames: indexPatterns,
       id: USER_PANEL_RISK_SCORE_QUERY_ID,
       skip: isInitializing,
+      executionContext,
     });
 
   useQueryInspector({

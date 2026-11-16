@@ -141,6 +141,15 @@ import {
   type SignalCardData,
   type SignalCardId,
 } from '../components/home/needs_attention_tiles/data';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../common/utils/execution_context';
+
+const WATCHLISTS_LIST_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'watchlists_list'
+);
 
 const GROUP_BY_SETTINGS = { hideCustomFieldOption: false };
 
@@ -642,7 +651,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     [esFilter, searchOverrides]
   );
 
-  const { data: watchlistsData, error: watchlistsError } = useGetWatchlists();
+  const { data: watchlistsData, error: watchlistsError } = useGetWatchlists({
+    executionContext: WATCHLISTS_LIST_CONTEXT,
+  });
   useErrorToast(
     i18n.translate('xpack.securitySolution.entityAnalytics.home.watchlists.queryError', {
       defaultMessage: 'There was an error loading watchlists',

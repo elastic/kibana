@@ -88,6 +88,15 @@ import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout/entity_detail
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 import { euidDslFilterToPageFilters } from '../../../helpers';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+
+const HOST_DETAILS_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,
+  'host_details_entity_from_store'
+);
 
 const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);
@@ -212,6 +221,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     identityFields: hostStoreIdentityFields,
     entityType: 'host',
     skip: !entityStoreV2Enabled || isInitializing,
+    executionContext: HOST_DETAILS_ENTITY_FROM_STORE_CONTEXT,
   });
 
   const euidApi = useEntityStoreEuidApi();

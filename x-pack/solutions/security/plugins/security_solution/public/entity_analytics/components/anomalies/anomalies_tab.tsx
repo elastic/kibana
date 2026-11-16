@@ -74,6 +74,19 @@ import { AnomaliesBorderedVisPanel } from './anomalies_bordered_vis_panel';
 import { MitreAttackChainPlaceholder } from './mitre/components/mitre_attack_chain_placeholder';
 import { AnomaliesErrorPrompt } from './anomalies_error_prompt';
 import type { EntityToAttach } from '../../../cases/attachments/entity';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
+
+const ANOMALIES_TAB_OVERVIEW_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'anomalies_tab_overview'
+);
+const ANOMALIES_TAB_SUMMARY_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'anomalies_tab_summary'
+);
 
 const TIME_RANGE_PRESETS: TimeRangeBoundsOption[] = [
   { start: 'now-15m', end: 'now', label: ENTITY_ANOMALY_DATE_RANGE_LAST_15_MINUTES },
@@ -223,6 +236,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
     to: timeRangeMs.to,
     threatTactics: selectedTactic ? [selectedTactic] : undefined,
     scoreRanges,
+    executionContext: ANOMALIES_TAB_OVERVIEW_CONTEXT,
   });
 
   const uniqueTactics = useMemo(
@@ -249,6 +263,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
       page_size: tablePageSize,
       sort: [{ field: tableSortField, order: tableSortDirection }],
     },
+    executionContext: ANOMALIES_TAB_SUMMARY_CONTEXT,
   });
   useEffect(() => {
     if (!anomalyOverview.isFetching) {

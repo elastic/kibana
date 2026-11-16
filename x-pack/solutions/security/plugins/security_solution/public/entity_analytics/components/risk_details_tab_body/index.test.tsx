@@ -36,6 +36,16 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
     hasEngineBeenInstalled: true,
   };
 
+  const contributorsOptions = {
+    executionContext: {
+      child: {
+        type: 'security_solution',
+        name: `entity_analytics:explore-${riskEntity}s_page`,
+        id: `${riskEntity}_details_risk_contributors`,
+      },
+    },
+  };
+
   const mockUseEntityRiskScores = useEntityRiskScores as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
 
@@ -60,7 +70,11 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
         <RiskDetailsTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseEntityRiskScores).toHaveBeenCalledWith(riskEntity, 'entity-123');
+    expect(mockUseEntityRiskScores).toHaveBeenCalledWith(
+      riskEntity,
+      'entity-123',
+      contributorsOptions
+    );
   });
 
   it('skips the read when the contributors toggle is off', () => {
@@ -70,6 +84,10 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
         <RiskDetailsTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseEntityRiskScores).toHaveBeenCalledWith(riskEntity, undefined);
+    expect(mockUseEntityRiskScores).toHaveBeenCalledWith(
+      riskEntity,
+      undefined,
+      contributorsOptions
+    );
   });
 });

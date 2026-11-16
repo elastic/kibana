@@ -27,12 +27,21 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import { useUserLimitStatus } from '../../../hooks/use_privileged_monitoring_health';
 
 enum IndexMode {
   STANDARD = 'standard',
   LOOKUP = 'lookup',
 }
+
+const PUM_INDEX_CREATE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pum_index_create'
+);
 
 const INDEX_NAME_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.indexNameLabel',
@@ -88,6 +97,7 @@ export const CreateIndexModal = ({
       await createPrivMonImportIndex({
         name: trimmedName,
         mode: indexMode,
+        context: PUM_INDEX_CREATE_CONTEXT,
       });
       onCreate(trimmedName);
     } catch (err) {

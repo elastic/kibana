@@ -46,6 +46,14 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
   }),
 }));
 
+const calculationContext = {
+  child: {
+    type: 'security_solution',
+    name: 'entity_analytics:risk_score_management',
+    id: 'risk_score_entity_calculation',
+  },
+};
+
 const identifierType = EntityType.user;
 const identifier = 'test-user';
 const params = {
@@ -124,7 +132,8 @@ describe('useCalculateEntityRiskScore', () => {
         expect.objectContaining({
           identifier_type: identifierType,
           identifier,
-        })
+        }),
+        calculationContext
       )
     );
   });
@@ -158,7 +167,8 @@ describe('useCalculateEntityRiskScore', () => {
           identifier_type: identifierType,
           identifier,
           entity_id: entityId,
-        })
+        }),
+        calculationContext
       )
     );
   });

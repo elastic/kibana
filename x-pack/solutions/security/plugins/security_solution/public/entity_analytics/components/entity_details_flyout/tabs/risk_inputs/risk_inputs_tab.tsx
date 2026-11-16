@@ -106,6 +106,14 @@ const RISK_INPUTS_HISTORY_CONTEXT = buildExecutionContext(
   EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
   'risk_inputs_history'
 );
+const RISK_INPUTS_RISK_SCORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'risk_inputs_risk_score'
+);
+const RISK_INPUTS_RESOLUTION_RISK_SCORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'risk_inputs_resolution_risk_score'
+);
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
@@ -184,6 +192,7 @@ export const RiskInputsTab = <T extends EntityType>({
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: entityFilterQuery === undefined,
+    executionContext: RISK_INPUTS_RISK_SCORE_CONTEXT,
   });
 
   const { data: resolutionGroup, isInitialLoading: loadingResolutionGroup } = useResolutionGroup(
@@ -222,6 +231,7 @@ export const RiskInputsTab = <T extends EntityType>({
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: !shouldFetchResolutionRiskScore,
+    executionContext: RISK_INPUTS_RESOLUTION_RISK_SCORE_CONTEXT,
   });
 
   const entityRiskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;

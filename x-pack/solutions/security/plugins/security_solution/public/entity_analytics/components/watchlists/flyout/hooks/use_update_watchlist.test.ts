@@ -26,6 +26,10 @@ jest.mock('../../../../api/api', () => ({
   }),
 }));
 
+const watchlistsContext = (id: string) => ({
+  child: { type: 'security_solution', name: 'entity_analytics:watchlists', id },
+});
+
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 
@@ -129,17 +133,20 @@ describe('useUpdateWatchlist', () => {
       await result.current.mutateAsync();
     });
 
-    expect(mockCreateWatchlistEntitySource).toHaveBeenCalledWith({
-      watchlistId: 'wl-1',
-      body: {
-        type: 'store',
-        name: 'Test Watchlist-store',
-        queryRule: 'risk > 50',
-        indexPattern: undefined,
-        identifierField: undefined,
-        enabled: undefined,
+    expect(mockCreateWatchlistEntitySource).toHaveBeenCalledWith(
+      {
+        watchlistId: 'wl-1',
+        body: {
+          type: 'store',
+          name: 'Test Watchlist-store',
+          queryRule: 'risk > 50',
+          indexPattern: undefined,
+          identifierField: undefined,
+          enabled: undefined,
+        },
       },
-    });
+      watchlistsContext('watchlist_entity_source_create')
+    );
     expect(mockUpdateWatchlistEntitySource).not.toHaveBeenCalled();
   });
 
@@ -165,17 +172,20 @@ describe('useUpdateWatchlist', () => {
       await result.current.mutateAsync();
     });
 
-    expect(mockUpdateWatchlistEntitySource).toHaveBeenCalledWith({
-      watchlistId: 'wl-1',
-      entitySourceId: 'es-1',
-      body: {
-        name: 'Test Watchlist-store',
-        queryRule: 'risk > 75',
-        indexPattern: undefined,
-        identifierField: undefined,
-        enabled: undefined,
+    expect(mockUpdateWatchlistEntitySource).toHaveBeenCalledWith(
+      {
+        watchlistId: 'wl-1',
+        entitySourceId: 'es-1',
+        body: {
+          name: 'Test Watchlist-store',
+          queryRule: 'risk > 75',
+          indexPattern: undefined,
+          identifierField: undefined,
+          enabled: undefined,
+        },
       },
-    });
+      watchlistsContext('watchlist_entity_source_update')
+    );
     expect(mockCreateWatchlistEntitySource).not.toHaveBeenCalled();
   });
 
@@ -204,15 +214,16 @@ describe('useUpdateWatchlist', () => {
     });
 
     // Old store source should be deleted
-    expect(mockDeleteWatchlistEntitySource).toHaveBeenCalledWith({
-      watchlistId: 'wl-1',
-      entitySourceId: 'es-store-1',
-    });
+    expect(mockDeleteWatchlistEntitySource).toHaveBeenCalledWith(
+      { watchlistId: 'wl-1', entitySourceId: 'es-store-1' },
+      watchlistsContext('watchlist_entity_source_delete')
+    );
     // New index source should be created
     expect(mockCreateWatchlistEntitySource).toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.objectContaining({ type: 'index', indexPattern: 'logs-*' }),
-      })
+      }),
+      watchlistsContext('watchlist_entity_source_create')
     );
     expect(mockUpdateWatchlistEntitySource).not.toHaveBeenCalled();
   });
@@ -248,10 +259,10 @@ describe('useUpdateWatchlist', () => {
       await result.current.mutateAsync();
     });
 
-    expect(mockDeleteWatchlistEntitySource).toHaveBeenCalledWith({
-      watchlistId: 'wl-1',
-      entitySourceId: 'es-1',
-    });
+    expect(mockDeleteWatchlistEntitySource).toHaveBeenCalledWith(
+      { watchlistId: 'wl-1', entitySourceId: 'es-1' },
+      watchlistsContext('watchlist_entity_source_delete')
+    );
     expect(mockCreateWatchlistEntitySource).not.toHaveBeenCalled();
     expect(mockUpdateWatchlistEntitySource).not.toHaveBeenCalled();
   });

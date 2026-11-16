@@ -206,6 +206,26 @@ describe('<User />', () => {
     expect(getByTestId('observedEntity-accordion')).toBeInTheDocument();
   });
 
+  it('labels the entity store lookup with the user flyout execution context', () => {
+    render(
+      <TestProviders>
+        <User {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(mockedUseEntityFromStore).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:entity_details_flyout',
+            id: 'user_entity_from_store',
+          },
+        },
+      })
+    );
+  });
+
   it('does not render an expand-details navigation button (no v2 left panel yet)', () => {
     const { queryByTestId } = render(
       <TestProviders>

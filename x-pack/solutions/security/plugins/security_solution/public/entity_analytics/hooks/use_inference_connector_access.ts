@@ -8,6 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useQuery } from '@kbn/react-query';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import { INFERENCE_CONNECTOR_PRIVILEGES_INTERNAL_URL } from '../../../common/inference_connector/constants';
 import { API_VERSIONS } from '../../../common/constants';
@@ -38,9 +39,15 @@ const isInferenceApiConnector = (connector?: InferenceConnectorAccessConnector):
 export const useInferenceConnectorAccess = ({
   connectors,
   selectedConnectorId,
+  executionContext,
 }: {
   connectors?: InferenceConnectorAccessConnector[];
   selectedConnectorId: string;
+  /**
+   * Optional Kibana execution context forwarded to the privilege check so slow logs and APM traces
+   * can attribute the request to the calling page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }) => {
   const { http } = useKibana().services;
 
@@ -57,9 +64,10 @@ export const useInferenceConnectorAccess = ({
         {
           version: API_VERSIONS.internal.v1,
           method: 'GET',
+          context: executionContext,
         }
       ),
-    [http]
+    [http, executionContext]
   );
 
   const {

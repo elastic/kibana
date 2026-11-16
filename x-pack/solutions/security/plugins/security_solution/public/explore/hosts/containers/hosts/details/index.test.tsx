@@ -81,6 +81,24 @@ describe('useHostDetails', () => {
     );
   });
 
+  it('labels the search with the execution context the caller passes', () => {
+    const executionContext = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:entity_details_flyout',
+        id: 'host_observed_details',
+      },
+    };
+
+    renderHook(() => useHostDetails({ ...defaultProps, executionContext }), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({ executionContext })
+    );
+  });
+
   it('does not run search when skip = true', () => {
     const props = {
       ...defaultProps,

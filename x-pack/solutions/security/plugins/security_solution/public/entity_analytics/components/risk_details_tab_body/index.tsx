@@ -25,6 +25,19 @@ import { useEntityRiskScores } from '../../api/hooks/use_entity_risk_scores';
 import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 import { RiskScoresNoDataDetected } from '../risk_score_no_data_detected';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
+
+const HOST_DETAILS_RISK_CONTRIBUTORS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,
+  'host_details_risk_contributors'
+);
+const USER_DETAILS_RISK_CONTRIBUTORS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'user_details_risk_contributors'
+);
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme: { euiTheme } }) => euiTheme.size.l};
@@ -59,7 +72,13 @@ const RiskDetailsTabBodyComponent: React.FC<
   // `risk.inputs`, which the contributors panel needs. Passing `undefined` skips the query.
   const { base: entityStoreRiskScore } = useEntityRiskScores(
     riskEntity,
-    contributorsToggleStatus ? entityId : undefined
+    contributorsToggleStatus ? entityId : undefined,
+    {
+      executionContext:
+        riskEntity === EntityType.host
+          ? HOST_DETAILS_RISK_CONTRIBUTORS_CONTEXT
+          : USER_DETAILS_RISK_CONTRIBUTORS_CONTEXT,
+    }
   );
 
   const { data, loading, refetch, inspect, hasEngineBeenInstalled } = entityStoreRiskScore;

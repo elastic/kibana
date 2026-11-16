@@ -9,6 +9,23 @@ import { useMemo } from 'react';
 import { API_VERSIONS } from '../../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '../../../../../../common/api/entity_analytics';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
+
+const PAD_INSTALLATION_STATUS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pad_installation_status'
+);
+const PAD_INSTALL_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pad_install'
+);
+const PAD_ML_MODULE_SETUP_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pad_ml_module_setup'
+);
 
 const PRIVILEGED_ACCESS_DETECTION_INDEX_PATTERN =
   'logs-*,ml_okta_multiple_user_sessions_pad.all,ml_windows_privilege_type_pad.all';
@@ -23,6 +40,7 @@ export const usePrivilegedAccessDetectionRoutes = () => {
         {
           method: 'GET',
           version: API_VERSIONS.public.v1,
+          context: PAD_INSTALLATION_STATUS_CONTEXT,
         }
       );
     };
@@ -31,6 +49,7 @@ export const usePrivilegedAccessDetectionRoutes = () => {
       return http.fetch('/api/entity_analytics/privileged_user_monitoring/pad/install', {
         method: 'POST',
         version: API_VERSIONS.public.v1,
+        context: PAD_INSTALL_CONTEXT,
       });
     };
 
@@ -43,6 +62,7 @@ export const usePrivilegedAccessDetectionRoutes = () => {
           useDedicatedIndex: false,
           startDatafeed: false,
         }),
+        context: PAD_ML_MODULE_SETUP_CONTEXT,
       });
     };
 

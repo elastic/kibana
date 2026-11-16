@@ -7,6 +7,15 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useEntityAnalyticsRoutes } from '../../../../api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
+
+const WATCHLIST_INDICES_SEARCH_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.WATCHLISTS,
+  'watchlist_indices_search'
+);
 
 /**
  * Fetches index names (via cat indices, open and hidden) for watchlist index pattern selection.
@@ -17,7 +26,8 @@ export const useFetchWatchlistIndices = (query: string | undefined) => {
 
   return useQuery(
     ['GET', 'SEARCH_WATCHLIST_INDICES', query],
-    ({ signal }) => searchWatchlistIndices({ signal, query }),
+    ({ signal }) =>
+      searchWatchlistIndices({ signal, query, context: WATCHLIST_INDICES_SEARCH_CONTEXT }),
     {
       keepPreviousData: true,
       cacheTime: 0,

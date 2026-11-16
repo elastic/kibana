@@ -11,7 +11,20 @@ import type { CreateWatchlistRequestBodyInput } from '../../../../../../common/a
 import type { GetWatchlistResponse } from '../../../../../../common/api/entity_analytics/watchlists/management/get.gen';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { useEntityAnalyticsRoutes } from '../../../../api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
 import type { SourceType } from './rule_based_source_helpers';
+
+const WATCHLIST_GET_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.WATCHLISTS,
+  'watchlist_get'
+);
+const WATCHLIST_FORM_ENTITY_SOURCES_LIST_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.WATCHLISTS,
+  'watchlist_form_entity_sources_list'
+);
 
 export type WatchlistFormValues = CreateWatchlistRequestBodyInput;
 
@@ -51,14 +64,19 @@ export const useGetWatchlistFormData = (watchlistId?: string) => {
   const watchlistQuery = useQuery<GetWatchlistResponse>({
     queryKey: ['watchlist-details', watchlistId],
     enabled: Boolean(watchlistId),
-    queryFn: ({ signal }) => getWatchlist({ id: watchlistId as string, signal }),
+    queryFn: ({ signal }) =>
+      getWatchlist({ id: watchlistId as string, signal, context: WATCHLIST_GET_CONTEXT }),
   });
 
   const entitySourcesQuery = useQuery({
     queryKey: ['watchlist-entity-sources', watchlistId],
     enabled: Boolean(watchlistId),
     queryFn: ({ signal }) =>
-      listWatchlistEntitySources({ watchlistId: watchlistId as string, signal }),
+      listWatchlistEntitySources({
+        watchlistId: watchlistId as string,
+        signal,
+        context: WATCHLIST_FORM_ENTITY_SOURCES_LIST_CONTEXT,
+      }),
   });
 
   // For managed watchlists the sources may include integration sources.

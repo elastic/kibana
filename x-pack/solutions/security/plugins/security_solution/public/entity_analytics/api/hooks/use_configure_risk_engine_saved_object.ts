@@ -8,11 +8,20 @@
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
 import type { TaskManagerUnavailableResponse } from '../../../../common/api/entity_analytics/common';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
 import { useEntityAnalyticsRoutes } from '../api';
 import type {
   ConfigureRiskEngineSavedObjectRequestBody,
   ConfigureRiskEngineSavedObjectResponse,
 } from '../../../../common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
+
+const RISK_ENGINE_CONFIGURE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.RISK_SCORE_MANAGEMENT,
+  'risk_engine_configure'
+);
 
 interface ConfigureRiskEngineParams {
   includeClosedAlerts: boolean;
@@ -35,12 +44,15 @@ export const useConfigureSORiskEngineMutation = (
     { body: ConfigureRiskEngineSavedObjectResponse | TaskManagerUnavailableResponse },
     ConfigureRiskEngineParams
   >(async (params: ConfigureRiskEngineParams) => {
-    await updateSavedObjectConfiguration({
-      exclude_alert_statuses: params.includeClosedAlerts ? [] : ['closed'],
-      range: params.range,
-      enable_reset_to_zero: params.enableResetToZero,
-      filters: params.filters,
-    });
+    await updateSavedObjectConfiguration(
+      {
+        exclude_alert_statuses: params.includeClosedAlerts ? [] : ['closed'],
+        range: params.range,
+        enable_reset_to_zero: params.enableResetToZero,
+        filters: params.filters,
+      },
+      RISK_ENGINE_CONFIGURE_CONTEXT
+    );
     return { risk_engine_saved_object_configured: true };
   }, options);
 };

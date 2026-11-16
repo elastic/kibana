@@ -28,12 +28,21 @@ import {
 import { css } from '@emotion/react';
 import { useQuery } from '@kbn/react-query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import type { HuntingLead } from './types';
 import { fromApiLead } from './types';
 import { GeneratedOnLabel } from './generated_on_label';
 import * as i18n from './translations';
 import { renderTextWithEntity } from './shared_lead_components';
 import { MAX_RECENT_LEADS, THREAT_HUNTING_LEADS_SCOPE_ID } from './utils';
+
+const LEADS_FLYOUT_LIST_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.THREAT_HUNTING_LEADS,
+  'leads_flyout_list'
+);
 
 interface ThreatHuntingLeadsFlyoutProps {
   onClose: () => void;
@@ -61,6 +70,7 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
           sortField: 'priority',
           sortOrder: 'desc',
         },
+        context: LEADS_FLYOUT_LIST_CONTEXT,
       }),
   });
 

@@ -63,6 +63,10 @@ import { useObservedService } from './hooks/use_observed_service';
 import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from './constants';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 export interface ServiceProps {
   /** Display name from the source row / document (typically `service.name`). */
@@ -94,6 +98,19 @@ export interface ServiceProps {
    */
   graphEntryPoint?: GraphEntryPoint;
 }
+
+const SERVICE_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'service_entity_from_store'
+);
+const SERVICE_RISK_SCORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'service_risk_score'
+);
+const SERVICE_RISK_SCORES_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'service_risk_scores'
+);
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
@@ -161,6 +178,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
     identityFields: serviceStoreIdentityFields,
     entityType: 'service',
     skip: !entityStoreV2Enabled || isInitializing,
+    executionContext: SERVICE_ENTITY_FROM_STORE_CONTEXT,
   });
   const { aliasRecords, aliasCount } = entityFromStoreResult;
   const isGroupView = isEntityGroupView(aliasRecords);
@@ -190,6 +208,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: entityStoreV2Enabled,
+    executionContext: SERVICE_RISK_SCORE_CONTEXT,
   });
 
   const { inspect: inspectRiskScore, refetch, loading } = riskScoreState;
@@ -209,6 +228,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
       entityFromStoreResult,
       riskScoreState,
       isGroupView,
+      executionContext: SERVICE_RISK_SCORES_CONTEXT,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {

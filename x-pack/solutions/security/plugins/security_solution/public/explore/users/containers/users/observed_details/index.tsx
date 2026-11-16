@@ -8,6 +8,7 @@
 import { useEffect, useMemo } from 'react';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { isEmpty } from 'lodash';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { inputsModel } from '../../../../../common/store';
 import * as i18n from './translations';
 import type { InspectResponse } from '../../../../../types';
@@ -68,6 +69,11 @@ interface UseUserDetails {
   indexNames: string[];
   skip?: boolean;
   startDate: string;
+  /**
+   * Labels the search with the calling surface. Defaults to the users page context; callers that
+   * render user details elsewhere (e.g. the entity flyout) pass their own.
+   */
+  executionContext?: KibanaExecutionContext;
 }
 
 export const useObservedUserDetails = ({
@@ -81,6 +87,7 @@ export const useObservedUserDetails = ({
   id = OBSERVED_USER_QUERY_ID,
   skip = false,
   startDate,
+  executionContext = OBSERVED_USER_CONTEXT,
 }: UseUserDetails): [boolean, UserDetailsArgs] => {
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
@@ -139,7 +146,7 @@ export const useObservedUserDetails = ({
     },
     errorMessage: i18n.FAIL_USER_DETAILS,
     abort: shouldSkip,
-    executionContext: OBSERVED_USER_CONTEXT,
+    executionContext,
   });
 
   const userDetailsResponse = useMemo(
