@@ -94,7 +94,8 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
     align-items: center;
     box-sizing: border-box;
     inline-size: 100%;
-    padding: ${euiTheme.size.base};
+    /* Match GroupedAttachmentRow / other flyout cells: 12px vertical, 16px horizontal. */
+    padding: ${euiTheme.size.m} ${euiTheme.size.base};
     border: 0;
     background: transparent;
     color: inherit;
