@@ -260,6 +260,7 @@ export const updateVendorApi = async ({
     fixtures,
     trackFields,
     preferredOperations,
+    invalidSchemas: 'skip',
   });
   // Each generated input reports its own findings, which are often the same.
   const problems = new Set<string>();
@@ -323,8 +324,22 @@ export const updateVendorApi = async ({
       }),
     ])
   );
+  for (const { operation, location, message } of recording.invalidOperations) {
+    warnings.add(
+      `${operation} is left out of the mock, as its schema in the spec is invalid (${location}): ${message}`
+    );
+  }
   warnings.forEach((warning) => log.warning(warning));
 
+  // Operations the mock left out for their broken schemas, which their requests match instead.
+  const brokenOperationOf = (method: string, requestPath: string) =>
+    recording.invalidOperations.find(({ operation }) => {
+      const [brokenMethod, template] = operation.split(' ');
+      return (
+        brokenMethod.toLowerCase() === method.toLowerCase() &&
+        matchesPathTemplate(template, requestPath)
+      );
+    });
   const unmatched: Record<string, UnmatchedRequest[]> = {};
   for (const [action, requests] of Object.entries(recording.unmatched)) {
     for (const { method, path: requestPath } of requests) {
@@ -335,6 +350,14 @@ export const updateVendorApi = async ({
         if (!unmatched[action]?.includes(acknowledged)) {
           unmatched[action] = [...(unmatched[action] ?? []), acknowledged];
         }
+        continue;
+      }
+      const broken = brokenOperationOf(method, requestPath);
+      if (broken) {
+        addProblem(
+          `${action}: calls ${broken.operation}, whose schema in the spec is invalid (${broken.location}): ${broken.message}; correct the spec in ${OVERLAY}`,
+          action
+        );
       } else {
         const refreshHint = fetchAll ? '' : '; if it is new to the connector, rerun with --refresh';
         addProblem(

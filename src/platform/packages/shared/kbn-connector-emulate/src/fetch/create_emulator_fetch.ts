@@ -35,9 +35,9 @@ import type { GraphQLSpec } from '../graphql/graphql_protocol';
 import { createGraphQLProtocol, isGraphQLSpec, toEndpoint } from '../graphql/graphql_protocol';
 import type { McpSpec } from '../mcp/mcp_protocol';
 import { createMcpProtocol, isMcpSpec } from '../mcp/mcp_protocol';
-import type { ContractOperation, OpenApiDocument } from '../openapi';
+import type { ContractOperation, InvalidSchemaFailure, OpenApiDocument } from '../openapi';
 import { serverNamesHost } from '../openapi/names_host';
-import { loadContractOperations } from '../openapi';
+import { loadContractOperations, loadValidContractOperations } from '../openapi';
 import type { OperationMatch } from '../openapi/match_operation';
 import { createOperationMatcher } from '../openapi/match_operation';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
@@ -120,6 +120,13 @@ export interface ContractCall {
  */
 export type EmulatorSpec = OpenApiDocument | GraphQLSpec | McpSpec | SmithyModel;
 
+/**
+ * What to do with operations whose schemas have defects that break validation: fail to load
+ * (`throw`, the default), or leave them out and list them in `invalidOperations` (`skip`), as a
+ * recorder does so a broken operation no action calls doesn't stop the others.
+ */
+export type InvalidSchemasMode = 'throw' | 'skip';
+
 export interface EmulatorOptions extends PaginationOptions {
   /**
    * The vendor specs the connector targets, e.g. both API versions it calls. Named specs (such
@@ -164,6 +171,8 @@ export interface EmulatorOptions extends PaginationOptions {
    * OpenAPI operations, by source, method and path template, that win over equally specific ones
    * of other sources, e.g. the ones a recorder found before when two specs describe one path.
    */
+  /** What to do with operations whose schemas are broken; see {@link InvalidSchemasMode}. */
+  readonly invalidSchemas?: InvalidSchemasMode;
   readonly preferredOperations?: ReadonlyArray<{
     readonly source?: string;
     readonly method: string;
@@ -191,6 +200,8 @@ export interface Emulator {
   readonly operations: readonly EmulatorOperation[];
   /** Fixtures and recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
+  /** With `invalidSchemas: 'skip'`, the operations left out, as their schemas are broken. */
+  readonly invalidOperations: readonly InvalidSchemaFailure[];
   /**
    * Fixtures set while the emulator runs, e.g. for a test or an agent to pick a scenario. They
    * take precedence over `fixtures`, are checked against the spec when set (an undeclared error
@@ -264,14 +275,29 @@ const toNamedSpecs = (
 
 // Loading copies and normalizes the document, which takes seconds and gigabytes for specs such
 // as Microsoft Graph, so mocks created from the same document share its operations.
-const loadedSpecs = new WeakMap<OpenApiDocument, Map<string | undefined, ContractOperation[]>>();
+interface LoadedSpec {
+  readonly operations: ContractOperation[];
+  /** The operations left out, as their schemas have defects. */
+  readonly invalid: InvalidSchemaFailure[];
+}
 
-const loadSpec = (document: OpenApiDocument, source?: string): ContractOperation[] => {
-  const bySource = loadedSpecs.get(document) ?? new Map();
-  loadedSpecs.set(document, bySource);
-  const operations = bySource.get(source) ?? loadContractOperations(document, source);
-  bySource.set(source, operations);
-  return operations;
+const loadedSpecs = new WeakMap<OpenApiDocument, Map<string, LoadedSpec>>();
+
+const loadSpec = (
+  document: OpenApiDocument,
+  source: string | undefined,
+  invalidSchemas: InvalidSchemasMode
+): LoadedSpec => {
+  const loaded = loadedSpecs.get(document) ?? new Map<string, LoadedSpec>();
+  loadedSpecs.set(document, loaded);
+  const key = `${invalidSchemas} ${source ?? ''}`;
+  const spec =
+    loaded.get(key) ??
+    (invalidSchemas === 'skip'
+      ? loadValidContractOperations(document, source)
+      : { operations: loadContractOperations(document, source), invalid: [] });
+  loaded.set(key, spec);
+  return spec;
 };
 
 // Converted once per model, so that mocks created from it share the loaded operations too.
@@ -300,11 +326,19 @@ const toDocument = (spec: EmulatorSpec): OpenApiDocument | undefined => {
   return isSmithyModel(spec) ? toSmithyDocument(spec) : spec;
 };
 
-const loadSpecs = (specs: EmulatorOptions['specs']): ContractOperation[] =>
-  toNamedSpecs(specs).flatMap(([source, spec]) => {
+const loadSpecs = (
+  specs: EmulatorOptions['specs'],
+  invalidSchemas: InvalidSchemasMode
+): LoadedSpec => {
+  const loaded = toNamedSpecs(specs).flatMap(([source, spec]) => {
     const document = toDocument(spec);
-    return document ? loadSpec(document, source) : [];
+    return document ? [loadSpec(document, source, invalidSchemas)] : [];
   });
+  return {
+    operations: loaded.flatMap(({ operations }) => operations),
+    invalid: loaded.flatMap(({ invalid }) => invalid),
+  };
+};
 
 // AWS JSON RPC services, from Smithy models or from the documents converted from them.
 const loadAwsJsonServices = (specs: EmulatorOptions['specs']): AwsJsonService[] =>
@@ -379,6 +413,7 @@ export const createEmulatorFetch = ({
   onCall,
   capture,
   preferredOperations = [],
+  invalidSchemas = 'throw',
 }: EmulatorOptions): Emulator => {
   const captureOptions = capture === true ? {} : capture || undefined;
   if (captureOptions) {
@@ -386,7 +421,7 @@ export const createEmulatorFetch = ({
   }
   const maxCapturedCalls =
     captureOptions && (captureOptions.maxCalls ?? DEFAULT_MAX_CAPTURED_CALLS);
-  const operations = loadSpecs(specs);
+  const { operations, invalid: invalidOperations } = loadSpecs(specs, invalidSchemas);
   // The spec's API key parameters are redacted too, whatever their name.
   const captureExchange =
     captureOptions && createCaptureExchange(captureOptions, toCredentialNames(operations));
@@ -740,6 +775,7 @@ export const createEmulatorFetch = ({
     maxCapturedCalls,
     operations: listOperations(operations, loadedProtocols),
     rejectedResponses,
+    invalidOperations,
     runtimeFixtures: {
       prepare: engine.runtime.prepare,
       set: engine.runtime.set,

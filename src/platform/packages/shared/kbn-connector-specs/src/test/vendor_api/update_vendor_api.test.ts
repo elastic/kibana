@@ -382,6 +382,30 @@ actions:
     expect(warnings.filter((warning) => warning.includes('auth type'))).toEqual([]);
   });
 
+  it('records past operations whose schemas are broken, reporting the actions that call them', async () => {
+    const broken = (yaml: string) =>
+      yaml.replace(
+        `schema: { type: array, items: { type: string } }`,
+        `schema: { $ref: '#/components/schemas/Void' }`
+      );
+    documents[SPEC_URL] = broken(specYaml('1.0'));
+
+    expect((await update({ sources: { main: SPEC_URL } })).problems).toEqual([]);
+    expect(warnings).toContainEqual(
+      expect.stringMatching(
+        /^GET \/tags is left out of the mock, as its schema in the spec is invalid/
+      )
+    );
+    expect((await readJson('manifest.json')).operations).toEqual({ listItems: [itemsOperation] });
+
+    const { problems } = await update({ connector: withTags, refresh: true });
+    expect(problems).toEqual([
+      expect.stringMatching(
+        /^listTags: calls GET \/tags, whose schema in the spec is invalid \(response 200 application\/json\): .*Void.*; correct the spec in overlay\.yaml$/
+      ),
+    ]);
+  });
+
   it('reports list-like operations it cannot propose pagination for', async () => {
     const { problems } = await update({ connector: withTags, sources: { main: SPEC_URL } });
 

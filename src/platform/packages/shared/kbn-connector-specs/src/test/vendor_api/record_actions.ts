@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContractCall, OpenApiDocument, Violation } from '@kbn/connector-emulate';
+import type { ContractCall, Emulator, OpenApiDocument, Violation } from '@kbn/connector-emulate';
 import type { ActionDefinition, ConnectorSpec } from '../../connector_spec';
 import type { ContractContext, ContractContextOptions } from '../create_contract_context';
 import { createContractContext } from '../create_contract_context';
@@ -91,6 +91,11 @@ export interface ActionsRecording {
   /** Per action, the requests that matched no operation, sorted by path and method. */
   readonly unmatched: Record<string, RequestedPath[]>;
   readonly findings: RecordingFinding[];
+  /**
+   * With `invalidSchemas: 'skip'`: the operations the mock left out, as their schemas are broken,
+   * so requests to them match nothing.
+   */
+  readonly invalidOperations: Emulator['invalidOperations'];
   /**
    * With `trackFields`: per action, what it did with the responses of each operation, by
    * `source METHOD /path`.
@@ -238,6 +243,7 @@ export const recordActions = async ({
   const operations: ActionsRecording['operations'] = {};
   const unmatched: ActionsRecording['unmatched'] = {};
   const findings: RecordingFinding[] = [];
+  const invalidOperations = new Map<string, Emulator['invalidOperations'][number]>();
   const brokenAuthTypes = new Map<string, string>();
 
   for (const action of Object.keys(connector.actions).sort()) {
@@ -277,6 +283,9 @@ export const recordActions = async ({
           break;
         }
         let { mock } = context;
+        for (const failure of mock.invalidOperations) {
+          invalidOperations.set(`${failure.operation} (${failure.location})`, failure);
+        }
         try {
           await context.runAction(action, input);
           worked = true;
@@ -406,6 +415,7 @@ export const recordActions = async ({
   return {
     operations,
     unmatched,
+    invalidOperations: [...invalidOperations.values()],
     ...(trackFields
       ? {
           fieldUse: Object.fromEntries(
