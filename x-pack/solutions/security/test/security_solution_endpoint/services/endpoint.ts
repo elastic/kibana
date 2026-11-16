@@ -186,7 +186,9 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
             undefined,
             undefined,
             undefined,
-            this.log
+            this.log,
+            undefined,
+            waitUntilTransformed
           );
 
       if (waitUntilTransformed) {
