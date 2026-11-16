@@ -29,10 +29,7 @@ interface VersionConfig {
   validate: false | { request: { body: { validate: (value: unknown) => unknown } } };
 }
 
-/**
- * Registers one route against a mock router and returns what a route test needs: the route and
- * version config, and the handler (already wrapped by the licence gate).
- */
+/** Registers one route on a mock router; the returned handler is already licence-gated. */
 export const setupRoute = (
   register: (dependencies: RouteDependencies) => void,
   method: Method,

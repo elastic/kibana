@@ -49,9 +49,8 @@ const refuse = (before: string, key: string, code: RuntimePinRefusalCode): Runti
 
 /**
  * Sets the three osquerybeat runtime keys to `process` in an `agent_internal` YAML document and
- * touches nothing else (comments, ordering and unrelated keys survive). Plan and apply share this
- * function, so a plan is exactly what apply would write. A document or path that cannot be edited
- * is refused with the offending key instead of being rewritten.
+ * touches nothing else (comments, ordering and unrelated keys survive). A document or path that
+ * cannot be edited is refused with the offending key instead of being rewritten.
  */
 export const mergeRuntimePin = (before: string | undefined | null): RuntimePinMerge => {
   const source = before ?? '';
