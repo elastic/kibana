@@ -241,7 +241,7 @@ export const MetricItemIcon = ({
               iconType="link"
               target="_blank"
               aria-label={i18n.translate(
-                'xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl',
+                'xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrlWithValue',
                 {
                   defaultMessage: 'Monitor url: {url}',
                   values: { url: monitor.urls },
