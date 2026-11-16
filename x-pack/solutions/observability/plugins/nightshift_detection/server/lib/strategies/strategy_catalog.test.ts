@@ -8,7 +8,7 @@
 import { Container } from 'inversify';
 import { TEST_STRATEGY_ID, createTestStrategy } from '../../test_utils/test_strategy';
 import { DuplicateStrategyError } from './duplicate_strategy_error';
-import { DetectionStrategy } from './tokens';
+import { DetectionStrategy } from './detection_strategy';
 import { StrategyCatalog } from './strategy_catalog';
 
 function createCatalog(strategies: Array<ReturnType<typeof createTestStrategy>>): StrategyCatalog {

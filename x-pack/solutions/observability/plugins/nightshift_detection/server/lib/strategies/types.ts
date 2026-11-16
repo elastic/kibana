@@ -13,10 +13,13 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 export interface DetectionStrategyDescriptor {
   /** Stable id, unique in the catalog. Stamped on every signal the strategy produces. */
   id: string;
+  /**
+   * Bump it when the strategy's logic changes what a reading means. The engine stamps it on every
+   * signal, so history written by an older version stays distinguishable.
+   */
+  version: number;
   name: string;
   description: string;
-  /** Where the strategy's readings come from: alerting rules or direct queries over the data. */
-  source: 'rules' | 'process';
   /** The strategy runs once per this many minutes. */
   cadence_minutes: number;
   /** Minutes to wait after a bucket ends before reading it, so late data has arrived. */
@@ -59,7 +62,7 @@ export interface DetectionSignalReading {
 }
 
 /** Reads back the readings a strategy wrote before, so a generator can compare with its history. */
-export interface ISignalHistoryReader {
+export interface SignalHistoryReader {
   /**
    * Readings of the calling strategy only, for the given series, whose bucket starts in
    * `[from, to)` (epoch milliseconds), grouped by fingerprint. A fingerprint without readings is
@@ -82,7 +85,7 @@ export interface GeneratorContext {
   /** Reads customer data as the space's detection service account. */
   esClient: ElasticsearchClient;
   /** The strategy's own history. */
-  history: ISignalHistoryReader;
+  history: SignalHistoryReader;
   /** Aborted when the run is out of time or cancelled; long queries should stop on it. */
   abortSignal: AbortSignal;
   logger: Logger;
@@ -99,15 +102,13 @@ export interface GenerateResult {
 }
 
 /** Produces the readings of a detection strategy. */
-export interface IDetectionSignalGenerator {
+export interface DetectionSignalGenerator {
   /** Reads the window and reports what it found. */
   generate(context: GeneratorContext): Promise<GenerateResult>;
 }
 
 /** An alerting rule the engine wants to exist for a strategy. */
 export interface DesiredRule {
-  /** Derived from the rule's definition, so an unchanged definition keeps its id. */
-  rule_id: string;
   source_id: string;
   data: CreateRuleData;
   /** What the generator needs to read the rule's rows back, such as the condition used. */
@@ -121,18 +122,7 @@ export interface DesiredRules {
 }
 
 /** What building a strategy's rules needs. */
-export type TDesiredRulesContext = Pick<
+export type DesiredRulesContext = Pick<
   GeneratorContext,
   'spaceId' | 'sources' | 'esClient' | 'abortSignal'
 >;
-
-/**
- * One way of finding that something may be wrong. A strategy produces detection signals and
- * never decides whether a signal becomes a significant event.
- */
-export interface IDetectionStrategy {
-  descriptor: DetectionStrategyDescriptor;
-  generator: IDetectionSignalGenerator;
-  /** The alerting rules this strategy runs on, when the engine owns them. */
-  desiredRules?(context: TDesiredRulesContext): Promise<DesiredRules>;
-}
