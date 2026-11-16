@@ -179,7 +179,10 @@ export type {
   RenderIacTemplateRequest,
   RenderIacTemplateResponse,
 } from '../common/types/rest_spec/iac_provisioner';
-export { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../common/types/rest_spec/iac_provisioner';
+export {
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+  IAC_MANAGED_ONBOARDING_BOOTSTRAP_WORKFLOW,
+} from '../common/types/rest_spec/iac_provisioner';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
 export { useOutputs } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/hooks';

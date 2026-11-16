@@ -11,6 +11,9 @@ import type { AWS_CLOUD_PROVIDER } from '../models/cloud_connector';
 /** IaCP workflow name for the AWS federated-identity connector (the `aws/workload_identity_federation` blueprint). */
 export const IAC_FEDERATED_IDENTITY_WORKFLOW = 'workload_identity_federation' as const;
 
+/** IaCP workflow name for the account-scoped AWS managed-onboarding bootstrap blueprint. */
+export const IAC_MANAGED_ONBOARDING_BOOTSTRAP_WORKFLOW = 'managed_onboarding_bootstrap' as const;
+
 /**
  * Upper bound on packages per render. Each entry costs a registry fetch, so the cap bounds abuse;
  * it sits well above the AWS onboarding's package count so a real selection never hits it. The

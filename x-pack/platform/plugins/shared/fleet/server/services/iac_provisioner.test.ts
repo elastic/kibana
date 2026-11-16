@@ -14,7 +14,10 @@ import {
   IacProvisionerUnavailableError,
 } from '../errors';
 
-import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../common/types/rest_spec/iac_provisioner';
+import {
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+  IAC_MANAGED_ONBOARDING_BOOTSTRAP_WORKFLOW,
+} from '../../common/types/rest_spec/iac_provisioner';
 
 import { appContextService } from './app_context';
 import {
@@ -450,6 +453,48 @@ describe('IacProvisionerService', () => {
     await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
       /invalid render body/
     );
+  });
+
+  describe('renderAccountTemplate', () => {
+    const ACCOUNT_RENDER_REQUEST = {
+      provider: 'aws' as const,
+      workflow: IAC_MANAGED_ONBOARDING_BOOTSTRAP_WORKFLOW,
+    };
+
+    it('posts to /api/v1/account-render without integrations and returns the rendered artifact', async () => {
+      mockConfig();
+      const logger = mockLogger();
+      mockedFetch.mockResolvedValueOnce(jsonResponse(200, RENDER_RESPONSE));
+
+      const result = await iacProvisionerService.renderAccountTemplate(ACCOUNT_RENDER_REQUEST);
+
+      expect(result).toEqual(RENDER_RESPONSE);
+      const [url, init] = mockedFetch.mock.calls[0] as unknown as [string, { body: string }];
+      expect(url).toBe('https://iac-provisioner.example/api/v1/account-render');
+      const body = JSON.parse(init.body);
+      expect(body).toEqual({ provider: 'aws', workflow: 'managed_onboarding_bootstrap' });
+      expect(body).not.toHaveProperty('integrations');
+      const logged = [...logger.info.mock.calls, ...logger.debug.mock.calls]
+        .flat()
+        .map(String)
+        .join(' ');
+      expect(logged).not.toContain('X-Amz-Signature');
+    });
+
+    it('rejects an invalid account render body', async () => {
+      mockConfig();
+      mockLogger();
+      mockedFetch.mockResolvedValueOnce(
+        jsonResponse(200, {
+          templateSha: 'sha256:661cb7def1c7101f',
+          blueprint: RENDER_RESPONSE.blueprint,
+        })
+      );
+
+      await expect(
+        iacProvisionerService.renderAccountTemplate(ACCOUNT_RENDER_REQUEST)
+      ).rejects.toThrow('provider returned an invalid render body');
+    });
   });
 });
 

@@ -15,6 +15,7 @@ import type { AWS_CLOUD_PROVIDER } from '../../common/types/models/cloud_connect
 import type {
   IacPolicyTemplateSelection,
   IAC_FEDERATED_IDENTITY_WORKFLOW,
+  IAC_MANAGED_ONBOARDING_BOOTSTRAP_WORKFLOW,
 } from '../../common/types/rest_spec/iac_provisioner';
 
 import {
@@ -28,6 +29,7 @@ import type { IacProvisionerConfig } from './utils/iac_provisioner';
 import { isIacProvisionerEnabled } from './utils/iac_provisioner';
 
 const RENDER_ENDPOINT = '/api/v1/render';
+const ACCOUNT_RENDER_ENDPOINT = '/api/v1/account-render';
 const REQUEST_TIMEOUT_MS = 30_000;
 
 /** undici reports TLS failures as `TypeError: fetch failed` with the OpenSSL reason on `cause`. */
@@ -57,6 +59,12 @@ export interface IacProvisionerRenderRequest {
   templateSha?: string;
 }
 
+export interface IacProvisionerAccountRenderRequest {
+  provider: typeof AWS_CLOUD_PROVIDER;
+  workflow: typeof IAC_MANAGED_ONBOARDING_BOOTSTRAP_WORKFLOW;
+  templateSha?: string;
+}
+
 export interface IacProvisionerRenderResponse {
   /**
    * Pre-signed URL of the rendered template. Present only when `render` is
@@ -78,6 +86,9 @@ interface IacProvisionerErrorBody {
 
 export interface IacProvisionerService {
   renderTemplate(request: IacProvisionerRenderRequest): Promise<IacProvisionerRenderResponse>;
+  renderAccountTemplate(
+    request: IacProvisionerAccountRenderRequest
+  ): Promise<IacProvisionerRenderResponse>;
 }
 
 const isIacProvisionerRenderResponse = (value: unknown): value is IacProvisionerRenderResponse => {
@@ -130,11 +141,26 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       }, integrations: ${JSON.stringify(request.integrations)}`
     );
 
-    const rendered = await this.request<IacProvisionerRenderResponse>(
-      RENDER_ENDPOINT,
-      request,
-      logger
+    return this.postRender(RENDER_ENDPOINT, request, logger);
+  }
+
+  public async renderAccountTemplate(
+    request: IacProvisionerAccountRenderRequest
+  ): Promise<IacProvisionerRenderResponse> {
+    const logger = appContextService.getLogger().get('IacProvisionerService');
+    // As with renderTemplate, the response's artifactUrl is never logged.
+    logger.info(
+      `[IaC Provisioner] Rendering account template for provider ${request.provider}, workflow ${request.workflow}`
     );
+    return this.postRender(ACCOUNT_RENDER_ENDPOINT, request, logger);
+  }
+
+  private async postRender(
+    endpoint: string,
+    body: IacProvisionerRenderRequest | IacProvisionerAccountRenderRequest,
+    logger: Logger
+  ): Promise<IacProvisionerRenderResponse> {
+    const rendered = await this.request<IacProvisionerRenderResponse>(endpoint, body, logger);
     if (!isIacProvisionerRenderResponse(rendered)) {
       throw new IacProvisionerUnavailableError('provider returned an invalid render body');
     }
