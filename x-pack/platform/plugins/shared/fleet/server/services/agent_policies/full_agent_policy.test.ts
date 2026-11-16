@@ -4406,6 +4406,37 @@ describe('getBinarySourceSettings', () => {
     });
   });
 
+  it.each([true, false])(
+    'should return agent download config with reserve_diskspace.enabled %s if set',
+    (reserveDiskspace) => {
+      expect(
+        getBinarySourceSettings(
+          [{ ...downloadSource, reserve_diskspace: reserveDiskspace }],
+          undefined
+        )
+      ).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
+        reserve_diskspace: { enabled: reserveDiskspace },
+      });
+    }
+  );
+
+  it('should use reserve_diskspace of the primary download source only', () => {
+    expect(
+      getBinarySourceSettings(
+        [
+          downloadSource,
+          { ...downloadSource, id: 'test-ds-2', host: 'http://other', reserve_diskspace: false },
+        ],
+        undefined
+      )
+    ).toEqual({
+      sourceURI: 'http://custom-registry-test',
+      sources: ['http://custom-registry-test', 'http://other'],
+    });
+  });
+
   it('should return agent download config with ssl options if present', () => {
     const downloadSourceSSL = {
       ...downloadSource,

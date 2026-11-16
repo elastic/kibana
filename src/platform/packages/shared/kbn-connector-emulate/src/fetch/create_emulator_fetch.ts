@@ -41,7 +41,12 @@ import { loadContractOperations } from '../openapi';
 import type { OperationMatch } from '../openapi/match_operation';
 import { createOperationMatcher } from '../openapi/match_operation';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
-import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
+import {
+  findAuthorizationEndpoints,
+  findTokenEndpoints,
+  respondToAuthorizationRequest,
+  respondToTokenRequest,
+} from '../openapi/token_endpoints';
 import { insufficientScopeChallenge } from '../openapi/validate_security';
 import type { SmithyModel } from '../smithy';
 import { convertSmithy, isSmithyModel } from '../smithy';
@@ -52,6 +57,14 @@ import type { OperationDescription } from './describe_operation';
 import { describeOperation } from './describe_operation';
 import type { EmulatorOperation, LoadedProtocol } from './list_operations';
 import { listOperations } from './list_operations';
+import type { CaptureOptions, CapturedExchange } from './capture_call';
+import {
+  checkCaptureOptions,
+  createCaptureExchange,
+  createCaptureWindow,
+  DEFAULT_MAX_CAPTURED_CALLS,
+  toCredentialNames,
+} from './capture_call';
 
 /** One request the mock received, for assertions in tests. */
 export interface ContractCall {
@@ -71,7 +84,10 @@ export interface ContractCall {
    * `operation` names the message.
    */
   readonly protocolMessage?: true;
-  /** Set for requests to the token URL of an OAuth 2 flow, which the mock answers itself. */
+  /**
+   * Set for requests to the token or authorization URL of an OAuth 2 flow, which the mock answers
+   * itself.
+   */
   readonly token?: true;
   /**
    * Set for answered OpenAPI operations: whether the response came from a fixture set while the
@@ -85,6 +101,17 @@ export interface ContractCall {
   readonly status: number;
   readonly requestViolations: readonly Violation[];
   readonly responseViolations: readonly Violation[];
+  /**
+   * Set with `capture`: the headers, query and bodies the request sent and its answer had, with
+   * secrets redacted. Only the latest `maxCalls` calls keep it. Calls recorded by one request,
+   * such as the tool calls of an MCP batch, share it.
+   */
+  readonly captured?: CapturedExchange;
+  /**
+   * Set with `checkScopes: 'report'` when the bearer token lacks scopes the operation needs; the
+   * request was answered as if the token had them.
+   */
+  readonly scopeViolations?: readonly Violation[];
 }
 
 /**
@@ -123,8 +150,16 @@ export interface EmulatorOptions extends PaginationOptions {
   /**
    * Answer 403 `insufficient_scope` when a bearer token the mock issued lacks the scopes an
    * operation's OAuth 2 requirements list. Off by default, as some specs declare scopes loosely.
+   * `'report'` answers the request as usual and lists the missing scopes in the call's
+   * `scopeViolations`, so a recorder sees every request a handler would send.
    */
-  readonly checkScopes?: boolean;
+  readonly checkScopes?: boolean | 'report';
+  /**
+   * Adds the headers, query and bodies of each exchange to its calls (`captured`), with the values
+   * of keys that may hold secrets redacted. Off by default, as captures take memory; `true` uses
+   * the defaults: the latest 100 calls keep theirs, and bodies are cut at 8 KiB.
+   */
+  readonly capture?: boolean | CaptureOptions;
 }
 
 export interface Emulator {
@@ -141,6 +176,8 @@ export interface Emulator {
    */
   readonly namesHost: (method: string, url: URL) => boolean;
   readonly calls: ContractCall[];
+  /** With `capture`: how many of the latest calls keep their capture. */
+  readonly maxCapturedCalls?: number;
   /** The operations the specs declare, which is what the emulator answers. */
   readonly operations: readonly EmulatorOperation[];
   /** Fixtures and recordings that aren't served because the spec contradicts them. */
@@ -296,6 +333,13 @@ const toOperationRef = ({ method, path, spec: { source } }: ContractOperation): 
 // HTTP sends no body with these, though specs such as Jira's declare content for 204 responses.
 const NULL_BODY_STATUSES = new Set([101, 204, 205, 304]);
 
+/** The response as sent: without a body for statuses that can't have one. */
+const withoutNullBody = (response: ContractResponse): ContractResponse =>
+  NULL_BODY_STATUSES.has(response.statusCode) ? { ...response, body: undefined } : response;
+
+/** Keeps a call the mock recorded while answering one request. */
+type RecordCall = (call: ContractCall) => void;
+
 const toResponse = ({ statusCode, headers, body }: ContractResponse): Response => {
   const payload =
     body === undefined || body === null || NULL_BODY_STATUSES.has(statusCode)
@@ -324,12 +368,23 @@ export const createEmulatorFetch = ({
   sampling = 'typical',
   checkScopes = false,
   onCall,
+  capture,
 }: EmulatorOptions): Emulator => {
+  const captureOptions = capture === true ? {} : capture || undefined;
+  if (captureOptions) {
+    checkCaptureOptions(captureOptions);
+  }
+  const maxCapturedCalls =
+    captureOptions && (captureOptions.maxCalls ?? DEFAULT_MAX_CAPTURED_CALLS);
   const operations = loadSpecs(specs);
+  // The spec's API key parameters are redacted too, whatever their name.
+  const captureExchange =
+    captureOptions && createCaptureExchange(captureOptions, toCredentialNames(operations));
   const namedResponses = collectNamedResponses(fixtures, recordings);
   const loadedProtocols = loadProtocols(specs, namedResponses);
   const protocols = toProtocolEndpoints(loadedProtocols);
   const tokenEndpoints = findTokenEndpoints(operations);
+  const isAuthorizationUrl = findAuthorizationEndpoints(operations);
   const engine = createResponseEngine(operations, {
     fixtures,
     recordings,
@@ -346,7 +401,9 @@ export const createEmulatorFetch = ({
     },
     engine.respond
   );
-  const contract = createOpenApiAdapter(operations, respond ?? defaultChain, { checkScopes });
+  const contract = createOpenApiAdapter(operations, respond ?? defaultChain, {
+    checkScopes: checkScopes !== false,
+  });
   const awsJsonServices = loadAwsJsonServices(specs);
   const state = new Map<unknown, unknown>();
   // The contexts whose responder deferred to the default chain, for `responseSource`.
@@ -364,10 +421,8 @@ export const createEmulatorFetch = ({
     return context;
   };
   const calls: ContractCall[] = [];
-  const record = (call: ContractCall) => {
-    calls.push(call);
-    onCall?.(call);
-  };
+  const captureWindow =
+    maxCapturedCalls === undefined ? undefined : createCaptureWindow(calls, maxCapturedCalls);
 
   const rejectAsJson = (
     rejection: AwsJsonRejection,
@@ -392,12 +447,22 @@ export const createEmulatorFetch = ({
       violations: readonly Violation[],
       name: string,
       challenge?: string
-    ) => ContractResponse
+    ) => ContractResponse,
+    record: RecordCall
   ): Promise<ContractResponse> => {
     const { operation } = routed;
     const name = operation.id;
     const matched = toOperationRef(operation);
-    const authViolations = contract.authenticate(routed, request);
+    const checked = contract.authenticate(routed, request);
+    // Reported scope shortfalls don't stop the request, so the rest of it is still checked.
+    const reportScopes = checkScopes === 'report';
+    const authViolations = reportScopes
+      ? checked.filter(({ code }) => code !== 'insufficient_scope')
+      : checked;
+    const scopeViolations = reportScopes
+      ? checked.filter(({ code }) => code === 'insufficient_scope')
+      : [];
+    const scopeReport = scopeViolations.length > 0 ? { scopeViolations } : {};
     const requestViolations =
       authViolations.length > 0 ? authViolations : contract.validateRequest(routed, request);
     if (requestViolations.length > 0) {
@@ -417,6 +482,7 @@ export const createEmulatorFetch = ({
         status: response.statusCode,
         requestViolations,
         responseViolations: [],
+        ...scopeReport,
       });
       return response;
     }
@@ -436,6 +502,7 @@ export const createEmulatorFetch = ({
       status: response.statusCode,
       requestViolations,
       responseViolations,
+      ...scopeReport,
     });
     // HEAD responses carry the headers of a GET, without its body.
     return request.method === 'head'
@@ -448,7 +515,8 @@ export const createEmulatorFetch = ({
   const serveAwsJson = async (
     service: AwsJsonService,
     request: ContractRequest,
-    description: string
+    description: string,
+    record: RecordCall
   ): Promise<ContractResponse> => {
     const target = service.route(request);
     if ('response' in target) {
@@ -477,19 +545,26 @@ export const createEmulatorFetch = ({
       };
     }
     return service.toResponse(
-      await serveOperation(routed, target.request, description, (rejection, violations) =>
-        service.reject(rejection, violations)
+      await serveOperation(
+        routed,
+        target.request,
+        description,
+        (rejection, violations) => service.reject(rejection, violations),
+        record
       )
     );
   };
 
-  const handle = async (request: ContractRequest): Promise<ContractResponse> => {
+  const handle = async (
+    request: ContractRequest,
+    record: RecordCall
+  ): Promise<ContractResponse> => {
     const description = `${request.method.toUpperCase()} ${request.url.origin}${
       request.url.pathname
     }`;
     const awsJson = awsJsonServices.find((service) => service.matches(request.url));
     if (awsJson) {
-      return serveAwsJson(awsJson, request, description);
+      return serveAwsJson(awsJson, request, description, record);
     }
     const protocol = protocols.get(toEndpoint(request.url));
     if (protocol) {
@@ -520,6 +595,18 @@ export const createEmulatorFetch = ({
     }
     const routed = contract.route(request);
     const grants = 'operation' in routed ? undefined : tokenEndpoints(request.url);
+    if (!('operation' in routed) && request.method === 'get' && isAuthorizationUrl(request.url)) {
+      const { response, violations } = respondToAuthorizationRequest(request);
+      record({
+        request: description,
+        operation: 'OAuth authorization',
+        token: true,
+        status: response.statusCode,
+        requestViolations: violations,
+        responseViolations: [],
+      });
+      return response;
+    }
     if (grants) {
       const { response, violations } = respondToTokenRequest(grants, request);
       record({
@@ -543,7 +630,7 @@ export const createEmulatorFetch = ({
       return { statusCode: routed.status, headers: JSON_HEADERS, body };
     }
 
-    return serveOperation(routed, request, description, rejectAsJson);
+    return serveOperation(routed, request, description, rejectAsJson, record);
   };
 
   const findById = (id: string, source?: string) =>
@@ -552,8 +639,30 @@ export const createEmulatorFetch = ({
         operation.id === id && (source === undefined || operation.spec.source === source)
     );
 
-  const mockFetch: typeof fetch = async (input, init) =>
-    toResponse(await handle(await toContractRequest(new Request(input, init))));
+  const keep = (recorded: readonly ContractCall[], captured?: CapturedExchange) => {
+    for (const call of recorded) {
+      const kept = captured ? { ...call, captured } : call;
+      calls.push(kept);
+      if (captured) {
+        captureWindow?.add(calls.length - 1);
+      }
+      onCall?.(kept);
+    }
+  };
+
+  // Calls are kept once the request is answered, so they can carry the exchange's capture; a
+  // request that throws keeps what it recorded, without one.
+  const mockFetch: typeof fetch = async (input, init) => {
+    const request = await toContractRequest(new Request(input, init));
+    const recorded: ContractCall[] = [];
+    let response: ContractResponse | undefined;
+    try {
+      response = await handle(request, (call) => recorded.push(call));
+      return toResponse(response);
+    } finally {
+      keep(recorded, response && captureExchange?.(request, withoutNullBody(response)));
+    }
+  };
 
   const rejectedResponses = [
     ...engine.rejected,
@@ -571,19 +680,21 @@ export const createEmulatorFetch = ({
     });
     // Token URLs are classified once resolved, as an absolute one names its host whatever the
     // API servers are.
+    const tokens = findTokenEndpoints(operations, { include: serverNamesHost });
+    const authorization = findAuthorizationEndpoints(operations, { include: serverNamesHost });
     return {
       route: createOperationMatcher(named),
-      tokens: findTokenEndpoints(operations, { include: serverNamesHost }),
+      oauth: (url: URL) => tokens(url) !== undefined || authorization(url),
     };
   });
 
   return {
     fetch: mockFetch,
     namesHost: (method, url) => {
-      const { route, tokens } = getWithHosts();
+      const { route, oauth } = getWithHosts();
       if (
         protocols.has(toEndpoint(url)) ||
-        tokens(url) !== undefined ||
+        oauth(url) ||
         awsJsonServices.some((service) => service.matches(url))
       ) {
         return true;
@@ -595,6 +706,7 @@ export const createEmulatorFetch = ({
       if (
         protocols.has(toEndpoint(url)) ||
         tokenEndpoints(url) !== undefined ||
+        (method.toLowerCase() === 'get' && isAuthorizationUrl(url)) ||
         awsJsonServices.some((service) => service.matches(url))
       ) {
         return true;
@@ -604,6 +716,7 @@ export const createEmulatorFetch = ({
       return 'operation' in routed || routed.status === 405;
     },
     calls,
+    maxCapturedCalls,
     operations: listOperations(operations, loadedProtocols),
     rejectedResponses,
     runtimeFixtures: {
@@ -619,6 +732,7 @@ export const createEmulatorFetch = ({
     },
     reset: () => {
       calls.length = 0;
+      captureWindow?.clear();
       state.clear();
       engine.runtime.clear();
       engine.restartSequences();

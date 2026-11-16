@@ -53,6 +53,7 @@ export interface PostDownloadSourceRequest {
     host: string;
     is_default?: boolean;
     proxy_id?: string | null;
+    reserve_diskspace?: boolean;
     ssl?: {
       certificate_authorities?: string[];
       certificate?: string;

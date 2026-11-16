@@ -1,5 +1,5 @@
 {
-  "sha1": "5e0327f77a92b1589dc1d6b55c53009809f1ee9b",
+  "sha1": "dcd17cc5d2d9c3b54a89f306a7c8947c4bb419f0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -114,6 +114,62 @@
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_aws_identity_federation_enabled.spec.ts",
         "line": 39,
         "column": 7
+      }
+    },
+    {
+      "id": "126d8252a9d3f70-d796638c34e3e18",
+      "title": "Onboarding — dedicated index template for a custom dataset (managed integrations) turning the switch off sends the opt-out with the deploy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_dedicated_dataset_templates_mi.spec.ts",
+        "line": 61,
+        "column": 21
+      }
+    },
+    {
+      "id": "126d8252a9d3f70-a54ec2efd656ce9",
+      "title": "Onboarding — dedicated index template for a custom dataset (managed integrations) leaving the switch on says so in the request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_dedicated_dataset_templates_mi.spec.ts",
+        "line": 74,
+        "column": 13
+      }
+    },
+    {
+      "id": "126d8252a9d3f70-59e669fe13270a6",
+      "title": "Onboarding — dedicated index template for a custom dataset (managed integrations) the switch is hidden for the generic dataset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_dedicated_dataset_templates_mi.spec.ts",
+        "line": 84,
+        "column": 24
+      }
+    },
+    {
+      "id": "126d8252a9d3f70-a1d13d9b9bfcf41",
+      "title": "Onboarding — dedicated index template for a custom dataset (managed integrations) the choice survives closing and reopening the flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_dedicated_dataset_templates_mi.spec.ts",
+        "line": 92,
+        "column": 14
       }
     },
     {

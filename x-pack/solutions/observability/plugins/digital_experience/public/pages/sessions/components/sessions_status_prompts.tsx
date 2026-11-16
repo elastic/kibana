@@ -6,17 +6,18 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { SessionsStatus } from '../../../../common/sessions';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
+import type { Formatters } from '../../../hooks/use_formatters';
 import { httpErrorMessage } from '../../../utils/http_error_message';
 
 const ASK_ADMIN_TEXT = i18n.translate('xpack.digitalExperience.sessions.status.askAdminText', {
   defaultMessage:
-    'Ask an administrator with the Manage sessions privilege of Digital Experience to set them up.',
+    'Ask an administrator with the Set up session summaries privilege of Digital Experience to set them up.',
 });
 
 const EnableError = ({ error }: { error: Error }) => (
@@ -59,7 +60,7 @@ export function EnableSessionsPrompt({ canManage, onEnable, enabling, enableErro
           <p>
             {i18n.translate('xpack.digitalExperience.sessions.status.notEnabledDescription', {
               defaultMessage:
-                'Sessions group the page views, clicks and errors of each visit to your applications. A background transform builds them from your EDOT Browser data, reading it with the access of whoever sets them up.',
+                'Sessions group the page views, clicks and errors of each visit to your applications. A background task builds them from your EDOT Browser data every minute, with an API key granted on behalf of whoever sets them up, so they hold only what that user can read.',
             })}
           </p>
           {!canManage && <p>{ASK_ADMIN_TEXT}</p>}
@@ -89,8 +90,8 @@ export function EnableSessionsPrompt({ canManage, onEnable, enabling, enableErro
 }
 
 /**
- * Sessions are set up but need attention: an update to this Kibana version or configuration, or a
- * failing or lagging transform. Nothing shows when they're healthy.
+ * Sessions are set up but need attention: their API key no longer works, the last run of the
+ * summaries task failed, or it is behind. Nothing shows when they're healthy.
  */
 export function SessionsStatusCallout({
   status,
@@ -99,42 +100,20 @@ export function SessionsStatusCallout({
   enabling,
   enableError,
 }: EnableProps & { status: SessionsStatus }) {
-  // Set up by a newer Kibana (a rollback, or an older node in a rolling upgrade): this one can't
-  // update them, and their summaries may not match what it reads.
-  if (status.installedVersion !== null && status.installedVersion > status.currentVersion) {
+  if (status.apiKeyInvalid) {
     return (
       <>
         <KbnWarningCallout
-          data-test-subj="digitalExperienceSessionsNewerVersion"
+          data-test-subj="digitalExperienceSessionsApiKeyInvalid"
           size="s"
-          title={i18n.translate('xpack.digitalExperience.sessions.status.newerVersionTitle', {
-            defaultMessage: 'Sessions were set up by a newer version of Kibana',
-          })}
-          text={
-            status.reason ??
-            i18n.translate('xpack.digitalExperience.sessions.status.newerVersionDescription', {
-              defaultMessage: 'Upgrade Kibana to manage sessions.',
-            })
-          }
-        />
-        <EuiSpacer size="m" />
-      </>
-    );
-  }
-  if (status.needsUpdate && !status.autoUpdate) {
-    return (
-      <>
-        <KbnWarningCallout
-          data-test-subj="digitalExperienceSessionsNeedUpdate"
-          size="s"
-          title={i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateTitle', {
-            defaultMessage: 'Sessions need an update',
+          title={i18n.translate('xpack.digitalExperience.sessions.status.apiKeyInvalidTitle', {
+            defaultMessage: 'Sessions are not being updated',
           })}
           text={
             <p>
-              {i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateDescription', {
+              {i18n.translate('xpack.digitalExperience.sessions.status.apiKeyInvalidDescription', {
                 defaultMessage:
-                  'Sessions were set up by an earlier version or with other settings, so new sessions may be missing or incomplete until they are updated.',
+                  'The API key sessions are built with was invalidated or has expired, so new sessions are missing until they are set up again.',
               })}{' '}
               {canManage ? null : ASK_ADMIN_TEXT}
             </p>
@@ -144,8 +123,8 @@ export function SessionsStatusCallout({
               ? {
                   primary: {
                     children: i18n.translate(
-                      'xpack.digitalExperience.sessions.status.updateButtonLabel',
-                      { defaultMessage: 'Update sessions' }
+                      'xpack.digitalExperience.sessions.status.setUpAgainButtonLabel',
+                      { defaultMessage: 'Set up sessions again' }
                     ),
                     'data-test-subj': 'digitalExperienceSessionsUpdate',
                     ...getEbtProps({
@@ -175,32 +154,23 @@ export function SessionsStatusCallout({
             defaultMessage: 'Sessions are not being updated',
           })}
           text={
-            status.reason ??
-            i18n.translate('xpack.digitalExperience.sessions.status.degradedDescription', {
-              defaultMessage:
-                'The sessions transform failed, so new sessions are missing. Check the transform in Stack Management.',
-            })
+            // The message is filled in only for users who may see Elasticsearch details. The
+            // others are pointed at someone who can, not at logs they usually cannot read.
+            status.lastError?.message
+              ? i18n.translate('xpack.digitalExperience.sessions.status.degradedReason', {
+                  defaultMessage: 'The task that builds sessions failed: {error}',
+                  values: { error: status.lastError.message },
+                })
+              : canManage
+              ? i18n.translate('xpack.digitalExperience.sessions.status.degradedDescription', {
+                  defaultMessage:
+                    'The task that builds sessions failed, so new sessions are missing. Check the Kibana server logs.',
+                })
+              : i18n.translate('xpack.digitalExperience.sessions.status.degradedAskAdmin', {
+                  defaultMessage:
+                    'The task that builds sessions failed, so new sessions are missing. An administrator with the Set up session summaries privilege can see why.',
+                })
           }
-        />
-        <EuiSpacer size="m" />
-      </>
-    );
-  }
-  // Applied by a background task with the API key granted at setup; nothing to do but wait. After
-  // a failing transform, as that one needs attention.
-  if (status.needsUpdate && status.autoUpdate) {
-    return (
-      <>
-        <KbnInfoCallout
-          data-test-subj="digitalExperienceSessionsUpdating"
-          size="s"
-          title={i18n.translate('xpack.digitalExperience.sessions.status.updatingTitle', {
-            defaultMessage: 'Sessions are being updated',
-          })}
-          text={i18n.translate('xpack.digitalExperience.sessions.status.updatingDescription', {
-            defaultMessage:
-              'Sessions were set up by an earlier version or with other settings. They update automatically within a few minutes, with the access granted when they were set up.',
-          })}
         />
         <EuiSpacer size="m" />
       </>
@@ -225,11 +195,62 @@ export function SessionsStatusCallout({
       </>
     );
   }
-  // A failed setup with nothing else to show, such as granting a new API key on a visit.
+  // A failed setup with nothing else to show.
   return enableError ? (
     <>
       <EnableError error={enableError} />
       <EuiSpacer size="m" />
     </>
   ) : null;
+}
+
+/** Up to when events are in the sessions, once they're built. */
+export function SessionsFreshness({
+  status,
+  formatters: { formatDate },
+}: {
+  status: SessionsStatus;
+  formatters: Formatters;
+}) {
+  if (status.rebuilding || !status.summarizedUntil) {
+    return null;
+  }
+  return (
+    <EuiText size="xs" color="subdued" data-test-subj="digitalExperienceSessionsFreshness">
+      {i18n.translate('xpack.digitalExperience.sessions.status.freshness', {
+        defaultMessage: 'Includes events up to {time}',
+        values: { time: formatDate(status.summarizedUntil) },
+      })}
+    </EuiText>
+  );
+}
+
+/**
+ * The time range starts before the oldest kept sessions, so that part is empty whatever happened
+ * then.
+ */
+export function SessionsRetentionCallout({
+  retentionDays,
+  rangeStart,
+}: {
+  retentionDays: number;
+  rangeStart: number;
+}) {
+  if (rangeStart >= Date.now() - retentionDays * 24 * 60 * 60 * 1000) {
+    return null;
+  }
+  return (
+    <>
+      <KbnInfoCallout
+        data-test-subj="digitalExperienceSessionsRetention"
+        size="s"
+        title={i18n.translate('xpack.digitalExperience.sessions.status.retentionTitle', {
+          defaultMessage:
+            'Sessions are kept for {days} days, so there are none before then in this time range.',
+          values: { days: retentionDays },
+        })}
+      />
+      <EuiSpacer size="m" />
+    </>
+  );
 }

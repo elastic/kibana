@@ -926,8 +926,20 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
       }
     });
 
+export const ruleIdSchema = lazySchema(() =>
+  entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`)
+);
+
 export const createRuleDataSchema = lazySchema(() =>
-  applyCreateRuleRefinements(createRuleDataBaseSchema).meta({
+  applyCreateRuleRefinements(
+    createRuleDataBaseSchema.extend({
+      id: ruleIdSchema
+        .optional()
+        .describe(
+          `Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, the request fails with HTTP 409 and the existing rule is not changed. ${ENTITY_ID_NOTE}`
+        ),
+    })
+  ).meta({
     id: 'alerting_new_rule',
   })
 );
@@ -1150,11 +1162,6 @@ export const ruleRoutingTagsResponseSchema = lazySchema(() =>
 );
 
 export type RuleRoutingTagsResponse = z.infer<typeof ruleRoutingTagsResponseSchema>;
-
-export const ruleIdSchema = lazySchema(() =>
-  entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`)
-);
-
 /**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_get`. Like every other
  * bulk route, a missing rule is a per-item error, not a request failure.
@@ -1189,7 +1196,7 @@ export const bulkCreateRuleItemSchema = lazySchema(() =>
       id: ruleIdSchema
         .optional()
         .describe(
-          'Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.'
+          `Optional rule ID. If omitted, Kibana generates one. IDs must be unique within the request. If a rule with this ID already exists, that item is reported in \`errors\` with the code \`RULE_ALREADY_EXISTS\` and the existing rule is not changed. ${ENTITY_ID_NOTE}`
         ),
     })
   ).meta({ id: 'alerting_bulk_create_rule_item' })

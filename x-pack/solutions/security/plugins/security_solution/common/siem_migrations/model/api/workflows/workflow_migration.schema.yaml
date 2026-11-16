@@ -135,34 +135,6 @@ paths:
           description: Indicates the migration id was not found.
 
   /internal/siem_migrations/workflows/{migration_id}/workflows:
-    post:
-      summary: Adds Tines stories to a workflow migration
-      operationId: CreateWorkflowMigrationWorkflows
-      x-codegen-enabled: true
-      x-internal: true
-      description: Adds original Tines story exports to an already existing workflow migration
-      tags:
-        - SIEM Workflow Migrations
-      parameters:
-        - name: migration_id
-          in: path
-          required: true
-          schema:
-            description: The migration id to add the workflows to
-            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              maxItems: 1000
-              items:
-                description: Tines story export to add to the migration
-                $ref: '../../vendor/workflows/tines.schema.yaml#/components/schemas/TinesStoryExport'
-      responses:
-        200:
-          description: Indicates workflows have been added to the migration successfully.
     get:
       summary: Retrieves workflows for a migration
       operationId: GetWorkflowMigrationWorkflows
@@ -302,6 +274,42 @@ paths:
                   updated:
                     type: boolean
                     description: Indicates workflow migration items have been updated.
+
+  /internal/siem_migrations/workflows/{migration_id}/tines/workflows:
+    post:
+      summary: Add Tines stories to a workflow migration
+      operationId: CreateTinesWorkflowMigrationWorkflows
+      x-codegen-enabled: true
+      x-internal: true
+      description: >
+        Parses Tines story exports and stores each story as an original workflow with vendor tines
+        and format json. Use this for a raw Tines story export. An empty list stores nothing.
+        A body that is not a Tines story is rejected and stores nothing. A missing migration id returns 404.
+      tags:
+        - SIEM Workflow Migrations
+        - Tines
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to add the Tines stories to
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              maxItems: 1000
+              items:
+                description: Tines story export to add to the migration
+                $ref: '../../vendor/workflows/tines.schema.yaml#/components/schemas/TinesStoryExport'
+      responses:
+        200:
+          description: Indicates Tines stories have been added to the migration successfully.
+        404:
+          description: Indicates the migration id was not found.
 
   /internal/siem_migrations/workflows/{migration_id}/stats:
     get:
