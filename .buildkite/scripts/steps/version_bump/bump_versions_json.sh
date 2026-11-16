@@ -21,6 +21,26 @@ update_patch_versions_json() {
     versions.json > versions.json.tmp && mv versions.json.tmp versions.json
 }
 
+# On the X.Y.1 patch bump (right after X.Y.0 ships), drop same-major release branches older than
+# X.(Y-1). Until X.Y.0 ships, the n-2 minor stays in CI for possible emergency patches.
+prune_superseded_minors() {
+  local major minor patch
+  IFS=. read -r major minor patch <<< "$NEW_VERSION"
+
+  # X.0.1 and X.1.1 have no same-major minor older than X.(Y-1) to drop
+  if [ "$patch" != "1" ] || [ "$minor" -lt 2 ]; then
+    return
+  fi
+
+  echo "First patch of ${major}.${minor}: removing ${major}.x release branches older than ${major}.$((minor - 1))"
+
+  jq --arg major "$major" --argjson minMinor "$((minor - 1))" \
+    '.versions |= map(select(
+      (.branchType == "release" and (.branch | startswith($major + ".")) and ((.branch | split(".")[1] | tonumber) < $minMinor)) | not
+    ))' \
+    versions.json > versions.json.tmp && mv versions.json.tmp versions.json
+}
+
 update_minor_versions_json() {
   local major minor next_minor
 
@@ -44,29 +64,6 @@ update_minor_versions_json() {
   else
     jq --arg version "$NEW_VERSION" --arg branch "$BRANCH" \
       '.versions |= [.[0]] + [{"version": $version, "branch": $branch, "branchType": "release"}] + .[1:]' \
-      versions.json > versions.json.tmp && mv versions.json.tmp versions.json
-  fi
-
-  # 3. Prune oldest same-major minor if there are more than 2 release entries for this major
-  local same_major_count
-  same_major_count=$(jq --arg major "$major" \
-    '[.versions[] | select(.branchType == "release" and (.branch | startswith($major + ".")))] | length' \
-    versions.json)
-
-  if [ "$same_major_count" -gt 2 ]; then
-    echo "Found $same_major_count release entries for major $major, pruning oldest"
-
-    local oldest_branch
-    oldest_branch=$(jq -r --arg major "$major" \
-      '[.versions[] | select(.branchType == "release" and (.branch | startswith($major + ".")))]
-       | sort_by(.branch | split(".")[1] | tonumber)
-       | .[0].branch' \
-      versions.json)
-
-    echo "Removing oldest branch: $oldest_branch"
-
-    jq --arg oldBranch "$oldest_branch" \
-      '.versions |= map(select(.branch != $oldBranch))' \
       versions.json > versions.json.tmp && mv versions.json.tmp versions.json
   fi
 }
@@ -101,6 +98,7 @@ FILES_TO_COMMIT="versions.json"
 
 if [ "$WORKFLOW" = "patch" ]; then
   update_patch_versions_json
+  prune_superseded_minors
 
 elif [ "$WORKFLOW" = "minor" ]; then
   update_minor_versions_json
