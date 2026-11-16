@@ -20,6 +20,7 @@ interface CommandMenuPopoverProps {
   commandMatch: CommandMatchResult;
   anchorPosition: AnchorPosition | null;
   onSelect: (selection: CommandBadgeData) => void;
+  onReplaceText?: (text: string) => void;
   onContentChange: (hasVisibleContent: boolean, forQuery: string) => void;
   commandMenuRef: React.RefObject<CommandMenuHandle>;
   'data-test-subj'?: string;
@@ -46,6 +47,7 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
   commandMatch,
   anchorPosition,
   onSelect,
+  onReplaceText,
   onContentChange,
   commandMenuRef,
   'data-test-subj': dataTestSubj = 'commandMenuPopover',
@@ -105,6 +107,7 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
               ref={commandMenuRef}
               query={activeCommand.query}
               onSelect={onSelect}
+              onReplaceText={onReplaceText}
               onContentChange={onContentChange}
             />
           </div>

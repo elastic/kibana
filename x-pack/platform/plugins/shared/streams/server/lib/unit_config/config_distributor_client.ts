@@ -11,11 +11,21 @@ import { Agent as HttpsAgent, request as httpsRequest } from 'node:https';
 import YAML from 'yaml';
 import type { Logger } from '@kbn/logging';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
-import type { StreamsUnit } from '@kbn/streams-schema';
+import type {
+  ComponentCatalogue,
+  ComponentValidationResult,
+  StreamsUnit,
+} from '@kbn/streams-schema';
 import { StatusError } from '../streams/errors/status_error';
 import { combineAbortSignals } from './combine_abort_signals';
 import { createTargetIdResolver, type ResolveTargetId } from './distributor_target_id';
-import type { UnitConfigHooks, UnitCredential, UnitValidationResult } from './types';
+import type {
+  FetchComponentCatalogue,
+  UnitConfigHooks,
+  UnitCredential,
+  UnitValidationResult,
+  ValidateComponent,
+} from './types';
 
 export interface ConfigDistributorClientConfig {
   url?: string;
@@ -29,6 +39,10 @@ export interface ConfigDistributorClientConfig {
 export type ConfigDistributorClient = Required<Pick<UnitConfigHooks, 'publish' | 'validate'>> & {
   /** The `target_id` the distributor derives from this client's certificate. */
   resolveTargetId: ResolveTargetId;
+  /** `GET /v1/components`, revalidated with the ETag of the copy the caller holds. */
+  fetchComponentCatalogue: FetchComponentCatalogue;
+  /** `POST /v1/components/validate` for one component, before any unit holds it. */
+  validateComponent: ValidateComponent;
 };
 
 type UnitDiagnostic = StreamsUnit.Diagnostic;
@@ -38,6 +52,8 @@ const REQUEST_TIMEOUT_MS = 30_000;
 const VALIDATE_PATH = '/v1/units/validate';
 // Distributors before streams-config-distributor#441 serve validate here. Drop once every target runs #441.
 const LEGACY_VALIDATE_PATH = '/v1/validate';
+const COMPONENTS_PATH = '/v1/components';
+const COMPONENTS_VALIDATE_PATH = '/v1/components/validate';
 
 const serializeUnitYaml = (unit: StreamsUnit.Configuration): string => YAML.stringify(unit);
 
@@ -55,15 +71,31 @@ const hashUnitPublishPayload = (unitYaml: string, credentials: UnitCredential[])
   return hash.digest('hex');
 };
 
+interface DistributorResponseHeaders {
+  get: (name: string) => string | null;
+}
+
 type DistributorFetch = (
   url: string,
   init: {
     method: string;
     headers: Record<string, string>;
-    body: string;
+    body?: string;
     signal: AbortSignal;
   }
-) => Promise<{ ok: boolean; status: number; text: () => Promise<string> }>;
+) => Promise<{
+  ok: boolean;
+  status: number;
+  headers?: DistributorResponseHeaders;
+  text: () => Promise<string>;
+}>;
+
+interface DistributorResponse {
+  ok: boolean;
+  status: number;
+  text: string;
+  header: (name: string) => string | undefined;
+}
 
 const createDistributorTls = (
   ssl: ConfigDistributorClientConfig['ssl']
@@ -110,7 +142,9 @@ const nodeHttpFetch = (agent: HttpsAgent | undefined): DistributorFetch => {
           method: init.method,
           headers: {
             ...init.headers,
-            'content-length': String(Buffer.byteLength(init.body)),
+            ...(init.body !== undefined
+              ? { 'content-length': String(Buffer.byteLength(init.body)) }
+              : {}),
           },
           signal: init.signal,
           ...(parsed.protocol === 'https:'
@@ -132,6 +166,12 @@ const nodeHttpFetch = (agent: HttpsAgent | undefined): DistributorFetch => {
             resolve({
               ok: status >= 200 && status < 300,
               status,
+              headers: {
+                get: (name) => {
+                  const value = res.headers[name.toLowerCase()];
+                  return Array.isArray(value) ? value.join(', ') : value ?? null;
+                },
+              },
               text: async () => text,
             });
           });
@@ -139,7 +179,9 @@ const nodeHttpFetch = (agent: HttpsAgent | undefined): DistributorFetch => {
       );
 
       req.on('error', reject);
-      req.write(init.body);
+      if (init.body !== undefined) {
+        req.write(init.body);
+      }
       req.end();
     });
   };
@@ -160,17 +202,20 @@ export const createConfigDistributorClient = ({
   const baseUrl = config.url?.replace(/\/$/, '');
 
   if (!baseUrl) {
-    const distributorNotConfigured = (): never => {
-      const message =
-        'streams-config-distributor URL is not configured; skipping unit validation and publish.';
-      logger.error(message);
+    const distributorNotConfigured = (operation: string): never => {
+      const message = `streams-config-distributor URL is not configured; skipping ${operation}.`;
+      logger.debug(message);
       throw new StatusError(message, 503);
     };
 
     return {
-      publish: async (): Promise<void> => distributorNotConfigured(),
-      validate: async (): Promise<UnitValidationResult> => distributorNotConfigured(),
-      resolveTargetId: distributorNotConfigured,
+      publish: async (): Promise<void> => distributorNotConfigured('unit publish'),
+      validate: async (): Promise<UnitValidationResult> =>
+        distributorNotConfigured('unit validation'),
+      resolveTargetId: () => distributorNotConfigured('target id resolution'),
+      fetchComponentCatalogue: async () => distributorNotConfigured('the component catalogue'),
+      validateComponent: async (): Promise<ComponentValidationResult> =>
+        distributorNotConfigured('component validation'),
     };
   }
 
@@ -190,13 +235,15 @@ export const createConfigDistributorClient = ({
     path,
     method,
     body,
+    headers = {},
     signal,
   }: {
     path: string;
     method: string;
-    body: string;
+    body?: string;
+    headers?: Record<string, string>;
     signal?: AbortSignal;
-  }): Promise<{ ok: boolean; status: number; text: string }> => {
+  }): Promise<DistributorResponse> => {
     const timeoutController = new AbortController();
     const timeout = setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS);
     const requestSignal = combineAbortSignals([timeoutController.signal, signal]);
@@ -204,7 +251,7 @@ export const createConfigDistributorClient = ({
     try {
       const response = await requestWithTls(`${baseUrl}${path}`, {
         method,
-        headers: { 'content-type': 'application/json' },
+        headers: body !== undefined ? { 'content-type': 'application/json', ...headers } : headers,
         body,
         signal: requestSignal.signal,
       });
@@ -213,6 +260,7 @@ export const createConfigDistributorClient = ({
         ok: response.ok,
         status: response.status,
         text: await response.text(),
+        header: (name) => response.headers?.get(name) ?? undefined,
       };
     } catch (error) {
       throw statusErrorFromFetchFailure(baseUrl, error, ssl);
@@ -260,7 +308,7 @@ export const createConfigDistributorClient = ({
         response = await request({ path: LEGACY_VALIDATE_PATH, method: 'POST', body, signal });
       }
 
-      const parsed = parseValidateResponse(response.text);
+      const parsed = parseValidationVerdict(response.text);
 
       if (parsed?.valid) {
         return compiledConfigResult(parsed.compiled_config);
@@ -273,20 +321,82 @@ export const createConfigDistributorClient = ({
       throw statusErrorFromDistributorResponse('Failed to validate Streams unit', response);
     },
     resolveTargetId,
+    fetchComponentCatalogue: async ({ etag, signal }) => {
+      logger.debug('Fetching the Streams component catalogue from config distributor');
+
+      const response = await request({
+        path: COMPONENTS_PATH,
+        method: 'GET',
+        headers: etag ? { 'if-none-match': etag } : {},
+        signal,
+      });
+
+      if (response.status === 304) {
+        return { notModified: true };
+      }
+
+      if (!response.ok) {
+        throw statusErrorFromDistributorResponse(
+          'Failed to fetch the Streams component catalogue',
+          response
+        );
+      }
+
+      const catalogue = parseComponentCatalogue(response.text);
+      if (!catalogue) {
+        throw new StatusError(
+          'streams-config-distributor returned a component catalogue Kibana cannot read.',
+          502
+        );
+      }
+
+      return { notModified: false, catalogue, etag: response.header('etag') };
+    },
+    validateComponent: async ({ kind, component, signal }) => {
+      logger.debug(`Validating Streams ${kind} [${component.id}] with config distributor`);
+
+      const response = await request({
+        path: COMPONENTS_VALIDATE_PATH,
+        method: 'POST',
+        body: JSON.stringify({ kind, configuration: YAML.stringify(component) }),
+        signal,
+      });
+
+      // An invalid component is a 400 that still carries the verdict.
+      const parsed = parseValidationVerdict(response.text);
+      if (parsed && (response.ok || response.status === 400)) {
+        return { valid: parsed.valid, diagnostics: parsed.diagnostics };
+      }
+
+      // Distributors before streams-config-distributor#429 have no such route. That is version
+      // skew on the backend, not a request the caller could fix.
+      if (response.status === 404) {
+        throw new StatusError(
+          'streams-config-distributor does not support component validation (streams-config-distributor#429).',
+          502
+        );
+      }
+
+      throw statusErrorFromDistributorResponse('Failed to validate Streams component', response);
+    },
   };
 };
 
 const credentialsField = (credentials: UnitCredential[]): { credentials?: UnitCredential[] } =>
   credentials.length > 0 ? { credentials } : {};
 
+// The distributor answers 401/403 when it rejects Kibana's client certificate. Passed through, a 401
+// logs the browser session out and a 403 reads as missing Kibana privileges, so both become 502.
+const DISTRIBUTOR_CERTIFICATE_STATUSES: ReadonlySet<number> = new Set([401, 403]);
+
 const statusErrorFromDistributorResponse = (
   prefix: string,
-  response: { ok: boolean; status: number; text: string }
+  response: { status: number; text: string }
 ): StatusError => {
-  return new StatusError(
-    `${prefix}: ${response.status} ${response.text}`,
-    response.status >= 400 && response.status < 500 ? response.status : 502
-  );
+  const { status, text } = response;
+  const isClientError =
+    status >= 400 && status < 500 && !DISTRIBUTOR_CERTIFICATE_STATUSES.has(status);
+  return new StatusError(`${prefix}: ${status} ${text}`, isClientError ? status : 502);
 };
 
 /** Include `error.cause` when Node nests the OpenSSL reason under the request error. */
@@ -337,7 +447,11 @@ const compiledConfigResult = (compiledConfig: string | undefined): UnitValidatio
   return { compiled_config: compiledConfig };
 };
 
-const parseValidateResponse = (
+/**
+ * The `{ valid, diagnostics }` verdict that both validate routes answer with. Only the unit
+ * route adds `compiled_config`; the component route never does.
+ */
+const parseValidationVerdict = (
   text: string
 ): { valid: boolean; diagnostics: UnitDiagnostic[]; compiled_config?: string } | undefined => {
   try {
@@ -367,6 +481,25 @@ const parseValidateResponse = (
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
+
+// Only the envelope is checked. The streams-api-driven-components schema owns the content, and the
+// UI renders field types it does not know with a fallback control.
+const isComponentCatalogue = (value: unknown): value is ComponentCatalogue =>
+  isRecord(value) &&
+  typeof value.schema_version === 'string' &&
+  typeof value.component_revision === 'string' &&
+  Array.isArray(value.components) &&
+  isRecord(value.metadata) &&
+  Array.isArray(value.definitions);
+
+const parseComponentCatalogue = (text: string): ComponentCatalogue | undefined => {
+  try {
+    const parsed: unknown = JSON.parse(text);
+    return isComponentCatalogue(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 const toUnitDiagnostic = (value: unknown): UnitDiagnostic | undefined => {
   if (!isRecord(value)) {

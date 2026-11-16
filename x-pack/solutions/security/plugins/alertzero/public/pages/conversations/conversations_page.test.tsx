@@ -33,6 +33,10 @@ import { CATEGORY_PAGE_SIZE, CLOSED_PAGE_SIZE } from './queue/use_queue_section'
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { useRunningSummary } from '../../hooks/use_running_summary';
 import type { ProposalItem } from '../../../common/proposals/list';
+import { of } from 'rxjs';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { AppChromeLayout } from '../../components/app_chrome';
 import { ConversationsPage } from './conversations_page';
 
 const mockDropDecided = jest.fn();
@@ -270,11 +274,14 @@ const renderPage = (
     proposalsCapabilities = { showProposals: true, decideProposals: true },
     alertZeroWrite = true,
     agentBuilderShow = true,
+    withAppChrome = false,
   }: {
     capabilities?: Record<string, unknown>;
     proposalsCapabilities?: Record<string, boolean>;
     alertZeroWrite?: boolean;
     agentBuilderShow?: boolean;
+    /** Renders the page inside `AppChromeLayout`, so tests can read the app heading. */
+    withAppChrome?: boolean;
   } = {}
 ) => {
   const core = coreMock.createStart();
@@ -307,13 +314,24 @@ const renderPage = (
   // A fresh element each time: React bails out of a root update when the element
   // is the same reference, so a poll-style mock change would never re-render.
   const queryClient = new QueryClient();
+  // The app heading's menu subscribes to the feedback handler, which the chrome mock leaves unset.
+  const appChrome = chromeServiceMock.createStartContract();
+  (appChrome.help.getFeedbackHandler$ as unknown as jest.Mock) = jest.fn(() => of(undefined));
   const page = () => (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={{ ...core, agentBuilder }}>
           <QueryClientProvider client={queryClient}>
             <Router history={history}>
-              <ConversationsPage />
+              {withAppChrome ? (
+                <MockChromeContextProvider chrome={appChrome as never}>
+                  <AppChromeLayout>
+                    <ConversationsPage />
+                  </AppChromeLayout>
+                </MockChromeContextProvider>
+              ) : (
+                <ConversationsPage />
+              )}
             </Router>
           </QueryClientProvider>
         </KibanaContextProvider>
@@ -378,6 +396,22 @@ describe('ConversationsPage proposals access', () => {
 
     expect(screen.queryByTestId('alertzeroProposalsPrivilegesGate')).not.toBeInTheDocument();
     expect(mockUseProposalsByCategory).toHaveBeenCalled();
+  });
+});
+
+describe('ConversationsPage app heading', () => {
+  it('titles the app heading Proposed actions', () => {
+    mockProposals({});
+    renderPage('/', { withAppChrome: true });
+
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('Proposed actions');
+  });
+
+  it('keeps the AlertZero heading behind the Proposed Actions privilege gate', () => {
+    renderPage('/', { withAppChrome: true, proposalsCapabilities: {} });
+
+    expect(screen.getByTestId('alertzeroProposalsPrivilegesGate')).toBeInTheDocument();
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('AlertZero');
   });
 });
 
@@ -1169,7 +1203,7 @@ describe('ConversationsPage impact pills', () => {
     mockProposals({ investigate: [{ ...proposal, conversationTitle: 'No impact' }] });
     renderPage('/');
 
-    expect(screen.queryByRole('heading', { name: 'Impact' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Impacted entities' })).not.toBeInTheDocument();
     expect(screen.getByText('No impact')).toBeInTheDocument();
   });
 

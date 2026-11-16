@@ -7,10 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DETECTION_TAB_IDS = ['events', 'rules', 'signals'] as const;
-export const DEVELOPER_MODE_TAB_IDS = ['signals'] as const;
+export const DETECTION_TAB_IDS = ['events', 'rules', 'signals', 'topology'] as const;
 
 export type DetectionTabId = (typeof DETECTION_TAB_IDS)[number];
+
+const DEVELOPER_MODE_TAB_IDS: readonly DetectionTabId[] = ['signals', 'topology'];
 
 export const DETECTION_TAB_LABELS: Record<DetectionTabId, string> = {
   events: i18n.translate('xpack.nightshift.detectionPage.tabs.events', {
@@ -22,14 +23,16 @@ export const DETECTION_TAB_LABELS: Record<DetectionTabId, string> = {
   signals: i18n.translate('xpack.nightshift.detectionPage.tabs.signals', {
     defaultMessage: 'Signals',
   }),
+  topology: i18n.translate('xpack.nightshift.detectionPage.tabs.topology', {
+    defaultMessage: 'Topology',
+  }),
 };
 
 export const isDetectionTabId = (value: string): value is DetectionTabId =>
   DETECTION_TAB_IDS.includes(value as DetectionTabId);
 
+export const isDeveloperModeTab = (id: DetectionTabId): boolean =>
+  DEVELOPER_MODE_TAB_IDS.includes(id);
+
 export const getVisibleDetectionTabs = (isDeveloperMode: boolean): DetectionTabId[] =>
-  isDeveloperMode
-    ? [...DETECTION_TAB_IDS]
-    : DETECTION_TAB_IDS.filter(
-        (id) => !DEVELOPER_MODE_TAB_IDS.includes(id as (typeof DEVELOPER_MODE_TAB_IDS)[number])
-      );
+  DETECTION_TAB_IDS.filter((id) => isDeveloperMode || !isDeveloperModeTab(id));

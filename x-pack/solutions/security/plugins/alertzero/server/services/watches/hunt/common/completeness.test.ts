@@ -10,6 +10,7 @@ import {
   completedSuccessfully,
   FINAL_WHEN_NOTHING_SEARCHABLE,
   huntCompletenessOf,
+  retryableReasonsOf,
 } from './completeness';
 
 const gap = (reason: HuntIncompleteReason): HuntIncompleteness => ({ reason, detail: 'because' });
@@ -136,5 +137,42 @@ describe('huntCompletenessOf', () => {
     const completeness = huntCompletenessOf([gap('nothing_searched')]);
     expect(completedSuccessfully(completeness)).toBe(true);
     expect(completeness).not.toBe('complete');
+  });
+});
+
+describe('retryableReasonsOf', () => {
+  it('lists each reason that keeps the run retryable once, and leaves out final ones', () => {
+    expect(
+      retryableReasonsOf([
+        gap('search_partial'),
+        gap('input_truncated'),
+        gap('search_partial'),
+        gap('query_ungrounded'),
+      ])
+    ).toEqual(['search_partial', 'query_ungrounded']);
+  });
+
+  it('is empty for a run that is not retryable', () => {
+    expect(retryableReasonsOf([gap('input_truncated'), gap('collapsed')])).toEqual([]);
+  });
+
+  it('leaves out a reason this run treats as final', () => {
+    expect(
+      retryableReasonsOf([gap('query_ungrounded'), gap('search_partial')], {
+        treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE,
+      })
+    ).toEqual(['search_partial']);
+  });
+
+  it('leaves out the gap of a technique the run gave up on, even though its reason is retryable', () => {
+    expect(
+      retryableReasonsOf(
+        [
+          { reason: 'generation_budget', technique_id: 'T1059', detail: 'because' },
+          gap('search_partial'),
+        ],
+        { finalTechniqueIds: new Set(['T1059']) }
+      )
+    ).toEqual(['search_partial']);
   });
 });

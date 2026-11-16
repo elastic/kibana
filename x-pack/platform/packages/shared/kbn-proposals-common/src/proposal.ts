@@ -55,6 +55,19 @@ export const proposalConfidenceSchema = z.enum(['low', 'medium', 'high']);
 export type ProposalConfidence = z.infer<typeof proposalConfidenceSchema>;
 
 /**
+ * Who owns the proposal's lifecycle: `workflow` parks a `system-create-proposal`
+ * execution behind it and that gate writes the decision, `none` is written and
+ * decided by the service directly.
+ *
+ * Set once at creation and never changed. Readers branch only on `none`, so a
+ * document written before the field existed — and anything else — takes the
+ * gated path, which keeps refusing a proposal without a `workflowExecutionId`
+ * instead of reading the omission as "gateless".
+ */
+export const proposalGateSchema = lazySchema(() => z.enum(['workflow', 'none']));
+export type ProposalGate = z.infer<typeof proposalGateSchema>;
+
+/**
  * Which feature produced the proposal, so a queue can show its own and not
  * another's. Deliberately not "machine or human" — `createdBy` already records
  * the actor behind it.
@@ -201,6 +214,13 @@ export const proposalSchema = lazySchema(() =>
      * on a proposal that carries no action.
      */
     category: proposalCategorySchema.optional(),
+    /**
+     * Whether declining this proposal can be recorded without a reason. Stored rather than
+     * re-derived by each reader, so the producer owns the question "is declining this a
+     * judgement that has to be justified?" — a to-do is work the analyst does themselves, so
+     * dropping one is not. Absent on documents written before the flag existed, read as `false`.
+     */
+    skipDiscardReason: z.boolean().optional(),
     origin: proposalOriginSchema,
     /** Decision deadline, evaluated on read rather than swept into a status. */
     expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
@@ -227,6 +247,12 @@ export const proposalSchema = lazySchema(() =>
      */
     previousExecutionError: z.string().max(MAX_ERROR_LENGTH).optional(),
 
+    /**
+     * Which lifecycle wrote this proposal. Absent on every document written
+     * before the field existed, which is why absence reads as `workflow`.
+     * Not accepted on any request body: the creator picks it.
+     */
+    gate: proposalGateSchema.optional(),
     /** Gating execution to resume. Absent when no workflow is waiting. */
     workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
     /**
@@ -250,56 +276,64 @@ export interface ProposalWithMetadata extends Proposal {
   action?: ActionMetadata;
 }
 
-export const createProposalRequestSchema = z.object({
-  conversationId: z.string().max(MAX_ID_LENGTH),
-  /**
-   * Short plain-text label. Same precedence as `category` — the caller wins,
-   * because it knows the situation the proposal came out of, which the action's
-   * own metadata cannot. Optional here only: omitting it stores the action's
-   * name, or `DEFAULT_PROPOSAL_TITLE` when the action has none either.
-   */
-  title: z.string().max(MAX_TITLE_LENGTH).optional(),
-  comment: z.string().max(MAX_COMMENT_LENGTH),
-  actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
-  actionInput: boundedActionInput.optional(),
-  /**
-   * Optional rather than defaulted so "the caller omitted it" stays
-   * distinguishable from "the caller said low": a supplied impact takes
-   * precedence over the action's own, and only a genuine omission falls back.
-   */
-  impact: proposalImpactSchema.optional(),
-  /**
-   * Overrides the action's own declared category, and is the only way a
-   * proposal carrying no action gets one at all — consumers group the queue by
-   * category, so without it a non-action proposal has nowhere to appear.
-   */
-  category: proposalCategorySchema.optional(),
-  confidence: proposalConfidenceSchema.default('medium'),
-  /**
-   * Required, and undefaulted on purpose: a default would attribute every
-   * caller that forgot it to whichever system the default named, and the queue
-   * filtering on it would show another solution's proposals as its own.
-   */
-  origin: proposalOriginSchema,
-  expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
-  workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
-  /**
-   * The id to create the proposal under, instead of a random one. For a caller
-   * that derives the id from what it is proposing, so that two calls for the same
-   * thing meet at the same id and Elasticsearch's `op_type: 'create'` — not a
-   * check-then-create in application code — decides which one creates it.
-   *
-   * An id that already exists is refused with `ProposalAlreadyExistsError`; the
-   * service reads and returns nothing. What a duplicate means, and whether a
-   * settled proposal should be followed by a new one under another id, is the
-   * caller's to decide.
-   *
-   * The index is shared across spaces and the service does not scope the id, so
-   * the caller must put the space (and its own producer) into whatever the id is
-   * derived from. Omitting `id` mints a random one, exactly as before.
-   */
-  id: z.uuid().optional(),
-});
+export const createProposalRequestSchema = lazySchema(() =>
+  z.object({
+    conversationId: z.string().max(MAX_ID_LENGTH),
+    /**
+     * Short plain-text label. Same precedence as `category` — the caller wins,
+     * because it knows the situation the proposal came out of, which the action's
+     * own metadata cannot. Optional here only: omitting it stores the action's
+     * name, or `DEFAULT_PROPOSAL_TITLE` when the action has none either.
+     */
+    title: z.string().max(MAX_TITLE_LENGTH).optional(),
+    comment: z.string().max(MAX_COMMENT_LENGTH),
+    actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
+    actionInput: boundedActionInput.optional(),
+    /**
+     * Optional rather than defaulted so "the caller omitted it" stays
+     * distinguishable from "the caller said low": a supplied impact takes
+     * precedence over the action's own, and only a genuine omission falls back.
+     */
+    impact: proposalImpactSchema.optional(),
+    /**
+     * Overrides the action's own declared category, and is the only way a
+     * proposal carrying no action gets one at all — consumers group the queue by
+     * category, so without it a non-action proposal has nowhere to appear.
+     */
+    category: proposalCategorySchema.optional(),
+    /**
+     * Waives the discard reason: declining the proposal is recorded without asking why, and a
+     * close that drops only such proposals asks nothing at all. Defaults to whether the proposal
+     * is a to-do, which the analyst carries out themselves.
+     */
+    skipDiscardReason: z.boolean().optional(),
+    confidence: proposalConfidenceSchema.default('medium'),
+    /**
+     * Required, and undefaulted on purpose: a default would attribute every
+     * caller that forgot it to whichever system the default named, and the queue
+     * filtering on it would show another solution's proposals as its own.
+     */
+    origin: proposalOriginSchema,
+    expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+    /**
+     * The id to create the proposal under, instead of a random one. For a caller
+     * that derives the id from what it is proposing, so that two calls for the same
+     * thing meet at the same id and Elasticsearch's `op_type: 'create'` — not a
+     * check-then-create in application code — decides which one creates it.
+     *
+     * An id that already exists is refused with `ProposalAlreadyExistsError`; the
+     * service reads and returns nothing. What a duplicate means, and whether a
+     * settled proposal should be followed by a new one under another id, is the
+     * caller's to decide.
+     *
+     * The index is shared across spaces and the service does not scope the id, so
+     * the caller must put the space (and its own producer) into whatever the id is
+     * derived from. Omitting `id` mints a random one, exactly as before.
+     */
+    id: z.uuid().optional(),
+  })
+);
 export type CreateProposalRequest = z.infer<typeof createProposalRequestSchema>;
 
 export const approveProposalRequestSchema = z.object({
@@ -438,14 +472,20 @@ export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean 
   proposal.status === 'pending';
 
 /**
- * A to-do for a human: something the analyst carries out themselves, so approving it records that
- * they did. Decision surfaces present it as "I've applied" rather than Approve/Decline, and as
- * "Applied" once marked. Keyed on the category rather than on the absence of an action, so a
- * producer states it explicitly, and a proposal without an action that still asks for permission
- * (to run an analysis, say) keeps Approve/Decline.
+ * Manual work for the analyst (`category: todo`): approving records that they did it.
+ * UI offers "Mark as applied" (with Decline). Keyed on category, not missing action —
+ * a proposal without an action can still ask for permission and keep Approve/Decline.
  */
 export const isTodoProposal = (proposal: Pick<Proposal, 'category'>): boolean =>
   proposal.category === PROPOSAL_CATEGORY_TODO;
+
+/**
+ * No gate workflow owns this proposal: the service wrote it and the service
+ * decides it, synchronously. Only an explicit `none` qualifies, so an older
+ * document stays gated rather than being read as gateless by omission.
+ */
+export const isGatelessProposal = (proposal: Pick<Proposal, 'gate'>): boolean =>
+  proposal.gate === 'none';
 
 /**
  * Approved, but the action it triggers has not finished running yet — `executing`, or briefly

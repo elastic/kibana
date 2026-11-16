@@ -159,6 +159,7 @@ export type {
 } from './search';
 
 export type { SearchSessionsConfigSchema } from '../server/config';
+export type { ReplayCacheContract, ReplayCacheEntry, ReplayCacheResult } from './replay_cache';
 
 export { isRunningResponse } from '../common';
 

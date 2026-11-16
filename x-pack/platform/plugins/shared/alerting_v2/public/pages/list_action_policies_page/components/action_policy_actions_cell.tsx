@@ -39,44 +39,39 @@ export const ActionPolicyActionsCell = ({
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
       {canWrite && (
-        <>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                isLicenseValid
-                  ? i18n.translate('xpack.alertingV2.actionPoliciesList.action.edit.description', {
-                      defaultMessage: 'Edit this action policy',
-                    })
-                  : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE
-              }
-              disableScreenReaderOutput
-            >
-              <EuiButtonIcon
-                iconType="pencil"
-                color="text"
-                aria-label={i18n.translate(
-                  'xpack.alertingV2.actionPoliciesList.action.edit.description',
-                  { defaultMessage: 'Edit this action policy' }
-                )}
-                onClick={() => onEdit(policy.id)}
-                isDisabled={isDisabled || !isLicenseValid}
-                data-test-subj={`editActionPolicyButton-${policy.id}`}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ActionPolicyActionsMenu
-              policy={policy}
-              onViewDetails={onViewDetails}
-              onEdit={onEdit}
-              onClone={onClone}
-              onDelete={onDelete}
-              onUpdateApiKey={onUpdateApiKey}
-              isDisabled={isDisabled}
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
+              isLicenseValid
+                ? i18n.translate('xpack.alertingV2.actionPoliciesList.action.edit.description', {
+                    defaultMessage: 'Edit this action policy',
+                  })
+                : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE
+            }
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="pencil"
+              color="text"
+              aria-label={i18n.translate(
+                'xpack.alertingV2.actionPoliciesList.action.edit.description',
+                { defaultMessage: 'Edit this action policy' }
+              )}
+              onClick={() => onEdit(policy.id)}
+              isDisabled={isDisabled || !isLicenseValid}
+              data-test-subj={`editActionPolicyButton-${policy.id}`}
             />
-          </EuiFlexItem>
-        </>
+          </EuiToolTip>
+        </EuiFlexItem>
       )}
+      <EuiFlexItem grow={false}>
+        {/* Readers reach the details through the name link, so their menu only offers the test. */}
+        <ActionPolicyActionsMenu
+          policy={policy}
+          {...(canWrite && { onViewDetails, onEdit, onClone, onDelete, onUpdateApiKey })}
+          isDisabled={isDisabled}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

@@ -7,10 +7,8 @@
 
 import React, { useCallback, useContext } from 'react';
 import { useSelector, useStore } from 'react-redux-v7';
-import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { PanelRouter } from './panels';
 import { useKibana } from '../../common/lib/kibana';
@@ -32,24 +30,13 @@ import { useSyncSelectedNode } from './use_sync_selected_node';
 import { ResolverNoProcessEvents } from './resolver_no_process_events';
 import { useAutotuneTimerange } from './use_autotune_timerange';
 import type { State } from '../../common/store/types';
-import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
+import { FlyoutBody } from '../../flyout/shared/components/flyout_body';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { buildFlyoutNavTitle } from '../../flyout_v2/shared/utils/build_flyout_nav_title';
 import { ANALYZER_PREVIEW_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
-
-export const ANALYZER_PREVIEW_BANNER = {
-  title: i18n.translate(
-    'xpack.securitySolution.flyout.left.visualizations.analyzer.panelPreviewTitle',
-    {
-      defaultMessage: 'Preview analyzer panel',
-    }
-  ),
-  backgroundColor: 'warning',
-  textColor: 'warning',
-} as const;
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -69,7 +56,6 @@ export const ResolverWithoutProviders = React.memo(
       filters,
       renderCellActions,
       onAlertUpdated,
-      useLegacyExpandableFlyout = false,
     }: ResolverProps,
     refToForward
   ) {
@@ -78,7 +64,6 @@ export const ResolverWithoutProviders = React.memo(
     const store = useStore();
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const { openPreviewPanel } = useExpandableFlyoutApi();
     const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
 
     useResolverQueryParamCleaner(resolverComponentInstanceID);
@@ -160,50 +145,36 @@ export const ResolverWithoutProviders = React.memo(
     );
 
     const onShowPanel = useCallback(() => {
-      const shouldUseSystemFlyout = !useLegacyExpandableFlyout;
-
-      if (shouldUseSystemFlyout) {
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <EuiPanel>
-                <PanelRouter
-                  id={resolverComponentInstanceID}
-                  nodeEventOnClick={onShowEvent}
-                  renderCellActions={renderCellActions}
-                />
-              </EuiPanel>
-            ),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            session: 'inherit',
-            title: buildFlyoutNavTitle(ANALYZER_PREVIEW_TITLE),
-          }
-        );
-      } else {
-        openPreviewPanel({
-          id: DocumentDetailsAnalyzerPanelKey,
-          params: {
-            resolverComponentInstanceID,
-            banner: ANALYZER_PREVIEW_BANNER,
-          },
-        });
-      }
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: (
+            <FlyoutBody panelProps={{ paddingSize: 'none' }}>
+              <PanelRouter
+                id={resolverComponentInstanceID}
+                nodeEventOnClick={onShowEvent}
+                renderCellActions={renderCellActions}
+              />
+            </FlyoutBody>
+          ),
+        }),
+        {
+          ...defaultFlyoutProperties,
+          session: 'inherit',
+          title: buildFlyoutNavTitle(ANALYZER_PREVIEW_TITLE),
+        }
+      );
     }, [
       defaultFlyoutProperties,
       history,
       onShowEvent,
-      openPreviewPanel,
       overlays,
       renderCellActions,
       resolverComponentInstanceID,
       services,
       store,
-      useLegacyExpandableFlyout,
     ]);
 
     return (

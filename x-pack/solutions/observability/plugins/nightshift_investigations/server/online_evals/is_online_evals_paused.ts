@@ -7,19 +7,16 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG } from '@kbn/nightshift-shared';
+import { followBooleanFlag } from './follow_boolean_flag';
 
 /**
- * Follows the `nightshift.onlineEvals.paused` kill switch, so flipping it applies to the next run
- * without a redeploy. Reads paused until start services resolve, so scoring fails closed.
+ * Follows the `nightshift.onlineEvals.paused` kill switch. Reads paused until start services
+ * resolve, so scoring fails closed.
  */
 export const createIsOnlineEvalsPaused = (
   getStartServices: CoreSetup['getStartServices']
-): (() => boolean) => {
-  let isPaused = true;
-  void getStartServices().then(([{ featureFlags }]) => {
-    featureFlags.getBooleanValue$(NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG, false).subscribe((value) => {
-      isPaused = value;
-    });
+): (() => boolean) =>
+  followBooleanFlag(getStartServices, NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG, {
+    fallback: false,
+    untilRead: true,
   });
-  return () => isPaused;
-};

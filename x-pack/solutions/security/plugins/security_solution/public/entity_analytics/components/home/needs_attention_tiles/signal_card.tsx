@@ -11,7 +11,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingSpinner,
+  EuiProgress,
+  EuiSkeletonRectangle,
   EuiText,
   EuiToolTip,
   useEuiFontSize,
@@ -21,11 +22,14 @@ import { css } from '@emotion/react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 
-import type { SignalCardData } from './data';
+import type { TimeRange } from '../../../../../common/entity_analytics/home/constants';
+import type { SignalCardData, TileDeltaFailure } from './data';
 
 export interface SignalCardProps {
   card: SignalCardData;
   selected: boolean;
+  /** The selected range; the delta compares with the range just before it. */
+  timeRange: TimeRange;
   onToggle: () => void;
 }
 
@@ -50,16 +54,60 @@ const SELECTED_DOT_OFFSET = 8;
 
 const TREND_UPWARD = '\u{2191}';
 const TREND_DOWNWARD = '\u{2193}';
+const TREND_NONE = '=';
 
 const notEnoughHistory = i18n.translate(
   'xpack.securitySolution.entityAnalytics.facelift.signalCard.deltaNoHistory',
+  { defaultMessage: 'Not enough history' }
+);
+
+/** What a screen reader hears for the same note: the visible text is shorter. */
+const notEnoughHistoryDescription = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCard.deltaNoHistoryDescription',
   { defaultMessage: 'Not enough history to compare' }
 );
 
-const vsPreviousPeriod = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.facelift.signalCard.vsPreviousPeriod',
-  { defaultMessage: 'vs previous period' }
+/** How much history the comparison needs: this period and the one before it. */
+const HISTORY_NEEDED: Record<TimeRange, string> = {
+  '24h': i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.history24h', {
+    defaultMessage: '48 hours',
+  }),
+  '7d': i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.history7d', {
+    defaultMessage: '14 days',
+  }),
+  '30d': i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.history30d', {
+    defaultMessage: '60 days',
+  }),
+};
+
+const getNotEnoughHistoryTooltip = (timeRange: TimeRange) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.deltaNoHistoryTip', {
+    defaultMessage:
+      'Comparing needs twice the selected range of history: this period and the one before it. The comparison will be available after {duration} of data.',
+    values: { duration: HISTORY_NEEDED[timeRange] },
+  });
+
+const COMPARISON_UNAVAILABLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCard.comparisonUnavailable',
+  { defaultMessage: 'Comparison unavailable' }
 );
+
+const COMPARISON_FAILURE_TOOLTIP: Record<TileDeltaFailure, string> = {
+  delta: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.facelift.signalCard.comparisonFailedTip',
+    { defaultMessage: "Couldn't load the previous period to compare with." }
+  ),
+  history: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.facelift.signalCard.historyCheckFailedTip',
+    { defaultMessage: "Couldn't check how much history is available to compare with." }
+  ),
+};
+
+const getVsPreviousPeriod = (timeRange: TimeRange) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.vsPreviousWindow', {
+    defaultMessage: 'vs. previous {window}',
+    values: { window: timeRange },
+  });
 
 /** Matches Elastic Charts metric title/subtitle truncation (line clamp). */
 const metricLineClamp = (maxLines: number) => css`
@@ -80,13 +128,20 @@ interface TrendBadgeColors {
 
 /**
  * Lens CompareTo secondary-metric palette with Trend reversed: for these tiles an increase is
- * bad (red) and a decrease is good (green).
+ * bad (red) and a decrease is good (green); no change is grey.
  */
 const getTrendReversedBadgeColors = (
   delta: number,
   euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']
-): TrendBadgeColors =>
-  delta < 0
+): TrendBadgeColors => {
+  if (delta === 0) {
+    return {
+      backgroundColor: euiTheme.colors.backgroundLightText,
+      textColor: euiTheme.colors.textParagraph,
+      icon: TREND_NONE,
+    };
+  }
+  return delta < 0
     ? {
         backgroundColor: euiTheme.colors.backgroundLightSuccess,
         textColor: euiTheme.colors.textSuccess,
@@ -97,6 +152,7 @@ const getTrendReversedBadgeColors = (
         textColor: euiTheme.colors.textDanger,
         icon: TREND_UPWARD,
       };
+};
 
 /** From this size on, a tile number is shortened: precision at that scale does not help triage. */
 const COMPACT_NUMBER_FROM = 10_000;
@@ -119,7 +175,15 @@ const getDeltaDescription = (
   shownDelta: number | undefined,
   showNoHistory: boolean
 ): string | undefined => {
-  if (shownDelta === undefined) return showNoHistory ? notEnoughHistory : undefined;
+  if (shownDelta === undefined) return showNoHistory ? notEnoughHistoryDescription : undefined;
+  if (shownDelta === 0) {
+    return i18n.translate(
+      'xpack.securitySolution.entityAnalytics.facelift.signalCard.ariaLabelNoChange',
+      {
+        defaultMessage: 'No change compared with the previous period',
+      }
+    );
+  }
   // Exact, even where the badge shortens it.
   const amount = Math.abs(shownDelta).toLocaleString();
   return shownDelta > 0
@@ -133,8 +197,8 @@ const getDeltaDescription = (
       });
 };
 
-const DeltaLabel: React.FC<{ text?: string; testSubj?: string }> = ({
-  text = vsPreviousPeriod,
+const DeltaLabel: React.FC<{ text: string; testSubj?: string }> = ({
+  text,
   testSubj = 'eaFaceliftSignalCardDeltaLabel',
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -158,8 +222,68 @@ const DeltaLabel: React.FC<{ text?: string; testSubj?: string }> = ({
   );
 };
 
+/** Keeps Enter and Space on a note inside the tile from reaching the tile's own key handler. */
+const stopToggleKeys = (event: React.KeyboardEvent) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.stopPropagation();
+  }
+};
+
+/**
+ * The delta row when there is something to say instead of a change: an icon, a short reason and a
+ * tooltip. The whole note is the hover target, not just the small icon. EuiToolTip needs a focusable
+ * child, so the note takes focus; Enter and Space on it stay on the note and do not reach the
+ * tile's own key handler, which would toggle the table filter.
+ */
+const DeltaNote: React.FC<{
+  icon: 'warning' | 'error';
+  text: string;
+  tooltip: string;
+  testSubj: string;
+}> = ({ icon, text, tooltip, testSubj }) => {
+  const { euiTheme } = useEuiTheme();
+  const { fontSize } = useEuiFontSize('xs');
+  return (
+    <EuiToolTip content={tooltip} position="top">
+      <span
+        tabIndex={0}
+        aria-label={`${text}. ${tooltip}`}
+        onKeyDown={stopToggleKeys}
+        css={css`
+          display: inline-flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: ${euiTheme.size.xs};
+          max-inline-size: 100%;
+          min-block-size: ${BADGE_HEIGHT}px;
+          text-align: end;
+        `}
+        data-test-subj={testSubj}
+      >
+        <EuiIcon
+          type={icon}
+          color={icon === 'error' ? euiTheme.colors.textDanger : 'warning'}
+          size="s"
+          aria-hidden
+          data-test-subj={`eaFaceliftSignalCardIssueIcon-${icon}`}
+        />
+        <span
+          css={css`
+            min-inline-size: 0;
+            font-size: ${fontSize};
+            line-height: ${METRIC_LINE_HEIGHT};
+            color: ${euiTheme.colors.textSubdued};
+          `}
+        >
+          {text}
+        </span>
+      </span>
+    </EuiToolTip>
+  );
+};
+
 /** Secondary metric: trend badge with the label after it. */
-const MetricTrendBadge: React.FC<{ delta: number }> = ({ delta }) => {
+const MetricTrendBadge: React.FC<{ delta: number; label: string }> = ({ delta, label }) => {
   const { euiTheme } = useEuiTheme();
   const { fontSize } = useEuiFontSize('xs');
   const { backgroundColor, textColor, icon } = getTrendReversedBadgeColors(delta, euiTheme);
@@ -206,7 +330,7 @@ const MetricTrendBadge: React.FC<{ delta: number }> = ({ delta }) => {
           {icon}
         </span>
       </span>
-      <DeltaLabel />
+      <DeltaLabel text={label} />
     </span>
   );
 };
@@ -346,10 +470,67 @@ const unfilterTableTooltip = (title: string) =>
     values: { title },
   });
 
-const renderValueRow = (card: SignalCardData, isLoading: boolean, isZero: boolean) => {
-  if (isLoading) {
-    return <EuiLoadingSpinner size="l" data-test-subj="eaFaceliftSignalCardLoading" />;
-  }
+const NOT_AVAILABLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCard.notAvailable',
+  { defaultMessage: 'N/A' }
+);
+
+/** What a screen reader calls the skeletons while the tile loads. */
+const COUNT_SKELETON_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCard.countSkeletonLabel',
+  { defaultMessage: 'Count' }
+);
+const CHANGE_SKELETON_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCard.changeSkeletonLabel',
+  { defaultMessage: 'Change' }
+);
+
+/** Where the count will be while it loads. */
+const CountSkeleton: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={css`
+        margin-block-end: ${euiTheme.size.s};
+      `}
+    >
+      <EuiSkeletonRectangle
+        width={64}
+        height={28}
+        borderRadius="m"
+        contentAriaLabel={COUNT_SKELETON_LABEL}
+        data-test-subj="eaFaceliftSignalCardCountSkeleton"
+      />
+    </div>
+  );
+};
+
+/** Where the change will be while it loads, with the label it will have. */
+const DeltaSkeleton: React.FC<{ label: string }> = ({ label }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <span
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        gap: ${euiTheme.size.xs};
+        max-inline-size: 100%;
+        min-block-size: ${BADGE_HEIGHT}px;
+      `}
+      data-test-subj="eaFaceliftSignalCardDeltaSkeleton"
+    >
+      <EuiSkeletonRectangle
+        width={36}
+        height={BADGE_HEIGHT}
+        borderRadius="m"
+        contentAriaLabel={CHANGE_SKELETON_LABEL}
+      />
+      <DeltaLabel text={label} />
+    </span>
+  );
+};
+
+const renderValueRow = (card: SignalCardData, isZero: boolean) => {
   // A 0 without a result (failed, skipped, timed out, no access) is not a count: keep the dash.
   if (isZero && !card.hasCount) {
     return '—';
@@ -362,16 +543,23 @@ const renderValueRow = (card: SignalCardData, isLoading: boolean, isZero: boolea
  * prototype. The whole card is the one control that toggles the filter (select and clear), with
  * hover and selected states.
  */
-export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle }) => {
+export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRange, onToggle }) => {
   const { euiTheme } = useEuiTheme();
+  const vsPreviousPeriod = getVsPreviousPeriod(timeRange);
   const { fontSize: titleFontSize } = useEuiFontSize('s');
   const { fontSize: subtitleFontSize } = useEuiFontSize('xs');
   const [hovered, setHovered] = useState(false);
 
   const isLoading = card.isLoading ?? false;
   const isZero = card.value === 0;
-  const interactive = !isZero && !isLoading;
-  const noDataMessage = isZero && !isLoading ? card.noDataMessage : undefined;
+  // A tile without a count has nothing to filter the table by.
+  const countIssue = isLoading ? undefined : card.countIssue;
+  // A count that came back, also 0, is compared with the previous period; only a count above 0
+  // filters the table.
+  const hasCount = !isLoading && !countIssue && card.hasCount;
+  const interactive = hasCount && !isZero;
+  // A selected tile stays clickable at 0, so the filter it applies can still be cleared.
+  const canToggle = (interactive || selected) && !isLoading;
   // Hover only: mouse clicks must not leave focus chrome that looks like hover after deselect.
   const emphasized = interactive && hovered;
 
@@ -389,25 +577,36 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
     : euiTheme.colors.borderBasePlain;
 
   const { delta, trend } = card;
-  const shownDelta =
-    interactive && !card.isDeltaLoading && delta !== undefined && delta !== 0 ? delta : undefined;
+  // Each part that is still loading has a skeleton or no line, and the tile gets one progress bar.
+  const isDeltaLoading = hasCount && Boolean(card.isDeltaLoading);
+  const isTrendLoading = hasCount && Boolean(card.isTrendLoading);
+  const showProgress = isLoading || isDeltaLoading || isTrendLoading;
+  const shownDelta = hasCount && !card.isDeltaLoading && delta !== undefined ? delta : undefined;
   // No line next to "Not enough history to compare": the short history would make it misleading.
   const shownTrend =
-    interactive && card.isDeltaUnavailable !== true && trend !== undefined && trend.length > 1
+    hasCount &&
+    !showProgress &&
+    card.isDeltaUnavailable !== true &&
+    trend !== undefined &&
+    trend.length > 1
       ? trend
       : undefined;
   const showNoHistory =
-    interactive &&
+    hasCount &&
     card.isDeltaUnavailable === true &&
     !card.isDeltaLoading &&
     shownDelta === undefined;
+  const failedComparison =
+    hasCount && !card.isDeltaLoading && shownDelta === undefined && !showNoHistory
+      ? card.deltaFailure
+      : undefined;
 
   const deltaDescription = getDeltaDescription(shownDelta, showNoHistory);
   const ariaLabel = deltaDescription ? `${card.title}. ${deltaDescription}` : card.title;
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
-      if (!interactive) {
+      if (!canToggle) {
         return;
       }
       if (event.key === 'Enter' || event.key === ' ') {
@@ -415,23 +614,24 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
         onToggle();
       }
     },
-    [interactive, onToggle]
+    [canToggle, onToggle]
   );
 
   const cardNode = (
     <div
       role="button"
-      tabIndex={interactive ? 0 : -1}
-      aria-pressed={interactive ? selected : undefined}
-      aria-disabled={!interactive || undefined}
+      tabIndex={canToggle ? 0 : -1}
+      aria-pressed={canToggle ? selected : undefined}
+      aria-disabled={!canToggle || undefined}
+      aria-busy={showProgress || undefined}
       aria-label={ariaLabel}
       data-test-subj={`eaFaceliftSignalCard-${card.id}`}
-      onClick={interactive ? onToggle : undefined}
+      onClick={canToggle ? onToggle : undefined}
       onKeyDown={onKeyDown}
       onMouseDown={(event) => {
         // Keep mouse activation from focusing the card, so deselection returns to
         // the default tile (not sticky focus-as-hover) when the pointer leaves.
-        if (interactive && event.button === 0) {
+        if (canToggle && event.button === 0) {
           event.preventDefault();
         }
       }}
@@ -448,7 +648,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
         border: 1px solid ${borderColor};
         border-radius: ${euiTheme.border.radius.panel};
         background: ${tileBackground};
-        cursor: ${interactive ? 'pointer' : 'default'};
+        cursor: ${canToggle ? 'pointer' : 'default'};
         overflow: hidden;
         position: relative;
         z-index: ${selected || emphasized ? 2 : 1};
@@ -464,6 +664,21 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
         }
       `}
     >
+      {showProgress ? (
+        <EuiProgress
+          size="xs"
+          color="primary"
+          position="absolute"
+          aria-hidden
+          data-test-subj="eaFaceliftSignalCardProgress"
+          css={css`
+            z-index: 2;
+            inset-block-start: auto;
+            inset-block-end: 0;
+            border-radius: 0;
+          `}
+        />
+      ) : null}
       {shownTrend ? (
         <div
           css={css`
@@ -554,12 +769,24 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
                 gap: ${DELTA_VALUE_GAP}px;
               `}
             >
-              {noDataMessage ? (
-                <EuiText size="xs" color="subdued">
-                  {noDataMessage}
+              {isLoading ? (
+                <CountSkeleton />
+              ) : countIssue?.kind === 'locked' ? (
+                <EuiText size="xs" color="subdued" data-test-subj="eaFaceliftSignalCardLocked">
+                  <EuiIcon
+                    type="lock"
+                    size="s"
+                    aria-hidden
+                    css={css`
+                      margin-inline-end: ${euiTheme.size.xs};
+                      vertical-align: -1px;
+                    `}
+                  />
+                  {countIssue.text}
                 </EuiText>
               ) : (
                 <EuiText
+                  data-test-subj="eaFaceliftSignalCardValue"
                   css={css`
                     font-family: 'Elastic UI Numeric', ${euiTheme.font.family};
                     font-size: ${VALUE_FONT_SIZE}px;
@@ -569,19 +796,39 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
                     color: ${euiTheme.colors.textParagraph};
                   `}
                 >
-                  {renderValueRow(card, isLoading, isZero)}
+                  {countIssue ? (
+                    <span data-test-subj="eaFaceliftSignalCardUnavailable">{NOT_AVAILABLE}</span>
+                  ) : (
+                    renderValueRow(card, isZero)
+                  )}
                 </EuiText>
               )}
-              {interactive && card.isDeltaLoading ? (
-                <span>
-                  <EuiLoadingSpinner size="s" /> <DeltaLabel />
-                </span>
+              {countIssue?.kind === 'issue' ? (
+                <DeltaNote
+                  icon={countIssue.icon}
+                  text={countIssue.text}
+                  tooltip={countIssue.tooltip}
+                  testSubj="eaFaceliftSignalCardCountIssue"
+                />
               ) : null}
-              {shownDelta !== undefined ? <MetricTrendBadge delta={shownDelta} /> : null}
+              {isLoading || isDeltaLoading ? <DeltaSkeleton label={vsPreviousPeriod} /> : null}
+              {shownDelta !== undefined ? (
+                <MetricTrendBadge delta={shownDelta} label={vsPreviousPeriod} />
+              ) : null}
               {showNoHistory ? (
-                <DeltaLabel
+                <DeltaNote
+                  icon="warning"
                   text={notEnoughHistory}
+                  tooltip={getNotEnoughHistoryTooltip(timeRange)}
                   testSubj="eaFaceliftSignalCardDeltaUnavailable"
+                />
+              ) : null}
+              {failedComparison ? (
+                <DeltaNote
+                  icon="error"
+                  text={COMPARISON_UNAVAILABLE}
+                  tooltip={COMPARISON_FAILURE_TOOLTIP[failedComparison]}
+                  testSubj="eaFaceliftSignalCardDeltaFailed"
                 />
               ) : null}
             </div>

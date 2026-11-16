@@ -8,12 +8,12 @@
 import Path from 'path';
 import { symptomTreeId } from '@kbn/nightshift-decision-trees';
 import {
-  CORTEX_ENTITY_TYPE_BUCKETS,
-  CORTEX_ENTITY_TYPES,
-  type CortexEntityType,
-} from '../../common/cortex';
-import { CORTEX_WORKSPACE_ROOT } from '../cortex/materialize';
-import { toCortexKiId } from '../cortex/page_store';
+  WIKI_ENTITY_TYPE_BUCKETS,
+  WIKI_ENTITY_TYPES,
+  type WikiEntityType,
+} from '../../common/wiki';
+import { WIKI_WORKSPACE_ROOT } from '../wiki/materialize';
+import { toWikiKiId } from '../wiki/page_store';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import {
   DECISION_TREE_WORKSPACE_ROOT,
@@ -37,22 +37,22 @@ import {
 } from './seeded_filter';
 
 export interface WorkspaceReadsSummary {
-  /** Canonical Cortex page IDs (`cortex_<entityType>_<slug>`) opened by the agent (excludes `README.md` / `INDEX.md`). */
-  cortexIds: string[];
+  /** Canonical Wiki page IDs (`wiki_<entityType>_<slug>`) opened by the agent (excludes `README.md` / `INDEX.md`). */
+  wikiIds: string[];
   /** Canonical Semantic Memory IDs (`memory_<slug>`) opened by the agent (excludes `README.md` / `.index.json`). */
   memoryIds: string[];
   /** Canonical Decision Tree IDs (`symptom:<slug>`) opened or edited by the agent (excludes `monitors.md`). */
   decisionTreeIds: string[];
   /** Whether the agent opened the catalog/index file of each store. */
   indexReads: {
-    cortexIndex: boolean;
+    wikiIndex: boolean;
     memoryIndex: boolean;
     decisionTreeIndex: boolean;
   };
 }
 
-const BUCKET_TO_ENTITY_TYPE = new Map<string, CortexEntityType>(
-  CORTEX_ENTITY_TYPES.map((entityType) => [CORTEX_ENTITY_TYPE_BUCKETS[entityType], entityType])
+const BUCKET_TO_ENTITY_TYPE = new Map<string, WikiEntityType>(
+  WIKI_ENTITY_TYPES.map((entityType) => [WIKI_ENTITY_TYPE_BUCKETS[entityType], entityType])
 );
 
 const BASH_DECISION_TREE_FILE_RE =
@@ -110,10 +110,10 @@ const NON_FILE_READING_VERBS = new Set<string>([
 ]);
 
 interface MutableReads {
-  cortexIds: Set<string>;
+  wikiIds: Set<string>;
   memoryIds: Set<string>;
   decisionTreeIds: Set<string>;
-  cortexIndex: boolean;
+  wikiIndex: boolean;
   memoryIndex: boolean;
   decisionTreeIndex: boolean;
 }
@@ -133,18 +133,18 @@ const recordDecisionTreeFileMatches = (rawText: string, acc: MutableReads): void
 const recordResolvedFilePath = (
   rawPath: string,
   acc: MutableReads,
-  options?: { allowCortexAndMemory?: boolean; baseDir?: string }
+  options?: { allowWikiAndMemory?: boolean; baseDir?: string }
 ): void => {
-  const allowCortexAndMemory = options?.allowCortexAndMemory ?? true;
+  const allowWikiAndMemory = options?.allowWikiAndMemory ?? true;
   const resolved = Path.posix.resolve(options?.baseDir ?? '/workspace', rawPath);
 
-  if (resolved.startsWith(`${CORTEX_WORKSPACE_ROOT}/`)) {
-    if (!allowCortexAndMemory) {
+  if (resolved.startsWith(`${WIKI_WORKSPACE_ROOT}/`)) {
+    if (!allowWikiAndMemory) {
       return;
     }
-    const relative = resolved.slice(`${CORTEX_WORKSPACE_ROOT}/`.length);
+    const relative = resolved.slice(`${WIKI_WORKSPACE_ROOT}/`.length);
     if (relative.toUpperCase() === 'INDEX.MD') {
-      acc.cortexIndex = true;
+      acc.wikiIndex = true;
       return;
     }
     if (relative.toUpperCase() === 'README.MD') {
@@ -155,14 +155,14 @@ const recordResolvedFilePath = (
       const entityType = BUCKET_TO_ENTITY_TYPE.get(parts[0].toLowerCase());
       const rawSlug = parts[1].slice(0, -'.md'.length);
       if (entityType && rawSlug.length > 0) {
-        acc.cortexIds.add(toCortexKiId(entityType, rawSlug));
+        acc.wikiIds.add(toWikiKiId(entityType, rawSlug));
       }
     }
     return;
   }
 
   if (resolved.startsWith(`${MEMORY_WORKSPACE_ROOT}/`)) {
-    if (!allowCortexAndMemory) {
+    if (!allowWikiAndMemory) {
       return;
     }
     const relative = resolved.slice(`${MEMORY_WORKSPACE_ROOT}/`.length);
@@ -254,7 +254,7 @@ const recordBashCommandReads = (
 };
 
 /**
- * Extracts canonical IDs of Cortex pages, Semantic Memories, and Decision Trees whose contents
+ * Extracts canonical IDs of Wiki pages, Semantic Memories, and Decision Trees whose contents
  * the investigator actually saw (`opened_ids` impressions).
  *
  * Failed tool calls (`step.isError === true` or non-zero bash exit code) and write-only operations
@@ -264,10 +264,10 @@ export const extractWorkspaceReads = (
   steps: readonly InvestigationTranscriptStep[]
 ): WorkspaceReadsSummary => {
   const acc: MutableReads = {
-    cortexIds: new Set<string>(),
+    wikiIds: new Set<string>(),
     memoryIds: new Set<string>(),
     decisionTreeIds: new Set<string>(),
-    cortexIndex: false,
+    wikiIndex: false,
     memoryIndex: false,
     decisionTreeIndex: false,
   };
@@ -281,7 +281,7 @@ export const extractWorkspaceReads = (
     const filePath = params.file_path ?? params.path;
     if (FILE_TOOL_IDS.has(toolId) && typeof filePath === 'string') {
       recordResolvedFilePath(filePath, acc, {
-        allowCortexAndMemory: toolId === SANDBOX_VIEW_FILE_TOOL_ID,
+        allowWikiAndMemory: toolId === SANDBOX_VIEW_FILE_TOOL_ID,
       });
       continue;
     }
@@ -297,11 +297,11 @@ export const extractWorkspaceReads = (
   }
 
   return {
-    cortexIds: [...acc.cortexIds],
+    wikiIds: [...acc.wikiIds],
     memoryIds: [...acc.memoryIds],
     decisionTreeIds: [...acc.decisionTreeIds],
     indexReads: {
-      cortexIndex: acc.cortexIndex,
+      wikiIndex: acc.wikiIndex,
       memoryIndex: acc.memoryIndex,
       decisionTreeIndex: acc.decisionTreeIndex,
     },

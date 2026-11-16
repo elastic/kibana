@@ -6,11 +6,13 @@
  */
 
 import type { ToolMessage } from '@langchain/core/messages';
+import { AIMessage } from '@langchain/core/messages';
 
 import {
   createToolCallMessage,
   createToolResultMessage,
   createUserMessage,
+  extractToolCallsWithIntent,
   extractToolReturn,
   wrapToolResultContent,
 } from './messages';
@@ -153,6 +155,56 @@ describe('createToolCallMessage', () => {
       args: {},
     });
     expect(message.tool_calls?.[0].name).toBe('platform_core_search');
+  });
+
+  it('re-injects the intent as _intent in the args', () => {
+    const message = createToolCallMessage({
+      toolCallId: 'call-1',
+      toolName: 'search',
+      args: { q: 1 },
+      intent: 'Searching logs',
+    });
+    expect(message.tool_calls?.[0].args).toEqual({ _intent: 'Searching logs', q: 1 });
+  });
+
+  it('leaves the args unchanged without intent', () => {
+    const message = createToolCallMessage({
+      toolCallId: 'call-1',
+      toolName: 'search',
+      args: { q: 1 },
+    });
+    expect(message.tool_calls?.[0].args).toEqual({ q: 1 });
+  });
+});
+
+describe('extractToolCallsWithIntent', () => {
+  const extract = (args: Record<string, unknown>) =>
+    extractToolCallsWithIntent(
+      new AIMessage({ content: '', tool_calls: [{ id: 'call-1', name: 'search', args }] })
+    );
+
+  it('moves _intent out of the args into intent', () => {
+    expect(extract({ _intent: 'Searching logs', q: 1 })).toEqual([
+      { toolCallId: 'call-1', toolName: 'search', args: { q: 1 }, intent: 'Searching logs' },
+    ]);
+  });
+
+  it('drops a blank _intent', () => {
+    const [call] = extract({ _intent: '   ', q: 1 });
+    expect(call.args).toEqual({ q: 1 });
+    expect(call.intent).toBeUndefined();
+  });
+
+  it('drops a non-string _intent', () => {
+    const [call] = extract({ _intent: { foo: 1 }, q: 1 });
+    expect(call.args).toEqual({ q: 1 });
+    expect(call.intent).toBeUndefined();
+  });
+
+  it('leaves calls without _intent unchanged', () => {
+    const [call] = extract({ q: 1 });
+    expect(call.args).toEqual({ q: 1 });
+    expect(call.intent).toBeUndefined();
   });
 });
 

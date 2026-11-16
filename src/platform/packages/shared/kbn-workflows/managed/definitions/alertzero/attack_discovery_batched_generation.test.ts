@@ -179,12 +179,19 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       );
     });
 
-    // A true-positive or inconclusive review retires its alerts with this tag, so
-    // correlating them again would only persist a near-duplicate attack.
-    it('excludes alerts the review tagged az:ad_correlated', () => {
+    // A true-positive or inconclusive review retires its alerts with
+    // `az:ad_correlated`, and a false positive retires them with `az:ad_fp_chain`.
+    // Correlating either again would only persist a near-duplicate attack.
+    it('excludes alerts tagged az:ad_correlated or az:ad_fp_chain', () => {
       expect(retrieve().with?.filter).toEqual({
         bool: {
-          must_not: [{ terms: { 'kibana.alert.workflow_tags': ['az:ad_correlated'] } }],
+          must_not: [
+            {
+              terms: {
+                'kibana.alert.workflow_tags': ['az:ad_correlated', 'az:ad_fp_chain'],
+              },
+            },
+          ],
         },
       });
     });

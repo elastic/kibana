@@ -39,6 +39,7 @@ describe('run workflow route', () => {
     ensureAuthorizedToRunWorkflow: jest.fn(),
     preflightWorkflowExecution: jest.fn(),
     recordWorkflowExecution: jest.fn(),
+    confirmAlertIndices: jest.fn(),
   };
   const service = {
     run: jest.fn(),

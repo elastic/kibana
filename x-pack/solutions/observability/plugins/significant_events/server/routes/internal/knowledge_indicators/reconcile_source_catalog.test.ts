@@ -622,11 +622,18 @@ describe('createSourceChangeListener', () => {
   const setup = () => {
     const enqueueReconciliation = jest.fn(async () => {});
     const ensurePeriodicReconciliation = jest.fn(async () => {});
+    const syncContinuousOnboarding = jest.fn(async () => {});
     const listener = createSourceChangeListener({
       enqueueReconciliation,
       ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
     });
-    return { listener, enqueueReconciliation, ensurePeriodicReconciliation };
+    return {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+    };
   };
 
   it.each<SourceChangeEvent>([
@@ -640,15 +647,38 @@ describe('createSourceChangeListener', () => {
       request,
     },
   ])('queues a $type change in its request space', async (event) => {
-    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
-    const otherRequest = { spaceId: 'other' } as KibanaRequest;
-    await listener({ ...event, request: otherRequest });
+    const {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+    } = setup();
+    await listener(event);
     expect(enqueueReconciliation).toHaveBeenCalledWith({
       sourceId: source.id,
       sourceSlug: source.slug,
-      request: otherRequest,
+      request,
     });
-    expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(otherRequest);
+    expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(request);
+    expect(syncContinuousOnboarding).toHaveBeenCalledWith(event);
+  });
+
+  // Each branch installs or enables a workflow in the event's space, and Nightshift only runs in
+  // the default one — including for a write made through `getSourcesClient()` rather than a route.
+  it('ignores a change made outside the default space', async () => {
+    const {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+    } = setup();
+    const otherRequest = { spaceId: 'marketing' } as KibanaRequest;
+
+    await listener({ type: 'created', source, request: otherRequest });
+
+    expect(enqueueReconciliation).not.toHaveBeenCalled();
+    expect(ensurePeriodicReconciliation).not.toHaveBeenCalled();
+    expect(syncContinuousOnboarding).not.toHaveBeenCalled();
   });
 
   it('retains queued cleanup when periodic recovery setup fails', async () => {
@@ -669,8 +699,30 @@ describe('createSourceChangeListener', () => {
     expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(request);
   });
 
+  it('keeps reconciliation tasks when continuous onboarding sync fails', async () => {
+    const {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+    } = setup();
+    syncContinuousOnboarding.mockRejectedValue(new Error('settings unavailable'));
+
+    await expect(listener({ type: 'created', source, request })).rejects.toThrow(
+      'settings unavailable'
+    );
+
+    expect(enqueueReconciliation).toHaveBeenCalledTimes(1);
+    expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(request);
+  });
+
   it('ignores title changes that preserve the query and enabled flag', async () => {
-    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
+    const {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+    } = setup();
     await listener({
       type: 'updated',
       source: { ...source, title: 'Renamed' },
@@ -679,6 +731,7 @@ describe('createSourceChangeListener', () => {
     });
     expect(enqueueReconciliation).not.toHaveBeenCalled();
     expect(ensurePeriodicReconciliation).not.toHaveBeenCalled();
+    expect(syncContinuousOnboarding).not.toHaveBeenCalled();
   });
 });
 

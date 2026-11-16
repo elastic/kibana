@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+/**
+ * Root of every temporary field a generated pipeline writes; the on_failure handler removes it.
+ */
+export const TEMP_FIELD = '_tmp';
+
 export const BOILERPLATE_PIPELINE = {
   processors: [
     {
@@ -35,6 +40,15 @@ export const BOILERPLATE_PIPELINE = {
     },
   ],
   on_failure: [
+    {
+      remove: {
+        tag: 'remove_temp_fields_on_failure',
+        field: TEMP_FIELD,
+        ignore_missing: true,
+        description:
+          'Temporary fields must not leak into documents that failed before the cleanup processor ran.',
+      },
+    },
     {
       set: {
         field: 'event.kind',

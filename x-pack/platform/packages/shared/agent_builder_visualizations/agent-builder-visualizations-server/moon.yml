@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-server'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/custom-content-server'
   - '@kbn/esql-server-utils'
   - '@kbn/esql-utils'
   - '@kbn/esql-types'
@@ -28,6 +29,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/palettes'
   - '@kbn/zod'
+  - '@kbn/custom-content-common'
 tags:
   - shared-server
   - package

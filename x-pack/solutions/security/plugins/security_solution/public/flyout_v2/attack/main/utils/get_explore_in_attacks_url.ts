@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
-import { getFieldValue } from '@kbn/discover-utils';
 import { encode } from '@kbn/rison';
 import moment from 'moment';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
-import { resolveAttackFlyoutParams } from '../../../../detections/pages/attacks/utils';
 import {
   ATTACK_FLYOUT_V2_URL_PARAM,
   encodeAttackFlyoutV2UrlParam,
@@ -21,12 +18,6 @@ export interface GetExploreInAttacksUrlParams {
   indexName: string;
   timestamp?: string;
   attacksBaseURL: string;
-  /**
-   * When true, encode an auto-open trigger for the v2 attack flyout instead of the
-   * legacy URL-driven flyout state. The destination attacks page reads this param
-   * and opens the v2 flyout via the system overlays API.
-   */
-  useFlyoutV2?: boolean;
 }
 
 /**
@@ -38,7 +29,6 @@ export const buildExploreInAttacksUrl = ({
   indexName,
   timestamp,
   attacksBaseURL,
-  useFlyoutV2 = false,
 }: GetExploreInAttacksUrlParams): string => {
   const fromTime = timestamp ?? new Date().toISOString();
   const toTime = moment(fromTime).add(5, 'minutes').toISOString();
@@ -63,41 +53,8 @@ export const buildExploreInAttacksUrl = ({
   const urlParams = new URLSearchParams({
     [URL_PARAM_KEY.appQuery]: kqlAppQuery,
     [URL_PARAM_KEY.timerange]: timerange,
+    [ATTACK_FLYOUT_V2_URL_PARAM]: encodeAttackFlyoutV2UrlParam({ attackId, indexName }),
   });
-
-  if (useFlyoutV2) {
-    urlParams.set(
-      ATTACK_FLYOUT_V2_URL_PARAM,
-      encodeAttackFlyoutV2UrlParam({ attackId, indexName })
-    );
-  } else {
-    urlParams.set(
-      URL_PARAM_KEY.flyout,
-      resolveAttackFlyoutParams({ index: indexName, attackId }, null)
-    );
-  }
 
   return `${attacksBaseURL}?${urlParams.toString()}`;
-};
-
-/**
- * Builds the explore-in-attacks URL by extracting attackId, indexName, and timestamp
- * from a DataTableRecord hit.
- */
-export const getExploreInAttacksUrl = (
-  hit: DataTableRecord,
-  attacksBaseURL: string,
-  { useFlyoutV2 = false }: { useFlyoutV2?: boolean } = {}
-): string => {
-  const attackId = hit.raw._id ?? (getFieldValue(hit, '_id') as string) ?? '';
-  const indexName = hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? '';
-  const timestamp = getFieldValue(hit, '@timestamp') as string | undefined;
-
-  return buildExploreInAttacksUrl({
-    attackId,
-    indexName,
-    timestamp,
-    attacksBaseURL,
-    useFlyoutV2,
-  });
 };

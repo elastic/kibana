@@ -10,13 +10,20 @@
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
+import {
+  API_VERSION,
+  AVAILABILITY,
+  MAX_EXECUTION_FIELD_NAME_LENGTH,
+  MAX_PAGE_SIZE,
+  MAX_WORKFLOW_ENTITY_ID_LENGTH,
+  OAS_TAG,
+} from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
-import { executionIdParamSchema } from '../utils/schemas';
+import { executionIdParamSchema, validatePaginationWindow } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerGetExecutionLogsRoute({ router, api, spaces }: RouteDependencies) {
@@ -42,32 +49,39 @@ export function registerGetExecutionLogsRoute({ router, api, spaces }: RouteDepe
         validate: {
           request: {
             params: executionIdParamSchema,
-            query: schema.object({
-              stepExecutionId: schema.maybe(
-                schema.string({
-                  meta: { description: 'Filter logs by a specific step execution ID.' },
-                })
-              ),
-              size: schema.number({
-                min: 1,
-                max: MAX_PAGE_SIZE,
-                defaultValue: 100,
-                meta: { description: 'Number of log entries per page.' },
-              }),
-              page: schema.number({
-                min: 1,
-                defaultValue: 1,
-                meta: { description: 'Page number.' },
-              }),
-              sortField: schema.maybe(
-                schema.string({ meta: { description: 'Field to sort by.' } })
-              ),
-              sortOrder: schema.maybe(
-                schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-                  meta: { description: 'Sort order.' },
-                })
-              ),
-            }),
+            query: schema.object(
+              {
+                stepExecutionId: schema.maybe(
+                  schema.string({
+                    maxLength: MAX_WORKFLOW_ENTITY_ID_LENGTH,
+                    meta: { description: 'Filter logs by a specific step execution ID.' },
+                  })
+                ),
+                size: schema.number({
+                  min: 1,
+                  max: MAX_PAGE_SIZE,
+                  defaultValue: 100,
+                  meta: { description: 'Number of log entries per page.' },
+                }),
+                page: schema.number({
+                  min: 1,
+                  defaultValue: 1,
+                  meta: { description: 'Page number.' },
+                }),
+                sortField: schema.maybe(
+                  schema.string({
+                    maxLength: MAX_EXECUTION_FIELD_NAME_LENGTH,
+                    meta: { description: 'Field to sort by.' },
+                  })
+                ),
+                sortOrder: schema.maybe(
+                  schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+                    meta: { description: 'Sort order.' },
+                  })
+                ),
+              },
+              { validate: validatePaginationWindow(MAX_PAGE_SIZE) }
+            ),
           },
         },
       },
