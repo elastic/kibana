@@ -16,8 +16,8 @@ const INVESTIGATION_FIELD = '_custom_agent_name';
 // Full wizard flows chain several helper waits of up to 60 s each (Continue enabled after
 // ES|QL validation, step navigation retries), which can exceed the default per-test budget.
 const LONG_FLOW_EXTRA_TIMEOUT_MS = 120_000;
-// Query-error flows never pass the About step, but the editor mount and the Continue retry
-// loops (up to 60 s each) can still exceed the default per-test budget on a cold project.
+// Define-step flows stop at or just past the query check, but the editor mount and the Continue
+// retry loops (up to 60 s each) can still exceed the default per-test budget on a cold project.
 const DEFINE_STEP_EXTRA_TIMEOUT_MS = 60_000;
 // ES|QL field-list loading is async; combo-box options stay empty until it settles, which can
 // take tens of seconds on a cold worker.
@@ -210,6 +210,7 @@ spaceTest.describe(
         await ruleCreateWizard.createAndEnable.click();
 
         await expect(saveWithWarningsModal).toBeVisible();
+        await expect(saveWithWarningsModal).toContainText('ES|QL Query: Error validating ES|QL');
         await expect(saveWithWarningsModal).toContainText('fake');
 
         await ruleEditPage.saveWithWarningsConfirmButton.click();
