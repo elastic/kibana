@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep } from 'lodash';
 import type { MutableRefObject } from 'react';
 import { getDragPreviewRect, getSensorOffsets } from '../../../common/utils';
 
@@ -16,6 +16,7 @@ import type { FlexLayoutData, FlexLayoutStateManager } from '../../types';
 import type { GridLayoutContextType } from '../../use_grid_layout_context';
 import { getSensorType } from '../../../common/sensors';
 import type { PointerPosition, UserInteractionEvent } from '../../../common/types';
+import { isFlexPanelDataEqual } from '../../utils/equality_checks';
 import { getPanelKeysInOrder } from '../../utils/panel_order';
 import type { UserKeyboardEvent } from '../../../common/sensors/keyboard/types';
 import { getAllowedBreakpoints, getKeyboardDragPosition, getResizePreviewRect } from './utils';
@@ -136,7 +137,7 @@ export const moveAction = (
   if (isResize) {
     const targetWidth = previewRect.right - previewRect.left;
     requestedPanelData.width = Math.max(targetWidth, 1);
-    if (!isEqual(requestedPanelData, lastRequestedPanelPosition.current)) {
+    if (!isFlexPanelDataEqual(requestedPanelData, lastRequestedPanelPosition.current)) {
       lastRequestedPanelPosition.current = { ...requestedPanelData };
 
       const nextLayout = cloneDeep(currentLayout) ?? {};

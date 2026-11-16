@@ -8,7 +8,6 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map } from 'rxjs';
@@ -17,6 +16,7 @@ import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfi
 import { getScrollContainer } from '@kbn/core-chrome-layout-utils';
 
 import type { ActivePanelEvent } from './panel';
+import { isFlexLayoutEqual } from './utils/equality_checks';
 import type {
   FlexLayoutData,
   FlexLayoutStateManager,
@@ -72,7 +72,7 @@ export const useGridLayoutState = ({
       filter(([_, event]) => !Boolean(event)),
       map(([currentLayout]) => currentLayout),
       // only emit if the layout has changed
-      distinctUntilChanged(isEqual)
+      distinctUntilChanged(isFlexLayoutEqual)
     );
 
     return {

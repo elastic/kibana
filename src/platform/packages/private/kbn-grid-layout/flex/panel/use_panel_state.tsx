@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, distinctUntilChanged, filter, map } from 'rxjs';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import type { FlexPanelData } from './types';
-import type { FlexLayoutData } from '../types';
 import { nonNullable } from '../../common/utils';
+import { isFlexPanelDataEqual } from '../utils/equality_checks';
 
 export const usePanelState = ({
   panelId,
@@ -25,16 +24,16 @@ export const usePanelState = ({
   const cleanupCallback = useRef<null | (() => void)>();
 
   const panel$ = useMemo(() => {
-    const panelSubject = new BehaviorSubject(
-      getPanelState(gridLayoutStateManager.gridLayout$.getValue(), panelId)
+    const panelSubject = new BehaviorSubject<FlexPanelData | undefined>(
+      gridLayoutStateManager.gridLayout$.getValue()[panelId]
     );
 
     const subscription = gridLayoutStateManager.gridLayout$
       .pipe(
-        map((layout) => getPanelState(layout, panelId)),
+        map((layout): FlexPanelData | undefined => layout[panelId]),
         // filter out undefined panels
         filter(nonNullable),
-        distinctUntilChanged((panelA, panelB) => isEqual(panelA, panelB))
+        distinctUntilChanged(isFlexPanelDataEqual)
       )
       .subscribe((panel) => {
         panelSubject.next(panel);
@@ -54,8 +53,4 @@ export const usePanelState = ({
   }, []);
 
   return panel$;
-};
-
-const getPanelState = (layout: FlexLayoutData, panelId: string): FlexPanelData | undefined => {
-  return layout[panelId];
 };

@@ -23,6 +23,7 @@ import type {
 import type { GridLayoutContextType } from './use_grid_layout_context';
 import { GridLayoutContext } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
+import { isFlexLayoutEqual } from './utils/equality_checks';
 import { getPanelKeysInOrder } from './utils/panel_order';
 
 export type GridLayoutProps = {
@@ -55,7 +56,7 @@ export const FlexLayout = ({
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
   useEffect(() => {
-    if (!isEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
+    if (!isFlexLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
       gridLayoutStateManager.gridLayout$.next(cloneDeep(layout));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
