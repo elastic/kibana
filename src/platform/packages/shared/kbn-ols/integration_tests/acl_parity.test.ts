@@ -29,6 +29,7 @@ import {
 import {
   ACL_SHAPE_FIXTURES,
   FIXTURE_POLICY,
+  FIXTURE_POLICY_ALL_LEVELS,
   FIXTURE_PROBES,
   type FixtureProbe,
 } from '../src/__fixtures__';
@@ -542,6 +543,102 @@ describe('ACLs in Elasticsearch', () => {
         }
       }
     });
+
+    // Hand-written transfers of an ACL with an entry for the former owner, an entry for the new
+    // owner, and an unrelated entry. The former owner keeps only what general access gives
+    // everyone, the new owner manages the object, and every other grant stays as it was.
+    it.each([
+      {
+        name: 'general access that the policy allows is kept',
+        policy: FIXTURE_POLICY_ALL_LEVELS,
+        stored: {
+          version: 1,
+          owner: { type: 'user', id: 'u_owner' },
+          general_access: 'view',
+          entries: [
+            { type: 'user', id: 'u_owner', access: 'use', added_at: NOW },
+            { type: 'user', id: 'u_grantee', access: 'edit', added_at: NOW },
+            { type: 'user', id: 'u_stranger', access: 'use', added_at: NOW },
+          ],
+        },
+        expected: {
+          owner: 'view',
+          grantee: 'edit',
+          stranger: 'manage',
+          ownerIdServiceAccount: 'view',
+          numericIdUser: 'view',
+          anonymous: 'view',
+        },
+      },
+      {
+        name: 'a private ACL stays private',
+        policy: FIXTURE_POLICY,
+        stored: {
+          version: 1,
+          owner: { type: 'user', id: 'u_owner' },
+          general_access: 'none',
+          entries: [
+            { type: 'user', id: 'u_owner', access: 'use', added_at: NOW },
+            { type: 'user', id: 'u_grantee', access: 'use', added_at: NOW },
+            { type: 'user', id: 'u_stranger', access: 'use', added_at: NOW },
+          ],
+        },
+        expected: { grantee: 'use', stranger: 'manage' },
+      },
+    ] as Array<{
+      name: string;
+      policy: AccessPolicy;
+      stored: Record<string, unknown>;
+      expected: Partial<Record<FixtureProbe, EntryLevel>>;
+    }>)(
+      'indexes a transfer that keeps exactly the other grants: $name',
+      async ({ name, policy, stored, expected }) => {
+        const id = `transfer-${name}`;
+        const current = normalizeAclSource({ [ACL_FIELD]: stored });
+        const { next } = prepareAclChange({
+          policy,
+          current,
+          decision: evaluateAcl({ policy, acl: current, principal: FIXTURE_PROBES.owner }),
+          principal: FIXTURE_PROBES.owner,
+          change: { kind: 'transfer', owner: FIXTURE_PROBES.stranger },
+          enabled: true,
+          now: NOW,
+        });
+        await esClient.index({
+          index: WRITTEN_INDEX,
+          id,
+          document: { namespaces: ['space-a'], [ACL_FIELD]: next },
+          refresh: 'wait_for',
+        });
+        const { _source: source } = await esClient.get<Record<string, unknown>>({
+          index: WRITTEN_INDEX,
+          id,
+        });
+        const acl = normalizeAclSource(source);
+
+        for (const probe of PROBES) {
+          for (const level of FIXTURE_LEVELS) {
+            const found = await search(
+              WRITTEN_INDEX,
+              buildFilter(policy, probe, level, SCENARIOS[0])
+            );
+            const evaluated = evaluateAcl({
+              policy,
+              acl,
+              principal: FIXTURE_PROBES[probe],
+            }).operations.has(toOperation(level));
+            const probeLevel = expected[probe];
+            const allowed = !!probeLevel && compareLevels(probeLevel, level) >= 0;
+            expect({ probe, level, filter: found.has(id), evaluated }).toEqual({
+              probe,
+              level,
+              filter: allowed,
+              evaluated: allowed,
+            });
+          }
+        }
+      }
+    );
 
     it('indexes a transfer of every stored ACL to a valid ACL that the new owner controls', async () => {
       const newOwner = FIXTURE_PROBES.grantee;

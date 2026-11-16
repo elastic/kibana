@@ -143,6 +143,13 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
     access: allProbesAt('edit'),
   },
   {
+    name: 'only a key the mapping does not know',
+    source: { acl: { foo: 'bar' } },
+    indexable: true,
+    state: 'absent',
+    access: allProbesAt('edit'),
+  },
+  {
     name: 'private',
     source: { acl: { ...PRIVATE, entries: [] } },
     indexable: true,
@@ -187,6 +194,20 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
   {
     name: 'owner without an ID is damaged',
     source: { acl: { ...VERSION, owner: { type: 'user' }, general_access: 'edit' } },
+    indexable: true,
+    state: 'invalid',
+    access: {},
+  },
+  {
+    name: 'an entry with only added_at is damaged',
+    source: { acl: { entries: [{ added_at: '2026-10-21T00:00:00Z' }] } },
+    indexable: true,
+    state: 'invalid',
+    access: {},
+  },
+  {
+    name: 'an empty general access string is damaged',
+    source: { acl: { general_access: '' } },
     indexable: true,
     state: 'invalid',
     access: {},
@@ -386,6 +407,20 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
     indexable: true,
     state: 'valid',
     access: { owner: 'manage', grantee: 'use' },
+  },
+  {
+    name: 'sibling dotted entry keys inside acl grant nothing',
+    source: {
+      acl: {
+        ...PRIVATE,
+        'entries.type': 'user',
+        'entries.id': 'u_grantee',
+        'entries.access': 'use',
+      },
+    },
+    indexable: true,
+    state: 'valid',
+    access: { owner: 'manage' },
   },
   {
     name: 'dotted root value merges with a lower nested value',
