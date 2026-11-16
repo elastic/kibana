@@ -45,7 +45,7 @@ const { parse } = require('yaml');
 // The limit is read from the workflow so this script cannot drift from what the engine enforces.
 const REVIEW_WORKFLOW_YAML = path.resolve(
   __dirname,
-  '../../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/floor_alert_triage_review.yaml'
+  '../../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/alert_triage/floor_alert_triage_review.yaml'
 );
 const readReviewLimit = () => {
   const max = parse(fs.readFileSync(REVIEW_WORKFLOW_YAML, 'utf8'))?.settings?.concurrency?.max;

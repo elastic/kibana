@@ -8,19 +8,16 @@
  */
 
 import { parse } from 'yaml';
-import DETECTION_RULE_COVERAGE_YAML from './detection_rule_coverage.yaml';
-import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
-import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
-import FLOOR_ATTACK_DISCOVERY_YAML from './floor_attack_discovery.yaml';
-import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
-import {
-  attackDiscoveryMaxAlerts,
-  renderAlertTriageWorkerYaml,
-  renderAttackDiscoveryWorkerYaml,
-  renderCommonWorkerYaml,
-  renderRuleCoverageWorkerYaml,
-  renderRuleTuningWorkerYaml,
-} from './worker_template_values';
+import FLOOR_ALERT_TRIAGE_YAML from './alert_triage/floor_alert_triage.yaml';
+import { renderAlertTriageWorkerYaml } from './alert_triage/worker_template_values';
+import FLOOR_ATTACK_DISCOVERY_YAML from './attack_discovery/floor_attack_discovery.yaml';
+import { renderAttackDiscoveryWorkerYaml } from './attack_discovery/worker_template_values';
+import FORENSICS_ENDPOINT_ANALYSIS_YAML from './endpoint_analysis/forensics_endpoint_analysis.yaml';
+import DETECTION_RULE_COVERAGE_YAML from './rule_coverage/detection_rule_coverage.yaml';
+import { renderRuleCoverageWorkerYaml } from './rule_coverage/worker_template_values';
+import DETECTION_RULE_TUNING_YAML from './rule_tuning/detection_rule_tuning.yaml';
+import { renderRuleTuningWorkerYaml } from './rule_tuning/worker_template_values';
+import { renderCommonWorkerYaml } from './worker_template_values';
 
 const HOSTILE_ID = 'we"ird: id\n#x/kibana';
 
@@ -103,102 +100,5 @@ describe('renderRunAs', () => {
     const settings = settingsOf(render(HOSTILE_ID)) as { run_as?: string };
 
     expect(settings.run_as).toBe(HOSTILE_ID);
-  });
-});
-
-describe('Attack Discovery alert cap', () => {
-  it.each([
-    ['1m', 100],
-    ['15m', 104],
-    ['1h', 416],
-    ['2h', 833],
-    ['143m', 993],
-    ['24h', 10000],
-    ['1d', 10000],
-    ['2d', 10000],
-  ])('prorates %s to %i alerts', (interval, alerts) => {
-    expect(attackDiscoveryMaxAlerts(interval)).toBe(alerts);
-  });
-
-  it('renders the cap into the floor worker and leaves no placeholder behind', () => {
-    const rendered = renderAttackDiscoveryWorkerYaml(FLOOR_ATTACK_DISCOVERY_YAML, {
-      ...shared,
-      scheduleInterval: '1h',
-    });
-
-    expect(rendered).not.toMatch(/__WORKER_[A-Z0-9_]+__/);
-    expect(
-      (parse(rendered) as { consts: { worker_settings: { maxAlerts: number } } }).consts
-        .worker_settings.maxAlerts
-    ).toBe(416);
-    expect((parse(rendered) as { settings: { timeout: string } }).settings.timeout).toBe('12h');
-  });
-});
-
-describe('Alert Triage sweep rendering', () => {
-  const render = (scheduleInterval: string, excludedRuleTags: string[] = []) =>
-    renderAlertTriageWorkerYaml(FLOOR_ALERT_TRIAGE_YAML, {
-      ...shared,
-      scheduleInterval,
-      extras: {
-        autoCloseConfidenceScoreMinThreshold: 0.85,
-        budgetPerHour: 1300,
-        lookbackHours: 24,
-        minSeverity: 'low',
-        excludeBuildingBlocks: false,
-        excludedRuleTags,
-      },
-    });
-
-  it.each([
-    ['15m', 15],
-    ['2h', 120],
-    ['1d', 1440],
-  ])('renders the %s interval as %i minutes for the budget per sweep', (interval, minutes) => {
-    const rendered = parse(render(interval)) as {
-      triggers: Array<{ type: string; with?: { every: string } }>;
-      consts: { schedule_interval_minutes: number };
-    };
-
-    expect(rendered.triggers.find(({ type }) => type === 'scheduled')?.with?.every).toBe(interval);
-    expect(rendered.consts.schedule_interval_minutes).toBe(minutes);
-  });
-
-  it('renders the settings under consts and leaves no placeholder behind', () => {
-    const rendered = render('15m');
-
-    expect(rendered).not.toMatch(/__WORKER_[A-Z_]+__/);
-    expect(
-      (parse(rendered) as { consts: { worker_settings: { extras: unknown } } }).consts
-        .worker_settings.extras
-    ).toEqual({
-      autoCloseConfidenceScoreMinThreshold: 0.85,
-      budgetPerHour: 1300,
-      lookbackHours: 24,
-      minSeverity: 'low',
-      excludeBuildingBlocks: false,
-      excludedRuleTags: [],
-    });
-  });
-
-  // Rule tags are free-form, and `$` sequences in a string replacement are expanded: `price$$`
-  // would silently become `price$` and stop matching, and `$'` would splice YAML into the document.
-  it.each(['price$$', "a$'b", 'x$`y', '$&', '$1'])(
-    'renders the excluded rule tag %s exactly as typed',
-    (tag) => {
-      const rendered = render('15m', [tag]);
-
-      expect(
-        (
-          parse(rendered) as {
-            consts: { worker_settings: { extras: { excludedRuleTags: string[] } } };
-          }
-        ).consts.worker_settings.extras.excludedRuleTags
-      ).toEqual([tag]);
-    }
-  );
-
-  it('rejects an interval the settings schema would not allow', () => {
-    expect(() => render('90s')).toThrow(/Unsupported schedule interval/);
   });
 });

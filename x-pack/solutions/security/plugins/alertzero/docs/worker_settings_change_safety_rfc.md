@@ -70,7 +70,8 @@ Where each piece lives:
 | Declaration: allowed levels, schedule default, extras defaults | `kbn-alertzero-common/impl/worker_settings/<worker>.ts` | Worker's team |
 | Reading stored settings | `plugins/alertzero/server/managed_workflows/workers/worker_settings.ts` | CWL |
 | Per-Worker allowed levels and defaults, and the upgrade applied on read and render | `kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts` | Worker's team (values), CWL (upgrade) |
-| Workflow YAML and render helpers | `kbn-workflows/managed/definitions/alertzero/` | Watch team (YAML), CWL (helpers) |
+| Workflow YAML and the Worker's renderer | `kbn-workflows/managed/definitions/alertzero/<worker>/` | Worker's team |
+| Shared render helpers | `kbn-workflows/managed/definitions/alertzero/worker_template_values.ts` | CWL |
 | The guard added by this PR | `plugins/alertzero/server/managed_workflows/workers/fixtures/`, `test_helpers/`, `worker_settings_compat.test.ts` | CWL |
 
 ## The problem

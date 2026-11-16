@@ -40,7 +40,7 @@ Liquid renders a missing value as `''`, so every count and flag treats `''` and 
 Each Worker wires its YAML in its own change, and declares what it wired in its own files, so no shared list changes:
 
 - `shipped_yaml_contract.<worker>.fixture.ts` here declares the Worker's workflows with report steps and runs that exercise each report. Its test renders each `with` block the way the engine does and validates it against the input schema, so a YAML edit the schema would reject fails in CI instead of logging `invalid_input` at runtime. `shipped_yaml_contract.test.ts` fails unless the declared workflows are exactly the AlertZero managed workflows with a report step.
-- In `definitions/alertzero/`, `worker_close_reports.test.ts` fails when a close in a workflow with a report step has no close report right after it, and each `worker_reports.<worker>.test.ts` pins what the Worker's reports render.
+- In `definitions/alertzero/`, `worker_close_reports.test.ts` fails when a close in a workflow with a report step has no close report right after it, and each Worker folder's `worker_reports.<worker>.test.ts` (`hunt/worker_reports.hunt.test.ts` for Hunt) pins what the Worker's reports render.
 
 Both shared guards check only the workflows that already have a report step, so on `main`, before any Worker adds one, they check nothing.
 
