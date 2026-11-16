@@ -25,6 +25,7 @@ describe('extendProfileProvider', () => {
     expect(extendedProfileProvider).toEqual({
       ...dataSourceProfileProviderMock,
       profileId: 'extended-profile',
+      telemetryLabels: ['data-source-profile'],
       profile: {
         ...dataSourceProfileProviderMock.profile,
         getDefaultAppState,
@@ -48,7 +49,17 @@ describe('extendProfileProvider', () => {
     expect(extendedProfileProvider.telemetryLabels).toEqual([
       'logs-data-source-profile',
       'shared-label',
+      'data-source-profile',
       'extended-profile',
     ]);
+  });
+
+  it('should keep ancestor profile ids when an extension is extended again', () => {
+    const parent = extendProfileProvider(dataSourceProfileProviderMock, {
+      profileId: 'parent-profile',
+    });
+    const child = extendProfileProvider(parent, { profileId: 'child-profile' });
+
+    expect(child.telemetryLabels).toEqual(['data-source-profile', 'parent-profile']);
   });
 });

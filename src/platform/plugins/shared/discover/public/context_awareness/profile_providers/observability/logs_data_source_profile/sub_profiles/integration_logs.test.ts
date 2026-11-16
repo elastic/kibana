@@ -33,10 +33,8 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
     profileProviderServices.uiSettings
   );
 
-  it('inherits the logs parent telemetry label', () => {
-    expect(logsDataSourceProfileProvider.telemetryLabels).toEqual([
-      'observability-logs-data-source-profile',
-    ]);
+  it('inherits the logs parent profile id as a telemetry label', () => {
+    expect(logsDataSourceProfileProvider.telemetryLabels).toBeUndefined();
     expect(
       providers.map(({ profileId, telemetryLabels }) => ({ profileId, telemetryLabels }))
     ).toEqual(

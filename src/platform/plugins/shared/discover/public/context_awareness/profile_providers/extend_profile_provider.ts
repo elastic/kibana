@@ -31,7 +31,7 @@ export const extendProfileProvider = <TProvider extends BaseProfileProvider<{}, 
   extension: Partial<TProvider> & Pick<TProvider, 'profileId'>
 ): TProvider => {
   const telemetryLabels = mergeTelemetryLabels(
-    baseProvider.telemetryLabels,
+    [...(baseProvider.telemetryLabels ?? []), baseProvider.profileId],
     extension.telemetryLabels
   );
 

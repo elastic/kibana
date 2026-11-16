@@ -68,8 +68,7 @@ export interface ResolveDataSourceProfileResult {
 const profileLabels = (context: { profileId: string; telemetryLabels?: string[] }) =>
   context.telemetryLabels ?? [context.profileId];
 
-const dedupeProfiles = (profiles: string[]) =>
-  profiles.filter((profile, index) => profiles.indexOf(profile) === index);
+const dedupeProfiles = (profiles: string[]) => [...new Set(profiles)];
 
 const serializeDataSourceProfileParams = (
   params: Omit<DataSourceProfileProviderParams, 'rootContext'>
