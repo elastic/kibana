@@ -13,7 +13,7 @@ import { esqlFixtureDocumentRequests } from './documents';
 import { esqlFixtureIndicesCreateRequests } from './indices';
 
 /**
- * Creates the fixture indices and seeds the APM documents. Fails fast: without
+ * Creates the fixture indices and seeds the sample documents. Fails fast: without
  * the fixtures every `EsqlExecution` score drops to 0 for reasons unrelated to
  * the model.
  */
@@ -43,9 +43,7 @@ export async function setupEsqlFixtures({
     })
   );
 
-  log.info(
-    `[workflows-esql] indexing ${esqlFixtureDocumentRequests.length} sample documents (APM fixtures)`
-  );
+  log.info(`[workflows-esql] indexing ${esqlFixtureDocumentRequests.length} sample documents`);
 
   for (const request of esqlFixtureDocumentRequests) {
     try {

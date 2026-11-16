@@ -20,6 +20,7 @@ export const postgresLogsIndexCreateRequest: IndicesCreateRequest = {
   index: 'postgres-logs-production.evaluations.2025.01.01',
   mappings: {
     properties: {
+      '@timestamp': { type: 'date' },
       message: { type: 'text' },
     },
   },
@@ -29,6 +30,7 @@ export const packetbeatIndexCreateRequest: IndicesCreateRequest = {
   index: 'packetbeat-production.evaluations.2025.01.01',
   mappings: {
     properties: {
+      '@timestamp': { type: 'date' },
       destination: {
         properties: {
           domain: { type: 'keyword' },
@@ -42,6 +44,7 @@ export const nycTaxisIndexCreateRequest: IndicesCreateRequest = {
   index: 'nyc_taxis-production.evaluations.2025.01.01',
   mappings: {
     properties: {
+      '@timestamp': { type: 'date' },
       drop_off_time: {
         type: 'date',
         format: 'strict_date_optional_time||epoch_millis',
@@ -54,6 +57,7 @@ export const metricbeatIndexCreateRequest: IndicesCreateRequest = {
   index: 'metricbeat-production.evaluations-2025.01.01',
   mappings: {
     properties: {
+      '@timestamp': { type: 'date' },
       system: {
         properties: {
           cpu: {
@@ -78,6 +82,7 @@ export const employeesIndexCreateRequest: IndicesCreateRequest = {
   index: 'employees-production.evaluations.2025.01.01',
   mappings: {
     properties: {
+      '@timestamp': { type: 'date' },
       emp_no: { type: 'keyword' },
       hire_date: {
         type: 'date',
