@@ -91,12 +91,7 @@ apiTest.describe('Create rule API', { tag: testData.API_ENGINE_TAG }, () => {
 
       const ruleId = response.body.id;
       expect((await apiServices.alertingV2.rules.get(ruleId)).enabled).toBe(false);
-      expect(
-        await apiServices.alertingV2.ruleExecutorTask.countRuns({
-          ruleId,
-          since: new Date(0),
-        })
-      ).toBe(0);
+      await apiServices.alertingV2.ruleExecutorTask.waitForTaskRemoved({ ruleId });
 
       const enabled = await apiServices.alertingV2.rules.enable(ruleId);
       expect(enabled.enabled).toBe(true);
