@@ -206,6 +206,11 @@ export type DashboardDatasetExample = Example<
     unavailableRequests?: readonly UnavailableRequestGold[];
     /** Nothing in the request can be built, so the turn must end without a dashboard. */
     noDashboard?: boolean;
+    /**
+     * Panel types the prompt asks for whose config schema is only in a skill reference. The agent
+     * reads each type's reference before writing a panel of it.
+     */
+    panelConfigTypes?: readonly string[];
     goldenToolPath?: string[];
   },
   {
