@@ -260,10 +260,27 @@ const link = (text: string, folder: string | undefined, file = ''): string =>
 
 type Rank = 'fails' | 'attention' | 'passes' | 'not-checked';
 
+type Outcome = 'passes' | 'fails' | 'not-checked';
+
 interface ActionStatus {
   readonly rank: Rank;
+  /** How the summary tells failures apart, by their start. */
   readonly text: string;
+  /** The Status column. */
+  readonly outcome: Outcome;
+  /** The Details column. */
+  readonly details: string;
 }
+
+const OUTCOMES: Record<Outcome, string> = {
+  passes: '✅ Passes',
+  fails: '❌ Fails',
+  'not-checked': '➖ Not checked',
+};
+
+// Changes that running an action verifies: what it sends and how it authenticates.
+const REQUEST_CHANGE = /^(request-|new-(required|optional)-request-|api-security-)/;
+const RESPONSE_CHANGE = /^(response-|api-schema-removed$)/;
 
 const RANKS: readonly Rank[] = ['fails', 'attention', 'passes', 'not-checked'];
 const ICONS: Record<Rank, string> = {
@@ -345,15 +362,20 @@ const statusOf = (
   reviewOf: (source: string, operation: string) => readonly ReviewItem[]
 ): ActionStatus => {
   if (action.snapshotProblems.length > 0) {
+    const problem = firstProblem(action.snapshotProblems);
     return {
       rank: 'fails',
-      text: `Fails against the committed snapshot: ${firstProblem(action.snapshotProblems)}`,
+      text: `Fails against the committed snapshot: ${problem}`,
+      outcome: 'fails',
+      details: `Against the committed snapshot: ${problem}`,
     };
   }
   if (action.latestProblems === undefined && isChecked(action)) {
     return {
       rank: 'attention',
-      text: "Not checked against the latest spec, which didn't load; passes against the committed snapshot",
+      text: 'Not checked against the latest spec',
+      outcome: 'not-checked',
+      details: "The latest spec didn't load; passes against the committed snapshot",
     };
   }
   const latestProblems = action.latestProblems ?? [];
@@ -361,20 +383,26 @@ const statusOf = (
     const locations = action.operations.map(({ latest }) => latest?.status);
     const unmatchedOnly = latestProblems.every((problem) => UNMATCHED_PROBLEM.test(problem));
     if (unmatchedOnly && locations.includes('moved') && !locations.includes('missing')) {
-      return { rank: 'attention', text: MOVED_STATUS };
+      return {
+        rank: 'attention',
+        text: MOVED_STATUS,
+        outcome: 'fails',
+        details: `${ICONS.attention} ${MOVED_STATUS}`,
+      };
     }
     if (unmatchedOnly && locations.includes('missing')) {
       const missing = action.operations.filter(({ latest }) => latest?.status === 'missing');
-      return {
-        rank: 'fails',
-        text: `Removed from current spec: ${listed(
-          missing.map(({ operation }) => code(operation))
-        )}`,
-      };
+      const text = `Removed from current spec: ${listed(
+        missing.map(({ operation }) => code(operation))
+      )}`;
+      return { rank: 'fails', text, outcome: 'fails', details: text };
     }
+    const problem = firstProblem(latestProblems);
     return {
       rank: 'fails',
-      text: `Fails against the latest spec: ${firstProblem(latestProblems)}`,
+      text: `Fails against the latest spec: ${problem}`,
+      outcome: 'fails',
+      details: `Against the latest spec: ${problem}`,
     };
   }
   if (!isChecked(action) && action.unmatched.length > 0) {
@@ -383,26 +411,33 @@ const statusOf = (
     const issues = [...new Set(action.unmatched.flatMap(({ reason }) => issueLinksOf(reason)))];
     return {
       rank: 'not-checked',
-      text: `${NOT_IN_SPEC_STATUS} (${[...issues, 'see below'].join(', ')})`,
+      text: NOT_IN_SPEC_STATUS,
+      outcome: 'not-checked',
+      details: `No spec describes the endpoint (${[...issues, 'see below'].join(', ')})`,
     };
   }
   if (!isChecked(action)) {
-    return { rank: 'not-checked', text: 'Not checked: calls no vendor operation' };
+    return {
+      rank: 'not-checked',
+      text: 'Not checked: calls no vendor operation',
+      outcome: 'not-checked',
+      details: 'Calls no vendor operation',
+    };
   }
-  const changes = action.operations.flatMap(({ source, operation }) =>
-    changesOf(source, operation)
-  );
-  const notable = [
-    ...new Set(changes.filter(({ kind }) => kind !== 'non-breaking').map(({ id }) => id)),
-  ];
+  const passes = (rank: Rank, details: string): ActionStatus => ({
+    rank,
+    text: 'Passes',
+    outcome: 'passes',
+    details,
+  });
   const fieldChanges = action.fieldChanges ?? [];
   if (fieldChanges.length > 0) {
-    return {
-      rank: 'attention',
-      text: `Passes, but fields it reads changed: ${listed(
+    return passes(
+      'attention',
+      `${ICONS.attention} Vendor response has changed, including fields Connector reads: ${listed(
         fieldChanges.map(({ field, changes: what }) => `${code(field)} (${what.join(', ')})`)
-      )}`,
-    };
+      )}`
+    );
   }
   const reviewKinds = [
     ...new Set(
@@ -412,31 +447,44 @@ const statusOf = (
     ),
   ];
   if (reviewKinds.length > 0) {
-    return {
-      rank: 'passes',
-      // The action works, but what it calls needs a look, as the summary counts it.
-      text: `Passes · ${ICONS.attention} ${listed(
-        reviewKinds.map((kind) => kind.toLowerCase())
-      )} (see changes to review)`,
-    };
-  }
-  if (notable.length > 0 && action.tracked) {
-    // Its operations changed, but none of the fields it reads did.
-    const passesThrough = Object.values(action.fieldUse ?? {}).some(
-      ({ copied, returned }) => copied.length > 0 || returned.length > 0
+    // The action works, but what it calls needs a look, as the summary counts it.
+    const kinds = listed(reviewKinds.map((kind) => kind.toLowerCase()));
+    return passes(
+      'passes',
+      `${ICONS.attention} ${kinds.charAt(0).toUpperCase()}${kinds.slice(1)} (see changes to review)`
     );
-    return {
-      rank: 'passes',
-      text: `Passes · fields it reads unchanged${
-        passesThrough ? '; returns response fields as they are' : ''
-      }`,
-    };
   }
-  return {
-    rank: 'passes',
-    text:
-      changes.length > 0 ? `Passes (${plural(changes.length, 'non-breaking change')})` : 'Passes',
-  };
+  const changes = action.operations.flatMap(({ source, operation }) =>
+    changesOf(source, operation).map((change) => ({ source, operation, change }))
+  );
+  const notable = changes.filter(({ change }) => change.kind !== 'non-breaking');
+  if (notable.length > 0 && action.tracked) {
+    // Its operations changed in ways running it and its field use verify.
+    const responses = notable.filter(({ change }) => RESPONSE_CHANGE.test(change.id));
+    const passedAlong = responses.flatMap(({ source, operation }) => {
+      const { copied = [], returned = [] } = action.fieldUse?.[`${source} ${operation}`] ?? {};
+      return [...copied, ...returned];
+    });
+    const sentences = [
+      ...(notable.some(({ change }) => REQUEST_CHANGE.test(change.id))
+        ? ["Vendor request has changed, and Connector's requests still match it"]
+        : []),
+      ...(responses.length === 0
+        ? []
+        : passedAlong.includes('')
+        ? [
+            'Vendor response has changed, and Connector is passing along the entire changed response',
+          ]
+        : passedAlong.length > 0
+        ? ['Vendor response has changed, and Connector is passing along parts of it as they are']
+        : ['Vendor response has changed, but Connector is not using changed fields']),
+    ];
+    return passes(
+      'passes',
+      sentences.length > 0 ? `${sentences.join('. ')}.` : 'Vendor spec has changed'
+    );
+  }
+  return passes('passes', changes.length > 0 ? plural(changes.length, 'non-breaking change') : '');
 };
 
 // What the check found, for the Result row; vendor drift needn't come from a failing action.
@@ -880,9 +928,9 @@ export const renderDriftIssue = (
       action.operations.length > 0
         ? action.operations.map(({ operation }) => code(operation))
         : action.unmatched.map(({ operation }) => code(operation));
-    return `| ${code(action.action)} | ${calls.join('<br>') || '—'} | ${ICONS[status.rank]} ${cell(
-      status.text
-    )} |`;
+    return `| ${code(action.action)} | ${calls.join('<br>') || '—'} | ${
+      OUTCOMES[status.outcome]
+    } | ${cell(status.details)} |`;
   });
   const legend: string[] = [];
   if (moved.length > 0) {
@@ -1047,8 +1095,8 @@ export const renderDriftIssue = (
       ? [
           '### Actions',
           '',
-          '| Action | Calls | Status |',
-          '|---|---|---|',
+          '| Action | Calls | Status | Details |',
+          '|---|---|---|---|',
           ...actionRows,
           '',
           ...legend.flatMap((line) => [line, '']),

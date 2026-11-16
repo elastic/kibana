@@ -403,10 +403,10 @@ describe('renderDriftIssue', () => {
       '[Committed snapshot](https://github.com/elastic/kibana/blob/main/src/specs/sentry/vendor_api/snapshots/v0.openapi.json)'
     );
     expect(body).toContain(
-      '| `getIssue` | `GET /api/0/issues/{id}/` | ⚠️ Moved in the spec, same URL |'
+      '| `getIssue` | `GET /api/0/issues/{id}/` | ❌ Fails | ⚠️ Moved in the spec, same URL |'
     );
     expect(body).toContain(
-      '| `listRules` | `GET /api/0/rules/` | ➖ Not checked: no spec describes the endpoint ([#296284](https://github.com/elastic/kibana/issues/296284), see below) |'
+      '| `listRules` | `GET /api/0/rules/` | ➖ Not checked | No spec describes the endpoint ([#296284](https://github.com/elastic/kibana/issues/296284), see below) |'
     );
     expect(body).toContain(
       '➖ **Not in the spec** (`listRules`): the manifest records why: _Legacy endpoint, absent from the spec; see https://github.com/elastic/kibana/issues/296284_'
@@ -435,7 +435,7 @@ describe('renderDriftIssue', () => {
     expect(body).not.toContain('`search` passes');
     expect(body.indexOf('| `search` |')).toBeLessThan(body.indexOf('| `getItem` |'));
     expect(body).toContain(
-      '| `search` | `GET /items` | ❌ Fails against the latest spec: `GET /items` limit must be <= 50 |'
+      '| `search` | `GET /items` | ❌ Fails | Against the latest spec: `GET /items` limit must be <= 50 |'
     );
     expect(body).toContain('| `getItem` | `GET /items/{id}` | ✅ Passes |');
     expect(body).toContain('<details><summary>2 spec changes</summary>');
@@ -495,7 +495,7 @@ describe('renderDriftIssue', () => {
     expect(body).not.toContain('| Request changed |');
     expect(body.indexOf('### Changes to review')).toBeLessThan(body.indexOf('### Actions'));
     expect(body).toContain(
-      '| `search` | `GET /items` | ✅ Passes · ⚠️ deprecated (see changes to review) |'
+      '| `search` | `GET /items` | ✅ Passes | ⚠️ Deprecated (see changes to review) |'
     );
   });
 
@@ -534,7 +534,46 @@ describe('renderDriftIssue', () => {
     );
     // `getItem` passes, which verifies the request change, and doesn't read `title`
     expect(body).not.toMatch(/^\| `GET \/items\/\{id\}` \| [^|]+ \| `getItem` \|/m);
-    expect(body).toContain('| ✅ Passes · fields it reads unchanged |');
+    expect(body).toContain(
+      "| ✅ Passes | Vendor request has changed, and Connector's requests still match it. Vendor response has changed, but Connector is not using changed fields. |"
+    );
+  });
+
+  it('says when a passing action passes a changed response along whole', () => {
+    const { body } = renderDriftIssue(
+      {
+        ...drifted,
+        verdict: 'healthy',
+        latestProblems: [],
+        sources: {
+          main: {
+            status: 'changed',
+            changes: [
+              {
+                kind: 'breaking',
+                id: 'response-property-type-changed',
+                text: 'changed the type of `title`',
+                operation: 'GET /items/{id}',
+              },
+            ],
+          },
+        },
+        actions: [
+          {
+            ...(drifted.actions?.[1] as NonNullable<ConnectorDrift['actions']>[number]),
+            tracked: true,
+            fieldUse: { 'main GET /items/{id}': { read: [], copied: [], returned: [''] } },
+            fieldChanges: [],
+          },
+        ],
+      },
+      { owners: [] }
+    );
+
+    expect(body).toContain('| Action | Calls | Status | Details |');
+    expect(body).toContain(
+      '| `getItem` | `GET /items/{id}` | ✅ Passes | Vendor response has changed, and Connector is passing along the entire changed response. |'
+    );
   });
 
   it('lists the changed fields that passing actions read, and those that read none', () => {
@@ -569,10 +608,10 @@ describe('renderDriftIssue', () => {
     expect(title).toBe('[Connectors][Validation] `.acme`: 1 action needs attention');
     expect(body).toContain('`search` passes but reads fields that changed.');
     expect(body).toContain(
-      '| `search` | `GET /items` | ⚠️ Passes, but fields it reads changed: `items/state` (new values: locked) |'
+      '| `search` | `GET /items` | ✅ Passes | ⚠️ Vendor response has changed, including fields Connector reads: `items/state` (new values: locked) |'
     );
     expect(body).toContain(
-      '| `listAll` | `GET /items` | ✅ Passes · fields it reads unchanged; returns response fields as they are |'
+      "| `listAll` | `GET /items` | ✅ Passes | Vendor request has changed, and Connector's requests still match it. |"
     );
     expect(body).toContain('| `search` | `GET /items` | `items/state` | new values: locked |');
   });
@@ -604,7 +643,7 @@ describe('renderDriftIssue', () => {
     expect(body).toContain('`search` passes but calls an endpoint removed from the current spec.');
     expect(body).toContain('| `GET /items` | Removed | `search` |');
     expect(body).toContain(
-      '| `search` | `GET /items` | ✅ Passes · ⚠️ removed (see changes to review) |'
+      '| `search` | `GET /items` | ✅ Passes | ⚠️ Removed (see changes to review) |'
     );
   });
 
@@ -691,7 +730,7 @@ describe('renderDriftIssue', () => {
     );
 
     expect(body).toContain(
-      `| \`search\` | \`GET /items\` | ❌ Fails against the latest spec: ${quoted} |`
+      `| \`search\` | \`GET /items\` | ❌ Fails | Against the latest spec: ${quoted} |`
     );
   });
 
@@ -727,7 +766,7 @@ describe('renderDriftIssue', () => {
     expect(body).toContain(
       "> `scan` fails against the latest vendor spec. 1 other spec change needs review (see the table). `quota` calls an endpoint no spec describes, so it isn't checked (see the table)."
     );
-    expect(body).toContain('| `scan` | `POST /scan/` | ❌ Fails against the latest spec:');
+    expect(body).toContain('| `scan` | `POST /scan/` | ❌ Fails | Against the latest spec:');
     expect(body).not.toContain('**Not in the spec** (`scan`)');
   });
 
@@ -770,7 +809,7 @@ describe('renderDriftIssue', () => {
 
     expect(title).toBe('[Connectors][Validation] `.acme`: 2 actions need attention');
     expect(body).toContain(
-      "| `getItem` | `GET /items/{id}` | ⚠️ Not checked against the latest spec, which didn't load; passes against the committed snapshot |"
+      "| `getItem` | `GET /items/{id}` | ➖ Not checked | The latest spec didn't load; passes against the committed snapshot |"
     );
     expect(body).not.toContain('✅');
   });
