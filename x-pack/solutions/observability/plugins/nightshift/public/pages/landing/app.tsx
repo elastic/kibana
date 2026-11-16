@@ -108,7 +108,9 @@ export function NightshiftApp({
   const {
     sections,
     severityCounts,
+    unfilteredSeverityCounts,
     areSeverityCountsLoading,
+    areUnfilteredSeverityCountsLoading,
     areSeverityCountsStale,
     hasSeverityCountsError,
     activeInvestigationCount,
@@ -151,6 +153,16 @@ export function NightshiftApp({
           .filter(isSeverity)
       ),
     [sections]
+  );
+
+  // Mute chrome from the no-search baseline, not the filtered list — a search that zeros Medium
+  // must keep Medium filled while Critical (never present) stays hollow.
+  const presentSeverities = useMemo(
+    () =>
+      new Set(
+        SEVERITY_OPTIONS.filter((severity) => unfilteredSeverityCounts[severity] > 0)
+      ),
+    [unfilteredSeverityCounts]
   );
 
   const needsYouCount =
@@ -466,11 +478,17 @@ export function NightshiftApp({
       >
         <InvestigationSeverityTiles
           severityCounts={severityCounts}
+          presentSeverities={presentSeverities}
           scrollableSeverities={scrollableSeverities}
           // The counts are their own query. Until they land (or are replaced after a filter
           // change) a number would be a default 0 or the previous filter's, contradicting the
           // rows below, so all four tiles show a skeleton and reveal together.
-          isLoading={isInitialLoading || areSeverityCountsLoading || areSeverityCountsStale}
+          isLoading={
+            isInitialLoading ||
+            areSeverityCountsLoading ||
+            areSeverityCountsStale ||
+            areUnfilteredSeverityCountsLoading
+          }
           onSeverityClick={handleSeverityClick}
         />
 
