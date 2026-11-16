@@ -60,10 +60,12 @@ spaceTest.describe(
 
         await lens.layers.activateLayerTab(0);
         expect(await lens.workspace.getEsqlQuery()).toBe(COUNT_QUERY);
-        await lens.layers.createLayer('referenceLine');
+        await lens.layers.createLayer('referenceLine', undefined, {
+          referenceLineSource: 'static',
+        });
         expect(await lens.layers.getLayerCount()).toBe(3);
         await lens.layers.ensureLayerTabIsActive(2);
-        await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
+        await expect(page.testSubj.locator('InlineEditingESQLEditor')).toHaveCount(0);
         expect(await lens.dimensions.getDimensionTriggerText(REFERENCE_LINE_DIMENSION)).toMatch(
           /^Static value: /
         );
@@ -106,7 +108,9 @@ spaceTest.describe(
         const { dashboard, lens } = pageObjects;
 
         await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-        await lens.layers.createLayer('referenceLine');
+        await lens.layers.createLayer('referenceLine', undefined, {
+          referenceLineSource: 'static',
+        });
         await applyLensInlineEditorAndWaitClosed({ lens });
         await dashboard.saveChangesToExistingDashboard();
 
@@ -152,7 +156,8 @@ spaceTest.describe(
         await expect(page.testSubj.locator('lnsLayerSettings')).toHaveCount(0);
         await lens.layers.openLayerActions(1);
         await expect(page.testSubj.locator('lnsXY_annotationLayer_saveToLibrary')).toHaveCount(0);
-        await lens.layers.closeLayerActions();
+        await lens.layers.closeLayerActions(1);
+        await expect(lens.applyFlyoutButton).toBeVisible();
 
         // The annotation editor is manual-only: no placement type switch (no "Custom query").
         await lens.dimensions.openDimensionEditor(
@@ -164,18 +169,21 @@ spaceTest.describe(
         await lens.closeDimensionEditor();
 
         await lens.layers.activateLayerTab(0);
-        await lens.layers.createLayer('referenceLine');
+        await lens.layers.createLayer('referenceLine', undefined, {
+          referenceLineSource: 'static',
+        });
         await lens.layers.ensureLayerTabIsActive(2);
         // No data view switcher on the reference line layer.
         await expect(page.testSubj.locator('lns_layerIndexPatternLabel')).toHaveCount(0);
 
-        // The reference line dimension editor is static-value-only: no
-        // Static value / Quick function / Formula tabs and no field selector.
         await lens.dimensions.openDimensionEditor(
           `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger`,
           2
         );
-        await expect(page.testSubj.locator('lens-dimensionTabs')).toHaveCount(0);
+        await expect(lens.dimensions.staticValueTab).toHaveCount(0);
+        await expect(lens.dimensions.esqlTab).toHaveCount(0);
+        await expect(lens.dimensions.quickFunctionsTab).toHaveCount(0);
+        await expect(lens.dimensions.formulaTab).toHaveCount(0);
         await expect(page.testSubj.locator('indexPattern-dimension-field')).toHaveCount(0);
         await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toBeVisible();
         await lens.closeDimensionEditor();
@@ -230,7 +238,9 @@ spaceTest.describe(
 
         // Reference line: set a custom static value and a below-fill style.
         await lens.layers.activateLayerTab(0);
-        await lens.layers.createLayer('referenceLine');
+        await lens.layers.createLayer('referenceLine', undefined, {
+          referenceLineSource: 'static',
+        });
         await lens.layers.ensureLayerTabIsActive(2);
 
         await lens.dimensions.openDimensionEditor(
@@ -271,10 +281,6 @@ spaceTest.describe(
         await lens.closeDimensionEditor();
         await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
 
-        // Adding a value via the empty dimension button routes the new static value
-        // column to the form-based datasource even though the chart's active
-        // datasource is text-based (regression: the column used to land in the
-        // text-based state, breaking the panel with an invalid-column error).
         await lens.dimensions.openDimensionEditor(
           `${REFERENCE_LINE_DIMENSION} > lns-empty-dimension`,
           2
@@ -290,8 +296,7 @@ spaceTest.describe(
         const referenceTriggers =
           lens.dimensions.getDimensionTriggersLocator(REFERENCE_LINE_DIMENSION);
         await expect(referenceTriggers).toHaveCount(3);
-        // every trigger carries a static value, proving initializeDimension ran
-        // against the form-based datasource for the newly added dimension too
+        // The added dimension must retain its initialized static value.
         await expect(referenceTriggers).toHaveText([
           /^Static value: /,
           /^Static value: /,

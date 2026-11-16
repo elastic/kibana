@@ -393,13 +393,13 @@ describe('AlertEpisodeDetailsFlyout', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('renders the severity header value as a colored dot with its label', () => {
+  it('renders the severity header value as a soft badge with its label', () => {
     mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, severity: 'high' });
 
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
     const severity = screen.getByTestId('alertingV2EpisodeFlyoutSeverity');
-    expect(severity.querySelector('[data-euiicon-type="dot"]')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-high')).toBeInTheDocument();
     expect(severity).toHaveTextContent('High');
   });
 
@@ -411,12 +411,12 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.queryByTestId('alertingV2EpisodeFlyoutSeverity')).not.toBeInTheDocument();
   });
 
-  it('links to an absolute HTTP(S) source URL from an info block', () => {
+  it('links to an absolute HTTP(S) data.source_alert_url from an info block', () => {
     mockUseEpisodeDetailsHeaderData.mockReturnValue({
       ...baseHeaderData,
       episode: {
         ...mockEpisode,
-        episode_data: JSON.stringify({ alert_url: 'https://monitoring.example/alerts/1' }),
+        episode_data: JSON.stringify({ source_alert_url: 'https://monitoring.example/alerts/1' }),
       } as AlertEpisode,
     });
 
@@ -454,7 +454,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
       ...baseHeaderData,
       episode: {
         ...mockEpisode,
-        episode_data: JSON.stringify({ alert_url: alertUrl }),
+        episode_data: JSON.stringify({ source_alert_url: alertUrl }),
       } as AlertEpisode,
     });
 

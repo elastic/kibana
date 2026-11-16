@@ -1,0 +1,113 @@
+{
+  "version": "1.0",
+  "sources": [
+    "model"
+  ],
+  "maven": {
+    "dependencies": [
+      "software.amazon.smithy:smithy-openapi:1.74.1",
+      "software.amazon.smithy:smithy-aws-traits:1.74.1",
+      "software.amazon.smithy:smithy-aws-iam-traits:1.74.1",
+      "software.amazon.smithy:smithy-aws-endpoints:1.74.1",
+      "software.amazon.smithy:smithy-rules-engine:1.74.1",
+      "software.amazon.smithy:smithy-waiters:1.74.1",
+      "software.amazon.smithy:smithy-smoke-test-traits:1.74.1",
+      "software.amazon.smithy:smithy-aws-smoke-test-model:1.74.1"
+    ]
+  },
+  "projections": {
+    "eks": {
+      "transforms": [
+        {
+          "name": "includeShapesBySelector",
+          "args": {
+            "selector": ":is([trait|trait], [trait|trait] ~> *, service[id = com.amazonaws.eks#AWSWesleyFrontend], resource[id|namespace = com.amazonaws.eks], resource[id|namespace = com.amazonaws.eks] -[identifier, property]-> *, operation[id|namespace = com.amazonaws.eks][id|name = ListClusters, DescribeCluster, UpdateClusterConfig, ListNodegroups, DescribeNodegroup, UpdateNodegroupConfig, ListUpdates, DescribeUpdate, ListTagsForResource, ListAccessPolicies, ListAccessEntries, DescribeAccessEntry, CreateAccessEntry, UpdateAccessEntry, DeleteAccessEntry, ListAssociatedAccessPolicies, AssociateAccessPolicy, DisassociateAccessPolicy], operation[id|namespace = com.amazonaws.eks][id|name = ListClusters, DescribeCluster, UpdateClusterConfig, ListNodegroups, DescribeNodegroup, UpdateNodegroupConfig, ListUpdates, DescribeUpdate, ListTagsForResource, ListAccessPolicies, ListAccessEntries, DescribeAccessEntry, CreateAccessEntry, UpdateAccessEntry, DeleteAccessEntry, ListAssociatedAccessPolicies, AssociateAccessPolicy, DisassociateAccessPolicy] ~> *)"
+          }
+        },
+        {
+          "name": "excludeTraits",
+          "args": {
+            "traits": [
+              "smithy.api#documentation",
+              "smithy.api#examples",
+              "smithy.rules#endpointRuleSet",
+              "smithy.rules#endpointBdd",
+              "smithy.rules#endpointTests",
+              "smithy.test#smokeTests",
+              "smithy.waiters#waitable"
+            ]
+          }
+        }
+      ],
+      "plugins": {
+        "openapi": {
+          "service": "com.amazonaws.eks#AWSWesleyFrontend",
+          "protocol": "aws.protocols#restJson1",
+          "ignoreUnsupportedTraits": true
+        }
+      }
+    },
+    "lambda": {
+      "transforms": [
+        {
+          "name": "includeShapesBySelector",
+          "args": {
+            "selector": ":is([trait|trait], [trait|trait] ~> *, service[id = com.amazonaws.lambda#AWSGirApiService], resource[id|namespace = com.amazonaws.lambda], resource[id|namespace = com.amazonaws.lambda] -[identifier, property]-> *, operation[id|namespace = com.amazonaws.lambda][id|name = ListFunctions, GetFunction, Invoke], operation[id|namespace = com.amazonaws.lambda][id|name = ListFunctions, GetFunction, Invoke] ~> *)"
+          }
+        },
+        {
+          "name": "excludeTraits",
+          "args": {
+            "traits": [
+              "smithy.api#documentation",
+              "smithy.api#examples",
+              "smithy.rules#endpointRuleSet",
+              "smithy.rules#endpointBdd",
+              "smithy.rules#endpointTests",
+              "smithy.test#smokeTests",
+              "smithy.waiters#waitable"
+            ]
+          }
+        }
+      ],
+      "plugins": {
+        "openapi": {
+          "service": "com.amazonaws.lambda#AWSGirApiService",
+          "protocol": "aws.protocols#restJson1",
+          "ignoreUnsupportedTraits": true
+        }
+      }
+    },
+    "xray": {
+      "transforms": [
+        {
+          "name": "includeShapesBySelector",
+          "args": {
+            "selector": ":is([trait|trait], [trait|trait] ~> *, service[id = com.amazonaws.xray#AWSXRay], resource[id|namespace = com.amazonaws.xray], resource[id|namespace = com.amazonaws.xray] -[identifier, property]-> *, operation[id|namespace = com.amazonaws.xray][id|name = GetInsightSummaries, GetInsight, GetServiceGraph, GetTraceSummaries, BatchGetTraces, GetInsightImpactGraph, GetInsightEvents, GetTimeSeriesServiceStatistics, GetGroups, GetTraceGraph, StartTraceRetrieval, GetRetrievedTracesGraph, GetSamplingRules], operation[id|namespace = com.amazonaws.xray][id|name = GetInsightSummaries, GetInsight, GetServiceGraph, GetTraceSummaries, BatchGetTraces, GetInsightImpactGraph, GetInsightEvents, GetTimeSeriesServiceStatistics, GetGroups, GetTraceGraph, StartTraceRetrieval, GetRetrievedTracesGraph, GetSamplingRules] ~> *)"
+          }
+        },
+        {
+          "name": "excludeTraits",
+          "args": {
+            "traits": [
+              "smithy.api#documentation",
+              "smithy.api#examples",
+              "smithy.rules#endpointRuleSet",
+              "smithy.rules#endpointBdd",
+              "smithy.rules#endpointTests",
+              "smithy.test#smokeTests",
+              "smithy.waiters#waitable"
+            ]
+          }
+        }
+      ],
+      "plugins": {
+        "openapi": {
+          "service": "com.amazonaws.xray#AWSXRay",
+          "protocol": "aws.protocols#restJson1",
+          "ignoreUnsupportedTraits": true
+        }
+      }
+    }
+  }
+}

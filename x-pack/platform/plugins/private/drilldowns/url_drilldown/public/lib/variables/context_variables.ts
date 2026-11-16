@@ -16,7 +16,7 @@ import type {
   PublishesTitle,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
-  PublishesDataViews,
+  PublishesDataSources,
 } from '@kbn/presentation-publishing';
 import { getTitle } from '@kbn/presentation-publishing';
 import type { UrlTemplateEditorVariable } from '../components/url_template_editor';
@@ -68,11 +68,11 @@ export const getContextScopeValues = (context: Partial<EmbeddableApiContext>): C
       PublishesTitle &
       PublishesSavedObjectId &
       PublishesUnifiedSearch &
-      PublishesDataViews &
+      PublishesDataSources &
       HasParentApi<Partial<PublishesUnifiedSearch>>
   >;
-  const dataViewIds = api.dataViews$?.value
-    ? (api.dataViews$?.value.map((dataView) => dataView.id).filter(Boolean) as string[])
+  const dataViewIds = api.dataSources$?.value
+    ? (api.dataSources$?.value.map((dataView) => dataView.id).filter(Boolean) as string[])
     : [];
 
   return {

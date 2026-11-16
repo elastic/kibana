@@ -18,7 +18,7 @@ import { TestWrapper } from '../../../shared/test_utils';
 // --- Mocks ---
 
 const mockDispatch = jest.fn();
-const mockSetSelectedExecution = jest.fn();
+const mockSelectEditorRun = jest.fn();
 const mockMutateAsync = jest.fn();
 
 jest.mock('react-redux-v7', () => {
@@ -49,7 +49,7 @@ jest.mock('../../../hooks/use_space_id', () => ({
 
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => ({
-    setSelectedExecution: mockSetSelectedExecution,
+    selectEditorRun: mockSelectEditorRun,
   }),
 }));
 
@@ -206,7 +206,7 @@ describe('WorkflowDetailTestStepModal', () => {
     });
 
     await waitFor(() => {
-      expect(mockSetSelectedExecution).toHaveBeenCalledWith('exec-1');
+      expect(mockSelectEditorRun).toHaveBeenCalledWith('exec-1');
     });
   });
 

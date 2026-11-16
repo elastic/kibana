@@ -30,6 +30,7 @@ import type {
   IContextProvider,
   IRouter,
   HttpSelfUnauthorizedErrorHandler,
+  HttpSelfCredentialRefresher,
 } from '@kbn/core-http-server';
 import type {
   InternalContextSetup,
@@ -94,6 +95,7 @@ export class HttpService
   private selfClientUiamAttestationGetter?: SelfClientUiamAttestationGetter;
   private selfClientOwnClientAuthenticationCheck?: SelfClientOwnClientAuthenticationCheck;
   private selfClientUnauthorizedErrorHandler?: HttpSelfUnauthorizedErrorHandler;
+  private selfClientCredentialRefresher?: HttpSelfCredentialRefresher;
 
   private readonly log: Logger;
   private readonly env: Env;
@@ -261,6 +263,12 @@ export class HttpService
         }
         this.selfClientUnauthorizedErrorHandler = handler;
       },
+      setSelfClientCredentialRefresher: (refresher) => {
+        if (this.selfClientCredentialRefresher) {
+          throw new Error('The self client credential refresher was already set');
+        }
+        this.selfClientCredentialRefresher = refresher;
+      },
       externalUrl: new ExternalUrlConfig(config.externalUrl),
       createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
         path: string,
@@ -309,6 +317,7 @@ export class HttpService
         getUiamAttestationGetter: () => this.selfClientUiamAttestationGetter,
         getOwnClientAuthenticationCheck: () => this.selfClientOwnClientAuthenticationCheck,
         getUnauthorizedErrorHandler: () => this.selfClientUnauthorizedErrorHandler,
+        getCredentialRefresher: () => this.selfClientCredentialRefresher,
       })),
       setRedactedSessionIdGetter: (getter) => {
         this.httpServer.setRedactedSessionIdGetter(getter);

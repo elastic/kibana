@@ -6,9 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import { MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+  MAX_USER_ACTIONS_PER_PAGE,
+} from '@kbn/cases-plugin/common/constants';
 import type { CommentUserAction } from '@kbn/cases-plugin/common/types/domain';
 import { UserActionTypes, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import {
@@ -65,6 +70,52 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(response.userActions.length).to.be(1);
       expect(response.userActions[0].id).not.to.be(undefined);
       expect(response.userActions[0].version).not.to.be(undefined);
+    });
+
+    it('returns user actions whose source type is unknown', async () => {
+      const theCase = await createCase(supertest, getPostCaseRequest());
+      const unknownSource = { type: 'futuristic', id: 'x1' };
+
+      // No API can write an unknown source type; a newer Kibana node can.
+      const { updated } = await es.updateByQuery({
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        query: {
+          bool: {
+            filter: [
+              { term: { type: CASE_USER_ACTION_SAVED_OBJECT } },
+              {
+                nested: {
+                  path: 'references',
+                  query: {
+                    bool: {
+                      filter: [
+                        { term: { 'references.id': theCase.id } },
+                        { term: { 'references.type': CASE_SAVED_OBJECT } },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+        script: {
+          source: `ctx._source['${CASE_USER_ACTION_SAVED_OBJECT}'].source = params.source`,
+          params: { source: unknownSource },
+        },
+        refresh: true,
+        conflicts: 'proceed',
+      });
+
+      expect(updated).to.be(1);
+
+      const response = await findCaseUserActions({
+        caseID: theCase.id,
+        supertest,
+      });
+
+      expect(response.userActions.length).to.be(1);
+      expect(response.userActions[0].source).to.eql(unknownSource);
     });
 
     describe('default parameters', () => {

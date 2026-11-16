@@ -24,7 +24,9 @@ const sourceListSchema = lazySchema(() =>
       .string()
       .max(MAX_SOURCE_TITLE_LENGTH)
       .optional()
-      .describe('Optional. Return only sources whose title starts with this text.'),
+      .describe(
+        'Optional. Return only sources whose title contains all of these words, in any order, ignoring case. The last word may be a partial word. Punctuation such as `-` or `"` only separates words and is not a search operator, so `checkout-prod` is the words `checkout` and `prod`.'
+      ),
     enabled: z
       .boolean()
       .optional()
@@ -53,7 +55,7 @@ export const createSourceListTool = ({
   id: NIGHTSHIFT_SOURCE_LIST_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    List the Nightshift sources defined in the current space. This is the full source catalog:
+    List the nightshift sources defined in the current space. This is the full source catalog:
     it includes disabled sources and sources that have no Knowledge Indicators (KIs).
 
     Each source reports its \`id\`, \`slug\`, \`title\`, \`description\`, \`tags\`, \`esql\` (the

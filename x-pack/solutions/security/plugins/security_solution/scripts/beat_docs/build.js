@@ -7,21 +7,27 @@
 
 require('@kbn/setup-node-env');
 
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 const AdmZip = require('adm-zip');
 const fs = require('fs');
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 const { parse } = require('yaml');
 const https = require('https');
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 const { get, isArray, isEmpty, isNumber, isString, pick } = require('lodash');
 const { resolve } = require('path');
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 const tar = require('tar');
 const zlib = require('zlib');
 
 const OUTPUT_DIRECTORY = resolve('scripts', 'beat_docs');
-const OUTPUT_SERVER_DIRECTORY = resolve('../timelines', 'server', 'utils', 'beat_schema');
+const OUTPUT_SERVER_DIRECTORY = resolve(
+  'server',
+  'lib',
+  'timelines_server',
+  'utils',
+  'beat_schema'
+);
 const BEATS_VERSION = '8.0.0-rc1';
 
 const beats = [

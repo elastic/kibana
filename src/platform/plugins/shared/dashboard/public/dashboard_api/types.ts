@@ -20,6 +20,7 @@ import type {
   CanExpandPanels,
   CanIndicateRelatedChildren,
   CanPinPanels,
+  CanSelectPanels,
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -30,7 +31,7 @@ import type {
   HasUniqueId,
   PresentationContainer,
   PublishesDataLoading,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesDescription,
   PublishesEditablePauseFetch,
   PublishesHideBorder,
@@ -170,6 +171,7 @@ export interface DashboardCreationOptions {
 export type DashboardApi = CanExpandPanels &
   CanIndicateRelatedChildren &
   CanPinPanels &
+  CanSelectPanels &
   HasSections &
   HasAppContext &
   HasExecutionContext &
@@ -179,7 +181,7 @@ export type DashboardApi = CanExpandPanels &
   HasUniqueId &
   PresentationContainer &
   PublishesDataLoading &
-  PublishesDataViews &
+  PublishesDataSources &
   PublishesDescription &
   PublishesHideBorder &
   Pick<PublishesTitle, 'title$' | 'hideTitle$'> &
@@ -230,7 +232,18 @@ export type DashboardApi = CanExpandPanels &
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     runInteractiveSave: (redirectTo?: DashboardRedirect) => Promise<{ id: string } | undefined>;
+    /**
+     * Saves the current dashboard state without showing the save modal.
+     * Set `restored` when the state was already saved by a restore.
+     * The save event is published without saving again.
+     * Never throws. Save failures are reported to the user with a toast,
+     * and failures while publishing the save event are logged as warnings.
+     */
     runQuickSave: (options?: { restored?: boolean }) => Promise<void>;
+    /** Adds the given panels to the current selection */
+    addPanelsToSelection: (panelIds: string[]) => void;
+    /** Removes several panels from the layout in a single state update */
+    removePanels: (panelIds: string[]) => void;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;

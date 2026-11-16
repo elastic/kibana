@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { getEmitterWorkflowExecutionIdFromRequest } from '@kbn/workflows-extensions/server';
 import {
   EMITTED_INVESTIGATION_STATUSES,
   INVESTIGATION_COMPLETED_TRIGGER_ID,
@@ -38,6 +39,19 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
     }),
   }),
   handler: async ({ request, params, getInvestigationsClient, getTriggerEmitter }) => {
+    const client = getInvestigationsClient(request);
+    const executionId = request.isInternalApiRequest
+      ? getEmitterWorkflowExecutionIdFromRequest(request)
+      : undefined;
+    // Failed runs report from `nightshift.handleInvestigationFailure`, which the workflow runs
+    // instead of this route, so only a completed run reports here. Telemetry does not depend on
+    // workflow triggers or a recorded subject, so it starts before either check. It is not
+    // awaited: its reads must not delay the completed trigger or the notifications after it, and
+    // it never throws.
+    if (executionId && params.body.status === 'completed') {
+      void client.reportRunEnded(params.path.id, executionId, 'completed');
+    }
+
     const emitter = getTriggerEmitter(request);
     if (!emitter) {
       return { accepted: false };
@@ -45,7 +59,7 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
 
     // Identity comes from the investigation's recorded subjects, never from the request body, so
     // a caller cannot emit lifecycle events attributed to a subject it made up.
-    const lifecycleSubject = await getInvestigationsClient(request)
+    const lifecycleSubject = await client
       .getLifecycleSubject(params.path.id)
       .catch(rethrowInvestigationClientError);
 
@@ -54,8 +68,14 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
       // event to, so no lifecycle event is emitted.
       return { accepted: false };
     }
+    const correlation = executionId
+      ? await client.getLifecycleCorrelation(params.path.id, executionId)
+      : {};
     const base = {
       investigation_id: params.path.id,
+      workflow_execution_id: executionId,
+      execution_id: executionId,
+      ...correlation,
       subject: lifecycleSubject.subject,
       trigger_type: lifecycleSubject.triggerType,
       started_at: lifecycleSubject.startedAt,

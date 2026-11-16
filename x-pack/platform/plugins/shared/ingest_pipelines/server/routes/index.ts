@@ -11,7 +11,6 @@ import {
   registerGetRoutes,
   registerCreateRoute,
   registerUpdateRoute,
-  registerPrivilegesRoute,
   registerDeleteRoute,
   registerSimulateRoute,
   registerDocumentsRoute,
@@ -26,7 +25,6 @@ export class ApiRoutes {
     registerGetRoutes(dependencies);
     registerCreateRoute(dependencies);
     registerUpdateRoute(dependencies);
-    registerPrivilegesRoute(dependencies);
     registerDeleteRoute(dependencies);
     registerSimulateRoute(dependencies);
     registerDocumentsRoute(dependencies);

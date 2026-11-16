@@ -45,7 +45,7 @@ export const EntityAnalyticsHomeHeader = React.memo(
     // The new page's route drops the template padding that `largeBleed` reaches out of.
     const isNewHomePageEnabled = featureFlags.useBooleanValue(
       USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
-      false
+      true
     );
 
     const menu = useMemo<AppHeaderMenu>(

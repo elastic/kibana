@@ -24,7 +24,7 @@ import { draftBrief } from './draft_brief';
 import { readAlertRules } from './read_alert_rules';
 import { readAnomalies } from './read_anomalies';
 import { readWatchlistNames } from './read_watchlist_names';
-import { getCandidateRisk, readEntities } from './read_entities';
+import { getCandidateRisk, readEntities, toAttachmentIdentifier } from './read_entities';
 import type { BriefPriority } from './prompts';
 import { renderBriefHtml } from './render_brief_html';
 import { verifyDraft } from './verify_draft';
@@ -139,11 +139,7 @@ const createEntityTable = async (
   if (candidates.length === 0) {
     return undefined;
   }
-  const entities = candidates.map(({ id, name, type }) => ({
-    identifierType: type,
-    identifier: name,
-    entityStoreId: id,
-  }));
+  const entities = candidates.map(toAttachmentIdentifier);
   const attachment = await ensureEntityAttachment({
     attachments,
     id: buildListEntityAttachmentId(entities),

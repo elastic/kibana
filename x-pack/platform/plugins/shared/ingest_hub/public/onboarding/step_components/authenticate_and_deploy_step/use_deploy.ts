@@ -226,7 +226,12 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         if (status === undefined) {
           return instance.instanceId in (detectAndReviewStep.policyIdsByInstance ?? {});
         }
-        return status === 'receiving' || status === 'detecting' || status === 'timeout';
+        return (
+          status === 'receiving' ||
+          status === 'unverified' ||
+          status === 'detecting' ||
+          status === 'timeout'
+        );
       })
     );
   }, [

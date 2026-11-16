@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Run AlertZero Hunt Tier 1 threat hunt API endpoint
+  title: Run AlertZero IOC Hunt API endpoint
   version: '1'
 paths:
   /internal/alertzero/hunt/hunt_for_threat:
@@ -9,9 +9,9 @@ paths:
       x-labels: [ess, serverless]
       operationId: HuntForThreat
       description: >-
-        Runs Tier 1's deterministic search over the space's Security Solution
+        Runs IOC Hunt's deterministic search over the space's Security Solution
         default data view. A blocked scope is refused with 409.
-      summary: Run Tier 1 deterministic hunt
+      summary: Run IOC Hunt
       tags:
         - AlertZero API
       requestBody:

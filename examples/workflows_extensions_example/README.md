@@ -137,7 +137,7 @@ steps:
 
 - **`system-` prefix** is reserved for managed workflow IDs; user-created workflows cannot use it.
 - **`yamlTemplate(values)`** enables install-time parameterization; `values` are persisted and reused on upgrades.
-- **`versionStrategy: 'auto'`** means the platform re-installs the workflow on startup when the template changes.
+- **`versionStrategy: 'auto'`** means the platform re-installs the workflow on startup when its rendered YAML changes.
 - **`enablement: 'restorable'`** preserves user-toggled enabled state across managed updates.
 - **`spaceId`** is mandatory — use `'*'` (the global space constant) for workflows visible from every space.
 

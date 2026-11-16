@@ -8,7 +8,7 @@
  */
 
 import path from 'path';
-import { findConnector } from './find_connector';
+import { findConnector, findVendorApiDirectory } from './find_connector';
 
 describe('findConnector', () => {
   it('finds a connector by id and the vendor_api folder next to it', async () => {
@@ -26,5 +26,23 @@ describe('findConnector', () => {
 
   it('fails for an unknown id', async () => {
     await expect(findConnector('.nope')).rejects.toThrow('metadata.id ".nope"');
+  });
+});
+
+describe('findVendorApiDirectory', () => {
+  const specs = path.resolve(__dirname, '../../specs');
+
+  it('finds the folder of a connector that exists', async () => {
+    expect(await findVendorApiDirectory('.datadog')).toBe(path.join(specs, 'datadog/vendor_api'));
+  });
+
+  it('names the folder of a connector that is not written yet after its id', async () => {
+    expect(await findVendorApiDirectory('acme-widgets')).toBe(
+      path.join(specs, 'acme_widgets/vendor_api')
+    );
+  });
+
+  it('refuses ids that could not name a connector', async () => {
+    await expect(findVendorApiDirectory('../datadog')).rejects.toThrow('not a connector id');
   });
 });

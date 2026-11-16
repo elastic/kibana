@@ -36,10 +36,17 @@ describe('getAuthenticatedUser', () => {
     await expect(
       getAuthenticatedUser(
         createRequest(),
-        createSecurity({ username: 'elastic', profile_uid: 'u_profile_1' }),
+        createSecurity({
+          username: 'elastic',
+          full_name: 'Elastic User',
+          profile_uid: 'u_profile_1',
+        }),
         createClusterClient()
       )
-    ).resolves.toBe('u_profile_1');
+    ).resolves.toEqual({
+      executedBy: 'u_profile_1',
+      user: { name: 'Elastic User', username: 'elastic', profileUid: 'u_profile_1' },
+    });
   });
 
   it('falls back to the username when the profile UID is unavailable', async () => {
@@ -49,7 +56,23 @@ describe('getAuthenticatedUser', () => {
         createSecurity({ username: 'elastic' }),
         createClusterClient()
       )
-    ).resolves.toBe('elastic');
+    ).resolves.toEqual({
+      executedBy: 'elastic',
+      user: { name: 'elastic', username: 'elastic' },
+    });
+  });
+
+  it('uses the username as the display name when the full name is unset', async () => {
+    await expect(
+      getAuthenticatedUser(
+        createRequest(),
+        createSecurity({ username: 'elastic', profile_uid: 'u_profile_1' }),
+        createClusterClient()
+      )
+    ).resolves.toEqual({
+      executedBy: 'u_profile_1',
+      user: { name: 'elastic', username: 'elastic', profileUid: 'u_profile_1' },
+    });
   });
 
   it('returns the username even when it is the string unknown', async () => {
@@ -59,7 +82,10 @@ describe('getAuthenticatedUser', () => {
         createSecurity({ username: 'unknown' }),
         createClusterClient()
       )
-    ).resolves.toBe('unknown');
+    ).resolves.toEqual({
+      executedBy: 'unknown',
+      user: { name: 'unknown', username: 'unknown' },
+    });
   });
 
   it('returns undefined when no user or API key identity can be resolved', async () => {
@@ -68,19 +94,23 @@ describe('getAuthenticatedUser', () => {
     ).resolves.toBeUndefined();
   });
 
-  it('returns the API key authenticate username when Kibana has no username', async () => {
+  it('returns the API key authenticate identity when Kibana has no username', async () => {
     const request = {
       headers: { authorization: 'ApiKey essu_granted' },
       isFakeRequest: true,
     } as KibanaRequest;
     const authenticate = jest.fn().mockResolvedValue({
       username: 'sa-id',
+      full_name: 'Service Account',
       authentication_realm: { name: '_cloud_service_account', type: '_cloud_service_account' },
     });
     const clusterClient = createScopedClusterClient(authenticate);
 
-    await expect(getAuthenticatedUser(request, createSecurity({}), clusterClient)).resolves.toBe(
-      'sa-id'
+    await expect(getAuthenticatedUser(request, createSecurity({}), clusterClient)).resolves.toEqual(
+      {
+        executedBy: 'sa-id',
+        user: { name: 'Service Account', username: 'sa-id' },
+      }
     );
     expect(clusterClient.asScoped).toHaveBeenCalledWith(request);
     expect(authenticate).toHaveBeenCalledTimes(1);

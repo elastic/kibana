@@ -14,6 +14,7 @@ import {
   createCase,
   createComment,
   getAttachmentV2,
+  seedUnreadableAttachment,
   superUserSpace1Auth,
 } from '../../../../common/lib/api';
 import {
@@ -81,6 +82,20 @@ export default ({ getService }: FtrProviderContext): void => {
         attachmentId: patchedCase.comments![0].id,
         expectedHttpCode: 404,
       });
+    });
+
+    it('404s when the stored attachment cannot be read', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const attachmentId = await seedUnreadableAttachment({ es, caseId: postedCase.id });
+
+      const error = (await getAttachmentV2({
+        supertest,
+        caseId: postedCase.id,
+        attachmentId,
+        expectedHttpCode: 404,
+      })) as unknown as { message: string };
+
+      expect(error.message).to.be(`Attachment ${attachmentId} could not be read.`);
     });
 
     describe('rbac', () => {

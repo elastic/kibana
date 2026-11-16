@@ -107,6 +107,7 @@ import {
   CaseDetailsLocatorDefinition,
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
+import { AlertsLocatorDefinition } from '../common/locators/alerts';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export interface ConfigSchema {
@@ -220,7 +221,7 @@ export class Plugin
     {
       id: 'alerts',
       title: getObservabilityAlertsLinkTitle(false),
-      order: 8001,
+      order: 8002,
       path: ALERTS_PATH,
       visibleIn: ['projectSideNav'],
       keywords: ['alerts', 'rules'],
@@ -251,7 +252,7 @@ export class Plugin
           basePath: CASES_PATH,
           extend: {
             [CasesDeepLinkId.cases]: {
-              order: 8003,
+              order: 8004,
               visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesCreate]: {
@@ -277,6 +278,7 @@ export class Plugin
 
     pluginsSetup.share.url.locators.create(CaseDetailsLocatorDefinition());
     pluginsSetup.share.url.locators.create(CasesOverviewLocatorDefinition());
+    pluginsSetup.share.url.locators.create(new AlertsLocatorDefinition());
 
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);

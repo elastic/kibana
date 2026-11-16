@@ -15,7 +15,7 @@ import type { BulkByIdsParams, BulkResponse } from '../rules_client';
 import { toBulkError } from '../rules_client/utils';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceInternalToken } from '../services/rules_saved_object_service/tokens';
-import { savedObjectNamespacesToSpaceId } from '../space_id_to_namespace';
+import { savedObjectNamespacesToSpaceId } from '../saved_object_namespaces_to_space_id';
 import { InternalRulesClientProvider } from './internal_rules_client_provider';
 
 /**
