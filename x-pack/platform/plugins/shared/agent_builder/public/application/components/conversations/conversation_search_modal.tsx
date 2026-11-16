@@ -42,8 +42,9 @@ const labels = {
   }),
 };
 
+const MODAL_WIDTH = 768;
 const modalStyles = css`
-  width: 768px;
+  width: ${MODAL_WIDTH}px;
 `;
 const LIST_MAX_HEIGHT = 290;
 
