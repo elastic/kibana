@@ -25,7 +25,7 @@ import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { CUSTOM_CONTENT_MAX_ESQL_QUERIES } from '@kbn/custom-content-common';
 import type { TabItem } from '@kbn/unified-tabs';
-import { UnifiedTabs } from '@kbn/unified-tabs';
+import { UnifiedTabs, getTabIdAttribute } from '@kbn/unified-tabs';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { EsqlDataResult } from '@kbn/custom-content-renderer';
 import type { DraftQuery } from '../hooks/flyout_reducer';
@@ -292,7 +292,11 @@ export const EsqlDataSection = ({
         <code data-test-subj="customContentQueryVariable">{activeTab.variable}</code>
       </EuiText>
 
-      <div id={QUERY_TAB_CONTENT_ID}>
+      <div
+        id={QUERY_TAB_CONTENT_ID}
+        role="tabpanel"
+        aria-labelledby={getTabIdAttribute({ id: activeTab.key, label: '' })}
+      >
         <EsqlQueryEditor
           key={activeTab.key}
           esqlQuery={activeTab.text}

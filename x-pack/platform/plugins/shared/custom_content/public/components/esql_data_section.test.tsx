@@ -95,6 +95,20 @@ describe('EsqlDataSection', () => {
       expect(screen.getByTestId('mockQueryText')).toHaveTextContent('FROM main');
     });
 
+    it('labels the editor as the panel of the selected tab, so a screen reader announces which query it is', async () => {
+      renderSeveral();
+
+      const labelledBy = () => screen.getByRole('tabpanel').getAttribute('aria-labelledby');
+      expect(document.getElementById(labelledBy() ?? '')).toBe(
+        screen.getByTestId(tabTestSubj('query-1'))
+      );
+
+      await userEvent.click(screen.getByTestId(tabTestSubj('query-4')));
+      expect(document.getElementById(labelledBy() ?? '')).toBe(
+        screen.getByTestId(tabTestSubj('query-4'))
+      );
+    });
+
     it('names the template variable of the selected query', async () => {
       renderSeveral();
       expect(screen.getByTestId('customContentQueryVariable')).toHaveTextContent(/^rows$/);

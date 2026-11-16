@@ -213,7 +213,7 @@ describe('getInlinePanelKindGuidance', () => {
 
       When one panel needs data of more than one shape — headline numbers above a ranked list, say — send one \`dataQueries\` entry per query. The template reads the first as \`rows\` and the n-th as \`queries[n].rows\`. Each entry says what ONE query returns, not how it looks: \`{ description: \\"total requests and the number of 5xx errors, as one row\\", index: \\"logs-*\\" }\`, then \`{ description: \\"the five hosts with the most requests\\" }\`. \`query\` stays the layout and how each query is used. Keep a panel to a few queries (at most ten).
 
-      To edit a panel that has several queries, send \`dataQueries\` only for the ones you change, in position order: an entry with \`description\` regenerates that query, \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one. Queries you do not list are kept. They cannot be removed one at a time; tell the user to remove one from the panel's editor, or use \`removeAllQueries: true\` to remove them all. For a layout or style edit omit \`dataQueries\`: every query is kept."
+      To edit a panel that has several queries, send \`dataQueries\` only for the ones you change, in position order: an entry with \`description\` regenerates that query, \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one. Queries you do not list are kept. They cannot be removed one at a time with this tool, and the panel's editor only lets the user remove the last query. To drop an earlier one, replace it with a different query (a new \`description\` or \`esql\`), or use \`removeAllQueries: true\` to remove them all. For a layout or style edit omit \`dataQueries\`: every query is kept."
     `);
   });
 });
