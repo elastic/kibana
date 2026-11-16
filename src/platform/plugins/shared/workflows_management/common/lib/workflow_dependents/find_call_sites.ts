@@ -91,18 +91,38 @@ const walkDefinitionSteps = (definition: unknown, visit: StepVisitor): void => {
   walkSteps(isRecord(onFailure) ? onFailure.fallback : undefined, visit);
 };
 
-// Whether an `on-failure` block can keep a failure from failing the run: `continue` (unless it is
-// `false`) or a `fallback`.
+// `continue` (unless it is `false`) keeps a failure from failing the run, including a failure in
+// the fallback it wraps.
+const canContinue = (onFailure: unknown): boolean =>
+  isRecord(onFailure) && onFailure.continue !== undefined && onFailure.continue !== false;
+
+// The engine fails the step again once its fallback has run, unless the fallback completed the run
+// or left the loop iteration first.
+const mayEndBeforeFailing = (steps: unknown): boolean => {
+  let mayEnd = false;
+  walkSteps(steps, (step) => {
+    mayEnd ||=
+      isCompletingOutputStep(step) || step.type === 'loop.break' || step.type === 'loop.continue';
+  });
+  return mayEnd;
+};
+
+// Whether an `on-failure` block can keep a failure from failing the run.
 const canRecover = (onFailure: unknown): boolean =>
-  isRecord(onFailure) &&
-  ((onFailure.continue !== undefined && onFailure.continue !== false) ||
-    onFailure.fallback !== undefined);
+  canContinue(onFailure) || (isRecord(onFailure) && mayEndBeforeFailing(onFailure.fallback));
 
 // A step whose handlers cover the steps it holds, and itself.
 const coversFailures = (step: Record<string, unknown>): boolean =>
   canRecover(step['on-failure']) ||
   canRecover(step['iteration-on-failure']) ||
   (step.type === 'parallel' && step.mode === 'settled');
+
+// What covers the steps of a step's fallback: the `continue` around it, and for the fallback of a
+// loop iteration, the step's own `on-failure` around the whole loop.
+const coversFallback = (step: Record<string, unknown>, pathSuffix: string): boolean =>
+  pathSuffix === '.iteration-on-failure.fallback'
+    ? canContinue(step['iteration-on-failure']) || canRecover(step['on-failure'])
+    : canContinue(step['on-failure']);
 
 const hasOwnOnFailure = (step: Record<string, unknown>): boolean =>
   step['on-failure'] !== undefined;
@@ -126,9 +146,8 @@ const findCoverage = (
       return coveredHere || (workflowCovers && !hasOwnOnFailure(step));
     }
     for (const { pathSuffix, steps: nestedSteps } of getNestedStepGroups(step)) {
-      // A step's handlers don't cover the steps of its own fallback.
       const found = isFallbackGroup(pathSuffix)
-        ? findCoverage(nestedSteps, stepName, covered, false)
+        ? findCoverage(nestedSteps, stepName, covered || coversFallback(step, pathSuffix), false)
         : findCoverage(nestedSteps, stepName, coveredHere, workflowCovers);
       if (found !== undefined) {
         return found;
@@ -147,7 +166,12 @@ export const mayRecoverFromFailure = (definition: unknown, stepName: string): bo
   const onFailure = getWorkflowOnFailure(definition);
   return (
     findCoverage(getSteps(definition), stepName, false, canRecover(onFailure)) ??
-    findCoverage(isRecord(onFailure) ? onFailure.fallback : undefined, stepName, false, false) ??
+    findCoverage(
+      isRecord(onFailure) ? onFailure.fallback : undefined,
+      stepName,
+      canContinue(onFailure),
+      false
+    ) ??
     false
   );
 };

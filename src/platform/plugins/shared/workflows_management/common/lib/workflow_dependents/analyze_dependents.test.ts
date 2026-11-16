@@ -350,6 +350,12 @@ describe('mayRecoverFromFailure', () => {
         run('maybe-continues', { 'on-failure': { continue: 'inputs.lenient : true' } }),
         run('strict', { 'on-failure': { continue: false } }),
         run('falls-back', { 'on-failure': { fallback: [{ name: 'log', type: 'console' }] } }),
+        run('ends-in-fallback', {
+          'on-failure': { fallback: [{ name: 'done', type: 'workflow.output', with: {} }] },
+        }),
+        run('fails-in-fallback', {
+          'on-failure': { fallback: [{ name: 'stop', type: 'workflow.fail', with: {} }] },
+        }),
         run('retries', { 'on-failure': { retry: { 'max-attempts': 2 } } }),
       ],
     };
@@ -359,20 +365,33 @@ describe('mayRecoverFromFailure', () => {
     expect(recovers('continues')).toBe(true);
     expect(recovers('maybe-continues')).toBe(true);
     expect(recovers('strict')).toBe(false);
-    expect(recovers('falls-back')).toBe(true);
+    // The engine fails the step again after its fallback, unless the fallback completed the run.
+    expect(recovers('falls-back')).toBe(false);
+    expect(recovers('ends-in-fallback')).toBe(true);
+    expect(recovers('fails-in-fallback')).toBe(false);
     expect(recovers('retries')).toBe(false);
     expect(recovers('missing')).toBe(false);
   });
 
-  it('reads the handlers of the steps that hold it, but not for their own fallback', () => {
+  it('reads the handlers of the steps that hold it, and the continue around a fallback', () => {
+    const done = { name: 'done', type: 'workflow.output', with: {} };
     const definition = {
       steps: [
         {
           name: 'guarded',
           type: 'if',
           condition: 'true',
-          'on-failure': { fallback: [run('in-fallback')] },
+          'on-failure': { fallback: [run('in-fallback'), done] },
           steps: [run('inside')],
+        },
+        run('continues', { 'on-failure': { continue: true, fallback: [run('in-continued')] } }),
+        {
+          name: 'iterations',
+          type: 'foreach',
+          foreach: '[1]',
+          'on-failure': { continue: true },
+          'iteration-on-failure': { fallback: [run('in-iteration-fallback')] },
+          steps: [run('body')],
         },
         {
           name: 'loop',
@@ -398,12 +417,14 @@ describe('mayRecoverFromFailure', () => {
 
     expect(recovers('inside')).toBe(true);
     expect(recovers('in-fallback')).toBe(false);
+    expect(recovers('in-continued')).toBe(true);
+    expect(recovers('in-iteration-fallback')).toBe(true);
     expect(recovers('iteration')).toBe(true);
     expect(recovers('branch')).toBe(true);
     expect(recovers('fast-branch')).toBe(false);
   });
 
-  it('applies the workflow-level handler to steps without their own, outside its fallback', () => {
+  it('applies the workflow-level handler to steps without their own, and its fallback', () => {
     const definition = {
       settings: { 'on-failure': { continue: true, fallback: [run('in-fallback')] } },
       steps: [run('plain'), run('strict', { 'on-failure': { continue: false } })],
@@ -412,7 +433,13 @@ describe('mayRecoverFromFailure', () => {
 
     expect(recovers('plain')).toBe(true);
     expect(recovers('strict')).toBe(false);
-    expect(recovers('in-fallback')).toBe(false);
+    expect(recovers('in-fallback')).toBe(true);
+    expect(
+      mayRecoverFromFailure(
+        { settings: { 'on-failure': { fallback: [run('in-fallback')] } }, steps: [] },
+        'in-fallback'
+      )
+    ).toBe(false);
   });
 });
 
@@ -1421,7 +1448,7 @@ describe('analyzeRemovalImpact', () => {
     const recovering = workflow('recovering', [
       {
         ...callStep('ctx', { inputs: { alert_id: 'a' } }),
-        'on-failure': { fallback: [{ name: 'log', type: 'console' }] },
+        'on-failure': { continue: true },
       },
       {
         name: 'emit',
@@ -1436,6 +1463,18 @@ describe('analyzeRemovalImpact', () => {
     const ignores = workflow('ignores', [callStep('run', {}, undefined, 'recovering')]);
 
     expect(analyzeRemovalImpact([CHILD_ID], [recovering, reads, ignores]).indirect).toBe(1);
+  });
+
+  it('fails callers whose fallback goes on, since the engine fails the step after it', () => {
+    const fallingBack = workflow('falling-back', [
+      {
+        ...callStep('ctx', { inputs: { alert_id: 'a' } }),
+        'on-failure': { fallback: [{ name: 'log', type: 'console' }] },
+      },
+    ]);
+    const top = workflow('top', [callStep('run', {}, undefined, 'falling-back')]);
+
+    expect(analyzeRemovalImpact([CHILD_ID], [fallingBack, top]).indirect).toBe(1);
   });
 
   it('ignores calls between workflows that are removed together', () => {
