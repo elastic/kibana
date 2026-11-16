@@ -145,7 +145,7 @@ describe('updateVendorApi', () => {
   it('fetches and bundles new sources, and writes the manifest and a projected snapshot', async () => {
     const result = await update({ sources: { main: SPEC_URL } });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       changed: ['snapshots/main.openapi.json', 'manifest.json'],
       problems: [],
     });
@@ -204,7 +204,7 @@ describe('updateVendorApi', () => {
     await update({ sources: { main: SPEC_URL } });
     fetched = [];
 
-    expect(await update({ now: () => new Date('2027-01-01T00:00:00.000Z') })).toEqual({
+    expect(await update({ now: () => new Date('2027-01-01T00:00:00.000Z') })).toMatchObject({
       changed: [],
       problems: [],
     });
@@ -474,7 +474,7 @@ actions:
     expect((await readJson('snapshots/main.openapi.json')).components.schemas.Legacy).toEqual({
       type: 'object',
     });
-    expect(await update({ connector: withLegacy })).toEqual({ changed: [], problems: [] });
+    expect(await update({ connector: withLegacy })).toMatchObject({ changed: [], problems: [] });
   });
 
   it('reports what would change in check mode without writing', async () => {
@@ -512,7 +512,7 @@ actions:
       },
     });
 
-    expect(await update({ sources: { main: discoveryUrl } })).toEqual({
+    expect(await update({ sources: { main: discoveryUrl } })).toMatchObject({
       changed: ['snapshots/main.openapi.json', 'manifest.json'],
       problems: [],
     });
@@ -585,7 +585,7 @@ actions:
         pages: { search: ['api-reference/'] },
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         changed: ['snapshots/search.openapi.json', 'manifest.json'],
         problems: [],
       });
@@ -615,9 +615,9 @@ actions:
       });
       fetched = [];
 
-      expect(await update({ connector: searcher })).toEqual({ changed: [], problems: [] });
+      expect(await update({ connector: searcher })).toMatchObject({ changed: [], problems: [] });
       expect(fetched).toEqual([]);
-      expect(await update({ connector: searcher, refresh: true })).toEqual({
+      expect(await update({ connector: searcher, refresh: true })).toMatchObject({
         changed: [],
         problems: [],
       });

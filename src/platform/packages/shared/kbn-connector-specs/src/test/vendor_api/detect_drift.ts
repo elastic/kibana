@@ -10,16 +10,22 @@
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
+import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-emulate';
 import type { ConnectorSpec } from '../../connector_spec';
 import { loadVendorSpec } from './load_vendor_spec';
 import { MANIFEST, OVERLAY, readOptional, snapshotFile } from './load_vendor_specs';
+import type { OperationLocation } from './locate_operation';
+import { locateOperation, serverUrls } from './locate_operation';
 import type { VendorApiManifest } from './manifest';
 import { parseManifest } from './manifest';
+import { parseSpecText } from './parse_spec_text';
 import type { DiffSpecs, OasdiffEntry } from './run_oasdiff';
 import { createOasdiff } from './run_oasdiff';
 import { toStableJson } from './stable_json';
-import type { VendorApiLog } from './update_vendor_api';
+import type { UpdateVendorApiResult, VendorApiLog } from './update_vendor_api';
 import { updateVendorApi } from './update_vendor_api';
+
+export type { OperationLocation } from './locate_operation';
 
 export type ChangeKind = 'breaking' | 'deprecation' | 'non-breaking';
 
@@ -39,6 +45,40 @@ export interface SourceDrift {
   readonly error?: string;
   /** For changed sources; undefined when no `oasdiff` was available to classify them. */
   readonly changes?: readonly SpecChange[];
+  /** The server URLs of the committed snapshot and of the latest spec, when it loaded. */
+  readonly servers?: { readonly snapshot: readonly string[]; readonly latest: readonly string[] };
+  /** Where the source is fetched from, as the manifest records it. */
+  readonly url?: string;
+}
+
+/** An operation an action calls, as the committed manifest records it. */
+export interface ActionOperation {
+  readonly source: string;
+  /** `METHOD /path`. */
+  readonly operation: string;
+  /** Where it is in the latest spec; undefined when the latest specs didn't load. */
+  readonly latest?: OperationLocation;
+}
+
+/** One of the connector's actions, and what the check found for it. */
+export interface ActionDrift {
+  readonly action: string;
+  readonly operations: readonly ActionOperation[];
+  /** Requests the manifest records as matching no operation, with the reason it gives. */
+  readonly unmatched: readonly { readonly operation: string; readonly reason: string }[];
+  /** Problems recording it against the committed snapshots. */
+  readonly snapshotProblems: readonly string[];
+  /** Problems recording it against the latest specs; undefined when those didn't load. */
+  readonly latestProblems?: readonly string[];
+}
+
+/** An overlay action that matches nothing in the latest specs. */
+export interface StaleCorrection {
+  /** Zero-based, as in the overlay's `actions`. */
+  readonly index: number;
+  readonly target: string;
+  /** For a target under `$.paths`, where its path is in the latest specs. */
+  readonly latest?: OperationLocation;
 }
 
 /**
@@ -65,6 +105,23 @@ export interface ConnectorDrift {
   /** Overlay actions that no longer apply to the latest specs. */
   readonly overlayFindings: readonly string[];
   readonly outcome: DriftOutcome;
+  // The fields below describe the findings for the drift issue. Reports written before they
+  // existed lack them.
+  readonly displayName?: string;
+  /** The connector's folder, relative to the repository root. */
+  readonly folder?: string;
+  /** When the check ran, as an ISO timestamp. */
+  readonly checkedAt?: string;
+  /** Every action of the connector. */
+  readonly actions?: readonly ActionDrift[];
+  /** Problems that concern no single action, e.g. a missing pagination declaration. */
+  readonly otherProblems?: {
+    readonly snapshot: readonly string[];
+    readonly latest?: readonly string[];
+  };
+  readonly staleCorrections?: readonly StaleCorrection[];
+  /** The zero-based index of the overlay action that targets the servers, if any. */
+  readonly serversCorrection?: number;
 }
 
 /** A connector the check couldn't run on at all. */
@@ -85,6 +142,8 @@ export interface DetectDriftOptions {
   readonly log: VendorApiLog;
   /** Classifies spec changes; defaults to `oasdiff changelog`. */
   readonly diff?: DiffSpecs;
+  /** The connector's folder relative to the repository root, recorded for links. */
+  readonly folder?: string;
 }
 
 /**
@@ -152,6 +211,8 @@ interface LatestComparison {
   readonly operationsChanged: boolean;
   readonly problems: readonly string[];
   readonly overlayFindings: readonly string[];
+  /** Undefined when recording against the latest specs failed outright. */
+  readonly result?: UpdateVendorApiResult;
 }
 
 // Regenerates the artifacts from the latest specs in a temporary copy of the folder, and
@@ -171,6 +232,7 @@ const compareWithLatest = async ({
   try {
     await fs.cp(directory, copy, { recursive: true });
     const overlayFindings: string[] = [];
+    let result: UpdateVendorApiResult | undefined;
     const problems = await updateVendorApi({
       connector,
       directory: copy,
@@ -186,7 +248,10 @@ const compareWithLatest = async ({
         },
       },
     }).then(
-      (result) => result.problems,
+      (updated) => {
+        result = updated;
+        return updated.problems;
+      },
       (error) => [message(error)]
     );
     const refreshed = await readOptional(path.join(copy, MANIFEST));
@@ -195,13 +260,25 @@ const compareWithLatest = async ({
       const [committed, current] = await Promise.all(
         [directory, copy].map((root) => readOptional(path.join(root, snapshotFile(name))))
       );
+      const latestDocument = result?.specs[name];
+      const servers = latestDocument
+        ? {
+            servers: {
+              snapshot: committed ? serverUrls(JSON.parse(committed) as OpenApiDocument) : [],
+              latest: serverUrls(latestDocument),
+            },
+          }
+        : {};
+      const { url } = manifest.sources[name];
       if (committed === current) {
-        sources[name] = { status: 'unchanged' };
+        sources[name] = { status: 'unchanged', ...servers, url };
       } else {
         const entries = await diff(committed ?? '{}', current ?? '{}');
         sources[name] = {
           status: 'changed',
           ...(entries === undefined ? {} : { changes: entries.map(toSpecChange) }),
+          ...servers,
+          url,
         };
       }
     }
@@ -211,6 +288,7 @@ const compareWithLatest = async ({
         refreshed !== undefined && callsOf(parseManifest(refreshed)) !== callsOf(manifest),
       problems,
       overlayFindings,
+      result,
     };
   } finally {
     await fs.rm(copy, { recursive: true, force: true });
@@ -234,6 +312,7 @@ export const detectDrift = async ({
   now,
   log,
   diff = createOasdiff(),
+  folder,
 }: DetectDriftOptions): Promise<ConnectorDrift> => {
   const manifestText = await readOptional(path.join(directory, MANIFEST));
   if (manifestText === undefined) {
@@ -241,7 +320,9 @@ export const detectDrift = async ({
   }
   const manifest = parseManifest(manifestText);
   const quiet: VendorApiLog = { info: () => {}, warning: () => {} };
+  const checkedAt = now().toISOString();
 
+  let snapshotResult: UpdateVendorApiResult | undefined;
   const snapshot = await updateVendorApi({
     connector,
     directory,
@@ -250,7 +331,10 @@ export const detectDrift = async ({
     now,
     log: quiet,
   }).then(
-    ({ problems }) => problems,
+    (result) => {
+      snapshotResult = result;
+      return result.problems;
+    },
     (error) => [message(error)]
   );
 
@@ -268,7 +352,7 @@ export const detectDrift = async ({
       await loadVendorSpec(url, fetchOnce, source);
     } catch (error) {
       log.warning(`${connector.metadata.id}: ${name} at ${url} didn't load: ${message(error)}`);
-      sources[name] = { status: 'unreachable', error: message(error) };
+      sources[name] = { status: 'unreachable', error: message(error), url };
     }
   }
 
@@ -276,6 +360,13 @@ export const detectDrift = async ({
     Object.keys(sources).length === 0
       ? await compareWithLatest({ connector, directory, manifest, fetchText: fetchOnce, now, diff })
       : undefined;
+
+  const latestSpecs = latest?.result?.specs;
+  const overlayText = await readOptional(path.join(directory, OVERLAY));
+  const overlay = overlayText ? (parseSpecText(overlayText) as OverlayDocument) : undefined;
+  const serversCorrection = overlay?.actions.findIndex(({ target }) =>
+    /^\$\.servers\b/.test(target.trim())
+  );
 
   const drift = {
     connector: connector.metadata.id,
@@ -285,6 +376,82 @@ export const detectDrift = async ({
     ...(latest ? { latestProblems: latest.problems } : {}),
     verdict: verdictOf(snapshot, latest?.problems),
     overlayFindings: latest?.overlayFindings ?? [],
+    displayName: connector.metadata.displayName,
+    ...(folder === undefined ? {} : { folder }),
+    checkedAt,
+    actions: Object.keys(connector.actions)
+      .sort()
+      .map((action) =>
+        describeAction({
+          action,
+          manifest,
+          snapshotResult,
+          latestResult: latest?.result,
+          latestSpecs,
+        })
+      ),
+    otherProblems: {
+      snapshot: snapshotResult?.otherProblems ?? snapshot,
+      ...(latest ? { latest: latest.result?.otherProblems ?? latest.problems } : {}),
+    },
+    staleCorrections: (latest?.result?.staleOverlayActions ?? []).map((index) =>
+      describeStaleCorrection(index, overlay, latestSpecs)
+    ),
+    ...(serversCorrection === undefined || serversCorrection < 0 ? {} : { serversCorrection }),
   };
   return { ...drift, outcome: outcomeOf(drift) };
+};
+
+const describeAction = ({
+  action,
+  manifest,
+  snapshotResult,
+  latestResult,
+  latestSpecs,
+}: {
+  readonly action: string;
+  readonly manifest: VendorApiManifest;
+  readonly snapshotResult?: UpdateVendorApiResult;
+  readonly latestResult?: UpdateVendorApiResult;
+  readonly latestSpecs?: Readonly<Record<string, OpenApiDocument>>;
+}): ActionDrift => ({
+  action,
+  operations: (manifest.operations[action] ?? []).map(({ source, method, path: opPath }) => {
+    const document = latestSpecs?.[source];
+    return {
+      source,
+      operation: `${method.toUpperCase()} ${opPath}`,
+      ...(document ? { latest: locateOperation(document, opPath, method) } : {}),
+    };
+  }),
+  unmatched: (manifest.unmatched?.[action] ?? []).map(({ method, path: requestPath, reason }) => ({
+    operation: `${method.toUpperCase()} ${requestPath}`,
+    reason,
+  })),
+  snapshotProblems: snapshotResult?.problemsByAction[action] ?? [],
+  ...(latestResult ? { latestProblems: latestResult.problemsByAction[action] ?? [] } : {}),
+});
+
+// `$.paths['/items/{id}'].put…` targets the path `/items/{id}`.
+const TARGET_PATH = /^\$\.paths\[['"]([^'"]+)['"]\]/;
+
+const describeStaleCorrection = (
+  index: number,
+  overlay: OverlayDocument | undefined,
+  latestSpecs: Readonly<Record<string, OpenApiDocument>> | undefined
+): StaleCorrection => {
+  const target = overlay?.actions[index]?.target.trim() ?? '';
+  const targetPath = target.match(TARGET_PATH)?.[1];
+  if (targetPath === undefined || latestSpecs === undefined) {
+    return { index, target };
+  }
+  // Present or moved in any source counts, as an overlay action applies to every source.
+  const locations = Object.values(latestSpecs).map((document) =>
+    locateOperation(document, targetPath)
+  );
+  const latest =
+    locations.find(({ status }) => status === 'present') ??
+    locations.find(({ status }) => status === 'moved') ??
+    ({ status: 'missing' } as const);
+  return { index, target, latest };
 };
