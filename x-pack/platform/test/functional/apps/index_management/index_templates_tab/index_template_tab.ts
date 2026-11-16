@@ -294,6 +294,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           await (await testSubjects.find('advancedOptionsTab')).click();
 
+          // The form resets to synthetic _source on load, closing a dropdown opened before that.
+          await retry.waitForWithTimeout('_source to default to synthetic', 30_000, async () =>
+            (await testSubjects.getVisibleText('sourceValueField')).includes('Synthetic _source')
+          );
+
           // Modify source
           await testSubjects.click('sourceValueField');
           await testSubjects.click('disabledSourceFieldOption');
