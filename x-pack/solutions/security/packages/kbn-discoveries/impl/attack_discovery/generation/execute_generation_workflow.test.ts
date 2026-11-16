@@ -1135,7 +1135,6 @@ describe('executeGenerationWorkflow', () => {
       expect(logger.warn).not.toHaveBeenCalledWith(
         "Could not install the AI Assistant resources for space 'default'"
       );
-      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('pipeline API key'));
     });
 
     it('warns and still fetches the anonymization fields when the install fails', async () => {
@@ -1150,9 +1149,12 @@ describe('executeGenerationWorkflow', () => {
     });
 
     it('fetches the anonymization fields when elastic_assistant is not available', async () => {
-      await run({ pluginsStart: {} });
+      const logger = await run({ pluginsStart: {} });
 
       expect(mockFetchAnonymizationFields).toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        "Could not install the AI Assistant resources for space 'default'"
+      );
     });
   });
 
