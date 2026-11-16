@@ -709,6 +709,27 @@ describe('DataGrid keyboard and logical focus', () => {
       expect(after).toHaveFocus();
     });
 
+    it('describes how to enter a cell with focusable content and announces how to leave', async () => {
+      const user = userEvent.setup();
+      renderGridBetweenButtons({ gridColumns: columnsWithLinks });
+
+      await user.tab();
+      await user.tab();
+      expect(await expectFocus('Name 0')).not.toHaveAccessibleDescription();
+
+      await user.keyboard('{End}');
+      expect(await expectFocus('Open row-0')).toHaveAccessibleDescription(
+        "Press the Enter key to interact with this cell's contents."
+      );
+
+      await user.keyboard('{Enter}');
+      await waitFor(() =>
+        expect(screen.getByRole('status')).toHaveTextContent(
+          'Press the Escape key to return to the cell.'
+        )
+      );
+    });
+
     it('activates the cell that owns a clicked link', async () => {
       const user = userEvent.setup();
       const { after } = renderGridBetweenButtons({ gridColumns: columnsWithLinks });

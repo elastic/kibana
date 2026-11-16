@@ -94,10 +94,11 @@ are not part of the keyboard navigation plane.
 - Home and End move to the first and last cell in the current row.
 - Ctrl/Cmd+Home and Ctrl/Cmd+End move to the first and last body cell.
 - Enter moves focus to the first focusable element in the active cell's content.
-  Cells without focusable content ignore Enter.
+  Cells without focusable content ignore Enter. Cells with focusable content tell screen readers
+  to press Enter, and entering announces that Escape returns to the cell.
 - While focus is inside a cell's content, Tab and Shift+Tab wrap among that cell's focusable
-  elements, and Escape returns focus to the cell. The grid looks these elements up when a key needs
-  them and never rewrites their `tabindex`.
+  elements, and Escape returns focus to the cell. The grid looks these elements up when the cell
+  receives focus or a key needs them, and never rewrites their `tabindex`.
 - The browser's copy command copies the column-provided text value unless the user has an explicit
   text selection. Multi-cell text selections are copied as tab-separated columns and
   newline-separated rows, matching EUIDataGrid.

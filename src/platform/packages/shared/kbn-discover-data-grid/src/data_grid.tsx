@@ -170,10 +170,13 @@ export const DataGrid = <TRow extends object>({
 
   const {
     liveRegion,
+    contentEntryHint,
+    contentEntryHintId,
     announceCopySuccess,
     announceCopyFailure,
     announceCommandFailure,
     announceRowsBecameEmpty,
+    announceCellContentEntered,
   } = useDataGridAnnouncements();
   const focus = useDataGridFocus({
     rowIds,
@@ -336,6 +339,8 @@ export const DataGrid = <TRow extends object>({
                         activateFocusedCell={focus.activateFocusedCell}
                         announceCopySuccess={announceCopySuccess}
                         announceCopyFailure={announceCopyFailure}
+                        announceCellContentEntered={announceCellContentEntered}
+                        contentEntryHintId={contentEntryHintId}
                       />
                     );
                   })}
@@ -347,6 +352,7 @@ export const DataGrid = <TRow extends object>({
         <span ref={endTabGuardRef} tabIndex={0} css={styles.tabGuard} onFocus={onTabGuardFocus} />
       </OverrideCopiedTabularContent>
       {liveRegion}
+      {contentEntryHint}
     </>
   );
 };

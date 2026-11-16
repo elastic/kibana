@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
-import type { ClipboardEvent, KeyboardEvent } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { ClipboardEvent, FocusEvent, KeyboardEvent } from 'react';
 import type { SerializedStyles } from '@emotion/react';
 import { keys, tabularCopyMarkers } from '@elastic/eui';
 import { tabbable } from 'tabbable';
@@ -34,6 +34,8 @@ interface DataGridCellProps<TRow extends object> {
   readonly activateFocusedCell: (address: DataGridCellAddress) => void;
   readonly announceCopySuccess: () => void;
   readonly announceCopyFailure: () => void;
+  readonly announceCellContentEntered: () => void;
+  readonly contentEntryHintId: string;
 }
 
 const hasExplicitTextSelection = (): boolean => {
@@ -69,6 +71,8 @@ export const DataGridCell = <TRow extends object>({
   activateFocusedCell,
   announceCopySuccess,
   announceCopyFailure,
+  announceCellContentEntered,
+  contentEntryHintId,
 }: DataGridCellProps<TRow>): React.ReactElement => {
   const { rowId, columnId } = address;
   const stableAddress = useMemo(() => ({ rowId, columnId }), [columnId, rowId]);
@@ -77,9 +81,16 @@ export const DataGridCell = <TRow extends object>({
     (element: HTMLDivElement | null) => registerCell(stableAddress, element),
     [registerCell, stableAddress]
   );
-  // Focus on the cell or inside its content, such as a clicked link, makes it the active cell.
+  const [hasContentTabStops, setHasContentTabStops] = useState(false);
+  // Focus on the cell or inside its content, such as a clicked link, makes it the active cell. Focus
+  // on the cell itself checks for tab stops, so the cell can describe how to enter its content.
   const onFocus = useCallback(
-    () => activateFocusedCell(stableAddress),
+    (event: FocusEvent<HTMLDivElement>) => {
+      activateFocusedCell(stableAddress);
+      if (event.target === event.currentTarget) {
+        setHasContentTabStops(tabbable(event.currentTarget).length > 0);
+      }
+    },
     [activateFocusedCell, stableAddress]
   );
 
@@ -142,6 +153,7 @@ export const DataGridCell = <TRow extends object>({
         if (firstTabStop) {
           event.preventDefault();
           firstTabStop.focus();
+          announceCellContentEntered();
         }
         return;
       }
@@ -161,7 +173,7 @@ export const DataGridCell = <TRow extends object>({
         void focusCell(navigationIntent.target);
       }
     },
-    [columnIds, focusCell, onContentKeyDown, rowIds, stableAddress]
+    [announceCellContentEntered, columnIds, focusCell, onContentKeyDown, rowIds, stableAddress]
   );
 
   return (
@@ -170,6 +182,7 @@ export const DataGridCell = <TRow extends object>({
       role="gridcell"
       tabIndex={isActive ? 0 : -1}
       aria-colindex={columnIndex + 1}
+      aria-describedby={hasContentTabStops ? contentEntryHintId : undefined}
       css={cellStyles}
       onFocus={onFocus}
       onCopy={onCopy}
