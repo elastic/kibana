@@ -27,7 +27,6 @@ describe('eventsWriteResultEventId', () => {
         skipped: true,
         reason: 'existing_active_event',
         existing_event_id: 'stored',
-        covering_event_ids: ['stored'],
       },
       undefined,
       'stored',
