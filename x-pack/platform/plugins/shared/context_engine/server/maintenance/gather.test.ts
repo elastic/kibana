@@ -280,15 +280,28 @@ describe('gatherMaintenance', () => {
   it('lists for review an entity that lost memories and has nothing left to summarize it from', async () => {
     const stored = [
       memory('m-1', { governance: deleted }),
+      memory('m-2'),
       entity('entity-a', {
         references: [...derivedFrom('m-1'), { uri: 'trace://abc', relation: 'derived_from' }],
       }),
+      entity('entity-b', { references: derivedFrom('m-2') }),
     ];
 
-    const output = await gatherMaintenance(fakeReader(stored, { changed: [stored[0]] }), options);
+    const output = await gatherMaintenance(
+      fakeReader(stored, {
+        changed: [stored[0], stored[3]],
+        similar: { 'entity-b': ['entity-a'] },
+      }),
+      options
+    );
 
-    expect(output.batches).toEqual([]);
-    expect(output.reviewed).toBe(0);
+    expect(output.batches).toEqual([
+      expect.objectContaining({
+        items: [expect.objectContaining({ id: 'entity-b' })],
+        neighbors: [],
+      }),
+    ]);
+    expect(output.reviewed).toBe(1);
     expect(output.needs_review).toEqual([
       expect.objectContaining({
         id: 'entity-a',
@@ -435,8 +448,13 @@ describe('gatherMaintenance', () => {
     const changed = Array.from({ length: 101 }, (_, index) =>
       fact(`fact-${String(index).padStart(3, '0')}`, { permissions: restrictedTo(`r${index}`) })
     );
-    const reader = fakeReader([memory('m-1'), ...changed], {
-      changed,
+    const gone = memory('m-gone', { governance: deleted });
+    const leftOut = entity('entity-left-out', {
+      permissions: restrictedTo('r-left-out'),
+      references: [...derivedFrom('m-gone'), { uri: 'trace://abc', relation: 'derived_from' }],
+    });
+    const reader = fakeReader([memory('m-1'), gone, leftOut, ...changed], {
+      changed: [...changed, gone],
       resume: cursorAt(300),
     });
     const similar = jest.spyOn(reader, 'similar');
@@ -445,6 +463,7 @@ describe('gatherMaintenance', () => {
 
     expect(output.batches).toHaveLength(100);
     expect(output.reviewed).toBe(100);
+    expect(output.needs_review).toEqual([]);
     expect(output.counts.changed).toBe(100);
     expect(similar.mock.calls[0][0]).toHaveLength(100);
     expect(output.resume_from).toBe(cursorAt(99).from);

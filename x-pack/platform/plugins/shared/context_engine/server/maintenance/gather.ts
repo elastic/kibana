@@ -368,7 +368,7 @@ export const gatherMaintenance = async (
     [...rewrites]
       .filter(
         ([id, { remaining_memories: remainingMemories }]) =>
-          remainingMemories.length === 0 && !aboutFactIdsOf.get(id)?.length
+          reviewedIds.has(id) && remainingMemories.length === 0 && !aboutFactIdsOf.get(id)?.length
       )
       .map(([id]) => id)
   );
@@ -406,7 +406,7 @@ export const gatherMaintenance = async (
       const neighborIds = new Set(
         part
           .flatMap((ki) => (neighborsOf.get(ki.id) ?? []).map(({ id }) => id))
-          .filter((id) => !ids.has(id))
+          .filter((id) => !ids.has(id) && !unsummarizable.has(id))
           .slice(0, MAX_BATCH_RELATED)
       );
       const shownItems = new Set([...ids, ...neighborIds]);
