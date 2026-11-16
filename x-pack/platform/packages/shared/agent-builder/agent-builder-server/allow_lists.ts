@@ -465,6 +465,10 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Observability – Nightshift
   'nightshift.notification_routing',
+
+  // Fleet
+  // New attachment type, pending Agent Builder team review
+  'fleet_aws_onboarding_credentials',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];
