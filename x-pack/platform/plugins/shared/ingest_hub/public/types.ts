@@ -11,6 +11,7 @@ import type { IconType } from '@elastic/eui';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { AddIntegrationModalProps } from './add_integration_modal/add_integration_modal';
 
 export interface IngestFlow {
   id: string;
@@ -33,4 +34,9 @@ export type IngestHubSetup = Record<string, never>;
 export interface IngestHubStart {
   registerIngestFlow: (flow: IngestFlow) => void;
   navigationAvailable$: Observable<boolean>;
+  /**
+   * The Add integration modal, for hosts that open the catalogue from their own flow
+   * (e.g. Streams). Lazy — render it inside a `<Suspense>` boundary.
+   */
+  AddIntegrationModal: ComponentType<AddIntegrationModalProps>;
 }

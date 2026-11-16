@@ -35,7 +35,8 @@
       "cps",
       "spaces",
       "indexLifecycleManagement",
-      "evals"
+      "evals",
+      "ingestHub"
     ],
     "requiredBundles": [
       "discover",
@@ -44,7 +45,8 @@
       "kibanaUtils",
       "observabilityAIAssistant",
       "esUiShared",
-      "stackConnectors"
+      "stackConnectors",
+      "ingestHub"
     ],
     "extraPublicDirs": ["common"]
   }

@@ -28,6 +28,8 @@ import type {
 } from './types';
 import { INGEST_HUB_ENABLED_FLAG } from '../common/core/constants';
 import { registerOnboardingApp } from './onboarding/core';
+import { setStartServices } from './services/start_services';
+import { LazyAddIntegrationModal } from './add_integration_modal/lazy';
 
 const IngestHubApp = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.IngestHubApp }))
@@ -128,11 +130,17 @@ export class IngestHubPlugin
 
   start(coreStart: CoreStart, deps: IngestHubStartDependencies): IngestHubStart {
     const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
+    setStartServices({
+      core: coreStart,
+      deps,
+      kibanaVersion: this.context.env.packageInfo.version,
+    });
     return {
       registerIngestFlow: (flow: IngestFlow) => {
         this.ingestFlows.push(flow);
       },
       navigationAvailable$: createNavigationAvailable$(coreStart, deps, isServerless),
+      AddIntegrationModal: LazyAddIntegrationModal,
     };
   }
 }

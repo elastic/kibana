@@ -65,6 +65,7 @@
     "@kbn/inference-common",
     "@kbn/inference-connectors",
     "@kbn/inference-endpoint-ui-common",
+    "@kbn/ingest-hub-plugin",
     "@kbn/ingest-pipeline-json-editor",
     "@kbn/ingest-pipelines-plugin",
     "@kbn/io-ts-utils",

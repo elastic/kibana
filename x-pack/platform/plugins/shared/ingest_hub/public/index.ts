@@ -11,6 +11,11 @@ import type { IngestHubSetup, IngestHubStart, IngestHubStartDependencies } from 
 
 export type { IngestHubSetup, IngestHubStart, IngestFlow } from './types';
 
+export { LazyAddIntegrationModal } from './add_integration_modal/lazy';
+export type { AddIntegrationModalProps } from './add_integration_modal';
+// Re-exported so hosts of the modal do not need a Fleet dependency of their own.
+export type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+
 export const plugin: PluginInitializer<
   IngestHubSetup,
   IngestHubStart,

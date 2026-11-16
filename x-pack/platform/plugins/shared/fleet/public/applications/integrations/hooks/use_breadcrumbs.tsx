@@ -112,9 +112,20 @@ const breadcrumbGetters: {
   ],
 };
 
-export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
+export function useBreadcrumbs(
+  page: Page,
+  values: DynamicPagePathValues = {},
+  options: { enabled?: boolean } = {}
+) {
   const { chrome, http, application } = useStartServices();
   const pageRef = useRef<Page | undefined>();
+  const { enabled = true } = options;
+
+  // When the page is embedded in another app (e.g. the catalogue rendered inside a modal),
+  // rewriting the chrome breadcrumbs and the document title would clobber the host's own.
+  if (!enabled) {
+    return;
+  }
 
   if (pageRef.current === page) {
     return;

@@ -131,6 +131,15 @@ export const LazyPackageCard = lazy(() =>
   }))
 );
 
+// The integrations catalogue, for hosts that embed it (e.g. the Add integration modal).
+// Lazy so that hosts only pay for the chunk when the catalogue is opened.
+export const LazyBrowseIntegrationsPage = lazy(() =>
+  import('./applications/integrations/sections/epm/screens/browse_integrations').then((module) => ({
+    default: module.BrowseIntegrationsPage,
+  }))
+);
+export type { BrowseIntegrationsPageProps } from './applications/integrations/sections/epm/screens/browse_integrations';
+
 export { useGetDataStreams } from './hooks/use_request/data_stream';
 export {
   useGetPackagesQuery,
