@@ -82,7 +82,7 @@ export function OverviewKpis({
   percentile,
   isLoading,
 }: {
-  overview: Omit<ApplicationOverview, 'trendInterval'>;
+  overview: Omit<ApplicationOverview, 'trendHistogram'>;
   /** The percentile the load time is at, named in its label. */
   percentile: OverviewPercentile;
   isLoading: boolean;

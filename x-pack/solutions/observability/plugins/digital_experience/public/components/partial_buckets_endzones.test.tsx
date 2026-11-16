@@ -11,7 +11,6 @@ import { EuiProvider } from '@elastic/eui';
 import type { RectAnnotationProps } from '@elastic/charts';
 import { PartialBucketsEndzones } from './partial_buckets_endzones';
 import { getTimeChartXDomain } from '../utils/histogram_interval';
-import type { QueriedRange } from '../utils/time_range_query';
 
 const mockShadedZones: RectAnnotationProps['dataValues'][] = [];
 
@@ -33,13 +32,12 @@ const POINTS = [0, HOUR, 2 * HOUR].map((timestamp) => {
 });
 
 const renderEndzones = (
-  range: QueriedRange | undefined,
+  range: { start: number; end: number } | undefined,
   { points = POINTS, hasBars = true }: { points?: typeof POINTS; hasBars?: boolean } = {}
 ) => {
   const xDomain = getTimeChartXDomain({
     points,
-    interval: { value: 3600, unit: 's' },
-    range,
+    histogram: range && { interval: { value: 3600, unit: 's' }, ...range },
     timeZone: 'UTC',
     hasBars,
   });

@@ -38,10 +38,9 @@ import {
   OVERVIEW_PERCENTILES,
 } from '../../../../../common/overview_filters';
 import type { OverviewPercentile } from '../../../../../common/overview_filters';
-import type { HistogramInterval } from '../../../../../common/types/applications';
+import type { HistogramBuckets } from '../../../../../common/types/applications';
 import type { OverviewTrendPoint } from '../../../../../common/types/overview';
 import { ChartArea } from '../../../../components/chart_area';
-import type { QueriedRange } from '../../../../utils/time_range_query';
 import { PartialBucketsEndzones } from '../../../../components/partial_buckets_endzones';
 import { getTimeChartXDomain, type TimeChartXDomain } from '../../../../utils/histogram_interval';
 import {
@@ -256,8 +255,7 @@ function TrendRow({
  */
 export function OverviewTrends({
   points,
-  interval,
-  range,
+  histogram,
   pageLoads,
   loadTimePercentileMs,
   percentile,
@@ -266,10 +264,8 @@ export function OverviewTrends({
   onTimeRangeSelect,
 }: {
   points: OverviewTrendPoint[];
-  /** The width of every bucket; `undefined` until the first response. */
-  interval: HistogramInterval | undefined;
-  /** The queried time range; the edge buckets are shaded where they cover only part of it. */
-  range: QueriedRange | undefined;
+  /** The buckets of the points; `undefined` until the first response. */
+  histogram: HistogramBuckets | undefined;
   /** The page loads of the whole range, the sum of the points. */
   pageLoads: number;
   /** The load time of the whole range, which the points' percentiles do not add up to. */
@@ -295,8 +291,7 @@ export function OverviewTrends({
   // Both charts span the whole time range, whatever each one has data for.
   const xDomain = getTimeChartXDomain({
     points,
-    interval,
-    range,
+    histogram,
     timeZone,
     hasBars: chartType === 'bar',
   });

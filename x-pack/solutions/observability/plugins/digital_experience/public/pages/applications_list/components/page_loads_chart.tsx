@@ -17,9 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import type { HistogramInterval, TimeSeriesPoint } from '../../../../common/types/applications';
+import type { HistogramBuckets, TimeSeriesPoint } from '../../../../common/types/applications';
 import { ChartArea } from '../../../components/chart_area';
-import type { QueriedRange } from '../../../utils/time_range_query';
 import { PartialBucketsEndzones } from '../../../components/partial_buckets_endzones';
 import { getTimeChartXDomain } from '../../../utils/histogram_interval';
 import { useFormatters } from '../../../hooks/use_formatters';
@@ -63,18 +62,15 @@ const METRIC_LEGEND = i18n.translate('xpack.digitalExperience.pageLoadsChart.met
 export function PageLoadsChart({
   pageLoads,
   sessions,
-  interval,
-  range,
+  histogram,
   isLoading,
   onTimeRangeSelect,
 }: {
   pageLoads: TimeSeriesPoint[];
   /** The sessions that started in each bucket, `null` when they are not counted. */
   sessions: TimeSeriesPoint[] | null;
-  /** The width of every bucket, the same for both metrics; `undefined` until the first response. */
-  interval: HistogramInterval | undefined;
-  /** The queried time range; the edge buckets are shaded where they cover only part of it. */
-  range: QueriedRange | undefined;
+  /** The buckets of both metrics; `undefined` until the first response. */
+  histogram: HistogramBuckets | undefined;
   isLoading: boolean;
   onTimeRangeSelect: TimeRangeSelect;
 }) {
@@ -94,7 +90,7 @@ export function PageLoadsChart({
   const points = shownMetric === 'sessions' ? sessions ?? [] : pageLoads;
   const label = METRIC_LABELS[shownMetric];
   const hasData = points.some(({ count }) => count > 0);
-  const xDomain = getTimeChartXDomain({ points, interval, range, timeZone, hasBars: true });
+  const xDomain = getTimeChartXDomain({ points, histogram, timeZone, hasBars: true });
 
   return (
     <EuiPanel hasBorder data-test-subj="digitalExperiencePageLoadsChart">

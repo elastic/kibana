@@ -27,15 +27,14 @@ const renderChart = ({
   sessions = NO_COUNTS as typeof NO_COUNTS | null,
   isLoading = false,
   range = { start: 0, end: 3 * HOUR },
-}: Partial<
-  Pick<Parameters<typeof PageLoadsChart>[0], 'pageLoads' | 'sessions' | 'isLoading' | 'range'>
-> = {}) =>
+}: Partial<Pick<Parameters<typeof PageLoadsChart>[0], 'pageLoads' | 'sessions' | 'isLoading'>> & {
+  range?: { start: number; end: number };
+} = {}) =>
   render(
     <PageLoadsChart
       pageLoads={pageLoads}
       sessions={sessions}
-      interval={{ value: 3600, unit: 's' }}
-      range={range}
+      histogram={{ interval: { value: 3600, unit: 's' }, ...range }}
       isLoading={isLoading}
       onTimeRangeSelect={jest.fn()}
     />,
@@ -165,8 +164,7 @@ describe('PageLoadsChart', () => {
         <PageLoadsChart
           pageLoads={NO_COUNTS}
           sessions={NO_COUNTS}
-          interval={{ value: 3600, unit: 's' }}
-          range={undefined}
+          histogram={undefined}
           isLoading={false}
           onTimeRangeSelect={jest.fn()}
         />

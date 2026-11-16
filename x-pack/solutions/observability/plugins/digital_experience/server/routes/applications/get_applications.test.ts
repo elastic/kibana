@@ -13,13 +13,13 @@ import type {
   ApplicationSummary,
   TimeSeriesPoint,
 } from '../../../common/types/applications';
-import { getApplications as getApplicationsWithInterval } from './get_applications';
+import { getApplications as getApplicationsWithHistogram } from './get_applications';
 
-const INTERVAL = { value: 60, unit: 's' as const };
+const HISTOGRAM = { interval: { value: 60, unit: 's' as const }, start: 0, end: 3_600_000 };
 
 const getApplications = (
-  params: Omit<Parameters<typeof getApplicationsWithInterval>[0], 'interval'>
-) => getApplicationsWithInterval({ interval: INTERVAL, ...params });
+  params: Omit<Parameters<typeof getApplicationsWithHistogram>[0], 'histogram'>
+) => getApplicationsWithHistogram({ histogram: HISTOGRAM, ...params });
 
 const app = (
   serviceName: string,
@@ -212,7 +212,7 @@ describe('getApplications', () => {
     expect(pageLoadsOverTime).toEqual({
       otel,
       classic,
-      interval: INTERVAL,
+      histogram: HISTOGRAM,
     });
   });
 

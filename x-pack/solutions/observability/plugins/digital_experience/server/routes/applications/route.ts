@@ -50,7 +50,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
     const { environment, timeZone } = params.query;
     const start = Date.parse(params.query.start);
     const end = Date.parse(params.query.end);
-    // The same buckets for every source and the interval of the response, which the chart reads.
+    // The same buckets for every source and the response, which the chart reads them from.
     const histogram = { interval: getHistogramInterval(start, end), timeZone };
 
     const { elasticsearch, savedObjects, uiSettings } = await context.core;
@@ -106,7 +106,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
 
     const { taskManager, sessionsReadable } = await getSessionsServices();
     return getApplications({
-      interval: histogram.interval,
+      histogram: { interval: histogram.interval, start, end },
       getOtelApplications: () =>
         getOtelApplicationsFromBestSource({
           esClient,

@@ -17,29 +17,14 @@ const POINTS = [1_000, 2_000].map((timestamp) => {
 });
 
 describe('getTimeChartXDomain', () => {
-  it('has no domain without buckets or before the interval and range are known', () => {
-    const range = { start: 1_000, end: 3_000 };
+  it('has no domain without buckets or before the response is known', () => {
+    const histogram = { interval: SECONDS, start: 1_000, end: 3_000 };
 
     expect(
-      getTimeChartXDomain({ points: [], interval: SECONDS, range, timeZone: 'UTC', hasBars: true })
+      getTimeChartXDomain({ points: [], histogram, timeZone: 'UTC', hasBars: true })
     ).toBeUndefined();
     expect(
-      getTimeChartXDomain({
-        points: POINTS,
-        interval: SECONDS,
-        range: undefined,
-        timeZone: 'UTC',
-        hasBars: true,
-      })
-    ).toBeUndefined();
-    expect(
-      getTimeChartXDomain({
-        points: POINTS,
-        interval: undefined,
-        range,
-        timeZone: 'UTC',
-        hasBars: true,
-      })
+      getTimeChartXDomain({ points: POINTS, histogram: undefined, timeZone: 'UTC', hasBars: true })
     ).toBeUndefined();
   });
 
@@ -52,7 +37,12 @@ describe('getTimeChartXDomain', () => {
     const range = { start: 1_500, end: 2_500 };
 
     expect(
-      getTimeChartXDomain({ points: POINTS, interval: SECONDS, range, timeZone: 'UTC', hasBars })
+      getTimeChartXDomain({
+        points: POINTS,
+        histogram: { interval: SECONDS, ...range },
+        timeZone: 'UTC',
+        hasBars,
+      })
     ).toEqual({ ...xDomain, range, hasBars });
   });
 
@@ -60,8 +50,7 @@ describe('getTimeChartXDomain', () => {
     expect(
       getTimeChartXDomain({
         points: POINTS,
-        interval: SECONDS,
-        range: { start: 1_000, end: 5_000 },
+        histogram: { interval: SECONDS, start: 1_000, end: 5_000 },
         timeZone: 'UTC',
         hasBars: true,
       })
@@ -76,8 +65,11 @@ describe('getTimeChartXDomain', () => {
     expect(
       getTimeChartXDomain({
         points: months,
-        interval: MONTH,
-        range: { start: months[0].timestamp, end: Date.parse('2026-04-01T00:00:00.000Z') },
+        histogram: {
+          interval: MONTH,
+          start: months[0].timestamp,
+          end: Date.parse('2026-04-01T00:00:00.000Z'),
+        },
         timeZone: 'UTC',
         hasBars: true,
       })?.minInterval

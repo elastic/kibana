@@ -23,10 +23,9 @@ import type {
   ApplicationOverview,
   ApplicationOverviewResponse,
 } from '../../../../common/types/overview';
-import type { HistogramInterval } from '../../../../common/types/applications';
+import type { HistogramBuckets } from '../../../../common/types/applications';
 import type { ApplicationUsageResponse } from '../../../../common/types/usage';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
-import type { QueriedRange } from '../../../utils/time_range_query';
 import { APPLICATION_OVERVIEW_EBT_ELEMENTS, ERRORS_EBT_ELEMENTS } from '../../../ebt_constants';
 import type { ApplicationData, ApplicationRequest } from '../../../hooks/use_application_data';
 import { useApplicationData } from '../../../hooks/use_application_data';
@@ -106,7 +105,7 @@ const usageRequestOf = (
 const emptyOverview = (
   serviceName: string,
   percentile: OverviewPercentile
-): Omit<ApplicationOverview, 'trendInterval'> => ({
+): Omit<ApplicationOverview, 'trendHistogram'> => ({
   serviceName,
   percentile,
   pageLoads: { count: 0 },
@@ -120,20 +119,18 @@ const emptyOverview = (
 /** The KPIs, Core Web Vitals and trends of one Overview, empty while it loads. */
 function OverviewPanels({
   overview,
-  trendInterval,
+  trendHistogram,
   percentile,
   onPercentileChange,
-  range,
   isLoading,
   onTimeRangeSelect,
 }: {
-  overview: Omit<ApplicationOverview, 'trendInterval'>;
+  overview: Omit<ApplicationOverview, 'trendHistogram'>;
   /** `undefined` until the first response. */
-  trendInterval: HistogramInterval | undefined;
+  trendHistogram: HistogramBuckets | undefined;
   /** The percentile asked for, which the panels name before its response arrives. */
   percentile: OverviewPercentile;
   onPercentileChange: (percentile: OverviewPercentile) => void;
-  range: QueriedRange | undefined;
   isLoading: boolean;
   onTimeRangeSelect: TimeRangeSelect;
 }) {
@@ -148,8 +145,7 @@ function OverviewPanels({
         <EuiFlexItem grow={5}>
           <OverviewTrends
             points={overview.trend}
-            interval={trendInterval}
-            range={range}
+            histogram={trendHistogram}
             pageLoads={overview.pageLoads.count}
             loadTimePercentileMs={overview.loadTime.percentileMs}
             percentile={percentile}
@@ -332,10 +328,9 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
       ) : (
         <OverviewPanels
           overview={overview.response?.overview ?? emptyOverview(serviceName, percentile)}
-          trendInterval={overview.response?.overview.trendInterval}
+          trendHistogram={overview.response?.overview.trendHistogram}
           percentile={percentile}
           onPercentileChange={setPercentile}
-          range={overview.range}
           isLoading={overview.isLoading}
           onTimeRangeSelect={setTimeRange}
         />

@@ -232,7 +232,11 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
 
       expect(response).toHaveStatusCode(200);
       const { pageLoadsOverTime } = response.body as ApplicationsResponse;
-      expect(pageLoadsOverTime.interval).toStrictEqual({ value: 43200, unit: 's' });
+      expect(pageLoadsOverTime.histogram).toStrictEqual({
+        interval: { value: 43200, unit: 's' },
+        start: Date.parse(THIRTY_DAYS.start),
+        end: Date.parse(THIRTY_DAYS.end),
+      });
       expect(
         pageLoadsOverTime.otel.every(({ timestamp }) => isLocalMidnightOrNoon(timestamp))
       ).toBe(true);
@@ -256,7 +260,11 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
 
       expect(response).toHaveStatusCode(200);
       const { pageLoadsOverTime } = response.body as ApplicationsResponse;
-      expect(pageLoadsOverTime.interval).toStrictEqual({ value: 1, unit: 'd' });
+      expect(pageLoadsOverTime.histogram).toStrictEqual({
+        interval: { value: 1, unit: 'd' },
+        start: Date.parse(ACROSS_DAYLIGHT_SAVING.start),
+        end: Date.parse(ACROSS_DAYLIGHT_SAVING.end),
+      });
       expect(pageLoadsOverTime.otel.every(({ timestamp }) => isLocalMidnight(timestamp))).toBe(
         true
       );
@@ -273,8 +281,12 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
     );
 
     expect(response).toHaveStatusCode(200);
-    const { trend, trendInterval } = (response.body as ApplicationOverviewResponse).overview;
-    expect(trendInterval).toStrictEqual({ value: 43200, unit: 's' });
+    const { trend, trendHistogram } = (response.body as ApplicationOverviewResponse).overview;
+    expect(trendHistogram).toStrictEqual({
+      interval: { value: 43200, unit: 's' },
+      start: Date.parse(THIRTY_DAYS.start),
+      end: Date.parse(THIRTY_DAYS.end),
+    });
     expect(trend.length).toBeGreaterThan(0);
     expect(trend.every(({ timestamp }) => isLocalMidnightOrNoon(timestamp))).toBe(true);
   });

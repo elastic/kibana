@@ -72,7 +72,7 @@ import {
   summarizeApplications,
 } from './utils/summarize_applications';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
-import { toQueriedRange, toTimeRangeQuery } from '../../utils/time_range_query';
+import { toTimeRangeQuery } from '../../utils/time_range_query';
 import {
   applicationColumnPreset,
   metricColumnPreset,
@@ -414,24 +414,20 @@ export function ApplicationsListPage() {
   const { timeZone } = formatters;
 
   const {
-    value: result,
+    value: response,
     loading,
     error,
     refresh,
   } = useAbortableAsync(
     async ({ signal }) => {
-      const query = toTimeRangeQuery(timeRange, environment, timeZone);
-      const applicationsResponse = await apiClient.fetch(
-        'GET /internal/digital_experience/applications',
-        { signal, params: { query } }
-      );
-      return { response: applicationsResponse, queriedRange: toQueriedRange(query) };
+      return apiClient.fetch('GET /internal/digital_experience/applications', {
+        signal,
+        params: { query: toTimeRangeQuery(timeRange, environment, timeZone) },
+      });
     },
     [apiClient, timeRange, environment, timeZone],
     { unsetValueOnError: true }
   );
-  const response = result?.response;
-  const queriedRange = result?.queriedRange;
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
 
@@ -679,8 +675,7 @@ export function ApplicationsListPage() {
         <PageLoadsChart
           pageLoads={pageLoadsOverTime}
           sessions={sessionsOverTime}
-          interval={response?.pageLoadsOverTime.interval}
-          range={queriedRange}
+          histogram={response?.pageLoadsOverTime.histogram}
           isLoading={isLoading}
           onTimeRangeSelect={setTimeRange}
         />

@@ -140,7 +140,7 @@ const response = (pageLoads: number): ApplicationOverviewResponse => ({
       ttfb: NO_VITAL,
     },
     trend: [{ timestamp: 1_000, pageLoads, loadTimePercentileMs: 2412.5 }],
-    trendInterval: { value: 60, unit: 's' },
+    trendHistogram: { interval: { value: 60, unit: 's' }, start: 0, end: 60_000 },
   },
   environments: ['production', 'staging'],
   filters: {

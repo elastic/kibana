@@ -61,8 +61,7 @@ const renderTrends = (
   render(
     <OverviewTrends
       points={points}
-      interval={{ value: 1, unit: 's' }}
-      range={range}
+      histogram={{ interval: { value: 1, unit: 's' }, ...range }}
       pageLoads={points.reduce((sum, { pageLoads }) => sum + pageLoads, 0)}
       loadTimePercentileMs={1500.5}
       percentile={percentile}

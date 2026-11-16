@@ -6,8 +6,7 @@
  */
 
 import { useAbortableAsync } from '@kbn/react-hooks';
-import type { QueriedRange } from '../utils/time_range_query';
-import { toQueriedRange, toTimeRangeQuery } from '../utils/time_range_query';
+import { toTimeRangeQuery } from '../utils/time_range_query';
 import type { DigitalExperienceApiClient } from './use_api_client';
 import { useApiClient } from './use_api_client';
 import { useEnvironment } from './use_environment';
@@ -27,8 +26,6 @@ export type ApplicationRequest<TResponse> = (
 
 export interface ApplicationData<TResponse> {
   response: TResponse | undefined;
-  /** The range the response is over, which a relative one like "last 24 hours" resolves per request. */
-  range: QueriedRange | undefined;
   /** True until the first response or error, and while the next one loads. */
   isLoading: boolean;
   error: Error | undefined;
@@ -47,14 +44,12 @@ export const useApplicationData = <TResponse>(
   const { timeRange } = useTimeRange();
   const { environment } = useEnvironment();
 
-  const { value, loading, error, refresh } = useAbortableAsync(
+  const { value, loading, error, refresh } = useAbortableAsync<Promise<TResponse>>(
     async ({ signal }) => {
-      const query = toTimeRangeQuery(timeRange, environment);
-      const response = await request(apiClient, {
+      return request(apiClient, {
         signal,
-        params: { path: { serviceName }, query },
+        params: { path: { serviceName }, query: toTimeRangeQuery(timeRange, environment) },
       });
-      return { response, range: toQueriedRange(query) };
     },
     [apiClient, request, serviceName, timeRange, environment],
     // The results of another application, environment or time range are never shown as current.
@@ -62,8 +57,7 @@ export const useApplicationData = <TResponse>(
   );
 
   return {
-    response: value?.response,
-    range: value?.range,
+    response: value,
     // Nothing has been fetched before the first request starts.
     isLoading: loading || (!value && !error),
     error,

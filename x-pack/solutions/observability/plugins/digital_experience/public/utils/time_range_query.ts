@@ -30,14 +30,3 @@ export const toTimeRangeQuery = (
     ...(timeZone ? { timeZone } : {}),
   };
 };
-
-/** Start and end of a queried time range, in epoch milliseconds. */
-export interface QueriedRange {
-  start: number;
-  end: number;
-}
-
-/** The range a query covers, which a relative one like "last 24 hours" resolves per request. */
-export const toQueriedRange = ({ start, end }: TimeRangeQuery): QueriedRange => {
-  return { start: Date.parse(start), end: Date.parse(end) };
-};

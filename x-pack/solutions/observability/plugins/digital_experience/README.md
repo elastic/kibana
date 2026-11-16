@@ -135,9 +135,9 @@ not be.
 Both routes take an optional `timeZone` (at most 64 characters; `UTC` when left out): a name
 moment-timezone knows, or a `+HH:MM`/`-HH:MM` offset, which the browser sends when it can't name
 its time zone. Anything else is a 400. The page sends the four `dateFormat:tz` names Elasticsearch
-rejects (`EST`, `HST`, `MST`, `ROC`) as the zones they link to. They return the bucket interval next to the buckets:
-`pageLoadsOverTime.interval` on the Applications route and `overview.trendInterval` on the Overview
-route.
+rejects (`EST`, `HST`, `MST`, `ROC`) as the zones they link to. They return the bucket interval and
+the queried range next to the buckets: `pageLoadsOverTime.histogram` on the Applications route and
+`overview.trendHistogram` on the Overview route.
 
 ### Application details (`/{serviceName}?source=otel|classic`)
 
