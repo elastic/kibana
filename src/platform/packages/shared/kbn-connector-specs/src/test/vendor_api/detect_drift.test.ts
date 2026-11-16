@@ -317,6 +317,20 @@ actions:
     expect(drift).toMatchObject({ verdict: 'healthy', outcome: 'refresh' });
   });
 
+  it('proposes a refresh for a removed auth requirement the passing actions verify', async () => {
+    documents[SPEC_URL] = specYaml({
+      itemProperties: '{ name: { type: string }, color: { type: string } }',
+    });
+    diffEntries = [entry('api-security-removed', 1)];
+
+    const drift = await detect();
+
+    expect(drift.sources.main.changes).toEqual([
+      expect.objectContaining({ kind: 'breaking', id: 'api-security-removed' }),
+    ]);
+    expect(drift).toMatchObject({ verdict: 'healthy', outcome: 'refresh' });
+  });
+
   it('opens an issue for deprecations, though the actions still pass', async () => {
     documents[SPEC_URL] = specYaml({
       itemProperties: '{ name: { type: string }, color: { type: string } }',

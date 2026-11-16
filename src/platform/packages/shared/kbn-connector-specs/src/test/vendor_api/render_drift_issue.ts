@@ -14,7 +14,61 @@ import type {
   SpecChange,
   StaleCorrection,
 } from './detect_drift';
+import { changeNeedsReview } from './detect_drift';
 import { OVERLAY, snapshotFile } from './load_vendor_specs';
+
+/** What kind of change a reviewer looks at, from its `oasdiff` rule. */
+type ReviewKind =
+  | 'Deprecated'
+  | 'Sunset'
+  | 'Auth requirement changed'
+  | 'Removed'
+  | 'Shared schema removed'
+  | 'Request changed'
+  | 'Response changed'
+  | 'Other';
+
+const reviewKindOf = (id: string): ReviewKind => {
+  if (/sunset/.test(id)) {
+    return 'Sunset';
+  }
+  if (/deprecat/.test(id)) {
+    return 'Deprecated';
+  }
+  if (id.startsWith('api-security-')) {
+    return 'Auth requirement changed';
+  }
+  if (id === 'api-schema-removed') {
+    return 'Shared schema removed';
+  }
+  if (/^api-.*removed/.test(id)) {
+    return 'Removed';
+  }
+  if (/^(request-|new-(required|optional)-request-)/.test(id)) {
+    return 'Request changed';
+  }
+  return id.startsWith('response-') ? 'Response changed' : 'Other';
+};
+
+// How the summary counts changes of a kind: `1 deprecation`, `2 removals`.
+const REVIEW_NOUNS: Record<ReviewKind, [string, string]> = {
+  Deprecated: ['deprecation', 'deprecations'],
+  Sunset: ['sunset', 'sunsets'],
+  'Auth requirement changed': ['auth requirement change', 'auth requirement changes'],
+  Removed: ['removal', 'removals'],
+  'Shared schema removed': ['removed shared schema', 'removed shared schemas'],
+  'Request changed': ['request change', 'request changes'],
+  'Response changed': ['response change', 'response changes'],
+  Other: ['other change', 'other changes'],
+};
+
+/** A spec change that keeps the issue open, with the actions that call its operation. */
+interface ReviewItem {
+  readonly kind: ReviewKind;
+  readonly source: string;
+  readonly change: SpecChange;
+  readonly actions: readonly string[];
+}
 
 /** The label of every drift issue; the connector is named by a marker in the body. */
 export const DRIFT_ISSUE_LABEL = 'connector-validation';
@@ -91,7 +145,8 @@ const isChecked = ({ operations }: ActionDrift): boolean => operations.length > 
 
 const statusOf = (
   action: ActionDrift,
-  changesOf: (source: string, operation: string) => readonly SpecChange[]
+  changesOf: (source: string, operation: string) => readonly SpecChange[],
+  reviewOf: (source: string, operation: string) => readonly ReviewItem[]
 ): ActionStatus => {
   if (action.snapshotProblems.length > 0) {
     return {
@@ -142,6 +197,21 @@ const statusOf = (
       )}`,
     };
   }
+  const reviewKinds = [
+    ...new Set(
+      action.operations.flatMap(({ source, operation }) =>
+        reviewOf(source, operation).map(({ kind }) => kind)
+      )
+    ),
+  ];
+  if (reviewKinds.length > 0) {
+    return {
+      rank: 'passes',
+      text: `Passes · ${listed(
+        reviewKinds.map((kind) => kind.toLowerCase())
+      )} (see changes to review)`,
+    };
+  }
   if (notable.length > 0 && action.tracked) {
     // Its operations changed, but none of the fields it reads did.
     const passesThrough = Object.values(action.fieldUse ?? {}).some(
@@ -152,12 +222,6 @@ const statusOf = (
       text: `Passes · fields it reads unchanged${
         passesThrough ? '; returns response fields as they are' : ''
       }`,
-    };
-  }
-  if (notable.length > 0) {
-    return {
-      rank: 'attention',
-      text: `Passes, but its operations changed: ${listed(notable.map(code))}`,
     };
   }
   return {
@@ -201,44 +265,54 @@ const targetText = (target: string): string => {
   return rest ? `${operation}: ${code(rest)}` : operation;
 };
 
-const sourceChanges = (drift: ConnectorDrift): string[] =>
-  Object.entries(drift.sources).flatMap(([name, { status, error, changes }]) => {
-    if (status === 'unchanged') {
-      return [];
-    }
+const MAX_SPEC_CHANGE_ROWS = 60;
+const KIND_ORDER: readonly SpecChange['kind'][] = ['breaking', 'deprecation', 'non-breaking'];
+
+// Every spec change, as a folded table, after the sources that didn't load or weren't classified.
+const specChanges = (drift: ConnectorDrift): string[] => {
+  const notes: string[] = [];
+  const rows: Array<{ source: string; change: SpecChange }> = [];
+  for (const [name, { status, error, changes }] of Object.entries(drift.sources)) {
     if (status === 'unreachable') {
-      return [`#### ${code(name)}: unreachable`, '', code(error ?? 'unknown error'), ''];
+      notes.push(`- ${code(name)}: unreachable: ${code(error ?? 'unknown error')}`);
+    } else if (status === 'changed' && changes === undefined) {
+      notes.push(`- ${code(name)}: changed, not classified (no \`oasdiff\` was available)`);
+    } else {
+      rows.push(...(changes ?? []).map((change) => ({ source: name, change })));
     }
-    if (changes === undefined) {
-      return [`#### ${code(name)}: changed, not classified (no \`oasdiff\` was available)`, ''];
-    }
-    const notable = changes.filter(({ kind }) => kind !== 'non-breaking');
-    const other = changes.filter(({ kind }) => kind === 'non-breaking');
-    if (notable.length === 0 && other.length === 0) {
-      return [];
-    }
-    return [
-      `#### ${code(name)}`,
-      '',
-      ...changeList(notable),
-      ...(other.length > 0
-        ? [
-            ...(notable.length > 0 ? [''] : []),
-            `<details><summary>${plural(other.length, 'non-breaking change')}</summary>`,
-            '',
-            ...changeList(other),
-            '',
-            '</details>',
-          ]
-        : []),
-      '',
-    ];
-  });
+  }
+  rows.sort((a, b) => KIND_ORDER.indexOf(a.change.kind) - KIND_ORDER.indexOf(b.change.kind));
+  const withSource = new Set(rows.map(({ source }) => source)).size > 1;
+  const shown = rows.slice(0, MAX_SPEC_CHANGE_ROWS);
+  return [
+    ...(notes.length > 0 ? [...notes, ''] : []),
+    ...(rows.length > 0
+      ? [
+          `<details><summary>${plural(rows.length, 'spec change')}</summary>`,
+          '',
+          `| Kind |${withSource ? ' Source |' : ''} Operation | Change | Rule |`,
+          `|---|${withSource ? '---|' : ''}---|---|---|`,
+          ...shown.map(
+            ({ source, change: { kind, operation, text, id } }) =>
+              `| ${kind} |${withSource ? ` ${code(source)} |` : ''} ${
+                operation ? code(operation) : '—'
+              } | ${cell(text)} | ${code(id)} |`
+          ),
+          ...(rows.length > shown.length
+            ? ['', `…and ${rows.length - shown.length} more; run the check for all of them.`]
+            : []),
+          '',
+          '</details>',
+          '',
+        ]
+      : []),
+  ];
+};
 
 const titleOf = (
   drift: ConnectorDrift,
   statuses: ReadonlyMap<string, ActionStatus>,
-  notableCount: number
+  reviewCount: number
 ): string => {
   const count = (predicate: (status: ActionStatus) => boolean) =>
     [...statuses.values()].filter(predicate).length;
@@ -284,8 +358,8 @@ const titleOf = (
       headline =
         fields.size > 0
           ? `actions pass, ${plural(fields.size, 'field')} they read changed`
-          : notableCount > 0
-          ? `actions pass, ${plural(notableCount, 'spec change')} to review`
+          : reviewCount > 0
+          ? `actions pass, ${plural(reviewCount, 'spec change')} to review`
           : (drift.staleCorrections ?? []).length > 0
           ? `actions pass, ${plural(
               drift.staleCorrections?.length ?? 0,
@@ -328,10 +402,29 @@ export const renderDriftIssue = (
   }
   const changesOf = (source: string, operation: string) =>
     changesByOperation.get(`${source} ${operation}`) ?? [];
-  const statuses = new Map(actions.map((action) => [action.action, statusOf(action, changesOf)]));
-  const notableCount = Object.values(drift.sources)
-    .flatMap(({ changes = [] }) => changes)
-    .filter(({ kind }) => kind !== 'non-breaking').length;
+  // The spec changes that keep the issue open, with the actions that call their operation.
+  const needsReview = changeNeedsReview(drift);
+  const callers = (source: string, operation: string): string[] =>
+    actions
+      .filter(({ operations }) =>
+        operations.some(
+          (candidate) => candidate.source === source && candidate.operation === operation
+        )
+      )
+      .map(({ action }) => action);
+  const review: ReviewItem[] = Object.entries(drift.sources).flatMap(([source, { changes = [] }]) =>
+    changes.filter(needsReview).map((change) => ({
+      kind: reviewKindOf(change.id),
+      source,
+      change,
+      actions: change.operation ? callers(source, change.operation) : [],
+    }))
+  );
+  const reviewOf = (source: string, operation: string) =>
+    review.filter((item) => item.source === source && item.change.operation === operation);
+  const statuses = new Map(
+    actions.map((action) => [action.action, statusOf(action, changesOf, reviewOf)])
+  );
 
   const checked = actions.filter(isChecked);
   const notChecked = actions.filter((action) => !isChecked(action));
@@ -410,22 +503,41 @@ export const renderDriftIssue = (
     default: {
       alert = 'NOTE';
       const changedFields = actions.flatMap(({ fieldChanges = [] }) => fieldChanges);
+      // Why the issue is open, by kind, with the actions each kind affects.
+      const kinds = new Map<ReviewKind, { count: number; actions: Set<string> }>();
+      for (const item of review) {
+        const entry = kinds.get(item.kind) ?? { count: 0, actions: new Set<string>() };
+        entry.count += 1;
+        item.actions.forEach((action) => entry.actions.add(action));
+        kinds.set(item.kind, entry);
+      }
       const parts = [
         ...(changedFields.length > 0
-          ? [`${plural(changedFields.length, 'field')} the actions read changed (see the table)`]
-          : notableCount > 0
-          ? [`${plural(notableCount, 'change')} that could affect it`]
+          ? [`${plural(changedFields.length, 'changed field')} the actions read`]
           : []),
+        ...[...kinds].map(([kind, { count, actions: affected }]) => {
+          const [one, many] = REVIEW_NOUNS[kind];
+          return `${count} ${count === 1 ? one : many}${
+            affected.size > 0 ? ` (${listed([...affected].map(code))})` : ''
+          }`;
+        }),
         ...(stale.length > 0
           ? [`${plural(stale.length, 'spec correction')} that no longer apply`]
           : []),
       ];
+      const reasons = changedFields.length + review.length + stale.length;
       summary = `**The connector still works against the latest spec: all ${plural(
         checked.length,
         'checked action'
-      )} of \`${drift.connector}\` pass.** Its spec has ${
-        parts.length > 0 ? listed(parts) : 'changed'
-      }. Review them before refreshing the artifacts.`;
+      )} of \`${drift.connector}\` pass.** ${
+        parts.length > 0
+          ? `This issue is open for ${listed(
+              parts
+            )}, which running the actions can't settle. Review ${
+              reasons === 1 ? 'it' : 'them'
+            } before refreshing the artifacts.`
+          : 'Its spec changed.'
+      }`;
     }
   }
   if (notChecked.length > 0) {
@@ -552,6 +664,29 @@ export const renderDriftIssue = (
         ]
       : [];
 
+  const MAX_REVIEW_ROWS = 30;
+  const reviewSection =
+    review.length > 0
+      ? [
+          '### Changes to review',
+          '',
+          '| Change | Operation | Actions | Details |',
+          '|---|---|---|---|',
+          ...review
+            .slice(0, MAX_REVIEW_ROWS)
+            .map(
+              ({ kind, change: { operation, text, id: rule }, actions: affected }) =>
+                `| ${kind} | ${operation ? code(operation) : '—'} | ${
+                  affected.map(code).join(', ') || '—'
+                } | ${cell(text)} (${code(rule)}) |`
+            ),
+          ...(review.length > MAX_REVIEW_ROWS
+            ? ['', `…and ${review.length - MAX_REVIEW_ROWS} more (see the spec changes below).`]
+            : []),
+          '',
+        ]
+      : [];
+
   const corrections = stale.length
     ? [
         '### Spec corrections that no longer apply',
@@ -582,7 +717,9 @@ export const renderDriftIssue = (
     drift.actions === undefined
       ? [...new Set([...drift.snapshotProblems, ...(drift.latestProblems ?? [])])]
       : otherProblems;
-  const changes = sourceChanges(drift);
+  const changes = specChanges(drift);
+  // When the actions pass, the changes to review are why the issue is open, so they come first.
+  const reviewFirst = drift.verdict === 'healthy';
 
   // What to do
   const movedCorrections = stale.filter(({ latest }) => latest?.status === 'moved');
@@ -614,6 +751,7 @@ export const renderDriftIssue = (
     '|---|---|',
     ...facts,
     '',
+    ...(reviewFirst ? reviewSection : []),
     ...(actions.length > 0
       ? [
           '### Actions',
@@ -627,6 +765,7 @@ export const renderDriftIssue = (
       : []),
     ...why,
     ...fieldsSection,
+    ...(reviewFirst ? [] : reviewSection),
     ...corrections,
     ...(unattributed.length > 0
       ? [
@@ -657,7 +796,7 @@ export const renderDriftIssue = (
   ].join('\n');
 
   return {
-    title: titleOf(drift, statuses, notableCount),
+    title: titleOf(drift, statuses, review.length),
     body:
       body.length > MAX_BODY_LENGTH
         ? `${body.slice(

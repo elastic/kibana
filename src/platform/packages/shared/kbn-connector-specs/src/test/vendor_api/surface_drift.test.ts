@@ -424,26 +424,63 @@ describe('renderDriftIssue', () => {
       '| `search` | `GET /items` | ❌ Fails against the latest spec: GET /items breaks the spec: limit must be <= 50 |'
     );
     expect(body).toContain('| `getItem` | `GET /items/{id}` | ✅ Passes |');
+    expect(body).toContain('<details><summary>2 spec changes</summary>');
     expect(body).toContain(
-      '- `GET /items`: decreased the max of `limit` to 50 (`request-parameter-max-decreased`)'
+      '| breaking | `GET /items` | decreased the max of `limit` to 50 | `request-parameter-max-decreased` |'
     );
-    expect(body).toContain('<details><summary>1 non-breaking change</summary>');
+    expect(body).toContain(
+      '| non-breaking | — | added `title` | `response-optional-property-added` |'
+    );
     expect(body).toContain('node scripts/connector_vendor_api --drift --connector acme');
     expect(body).toContain('`/update-connector acme <link to this issue>`');
   });
 
-  it('flags actions that pass but whose operations changed', () => {
+  it('says why the issue is open when the actions pass, and lists the changes to review first', () => {
     const passing: ConnectorDrift = {
       ...drifted,
       verdict: 'healthy',
       latestProblems: [],
-      actions: drifted.actions?.map((action) => ({ ...action, latestProblems: [] })),
+      sources: {
+        main: {
+          status: 'changed',
+          changes: [
+            {
+              kind: 'deprecation',
+              id: 'endpoint-deprecated',
+              text: 'endpoint deprecated',
+              operation: 'GET /items',
+            },
+            {
+              kind: 'breaking',
+              id: 'request-parameter-max-decreased',
+              text: 'decreased the max of `limit` to 50',
+              operation: 'GET /items',
+            },
+          ],
+        },
+      },
+      actions: drifted.actions?.map((action) => ({
+        ...action,
+        latestProblems: [],
+        tracked: true,
+        fieldUse: {},
+        fieldChanges: [],
+      })),
     };
     const { title, body } = renderDriftIssue(passing, { owners: [] });
 
     expect(title).toBe('[Connector validation] .acme: actions pass, 1 spec change to review');
     expect(body).toContain(
-      '| `search` | `GET /items` | ⚠️ Passes, but its operations changed: `request-parameter-max-decreased` |'
+      "This issue is open for 1 deprecation (`search`), which running the actions can't settle. Review it before refreshing the artifacts."
+    );
+    expect(body).toContain(
+      '| Deprecated | `GET /items` | `search` | endpoint deprecated (`endpoint-deprecated`) |'
+    );
+    // The request change is verified by running the actions, so it isn't one to review
+    expect(body).not.toContain('| Request changed |');
+    expect(body.indexOf('### Changes to review')).toBeLessThan(body.indexOf('### Actions'));
+    expect(body).toContain(
+      '| `search` | `GET /items` | ✅ Passes · deprecated (see changes to review) |'
     );
   });
 
@@ -478,7 +515,7 @@ describe('renderDriftIssue', () => {
 
     expect(title).toBe('[Connector validation] .acme: actions pass, 1 field they read changed');
     expect(body).toContain(
-      '**The connector still works against the latest spec: all 2 checked actions of `.acme` pass.** Its spec has 1 field the actions read changed (see the table).'
+      "**The connector still works against the latest spec: all 2 checked actions of `.acme` pass.** This issue is open for 1 changed field the actions read, which running the actions can't settle. Review it before refreshing the artifacts."
     );
     expect(body).toContain(
       '| `search` | `GET /items` | ⚠️ Passes, but fields it reads changed: `items/state` (new values: locked) |'
@@ -516,7 +553,7 @@ describe('renderDriftIssue', () => {
   });
 
   it('reports unreachable sources and caps long change lists', () => {
-    const many = Array.from({ length: 40 }, (_, index) => ({
+    const many = Array.from({ length: 70 }, (_, index) => ({
       kind: 'breaking' as const,
       id: 'api-removed',
       text: `removed ${index}`,
@@ -534,8 +571,8 @@ describe('renderDriftIssue', () => {
     );
 
     expect(title).toBe("[Connector validation] .acme: a latest vendor spec couldn't be loaded");
-    expect(body).toContain('- …and 10 more');
-    expect(body).toContain('#### `extra`: unreachable');
+    expect(body).toContain('…and 10 more; run the check for all of them.');
+    expect(body).toContain('- `extra`: unreachable: `404 Not Found`');
     expect(body).toContain('| **Vendor spec `extra`** | Latest (unreachable: `404 Not Found`)');
   });
 

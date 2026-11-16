@@ -206,29 +206,46 @@ const verdictOf = (
     ? 'vendor-drift'
     : 'healthy';
 
-// With the actions passing against the latest spec, a breaking request change is harmless (the
-// requests still validate), and so is a breaking response change if no field the actions read
-// changed. That needs field use recorded for every action that calls the vendor.
-const fieldUseCoversChanges = (drift: Omit<ConnectorDrift, 'outcome'>): boolean =>
-  drift.verdict === 'healthy' &&
+// Breaking changes that running the actions against the latest spec verifies: requests are
+// validated against it, and so are their credentials and OAuth scopes.
+const VERIFIED_BY_RUNNING = /^(request-|new-(required|optional)-request-|api-security-)/;
+// Breaking changes that field use verifies: only the response fields the actions read matter,
+// and those are compared one by one (`ActionDrift.fieldChanges`).
+const VERIFIED_BY_FIELD_USE = /^(response-|api-schema-removed$)/;
+
+const fieldUseComplete = (drift: Omit<ConnectorDrift, 'outcome'>): boolean =>
   drift.actions !== undefined &&
-  drift.actions.every(
-    ({ operations, tracked, fieldChanges = [] }) =>
-      operations.length === 0 || (tracked === true && fieldChanges.length === 0)
-  );
+  drift.actions.every(({ operations, tracked }) => operations.length === 0 || tracked === true);
+
+/**
+ * Whether a spec change needs a person to review it: deprecations and sunsets always, and a
+ * breaking change unless the actions passing against the latest spec verifies it.
+ */
+export const changeNeedsReview = (
+  drift: Omit<ConnectorDrift, 'outcome'>
+): ((change: SpecChange) => boolean) => {
+  const passes = drift.verdict === 'healthy';
+  const fieldsCompared = passes && fieldUseComplete(drift);
+  return ({ kind, id }) =>
+    kind !== 'non-breaking' &&
+    !(
+      kind === 'breaking' &&
+      ((passes && VERIFIED_BY_RUNNING.test(id)) ||
+        (fieldsCompared && VERIFIED_BY_FIELD_USE.test(id)))
+    );
+};
 
 const outcomeOf = (drift: Omit<ConnectorDrift, 'outcome'>): DriftOutcome => {
   const sources = Object.values(drift.sources);
-  const covered = fieldUseCoversChanges(drift);
-  const needsAttention = ({ kind, id }: SpecChange): boolean =>
-    kind !== 'non-breaking' && !(covered && kind === 'breaking' && /^(request|response)-/.test(id));
+  const needsReview = changeNeedsReview(drift);
   const needsIssue =
     drift.verdict !== 'healthy' ||
     drift.overlayFindings.length > 0 ||
+    (drift.actions ?? []).some(({ fieldChanges = [] }) => fieldChanges.length > 0) ||
     sources.some(
       ({ status, changes }) =>
         status === 'unreachable' ||
-        (status === 'changed' && (changes === undefined || changes.some(needsAttention)))
+        (status === 'changed' && (changes === undefined || changes.some(needsReview)))
     );
   if (needsIssue) {
     return 'issue';
