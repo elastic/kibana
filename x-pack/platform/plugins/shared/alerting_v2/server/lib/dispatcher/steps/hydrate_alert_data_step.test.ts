@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { HydrateAlertDataStep } from './hydrate_alert_data_step';
+import { errors } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
+import { HydrateAlertDataStep, HYDRATION_MAX_RESPONSE_SIZE_BYTES } from './hydrate_alert_data_step';
+import { ESQL_QUERY_ROW_LIMIT } from '../queries';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createAlert, createDispatcherPipelineState } from '../fixtures/test_utils';
@@ -209,5 +213,197 @@ describe('HydrateAlertDataStep', () => {
     expect(alert1?.data).toEqual({ c: 1 });
     expect(alert2?.data).toEqual({ d: 2 });
     expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
+  });
+
+  it('applies the same range bounds to every chunk', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService } = createLoggerService();
+    const step = new HydrateAlertDataStep(queryService);
+
+    const longId1 = 'a'.repeat(400_000) + '-1';
+    const longId2 = 'b'.repeat(400_000) + '-2';
+    const alerts = [
+      createAlert({ alert_id: longId1, last_event_timestamp: '2026-01-22T07:00:00.000Z' }),
+      createAlert({ alert_id: longId2, last_event_timestamp: '2026-01-22T07:10:00.000Z' }),
+    ];
+
+    mockEsClient.esql.query.mockResolvedValue(createAlertDataResponse([]));
+
+    await step.execute(createDispatcherPipelineState({ dispatchable: alerts }), loggerService);
+
+    expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
+    for (const [{ query }] of mockEsClient.esql.query.mock.calls) {
+      expect(query).toContain('"2026-01-22T07:00:00.000Z"');
+      expect(query).toContain('"2026-01-22T07:10:00.000Z"');
+    }
+  });
+
+  it('never puts more alert ids in a query than the row limit returns', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService } = createLoggerService();
+    const step = new HydrateAlertDataStep(queryService);
+
+    const alerts = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
+      createAlert({ alert_id: `ep-${i}` })
+    );
+
+    mockEsClient.esql.query.mockResolvedValue(createAlertDataResponse([]));
+
+    await step.execute(createDispatcherPipelineState({ dispatchable: alerts }), loggerService);
+
+    expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
+    expect(mockEsClient.esql.query.mock.calls[1][0].query).toContain(
+      `alert.id IN ("ep-${ESQL_QUERY_ROW_LIMIT}")`
+    );
+  });
+
+  it('caps the response size of every hydration query', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService } = createLoggerService();
+    const step = new HydrateAlertDataStep(queryService);
+
+    mockEsClient.esql.query.mockResolvedValueOnce(createAlertDataResponse([]));
+
+    await step.execute(
+      createDispatcherPipelineState({ dispatchable: [createAlert({ alert_id: 'ep-1' })] }),
+      loggerService
+    );
+
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ maxResponseSize: HYDRATION_MAX_RESPONSE_SIZE_BYTES })
+    );
+  });
+
+  describe('when a response exceeds the size cap', () => {
+    const responseTooLarge = () =>
+      new errors.RequestAbortedError(
+        'The content length (104872541) is bigger than the maximum allowed string (52428800)'
+      );
+
+    const queriedIds = ({ esql }: DeeplyMockedApi<ElasticsearchClient>): string[][] =>
+      esql.query.mock.calls.map(([{ query }]) =>
+        [...query.matchAll(/"(ep-\d+)"/g)].map(([, id]) => id)
+      );
+
+    it('halves the batch and retries until every alert is hydrated', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      const { loggerService, mockLogger } = createLoggerService();
+      const step = new HydrateAlertDataStep(queryService);
+
+      const alerts = ['ep-1', 'ep-2', 'ep-3', 'ep-4'].map((id) => createAlert({ alert_id: id }));
+
+      mockEsClient.esql.query
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockResolvedValueOnce(
+          createAlertDataResponse([
+            { alert_id: 'ep-1', data_json: '{"a":1}' },
+            { alert_id: 'ep-2', data_json: '{"a":2}' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          createAlertDataResponse([
+            { alert_id: 'ep-3', data_json: '{"a":3}' },
+            { alert_id: 'ep-4', data_json: '{"a":4}' },
+          ])
+        );
+
+      const result = await step.execute(
+        createDispatcherPipelineState({ dispatchable: alerts }),
+        loggerService
+      );
+
+      expect(queriedIds(mockEsClient)).toEqual([
+        ['ep-1', 'ep-2', 'ep-3', 'ep-4'],
+        ['ep-1', 'ep-2'],
+        ['ep-3', 'ep-4'],
+      ]);
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') return;
+      expect(result.data?.triage?.dispatchable.map(({ data }) => data)).toEqual([
+        { a: 1 },
+        { a: 2 },
+        { a: 3 },
+        { a: 4 },
+      ]);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('keeps the halved batch size for the remaining alerts', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      const { loggerService } = createLoggerService();
+      const step = new HydrateAlertDataStep(queryService);
+
+      const alerts = ['ep-1', 'ep-2', 'ep-3', 'ep-4'].map((id) => createAlert({ alert_id: id }));
+
+      mockEsClient.esql.query
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockResolvedValue(createAlertDataResponse([]));
+
+      await step.execute(createDispatcherPipelineState({ dispatchable: alerts }), loggerService);
+
+      expect(queriedIds(mockEsClient)).toEqual([
+        ['ep-1', 'ep-2', 'ep-3', 'ep-4'],
+        ['ep-1', 'ep-2'],
+        ['ep-1'],
+        ['ep-2'],
+        ['ep-3'],
+        ['ep-4'],
+      ]);
+    });
+
+    it('skips an alert whose data alone exceeds the cap and hydrates the others', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      const { loggerService, mockLogger } = createLoggerService();
+      const step = new HydrateAlertDataStep(queryService);
+
+      const alerts = ['ep-1', 'ep-2'].map((id) => createAlert({ alert_id: id }));
+
+      mockEsClient.esql.query
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockResolvedValueOnce(
+          createAlertDataResponse([{ alert_id: 'ep-2', data_json: '{"a":2}' }])
+        );
+
+      const result = await step.execute(
+        createDispatcherPipelineState({ dispatchable: alerts }),
+        loggerService
+      );
+
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') return;
+      expect(result.data?.triage?.dispatchable.map(({ data }) => data)).toEqual([
+        undefined,
+        { a: 2 },
+      ]);
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
+        labels: { code: 'HYDRATE_ALERT_DATA_STEP_OVERSIZED_DATA_SKIPPED' },
+      });
+      const [message] = mockLogger.warn.mock.calls[0];
+      expect(typeof message === 'function' ? message() : message).toBe(
+        `1 of 2 alerts have data larger than ${HYDRATION_MAX_RESPONSE_SIZE_BYTES} bytes; ` +
+          'their data will be absent (first alert ids: ep-1)'
+      );
+    });
+  });
+
+  it('rethrows query errors that are not response size errors', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService } = createLoggerService();
+    const step = new HydrateAlertDataStep(queryService);
+
+    const failure = new errors.RequestAbortedError('Request aborted');
+    mockEsClient.esql.query.mockRejectedValueOnce(failure);
+
+    await expect(
+      step.execute(
+        createDispatcherPipelineState({ dispatchable: [createAlert({ alert_id: 'ep-1' })] }),
+        loggerService
+      )
+    ).rejects.toBe(failure);
+    expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
   });
 });
