@@ -23,6 +23,7 @@ type ReviewKind =
   | 'Sunset'
   | 'Auth requirement changed'
   | 'Removed'
+  | 'Moved, same URL'
   | 'Shared schema removed'
   | 'Request changed'
   | 'Response changed'
@@ -65,6 +66,10 @@ const AFFECTED: Record<ReviewKind, readonly [string, string]> = {
   Removed: [
     'passes but calls an endpoint removed from the current spec',
     'pass but call endpoints removed from the current spec',
+  ],
+  'Moved, same URL': [
+    'calls an endpoint that moved in the spec, keeping its URL',
+    'call endpoints that moved in the spec, keeping their URL',
   ],
   'Shared schema removed': [
     'passes but uses a schema removed from the current spec',
@@ -563,11 +568,25 @@ export const renderDriftIssue = (
     changesByOperation.get(`${source} ${operation}`) ?? [];
   // The spec changes that keep the issue open, with the actions that need to review them.
   const reviewersOf = reviewOfChange(drift);
+  // A path the actions call that moved into the server URL is reported as removed by oasdiff.
+  const movedOperations = new Set(
+    actions.flatMap(({ operations }) =>
+      operations.flatMap(({ source, operation, latest }) =>
+        latest?.status === 'moved' ? [`${source} ${operation}`] : []
+      )
+    )
+  );
+  const kindOf = (source: string, change: SpecChange): ReviewKind => {
+    const kind = reviewKindOf(change.id);
+    return kind === 'Removed' && movedOperations.has(`${source} ${change.operation}`)
+      ? 'Moved, same URL'
+      : kind;
+  };
   const review: ReviewItem[] = Object.entries(drift.sources).flatMap(([source, { changes = [] }]) =>
     changes.flatMap((change) => {
       const { needsReview, actions: reviewers } = reviewersOf(source, change);
       return needsReview
-        ? [{ kind: reviewKindOf(change.id), source, change, actions: [...reviewers] }]
+        ? [{ kind: kindOf(source, change), source, change, actions: [...reviewers] }]
         : [];
     })
   );

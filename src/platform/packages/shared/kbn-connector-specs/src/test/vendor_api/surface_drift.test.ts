@@ -385,6 +385,10 @@ describe('renderDriftIssue', () => {
     const { title, body } = renderDriftIssue(moved, { owners: [] });
 
     expect(title).toBe('[Connectors][Validation] `.sentry`: 1 action needs attention');
+    // oasdiff reports the moved path as removed
+    expect(body).toContain(
+      '| `GET /api/0/issues/{id}/` | Moved, same URL | `getIssue` | API path removed without deprecation (`api-path-removed-without-deprecation`) |'
+    );
     expect(body).toContain('> [!NOTE]');
     expect(body).toContain(
       "**Sentry's spec moved `/api/0` from its paths into its server URL. The connector most likely still works.**"

@@ -187,6 +187,39 @@ const toSpecChange = (entry: OasdiffEntry): SpecChange => ({
   ...(entry.operation && entry.path ? { operation: `${entry.operation} ${entry.path}` } : {}),
 });
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const NAMED_COMPONENT = /`([^`]+)`/;
+
+/**
+ * Whether a removal oasdiff reports between two snapshots is only the snapshot's: a snapshot keeps
+ * just the operations the actions call, with what they reference, so a path, schema or security
+ * scheme the actions stop using drops out though the latest spec still has it.
+ */
+const stillInSpec = ({ id, text, operation, path: entryPath }: OasdiffEntry, spec: unknown) => {
+  if (!isRecord(spec)) {
+    return false;
+  }
+  const { paths, components } = spec;
+  if (id.startsWith('api-path-removed') && operation && entryPath && isRecord(paths)) {
+    const item = paths[entryPath];
+    return isRecord(item) && operation.toLowerCase() in item;
+  }
+  const name = text.match(NAMED_COMPONENT)?.[1];
+  const section =
+    id === 'api-schema-removed'
+      ? 'schemas'
+      : id === 'api-security-component-removed'
+      ? 'securitySchemes'
+      : undefined;
+  if (!name || !section || !isRecord(components)) {
+    return false;
+  }
+  const named = components[section];
+  return isRecord(named) && name in named;
+};
+
 const message = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
@@ -352,9 +385,12 @@ const compareWithLatest = async ({
         sources[name] = { status: 'unchanged', ...servers, url };
       } else {
         const entries = await diff(committed ?? '{}', current ?? '{}');
+        const changes = entries
+          ?.filter((entry) => !stillInSpec(entry, latestDocument))
+          .map(toSpecChange);
         sources[name] = {
           status: 'changed',
-          ...(entries === undefined ? {} : { changes: entries.map(toSpecChange) }),
+          ...(changes === undefined ? {} : { changes }),
           ...servers,
           url,
         };

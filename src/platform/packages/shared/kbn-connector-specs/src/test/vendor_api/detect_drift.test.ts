@@ -331,6 +331,39 @@ actions:
     expect(drift).toMatchObject({ verdict: 'healthy', outcome: 'refresh' });
   });
 
+  it('leaves out removals of what the latest spec still has, which only the snapshot lacks', async () => {
+    documents[SPEC_URL] = `${specYaml({
+      itemProperties: '{ name: { type: string }, color: { type: string } }',
+    })}
+  /other:
+    get:
+      responses: { '204': { description: none } }
+components:
+  schemas:
+    Shared: { type: string }
+  securitySchemes:
+    token: { type: http, scheme: bearer }
+`;
+    const removed = (id: string, text: string, level = 1): OasdiffEntry => ({ id, text, level });
+    diffEntries = [
+      { ...entry('api-path-removed-without-deprecation', 3), path: '/other' },
+      { ...entry('api-path-removed-without-deprecation', 3), path: '/gone' },
+      removed('api-schema-removed', 'removed the schema `Shared`'),
+      removed('api-schema-removed', 'removed the schema `Gone`'),
+      removed(
+        'api-security-component-removed',
+        'the component security scheme `token` was removed'
+      ),
+    ];
+
+    const { sources } = await detect();
+
+    expect(sources.main.changes?.map(({ operation, text }) => operation ?? text)).toEqual([
+      'GET /gone',
+      'removed the schema `Gone`',
+    ]);
+  });
+
   it('opens an issue for deprecations, though the actions still pass', async () => {
     documents[SPEC_URL] = specYaml({
       itemProperties: '{ name: { type: string }, color: { type: string } }',
