@@ -68,9 +68,9 @@ describe('endpointForensicAnalysisSkill', () => {
   });
 
   describe(`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID} handler`, () => {
-    const catIndices = jest.fn();
+    const resolveIndex = jest.fn();
     const context = {
-      esClient: { asCurrentUser: { cat: { indices: catIndices } } },
+      esClient: { asCurrentUser: { indices: { resolveIndex } } },
     } as unknown as ToolHandlerContext;
 
     const getTool = async (): Promise<BuiltinSkillBoundedTool> => {
@@ -97,12 +97,15 @@ describe('endpointForensicAnalysisSkill', () => {
       return toolReturn.results[0].data as Record<string, unknown>;
     };
 
+    const emptyResolve = { indices: [], aliases: [], data_streams: [] };
+
     beforeEach(() => {
-      catIndices.mockReset();
+      resolveIndex.mockReset();
+      resolveIndex.mockResolvedValue(emptyResolve);
     });
 
-    it('returns the recommended Defend index patterns even when cat.indices fails', async () => {
-      catIndices.mockRejectedValue(new Error('index_not_found_exception'));
+    it('returns the recommended Defend index patterns and the error when discovery fails', async () => {
+      resolveIndex.mockRejectedValue(new Error('security_exception'));
 
       const data = await runHandler({ hosts: ['WKSTN-RECV01'] });
 
@@ -113,39 +116,86 @@ describe('endpointForensicAnalysisSkill', () => {
         'logs-endpoint.events.registry-*',
       ]);
       expect(data.available_indices).toEqual([]);
+      expect(data.index_discovery_error).toBe('security_exception');
+      expect(data).not.toHaveProperty('patterns_without_data');
       expect(data.scoped_hosts).toEqual(['WKSTN-RECV01']);
       expect(data.searched_window).toMatchObject({ anchor: 'lookback' });
     });
 
-    it('lists available Defend indices from cat.indices', async () => {
-      catIndices.mockResolvedValue([
-        { index: 'logs-endpoint.events.process-default' },
-        { index: undefined },
-        { index: 'logs-endpoint.events.network-default' },
-      ]);
+    it('lists available Defend data streams and indices through resolveIndex', async () => {
+      resolveIndex.mockResolvedValue({
+        aliases: [],
+        data_streams: [
+          {
+            name: 'logs-endpoint.events.process-default',
+            backing_indices: ['.ds-logs-endpoint.events.process-default-2026.11.02-000001'],
+            timestamp_field: '@timestamp',
+          },
+          {
+            name: 'logs-endpoint.events.network-default',
+            backing_indices: ['.ds-logs-endpoint.events.network-default-2026.11.02-000001'],
+            timestamp_field: '@timestamp',
+          },
+        ],
+        indices: [
+          {
+            name: '.ds-logs-endpoint.events.process-default-2026.11.02-000001',
+            data_stream: 'logs-endpoint.events.process-default',
+            attributes: ['open'],
+          },
+          { name: 'logs-endpoint.events.file-restored', attributes: ['open'] },
+        ],
+      });
 
       const data = await runHandler({ hosts: ['SRV-DC01'], time_window_hours: 24 });
 
-      expect(catIndices).toHaveBeenCalledWith({
-        index: 'logs-endpoint.events.*',
-        format: 'json',
-        h: 'index',
+      expect(resolveIndex).toHaveBeenCalledWith({
+        name: [
+          'logs-endpoint.events.process-*',
+          'logs-endpoint.events.network-*',
+          'logs-endpoint.events.file-*',
+          'logs-endpoint.events.registry-*',
+        ],
+        expand_wildcards: 'open',
       });
       expect(data.available_indices).toEqual([
-        'logs-endpoint.events.process-default',
+        'logs-endpoint.events.file-restored',
         'logs-endpoint.events.network-default',
+        'logs-endpoint.events.process-default',
       ]);
+      expect(data.patterns_without_data).toEqual(['logs-endpoint.events.registry-*']);
+      expect(data).not.toHaveProperty('index_discovery_error');
       expect(data.scoped_hosts).toEqual(['SRV-DC01']);
       const searched = data.searched_window as { start: string; end: string; anchor: string };
       expect(searched.anchor).toBe('lookback');
       expect(Date.parse(searched.end) - Date.parse(searched.start)).toBe(24 * 60 * 60 * 1000);
     });
 
+    it('counts an alias match as available data, not as a pattern without data', async () => {
+      resolveIndex.mockResolvedValue({
+        data_streams: [],
+        indices: [{ name: 'restored-process-events-000001', attributes: ['open'] }],
+        aliases: [
+          {
+            name: 'logs-endpoint.events.process-restored',
+            indices: ['restored-process-events-000001'],
+          },
+        ],
+      });
+
+      const data = await runHandler({ hosts: ['SRV-DC01'] });
+
+      expect(data.available_indices).toContain('logs-endpoint.events.process-restored');
+      expect(data.patterns_without_data).toEqual([
+        'logs-endpoint.events.network-*',
+        'logs-endpoint.events.file-*',
+        'logs-endpoint.events.registry-*',
+      ]);
+    });
+
     // The worker hands the agent an incident window. The tool is what applies the margin and
     // hands back the exact range, so the agent never does date arithmetic itself.
     it('anchors on the incident window and tells the agent the exact range to query', async () => {
-      catIndices.mockResolvedValue([]);
-
       const data = await runHandler({
         hosts: ['azep-bd79f31511'],
         start: '2026-10-16T10:00:00.000Z',
@@ -165,8 +215,6 @@ describe('endpointForensicAnalysisSkill', () => {
     });
 
     it('searches the padded window when the incident bounds are the same instant', async () => {
-      catIndices.mockResolvedValue([]);
-
       const data = await runHandler({
         hosts: ['WKSTN-RECV01'],
         start: '2026-10-16T10:00:00.000Z',
