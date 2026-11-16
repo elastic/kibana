@@ -18,21 +18,21 @@ import { ExecutionError } from '@kbn/workflows/server';
 import {
   triageGroupFpCandidatesStepCommonDefinition,
   triageJoinProposalStepCommonDefinition,
-} from '../../../common/step_types/alert_triage';
-import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
-import { GROUPED_PROPOSAL_EXPIRY_MS } from '../../alert_triage/constants';
-import { hashKey, strictKeyTags } from '../../alert_triage/key_tags';
+} from '../../../../common/workers/alert_triage/step_types';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../../common/proposals/origin';
+import { GROUPED_PROPOSAL_EXPIRY_MS } from '../constants';
+import { hashKey, strictKeyTags } from '../key_tags';
 import {
   groupFpCandidates,
   HeadsTruncatedError,
   tryJoinHead,
   type GroupingDeps,
   type GroupingHead,
-} from '../../alert_triage/group_proposals';
-import { buildPatternKeys, getField } from '../../alert_triage/pattern_key';
-import { buildProposalText } from '../../alert_triage/proposal_text';
-import { createInvestigationOpenChecker } from '../../services/proposals/dedup';
-import type { WorkflowExecutionReader } from '../report_worker_outcome/report_worker_outcome_step';
+} from '../group_proposals';
+import { buildPatternKeys, getField } from '../pattern_key';
+import { buildProposalText } from '../proposal_text';
+import { createInvestigationOpenChecker } from '../../../services/proposals/dedup';
+import type { WorkflowExecutionReader } from '../../../step_types/report_worker_outcome/report_worker_outcome_step';
 import { loadAlertsByIds, readKeyHistory } from './ports';
 
 /** How far back the proposal comment looks for earlier verdicts of the same pattern. */

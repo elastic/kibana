@@ -16,13 +16,13 @@ import {
   triagePlanSweepStepCommonDefinition,
   triageRetagProposalAlertsStepCommonDefinition,
   triageTagPatternKeysStepCommonDefinition,
-} from '../../../common/step_types/alert_triage';
-import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
-import { TAG_CHUNK_SIZE } from '../../alert_triage/constants';
-import { readHeadroom } from '../../alert_triage/headroom';
-import { planKeyTags } from '../../alert_triage/key_tags';
-import { planSweep, tagInChunks } from '../../alert_triage/plan_sweep';
-import type { HeadroomResult } from '../../alert_triage/types';
+} from '../../../../common/workers/alert_triage/step_types';
+import { LOADED_ALERT_FIELDS } from '../loaded_alert_fields';
+import { TAG_CHUNK_SIZE } from '../constants';
+import { readHeadroom } from '../headroom';
+import { planKeyTags } from '../key_tags';
+import { planSweep, tagInChunks } from '../plan_sweep';
+import type { HeadroomResult } from '../types';
 import {
   countAgedOutAlerts,
   fetchTriageAlerts,

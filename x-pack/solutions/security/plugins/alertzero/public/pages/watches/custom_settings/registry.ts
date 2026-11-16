@@ -10,7 +10,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
 } from '@kbn/alertzero-common';
-import { AlertTriageSettings } from './alert_triage_settings';
+import { AlertTriageSettings } from '../../../workers/alert_triage/alert_triage_settings';
 import { RuleCoverageSettings } from './rule_coverage/rule_coverage_settings';
 import { RuleTuningSettings } from './rule_tuning/rule_tuning_settings';
 import type { WorkerCustomSettingsComponent } from './types';

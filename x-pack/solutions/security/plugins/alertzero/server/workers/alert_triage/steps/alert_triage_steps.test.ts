@@ -8,8 +8,8 @@
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { AlertDocumentsTooLargeError } from '@kbn/workflows-management-plugin/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
-import { TM_DELAY_LIMIT_MS } from '../../alert_triage/constants';
-import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
+import { TM_DELAY_LIMIT_MS } from '../constants';
+import { LOADED_ALERT_FIELDS } from '../loaded_alert_fields';
 import {
   getTriageHeadroomStepDefinition,
   getTriageLoadAlertsStepDefinition,

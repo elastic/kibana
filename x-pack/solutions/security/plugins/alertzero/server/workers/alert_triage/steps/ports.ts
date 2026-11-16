@@ -19,11 +19,11 @@ import {
   TRIAGE_PENDING_TAG,
   VERDICT_TAGS,
   type AlertSeverity,
-} from '../../alert_triage/constants';
-import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
-import { getDetection } from '../../alert_triage/pattern_key';
-import type { SweepPorts } from '../../alert_triage/plan_sweep';
-import type { TriageAlert } from '../../alert_triage/types';
+} from '../constants';
+import { LOADED_ALERT_FIELDS } from '../loaded_alert_fields';
+import { getDetection } from '../pattern_key';
+import type { SweepPorts } from '../plan_sweep';
+import type { TriageAlert } from '../types';
 
 type KibanaApi = Pick<StepHandlerContext['contextManager'], 'callKibanaApi'>;
 

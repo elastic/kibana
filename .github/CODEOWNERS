@@ -3313,6 +3313,23 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
 
+# AlertZero Alert Triage Worker
+/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/alert_triage @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/alert_triage_settings.gen.ts @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/alert_triage_settings.schema.yaml @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/worker_settings/alert_triage.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/workers/alert_triage.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/workers/alert_triage.fixture.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/common/workers/alert_triage @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/public/workers/alert_triage @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/scripts/alert_triage @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.alert_triage.fixture.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.alert_triage.test.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/alert_triage.md @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/alert_triage.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/alert_triage.fixture.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/workers/alert_triage @elastic/security-investigations
+
 # AlertZero Worker settings contract
 # Keep this section below every AlertZero Worker section: CODEOWNERS uses the last match.
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/fixtures @elastic/alertzero-common-layer

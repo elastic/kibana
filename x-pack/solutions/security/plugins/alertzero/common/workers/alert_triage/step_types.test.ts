@@ -7,7 +7,7 @@
 
 import { WorkerScheduleInterval } from '@kbn/alertzero-common';
 import { scheduleIntervalToMinutes } from '@kbn/workflows/managed/definitions/alertzero/worker_template_values';
-import { triagePlanSweepStepCommonDefinition } from './alert_triage';
+import { triagePlanSweepStepCommonDefinition } from './step_types';
 
 const planSweepInputFor = (intervalMinutes: number) =>
   triagePlanSweepStepCommonDefinition.inputSchema.safeParse({

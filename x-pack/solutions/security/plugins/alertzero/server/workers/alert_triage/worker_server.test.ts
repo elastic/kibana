@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { getTriageLoadAlertsStepDefinition } from '../step_types/alert_triage/alert_triage_steps';
-import { createWorkerServerContextMock } from '../workers/worker_server_context.mock';
+import { getTriageLoadAlertsStepDefinition } from './steps/alert_triage_steps';
+import { createWorkerServerContextMock } from '../worker_server_context.mock';
 import { TRIAGE_GROUPING_KILL_SWITCH, alertTriageServerDefinition } from './worker_server';
 
-jest.mock('../step_types/alert_triage/alert_triage_steps', () => {
-  const actual = jest.requireActual('../step_types/alert_triage/alert_triage_steps');
+jest.mock('./steps/alert_triage_steps', () => {
+  const actual = jest.requireActual('./steps/alert_triage_steps');
   return {
     ...actual,
     getTriageLoadAlertsStepDefinition: jest.fn(actual.getTriageLoadAlertsStepDefinition),
