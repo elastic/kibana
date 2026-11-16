@@ -19,6 +19,12 @@ import {
   MAX_LENGTH_PER_WORKFLOW_TAG,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
+  MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES,
+  MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH,
+  MAX_OBSERVABLE_TYPE_PATHS,
+  MAX_OBSERVABLE_TYPE_PATH_LENGTH,
+  MAX_OBSERVABLE_TYPE_SETTINGS,
+  MAX_OBSERVABLE_TYPE_VALUE_PATTERN_LENGTH,
   MAX_TAGS_PER_CASE,
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATES_LENGTH,
@@ -43,6 +49,7 @@ import {
   NumberCustomFieldConfigurationSchema,
   TemplateConfigurationSchema,
   ObservableTypesConfigurationSchema,
+  ObservableTypeSettingsConfigurationSchema,
 } from './v1';
 
 describe('configure', () => {
@@ -81,6 +88,19 @@ describe('configure', () => {
         expect(result.data).toStrictEqual(request);
       }
     );
+
+    it('has expected attributes in request with observableTypeSettings', () => {
+      const request = {
+        ...defaultRequest,
+        observableTypes: [{ key: 'custom_type', label: 'Custom type' }],
+        observableTypeSettings: [
+          { key: 'custom_type', paths: [{ path: 'custom.field', enabled: true }] },
+        ],
+      };
+      const result = ConfigurationRequestSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
 
     it(`does not accept customFields exceeding ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
       const customFields = new Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
@@ -128,6 +148,18 @@ describe('configure', () => {
 
     it('has expected attributes in request with extractObservables', () => {
       const request = { ...defaultRequest, extractObservables: false };
+      const result = ConfigurationPatchRequestSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
+
+    it('has expected attributes in request with observableTypeSettings', () => {
+      const request = {
+        ...defaultRequest,
+        observableTypeSettings: [
+          { key: 'observable-type-ipv4', paths: [{ path: 'source.ip', enabled: false }] },
+        ],
+      };
       const result = ConfigurationPatchRequestSchema.safeParse(request);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(request);
@@ -737,6 +769,168 @@ describe('configure', () => {
         label: 'label',
       });
       const result = ObservableTypesConfigurationSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('ObservableTypeSettingsConfigurationSchema', () => {
+    const path = { path: 'source.ip', enabled: true };
+
+    it('has expected attributes', () => {
+      const validData = [
+        {
+          key: 'observable-type-ipv4',
+          paths: [{ ...path, excludedValues: ['127.0.0.1'] }],
+        },
+        { key: 'custom_type', paths: [], valuePattern: '^[a-z]+$' },
+      ];
+      const result = ObservableTypeSettingsConfigurationSchema.safeParse(validData);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(validData);
+    });
+
+    it('accepts an entry with only a key', () => {
+      const result = ObservableTypeSettingsConfigurationSchema.safeParse([{ key: 'custom_type' }]);
+      expect(result.success).toBe(true);
+    });
+
+    it('strips unknown fields', () => {
+      const result = ObservableTypeSettingsConfigurationSchema.safeParse([
+        { key: 'custom_type', label: 'Custom type', paths: [{ ...path, foo: 'bar' }] },
+      ]);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual([{ key: 'custom_type', paths: [path] }]);
+    });
+
+    it('does not trim the path, the excluded values, or the value pattern', () => {
+      const validData = [
+        {
+          key: 'custom_type',
+          paths: [{ path: ' source.ip ', enabled: true, excludedValues: [' 10.0.0.1 '] }],
+          valuePattern: ' ^a$ ',
+        },
+      ];
+      const result = ObservableTypeSettingsConfigurationSchema.safeParse(validData);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(validData);
+    });
+
+    it.each([
+      ['an invalid key', [{ key: 'Invalid Key!' }]],
+      ['a key exceeding max length', [{ key: 'a'.repeat(MAX_OBSERVABLE_TYPE_KEY_LENGTH + 1) }]],
+      [
+        'too many entries',
+        Array.from({ length: MAX_OBSERVABLE_TYPE_SETTINGS + 1 }, (_, index) => ({
+          key: `type_${index}`,
+        })),
+      ],
+      [
+        'too many paths',
+        [
+          {
+            key: 'custom_type',
+            paths: Array.from({ length: MAX_OBSERVABLE_TYPE_PATHS + 1 }, (_, index) => ({
+              path: `field.${index}`,
+              enabled: true,
+            })),
+          },
+        ],
+      ],
+      ['an empty path', [{ key: 'custom_type', paths: [{ path: '', enabled: true }] }]],
+      [
+        'a path exceeding max length',
+        [
+          {
+            key: 'custom_type',
+            paths: [{ path: 'a'.repeat(MAX_OBSERVABLE_TYPE_PATH_LENGTH + 1), enabled: true }],
+          },
+        ],
+      ],
+      [
+        'a path padded with whitespace beyond max length',
+        [
+          {
+            key: 'custom_type',
+            paths: [
+              {
+                path: `a${' '.repeat(MAX_OBSERVABLE_TYPE_PATH_LENGTH)}`,
+                enabled: true,
+              },
+            ],
+          },
+        ],
+      ],
+      ['a path without enabled', [{ key: 'custom_type', paths: [{ path: 'source.ip' }] }]],
+      [
+        'too many excluded values',
+        [
+          {
+            key: 'custom_type',
+            paths: [
+              {
+                ...path,
+                excludedValues: Array.from(
+                  { length: MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES + 1 },
+                  (_, index) => `v${index}`
+                ),
+              },
+            ],
+          },
+        ],
+      ],
+      [
+        'an excluded value exceeding max length',
+        [
+          {
+            key: 'custom_type',
+            paths: [
+              {
+                ...path,
+                excludedValues: ['a'.repeat(MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH + 1)],
+              },
+            ],
+          },
+        ],
+      ],
+      [
+        'an excluded value padded with whitespace beyond max length',
+        [
+          {
+            key: 'custom_type',
+            paths: [
+              {
+                ...path,
+                excludedValues: [` ${'a'.repeat(MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH)}`],
+              },
+            ],
+          },
+        ],
+      ],
+      [
+        'an empty excluded value',
+        [{ key: 'custom_type', paths: [{ ...path, excludedValues: [''] }] }],
+      ],
+      ['an empty value pattern', [{ key: 'custom_type', valuePattern: '' }]],
+      [
+        'a value pattern exceeding max length',
+        [
+          {
+            key: 'custom_type',
+            valuePattern: 'a'.repeat(MAX_OBSERVABLE_TYPE_VALUE_PATTERN_LENGTH + 1),
+          },
+        ],
+      ],
+      [
+        'a value pattern padded with whitespace beyond max length',
+        [
+          {
+            key: 'custom_type',
+            valuePattern: `a${' '.repeat(MAX_OBSERVABLE_TYPE_VALUE_PATTERN_LENGTH)}`,
+          },
+        ],
+      ],
+    ])('rejects %s', (_, invalidData) => {
+      const result = ObservableTypeSettingsConfigurationSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
     });
   });
