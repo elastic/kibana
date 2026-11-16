@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EngineHttpError } from '../errors/engine_http_error';
+import { EngineHttpError } from './engine_http_error';
 
 /**
  * The refusal for detection engine work in a space that is not set up. There is no fallback to the
