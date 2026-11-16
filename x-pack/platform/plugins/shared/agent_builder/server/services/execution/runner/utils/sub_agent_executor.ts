@@ -54,7 +54,8 @@ export const createSubAgentExecutor = ({
         ...(params.background ? backgroundDispatch : {}),
         params: {
           agentId: params.agentId,
-          connectorId: params.connectorId,
+          connectorId: params.modelSource?.connectorId,
+          inferenceFeatureId: params.modelSource?.featureId,
           parentExecutionId: params.parentExecutionId,
           ...(params.background?.parentTriggerMode
             ? { parentTriggerMode: params.background.parentTriggerMode }
@@ -77,7 +78,8 @@ export const createSubAgentExecutor = ({
         ...(params.background ? backgroundDispatch : {}),
         params: {
           agentId: params.agentId,
-          connectorId: params.connectorId,
+          connectorId: params.modelSource?.connectorId,
+          inferenceFeatureId: params.modelSource?.featureId,
           parentExecutionId: params.parentExecutionId,
           ...(params.background?.parentTriggerMode
             ? { parentTriggerMode: params.background.parentTriggerMode }
@@ -105,7 +107,8 @@ export const createSubAgentExecutor = ({
         ...(params.background ? backgroundDispatch : {}),
         params: {
           agentId: params.agentId,
-          connectorId: params.connectorId,
+          connectorId: params.modelSource?.connectorId,
+          inferenceFeatureId: params.modelSource?.featureId,
           parentExecutionId: params.parentExecutionId,
           ...(params.background?.parentTriggerMode
             ? { parentTriggerMode: params.background.parentTriggerMode }
