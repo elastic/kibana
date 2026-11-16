@@ -6,9 +6,15 @@
  */
 
 export { apiTest } from '@kbn/scout';
-export { COMMON_HEADERS, PROPOSALS_MANAGE_ROLE, PROPOSALS_READ_ONLY_ROLE } from './constants';
+export {
+  COMMON_HEADERS,
+  PUBLIC_HEADERS,
+  PROPOSALS_MANAGE_ROLE,
+  PROPOSALS_READ_ONLY_ROLE,
+} from './constants';
 export {
   cleanupProposalFixtures,
+  deleteProposalsByConversation,
   seedProposal,
   getProposal,
   reviseProposal,
@@ -16,3 +22,5 @@ export {
   spaceUrl,
 } from './helpers';
 export type { SeedProposalOptions } from './helpers';
+export { createIdentity } from './identities';
+export type { TestIdentity } from './identities';

@@ -314,3 +314,21 @@ export const dismissProposal = (
     body,
     responseType: 'json',
   });
+
+/** Deletes by conversation id, which retry clones copy, so a late clone goes too. */
+export const deleteProposalsByConversation = async (
+  esClient: Client,
+  conversationIds: string[]
+): Promise<void> => {
+  if (conversationIds.length === 0) return;
+  try {
+    await esClient.deleteByQuery({
+      index: PROPOSALS_INDEX_ALIAS,
+      refresh: true,
+      query: { terms: { conversationId: conversationIds } },
+      conflicts: 'proceed',
+    });
+  } catch (error) {
+    if (!isNotFound(error)) throw error;
+  }
+};
