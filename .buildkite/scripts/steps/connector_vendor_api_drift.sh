@@ -49,11 +49,20 @@ if ! command -v "$OASDIFF_BIN" > /dev/null; then
   echo "oasdiff ($OASDIFF_BIN) is not installed on this agent"
   exit 1
 fi
+# Versions classify some changes differently (a new response enum value is a warning in older
+# releases and breaking in newer ones), so record which one ran
+OASDIFF_VERSION="$("$OASDIFF_BIN" --version 2>&1 | head -n 1)"
+echo "Using $OASDIFF_VERSION"
 
 echo "--- Bootstrap Kibana"
 # The step only runs Node scripts; skip building the dev-mode shared webpack bundles
 export KBN_BOOTSTRAP_NO_PREBUILT=true
 .buildkite/scripts/bootstrap.sh
+
+# The check loads every source's full vendor spec, and one Microsoft Graph connector alone peaks
+# at about 5.5 GB, above the 4 GB CI sets for every job. The agent has 16 GB. The last
+# --max-old-space-size wins, so this overrides the CI default without dropping other options.
+export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=8192"
 
 echo "+++ Detect vendor API drift"
 drift_args=(--drift --report "$REPORT_PATH")
@@ -155,7 +164,7 @@ if [[ "$exit_code" != "0" ]]; then
   style="error"
 fi
 {
-  echo "Vendor API drift in \`${GITHUB_REPO}\` (${MODE}):"
+  echo "Vendor API drift in \`${GITHUB_REPO}\` (${MODE}, ${OASDIFF_VERSION}):"
   echo
   jq -r '.actions[]
     | "- `\(.connector)`: \(.action)"
