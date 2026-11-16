@@ -152,7 +152,8 @@ const expectStableCount = async (
   return actions;
 };
 
-apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/299775
+apiTest.describe.skip('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.maintenanceWindows.cleanUp();
     await apiServices.alertingV2.actionPolicies.cleanUp();

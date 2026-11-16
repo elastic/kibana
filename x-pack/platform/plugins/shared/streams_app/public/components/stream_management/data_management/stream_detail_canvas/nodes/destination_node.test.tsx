@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider, type NodeProps } from '@xyflow/react';
+import { REMOTE_ELASTICSEARCH_TYPE } from '../../../../streams_layout/destinations/types';
 import type { DestinationNodeData, DestinationNode as DestinationNodeType } from '../types';
 import { DestinationNode } from './destination_node';
 
@@ -22,6 +23,7 @@ const ELASTICSEARCH_NODE_DATA: DestinationNodeData = {
   subtitle: 'Auto',
   destinationId: 'es-prod',
   destinationType: 'elasticsearch',
+  hasSavedSource: true,
   signals: ['logs'],
   indexCount: 3,
 };
@@ -64,6 +66,73 @@ describe('DestinationNode', () => {
     expect(screen.getByTestId('streamsCanvasDestinationIndexCount').textContent).toBe('3 indices');
   });
 
+  it('does not read the stats of a destination that no source feeds in the saved unit', () => {
+    renderNode({ ...ELASTICSEARCH_NODE_DATA, hasSavedSource: false });
+
+    expect(mockUseDestinationStats).toHaveBeenCalledWith(undefined);
+    expect(mockUseDestinationStats).not.toHaveBeenCalledWith('es-prod');
+    expect(screen.getByTestId('streamsCanvasDestinationNotFlowing').textContent).toBe(
+      'Data not flowing in'
+    );
+  });
+
+  it('shows the stats footer of a remote Elasticsearch destination, without an index count', () => {
+    mockUseDestinationStats.mockReturnValue({
+      status: 'ready',
+      stats: {
+        eventsRate: 3700,
+        eventsTotal: null,
+        failedRate: null,
+        latencyAverage: 0.175,
+        series: { bucketMs: 300000, points: [] },
+      },
+    });
+
+    renderNode({
+      title: 'backup',
+      subtitle: 'my-cluster.es.example.com:9243',
+      destinationId: 'backup',
+      destinationType: REMOTE_ELASTICSEARCH_TYPE,
+      hasSavedSource: true,
+      signals: ['logs'],
+      endpoint: 'https://my-cluster.es.example.com:9243/proxy/',
+      remoteIndexNames: ['remote-logs'],
+    });
+
+    expect(mockUseDestinationStats).toHaveBeenCalledWith('backup');
+    expect(screen.getByTestId('streamsCanvasDestinationRate').textContent).toBe('3.7k/s');
+    expect(screen.getByTestId('streamsCanvasDestinationLatency').textContent).toBe('175ms');
+    expect(isShown('streamsCanvasDestinationIndexCount')).toBe(false);
+  });
+
+  it('shows the stats footer of an S3 destination, without an index count', () => {
+    mockUseDestinationStats.mockReturnValue({
+      status: 'ready',
+      stats: {
+        eventsRate: 3700,
+        eventsTotal: null,
+        failedRate: null,
+        latencyAverage: 0.175,
+        series: { bucketMs: 300000, points: [] },
+      },
+    });
+
+    renderNode({
+      title: 'archive',
+      subtitle: 'my-archive',
+      destinationId: 'archive',
+      destinationType: 's3',
+      hasSavedSource: true,
+      signals: ['logs'],
+      bucket: 'my-archive',
+    });
+
+    expect(mockUseDestinationStats).toHaveBeenCalledWith('archive');
+    expect(screen.getByTestId('streamsCanvasDestinationRate').textContent).toBe('3.7k/s');
+    expect(screen.getByTestId('streamsCanvasDestinationLatency').textContent).toBe('175ms');
+    expect(isShown('streamsCanvasDestinationIndexCount')).toBe(false);
+  });
+
   it('still shows the title, the signals and the subtitle', () => {
     renderNode(ELASTICSEARCH_NODE_DATA);
 
@@ -79,19 +148,6 @@ describe('DestinationNode', () => {
   });
 
   describe('a destination that reports no stats', () => {
-    it('shows no footer for an S3 destination, and never reads its stats', () => {
-      renderNode({
-        title: 'archive',
-        subtitle: 'my-archive',
-        destinationId: 'archive',
-        destinationType: 's3',
-        signals: ['logs'],
-      });
-
-      expect(isShown('streamsCanvasDestinationStats')).toBe(false);
-      expect(mockUseDestinationStats).not.toHaveBeenCalled();
-    });
-
     it('shows no footer for a node without a destination type', () => {
       renderNode({ ...ELASTICSEARCH_NODE_DATA, destinationType: undefined });
 
