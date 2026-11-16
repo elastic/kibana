@@ -10,7 +10,7 @@ import { testData } from '../fixtures';
 
 globalSetupHook(
   'Ingest Exploratory View test data',
-  { tag: tags.stateful.classic },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   async ({ esArchiver, log }) => {
     const archives = [
       testData.ES_ARCHIVES.RUM_8_0_0,

@@ -27,6 +27,8 @@ import { test } from '../fixtures';
  *    asserted nothing meaningful. The lens-render + breakdown assertions cover the
  *    intent (the prefilled visualization renders and responds to a breakdown).
  */
+// Stateful only: the test starts in the UX app, and the ux plugin is disabled on serverless
+// (`xpack.ux.enabled: false` in config/serverless.oblt.yml).
 test.describe(
   'Exploratory View - prefilled from the UX app',
   { tag: tags.stateful.classic },
