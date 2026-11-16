@@ -34,6 +34,7 @@ responses:
               page: 1
               size: 20
               total: 2
+              hasNamedExecution: false
 x-codeSamples:
   - lang: curl
     source: |

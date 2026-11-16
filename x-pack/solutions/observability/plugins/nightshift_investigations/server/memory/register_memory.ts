@@ -9,13 +9,15 @@ import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID } from '@kbn/nightshift-shared';
+import type { AuditedSandboxSession } from '../sandbox_audit';
 import { MEMORY_AI_INDEX_ID, MEMORY_INDEX } from '../../common/memory';
 import {
-  createInvestigationMemoryTelemetry,
+  createInvestigationBackgroundTelemetry,
   createOptimizeModel,
 } from '../lib/create_optimize_model';
+import type { ModelUsageCollector } from '../lib/model_usage_collector';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { previewText } from './log_format';
 import { stepsFromRound, stepsFromToolCalls, type TranscriptStep } from './transcript';
@@ -77,7 +79,7 @@ export const hydrateMemoryWorkspace = async ({
   signal,
   logger,
 }: {
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   esClient: ElasticsearchClient;
   spaceId: string;
   agentId: string;
@@ -159,6 +161,7 @@ export const runMemoryOptimize = async ({
   requestedConnectorId,
   roundConnectorId,
   interactionId,
+  modelUsage,
 }: {
   request: KibanaRequest;
   agentId?: string;
@@ -180,6 +183,7 @@ export const runMemoryOptimize = async ({
   requestedConnectorId?: string;
   roundConnectorId?: string;
   interactionId: string;
+  modelUsage?: ModelUsageCollector;
 }): Promise<MemoryOptimizeSummary | MemoryOptimizeSkipped | undefined> => {
   logger.debug(
     `Memory optimize wiring space=${spaceId} agent=${agentId} ` +
@@ -196,7 +200,11 @@ export const runMemoryOptimize = async ({
     inference: getInference(),
     savedObjects: getSavedObjects(),
     uiSettings: getUiSettings(),
-    telemetryMetadata: createInvestigationMemoryTelemetry(interactionId),
+    telemetryMetadata: createInvestigationBackgroundTelemetry(
+      NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+      interactionId
+    ),
+    modelUsage,
     logger,
   });
   if (!model) {

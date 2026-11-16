@@ -107,6 +107,14 @@ describe('resolveRound', () => {
     ).toMatchObject({ outcome: 'found' });
   });
 
+  it('is unknown when no hypotheses were written during the round, not read from an older version', () => {
+    expect(
+      resolveRound(conversation([R1, R2], [AFTER_R1, [gateway('investigating')]]), {
+        roundId: 'r2',
+      })
+    ).toEqual({ roundKind: 'follow_up', roundId: 'r2', outcome: 'unknown' });
+  });
+
   it('is unknown with no record, or for a round that is not saved yet', () => {
     expect(resolveRound({ rounds: [R1, R2] }, { roundId: 'r2' })).toEqual({
       roundKind: 'follow_up',

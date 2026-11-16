@@ -64,7 +64,7 @@ describe('openConversationDetailsFlyout', () => {
       expect.objectContaining({
         session: 'start',
         historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
-        title: 'Chat info',
+        title: 'Summary',
         type: 'push',
       })
     );

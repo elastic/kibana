@@ -145,7 +145,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   const hasCloseButton = Boolean(onClose);
   const hasActionButtons = actionButtons && actionButtons.length > 0;
 
-  if (!hasCloseButton && !hasActionButtons) {
+  if (!hasCloseButton && !hasActionButtons && previewBadgeState === 'none') {
     return null;
   }
 

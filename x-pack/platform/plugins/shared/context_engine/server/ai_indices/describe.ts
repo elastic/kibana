@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AiIndexHttpItem, KiTypeCount } from '../../common/http_api/ai_indices';
-import { MEMORY_KI_TYPES } from '../../common/memory';
+import type { AiIndexItem, KiTypeCount } from '../../common/http_api/ai_indices';
+import { MEMORY_KI_TYPES, takesMemories } from '../../common/memory';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
 import { buildExampleQueries, EXCLUDE_MEMORY_KI_TYPES_FILTER } from './example_queries';
@@ -18,7 +18,7 @@ const MEMORY_KI_TYPE_SET: ReadonlySet<string> = new Set(MEMORY_KI_TYPES);
 
 export interface DescribeAiIndexParams {
   esClient: ElasticsearchClient;
-  aiIndex: AiIndexHttpItem;
+  aiIndex: AiIndexItem;
   spaceId: string;
   includeMemory: boolean;
 }
@@ -30,7 +30,7 @@ const fieldLine = ({ path, type, searchable, aggregatable }: AiIndexField): stri
     ...(aggregatable ? ['aggregatable'] : []),
   ].join(', ');
 
-const headerSection = ({ id, description, dest }: AiIndexHttpItem): string[] => [
+const headerSection = ({ id, description, dest }: AiIndexItem): string[] => [
   `AI-index registry ID: ${id}`,
   ...(description ? [description] : []),
   `Backing Elasticsearch target (use only in ES|QL queries): ${dest.value}`,
@@ -67,11 +67,8 @@ const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
     counts.map(({ tag, count }) => [tag, count])
   );
 
-const memorySection = (
-  { memory_enabled: memoryEnabled }: AiIndexHttpItem,
-  target: string
-): string[] => {
-  if (!memoryEnabled) {
+const memorySection = (aiIndex: AiIndexItem, target: string): string[] => {
+  if (!takesMemories(aiIndex)) {
     return [];
   }
 
@@ -94,7 +91,7 @@ const memorySection = (
   ];
 };
 
-const exampleQueriesSection = (dest: AiIndexHttpItem['dest'], excludeMemory: boolean): string[] => [
+const exampleQueriesSection = (dest: AiIndexItem['dest'], excludeMemory: boolean): string[] => [
   'Example queries (adapt field names for non-canonical indices)',
   ...buildExampleQueries(dest, { excludeMemory }).flatMap(({ title, esql }) => ['', title, esql]),
 ];

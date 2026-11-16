@@ -11,6 +11,7 @@ import { randomBytes } from 'crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   BindServiceAccountWorkloadParams,
+  ServiceAccountSummary,
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRef,
@@ -33,6 +34,12 @@ import type { EnsureClusterPrivilegeParams } from '../cluster_privilege';
 import { ensureClusterPrivilege } from '../cluster_privilege';
 import type { ServiceAccountMintInterceptor } from '../fake_requests';
 import { isTerminalMintFailure } from '../fake_requests';
+import type { ServiceAccountAssumeAttempt, ServiceAccountAssumeErrorType } from '../metrics';
+import {
+  getOperationErrorType,
+  getTokenExchangeErrorType,
+  serviceAccountsMetrics,
+} from '../metrics';
 import type { ServiceAccountsBackend } from '../types';
 
 /**
@@ -63,6 +70,11 @@ export interface ServiceAccountWorkloadBindingsApi {
     pluginId: string,
     params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountWorkloadBinding | null>;
+
+  getServiceAccountSummary(
+    pluginId: string,
+    params: ServiceAccountWorkloadCoordinates
+  ): Promise<ServiceAccountSummary | null>;
 
   withScopedRequest<T>(
     pluginId: string,
@@ -102,6 +114,34 @@ interface ExecutionAudit {
   revoked(request: KibanaRequest, serviceAccountId: string, error: Error): void;
 }
 
+/** The steps of an attempt to assume a service account, in order. */
+type AssumeStage = 'available' | 'binding' | 'mint';
+
+/**
+ * Classifies a failed attempt to assume a service account by the step it failed in. A binding the
+ * caller expected under another account is classified where it is refused, since its 403 looks like
+ * a failed integrity check from here.
+ */
+const getAssumeErrorType = (stage: AssumeStage, error: unknown): ServiceAccountAssumeErrorType => {
+  switch (stage) {
+    case 'available':
+      return 'unavailable';
+    case 'binding':
+      if (Boom.isBoom(error)) {
+        const { statusCode } = error.output;
+        if (statusCode === 404) {
+          return 'binding_not_found';
+        }
+        if (statusCode === 403) {
+          return 'binding_integrity';
+        }
+      }
+      return '_OTHER';
+    case 'mint':
+      return getTokenExchangeErrorType(error);
+  }
+};
+
 export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBindingsApi {
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
@@ -139,6 +179,30 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   }
 
   async bindWorkload(
+    pluginId: string,
+    request: KibanaRequest,
+    params: BindServiceAccountWorkloadParams
+  ): Promise<ServiceAccountWorkloadBinding> {
+    return await this.recordWorkloadOperation(
+      'workload_bind',
+      { pluginId, workloadType: params.workloadType },
+      () => this.bind(pluginId, request, params)
+    );
+  }
+
+  async unbindWorkload(
+    pluginId: string,
+    request: KibanaRequest,
+    params: ServiceAccountWorkloadRef
+  ): Promise<boolean> {
+    return await this.recordWorkloadOperation(
+      'workload_unbind',
+      { pluginId, workloadType: params.workloadType },
+      () => this.unbind(pluginId, request, params)
+    );
+  }
+
+  private async bind(
     pluginId: string,
     request: KibanaRequest,
     { serviceAccountId, workloadType, workloadId }: BindServiceAccountWorkloadParams
@@ -201,7 +265,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     return binding;
   }
 
-  async unbindWorkload(
+  private async unbind(
     pluginId: string,
     request: KibanaRequest,
     { workloadType, workloadId }: ServiceAccountWorkloadRef
@@ -257,23 +321,53 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     return await this.store.getVerified(this.toCoordinates(pluginId, params));
   }
 
+  /**
+   * Names the account of the workload's verified binding, never an account the caller names, so
+   * that it can only describe an account the workload runs as.
+   */
+  async getServiceAccountSummary(
+    pluginId: string,
+    params: ServiceAccountWorkloadCoordinates
+  ): Promise<ServiceAccountSummary | null> {
+    const binding = await this.getBinding(pluginId, params);
+    return binding ? await this.backend.getSummary(binding.serviceAccountId) : null;
+  }
+
   async withScopedRequest<T>(
     pluginId: string,
     params: ServiceAccountWorkloadRequestParams,
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T> {
-    this.ensureAvailable();
+    const assume = serviceAccountsMetrics.startAssume({
+      backend: this.backend.type,
+      workload: { pluginId, workloadType: params.workloadType },
+    });
+    // Which step a failure came from decides how it is classified, see `getAssumeErrorType`.
+    let stage: AssumeStage = 'available';
 
-    const coordinates = this.toCoordinates(pluginId, params);
-    const executionAudit = this.executionAudit(coordinates, params.executionId);
+    let request: KibanaRequest;
+    try {
+      this.ensureAvailable();
 
-    const binding = await this.resolveExecutionBinding(
-      coordinates,
-      params.expectedServiceAccountId,
-      executionAudit
-    );
-    const request = await this.createExecutionRequest(coordinates, binding, executionAudit);
-    executionAudit.started(request, binding.serviceAccountId);
+      const coordinates = this.toCoordinates(pluginId, params);
+      const executionAudit = this.executionAudit(coordinates, params.executionId);
+
+      stage = 'binding';
+      const binding = await this.resolveExecutionBinding(
+        coordinates,
+        params.expectedServiceAccountId,
+        executionAudit,
+        assume
+      );
+
+      stage = 'mint';
+      request = await this.createExecutionRequest(coordinates, binding, executionAudit);
+      executionAudit.started(request, binding.serviceAccountId);
+    } catch (e) {
+      assume.failed(getAssumeErrorType(stage, e));
+      throw e;
+    }
+    assume.succeeded();
 
     try {
       return await fn(request);
@@ -331,7 +425,8 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   private async resolveExecutionBinding(
     coordinates: WorkloadBindingCoordinates,
     expectedServiceAccountId: string | undefined,
-    executionAudit: ExecutionAudit
+    executionAudit: ExecutionAudit,
+    assume: ServiceAccountAssumeAttempt
   ): Promise<ServiceAccountWorkloadBinding> {
     const binding = await this.requireBinding(coordinates).catch((e) => {
       // The event names no account: the id in a tampered binding is the one thing it must not
@@ -350,6 +445,8 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
         'The workload binding does not match the expected service account.'
       );
       executionAudit.failed(error, binding.serviceAccountId);
+      // Also a 403, so it is classified here rather than taken for a failed integrity check.
+      assume.failed('account_mismatch');
       throw error;
     }
 
@@ -542,6 +639,28 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       action,
       onRefused,
     });
+  }
+
+  /** Runs a binding change and counts it on the service account operation metric. */
+  private async recordWorkloadOperation<T>(
+    operation: 'workload_bind' | 'workload_unbind',
+    workload: { pluginId: string; workloadType: string },
+    change: () => Promise<T>
+  ): Promise<T> {
+    let result: T;
+    try {
+      result = await change();
+    } catch (e) {
+      serviceAccountsMetrics.recordOperation({
+        operation,
+        backend: this.backend.type,
+        workload,
+        errorType: getOperationErrorType(e),
+      });
+      throw e;
+    }
+    serviceAccountsMetrics.recordOperation({ operation, backend: this.backend.type, workload });
+    return result;
   }
 
   // Picks the coordinates out explicitly, so a caller's extra fields never reach the store.

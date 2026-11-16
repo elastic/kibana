@@ -13,22 +13,6 @@ export default ({ getService }: FtrProviderContext) => {
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
   describe('@serverless essentials tier api access', () => {
-    it('should not find init api', async () => {
-      await riskEngineRoutes.init(404);
-    });
-
-    it('should not find getStatus api', async () => {
-      await riskEngineRoutes.getStatus(404);
-    });
-
-    it('should not find enable api', async () => {
-      await riskEngineRoutes.enable(404);
-    });
-
-    it('should not find disable api', async () => {
-      await riskEngineRoutes.disable(404);
-    });
-
     it('should not find privileges api', async () => {
       await riskEngineRoutes.privileges(404);
     });

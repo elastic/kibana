@@ -63,6 +63,7 @@ export const ENTITY_STORE_ROUTES = {
     STATUS: `${PUBLIC_BASE_ROUTE}/status`,
     START: `${PUBLIC_BASE_ROUTE}/start`,
     STOP: `${PUBLIC_BASE_ROUTE}/stop`,
+    UPDATE_API_KEY: `${PUBLIC_BASE_ROUTE}/update_api_key`,
     ENABLE_HISTORY_SNAPSHOT: `${PUBLIC_BASE_ROUTE}/history_snapshot/enable`,
     DISABLE_HISTORY_SNAPSHOT: `${PUBLIC_BASE_ROUTE}/history_snapshot/disable`,
     CRUD_CREATE: `${PUBLIC_BASE_ROUTE}/entities/{entityType}`,
@@ -135,7 +136,11 @@ export type {
 } from './domain/definitions/entity_schema';
 
 // Consumed by the entity inventory plugin, which must not restate the store's definition rules.
-export { entitySchema } from './domain/definitions/entity_schema';
+export {
+  entitySchema,
+  ENTITY_DEFINITION_TYPE_PATTERN,
+  ENTITY_DEFINITION_TYPE_MAX_LENGTH,
+} from './domain/definitions/entity_schema';
 export type { EntityDefinitionManagedBy } from './domain/definitions/entity_schema';
 export type { DynamicAttribute, DynamicSource } from './domain/definitions/dynamic';
 export {

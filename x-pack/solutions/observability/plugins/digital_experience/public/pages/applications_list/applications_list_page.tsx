@@ -63,17 +63,21 @@ import type { Formatters } from '../../hooks/use_formatters';
 import { useFormatters } from '../../hooks/use_formatters';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useVisibleColumns } from '../../hooks/use_visible_columns';
-import { APPLICATIONS_LABEL, SOURCE_LABELS } from '../../labels';
+import { APPLICATIONS_LABEL, LAST_SEEN_LABEL, SOURCE_LABELS } from '../../labels';
 import type { ApplicationRow } from './utils/filter_applications';
 import { applicationsMatching, filterApplications } from './utils/filter_applications';
-import { pageLoadsOfSources, summarizeApplications } from './utils/summarize_applications';
+import {
+  pageLoadsOfSources,
+  sessionsOfSource,
+  summarizeApplications,
+} from './utils/summarize_applications';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { toTimeRangeQuery } from '../../utils/time_range_query';
 import {
   applicationColumnPreset,
   metricColumnPreset,
   timeColumnPreset,
-} from './utils/column_presets';
+} from '../../utils/column_presets';
 
 // Long names shrink and truncate; the badges keep their size.
 const nameCss = css({ minWidth: 0 });
@@ -230,10 +234,6 @@ const ERROR_RATE_DESCRIPTION = i18n.translate(
   { defaultMessage: 'JS errors per page load' }
 );
 
-const LAST_SEEN_COLUMN = i18n.translate('xpack.digitalExperience.applications.lastSeenColumn', {
-  defaultMessage: 'Last seen',
-});
-
 const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.digitalExperience.applications.searchPlaceholder',
   { defaultMessage: 'Search applications' }
@@ -345,6 +345,18 @@ const UnavailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }
   />
 );
 
+const PartiallyAvailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }) => (
+  <KbnWarningCallout
+    data-test-subj="digitalExperiencePartiallyAvailableSources"
+    size="s"
+    title={i18n.translate('xpack.digitalExperience.applications.partiallyAvailableSources', {
+      defaultMessage:
+        "You can't read all of the {sources} indices, so the applications, totals and chart may be incomplete. Ask an administrator for read access to them.",
+      values: { sources: sources.map((source) => SOURCE_LABELS[source]).join(', ') },
+    })}
+  />
+);
+
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.applications.fetchError', {
   defaultMessage: 'Could not load the applications',
 });
@@ -375,7 +387,7 @@ const OPTIONAL_COLUMNS: Array<{ id: OptionalColumnId; label: string }> = [
   { id: 'ttfb', label: TTFB_COLUMN },
   { id: 'jsErrors', label: JS_ERRORS_COLUMN },
   { id: 'failedHttp', label: FAILED_HTTP_COLUMN },
-  { id: 'lastSeen', label: LAST_SEEN_COLUMN },
+  { id: 'lastSeen', label: LAST_SEEN_LABEL },
 ];
 
 const OPTIONAL_COLUMN_IDS = OPTIONAL_COLUMNS.map(({ id }) => id);
@@ -449,7 +461,12 @@ export function ApplicationsListPage() {
     () => pageLoadsOfSources(response?.pageLoadsOverTime ?? NO_PAGE_LOADS, selectedSource),
     [response, selectedSource]
   );
+  const sessionsOverTime = useMemo(
+    () => sessionsOfSource(response?.sessionsOverTime ?? null, selectedSource),
+    [response, selectedSource]
+  );
   const unavailableSources = response?.unavailableSources ?? [];
+  const partiallyAvailableSources = response?.partiallyAvailableSources ?? [];
 
   const { visibleColumns, setVisibleColumns } = useVisibleColumns({
     storageKey: HIDDEN_COLUMNS_STORAGE_KEY,
@@ -611,7 +628,7 @@ export function ApplicationsListPage() {
       },
       lastSeen: {
         field: 'lastSeen',
-        name: LAST_SEEN_COLUMN,
+        name: LAST_SEEN_LABEL,
         ...timeColumnPreset<ApplicationRow>(),
         sortable: true,
         render: renderLastSeen(formatters),
@@ -643,10 +660,17 @@ export function ApplicationsListPage() {
             <EuiSpacer size="m" />
           </>
         )}
+        {partiallyAvailableSources.length > 0 && (
+          <>
+            <PartiallyAvailableSourcesCallOut sources={partiallyAvailableSources} />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <ApplicationsSummaryPanel summary={summary} isLoading={isLoading} />
         <EuiSpacer size="m" />
         <PageLoadsChart
-          points={pageLoadsOverTime}
+          pageLoads={pageLoadsOverTime}
+          sessions={sessionsOverTime}
           isLoading={isLoading}
           onTimeRangeSelect={setTimeRange}
         />
