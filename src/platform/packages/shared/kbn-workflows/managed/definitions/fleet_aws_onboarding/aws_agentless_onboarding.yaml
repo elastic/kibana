@@ -65,7 +65,7 @@ steps:
           - name: ask_credentials
             type: waitForInput
             with:
-              message: "Set up onboarding access for Elastic in your AWS account (run the bootstrap stack, then enter the access key and role ARNs in Kibana's AWS onboarding credentials form). Reply when done."
+              message: "Complete the AWS onboarding access card above: download the template, create the stack in CloudFormation, then enter the stack outputs. Reply done when the card shows verified."
               schema:
                 properties:
                   done:
