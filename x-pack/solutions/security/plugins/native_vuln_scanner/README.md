@@ -78,6 +78,13 @@ in the workflow's execution history.
 **Limits.** The feed cache is per Kibana node and is lost on restart, so each node downloads a feed once
 after a restart.
 
+## Licence
+
+Native vulnerability scanning requires an **Enterprise** licence; a trial licence counts. Below that,
+each workflow step (`native_vuln.fetch_feed`, `native_vuln.match`, `native_vuln.summarize`) checks the
+current licence before it reads or writes anything and fails with "Native vulnerability scanning
+requires an Enterprise licence". Findings written while the licence was sufficient stay readable.
+
 ## Finding lifecycle and detection rules
 
 A finding is `new` on its first sighting, `active` while later scans still match it, `fixed` once
@@ -92,7 +99,7 @@ before the rule existed match again. How often it alerts depends on the license:
 | License | Alerts |
 | --- | --- |
 | Platinum, Enterprise or trial | Suppression is applied. Each new finding and every reopen raises a new alert. Scans that fix a finding or change nothing raise none. Matches on one host within a single rule run fold into one alert. |
-| Basic | Suppression is ignored, so there is no per-host grouping. The alert id derives from the finding's stable document id, so the finding alerts once per rule: the first time it is new or reopened after the rule was created. Later reopens raise no alert. |
+| Basic (only after a downgrade) | Suppression is ignored, so there is no per-host grouping. The alert id derives from the finding's stable document id, so the finding alerts once per rule: the first time it is new or reopened after the rule was created. Later reopens raise no alert. |
 
 A reopened finding has `native_vuln_scanner.state: reopened`, which you can filter on or add as a
 column on the findings page.

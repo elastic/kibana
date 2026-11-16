@@ -8,6 +8,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { fetchFeedStepCommonDefinition } from '../../../../common/workflows/step_types/fetch_feed/fetch_feed_common';
 import type { FetchedFeed } from '../../../../common/workflows/step_types/fetch_feed/fetch_feed_common';
+import { LicenseRequiredError, isEnterprise } from '../../../lib/license';
 import { downloadFeed } from '../../../lib/feeds/fetch';
 import { getCachedFeed, retainCachedFeeds, setCachedFeed } from '../../../lib/feeds/feed_cache';
 import { groupByRelease, readInventory, truncate } from '../../../lib/scan';
@@ -19,10 +20,11 @@ const ABORTED = 'The feed download was aborted';
  * Downloads each needed vendor feed (conditionally, by ETag) and keeps the bytes on the server.
  * The output is per-release metadata only: advisory data would blow the step output size limit.
  */
-export const buildFetchFeedStepDefinition = ({ logger, getScanDeps }: StepDeps) =>
+export const buildFetchFeedStepDefinition = ({ logger, getScanDeps, getLicense }: StepDeps) =>
   createServerStepDefinition({
     ...fetchFeedStepCommonDefinition,
     handler: async ({ abortSignal: signal }) => {
+      if (!isEnterprise(await getLicense())) return { error: new LicenseRequiredError() };
       const { es, packRepository } = await getScanDeps();
       const inventory = await readInventory({ es, packRepository, logger }, signal);
       if (inventory.packMissing) {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { clearFeedCache, setCachedFeed } from '../../../lib/feeds/feed_cache';
 import { loadFeed, parseFeedBody } from '../../../lib/feeds/fetch';
 import type { FeedOs } from '../../../lib/feeds/fetch';
@@ -166,5 +167,35 @@ describe('native_vuln.match handler', () => {
 
       expect(loadFeedMock).toHaveBeenCalledWith(noble, { signal: expect.any(AbortSignal) });
     });
+  });
+
+  it.each(['basic', 'gold', 'platinum'])(
+    'refuses on a %s licence before scanning',
+    async (type) => {
+      const { deps } = buildDeps({
+        getLicense: async () => licenseMock.createLicense({ license: { type: type as never } }),
+      });
+
+      const result = await buildMatchStepDefinition(deps).handler(buildContext({}));
+
+      expect(result.error?.message).toBe(
+        'Native vulnerability scanning requires an Enterprise licence'
+      );
+      expect(runScanMock).not.toHaveBeenCalled();
+      expect(deps.getScanDeps).not.toHaveBeenCalled();
+    }
+  );
+
+  it('scans on a trial licence', async () => {
+    runScanMock.mockResolvedValue(summary());
+    const { deps } = buildDeps({
+      getLicense: async () =>
+        licenseMock.createLicense({ license: { type: 'trial', mode: 'trial' } }),
+    });
+
+    const result = await buildMatchStepDefinition(deps).handler(buildContext({}));
+
+    expect(result.error).toBeUndefined();
+    expect(runScanMock).toHaveBeenCalledTimes(1);
   });
 });

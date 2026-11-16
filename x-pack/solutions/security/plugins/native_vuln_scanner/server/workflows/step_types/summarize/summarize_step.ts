@@ -8,6 +8,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { summarizeStepCommonDefinition } from '../../../../common/workflows/step_types/summarize/summarize_common';
 import type { SummarizeInput } from '../../../../common/workflows/step_types/summarize/summarize_common';
+import { LicenseRequiredError, isEnterprise } from '../../../lib/license';
 import { truncate } from '../../../lib/scan';
 import { SUMMARY_INDEX, ensureSummaryIndex, writeSummary } from '../../../lib/summary';
 import type { SummaryDoc, SummaryFeed, SummaryRunStatus } from '../../../lib/summary';
@@ -59,11 +60,13 @@ const feedsOf = ({ fetch, match, match_error: matchError }: SummarizeInput): Sum
 export const buildSummarizeStepDefinition = ({
   logger,
   getScanDeps,
+  getLicense,
   now = () => new Date(),
 }: StepDeps) =>
   createServerStepDefinition({
     ...summarizeStepCommonDefinition,
     handler: async ({ input, contextManager }) => {
+      if (!isEnterprise(await getLicense())) return { error: new LicenseRequiredError() };
       const params = input as SummarizeInput;
       const { fetch, match, fetch_error: fetchError, match_error: matchError } = params;
       const { es } = await getScanDeps();

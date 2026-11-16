@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { StepDeps } from './deps';
 
@@ -28,6 +29,9 @@ export const buildDeps = (overrides: Partial<StepDeps> = {}) => {
   const deps: StepDeps = {
     logger: loggingSystemMock.createLogger(),
     getScanDeps: jest.fn(async () => ({ es, packRepository } as never)),
+    getLicense: jest.fn(async () =>
+      licenseMock.createLicense({ license: { type: 'enterprise', mode: 'enterprise' } })
+    ),
     now: () => new Date('2026-11-13T01:00:00.000Z'),
     ...overrides,
   };

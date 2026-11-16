@@ -16,6 +16,8 @@
     "@kbn/logging-mocks",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/licensing-plugin",
+    "@kbn/licensing-types"
   ]
 }

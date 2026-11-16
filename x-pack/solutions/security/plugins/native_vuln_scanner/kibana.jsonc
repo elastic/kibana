@@ -10,7 +10,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "nativeVulnScanner"],
-    "requiredPlugins": ["workflowsExtensions", "workflowsManagement"],
+    "requiredPlugins": ["licensing", "workflowsExtensions", "workflowsManagement"],
     "optionalPlugins": []
   }
 }

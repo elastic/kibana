@@ -51,6 +51,10 @@ export class NativeVulnScannerPlugin
     registerOwner({ workflowsExtensions });
     registerNativeVulnScannerSteps(workflowsExtensions, {
       logger: this.logger.get('scan'),
+      getLicense: async () => {
+        const [, { licensing }] = await core.getStartServices();
+        return licensing.getLicense();
+      },
       getScanDeps: async () => {
         const [coreStart] = await core.getStartServices();
         return {

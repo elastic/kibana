@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -19,5 +20,6 @@ export interface NativeVulnScannerSetupDeps {
 }
 
 export interface NativeVulnScannerStartDeps {
+  licensing: LicensingPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }

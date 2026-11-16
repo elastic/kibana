@@ -14,6 +14,7 @@ import type {
 import { getCachedFeed } from '../../../lib/feeds/feed_cache';
 import { loadFeed, parseFeedBody } from '../../../lib/feeds/fetch';
 import type { FeedOs, LoadFeedResult } from '../../../lib/feeds/fetch';
+import { LicenseRequiredError, isEnterprise } from '../../../lib/license';
 import { ScanFailedError, releaseKey, runScan } from '../../../lib/scan';
 import type { ScanSummary } from '../../../lib/scan';
 import type { StepDeps } from '../deps';
@@ -50,10 +51,11 @@ const buildFeedLoader =
     return { status: 'ok', feed, etag: cached.etag, lastModified: cached.lastModified };
   };
 
-export const buildMatchStepDefinition = ({ logger, getScanDeps, now }: StepDeps) =>
+export const buildMatchStepDefinition = ({ logger, getScanDeps, getLicense, now }: StepDeps) =>
   createServerStepDefinition({
     ...matchStepCommonDefinition,
     handler: async ({ input, abortSignal: signal, contextManager }) => {
+      if (!isEnterprise(await getLicense())) return { error: new LicenseRequiredError() };
       const { feeds = [] } = input as MatchInput;
       const { es, packRepository } = await getScanDeps();
       const runId = contextManager.getContext().execution.id;

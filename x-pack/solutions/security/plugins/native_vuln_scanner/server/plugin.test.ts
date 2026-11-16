@@ -7,6 +7,8 @@
 
 import type { loggingSystemMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { NativeVulnScannerPlugin } from './plugin';
 import { ensureFindingsIndex } from './lib/findings';
@@ -38,10 +40,17 @@ const startPlugin = async (enabled: boolean) => {
   plugin.setup(coreSetup, { workflowsExtensions: workflowsSetup });
   const core = coreMock.createStart();
   const workflowsStart = workflowsExtensionsMock.createStart();
-  plugin.start(core, { workflowsExtensions: workflowsStart });
+  const licensing = licensingMock.createStart();
+  coreSetup.getStartServices.mockResolvedValue([
+    core,
+    { workflowsExtensions: workflowsStart, licensing },
+    {},
+  ]);
+  plugin.start(core, { workflowsExtensions: workflowsStart, licensing });
   await new Promise(process.nextTick);
   return {
     coreSetup,
+    licensing,
     core,
     workflowsSetup,
     workflowsStart,
@@ -105,6 +114,16 @@ describe('NativeVulnScannerPlugin', () => {
     >;
     expect(createInternalRepository).toHaveBeenCalledWith([OSQUERY_PACK_SO_TYPE]);
     expect(deps.packRepository).toBe(createInternalRepository.mock.results[0].value);
+  });
+
+  it('reads the licence from the licensing start contract', async () => {
+    const { licensing } = await startPlugin(true);
+    const current = licenseMock.createLicense({ license: { type: 'enterprise' } });
+    licensing.getLicense.mockResolvedValue(current);
+    const { getLicense } = registerStepsMock.mock.calls[0][1];
+
+    expect(await getLicense()).toBe(current);
+    expect(licensing.getLicense).toHaveBeenCalledTimes(1);
   });
 
   it('touches nothing when disabled', async () => {

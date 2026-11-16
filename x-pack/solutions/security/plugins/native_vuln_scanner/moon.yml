@@ -28,6 +28,8 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/workflows-extensions'
   - '@kbn/zod'
+  - '@kbn/licensing-plugin'
+  - '@kbn/licensing-types'
 tags:
   - plugin
   - prod

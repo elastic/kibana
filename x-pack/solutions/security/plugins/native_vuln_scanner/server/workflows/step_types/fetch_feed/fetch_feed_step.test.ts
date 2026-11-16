@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { clearFeedCache, getCachedFeed, setCachedFeed } from '../../../lib/feeds/feed_cache';
 import { downloadFeed } from '../../../lib/feeds/fetch';
 import { readInventory } from '../../../lib/scan';
@@ -191,5 +192,36 @@ describe('native_vuln.fetch_feed handler', () => {
 
     expect(result.error?.message).toBe('The feed download was aborted');
     expect(result.output).toEqual(expect.objectContaining({ feeds: [] }));
+  });
+
+  it.each(['basic', 'gold', 'platinum'])(
+    'refuses on a %s licence before reading anything',
+    async (type) => {
+      const { deps } = buildDeps({
+        getLicense: async () => licenseMock.createLicense({ license: { type: type as never } }),
+      });
+
+      const result = await buildFetchFeedStepDefinition(deps).handler(buildContext({}));
+
+      expect(result.error?.message).toBe(
+        'Native vulnerability scanning requires an Enterprise licence'
+      );
+      expect(result.output).toBeUndefined();
+      expect(deps.getScanDeps).not.toHaveBeenCalled();
+      expect(inventoryMock).not.toHaveBeenCalled();
+    }
+  );
+
+  it('runs on a trial licence', async () => {
+    inventoryMock.mockResolvedValue(snapshot([], true));
+    const { deps } = buildDeps({
+      getLicense: async () =>
+        licenseMock.createLicense({ license: { type: 'trial', mode: 'trial' } }),
+    });
+
+    const result = await buildFetchFeedStepDefinition(deps).handler(buildContext({}));
+
+    expect(result.error).toBeUndefined();
+    expect(result.output).toEqual({ feeds: [], hosts: 0, pack_missing: true });
   });
 });

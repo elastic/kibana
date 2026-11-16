@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { SUMMARY_INDEX, ensureSummaryIndex, writeSummary } from '../../../lib/summary';
 import type { SummaryDoc } from '../../../lib/summary';
 import type { FetchFeedOutput } from '../../../../common/workflows/step_types/fetch_feed/fetch_feed_common';
@@ -170,5 +171,38 @@ describe('native_vuln.summarize handler', () => {
     writeMock.mockRejectedValue(new Error('index is read-only'));
 
     await expect(run({ fetch: fetched, match: matched() })).rejects.toThrow('index is read-only');
+  });
+
+  it.each(['basic', 'gold', 'platinum'])(
+    'refuses on a %s licence and writes nothing',
+    async (type) => {
+      const { deps } = buildDeps({
+        getLicense: async () => licenseMock.createLicense({ license: { type: type as never } }),
+      });
+
+      const result = await buildSummarizeStepDefinition(deps).handler(
+        buildContext({ fetch: fetched, match: matched() })
+      );
+
+      expect(result.error?.message).toBe(
+        'Native vulnerability scanning requires an Enterprise licence'
+      );
+      expect(writeMock).not.toHaveBeenCalled();
+      expect(ensureMock).not.toHaveBeenCalled();
+    }
+  );
+
+  it('writes the summary on a trial licence', async () => {
+    const { deps } = buildDeps({
+      getLicense: async () =>
+        licenseMock.createLicense({ license: { type: 'trial', mode: 'trial' } }),
+    });
+
+    const result = await buildSummarizeStepDefinition(deps).handler(
+      buildContext({ fetch: fetched, match: matched() })
+    );
+
+    expect(result.error).toBeUndefined();
+    expect(writeMock).toHaveBeenCalledTimes(1);
   });
 });

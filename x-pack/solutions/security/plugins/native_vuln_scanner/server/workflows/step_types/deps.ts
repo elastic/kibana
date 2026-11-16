@@ -6,10 +6,13 @@
  */
 
 import type { ElasticsearchClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { ILicense } from '@kbn/licensing-types';
 
 export interface StepDeps {
   logger: Logger;
   /** Resolved lazily: the clients only exist after core start. */
   getScanDeps: () => Promise<{ es: ElasticsearchClient; packRepository: ISavedObjectsRepository }>;
+  /** Resolved lazily: the licence only exists after the licensing plugin starts. */
+  getLicense: () => Promise<ILicense>;
   now?: () => Date;
 }
