@@ -32,6 +32,7 @@ import {
   DESTINATION_FIXED_INDEX_MODE_LABEL,
   DESTINATION_SIGNAL_LABELS,
 } from './destination_type_config';
+import { DocsIndexField } from './docs_target_fields';
 import {
   EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
   type DestinationCreationFormData,
@@ -49,6 +50,11 @@ type IndexFields = Record<
 >;
 
 type IndexError = DestinationCreationFormErrors['logsIndex'];
+
+type DocsIndexFieldProps = ControllerRenderProps<
+  DestinationCreationFormData,
+  'remoteElasticsearch.docsIndex'
+>;
 
 interface RemoteElasticsearchRoutingFieldsProps {
   errors: DestinationCreationFormErrors;
@@ -97,7 +103,11 @@ const StaticFields = ({
   errors,
   disabled,
   indexFields,
-}: RemoteElasticsearchRoutingFieldsProps & { indexFields: IndexFields }) => {
+  docsIndexField,
+}: RemoteElasticsearchRoutingFieldsProps & {
+  indexFields: IndexFields;
+  docsIndexField: DocsIndexFieldProps;
+}) => {
   const { control, setValue } = useFormContext<DestinationCreationFormData>();
   const staticNaming = useWatch({ control, name: 'remoteElasticsearch.staticNaming' });
   const requiredError =
@@ -227,6 +237,14 @@ const StaticFields = ({
           </EuiText>
         </>
       )}
+      <EuiSpacer size="s" />
+      <DocsIndexField
+        value={docsIndexField.value}
+        error={errors.docsIndex}
+        disabled={disabled}
+        onChange={docsIndexField.onChange}
+        onBlur={docsIndexField.onBlur}
+      />
     </>
   );
 };
@@ -242,6 +260,10 @@ export const RemoteElasticsearchRoutingFields = (props: RemoteElasticsearchRouti
     metrics: useController({ control, name: getIndexFieldPath('metrics') }).field,
     traces: useController({ control, name: getIndexFieldPath('traces') }).field,
   };
+  const { field: docsIndexField } = useController({
+    control,
+    name: 'remoteElasticsearch.docsIndex',
+  });
   const autoRadioId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationRemoteRoutingAuto' });
   const staticRadioId = useGeneratedHtmlId({
     prefix: 'streamsCreateDestinationRemoteRoutingStatic',
@@ -254,6 +276,7 @@ export const RemoteElasticsearchRoutingFields = (props: RemoteElasticsearchRouti
     for (const signal of PREFIXED_DESTINATION_SIGNALS) {
       resetField(getIndexFieldPath(signal));
     }
+    resetField('remoteElasticsearch.docsIndex');
     // `resetField` skips unregistered paths, and naming is only ever set with `setValue`.
     setValue(
       'remoteElasticsearch.staticNaming',
@@ -307,7 +330,7 @@ export const RemoteElasticsearchRoutingFields = (props: RemoteElasticsearchRouti
       {!auto && (
         <>
           <EuiHorizontalRule margin="s" />
-          <StaticFields {...props} indexFields={indexFields} />
+          <StaticFields {...props} indexFields={indexFields} docsIndexField={docsIndexField} />
         </>
       )}
     </>
