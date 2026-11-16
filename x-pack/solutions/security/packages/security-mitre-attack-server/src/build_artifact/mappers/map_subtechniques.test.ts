@@ -16,13 +16,15 @@ import {
   getMockAtlasTechniqueEntity,
   getMockAtlasRelationshipEntity,
   getMockAtlasExternalReferences,
+  getMockIcsStixBundle,
 } from '../stix_entities.mock';
 import type { StixBundle } from '../types';
 import { mapSubtechniques } from './map_subtechniques';
+import { ENTERPRISE_STIX_SOURCE, ATLAS_STIX_SOURCE, ICS_STIX_SOURCE } from '../stix_sources';
 
 const FRAMEWORK = 'enterprise' as const;
 const FRAMEWORK_VERSION = '18.0';
-const SOURCE_NAME = 'mitre-attack' as const;
+const SOURCE = ENTERPRISE_STIX_SOURCE;
 
 const tactic = getMockTacticEntity(); // TA0006, credential-access
 const matrix = getMockMatrixEntity(); // tactic_refs: ['x-mitre-tactic--ta0006']
@@ -33,7 +35,7 @@ describe('mapSubtechniques', () => {
     const subtechnique = getMockSubtechniqueEntity(); // T1003.001
     const rel = getMockRelationshipEntity(); // subtechnique-of, T1003.001 -> T1003
     const bundle: StixBundle = { objects: [matrix, tactic, technique, subtechnique, rel] };
-    const result = mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     const ids = result.map((s) => s.id);
     expect(ids).toContain('T1003.001');
     expect(ids).not.toContain('T1003');
@@ -43,7 +45,7 @@ describe('mapSubtechniques', () => {
     const subtechnique = getMockSubtechniqueEntity(); // T1003.001
     const rel = getMockRelationshipEntity(); // subtechnique-of, T1003.001 -> T1003
     const bundle: StixBundle = { objects: [matrix, tactic, technique, subtechnique, rel] };
-    const result = mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     expect(result[0].technique_id).toBe('T1003');
   });
 
@@ -51,7 +53,7 @@ describe('mapSubtechniques', () => {
     const subtechnique = getMockSubtechniqueEntity(); // T1003.001, dot prefix implies T1003
     // No subtechnique-of relationship in the bundle.
     const bundle: StixBundle = { objects: [matrix, tactic, technique, subtechnique] };
-    const result = mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     expect(result[0].technique_id).toBe('T1003');
   });
 
@@ -67,7 +69,7 @@ describe('mapSubtechniques', () => {
     const bundle: StixBundle = {
       objects: [matrix, tactic, technique, wrongParent, subtechnique, badRel],
     };
-    expect(() => mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME)).toThrow(
+    expect(() => mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE)).toThrow(
       /dot-prefix implies parent/
     );
   });
@@ -77,7 +79,7 @@ describe('mapSubtechniques', () => {
       external_references: getMockMitreExternalReferences('T1003'),
     });
     const bundle: StixBundle = { objects: [matrix, tactic, technique, malformed] };
-    expect(() => mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME)).toThrow(
+    expect(() => mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE)).toThrow(
       /Subtechnique ID 'T1003' is malformed/
     );
   });
@@ -87,7 +89,7 @@ describe('mapSubtechniques', () => {
       external_references: getMockMitreExternalReferences('AML.T0024'),
     });
     const bundle: StixBundle = { objects: [matrix, tactic, technique, malformed] };
-    expect(() => mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME)).toThrow(
+    expect(() => mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE)).toThrow(
       /Subtechnique ID 'AML.T0024' is malformed/
     );
   });
@@ -96,7 +98,7 @@ describe('mapSubtechniques', () => {
     const subtechnique = getMockSubtechniqueEntity(); // credential-access phase -> TA0006
     const rel = getMockRelationshipEntity(); // subtechnique-of, T1003.001 -> T1003
     const bundle: StixBundle = { objects: [matrix, tactic, technique, subtechnique, rel] };
-    const result = mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     expect(result[0].tactic_ids).toEqual(['TA0006']);
   });
 
@@ -116,7 +118,7 @@ describe('mapSubtechniques', () => {
     const bundle: StixBundle = {
       objects: [matrix, tactic, technique, sub002, sub001, rel001, rel002],
     };
-    const result = mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     expect(result.map((s) => s.id)).toEqual(['T1003.001', 'T1003.002']);
   });
 
@@ -125,7 +127,7 @@ describe('mapSubtechniques', () => {
 
     it('resolves technique_id from the subtechnique-of relationship, keeping the AML prefix', () => {
       const bundle = getMockAtlasStixBundle(); // AML.T0024.002 -> AML.T0024
-      const result = mapSubtechniques(bundle, 'atlas', ATLAS_VERSION, 'mitre-atlas');
+      const result = mapSubtechniques(bundle, 'atlas', ATLAS_VERSION, ATLAS_STIX_SOURCE);
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('AML.T0024.002');
       expect(result[0].technique_id).toBe('AML.T0024');
@@ -137,7 +139,7 @@ describe('mapSubtechniques', () => {
       const bundle = getMockAtlasStixBundle({
         objects: getMockAtlasStixBundle().objects.filter((o) => o.type !== 'relationship'),
       });
-      const result = mapSubtechniques(bundle, 'atlas', ATLAS_VERSION, 'mitre-atlas');
+      const result = mapSubtechniques(bundle, 'atlas', ATLAS_VERSION, ATLAS_STIX_SOURCE);
       // A split on the first dot would wrongly yield 'AML'.
       expect(result[0].technique_id).toBe('AML.T0024');
     });
@@ -155,9 +157,20 @@ describe('mapSubtechniques', () => {
           badRel,
         ],
       });
-      expect(() => mapSubtechniques(bundle, 'atlas', ATLAS_VERSION, 'mitre-atlas')).toThrow(
+      expect(() => mapSubtechniques(bundle, 'atlas', ATLAS_VERSION, ATLAS_STIX_SOURCE)).toThrow(
         /'AML.T9999' but dot-prefix implies parent 'AML.T0024'/
       );
+    });
+  });
+
+  describe('ICS', () => {
+    it('resolves a T1xxx subtechnique to its T1xxx parent with ICS tactic ids', () => {
+      const result = mapSubtechniques(getMockIcsStixBundle(), 'ics', '19.2', ICS_STIX_SOURCE);
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('T1691.001');
+      expect(result[0].technique_id).toBe('T1691');
+      expect(result[0].tactic_ids).toEqual(['TA0100']);
+      expect(result[0].reference).toBe('https://attack.mitre.org/techniques/T1691/001/');
     });
   });
 });

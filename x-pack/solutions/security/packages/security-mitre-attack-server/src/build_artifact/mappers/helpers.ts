@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StixEntity, StixSourceName } from '../types';
+import type { StixEntity, StixFrameworkSource } from '../types';
 
 /** A relationship entity with both endpoints present. */
 type StixRelationship = StixEntity & { source_ref: string; target_ref: string };
@@ -60,17 +60,19 @@ export const buildTacticByShortname = (objects: StixEntity[]): Map<string, StixE
  *
  *   T1003 (technique) kill_chain_phases: ['credential-access'] -> tactic_ids: ['TA0006']
  *
- * Only phases whose kill_chain_name matches `sourceName` are considered; phases from other
+ * Only phases whose kill_chain_name matches `source.killChainName` are considered; phases from other
  * frameworks are ignored. A phase matching no tactic throws, unless the entity is revoked or
  * deprecated, where a retired tactic reference is expected and skipped.
  */
 export const resolveTacticIds = (
   stixEntity: StixEntity,
   tacticByShortname: Map<string, StixEntity>,
-  sourceName: StixSourceName
+  source: StixFrameworkSource
 ): string[] => {
   const phases =
-    stixEntity.kill_chain_phases?.filter((phase) => phase.kill_chain_name === sourceName) ?? [];
+    stixEntity.kill_chain_phases?.filter(
+      (phase) => phase.kill_chain_name === source.killChainName
+    ) ?? [];
   if (phases.length === 0) return [];
 
   const ids = phases.flatMap((phase) => {
@@ -84,7 +86,7 @@ export const resolveTacticIds = (
           ` (referenced by STIX entity '${stixEntity.id}')`
       );
     }
-    const mitreReference = getMitreReference(tacticEntity, sourceName);
+    const mitreReference = getMitreReference(tacticEntity, source);
     return mitreReference != null ? [mitreReference.id] : [];
   });
 
@@ -99,7 +101,7 @@ export const resolveSupersededBy = (
   stixId: string,
   entityById: Map<string, StixEntity>,
   revokedByTargetRefs: Map<string, string[]>,
-  sourceName: StixSourceName
+  source: StixFrameworkSource
 ): string[] | undefined => {
   const targetRefs = revokedByTargetRefs.get(stixId);
   if (!targetRefs || targetRefs.length === 0) return undefined;
@@ -107,7 +109,7 @@ export const resolveSupersededBy = (
   const ids = targetRefs.flatMap((targetStixId) => {
     const targetEntity = entityById.get(targetStixId);
     if (targetEntity == null) return [];
-    const mitreReference = getMitreReference(targetEntity, sourceName);
+    const mitreReference = getMitreReference(targetEntity, source);
     return mitreReference != null ? [mitreReference.id] : [];
   });
 
@@ -128,17 +130,17 @@ const normalizeThreatReference = (reference: string): string => {
 };
 
 /**
- * Returns the MITRE ID and normalized URL from the entity's external reference whose
- * source_name equals `sourceName`, or null when it has none (such entities are skipped
- * during the build). Matching is exact, so an ATLAS technique's secondary 'mitre-attack'
- * reference is never picked up when building the ATLAS framework.
+ * Returns the MITRE ID and normalized URL from the entity's first external reference whose
+ * source_name is one of `source.sourceNames`, or null when it has none (such entities are
+ * skipped during the build). Matching is exact, so an ATLAS technique's secondary
+ * 'mitre-attack' reference is never picked up when building the ATLAS framework.
  */
 export const getMitreReference = (
   stixEntity: StixEntity,
-  sourceName: StixSourceName
+  source: StixFrameworkSource
 ): { id: string; reference: string } | null => {
-  const mitreRef = stixEntity.external_references?.find(
-    (externalRef) => externalRef.source_name === sourceName
+  const mitreRef = stixEntity.external_references?.find((externalRef) =>
+    source.sourceNames.some((sourceName) => sourceName === externalRef.source_name)
   );
   if (mitreRef == null || !mitreRef.external_id || !mitreRef.url) {
     return null;

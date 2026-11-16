@@ -75,9 +75,13 @@ export const useFetchCoverageOverviewQuery = (
   const data = useMemo(
     () =>
       response && mitreReady
-        ? buildCoverageOverviewDashboardModel(response, { tactics, techniques, subtechniques })
+        ? buildCoverageOverviewDashboardModel(
+            response,
+            { tactics, techniques, subtechniques },
+            framework
+          )
         : undefined,
-    [response, mitreReady, tactics, techniques, subtechniques]
+    [response, mitreReady, tactics, techniques, subtechniques, framework]
   );
 
   return {

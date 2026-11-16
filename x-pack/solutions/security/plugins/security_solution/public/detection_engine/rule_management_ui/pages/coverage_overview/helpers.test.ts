@@ -50,11 +50,23 @@ describe('helpers', () => {
   describe('filterInvalidlyMappedRulesByFramework', () => {
     const invalidlyMappedRules = {
       enabledRules: [
-        { id: 'both', name: 'Both', invalidMitreIds: ['T9999', 'AML.T9999'] },
-        { id: 'atlas-only', name: 'Atlas only', invalidMitreIds: ['AML.TA9999'] },
+        {
+          id: 'both',
+          name: 'Both',
+          invalidMitreIdsByFramework: { enterprise: ['T9999'], atlas: ['AML.T9999'] },
+        },
+        {
+          id: 'atlas-only',
+          name: 'Atlas only',
+          invalidMitreIdsByFramework: { atlas: ['AML.TA9999'] },
+        },
       ],
       disabledRules: [
-        { id: 'enterprise-only', name: 'Enterprise only', invalidMitreIds: ['T1234'] },
+        {
+          id: 'enterprise-only',
+          name: 'Enterprise only',
+          invalidMitreIdsByFramework: { enterprise: ['T1234'] },
+        },
       ],
     };
 
@@ -75,6 +87,31 @@ describe('helpers', () => {
         ],
         disabledRules: [],
       });
+    });
+
+    it('keeps ics IDs apart from enterprise IDs of the same shape', () => {
+      const rules = {
+        enabledRules: [
+          {
+            id: 'mixed',
+            name: 'Mixed',
+            invalidMitreIdsByFramework: { enterprise: ['T9999'], ics: ['T9999'] },
+          },
+          { id: 'ics-only', name: 'ICS only', invalidMitreIdsByFramework: { ics: ['T0999'] } },
+        ],
+        disabledRules: [],
+      };
+
+      expect(filterInvalidlyMappedRulesByFramework(rules, 'ics')).toEqual({
+        enabledRules: [
+          { id: 'mixed', name: 'Mixed', invalidMitreIds: ['T9999'] },
+          { id: 'ics-only', name: 'ICS only', invalidMitreIds: ['T0999'] },
+        ],
+        disabledRules: [],
+      });
+      expect(filterInvalidlyMappedRulesByFramework(rules, 'enterprise').enabledRules).toEqual([
+        { id: 'mixed', name: 'Mixed', invalidMitreIds: ['T9999'] },
+      ]);
     });
 
     it('returns empty lists when there is no data', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MitreEntitySummaryBuckets } from '@kbn/security-mitre-attack-common';
+import type { MitreEntitySummaryBuckets, MitreFramework } from '@kbn/security-mitre-attack-common';
 import type {
   CoverageOverviewResponse,
   CoverageOverviewRuleAttributes,
@@ -21,26 +21,28 @@ import { buildCoverageOverviewMitreGraph } from './build_coverage_overview_mitre
 
 export function buildCoverageOverviewDashboardModel(
   apiResponse: CoverageOverviewResponse,
-  mitreData: MitreEntitySummaryBuckets
+  mitreData: MitreEntitySummaryBuckets,
+  framework: MitreFramework
 ): CoverageOverviewDashboard {
+  const coverage = apiResponse.coverage[framework] ?? {};
   const { tactics, techniques, subtechniques } = mitreData;
   const mitreTactics = buildCoverageOverviewMitreGraph(tactics, techniques, subtechniques);
 
   for (const tactic of mitreTactics) {
-    for (const ruleId of apiResponse.coverage[tactic.id] ?? []) {
+    for (const ruleId of coverage[tactic.id] ?? []) {
       addRule(tactic, ruleId, apiResponse.rules_data[ruleId]);
     }
 
     for (const technique of tactic.techniques) {
-      for (const ruleId of apiResponse.coverage[technique.id] ?? []) {
-        if (apiResponse.coverage[tactic.id]?.includes(ruleId)) {
+      for (const ruleId of coverage[technique.id] ?? []) {
+        if (coverage[tactic.id]?.includes(ruleId)) {
           addRule(technique, ruleId, apiResponse.rules_data[ruleId]);
         }
       }
 
       for (const subtechnique of technique.subtechniques) {
-        for (const ruleId of apiResponse.coverage[subtechnique.id] ?? []) {
-          if (apiResponse.coverage[tactic.id]?.includes(ruleId)) {
+        for (const ruleId of coverage[subtechnique.id] ?? []) {
+          if (coverage[tactic.id]?.includes(ruleId)) {
             addRule(subtechnique, ruleId, apiResponse.rules_data[ruleId]);
           }
         }
@@ -98,12 +100,14 @@ function buildInvalidlyMappedRules(
     disabledRules: [],
   };
 
-  for (const [ruleId, invalidMitreIds] of Object.entries(apiResponse.invalid_mitre_ids)) {
+  for (const [ruleId, invalidMitreIdsByFramework] of Object.entries(
+    apiResponse.invalid_mitre_ids
+  )) {
     addRuleWithInvalidMitreIds(
       invalidlyMappedRules,
       ruleId,
       apiResponse.rules_data[ruleId],
-      invalidMitreIds
+      invalidMitreIdsByFramework
     );
   }
 
@@ -117,7 +121,7 @@ function addRuleWithInvalidMitreIds(
   },
   ruleId: string,
   ruleData: CoverageOverviewRuleAttributes,
-  invalidMitreIds: string[]
+  invalidMitreIdsByFramework: CoverageOverviewRuleWithInvalidMitre['invalidMitreIdsByFramework']
 ): void {
   if (!ruleData) {
     return;
@@ -126,7 +130,7 @@ function addRuleWithInvalidMitreIds(
   const rule: CoverageOverviewRuleWithInvalidMitre = {
     id: ruleId,
     name: ruleData.name,
-    invalidMitreIds,
+    invalidMitreIdsByFramework,
   };
 
   if (ruleData.activity === CoverageOverviewRuleActivity.Enabled) {

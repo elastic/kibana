@@ -55,7 +55,13 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
     renderCallout({
       frameworkVersion: null,
       invalidlyMappedRules: {
-        enabledRules: [{ id: 'rule-1', name: 'Enabled rule', invalidMitreIds: ['TA9999'] }],
+        enabledRules: [
+          {
+            id: 'rule-1',
+            name: 'Enabled rule',
+            invalidMitreIdsByFramework: { enterprise: ['TA9999'] },
+          },
+        ],
         disabledRules: [],
       },
     });
@@ -66,7 +72,13 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
   it('renders the callout with singular description when there is one invalid rule', () => {
     renderCallout({
       invalidlyMappedRules: {
-        enabledRules: [{ id: 'rule-1', name: 'Enabled rule', invalidMitreIds: ['TA9999'] }],
+        enabledRules: [
+          {
+            id: 'rule-1',
+            name: 'Enabled rule',
+            invalidMitreIdsByFramework: { enterprise: ['TA9999'] },
+          },
+        ],
         disabledRules: [],
       },
     });
@@ -86,7 +98,13 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
   it('displays the managed framework version when available', () => {
     renderCallout({
       invalidlyMappedRules: {
-        enabledRules: [{ id: 'rule-1', name: 'Enabled rule', invalidMitreIds: ['TA9999'] }],
+        enabledRules: [
+          {
+            id: 'rule-1',
+            name: 'Enabled rule',
+            invalidMitreIdsByFramework: { enterprise: ['TA9999'] },
+          },
+        ],
         disabledRules: [],
       },
     });
@@ -99,8 +117,20 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
   it('uses plural description when there are multiple invalid rules', () => {
     renderCallout({
       invalidlyMappedRules: {
-        enabledRules: [{ id: 'rule-1', name: 'Enabled rule', invalidMitreIds: ['TA9999'] }],
-        disabledRules: [{ id: 'rule-2', name: 'Disabled rule', invalidMitreIds: ['T9999'] }],
+        enabledRules: [
+          {
+            id: 'rule-1',
+            name: 'Enabled rule',
+            invalidMitreIdsByFramework: { enterprise: ['TA9999'] },
+          },
+        ],
+        disabledRules: [
+          {
+            id: 'rule-2',
+            name: 'Disabled rule',
+            invalidMitreIdsByFramework: { enterprise: ['T9999'] },
+          },
+        ],
       },
     });
 
@@ -111,7 +141,13 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
   it('renders the outdated-mappings warning title', () => {
     renderCallout({
       invalidlyMappedRules: {
-        enabledRules: [{ id: 'rule-1', name: 'Enabled rule', invalidMitreIds: ['TA9999'] }],
+        enabledRules: [
+          {
+            id: 'rule-1',
+            name: 'Enabled rule',
+            invalidMitreIdsByFramework: { enterprise: ['TA9999'] },
+          },
+        ],
         disabledRules: [],
       },
     });
@@ -128,14 +164,14 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
           {
             id: 'rule-enabled',
             name: 'Enabled rule with bad MITRE',
-            invalidMitreIds: ['TA9999', 'T9999'],
+            invalidMitreIdsByFramework: { enterprise: ['TA9999', 'T9999'] },
           },
         ],
         disabledRules: [
           {
             id: 'rule-disabled',
             name: 'Disabled rule with bad MITRE',
-            invalidMitreIds: ['T1234.999'],
+            invalidMitreIdsByFramework: { enterprise: ['T1234.999'] },
           },
         ],
       },
@@ -168,7 +204,11 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
     renderCallout({
       invalidlyMappedRules: {
         enabledRules: [
-          { id: 'rule-enabled-only', name: 'Enabled rule', invalidMitreIds: ['TA9999'] },
+          {
+            id: 'rule-enabled-only',
+            name: 'Enabled rule',
+            invalidMitreIdsByFramework: { enterprise: ['TA9999'] },
+          },
         ],
         disabledRules: [],
       },
@@ -187,7 +227,13 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
 
     renderCallout({
       invalidlyMappedRules: {
-        enabledRules: [{ id: 'rule-1', name: 'Some rule', invalidMitreIds: ['TA9999'] }],
+        enabledRules: [
+          {
+            id: 'rule-1',
+            name: 'Some rule',
+            invalidMitreIdsByFramework: { enterprise: ['TA9999'] },
+          },
+        ],
         disabledRules: [],
       },
     });
@@ -200,8 +246,16 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
   });
 
   describe('per-framework filtering', () => {
-    const mixedRule = { id: 'mixed', name: 'Mixed rule', invalidMitreIds: ['T9999', 'AML.T9999'] };
-    const atlasOnlyRule = { id: 'atlas', name: 'Atlas rule', invalidMitreIds: ['AML.T9999'] };
+    const mixedRule = {
+      id: 'mixed',
+      name: 'Mixed rule',
+      invalidMitreIdsByFramework: { enterprise: ['T9999'], atlas: ['AML.T9999'] },
+    };
+    const atlasOnlyRule = {
+      id: 'atlas',
+      name: 'Atlas rule',
+      invalidMitreIdsByFramework: { atlas: ['AML.T9999'] },
+    };
 
     it('counts a rule with IDs from both frameworks on enterprise', () => {
       renderCallout({
@@ -242,6 +296,37 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
       });
 
       expect(container).toBeEmptyDOMElement();
+    });
+
+    it('keeps an ICS-only invalid ID off the enterprise tab even when the id shape is identical', () => {
+      const icsOnlyRule = {
+        id: 'ics',
+        name: 'ICS rule',
+        invalidMitreIdsByFramework: { ics: ['T1059'] },
+      };
+
+      const { container } = renderCallout({
+        framework: 'enterprise',
+        invalidlyMappedRules: { enabledRules: [icsOnlyRule], disabledRules: [] },
+      });
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it('shows an ICS-only rule on the ics tab, naming ATT&CK for ICS', () => {
+      renderCallout({
+        framework: 'ics',
+        invalidlyMappedRules: {
+          enabledRules: [
+            { id: 'ics', name: 'ICS rule', invalidMitreIdsByFramework: { ics: ['T1059'] } },
+          ],
+          disabledRules: [],
+        },
+      });
+
+      const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
+      expect(callout.textContent).toContain(
+        'You have 1 rule that references MITRE ATT&CK® for ICS IDs'
+      );
     });
   });
 });

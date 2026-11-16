@@ -212,3 +212,107 @@ export const getMockAtlasStixBundle = (overrides: Partial<StixBundle> = {}): Sti
   ],
   ...overrides,
 });
+
+// ---------------------------------------------------------------------------
+// MITRE ATT&CK for ICS fixtures. ICS bundles tag techniques with the
+// 'mitre-ics-attack' kill chain, while the canonical external reference's
+// source_name is 'mitre-attack' on most objects and 'mitre-ics-attack' on some.
+// IDs are T0xxx plus a few T1xxx, with no prefix distinguishing them from Enterprise.
+// ---------------------------------------------------------------------------
+
+/** Returns an ICS external reference array for the given id, source_name and optional URL. */
+export const getMockIcsExternalReferences = (
+  icsId: string,
+  sourceName: 'mitre-attack' | 'mitre-ics-attack' = 'mitre-attack',
+  url?: string
+): StixExternalReference[] => [
+  {
+    source_name: sourceName,
+    external_id: icsId,
+    url:
+      url ??
+      (icsId.startsWith('TA')
+        ? `https://attack.mitre.org/tactics/${icsId}`
+        : `https://attack.mitre.org/techniques/${icsId.replace('.', '/')}`),
+  },
+];
+
+/** Returns a default ICS x-mitre-tactic entity merged with any supplied overrides. */
+export const getMockIcsTacticEntity = (overrides: Partial<StixEntity> = {}): StixEntity => ({
+  id: 'x-mitre-tactic--ics-ta0100',
+  type: 'x-mitre-tactic',
+  name: 'Collection',
+  description: 'The adversary is trying to gather data of interest.',
+  x_mitre_shortname: 'collection',
+  external_references: getMockIcsExternalReferences('TA0100'),
+  ...overrides,
+});
+
+/** Returns an ICS technique whose canonical reference uses source_name 'mitre-ics-attack'. */
+export const getMockIcsTechniqueEntity = (overrides: Partial<StixEntity> = {}): StixEntity => ({
+  id: 'attack-pattern--ics-t0800',
+  type: 'attack-pattern',
+  name: 'Activate Firmware Update Mode',
+  description: 'Adversaries may activate firmware update mode on devices.',
+  x_mitre_is_subtechnique: false,
+  kill_chain_phases: [{ kill_chain_name: 'mitre-ics-attack', phase_name: 'collection' }],
+  external_references: getMockIcsExternalReferences('T0800', 'mitre-ics-attack'),
+  ...overrides,
+});
+
+/** Returns an ICS T1xxx technique whose canonical reference uses source_name 'mitre-attack'. */
+export const getMockIcsT1xxxTechniqueEntity = (
+  overrides: Partial<StixEntity> = {}
+): StixEntity => ({
+  id: 'attack-pattern--ics-t1691',
+  type: 'attack-pattern',
+  name: 'ICS Technique With A T1xxx Id',
+  description: 'An ICS technique whose id is in the Enterprise-looking range.',
+  x_mitre_is_subtechnique: false,
+  kill_chain_phases: [{ kill_chain_name: 'mitre-ics-attack', phase_name: 'collection' }],
+  external_references: getMockIcsExternalReferences('T1691'),
+  ...overrides,
+});
+
+/** Returns a default ICS subtechnique entity merged with any supplied overrides. */
+export const getMockIcsSubtechniqueEntity = (overrides: Partial<StixEntity> = {}): StixEntity => ({
+  id: 'attack-pattern--ics-t1691-001',
+  type: 'attack-pattern',
+  name: 'ICS Subtechnique',
+  x_mitre_is_subtechnique: true,
+  kill_chain_phases: [{ kill_chain_name: 'mitre-ics-attack', phase_name: 'collection' }],
+  external_references: getMockIcsExternalReferences('T1691.001'),
+  ...overrides,
+});
+
+/** Returns a default ICS x-mitre-matrix entity merged with any supplied overrides. */
+export const getMockIcsMatrixEntity = (overrides: Partial<StixEntity> = {}): StixEntity => ({
+  id: 'x-mitre-matrix--ics',
+  type: 'x-mitre-matrix',
+  name: 'ATT&CK for ICS',
+  tactic_refs: ['x-mitre-tactic--ics-ta0100'],
+  ...overrides,
+});
+
+/** Returns a default ICS subtechnique-of relationship entity merged with any supplied overrides. */
+export const getMockIcsRelationshipEntity = (overrides: Partial<StixEntity> = {}): StixEntity => ({
+  id: 'relationship--subtechnique-of--ics-t1691-001--ics-t1691',
+  type: 'relationship',
+  relationship_type: 'subtechnique-of',
+  source_ref: 'attack-pattern--ics-t1691-001',
+  target_ref: 'attack-pattern--ics-t1691',
+  ...overrides,
+});
+
+/** Returns an ICS STIX bundle with a matrix, tactic, two techniques, a subtechnique and its relationship. */
+export const getMockIcsStixBundle = (overrides: Partial<StixBundle> = {}): StixBundle => ({
+  objects: [
+    getMockIcsMatrixEntity(),
+    getMockIcsTacticEntity(),
+    getMockIcsTechniqueEntity(),
+    getMockIcsT1xxxTechniqueEntity(),
+    getMockIcsSubtechniqueEntity(),
+    getMockIcsRelationshipEntity(),
+  ],
+  ...overrides,
+});

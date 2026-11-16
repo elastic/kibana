@@ -8,19 +8,22 @@
 import { mitreEntitiesSchema } from '@kbn/security-mitre-attack-common';
 import type { MitreEntity, MitreFramework } from '@kbn/security-mitre-attack-common';
 import { fetchStixBundle } from './fetch_stix_bundle';
-import type { StixBundle, StixSourceName } from './types';
+import type { StixBundle, StixFrameworkSource, StixSourceName } from './types';
+import { ATLAS_STIX_SOURCE, ENTERPRISE_STIX_SOURCE, ICS_STIX_SOURCE } from './stix_sources';
 import { mapSubtechniques } from './mappers/map_subtechniques';
 import { mapTactics } from './mappers/map_tactics';
 import { mapTechniques } from './mappers/map_techniques';
 
-export type { StixSourceName } from './types';
+export type { StixFrameworkSource, StixSourceName } from './types';
 
 /** Describes how one MITRE framework is fetched and projected into the artifact. */
 export interface FrameworkDefinition {
   /** Framework stamped on every entity produced from this definition. */
   framework: MitreFramework;
-  /** `source_name` / `kill_chain_name` identifying this framework's objects inside its STIX bundle. */
-  sourceName: StixSourceName;
+  /** `kill_chain_name` identifying this framework's techniques inside its STIX bundle. */
+  killChainName: StixSourceName;
+  /** Accepted `external_references[].source_name` values for an object's canonical MITRE entry. */
+  sourceNames: readonly StixSourceName[];
   /** Resolves a release tag to the URL of the STIX bundle for that release. */
   bundleUrl: (tag: string) => string;
   /** Resolves a release tag to the `framework_version` stored on each entity. */
@@ -35,14 +38,20 @@ export interface FrameworkDefinition {
 // Tags are published at https://github.com/mitre/cti/tags.
 export const MITRE_CONTENT_VERSIONS: readonly string[] = ['ATT&CK-v19.2'];
 
+// Append a tag here to include an additional MITRE ATT&CK for ICS version in the artifact.
+// ICS releases share the Enterprise tags (the same `ATT&CK-v*` release carries both bundles),
+// and each tag must match the version used by prebuilt rules in
+// https://github.com/elastic/detection-rules.
+export const ICS_CONTENT_VERSIONS: readonly string[] = ['ATT&CK-v20.1'];
+
 // Append a tag here to include an additional MITRE ATLAS version in the artifact.
 // Tags are published at https://github.com/mitre-atlas/atlas-data/releases and must
 // match the ATLAS version used by prebuilt rules in https://github.com/elastic/detection-rules
 // (see detection_rules/etc/atlas-v*.json.gz).
 export const ATLAS_CONTENT_VERSIONS: readonly string[] = ['v2026.08', 'v2026.09'];
 
-/** Strips the 'ATT&CK-v' prefix, e.g. 'ATT&CK-v19.1' -> '19.1'. */
-const toAttackFrameworkVersion = (tag: string): string => tag.replace(/^ATT&CK-v/, '');
+/** Strips the 'ATT&CK-v' prefix, e.g. 'ATT&CK-v19.1' -> '19.1'. Shared by Enterprise and ICS. */
+export const toAttackFrameworkVersion = (tag: string): string => tag.replace(/^ATT&CK-v/, '');
 
 /**
  * Normalizes an ATLAS release tag into the `framework_version` stored on each entity,
@@ -66,7 +75,8 @@ export const normalizeAtlasVersion = (tag: string): string =>
 export const MITRE_FRAMEWORK_DEFINITIONS: readonly FrameworkDefinition[] = [
   {
     framework: 'enterprise',
-    sourceName: 'mitre-attack',
+    killChainName: ENTERPRISE_STIX_SOURCE.killChainName,
+    sourceNames: ENTERPRISE_STIX_SOURCE.sourceNames,
     bundleUrl: (tag) =>
       `https://raw.githubusercontent.com/mitre/cti/${tag}/enterprise-attack/enterprise-attack.json`,
     toFrameworkVersion: toAttackFrameworkVersion,
@@ -74,11 +84,21 @@ export const MITRE_FRAMEWORK_DEFINITIONS: readonly FrameworkDefinition[] = [
   },
   {
     framework: 'atlas',
-    sourceName: 'mitre-atlas',
+    killChainName: ATLAS_STIX_SOURCE.killChainName,
+    sourceNames: ATLAS_STIX_SOURCE.sourceNames,
     bundleUrl: (tag) =>
       `https://github.com/mitre-atlas/atlas-data/releases/download/${tag}/stix-atlas.json`,
     toFrameworkVersion: normalizeAtlasVersion,
     versions: ATLAS_CONTENT_VERSIONS,
+  },
+  {
+    framework: 'ics',
+    killChainName: ICS_STIX_SOURCE.killChainName,
+    sourceNames: ICS_STIX_SOURCE.sourceNames,
+    bundleUrl: (tag) =>
+      `https://raw.githubusercontent.com/mitre/cti/${tag}/ics-attack/ics-attack.json`,
+    toFrameworkVersion: toAttackFrameworkVersion,
+    versions: ICS_CONTENT_VERSIONS,
   },
 ];
 
@@ -99,7 +119,7 @@ export const buildMitreArtifact = async (
         bundle,
         definition.framework,
         definition.toFrameworkVersion(tag),
-        definition.sourceName
+        { killChainName: definition.killChainName, sourceNames: definition.sourceNames }
       );
       allEntities.push(...entities);
     }
@@ -110,16 +130,16 @@ export const buildMitreArtifact = async (
 
 /**
  * Maps one STIX bundle into the full entity set for a single framework version. Only
- * objects referenced through `sourceName` are considered, so cross-framework references
+ * objects referenced through `source` are considered, so cross-framework references
  * (e.g. the 'mitre-attack' link some ATLAS techniques carry) are ignored.
  */
 export const mapBundleToMitreEntities = (
   bundle: StixBundle,
   framework: MitreFramework,
   frameworkVersion: string,
-  sourceName: StixSourceName
+  source: StixFrameworkSource
 ): MitreEntity[] => [
-  ...mapTactics(bundle, framework, frameworkVersion, sourceName),
-  ...mapTechniques(bundle, framework, frameworkVersion, sourceName),
-  ...mapSubtechniques(bundle, framework, frameworkVersion, sourceName),
+  ...mapTactics(bundle, framework, frameworkVersion, source),
+  ...mapTechniques(bundle, framework, frameworkVersion, source),
+  ...mapSubtechniques(bundle, framework, frameworkVersion, source),
 ];

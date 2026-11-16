@@ -2,14 +2,14 @@
 
 Managed MITRE data source for Kibana.
 
-This plugin makes structured MITRE ATT&CK Enterprise and MITRE ATLAS data available to the Security solution without external network calls. It registers a Saved Object type, populates it at startup from an artifact bundled with Kibana, and exposes a read-only client for server-side consumers.
+This plugin makes structured MITRE ATT&CK Enterprise, MITRE ATLAS and MITRE ATT&CK for ICS data available to the Security solution without external network calls. It registers a Saved Object type, populates it at startup from an artifact bundled with Kibana, and exposes a read-only client for server-side consumers.
 
 It replaces the hardcoded `mitre_tactics_techniques.ts` blob in `security_solution`, which is a large generated file that has to be lazily loaded in the browser, carries no entity descriptions, and produces a very large pull request on every MITRE version bump.
 
 ## What this plugin owns
 
 - The `mitre-attack-entity` Saved Object type. Space agnostic, hidden, stored in the Security Solution Saved Objects index.
-- Startup population of that type from the artifact shipped in `@kbn/security-mitre-attack-server`. The artifact carries every supported framework (ATT&CK Enterprise and ATLAS); each entity is stamped with its `framework` and `framework_version`.
+- Startup population of that type from the artifact shipped in `@kbn/security-mitre-attack-server`. The artifact carries every supported framework (ATT&CK Enterprise, ATLAS and ATT&CK for ICS); each entity is stamped with its `framework` and `framework_version`.
 - `MitreAttackDataClient`, a read-only client returned from the server `start` contract.
 
 ## Configuration
@@ -57,6 +57,9 @@ public start(core: CoreStart, plugins: { mitreAttack?: MitreAttackServerStart })
 
     // ATLAS entities (AML.* ids) live under their own framework.
     const atlasTechnique = await dataClient.getById('AML.T0024', { framework: 'atlas' });
+    // ATT&CK for ICS ids (T0xxx, plus some T1xxx) look like Enterprise ids, so the
+    // framework must always be passed explicitly.
+    const icsTechnique = await dataClient.getById('T0800', { framework: 'ics' });
   }
 }
 ```
@@ -71,7 +74,7 @@ In `setup()`, the plugin registers a `mitreAttack` request handler context via `
 
 | Query parameter | Type | Default | Notes |
 |---|---|---|---|
-| `framework` | `'enterprise'` \| `'atlas'` | `'enterprise'` | Each response covers a single framework |
+| `framework` | `'enterprise'` \| `'atlas'` \| `'ics'` | `'enterprise'` | Each response covers a single framework |
 | `framework_version` | string ≤ 32 chars | latest indexed | Pin to a specific version |
 | `types` | comma-separated or array of `'tactic'`, `'technique'`, `'subtechnique'` (max 3) | all | Filter by entity type |
 | `status` | `'active'` \| `'all'` | `'active'` | `'all'` includes revoked and deprecated entities |

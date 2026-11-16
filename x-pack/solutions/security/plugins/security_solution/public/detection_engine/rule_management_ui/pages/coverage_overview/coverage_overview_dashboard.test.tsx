@@ -152,7 +152,7 @@ describe('CoverageOverviewDashboard', () => {
       {
         id: 'rule-2',
         name: 'Rule with bad MITRE',
-        invalidMitreIds: ['TA9999'],
+        invalidMitreIdsByFramework: { enterprise: ['TA9999'] },
       },
     ];
 

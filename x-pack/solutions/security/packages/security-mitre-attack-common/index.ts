@@ -25,10 +25,11 @@ export {
   THREAT_FRAMEWORK_NAME,
   THREAT_FRAMEWORK_DISPLAY_NAME,
   getMitreFrameworkByThreatName,
-  getMitreFrameworkById,
+  isAtlasEntityId,
   buildMitreReferenceUrl,
   MITRE_ATTACK_FRAMEWORK,
   MITRE_ATLAS_FRAMEWORK,
+  MITRE_ICS_FRAMEWORK,
 } from './src/threat_framework';
 
 export type {
@@ -47,6 +48,7 @@ export type {
 export {
   DEFAULT_MITRE_FRAMEWORK,
   DEFAULT_MITRE_ENTITY_STATUS,
+  MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS,
   MITRE_INTERNAL_URL,
   GET_MITRE_ENTITIES_URL,
   MITRE_ATTACK_ENTITY_SO_TYPE,

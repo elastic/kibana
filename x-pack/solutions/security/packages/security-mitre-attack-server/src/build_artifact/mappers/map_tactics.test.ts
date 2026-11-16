@@ -13,10 +13,11 @@ import {
 } from '../stix_entities.mock';
 import type { StixBundle } from '../types';
 import { mapTactics } from './map_tactics';
+import { ENTERPRISE_STIX_SOURCE } from '../stix_sources';
 
 const FRAMEWORK = 'enterprise' as const;
 const FRAMEWORK_VERSION = '18.0';
-const SOURCE_NAME = 'mitre-attack' as const;
+const SOURCE = ENTERPRISE_STIX_SOURCE;
 
 describe('mapTactics', () => {
   it('positions tactics by their index in tactic_refs and sorts output by position', () => {
@@ -34,7 +35,7 @@ describe('mapTactics', () => {
         tactic1,
       ],
     };
-    const result = mapTactics(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapTactics(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     expect(result.map((t) => t.id)).toEqual(['TA0006', 'TA0002']);
     expect(result[0].position).toBe(0);
     expect(result[1].position).toBe(1);
@@ -55,7 +56,7 @@ describe('mapTactics', () => {
         deprecatedTactic,
       ],
     };
-    const result = mapTactics(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapTactics(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     const ta0006 = result.find((t) => t.id === 'TA0006');
     const ta0002 = result.find((t) => t.id === 'TA0002');
     expect(ta0006?.revoked).toBe(true);
@@ -85,7 +86,7 @@ describe('mapTactics', () => {
         rel,
       ],
     };
-    const result = mapTactics(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapTactics(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     const ta0006 = result.find((t) => t.id === 'TA0006');
     expect(ta0006?.superseded_by_id).toEqual(['TA0009']);
   });
@@ -104,7 +105,7 @@ describe('mapTactics', () => {
         normal,
       ],
     };
-    const result = mapTactics(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapTactics(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     expect(result.map((t) => t.id)).toEqual(['TA0002']);
   });
 
@@ -122,7 +123,7 @@ describe('mapTactics', () => {
         missing,
       ],
     };
-    expect(() => mapTactics(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME)).toThrow(
+    expect(() => mapTactics(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE)).toThrow(
       /TA0006.*not present in x-mitre-matrix/
     );
   });
@@ -141,7 +142,7 @@ describe('mapTactics', () => {
         revokedMissing,
       ],
     };
-    expect(() => mapTactics(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME)).toThrow(
+    expect(() => mapTactics(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE)).toThrow(
       /TA0006.*not present in x-mitre-matrix/
     );
   });

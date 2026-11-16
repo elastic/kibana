@@ -155,6 +155,32 @@ describe('reduceMitreToTacticsOnly', () => {
     ]);
   });
 
+  it('drops ICS entries until ICS is enabled for consumers', () => {
+    const result = reduceMitreToTacticsOnly(
+      makeRule({
+        threat: [
+          {
+            framework: 'MITRE ATT&CK ICS',
+            tactic: {
+              id: 'TA0107',
+              name: 'Inhibit Response Function',
+              reference: 'https://example',
+            },
+            technique: [],
+          },
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: { id: 'TA0001', name: 'Initial Access', reference: 'https://example' },
+            technique: [],
+          },
+        ],
+      })
+    );
+    expect(result.threat).toEqual([
+      { framework: 'MITRE ATT&CK', tactic: { id: 'TA0001', name: 'Initial Access' } },
+    ]);
+  });
+
   it('abridges absent threat to an empty array', () => {
     const result = reduceMitreToTacticsOnly(makeRule({ threat: undefined }));
     expect(result.threat).toEqual([]);

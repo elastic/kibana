@@ -6,9 +6,17 @@
  */
 
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
-import { findInvalidMitreIds, buildValidMitreIdsFromBuckets } from './find_invalid_mitre_ids';
+import {
+  findInvalidMitreIds,
+  findInvalidMitreIdsByFramework,
+  buildValidMitreIdsFromBuckets,
+} from './find_invalid_mitre_ids';
 import type { ValidMitreIdSets, ValidMitreIdSetsByFramework } from './find_invalid_mitre_ids';
-import { MITRE_ATTACK_FRAMEWORK, MITRE_ATLAS_FRAMEWORK } from './iterate_mitre_threat_entities';
+import {
+  MITRE_ATTACK_FRAMEWORK,
+  MITRE_ATLAS_FRAMEWORK,
+  MITRE_ICS_FRAMEWORK,
+} from './iterate_mitre_threat_entities';
 
 const MITRE_FRAMEWORK = MITRE_ATTACK_FRAMEWORK;
 
@@ -326,5 +334,73 @@ describe('findInvalidMitreIds', () => {
       ];
       expect(findInvalidMitreIds(threats, validIds)).toEqual(['T9999']);
     });
+  });
+});
+
+describe('ICS framework', () => {
+  const icsIds: ValidMitreIdSets = {
+    tactic: new Set(['TA0100']),
+    technique: new Set(['T0800', 'T1691']),
+    subtechnique: new Set(['T1691.001']),
+  };
+  const idsWithIcs: ValidMitreIdSetsByFramework = { enterprise: enterpriseIds, ics: icsIds };
+
+  const makeIcsThreat = (overrides?: Partial<Threats[number]>): Threats[number] => ({
+    framework: MITRE_ICS_FRAMEWORK,
+    tactic: {
+      id: 'TA0100',
+      name: 'Collection',
+      reference: 'https://attack.mitre.org/tactics/TA0100/',
+    },
+    technique: [],
+    ...overrides,
+  });
+
+  it('accepts ICS ids that are members of the ics id sets', () => {
+    const threats: Threats = [
+      makeIcsThreat({
+        technique: [
+          {
+            id: 'T1691',
+            name: 'ICS technique',
+            reference: 'https://attack.mitre.org/techniques/T1691/',
+            subtechnique: [
+              {
+                id: 'T1691.001',
+                name: 'ICS subtechnique',
+                reference: 'https://attack.mitre.org/techniques/T1691/001/',
+              },
+            ],
+          },
+        ],
+      }),
+    ];
+    expect(findInvalidMitreIds(threats, idsWithIcs)).toEqual([]);
+  });
+
+  it('rejects an Enterprise id under ICS by membership, not by id shape', () => {
+    const threats: Threats = [
+      makeIcsThreat({
+        technique: [{ id: VALID_TECHNIQUE_ID, name: 'T1548', reference: 'https://example.com' }],
+      }),
+    ];
+    expect(findInvalidMitreIdsByFramework(threats, idsWithIcs)).toEqual({
+      ics: [VALID_TECHNIQUE_ID],
+    });
+  });
+
+  it('validates the same id separately under each framework', () => {
+    const threats: Threats = [
+      makeThreat({ technique: [{ id: 'T1691', name: 'x', reference: 'https://example.com' }] }),
+      makeIcsThreat({ technique: [{ id: 'T1691', name: 'x', reference: 'https://example.com' }] }),
+    ];
+    expect(findInvalidMitreIdsByFramework(threats, idsWithIcs)).toEqual({ enterprise: ['T1691'] });
+  });
+
+  it('skips ICS entries when ics sets are unavailable', () => {
+    const threats: Threats = [
+      makeIcsThreat({ technique: [{ id: 'T9999', name: 'x', reference: 'https://example.com' }] }),
+    ];
+    expect(findInvalidMitreIdsByFramework(threats, validIds)).toEqual({});
   });
 });
