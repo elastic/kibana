@@ -83,8 +83,10 @@ export const getPolicyTemplateReadmePath = (
   packageInfo: PackageInfo,
   policyTemplate: string
 ): string | undefined => {
-  const readme = packageInfo.policy_templates?.find(({ name }) => name === policyTemplate)?.readme;
-  if (!readme) return undefined;
+  const template = packageInfo.policy_templates?.find(({ name }) => name === policyTemplate);
+  // The template type is a union and only some members declare a readme.
+  const readme = template && 'readme' in template ? template.readme : undefined;
+  if (typeof readme !== 'string' || readme === '') return undefined;
   const prefix = `/package/${packageInfo.name}/${packageInfo.version}/`;
   return readme.startsWith(prefix) ? readme.slice(prefix.length) : readme.replace(/^\/+/, '');
 };

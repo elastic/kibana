@@ -55,7 +55,12 @@ const guardduty = {
       defaultEnabledInputs: ['httpjson', 'aws-s3'],
       varDefsByInput: {
         httpjson: {
-          detector_id: v('detector_id', { title: 'Detector ID', required: true, default: null }),
+          detector_id: v('detector_id', {
+            title: 'Detector ID',
+            required: true,
+            // Registry YAML can carry an explicit null default, which the manifest type omits.
+            default: null as unknown as undefined,
+          }),
           access_key_id: v('access_key_id', { required: true }),
           region: v('region', { required: true }),
           proxy_url: v('proxy_url'),
