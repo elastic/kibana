@@ -173,6 +173,12 @@ export interface ProposalGateFixture {
    * starts.
    */
   seedProposal: (params: { id?: string }) => Promise<{ id: string }>;
+  /** Creates a gateless proposal through the real service, as a producer with no gate would. */
+  seedGatelessProposal: (params: { actionWorkflowId?: string }) => Promise<{ id: string }>;
+  /** Decides a proposal through the real service, as the decision route does. */
+  releaseGate: (id: string, approved: boolean) => Promise<Proposal>;
+  /** Reads a proposal through the real service, settling it on read as the routes do. */
+  get: (id: string) => Promise<Proposal>;
   /** Runs the workflow to its first park (or to completion). */
   start: (inputs?: Record<string, unknown>) => Promise<void>;
   /** Answers the parked gate as a human would through a resume surface. */
@@ -219,9 +225,10 @@ export interface ProposalGateFixture {
 
 export const createProposalGateFixture = (): ProposalGateFixture => {
   const engine = new WorkflowRunFixture();
-  // The gate runs `system-resolve-proposal` as a sync child. This second engine
-  // runs it for real, against the same proposal storage, so its writes are
-  // what the gate reads afterwards.
+  // The gate runs `system-resolve-proposal` as a sync child, and approving a
+  // gateless action proposal starts it directly. This second engine runs it for
+  // real, against the same proposal storage, so its writes are what the gate
+  // and the service read afterwards.
   const resolveEngine = new WorkflowRunFixture();
   const { documents, client } = createInMemoryStorage();
   let canDecide = true;
@@ -258,6 +265,16 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       })
     ),
     resumeWorkflowExecution: jest.fn(),
+    // Runs inline to completion, as a dispatch from inside Task Manager does,
+    // so the service records the run on a proposal the run already wrote to.
+    executeWorkflow: jest.fn(
+      async ({ workflowId, inputs }: { workflowId: string; inputs: Record<string, unknown> }) => {
+        if (workflowId !== RESOLVE_PROPOSAL_WORKFLOW_ID) {
+          throw new Error(`Workflow [${workflowId}] not found`);
+        }
+        return runResolution(inputs);
+      }
+    ),
   };
 
   const attachedProposalIds: string[] = [];
@@ -338,28 +355,31 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
 
   const resolveStepExecutions: EsWorkflowStepExecution[] = [];
   let resolutions = 0;
-  engine.workflowsExecutionEngineMock.executeWorkflow.mockImplementation(
-    async (_workflow: unknown, { inputs }: { inputs?: Record<string, unknown> }) => {
-      await resolveEngine.runWorkflow({ workflowYaml: resolveWorkflowYaml, inputs });
-      const execution =
-        resolveEngine.workflowExecutionRepositoryMock.workflowExecutions.get(FIXTURE_EXECUTION_ID)!;
-      if (!isTerminalStatus(execution.status)) {
-        throw new Error(
-          `The resolution stopped as ${execution.status}, which nothing here resumes`
-        );
-      }
-      resolveStepExecutions.push(
-        ...resolveEngine.stepExecutionRepositoryMock.stepExecutions.values()
-      );
-      // Copied under an id of its own, where the gate's sync step reads it back.
-      resolutions += 1;
-      const workflowExecutionId = `resolve-proposal-${resolutions}`;
-      engine.workflowExecutionRepositoryMock.workflowExecutions.set(workflowExecutionId, {
-        ...execution,
-        id: workflowExecutionId,
-      });
-      return { workflowExecutionId };
+  const runResolution = async (
+    inputs?: Record<string, unknown>
+  ): Promise<{ workflowExecutionId: string }> => {
+    await resolveEngine.runWorkflow({ workflowYaml: resolveWorkflowYaml, inputs });
+    const execution =
+      resolveEngine.workflowExecutionRepositoryMock.workflowExecutions.get(FIXTURE_EXECUTION_ID)!;
+    if (!isTerminalStatus(execution.status)) {
+      throw new Error(`The resolution stopped as ${execution.status}, which nothing here resumes`);
     }
+    resolveStepExecutions.push(
+      ...resolveEngine.stepExecutionRepositoryMock.stepExecutions.values()
+    );
+    // Copied under an id of its own, where the gate's sync step and the
+    // service's settle-on-read both read it back.
+    resolutions += 1;
+    const workflowExecutionId = `resolve-proposal-${resolutions}`;
+    engine.workflowExecutionRepositoryMock.workflowExecutions.set(workflowExecutionId, {
+      ...execution,
+      id: workflowExecutionId,
+    });
+    return { workflowExecutionId };
+  };
+  engine.workflowsExecutionEngineMock.executeWorkflow.mockImplementation(
+    async (_workflow: unknown, { inputs }: { inputs?: Record<string, unknown> }) =>
+      runResolution(inputs)
   );
 
   const executionStatus = () =>
@@ -437,6 +457,28 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       );
       return { id: created.id };
     },
+    seedGatelessProposal: async ({ actionWorkflowId }) => {
+      const created = await service.create(
+        {
+          gate: 'none',
+          conversationId: 'conv-1',
+          comment: 'Add a knowledge indicator',
+          origin: 'context_engine',
+          confidence: 'medium',
+          category: 'tune',
+          ...(actionWorkflowId !== undefined && { actionWorkflowId }),
+        },
+        { spaceId: 'fake_space_id', request: httpServerMock.createKibanaRequest() }
+      );
+      return { id: created.id };
+    },
+    releaseGate: (id, approved) =>
+      service.releaseGate(id, {
+        approved,
+        spaceId: 'fake_space_id',
+        request: httpServerMock.createKibanaRequest(),
+      }),
+    get: (id) => service.get(id, 'fake_space_id', httpServerMock.createKibanaRequest()),
     start: async (inputs = {}) => {
       resolveStepExecutions.length = 0;
       await engine.runWorkflow({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { asyncMapWithLimit } from '@kbn/std';
 import type { AnalyticsServiceStart, KibanaRequest, Logger } from '@kbn/core/server';
@@ -19,6 +19,7 @@ import {
   isHitlWaitStepType,
   isTerminalStatus,
 } from '@kbn/workflows';
+import { RESOLVE_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionMetadata, WorkflowExecutionDto } from '@kbn/workflows';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
@@ -61,10 +62,12 @@ import { CONFIDENCE_RANK_FIELD, IMPACT_RANK_FIELD, toSortRanks } from '../storag
 import {
   ProposalAlreadyExistsError,
   ProposalConflictError,
+  ProposalForbiddenError,
   ProposalInvalidActionInputError,
   ProposalInvalidGateError,
   ProposalLookupTruncatedError,
   ProposalNotFoundError,
+  ProposalWriteConflictError,
 } from './errors';
 import { reportProposalDecided, reportProposalReopened } from '../telemetry/proposal_decided_event';
 import type { ResolveProposalUser } from './resolve_proposal_user';
@@ -130,16 +133,18 @@ export interface ProposalsServiceDeps {
  *
  * `gate` is optional on the gated branch because gated is what every caller
  * before this field already was; `none` is always explicit.
+ *
+ * A gateless proposal may carry an action: approving it starts
+ * `system-resolve-proposal` directly, as the approver, instead of resuming a
+ * parked gate that would start it.
  */
 export type CreateProposalParams =
   | (CreateProposalRequest & { gate?: 'workflow'; workflowExecutionId: string })
-  | (Omit<CreateProposalRequest, 'workflowExecutionId' | 'expiresAt' | 'actionWorkflowId'> & {
+  | (Omit<CreateProposalRequest, 'workflowExecutionId' | 'expiresAt'> & {
       gate: 'none';
       workflowExecutionId?: never;
       /** Nothing would ever settle a gateless proposal at its deadline. */
       expiresAt?: never;
-      /** Permanent: an action only ever runs behind a gate. */
-      actionWorkflowId?: never;
     });
 
 /**
@@ -150,6 +155,47 @@ const MAX_LATEST_REVISIONS = 10_000;
 
 const gateEndedError = (status: ExecutionStatus): string =>
   `The gate execution ended as ${status} before it settled the proposal.`;
+
+const resolveEndedError = (status: ExecutionStatus): string =>
+  `The resolve execution ended as ${status} before it settled the proposal.`;
+
+/** How many times an approval re-reads the proposal to record its resolve run. */
+const RECORD_RESOLVE_EXECUTION_ATTEMPTS = 3;
+
+/**
+ * Delays between reloads while a write that won a race is not yet searchable.
+ * Together they outlast one default refresh interval.
+ */
+const RELOAD_BACKOFF_MS = [50, 100, 200, 400, 800, 1000] as const;
+
+const isNewerThan = (stored: WriteVersion, previous: WriteVersion): boolean =>
+  stored.seqNo === undefined ||
+  previous.seqNo === undefined ||
+  stored.seqNo > previous.seqNo ||
+  (stored.primaryTerm ?? 0) > (previous.primaryTerm ?? 0);
+
+/** An ended execution a proposal was waiting on, and how it ended. */
+interface Settlement {
+  executionId: string;
+  status: ExecutionStatus;
+}
+
+/**
+ * A gateless proposal whose approval started the resolve run, which is then
+ * the one workflow allowed to advance it.
+ */
+const isReleasedGatelessAction = (
+  proposal: Pick<Proposal, 'actionWorkflowId' | 'gateReleasedAt'>
+) => proposal.actionWorkflowId !== undefined && proposal.gateReleasedAt !== undefined;
+
+/** Whether the only write between two loads was the approval recording its resolve run. */
+const isOnlyResolveExecutionRecorded = (
+  before: StoredProposalRecord,
+  after: StoredProposalRecord
+): boolean =>
+  before.resolveExecutionId === undefined &&
+  after.resolveExecutionId !== undefined &&
+  isEqual(omit(before, 'resolveExecutionId'), omit(after, 'resolveExecutionId'));
 
 /**
  * Owns every write to the proposals index, and the invariants that go with it:
@@ -241,8 +287,6 @@ export class ProposalsService {
     assertGateConsistent(gate, {
       workflowExecutionId: blankToUndefined(params.workflowExecutionId),
       expiresAt: blankToUndefined(params.expiresAt),
-      actionWorkflowId,
-      category,
     });
 
     const impact = blankToUndefined(params.impact) ?? metadata?.impact ?? 'low';
@@ -526,10 +570,14 @@ export class ProposalsService {
     const stored = await this.load(id, spaceId);
     const { proposal, seqNo, primaryTerm } = stored;
 
-    // No gate to release: the service owns this proposal's decision, so it is
-    // written here, synchronously, instead of behind a resumed workflow.
+    // No gate to release. An approved action is resolved by the same workflow a
+    // gate would have started; anything else is written here, synchronously.
     if (isGatelessProposal(proposal)) {
-      return this.decideDirectly(stored, { approved, dismissReason, rationale, request });
+      const current = await this.settleStaleRelease(stored, spaceId, request);
+      if (approved && current.proposal.actionWorkflowId !== undefined) {
+        return this.releaseGatelessAction(current, { actionInput, rationale, spaceId, request });
+      }
+      return this.decideDirectly(current, { approved, dismissReason, rationale, request });
     }
 
     // Every refusal comes first, so a rejected release never leaves an
@@ -552,7 +600,7 @@ export class ProposalsService {
 
     const execution = await this.getGateExecution(proposal, spaceId, request);
     if (isTerminalStatus(execution.status)) {
-      await this.settleOrphan(id, execution.status, spaceId);
+      await this.settleOrphan(id, { executionId: execution.id, status: execution.status }, spaceId);
       throw new ProposalConflictError(
         `Proposal [${id}] can no longer be decided: ${gateEndedError(execution.status)}`
       );
@@ -628,6 +676,7 @@ export class ProposalsService {
     // Ahead of the write, so a refusal leaves no annotation behind, exactly as
     // on the gated path.
     this.assertDecidable(proposal);
+    this.assertNotReleased(proposal);
 
     return this.applyUpdate(
       { proposal, seqNo, primaryTerm },
@@ -641,6 +690,151 @@ export class ProposalsService {
         rationale,
       }
     );
+  }
+
+  /**
+   * Approves a gateless proposal that carries an action by starting
+   * `system-resolve-proposal` as the approver: the same workflow a gate starts
+   * once it is answered, so the privilege check, the adoption of the live
+   * revision, the decision write and the action all happen exactly as on the
+   * gated path, and only that workflow writes the decision.
+   *
+   * The release mark is stamped first, under the loaded sequence number, so the
+   * first approver wins and no revision can land before the decision does. The
+   * mark is reverted if the run cannot be started, since nothing would ever
+   * decide the proposal otherwise. Once started, the run's execution id is
+   * recorded so a run that ends without settling the proposal is followed up
+   * on read (see `settleOrphans`).
+   *
+   * The decision lands asynchronously, as it does behind a gate: the returned
+   * record is still undecided.
+   */
+  private async releaseGatelessAction(
+    { proposal, seqNo, primaryTerm }: StoredProposal,
+    {
+      actionInput,
+      rationale,
+      spaceId,
+      request,
+    }: Pick<ReleaseGateParams, 'actionInput' | 'rationale' | 'spaceId' | 'request'>
+  ): Promise<Proposal> {
+    const { id, actionWorkflowId } = proposal;
+    this.assertDecidable(proposal);
+    this.assertNotReleased(proposal);
+    if (actionInput !== undefined && !sameInput(actionInput, proposal.actionInput)) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was modified since it was rendered; re-read it before approving`
+      );
+    }
+    // The resolve workflow reads a blank decider as an automatic approval, so
+    // an approver it cannot name must not get as far as starting it.
+    const username = (await this.deps.resolveUser(request))?.username;
+    if (!username) {
+      throw new ProposalForbiddenError(
+        `Proposal [${id}] can only be approved by a user the decision can be attributed to`
+      );
+    }
+
+    const released = await this.markReleased(proposal, { rationale }, { seqNo, primaryTerm });
+
+    let resolveExecutionId: string;
+    try {
+      ({ workflowExecutionId: resolveExecutionId } = await this.deps
+        .getWorkflowsApi()
+        .executeWorkflow({
+          workflowId: RESOLVE_PROPOSAL_WORKFLOW_ID,
+          spaceId,
+          request,
+          inputs: { proposalId: id, actionWorkflowId, approved: true, decidedBy: username },
+          waitForCompletion: false,
+        }));
+    } catch (error) {
+      await this.revertRelease(proposal, released);
+      throw error;
+    }
+
+    const recorded = await this.recordResolveExecution(released.proposal, resolveExecutionId);
+    return stripRanks(recorded ?? released.proposal);
+  }
+
+  /**
+   * Stores the resolve run an approval started. That run writes to the same
+   * record and either write can land first: Task Manager can claim the run
+   * before this write's refresh completes, and started from inside Task
+   * Manager the run executes inline and has already finished. So this write is
+   * reloaded and retried on a conflict, and `update()` re-applies the run's own
+   * write when this is the only thing that landed under it.
+   *
+   * Best effort. A run that is not recorded still decides the proposal; only a
+   * run that ends without settling it is left for nobody to follow up. Skipped
+   * once the mark is gone, since the run it named has then ended and been
+   * followed up already.
+   */
+  private async recordResolveExecution(
+    { id, spaceId, gateReleasedAt }: StoredProposalRecord,
+    resolveExecutionId: string
+  ): Promise<StoredProposalRecord | undefined> {
+    let conflicted: WriteVersion | undefined;
+    for (let attempt = 1; attempt <= RECORD_RESOLVE_EXECUTION_ATTEMPTS; attempt++) {
+      try {
+        const { proposal, ...version } = conflicted
+          ? await this.loadNewerThan(id, spaceId, conflicted)
+          : await this.load(id, spaceId);
+        if (proposal.gateReleasedAt !== gateReleasedAt) {
+          return undefined;
+        }
+        const recorded: StoredProposalRecord = { ...proposal, resolveExecutionId };
+        const { id: _id, ...document } = recorded;
+        conflicted = version;
+        await this.writeDocument(id, document, version);
+        return recorded;
+      } catch (error) {
+        if (!(error instanceof ProposalWriteConflictError)) {
+          this.deps.logger.warn(
+            `Could not record resolve execution [${resolveExecutionId}] on proposal [${id}]: ${error}`
+          );
+          return undefined;
+        }
+      }
+    }
+    this.deps.logger.warn(
+      `Could not record resolve execution [${resolveExecutionId}] on proposal [${id}]: ` +
+        `it kept changing underneath ${RECORD_RESOLVE_EXECUTION_ATTEMPTS} attempts`
+    );
+    return undefined;
+  }
+
+  /**
+   * A gateless proposal still carrying a release mark whose resolve run has
+   * ended is settled before it is decided again, so an approver refused by
+   * that run, or one whose run crashed, is not turned away by a mark nothing
+   * will ever clear. Returns the record to decide.
+   */
+  private async settleStaleRelease(
+    stored: StoredProposal,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<StoredProposal> {
+    if (stored.proposal.gateReleasedAt === undefined) {
+      return stored;
+    }
+    const [settled] = await this.settleOrphans([stripRanks(stored.proposal)], spaceId, request);
+    return settled === undefined || settled.gateReleasedAt === stored.proposal.gateReleasedAt
+      ? stored
+      : this.load(stored.proposal.id, spaceId);
+  }
+
+  /**
+   * A gateless proposal is released only by an approval that started its
+   * resolve run. Until that run decides, a second approval would start a
+   * second run, and a dismissal would race the first one's decision.
+   */
+  private assertNotReleased(proposal: StoredProposalRecord): void {
+    if (proposal.gateReleasedAt !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${proposal.id}] is already being decided: its approval is being resolved`
+      );
+    }
   }
 
   /**
@@ -699,7 +893,7 @@ export class ProposalsService {
         this.deps.logger.debug(`Proposal [${id}] moved before its release could be reverted`);
       } else {
         this.deps.logger.warn(
-          `Could not revert the release of proposal [${id}] after its gate refused the resume: ${error}`
+          `Could not revert the release of proposal [${id}] after it was refused: ${error}`
         );
       }
     }
@@ -720,14 +914,34 @@ export class ProposalsService {
     // and `proposals.settleIncompleteProposal`, and any workflow holding
     // `manage_proposals` can call either on any id. A gateless proposal has no
     // workflow to advance it, so a write arriving here is addressed to the
-    // wrong record. The direct path writes through `applyUpdate` instead.
-    if (isGatelessProposal(stored.proposal)) {
+    // wrong record — unless its approval started the resolve run that now owns
+    // it, which is what the release mark on an action proposal says. The
+    // direct path writes through `applyUpdate` instead.
+    if (isGatelessProposal(stored.proposal) && !isReleasedGatelessAction(stored.proposal)) {
       throw new ProposalConflictError(
         `Proposal [${params.id}] is not owned by a workflow, so a workflow cannot update it`
       );
     }
 
-    return this.applyUpdate(stored, params);
+    try {
+      return await this.applyUpdate(stored, params);
+    } catch (error) {
+      if (
+        !(error instanceof ProposalWriteConflictError) ||
+        !isReleasedGatelessAction(stored.proposal)
+      ) {
+        throw error;
+      }
+      // The approval that started this run records the run on the proposal
+      // once it has started, and that write can land between this load and
+      // this write. It changes nothing the guards read, so the update is
+      // re-applied to the record it produced; any other change still conflicts.
+      const current = await this.loadNewerThan(params.id, spaceId, stored);
+      if (!isOnlyResolveExecutionRecorded(stored.proposal, current.proposal)) {
+        throw error;
+      }
+      return this.applyUpdate(current, params);
+    }
   }
 
   /** `update` against a record already loaded, written under that load's sequence number. */
@@ -1497,6 +1711,29 @@ export class ProposalsService {
   }
 
   /**
+   * Reloads after a guarded write lost a race, until the write that won is
+   * visible. `load` searches, and a search only sees a write once the index
+   * refreshes, so a plain reload can return the very version that just
+   * conflicted. Gives up after the backoff and returns what it last read,
+   * which the caller's next guarded write then refuses.
+   */
+  private async loadNewerThan(
+    id: string,
+    spaceId: string,
+    conflicted: WriteVersion
+  ): Promise<StoredProposal> {
+    let stored = await this.load(id, spaceId);
+    for (const delayMs of RELOAD_BACKOFF_MS) {
+      if (isNewerThan(stored, conflicted)) {
+        return stored;
+      }
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      stored = await this.load(id, spaceId);
+    }
+    return stored;
+  }
+
+  /**
    * Whether a decision can still be made. Both axes have to be checked, for
    * different reasons.
    *
@@ -1548,7 +1785,9 @@ export class ProposalsService {
       return { seqNo: writtenSeqNo, primaryTerm: writtenPrimaryTerm };
     } catch (error) {
       if (isVersionConflict(error)) {
-        throw new ProposalConflictError(`Proposal [${id}] was modified by another actor first`);
+        throw new ProposalWriteConflictError(
+          `Proposal [${id}] was modified by another actor first`
+        );
       }
       throw error;
     }
@@ -1613,29 +1852,37 @@ export class ProposalsService {
    * missing or unreadable is left alone. Best effort: a failed lookup or write
    * is logged and the proposal is returned as read, because a read must not
    * fail on it.
+   *
+   * A gateless action proposal is followed through the resolve run its
+   * approval started instead. That run never parks, so it ending is not by
+   * itself a problem — only ending with the proposal unsettled is. Nothing
+   * else would expire a gateless proposal, so it never is here either.
    */
   private async settleOrphans(
     proposals: Proposal[],
     spaceId: string,
     request: KibanaRequest
   ): Promise<Proposal[]> {
-    const settlements = new Map<string, ExecutionStatus>();
-    const awaitingGate: Array<{ proposal: Proposal; executionId: string }> = [];
+    const settlements = new Map<string, Settlement>();
+    const awaitingRun: Array<{ proposal: Proposal; executionId: string }> = [];
     for (const proposal of proposals) {
-      if (isUnsettled(proposal) && proposal.workflowExecutionId) {
-        awaitingGate.push({ proposal, executionId: proposal.workflowExecutionId });
+      const executionId = isGatelessProposal(proposal)
+        ? proposal.resolveExecutionId
+        : proposal.workflowExecutionId;
+      if (isUnsettled(proposal) && executionId) {
+        awaitingRun.push({ proposal, executionId });
       }
     }
 
-    const endedGates = await this.findEndedGates(
-      awaitingGate.map(({ executionId }) => executionId),
+    const endedRuns = await this.findEndedGates(
+      awaitingRun.map(({ executionId }) => executionId),
       spaceId,
       request
     );
-    for (const { proposal, executionId } of awaitingGate) {
-      const gateStatus = endedGates.get(executionId);
-      if (gateStatus !== undefined) {
-        settlements.set(proposal.id, gateStatus);
+    for (const { proposal, executionId } of awaitingRun) {
+      const status = endedRuns.get(executionId);
+      if (status !== undefined) {
+        settlements.set(proposal.id, { executionId, status });
       }
     }
 
@@ -1646,7 +1893,7 @@ export class ProposalsService {
       await asyncMapWithLimit(
         [...settlements],
         10,
-        async ([id, gateStatus]) => [id, await this.settleOrphan(id, gateStatus, spaceId)] as const
+        async ([id, settlement]) => [id, await this.settleOrphan(id, settlement, spaceId)] as const
       )
     );
     return proposals.map((proposal) => settled.get(proposal.id) ?? proposal);
@@ -1682,33 +1929,67 @@ export class ProposalsService {
    * terminal status twice, so a gate that settled it first would otherwise have
    * its real error replaced. Returns the stored record when the gate got there
    * first, and undefined when the write did not land.
+   *
+   * A gateless proposal whose resolve run ended before deciding it — the run
+   * refused the approver, or crashed before its first write — is undecided
+   * and still marked. The mark is lifted rather than the proposal expired, so
+   * it can be decided again, but only while it still names the run that ended:
+   * a mark a later approval stamped belongs to a run still going.
    */
   private async settleOrphan(
     id: string,
-    gateStatus: ExecutionStatus,
+    { executionId, status }: Settlement,
     spaceId: string
   ): Promise<Proposal | undefined> {
     try {
       const stored = await this.load(id, spaceId);
-      if (!isUnsettled(stored.proposal)) {
-        return stripRanks(stored.proposal);
+      const { proposal } = stored;
+      if (!isUnsettled(proposal)) {
+        return stripRanks(proposal);
+      }
+      if (isGatelessProposal(proposal)) {
+        if (proposal.resolveExecutionId !== executionId) {
+          return stripRanks(proposal);
+        }
+        if (proposal.status === 'pending') {
+          return await this.liftRelease(stored);
+        }
       }
       return await this.applyUpdate(stored, {
         id,
         // `executing` is only ever approved, and `pending` only ever undecided.
-        status: stored.proposal.status === 'executing' ? 'failed' : 'expired',
-        executionError: gateEndedError(gateStatus),
+        status: proposal.status === 'executing' ? 'failed' : 'expired',
+        executionError: isGatelessProposal(proposal)
+          ? resolveEndedError(status)
+          : gateEndedError(status),
       });
     } catch (error) {
       if (error instanceof ProposalConflictError) {
         this.deps.logger.debug(`Proposal [${id}] moved before it could be settled: ${error}`);
       } else {
         this.deps.logger.warn(
-          `Could not settle proposal [${id}] after its gate ended as ${gateStatus}: ${error}`
+          `Could not settle proposal [${id}] after execution [${executionId}] ended as ${status}: ${error}`
         );
       }
       return undefined;
     }
+  }
+
+  /**
+   * Clears what an approval whose resolve run never decided left behind on a
+   * gateless proposal: the mark, the approver's rationale, and the run. Guarded
+   * by the loaded sequence number, like every other write.
+   */
+  private async liftRelease({ proposal, seqNo, primaryTerm }: StoredProposal): Promise<Proposal> {
+    const {
+      id,
+      gateReleasedAt: _gateReleasedAt,
+      rationale: _rationale,
+      resolveExecutionId: _resolveExecutionId,
+      ...document
+    } = proposal;
+    await this.writeDocument(id, document, { seqNo, primaryTerm });
+    return stripRanks({ id, ...document });
   }
 
   private async withMetadata(
@@ -1894,22 +2175,19 @@ const VALID_STATUSES: Record<'undecided' | ProposalDecision, readonly ProposalSt
  *
  * A gated proposal needs the execution that decides it, because the decision
  * is written behind that gate and a record without one can never be decided.
- * A gateless one must carry nothing a gate would have had to settle, and is
- * restricted to to-dos — policy for now, and the single check to relax if
- * gateless proposals are ever widened.
+ * A gateless one must carry nothing only a gate could settle: no gate
+ * execution, and no deadline, since nothing would expire it. It may carry an
+ * action, which its approval runs through `system-resolve-proposal`; a to-do
+ * carrying one is refused before this check.
  */
 const assertGateConsistent = (
   gate: ProposalGate,
   {
     workflowExecutionId,
     expiresAt,
-    actionWorkflowId,
-    category,
   }: {
     workflowExecutionId?: string;
     expiresAt?: string;
-    actionWorkflowId?: string;
-    category?: string;
   }
 ): void => {
   if (gate === 'workflow') {
@@ -1924,20 +2202,12 @@ const assertGateConsistent = (
   const carried = [
     ['workflowExecutionId', workflowExecutionId],
     ['expiresAt', expiresAt],
-    ['actionWorkflowId', actionWorkflowId],
   ].filter(([, value]) => value !== undefined);
 
   if (carried.length > 0) {
     throw new ProposalInvalidGateError(
       `A gateless proposal cannot carry ${carried.map(([field]) => field).join(', ')}: ` +
-        'nothing would run or settle it'
-    );
-  }
-  if (category !== PROPOSAL_CATEGORY_TODO) {
-    throw new ProposalInvalidGateError(
-      `Only a "${PROPOSAL_CATEGORY_TODO}" proposal can be gateless, not "${
-        category ?? 'uncategorized'
-      }"`
+        'nothing would settle it'
     );
   }
 };

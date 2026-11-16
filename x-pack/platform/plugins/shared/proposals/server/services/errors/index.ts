@@ -12,3 +12,4 @@ export { ProposalInvalidActionInputError } from './proposal_invalid_action_input
 export { ProposalInvalidGateError } from './proposal_invalid_gate_error';
 export { ProposalLookupTruncatedError } from './proposal_lookup_truncated_error';
 export { ProposalNotFoundError } from './proposal_not_found_error';
+export { ProposalWriteConflictError } from './proposal_write_conflict_error';

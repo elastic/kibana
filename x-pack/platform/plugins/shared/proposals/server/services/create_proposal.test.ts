@@ -142,6 +142,74 @@ describe('createProposalCreator', () => {
     expect(params.confidence).toBe('medium');
   });
 
+  it('writes a gateless action proposal directly when asked for no gate', async () => {
+    const { create, executeWorkflow, createDirectly, assertCanManage } = setup();
+
+    await expect(
+      create({
+        ...input,
+        proposal: {
+          ...input.proposal,
+          gate: 'none',
+          category: 'tune',
+          actionWorkflowId: 'system-context-engine-apply-improvement',
+          actionInput: { improvementId: 'improvement-1' },
+          id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+        },
+      })
+    ).resolves.toEqual({ proposal });
+
+    expect(executeWorkflow).not.toHaveBeenCalled();
+    // Approving it starts a workflow, so Workflows has to be there for it.
+    expect(assertCanManage).toHaveBeenCalledWith(request);
+    expect(createDirectly).toHaveBeenCalledWith(
+      expect.objectContaining({
+        gate: 'none',
+        category: 'tune',
+        actionWorkflowId: 'system-context-engine-apply-improvement',
+        actionInput: { improvementId: 'improvement-1' },
+        id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      }),
+      { spaceId: 'default', request }
+    );
+  });
+
+  it('does not write a gateless action proposal when workflows are unavailable', async () => {
+    const { create, createDirectly } = setup({ isWorkflowsAvailable: false });
+
+    await expect(
+      create({
+        ...input,
+        proposal: {
+          ...input.proposal,
+          gate: 'none',
+          actionWorkflowId: 'system-context-engine-apply-improvement',
+        },
+      })
+    ).rejects.toThrow('Workflows are not available');
+    expect(createDirectly).not.toHaveBeenCalled();
+  });
+
+  it('passes an action and a caller-supplied id to the gate workflow', async () => {
+    const { create, executeWorkflow } = setup();
+
+    await create({
+      ...input,
+      proposal: {
+        ...input.proposal,
+        actionWorkflowId: 'system-alertzero-action-isolate',
+        actionInput: { hostId: 'host-1' },
+        id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      },
+    });
+
+    expect(executeWorkflow.mock.calls[0][0].inputs).toMatchObject({
+      actionWorkflowId: 'system-alertzero-action-isolate',
+      actionInput: { hostId: 'host-1' },
+      proposalId: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+    });
+  });
+
   it('creates a to-do for a user without Workflows available', async () => {
     const { create, createDirectly } = setup({ isWorkflowsAvailable: false });
 

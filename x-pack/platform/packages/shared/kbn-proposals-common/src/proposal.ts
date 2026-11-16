@@ -264,6 +264,12 @@ export const proposalSchema = lazySchema(() =>
      * about who decided or how.
      */
     gateReleasedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    /**
+     * The `system-resolve-proposal` run that approving a gateless action proposal
+     * started, so a run that ends without settling the proposal can be followed
+     * up on read. Absent on a gated proposal, whose gate starts that run itself.
+     */
+    resolveExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
 
     createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
     createdBy: proposalUserSchema.optional(),

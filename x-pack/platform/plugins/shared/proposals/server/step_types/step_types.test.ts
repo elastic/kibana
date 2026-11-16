@@ -536,6 +536,50 @@ describe('proposals.createProposal step', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
+  it('should create a gateless proposal with nothing parked on it when gate is none', async () => {
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', gate: 'none' });
+    const { definition } = createDefinition(create);
+
+    await definition.handler(
+      createContext({
+        conversationId: 'conv-1',
+        origin: 'context_engine',
+        comment: 'Add a knowledge indicator',
+        actionWorkflowId: 'system-context-engine-apply-improvement',
+        actionInput: { improvementId: 'improvement-1' },
+        gate: 'none',
+      })
+    );
+
+    const [params] = create.mock.calls[0];
+    expect(params).toMatchObject({
+      gate: 'none',
+      actionWorkflowId: 'system-context-engine-apply-improvement',
+      actionInput: { improvementId: 'improvement-1' },
+    });
+    // Approving it must not resume this execution, and nothing would settle a deadline.
+    expect(params).not.toHaveProperty('workflowExecutionId');
+    expect(params).not.toHaveProperty('expiresAt');
+  });
+
+  it('should refuse a gateless proposal with a deadline before writing anything', async () => {
+    const create = jest.fn();
+    const { definition } = createDefinition(create);
+
+    await expect(
+      definition.handler(
+        createContext({
+          conversationId: 'conv-1',
+          origin: 'context_engine',
+          comment: 'Add a knowledge indicator',
+          gate: 'none',
+          expiresIn: '24h',
+        })
+      )
+    ).rejects.toMatchObject({ type: 'ValidationError' });
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('should fail the step with a typed error when the service fails', async () => {
     const create = jest.fn().mockRejectedValue(new Error('index unavailable'));
     const { definition } = createDefinition(create);
