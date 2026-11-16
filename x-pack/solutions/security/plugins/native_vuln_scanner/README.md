@@ -43,8 +43,8 @@ The scan is a managed workflow, `system-security-native-vuln-scan`, not a Task M
 definition lives in `kbn-workflows/managed/definitions/native_vuln_scanner/scan.yaml`. When the plugin
 is enabled, Kibana installs it once, in the default space, at start. It is installed **disabled**:
 the findings depend on an inventory pack that agent policies opt in to, so an operator turns it on.
-When the plugin is disabled, Kibana removes the workflow at start (best effort: a failure is logged
-and does not stop Kibana), so a scan workflow installed earlier does not keep running.
+Kibana does not load the plugin when it is disabled, so Workflows' start-up cleanup removes the
+workflow.
 
 **Enable flow.** Open the workflow in Workflows (search for "Scan for vulnerabilities") and enable
 it. It then runs every `24h`. Use **Run** for a first scan once the first inventory has arrived. A scan

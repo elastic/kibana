@@ -44,24 +44,3 @@ export const installWorkflows = async ({
   await client.ready();
   return { failedIds };
 };
-
-/** Removes every workflow `installWorkflows` installs; one failing id does not stop the others. */
-export const uninstallWorkflows = async ({
-  logger,
-  workflowsExtensions,
-}: {
-  logger: Logger;
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
-}): Promise<void> => {
-  const client = await workflowsExtensions.initManagedWorkflowsClient(MANAGED_WORKFLOW_OWNER_ID);
-  for (const id of NATIVE_VULN_SCANNER_WORKFLOW_IDS) {
-    try {
-      await client.uninstall(id, { spaceId: DEFAULT_SPACE_ID });
-    } catch (error) {
-      logger.warn(
-        `nativeVulnScanner: Failed to uninstall managed workflow "${id}": ${errorMessage(error)}`
-      );
-    }
-  }
-  await client.ready();
-};

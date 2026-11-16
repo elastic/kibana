@@ -13,7 +13,7 @@ import {
   NATIVE_VULN_SCANNER_WORKFLOW_IDS,
 } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { installWorkflows, uninstallWorkflows } from './install';
+import { installWorkflows } from './install';
 import { MANAGED_WORKFLOW_OWNER_ID } from './register_owner';
 
 const createClient = () => ({
@@ -21,7 +21,6 @@ const createClient = () => ({
   install: jest.fn().mockResolvedValue(undefined),
   installMany: jest.fn().mockResolvedValue({ failed: [] }),
   ready: jest.fn().mockResolvedValue(undefined),
-  uninstall: jest.fn().mockResolvedValue(undefined),
 });
 
 const createStart = (client = createClient()) =>
@@ -96,30 +95,6 @@ describe('managed workflow install', () => {
 
       expect(result.failedIds).toEqual([...NATIVE_VULN_SCANNER_WORKFLOW_IDS]);
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('es down'));
-      expect(client.ready).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('uninstallWorkflows', () => {
-    it('uninstalls exactly the ids the install uses, in the default space', async () => {
-      const client = createClient();
-
-      await uninstallWorkflows({ logger, workflowsExtensions: createStart(client) });
-
-      expect(client.uninstall.mock.calls).toEqual(
-        NATIVE_VULN_SCANNER_WORKFLOW_IDS.map((id) => [id, { spaceId: DEFAULT_SPACE_ID }])
-      );
-      expect(client.ready).toHaveBeenCalledTimes(1);
-    });
-
-    it('warns on a failing id and still processes the rest', async () => {
-      const client = createClient();
-      client.uninstall.mockRejectedValueOnce(new Error('nope'));
-
-      await uninstallWorkflows({ logger, workflowsExtensions: createStart(client) });
-
-      expect(client.uninstall).toHaveBeenCalledTimes(NATIVE_VULN_SCANNER_WORKFLOW_IDS.length);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('nope'));
       expect(client.ready).toHaveBeenCalledTimes(1);
     });
   });

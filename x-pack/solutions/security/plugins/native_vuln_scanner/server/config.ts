@@ -10,8 +10,9 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 export const configSchema = schema.object({
   /**
-   * Off by default while the scanner is experimental. When false the plugin registers no
-   * steps and creates no indices, and it removes the managed workflow if an earlier run installed it.
+   * Off by default while the scanner is experimental. When false Kibana does not load the plugin,
+   * so it registers no steps and creates no indices, and Workflows' start-up cleanup removes the
+   * managed workflow.
    */
   enabled: schema.boolean({ defaultValue: false }),
 });

@@ -82,7 +82,8 @@ const describeRun = (source: ResultSource): { key: string; time: number } | unde
   return { key: `live:${source.action_id}`, time: timestamp };
 };
 
-class AgentAccumulator {
+/** Exported for tests only. */
+export class AgentAccumulator {
   /**
    * Only the newest run per query is held, whichever shape or schedule id produced it; an older
    * run is dropped as its rows arrive. Ties keep the first seen.
@@ -102,6 +103,13 @@ class AgentAccumulator {
       best.rows.push(row);
       best.time = Math.max(best.time, run.time);
     }
+  }
+
+  /** Rows currently held across all queries; tests use it to guard the one-run-per-query bound. */
+  heldRowCount(): number {
+    let count = 0;
+    for (const { rows } of this.bestByKind.values()) count += rows.length;
+    return count;
   }
 
   build(): AgentInventoryRows {

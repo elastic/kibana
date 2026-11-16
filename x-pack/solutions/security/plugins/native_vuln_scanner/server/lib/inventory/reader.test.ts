@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { AgentInventoryRows } from './normalize';
-import { readAgentInventories } from './reader';
+import { AgentAccumulator, readAgentInventories } from './reader';
 
 interface Doc {
   agent: string;
@@ -339,5 +339,32 @@ describe('readAgentInventories', () => {
     const es = setup(docs);
     expect(await collect(readAgentInventories(es, { scheduleIds: {} }))).toEqual([]);
     expect(es.openPointInTime).not.toHaveBeenCalled();
+  });
+});
+
+describe('AgentAccumulator', () => {
+  it('holds only the newest run of a query while older runs stream in', () => {
+    const accumulator = new AgentAccumulator('a1');
+    for (let run = 1; run <= 50; run++) {
+      for (let i = 0; i < 100; i++) {
+        accumulator.add(
+          'deb_packages',
+          { osquery: { name: `pkg-${i}`, version: `${run}` } },
+          { key: `deb@${run}`, time: run }
+        );
+        expect(accumulator.heldRowCount()).toBeLessThanOrEqual(100);
+      }
+    }
+    for (let i = 0; i < 3; i++) {
+      accumulator.add(
+        'deb_packages',
+        { osquery: { name: `new-${i}`, version: '51' } },
+        { key: 'deb@51', time: 51 }
+      );
+      expect(accumulator.heldRowCount()).toBeLessThanOrEqual(100);
+    }
+
+    expect(accumulator.heldRowCount()).toBe(3);
+    expect(accumulator.build().deb?.map((row) => row.name)).toEqual(['new-0', 'new-1', 'new-2']);
   });
 });
