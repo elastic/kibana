@@ -7,7 +7,7 @@
 
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 import type { InventoryQueryKind } from './queries';
-import { INVENTORY_QUERIES } from './queries';
+import { KIND_BY_QUERY_ID } from './queries';
 
 /** Saved object type of osquery packs (owned by the osquery plugin). */
 export const OSQUERY_PACK_SO_TYPE = 'osquery-pack';
@@ -26,12 +26,6 @@ interface PackAttributes {
   name?: string;
   queries?: PackQueryAttributes[];
 }
-
-const KIND_BY_QUERY_ID = new Map<string, InventoryQueryKind>(
-  (Object.entries(INVENTORY_QUERIES) as Array<[InventoryQueryKind, { id: string }]>).map(
-    ([kind, { id }]) => [id, kind]
-  )
-);
 
 /**
  * Every `schedule_id` osquerybeat may stamp on a result of the inventory pack's queries, per query

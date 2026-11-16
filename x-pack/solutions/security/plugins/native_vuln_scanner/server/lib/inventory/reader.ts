@@ -6,8 +6,10 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SortCombinations, SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { InventoryQueryKind } from './queries';
+import { KIND_BY_QUERY_ID } from './queries';
 import type { AgentInventoryRows, OsqueryRow } from './normalize';
 
 export const OSQUERY_RESULTS_INDEX = 'logs-osquery_manager.result-*';
@@ -29,43 +31,83 @@ export interface ReadInventoriesOptions {
 }
 
 interface ResultSource {
+  '@timestamp'?: string;
   agent?: { id?: string };
   host?: { name?: string; hostname?: string };
+  /** Scheduled runs only. */
   schedule_id?: string;
   osquery_meta?: { unix_time?: number | string };
+  /** Live-query runs only: one id per query execution. */
+  action_id?: string;
+  action_data?: { id?: string; space_id?: string };
   osquery?: OsqueryRow;
 }
 
 /**
- * Sorted by agent, then run time (newest first): each agent arrives as one contiguous block,
- * and the first run seen for a query is its newest, whichever of its schedule ids produced it.
+ * Sorted by agent, then `@timestamp` (newest first); both result shapes carry it, unlike
+ * `osquery_meta.unix_time`. Each agent arrives as one contiguous block. Rows of one run can
+ * interleave with another run's, so newest-wins is decided on run time, not on arrival order.
  */
 const SORT: SortCombinations[] = [
   { 'agent.id': { order: 'asc' } },
-  { 'osquery_meta.unix_time': { order: 'desc', unmapped_type: 'long' } },
+  { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
 ];
 
+interface Run {
+  /** Epoch ms: the scheduled run's start, or the newest row of a live run. */
+  time: number;
+  rows: OsqueryRow[];
+}
+
+const toMillis = (value: number | string | undefined): number => {
+  const millis = typeof value === 'number' ? value : Date.parse(value ?? '');
+  return Number.isFinite(millis) ? millis : 0;
+};
+
+/** Identifies the run a result belongs to and when it happened; `undefined` for a foreign space. */
+const describeRun = (source: ResultSource): { key: string; time: number } | undefined => {
+  const timestamp = toMillis(source['@timestamp']);
+  if (source.schedule_id) {
+    const unixTime = source.osquery_meta?.unix_time;
+    return {
+      key: `${source.schedule_id}@${unixTime ?? ''}`,
+      time: unixTime === undefined ? timestamp : Number(unixTime) * 1000 || timestamp,
+    };
+  }
+  if (source.action_data?.space_id !== DEFAULT_SPACE_ID) return undefined;
+  return { key: `live:${source.action_id ?? ''}`, time: timestamp };
+};
+
 class AgentAccumulator {
-  private readonly runByKind = new Map<InventoryQueryKind, string>();
-  private readonly rowsByKind = new Map<InventoryQueryKind, OsqueryRow[]>();
+  private readonly runsByKind = new Map<InventoryQueryKind, Map<string, Run>>();
   private hostName?: string;
 
   constructor(public readonly agentId: string) {}
 
-  add(kind: InventoryQueryKind, source: ResultSource): void {
-    const run = `${source.schedule_id}@${source.osquery_meta?.unix_time ?? ''}`;
-    const seen = this.runByKind.get(kind);
-    // Older runs of the same query sort after the newest one; drop them.
-    if (seen !== undefined && seen !== run) return;
-    this.runByKind.set(kind, run);
+  add(kind: InventoryQueryKind, source: ResultSource, run: { key: string; time: number }): void {
     this.hostName ??= source.host?.name ?? source.host?.hostname;
-    const rows = this.rowsByKind.get(kind);
-    if (rows) rows.push(source.osquery ?? {});
-    else this.rowsByKind.set(kind, [source.osquery ?? {}]);
+    let runs = this.runsByKind.get(kind);
+    if (!runs) this.runsByKind.set(kind, (runs = new Map()));
+    const existing = runs.get(run.key);
+    if (existing) {
+      existing.rows.push(source.osquery ?? {});
+      existing.time = Math.max(existing.time, run.time);
+    } else {
+      runs.set(run.key, { time: run.time, rows: [source.osquery ?? {}] });
+    }
+  }
+
+  /** The newest run of a query, whichever shape or schedule id produced it; ties keep the first seen. */
+  private newestRows(kind: InventoryQueryKind): OsqueryRow[] | undefined {
+    let newest: Run | undefined;
+    for (const run of this.runsByKind.get(kind)?.values() ?? []) {
+      if (!newest || run.time > newest.time) newest = run;
+    }
+    return newest?.rows;
   }
 
   build(): AgentInventoryRows {
-    const { rowsByKind } = this;
+    const rowsByKind = { get: (kind: InventoryQueryKind) => this.newestRows(kind) };
     return {
       agentId: this.agentId,
       hostName: this.hostName,
@@ -78,8 +120,10 @@ class AgentAccumulator {
 }
 
 /**
- * Streams the newest inventory snapshot of every agent from osquery scheduled results. Pages
- * with a point in time and `search_after`, so it has no 10k cap and sees one consistent view.
+ * Streams the newest inventory snapshot of every agent from osquery results: scheduled runs
+ * (matched by `schedule_id`) and live-query runs (matched by `action_data.id` in the default
+ * space). Pages with a point in time and `search_after`, so it has no 10k cap and sees one
+ * consistent view.
  */
 export async function* readAgentInventories(
   es: ElasticsearchClient,
@@ -115,17 +159,36 @@ export async function* readAgentInventories(
           search_after: searchAfter,
           track_total_hits: false,
           _source: [
+            '@timestamp',
             'agent.id',
             'host.name',
             'host.hostname',
             'schedule_id',
             'osquery_meta.unix_time',
+            'action_id',
+            'action_data.id',
+            'action_data.space_id',
             'osquery',
           ],
           query: {
             bool: {
               filter: [
-                { terms: { schedule_id: [...kindById.keys()] } },
+                {
+                  bool: {
+                    should: [
+                      { terms: { schedule_id: [...kindById.keys()] } },
+                      {
+                        bool: {
+                          filter: [
+                            { terms: { 'action_data.id': [...KIND_BY_QUERY_ID.keys()] } },
+                            { term: { 'action_data.space_id': DEFAULT_SPACE_ID } },
+                          ],
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
                 { range: { '@timestamp': { gte: since } } },
                 { exists: { field: 'agent.id' } },
               ],
@@ -140,13 +203,17 @@ export async function* readAgentInventories(
       const { hits } = response.hits;
       for (const { _source: source } of hits) {
         const agentId = source?.agent?.id;
-        const kind = source?.schedule_id ? kindById.get(source.schedule_id) : undefined;
-        if (!source || !agentId || !kind) continue;
+        if (!source || !agentId) continue;
+        const kind = source.schedule_id
+          ? kindById.get(source.schedule_id)
+          : KIND_BY_QUERY_ID.get(source.action_data?.id ?? '');
+        const run = kind && describeRun(source);
+        if (!kind || !run) continue;
         if (current?.agentId !== agentId) {
           if (current) yield current.build();
           current = new AgentAccumulator(agentId);
         }
-        current.add(kind, source);
+        current.add(kind, source, run);
       }
       if (hits.length < pageSize) break;
       searchAfter = hits[hits.length - 1].sort;

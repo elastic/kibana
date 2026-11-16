@@ -11,10 +11,16 @@ import { readAgentInventories } from './reader';
 
 interface Doc {
   agent: string;
-  schedule: string;
+  /** Scheduled run: the schedule id. */
+  schedule?: string;
+  /** Live run: the query id (`action_data.id`), the action id and the space it ran in. */
+  live?: { queryId: string; action: string; space?: string };
+  /** Seconds since epoch: `osquery_meta.unix_time` of a scheduled run, `@timestamp` of a live one. */
   time: number;
   row: Record<string, unknown>;
 }
+
+const live = (queryId: string, action: string, space = 'default') => ({ queryId, action, space });
 
 const SCHEDULES = {
   deb_packages: ['deb-new', 'pack_inventory_deb'],
@@ -22,17 +28,23 @@ const SCHEDULES = {
   kernel_info: ['kernel'],
 };
 
-const hit = ({ agent, schedule, time, row }: Doc, sort: number) => ({
+const hit = ({ agent, schedule, live: liveRun, time, row }: Doc, sort: number) => ({
   _index: 'i',
-  _id: `${agent}-${schedule}-${time}-${sort}`,
+  _id: `${agent}-${schedule ?? liveRun?.action}-${time}-${sort}`,
   _source: {
+    '@timestamp': new Date(time * 1000).toISOString(),
     agent: { id: agent },
     host: { name: `${agent}-host` },
-    schedule_id: schedule,
-    osquery_meta: { unix_time: time },
+    ...(schedule ? { schedule_id: schedule, osquery_meta: { unix_time: time } } : {}),
+    ...(liveRun
+      ? {
+          action_id: liveRun.action,
+          action_data: { id: liveRun.queryId, space_id: liveRun.space },
+        }
+      : {}),
     osquery: row,
   },
-  sort: [agent, time, sort],
+  sort: [agent, time * 1000, sort],
 });
 
 const setup = (docs: Doc[]) => {
@@ -120,16 +132,40 @@ describe('readAgentInventories', () => {
     const requests = es.search.mock.calls.map(([req]) => req);
     expect(requests).toHaveLength(4);
     expect(requests[0]).toMatchObject({ pit: { id: 'pit-0' }, size: 3, search_after: undefined });
-    expect(requests[1]).toMatchObject({ pit: { id: 'pit-0' }, search_after: ['a1', 200, 2] });
+    expect(requests[1]).toMatchObject({ pit: { id: 'pit-0' }, search_after: ['a1', 200000, 2] });
 
     const sort = [
       { 'agent.id': { order: 'asc' } },
-      { 'osquery_meta.unix_time': { order: 'desc', unmapped_type: 'long' } },
+      { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
     ];
     const query = {
       bool: {
         filter: [
-          { terms: { schedule_id: ['deb-new', 'pack_inventory_deb', 'os', 'kernel'] } },
+          {
+            bool: {
+              should: [
+                { terms: { schedule_id: ['deb-new', 'pack_inventory_deb', 'os', 'kernel'] } },
+                {
+                  bool: {
+                    filter: [
+                      {
+                        terms: {
+                          'action_data.id': [
+                            'native_vuln_scanner_deb_packages',
+                            'native_vuln_scanner_rpm_packages',
+                            'native_vuln_scanner_os_version',
+                            'native_vuln_scanner_kernel_info',
+                          ],
+                        },
+                      },
+                      { term: { 'action_data.space_id': 'default' } },
+                    ],
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
           { range: { '@timestamp': { gte: 'now-1d' } } },
           { exists: { field: 'agent.id' } },
         ],
@@ -141,6 +177,107 @@ describe('readAgentInventories', () => {
       expect(request?.sort).toEqual(sort);
       expect(request?.query).toEqual(query);
     }
+  });
+
+  describe('live-query results', () => {
+    const RPM = 'native_vuln_scanner_rpm_packages';
+    const OS = 'native_vuln_scanner_os_version';
+    const KERNEL = 'native_vuln_scanner_kernel_info';
+    const SCHEDULED = { rpm_packages: ['rpm-sched'], os_version: ['os'], kernel_info: ['kernel'] };
+    const read = async (results: Doc[]) =>
+      collect(readAgentInventories(setup(results), { scheduleIds: SCHEDULED, pageSize: 2 }));
+
+    // Trimmed from a live query run on a RHEL 9.9 agent.
+    const liveDocs: Doc[] = [
+      {
+        agent: 'rhel',
+        live: live(RPM, 'rpm-1'),
+        time: 1000,
+        row: { name: 'util-linux', epoch: '', version: '2.37.4', release: '28.el9_9.1' },
+      },
+      {
+        agent: 'rhel',
+        live: live(OS, 'os-1'),
+        time: 1001,
+        row: { platform: 'rhel', major: 9, name: 'Red Hat Enterprise Linux' },
+      },
+      {
+        agent: 'rhel',
+        live: live(KERNEL, 'kernel-1'),
+        time: 1002,
+        row: { version: '5.14.0-570.el9.aarch64' },
+      },
+    ];
+
+    it('reads an inventory made only of live-query results', async () => {
+      expect(await read(liveDocs)).toEqual([
+        {
+          agentId: 'rhel',
+          hostName: 'rhel-host',
+          deb: undefined,
+          rpm: [liveDocs[0].row],
+          os: liveDocs[1].row,
+          kernel: liveDocs[2].row,
+        },
+      ]);
+    });
+
+    it('reads an inventory made only of scheduled results', async () => {
+      const [agent] = await read([
+        { agent: 'rhel', schedule: 'rpm-sched', time: 900, row: { name: 'shadow-utils' } },
+        { agent: 'rhel', schedule: 'os', time: 900, row: { platform: 'rhel' } },
+      ]);
+      expect(agent).toMatchObject({
+        rpm: [{ name: 'shadow-utils' }],
+        os: { platform: 'rhel' },
+        kernel: undefined,
+      });
+    });
+
+    it('prefers a newer scheduled run over an older live run, per query', async () => {
+      const [agent] = await read([
+        ...liveDocs,
+        { agent: 'rhel', schedule: 'rpm-sched', time: 2000, row: { name: 'scheduled-newer' } },
+        { agent: 'rhel', schedule: 'os', time: 500, row: { platform: 'older-scheduled' } },
+      ]);
+      expect(agent.rpm).toEqual([{ name: 'scheduled-newer' }]);
+      // The scheduled OS run predates the live one, so the live row wins.
+      expect(agent.os).toEqual(liveDocs[1].row);
+      expect(agent.kernel).toEqual(liveDocs[2].row);
+    });
+
+    it('prefers a newer live run over an older scheduled run, per query', async () => {
+      const [agent] = await read([
+        { agent: 'rhel', schedule: 'rpm-sched', time: 500, row: { name: 'scheduled-older' } },
+        ...liveDocs,
+      ]);
+      expect(agent.rpm).toEqual([liveDocs[0].row]);
+    });
+
+    it('keeps only the newest of overlapping live runs even when their rows interleave', async () => {
+      const [agent] = await read([
+        { agent: 'rhel', live: live(RPM, 'new'), time: 3000, row: { name: 'new-a' } },
+        { agent: 'rhel', live: live(RPM, 'old'), time: 2999, row: { name: 'old-a' } },
+        { agent: 'rhel', live: live(RPM, 'new'), time: 2998, row: { name: 'new-b' } },
+        { agent: 'rhel', live: live(RPM, 'old'), time: 2997, row: { name: 'old-b' } },
+      ]);
+      expect(agent.rpm).toEqual([{ name: 'new-a' }, { name: 'new-b' }]);
+    });
+
+    it('ignores a live result of an unknown query', async () => {
+      const agents = await read([
+        { agent: 'rhel', live: live('some_other_query', 'x'), time: 1000, row: { name: 'noise' } },
+      ]);
+      expect(agents).toEqual([]);
+    });
+
+    it('ignores a live result that ran in another space', async () => {
+      const agents = await read([
+        { agent: 'rhel', live: live(OS, 'x', 'other-space'), time: 1000, row: { platform: 'x' } },
+        { agent: 'rhel', live: { queryId: OS, action: 'y' }, time: 1001, row: { platform: 'y' } },
+      ]);
+      expect(agents).toEqual([]);
+    });
   });
 
   it('closes the point in time when the search fails', async () => {

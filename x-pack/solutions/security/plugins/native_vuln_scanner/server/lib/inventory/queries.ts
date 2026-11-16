@@ -47,3 +47,10 @@ export const INVENTORY_QUERIES: Readonly<Record<InventoryQueryKind, InventoryQue
   ),
   kernel_info: linuxSnapshot('native_vuln_scanner_kernel_info', 'SELECT version FROM kernel_info;'),
 };
+
+/** Inventory query kind by query id: how a live-query result, which carries no schedule id, is classified. */
+export const KIND_BY_QUERY_ID: ReadonlyMap<string, InventoryQueryKind> = new Map(
+  (Object.entries(INVENTORY_QUERIES) as Array<[InventoryQueryKind, InventoryQuery]>).map(
+    ([kind, { id }]) => [id, kind]
+  )
+);

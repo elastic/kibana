@@ -37,6 +37,37 @@ const resultDoc = (
   osquery: row,
 });
 
+/** Shape osquerybeat publishes for one row of a live query: no schedule id, no `osquery_meta`. */
+const liveDoc = (
+  agentId: string,
+  queryId: string,
+  actionId: string,
+  row: Record<string, unknown>,
+  spaceId = 'default'
+) => ({
+  '@timestamp': new Date().toISOString(),
+  agent: { id: agentId },
+  host: { name: `${agentId}-host` },
+  action_id: actionId,
+  action_data: { id: queryId, space_id: spaceId, query: 'SELECT 1' },
+  osquery: row,
+});
+
+const OPENSSL_RPM = {
+  name: 'openssl-libs',
+  epoch: 1,
+  version: '3.2.2',
+  release: '6.el9_5',
+  arch: 'x86_64',
+  source: 'openssl-3.2.2-6.el9_5.src.rpm',
+};
+const RHEL_OS = {
+  platform: 'rhel',
+  platform_like: 'fedora',
+  major: 9,
+  name: 'Red Hat Enterprise Linux',
+};
+
 const DOCS = [
   resultDoc('ubuntu-1', 'os', 2000, {
     platform: 'ubuntu',
@@ -67,21 +98,20 @@ const DOCS = [
   }),
   // A differential row would read as a one-package inventory.
   resultDoc('ubuntu-1', 'deb', 3000, { name: 'curl', version: '8.5.0-2ubuntu10' }, 'added'),
-  resultDoc('rhel-1', 'os', 2100, {
-    platform: 'rhel',
-    platform_like: 'fedora',
-    major: 9,
-    name: 'Red Hat Enterprise Linux',
-  }),
-  resultDoc('rhel-1', 'rpm', 2100, {
-    name: 'openssl-libs',
-    epoch: 1,
-    version: '3.2.2',
-    release: '6.el9_5',
-    arch: 'x86_64',
-    source: 'openssl-3.2.2-6.el9_5.src.rpm',
-  }),
+  resultDoc('rhel-1', 'os', 2100, RHEL_OS),
+  resultDoc('rhel-1', 'rpm', 2100, OPENSSL_RPM),
   resultDoc('rhel-1', 'rpm', 2100, { name: 'gpg-pubkey', version: 'fd431d51', release: '1' }),
+  // The same host inventory as rhel-1, delivered by live queries instead of a schedule.
+  liveDoc('rhel-live', 'native_vuln_scanner_os_version', 'action-os', RHEL_OS),
+  liveDoc('rhel-live', 'native_vuln_scanner_rpm_packages', 'action-rpm', OPENSSL_RPM),
+  liveDoc('rhel-live', 'native_vuln_scanner_rpm_packages', 'action-rpm', {
+    name: 'gpg-pubkey',
+    version: 'fd431d51',
+    release: '1',
+  }),
+  // Live results of another space or another query do not count.
+  liveDoc('foreign', 'native_vuln_scanner_os_version', 'action-x', RHEL_OS, 'other-space'),
+  liveDoc('foreign', 'unrelated_query', 'action-y', RHEL_OS),
   // Only an OS row so far: skipped, not scanned as empty.
   resultDoc('rhel-2', 'os', 2100, { platform: 'rhel', major: 8 }),
   resultDoc('other', 'unrelated', 2100, { name: 'noise' }),
@@ -141,7 +171,12 @@ describe('inventory reader', () => {
   it.each([2, 100])('reads the newest snapshot per agent with page size %i', async (pageSize) => {
     const agents = await read(pageSize);
 
-    expect(agents.map(({ agentId }) => agentId)).toEqual(['rhel-1', 'rhel-2', 'ubuntu-1']);
+    expect(agents.map(({ agentId }) => agentId)).toEqual([
+      'rhel-1',
+      'rhel-2',
+      'rhel-live',
+      'ubuntu-1',
+    ]);
     const ubuntu = agents.find(({ agentId }) => agentId === 'ubuntu-1');
     expect(ubuntu?.deb?.map(({ name }) => name).sort()).toEqual(['bash', 'libssl3t64']);
     expect(ubuntu?.os).toMatchObject({ codename: 'noble' });
@@ -152,20 +187,21 @@ describe('inventory reader', () => {
   it('feeds the normaliser end to end', async () => {
     const { hosts, skippedHosts, skippedRows } = normalizeInventories(await read(100));
 
+    const rhelInventory = {
+      os: { family: 'rhel', version: '9' },
+      kernelRelease: undefined,
+      packages: [
+        {
+          name: 'openssl-libs',
+          version: '1:3.2.2-6.el9_5',
+          arch: 'x86_64',
+          source: 'openssl-3.2.2-6.el9_5.src.rpm',
+        },
+      ],
+    };
     expect(hosts.map(({ inventory }) => inventory)).toEqual([
-      {
-        id: 'rhel-1',
-        os: { family: 'rhel', version: '9' },
-        kernelRelease: undefined,
-        packages: [
-          {
-            name: 'openssl-libs',
-            version: '1:3.2.2-6.el9_5',
-            arch: 'x86_64',
-            source: 'openssl-3.2.2-6.el9_5.src.rpm',
-          },
-        ],
-      },
+      { id: 'rhel-1', ...rhelInventory },
+      { id: 'rhel-live', ...rhelInventory },
       {
         id: 'ubuntu-1',
         os: { family: 'ubuntu', version: 'noble' },
@@ -177,6 +213,6 @@ describe('inventory reader', () => {
       },
     ]);
     expect(skippedHosts).toEqual({ missing_packages: 1 });
-    expect(skippedRows).toEqual({ rpm_gpg_pubkey: 1 });
+    expect(skippedRows).toEqual({ rpm_gpg_pubkey: 2 });
   });
 });
