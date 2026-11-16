@@ -98,20 +98,19 @@ export const registerDashboardAppIntegration = ({
     const dashboardAttachment = linkable
       ? findDashboardAttachment({ attachments: attachments ?? [], dashboardId })
       : undefined;
-    const action = reconcileStaging({
+    const attachmentId = reconcileStaging({
       dashboardAttachmentId: dashboardAttachment?.id,
       isNewConversation: !conversationId,
       draftAttachmentId: draftAttachmentId.current,
     });
-    if (action.type === 'unstage') {
-      chat.unstage();
+    if (!attachmentId) {
       return undefined;
     }
     if (!linkable) {
-      unlinkedStagedAttachmentIds.add(action.attachmentId);
+      unlinkedStagedAttachmentIds.add(attachmentId);
     }
     chat.stage({
-      id: action.attachmentId,
+      id: attachmentId,
       origin: dashboardId,
       data: dashboardStateToAttachmentData(api.getSerializedState().attributes),
     });
@@ -229,9 +228,6 @@ export const registerDashboardAppIntegration = ({
     integrationSubscription.unsubscribe();
     originSyncSubscription.unsubscribe();
     otherDashboardUpdateNotifier.removeAll();
-    // a dashboard the user left is no longer context for their next message; attachments already
-    // sent stay in the conversation
-    chat.unstage();
   };
 };
 

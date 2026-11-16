@@ -41,10 +41,8 @@ export interface ChatAdapter {
   conversationChanges$: Observable<ConversationChange | null>;
   /** Dashboard attachments the agent updated, as soon as the tool that updated them finishes. */
   dashboardUpdates$: Observable<DashboardAttachment>;
-  /** Stages the attachment in the chat input, replacing what it staged before under the same id. */
+  /** Stages the attachment in the chat input, replacing the attachment it staged before. */
   stage: (attachment: Omit<DashboardAttachment, 'type'>) => void;
-  /** Removes the attachment it staged from the chat input. */
-  unstage: () => void;
   /** Persists the attachment's origin, keeping the rendered conversation in sync. */
   updateOrigin: (
     attachmentId: string,
@@ -112,14 +110,13 @@ export const createChatAdapter = ({
     conversationChanges$,
     dashboardUpdates$,
     stage: ({ id, origin, data }) => {
+      // switching conversations changes the id the dashboard is staged under, which would
+      // otherwise leave a pill per conversation in the chat input
+      if (stagedAttachmentId && stagedAttachmentId !== id) {
+        agentBuilder.removeAttachment(stagedAttachmentId);
+      }
       stagedAttachmentId = id;
       agentBuilder.addAttachment({ id, origin, type: DASHBOARD_ATTACHMENT_TYPE, data });
-    },
-    unstage: () => {
-      if (stagedAttachmentId) {
-        agentBuilder.removeAttachment(stagedAttachmentId);
-        stagedAttachmentId = undefined;
-      }
     },
     updateOrigin: (attachmentId, origin) => getUpdateOrigin(attachmentId)?.(origin),
   };

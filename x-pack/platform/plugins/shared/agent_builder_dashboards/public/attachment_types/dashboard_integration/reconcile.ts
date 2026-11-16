@@ -7,8 +7,6 @@
 
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 
-export type StagingAction = { type: 'unstage' } | { type: 'stage'; attachmentId: string };
-
 /**
  * The attachment the open dashboard stands for: the one whose origin is the dashboard, which for an
  * unsaved dashboard is one without an origin.
@@ -23,9 +21,8 @@ export const findDashboardAttachment = ({
 }): DashboardAttachment | undefined => attachments.find(({ origin }) => origin === dashboardId);
 
 /**
- * The chat input stages the open dashboard as its attachment, or as a new attachment when the
- * conversation is new. Otherwise it stages nothing, so a pill staged for another conversation
- * doesn't stay behind.
+ * The id the chat input stages the open dashboard under: its attachment, or a new attachment when
+ * the conversation is new. `undefined` leaves the chat input as it is.
  */
 export const reconcileStaging = ({
   dashboardAttachmentId,
@@ -35,14 +32,8 @@ export const reconcileStaging = ({
   dashboardAttachmentId: string | undefined;
   isNewConversation: boolean;
   draftAttachmentId: string;
-}): StagingAction => {
-  if (dashboardAttachmentId) {
-    return { type: 'stage', attachmentId: dashboardAttachmentId };
-  }
-  return isNewConversation
-    ? { type: 'stage', attachmentId: draftAttachmentId }
-    : { type: 'unstage' };
-};
+}): string | undefined =>
+  dashboardAttachmentId ?? (isNewConversation ? draftAttachmentId : undefined);
 
 /**
  * Whether an agent update belongs to the open dashboard: an unsaved dashboard takes every update,

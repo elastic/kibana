@@ -495,7 +495,7 @@ describe('registerDashboardAppIntegration', () => {
     expect(addAttachment).not.toHaveBeenCalled();
   });
 
-  it('unstages the dashboard when switching to a conversation without its attachment', async () => {
+  it('keeps the staged dashboard when switching to a conversation without its attachment', async () => {
     const attachment = createDashboardAttachment({ origin: 'dashboard-1' });
     mockApi.savedObjectId$.next('dashboard-1');
     register();
@@ -510,7 +510,7 @@ describe('registerDashboardAppIntegration', () => {
     await jest.runOnlyPendingTimersAsync();
 
     expect(addAttachment).not.toHaveBeenCalled();
-    expect(removeAttachment).toHaveBeenCalledWith('dashboard-attachment-id');
+    expect(removeAttachment).not.toHaveBeenCalled();
   });
 
   it('does not stage manual changes in an existing conversation without its attachment', async () => {
@@ -582,20 +582,29 @@ describe('registerDashboardAppIntegration', () => {
     );
   });
 
-  it('removes the attachment it staged in the chat input when the user leaves the dashboard', () => {
+  it('replaces the staged dashboard instead of staging it twice when switching conversations', async () => {
+    const attachment = createDashboardAttachment({ origin: 'dashboard-1' });
+    mockApi.savedObjectId$.next('dashboard-1');
+    register();
+    emitConversationChange({
+      id: 'conversation-1',
+      attachments: [createVersionedAttachment(attachment)],
+    });
+    await jest.runOnlyPendingTimersAsync();
+
+    emitConversationChange({});
+    await jest.runOnlyPendingTimersAsync();
+
+    expect(removeAttachment).toHaveBeenCalledWith('dashboard-attachment-id');
+    expect(addAttachment).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'draft-attachment-id-1' })
+    );
+  });
+
+  it('keeps the staged dashboard in the chat input when the user leaves the dashboard', () => {
     register();
     emitConversationChange({});
     jest.runOnlyPendingTimers();
-
-    cleanup();
-
-    expect(removeAttachment).toHaveBeenCalledWith('draft-attachment-id-1');
-  });
-
-  it("doesn't remove anything when the user leaves a dashboard that staged nothing", async () => {
-    register();
-    emitConversationChange({ id: 'conversation-1', attachments: [] });
-    await jest.runOnlyPendingTimersAsync();
 
     cleanup();
 
