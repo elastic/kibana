@@ -115,6 +115,7 @@ const countRules = async (
 const collectSpaceSnapshot = async (
   spaceId: string,
   sources: DetectionSnapshotSources,
+  logger: Logger,
   signal: AbortSignal
 ): Promise<DetectionSnapshotEvent> => {
   const [automations, connectorSources] = await Promise.all([
@@ -132,7 +133,11 @@ const collectSpaceSnapshot = async (
     sources.getAlertActivity(spaceId, connectorSources),
     sources.countMemoryPages(spaceId),
     sources.getSettings(spaceId),
-    sources.getKnowledgeCounts(spaceId),
+    // Optional in the event, so a failure omits the counts rather than the snapshot.
+    sources.getKnowledgeCounts(spaceId).catch((error) => {
+      logger.warn(`Failed to read the knowledge counts of space [${spaceId}]: ${error.message}`);
+      return undefined;
+    }),
   ]);
 
   return {
@@ -161,7 +166,7 @@ export const reportDetectionSnapshots = async (
   for (const spaceId of spaceIds) {
     signal.throwIfAborted();
     try {
-      const snapshot = await collectSpaceSnapshot(spaceId, sources, signal);
+      const snapshot = await collectSpaceSnapshot(spaceId, sources, logger, signal);
       // Do not report an event when cancellation races completed reads.
       signal.throwIfAborted();
       analytics.reportEvent(NIGHTSHIFT_DETECTION_SNAPSHOT_EVENT, snapshot);

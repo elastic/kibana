@@ -176,6 +176,17 @@ describe('reportDetectionSnapshots', () => {
     });
   });
 
+  it('reports the snapshot without knowledge counts when their read fails', async () => {
+    const { sources, analytics, run } = setup();
+    sources.getKnowledgeCounts.mockRejectedValue(new Error('esql timeout'));
+
+    await run();
+
+    const [, event] = analytics.reportEvent.mock.calls[0];
+    expect(event).toMatchObject({ space_id: 'default', external_alerts_24h: 7 });
+    expect(event).not.toHaveProperty('knowledge_indicators_features');
+  });
+
   it('skips a space whose read fails and reports the others', async () => {
     const { sources, analytics, run } = setup({ spaceIds: ['default', 'marketing'] });
     sources.getAlertActivity.mockRejectedValueOnce(new Error('shard failure'));

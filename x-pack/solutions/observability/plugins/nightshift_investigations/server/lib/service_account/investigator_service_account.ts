@@ -548,8 +548,13 @@ export const createInvestigatorServiceAccountService = ({
   // Waits for every change before failing, so none outlives the lifecycle lock.
   const settleAll = async (changes: Array<Promise<void>>): Promise<void> => {
     const results = await Promise.allSettled(changes);
-    const failure = results.find((result) => result.status === 'rejected');
-    if (failure?.status === 'rejected') throw failure.reason;
+    const failures = results.flatMap((result) =>
+      result.status === 'rejected' ? [result.reason] : []
+    );
+    if (failures.length === 1) throw failures[0];
+    if (failures.length > 1) {
+      throw new AggregateError(failures, failures.map(({ message }) => message).join('; '));
+    }
   };
 
   const scheduleTelemetryTasks = (request: KibanaRequest): Promise<void> =>

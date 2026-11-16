@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { DetectionSnapshotKnowledgeCounts } from '@kbn/nightshift-investigations-plugin/server';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../knowledge_indicators';
 import { IndicatorReader } from '../knowledge_indicators/knowledge_indicator_client/indicator_reader';
 import { RevisionReader } from '../knowledge_indicators/knowledge_indicator_client/revision_reader';
@@ -14,15 +15,6 @@ import { ruleIdsFromQueryLinks } from '../knowledge_indicators/rule_ids_from_que
 import { RuleEventsClient } from '../significant_events/events/rule_events_client';
 
 const RULE_IDS_PER_QUERY = 500;
-
-export interface DetectionSnapshotKnowledgeCounts {
-  knowledge_indicators_features: number;
-  knowledge_indicators_queries: number;
-  significant_event_rules: number;
-  significant_event_rules_active: number;
-  significant_events_total: number;
-  significant_events_open: number;
-}
 
 const countEnabledRules = async (
   rulesClient: Pick<RulesClientApi, 'findRules'>,

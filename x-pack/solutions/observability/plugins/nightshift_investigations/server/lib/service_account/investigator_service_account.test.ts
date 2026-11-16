@@ -153,6 +153,7 @@ const setup = ({
     }
   });
   const lockManager = { withLock } as unknown as LockManagerService;
+  const logger = loggingSystemMock.createLogger();
   const service = createInvestigatorServiceAccountService({
     core,
     workflowsExtensions,
@@ -171,7 +172,7 @@ const setup = ({
     removeDetectionSnapshotTask,
     isUniversalAlertingAvailable: () => true,
     isServerless,
-    logger: loggingSystemMock.createLogger(),
+    logger,
   });
   return {
     service,
@@ -191,6 +192,7 @@ const setup = ({
     removeDetectionSnapshotTask,
     lock,
     withLock,
+    logger,
   };
 };
 
@@ -621,6 +623,18 @@ describe('createInvestigatorServiceAccountService', () => {
     await slowRemoval;
 
     expect(heldWhenRemovalSettled).toBe(true);
+  });
+
+  it('logs every telemetry task change that fails', async () => {
+    const { service, logger, scheduleSourceVolumeTask, scheduleDetectionSnapshotTask } = setup();
+    scheduleSourceVolumeTask.mockRejectedValue(new Error('source volume failure'));
+    scheduleDetectionSnapshotTask.mockRejectedValue(new Error('detection snapshot failure'));
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to schedule the telemetry tasks: source volume failure; detection snapshot failure'
+    );
   });
 
   it('continues setup and teardown when the telemetry task cannot be changed', async () => {
