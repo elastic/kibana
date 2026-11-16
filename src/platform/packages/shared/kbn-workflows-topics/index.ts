@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { WORKFLOW_EXECUTION_FINISHED_TOPIC_NAME } from './execution_finished';
+
 export type {
   WorkflowExecutionFinishedData,
   WorkflowExecutionFinishedStatus,

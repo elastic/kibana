@@ -110,6 +110,7 @@ import {
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
 } from './service_account_execution';
 import { resolveWorkflowWorkloads } from './service_account_workload_resolver';
+import { workflowExecutionFinishedTopic } from './topics/workflow_execution_finished';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -433,6 +434,9 @@ export class WorkflowsExecutionEnginePlugin
     plugins: WorkflowsExecutionEnginePluginSetupDeps
   ) {
     this.logger.debug('Workflows execution engine setup');
+
+    // Before any task can run. Publication does not depend on a consumer being enabled.
+    core.pubsub.registerTopic(workflowExecutionFinishedTopic);
 
     // Register telemetry event schemas
     WorkflowExecutionTelemetryClient.setup(core.analytics);

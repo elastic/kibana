@@ -9,6 +9,9 @@
 
 import type { Topic } from '@kbn/core-pubsub-server';
 
+/** Topic name for a workflow execution reaching a terminal status. */
+export const WORKFLOW_EXECUTION_FINISHED_TOPIC_NAME = 'workflows.executionFinished' as const;
+
 /** Terminal status a workflow execution can finish in. */
 export type WorkflowExecutionFinishedStatus =
   | 'completed'
@@ -35,5 +38,5 @@ export interface WorkflowExecutionFinishedData {
 
 export type WorkflowExecutionFinishedTopic = Topic<
   WorkflowExecutionFinishedData,
-  'workflows.executionFinished'
+  typeof WORKFLOW_EXECUTION_FINISHED_TOPIC_NAME
 >;
