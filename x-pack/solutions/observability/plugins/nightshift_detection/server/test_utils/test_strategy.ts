@@ -9,8 +9,8 @@ import type {
   DetectionSignalReading,
   GenerateResult,
   GeneratorContext,
-  IDetectionStrategy,
 } from '../lib/strategies/types';
+import type { DetectionStrategy } from '../lib/strategies/detection_strategy';
 
 const ONE_MINUTE_MS = 60_000;
 
@@ -46,13 +46,13 @@ export const TEST_STRATEGY_ID = 'test_strategy';
  * A strategy for tests: it runs every minute with no settle time and reports one breached and one
  * recovered reading for the first minute of every window.
  */
-export function createTestStrategy(): IDetectionStrategy {
+export function createTestStrategy(): DetectionStrategy {
   return {
     descriptor: {
       id: TEST_STRATEGY_ID,
       name: 'Test strategy',
       description: 'Reports a fixed pair of readings per window.',
-      source: 'process',
+      version: 1,
       cadence_minutes: 1,
       settle_minutes: 0,
       daily_new_event_cap: 10,

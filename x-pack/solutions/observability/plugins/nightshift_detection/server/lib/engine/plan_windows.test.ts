@@ -6,7 +6,7 @@
  */
 
 import { createTestStrategy } from '../../test_utils/test_strategy';
-import type { IDetectionStrategy } from '../strategies/types';
+import type { DetectionStrategy } from '../strategies/detection_strategy';
 import { MAX_CATCH_UP_MINUTES, MAX_MINUTES_PER_RUN, planWindows } from './plan_windows';
 
 const MINUTE_MS = 60_000;
@@ -14,7 +14,7 @@ const MINUTE_MS = 60_000;
 const SETTLED_END = Date.UTC(2026, 10, 13, 10, 0);
 const NOW = SETTLED_END + 20_000;
 
-function createStrategy({ id, cadence }: { id: string; cadence: number }): IDetectionStrategy {
+function createStrategy({ id, cadence }: { id: string; cadence: number }): DetectionStrategy {
   const strategy = createTestStrategy();
 
   return {
@@ -32,7 +32,7 @@ function plan({
   now = NOW,
   skipBacklog,
 }: {
-  strategies?: IDetectionStrategy[];
+  strategies?: DetectionStrategy[];
   watermarks?: Record<string, number>;
   now?: number;
   skipBacklog?: boolean;

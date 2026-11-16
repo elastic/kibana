@@ -29,7 +29,13 @@ const wrap = ({
   reading = READING,
   spaceId = 'default',
 }: { reading?: DetectionSignalReading; spaceId?: string } = {}) =>
-  wrapReading({ reading, strategyId: 'error_rate', spaceId, scheduledMinute: 60_000 });
+  wrapReading({
+    reading,
+    strategyId: 'error_rate',
+    strategyVersion: 1,
+    spaceId,
+    scheduledMinute: 60_000,
+  });
 
 describe('wrapReading', () => {
   it('gives a series the same group hash every time and another one in another space', () => {
@@ -52,6 +58,12 @@ describe('wrapReading', () => {
       signal: {
         group_hash: 'cd70abc63445b2b9036b1a80a0c5e22b744a66ad3c4584353be0fcd9eb891564',
       },
+    });
+  });
+
+  it('stamps the strategy id and version on the signal', () => {
+    expect(wrap()).toMatchObject({
+      signal: { data: { strategy: 'error_rate', strategy_version: 1 } },
     });
   });
 

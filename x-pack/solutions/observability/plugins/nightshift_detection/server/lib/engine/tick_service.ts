@@ -15,7 +15,7 @@ import type { NightshiftSourcesServerStart } from '@kbn/nightshift-sources-plugi
 import { EngineHttpError } from '../errors/engine_http_error';
 import { DetectionEngineDataClient } from './es_client_tokens';
 import { EngineRunner } from './run_engine';
-import type { TTickResult } from './tick_result';
+import type { TickResult } from './tick_result';
 import { EnabledSources, RunContext } from './tokens';
 
 const MINUTE_MS = 60_000;
@@ -51,7 +51,7 @@ export class TickService {
     spaceId: string;
     skipBacklog: boolean;
     abortSignal: AbortSignal;
-  }): Promise<TTickResult> {
+  }): Promise<TickResult> {
     const now = Date.now();
     const scope = this.injection.fork();
 

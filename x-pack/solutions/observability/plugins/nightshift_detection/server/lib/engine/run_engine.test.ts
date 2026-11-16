@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { acquireRunLease } from '../state/run_lease';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
-import type { IDetectionStrategy } from '../strategies/types';
+import type { DetectionStrategy } from '../strategies/detection_strategy';
 import { InMemorySignalStore } from '../../test_utils/in_memory_signal_store';
 import { InMemoryStateStore } from '../../test_utils/in_memory_state_store';
 import { createTestStrategy, TEST_STRATEGY_ID } from '../../test_utils/test_strategy';
@@ -26,7 +26,7 @@ function createRunner({
   state = new InMemoryStateStore(),
   signals = new InMemorySignalStore(),
 }: {
-  strategies?: IDetectionStrategy[];
+  strategies?: DetectionStrategy[];
   isAvailable?: boolean;
   state?: InMemoryStateStore;
   signals?: InMemorySignalStore;
@@ -45,7 +45,7 @@ function createRunner({
   return { runner, state, signals };
 }
 
-function createFailingStrategy(): IDetectionStrategy {
+function createFailingStrategy(): DetectionStrategy {
   const { descriptor } = createTestStrategy();
 
   return {
@@ -133,7 +133,7 @@ describe('EngineRunner', () => {
     const started = new Promise<void>((resolve) => {
       generatorStarted = resolve;
     });
-    const waitsForAbort: IDetectionStrategy = {
+    const waitsForAbort: DetectionStrategy = {
       descriptor: { ...createTestStrategy().descriptor, id: 'waits_for_abort' },
       generator: {
         generate: ({ abortSignal }) =>

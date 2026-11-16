@@ -6,16 +6,16 @@
  */
 
 import type { DetectionSignal } from '../../common/detection_signal';
-import type { IDetectionSignalStore, IWriteSignalsResult } from '../lib/signals/signal_store';
+import type { DetectionSignalStore, WriteSignalsResult } from '../lib/signals/signal_store';
 import type { DetectionSignalReading } from '../lib/strategies/types';
 
 /** A signal store in memory, for tests. It keeps what was written and can be told to reject a series. */
-export class InMemorySignalStore implements IDetectionSignalStore {
+export class InMemorySignalStore implements DetectionSignalStore {
   public readonly written: DetectionSignal[] = [];
 
   constructor(private readonly rejectedFingerprints: string[] = []) {}
 
-  public async write(signals: DetectionSignal[]): Promise<IWriteSignalsResult> {
+  public async write(signals: DetectionSignal[]): Promise<WriteSignalsResult> {
     const failures = signals
       .filter(({ data }) => this.rejectedFingerprints.includes(data.fingerprint))
       .map(({ data }) => ({ fingerprint: data.fingerprint, reason: 'rejected by the test' }));

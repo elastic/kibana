@@ -9,7 +9,7 @@ import { createToken } from '@kbn/core-di';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 
 /** What identifies one tick. */
-export interface IRunContext {
+export interface RunContext {
   spaceId: string;
   /** Unique per tick; reported back and stamped on what the run records. */
   runId: string;
@@ -18,10 +18,10 @@ export interface IRunContext {
 }
 
 /** The tick's identity. Bound per tick scope: by the `_tick` route from the request, by tests directly. */
-export const RunContext = createToken<IRunContext>('nightshiftDetection.RunContext');
+export const RunContext = createToken<RunContext>('nightshiftDetection.RunContext');
 
 /** The sources the admin enabled for the tick's space. */
-export interface IEnabledSources {
+export interface EnabledSources {
   /** The sources enabled in the tick's space. */
   list(): Promise<NightshiftSource[]>;
 }
@@ -30,4 +30,4 @@ export interface IEnabledSources {
  * Reads the enabled sources. Bound per tick scope next to {@link RunContext}, because the sources
  * client of `nightshift_sources` is built from the request.
  */
-export const EnabledSources = createToken<IEnabledSources>('nightshiftDetection.EnabledSources');
+export const EnabledSources = createToken<EnabledSources>('nightshiftDetection.EnabledSources');

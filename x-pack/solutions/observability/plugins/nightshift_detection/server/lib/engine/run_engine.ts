@@ -11,20 +11,17 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { inject, injectable } from 'inversify';
 import { AvailabilityService } from '../availability/availability_service';
 import { DetectionSignalStore } from '../signals/signal_store';
-import type { IDetectionSignalStore } from '../signals/signal_store';
 import { wrapReading } from '../signals/wrap_reading';
 import { acquireRunLease } from '../state/run_lease';
 import { StateStore } from '../state/state_store';
-import type { IStateStore } from '../state/state_store';
 import { advanceWatermark, readWatermarks } from '../state/watermarks';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { GenerateResult } from '../strategies/types';
 import { DetectionEngineDataClient } from './es_client_tokens';
 import { planWindows } from './plan_windows';
-import type { IPlannedWindow } from './plan_windows';
-import type { IStrategyRunResult, TTickResult } from './tick_result';
+import type { PlannedWindow } from './plan_windows';
+import type { StrategyRunResult, TickResult } from './tick_result';
 import { EnabledSources, RunContext } from './tokens';
-import type { IEnabledSources, IRunContext } from './tokens';
 
 /**
  * Time one tick has for all its generators together. A generator past it is aborted. JavaScript
@@ -64,13 +61,13 @@ function rejectOnAbort(signal: AbortSignal): Promise<never> {
 @injectable()
 export class EngineRunner {
   constructor(
-    @inject(RunContext) private readonly runContext: IRunContext,
+    @inject(RunContext) private readonly runContext: RunContext,
     @inject(AvailabilityService)
     private readonly availability: Pick<AvailabilityService, 'isAvailable'>,
     @inject(StrategyCatalog) private readonly catalog: StrategyCatalog,
-    @inject(StateStore) private readonly state: IStateStore,
-    @inject(DetectionSignalStore) private readonly signalStore: IDetectionSignalStore,
-    @inject(EnabledSources) private readonly enabledSources: IEnabledSources,
+    @inject(StateStore) private readonly state: StateStore,
+    @inject(DetectionSignalStore) private readonly signalStore: DetectionSignalStore,
+    @inject(EnabledSources) private readonly enabledSources: EnabledSources,
     @inject(DetectionEngineDataClient) private readonly dataClient: ElasticsearchClient,
     @inject(CoreLogger) private readonly logger: Logger
   ) {}
@@ -97,7 +94,7 @@ export class EngineRunner {
     now: number;
     skipBacklog?: boolean;
     abortSignal?: AbortSignal;
-  }): Promise<TTickResult> {
+  }): Promise<TickResult> {
     const { runId, spaceId } = this.runContext;
 
     // 1. Availability: nothing is read or written while the engine is off for this deployment.
@@ -161,7 +158,7 @@ export class EngineRunner {
    * Triage and lifecycle run here, after the signals are stored: nightshift-program#2080 and
    * #2084 fill this in. Called on every tick so the later phases need no change to the loop.
    */
-  private async triageAndLifecycle(_results: IStrategyRunResult[]): Promise<void> {}
+  private async triageAndLifecycle(_results: StrategyRunResult[]): Promise<void> {}
 
   private async runStrategy({
     window,
@@ -169,16 +166,16 @@ export class EngineRunner {
     runSignal,
     leaseDeadline,
   }: {
-    window: IPlannedWindow;
+    window: PlannedWindow;
     sources: NightshiftSource[];
     runSignal: AbortSignal;
     leaseDeadline: number;
-  }): Promise<IStrategyRunResult> {
+  }): Promise<StrategyRunResult> {
     const { spaceId, scheduledMinute } = this.runContext;
     const { strategy, from, to, skipped_minutes: skippedMinutes } = window;
     const strategyId = strategy.descriptor.id;
     const notes: string[] = [];
-    const result: IStrategyRunResult = {
+    const result: StrategyRunResult = {
       id: strategyId,
       from,
       to,
@@ -224,7 +221,13 @@ export class EngineRunner {
       }
 
       const signals = generated.readings.flatMap((reading) => {
-        const wrapped = wrapReading({ reading, strategyId, spaceId, scheduledMinute });
+        const wrapped = wrapReading({
+          reading,
+          strategyId,
+          strategyVersion: strategy.descriptor.version,
+          spaceId,
+          scheduledMinute,
+        });
         if (wrapped.dropped) {
           notes.push(wrapped.note);
           return [];

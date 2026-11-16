@@ -6,23 +6,23 @@
  */
 
 import { StateConflictError } from '../lib/state/state_conflict_error';
-import type { StateDocuments, StateVersion, TStateKind } from '../lib/state/state_kinds';
-import type { IStateStore, IVersionedState } from '../lib/state/state_store';
+import type { StateDocuments, StateVersion, StateKind } from '../lib/state/state_kinds';
+import type { StateStore, VersionedState } from '../lib/state/state_store';
 
 /** A state store in memory with the conflict rules of the real one, for tests. */
-export class InMemoryStateStore implements IStateStore {
+export class InMemoryStateStore implements StateStore {
   private readonly documents = new Map<string, { value: unknown; version: StateVersion }>();
   private seqNo = 0;
 
-  private static toId({ spaceId, kind, key }: { spaceId: string; kind: TStateKind; key?: string }) {
+  private static toId({ spaceId, kind, key }: { spaceId: string; kind: StateKind; key?: string }) {
     return [spaceId, kind, key].filter((part) => part !== undefined).join(':');
   }
 
-  public async get<TKind extends TStateKind>(params: {
+  public async get<TKind extends StateKind>(params: {
     spaceId: string;
     kind: TKind;
     key?: string;
-  }): Promise<IVersionedState<TKind> | undefined> {
+  }): Promise<VersionedState<TKind> | undefined> {
     const stored = this.documents.get(InMemoryStateStore.toId(params));
 
     return stored
@@ -30,7 +30,7 @@ export class InMemoryStateStore implements IStateStore {
       : undefined;
   }
 
-  public async put<TKind extends TStateKind>(params: {
+  public async put<TKind extends StateKind>(params: {
     spaceId: string;
     kind: TKind;
     key?: string;
@@ -48,7 +48,7 @@ export class InMemoryStateStore implements IStateStore {
 
   public async delete(params: {
     spaceId: string;
-    kind: TStateKind;
+    kind: StateKind;
     key?: string;
     version: StateVersion;
   }): Promise<void> {
