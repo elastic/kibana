@@ -80,6 +80,7 @@ Query
     - **sql** (required): The `SELECT` or `WITH` query to run. Include a `LIMIT` clause, because the Data API fails any response larger than 1 MiB. Do not include a trailing semicolon.
     - **database** (optional): The database to run in. Uses the configured default if omitted.
     - **maxRows** (optional): Maximum number of rows to return (1 to 1,000, default: 100).
+    - Integer values larger than 9,007,199,254,740,991 (2^53 − 1), such as some `BIGINT` IDs, can lose precision in results. Cast them to text in the query, for example `CAST(id AS CHAR)` on Aurora MySQL or `CAST(id AS TEXT)` on Aurora PostgreSQL.
 
 List Databases
 :   List the databases on the cluster.

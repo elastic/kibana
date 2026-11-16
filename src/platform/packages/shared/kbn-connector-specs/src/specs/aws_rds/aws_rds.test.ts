@@ -332,6 +332,31 @@ describe('AwsRds', () => {
       });
     });
 
+    it('reads constraints from pg_catalog on PostgreSQL so SELECT-only users still see them', async () => {
+      respondWithRows([{ column_name: 'id', data_type: 'integer', is_nullable: 'NO' }]);
+      respondWithRows([
+        { constraint_name: 'orders_pkey', constraint_type: 'PRIMARY KEY', column_name: 'id' },
+      ]);
+
+      const result = await AwsRds.actions.describeTable.handler(
+        buildContext({ engine: 'postgresql' }),
+        { table: 'orders' }
+      );
+
+      expect(sentBody(1).sql).toContain('pg_constraint');
+      expect(sentBody(1).sql).not.toContain('table_constraints');
+      expect(sentBody(1).parameters).toEqual([
+        { name: 'schema_name', value: { stringValue: 'public' } },
+        { name: 'table_name', value: { stringValue: 'orders' } },
+      ]);
+      expect(result).toEqual({
+        columns: [{ column_name: 'id', data_type: 'integer', is_nullable: 'NO' }],
+        constraints: [
+          { constraint_name: 'orders_pkey', constraint_type: 'PRIMARY KEY', column_name: 'id' },
+        ],
+      });
+    });
+
     it('fails with a helpful message when the table has no columns', async () => {
       respondWithRows([]);
       await expect(
@@ -362,6 +387,26 @@ describe('AwsRds', () => {
         truncated: false,
       });
     });
+
+    it.each(['constructor', 'toString', '__proto__'])(
+      'groups columns for a table named %s without throwing',
+      async (tableName) => {
+        respondWithRows([
+          { table_name: tableName, column_name: 'id', data_type: 'int', is_nullable: 'NO' },
+          { table_name: tableName, column_name: 'name', data_type: 'text', is_nullable: 'YES' },
+        ]);
+
+        const { tables } = (await AwsRds.actions.getSchema.handler(buildContext(), {})) as {
+          tables: Record<string, unknown>;
+        };
+
+        expect(Object.keys(tables)).toEqual([tableName]);
+        expect(Object.getOwnPropertyDescriptor(tables, tableName)?.value).toEqual([
+          { column_name: 'id', data_type: 'int', is_nullable: 'NO' },
+          { column_name: 'name', data_type: 'text', is_nullable: 'YES' },
+        ]);
+      }
+    );
 
     it('reports truncation when the column cap is exceeded', async () => {
       respondWithRows(

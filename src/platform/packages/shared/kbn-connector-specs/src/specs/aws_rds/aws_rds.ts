@@ -52,6 +52,25 @@ const SECRET_ARN_PATTERN = /^arn:aws[a-z-]*:secretsmanager:[a-z0-9-]+:\d{12}:sec
 
 type Engine = 'mysql' | 'postgresql';
 
+// information_schema.table_constraints hides constraints from users with only SELECT on PostgreSQL,
+// so the PostgreSQL lookup reads pg_catalog, which is visible regardless of table privileges.
+const PG_CONSTRAINTS_SQL =
+  "SELECT c.conname AS constraint_name, CASE c.contype WHEN 'p' THEN 'PRIMARY KEY' " +
+  "WHEN 'u' THEN 'UNIQUE' WHEN 'f' THEN 'FOREIGN KEY' END AS constraint_type, " +
+  'a.attname AS column_name FROM pg_constraint c ' +
+  'JOIN pg_class t ON t.oid = c.conrelid JOIN pg_namespace n ON n.oid = t.relnamespace ' +
+  'CROSS JOIN LATERAL unnest(c.conkey) WITH ORDINALITY AS k(attnum, ord) ' +
+  'JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = k.attnum ' +
+  "WHERE n.nspname = :schema_name AND t.relname = :table_name AND c.contype IN ('p', 'u', 'f') " +
+  'ORDER BY c.conname, k.ord';
+const MYSQL_CONSTRAINTS_SQL =
+  'SELECT tc.constraint_name AS constraint_name, tc.constraint_type AS constraint_type, ' +
+  '  kcu.column_name AS column_name FROM information_schema.table_constraints tc ' +
+  'JOIN information_schema.key_column_usage kcu ON kcu.constraint_schema = tc.constraint_schema ' +
+  ' AND kcu.constraint_name = tc.constraint_name AND kcu.table_name = tc.table_name ' +
+  ' WHERE tc.table_schema = :schema_name AND tc.table_name = :table_name ' +
+  'ORDER BY tc.constraint_name, kcu.ordinal_position';
+
 interface AwsRdsConfig {
   region: string;
   clusterArn: string;
@@ -285,12 +304,7 @@ export const AwsRds: ConnectorSpec = {
         }
         const { rows: constraints } = await executeStatement(
           ctx,
-          'SELECT tc.constraint_name AS constraint_name, tc.constraint_type AS constraint_type, ' +
-            '  kcu.column_name AS column_name FROM information_schema.table_constraints tc ' +
-            'JOIN information_schema.key_column_usage kcu ON kcu.constraint_schema = tc.constraint_schema ' +
-            ' AND kcu.constraint_name = tc.constraint_name AND kcu.table_name = tc.table_name ' +
-            ' WHERE tc.table_schema = :schema_name AND tc.table_name = :table_name ' +
-            'ORDER BY tc.constraint_name, kcu.ordinal_position',
+          getConfig(ctx).engine === 'postgresql' ? PG_CONSTRAINTS_SQL : MYSQL_CONSTRAINTS_SQL,
           { database: input.database, parameters }
         );
         return { columns, constraints };
@@ -316,11 +330,15 @@ export const AwsRds: ConnectorSpec = {
           }`,
           { database: input.database, parameters: stringParams({ schema_name: schemaName }) }
         );
-        const tables: Record<string, Array<Record<string, unknown>>> = {};
+        // A Map avoids inherited keys such as `constructor` or `__proto__` colliding with table names.
+        const tables = new Map<string, Array<Record<string, unknown>>>();
         for (const { table_name: tableName, ...column } of rows.slice(0, SCHEMA_MAX_ROWS)) {
-          (tables[String(tableName)] ??= []).push(column);
+          const key = String(tableName);
+          const columns = tables.get(key) ?? [];
+          columns.push(column);
+          tables.set(key, columns);
         }
-        return { tables, truncated: rows.length > SCHEMA_MAX_ROWS };
+        return { tables: Object.fromEntries(tables), truncated: rows.length > SCHEMA_MAX_ROWS };
       },
     },
 
