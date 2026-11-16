@@ -50,7 +50,7 @@ import { queryKeys } from '../../query_keys';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ALERTZERO_PAGE_CONTENT_WIDTH } from '../../components/layout/constants';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
-import { useAppHeadingTitle } from '../../components/app_chrome';
+import { useAppHeadingDocLink, useAppHeadingTitle } from '../../components/app_chrome';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
@@ -161,6 +161,7 @@ const ConversationsPageContent: React.FC = () => {
   const dropDecided = useDropDecidedProposal(effectiveEntityFilter);
   useAlertZeroDocTitle();
   useAppHeadingTitle(QUEUE_PAGE_INFO.pageTitle);
+  useAppHeadingDocLink('proposedActions');
   const { reportEvent } = useAlertZeroTelemetry();
 
   // The Impact entity filter is the queue's only filter today. Only setting it reports, never
@@ -312,8 +313,12 @@ const ConversationsPageContent: React.FC = () => {
   const assignInvestigation = useAssignInvestigation();
 
   const renderInFlightStatus = useCallback(
-    ({ id, isProposalSettling }: Investigation) => (
-      <InFlightProposalBadge proposalId={id} isProposalSettling={isProposalSettling} />
+    ({ id, isProposalSettling, isDecisionShown }: Investigation) => (
+      <InFlightProposalBadge
+        proposalId={id}
+        isProposalSettling={isProposalSettling}
+        isDecisionShown={isDecisionShown}
+      />
     ),
     []
   );

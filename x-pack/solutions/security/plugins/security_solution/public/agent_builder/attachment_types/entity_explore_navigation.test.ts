@@ -15,6 +15,10 @@ import {
 } from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry/events/flyout_v2/types';
 import {
+  EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
+} from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import {
   buildEntityFlyoutV2NavigationState,
   buildEntityRightPanel,
   getAgentBuilderLastAgentIdForSecurityOpenChat,
@@ -240,10 +244,7 @@ describe('entity_explore_navigation', () => {
       expect(
         buildEntityFlyoutV2NavigationState({
           preview: [],
-          left: {
-            id: 'host_details',
-            params: { path: { tab: 'graph_view' } },
-          },
+          left: { path: { tab: EntityDetailsLeftPanelTab.GRAPH_VIEW } },
           right: {
             id: 'host-panel',
             params: {
@@ -277,8 +278,10 @@ describe('entity_explore_navigation', () => {
         buildEntityFlyoutV2NavigationState({
           preview: [],
           left: {
-            id: 'user_details',
-            params: { path: { tab: 'risk_inputs', subTab: 'resolution' } },
+            path: {
+              tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+              subTab: RiskScoreLeftPanelSubTab.RESOLUTION,
+            },
           },
           right: {
             id: 'user-panel',
@@ -370,10 +373,10 @@ describe('entity_explore_navigation', () => {
         expect(params.get('watchlistId')).toBe('wl-123');
         expect(params.get('watchlistName')).toBe('VIPs');
         expect(params.get('groupBy')).toBe('resolution');
-        expect(params.get('flyout')).toContain('right');
+        expect(params.get(FLYOUT_V2_URL_PARAM)).not.toBeNull();
       });
 
-      it('writes flyoutV2 and removes a stale legacy flyout when the new flyout is enabled', () => {
+      it('writes flyoutV2 and removes a stale legacy flyout', () => {
         const application = buildApplicationMock();
         window.history.replaceState({}, '', `${EA_HOME_PATH}?flyout=stale&watchlistId=wl-123`);
 
@@ -391,7 +394,6 @@ describe('entity_explore_navigation', () => {
               },
             },
           },
-          isNewFlyoutEnabled: true,
         });
 
         const [, options] = application.navigateToApp.mock.calls[0];
@@ -420,7 +422,7 @@ describe('entity_explore_navigation', () => {
           appId: 'securitySolutionUI',
           flyout: {
             preview: [],
-            left: { id: 'host_details', params: {} },
+            left: { path: {} },
             right: { id: 'host-panel', params: { hostName: 'web-01' } },
           },
           searchSession: searchSession as unknown as ISessionService,
@@ -442,7 +444,7 @@ describe('entity_explore_navigation', () => {
             appId: 'securitySolutionUI',
             flyout: {
               preview: [],
-              left: { id: 'host_details', params: {} },
+              left: { path: {} },
               right: { id: 'host-panel', params: { hostName: 'web-01' } },
             },
           })

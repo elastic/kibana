@@ -13,7 +13,7 @@ describe('SuppressionIndex', () => {
     [{ last_snooze_action: 'snooze' }, { reason: 'snooze', action_subtype: 'snooze' }],
     [{ last_ack_action: 'ack' }, { reason: 'ack', action_subtype: 'ack' }],
     [
-      { last_deactivate_action: 'deactivate' },
+      { last_lifecycle_action: 'deactivate' },
       { reason: 'deactivate', action_subtype: 'deactivate' },
     ],
     [{}, { reason: 'unknown suppression reason', action_subtype: 'unknown' }],
@@ -69,7 +69,7 @@ describe('SuppressionIndex', () => {
         group_hash: 'h1',
         alert_id: 'e1',
         should_suppress: true,
-        last_deactivate_action: 'deactivate',
+        last_lifecycle_action: 'deactivate',
       }),
     ]);
 

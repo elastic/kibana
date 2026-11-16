@@ -31,7 +31,7 @@ export const createSourceDeleteTool = ({
   id: NIGHTSHIFT_SOURCE_DELETE_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    Delete a Nightshift source of the current space. This cannot be undone. It deletes the source's
+    Delete a nightshift source of the current space. This cannot be undone. It deletes the source's
     ES|QL view and, as when a source is deleted in the UI, cleans up what belongs to it: its
     Knowledge Indicators and rules, and cancels any running onboarding.
 

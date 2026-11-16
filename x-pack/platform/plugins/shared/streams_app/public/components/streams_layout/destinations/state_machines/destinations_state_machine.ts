@@ -8,6 +8,7 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import {
   and,
   assign,
@@ -23,7 +24,6 @@ import type { TimeState } from '@kbn/es-query';
 import { filter, map, startWith } from 'rxjs';
 import type { ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import {
-  STREAMS_DEFAULT_UNIT_ID,
   type ResolveUnitIndicesResponse,
   type ResolvedDestinationIndex,
 } from '@kbn/streams-plugin/common';
@@ -40,6 +40,7 @@ import {
   getConfiguredDestinations,
   getDestinationCreateSpec,
   getUnitDestinations,
+  localElasticsearchCredentialName,
   toDestinationViewModel,
   toRemoteElasticsearchDestinationViewModel,
   toS3DestinationViewModel,
@@ -100,10 +101,20 @@ export interface PendingDestination extends DestinationSignalTargets {
 export interface DestinationCreationContext {
   formData: DestinationCreationFormData;
   pendingDestination?: PendingDestination;
+  /** Id of the key minted for the pending destination, revoked if the save fails. */
+  pendingApiKeyId?: string;
+  /** Encoded API key sent as a unit secret, never embedded in the unit. */
+  pendingApiKey?: string;
   createdDestination?: DestinationViewModel;
 }
 
 export type ResolvedIndicesStatus = 'loading' | 'ready' | 'unavailable';
+
+export interface ResolvedIndicesError {
+  message: string;
+  /** Elasticsearch refused the lookup because the user lacks index privileges on the targets. */
+  forbidden: boolean;
+}
 
 export interface DestinationsStateContext {
   unitDefinition: Unit;
@@ -114,7 +125,7 @@ export interface DestinationsStateContext {
   hasReceivedUnit: boolean;
   parentRef: AnyActorRef;
   resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>;
-  resolvedIndicesError?: string;
+  resolvedIndicesError?: ResolvedIndicesError;
   /** Spawned when a destination's details are first shown, stopped once nothing shows them. */
   destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
   /** Components showing each destination's details. */
@@ -153,9 +164,10 @@ export type DestinationsStateEvent =
 
 /** Values for the unit PUT `secrets`. The created node references them by credential name. */
 const getCreateSecrets = (
-  formData: DestinationCreationFormData,
+  creationContext: DestinationCreationContext,
   destinationId: string
 ): StreamsUnit.Secrets | undefined => {
+  const { formData } = creationContext;
   switch (formData.storageKind) {
     case 'external_storage': {
       const names = s3CredentialNames(destinationId);
@@ -170,7 +182,11 @@ const getCreateSecrets = (
           formData.remoteElasticsearch.apiKey.trim(),
       };
     case 'local_elasticsearch':
-      return undefined;
+      return creationContext.pendingApiKey
+        ? {
+            [localElasticsearchCredentialName(destinationId)]: creationContext.pendingApiKey,
+          }
+        : undefined;
   }
 };
 
@@ -354,7 +370,12 @@ export const destinationsStateMachine = setup({
     }),
     storeResolvedIndicesError: assign(({ event }) =>
       event.type === 'xstate.error.actor.loadResolvedIndices'
-        ? { resolvedIndicesError: getFormattedError(event.error).message }
+        ? {
+            resolvedIndicesError: {
+              message: getFormattedError(event.error).message,
+              forbidden: isHttpFetchError(event.error) && event.error.body?.statusCode === 403,
+            },
+          }
         : {}
     ),
     syncLoadedUnit: assign(({ context, event }) => {
@@ -480,7 +501,7 @@ export const destinationsStateMachine = setup({
         signals,
         indexBySignal,
         writePatternsBySignal,
-        apiKey: event.output.encoded,
+        apiKeyCredential: localElasticsearchCredentialName(id),
       });
       const createdDestination = toDestinationViewModel(unitDestination);
       if (!createdDestination) {
@@ -493,7 +514,12 @@ export const destinationsStateMachine = setup({
         unitDestination,
       ]);
       return {
-        creationContext: { ...context.creationContext, createdDestination },
+        creationContext: {
+          ...context.creationContext,
+          pendingApiKeyId: event.output.id,
+          pendingApiKey: event.output.encoded,
+          createdDestination,
+        },
         unitDefinition,
         persistenceError: undefined,
         apiKeyError: undefined,
@@ -516,7 +542,7 @@ export const destinationsStateMachine = setup({
           unitDefinition: context.unitDefinition,
           destinationIds: [createdDestination.id],
           intent: 'create',
-          secrets: getCreateSecrets(context.creationContext.formData, createdDestination.id),
+          secrets: getCreateSecrets(context.creationContext, createdDestination.id),
         };
       }
     ),
@@ -577,6 +603,7 @@ export const destinationsStateMachine = setup({
             creationContext: context.creationContext
               ? {
                   ...context.creationContext,
+                  pendingApiKey: undefined,
                   formData: {
                     ...context.creationContext.formData,
                     s3: {
@@ -937,13 +964,15 @@ const revokeDestinationApiKey = async ({
   services,
   toasts,
   destinationId,
+  apiKeyId,
 }: {
   services: DestinationApiKeyServices;
   toasts: Toasts;
   destinationId: string;
+  apiKeyId: string;
 }): Promise<void> => {
   try {
-    await services.delete(destinationId);
+    await services.delete(destinationId, apiKeyId);
   } catch {
     toasts.addWarning({
       title: i18n.translate('xpack.streams.destinations.unusedApiKeyRevokeFailedTitle', {
@@ -977,18 +1006,20 @@ function createRevokePendingDestinationApiKeyAction({
 }) {
   return ({ context }: { context: DestinationsStateContext }) => {
     const destinationId = context.creationContext?.pendingDestination?.id;
-    if (destinationId) {
-      void revokeDestinationApiKey({ services, toasts, destinationId });
+    const apiKeyId = context.creationContext?.pendingApiKeyId;
+    if (destinationId && apiKeyId) {
+      void revokeDestinationApiKey({ services, toasts, destinationId, apiKeyId });
     }
   };
 }
 
 function createLoadResolvedIndicesActor({
   streamsRepositoryClient,
+  unitId,
 }: DestinationApiKeyGenerationDeps) {
   return fromPromise(async ({ signal }): Promise<ResolveUnitIndicesResponse> => {
     return streamsRepositoryClient.fetch('GET /internal/streams/unit/{id}/_resolve_indices', {
-      params: { path: { id: STREAMS_DEFAULT_UNIT_ID } },
+      params: { path: { id: unitId } },
       signal,
     });
   });

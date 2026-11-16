@@ -78,6 +78,8 @@ export const Conversation: React.FC<{}> = () => {
     scrollContainerHeight,
     timelineContent,
     anchoredItemKey,
+    // Keeps the sent message off the header's bottom border.
+    anchoredItemGap: parseFloat(euiTheme.size.s),
   });
 
   const stagedAttachmentIds = useMemo(() => {

@@ -83,6 +83,8 @@ export interface DetectAndReviewStepState {
     stackName: string;
     templateVersion: string;
     stackArn?: string;
+    /** `DataStreamNamespace` the stack was last launched or updated with, for families that take one. */
+    namespace?: string;
   }>;
   /**
    * instanceId → policyId for instances removed from Step 1 whose deployed policy has not yet
@@ -161,6 +163,8 @@ interface PersistedDetectAndReviewStep {
     stackName: string;
     templateVersion: string;
     stackArn?: string;
+    /** `DataStreamNamespace` the stack was last launched or updated with, for families that take one. */
+    namespace?: string;
   }>;
   pendingCleanupPolicyIds?: Record<string, string>;
   isDirty?: boolean;

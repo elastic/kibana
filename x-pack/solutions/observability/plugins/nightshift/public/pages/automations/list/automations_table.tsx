@@ -38,9 +38,12 @@ export const AutomationsTable = ({
   usedToday,
   getFacets,
   isRateLimited,
+  isGlobalLimitReached = false,
   pageIndex,
   pageSize,
   onPageChange,
+  onRun,
+  isRunPending,
   onClone,
   onDelete,
   onOpenAutomation,
@@ -56,9 +59,12 @@ export const AutomationsTable = ({
   usedToday: Map<string, number>;
   getFacets: (automation: Automation) => AutomationFacets;
   isRateLimited: (automation: Automation) => boolean;
+  isGlobalLimitReached?: boolean;
   pageIndex: number;
   pageSize: number;
   onPageChange: (index: number, size: number) => void;
+  onRun: (automation: Automation) => void;
+  isRunPending: boolean;
   onClone: (automation: Automation) => void;
   onDelete: (automation: Automation) => void;
   onOpenAutomation: (automation: Automation) => void;
@@ -129,6 +135,7 @@ export const AutomationsTable = ({
           used={usedToday.get(automation.id)}
           limit={automation.runtime.dailyDispatchLimit}
           isRateLimited={isRateLimited(automation)}
+          isGlobalLimitReached={isGlobalLimitReached}
         />
       ),
     },
@@ -174,6 +181,8 @@ export const AutomationsTable = ({
             render: (automation: Automation) => (
               <AutomationActions
                 automation={automation}
+                onRun={() => onRun(automation)}
+                isRunPending={isRunPending}
                 onClone={() => onClone(automation)}
                 onDelete={() => onDelete(automation)}
               />

@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import type { SessionsStatus } from '../../../../common/sessions';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
+import { httpErrorMessage } from '../../../utils/http_error_message';
 
 const ASK_ADMIN_TEXT = i18n.translate('xpack.digitalExperience.sessions.status.askAdminText', {
   defaultMessage:
@@ -28,7 +28,7 @@ const EnableError = ({ error }: { error: Error }) => (
       title={i18n.translate('xpack.digitalExperience.sessions.status.enableErrorTitle', {
         defaultMessage: 'Could not set up sessions',
       })}
-      text={error.message}
+      text={httpErrorMessage(error)}
     />
   </>
 );
@@ -58,7 +58,7 @@ export function EnableSessionsPrompt({ canManage, onEnable, enabling, enableErro
           <p>
             {i18n.translate('xpack.digitalExperience.sessions.status.notEnabledDescription', {
               defaultMessage:
-                'Sessions group the page views, clicks and errors of each visit to your applications. A background transform builds them from your EDOT Browser data, reading it with the access of whoever sets them up.',
+                'Sessions group the page views, clicks and errors of each visit to your applications. They are read from the sessions index, which is created with the access of whoever sets them up.',
             })}
           </p>
           {!canManage && <p>{ASK_ADMIN_TEXT}</p>}
@@ -85,124 +85,4 @@ export function EnableSessionsPrompt({ canManage, onEnable, enabling, enableErro
       }
     />
   );
-}
-
-/**
- * Sessions are set up but need attention: an update to this Kibana version or configuration, or a
- * failing or lagging transform. Nothing shows when they're healthy.
- */
-export function SessionsStatusCallout({
-  status,
-  canManage,
-  onEnable,
-  enabling,
-  enableError,
-}: EnableProps & { status: SessionsStatus }) {
-  // Set up by a newer Kibana (a rollback, or an older node in a rolling upgrade): this one can't
-  // update them, and their summaries may not match what it reads.
-  if (status.installedVersion !== null && status.installedVersion > status.currentVersion) {
-    return (
-      <>
-        <KbnWarningCallout
-          data-test-subj="digitalExperienceSessionsNewerVersion"
-          size="s"
-          title={i18n.translate('xpack.digitalExperience.sessions.status.newerVersionTitle', {
-            defaultMessage: 'Sessions were set up by a newer version of Kibana',
-          })}
-          text={
-            status.reason ??
-            i18n.translate('xpack.digitalExperience.sessions.status.newerVersionDescription', {
-              defaultMessage: 'Upgrade Kibana to manage sessions.',
-            })
-          }
-        />
-        <EuiSpacer size="m" />
-      </>
-    );
-  }
-  if (status.needsUpdate) {
-    return (
-      <>
-        <KbnWarningCallout
-          data-test-subj="digitalExperienceSessionsNeedUpdate"
-          size="s"
-          title={i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateTitle', {
-            defaultMessage: 'Sessions need an update',
-          })}
-          text={
-            <p>
-              {i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateDescription', {
-                defaultMessage:
-                  'Sessions were set up by an earlier version or with other settings, so new sessions may be missing or incomplete until they are updated.',
-              })}{' '}
-              {canManage ? null : ASK_ADMIN_TEXT}
-            </p>
-          }
-          actionProps={
-            canManage
-              ? {
-                  primary: {
-                    children: i18n.translate(
-                      'xpack.digitalExperience.sessions.status.updateButtonLabel',
-                      { defaultMessage: 'Update sessions' }
-                    ),
-                    'data-test-subj': 'digitalExperienceSessionsUpdate',
-                    ...getEbtProps({
-                      action: DIGITAL_EXPERIENCE_EBT_ACTIONS.ENABLE_SESSIONS,
-                      element: SESSIONS_EBT_ELEMENTS.UPDATE,
-                    }),
-                    isLoading: enabling,
-                    onClick: onEnable,
-                  },
-                }
-              : undefined
-          }
-        />
-        {enableError && <EnableError error={enableError} />}
-        <EuiSpacer size="m" />
-      </>
-    );
-  }
-  if (status.health === 'degraded') {
-    return (
-      <>
-        <KbnDangerCallout
-          data-test-subj="digitalExperienceSessionsDegraded"
-          announceOnMount
-          size="s"
-          title={i18n.translate('xpack.digitalExperience.sessions.status.degradedTitle', {
-            defaultMessage: 'Sessions are not being updated',
-          })}
-          text={
-            status.reason ??
-            i18n.translate('xpack.digitalExperience.sessions.status.degradedDescription', {
-              defaultMessage:
-                'The sessions transform failed, so new sessions are missing. Check the transform in Stack Management.',
-            })
-          }
-        />
-        <EuiSpacer size="m" />
-      </>
-    );
-  }
-  if (status.health === 'lagging') {
-    return (
-      <>
-        <KbnWarningCallout
-          data-test-subj="digitalExperienceSessionsLagging"
-          size="s"
-          title={i18n.translate('xpack.digitalExperience.sessions.status.laggingTitle', {
-            defaultMessage: 'Sessions are behind',
-          })}
-          text={i18n.translate('xpack.digitalExperience.sessions.status.laggingDescription', {
-            defaultMessage:
-              'Sessions from the last {minutes, plural, one {minute} other {# minutes}} may be missing or incomplete.',
-            values: { minutes: Math.max(1, Math.round((status.lagSeconds ?? 0) / 60)) },
-          })}
-        />
-        <EuiSpacer size="m" />
-      </>
-    );
-  }
-  return null;
 }

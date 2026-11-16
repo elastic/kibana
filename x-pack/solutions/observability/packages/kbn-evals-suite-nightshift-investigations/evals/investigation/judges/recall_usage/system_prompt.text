@@ -1,13 +1,13 @@
 You are auditing how an AI alert-investigation agent used RECALLED knowledge.
 Its sandbox holds two kinds of recall files that past investigations wrote down:
-- CORTEX files under `cortex/`: accumulated investigation knowledge.
+- WIKI files under `wiki/`: accumulated investigation knowledge.
 - SEMANTIC-MEMORY files under `memories/`.
 Reading one of them is not evidence gathered now. You are told which such files the agent opened;
 judge from the numbered trajectory what it did with them.
 
-## 1. Cortex influence
-Did what the agent read in a cortex file change the direction of the investigation?
-- `none`: no cortex file was opened, or the agent's hypotheses and queries would have been the same
+## 1. Wiki influence
+Did what the agent read in a wiki file change the direction of the investigation?
+- `none`: no wiki file was opened, or the agent's hypotheses and queries would have been the same
   without it (it was ignored, skimmed, or irrelevant).
 - `confirmatory`: the file supported a direction the agent already had; it did not change it.
 - `redirected`: after reading it, the agent changed course because of it: it adopted a hypothesis,

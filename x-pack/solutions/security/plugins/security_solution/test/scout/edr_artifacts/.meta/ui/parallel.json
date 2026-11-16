@@ -1,5 +1,5 @@
 {
-  "sha1": "a9ce1e181d7a003d7803ded414c5dad6c2f7c757",
+  "sha1": "98ed07cf009ac3c0cd0b18c307d92df27be62524",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -355,6 +355,62 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/endpoint_exception_or_suite.ts",
         "line": 64,
         "column": 25
+      }
+    },
+    {
+      "id": "9667109acb83f7a-d5124a4abf1e969",
+      "title": "Artifact list page — Endpoint exceptions T1 analyst sees no privileges on the list page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
+        "line": 65,
+        "column": 26
+      }
+    },
+    {
+      "id": "9667109acb83f7a-7f59cd8e8022ee0",
+      "title": "Artifact list page — Endpoint exceptions READ user sees empty state without add",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
+        "line": 77,
+        "column": 29
+      }
+    },
+    {
+      "id": "9667109acb83f7a-d704a5359f127a8",
+      "title": "Artifact list page — Endpoint exceptions READ user can view artifacts but cannot add, edit, or delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
+        "line": 85,
+        "column": 17
+      }
+    },
+    {
+      "id": "9667109acb83f7a-2eb2d5bd1f5ea82",
+      "title": "Artifact list page — Endpoint exceptions WRITE user can create, update, and delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
+        "line": 108,
+        "column": 57
       }
     },
     {

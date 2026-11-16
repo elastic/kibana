@@ -26,6 +26,8 @@ export interface CloudOnboardingEcfStack {
   serviceIds?: string[];
   /** Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated. Used to detect settings drift on session resume. */
   serviceConfigs?: CloudOnboardingEcfServiceConfig[];
+  /** `DataStreamNamespace` the stack was last launched or updated with. Only the unified family takes one. Used to detect namespace drift on session resume. */
+  namespace?: string;
 }
 
 /** The per-service values that feed an ECF stack's parameters. */
@@ -86,6 +88,8 @@ export interface CloudOnboardingDeployment {
   description?: string;
   /** Global data stream namespace from the Service settings step. Absent or empty means each policy inherits its agent policy's namespace. */
   namespace?: string;
+  /** Whether the global namespace uses dedicated index templates (the package's namespace_customization_enabled_for list), as set in the Service settings step. Absent means off. */
+  dedicatedNamespaceTemplates?: boolean;
   /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. Absent on onboardings saved before this field existed. */
   instances?: CloudOnboardingInstance[];
   /** Package policy settings from the Service settings step that apply to every package policy of the deployment, keyed by package policy field (e.g. output_id). Each deployment method uses only the settings it supports. Absent on onboardings saved before this field existed. */

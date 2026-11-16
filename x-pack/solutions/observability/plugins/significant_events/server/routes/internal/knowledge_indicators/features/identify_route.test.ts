@@ -6,6 +6,10 @@
  */
 
 import { NightshiftModelNotFoundError } from '@kbn/significant-events-schema';
+import {
+  EVENT_CHAIN_DEPTH_HEADER,
+  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
+} from '@kbn/workflows-extensions/server';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../../agent_builder/agents/feature_identification';
 import {
@@ -91,7 +95,7 @@ const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enab
 });
 
 const makeRequest = () => ({
-  spaceId: 'space-a',
+  spaceId: 'default',
   events: {
     aborted$: {
       subscribe: jest.fn(),
@@ -413,7 +417,7 @@ describe('inferred feature identification route', () => {
     const getKnowledgeIndicatorClient = jest.fn();
     const handlerParams = {
       params: { path: { sourceId: 'logs.test' }, body: null },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getKnowledgeIndicatorClient,
@@ -471,7 +475,7 @@ describe('inferred feature identification route', () => {
       })
     );
     expect(telemetry.trackFeaturesIdentified).not.toHaveBeenCalled();
-    expect(ensureEnabled).toHaveBeenCalledWith({ request, spaceId: 'space-a' });
+    expect(ensureEnabled).toHaveBeenCalledWith({ request, spaceId: 'default' });
   });
 
   it('installs the feature identification agent in the request space before identifying', async () => {
@@ -481,7 +485,7 @@ describe('inferred feature identification route', () => {
 
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
       expect.objectContaining({
-        spaceId: 'space-a',
+        spaceId: 'default',
         agent: expect.objectContaining({ id: FEATURE_IDENTIFICATION_AGENT_ID }),
       })
     );
@@ -507,6 +511,30 @@ describe('inferred feature identification route', () => {
     const { runId } = mockIdentifyInferredFeatures.mock.calls[0][0];
     expect(runId).toEqual(expect.any(String));
     expect(runId).not.toBe('');
+  });
+
+  it('uses trusted workflow request provenance independently of the legacy run id', async () => {
+    const { handlerParams, telemetry } = makeInferredHandlerParams();
+    Object.assign(handlerParams.request, {
+      isInternalApiRequest: true,
+      headers: {
+        [EVENT_CHAIN_DEPTH_HEADER]: '0',
+        [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: 'workflow-run-1',
+      },
+    });
+    handlerParams.params.body.parentWorkflowExecutionId = 'onboarding-run-1';
+
+    await inferredRoute.handler(handlerParams);
+    const track = mockIdentifyInferredFeatures.mock.calls[0][0].trackFeaturesIdentified;
+    track?.({ run_id: 'run-1' } as never);
+
+    expect(telemetry.trackFeaturesIdentified).toHaveBeenCalledWith(
+      expect.objectContaining({
+        run_id: 'run-1',
+        workflow_execution_id: 'workflow-run-1',
+        parent_workflow_execution_id: 'onboarding-run-1',
+      })
+    );
   });
 
   it('returns identification results when sync workflow bootstrap fails', async () => {
@@ -547,7 +575,7 @@ describe('computed feature identification route', () => {
     const getKnowledgeIndicatorClient = jest.fn();
     const handlerParams = {
       params: { path: { sourceId: 'logs.test' }, body: null },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getKnowledgeIndicatorClient,
@@ -618,7 +646,7 @@ describe('should identify features route', () => {
         path: { sourceId: 'logs.test' },
         query: { thresholdHours: 24 },
       },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         sourcesClient: { get: jest.fn().mockResolvedValue({ source: { id: 'logs.test' } }) },

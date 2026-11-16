@@ -7,7 +7,7 @@
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbox_audit';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import {
@@ -35,10 +35,10 @@ const setup = ({
   });
   const mkdirs = jest.fn().mockResolvedValue([true]);
   const writeFiles = jest.fn().mockResolvedValue([{ success: true }]);
-  const session = { runCommand, mkdirs, writeFiles } as unknown as SandboxSession;
+  const session = { runCommand, mkdirs, writeFiles } as unknown as AuditedSandboxSession;
   const sandboxStart = {
     getSession: jest.fn(() => session),
-  } as unknown as SandboxPluginStart;
+  } as unknown as NightshiftSandboxStart;
   const sandboxWorkspaceManager = {
     ensureWorkspaceReady: jest.fn().mockResolvedValue(undefined),
   } as unknown as SandboxWorkspaceManager;
@@ -59,6 +59,7 @@ const setup = ({
   const context = {
     request,
     runContext: { stack: [{ type: 'agent', agentId: 'agent', conversationId: 'conv-1' }] },
+    callContext: { toolId: 'nightshift_sandbox_bash', toolCallId: 'call-1', callSource: 'agent' },
     agentConfiguration: { connector_ids: ['connector-1'] },
   };
 
@@ -68,7 +69,17 @@ const setup = ({
       context
     );
 
-  return { tool, run, runCommand, writeFiles, request, logger, session, sandboxAllowlistClient };
+  return {
+    tool,
+    run,
+    runCommand,
+    writeFiles,
+    request,
+    logger,
+    session,
+    sandboxStart,
+    sandboxAllowlistClient,
+  };
 };
 
 describe('sandbox bash tool', () => {
@@ -76,6 +87,18 @@ describe('sandbox bash tool', () => {
     const { tool } = setup();
 
     expect(tool.excludeFromMcp).toBe(true);
+  });
+
+  it('names the tool and this call of it when it obtains the session, so its RPCs are audited', async () => {
+    const { run, request, sandboxStart } = setup();
+
+    await run({});
+
+    expect(sandboxStart.getSession).toHaveBeenCalledWith(request, 'conv-1', {
+      type: 'tool',
+      toolId: 'nightshift_sandbox_bash',
+      toolCallId: 'call-1',
+    });
   });
 
   it('logs only the error type, never the error message, when the sandbox call throws', async () => {

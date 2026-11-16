@@ -59,6 +59,15 @@ const EcfStackSchema = schema.object({
       },
     })
   ),
+  namespace: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 100,
+      meta: {
+        description: 'Data stream namespace the stack was last launched or updated with.',
+      },
+    })
+  ),
 });
 
 const CloudOnboardingDeploymentProviderSchema = schema.oneOf(
@@ -131,6 +140,13 @@ const InstanceSchema = schema.object({
 
 // The field shipped after the routes (`since: '9.5.0'`), so it carries its own availability.
 const INSTANCES_AVAILABILITY = { stability: 'experimental' as const, since: '9.7.0' };
+
+// Like `instances`, this field shipped after the routes (`since: '9.5.0'`), so it carries its own
+// availability.
+const DEDICATED_NAMESPACE_TEMPLATES_AVAILABILITY = {
+  stability: 'experimental' as const,
+  since: '9.7.0',
+};
 
 const InstancesSchema = (description: string) =>
   schema.arrayOf(InstanceSchema, {
@@ -222,6 +238,15 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       meta: {
         description:
           'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+      },
+    })
+  ),
+  dedicatedNamespaceTemplates: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.',
+        availability: DEDICATED_NAMESPACE_TEMPLATES_AVAILABILITY,
       },
     })
   ),
@@ -377,6 +402,15 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         meta: {
           description:
             'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+        },
+      })
+    ),
+    dedicatedNamespaceTemplates: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.',
+          availability: DEDICATED_NAMESPACE_TEMPLATES_AVAILABILITY,
         },
       })
     ),
@@ -585,6 +619,15 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
           },
         })
       )
+    ),
+    dedicatedNamespaceTemplates: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Whether the global namespace uses dedicated index templates. Omit it to keep the stored value. Applied to the installed packages after a deployment.',
+          availability: DEDICATED_NAMESPACE_TEMPLATES_AVAILABILITY,
+        },
+      })
     ),
     packageNames: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
