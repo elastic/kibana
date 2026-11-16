@@ -145,6 +145,25 @@ describe('mapEsqlResponseToDatatable', () => {
     expect(result.warning).toBe('some-warning');
   });
 
+  it('keeps all-null columns on the column list and off each row', () => {
+    const result = mapEsqlResponseToDatatable(
+      makeResponse([{ name: 'host', type: 'keyword' }], [['web']], {
+        all_columns: [
+          { name: 'empty', type: 'keyword' },
+          { name: 'host', type: 'keyword' },
+        ],
+      }),
+      { query: 'FROM logs-*' }
+    );
+
+    expect(result.columns.map((column) => ({ name: column.name, isNull: column.isNull }))).toEqual([
+      { name: 'host', isNull: false },
+      { name: 'empty', isNull: true },
+    ]);
+    expect(result.rows).toEqual([{ host: 'web' }]);
+    expect('empty' in result.rows[0]).toBe(false);
+  });
+
   it('includes meta.type = ESQL_TABLE_TYPE and statistics', () => {
     const result = mapEsqlResponseToDatatable(
       makeResponse([{ name: 'host', type: 'keyword' }], [['web']]),

@@ -98,13 +98,19 @@ export const mapEsqlResponseToDatatable = (
     allColumns as DatatableColumn[]
   );
 
-  // Sort so null columns are last, to correctly align with values array
+  // Sort so null columns are last. `values` lines up with the non-null prefix.
   if (hasEmptyColumns) {
     updatedWithVariablesColumns.sort((a, b) => Number(a.isNull) - Number(b.isNull));
   }
 
-  const columnNames = updatedWithVariablesColumns.map(({ name }) => name);
-  const rows = normalizedValues.map((row) => zipObject(columnNames, row));
+  // All-null columns stay on `columns` (`isNull`). A key for each of them on every
+  // row exhausts the browser heap for wide `FROM` patterns such as `logs-*`.
+  const valueColumnNames = (
+    hasEmptyColumns
+      ? updatedWithVariablesColumns.filter((column) => !column.isNull)
+      : updatedWithVariablesColumns
+  ).map(({ name }) => name);
+  const rows = normalizedValues.map((row) => zipObject(valueColumnNames, row));
 
   return {
     type: 'datatable',
