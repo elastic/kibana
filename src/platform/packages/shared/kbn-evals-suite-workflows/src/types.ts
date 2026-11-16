@@ -56,6 +56,14 @@ export interface StructuralExpectations {
   expectsBulkOperationShape?: boolean;
 }
 
+/**
+ * Opt-in for the `EsqlValidity` / `EsqlExecution` evaluators. When true, a
+ * workflow without an `elasticsearch.esql.query` step scores 0 instead of N/A.
+ */
+export interface EsqlExpectations {
+  expectsEsql?: boolean;
+}
+
 export interface EfficiencyExpectations {
   /** Maximum tool calls allowed before score degrades (tiered penalty). */
   expectedMaxToolCalls?: number;
@@ -87,7 +95,8 @@ export interface WorkflowCreateExample extends Example {
   output: {
     criteria: WeightedCriterion[];
   } & StructuralExpectations &
-    EfficiencyExpectations;
+    EfficiencyExpectations &
+    EsqlExpectations;
   metadata?: {
     category?: string;
     authoringMode?: AuthoringMode;

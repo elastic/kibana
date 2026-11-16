@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/std'
   - '@kbn/workflows'
+  - '@kbn/esql-language'
 tags:
   - functional-tests
   - package
