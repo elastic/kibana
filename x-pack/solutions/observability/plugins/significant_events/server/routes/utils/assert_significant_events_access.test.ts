@@ -20,6 +20,7 @@ interface ContextOverrides {
   projectType?: string;
   tierAvailable?: boolean;
   hasEnterpriseLicense?: boolean;
+  licenseActive?: boolean;
   workflowsExtensionsPlugin?: boolean;
   workflowsManagementPlugin?: boolean;
   agentBuilderPlugin?: boolean;
@@ -31,6 +32,7 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
     projectType,
     tierAvailable = true,
     hasEnterpriseLicense = true,
+    licenseActive = true,
     workflowsExtensionsPlugin = true,
     workflowsManagementPlugin = true,
     agentBuilderPlugin = true,
@@ -48,9 +50,10 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
   };
 
   const licensing = {
-    getLicense: jest
-      .fn()
-      .mockResolvedValue({ hasAtLeast: jest.fn().mockReturnValue(hasEnterpriseLicense) }),
+    getLicense: jest.fn().mockResolvedValue({
+      isActive: licenseActive,
+      hasAtLeast: jest.fn().mockReturnValue(hasEnterpriseLicense),
+    }),
   };
 
   return {
@@ -122,6 +125,12 @@ describe('assertSignificantEventsAccess', () => {
   it('throws a FeatureNotEnabledError (403) when the license is insufficient', async () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ hasEnterpriseLicense: false }))
+    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
+  });
+
+  it('throws a FeatureNotEnabledError (403) when the Enterprise license has expired', async () => {
+    await expect(
+      assertSignificantEventsAccess(buildArgs({ licenseActive: false }))
     ).rejects.toBeInstanceOf(FeatureNotEnabledError);
   });
 

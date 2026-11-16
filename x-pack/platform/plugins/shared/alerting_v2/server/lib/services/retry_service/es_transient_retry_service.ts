@@ -12,7 +12,6 @@ import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import { injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
-import { EsConcurrentModificationError } from './es_concurrent_modification_error';
 import { EsUnacknowledgedError } from './es_unacknowledged_error';
 import type { IRetryService, RetryOptions } from './types';
 
@@ -46,8 +45,7 @@ const toError = (e: unknown): Error => {
 
 /**
  * Retries transient Elasticsearch errors: connection/timeout failures, retryable
- * response status codes, unacknowledged cluster-state mutations, and resources
- * modified concurrently by another node. Each retry is logged through the caller's
+ * response status codes, and unacknowledged cluster-state mutations. Each retry is logged through the caller's
  * logger so it carries the caller's `log.logger` and bound labels.
  */
 @injectable()
@@ -67,7 +65,7 @@ export class EsTransientRetryService extends RetryService implements IRetryServi
   }
 
   protected isRetryableError(error: Error): boolean {
-    if (error instanceof EsUnacknowledgedError || error instanceof EsConcurrentModificationError) {
+    if (error instanceof EsUnacknowledgedError) {
       return true;
     }
 

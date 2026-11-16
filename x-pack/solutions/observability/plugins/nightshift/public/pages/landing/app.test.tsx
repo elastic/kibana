@@ -6,8 +6,9 @@
  */
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { usePageReady } from '@kbn/ebt-tools';
+import { usePageReady } from '@kbn/ebt-tools/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import React from 'react';
@@ -15,16 +16,33 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
 import type { InvestigationSectionState } from '../../data/investigations/use_investigation_sections';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
+import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from '../../data/investigations/use_fetch_investigations';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDetectionSetupBanner } from './use_detection_setup_banner';
 
 jest.mock('../../data/investigations/use_investigation_sections');
 jest.mock('../../hooks/use_kibana');
-jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/ebt-tools/react');
 jest.mock('../../components/entities/investigation/use_investigation_assignees', () => ({
   useInvestigationAssignees: () => () => null,
 }));
 jest.mock('./use_detection_setup_banner');
+jest.mock('../../components/ui/time_range_picker', () => ({
+  NightshiftTimeRangePicker: ({
+    start,
+    end,
+    showRefreshButton,
+  }: {
+    start: string;
+    end: string;
+    showRefreshButton?: boolean;
+  }) => (
+    <div data-test-subj="nightshiftInvestigationsTimeRangePicker">
+      {`${start} to ${end}`}
+      {showRefreshButton && <button data-test-subj="stubRefresh" type="button" />}
+    </div>
+  ),
+}));
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
@@ -174,6 +192,13 @@ function LocationProbe(): React.ReactElement {
   return <span data-test-subj="locationProbe">{useLocation().search}</span>;
 }
 
+const queryClient = new QueryClient();
+const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+
+const QueryWrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
+
 function renderApp({ initialEntries = ['/'] }: { initialEntries?: string[] } = {}) {
   return render(
     <I18nProvider>
@@ -181,7 +206,8 @@ function renderApp({ initialEntries = ['/'] }: { initialEntries?: string[] } = {
         <NightshiftApp />
         <LocationProbe />
       </MemoryRouter>
-    </I18nProvider>
+    </I18nProvider>,
+    { wrapper: QueryWrapper }
   );
 }
 
@@ -241,6 +267,42 @@ describe('NightshiftApp', () => {
         }),
       })
     );
+  });
+
+  it('filters investigations to those modified in the last 48 hours by default', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-11-09T12:00:30.000Z'));
+    try {
+      renderApp();
+
+      expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toHaveTextContent(
+        'now-48h to now'
+      );
+      expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          updatedAfter: '2026-11-07T12:00:30.000Z',
+          updatedBefore: undefined,
+        })
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('offers a refresh button next to the time range', () => {
+    renderApp();
+
+    expect(screen.getByTestId('stubRefresh')).toBeInTheDocument();
+  });
+
+  it('filters by the time range in the URL', () => {
+    renderApp({ initialEntries: ['/?rangeFrom=now-7d&rangeTo=now-1d'] });
+
+    expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toHaveTextContent(
+      'now-7d to now-1d'
+    );
+    const [{ updatedAfter, updatedBefore }] = mockUseInvestigationSections.mock.calls.at(-1)!;
+    expect(updatedAfter).toBeDefined();
+    expect(updatedBefore).toBeDefined();
   });
 
   it('shows the finished open severity sum when nothing is in progress', () => {
@@ -446,11 +508,43 @@ describe('NightshiftApp', () => {
     renderApp();
 
     expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
-      'No investigations found'
+      'No open investigations'
     );
+    expect(screen.queryByTestId('nightshiftInvestigationsSearchInput')).not.toBeInTheDocument();
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
+  });
+
+  it('keeps search mounted when clearing an empty-result query', async () => {
+    setSections({
+      sections: defaultSections({
+        'in-progress': { investigations: [investigation], total: 1 },
+      }),
+      hasActiveInvestigations: true,
+    });
+    renderApp();
+
+    fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
+      target: { value: 'zzz' },
+    });
+    setSections({ sections: defaultSections() });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
+        'No open investigations found'
+      )
+    );
+
+    // Leave totals at the filtered empty result so visibility cannot ride on totalCount.
+    fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
+      target: { value: '' },
+    });
+    // Wait past the 300 ms search debounce: without the unfiltered latch, search would unmount here.
+    await new Promise((resolve) => {
+      window.setTimeout(resolve, 350);
+    });
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
   });
 
   it('does not scroll from a severity tile with no investigations', () => {
@@ -538,7 +632,12 @@ describe('NightshiftApp', () => {
       )
     );
 
-    const [{ onClose }] = openConversationDetails.mock.calls[0];
+    const [{ onClose, onConversationUpdated }] = openConversationDetails.mock.calls[0];
+    invalidateQueries.mockClear();
+    onConversationUpdated();
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY,
+    });
     onClose();
     await waitFor(() => expect(screen.getByTestId('locationProbe')).toHaveTextContent(''));
   });
@@ -584,6 +683,17 @@ describe('NightshiftApp', () => {
     expect(
       reportEvent.mock.calls.filter(([eventType]) => eventType === 'nightshift_homepage_viewed')
     ).toHaveLength(1);
+  });
+
+  it('shows no tile counts until the counts query lands, even when the sections have rows', () => {
+    const sections = defaultSections({
+      critical: { investigations: [criticalInvestigation], total: 1 },
+    });
+    setSections({ sections, areSeverityCountsLoading: true });
+
+    renderApp();
+
+    expect(screen.queryByTestId('nightshiftSeverityTileCount-critical')).toBeNull();
   });
 
   it('waits for the severity counts before reporting the landing page view', () => {

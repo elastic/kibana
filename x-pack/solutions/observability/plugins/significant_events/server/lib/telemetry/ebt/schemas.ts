@@ -11,7 +11,6 @@ import type {
   ExistingAlertIdentityProps,
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
-  AgentToolEventInvestigationAttachProps,
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   DetectionScanProps,
@@ -512,14 +511,14 @@ const eventStatusChangedSchema: RootSchema<EventStatusChangedProps> = {
     type: 'keyword',
     _meta: {
       description:
-        'The entry point that wrote the version: `agent_tool` (an Agent Builder tool, in discovery or chat), `rest_api` (the event update route, which the UI calls) or `stale_event_cleanup` (the cleanup that closes events whose rule was deleted). It names the code path, not whether a person was behind it',
+        'The entry point that wrote the version: `agent_tool` (an Agent Builder tool, in discovery or chat), `rest_api` (the event update route, which the UI calls) or `stale_event_cleanup` (the cleanup that closes events whose rule was deleted or that stayed recovering past the timeout). It names the code path, not whether a person was behind it',
     },
   },
   change_kind: {
     type: 'keyword',
     _meta: {
       description:
-        'How the status was decided: `operator` (a status chosen through the update route or a chat tool), `assessment` (discovery re-checked the member signals) or `rule_deleted`. Absent when the writer supplied the status itself, as `event_create` does. An `operator` deactivation is a manual close; `close_reason` says why when the caller stated it',
+        'How the status was decided: `operator` (a status chosen through the update route or a chat tool), `assessment` (discovery re-checked the member signals), `rule_deleted` or `recovery_timeout` (the cleanup closed an event that stayed recovering past the timeout). Absent when the writer supplied the status itself, as `event_create` does. An `operator` deactivation is a manual close; `close_reason` says why when the caller stated it',
       optional: true,
     },
   },
@@ -814,48 +813,6 @@ const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingSchedule
   },
 };
 
-const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestigationAttachProps> =
-  {
-    ...optionalWorkflowExecutionTelemetrySchema,
-    ...existingAlertIdentitySchema,
-    success: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether the investigation attachment succeeded',
-      },
-    },
-    event_uuid: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Deprecated — superseded by `event_id`. The identifier of the significant event the investigation was attached to',
-        optional: true,
-      },
-    },
-    event_id: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'The stable event id of the significant event the investigation was attached to; the same value as `fingerprint`, kept for compatibility',
-        optional: true,
-      },
-    },
-    investigation_id: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Agent Builder conversation ID of the attached investigation; joins to nightshift-investigation-started.investigation_id',
-      },
-    },
-    error_message: {
-      type: 'text',
-      _meta: {
-        description: 'Error message when investigation attachment fails',
-        optional: true,
-      },
-    },
-  };
-
 const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
   ...optionalWorkflowExecutionTelemetrySchema,
   ...alertCreationAttemptIdentitySchema,
@@ -984,7 +941,6 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
 export {
   agentBuilderKnowledgeIndicatorCreatedSchema,
   agentToolEventCreateSchema,
-  agentToolEventInvestigationAttachSchema,
   agentToolEventSearchSchema,
   agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,

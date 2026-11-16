@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { PackageAssetsVerificationError } from '../../../../../errors';
 import { verifyEsAssetsExist } from '../../verify_es_assets';
 import { withPackageSpan } from '../../utils';
 
@@ -26,14 +25,17 @@ export async function stepVerifyAssets(context: InstallContext) {
   );
 
   if (missingAssets.length > 0) {
-    logger.error(
+    // Verification is report-only: installed_es can hold references to assets of older package
+    // versions that no longer exist (left by earlier upgrades), and failing the install on them
+    // blocks upgrades, reinstalls and rollbacks. Log the missing assets and carry on.
+    logger.warn(
       `stepVerifyAssets: ${
         missingAssets.length
       } ES asset(s) missing after installation: ${missingAssets
         .map((a) => `${a.type}/${a.id}`)
         .join(', ')}`
     );
-    throw new PackageAssetsVerificationError(missingAssets.map(({ id, type }) => ({ id, type })));
+    return;
   }
 
   logger.debug(`stepVerifyAssets: all ${esReferences.length} ES asset(s) verified successfully`);

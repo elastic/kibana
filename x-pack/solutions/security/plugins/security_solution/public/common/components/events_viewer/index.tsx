@@ -26,12 +26,12 @@ import type {
   DeprecatedRowRenderer,
   Direction,
 } from '@kbn/securitysolution-timeline-common';
-import { EntityType } from '@kbn/timelines-plugin/common';
+import { EntityType } from '@kbn/securitysolution-timeline-search-strategy';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
 import type { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { InspectButton } from '../inspect';
@@ -171,10 +171,9 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     );
     return () => {
       dispatch(inputsActions.deleteOneQuery({ id: tableId, inputId: InputsModelId.global }));
-      if (editorActionsRef.current) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        editorActionsRef.current.closeEditor();
-      }
+      // The editor may have been opened after mount, so the latest ref value is read on unmount
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      editorActionsRef.current?.closeEditor();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

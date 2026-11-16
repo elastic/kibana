@@ -17,15 +17,14 @@ import { getSafeDateISORange } from '../utils';
 export function useDatasetTelemetry() {
   const { service, telemetryClient } = useDatasetQualityContext();
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const datasets = useSelector(service, (state) => state.context.datasets) ?? {};
+  const datasets = useSelector(service, (state) => state.context.datasets);
   const nonAggregatableDatasets = useSelector(
     service,
     (state) => state.context.nonAggregatableDatasets
   );
   const canUserViewIntegrations = useSelector(
     service,
-    (state) => state.context.datasetUserPrivileges.canViewIntegrations
+    (state) => state.context.canViewIntegrations
   );
   const sort = useSelector(service, (state) => state.context.table.sort);
   const appliedFilters = useDatasetQualityFilters();
