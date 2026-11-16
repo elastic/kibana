@@ -1,5 +1,5 @@
 {
-  "sha1": "79b8e7720cad36494def089d70b5ad94ec9f5b78",
+  "sha1": "a0c783d987915ae7456312389c0c5364b268ca8a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -368,6 +368,71 @@
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/network.spec.ts",
         "line": 77,
         "column": 25
+      }
+    },
+    {
+      "id": "a96b174c2f77244-e079573bd9db89f",
+      "title": "Digital Experience applications API with partial index access on serverless reports EDOT Browser as partially available when its logs are not readable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access_serverless.spec.ts",
+        "line": 34,
+        "column": 49
+      }
+    },
+    {
+      "id": "a96b174c2f77244-460300abe87d21f",
+      "title": "Digital Experience applications API with partial index access on serverless reports no partially available source for the viewer role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access_serverless.spec.ts",
+        "line": 46,
+        "column": 11
+      }
+    },
+    {
+      "id": "b11fddbc68c0b06-f347b6ec04ba511",
+      "title": "Digital Experience applications API with partial index access reports Classic RUM as partially available when only the OTel indices are readable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access.spec.ts",
+        "line": 60,
+        "column": 20
+      }
+    },
+    {
+      "id": "b11fddbc68c0b06-a38450f417dbdf4",
+      "title": "Digital Experience applications API with partial index access reports EDOT Browser as partially available when its logs are not readable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access.spec.ts",
+        "line": 75,
+        "column": 25
+      }
+    },
+    {
+      "id": "b11fddbc68c0b06-366f847e6947fd2",
+      "title": "Digital Experience applications API with partial index access reports no partially available source for the viewer role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access.spec.ts",
+        "line": 84,
+        "column": 37
       }
     },
     {
