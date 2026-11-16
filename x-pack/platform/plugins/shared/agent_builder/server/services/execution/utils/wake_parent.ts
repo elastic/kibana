@@ -67,11 +67,13 @@ const isWakeParentEnabled = ({
 
 /**
  * The settings the user or caller chose for the run that spawned the child, which its wake
- * continues: the model, project scope, effort, runtime overrides, size limit and tracing. Nothing
- * that belongs to that one request or to conversation creation.
+ * continues: the model (a connector or an inference feature), project scope, effort, runtime
+ * overrides, size limit and tracing. Nothing that belongs to that one request or to conversation
+ * creation.
  */
 export const inheritedRunSettings = ({
   connectorId,
+  inferenceFeatureId,
   projectRouting,
   reasoningLevel,
   configurationOverrides,
@@ -82,6 +84,7 @@ export const inheritedRunSettings = ({
   Object.fromEntries(
     Object.entries({
       connectorId,
+      inferenceFeatureId,
       projectRouting,
       reasoningLevel,
       configurationOverrides,

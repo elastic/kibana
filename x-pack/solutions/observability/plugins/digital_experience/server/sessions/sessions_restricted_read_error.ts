@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 
 /**
  * Thrown before any setup write when the enabling user's read on the source indices is filtered
- * by document- or field-level security, or can't be checked. The transforms summarize everything
- * the enabling user can read, for every reader, so a filtered read would silently drop other
- * applications' sessions or fields for everyone.
+ * by document- or field-level security, or can't be checked. Sessions are summarized from
+ * everything the enabling user can read, for every reader, so a filtered read would silently drop
+ * other applications' sessions or fields for everyone.
  */
 export class SessionsRestrictedReadError extends Error {
   constructor(
@@ -23,7 +23,7 @@ export class SessionsRestrictedReadError extends Error {
       reason === 'filtered'
         ? i18n.translate('xpack.digitalExperience.sessions.api.filteredRead', {
             defaultMessage:
-              'Enabling sessions requires read on {indices} without document- or field-level security, as the sessions transforms summarize what the enabling user can read for everyone who reads sessions.',
+              'Enabling sessions requires read on {indices} without document- or field-level security, as sessions are summarized from what the enabling user can read, for everyone who reads sessions.',
             values: { indices },
           })
         : i18n.translate('xpack.digitalExperience.sessions.api.unverifiableRead', {

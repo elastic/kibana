@@ -72,7 +72,10 @@ import {
   CloudOnboardingDeploymentSchemaV8,
 } from '../types';
 
-import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
+import {
+  downloadSourceSchemaV2,
+  downloadSourceSchemaV3,
+} from '../../common/types/models/download_source_schema';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
@@ -1918,6 +1921,13 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: downloadSourceSchemaV2,
             create: downloadSourceSchemaV2,
+          },
+        },
+        '3': {
+          changes: [],
+          schemas: {
+            forwardCompatibility: downloadSourceSchemaV3,
+            create: downloadSourceSchemaV3,
           },
         },
       },

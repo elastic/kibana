@@ -1353,3 +1353,79 @@ describe('useServiceSettings — proxy URL', () => {
     expect(result.current.isReady).toBe(true);
   });
 });
+
+describe('useServiceSettings — dedicated index template choice', () => {
+  const makeService = (id: string) =>
+    makeEntry(id, {
+      dataStreams: [id],
+      inputs: ['aws-s3'],
+      defaultEnabledInputs: ['aws-s3'],
+      varDefsByInput: {},
+      varDefsByDataStream: {
+        [id]: { inputs: ['aws-s3'], defaultEnabledInputs: ['aws-s3'], varDefsByInput: {} },
+      },
+    });
+  const fields = { svc_a: { enabledInputs: ['aws-s3'], varsByInput: {} } };
+
+  beforeEach(() => {
+    mockUseSessionStorage.mockImplementation((_key: string, initial: unknown) => useState(initial));
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['svc_a', 'svc_b'] },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: new Map([
+        ['svc_a', makeService('svc_a')],
+        ['svc_b', makeService('svc_b')],
+      ]),
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+  });
+
+  it('writes the choice to every service of the policy in one update', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    act(() =>
+      result.current.setServiceFieldsAndInputs('svc_a', fields, ['svc_a'], undefined, undefined, {
+        instanceIds: ['svc_a', 'svc_b'],
+        enabled: false,
+      })
+    );
+
+    expect(result.current.getServiceVars('svc_a').createDatasetTemplates).toBe(false);
+    expect(result.current.getServiceVars('svc_b').createDatasetTemplates).toBe(false);
+  });
+
+  it('keeps the choice when the fields are saved again without changing it', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() =>
+      result.current.setServiceFieldsAndInputs('svc_a', fields, ['svc_a'], undefined, undefined, {
+        instanceIds: ['svc_a'],
+        enabled: false,
+      })
+    );
+
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', fields, ['svc_a']));
+
+    expect(result.current.getServiceVars('svc_a').createDatasetTemplates).toBe(false);
+  });
+
+  it('leaves a service outside the policy alone', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    act(() =>
+      result.current.setServiceFieldsAndInputs('svc_a', fields, ['svc_a'], undefined, undefined, {
+        instanceIds: ['svc_a'],
+        enabled: false,
+      })
+    );
+
+    expect(result.current.getServiceVars('svc_b').createDatasetTemplates).toBeUndefined();
+  });
+
+  it('gives a duplicate its own choice', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, [], undefined, false));
+
+    expect(result.current.getServiceVars('svc_a__dup-1').createDatasetTemplates).toBe(false);
+    expect(result.current.getServiceVars('svc_a').createDatasetTemplates).toBeUndefined();
+  });
+});

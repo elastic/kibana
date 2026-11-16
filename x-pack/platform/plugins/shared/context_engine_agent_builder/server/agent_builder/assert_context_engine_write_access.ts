@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { apiPrivileges } from '@kbn/context-engine-plugin/common/features';
 import { isContextEngineEnabledInSpace } from '@kbn/context-engine-plugin/server/utils/is_context_engine_enabled_in_space';
+import { ContextEngineDisabledError, InsufficientPrivilegesError } from '../errors';
 
 export const assertContextEngineWriteAccess = async ({
   request,
@@ -36,7 +37,7 @@ export const assertContextEngineWriteAccess = async ({
   });
 
   if (!isEnabled) {
-    throw new Error('Context Engine is not enabled in this space.');
+    throw new ContextEngineDisabledError();
   }
 
   const checkPrivileges = security.authz.checkPrivilegesWithRequest(request);
@@ -45,6 +46,8 @@ export const assertContextEngineWriteAccess = async ({
   });
 
   if (!privileges.hasAllRequested) {
-    throw new Error('Insufficient privileges to update Context Engine AI indices.');
+    throw new InsufficientPrivilegesError(
+      'Insufficient privileges to update Context Engine AI indices.'
+    );
   }
 };

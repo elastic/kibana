@@ -10,7 +10,6 @@ import type { Logger } from '@kbn/core/server';
 import {
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
-  agentToolEventInvestigationAttachEventType,
   agentToolEventStatusUpdateEventType,
   agentToolKiIdentificationStartedEventType,
   detectionScanEventType,
@@ -53,7 +52,6 @@ export class EbtTelemetryService {
     this.analytics.registerEventType(agentToolEventStatusUpdateEventType);
     this.analytics.registerEventType(agentToolEventWriteEventType);
     this.analytics.registerEventType(agentToolEventSearchEventType);
-    this.analytics.registerEventType(agentToolEventInvestigationAttachEventType);
     this.analytics.registerEventType(eventStatusChangedEventType);
     this.analytics.registerEventType(discoveryTriggeredEventType);
     this.analytics.registerEventType(discoveryStartedEventType);

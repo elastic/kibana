@@ -10,7 +10,6 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
-  AgentToolEventInvestigationAttachProps,
   AgentToolEventSearchProps,
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
@@ -34,7 +33,6 @@ import {
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
@@ -109,18 +107,6 @@ export class EbtTelemetryClient {
   ) {
     this.report(
       SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
-      params,
-      request,
-      'origin'
-    );
-  }
-
-  public trackAgentToolEventInvestigationAttach(
-    params: TrackParams<AgentToolEventInvestigationAttachProps>,
-    request: KibanaRequest
-  ) {
-    this.report(
-      SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
       params,
       request,
       'origin'
