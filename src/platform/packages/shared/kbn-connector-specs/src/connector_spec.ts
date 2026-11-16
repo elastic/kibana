@@ -429,6 +429,8 @@ export interface ConnectorSpec {
 
   transformations?: Transformations;
 
+  // `skill` is inline text added to the connector's agent attachment; `skillFiles` are separate
+  // built-in skills the agent loads on demand.
   // Optional skill content for Agent Builder. When present, this string is
   // included in the connector's agent attachment representation so the LLM
   // has richer context about how to use the connector's sub-actions.

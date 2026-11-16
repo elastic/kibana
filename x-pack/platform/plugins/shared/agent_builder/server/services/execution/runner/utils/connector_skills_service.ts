@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ConnectorSkillsService } from '@kbn/agent-builder-server/runner';
 import { getConnectorSkillRegistryIds } from '@kbn/connector-specs';
+
+const MAX_CONCURRENT_CONNECTOR_LOOKUPS = 5;
 
 export const createConnectorSkillsService = ({
   actions,
@@ -25,11 +28,18 @@ export const createConnectorSkillsService = ({
       if (connectorIds.length === 0) return [];
       try {
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        const connectors = await actionsClient.getAll();
+        // Fetch only the agent's connectors, a few at a time; a stale id is skipped, not fatal.
+        const actionTypeIds = await pMap(
+          [...new Set(connectorIds)],
+          (id) =>
+            actionsClient.get({ id }).then(
+              ({ actionTypeId }) => actionTypeId,
+              () => undefined
+            ),
+          { concurrency: MAX_CONCURRENT_CONNECTOR_LOOKUPS }
+        );
         const connectorTypes = new Set(
-          connectors
-            .filter((connector) => connectorIds.includes(connector.id))
-            .map((connector) => connector.actionTypeId)
+          actionTypeIds.filter((id): id is string => id !== undefined)
         );
         return [...new Set([...connectorTypes].flatMap(getConnectorSkillRegistryIds))];
       } catch (error) {

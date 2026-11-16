@@ -15,10 +15,14 @@ describe('createConnectorSkillsService', () => {
   const logger = loggerMock.create();
 
   const setup = (connectors: Array<{ id: string; actionTypeId: string }>) => {
-    const getAll = jest.fn().mockResolvedValue(connectors);
-    const getActionsClientWithRequest = jest.fn().mockResolvedValue({ getAll });
+    const get = jest.fn(async ({ id }: { id: string }) => {
+      const connector = connectors.find((c) => c.id === id);
+      if (!connector) throw new Error(`Saved object [action/${id}] not found`);
+      return connector;
+    });
+    const getActionsClientWithRequest = jest.fn().mockResolvedValue({ get });
     const actions = { getActionsClientWithRequest } as unknown as ActionsPluginStart;
-    return { service: createConnectorSkillsService({ actions, request, logger }), getAll };
+    return { service: createConnectorSkillsService({ actions, request, logger }), get };
   };
 
   const CONNECTORS = [
@@ -29,17 +33,26 @@ describe('createConnectorSkillsService', () => {
   ];
 
   it('returns no skills, without loading connectors, when the agent has no connectors', async () => {
-    const { service, getAll } = setup(CONNECTORS);
+    const { service, get } = setup(CONNECTORS);
 
     await expect(service.resolveSkillIds([])).resolves.toEqual([]);
-    expect(getAll).not.toHaveBeenCalled();
+    expect(get).not.toHaveBeenCalled();
   });
 
-  it('returns each skill once for the types of the agent connectors, ignoring other connectors', async () => {
+  it('returns each skill once for every connector type, skipping types without skills and missing ids', async () => {
     const { service } = setup(CONNECTORS);
 
-    const ids = await service.resolveSkillIds(['gh-1', 'gh-2', 'slack-1', 'not-a-connector']);
-    expect(ids).toEqual(['platform.connectors.github']);
+    const ids = await service.resolveSkillIds([
+      'gh-1',
+      'gh-2',
+      'pd-1',
+      'slack-1',
+      'not-a-connector',
+    ]);
+    expect([...ids].sort()).toEqual([
+      'platform.connectors.github',
+      'platform.connectors.pagerduty',
+    ]);
   });
 
   it('returns no skills and warns when connectors cannot be loaded', async () => {

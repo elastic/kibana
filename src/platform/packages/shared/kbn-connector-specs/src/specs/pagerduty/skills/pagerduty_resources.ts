@@ -25,8 +25,10 @@ export const buildPagerdutyResources = ({
 Run this workflow with ${bt}platform.core.execute_workflow${bt}: pass the YAML as ${bt}yaml${bt} (no need to save it first) and
 ${bt}connector_id${bt} plus the inputs below as ${bt}inputs${bt}, for example
 ${bt}{"connector_id":"<connectorId>","query":"primary"}${bt}. It finds the schedules whose name matches ${bt}query${bt}, then
-returns who is on call for them, in one call. The result is ${bt}{ "response": [...], "truncated": bool, "matched_schedules": N }${bt}.
+returns who is on call for them, in one call. The result is ${bt}{ "response": [...], "truncated": bool, "schedules_truncated": bool, "matched_schedules": N }${bt}.
 
+- If ${bt}schedules_truncated${bt} is true, more schedules match ${bt}query${bt} than ${bt}limit${bt}, so ${bt}response${bt} covers only some of them; narrow
+  ${bt}query${bt} or tell the user the list is partial.
 - ${bt}matched_schedules${bt} is how many schedules matched ${bt}query${bt}. If it is 0, nothing matched and ${bt}response${bt} is **not**
   filtered by schedule (it can list everyone), so tell the user no schedule matched instead of reporting it.
 - Entries not driven by a schedule (for example a user targeted directly by a policy) have ${bt}schedule${bt}, ${bt}start${bt} and
@@ -36,7 +38,7 @@ returns who is on call for them, in one call. The result is ${bt}{ "response": [
 | Input | Description |
 |---|---|
 | ${bt}query${bt} | Schedule name to search for (required) |
-| ${bt}limit${bt} | Max schedules to match (1-100, default 20) |
+| ${bt}limit${bt} | Max schedules to match (1-25, default 25) |
 | ${bt}team_ids${bt} | Only schedules belonging to these team IDs |
 | ${bt}kind${bt} | ${bt}legacy${bt} or ${bt}shift_based${bt}; omit for both |
 
@@ -52,7 +54,7 @@ triggers:
           type: string
         limit:
           type: number
-          default: 20
+          default: 25
         team_ids:
           type: array
           items:
@@ -90,6 +92,7 @@ steps:
     with:
       response: \${{ steps.list_oncalls.output.response }}
       truncated: \${{ steps.list_oncalls.output.truncated }}
+      schedules_truncated: \${{ steps.list_schedules.output.truncated }}
       matched_schedules: \${{ steps.list_schedules.output.response | size }}
 ${fence}
 `.trim(),
