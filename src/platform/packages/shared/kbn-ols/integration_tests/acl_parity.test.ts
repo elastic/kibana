@@ -30,6 +30,7 @@ import {
   ACL_SHAPE_FIXTURES,
   FIXTURE_POLICY,
   FIXTURE_POLICY_ALL_LEVELS,
+  FIXTURE_POLICY_MANAGE_ENTRIES,
   FIXTURE_PROBES,
   type FixtureProbe,
 } from '../src/__fixtures__';
@@ -590,6 +591,28 @@ describe('ACLs in Elasticsearch', () => {
           ],
         },
         expected: { grantee: 'use', stranger: 'manage' },
+      },
+      {
+        name: 'a manage grant is kept',
+        policy: FIXTURE_POLICY_MANAGE_ENTRIES,
+        stored: {
+          version: 1,
+          owner: { type: 'user', id: 'u_owner' },
+          general_access: 'view',
+          entries: [
+            { type: 'user', id: 'u_owner', access: 'manage', added_at: NOW },
+            { type: 'user', id: 'u_grantee', access: 'manage', added_at: NOW },
+            { type: 'user', id: 'u_stranger', access: 'use', added_at: NOW },
+          ],
+        },
+        expected: {
+          owner: 'view',
+          grantee: 'manage',
+          stranger: 'manage',
+          ownerIdServiceAccount: 'view',
+          numericIdUser: 'view',
+          anonymous: 'view',
+        },
       },
     ] as Array<{
       name: string;

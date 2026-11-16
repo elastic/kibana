@@ -40,6 +40,17 @@ export const FIXTURE_POLICY_ALL_LEVELS: AccessPolicy = {
 };
 
 /**
+ * Policy where an entry can grant access management: private by default, general access that can
+ * be `view`, and entries that grant `use` or `manage`.
+ */
+export const FIXTURE_POLICY_MANAGE_ENTRIES: AccessPolicy = {
+  generalAccessLevels: ['none', 'view'],
+  defaultGeneralAccessLevel: 'none',
+  entryLevels: ['use', 'manage'],
+  operations: FIXTURE_POLICY.operations,
+};
+
+/**
  * Principals whose access each fixture states. `anonymous` stands for a request with no principal.
  */
 export const FIXTURE_PROBES = {
@@ -501,5 +512,60 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
     policy: FIXTURE_POLICY_ALL_LEVELS,
     state: 'valid',
     access: { owner: 'manage', grantee: 'view' },
+  },
+  {
+    name: 'no acl when entries can grant manage',
+    source: {},
+    indexable: true,
+    policy: FIXTURE_POLICY_MANAGE_ENTRIES,
+    state: 'absent',
+    access: {},
+  },
+  {
+    name: 'a manage entry lets the grantee manage access',
+    source: { acl: { ...PRIVATE, entries: [{ ...GRANTEE_USE, access: 'manage' }] } },
+    indexable: true,
+    policy: FIXTURE_POLICY_MANAGE_ENTRIES,
+    state: 'valid',
+    access: { owner: 'manage', grantee: 'manage' },
+  },
+  {
+    name: 'a manage entry for a user gives a service account with the same ID nothing more',
+    source: {
+      acl: {
+        ...VERSION,
+        ...OWNER,
+        general_access: 'view',
+        entries: [{ ...GRANTEE_USE, id: 'u_owner', access: 'manage' }],
+      },
+    },
+    indexable: true,
+    policy: FIXTURE_POLICY_MANAGE_ENTRIES,
+    state: 'valid',
+    access: { ...allProbesAt('view'), owner: 'manage' },
+  },
+  {
+    name: 'a manage entry that also stores use grants use',
+    source: { acl: { ...PRIVATE, entries: [{ ...GRANTEE_USE, access: ['manage', 'use'] }] } },
+    indexable: true,
+    policy: FIXTURE_POLICY_MANAGE_ENTRIES,
+    state: 'valid',
+    access: { owner: 'manage', grantee: 'use' },
+  },
+  {
+    name: 'a manage entry that also stores a level the policy does not allow grants manage',
+    source: { acl: { ...PRIVATE, entries: [{ ...GRANTEE_USE, access: ['edit', 'manage'] }] } },
+    indexable: true,
+    policy: FIXTURE_POLICY_MANAGE_ENTRIES,
+    state: 'valid',
+    access: { owner: 'manage', grantee: 'manage' },
+  },
+  {
+    name: 'a use entry and a manage entry for one principal grant manage',
+    source: { acl: { ...PRIVATE, entries: [GRANTEE_USE, { ...GRANTEE_USE, access: 'manage' }] } },
+    indexable: true,
+    policy: FIXTURE_POLICY_MANAGE_ENTRIES,
+    state: 'valid',
+    access: { owner: 'manage', grantee: 'manage' },
   },
 ];
