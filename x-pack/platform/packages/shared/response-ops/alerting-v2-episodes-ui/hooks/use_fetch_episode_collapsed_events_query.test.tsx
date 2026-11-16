@@ -8,6 +8,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import {
   buildCollapsedStatusPhasesQuery,
   buildCollapsedSeverityPhasesQuery,
@@ -30,7 +31,10 @@ const severityQueryString = buildCollapsedSeverityPhasesQuery(queryOptions).prin
 
 describe('useFetchEpisodeCollapsedEventsQuery', () => {
   const data = dataPluginMock.createStartContract();
+  const notifications = notificationServiceMock.createStartContract();
   const mockSpaces = createMockSpaces();
+  const services = { data, notifications, spaces: mockSpaces };
+  const eventCounts = { shownEventCount: 1000, totalEventCount: 5002 };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -45,8 +49,7 @@ describe('useFetchEpisodeCollapsedEventsQuery', () => {
     ['missing the episode id', { episodeId: undefined, enabled: true }],
   ])('does not run when %s', (_label, options) => {
     const { result } = renderHook(
-      () =>
-        useFetchEpisodeCollapsedEventsQuery({ ...options, services: { data, spaces: mockSpaces } }),
+      () => useFetchEpisodeCollapsedEventsQuery({ ...options, ...eventCounts, services }),
       { wrapper }
     );
 
@@ -112,7 +115,8 @@ describe('useFetchEpisodeCollapsedEventsQuery', () => {
         useFetchEpisodeCollapsedEventsQuery({
           episodeId: 'ep-1',
           enabled: true,
-          services: { data, spaces: mockSpaces },
+          ...eventCounts,
+          services,
         }),
       { wrapper }
     );
@@ -147,5 +151,59 @@ describe('useFetchEpisodeCollapsedEventsQuery', () => {
         { '@timestamp': '2024-01-01T12:10:00.000Z', severity: 'high' },
       ],
     });
+  });
+
+  it('retries a failed load, then toasts the error', async () => {
+    const error = new Error('search failed');
+    runEsqlAsyncSearchMock.mockRejectedValue(error);
+    const retryWrapper = createQueryClientWrapper(
+      createTestQueryClient({ defaultOptions: { queries: { retryDelay: 0 } } })
+    );
+
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeCollapsedEventsQuery({
+          episodeId: 'ep-1',
+          enabled: true,
+          ...eventCounts,
+          services,
+        }),
+      { wrapper: retryWrapper }
+    );
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    // Two queries per attempt: the first try and two retries.
+    expect(runEsqlAsyncSearchMock).toHaveBeenCalledTimes(6);
+    expect(notifications.toasts.addError).toHaveBeenCalledTimes(1);
+    expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
+      title: 'Could not load the full history for this alert',
+      toastMessage:
+        'The timeline shows 1000 of 5002 events, so the latest status and severity may be missing.',
+    });
+  });
+
+  it('does not toast an aborted load', async () => {
+    const abortError = new Error('aborted');
+    abortError.name = 'AbortError';
+    runEsqlAsyncSearchMock.mockRejectedValue(abortError);
+    const retryWrapper = createQueryClientWrapper(
+      createTestQueryClient({ defaultOptions: { queries: { retryDelay: 0 } } })
+    );
+
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeCollapsedEventsQuery({
+          episodeId: 'ep-1',
+          enabled: true,
+          ...eventCounts,
+          services,
+        }),
+      { wrapper: retryWrapper }
+    );
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(notifications.toasts.addError).not.toHaveBeenCalled();
   });
 });

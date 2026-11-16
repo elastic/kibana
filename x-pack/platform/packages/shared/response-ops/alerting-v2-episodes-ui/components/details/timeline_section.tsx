@@ -25,7 +25,7 @@ export interface AlertEpisodeTimelineSectionProps {
   episodeId: string;
   seriesId: string | null | undefined;
   groupHash: string | undefined;
-  services: Pick<AlertEpisodeDetailsServices, 'data' | 'spaces' | 'userProfile'>;
+  services: Pick<AlertEpisodeDetailsServices, 'data' | 'notifications' | 'spaces' | 'userProfile'>;
 }
 
 export const AlertEpisodeTimelineSection = ({

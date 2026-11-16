@@ -26,7 +26,7 @@ const HeatmapSkeleton = () => (
 
 export interface AlertEpisodeTimelineHeatmapsSectionProps {
   episodeId: string;
-  services: Pick<AlertEpisodeDetailsServices, 'data' | 'spaces'>;
+  services: Pick<AlertEpisodeDetailsServices, 'data' | 'notifications' | 'spaces'>;
   /** Renders the timeline titles one step smaller, for narrow hosts like the details flyout. */
   compressed?: boolean;
 }

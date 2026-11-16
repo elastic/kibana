@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -22,8 +23,16 @@ import type {
   SeverityChangeSourceRow,
   StateChangeSourceRow,
 } from '../components/details/timeline/entries';
+import { shouldSwallowFetchError } from '../utils/should_swallow_fetch_error';
 import { sweepPhaseRanges } from '../utils/sweep_phase_ranges';
+import {
+  COLLAPSED_EVENTS_FETCH_ERROR_TOAST_TITLE,
+  getCollapsedEventsFetchErrorToastMessage,
+} from './translations';
 import { useSpaceId } from './use_space_id';
+
+/** Retries before the failure is toasted; the timeline then shows only the first events. */
+const COLLAPSED_EVENTS_QUERY_RETRIES = 2;
 
 /** A status row for the episode timelines: one event, or one collapsed status phase. */
 export interface EpisodeTimelineStatusRow extends StateChangeSourceRow, AlertTimelineEventRow {}
@@ -36,7 +45,15 @@ export interface EpisodeTimelineSeverityRow
 export interface UseFetchEpisodeCollapsedEventsQueryOptions {
   episodeId: string | undefined;
   enabled: boolean;
-  services: { data: DataPublicPluginStart; spaces: SpacesPluginStart };
+  /** Events the truncated events query returned, named in the failure toast. */
+  shownEventCount: number;
+  /** Events the episode has in total, named in the failure toast. */
+  totalEventCount: number;
+  services: {
+    data: DataPublicPluginStart;
+    notifications: NotificationsStart;
+    spaces: SpacesPluginStart;
+  };
 }
 
 export interface EpisodeCollapsedEvents {
@@ -69,11 +86,14 @@ const sweepRows = <Row extends CollapsedPhaseRow>(
  * severity (the rule-details Gantt chart grouping), swept into chronological
  * changes, oldest first. Scoped by space and episode only, so alerts without a
  * rule (external ingest) collapse too. Per-change event counts are not
- * available once phases are merged, so the rows carry none.
+ * available once phases are merged, so the rows carry none. A failure is
+ * retried, then toasted, since the timeline falls back to the truncated events.
  */
 export const useFetchEpisodeCollapsedEventsQuery = ({
   episodeId,
   enabled,
+  shownEventCount,
+  totalEventCount,
   services,
 }: UseFetchEpisodeCollapsedEventsQueryOptions) => {
   const { data } = services;
@@ -122,5 +142,15 @@ export const useFetchEpisodeCollapsedEventsQuery = ({
     },
     enabled: enabled && Boolean(episodeId),
     staleTime: QUERY_STALE_TIME,
+    retry: COLLAPSED_EVENTS_QUERY_RETRIES,
+    onError: (error: Error) => {
+      if (shouldSwallowFetchError(error)) {
+        return;
+      }
+      services.notifications.toasts.addError(error, {
+        title: COLLAPSED_EVENTS_FETCH_ERROR_TOAST_TITLE,
+        toastMessage: getCollapsedEventsFetchErrorToastMessage(shownEventCount, totalEventCount),
+      });
+    },
   });
 };

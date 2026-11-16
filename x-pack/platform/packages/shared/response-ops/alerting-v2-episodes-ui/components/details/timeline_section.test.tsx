@@ -45,6 +45,7 @@ const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfiles);
 
 const mockServices = {
   data: {} as never,
+  notifications: {} as never,
   spaces: {} as never,
   userProfile: {} as never,
 };

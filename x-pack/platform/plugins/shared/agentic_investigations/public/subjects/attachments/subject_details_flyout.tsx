@@ -69,6 +69,7 @@ export const SubjectDetailsFlyout = ({
     }
     const {
       http,
+      notifications,
       uiSettings,
       userProfile,
       data,
@@ -87,6 +88,7 @@ export const SubjectDetailsFlyout = ({
           getEpisodeDetailsHref={() => detailsHref ?? ''}
           services={{
             http,
+            notifications,
             uiSettings,
             userProfile,
             data,

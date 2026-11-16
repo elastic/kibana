@@ -7,6 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import type {
@@ -34,7 +35,11 @@ jest.mock('./use_fetch_episode_collapsed_events_query', () => ({
     mockUseFetchCollapsedEvents(options),
 }));
 
-const services = { data: dataPluginMock.createStartContract(), spaces: createMockSpaces() };
+const services = {
+  data: dataPluginMock.createStartContract(),
+  notifications: notificationServiceMock.createStartContract(),
+  spaces: createMockSpaces(),
+};
 
 const eventRows: EpisodeEventRow[] = [
   {
@@ -126,7 +131,11 @@ describe('useEpisodeTimelineSourceRows', () => {
     const { result } = renderSourceRows();
 
     expect(mockUseFetchCollapsedEvents).toHaveBeenCalledWith(
-      expect.objectContaining({ enabled: true })
+      expect.objectContaining({
+        enabled: true,
+        shownEventCount: eventRows.length,
+        totalEventCount: 5000,
+      })
     );
     expect(result.current).toEqual({
       statusRows: collapsedEvents.statusRows,

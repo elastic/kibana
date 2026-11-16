@@ -506,6 +506,7 @@ export const EpisodesTable = ({
           services={{
             data: services.data,
             http: services.http,
+            notifications: services.notifications,
             expressions: services.expressions,
             userProfile: services.userProfile,
             spaces: services.spaces,

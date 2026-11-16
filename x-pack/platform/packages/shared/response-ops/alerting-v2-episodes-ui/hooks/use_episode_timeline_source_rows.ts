@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
@@ -17,7 +18,11 @@ import {
 
 export interface UseEpisodeTimelineSourceRowsOptions {
   episodeId: string | undefined;
-  services: { data: DataPublicPluginStart; spaces: SpacesPluginStart };
+  services: {
+    data: DataPublicPluginStart;
+    notifications: NotificationsStart;
+    spaces: SpacesPluginStart;
+  };
 }
 
 export interface EpisodeTimelineSourceRows {
@@ -48,13 +53,15 @@ export const useEpisodeTimelineSourceRows = ({
   } = useFetchEpisodeEventsQuery({ episodeId, services });
 
   const eventRows = episodeEvents?.eventRows ?? EMPTY_EVENT_ROWS;
-  const isTruncated =
-    episodeEvents !== undefined && episodeEvents.totalEventCount > eventRows.length;
+  const totalEventCount = episodeEvents?.totalEventCount ?? 0;
+  const isTruncated = episodeEvents !== undefined && totalEventCount > eventRows.length;
 
   const { data: collapsedEvents, isInitialLoading: isLoadingCollapsedEvents } =
     useFetchEpisodeCollapsedEventsQuery({
       episodeId,
       enabled: isTruncated,
+      shownEventCount: eventRows.length,
+      totalEventCount,
       services,
     });
 
