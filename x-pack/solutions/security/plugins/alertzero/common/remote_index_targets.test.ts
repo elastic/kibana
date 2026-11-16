@@ -27,7 +27,7 @@ describe('remoteIndexTargets with one local pattern', () => {
     expect(endpointEventIndices(['logs-*', 'filebeat-*', 'endgame-*'])).toBe(ENDPOINT_EVENTS_INDEX);
   });
 
-  it('subtracts a remote exclusion instead of searching that cluster', () => {
+  it('does not search an excluded cluster, and does not name it when nothing would search it', () => {
     expect(
       endpointEventIndices([
         '-remote_a:logs-*',
@@ -35,9 +35,7 @@ describe('remoteIndexTargets with one local pattern', () => {
         '-logs-*',
         'remote_kept:logs-*',
       ])
-    ).toBe(
-      `${ENDPOINT_EVENTS_INDEX},remote_kept:${ENDPOINT_EVENTS_INDEX},-remote_a:${ENDPOINT_EVENTS_INDEX},-remote_b:${ENDPOINT_EVENTS_INDEX}`
-    );
+    ).toBe(`${ENDPOINT_EVENTS_INDEX},remote_kept:${ENDPOINT_EVENTS_INDEX}`);
   });
 
   it('keeps a wildcard include from searching an excluded cluster', () => {
@@ -46,9 +44,29 @@ describe('remoteIndexTargets with one local pattern', () => {
     );
   });
 
-  it('does not add a cluster the data view excludes', () => {
+  it('does not add a cluster the data view excludes, and does not name it', () => {
     expect(endpointEventIndices(['remote_excluded:logs-*', '-remote_excluded:*'])).toBe(
-      `${ENDPOINT_EVENTS_INDEX},-remote_excluded:${ENDPOINT_EVENTS_INDEX}`
+      ENDPOINT_EVENTS_INDEX
+    );
+  });
+
+  it('keeps a stale excluded alias out of the target', () => {
+    // Elasticsearch fails the whole request for an alias that is not a configured remote,
+    // including one that only appears in an exclusion.
+    expect(endpointEventIndices(['remote_a:logs-*', '-ghost:logs-*'])).toBe(
+      `${ENDPOINT_EVENTS_INDEX},remote_a:${ENDPOINT_EVENTS_INDEX}`
+    );
+  });
+
+  it('names an excluded cluster when a wildcard alias would search it', () => {
+    expect(endpointEventIndices(['remote_*:logs-*', '-remote_a:logs-*'])).toBe(
+      `${ENDPOINT_EVENTS_INDEX},remote_*:${ENDPOINT_EVENTS_INDEX},-remote_a:${ENDPOINT_EVENTS_INDEX}`
+    );
+  });
+
+  it('does not name an exclusion that a different wildcard alias cannot reach', () => {
+    expect(endpointEventIndices(['other_*:logs-*', '-remote_a:logs-*'])).toBe(
+      `${ENDPOINT_EVENTS_INDEX},other_*:${ENDPOINT_EVENTS_INDEX}`
     );
   });
 
@@ -100,7 +118,7 @@ describe('remoteIndexTargets with one local pattern', () => {
     const stars = '*'.repeat(40);
 
     expect(endpointEventIndices(['remote_a:logs-*', `-remote_a:logs-${stars}`])).toBe(
-      `${ENDPOINT_EVENTS_INDEX},-remote_a:${ENDPOINT_EVENTS_INDEX}`
+      ENDPOINT_EVENTS_INDEX
     );
     expect(endpointEventIndices(['remote_a:logs-*', `-remote_a:logs-${stars}x`])).toBe(
       `${ENDPOINT_EVENTS_INDEX},remote_a:${ENDPOINT_EVENTS_INDEX},-remote_a:logs-${stars}x`
@@ -184,23 +202,23 @@ describe('remoteIndexTargets with several local patterns', () => {
     ).toEqual(['remote_b', 'remote_a']);
   });
 
-  it('drops only the pattern a remote exclusion covers', () => {
+  it('drops only the pattern a remote exclusion covers, and does not name the exclusion', () => {
     expect(
       remoteIndexTargets(['remote_a:logs-*', `-remote_a:${PROCESS}`], [PROCESS, NETWORK])
     ).toEqual({
-      index: `${PROCESS},${NETWORK},remote_a:${NETWORK},-remote_a:${PROCESS}`,
+      index: `${PROCESS},${NETWORK},remote_a:${NETWORK}`,
       clusters: ['remote_a'],
     });
   });
 
-  it('reports no cluster when an exclusion covers every pattern', () => {
+  it('reports no cluster, and names no exclusion, when an exclusion covers every pattern', () => {
     expect(
       remoteIndexTargets(
         ['remote_a:logs-*', '-remote_a:logs-endpoint.events.*'],
         [PROCESS, NETWORK]
       )
     ).toEqual({
-      index: `${PROCESS},${NETWORK},-remote_a:${PROCESS},-remote_a:${NETWORK}`,
+      index: `${PROCESS},${NETWORK}`,
       clusters: [],
     });
   });

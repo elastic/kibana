@@ -133,6 +133,25 @@ consts:
   # Local Elastic Defend events. The resolve step adds `{alias}:logs-endpoint.events.*`
   # for each cluster in the space's default data view. A failed resolve keeps this.
   endpoint_events_index: logs-endpoint.events.*
+  # The fields each raw-event search returns. All four searches read the same list.
+  event_fields:
+    - '@timestamp'
+    - host.name
+    - host.id
+    - user.name
+    - process.name
+    - process.parent.name
+    - process.entity_id
+    - process.executable
+    - process.command_line
+    - source.ip
+    - destination.ip
+    - destination.domain
+    - event.action
+    - event.category
+    - agent.id
+    - dns.question.name
+    - network.direction
 steps:
   # Loaded rather than received, so a retry cannot reason over a copy that went
   # stale. `ids` works because a persisted discovery is indexed under its
@@ -332,24 +351,7 @@ steps:
       size: 50
       # The template caps this string at 200k characters. Endpoint documents
       # carry process and network trees the parent and destination checks do not use.
-      _source:
-        - '@timestamp'
-        - host.name
-        - host.id
-        - user.name
-        - process.name
-        - process.parent.name
-        - process.entity_id
-        - process.executable
-        - process.command_line
-        - source.ip
-        - destination.ip
-        - destination.domain
-        - event.action
-        - event.category
-        - agent.id
-        - dns.question.name
-        - network.direction
+      _source: "${{ consts.event_fields }}"
       sort:
         - "@timestamp": asc
       query:
@@ -375,24 +377,7 @@ steps:
       ignore_unavailable: true
       allow_partial_search_results: true
       size: 50
-      _source:
-        - '@timestamp'
-        - host.name
-        - host.id
-        - user.name
-        - process.name
-        - process.parent.name
-        - process.entity_id
-        - process.executable
-        - process.command_line
-        - source.ip
-        - destination.ip
-        - destination.domain
-        - event.action
-        - event.category
-        - agent.id
-        - dns.question.name
-        - network.direction
+      _source: "${{ consts.event_fields }}"
       sort:
         - "@timestamp": asc
       query:
@@ -415,24 +400,7 @@ steps:
       ignore_unavailable: true
       allow_partial_search_results: true
       size: 50
-      _source:
-        - '@timestamp'
-        - host.name
-        - host.id
-        - user.name
-        - process.name
-        - process.parent.name
-        - process.entity_id
-        - process.executable
-        - process.command_line
-        - source.ip
-        - destination.ip
-        - destination.domain
-        - event.action
-        - event.category
-        - agent.id
-        - dns.question.name
-        - network.direction
+      _source: "${{ consts.event_fields }}"
       sort:
         - "@timestamp": asc
       query:
@@ -455,24 +423,7 @@ steps:
       ignore_unavailable: true
       allow_partial_search_results: true
       size: 50
-      _source:
-        - '@timestamp'
-        - host.name
-        - host.id
-        - user.name
-        - process.name
-        - process.parent.name
-        - process.entity_id
-        - process.executable
-        - process.command_line
-        - source.ip
-        - destination.ip
-        - destination.domain
-        - event.action
-        - event.category
-        - agent.id
-        - dns.question.name
-        - network.direction
+      _source: "${{ consts.event_fields }}"
       sort:
         - "@timestamp": asc
       query:
@@ -497,6 +448,19 @@ steps:
     with:
       entities_failed: "${{ steps.load_entities.error != null }}"
       events_failed: "${{ (steps.load_events_by_host_id.error != null and steps.load_events_by_host_id_local.error != null) or (steps.load_events_by_host_name.error != null and steps.load_events_by_host_name_local.error != null) }}"
+      # The hits may be missing events that live on a remote cluster. True when the combined
+      # search failed (the local retry then answered, or nothing did) or when a remote was
+      # skipped, partial, or failed in a search that returned. `events_failed` stays false in
+      # these cases, so it cannot stand for "every event was read".
+      events_degraded: >-
+        ${{ steps.load_events_by_host_id.error != null
+          or steps.load_events_by_host_name.error != null
+          or steps.load_events_by_host_id.output._clusters.skipped > 0
+          or steps.load_events_by_host_id.output._clusters.partial > 0
+          or steps.load_events_by_host_id.output._clusters.failed > 0
+          or steps.load_events_by_host_name.output._clusters.skipped > 0
+          or steps.load_events_by_host_name.output._clusters.partial > 0
+          or steps.load_events_by_host_name.output._clusters.failed > 0 }}
 
   - name: analyze
     type: ai.agent
@@ -757,19 +721,19 @@ steps:
         {{ consts.supported_verdicts | join: ", " }}, or the summary was empty.
         No classification was produced.
 
-  # A truncated entity or event page is missing evidence. The review closes the
-  # attack on `false_positive`, so that verdict becomes `inconclusive` before it is
-  # emitted. `true_positive` is left alone: truncation blocks a clear, not an
-  # escalation.
+  # A truncated entity or event page, or a raw-event read that may be missing events
+  # from a remote cluster, is missing evidence. The review closes the attack on
+  # `false_positive`, so that verdict becomes `inconclusive` before it is emitted.
+  # `true_positive` is left alone: missing evidence blocks a clear, not an escalation.
   #
   # Parentheses are required. `and` binds tighter than `or`, so an ungrouped
-  # condition also rewrites a truncated `true_positive`.
+  # condition also rewrites a truncated or incomplete `true_positive`.
   - name: block_truncated_clear
     type: data.set
     with:
-      downgraded: "${{ (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' }}"
-      verdict: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}inconclusive{% else %}{{ steps.analyze.output.structured_output.verdict }}{% endif %}"
-      summary_markdown: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}Evidence was truncated, so this cannot be cleared as a false positive.{% else %}{{ steps.analyze.output.structured_output.summary_markdown }}{% endif %}"
+      downgraded: "${{ (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50 or steps.source_status.output.events_degraded == true) and steps.analyze.output.structured_output.verdict == 'false_positive' }}"
+      verdict: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50 or steps.source_status.output.events_degraded == true) and steps.analyze.output.structured_output.verdict == 'false_positive' %}inconclusive{% else %}{{ steps.analyze.output.structured_output.verdict }}{% endif %}"
+      summary_markdown: "{% if steps.analyze.output.structured_output.verdict == 'false_positive' and (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) %}Evidence was truncated, so this cannot be cleared as a false positive.{% elsif steps.analyze.output.structured_output.verdict == 'false_positive' and steps.source_status.output.events_degraded == true %}Some endpoint events could not be read from every cluster, so this cannot be cleared as a false positive.{% else %}{{ steps.analyze.output.structured_output.summary_markdown }}{% endif %}"
 
   # A world claim may only cite an id from the hits. An entity-store claim may
   # cite `entity.id` or the hit `_id`; the prompt renders both. A raw-event claim

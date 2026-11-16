@@ -267,7 +267,10 @@ export class AlertZeroPlugin
         stepsLogger
       ),
       isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
-      getCoreStart: () => this.requireCoreStart(),
+      getUiSettingsClient: (request) => {
+        const core = this.requireCoreStart();
+        return core.uiSettings.asScopedToClient(core.savedObjects.getScopedClient(request));
+      },
       getInternalEsClient: () => this.requireCoreStart().elasticsearch.client.asInternalUser,
       getTaskManager: () => this.requireStarted(this.taskManager, 'Task Manager'),
       getWorkflowsManagement: () =>

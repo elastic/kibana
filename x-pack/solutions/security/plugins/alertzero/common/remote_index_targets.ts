@@ -97,13 +97,22 @@ export interface RemoteIndexTargets {
  * Search target for a read of `localTargets` that also reaches the remote clusters the space's
  * default data view names. Always the local patterns first. Each positive cluster alias in the
  * data view adds `{alias}:{pattern}` for every local pattern. A remote exclusion that covers
- * every index a pattern matches does not add that alias for the pattern; it is rewritten as
- * `-cluster:{pattern}` so a wildcard include cannot search that cluster. A narrower exclusion is
- * passed through as `-cluster:<index>` and the cluster stays in the search. An exclusion that
- * does not fit in the target takes its positive patterns back out, so the search cannot read
- * events the space excluded. Local exclusions, and ES|QL mode prefixes (`_any:`, `_remote:`,
- * `_coordinator:`), add nothing. The data view's own streams are not searched: a caller reads only
- * the patterns it names.
+ * every index a pattern matches does not add that alias for the pattern. It is written out as
+ * `-cluster:{pattern}` only when a wildcard include (`*:` or `remote_*:`) would otherwise search
+ * that cluster. A narrower exclusion is passed through as `-cluster:<index>` and the cluster stays
+ * in the search. An exclusion that nothing in the target would search is left out: Elasticsearch
+ * fails the whole request when an alias in it is not a configured remote, so an alias the data view
+ * still names but the deployment no longer has must not reach the target without need.
+ *
+ * Elasticsearch counts a `-cluster:<index>` entry as including that cluster, so an exclusion that
+ * is written out still contacts the cluster, with no shards to search. The data it returns is
+ * correct. `-cluster:*` would avoid the contact, but Elasticsearch rejects it unless an earlier
+ * entry included the cluster.
+ *
+ * An exclusion that does not fit in the target takes its positive patterns back out, so the search
+ * cannot read events the space excluded. Local exclusions, and ES|QL mode prefixes (`_any:`,
+ * `_remote:`, `_coordinator:`), add nothing. The data view's own streams are not searched: a caller
+ * reads only the patterns it names.
  */
 export const remoteIndexTargets = (
   dataViewPatterns: readonly string[],
@@ -152,7 +161,18 @@ export const remoteIndexTargets = (
       result.push(next);
     }
   }
+  const searchesExcluded = (exclusion: RemoteExclusion): boolean =>
+    result.slice(locals.length).some((entry) => {
+      if (entry.startsWith('-')) return false;
+      const separator = entry.indexOf(':');
+      return (
+        positiveWouldSearch(entry.slice(0, separator), exclusion.cluster) &&
+        globsOverlap(entry.slice(separator + 1), exclusion.index)
+      );
+    });
+
   for (const exclusion of excluded) {
+    if (!searchesExcluded(exclusion)) continue;
     const next = `-${exclusion.cluster}:${exclusion.index}`;
     if (fits(result, next)) {
       result.push(next);

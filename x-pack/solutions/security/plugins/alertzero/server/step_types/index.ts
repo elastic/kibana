@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IUiSettingsClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -44,7 +49,7 @@ export const registerStepDefinitions = ({
   getHuntServices,
   getResolveHostEnrollment,
   isContextEngineEnabled,
-  getCoreStart,
+  getUiSettingsClient,
   getInternalEsClient,
   getTaskManager,
   getWorkflowsManagement,
@@ -59,7 +64,7 @@ export const registerStepDefinitions = ({
   getHuntServices: () => HuntServices;
   getResolveHostEnrollment?: PackageReportStepDependencies['getResolveHostEnrollment'];
   isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
-  getCoreStart: () => CoreStart;
+  getUiSettingsClient: (request: KibanaRequest) => IUiSettingsClient;
   getInternalEsClient?: () => ElasticsearchClient;
   getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
   getWorkflowsManagement: LoadAlertsStepDependencies['getWorkflowsManagement'];
@@ -94,7 +99,7 @@ export const registerStepDefinitions = ({
     })
   );
   workflowsExtensions.registerStepDefinition(
-    getRemoteIndexTargetsStepDefinition({ getCoreStart, logger })
+    getRemoteIndexTargetsStepDefinition({ getUiSettingsClient, logger })
   );
   workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
   workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());

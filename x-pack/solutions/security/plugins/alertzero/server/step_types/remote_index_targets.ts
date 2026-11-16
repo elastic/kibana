@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { SECURITY_SOLUTION_DEFAULT_INDEX_ID } from '@kbn/management-settings-ids';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { RemoteIndexTargets } from '../../common/remote_index_targets';
@@ -13,7 +13,8 @@ import { remoteIndexTargets } from '../../common/remote_index_targets';
 import { remoteIndexTargetsStepCommonDefinition } from '../../common/step_types/remote_index_targets';
 
 export interface RemoteIndexTargetsStepDependencies {
-  getCoreStart: () => CoreStart;
+  /** The space's advanced settings, read as the request's user. Throws before the plugin starts. */
+  getUiSettingsClient: (request: KibanaRequest) => IUiSettingsClient;
   logger?: Logger;
 }
 
@@ -28,16 +29,15 @@ const localOnly = (localTargets: readonly string[]): RemoteIndexTargets => ({
  * failed read returns the local patterns, so the caller still searches this cluster.
  */
 export const resolveRemoteIndexTargets = async (
-  getCoreStart: () => CoreStart,
+  getUiSettingsClient: RemoteIndexTargetsStepDependencies['getUiSettingsClient'],
   request: KibanaRequest,
   localTargets: readonly string[],
   logger?: Logger
 ): Promise<RemoteIndexTargets> => {
   try {
-    const coreStart = getCoreStart();
-    const configured = await coreStart.uiSettings
-      .asScopedToClient(coreStart.savedObjects.getScopedClient(request))
-      .get<unknown>(SECURITY_SOLUTION_DEFAULT_INDEX_ID);
+    const configured = await getUiSettingsClient(request).get<unknown>(
+      SECURITY_SOLUTION_DEFAULT_INDEX_ID
+    );
     if (!Array.isArray(configured)) return localOnly(localTargets);
     return remoteIndexTargets(
       configured.filter((pattern): pattern is string => typeof pattern === 'string'),
@@ -54,7 +54,7 @@ export const resolveRemoteIndexTargets = async (
 };
 
 export const getRemoteIndexTargetsStepDefinition = ({
-  getCoreStart,
+  getUiSettingsClient,
   logger,
 }: RemoteIndexTargetsStepDependencies) =>
   createServerStepDefinition({
@@ -66,6 +66,8 @@ export const getRemoteIndexTargetsStepDefinition = ({
         logger?.warn('Remote index targets step has no request; searching the local patterns');
         return { output: localOnly(patterns) };
       }
-      return { output: await resolveRemoteIndexTargets(getCoreStart, request, patterns, logger) };
+      return {
+        output: await resolveRemoteIndexTargets(getUiSettingsClient, request, patterns, logger),
+      };
     },
   });

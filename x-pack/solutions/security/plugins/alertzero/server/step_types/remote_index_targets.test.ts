@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { IUiSettingsClient, KibanaRequest } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { SECURITY_SOLUTION_DEFAULT_INDEX_ID } from '@kbn/management-settings-ids';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import {
@@ -18,12 +18,9 @@ const ENDPOINT_EVENTS = 'logs-endpoint.events.*';
 const PROCESS = 'logs-endpoint.events.process-*';
 const NETWORK = 'logs-endpoint.events.network-*';
 
-const coreStartWith = (settingValue: unknown, get = jest.fn().mockResolvedValue(settingValue)) => {
-  const coreStart = coreMock.createStart();
-  coreStart.uiSettings.asScopedToClient.mockReturnValue({
-    get,
-  } as unknown as ReturnType<CoreStart['uiSettings']['asScopedToClient']>);
-  return { coreStart, get };
+const settingsWith = (settingValue: unknown, get = jest.fn().mockResolvedValue(settingValue)) => {
+  const getUiSettingsClient = jest.fn().mockReturnValue({ get } as unknown as IUiSettingsClient);
+  return { getUiSettingsClient, get };
 };
 
 describe('resolveRemoteIndexTargets', () => {
@@ -34,10 +31,13 @@ describe('resolveRemoteIndexTargets', () => {
   });
 
   it('turns the space data view into local and remote patterns', async () => {
-    const { coreStart } = coreStartWith(['remote_a:logs-aws.cloudtrail*', 'remote_*:logs-*']);
+    const { getUiSettingsClient } = settingsWith([
+      'remote_a:logs-aws.cloudtrail*',
+      'remote_*:logs-*',
+    ]);
 
     await expect(
-      resolveRemoteIndexTargets(() => coreStart, request, [ENDPOINT_EVENTS])
+      resolveRemoteIndexTargets(getUiSettingsClient, request, [ENDPOINT_EVENTS])
     ).resolves.toEqual({
       index: `${ENDPOINT_EVENTS},remote_a:${ENDPOINT_EVENTS},remote_*:${ENDPOINT_EVENTS}`,
       clusters: ['remote_a', 'remote_*'],
@@ -45,10 +45,10 @@ describe('resolveRemoteIndexTargets', () => {
   });
 
   it('adds every requested pattern for each cluster', async () => {
-    const { coreStart } = coreStartWith(['remote_a:logs-*']);
+    const { getUiSettingsClient } = settingsWith(['remote_a:logs-*']);
 
     await expect(
-      resolveRemoteIndexTargets(() => coreStart, request, [PROCESS, NETWORK])
+      resolveRemoteIndexTargets(getUiSettingsClient, request, [PROCESS, NETWORK])
     ).resolves.toEqual({
       index: `${PROCESS},${NETWORK},remote_a:${PROCESS},remote_a:${NETWORK}`,
       clusters: ['remote_a'],
@@ -56,30 +56,30 @@ describe('resolveRemoteIndexTargets', () => {
   });
 
   it('reads the Security default data view through the request', async () => {
-    const { coreStart, get } = coreStartWith(['logs-*']);
+    const { getUiSettingsClient, get } = settingsWith(['logs-*']);
 
-    await resolveRemoteIndexTargets(() => coreStart, request, [ENDPOINT_EVENTS]);
+    await resolveRemoteIndexTargets(getUiSettingsClient, request, [ENDPOINT_EVENTS]);
 
-    expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request);
+    expect(getUiSettingsClient).toHaveBeenCalledWith(request);
     expect(get).toHaveBeenCalledWith(SECURITY_SOLUTION_DEFAULT_INDEX_ID);
   });
 
   it('returns the local patterns when the setting is missing or not a list', async () => {
-    const { coreStart } = coreStartWith(undefined);
+    const { getUiSettingsClient } = settingsWith(undefined);
 
     await expect(
-      resolveRemoteIndexTargets(() => coreStart, request, [PROCESS, NETWORK])
+      resolveRemoteIndexTargets(getUiSettingsClient, request, [PROCESS, NETWORK])
     ).resolves.toEqual({ index: `${PROCESS},${NETWORK}`, clusters: [] });
   });
 
   it('returns the local patterns when the read throws', async () => {
-    const coreStart = coreMock.createStart();
-    coreStart.uiSettings.asScopedToClient.mockReturnValue({
-      get: jest.fn().mockRejectedValue(new Error('saved object unavailable')),
-    } as unknown as ReturnType<CoreStart['uiSettings']['asScopedToClient']>);
+    const { getUiSettingsClient } = settingsWith(
+      undefined,
+      jest.fn().mockRejectedValue(new Error('saved object unavailable'))
+    );
 
     await expect(
-      resolveRemoteIndexTargets(() => coreStart, request, [ENDPOINT_EVENTS])
+      resolveRemoteIndexTargets(getUiSettingsClient, request, [ENDPOINT_EVENTS])
     ).resolves.toEqual({ index: ENDPOINT_EVENTS, clusters: [] });
   });
 });
@@ -94,8 +94,8 @@ describe('remote index targets step', () => {
 
   it('returns the local patterns when the workflow has no request', async () => {
     const step = getRemoteIndexTargetsStepDefinition({
-      getCoreStart: () => {
-        throw new Error('should not read core');
+      getUiSettingsClient: () => {
+        throw new Error('should not read settings');
       },
     });
 
@@ -106,7 +106,7 @@ describe('remote index targets step', () => {
 
   it('returns the local patterns when core has not started', async () => {
     const step = getRemoteIndexTargetsStepDefinition({
-      getCoreStart: () => {
+      getUiSettingsClient: () => {
         throw new Error('CoreStart is not available until the AlertZero plugin has started');
       },
     });
@@ -117,8 +117,8 @@ describe('remote index targets step', () => {
   });
 
   it('resolves the requested patterns for the running identity', async () => {
-    const { coreStart } = coreStartWith(['remote_a:logs-*']);
-    const step = getRemoteIndexTargetsStepDefinition({ getCoreStart: () => coreStart });
+    const { getUiSettingsClient } = settingsWith(['remote_a:logs-*']);
+    const step = getRemoteIndexTargetsStepDefinition({ getUiSettingsClient });
 
     const { output } = await step.handler(contextFor(httpServerMock.createKibanaRequest()));
 
@@ -130,7 +130,7 @@ describe('remote index targets step', () => {
 
   it('bounds the patterns it accepts', () => {
     const { inputSchema: schema } = getRemoteIndexTargetsStepDefinition({
-      getCoreStart: jest.fn(),
+      getUiSettingsClient: jest.fn(),
     });
 
     expect(schema.safeParse({ patterns: [] }).success).toBe(false);
