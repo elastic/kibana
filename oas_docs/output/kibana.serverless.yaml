@@ -164713,6 +164713,7 @@ components:
                     synthetics_stats_overview: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
                     time_slider_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
                     vis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
+                    workflow_run: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-workflow_run'
                   propertyName: type
                 oneOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
@@ -164731,6 +164732,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-workflow_run'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_single_metric_viewer'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_burn_rate'
@@ -166978,6 +166980,156 @@ components:
         - config
       title: Visualization
       type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-workflow_run:
+      additionalProperties: false
+      properties:
+        config:
+          additionalProperties: false
+          description: Run workflow panel schema
+          type: object
+          properties:
+            button_label:
+              description: Text on the run button. Defaults to "Run workflow".
+              maxLength: 100
+              type: string
+            description:
+              description: A short description of the panel.
+              type: string
+            graph_layout:
+              description: Direction of the workflow graph drawn in the panel. `auto` (the default) picks the direction that draws the graph largest in the panel.
+              enum:
+                - auto
+                - horizontal
+                - vertical
+              type: string
+            hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
+              type: boolean
+            hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
+              type: boolean
+            input_mappings:
+              description: Where each workflow input gets its value when a viewer runs the workflow. Inputs without a mapping are asked for in the confirmation dialog.
+              items:
+                discriminator:
+                  propertyName: source
+                oneOf:
+                  - additionalProperties: false
+                    properties:
+                      control_id:
+                        description: ID of the dashboard control whose current selection fills the input.
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      input:
+                        description: Name of the workflow input this mapping fills.
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      source:
+                        enum:
+                          - control
+                        type: string
+                    required:
+                      - input
+                      - source
+                      - control_id
+                    title: control
+                    type: object
+                  - additionalProperties: false
+                    properties:
+                      input:
+                        description: Name of the workflow input this mapping fills.
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      part:
+                        description: Pass only the start or end of the range as an ISO timestamp. When omitted, the input receives the whole range (see the dashboardTimeRange input definition).
+                        enum:
+                          - from
+                          - to
+                        type: string
+                      source:
+                        enum:
+                          - time_range
+                        type: string
+                    required:
+                      - input
+                      - source
+                    title: time_range
+                    type: object
+                  - additionalProperties: false
+                    description: Pass the dashboard query and filters, as authored and compiled (see the dashboardQuery input definition).
+                    properties:
+                      input:
+                        description: Name of the workflow input this mapping fills.
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      source:
+                        enum:
+                          - query
+                        type: string
+                    required:
+                      - input
+                      - source
+                    title: query
+                    type: object
+                  - additionalProperties: false
+                    properties:
+                      input:
+                        description: Name of the workflow input this mapping fills.
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      source:
+                        enum:
+                          - constant
+                        type: string
+                      value:
+                        anyOf:
+                          - maxLength: 10000
+                            type: string
+                          - type: number
+                          - type: boolean
+                          - items:
+                              maxLength: 10000
+                              type: string
+                            maxItems: 100
+                            type: array
+                    required:
+                      - input
+                      - source
+                      - value
+                    title: constant
+                    type: object
+              maxItems: 50
+              type: array
+            title:
+              description: The panel title.
+              type: string
+            workflow_id:
+              description: ID of the workflow the panel runs, in the dashboard space.
+              maxLength: 255
+              minLength: 1
+              type: string
+          required:
+            - workflow_id
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - workflow_run
+          type: string
+      required:
+        - type
+        - grid
+        - config
+      title: Run workflow
+      type: object
     Kibana_HTTP_APIs_kbn-dashboard-section:
       additionalProperties: false
       description: A collapsible group of panels.
@@ -167028,6 +167180,7 @@ components:
                 synthetics_stats_overview: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
                 time_slider_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
                 vis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
+                workflow_run: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-workflow_run'
               propertyName: type
             oneOf:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
@@ -167046,6 +167199,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-workflow_run'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_single_metric_viewer'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_burn_rate'
