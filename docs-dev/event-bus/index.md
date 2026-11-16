@@ -23,17 +23,21 @@ The topic's meaning, data, and event identity remain a shared contract.
 
 Choose pub/sub when the producer should not call or await its consumers, or when several consumers need separate reactions to the same fact. For example, webhook ingress could publish an issue update for both Case synchronization and a Workflow trigger.
 
-A requirement to recover events after downtime is also a reason to adopt this model. Discuss such integrations in `#kibana-event-bus` to establish the required acceptance, retry, recovery, and retention guarantees. If acknowledging a webhook must guarantee recovery after a restart, today's publish alone cannot satisfy that requirement. Until durable delivery is available, retain an existing durable path or use reconciliation where missed events are acceptable.
+A requirement to recover events after downtime is also a reason to adopt this model. Discuss such integrations in `#kibana-event-bus` to establish the required acceptance, retry, recovery, and retention guarantees. If acknowledging a webhook must guarantee recovery after a restart, today's publish alone cannot satisfy that requirement.
 
-Use a plugin's API when you need the result of a specific operation. Use Task Manager to schedule and execute background work. A bus consumer can schedule long-running work there, but this does not protect an event lost before the handler runs. Durable event delivery and durable job execution are separate.
+- **Plugin API:** request an operation and receive its result.
+- **Event bus:** publish a fact for independent consumers to react to.
+- **Task Manager:** schedule and execute background work, potentially triggered by a consumer.
 
 ## Plugin availability and shared contracts
 
 Shared topic types replace direct plugin API calls, not {{kib}}'s plugin dependency graph.
 
-If a consumer requires a particular producer to be enabled, declare it in `requiredPlugins` in `kibana.jsonc`. An observer of optional sources need not require every producer. Required dependencies establish plugin availability, not correct integration configuration or active event production; report missing configuration through integration health.
+Plugin dependencies and event subscriptions serve different purposes. A dependency declares which plugins must be available for a feature to work. A subscription declares which events a consumer handles. Although pub/sub removes the need to call the producer's plugin API, the consumer may still require that producer to be enabled.
 
-A producer needs no dependency on consumers merely to publish. A consumer can declare required or optional dependencies while communicating through topics.
+If a consumer requires a particular producer, declare that producer in `requiredPlugins` in `kibana.jsonc`. For example, a plugin dedicated to synchronizing Jira updates cannot function without its event source. A general-purpose consumer can remain useful without every source: Workflows might handle Case events when Cases is enabled without requiring Cases for its other functionality.
+
+The producer does not need to depend on its consumers to publish events. A consumer may still declare a required or optional dependency on the producer while receiving events through the bus rather than calling the producer's API.
 
 Share the topic type from a small types-only package. Each plugin imports the type and calls `defineTopic` independently; consumers should not import the producer's runtime token.
 
@@ -67,7 +71,7 @@ A resolved publish does not guarantee delivery. A consumer's copy is dropped whe
 
 Other nodes never receive the publication. Queued events are lost at shutdown; absent consumers have no history to recover. A producer running on every node, such as a timer, publishes separately on each node. If the resulting work must run once across the cluster, coordinate it separately; pub/sub does not elect one consumer.
 
-At start, subscriptions to unregistered topics generate a warning and receive no events. This does not enforce producer availability. Publishing to an unregistered topic rejects.
+At start, subscriptions to unregistered topics generate a warning and receive no events. Publishing to an unregistered topic rejects.
 
 ## Consumer responsibilities
 
