@@ -9,7 +9,7 @@ import { MAX_TEXT_LENGTH, type FeatureUpsert } from '@kbn/significant-events-sch
 import { isConditionComplete } from '@kbn/streamlang';
 import { ENTITY_KEY_TABLE } from './entity_key_table';
 import { getDatasetFamily } from './entity_rows/helpers';
-import { foldHostRows, mergeHostFeatures } from './hosts';
+import { buildHostQuery, foldHostRows, mergeHostFeatures } from './hosts';
 import { identifyMetricsEntities } from './identify_metrics_entities';
 import { buildInfrastructureConceptDescription } from './kubernetes/concepts';
 import { foldNamespaceRows } from './kubernetes/namespaces';
@@ -471,6 +471,29 @@ describe('Kubernetes type KIs', () => {
 });
 
 describe('host type KIs', () => {
+  it('keeps standalone hosts with empty cluster names and drops node hosts with them', () => {
+    const query = buildHostQuery(foldContext.sourceQuery);
+    const features = foldHostRows(
+      [
+        {
+          entity_type: 'host',
+          concept_cluster: '',
+          scale: 1,
+          members: ['router-a'],
+          os: ['Linux'],
+          cloud_provider: [],
+        },
+      ],
+      foldContext
+    ).features;
+
+    expect(query).toContain(`| EVAL node_name = COALESCE(kubernetes.node.name, k8s.node.name)
+| WHERE node_name IS NULL
+    OR orchestrator.cluster.name IS NULL
+    OR orchestrator.cluster.name != ""`);
+    expect(features.map(({ id }) => id)).toEqual(['hosts:source-id']);
+  });
+
   it('groups standalone hosts and lets node hosts enrich the node type KI', () => {
     const standaloneMembers = Array.from(
       { length: 50 },
@@ -581,7 +604,7 @@ describe('host type KIs', () => {
         foldContext.sourceQuery
       ) ?? '';
     expect(hostQuery).toContain(
-      '| WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""'
+      '| WHERE node_name IS NULL\n    OR orchestrator.cluster.name IS NULL\n    OR orchestrator.cluster.name != ""'
     );
   });
 });

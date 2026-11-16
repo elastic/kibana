@@ -47,8 +47,10 @@ export const buildHostQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
     AND ${HOST_DATASET_CONDITION}
     AND host.name IS NOT NULL
-| WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""
 ${HOST_NODE_NAME_EVAL}
+| WHERE node_name IS NULL
+    OR orchestrator.cluster.name IS NULL
+    OR orchestrator.cluster.name != ""
 | EVAL entity_type = CASE(node_name IS NULL, "host", "node"),
        concept_cluster = CASE(node_name IS NULL, "", orchestrator.cluster.name),
        member = COALESCE(node_name, host.name)
