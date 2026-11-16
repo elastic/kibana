@@ -34,6 +34,22 @@ export const truncate = (text: string, maxChars: number): string =>
     ? `${text.slice(0, maxChars)}\n[truncated ${text.length - maxChars} characters]`
     : text;
 
+/**
+ * Cuts text to about `maxChars` by dropping its middle, keeping the start and the end, and puts a
+ * marker with the number of characters cut between them. A command's outcome (stderr, an error
+ * body, an exit code) is usually at the end of its result, so cutting only the end would hide it.
+ */
+export const truncateKeepingEnds = (text: string, maxChars: number): string => {
+  if (text.length <= maxChars) {
+    return text;
+  }
+  const head = Math.floor(maxChars / 2);
+  const tail = maxChars - head;
+  return `${text.slice(0, head)}\n[truncated ${text.length - maxChars} characters]\n${text.slice(
+    text.length - tail
+  )}`;
+};
+
 const stringify = (value: unknown): string => {
   if (value === undefined) {
     return '';
@@ -42,12 +58,15 @@ const stringify = (value: unknown): string => {
 };
 
 /** The round's tool calls as numbered sections, and how many were left out to fit the budget. */
-const renderToolCallSections = (round: EvidenceRound): { sections: string[]; omitted: number } => {
+const renderToolCallSections = (
+  round: EvidenceRound,
+  cut: (text: string) => string = (text) => truncate(text, MAX_TOOL_FIELD_CHARS)
+): { sections: string[]; omitted: number } => {
   const renderedSteps = round.steps.map((step, index) =>
     [
       `## Tool call ${index + 1}: ${step.tool_id ?? 'unknown tool'}`,
-      `Arguments:\n${truncate(stringify(step.arguments), MAX_TOOL_FIELD_CHARS)}`,
-      `Result:\n${truncate(stringify(step.result), MAX_TOOL_FIELD_CHARS)}`,
+      `Arguments:\n${cut(stringify(step.arguments))}`,
+      `Result:\n${cut(stringify(step.result))}`,
     ].join('\n')
   );
   const { headEnd, tailStart, omitted } = keepHeadAndTail(
@@ -69,10 +88,16 @@ const renderToolCallSections = (round: EvidenceRound): { sections: string[]; omi
 
 /**
  * Renders only the round's tool calls, each with its arguments and result, for judges that
- * audit how the tools were used. `omitted` counts the calls left out to fit the budget.
+ * audit how the tools were used. Each argument and result is cut to `maxFieldChars` keeping its
+ * start and end. `omitted` counts the calls left out to fit the budget.
  */
-export const renderToolCalls = (round: EvidenceRound): { text: string; omitted: number } => {
-  const { sections, omitted } = renderToolCallSections(round);
+export const renderToolCalls = (
+  round: EvidenceRound,
+  { maxFieldChars }: { maxFieldChars: number }
+): { text: string; omitted: number } => {
+  const { sections, omitted } = renderToolCallSections(round, (text) =>
+    truncateKeepingEnds(text, maxFieldChars)
+  );
   return { text: sections.join('\n\n'), omitted };
 };
 

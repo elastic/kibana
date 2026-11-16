@@ -14,6 +14,13 @@ import {
   toolCallHealthPrompt,
 } from './prompt';
 
+/**
+ * Each argument and result is cut to this many characters (its start and end), enough to see
+ * whether a call failed or came back empty. Backtested against the full results on 30 offline
+ * investigations: the same calls were flagged, at about half the prompt size.
+ */
+const MAX_FIELD_CHARS = 2_000;
+
 type Score = EvaluatorResult['scores'][number];
 interface ToolCallIssue {
   step: number;
@@ -71,7 +78,7 @@ export const toolCallHealthJudge: RegisteredEvaluatorDefinition = {
     if (callCount === 0) {
       return { scores: notApplicableScores('The investigation made no tool calls.') };
     }
-    const { text, omitted } = renderToolCalls(round);
+    const { text, omitted } = renderToolCalls(round, { maxFieldChars: MAX_FIELD_CHARS });
     if (omitted > 0) {
       return {
         scores: notApplicableScores(

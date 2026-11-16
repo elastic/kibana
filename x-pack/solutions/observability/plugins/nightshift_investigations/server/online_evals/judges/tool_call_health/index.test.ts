@@ -14,7 +14,7 @@ const judgeReturning = (args: Record<string, unknown>) =>
 
 const evaluate = (
   prompt: jest.Mock,
-  steps: Array<{ tool_id: string; result: unknown }>
+  steps: Array<{ tool_id: string; result: unknown; arguments?: unknown }>
 ): ReturnType<typeof toolCallHealthJudge.evaluate> =>
   toolCallHealthJudge.evaluate({
     round: {
@@ -92,11 +92,17 @@ describe('nightshift_tool_call_health', () => {
 
   it('is not applicable when tool calls were left out to fit the judge context', async () => {
     const prompt = judgeReturning({ failed_calls: [], empty_calls: [] });
-    const bigResult = 'x'.repeat(10_000);
+    const big = 'x'.repeat(10_000);
 
+    // Each argument and result is cut to a couple of thousand characters, so it takes many
+    // large calls to overflow the judge's context.
     const { scores } = await evaluate(
       prompt,
-      Array.from({ length: 60 }, () => ({ tool_id: 'platform.core.search', result: bigResult }))
+      Array.from({ length: 150 }, () => ({
+        tool_id: 'platform.core.search',
+        arguments: big,
+        result: big,
+      }))
     );
 
     expect(prompt).not.toHaveBeenCalled();
@@ -105,6 +111,19 @@ describe('nightshift_tool_call_health', () => {
       { score: null, label: 'n/a' },
     ]);
     expect(scores[0].explanation).toContain('did not fit');
+  });
+
+  it('keeps the start and the end of a long result, where the outcome usually is', async () => {
+    const prompt = judgeReturning({ failed_calls: [], empty_calls: [] });
+    const result = `START${'x'.repeat(10_000)}exit_code: 22 END`;
+
+    await evaluate(prompt, [{ tool_id: 'nightshift_sandbox_bash', result }]);
+
+    const { toolCalls } = prompt.mock.calls[0][0].input;
+    expect(toolCalls).toContain('START');
+    expect(toolCalls).toContain('exit_code: 22 END');
+    expect(toolCalls).toMatch(/\[truncated \d+ characters\]/);
+    expect(toolCalls.length).toBeLessThan(3_000);
   });
 
   it('requires a user input and a final answer', () => {

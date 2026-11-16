@@ -23,8 +23,8 @@ A call is either FAILED or NO DATA, never both: if it failed, do not also list i
   (for example "were there any errors in this window?" returning none), because that is real
   evidence, not wasted effort.
 - A call that returned useful data, even if part of it is noisy or truncated.
-- A result that ends in a "[truncated N characters]" marker: the transcript was shortened for you,
-  the tool did not fail.
+- A "[truncated N characters]" marker inside an argument or result: the transcript kept the start
+  and the end of it and dropped the middle for you, the tool did not fail.
 - A call that only records the agent's own bookkeeping, such as setting conversation metadata,
   and succeeded.
 - Calls you cannot assess because the result text is cut off. Judge only what is visible.
