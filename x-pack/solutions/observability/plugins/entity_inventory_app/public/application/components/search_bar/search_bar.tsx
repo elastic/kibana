@@ -22,7 +22,7 @@ export const EntityInventorySearchBar = () => {
   const {
     services: { unifiedSearch },
   } = useKibana();
-  const { entityCategory, query, filters, dateRange, setFilters, submit } =
+  const { entityCategory, query, filters, dateRange, setFilters, isTimeRangeLimited, submit } =
     useEntityInventorySearch();
   const { dataView } = useEntityInventoryDataView();
   // SearchBar only resyncs its picker when the range props change, so remount it whenever the
@@ -54,10 +54,14 @@ export const EntityInventorySearchBar = () => {
           indexPatterns={dataView ? [dataView] : undefined}
           useDefaultBehaviors={false}
           enableDateRangePicker={false}
-          legacyDatePickerProps={{
-            minDate: moment().subtract(ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS, 'days'),
-            commonlyUsedRanges: QUICK_RANGES,
-          }}
+          legacyDatePickerProps={
+            isTimeRangeLimited
+              ? {
+                  minDate: moment().subtract(ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS, 'days'),
+                  commonlyUsedRanges: QUICK_RANGES,
+                }
+              : undefined
+          }
           showDatePicker
           showFilterBar
           hiddenFilterPanelOptions={['pinFilter']}
@@ -75,17 +79,19 @@ export const EntityInventorySearchBar = () => {
           onFiltersUpdated={setFilters}
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          justify-content: center;
-          min-height: ${euiTheme.size.xxl};
-        `}
-      >
-        <EuiText size="xs" color="subdued" data-test-subj="entityInventoryMaxTimeRangeHint">
-          {MAX_TIME_RANGE_HINT}
-        </EuiText>
-      </EuiFlexItem>
+      {isTimeRangeLimited && (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            justify-content: center;
+            min-height: ${euiTheme.size.xxl};
+          `}
+        >
+          <EuiText size="xs" color="subdued" data-test-subj="entityInventoryMaxTimeRangeHint">
+            {MAX_TIME_RANGE_HINT}
+          </EuiText>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
