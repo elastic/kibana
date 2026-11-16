@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { riskScoreFieldMap } from '../../risk_score/configurations';
+import { riskScoreFieldMap } from '../configurations';
 import { getDefaultRiskEngineConfiguration } from './saved_object_configuration';
 
 describe('#getDefaultRiskEngineConfiguration', () => {
