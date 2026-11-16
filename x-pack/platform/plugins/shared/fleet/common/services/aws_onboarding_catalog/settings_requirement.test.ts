@@ -240,6 +240,19 @@ describe('extractReadmeNotes', () => {
     expect(extractReadmeNotes('# Title\n\n- a bullet but no heading\n')).toBeUndefined();
   });
 
+  it('reads the real guardduty text: emphasis on the word only, trailing space, one-space bullets', () => {
+    const readme =
+      '## Setup\n\n**Note**: \n - It is recommended to use AWS SQS for Amazon GuardDuty.\n - When using the Amazon GuardDuty API to collect logs, data duplication can occur due to limitations with the current input.\n\nNext.\n';
+
+    expect(extractReadmeNotes(readme)).toBe(
+      '- It is recommended to use AWS SQS for Amazon GuardDuty.\n- When using the Amazon GuardDuty API to collect logs, data duplication can occur due to limitations with the current input.'
+    );
+  });
+
+  it('reads a blockquote Note', () => {
+    expect(extractReadmeNotes('> **Note**:\n> - One\n> - Two\n\nAfter\n')).toBe('- One\n- Two');
+  });
+
   it('ignores a loose "note" in prose even when a later list exists', () => {
     const readme =
       '# Title\n\nPlease note that this is an intro.\n\n## Setup\n\n- Step one\n- Step two\n';

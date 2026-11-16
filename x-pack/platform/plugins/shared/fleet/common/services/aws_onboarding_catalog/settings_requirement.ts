@@ -38,7 +38,8 @@ const MAX_LINES_TO_LIST = 2;
  * The list must start within two lines of the anchor; otherwise returns undefined.
  */
 export const extractReadmeNotes = (markdown: string): string | undefined => {
-  const lines = markdown.split(/\r?\n/);
+  // Blockquote markers ("> **Note**:") are layout, not content.
+  const lines = markdown.split(/\r?\n/).map((line) => line.replace(/^\s*>\s?/, ''));
   let start = -1;
   lines.some((line, anchor) => {
     if (!NOTE_ANCHOR.test(line)) return false;
@@ -67,7 +68,13 @@ export const extractReadmeNotes = (markdown: string): string | undefined => {
     bullets.push(line);
   }
 
-  const notes = bullets.join('\n').trim().slice(0, README_NOTES_MAX_LENGTH).trim();
+  // Drop the list's own indentation (the real README indents bullets by one space).
+  const indent = Math.min(...bullets.map((line) => line.length - line.trimStart().length));
+  const notes = bullets
+    .map((line) => line.slice(indent).trimEnd())
+    .join('\n')
+    .slice(0, README_NOTES_MAX_LENGTH)
+    .trim();
   return notes === '' ? undefined : notes;
 };
 
