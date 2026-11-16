@@ -22,7 +22,11 @@ const cvssVendor: MappingProperty = {
   },
 };
 
-/** Strict, so a field the doc builder adds without a mapping fails loudly in tests. */
+/**
+ * Strict, so Elasticsearch rejects a document carrying an unmapped field. The findings_writer
+ * integration test writes real `toFindingDoc` output through it, which covers the fields that
+ * test's findings populate; a field the builder emits only conditionally is not covered.
+ */
 export const findingsMappings: MappingTypeMapping = {
   dynamic: 'strict',
   properties: {

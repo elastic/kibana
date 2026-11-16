@@ -67,7 +67,8 @@ describe('run summary index', () => {
     await ensureSummaryIndex(kibana);
     await ensureSummaryIndex(kibana);
     await writeSummary(kibana, doc('run-1'));
-    await writeSummary(kibana, doc('run-1'));
+    const rerun: SummaryDoc = { ...doc('run-1'), status: 'success', findings_open: 99 };
+    await writeSummary(kibana, rerun);
     await writeSummary(kibana, doc('run-2'));
 
     const admin: Client = esServer.es.getClient();
@@ -78,10 +79,11 @@ describe('run summary index', () => {
       query: { match_all: {} },
     });
     expect(hits.hits.map(({ _id }) => _id).sort()).toEqual(['run-1', 'run-2']);
-    expect(hits.hits.find(({ _id }) => _id === 'run-1')?._source).toEqual(doc('run-1'));
+    expect(hits.hits.find(({ _id }) => _id === 'run-1')?._source).toEqual(rerun);
   });
 
   it('rejects a field the mapping does not know', async () => {
+    await ensureSummaryIndex(kibana);
     await expect(
       kibana.index({ index: SUMMARY_INDEX, document: { ...doc('run-3'), surprise: true } })
     ).rejects.toMatchObject({ meta: { statusCode: 400 } });
