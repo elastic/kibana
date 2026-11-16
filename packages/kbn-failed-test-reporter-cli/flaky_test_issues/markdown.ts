@@ -35,6 +35,9 @@ export const CATEGORY_LABELS: Record<string, string> = {
   'unit-integration-test': 'Unit integration',
 };
 
+/** Keeps words together on one line in a table cell. */
+export const NBSP = '&nbsp;';
+
 export const KIBANA_BLOB_URL = 'https://github.com/elastic/kibana/blob/main';
 export const BUILDKITE_ORG_URL = 'https://buildkite.com/elastic';
 /** A button with the Kibana logo; GitHub strips the HTML that could style a link as one. */
@@ -45,8 +48,6 @@ const DASHBOARD_BUTTON_IMAGE_URL =
 export const dashboardButton = (testId: string): string =>
   `[![Dashboard](${DASHBOARD_BUTTON_IMAGE_URL})](${testHistoryUrl(testId)})`;
 
-/** Keeps words together on one line in a table cell. */
-export const NBSP = '&nbsp;';
 /** Forbids a line break between two emoji, which browsers otherwise allow. */
 const WORD_JOINER = '\u2060';
 
@@ -130,13 +131,13 @@ export const pipelineTargetEnvironment = (target: {
   return target.type === 'local' ? `${environment} (${inlineCode(target.pipeline)})` : environment;
 };
 
-/** `98 / 505 (**19%**)`, the rate in bold so it stands out in a table. */
+/** `**19%** (98 / 505)`, the rate first and in bold, as in the tests table, kept on one line. */
 export const formatFailedBuilds = ({
   builds,
   failedBuilds,
   buildFailRate,
 }: Pick<FlakyTestBranchStats, 'builds' | 'failedBuilds' | 'buildFailRate'>): string =>
-  `${failedBuilds} / ${builds} (**${formatPercent(buildFailRate)}**)`;
+  `**${formatPercent(buildFailRate)}**${NBSP}(${failedBuilds}${NBSP}/${NBSP}${builds})`;
 
 /** `2026-09-08 16:05 UTC` */
 export const formatDateTime = (date: Date): string =>
@@ -147,6 +148,10 @@ export const formatDay = (date: Date, withYear = false): string =>
   `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}${
     withYear ? ` ${date.getUTCFullYear()}` : ''
   }`;
+
+/** `8 Sep 16:05`, UTC: a time within the report window, short enough for a table cell. */
+export const formatShortDateTime = (date: Date): string =>
+  `${formatDay(date)} ${date.toISOString().slice(11, 16)}`;
 
 /** `3–10 Sep 2026`, `28 Aug – 4 Sep 2026`, `28 Dec 2025 – 4 Jan 2026`, or `7 Sep 2026` for one day. */
 export const formatDateRange = (from: Date, to: Date): string => {

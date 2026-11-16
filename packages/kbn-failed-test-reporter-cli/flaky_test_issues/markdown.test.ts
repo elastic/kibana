@@ -223,12 +223,12 @@ describe('formatFullFailureMessage', () => {
 });
 
 describe('formatFailedBuilds', () => {
-  it('bolds the rate', () => {
+  it('puts the rate first, in bold, and keeps the counts on its line', () => {
     expect(formatFailedBuilds({ builds: 505, failedBuilds: 98, buildFailRate: 98 / 505 })).toBe(
-      '98 / 505 (**19%**)'
+      '**19%**&nbsp;(98&nbsp;/&nbsp;505)'
     );
     expect(formatFailedBuilds({ builds: 400, failedBuilds: 1, buildFailRate: 1 / 400 })).toBe(
-      '1 / 400 (**<1%**)'
+      '**<1%**&nbsp;(1&nbsp;/&nbsp;400)'
     );
   });
 });

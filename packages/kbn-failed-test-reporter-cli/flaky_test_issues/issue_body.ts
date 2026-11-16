@@ -32,6 +32,7 @@ import {
   formatFullFailureMessage,
   formatPercent,
   formatScope,
+  formatShortDateTime,
   FRAMEWORK_LABELS,
   inlineCode,
   isFlakyBranch,
@@ -454,17 +455,21 @@ interface BranchSkip {
 }
 
 /**
- * `49 / 509 (10%) | [#12345](…#job) · 2026-09-09 06:12 UTC`, or `0 / 58 |` for a clean row.
- * Reports written before the build was recorded get the time alone.
+ * `[#12345](…#job) · 9 Sep 06:12`: the newest failure's job and time, on one line. Reports
+ * written before the build was recorded get the time alone.
  */
+const lastFailureCell = ({ lastFailedAt, lastFailedBuildUrl, lastFailedJobId }: BuildCounts) => {
+  const link = lastFailedBuildUrl
+    ? formatBuildLink({ buildUrl: lastFailedBuildUrl, jobId: lastFailedJobId }, undefined)
+    : undefined;
+  const time = lastFailedAt ? formatShortDateTime(lastFailedAt).replace(/ /g, NBSP) : undefined;
+  return [link, time].filter((part) => part !== undefined).join(`${NBSP}·${NBSP}`);
+};
+
+/** `**10%** (49 / 509) | [#12345](…#job) · 9 Sep 06:12`, or `0 / 58 |` for a clean row. */
 const failuresCells = ({ worst, latest }: WorstFailures<BuildCounts>): string[] => [
-  worst.failedBuilds > 0 ? formatFailedBuilds(worst) : `0 / ${worst.builds}`,
-  latest
-    ? formatBuildLink(
-        { buildUrl: latest.lastFailedBuildUrl, jobId: latest.lastFailedJobId },
-        latest.lastFailedAt
-      )
-    : '',
+  worst.failedBuilds > 0 ? formatFailedBuilds(worst) : `0${NBSP}/${NBSP}${worst.builds}`,
+  latest ? lastFailureCell(latest) : '',
 ];
 
 /** What the suite does on a branch, in the order the branch table lists them. */
@@ -493,21 +498,20 @@ const branchStatus = (worst: BuildCounts, flaky: boolean, skip?: BranchSkip): Br
 };
 
 const BRANCH_STATUS_LABELS: Readonly<Record<BranchStatus, string>> = {
-  flaky: '🔴 Flaky',
-  failing: '🟠 Some failures',
-  skipped: '⏭️ Skipped',
-  clean: '✅ No failures',
+  flaky: `🔴${NBSP}Flaky`,
+  failing: `🟠${NBSP}Some${NBSP}failures`,
+  skipped: `⏭️${NBSP}Skipped`,
+  clean: `✅${NBSP}No${NBSP}failures`,
 };
 
-/** `🔴 Flaky: \`main\``, or `⏭️ Skipped: \`main\`, last ran 7 Sep` for a skipped branch. */
-const branchCell = (scope: string, status: BranchStatus, skip?: BranchSkip): string => {
-  const cell = `${BRANCH_STATUS_LABELS[status]}: ${scope}`;
+/** `🔴 Flaky`, or `⏭️ Skipped` over when the suite last ran there for a skipped branch. */
+const statusCell = (status: BranchStatus, skip?: BranchSkip): string => {
   if (status !== 'skipped') {
-    return cell;
+    return BRANCH_STATUS_LABELS[status];
   }
-  return skip?.lastRanAt
-    ? `${cell}, last ran ${formatDay(skip.lastRanAt)}`
-    : `${cell}, in every run`;
+  return `${BRANCH_STATUS_LABELS[status]}<br>${
+    skip?.lastRanAt ? `last ran ${formatDay(skip.lastRanAt)}` : 'in every run'
+  }`;
 };
 
 const latestOf = (a: Date | undefined, b: Date | undefined): Date | undefined =>
@@ -557,13 +561,14 @@ const statusByBranch = (suite: FlakySuite, { thresholds }: FlakyTestReport): str
   const rows = branches
     .sort((a, b) => BRANCH_STATUSES.indexOf(a.status) - BRANCH_STATUSES.indexOf(b.status))
     .map(({ row, skip, status }) => [
-      branchCell(formatScope(row.worst), status, skip),
+      statusCell(status, skip),
+      formatScope(row.worst),
       ...failuresCells(row),
     ]);
   return [
     '#### Status by Branch',
     '',
-    table(['Branch', 'Failed builds', 'Sample failure'], rows),
+    table(['Status', 'Branch', 'Failed builds', 'Last failure'], rows),
   ].join('\n');
 };
 
@@ -571,29 +576,39 @@ const statusByBranch = (suite: FlakySuite, { thresholds }: FlakyTestReport): str
 const UNKNOWN_TARGET_MODE = 'unknown';
 
 /**
- * Which Scout targets the suite fails on and which it does not, with where each ran (local
- * deployment or serverless simulation, ECH, MKI). Runs that recorded no target are left out, so
- * the table only appears for suites that have one.
+ * Which Scout targets the suite is flaky on, fails on and is clean on, judged on the report's
+ * thresholds as branches are, with where each ran (local deployment or serverless simulation,
+ * ECH, MKI). Runs that recorded no target are left out, so the table only appears for suites that
+ * have one.
  */
-const statusByTarget = (suite: FlakySuite): string | undefined => {
+const statusByTarget = (suite: FlakySuite, { thresholds }: FlakyTestReport): string | undefined => {
+  const keyOf = (stats: FlakySuite['tests'][number]['byTarget'][number]) =>
+    // a pipeline judged on its own, such as FIPS, has rows of its own for the same targets
+    [stats.mode, stats.type, stats.pipeline ?? ''].join(' · ');
+  const flaky = new Set(
+    suite.tests.flatMap((test) =>
+      test.byTarget.filter((stats) => isFlakyBranch(stats, thresholds)).map(keyOf)
+    )
+  );
   const targets = worstPerKey(
     suite,
     (test) => test.byTarget.filter((stats) => stats.mode !== UNKNOWN_TARGET_MODE),
-    // a pipeline judged on its own, such as FIPS, has rows of its own for the same targets
-    (stats) => [stats.mode, stats.type, stats.pipeline ?? ''].join(' · ')
-  );
+    keyOf
+  ).map((row) => ({ row, status: branchStatus(row.worst, flaky.has(keyOf(row.worst))) }));
   if (targets.length === 0) {
     return undefined;
   }
-  const rows = targets.map((row) => [
-    `${row.worst.failedBuilds > 0 ? '🔴' : '✅'} ${pipelineTargetEnvironment(row.worst)}`,
-    inlineCode(row.worst.mode),
-    ...failuresCells(row),
-  ]);
+  const rows = targets
+    .sort((a, b) => BRANCH_STATUSES.indexOf(a.status) - BRANCH_STATUSES.indexOf(b.status))
+    .map(({ row, status }) => [
+      statusCell(status),
+      `${pipelineTargetEnvironment(row.worst)}<br>${inlineCode(row.worst.mode)}`,
+      ...failuresCells(row),
+    ]);
   return [
     '#### Status by Target',
     '',
-    table(['Environment', 'Target', 'Failed builds', 'Sample failure'], rows),
+    table(['Status', 'Target', 'Failed builds', 'Last failure'], rows),
   ].join('\n');
 };
 
@@ -811,17 +826,14 @@ const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string 
     pipelineLink(stats.pipeline),
     formatFailedBuilds(stats),
     formatFailedBranches(stats),
-    formatBuildLink(
-      { buildUrl: stats.lastFailedBuildUrl, jobId: stats.lastFailedJobId },
-      stats.lastFailedAt
-    ),
+    lastFailureCell(stats),
   ]);
   return [
     '#### Failures by Pipeline',
     '',
     scope,
     '',
-    table(['Pipeline', 'Failed builds', 'Branches', 'Sample failure'], rows),
+    table(['Pipeline', 'Failed builds', 'Branches', 'Last failure'], rows),
   ].join('\n');
 };
 
@@ -867,7 +879,7 @@ const reportSections = (
 const failureSections = (suite: FlakySuite, report: FlakyTestReport): Array<string | undefined> => [
   failuresByErrorMessage(suite),
   statusByBranch(suite, report),
-  statusByTarget(suite),
+  statusByTarget(suite, report),
   failuresByPipeline(suite, report),
 ];
 

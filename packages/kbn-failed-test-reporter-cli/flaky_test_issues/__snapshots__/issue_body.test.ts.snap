@@ -49,19 +49,19 @@ Hit by *reverts breakdown, interval, and visibility on a saved session* · seen 
 
 #### Status by Branch
 
-| Branch | Failed builds | Sample failure |
-|---|---|---|
-| 🔴 Flaky: \`main\` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
-| 🔴 Flaky: \`9.2\` | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |
-| ✅ No failures: \`9.1\` | 0 / 58 |  |
+| Status | Branch | Failed builds | Last failure |
+|---|---|---|---|
+| 🔴&nbsp;Flaky | \`main\` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |
+| 🔴&nbsp;Flaky | \`9.2\` | **5%**&nbsp;(3&nbsp;/&nbsp;64) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)&nbsp;·&nbsp;7&nbsp;Sep&nbsp;11:40 |
+| ✅&nbsp;No&nbsp;failures | \`9.1\` | 0&nbsp;/&nbsp;58 |  |
 
 #### Status by Target
 
-| Environment | Target | Failed builds | Sample failure |
+| Status | Target | Failed builds | Last failure |
 |---|---|---|---|
-| 🔴 Local deployment | \`stateful-classic\` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
-| 🔴 MKI | \`serverless-security_complete\` | 3 / 64 (**5%**) | 2026-09-07 11:40 UTC |
-| ✅ Local serverless simulation | \`serverless-observability_complete\` | 0 / 426 |  |
+| 🔴&nbsp;Flaky | Local deployment<br>\`stateful-classic\` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |
+| 🔴&nbsp;Flaky | MKI<br>\`serverless-security_complete\` | **5%**&nbsp;(3&nbsp;/&nbsp;64) | 7&nbsp;Sep&nbsp;11:40 |
+| ✅&nbsp;No&nbsp;failures | Local serverless simulation<br>\`serverless-observability_complete\` | 0&nbsp;/&nbsp;426 |  |
 
 > [!TIP]
 > Review the failures. If you'd like to skip the test, ask the #kibana-operations team to \`/skip\` it, or skip the test case manually.
@@ -99,26 +99,26 @@ Seen on \`kibana-on-merge\` (40) and \`kibana-pull-request\` (9) · \`main\`, 1 
 
 #### Status by Branch
 
-| Branch | Failed builds | Sample failure |
-|---|---|---|
-| 🔴 Flaky: \`main\` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| Status | Branch | Failed builds | Last failure |
+|---|---|---|---|
+| 🔴&nbsp;Flaky | \`main\` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |
 
 #### Status by Target
 
-| Environment | Target | Failed builds | Sample failure |
+| Status | Target | Failed builds | Last failure |
 |---|---|---|---|
-| 🔴 Local deployment | \`stateful-classic\` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
-| ✅ Local serverless simulation | \`serverless-observability_complete\` | 0 / 426 |  |
+| 🔴&nbsp;Flaky | Local deployment<br>\`stateful-classic\` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |
+| ✅&nbsp;No&nbsp;failures | Local serverless simulation<br>\`serverless-observability_complete\` | 0&nbsp;/&nbsp;426 |  |
 
 #### Failures by Pipeline
 
 Where it failed 2–9 Sep 2026, across all pipelines and branches:
 
-| Pipeline | Failed builds | Branches | Sample failure |
+| Pipeline | Failed builds | Branches | Last failure |
 |---|---|---|---|
-| [\`kibana-pull-request\`](https://buildkite.com/elastic/kibana-pull-request) | 70 / 661 (**11%**) | \`main\`, 63 PRs | [#498441](https://buildkite.com/elastic/kibana-pull-request/builds/498441#0199-abcd) · 2026-09-08 16:05 UTC |
-| [\`kibana-on-merge\`](https://buildkite.com/elastic/kibana-on-merge) | 49 / 509 (**10%**) | \`main\` | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
-| [\`kibana-elasticsearch-snapshot-verify\`](https://buildkite.com/elastic/kibana-elasticsearch-snapshot-verify) | 1 / 5 (**20%**) | 1 | 2026-09-09 06:12 UTC |
+| [\`kibana-pull-request\`](https://buildkite.com/elastic/kibana-pull-request) | **11%**&nbsp;(70&nbsp;/&nbsp;661) | \`main\`, 63 PRs | [#498441](https://buildkite.com/elastic/kibana-pull-request/builds/498441#0199-abcd)&nbsp;·&nbsp;8&nbsp;Sep&nbsp;16:05 |
+| [\`kibana-on-merge\`](https://buildkite.com/elastic/kibana-on-merge) | **10%**&nbsp;(49&nbsp;/&nbsp;509) | \`main\` | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |
+| [\`kibana-elasticsearch-snapshot-verify\`](https://buildkite.com/elastic/kibana-elasticsearch-snapshot-verify) | **20%**&nbsp;(1&nbsp;/&nbsp;5) | 1 | 9&nbsp;Sep&nbsp;06:12 |
 
 > [!TIP]
 > Review the failures. If you'd like to skip the test, ask the #kibana-operations team to \`/skip\` it, or skip the test case manually.
