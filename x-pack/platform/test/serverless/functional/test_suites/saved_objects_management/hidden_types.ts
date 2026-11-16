@@ -7,8 +7,9 @@
 
 import path from 'path';
 import expect from '@kbn/expect';
-import { byIdAscComparator } from '@kbn/core-saved-objects-import-export-server-internal/src/export/utils';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+const byIdAscComparator = (a: { id: string }, b: { id: string }) => (a.id > b.id ? 1 : -1);
 
 const fixturePaths = {
   hiddenImportable: path.join(__dirname, 'exports', '_import_hidden_importable.ndjson'),

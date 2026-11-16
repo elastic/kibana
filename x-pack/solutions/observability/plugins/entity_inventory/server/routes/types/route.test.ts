@@ -8,7 +8,7 @@
 import { AuthzDisabled } from '@kbn/core-security-server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { GetTypesResponse } from '../types';
+import type { GetTypesResponse } from '../../../common';
 import { typesRoute } from './route';
 
 const route = typesRoute['GET /internal/entity_inventory/types'];

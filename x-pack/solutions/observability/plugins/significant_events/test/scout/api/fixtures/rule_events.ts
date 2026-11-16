@@ -12,6 +12,7 @@ import {
 import type { EsClient } from '@kbn/scout-oblt';
 
 export const RULE_EVENTS_INDEX = '.rule-events';
+const ALERT_ACTIONS_INDEX = '.alert-actions';
 
 /** Stored event fields a caller can override when seeding directly into `.rule-events`. */
 type SeedSignificantEventData = Partial<
@@ -54,6 +55,13 @@ export const deleteSignificantEvent = async (
     index: RULE_EVENTS_INDEX,
     // Status updates are written with a hashed `group_hash`, so match on the event id instead.
     query: { term: { 'data.event_id': eventId } },
+    refresh: true,
+    ignore_unavailable: true,
+  });
+  // Operator status changes are alert actions keyed by the seeded alert id.
+  await esClient.deleteByQuery({
+    index: ALERT_ACTIONS_INDEX,
+    query: { term: { alert_id: eventId } },
     refresh: true,
     ignore_unavailable: true,
   });

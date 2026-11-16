@@ -114,10 +114,14 @@ export const renderVisibleContext = async (
 ): Promise<BaseMessage[]> => {
   const view = buildContextView({ conversation, run, conversationTimestamp }, deps);
   const notices = noticeRendererFor(conversation);
+  // the answer agent has no tools, so it should not get dynamic tool definitions
+  const dynamicToolDefinitions =
+    phase === 'research' ? run.compactionSummary?.dynamic_tools : undefined;
   const history = await prepareMessages({
     conversation,
     roundResultTransformer: view.historyTransformer,
     compactionSummary: run.compactionSummary,
+    dynamicToolDefinitions,
     visibility: view.visibility,
     conversationTimestamp,
     attachmentNotices: notices,
