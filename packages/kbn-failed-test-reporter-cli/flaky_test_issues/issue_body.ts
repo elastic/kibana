@@ -492,26 +492,22 @@ const branchStatus = (worst: BuildCounts, flaky: boolean, skip?: BranchSkip): Br
   return worst.failedBuilds > 0 ? 'failing' : 'clean';
 };
 
-const BRANCH_STATUS_EMOJI: Readonly<Record<BranchStatus, string>> = {
-  flaky: '🔴',
-  failing: '🟠',
-  skipped: '⏭️',
-  clean: '✅',
+const BRANCH_STATUS_LABELS: Readonly<Record<BranchStatus, string>> = {
+  flaky: '🔴 Flaky',
+  failing: '🟠 Some failures',
+  skipped: '⏭️ Skipped',
+  clean: '✅ No failures',
 };
 
-const branchStatusLabel = (status: BranchStatus, skip?: BranchSkip): string => {
-  switch (status) {
-    case 'flaky':
-      return 'Flaky';
-    case 'failing':
-      return 'Some failures';
-    case 'skipped':
-      return skip?.lastRanAt
-        ? `Skipped, last ran ${formatDay(skip.lastRanAt)}`
-        : 'Skipped in every run';
-    case 'clean':
-      return 'No failures';
+/** `🔴 Flaky: \`main\``, or `⏭️ Skipped: \`main\`, last ran 7 Sep` for a skipped branch. */
+const branchCell = (scope: string, status: BranchStatus, skip?: BranchSkip): string => {
+  const cell = `${BRANCH_STATUS_LABELS[status]}: ${scope}`;
+  if (status !== 'skipped') {
+    return cell;
   }
+  return skip?.lastRanAt
+    ? `${cell}, last ran ${formatDay(skip.lastRanAt)}`
+    : `${cell}, in every run`;
 };
 
 const latestOf = (a: Date | undefined, b: Date | undefined): Date | undefined =>
@@ -561,14 +557,13 @@ const statusByBranch = (suite: FlakySuite, { thresholds }: FlakyTestReport): str
   const rows = branches
     .sort((a, b) => BRANCH_STATUSES.indexOf(a.status) - BRANCH_STATUSES.indexOf(b.status))
     .map(({ row, skip, status }) => [
-      `${BRANCH_STATUS_EMOJI[status]} ${formatScope(row.worst)}`,
-      branchStatusLabel(status, skip),
+      branchCell(formatScope(row.worst), status, skip),
       ...failuresCells(row),
     ]);
   return [
     '#### Status by Branch',
     '',
-    table(['Branch', 'Status', 'Failed builds', 'Sample failure'], rows),
+    table(['Branch', 'Failed builds', 'Sample failure'], rows),
   ].join('\n');
 };
 
