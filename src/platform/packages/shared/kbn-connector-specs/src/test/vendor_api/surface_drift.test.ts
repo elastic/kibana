@@ -425,7 +425,7 @@ describe('renderDriftIssue', () => {
 
     expect(body).toContain('> [!WARNING]');
     expect(body).toContain(
-      '> **1 of 2 actions works with the latest spec. 1 action needs attention.**\n>\n> `search` fails against the latest spec: GET /items breaks the spec: limit must be <= 50.\n>\n> Update the connector to ensure it will continue working.'
+      '> **1 of 2 actions works with the latest spec. 1 action needs attention.**\n>\n> `search` fails against the latest vendor spec.\n>\n> Update the connector to ensure it will continue working.'
     );
     // A failing action isn't also described as passing with changes
     expect(body).not.toContain('`search` passes');

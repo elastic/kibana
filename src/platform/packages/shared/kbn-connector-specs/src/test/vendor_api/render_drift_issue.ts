@@ -100,6 +100,7 @@ const SKILLS = 'src/platform/packages/shared/kbn-connector-specs/.claude/skills'
 const MAX_CHANGES_PER_KIND = 30;
 const MAX_LISTED = 3;
 const MAX_NAMED_ACTIONS = 8;
+const MOVED_STATUS = 'Moved in the spec, same URL';
 // GitHub rejects issue bodies longer than 65536 characters.
 const MAX_BODY_LENGTH = 60000;
 
@@ -136,19 +137,43 @@ const listed = (items: readonly string[], max = MAX_LISTED): string => {
   return shown.length > 1 ? `${shown.slice(0, -1).join(', ')} and ${shown.at(-1)}` : shown[0];
 };
 
-// A failing action's status from the actions table, as a sentence: "`scrape` fails against the
-// latest spec: …", "`listRules` calls `GET /rules`, which is removed from the current spec."
-const failureSentence = (action: string, status: string): string => {
-  const removed = status.match(/^Removed from current spec: (.*)$/);
-  if (removed) {
-    const several = (removed[1].match(/`/g) ?? []).length > 2;
-    return `${code(action)} calls ${removed[1]}, which ${
-      several ? 'are' : 'is'
-    } removed from the current spec.`;
-  }
-  const text = `${status.charAt(0).toLowerCase()}${status.slice(1)}`.replace(/\.$/, '');
-  return `${code(action)} ${text}.`;
-};
+// How the summary names failing actions, by the start of their status, one or several. The
+// actions table has the details.
+const FAILURES: ReadonlyArray<readonly [string, readonly [string, string]]> = [
+  [
+    'Fails against the latest spec',
+    ['fails against the latest vendor spec', 'fail against the latest vendor spec'],
+  ],
+  [
+    'Fails against the committed snapshot',
+    ['fails against the committed snapshot', 'fail against the committed snapshot'],
+  ],
+  [
+    'Removed from current spec',
+    [
+      'calls an endpoint removed from the current spec',
+      'call endpoints removed from the current spec',
+    ],
+  ],
+  [
+    MOVED_STATUS,
+    [
+      'calls an endpoint that moved in the spec, keeping its URL',
+      'call endpoints that moved in the spec, keeping their URL',
+    ],
+  ],
+];
+
+/** One sentence per way of failing, naming the actions: "`a` and `b` fail against …". */
+const failureSentences = (failing: Attention['failing']): string[] =>
+  FAILURES.flatMap(([prefix, [one, many]]) => {
+    const named = failing
+      .filter(({ status }) => status.startsWith(prefix))
+      .map(({ action }) => code(action));
+    return named.length > 0
+      ? [`${listed(named, MAX_NAMED_ACTIONS)} ${named.length === 1 ? one : many}.`]
+      : [];
+  });
 
 interface OtherProblemRow {
   readonly problem: string;
@@ -243,7 +268,6 @@ const ICONS: Record<Rank, string> = {
   'not-checked': '➖',
 };
 
-const MOVED_STATUS = 'Moved in the spec, same URL';
 const MISSING_STATUS = 'Endpoint is missing from current spec';
 
 // The issues a recorded reason links to, as `[#123](url)`.
@@ -589,7 +613,7 @@ export const renderDriftIssue = (
     const sentence = (named: readonly string[], [one, many]: readonly [string, string]) =>
       `${listed(named.map(code), MAX_NAMED_ACTIONS)} ${named.length === 1 ? one : many}.`;
     const reasons = [
-      ...attention.failing.map(({ action, status }) => failureSentence(action, status)),
+      ...failureSentences(attention.failing),
       ...(readers.length > 0
         ? [
             sentence(readers, [
