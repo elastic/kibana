@@ -479,7 +479,7 @@ describe('renderDriftIssue', () => {
 
     expect(title).toBe('[Connector validation] .acme: actions pass, 1 spec change to review');
     expect(body).toContain(
-      '> **The connector still works against the latest spec: all 2 checked actions of `.acme` pass.**\n>\n> The reason for this issue is 1 deprecation in the vendor API spec affecting `search`. Update the connector to ensure it will continue working.'
+      '> **1 of 2 actions works with the latest spec. 1 action needs attention.**\n>\n> `search` passes but calls a deprecated endpoint.\n>\n> Update the connector to ensure it will continue working.'
     );
     expect(body).toContain(
       '| Deprecated | `GET /items` | `search` | endpoint deprecated (`endpoint-deprecated`) |'
@@ -522,9 +522,7 @@ describe('renderDriftIssue', () => {
     const { title, body } = renderDriftIssue(passing, { owners: [] });
 
     expect(title).toBe('[Connector validation] .acme: actions pass, 1 field they read changed');
-    expect(body).toContain(
-      'The reason for this issue is 1 changed field in the responses `search` reads. Update the connector to ensure it will continue working.'
-    );
+    expect(body).toContain('`search` passes but reads fields that changed.');
     expect(body).toContain(
       '| `search` | `GET /items` | ⚠️ Passes, but fields it reads changed: `items/state` (new values: locked) |'
     );
@@ -558,13 +556,36 @@ describe('renderDriftIssue', () => {
       { owners: [] }
     );
 
-    expect(body).toContain(
-      'The reason for this issue is 1 removal in the vendor API spec affecting `search`.'
-    );
+    expect(body).toContain('`search` passes but calls an endpoint removed from the current spec.');
     expect(body).toContain('| Removed | `GET /items` | `search` |');
     expect(body).toContain(
       '| `search` | `GET /items` | ✅ Passes · removed (see changes to review) |'
     );
+  });
+
+  it('names the actions whose endpoints are missing from the current spec', () => {
+    const { body } = renderDriftIssue(
+      {
+        ...drifted,
+        verdict: 'healthy',
+        latestProblems: [],
+        sources: { main: { status: 'unchanged' } },
+        actions: [
+          { ...(drifted.actions?.[1] as NonNullable<ConnectorDrift['actions']>[number]) },
+          ...(moved.actions ?? []).filter(({ action }) => action === 'listRules'),
+        ],
+        staleCorrections: [{ index: 0, target: '$.servers' }],
+      },
+      { owners: [] }
+    );
+
+    expect(body).toContain(
+      '> **1 of 2 actions works with the latest spec. 1 action needs attention.**'
+    );
+    expect(body).toContain(
+      '> `listRules` calls an endpoint that is missing from the current spec. 1 spec correction in `overlay.yaml` no longer applies.'
+    );
+    expect(body).not.toContain('(see the table).');
   });
 
   it('says when the actions pass but the check found problems outside them', () => {

@@ -51,16 +51,34 @@ const reviewKindOf = (id: string): ReviewKind => {
   return id.startsWith('response-') ? 'Response changed' : 'Other';
 };
 
-// How the summary counts changes of a kind: `1 deprecation`, `2 removals`.
-const REVIEW_NOUNS: Record<ReviewKind, [string, string]> = {
-  Deprecated: ['deprecation', 'deprecations'],
-  Sunset: ['sunset', 'sunsets'],
-  'Auth requirement changed': ['auth requirement change', 'auth requirement changes'],
-  Removed: ['removal', 'removals'],
-  'Shared schema removed': ['removed shared schema', 'removed shared schemas'],
-  'Request changed': ['request change', 'request changes'],
-  'Response changed': ['response change', 'response changes'],
-  Other: ['other change', 'other changes'],
+// How the summary says that passing actions are affected by a kind of change, one or several.
+const AFFECTED: Record<ReviewKind, readonly [string, string]> = {
+  Deprecated: ['passes but calls a deprecated endpoint', 'pass but call deprecated endpoints'],
+  Sunset: [
+    'passes but calls an endpoint with a sunset date',
+    'pass but call endpoints with a sunset date',
+  ],
+  'Auth requirement changed': [
+    'passes but calls an endpoint whose auth requirements changed',
+    'pass but call endpoints whose auth requirements changed',
+  ],
+  Removed: [
+    'passes but calls an endpoint removed from the current spec',
+    'pass but call endpoints removed from the current spec',
+  ],
+  'Shared schema removed': [
+    'passes but uses a schema removed from the current spec',
+    'pass but use schemas removed from the current spec',
+  ],
+  'Request changed': [
+    'passes but sends a request that changed',
+    'pass but send requests that changed',
+  ],
+  'Response changed': [
+    'passes but gets a response that changed',
+    'pass but get responses that changed',
+  ],
+  Other: ['passes but calls an endpoint that changed', 'pass but call endpoints that changed'],
 };
 
 /** A spec change that keeps the issue open, with the actions that call its operation. */
@@ -81,6 +99,7 @@ const REPO_BLOB_URL = 'https://github.com/elastic/kibana/blob/main';
 const SKILLS = 'src/platform/packages/shared/kbn-connector-specs/.claude/skills';
 const MAX_CHANGES_PER_KIND = 30;
 const MAX_LISTED = 3;
+const MAX_NAMED_ACTIONS = 8;
 // GitHub rejects issue bodies longer than 65536 characters.
 const MAX_BODY_LENGTH = 60000;
 
@@ -108,8 +127,8 @@ const code = (text: string): string => `\`${text.replace(/`/g, "'")}\``;
 // A table cell can't hold a pipe or a line break.
 const cell = (text: string): string => text.replace(/\|/g, '\\|').replace(/\s*\n\s*/g, ' ');
 
-const listed = (items: readonly string[]): string => {
-  const shown = items.slice(0, MAX_LISTED);
+const listed = (items: readonly string[], max = MAX_LISTED): string => {
+  const shown = items.slice(0, max);
   const rest = items.length - shown.length;
   if (rest > 0) {
     return `${shown.join(', ')} and ${rest} more`;
@@ -514,60 +533,85 @@ export const renderDriftIssue = (
       break;
     default: {
       alert = 'NOTE';
-      const changedFields = actions.flatMap(({ fieldChanges = [] }) => fieldChanges);
-      // Why the issue is open, by kind, with the actions each kind affects.
-      const kinds = new Map<ReviewKind, { count: number; actions: Set<string> }>();
-      for (const item of review) {
-        const entry = kinds.get(item.kind) ?? { count: 0, actions: new Set<string>() };
-        entry.count += 1;
-        item.actions.forEach((action) => entry.actions.add(action));
-        kinds.set(item.kind, entry);
-      }
-      // e.g. `5 removals in the vendor API spec affecting `listClusters`, …`
-      const counted = [...kinds].map(([kind, { count }]) => {
-        const [one, many] = REVIEW_NOUNS[kind];
-        return `${count} ${count === 1 ? one : many}`;
-      });
-      const affected = [...new Set([...kinds.values()].flatMap(({ actions: own }) => [...own]))];
+      // Which actions need attention, and why: one sentence per reason.
       const readers = actions
         .filter(({ fieldChanges = [] }) => fieldChanges.length > 0)
         .map(({ action }) => action);
+      const byKind = new Map<ReviewKind, Set<string>>();
+      for (const item of review) {
+        const named = byKind.get(item.kind) ?? new Set<string>();
+        item.actions.forEach((action) => named.add(action));
+        byKind.set(item.kind, named);
+      }
+      const missing = notChecked
+        .filter(({ unmatched }) => unmatched.length > 0)
+        .map(({ action }) => action);
+      const unattached = review.filter((item) => item.actions.length === 0).length;
+      const attention = new Set([
+        ...readers,
+        ...[...byKind.values()].flatMap((named) => [...named]),
+        ...missing,
+      ]);
+      const total = checked.length + missing.length;
+      const working = total - attention.size;
+      // The actions are the point of these sentences, so more of them are named.
+      const sentence = (named: readonly string[], [one, many]: readonly [string, string]) =>
+        `${listed(named.map(code), MAX_NAMED_ACTIONS)} ${named.length === 1 ? one : many}.`;
       const reasons = [
-        ...(counted.length > 0
+        ...(readers.length > 0
           ? [
-              `${listed(counted)} in the vendor API spec${
-                affected.length > 0 ? ` affecting ${listed(affected.map(code))}` : ''
-              }`,
+              sentence(readers, [
+                'passes but reads fields that changed',
+                'pass but read fields that changed',
+              ]),
             ]
           : []),
-        ...(changedFields.length > 0
+        ...[...byKind]
+          .filter(([, named]) => named.size > 0)
+          .map(([kind, named]) => sentence([...named], AFFECTED[kind])),
+        ...(missing.length > 0
           ? [
-              `${plural(changedFields.length, 'changed field')} in the responses ${listed(
-                readers.map(code)
-              )} ${readers.length === 1 ? 'reads' : 'read'}`,
+              sentence(missing, [
+                'calls an endpoint that is missing from the current spec',
+                'call endpoints that are missing from the current spec',
+              ]),
+            ]
+          : []),
+        ...(unattached > 0
+          ? [
+              `${plural(unattached, 'other spec change')} ${
+                unattached === 1 ? 'needs' : 'need'
+              } review (see the table).`,
             ]
           : []),
         ...(stale.length > 0
           ? [
-              `${plural(stale.length, 'spec correction')} that no longer ${
+              `${plural(stale.length, 'spec correction')} in \`${OVERLAY}\` no longer ${
                 stale.length === 1 ? 'applies' : 'apply'
-              }`,
+              }.`,
             ]
           : []),
       ];
-      summary = `**The connector still works against the latest spec: all ${plural(
-        checked.length,
-        'checked action'
-      )} of \`${drift.connector}\` pass.**\n\n${
-        reasons.length > 0
-          ? `The reason for this issue is ${listed(
-              reasons
-            )}. Update the connector to ensure it will continue working.`
-          : 'Its spec changed.'
-      }`;
+      const headline =
+        attention.size === 0
+          ? `**All ${plural(total, 'action')} ${
+              total === 1 ? 'works' : 'work'
+            } with the latest spec.**`
+          : `**${working} of ${plural(total, 'action')} ${
+              working === 1 ? 'works' : 'work'
+            } with the latest spec. ${plural(attention.size, 'action')} ${
+              attention.size === 1 ? 'needs' : 'need'
+            } attention.**`;
+      summary = [
+        headline,
+        reasons.length > 0 ? reasons.join(' ') : 'Its spec changed.',
+        'Update the connector to ensure it will continue working.',
+      ].join('\n\n');
     }
   }
-  const missingEndpoints = notChecked.filter(({ unmatched }) => unmatched.length > 0);
+  // The note for passing actions names these already.
+  const missingEndpoints =
+    drift.verdict === 'healthy' ? [] : notChecked.filter(({ unmatched }) => unmatched.length > 0);
   if (missingEndpoints.length > 0) {
     summary += ` ${plural(missingEndpoints.length, 'action')} ${
       missingEndpoints.length === 1 ? 'calls an endpoint' : 'call endpoints'
