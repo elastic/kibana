@@ -32,6 +32,7 @@ import {
   HistoricalTrendsSection,
 } from '../../components/health_overview';
 import { ExecutionOutcomesChart } from '../../components/health_overview/execution_outcomes';
+import { HealthIntervalFilter } from './health_interval_filter';
 import { SpaceRulesHealthAppHeader } from './space_rules_health_app_header';
 
 export const DetectionEngineSpaceRulesHealthPage = memo(
@@ -136,13 +137,18 @@ export const DetectionEngineSpaceRulesHealthPage = memo(
     return (
       <>
         <SecuritySolutionPageWrapper>
-          <SpaceRulesHealthAppHeader
-            interval={interval}
-            onIntervalChange={handleIntervalChange}
-            disabled={isLoading}
-          />
+          <SpaceRulesHealthAppHeader />
           <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>{isLoading ? skeleton : dashboard}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <HealthIntervalFilter onChange={handleIntervalChange} disabled={isLoading} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              {isLoading ? skeleton : dashboard}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </SecuritySolutionPageWrapper>
 

@@ -13,21 +13,3 @@ export const SPACE_RULES_HEALTH_TITLE = i18n.translate(
     defaultMessage: 'Detection Engine Space Rules Health',
   }
 );
-
-export const TIME_RANGE = i18n.translate('xpack.securitySolution.spaceRulesHealth.timeRange', {
-  defaultMessage: 'Time range',
-});
-
-export const TIME_RANGE_SETTINGS = i18n.translate(
-  'xpack.securitySolution.spaceRulesHealth.timeRangeSettings',
-  {
-    defaultMessage: 'Time range settings',
-  }
-);
-
-export const CLOSE_TIME_RANGE_SETTINGS = i18n.translate(
-  'xpack.securitySolution.spaceRulesHealth.closeTimeRangeSettings',
-  {
-    defaultMessage: 'Close time range settings',
-  }
-);
