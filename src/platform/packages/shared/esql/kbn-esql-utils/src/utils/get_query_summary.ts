@@ -96,9 +96,8 @@ export function getQuerySummaryFromCommands(
 }
 
 /**
- * With `LET a = (...); FROM a`, the summary of FROM must also include the summary of the LET body.
- * This builds the context that makes it possible: `summarizeBinding` says how to summarize a body,
- * each LET is summarized only once, and its body only sees the LETs declared before it.
+ * Builds the context that gives a source command the summary of the LETs it reads, each one
+ * summarized once with `summarizeBinding` and seeing only the LETs declared before it.
  */
 export const createNamedSubquerySummaryContext = (
   namedSubqueries: readonly NamedSubquery[],

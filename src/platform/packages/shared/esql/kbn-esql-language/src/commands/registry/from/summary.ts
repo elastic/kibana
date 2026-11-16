@@ -55,11 +55,13 @@ export const summary = (
     aggregateSummary(subquerySummary, target);
   }
 
+  const { namedSubqueries, getNamedSubquerySummary } = context;
+
   for (const source of command.args.filter(isSource)) {
-    const namedSubquery = findNamedSubqueryForSource(source, context.namedSubqueries);
+    const namedSubquery = findNamedSubqueryForSource(source, namedSubqueries);
 
     if (namedSubquery) {
-      aggregateSummary(context.getNamedSubquerySummary(namedSubquery), target);
+      aggregateSummary(getNamedSubquerySummary(namedSubquery), target);
     }
   }
 

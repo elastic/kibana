@@ -53,6 +53,13 @@ describe('FROM > summary', () => {
     });
   });
 
+  it('collects aggregates and grouping from a subquery', () => {
+    const result = summary(synth.cmd`FROM (FROM logs | STATS n = COUNT() BY host)`, '', context);
+
+    expect(result.aggregates).toEqual(new Set([expect.objectContaining({ field: 'n' })]));
+    expect(result.grouping).toEqual(new Set([expect.objectContaining({ field: 'host' })]));
+  });
+
   it('collects columns from multiple subqueries', () => {
     const result = summary(
       synth.cmd`FROM index1, (FROM index2 | EVAL a = 1), (FROM index3 | EVAL b = 2)`,
