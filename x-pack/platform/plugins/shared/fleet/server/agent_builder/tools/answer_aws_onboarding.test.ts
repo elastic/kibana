@@ -168,4 +168,78 @@ describe('answer_aws_onboarding', () => {
       expect(results[0].data.waiting.step_name).toBe('ask_credentials');
     });
   });
+
+  it('returns invalid with problems for ask_settings and does not resume', async () => {
+    const requirement = {
+      package_name: 'aws',
+      package_version: '8.18.1',
+      region: 'us-east-1',
+      services: [
+        {
+          id: 'guardduty',
+          name: 'GuardDuty',
+          policy_template: 'guardduty',
+          data_streams: [
+            {
+              id: 'guardduty',
+              dataset: 'aws.guardduty',
+              type: 'logs',
+              title: 'GuardDuty findings',
+              choice: 'one_of',
+              inputs: [
+                {
+                  input: 'httpjson',
+                  ingestion_method: 'API',
+                  title: 'GuardDuty API',
+                  description: 'Poll the API',
+                  fields: [
+                    { name: 'detector_id', title: 'Detector ID', type: 'text', required: true },
+                  ],
+                  var_groups: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const workflowApi = {
+      resumeWorkflowExecution: jest.fn(),
+      getWorkflowExecution: jest.fn().mockResolvedValue({
+        status: 'waiting_for_input',
+        workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
+        stepExecutions: [
+          {
+            id: 'se-req',
+            stepId: 'settings_requirement',
+            globalExecutionIndex: 1,
+            status: 'completed',
+            output: requirement,
+          },
+          {
+            id: 'se-1',
+            stepId: 'ask_settings',
+            globalExecutionIndex: 2,
+            status: 'waiting_for_input',
+          },
+        ],
+      }),
+    } as any;
+
+    const returned = await createAnswerAwsOnboardingTool({ workflowApi }).handler(
+      {
+        execution_id: 'exec-1',
+        step_name: 'ask_settings',
+        answer: {
+          services: { guardduty: { data_streams: { guardduty: { input: 'httpjson' } } } },
+        },
+      },
+      { request, spaceId: 'default' } as any
+    );
+    const { results } = returned as unknown as { results: Array<{ data: any }> };
+
+    expect(results[0].data.status).toBe('invalid');
+    expect(results[0].data.problems[0].path).toBe('guardduty.guardduty.vars.detector_id');
+    expect(workflowApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+  });
 });

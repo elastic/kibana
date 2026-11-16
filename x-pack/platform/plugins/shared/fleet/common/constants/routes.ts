@@ -159,6 +159,7 @@ export const AWS_ONBOARDING_API_ROUTES = {
   BOOTSTRAP_LAUNCH_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/bootstrap_launch`,
   DISCOVERY_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/discovery`,
   VERIFY_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/verify`,
+  SETTINGS_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/executions/{executionId}/settings`,
 };
 
 // Kubernetes Manifest API routes

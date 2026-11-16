@@ -346,4 +346,50 @@ describe('get_aws_onboarding_state', () => {
       expect(warn).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('settings card', () => {
+    const requirement = {
+      package_name: 'aws',
+      package_version: '8.18.1',
+      region: 'us-east-1',
+      services: [],
+    };
+    const requirementStep = () =>
+      step('settings_requirement', 2, { status: 'completed', output: requirement });
+
+    it('returns settings_requirement and creates the settings card at ask_settings', async () => {
+      const attachments = createAttachments();
+      const { results } = await runWithAttachments(
+        waitingExecution('ask_settings', [requirementStep()]),
+        attachments
+      );
+
+      expect(attachments.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'fleet_aws_onboarding_settings',
+          data: { execution_id: 'exec-1', requirement },
+        })
+      );
+      expect(results[0].data.settings_card_attachment_id).toBe('att-1');
+      expect(results[0].data.settings_requirement).toEqual(requirement);
+    });
+
+    it('does not return the settings card id at other pauses', async () => {
+      const attachments = createAttachments([
+        {
+          id: 'att-5',
+          type: 'fleet_aws_onboarding_settings',
+          versions: [{ version: 1, data: { execution_id: 'exec-1', requirement } }],
+          current_version: 1,
+        },
+      ]);
+      const { results } = await runWithAttachments(
+        waitingExecution('ask_resolve', [requirementStep()]),
+        attachments
+      );
+
+      expect(results[0].data).not.toHaveProperty('settings_card_attachment_id');
+      expect(results[0].data).not.toHaveProperty('settings_requirement');
+    });
+  });
 });

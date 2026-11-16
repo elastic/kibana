@@ -19,6 +19,11 @@ import {
   AWS_ONBOARDING_CREDENTIALS_ATTACHMENT_TYPE,
   type AwsOnboardingCredentialsAttachmentData,
 } from '../../../common/agent_builder/aws_onboarding_credentials_attachment';
+import {
+  AWS_ONBOARDING_SETTINGS_ATTACHMENT_TYPE,
+  type AwsOnboardingSettingsAttachmentData,
+} from '../../../common/agent_builder/aws_onboarding_settings_attachment';
+import type { AwsOnboardingSettingsRequirement } from '../../../common/workflows/steps/settings';
 import type { AwsOnboardingCredentialsOutput } from '../../../common/workflows/steps/credentials';
 import type { AwsOnboardingDiscoverOutput } from '../../../common/workflows/steps/discover';
 import type { AwsOnboardingResolveOutput } from '../../../common/workflows/steps/resolve';
@@ -154,6 +159,54 @@ const syncCredentialsCard = async ({
   return existing.id;
 };
 
+/**
+ * Creates the settings card once per execution (only while the run waits for settings) and keeps
+ * its requirement in step with the stored step output. The answer and problems on the card are
+ * left alone: they record what the user gave, which the answer path owns.
+ */
+const syncSettingsCard = async ({
+  attachments,
+  executionId,
+  waitingStepId,
+  requirement,
+}: {
+  attachments: AttachmentStateManager;
+  executionId: string;
+  waitingStepId: string | undefined;
+  requirement: AwsOnboardingSettingsRequirement | undefined;
+}): Promise<string | undefined> => {
+  if (!requirement) {
+    return undefined;
+  }
+  const existing = attachments
+    .getActive()
+    .find(
+      (a) =>
+        a.type === AWS_ONBOARDING_SETTINGS_ATTACHMENT_TYPE &&
+        (getLatestVersion(a)?.data as Partial<AwsOnboardingSettingsAttachmentData> | undefined)
+          ?.execution_id === executionId
+    );
+
+  if (!existing) {
+    if (waitingStepId !== 'ask_settings') {
+      return undefined;
+    }
+    const data: AwsOnboardingSettingsAttachmentData = { execution_id: executionId, requirement };
+    const created = await attachments.add({
+      type: AWS_ONBOARDING_SETTINGS_ATTACHMENT_TYPE,
+      data,
+      description: 'AWS onboarding integration settings for this run',
+    });
+    return created.id;
+  }
+
+  const stored = getLatestVersion(existing)?.data as AwsOnboardingSettingsAttachmentData;
+  if (JSON.stringify(stored.requirement) !== JSON.stringify(requirement)) {
+    await attachments.update(existing.id, { data: { ...stored, requirement } });
+  }
+  return existing.id;
+};
+
 export const createGetAwsOnboardingStateTool = ({
   workflowApi,
 }: AwsOnboardingToolDeps): BuiltinSkillBoundedTool<typeof stateSchema> => ({
@@ -198,7 +251,12 @@ export const createGetAwsOnboardingStateTool = ({
     const credentialsOutput =
       lastOutput<AwsOnboardingCredentialsOutput>(execution, 'credentials_recheck') ??
       lastOutput<AwsOnboardingCredentialsOutput>(execution, 'credentials');
+    const settingsRequirement = lastOutput<AwsOnboardingSettingsRequirement>(
+      execution,
+      'settings_requirement'
+    );
     let cardId: string | undefined;
+    let settingsCardId: string | undefined;
     if (attachments) {
       try {
         cardId = await syncCredentialsCard({
@@ -212,6 +270,18 @@ export const createGetAwsOnboardingStateTool = ({
         appContextService
           .getLogger()
           .warn(`Could not sync the AWS onboarding credentials card: ${e.message}`);
+      }
+      try {
+        settingsCardId = await syncSettingsCard({
+          attachments,
+          executionId,
+          waitingStepId: waitingStep?.stepId,
+          requirement: settingsRequirement,
+        });
+      } catch (e) {
+        appContextService
+          .getLogger()
+          .warn(`Could not sync the AWS onboarding settings card: ${e.message}`);
       }
     }
 
@@ -231,6 +301,13 @@ export const createGetAwsOnboardingStateTool = ({
           ...(cardId &&
             waitingStep?.stepId === 'ask_credentials' && {
               credentials_card_attachment_id: cardId,
+            }),
+          // The requirement and its card belong to the settings pause only.
+          ...(waitingStep?.stepId === 'ask_settings' &&
+            settingsRequirement && { settings_requirement: settingsRequirement }),
+          ...(settingsCardId &&
+            waitingStep?.stepId === 'ask_settings' && {
+              settings_card_attachment_id: settingsCardId,
             }),
           ...(discover && { region: discover.region, discovered_services: discover.services }),
           ...(resolve && {

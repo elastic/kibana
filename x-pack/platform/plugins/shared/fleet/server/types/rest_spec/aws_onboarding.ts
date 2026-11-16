@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { isCloudFormationStackArn } from '../../../common/services/cloud_connectors/iac_deployment';
+import { awsOnboardingSettingsAnswerSchema } from '../../../common/workflows/steps/settings';
 
 import { MAX_IAC_RENDER_INTEGRATIONS, RenderIacTemplateIntegrationSchema } from './iac_provisioner';
 
@@ -98,6 +99,14 @@ export const UpdateAwsOnboardingStackRequestSchema = {
     templateUrl: TemplateUrlSchema,
     parameters: schema.maybe(ParametersSchema),
   }),
+};
+
+export const SubmitAwsOnboardingSettingsRequestSchema = {
+  params: schema.object({
+    executionId: schema.string({ minLength: 1, maxLength: 255 }),
+  }),
+  // The strict zod schema is the same contract the answer tool parses.
+  body: awsOnboardingSettingsAnswerSchema,
 };
 
 function validateHttpsUrl(value: string): string | undefined {

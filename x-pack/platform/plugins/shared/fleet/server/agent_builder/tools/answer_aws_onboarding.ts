@@ -13,6 +13,9 @@ import { toWorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflow
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 
+import { awsOnboardingSettingsAnswerSchema } from '../../../common/workflows/steps/settings';
+import { submitSettingsAnswer } from '../../services/aws_onboarding/settings_answer';
+
 import { checkOnboardingAccess, getOnboardingExecution } from './common';
 import type { AwsOnboardingToolDeps } from './common';
 
@@ -53,7 +56,7 @@ export const createAnswerAwsOnboardingTool = ({
   confirmation: { askUser: 'never' },
   handler: async (
     { execution_id: executionId, step_name: stepName, answer },
-    { request, spaceId }
+    { request, spaceId, attachments }
   ) => {
     const denied = await checkOnboardingAccess(request, 'write');
     if (denied) {
@@ -84,9 +87,32 @@ export const createAnswerAwsOnboardingTool = ({
     }
 
     try {
-      await workflowApi.resumeWorkflowExecution(executionId, spaceId, answer, request, {
-        stepExecutionId: waitingStep.id,
-      });
+      if (stepName === 'ask_settings') {
+        // Validation and resume live in one service so the settings route behaves the same.
+        const parsed = awsOnboardingSettingsAnswerSchema.safeParse(answer);
+        if (!parsed.success) {
+          return {
+            results: [errorResult(`The settings answer is malformed: ${parsed.error.message}`)],
+          };
+        }
+        const submitted = await submitSettingsAnswer({
+          workflowApi,
+          executionId,
+          spaceId,
+          request,
+          answer: parsed.data,
+          attachments,
+        });
+        if (submitted.status === 'invalid') {
+          return {
+            results: [otherResult({ status: 'invalid', problems: submitted.problems })],
+          };
+        }
+      } else {
+        await workflowApi.resumeWorkflowExecution(executionId, spaceId, answer, request, {
+          stepExecutionId: waitingStep.id,
+        });
+      }
     } catch (e) {
       return {
         results: [
