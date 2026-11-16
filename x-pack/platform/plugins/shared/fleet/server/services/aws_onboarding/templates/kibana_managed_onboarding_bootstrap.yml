@@ -130,6 +130,21 @@ Resources:
                   - lambda:TagResource
                   - lambda:ListTags
                 Resource: !Sub "arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function:${StackNamePrefix}-*"
+              - Sid: ManageFunctionLogGroup
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:DeleteLogGroup
+                  - logs:PutRetentionPolicy
+                  - logs:DeleteRetentionPolicy
+                  - logs:TagResource
+                  - logs:UntagResource
+                  - logs:ListTagsForResource
+                Resource: !Sub "arn:${AWS::Partition}:logs:*:${AWS::AccountId}:log-group:${StackNamePrefix}-*"
+              - Sid: DescribeLogGroups
+                Effect: Allow
+                Action: logs:DescribeLogGroups
+                Resource: "*"
 
   # The identity Kibana holds. It can only assume the roles above (the stand-in for a delegated
   # session) and clean this stack up when the credentials are removed from Kibana. Inline
