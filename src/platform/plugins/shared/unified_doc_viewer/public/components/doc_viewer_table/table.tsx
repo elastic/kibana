@@ -113,6 +113,7 @@ const InternalDocViewerTable = ({
   dataView,
   textBasedHits,
   filter,
+  onFindSimilarValues,
   decreaseAvailableHeightBy,
   onAddColumn,
   onRemoveColumn,
@@ -425,6 +426,8 @@ const InternalDocViewerTable = ({
             rows={rows}
             isEsqlMode={isEsqlMode}
             filter={filter}
+            dataView={dataView}
+            onFindSimilarValues={onFindSimilarValues}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             columns={columns}
