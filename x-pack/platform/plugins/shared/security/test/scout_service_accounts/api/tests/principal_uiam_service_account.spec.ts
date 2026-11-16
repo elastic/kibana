@@ -7,12 +7,14 @@
 
 import { randomUUID } from 'crypto';
 
-import { MOCK_IDP_GATEWAY_SHARED_SECRET } from '@kbn/mock-idp-utils';
+import {
+  exchangeUiamServiceAccountToken,
+  MOCK_IDP_GATEWAY_SHARED_SECRET,
+} from '@kbn/mock-idp-utils';
 import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
 import { apiTest, HEADERS } from '../fixtures';
-import { exchangeUiamServiceAccountToken } from '../fixtures/uiam_service_account_token';
 
 const PRINCIPAL_PATH = 'internal/service_accounts_test/_principal';
 

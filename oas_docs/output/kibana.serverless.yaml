@@ -13512,7 +13512,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/{id}/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Creates a rule. You can supply your own `id`; if you omit it, Kibana generates one. If a rule with that `id` already exists, the request fails with HTTP 409 and the existing rule is not changed. To create or replace a rule at a specific ID, use PUT /api/alerting/v2/rules/{id}.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
       operationId: post-alerting-v2-rules
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13652,6 +13652,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the user does not have the required privileges to perform the request.
+        '409':
+          content:
+            application/json:
+              examples:
+                ruleAlreadyExists:
+                  summary: A rule with the requested ID already exists
+                  value:
+                    code: RULE_ALREADY_EXISTS
+                    details:
+                      rule_id: rule-1
+                    error: Conflict
+                    message: Rule with id "rule-1" already exists
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates a rule with the given ID already exists.
         '500':
           content:
             application/json:
@@ -23134,7 +23149,6 @@ paths:
                           value: ai-index-ds-customer-support
                         id: customer_support
                         managed: false
-                        memory_enabled: true
                         sources:
                           - type: esql
                             value: FROM support-cases | LIMIT 100
@@ -23268,9 +23282,6 @@ paths:
                         managed:
                           description: Whether the AI Index is managed by a plugin and therefore immutable.
                           type: boolean
-                        memory_enabled:
-                          description: Whether this AI Index accepts memory writes.
-                          type: boolean
                         sources:
                           description: Additional sources that provide context for the AI Index.
                           items:
@@ -23317,7 +23328,6 @@ paths:
                       required:
                         - id
                         - managed
-                        - memory_enabled
                         - date_created
                         - date_modified
                         - dest
@@ -23595,7 +23605,8 @@ paths:
                   minLength: 1
                   type: string
                 memory_enabled:
-                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  deprecated: true
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted. Deprecated and ignored in Serverless and in Elastic 9.7 and later.
                   type: boolean
                 sources:
                   default: []
@@ -24306,7 +24317,6 @@ paths:
                       value: ai-index-ds-customer-support
                     id: customer_support
                     managed: false
-                    memory_enabled: true
                     sources:
                       - type: esql
                         value: FROM support-cases | LIMIT 100
@@ -24439,9 +24449,6 @@ paths:
                   managed:
                     description: Whether the AI Index is managed by a plugin and therefore immutable.
                     type: boolean
-                  memory_enabled:
-                    description: Whether this AI Index accepts memory writes.
-                    type: boolean
                   sources:
                     description: Additional sources that provide context for the AI Index.
                     items:
@@ -24488,7 +24495,6 @@ paths:
                 required:
                   - id
                   - managed
-                  - memory_enabled
                   - date_created
                   - date_modified
                   - dest
@@ -24739,7 +24745,8 @@ paths:
                   required:
                     - enabled
                 memory_enabled:
-                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  deprecated: true
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted. Deprecated and ignored in Serverless and in Elastic 9.7 and later.
                   type: boolean
                 sources:
                   default: []
@@ -48979,10 +48986,16 @@ paths:
                           type: object
                         policySettings:
                           additionalProperties:
+                            anyOf:
+                              - maxLength: 10000
+                                type: string
+                              - items:
+                                  maxLength: 256
+                                  type: string
+                                maxItems: 100
+                                type: array
                             default: null
-                            maxLength: 10000
                             nullable: true
-                            type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                           type: object
                           x-state: Experimental
@@ -49285,10 +49298,16 @@ paths:
                   type: array
                 policySettings:
                   additionalProperties:
+                    anyOf:
+                      - maxLength: 10000
+                        type: string
+                      - items:
+                          maxLength: 256
+                          type: string
+                        maxItems: 100
+                        type: array
                     default: null
-                    maxLength: 10000
                     nullable: true
-                    type: string
                   description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                   type: object
                   x-state: Experimental
@@ -49599,10 +49618,16 @@ paths:
                         type: object
                       policySettings:
                         additionalProperties:
+                          anyOf:
+                            - maxLength: 10000
+                              type: string
+                            - items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
                           default: null
-                          maxLength: 10000
                           nullable: true
-                          type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                         type: object
                         x-state: Experimental
@@ -50052,10 +50077,16 @@ paths:
                         type: object
                       policySettings:
                         additionalProperties:
+                          anyOf:
+                            - maxLength: 10000
+                              type: string
+                            - items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
                           default: null
-                          maxLength: 10000
                           nullable: true
-                          type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                         type: object
                         x-state: Experimental
@@ -50401,10 +50432,16 @@ paths:
                   type: object
                 policySettings:
                   additionalProperties:
+                    anyOf:
+                      - maxLength: 10000
+                        type: string
+                      - items:
+                          maxLength: 256
+                          type: string
+                        maxItems: 100
+                        type: array
                     default: null
-                    maxLength: 10000
                     nullable: true
-                    type: string
                   description: Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.
                   type: object
                   x-state: Experimental
@@ -50672,10 +50709,16 @@ paths:
                         type: object
                       policySettings:
                         additionalProperties:
+                          anyOf:
+                            - maxLength: 10000
+                              type: string
+                            - items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
                           default: null
-                          maxLength: 10000
                           nullable: true
-                          type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                         type: object
                         x-state: Experimental
@@ -51052,10 +51095,16 @@ paths:
                           type: object
                         policySettings:
                           additionalProperties:
+                            anyOf:
+                              - maxLength: 10000
+                                type: string
+                              - items:
+                                  maxLength: 256
+                                  type: string
+                                maxItems: 100
+                                type: array
                             default: null
-                            maxLength: 10000
                             nullable: true
-                            type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                           type: object
                           x-state: Experimental
@@ -86463,7 +86512,7 @@ paths:
                   type: string
                 initials:
                   description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                  maxLength: 2
+                  maxLength: 64
                   type: string
                 name:
                   description: 'The display name for the space. '
@@ -86509,7 +86558,7 @@ paths:
                     type: string
                   initials:
                     description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                    maxLength: 2
+                    maxLength: 64
                     type: string
                   name:
                     description: 'The display name for the space. '
@@ -86614,7 +86663,7 @@ paths:
                     type: string
                   initials:
                     description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                    maxLength: 2
+                    maxLength: 64
                     type: string
                   name:
                     description: 'The display name for the space. '
@@ -86680,7 +86729,7 @@ paths:
                   type: string
                 initials:
                   description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                  maxLength: 2
+                  maxLength: 64
                   type: string
                 name:
                   description: 'The display name for the space. '
@@ -86739,7 +86788,7 @@ paths:
                     type: string
                   initials:
                     description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                    maxLength: 2
+                    maxLength: 64
                     type: string
                   name:
                     description: 'The display name for the space. '
@@ -154283,7 +154332,7 @@ components:
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
         id:
-          description: Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.
+          description: 'Optional rule ID. If omitted, Kibana generates one. IDs must be unique within the request. If a rule with this ID already exists, that item is reported in `errors` with the code `RULE_ALREADY_EXISTS` and the existing rule is not changed. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           maxLength: 150
           minLength: 1
           pattern: ^[a-zA-Z0-9_-]+$
@@ -154684,6 +154733,12 @@ components:
           type: array
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
+        id:
+          description: 'Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, the request fails with HTTP 409 and the existing rule is not changed. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+          maxLength: 150
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
+          type: string
         kind:
           anyOf:
             - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
@@ -204632,12 +204687,22 @@ components:
                   example: true
                   type: boolean
                 path:
-                  description: The full file path to retrieve from the endpoint.
+                  description: The full file path to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both.
                   maxLength: 4096
                   minLength: 1
                   type: string
-              required:
-                - path
+                paths:
+                  description: The list of file paths to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both. Valid for the Elastic Defend Endpoint agent type only, and requires an Endpoint that supports the `get_file_multi_path` capability.
+                  example:
+                    - /var/log/syslog
+                    - /var/log/auth.log
+                  items:
+                    maxLength: 4096
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  minItems: 1
+                  type: array
           required:
             - parameters
     Security_Endpoint_Management_API_GetProcessesRouteRequestBody:
