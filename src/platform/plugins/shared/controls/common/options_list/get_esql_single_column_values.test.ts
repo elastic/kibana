@@ -85,7 +85,7 @@ describe('getESQLSingleColumnValues', () => {
     expect(result.errors[0].message).toBe('Query must return a single column');
   });
   it('returns an error on a failed query', async () => {
-    esqlMock.mockRejectedValueOnce('Invalid ES|QL query');
+    esqlMock.mockRejectedValueOnce(new Error('Invalid ES|QL query'));
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index | EVAL',
       search: { esql: esqlMock },
@@ -96,7 +96,7 @@ describe('getESQLSingleColumnValues', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "errors": Array [
-          "Invalid ES|QL query",
+          [Error: Invalid ES|QL query],
         ],
       }
     `);

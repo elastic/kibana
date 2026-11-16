@@ -268,6 +268,30 @@ describe('SearchMethodsService', () => {
         expect(requestResponder.json.mock.calls[0][0]).not.toHaveProperty('project_routing');
       });
 
+      it.each([
+        [
+          'an error with attributes',
+          Object.assign(new Error('x'), {
+            attributes: { type: 'parsing_exception', reason: 'bad' },
+          }),
+          { type: 'parsing_exception', reason: 'bad' },
+        ],
+        ['an error without attributes', new Error('network down'), { message: 'network down' }],
+        ['a string', 'plain failure', { message: 'plain failure' }],
+        ['null', null, { message: 'null' }],
+        ['undefined', undefined, { message: 'undefined' }],
+      ])('logs a rejection with %s without failing on it', async (_label, rejection, json) => {
+        mockSearch.mockReturnValue(throwError(() => rejection));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await expect(service.esql({ query: 'FROM logs' }, { inspector })).rejects.toBeInstanceOf(
+          Error
+        );
+
+        expect(requestResponder.error).toHaveBeenCalledWith({ json });
+      });
+
       it('calls requestResponder.stats with getEsqlInspectorStats result on success', async () => {
         const mockResponse = {
           columns: [{ name: 'status', type: 'integer' }],

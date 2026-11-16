@@ -11,6 +11,7 @@ import {
   mapEsqlResponseToDatatable,
   extractEsqlErrorInfo,
   formatAndRethrowEsqlError,
+  getInspectorErrorJson,
 } from './datatable_mapper';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 
@@ -176,12 +177,55 @@ describe('extractEsqlErrorInfo', () => {
   });
 });
 
+describe('getInspectorErrorJson', () => {
+  it('returns the attributes of an Elasticsearch error', () => {
+    const attributes = { type: 'parsing_exception', reason: 'bad syntax' };
+    expect(getInspectorErrorJson(Object.assign(new Error('x'), { attributes }))).toBe(attributes);
+  });
+
+  it('returns the message of an error without attributes', () => {
+    expect(getInspectorErrorJson(new Error('network down'))).toEqual({ message: 'network down' });
+  });
+
+  it.each([[null], [undefined], ['a string'], [42]])(
+    'ignores attributes that are not an object: %p',
+    (attributes) => {
+      expect(getInspectorErrorJson(Object.assign(new Error('boom'), { attributes }))).toEqual({
+        message: 'boom',
+      });
+    }
+  );
+
+  it.each([
+    ['a string', 'plain failure', 'plain failure'],
+    ['null', null, 'null'],
+    ['undefined', undefined, 'undefined'],
+  ])('does not assume a thrown value is an error: %s', (_label, thrown, message) => {
+    expect(getInspectorErrorJson(thrown)).toEqual({ message });
+  });
+});
+
 describe('formatAndRethrowEsqlError', () => {
   it('prefixes unexpected errors', () => {
     const err = Object.assign(new Error('connection refused'), { message: 'connection refused' });
     expect(() => formatAndRethrowEsqlError(err)).toThrow(
       'Unexpected error from Elasticsearch: connection refused'
     );
+  });
+
+  it.each([
+    ['a string', 'plain failure', 'Unexpected error from Elasticsearch: plain failure'],
+    ['null', null, 'Unexpected error from Elasticsearch: null'],
+    ['undefined', undefined, 'Unexpected error from Elasticsearch: undefined'],
+  ])('rethrows %s as an error instead of failing on it', (_label, thrown, message) => {
+    let caught: unknown;
+    try {
+      formatAndRethrowEsqlError(thrown);
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeInstanceOf(Error);
+    expect((caught as Error).message).toBe(message);
   });
 
   it('formats parsing_exception with a friendly message', () => {

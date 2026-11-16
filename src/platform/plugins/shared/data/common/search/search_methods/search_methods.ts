@@ -49,7 +49,11 @@ import type {
   SQL_SEARCH_STRATEGY,
 } from '..';
 import { getTime } from '../../query';
-import { mapEsqlResponseToDatatable, formatAndRethrowEsqlError } from './datatable_mapper';
+import {
+  mapEsqlResponseToDatatable,
+  formatAndRethrowEsqlError,
+  getInspectorErrorJson,
+} from './datatable_mapper';
 import {
   getDslRequestInspectorStats,
   getDslResponseInspectorStats,
@@ -135,7 +139,7 @@ export class SearchMethodsService implements ISearchMethods {
       };
     } catch (error) {
       requestResponder?.error({
-        json: 'attributes' in error ? error.attributes : { message: error.message },
+        json: getInspectorErrorJson(error),
       });
       return formatAndRethrowEsqlError(error);
     }
@@ -176,7 +180,7 @@ export class SearchMethodsService implements ISearchMethods {
       };
     } catch (error) {
       requestResponder?.error({
-        json: 'attributes' in error ? error.attributes : { message: error.message },
+        json: getInspectorErrorJson(error),
       });
       throw error;
     }
@@ -236,7 +240,7 @@ export class SearchMethodsService implements ISearchMethods {
       };
     } catch (error) {
       requestResponder?.error({
-        json: 'attributes' in error ? error.attributes : { message: error.message },
+        json: getInspectorErrorJson(error),
       });
       throw error;
     }
@@ -273,7 +277,7 @@ export class SearchMethodsService implements ISearchMethods {
       };
     } catch (error) {
       requestResponder?.error({
-        json: 'attributes' in error ? error.attributes : { message: error.message },
+        json: getInspectorErrorJson(error),
       });
       throw error;
     }

@@ -133,9 +133,22 @@ export const extractEsqlErrorInfo = (attributes: unknown): { type?: string; reas
   return {};
 };
 
+/**
+ * Builds the JSON that the Inspector shows for a failed request: the error attributes when there
+ * are any, else the message. Anything can be thrown, so it makes no assumption about the value.
+ */
+export const getInspectorErrorJson = (error: unknown): object => {
+  const attributes = (error as { attributes?: unknown } | null | undefined)?.attributes;
+  if (typeof attributes === 'object' && attributes !== null) return attributes;
+  return { message: error instanceof Error ? error.message : String(error) };
+};
+
 /** Re-formats an Elasticsearch ES|QL error into a user-friendly message and re-throws it. */
 export const formatAndRethrowEsqlError = (error: unknown): never => {
-  const err = error as Record<string, unknown> & { message: string };
+  // A rejection is not always an object (e.g. a string), which would throw while it is annotated
+  const err = (
+    typeof error === 'object' && error !== null ? error : new Error(String(error))
+  ) as Record<string, unknown> & { message: string };
   if (!err.attributes) {
     err.message = `Unexpected error from Elasticsearch: ${err.message}`;
   } else {
