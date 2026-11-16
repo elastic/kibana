@@ -112,6 +112,9 @@ const MOVED_STATUS = 'Moved in the spec, same URL';
 const MAX_BODY_LENGTH = 60000;
 
 const UNMATCHED_PROBLEM = / matches no operation of any source/;
+// The one violation a request with credentials the operation doesn't accept has.
+const MISSING_CREDENTIALS =
+  /breaks the spec: Request has no credentials for the operation; expected ([^;]+)$/;
 
 const changeLine = ({ operation, text, id }: SpecChange): string =>
   `- ${operation ? `\`${operation}\`: ` : ''}${text} (\`${id}\`)`;
@@ -146,7 +149,18 @@ const listed = (items: readonly string[], max = MAX_LISTED): string => {
 
 // How the summary names failing actions, by the start of their status, one or several. The
 // actions table has the details.
+const CREDENTIALS_STATUS = 'Fails on credentials against the latest spec';
+// Specs that start documenting OAuth scopes per operation drop the other schemes by accident.
+const CREDENTIALS_ADVICE = `Check the vendor's docs on authentication: if they still accept the connector's credentials, correct the spec in \`${OVERLAY}\` rather than the connector.`;
+
 const FAILURES: ReadonlyArray<readonly [string, readonly [string, string]]> = [
+  [
+    CREDENTIALS_STATUS,
+    [
+      "fails because the latest spec requires credentials it doesn't send",
+      "fail because the latest spec requires credentials they don't send",
+    ],
+  ],
   [
     'Fails against the latest spec',
     ['fails against the latest vendor spec', 'fail against the latest vendor spec'],
@@ -447,6 +461,25 @@ const statusOf = (
         missing.map(({ operation }) => code(operation))
       )}`;
       return { rank: 'fails', text, outcome: 'fails', details: text };
+    }
+    // Credentials the latest spec doesn't accept, and nothing else: often a spec that started
+    // documenting OAuth scopes per operation, rather than a vendor that stopped taking the others.
+    const expected = latestProblems.flatMap((problem) => {
+      const credentials = problem.match(MISSING_CREDENTIALS)?.[1];
+      return credentials === undefined ? [] : [credentials];
+    });
+    if (expected.length === latestProblems.length) {
+      const authChanges = action.operations.flatMap(({ source, operation }) =>
+        changesOf(source, operation).filter(({ id }) => id.startsWith('api-security-'))
+      );
+      return {
+        rank: 'fails',
+        text: CREDENTIALS_STATUS,
+        outcome: 'fails',
+        details: `The latest spec requires credentials the connector doesn't send: ${problemText(
+          `expected ${listed([...new Set(expected)])}`
+        )}.${authChanges.length > 0 ? ` Spec change: ${authChanges[0].text}.` : ''}`,
+      };
     }
     const problem = firstProblem(latestProblems);
     return {
@@ -829,8 +862,18 @@ export const renderDriftIssue = (
     // The actions are the point of these sentences, so more of them are named.
     const sentence = (named: readonly string[], [one, many]: readonly [string, string]) =>
       `${listed(named.map(code), MAX_NAMED_ACTIONS)} ${named.length === 1 ? one : many}.`;
+    const credentialFailures = attention.failing.filter(
+      ({ status }) => status === CREDENTIALS_STATUS
+    );
+    const onlyCredentials =
+      credentialFailures.length > 0 && credentialFailures.length === attention.actions.size;
+    // The credentials sentence comes first; its advice follows it, or closes the note when
+    // nothing else needs attention.
+    const [firstFailure, ...otherFailures] = failureSentences(attention.failing);
     const reasons = [
-      ...failureSentences(attention.failing),
+      ...(firstFailure === undefined ? [] : [firstFailure]),
+      ...(credentialFailures.length > 0 && !onlyCredentials ? [CREDENTIALS_ADVICE] : []),
+      ...otherFailures,
       ...(readers.length > 0
         ? [
             sentence(readers, [
@@ -871,7 +914,9 @@ export const renderDriftIssue = (
     return [
       headline,
       [reasons.length > 0 ? reasons.join(' ') : 'Its spec changed.', ...notInSpecNote].join(' '),
-      attention.actions.size > 0
+      onlyCredentials
+        ? CREDENTIALS_ADVICE
+        : attention.actions.size > 0
         ? 'Update the connector to ensure it will continue working.'
         : "The actions don't need to change; fix what the tables below list.",
     ].join('\n\n');

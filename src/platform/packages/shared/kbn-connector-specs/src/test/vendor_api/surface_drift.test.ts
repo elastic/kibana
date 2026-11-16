@@ -817,6 +817,64 @@ describe('renderDriftIssue', () => {
     );
   });
 
+  it('says when actions only fail on credentials, and to check the vendor before the connector', () => {
+    const credentials =
+      'GET https://api.example.com/items breaks the spec: Request has no credentials for the operation; expected Authorization: Bearer';
+    const withAuthChange = (actions: ConnectorDrift['actions']): ConnectorDrift => ({
+      ...drifted,
+      sources: {
+        main: {
+          status: 'changed',
+          changes: [
+            {
+              kind: 'breaking',
+              id: 'api-security-removed',
+              text: 'the endpoint scheme security `basicAuth` was removed from the API',
+              operation: 'GET /items',
+            },
+          ],
+        },
+      },
+      actions,
+    });
+    const advice =
+      "Check the vendor's docs on authentication: if they still accept the connector's credentials, correct the spec in `overlay.yaml` rather than the connector.";
+
+    const { body } = renderDriftIssue(
+      withAuthChange(
+        drifted.actions?.map((action) =>
+          action.action === 'search' ? { ...action, latestProblems: [credentials] } : action
+        )
+      ),
+      { owners: [] }
+    );
+    expect(body).toContain(
+      `> \`search\` fails because the latest spec requires credentials it doesn't send.\n>\n> ${advice}`
+    );
+    expect(body).toContain(
+      "| `search` | `GET /items` | ❌ Fails | The latest spec requires credentials the connector doesn't send: expected `Authorization: Bearer`. Spec change: the endpoint scheme security `basicAuth` was removed from the API. |"
+    );
+    expect(body).not.toContain('Update the connector to ensure it will continue working.');
+
+    // With another failure, the advice follows the credentials sentence
+    const { body: mixed } = renderDriftIssue(
+      withAuthChange(
+        drifted.actions?.map((action) => ({
+          ...action,
+          latestProblems:
+            action.action === 'search'
+              ? [credentials]
+              : ['GET https://api.example.com/items/0 breaks the spec: limit must be <= 50'],
+        }))
+      ),
+      { owners: [] }
+    );
+    expect(mixed).toContain(
+      `> \`search\` fails because the latest spec requires credentials it doesn't send. ${advice} \`getItem\` fails against the latest vendor spec.`
+    );
+    expect(mixed).toContain('Update the connector to ensure it will continue working.');
+  });
+
   it('counts problems outside the actions as the table lists them, and says what to fix', () => {
     const { title, body } = renderDriftIssue(
       {
