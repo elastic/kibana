@@ -404,8 +404,7 @@
     "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customIncompatibleAntivirusEvaluator.test.ts": "'customIncompatibleAntivirusEvaluator.test.ts' should be snake_case",
     "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customIncompatibleAntivirusEvaluator.ts": "'customIncompatibleAntivirusEvaluator.ts' should be snake_case",
     "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator.test.ts": "'customPolicyResponseFailureEvaluator.test.ts' should be snake_case",
-    "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator.ts": "'customPolicyResponseFailureEvaluator.ts' should be snake_case",
-    "x-pack/solutions/security/test/security_solution_endpoint": "'security_solution_endpoint' should be kebab-case"
+    "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator.ts": "'customPolicyResponseFailureEvaluator.ts' should be snake_case"
   },
   "@elastic/security-detection-engineering": {
     "x-pack/solutions/security/test/security_solution_api_integration": "'security_solution_api_integration' should be kebab-case",
