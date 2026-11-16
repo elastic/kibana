@@ -11,6 +11,7 @@ import { isValidNamespace, validateNoPathTraversalIdSchema } from '../../service
 import {
   MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY,
   PACKAGE_POLICY_CONDITION_MAX_LENGTH,
+  VALIDATE_DATASTREAMS_PERMISSION_REGEX,
 } from '../../constants/package_policy';
 
 const PACKAGE_POLICY_ID_MAX_LENGTH = 255;
@@ -646,8 +647,6 @@ export const SimplifiedPackagePolicyInputRecordSchema = schema.recordOf(
 export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
   SimplifiedPackagePolicyInputRecordSchema
 );
-
-const VALIDATE_DATASTREAMS_PERMISSION_REGEX = /^(logs|metrics|traces|synthetics|profiles)-(.+)$/;
 
 function validateAdditionalDatastreamsPermissions(values: string[]) {
   for (const val of values) {
