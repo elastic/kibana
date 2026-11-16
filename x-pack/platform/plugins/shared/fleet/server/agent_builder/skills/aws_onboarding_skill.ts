@@ -32,7 +32,7 @@ const AWS_ONBOARDING_CONTENT = [
   '',
   '### Rules',
   '',
-  '- Never ask the user for AWS secrets such as access keys or secret keys, and never repeat one if the user pastes it. When the workflow asks for credentials, the rendered card is where the user completes setup: tell them to use it and to reply done once the card shows verified. Check `get_aws_onboarding_state` again only when they say they are done, not on a timer.',
+  '- Never ask the user for AWS secrets such as access keys or secret keys, and never repeat one if the user pastes it. When the workflow asks for credentials, the rendered card is where the user completes setup. When the user replies done, call `answer_aws_onboarding` for `ask_credentials` with { "done": true } without checking the card first: the workflow re-checks the stored credentials itself and asks again if they are missing. Do not read the card attachment to decide; it is for the user.',
   '- If the user rejects an approval, answer `{ "approved": false }`, report that the run stopped, and do not retry on your own.',
   '- If `status` is `failed`, report `error` and `stack.reason` if present, and offer to start a new run.',
   '- If a tool returns an error about permissions or the feature being unavailable, tell the user and stop.',

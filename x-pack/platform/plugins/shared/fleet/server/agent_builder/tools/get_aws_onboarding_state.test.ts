@@ -12,12 +12,23 @@ import { getAuthzFromRequest } from '../../services/security/security';
 import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_onboarding';
 
 import { appContextService } from '../../services/app_context';
+import {
+  awsOnboardingCredentialsService,
+  awsOnboardingDiscoveryService,
+} from '../../services/aws_onboarding';
 
 import { createGetAwsOnboardingStateTool } from './get_aws_onboarding_state';
 
 jest.mock('../../services/security/security');
 jest.mock('../../services/utils/agentic_aws_onboarding');
 jest.mock('../../services/app_context');
+jest.mock('../../services/aws_onboarding', () => ({
+  awsOnboardingCredentialsService: { getPublic: jest.fn() },
+  awsOnboardingDiscoveryService: { verify: jest.fn() },
+}));
+
+const getPublic = awsOnboardingCredentialsService.getPublic as jest.Mock;
+const verify = awsOnboardingDiscoveryService.verify as jest.Mock;
 
 const request = httpServerMock.createKibanaRequest();
 
@@ -86,6 +97,7 @@ describe('get_aws_onboarding_state', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.mocked(isAgenticAwsOnboardingEnabled).mockResolvedValue(true);
+    getPublic.mockResolvedValue({ configured: false });
     jest
       .mocked(getAuthzFromRequest)
       .mockResolvedValue({ integrations: { readIntegrationPolicies: true } } as any);
@@ -258,7 +270,7 @@ describe('get_aws_onboarding_state', () => {
     it('marks the card verify_failed with the reason when a role cannot be assumed', async () => {
       const attachments = createAttachments([existingCard('pending')]);
       await runWithAttachments(
-        waitingExecution('ask_credentials', [
+        waitingExecution('ask_discover', [
           step('credentials_recheck', 2, {
             status: 'completed',
             output: {
@@ -274,6 +286,43 @@ describe('get_aws_onboarding_state', () => {
 
       expect(attachments.update).toHaveBeenCalledWith('att-9', {
         data: expect.objectContaining({ status: 'verify_failed', error: 'AccessDenied' }),
+      });
+    });
+
+    it('reads the live state while waiting for credentials and marks the card verified', async () => {
+      getPublic.mockResolvedValue({ configured: true, mode: 'fully-managed' });
+      verify.mockResolvedValue({
+        accountId: '123456789012',
+        discovery: { ok: true },
+        provisioning: { ok: true },
+      });
+      const attachments = createAttachments([existingCard('pending')]);
+      const { results } = await runWithAttachments(
+        waitingExecution('ask_credentials', [
+          step('credentials', 1, { status: 'completed', output: { configured: false } }),
+        ]),
+        attachments
+      );
+
+      expect(attachments.update).toHaveBeenCalledWith('att-9', {
+        data: expect.objectContaining({ status: 'verified', account_id: '123456789012' }),
+      });
+      expect(results[0].data.credentials_card_attachment_id).toBe('att-9');
+    });
+
+    it('marks the card verify_failed with the message when the live verification throws', async () => {
+      getPublic.mockResolvedValue({ configured: true, mode: 'fully-managed' });
+      verify.mockRejectedValue(new Error('AWS AccessDenied'));
+      const attachments = createAttachments([existingCard('pending')]);
+      await runWithAttachments(
+        waitingExecution('ask_credentials', [
+          step('credentials', 1, { status: 'completed', output: { configured: false } }),
+        ]),
+        attachments
+      );
+
+      expect(attachments.update).toHaveBeenCalledWith('att-9', {
+        data: expect.objectContaining({ status: 'verify_failed', error: 'AWS AccessDenied' }),
       });
     });
 

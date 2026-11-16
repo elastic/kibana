@@ -28,6 +28,10 @@ import type { AwsOnboardingCreatePoliciesOutput } from '../../../common/workflow
 import type { AwsOnboardingHasDataOutput } from '../../../common/workflows/steps/has_data';
 
 import { appContextService } from '../../services/app_context';
+import {
+  awsOnboardingCredentialsService,
+  awsOnboardingDiscoveryService,
+} from '../../services/aws_onboarding';
 
 import { checkOnboardingAccess, getOnboardingExecution } from './common';
 import type { AwsOnboardingToolDeps } from './common';
@@ -62,6 +66,37 @@ const deriveCardState = (
     return { status: 'verified', ...accountId };
   }
   return { status: 'configured', ...accountId };
+};
+
+/**
+ * While the run waits for credentials no step output can change, so the stored card status is
+ * read from the live credentials state, mirroring what the credentials step derives.
+ */
+const deriveLiveCardState = async (): Promise<
+  Pick<AwsOnboardingCredentialsAttachmentData, 'status' | 'account_id' | 'error'>
+> => {
+  const { configured } = await awsOnboardingCredentialsService.getPublic();
+  if (!configured) {
+    return { status: 'pending' };
+  }
+  try {
+    const { accountId, discovery, provisioning } = await awsOnboardingDiscoveryService.verify();
+    const failures = [
+      discovery.ok ? undefined : `discovery: ${discovery.error ?? 'failed'}`,
+      provisioning && !provisioning.ok
+        ? `provisioning: ${provisioning.error ?? 'failed'}`
+        : undefined,
+    ].filter((failure): failure is string => failure !== undefined);
+    if (failures.length > 0) {
+      return { status: 'verify_failed', error: failures.join('; '), account_id: accountId };
+    }
+    return { status: 'verified', account_id: accountId };
+  } catch (error) {
+    return {
+      status: 'verify_failed',
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
 };
 
 /**
@@ -107,7 +142,10 @@ const syncCredentialsCard = async ({
   }
 
   const stored = getLatestVersion(existing)?.data as AwsOnboardingCredentialsAttachmentData;
-  const next = deriveCardState(credentialsOutput);
+  const next =
+    waitingStepId === 'ask_credentials'
+      ? await deriveLiveCardState()
+      : deriveCardState(credentialsOutput);
   if (next.status !== stored.status || next.error !== stored.error) {
     // Replace the derived fields wholesale so a stale account_id or error does not linger.
     const { account_id: _a, error: _e, ...base } = stored;
