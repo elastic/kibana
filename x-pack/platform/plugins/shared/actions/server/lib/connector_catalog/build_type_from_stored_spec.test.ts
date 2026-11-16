@@ -46,13 +46,13 @@ describe('buildTypeFromStoredSpec', () => {
     expect(type.isExperimental).toBe(true);
   });
 
-  it('forces the enterprise license even when the YAML says gold', () => {
+  it('preserves the license from the YAML', () => {
     const yaml = loadFixture('abuseipdb-1.1.0.yaml');
     expect(yaml).toContain('minimumLicense: gold');
 
     const type = buildTypeFromStoredSpec(createDefinition(yaml), actions);
 
-    expect(type.minimumLicenseRequired).toBe('enterprise');
+    expect(type.minimumLicenseRequired).toBe('gold');
   });
 
   it('builds the real actions from the YAML', () => {

@@ -21,9 +21,5 @@ export type BuildTypeFromStoredSpec = (
 export const buildTypeFromStoredSpec: BuildTypeFromStoredSpec = (definition, actions) => {
   const spec = materializeDeclarativeConnectorSpec(parseDeclarativeConnectorSpec(definition.yaml));
 
-  // Every catalog connector is enterprise, whatever the YAML says.
-  return createConnectorTypeFromSpec(
-    { ...spec, metadata: { ...spec.metadata, minimumLicense: 'enterprise' } },
-    actions
-  );
+  return createConnectorTypeFromSpec(spec, actions);
 };
