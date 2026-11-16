@@ -52,6 +52,7 @@ import {
 import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
 import { WorkflowRequiresDelegatedIdentityError } from '../api/workflow_requires_delegated_identity_error';
 import { chunkByCountAndBytes } from '../lib/chunk_by_count_and_bytes';
+import { ManagedWorkflowRenderError } from '../lib/managed_workflow_render_error';
 import { applyWorkflowVersion } from '../lib/workflow_version';
 import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
@@ -1138,11 +1139,24 @@ export class ManagedWorkflowsService {
     }
 
     for (const update of dynamicUpdates) {
-      await this.installManagedWorkflow(
-        update.definitionId,
-        { workflowId: update.workflowId, spaceId: update.spaceId },
-        pluginId
-      );
+      try {
+        await this.installManagedWorkflow(
+          update.definitionId,
+          { workflowId: update.workflowId, spaceId: update.spaceId },
+          pluginId
+        );
+      } catch (error) {
+        // One instance whose stored values no longer render must not block upgrades of the rest.
+        // Anything else (Elasticsearch, write conflicts, permissions) still fails the pass.
+        if (!(error instanceof ManagedWorkflowRenderError)) {
+          throw error;
+        }
+        this.logger.warn(
+          `Managed workflows: dynamic auto upgrade of '${update.workflowId}' ` +
+            `(definition '${update.definitionId}', space '${update.spaceId}') failed and was skipped`,
+          { error }
+        );
+      }
     }
   }
 
@@ -1508,7 +1522,12 @@ export class ManagedWorkflowsService {
           `Managed workflow '${definition.id}' uses yamlTemplate but no template values were provided and none are persisted`
         );
       }
-      const yaml = definition.yamlTemplate(templateValues);
+      let yaml: string;
+      try {
+        yaml = definition.yamlTemplate(templateValues);
+      } catch (error) {
+        throw new ManagedWorkflowRenderError(error);
+      }
       return {
         yaml,
         managedTemplateValues: templateValues,
