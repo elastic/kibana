@@ -34,7 +34,10 @@ export const SHARED_MIN_NEIGHBOURS = 10;
  * single neighbour; counted, they would make every team's gateway look like an outlier.
  */
 export const SHARED_TYPICAL_MIN_NEIGHBOURS = 2;
-/** At most this share of the estate is shared. */
+/**
+ * At most this share of the estate is shared for its neighbours. Services called by many are
+ * shared however many there are.
+ */
 export const SHARED_MAX_SHARE = 0.05;
 
 /** A piece of the call graph this small, cut off from the rest, is not connected. */

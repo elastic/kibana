@@ -94,22 +94,36 @@ describe('findSharedServices', () => {
     expect(findSharedServices({ stats })).toEqual(new Set());
   });
 
-  it('shares at most 5% of the map, those with the most neighbours, then by name', () => {
+  it('shares at most 5% of the map for its neighbours, those with the most, then by name', () => {
+    // every hub clears the bar of about 39 neighbours, so only the cap leaves some out
     const stats = new Map([
       ...servicesLike('svc', 92, { callers: 1, neighbours: 2 }),
-      ['hub-a', stat(30, 30)],
-      ['hub-b', stat(30, 31)],
-      ['hub-c', stat(30, 32)],
-      ['hub-d', stat(30, 33)],
-      ['hub-e', stat(30, 33)],
-      ['hub-f', stat(30, 34)],
-      ['hub-g', stat(30, 35)],
-      ['hub-h', stat(30, 36)],
+      ['hub-a', stat(2, 40)],
+      ['hub-b', stat(2, 41)],
+      ['hub-c', stat(2, 42)],
+      ['hub-d', stat(2, 42)],
+      ['hub-e', stat(2, 43)],
+      ['hub-f', stat(2, 44)],
+      ['hub-g', stat(2, 45)],
+      ['hub-h', stat(2, 46)],
     ]);
 
-    // 100 services: at most 5, hub-d and hub-e tied on 33 neighbours, hub-d first by name
+    // 100 services: at most 5, the last place goes to hub-c over hub-d, tied on 42, by name
     expect(findSharedServices({ stats })).toEqual(
-      new Set(['hub-h', 'hub-g', 'hub-f', 'hub-d', 'hub-e'])
+      new Set(['hub-h', 'hub-g', 'hub-f', 'hub-e', 'hub-c'])
+    );
+  });
+
+  it('shares every service called by a quarter of the map, beyond the cap', () => {
+    // 5 gateways fill the cap of 5, and auth has fewer neighbours than any of them
+    const stats = new Map([
+      ...servicesLike('svc', 94, { callers: 1, neighbours: 2 }),
+      ...servicesLike('gateway', 5, { callers: 0, neighbours: 40 }),
+      ['auth', stat(30, 30)],
+    ]);
+
+    expect(findSharedServices({ stats })).toEqual(
+      new Set(['gateway-0', 'gateway-1', 'gateway-2', 'gateway-3', 'gateway-4', 'auth'])
     );
   });
 

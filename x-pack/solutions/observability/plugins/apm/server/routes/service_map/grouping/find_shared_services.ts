@@ -31,9 +31,12 @@ import { compareNames } from './utils';
  * team's gateway would be shared, leaving its backends with no calls.
  *
  * Neighbour counts are skewed, so by chance a few ordinary services sit above the mean plus 3
- * standard deviations: a service also needs at least 3 times the median, and at least 10. At most
- * a small share of the map is shared, those with the most neighbours. Ties are arbitrarily broken
- * by name.
+ * standard deviations: a service also needs at least 3 times the median, and at least 10.
+ *
+ * Services called by a quarter of the map are always shared. Of the rest, at most a small share of
+ * the map is shared for its neighbours, those with the most. Ties are arbitrarily broken by name.
+ * A service called by a quarter of the map often calls nothing itself, so it has fewer neighbours
+ * than a gateway: one cap over both rules would let gateways crowd it out.
  *
  * Both rules count distinct services, not calls, so a stray call (a health check, a script run
  * once in the day) counts as much as a real dependency. Grouping by calls weighs those down, but
@@ -67,12 +70,16 @@ export function findSharedServices({
     SHARED_MIN_NEIGHBOURS
   );
 
-  const shared = [...stats]
-    .filter(([, { callers, neighbours }]) => calledByMany(callers) || neighbours >= minNeighbours)
+  const entries = [...stats];
+  const calledByManyServices = entries
+    .filter(([, { callers }]) => calledByMany(callers))
+    .map(([service]) => service);
+  const manyNeighbourServices = entries
+    .filter(([, { callers, neighbours }]) => !calledByMany(callers) && neighbours >= minNeighbours)
     .sort(([a, statsA], [b, statsB]) => statsB.neighbours - statsA.neighbours || compareNames(a, b))
     .slice(0, Math.floor(SHARED_MAX_SHARE * serviceCount))
     .map(([service]) => service);
-  return new Set(shared);
+  return new Set([...calledByManyServices, ...manyNeighbourServices]);
 }
 
 /** The mean, 0 for no values. */

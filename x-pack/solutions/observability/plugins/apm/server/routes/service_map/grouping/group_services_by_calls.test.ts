@@ -150,8 +150,10 @@ describe('groupServicesByCalls', () => {
   });
 
   it('names each group found from calls after its busiest service, ties broken by name', () => {
-    // a clique of 4: too small to share anything, and grouped as one
-    const services = ['a', 'b', 'c', 'd'];
+    // A clique of 4 on a map of 100: each member is called by 3, under a quarter of the map, and
+    // has too few neighbours to be shared, so the clique is grouped as one. The rest have no calls.
+    const idle = Array.from({ length: 96 }, (_, index) => `idle-${index}`);
+    const services = ['a', 'b', 'c', 'd', ...idle];
     const edges = [
       { source: 'a', target: 'b', weight: 1 },
       { source: 'a', target: 'c', weight: 1 },
@@ -165,12 +167,19 @@ describe('groupServicesByCalls', () => {
       ['b', { callers: 3, neighbours: 3, traffic: 5 }],
       ['c', { callers: 3, neighbours: 3, traffic: 5 }],
       ['d', { callers: 3, neighbours: 3, traffic: 2 }],
+      ...idle.map((service): [string, ServiceCallStats] => [
+        service,
+        { callers: 0, neighbours: 0, traffic: 0 },
+      ]),
     ]);
 
     expect(groupServicesByCalls({ services, edges, stats })).toEqual({
       source: 'calls',
-      groups: [{ id: 'calls:b', kind: 'calls', busiestService: 'b' }],
-      assignment: [0, 0, 0, 0],
+      groups: [
+        { id: 'calls:b', kind: 'calls', busiestService: 'b' },
+        { id: 'notConnected', kind: 'notConnected' },
+      ],
+      assignment: [0, 0, 0, 0, ...idle.map(() => 1)],
     });
   });
 
