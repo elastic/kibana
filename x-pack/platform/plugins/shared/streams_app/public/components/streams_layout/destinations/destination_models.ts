@@ -41,6 +41,8 @@ const exceedsIndexNameBytes = (value: string): boolean =>
 
 const LOCAL_ELASTICSEARCH_TYPE = 'elasticsearch' as const;
 
+export const localElasticsearchCredentialName = (id: string): string => `${id}-api-key`;
+
 export const DESTINATION_SIGNALS: DestinationSignal[] = [...UNIT_DESTINATION_SIGNALS];
 
 export const PREFIXED_DESTINATION_SIGNALS: PrefixedDestinationSignal[] = [
@@ -236,7 +238,7 @@ export const getConfiguredDestinations = (unit: Unit): DestinationViewModel[] =>
  * (https://github.com/elastic/streams-spec/pull/393).
  *
  * Each signal gets either a scoped `index` (static) or, when routed from document
- * metadata (auto), an optional scoped `write_patterns`. The `api_key` is shared.
+ * metadata (auto), an optional scoped `write_patterns`. The `api_key` is a credential reference.
  */
 export const createUnitDestination = ({
   id,
@@ -245,12 +247,12 @@ export const createUnitDestination = ({
   signals,
   indexBySignal,
   writePatternsBySignal,
-  apiKey,
+  apiKeyCredential,
 }: DestinationSignalTargets & {
   id: string;
   name: string;
   description?: string;
-  apiKey?: string;
+  apiKeyCredential?: string;
 }): UnitDestination => {
   const config: NonNullable<UnitDestination['config']> = [];
   for (const signal of signals) {
@@ -268,8 +270,8 @@ export const createUnitDestination = ({
     }
   }
 
-  if (apiKey) {
-    config.push({ name: 'api_key', value: apiKey });
+  if (apiKeyCredential) {
+    config.push({ name: 'api_key', value: { credential: apiKeyCredential } });
   }
 
   const trimmedDescription = description?.trim();

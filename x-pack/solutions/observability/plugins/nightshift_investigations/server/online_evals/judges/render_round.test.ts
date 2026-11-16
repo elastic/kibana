@@ -49,7 +49,7 @@ describe('renderRound', () => {
     expect(transcript).not.toContain('x'.repeat(MAX_TOOL_FIELD_CHARS + 1));
   });
 
-  it('omits tool calls past the budget but always keeps the answer', () => {
+  it('omits tool calls from the middle past the budget but always keeps both ends and the answer', () => {
     const steps = Array.from({ length: 100 }, () => ({
       tool_id: 'search',
       result: 'y'.repeat(MAX_TOOL_FIELD_CHARS),
@@ -63,9 +63,11 @@ describe('renderRound', () => {
     const renderedCalls = transcript.match(/## Tool call/g)?.length ?? 0;
     expect(renderedCalls).toBeLessThan(steps.length);
     expect(transcript.length).toBeLessThan(MAX_TOOL_CALLS_CHARS + 2 * MAX_TOOL_FIELD_CHARS);
-    expect(transcript).toContain(
-      `[${steps.length - renderedCalls} more tool calls omitted to fit the judge's context]`
-    );
+    const marker = `[${
+      steps.length - renderedCalls
+    } tool calls omitted here to fit the judge's context]`;
+    expect(transcript.indexOf('## Tool call 1: ')).toBeLessThan(transcript.indexOf(marker));
+    expect(transcript.indexOf(marker)).toBeLessThan(transcript.indexOf('## Tool call 100: '));
     expect(transcript.endsWith('## Agent final answer\nfinal answer')).toBe(true);
   });
 });
@@ -86,6 +88,20 @@ describe('roundEvidenceSchema', () => {
 });
 
 describe('renderTraceMessages', () => {
+  it('leaves out the final answer when asked', () => {
+    const { messages } = renderTraceMessages(
+      {
+        input: { message: 'q' },
+        steps: [{ tool_id: 'search', arguments: {}, result: 'r' }],
+        response: { message: 'final answer' },
+      },
+      { includeFinalAnswer: false }
+    );
+
+    expect(messages.map(({ role }) => role)).toEqual(['user', 'assistant', 'tool']);
+    expect(JSON.stringify(messages)).not.toContain('final answer');
+  });
+
   it('renders tool calls as assistant and tool messages between the input and the answer', () => {
     const { messages, omittedToolCalls } = renderTraceMessages({
       input: { message: 'Why is checkout slow?' },
@@ -154,7 +170,7 @@ describe('renderTraceMessages', () => {
     expect(result.response!.result).toContain('[truncated 50 characters]');
   });
 
-  it('counts the tool calls left out once the budget is spent', () => {
+  it('keeps the first and last tool calls and counts those left out from the middle', () => {
     const steps = Array.from({ length: 80 }, (_, index) => ({
       tool_id: 'search',
       arguments: { index },
@@ -169,6 +185,10 @@ describe('renderTraceMessages', () => {
 
     expect(omittedToolCalls).toBeGreaterThan(0);
     expect(messages).toHaveLength(1 + (80 - omittedToolCalls) * 2 + 1);
+    expect(messages[2]).toEqual(expect.objectContaining({ toolCallId: 'call_1' }));
+    expect(messages[messages.length - 2]).toEqual(
+      expect.objectContaining({ toolCallId: 'call_80' })
+    );
     expect(messages[messages.length - 1]).toEqual({ role: 'assistant', content: 'a' });
   });
 });

@@ -12,11 +12,20 @@ import type { TaskHandler } from './task_handler';
 
 export const taskTypes = {
   runAgent: 'agent-builder:run-agent',
+  wakeParent: 'agent-builder:wake-parent',
 } as const;
 
 export interface RunAgentTaskParams {
   executionId: string;
 }
+
+export interface WakeParentTaskParams {
+  childExecutionId: string;
+}
+
+export const wakeParentTaskId = (childExecutionId: string) => `agent-wake-${childExecutionId}`;
+
+export const WAKE_PARENT_RETRY_INTERVAL_MS = 5_000;
 
 /**
  * Register agent builder task definitions with task manager.
@@ -64,6 +73,30 @@ export const registerTaskDefinitions = ({
           },
           cancel: async () => {
             await taskHandler.cancel({ executionId });
+          },
+        };
+      },
+    },
+    [taskTypes.wakeParent]: {
+      title: 'Agent Builder: Wake a busy parent agent once a background sub-agent finished',
+      timeout: '2m',
+      maxAttempts: 5,
+      createTaskRunner: (context) => {
+        const { taskInstance, fakeRequest, signal } = context;
+
+        if (!fakeRequest) {
+          throw new Error('Cannot wake a parent agent without a request (missing API key)');
+        }
+
+        const params = taskInstance.params as WakeParentTaskParams;
+        const taskHandler = getTaskHandler();
+
+        return {
+          run: async () => {
+            const { done } = await taskHandler.wakeParent({ ...params, fakeRequest, signal });
+            return done
+              ? { state: {} }
+              : { state: {}, runAt: new Date(Date.now() + WAKE_PARENT_RETRY_INTERVAL_MS) };
           },
         };
       },

@@ -43,13 +43,14 @@ describe('notifyInvestigationQuotaReached', () => {
     const getActions = jest.fn().mockReturnValue({
       getActionsClientWithRequestInSpace: jest.fn().mockResolvedValue({ execute }),
     });
-    const run = (channel = 'C1', limit?: number) =>
+    const run = (channel = 'C1', deniedBy?: 'automatic' | 'manual' | 'all', limit?: number) =>
       notifyInvestigationQuotaReached({
         getSoClient: () => soClient,
         getActions,
         request,
         spaceId: 'default',
         slackThread: { channel, thread_ts: '1700000000.000100' },
+        ...(deniedBy ? { deniedBy } : {}),
         settingsLocator,
         kibanaUrl,
         limit,
@@ -85,10 +86,25 @@ describe('notifyInvestigationQuotaReached', () => {
     });
   });
 
+  it('names the limit that denied the start, with its own channel marker', async () => {
+    const { soClient, execute, run } = setup();
+
+    await run('C1', 'all', 10);
+
+    expect(soClient.create).toHaveBeenCalledWith(
+      'nightshift-automation-budget',
+      expect.objectContaining({ automationId: 'investigation-quota-notice:all:C1' }),
+      { id: 'investigation-quota-notice:all:C1', overwrite: false }
+    );
+    expect(execute.mock.calls[0][0].params.subActionParams.text).toBe(
+      `Elastic nightshift has reached today's limit of 10 investigations in total. New investigations resume at 00:00 UTC, or an admin can raise the limit in <${settingsUrl}|settings>.`
+    );
+  });
+
   it('links the settings page in the workflow space for an admin to follow', async () => {
     const { execute, run } = setup();
 
-    await run('C1', 5);
+    await run('C1', undefined, 5);
 
     expect(settingsLocator.getRedirectUrl).toHaveBeenCalledWith(
       { tab: 'investigations' },
@@ -178,8 +194,14 @@ describe('getNightshiftSettingsUrl', () => {
     expect(getInvestigationQuotaReachedMessage()).toBe(
       "Elastic nightshift has reached today's limit for automatic investigations across all automations. New investigations resume at 00:00 UTC, or an admin can raise the limit in settings."
     );
+    expect(getInvestigationQuotaReachedMessage({ limit: 1 })).toBe(
+      "Elastic nightshift has reached today's limit of 1 automatic investigation across all automations. New investigations resume at 00:00 UTC, or an admin can raise the limit in settings."
+    );
     expect(getInvestigationQuotaReachedMessage({ limit: 5 })).toBe(
       "Elastic nightshift has reached today's limit of 5 automatic investigations across all automations. New investigations resume at 00:00 UTC, or an admin can raise the limit in settings."
+    );
+    expect(getInvestigationQuotaReachedMessage({ deniedBy: 'manual', limit: 1 })).toBe(
+      "Elastic nightshift has reached today's limit of 1 manual investigation. New investigations resume at 00:00 UTC, or an admin can raise the limit in settings."
     );
   });
 });

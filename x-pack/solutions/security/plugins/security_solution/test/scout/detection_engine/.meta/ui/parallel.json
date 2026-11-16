@@ -1,5 +1,5 @@
 {
-  "sha1": "f69afa7c49914432dcb457e4f4fe95e890a1cbda",
+  "sha1": "54c4fb8e99d290e0b3df7b96145fbb0f71422efb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -252,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/indicator_match_rule_duplication.spec.ts",
-        "line": 50,
+        "line": 53,
         "column": 7
       }
     },

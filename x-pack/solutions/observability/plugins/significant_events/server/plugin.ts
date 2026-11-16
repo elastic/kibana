@@ -18,7 +18,7 @@ import type {
 import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   catchError,
   combineLatest,
@@ -48,15 +48,7 @@ import {
 } from './lib/slack_app/saved_object';
 import { SlackAppService } from './lib/slack_app/service';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
-import {
-  consumeRunQuota,
-  createRunQuotaInternalRepository,
-  dayKey,
-  releaseRunQuota,
-  resolveDailyWindow,
-  runQuotaLedgerSavedObjectType,
-  runQuotaSettingsSavedObjectType,
-} from './lib/run_quotas';
+import { runQuotaLedgerSavedObjectType, runQuotaSettingsSavedObjectType } from './lib/run_quotas';
 import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
@@ -185,28 +177,22 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
-    plugins.nightshiftInvestigations?.registerInvestigationQuota(async () => {
-      if (!this.server?.core) {
-        throw new Error('Significant Events start services are unavailable');
-      }
-      const internalRepository = createRunQuotaInternalRepository(this.server);
-      const date = dayKey(resolveDailyWindow());
-      const { allowed, limit } = await consumeRunQuota({
-        internalRepository,
-        group: 'investigation',
-        date,
-      });
-      return {
-        allowed,
-        limit,
-        release: () => releaseRunQuota({ internalRepository, group: 'investigation', date }),
-      };
-    });
-
     core.dataStreams.registerDataStream(detectionsDataStream);
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);
 
-    this.ebtTelemetryService.setup(core.analytics);
+    this.ebtTelemetryService.setup(
+      core.analytics,
+      {
+        cpsEnabled: plugins.cps?.getCpsEnabled() ?? false,
+        originProjectId: plugins.cloud?.serverless.projectId,
+        getLinkedProjectIds: async (request) => {
+          const [, pluginsStart] = await core.getStartServices();
+          const linkedProjects = await pluginsStart.cps?.getLinkedProjects(request);
+          return linkedProjects?.map(({ id }) => id);
+        },
+      },
+      this.logger.get('telemetry')
+    );
 
     const significantEventsServices = createSignificantEventsServices();
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
@@ -256,6 +242,13 @@ export class SignificantEventsPlugin
         return alertEventsClientPromise;
       };
 
+      let alertActionsClientPromise: Promise<AlertActionsClientApi> | undefined;
+      const getAlertActionsClient = (): Promise<AlertActionsClientApi> => {
+        alertActionsClientPromise ??=
+          pluginsStart.alertingVTwo.getAlertActionsClientWithRequest(request);
+        return alertActionsClientPromise;
+      };
+
       const significantEventsClients = createSignificantEventsClients({
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
@@ -264,11 +257,16 @@ export class SignificantEventsPlugin
         logger: this.logger,
         space,
         getAlertEventsClient,
+        getAlertActionsClient,
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,
           logger: this.logger,
         }),
+        telemetry: {
+          trackEventStatusChanged: (params) =>
+            this.ebtTelemetryService.getClient().trackEventStatusChanged(params, request),
+        },
       });
 
       const getAlertingV2RulesClient = async () =>
@@ -384,6 +382,7 @@ export class SignificantEventsPlugin
           return true;
         },
         getAlertEventsClient,
+        getAlertActionsClient,
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,
@@ -843,7 +842,7 @@ export class SignificantEventsPlugin
 
   private logFlagOffPauseError(error: unknown): void {
     this.logger.error(
-      `significantEvents: failed to pause after Nightshift was turned off: ${
+      `significantEvents: failed to pause after nightshift was turned off: ${
         error instanceof Error ? error.message : String(error)
       }`
     );

@@ -6,10 +6,7 @@
  */
 
 import type { DataRetention } from '../../../../../../common';
-import {
-  HOT_ONLY_INFINITE_DATA_RETENTION,
-  splitSizeAndUnits,
-} from '../../../../../../common/lib/data_stream_utils';
+import { splitSizeAndUnits } from '../../../../../../common/lib/data_stream_utils';
 import type { SerializedDlmPhases } from '../types';
 
 export const buildDataRetentionFromSerializedDlmPhases = (
@@ -18,7 +15,7 @@ export const buildDataRetentionFromSerializedDlmPhases = (
   const { data_retention: dataRetention, frozen_after: frozenAfter } = serialized;
 
   if (!dataRetention && !frozenAfter) {
-    return HOT_ONLY_INFINITE_DATA_RETENTION;
+    return { enabled: false };
   }
 
   const next: DataRetention = { enabled: false };

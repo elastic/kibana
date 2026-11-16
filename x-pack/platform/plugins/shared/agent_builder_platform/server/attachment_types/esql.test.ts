@@ -42,7 +42,8 @@ describe('esql attachment type', () => {
             buttons: [
               {
                 label: 'Open in Discover',
-                url: `${SURFACE_BASE_URL}/app/discover#/?_a=(query:(esql:'FROM%20logs%20%7C%20LIMIT%2010'))`,
+                app: 'discover',
+                path: "#/?_a=(query:(esql:'FROM%20logs%20%7C%20LIMIT%2010'))",
               },
             ],
           },
@@ -62,17 +63,6 @@ describe('esql attachment type', () => {
       const composition = await toComposition({ query: 'FROM logs' }, discoverLocator);
 
       expect(composition?.body.map(({ type }) => type)).toEqual(['code', 'actions']);
-    });
-
-    it('leaves out the link when Kibana has no public URL', async () => {
-      const composition = await createEsqlAttachmentType({
-        getDiscoverLocator: () => discoverLocator,
-      }).toSurfaceComposition?.(
-        { id: 'esql-1', type: AttachmentType.esql, data: { query: 'FROM logs' } },
-        { ...surfaceContext, kibanaUrl: undefined }
-      );
-
-      expect(composition?.body.map(({ type }) => type)).toEqual(['code']);
     });
 
     it('leaves out the link when Discover has no locator', async () => {

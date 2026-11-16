@@ -6,9 +6,34 @@
  */
 
 import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
-import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type {
+  Severity,
+  SignificantEventCloseReason,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
+import type {
+  StatusChange,
+  StatusOutcome,
+} from '../../significant_events/events/lifecycle/lifecycle_controller';
+import type { SIGNIFICANT_EVENT_ENTITY_TYPE } from './constants';
+import type { EbtTelemetryContext } from './cps_telemetry_context';
 
-interface KnowledgeIndicatorQueriesGeneratedProps {
+interface WorkflowExecutionTelemetryProps {
+  workflow_execution_id: string;
+}
+
+interface OptionalWorkflowExecutionTelemetryProps {
+  workflow_execution_id?: string;
+}
+
+interface ParentWorkflowExecutionTelemetryProps {
+  parent_workflow_execution_id?: string;
+}
+
+interface KnowledgeIndicatorQueriesGeneratedProps
+  extends EbtTelemetryContext,
+    OptionalWorkflowExecutionTelemetryProps,
+    ParentWorkflowExecutionTelemetryProps {
   count: number;
   connector_id: string;
   input_tokens_used: number;
@@ -20,7 +45,11 @@ interface KnowledgeIndicatorQueriesGeneratedProps {
   external_content_tool_continuations?: number;
 }
 
-interface KnowledgeIndicatorFeaturesIdentifiedProps {
+interface KnowledgeIndicatorFeaturesIdentifiedProps
+  extends EbtTelemetryContext,
+    OptionalWorkflowExecutionTelemetryProps,
+    ParentWorkflowExecutionTelemetryProps {
+  /** @deprecated Use `workflow_execution_id`. */
   run_id: string;
   connector_id: string;
   iteration: number;
@@ -43,27 +72,50 @@ interface KnowledgeIndicatorFeaturesIdentifiedProps {
   state: 'success' | 'failure' | 'canceled';
 }
 
-interface AgentBuilderKnowledgeIndicatorCreatedProps {
+interface AgentBuilderKnowledgeIndicatorCreatedProps
+  extends EbtTelemetryContext,
+    OptionalWorkflowExecutionTelemetryProps {
   ki_kind: 'feature' | 'query';
   tool_id: 'ki_feature_create' | 'ki_query_create';
   success: boolean;
   source_id: string;
+  space_id: string;
+  knowledge_indicator_id?: string;
   error_message?: string;
 }
 
-interface AgentToolKnowledgeIndicatorIdentificationStartedProps {
+interface AgentToolKnowledgeIndicatorIdentificationStartedProps
+  extends EbtTelemetryContext,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   source_id: string;
   error_message?: string;
 }
 
-interface AgentToolEventCreateProps {
+/** Identity used to join telemetry to `.rule-events`; a failed operation may have no row. */
+interface ExistingAlertIdentityProps extends EbtTelemetryContext {
+  alert_source: string;
+  fingerprint: string;
+}
+
+/** `fingerprint` is absent for an unpersisted server-generated id; `group_hash` only on create. */
+interface AlertCreationAttemptIdentityProps extends EbtTelemetryContext {
+  alert_source: string;
+  fingerprint?: string;
+  group_hash?: string;
+}
+
+interface AgentToolEventCreateProps
+  extends AlertCreationAttemptIdentityProps,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   source_ids: string[];
   error_message?: string;
 }
 
-interface AgentToolEventStatusUpdateProps {
+interface AgentToolEventStatusUpdateProps
+  extends ExistingAlertIdentityProps,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   /**
    * @deprecated Superseded by `event_id`. Kept optional for schema continuity with events sent by
@@ -75,25 +127,54 @@ interface AgentToolEventStatusUpdateProps {
   error_message?: string;
 }
 
-interface AgentToolEventInvestigationAttachProps {
-  success: boolean;
-  /**
-   * @deprecated Superseded by `event_id`. Kept optional for schema continuity with pre-#1517
-   * events; new events populate `event_id` instead.
-   */
-  event_uuid?: string;
-  /** Stable event_id slug. Optional for rolling-deploy compatibility with pre-#1517 nodes. */
-  event_id?: string;
-  workflow_execution_id: string;
+/** The entry point that wrote the version, not who was behind it. */
+type SignificantEventActor = 'agent_tool' | 'rest_api' | 'stale_event_cleanup';
+
+interface EventStatusChangedProps extends ExistingAlertIdentityProps {
+  entity_type: typeof SIGNIFICANT_EVENT_ENTITY_TYPE;
+  previous_status?: SignificantEventStatus;
+  status: SignificantEventStatus;
+  actor: SignificantEventActor;
+  change_kind?: StatusChange['kind'];
+  assessment_outcome?: StatusOutcome;
+  close_reason?: SignificantEventCloseReason;
+  severity: Severity;
+  confidence: number;
+  signal_count: number;
+  confirmed_signal_count: number;
+  source_ids: string[];
+  workflow_execution_id?: string;
+}
+
+interface DiscoveryTriggeredProps extends EbtTelemetryContext, WorkflowExecutionTelemetryProps {
+  /** @deprecated Use `workflow_execution_id`. */
+  execution_id: string;
+}
+
+interface DiscoveryRunIdentityProps
+  extends EbtTelemetryContext,
+    WorkflowExecutionTelemetryProps,
+    ParentWorkflowExecutionTelemetryProps {
+  alert_source: string;
+}
+
+type DiscoveryStartedProps = DiscoveryRunIdentityProps;
+
+interface DiscoveryCompletedProps extends DiscoveryRunIdentityProps {
+  outcome: 'completed' | 'failed' | 'timed_out';
+  duration_ms?: number;
+  has_work?: boolean;
+  budget_denied?: boolean;
+  processed_count?: number;
+  skipped_count?: number;
+  held_back_count?: number;
+  needs_agent_count?: number;
+  written_rule_count?: number;
+  classifier_failed?: boolean;
   error_message?: string;
 }
 
-interface DiscoveryTriggeredProps {
-  execution_id: string;
-  space_id: string;
-}
-
-interface DetectionScanProps {
+interface DetectionScanProps extends EbtTelemetryContext, OptionalWorkflowExecutionTelemetryProps {
   /** ES `took` (ms) reported by the alerts-source search itself. */
   took_ms: number;
   /** Wall-clock (ms) around the reader call, including transport and parsing. */
@@ -118,32 +199,37 @@ interface DetectionScanProps {
   default_lookback: string;
   /** Default analysis outer bucket interval, e.g. `5m`. */
   default_bucket_interval: string;
-  /** The Kibana space in which the scan ran. */
-  space_id: string;
 }
 
-interface KnowledgeIndicatorOnboardingScheduledProps {
+interface KnowledgeIndicatorOnboardingScheduledProps
+  extends EbtTelemetryContext,
+    WorkflowExecutionTelemetryProps {
   source_id: string;
+  /** @deprecated Use `workflow_execution_id`. */
   execution_id: string;
   workflow_id: string;
-  space_id: string;
   skip_features: boolean;
   skip_queries: boolean;
 }
 
-interface AgentToolEventWriteProps {
+interface AgentToolEventWriteProps
+  extends AlertCreationAttemptIdentityProps,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   event_id: string;
   /** Absent when no status was decided for the item (it was rejected or skipped earlier). */
   status?: SignificantEventStatus;
   written: boolean;
   source_ids: string[];
+  detection_workflow_execution_ids?: string[];
   error_message?: string;
   /** Tier actually stored. Present only when written is true. */
   severity?: Severity;
 }
 
-interface AgentToolEventSearchProps {
+interface AgentToolEventSearchProps
+  extends EbtTelemetryContext,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   result_count: number;
   has_query: boolean;
@@ -155,16 +241,25 @@ interface AgentToolEventSearchProps {
 }
 
 export {
+  type EbtTelemetryContext,
+  type AlertCreationAttemptIdentityProps,
+  type ExistingAlertIdentityProps,
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
   type AgentToolEventCreateProps,
-  type AgentToolEventInvestigationAttachProps,
   type AgentToolEventSearchProps,
   type AgentToolEventStatusUpdateProps,
   type AgentToolEventWriteProps,
   type DetectionScanProps,
+  type DiscoveryCompletedProps,
+  type DiscoveryStartedProps,
   type DiscoveryTriggeredProps,
+  type EventStatusChangedProps,
+  type SignificantEventActor,
   type KnowledgeIndicatorQueriesGeneratedProps,
   type KnowledgeIndicatorFeaturesIdentifiedProps,
   type KnowledgeIndicatorOnboardingScheduledProps,
+  type OptionalWorkflowExecutionTelemetryProps,
+  type ParentWorkflowExecutionTelemetryProps,
+  type WorkflowExecutionTelemetryProps,
 };

@@ -23,6 +23,7 @@ import {
 } from '../hitl_notifications/send_wait_for_approval_notifications';
 
 jest.mock('../wait_for_input_step/hitl_external_resume_helpers', () => ({
+  ...jest.requireActual('../wait_for_input_step/hitl_external_resume_helpers'),
   invalidateHitlExternalResumeTokenIfPresent: jest.fn(),
   mintHitlExternalResumeToken: jest.fn().mockReturnValue({
     token: 'resume-token',
@@ -93,6 +94,7 @@ describe('WaitForApprovalStepImpl', () => {
       failStep: jest.fn(),
       stampHitlAudit: jest.fn(),
       setInput: jest.fn(),
+      getCurrentStepState: jest.fn().mockReturnValue({ dynamicTimeout: '24h' }),
       setCurrentStepState: jest.fn(),
       updateWorkflowExecution: jest.fn(),
       stepExecutionId: 'test-step-exec-id',
@@ -208,12 +210,18 @@ describe('WaitForApprovalStepImpl', () => {
     expect(mockMintHitlExternalResumeToken).toHaveBeenCalledWith(
       expect.objectContaining({ timeout: '24h' })
     );
-    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenLastCalledWith(
       expect.objectContaining({
+        message: 'Approve this change?',
         _hitlTokenHash: 'resume-token-hash',
         _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
       })
     );
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+      dynamicTimeout: '24h',
+      _hitlTokenHash: 'resume-token-hash',
+      _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+    });
     expect(mockBuildWaitForApprovalResumeLinks).toHaveBeenCalledWith(
       expect.objectContaining({ stepId: 'test-step-exec-id', token: 'resume-token' })
     );
@@ -234,15 +242,22 @@ describe('WaitForApprovalStepImpl', () => {
 
     await underTest.run();
 
-    expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(
-      1,
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+      })
+    );
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith(
       expect.objectContaining({
         _hitlTokenHash: 'resume-token-hash',
         _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
       })
     );
     expect(mockSendWaitForApprovalNotifications).toHaveBeenCalled();
-    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledTimes(2);
+    expect(
+      mockStepExecutionRuntime.setCurrentStepState.mock.invocationCallOrder.at(-1)
+    ).toBeLessThan(mockSendWaitForApprovalNotifications.mock.invocationCallOrder[0]);
   });
 
   it('persists the external resume token metadata when notification delivery fails', async () => {
@@ -260,7 +275,13 @@ describe('WaitForApprovalStepImpl', () => {
 
     await expect(underTest.run()).rejects.toThrow('Slack connector failed');
 
-    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+      })
+    );
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenLastCalledWith(
       expect.objectContaining({
         _hitlTokenHash: 'resume-token-hash',
         _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',

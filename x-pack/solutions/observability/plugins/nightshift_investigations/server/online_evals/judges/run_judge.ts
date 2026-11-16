@@ -7,17 +7,34 @@
 
 import type {
   BoundInferenceClient,
+  ChatCompleteMetadata,
   Message,
   Prompt,
   ToolChoice,
   ToolSchema,
 } from '@kbn/inference-common';
+import {
+  NIGHTSHIFT_ONLINE_EVALS_USAGE_ID,
+  NIGHTSHIFT_USAGE_PARENT_ID,
+  NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
+  NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
+} from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
 import pRetry from 'p-retry';
 import { MAX_EXPLANATION_LENGTH } from '../build_score_event';
 
 /** Matches the evals plugin's shipped judges. */
 const JUDGE_RETRIES = 3;
+
+/** Attributes judge calls to online evals in Nightshift's usage, apart from investigation spend. */
+const JUDGE_METADATA: ChatCompleteMetadata = {
+  connectorTelemetry: {
+    pluginId: NIGHTSHIFT_ONLINE_EVALS_USAGE_ID,
+    aggregateBy: NIGHTSHIFT_USAGE_PARENT_ID,
+    productSolution: NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
+    productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
+  },
+};
 
 export { MAX_EXPLANATION_LENGTH };
 
@@ -61,6 +78,7 @@ export const runJudge = async <TOutput>({
       input,
       stream: false,
       toolChoice: { function: toolName } as ToolChoice,
+      metadata: JUDGE_METADATA,
     });
     const output = response.toolCalls?.[0]?.function.arguments;
     if (!output) {
@@ -97,6 +115,7 @@ export const runConversationJudge = async <TOutput>({
       tools: { [tool.name]: { description: tool.description, schema: tool.schema } },
       toolChoice: { function: tool.name } as ToolChoice,
       stream: false,
+      metadata: JUDGE_METADATA,
     });
     const output = response.toolCalls?.[0]?.function.arguments;
     if (!output) {

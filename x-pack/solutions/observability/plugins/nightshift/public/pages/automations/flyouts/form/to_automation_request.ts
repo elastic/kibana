@@ -31,6 +31,10 @@ const toTriggerRow = (
       ...(ruleNamePattern ? { ruleNamePattern } : {}),
       ...(trigger.ruleNames.length ? { ruleNames: trigger.ruleNames } : {}),
       ...(trigger.ruleTags.length ? { tags: trigger.ruleTags } : {}),
+      ...(trigger.severities.length ? { severities: trigger.severities } : {}),
+      ...(trigger.alertSources.length
+        ? { alertSources: trigger.alertSources, alertSourceMode: trigger.alertSourceMode }
+        : {}),
     };
   }
   if (isSlackTrigger(trigger)) {

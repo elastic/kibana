@@ -187,6 +187,22 @@ describe('AppHeaderView', () => {
     expect(screen.getByRole('button', { name: 'Add to Starred' })).toBeDisabled();
   });
 
+  it('renders the pin variant with pin icons and Pin / Unpin labels', () => {
+    const { rerender } = render(
+      <AppHeaderView favorite={{ variant: 'pin', status: 'unfavorited', onToggle: jest.fn() }} />
+    );
+    expect(
+      screen.getByRole('button', { name: 'Pin' }).querySelector('[data-euiicon-type]')
+    ).toHaveAttribute('data-euiicon-type', 'pin');
+
+    rerender(
+      <AppHeaderView favorite={{ variant: 'pin', status: 'favorited', onToggle: jest.fn() }} />
+    );
+    expect(
+      screen.getByRole('button', { name: 'Unpin' }).querySelector('[data-euiicon-type]')
+    ).toHaveAttribute('data-euiicon-type', 'pinFill');
+  });
+
   it('renders when the only content is an experimental dashboard AI action', () => {
     const onClick = jest.fn();
     render(<AppHeaderView experimentalDashboardAiAction={{ onClick, tooltip: ENHANCE_TOOLTIP }} />);

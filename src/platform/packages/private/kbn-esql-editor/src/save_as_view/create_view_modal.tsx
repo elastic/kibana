@@ -28,10 +28,11 @@ import {
   EuiTextArea,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { validateQuery } from '@kbn/esql-language';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import {
   createEsqlViewsManagementClient,
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
@@ -43,6 +44,14 @@ import {
 } from '@kbn/esql-utils';
 import type { ESQLEditorDeps } from '../types';
 import { ESQLEditorTelemetryService, type ViewCreatedSource } from '../telemetry/telemetry_service';
+
+// A long warning must not set the modal's shrink-to-fit width. Zero intrinsic size
+// plus min-inline-size 100% makes it wrap to the width the form already establishes.
+const validationWarningStyles = css({
+  inlineSize: 0,
+  minInlineSize: '100%',
+  overflowWrap: 'anywhere',
+});
 
 export const createViewLabel = i18n.translate('esqlEditor.createView.openModalTooltip', {
   defaultMessage: 'Create view',
@@ -83,6 +92,10 @@ const cancelButtonLabel = i18n.translate('esqlEditor.saveAsView.cancelButtonLabe
 
 const createButtonLabel = i18n.translate('esqlEditor.createView.createButtonLabel', {
   defaultMessage: 'Create',
+});
+
+const closeButtonLabel = i18n.translate('esqlEditor.createView.closeButtonLabel', {
+  defaultMessage: 'Close',
 });
 
 const nameRequiredErrorMessage = i18n.translate('esqlEditor.saveAsView.nameRequiredErrorMessage', {
@@ -147,6 +160,12 @@ const createSuccessTitle = (name: string) =>
     values: { name },
   });
 
+const createWarningTitle = (name: string) =>
+  i18n.translate('esqlEditor.createView.createWarningTitle', {
+    defaultMessage: 'View "{name}" was created, but its query has validation warnings.',
+    values: { name },
+  });
+
 const getNameValidationMessage = (
   validationError: EsqlViewNameValidationError | undefined
 ): string | undefined => {
@@ -195,6 +214,7 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
   const [nameConflict, setNameConflict] = useState<NameConflict>();
   const [saveError, setSaveError] = useState<string>();
   const [queryError, setQueryError] = useState<string>();
+  const [validationWarnings, setValidationWarnings] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleClose = () => {
@@ -256,17 +276,20 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
 
     setIsSaving(true);
     const hasDescription = description.trim().length > 0;
+    let warnings: string[] = [];
     try {
-      await client.createView({
+      const result = await client.createView({
         name,
         query,
         description: hasDescription ? description : undefined,
+        validate: true,
       });
       telemetryService.trackViewCreated({
         source,
         hasDescription,
         queryLength: query.length,
       });
+      warnings = result.warnings ?? [];
     } catch (error) {
       if (error instanceof EsqlViewsClientError) {
         if (error.errorType === ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE) {
@@ -283,7 +306,12 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
       return;
     }
 
-    core.notifications.toasts.addSuccess({ title: createSuccessTitle(name) });
+    if (warnings.length > 0) {
+      setValidationWarnings(warnings);
+      setIsSaving(false);
+    } else {
+      core.notifications.toasts.addSuccess({ title: createSuccessTitle(name) });
+    }
     try {
       await onSaved?.(name);
     } catch (error) {
@@ -293,6 +321,9 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
           title: applyViewErrorTitle,
         }
       );
+    }
+    if (warnings.length > 0) {
+      return;
     }
     setIsSaving(false);
     onClose();
@@ -305,6 +336,22 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
       </EuiModalHeader>
 
       <EuiModalBody>
+        {validationWarnings.length > 0 && (
+          <>
+            <div css={validationWarningStyles}>
+              <KbnWarningCallout
+                announceOnMount
+                data-test-subj="saveAsViewValidationWarning"
+                size="s"
+                text={validationWarnings.map((warning) => (
+                  <p key={warning}>{warning}</p>
+                ))}
+                title={createWarningTitle(name)}
+              />
+            </div>
+            <EuiSpacer size="l" />
+          </>
+        )}
         {saveError && (
           <>
             <KbnDangerCallout
@@ -327,7 +374,7 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
           >
             <EuiFieldText
               data-test-subj="saveAsViewNameInput"
-              disabled={isSaving}
+              disabled={isSaving || validationWarnings.length > 0}
               fullWidth
               isInvalid={Boolean(nameError)}
               onChange={({ target }) => {
@@ -350,7 +397,7 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
           >
             <EuiTextArea
               data-test-subj="saveAsViewDescriptionInput"
-              disabled={isSaving}
+              disabled={isSaving || validationWarnings.length > 0}
               fullWidth
               isInvalid={Boolean(descriptionError)}
               onChange={({ target }) => {
@@ -383,28 +430,38 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="saveAsViewCancelButton"
-              isDisabled={isSaving}
-              onClick={handleClose}
-            >
-              {cancelButtonLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="saveAsViewSubmitButton"
-              fill
-              form={formId}
-              isLoading={isSaving}
-              type="submit"
-            >
-              {createButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {validationWarnings.length > 0 ? (
+          <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton data-test-subj="saveAsViewCloseButton" fill onClick={handleClose}>
+                {closeButtonLabel}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="saveAsViewCancelButton"
+                isDisabled={isSaving}
+                onClick={handleClose}
+              >
+                {cancelButtonLabel}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="saveAsViewSubmitButton"
+                fill
+                form={formId}
+                isLoading={isSaving}
+                type="submit"
+              >
+                {createButtonLabel}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiModalFooter>
     </EuiModal>
   );

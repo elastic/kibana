@@ -7,11 +7,14 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { OVERVIEW_PERCENTILES } from '../../../common/overview_filters';
+import { readOverviewFilters } from '../../../common/overview_filters_param';
 import type { ApplicationOverviewResponse } from '../../../common/types/overview';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import { MAX_SERVICE_NAME_LENGTH } from '../../lib/constants';
+import { kueryToQuery } from '../../lib/helpers/kuery';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
-import { filteredTimeRangeQuery } from '../params';
+import { START_AFTER_END_ISSUE, filteredTimeRangeShape, isStartBeforeEnd } from '../params';
 import { getOtelOverview } from './otel/get_otel_overview';
 
 export const APPLICATION_OVERVIEW_ENDPOINT =
@@ -29,12 +32,21 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
       path: z.object({
         serviceName: z.string().min(1).max(MAX_SERVICE_NAME_LENGTH),
       }),
-      query: filteredTimeRangeQuery(),
+      query: z
+        .object({
+          ...filteredTimeRangeShape(),
+          // The percentile of the load time, as a string like the rest of the query; 75 when left out.
+          percentile: z
+            .enum(OVERVIEW_PERCENTILES.map(String))
+            .transform((raw) => OVERVIEW_PERCENTILES.find((candidate) => String(candidate) === raw))
+            .optional(),
+        })
+        .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
     })
   ),
   handler: async ({ params, context, request }): Promise<ApplicationOverviewResponse> => {
     const { serviceName } = params.path;
-    const { environment, browser, os, device, country, pageUrl } = params.query;
+    const { environment, filters, percentile, kuery } = params.query;
     const start = Date.parse(params.query.start);
     const end = Date.parse(params.query.end);
 
@@ -48,7 +60,9 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
       start,
       end,
       environment,
-      filters: { browser, os, device, country, pageUrl },
+      filters: readOverviewFilters(filters),
+      percentile,
+      kuery: kueryToQuery(kuery),
       signal,
     });
   },

@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -272,6 +272,8 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       getNewFieldsBySpec,
     });
 
+  const [isFieldNameSearchFocused, setIsFieldNameSearchFocused] = useState(false);
+
   const closeFieldEditor = useRef<() => void | undefined>();
 
   useEffect(() => {
@@ -406,13 +408,21 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     <FieldList
       css={dataPanelStyles(euiThemeContext)}
       isProcessing={isProcessing}
-      prepend={<FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsIndexPattern" />}
+      prepend={
+        <FieldListFilters
+          {...fieldListFiltersProps}
+          data-test-subj="lnsIndexPattern"
+          onFieldNameSearchBlur={() => setIsFieldNameSearchFocused(false)}
+          onFieldNameSearchFocus={() => setIsFieldNameSearchFocused(true)}
+        />
+      }
     >
       <FieldListGrouped<IndexPatternField>
         {...fieldListGroupedProps}
         renderFieldItem={renderFieldItem}
         data-test-subj="lnsIndexPattern"
         localStorageKeyPrefix="lens"
+        muteScreenReader={!isFieldNameSearchFocused}
       />
     </FieldList>
   );
