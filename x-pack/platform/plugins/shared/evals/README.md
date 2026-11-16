@@ -323,20 +323,17 @@ The plugin UI is organized into five navigation tabs:
 
 #### Comparing experiments
 
-A comparison tests one pair per example and evaluator. When an example ran several times, each experiment's valid scores for it are first averaged (`repetition_policy=mean`, the default). N is then the number of examples, not of repetitions, because the repetitions of one example are not independent. The page and the `ai.evals.compareExperiments` workflow step always use the default.
+A comparison runs one paired test per evaluator, and each example counts once: its repetitions are combined first, so N is the number of examples. Repetitions of one example share the same input, so they are not independent evidence.
 
-- `median` takes the median of the repetitions instead. It needs scores in [0, 1]. Slices with other scores are left out and listed in `pairing.rejectedSlices`, and the request fails with 400 when no slice is left. On pass/fail scores with an odd number of repetitions the median is a majority vote, so the row gets McNemar.
-- `pool` pairs every repetition by its index, as comparisons did before. Use it only when the repetitions are independent by design. By default they are not: they share the same input, so their scores are correlated. They are independent by design only when each repetition is in effect a different input (for example, a template that generates a new input on every repetition); when in doubt, keep the default.
+`repetition_policy` sets how the repetitions are combined. The page and the `ai.evals.compareExperiments` workflow step always use the default.
 
-Averaged pass/fail scores are fractions when the repetitions disagree, so those rows get Wilcoxon signed-rank or the paired t-test, never McNemar. Whole-number scores (a 1 to 5 scale, a count) also become decimals when the repetitions disagree. Those rows then count as continuous and can get the paired t-test from 30 examples. The means are averages of the per-example scores, so they can differ from a plain average over all repetitions.
+- `mean` (default): the average of the example's valid scores.
+- `median`: the median. Only for scores in [0, 1]. Other slices are left out and listed in `pairing.rejectedSlices`, and the request fails with 400 when none is left.
+- `pool`: the old behaviour, one pair per repetition. Use it only when each repetition gets a different input.
 
-Because N counts examples, Wilcoxon signed-rank cannot reach p < 0.05 with 5 or fewer examples, so those rows cannot flag a difference in such a suite. With `pool` they could, through the repetitions.
+Under `mean`, pass/fail and whole-number scores become decimals when an example's repetitions disagree, so those rows get Wilcoxon signed-rank or the paired t-test instead of McNemar. With 5 or fewer examples, Wilcoxon cannot reach p < 0.05.
 
-Each row also reports, per experiment, the valid and the missing (null) repetitions, and the stability: the mean sample standard deviation of each paired example's valid repetitions, over the examples with at least two (null when there are none). A row is flagged when an example has a different number of valid repetitions in the two experiments, or a null score.
-
-When a repetition fails, the example keeps its other valid repetitions for the mean. It drops out of the stability when only one is left. Only a repetition stored with a null score counts as missing. One with no score document is not counted.
-
-With one repetition per example the results are the same as with `pool`, except in two cases. When an example's score is stored under repetition index 1 in one experiment and under index 0 in the other, the two scores are paired; `pool` leaves both unpaired. When one execution holds the same example twice (`type=execution`), its two scores are averaged; `pool` pairs only one of them.
+Each row also shows, per experiment, how many repetitions were used and how many had a null score, and the stability: the mean standard deviation of each paired example's repetitions, null when no example has two. A row is flagged (`repetitionWarning`, `N*` in the reports) when an example has a different number of valid repetitions in the two experiments, or a null score.
 
 #### Score direction
 
