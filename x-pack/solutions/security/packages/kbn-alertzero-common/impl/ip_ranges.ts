@@ -181,6 +181,30 @@ export const isNonRoutableIPv6 = (ip: string): boolean => {
 };
 
 const IPV4_DOTTED = /^(?:\d{1,3}\.){3}\d{1,3}$/;
+/** IPv4 with an optional `:port`. Stored `ip` values are usually bare, but free-form
+ * extracts sometimes keep the port; the address check still applies to the host. */
+const IPV4_DOTTED_OPTIONAL_PORT = /^((?:\d{1,3}\.){3}\d{1,3})(?::\d+)?$/;
+/** `[ipv6]` or `[ipv6]:port` — brackets must come off before the IPv6 classifiers run. */
+const BRACKETED_IPV6_OPTIONAL_PORT = /^\[([^\]]+)\](?::\d+)?$/;
+
+/**
+ * Host portion of a stored `ip` / `cidr` value for range classification. Strips a
+ * CIDR suffix (for either type: a legacy `ip` of `127.0.0.1/32` still needs the
+ * address check), an IPv4 `:port`, and IPv6 brackets / `[addr]:port`.
+ */
+const hostForIpIocValue = (raw: string): string => {
+  const slash = raw.indexOf('/');
+  const host = slash !== -1 ? raw.slice(0, slash) : raw;
+  const bracketed = host.match(BRACKETED_IPV6_OPTIONAL_PORT);
+  if (bracketed) {
+    return bracketed[1];
+  }
+  const ipv4 = host.match(IPV4_DOTTED_OPTIONAL_PORT);
+  if (ipv4) {
+    return ipv4[1];
+  }
+  return host;
+};
 
 /**
  * True when a stored `ip` or `cidr` IOC value sits in non-routable space. A CIDR is
@@ -195,8 +219,7 @@ export const isNonRoutableIpIoc = (ioc: { type?: unknown; value?: unknown }): bo
   if (raw.length === 0) {
     return false;
   }
-  const slash = raw.indexOf('/');
-  const host = ioc.type === 'cidr' && slash !== -1 ? raw.slice(0, slash) : raw;
+  const host = hostForIpIocValue(raw);
   if (IPV4_DOTTED.test(host)) {
     return isNonRoutableIPv4(host);
   }

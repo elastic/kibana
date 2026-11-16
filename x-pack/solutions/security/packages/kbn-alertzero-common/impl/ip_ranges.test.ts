@@ -145,4 +145,18 @@ describe('isNonRoutableIpIoc', () => {
     expect(isNonRoutableIpIoc({ type: 'ip', value: '::1' })).toBe(true);
     expect(isNonRoutableIpIoc({ type: 'ip', value: '203.0.113.10' })).toBe(false);
   });
+
+  it.each([
+    ['ip typed with a CIDR suffix', { type: 'ip', value: '127.0.0.1/32' }],
+    ['ip typed with a port', { type: 'ip', value: '127.0.0.1:443' }],
+    ['private ip typed with a CIDR suffix', { type: 'ip', value: '10.0.0.5/32' }],
+    ['bracketed IPv6 with a port', { type: 'ip', value: '[::1]:80' }],
+    ['bracketed link-local with a port', { type: 'ip', value: '[fe80::1]:8080' }],
+  ])('still flags %s when the stored spelling is not a bare address', (_label, ioc) => {
+    expect(isNonRoutableIpIoc(ioc)).toBe(true);
+  });
+
+  it('leaves a public IPv4 with a port routable', () => {
+    expect(isNonRoutableIpIoc({ type: 'ip', value: '203.0.113.10:443' })).toBe(false);
+  });
 });

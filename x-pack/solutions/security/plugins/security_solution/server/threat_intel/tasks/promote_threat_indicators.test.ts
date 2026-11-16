@@ -416,7 +416,12 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       ['benchmarking range', { type: 'ip', value: '198.18.0.9', tier: 'contextual' }],
       ['multicast', { type: 'ip', value: '239.255.255.250', tier: 'uncertain' }],
       ['loopback', { type: 'ip', value: '127.0.0.1', tier: 'discriminating' }],
-      ['IPv6 loopback written out in full', { type: 'ip', value: '0:0:0:0:0:0:0:1' }],
+      // Must carry a promotable tier: without one, isPromotableTier already drops it and
+      // the non-routable check is never what the assertion proves.
+      [
+        'IPv6 loopback written out in full',
+        { type: 'ip', value: '0:0:0:0:0:0:0:1', tier: 'discriminating' },
+      ],
       ['private CIDR', { type: 'cidr', value: '10.20.0.0/16', tier: 'contextual' }],
     ])('does not upsert a promotable-tier %s', (_label, ioc) => {
       const ops = buildBulkOpsForTest([makeReport({ id: 'r-private', iocs: [ioc] })], NOW);
