@@ -140,6 +140,13 @@ export async function processJUnitReports(
         continue;
       }
 
+      // its per-test issue, if any, is left for the suite issue it gets to replace
+      if (!perTestIssues) {
+        pushMessage('No suite issue tracks this test yet');
+        failure.failureCount = 0;
+        continue;
+      }
+
       const existingIssue = existingIssues.getForFailure(failure);
       if (existingIssue) {
         const { newBody, newCount } = await updateFailureIssue(
@@ -160,12 +167,6 @@ export async function processJUnitReports(
         if (updateGithub) {
           pushMessage(`Updated existing issue: ${url} (fail count: ${newCount})`);
         }
-        continue;
-      }
-
-      if (!perTestIssues) {
-        pushMessage('No failed-test issue tracks this test yet');
-        failure.failureCount = 0;
         continue;
       }
 
