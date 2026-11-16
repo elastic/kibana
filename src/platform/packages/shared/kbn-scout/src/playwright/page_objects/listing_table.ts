@@ -24,8 +24,7 @@ export class ListingTable {
   }
 
   async getAllItemsNames(): Promise<string[]> {
-    // TableListView renders the title as an EuiLink, which is an anchor or a button depending on `href`
-    const links = this.table.locator('[data-test-subj*="ListingTitleLink-"]');
+    const links = this.table.locator(euiSelectors.basicTable.ROW_SELECTOR).getByRole('link');
     return links.allTextContents();
   }
 
