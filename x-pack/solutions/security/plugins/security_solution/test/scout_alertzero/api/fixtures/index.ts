@@ -35,6 +35,7 @@ export {
   waitForFinishedSweepGate,
   withHuntHeaders,
   type FinishedSweepGate,
+  type SweepStepExecution,
   type HuntPrerequisites,
   type SupplyStatusBody,
 } from './helpers';
