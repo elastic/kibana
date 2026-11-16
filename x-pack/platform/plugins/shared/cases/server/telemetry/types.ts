@@ -351,6 +351,34 @@ export interface UserActionsSourceTelemetry {
   bySource: UserActionsBySourceRow[];
 }
 
+/** Case counts per age range. Ranges do not overlap: `from` is inclusive, `to` is exclusive. */
+export interface CaseAgeBuckets {
+  upTo1h: number;
+  upTo1d: number;
+  upTo7d: number;
+  upTo30d: number;
+  upTo90d: number;
+  over90d: number;
+}
+
+/** Percentiles are in seconds and are 0 when `total` is 0. */
+export interface CaseAgeStats {
+  total: number;
+  p50: number;
+  p90: number;
+  buckets: CaseAgeBuckets;
+}
+
+/**
+ * `closed` is the time to close of cases closed in the last 30 days. `open` and `inProgress`
+ * are the current age of cases in that status, measured from creation.
+ */
+export interface CaseAgeSolutionTelemetry {
+  closed: CaseAgeStats;
+  open: CaseAgeStats;
+  inProgress: CaseAgeStats;
+}
+
 export interface CasesTelemetry {
   cases: {
     all: Count &
@@ -426,6 +454,12 @@ export interface CasesTelemetry {
     obs: WorkflowsSolutionTelemetry;
     main: WorkflowsSolutionTelemetry;
   };
+  caseAge: {
+    all: CaseAgeSolutionTelemetry;
+    sec: CaseAgeSolutionTelemetry;
+    obs: CaseAgeSolutionTelemetry;
+    main: CaseAgeSolutionTelemetry;
+  };
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;
@@ -442,3 +476,4 @@ export type TemplatesSolutionTelemetrySchema = MakeSchemaFrom<TemplatesSolutionT
 export type FieldLibrarySolutionTelemetrySchema = MakeSchemaFrom<FieldLibrarySolutionTelemetry>;
 export type WorkflowsSolutionTelemetrySchema = MakeSchemaFrom<WorkflowsSolutionTelemetry>;
 export type UserActionsSourceTelemetrySchema = MakeSchemaFrom<UserActionsSourceTelemetry>;
+export type CaseAgeStatsSchema = MakeSchemaFrom<CaseAgeStats>;
