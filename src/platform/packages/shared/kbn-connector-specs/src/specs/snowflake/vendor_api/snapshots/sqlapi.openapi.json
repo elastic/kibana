@@ -1,0 +1,775 @@
+{
+  "components": {
+    "headers": {
+      "Link": {
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "parameters": {
+      "accept": {
+        "allowEmptyValue": false,
+        "in": "header",
+        "name": "Accept",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "async": {
+        "in": "query",
+        "name": "async",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "nullable": {
+        "in": "query",
+        "name": "nullable",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "partition": {
+        "in": "query",
+        "name": "partition",
+        "required": false,
+        "schema": {
+          "format": "int64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "requestId": {
+        "allowEmptyValue": false,
+        "in": "query",
+        "name": "requestId",
+        "required": false,
+        "schema": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "snowflakeAuthorizationTokenType": {
+        "allowEmptyValue": true,
+        "in": "header",
+        "name": "X-Snowflake-Authorization-Token-Type",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "statementHandle": {
+        "allowEmptyValue": false,
+        "in": "path",
+        "name": "statementHandle",
+        "required": true,
+        "schema": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "userAgent": {
+        "allowEmptyValue": false,
+        "in": "header",
+        "name": "User-Agent",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "400BadRequest": {},
+      "401Unauthorized": {},
+      "403Forbidden": {},
+      "404NotFound": {},
+      "405MethodNotAllowed": {},
+      "415UnsupportedMediaType": {},
+      "429LimitExceeded": {},
+      "500InternalServerError": {},
+      "503ServiceUnavailable": {},
+      "504GatewayTimeout": {}
+    },
+    "schemas": {
+      "CancelStatus": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "sqlState": {
+            "type": "string"
+          },
+          "statementHandle": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "statementStatusUrl": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "statementHandle"
+        ],
+        "type": "object"
+      },
+      "QueryFailureStatus": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "createdOn": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "sqlState": {
+            "type": "string"
+          },
+          "statementHandle": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "statementStatusUrl": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "message",
+          "statementHandle"
+        ],
+        "type": "object"
+      },
+      "QueryStatus": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "createdOn": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "sqlState": {
+            "type": "string"
+          },
+          "statementHandle": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "statementStatusUrl": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "statementHandle"
+        ],
+        "type": "object"
+      },
+      "ResultSet": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "createdOn": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "items": {
+                "minItems": 0,
+                "nullable": true,
+                "type": "string"
+              },
+              "minItems": 0,
+              "type": "array"
+            },
+            "minItems": 0,
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          },
+          "resultSetMetaData": {
+            "properties": {
+              "format": {
+                "enum": [
+                  "jsonv2"
+                ],
+                "type": "string"
+              },
+              "nullable": {
+                "type": "boolean"
+              },
+              "numRows": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "parameters": {
+                "properties": {
+                  "binary_output_format": {
+                    "type": "string"
+                  },
+                  "date_output_format": {
+                    "type": "string"
+                  },
+                  "multi_statement_count": {
+                    "type": "integer"
+                  },
+                  "time_output_format": {
+                    "type": "string"
+                  },
+                  "timestamp_ltz_output_format": {
+                    "type": "string"
+                  },
+                  "timestamp_ntz_output_format": {
+                    "type": "string"
+                  },
+                  "timestamp_output_format": {
+                    "type": "string"
+                  },
+                  "timestamp_tz_output_format": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "partitionInfo": {
+                "items": {
+                  "properties": {
+                    "compressedSize": {
+                      "format": "int64",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "rowCount": {
+                      "format": "int64",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "uncompressedSize": {
+                      "format": "int64",
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                },
+                "minItems": 0,
+                "type": "array"
+              },
+              "rowType": {
+                "items": {
+                  "properties": {
+                    "length": {
+                      "format": "int64",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "nullable": {
+                      "type": "boolean"
+                    },
+                    "precision": {
+                      "format": "int64",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "scale": {
+                      "format": "int64",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "sqlState": {
+            "type": "string"
+          },
+          "statementHandle": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "statementStatusUrl": {
+            "format": "uri",
+            "type": "string"
+          },
+          "stats": {
+            "properties": {
+              "numDuplicateRowsUpdated": {
+                "format": "int64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "numRowsDeleted": {
+                "format": "int64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "numRowsInserted": {
+                "format": "int64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "numRowsUpdated": {
+                "format": "int64",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "ExternalOAuth": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "KeyPair": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "ProgrammaticAccessToken": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "SnowflakeOAuth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "/oauth/authorize",
+            "scopes": {}
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Snowflake SQL API"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v2/statements": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/requestId"
+        },
+        {
+          "$ref": "#/components/parameters/async"
+        },
+        {
+          "$ref": "#/components/parameters/nullable"
+        },
+        {
+          "$ref": "#/components/parameters/accept"
+        },
+        {
+          "$ref": "#/components/parameters/userAgent"
+        },
+        {
+          "$ref": "#/components/parameters/snowflakeAuthorizationTokenType"
+        }
+      ],
+      "post": {
+        "operationId": "SubmitStatement",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "bindings": {
+                    "properties": {},
+                    "type": "object"
+                  },
+                  "database": {
+                    "type": "string"
+                  },
+                  "parameters": {
+                    "properties": {
+                      "binary_output_format": {
+                        "type": "string"
+                      },
+                      "date_output_format": {
+                        "type": "string"
+                      },
+                      "multi_statement_count": {
+                        "default": 1,
+                        "type": "integer"
+                      },
+                      "query_tag": {
+                        "type": "string"
+                      },
+                      "time_output_format": {
+                        "type": "string"
+                      },
+                      "timestamp_ltz_output_format": {
+                        "type": "string"
+                      },
+                      "timestamp_ntz_output_format": {
+                        "type": "string"
+                      },
+                      "timestamp_output_format": {
+                        "type": "string"
+                      },
+                      "timestamp_tz_output_format": {
+                        "type": "string"
+                      },
+                      "timezone": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "schema": {
+                    "type": "string"
+                  },
+                  "statement": {
+                    "type": "string"
+                  },
+                  "timeout": {
+                    "format": "int64",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "warehouse": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultSet"
+                }
+              }
+            },
+            "headers": {
+              "link": {
+                "$ref": "#/components/headers/Link"
+              }
+            },
+            "links": {
+              "CancelStatement": {
+                "operationId": "CancelStatement",
+                "parameters": {
+                  "statementHandle": "$response.body#/resultMetaData.statementHandle"
+                }
+              },
+              "GetStatementStatus": {
+                "operationId": "GetStatementStatus",
+                "parameters": {
+                  "statementHandle": "$response.body#/resultMetaData.statementHandle"
+                }
+              }
+            }
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/405MethodNotAllowed"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryStatus"
+                }
+              }
+            }
+          },
+          "415": {
+            "$ref": "#/components/responses/415UnsupportedMediaType"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryFailureStatus"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/429LimitExceeded"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/504GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "KeyPair": []
+          },
+          {
+            "ExternalOAuth": []
+          },
+          {
+            "SnowflakeOAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v2/statements/{statementHandle}": {
+      "get": {
+        "operationId": "GetStatementStatus",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultSet"
+                }
+              }
+            },
+            "headers": {
+              "link": {
+                "$ref": "#/components/headers/Link"
+              }
+            }
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/405MethodNotAllowed"
+          },
+          "415": {
+            "$ref": "#/components/responses/415UnsupportedMediaType"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryFailureStatus"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/429LimitExceeded"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/504GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "KeyPair": []
+          },
+          {
+            "ExternalOAuth": []
+          },
+          {
+            "SnowflakeOAuth": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/statementHandle"
+        },
+        {
+          "$ref": "#/components/parameters/requestId"
+        },
+        {
+          "$ref": "#/components/parameters/partition"
+        },
+        {
+          "$ref": "#/components/parameters/accept"
+        },
+        {
+          "$ref": "#/components/parameters/userAgent"
+        },
+        {
+          "$ref": "#/components/parameters/snowflakeAuthorizationTokenType"
+        }
+      ]
+    },
+    "/api/v2/statements/{statementHandle}/cancel": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/statementHandle"
+        },
+        {
+          "$ref": "#/components/parameters/requestId"
+        },
+        {
+          "$ref": "#/components/parameters/accept"
+        },
+        {
+          "$ref": "#/components/parameters/userAgent"
+        },
+        {
+          "$ref": "#/components/parameters/snowflakeAuthorizationTokenType"
+        }
+      ],
+      "post": {
+        "operationId": "CancelStatement",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/405MethodNotAllowed"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelStatus"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/504GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "KeyPair": []
+          },
+          {
+            "ExternalOAuth": []
+          },
+          {
+            "SnowflakeOAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "KeyPair": []
+    },
+    {
+      "ExternalOAuth": []
+    },
+    {
+      "SnowflakeOAuth": []
+    },
+    {
+      "ProgrammaticAccessToken": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://org-account.snowflakecomputing.com"
+    }
+  ]
+}

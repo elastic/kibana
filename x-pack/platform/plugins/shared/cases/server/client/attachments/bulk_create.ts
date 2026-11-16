@@ -114,9 +114,19 @@ const createAttachments = async (
     }
 
     // This call never throws — failures are logged and do not abort the attachment creation.
-    await extractAndAddObservables(caseId, decodedAttachments, { settings }, clientArgs);
+    const caseWithObservables = await extractAndAddObservables(
+      caseId,
+      decodedAttachments,
+      { settings },
+      clientArgs
+    );
 
-    return { model: updatedModel, createdAttachments };
+    return {
+      model: caseWithObservables
+        ? updatedModel.newObjectWithInfo(caseWithObservables)
+        : updatedModel,
+      createdAttachments,
+    };
   } catch (error) {
     throw createCaseError({
       message: `Failed while bulk creating attachment to case id: ${caseId} error: ${error}`,

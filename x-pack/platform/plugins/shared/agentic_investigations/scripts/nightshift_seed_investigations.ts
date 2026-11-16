@@ -58,7 +58,6 @@ import type {
   EvidenceChart,
   EvidenceChartAnnotation,
   EvidenceChartSeries,
-  EvidenceReference,
   Hypothesis,
   Impact,
   ImpactEntity,
@@ -177,14 +176,9 @@ const timeChart = ({
   ...(annotations && { annotations }),
 });
 
-const evidence = (
-  description: string,
-  chart?: EvidenceChart,
-  references?: EvidenceReference[]
-): InvestigationEvidence => ({
+const evidence = (description: string, chart?: EvidenceChart): InvestigationEvidence => ({
   description,
   ...(chart && { chart }),
-  ...(references && { references }),
 });
 
 const hypothesis = (
@@ -457,19 +451,7 @@ const SCENARIOS: Scenario[] = [
       summary:
         'For about 20 minutes each night, cart and pricing reads from cache-service slow from 2ms to 40ms P99. It is a low-traffic hour, so few shoppers notice, and there are no errors.',
       evidence: evidence(
-        'P99 latency on cache-service during the batch window:\n\n| Window | P99 latency |\n| --- | --- |\n| 01:40–02:00 | 2ms |\n| 02:00–02:20 | 40ms |\n| 02:20–02:40 | 3ms |',
-        undefined,
-        [
-          {
-            url: 'https://github.com/elastic/kibana/pull/1',
-            label: 'Price-sync job change',
-          },
-          { url: 'https://example.com/dashboards/cache-service' },
-          {
-            query:
-              'FROM metrics-*\n| WHERE service.name == "cache-service"\n| STATS p99 = PERCENTILE(latency, 99) BY BUCKET(@timestamp, 20 minutes)',
-          },
-        ]
+        'P99 latency on cache-service during the batch window:\n\n| Window | P99 latency |\n| --- | --- |\n| 01:40–02:00 | 2ms |\n| 02:00–02:20 | 40ms |\n| 02:20–02:40 | 3ms |'
       ),
     },
   }),
@@ -1214,6 +1196,21 @@ const createProposals = async (
     });
     await waitFor(`proposal "${title}"`, async () =>
       (await listProposals(client, conversationId)).length > before ? true : undefined
+    );
+  }
+
+  // The gate workflow writes the proposal, and its inputs carry no waiver, so the flag the real
+  // Nightshift producer sets (`findings_recorder`) is stamped on afterwards — without it a
+  // seeded investigation would ask for a decline reason the product no longer asks for.
+  if (proposals.length > 0) {
+    await client.es(
+      'POST',
+      `/${PROPOSALS_INDEX_NAME}/_update_by_query?refresh=true`,
+      {
+        query: { term: { conversationId } },
+        script: { source: 'ctx._source.skipDiscardReason = true', lang: 'painless' },
+      },
+      [409]
     );
   }
   // The gate's create step indexes the proposal, then attaches its card.

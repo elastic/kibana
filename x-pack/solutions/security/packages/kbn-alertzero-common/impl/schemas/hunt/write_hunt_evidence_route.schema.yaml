@@ -47,7 +47,7 @@ paths:
                 totalHits:
                   type: integer
                   minimum: 0
-                  description: Tier 1's total-hits count for this run.
+                  description: IOC Hunt's total-hits count for this run.
                 searchedTechniqueIds:
                   type: array
                   maxItems: 100
@@ -69,7 +69,7 @@ paths:
                     `pending_technique_ids`. Replaces the report's
                     recorded list for the space, so the next run keeps them
                     as pending even if its own extraction no longer
-                    returns them. Omit when Tier 2 did not run, which leaves
+                    returns them. Omit when Behavior Hunt did not run, which leaves
                     the recorded list as it is.
                   items:
                     type: string
@@ -81,7 +81,20 @@ paths:
                     From the coordinator's `replayed_whole_report`. True lets
                     this run's result replace an earlier finding the report
                     still carries while its coverage is pending. Omit when
-                    Tier 2 did not run.
+                    Behavior Hunt did not run.
+                retryableReasons:
+                  type: array
+                  maxItems: 100
+                  description: >-
+                    From the coordinator's `retryable_reasons`: the reasons of
+                    the gaps that kept the run retryable. A retryable run whose
+                    reasons all came from the environment (an unavailable index
+                    or catalog, a partial search, enrichment not finished)
+                    leaves the retry count as it was, even when it searched
+                    something new. Omit or send none to count every retryable
+                    run.
+                  items:
+                    $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIncompleteReason'
             examples:
               WriteHuntEvidenceRequestExample:
                 summary: Stamp a clean run as hunted.
@@ -102,6 +115,9 @@ paths:
                 properties:
                   acknowledged:
                     type: boolean
+                  settledByCap:
+                    type: boolean
+                    description: True when a retryable run was settled and stamped as hunted instead of left eligible for a later sweep, either because the report's coverage ledger could not hold every technique or because the report reached the retry bound.
               examples:
                 WriteHuntEvidenceResponse200Example:
                   summary: Evidence written.

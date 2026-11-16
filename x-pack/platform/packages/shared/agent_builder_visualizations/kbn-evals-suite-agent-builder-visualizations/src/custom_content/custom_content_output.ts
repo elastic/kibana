@@ -7,6 +7,10 @@
 
 import type { Conversation } from '@kbn/agent-builder-common';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import {
+  CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
+  CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
+} from '@kbn/custom-content-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -110,7 +114,6 @@ export const readStoredCustomContent = (
   };
 };
 
-const GENERATE_DASHBOARD_TOOL_ID = 'platform.dashboard.generate_dashboard';
 const CUSTOM_CONTENT_PANEL_TYPE = 'custom_content';
 
 /**
@@ -121,7 +124,7 @@ export const getLastWrittenDashboardId = (
   steps: Array<Record<string, unknown>> | undefined
 ): string | undefined => {
   for (const step of [...(steps ?? [])].reverse()) {
-    if (step.type !== 'tool_call' || step.tool_id !== GENERATE_DASHBOARD_TOOL_ID) {
+    if (step.type !== 'tool_call' || step.tool_id !== CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID) {
       continue;
     }
     for (const result of Array.isArray(step.results) ? step.results : []) {
@@ -254,7 +257,6 @@ export const findStoredPanel = (
 };
 
 const CREATE_VISUALIZATION_TOOL_ID = 'platform.core.create_visualization';
-const UPDATE_PANEL_TOOL_ID = 'custom_content_update_panel';
 const PROMPT_EXCERPT_LENGTH = 80;
 
 const flag = (value: unknown): string =>
@@ -281,7 +283,7 @@ export const getCustomContentToolArgs = (
     const { params } = step;
     const toolId = String(step.tool_id);
 
-    if (toolId === GENERATE_DASHBOARD_TOOL_ID && Array.isArray(params.panels)) {
+    if (toolId === CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID && Array.isArray(params.panels)) {
       return params.panels.flatMap((item: unknown) =>
         isRecord(item) && isRecord(item.content) && item.content.renderer === 'custom_content'
           ? [
@@ -308,7 +310,7 @@ export const getCustomContentToolArgs = (
         : [];
     }
 
-    if (toolId.includes(UPDATE_PANEL_TOOL_ID)) {
+    if (toolId.includes(CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID)) {
       return [
         `${toolId}: regenerateEsql=${flag(params.regenerateEsql)} esqlQuery=${presence(
           params.esqlQuery

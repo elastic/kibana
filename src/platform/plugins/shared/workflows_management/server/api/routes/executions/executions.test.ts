@@ -476,6 +476,37 @@ describe('Execution Routes', () => {
         body: { message: 'failed to create query: For input string: "2s"' },
       });
     });
+
+    it('should return the sanitized bad request when ES rejects the result window', async () => {
+      mockApi.searchExecutionsView.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 400,
+          body: {
+            error: {
+              type: 'search_phase_execution_exception',
+              root_cause: [
+                {
+                  type: 'illegal_argument_exception',
+                  reason:
+                    'Result window is too large, from + size must be less than or equal to: [50] but was [100].',
+                },
+              ],
+            },
+          },
+          headers: {},
+          warnings: [],
+          meta: {} as any,
+        })
+      );
+      const h = handler('GET', path)!;
+      await h(mockContext, { query: { page: 2, size: 50 } } as any, mockResponse as any);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: 'Pagination exceeds the maximum result window. Use a smaller page or size.',
+        },
+      });
+    });
   });
 
   describe('GET /api/workflows/workflow/{workflowId}/executions (get_workflow_executions)', () => {
@@ -560,6 +591,7 @@ describe('Execution Routes', () => {
           sortField: 'finishedAt',
           sortOrder: 'desc',
           concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
+          runName: 'production',
         },
       };
 
@@ -571,6 +603,7 @@ describe('Execution Routes', () => {
           statuses: ['running'],
           executionTypes: undefined,
           executedBy: undefined,
+          runName: 'production',
           concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
           page: 2,
           size: 5,

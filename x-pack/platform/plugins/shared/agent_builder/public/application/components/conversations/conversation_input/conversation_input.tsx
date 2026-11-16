@@ -44,10 +44,12 @@ import {
   useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
-  useIsSharedConversation,
 } from '../../../hooks/use_conversation';
 import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
+import { getLeadingMention } from './mentions/get_leading_mention';
+import { useCanMention } from './mentions/use_can_mention';
+import { useTriggerMode } from './use_trigger_mode';
 import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -59,7 +61,7 @@ const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.
 });
 
 const postToTeamLabel = i18n.translate('xpack.agentBuilder.conversationInput.postToTeam.label', {
-  defaultMessage: 'Leaving a post to the team',
+  defaultMessage: "Agent won't respond to this message.",
 });
 
 const getMessageTooLongLabel = (characterCount: number): string =>
@@ -182,36 +184,6 @@ const InputContainer: React.FC<
   );
 };
 
-/**
- * The input stays mounted across conversations, so a trigger mode choice only applies to the
- * conversation it was made in and is dropped once the selector stops being offered.
- */
-const useTriggerMode = () => {
-  const conversationId = useConversationId();
-  const isSelectable = useIsSharedConversation();
-
-  const [choice, setChoice] = useState<{
-    conversationId?: string;
-    triggerMode: ChatTriggerMode;
-  }>();
-
-  if (!isSelectable && choice) {
-    setChoice(undefined);
-  }
-
-  const setTriggerMode = useCallback(
-    (triggerMode: ChatTriggerMode) => setChoice({ conversationId, triggerMode }),
-    [conversationId]
-  );
-
-  const triggerMode =
-    isSelectable && choice && choice.conversationId === conversationId
-      ? choice.triggerMode
-      : ChatTriggerMode.Always;
-
-  return { triggerMode, setTriggerMode, isSelectable };
-};
-
 interface ConversationInputProps {
   onSubmit?: () => void;
   onEditorFocus?: () => void;
@@ -251,6 +223,16 @@ const getMessageEditorAriaLabel = ({
   });
 };
 
+// Narrow to editable controls: after a sidebar click focus sits on the conversation row button,
+// so a broader "focus moved elsewhere" check would suppress the auto-focus in the normal case.
+const isEditableElementFocused = (): boolean => {
+  const { activeElement } = document;
+  return (
+    activeElement instanceof HTMLElement &&
+    (activeElement.isContentEditable || activeElement.matches('input, textarea'))
+  );
+};
+
 const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
@@ -276,6 +258,16 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     conversationId,
   });
 
+  const canMention = useCanMention();
+  const {
+    triggerMode,
+    setTriggerMode,
+    isSelectable: isTriggerModeSelectable,
+    updateLeadingMention,
+    markSent,
+    markCleared,
+  } = useTriggerMode({ canMention });
+
   const messageEditorControllerRef = useRef<
     ReturnType<typeof useMessageEditor>['controller'] | null
   >(null);
@@ -285,6 +277,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     try {
       const content = messageEditorControllerRef.current?.getContent() ?? '';
       lastEditorContentRef.current = content;
+      updateLeadingMention(getLeadingMention(content));
       if (saveDraftDebounceRef.current) clearTimeout(saveDraftDebounceRef.current);
       saveDraftDebounceRef.current = setTimeout(() => {
         saveDraft(lastEditorContentRef.current);
@@ -292,7 +285,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     } catch (err) {
       if (!(err instanceof CommandBadgeSerializationError)) throw err;
     }
-  }, [saveDraft]);
+  }, [saveDraft, updateLeadingMention]);
 
   const {
     messageEditor,
@@ -328,7 +321,6 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     resetInitialMessage,
   } = useConversationContext();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
-  const { triggerMode, setTriggerMode, isSelectable: isTriggerModeSelectable } = useTriggerMode();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
@@ -410,10 +402,11 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     if (isConvSwitchRef.current) {
       messageEditorControllerRef.current?.clear();
       lastEditorContentRef.current = '';
+      markCleared();
     }
     isConvSwitchRef.current = true;
     draftHydratedRef.current = false;
-  }, [agentId, conversationId, spaceId, sessionTag]);
+  }, [agentId, conversationId, spaceId, sessionTag, markCleared]);
 
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
   useEffect(() => {
@@ -444,6 +437,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     draftHydratedRef.current = true;
     if (draft && !lastEditorContentRef.current) {
       messageEditorController.setContent(draft);
+      updateLeadingMention(getLeadingMention(draft));
     }
   }, [
     draft,
@@ -456,12 +450,15 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     isConversationReadOnly,
     isConversationReadOnlyLoading,
     messageEditorController,
+    updateLeadingMention,
   ]);
 
-  // Skip auto-focus while a HITL prompt is open, it should own focus instead
+  // Skip auto-focus while a HITL prompt is open, or while another editable control already has
+  // focus, since both should own focus instead
   useEffect(() => {
     if (isAwaitingPrompt || isConversationReadOnly) return;
     const timeoutId = setTimeout(() => {
+      if (isEditableElementFocused()) return;
       messageEditorController.focus();
     }, 200);
 
@@ -469,6 +466,11 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       clearTimeout(timeoutId);
     };
   }, [conversationId, messageEditorController, isAwaitingPrompt, isConversationReadOnly]);
+
+  const handleMentionClick = useCallback(
+    () => messageEditorController.insertText('@'),
+    [messageEditorController]
+  );
 
   const handleSubmit = () => {
     if (isSubmitDisabled) {
@@ -499,6 +501,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
           lastEditorContentRef.current = '';
           clearDraft();
           messageEditorController.clear();
+          markSent();
           onSubmit?.();
         })
         .catch((sendError: unknown) => {
@@ -515,6 +518,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     }
     clearDraft();
     messageEditorController.clear();
+    markSent();
     onSubmit?.();
   };
 
@@ -579,6 +583,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
           showTriggerModeSelector={isTriggerModeSelectable}
           triggerMode={triggerMode}
           onTriggerModeChange={setTriggerMode}
+          onMentionClick={canMention ? handleMentionClick : undefined}
+          isMentionDisabled={isInputDisabled}
         />
       )}
     </InputContainer>

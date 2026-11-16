@@ -179,4 +179,43 @@ describe('useGetWatchlistFormData', () => {
       store: 'src-store-1',
     });
   });
+
+  it('returns the index source as indexSourceWithMissingApiKey when it has no apiKeyId', async () => {
+    mockGetWatchlist.mockResolvedValue(watchlistResponse);
+    mockListWatchlistEntitySources.mockResolvedValue({
+      sources: [storeSource, indexSource],
+    });
+
+    const { result } = renderHook(() => useGetWatchlistFormData('wl-1'), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.initialWatchlist).not.toBeNull();
+    });
+
+    expect(result.current.indexSourceWithMissingApiKey).toEqual(indexSource);
+  });
+
+  it('returns undefined indexSourceWithMissingApiKey when the index source has an apiKeyId', async () => {
+    mockGetWatchlist.mockResolvedValue(watchlistResponse);
+    mockListWatchlistEntitySources.mockResolvedValue({
+      sources: [storeSource, { ...indexSource, apiKeyId: 'kid-1' }],
+    });
+
+    const { result } = renderHook(() => useGetWatchlistFormData('wl-1'), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.initialWatchlist).not.toBeNull();
+    });
+
+    // The index source is still loaded (positive anchor), it just is not flagged as missing a key.
+    expect(result.current.ruleBasedSourceIds).toEqual({
+      store: 'src-store-1',
+      index: 'src-index-1',
+    });
+    expect(result.current.indexSourceWithMissingApiKey).toBeUndefined();
+  });
 });

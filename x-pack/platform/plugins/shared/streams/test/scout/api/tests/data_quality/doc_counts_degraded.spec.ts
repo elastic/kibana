@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { streamsApiTest as apiTest } from '../../fixtures';
-import { findCount, getDocCounts } from '../../lib/doc_counts';
+import { findCount, getDocCounts, postDocCounts } from '../../lib/doc_counts';
 import { wiredUpsertRequest } from '../../lib/streams';
 
 const ROOT = 'logs.otel';
@@ -87,6 +87,14 @@ apiTest.describe('Doc counts - degraded', { tag: tags.deploymentAgnostic }, () =
         });
         expect(response).toHaveStatusCode(200);
         expect(findCount(response.body, STREAM)).toBe(1);
+      });
+
+      await apiTest.step('returns degraded counts for the posted streams', async () => {
+        const response = await postDocCounts(apiClient, cookieHeader, 'degraded', {
+          streams: [STREAM, `${STREAM}-missing`],
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual([{ stream: STREAM, count: 1 }]);
       });
     }
   );

@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable camelcase, no-undef */
+/* eslint-disable @kbn/compat/eslint-camelcase, no-undef */
 __webpack_public_path__ = window.__kbnPublicPath__['kbn-ui-shared-deps-src'];

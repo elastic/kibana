@@ -15,6 +15,9 @@ Scout server configuration. Role loading and service account responses are not m
     a caller without `manage_security`.
   - Renews the workload's token after it expires, and denies renewal once the
     workload is unbound. Both tests wait 65 seconds to outlive a token.
+  - Ages a workload's token for 50 seconds, then calls a 25-second route handler
+    through the self client. The handler authenticates to Elasticsearch before
+    and after waiting, proving the refreshed credential outlives the original.
   - Classifies an inbound request carrying a UIAM service account token as that
     account.
   - Deletes an account, refuses to delete a bound one unless forced, and refuses
@@ -23,7 +26,7 @@ Scout server configuration. Role loading and service account responses are not m
     expires, so that test waits 65 seconds too.
 
 The config set loads the `service_accounts` test plugin from
-`x-pack/platform/test/security_api_integration/plugins/service_accounts`. It
+`x-pack/platform/test_plugins/security_api_integration/plugins/service_accounts`. It
 binds, unbinds and runs workloads over HTTP. It also sets UIAM's exchange token
 lifetime to one minute, the shortest UIAM allows, so the renewal tests finish in
 reasonable time.

@@ -147,6 +147,7 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
+        breakdownField: 'log.level',
         columns: expectedColumnsMap[provider.profileId],
       });
     });

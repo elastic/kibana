@@ -1,0 +1,218 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import _ from 'lodash';
+import React, { Fragment, Component } from 'react';
+
+import { i18n } from '@kbn/i18n';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+
+import { EuiFormRow, EuiPanel } from '@elastic/eui';
+import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
+import { SingleFieldSelect } from '../../../components/single_field_select';
+import { getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
+import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../common/i18n_getters';
+import type { ESPewPewSourceDescriptor } from '../../../../common/descriptor_types';
+
+interface Props {
+  onSourceConfigChange: (sourceConfig: Partial<ESPewPewSourceDescriptor> | null) => void;
+}
+
+interface State {
+  isLoadingIndexPattern: boolean;
+  indexPattern?: DataView;
+  indexPatternId?: string;
+  sourceGeoField?: string;
+  destGeoField?: string;
+  indexPatternHasMultipleGeoFields: boolean;
+}
+
+export class CreateSourceEditor extends Component<Props, State> {
+  private _isMounted = false;
+
+  state: State = {
+    isLoadingIndexPattern: false,
+    indexPattern: undefined,
+    indexPatternId: undefined,
+    sourceGeoField: undefined,
+    destGeoField: undefined,
+    indexPatternHasMultipleGeoFields: false,
+  };
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  onIndexPatternSelect = (indexPatternId?: string) => {
+    this.setState(
+      {
+        indexPatternId,
+      },
+      this.loadIndexPattern.bind(null, indexPatternId)
+    );
+  };
+
+  loadIndexPattern = (indexPatternId?: string) => {
+    this.setState(
+      {
+        isLoadingIndexPattern: true,
+        indexPattern: undefined,
+        sourceGeoField: undefined,
+        destGeoField: undefined,
+        indexPatternHasMultipleGeoFields: false,
+      },
+      this.debouncedLoad.bind(null, indexPatternId)
+    );
+  };
+
+  debouncedLoad = _.debounce(async (indexPatternId?: string) => {
+    if (!indexPatternId || indexPatternId.length === 0) {
+      return;
+    }
+
+    let indexPattern: DataView;
+    try {
+      indexPattern = await getIndexPatternService().get(indexPatternId);
+    } catch (err) {
+      // index pattern no longer exists
+      return;
+    }
+
+    if (!this._isMounted) {
+      return;
+    }
+
+    // props.indexPatternId may be updated before getIndexPattern returns
+    // ignore response when fetched index pattern does not match active index pattern
+    if (this.state.indexPatternId !== indexPatternId) {
+      return;
+    }
+
+    const geoFields = getFieldsWithGeoTileAgg(indexPattern.fields);
+    this.setState({
+      isLoadingIndexPattern: false,
+      indexPattern,
+      indexPatternHasMultipleGeoFields: geoFields.length >= 2,
+    });
+  }, 300);
+
+  _onSourceGeoSelect = (sourceGeoField?: string) => {
+    this.setState(
+      {
+        sourceGeoField,
+      },
+      this.previewLayer
+    );
+  };
+
+  _onDestGeoSelect = (destGeoField?: string) => {
+    this.setState(
+      {
+        destGeoField,
+      },
+      this.previewLayer
+    );
+  };
+
+  previewLayer = () => {
+    const { indexPatternId, sourceGeoField, destGeoField } = this.state;
+
+    const sourceConfig =
+      indexPatternId && sourceGeoField && destGeoField
+        ? { indexPatternId, sourceGeoField, destGeoField }
+        : null;
+    this.props.onSourceConfigChange(sourceConfig);
+  };
+
+  _renderGeoSelects() {
+    if (!this.state.indexPattern || !this.state.indexPatternHasMultipleGeoFields) {
+      return null;
+    }
+
+    const fields = this.state.indexPattern
+      ? getFieldsWithGeoTileAgg(this.state.indexPattern.fields)
+      : undefined;
+    return (
+      <Fragment>
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.source.pewPew.sourceGeoFieldLabel', {
+            defaultMessage: 'Source',
+          })}
+        >
+          <SingleFieldSelect
+            placeholder={i18n.translate('xpack.maps.source.pewPew.sourceGeoFieldPlaceholder', {
+              defaultMessage: 'Select source geo field',
+            })}
+            value={this.state.sourceGeoField ?? null}
+            onChange={this._onSourceGeoSelect}
+            fields={fields}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.source.pewPew.destGeoFieldLabel', {
+            defaultMessage: 'Destination',
+          })}
+        >
+          <SingleFieldSelect
+            placeholder={i18n.translate('xpack.maps.source.pewPew.destGeoFieldPlaceholder', {
+              defaultMessage: 'Select destination geo field',
+            })}
+            value={this.state.destGeoField ?? null}
+            onChange={this._onDestGeoSelect}
+            fields={fields}
+          />
+        </EuiFormRow>
+      </Fragment>
+    );
+  }
+
+  _renderIndexPatternSelect() {
+    const IndexPatternSelect = getIndexPatternSelectComponent();
+
+    return (
+      <EuiFormRow label={getDataViewLabel()}>
+        <IndexPatternSelect
+          indexPatternId={this.state.indexPatternId ?? ''}
+          onChange={this.onIndexPatternSelect}
+          placeholder={getDataViewSelectPlaceholder()}
+        />
+      </EuiFormRow>
+    );
+  }
+
+  render() {
+    let callout;
+    if (this.state.indexPattern && !this.state.indexPatternHasMultipleGeoFields) {
+      callout = (
+        <KbnWarningCallout
+          announceOnMount={false}
+          title={
+            <FormattedMessage
+              id="xpack.maps.source.pewPew.noSourceAndDestDetails"
+              defaultMessage="Selected data view does not contain source and destination fields."
+            />
+          }
+        />
+      );
+    }
+
+    return (
+      <EuiPanel>
+        {callout}
+        {this._renderIndexPatternSelect()}
+        {this._renderGeoSelects()}
+      </EuiPanel>
+    );
+  }
+}

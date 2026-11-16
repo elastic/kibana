@@ -8,12 +8,19 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { streamsApiTest as apiTest } from '../../fixtures';
-import { METERING_REFRESH_TIMEOUT_MS, getStreamCounts, lastHourRange } from '../../lib/doc_counts';
+import {
+  METERING_REFRESH_TIMEOUT_MS,
+  getStreamCounts,
+  lastHourRange,
+  postDocCounts,
+  postStreamCounts,
+} from '../../lib/doc_counts';
 
 const ROOT = 'logs.otel';
 const PREFIX = `${ROOT}.dcounts`;
 const STREAM_1 = `${PREFIX}-1`;
 const STREAM_2 = `${PREFIX}-2`;
+const MISSING_STREAM = `${PREFIX}-missing`;
 const CLASSIC_STREAM = 'logs-dcounts-classic';
 
 const routedDocument = (logger: string, message: string) => {
@@ -147,5 +154,65 @@ apiTest.describe('Doc counts - total and ingestion', { tag: tags.deploymentAgnos
         { timeout: METERING_REFRESH_TIMEOUT_MS }
       )
       .toStrictEqual({ statusCode: 200, counts: { [STREAM_1]: 2 } });
+  });
+
+  apiTest(
+    'returns total document counts for the posted streams only',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsReadOnly();
+
+      await expect
+        .poll(
+          () =>
+            postStreamCounts(
+              apiClient,
+              cookieHeader,
+              'total',
+              { streams: [CLASSIC_STREAM, STREAM_1, MISSING_STREAM] },
+              [CLASSIC_STREAM, STREAM_1, STREAM_2, MISSING_STREAM]
+            ),
+          { timeout: METERING_REFRESH_TIMEOUT_MS }
+        )
+        .toStrictEqual({
+          statusCode: 200,
+          counts: {
+            [CLASSIC_STREAM]: 1,
+            [STREAM_1]: 2,
+            [STREAM_2]: undefined,
+            [MISSING_STREAM]: undefined,
+          },
+        });
+    }
+  );
+
+  apiTest(
+    'returns range-scoped ingestion counts for the posted streams only',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsReadOnly();
+
+      await expect
+        .poll(
+          () =>
+            postStreamCounts(
+              apiClient,
+              cookieHeader,
+              'ingestion',
+              { ...lastHourRange(), streams: [STREAM_1, MISSING_STREAM] },
+              [STREAM_1, STREAM_2, MISSING_STREAM]
+            ),
+          { timeout: METERING_REFRESH_TIMEOUT_MS }
+        )
+        .toStrictEqual({
+          statusCode: 200,
+          counts: { [STREAM_1]: 2, [STREAM_2]: undefined, [MISSING_STREAM]: undefined },
+        });
+    }
+  );
+
+  apiTest('rejects a posted request without stream names', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asStreamsReadOnly();
+
+    const response = await postDocCounts(apiClient, cookieHeader, 'total', { streams: [] });
+    expect(response).toHaveStatusCode(400);
   });
 });

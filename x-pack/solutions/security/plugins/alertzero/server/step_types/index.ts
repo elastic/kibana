@@ -9,6 +9,7 @@ import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { LoadAlertsStepDependencies } from './alert_triage/alert_triage_steps';
 import type { ActionsService } from '../services/actions/actions_service';
 import type { HuntServices } from '../services/watches/hunt/types';
 import {
@@ -46,6 +47,7 @@ export const registerStepDefinitions = ({
   getCoreStart,
   getInternalEsClient,
   getTaskManager,
+  getWorkflowsManagement,
   grouping,
   logger,
 }: {
@@ -60,6 +62,7 @@ export const registerStepDefinitions = ({
   getCoreStart: () => CoreStart;
   getInternalEsClient?: () => ElasticsearchClient;
   getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
+  getWorkflowsManagement: LoadAlertsStepDependencies['getWorkflowsManagement'];
   grouping: Omit<GroupProposalsStepDependencies, 'getConversations' | 'logger'>;
   logger?: Logger;
 }) => {
@@ -95,7 +98,9 @@ export const registerStepDefinitions = ({
   );
   workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
   workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());
-  workflowsExtensions.registerStepDefinition(getTriageLoadAlertsStepDefinition());
+  workflowsExtensions.registerStepDefinition(
+    getTriageLoadAlertsStepDefinition({ getWorkflowsManagement })
+  );
   workflowsExtensions.registerStepDefinition(getTriageTagPatternKeysStepDefinition());
   workflowsExtensions.registerStepDefinition(getTriageRetagProposalAlertsStepDefinition());
   const groupingDeps = { ...grouping, getConversations, logger };
