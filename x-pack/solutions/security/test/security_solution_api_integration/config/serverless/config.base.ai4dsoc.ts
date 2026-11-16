@@ -13,6 +13,7 @@ export interface CreateTestConfigOptions {
   kbnTestServerArgs?: string[];
   kbnTestServerEnv?: Record<string, string>;
 }
+import { withUiamCertOfProject } from '@kbn/test-suites-xpack-platform/serverless/shared/uiam_cert';
 import { services } from './services';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
@@ -29,7 +30,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
-          ...svlSharedConfig.get('kbnTestServer.serverArgs'),
+          ...withUiamCertOfProject(svlSharedConfig.get('kbnTestServer.serverArgs'), 'security'),
           '--serverless=security',
           `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
             { product_line: 'ai_soc', product_tier: 'search_ai_lake' },
