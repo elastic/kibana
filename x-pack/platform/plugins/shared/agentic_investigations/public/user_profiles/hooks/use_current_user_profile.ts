@@ -10,6 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { userProfileQueryKeys } from '../query_keys';
 
 // 404 = no Elastic profile for this user (anonymous / proxy-auth / not a native user).
 // 403 = the user exists but cannot fetch their own profile (very unusual, but durable).
@@ -22,7 +23,7 @@ export const useCurrentUserProfile = () => {
   const { services } = useKibana<CoreStart>();
 
   return useQuery<UserProfileWithAvatar | null>({
-    queryKey: ['currentUserProfile'],
+    queryKey: userProfileQueryKeys.current(),
     queryFn: async () => {
       try {
         return await services.http.get<UserProfileWithAvatar>('/internal/security/user_profile', {

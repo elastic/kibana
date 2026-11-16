@@ -27,6 +27,8 @@ export const FLYOUT_TYPE = {
   GENERIC: 'generic',
   MISCONFIGURATION: 'misconfiguration',
   VULNERABILITY: 'vulnerability',
+  INVESTIGATION_TIMELINE: 'investigation_timeline',
+  INVESTIGATION_IOCS: 'investigation_iocs',
 } as const;
 export type FlyoutType = (typeof FLYOUT_TYPE)[keyof typeof FLYOUT_TYPE];
 
@@ -187,8 +189,12 @@ export const FLYOUT_ORIGIN = {
   RISK_SCORE_PREVIEW: 'risk_score_preview',
   // Entity attachment action in AI chat.
   AI_CHAT_ENTITY_ATTACHMENT: 'ai_chat_entity_attachment',
+  // Attachment summary row in the investigation details flyout.
+  ATTACHMENT_SUMMARY: 'attachment_summary',
   // Privileged user monitoring users table.
   PRIVILEGED_USERS_TABLE: 'privileged_users_table',
+  // Privileged user monitoring user activity table row.
+  PRIVILEGED_USER_ACTIVITY_TABLE: 'privileged_user_activity_table',
   // Privileged access detection chart entity link.
   PRIVILEGED_ACCESS_DETECTION: 'privileged_access_detection',
   // Recent anomalies chart entity link.
@@ -201,6 +207,8 @@ export const FLYOUT_ORIGIN = {
   ROW_ACTION: 'row_action',
   // Clickable alert-id chip in the Attack Summary / Background markdown section.
   ATTACK_SUMMARY_ALERT: 'attack_summary_alert',
+  // Timeline or IOCs row in the investigation attachments overview.
+  ATTACHMENTS_OVERVIEW: 'attachments_overview',
 } as const;
 export type FlyoutOrigin = (typeof FLYOUT_ORIGIN)[keyof typeof FLYOUT_ORIGIN];
 

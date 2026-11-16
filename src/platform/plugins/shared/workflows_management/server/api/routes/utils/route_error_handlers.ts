@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { InvalidAccessControlError } from '@kbn/entity-access-control';
 import {
   WorkflowDisabledError,
   WorkflowExecutionInvalidStatusError,
@@ -25,7 +27,9 @@ import { logWorkflowsRouteError } from './log_workflows_route_error';
 import { WorkflowChangeHistoryDisabledError } from '../../../lib/workflow_change_history_disabled_error';
 import { WorkflowHistoryEventNotFoundError } from '../../../lib/workflow_history_event_not_found_error';
 import { WorkflowHistoryPaginationError } from '../../../lib/workflow_history_pagination_error';
+import { isResultWindowTooLargeError } from '../../lib/es_error_helpers';
 import { WorkflowForbiddenError } from '../../workflow_forbidden_error';
+import { WorkflowTriggerInputError } from '../../workflow_trigger_input_error';
 
 /**
  * Unified error handler for workflow management routes
@@ -45,6 +49,16 @@ export function handleRouteError(
   error: Error,
   options?: HandleRouteErrorOptions
 ) {
+  if (error instanceof InvalidAccessControlError) {
+    return response.badRequest({ body: { message: error.message } });
+  }
+
+  if (Boom.isBoom(error)) {
+    return response.customError({
+      statusCode: error.output.statusCode,
+      body: { message: error.output.payload.message },
+    });
+  }
   if (options?.checkNotFound && error instanceof WorkflowExecutionNotFoundError) {
     return response.notFound();
   }
@@ -131,7 +145,23 @@ export function handleRouteError(
     });
   }
 
+  if (isResultWindowTooLargeError(error)) {
+    return response.badRequest({
+      body: {
+        message: 'Pagination exceeds the maximum result window. Use a smaller page or size.',
+      },
+    });
+  }
+
   if (error instanceof WorkflowDisabledError) {
+    return response.badRequest({
+      body: {
+        message: error.message,
+      },
+    });
+  }
+
+  if (error instanceof WorkflowTriggerInputError) {
     return response.badRequest({
       body: {
         message: error.message,

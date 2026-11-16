@@ -14,7 +14,7 @@ exports[`MostRecentError component renders properly with mock data 1`] = `
     class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
   >
     <a
-      class="euiLink emotion-euiLink-primary"
+      class="euiLink emotion-euiLink-text"
       data-test-subj="monitor-page-link-bad-ssl"
       href="/monitor/YmFkLXNzbA==/?statusFilter=down"
       rel="noreferrer"

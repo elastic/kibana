@@ -8,17 +8,27 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
-import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
+import { toOptionalKiStatus, type KiStatus } from '../../common/ki_lifecycle_status';
+import { DEFAULT_KI_LIST_SORT, type KiListSort } from '../../common/ki_list_sort';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
+
+const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
+/** Normalized lifecycle column: unset stored values become `active`. */
+const KI_LIFECYCLE_STATUS_ALIAS = 'lifecycle_status';
+export const KI_STATUS_ALIAS = 'ki_status';
 
 /** Columns the list reads. Each is guarded by a schema probe since AI indices vary in shape. */
 const KI_LIST_FIELDS = [
   'id',
   '@timestamp',
+  'updated_at',
   'type',
   'title',
-  'governance.lifecycle.status',
+  'description',
+  'expires_at',
+  KI_LIFECYCLE_STATUS_FIELD,
 ] as const;
 type KiListField = (typeof KI_LIST_FIELDS)[number];
 
@@ -26,6 +36,11 @@ export interface GetKisOptions {
   dest: AiIndexDest;
   size: number;
   type?: string;
+  /** Fuzzy full-text search over indexed title and description columns. */
+  query?: string;
+  /** When omitted, non-deleted KIs only (unset status counts as active). */
+  statuses?: KiStatus[];
+  sort?: KiListSort;
 }
 
 const EMPTY: ListKisResponse = { kis: [], total: 0, summary: { total: 0, counts_by_type: [] } };
@@ -35,14 +50,72 @@ const toRecords = (response: ESQLSearchResponse): Array<Record<string, unknown>>
     Object.fromEntries(response.columns.map((column, i) => [column.name, row[i]]))
   );
 
+const toOptionalString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
+
 const toKiListItem = (row: Record<string, unknown>): KiListItem => {
-  const { _index: index, id, type, title } = row;
+  const { _index: index, id, type, title, updated_at: updatedAt, expires_at: expiresAt } = row;
+  const updatedAtValue = toOptionalString(updatedAt);
+  const expiresAtValue = toOptionalString(expiresAt);
+  const status = toOptionalKiStatus(row[KI_STATUS_ALIAS]) ?? 'active';
   return {
     id: String(id),
     index: String(index),
     ...(typeof type === 'string' ? { type } : {}),
     ...(typeof title === 'string' ? { title } : {}),
+    ...(updatedAtValue !== undefined ? { updated_at: updatedAtValue } : {}),
+    ...(expiresAtValue !== undefined ? { expires_at: expiresAtValue } : {}),
+    status,
   };
+};
+
+export const lifecycleStatusEvalClause = (has: (field: KiListField) => boolean): string =>
+  has(KI_LIFECYCLE_STATUS_FIELD)
+    ? `EVAL ${KI_LIFECYCLE_STATUS_ALIAS} = COALESCE(${KI_LIFECYCLE_STATUS_FIELD}, "active")`
+    : `EVAL ${KI_LIFECYCLE_STATUS_ALIAS} = "active"`;
+
+export const kiStatusEvalClause = (has: (field: KiListField) => boolean): string => {
+  const expired = has('expires_at') ? 'expires_at <= NOW()' : 'false';
+  return `EVAL ${KI_STATUS_ALIAS} = CASE(${KI_LIFECYCLE_STATUS_ALIAS} == "active" AND COALESCE(${expired}, false), "expired", ${KI_LIFECYCLE_STATUS_ALIAS})`;
+};
+
+const statusFilterClause = (statuses?: KiStatus[]): string[] => {
+  if (statuses === undefined) {
+    return [`WHERE ${KI_LIFECYCLE_STATUS_ALIAS} != "deleted"`];
+  }
+  if (statuses.length === 0) {
+    return ['WHERE FALSE'];
+  }
+  const values = statuses.map((status) => `"${status}"`).join(', ');
+  return [`WHERE ${KI_STATUS_ALIAS} IN (${values})`];
+};
+
+const searchFilterClause = (has: (field: KiListField) => boolean, query?: string): string[] => {
+  if (query === undefined) {
+    return [];
+  }
+  const matches: string[] = [];
+  if (has('title')) {
+    matches.push('MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2})');
+  }
+  if (has('description')) {
+    matches.push('MATCH(description, ?searchQuery, {"fuzziness":"AUTO"})');
+  }
+  if (matches.length === 0) {
+    return ['WHERE FALSE'];
+  }
+  return [`WHERE (${matches.join(' OR ')})`];
+};
+
+const listQueryParams = (type?: string, query?: string) => {
+  const params: Array<{ type: string } | { searchQuery: string }> = [];
+  if (type !== undefined) {
+    params.push({ type });
+  }
+  if (query !== undefined) {
+    params.push({ searchQuery: query });
+  }
+  return params.length > 0 ? { params } : {};
 };
 
 /** A dest value may be a comma-separated list of index expressions. */
@@ -59,12 +132,13 @@ const probeQuery = (expression: string): string =>
   `FROM ${JSON.stringify(expression)} METADATA _id, _index\n| LIMIT 0`;
 
 /** The mapped columns of one index expression, or undefined when it resolves to nothing. */
-const probeColumns = async (
+export const probeColumns = async (
   esClient: ElasticsearchClient,
-  expression: string
+  expression: string,
+  options?: { requestTimeout?: number }
 ): Promise<string[] | undefined> => {
   try {
-    const probe = await esClient.esql.query({ query: probeQuery(expression) });
+    const probe = await esClient.esql.query({ query: probeQuery(expression) }, options);
     return (probe as unknown as ESQLSearchResponse).columns.map(({ name }) => name);
   } catch (error) {
     if (isEsqlUnknownIndexError(error)) {
@@ -75,19 +149,36 @@ const probeColumns = async (
 };
 
 /**
- * One row per KI: the latest revision by `@timestamp` for each logical id,
- * excluding KIs whose lifecycle status is deleted. On an index dest the same
- * id may exist in several backing indices, so those are distinct KIs.
+ * A search ranks by best match first; the chosen sort only breaks score ties.
+ * ES|QL sorts `text` case-sensitively, and an empty title sorts first unless nulled.
+ */
+const getRowsSort = (
+  sort: KiListSort,
+  hasTimestampColumn: boolean,
+  query: string | undefined
+): string[] => {
+  const scoreKeys = query !== undefined ? ['_score DESC'] : [];
+  if (sort === 'title') {
+    return [
+      'EVAL title_sort = CASE(title == "", NULL, TO_LOWER(title))',
+      `SORT ${[...scoreKeys, 'title_sort ASC NULLS LAST', 'id ASC'].join(', ')}`,
+    ];
+  }
+  const sortKeys = hasTimestampColumn ? ['revision_time DESC', 'id ASC'] : ['id ASC'];
+  return [`SORT ${[...scoreKeys, ...sortKeys].join(', ')}`];
+};
+
+/**
+ * Keeps only the latest revision by `@timestamp` for each logical id.
+ * On an index dest the same id may exist in several backing indices, so those are distinct KIs.
  * Documents without a timestamp sort first, and `_id` breaks timestamp ties.
  */
-const currentKisQuery = (
+export const latestRevisionPipeline = (
   dest: AiIndexDest,
-  sources: string[],
-  has: (field: KiListField) => boolean
-): string => {
+  has: (field: 'id' | '@timestamp') => boolean
+): string[] => {
   const key = dest.type === 'data_stream' ? 'id' : '_index, id';
   return [
-    `FROM ${fromSources(sources)} METADATA _id, _index`,
     has('id') ? 'EVAL id = COALESCE(id, _id)' : 'EVAL id = _id',
     ...(has('@timestamp')
       ? [
@@ -98,17 +189,35 @@ const currentKisQuery = (
           'WHERE _id == latest_doc',
         ]
       : []),
-    ...(has('governance.lifecycle.status')
-      ? ['WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"']
-      : []),
+  ];
+};
+
+/** One row per KI, filtered by status. */
+const currentKisQuery = (
+  dest: AiIndexDest,
+  sources: string[],
+  has: (field: KiListField) => boolean,
+  statuses?: KiStatus[],
+  query?: string
+): string =>
+  [
+    `FROM ${fromSources(sources)} ${
+      query !== undefined ? 'METADATA _id, _index, _score' : 'METADATA _id, _index'
+    }`,
+    ...latestRevisionPipeline(dest, has),
+    lifecycleStatusEvalClause(has),
+    kiStatusEvalClause(has),
+    ...statusFilterClause(statuses),
+    ...searchFilterClause(has, query),
     ...(has('type') ? [] : ['EVAL type = TO_STRING(NULL)']),
     ...(has('title') ? [] : ['EVAL title = TO_STRING(NULL)']),
+    ...(has('updated_at') ? [] : ['EVAL updated_at = TO_STRING(NULL)']),
+    ...(has('expires_at') ? [] : ['EVAL expires_at = TO_STRING(NULL)']),
   ].join('\n| ');
-};
 
 export const getKis = async (
   esClient: ElasticsearchClient,
-  { dest, size, type }: GetKisOptions
+  { dest, size, type, query, statuses, sort = DEFAULT_KI_LIST_SORT }: GetKisOptions
 ): Promise<ListKisResponse> => {
   // Zero-row probes resolve the mapped columns under the caller's own read privilege; an
   // expression that resolves to nothing is left out so the rest of the dest still lists.
@@ -128,15 +237,28 @@ export const getKis = async (
   const base = currentKisQuery(
     dest,
     sources.map(({ expression }) => expression),
-    has
+    has,
+    statuses,
+    query
   );
-  const typeParams = type !== undefined ? { params: [{ type }] } : {};
+  const filterParams = listQueryParams(type, query);
+  const keepFields = [
+    '_index',
+    'id',
+    'type',
+    'title',
+    'updated_at',
+    'expires_at',
+    KI_STATUS_ALIAS,
+  ].join(', ');
+
+  const rowsSort = getRowsSort(sort, has('@timestamp'), query);
 
   const rowsQuery = [
     base,
     ...(type !== undefined ? ['WHERE type == ?type'] : []),
-    has('@timestamp') ? 'SORT revision_time DESC, id ASC' : 'SORT id ASC',
-    'KEEP _index, id, type, title',
+    ...rowsSort,
+    `KEEP ${keepFields}`,
     `LIMIT ${size}`,
   ].join('\n| ');
   // Exact counts, independent of how many type buckets exist.
@@ -153,11 +275,12 @@ export const getKis = async (
     'SORT count DESC, type ASC',
     `LIMIT ${MAX_KI_TYPE_FILTER_COUNT}`,
   ].join('\n| ');
+  const bucketsParams = listQueryParams(undefined, query);
 
   const [rows, totals, buckets] = await Promise.all([
-    size > 0 ? esClient.esql.query({ query: rowsQuery, ...typeParams }) : undefined,
-    esClient.esql.query({ query: totalsQuery, ...typeParams }),
-    esClient.esql.query({ query: bucketsQuery }),
+    size > 0 ? esClient.esql.query({ query: rowsQuery, ...filterParams }) : undefined,
+    esClient.esql.query({ query: totalsQuery, ...filterParams }),
+    esClient.esql.query({ query: bucketsQuery, ...bucketsParams }),
   ]);
 
   const [totalRow] = toRecords(totals as unknown as ESQLSearchResponse);

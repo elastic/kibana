@@ -10,9 +10,10 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import {
   AI_INDEX_API_VERSION,
   AI_INDEX_INTERNAL_API_VERSION,
-  aiIndexByIdPath,
-  aiIndexFeedbackAnalysisPath,
-  aiIndexPath,
+  AI_INDEX_BY_ID_PATH,
+  AI_INDEX_DREAMING_PATH,
+  AI_INDEX_FEEDBACK_ANALYSIS_PATH,
+  AI_INDEX_PATH,
 } from '../../../common/constants';
 import type {
   AiIndexFeedbackAnalysis,
@@ -24,6 +25,7 @@ import type {
   PutAiIndexFeedbackAnalysisResponse,
   PutAiIndexResponse,
 } from '../../../common/http_api/ai_indices';
+import type { AiIndexDreamingConfig, GetAiIndexDreamingResponse } from '../../../common/dreaming';
 
 interface ListAiIndicesArgs {
   signal?: AbortSignal;
@@ -33,7 +35,7 @@ export const listAiIndices = (
   http: HttpStart,
   { signal }: ListAiIndicesArgs = {}
 ): Promise<ListAiIndexResponse> =>
-  http.get<ListAiIndexResponse>(aiIndexPath, {
+  http.get<ListAiIndexResponse>(AI_INDEX_PATH, {
     version: AI_INDEX_API_VERSION,
     ...(signal ? { signal } : {}),
   });
@@ -50,9 +52,29 @@ export const getAiIndex = (
   http: HttpStart,
   { aiIndexId, signal }: GetAiIndexArgs
 ): Promise<GetAiIndexResponse> =>
-  http.get<GetAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId }), {
+  http.get<GetAiIndexResponse>(buildPath(AI_INDEX_BY_ID_PATH, { aiIndexId }), {
     version: AI_INDEX_API_VERSION,
     ...(signal ? { signal } : {}),
+  });
+
+/** Fetches an AI index's dreaming config. */
+export const getAiIndexDreaming = (
+  http: HttpStart,
+  { aiIndexId, signal }: GetAiIndexArgs
+): Promise<GetAiIndexDreamingResponse> =>
+  http.get<GetAiIndexDreamingResponse>(buildPath(AI_INDEX_DREAMING_PATH, { aiIndexId }), {
+    version: AI_INDEX_INTERNAL_API_VERSION,
+    ...(signal ? { signal } : {}),
+  });
+
+/** Replaces an AI index's dreaming config, including on managed AI indices. */
+export const setAiIndexDreaming = (
+  http: HttpStart,
+  { aiIndexId, config }: { aiIndexId: string; config: AiIndexDreamingConfig }
+): Promise<GetAiIndexDreamingResponse> =>
+  http.put<GetAiIndexDreamingResponse>(buildPath(AI_INDEX_DREAMING_PATH, { aiIndexId }), {
+    version: AI_INDEX_INTERNAL_API_VERSION,
+    body: JSON.stringify(config),
   });
 
 interface CreateAiIndexArgs {
@@ -67,7 +89,7 @@ export const createAiIndex = (
   http: HttpStart,
   { aiIndexId, properties }: CreateAiIndexArgs
 ): Promise<CreateAiIndexResponse> =>
-  http.post<CreateAiIndexResponse>(aiIndexPath, {
+  http.post<CreateAiIndexResponse>(AI_INDEX_PATH, {
     version: AI_INDEX_API_VERSION,
     body: JSON.stringify({ id: aiIndexId, ...properties }),
   });
@@ -84,7 +106,7 @@ export const putAiIndex = (
   http: HttpStart,
   { aiIndexId, properties }: PutAiIndexArgs
 ): Promise<PutAiIndexResponse> =>
-  http.put<PutAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId }), {
+  http.put<PutAiIndexResponse>(buildPath(AI_INDEX_BY_ID_PATH, { aiIndexId }), {
     version: AI_INDEX_API_VERSION,
     body: JSON.stringify(properties),
   });
@@ -103,7 +125,7 @@ export const putAiIndexFeedbackAnalysis = (
   { aiIndexId, feedbackAnalysis }: PutAiIndexFeedbackAnalysisArgs
 ): Promise<PutAiIndexFeedbackAnalysisResponse> =>
   http.put<PutAiIndexFeedbackAnalysisResponse>(
-    buildPath(aiIndexFeedbackAnalysisPath, { aiIndexId }),
+    buildPath(AI_INDEX_FEEDBACK_ANALYSIS_PATH, { aiIndexId }),
     {
       version: AI_INDEX_INTERNAL_API_VERSION,
       body: JSON.stringify(feedbackAnalysis),
@@ -120,7 +142,7 @@ export const deleteAiIndex = (
   http: HttpStart,
   { aiIndexId, deleteKnowledgeIndicators = false, deleteAutomations = false }: DeleteAiIndexArgs
 ): Promise<DeleteAiIndexResponse> =>
-  http.delete<DeleteAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId }), {
+  http.delete<DeleteAiIndexResponse>(buildPath(AI_INDEX_BY_ID_PATH, { aiIndexId }), {
     version: AI_INDEX_API_VERSION,
     query: {
       delete_knowledge_indicators: deleteKnowledgeIndicators,

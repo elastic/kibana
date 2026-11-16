@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  CONVERSATION_EVENT_ID_DELIMITER,
-  RESERVED_CONVERSATION_EVENT_TYPES,
-  isBuiltInConversationEventType,
-} from '@kbn/agent-builder-common';
+import { assertValidConversationEventType } from '@kbn/agent-builder-common';
 import type { ConversationEventTypeDefinition } from '@kbn/agent-builder-server/conversation_events';
 
 export interface ConversationEventTypeRegistry {
@@ -31,19 +27,7 @@ class ConversationEventTypeRegistryImpl implements ConversationEventTypeRegistry
     if (this.definitions.has(type)) {
       throw new Error(`Conversation event type "${type}" already registered`);
     }
-    if (type.includes(CONVERSATION_EVENT_ID_DELIMITER)) {
-      throw new Error(
-        `Conversation event type "${type}" must not contain "${CONVERSATION_EVENT_ID_DELIMITER}"`
-      );
-    }
-    if ((RESERVED_CONVERSATION_EVENT_TYPES as readonly string[]).includes(type)) {
-      throw new Error(`Conversation event type "${type}" is reserved and cannot be registered`);
-    }
-    if (isBuiltInConversationEventType(type)) {
-      throw new Error(
-        `Conversation event type "${type}" is a built-in timeline event type and cannot be registered`
-      );
-    }
+    assertValidConversationEventType(type);
     this.definitions.set(type, definition);
   }
 

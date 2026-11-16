@@ -7,12 +7,32 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
+import type {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/types';
+import {
+  buildAliasesFilter,
+  RESOLUTION_GROUP_RISK_SORT_FIELD,
+  RESOLVED_MODE_MAX_RECORDS,
+  type EntityViewMode,
+} from '../../../../common/entity_analytics/entity_store/resolution_group';
 
 interface CheckEntityExistsParams {
   crudClient: EntityStoreCRUDClient;
   esClient: ElasticsearchClient;
   entityId: string;
   entityType: EntityType;
+}
+
+type ListEntityRecordsParams = Pick<CheckEntityExistsParams, 'crudClient' | 'esClient'> & {
+  filter: QueryDslQueryContainer[];
+  size: number;
+  sort?: SortCombinations[];
+};
+
+interface GetEntityRecordsParams extends CheckEntityExistsParams {
+  mode?: EntityViewMode;
 }
 export class EntityStoreAccessError extends Error {
   constructor(message = 'Insufficient privileges to access feature') {
@@ -22,21 +42,19 @@ export class EntityStoreAccessError extends Error {
 }
 
 /**
- * Returns the entity record for the given EUID (`entity.id`) and type, or
- * `null` if no such entity exists in the store. Used to 404 requests for
- * entities that either never existed or have since been removed, and to
- * provide the caller with the entity record for downstream identity filtering.
+ * Lists entity store records using the provided `filter`, `size` and optional `sort`.
  *
  * For hidden indices, ES silently returns empty results when the user lacks
  * read access (rather than 403), so we check index privileges explicitly
  * before querying to ensure "no access" surfaces as EntityStoreAccessError.
  */
-export const checkEntityExists = async ({
+const listEntityRecords = async ({
   crudClient,
   esClient,
-  entityId,
-  entityType,
-}: CheckEntityExistsParams): Promise<Entity | null> => {
+  filter,
+  size,
+  sort,
+}: ListEntityRecordsParams): Promise<Entity[]> => {
   const latestIndex = await crudClient.latestIndexName();
   const { has_all_requested: hasRead } = await esClient.security.hasPrivileges({
     index: [{ names: [latestIndex], privileges: ['read'] }],
@@ -46,19 +64,68 @@ export const checkEntityExists = async ({
   }
 
   try {
-    const { entities } = await crudClient.listEntities({
-      filter: [
-        { term: { 'entity.id': entityId } },
-        { term: { 'entity.EngineMetadata.Type': entityType } },
-      ],
-      size: 1,
-    });
-
-    return entities[0] ?? null;
+    const { entities } = await crudClient.listEntities({ filter, size, sort });
+    return entities;
   } catch (err) {
     if (err?.statusCode === 403) {
       throw new EntityStoreAccessError();
     }
     throw err;
   }
+};
+
+/**
+ * Returns the entity record for the given EUID (`entity.id`) and type, or
+ * `null` if no such entity exists in the store. Used to 404 requests for
+ * entities that either never existed or have since been removed, and to
+ * provide the caller with the entity record for downstream identity filtering.
+ */
+export const checkEntityExists = async ({
+  crudClient,
+  esClient,
+  entityId,
+  entityType,
+}: CheckEntityExistsParams): Promise<Entity | null> => {
+  const entities = await listEntityRecords({
+    crudClient,
+    esClient,
+    filter: [
+      { term: { 'entity.id': entityId } },
+      { term: { 'entity.EngineMetadata.Type': entityType } },
+    ],
+    size: 1,
+  });
+  return entities[0] ?? null;
+};
+
+/**
+ * Entity records the given EUID covers in `mode`: the target record first, followed (in `resolved`
+ * mode) by the records resolved to it, i.e. its resolution group, riskiest first and capped at
+ * `RESOLVED_MODE_MAX_RECORDS` members. Empty when the target itself is missing — aliases never
+ * stand in for the target.
+ */
+export const getEntityRecords = async ({
+  crudClient,
+  esClient,
+  entityId,
+  entityType,
+  mode = 'single',
+}: GetEntityRecordsParams): Promise<Entity[]> => {
+  const target = await checkEntityExists({ crudClient, esClient, entityId, entityType });
+  if (!target) {
+    return [];
+  }
+  if (mode !== 'resolved') {
+    return [target];
+  }
+
+  // The riskiest aliases of this entity; the target takes one of the member slots.
+  const aliases = await listEntityRecords({
+    crudClient,
+    esClient,
+    filter: [buildAliasesFilter(entityId), { term: { 'entity.EngineMetadata.Type': entityType } }],
+    size: RESOLVED_MODE_MAX_RECORDS - 1,
+    sort: [{ [RESOLUTION_GROUP_RISK_SORT_FIELD]: 'desc' }],
+  });
+  return [target, ...aliases.filter((entity) => entity.entity?.id !== entityId)];
 };

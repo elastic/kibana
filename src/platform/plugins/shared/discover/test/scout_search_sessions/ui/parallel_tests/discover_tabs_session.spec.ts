@@ -18,7 +18,7 @@ import {
   getSessionCookieHeader,
   BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT,
   FLIGHTS_SAMPLE_DATA_SET,
-} from '@kbn/data-plugin/test/scout_search_sessions/ui/fixtures';
+} from '../fixtures';
 
 const SLOW_ESQL_QUERY = 'FROM kibana_sample_data_flights | LIMIT 1 | WHERE DELAY(5000ms)';
 
@@ -52,7 +52,7 @@ spaceTest.describe(
     spaceTest('stores a background search from a newly created tab', async ({ pageObjects }) => {
       await pageObjects.unifiedTabs.createNewTab();
       await pageObjects.discover.selectTextBaseLang();
-      await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+      await pageObjects.esqlEditor.setQuery(SLOW_ESQL_QUERY);
 
       await pageObjects.backgroundSearch.sendToBackground();
 
@@ -67,7 +67,7 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         await pageObjects.unifiedTabs.createNewTab();
         await pageObjects.discover.selectTextBaseLang();
-        await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+        await pageObjects.esqlEditor.setQuery(SLOW_ESQL_QUERY);
 
         // A third tab, then back to the one holding the slow query.
         await pageObjects.unifiedTabs.createNewTab();

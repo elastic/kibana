@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import { getConnectorSpec, isSelectedActionEnabled, isToolAction } from '@kbn/connector-specs';
+import type { SelectedActions } from '@kbn/connector-specs';
 import { formatSchemaForLlm } from './tools';
 
 /** Minimal actions-client interface needed by the connector helpers below. */
 interface MinimalActionsClient {
   getAll(): Promise<Array<{ id: string; name: string; actionTypeId: string }>>;
-  get(opts: { id: string }): Promise<{ id: string; name: string; actionTypeId: string }>;
+  get(opts: { id: string }): Promise<{
+    id: string;
+    name: string;
+    actionTypeId: string;
+    config?: Record<string, unknown>;
+  }>;
 }
 
 export interface ConnectorSummary {
@@ -34,6 +40,16 @@ export interface ConnectorDetail {
   description: string;
   subActions: ConnectorSubActionDetail[];
 }
+
+/**
+ * Resolves the connector allow-list for a run. When an agent configuration is present,
+ * an unset `connector_ids` means no connectors are assigned; with no agent context
+ * there is no scoping (undefined). Mirrors `execute_connector_sub_action` and `sml_search`.
+ */
+export const resolveAllowedConnectorIds = (
+  agentConfiguration?: { connector_ids?: string[] } | undefined
+): string[] | undefined =>
+  agentConfiguration ? agentConfiguration.connector_ids ?? [] : undefined;
 
 /**
  * Returns connectors that have a ConnectorSpec and, when allowedIds is provided,
@@ -77,8 +93,10 @@ export const getAgentConnectorDetail = async (
   const spec = getConnectorSpec(connector.actionTypeId);
   if (!spec) return null;
 
+  const selectedActions = connector.config?.selectedActions as SelectedActions;
+
   const subActions: ConnectorSubActionDetail[] = Object.entries(spec.actions)
-    .filter(([name]) => isToolAction(spec, name))
+    .filter(([name]) => isToolAction(spec, name) && isSelectedActionEnabled(name, selectedActions))
     .map(([name, action]) => ({
       name,
       description: action.description ?? name,

@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import type { License } from '@kbn/license-api-guard-plugin/server';
 
 import { DATA_SET_BY_ID_ROUTE_PATH } from '../../../common';
 import { DataSetsClient } from '../../data_sets_client';
@@ -14,7 +15,7 @@ import { getRouteErrorMessage } from '../../get_route_error_message';
 
 import { datasetSchema } from './dataset_schema';
 
-export function registerCreateDataset(router: IRouter): void {
+export function registerCreateDataset(router: IRouter, license: License): void {
   router.put(
     {
       path: DATA_SET_BY_ID_ROUTE_PATH,
@@ -34,20 +35,32 @@ export function registerCreateDataset(router: IRouter): void {
         body: datasetSchema,
       },
     },
-    router.handleLegacyErrors(async (context, request, response) => {
-      const { id } = request.params;
-      const { client } = (await context.core).elasticsearch;
-      const dataSetsClient = new DataSetsClient(client.asCurrentUser);
-      try {
-        await dataSetsClient.put(id, request.body);
-        return response.ok();
-      } catch (error) {
-        return response.badRequest({
-          body: {
-            message: getRouteErrorMessage(error),
-          },
-        });
-      }
-    })
+    router.handleLegacyErrors(
+      license.guardApiRoute(async (context, request, response) => {
+        const { id } = request.params;
+        const { client } = (await context.core).elasticsearch;
+        const dataSetsClient = new DataSetsClient(client.asCurrentUser);
+        try {
+          const mappings = request.body.mappings as unknown as
+            | { properties?: Record<string, unknown> }
+            | undefined;
+          if (mappings && Object.keys(mappings.properties ?? {}).length === 0) {
+            return response.badRequest({
+              body: {
+                message: 'mappings.properties must contain at least one field',
+              },
+            });
+          }
+          await dataSetsClient.put(id, request.body);
+          return response.ok();
+        } catch (error) {
+          return response.badRequest({
+            body: {
+              message: getRouteErrorMessage(error),
+            },
+          });
+        }
+      })
+    )
   );
 }

@@ -84,12 +84,56 @@ describe('ES|QL views routes', () => {
       registerGetViewsRoute(mocks.router, mocks.initializerContext);
 
       await expect(
-        mocks.handlers.get(mocks.requestHandlerContext, {}, mocks.response)
+        mocks.handlers.get(
+          mocks.requestHandlerContext,
+          { query: { strict: false } },
+          mocks.response
+        )
       ).resolves.toEqual({
         status: 200,
         body: { views: [] },
       });
       expect(mocks.response.customError).not.toHaveBeenCalled();
+    });
+
+    it('preserves Elasticsearch errors for strict management requests', async () => {
+      const mocks = createMocks();
+      const error = Object.assign(new Error('Forbidden'), { statusCode: 403 });
+      service.getViews.mockRejectedValue(error);
+      registerGetViewsRoute(mocks.router, mocks.initializerContext);
+
+      await expect(
+        mocks.handlers.get(mocks.requestHandlerContext, { query: { strict: true } }, mocks.response)
+      ).resolves.toEqual({
+        status: 403,
+        body: { message: 'Forbidden' },
+      });
+      expect(mocks.response.customError).toHaveBeenCalledWith({
+        statusCode: 403,
+        body: { message: 'Forbidden' },
+      });
+    });
+
+    it('maps a missing Elasticsearch views API to unsupported for strict requests', async () => {
+      const mocks = createMocks();
+      const message = 'no handler found for uri [/_query/view] and method [GET]';
+      const error = Object.assign(new Error('Bad Request'), {
+        statusCode: 400,
+        body: { error: message, status: 400 },
+      });
+      service.getViews.mockRejectedValue(error);
+      registerGetViewsRoute(mocks.router, mocks.initializerContext);
+
+      await expect(
+        mocks.handlers.get(mocks.requestHandlerContext, { query: { strict: true } }, mocks.response)
+      ).resolves.toEqual({
+        status: 501,
+        body: { message: 'Bad Request' },
+      });
+      expect(mocks.response.customError).toHaveBeenCalledWith({
+        statusCode: 501,
+        body: { message: 'Bad Request' },
+      });
     });
   });
 
@@ -182,6 +226,70 @@ describe('ES|QL views routes', () => {
       });
     });
 
+    it('returns parsed validation warnings when requested', async () => {
+      const mocks = createMocks();
+      mocks.esql.putView.mockResolvedValue({
+        body: { acknowledged: true },
+        warnings: [
+          '299 Elasticsearch-9.7.0 "view [my-view] query is not valid: Unknown index [missing]"',
+        ],
+      });
+      registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
+
+      await expect(
+        mocks.handlers.put(
+          mocks.requestHandlerContext,
+          {
+            params: { name: 'my-view' },
+            query: { validate: true },
+            body: { query: 'FROM missing' },
+          },
+          mocks.response
+        )
+      ).resolves.toEqual({
+        status: 200,
+        body: {
+          acknowledged: true,
+          warnings: ['view [my-view] query is not valid: Unknown index [missing]'],
+        },
+      });
+      expect(mocks.esql.putView).toHaveBeenCalledWith(
+        {
+          name: 'my-view',
+          query: 'FROM missing',
+          querystring: { validate: true },
+        },
+        { meta: true }
+      );
+    });
+
+    it('returns an empty warning list when validation finds no problems', async () => {
+      const mocks = createMocks();
+      mocks.esql.putView.mockResolvedValue({
+        body: { acknowledged: true },
+        warnings: null,
+      });
+      registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
+
+      await expect(
+        mocks.handlers.put(
+          mocks.requestHandlerContext,
+          {
+            params: { name: 'my-view' },
+            query: { validate: true },
+            body: { query: 'FROM logs-*' },
+          },
+          mocks.response
+        )
+      ).resolves.toEqual({
+        status: 200,
+        body: {
+          acknowledged: true,
+          warnings: [],
+        },
+      });
+    });
+
     it('deletes one view', async () => {
       const mocks = createMocks();
       mocks.esql.deleteView.mockResolvedValue({ acknowledged: true });
@@ -212,9 +320,16 @@ describe('ES|QL views routes', () => {
       });
     });
 
-    it('preserves Elasticsearch errors with their status', async () => {
+    it('preserves Elasticsearch errors with their status and structured type', async () => {
       const mocks = createMocks();
-      const error = Object.assign(new Error('Conflict'), { statusCode: 409 });
+      const error = Object.assign(new Error('Conflict with an existing index'), {
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'resource_already_exists_exception',
+          },
+        },
+      });
       mocks.esql.putView.mockRejectedValue(error);
       registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
@@ -228,8 +343,13 @@ describe('ES|QL views routes', () => {
           mocks.response
         )
       ).resolves.toEqual({
-        status: 409,
-        body: { message: 'Conflict' },
+        status: 400,
+        body: {
+          message: 'Conflict with an existing index',
+          attributes: {
+            errorType: 'resource_already_exists_exception',
+          },
+        },
       });
       expect(mocks.logger.error).toHaveBeenCalled();
     });

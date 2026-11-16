@@ -10,7 +10,7 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
   DASHBOARD_SO_TYPE,
 } from '@kbn/cases-plugin/common/constants/attachments';
-import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api';
+import type { BulkCreateUnifiedAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq } from '../../../../common/lib/mock';
@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const updatedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [dashboardPayload] as unknown as BulkCreateAttachmentsRequestV2,
+        params: [dashboardPayload] as unknown as BulkCreateUnifiedAttachmentsRequest,
       });
 
       await getComment({
@@ -91,7 +91,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [dashboardPayload] as unknown as BulkCreateAttachmentsRequestV2,
+        params: [dashboardPayload] as unknown as BulkCreateUnifiedAttachmentsRequest,
       });
 
       await pushCase({

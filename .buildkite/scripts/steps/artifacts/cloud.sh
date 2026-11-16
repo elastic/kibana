@@ -12,6 +12,8 @@ if [[ "${DRY_RUN:-}" =~ ^(true|1)$ ]]; then
   exit 0
 fi
 
+load_cloud_deploy_credentials
+
 echo "--- Clean up cached images"
 clean_cached_images
 
@@ -29,7 +31,7 @@ esac
 echo "--- Push docker image"
 mkdir -p target
 
-download_artifact "kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_artifact "kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz" ./target --build "$BUILDKITE_BUILD_ID"
 docker load < "target/kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz"
 rm -f "target/kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz"
 

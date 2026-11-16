@@ -8,25 +8,38 @@
 import {
   AppStatus,
   DEFAULT_APP_CATEGORIES,
+  type AppUpdater,
   type CoreSetup,
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
 import {
+  BehaviorSubject,
+  ReplaySubject,
+  Subject,
+  combineLatest,
+  filter,
+  map,
+  startWith,
+  take,
+  type Subscription,
+} from 'rxjs';
+import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
+import {
+  ALERTZERO_FEATURE_ID,
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
-  TEMPLATE_ID_INVESTIGATION,
+  ALERTZERO_ENABLED_SETTING_ID,
 } from '@kbn/alertzero-common';
-import {
-  AGENTIC_INVESTIGATIONS_PLUGIN_ID,
-  ESCALATIONS_UI_CAPABILITY_MANAGE,
-} from '@kbn/agentic-investigations-plugin/common';
 import React from 'react';
-import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
+import { getSubscriptionAvailability, type SubscriptionAvailability } from '../common/availability';
 import { getAlertZeroDeepLinks } from './deep_links';
-import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
+import { isSpaceSupported$ } from './is_space_supported';
+import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
+import { registerAlertZeroPublicStepDefinitions } from './step_types';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -41,10 +54,6 @@ const APP_TITLE = i18n.translate('xpack.alertzero.appTitle', {
   defaultMessage: 'AlertZero',
 });
 
-const INVESTIGATION_TEMPLATE_NAME = i18n.translate('xpack.alertzero.conversationTemplate.name', {
-  defaultMessage: 'Investigation',
-});
-
 export class AlertZeroPublicPlugin
   implements
     Plugin<
@@ -55,18 +64,40 @@ export class AlertZeroPublicPlugin
     >
 {
   private readonly config: AlertZeroClientConfig;
+  private readonly isServerless: boolean;
+  private readonly serverlessTierAvailable$ = new BehaviorSubject(false);
+  private readonly availability$ = new BehaviorSubject<SubscriptionAvailability>('loading');
+  private readonly spaceSupported$ = new ReplaySubject<boolean>(1);
+  private availabilitySubscription?: Subscription;
+  private spaceSupportedSubscription?: Subscription;
+  private attachmentRegistration?: Subscription;
+  private readonly startContract: AlertZeroPublicStart = {
+    setServerlessTierAvailable: (available) => this.serverlessTierAvailable$.next(available),
+  };
+  private statusSubscription?: Subscription;
+  private readonly logger: Logger;
+  /**
+   * Allows `start()` to push updated deep links (with capability-resolved visibility)
+   * after capabilities become available, without re-registering the application.
+   */
+  private readonly appUpdater$ = new Subject<AppUpdater>();
+  private uiEventsRegistered = false;
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {
     this.config = context.config.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
+    this.logger = context.logger.get();
   }
 
   public setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPublicStart>,
-    _setupDeps: AlertZeroSetupDependencies
+    { workflowsExtensions }: AlertZeroSetupDependencies
   ): AlertZeroPublicSetup {
     if (!this.config.enabled) {
-      return {};
+      return { enabled: false };
     }
+
+    registerAlertZeroPublicStepDefinitions(workflowsExtensions);
 
     coreSetup.application.register({
       id: ALERTZERO_APP_ID,
@@ -74,88 +105,151 @@ export class AlertZeroPublicPlugin
       appRoute: ALERTZERO_APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       euiIconType: 'securitySignalDetected',
-      status: AppStatus.accessible,
-      visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+      // Inaccessible until the per-space setting is on. Core then empties `visibleIn` and
+      // `deepLinks` for us, which is what removes the AlertZero nodes from the Security
+      // navigation tree — those trees hold no check of their own.
+      status: AppStatus.inaccessible,
+      visibleIn: ['projectSideNav', 'globalSearch'],
       order: 101,
+      // Initial deep links without capability filtering — capabilities are not available at
+      // setup. `start()` emits an update via appUpdater$ once capabilities are known.
       deepLinks: getAlertZeroDeepLinks(),
+      updater$: this.appUpdater$,
       mount: async (params) => {
         const [coreStart, startDeps] = await coreSetup.getStartServices();
-        const { renderApp } = await import('./application');
+        const [{ renderApp }, { registerAlertZeroUiEvents }] = await Promise.all([
+          import('./application'),
+          import('./telemetry/register_ui_events'),
+        ]);
+        // Every AlertZero UI event is reported from inside the app, so registering on its first
+        // mount keeps the event schemas out of the page-load bundle. Registering twice throws.
+        if (!this.uiEventsRegistered) {
+          registerAlertZeroUiEvents(coreSetup.analytics);
+          this.uiEventsRegistered = true;
+        }
         return renderApp({
           coreStart,
           startDeps,
           params,
+          availability$: this.availability$,
+          spaceSupported$: this.spaceSupported$,
+          isServerless: this.isServerless,
         });
       },
     });
 
-    return {};
+    return { enabled: true };
   }
 
   public start(core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
     if (!this.config.enabled) {
-      return {};
+      return this.startContract;
     }
 
-    // Lazy-load the entire escalation modal subtree — only resolved when the modal is first opened.
-    // This keeps KibanaContextProvider, QueryClient, and ConnectedEscalationModal (plus all their
-    // EUI and hook dependencies) out of alertzero's main chunk.
-    const LazyEscalationModal = React.lazy(async () => {
-      const [
-        { KibanaContextProvider },
-        { QueryClient, QueryClientProvider },
-        { ConnectedEscalationModal },
-      ] = await Promise.all([
+    this.availabilitySubscription = combineLatest([
+      startDeps.licensing.license$.pipe(startWith(undefined)),
+      this.serverlessTierAvailable$,
+    ])
+      .pipe(
+        map(([license, serverlessTierAvailable]) =>
+          getSubscriptionAvailability({
+            isServerless: this.isServerless,
+            serverlessTierAvailable,
+            license,
+          })
+        )
+      )
+      .subscribe(this.availability$);
+
+    const canRead = core.application.capabilities[ALERTZERO_FEATURE_ID]?.show === true;
+    const settingEnabled$ = core.uiSettings.get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false);
+    this.spaceSupportedSubscription = isSpaceSupported$({
+      isServerless: this.isServerless,
+      spaces: startDeps.spaces,
+    }).subscribe(this.spaceSupported$);
+    // An unsupported space keeps the app accessible, whatever the setting is, so a direct URL
+    // shows an explanation instead of core's generic "Application unavailable" page. Navigation
+    // and deep links stay hidden.
+    this.statusSubscription = combineLatest([
+      settingEnabled$,
+      this.availability$,
+      this.spaceSupported$,
+    ]).subscribe(([settingEnabled, availability, spaceSupported]) => {
+      const showNavigation =
+        settingEnabled && spaceSupported && canRead && availability === 'available';
+      this.appUpdater$.next(() => ({
+        status: settingEnabled || !spaceSupported ? AppStatus.accessible : AppStatus.inaccessible,
+        visibleIn: showNavigation ? ['projectSideNav', 'globalSearch'] : [],
+        deepLinks: showNavigation ? getAlertZeroDeepLinks(core.application.capabilities) : [],
+      }));
+    });
+
+    const { agentBuilder } = startDeps;
+    if (!agentBuilder || !startDeps.agenticInvestigations || !startDeps.proposals) {
+      return this.startContract;
+    }
+    const canAccess$ = combineLatest([
+      settingEnabled$,
+      this.availability$,
+      this.spaceSupported$,
+    ]).pipe(
+      map(
+        ([enabled, availability, spaceSupported]) =>
+          enabled && spaceSupported && canRead && availability === 'available'
+      )
+    );
+
+    // Space id comes from the base path so registration starts synchronously.
+    const { spaceId } = getSpaceIdFromPath(
+      core.http.basePath.get(),
+      core.http.basePath.serverBasePath
+    );
+
+    const AttachmentAccessBoundary = React.lazy(async () => {
+      const [{ KibanaContextProvider }, { AccessBoundary }] = await Promise.all([
         import('@kbn/kibana-react-plugin/public'),
-        import('@kbn/react-query'),
-        import('./pages/conversations/connected_escalation_modal'),
+        import('./components/access_boundary'),
       ]);
-
-      // Both `flyoutQueryClient` and `stableServices` are created once inside the lazy factory
-      // so they are stable across renders. KibanaContextProvider compares `services` by reference;
-      // a spread inside the component body would create a new object on every render and
-      // cause all consumers to re-render unnecessarily.
-      const flyoutQueryClient = new QueryClient();
-      const stableServices = { ...core, ...startDeps };
-
-      const WrappedModal: React.FC<React.ComponentProps<typeof ConnectedEscalationModal>> = (
-        props
-      ) =>
+      const services = { ...core, ...startDeps };
+      const Boundary: React.FC<React.PropsWithChildren> = ({ children }) =>
         React.createElement(
           KibanaContextProvider,
-          { services: stableServices },
+          { services },
           React.createElement(
-            QueryClientProvider,
-            { client: flyoutQueryClient },
-            React.createElement(ConnectedEscalationModal, props)
+            AccessBoundary,
+            {
+              availability$: this.availability$,
+              spaceSupported$: this.spaceSupported$,
+              serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
+            },
+            children
           )
         );
-
-      return { default: WrappedModal };
+      return { default: Boundary };
     });
 
-    const canManageEscalations =
-      core.application.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
-        ESCALATIONS_UI_CAPABILITY_MANAGE
-      ] === true;
-
-    registerAgenticInvestigationTemplateUI({
-      conversationTemplates: startDeps.agentBuilder.conversationTemplates,
-      templateId: TEMPLATE_ID_INVESTIGATION,
-      name: INVESTIGATION_TEMPLATE_NAME,
-      icon: 'securitySignalDetected',
-      renderEscalationModal: canManageEscalations
-        ? (props) =>
-            React.createElement(
-              EscalationModalBoundary,
-              null,
-              React.createElement(LazyEscalationModal, props)
-            )
-        : undefined,
+    this.attachmentRegistration = canAccess$.pipe(filter(Boolean), take(1)).subscribe(() => {
+      registerAlertZeroAttachmentTypesUI(agentBuilder.attachments, {
+        AccessBoundary: AttachmentAccessBoundary,
+        http: core.http,
+        navigation: {
+          share: startDeps.share,
+          spaceId,
+          prependPath: (path) => core.http.basePath.prepend(path),
+          getUrlForApp: core.application.getUrlForApp,
+        },
+      }).catch((error) => {
+        this.logger.error('Failed to register AlertZero attachment UI definitions', error);
+      });
     });
 
-    return {};
+    return this.startContract;
   }
 
-  public stop() {}
+  public stop() {
+    this.availabilitySubscription?.unsubscribe();
+    this.spaceSupportedSubscription?.unsubscribe();
+    this.attachmentRegistration?.unsubscribe();
+    this.statusSubscription?.unsubscribe();
+  }
 }

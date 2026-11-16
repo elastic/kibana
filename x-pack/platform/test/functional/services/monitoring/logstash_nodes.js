@@ -35,10 +35,8 @@ export function MonitoringLogstashNodesProvider({ getService, getPageObjects }) 
       return pageId !== null;
     }
     async clickRowByResolver(nodeResolver) {
-      await retry.waitForWithTimeout('redirection to node detail', 30000, async () => {
-        await testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver, 5000);
-        return testSubjects.exists('logstashDetailStatus', { timeout: 5000 });
-      });
+      await testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver, 5000);
+      await testSubjects.existOrFail('logstashDetailStatus', { timeout: 30000 });
     }
     getRows() {
       return PageObjects.monitoring.tableGetRowsFromContainer(SUBJ_TABLE_CONTAINER);

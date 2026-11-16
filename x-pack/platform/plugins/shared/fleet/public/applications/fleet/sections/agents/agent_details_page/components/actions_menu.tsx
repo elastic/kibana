@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
+  AgentForceUnenrollModal,
   AgentUnenrollAgentModal,
   AgentRemoveCollectorModal,
   AgentReassignAgentPolicyModal,
@@ -29,6 +30,7 @@ import {
 } from '../../agent_list_page/components';
 import { UninstallCommandFlyout } from '../../../../components';
 import { AgentRollbackModal } from '../../components/agent_rollback_modal';
+import { AgentRestartModal } from '../../components/agent_restart_modal';
 import { AgentPolicyYamlFlyout } from '../../../../components';
 
 import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
@@ -52,6 +54,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     // Modal/flyout state
     const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
     const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
+    const [isForceUnenrollModalOpen, setIsForceUnenrollModalOpen] = useState(false);
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
     const [isAgentDetailsJsonFlyoutOpen, setIsAgentDetailsJsonFlyoutOpen] = useState(false);
@@ -60,6 +63,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     const [isChangePrivilegeLevelFlyoutOpen, setIsChangePrivilegeLevelFlyoutOpen] = useState(false);
     const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
     const [isRollbackModalOpen, setIsRollbackModalOpen] = useState(false);
+    const [isRestartModalOpen, setIsRestartModalOpen] = useState(false);
     const [isRemoveCollectorModalOpen, setIsRemoveCollectorModalOpen] = useState(false);
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -68,7 +72,6 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     }, []);
 
     const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
-    const isUnenrolling = agent.status === 'unenrolling';
 
     const onClose = useMemo(() => {
       if (onCancelReassign) {
@@ -91,8 +94,10 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         onRequestDiagnosticsClick: () => setIsRequestDiagnosticsModalOpen(true),
         onChangeAgentPrivilegeLevelClick: () => setIsChangePrivilegeLevelFlyoutOpen(true),
         onUnenrollClick: () => setIsUnenrollModalOpen(true),
+        onForceUnenrollClick: () => setIsForceUnenrollModalOpen(true),
         onUninstallClick: () => setIsUninstallCommandFlyoutOpen(true),
         onRollbackClick: () => setIsRollbackModalOpen(true),
+        onRestartClick: () => setIsRestartModalOpen(true),
         onRemoveCollectorClick: () => setIsRemoveCollectorModalOpen(true),
       }),
       [onAddRemoveTagsClick]
@@ -121,7 +126,19 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
                 setIsUnenrollModalOpen(false);
                 refreshAgent();
               }}
-              useForceUnenroll={isUnenrolling}
+              hasFleetServer={hasFleetServer}
+            />
+          </EuiPortal>
+        )}
+        {isForceUnenrollModalOpen && (
+          <EuiPortal>
+            <AgentForceUnenrollModal
+              agents={[agent]}
+              agentCount={1}
+              onClose={() => {
+                setIsForceUnenrollModalOpen(false);
+                refreshAgent();
+              }}
               hasFleetServer={hasFleetServer}
             />
           </EuiPortal>
@@ -215,6 +232,18 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               agents={[agent]}
               agentCount={1}
               onClose={() => setIsRollbackModalOpen(false)}
+            />
+          </EuiPortal>
+        )}
+        {isRestartModalOpen && (
+          <EuiPortal>
+            <AgentRestartModal
+              agents={[agent]}
+              agentCount={1}
+              onClose={() => {
+                setIsRestartModalOpen(false);
+                refreshAgent();
+              }}
             />
           </EuiPortal>
         )}

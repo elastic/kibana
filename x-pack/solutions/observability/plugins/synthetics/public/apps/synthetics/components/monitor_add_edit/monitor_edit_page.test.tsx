@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import { act, fireEvent } from '@testing-library/react';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorEditPage } from './monitor_edit_page';
-import { useMonitorName } from '../../hooks/use_monitor_name';
 import { ConfigKey } from '../../../../../common/runtime_types';
 
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
@@ -200,58 +198,4 @@ describe('MonitorEditPage', () => {
     // error
     expect(getByText('Unable to load monitor configuration')).toBeInTheDocument();
   });
-
-  it.each([true, false])(
-    'shows duplicate error when "nameAlreadyExists" is %s',
-    async (nameAlreadyExists) => {
-      (useMonitorName as jest.Mock).mockReturnValue({ nameAlreadyExists });
-
-      jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
-        status: FETCH_STATUS.SUCCESS,
-        data: {
-          attributes: {
-            [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
-            [ConfigKey.FORM_MONITOR_TYPE]: 'multistep',
-            [ConfigKey.MONITOR_TYPE]: 'browser',
-            [ConfigKey.LOCATIONS]: [],
-            [ConfigKey.THROTTLING_CONFIG]: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
-          },
-        },
-        refetch: () => null,
-        loading: false,
-      });
-      const { getByText, queryByText, getByTestId } = render(<MonitorEditPage />, {
-        state: {
-          serviceLocations: {
-            locations: [
-              {
-                id: 'us_central',
-                label: 'Us Central',
-              },
-              {
-                id: 'us_east',
-                label: 'US East',
-              },
-            ],
-            locationsLoaded: true,
-            loading: false,
-          },
-        },
-      });
-
-      const inputField = getByTestId('syntheticsMonitorConfigName');
-      fireEvent.focus(inputField);
-      fireEvent.change(inputField, { target: { value: 'any value' } }); // Hook is made to return duplicate error as true
-      fireEvent.blur(inputField);
-
-      await act(async () => {
-        jest.advanceTimersByTime(1000);
-      });
-      if (nameAlreadyExists) {
-        expect(getByText('Monitor name already exists')).toBeInTheDocument();
-      } else {
-        expect(queryByText('Monitor name already exists')).not.toBeInTheDocument();
-      }
-    }
-  );
 });

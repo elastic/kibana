@@ -8,9 +8,9 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
+import type { AnalyticsServiceStart, ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -19,6 +19,12 @@ import type { RunWorkflowResponseDto, WorkflowListItemDto } from '@kbn/workflows
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { RunWorkflowInputsModal } from './run_workflow_inputs_modal';
 import { requiresUserSuppliedInputs } from './run_workflow_panel_helpers';
+import {
+  RUN_WORKFLOW_EXECUTED_EVENT_TYPE,
+  type RunWorkflowExecutedEvent,
+  type RunWorkflowTelemetry,
+  UNKNOWN_RUN_WORKFLOW_TELEMETRY_VALUE,
+} from './telemetry';
 import * as i18n from './translations';
 import type { RunWorkflowOptions } from '../../api/types';
 import { useRunWorkflow } from '../../hooks/use_run_workflow';
@@ -36,9 +42,31 @@ import {
  */
 export type WorkflowRunInputs = RunWorkflowOptions['inputs'];
 
+export interface RunWorkflowExecutorParams {
+  /** ID of the workflow to execute. */
+  workflowId: string;
+  /** Merged inputs to forward to the execution API. */
+  inputs: WorkflowRunInputs;
+}
+
+/**
+ * Optional executor that replaces the default `useRunWorkflow` mutation.
+ * Useful when the caller needs to route execution through its own API endpoint
+ * (e.g. the Cases-owned execution wrapper) rather than the shared Workflows API.
+ */
+export type RunWorkflowExecutor = (
+  params: RunWorkflowExecutorParams
+) => Promise<RunWorkflowResponseDto>;
+
 export interface RunWorkflowPanelProps {
   /** The inputs payload to pass when executing the workflow. */
   inputs: WorkflowRunInputs;
+  /**
+   * Optional executor used instead of the default `useRunWorkflow` hook.
+   * When provided the panel calls `runWorkflow({ workflowId, inputs })` and
+   * handles success/error/settled internally so toast behaviour is unchanged.
+   */
+  runWorkflow?: RunWorkflowExecutor;
   /**
    * Server-side managed workflow visibility filter. Only managed workflows tagged with a
    * matching managedVisibilityContexts value (selector or solution) are returned by the server.
@@ -59,32 +87,60 @@ export interface RunWorkflowPanelProps {
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
+  /** Optional callback invoked after workflow execution settles while the panel is mounted. */
+  onExecutionSettled?: () => void;
+  /**
+   * When false, the panel skips its built-in success toast so the caller can
+   * report the outcome itself (e.g. a multi-target run). Defaults to true.
+   */
+  showSuccessToast?: boolean;
+  /** Surface context attached to the run telemetry event. Origin and owner are `unknown` when omitted. */
+  telemetry?: RunWorkflowTelemetry;
 }
 
 interface RunWorkflowPanelServices {
+  analytics?: AnalyticsServiceStart;
   application: ApplicationStart;
   notifications: NotificationsStart;
   rendering?: ToMountPointParams;
 }
 
+const getWorkflowExecutionError = (error: unknown): Error =>
+  new Error(
+    (error as { body?: { message?: string } })?.body?.message ??
+      (error instanceof Error ? error.message : String(error))
+  );
+
 /** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
 export const RunWorkflowPanel = ({
   inputs,
+  runWorkflow: runWorkflowExecutor,
   visibility,
   sortWorkflow,
   filterWorkflow,
   onClose,
   onExecute,
+  onExecutionSettled,
+  showSuccessToast = true,
+  telemetry,
 }: RunWorkflowPanelProps) => {
   const {
-    services: { application, notifications, rendering },
+    services: { analytics, application, notifications, rendering },
   } = useKibana<RunWorkflowPanelServices>();
   const { euiTheme } = useEuiTheme();
 
-  const runWorkflow = useRunWorkflow();
+  const { mutateAsync: runDefaultWorkflow } = useRunWorkflow();
   const [selectedId, setSelectedId] = React.useState<string>('');
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isInputsModalOpen, setIsInputsModalOpen] = React.useState<boolean>(false);
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const { canReadManagedWorkflow } = useWorkflowsCapabilities();
 
@@ -111,48 +167,90 @@ export const RunWorkflowPanel = ({
       setIsLoading(true);
       onExecute?.();
 
-      runWorkflow.mutate(
-        {
-          id: selectedId,
-          inputs: { ...extraInputs, ...inputs },
-        },
-        {
-          onSuccess: (data: RunWorkflowResponseDto) => {
-            notifications.toasts.addSuccess({
-              title: i18n.WORKFLOW_START_SUCCESS_TOAST,
-              ...(rendering && {
-                text: toMountPoint(
-                  <EuiFlexGroup justifyContent={'flexEnd'}>
-                    <EuiButton
-                      size="s"
-                      onClick={() => {
-                        application.navigateToApp(WORKFLOWS_APP_ID, {
-                          openInNewTab: true,
-                          path: `${selectedId}?executionId=${data.workflowExecutionId}`,
-                        });
-                      }}
-                    >
-                      {i18n.WORKFLOW_START_SUCCESS_BUTTON}
-                    </EuiButton>
-                  </EuiFlexGroup>,
-                  rendering
-                ),
-              }),
-            });
-          },
-          onError: (err) => {
-            notifications.toasts.addError(new Error(err.body?.message ?? err.message), {
-              title: i18n.WORKFLOW_START_FAILED_TOAST,
-            });
-          },
-          onSettled: () => {
-            setIsLoading(false);
-            onClose();
-          },
+      const mergedInputs = { ...extraInputs, ...inputs };
+
+      // Reported regardless of mount state, so dismissing the panel mid-run still counts the run.
+      const reportRunExecuted = (succeeded: boolean, workflowExecutionId?: string) => {
+        const event: RunWorkflowExecutedEvent = {
+          origin: telemetry?.origin ?? UNKNOWN_RUN_WORKFLOW_TELEMETRY_VALUE,
+          ...(telemetry?.attachmentType !== undefined && {
+            attachment_type: telemetry.attachmentType,
+          }),
+          succeeded,
+          ...(workflowExecutionId && { workflow_execution_id: workflowExecutionId }),
+          ...(telemetry?.itemCount !== undefined && { item_count: telemetry.itemCount }),
+          owner: telemetry?.owner ?? UNKNOWN_RUN_WORKFLOW_TELEMETRY_VALUE,
+        };
+        try {
+          analytics?.reportEvent(RUN_WORKFLOW_EXECUTED_EVENT_TYPE, event);
+        } catch (e) {
+          // `reportEvent` throws when the event type is unregistered; telemetry must not break the run flow.
         }
-      );
+      };
+
+      const onError = (err: unknown) => {
+        reportRunExecuted(false);
+        notifications.toasts.addError(getWorkflowExecutionError(err), {
+          title: i18n.WORKFLOW_START_FAILED_TOAST,
+        });
+      };
+
+      const onSuccess = (data: RunWorkflowResponseDto) => {
+        reportRunExecuted(true, data.workflowExecutionId);
+        if (!showSuccessToast) return;
+        notifications.toasts.addSuccess({
+          title: i18n.WORKFLOW_START_SUCCESS_TOAST,
+          ...(rendering && {
+            text: toMountPoint(
+              <EuiFlexGroup justifyContent={'flexEnd'}>
+                <EuiButton
+                  size="s"
+                  onClick={() => {
+                    application.navigateToApp(WORKFLOWS_APP_ID, {
+                      openInNewTab: true,
+                      path: `${selectedId}?executionId=${data.workflowExecutionId}`,
+                    });
+                  }}
+                >
+                  {i18n.WORKFLOW_START_SUCCESS_BUTTON}
+                </EuiButton>
+              </EuiFlexGroup>,
+              rendering
+            ),
+          }),
+        });
+      };
+
+      const onSettled = () => {
+        if (!isMounted.current) return;
+        setIsLoading(false);
+        onExecutionSettled?.();
+        onClose();
+      };
+
+      // Chained on the returned promise rather than `mutate` callbacks, which are dropped once the panel unmounts.
+      const run = () =>
+        runWorkflowExecutor
+          ? runWorkflowExecutor({ workflowId: selectedId, inputs: mergedInputs })
+          : runDefaultWorkflow({ id: selectedId, inputs: mergedInputs });
+
+      void Promise.resolve().then(run).then(onSuccess, onError).finally(onSettled);
     },
-    [application, selectedId, runWorkflow, inputs, notifications, rendering, onClose, onExecute]
+    [
+      analytics,
+      application,
+      selectedId,
+      runDefaultWorkflow,
+      runWorkflowExecutor,
+      inputs,
+      notifications,
+      rendering,
+      onClose,
+      onExecute,
+      onExecutionSettled,
+      showSuccessToast,
+      telemetry,
+    ]
   );
 
   const handleExecuteClick = useCallback(() => {

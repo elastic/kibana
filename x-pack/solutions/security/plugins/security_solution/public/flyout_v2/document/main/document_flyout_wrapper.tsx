@@ -6,17 +6,20 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiFlyoutBody } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { useResolvedDocument } from './hooks/use_resolved_document';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
+import {
+  DocumentPaginationHeader,
+  DocumentPaginationLoading,
+} from './components/document_pagination';
 import { DataViewDegradedCallout } from '../../../data_view_manager/components/data_view_degraded_callout';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
@@ -72,7 +75,17 @@ export interface DocumentFlyoutWrapperProps {
  * based on the provided document ID and index name, and manages loading and error states.
  * It is currently used in Analyzer when opening a document from the detail panel.
  */
-export const DocumentFlyoutWrapper = memo(
+export const DocumentFlyoutWrapper = memo((props: DocumentFlyoutWrapperProps) => (
+  // Remounted per document so the document search never serves the previous document's hit.
+  <DocumentFlyoutWrapperContent
+    key={`${props.documentId ?? ''}\0${props.indexName ?? ''}`}
+    {...props}
+  />
+));
+
+DocumentFlyoutWrapper.displayName = 'DocumentFlyoutWrapper';
+
+const DocumentFlyoutWrapperContent = memo(
   ({
     documentId,
     indexName,
@@ -80,32 +93,31 @@ export const DocumentFlyoutWrapper = memo(
     onAlertUpdated,
     dataTestSubj,
   }: DocumentFlyoutWrapperProps) => {
-    const { dataView, status } = useDataView(PageScope.default);
+    const { dataView, status: dataViewStatus } = useDataView(PageScope.default);
 
-    const isDataViewLoading = status === 'loading' || status === 'pristine';
-    const isDataViewInvalid = status === 'error';
-    const isDataViewDegraded = status === 'ready' && !dataView.hasMatchedIndices();
-
+    const isDataViewLoading = dataViewStatus === 'loading' || dataViewStatus === 'pristine';
+    const isDataViewInvalid = dataViewStatus === 'error';
+    const isDataViewDegraded = dataViewStatus === 'ready' && !dataView.hasMatchedIndices();
     const shouldSkipSearch = useMemo(
       () => isDataViewLoading || isDataViewInvalid || !documentId || !indexName || !dataView,
       [dataView, documentId, indexName, isDataViewInvalid, isDataViewLoading]
     );
 
-    const [requestState, hit, refetchDocument] = useEsDocSearch({
-      id: documentId ?? '',
-      index: indexName,
+    const { status, hit, refetch } = useResolvedDocument({
+      documentId,
+      indexName,
       dataView,
       skip: shouldSkipSearch,
     });
 
     const handleAlertUpdated = useCallback(() => {
       onAlertUpdated();
-      refetchDocument();
-    }, [onAlertUpdated, refetchDocument]);
+      refetch();
+    }, [onAlertUpdated, refetch]);
 
     const isAlert = useMemo(
-      () => hit && (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
-      [hit]
+      () => status === 'found' && (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      [hit, status]
     );
 
     const { hasAlertsRead, loading: isAlertsPrivilegesLoading } = useAlertsPrivileges();
@@ -114,9 +126,9 @@ export const DocumentFlyoutWrapper = memo(
     if (
       isDataViewLoading ||
       (isAlert && isAlertsPrivilegesLoading) ||
-      requestState === ElasticRequestState.Loading
+      (!shouldSkipSearch && status === 'loading')
     ) {
-      return <FlyoutLoading data-test-subj="document-overview-wrapper-loading" />;
+      return <DocumentPaginationLoading data-test-subj="document-overview-wrapper-loading" />;
     }
 
     if (missingAlertsPrivilege) {
@@ -125,17 +137,15 @@ export const DocumentFlyoutWrapper = memo(
 
     if (isDataViewInvalid) {
       return (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
-          color="danger"
-          iconType="warning"
           title={DATA_VIEW_ERROR}
           data-test-subj="document-overview-wrapper-data-view-error"
         />
       );
     }
 
-    if (requestState === ElasticRequestState.Found && hit) {
+    if (status === 'found') {
       return (
         <>
           {isDataViewDegraded && (
@@ -160,27 +170,21 @@ export const DocumentFlyoutWrapper = memo(
       );
     }
 
-    if (requestState === ElasticRequestState.NotFound) {
+    if (status === 'notFound' || status === 'error') {
+      const isNotFound = status === 'notFound';
       return (
-        <EuiCallOut
-          announceOnMount
-          color="danger"
-          iconType="warning"
-          title={DOCUMENT_NOT_FOUND}
-          data-test-subj="document-overview-wrapper-not-found"
-        />
-      );
-    }
-
-    if (requestState === ElasticRequestState.Error) {
-      return (
-        <EuiCallOut
-          announceOnMount
-          color="danger"
-          iconType="warning"
-          title={FETCH_ERROR}
-          data-test-subj="document-overview-fetch-error"
-        />
+        <>
+          <DocumentPaginationHeader />
+          <EuiFlyoutBody>
+            <KbnDangerCallout
+              announceOnMount
+              title={isNotFound ? DOCUMENT_NOT_FOUND : FETCH_ERROR}
+              data-test-subj={
+                isNotFound ? 'document-overview-wrapper-not-found' : 'document-overview-fetch-error'
+              }
+            />
+          </EuiFlyoutBody>
+        </>
       );
     }
 
@@ -188,4 +192,4 @@ export const DocumentFlyoutWrapper = memo(
   }
 );
 
-DocumentFlyoutWrapper.displayName = 'DocumentFlyoutWrapper';
+DocumentFlyoutWrapperContent.displayName = 'DocumentFlyoutWrapperContent';

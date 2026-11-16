@@ -31,6 +31,13 @@ const createCore = ({
 });
 
 describe('getWorkflowsNavPanel', () => {
+  it('uses the enabled default for the library setting', () => {
+    const get = jest.fn(<T>(_key: string, defaultValue: T): T => defaultValue);
+    getWorkflowsNavPanel({ settings: { globalClient: { get } } });
+
+    expect(get).toHaveBeenCalledWith(WORKFLOWS_LIBRARY_ENABLED_SETTING_ID, true);
+  });
+
   it('returns a single workflows link when both features are disabled', () => {
     expect(getWorkflowsNavPanel(createCore())).toEqual([{ link: WORKFLOWS_APP_ID }]);
   });

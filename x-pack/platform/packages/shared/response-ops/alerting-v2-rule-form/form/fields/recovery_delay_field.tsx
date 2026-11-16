@@ -87,6 +87,7 @@ export const RecoveryDelayField = () => {
               ...st,
               recoveringCount: null,
               recoveringTimeframe: null,
+              recoveringOperator: null,
             },
             { shouldDirty: true, shouldTouch: true }
           );
@@ -101,6 +102,7 @@ export const RecoveryDelayField = () => {
               ...st,
               recoveringCount: st.recoveringCount || DEFAULT_RECOVERING_COUNT,
               recoveringTimeframe: null,
+              recoveringOperator: null,
             },
             { shouldDirty: true, shouldTouch: true }
           );
@@ -113,6 +115,7 @@ export const RecoveryDelayField = () => {
               ...st,
               recoveringCount: null,
               recoveringTimeframe: st.recoveringTimeframe ?? DEFAULT_RECOVERING_TIMEFRAME,
+              recoveringOperator: null,
             },
             { shouldDirty: true, shouldTouch: true }
           );

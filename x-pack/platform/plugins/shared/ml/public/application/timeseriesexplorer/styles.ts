@@ -9,11 +9,11 @@ import { useMemo } from 'react';
 import { css } from '@emotion/react';
 
 import { useEuiFontSize, useEuiTheme, transparentize } from '@elastic/eui';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import {
-  ML_ANOMALY_THRESHOLD,
   getThemeResolvedSeverityColor,
   getThemeResolvedSeverityStrokeColor,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-anomaly-utils/use_severity_color';
 
 // Annotations constants
 const mlAnnotationBorderWidth = '2px';

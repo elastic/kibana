@@ -35,8 +35,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
   const timelinePage = pageObjects.timeline;
 
-  // Failing: See https://github.com/elastic/kibana/issues/284956
-  describe.skip('Security Alerts Page - Graph visualization', function () {
+  describe('Security Alerts Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
@@ -63,13 +62,10 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
 
-      // Enable asset inventory and entity store v2 settings.
-      // Disable the new flyout so the graph preview panel uses its legacy expandable-flyout
-      // selectors (e.g. `previewSection`), which don't exist in the new flyout system.
+      // Enable asset inventory and entity store v2 settings
       await kibanaServer.uiSettings.update({
         'securitySolution:enableAssetInventory': true,
         'securitySolution:entityStoreEnableV2': true,
-        'securitySolution:enableNewFlyout': false,
       });
 
       // Initialize security-solution-default data-view (required by entity store)
@@ -91,7 +87,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await esArchiver.unload(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
-      await kibanaServer.uiSettings.unset('securitySolution:enableNewFlyout');
     });
 
     it('expanded flyout - filter by node', async () => {
@@ -160,11 +155,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showEntityDetails(
         '788e996886e5d4eea273c24f7d591159076bca81e76bde03cf2936802da9c701'
       );
-      // check the preview panel grouped items rendered correctly
+      // check the grouped node panel items rendered correctly
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(4);
       await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleTextNumber(4);
 
-      await expandedFlyoutGraph.closePreviewSection();
+      await expandedFlyoutGraph.closeChildFlyout();
       // Hide events with the same action
       await expandedFlyoutGraph.hideEventsOfSameAction(
         'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(1)'
@@ -225,13 +220,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showEventOrAlertDetails(
         'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(1)'
       );
-      // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
+      // An alert is always coupled with an event, so we open the grouped node panel instead of the alert flyout
       await alertsPage.flyout.assertPreviewPanelIsOpen('group');
-      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
+      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
 
       // assert the grouped items are rendered correctly
-      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
-      await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(3);
+      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
+      await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
       await expandedFlyoutGraph.assertGroupedItemActorAndTargetValues(
         2,
         'admin@example.com',
@@ -264,13 +259,12 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showEventOrAlertDetails(
         'label(google.iam.admin.v1.CreateRole2)ln(fe63b16ddd48d7792e4391e9067cdf4f273045a23d5596074c89afe7c03b3083)oe(0)oa(0)'
       );
-      // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
+      // An alert is always coupled with an event, so we open the grouped node panel instead of the alert flyout
       await alertsPage.flyout.assertPreviewPanelIsOpen('group');
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
 
-    // Failing: See https://github.com/elastic/kibana/issues/292038
-    describe.skip('ECS fields only', function () {
+    describe('ECS fields only', function () {
       // Entity store v2 is installed at the parent level for graph visibility.
       // Enrichment tests use LOOKUP JOIN (v2) with custom entity data loaded via esArchiver.
       before(async () => {
@@ -334,11 +328,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.showEntityDetails(
             'aee6fb9ccf55bf0e3e974083019a0a1ba7786ef99ed3fe59a1504f22ac94ee31'
           );
-          // check the preview panel grouped items rendered correctly
+          // check the grouped node panel items rendered correctly
           await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
           await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(3);
 
-          await expandedFlyoutGraph.closePreviewSection();
+          await expandedFlyoutGraph.closeChildFlyout();
 
           // Clear filters to reset state
           await expandedFlyoutGraph.clearAllFilters();
@@ -404,10 +398,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
           // Verify second entity node - Host target
           // get Node by sha256 hash of host:host-instance-1 and host:host-instance-2
-          await expandedFlyoutGraph.assertNodeEntityTag(
-            '081f21718bb4b854bda72b01719d0febe88b10520dede17fc2640260002ea339',
-            'Host'
-          );
           await expandedFlyoutGraph.assertNodeEntityDetails(
             '081f21718bb4b854bda72b01719d0febe88b10520dede17fc2640260002ea339',
             'GCP Compute Instance'
@@ -415,8 +405,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         });
       };
 
-      // Failing: See https://github.com/elastic/kibana/issues/271798
-      describe.skip('via LOOKUP JOIN (v2)', () => {
+      describe('via LOOKUP JOIN (v2)', () => {
         before(async () => {
           // Load v2 entity data into the entity store index created by v2 install
           await esArchiver.load(

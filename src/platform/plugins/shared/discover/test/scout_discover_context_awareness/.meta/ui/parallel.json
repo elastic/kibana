@@ -1,5 +1,5 @@
 {
-  "sha1": "62e92ef127a35cfaf7aa735b0ca71f1d915ccf7f",
+  "sha1": "d05169485a9dae636fcddb56048ffcb12ffb3046",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -401,8 +401,8 @@
       }
     },
     {
-      "id": "f72fc4a4029e58b-ee108870e3a1986",
-      "title": "Discover context awareness - extension getDefaultAdHocDataViews forks the profile data view into an unmanaged copy when saving the session",
+      "id": "f72fc4a4029e58b-b1e724df26be67a",
+      "title": "Discover context awareness - extension getDefaultAdHocDataViews saves and reloads an unmanaged copy of the profile data view without unsaved changes",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

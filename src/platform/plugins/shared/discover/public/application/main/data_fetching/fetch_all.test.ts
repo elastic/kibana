@@ -8,11 +8,13 @@
  */
 
 import { FetchStatus } from '../../types';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import type { Subject } from 'rxjs';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { reduce } from 'rxjs';
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import type {
@@ -96,6 +98,12 @@ describe('test fetchAll', () => {
     mockfetchEsql.mockReset().mockResolvedValue({ records: [] });
   });
 
+  const setEsqlQuery = (query: { esql: string }) => {
+    deps.internalState.dispatch(
+      internalStateActions.updateAppState({ tabId: deps.getCurrentTab().id, appState: { query } })
+    );
+  };
+
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async () => {
     const stateArr: FetchStatus[] = [];
 
@@ -126,11 +134,13 @@ describe('test fetchAll', () => {
       {
         fetchStatus: FetchStatus.LOADING,
         query: { query: '', language: 'kuery' },
+        dataSource: expect.any(Object),
       },
       {
         fetchStatus: FetchStatus.COMPLETE,
         interceptedWarnings: [],
         result: documents,
+        dataSource: expect.any(Object),
         query: { query: '', language: 'kuery' },
       },
     ]);
@@ -252,31 +262,70 @@ describe('test fetchAll', () => {
       { _id: '2', _index: 'logs' },
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockfetchEsql.mockResolvedValue({
-      records: documents,
-      esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
-    });
     const query = { esql: 'from foo' };
-    deps.internalState.dispatch(
-      internalStateActions.updateAppState({
-        tabId: deps.getCurrentTab().id,
-        appState: { query },
-      })
-    );
-    fetchAll(deps);
+    setEsqlQuery(query);
+    const mockEsqlSource = createMockEsqlSource([], [], '@timestamp');
+    mockfetchEsql.mockResolvedValue({ records: documents, dataSource: mockEsqlSource });
+    fetchAll({
+      ...deps,
+      esqlSource: mockEsqlSource,
+    });
     await waitForNextTick();
 
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, query },
+      {
+        fetchStatus: FetchStatus.LOADING,
+        query,
+        dataSource: expect.objectContaining({ id: 'mock-esql-source' }),
+      },
       {
         fetchStatus: FetchStatus.PARTIAL,
         interceptedWarnings: [],
         result: documents,
-        esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
+        dataSource: expect.objectContaining({ id: 'mock-esql-source' }),
         query,
       },
     ]);
+  });
+
+  test('finishes loading when ES|QL is canceled before returning results', async () => {
+    const query = { esql: 'from foo' };
+    setEsqlQuery(query);
+    mockfetchEsql.mockRejectedValue(new Error('The query was canceled'));
+    const onFetchRecordsComplete = jest.fn();
+
+    const fetching = fetchAll({ ...deps, onFetchRecordsComplete });
+    deps.abortController.abort(AbortReason.CANCELED);
+    await fetching;
+
+    expect(subjects.documents$.getValue()).toEqual({
+      fetchStatus: FetchStatus.COMPLETE,
+      query,
+    });
+    expect(subjects.totalHits$.getValue()).toEqual({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: undefined,
+    });
+    expect(subjects.main$.getValue().fetchStatus).toBe(FetchStatus.COMPLETE);
+    expect(onFetchRecordsComplete).not.toHaveBeenCalled();
+  });
+
+  test('does not finish loading when the ES|QL search is replaced', async () => {
+    const query = { esql: 'from foo' };
+    setEsqlQuery(query);
+    mockfetchEsql.mockRejectedValue(new Error('The query was replaced'));
+
+    fetchAll(deps);
+    deps.abortController.abort(AbortReason.REPLACED);
+    await waitForNextTick();
+
+    expect(subjects.documents$.getValue()).toEqual({
+      fetchStatus: FetchStatus.LOADING,
+      query,
+    });
+    expect(subjects.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+    expect(subjects.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
   });
 
   describe('fetchMoreDocuments', () => {
@@ -286,9 +335,19 @@ describe('test fetchAll', () => {
 
     const interceptedWarnings = [searchResponseIncompleteWarningLocalCluster];
 
-    test('should add more records', async () => {
+    test('should add more records using the original absolute time range', async () => {
       const collectDocuments = subjectCollector(subjects.documents$);
       const collectMain = subjectCollector(subjects.main$);
+      const timeRangeAbsolute = {
+        from: '2026-01-01T12:00:00.000Z',
+        to: '2026-01-01T13:00:00.000Z',
+      };
+      deps.internalState.dispatch(
+        internalStateActions.setDataRequestParams({
+          tabId: deps.getCurrentTab().id,
+          dataRequestParams: { ...deps.getCurrentTab().dataRequestParams, timeRangeAbsolute },
+        })
+      );
       mockFetchDocuments.mockResolvedValue({ records: moreRecords, interceptedWarnings });
       subjects.documents$.next({
         fetchStatus: FetchStatus.COMPLETE,
@@ -297,6 +356,10 @@ describe('test fetchAll', () => {
       fetchMoreDocuments(deps);
       await waitForNextTick();
 
+      expect(deps.services.data.query.timefilter.timefilter.createFilter).toHaveBeenLastCalledWith(
+        searchSource.getField('index'),
+        timeRangeAbsolute
+      );
       expect(await collectDocuments()).toEqual([
         { fetchStatus: FetchStatus.UNINITIALIZED },
         {
@@ -362,13 +425,7 @@ describe('test fetchAll', () => {
     test('should swallow abort errors', async () => {
       const collect = subjectCollector(subjects.documents$);
       mockfetchEsql.mockRejectedValue({ msg: 'The query was aborted' });
-      const query = { esql: 'from foo' };
-      deps.internalState.dispatch(
-        internalStateActions.updateAppState({
-          tabId: deps.getCurrentTab().id,
-          appState: { query },
-        })
-      );
+      setEsqlQuery({ esql: 'from foo' });
       fetchAll(deps);
       deps.abortController.abort();
       await waitForNextTick();

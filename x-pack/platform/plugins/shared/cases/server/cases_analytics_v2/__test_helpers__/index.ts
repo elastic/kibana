@@ -103,6 +103,7 @@ export const makeUserAction = (
     namespaces?: string[];
     references?: SavedObjectReference[];
     createdBy?: UserActionPersistedAttributes['created_by'] | null;
+    source?: UserActionPersistedAttributes['source'];
   } = {}
 ): SavedObject<UserActionPersistedAttributes> =>
   ({
@@ -122,6 +123,7 @@ export const makeUserAction = (
         opts.createdBy === undefined
           ? { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' }
           : opts.createdBy,
+      ...(opts.source !== undefined ? { source: opts.source } : {}),
     } as UserActionPersistedAttributes,
   } as SavedObject<UserActionPersistedAttributes>);
 

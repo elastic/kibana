@@ -26,7 +26,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./test_suites/hardening'),
       require.resolve('./test_suites/core_plugins'),
       require.resolve('./test_suites/application_links'),
-      require.resolve('./test_suites/data_plugin'),
       require.resolve('./test_suites/saved_objects_management'),
       require.resolve('./test_suites/saved_objects_hidden_type'),
     ],
@@ -65,6 +64,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.cloud_integrations.full_story.enabled=true',
         '--xpack.cloud_integrations.full_story.org_id=a_string',
         ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
+        ...findTestPluginPaths(path.resolve(__dirname, '../../test_plugins/plugin_functional')),
+        `--plugin-path=${path.resolve(__dirname, '../../test_plugins/data_search')}`,
+        `--plugin-path=${path.resolve(
+          __dirname,
+          '../../test_plugins/kbn_tp_custom_visualizations'
+        )}`,
+        ...findTestPluginPaths(
+          path.resolve(__dirname, '../../test_plugins/plugin_functional/plugins')
+        ),
       ],
     },
   };

@@ -88,6 +88,20 @@ describe('queryAiIndices', () => {
     expect(lastRequest().query).toBe(`FROM ai-index-idx-a | LIMIT ${MAX_AI_INDEX_QUERY_LIMIT}`);
   });
 
+  it('applies the lifecycle pipeline before the limit', async () => {
+    await queryAiIndices({
+      esClient,
+      spaceId: 'default',
+      query: 'FROM ai-index-idx-a | KEEP title',
+      limit: 5,
+      aiIndexDests: [{ type: 'index', value: 'ai-index-idx-a' }],
+    });
+
+    expect(lastRequest().query.replace(/\s+/g, ' ')).toBe(
+      'FROM ai-index-idx-a | WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active" | WHERE expires_at IS NULL OR expires_at > NOW() | DROP governance.* | KEEP title | LIMIT 5'
+    );
+  });
+
   it('still caps a query the parser rejects', async () => {
     await queryAiIndices({
       esClient,

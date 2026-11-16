@@ -21,8 +21,10 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { DEFAULT_SIGNALS_PAGE_SIZE, MAX_SIGNALS_PAGE_SIZE } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { SignalGroup } from '../../../../common/http_api/signals';
@@ -97,6 +99,11 @@ export const SignalGroupFlyout = ({ group, aiIndex, onClose }: SignalGroupFlyout
                   }
                   isDisabled={aiIndex === undefined}
                   data-test-subj="contextSignalGroupAnalyzeButton"
+                  {...getEbtProps({
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailFlyoutSignalGroup,
+                    action: CONTEXT_ENGINE_UI_EBT.action.signals.GROUP_ANALYZE,
+                    detail: group.tag,
+                  })}
                 >
                   {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.analyzeButton', {
                     defaultMessage: 'Analyze & improve',
@@ -170,6 +177,11 @@ export const SignalGroupFlyout = ({ group, aiIndex, onClose }: SignalGroupFlyout
                           isLoading={isLoading}
                           onClick={loadMore}
                           data-test-subj="contextSignalsGroupLoadMore"
+                          {...getEbtProps({
+                            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailFlyoutSignalGroup,
+                            action: CONTEXT_ENGINE_UI_EBT.action.signals.LOAD_MORE,
+                            detail: group.tag,
+                          })}
                         >
                           {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.loadMore', {
                             defaultMessage: 'Load more',

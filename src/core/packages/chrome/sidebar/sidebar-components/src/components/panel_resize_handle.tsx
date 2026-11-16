@@ -9,14 +9,22 @@
 
 import type { FC, MouseEvent, TouchEvent, KeyboardEvent } from 'react';
 import React, { useCallback, useRef } from 'react';
-import { EuiResizableButton } from '@elastic/eui';
+import { EuiResizableButton, type UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { layoutVar } from '@kbn/ui-chrome-layout';
 import { css } from '@emotion/react';
 import { useSidebarWidth, useSidebar } from '../hooks';
 
-const resizeButtonStyles = css`
-  flex-shrink: 0;
-`;
+const resizeButtonStyles = {
+  button: ({ euiTheme }: UseEuiTheme) => css`
+    position: relative;
+    inset-inline-start: -${euiTheme.border.width.thin};
+    block-size: calc(100% - ${layoutVar('sidebar.borderRadius', '0px')} * 2);
+    flex-shrink: 0;
+    align-self: center;
+  `,
+};
 
 const KEYBOARD_RESIZE_STEP = 10;
 
@@ -33,6 +41,8 @@ export const PanelResizeHandle: FC<{}> = () => {
 
   const startXRef = useRef<number>(0);
   const startWidthRef = useRef<number>(0);
+
+  const styles = useMemoCss(resizeButtonStyles);
 
   const handleMouseDown = useCallback(
     (e: MouseEvent) => {
@@ -100,7 +110,7 @@ export const PanelResizeHandle: FC<{}> = () => {
 
   return (
     <EuiResizableButton
-      css={resizeButtonStyles}
+      css={styles.button}
       indicator="border"
       isHorizontal
       onMouseDown={handleMouseDown}

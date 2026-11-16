@@ -1,0 +1,4057 @@
+{
+  "id": "vendor_n_firewall",
+  "title": "Vendor N firewall",
+  "description": "Firewall logs",
+  "cohort": "control",
+  "format": "text",
+  "samples": [
+    {
+      "line": "device=\"SFW\" date=2017-01-31 time=18:28:25 timezone=\"IST\" device_name=\"CR750iNG-XP\" device_id=C44313350024-P29PUA log_id=041107413001 log_type=\"Anti-Spam\" log_component=\"SMTP\" log_subtype=\"Spam\" status=\"\" priority=Warning fw_rule_id=0 user_name=\"gaurav\" av_policy_name=\"Gaurav235\" from_email_address=\"gaurav1@iview.com\" to_email_address=\"gaurav2@iview.com\" email_subject=\"RPD Spam Test: Spam\" mailid=\"c000000b-1485867502\" mailsize=400 spamaction=\"DROP\" reason=\"\" src_domainname=\"iview.com\" dst_domainname=\"\" src_ip=10.198.47.71 src_country_code=R1 dst_ip=10.198.233.61 dst_country_code=R1 protocol=\"TCP\" src_port=22258 dst_port=25 sent_bytes=0 recv_bytes=0 quarantine_reason=\"Spam\"",
+      "expected": {
+        "@timestamp": "2017-01-31T18:28:25.000+05:30",
+        "destination": {
+          "bytes": 0,
+          "ip": "10.198.233.61",
+          "port": 25,
+          "user": {
+            "email": "gaurav2@iview.com"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "gaurav1@iview.com"
+            ]
+          },
+          "subject": "RPD Spam Test: Spam",
+          "to": {
+            "address": [
+              "gaurav2@iview.com"
+            ]
+          }
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "warning"
+        },
+        "network": {
+          "bytes": 0,
+          "community_id": "1:58l6YYAlS4MiONjMobtnTJYmpWQ=",
+          "protocol": "smtp",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C44313350024-P29PUA",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "iview.com"
+          ],
+          "ip": [
+            "10.198.47.71",
+            "10.198.233.61"
+          ],
+          "user": [
+            "gaurav1",
+            "gaurav1@iview.com"
+          ]
+        },
+        "source": {
+          "bytes": 0,
+          "domain": "iview.com",
+          "ip": "10.198.47.71",
+          "port": 22258,
+          "user": {
+            "domain": "iview.com",
+            "email": "gaurav1@iview.com",
+            "name": "gaurav1"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Spam",
+          "category": [
+            "malware",
+            "network"
+          ],
+          "code": "13001",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 4,
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "info",
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-06-06 time=10:41:29 timezone=\"IST\" device_name=\"SG430\" device_id=S4000806149EE49 log_id=041108413002 log_type=\"Anti-Spam\" log_component=\"SMTP\" log_subtype=\"Probable Spam\" status=\"\" priority=Warning fw_rule_id=0 user_name=\"\" av_policy_name=\"postman\" from_email_address=\"pankhil@postman.local\" to_email_address=\"pankhil@postman.local\" email_subject=\"[SPAM] RPD Spam test: Bulk\" mailid=\"c0000006-1528261885\" mailsize=438 spamaction=\"WARN\" reason=\"Mail detected as PROBABLE SPAM.\" src_domainname=\"postman.local\" dst_domainname=\"\" src_ip=10.198.16.121 src_country_code=R1 dst_ip=10.198.16.204 dst_country_code=R1 protocol=\"TCP\" src_port=56341 dst_port=25 sent_bytes=0 recv_bytes=0 quarantine_reason=\"Spam\"",
+      "expected": {
+        "@timestamp": "2018-06-06T10:41:29.000+05:30",
+        "destination": {
+          "bytes": 0,
+          "ip": "10.198.16.204",
+          "port": 25,
+          "user": {
+            "email": "pankhil@postman.local"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "pankhil@postman.local"
+            ]
+          },
+          "subject": "[SPAM] RPD Spam test: Bulk",
+          "to": {
+            "address": [
+              "pankhil@postman.local"
+            ]
+          }
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "warning"
+        },
+        "network": {
+          "bytes": 0,
+          "community_id": "1:abMOcgeJH+xBFHn6l4jTehUSlBI=",
+          "protocol": "smtp",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "S4000806149EE49",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "postman.local"
+          ],
+          "ip": [
+            "10.198.16.121",
+            "10.198.16.204"
+          ],
+          "user": [
+            "pankhil",
+            "pankhil@postman.local"
+          ]
+        },
+        "source": {
+          "bytes": 0,
+          "domain": "postman.local",
+          "ip": "10.198.16.121",
+          "port": 56341,
+          "user": {
+            "domain": "postman.local",
+            "email": "pankhil@postman.local",
+            "name": "pankhil"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Probable Spam",
+          "category": [
+            "malware",
+            "network"
+          ],
+          "code": "13002",
+          "kind": "alert",
+          "outcome": "success",
+          "reason": "Mail detected as PROBABLE SPAM.",
+          "severity": 4,
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "info",
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2017-01-31 time=18:36:22 timezone=\"IST\" device_name=\"CR750iNG-XP\" device_id=C44313350024-P29PUA log_id=041105613003 log_type=\"Anti-Spam\" log_component=\"SMTP\" log_subtype=\"Clean\" status=\"\" priority=Information fw_rule_id=0 user_name=\"gaurav\" av_policy_name=\"None\" from_email_address=\"gaurav2@iview.com\" to_email_address=\"gaurav1@iview.com\" email_subject=\"EMAIL\" mailid=\"<5ab27db7-7bac-82e2-ba40-83ce90577c7f@iview.com>\" mailsize=398 spamaction=\"Accept\" reason=\"\" src_domainname=\"iview.com\" dst_domainname=\"\" src_ip=10.198.47.71 src_country_code=R1 dst_ip=10.198.233.61 dst_country_code=R1 protocol=\"TCP\" src_port=22477 dst_port=25 sent_bytes=0 recv_bytes=0 quarantine_reason=\"Other\"",
+      "expected": {
+        "@timestamp": "2017-01-31T18:36:22.000+05:30",
+        "destination": {
+          "bytes": 0,
+          "ip": "10.198.233.61",
+          "port": 25,
+          "user": {
+            "email": "gaurav1@iview.com"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "gaurav2@iview.com"
+            ]
+          },
+          "subject": "EMAIL",
+          "to": {
+            "address": [
+              "gaurav1@iview.com"
+            ]
+          }
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "bytes": 0,
+          "community_id": "1:TxMs7HDGo6klbRU54soSJPEvELk=",
+          "protocol": "smtp",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C44313350024-P29PUA",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "iview.com"
+          ],
+          "ip": [
+            "10.198.47.71",
+            "10.198.233.61"
+          ],
+          "user": [
+            "gaurav2",
+            "gaurav2@iview.com"
+          ]
+        },
+        "source": {
+          "bytes": 0,
+          "domain": "iview.com",
+          "ip": "10.198.47.71",
+          "port": 22477,
+          "user": {
+            "domain": "iview.com",
+            "email": "gaurav2@iview.com",
+            "name": "gaurav2"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Clean",
+          "category": [
+            "network"
+          ],
+          "code": "13003",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-06-06 time=11:08:08 timezone=\"IST\" device_name=\"SG430\" device_id=S4000806149EE49 log_id=041108413004 log_type=\"Anti-Spam\" log_component=\"SMTP\" log_subtype=\"Probable Spam\" status=\"\" priority=Warning fw_rule_id=0 user_name=\"\" av_policy_name=\"postman\" from_email_address=\"pankhil@postman.local\" to_email_address=\"pankhil@postman.local\" email_subject=\"Test RBL email\" mailid=\"c0000008-1528263488\" mailsize=433 spamaction=\"DROP\" reason=\"Sender IP address is blacklisted.\" src_domainname=\"postman.local\" dst_domainname=\"\" src_ip=10.198.16.121 src_country_code=R1 dst_ip=10.198.17.121 dst_country_code=R1 protocol=\"TCP\" src_port=57854 dst_port=25 sent_bytes=0 recv_bytes=0 quarantine_reason=\"RBL\"",
+      "expected": {
+        "@timestamp": "2018-06-06T11:08:08.000+05:30",
+        "destination": {
+          "bytes": 0,
+          "ip": "10.198.17.121",
+          "port": 25,
+          "user": {
+            "email": "pankhil@postman.local"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "pankhil@postman.local"
+            ]
+          },
+          "subject": "Test RBL email",
+          "to": {
+            "address": [
+              "pankhil@postman.local"
+            ]
+          }
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "warning"
+        },
+        "network": {
+          "bytes": 0,
+          "community_id": "1:NvdaEFP3A+xwUrbF32GvYv4ezIE=",
+          "protocol": "smtp",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "S4000806149EE49",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "postman.local"
+          ],
+          "ip": [
+            "10.198.16.121",
+            "10.198.17.121"
+          ],
+          "user": [
+            "pankhil",
+            "pankhil@postman.local"
+          ]
+        },
+        "source": {
+          "bytes": 0,
+          "domain": "postman.local",
+          "ip": "10.198.16.121",
+          "port": 57854,
+          "user": {
+            "domain": "postman.local",
+            "email": "pankhil@postman.local",
+            "name": "pankhil"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Probable Spam",
+          "category": [
+            "malware",
+            "network"
+          ],
+          "code": "13004",
+          "kind": "alert",
+          "outcome": "success",
+          "reason": "Sender IP address is blacklisted.",
+          "severity": 4,
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "info",
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-06-21 time=19:50:23 timezone=\"CEST\" device_name=\"SF01V\" device_id=SFDemo-2df0960 log_id=031006209001 log_type=\"Anti-Virus\" log_component=\"FTP\" log_subtype=\"Virus\" priority=Critical fw_rule_id=0 user_name=\"\" virus=\"EICAR-AV-Test\" FTP_url=\"/var/www//home/ftp-user/ta_test_file_1ta-cl1-46\" FTP_direction=\"Upload\" filename=\"/home/ftp-user/ta_test_file_1ta-cl1-46\" file_size=0 file_path=\"/var/www//home/ftp-user/ta_test_file_1ta-cl1-46\" ftpcommand=\"STOR\" src_ip=10.146.13.49 src_country_code=R1 dst_ip=10.8.142.181 dst_country_code=R1 protocol=\"TCP\" src_port=39910 dst_port=21 dstdomain=\"\" sent_bytes=0 recv_bytes=0",
+      "expected": {
+        "@timestamp": "2018-06-21T19:50:23.000+02:00",
+        "destination": {
+          "bytes": 0,
+          "ip": "10.8.142.181",
+          "port": 21
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "file": {
+          "directory": "/var/www//home/ftp-user/ta_test_file_1ta-cl1-46",
+          "name": "/home/ftp-user/ta_test_file_1ta-cl1-46",
+          "size": 0
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "critical"
+        },
+        "network": {
+          "bytes": 0,
+          "community_id": "1:pEAtCi2v+cfDLsHaWvO82/Ahn0k=",
+          "protocol": "ftp",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "SFDemo-2df0960",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "10.146.13.49",
+            "10.8.142.181"
+          ]
+        },
+        "rule": {
+          "id": "0"
+        },
+        "source": {
+          "bytes": 0,
+          "ip": "10.146.13.49",
+          "port": 39910
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Virus",
+          "category": [
+            "malware",
+            "network"
+          ],
+          "code": "09001",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 2,
+          "timezone": "Etc/GMT-2",
+          "type": [
+            "info",
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-06-21 time=19:50:48 timezone=\"CEST\" device_name=\"SF01V\" device_id=SFDemo-2df0960 log_id=031001609002 log_type=\"Anti-Virus\" log_component=\"FTP\" log_subtype=\"Allowed\" priority=Information fw_rule_id=0 user_name=\"\" virus=\"\" FTP_url=\"/var/www//home/ftp-user/ta_test_file_1ta-cl1-46\" FTP_direction=\"Download\" filename=\"/home/ftp-user/ta_test_file_1ta-cl1-46\" file_size=19926248 file_path=\"/var/www//home/ftp-user/ta_test_file_1ta-cl1-46\" ftpcommand=\"RETR\" src_ip=10.146.13.49 src_country_code= dst_ip=10.8.142.181 dst_country_code= protocol=\"TCP\" src_port=39936 dst_port=21 dstdomain=\"example.com\" sent_bytes=0 recv_bytes=19926248",
+      "expected": {
+        "@timestamp": "2018-06-21T19:50:48.000+02:00",
+        "destination": {
+          "bytes": 19926248,
+          "domain": "example.com",
+          "ip": "10.8.142.181",
+          "port": 21
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "file": {
+          "directory": "/var/www//home/ftp-user/ta_test_file_1ta-cl1-46",
+          "name": "/home/ftp-user/ta_test_file_1ta-cl1-46",
+          "size": 19926248
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "bytes": 19926248,
+          "community_id": "1:hUeUw/6dIhcWCOgAeWChZiMq1qA=",
+          "protocol": "ftp",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "SFDemo-2df0960",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "example.com"
+          ],
+          "ip": [
+            "10.146.13.49",
+            "10.8.142.181"
+          ]
+        },
+        "rule": {
+          "id": "0"
+        },
+        "source": {
+          "bytes": 0,
+          "ip": "10.146.13.49",
+          "port": 39936
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Allowed",
+          "category": [
+            "network"
+          ],
+          "code": "09002",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "timezone": "Etc/GMT-2",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-06-06 time=10:44:40 timezone=\"IST\" device_name=\"SG430\" device_id=S4000806149EE49 log_id=031106210001 log_type=\"Anti-Virus\" log_component=\"SMTP\" log_subtype=\"Virus\" status=\"\" priority=Critical fw_rule_id=0 user_name=\"\" av_policy_name=\"postman\" from_email_address=\"pankhil@postman.local\" to_email_address=\"pankhil@postman.local\" subject=\"virus infected message\" mailid=\"c0000007-1528262079\" mailsize=2064 virus=\"EICAR-AV-Test\" filename=\"\" quarantine=\"\" src_domainname=\"postman.local\" dst_domainname=\"\" src_ip=10.198.16.121 src_country_code=R1 dst_ip=10.198.17.121 dst_country_code=R1 protocol=\"TCP\" src_port=56428 dst_port=25 sent_bytes=0 recv_bytes=0 quarantine_reason=\" Infected\"",
+      "expected": {
+        "@timestamp": "2018-06-06T10:44:40.000+05:30",
+        "destination": {
+          "bytes": 0,
+          "ip": "10.198.17.121",
+          "port": 25,
+          "user": {
+            "email": "pankhil@postman.local"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "pankhil@postman.local"
+            ]
+          },
+          "subject": "virus infected message",
+          "to": {
+            "address": [
+              "pankhil@postman.local"
+            ]
+          }
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "critical"
+        },
+        "network": {
+          "bytes": 0,
+          "community_id": "1:/s4RRYmRyH8lqMULh9n00Z6AVA8=",
+          "protocol": "smtp",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "S4000806149EE49",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "postman.local"
+          ],
+          "ip": [
+            "10.198.16.121",
+            "10.198.17.121"
+          ],
+          "user": [
+            "pankhil",
+            "pankhil@postman.local"
+          ]
+        },
+        "rule": {
+          "id": "0"
+        },
+        "source": {
+          "bytes": 0,
+          "domain": "postman.local",
+          "ip": "10.198.16.121",
+          "port": 56428,
+          "user": {
+            "domain": "postman.local",
+            "email": "pankhil@postman.local",
+            "name": "pankhil"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Virus",
+          "category": [
+            "malware",
+            "network"
+          ],
+          "code": "10001",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 2,
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "info",
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-06-06 time=10:51:29 timezone=\"IST\" device_name=\"SG430\" device_id=S4000806149EE49 log_id=036106211001 log_type=\"Anti-Virus\" log_component=\"POPS\" log_subtype=\"Virus\" status=\"\" priority=Critical fw_rule_id=0 user_name=\"\" av_policy_name=\"None\" from_email_address=\"pankhil@postman.local\" to_email_address=\"pankhil@postman.local\" subject=\"EICAR\" mailid=\"<a5c35e4b-1198-d0eb-0763-c0d5af3c817e@postman.local>\" mailsize=0 virus=\"EICAR-AV-Test\" filename=\"\" quarantine=\"\" src_domainname=\"postman.local\" dst_domainname=\"\" src_ip=10.198.16.121 src_country_code=R1 dst_ip=10.198.234.240 dst_country_code=R1 protocol=\"TCP\" src_port=56653 dst_port=995 sent_bytes=0 recv_bytes=0 quarantine_reason=\"Other\"",
+      "expected": {
+        "@timestamp": "2018-06-06T10:51:29.000+05:30",
+        "destination": {
+          "bytes": 0,
+          "ip": "10.198.234.240",
+          "port": 995,
+          "user": {
+            "email": "pankhil@postman.local"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "pankhil@postman.local"
+            ]
+          },
+          "subject": "EICAR",
+          "to": {
+            "address": [
+              "pankhil@postman.local"
+            ]
+          }
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "critical"
+        },
+        "network": {
+          "bytes": 0,
+          "community_id": "1:miDZMZyHzg1ArtBIc4N8695JaWk=",
+          "protocol": "pop3s",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "S4000806149EE49",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "postman.local"
+          ],
+          "ip": [
+            "10.198.16.121",
+            "10.198.234.240"
+          ],
+          "user": [
+            "pankhil",
+            "pankhil@postman.local"
+          ]
+        },
+        "rule": {
+          "id": "0"
+        },
+        "source": {
+          "bytes": 0,
+          "domain": "postman.local",
+          "ip": "10.198.16.121",
+          "port": 56653,
+          "user": {
+            "domain": "postman.local",
+            "email": "pankhil@postman.local",
+            "name": "pankhil"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Virus",
+          "category": [
+            "malware",
+            "network"
+          ],
+          "code": "11001",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 2,
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "info",
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-06-06 time=10:58:29 timezone=\"IST\" device_name=\"SG430\" device_id=S4000806149EE49 log_id=036206212001 log_type=\"Anti-Virus\" log_component=\"IMAPS\" log_subtype=\"Virus\" status=\"\" priority=Critical fw_rule_id=0 user_name=\"\" av_policy_name=\"None\" from_email_address=\"pankhil@postman.local\" to_email_address=\"ganga@postman.local\" subject=\"EICAR test email\" mailid=\"<2ca37b7c-e93a-743a-99c4-a0796f0bbb79@postman.local>\" mailsize=0 virus=\"EICAR-AV- Test\" filename=\"\" quarantine=\"\" src_domainname=\"postman.local\" dst_domainname=\"\" src_ip=10.198.16.121 src_country_code=R1 dst_ip=10.198.234.240 dst_country_code=R1 protocol=\"TCP\" src_port=56632 dst_port=993 sent_bytes=0 recv_bytes=0 quarantine_reason=\"Other\"",
+      "expected": {
+        "@timestamp": "2018-06-06T10:58:29.000+05:30",
+        "destination": {
+          "bytes": 0,
+          "ip": "10.198.234.240",
+          "port": 993,
+          "user": {
+            "email": "ganga@postman.local"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "pankhil@postman.local"
+            ]
+          },
+          "subject": "EICAR test email",
+          "to": {
+            "address": [
+              "ganga@postman.local"
+            ]
+          }
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "critical"
+        },
+        "network": {
+          "bytes": 0,
+          "community_id": "1:brG0+fyFYq1h9huQh5nQ8cHjL5E=",
+          "protocol": "imaps",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "S4000806149EE49",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "postman.local"
+          ],
+          "ip": [
+            "10.198.16.121",
+            "10.198.234.240"
+          ],
+          "user": [
+            "pankhil",
+            "pankhil@postman.local"
+          ]
+        },
+        "rule": {
+          "id": "0"
+        },
+        "source": {
+          "bytes": 0,
+          "domain": "postman.local",
+          "ip": "10.198.16.121",
+          "port": 56632,
+          "user": {
+            "domain": "postman.local",
+            "email": "pankhil@postman.local",
+            "name": "pankhil"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Virus",
+          "category": [
+            "malware",
+            "network"
+          ],
+          "code": "12001",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 2,
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "info",
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2016-12-02 time=18:48:18 timezone=\"GMT\" device_name=\"SFVUNL\" device_id=C01001K234RXPA1 log_id=034806208001 log_type=\"Anti-Virus\" log_component=\"HTTPS\" log_subtype=\"Virus\" priority=Critical fw_rule_id=2 user_name=\"rich\" iap=13 virus=\"EICAR-AV-Test\" url=\"https://secure.eicar.org/eicar.com\" domainname=\"secure.eicar.org\" src_ip=192.168.73.220 src_country_code=R1 dst_ip=216.160.83.61 dst_country_code=DEU protocol=\"TCP\" src_port=51499 dst_port=443 sent_bytes=0 recv_bytes=353",
+      "expected": {
+        "@timestamp": "2016-12-02T18:48:18.000Z",
+        "destination": {
+          "as": {
+            "number": 209
+          },
+          "bytes": 353,
+          "geo": {
+            "city_name": "Milton",
+            "continent_name": "North America",
+            "country_iso_code": "US",
+            "country_name": "United States",
+            "region_iso_code": "US-WA",
+            "region_name": "Washington"
+          },
+          "ip": "216.160.83.61",
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "critical"
+        },
+        "network": {
+          "bytes": 353,
+          "community_id": "1:pXQp5es2PyNVnMf24vl407J45fs=",
+          "protocol": "https",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C01001K234RXPA1",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "secure.eicar.org"
+          ],
+          "ip": [
+            "192.168.73.220",
+            "216.160.83.61"
+          ],
+          "user": [
+            "rich"
+          ]
+        },
+        "rule": {
+          "id": "2"
+        },
+        "source": {
+          "bytes": 0,
+          "ip": "192.168.73.220",
+          "port": 51499,
+          "user": {
+            "name": "rich"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "secure.eicar.org",
+          "extension": "com",
+          "full": "https://secure.eicar.org/eicar.com",
+          "original": "https://secure.eicar.org/eicar.com",
+          "path": "/eicar.com",
+          "scheme": "https"
+        },
+        "event": {
+          "action": "Virus",
+          "category": [
+            "malware",
+            "network"
+          ],
+          "code": "08001",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 2,
+          "timezone": "GMT",
+          "type": [
+            "info",
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2016-12-02 time=18:57:57 timezone=\"GMT\" device_name=\"SFVUNL\" device_id=C01001K234RXPA1 log_id=030906208001 log_type=\"Anti-Virus\" log_component=\"HTTP\" log_subtype=\"Virus\" priority=Critical fw_rule_id=0 user_name=\"rich\" iap=13 virus=\"Sandstorm\" url=\"http://floater.baldrys.ca/badb.exe\" domainname=\"floater.baldrys.ca\" src_ip=192.168.73.220 src_country_code=R1 dst_ip=192.168.73.220 dst_country_code=R1 protocol=\"TCP\" src_port=54110 dst_port=80 sent_bytes=0 recv_bytes=1594715",
+      "expected": {
+        "@timestamp": "2016-12-02T18:57:57.000Z",
+        "destination": {
+          "bytes": 1594715,
+          "ip": "192.168.73.220",
+          "port": 80
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "critical"
+        },
+        "network": {
+          "bytes": 1594715,
+          "community_id": "1:4ao/YhRCSn5/cM88NdWtPMdl8U8=",
+          "protocol": "http",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C01001K234RXPA1",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "floater.baldrys.ca"
+          ],
+          "ip": [
+            "192.168.73.220"
+          ],
+          "user": [
+            "rich"
+          ]
+        },
+        "rule": {
+          "id": "0"
+        },
+        "source": {
+          "bytes": 0,
+          "ip": "192.168.73.220",
+          "port": 54110,
+          "user": {
+            "name": "rich"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "floater.baldrys.ca",
+          "extension": "exe",
+          "full": "http://floater.baldrys.ca/badb.exe",
+          "original": "http://floater.baldrys.ca/badb.exe",
+          "path": "/badb.exe",
+          "scheme": "http"
+        },
+        "event": {
+          "action": "Virus",
+          "category": [
+            "malware",
+            "network"
+          ],
+          "code": "08001",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 2,
+          "timezone": "GMT",
+          "type": [
+            "info",
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-06-05 time=08:49:00 timezone=\"BST\" device_name=\"XG310\" device_id=C30006T22TGR89B log_id=086320518009 log_type=\"ATP\" log_component=\"Firewall\" log_subtype=\"Alert\" priority=Notice user_name=\"\" protocol=\" ICMP\" src_port=0 dst_port=0 sourceip=10.198.32.89 destinationip=81.2.69.193 url=81.2.69.193 threatname=C2/Generic-A eventid=C7E26E6F-0097-4EA2-89DE-C31C40636CB2 eventtype=\"Standard\" login_user=\"\" process_user=\"\" ep_uuid= execution_path=\"\"",
+      "expected": {
+        "@timestamp": "2018-06-05T08:49:00.000+01:00",
+        "destination": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.193",
+          "port": 0
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "notification"
+        },
+        "network": {
+          "transport": " icmp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C30006T22TGR89B",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "10.198.32.89",
+            "81.2.69.193"
+          ]
+        },
+        "source": {
+          "ip": "10.198.32.89",
+          "port": 0
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "original": "81.2.69.193"
+        },
+        "event": {
+          "action": "alert",
+          "category": [
+            "intrusion_detection",
+            "network"
+          ],
+          "code": "18009",
+          "id": "C7E26E6F-0097-4EA2-89DE-C31C40636CB2",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 5,
+          "timezone": "Etc/GMT-1",
+          "type": [
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2017-01-31 time=18:44:31 timezone=\"IST\" device_name=\"CR750iNG-XP\" device_id=C44313350024-P29PUA log_id=086304418010 log_type=\"ATP\" log_component=\"Firewall\" log_subtype=\"Drop\" priority=Warning user_name=\"gaurav\" protocol=\"TCP\" src_port=22623 dst_port=80 sourceip=10.198.47.71 destinationip=67.43.156.12 url=67.43.156.12 threatname=C2 /Generic-A eventid=C366ACFB-7A6F-4870-B359-A6CFDA8C85F7 eventtype=\"Standard\" login_user=\"\" process_user=\"\" ep_uuid= execution_path=\"\"",
+      "expected": {
+        "@timestamp": "2017-01-31T18:44:31.000+05:30",
+        "destination": {
+          "as": {
+            "number": 35908
+          },
+          "geo": {
+            "continent_name": "Asia",
+            "country_iso_code": "BT",
+            "country_name": "Bhutan"
+          },
+          "ip": "67.43.156.12",
+          "port": 80
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "warning"
+        },
+        "network": {
+          "community_id": "1:nB9nte3WRkewayDVwPW2FGsg5L0=",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C44313350024-P29PUA",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "10.198.47.71",
+            "67.43.156.12"
+          ],
+          "user": [
+            "gaurav"
+          ]
+        },
+        "source": {
+          "ip": "10.198.47.71",
+          "port": 22623,
+          "user": {
+            "name": "gaurav"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "original": "67.43.156.12"
+        },
+        "event": {
+          "action": "drop",
+          "category": [
+            "intrusion_detection",
+            "network"
+          ],
+          "code": "18010",
+          "id": "C366ACFB-7A6F-4870-B359-A6CFDA8C85F7",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 4,
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2017-01-31 time=18:13:38 timezone=\"IST\" device_name=\"CR750iNG-XP\" device_id=C44313350024-P29PUA log_id=062910617701 log_type=\"Event\" log_component=\"Firewall Authentication\" log_subtype=\"Authentication\" status=\"Successful\" priority=Information user_name=\"gaurav\" usergroupname=\"Open Group\" auth_client=\"Web Client\" auth_mechanism=\"Local\" reason=\"\" src_ip=10.198.47.71 message=\"User gaurav of group Open Group logged in successfully to Firewall through Local authentication mechanism from 10.198.47.71\" name=\"gaurav\" src_mac=",
+      "expected": {
+        "@timestamp": "2017-01-31T18:13:38.000+05:30",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "message": "User gaurav of group Open Group logged in successfully to Firewall through Local authentication mechanism from 10.198.47.71",
+        "observer": {
+          "product": "XG",
+          "serial_number": "C44313350024-P29PUA",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "10.198.47.71"
+          ],
+          "user": [
+            "gaurav"
+          ]
+        },
+        "source": {
+          "ip": "10.198.47.71",
+          "user": {
+            "group": {
+              "name": "Open Group"
+            },
+            "name": "gaurav"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "gaurav"
+        },
+        "event": {
+          "category": [
+            "authentication"
+          ],
+          "code": "17701",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "start"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2017-03-15 time=14:33:37 timezone=\"IST\" device_name=\"CR750iNG-XP\" device_id=C44313350024-P29PUA log_id=063010617707 log_type=\"Event\" log_component=\"VPN Authentication\" log_subtype=\"Authentication\" status=\"Successful\" priority=Information user_name=\"gaurav\" usergroupname=\"\" auth_client=\"N/A\" auth_mechanism=\"Local\" reason=\"\" src_ip=10.198.233.49 message=\"User gaurav logged in successfully to L2TP through Local authentication mechanism\" name=\"\" src_mac=",
+      "expected": {
+        "@timestamp": "2017-03-15T14:33:37.000+05:30",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "message": "User gaurav logged in successfully to L2TP through Local authentication mechanism",
+        "observer": {
+          "product": "XG",
+          "serial_number": "C44313350024-P29PUA",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "10.198.233.49"
+          ],
+          "user": [
+            "gaurav"
+          ]
+        },
+        "source": {
+          "ip": "10.198.233.49",
+          "user": {
+            "name": "gaurav"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "gaurav"
+        },
+        "event": {
+          "category": [
+            "authentication"
+          ],
+          "code": "17707",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "start"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2017-03-15 time=17:23:00 timezone=\"IST\" device_name=\"CR750iNG-XP\" device_id=C44313350024-P29PUA log_id=063110617710 log_type=\"Event\" log_component=\"SSL VPN Authentication\" log_subtype=\"Authentication\" status=\"Successful\" priority=Information user_name=\"gaurav\" usergroupname=\"\" auth_client=\"N/A\" auth_mechanism=\"Local\" reason=\"\" src_ip=10.198.233.49 message=\"User gaurav authenticated successfully to login to SSLVPN through Local authentication mechanism\" name=\"\" src_mac=",
+      "expected": {
+        "@timestamp": "2017-03-15T17:23:00.000+05:30",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "message": "User gaurav authenticated successfully to login to SSLVPN through Local authentication mechanism",
+        "observer": {
+          "product": "XG",
+          "serial_number": "C44313350024-P29PUA",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "10.198.233.49"
+          ],
+          "user": [
+            "gaurav"
+          ]
+        },
+        "source": {
+          "ip": "10.198.233.49",
+          "user": {
+            "name": "gaurav"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "gaurav"
+        },
+        "event": {
+          "category": [
+            "authentication"
+          ],
+          "code": "17710",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "start"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2016-12-02 time=18:27:03 timezone=\"GMT\" device_name=\"SFVUNL\" device_id=C01001K234RXPA1 log_id=050901616001 log_type=\"Content Filtering\" log_component=\"HTTP\" log_subtype=\"Allowed\" priority=Information fw_rule_id=2 user_name=\"rich\" user_gp=\"Clientless Open Group\" iap=13 category=\"None\" category_type=\"\" url=\"http://floater.baldrys.ca/adsenum.exe\" contenttype=\"application/octet-stream\" override_token=\"\" src_ip=192.168.73.220 dst_ip=67.43.156.13 protocol=\"TCP\" src_port=54110 dst_port=80 sent_bytes=0 recv_bytes=15940 domain=floater.baldrys.ca exceptions= activityname=\"\" reason=\"cached clean\"",
+      "expected": {
+        "@timestamp": "2016-12-02T18:27:03.000Z",
+        "destination": {
+          "as": {
+            "number": 35908
+          },
+          "bytes": 15940,
+          "geo": {
+            "continent_name": "Asia",
+            "country_iso_code": "BT",
+            "country_name": "Bhutan"
+          },
+          "ip": "67.43.156.13",
+          "port": 80
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "bytes": 15940,
+          "community_id": "1:A533V8KpijZTUOuXt+PhEWpnluA=",
+          "protocol": "http",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C01001K234RXPA1",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "floater.baldrys.ca"
+          ],
+          "ip": [
+            "192.168.73.220",
+            "67.43.156.13"
+          ],
+          "user": [
+            "rich"
+          ]
+        },
+        "source": {
+          "bytes": 0,
+          "ip": "192.168.73.220",
+          "port": 54110,
+          "user": {
+            "group": {
+              "name": "Clientless Open Group"
+            },
+            "name": "rich"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "floater.baldrys.ca",
+          "extension": "exe",
+          "full": "http://floater.baldrys.ca/adsenum.exe",
+          "original": "http://floater.baldrys.ca/adsenum.exe",
+          "path": "/adsenum.exe",
+          "scheme": "http"
+        },
+        "event": {
+          "action": "allowed",
+          "category": [
+            "network"
+          ],
+          "code": "16001",
+          "kind": "event",
+          "outcome": "success",
+          "reason": "cached clean",
+          "severity": 6,
+          "timezone": "GMT",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2016-12-02 time=18:35:51 timezone=\"GMT\" device_name=\"SFVUNL\" device_id=C01001K234RXPA1 log_id=050901616001 log_type=\"Content Filtering\" log_component=\"HTTP\" log_subtype=\"Allowed\" priority=Information fw_rule_id=0 user_name=\"rich\" user_gp=\"\" iap=13 category=\"None\" category_type=\"\" url=\"http://floater.baldrys.ca/usemem.exe\" contenttype=\"application/octet-stream\" override_token=\"\" src_ip=192.168.73.220 dst_ip=192.168.73.220 protocol=\"TCP\" src_port=54110 dst_port=80 sent_bytes=0 recv_bytes=321677 domain=floater.baldrys.ca exceptions= activityname=\"\" reason=\" cloud clean\"",
+      "expected": {
+        "@timestamp": "2016-12-02T18:35:51.000Z",
+        "destination": {
+          "bytes": 321677,
+          "ip": "192.168.73.220",
+          "port": 80
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "bytes": 321677,
+          "community_id": "1:4ao/YhRCSn5/cM88NdWtPMdl8U8=",
+          "protocol": "http",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C01001K234RXPA1",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "floater.baldrys.ca"
+          ],
+          "ip": [
+            "192.168.73.220"
+          ],
+          "user": [
+            "rich"
+          ]
+        },
+        "source": {
+          "bytes": 0,
+          "ip": "192.168.73.220",
+          "port": 54110,
+          "user": {
+            "name": "rich"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "floater.baldrys.ca",
+          "extension": "exe",
+          "full": "http://floater.baldrys.ca/usemem.exe",
+          "original": "http://floater.baldrys.ca/usemem.exe",
+          "path": "/usemem.exe",
+          "scheme": "http"
+        },
+        "event": {
+          "action": "allowed",
+          "category": [
+            "network"
+          ],
+          "code": "16001",
+          "kind": "event",
+          "outcome": "success",
+          "reason": " cloud clean",
+          "severity": 6,
+          "timezone": "GMT",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2016-12-02 time=19:21:41 timezone=\"GMT\" device_name=\"SFVUNL\" device_id=C01001K234RXPA1 log_id=050901616001 log_type=\"Content Filtering\" log_component=\"HTTP\" log_subtype=\"Allowed\" priority=Information fw_rule_id=2 user_name=\"rich\" user_gp=\"Clientless Open Group\" iap=13 category=\"Information Technology\" category_type=\" Acceptable\" url=\"https://the.earth.li/~sgtatham/putty/0.67/x86/putty.exe\" contenttype=\"application/x-msdos-program\" override_token=\"\" src_ip=192.168.73.220 dst_ip=67.43.156.12 protocol=\"TCP\" src_port=51570 dst_port=443 sent_bytes=0 recv_bytes=531659 domain=the.earth.li exceptions= activityname=\"\" reason=\"eligible\"",
+      "expected": {
+        "@timestamp": "2016-12-02T19:21:41.000Z",
+        "destination": {
+          "as": {
+            "number": 35908
+          },
+          "bytes": 531659,
+          "geo": {
+            "continent_name": "Asia",
+            "country_iso_code": "BT",
+            "country_name": "Bhutan"
+          },
+          "ip": "67.43.156.12",
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "bytes": 531659,
+          "community_id": "1:Rx2NAbhO+cUNx7MOYl+KZ/KqxR8=",
+          "protocol": "https",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C01001K234RXPA1",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "the.earth.li"
+          ],
+          "ip": [
+            "192.168.73.220",
+            "67.43.156.12"
+          ],
+          "user": [
+            "rich"
+          ]
+        },
+        "source": {
+          "bytes": 0,
+          "ip": "192.168.73.220",
+          "port": 51570,
+          "user": {
+            "group": {
+              "name": "Clientless Open Group"
+            },
+            "name": "rich"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "the.earth.li",
+          "extension": "exe",
+          "full": "https://the.earth.li/~sgtatham/putty/0.67/x86/putty.exe",
+          "original": "https://the.earth.li/~sgtatham/putty/0.67/x86/putty.exe",
+          "path": "/~sgtatham/putty/0.67/x86/putty.exe",
+          "scheme": "https"
+        },
+        "event": {
+          "action": "allowed",
+          "category": [
+            "network"
+          ],
+          "code": "16001",
+          "kind": "event",
+          "outcome": "success",
+          "reason": "eligible",
+          "severity": 6,
+          "timezone": "GMT",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2016-12-02 time=19:21:59 timezone=\"GMT\" device_name=\"SFVUNL\" device_id=C01001K234RXPA1 log_id=050901616001 log_type=\"Content Filtering\" log_component=\"HTTP\" log_subtype=\"Allowed\" priority=Information fw_rule_id=2 user_name=\"rich\" user_gp=\"Clientless Open Group\" iap=13 category=\"General Business\" category_type=\" Acceptable\" url=\"http://ads.adaptv.advertising.com/a/h/WWEVd91PNug3Es_Gwp40Tnr0FIh9nkWQ?cb=1481065476497&pet=preroll&pageUrl=http%3A%2F%2Fbbc.com%2F&eov=eov&a.cluster=0&a.pvt=0&width=300&height=250&a.sdk=adaptv&a.sdkType=js&a.d.pageUrl=http%3A%2F%2Fwww.bbc.com%2Fsport&referrerUrl=http%3A%2F%2Fwww.bbc.com%2Fearth%2Fworld&depth=0&p.vw.active=-1&p.vw.area=-1&p.vw.domId=-1&p.vw.framerate=-1&p.vw.geometric=-1&p.vw.pHeight=0&p.vw.psize=-1&p.vw.pWidth=0&p.vw.viewable=-1&p.vw.viewableOpportunity=-1\" contenttype=\"text/xml\" override_token=\"\" src_ip=192.168.73.220 dst_ip=67.43.156.14 protocol=\"TCP\" src_port=56477 dst_port=80 sent_bytes=0 recv_bytes=3672 domain=ads.adaptv.advertising.com exceptions= activityname=\"\" reason=\"not eligible\"",
+      "expected": {
+        "@timestamp": "2016-12-02T19:21:59.000Z",
+        "destination": {
+          "as": {
+            "number": 35908
+          },
+          "bytes": 3672,
+          "geo": {
+            "continent_name": "Asia",
+            "country_iso_code": "BT",
+            "country_name": "Bhutan"
+          },
+          "ip": "67.43.156.14",
+          "port": 80
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "bytes": 3672,
+          "community_id": "1:0QC4IPLl7ucQNCsWUyc5nb6AHMM=",
+          "protocol": "http",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C01001K234RXPA1",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "ads.adaptv.advertising.com"
+          ],
+          "ip": [
+            "192.168.73.220",
+            "67.43.156.14"
+          ],
+          "user": [
+            "rich"
+          ]
+        },
+        "source": {
+          "bytes": 0,
+          "ip": "192.168.73.220",
+          "port": 56477,
+          "user": {
+            "group": {
+              "name": "Clientless Open Group"
+            },
+            "name": "rich"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "ads.adaptv.advertising.com",
+          "full": "http://ads.adaptv.advertising.com/a/h/WWEVd91PNug3Es_Gwp40Tnr0FIh9nkWQ?cb=1481065476497&pet=preroll&pageUrl=http%3A%2F%2Fbbc.com%2F&eov=eov&a.cluster=0&a.pvt=0&width=300&height=250&a.sdk=adaptv&a.sdkType=js&a.d.pageUrl=http%3A%2F%2Fwww.bbc.com%2Fsport&referrerUrl=http%3A%2F%2Fwww.bbc.com%2Fearth%2Fworld&depth=0&p.vw.active=-1&p.vw.area=-1&p.vw.domId=-1&p.vw.framerate=-1&p.vw.geometric=-1&p.vw.pHeight=0&p.vw.psize=-1&p.vw.pWidth=0&p.vw.viewable=-1&p.vw.viewableOpportunity=-1",
+          "original": "http://ads.adaptv.advertising.com/a/h/WWEVd91PNug3Es_Gwp40Tnr0FIh9nkWQ?cb=1481065476497&pet=preroll&pageUrl=http%3A%2F%2Fbbc.com%2F&eov=eov&a.cluster=0&a.pvt=0&width=300&height=250&a.sdk=adaptv&a.sdkType=js&a.d.pageUrl=http%3A%2F%2Fwww.bbc.com%2Fsport&referrerUrl=http%3A%2F%2Fwww.bbc.com%2Fearth%2Fworld&depth=0&p.vw.active=-1&p.vw.area=-1&p.vw.domId=-1&p.vw.framerate=-1&p.vw.geometric=-1&p.vw.pHeight=0&p.vw.psize=-1&p.vw.pWidth=0&p.vw.viewable=-1&p.vw.viewableOpportunity=-1",
+          "path": "/a/h/WWEVd91PNug3Es_Gwp40Tnr0FIh9nkWQ",
+          "query": "cb=1481065476497&pet=preroll&pageUrl=http://bbc.com/&eov=eov&a.cluster=0&a.pvt=0&width=300&height=250&a.sdk=adaptv&a.sdkType=js&a.d.pageUrl=http://www.bbc.com/sport&referrerUrl=http://www.bbc.com/earth/world&depth=0&p.vw.active=-1&p.vw.area=-1&p.vw.domId=-1&p.vw.framerate=-1&p.vw.geometric=-1&p.vw.pHeight=0&p.vw.psize=-1&p.vw.pWidth=0&p.vw.viewable=-1&p.vw.viewableOpportunity=-1",
+          "scheme": "http"
+        },
+        "event": {
+          "action": "allowed",
+          "category": [
+            "network"
+          ],
+          "code": "16001",
+          "kind": "event",
+          "outcome": "success",
+          "reason": "not eligible",
+          "severity": 6,
+          "timezone": "GMT",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device_name=\"SF01V\" device_id=SFDemo-c45b327 log_id=058420116010 log_type=\"Content Filtering\" log_component=\"Web Content Policy\" log_subtype=\"Alert\" user=\"gi123456\" src_ip=10.108.108.49 transaction_id=\"e4a127f7-a850-477c-920e-a471b38727c1\" dictionary_name=\"complicated_Custom\" site_category=Information Technology website=\"ta-web-static-testing.qa.astaro.de\" direction=\"in\" action=\"Deny\" file_name=\"cgi_echo.pl\" context_match=\"Not\" context_prefix=\"blah blah hello \" context_suffix=\" hello blah \"",
+      "expected": {
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "alert"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "SFDemo-c45b327",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "10.108.108.49"
+          ]
+        },
+        "source": {
+          "ip": "10.108.108.49"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "alert",
+          "category": [
+            "network"
+          ],
+          "code": "16010",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 1,
+          "timezone": "UTC"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2017-01-31 time=14:16:19 timezone=\"IST\" device_name=\"CR750iNG-XP\" device_id=C44313350024- P29PUA log_id=010101600001 log_type=\"Firewall\" log_component=\"Firewall Rule\" log_subtype=\"Allowed\" status=\"Allow\" priority=Information duration=30 fw_rule_id=2 policy_type=2 user_name=\"gaurav\" user_gp=\"Open Group\" iap=1 ips_policy_id=0 appfilter_policy_id=1 application=\"Youtube Video Streaming\" application_risk=3 application_technology=\"Browser Based\" application_category=\"Streaming Media\" in_interface=\"PortA\" out_interface=\"PortB\" src_mac=00:00:00:00:00:00 src_ip=10.198.47.71 src_country_code=R1 dst_ip=81.2.69.143 dst_country_code=USA protocol=\"UDP\" src_port=59859 dst_port=53 sent_pkts=1 recv_pkts=1 sent_bytes=77 recv_bytes=105 tran_src_ip=81.2.69.144 tran_src_port=0 tran_dst_ip= tran_dst_port=0 srczonetype=\"LAN\" srczone=\"LAN\" dstzonetype=\"WAN\" dstzone=\"WAN\" dir_disp=\"\" connevent=\"Stop\" connid=\"185246656\" vconnid=\"\" hb_health=\"No Heartbeat\"",
+      "expected": {
+        "@timestamp": "2017-01-31T14:16:19.000+05:30",
+        "destination": {
+          "bytes": 105,
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.143",
+          "nat": {
+            "port": 0
+          },
+          "packets": 1,
+          "port": 53
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "bytes": 182,
+          "community_id": "1:lYJim7EEUckhyqriZSUn2kEcAwY=",
+          "direction": "outbound",
+          "packets": 2,
+          "protocol": "youtube video streaming",
+          "transport": "udp"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "PortB"
+            },
+            "zone": "WAN"
+          },
+          "ingress": {
+            "interface": {
+              "name": "PortA"
+            },
+            "zone": "LAN"
+          },
+          "product": "XG",
+          "serial_number": "C44313350024- P29PUA",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "10.198.47.71",
+            "81.2.69.143",
+            "81.2.69.144"
+          ],
+          "user": [
+            "gaurav"
+          ]
+        },
+        "rule": {
+          "id": "2",
+          "ruleset": "2"
+        },
+        "source": {
+          "bytes": 77,
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "10.198.47.71",
+          "mac": "00-00-00-00-00-00",
+          "nat": {
+            "ip": "81.2.69.144",
+            "port": 0
+          },
+          "packets": 1,
+          "port": 59859,
+          "user": {
+            "group": {
+              "name": "Open Group"
+            },
+            "name": "gaurav"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "allowed",
+          "category": [
+            "network"
+          ],
+          "code": "00001",
+          "duration": 30000000000,
+          "end": "2017-01-31T14:16:49.000+05:30",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "start": "2017-01-31T14:16:19.000+05:30",
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "end",
+            "allowed",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-05-30 time=13:14:26 timezone=\"IST\" device_name=\"XG125w\" device_id=SFDemo-763180a log_id=010102600002 log_type=\"Firewall\" log_component=\"Firewall Rule\" log_subtype=\"Denied\" status=\"Deny\" priority=Information duration=0 fw_rule_id=1 policy_type=1 user_name=\"\" user_gp=\"\" iap=2 ips_policy_id=0 appfilter_policy_id=0 application=\"\" application_risk=0 application_technology=\"\" application_category=\"\" in_interface=\"Port1\" out_interface=\"Port2.531\" src_mac=b8:97:5a:5b:0f:fd src_ip=10.198.32.19 src_country_code= dst_ip=1.128.3.4 dst_country_code= protocol=\"ICMP\" icmp_type=8 icmp_code=0 sent_pkts=0 recv_pkts=0 sent_bytes=0 recv_bytes=0 tran_src_ip= tran_src_port=0 tran_dst_ip= tran_dst_port=0 srczonetype=\"\" srczone=\"\" dstzonetype=\"\" dstzone=\"\" dir_disp=\"\" connid=\"\" vconnid=\"\" hb_health=\"No Heartbeat\" message=\"\" appresolvedby=\"Signature",
+      "expected": {
+        "@timestamp": "2018-05-30T13:14:26.000+05:30",
+        "destination": {
+          "as": {
+            "number": 1221,
+            "organization": {
+              "name": "Telstra Pty Ltd"
+            }
+          },
+          "bytes": 0,
+          "ip": "1.128.3.4",
+          "nat": {
+            "port": 0
+          },
+          "packets": 0
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "bytes": 0,
+          "community_id": "1:dx7kJlo3wECJdR37qq2A64L5Iuo=",
+          "packets": 0,
+          "transport": "icmp"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "Port2.531"
+            }
+          },
+          "ingress": {
+            "interface": {
+              "name": "Port1"
+            }
+          },
+          "product": "XG",
+          "serial_number": "SFDemo-763180a",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "10.198.32.19",
+            "1.128.3.4"
+          ]
+        },
+        "rule": {
+          "id": "1",
+          "ruleset": "1"
+        },
+        "source": {
+          "bytes": 0,
+          "ip": "10.198.32.19",
+          "mac": "B8-97-5A-5B-0F-FD",
+          "nat": {
+            "port": 0
+          },
+          "packets": 0
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "denied",
+          "category": [
+            "network"
+          ],
+          "code": "00002",
+          "duration": 0,
+          "end": "2018-05-30T13:14:26.000+05:30",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "start": "2018-05-30T13:14:26.000+05:30",
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-06-01 time=10:55:41 timezone=\"BST\" device_name=\"XG310\" device_id=SFDemo-9a04c43 log_id=016602600003 log_type=\"Firewall\" log_component=\"Heartbeat\" log_subtype=\"Denied\" status=\"Deny\" priority=Information duration=0 fw_rule_id=16 policy_type=1 user_name=\"\" user_gp=\"\" iap=2 ips_policy_id=0 appfilter_policy_id=0 application=\"\" application_risk=0 application_technology=\"\" application_category=\"\" in_interface=\"Port3.611\" out_interface=\"\" src_mac=08:00:27:4c:49:e3 src_ip=10.198.37.57 src_country_code= dst_ip=175.16.199.1 dst_country_code= protocol=\"ICMP\" icmp_type=8 icmp_code=0 sent_pkts=0 recv_pkts=0 sent_bytes=0 recv_bytes=0 tran_src_ip= tran_src_port=0 tran_dst_ip= tran_dst_port=0 srczonetype=\"\" srczone=\"\" dstzonetype=\"\" dstzone=\"\" dir_disp=\"\" connid=\"\" vconnid=\"\" hb_health=\"Red\" message=\"\" appresolvedby=\"Signature\" app_is_cloud=0",
+      "expected": {
+        "@timestamp": "2018-06-01T10:55:41.000+01:00",
+        "destination": {
+          "bytes": 0,
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "nat": {
+            "port": 0
+          },
+          "packets": 0
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "bytes": 0,
+          "community_id": "1:Sor11fKmsq4B9ppdtSRcf8VuJ2A=",
+          "packets": 0,
+          "transport": "icmp"
+        },
+        "observer": {
+          "ingress": {
+            "interface": {
+              "name": "Port3.611"
+            }
+          },
+          "product": "XG",
+          "serial_number": "SFDemo-9a04c43",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "10.198.37.57",
+            "175.16.199.1"
+          ]
+        },
+        "rule": {
+          "id": "16",
+          "ruleset": "1"
+        },
+        "source": {
+          "bytes": 0,
+          "ip": "10.198.37.57",
+          "mac": "08-00-27-4C-49-E3",
+          "nat": {
+            "port": 0
+          },
+          "packets": 0
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "denied",
+          "category": [
+            "intrusion_detection",
+            "network"
+          ],
+          "code": "00003",
+          "duration": 0,
+          "end": "2018-06-01T10:55:41.000+01:00",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 6,
+          "start": "2018-06-01T10:55:41.000+01:00",
+          "timezone": "Etc/GMT-1",
+          "type": [
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-05-30 time=17:55:09 timezone=\"IST\" device_name=\"XG125w\" device_id=SFDemo-763180a log_id=018202500004 log_type=\"Firewall\" log_component=\"ICMP ERROR MESSAGE\" log_subtype=\"Denied\" status=\"Deny\" priority=Notice duration=0 fw_rule_id=1 policy_type=1 user_name=\"\" user_gp=\"\" iap=0 ips_policy_id=0 appfilter_policy_id=0 application=\"\" application_risk=0 application_technology=\"\" application_category=\"\" in_interface=\"Port2.531\" out_interface=\"\" src_mac=00:1a:8c:50:6a:8c src_ip=216.160.83.61 src_country_code= dst_ip=10.198.232.48 dst_country_code= protocol=\"ICMP\" icmp_type=11 icmp_code=0 sent_pkts=0 recv_pkts=0 sent_bytes=0 recv_bytes=0 tran_src_ip= tran_src_port=0 tran_dst_ip= tran_dst_port=0 srczonetype=\"\" srczone=\"\" dstzonetype=\"\" dstzone=\"\" dir_disp=\"\" connid=\"1084482152\" vconnid=\"\" hb_health=\" No Heartbeat\" message=\"\" appresolvedby=\"Signature\"",
+      "expected": {
+        "@timestamp": "2018-05-30T17:55:09.000+05:30",
+        "destination": {
+          "bytes": 0,
+          "ip": "10.198.232.48",
+          "nat": {
+            "port": 0
+          },
+          "packets": 0
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "notification"
+        },
+        "network": {
+          "bytes": 0,
+          "community_id": "1:qJ07DCea4ghp9BOH8VwBZhcsIos=",
+          "packets": 0,
+          "transport": "icmp"
+        },
+        "observer": {
+          "ingress": {
+            "interface": {
+              "name": "Port2.531"
+            }
+          },
+          "product": "XG",
+          "serial_number": "SFDemo-763180a",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "216.160.83.61",
+            "10.198.232.48"
+          ]
+        },
+        "rule": {
+          "id": "1",
+          "ruleset": "1"
+        },
+        "source": {
+          "as": {
+            "number": 209
+          },
+          "bytes": 0,
+          "geo": {
+            "city_name": "Milton",
+            "continent_name": "North America",
+            "country_iso_code": "US",
+            "country_name": "United States",
+            "region_iso_code": "US-WA",
+            "region_name": "Washington"
+          },
+          "ip": "216.160.83.61",
+          "mac": "00-1A-8C-50-6A-8C",
+          "nat": {
+            "port": 0
+          },
+          "packets": 0
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "denied",
+          "category": [
+            "intrusion_detection",
+            "network"
+          ],
+          "code": "00004",
+          "duration": 0,
+          "end": "2018-05-30T17:55:09.000+05:30",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 5,
+          "start": "2018-05-30T17:55:09.000+05:30",
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-05-23 time=16:20:34 timezone=\"BST\" device_name=\"XG750\" device_id=SFDemo-f64dd6be log_id=020703406001 log_type=\"IDP\" log_component=\"Anomaly\" log_subtype=\"Detect\" priority=Warning idp_policy_id=1 fw_rule_id=2 user_name=\"\" signature_id=26022 signature_msg=\"FILE-PDF EmbeddedFile contained within a PDF\" classification=\"A Network Trojan was detected\" rule_priority=1 src_ip=10.0.0.168 src_country_code=R1 dst_ip=10.1.1.234 dst_country_code=R1 protocol=\"TCP\" src_port=28938 dst_port=25 platform=\"Windows\" category=\"Malware Communication\" target=\"Server\"",
+      "expected": {
+        "@timestamp": "2018-05-23T16:20:34.000+01:00",
+        "destination": {
+          "ip": "10.1.1.234",
+          "port": 25
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "warning"
+        },
+        "network": {
+          "community_id": "1:U2yQKH6TWkggtH81oE8Yw/5bA30=",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "SFDemo-f64dd6be",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "10.0.0.168",
+            "10.1.1.234"
+          ]
+        },
+        "rule": {
+          "category": "A Network Trojan was detected",
+          "id": "26022",
+          "name": "FILE-PDF EmbeddedFile contained within a PDF"
+        },
+        "source": {
+          "ip": "10.0.0.168",
+          "port": 28938
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "detect",
+          "category": [
+            "intrusion_detection",
+            "network"
+          ],
+          "code": "06001",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 4,
+          "timezone": "Etc/GMT-1",
+          "type": [
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-05-23 time=16:16:43 timezone=\"BST\" device_name=\"XG750\" device_id=SFDemo-f64dd6be log_id=020704406002 log_type=\"IDP\" log_component=\"Anomaly\" log_subtype=\"Drop\" priority=Warning idp_policy_id=1 fw_rule_id=2 user_name=\"\" signature_id=26022 signature_msg=\"FILE-PDF EmbeddedFile contained within a PDF\" classification=\"A Network Trojan was detected\" rule_priority=1 src_ip=10.0.1.31 src_country_code=R1 dst_ip=10.1.0.115 dst_country_code=R1 protocol=\"TCP\" src_port=40140 dst_port=25 platform=\"Windows\" category=\"Malware Communication\" target=\"Server\"",
+      "expected": {
+        "@timestamp": "2018-05-23T16:16:43.000+01:00",
+        "destination": {
+          "ip": "10.1.0.115",
+          "port": 25
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "warning"
+        },
+        "network": {
+          "community_id": "1:ZiG8ga1b+BkNsFyuxbnjyDn2xjQ=",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "SFDemo-f64dd6be",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "10.0.1.31",
+            "10.1.0.115"
+          ]
+        },
+        "rule": {
+          "category": "A Network Trojan was detected",
+          "id": "26022",
+          "name": "FILE-PDF EmbeddedFile contained within a PDF"
+        },
+        "source": {
+          "ip": "10.0.1.31",
+          "port": 40140
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "drop",
+          "category": [
+            "intrusion_detection",
+            "network"
+          ],
+          "code": "06002",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 4,
+          "timezone": "Etc/GMT-1",
+          "type": [
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-05-23 time=15:49:38 timezone=\"BST\" device_name=\"XG750\" device_id=SFDemo-f64dd6be log_id=020803407001 log_type=\"IDP\" log_component=\"Signatures\" log_subtype=\"Detect\" priority=Warning idp_policy_id=1 fw_rule_id=2 user_name=\"\" signature_id=584 signature_msg=\"PROTOCOL-RPC portmap rusers request UDP\" classification=\"Decode of an RPC Query\" rule_priority=5 src_ip=10.0.1.39 src_country_code=R1 dst_ip=10.1.0.42 dst_country_code=R1 protocol=\"UDP\" src_port=21378 dst_port=111 platform=\"BSD,Linux,Mac,Solaris,Unix\" category=\"Operating System and Services\" target=\"Server\"",
+      "expected": {
+        "@timestamp": "2018-05-23T15:49:38.000+01:00",
+        "destination": {
+          "ip": "10.1.0.42",
+          "port": 111
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "warning"
+        },
+        "network": {
+          "community_id": "1:2f9LkOfa+shAInkup2Av8GQz/s8=",
+          "transport": "udp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "SFDemo-f64dd6be",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "10.0.1.39",
+            "10.1.0.42"
+          ]
+        },
+        "rule": {
+          "category": "Decode of an RPC Query",
+          "id": "584",
+          "name": "PROTOCOL-RPC portmap rusers request UDP"
+        },
+        "source": {
+          "ip": "10.0.1.39",
+          "port": 21378
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "detect",
+          "category": [
+            "intrusion_detection",
+            "network"
+          ],
+          "code": "07001",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 4,
+          "timezone": "Etc/GMT-1",
+          "type": [
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2017-02-01 time=12:51:35 timezone=\"IST\" device_name=\"CR750iNG-XP\" device_id=C44313350024- P29PUA log_id=020804407002 log_type=\"IDP\" log_component=\"Signatures\" log_subtype=\"Drop\" status=\"\" priority=Warning idp_policy_id=2 fw_rule_id=1 user_name=\"\" signature_id=1151209031 signature_msg=\"Autodesk Design Review GIF GlobalColorTable DataSubBlock Buffer Overflow\" classification=\"Unknown\" rule_priority=3 src_ip=81.2.69.145 src_country_code=HKG dst_ip=10.198.47.71 dst_country_code=R1 protocol=\"TCP\" src_port=80 dst_port=40575 platform=\" Windows\" category=\"Application and Software\" target=\"Client\"",
+      "expected": {
+        "@timestamp": "2017-02-01T12:51:35.000+05:30",
+        "destination": {
+          "ip": "10.198.47.71",
+          "port": 40575
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "warning"
+        },
+        "network": {
+          "community_id": "1:b8cwgXEoZZVR2PdphquxalsImxQ=",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C44313350024- P29PUA",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "81.2.69.145",
+            "10.198.47.71"
+          ]
+        },
+        "rule": {
+          "category": "Unknown",
+          "id": "1151209031",
+          "name": "Autodesk Design Review GIF GlobalColorTable DataSubBlock Buffer Overflow"
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.145",
+          "port": 80
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "drop",
+          "category": [
+            "intrusion_detection",
+            "network"
+          ],
+          "code": "07002",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 4,
+          "timezone": "Asia/Kolkata",
+          "type": [
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2016-12-02 time=18:27:55 timezone=\"GMT\" device_name=\"SFVUNL\" device_id=C01001K234RXPA1 log_id=136501618041 log_type=\"Sandbox\" log_component=\"Web\" log_subtype=\"Allowed\" priority=Information user_name=\"\" src_ip= filename=\"\" filetype=\"\" filesize=0 sha1sum=\"\" source=\"\" reason=\"eligible\" destination=\"\" subject=\"\"",
+      "expected": {
+        "@timestamp": "2016-12-02T18:27:55.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "file": {
+          "size": 0
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C01001K234RXPA1",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Allowed",
+          "category": [
+            "network"
+          ],
+          "code": "18041",
+          "kind": "event",
+          "outcome": "success",
+          "reason": "eligible",
+          "severity": 6,
+          "timezone": "GMT",
+          "type": [
+            "allowed",
+            "end",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2016-12-02 time=18:31:50 timezone=\"GMT\" device_name=\"SFVUNL\" device_id=C01001K234RXPA1 log_id=136501618041 log_type=\"Sandbox\" log_component=\"Web\" log_subtype=\"Allowed\" priority=Information user_name=\"rich\" src_ip=192.168.73.220 filename=\"test7.exe\" filetype=\"application/octet-stream\" filesize=871700 sha1sum=\"7769b038037bc8e5c6373e92f99aa2324eee827c\" source=\"floater.baldrys.ca\" reason=\"cloud clean\" destination=\"\" subject=\"\"",
+      "expected": {
+        "@timestamp": "2016-12-02T18:31:50.000Z",
+        "destination": {
+          "domain": "floater.baldrys.ca"
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "file": {
+          "hash": {
+            "sha1": "7769b038037bc8e5c6373e92f99aa2324eee827c"
+          },
+          "mime_type": "application/octet-stream",
+          "name": "test7.exe",
+          "size": 871700
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C01001K234RXPA1",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hash": [
+            "7769b038037bc8e5c6373e92f99aa2324eee827c"
+          ],
+          "hosts": [
+            "defaulttest.local",
+            "floater.baldrys.ca"
+          ],
+          "ip": [
+            "192.168.73.220"
+          ],
+          "user": [
+            "rich"
+          ]
+        },
+        "source": {
+          "ip": "192.168.73.220",
+          "user": {
+            "name": "rich"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "floater.baldrys.ca"
+        },
+        "event": {
+          "action": "Allowed",
+          "category": [
+            "network"
+          ],
+          "code": "18041",
+          "kind": "event",
+          "outcome": "success",
+          "reason": "cloud clean",
+          "severity": 6,
+          "timezone": "GMT",
+          "type": [
+            "allowed"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-06-21 time=23:43:25 timezone=\"CEST\" device_name=\"SG650\" device_id=SFDemo-058196d log_id=136502218042 log_type=\"Sandbox\" log_component=\"Web\" log_subtype=\"Denied\" priority=Critical user_name=\"ta-client\" src_ip=10.146.13.251 filename=\"sandbox_dirty_no_cache\" filetype=\"text/plain\" filesize=266541 sha1sum=\"dd0bf29e56e4433e7dcffbe35f4003b1f251ce9d\" source=\"ta-web-static.qa.astaro.de\" reason=\"cached malicious\" destination=\"\" subject=\"\"",
+      "expected": {
+        "@timestamp": "2018-06-21T23:43:25.000+02:00",
+        "destination": {
+          "domain": "ta-web-static.qa.astaro.de"
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "file": {
+          "hash": {
+            "sha1": "dd0bf29e56e4433e7dcffbe35f4003b1f251ce9d"
+          },
+          "mime_type": "text/plain",
+          "name": "sandbox_dirty_no_cache",
+          "size": 266541
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "critical"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "SFDemo-058196d",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hash": [
+            "dd0bf29e56e4433e7dcffbe35f4003b1f251ce9d"
+          ],
+          "hosts": [
+            "defaulttest.local",
+            "ta-web-static.qa.astaro.de"
+          ],
+          "ip": [
+            "10.146.13.251"
+          ],
+          "user": [
+            "ta-client"
+          ]
+        },
+        "source": {
+          "ip": "10.146.13.251",
+          "user": {
+            "name": "ta-client"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "ta-web-static.qa.astaro.de"
+        },
+        "event": {
+          "action": "Denied",
+          "category": [
+            "malware",
+            "network"
+          ],
+          "code": "18042",
+          "kind": "alert",
+          "outcome": "success",
+          "reason": "cached malicious",
+          "severity": 2,
+          "timezone": "Etc/GMT-2",
+          "type": [
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2016-12-02 time=18:27:55 timezone=\"GMT\" device_name=\"SFVUNL\" device_id=C01001K234RXPA1 log_id=136528618043 log_type=\"Sandbox\" log_component=\"Web\" log_subtype=\"Pending\" priority=Information user_name=\"rich\" src_ip=192.168.73.220 filename=\"badb.exe\" filetype=\"application/octet-stream\" filesize=1634319 sha1sum=\"9379f98b00017db44f3c6120bde7bdcd680296cb\" source=\"floater.baldrys.ca\" reason=\"pending\" destination=\"\" subject=\"\"",
+      "expected": {
+        "@timestamp": "2016-12-02T18:27:55.000Z",
+        "destination": {
+          "domain": "floater.baldrys.ca"
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "file": {
+          "hash": {
+            "sha1": "9379f98b00017db44f3c6120bde7bdcd680296cb"
+          },
+          "mime_type": "application/octet-stream",
+          "name": "badb.exe",
+          "size": 1634319
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "C01001K234RXPA1",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hash": [
+            "9379f98b00017db44f3c6120bde7bdcd680296cb"
+          ],
+          "hosts": [
+            "defaulttest.local",
+            "floater.baldrys.ca"
+          ],
+          "ip": [
+            "192.168.73.220"
+          ],
+          "user": [
+            "rich"
+          ]
+        },
+        "source": {
+          "ip": "192.168.73.220",
+          "user": {
+            "name": "rich"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "floater.baldrys.ca"
+        },
+        "event": {
+          "action": "Pending",
+          "category": [
+            "network"
+          ],
+          "code": "18043",
+          "kind": "event",
+          "outcome": "success",
+          "reason": "pending",
+          "severity": 6,
+          "timezone": "GMT",
+          "type": [
+            "start",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-06-05 time=15:10:00 timezone=\"CEST\" device_name=\"SF01V\" device_id=SFDemo-fe75a9f log_id=127626618031 log_type=\"System Health\" log_component=\"CPU\" log_subtype=\"Usage\" priority=Information system=1.29% user=7.60% idle=91.11%",
+      "expected": {
+        "@timestamp": "2018-06-05T15:10:00.000+02:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "SFDemo-fe75a9f",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "code": "18031",
+          "kind": "event",
+          "severity": 6,
+          "timezone": "Etc/GMT-2"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-06-05 time=15:10:00 timezone=\"CEST\" device_name=\"SF01V\" device_id=SFDemo-fe75a9f log_id=127726618031 log_type=\"System Health\" log_component=\"Memory\" log_subtype=\"Usage\" priority=Information unit=byte total_memory=2100191232 free=578650112 used=1521541120",
+      "expected": {
+        "@timestamp": "2018-06-05T15:10:00.000+02:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "SFDemo-fe75a9f",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "code": "18031",
+          "kind": "event",
+          "severity": 6,
+          "timezone": "Etc/GMT-2"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2018-06-05 time=15:10:00 timezone=\"CEST\" device_name=\"SF01V\" device_id=SFDemo-fe75a9f log_id=123526618031 log_type=\"System Health\" log_component=\"Interface\" log_subtype=\"Usage\" priority=Information interface=Port1 receivedkbits=4.55 transmittedkbits=2.03 receivederrors=0.00 transmitteddrops=0.00 collisions=0.00 transmittederrors=0.00 receiveddrops=0.00",
+      "expected": {
+        "@timestamp": "2018-06-05T15:10:00.000+02:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "SFDemo-fe75a9f",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "code": "18031",
+          "kind": "event",
+          "severity": 6,
+          "timezone": "Etc/GMT-2"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2017-02-01 time=14:17:35 timezone=\"IST\" device_name=\"SG115\" device_id=S110016E28BA631 log_id=106025618011 log_type=\"Wireless Protection\" log_component=\"Wireless Protection\" log_subtype=\"Information\" priority=Information ap=A40024A636F7862 ssid=SPIDIGO2015 clients_conn_SSID=2",
+      "expected": {
+        "@timestamp": "2017-02-01T14:17:35.000+05:30",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "S110016E28BA631",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "code": "18011",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "timezone": "Asia/Kolkata"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "device=\"SFW\" date=2017-02-01 time=14:19:47 timezone=\"IST\" device_name=\"SG115\" device_id=S110016E28BA631 log_id=106025618011 log_type=\"Wireless Protection\" log_component=\"Wireless Protection\" log_subtype=\"Information\" priority=Information ap=A40024A636F7862 ssid=SPIDIGO2015 clients_conn_SSID=3",
+      "expected": {
+        "@timestamp": "2017-02-01T14:19:47.000+05:30",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "S110016E28BA631",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "code": "18011",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "timezone": "Asia/Kolkata"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "<30>device=\"SFW\" date=2020-05-18 time=14:38:48 timezone=\"CEST\" device_name=\"XG230\" device_id=1234567890123456 log_id=041101618035 log_type=\"Anti-Spam\" log_component=\"SMTP\" log_subtype=\"Allowed\" status=\"\" priority=Information fw_rule_id=0 user_name=\"\" av_policy_name=\"None\" from_email_address=\"firewall@firewallgate.com\" to_email_address=\"Sysadmin@elasticuser.com\" email_subject=\"*ALERT* Sophos XG Firewall\" mailid=\"qkW2Y6-LxBk6U-vH-1590055245\" mailsize=19728 spamaction=\"QUEUED\" reason=\"Email has been accepted by Device and queued for scanning.\" src_domainname=\"elasticuser.com\" dst_domainname=\"\" src_ip=\"\" src_country_code=\"\" dst_ip=\"\" dst_country_code=\"\" protocol=\"TCP\" src_port=0 dst_port=0 sent_bytes=0 recv_bytes=0 quarantine_reason=\"Other\"",
+      "expected": {
+        "@timestamp": "2020-05-18T14:38:48.000+02:00",
+        "destination": {
+          "bytes": 0,
+          "port": 0,
+          "user": {
+            "email": "Sysadmin@elasticuser.com"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "firewall@firewallgate.com"
+            ]
+          },
+          "subject": "*ALERT* Sophos XG Firewall",
+          "to": {
+            "address": [
+              "Sysadmin@elasticuser.com"
+            ]
+          }
+        },
+        "host": {
+          "name": "testhost.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "bytes": 0,
+          "protocol": "smtp",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "1234567890123456",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "testhost.local",
+            "elasticuser.com"
+          ],
+          "user": [
+            "firewall",
+            "firewall@firewallgate.com"
+          ]
+        },
+        "source": {
+          "bytes": 0,
+          "domain": "elasticuser.com",
+          "port": 0,
+          "user": {
+            "domain": "firewallgate.com",
+            "email": "firewall@firewallgate.com",
+            "name": "firewall"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Allowed",
+          "category": [
+            "network"
+          ],
+          "code": "18035",
+          "kind": "event",
+          "outcome": "success",
+          "reason": "Email has been accepted by Device and queued for scanning.",
+          "severity": 6,
+          "timezone": "Etc/GMT-2",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "host.name"
+      ]
+    },
+    {
+      "line": "<30>device=\"SFW\" date=2020-05-18 time=14:38:49 timezone=\"CEST\" device_name=\"XG230\" device_id=1234567890123457 log_id=041105613003 log_type=\"Anti-Spam\" log_component=\"SMTP\" log_subtype=\"Clean\" status=\"\" priority=Information fw_rule_id=22 user_name=\"\" av_policy_name=\"Default\" from_email_address=\"telekommunikation@constant-big.email\" to_email_address=\"info@pelasticuser.com\" email_subject=\"Telefonservice statt Anrufbeantworter\" mailid=\"<MzQ4NzU1ODA4Mw==.70c409993fe53cb7c5e32c9974adf8ff@constant-big\" mailsize=13371 spamaction=\"Accept\" reason=\"Mail is Clean.\" src_domainname=\"constant-big.email\" dst_domainname=\"\" src_ip=175.16.199.1 src_country_code=USA dst_ip=175.16.199.1 dst_country_code=DEU protocol=\"TCP\" src_port=52742 dst_port=25 sent_bytes=0 recv_bytes=0 quarantine_reason=\"Other\"",
+      "expected": {
+        "@timestamp": "2020-05-18T14:38:49.000+02:00",
+        "destination": {
+          "bytes": 0,
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "port": 25,
+          "user": {
+            "email": "info@pelasticuser.com"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "telekommunikation@constant-big.email"
+            ]
+          },
+          "subject": "Telefonservice statt Anrufbeantworter",
+          "to": {
+            "address": [
+              "info@pelasticuser.com"
+            ]
+          }
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "bytes": 0,
+          "community_id": "1:7d/3uzjf495waTHySBG1PJtS3h4=",
+          "protocol": "smtp",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "1234567890123457",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "constant-big.email"
+          ],
+          "ip": [
+            "175.16.199.1"
+          ],
+          "user": [
+            "telekommunikation",
+            "telekommunikation@constant-big.email"
+          ]
+        },
+        "source": {
+          "bytes": 0,
+          "domain": "constant-big.email",
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "port": 52742,
+          "user": {
+            "domain": "constant-big.email",
+            "email": "telekommunikation@constant-big.email",
+            "name": "telekommunikation"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Clean",
+          "category": [
+            "network"
+          ],
+          "code": "13003",
+          "kind": "event",
+          "outcome": "success",
+          "reason": "Mail is Clean.",
+          "severity": 6,
+          "timezone": "Etc/GMT-2",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "host.name"
+      ]
+    },
+    {
+      "line": "<30>device=\"SFW\" date=2020-05-18 time=14:38:50 timezone=\"CEST\" device_name=\"XG230\" device_id=1234567890123456 log_id=041107413001 log_type=\"Anti-Spam\" log_component=\"SMTP\" log_subtype=\"Spam\" status=\"\" priority=Warning fw_rule_id=22 user_name=\"\" av_policy_name=\"Spam\" from_email_address=\"ripxfc@17buddies.net\" to_email_address=\"hein.mueck@elasticuser.de\" email_subject=\"nimm dringend Geld\" mailid=\"<oE6Bl1v.H9RXAIt.N5WB1my7xW.JavaMail.app@9in8-vovZnu.prod.17bud\" mailsize=2025 spamaction=\"Reject\" reason=\"Mail detected as SPAM.\" src_domainname=\"17buddies.net\" dst_domainname=\"\" src_ip=175.16.199.1 src_country_code=BRA dst_ip=175.16.199.1 dst_country_code=DEU protocol=\"TCP\" src_port=51789 dst_port=25 sent_bytes=0 recv_bytes=0 quarantine_reason=\"Spam\"",
+      "expected": {
+        "@timestamp": "2020-05-18T14:38:50.000+02:00",
+        "destination": {
+          "bytes": 0,
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "port": 25,
+          "user": {
+            "email": "hein.mueck@elasticuser.de"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "ripxfc@17buddies.net"
+            ]
+          },
+          "subject": "nimm dringend Geld",
+          "to": {
+            "address": [
+              "hein.mueck@elasticuser.de"
+            ]
+          }
+        },
+        "host": {
+          "name": "testhost.local"
+        },
+        "log": {
+          "level": "warning"
+        },
+        "network": {
+          "bytes": 0,
+          "community_id": "1:YK7dIGysD31VmEWNgT32s7vj2b8=",
+          "protocol": "smtp",
+          "transport": "tcp"
+        },
+        "observer": {
+          "product": "XG",
+          "serial_number": "1234567890123456",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "testhost.local",
+            "17buddies.net"
+          ],
+          "ip": [
+            "175.16.199.1"
+          ],
+          "user": [
+            "ripxfc",
+            "ripxfc@17buddies.net"
+          ]
+        },
+        "source": {
+          "bytes": 0,
+          "domain": "17buddies.net",
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "port": 51789,
+          "user": {
+            "domain": "17buddies.net",
+            "email": "ripxfc@17buddies.net",
+            "name": "ripxfc"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Spam",
+          "category": [
+            "malware",
+            "network"
+          ],
+          "code": "13001",
+          "kind": "alert",
+          "outcome": "success",
+          "reason": "Mail detected as SPAM.",
+          "severity": 4,
+          "timezone": "Etc/GMT-2",
+          "type": [
+            "info",
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.vendor",
+        "host.name"
+      ]
+    },
+    {
+      "line": "Nov 16 00:28:48 sophos device_name=\"SFW\" timestamp=\"2021-11-15T18:28:48-0600\" device_model=\"SFVH\" device_serial_id=\"C01001BQC8TFFFF\" log_id=054402617051 log_type=\"Content Filtering\" log_component=\"Application\" log_subtype=\"Denied\" log_version=1 severity=\"Information\" fw_rule_id=\"12\" app_filter_policy_id=6 app_name=\"Torrent Clients P2P\" app_risk=5 app_technology=\"P2P\" app_category=\"P2P\" src_ip=\"192.168.2.32\" src_country=\"R1\" dst_ip=\"192.168.1.15\" dst_country=\"R1\" protocol=\"UDP\" src_port=44740 dst_port=22083 app_resolved_by=\"Signature\" app_is_cloud=\"FALSE\" qualifier=\"New\"",
+      "expected": {
+        "@timestamp": "2021-11-15T18:28:48.000-06:00",
+        "destination": {
+          "ip": "192.168.1.15",
+          "port": 22083
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "Information"
+        },
+        "network": {
+          "community_id": "1:kdzp9Tsl6hwRu0vniAYiYJbMFVM=",
+          "transport": "udp"
+        },
+        "observer": {
+          "hostname": "sophos",
+          "product": "XG",
+          "serial_number": "C01001BQC8TFFFF",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "192.168.2.32",
+            "192.168.1.15"
+          ]
+        },
+        "source": {
+          "ip": "192.168.2.32",
+          "port": 44740
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "denied",
+          "category": [
+            "malware",
+            "network"
+          ],
+          "code": "17051",
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 6,
+          "timezone": "-06:00",
+          "type": [
+            "info",
+            "denied",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "Nov 16 00:28:51 sophos device_name=\"SFW\" timestamp=\"2021-11-15T18:28:51-0600\" device_model=\"SFVH\" device_serial_id=\"C01001BQC8TFFFF\" log_id=050901616001 log_type=\"Content Filtering\" log_component=\"HTTP\" log_subtype=\"Allowed\" log_version=1 severity=\"Information\" fw_rule_id=\"12\" web_policy_id=12 http_category=\"Content Delivery\" http_category_type=\"Acceptable\" url=\"https://hls14.asiancdn.net\" src_ip=\"192.168.2.111\" dst_ip=\"89.160.20.156\" protocol=\"TCP\" src_port=50931 dst_port=443 bytes_sent=19591 bytes_received=2856085 domain=\"hls14.asiancdn.net\" http_status=\"0\" con_id=173026752 app_is_cloud=\"FALSE\" used_quota=\"0\" src_zone_type=\"LAN\" src_zone=\"LAN\" dst_zone_type=\"WAN\" dst_zone=\"WAN\" src_country=\"R1\" dst_country=\"USA\"",
+      "expected": {
+        "@timestamp": "2021-11-15T18:28:51.000-06:00",
+        "destination": {
+          "as": {
+            "number": 29518,
+            "organization": {
+              "name": "Bredband2 AB"
+            }
+          },
+          "bytes": 2856085,
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.156",
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "Information"
+        },
+        "network": {
+          "bytes": 2875676,
+          "community_id": "1:Csn8PpYg1ZmzntVBK+msiz/odY0=",
+          "protocol": "https",
+          "transport": "tcp"
+        },
+        "observer": {
+          "egress": {
+            "zone": "WAN"
+          },
+          "hostname": "sophos",
+          "ingress": {
+            "zone": "LAN"
+          },
+          "product": "XG",
+          "serial_number": "C01001BQC8TFFFF",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "hls14.asiancdn.net"
+          ],
+          "ip": [
+            "192.168.2.111",
+            "89.160.20.156"
+          ]
+        },
+        "source": {
+          "bytes": 19591,
+          "ip": "192.168.2.111",
+          "port": 50931
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "hls14.asiancdn.net",
+          "full": "https://hls14.asiancdn.net",
+          "original": "https://hls14.asiancdn.net",
+          "path": "",
+          "scheme": "https"
+        },
+        "event": {
+          "action": "allowed",
+          "category": [
+            "network"
+          ],
+          "code": "16001",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "timezone": "-06:00",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "Nov 16 00:28:57 sophos device_name=\"SFW\" timestamp=\"2021-11-15T18:28:57-0600\" device_model=\"SFVH\" device_serial_id=\"C01001BQC8TFFFF\" log_id=050901616001 log_type=\"Content Filtering\" log_component=\"HTTP\" log_subtype=\"Allowed\" log_version=1 severity=\"Information\" fw_rule_id=\"12\" web_policy_id=12 http_category=\"Content Delivery\" http_category_type=\"Acceptable\" url=\"https://hls14.asiancdn.net\" src_ip=\"192.168.2.111\" dst_ip=\"89.160.20.156\" protocol=\"TCP\" src_port=50932 dst_port=443 bytes_sent=12138 bytes_received=1708430 domain=\"hls14.asiancdn.net\" http_status=\"0\" con_id=2694936768 app_is_cloud=\"FALSE\" used_quota=\"0\" src_zone_type=\"LAN\" src_zone=\"LAN\" dst_zone_type=\"WAN\" dst_zone=\"WAN\" src_country=\"R1\" dst_country=\"USA\"",
+      "expected": {
+        "@timestamp": "2021-11-15T18:28:57.000-06:00",
+        "destination": {
+          "as": {
+            "number": 29518,
+            "organization": {
+              "name": "Bredband2 AB"
+            }
+          },
+          "bytes": 1708430,
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.156",
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "Information"
+        },
+        "network": {
+          "bytes": 1720568,
+          "community_id": "1:SaRGAGzTVUTVBIyokttfH+yRSwI=",
+          "protocol": "https",
+          "transport": "tcp"
+        },
+        "observer": {
+          "egress": {
+            "zone": "WAN"
+          },
+          "hostname": "sophos",
+          "ingress": {
+            "zone": "LAN"
+          },
+          "product": "XG",
+          "serial_number": "C01001BQC8TFFFF",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local",
+            "hls14.asiancdn.net"
+          ],
+          "ip": [
+            "192.168.2.111",
+            "89.160.20.156"
+          ]
+        },
+        "source": {
+          "bytes": 12138,
+          "ip": "192.168.2.111",
+          "port": 50932
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "hls14.asiancdn.net",
+          "full": "https://hls14.asiancdn.net",
+          "original": "https://hls14.asiancdn.net",
+          "path": "",
+          "scheme": "https"
+        },
+        "event": {
+          "action": "allowed",
+          "category": [
+            "network"
+          ],
+          "code": "16001",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "timezone": "-06:00",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "Nov 16 02:52:23 sophos device_name=\"SFW\" timestamp=\"2021-11-15T20:52:23-0600\" device_model=\"SFVH\" device_serial_id=\"C01001BQC8TFFFF\" log_id=063411660020 log_type=\"Event\" log_component=\"DHCP Server\" log_subtype=\"System\" log_version=1 status=\"Renew\" severity=\"Information\" reported_ip=\"192.168.2.131\" src_mac=\"00:11:d9:a0:19:11\" reported_host=\"TIVO-846001190AE52F2\" message=\"Lease IP 192.168.2.250 renewed for MAC 00:11:d9:a0:19:11\" lease_time=\"345600\"",
+      "expected": {
+        "@timestamp": "2021-11-15T20:52:23.000-06:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "Information"
+        },
+        "message": "Lease IP 192.168.2.250 renewed for MAC 00:11:d9:a0:19:11",
+        "observer": {
+          "hostname": "sophos",
+          "product": "XG",
+          "serial_number": "C01001BQC8TFFFF",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ]
+        },
+        "source": {
+          "mac": "00-11-D9-A0-19-11"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "code": "60020",
+          "kind": "event",
+          "severity": 6,
+          "timezone": "-06:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "Nov 16 02:57:56 sophos device_name=\"SFW\" timestamp=\"2021-11-15T20:57:56-0600\" device_model=\"SFVH\" device_serial_id=\"C01001BQC8TFFFF\" log_id=063411660020 log_type=\"Event\" log_component=\"DHCP Server\" log_subtype=\"System\" log_version=1 status=\"Renew\" severity=\"Information\" reported_ip=\"192.168.2.112\" src_mac=\"88:57:1d:2d:FF:db\" reported_host=\"TIZEN-ODg6NTc6MUQ6MkQ6MTk6REIKK\" message=\"Lease IP 192.168.2.250 renewed for MAC 88:57:1d:2d:19:db\" lease_time=\"345600\"",
+      "expected": {
+        "@timestamp": "2021-11-15T20:57:56.000-06:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "Information"
+        },
+        "message": "Lease IP 192.168.2.250 renewed for MAC 88:57:1d:2d:19:db",
+        "observer": {
+          "hostname": "sophos",
+          "product": "XG",
+          "serial_number": "C01001BQC8TFFFF",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ]
+        },
+        "source": {
+          "mac": "88-57-1D-2D-FF-DB"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "code": "60020",
+          "kind": "event",
+          "severity": 6,
+          "timezone": "-06:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "Nov 16 03:04:08 sophos device_name=\"SFW\" timestamp=\"2021-11-15T21:04:08-0600\" device_model=\"SFVH\" device_serial_id=\"C01001BQC8TFFFF\" log_id=063411660020 log_type=\"Event\" log_component=\"DHCP Server\" log_subtype=\"System\" log_version=1 status=\"Renew\" severity=\"Information\" reported_ip=\"192.168.2.112\" src_mac=\"88:57:1d:2d:FF:db\" reported_host=\"TIZEN-ODg6NTc6MUQ6MkQ6MTk6REIKK\" message=\"Lease IP 192.168.2.250 renewed for MAC 88:57:1d:2d:19:db\" lease_time=\"345600\"",
+      "expected": {
+        "@timestamp": "2021-11-15T21:04:08.000-06:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "Information"
+        },
+        "message": "Lease IP 192.168.2.250 renewed for MAC 88:57:1d:2d:19:db",
+        "observer": {
+          "hostname": "sophos",
+          "product": "XG",
+          "serial_number": "C01001BQC8TFFFF",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ]
+        },
+        "source": {
+          "mac": "88-57-1D-2D-FF-DB"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "code": "60020",
+          "kind": "event",
+          "severity": 6,
+          "timezone": "-06:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "Nov 16 00:25:00 sophos device_name=\"SFW\" timestamp=\"2021-11-15T18:25:00-0600\" device_model=\"SFVH\" device_serial_id=\"C01001BQC8TFFFF\" log_id=\"010101600001\" log_type=\"Firewall\" log_component=\"Firewall Rule\" log_subtype=\"Allowed\" log_version=1 severity=\"Information\" fw_rule_id=\"12\" nat_rule_id=\"12\" fw_rule_type=\"USER\" web_policy_id=12 ips_policy_id=8 app_filter_policy_id=6 ether_type=\"Unknown (0x0000)\" in_interface=\"Port1\" out_interface=\"Port2\" src_mac=\"00:26:37:EE:47:20\" dst_mac=\"00:50:56:9F:39:33\" src_ip=\"192.168.2.111\" src_country=\"R1\" dst_ip=\"89.160.20.156\" dst_country=\"USA\" protocol=\"TCP\" src_port=50875 dst_port=443 src_trans_ip=\"192.168.1.2\" src_zone_type=\"LAN\" src_zone=\"LAN\" dst_zone_type=\"WAN\" dst_zone=\"WAN\" con_event=\"Start\" con_id=\"3153941760\" hb_status=\"No Heartbeat\" app_resolved_by=\"Signature\" app_is_cloud=\"FALSE\" qualifier=\"New\" in_display_interface=\"Port1\" out_display_interface=\"Port2\"",
+      "expected": {
+        "@timestamp": "2021-11-15T18:25:00.000-06:00",
+        "destination": {
+          "as": {
+            "number": 29518,
+            "organization": {
+              "name": "Bredband2 AB"
+            }
+          },
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.156",
+          "mac": "00-50-56-9F-39-33",
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "Information"
+        },
+        "network": {
+          "community_id": "1:+LLtOJSFMre1dW9EhupSeKW7YAo=",
+          "direction": "outbound",
+          "transport": "tcp"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "Port2"
+            },
+            "zone": "WAN"
+          },
+          "hostname": "sophos",
+          "ingress": {
+            "interface": {
+              "name": "Port1"
+            },
+            "zone": "LAN"
+          },
+          "product": "XG",
+          "serial_number": "C01001BQC8TFFFF",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "192.168.2.111",
+            "89.160.20.156",
+            "192.168.1.2"
+          ]
+        },
+        "rule": {
+          "id": "12"
+        },
+        "source": {
+          "ip": "192.168.2.111",
+          "mac": "00-26-37-EE-47-20",
+          "nat": {
+            "ip": "192.168.1.2"
+          },
+          "port": 50875
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "allowed",
+          "category": [
+            "network"
+          ],
+          "code": "00001",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "timezone": "-06:00"
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "Nov 16 00:25:01 sophos device_name=\"SFW\" timestamp=\"2021-11-15T18:25:01-0600\" device_model=\"SFVH\" device_serial_id=\"C01001BQC8TFFFF\" log_id=\"010101600001\" log_type=\"Firewall\" log_component=\"Firewall Rule\" log_subtype=\"Allowed\" log_version=1 severity=\"Information\" fw_rule_id=\"12\" nat_rule_id=\"12\" fw_rule_type=\"USER\" web_policy_id=12 ips_policy_id=8 app_filter_policy_id=6 ether_type=\"Unknown (0x0000)\" in_interface=\"Port1\" out_interface=\"Port2\" src_mac=\"A4:FC:77:2E:BD:6F\" dst_mac=\"00:50:56:9F:39:33\" src_ip=\"192.168.2.162\" src_country=\"R1\" dst_ip=\"89.160.20.156\" dst_country=\"USA\" protocol=\"TCP\" src_port=56257 dst_port=443 src_trans_ip=\"192.168.1.2\" src_zone_type=\"LAN\" src_zone=\"LAN\" dst_zone_type=\"WAN\" dst_zone=\"WAN\" con_event=\"Start\" con_id=\"151869632\" hb_status=\"No Heartbeat\" app_resolved_by=\"Signature\" app_is_cloud=\"FALSE\" qualifier=\"New\" in_display_interface=\"Port1\" out_display_interface=\"Port2\"",
+      "expected": {
+        "@timestamp": "2021-11-15T18:25:01.000-06:00",
+        "destination": {
+          "as": {
+            "number": 29518,
+            "organization": {
+              "name": "Bredband2 AB"
+            }
+          },
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.156",
+          "mac": "00-50-56-9F-39-33",
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "Information"
+        },
+        "network": {
+          "community_id": "1:HtDb/A7Cawt4bTv/+4DzHoiT21Q=",
+          "direction": "outbound",
+          "transport": "tcp"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "Port2"
+            },
+            "zone": "WAN"
+          },
+          "hostname": "sophos",
+          "ingress": {
+            "interface": {
+              "name": "Port1"
+            },
+            "zone": "LAN"
+          },
+          "product": "XG",
+          "serial_number": "C01001BQC8TFFFF",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "192.168.2.162",
+            "89.160.20.156",
+            "192.168.1.2"
+          ]
+        },
+        "rule": {
+          "id": "12"
+        },
+        "source": {
+          "ip": "192.168.2.162",
+          "mac": "A4-FC-77-2E-BD-6F",
+          "nat": {
+            "ip": "192.168.1.2"
+          },
+          "port": 56257
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "allowed",
+          "category": [
+            "network"
+          ],
+          "code": "00001",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "timezone": "-06:00"
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.product",
+        "host.name"
+      ]
+    },
+    {
+      "line": "Nov 16 00:25:01 sophos device_name=\"SFW\" timestamp=\"2021-11-15T18:25:01-0600\" device_model=\"SFVH\" device_serial_id=\"C01001BQC8TFFFF\" log_id=\"010101600001\" log_type=\"Firewall\" log_component=\"Firewall Rule\" log_subtype=\"Allowed\" log_version=1 severity=\"Information\" fw_rule_id=\"12\" nat_rule_id=\"12\" fw_rule_type=\"USER\" web_policy_id=12 ips_policy_id=8 app_filter_policy_id=6 ether_type=\"Unknown (0x0000)\" in_interface=\"Port1\" out_interface=\"Port2\" src_mac=\"00:26:37:EE:47:20\" dst_mac=\"00:50:56:9F:39:33\" src_ip=\"192.168.2.111\" src_country=\"R1\" dst_ip=\"89.160.20.156\" dst_country=\"USA\" protocol=\"TCP\" src_port=50876 dst_port=443 src_trans_ip=\"192.168.1.2\" src_zone_type=\"LAN\" src_zone=\"LAN\" dst_zone_type=\"WAN\" dst_zone=\"WAN\" con_event=\"Start\" con_id=\"2719000128\" hb_status=\"No Heartbeat\" app_resolved_by=\"Signature\" app_is_cloud=\"FALSE\" qualifier=\"New\" in_display_interface=\"Port1\" out_display_interface=\"Port2\"",
+      "expected": {
+        "@timestamp": "2021-11-15T18:25:01.000-06:00",
+        "destination": {
+          "as": {
+            "number": 29518,
+            "organization": {
+              "name": "Bredband2 AB"
+            }
+          },
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.156",
+          "mac": "00-50-56-9F-39-33",
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "defaulttest.local"
+        },
+        "log": {
+          "level": "Information"
+        },
+        "network": {
+          "community_id": "1:ZDWJNXIpvgXVte2hLgQgmTbXHlM=",
+          "direction": "outbound",
+          "transport": "tcp"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "Port2"
+            },
+            "zone": "WAN"
+          },
+          "hostname": "sophos",
+          "ingress": {
+            "interface": {
+              "name": "Port1"
+            },
+            "zone": "LAN"
+          },
+          "product": "XG",
+          "serial_number": "C01001BQC8TFFFF",
+          "type": "firewall",
+          "vendor": "Sophos"
+        },
+        "related": {
+          "hosts": [
+            "defaulttest.local"
+          ],
+          "ip": [
+            "192.168.2.111",
+            "89.160.20.156",
+            "192.168.1.2"
+          ]
+        },
+        "rule": {
+          "id": "12"
+        },
+        "source": {
+          "ip": "192.168.2.111",
+          "mac": "00-26-37-EE-47-20",
+          "nat": {
+            "ip": "192.168.1.2"
+          },
+          "port": 50876
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "allowed",
+          "category": [
+            "network"
+          ],
+          "code": "00001",
+          "kind": "event",
+          "outcome": "success",
+          "severity": 6,
+          "timezone": "-06:00"
+        }
+      },
+      "unscoredFields": [
+        "network.community_id",
+        "observer.product",
+        "host.name"
+      ]
+    }
+  ]
+}

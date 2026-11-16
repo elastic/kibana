@@ -158,6 +158,15 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               type: 'password',
               value: null,
             },
+            // synthetics package 1.12.0+ (elastic/integrations#21116)
+            kerberos: {
+              type: 'text',
+              value: null,
+            },
+            ntlm: {
+              type: 'text',
+              value: null,
+            },
             processors: {
               type: 'yaml',
               value: JSON.stringify([
@@ -585,6 +594,9 @@ export const getTestProjectSyntheticsPolicy = (
             tags: { type: 'yaml' },
             username: { type: 'text' },
             password: { type: 'password' },
+            // synthetics package 1.12.0+ (elastic/integrations#21116)
+            kerberos: { type: 'text' },
+            ntlm: { type: 'text' },
             'response.include_headers': { type: 'bool' },
             'response.include_body': { type: 'text' },
             'response.include_body_max_bytes': { type: 'text' },
@@ -838,6 +850,8 @@ export const getTestProjectSyntheticsPolicy = (
       ],
     },
   ],
+  // Test private locations enroll no complete agent, so a browser monitor is pinned to nobody.
+  condition: "${agent.id} == '__synthetics_unassigned__'",
   is_managed: true,
   revision: 1,
   created_at: '2022-08-23T13:52:42.531Z',

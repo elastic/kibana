@@ -22,7 +22,11 @@ import type {
   RegistryVarGroup,
 } from '../types';
 
-import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../constants';
+import {
+  DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
+  VALIDATE_DATASTREAMS_PERMISSION_REGEX,
+} from '../constants';
 
 import {
   isValidNamespace,
@@ -36,6 +40,8 @@ import { packageHasNoPolicyTemplates } from './policy_template';
 import { isValidDataset, isValidDataStreamType } from './is_valid_namespace';
 
 type Errors = string[] | null;
+
+const AGENT_VARIABLE_REGEX = /\$\{[^}]+\}/;
 
 export interface ValidatePackagePolicyDeps {
   safeLoadYaml: (yaml: string) => any;
@@ -164,13 +170,19 @@ const validateCondition = (
     typeof expr === 'string' ? expr : typeof expr === 'boolean' ? String(expr) : undefined;
   const errors = conditionValidator(normalized);
   if (!errors.length) return null;
-  return errors.map(({ line, column, message }) =>
+  return formatAgentConditionErrors(errors);
+};
+
+/** Error messages for the syntax errors of an agent condition, as the condition fields show them. */
+export const formatAgentConditionErrors = (
+  errors: ReturnType<NonNullable<ValidatePackagePolicyDeps['conditionValidator']>>
+): string[] =>
+  errors.map(({ line, column, message }) =>
     i18n.translate('xpack.fleet.packagePolicyValidation.conditionSyntaxErrorMessage', {
       defaultMessage: 'Line {line}, column {col}: {message}',
       values: { line, col: column + 1, message },
     })
   );
-};
 
 const validatePackageRequiredVars = (
   streamOrInput: Pick<NewPackagePolicyInputStream | PackagePolicyInput, 'vars' | 'enabled'>,
@@ -292,8 +304,6 @@ const isVarRequiredByVarGroup = (
 
   return false;
 };
-
-const VALIDATE_DATASTREAMS_PERMISSION_REGEX = /^(logs|metrics|traces|synthetics|profiles)-(.+)$/;
 
 /*
  * Returns validation information for a given package policy and package info
@@ -866,12 +876,16 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varName === DATASET_VAR_NAME && parsedValue !== undefined) {
-    const { valid, error } = isValidDataset(
-      parsedValue.dataset ? parsedValue.dataset : parsedValue,
-      false
-    );
-    if (!valid && error) {
-      errors.push(error);
+    const dataset = parsedValue.dataset ? parsedValue.dataset : parsedValue;
+    // Integration packages may use agent variables (e.g. ${env.NAME}) that Kibana can't resolve.
+    // Input packages stay strict because Kibana installs templates named after the dataset.
+    const isAgentResolved =
+      packageType !== 'input' && typeof dataset === 'string' && AGENT_VARIABLE_REGEX.test(dataset);
+    if (!isAgentResolved) {
+      const { valid, error } = isValidDataset(dataset, false);
+      if (!valid && error) {
+        errors.push(error);
+      }
     }
   }
 

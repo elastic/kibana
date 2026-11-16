@@ -15,5 +15,5 @@ export {
   loadPreviousConnectorEventIdentity,
   mintInboundEventIdentityAttributes,
 } from './apply_connector_event_identity';
-export { toRawActionIdentityAttributes } from './encode_api_key';
+export { hasInboundEventIdentityAttributes, toRawActionIdentityAttributes } from './encode_api_key';
 export type { ConnectorEventIdentity } from './types';

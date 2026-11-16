@@ -9,8 +9,10 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import { preprocessAlertInputs } from './preprocess_alert_inputs';
 import type { WorkflowsRequestHandlerContext } from '../../../../types';
+import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 
 describe('preprocessAlertInputs', () => {
   let mockEsClient: { mget: jest.Mock };
@@ -83,11 +85,15 @@ describe('preprocessAlertInputs', () => {
       expect(mockEsClient.mget).not.toHaveBeenCalled();
     });
 
-    it('should return inputs unchanged when alertIds is empty', async () => {
+    it.each([
+      ['empty', { alertIds: [] }],
+      ['null', { alertIds: null }],
+      ['missing', {}],
+    ])('should return inputs unchanged when alertIds is %s', async (_name, selection) => {
       const inputs = {
         event: {
           triggerType: 'alert',
-          alertIds: [],
+          ...selection,
         },
       };
 
@@ -250,9 +256,60 @@ describe('preprocessAlertInputs', () => {
 
       await expect(
         preprocessAlertInputs(inputs, mockContext, 'default', mockLogger)
-      ).rejects.toThrow('No alerts found with the provided IDs');
+      ).rejects.toThrow(new WorkflowTriggerInputError('No alerts found with the provided IDs'));
 
       expect(mockLogger.warn).toHaveBeenCalledTimes(2);
+    });
+
+    it('rejects a selection larger than the supported maximum without querying', async () => {
+      const alertIds = Array.from({ length: MAX_RUN_WORKFLOW_DOCS + 1 }, (_, i) => ({
+        _id: `alert-${i}`,
+        _index: '.alerts-test-default',
+      }));
+
+      const result = preprocessAlertInputs(
+        { event: { triggerType: 'alert', alertIds } },
+        mockContext,
+        'default',
+        mockLogger
+      );
+
+      await expect(result).rejects.toBeInstanceOf(WorkflowTriggerInputError);
+      await expect(result).rejects.toThrow(
+        `Cannot run a workflow on more than ${MAX_RUN_WORKFLOW_DOCS} alerts`
+      );
+      expect(mockEsClient.mget).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['a non-array', 'alert-1', 'inputs.event.alertIds must be an array.'],
+      ['an empty string', '', 'inputs.event.alertIds must be an array.'],
+      [
+        'a null entry',
+        [null],
+        'non-empty string "_id" (max 512 bytes) and "_index" (max 255 bytes)',
+      ],
+      [
+        'an object _id',
+        [{ _id: { nested: true }, _index: '.alerts-test-default' }],
+        'non-empty string "_id" (max 512 bytes) and "_index" (max 255 bytes)',
+      ],
+      [
+        'a wildcard _index',
+        [{ _id: 'alert-1', _index: '.alerts-*' }],
+        'must name a single index, alias, or data stream',
+      ],
+    ])('rejects %s as an input error without querying', async (_name, alertIds, message) => {
+      const result = preprocessAlertInputs(
+        { event: { triggerType: 'alert', alertIds } },
+        mockContext,
+        'default',
+        mockLogger
+      );
+
+      await expect(result).rejects.toBeInstanceOf(WorkflowTriggerInputError);
+      await expect(result).rejects.toThrow(message);
+      expect(mockEsClient.mget).not.toHaveBeenCalled();
     });
 
     it('should throw error when alerts are missing rule information', async () => {

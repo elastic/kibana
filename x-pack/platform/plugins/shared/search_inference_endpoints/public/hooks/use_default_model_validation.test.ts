@@ -171,6 +171,6 @@ describe('useDefaultModelValidation', () => {
     );
 
     expect(result.current.isValid).toBe(false);
-    expect(result.current.errors[0]).toMatch(/end of life/i);
+    expect(result.current.errors[0]).toMatch(/unavailable since/i);
   });
 });

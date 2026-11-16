@@ -10,6 +10,7 @@
 import React, { createContext, useContext, useId, useMemo, type ReactNode } from 'react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { KibanaContentListPageActiveTab } from './active_tab';
 
 const DEFAULT_DATA_TEST_SUBJ = 'kibana-content-list-page';
 
@@ -19,11 +20,8 @@ const DEFAULT_DATA_TEST_SUBJ = 'kibana-content-list-page';
 
 interface KibanaContentListPageContextValue {
   /**
-   * DOM `id` set on the heading element rendered by `Header`. `Section` uses
-   * this value as its default `aria-labelledby` when explicitly overridden,
-   * but does not default to it — callers that omit `Header` should provide an
-   * explicit `aria-labelledby` on `Section` to avoid referencing a missing
-   * element.
+   * DOM `id` set on the heading rendered by `Header`. `Section` uses it as its
+   * default `aria-labelledby` when neither `aria-label` nor `aria-labelledby` is passed.
    */
   readonly headingId: string;
   /** Root `data-test-subj`; consumed by child components to derive their subjects. */
@@ -106,12 +104,14 @@ const KibanaContentListPageHeader = ({
 export interface KibanaContentListPageSectionProps {
   children: ReactNode;
   /**
-   * Override the default `aria-labelledby` (which points at the page heading
-   * rendered by {@link KibanaContentListPage.Header}).
-   *
-   * Always provide an explicit value when using `Section` without a `Header`
-   * sibling — omitting it will cause `aria-labelledby` to reference a missing
-   * element, which is invalid for accessibility.
+   * Accessible name for the section. Use it when the page heading is rendered
+   * outside this page. Takes precedence over `aria-labelledby`.
+   */
+  'aria-label'?: string;
+  /**
+   * `id` of the element that names the section. Defaults to the heading rendered
+   * by {@link KibanaContentListPage.Header}. Pages without a `Header` should pass
+   * `aria-label` instead, so the section never references a missing element.
    */
   'aria-labelledby'?: string;
   /** Override the default `data-test-subj`. Defaults to `<page data-test-subj>-section`. */
@@ -120,20 +120,20 @@ export interface KibanaContentListPageSectionProps {
 
 const KibanaContentListPageSection = ({
   children,
-  'aria-labelledby': ariaLabelledBy,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledByProp,
   'data-test-subj': dataTestSubjProp,
 }: KibanaContentListPageSectionProps) => {
   const { headingId, dataTestSubj: pageDataTestSubj } = useKibanaContentListPageContext(
     'KibanaContentListPage.Section'
   );
 
-  // Apply aria-labelledby only when an explicit prop is provided. When the
-  // default from context is used, it relies on <Header> being rendered in the
-  // same page; callers that render <Section> without <Header> must pass an
-  // explicit aria-labelledby to avoid referencing a missing element.
+  const ariaLabelledBy = ariaLabel ? undefined : ariaLabelledByProp ?? headingId;
+
   return (
     <KibanaPageTemplate.Section
-      aria-labelledby={ariaLabelledBy ?? headingId}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
       data-test-subj={dataTestSubjProp ?? `${pageDataTestSubj}-section`}
     >
       {children}
@@ -210,6 +210,7 @@ const KibanaContentListPageRoot = ({
  *
  * - {@link KibanaContentListPage.Header} — page title, description, and actions.
  * - {@link KibanaContentListPage.Section} — a labelled `KibanaPageTemplate.Section`.
+ * - {@link KibanaContentListPage.ActiveTab} — resolves the content of the tab selected by the application.
  *
  * The page renders full-width by default (`restrictWidth={false}`). The
  * `ContentListTable` column presets each have their own `maxWidth` cap, so
@@ -238,8 +239,21 @@ const KibanaContentListPageRoot = ({
  *   <KibanaContentListPage.Section>{...}</KibanaContentListPage.Section>
  * </KibanaContentListPage>
  * ```
+ *
+ * @example Tabbed listing with the page heading rendered by `AppHeader`
+ * ```tsx
+ * <AppHeader title="Dashboards" tabs={headerTabs} />
+ * <KibanaContentListPage>
+ *   <KibanaContentListPage.Section aria-label="Dashboards">
+ *     <KibanaSectionErrorBoundary key={activeTabId} sectionName="Dashboards">
+ *       <KibanaContentListPage.ActiveTab tabs={tabs} activeTabId={activeTabId} />
+ *     </KibanaSectionErrorBoundary>
+ *   </KibanaContentListPage.Section>
+ * </KibanaContentListPage>
+ * ```
  */
 export const KibanaContentListPage = Object.assign(KibanaContentListPageRoot, {
   Header: KibanaContentListPageHeader,
   Section: KibanaContentListPageSection,
+  ActiveTab: KibanaContentListPageActiveTab,
 });

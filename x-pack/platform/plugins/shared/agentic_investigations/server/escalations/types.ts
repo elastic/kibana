@@ -8,13 +8,17 @@
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { EscalationsService } from './services/escalations_service';
+import type { AssignmentsService } from '../assignments/assignments_service';
 
 export interface EscalationRouteDependencies {
   router: IRouter;
   logger: Logger;
   getEscalationsService: () => EscalationsService;
+  getAssignmentsService: () => AssignmentsService;
   /** Returns the current space id; falls back to `'default'` when the spaces plugin is absent. */
   getSpaceId: (request: KibanaRequest) => string;
   /** Resolves the security plugin start contract; undefined when security is absent. */
   getSecurity: () => Promise<SecurityPluginStart | undefined>;
+  /** `xpack.agenticInvestigations.escalations.enabled`; when false only the shared routes register. */
+  escalationsEnabled: boolean;
 }

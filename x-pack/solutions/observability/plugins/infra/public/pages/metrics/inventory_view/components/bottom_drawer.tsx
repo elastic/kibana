@@ -19,6 +19,7 @@ import styled from '@emotion/styled';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
+import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import type { InfraFormatter } from '../../../../common/inventory/types';
 import { Timeline } from './timeline/timeline';
 import { KubernetesDashboardLink } from '../../../../components/kubernetes_dashboard_promotion/kubernetes_dashboard_promotion';
@@ -60,13 +61,17 @@ const RelatedDashboards = () => {
 
 export const BottomDrawer = ({ interval, formatter, view, nodeType, loading }: Props) => {
   const { timelineOpen, changeTimelineOpen } = useWaffleOptionsContext();
+  const { isAutoReloading } = useWaffleTimeContext();
   const [isOpen, setIsOpen] = useState(Boolean(timelineOpen));
 
   const { hasEcsSchema, hasSemconvSchema, hasEcsK8sIntegration, hasSemconvK8sIntegration } =
     useKubernetesDashboardPromotion(nodeType);
 
-  const showEcsK8sButton = !loading && hasEcsSchema && hasEcsK8sIntegration;
-  const showSemconvK8sButton = !loading && hasSemconvSchema && hasSemconvK8sIntegration;
+  // Keep related-dashboard links visible during auto-reload (same as Layout cards).
+  const showPromotionWhileLoading = !loading || isAutoReloading;
+  const showEcsK8sButton = showPromotionWhileLoading && hasEcsSchema && hasEcsK8sIntegration;
+  const showSemconvK8sButton =
+    showPromotionWhileLoading && hasSemconvSchema && hasSemconvK8sIntegration;
 
   useEffect(() => {
     if (isOpen !== timelineOpen) setIsOpen(Boolean(timelineOpen));

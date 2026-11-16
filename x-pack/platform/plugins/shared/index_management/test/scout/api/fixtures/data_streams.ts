@@ -81,7 +81,9 @@ export const expectedDataStream = ({
     manage: true,
   },
   timeStampField: { name: '@timestamp' },
-  indices: [{ name: indexName, uuid, preferILM: true, managedBy: 'Data stream lifecycle' }],
+  indices: [
+    { name: indexName, uuid, preferILM: true, managedBy: 'Data stream lifecycle', indexMode },
+  ],
   nextGenerationManagedBy: 'Data stream lifecycle',
   generation: 1,
   health,

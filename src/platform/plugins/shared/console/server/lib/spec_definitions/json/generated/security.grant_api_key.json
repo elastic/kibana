@@ -23,6 +23,7 @@
                   "__any_of": [
                     "all",
                     "cancel_task",
+                    "clone_api_key",
                     "create_snapshot",
                     "cross_cluster_replication",
                     "cross_cluster_search",
@@ -191,51 +192,39 @@
                   }
                 ],
                 "global": {
-                  "__one_of": [
-                    {
-                      "application": {
-                        "manage": {
-                          "applications": []
-                        }
-                      },
-                      "data_source": [
+                  "application": {
+                    "manage": {
+                      "applications": []
+                    }
+                  },
+                  "profile": {
+                    "write": {
+                      "applications": []
+                    }
+                  },
+                  "role": {
+                    "manage": {
+                      "indices": [
                         {
                           "names": [],
-                          "privileges": {
-                            "__any_of": [
-                              "create",
-                              "delete",
-                              "read_metadata",
-                              "read",
-                              "manage"
-                            ]
-                          }
+                          "privileges": []
                         }
                       ]
-                    },
-                    [
-                      {
-                        "application": {
-                          "manage": {
-                            "applications": []
-                          }
-                        },
-                        "data_source": [
-                          {
-                            "names": [],
-                            "privileges": {
-                              "__any_of": [
-                                "create",
-                                "delete",
-                                "read_metadata",
-                                "read",
-                                "manage"
-                              ]
-                            }
-                          }
+                    }
+                  },
+                  "data_source": [
+                    {
+                      "names": [],
+                      "privileges": {
+                        "__any_of": [
+                          "create",
+                          "delete",
+                          "read_metadata",
+                          "read",
+                          "manage"
                         ]
                       }
-                    ]
+                    }
                   ]
                 },
                 "applications": [
@@ -265,6 +254,7 @@
                     "__any_of": [
                       "all",
                       "cancel_task",
+                      "clone_api_key",
                       "create_snapshot",
                       "cross_cluster_replication",
                       "cross_cluster_search",
@@ -433,51 +423,39 @@
                     }
                   ],
                   "global": {
-                    "__one_of": [
-                      {
-                        "application": {
-                          "manage": {
-                            "applications": []
-                          }
-                        },
-                        "data_source": [
+                    "application": {
+                      "manage": {
+                        "applications": []
+                      }
+                    },
+                    "profile": {
+                      "write": {
+                        "applications": []
+                      }
+                    },
+                    "role": {
+                      "manage": {
+                        "indices": [
                           {
                             "names": [],
-                            "privileges": {
-                              "__any_of": [
-                                "create",
-                                "delete",
-                                "read_metadata",
-                                "read",
-                                "manage"
-                              ]
-                            }
+                            "privileges": []
                           }
                         ]
-                      },
-                      [
-                        {
-                          "application": {
-                            "manage": {
-                              "applications": []
-                            }
-                          },
-                          "data_source": [
-                            {
-                              "names": [],
-                              "privileges": {
-                                "__any_of": [
-                                  "create",
-                                  "delete",
-                                  "read_metadata",
-                                  "read",
-                                  "manage"
-                                ]
-                              }
-                            }
+                      }
+                    },
+                    "data_source": [
+                      {
+                        "names": [],
+                        "privileges": {
+                          "__any_of": [
+                            "create",
+                            "delete",
+                            "read_metadata",
+                            "read",
+                            "manage"
                           ]
                         }
-                      ]
+                      }
                     ]
                   },
                   "applications": [

@@ -9,6 +9,7 @@ import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-serve
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ENGINE_DESCRIPTOR_TYPE_NAME } from '../../../../common/privileges';
+import { MIN_SAMPLING_RATE } from '../global_state/constants';
 
 export const EngineDescriptorTypeName = ENGINE_DESCRIPTOR_TYPE_NAME;
 
@@ -425,6 +426,57 @@ const version10: SavedObjectsFullModelVersion = {
   },
 };
 
+const nonPriorityLogExtractionConfigSchemaV11 = schema.object({
+  lookbackPeriod: schema.maybe(schema.nullable(schema.string())),
+  delay: schema.maybe(schema.nullable(schema.string())),
+  docsLimit: schema.maybe(schema.nullable(schema.number())),
+  maxLogsPerPage: schema.maybe(schema.nullable(schema.number())),
+  frequency: schema.maybe(schema.nullable(schema.string())),
+  maxTimeWindowSize: schema.maybe(schema.nullable(schema.string())),
+  maxLogsPerWindow: schema.maybe(schema.nullable(schema.number())),
+  maxLogsPerWindowCapBehavior: schema.maybe(
+    schema.nullable(schema.oneOf([schema.literal('defer'), schema.literal('drop')] as const))
+  ),
+  samplingRate: schema.maybe(schema.nullable(schema.number({ min: MIN_SAMPLING_RATE, max: 1 }))),
+});
+
+const engineDescriptorSchemaV11 = engineDescriptorSchemaV10.extends({
+  nonPriorityLogExtractionConfig: schema.maybe(nonPriorityLogExtractionConfigSchemaV11),
+});
+
+// Adds nonPriorityLogExtractionConfig for future non-priority-specific overrides (e.g. samplingRate).
+// Not exposed via any API - populated only by internal server logic. Optional, so older descriptors
+// stay valid with no backfill. Not queried, so no mappings addition.
+const version11: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV11,
+    forwardCompatibility: engineDescriptorSchemaV11.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+const logExtractionRuntimeStateSchemaV12 = logExtractionRuntimeStateSchemaV7.extends({
+  sliceSamplingRate: schema.nullable(schema.number({ min: MIN_SAMPLING_RATE, max: 1 })),
+});
+
+const engineDescriptorSchemaV12 = engineDescriptorSchemaV11.extends({
+  logExtractionState: logExtractionRuntimeStateSchemaV12,
+  nonPriorityLogExtractionState: schema.nullable(logExtractionRuntimeStateSchemaV12),
+});
+
+// Adds sliceSamplingRate to the runtime cursor state, pinning the rate applied to an in-progress
+// log slice so a resumed run reuses it instead of recomputing from a skipped (and therefore
+// zeroed) volume probe. schema.nullable defaults absent keys to null, so no backfill is needed.
+// Runtime cursor fields are stored but not indexed (mappings are dynamic: false), so there is no
+// mappings addition either.
+const version12: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV12,
+    forwardCompatibility: engineDescriptorSchemaV12.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
@@ -441,6 +493,8 @@ export const EngineDescriptorType: SavedObjectsType = {
     8: version8,
     9: version9,
     10: version10,
+    11: version11,
+    12: version12,
   },
   hiddenFromHttpApis: true,
 };

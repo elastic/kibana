@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { evalsTools } from './tools/common';
+import { evalsExperimentTools } from './tools/tool_utils';
 
 /**
  * Guidance shown to the agent when the eval-experiment-authoring skill is loaded. It
@@ -54,21 +54,21 @@ preview/save/run once every input above has been confirmed by the user.
 ## Recommended Flow
 
 1. **Discover** the building blocks (only fetch what you still need):
-   - \`${evalsTools.listDatasets}\` - datasets and their ids.
-   - \`${evalsTools.listTargets}\` - agents to pick the \`agent_id\`. Only needed for \`target: 'agent'\`.
-   - \`${evalsTools.listConnectors}\` - model connectors and their ids. Use this to map a model name
+   - \`${evalsExperimentTools.listDatasets}\` - datasets and their ids.
+   - \`${evalsExperimentTools.listTargets}\` - agents to pick the \`agent_id\`. Only needed for \`target: 'agent'\`.
+   - \`${evalsExperimentTools.listConnectors}\` - model connectors and their ids. Use this to map a model name
      the user mentioned (e.g. "Claude Opus 4.5") to a \`connector_id\`, for both the model under
      evaluation and any llm evaluator judge.
-   - \`${evalsTools.listEvaluators}\` - evaluators. Note the flag per evaluator:
+   - \`${evalsExperimentTools.listEvaluators}\` - evaluators. Note the flag per evaluator:
      - \`needsJudgeConnector: true\` -> it is an \`llm\` evaluator and **requires** a \`connector_id\` per evaluator.
-2. **Preview** with \`${evalsTools.previewExperiment}\` to show the generated workflow YAML and the
+2. **Preview** with \`${evalsExperimentTools.previewExperiment}\` to show the generated workflow YAML and the
    run plan (single, dataset fan-out, or cross-model). This writes nothing — use it to confirm the
    configuration with the user.
 3. **Save or run**:
-   - \`${evalsTools.saveExperiment}\` - persist a reusable workflow. Returns a \`workflow_id\`.
+   - \`${evalsExperimentTools.saveExperiment}\` - persist a reusable workflow. Returns a \`workflow_id\`.
      To re-save the same experiment after edits, pass that \`workflow_id\` back so it is **updated in
      place** instead of duplicated.
-   - \`${evalsTools.runExperiment}\` - run immediately. This launches real workflow executions (which
+   - \`${evalsExperimentTools.runExperiment}\` - run immediately. This launches real workflow executions (which
      call the model/connectors and ingest scores), so it always asks the user to confirm first.
      It returns a \`results_url\` to view the live run.
 
@@ -78,7 +78,7 @@ preview/save/run once every input above has been confirmed by the user.
   entirely when \`target\` is \`inference\`.
 - \`connector_ids\`, \`dataset_ids\`, and \`evaluators\` each need at least one entry.
 - Resolve every connector id (models under evaluation and judge connectors) from
-  \`${evalsTools.listConnectors}\`. Never guess connector ids or try to read them from system
+  \`${evalsExperimentTools.listConnectors}\`. Never guess connector ids or try to read them from system
   indices or a throwaway workflow. If a name is unspecified or ambiguous, ask the user to pick from
   the list — do not default to the first match.
 - For every evaluator with \`needsJudgeConnector: true\`, include a \`connector_id\`. Omit it for

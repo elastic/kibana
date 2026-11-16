@@ -80,8 +80,8 @@ export function TransactionCharts({
     return pills;
   }, [transactionName, transactionType]);
 
-  // Seed the service flyout with the page's filters so its charts match the
-  // page charts.
+  // Chart filters only. The flyout copies the embeddable's resolved start/end
+  // when it opens and keeps that window across Refresh.
   const serviceMapFlyoutOptions = useMemo(
     () => ({
       transactionType,

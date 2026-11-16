@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-export { VISUALIZATION_ATTACHMENT_TYPE, MAX_VEGA_SPEC_LENGTH } from './constants';
+export {
+  VISUALIZATION_ATTACHMENT_TYPE,
+  MAX_VEGA_SPEC_LENGTH,
+  DEFAULT_TIME_RANGE,
+} from './constants';
 
 export type {
   VisualizationAttachmentData,
   ChartVisualizationAttachmentData,
   VisualizationRenderer,
 } from './visualization_types';
-export { getEffectiveRenderer, isCustomContentVisualization } from './visualization_types';
+export {
+  getEffectiveRenderer,
+  isCustomContentVisualization,
+  readAttachmentQueries,
+  toQueryList,
+} from './visualization_types';
 
 export {
   buildVegaSavedVis,

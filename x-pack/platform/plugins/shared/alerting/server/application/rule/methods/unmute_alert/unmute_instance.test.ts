@@ -71,6 +71,7 @@ describe('unmuteInstance()', () => {
       {
         mutedInstanceIds: [],
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
       },
       { version: '123' }

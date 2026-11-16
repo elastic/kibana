@@ -5,39 +5,22 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginStart, AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
 import type { GetScopedClients } from '../../routes/types';
+import type { SignificantEventsServer } from '../../types';
 import { createKIQueryGenerationSkill } from './ki_query_generation';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
+import { nightshiftSourcesManagementSkill } from './nightshift_sources_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
 import { featureIdentificationSkill } from './feature_identification';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
-import { streamsInvestigationManagementSkill } from './investigation_management';
 
 type SignificantEventsSkill = Parameters<AgentBuilderPluginStart['skills']['register']>[0];
-
-/**
- * Hides a skill's inline tools while significant events is unavailable. Registered tools declare
- * `availability` and get filtered out of the catalog; inline tools have no such hook, and skills
- * cannot be unregistered, so `getInlineTools` (re-invoked per skill load) is the only place left
- * that still sees current availability.
- */
-export const gateInlineTools = <TSkill extends SignificantEventsSkill>(
-  skill: TSkill,
-  isAvailable: () => Promise<boolean>
-): TSkill => {
-  const { getInlineTools } = skill;
-  if (!getInlineTools) {
-    return skill;
-  }
-
-  return { ...skill, getInlineTools: async () => ((await isAvailable()) ? getInlineTools() : []) };
-};
 
 interface RegisterSignificantEventsSkillsOptions {
   agentBuilder: AgentBuilderPluginStart;
@@ -45,8 +28,17 @@ interface RegisterSignificantEventsSkillsOptions {
   streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   maintenanceService?: SignificantEventsMaintenanceService;
   getScopedClients: GetScopedClients;
+  server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
   isAvailable: () => Promise<boolean>;
+  /**
+   * Request-time gate, shared with the significant events agents and tools. Skills cannot be
+   * unregistered, so this is what drops an already-registered skill from the catalog — and from
+   * elastic capabilities — once the feature is turned off. It also covers the skills' inline
+   * tools: all three paths that resolve them (`load_skill`, the read hook, and `selectTools`) go
+   * through the skill registry, which applies this gate on `list`, `get` and `bulkGet`.
+   */
+  availability: AvailabilityConfig;
 }
 
 /**
@@ -71,27 +63,31 @@ export const registerSignificantEventsSkills = async ({
   streamsKIsOnboardingClient,
   maintenanceService,
   getScopedClients,
+  server,
   logger,
   isAvailable,
+  availability,
 }: RegisterSignificantEventsSkillsOptions): Promise<{ ensureRegistered: () => Promise<void> }> => {
   const registeredSkillIds = new Set<string>();
 
   const getCoreSkills = (): SignificantEventsSkill[] => [
     knowledgeIndicatorsManagementSkill,
-    createKIQueryGenerationSkill({ getScopedClients, logger }),
+    nightshiftSourcesManagementSkill,
+    createKIQueryGenerationSkill({ getScopedClients, server, logger }),
     significantEventsKIGroundingSkill,
     significantEventsManagementSkill,
     featureIdentificationSkill,
     ...(streamsKIsOnboardingClient && maintenanceService
       ? [
           createKiIdentificationManagementSkill({
+            server,
             telemetry,
             streamsKIsOnboardingClient,
             maintenanceService,
+            getScopedClients,
           }),
         ]
       : []),
-    streamsInvestigationManagementSkill,
   ];
 
   // Registers only the skills not registered yet. Already-registered skills are skipped (a second
@@ -107,7 +103,7 @@ export const registerSignificantEventsSkills = async ({
     }
 
     const results = await Promise.allSettled(
-      pending.map((skill) => agentBuilder.skills.register(gateInlineTools(skill, isAvailable)))
+      pending.map((skill) => agentBuilder.skills.register({ ...skill, availability }))
     );
 
     const failed: string[] = [];

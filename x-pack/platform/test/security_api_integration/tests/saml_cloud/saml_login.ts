@@ -6,7 +6,9 @@
  */
 
 import type { Cookie } from 'tough-cookie';
+import url from 'url';
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 import { getSAMLResponse } from '@kbn/security-api-integration-helpers/saml/saml_tools';
@@ -22,7 +24,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
-      destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
+      destination: url.format({
+        protocol: 'http',
+        hostname: kibanaServerConfig.hostname,
+        port: kibanaServerConfig.port,
+        pathname: '/api/security/saml/callback',
+      }),
       sessionIndex: String(randomness.naturalNumber()),
       ...options,
     });
@@ -67,6 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Same user, same provider - session ID hasn't changed and cookie should still be valid.
       await supertest
         .get('/internal/security/me')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
         .expect(200);

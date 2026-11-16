@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import { TEST_MESSAGE } from '@kbn/connector-schemas/email/constants';
@@ -346,23 +346,26 @@ export const EmailParamsFields = ({
         </EuiFormRow>
       ) : null}
       {isTestMode ? (
-        <KbnInfoCallout
-          announceOnMount
-          data-test-subj="emailTestModeFixedMessageCallout"
-          title={i18n.translate(
-            'xpack.stackConnectors.components.email.testModeFixedMessageTitle',
-            { defaultMessage: 'Fixed test message' }
-          )}
-          text={
-            <p>
-              <FormattedMessage
-                id="xpack.stackConnectors.components.email.testModeFixedMessageDescription"
-                defaultMessage="Testing this connector always sends the fixed subject and message: {testMessage}"
-                values={{ testMessage: <strong>{TEST_MESSAGE}</strong> }}
-              />
-            </p>
-          }
-        />
+        <>
+          <EuiSpacer size="m" />
+          <KbnInfoCallout
+            announceOnMount
+            data-test-subj="emailTestModeFixedMessageCallout"
+            title={i18n.translate(
+              'xpack.stackConnectors.components.email.testModeFixedMessageTitle',
+              { defaultMessage: 'Fixed test message' }
+            )}
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.stackConnectors.components.email.testModeFixedMessageDescription"
+                  defaultMessage="Testing this connector always sends the fixed subject and message: {testMessage}"
+                  values={{ testMessage: <strong>{TEST_MESSAGE}</strong> }}
+                />
+              </p>
+            }
+          />
+        </>
       ) : (
         <>
           {showEmailSubjectAndMessage && (

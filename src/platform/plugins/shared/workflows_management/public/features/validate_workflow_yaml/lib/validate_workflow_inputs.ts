@@ -13,13 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { convertJsonSchemaToZodWithRefs } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { isDynamicValue } from '@kbn/workflows-yaml';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
 import {
   getValueFromValueNode,
   type StepInfo,
   type WorkflowLookup,
 } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { YamlValidationResult } from '../model/types';
 
 const WORKFLOW_EXECUTE_STEP_TYPES = ['workflow.execute', 'workflow.executeAsync'];
 const WITH_INPUTS_PREFIX = 'with.inputs.';

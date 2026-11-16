@@ -6,13 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  ANALYSIS_WINDOW_DAYS_MAX,
+  ANALYSIS_WINDOW_DAYS_MIN,
+  FP_COUNT_THRESHOLD_MAX,
+  FP_COUNT_THRESHOLD_MIN,
+  FP_RATE_THRESHOLD_PCT_MAX,
+  FP_RATE_THRESHOLD_PCT_MIN,
+} from '@kbn/alertzero-common';
 
 /** Copy for the Rule Tuning settings controls, owned by the Detection Watch team. */
-
-export const TUNING_THRESHOLDS_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.tuningThresholds.title',
-  { defaultMessage: 'Tuning thresholds' }
-);
 
 export const ANALYSIS_WINDOW_DAYS_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.analysisWindowDays.label',
@@ -22,12 +25,66 @@ export const ANALYSIS_WINDOW_DAYS_LABEL = i18n.translate(
 export const ANALYSIS_WINDOW_DAYS_HELP = i18n.translate(
   'xpack.alertzero.watches.settings.analysisWindowDays.help',
   {
-    defaultMessage:
-      'How many days of alerts Rule Tuning analyses. Applies to this Worker only. Between 1 and 30.',
+    defaultMessage: 'How many days of alerts this Worker analyzes. Between {min} and {max}.',
+    values: { min: ANALYSIS_WINDOW_DAYS_MIN, max: ANALYSIS_WINDOW_DAYS_MAX },
   }
 );
 
 export const ANALYSIS_WINDOW_DAYS_ARIA_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.analysisWindowDays.ariaLabel',
   { defaultMessage: 'Analysis window in days' }
+);
+
+export const QUALIFYING_THRESHOLDS_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.qualifyingThresholds.label',
+  { defaultMessage: 'Qualifying thresholds' }
+);
+
+export const QUALIFYING_THRESHOLDS_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.qualifyingThresholds.help',
+  {
+    defaultMessage:
+      'A rule is analyzed only when it meets both thresholds in this window. Count between {countMin} and {countMax}, rate between {rateMin} and {rateMax}%.',
+    values: {
+      countMin: FP_COUNT_THRESHOLD_MIN,
+      countMax: FP_COUNT_THRESHOLD_MAX,
+      rateMin: FP_RATE_THRESHOLD_PCT_MIN,
+      rateMax: FP_RATE_THRESHOLD_PCT_MAX,
+    },
+  }
+);
+
+/** Tooltip on the thresholds row: defines both thresholds. */
+export const QUALIFYING_THRESHOLDS_FIELDS_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.qualifyingThresholds.fieldsHelp',
+  {
+    defaultMessage:
+      "Count is alerts closed as false positives within the analysis window. Rate is the share of the rule's alerts closed as false positives.",
+  }
+);
+
+/** Conjunction rendered between the two threshold inputs. */
+export const QUALIFYING_THRESHOLDS_AND = i18n.translate(
+  'xpack.alertzero.watches.settings.qualifyingThresholds.and',
+  { defaultMessage: 'and' }
+);
+
+export const FP_COUNT_THRESHOLD_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.fpCountThreshold.label',
+  { defaultMessage: 'False positive count' }
+);
+
+export const FP_COUNT_THRESHOLD_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.fpCountThreshold.ariaLabel',
+  { defaultMessage: 'False positive count threshold' }
+);
+
+export const FP_RATE_THRESHOLD_PCT_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.fpRateThresholdPct.label',
+  { defaultMessage: 'False positive rate' }
+);
+
+export const FP_RATE_THRESHOLD_PCT_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.fpRateThresholdPct.ariaLabel',
+  { defaultMessage: 'False positive rate threshold in percent' }
 );

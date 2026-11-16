@@ -7,6 +7,7 @@
 
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { getRiskScoreConfigurationWithDefaults, type RiskScoreConfiguration } from '../common';
 
@@ -32,8 +33,15 @@ export const useRiskEngineSettingsQuery = () => {
   } = useQuery<RiskScoreConfiguration | undefined>(
     FETCH_RISK_ENGINE_SETTINGS,
     async () => {
-      const riskEngineSettings = await fetchRiskEngineSettings();
-      return getRiskScoreConfigurationWithDefaults(riskEngineSettings);
+      try {
+        const riskEngineSettings = await fetchRiskEngineSettings();
+        return getRiskScoreConfigurationWithDefaults(riskEngineSettings);
+      } catch (error) {
+        if (isHttpFetchError(error) && error.response?.status === 404) {
+          return getRiskScoreConfigurationWithDefaults();
+        }
+        throw error;
+      }
     },
     { retry: false, refetchOnWindowFocus: false }
   );

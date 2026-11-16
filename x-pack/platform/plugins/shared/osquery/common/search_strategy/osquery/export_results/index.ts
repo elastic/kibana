@@ -25,6 +25,12 @@ export interface ExportResultsRequestOptions extends RequestBasicOptions {
    * Composed by the route handler before delegating to the factory.
    */
   baseFilter: string;
+  /**
+   * Live-query `action_id` the route has already matched against its parent action.
+   * The search strategy verifies it against the actions index itself before reading
+   * without the data-document space filter. Scheduled exports leave it unset.
+   */
+  actionId?: string;
   /** Active PIT id and keep-alive duration for paginated export fetches. */
   pit: { id: string; keep_alive: string };
   /** Optional additional KQL filter supplied by the caller. */

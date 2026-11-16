@@ -155,17 +155,28 @@ function isVisibleStepType(stepType: string): boolean {
  * @param stackFrames - Array of stack frames representing the execution hierarchy
  * @returns A string array representing the deterministic step path
  */
+const RUNTIME_STEP_NODE_TYPES = new Set([
+  'enter-foreach',
+  'enter-foreach-iteration',
+  'enter-iteration',
+]);
+
 export function flattenStackFrames(stackFrames: StackFrame[]): string[] {
   return stackFrames.flatMap((stackFrame) => {
-    const scopeWithSubScope = stackFrame.nestedScopes
+    const scopeIds = stackFrame.nestedScopes
       .filter((scopeEntry) => scopeEntry.scopeId)
-      .map((scopeEntry) => scopeEntry.scopeId!);
+      .map((scopeEntry) => scopeEntry.scopeId as string);
 
-    if (!scopeWithSubScope.length) {
-      return [];
+    // scopeId-based: foreach/if/retry still nest as stepId > "0" / "true" / "1-attempt"
+    if (scopeIds.length) {
+      return [stackFrame.stepId, ...scopeIds];
     }
 
-    return [stackFrame.stepId, ...scopeWithSubScope];
+    // runtime-step-based: real iteration steps have no scopeId; nest under the stepId
+    const isRuntimeStep = stackFrame.nestedScopes.some((scope) =>
+      RUNTIME_STEP_NODE_TYPES.has(scope.nodeType)
+    );
+    return isRuntimeStep ? [stackFrame.stepId] : [];
   });
 }
 
@@ -364,21 +375,21 @@ const ATTEMPT_ID_REGEX = /^(\d+)-attempt$/;
  * - 1 attempt → hoist the leaf; zero retry chrome (config alone is not history)
  * - 2+ attempts → parent is the step itself (real name + step-type); children are attempts
  *
- * Fallback / on-failure branch steps are out of scope until we confirm how those
- * results are recorded; they should hang off this same parent via the shared node
- * pattern when added.
+ * Other children of the same step (e.g. its `fallback` scope) stay after the attempts.
  */
 function transformRetryAttempts(nodes: StepExecutionTreeItem[]): StepExecutionTreeItem[] {
   return nodes.map((node) => {
-    const allChildrenAreAttempts =
-      node.children.length > 0 && node.children.every((c) => ATTEMPT_ID_REGEX.test(c.stepId));
+    const attemptNodes = node.children.filter((c) => ATTEMPT_ID_REGEX.test(c.stepId));
+    const otherChildren = transformRetryAttempts(
+      node.children.filter((c) => !ATTEMPT_ID_REGEX.test(c.stepId))
+    );
 
-    if (allChildrenAreAttempts) {
-      const attemptCount = node.children.length;
+    if (attemptNodes.length > 0) {
+      const attemptCount = attemptNodes.length;
       const builtAttempts: StepExecutionTreeItem[] = [];
 
-      for (let attemptIdx = 0; attemptIdx < node.children.length; attemptIdx++) {
-        const attemptNode = node.children[attemptIdx];
+      for (let attemptIdx = 0; attemptIdx < attemptNodes.length; attemptIdx++) {
+        const attemptNode = attemptNodes[attemptIdx];
         const match = attemptNode.stepId.match(ATTEMPT_ID_REGEX);
         const attemptNumber = match ? parseInt(match[1], 10) : attemptIdx + 1;
         const isFinalAttempt = attemptIdx === attemptCount - 1;
@@ -419,7 +430,7 @@ function transformRetryAttempts(nodes: StepExecutionTreeItem[]): StepExecutionTr
           isFinalAttempt: undefined,
           isRetryAttempt: undefined,
           retryAttemptCount: undefined,
-          children: only.children,
+          children: [...only.children, ...otherChildren],
         };
       }
 
@@ -439,16 +450,17 @@ function transformRetryAttempts(nodes: StepExecutionTreeItem[]): StepExecutionTr
         status: tip?.status ?? node.status,
         retryAttemptCount: attemptCount,
         retryRecovered: Boolean(tipSucceeded && earlierFailed),
-        children: builtAttempts,
+        children: [...builtAttempts, ...otherChildren],
       };
     }
 
-    return { ...node, children: transformRetryAttempts(node.children) };
+    return { ...node, children: otherChildren };
   });
 }
 
 /**
  * Injects child workflow execution steps into the tree as children of `workflow.execute` nodes.
+ * Parent siblings wrongly nested under execute are lifted back to the same level.
  * For steps where child data is still loading, adds a loading placeholder to show the expand arrow.
  */
 export function injectChildWorkflowSteps(
@@ -458,62 +470,107 @@ export function injectChildWorkflowSteps(
 ): { tree: StepExecutionTreeItem[]; childStepExecutions: WorkflowStepExecutionDto[] } {
   const childStepExecutions: WorkflowStepExecutionDto[] = [];
 
-  function processNode(node: StepExecutionTreeItem): StepExecutionTreeItem {
-    const isWorkflowExecuteStep = isExecuteSyncStepType(node.stepType) && node.stepExecutionId;
+  const toChildItems = (visibleSteps: WorkflowStepExecutionDto[]): StepExecutionTreeItem[] =>
+    visibleSteps.map((step) => ({
+      stepId: step.stepId,
+      stepType: step.stepType ?? 'unknown',
+      executionIndex: step.stepExecutionIndex,
+      stepExecutionId: step.id,
+      status: step.status,
+      isChildWorkflowStep: true,
+      children: [],
+    }));
+
+  const splitExecuteChildren = (
+    children: StepExecutionTreeItem[]
+  ): { retryAttempts: StepExecutionTreeItem[]; lifted: StepExecutionTreeItem[] } => {
+    const processed = processList(children);
+    return {
+      retryAttempts: processed.filter((child) => child.isRetryAttempt),
+      lifted: processed.filter((child) => !child.isRetryAttempt),
+    };
+  };
+
+  function processNode(node: StepExecutionTreeItem): {
+    node: StepExecutionTreeItem;
+    lifted: StepExecutionTreeItem[];
+  } {
+    const isWorkflowExecuteStep = isExecuteSyncStepType(node.stepType) && !node.isRetryAttempt;
 
     if (!isWorkflowExecuteStep) {
       return {
-        ...node,
-        children: node.children.map(processNode),
+        node: {
+          ...node,
+          children: processList(node.children),
+        },
+        lifted: [],
       };
     }
 
-    if (childExecutionsMap.has(node.stepExecutionId!)) {
-      const childExecution = childExecutionsMap.get(node.stepExecutionId!)!;
+    const executeStepExecutionIds = [
+      node.stepExecutionId,
+      ...node.children
+        .filter((child) => child.isRetryAttempt)
+        .map((child) => child.stepExecutionId),
+    ].filter((id): id is string => Boolean(id));
+    const childMapKey = executeStepExecutionIds.find((id) => childExecutionsMap.has(id));
+
+    if (childMapKey) {
+      const childExecution = childExecutionsMap.get(childMapKey)!;
       const visibleSteps = childExecution.stepExecutions.filter((step) =>
         isVisibleStepType(step.stepType ?? '')
       );
       childStepExecutions.push(...visibleSteps);
-      const childItems: StepExecutionTreeItem[] = visibleSteps.map((step) => ({
-        stepId: step.stepId,
-        stepType: step.stepType ?? 'unknown',
-        executionIndex: step.stepExecutionIndex,
-        stepExecutionId: step.id,
-        status: step.status,
-        isChildWorkflowStep: true,
-        children: [],
-      }));
-
+      const { retryAttempts, lifted } = splitExecuteChildren(node.children);
       return {
-        ...node,
-        children: [...childItems, ...node.children.map(processNode)],
+        node: {
+          ...node,
+          children: [...toChildItems(visibleSteps), ...retryAttempts],
+        },
+        lifted,
       };
     }
 
     if (isLoadingChildData && node.status && isTerminalStatus(node.status)) {
+      const { retryAttempts, lifted } = splitExecuteChildren(node.children);
       return {
-        ...node,
-        children: [
-          {
-            stepId: 'Loading...',
-            stepType: '__loading',
-            executionIndex: 0,
-            stepExecutionId: `__loading_${node.stepExecutionId}`,
-            status: ExecutionStatus.RUNNING,
-            isChildWorkflowStep: true,
-            children: [],
-          },
-          ...node.children.map(processNode),
-        ],
+        node: {
+          ...node,
+          children: [
+            {
+              stepId: 'Loading...',
+              stepType: '__loading',
+              executionIndex: 0,
+              stepExecutionId: `__loading_${childMapKey ?? node.stepExecutionId ?? node.stepId}`,
+              status: ExecutionStatus.RUNNING,
+              isChildWorkflowStep: true,
+              children: [],
+            },
+            ...retryAttempts,
+          ],
+        },
+        lifted,
       };
     }
 
+    const { retryAttempts, lifted } = splitExecuteChildren(node.children);
     return {
-      ...node,
-      children: node.children.map(processNode),
+      node: {
+        ...node,
+        children: retryAttempts,
+      },
+      lifted,
     };
   }
 
-  const processedTree = tree.map(processNode);
-  return { tree: processedTree, childStepExecutions };
+  function processList(nodes: StepExecutionTreeItem[]): StepExecutionTreeItem[] {
+    const result: StepExecutionTreeItem[] = [];
+    for (const node of nodes) {
+      const { node: next, lifted } = processNode(node);
+      result.push(next, ...lifted);
+    }
+    return result;
+  }
+
+  return { tree: processList(tree), childStepExecutions };
 }

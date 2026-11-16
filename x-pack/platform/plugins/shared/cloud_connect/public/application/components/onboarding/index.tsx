@@ -17,7 +17,7 @@ import {
   EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
-import { arrowDeployCloud } from '@elastic/eui-illustrations';
+import { api } from '@elastic/eui-illustrations';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useCloudConnectedAppContext } from '../../app_context';
@@ -101,7 +101,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
         </EuiFlexItem>
         <EuiFlexItem style={{ maxWidth: 340 }}>
           <EuiIllustration
-            type={arrowDeployCloud}
+            type={api}
             alt={i18n.translate('xpack.cloudConnect.onboarding.illustration.alt', {
               defaultMessage: 'Illustration for Cloud Connect',
             })}

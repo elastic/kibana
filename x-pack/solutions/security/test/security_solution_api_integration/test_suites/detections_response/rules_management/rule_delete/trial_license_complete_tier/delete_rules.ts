@@ -21,7 +21,6 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   updateUsername,
 } from '../../../utils';
-
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {

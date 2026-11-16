@@ -11,26 +11,34 @@ export { FlyoutTemplate } from './src/flyout_template';
 export { useFlyoutClose } from './src/context';
 
 /** @internal Openers only: hands `FlyoutTemplate` the root props it must render with. */
-export { FlyoutTemplateManagedProvider } from './src/context';
+export { FlyoutTemplateManagedProvider } from './src/frame';
 export type { FlyoutTemplateManaged } from './src/context';
 
 export type {
   FlyoutTemplateProps,
+  FlyoutTemplateFrameProps,
   FlyoutHeaderProps,
   FlyoutHeaderBadgeProps,
   FlyoutHeaderInfoBlockProps,
   FlyoutHeaderMetaBlockProps,
   FlyoutTabProps,
+  FlyoutTabBarProps,
   FlyoutBodyProps,
+  FlyoutBodyCalloutLevel,
+  FlyoutBodyCalloutProps,
   FlyoutBodyTabPanelProps,
   FlyoutBodySectionProps,
   FlyoutBodySectionAction,
   FlyoutBodySubsectionProps,
   FlyoutBodyAccordionProps,
   FlyoutFooterProps,
+  FlyoutFooterPrimaryActionColor,
   FlyoutFooterPrimaryActionProps,
   FlyoutFooterSecondaryActionProps,
+  FlyoutFooterAiActionIconType,
   FlyoutFooterPrimaryActionMenuProps,
   FlyoutFooterMenuPanel,
   FlyoutFooterMenuItem,
+  FlyoutFooterMenuCustomItem,
+  FlyoutFooterMenuItemRenderContext,
 } from './src/types';

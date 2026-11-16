@@ -57,6 +57,38 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
   const retry = getService('retry');
   const log = getService('log');
 
+  const createOrUpdateEntity = async (
+    entityType: 'host' | 'user',
+    entityConfig: HostEntityConfig | UserEntityConfig
+  ): Promise<void> => {
+    const route = `/api/security/entity_store/entities/${entityType}`;
+    const createRes = await withHeaders(supertest.post(route)).send(entityConfig);
+
+    if (createRes.status === 200) {
+      return;
+    }
+
+    if (createRes.status !== 409) {
+      throw new Error(
+        `Create ${entityType} entity failed (status ${createRes.status}): ${JSON.stringify(
+          createRes.body
+        )}`
+      );
+    }
+
+    // The risk-score maintainer can create the entity from archived alerts before this test
+    // seeds its enrichment fields. Update that entity instead of treating the expected race
+    // as a setup failure.
+    const updateRes = await withHeaders(supertest.put(`${route}?force=true`)).send(entityConfig);
+    if (updateRes.status !== 200) {
+      throw new Error(
+        `Update ${entityType} entity failed (status ${updateRes.status}): ${JSON.stringify(
+          updateRes.body
+        )}`
+      );
+    }
+  };
+
   const setup = async (enrichmentConfig: EnrichmentSetupConfig): Promise<void> => {
     const entityTypes: string[] = [];
     if (enrichmentConfig.hosts?.length) entityTypes.push('host');
@@ -112,29 +144,11 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
     );
 
     for (const hostConfig of enrichmentConfig.hosts ?? []) {
-      const createRes = await withHeaders(
-        supertest.post('/api/security/entity_store/entities/host')
-      ).send(hostConfig);
-      if (createRes.status !== 200) {
-        throw new Error(
-          `Create host entity failed (status ${createRes.status}): ${JSON.stringify(
-            createRes.body
-          )}`
-        );
-      }
+      await createOrUpdateEntity('host', hostConfig);
     }
 
     for (const userConfig of enrichmentConfig.users ?? []) {
-      const createRes = await withHeaders(
-        supertest.post('/api/security/entity_store/entities/user')
-      ).send(userConfig);
-      if (createRes.status !== 200) {
-        throw new Error(
-          `Create user entity failed (status ${createRes.status}): ${JSON.stringify(
-            createRes.body
-          )}`
-        );
-      }
+      await createOrUpdateEntity('user', userConfig);
     }
   };
 

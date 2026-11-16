@@ -81,7 +81,7 @@ export class WorkflowExecutionRuntimeManager {
   private coreStart?: CoreStart;
   private dependencies?: ContextDependencies;
   private telemetryClient?: WorkflowExecutionTelemetryClient;
-  private telemetryReported: boolean = false;
+  private terminalStateFinalized: boolean = false;
 
   constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
     this.workflowGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
@@ -525,9 +525,12 @@ export class WorkflowExecutionRuntimeManager {
       }
     }
 
+    // Terminal finalization runs once per run; later saves must not re-stamp finishedAt/duration,
+    // re-log completion or re-report telemetry.
     if (
-      (workflowExecutionUpdate.status && isTerminalStatus(workflowExecutionUpdate.status)) ||
-      isTerminalStatus(workflowExecution.status)
+      !this.terminalStateFinalized &&
+      ((workflowExecutionUpdate.status && isTerminalStatus(workflowExecutionUpdate.status)) ||
+        isTerminalStatus(workflowExecution.status))
     ) {
       const startedAt = new Date(workflowExecution.startedAt);
       const finishDate = new Date();
@@ -566,8 +569,8 @@ export class WorkflowExecutionRuntimeManager {
         }
       }
 
-      // Report telemetry for terminal status (only once)
       this.reportTelemetryIfTerminal(workflowExecution, workflowExecutionUpdate);
+      this.terminalStateFinalized = true;
     }
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
@@ -596,22 +599,23 @@ export class WorkflowExecutionRuntimeManager {
 
   /**
    * Reports telemetry for workflow execution when it reaches a terminal status.
-   * Only reports once per execution to avoid duplicate events.
+   * Called only from the once-per-run terminal block in saveState.
    */
   private reportTelemetryIfTerminal(
     workflowExecution: EsWorkflowExecution,
     workflowExecutionUpdate: Partial<EsWorkflowExecution>
   ): void {
     const finalStatus = workflowExecutionUpdate.status || workflowExecution.status;
-    if (!this.telemetryClient || this.telemetryReported || !isTerminalStatus(finalStatus)) {
+    if (!this.telemetryClient || !isTerminalStatus(finalStatus)) {
       return;
     }
 
-    this.telemetryReported = true;
     const stepExecutions = this.workflowExecutionState.getAllStepExecutions();
     const finalWorkflowExecution = {
       ...workflowExecution,
       ...workflowExecutionUpdate,
+      // The update's context is rebuilt without the raw parent* keys, so keep the stored ones.
+      context: { ...workflowExecution.context, ...workflowExecutionUpdate.context },
       status: finalStatus,
     } as EsWorkflowExecution;
 

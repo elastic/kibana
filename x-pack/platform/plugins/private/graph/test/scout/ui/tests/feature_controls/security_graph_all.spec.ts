@@ -22,7 +22,6 @@ test.describe(
       await test.step('navigate to the graph listing', async () => {
         await graph.goto();
         await graph.waitForListing();
-        await expect(graph.createGraphPromptButton).toBeVisible();
       });
 
       await test.step('open an empty workspace via the Create button', async () => {

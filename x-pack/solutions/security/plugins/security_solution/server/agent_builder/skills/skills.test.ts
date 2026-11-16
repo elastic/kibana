@@ -17,14 +17,16 @@ import {
   automaticMigrationRulesStopMigrationSkill,
   automaticMigrationRulesUpdateMigrationSkill,
   automaticMigrationRulesDeleteMigrationSkill,
+  automaticMigrationRulesInstallRulesSkill,
+  automaticMigrationRulesUpdateTranslatedRuleSkill,
 } from './siem_migration';
+import { RULE_MIGRATION_SKILLS } from './siem_migration/rules/skill_catalog';
+import { SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID } from '../tools/siem_migrations';
 import { createElasticDefendPolicyManagementSkill } from './elastic_defend_policy_management';
 
 const endpointAppContextService = createMockEndpointAppContext().service;
-const getStartServices = jest.fn();
 const elasticDefendPolicyManagementSkill = createElasticDefendPolicyManagementSkill({
   endpointAppContextService,
-  getStartServices,
 });
 
 const ALL_SKILLS = [
@@ -36,6 +38,7 @@ const ALL_SKILLS = [
   automaticMigrationRulesStopMigrationSkill,
   automaticMigrationRulesUpdateMigrationSkill,
   automaticMigrationRulesDeleteMigrationSkill,
+  automaticMigrationRulesInstallRulesSkill,
   elasticDefendPolicyManagementSkill,
 ];
 
@@ -175,14 +178,20 @@ describe('Security Skills', () => {
       expect(automaticMigrationRulesSummarizeSkill.description.length).toBeLessThanOrEqual(1024);
     });
 
-    it('returns 4 registry tools (under 25 limit)', () => {
+    it('returns 5 registry tools (under 25 limit)', () => {
       const tools = automaticMigrationRulesSummarizeSkill.getRegistryTools!();
-      expect(tools).toHaveLength(4);
+      expect(tools).toHaveLength(5);
       expect((tools as string[]).length).toBeLessThanOrEqual(25);
     });
 
     it('has no inline tools', () => {
       expect(automaticMigrationRulesSummarizeSkill.getInlineTools).toBeUndefined();
+    });
+
+    it('should be able to list the missing resources of a migration', () => {
+      expect(automaticMigrationRulesSummarizeSkill.getRegistryTools!()).toContain(
+        SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID
+      );
     });
 
     it('content includes the Automatic Migration capabilities block', () => {
@@ -268,6 +277,32 @@ describe('Security Skills', () => {
       expect(automaticMigrationRulesStartMigrationSkill.description).not.toContain(
         'SIEM migration'
       );
+    });
+  });
+
+  describe('automatic-migration-rules-install-rules skill', () => {
+    it('validates and registers the complete install workflow tool set', async () => {
+      await expect(
+        validateSkillDefinition(automaticMigrationRulesInstallRulesSkill)
+      ).resolves.toBeDefined();
+
+      expect(automaticMigrationRulesInstallRulesSkill.getRegistryTools!()).toEqual([
+        'security.siem_migration.get_all_rule_migration_stats',
+        'security.siem_migration.get_rule_migration_stats',
+        'security.siem_migration.get_rule_migration_translation_stats',
+        'security.siem_migration.get_migration_rules',
+        'security.build_redirect_url',
+        'security.siem_migration.install_migration_rules',
+      ]);
+    });
+
+    it('documents result semantics, linked sample, and follow-up choices', () => {
+      const { content } = automaticMigrationRulesInstallRulesSkill;
+
+      expect(content).toContain('Rules: All');
+      expect(content).toContain('processed N rules');
+      expect(content).toContain('/app/security/rules/id/');
+      expect(content).toContain('Sample of installed rules');
     });
   });
 
@@ -457,6 +492,26 @@ describe('Security Skills', () => {
           expect(ref.relativePath).toMatch(/^(?:\.|\.\/[a-z0-9-_]+)$/);
           expect(ref.name).toMatch(/^[a-z0-9-_]+$/);
           expect(ref.content.length).toBeGreaterThan(0);
+        }
+      }
+    });
+
+    it('should list every Automatic Rule Migration skill, with its description, in each sibling skill', () => {
+      const siblingSkills = [
+        automaticMigrationRulesSummarizeSkill,
+        automaticMigrationRulesStartMigrationSkill,
+        automaticMigrationRulesStopMigrationSkill,
+        automaticMigrationRulesUpdateMigrationSkill,
+        automaticMigrationRulesDeleteMigrationSkill,
+        automaticMigrationRulesInstallRulesSkill,
+        automaticMigrationRulesUpdateTranslatedRuleSkill,
+      ];
+      for (const skill of siblingSkills) {
+        for (const { id, description } of Object.values(RULE_MIGRATION_SKILLS)) {
+          expect(skill.content).toContain(`- **${id}**`);
+          for (const line of description.split('\n').filter(Boolean)) {
+            expect(skill.content).toContain(line);
+          }
         }
       }
     });

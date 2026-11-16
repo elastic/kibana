@@ -71,7 +71,7 @@ const BASE_COMPOSE_VALUES: FormValues = {
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'composed', base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
+  query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
@@ -357,6 +357,44 @@ describe('RuleBuilderAlertConditionStep', () => {
     );
 
     expect(screen.queryByTestId('ruleBuilderConditionOperator')).not.toBeInTheDocument();
+  });
+
+  it('seeds a newly added condition with a currently valid metric after a stat rename', () => {
+    let builderState = makeBuilderState();
+    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+      builderState = next;
+    });
+
+    const { rerender } = render(
+      <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.change(screen.getByTestId('ruleBuilderStatLabel-0'), {
+      target: { value: 'my_metric' },
+    });
+    const afterRename = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+
+    rerender(
+      <Wrapper builderState={afterRename} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('ruleBuilderAddCondition'));
+    const afterAdd = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+
+    expect(afterAdd.alertConditions).toHaveLength(2);
+    expect(afterAdd.alertConditions[1].metric).toBe('my_metric');
   });
 
   it('adds and removes evaluations and reflects label in condition metric dropdown', () => {

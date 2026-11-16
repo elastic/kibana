@@ -59,6 +59,7 @@ export const getRunStepDefinition = ({
         // the documented "all inputs optional" contract holds for every path.
         const {
           additional_context: additionalContext,
+          aggregate_by: aggregateBy,
           alert_retrieval_mode: alertRetrievalMode = 'custom_query',
           alert_retrieval_workflow_ids: alertRetrievalWorkflowIds = [],
           alerts,
@@ -67,10 +68,13 @@ export const getRunStepDefinition = ({
           esql_query: esqlQuery,
           feature_id: featureId,
           filter,
+          generation_source: generationSource,
+          ground_truth_gate_enabled: groundTruthGateEnabled = true,
           // The engine does not apply the schema's zod defaults to
           // `context.input`, so the default is mirrored here (see the note above).
           include_attack_discoveries: includeAttackDiscoveries = true,
           mode = 'sync',
+          plugin_id: pluginId,
           size = 100,
           start,
           validation_workflow_id: validationWorkflowId = '',
@@ -146,7 +150,11 @@ export const getRunStepDefinition = ({
           alert_retrieval_workflows_enabled: alertRetrievalWorkflowIds.length > 0,
           default_retrieval_enabled: !hasProvidedAlerts && alertRetrievalMode !== 'custom_only',
           ...(esqlQuery != null ? { esql_query: esqlQuery } : {}),
-          skill_enabled: true,
+          ...(generationSource != null ? { generation_source: generationSource } : {}),
+          ground_truth_gate_enabled: groundTruthGateEnabled,
+          // The skill's additional retrieval runs inside the gate, so it is off
+          // with the gate. That also keeps the "no alert source" check strict.
+          skill_enabled: groundTruthGateEnabled,
           validation_workflow_id: validationWorkflowId,
         };
 
@@ -196,6 +204,11 @@ export const getRunStepDefinition = ({
           shouldStopExecution: () => context.abortSignal?.aborted === true,
           size,
           start,
+          // Only an opting-in caller (a workflow naming `plugin_id`) tags the model calls. The
+          // workflow template can hand an unset input over as an empty string.
+          ...(pluginId
+            ? { telemetryMetadata: { pluginId, ...(aggregateBy ? { aggregateBy } : {}) } }
+            : {}),
           trigger: 'workflow',
           type: 'attack_discovery',
           workflowConfig,

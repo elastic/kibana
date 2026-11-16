@@ -42,7 +42,7 @@ const locationStats: LocationAgentStats = {
   locationLabel: 'Local Docker PL',
   agentPolicyId: 'policy-1',
   agentPolicyName: 'Policy One',
-  isAgentSharding: false,
+  isShardingActive: false,
   agents: [
     {
       host: 'host-a',
@@ -60,6 +60,7 @@ const locationStats: LocationAgentStats = {
       platform: 'linux',
       tags: [],
       monitorsAssigned: null,
+      complete: false,
     },
   ],
 };

@@ -9,7 +9,6 @@ import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { MeterFillStyle } from '@elastic/charts';
 import { getFallbackDataBounds } from '@kbn/coloring';
-import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import type { MeterFill } from '@elastic/charts';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
@@ -65,6 +64,7 @@ export const createGridCell = (
     colorMapping?: string
   ) => CellColorFn,
   paletteService: PaletteRegistry,
+  isInteractive: boolean,
   fitRowToContent?: boolean,
   density?: DataGridDensity
 ) => {
@@ -74,7 +74,6 @@ export const createGridCell = (
 
   return ({ rowIndex, columnId, setCellProps, isExpanded }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, handleFilterClick, minMaxByColumnId } = useContext(DataContext);
-    const { euiTheme } = useEuiTheme();
     const hasColorStyleRef = useRef(false);
 
     const rawValue: RawValue = table?.rows[rowIndex]?.[columnId];
@@ -233,7 +232,7 @@ export const createGridCell = (
         if (!progressBarProps) {
           return (
             <FormattedCell
-              content={formatter?.convertToReact(rawValue) ?? fallbackText}
+              content={formatter?.convertToReact(rawValue, { isInteractive }) ?? fallbackText}
               alignment={alignment}
               fitRowToContent={fitRowToContent}
               isColored={false}
@@ -243,7 +242,7 @@ export const createGridCell = (
         return (
           <ProgressBarCell
             value={progressBarProps.value}
-            label={formatter?.convertToReact(rawValue) ?? fallbackText}
+            label={formatter?.convertToReact(rawValue, { isInteractive }) ?? fallbackText}
             domain={progressBarProps.domain}
             fill={progressBarProps.fill}
             size={progressBarSize}
@@ -266,18 +265,9 @@ export const createGridCell = (
           formatter && isMissingValue(rawValue)
             ? formatter.convertToReact(rawValue)
             : formatter?.convertToText(rawValue) ?? fallbackText;
-        const backgroundColor =
-          colorMode === 'cell' && !isEmptyValue(rawValue)
-            ? getCellColor(columnId, palette, colorMapping)(rawValue)
-            : null;
-        // Only override EuiLink color when the cell background is colored (colorMode: cell).
-        const linkColor =
-          colorMode === 'cell' && backgroundColor
-            ? makeHighContrastColor(
-                isDarkMode ? euiTheme.colors.highlight : euiTheme.colors.textPrimary,
-                4.5 // WCAG AA contrast ratio (default in EUI)
-              )(backgroundColor)
-            : undefined;
+        // When the cell is colored, drop the link color: `cell` mode uses the high-contrast text
+        // color for the background, `text` mode uses the mapped color itself.
+        const linkColor = cellStyle?.color;
 
         return (
           <LinkCell
@@ -294,7 +284,7 @@ export const createGridCell = (
       default:
         return (
           <FormattedCell
-            content={formatter?.convertToReact(rawValue) ?? fallbackText}
+            content={formatter?.convertToReact(rawValue, { isInteractive }) ?? fallbackText}
             alignment={alignment}
             fitRowToContent={fitRowToContent}
             isColored={Boolean(cellStyle)}

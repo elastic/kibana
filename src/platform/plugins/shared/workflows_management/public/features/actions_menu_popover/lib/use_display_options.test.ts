@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildDisplayOptions, STEPS_PREFIX } from './use_display_options';
+import { buildDisplayOptions, getActionMatchRank, STEPS_PREFIX } from './use_display_options';
 import type {
   ActionOptionData,
   EditorCommand,
@@ -109,6 +109,31 @@ describe('buildDisplayOptions', () => {
         searchTerm: `${STEPS_PREFIX}a`,
       });
       expect(groupLabels(result)).toEqual([]);
+    });
+  });
+
+  describe('getActionMatchRank word matching', () => {
+    const fail = makeAction(
+      'workflow.fail',
+      'Fail Workflow',
+      'Stop the workflow with a failed status'
+    );
+
+    it('matches every word in any order across id and label', () => {
+      expect(getActionMatchRank(fail, 'workflow fa')).toBe(6);
+      expect(getActionMatchRank(fail, 'workflow fail')).toBe(6);
+    });
+
+    it('ranks substring matches before word matches', () => {
+      expect(getActionMatchRank(fail, 'fail work')).toBe(4);
+    });
+
+    it('does not match words found only in the description', () => {
+      expect(getActionMatchRank(fail, 'workflow status')).toBeGreaterThan(6);
+    });
+
+    it('does not match when one word is missing', () => {
+      expect(getActionMatchRank(fail, 'workflow output')).toBeGreaterThan(6);
     });
   });
 

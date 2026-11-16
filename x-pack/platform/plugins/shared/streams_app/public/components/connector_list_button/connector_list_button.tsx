@@ -104,7 +104,7 @@ export function ConnectorListButtonBase({
                 data-test-subj="streamsAppAiPickConnectorButton"
                 onClick={togglePopover}
                 size={buttonSize}
-                iconType={'gear' as AiButtonIconType}
+                iconType={'chevronSingleDown' as AiButtonIconType}
                 aria-label={CHOOSE_CONNECTOR_ARIA_LABEL}
               />
             }

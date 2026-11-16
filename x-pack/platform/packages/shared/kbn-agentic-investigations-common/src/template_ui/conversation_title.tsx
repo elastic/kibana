@@ -12,7 +12,7 @@ import { EuiTitle } from '@elastic/eui';
  * Stands in for the investigation's own header, both while the header slot's chunk loads and when
  * the investigation cannot be resolved, so the flyout's labelling target always has text.
  */
-export const ConversationTitle = ({ title }: { title: string }) => (
+export const ConversationTitle = ({ title }: { title: React.ReactNode }) => (
   <EuiTitle size="s">
     <h2>{title}</h2>
   </EuiTitle>

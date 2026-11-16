@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { euiSelectors } from '@kbn/scout';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -26,10 +27,10 @@ export class FileDataVisualizer {
 
   constructor(private readonly page: ScoutPage) {
     this.fileLoadingIndicator = this.page.testSubj.locator('dataVisualizerPageFileLoading');
-    // Scope to `.euiCallOut` so the locator does not also match EUI's
-    // `…__content` child that reuses the same data-test-subj token.
+    // The subj is compound (`… fileTooLarge`), so match the token and exclude the
+    // `…__message`, `…__content` and `…__actions` children EUI derives from it.
     this.fileUploadErrorCallout = this.page.locator(
-      '.euiCallOut[data-test-subj~="dataVisualizerFileUploadErrorCallout"]'
+      '[data-test-subj~="dataVisualizerFileUploadErrorCallout"]:not([data-test-subj$="__message"]):not([data-test-subj$="__content"]):not([data-test-subj$="__actions"])'
     );
     this.fileInput = this.page.locator('input[type="file"]');
     this.importButton = this.page.testSubj.locator('fileUploadImportButton');
@@ -111,7 +112,7 @@ export class FileDataVisualizer {
   }
 
   async closeAnalysisExplanationPanel() {
-    await this.page.locator('.euiButtonIcon.euiModal__closeIcon').click();
+    await this.page.locator(euiSelectors.modal.CLOSE_BUTTON_SELECTOR).click();
   }
 
   async waitForFileStatsPanel(index: number) {

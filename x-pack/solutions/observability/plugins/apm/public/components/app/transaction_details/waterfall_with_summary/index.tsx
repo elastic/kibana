@@ -23,6 +23,7 @@ import {
   getSubtreeIds,
   TRACE_WATERFALL_EBT_ELEMENTS,
 } from '@kbn/apm-ui-shared';
+import { useTimeRangeId } from '../../../../context/time_range_id/use_time_range_id';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
@@ -34,11 +35,12 @@ import { isNotInitiated, isPending, isSuccess } from '../../../../hooks/use_fetc
 import type { UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import { useGetErrorMarkerHrefFromRouter } from './waterfall_container/use_get_error_marker_href_from_router';
+import { isValidSampleIndex } from '../is_valid_sample_index';
 
 interface Props<TSample extends {}> {
   traceSamples?: TSample[];
   traceSamplesFetchStatus: FETCH_STATUS;
-  onSampleClick: (sample: TSample) => void;
+  onSampleClick: (sample: TSample, index: number) => void;
   onTabClick: (tab: TransactionTab) => void;
   serviceName?: string;
   waterfallItemId?: string;
@@ -46,6 +48,7 @@ interface Props<TSample extends {}> {
   showCriticalPath: boolean;
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
   selectedSample?: TSample | null;
+  selectedSampleIndex?: number;
   logsTableConfig?: SavedSearchTableConfig;
   onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
   unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
@@ -66,6 +69,7 @@ export function WaterfallWithSummary<TSample extends {}>({
   showCriticalPath,
   onShowCriticalPathChange,
   selectedSample,
+  selectedSampleIndex,
   logsTableConfig,
   onLogsTableConfigChange,
   unifiedWaterfallFetchResult,
@@ -77,6 +81,13 @@ export function WaterfallWithSummary<TSample extends {}>({
   const [sampleActivePage, setSampleActivePage] = useState(0);
   const [isFullTraceFlyoutOpen, setIsFullTraceFlyoutOpen] = useState(false);
   const getErrorMarkerHref = useGetErrorMarkerHrefFromRouter();
+  const { pauseAutoRefresh, resumeAutoRefresh } = useTimeRangeId();
+
+  useEffect(() => {
+    if (!isFullTraceFlyoutOpen) return;
+    pauseAutoRefresh();
+    return resumeAutoRefresh;
+  }, [isFullTraceFlyoutOpen, pauseAutoRefresh, resumeAutoRefresh]);
 
   const isControlled = selectedSample !== undefined;
 
@@ -100,14 +111,20 @@ export function WaterfallWithSummary<TSample extends {}>({
     if (!isControlled) {
       setSampleActivePage(index);
     }
-    onSampleClick(sample);
+    onSampleClick(sample, index);
   };
 
-  const samplePageIndex = isControlled
-    ? selectedSample
-      ? traceSamples?.indexOf(selectedSample)
-      : 0
-    : sampleActivePage;
+  const getControlledSamplePageIndex = () => {
+    if (isValidSampleIndex(selectedSampleIndex, traceSamples)) {
+      return selectedSampleIndex;
+    }
+    if (selectedSample) {
+      return traceSamples?.indexOf(selectedSample);
+    }
+    return 0;
+  };
+
+  const samplePageIndex = isControlled ? getControlledSamplePageIndex() : sampleActivePage;
 
   const entryTransaction = unifiedWaterfallFetchResult.entryTransaction;
 
@@ -224,7 +241,7 @@ export function WaterfallWithSummary<TSample extends {}>({
       ) : (
         <EuiFlexItem grow={false}>
           <TransactionSummary
-            errorCount={unifiedWaterfallFetchResult.errors.length}
+            errorCount={unifiedWaterfallFetchResult.totalErrors}
             totalDuration={unifiedRootTransactionDuration}
             transaction={entryTransaction}
           />

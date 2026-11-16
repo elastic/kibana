@@ -313,6 +313,50 @@ describe('useFetchUnfilteredResolutionGroupData', () => {
     setupKibanaMock();
   });
 
+  it('tags the ES|QL query and every DSL search with the resolution-groups execution context', async () => {
+    (getESQLResults as jest.Mock).mockResolvedValue(
+      makeUnfilteredResolutionEsqlResponse([
+        {
+          id: 'user:alice',
+          name: 'alice',
+          type: 'user',
+          eff: 85,
+          riskScore: 70,
+          resolutionRisk: 85,
+        },
+      ])
+    );
+    mockSearch
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 1 } } } })) // group count
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 1 } } } })) // unit count
+      .mockReturnValueOnce(
+        of({ rawResponse: { aggregations: { aliases_by_target: { buckets: [] } } } })
+      ); // alias count
+
+    const { result } = renderHook(
+      () => useFetchUnfilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const expectedContext = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:home_page',
+        id: 'entities_table_resolution_groups',
+      },
+    };
+    expect(getESQLResults as jest.Mock).toHaveBeenCalledTimes(1);
+    expect((getESQLResults as jest.Mock).mock.calls[0][0].executionContext).toEqual(
+      expectedContext
+    );
+    expect(mockSearch).toHaveBeenCalledTimes(3);
+    mockSearch.mock.calls.forEach(([, options]) => {
+      expect(options).toEqual({ executionContext: expectedContext });
+    });
+  });
+
   it('returns target metadata from ES|QL rows without a separate metadata DSL query', async () => {
     (getESQLResults as jest.Mock).mockResolvedValue(
       makeUnfilteredResolutionEsqlResponse([
@@ -571,6 +615,36 @@ describe('useFetchFilteredResolutionGroupData', () => {
     setupKibanaMock();
   });
 
+  it('tags both ES|QL queries and every DSL search with the filtered resolution-groups execution context', async () => {
+    (getESQLResults as jest.Mock).mockResolvedValue(makeFilteredResolutionEsqlResponse([]));
+    mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: { value: 0 }, hits: [] } } }));
+
+    const { result } = renderHook(
+      () => useFetchFilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const expectedContext = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:home_page',
+        id: 'entities_table_resolution_groups_filtered',
+      },
+    };
+    // STATS join + distinct-group count
+    expect(getESQLResults as jest.Mock).toHaveBeenCalledTimes(2);
+    (getESQLResults as jest.Mock).mock.calls.forEach(([params]) => {
+      expect(params.executionContext).toEqual(expectedContext);
+    });
+    // Unit count + metadata fixup
+    expect(mockSearch).toHaveBeenCalledTimes(2);
+    mockSearch.mock.calls.forEach(([, options]) => {
+      expect(options).toEqual({ executionContext: expectedContext });
+    });
+  });
+
   it('passes the user DSL filter to the STATS join ES|QL query', async () => {
     const userFilter = {
       bool: { filter: [{ term: { 'host.name': 'my-host' } }], must: [], should: [], must_not: [] },
@@ -820,6 +894,27 @@ describe('useFetchGroupedData', () => {
   });
 
   const query = { size: 0 } as EntitiesGroupingQuery;
+
+  it('tags the grouped search with the entities-table-grouped execution context', async () => {
+    mockSearch.mockReturnValue(of({ rawResponse: { aggregations: {} } }));
+
+    const { result } = renderHook(() => useFetchGroupedData({ query, enabled: true }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(mockSearch).toHaveBeenCalledTimes(1);
+    expect(mockSearch.mock.calls[0][1]).toEqual({
+      executionContext: {
+        child: {
+          type: 'security_solution',
+          name: 'entity_analytics:home_page',
+          id: 'entities_table_grouped',
+        },
+      },
+    });
+  });
 
   it('returns the aggregations when the search resolves with them', async () => {
     const aggregations = { groupsCount: { value: 3 }, unitsCount: { value: 12 } };

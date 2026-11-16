@@ -10,7 +10,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import type { InfiniteData, QueryFilters } from '@kbn/react-query';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ProposalsPageResponse } from '../../../../common/proposals/list';
-import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { queryKeys } from '../../../query_keys';
 import { useProposalsByCategory } from '../../../hooks/use_proposals_api';

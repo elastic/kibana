@@ -142,4 +142,20 @@ describe('RangeSliderControl', () => {
     expect(rangeSliderControl.getByTestId('rangeSlider__lowerBoundFieldNumber')).toHaveValue(null);
     expect(rangeSliderControl.getByTestId('rangeSlider__upperBoundFieldNumber')).toHaveValue(80);
   });
+
+  it('should render range slider inputs as enabled by default', () => {
+    const rangeSliderControl = render(<RangeSliderControl {...defaultProps} />);
+
+    expect(rangeSliderControl.getByTestId('rangeSlider__lowerBoundFieldNumber')).not.toBeDisabled();
+    expect(rangeSliderControl.getByTestId('rangeSlider__upperBoundFieldNumber')).not.toBeDisabled();
+  });
+
+  it('should disable range slider inputs when isInteractive is false', () => {
+    const rangeSliderControl = render(
+      <RangeSliderControl {...defaultProps} isInteractive={false} />
+    );
+
+    expect(rangeSliderControl.getByTestId('rangeSlider__lowerBoundFieldNumber')).toBeDisabled();
+    expect(rangeSliderControl.getByTestId('rangeSlider__upperBoundFieldNumber')).toBeDisabled();
+  });
 });

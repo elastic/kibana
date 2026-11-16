@@ -50,6 +50,7 @@ export function buildInputDefaultRenderContext(
       startedAt: new Date(startedAt),
       url: executionUrl,
       executedBy: workflowExecution.executedBy ?? 'unknown',
+      effectiveIdentity: workflowExecution.effectiveIdentity,
       triggeredBy: workflowExecution.triggeredBy,
       usage: workflowExecution.usage,
     },
@@ -79,7 +80,7 @@ export function buildInputDefaultRenderContext(
 }
 
 export function buildWorkflowContext(
-  workflowExecution: EsWorkflowExecution,
+  workflowExecution: WorkflowExecutionForInputRendering,
   coreStart?: CoreStart,
   dependencies?: ContextDependencies
 ): WorkflowContext {
@@ -95,7 +96,7 @@ export function buildWorkflowContext(
 
 /** Liquid render context with `event.inputs` aliased. Do not persist this object. */
 export function buildWorkflowRenderContext(
-  workflowExecution: EsWorkflowExecution,
+  workflowExecution: WorkflowExecutionForInputRendering,
   coreStart?: CoreStart,
   dependencies?: ContextDependencies
 ): WorkflowContext {

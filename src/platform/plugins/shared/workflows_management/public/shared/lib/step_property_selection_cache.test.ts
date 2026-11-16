@@ -8,6 +8,7 @@
  */
 
 import type { SelectionDetails, SelectionOption } from '@kbn/workflows/types/v1';
+import type { StepPropertyItem } from '@kbn/workflows-yaml';
 import {
   cacheSearchOptions,
   clearCache,
@@ -16,7 +17,6 @@ import {
   getStepPropertyValidationOutcomeCacheKey,
   setCachedStepPropertyValidationOutcome,
 } from './step_property_selection_cache';
-import type { StepPropertyItem } from '../../features/validate_workflow_yaml/model/types';
 
 describe('step_property_selection_cache', () => {
   const mockOption1: SelectionOption = {

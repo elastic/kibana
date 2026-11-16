@@ -14,6 +14,7 @@ export enum CommandId {
   Attachment = 'attachment',
   Skill = 'skill',
   Sml = 'sml',
+  Mention = 'mention',
 }
 
 /**
@@ -22,6 +23,7 @@ export enum CommandId {
 export interface CommandMenuComponentProps {
   readonly query: string;
   readonly onSelect: (selection: CommandBadgeData) => void;
+  readonly onReplaceText?: (text: string) => void;
   readonly onContentChange?: (hasContent: boolean, forQuery: string) => void;
 }
 
@@ -49,6 +51,8 @@ export interface CommandDefinition {
   readonly scheme: string;
   /** The character sequence that activates the command (e.g. '@', '/') */
   readonly sequence: string;
+  /** Sequences that activated the command before `sequence`, still found in labels of badges serialized then */
+  readonly legacySequences?: readonly string[];
   /** Human readable name to be used for a11y */
   readonly name: string;
   /** Component that will render the menu for this command */

@@ -25,7 +25,7 @@ Start the Kibana and Elasticsearch servers once:
 ```bash
 node scripts/scout start-server \
   --arch <stateful|serverless> \
-  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai>
+  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|vectordb>
 ```
 
 :::::
@@ -42,6 +42,7 @@ node scripts/playwright test --config <plugin-path>/test/scout/ui/playwright.con
 
 - Use `--project local` to target your locally running Kibana/Elasticsearch processes.
 - Use `--grep` to filter by tag (for example `@local-stateful-classic`). If you omit `--grep`, Playwright will run all suites in the config, including ones that may not be compatible with your target.
+- [Limit tags](./deployment-tags.md#scout-deployment-tags-limit) are not applied when calling Playwright directly. Use `--grep-invert` to skip the suites whose limit tags don't match your environment, for example `--grep-invert @limit/only-<attribute>` for an attribute your environment doesn't have.
 
 We recommend checking out Playwright's [**UI mode**](./debugging.md#playwright-ui-mode) (use `--ui`).
 
@@ -53,7 +54,7 @@ We recommend checking out Playwright's [**UI mode**](./debugging.md#playwright-u
 ```bash
 node scripts/scout run-tests \
   --arch <stateful|serverless> \
-  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai> \
+  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|vectordb> \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
@@ -83,11 +84,31 @@ node scripts/scout run-tests \
 All `--testFiles` paths must fall under the same Scout root (for example, `scout/ui/tests` vs `scout/ui/parallel_tests`) so Scout can discover the right config.
 :::::::
 
+### Declare target attributes with `--targetAttribute` [scout-run-tests-target-attributes]
+
+[Limit tags](./deployment-tags.md#scout-deployment-tags-limit) are only honored when the run declares the **target attributes** of the environment it runs against. Declare them so that `limit.only` suites for those attributes run and `limit.except` suites are skipped:
+
+```bash
+node scripts/scout run-tests \
+  --arch <stateful|serverless> \
+  --domain <domain> \
+  --targetAttribute <attribute> \ <1>
+  --config <plugin-path>/test/scout/ui/playwright.config.ts
+```
+
+1. For example `fips`, for a Kibana running in FIPS mode.
+
+`--targetAttribute` is repeatable and accepts comma-separated values. When omitted, Scout reads the `SCOUT_TARGET_ATTRIBUTES` environment variable instead. Without either, Scout assumes the environment has no attributes and skips every `limit.only` suite.
+
+::::::{note}
+Declaring an attribute doesn't change how Scout starts the servers: it tells Scout what the environment is but doesn't make it so.
+::::::
+
 ### Custom server configuration [scout-run-tests-server-config-set]
 
 By default, Scout starts Kibana and Elasticsearch using the built-in `default` configuration set. This works for most tests and requires no extra flags. Because all suites that use the default config share the same servers, they can be grouped together in CI, saving both time and resources.
 
-If your tests need specific server-level settings that must be present at boot time (for example, feature flags that cannot be toggled at runtime), you can point Scout at a **custom configuration set** with `--serverConfigSet`. Each custom config set requires its own dedicated server instance, so prefer [runtime feature flags](./feature-flags.md#scout-feature-flags-runtime) whenever possible.
+If your tests need specific server-level settings that must be present at boot time (for example, feature flags that cannot be toggled at runtime), use a **custom configuration set**. With `start-server`, select it using `--serverConfigSet`. Each custom config set requires its own dedicated server instance, so prefer [runtime feature flags](./feature-flags.md#scout-feature-flags-runtime) whenever possible.
 
 ```bash
 node scripts/scout start-server \
@@ -96,14 +117,13 @@ node scripts/scout start-server \
   --serverConfigSet evals_entity_analytics
 ```
 
-Or with `run-tests`:
+With `run-tests`, Scout detects the configuration set from the `test/scout_<name>/` directory in the Playwright config path:
 
 ```bash
 node scripts/scout run-tests \
   --arch stateful \
   --domain classic \
-  --serverConfigSet evals_entity_analytics \
-  --config <plugin-path>/test/scout/ui/playwright.config.ts
+  --config <plugin-path>/test/scout_evals_entity_analytics/ui/playwright.config.ts
 ```
 
 See [Feature flags](./feature-flags.md#scout-feature-flags-custom-servers) for more details on when and how to use custom server configurations.

@@ -29,7 +29,8 @@
     "optionalPlugins": [
       "usageCollection",
       "esql",
-      "licensing"
+      "licensing",
+      "searchSessionsManagement"
     ],
     "requiredBundles": [
       "kibanaUtils",

@@ -69,14 +69,7 @@ export const defaultConfig: StorybookConfig = {
             use: [
               { loader: 'style-loader' },
               { loader: 'css-loader', options: { importLoaders: 2 } },
-              {
-                loader: 'postcss-loader',
-                options: {
-                  postcssOptions: {
-                    config: require.resolve('@kbn/optimizer-webpack-helpers/postcss.config'),
-                  },
-                },
-              },
+              { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
               {
                 loader: 'sass-loader',
                 options: {
@@ -86,7 +79,7 @@ export const defaultConfig: StorybookConfig = {
                         loaderContext.context || loaderContext.rootContext,
                         resolve(
                           REPO_ROOT,
-                          'src/core/public/styles/core_app/_globals_borealislight.scss'
+                          'src/core/packages/core/public/styles/core_app/_globals_borealislight.scss'
                         )
                       )
                     );

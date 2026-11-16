@@ -124,6 +124,25 @@ describe('findLiveQueryRoute', () => {
     );
   });
 
+  it('sorts by @timestamp by default, since created_at is not mapped on the actions index', async () => {
+    const mockSearchFn = jest
+      .fn()
+      .mockReturnValue(of({ edges: [], rawResponse: { hits: { total: 0 } }, total: 0 }));
+
+    setupRoute();
+
+    await routeHandler(
+      createRouteContext(mockSearchFn),
+      httpServerMock.createKibanaRequest({ query: { page: 0, pageSize: 20 } }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(mockSearchFn).toHaveBeenCalledWith(
+      expect.objectContaining({ sort: { direction: 'desc', field: '@timestamp' } }),
+      expect.anything()
+    );
+  });
+
   it('enriches single query items with result_counts when withResultCounts is true', async () => {
     const edges = [
       {
@@ -161,7 +180,6 @@ describe('findLiveQueryRoute', () => {
     expect(getResultCountsForActions).toHaveBeenCalledWith(
       mockEsClient,
       ['query-1'],
-      'default',
       undefined,
       false
     );
@@ -325,7 +343,6 @@ describe('findLiveQueryRoute', () => {
     expect(getResultCountsForActions).toHaveBeenCalledWith(
       mockEsClient,
       ['query-1'],
-      'custom-space',
       undefined,
       false
     );
@@ -380,7 +397,6 @@ describe('findLiveQueryRoute', () => {
     expect(getResultCountsForActions).toHaveBeenCalledWith(
       mockEsClient,
       ['query-1'],
-      'custom-space',
       ['team.a'],
       false
     );
@@ -437,7 +453,6 @@ describe('findLiveQueryRoute', () => {
     expect(getResultCountsForActions).toHaveBeenCalledWith(
       mockEsClient,
       ['query-1'],
-      'production',
       ['prod'],
       false
     );
@@ -565,7 +580,6 @@ describe('findLiveQueryRoute', () => {
       expect(getResultCountsForActions).toHaveBeenCalledWith(
         mockScopedEsClient,
         ['query-1'],
-        'default',
         undefined,
         false
       );

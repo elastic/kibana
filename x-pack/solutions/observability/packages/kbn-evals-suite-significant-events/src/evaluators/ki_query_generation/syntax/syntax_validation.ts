@@ -10,7 +10,7 @@ import type { ESQLAstQueryExpression, ESQLCommand } from '@elastic/esql/types';
 import { deriveQueryType } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { KIQueryGenerationEvaluator } from '../types';
-import { getQueriesFromOutput, getQueryAttempts } from '../types';
+import { getQueriesFromOutput } from '../types';
 import { parseEsqlStrict } from '../parse_esql_strict';
 
 type MatchOutcome = 'matched' | 'empty' | 'unknown';
@@ -134,8 +134,8 @@ export const createSyntaxValidationEvaluator = (
           proactiveMatchedCount++;
         }
       } else {
-        // Unreachable while the eval runs with `requireQueryIntent`, which rejects intent-less
-        // queries before they are accepted. Kept as an invariant: non-zero means that broke.
+        // Intent is eval-only metadata. Production accepts its omission, so report natural model
+        // compliance here without forcing an additional repair turn.
         acceptedWithoutIntentCount++;
       }
 
@@ -179,15 +179,6 @@ export const createSyntaxValidationEvaluator = (
 
     const declaredProactiveRate = queries.length > 0 ? declaredProactiveCount / queries.length : 0;
 
-    // How often the model actually omitted intent. Accepted queries cannot show this under
-    // `requireQueryIntent`, so it has to come from the rejected attempts.
-    // Reported, not scored: omitting intent is a tool-usage fault, so folding it into the syntax
-    // score would move a number that is not about syntax.
-    const attempts = getQueryAttempts(output);
-    const missingIntentAttemptCount = attempts?.filter(
-      (attempt) => attempt.failureReason === 'missing_intent'
-    ).length;
-
     return {
       score,
       explanation:
@@ -206,7 +197,6 @@ export const createSyntaxValidationEvaluator = (
         declaredProactiveRate,
         proactiveMatchedCount,
         acceptedWithoutIntentCount,
-        missingIntentAttemptCount: missingIntentAttemptCount ?? null,
         hitRateDenominator,
         queries: details,
       },

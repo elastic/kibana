@@ -9,7 +9,7 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
     id="idPrefix-popover"
   >
     <button
-      class="euiLink emotion-euiLink-primary"
+      class="euiLink emotion-euiLink-text"
       data-test-subj="overflow-button"
       type="button"
     >

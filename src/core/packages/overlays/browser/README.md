@@ -99,13 +99,15 @@ const MyFlyout = ({ onClose }) => {
 };
 
 const flyoutRef = overlays.openFlyoutTemplate(
-  { size: 'm', maxWidth: 600, ownFocus: false },
+  { size: 'm', maxWidth: 600, ownFocus: false, flyoutMenuProps: { title: 'My Flyout' } },
   MyFlyout
 );
 
 // Close the flyout programmatically
 flyoutRef.close();
 ```
+
+**The history title comes only from `flyoutMenuProps.title` in the options.** The content mounts after the flyout opens, so its header title cannot name the flyout's entry in EUI's flyout menu. Without `flyoutMenuProps.title`, EUI shows "Unknown Flyout" and a warning is logged in development.
 
 **`onClose` is the only root prop the content sets**, and it arrives as a prop on the content component. It stays required so the declarative contract cannot be satisfied by a flyout nobody can dismiss. Every other root prop comes from the options argument, which is also the only place that can vary them per call — props passed to a managed `FlyoutTemplate` are ignored and warn in development. A flyout whose root props depend on its own data has to own its lifecycle and render `FlyoutTemplate` directly in a React tree.
 
@@ -123,7 +125,7 @@ const StaticFlyout = ({ onClose }) => (
   </FlyoutTemplate>
 );
 
-overlays.openFlyoutTemplate({ size: 'm' }, StaticFlyout);
+overlays.openFlyoutTemplate({ size: 'm', flyoutMenuProps: { title: 'Static' } }, StaticFlyout);
 ```
 
 Callers import `FlyoutTemplate` from `@kbn/flyout-template` and need a `kbn_references` entry for it. `useFlyoutClose`, from the same package, closes the flyout from anywhere inside the content without threading the `OverlayRef` through.
@@ -138,3 +140,11 @@ For what each zone accepts — sections, subsections, accordions, tabs, header b
 
 - **`openFlyout`**: Traditional method that requires `toMountPoint`. Opens flyouts with `session="never"`. Content should include `EuiFlyoutHeader` and `EuiFlyoutBody`. Optionally include `EuiFlyoutFooter`.
 - **`openFlyoutTemplate`**: The recommended method for session-based flyouts. Opens flyouts with `session="start"` for full EUI Flyout System integration, rendered as a `FlyoutTemplate` from its props plus a component that composes its zones — no hand-composed `EuiFlyoutHeader`/`Body`/`Footer`.
+
+#### `onClose`
+
+The two methods hand the handler different arguments, and the difference is meaningful.
+
+`openFlyout` passes the `OverlayRef` and leaves the flyout open until something calls `close()` on it. A handler that never calls `close()` keeps the flyout open, which is how callers such as the Data View Field Editor block dismissal while there are unsaved changes.
+
+`openFlyoutTemplate` passes nothing and closes the flyout once the handler returns. Use it to react to a dismissal, not to gate one. Blocking dismissal needs a `beforeClose` affordance in the EUI Flyout Manager, tracked in [#290414](https://github.com/elastic/kibana/issues/290414). The deprecated `openSystemFlyout` behaves the same way.

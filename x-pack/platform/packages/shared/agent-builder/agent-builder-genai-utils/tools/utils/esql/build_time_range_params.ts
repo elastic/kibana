@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import dateMath from '@kbn/datemath';
 import type { TimeRange } from '@kbn/es-query';
+import { getAnySourceCommandFromESQLQuery } from '@kbn/esql-utils';
+
+// Source commands that read time series data, whose time field is always `@timestamp`.
+const TIMESTAMP_SOURCE_COMMANDS: ReadonlySet<string> = new Set(['TS', 'PROMQL']);
 
 /**
  * Resolves a datemath expression (e.g. "now-2w", "now", or an ISO string)
@@ -37,4 +41,28 @@ export function buildTimeRangeParams(
     { _tstart: resolveDateMath(timeRange.from, false) },
     { _tend: resolveDateMath(timeRange.to, true) },
   ];
+}
+
+/**
+ * Builds the `@timestamp` range filter that Kibana's date picker applies to a `TS` or `PROMQL`
+ * query, which rely on it rather than filtering on `?_tstart`/`?_tend` themselves.
+ *
+ * Returns `undefined` if no time range is provided or the query reads from another source command.
+ */
+export function buildTimeSeriesTimeRangeFilter(
+  query: string,
+  timeRange: TimeRange | undefined
+): QueryDslQueryContainer | undefined {
+  if (!timeRange || !TIMESTAMP_SOURCE_COMMANDS.has(getAnySourceCommandFromESQLQuery(query))) {
+    return undefined;
+  }
+  return {
+    range: {
+      '@timestamp': {
+        gte: resolveDateMath(timeRange.from, false),
+        lte: resolveDateMath(timeRange.to, true),
+        format: 'strict_date_optional_time',
+      },
+    },
+  };
 }

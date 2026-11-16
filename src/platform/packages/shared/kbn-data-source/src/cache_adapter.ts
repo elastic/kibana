@@ -7,54 +7,68 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { HttpStart } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { buildFilterableFieldSpecs } from './filterable_fields';
 import type { EsqlSource } from './sources/esql_source';
-import type { Column } from './types';
+
+const esqlDataViewsById = new Map<string, DataView>();
 
 /**
- * Transitional shim. Registers a thin DataView in the `dataViewsService` cache so that
- * consumers still calling `dataViewsService.get(id)` for ES|QL ids keep resolving.
- * Delete this file once all such consumers migrate to `DataSourceService.get()`.
- *
- * Uses `skipFetchFields: true` — fields come from the `EsqlSource`'s columns, no `_field_caps`.
- * The cache is cleared first so re-registration picks up fresh columns when the query changes.
+ * Transitional shim: registers one DataView per dataset (FROM target, time field, project routing)
+ * whose fields are the source's filterable fields, never fetched from field caps.
  */
 export async function registerEsqlSourceInDataViewsCache(
   dataViews: DataViewsPublicPluginStart,
-  source: EsqlSource
-): Promise<void> {
-  dataViews.clearInstanceCache(source.id);
-  await dataViews.create(
-    {
-      id: source.id,
-      title: source.title,
-      type: ESQL_TYPE,
-      timeFieldName: source.timeFieldName,
-      fields: makeFieldsSpec(source.getColumns()),
-    },
-    true // skipFetchFields — never call _field_caps for ES|QL adapter DVs
-  );
+  source: EsqlSource,
+  http?: HttpStart
+): Promise<DataView> {
+  const { datasetId: id } = source;
+  const filterableFields = await source.getFilterableFields(http);
+  const spec = {
+    id,
+    title: source.title,
+    type: ESQL_TYPE,
+    timeFieldName: source.timeFieldName,
+    fields: buildFilterableFieldSpecs(filterableFields, source.timeFieldName),
+  };
+  let dataView = await dataViews.create(spec, true);
+  // The id is shared with the legacy ad-hoc DataView, which `getESQLAdHocDataview` callers (e.g.
+  // Lens text_based) or a hydrated saved search source may have cached with field caps fields
+  // (none for views). Replace it when it lacks the dataset's fields.
+  // TODO: remove once Lens and the remaining callers produce an `EsqlSource` instead.
+  if (filterableFields.some(({ name }) => !dataView.fields.getByName(name))) {
+    dataViews.clearInstanceCache(id);
+    dataView = await dataViews.create(spec, true);
+  }
+  // A failed schema lookup yields no fields; don't keep that DataView so the next query retries.
+  if (!filterableFields.length) {
+    dataViews.clearInstanceCache(id);
+  }
+
+  esqlDataViewsById.set(source.id, dataView);
+  return dataView;
 }
 
-export function unregisterFromDataViewsCache(
+/** DataView shim already registered for this ES|QL source. */
+export function getRegisteredEsqlDataView(source: EsqlSource): DataView | undefined {
+  return esqlDataViewsById.get(source.id);
+}
+
+/** DataView shim for Lens, reusing the one registered for this source. */
+export async function getOrRegisterEsqlDataView(
   dataViews: DataViewsPublicPluginStart,
-  id: string
-): void {
-  dataViews.clearInstanceCache(id);
+  source: EsqlSource,
+  http?: HttpStart
+): Promise<DataView> {
+  return (
+    getRegisteredEsqlDataView(source) ?? registerEsqlSourceInDataViewsCache(dataViews, source, http)
+  );
 }
 
-function makeFieldsSpec(columns: readonly Column[]) {
-  return Object.fromEntries(
-    columns.map((col) => [
-      col.name,
-      {
-        name: col.name,
-        type: col.type,
-        esTypes: col.esType ? [col.esType] : undefined,
-        searchable: true,
-        aggregatable: true,
-      },
-    ])
-  );
+/** The dataset DataView stays registered, as other queries on the same dataset share it. */
+export function unregisterFromDataViewsCache(id: string): void {
+  esqlDataViewsById.delete(id);
 }

@@ -19,4 +19,7 @@
  * repositories at module scope, so importing it outside a test does nothing
  * useful.
  */
-export { WorkflowRunFixture } from './integration_tests/workflow_run_fixture';
+export {
+  WorkflowRunFixture,
+  type WorkflowRunFixtureOptions,
+} from './integration_tests/workflow_run_fixture';

@@ -15,9 +15,9 @@ export const REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY = 'pinClearAttempts';
 
 /**
  * Cluster-wide kill-switch, stored on the singleton rebalance task's state —
- * same space-agnostic pattern as the maintenance-windows sync interval
- * (which lives on that task's `schedule`). The task stays scheduled and
- * claimable so a disabled run can still drain leftover agent pins.
+ * same space-agnostic pattern as `disableAutoSync` on the private-location
+ * sync task. The task stays scheduled and claimable so a disabled run can
+ * still drain leftover agent pins.
  */
 export const isRebalancePrivateLocationShardsEnabled = (task?: {
   state?: Record<string, unknown>;

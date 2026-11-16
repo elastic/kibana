@@ -16,12 +16,37 @@
  */
 export type WellKnownWorkflowTriggerSource = 'manual' | 'scheduled' | 'alert' | 'workflow-step';
 
+/** `triggeredBy` of every execution a `workflow.execute` or `workflow.executeAsync` step starts. */
+export const WORKFLOW_STEP_TRIGGER_SOURCE: Extract<
+  WellKnownWorkflowTriggerSource,
+  'workflow-step'
+> = 'workflow-step';
+
+/**
+ * `triggeredBy` of every execution Agent Builder starts as an agent hook (before-agent and
+ * post-execution workflows). Only server code sets `triggeredBy`, so a workflow can check it to
+ * refuse runs that a user started directly.
+ */
+export const AGENT_BUILDER_HOOK_TRIGGER_SOURCE = 'agent-builder-hook';
+
+/** True when a `workflow.execute` or `workflow.executeAsync` step started the execution. */
+export const isWorkflowStepTriggered = (triggeredBy: string | undefined): boolean =>
+  triggeredBy === WORKFLOW_STEP_TRIGGER_SOURCE;
+
 const WELL_KNOWN_SET: ReadonlySet<string> = new Set<WellKnownWorkflowTriggerSource>([
   'manual',
   'scheduled',
   'alert',
   'workflow-step',
 ]);
+
+/**
+ * True when the engine evaluates a provided `${{ }}` input value as an expression: only when the
+ * execution's `triggeredBy` is `manual`. The engine records `manual` for a caller that does not set
+ * `triggeredBy`, so a plugin caller that passes untrusted values must set its own `triggeredBy`.
+ */
+export const evaluatesProvidedInputExpressions = (triggeredBy: string | undefined): boolean =>
+  triggeredBy === 'manual';
 
 /**
  * Execution fields used to classify event-driven runs. Callers may pass a full

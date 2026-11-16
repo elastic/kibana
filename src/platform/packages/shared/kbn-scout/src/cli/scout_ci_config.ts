@@ -103,6 +103,10 @@ export const getScoutCiConfigModuleFromPath = (relativePath: string): ScoutCiCon
     return { kind: 'packages', name: 'core' };
   }
 
+  if (normalized === 'src/dev/build' || normalized.startsWith('src/dev/build/')) {
+    return { kind: 'packages', name: 'dev' };
+  }
+
   const parts = normalized.split('/').filter(Boolean);
 
   const typeIndex = parts.findIndex((p) => p === 'plugins' || p === 'packages');

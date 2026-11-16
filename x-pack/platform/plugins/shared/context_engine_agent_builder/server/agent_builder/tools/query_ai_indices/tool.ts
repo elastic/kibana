@@ -68,11 +68,12 @@ export const createQueryAiIndicesTool = (
   },
   description: dedent`
     Run an ES|QL query against Context Engine AI Indices and return the rows.
+    Only for AI Indices. Query other indices, data streams, and aliases with a general ES|QL tool instead.
     Call the describe AI Index tool first: it gives the FROM target, the fields, and example queries to start from.
 
     The server adds the space filter and a row limit (at most ${MAX_AI_INDEX_QUERY_LIMIT}). Do not write a space condition in the query.
     The space comes from the request. Over MCP that is the URL: /api/agent_builder/mcp is the default space, /s/{spaceId}/api/agent_builder/mcp is another space.
-    The query's FROM decides which indices are read. It is not limited to one AI Index, and it can only read indices you have Elasticsearch read access to.
+    The query's FROM decides which indices are read. It can read more than one AI Index, but only the indices you have Elasticsearch read access to.
     Put time constraints in the ES|QL itself (for example WHERE @timestamp >= NOW() - 24 hours) or in params.
   `,
   schema: queryAiIndicesSchema,

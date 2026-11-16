@@ -5,15 +5,19 @@
  * 2.0.
  */
 
+import { sortBy } from 'lodash';
 import { stableStringify } from '@kbn/std';
 import { Version } from './versions_picker/constants';
 import {
   ThreeWayDiffOutcome,
+  type RequiredField,
+  type RequiredFieldInput,
   type ThreeWayDiff,
   ThreeWayDiffConflict,
 } from '../../../../../../../common/api/detection_engine';
 import { VersionsPickerOptionEnum } from './versions_picker/versions_picker';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { dedupeRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import * as i18n from './translations';
 
 /**
@@ -91,6 +95,35 @@ export const stringifyWithExpandedEmpties = (value: unknown): string => {
     .replace(/^(\s*)(.*): \{\}/gm, '$1$2: {\n$1}');
 
   return expanded;
+};
+
+/**
+ * Normalizes required fields for display: deduplicates and sorts by `name` and `type`
+ * so order and duplicates don't show up as changes.
+ */
+export const normalizeRequiredFieldsForDisplay = <T extends RequiredFieldInput>(
+  requiredFields: T[]
+): T[] => sortBy(dedupeRequiredFields(requiredFields), ['name', 'type']);
+
+/**
+ * Stringifies required fields one field per line, which keeps diffs of long lists compact.
+ */
+export const stringifyRequiredFields = (requiredFields: RequiredField[] | undefined): string => {
+  if (requiredFields === undefined) {
+    return '';
+  }
+
+  const lines = normalizeRequiredFieldsForDisplay(requiredFields).map(
+    ({ name, type, ecs }) =>
+      `  { "name": ${JSON.stringify(name)}, "type": ${JSON.stringify(type)}, "ecs": ${ecs} }`
+  );
+
+  // Keeps empty arrays multi-line so the line-based diff renders additions as clean insertions
+  if (lines.length === 0) {
+    return '[\n]';
+  }
+
+  return `[\n${lines.join(',\n')}\n]`;
 };
 
 interface OptionDetails {

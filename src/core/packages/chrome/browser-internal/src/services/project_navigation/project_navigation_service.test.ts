@@ -533,6 +533,43 @@ describe('initNavigation()', () => {
     });
   });
 
+  test('should add the Search Power Cloud link to the navigation tree', async () => {
+    const { projectNavigation } = setup();
+    projectNavigation.setCloudUrls({
+      searchPowerUrl:
+        'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power',
+    });
+
+    projectNavigation.initNavigation<any>(
+      'vectordb',
+      of({
+        body: [
+          {
+            id: 'group1',
+            type: 'navGroup',
+            children: [{ cloudLink: 'searchPower' }],
+          },
+        ],
+      })
+    );
+
+    const treeDefinition = await lastValueFrom(
+      projectNavigation.getNavigation$().pipe(
+        take(1),
+        map((nav) => nav.navigationTree)
+      )
+    );
+    const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
+
+    expect(node.children).toEqual([
+      expect.objectContaining({
+        href: 'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power',
+        isExternalLink: true,
+        title: 'Configure Search Power',
+      }),
+    ]);
+  });
+
   test('should update the navigation tree when cloud URLs are updated after initialization', async () => {
     const { projectNavigation } = setup();
 

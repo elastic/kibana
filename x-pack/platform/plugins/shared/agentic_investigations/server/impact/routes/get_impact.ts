@@ -9,7 +9,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { AGENTIC_INVESTIGATIONS_API_VERSION } from '../../../common/constants';
 import { IMPACT_INTERNAL_URL } from '../../../common/impact/constants';
 import { getImpactQuerySchema } from '../../../common/impact/impact';
-import { IMPACT_API_PRIVILEGE_READ } from '../constants';
+import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from '../../investigations/constants';
 import type { ImpactRouteDependencies } from '../types';
 import { handleRouteError } from './handle_route_error';
 import { INTERNAL_ACCESS } from './shared';
@@ -24,7 +24,7 @@ export const registerGetImpactRoute = ({
     .get({
       path: IMPACT_INTERNAL_URL,
       access: INTERNAL_ACCESS,
-      security: { authz: { requiredPrivileges: [IMPACT_API_PRIVILEGE_READ] } },
+      security: { authz: { requiredPrivileges: [INVESTIGATIONS_API_PRIVILEGE_MANAGE] } },
       summary: 'Get investigation impact by conversation',
     })
     .addVersion(

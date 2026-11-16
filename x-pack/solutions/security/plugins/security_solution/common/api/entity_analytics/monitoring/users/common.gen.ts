@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 export const UserName = lazySchema(() =>
   z.object({
@@ -106,11 +106,11 @@ export const MonitoredUserDoc = lazySchema(() =>
     z.object({
       event: z
         .object({
-          ingested: z.string().datetime().optional(),
-          '@timestamp': z.string().datetime().optional(),
+          ingested: isoDateTime().optional(),
+          '@timestamp': isoDateTime().optional(),
         })
         .optional(),
-      '@timestamp': z.string().datetime().optional(),
+      '@timestamp': isoDateTime().optional(),
       user: z
         .object({
           name: z.string().optional(),

@@ -109,6 +109,11 @@ components:
         - service
         - generic
 
+    EntityViewMode:
+      type: string
+      enum: [single, resolved]
+      description: Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group).
+
     RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
       type: object

@@ -9,9 +9,57 @@
 
 import { monaco } from '@kbn/code-editor';
 import { runWorkflowYamlValidations } from './run_workflow_yaml_validations';
+import { createMockWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry.mock';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
 
+const emptyRegistry = createMockWorkflowContextRegistry();
+
 describe('runWorkflowYamlValidations', () => {
+  it('shares step contexts across variable and Liquid validation only within one run', () => {
+    const yaml = [
+      'name: shared-context-workflow',
+      'steps:',
+      '  - name: render',
+      '    type: console',
+      '    with:',
+      '      message: "{{ consts.missing }} {% for item in consts.missing %}{{ item }}{% endfor %}"',
+    ].join('\n');
+    const { yamlDocument, yamlLineCounter, workflowGraph, workflowDefinition } =
+      performComputation(yaml);
+    if (!yamlDocument || !yamlLineCounter || !workflowGraph || !workflowDefinition) {
+      throw new Error('Expected a parsed workflow and graph');
+    }
+    const getAllPredecessorsSpy = jest.spyOn(workflowGraph, 'getAllPredecessors');
+    const model = monaco.editor.createModel(yaml, 'yaml');
+    const params = {
+      registry: emptyRegistry,
+      yamlString: yaml,
+      model,
+      yamlDocument,
+      lineCounter: yamlLineCounter,
+      workflowGraph,
+      workflowDefinition,
+    };
+
+    try {
+      const results = runWorkflowYamlValidations(params);
+
+      expect(results).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ ruleId: 'invalidVariableReference', severity: 'error' }),
+          expect.objectContaining({ ruleId: 'invalidCollectionPath', severity: 'error' }),
+        ])
+      );
+      expect(getAllPredecessorsSpy).toHaveBeenCalledTimes(1);
+      expect(getAllPredecessorsSpy).toHaveBeenCalledWith('render');
+
+      expect(runWorkflowYamlValidations(params)).toEqual(results);
+      expect(getAllPredecessorsSpy).toHaveBeenCalledTimes(2);
+    } finally {
+      model.dispose();
+    }
+  });
+
   it('reports variable validation errors with line-accurate positions', () => {
     const yaml = [
       'name: test-workflow',
@@ -30,6 +78,7 @@ describe('runWorkflowYamlValidations', () => {
 
     const model = monaco.editor.createModel(yaml, 'yaml');
     const results = runWorkflowYamlValidations({
+      registry: emptyRegistry,
       yamlString: yaml,
       model,
       yamlDocument: computed.yamlDocument!,
@@ -63,6 +112,7 @@ describe('runWorkflowYamlValidations', () => {
     const computed = performComputation(yaml);
     const model = monaco.editor.createModel(yaml, 'yaml');
     const results = runWorkflowYamlValidations({
+      registry: emptyRegistry,
       yamlString: yaml,
       model,
       yamlDocument: computed.yamlDocument!,
@@ -107,6 +157,7 @@ describe('runWorkflowYamlValidations', () => {
     const model = monaco.editor.createModel(yaml, 'yaml');
 
     const results = runWorkflowYamlValidations({
+      registry: emptyRegistry,
       yamlString: yaml,
       model,
       yamlDocument: computed.yamlDocument!,
@@ -117,6 +168,48 @@ describe('runWorkflowYamlValidations', () => {
     });
 
     expect(results.filter((result) => result.ruleId === 'duplicateStepName')).not.toHaveLength(0);
+
+    model.dispose();
+  });
+
+  it('warns about kibana fetcher only when the self-client path is on', () => {
+    const yaml = [
+      "version: '1'",
+      'name: kibana-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: status',
+      '    type: kibana.request',
+      '    with:',
+      '      method: GET',
+      '      path: /api/status',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+
+    const computed = performComputation(yaml);
+    const model = monaco.editor.createModel(yaml, 'yaml');
+    const shared = {
+      registry: emptyRegistry,
+      yamlString: yaml,
+      model,
+      yamlDocument: computed.yamlDocument!,
+      lineCounter: computed.yamlLineCounter!,
+      workflowLookup: computed.workflowLookup,
+      workflowGraph: computed.workflowGraph,
+      workflowDefinition: computed.workflowDefinition ?? undefined,
+    };
+
+    expect(
+      runWorkflowYamlValidations(shared).some((result) => result.ruleId === 'ignoredFetcherSetting')
+    ).toBe(false);
+    expect(
+      runWorkflowYamlValidations({ ...shared, warnIgnoredKibanaFetcher: true }).some(
+        (result) => result.ruleId === 'ignoredFetcherSetting'
+      )
+    ).toBe(true);
 
     model.dispose();
   });

@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 import { isValidDateMath } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '../../../model/primitives.gen';
@@ -32,7 +32,7 @@ export const MigrationStatus = lazySchema(() =>
     id: NonEmptyString,
     status: z.enum(['success', 'failure', 'pending']),
     version: z.number().int(),
-    updated: z.string().datetime(),
+    updated: isoDateTime(),
   })
 );
 export type MigrationStatus = z.infer<typeof MigrationStatus>;
