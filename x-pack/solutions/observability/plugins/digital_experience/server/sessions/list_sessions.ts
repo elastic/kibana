@@ -157,39 +157,12 @@ const sessionFilters = (filters: SessionListFilters = {}): QueryDslQueryContaine
   ...durationRange('duration_ms', filters),
 ];
 
-/**
- * The dest pipeline sets `duration_ms`, so a summary it failed on may lack it; its start and end
- * come from the transform. Mapped at search time only when a duration range is set.
- */
-const FAILED_SUMMARY_DURATION_FIELD = 'failed_summary_duration_ms';
-const FAILED_SUMMARY_DURATION_MAPPING = {
-  [FAILED_SUMMARY_DURATION_FIELD]: {
-    type: 'long' as const,
-    script: {
-      source:
-        "if (doc['start_time'].size() > 0 && doc['end_time'].size() > 0) { emit(doc['end_time'].value.toInstant().toEpochMilli() - doc['start_time'].value.toInstant().toEpochMilli()); }",
-    },
-  },
-};
-
-const hasDurationRange = ({ minDurationMs, maxDurationMs }: SessionListFilters = {}) =>
-  minDurationMs !== undefined || maxDurationMs !== undefined;
-
-const allOf = (filters: QueryDslQueryContainer[]): QueryDslQueryContainer =>
-  filters.length > 0 ? { bool: { filter: filters } } : { match_all: {} };
-
-/** Set by the dest pipeline when it couldn't summarize a session; its counts are missing. */
-const FAILED_SUMMARY: QueryDslQueryContainer = { exists: { field: 'error.message' } };
-
-/** The listed sessions: selected filters and facets, and only summaries the pipeline completed. */
+/** The listed sessions: the selected filters and facets, except `exclude`'s facet. */
 const listedFilter = (
   { facets, filters }: Pick<ListSessionsParams, 'facets' | 'filters'>,
   exclude?: FacetName
 ) => ({
-  bool: {
-    filter: [...sessionFilters(filters), ...facetFilters(facets, exclude)],
-    must_not: [FAILED_SUMMARY],
-  },
+  bool: { filter: [...sessionFilters(filters), ...facetFilters(facets, exclude)] },
 });
 
 export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequest => {
@@ -229,23 +202,11 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
     from,
     size,
     sort: [{ [params.sortField]: params.sortDirection }, { 'session.id': 'asc' }],
-    ...(hasDurationRange(params.filters)
-      ? { runtime_mappings: FAILED_SUMMARY_DURATION_MAPPING }
-      : {}),
     query: { bool: { filter: [...sessionScopeFilters(params), ...searchFilter(params.query)] } },
     post_filter: listedFilter(params),
     aggs: {
       ...facetAggs,
       kpis: { filter: listedFilter(params), aggs: kpiAggs },
-      // Narrowed like the list, by search, facets and duration, but not by errors: `has_error`
-      // is set by the pipeline that failed on them.
-      failed_summaries: {
-        filter: allOf([
-          ...facetFilters(params.facets),
-          ...durationRange(FAILED_SUMMARY_DURATION_FIELD, params.filters),
-          FAILED_SUMMARY,
-        ]),
-      },
     },
   };
 };
@@ -307,7 +268,6 @@ export interface ListSessionsAggs {
     bounced?: { doc_count: number };
     with_errors?: { doc_count: number };
   } & Record<string, unknown>;
-  failed_summaries?: { doc_count: number };
   [facet: string]: unknown;
 }
 
@@ -337,14 +297,13 @@ export const parseListSessionsResponse = (
   }
 
   return {
-    // A summary without ids can't be opened; the transform skips empty ids, so this is defensive.
+    // A summary without ids can't be opened, so it is left out.
     sessions: response.hits.hits.flatMap(({ _source: doc }) =>
       doc?.session?.id && doc.service?.name ? [toSessionSummary(doc)] : []
     ),
     total,
     page,
     perPage,
-    failedSummaries: aggs.failed_summaries?.doc_count ?? 0,
     facets: {
       browsers: facetBuckets(aggs.browsers),
       os: facetBuckets(aggs.os),

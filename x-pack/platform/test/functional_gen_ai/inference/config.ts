@@ -47,6 +47,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // This suite installs product docs itself. Startup auto-install holds the same
         // cluster-wide lock and the explicit install then waits until Mocha times out.
         '--xpack.productDocBase.autoInstallEnabled=false',
+        // The explicit install must exercise the real artifacts, not the test stub
+        '--xpack.productDocBase.artifactRepositoryUrl=https://kibana-knowledge-base-artifacts.elastic.co',
       ],
     },
   };

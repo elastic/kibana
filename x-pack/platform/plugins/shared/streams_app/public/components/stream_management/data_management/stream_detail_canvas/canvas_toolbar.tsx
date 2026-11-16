@@ -74,6 +74,10 @@ function AddResourceButton({
         data-test-subj={dataTestSubj}
         css={css`
           border-radius: ${euiTheme.border.radius.medium};
+          color: ${isDisabled ? euiTheme.colors.textDisabled : euiTheme.colors.textParagraph};
+          &:disabled {
+            cursor: not-allowed;
+          }
         `}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -85,7 +89,7 @@ function AddResourceButton({
               size="xs"
               css={css`
                 font-weight: ${euiTheme.font.weight.medium};
-                color: ${euiTheme.colors.textParagraph};
+                color: inherit;
               `}
             >
               {label}

@@ -56,6 +56,14 @@ export const OPENS_IN_NEW_TAB = i18n.translate(
   { defaultMessage: 'Opens in a new tab' }
 );
 
+export const OPEN_IN_FLYOUT = i18n.translate('xpack.agenticInvestigations.subjects.openInFlyout', {
+  defaultMessage: 'Open in flyout',
+});
+
+export const OPEN_NEW_TAB = i18n.translate('xpack.agenticInvestigations.subjects.openNewTab', {
+  defaultMessage: 'Open new tab',
+});
+
 /** The summary row of several alerts. */
 export const alertsCountLabel = (count: number): string =>
   i18n.translate('xpack.agenticInvestigations.subjects.alertsCount', {

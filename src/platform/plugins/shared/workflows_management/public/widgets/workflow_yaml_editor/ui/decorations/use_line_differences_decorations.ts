@@ -56,7 +56,11 @@ export const useLineDifferencesDecorations = ({
       changesHighlightDecorationCollectionRef.current.clear();
     }
 
-    const changedLines = calculateLineDifferences(originalValue, currentValue ?? '');
+    // Lines that exist only in the original were deleted and have no range in the model to decorate.
+    const lineCount = model.getLineCount();
+    const changedLines = calculateLineDifferences(originalValue, currentValue ?? '').filter(
+      (lineNumber) => lineNumber <= lineCount
+    );
     if (changedLines.length === 0) return;
 
     const decorations = changedLines.map((lineNumber) => ({

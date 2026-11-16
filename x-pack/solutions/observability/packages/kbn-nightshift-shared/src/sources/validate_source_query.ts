@@ -152,18 +152,21 @@ const isRemoteIndex = ({ raw, hasPrefix }: ISourceName): boolean => {
 const isIndexSource = (node: { type: string; sourceType?: string }): node is ESQLSource =>
   node.type === 'source' && node.sourceType === 'index';
 
-const targetedIndices = (command: ESQLCommand): TargetedIndex[] =>
+const sourceNames = (command: ESQLCommand): ISourceName[] =>
   Walker.matchAll(command, { type: 'source', sourceType: 'index' }).flatMap((node) => {
     if (!isIndexSource(node) || typeof node.name !== 'string') {
       return [];
     }
-    return namesOf(node, node.name).flatMap((entry) => {
-      const pattern = indexPatternOf(entry);
-      if (pattern === undefined || isExcludedIndex(entry)) {
-        return [];
-      }
-      return [{ name: entry.name, pattern, remote: isRemoteIndex(entry) }];
-    });
+    return namesOf(node, node.name);
+  });
+
+const targetedIndices = (command: ESQLCommand): TargetedIndex[] =>
+  sourceNames(command).flatMap((entry) => {
+    const pattern = indexPatternOf(entry);
+    if (pattern === undefined || isExcludedIndex(entry)) {
+      return [];
+    }
+    return [{ name: entry.name, pattern, remote: isRemoteIndex(entry) }];
   });
 
 /**
@@ -334,6 +337,31 @@ const toPrivilegeName = (pattern: string): string => {
   return withoutSelector.startsWith('<') && withoutSelector.endsWith('>')
     ? withoutSelector.slice(1, -1)
     : withoutSelector;
+};
+
+/** Exact local index expressions, preserving exclusions and date math. */
+export const getSourceLocalIndexExpressions = (esql: string): string[] => {
+  const parsed = Parser.parse(esql);
+  if (parsed.errors.length > 0) {
+    throw new Error(
+      `Invalid ES|QL query: ${parsed.errors.map(({ message }) => message).join('; ')}`
+    );
+  }
+  const [firstCommand] = parsed.root.commands;
+  if (!firstCommand) {
+    return [];
+  }
+  const localNames = sourceNames(firstCommand).filter((entry) => !isRemoteIndex(entry));
+  if (!localNames.some((entry) => !isExcludedIndex(entry))) {
+    return [];
+  }
+  return [
+    ...new Set(
+      localNames
+        .map(({ raw }) => raw?.replace(BACKTICK_QUOTES, '$1').replace(/::.*$/, ''))
+        .filter((name): name is string => name !== undefined && name !== '')
+    ),
+  ];
 };
 
 export interface ISourceReadTargets {

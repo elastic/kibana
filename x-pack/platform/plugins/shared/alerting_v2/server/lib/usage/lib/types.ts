@@ -99,6 +99,13 @@ export interface DispatcherEventStatsAggregations {
     doc_count: number;
     by_reason: { buckets: TermsBucket[] };
   };
+  throttled: {
+    doc_count: number;
+    by_strategy: { buckets: DispatcherStrategyBucket[] };
+  };
+}
+export interface DispatcherStrategyBucket extends TermsBucket {
+  action_groups: ValueAggregation;
 }
 
 /**
@@ -123,6 +130,15 @@ export interface DispatcherPolicyDispatchBucket extends TermsBucket {
     workflow_executions: ValueAggregation;
   };
 }
+export interface DispatcherGroupingModeBucket extends TermsBucket {
+  policy_refs: {
+    policies: {
+      by_policy: { buckets: DispatcherPolicyDispatchBucket[] };
+      action_groups_percentiles: PercentilesAggregation;
+      action_groups_avg: ValueAggregation;
+    };
+  };
+}
 export interface DispatcherPolicyStatsAggregations {
   policy_refs: {
     policies: {
@@ -144,6 +160,8 @@ export interface DispatcherPolicyStatsAggregations {
         workflow_executions_avg: ValueAggregation;
       };
     };
+    /** Same per-policy distribution of dispatched groups, one bucket per `grouping_mode`. */
+    by_grouping_mode: { buckets: DispatcherGroupingModeBucket[] };
   };
   unmatched_events: {
     doc_count: number;
@@ -167,6 +185,8 @@ export type DispatcherStatsResults = Pick<
   | 'dispatcher_throttle_ratio_per_policy_24hr'
   | 'dispatcher_uncovered_rules_count_24hr'
   | 'dispatcher_dispatch_failures_count_by_reason_24hr'
+  | 'dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr'
+  | 'dispatcher_action_groups_throttled_count_by_strategy_24hr'
 >;
 
 export interface RuleStatsAggregations {

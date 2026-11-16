@@ -330,21 +330,7 @@ import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
   ConfigureRiskEngineSavedObjectResponse,
 } from './entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
-import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
-import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
-import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
-import type {
-  ScheduleRiskEngineNowRequestBodyInput,
-  ScheduleRiskEngineNowResponse,
-} from './entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type { ReadRiskEngineSettingsResponse } from './entity_analytics/risk_engine/engine_settings_route.gen';
-import type { GetRiskEngineStatusResponse } from './entity_analytics/risk_engine/engine_status_route.gen';
-import type {
-  DeprecatedTriggerRiskScoreCalculationRequestBodyInput,
-  DeprecatedTriggerRiskScoreCalculationResponse,
-  TriggerRiskScoreCalculationRequestBodyInput,
-  TriggerRiskScoreCalculationResponse,
-} from './entity_analytics/risk_engine/entity_calculation_route.gen';
 import type { RiskEngineGetPrivilegesResponse } from './entity_analytics/risk_engine/get_risk_engine_privileges.gen';
 import type {
   PreviewRiskScoreRequestBodyInput,
@@ -373,6 +359,10 @@ import type {
   ListWatchlistEntitySourcesRequestParamsInput,
   ListWatchlistEntitySourcesResponse,
 } from './entity_analytics/watchlists/data_source/list.gen';
+import type {
+  UpdateWatchlistEntitySourceApiKeyRequestParamsInput,
+  UpdateWatchlistEntitySourceApiKeyResponse,
+} from './entity_analytics/watchlists/data_source/update_api_key.gen';
 import type {
   UpdateWatchlistEntitySourceRequestParamsInput,
   UpdateWatchlistEntitySourceRequestBodyInput,
@@ -564,10 +554,10 @@ import type {
   UpsertRuleMigrationResourcesResponse,
 } from '../siem_migrations/model/api/rules/rule_migration.gen';
 import type {
+  CreateTinesWorkflowMigrationWorkflowsRequestParamsInput,
+  CreateTinesWorkflowMigrationWorkflowsRequestBodyInput,
   CreateWorkflowMigrationRequestBodyInput,
   CreateWorkflowMigrationResponse,
-  CreateWorkflowMigrationWorkflowsRequestParamsInput,
-  CreateWorkflowMigrationWorkflowsRequestBodyInput,
   DeleteWorkflowMigrationRequestParamsInput,
   GetAllWorkflowMigrationStatsResponse,
   GetWorkflowMigrationRequestParamsInput,
@@ -724,7 +714,7 @@ If asset criticality records already exist for the specified entities, those rec
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Cleaning up the the Risk Engine by removing the indices, mapping and transforms
+   * Stops risk scoring for the space. Removes the risk score data stream, the lookup index and its template, the risk engine configuration, and the risk score maintainer task, and clears risk fields stored on entity documents.
    */
   async cleanUpRiskEngine() {
     this.log.info(`${new Date().toISOString()} Calling API CleanUpRiskEngine`);
@@ -1081,6 +1071,26 @@ For detailed information on Kibana actions and alerting, and additional API call
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Parses Tines story exports and stores each story as an original workflow with vendor tines and format json. Use this for a raw Tines story export. An empty list stores nothing. A body that is not a Tines story is rejected and stores nothing. A missing migration id returns 404.
+
+    */
+  async createTinesWorkflowMigrationWorkflows(props: CreateTinesWorkflowMigrationWorkflowsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateTinesWorkflowMigrationWorkflows`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/workflows/{migration_id}/tines/workflows',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Create or update the protection updates note for a package policy.
    */
   async createUpdateProtectionUpdatesNote(props: CreateUpdateProtectionUpdatesNoteProps) {
@@ -1143,25 +1153,6 @@ For detailed information on Kibana actions and alerting, and additional API call
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PUT',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Adds original Tines story exports to an already existing workflow migration
-   */
-  async createWorkflowMigrationWorkflows(props: CreateWorkflowMigrationWorkflowsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API CreateWorkflowMigrationWorkflows`);
-    return this.kbnClient
-      .request({
-        path: replaceParams(
-          '/internal/siem_migrations/workflows/{migration_id}/workflows',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -1380,22 +1371,6 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
-   */
-  async deprecatedTriggerRiskScoreCalculation(props: DeprecatedTriggerRiskScoreCalculationProps) {
-    this.log.info(`${new Date().toISOString()} Calling API DeprecatedTriggerRiskScoreCalculation`);
-    return this.kbnClient
-      .request<DeprecatedTriggerRiskScoreCalculationResponse>({
-        path: '/api/risk_scores/calculation/entity',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * **Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
    */
   async disableMonitoringEngine() {
@@ -1405,30 +1380,6 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         path: '/api/entity_analytics/monitoring/engine/disable',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async disableRiskEngine() {
-    this.log.info(`${new Date().toISOString()} Calling API DisableRiskEngine`);
-    return this.kbnClient
-      .request<DisableRiskEngineResponse>({
-        path: '/internal/risk_score/engine/disable',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async enableRiskEngine() {
-    this.log.info(`${new Date().toISOString()} Calling API EnableRiskEngine`);
-    return this.kbnClient
-      .request<EnableRiskEngineResponse>({
-        path: '/internal/risk_score/engine/enable',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
       })
@@ -2163,21 +2114,6 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
-   */
-  async getRiskEngineStatus() {
-    this.log.info(`${new Date().toISOString()} Calling API GetRiskEngineStatus`);
-    return this.kbnClient
-      .request<GetRiskEngineStatusResponse>({
-        path: '/internal/risk_score/engine/status',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * Returns time-ordered historical risk score entries from the risk score time-series index for a given entity.
    */
   async getRiskScoreHistory(props: GetRiskScoreHistoryProps) {
@@ -2575,21 +2511,6 @@ response reports a result for each one.
         path: '/api/entity_analytics/monitoring/engine/init',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
-   */
-  async initRiskEngine() {
-    this.log.info(`${new Date().toISOString()} Calling API InitRiskEngine`);
-    return this.kbnClient
-      .request<InitRiskEngineResponse>({
-        path: '/internal/risk_score/engine/init',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
       })
@@ -3316,22 +3237,6 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
-   */
-  async scheduleRiskEngineNow(props: ScheduleRiskEngineNowProps) {
-    this.log.info(`${new Date().toISOString()} Calling API ScheduleRiskEngineNow`);
-    return this.kbnClient
-      .request<ScheduleRiskEngineNowResponse>({
-        path: '/api/risk_score/engine/schedule_now',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * Find and/or aggregate detection alerts that match the given query.
    */
   async searchAlerts(props: SearchAlertsProps) {
@@ -3710,22 +3615,6 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
-   */
-  async triggerRiskScoreCalculation(props: TriggerRiskScoreCalculationProps) {
-    this.log.info(`${new Date().toISOString()} Calling API TriggerRiskScoreCalculation`);
-    return this.kbnClient
-      .request<TriggerRiskScoreCalculationResponse>({
-        path: '/internal/risk_score/calculation/entity',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
     * Unassigns the provided entities from the specified watchlist.
 This only removes the "manual" assignment. If the entity is also
 assigned via other sources (for example, index or integration), it will
@@ -3905,6 +3794,24 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'PUT',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Replace the API key of an index entity source with a new one owned by the user making this request, for example after the user who created the source is removed or loses access to the index. The new key is created and saved first; the previous key is invalidated only afterwards, so a failure leaves the source with its previous key. The user must be able to read the source's index pattern.
+   */
+  async updateWatchlistEntitySourceApiKey(props: UpdateWatchlistEntitySourceApiKeyProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateWatchlistEntitySourceApiKey`);
+    return this.kbnClient
+      .request<UpdateWatchlistEntitySourceApiKeyResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}/_update_api_key',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -4092,6 +3999,10 @@ export interface CreateSentinelRuleMigrationRulesProps {
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;
 }
+export interface CreateTinesWorkflowMigrationWorkflowsProps {
+  params: CreateTinesWorkflowMigrationWorkflowsRequestParamsInput;
+  body: CreateTinesWorkflowMigrationWorkflowsRequestBodyInput;
+}
 export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
   body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
@@ -4105,10 +4016,6 @@ export interface CreateWatchlistEntitySourceProps {
 }
 export interface CreateWorkflowMigrationProps {
   body: CreateWorkflowMigrationRequestBodyInput;
-}
-export interface CreateWorkflowMigrationWorkflowsProps {
-  params: CreateWorkflowMigrationWorkflowsRequestParamsInput;
-  body: CreateWorkflowMigrationWorkflowsRequestBodyInput;
 }
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
@@ -4142,9 +4049,6 @@ export interface DeleteWatchlistEntitySourceProps {
 }
 export interface DeleteWorkflowMigrationProps {
   params: DeleteWorkflowMigrationRequestParamsInput;
-}
-export interface DeprecatedTriggerRiskScoreCalculationProps {
-  body: DeprecatedTriggerRiskScoreCalculationRequestBodyInput;
 }
 export interface EndpointExecuteActionProps {
   body: EndpointExecuteActionRequestBodyInput;
@@ -4406,9 +4310,6 @@ export interface RulePreviewProps {
 export interface RunScriptActionProps {
   body: RunScriptActionRequestBodyInput;
 }
-export interface ScheduleRiskEngineNowProps {
-  body: ScheduleRiskEngineNowRequestBodyInput;
-}
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
 }
@@ -4478,9 +4379,6 @@ export interface SuggestUserProfilesProps {
 export interface SyncWatchlistProps {
   params: SyncWatchlistRequestParamsInput;
 }
-export interface TriggerRiskScoreCalculationProps {
-  body: TriggerRiskScoreCalculationRequestBodyInput;
-}
 export interface UnassignWatchlistEntitiesProps {
   params: UnassignWatchlistEntitiesRequestParamsInput;
   body: UnassignWatchlistEntitiesRequestBodyInput;
@@ -4519,6 +4417,9 @@ export interface UpdateWatchlistProps {
 export interface UpdateWatchlistEntitySourceProps {
   params: UpdateWatchlistEntitySourceRequestParamsInput;
   body: UpdateWatchlistEntitySourceRequestBodyInput;
+}
+export interface UpdateWatchlistEntitySourceApiKeyProps {
+  params: UpdateWatchlistEntitySourceApiKeyRequestParamsInput;
 }
 export interface UpdateWorkflowMigrationProps {
   params: UpdateWorkflowMigrationRequestParamsInput;

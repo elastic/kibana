@@ -13,8 +13,13 @@ import type {
   GithubIssue,
   ListIssuesOptions,
 } from '../failed_tests_reporter/github_api';
-import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
-import { readFlakySuiteIssueMetadata, renderFlakySuiteIssueBody } from './issue_body';
+import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
+import { replacedIssueComment } from './replace_per_test_issues';
+import {
+  FLAKY_TEST_SUITE_METADATA_PREFIX,
+  readFlakySuiteIssueMetadata,
+  renderFlakySuiteIssueBody,
+} from './issue_body';
 import {
   issueLabels,
   reportFlakySuiteIssues,
@@ -44,6 +49,7 @@ const createGithubApi = (issues: GithubIssue[] = []) => {
     ),
     createIssue: jest.fn(async (title: string, body: string, _labels?: string[]) => ({
       number: 900,
+      id: 1900,
       html_url: 'https://github.com/elastic/kibana/issues/900',
       node_id: 'n900',
       title,
@@ -54,6 +60,7 @@ const createGithubApi = (issues: GithubIssue[] = []) => {
       async (_number: number, _changes: { body: string; state?: GithubIssue['state'] }) => {}
     ),
     editIssueBodyAndEnsureOpen: jest.fn(async (_number: number, _body: string) => {}),
+    closeAsDuplicate: jest.fn(async (_number: number, _duplicateOf: number) => {}),
   };
   return api as typeof api & GithubApi;
 };
@@ -77,6 +84,7 @@ const run = (
     omitSkippedTests: true,
     updateIssues: true,
     commentCooldownDays: 3,
+    replacePerTestIssues: false,
     dryRun: false,
     ...overrides,
   });
@@ -122,11 +130,16 @@ const fileMention = (number: number) =>
 const trackedTest = (overrides: Parameters<typeof flakyTest>[0] = {}) =>
   flakyTest({ testId: 'pw-1', ...overrides });
 
+/** The issues a suite issue's body lists as previously tracking it. */
+const previousIssuesOf = (body: string): number[] | undefined =>
+  getIssueMetadata(body, 'suite.previousIssues', undefined, FLAKY_TEST_SUITE_METADATA_PREFIX);
+
 const expectNoWrites = (github: ReturnType<typeof createGithubApi>) => {
   expect(github.createIssue).not.toHaveBeenCalled();
   expect(github.addIssueComment).not.toHaveBeenCalled();
   expect(github.editIssue).not.toHaveBeenCalled();
   expect(github.editIssueBodyAndEnsureOpen).not.toHaveBeenCalled();
+  expect(github.closeAsDuplicate).not.toHaveBeenCalled();
 };
 
 describe('reportFlakySuiteIssues', () => {
@@ -393,7 +406,8 @@ describe('reportFlakySuiteIssues', () => {
 
       expect(github.createIssue).toHaveBeenCalledTimes(1);
       const [, body] = github.createIssue.mock.calls[0];
-      expect(body).toContain('Previously tracked in #43, closed before the suite failed again.');
+      expect(body).toContain('| Previously tracked in |');
+      expect(body).toContain('| #43 |');
       expect(body).not.toContain('Possibly related');
       expect(summary.actions).toEqual([
         {
@@ -451,7 +465,7 @@ describe('reportFlakySuiteIssues', () => {
         supersedes: [expect.objectContaining({ number: 44 })],
       });
       const [, body] = github.createIssue.mock.calls[0];
-      expect(body).toContain('Previously tracked in #44, closed before the suite failed again.');
+      expect(body).toMatch(/\| another test \|.*\| #44 \|\n/);
       expect(body).toContain('Possibly related: #43.');
     });
 
@@ -489,6 +503,193 @@ describe('reportFlakySuiteIssues', () => {
         reason: 'tracked',
         issue: { number: 42, state: 'closed' },
       });
+    });
+
+    it("reopens the suite's own closed issue even when one of its tests has an open per-test issue", async () => {
+      // CI failures of the test are counted on the suite issue, closed or not
+      const github = createGithubApi([
+        suiteIssue(42, closedBefore),
+        scoutTestIssue(43, flakyTest().testId),
+      ]);
+
+      const summary = await run(github, { report: flakyReport([flakyTest()]) });
+
+      expect(github.createIssue).not.toHaveBeenCalled();
+      expect(github.editIssue).toHaveBeenCalledWith(42, {
+        body: expect.any(String),
+        state: 'open',
+      });
+      expect(summary.actions[0]).toMatchObject({
+        action: 'updated',
+        reopened: true,
+        issue: { number: 42 },
+      });
+    });
+  });
+
+  describe('replacing per-test issues', () => {
+    const replacing = { replacePerTestIssues: true };
+
+    it('files the suite issue over open per-test issues, and closes them as its duplicates', async () => {
+      const perTest = scoutTestIssue(43, 'pw-1');
+      const github = createGithubApi([perTest, fileMention(7)]);
+
+      const summary = await run(github, { report: flakyReport([trackedTest()]), ...replacing });
+
+      const [, body] = github.createIssue.mock.calls[0];
+      expect(body).toContain('| #43 |');
+      expect(body).toContain('Possibly related: #7.');
+      expect(github.closeAsDuplicate).toHaveBeenCalledTimes(1);
+      expect(github.closeAsDuplicate).toHaveBeenCalledWith(43, 1900);
+      expect(github.addIssueComment).toHaveBeenCalledWith(
+        43,
+        'Now tracked in #900, together with the other tests of its suite. New failures will be ' +
+          'reported there, so this issue is closed as a duplicate.'
+      );
+      // closed first: the failed-test Slack alert and investigator skip comments on closed issues
+      expect(github.closeAsDuplicate.mock.invocationCallOrder[0]).toBeLessThan(
+        github.addIssueComment.mock.invocationCallOrder[0]
+      );
+      expect(summary.actions).toEqual([
+        {
+          action: 'created',
+          filePath: SUITE_PATH,
+          suiteTitle: 'Default status alert',
+          issue: expect.objectContaining({ number: 900 }),
+          replaced: [{ number: 43, url: perTest.html_url, title: perTest.title, state: 'closed' }],
+        },
+      ]);
+    });
+
+    it('replaces the per-test issues of its tests with the suite issue it refreshes', async () => {
+      const github = createGithubApi([suiteIssue(42), scoutTestIssue(43, 'pw-1')]);
+
+      const summary = await run(github, { report: flakyReport([trackedTest()]), ...replacing });
+
+      expect(github.createIssue).not.toHaveBeenCalled();
+      expect(github.closeAsDuplicate).toHaveBeenCalledWith(43, 1042);
+      // the body lists it below its text, the comment of this refresh names it
+      const [[, { body }]] = github.editIssue.mock.calls;
+      expect(body).toContain('\n\nPreviously tracked in #43.\n\n<!-- kibanaCiData');
+      expect(previousIssuesOf(body)).toEqual([43]);
+      expect(github.addIssueComment.mock.calls).toEqual([
+        [42, expect.stringMatching(/\n\nPreviously tracked in #43\.$/)],
+        [43, replacedIssueComment(42)],
+      ]);
+      expect(summary.actions[0]).toMatchObject({
+        action: 'updated',
+        issue: { number: 42 },
+        replaced: [{ number: 43, state: 'closed' }],
+      });
+    });
+
+    it('names a per-test issue it replaces in a comment right away, even when none is due', async () => {
+      // filed the day before: no comment is due yet
+      const github = createGithubApi([
+        suiteIssue(42, {}, new Date('2026-09-08T09:00:00.000Z')),
+        scoutTestIssue(43, 'pw-1'),
+      ]);
+
+      const summary = await run(github, { report: flakyReport([trackedTest()]), ...replacing });
+
+      expect(github.addIssueComment.mock.calls).toEqual([
+        [42, expect.stringMatching(/\n\nPreviously tracked in #43\.$/)],
+        [43, replacedIssueComment(42)],
+      ]);
+      expect(summary.actions[0]).toMatchObject({ action: 'updated', commented: true });
+      // the comment restarts the cooldown
+      const [[, { body }]] = github.editIssue.mock.calls;
+      expect(previousIssuesOf(body)).toEqual([43]);
+      expect(readFlakySuiteIssueMetadata(body)?.['report.commentedAt']).toBe(
+        GENERATED_AT.toISOString()
+      );
+    });
+
+    it('names a per-test issue in the next run when the comment naming it fails', async () => {
+      const github = createGithubApi([
+        suiteIssue(42, {}, new Date('2026-09-08T09:00:00.000Z')),
+        scoutTestIssue(43, 'pw-1'),
+      ]);
+      github.addIssueComment.mockRejectedValueOnce(new Error('502 Bad Gateway'));
+      const report = flakyReport([trackedTest()]);
+
+      await run(github, { report, ...replacing });
+
+      // the body already lists it, but the per-test issue is left open
+      const [[, { body }]] = github.editIssue.mock.calls;
+      expect(previousIssuesOf(body)).toEqual([43]);
+      expect(github.closeAsDuplicate).not.toHaveBeenCalled();
+
+      // the next day, no comment is due, but one names it before it is closed
+      const next = createGithubApi([suiteIssue(42, { body }), scoutTestIssue(43, 'pw-1')]);
+      await run(next, {
+        report: { ...report, generatedAt: new Date('2026-09-10T09:04:41.000Z') },
+        ...replacing,
+      });
+
+      expect(next.addIssueComment.mock.calls).toEqual([
+        [42, expect.stringMatching(/\n\nPreviously tracked in #43\.$/)],
+        [43, replacedIssueComment(42)],
+      ]);
+      expect(next.closeAsDuplicate).toHaveBeenCalledWith(43, 1042);
+    });
+
+    it('leaves per-test issues alone without the option', async () => {
+      const github = createGithubApi([suiteIssue(42), scoutTestIssue(43, 'pw-1')]);
+
+      await run(github, { report: flakyReport([trackedTest()]) });
+
+      expect(github.editIssue).toHaveBeenCalledWith(42, expect.anything());
+      expect(github.closeAsDuplicate).not.toHaveBeenCalled();
+    });
+
+    it('leaves the issue of a skipped test open, only linking it', async () => {
+      const github = createGithubApi([
+        scoutTestIssue(43, 'pw-1', { labels: [{ name: 'skipped-test' }] }),
+      ]);
+
+      const summary = await run(github, { report: flakyReport([trackedTest()]), ...replacing });
+
+      expect(summary.actions[0]).toMatchObject({ action: 'created' });
+      expect(github.createIssue.mock.calls[0][1]).toContain('Possibly related: #43.');
+      expect(github.closeAsDuplicate).not.toHaveBeenCalled();
+    });
+
+    it('keeps counting a per-test issue closed after its test last failed', async () => {
+      const github = createGithubApi([
+        scoutTestIssue(43, 'pw-1', { state: 'closed', closed_at: '2026-09-09T08:00:00Z' }),
+      ]);
+
+      const summary = await run(github, { report: flakyReport([trackedTest()]), ...replacing });
+
+      expectNoWrites(github);
+      expect(summary.actions[0]).toMatchObject({ action: 'skipped', reason: 'tracked' });
+    });
+
+    it('keeps counting the per-test issues of the tracking repository, which it never writes to', async () => {
+      const github = createGithubApi();
+      const tracking = trackingRepo([scoutTestIssue(43, 'pw-1')]);
+
+      const summary = await run(github, {
+        report: flakyReport([trackedTest()]),
+        tracking,
+        ...replacing,
+      });
+
+      expectNoWrites(github);
+      expectNoWrites(tracking.github);
+      expect(summary.actions[0]).toMatchObject({ action: 'skipped', reason: 'tracked-upstream' });
+    });
+
+    it('leaves a per-test issue it fails to close open for the next run, without failing this one', async () => {
+      const github = createGithubApi([scoutTestIssue(43, 'pw-1')]);
+      github.closeAsDuplicate.mockRejectedValueOnce(new Error('422 Validation Failed'));
+
+      const summary = await run(github, { report: flakyReport([trackedTest()]), ...replacing });
+
+      expect(summary.counts).toMatchObject({ created: 1, failed: 0 });
+      expect(summary.actions[0]).not.toHaveProperty('replaced');
+      expect(github.addIssueComment).not.toHaveBeenCalled();
     });
   });
 
@@ -556,7 +757,7 @@ describe('reportFlakySuiteIssues', () => {
   describe('suites with an issue of their own in the target repository', () => {
     const report = () => flakyReport([flakyTest()]);
 
-    it("brings the issue's metadata up to the report, then comments with its numbers, the text left as filed", async () => {
+    it("brings the issue's metadata up to the report, then comments with where it is still flaky, the text left as filed", async () => {
       const issue = suiteIssue(42);
       const github = createGithubApi([issue]);
 
@@ -579,7 +780,7 @@ describe('reportFlakySuiteIssues', () => {
       expect(github.addIssueComment).toHaveBeenCalledWith(
         42,
         expect.stringMatching(
-          /^This test suite still appears to be flaky, with 1 flaky test over 2–9 Sep 2026:\n\n\| Test \|[\s\S]*49 \/ 509[\s\S]*> \[!TIP\]/
+          /^Still flaky on `main`:\n\n- `creates default alert, triggers on down status, and recovers`: 10% of builds \(49 \/ 509\), last failed \[9 Sep\]\(.*\)$/
         )
       );
       // The failed-test alert a comment runs reads the metadata, so the body goes first
@@ -661,7 +862,7 @@ describe('reportFlakySuiteIssues', () => {
       });
       expect(github.addIssueComment).toHaveBeenCalledWith(
         42,
-        expect.stringContaining('appears to be flaky again after this issue was closed')
+        expect.stringContaining('Flaky again after this issue was closed, on `main`:\n\n- ')
       );
       expect(summary.actions[0]).toMatchObject({
         action: 'updated',
@@ -699,17 +900,58 @@ describe('reportFlakySuiteIssues', () => {
       }
     });
 
-    it('does not refresh an issue about the whole file for one of its describe blocks', async () => {
+    it('refreshes an open issue about the whole file once for all its flaky describe blocks, naming their tests', async () => {
+      // e.g. a consistently failing issue filed for tests in several blocks: no report found it flaky
       const github = createGithubApi([fileWideIssue(44)]);
-
-      const summary = await run(github, { report: report() });
-
-      expectNoWrites(github);
-      expect(summary.actions[0]).toMatchObject({
-        action: 'skipped',
-        reason: 'tracked',
-        issue: { number: 44 },
+      const otherBlock = flakyTest({
+        testId: 'b',
+        suiteTitle: 'another describe',
+        title: 'does b',
+        failedBuilds: 9,
       });
+
+      const summary = await run(github, { report: flakyReport([flakyTest(), otherBlock]) });
+
+      expect(github.createIssue).not.toHaveBeenCalled();
+      expect(github.editIssue).toHaveBeenCalledTimes(1);
+      const [[number, { body }]] = github.editIssue.mock.calls;
+      expect(number).toBe(44);
+      const metadata = readFlakySuiteIssueMetadata(body);
+      // still about the whole file
+      expect(metadata?.['suite.title']).toBeUndefined();
+      expect(metadata?.['suite.testIds']).toEqual([flakyTest().testId, 'b']);
+      expect(metadata?.['report.count']).toBe(1);
+      expect(github.addIssueComment).toHaveBeenCalledTimes(1);
+      expect(github.addIssueComment.mock.calls[0][1]).toMatch(
+        new RegExp(
+          '^2 tests now flaky on `main`:\\n\\n' +
+            '- `Default status alert creates default alert, triggers on down status, and recovers`: 10% of builds \\(49 / 509\\), last failed \\[9 Sep\\]\\(.*\\)\\n' +
+            '- `another describe does b`: 10% of builds \\(49 / 509\\), last failed \\[9 Sep\\]\\(.*\\)$'
+        )
+      );
+      expect(
+        summary.actions.map((action) => [
+          action.action,
+          action.suiteTitle,
+          action.action === 'updated' ? action.issue.number : undefined,
+        ])
+      ).toEqual([
+        ['updated', 'Default status alert', 44],
+        ['updated', 'another describe', 44],
+      ]);
+    });
+
+    it("refreshes the describe block's own issue rather than an open issue about its whole file", async () => {
+      const github = createGithubApi([suiteIssue(42), fileWideIssue(44)]);
+
+      await run(github, { report: report() });
+
+      expect(github.editIssue).toHaveBeenCalledTimes(1);
+      expect(github.editIssue.mock.calls[0][0]).toBe(42);
+      expect(github.addIssueComment).toHaveBeenCalledWith(
+        42,
+        expect.stringMatching(/^Still flaky on `main`/)
+      );
     });
 
     it('records a failed update and carries on with the next suite', async () => {

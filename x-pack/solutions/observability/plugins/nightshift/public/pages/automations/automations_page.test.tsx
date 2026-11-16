@@ -6,32 +6,43 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
 import { AutomationsPage } from './automations_page';
 import {
   useAutomationRunsInRange,
+  useAutomationRunActivity,
   useAutomationsRunsInRange,
   useCreateAutomation,
   useCurrentUsername,
   useDeleteAutomation,
+  useRunAutomation,
   useFetchAutomations,
   useToggleAutomation,
   useUpdateAutomation,
 } from '../../data/automations/use_automations';
-import { useRunQuotas } from '../../data/run_quotas/use_significant_events_run_quotas';
+import { useInvestigationQuotas } from '../../data/run_quotas/use_investigation_quotas';
 import { useKibana } from '../../hooks/use_kibana';
 import type { Automation } from '../../data/automations/use_automations';
 
 jest.mock('../../data/automations/use_automations', () => ({
   AUTOMATIONS_LOAD_ERROR_TITLE: 'Failed to load automations',
   useAutomationRunsInRange: jest.fn(),
+  useAutomationDetail: () => ({
+    data: { isWorkflowMissing: false },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
+  useRepairAutomation: () => ({ mutate: jest.fn(), isLoading: false }),
+  useAutomationRunActivity: jest.fn(),
   useAutomationsRunsInRange: jest.fn(),
   useCreateAutomation: jest.fn(),
   useCurrentUsername: jest.fn(),
   useDeleteAutomation: jest.fn(),
+  useRunAutomation: jest.fn(),
   useFetchAutomations: jest.fn(),
   useRefreshAutomations: jest.fn(() => jest.fn()),
   useToggleAutomation: jest.fn(),
@@ -42,8 +53,8 @@ let mockServiceAccount: { data?: Record<string, unknown> } = {};
 jest.mock('../../data/service_accounts/use_investigator_service_account', () => ({
   useInvestigatorServiceAccount: () => mockServiceAccount,
 }));
-jest.mock('../../data/run_quotas/use_significant_events_run_quotas', () => ({
-  useRunQuotas: jest.fn(),
+jest.mock('../../data/run_quotas/use_investigation_quotas', () => ({
+  useInvestigationQuotas: jest.fn(),
 }));
 jest.mock('../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 jest.mock('../../data/relay_apps/use_relay_app_bindings', () => ({
@@ -67,7 +78,7 @@ const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
 const mockUseFetchAutomations = useFetchAutomations as jest.Mock;
 const mockUseToggleAutomation = useToggleAutomation as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
-const mockUseRunQuotas = useRunQuotas as jest.Mock;
+const mockUseInvestigationQuotas = useInvestigationQuotas as jest.Mock;
 
 const uiSettingsValues: Record<string, string> = {
   'dateFormat:tz': 'Browser',
@@ -80,6 +91,9 @@ describe('AutomationsPage', () => {
   });
 
   beforeEach(() => {
+    (useAutomationRunActivity as jest.Mock).mockReturnValue({ data: { isRunning: false } });
+    (useRunAutomation as jest.Mock).mockReturnValue({ mutate: jest.fn(), isLoading: false });
+
     mockServiceAccount = {
       data: { serviceAccountsEnabled: true, canModifyBoundWorkflows: true },
     };
@@ -99,7 +113,7 @@ describe('AutomationsPage', () => {
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
-    mockUseRunQuotas.mockReturnValue({ data: undefined, refetch: jest.fn() });
+    mockUseInvestigationQuotas.mockReturnValue({ data: undefined, refetch: jest.fn() });
     mockUseAutomationRunsInRange.mockReturnValue({
       data: { runs: [], total: 0, usedToday: 0 },
       isInitialLoading: false,
@@ -128,6 +142,254 @@ describe('AutomationsPage', () => {
       ),
     };
   };
+
+  it('runs an enabled scheduled automation immediately from the row menu', async () => {
+    const automation = {
+      id: 'scheduled-1',
+      name: 'Health review',
+      isEnabled: true,
+      tags: [],
+      trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+      execution: { promptTemplate: 'Review health.' },
+      completions: [],
+      runtime: {},
+      author: 'alice',
+    };
+    mockUseFetchAutomations.mockReturnValue({
+      data: { automations: [automation] },
+      isInitialLoading: false,
+    });
+    const mutate = jest.fn();
+    (useRunAutomation as jest.Mock).mockReturnValue({ mutate, isLoading: false });
+    renderPage();
+    fireEvent.click(screen.getByTestId('automationActions-scheduled-1'));
+    fireEvent.click(screen.getByTestId('runAutomation'));
+    expect(mutate).toHaveBeenCalledWith(automation, expect.anything());
+    await waitFor(() => expect(screen.queryByTestId('runAutomation')).not.toBeInTheDocument());
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it.each([undefined, 'drop', 'queue', 'cancel_in_progress'] as const)(
+    'handles an active execution with overlap policy %s in the row menu',
+    async (overlapPolicy) => {
+      mockUseFetchAutomations.mockReturnValue({
+        data: {
+          automations: [
+            {
+              id: 'scheduled-1',
+              name: 'Health review',
+              isEnabled: true,
+              tags: [],
+              trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+              execution: { promptTemplate: 'Review health.' },
+              completions: [],
+              runtime: { overlapPolicy },
+              author: 'alice',
+            },
+          ],
+        },
+        isInitialLoading: false,
+      });
+      (useAutomationRunActivity as jest.Mock).mockReturnValue({ data: { isRunning: true } });
+      const mutate = jest.fn();
+      (useRunAutomation as jest.Mock).mockReturnValue({ mutate, isLoading: false });
+      renderPage();
+      fireEvent.click(screen.getByTestId('automationActions-scheduled-1'));
+      const run = screen.getByTestId('runAutomation');
+      if (overlapPolicy === undefined || overlapPolicy === 'drop') {
+        expect(run).toBeDisabled();
+        fireEvent.click(run);
+        expect(mutate).not.toHaveBeenCalled();
+        fireEvent.mouseOver(run);
+        expect(await screen.findByRole('tooltip')).toHaveTextContent(
+          'This automation is already running. Wait for it to finish before running it again.'
+        );
+      } else {
+        expect(run).toBeEnabled();
+        fireEvent.click(run);
+        expect(mutate).toHaveBeenCalledTimes(1);
+      }
+    }
+  );
+
+  it.each(['manual_investigation', 'total_investigation'] as const)(
+    'disables queued manual Run at the %s quota with a reset explanation',
+    async (group) => {
+      mockUseFetchAutomations.mockReturnValue({
+        data: {
+          automations: [
+            {
+              id: 'scheduled-1',
+              name: 'Health review',
+              isEnabled: true,
+              tags: [],
+              author: 'alice',
+              trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+              execution: {},
+              completions: [],
+              runtime: { overlapPolicy: 'queue' },
+            },
+          ],
+        },
+        isInitialLoading: false,
+      });
+      mockUseInvestigationQuotas.mockReturnValue({
+        data: {
+          enabled: true,
+          limits: {
+            automatic_investigation: null,
+            manual_investigation: null,
+            total_investigation: null,
+            [group]: 1,
+          },
+          counts: {
+            automatic_investigation: 0,
+            manual_investigation: 0,
+            total_investigation: 0,
+            [group]: 1,
+          },
+          window: {
+            start: '2040-01-01T00:00:00.000Z',
+            resetsAt: '2040-01-02T00:00:00.000Z',
+            timezone: 'UTC',
+          },
+        },
+      });
+      const mutate = jest.fn();
+      (useRunAutomation as jest.Mock).mockReturnValue({ mutate, isLoading: false });
+      renderPage();
+      fireEvent.click(screen.getByTestId('automationActions-scheduled-1'));
+      const run = screen.getByTestId('runAutomation');
+      expect(run).toBeDisabled();
+      fireEvent.click(run);
+      expect(mutate).not.toHaveBeenCalled();
+      fireEvent.mouseOver(run);
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(
+        group === 'manual_investigation'
+          ? 'The daily manual investigation limit has been reached.'
+          : 'The daily total investigation limit has been reached.'
+      );
+      expect(tooltip).toHaveTextContent('Jan 2');
+      expect(tooltip).toHaveTextContent('UTC');
+    }
+  );
+
+  it.each([
+    { enabled: true, manualLimit: 1, manualCount: 0 },
+    { enabled: true, manualLimit: null, manualCount: 20 },
+    { enabled: false, manualLimit: 1, manualCount: 20 },
+  ])(
+    'keeps Run available for automatic-only limits, unlimited or disabled manual quotas: %j',
+    (settings) => {
+      mockUseFetchAutomations.mockReturnValue({
+        data: {
+          automations: [
+            {
+              id: 'scheduled-1',
+              name: 'Health review',
+              isEnabled: true,
+              tags: [],
+              author: 'alice',
+              trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+              execution: {},
+              completions: [],
+              runtime: { dailyDispatchLimit: 1 },
+            },
+          ],
+        },
+        isInitialLoading: false,
+      });
+      mockUseAutomationsRunsInRange.mockReturnValue([{ data: { runs: [], usedToday: 100 } }]);
+      mockUseInvestigationQuotas.mockReturnValue({
+        data: {
+          enabled: settings.enabled,
+          limits: {
+            automatic_investigation: 1,
+            manual_investigation: settings.manualLimit,
+            total_investigation: null,
+          },
+          counts: {
+            automatic_investigation: 1,
+            manual_investigation: settings.manualCount,
+            total_investigation: 20,
+          },
+        },
+      });
+      renderPage();
+      fireEvent.click(screen.getByTestId('automationActions-scheduled-1'));
+      expect(screen.getByTestId('runAutomation')).toBeEnabled();
+    }
+  );
+
+  it('disables Run for a disabled automation and explains why', async () => {
+    mockUseFetchAutomations.mockReturnValue({
+      data: {
+        automations: [
+          {
+            id: 'disabled-1',
+            name: 'Health review',
+            isEnabled: false,
+            tags: [],
+            trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+            execution: { promptTemplate: 'Review health.' },
+            completions: [],
+            runtime: {},
+            author: 'alice',
+          },
+        ],
+      },
+      isInitialLoading: false,
+    });
+    const mutate = jest.fn();
+    (useRunAutomation as jest.Mock).mockReturnValue({ mutate, isLoading: false });
+    renderPage();
+    fireEvent.click(screen.getByTestId('automationActions-disabled-1'));
+    const run = screen.getByTestId('runAutomation');
+    expect(run).toBeDisabled();
+    fireEvent.click(run);
+    expect(mutate).not.toHaveBeenCalled();
+    fireEvent.mouseOver(run);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'This automation is disabled. Enable it to run on a schedule or manually.'
+    );
+  });
+
+  it.each([
+    [true, [{ kind: 'alert' }], false],
+    [true, [{ kind: 'slack', event: 'message' }], false],
+    [true, [{ kind: 'schedule', schedulePreset: 'hourly' }, { kind: 'alert' }], false],
+    [true, [{ kind: 'schedule', schedulePreset: 'hourly' }], true],
+  ])(
+    'disables Run for ineligible or pending automations: enabled=%s rows=%j pending=%s',
+    (isEnabled, rows, isLoading) => {
+      mockUseFetchAutomations.mockReturnValue({
+        data: {
+          automations: [
+            {
+              id: 'a1',
+              name: 'Review',
+              isEnabled,
+              trigger: { rows },
+              execution: {},
+              completions: [],
+              runtime: {},
+              tags: [],
+              author: 'alice',
+            },
+          ],
+        },
+        isInitialLoading: false,
+      });
+      const mutate = jest.fn();
+      (useRunAutomation as jest.Mock).mockReturnValue({ mutate, isLoading });
+      renderPage();
+      fireEvent.click(screen.getByTestId('automationActions-a1'));
+      expect(screen.getByTestId('runAutomation')).toBeDisabled();
+      fireEvent.click(screen.getByTestId('runAutomation'));
+      expect(mutate).not.toHaveBeenCalled();
+    }
+  );
 
   it('shows the empty state and create action when no automations exist', () => {
     renderPage();
@@ -296,6 +558,8 @@ describe('AutomationsPage', () => {
     const rowOf = (name: string) => screen.getByText(name).closest('tr') as HTMLElement;
 
     beforeEach(() => {
+      (useRunAutomation as jest.Mock).mockReturnValue({ mutate: jest.fn(), isLoading: false });
+
       createMutate.mockClear();
       deleteMutate.mockClear();
       toggleMutate.mockClear();
@@ -485,8 +749,12 @@ describe('AutomationsPage', () => {
     });
 
     it('shows only the global callout when automations are also rate limited', () => {
-      mockUseRunQuotas.mockReturnValue({
-        data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: 3 } },
+      mockUseInvestigationQuotas.mockReturnValue({
+        data: {
+          enabled: true,
+          limits: { automatic_investigation: 3 },
+          counts: { automatic_investigation: 3 },
+        },
       });
       renderPage();
 
@@ -495,7 +763,7 @@ describe('AutomationsPage', () => {
     });
 
     it('hides the global callout and keeps the page working when the limit cannot be loaded', () => {
-      mockUseRunQuotas.mockReturnValue({
+      mockUseInvestigationQuotas.mockReturnValue({
         data: undefined,
         error: new Error('Forbidden'),
         refetch: jest.fn(),
@@ -509,14 +777,18 @@ describe('AutomationsPage', () => {
 
     it('shows the paused callout only when the global investigation limit is reached', () => {
       const quotas = (used: number) => ({
-        data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: used } },
+        data: {
+          enabled: true,
+          limits: { automatic_investigation: 3 },
+          counts: { automatic_investigation: used },
+        },
       });
-      mockUseRunQuotas.mockReturnValue(quotas(2));
+      mockUseInvestigationQuotas.mockReturnValue(quotas(2));
       const { unmount } = renderPage();
       expect(screen.queryByTestId('automationsGlobalLimitBanner')).not.toBeInTheDocument();
       unmount();
 
-      mockUseRunQuotas.mockReturnValue(quotas(3));
+      mockUseInvestigationQuotas.mockReturnValue(quotas(3));
       renderPage();
       expect(screen.getByTestId('automationsGlobalLimitBanner')).toBeInTheDocument();
     });
@@ -525,17 +797,17 @@ describe('AutomationsPage', () => {
       const quotas = (canManage: boolean) => ({
         data: {
           enabled: true,
-          limits: { investigation: 3 },
-          counts: { investigation: 3 },
+          limits: { automatic_investigation: 3 },
+          counts: { automatic_investigation: 3 },
           canManage,
         },
       });
-      mockUseRunQuotas.mockReturnValue(quotas(false));
+      mockUseInvestigationQuotas.mockReturnValue(quotas(false));
       const { unmount } = renderPage();
       expect(screen.queryByTestId('automationsGlobalLimitSettingsLink')).not.toBeInTheDocument();
       unmount();
 
-      mockUseRunQuotas.mockReturnValue(quotas(true));
+      mockUseInvestigationQuotas.mockReturnValue(quotas(true));
       renderPage();
       expect(screen.getByTestId('automationsGlobalLimitSettingsLink')).toHaveAttribute(
         'href',

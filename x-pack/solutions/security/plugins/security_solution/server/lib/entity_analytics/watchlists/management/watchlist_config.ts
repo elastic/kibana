@@ -141,7 +141,6 @@ export class WatchlistConfigClient {
   async list(limit: number = MAX_PER_PAGE): Promise<WatchlistObjectWithId[]> {
     const response = await this.deps.soClient.find<WatchlistObject>({
       type: watchlistConfigTypeName,
-      namespaces: [this.deps.namespace],
       perPage: limit,
     });
     const watchlists = response.saved_objects.map(
@@ -186,7 +185,6 @@ export class WatchlistConfigClient {
     // 2. Look it up by exact name
     const response = await this.deps.soClient.find<WatchlistSavedObjectAttributes>({
       type: watchlistConfigTypeName,
-      namespaces: [this.deps.namespace],
       filter: nodeBuilder.is(`${watchlistConfigTypeName}.attributes.name`, trimmed),
       perPage: 100,
       fields: ['name'],

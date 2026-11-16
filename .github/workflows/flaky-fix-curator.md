@@ -9,7 +9,7 @@ on:
         description: How many days of findings to review
         required: false
         type: string
-        default: '7'
+        default: '28'
   # One proposal at a time: wait until the previous curator PR is merged or closed.
   skip-if-match: 'is:pr is:open label:flaky-fix-curator'
 
