@@ -43,7 +43,7 @@ describe('getReturnedOutputNames', () => {
 
   it('ignores workflow.output steps that fail or cancel the run', () => {
     const emitOnFailure = (status: string) => ({
-      name: 'on_error',
+      name: `on_error_${status}`,
       type: 'workflow.output',
       status,
       with: { message: 'boom' },
@@ -72,7 +72,9 @@ describe('getReturnedOutputNames', () => {
           fallback: [{ name: 'recover', type: 'workflow.output', with: fallbackWith }],
         },
       },
-      steps: [{ name: 'emit', type: 'workflow.output', with: { severity: 'high' } }],
+      steps: [
+        { name: 'emit', type: 'workflow.output', with: { severity: '{{ inputs.severity }}' } },
+      ],
     });
     expect(getReturnedOutputNames(withFallback({ recovery: true }))).toEqual([
       'severity',
@@ -98,9 +100,28 @@ describe('getReturnedOutputNames', () => {
     ).toBeUndefined();
     expect(
       getReturnedOutputNames({
-        steps: [{ name: 'check', type: 'if', condition: 'true', steps: [emit] }, emit],
+        steps: [
+          { name: 'check', type: 'if', condition: 'true', steps: [emit] },
+          { ...emit, name: 'emit_last' },
+        ],
       })
     ).toEqual(['severity']);
+  });
+
+  it('knows every run ends in a workflow.output step when every switch branch does', () => {
+    const emit = (name: string) => ({ name, type: 'workflow.output', with: { severity: name } });
+    const switchStep = (extra: Record<string, unknown>) => ({
+      name: 'route',
+      type: 'switch',
+      expression: '{{ inputs.kind }}',
+      cases: [{ match: 'a', steps: [emit('high')] }],
+      ...extra,
+    });
+    const last = { name: 'last', type: 'data.set', with: { other: 1 } };
+    expect(
+      getReturnedOutputNames({ steps: [switchStep({ default: [emit('low')] }), last] })
+    ).toEqual(['severity']);
+    expect(getReturnedOutputNames({ steps: [switchStep({}), last] })).toBeUndefined();
   });
 
   it('counts workflow.fail as ending the run', () => {
@@ -125,10 +146,27 @@ describe('getReturnedOutputNames', () => {
     expect(
       getReturnedOutputNames({
         steps: [
-          { name: 'emit', type: 'workflow.output', with: { severity: 'high' } },
-          { name: 'emit_all', type: 'workflow.output', with: '${{ steps.prev.output }}' },
+          {
+            name: 'check',
+            type: 'if',
+            condition: 'true',
+            steps: [{ name: 'emit', type: 'workflow.output', with: { severity: 'high' } }],
+            else: [{ name: 'emit_all', type: 'workflow.output', with: '${{ steps.prev.output }}' }],
+          },
         ],
       })
     ).toBeUndefined();
+  });
+
+  it('ignores workflow.output steps no run reaches', () => {
+    expect(
+      getReturnedOutputNames({
+        steps: [
+          { name: 'emit', type: 'workflow.output', with: { severity: 'high' } },
+          { name: 'emit_more', type: 'workflow.output', with: { severity: 'high', value: 1 } },
+          { name: 'emit_all', type: 'workflow.output', with: '${{ steps.prev.output }}' },
+        ],
+      })
+    ).toEqual(['severity']);
   });
 });

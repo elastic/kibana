@@ -13,6 +13,7 @@ import {
   analyzeDependents,
   analyzeRemovalImpact,
   buildDependentsIndex,
+  checkRun,
   MAX_INDIRECT_DEPTH,
 } from '../../../common/lib/workflow_dependents/analyze_dependents';
 import type { WorkflowDependentsImpactResponse } from '../../../common/lib/workflow_dependents/api';
@@ -84,6 +85,30 @@ export const collectCalledWorkflows = async (
   return [...found.values()];
 };
 
+// Reads each workflow once, however many walks ask for it.
+const withSharedWorkflowReads = (lookup: WorkflowDependentsLookup): WorkflowDependentsLookup => {
+  const reads = new Map<string, Promise<WorkflowLookupItem | undefined>>();
+  return {
+    ...lookup,
+    getWorkflowsByIds: async (ids) => {
+      const unread = ids.filter((id) => !reads.has(id));
+      if (unread.length > 0) {
+        const byId = lookup
+          .getWorkflowsByIds(unread)
+          .then((workflows) => new Map(workflows.map((workflow) => [workflow.id, workflow])));
+        unread.forEach((id) =>
+          reads.set(
+            id,
+            byId.then((workflows) => workflows.get(id))
+          )
+        );
+      }
+      const workflows = await Promise.all(ids.map((id) => reads.get(id)));
+      return workflows.filter((workflow): workflow is WorkflowLookupItem => workflow !== undefined);
+    },
+  };
+};
+
 /** Grades the workflows that run a workflow, and the ones it runs, against its draft. */
 export const analyzeWorkflowDependentsImpact = async ({
   workflowId,
@@ -102,10 +127,16 @@ export const analyzeWorkflowDependentsImpact = async ({
   managed?: boolean;
   lookup: WorkflowDependentsLookup;
 }): Promise<WorkflowDependentsImpactResponse> => {
-  const [callers, calledWorkflows] = await Promise.all([
+  const sharedLookup = withSharedWorkflowReads(lookup);
+  const [callers, calledWorkflows, calledBySaved] = await Promise.all([
     collectCallers([workflowId], lookup),
-    collectCalledWorkflows(workflowId, draftDefinition, lookup),
+    collectCalledWorkflows(workflowId, draftDefinition, sharedLookup),
+    collectCalledWorkflows(workflowId, savedDefinition, sharedLookup),
   ]);
+  const getRunCheck = (definition: unknown, called: readonly WorkflowLookupItem[]) =>
+    checkRun({ id: workflowId, name: workflowId, enabled: true, definition, managed }, called);
+  // An invalid draft is stored without a definition, so it never runs.
+  const draftRun = isDraftValid ? getRunCheck(draftDefinition, calledWorkflows) : {};
 
   return {
     analysis: analyzeDependents({
@@ -113,6 +144,9 @@ export const analyzeWorkflowDependentsImpact = async ({
       savedDefinition,
       draftDefinition,
       isDraftValid,
+      savedRunFailure: getRunCheck(savedDefinition, calledBySaved).failure,
+      draftRunFailure: draftRun.failure,
+      draftUncheckedRun: draftRun.unchecked,
       managed,
     }),
     calledWorkflows: analyzeCalledWorkflows({

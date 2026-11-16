@@ -13,6 +13,14 @@ export {
 } from './build_execution_graph/build_execution_graph';
 export { GraphBuildError, isGraphBuildError } from './build_execution_graph/graph_build_error';
 export { WorkflowGraph } from './workflow_graph/workflow_graph';
+export {
+  alwaysEndsInOutputStep,
+  failureEscapes,
+  findAlwaysFailure,
+  getOutputSteps,
+  UNSUPPORTED_RUN,
+} from './run_outcomes/run_outcomes';
+export type { StepFailures } from './run_outcomes/run_outcomes';
 
 export type {
   AtomicGraphNode,

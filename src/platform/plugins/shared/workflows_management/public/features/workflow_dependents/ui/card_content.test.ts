@@ -12,6 +12,7 @@ import type {
   CallSiteImpact,
   DependentImpact,
   ImpactIssue,
+  UncheckedRun,
   UpstreamImpact,
   WorkflowContract,
 } from '../../../../common/lib/workflow_dependents/types';
@@ -205,5 +206,42 @@ describe('getCalledCardContent', () => {
     expect(content.name).toBe('missing-id');
     expect(content.verdict).toBe('Will fail when it runs');
     expect(content.details).toEqual([]);
+  });
+
+  it('says why whether its runs fail can’t be checked', () => {
+    const verdictFor = (uncheckedRun: UncheckedRun) =>
+      getCalledCardContent({
+        workflowId: 'alert-context',
+        workflowName: 'Alert context',
+        status: 'unknown',
+        callSites: [callSite()],
+        issues: [],
+        contract,
+        uncheckedRun,
+      }).verdict;
+
+    expect(verdictFor({ reason: 'unsupportedSteps' })).toBe(
+      'Can’t check: some of its steps can’t be checked before it runs'
+    );
+    expect(verdictFor({ reason: 'calledNotFound', from: 'enrich', to: 'gone' })).toBe(
+      'Can’t check: its step "enrich" runs gone, which wasn’t found or you can’t view'
+    );
+    expect(verdictFor({ reason: 'calledUnchecked', from: 'enrich', to: 'Enrich' })).toBe(
+      'Can’t check: its step "enrich" runs Enrich, which can’t be checked'
+    );
+  });
+});
+
+describe('getCallerCardContent for a draft whose runs can’t be checked', () => {
+  it('says why the caller can’t be checked', () => {
+    const { verdict } = getCallerCardContent(
+      dependent({ status: 'unknown', uncheckedRun: { reason: 'unsupportedSteps' } }),
+      'Alert context',
+      true
+    );
+
+    expect(verdict).toBe(
+      'Can’t check: some steps of Alert context can’t be checked before it runs'
+    );
   });
 });
