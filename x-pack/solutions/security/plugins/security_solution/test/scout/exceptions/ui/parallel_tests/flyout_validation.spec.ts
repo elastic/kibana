@@ -12,21 +12,6 @@ import {
   FLYOUT_VALIDATION_ROLE,
 } from '../fixtures/flyout_validation_role';
 
-/**
- * Migrated from the Cypress suite `flyout_validation.cy.ts`.
- *
- * The exception builder keeps its rows in React state and keys a row by its position when the
- * row has no id. Removing or adding a row is therefore where values can leak into the wrong
- * row. These tests drive the builder inside the real "Add rule exception" flyout and check
- * that every row keeps its own field after rows are removed, together with the validation
- * that enables the confirm button.
- *
- * Not migrated, with the reason:
- * - "Warns users about mapping conflicts": covered by the `BuilderEntryItem` unit test
- *   "it render mapping issues warning text when field has mapping conflicts".
- * - "flyout errors" (version conflict, deleted list): they target the edit flyout, and the
- *   version conflict element they assert on no longer exists in the app.
- */
 spaceTest.describe('Exceptions flyout builder', { tag: tags.stateful.classic }, () => {
   let sourceIndex: string;
   let ruleId: string;
@@ -35,9 +20,6 @@ spaceTest.describe('Exceptions flyout builder', { tag: tags.stateful.classic }, 
     const idSegment = scoutSpace.id.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     sourceIndex = `${FLYOUT_VALIDATION_INDEX_PREFIX}-${idSegment}`;
 
-    // The Cypress version loaded the shared `exceptions` archive, whose mapping lacks several
-    // fields the tests type (agent.type, user.id, the nested process.elf.sections). The
-    // index is created here so the fields every test relies on are explicit.
     await esClient.indices.delete({ index: sourceIndex, ignore_unavailable: true });
     await esClient.indices.create({
       index: sourceIndex,
