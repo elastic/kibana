@@ -10,4 +10,5 @@ export * from './field_config';
 export * from './instances';
 export * from './package_inputs';
 export * from './service_index_patterns';
+export * from './settings_requirement';
 export * from './types';
