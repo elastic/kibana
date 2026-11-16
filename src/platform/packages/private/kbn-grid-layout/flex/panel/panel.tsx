@@ -51,9 +51,10 @@ export const Panel = React.memo(({ panelId }: PanelProps) => {
   const panelStyles = useMemo(() => styles.panel(euiThemeContext), [euiThemeContext]);
 
   useEffect(() => {
+    const { current: panelRefs } = gridLayoutStateManager.panelRefs;
     return () => {
       // remove reference on unmount
-      delete gridLayoutStateManager.panelRefs.current[panelId];
+      delete panelRefs[panelId];
     };
   }, [panelId, gridLayoutStateManager]);
 
