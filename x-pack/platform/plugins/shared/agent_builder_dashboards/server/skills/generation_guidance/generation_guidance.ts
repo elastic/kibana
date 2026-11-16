@@ -10,12 +10,16 @@ import {
   getChartTypeSelectionPromptContent,
   seriesStatisticsAgentGuidance,
 } from '@kbn/agent-builder-visualizations-server';
+import { getInlinePanelKindGuidance, getPanelTypeSelection } from '@kbn/dashboard-agent-authoring';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
 import { ENHANCE_GUIDANCE_PATH, enhanceGuidanceReference } from './enhance_guidance';
+import { panelConfigReferenceGuidance, panelConfigReferences } from './panel_config_references';
 
 const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
+const panelTypeSelection = getPanelTypeSelection();
+const inlinePanelKindGuidance = getInlinePanelKindGuidance();
 
 const guidance = `## Dashboard Changes
 
@@ -44,30 +48,15 @@ Each visualization request is authored in a separate context. New-panel authors 
 
 - Use \`source: "request"\` to create or edit a Lens, Vega, or custom content panel from a natural-language query — this is the only way to make a **new** generated panel.
 - Use \`source: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation. A \`source: "request"\` would generate a **new**, different panel instead.
-- Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels.
+- Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels. ${panelConfigReferenceGuidance}
 
 ## Panel Type Selection
 
 Choose the first panel type that fits:
 
-1. **Lens** (\`renderer: "lens"\` or omitted) — metrics, time series, bar, line, pie, area, and data tables.
-2. **Vega** (\`renderer: "vega"\`) — scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user asks for Vega.
-3. **Markdown** (\`source: "config"\`, \`type: "markdown"\`) — static text, links, or notes with no data.
-4. **Custom content** (\`renderer: "custom_content"\`) — a last resort for HTML/CSS layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or narrative text mixed with live data values, or when the user asks for a custom/HTML panel.
+${panelTypeSelection}
 
-## Custom Content Panels
-
-A custom content panel with live data does not need a query from you. When you create one, always say which kind it is, since there is no default: \`dataQueries\` for live data, or \`removeAllQueries: true\` for static content with no data. \`dataQueries\` lists the panel's queries by position, one entry per query, and the server generates each query from its \`description\` and samples its schema before generating the template. Set \`index\` on an entry when you know it. \`removeAllQueries: true\` makes a static panel — use that for banners, legends and notes, and never invent a query for them. Do not write a query yourself; give \`esql\` on an entry only when the user supplied one to use as it is. If the server cannot generate a query, the panel fails with an error naming the reason — fix the \`index\` or the description and retry rather than proceeding.
-
-To create one, set \`query\` to a concise description of what to display; the HTML template is generated server-side from it.
-
-To edit one, list its id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits (colors, sizes, wording) keep the current queries, so send no \`dataQueries\`. An edit that needs different data, such as "also show the average bytes", a new grouping or filter, or another time window, also needs \`dataQueries\` with an entry at the position of the query to change: without it the stored query is kept and the new data can never appear. The server then regenerates that query from the \`description\`, keeping what the request does not change. \`removeAllQueries: true\` removes every query. The server refines the existing template.
-
-### Panels with several queries
-
-When one panel needs data of more than one shape — headline numbers above a ranked list, say — send one \`dataQueries\` entry per query. The template reads the first as \`rows\` and the n-th as \`queries[n].rows\`. Each entry says what ONE query returns, not how it looks: \`{ description: "total requests and the number of 5xx errors, as one row", index: "logs-*" }\`, then \`{ description: "the five hosts with the most requests" }\`. \`query\` stays the layout and how each query is used. Keep a panel to a few queries (at most ten).
-
-To edit a panel that has several queries, send \`dataQueries\` only for the ones you change, in position order: an entry with \`description\` regenerates that query, \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one. Queries you do not list are kept. They cannot be removed one at a time; tell the user to remove one from the panel's editor, or use \`removeAllQueries: true\` to remove them all. For a layout or style edit omit \`dataQueries\`: every query is kept.
+${inlinePanelKindGuidance}
 
 Other panel types never take \`esql\` unless it came from \`${platformCoreTools.generateEsql}\` or the user pasted it: their query is generated from \`query\`.
 
@@ -106,5 +95,5 @@ Controls are keyed by the \`id\` from the \`controls[]\` list in the tool result
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
-  referencedContent: [enhanceGuidanceReference],
+  referencedContent: [enhanceGuidanceReference, ...panelConfigReferences],
 };
