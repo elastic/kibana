@@ -42,7 +42,7 @@ describe('aws onboarding credentials attachment type', () => {
       } as any,
       {} as any
     );
-    const text = JSON.stringify(formatted.getRepresentation());
+    const text = JSON.stringify(formatted.getRepresentation!());
     expect(text).toContain('verified');
     expect(text).toContain('123456789012');
     expect(text).not.toContain('AKIA');
@@ -63,7 +63,7 @@ describe('aws onboarding credentials attachment type', () => {
       } as any,
       {} as any
     );
-    expect(JSON.stringify(formatted.getRepresentation())).toContain('AccessDenied');
+    expect(JSON.stringify(formatted.getRepresentation!())).toContain('AccessDenied');
   });
 
   it('is read-only for the agent', () => {

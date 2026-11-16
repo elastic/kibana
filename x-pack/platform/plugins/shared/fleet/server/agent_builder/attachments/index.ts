@@ -16,5 +16,10 @@ export const registerAwsOnboardingAttachments = ({
 }: {
   agentBuilder: AgentBuilderPluginSetup;
 }) => {
-  agentBuilder.attachments.registerType(createAwsOnboardingCredentialsAttachmentType());
+  // registerType is declared on the default generics, so the specific definition needs a cast.
+  agentBuilder.attachments.registerType(
+    createAwsOnboardingCredentialsAttachmentType() as Parameters<
+      typeof agentBuilder.attachments.registerType
+    >[0]
+  );
 };
