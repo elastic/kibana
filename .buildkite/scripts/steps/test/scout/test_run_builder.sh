@@ -115,7 +115,7 @@ resolve_on_merge_shadow_scope() {
   buildkite-agent artifact upload "$shadow_code_changes" || return 1
   buildkite-agent artifact upload "$shadow_scope" || return 1
 
-  jq -r --arg base "$base" '"On-merge selective testing (shadow) for Scout: \(.kind) scope from base \($base[0:12]) — \(.affectedConfigs // [] | length) affected config(s), \(.affectedModules | length) affected module(s); all configs still run"' \
+  jq -r --arg base "$base" '"On-merge selective testing (shadow) for Scout: \(.kind) scope from base \($base[0:12]) — \(if .affectedConfigs == null then "n/a" else (.affectedConfigs | length) end) affected config(s), \(.affectedModules | length) affected module(s); all configs still run"' \
     "$shadow_scope" |
     buildkite-agent annotate --context on-merge-selective-shadow-scout --style info || return 1
 }

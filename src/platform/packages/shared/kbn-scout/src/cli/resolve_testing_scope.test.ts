@@ -153,6 +153,7 @@ describe('runResolveTestingScope', () => {
     expect(readScoutTestingScope(scopeOutputPath)).toEqual({
       kind: 'dependency-tree',
       affectedModules: ['@kbn/bar', '@kbn/foo'],
+      affectedConfigs: [],
     });
   });
 
