@@ -240,6 +240,17 @@ describe('response action error helpers', () => {
       message: "No endpoint found with agent ID 'agent-404'.",
     });
   });
+
+  // Labelling an IP miss as a hostname led the agent to retry by hostname.
+  it('endpointNotFoundData labels an IP miss as an IP address, not a hostname', () => {
+    expect(endpointNotFoundData({ ip: '10.42.0.15' })).toEqual({
+      kind: 'response_action_result',
+      ip: '10.42.0.15',
+      found: false,
+      reason: 'endpoint_not_found',
+      message: "No endpoint found with IP address '10.42.0.15'.",
+    });
+  });
 });
 
 describe('formatForConfirmationCard', () => {

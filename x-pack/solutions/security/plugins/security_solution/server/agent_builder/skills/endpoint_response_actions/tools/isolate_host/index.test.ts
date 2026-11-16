@@ -655,6 +655,26 @@ describe('isolateHostTool', () => {
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
+    it('reports an IP miss under ip, not hostName', async () => {
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation((() => ({
+          getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+        })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
+
+      const result = await tool.handler({ ip: '10.0.0.99' }, mockContext);
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(data).toMatchObject({
+        found: false,
+        reason: 'endpoint_not_found',
+        ip: '10.0.0.99',
+        message: "No endpoint found with IP address '10.0.0.99'.",
+      });
+      expect(data).not.toHaveProperty('hostName');
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
+    });
+
     it('returns ambiguous_hostname with candidates and never dispatches when several endpoints share the hostname', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({

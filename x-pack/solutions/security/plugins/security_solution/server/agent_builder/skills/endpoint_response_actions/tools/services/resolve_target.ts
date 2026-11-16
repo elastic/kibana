@@ -164,7 +164,7 @@ export async function resolveDispatchTarget(
   if (ip) {
     const resolved = await lookup.resolveByIp(ip);
     if (resolved.kind === 'not_found') {
-      return { kind: 'respond', data: endpointNotFoundData({ hostName: ip }) };
+      return { kind: 'respond', data: endpointNotFoundData({ ip }) };
     }
     if (resolved.kind === 'ambiguous') {
       return {

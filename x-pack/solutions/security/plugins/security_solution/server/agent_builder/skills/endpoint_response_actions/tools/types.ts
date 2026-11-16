@@ -465,6 +465,8 @@ export interface EndpointNotFoundResult {
   hostName?: string;
   /** Set when the lookup was by agent ID only. */
   agentId?: string;
+  /** Set when the lookup was by IP address. */
+  ip?: string;
   found: false;
   reason: 'endpoint_not_found';
   /** Human-readable explanation for the agent's response text. */
@@ -478,13 +480,20 @@ export interface EndpointNotFoundResult {
  * answer claim a host is not isolated when nothing was found at all.
  */
 export function endpointNotFoundData(
-  lookup: { hostName: string } | { agentId: string }
+  lookup: { hostName: string } | { agentId: string } | { ip: string }
 ): EndpointNotFoundResult {
   const base = {
     kind: 'response_action_result' as const,
     found: false as const,
     reason: 'endpoint_not_found' as const,
   };
+  if ('ip' in lookup) {
+    return {
+      ...base,
+      ip: lookup.ip,
+      message: `No endpoint found with IP address '${lookup.ip}'.`,
+    };
+  }
   if ('hostName' in lookup) {
     return {
       ...base,

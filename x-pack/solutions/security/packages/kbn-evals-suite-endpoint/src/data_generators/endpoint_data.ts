@@ -14,6 +14,7 @@ import {
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { buildBaseEndpointMetadataFilter } from '@kbn/security-solution-plugin/common/endpoint/utils/endpoint_metadata_filter';
 
 const POLL_INTERVAL_MS = 5_000;
 
@@ -99,6 +100,11 @@ export async function waitForTransformPropagation(
   const start = Date.now();
   let lastCounts = { metadataCurrent: 0, metadataUnited: 0 };
   const seededQuery = { prefix: { 'agent.id': agentIdPrefix } };
+  // A half-merged united doc matches the prefix but not the base filter the
+  // lookup tools apply, so the first scenarios would see an empty inventory.
+  const seededUnitedQuery = {
+    bool: { filter: [seededQuery, buildBaseEndpointMetadataFilter()] },
+  };
   log.info(
     `Waiting for transform propagation: metadataCurrent >= ${expectedCounts.metadataCurrent}, metadataUnited >= ${expectedCounts.metadataUnited}`
   );
@@ -113,7 +119,7 @@ export async function waitForTransformPropagation(
         }),
         esClient.count({
           index: METADATA_UNITED_INDEX,
-          query: seededQuery,
+          query: seededUnitedQuery,
           ignore_unavailable: true,
         }),
       ]);
