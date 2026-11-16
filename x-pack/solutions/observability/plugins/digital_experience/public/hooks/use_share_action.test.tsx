@@ -47,7 +47,7 @@ describe('getShareParams', () => {
     expect(
       getShareParams({
         ...base,
-        search: '?rangeFrom=now-3h&rangeTo=now&percentile=95&kuery=a%20%3A%20b&hasErrors=true',
+        search: '?rangeFrom=now-3h&rangeTo=now&percentile=95&kuery=a%20%3A%20b&withJsErrors=true',
       })
     ).toEqual({
       ...base,
@@ -55,7 +55,7 @@ describe('getShareParams', () => {
       rangeTo: 'now',
       percentile: '95',
       kuery: 'a : b',
-      hasErrors: 'true',
+      withJsErrors: 'true',
     });
   });
 

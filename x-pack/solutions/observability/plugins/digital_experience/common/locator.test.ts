@@ -93,7 +93,8 @@ describe('DigitalExperienceLocatorDefinition', () => {
       serviceName: 'storefront-web',
       tab: 'sessions',
       source: 'otel',
-      hasErrors: true,
+      withJsErrors: true,
+      withFailedRequests: true,
       page: 2,
       perPage: 50,
       sortField: 'duration',
@@ -101,7 +102,7 @@ describe('DigitalExperienceLocatorDefinition', () => {
     });
 
     expect(path).toBe(
-      '/storefront-web/sessions?hasErrors=true&page=2&perPage=50&sortDirection=desc&sortField=duration&source=otel'
+      '/storefront-web/sessions?page=2&perPage=50&sortDirection=desc&sortField=duration&source=otel&withFailedRequests=true&withJsErrors=true'
     );
   });
 
