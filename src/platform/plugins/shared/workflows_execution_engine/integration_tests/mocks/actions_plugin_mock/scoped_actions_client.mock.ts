@@ -16,6 +16,12 @@ export class ScopedActionsClientMock implements Partial<ActionsClient> {
   getAll = jest
     .fn()
     .mockResolvedValue(Object.values(FakeConnectors) as ConnectorWithExtraFindData[]);
+  resolveConnectorName = jest
+    .fn()
+    .mockImplementation(
+      async (name: string) =>
+        Object.values(FakeConnectors).find((connector) => connector.name === name)?.id
+    );
   execute = jest.fn().mockImplementation((options) => this.returnMockedConnectorResult(options));
   bulkEnqueueExecution = jest.fn().mockResolvedValue(undefined);
 
