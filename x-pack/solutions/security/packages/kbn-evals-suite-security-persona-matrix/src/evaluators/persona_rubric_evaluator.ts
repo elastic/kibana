@@ -16,6 +16,7 @@ import {
   PersonaRubricPrompt,
   resolvePersonaToolsRow,
 } from './persona_rubric_prompt';
+import { InvalidVerdictError, JUDGE_MAX_RETRIES } from './judge_retry';
 import { NO_TOOL_CALL_RUBRIC_CAP } from './rubric_cap_no_tool_call_evaluator';
 import { getAnswerText, getSteps, isRecord } from './task_output_helpers';
 
@@ -97,12 +98,13 @@ export const runPersonaRubricJudge = async ({
         toolCalls,
       }),
       finalToolChoice: { function: 'grade' } as ToolChoice<'grade'>,
-      maxRetries: 3,
+      maxRetries: JUDGE_MAX_RETRIES,
       toolCallbacks: {
-        // Throwing makes executeUntilValid hand the error back to the judge and retry.
+        // A throw is caught by executeUntilValid, which retries once and passes the error to the
+        // judge as the tool result; InvalidVerdictError keeps its message through JSON.stringify.
         grade: async (toolCall) => {
           if (!parseScore(toolCall.function.arguments)) {
-            throw new Error(
+            throw new InvalidVerdictError(
               `score must be an integer between ${PERSONA_RUBRIC_MIN_SCORE} and ${PERSONA_RUBRIC_MAX_SCORE}`
             );
           }

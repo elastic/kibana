@@ -15,6 +15,7 @@ import {
   AD_AXES_MIN_SCORE,
   AdAxesRubricPrompt,
 } from './ad_axes_rubric_prompt';
+import { InvalidVerdictError, JUDGE_MAX_RETRIES } from './judge_retry';
 import { isRecord } from './task_output_helpers';
 
 export const AD_AXES_RUBRIC_EVALUATOR_NAME = 'AdAxesRubric';
@@ -121,9 +122,10 @@ export const createAdAxesRubricEvaluator = ({
         inferenceClient,
         input,
         finalToolChoice: { function: 'grade' } as ToolChoice<'grade'>,
-        maxRetries: 3,
+        maxRetries: JUDGE_MAX_RETRIES,
         toolCallbacks: {
-          // Throwing makes executeUntilValid hand the error back to the judge and retry.
+          // A throw is caught by executeUntilValid, which retries once and passes the error to the
+          // judge as the tool result; InvalidVerdictError keeps its message through JSON.stringify.
           grade: async (toolCall) => {
             const args = toolCall.function.arguments;
             if (
@@ -132,7 +134,7 @@ export const createAdAxesRubricEvaluator = ({
                 (v) => normalizeScore(v) === undefined
               )
             ) {
-              throw new Error(
+              throw new InvalidVerdictError(
                 `overall and every axis score must be a number between ${AD_AXES_MIN_SCORE} and ${AD_AXES_MAX_SCORE}`
               );
             }

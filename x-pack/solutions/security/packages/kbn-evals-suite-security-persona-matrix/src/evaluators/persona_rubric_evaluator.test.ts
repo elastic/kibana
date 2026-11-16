@@ -264,6 +264,46 @@ describe('runPersonaRubricJudge', () => {
     await expect(grade(undefined)).rejects.toThrow();
   });
 
+  describe('with the real executeUntilValid loop', () => {
+    const { executeUntilValid: realExecuteUntilValid } = jest.requireActual(
+      '@kbn/inference-prompt-utils'
+    );
+
+    const runAgainstFakeJudge = async (judgeArgs: unknown) => {
+      const prompt = jest.fn().mockResolvedValue({
+        content: '',
+        toolCalls: [{ toolCallId: 'c1', function: { name: 'grade', arguments: judgeArgs } }],
+      });
+      executeUntilValidMock.mockImplementation(realExecuteUntilValid);
+      const result = await runPersonaRubricJudge({
+        inferenceClient: { prompt } as unknown as BoundInferenceClient,
+        category: 'alert-analysis',
+        judgeOutput: withTools,
+      });
+      return { prompt, result };
+    };
+
+    it('calls the judge at most twice when the verdict stays invalid', async () => {
+      const { prompt, result } = await runAgainstFakeJudge({ score: 11 });
+      expect(prompt).toHaveBeenCalledTimes(2);
+      expect(result).toMatchObject({ score: null, label: 'unavailable' });
+    });
+
+    it('tells the judge why its verdict was rejected on the retry', async () => {
+      const { prompt } = await runAgainstFakeJudge({ score: 11 });
+      const { prevMessages } = prompt.mock.calls[1][0];
+      const toolMessage = prevMessages.find((m: { role: string }) => m.role === 'tool');
+      // The OpenAI adapter sends `JSON.stringify(message.response)`.
+      expect(JSON.stringify(toolMessage.response)).toContain('score must be an integer between');
+    });
+
+    it('stops after one call when the first verdict is valid', async () => {
+      const { prompt, result } = await runAgainstFakeJudge({ score: 8, explanation: 'ok' });
+      expect(prompt).toHaveBeenCalledTimes(1);
+      expect(result).toMatchObject({ score: 0.8 });
+    });
+  });
+
   it('returns unavailable when the judge returns no tool call', async () => {
     executeUntilValidMock.mockResolvedValue({ toolCalls: [] } as never);
     expect(await run(withTools)).toMatchObject({ score: null, label: 'unavailable' });

@@ -116,6 +116,51 @@ describe('AdAxesRubric', () => {
     await expect(grade('garbage')).rejects.toThrow();
   });
 
+  describe('with the real executeUntilValid loop', () => {
+    const { executeUntilValid: realExecuteUntilValid } = jest.requireActual(
+      '@kbn/inference-prompt-utils'
+    );
+
+    const runAgainstFakeJudge = async (judgeArgs: unknown) => {
+      const prompt = jest.fn().mockResolvedValue({
+        content: '',
+        toolCalls: [{ toolCallId: 'c1', function: { name: 'grade', arguments: judgeArgs } }],
+      });
+      executeUntilValidMock.mockImplementation(realExecuteUntilValid);
+      const result = await createAdAxesRubricEvaluator({
+        inferenceClient: { prompt } as unknown as BoundInferenceClient,
+      }).evaluate({
+        input: {},
+        expected: {},
+        output: { insights: [{ title: 'x' }] },
+        metadata: {},
+      } as never);
+      return { prompt, result };
+    };
+
+    it('calls the judge at most twice when the verdict stays invalid', async () => {
+      const { prompt, result } = await runAgainstFakeJudge({ ...goodArgs, coverage: 11 });
+      expect(prompt).toHaveBeenCalledTimes(2);
+      expect(result).toMatchObject({ score: null, label: 'unavailable' });
+    });
+
+    it('tells the judge why its verdict was rejected on the retry', async () => {
+      const { prompt } = await runAgainstFakeJudge({ ...goodArgs, coverage: 11 });
+      const { prevMessages } = prompt.mock.calls[1][0];
+      const toolMessage = prevMessages.find((m: { role: string }) => m.role === 'tool');
+      // The OpenAI adapter sends `JSON.stringify(message.response)`.
+      expect(JSON.stringify(toolMessage.response)).toContain(
+        'every axis score must be a number between'
+      );
+    });
+
+    it('stops after one call when the first verdict is valid', async () => {
+      const { prompt, result } = await runAgainstFakeJudge(goodArgs);
+      expect(prompt).toHaveBeenCalledTimes(1);
+      expect(result).toMatchObject({ score: 0.8 });
+    });
+  });
+
   it('forwards getModel', () => {
     const getModel = jest.fn();
     expect(
@@ -174,5 +219,43 @@ describe('toSubmission', () => {
     const { submission, keptCount } = toSubmission(insights);
     expect(keptCount).toBe(expected.length);
     expect(submission).toBe(serialize(expected));
+  });
+
+  describe('at the exact size boundary', () => {
+    const KEPT = 3;
+    const serialize = (items: unknown[]) => JSON.stringify({ attackDiscoveries: items }, null, 2);
+
+    // `KEPT` multi-line items whose serialization is exactly the cap plus `overBy` characters,
+    // followed by one more item that cannot fit. A length estimate that counts even one character
+    // too high drops an item that fits, and one that counts too low overshoots the cap.
+    const boundaryInsights = (overBy: number): unknown[] => {
+      const item = (bodyLength: number) => ({
+        body: 'y'.repeat(bodyLength),
+        nested: { a: [1, 2, { b: 'line\nbreak' }] },
+      });
+      const bodyLength = Math.floor(AD_AXES_MAX_SUBMISSION_CHARS / KEPT);
+      const target = AD_AXES_MAX_SUBMISSION_CHARS + overBy;
+      const fitted = Array.from({ length: KEPT }, () => item(bodyLength));
+      const lastLength = bodyLength + target - serialize(fitted).length;
+      return [...fitted.slice(0, -1), item(lastLength), { body: 'z' }];
+    };
+
+    it('keeps every insight that lands exactly on the cap', () => {
+      const insights = boundaryInsights(0);
+      expect(serialize(insights.slice(0, KEPT)).length).toBe(AD_AXES_MAX_SUBMISSION_CHARS);
+      const { submission, keptCount } = toSubmission(insights);
+      expect(keptCount).toBe(KEPT);
+      expect(submission).toBe(serialize(insights.slice(0, KEPT)));
+      expect(submission.length).toBe(AD_AXES_MAX_SUBMISSION_CHARS);
+    });
+
+    it('drops the last insight when it is one character over the cap', () => {
+      const insights = boundaryInsights(1);
+      expect(serialize(insights.slice(0, KEPT)).length).toBe(AD_AXES_MAX_SUBMISSION_CHARS + 1);
+      const { submission, keptCount } = toSubmission(insights);
+      expect(keptCount).toBe(KEPT - 1);
+      expect(submission).toBe(serialize(insights.slice(0, KEPT - 1)));
+      expect(submission.length).toBeLessThanOrEqual(AD_AXES_MAX_SUBMISSION_CHARS);
+    });
   });
 });
