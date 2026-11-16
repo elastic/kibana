@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IStateStore } from './state_store';
+import type { StateStore } from './state_store';
 
 /**
  * The end of the last fully processed minute of each strategy, in epoch milliseconds. A strategy
@@ -16,7 +16,7 @@ export async function readWatermarks({
   spaceId,
   strategyIds,
 }: {
-  state: IStateStore;
+  state: StateStore;
   spaceId: string;
   strategyIds: string[];
 }): Promise<Map<string, number>> {
@@ -45,7 +45,7 @@ export async function advanceWatermark({
   strategyId,
   processedUntil,
 }: {
-  state: IStateStore;
+  state: StateStore;
   spaceId: string;
   strategyId: string;
   processedUntil: number;

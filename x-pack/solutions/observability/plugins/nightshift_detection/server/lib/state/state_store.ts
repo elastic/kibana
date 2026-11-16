@@ -6,10 +6,10 @@
  */
 
 import { createToken } from '@kbn/core-di';
-import type { StateDocuments, StateVersion, TStateKind } from './state_kinds';
+import type { StateDocuments, StateVersion, StateKind } from './state_kinds';
 
 /** A state document with the version a conditional write must present. */
-export interface IVersionedState<TKind extends TStateKind> {
+export interface VersionedState<TKind extends StateKind> {
   value: StateDocuments[TKind];
   version: StateVersion;
 }
@@ -18,13 +18,13 @@ export interface IVersionedState<TKind extends TStateKind> {
  * Documents the engine keeps per space: the run lease and the strategy watermarks. A document is
  * addressed by space, kind and an optional key.
  */
-export interface IStateStore {
+export interface StateStore {
   /** The document, or `undefined` when it does not exist. */
-  get<TKind extends TStateKind>(params: {
+  get<TKind extends StateKind>(params: {
     spaceId: string;
     kind: TKind;
     key?: string;
-  }): Promise<IVersionedState<TKind> | undefined>;
+  }): Promise<VersionedState<TKind> | undefined>;
 
   /**
    * Writes the document and returns its new version. Without `version` the document is created
@@ -32,7 +32,7 @@ export interface IStateStore {
    *
    * @throws StateConflictError when the write lost.
    */
-  put<TKind extends TStateKind>(params: {
+  put<TKind extends StateKind>(params: {
     spaceId: string;
     kind: TKind;
     key?: string;
@@ -47,11 +47,11 @@ export interface IStateStore {
    */
   delete(params: {
     spaceId: string;
-    kind: TStateKind;
+    kind: StateKind;
     key?: string;
     version: StateVersion;
   }): Promise<void>;
 }
 
 /** The engine's state store. Bound to the Elasticsearch implementation; tests bind their own. */
-export const StateStore = createToken<IStateStore>('nightshiftDetection.StateStore');
+export const StateStore = createToken<StateStore>('nightshiftDetection.StateStore');

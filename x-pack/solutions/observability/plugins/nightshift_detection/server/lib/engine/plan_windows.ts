@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IDetectionStrategy } from '../strategies/types';
+import type { DetectionStrategy } from '../strategies/detection_strategy';
 
 const MINUTE_MS = 60_000;
 
@@ -19,8 +19,8 @@ export const MAX_MINUTES_PER_RUN = 10;
 export const MAX_CATCH_UP_MINUTES = 120;
 
 /** The window one strategy processes in a run: `[from, to)` in epoch milliseconds. */
-export interface IPlannedWindow {
-  strategy: IDetectionStrategy;
+export interface PlannedWindow {
+  strategy: DetectionStrategy;
   from: number;
   to: number;
   /** Minutes jumped over because the strategy was too far behind, or the backlog was skipped. */
@@ -38,11 +38,11 @@ function planWindow({
   now,
   skipBacklog,
 }: {
-  strategy: IDetectionStrategy;
+  strategy: DetectionStrategy;
   watermark: number | undefined;
   now: number;
   skipBacklog: boolean;
-}): IPlannedWindow | undefined {
+}): PlannedWindow | undefined {
   const { cadence_minutes: cadence, settle_minutes: settle } = strategy.descriptor;
   const cadenceMs = cadence * MINUTE_MS;
   const maxRunMs = Math.max(MAX_MINUTES_PER_RUN, cadence) * MINUTE_MS;
@@ -93,12 +93,12 @@ export function planWindows({
   now,
   skipBacklog = false,
 }: {
-  strategies: IDetectionStrategy[];
+  strategies: DetectionStrategy[];
   /** Last processed minute per strategy id; a strategy that never ran is absent. */
   watermarks: Map<string, number>;
   now: number;
   skipBacklog?: boolean;
-}): IPlannedWindow[] {
+}): PlannedWindow[] {
   return strategies.flatMap((strategy) => {
     const window = planWindow({
       strategy,
