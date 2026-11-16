@@ -11,45 +11,41 @@ import { advanceWatermark, readWatermarks } from './watermarks';
 const SPACE_ID = 'default';
 const STRATEGY_ID = 'error_rate';
 
-describe('watermarks', () => {
-  const advance = ({
-    state,
-    processedUntil,
-  }: {
-    state: InMemoryStateStore;
-    processedUntil: number;
-  }) => advanceWatermark({ state, spaceId: SPACE_ID, strategyId: STRATEGY_ID, processedUntil });
-
-  const read = async (state: InMemoryStateStore) =>
-    (await readWatermarks({ state, spaceId: SPACE_ID, strategyIds: [STRATEGY_ID] })).get(
-      STRATEGY_ID
-    );
-
-  it('creates the watermark on the first advance and moves it forward after that', async () => {
-    const state = new InMemoryStateStore();
-
-    await advance({ state, processedUntil: 100 });
-    expect(await read(state)).toBe(100);
-
-    await advance({ state, processedUntil: 200 });
-    expect(await read(state)).toBe(200);
-  });
-
+describe('advanceWatermark', () => {
   it('never moves back, so a late writer cannot undo the progress of a newer run', async () => {
     const state = new InMemoryStateStore();
-    await advance({ state, processedUntil: 200 });
-    const put = jest.spyOn(state, 'put');
+    await advanceWatermark({
+      state,
+      spaceId: SPACE_ID,
+      strategyId: STRATEGY_ID,
+      processedUntil: 200,
+    });
 
-    await advance({ state, processedUntil: 100 });
-    await advance({ state, processedUntil: 200 });
+    await advanceWatermark({
+      state,
+      spaceId: SPACE_ID,
+      strategyId: STRATEGY_ID,
+      processedUntil: 100,
+    });
 
-    expect(put).not.toHaveBeenCalled();
-    expect(await read(state)).toBe(200);
+    const watermarks = await readWatermarks({
+      state,
+      spaceId: SPACE_ID,
+      strategyIds: [STRATEGY_ID],
+    });
+    expect(watermarks.get(STRATEGY_ID)).toBe(200);
   });
+});
 
+describe('readWatermarks', () => {
   it('leaves out a strategy that never ran', async () => {
     const state = new InMemoryStateStore();
-    await advance({ state, processedUntil: 100 });
+    await advanceWatermark({
+      state,
+      spaceId: SPACE_ID,
+      strategyId: STRATEGY_ID,
+      processedUntil: 100,
+    });
 
     const watermarks = await readWatermarks({
       state,

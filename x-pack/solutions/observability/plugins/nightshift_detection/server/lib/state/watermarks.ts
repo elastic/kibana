@@ -36,8 +36,8 @@ export async function readWatermarks({
 
 /**
  * Moves a strategy's watermark forward. It never moves back, so a late writer cannot undo the
- * progress of a newer run. The caller holds the run lease, so a conflict means a bug and is
- * thrown.
+ * progress of a newer run. A conflict is thrown: the caller's lease expired and another node took
+ * over, so the caller must stop writing.
  */
 export async function advanceWatermark({
   state,
