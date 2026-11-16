@@ -50,7 +50,7 @@ export const INVESTIGATION_TOOL_IDS = [SET_IMPACT_TOOL_ID, SET_HYPOTHESES_TOOL_I
 export const INVESTIGATION_AGENT_NAME = 'Nightshift Investigator';
 export const INVESTIGATION_AGENT_DESCRIPTION =
   'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
-  'inside a sandbox and, when Wiki is enabled, records what it learns in the Nightshift Wiki.';
+  'inside a sandbox and, when Wiki is enabled, records what it learns in the nightshift Wiki.';
 
 const SEMANTIC_MEMORY_SECTION = `
 **USING MEMORIES**

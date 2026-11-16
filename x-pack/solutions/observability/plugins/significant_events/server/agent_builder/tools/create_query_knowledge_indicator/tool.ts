@@ -20,6 +20,7 @@ import { assertSignificantEventsAccess } from '../../../routes/utils/assert_sign
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { getSourceWriteConflictMetadata } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import { trackTelemetryBestEffort } from '../bulk_write';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 import {
@@ -67,7 +68,7 @@ export function createQueryKnowledgeIndicatorTool({
     id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Create a query Knowledge Indicator (KI) for a Nightshift source and persist it to
+      Create a query Knowledge Indicator (KI) for a nightshift source and persist it to
       significant events query storage.
 
       Use this tool when the conversation discovers a new detection query that should be saved for
@@ -103,6 +104,7 @@ export function createQueryKnowledgeIndicatorTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async ({ slug, ...queryInput }, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       let sourceId = '';
 
       try {
@@ -133,14 +135,18 @@ export function createQueryKnowledgeIndicatorTool({
           logger,
           description: 'ki_query_create telemetry',
           track: () =>
-            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-              ki_kind: 'query',
-              tool_id: 'ki_query_create',
-              success: true,
-              source_id: source.id,
-              space_id: request.spaceId,
-              knowledge_indicator_id: id,
-            }),
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ki_kind: 'query',
+                tool_id: 'ki_query_create',
+                success: true,
+                source_id: source.id,
+                space_id: request.spaceId,
+                knowledge_indicator_id: id,
+              },
+              request
+            ),
         });
 
         return {
@@ -170,15 +176,19 @@ export function createQueryKnowledgeIndicatorTool({
           logger,
           description: 'failed ki_query_create telemetry',
           track: () =>
-            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-              ki_kind: 'query',
-              tool_id: 'ki_query_create',
-              success: false,
-              source_id: sourceId,
-              space_id: request.spaceId,
-              ...(queryInput.id !== undefined ? { knowledge_indicator_id: queryInput.id } : {}),
-              error_message: message,
-            }),
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ki_kind: 'query',
+                tool_id: 'ki_query_create',
+                success: false,
+                source_id: sourceId,
+                space_id: request.spaceId,
+                ...(queryInput.id !== undefined ? { knowledge_indicator_id: queryInput.id } : {}),
+                error_message: message,
+              },
+              request
+            ),
         });
 
         return {
