@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
+
 // Local only: the flag is turned on through server args, which Cloud deployments do not accept.
 export const DIGITAL_EXPERIENCE_TAGS = [
-  '@local-stateful-classic',
-  '@local-serverless-observability_complete',
+  ...tags.local.stateful.classic,
+  ...tags.local.serverless.observability.complete,
 ];
 
 // Stateful only: serverless disables the ux plugin, which the Classic RUM data and the legacy
 // navigation need.
-export const DIGITAL_EXPERIENCE_WITH_UX_TAGS = ['@local-stateful-classic'];
+export const DIGITAL_EXPERIENCE_WITH_UX_TAGS = tags.local.stateful.classic;
 
-export const DIGITAL_EXPERIENCE_SERVERLESS_TAGS = ['@local-serverless-observability_complete'];
+export const DIGITAL_EXPERIENCE_SERVERLESS_TAGS = tags.local.serverless.observability.complete;
