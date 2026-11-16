@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { attachmentTools, internalTools } from '@kbn/agent-builder-common';
 import type { Evaluator } from '@kbn/evals';
 import { createTrajectoryEvaluator } from '@kbn/evals';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -74,6 +75,9 @@ export const unsafeClose: Evaluator = {
   },
 };
 
+/** "Missing evidence cannot clear an alert"; see `payloadConformance` for how it is counted. */
+const MISSING_EVIDENCE_PROBLEM = 'false_positive with missing evidence';
+
 /** The world checks the managed prompt requires in `raw.checks`. */
 const WORLD_CHECK_NAMES = ['entity_role', 'process_parent', 'network_destination'] as const;
 
@@ -130,7 +134,7 @@ const contractProblems = (output: FpTpTaskOutput): string[] => {
     // "Missing evidence cannot clear an alert": a failed or empty query yields
     // `seen: 0` (or no coverage entry at all) for that source.
     if (sourceSeen('entities') === 0 || sourceSeen('events') === 0) {
-      problems.push('false_positive with missing evidence');
+      problems.push(MISSING_EVIDENCE_PROBLEM);
     }
   }
 
@@ -227,6 +231,9 @@ const failureProblems = (output: FpTpTaskOutput): string[] => [
  * Contract conformance. A run whose gold is `failed` must end FAILED (not timed out or
  * cancelled) and produce no payload;
  * any other run must produce a payload that satisfies the output contract.
+ *
+ * N/A when the only problem is a `false_positive` with missing evidence on a non-FP gold:
+ * `UnsafeClose` already scores 0 for that close, so one decision would otherwise fail twice.
  */
 export const payloadConformance: Evaluator = {
   name: 'PayloadConformance',
@@ -238,6 +245,17 @@ export const payloadConformance: Evaluator = {
       expectedOutcome(expected) === 'failed'
         ? failureProblems(task)
         : payloadProblems(task, task.seededIds.attackDiscoveryId);
+    if (
+      problems.length === 1 &&
+      problems[0] === MISSING_EVIDENCE_PROBLEM &&
+      expectedOutcome(expected) !== 'false_positive'
+    ) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: `${MISSING_EVIDENCE_PROBLEM}; scored by UnsafeClose`,
+      };
+    }
     return {
       score: problems.length === 0 ? 1 : 0,
       label: problems.length === 0 ? 'conforms' : 'violates',
@@ -247,12 +265,26 @@ export const payloadConformance: Evaluator = {
 };
 
 /**
- * Zero-tool guardrail: the workflow gathers the evidence and the agent is tool-less, so
- * any tool call fails. N/A when the traces are unavailable.
+ * Tools the agent runtime registers on every run, whatever the agent declares. They read or
+ * plan within the conversation and gather no evidence. `write_todos` is a removed tool that
+ * older runtimes still register.
+ */
+const RUNTIME_BUILT_IN_TOOL_IDS: ReadonlySet<string> = new Set([
+  ...Object.values(attachmentTools),
+  internalTools.searchRelevantSkills,
+  'write_todos',
+]);
+
+const evidenceToolCalls = (output: unknown): string[] =>
+  (asOutput(output).toolCallIds ?? []).filter((id) => !RUNTIME_BUILT_IN_TOOL_IDS.has(id));
+
+/**
+ * Zero-tool guardrail: the workflow gathers the evidence and the agent declares no tools, so
+ * any call to a tool other than a runtime built-in fails. N/A when the traces are unavailable.
  */
 export const createFpTpTrajectoryEvaluator = (): Evaluator => {
   const inner = createTrajectoryEvaluator({
-    extractToolCalls: (output) => asOutput(output).toolCallIds ?? [],
+    extractToolCalls: evidenceToolCalls,
     goldenPathExtractor: () => [],
     orderWeight: 1,
     coverageWeight: 0,

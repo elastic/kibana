@@ -223,6 +223,32 @@ describe('PayloadConformance contract checks', () => {
     expect(result.explanation).toContain('false_positive with missing evidence');
   });
 
+  it('is N/A when a missing-evidence false_positive on a non-FP gold is already an UnsafeClose', async () => {
+    const output = {
+      ...completed,
+      raw: { coverage: coverage(0, 5), checks: worldChecks('contradicts'), claims: {} },
+    };
+    const args = { input: {}, output, expected: { outcome: 'inconclusive' }, metadata: {} };
+    const result = await payloadConformance.evaluate(args);
+    expect(result).toMatchObject({ score: null, label: 'N/A' });
+    expect(result.explanation).toContain('scored by UnsafeClose');
+    expect((await unsafeClose.evaluate(args)).score).toBe(0);
+  });
+
+  it('still returns 0 on a non-FP gold when missing evidence comes with another problem', async () => {
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: {
+        ...completed,
+        raw: { coverage: coverage(0, 5), checks: [], claims: {} },
+      },
+      expected: { outcome: 'inconclusive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('false_positive with missing evidence');
+  });
+
   it('returns 0 for a false_positive whose world checks support and contradict', async () => {
     const result = await payloadConformance.evaluate({
       input: {},
@@ -628,6 +654,23 @@ describe('trajectory', () => {
   it('returns less than 1 when the agent called a tool', async () => {
     expect(
       await score(trajectory, { ...completed, toolCallIds: ['search'] }, 'false_positive')
+    ).toBeLessThan(1);
+  });
+
+  it('ignores tools the agent runtime registers on every run', async () => {
+    const toolCallIds = [
+      'write_todos',
+      'search_relevant_skills',
+      'attachments.list',
+      'attachments.add',
+    ];
+    expect(await score(trajectory, { ...completed, toolCallIds }, 'false_positive')).toBe(1);
+    expect(
+      await score(
+        trajectory,
+        { ...completed, toolCallIds: [...toolCallIds, 'search'] },
+        'false_positive'
+      )
     ).toBeLessThan(1);
   });
 
