@@ -2,7 +2,7 @@
 # https://www.updatecli.io/docs/core/compose/
 policies:
   - name: Handle ironbank bumps
-    policy: ghcr.io/elastic/oblt-updatecli-policies/ironbank/templates:0.6.0@sha256:6cad6022698d0b164c19d0fbf5cfbecd60d5246c228a453a64f1b624ee2281d3
+    policy: ghcr.io/elastic/oblt-updatecli-policies/ironbank/templates:1.2.0@sha256:ba973b3ce729e88fb4b8900e104463f8c512f94429a7a422d2089f9089e70080
     values:
       - .github/updatecli/values.d/scm.yml
       - .github/updatecli/values.d/ironbank.yml
