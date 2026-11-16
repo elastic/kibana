@@ -14,11 +14,7 @@ import {
   listResearchSourcesStepCommonDefinition,
   type ListResearchSourcesOutput,
 } from '../../common/step_types/list_research_sources';
-import {
-  searchResearchSourcesStepCommonDefinition,
-  type SearchResearchSourcesOutput,
-} from '../../common/step_types/search_research_sources';
-import { describeResearchSources, runResearchSearches } from '../dreaming/research';
+import { describeResearchSources } from '../dreaming/research';
 import type { ResearchStepDependencies } from './helpers';
 import {
   assertDreamingAvailable,
@@ -90,40 +86,6 @@ export const getListResearchSourcesStepDefinition = (deps: ResearchStepDependenc
         sources,
         usable: sources.filter(({ error }) => error === undefined).length,
       };
-      return { output };
-    },
-  });
-
-export const getSearchResearchSourcesStepDefinition = (deps: ResearchStepDependencies) =>
-  createServerStepDefinition({
-    ...searchResearchSourcesStepCommonDefinition,
-    handler: async (context) => {
-      const {
-        ai_index_id: aiIndexId,
-        searches,
-        results_per_search: resultsPerSearch,
-        skip_evidence_ids: skip,
-      } = context.input;
-      const { request, aiIndex, esClient } = await prepareResearchStep(
-        deps,
-        context,
-        aiIndexId,
-        'read'
-      );
-      const actionsClient = await (await deps.getActions()).getActionsClientWithRequest(request);
-      const output: SearchResearchSourcesOutput = await runResearchSearches({
-        sources: aiIndex.sources,
-        searches,
-        esClient,
-        actionsClient,
-        resultsPerSearch,
-        skip,
-        logger: deps.logger,
-        abortSignal: context.abortSignal,
-      });
-      deps.logger.debug(
-        `Research for AI index '${aiIndexId}' ran ${searches.length} searches: ${output.evidence.length} results, ${output.errors.length} failed`
-      );
       return { output };
     },
   });

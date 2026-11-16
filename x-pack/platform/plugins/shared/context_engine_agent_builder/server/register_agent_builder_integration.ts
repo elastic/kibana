@@ -13,6 +13,7 @@ import { hasContextEngineReadPrivilege } from './agent_builder/has_context_engin
 import { registerAgentBuilderTools } from './agent_builder/tools';
 import { registerAttachmentTypes } from './attachment_types';
 import { registerContextEngineAgent } from './agent/context_engine_agent';
+import { registerDreamingResearchAgent } from './agent/dreaming_research_agent';
 import type {
   ContextEngineAgentBuilderPluginStart,
   ContextEngineAgentBuilderStartDependencies,
@@ -34,6 +35,10 @@ export const registerContextEngineAgentBuilderIntegration = ({
 }): void => {
   registerAttachmentTypes(agentBuilder);
   registerContextEngineAgent(agentBuilder);
+  registerDreamingResearchAgent(agentBuilder, async (request) => {
+    const [, { contextEngine }] = await coreSetup.getStartServices();
+    return contextEngine.getReadOnlyConnectorIds(request);
+  });
 
   agentBuilder.agents.registerAiIndexResolver(async ({ ids, request }) => {
     const [coreStart, startDeps] = await coreSetup.getStartServices();

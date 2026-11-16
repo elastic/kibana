@@ -171,7 +171,7 @@ export const EnrichmentEditor = ({
         <p>
           {i18n.translate('xpack.contextEngine.dreamingConfig.enrichment.description', {
             defaultMessage:
-              'Dreaming picks the knowledge items worth improving, searches the sources of this AI index for what they lack, and adds what it finds, citing where it came from. It searches the indices of ES|QL sources and runs only the read-only actions of connector sources.',
+              'Dreaming picks the knowledge items worth improving, has an agent search the sources of this AI index for what they lack, and adds what it finds, citing where it came from. The agent searches the indices of ES|QL sources, and uses a connector source only when it is read-only: every action enabled on the connector only reads.',
           })}
         </p>
       </EuiText>

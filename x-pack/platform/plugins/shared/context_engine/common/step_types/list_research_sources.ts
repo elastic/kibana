@@ -26,10 +26,11 @@ export const researchSourceSchema = lazySchema(() =>
     name: z.string().describe('The ES|QL query, or the connector name'),
     description: z.string(),
     indices: z.array(z.string()).optional().describe('For an ES|QL source: the indices it reads'),
+    connector_id: z.string().optional().describe('For a connector source: its id'),
     sub_actions: z
       .array(z.object({ name: z.string(), description: z.string(), params: z.string() }))
       .optional()
-      .describe('For a connector source: the read-only sub-actions research may run'),
+      .describe('For a connector source: the sub-actions research may run, all of which only read'),
     guidance: z.string().optional().describe('For a connector source: how to use its sub-actions'),
     error: z.string().optional().describe('Why the source cannot be searched'),
   })
@@ -69,10 +70,11 @@ export const listResearchSourcesStepCommonDefinition: CommonStepDefinition<
       'xpack.contextEngine.workflows.steps.listResearchSources.documentation.details',
       {
         defaultMessage:
-          'Describes each source of the AI index for a research model: an ES|QL source by the ' +
-          'indices its FROM reads, which are searched full-text, and a connector source by its ' +
-          'read-only sub-actions and their parameters. Sub-actions that write are never listed. ' +
-          'A source that cannot be searched says why.',
+          'Describes each source of the AI index for the research agent: an ES|QL source by the ' +
+          'indices its FROM reads, and a connector source by its sub-actions and their ' +
+          'parameters. Research only uses read-only connectors: those whose enabled agent ' +
+          'sub-actions all only read. A connector that can write, like any source that cannot ' +
+          'be searched, says why.',
       }
     ),
   },

@@ -246,77 +246,81 @@ describe('CONTEXT_ENGINE_ENRICHMENT_WORKFLOW', () => {
     ).toEqual([{ id: 'fact-1' }, { id: 'entity-customer--acme' }]);
   });
 
-  it('researches each item in up to three rounds, until the model is done or plans no search', () => {
+  it('researches each item with the research agent, without storing a conversation', () => {
     const all = steps();
-    const research = findStep(all, 'research');
-    const decide = findStep(all, 'decide').with?.research_done;
+    const research = findStep(all, 'research') as Step & Record<string, unknown>;
 
-    expect(findStep(all, 'start').with).toEqual({
-      selected: '${{ variables.selected | plus: 1 }}',
-      evidence: '${{ consts.no_items }}',
-      searches_run: '${{ consts.no_items }}',
-      research_errors: '${{ consts.no_items }}',
-      research_done: false,
-    });
-    expect(research.type).toBe('while');
-    expect(research.condition).toBe('${{ variables.research_done != true }}');
-    expect(research['max-iterations']).toEqual({ limit: 3, 'on-limit': 'continue' });
-    expect((research.steps ?? []).map(({ name }) => name)).toEqual(['plan', 'search', 'decide']);
-    const done = (content: unknown) =>
-      evaluate(decide, { steps: { plan: { output: { content } } } });
-    expect(done({ done: true, searches: [{}] })).toBe(true);
-    expect(done({ done: false, searches: [] })).toBe(true);
-    expect(done({ done: false, searches: [{}] })).toBe(false);
-  });
-
-  it('runs at most five searches a round, skipping evidence already found, and collects it', () => {
-    const all = steps();
-    const searches = Array.from({ length: 7 }, (_, i) => ({ source: `esql:${i}` }));
-    const scope = {
-      variables: { evidence: [{ id: 'e-1' }], searches_run: [{ source: 'esql:x' }] },
-      steps: {
-        plan: { output: { content: { searches } } },
-        run_searches: {
-          output: { evidence: [{ id: 'e-2' }], errors: [{ source: 's', message: 'm' }] },
+    expect(findStep(all, 'improve').steps?.map(({ name }) => name)).toEqual([
+      'start',
+      'research',
+      'collect',
+      'write',
+    ]);
+    expect(research).toEqual(
+      expect.objectContaining({
+        type: 'ai.agent',
+        'agent-id': 'platform.context_engine.dreaming_research',
+        'connector-id': '{{ consts.connector_id }}',
+        'connector-id-by-feature':
+          '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}',
+        'plugin-id': 'context_engine_dreaming',
+        'aggregate-by': 'context_engine',
+        ephemeral: true,
+        timeout: '10m',
+        'on-failure': { retry: { 'max-attempts': 2, delay: '30s' } },
+      })
+    );
+    expect(research.with?.schema).toEqual(
+      expect.objectContaining({
+        required: ['evidence'],
+        properties: {
+          evidence: expect.objectContaining({
+            maxItems: 20,
+            items: expect.objectContaining({ required: ['id', 'source', 'uri', 'text'] }),
+          }),
         },
-      },
-    };
-    const run = findStep(all, 'run_searches');
-    const collect = findStep(all, 'collect').with ?? {};
-
-    expect(run.type).toBe('context-engine.searchResearchSources');
-    expect(evaluate(run.with?.searches, scope)).toHaveLength(5);
-    expect(evaluate(run.with?.skip_evidence_ids, scope)).toEqual(['e-1']);
-    expect(evaluate(collect.evidence, scope)).toEqual([{ id: 'e-1' }, { id: 'e-2' }]);
-    expect(evaluate(collect.searches_run, scope)).toHaveLength(8);
-    expect(evaluate(collect.research_errors, scope)).toEqual([{ source: 's', message: 'm' }]);
+      })
+    );
   });
 
-  it('shows the research model the goal, the item, the searchable sources and what it found', () => {
-    const prompt = renderTemplate(findStep(steps(), 'plan').with?.prompt, {
+  it('collects the evidence the agent returned, or none', () => {
+    const evidence = findStep(steps(), 'collect').with?.evidence;
+    const collect = (structuredOutput: unknown) =>
+      evaluate(evidence, {
+        consts: render().consts,
+        steps: { research: { output: { structured_output: structuredOutput } } },
+      });
+
+    expect(collect({ evidence: [{ id: 'e-1' }] })).toEqual([{ id: 'e-1' }]);
+    expect(collect(undefined)).toEqual([]);
+  });
+
+  it('tells the research agent the goal, the item, and how to use each searchable source', () => {
+    const prompt = renderTemplate(findStep(steps(), 'research').with?.message, {
       consts: render().consts,
       foreach: { item: { id: 'fact-1', title: 'Acme likes email' } },
-      variables: {
-        evidence: [{ id: 'e-1', source: 'esql:1a2b3c4d', uri: 'index://a/1', text: 'tier: gold' }],
-        searches_run: [],
-        research_errors: [{ source: 'connector:notion-1', message: 'bad params' }],
-      },
       steps: {
         select: { output: { content: { selected: [{ id: 'fact-1', goal: 'the tier of Acme' }] } } },
-        sources: { output: { sources } },
+        sources: {
+          output: {
+            sources: sources.map((source) => ({
+              ...source,
+              connector_id: source.ref.replace('connector:', ''),
+            })),
+          },
+        },
       },
     });
 
     expect(prompt).toContain('GOAL: the tier of Acme');
+    expect(prompt).toContain(`WHAT THE INFORMATION IS FOR:\n\n${values.enrichment.improvement}\n`);
     expect(prompt).toContain('KNOWLEDGE ITEM:\n{"id":"fact-1","title":"Acme likes email"}');
-    expect(prompt).toContain('- ref: esql:1a2b3c4d');
-    expect(prompt).toContain('Search it with query: a few keywords.');
-    expect(prompt).toContain('sub_action searchPageOrDSByTitle: Search pages by title');
+    expect(prompt).toContain('- ref: esql:1a2b3c4d\n  Indices: support-cases');
+    expect(prompt).toContain('Connector "Team Notion", connectorId: notion-1. Notion workspace');
+    expect(prompt).toContain('subAction searchPageOrDSByTitle: Search pages by title');
     expect(prompt).toContain('- query (string, required): The title to search for');
     expect(prompt).toContain('How to use it: Search first, then read a page by id.');
     expect(prompt).not.toContain('connector:broken');
-    expect(prompt).toContain('{"source":"connector:notion-1","message":"bad params"}');
-    expect(prompt).toContain('"text":"tier: gold"');
   });
 
   it('rewrites an item only from evidence, and otherwise records that it was looked at', () => {

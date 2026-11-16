@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import {
   getConnectorSpec,
@@ -18,20 +17,13 @@ import { z, inlineRootJsonSchemaRef } from '@kbn/zod/v4';
 import type { AiIndexSource } from '../../common/http_api/ai_indices';
 import {
   CONNECTOR_SOURCE_REF_PREFIX,
-  DEFAULT_RESEARCH_RESULTS_PER_SEARCH,
   ESQL_SOURCE_REF_PREFIX,
-  MAX_EVIDENCE_TEXT_LENGTH,
-  MAX_RESEARCH_RESULTS_PER_SEARCH,
-  type Evidence,
-  type ResearchError,
-  type ResearchSearch,
 } from '../../common/step_types/research';
-import { MAX_KI_REFERENCE_URI_LENGTH, MAX_KI_TITLE_LENGTH } from '../../common/step_types/ki';
 import { parseFromClause } from '../tasks/transform';
 import { shortHash } from './ids';
 
 /** The actions client methods research uses. */
-export type ResearchActionsClient = Pick<ActionsClient, 'get' | 'execute'>;
+export type ResearchActionsClient = Pick<ActionsClient, 'get' | 'getAll'>;
 
 export interface ResearchSubAction {
   name: string;
@@ -40,7 +32,7 @@ export interface ResearchSubAction {
   params: string;
 }
 
-/** A source of an AI index as the research model sees it. */
+/** A source of an AI index as the research agent sees it. */
 export interface ResearchSource {
   ref: string;
   type: AiIndexSource['type'];
@@ -48,7 +40,9 @@ export interface ResearchSource {
   description: string;
   /** For an ES|QL source: the indices its `FROM` reads. */
   indices?: string[];
-  /** For a connector source: the read-only sub-actions research may run. */
+  /** For a connector source: its id, as the connector tool takes it. */
+  connector_id?: string;
+  /** For a connector source: the sub-actions research may run, all of which only read. */
   sub_actions?: ResearchSubAction[];
   /** For a connector source: how to use its sub-actions, from the connector type. */
   guidance?: string;
@@ -59,11 +53,6 @@ export interface ResearchSource {
 const MAX_GUIDANCE_LENGTH = 4000;
 const MAX_PARAM_DESCRIPTION_LENGTH = 300;
 const ID_HASH_LENGTH = 8;
-
-const TITLE_FIELDS = ['title', 'name', 'subject', 'summary', 'displayName', 'key', 'filename'];
-const URL_FIELDS = ['url', 'html_url', 'webViewLink', 'web_url', 'webUrl', 'permalink', 'link'];
-/** Fields an indexed document carries for search engines rather than for readers. */
-const EXCLUDED_SOURCE_FIELDS = ['*.inference', '*.inference.*', '*embedding*', '*vector*'];
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -76,8 +65,6 @@ export const esqlSourceRef = (query: string): string =>
 
 export const connectorSourceRef = (connectorId: string): string =>
   `${CONNECTOR_SOURCE_REF_PREFIX}${connectorId}`;
-
-export const evidenceId = (uri: string): string => `e-${shortHash(uri).slice(0, ID_HASH_LENGTH)}`;
 
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -119,51 +106,40 @@ export const describeParams = (input: z.ZodType | undefined): string => {
   }
 };
 
+/** The sub-actions an agent may run on a connector: its tools enabled by `selectedActions`. */
+const enabledToolActions = (spec: ConnectorSpec, selectedActions: SelectedActions) =>
+  Object.entries(spec.actions).filter(
+    ([name]) => isToolAction(spec, name) && isSelectedActionEnabled(name, selectedActions)
+  );
+
 /**
- * The sub-actions of a connector research may run: tools that only read and are enabled on the
- * connector. Research runs unattended, so anything that writes is never offered.
+ * Whether an agent can only read through a connector: it has sub-actions an agent may run, and
+ * every one of them only reads. Research runs unattended, so it only uses such connectors; one
+ * that can write is made read-only by enabling only its read sub-actions on it.
  */
-export const readOnlySubActions = (
-  spec: ConnectorSpec,
+export const isReadOnlyConnector = (
+  spec: ConnectorSpec | undefined,
   selectedActions: SelectedActions
-): ResearchSubAction[] =>
-  Object.entries(spec.actions)
-    .filter(
-      ([name, action]) =>
-        action.scope === 'read' &&
-        isToolAction(spec, name) &&
-        isSelectedActionEnabled(name, selectedActions)
-    )
-    .map(([name, action]) => ({
-      name,
-      description: action.description ?? name,
-      params: describeParams(action.input),
-    }));
-
-interface ResolvedConnector {
-  id: string;
-  name: string;
-  actionTypeId: string;
-  spec?: ConnectorSpec;
-  subActions: ResearchSubAction[];
-}
-
-const resolveConnector = async (
-  actionsClient: ResearchActionsClient,
-  connectorId: string
-): Promise<ResolvedConnector> => {
-  const connector = await actionsClient.get({ id: connectorId });
-  const spec = getConnectorSpec(connector.actionTypeId);
-  return {
-    id: connector.id,
-    name: connector.name,
-    actionTypeId: connector.actionTypeId,
-    spec,
-    subActions: spec
-      ? readOnlySubActions(spec, connector.config?.selectedActions as SelectedActions)
-      : [],
-  };
+): boolean => {
+  if (!spec) {
+    return false;
+  }
+  const actions = enabledToolActions(spec, selectedActions);
+  return actions.length > 0 && actions.every(([, action]) => action.scope === 'read');
 };
+
+const selectedActionsOf = (connector: { config?: Record<string, unknown> }): SelectedActions =>
+  connector.config?.selectedActions as SelectedActions;
+
+/** The ids of the connectors the caller can see that an agent can only read through. */
+export const readOnlyConnectorIds = async (
+  actionsClient: Pick<ActionsClient, 'getAll'>
+): Promise<string[]> =>
+  (await actionsClient.getAll())
+    .filter((connector) =>
+      isReadOnlyConnector(getConnectorSpec(connector.actionTypeId), selectedActionsOf(connector))
+    )
+    .map(({ id }) => id);
 
 const describeEsqlSource = (query: string): ResearchSource => {
   const indices = indicesOfEsqlSource(query);
@@ -171,7 +147,7 @@ const describeEsqlSource = (query: string): ResearchSource => {
     ref: esqlSourceRef(query),
     type: 'esql',
     name: query,
-    description: `Full-text search over ${indices.join(', ') || 'no index'}`,
+    description: `Documents in ${indices.join(', ') || 'no index'}`,
     indices,
     ...(indices.length === 0 && { error: 'The ES|QL source has no FROM clause to search.' }),
   };
@@ -183,28 +159,37 @@ const describeConnectorSource = async (
 ): Promise<ResearchSource> => {
   const ref = connectorSourceRef(connectorId);
   try {
-    const connector = await resolveConnector(actionsClient, connectorId);
+    const connector = await actionsClient.get({ id: connectorId });
+    const spec = getConnectorSpec(connector.actionTypeId);
+    const selectedActions = selectedActionsOf(connector);
     const base = {
       ref,
       type: 'connector' as const,
       name: connector.name,
-      description: connector.spec?.metadata.description ?? connector.name,
+      description: spec?.metadata.description ?? connector.name,
+      connector_id: connector.id,
     };
-    if (!connector.spec) {
+    if (!spec) {
       return {
         ...base,
-        error: `Connector type '${connector.actionTypeId}' has no sub-actions research can run.`,
+        error: `Connector type '${connector.actionTypeId}' has no sub-actions an agent can run.`,
       };
     }
-    if (connector.subActions.length === 0) {
-      return { ...base, error: 'The connector has no read-only sub-actions enabled.' };
+    if (!isReadOnlyConnector(spec, selectedActions)) {
+      return {
+        ...base,
+        error:
+          'The connector is not read-only: research only uses connectors whose enabled sub-actions all only read. Enable only its read sub-actions to use it.',
+      };
     }
     return {
       ...base,
-      sub_actions: connector.subActions,
-      ...(connector.spec.skill && {
-        guidance: truncate(connector.spec.skill, MAX_GUIDANCE_LENGTH),
-      }),
+      sub_actions: enabledToolActions(spec, selectedActions).map(([name, action]) => ({
+        name,
+        description: action.description ?? name,
+        params: describeParams(action.input),
+      })),
+      ...(spec.skill && { guidance: truncate(spec.skill, MAX_GUIDANCE_LENGTH) }),
     };
   } catch (error) {
     return {
@@ -212,12 +197,13 @@ const describeConnectorSource = async (
       type: 'connector',
       name: connectorId,
       description: connectorId,
+      connector_id: connectorId,
       error: `The connector cannot be read: ${errorMessage(error)}`,
     };
   }
 };
 
-/** The research source catalog of an AI index: each source, and what research can do with it. */
+/** The research source catalog of an AI index: each source, and how research can use it. */
 export const describeResearchSources = async ({
   sources,
   actionsClient,
@@ -240,255 +226,4 @@ export const describeResearchSources = async ({
     );
   }
   return described;
-};
-
-const firstString = (record: Record<string, unknown>, fields: readonly string[]) =>
-  fields
-    .map((field) => record[field])
-    .find((value): value is string => typeof value === 'string' && value.trim().length > 0);
-
-const titleOf = (value: unknown): string | undefined => {
-  if (!isRecord(value)) {
-    return undefined;
-  }
-  const title = firstString(value, TITLE_FIELDS);
-  return title !== undefined ? truncate(title, MAX_KI_TITLE_LENGTH) : undefined;
-};
-
-const textOf = (value: unknown): string =>
-  truncate(
-    typeof value === 'string' ? value : JSON.stringify(value) ?? '',
-    MAX_EVIDENCE_TEXT_LENGTH
-  );
-
-/**
- * The results in a connector response: its top-level array, or the first array of objects one
- * or two levels down, such as `results` or `hits.hits`. Otherwise the whole response.
- */
-export const resultsOf = (data: unknown): unknown[] => {
-  if (Array.isArray(data)) {
-    return data;
-  }
-  if (!isRecord(data)) {
-    return data === undefined || data === null ? [] : [data];
-  }
-  const arrayIn = (record: Record<string, unknown>) =>
-    Object.values(record).find(
-      (value): value is unknown[] =>
-        Array.isArray(value) && value.length > 0 && value.every(isRecord)
-    );
-  const nested = Object.values(data)
-    .filter(isRecord)
-    .map(arrayIn)
-    .find((value) => value !== undefined);
-  return arrayIn(data) ?? nested ?? [data];
-};
-
-const connectorResultUri = (connectorId: string, subAction: string, result: unknown): string => {
-  const url = isRecord(result) ? firstString(result, URL_FIELDS) : undefined;
-  return url !== undefined && url.length <= MAX_KI_REFERENCE_URI_LENGTH
-    ? url
-    : `connector://${connectorId}/${subAction}/${shortHash(JSON.stringify(result) ?? '').slice(
-        0,
-        ID_HASH_LENGTH
-      )}`;
-};
-
-const toEvidence = (source: string, uri: string, value: unknown): Evidence => {
-  const title = titleOf(value);
-  return {
-    id: evidenceId(uri),
-    source,
-    uri,
-    ...(title !== undefined && { title }),
-    text: textOf(value),
-  };
-};
-
-const isAbort = (error: unknown): boolean =>
-  error instanceof Error && (error.name === 'AbortError' || error.name === 'RequestAbortedError');
-
-const searchIndices = async ({
-  esClient,
-  indices,
-  query,
-  size,
-  abortSignal,
-}: {
-  esClient: ElasticsearchClient;
-  indices: string[];
-  query: string;
-  size: number;
-  abortSignal?: AbortSignal;
-}) => {
-  const request = (fullText: Record<string, unknown>) =>
-    esClient.search(
-      {
-        index: indices.join(','),
-        size,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        query: fullText,
-        _source: { excludes: EXCLUDED_SOURCE_FIELDS },
-      },
-      { signal: abortSignal }
-    );
-  try {
-    return await request({ multi_match: { query, lenient: true } });
-  } catch (error) {
-    if (isAbort(error)) {
-      throw error;
-    }
-    return request({ simple_query_string: { query, lenient: true } });
-  }
-};
-
-/** The parameters of a connector search: an object, a JSON object string, or none. */
-export const paramsOf = (params: ResearchSearch['params']): Record<string, unknown> => {
-  if (params === undefined || (typeof params === 'string' && params.trim() === '')) {
-    return {};
-  }
-  if (typeof params !== 'string') {
-    return params;
-  }
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(params);
-  } catch {
-    throw new Error('params is not valid JSON.');
-  }
-  if (!isRecord(parsed)) {
-    throw new Error('params must be a JSON object.');
-  }
-  return parsed;
-};
-
-/** What a round of searches found. */
-export interface ResearchResult {
-  evidence: Evidence[];
-  errors: ResearchError[];
-}
-
-/**
- * Runs the searches the research model asked for against the sources of an AI index. An ES|QL
- * source is searched full-text across the indices of its `FROM`, as the workflow user; a
- * connector source runs one of its read-only sub-actions. A search that fails is reported in
- * `errors` and does not stop the others. Evidence already found, or listed in `skip`, is left out.
- */
-export const runResearchSearches = async ({
-  sources,
-  searches,
-  esClient,
-  actionsClient,
-  resultsPerSearch = DEFAULT_RESEARCH_RESULTS_PER_SEARCH,
-  skip = [],
-  logger,
-  abortSignal,
-}: {
-  sources: readonly AiIndexSource[];
-  searches: readonly ResearchSearch[];
-  esClient: ElasticsearchClient;
-  actionsClient: ResearchActionsClient;
-  resultsPerSearch?: number;
-  skip?: readonly string[];
-  logger: Logger;
-  abortSignal?: AbortSignal;
-}): Promise<ResearchResult> => {
-  const size = Math.min(Math.max(1, resultsPerSearch), MAX_RESEARCH_RESULTS_PER_SEARCH);
-  const esqlSources = new Map(
-    sources.filter(({ type }) => type === 'esql').map(({ value }) => [esqlSourceRef(value), value])
-  );
-  const connectorIds = new Set(
-    sources.filter(({ type }) => type === 'connector').map(({ value }) => value)
-  );
-  const connectors = new Map<string, Promise<ResolvedConnector>>();
-  const seen = new Set(skip);
-  const evidence: Evidence[] = [];
-  const errors: ResearchError[] = [];
-  const add = (items: Evidence[]) => {
-    for (const item of items) {
-      if (!seen.has(item.id)) {
-        seen.add(item.id);
-        evidence.push(item);
-      }
-    }
-  };
-
-  const runEsql = async (source: string, query: string | undefined) => {
-    const esqlQuery = esqlSources.get(source);
-    if (esqlQuery === undefined) {
-      throw new Error('There is no such source.');
-    }
-    if (!query?.trim()) {
-      throw new Error('A search of an ES|QL source needs a query.');
-    }
-    const indices = indicesOfEsqlSource(esqlQuery);
-    if (indices.length === 0) {
-      throw new Error('The ES|QL source has no FROM clause to search.');
-    }
-    const response = await searchIndices({ esClient, indices, query, size, abortSignal });
-    return response.hits.hits.map((hit) => {
-      const uri = truncate(
-        `index://${hit._index}/${encodeURIComponent(hit._id ?? '')}`,
-        MAX_KI_REFERENCE_URI_LENGTH
-      );
-      return toEvidence(source, uri, hit._source ?? {});
-    });
-  };
-
-  const runConnector = async ({
-    source,
-    sub_action: subAction,
-    params: rawParams,
-  }: ResearchSearch) => {
-    const connectorId = source.slice(CONNECTOR_SOURCE_REF_PREFIX.length);
-    if (!connectorIds.has(connectorId)) {
-      throw new Error('There is no such source.');
-    }
-    if (!subAction) {
-      throw new Error('A search of a connector source needs a sub_action.');
-    }
-    if (!connectors.has(connectorId)) {
-      connectors.set(connectorId, resolveConnector(actionsClient, connectorId));
-    }
-    const connector = await (connectors.get(connectorId) as Promise<ResolvedConnector>);
-    if (!connector.subActions.some(({ name }) => name === subAction)) {
-      throw new Error(
-        `Sub-action '${subAction}' is not one of the read-only sub-actions of this connector: ${
-          connector.subActions.map(({ name }) => name).join(', ') || 'none'
-        }.`
-      );
-    }
-    const result = await actionsClient.execute({
-      actionId: connectorId,
-      params: { subAction, subActionParams: paramsOf(rawParams) },
-      signal: abortSignal,
-    });
-    if (result.status === 'error') {
-      throw new Error(result.message ?? result.serviceMessage ?? 'The sub-action failed.');
-    }
-    return resultsOf(result.data)
-      .slice(0, size)
-      .map((item) => toEvidence(source, connectorResultUri(connectorId, subAction, item), item));
-  };
-
-  for (const search of searches) {
-    abortSignal?.throwIfAborted();
-    try {
-      if (search.source.startsWith(ESQL_SOURCE_REF_PREFIX)) {
-        add(await runEsql(search.source, search.query));
-      } else if (search.source.startsWith(CONNECTOR_SOURCE_REF_PREFIX)) {
-        add(await runConnector(search));
-      } else {
-        throw new Error('There is no such source.');
-      }
-    } catch (error) {
-      if (isAbort(error) || abortSignal?.aborted) {
-        throw error;
-      }
-      logger.debug(() => `Research search of '${search.source}' failed: ${errorMessage(error)}`);
-      errors.push({ source: search.source, message: errorMessage(error) });
-    }
-  }
-  return { evidence, errors };
 };

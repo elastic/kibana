@@ -6,3 +6,7 @@
  */
 
 export const CONTEXT_ENGINE_SETUP_AGENT_ID = 'platform.context_engine.setup' as const;
+
+/** The agent dreaming researches knowledge items with, through read-only connectors and ES|QL. */
+export const CONTEXT_ENGINE_DREAMING_RESEARCH_AGENT_ID =
+  'platform.context_engine.dreaming_research' as const;

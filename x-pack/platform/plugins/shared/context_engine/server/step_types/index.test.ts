@@ -64,7 +64,6 @@ describe('registerStepDefinitions', () => {
       'context-engine.applyDreamChanges',
       'context-engine.applyDreamRelationships',
       'context-engine.listResearchSources',
-      'context-engine.searchResearchSources',
       'context-engine.readKis',
       'context-engine.selectEnrichmentCandidates',
       'context-engine.applyEnrichment',

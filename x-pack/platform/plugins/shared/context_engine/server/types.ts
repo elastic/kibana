@@ -51,6 +51,11 @@ export interface ContextEnginePluginStart {
     esClient: ElasticsearchClient,
     spaceId: string
   ) => ImprovementsServiceApi;
+  /**
+   * The connectors the caller can see that an agent can only read through: every agent sub-action
+   * enabled on them only reads. Dreaming research gives its agent only these.
+   */
+  getReadOnlyConnectorIds: (request: KibanaRequest) => Promise<string[]>;
 }
 
 /** Duck-typed so Context Engine does not depend on `@kbn/workflows-management-plugin` (Moon cycle). */

@@ -290,10 +290,43 @@ describe('CONTEXT_ENGINE_WIKI_WORKFLOW', () => {
       })
     ).toBe(true);
     expect(evaluate(researchable, { consts: { research: true }, steps: {} })).toBe(false);
-    expect(stepNamed(all, 'research')['max-iterations']).toEqual({
-      limit: 3,
-      'on-limit': 'continue',
+    expect(stepNamed(all, 'researchable').steps?.map(({ name }) => name)).toEqual([
+      'research',
+      'collect',
+    ]);
+    expect(stepNamed(all, 'research')).toEqual(
+      expect.objectContaining({
+        type: 'ai.agent',
+        'agent-id': 'platform.context_engine.dreaming_research',
+        ephemeral: true,
+      })
+    );
+    expect(stepNamed(all, 'start_page').with).toEqual({
+      pages: '${{ variables.pages | plus: 1 }}',
+      evidence: '${{ consts.no_items }}',
     });
+  });
+
+  it('tells the research agent the page, its members and the searchable sources', () => {
+    const prompt = renderTemplate(stepNamed(steps(), 'research').with?.message, {
+      foreach: { item: { ref: 'new:1', title: 'Acme', description: 'The customer Acme.' } },
+      steps: {
+        gather: { output: { members: [{ id: 'fact-1', title: 'Acme likes email' }] } },
+        sources: {
+          output: {
+            sources: [
+              { ref: 'esql:1', type: 'esql', name: 'FROM crm', indices: ['crm'] },
+              { ref: 'connector:x', type: 'connector', name: 'X', error: 'not read-only' },
+            ],
+          },
+        },
+      },
+    });
+
+    expect(prompt).toContain('PAGE: Acme: The customer Acme.');
+    expect(prompt).toContain('- Acme likes email');
+    expect(prompt).toContain('- ref: esql:1\n  Indices: crm');
+    expect(prompt).not.toContain('connector:x');
   });
 
   it('applies the page to its existing id, or the key the plan gave a new one', () => {

@@ -22,10 +22,7 @@ import { getApplyDreamChangesStepDefinition } from './apply_dream_changes';
 import { getApplyDreamRelationshipsStepDefinition } from './apply_dream_relationships';
 import { getDreamingStatusStepDefinition } from './get_dreaming_status';
 import { getReadTraceTranscriptsStepDefinition } from './read_trace_transcripts';
-import {
-  getListResearchSourcesStepDefinition,
-  getSearchResearchSourcesStepDefinition,
-} from './research_steps';
+import { getListResearchSourcesStepDefinition } from './research_steps';
 import {
   getApplyEnrichmentStepDefinition,
   getReadKisStepDefinition,
@@ -58,7 +55,6 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(getApplyDreamChangesStepDefinition(deps));
   workflowsExtensions.registerStepDefinition(getApplyDreamRelationshipsStepDefinition(deps));
   workflowsExtensions.registerStepDefinition(getListResearchSourcesStepDefinition(research));
-  workflowsExtensions.registerStepDefinition(getSearchResearchSourcesStepDefinition(research));
   workflowsExtensions.registerStepDefinition(getReadKisStepDefinition(research));
   workflowsExtensions.registerStepDefinition(getSelectEnrichmentCandidatesStepDefinition(research));
   workflowsExtensions.registerStepDefinition(getApplyEnrichmentStepDefinition(research));

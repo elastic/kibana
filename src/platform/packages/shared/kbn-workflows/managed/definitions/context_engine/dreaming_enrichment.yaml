@@ -78,7 +78,7 @@ steps:
         status: cancelled
         with:
           improved: 0
-          reason: 'None of the sources of the AI index can be searched.'
+          reason: 'None of the sources of the AI index can be searched. Connector sources must be read-only: only their read sub-actions enabled.'
 
   - name: candidates
     type: context-engine.selectEnrichmentCandidates
@@ -180,134 +180,93 @@ steps:
             type: data.set
             with:
               selected: '${{ variables.selected | plus: 1 }}'
-              evidence: '${{ consts.no_items }}'
-              searches_run: '${{ consts.no_items }}'
-              research_errors: '${{ consts.no_items }}'
-              research_done: false
 
           - name: research
-            type: while
-            condition: '${{ variables.research_done != true }}'
-            max-iterations:
-              limit: 3
-              on-limit: continue
-            steps:
-              - name: plan
-                type: ai.prompt
-                connector-id: '{{ consts.connector_id }}'
-                connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
-                on-failure:
-                  retry:
-                    max-attempts: 2
-                    delay: '30s'
-                with:
-                  prompt: |
-                    You research the sources of an AI index for information that would improve one knowledge item.
+            type: ai.agent
+            agent-id: platform.context_engine.dreaming_research
+            connector-id: '{{ consts.connector_id }}'
+            connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+            plugin-id: context_engine_dreaming
+            aggregate-by: context_engine
+            ephemeral: true
+            timeout: '10m'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '30s'
+            with:
+              message: |
+                Research the sources of an AI index for information that would improve one of its knowledge items.
 
-                    {%- assign pick = steps.select.output.content.selected | where: "id", foreach.item.id | first %}
+                {%- assign pick = steps.select.output.content.selected | where: "id", foreach.item.id | first %}
 
-                    GOAL: {{ pick.goal }}
+                GOAL: {{ pick.goal }}
 
-                    WHAT TO IMPROVE:
+                WHAT THE INFORMATION IS FOR:
 
-                    {{ consts.improvement | default: "Missing facts, exact values, current status, and context that make the item more useful on its own." }}
+                {{ consts.improvement | default: "Missing facts, exact values, current status, and context that make the item more useful on its own." }}
 
-                    KNOWLEDGE ITEM:
-                    {{ foreach.item | json }}
+                KNOWLEDGE ITEM:
+                {{ foreach.item | json }}
 
-                    SOURCES (search one by its ref):
-                    {%- for source in steps.sources.output.sources %}
-                    {%- unless source.error %}
-                    - ref: {{ source.ref }}
-                      {{ source.type }}: {{ source.name }}. {{ source.description }}
-                    {%- if source.type == 'esql' %}
-                      Search it with query: a few keywords.
-                    {%- endif %}
-                    {%- for sub_action in source.sub_actions %}
-                      sub_action {{ sub_action.name }}: {{ sub_action.description }}
-                      params:
-                    {{ sub_action.params }}
-                    {%- endfor %}
-                    {%- if source.guidance %}
-                      How to use it: {{ source.guidance }}
-                    {%- endif %}
-                    {%- endunless %}
-                    {%- endfor %}
+                SOURCES (search only these):
+                {%- for source in steps.sources.output.sources %}
+                {%- unless source.error %}
+                {%- if source.type == 'esql' %}
+                - ref: {{ source.ref }}
+                  Indices: {{ source.indices | join: ", " }}
+                {%- else %}
+                - ref: {{ source.ref }}
+                  Connector "{{ source.name }}", connectorId: {{ source.connector_id }}. {{ source.description }}
+                {%- for sub_action in source.sub_actions %}
+                  subAction {{ sub_action.name }}: {{ sub_action.description }}
+                  params:
+                {{ sub_action.params }}
+                {%- endfor %}
+                {%- if source.guidance %}
+                  How to use it: {{ source.guidance }}
+                {%- endif %}
+                {%- endif %}
+                {%- endunless %}
+                {%- endfor %}
+              schema:
+                type: object
+                properties:
+                  evidence:
+                    type: array
+                    description: The information found that bears on the goal. Empty when nothing was found.
+                    maxItems: 20
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: e-1, e-2 and so on, in the order found.
+                        source:
+                          type: string
+                          description: The ref of the source it came from.
+                        uri:
+                          type: string
+                          description: Where it came from, such as index://<index>/<document id> or the URL a connector returned.
+                        title:
+                          type: string
+                          description: A short label for it.
+                        text:
+                          type: string
+                          maxLength: 1500
+                          description: What it says, quoted or closely paraphrased, with exact names, numbers and dates.
+                      required:
+                        - id
+                        - source
+                        - uri
+                        - text
+                required:
+                  - evidence
 
-                    SEARCHES RUN SO FAR (one per line, none when empty):
-                    {%- for search in variables.searches_run %}
-                    {{ search | json }}
-                    {%- endfor %}
-
-                    FAILED SEARCHES OF THE LAST ROUND (one per line, none when empty):
-                    {%- for error in variables.research_errors %}
-                    {{ error | json }}
-                    {%- endfor %}
-
-                    FOUND SO FAR (one per line, none when empty):
-                    {%- for item in variables.evidence %}
-                    {{ item | json }}
-                    {%- endfor %}
-
-                    Return up to 5 searches that would find what the GOAL asks for and the item lacks.
-                    - For an ES|QL source, give query: a few keywords, such as names, ids and terms from the item. Not a sentence.
-                    - For a connector source, give sub_action, one of its sub-actions, and params: its parameters as a JSON object string, such as {"query": "Acme"}.
-                    - Build on what was found: read a page, file or record whose id a search returned.
-                    - Fix a failed search, or try another source; never repeat a search that already ran.
-
-                    Set done to true, with no searches, when what was found is enough for the goal or the sources hold nothing more about the item.
-                  schema:
-                    type: object
-                    properties:
-                      searches:
-                        type: array
-                        description: The searches to run next. Empty when done.
-                        items:
-                          type: object
-                          properties:
-                            source:
-                              type: string
-                              description: The ref of a source.
-                            query:
-                              type: string
-                              description: For an ES|QL source, the keywords to search for.
-                            sub_action:
-                              type: string
-                              description: For a connector source, one of its sub-actions.
-                            params:
-                              type: string
-                              description: For a connector source, the parameters of the sub-action as a JSON object string.
-                          required:
-                            - source
-                      done:
-                        type: boolean
-                        description: True when no more searches are needed.
-                    required:
-                      - searches
-                      - done
-
-              - name: search
-                type: if
-                condition: '${{ steps.plan.output.content.searches.size > 0 }}'
-                steps:
-                  - name: run_searches
-                    type: context-engine.searchResearchSources
-                    with:
-                      ai_index_id: '{{ consts.ai_index_id }}'
-                      searches: '${{ steps.plan.output.content.searches | slice: 0, 5 }}'
-                      skip_evidence_ids: '${{ variables.evidence | map: "id" }}'
-
-                  - name: collect
-                    type: data.set
-                    with:
-                      evidence: '${{ variables.evidence | concat: steps.run_searches.output.evidence }}'
-                      searches_run: '${{ variables.searches_run | concat: steps.plan.output.content.searches }}'
-                      research_errors: '${{ steps.run_searches.output.errors }}'
-
-              - name: decide
-                type: data.set
-                with:
-                  research_done: '${{ steps.plan.output.content.done == true or steps.plan.output.content.searches.size == 0 }}'
+          - name: collect
+            type: data.set
+            with:
+              evidence: '${{ steps.research.output.structured_output.evidence | default: consts.no_items }}'
 
           - name: write
             type: if

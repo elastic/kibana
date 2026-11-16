@@ -9,18 +9,13 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
-import { describeResearchSources, runResearchSearches } from '../dreaming/research';
+import { describeResearchSources } from '../dreaming/research';
 import type { ResearchStepDependencies } from './helpers';
-import {
-  getListResearchSourcesStepDefinition,
-  getSearchResearchSourcesStepDefinition,
-  prepareResearchStep,
-} from './research_steps';
+import { getListResearchSourcesStepDefinition, prepareResearchStep } from './research_steps';
 import { createMockStepContext } from './test_utils';
 
 jest.mock('../dreaming/research', () => ({
   describeResearchSources: jest.fn(),
-  runResearchSearches: jest.fn(),
 }));
 
 const sources = [
@@ -124,39 +119,5 @@ describe('getListResearchSourcesStepDefinition', () => {
 
     expect(describeResearchSources).toHaveBeenCalledWith({ sources, actionsClient });
     expect(output).toEqual(expect.objectContaining({ usable: 1 }));
-  });
-});
-
-describe('getSearchResearchSourcesStepDefinition', () => {
-  it('runs the searches against the sources of the AI index, as the workflow user', async () => {
-    const { deps, actionsClient } = createResearchDeps();
-    const esClient = { search: jest.fn() };
-    const found = { evidence: [], errors: [] };
-    jest.mocked(runResearchSearches).mockResolvedValue(found);
-    const searches = [{ source: 'esql:1', query: 'acme' }];
-
-    const { output } = await getSearchResearchSourcesStepDefinition(deps).handler(
-      createMockStepContext({
-        input: {
-          ai_index_id: 'support',
-          searches,
-          results_per_search: 2,
-          skip_evidence_ids: ['e-1'],
-        },
-        esClient,
-      })
-    );
-
-    expect(output).toBe(found);
-    expect(runResearchSearches).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sources,
-        searches,
-        esClient,
-        actionsClient,
-        resultsPerSearch: 2,
-        skip: ['e-1'],
-      })
-    );
   });
 });
