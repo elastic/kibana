@@ -16,7 +16,7 @@ The scanner reads inventory results from an osquery pack named exactly `software
 (and only that name — the schedule-id lookup in `server/lib/inventory/schedule_ids.ts`
 matches on it). The pack must contain the four queries below, with these exact query ids,
 run in snapshot mode on Linux. Until the pack exists and is assigned to your agent policies,
-the scan task exits early with `No "software-inventory" osquery pack found; nothing to scan`
+the scan exits early with `No "software-inventory" osquery pack found; nothing to scan`
 and produces no findings.
 
 | Query id | SQL |
@@ -37,28 +37,44 @@ testing, a pack with `interval: 86400` returned no snapshot results within ~8 mi
 assigned to an agent, while `interval: 60` returned results right away. Expect the first
 inventory to take up to one `interval` after the agent receives the pack.
 
-The scan task has its own schedule, independent of osquery. It is scheduled every day (`1d`) and
-Kibana asks Task Manager to run it as soon as possible (`runSoon`) on start when the task already
-exists and has not finished a scan within its interval. A new task runs on its own, and a scan
-that finished recently is not repeated on every restart. If the `runSoon` request fails, for
-example because a scan is already running, Kibana logs it at debug level and the regular schedule
-still applies. A scan that runs before the first inventory arrives finds nothing,
-and the findings only appear at the next scan. To see a first result quickly:
+## Scan workflow
 
-1. Create the pack with a short interval (for example `60`) and assign it to the agent policy.
-2. Wait for the agent to report results, then restart Kibana. A restart triggers a scan only once
-   the last scan is older than the scan interval; otherwise the next run follows the schedule.
-3. Raise the pack interval back to `86400` once the first findings show up.
+The scan is a managed workflow, `system-security-native-vuln-scan`, not a Task Manager task. Its
+definition lives in `kbn-workflows/managed/definitions/native_vuln_scanner/scan.yaml`. When the plugin
+is enabled, Kibana installs it once, in the default space, at start. It is installed **disabled**:
+the findings depend on an inventory pack that agent policies opt in to, so an operator turns it on.
 
-To check what the last scan did, look for the `Vulnerability scan <run id>: {...}` line in the
-Kibana log (`hosts`, `findings` and per-release `releases` status) and for the `lastRun` object
-in the task state (`native-vuln-scanner:scan` in the `.kibana_task_manager` index). A missing
-pack, a release with no vendor feed and a failed feed download are logged as warnings. A run that
-exceeds the task timeout (30 minutes) is cancelled by Task Manager, which drops the state that run
-returns, so `lastRun` keeps the previous run. Such a run shows up only in the Kibana log: Task
-Manager's `Cancelling task ... as it expired` warning, plus the `Vulnerability scan` summary line
-(with `aborted: true`) when the timeout lands while the releases are being processed; a timeout
-during the index setup or the inventory read logs no summary line.
+**Enable flow.** Open the workflow in Workflows (search for "Scan for vulnerabilities") and enable
+it. It then runs every `24h`. Use **Run** for a first scan once the first inventory has arrived. A scan
+that runs before the first inventory finds nothing, and the findings only appear at the next one. To see
+a first result quickly, create the pack with a short interval (for example `60`), assign it to the agent
+policy, wait for the agent to report, run the workflow, then raise the interval back to `86400`.
+
+**Steps.** Three custom steps, in order:
+
+1. `native_vuln.fetch_feed` reads the inventory, works out which OS releases it contains and downloads
+   those vendor feeds, sending `If-None-Match` when it holds a cached copy. Its output is metadata and
+   counts only (per-release status, etag), never advisory data. The feeds themselves stay in a per-node
+   cache keyed by release.
+2. `native_vuln.match` re-reads the inventory, matches each release against its feed and writes the
+   findings as the Kibana internal user. A release whose feed failed fails alone.
+3. `native_vuln.summarize` writes one summary document for the run.
+
+A failed step does not skip the summary; the workflow's last step then fails the run so the failure
+shows in the execution list.
+
+**Concurrency.** `settings.concurrency` uses the key `native-vuln-scan`, strategy `drop`, maximum 1: a
+run that starts while another is in flight is dropped, not queued.
+
+**Where the result is.** Each run writes one document, with the execution id as its id, to the hidden
+index `.kibana-native-vuln-scanner-runs`: run id, start and finish time, hosts scanned, findings open and
+fixed, per-feed status and failures. The name sits under `.kibana*` because that is the only pattern the
+`kibana_system` role may create and write for a plugin; the other names we tried were rejected with
+`indices:admin/create is unauthorized`. Query it with `expand_wildcards: hidden`. Each step's output is
+in the workflow's execution history.
+
+**Limits.** The feed cache is per Kibana node and is lost on restart, so each node downloads a feed once
+after a restart.
 
 ## Finding lifecycle and detection rules
 

@@ -7,38 +7,44 @@
 
 import type { loggingSystemMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { NativeVulnScannerPlugin } from './plugin';
 import { ensureFindingsIndex } from './lib/findings';
 import { OSQUERY_PACK_SO_TYPE } from './lib/inventory';
-import { registerScanTask, SCAN_TASK_ID, scheduleScanTask } from './tasks/scan_task';
+import { ensureSummaryIndex } from './lib/summary';
+import { installWorkflows } from './managed_workflows/install';
+import { registerOwner } from './managed_workflows/register_owner';
+import { registerNativeVulnScannerSteps } from './workflows/step_types';
 
 jest.mock('./lib/findings', () => ({ ensureFindingsIndex: jest.fn() }));
-jest.mock('./tasks/scan_task', () => ({
-  SCAN_TASK_ID: 'native-vuln-scanner:scan',
-  registerScanTask: jest.fn(),
-  scheduleScanTask: jest.fn(),
-}));
+jest.mock('./lib/summary', () => ({ ensureSummaryIndex: jest.fn() }));
+jest.mock('./managed_workflows/install', () => ({ installWorkflows: jest.fn() }));
+jest.mock('./managed_workflows/register_owner', () => ({ registerOwner: jest.fn() }));
+jest.mock('./workflows/step_types', () => ({ registerNativeVulnScannerSteps: jest.fn() }));
 
-const ensureMock = ensureFindingsIndex as jest.MockedFunction<typeof ensureFindingsIndex>;
-const registerMock = registerScanTask as jest.MockedFunction<typeof registerScanTask>;
-const scheduleMock = scheduleScanTask as jest.MockedFunction<typeof scheduleScanTask>;
+const ensureFindingsMock = ensureFindingsIndex as jest.MockedFunction<typeof ensureFindingsIndex>;
+const ensureSummaryMock = ensureSummaryIndex as jest.MockedFunction<typeof ensureSummaryIndex>;
+const installMock = installWorkflows as jest.MockedFunction<typeof installWorkflows>;
+const registerOwnerMock = registerOwner as jest.MockedFunction<typeof registerOwner>;
+const registerStepsMock = registerNativeVulnScannerSteps as jest.MockedFunction<
+  typeof registerNativeVulnScannerSteps
+>;
 
 const startPlugin = async (enabled: boolean) => {
   const context = coreMock.createPluginInitializerContext({ enabled });
   const plugin = new NativeVulnScannerPlugin(context);
   const coreSetup = coreMock.createSetup();
-  const taskManagerSetup = taskManagerMock.createSetup();
-  plugin.setup(coreSetup, { taskManager: taskManagerSetup });
+  const workflowsSetup = workflowsExtensionsMock.createSetup();
+  plugin.setup(coreSetup, { workflowsExtensions: workflowsSetup });
   const core = coreMock.createStart();
-  const taskManagerStart = taskManagerMock.createStart();
-  plugin.start(core, { taskManager: taskManagerStart });
+  const workflowsStart = workflowsExtensionsMock.createStart();
+  plugin.start(core, { workflowsExtensions: workflowsStart });
   await new Promise(process.nextTick);
   return {
     coreSetup,
     core,
-    taskManagerSetup,
-    taskManagerStart,
+    workflowsSetup,
+    workflowsStart,
     logger: context.logger.get() as ReturnType<typeof loggingSystemMock.createLogger>,
   };
 };
@@ -46,27 +52,52 @@ const startPlugin = async (enabled: boolean) => {
 describe('NativeVulnScannerPlugin', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    ensureMock.mockResolvedValue();
-    scheduleMock.mockResolvedValue(true);
+    ensureFindingsMock.mockResolvedValue();
+    ensureSummaryMock.mockResolvedValue();
+    installMock.mockResolvedValue({ failedIds: [] });
   });
 
-  it('sets up the findings index as the internal user when enabled', async () => {
+  it('sets up both indices as the internal user when enabled', async () => {
     const { core } = await startPlugin(true);
-    expect(ensureMock).toHaveBeenCalledWith(core.elasticsearch.client.asInternalUser);
+    expect(ensureFindingsMock).toHaveBeenCalledWith(core.elasticsearch.client.asInternalUser);
+    expect(ensureSummaryMock).toHaveBeenCalledWith(core.elasticsearch.client.asInternalUser);
   });
 
-  it('registers and schedules the scan task when enabled', async () => {
-    const { taskManagerSetup, taskManagerStart } = await startPlugin(true);
-    expect(registerMock).toHaveBeenCalledWith(taskManagerSetup, expect.any(Function));
-    expect(scheduleMock).toHaveBeenCalledWith(taskManagerStart);
+  it('registers the owner and the steps at setup when enabled', async () => {
+    const { workflowsSetup } = await startPlugin(true);
+    expect(registerOwnerMock).toHaveBeenCalledWith({ workflowsExtensions: workflowsSetup });
+    expect(registerStepsMock).toHaveBeenCalledWith(workflowsSetup, expect.any(Object));
+  });
+
+  it('installs the workflow once at start, after the indices exist', async () => {
+    const order: string[] = [];
+    ensureFindingsMock.mockImplementation(async () => {
+      order.push('findings');
+    });
+    ensureSummaryMock.mockImplementation(async () => {
+      order.push('summary');
+    });
+    installMock.mockImplementation(async () => {
+      order.push('install');
+      return { failedIds: [] };
+    });
+
+    const { workflowsStart } = await startPlugin(true);
+
+    expect(installMock).toHaveBeenCalledTimes(1);
+    expect(installMock).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowsExtensions: workflowsStart })
+    );
+    expect(order[order.length - 1]).toBe('install');
+    expect(order).toEqual(expect.arrayContaining(['findings', 'summary']));
   });
 
   it('builds scan dependencies from the internal user and an osquery pack repository', async () => {
     const { coreSetup } = await startPlugin(true);
     const [coreStart] = await coreSetup.getStartServices();
-    const getDeps = registerMock.mock.calls[0][1];
+    const { getScanDeps } = registerStepsMock.mock.calls[0][1];
 
-    const deps = await getDeps();
+    const deps = await getScanDeps();
 
     expect(deps.es).toBe(coreStart.elasticsearch.client.asInternalUser);
     const { createInternalRepository } = coreStart.savedObjects as jest.Mocked<
@@ -78,53 +109,30 @@ describe('NativeVulnScannerPlugin', () => {
 
   it('touches nothing when disabled', async () => {
     await startPlugin(false);
-    expect(ensureMock).not.toHaveBeenCalled();
-    expect(registerMock).not.toHaveBeenCalled();
-    expect(scheduleMock).not.toHaveBeenCalled();
+    expect(registerOwnerMock).not.toHaveBeenCalled();
+    expect(registerStepsMock).not.toHaveBeenCalled();
+    expect(ensureFindingsMock).not.toHaveBeenCalled();
+    expect(ensureSummaryMock).not.toHaveBeenCalled();
+    expect(installMock).not.toHaveBeenCalled();
   });
 
-  it('logs instead of failing start when the index setup fails', async () => {
-    ensureMock.mockRejectedValue(new Error('boom'));
+  it('logs instead of failing start when the findings index setup fails', async () => {
+    ensureFindingsMock.mockRejectedValue(new Error('boom'));
     const { logger } = await startPlugin(true);
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('boom'));
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to set up the vulnerability findings index: boom')
+    );
   });
 
-  it('logs instead of failing start when scheduling fails', async () => {
-    scheduleMock.mockRejectedValue(new Error('no task store'));
+  it('logs instead of failing start when the summary index setup fails', async () => {
+    ensureSummaryMock.mockRejectedValue(new Error('denied'));
     const { logger } = await startPlugin(true);
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('no task store'));
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('denied'));
   });
 
-  it('runs the scan right away when none ran within the interval', async () => {
-    const { taskManagerStart } = await startPlugin(true);
-    expect(taskManagerStart.runSoon).toHaveBeenCalledWith(SCAN_TASK_ID);
-  });
-
-  it('does not repeat a scan that ran within the interval', async () => {
-    scheduleMock.mockResolvedValue(false);
-    const { taskManagerStart } = await startPlugin(true);
-    expect(taskManagerStart.runSoon).not.toHaveBeenCalled();
-  });
-
-  it('does not run the scan when scheduling failed', async () => {
-    scheduleMock.mockRejectedValue(new Error('no task store'));
-    const { taskManagerStart } = await startPlugin(true);
-    expect(taskManagerStart.runSoon).not.toHaveBeenCalled();
-  });
-
-  it('logs and carries on when the startup run is rejected', async () => {
-    const taskManagerStart = taskManagerMock.createStart();
-    taskManagerStart.runSoon.mockRejectedValue(new Error('already running'));
-    const context = coreMock.createPluginInitializerContext({ enabled: true });
-    const plugin = new NativeVulnScannerPlugin(context);
-    plugin.setup(coreMock.createSetup(), { taskManager: taskManagerMock.createSetup() });
-    expect(() =>
-      plugin.start(coreMock.createStart(), { taskManager: taskManagerStart })
-    ).not.toThrow();
-    await new Promise(process.nextTick);
-    const logger = context.logger.get() as ReturnType<typeof loggingSystemMock.createLogger>;
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('already running'));
-    expect(logger.warn).not.toHaveBeenCalled();
-    expect(logger.error).not.toHaveBeenCalled();
+  it('logs instead of failing start when the install throws', async () => {
+    installMock.mockRejectedValue(new Error('no workflows'));
+    const { logger } = await startPlugin(true);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('no workflows'));
   });
 });

@@ -14,5 +14,7 @@ module.exports = {
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/security/plugins/native_vuln_scanner/server/**/*.ts',
+    '<rootDir>/x-pack/solutions/security/plugins/native_vuln_scanner/public/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/solutions/security/plugins/native_vuln_scanner/common/**/*.ts',
   ],
 };

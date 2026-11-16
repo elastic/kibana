@@ -15,7 +15,10 @@ import type {
 import type { NativeVulnScannerConfig } from './config';
 import { ensureFindingsIndex } from './lib/findings';
 import { OSQUERY_PACK_SO_TYPE } from './lib/inventory';
-import { registerScanTask, SCAN_TASK_ID, scheduleScanTask } from './tasks/scan_task';
+import { ensureSummaryIndex } from './lib/summary';
+import { installWorkflows } from './managed_workflows/install';
+import { registerOwner } from './managed_workflows/register_owner';
+import { registerNativeVulnScannerSteps } from './workflows/step_types';
 import type {
   NativeVulnScannerServerSetup,
   NativeVulnScannerServerStart,
@@ -42,45 +45,53 @@ export class NativeVulnScannerPlugin
 
   public setup(
     core: CoreSetup<NativeVulnScannerStartDeps>,
-    { taskManager }: NativeVulnScannerSetupDeps
+    { workflowsExtensions }: NativeVulnScannerSetupDeps
   ): NativeVulnScannerServerSetup {
     if (!this.config.enabled) return {};
-    const logger = this.logger.get('scan');
-    registerScanTask(taskManager, async () => {
-      const [coreStart] = await core.getStartServices();
-      return {
-        // Origin-only under CPS: osquery results and the findings index live in this project.
-        es: coreStart.elasticsearch.client.asInternalUser,
-        packRepository: coreStart.savedObjects.createInternalRepository([OSQUERY_PACK_SO_TYPE]),
-        logger,
-      };
+    registerOwner({ workflowsExtensions });
+    registerNativeVulnScannerSteps(workflowsExtensions, {
+      logger: this.logger.get('scan'),
+      getScanDeps: async () => {
+        const [coreStart] = await core.getStartServices();
+        return {
+          // Origin-only under CPS: osquery results and the findings index live in this project.
+          es: coreStart.elasticsearch.client.asInternalUser,
+          packRepository: coreStart.savedObjects.createInternalRepository([OSQUERY_PACK_SO_TYPE]),
+        };
+      },
     });
     return {};
   }
 
   public start(
     core: CoreStart,
-    { taskManager }: NativeVulnScannerStartDeps
+    { workflowsExtensions }: NativeVulnScannerStartDeps
   ): NativeVulnScannerServerStart {
     if (!this.config.enabled) return {};
-    // Origin-only under CPS: the findings index is plugin-owned and lives in this project.
-    ensureFindingsIndex(core.elasticsearch.client.asInternalUser).catch((error: Error) => {
-      this.logger.error(`Failed to set up the vulnerability findings index: ${error.message}`);
-    });
-    this.scheduleAndRun(taskManager).catch((error: Error) => {
-      this.logger.error(`Failed to schedule the vulnerability scan task: ${error.message}`);
+    this.setUp(core, workflowsExtensions).catch((error: Error) => {
+      this.logger.error(`Failed to set up the vulnerability scanner: ${error.message}`);
     });
     return {};
   }
 
-  /** Requests a scan after (re)scheduling when none ran within the interval, so a restart does not repeat one. */
-  private async scheduleAndRun(taskManager: NativeVulnScannerStartDeps['taskManager']) {
-    const runNow = await scheduleScanTask(taskManager);
-    if (!runNow) return;
-    await taskManager.runSoon(SCAN_TASK_ID).catch((error: Error) => {
-      // e.g. the task is already running; the regular schedule still applies.
-      this.logger.debug(`Could not run the vulnerability scan at startup: ${error.message}`);
-    });
+  /** The indices come first so the first scheduled run never writes into an auto-created index. */
+  private async setUp(
+    core: CoreStart,
+    workflowsExtensions: NativeVulnScannerStartDeps['workflowsExtensions']
+  ) {
+    // Origin-only under CPS: both indices are plugin-owned and live in this project.
+    const es = core.elasticsearch.client.asInternalUser;
+    await Promise.all([
+      ensureFindingsIndex(es).catch((error: Error) => {
+        this.logger.error(`Failed to set up the vulnerability findings index: ${error.message}`);
+      }),
+      ensureSummaryIndex(es).catch((error: Error) => {
+        this.logger.error(
+          `Failed to set up the vulnerability scan summary index: ${error.message}`
+        );
+      }),
+    ]);
+    await installWorkflows({ logger: this.logger, workflowsExtensions });
   }
 
   public stop(): void {}

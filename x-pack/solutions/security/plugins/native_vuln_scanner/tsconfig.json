@@ -3,14 +3,20 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/cloud-security-posture-common",
     "@kbn/config-schema",
     "@kbn/core",
+    "@kbn/core-spaces-common",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-saved-objects-api-server-mocks",
-    "@kbn/task-manager-plugin"
+    "@kbn/i18n",
+    "@kbn/logging-mocks",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows-management-plugin",
+    "@kbn/zod"
   ]
 }

@@ -35,10 +35,30 @@ export const feedUrl = ({ family, version }: FeedOs): string => {
   throw new Error(`No advisory feed for ${family} ${version}`);
 };
 
-export type LoadFeedResult =
-  | { status: 'ok'; feed: FeedParseResult }
+export interface FeedHeaders {
+  /** Validators the vendor sent with the feed; reported in the run summary. */
+  etag?: string;
+  lastModified?: string;
+}
+
+export type DownloadFeedResult =
+  | ({ status: 'ok'; body: Uint8Array } & FeedHeaders)
+  /** The vendor answered 304 to the `etag` the caller sent. */
+  | ({ status: 'not_modified' } & FeedHeaders)
   /** The vendor publishes no feed for this release (HTTP 404), e.g. RHEL 10 or an EOL codename. */
   | { status: 'unavailable'; url: string };
+
+export type LoadFeedResult =
+  | ({ status: 'ok'; feed: FeedParseResult } & FeedHeaders)
+  /** The vendor publishes no feed for this release (HTTP 404), e.g. RHEL 10 or an EOL codename. */
+  | { status: 'unavailable'; url: string };
+
+export interface DownloadFeedOptions {
+  signal?: AbortSignal;
+  fetchImpl?: typeof fetch;
+  /** Sent as `If-None-Match`, so an unchanged feed costs no body. */
+  etag?: string;
+}
 
 export interface LoadFeedOptions {
   signal?: AbortSignal;
@@ -92,13 +112,24 @@ const guardBlocks = function* (
   }
 };
 
-/** Downloads, decompresses and parses the advisory feed for one OS release. */
-export const loadFeed = async (
+/** Downloads the compressed advisory feed for one OS release without parsing it. */
+export const downloadFeed = async (
   os: FeedOs,
-  { signal, fetchImpl = fetch, maxDecompressedBytes }: LoadFeedOptions = {}
-): Promise<LoadFeedResult> => {
+  { signal, fetchImpl = fetch, etag: knownEtag }: DownloadFeedOptions = {}
+): Promise<DownloadFeedResult> => {
   const url = feedUrl(os);
-  const response = await fetchImpl(url, { signal });
+  const response = await fetchImpl(url, {
+    signal,
+    headers: knownEtag ? { 'if-none-match': knownEtag } : undefined,
+  });
+  if (response.status === 304) {
+    await response.body?.cancel();
+    return {
+      status: 'not_modified',
+      etag: response.headers.get('etag') ?? knownEtag,
+      lastModified: response.headers.get('last-modified') ?? undefined,
+    };
+  }
   if (response.status === 404) {
     await response.body?.cancel();
     return { status: 'unavailable', url };
@@ -108,15 +139,40 @@ export const loadFeed = async (
     throw new Error(`Advisory feed ${url} returned HTTP ${response.status}`);
   }
   const body = await readCapped(response, url);
+  const etag = response.headers.get('etag') ?? undefined;
+  const lastModified = response.headers.get('last-modified') ?? undefined;
+  return { status: 'ok', body, etag, lastModified };
+};
+
+/** Decompresses and parses a feed body from {@link downloadFeed}. */
+export const parseFeedBody = async (
+  os: FeedOs,
+  body: Uint8Array,
+  { signal, maxDecompressedBytes }: Pick<LoadFeedOptions, 'signal' | 'maxDecompressedBytes'> = {}
+): Promise<FeedParseResult> => {
   const blocks = guardBlocks(
     bunzip2Blocks(body),
-    url,
+    feedUrl(os),
     signal,
     maxDecompressedBytes ?? MAX_DECOMPRESSED_FEED_BYTES
   );
-  const feed =
-    os.family === 'ubuntu'
-      ? await parseUbuntuOval(blocks, { release: os.version })
-      : await parseRhelOval(blocks, { major: os.version });
-  return { status: 'ok', feed };
+  return os.family === 'ubuntu'
+    ? parseUbuntuOval(blocks, { release: os.version })
+    : parseRhelOval(blocks, { major: os.version });
+};
+
+/** Downloads, decompresses and parses the advisory feed for one OS release. */
+export const loadFeed = async (
+  os: FeedOs,
+  { signal, fetchImpl, maxDecompressedBytes }: LoadFeedOptions = {}
+): Promise<LoadFeedResult> => {
+  const downloaded = await downloadFeed(os, { signal, fetchImpl });
+  if (downloaded.status === 'unavailable') return downloaded;
+  // No etag is sent here, so a 304 can only come from a misbehaving server.
+  if (downloaded.status === 'not_modified') {
+    throw new Error(`Advisory feed ${feedUrl(os)} answered 304 to an unconditional request`);
+  }
+  const { body, etag, lastModified } = downloaded;
+  const feed = await parseFeedBody(os, body, { signal, maxDecompressedBytes });
+  return { status: 'ok', feed, etag, lastModified };
 };

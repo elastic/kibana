@@ -11,7 +11,7 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 export const configSchema = schema.object({
   /**
    * Off by default while the scanner is experimental. When false the plugin registers nothing:
-   * no task, no routes, no index templates.
+   * no steps, no managed workflow, no indices.
    */
   enabled: schema.boolean({ defaultValue: false }),
 });

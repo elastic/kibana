@@ -6,18 +6,18 @@
  */
 
 import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 
 export type NativeVulnScannerServerSetup = Record<string, never>;
 
 export type NativeVulnScannerServerStart = Record<string, never>;
 
 export interface NativeVulnScannerSetupDeps {
-  taskManager: TaskManagerSetupContract;
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface NativeVulnScannerStartDeps {
-  taskManager: TaskManagerStartContract;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }

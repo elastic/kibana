@@ -7,10 +7,10 @@
   "description": "Matches osquery software inventory against vendor security advisories and writes vulnerability findings",
   "plugin": {
     "id": "nativeVulnScanner",
-    "browser": false,
+    "browser": true,
     "server": true,
     "configPath": ["xpack", "nativeVulnScanner"],
-    "requiredPlugins": ["taskManager"],
+    "requiredPlugins": ["workflowsExtensions", "workflowsManagement"],
     "optionalPlugins": []
   }
 }

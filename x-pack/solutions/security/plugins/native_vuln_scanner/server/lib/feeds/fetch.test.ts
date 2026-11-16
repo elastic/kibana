@@ -8,7 +8,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { bunzip2Blocks } from './bzip2';
-import { feedUrl, loadFeed, MAX_FEED_BYTES } from './fetch';
+import { downloadFeed, feedUrl, loadFeed, MAX_FEED_BYTES, parseFeedBody } from './fetch';
 
 jest.mock('./bzip2', () => {
   const actual = jest.requireActual('./bzip2');
@@ -88,7 +88,7 @@ describe('loadFeed', () => {
     const fetchImpl = respond(rhelBz2);
     const { signal } = new AbortController();
     const result = await loadFeed(rhel9, { signal, fetchImpl });
-    expect(fetchImpl).toHaveBeenCalledWith(feedUrl(rhel9), { signal });
+    expect(fetchImpl).toHaveBeenCalledWith(feedUrl(rhel9), { signal, headers: undefined });
     if (result.status !== 'ok') throw new Error(`unexpected ${result.status}`);
     expect(result.feed.os).toEqual({ family: 'rhel', version: '9' });
     expect(result.feed.definitions).toBe(5);
@@ -173,5 +173,64 @@ describe('loadFeed', () => {
       return fakeResponse(rhelBz2);
     }) as unknown as typeof fetch;
     await expect(loadFeed(rhel9, { signal: controller.signal, fetchImpl })).rejects.toThrow();
+  });
+});
+
+describe('downloadFeed', () => {
+  const rhel9 = { family: 'rhel', version: '9' } as const;
+
+  it('reports the validators the vendor sent', async () => {
+    const result = await downloadFeed(rhel9, {
+      fetchImpl: respond(rhelBz2, {
+        headers: { etag: '"abc"', 'last-modified': 'Fri, 13 Nov 2026 10:00:00 GMT' },
+      }),
+    });
+    expect(result).toMatchObject({
+      status: 'ok',
+      etag: '"abc"',
+      lastModified: 'Fri, 13 Nov 2026 10:00:00 GMT',
+    });
+  });
+
+  it('sends a known etag as If-None-Match and reports a 304 without reading a body', async () => {
+    const fetchImpl = respond('', { status: 304, headers: { etag: '"abc"' } });
+    const result = await downloadFeed(rhel9, { fetchImpl, etag: '"abc"' });
+    expect(fetchImpl).toHaveBeenCalledWith(feedUrl(rhel9), {
+      signal: undefined,
+      headers: { 'if-none-match': '"abc"' },
+    });
+    expect(result).toEqual({ status: 'not_modified', etag: '"abc"', lastModified: undefined });
+  });
+
+  it('keeps the known etag when a 304 omits it', async () => {
+    const result = await downloadFeed(rhel9, {
+      fetchImpl: respond('', { status: 304 }),
+      etag: '"known"',
+    });
+    expect(result).toMatchObject({ status: 'not_modified', etag: '"known"' });
+  });
+});
+
+describe('loadFeed validators', () => {
+  const rhel9 = { family: 'rhel', version: '9' } as const;
+
+  it('returns the etag alongside the parsed feed', async () => {
+    const result = await loadFeed(rhel9, {
+      fetchImpl: respond(rhelBz2, { headers: { etag: '"v1"' } }),
+    });
+    expect(result).toMatchObject({ status: 'ok', etag: '"v1"' });
+  });
+
+  it('refuses a 304 to an unconditional request', async () => {
+    await expect(loadFeed(rhel9, { fetchImpl: respond('', { status: 304 }) })).rejects.toThrow(
+      'answered 304 to an unconditional request'
+    );
+  });
+});
+
+describe('parseFeedBody', () => {
+  it('parses a downloaded body', async () => {
+    const feed = await parseFeedBody({ family: 'rhel', version: '9' }, rhelBz2);
+    expect(feed.definitions).toBe(5);
   });
 });
