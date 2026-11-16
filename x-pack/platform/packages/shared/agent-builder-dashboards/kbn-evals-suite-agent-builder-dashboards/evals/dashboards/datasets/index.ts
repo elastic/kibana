@@ -10,4 +10,5 @@ export { DASHBOARD_DISCOVER_RESULTS_EXAMPLES } from './discover_results';
 export { DASHBOARD_EDIT_SCENARIO_EXAMPLES } from './edit_scenarios';
 export { DASHBOARD_ENHANCE_EXAMPLES } from './enhance';
 export { DASHBOARD_LAYOUT_EDIT_EXAMPLES } from './layout_edit';
+export { DASHBOARD_ML_PANEL_EXAMPLES, ML_PANEL_JOB_IDS } from './ml_panels';
 export { DASHBOARD_ROUTING_EXAMPLES } from './routing';

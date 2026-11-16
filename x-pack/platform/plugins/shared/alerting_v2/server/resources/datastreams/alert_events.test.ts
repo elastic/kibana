@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ALERT_EVENTS_DATA_IGNORE_ABOVE } from '@kbn/alerting-v2-schemas';
 import {
-  ALERT_EVENTS_DATA_IGNORE_ABOVE,
   alertEventSchema,
   buildRuleEventDocument,
   getAlertEventsResourceDefinition,

@@ -14,12 +14,10 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import { ALERT_EVENTS_DATA_IGNORE_ABOVE } from '@kbn/alerting-v2-schemas';
 import { expect } from '@kbn/scout/api';
 import { getAlertActionsResourceDefinition } from '../../../../../server/resources/datastreams/alert_actions';
-import {
-  ALERT_EVENTS_DATA_IGNORE_ABOVE,
-  getAlertEventsResourceDefinition,
-} from '../../../../../server/resources/datastreams/alert_events';
+import { getAlertEventsResourceDefinition } from '../../../../../server/resources/datastreams/alert_events';
 import { apiTest, testData } from '../fixtures';
 
 const MARKER = 'scout-final-pipeline';

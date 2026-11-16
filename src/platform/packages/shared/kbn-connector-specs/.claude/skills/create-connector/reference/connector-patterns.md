@@ -11,8 +11,11 @@ kbn-connector-specs/src/specs/
 ├── all_specs.ts                # Registration file - ADD YOUR SPEC HERE
 ├── slack/
 │   ├── slack.ts                # Connector spec
+│   ├── events.ts               # Inbound events (vendor → Kibana)
+│   ├── events.test.ts
 │   ├── slack.test.ts           # Tests
 │   ├── types.ts                # Zod schemas and inferred types
+│   ├── constants.ts            # Event keys and buildEventId results
 │   └── icon/
 │       └── index.tsx           # Brand icon component
 ├── github/
@@ -27,6 +30,8 @@ kbn-connector-specs/src/specs/
     ├── types.ts
     ├── {helper}.ts             # Optional: helpers moved out of the spec file
     ├── {helper}.test.ts
+    ├── events.ts               # When the vendor pushes webhooks; omit otherwise
+    ├── events.test.ts
     └── icon/
         └── index.tsx
 ```
@@ -45,7 +50,10 @@ for what they hold:
 - token or credential exchanges — e.g. `azure_monitor/azure_ad_token.ts`
 - constants shared by several of those files — `constants.ts`
 - a group of related actions whose handlers stay long even after that, as an exported object of action
-  definitions — e.g. `slack/events.ts`, spread into `actions` in the spec file
+  definitions spread into `actions` in the spec file
+- inbound events, when the vendor pushes them — `events.ts`, assigned to `events` on the spec (see
+  [Inbound events](#inbound-events)). This file is not an action group. `slack/events.ts` is the
+  inbound spoke for `.slack2`
 
 Handlers call those functions; they do not re-implement them. Keep one function per job, shared by
 every action that needs it, rather than one copy per handler. Each helper file gets its own
@@ -151,6 +159,62 @@ export const YourConnector: ConnectorSpec = {
   },
 };
 ```
+
+## Inbound events
+
+Add `events` when the vendor POSTs webhooks, subscriptions, or callbacks that should start something in kibana. That is the same spec as the outbound actions: a
+bi-directional connector does not get a second type, and it does not get a classic ActionType.
+The package README's [Inbound events](../../../../README.md#inbound-events) section is the contract.
+This section is the file layout.
+
+Omit `events` when the connector only calls the vendor. On the first PR for a new connector type, omit
+them even when the vendor pushes webhooks. Triggers are registered from `events.definitions` without
+reading `supportedFeatureIds`, and the workflows connector list includes event types that do not
+declare `'workflows'`. Add this file in the follow-up that adds `'workflows'`, once the type is
+registered in every Production-NonCanary version. Record the event keys in the first PR's description.
+
+```
+{connector}/
+├── events.ts            # ConnectorSpecEvents: definitions + handleEvents
+├── events.test.ts
+├── constants.ts         # EVENT_KEY and buildEventId(metadata.id, key)
+└── types.ts             # event payload schemas, or event_schemas.ts when types.ts is already large
+```
+
+Assign the export on the spec. Do not spread it into `actions`:
+
+```typescript
+import { myConnectorEvents } from './events';
+
+export const MyConnector: ConnectorSpec = {
+  // metadata, auth, schema, actions, test ...
+  events: myConnectorEvents,
+};
+```
+
+Rules the contract tests enforce:
+
+- `metadata.id` is in `SPECS_ALLOWED_EVENTS` (`src/specs_allowed_events.ts`)
+- each `eventId` equals `buildEventId(metadata.id, definitionKey)` (`.github` + `issues` → `github.issues`)
+- `events.headers` are lowercase and are not `authorization` or `cookie`
+
+`handleEvents` returns one of:
+
+- `{ type: 'emit', events: [...] }` for a body you recognized. `correlationKey` is a vendor id when
+  the payload has one, otherwise a UUID. Payload keys stay within 32, and the payload must satisfy
+  that definition's `eventSchema`.
+- `{ type: 'emit', events: [] }` for a body you do not model.
+- `{ type: 'http', httpResponse: { status, body?, headers? } }` for a handshake, with no emit.
+  Response headers may only be `content-type` and `cache-control`.
+- an emit plus `httpResponse` when the vendor requires a response and the events must still be
+  scheduled.
+
+`handleEvents` sees `rawBody`, `config` without secrets, and only the headers you listed. It does
+not see the ingest token or connector secrets. Do not declare `ingestTokenHash`; the factory injects
+it. Do not log `rawBody` at info.
+
+An inbound-only connector (`.inboundWebhook`) uses `actions: {}` and `test.enabled: false`. A dual
+connector keeps its actions and `test.enabled: true`.
 
 ## Input Schemas & Types
 
