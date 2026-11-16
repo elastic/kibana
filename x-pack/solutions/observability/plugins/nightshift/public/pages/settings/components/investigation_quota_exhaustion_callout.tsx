@@ -33,10 +33,16 @@ const getExhaustionCopy = (
           defaultMessage: 'Automations reached a daily run limit of {limit} for this deployment',
           values: { limit },
         }),
-        text: i18n.translate('xpack.nightshift.settings.runLimits.exhaustionDescription', {
-          defaultMessage:
-            'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue.',
-        }),
+        text:
+          limit === 0
+            ? i18n.translate('xpack.nightshift.settings.runLimits.zeroExhaustionDescription', {
+                defaultMessage:
+                  'Further triggers will be skipped until the limit is changed or enforcement is turned off. Already started investigations will continue.',
+              })
+            : i18n.translate('xpack.nightshift.settings.runLimits.exhaustionDescription', {
+                defaultMessage:
+                  'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue.',
+              }),
       };
     case 'manual_investigation':
       return {
@@ -45,10 +51,19 @@ const getExhaustionCopy = (
             'Manual investigations reached a daily limit of {limit} for this deployment',
           values: { limit },
         }),
-        text: i18n.translate('xpack.nightshift.settings.runLimits.manualExhaustionDescription', {
-          defaultMessage:
-            'New investigations from the home page, Slack mentions, the API and the CLI are blocked until the limit resets at midnight (UTC). Follow-ups on open investigations still run, and automations are not affected.',
-        }),
+        text:
+          limit === 0
+            ? i18n.translate(
+                'xpack.nightshift.settings.runLimits.zeroManualExhaustionDescription',
+                {
+                  defaultMessage:
+                    'New investigations from the home page, Slack mentions, the API and the CLI are blocked until the limit is changed or enforcement is turned off. Follow-ups on open investigations still run, and automations are not affected.',
+                }
+              )
+            : i18n.translate('xpack.nightshift.settings.runLimits.manualExhaustionDescription', {
+                defaultMessage:
+                  'New investigations from the home page, Slack mentions, the API and the CLI are blocked until the limit resets at midnight (UTC). Follow-ups on open investigations still run, and automations are not affected.',
+              }),
       };
     case 'total_investigation':
       return {
@@ -56,10 +71,16 @@ const getExhaustionCopy = (
           defaultMessage: 'Investigations reached a daily limit of {limit} for this deployment',
           values: { limit },
         }),
-        text: i18n.translate('xpack.nightshift.settings.runLimits.totalExhaustionDescription', {
-          defaultMessage:
-            'New automatic and manual investigations are blocked until the limit resets at midnight (UTC). Follow-ups on open investigations still run.',
-        }),
+        text:
+          limit === 0
+            ? i18n.translate('xpack.nightshift.settings.runLimits.zeroTotalExhaustionDescription', {
+                defaultMessage:
+                  'New automatic and manual investigations are blocked until the limit is changed or enforcement is turned off. Follow-ups on open investigations still run.',
+              })
+            : i18n.translate('xpack.nightshift.settings.runLimits.totalExhaustionDescription', {
+                defaultMessage:
+                  'New automatic and manual investigations are blocked until the limit resets at midnight (UTC). Follow-ups on open investigations still run.',
+              }),
       };
   }
 };
