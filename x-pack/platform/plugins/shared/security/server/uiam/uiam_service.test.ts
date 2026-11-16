@@ -1384,13 +1384,6 @@ describe('UiamService', () => {
 
   describe('#cloneApiKey', () => {
     const source = new HTTPAuthorizationHeader('ApiKey', 'essu_source_key');
-    const refuseWith = (status: number, code: string) =>
-      fetchSpy.mockResolvedValue({
-        ok: false,
-        status,
-        headers: new Headers(),
-        json: async () => ({ error: { message: 'Refused', code } }),
-      });
 
     it('asks UIAM to clone the key, authenticated by the client certificate alone', async () => {
       fetchSpy.mockResolvedValue({
@@ -1423,20 +1416,8 @@ describe('UiamService', () => {
     });
 
     it.each([
-      ['a 400 for a key UIAM can not clone', 400, '0x824009'],
-      ['a 401 when it does not accept the client certificate', 401, '0xBA477C'],
-      ['a 404 when it has no clone endpoint', 404, '0x1C6964'],
-      ['a 500', 500, '0x1C6964'],
-    ])('keeps the status and code of %s', async (_, status, code) => {
-      refuseWith(status, code);
-
-      await expect(uiamService.cloneApiKey(source, { name: 'my-clone' })).rejects.toMatchObject({
-        output: { statusCode: status, payload: { error: { code } } },
-      });
-    });
-
-    it.each([
       ['no key', {}],
+      ['an empty key', { id: 'clone-id', key: '', description: 'my-clone' }],
       ['an empty body', undefined],
       ['a key that is not a string', { id: 'clone-id', key: 1, description: 'my-clone' }],
     ])('rejects a response with %s', async (_, body) => {

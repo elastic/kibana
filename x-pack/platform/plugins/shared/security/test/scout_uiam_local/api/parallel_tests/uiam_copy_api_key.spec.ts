@@ -24,6 +24,9 @@ import { COMMON_UNSAFE_HEADERS, extractAttributeValue, UIAM_PROJECT_TYPES } from
 
 const UIAM_AUTHENTICATE_URL = `${MOCK_IDP_UIAM_SERVICE_URL}/uiam/api/v1/authentication/_authenticate`;
 
+const USERNAME = '1234567890';
+const USER_CREATOR = { type: 'user', user_id: Number(USERNAME) };
+
 interface UiamCreator {
   type: string;
   user_id?: number;
@@ -48,7 +51,7 @@ apiTest.describe('[NON-MKI] UIAM API Keys copy', { tag: tags.serverless.all }, (
 
     loginForAccessToken = async () => {
       const samlResponse = await createSAMLResponse({
-        username: '1234567890',
+        username: USERNAME,
         email: 'elastic_admin@elastic.co',
         roles: ['admin'],
         serverless: {
@@ -111,7 +114,7 @@ apiTest.describe('[NON-MKI] UIAM API Keys copy', { tag: tags.serverless.all }, (
     async ({ apiClient }) => {
       const source = await createSourceKey(apiClient);
       const { creator: sourceCreator } = await authenticateAtUiam(source.apiKey);
-      expect(sourceCreator?.type).toBe('user');
+      expect(sourceCreator).toStrictEqual(USER_CREATOR);
 
       const response = await callTestEndpoint(apiClient, 'copy', {
         name: 'copy-test-copy',
@@ -162,7 +165,7 @@ apiTest.describe('[NON-MKI] UIAM API Keys copy', { tag: tags.serverless.all }, (
       expect(response).toHaveStatusCode(200);
       expect(response.body.name).toBe('copy-test-from-token');
       const copy = await authenticateAtUiam(response.body.api_key);
-      expect(copy.creator?.type).toBe('user');
+      expect(copy.creator).toStrictEqual(USER_CREATOR);
     }
   );
 

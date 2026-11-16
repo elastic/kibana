@@ -113,7 +113,7 @@ export interface GrantUiamApiKeyResponse {
 }
 
 const cloneApiKeyResponseSchema = lazySchema(() =>
-  z.object({ id: z.string(), key: z.string(), description: z.string() })
+  z.object({ id: z.string().min(1), key: z.string().min(1), description: z.string() })
 );
 
 /** A cloned key is returned in the same shape as a granted one. */
