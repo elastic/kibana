@@ -51,13 +51,13 @@ function createReading({
 
 function wrapAll(
   readings: DetectionSignalReading[],
-  { spaceId = 'default', strategyId = 'error_rate' } = {}
+  { spaceId = 'default', strategyId = 'error_rate', strategyVersion = 1 } = {}
 ): DetectionSignal[] {
   return readings.map((reading) => {
     const result = wrapReading({
       reading,
       strategyId,
-      strategyVersion: 1,
+      strategyVersion,
       spaceId,
       scheduledMinute: reading.bucket_end,
     });
@@ -142,6 +142,7 @@ describe('FallbackSignalStore', () => {
     const history = await store.readHistory({
       spaceId: 'default',
       strategy: 'error_rate',
+      strategyVersion: 1,
       fingerprints: ['history-a', 'history-b', 'history-missing'],
       from: WINDOW_START,
       to: WINDOW_START + 2 * MINUTE_MS,
@@ -150,5 +151,39 @@ describe('FallbackSignalStore', () => {
     expect([...history.keys()].sort()).toEqual(['history-a', 'history-b']);
     expect(history.get('history-a')?.map(({ value }) => value)).toEqual([1.5, 2.5]);
     expect(history.get('history-b')?.map(({ value }) => value)).toEqual([7]);
+  });
+
+  it('keeps the versions of a strategy apart and returns a signal stored in two backing indices once', async () => {
+    const versionOne = wrapAll([createReading({ fingerprint: 'versions', minute: 0, value: 1 })]);
+    const versionTwo = wrapAll([createReading({ fingerprint: 'versions', minute: 0, value: 2 })], {
+      strategyVersion: 2,
+    });
+    await store.write([...versionOne, ...versionTwo]);
+    // After a rollover the same id no longer conflicts, so rewriting a window stores it again.
+    await esClient.indices.rollover({ alias: DETECTION_SIGNALS_FALLBACK_STREAM });
+    await store.write(versionOne);
+    await esClient.indices.refresh({ index: DETECTION_SIGNALS_FALLBACK_STREAM });
+
+    const stored = await esClient.search({
+      index: DETECTION_SIGNALS_FALLBACK_STREAM,
+      query: { term: { 'data.fingerprint': 'versions' } },
+    });
+    const readValues = async (strategyVersion: number) =>
+      (
+        await store.readHistory({
+          spaceId: 'default',
+          strategy: 'error_rate',
+          strategyVersion,
+          fingerprints: ['versions'],
+          from: WINDOW_START,
+          to: WINDOW_START + MINUTE_MS,
+        })
+      )
+        .get('versions')
+        ?.map(({ value }) => value);
+
+    expect(stored.hits.hits).toHaveLength(3);
+    expect(await readValues(1)).toEqual([1]);
+    expect(await readValues(2)).toEqual([2]);
   });
 });
