@@ -1550,6 +1550,7 @@ packages:
   - 'x-pack/platform/plugins/shared/triggers_actions_ui'
   - 'x-pack/platform/plugins/shared/usage_api'
   - 'x-pack/platform/test'
+  - 'x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector'
   - 'x-pack/platform/test_plugins/agent_builder_sml_test_types'
   - 'x-pack/platform/test_plugins/cloud_integration/saml_provider'
   - 'x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin'
