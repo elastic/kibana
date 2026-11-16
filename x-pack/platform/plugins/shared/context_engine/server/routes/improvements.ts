@@ -78,10 +78,7 @@ const improvementParamsSchema = schema.object({
 });
 
 const listImprovementsQuerySchema = schema.object({
-  /**
-   * Statuses to include. Omitted means the open ones, so the review panel never leads with a
-   * decision the user already made.
-   */
+  /** Statuses to include; defaults to the open statuses. */
   status: schema.maybe(
     schema.arrayOf(
       schema.oneOf([
@@ -106,7 +103,7 @@ const listImprovementsQuerySchema = schema.object({
 });
 
 const rejectBodySchema = schema.object({
-  /** The reviewer's words, read back to later runs so the same fix is not proposed again. */
+  /** Why the improvement was rejected. */
   reason: schema.maybe(schema.string({ maxLength: MAX_IMPROVEMENT_REJECT_REASON_LENGTH })),
 });
 
@@ -123,29 +120,22 @@ const handleImprovementError = (error: unknown, response: KibanaResponseFactory)
 export interface ImprovementRouteDeps {
   router: IRouter;
   getAiIndexService: () => AiIndexService;
-  /** Request-scoped: the improvements store is a user-owned index, authorized per call by ES. */
+  /** Returns an improvements service that uses the given request-scoped client. */
   getImprovementsService: (
     esClient: ElasticsearchClient,
     spaceId: string
   ) => ImprovementsServiceApi;
-  /** Absent until `contextEngineAgentBuilder` registers it, which rules out the workflow actions. */
+  /** Returns the registered workflow operations, or `undefined` if none are registered. */
   getWorkflowProvider: () => WorkflowProvider | undefined;
   getScheduleService: () => FeedbackAnalysisScheduleService;
   getActions: () => Promise<ActionsPluginStart>;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
-  /** Reads the global `contextEngine:feedbackLoopEnabled` setting; routes 404 while it is off. */
+  /** Whether the global `contextEngine:feedbackLoopEnabled` setting is on. */
   getFeedbackLoopEnabled: () => Promise<boolean>;
   logger: Logger;
 }
 
-/**
- * Registers the improvement review routes: read the suggestions a run produced, decide on one, and
- * start a run by hand.
- *
- * **Approving is the authorization boundary.** Both the store access and the change it materializes
- * run on the approving user's own Elasticsearch client and request, so an approval can never effect
- * something the user could not do themselves — the runner's credentials are not borrowed here.
- */
+/** Registers the routes for reviewing improvements and starting a feedback analysis run. */
 export const registerImprovementRoutes = ({
   router,
   getAiIndexService,
@@ -183,9 +173,6 @@ export const registerImprovementRoutes = ({
       },
       gate(async (ctx, request, response) => {
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-        // Improvements are recorded by the workflow, which always runs in the default space
-        // (SCHEDULE_SPACE_ID). Reading from the caller's active space would return nothing for
-        // non-default spaces, so pin the store to 'default' regardless of who is asking.
         const spaceId = 'default';
         const { status, from, size } = request.query;
 
@@ -231,7 +218,6 @@ export const registerImprovementRoutes = ({
             })
           );
 
-        // Improvements are stored in the default space (written by the workflow runner).
         const spaceId = resolveSpaceId(await getSpaces(), request);
         const improvements = getImprovementsService(esClient, 'default');
         const improvement = await improvements.get(improvementId);
@@ -269,8 +255,6 @@ export const registerImprovementRoutes = ({
             return handleImprovementError(error, response);
           }
 
-          // Recorded on the improvement rather than only returned, so the next run can see what
-          // went wrong, and so a reviewer who fixes the cause can approve the same proposal again.
           await improvements
             .transition(improvementId, 'failed', { ...resolution, error: error.message })
             .catch((transitionError) => {
@@ -293,8 +277,6 @@ export const registerImprovementRoutes = ({
           const body: MutateImprovementResponse = { improvement: improved };
           return response.ok({ body });
         } catch (error) {
-          // The change is already written. Reporting the bookkeeping failure is honest, and leaves
-          // the improvement open rather than claiming a decision the store never recorded.
           audit(error instanceof Error ? error : new Error(String(error)));
           return handleImprovementError(error, response);
         }
@@ -321,7 +303,6 @@ export const registerImprovementRoutes = ({
         const auditLogger = core.security.audit.logger;
         const { aiIndexId, improvementId } = request.params;
 
-        // Improvements are stored in the default space (written by the workflow runner).
         const improvements = getImprovementsService(esClient, 'default');
         const improvement = await improvements.get(improvementId);
 
@@ -422,8 +403,6 @@ export const registerImprovementRoutes = ({
             })
           );
 
-          // A collision with a run already in flight, which is a state rather than a failure: the
-          // analysis the caller asked for is happening, so the answer is what is true, not an error.
           if (error instanceof FeedbackAnalysisAlreadyRunningError) {
             return response.conflict({ body: { message: error.message } });
           }

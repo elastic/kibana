@@ -390,8 +390,6 @@ describe('improvements routes', () => {
     });
 
     it('returns 409 when a run is already in flight', async () => {
-      // Not an error: the analysis the caller asked for is happening, so 200 would report a run
-      // that the engine discarded and leave them waiting on improvements nothing is producing.
       scheduleService.run.mockRejectedValue(new FeedbackAnalysisAlreadyRunningError(AI_INDEX_ID));
 
       await callRoute('POST', aiIndexFeedbackAnalysisRunPath, {

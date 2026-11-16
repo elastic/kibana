@@ -15,11 +15,7 @@ import {
   InvalidConnectorSourceError,
 } from '../ai_indices/errors';
 
-/**
- * Maps AI index registry errors onto HTTP responses. Shared by every route that touches the
- * registry — the AI index CRUD routes, and the improvements and feedback-loop routes, which resolve
- * an AI index before doing anything else. Anything unrecognised is rethrown so it surfaces as a 500.
- */
+/** Maps AI index registry errors to HTTP responses and rethrows anything else. */
 export const handleAiIndexError = (
   error: unknown,
   response: KibanaResponseFactory

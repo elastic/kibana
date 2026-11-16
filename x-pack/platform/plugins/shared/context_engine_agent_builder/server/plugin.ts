@@ -44,8 +44,6 @@ export class ContextEngineAgentBuilderPlugin
       registerContextEngineInferenceFeatures(setupDeps.searchInferenceEndpoints);
     }
 
-    // Closes the dependency inversion in `ContextEnginePluginSetup.registerWorkflowProvider`: this
-    // plugin is the one place that may depend on both Context Engine and workflows.
     setupDeps.contextEngine.registerWorkflowProvider(
       createWorkflowProvider(setupDeps.workflowsManagement.management)
     );

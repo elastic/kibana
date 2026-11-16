@@ -16,15 +16,6 @@ import {
 } from '../../../common/ki_lifecycle';
 import { ApplyImprovementError } from './errors';
 
-/**
- * Writes to an AI index destination.
- *
- * Adds go through `op_type: 'create'`, the only write a data stream accepts. Edits and removals go
- * through `_update_by_query` on the document `_id`: a data stream rejects an index-or-update by id
- * outright, and `_update_by_query` is the one form that works against both a data stream and a
- * plain index, so there is a single code path rather than a branch per destination type.
- */
-
 const UPDATE_FIELDS_SCRIPT = `
 for (entry in params.fields.entrySet()) {
   ctx._source[entry.getKey()] = entry.getValue();
@@ -52,10 +43,7 @@ const assertWritableDest = (dest: AiIndexDest): void => {
   }
 };
 
-/**
- * Creates a Knowledge Indicator in the destination and returns its `_id`, which becomes the handle
- * a later `edit_ki` or `remove_ki` targets.
- */
+/** Creates a Knowledge Indicator in the destination and returns its `_id`. */
 export const addKi = async ({
   esClient,
   dest,
@@ -71,11 +59,9 @@ export const addKi = async ({
 
   const response = await esClient.index({
     index: dest.value,
-    // A data stream accepts nothing else, and on a plain index it still means "must not already exist".
     op_type: 'create',
     refresh: 'wait_for',
     document: {
-      // Required by every `ai-index-ds-*` data stream, and mapped on plain AI indices too.
       '@timestamp': now,
       ...definedEntries(ki),
       ...(ki.attributes ? { attributes: ki.attributes } : {}),
@@ -147,10 +133,7 @@ export const editKi = async ({
   return kiId;
 };
 
-/**
- * Flags a Knowledge Indicator as excluded instead of deleting it, so the removal is recoverable and
- * the document remains available for anyone auditing what the loop changed.
- */
+/** Marks a Knowledge Indicator as excluded instead of deleting it. */
 export const removeKi = async ({
   esClient,
   dest,

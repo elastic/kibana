@@ -10,11 +10,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export const DEFAULT_SPACE_ID = 'default';
 
-/**
- * Resolves the active space for a request, falling back to the default space when the spaces plugin
- * is absent. Signals live in per-space indices, and an analysis run executes in a space, so both
- * reading signals and driving the loop need this.
- */
+/** Resolves the request's active space, or the default space when the spaces plugin is absent. */
 export const resolveSpaceId = (
   spaces: SpacesPluginStart | undefined,
   request: KibanaRequest

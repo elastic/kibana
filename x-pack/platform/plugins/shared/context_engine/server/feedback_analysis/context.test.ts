@@ -197,8 +197,6 @@ describe('buildFeedbackContext', () => {
       } as unknown as Awaited<ReturnType<typeof getKis>>);
 
     it('still analyzes an index nobody has queried', async () => {
-      // The setup is what a run reads when the traffic says nothing, and an index nobody has hit
-      // yet is when a bad one is cheapest to fix.
       withoutSignals();
 
       const context = await build();
@@ -227,8 +225,6 @@ describe('buildFeedbackContext', () => {
     });
 
     it('skips an index with nothing configured and nothing observed', async () => {
-      // Not an empty window but an empty index: no signals, no indicators, no sources, no
-      // automations. There is nothing for a run to read, so the agent is not worth the call.
       withoutSignals();
       withoutKis();
 

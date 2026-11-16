@@ -16,11 +16,7 @@ import type { AiIndexFeedbackAnalysis } from '../../common/http_api/ai_indices';
 import { parseIntervalMinutes } from '../../common/validation';
 import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
 
-/**
- * The workflows management calls this plugin makes, declared structurally rather than imported:
- * workflows management reaches back here through Agent Builder, so depending on its contract would
- * close a project reference cycle. Only the fields that are read are named.
- */
+/** The subset of the workflows management API that feedback analysis scheduling uses. */
 export interface WorkflowsManagementPort {
   updateWorkflow(
     workflowId: string,
@@ -35,12 +31,7 @@ export interface WorkflowsManagementPort {
   ): Promise<{ status: string } | null>;
 }
 
-/**
- * Raised when a requested run collided with one already in flight for the same AI index.
- *
- * Not a failure of the request so much as an answer to it: the analysis the caller wanted is
- * happening, just not because of them.
- */
+/** Thrown when a feedback analysis run is requested while one is already running for the AI index. */
 export class FeedbackAnalysisAlreadyRunningError extends Error {
   constructor(aiIndexId: string) {
     super(
@@ -67,18 +58,7 @@ export interface FeedbackAnalysisScheduleService {
   /** Brings the managed workflow for one AI index in line with its configuration. */
   reconcile(params: ReconcileScheduleParams): Promise<void>;
 
-  /**
-   * Runs one analysis immediately, off-schedule, and returns the execution id.
-   *
-   * Only possible while analysis is enabled: disabling uninstalls the per-index workflow, so with
-   * it off there is no instance to execute. The caller checks the configuration and explains that,
-   * rather than offering an action that would fail here.
-   *
-   * Throws {@link FeedbackAnalysisAlreadyRunningError} when a run for this index is already in
-   * flight, which the workflow's own concurrency settings decide rather than this code.
-   *
-   * Takes no space: the instance lives where it was installed, not where the request came from.
-   */
+  /** Starts a feedback analysis run immediately and returns its workflow execution id. */
   run(params: { aiIndexId: string; spaceId: string; request: KibanaRequest }): Promise<string>;
 
   /** Tears the schedule down when the AI index it analyzes is deleted. */

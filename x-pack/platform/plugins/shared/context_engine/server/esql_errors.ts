@@ -8,12 +8,7 @@
 import { isResponseError } from '@kbn/es-errors';
 import type { errors } from '@elastic/elasticsearch';
 
-/**
- * ES|QL rejects a query that names a column no index in the target maps, as a 400
- * `verification_exception` rather than returning empty results. Mirrors
- * `isEsqlUnknownIndexError` from `@kbn/storage-adapter`, which handles the missing-index case the
- * same way.
- */
+/** Whether the error is an ES|QL `verification_exception` for an unknown column. */
 export const isEsqlUnknownColumnError = (error: unknown): boolean => {
   if (!isResponseError(error as Error)) {
     return false;

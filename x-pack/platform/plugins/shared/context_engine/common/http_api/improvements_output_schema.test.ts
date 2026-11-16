@@ -49,8 +49,6 @@ describe('buildImprovementsOutputSchema', () => {
   });
 
   it('takes a proposal with no signals behind it', () => {
-    // A run over a window with no signals reads the index itself — an indicator its source
-    // contradicts, an automation producing nothing — and has no ids to cite for any of it.
     const result = proposedImprovementSchema.safeParse({
       action: 'add_ki',
       title: 'Add something',

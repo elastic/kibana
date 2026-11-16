@@ -18,10 +18,10 @@ import { addWorkflow, editWorkflow, removeWorkflow } from './workflow';
 export { ApplyImprovementError } from './errors';
 
 export interface ApplyImprovementDeps {
-  /** Request-scoped, so an approval is bounded by the approving user's own privileges. */
+  /** Elasticsearch client scoped to the approving user. */
   esClient: ElasticsearchClient;
   aiIndexService: AiIndexService;
-  /** Absent until `contextEngineAgentBuilder` registers it, which rules out the workflow actions. */
+  /** Workflow operations; absent until `contextEngineAgentBuilder` registers them. */
   workflows?: WorkflowProvider;
   actions: ActionsPluginStart;
   spaceId: string;
@@ -47,13 +47,7 @@ const requireWorkflows = (workflows: WorkflowProvider | undefined): WorkflowProv
   return workflows;
 };
 
-/**
- * Carries out an approved suggestion and returns the id of what it created or changed.
- *
- * Throws {@link ApplyImprovementError} for anything the reviewer could plausibly fix — a malformed
- * payload, a target that has since disappeared, invalid workflow YAML. The caller records the
- * message on the improvement as `failed`, which stays actionable so it can be approved again.
- */
+/** Applies an approved improvement and returns the id of what it created or changed. */
 export const applyImprovement = async (
   improvement: Improvement,
   { esClient, aiIndexService, workflows, actions, spaceId, request, logger }: ApplyImprovementDeps

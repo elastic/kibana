@@ -97,7 +97,7 @@ export interface ImprovementDecisionAuditEventParams {
     | ImprovementAuditAction.REJECT
     | ImprovementAuditAction.RUN;
   aiIndexId: string;
-  /** Absent for a run, which decides nothing. */
+  /** Id of the approved or rejected improvement; absent for a run. */
   improvementId?: string;
   error?: Error;
 }
@@ -114,13 +114,7 @@ const DECISION_VERB: Record<
   },
 };
 
-/**
- * Audits a reviewer approving or rejecting a proposal, or starting a run by hand.
- *
- * Approving is the point at which the loop is allowed to change something, so the decision and its
- * outcome are both privileged mutations worth a record of their own — `RECORD` above covers only
- * what a run proposed, which changes nothing on its own.
- */
+/** Audit event for approving or rejecting an improvement, or starting a feedback analysis run. */
 export const improvementDecisionAuditEvent = ({
   action,
   aiIndexId,

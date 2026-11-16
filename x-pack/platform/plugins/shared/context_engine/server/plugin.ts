@@ -360,7 +360,6 @@ export class ContextEnginePlugin
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
-    // Improvement review: list what a run proposed, decide on one, and start a run by hand.
     registerImprovementRoutes({
       router,
       getAiIndexService,

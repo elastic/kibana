@@ -8,11 +8,7 @@
 import type { WorkflowProvider } from '@kbn/context-engine-plugin/server';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 
-/**
- * Adapts the workflows management API to the port Context Engine applies automation improvements
- * through. Context Engine cannot depend on workflows itself — workflows depends on Agent Builder
- * SML, which depends on Context Engine — so this plugin, which already depends on both, bridges it.
- */
+/** Creates a Context Engine workflow provider backed by the workflows management API. */
 export const createWorkflowProvider = (
   workflowsManagement: WorkflowsManagementApi
 ): WorkflowProvider => ({

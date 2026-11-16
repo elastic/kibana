@@ -35,8 +35,6 @@ export const buildFeedbackContext = async (
   const aiIndex = await aiIndexService.get(aiIndexId, spaceId);
   const feedbackAnalysis = aiIndex.feedback_analysis;
 
-  // Managed indexes reject source writes and automation changes, so cap allowed actions to KI
-  // operations only — the ones that target the destination index rather than the config itself.
   const managedSafeActions: ImprovementAction[] = ['add_ki', 'edit_ki', 'remove_ki'];
   const allowedActions: ImprovementAction[] = (
     feedbackAnalysis?.allowed_actions ?? [...IMPROVEMENT_ACTIONS]
@@ -76,15 +74,6 @@ export const buildFeedbackContext = async (
     }),
     output_schema: buildImprovementsJsonSchema(allowedActions),
     has_signals: groups.length > 0,
-    /**
-     * Signals are the sharpest evidence an index gives up, not the only kind. An indicator its
-     * source contradicts, an automation producing nothing, a source nothing covers are all visible
-     * without a failed retrieval — and an index nobody has queried yet is exactly when its setup is
-     * worth checking, which is the case signals can never cover.
-     *
-     * False only for an index with nothing configured and nothing observed, where a run would have
-     * no material to reason from and the agent is not worth the call.
-     */
     can_analyze:
       groups.length > 0 ||
       kiList.summary.total > 0 ||

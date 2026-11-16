@@ -56,7 +56,6 @@ describe('createFeedbackAnalysisScheduleService', () => {
     };
     workflowsManagement = {
       updateWorkflow: jest.fn().mockResolvedValue(undefined),
-      // The engine only skips a run it refused, so anything else means it started.
       getWorkflowExecution: jest.fn().mockResolvedValue({ status: 'running' }),
     };
     request = httpServerMock.createKibanaRequest();
@@ -243,8 +242,6 @@ describe('createFeedbackAnalysisScheduleService', () => {
   });
 
   it('installs in the space where analysis is enabled, giving each space its own instance', async () => {
-    // Each space that enables analysis gets its own workflow instance, so disabling in one space
-    // does not affect another space's schedule.
     await service.reconcile({
       aiIndexId: 'orders',
       spaceId: 'default',
@@ -343,8 +340,6 @@ describe('createFeedbackAnalysisScheduleService', () => {
     });
 
     it('reports a run that collided with one already in flight', async () => {
-      // The workflow caps itself at one run per index and drops the rest. A dropped run is still
-      // given an execution id, so only its status says it never started.
       workflowsManagement.getWorkflowExecution.mockResolvedValue({ status: 'skipped' });
 
       await expect(
@@ -367,8 +362,6 @@ describe('createFeedbackAnalysisScheduleService', () => {
     });
 
     it('treats a run it cannot check as started', async () => {
-      // Saying "already running" on a failed read would tell the user not to retry the one thing
-      // that would fix it.
       workflowsManagement.getWorkflowExecution.mockRejectedValue(
         new Error('executions unreadable')
       );

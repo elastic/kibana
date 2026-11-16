@@ -429,10 +429,7 @@ export class AiIndexService {
     );
   }
 
-  /**
-   * Detaches a workflow automation, retrying on concurrent writes. Detaching is not the same as
-   * disabling the workflow: the caller does both, so a re-attach later is a link away.
-   */
+  /** Detaches a workflow automation from an AI index, retrying on concurrent writes. */
   async removeAutomation(
     aiIndexId: string,
     spaceId: string,

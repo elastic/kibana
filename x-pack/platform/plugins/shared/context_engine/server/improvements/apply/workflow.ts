@@ -10,14 +10,6 @@ import type { AiIndexService } from '../../ai_indices/service';
 import type { WorkflowProvider, WorkflowProviderContext } from '../../workflows/provider';
 import { ApplyImprovementError } from './errors';
 
-/**
- * Applies the automation half of an improvement.
- *
- * Every call runs with the approving user's request, so the workflow is created, updated, or
- * disabled under their own privileges — approving a suggestion never grants more than the user
- * already has. Removal disables and detaches rather than deletes, so it stays reversible.
- */
-
 const assertValidYaml = async ({
   workflows,
   yaml,
@@ -56,10 +48,7 @@ const getWorkflowOrThrow = async ({
   return workflow;
 };
 
-/**
- * Creates the suggested workflow and links it to the AI index. The link is checked first and the
- * workflow is deleted again if linking still fails, so a rejected link leaves no orphan behind.
- */
+/** Creates the suggested workflow and links it to the AI index, deleting it again if linking fails. */
 export const addWorkflow = async ({
   workflows,
   aiIndexService,
@@ -127,10 +116,7 @@ export const editWorkflow = async ({
   return workflowId;
 };
 
-/**
- * Disables the workflow and detaches it from the AI index. The definition is kept, so re-enabling it
- * is all it takes to undo the removal.
- */
+/** Detaches the workflow from the AI index and disables it, keeping its definition. */
 export const removeWorkflow = async ({
   workflows,
   aiIndexService,
@@ -152,8 +138,6 @@ export const removeWorkflow = async ({
     );
   }
 
-  // Detach before disabling: if detach fails the workflow stays enabled but linked (retriable),
-  // whereas disabling first and then failing to detach leaves an orphaned disabled workflow.
   await aiIndexService.removeAutomation(aiIndexId, context.spaceId, {
     type: 'workflow',
     value: workflowId,

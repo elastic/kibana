@@ -12,15 +12,6 @@ import type { AiIndexService } from '../../ai_indices/service';
 import { validateConnectorSources } from '../../ai_indices/validate_connector_sources';
 import { ApplyImprovementError } from './errors';
 
-/**
- * Applies the source half of an improvement.
- *
- * Sources live on the AI index registry entry rather than in a workflow, so every change here is a
- * read-modify-write of the whole `sources` array. Connector sources are re-validated against the
- * approving user's own actions client, which is what stops an approval from attaching a connector
- * the approver cannot see.
- */
-
 export interface SourceApplyContext {
   aiIndexService: AiIndexService;
   aiIndexId: string;
@@ -46,7 +37,7 @@ const writeSources = async (
   });
 };
 
-/** Adds a source, treating an identical existing one as already done rather than duplicating it. */
+/** Adds a source to the AI index unless an identical one is already configured. */
 export const addSource = async (
   context: SourceApplyContext,
   source: AiIndexSource
@@ -62,7 +53,7 @@ export const addSource = async (
   return source.value;
 };
 
-/** Replaces one source with the suggested replacement, which may change its type as well as value. */
+/** Replaces a source on the AI index with the suggested one. */
 export const editSource = async (
   context: SourceApplyContext,
   sourceValue: string,
@@ -85,10 +76,7 @@ export const editSource = async (
   return source.value;
 };
 
-/**
- * Detaches a source. The indicators an automation already generated from it are left alone — they
- * age out or are regenerated on the next run, so removing a source is not a way to remove content.
- */
+/** Detaches a source from the AI index. */
 export const removeSource = async (
   context: SourceApplyContext,
   sourceValue: string
