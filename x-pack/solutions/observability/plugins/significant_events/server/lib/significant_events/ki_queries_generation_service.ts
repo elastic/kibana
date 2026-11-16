@@ -62,38 +62,43 @@ export async function generateKIQueries(
   } = params;
   const { kiClient, agentBuilder, resolveModel, request, logger, signal, telemetry } = deps;
 
-  const connectorId = await resolveModel(connectorIdOverride);
-
-  logger.debug(`Using connector ${connectorId} for query generation`);
-
-  const { [source.id]: existingLinks } = await kiClient.getSourceToQueryLinksMap([source.id]);
-  const existingQueries = existingLinks.map(({ query }) => ({
-    id: query.id,
-    title: query.title,
-    type: query.type,
-    severity_score: query.severity_score,
-    description: query.description,
-    esql: query.esql.query,
-  }));
-
   const startedAt = Date.now();
-  const { queries, tokensUsed } = await executeKIQueryGenerationAgent({
-    agentBuilder,
-    request,
-    connectorId,
-    interactionId: runId,
-    source,
-    existingQueries,
-    maxExistingQueriesForContext,
-    signal,
-    logger: logger.get('significant_events_queries_generation'),
-  }).catch((error: unknown) => {
+  let resolvedConnectorId: string | undefined;
+  const { queries, tokensUsed, connectorId } = await (async () => {
+    const canonicalConnectorId = await resolveModel(connectorIdOverride);
+    resolvedConnectorId = canonicalConnectorId;
+
+    logger.debug(`Using connector ${canonicalConnectorId} for query generation`);
+
+    const { [source.id]: existingLinks } = await kiClient.getSourceToQueryLinksMap([source.id]);
+    const existingQueries = existingLinks.map(({ query }) => ({
+      id: query.id,
+      title: query.title,
+      type: query.type,
+      severity_score: query.severity_score,
+      description: query.description,
+      esql: query.esql.query,
+    }));
+
+    const result = await executeKIQueryGenerationAgent({
+      agentBuilder,
+      request,
+      connectorId: canonicalConnectorId,
+      interactionId: runId,
+      source,
+      existingQueries,
+      maxExistingQueriesForContext,
+      signal,
+      logger: logger.get('significant_events_queries_generation'),
+    });
+    return { ...result, connectorId: canonicalConnectorId };
+  })().catch((error: unknown) => {
     try {
       telemetry.trackSignificantEventsQueriesGenerationFailed({
         workflow_execution_id: workflowExecutionId,
         parent_workflow_execution_id: parentWorkflowExecutionId,
         error_code: toGenerationFailureCode(error, signal),
-        connector_id: connectorId,
+        ...(resolvedConnectorId !== undefined ? { connector_id: resolvedConnectorId } : {}),
         source_id: source.id,
         duration_ms: Date.now() - startedAt,
       });

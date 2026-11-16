@@ -337,7 +337,7 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
       type: 'keyword',
       _meta: {
         description:
-          'The `feature.id` or `query.id` the write addressed, unique within `source_id`; absent only when a failed query write had no caller-supplied id',
+          'The `feature.id` or `query.id` created, unique within `source_id`; absent when the write failed',
         optional: true,
       },
     },
@@ -1023,7 +1023,9 @@ const knowledgeIndicatorQueriesGenerationFailedSchema: RootSchema<KnowledgeIndic
     connector_id: {
       type: 'keyword',
       _meta: {
-        description: 'The ID of the LLM connector used for the inference',
+        description:
+          'The ID of the LLM connector used for the inference; absent when model resolution failed',
+        optional: true,
       },
     },
     source_id: {

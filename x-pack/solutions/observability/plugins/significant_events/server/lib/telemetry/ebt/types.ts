@@ -279,7 +279,7 @@ interface KnowledgeIndicatorQueriesGenerationFailedProps
   extends OptionalWorkflowExecutionTelemetryProps,
     ParentWorkflowExecutionTelemetryProps {
   error_code: KnowledgeIndicatorQueriesGenerationFailureCode;
-  connector_id: string;
+  connector_id?: string;
   source_id: string;
   duration_ms: number;
 }

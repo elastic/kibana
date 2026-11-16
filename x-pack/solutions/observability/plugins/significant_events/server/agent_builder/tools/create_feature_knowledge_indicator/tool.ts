@@ -175,7 +175,6 @@ export function createFeatureKnowledgeIndicatorTool({
               success: false,
               source_id: sourceId,
               space_id: request.spaceId,
-              knowledge_indicator_id: featureInput.id,
               error_message: toTelemetryErrorMessage(failure, message),
             }),
         });

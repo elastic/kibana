@@ -12,6 +12,7 @@ import {
   agentToolEventWriteEventType,
   agentToolFailedEventType,
   eventStatusChangedEventType,
+  knowledgeIndicatorQueriesGenerationFailedEventType,
 } from './events';
 
 const isOptional = (field: { _meta?: { optional?: boolean } }) => field._meta?.optional === true;
@@ -53,6 +54,12 @@ describe('EBT event types', () => {
     expect(Object.keys(agentToolFailedEventType.schema)).not.toContain('error_message');
     expect(Object.values(agentToolFailedEventType.schema).map(({ type }) => type)).not.toContain(
       'text'
+    );
+  });
+
+  it('lets a query generation failure omit the connector when model resolution failed', () => {
+    expect(isOptional(knowledgeIndicatorQueriesGenerationFailedEventType.schema.connector_id)).toBe(
+      true
     );
   });
 });

@@ -179,7 +179,8 @@ describe('generateKIQueries', () => {
 
     const generate = (
       telemetry: ReturnType<typeof createFailureTelemetry>,
-      signal = new AbortController().signal
+      signal = new AbortController().signal,
+      overrides: Partial<GenerateKIQueriesDependencies> = {}
     ) =>
       generateKIQueries(
         {
@@ -190,7 +191,12 @@ describe('generateKIQueries', () => {
           parentWorkflowExecutionId: 'onboarding-run-1',
           maxExistingQueriesForContext: 10,
         },
-        makeDeps({ telemetry: telemetry as unknown as EbtTelemetryClient, logger, signal })
+        makeDeps({
+          telemetry: telemetry as unknown as EbtTelemetryClient,
+          logger,
+          signal,
+          ...overrides,
+        })
       );
 
     it('reports a run that never finalized by that cause and still fails', async () => {
@@ -237,6 +243,39 @@ describe('generateKIQueries', () => {
       expect(telemetry.trackSignificantEventsQueriesGenerationFailed).toHaveBeenCalledWith(
         expect.objectContaining({ error_code: 'internal_error' })
       );
+    });
+
+    it('reports model resolution failures without an unresolved connector id', async () => {
+      const telemetry = createFailureTelemetry();
+      const resolveModel = jest.fn().mockRejectedValue(new Error('model resolution failed'));
+
+      await expect(
+        generate(telemetry, new AbortController().signal, { resolveModel })
+      ).rejects.toThrow('model resolution failed');
+
+      const [[reported]] = telemetry.trackSignificantEventsQueriesGenerationFailed.mock.calls;
+      expect(reported).toEqual(expect.objectContaining({ error_code: 'internal_error' }));
+      expect(reported).not.toHaveProperty('connector_id');
+      expect(executeKIQueryGenerationAgentMock).not.toHaveBeenCalled();
+    });
+
+    it('reports failures while loading existing queries', async () => {
+      const telemetry = createFailureTelemetry();
+      const kiClient = {
+        getSourceToQueryLinksMap: jest.fn().mockRejectedValue(new Error('query read failed')),
+      } as unknown as GenerateKIQueriesDependencies['kiClient'];
+
+      await expect(generate(telemetry, new AbortController().signal, { kiClient })).rejects.toThrow(
+        'query read failed'
+      );
+
+      expect(telemetry.trackSignificantEventsQueriesGenerationFailed).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error_code: 'internal_error',
+          connector_id: 'test-connector',
+        })
+      );
+      expect(executeKIQueryGenerationAgentMock).not.toHaveBeenCalled();
     });
 
     it('fails with the agent error when telemetry throws', async () => {

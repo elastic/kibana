@@ -184,7 +184,6 @@ export function createQueryKnowledgeIndicatorTool({
               success: false,
               source_id: sourceId,
               space_id: request.spaceId,
-              ...(queryInput.id !== undefined ? { knowledge_indicator_id: queryInput.id } : {}),
               error_message: toTelemetryErrorMessage(failure, message),
             }),
         });
