@@ -16,6 +16,7 @@ import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import {
+  DEFERRED_CONFIRMATION_MESSAGE,
   processResearchResponse,
   processStructuredAnswerResponse,
   processToolNodeResponse,
@@ -226,6 +227,58 @@ describe('processToolNodeResponse', () => {
       },
     ]);
     expect(turn.completedToolCallIds).toEqual([]);
+  });
+
+  it('surfaces only the first confirmation prompt and defers the other confirmation-gated calls', () => {
+    const confirm = (id: string) => ({
+      id,
+      type: AgentPromptType.confirmation,
+      title: 't',
+      message: 'm',
+    });
+    const askPrompt = {
+      id: 'ask',
+      type: AgentPromptType.ask_user_question,
+      questions: [{ question: 'Which?', options: [{ label: 'a' }], multi_select: false }],
+    };
+    const artifact = { results: [{ type: 'other', data: { ok: true } }] };
+    const turn = processToolNodeResponse(
+      [
+        new ToolMessage({ tool_call_id: 'c1', content: '', artifact: { prompt: confirm('p1') } }),
+        new ToolMessage({ tool_call_id: 'r1', content: JSON.stringify(artifact), artifact }),
+        new ToolMessage({ tool_call_id: 'c2', content: '', artifact: { prompt: confirm('p2') } }),
+        new ToolMessage({ tool_call_id: 'a1', content: '', artifact: { prompt: askPrompt } }),
+        new ToolMessage({ tool_call_id: 'c3', content: '', artifact: { prompt: confirm('p3') } }),
+      ],
+      deps
+    );
+
+    expect(turn.prompts).toEqual([
+      { toolCallId: 'c1', prompt: confirm('p1') },
+      { toolCallId: 'a1', prompt: askPrompt },
+    ]);
+    expect(turn.completedToolCallIds).toEqual(['r1', 'c2', 'c3']);
+
+    const deferred = turn.stepUpdates.filter(
+      (update) => update.type === 'resolve_tool_call' && ['c2', 'c3'].includes(update.toolCallId)
+    );
+    expect(deferred).toEqual([
+      expect.objectContaining({
+        toolCallId: 'c2',
+        toolId: 'my.tool',
+        results: [
+          expect.objectContaining({
+            type: ToolResultType.error,
+            data: { message: DEFERRED_CONFIRMATION_MESSAGE },
+          }),
+        ],
+      }),
+      expect.objectContaining({ toolCallId: 'c3' }),
+    ]);
+    expect(JSON.parse(turn.renderState.c2?.content ?? '')).toEqual({
+      results: [expect.objectContaining({ data: { message: DEFERRED_CONFIRMATION_MESSAGE } })],
+    });
+    expect(turn.renderState.c2?.cycle).toBe(2);
   });
 
   it('strips the LangGraph error suffix and resolves a thrown tool error as an error result', () => {
