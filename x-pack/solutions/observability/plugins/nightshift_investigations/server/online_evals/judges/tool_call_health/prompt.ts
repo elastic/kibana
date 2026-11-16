@@ -12,36 +12,28 @@ import systemPromptText from './system_prompt.text';
 
 export const TOOL_CALL_HEALTH_TOOL_NAME = 'score_tool_call_health';
 
-/** The longest reason the model is asked for; the judge trims longer ones. */
-export const MAX_REASON_CHARS = 100;
-
-const toolCallIssuesSchema = lazySchema(() =>
-  z.array(z.object({ step: z.number(), reason: z.string() }))
-);
+/** The longest summary the model is asked for; the judge trims longer ones. */
+export const MAX_SUMMARY_CHARS = 200;
 
 export const toolCallHealthOutputSchema = lazySchema(() =>
   z.object({
-    failed_calls: toolCallIssuesSchema,
-    empty_calls: toolCallIssuesSchema,
+    failed_calls: z.array(z.number()),
+    failed_summary: z.string().optional(),
+    empty_calls: z.array(z.number()),
+    empty_summary: z.string().optional(),
   })
 );
 
 export type ToolCallHealthOutput = z.infer<typeof toolCallHealthOutputSchema>;
 
-const issuesToolSchema = {
+const callNumbersSchema = {
   type: 'array',
-  items: {
-    type: 'object',
-    properties: {
-      step: { type: 'number', description: 'The number of the tool call, as in its heading.' },
-      reason: {
-        type: 'string',
-        maxLength: MAX_REASON_CHARS,
-        description: `What went wrong, in at most ${MAX_REASON_CHARS} characters.`,
-      },
-    },
-    required: ['step', 'reason'],
-  },
+  items: { type: 'number' },
+} as const;
+
+const summarySchema = {
+  type: 'string',
+  maxLength: MAX_SUMMARY_CHARS,
 } as const;
 
 export const toolCallHealthPrompt = createPrompt({
@@ -81,15 +73,23 @@ export const toolCallHealthPrompt = createPrompt({
           type: 'object',
           properties: {
             failed_calls: {
-              ...issuesToolSchema,
-              description: 'Calls that failed to do what the agent intended.',
+              ...callNumbersSchema,
+              description: 'Numbers of the calls that failed to do what the agent intended.',
+            },
+            failed_summary: {
+              ...summarySchema,
+              description: `Why the most important failed calls failed, naming them by number, in at most ${MAX_SUMMARY_CHARS} characters. Empty when none failed.`,
             },
             empty_calls: {
-              ...issuesToolSchema,
-              description: 'Calls that ran correctly but returned no data.',
+              ...callNumbersSchema,
+              description: 'Numbers of the calls that ran correctly but returned no data.',
+            },
+            empty_summary: {
+              ...summarySchema,
+              description: `Which no-data calls matter most and what they were looking for, naming them by number, in at most ${MAX_SUMMARY_CHARS} characters. Empty when none came back empty.`,
             },
           },
-          required: ['failed_calls', 'empty_calls'],
+          required: ['failed_calls', 'failed_summary', 'empty_calls', 'empty_summary'],
         },
       },
     },

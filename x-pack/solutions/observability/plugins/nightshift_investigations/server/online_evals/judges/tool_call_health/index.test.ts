@@ -29,15 +29,10 @@ const evaluate = (
 describe('nightshift_tool_call_health', () => {
   it('counts the failed and the no-data calls from one judge call', async () => {
     const prompt = judgeReturning({
-      failed_calls: [
-        { step: 1, reason: 'The query was rejected.' },
-        { step: 1, reason: 'A repeat of the same call.' },
-        { step: 9, reason: 'There is no call 9.' },
-      ],
-      empty_calls: [
-        { step: 1, reason: 'Already counted as failed.' },
-        { step: 2, reason: 'No hits came back.' },
-      ],
+      failed_calls: [1, 1, 9],
+      failed_summary: 'The query was rejected.',
+      empty_calls: [1, 2],
+      empty_summary: 'No hits came back.',
     });
 
     const result = await evaluate(prompt, [
@@ -51,18 +46,19 @@ describe('nightshift_tool_call_health', () => {
     expect(prompt.mock.calls[0][0].input.toolCalls).toContain(
       '## Tool call 2: platform.core.search'
     );
+    // Call 9 does not exist, a repeat counts once, and a failed call is not also an empty one.
     expect(result.scores).toEqual([
       {
         name: 'tool_calls_failed',
         score: 1,
         label: '1/2',
-        explanation: 'call 1: The query was rejected.',
+        explanation: 'The query was rejected.',
       },
       {
         name: 'tool_calls_empty',
         score: 1,
         label: '1/2',
-        explanation: 'call 2: No hits came back.',
+        explanation: 'No hits came back.',
       },
     ]);
   });
@@ -123,15 +119,49 @@ describe('nightshift_tool_call_health', () => {
     expect(toolCalls.length).toBeLessThan(3_000);
   });
 
-  it('trims a reason longer than the limit it asked for', async () => {
+  it('counts every call with one short summary when there are many', async () => {
     const prompt = judgeReturning({
-      failed_calls: [{ step: 1, reason: 'x'.repeat(500) }],
+      failed_calls: [1, 2, 3, 4, 5, 6, 7, 8],
+      failed_summary: 'Calls 1-8: the sandbox refused every connection.',
+      empty_calls: [],
+      empty_summary: '',
+    });
+
+    const { scores } = await evaluate(
+      prompt,
+      Array.from({ length: 10 }, () => ({ tool_id: 'nightshift_sandbox_bash', result: [] }))
+    );
+
+    expect(scores[0]).toEqual({
+      name: 'tool_calls_failed',
+      score: 8,
+      label: '8/10',
+      explanation: 'Calls 1-8: the sandbox refused every connection.',
+    });
+    expect(scores[1].explanation).toBe('No no-data tool calls.');
+  });
+
+  it('trims a summary longer than the limit it asked for', async () => {
+    const prompt = judgeReturning({
+      failed_calls: [1],
+      failed_summary: 'x'.repeat(500),
       empty_calls: [],
     });
 
     const { scores } = await evaluate(prompt, [{ tool_id: 'platform.core.search', result: [] }]);
 
-    expect(scores[0].explanation).toBe(`call 1: ${'x'.repeat(100)}`);
+    expect(scores[0].explanation).toBe('x'.repeat(200));
+  });
+
+  it('names the calls when the judge wrote no summary', async () => {
+    const prompt = judgeReturning({ failed_calls: [2, 1], failed_summary: '  ', empty_calls: [] });
+
+    const { scores } = await evaluate(prompt, [
+      { tool_id: 'platform.core.search', result: [] },
+      { tool_id: 'platform.core.search', result: [] },
+    ]);
+
+    expect(scores[0].explanation).toBe('calls 1, 2');
   });
 
   it('requires a user input and a final answer', () => {

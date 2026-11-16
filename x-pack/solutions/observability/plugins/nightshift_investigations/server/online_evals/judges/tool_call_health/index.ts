@@ -9,7 +9,7 @@ import type { EvaluatorResult, RegisteredEvaluatorDefinition } from '@kbn/evals-
 import { renderToolCalls, roundEvidenceSchema } from '../render_round';
 import { capExplanation, runJudge } from '../run_judge';
 import {
-  MAX_REASON_CHARS,
+  MAX_SUMMARY_CHARS,
   TOOL_CALL_HEALTH_TOOL_NAME,
   toolCallHealthOutputSchema,
   toolCallHealthPrompt,
@@ -23,41 +23,45 @@ import {
 const MAX_FIELD_CHARS = 2_000;
 
 type Score = EvaluatorResult['scores'][number];
-interface ToolCallIssue {
-  step: number;
-  reason: string;
-}
 
-/** Valid, unique issues for calls that exist, in call order; calls in `excluded` are skipped. */
-const toIssues = (
-  issues: readonly ToolCallIssue[],
+/** Valid, unique call numbers that exist, in order; numbers in `excluded` are skipped. */
+const toCallNumbers = (
+  numbers: readonly number[],
   callCount: number,
   excluded: ReadonlySet<number> = new Set()
-): ToolCallIssue[] => {
-  const byStep = new Map<number, ToolCallIssue>();
-  for (const { step, reason } of issues) {
-    if (!Number.isInteger(step) || step < 1 || step > callCount) continue;
-    if (excluded.has(step) || byStep.has(step)) continue;
-    byStep.set(step, { step, reason: reason.slice(0, MAX_REASON_CHARS) });
+): number[] =>
+  [
+    ...new Set(
+      numbers.filter(
+        (number) =>
+          Number.isInteger(number) && number >= 1 && number <= callCount && !excluded.has(number)
+      )
+    ),
+  ].sort((a, b) => a - b);
+
+/** The model's short summary of the most important calls, or the call numbers when it wrote none. */
+const explain = (calls: number[], summary: string | undefined, noun: string): string => {
+  if (calls.length === 0) {
+    return `No ${noun} tool calls.`;
   }
-  return [...byStep.values()].sort((a, b) => a.step - b.step);
+  const text = summary?.trim().slice(0, MAX_SUMMARY_CHARS);
+  return capExplanation(text || `calls ${calls.join(', ')}`);
 };
 
-const issuesScore = (
+const callsScore = (
   name: string,
   noun: string,
-  issues: ToolCallIssue[],
+  calls: number[],
+  summary: string | undefined,
   callCount: number
 ): Score => ({
   name,
-  score: issues.length,
+  // Many failures point at the agent or sandbox setup, so the count is the signal; the
+  // explanation only summarizes the most important calls.
+  score: calls.length,
   // The total makes counts comparable between a round of 10 calls and one of 150.
-  label: `${issues.length}/${callCount}`,
-  explanation: capExplanation(
-    issues.length > 0
-      ? issues.map(({ step, reason }) => `call ${step}: ${reason}`).join('\n')
-      : `No ${noun} tool calls.`
-  ),
+  label: `${calls.length}/${callCount}`,
+  explanation: explain(calls, summary, noun),
 });
 
 export const toolCallHealthJudge: RegisteredEvaluatorDefinition = {
@@ -95,15 +99,14 @@ export const toolCallHealthJudge: RegisteredEvaluatorDefinition = {
       outputSchema: toolCallHealthOutputSchema,
     });
 
-    const failed = toIssues(output.failed_calls, callCount);
-    const failedSteps = new Set(failed.map(({ step }) => step));
+    const failed = toCallNumbers(output.failed_calls, callCount);
     // A call is failed or empty, never both.
-    const empty = toIssues(output.empty_calls, callCount, failedSteps);
+    const empty = toCallNumbers(output.empty_calls, callCount, new Set(failed));
 
     return {
       scores: [
-        issuesScore('tool_calls_failed', 'failed', failed, callCount),
-        issuesScore('tool_calls_empty', 'no-data', empty, callCount),
+        callsScore('tool_calls_failed', 'failed', failed, output.failed_summary, callCount),
+        callsScore('tool_calls_empty', 'no-data', empty, output.empty_summary, callCount),
       ],
     };
   },
