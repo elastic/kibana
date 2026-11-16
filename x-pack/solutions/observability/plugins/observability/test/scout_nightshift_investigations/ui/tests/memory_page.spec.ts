@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import { NIGHTSHIFT_SUPPORTED_SPACE_ID } from '@kbn/nightshift-shared';
 import type { EsClient, KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
@@ -22,6 +23,7 @@ import {
   memoryPath,
   minutesAgo,
   memoryHeaderTab,
+  memoryPagesUrl,
   memoryUrl,
   OTHER_SPACE_ID,
   seedMemory,
@@ -35,14 +37,14 @@ const suffix = randomUUID().slice(0, 8);
 const slug = (name: string) => `${name}-${suffix}`;
 
 /**
- * A Space this suite owns, created and deleted around the run.
+ * The Space this suite runs in.
  *
- * The default Space is shared with every other suite on the deployment, so a
- * pre-existing memory there would move the header's totals and its archived
- * count under assertions that are about this run's fixture. Seeding here is what
- * makes those numbers exact, and it is why teardown can be precise as well.
+ * Nightshift only runs in the default Space, so that is the only Space its UI
+ * mounts in and the only one this suite can drive. Every document it seeds
+ * carries a run-unique slug, so teardown stays precise even though the Space is
+ * shared with the rest of the deployment.
  */
-const SUITE_SPACE_ID = `memory-ui-${randomUUID().slice(0, 8)}`;
+const SUITE_SPACE_ID = NIGHTSHIFT_SUPPORTED_SPACE_ID;
 
 /** Every document this run seeded, so teardown deletes those and nothing else. */
 const seededDocumentIds: string[] = [];
@@ -75,8 +77,8 @@ const PAGE_SIZE_SLUGS = Array.from({ length: 30 }, (_, index) => slug(`paged-${i
 const MAIN_TITLE = 'Checkout latency postmortem: consumer lag and DNS';
 /** The Agent Builder conversation route the provenance link points at. */
 const SOURCE_TASK_PATH = `/app/agent_builder/agents/${SEEDED_AGENT_ID}/conversations/${SEEDED_CONVERSATION_ID}`;
-/** Every reader is in the suite's own Space, so its URLs are Space-scoped. */
-const scoped = (path: string): string => `/s/${SUITE_SPACE_ID}${path}`;
+/** Every reader is in the default Space, whose URLs carry no Space prefix. */
+const scoped = (path: string): string => path;
 
 /** The task-recall text (`context`, stored as `description`) E11 searches for. */
 const SEARCH_PHRASE = 'ingest-2 queue backlog';
@@ -88,21 +90,34 @@ const SEARCH_PHRASE = 'ingest-2 queue backlog';
  * next, so the two cells E13 clicks are the two largest ones: a treemap draws
  * its biggest cell as the top strip, which is where the test aims.
  */
-const KEYWORD_DOCS: { key: string; tags: string[] }[] = [
-  { key: 'checkout-invoke-agent', tags: ['invoke-agent', 'checkout'] },
-  { key: 'dns-invoke-agent', tags: ['invoke-agent', 'dns'] },
-  { key: 'traces-invoke-agent', tags: ['invoke-agent', 'traces'] },
-  { key: 'cart-cache-invoke-agent', tags: ['invoke-agent', 'cart-cache'] },
-  { key: 'traces-invoke-agent-hub', tags: ['invoke-agent', 'checkout', 'traces'] },
-  { key: 'redis-invoke-agent', tags: ['invoke-agent', 'redis'] },
-  { key: 'checkout-invoke-agent-runbook', tags: ['invoke-agent', 'checkout'] },
-  // The one memory without the keyword: it is what proves the filter filtered.
-  { key: 'checkout-redis-runbook', tags: ['checkout', 'redis'] },
-];
+/**
+ * The canonical keywords E13 filters by, and the keys their chips carry.
+ *
+ * Run-unique, because the default Space is shared with every other suite on the deployment: the
+ * header counts E13 asserts come from a store-wide query, so a plain `checkout` could be carried
+ * by a memory this run did not seed.
+ */
+const INVOKE_AGENT_KEYWORD = slug('invoke-agent');
+const CHECKOUT_KEYWORD = slug('checkout');
+const DNS_KEYWORD = slug('dns');
+const TRACES_KEYWORD = slug('traces');
+const CART_CACHE_KEYWORD = slug('cart-cache');
+const REDIS_KEYWORD = slug('redis');
 
-/** The canonical keyword E13 filters by, and the key the chip carries. */
-const INVOKE_AGENT_KEYWORD = 'invoke-agent';
-const CHECKOUT_KEYWORD = 'checkout';
+const KEYWORD_DOCS: { key: string; tags: string[] }[] = [
+  { key: 'checkout-invoke-agent', tags: [INVOKE_AGENT_KEYWORD, CHECKOUT_KEYWORD] },
+  { key: 'dns-invoke-agent', tags: [INVOKE_AGENT_KEYWORD, DNS_KEYWORD] },
+  { key: 'traces-invoke-agent', tags: [INVOKE_AGENT_KEYWORD, TRACES_KEYWORD] },
+  { key: 'cart-cache-invoke-agent', tags: [INVOKE_AGENT_KEYWORD, CART_CACHE_KEYWORD] },
+  {
+    key: 'traces-invoke-agent-hub',
+    tags: [INVOKE_AGENT_KEYWORD, CHECKOUT_KEYWORD, TRACES_KEYWORD],
+  },
+  { key: 'redis-invoke-agent', tags: [INVOKE_AGENT_KEYWORD, REDIS_KEYWORD] },
+  { key: 'checkout-invoke-agent-runbook', tags: [INVOKE_AGENT_KEYWORD, CHECKOUT_KEYWORD] },
+  // The one memory without the keyword: it is what proves the filter filtered.
+  { key: 'checkout-redis-runbook', tags: [CHECKOUT_KEYWORD, REDIS_KEYWORD] },
+];
 
 /**
  * Every active document this run seeds: the paged rows, the keyword graph, and
@@ -128,9 +143,8 @@ test.describe(
   },
   () => {
     test.beforeAll(async ({ esClient, apiServices }) => {
-      // The routes scope by `getSpaceId(request)`, so both Spaces this suite uses
-      // are real ones rather than a space_id string on a document.
-      await apiServices.spaces.create({ id: SUITE_SPACE_ID, name: SUITE_SPACE_ID });
+      // The routes scope by `getSpaceId(request)`, so the second Space E12 reads
+      // is a real one rather than a space_id string on a document.
       await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
 
       await seed(esClient, {
@@ -141,7 +155,7 @@ test.describe(
           'resolution flapped inside the pod.\n\n## Fix\n\nRaise the cache size and keep the ' +
           'resolver warm.',
         description: 'Investigate why checkout latency spiked after the DNS cache change',
-        tags: ['checkout', 'dns'],
+        tags: [CHECKOUT_KEYWORD, DNS_KEYWORD],
         // 6 of 8 → 75%, and nothing to decay between the seed and the assertion.
         impressions: 8,
         conversions: 6,
@@ -267,7 +281,6 @@ test.describe(
 
     test.afterAll(async ({ esClient, apiServices }) => {
       await deleteSeededMemories(esClient, seededDocumentIds);
-      await apiServices.spaces.delete(SUITE_SPACE_ID);
       await apiServices.spaces.delete(OTHER_SPACE_ID);
     });
 
@@ -280,18 +293,14 @@ test.describe(
      * assertion. The mounted tab is the signal; the URL is only read once it is up,
      * because a client-side redirect lands after `goto` resolves.
      */
-    const gotoMemory = async (
-      page: ScoutPage,
-      kbnUrl: KibanaUrl,
-      spaceId: string = SUITE_SPACE_ID
-    ) => {
+    const gotoMemory = async (page: ScoutPage, kbnUrl: KibanaUrl, spaceId?: string) => {
       await page.goto(memoryUrl(kbnUrl, spaceId));
       await expect(page.testSubj.locator('nightshiftMemoryTab')).toBeVisible();
       expect(page.url()).toContain(memoryPath(spaceId));
     };
 
     /** Reload on the Memory route and require it to still be Memory afterwards. */
-    const reloadMemory = async (page: ScoutPage, spaceId: string = SUITE_SPACE_ID) => {
+    const reloadMemory = async (page: ScoutPage, spaceId?: string) => {
       await page.reload();
       await expect(page.testSubj.locator('nightshiftMemoryTab')).toBeVisible();
       expect(page.url()).toContain(memoryPath(spaceId));
@@ -351,7 +360,7 @@ test.describe(
       // A tag is a keyword the store already ranks, so clicking one is a
       // question about other memories: it leaves the one being read and filters
       // home by the canonical form of that tag.
-      await page.testSubj.locator('nightshiftMemoryTag-checkout').click();
+      await page.testSubj.locator(`nightshiftMemoryTag-${CHECKOUT_KEYWORD}`).click();
       await expect(page.testSubj.locator('nightshiftMemoryHome')).toBeVisible();
       await expect(page.testSubj.locator('nightshiftMemoryKeywordFilters')).toBeVisible();
       await expect(
@@ -570,6 +579,9 @@ test.describe(
       await attachScreenshot(page, testInfo, 'memory-e11-search');
     });
 
+    // The other Space is read through the list route rather than its Memory page: Nightshift
+    // only mounts in the default Space, while the store and its routes stay Space-scoped, so
+    // the isolation this case is about is still what gets asserted.
     test('E12 keeps one Space out of another', async ({ page, kbnUrl }, testInfo) => {
       await gotoMemory(page, kbnUrl);
 
@@ -578,14 +590,18 @@ test.describe(
       await page.testSubj.locator('nightshiftMemorySearch').fill('Belongs to the other Space');
       await expect(page.testSubj.locator('nightshiftMemorySidebarEmpty')).toBeVisible();
       await page.testSubj.locator('nightshiftMemorySearch').fill('');
-
-      // And the other Space sees its own memory, not this Space's.
-      await gotoMemory(page, kbnUrl, OTHER_SPACE_ID);
-      await expect(
-        page.testSubj.locator(`nightshiftMemoryLink-memory_${OTHER_SPACE_MEMORY}`)
-      ).toBeVisible();
-      await expect(page.testSubj.locator(`nightshiftMemoryLink-memory_${MAIN}`)).toHaveCount(0);
       await attachScreenshot(page, testInfo, 'memory-e12-space-isolation');
+
+      // And the other Space sees its own memory, not this Space's. The request carries the
+      // browser's session, so it is the same reader the page above used.
+      const listed = await page.request.get(memoryPagesUrl(kbnUrl, OTHER_SPACE_ID), {
+        headers: { 'kbn-xsrf': 'scout', 'x-elastic-internal-origin': 'scout' },
+      });
+      expect(listed.status()).toBe(200);
+      const { pages } = (await listed.json()) as { pages: Array<{ id: string }> };
+      const listedIds = pages.map(({ id }) => id);
+      expect(listedIds).toContain(`memory_${OTHER_SPACE_MEMORY}`);
+      expect(listedIds).not.toContain(`memory_${MAIN}`);
     });
 
     /**
@@ -681,10 +697,11 @@ test.describe(
       const unfilteredTotal = await headerTotal(page);
       expect(KEYWORD_DOCS_WITH_INVOKE_AGENT.length).toBeGreaterThan(1);
 
-      // The sidebar opens on Active, so an archived count of zero here would be
-      // the count being taken from a listing that excludes archived memories. The
-      // fixture archives four: one by a person and three merge sources.
-      expect(await headerArchived(page)).toBe(ARCHIVED_SEEDED_COUNT);
+      // The sidebar opens on Active, so an archived count of zero here would be the count being
+      // taken from a listing that excludes archived memories. The fixture archives four: one by a
+      // person and three merge sources. At least, because the default Space is shared and another
+      // suite's archived memory counts here too.
+      expect(await headerArchived(page)).toBeGreaterThanOrEqual(ARCHIVED_SEEDED_COUNT);
 
       // The chart selects the canonical key.
       await clickLargestCell(page, INVOKE_AGENT_KEYWORD);

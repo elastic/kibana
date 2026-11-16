@@ -8,7 +8,9 @@
  */
 
 import { systemConnectorActionRefPrefix } from '@kbn/alerting-plugin/common';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
+import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
 import { ConnectorTypeId } from '../../../connectors/workflows';
 import type { RouteDependencies } from '../types';
@@ -50,19 +52,30 @@ export function registerGetLinkedRulesRoute(deps: RouteDependencies) {
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
+          const filter = buildLinkedRulesFilter(request.body.ids);
           const rulesClient = await (await context.alerting).getRulesClient();
-          const { total, data } = await rulesClient.find({
-            options: {
-              filter: buildLinkedRulesFilter(request.body.ids),
-              page: 1,
-              perPage: MAX_LINKED_RULES,
-              sortField: 'name',
-              sortOrder: 'asc',
-            },
+          // Counts every linked rule in the space, also the ones the user cannot read, so the
+          // client can warn about them. Only the count leaves this handler.
+          const unsecuredSavedObjectsClient = (await context.core).savedObjects.getClient({
+            includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+            excludedExtensions: [SECURITY_EXTENSION_ID],
           });
+          const [{ total, data }, { total: totalInSpace }] = await Promise.all([
+            rulesClient.find({
+              options: {
+                filter,
+                page: 1,
+                perPage: MAX_LINKED_RULES,
+                sortField: 'name',
+                sortOrder: 'asc',
+              },
+            }),
+            unsecuredSavedObjectsClient.find({ type: RULE_SAVED_OBJECT_TYPE, filter, perPage: 0 }),
+          ]);
           return response.ok({
             body: {
               total,
+              hiddenTotal: Math.max(totalInSpace - total, 0),
               rules: data.map(({ id, name, alertTypeId }) => ({
                 id,
                 name,

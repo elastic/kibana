@@ -116,6 +116,8 @@ describe('getOtelApplications', () => {
           source: 'otel',
           environments: ['production', 'canary'],
           pageLoads: { count: 12 },
+          // The raw events don't count sessions.
+          sessions: null,
           webVitals: {
             lcp: { p75Ms: 2412.5, sampleCount: 10, ratings: ALL_GOOD },
             inp: { p75Ms: 180.25, sampleCount: 4, ratings: ALL_GOOD },
@@ -137,6 +139,7 @@ describe('getOtelApplications', () => {
           source: 'otel',
           environments: ['staging'],
           pageLoads: { count: 1 },
+          sessions: null,
           webVitals: {
             lcp: NO_VITAL,
             inp: NO_VITAL,
@@ -151,6 +154,7 @@ describe('getOtelApplications', () => {
       ],
       environments: ['production', 'staging'],
       pageLoadsOverTime: [],
+      sessionsOverTime: null,
     });
   });
 

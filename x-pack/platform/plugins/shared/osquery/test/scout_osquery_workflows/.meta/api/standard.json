@@ -1,0 +1,138 @@
+{
+  "sha1": "809cdf89456a5a99113eaf0a1a466c7afaf27ae5",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "6f10528a93307ba-400a1363433e14a",
+      "title": "osquery.runQuery workflow step success: rows carry the host, string columns and only the mapped ECS fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
+        "line": 139,
+        "column": 22
+      }
+    },
+    {
+      "id": "6f10528a93307ba-f07eee3f04e33a4",
+      "title": "osquery.runQuery workflow step partial: one of two agents answers before the deadline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
+        "line": 179,
+        "column": 9
+      }
+    },
+    {
+      "id": "6f10528a93307ba-0e0f0b8926258f1",
+      "title": "osquery.runQuery workflow step failed: the only agent reports a query error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
+        "line": 203,
+        "column": 7
+      }
+    },
+    {
+      "id": "6f10528a93307ba-0e43e42f76d461f",
+      "title": "osquery.runQuery workflow step timed_out: no agent answers by the deadline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
+        "line": 222,
+        "column": 21
+      }
+    },
+    {
+      "id": "6f10528a93307ba-715cc376e76ef45",
+      "title": "osquery.runQuery workflow step linux targets every Linux distribution of the online osquery agents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
+        "line": 234,
+        "column": 41
+      }
+    },
+    {
+      "id": "6f10528a93307ba-fe5a91109825411",
+      "title": "osquery.runQuery workflow step SAVED_QUERY_NOT_FOUND for a saved query that exists only in another space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
+        "line": 276,
+        "column": 25
+      }
+    },
+    {
+      "id": "6f10528a93307ba-d22385c199f980f",
+      "title": "osquery.runQuery workflow step success with the minimal role: the step runs as the calling user, not as an admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
+        "line": 296,
+        "column": 33
+      }
+    },
+    {
+      "id": "6f10528a93307ba-ba56d72f7a21a8c",
+      "title": "osquery.runQuery workflow step MISSING_PRIVILEGE without run_saved_queries, before anything is dispatched",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
+        "line": 334,
+        "column": 43
+      }
+    },
+    {
+      "id": "6f10528a93307ba-09e279b6971b595",
+      "title": "osquery.runQuery workflow step MISSING_PRIVILEGE without live_queries_read, before anything is dispatched",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
+        "line": 353,
+        "column": 25
+      }
+    },
+    {
+      "id": "6f10528a93307ba-054166ec469e649",
+      "title": "osquery.runQuery workflow step MISSING_PRIVILEGE without saved_queries_read, before anything is dispatched",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
+        "line": 373,
+        "column": 23
+      }
+    }
+  ]
+}

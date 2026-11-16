@@ -136,8 +136,8 @@ const assertCreatedTransform = async (
   await assertTransformRow(transformManagement, transform.transformId, {
     description: transform.description,
     type: transform.type,
-    status: 'stopped',
-    mode: 'batch',
+    status: 'Stopped',
+    execution: '100%',
     progress: 100,
     health: 'Healthy',
   });
@@ -196,7 +196,7 @@ test.describe('Create transform from a saved search', { tag: tags.deploymentAgno
       await assertCreateStep(transformWizard);
       await assertCreatedTransform(transformWizard, transformManagement, {
         ...pivot,
-        type: 'pivot',
+        type: 'Pivot',
       });
     });
   });
@@ -228,7 +228,7 @@ test.describe('Create transform from a saved search', { tag: tags.deploymentAgno
       await assertCreateStep(transformWizard);
       await assertCreatedTransform(transformWizard, transformManagement, {
         ...latest,
-        type: 'latest',
+        type: 'Latest',
       });
     });
   });

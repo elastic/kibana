@@ -32,6 +32,9 @@ import {
   STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
   STREAMS_UI_METADATA_SAVED_OBJECT_TYPE,
+  STREAMS_V2_API_PRIVILEGES,
+  STREAMS_V2_FEATURE_ID,
+  STREAMS_V2_UI_PRIVILEGES,
 } from '../common/constants';
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
@@ -62,6 +65,7 @@ import { createComponentCatalogueService } from './lib/component_catalogue/compo
 import { createEncryptionKeyStore } from './lib/unit_config/encryption_key_store';
 import { createCredentialPreparer } from './lib/unit_config/seal_credentials';
 import type { UnitConfigHooks } from './lib/unit_config/types';
+import { createRemoteDestinationProbe } from './lib/unit_config/remote_destination_probe';
 import {
   registerRepublishUnitsTask,
   removeRepublishUnitsTask,
@@ -170,10 +174,14 @@ export class StreamsPlugin
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
 
-      const scopedSoClient = coreStart.savedObjects.getScopedClient(request, {
+      const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
+      // Units are cluster-wide: routes authorize with the V2 feature privilege, so their
+      // saved objects skip space-scoped saved object authorization.
+      const unitSoClient = coreStart.savedObjects.getUnsafeInternalClient({
         includedHiddenTypes: this.config.canvas.enabled
           ? [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE, STREAMS_UI_METADATA_SAVED_OBJECT_TYPE]
           : [],
+        excludedExtensions: [SPACES_EXTENSION_ID],
       });
       const encryptedSavedObjectsClient = pluginsStart.encryptedSavedObjects.getClient({
         includedHiddenTypes: this.config.canvas.enabled
@@ -215,8 +223,11 @@ export class StreamsPlugin
       return {
         scopedClusterClient,
         soClient,
+        unitSoClient,
         encryptedSavedObjectsClient,
         canEncrypt: this.canEncrypt,
+        invalidateApiKeysAsInternalUser: (ids) =>
+          coreStart.security.authc.apiKeys.invalidateAsInternalUser({ ids }),
         attachmentClient,
         streamsClient,
         unitStatsClient: unitStatsService.getClient({
@@ -296,6 +307,38 @@ export class StreamsPlugin
       },
     });
 
+    if (this.config.canvas.enabled) {
+      plugins.features.registerKibanaFeature({
+        id: STREAMS_V2_FEATURE_ID,
+        name: i18n.translate('xpack.streams.featureRegistry.streamsV2FeatureName', {
+          defaultMessage: 'Streams V2',
+        }),
+        order: 610,
+        category: DEFAULT_APP_CATEGORIES.management,
+        app: [STREAMS_FEATURE_ID],
+        privileges: {
+          all: {
+            app: [STREAMS_FEATURE_ID],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            api: [STREAMS_V2_API_PRIVILEGES.read, STREAMS_V2_API_PRIVILEGES.manage],
+            ui: [STREAMS_V2_UI_PRIVILEGES.show, STREAMS_V2_UI_PRIVILEGES.manage],
+          },
+          read: {
+            app: [STREAMS_FEATURE_ID],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            api: [STREAMS_V2_API_PRIVILEGES.read],
+            ui: [STREAMS_V2_UI_PRIVILEGES.show],
+          },
+        },
+      });
+    }
+
     registerFeatureFlags(core);
     core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
 
@@ -315,6 +358,7 @@ export class StreamsPlugin
             logger: this.logger.get('credential-sealer'),
           })
         : undefined,
+      probeRemoteDestination: createRemoteDestinationProbe(),
     };
     const componentCatalogue = createComponentCatalogueService({
       fetchComponentCatalogue: distributorClient.fetchComponentCatalogue,

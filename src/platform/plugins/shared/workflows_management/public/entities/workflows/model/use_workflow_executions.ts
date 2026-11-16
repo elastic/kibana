@@ -190,6 +190,10 @@ export function useWorkflowExecutions(
       size: firstPage.size,
       total: firstPage.total,
       ...(lastPage.searchAfter ? { searchAfter: lastPage.searchAfter } : {}),
+      // Later pages omit the flag. The first page is the one that checked the workflow.
+      ...(firstPage.hasNamedExecution !== undefined
+        ? { hasNamedExecution: firstPage.hasNamedExecution }
+        : {}),
     };
   }, [data]);
 

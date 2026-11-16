@@ -138,6 +138,54 @@ describe('loadVendorSpecs', () => {
     expect(Object.keys(specs.v1.paths ?? {})).toEqual(['/v1/search']);
   });
 
+  describe('with an overlay action that matches nothing', () => {
+    const STALE_WARNING =
+      'overlay.yaml action 0 matches nothing in any source; the vendor may have fixed it';
+    const fetchText = async () => JSON.stringify(snapshot('Latest'));
+
+    beforeEach(async () => {
+      await fs.writeFile(
+        path.join(directory, 'overlay.yaml'),
+        [
+          'overlay: 1.0.0',
+          'info: { title: Fix, version: 1.0.0 }',
+          'actions:',
+          "  - target: $.paths['/gone']",
+          '    remove: true',
+        ].join('\n')
+      );
+    });
+
+    it('stays quiet against the snapshots, which only have the operations the connector calls', async () => {
+      await loadVendorSpecs({ directory, fetchText, log });
+
+      expect(log.warning).not.toHaveBeenCalled();
+    });
+
+    it('warns when every source is fetched', async () => {
+      await loadVendorSpecs({ directory, latest: true, fetchText, log });
+
+      expect(log.warning).toHaveBeenCalledWith(STALE_WARNING);
+    });
+
+    it('stays quiet when only some sources are fetched', async () => {
+      await fs.writeFile(
+        path.join(directory, 'manifest.json'),
+        serializeManifest({
+          ...manifest,
+          sources: {
+            ...manifest.sources,
+            v2: { format: 'openapi', url: SPEC_URL, fetchedAt: '2026-10-07T00:00:00.000Z' },
+          },
+        })
+      );
+
+      await loadVendorSpecs({ directory, fetchText, log });
+
+      expect(log.warning).not.toHaveBeenCalled();
+    });
+  });
+
   it('fails without a manifest', async () => {
     await fs.rm(path.join(directory, 'manifest.json'));
 

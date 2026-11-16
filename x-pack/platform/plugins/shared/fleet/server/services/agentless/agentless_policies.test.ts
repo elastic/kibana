@@ -1688,6 +1688,24 @@ describe('AgentlessPoliciesService', () => {
       expect(result).not.toHaveProperty('supports_agentless');
     });
 
+    it('should return the cloud onboarding instance that manages the policy, if any', async () => {
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({ onboarding_deployment_id: 'deploy-1' })
+      );
+      expect(await createService().getAgentlessPolicy('agentless-policy-id')).toHaveProperty(
+        'onboarding_deployment_id',
+        'deploy-1'
+      );
+
+      // A policy the instance no longer manages has a cleared (null) value, which is left out.
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({ onboarding_deployment_id: null })
+      );
+      expect(await createService().getAgentlessPolicy('agentless-policy-id')).not.toHaveProperty(
+        'onboarding_deployment_id'
+      );
+    });
+
     it('should return null when the package policy is not agentless', async () => {
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ supports_agentless: false })

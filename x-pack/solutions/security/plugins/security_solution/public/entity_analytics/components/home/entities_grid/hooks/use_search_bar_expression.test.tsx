@@ -9,7 +9,9 @@ import React from 'react';
 import type { PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
+import { FILTERS } from '@kbn/es-query';
 import type { RowsMode } from '../common';
 import type { GridContext } from './use_entity_grid_context';
 import { useGridContext } from './use_entity_grid_context';
@@ -41,13 +43,22 @@ jest.mock('../queries/resolved_entities', () => ({
   fetchResolvedEntityOverrides: (...args: unknown[]) => mockFetchResolvedEntityOverrides(...args),
 }));
 
+const phraseFilter = (field: string, value: string): Filter => ({
+  meta: { key: field, type: FILTERS.PHRASE, params: { query: value } },
+  query: { match_phrase: { [field]: value } },
+});
+
+const entityDataView = {
+  fields: { getAll: () => [{ name: 'entity.id' }, { name: 'entity.name' }] },
+} as unknown as DataView;
+
 const PILL = { meta: { key: 'asset.criticality' }, query: {} } as unknown as Filter;
 
 describe('useSearchBarExpression', () => {
   let queryClient: QueryClient;
 
-  const renderSearch = (rowsMode: RowsMode = 'resolved') =>
-    renderHook(() => useSearchBarExpression(rowsMode), {
+  const renderSearch = (rowsMode: RowsMode = 'resolved', dataView?: DataView) =>
+    renderHook(() => useSearchBarExpression(rowsMode, dataView), {
       wrapper: ({ children }: PropsWithChildren<{}>) => (
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       ),
@@ -186,5 +197,43 @@ describe('useSearchBarExpression', () => {
 
     expect(result.current.searchExpression).toBeUndefined();
     expect(result.current.mainEntityOnlySearch).toBeUndefined();
+  });
+
+  describe('filters on fields the entity data view lacks', () => {
+    beforeEach(() => {
+      mockFilters = [
+        phraseFilter('entity.id', 'host:a'),
+        phraseFilter('kibana.alert.workflow_status', 'open'),
+      ];
+      mockQuery = { query: 'entity.name: a', language: 'kuery' };
+    });
+
+    it('leaves them out and reports their fields', () => {
+      const { result } = renderSearch('individual', entityDataView);
+
+      expect(result.current.ignoredFields).toEqual(['kibana.alert.workflow_status']);
+      expect(result.current.applicableFilters).toEqual([mockFilters[0]]);
+      expect(result.current.searchExpression).toContain('entity.id');
+      expect(result.current.searchExpression).toContain('KQL(');
+      expect(result.current.searchExpression).not.toContain('workflow_status');
+    });
+
+    it('converts every filter and ignores none while there is no data view', () => {
+      const { result } = renderSearch('individual');
+
+      expect(result.current.ignoredFields).toEqual([]);
+      expect(result.current.applicableFilters).toEqual(mockFilters);
+      expect(result.current.searchExpression).toContain('workflow_status');
+    });
+
+    it('is not a main-entities-only search when only an ignored filter is left of it', () => {
+      mockQuery = { query: '', language: 'kuery' };
+      mockFilters = [phraseFilter('kibana.alert.workflow_status', 'open')];
+      const { result } = renderSearch('resolved', entityDataView);
+
+      expect(result.current.searchExpression).toBeUndefined();
+      expect(result.current.mainEntityOnlySearch).toBeUndefined();
+      expect(result.current.ignoredFields).toEqual(['kibana.alert.workflow_status']);
+    });
   });
 });

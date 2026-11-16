@@ -107,6 +107,13 @@ const getGradedRound = (
   round: ConversationRound
 ): ConversationRound => {
   if (input.graded_report === 'first_round') {
+    // A recovery that is the first round, or read before it was saved, would grade itself.
+    if (input.round_kind === 'alert_recovery' && rounds[0].id === round.id) {
+      throw new OnlineEvalsStepError(
+        'invalid_input',
+        'Cannot grade an alert recovery against itself: it is the first round'
+      );
+    }
     return rounds[0];
   }
   if (input.graded_report === 'current' && input.round_kind !== 'alert_recovery') {

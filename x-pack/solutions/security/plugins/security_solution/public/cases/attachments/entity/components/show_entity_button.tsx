@@ -7,17 +7,10 @@
 
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
-import {
-  EntityPanelKeyByType,
-  EntityPanelParamByType,
-} from '../../../../flyout/entity_details/shared/constants';
-import type { EntityType } from '../../../../../common/entity_analytics/types';
 
 const SHOW_ENTITY_TOOLTIP = i18n.translate(
   'xpack.securitySolution.entityAnalytics.cases.showEntityDetails',
@@ -37,34 +30,17 @@ export const ShowEntityButton = ({
   entityName,
   entityType,
 }: ShowEntityButtonProps) => {
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openEntityFlyout } = useFlyoutApi();
-  const { openFlyout } = useExpandableFlyoutApi();
 
   const onClick = useCallback(() => {
-    if (enableNewFlyout) {
-      openEntityFlyout({
-        engineType: entityType,
-        entityId,
-        entityName,
-        scopeId: TimelineId.casePage,
-        origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
-      });
-    } else {
-      // Legacy expandable flyout path. No telemetry here — the new-flyout path reports
-      // telemetry internally via openEntityFlyout, and the legacy path is being deprecated.
-      const panelKey = EntityPanelKeyByType[entityType as EntityType];
-      const paramName = EntityPanelParamByType[entityType as EntityType];
-      if (panelKey && paramName) {
-        openFlyout({
-          right: {
-            id: panelKey,
-            params: { [paramName]: entityName, entityId, scopeId: TimelineId.casePage },
-          },
-        });
-      }
-    }
-  }, [enableNewFlyout, entityId, entityName, entityType, openEntityFlyout, openFlyout]);
+    openEntityFlyout({
+      engineType: entityType,
+      entityId,
+      entityName,
+      scopeId: TimelineId.casePage,
+      origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+    });
+  }, [entityId, entityName, entityType, openEntityFlyout]);
 
   return (
     <EuiToolTip position="top" content={<p>{SHOW_ENTITY_TOOLTIP}</p>}>

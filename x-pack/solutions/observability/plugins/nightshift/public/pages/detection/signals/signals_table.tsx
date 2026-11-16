@@ -122,6 +122,7 @@ export const SignalsTable = ({
     <EuiBasicTable<Detection>
       data-test-subj="nightshiftDetectionSignalsTable"
       tableCaption={TABLE_CAPTION}
+      stickyHeader
       itemId="detection_id"
       items={signals}
       columns={columns}
