@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { StateConflictError } from './state_conflict_error';
+import { StateConflictError } from '../errors/state_conflict_error';
 import type { StateStore } from './state_store';
 import type { StateVersion } from './state_kinds';
 

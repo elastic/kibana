@@ -11,7 +11,7 @@ import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { ElasticsearchStateStore } from '../elasticsearch_state_store';
 import { acquireRunLease } from '../run_lease';
-import { StateConflictError } from '../state_conflict_error';
+import { StateConflictError } from '../../errors/state_conflict_error';
 import { StateIndex } from '../state_index';
 
 // Runs as the test cluster's superuser: the kibana_system grant on the state index is a separate
