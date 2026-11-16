@@ -434,11 +434,11 @@ describe('renderFlakySuiteIssueBody', () => {
       [
         '#### Status by Target',
         '',
-        '| Target | Environment | Failed builds | Sample failure |',
+        '| Environment | Target | Failed builds | Sample failure |',
         '|---|---|---|---|',
-        '| 🔴 `stateful-classic` | Local deployment | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
-        '| 🔴 `serverless-security_complete` | MKI | 3 / 64 (**5%**) | 2026-09-07 11:40 UTC |',
-        '| ✅ `serverless-observability_complete` | Local serverless simulation | 0 / 426 |  |',
+        '| 🔴 Local deployment | `stateful-classic` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
+        '| 🔴 MKI | `serverless-security_complete` | 3 / 64 (**5%**) | 2026-09-07 11:40 UTC |',
+        '| ✅ Local serverless simulation | `serverless-observability_complete` | 0 / 426 |  |',
       ].join('\n')
     );
   });
@@ -1175,10 +1175,10 @@ describe('a suite flaky only in a pipeline judged on its own', () => {
   it('gives the FIPS runs of a target their own row in the failures by target', () => {
     const body = renderFlakySuiteIssueBody(suite, { report });
 
-    expect(body).toContain('| 🔴 `stateful-classic` | Local deployment (FIPS enabled) | 4 / 14');
-    expect(body).toContain('| 🔴 `stateful-classic` | Local deployment | 1 / 509');
+    expect(body).toContain('| 🔴 Local deployment (FIPS enabled) | `stateful-classic` | 4 / 14');
+    expect(body).toContain('| 🔴 Local deployment | `stateful-classic` | 1 / 509');
     // a Cloud target already says where it ran
-    expect(body).toContain('| ✅ `serverless-observability_complete` | MKI | 0 / 65');
+    expect(body).toContain('| ✅ MKI | `serverless-observability_complete` | 0 / 65');
   });
 
   it('says where it is still flaky in its comments', () => {

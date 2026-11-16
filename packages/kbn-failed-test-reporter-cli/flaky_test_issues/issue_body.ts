@@ -584,14 +584,14 @@ const statusByTarget = (suite: FlakySuite): string | undefined => {
     return undefined;
   }
   const rows = targets.map((row) => [
-    `${row.worst.failedBuilds > 0 ? '🔴' : '✅'} ${inlineCode(row.worst.mode)}`,
-    pipelineTargetEnvironment(row.worst),
+    `${row.worst.failedBuilds > 0 ? '🔴' : '✅'} ${pipelineTargetEnvironment(row.worst)}`,
+    inlineCode(row.worst.mode),
     ...failuresCells(row),
   ]);
   return [
     '#### Status by Target',
     '',
-    table(['Target', 'Environment', 'Failed builds', 'Sample failure'], rows),
+    table(['Environment', 'Target', 'Failed builds', 'Sample failure'], rows),
   ].join('\n');
 };
 
