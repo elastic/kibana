@@ -46,7 +46,10 @@ export const composeOtelDataStreamName = (
   { dataset, namespace }: OtelDataStreamName
 ): string => `${signal}-${dataset.trim()}${OTEL_TYPE_SEPARATOR}${namespace.trim()}`;
 
-/** Splits `<signal>-<dataset>.otel-<namespace>`, or returns undefined when the name has another shape. */
+/**
+ * Splits `<signal>-<dataset>.otel-<namespace>` on the first `.otel-`, like `getPrometheusDataStream`,
+ * or returns undefined when the name has another shape.
+ */
 export const parseOtelDataStreamName = (
   signal: OtelDataStreamSignal,
   index: string
@@ -56,7 +59,7 @@ export const parseOtelDataStreamName = (
     return undefined;
   }
   const rest = index.slice(prefix.length);
-  const separatorAt = rest.lastIndexOf(OTEL_TYPE_SEPARATOR);
+  const separatorAt = rest.indexOf(OTEL_TYPE_SEPARATOR);
   if (separatorAt < 0) {
     return undefined;
   }

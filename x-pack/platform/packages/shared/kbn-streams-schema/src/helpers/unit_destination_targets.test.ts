@@ -251,6 +251,7 @@ describe('getPrometheusDataStream', () => {
     ['metrics-billing.prometheus-default', 'metrics-billing.prometheus-default'],
     ['metrics-billing-default', 'metrics-billing.prometheus-default'],
     ['metrics-billing.otel-prod-eu', 'metrics-billing.prometheus-prod-eu'],
+    ['metrics-a.otel-b.otel-c', 'metrics-a.prometheus-b.otel-c'],
     // Elasticsearch sanitization
     ['metrics-a.b-c-prod', 'metrics-a.b_c.prometheus-prod'],
     ['metrics-Bad.otel-x#y', 'metrics-bad.prometheus-x_y'],

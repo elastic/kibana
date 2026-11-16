@@ -26,6 +26,7 @@ describe('parseOtelDataStreamName', () => {
     ['traces', 'traces-nginx.access.otel-prod', { dataset: 'nginx.access', namespace: 'prod' }],
     ['logs', 'logs-billing.otel.otel-default', { dataset: 'billing.otel', namespace: 'default' }],
     ['logs', 'logs-my-app.otel-default', { dataset: 'my-app', namespace: 'default' }],
+    ['metrics', 'metrics-a.otel-b.otel-c', { dataset: 'a', namespace: 'b.otel-c' }],
     ['logs', 'logs-.otel-default', { dataset: '', namespace: 'default' }],
   ] as const)('%s %s', (signal, index, expected) => {
     expect(parseOtelDataStreamName(signal, index)).toEqual(expected);
