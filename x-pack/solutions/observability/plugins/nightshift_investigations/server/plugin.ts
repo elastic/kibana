@@ -718,6 +718,7 @@ export class NightshiftInvestigationsPlugin
             getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
+            telemetry,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(

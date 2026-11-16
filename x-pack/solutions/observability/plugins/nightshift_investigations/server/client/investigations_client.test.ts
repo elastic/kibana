@@ -893,11 +893,13 @@ describe('NightshiftInvestigationsClient.start()', () => {
       origin: 'significant_event',
       automation_id: 'a1',
       skip_reason: 'deployment_quota',
+      event_id: 'event-1',
     });
     expect(telemetry.reportInvestigationSkipped).toHaveBeenNthCalledWith(2, {
       trigger: 'manual',
       origin: 'alert',
       skip_reason: 'deployment_quota',
+      alert_version: 'v1',
     });
   });
 
@@ -988,7 +990,13 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
 
     expect(telemetry.reportInvestigationStarted).toHaveBeenCalledWith(
-      expect.objectContaining({ event_id: 'event-1' })
+      expect.objectContaining({
+        event_id: 'event-1',
+        alert_version: 'v2',
+        alert_source: 'elastic.significant_events',
+        source_kind: 'significant_events',
+        fingerprint: 'event-1',
+      })
     );
   });
 
@@ -3352,7 +3360,10 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
     agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
     withConversations(makeConversation({ id: 'inv-1', status: 'open' }));
     subjectsClient.listByConversationIds.mockResolvedValue([
-      { ...makeStoredSubject(), snapshot: { id: 'alert-1', reason: 'Latency spike' } },
+      {
+        ...makeStoredSubject(),
+        snapshot: { id: 'alert-1', reason: 'Latency spike', source: 'datadog' },
+      },
     ]);
     const telemetry = { reportInvestigationStarted: jest.fn() };
 
@@ -3369,6 +3380,9 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
       entry_point: 'alert_recovery',
       subject_type: 'alert',
       is_follow_up: true,
+      alert_version: 'v2',
+      alert_source: 'datadog',
+      source_kind: 'external',
     });
     expect(mockLogger.info).toHaveBeenCalledWith(
       'Requested a recovery round on investigation "inv-1" for alert/alert-1, execution_id=exec-rec-1'
