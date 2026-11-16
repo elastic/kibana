@@ -2137,6 +2137,53 @@ describe('Package policy service', () => {
       await expect(createPackagePolicy(soClient)).resolves.toBeDefined();
     });
 
+    describe('package listed as FIPS incompatible without fips_compatible flags', () => {
+      const connectorsPkgInfo = {
+        name: 'elastic_connectors',
+        version: '0.0.1',
+        policy_templates: [{ name: 'github', inputs: [] }],
+      };
+      const connectorsPolicy: NewPackagePolicy = {
+        ...newPackagePolicy,
+        inputs: [{ type: 'connectors-py', policy_template: 'github', enabled: true, streams: [] }],
+        package: { name: 'elastic_connectors', title: 'Elastic Connectors', version: '0.0.1' },
+      };
+
+      beforeEach(() => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(connectorsPkgInfo);
+      });
+
+      it('create should reject the package when FIPS is enabled', async () => {
+        const soClient = createSavedObjectClientMock();
+        mockAgentPolicyGet();
+
+        const promise = createPackagePolicy(soClient, {}, connectorsPolicy);
+
+        await expect(promise).rejects.toBeInstanceOf(PackageFipsIncompatibleError);
+        await expect(promise).rejects.toThrow(
+          'Cannot create a package policy for elastic_connectors: the integration is not FIPS compatible'
+        );
+        expect(soClient.create).not.toHaveBeenCalled();
+      });
+
+      it('create should allow the package when using the force flag', async () => {
+        const soClient = createSavedObjectClientMock();
+        mockCreateSuccess(soClient);
+
+        await expect(
+          createPackagePolicy(soClient, { force: true }, connectorsPolicy)
+        ).resolves.toBeDefined();
+      });
+
+      it('create should allow the package when FIPS is not enabled', async () => {
+        jest.spyOn(appContextService, 'getIsFipsEnabled').mockReturnValue(false);
+        const soClient = createSavedObjectClientMock();
+        mockCreateSuccess(soClient);
+
+        await expect(createPackagePolicy(soClient, {}, connectorsPolicy)).resolves.toBeDefined();
+      });
+    });
+
     describe('package with a mix of FIPS compatible and non FIPS policy templates', () => {
       const policyWithInput = (policyTemplate: string, enabled = true): NewPackagePolicy => ({
         ...newPackagePolicy,
