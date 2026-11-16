@@ -124,7 +124,7 @@ export class DetectionSetupService {
       this.account.getDetectionEngineAccountId({ spaceId }),
       // A failing privilege probe must not fail a read: it reads as "cannot set up".
       serviceAccountsEnabled
-        ? this.account.canManageSecurity({ request }).catch(() => false)
+        ? this.account.canSetUp({ request, spaceId }).catch(() => false)
         : false,
     ]);
 

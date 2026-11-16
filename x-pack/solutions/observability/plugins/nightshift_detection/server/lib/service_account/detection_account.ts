@@ -9,6 +9,7 @@ import { inject, injectable } from 'inversify';
 import { v4 as uuidv4 } from 'uuid';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { CoreStart as CoreStartToken } from '@kbn/core-di-server';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { EngineHttpError } from '../errors/engine_http_error';
 import { createNotSetUpError } from '../errors/create_not_set_up_error';
 import { DETECTION_ENGINE_WORKLOAD_ID, DETECTION_ENGINE_WORKLOAD_TYPE } from './workload';
@@ -51,6 +52,34 @@ export class DetectionAccountService {
     const { has_all_requested: allowed } = await this.elasticsearch.client
       .asScoped(request)
       .asCurrentUser.security.hasPrivileges({ cluster: ['manage_security'] });
+
+    return allowed;
+  }
+
+  /**
+   * Whether the request's user can call `_enable` in the space: `manage_security`, which binding
+   * requires, and the Nightshift manage privilege, which the route requires. Elasticsearch answers
+   * both in one call, so the status never offers setup to a user the route would refuse.
+   */
+  public async canSetUp({
+    request,
+    spaceId,
+  }: {
+    request: KibanaRequest;
+    spaceId: string;
+  }): Promise<boolean> {
+    const { has_all_requested: allowed } = await this.elasticsearch.client
+      .asScoped(request)
+      .asCurrentUser.security.hasPrivileges({
+        cluster: ['manage_security'],
+        application: [
+          {
+            application: 'kibana-.kibana',
+            resources: [`space:${spaceId}`],
+            privileges: [`api:${NIGHTSHIFT_API_PRIVILEGES.manage}`],
+          },
+        ],
+      });
 
     return allowed;
   }
