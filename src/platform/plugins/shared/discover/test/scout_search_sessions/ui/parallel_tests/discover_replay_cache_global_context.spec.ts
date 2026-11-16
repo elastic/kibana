@@ -13,6 +13,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { ListingTable } from '@kbn/content-list-scout';
 import {
   spaceTest,
   DISCOVER_DEFAULT_KBN_ARCHIVE,
@@ -24,9 +25,7 @@ import {
 } from '../fixtures';
 
 const STORED_TIME_DASHBOARD = 'Replay stored time';
-const STORED_TIME_DASHBOARD_LINK = 'dashboardListingTitleLink-Replay-stored-time';
 const UNSTORED_TIME_DASHBOARD = 'Replay unstored time';
-const UNSTORED_TIME_DASHBOARD_LINK = 'dashboardListingTitleLink-Replay-unstored-time';
 const PINNED_FILTER = { field: 'extension.raw', operator: 'is', value: 'jpg' } as const;
 
 spaceTest.describe(
@@ -62,8 +61,10 @@ spaceTest.describe(
     spaceTest(
       'loads fresh results after opening a dashboard with a stored time range',
       async ({ page, pageObjects, network }) => {
+        const listingTable = new ListingTable(page);
         await pageObjects.collapsibleNav.clickItem('Dashboards');
-        await page.testSubj.click(STORED_TIME_DASHBOARD_LINK);
+        await listingTable.waitUntilTableIsLoaded();
+        await listingTable.clickItemByName(STORED_TIME_DASHBOARD);
         await expect
           .poll(() => pageObjects.datePicker.getTimeRangeText(), { timeout: 30_000 })
           .toContain('2015');
@@ -83,6 +84,7 @@ spaceTest.describe(
     spaceTest(
       'loads fresh results after a dashboard removes a pinned filter',
       async ({ page, pageObjects, network }) => {
+        const listingTable = new ListingTable(page);
         const discoverContext = { page, network, discover: pageObjects.discover };
         await refetchDiscover(discoverContext, () =>
           pageObjects.filterBar.addFilter(PINNED_FILTER)
@@ -91,7 +93,8 @@ spaceTest.describe(
           pageObjects.filterBar.toggleFilterPinned(PINNED_FILTER.field)
         );
         await pageObjects.collapsibleNav.clickItem('Dashboards');
-        await page.testSubj.click(UNSTORED_TIME_DASHBOARD_LINK);
+        await listingTable.waitUntilTableIsLoaded();
+        await listingTable.clickItemByName(UNSTORED_TIME_DASHBOARD);
         await expect
           .poll(
             () => pageObjects.filterBar.hasFilter({ field: PINNED_FILTER.field, pinned: true }),
