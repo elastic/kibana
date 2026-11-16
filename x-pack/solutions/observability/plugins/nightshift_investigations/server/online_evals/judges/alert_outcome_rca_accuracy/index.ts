@@ -71,7 +71,7 @@ const toScores = ({
   {
     name: 'alert_outcome_rca_accuracy',
     score: effective >= 3 ? 1 : 0,
-    label: `score=${effective}/3`,
+    label: `score=${effective}/3 pass=3/3`,
     explanation: capExplanation(reasoning),
   },
   {
