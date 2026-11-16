@@ -49,7 +49,7 @@ interface GetESQLSingleColumnValuesParams {
   signal?: AbortSignal;
   timeRange?: TimeRange;
   /** ES DSL filter applied as `params.filter` on the ES|QL `_query` endpoint to pre-filter the pipeline. */
-  filter?: unknown;
+  filter?: IEsqlSearchParams['filter'];
   esqlVariables: ESQLControlVariable[];
   projectRouting?: string;
 }
@@ -68,7 +68,7 @@ export const getESQLSingleColumnValues = async ({
     const { rawResponse: response } = await search.esql(
       {
         query,
-        filter: filter as IEsqlSearchParams['filter'],
+        filter,
         dropNullColumns: true,
         projectRouting,
         kibanaQueryContext: { timeRange, esqlVariables },
