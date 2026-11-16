@@ -6,12 +6,11 @@
  */
 
 import { injectable } from 'inversify';
-import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import type { RouteHandler } from '@kbn/core-di-server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { AvailabilityService } from '../lib/availability/availability_service';
 import { EngineHttpError } from '../lib/errors/engine_http_error';
 import { getStatusCode } from '../lib/errors/get_status_code';
+import type { EngineRouteContext } from './engine_route_context';
 
 /**
  * Shared edge of the engine's routes: a 404 when Nightshift is not available, and failures turned
@@ -22,10 +21,8 @@ import { getStatusCode } from '../lib/errors/get_status_code';
 @injectable()
 export abstract class BaseEngineRoute<TBody = unknown> implements RouteHandler {
   constructor(
-    protected readonly request: KibanaRequest<unknown, unknown, TBody>,
-    protected readonly response: KibanaResponseFactory,
-    private readonly availability: AvailabilityService,
-    private readonly spaces: SpacesPluginStart
+    protected readonly ctx: EngineRouteContext,
+    protected readonly request: KibanaRequest<unknown, unknown, TBody>
   ) {}
 
   /** The route's work. Runs only when the engine is available. */
@@ -34,7 +31,7 @@ export abstract class BaseEngineRoute<TBody = unknown> implements RouteHandler {
   /** Runs the route and turns its failures into responses. */
   public async handle(): Promise<IKibanaResponse> {
     try {
-      if (!(await this.availability.isAvailable())) {
+      if (!(await this.ctx.availability.isAvailable())) {
         throw new EngineHttpError('Nightshift detection is not available.', 404);
       }
 
@@ -43,7 +40,7 @@ export abstract class BaseEngineRoute<TBody = unknown> implements RouteHandler {
       const statusCode = getStatusCode(error);
 
       if (error instanceof Error && statusCode !== undefined && statusCode >= 400) {
-        return this.response.customError({ statusCode, body: { message: error.message } });
+        return this.ctx.response.customError({ statusCode, body: { message: error.message } });
       }
 
       throw error;
@@ -52,6 +49,6 @@ export abstract class BaseEngineRoute<TBody = unknown> implements RouteHandler {
 
   /** The space the request is made in. */
   protected getSpaceId(): string {
-    return this.spaces.spacesService.getSpaceId(this.request);
+    return this.ctx.getSpaceId(this.request);
   }
 }

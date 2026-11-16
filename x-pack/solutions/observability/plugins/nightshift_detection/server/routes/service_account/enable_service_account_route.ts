@@ -7,16 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import { inject, injectable } from 'inversify';
-import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import { PluginStart } from '@kbn/core-di';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
-import { Request, Response } from '@kbn/core-di-server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { DetectionEngineEnableBody } from '../../common/service_account';
-import { AvailabilityService } from '../lib/availability/availability_service';
-import { DetectionSetupService } from '../lib/service_account/setup_service';
-import { BaseEngineRoute } from './base_engine_route';
+import { Request } from '@kbn/core-di-server';
+import type { DetectionEngineEnableBody } from '../../../common/service_account';
+import { DetectionSetupService } from '../../lib/service_account/setup_service';
+import { BaseEngineRoute } from '../base_engine_route';
+import { EngineRouteContext } from '../engine_route_context';
 import { SERVICE_ACCOUNT_API_PATH } from './constants';
 
 // Ids are opaque: `kibana/<name>` on stateful, a generated id on Serverless.
@@ -48,13 +46,11 @@ export class EnableServiceAccountRoute extends BaseEngineRoute<DetectionEngineEn
   };
 
   constructor(
+    @inject(EngineRouteContext) ctx: EngineRouteContext,
     @inject(Request) request: KibanaRequest<unknown, unknown, DetectionEngineEnableBody>,
-    @inject(Response) response: KibanaResponseFactory,
-    @inject(AvailabilityService) availability: AvailabilityService,
-    @inject(PluginStart<SpacesPluginStart>('spaces')) spaces: SpacesPluginStart,
     @inject(DetectionSetupService) private readonly setup: DetectionSetupService
   ) {
-    super(request, response, availability, spaces);
+    super(ctx, request);
   }
 
   protected async execute(): Promise<IKibanaResponse> {
@@ -64,6 +60,6 @@ export class EnableServiceAccountRoute extends BaseEngineRoute<DetectionEngineEn
       serviceAccountId: this.request.body.serviceAccountId,
     });
 
-    return this.response.ok({ body: result });
+    return this.ctx.response.ok({ body: result });
   }
 }

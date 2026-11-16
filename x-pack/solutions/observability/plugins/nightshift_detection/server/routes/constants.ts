@@ -7,6 +7,3 @@
 
 /** Base path of the engine's internal routes. */
 export const DETECTION_ENGINE_API_PATH = '/internal/nightshift/detection';
-
-/** Base path of the service account routes. */
-export const SERVICE_ACCOUNT_API_PATH = `${DETECTION_ENGINE_API_PATH}/service_account`;

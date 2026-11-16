@@ -7,8 +7,8 @@
 
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { Route } from '@kbn/core-di-server';
-import { EnableServiceAccountRoute } from '../routes/enable_service_account_route';
-import { GetServiceAccountStatusRoute } from '../routes/get_service_account_status_route';
+import { EnableServiceAccountRoute } from '../routes/service_account/enable_service_account_route';
+import { GetServiceAccountStatusRoute } from '../routes/service_account/get_service_account_status_route';
 
 /** Registers the engine's HTTP routes. A route is one `bind(Route).toConstantValue(...)` line. */
 export function bindRoutes({ bind }: ContainerModuleLoadOptions): void {
