@@ -286,7 +286,10 @@ const firstProblem = (problems: readonly string[]): string =>
     problems.length > 1 ? ` (and ${plural(problems.length - 1, 'more problem')})` : ''
   }`;
 
-const isChecked = ({ operations }: ActionDrift): boolean => operations.length > 0;
+// Recorded against an operation, or, when the manifest records none, failing against the latest
+// spec, which now describes what it calls (e.g. once a trailing slash no longer keeps it out).
+const isChecked = ({ operations, latestProblems = [] }: ActionDrift): boolean =>
+  operations.length > 0 || latestProblems.length > 0;
 
 const statusOf = (
   action: ActionDrift,
@@ -824,9 +827,10 @@ export const renderDriftIssue = (
   );
   const actionRows = ordered.map((action) => {
     const status = statuses.get(action.action) as ActionStatus;
-    const calls = isChecked(action)
-      ? action.operations.map(({ operation }) => code(operation))
-      : action.unmatched.map(({ operation }) => code(operation));
+    const calls =
+      action.operations.length > 0
+        ? action.operations.map(({ operation }) => code(operation))
+        : action.unmatched.map(({ operation }) => code(operation));
     return `| ${code(action.action)} | ${calls.join('<br>') || '—'} | ${ICONS[status.rank]} ${cell(
       status.text
     )} |`;

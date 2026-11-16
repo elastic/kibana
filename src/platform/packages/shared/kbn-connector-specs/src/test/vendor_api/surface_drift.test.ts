@@ -666,6 +666,42 @@ describe('renderDriftIssue', () => {
     expect(body).toContain('| Other | — | something the renderer does not recognise | — |');
   });
 
+  it('counts an unmatched action that fails against the latest spec as checked', () => {
+    const { title, body } = renderDriftIssue(
+      {
+        ...drifted,
+        actions: [
+          ...(drifted.actions ?? []).filter(({ action }) => action === 'getItem'),
+          {
+            action: 'scan',
+            operations: [],
+            unmatched: [{ operation: 'POST /scan/', reason: 'The spec has no trailing slash' }],
+            snapshotProblems: [],
+            latestProblems: ['POST https://api.example.com/scan/ breaks the spec: tags too long'],
+          },
+          {
+            action: 'quota',
+            operations: [],
+            unmatched: [{ operation: 'GET /quota/', reason: 'Not in the spec' }],
+            snapshotProblems: [],
+            latestProblems: [],
+          },
+        ],
+      },
+      { owners: [] }
+    );
+
+    expect(title).toBe('[Connectors][Validation] `.acme`: 1 action needs attention');
+    expect(body).toContain(
+      '> **1 of 2 actions works with the latest spec. 1 action needs attention.**'
+    );
+    expect(body).toContain(
+      "> `scan` fails against the latest vendor spec. 1 other spec change needs review (see the table). `quota` calls an endpoint no spec describes, so it isn't checked (see the table)."
+    );
+    expect(body).toContain('| `scan` | `POST /scan/` | ❌ Fails against the latest spec:');
+    expect(body).not.toContain('**Not in the spec** (`scan`)');
+  });
+
   it('counts problems outside the actions as the table lists them, and says what to fix', () => {
     const { title, body } = renderDriftIssue(
       {
