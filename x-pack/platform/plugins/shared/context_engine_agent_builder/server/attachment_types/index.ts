@@ -8,8 +8,13 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { createAiIndexAttachmentType } from './ai_index';
 
-export const registerAttachmentTypes = (agentBuilder: AgentBuilderPluginSetup) => {
+export const registerAttachmentTypes = (
+  agentBuilder: AgentBuilderPluginSetup,
+  options: Parameters<typeof createAiIndexAttachmentType>[0] = {}
+) => {
   agentBuilder.attachments.registerType(
-    createAiIndexAttachmentType() as Parameters<typeof agentBuilder.attachments.registerType>[0]
+    createAiIndexAttachmentType(options) as Parameters<
+      typeof agentBuilder.attachments.registerType
+    >[0]
   );
 };

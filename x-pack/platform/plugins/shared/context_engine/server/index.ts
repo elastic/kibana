@@ -14,6 +14,13 @@ import type {
 } from './types';
 
 export type { ContextEnginePluginSetup, ContextEnginePluginStart } from './types';
+export type {
+  BudgetAdmission,
+  BudgetServiceApi,
+  SpendSource,
+  SpendSourceQuery,
+  UsageRecord,
+} from './budgets';
 
 export const plugin: PluginInitializer<
   ContextEnginePluginSetup,

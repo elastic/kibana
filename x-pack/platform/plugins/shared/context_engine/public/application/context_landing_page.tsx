@@ -18,6 +18,7 @@ import {
   AiIndexOnboardingPanel,
   CreateAiIndexModal,
 } from './components/ai_index_list';
+import { SpaceBudgetCallout } from './components/space_budget_callout';
 import { useAiIndexListMode } from './hooks/use_ai_index_list_mode';
 import { useContextEngineBreadcrumbs } from './hooks/use_context_engine_breadcrumbs';
 import { useListAiIndices } from './hooks/use_list_ai_indices';
@@ -115,6 +116,7 @@ const ContextLandingPageContent = ({
               </>
             ) : (
               <>
+                <SpaceBudgetCallout />
                 <ContentListToolbar data-test-subj="contextAiIndexList">
                   <ContentListToolbar.Filters>
                     <AiIndexOwnerFilter />

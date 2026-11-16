@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  ElasticsearchClient,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import { createConversationsSpendSource } from './budgets/conversations_spend_source';
 import type {
   ContextEngineAgentBuilderPluginSetup,
   ContextEngineAgentBuilderPluginStart,
@@ -24,7 +32,12 @@ export class ContextEngineAgentBuilderPlugin
       ContextEngineAgentBuilderStartDependencies
     >
 {
-  constructor(_initializerContext: PluginInitializerContext) {}
+  private readonly logger: Logger;
+  private esClient?: ElasticsearchClient;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
   setup(
     coreSetup: CoreSetup<
@@ -37,7 +50,19 @@ export class ContextEngineAgentBuilderPlugin
       coreSetup,
       agentBuilder: setupDeps.agentBuilder,
       workflowsManagement: setupDeps.workflowsManagement.management,
+      logger: this.logger,
     });
+
+    setupDeps.contextEngine.budgets.registerSpendSource(
+      createConversationsSpendSource({
+        getEsClient: () => {
+          if (!this.esClient) {
+            throw new Error('Elasticsearch client is not available before start');
+          }
+          return this.esClient;
+        },
+      })
+    );
 
     if (setupDeps.searchInferenceEndpoints) {
       registerContextEngineInferenceFeatures(setupDeps.searchInferenceEndpoints);
@@ -47,9 +72,10 @@ export class ContextEngineAgentBuilderPlugin
   }
 
   start(
-    _coreStart: CoreStart,
+    coreStart: CoreStart,
     _startDeps: ContextEngineAgentBuilderStartDependencies
   ): ContextEngineAgentBuilderPluginStart {
+    this.esClient = coreStart.elasticsearch.client.asInternalUser;
     return {};
   }
 

@@ -51,6 +51,7 @@ const createSetupMock: () => jest.Mocked<WorkflowsExtensionsServerPluginSetup> =
     registerWorkflowsClientProvider: jest.fn(),
     registerManagedWorkflowsSystemApiProvider: jest.fn(),
     registerManagedWorkflowOwner: jest.fn(),
+    registerExecutionAdmissionGuard: jest.fn(),
   };
 };
 
@@ -87,6 +88,7 @@ const createStartMock: () => jest.Mocked<WorkflowsExtensionsServerPluginStart> =
       execute: jest.fn().mockResolvedValue('mock-execution-id'),
     }),
     getManagedWorkflowPluginIds: jest.fn().mockReturnValue([]),
+    checkExecutionAdmission: jest.fn().mockResolvedValue({ admitted: true }),
     isReady: jest.fn(() => Promise.resolve()),
   };
 };

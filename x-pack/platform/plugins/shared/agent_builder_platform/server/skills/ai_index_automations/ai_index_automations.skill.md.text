@@ -58,8 +58,9 @@ Whatever the strategy, a generated workflow has to:
   An empty `connector_id` is the default model for every prompt step in every automation this
   skill produces: Context Engine's own, the `context_engine_prompt` feature. The templates carry
   these two lines, and a workflow you assemble outside the templates carries them too, on each
-  `ai.prompt` and `ai.agent` step. Use a different connector only when the user names one, by
-  setting `connector_id`; they can change it after the save, in the workflow editor, without your
+  `ai.prompt` and `ai.agent` step. Use a different connector only when the user names one, or when the
+  index's cost tier calls for a different model (see "Cost tier and budget"), by setting
+  `connector_id`; they can change it after the save, in the workflow editor, without your
   involvement.
 - **Retry `ai.prompt` outside a `parallel` branch**: `on-failure.retry` with three attempts,
   exponential delay and jitter. Rate limits, transient connector errors and a structured output
@@ -372,6 +373,33 @@ carry it.
 `platform.context_engine.install_automation_template` for them and do not draft a workflow for them
 yourself, through this tool or any other: tell the user to build it in the Workflow editor, as
 described above.
+
+## Cost tier and budget
+
+The `ai_index` attachment reports the index's cost tier and, per budget, what is left to spend this
+month: automation runs, which every run of this index's automations draws on, and automation
+suggestions, which this conversation draws on. When a budget is spent, new runs of the index's
+automations are refused until the reset date the attachment gives; `run_automation` reports that
+as a run that did not start. The tier is the user's statement of how much this index is worth
+spending on. It shapes what you build, and the Cost section of the proposal says how the design
+follows it:
+
+- **cheap** — keep the configured model; never move a prompt step to a larger one. Prefer
+  deterministic steps (ES|QL `STATS`, the Targeted KI writer) over a model call wherever they can
+  produce the indicator. Bound the corpus tightly and, for anything that runs again, process only
+  the records added or changed since the last run. Keep `maxUnits` and the pilot small. When you
+  add a schedule, run it daily at most.
+- **medium** — the default. The templates as they stand, the configured model, a schedule no more
+  often than every few hours, and the pilot sizes this skill gives.
+- **expensive** — a larger model is acceptable on the prompt steps whose output quality the
+  pilot showed to be the limit, and a higher run frequency is acceptable where the data changes
+  that fast. Still state the per-run model calls, since the user is paying for them.
+
+Estimate a full run against what is left: when the projected model calls of one run, or of a
+month of the schedule you propose, would plausibly spend more than the remaining automation
+budget, say so in the Cost section and propose a narrower design rather than one that will be
+paused partway through the month. When the attachment says prices are unavailable, report the
+model calls and leave the dollar estimate out.
 
 ## Projecting a full run from a pilot
 

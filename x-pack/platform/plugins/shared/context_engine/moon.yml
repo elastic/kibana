@@ -102,6 +102,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - server/**/*.json
     - scripts/**/*
     - test/scout_agent_builder/**/*
     - '!target/**/*'
