@@ -63,6 +63,10 @@ import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 export interface HostProps {
   /**
@@ -100,6 +104,23 @@ export interface HostProps {
    */
   graphEntryPoint?: GraphEntryPoint;
 }
+
+const HOST_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'host_entity_from_store'
+);
+const HOST_RISK_SCORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'host_risk_score'
+);
+const HOST_RISK_SCORES_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'host_risk_scores'
+);
+const HOST_OBSERVED_DETAILS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'host_observed_details'
+);
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
@@ -170,6 +191,7 @@ export const Host: FC<HostProps> = memo(function Host({
     identityFields: hostStoreIdentityFields,
     entityType: 'host',
     skip: !entityStoreV2Enabled || isInitializing,
+    executionContext: HOST_ENTITY_FROM_STORE_CONTEXT,
   });
   const { aliasRecords, aliasCount } = entityFromStoreResult;
   const isGroupView = isEntityGroupView(aliasRecords);
@@ -199,6 +221,7 @@ export const Host: FC<HostProps> = memo(function Host({
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: entityStoreV2Enabled,
+    executionContext: HOST_RISK_SCORE_CONTEXT,
   });
 
   const { inspect: inspectRiskScore, refetch, loading } = riskScoreState;
@@ -206,7 +229,8 @@ export const Host: FC<HostProps> = memo(function Host({
   const observedHost = useObservedHost(
     hostName,
     scopeId,
-    entityStoreV2Enabled ? entityFromStoreResult : undefined
+    entityStoreV2Enabled ? entityFromStoreResult : undefined,
+    HOST_OBSERVED_DETAILS_CONTEXT
   );
 
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
@@ -218,6 +242,7 @@ export const Host: FC<HostProps> = memo(function Host({
       entityFromStoreResult,
       riskScoreState,
       isGroupView,
+      executionContext: HOST_RISK_SCORES_CONTEXT,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {

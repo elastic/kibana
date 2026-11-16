@@ -65,6 +65,10 @@ import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 export interface UserProps {
   /**
@@ -102,6 +106,27 @@ export interface UserProps {
    */
   graphEntryPoint?: GraphEntryPoint;
 }
+
+const USER_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'user_entity_from_store'
+);
+const USER_RISK_SCORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'user_risk_score'
+);
+const USER_RISK_SCORES_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'user_risk_scores'
+);
+const USER_OBSERVED_DETAILS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'user_observed_details'
+);
+const USER_MANAGED_DETAILS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'user_managed_details'
+);
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
@@ -170,6 +195,7 @@ export const User: FC<UserProps> = memo(function User({
     identityFields: userStoreIdentityFields,
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
+    executionContext: USER_ENTITY_FROM_STORE_CONTEXT,
   });
   const { aliasRecords, aliasCount } = entityFromStoreResult;
   const isGroupView = isEntityGroupView(aliasRecords);
@@ -199,16 +225,18 @@ export const User: FC<UserProps> = memo(function User({
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: entityStoreV2Enabled,
+    executionContext: USER_RISK_SCORE_CONTEXT,
   });
 
   const { inspect: inspectRiskScore, refetch, loading } = riskScoreState;
 
-  const managedUser = useManagedUser();
+  const managedUser = useManagedUser({ executionContext: USER_MANAGED_DETAILS_CONTEXT });
 
   const observedUser = useObservedUser(
     userName,
     scopeId,
-    entityStoreV2Enabled ? entityFromStoreResult : undefined
+    entityStoreV2Enabled ? entityFromStoreResult : undefined,
+    USER_OBSERVED_DETAILS_CONTEXT
   );
 
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
@@ -220,6 +248,7 @@ export const User: FC<UserProps> = memo(function User({
       entityFromStoreResult,
       riskScoreState,
       isGroupView,
+      executionContext: USER_RISK_SCORES_CONTEXT,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {

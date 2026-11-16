@@ -9,6 +9,7 @@ import { useEffect, useMemo } from 'react';
 
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { isEmpty } from 'lodash';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { inputsModel } from '../../../../../common/store';
 import type { HostItem } from '../../../../../../common/search_strategy/security_solution/hosts';
 import { HostsQueries } from '../../../../../../common/search_strategy/security_solution/hosts';
@@ -70,6 +71,11 @@ interface UseHostDetails {
   indexNames: string[];
   skip?: boolean;
   startDate: string;
+  /**
+   * Labels the search with the calling surface. Defaults to the hosts page context; callers that
+   * render host details elsewhere (e.g. the entity flyout) pass their own.
+   */
+  executionContext?: KibanaExecutionContext;
 }
 
 export const useHostDetails = ({
@@ -83,6 +89,7 @@ export const useHostDetails = ({
   id = ID,
   skip = false,
   startDate,
+  executionContext = HOST_DETAILS_CONTEXT,
 }: UseHostDetails): [boolean, HostDetailsArgs, inputsModel.Refetch] => {
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
@@ -141,7 +148,7 @@ export const useHostDetails = ({
     },
     errorMessage: i18n.FAIL_HOST_OVERVIEW,
     abort: shouldSkip,
-    executionContext: HOST_DETAILS_CONTEXT,
+    executionContext,
   });
 
   const hostDetailsResponse = useMemo(

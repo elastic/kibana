@@ -87,6 +87,15 @@ import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/
 import type { UserItem } from '../../../../../common/search_strategy';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 import { euidDslFilterToPageFilters } from '../../../helpers';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+
+const USER_DETAILS_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'user_details_entity_from_store'
+);
 
 const USERS_DETAILS_OVERVIEW_QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -211,6 +220,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     identityFields: userStoreIdentityFields,
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
+    executionContext: USER_DETAILS_ENTITY_FROM_STORE_CONTEXT,
   });
 
   const euidApi = useEntityStoreEuidApi();

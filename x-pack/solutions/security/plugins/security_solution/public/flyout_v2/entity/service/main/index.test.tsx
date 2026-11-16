@@ -232,6 +232,26 @@ describe('<Service />', () => {
     mockEntityStoreV2Enabled.mockReturnValue(true);
   });
 
+  it('labels the entity store lookup with the service flyout execution context', () => {
+    render(
+      <TestProviders>
+        <Service {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(mockedUseEntityFromStore).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:entity_details_flyout',
+            id: 'service_entity_from_store',
+          },
+        },
+      })
+    );
+  });
+
   it('renders the header', () => {
     const { getByTestId } = render(
       <TestProviders>

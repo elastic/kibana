@@ -36,6 +36,15 @@ import {
   AnomaliesSection,
   EMPTY_ANOMALY_OVERVIEW,
 } from '../../../../entity_analytics/components/anomalies/anomalies_section';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+
+const HOST_ANOMALY_OVERVIEW_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'host_anomaly_overview'
+);
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
@@ -158,6 +167,7 @@ export const Content = ({
     from: flyoutTimeRangeMs?.from,
     to: flyoutTimeRangeMs?.to,
     enabled: loadAnomalies,
+    executionContext: HOST_ANOMALY_OVERVIEW_CONTEXT,
   });
 
   // Extract hostName from identityFields for components that need a string
