@@ -448,7 +448,7 @@ describe('deliverCallbackEvents', () => {
     renderPayload.mockRestore();
   });
 
-  it("adds a summary of the stream's tool calls to execution_terminated, without params or results", async () => {
+  it("adds a summary of the stream's tool calls to execution_terminated, with only their ids", async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const searchCall = createToolCallEvent({
       tool_call_id: 'tc_1',
@@ -479,7 +479,7 @@ describe('deliverCallbackEvents', () => {
       | undefined;
 
     expect(terminated?.tool_calls).toEqual([
-      { tool_call_id: 'tc_1', tool_id: 'search', intent: 'Searching checkout service logs' },
+      { tool_call_id: 'tc_1', tool_id: 'search' },
       { tool_call_id: 'tc_2', tool_id: 'execute_api' },
     ]);
     expect(deliveredEvents.find(isRoundCompleteEvent)).not.toHaveProperty('tool_calls');

@@ -167,7 +167,7 @@ export const deliverCallbackEvents = ({
   return new Promise<void>((resolve) => {
     let executionTerminatedEvent: ExecutionTerminatedEvent | undefined;
     let roundCompleteEvent: RoundCompleteEvent | undefined;
-    // The execution's tool calls, by id, summarized for execution_terminated: no params or results.
+    // The execution's tool calls, keyed by id, summarized for execution_terminated as their ids only.
     const toolCalls = new Map<string, ChatCallbackToolCall>();
 
     events$
@@ -182,13 +182,9 @@ export const deliverCallbackEvents = ({
         ),
         tap((event) => {
           if (isToolCallEvent(event) && !toolCalls.has(event.data.tool_call_id)) {
-            const { tool_call_id: toolCallId, tool_id: toolId, intent } = event.data;
+            const { tool_call_id: toolCallId, tool_id: toolId } = event.data;
 
-            toolCalls.set(toolCallId, {
-              tool_call_id: toolCallId,
-              tool_id: toolId,
-              ...(intent ? { intent } : {}),
-            });
+            toolCalls.set(toolCallId, { tool_call_id: toolCallId, tool_id: toolId });
           }
         }),
         concatMap((event) => {
