@@ -218,6 +218,14 @@ export function canAddToAgentPolicy(pkg: {
 }
 
 /**
+ * True when the package is listed in FIPS_INCOMPATIBLE_PACKAGES, i.e. it is known to be
+ * FIPS incompatible even though its manifest does not flag its policy templates.
+ */
+export function isPackageNameFipsIncompatible(packageName?: string): boolean {
+  return !!packageName && FIPS_INCOMPATIBLE_PACKAGES.includes(packageName);
+}
+
+/**
  * A package is FIPS incompatible when it is listed in FIPS_INCOMPATIBLE_PACKAGES, or when it has
  * policy templates and all of them are explicitly marked `fips_compatible: false`.
  * A missing flag means compatible.
@@ -226,7 +234,7 @@ export function isPackageFipsIncompatible(
   policyTemplates?: Array<{ fips_compatible?: boolean }>,
   packageName?: string
 ): boolean {
-  if (packageName && FIPS_INCOMPATIBLE_PACKAGES.includes(packageName)) {
+  if (isPackageNameFipsIncompatible(packageName)) {
     return true;
   }
   return (
