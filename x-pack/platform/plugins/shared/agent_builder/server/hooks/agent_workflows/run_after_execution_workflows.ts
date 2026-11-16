@@ -121,7 +121,8 @@ export const runAfterExecutionWorkflows = async ({
 
     const roundConnectorId = context.connectorId?.trim() || round.model_usage?.connector_id?.trim();
     const workflowContext = round.steps.find(isPreExecutionWorkflowStep)?.workflow_context;
-    const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
+    // A round resumed after human-in-the-loop has one trace per execution; this hook belongs to the latest.
+    const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id.at(-1) : round.trace_id;
 
     const workflowParams: AfterExecutionWorkflowParams = {
       prompt: round.input.message ?? '',

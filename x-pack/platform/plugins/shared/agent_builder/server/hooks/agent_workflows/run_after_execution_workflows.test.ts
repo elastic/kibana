@@ -523,7 +523,7 @@ describe('runAfterExecutionWorkflows', () => {
         expect(params).not.toHaveProperty('workflow_context');
       });
 
-      it('sends the round trace id (first one when merged) only when declared', async () => {
+      it('sends the round trace id (latest one when merged) only when declared', async () => {
         const { workflowApi, getInternalServices, getStartServices } = createDeps({
           definition: strictDefinition([...legacyInputNames, 'round_trace_id']),
         });
@@ -540,7 +540,7 @@ describe('runAfterExecutionWorkflows', () => {
         });
 
         const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
-        expect(params).toHaveProperty('round_trace_id', 'trace-1');
+        expect(params).toHaveProperty('round_trace_id', 'trace-2');
         expect(params).not.toHaveProperty('round_connector_id');
       });
 
