@@ -115,6 +115,47 @@ describe('AppMenu', () => {
 
       expect(screen.getByText('Save')).toBeInTheDocument();
     });
+
+    it('should render the overflow button after the primary action item', () => {
+      const configWithPrimaryAndOverflow: AppMenuConfig = {
+        items: [
+          ...defaultItems,
+          {
+            id: 'item3',
+            label: 'Item 3',
+            run: jest.fn(),
+            iconType: 'copy',
+            order: 3,
+            overflow: true,
+          },
+        ],
+        primaryActionItem: {
+          id: 'save',
+          label: 'Save',
+          run: jest.fn(),
+          iconType: 'save',
+        },
+      };
+
+      for (const breakpoint of ['s', 'xl'] as const) {
+        mockCurrentBreakpoint = breakpoint;
+
+        const { unmount } = render(<AppMenuComponent config={configWithPrimaryAndOverflow} />);
+
+        const elements = Array.from(
+          screen.getByTestId(APP_MENU_TEST_SUBJECTS.root).querySelectorAll('*')
+        );
+        const primaryActionIndex = elements.indexOf(screen.getByText('Save'));
+        const overflowButtonIndex = elements.indexOf(
+          screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)
+        );
+
+        expect(primaryActionIndex).toBeGreaterThan(-1);
+        expect(overflowButtonIndex).toBeGreaterThan(primaryActionIndex);
+
+        unmount();
+      }
+    });
   });
 
   describe('responsive behavior', () => {

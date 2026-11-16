@@ -149,7 +149,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         // verify that solution filter is not visible
         await testSubjects.missingOrFail('options-filter-popover-button-owner');
 
-        await testSubjects.click(`cases-table-row-select-${theCase.id}`);
+        await cases.common.selectCaseInModal(theCase.id);
 
         await cases.common.expectToasterToContain(`Case ${theCaseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
