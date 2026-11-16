@@ -96,7 +96,6 @@ describe('recalculateEntityRiskScore', () => {
       entityId: ENTITY_ID,
       identifierType: EntityType.user,
       getWriter: async () => writer,
-      idBasedRiskScoringEnabled: true,
       logger,
       telemetry,
       profiling,

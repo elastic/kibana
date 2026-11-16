@@ -9,8 +9,9 @@
 
 import { BROWSER_PROFILES, pickBrowserProfile, withoutBrowserDetails } from './browser_profiles';
 import { EdotBrowserApp, type EdotBrowserAppOptions } from './edot_browser_app';
-import { idleTab, session } from './edot_browser_session';
+import { idleTab, session, sessionWithDocuments } from './edot_browser_session';
 import { HEALTH_PROFILES } from './health_profiles';
+import { replaySession, REPLAY_SIZES } from './replay/edot_browser_replay';
 
 export type { BrowserProfileId } from './browser_profiles';
 export type { HealthProfileName } from './health_profiles';
@@ -23,12 +24,21 @@ export type {
   EdotBrowserPage,
   EdotBrowserResource,
   EdotBrowserSite,
+  EdotBrowserSessionDocument,
   EdotBrowserStackFrame,
 } from './edot_browser_session';
+export type {
+  EdotBrowserReplayOptions,
+  EdotBrowserReplayVisit,
+  ReplaySize,
+} from './replay/edot_browser_replay';
 
 export const edotBrowser = {
   app: (options: EdotBrowserAppOptions): EdotBrowserApp => new EdotBrowserApp(options),
   session,
+  sessionWithDocuments,
+  replaySession,
+  replaySizes: REPLAY_SIZES,
   idleTab,
   browserProfiles: BROWSER_PROFILES,
   pickBrowserProfile,

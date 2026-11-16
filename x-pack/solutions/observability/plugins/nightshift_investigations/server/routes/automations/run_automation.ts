@@ -71,11 +71,11 @@ export const runAutomationRoute = createNightshiftInvestigationsServerRoute({
     );
     const { workflowId } = automation;
     if (!workflowId)
-      throw badRequest('The backing workflow is missing. Save the automation again to repair it.');
+      throw badRequest('The backing workflow is missing. Open the automation and use Repair.');
     const workflow = await management.getWorkflow(workflowId, spaceId, request);
     if (!workflow?.definition || !workflow.valid) {
       throw badRequest(
-        'The backing workflow is missing or invalid. Save the automation again to repair it.'
+        'The backing workflow is missing, unreadable, or invalid. If it was deleted, open the automation and use Repair; otherwise check workflow permissions or save the automation.'
       );
     }
     if (!serviceAccountId || workflow.definition.settings?.run_as !== serviceAccountId) {
