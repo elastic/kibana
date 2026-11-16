@@ -13,6 +13,9 @@ import { expect } from '../../../../../ui';
 /** One attempt to pick options before the selection is retried. */
 const OPTION_ATTEMPT_TIMEOUT_MS = 5_000;
 
+/** One click on "Continue" before the click is repeated. */
+const CONTINUE_ATTEMPT_TIMEOUT_MS = 3_000;
+
 type ComboBox = ReturnType<ScoutPage['components']['comboBox']>;
 
 /**
@@ -76,8 +79,7 @@ export class EsqlRuleFormPage {
     await this.ruleTypeCard.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
     await this.ruleTypeCard.click();
     await this.esqlEditor.waitReady();
-    // "Continue" stays disabled until the data view of the form has settled. The query bar is
-    // disabled while it loads, so a query set before that is not kept by the form.
+    // "Continue" stays disabled until the data view of the form has settled
     await expect(this.defineContinue).toBeEnabled({ timeout: APP_LOAD_TIMEOUT_MS });
   }
 
@@ -86,8 +88,33 @@ export class EsqlRuleFormPage {
     await this.esqlEditor.setQuery(query);
   }
 
+  /** Clicks "Continue" once. Use it when the Define step is expected to stay open on an error. */
   async continueFromDefineStep(): Promise<void> {
     await this.defineContinue.click();
+  }
+
+  /**
+   * Clicks "Continue" until the Define step collapses. For a non-aggregating query the form
+   * requests the query columns from Elasticsearch and treats a failed request as a blocking
+   * error, so on a loaded cluster a click can leave the step open. Clicking again validates
+   * the query again. When the step never collapses, the failure carries the text of the query
+   * bar, which includes the validation message.
+   */
+  async continueToAboutStep(): Promise<void> {
+    try {
+      await expect(async () => {
+        if (await this.queryBar.isHidden()) {
+          return;
+        }
+        await this.defineContinue.click();
+        await expect(this.queryBar).toBeHidden({ timeout: CONTINUE_ATTEMPT_TIMEOUT_MS });
+      }).toPass({ timeout: DATA_LOAD_TIMEOUT_MS });
+    } catch (error) {
+      const queryBarText = (await this.queryBar.textContent()) ?? '';
+      throw new Error(`The Define step did not close. Query bar: ${queryBarText}`, {
+        cause: error,
+      });
+    }
   }
 
   /** Picks the field that provides the rule name in the "Rule name override" control. */

@@ -57,7 +57,7 @@ spaceTest.describe(
 
         await spaceTest.step('fill the define step', async () => {
           await esqlRuleForm.setQuery(query);
-          await esqlRuleForm.continueFromDefineStep();
+          await esqlRuleForm.continueToAboutStep();
         });
 
         await spaceTest.step('fill the about step', async () => {
@@ -106,7 +106,7 @@ spaceTest.describe(
         const { esqlRuleForm, ruleCreateWizard, ruleDetailsPage } = pageObjects;
 
         await esqlRuleForm.setQuery(getEsqlRuleQuery(esqlSourceIndexName(scoutSpace.id)));
-        await esqlRuleForm.continueFromDefineStep();
+        await esqlRuleForm.continueToAboutStep();
 
         await ruleCreateWizard.waitForAboutStepEnabled();
         await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
@@ -136,7 +136,7 @@ spaceTest.describe(
         ].join(' | ');
 
         await esqlRuleForm.setQuery(query);
-        await esqlRuleForm.continueFromDefineStep();
+        await esqlRuleForm.continueToAboutStep();
 
         await ruleCreateWizard.waitForAboutStepEnabled();
         await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
@@ -170,7 +170,7 @@ spaceTest.describe(
           await esqlRuleForm.suppressPerTimePeriod.check();
           await esqlRuleForm.suppressionDurationValue.fill('2');
           await esqlRuleForm.suppressionDurationUnit.selectOption('h');
-          await esqlRuleForm.continueFromDefineStep();
+          await esqlRuleForm.continueToAboutStep();
         });
 
         await spaceTest.step('the define step summary shows the suppression', async () => {

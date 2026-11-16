@@ -62,7 +62,7 @@ spaceTest.describe(
         await expect(esqlRuleForm.queryBar).toContainText('required');
 
         await esqlRuleForm.setQuery(getEsqlRuleQuery(esqlSourceIndexName(scoutSpace.id)));
-        await esqlRuleForm.continueFromDefineStep();
+        await esqlRuleForm.continueToAboutStep();
 
         await expect(esqlRuleForm.queryBar).toBeHidden();
         await expect(ruleCreateWizard.aboutRuleName).toBeVisible();
@@ -78,7 +78,7 @@ spaceTest.describe(
 
         await esqlRuleForm.setQuery(query);
         expect(await esqlRuleForm.esqlEditor.getQuery()).toBe(query);
-        await esqlRuleForm.continueFromDefineStep();
+        await esqlRuleForm.continueToAboutStep();
 
         await expect(esqlRuleForm.queryBar).toBeHidden();
         await expect(ruleCreateWizard.aboutRuleName).toBeVisible();
@@ -115,7 +115,7 @@ spaceTest.describe(
         await esqlRuleForm.setQuery(
           `from ${MISSING_ESQL_SOURCE} metadata _id, _version, _index | limit 5`
         );
-        await esqlRuleForm.continueFromDefineStep();
+        await esqlRuleForm.continueToAboutStep();
 
         await ruleCreateWizard.waitForAboutStepEnabled();
         await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
@@ -142,7 +142,7 @@ spaceTest.describe(
             scoutSpace.id
           )} metadata _id, _version, _index | drop _id | limit 5`
         );
-        await esqlRuleForm.continueFromDefineStep();
+        await esqlRuleForm.continueToAboutStep();
 
         await ruleCreateWizard.waitForAboutStepEnabled();
         await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
