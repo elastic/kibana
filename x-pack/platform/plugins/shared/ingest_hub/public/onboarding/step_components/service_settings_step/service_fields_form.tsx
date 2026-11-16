@@ -14,6 +14,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -31,14 +32,20 @@ import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-s
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
+import type { VarGroupSelections } from './field_config';
 import {
   REGION_FIELD_NAMES,
   getFlyoutFields,
   getMissingSourceGroup,
   getRegionFieldName,
   getRequiredTextFields,
+  getStreamVarGroups,
   isAdvancedVar,
+  isFieldVisible,
+  isInSelectedVarGroupOption,
+  isRequiredBySelectedOption,
   resolveFieldMeta,
+  resolveVarGroupSelections,
   toDraft,
   toTyped,
 } from './field_config';
@@ -71,6 +78,13 @@ export interface ServiceFieldsFormProps {
   globalRegion: string;
   onFieldChange: (dsId: string, input: string, fieldName: string, value: string) => void;
   onInputToggle: (dsId: string, input: string, enabled: boolean) => void;
+  /** The user picked an option of a stream-level var_group (see `getStreamVarGroups`). */
+  onVarGroupSelectionChange?: (
+    dsId: string,
+    input: string,
+    groupName: string,
+    optionName: string
+  ) => void;
 }
 
 // ECF trigger vars reference a "Collect logs via S3 Bucket" toggle that doesn't exist in
@@ -85,6 +99,7 @@ function VarField({
   onFieldChange,
   forceShowErrors,
   datastreams,
+  varGroupSelections,
 }: {
   service: AwsServiceMatrixEntry;
   activeInput: string;
@@ -93,6 +108,7 @@ function VarField({
   onFieldChange: (input: string, fieldName: string, value: string) => void;
   forceShowErrors?: boolean;
   datastreams?: InputFieldProps['datastreams'];
+  varGroupSelections?: VarGroupSelections;
 }) {
   const { colorMode } = useEuiTheme();
   const meta = resolveFieldMeta(service, activeInput, fieldName);
@@ -118,7 +134,10 @@ function VarField({
     );
   }
 
-  const isRequired = !meta.isBool && (service.requiredConfig ?? []).includes(fieldName);
+  const isRequiredByVarGroup =
+    !meta.isBool && isRequiredBySelectedOption(service, activeInput, fieldName, varGroupSelections);
+  const isRequired =
+    (!meta.isBool && (service.requiredConfig ?? []).includes(fieldName)) || isRequiredByVarGroup;
   const isEmpty = Array.isArray(value)
     ? value.length === 0
     : typeof value === 'string' && !value.trim();
@@ -163,6 +182,9 @@ function VarField({
             }}
             errors={errors}
             forceShowErrors={forceShowErrors}
+            // The manifest says `required: false`; the selected var_group option is what makes
+            // the field mandatory, and Fleet's field drops its "Optional" label for this flag.
+            isRequiredByVarGroup={isRequiredByVarGroup}
             packageName={service.packageName}
             datastreams={datastreams}
           />
@@ -176,16 +198,29 @@ function InputVarFields({
   service,
   activeInput,
   varsByInput,
+  varGroupSelectionsByInput,
   globalRegion,
   onFieldChange,
+  onVarGroupSelectionChange,
 }: {
   service: AwsServiceMatrixEntry;
   activeInput: string;
   varsByInput: Record<string, Record<string, string | string[]>>;
+  varGroupSelectionsByInput?: Record<string, VarGroupSelections>;
   globalRegion: string;
   onFieldChange: (input: string, fieldName: string, value: string) => void;
+  onVarGroupSelectionChange?: (input: string, groupName: string, optionName: string) => void;
 }) {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState(false);
+
+  // Stream-level var_groups: a selector per group; only the selected option's vars are shown,
+  // and they are required when the group is. Unset → the manifest default (first option).
+  const varGroups = getStreamVarGroups(service, activeInput);
+  const varGroupSelections = resolveVarGroupSelections(
+    service,
+    activeInput,
+    varGroupSelectionsByInput?.[activeInput]
+  );
 
   const allConfigFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
   // data_stream.dataset is only present on OTel input-package services. useGetDataStreams cannot
@@ -209,15 +244,20 @@ function InputVarFields({
     ? resolveFieldMeta(service, activeInput, regionFieldName)
     : undefined;
 
-  const requiredTextFields = getRequiredTextFields(service, activeInput);
+  const requiredTextFields = getRequiredTextFields(service, activeInput, varGroupSelections);
   const requiredTextFieldSet = new Set(requiredTextFields);
-  const flyoutFields = getFlyoutFields(service, activeInput);
+  const flyoutFields = getFlyoutFields(service, activeInput, varGroupSelections);
   const otherFlyoutFields = flyoutFields.filter(
     (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f)
   );
   const isAdvanced = (fieldName: string) => {
     const meta = resolveFieldMeta(service, activeInput, fieldName);
-    return meta ? isAdvancedVar(meta.def) : false;
+    if (!meta) return false;
+    // A var the user just chose through the selector is never tucked under "Advanced options".
+    if (isInSelectedVarGroupOption(service, activeInput, fieldName, varGroupSelections)) {
+      return false;
+    }
+    return isAdvancedVar(meta.def);
   };
 
   // Collect ALL bool fields from both required and optional config — getRequiredBooleanFields
@@ -225,7 +265,7 @@ function InputVarFields({
   // "Enable request tracing" (show_user:false in optionalConfig).
   const allBoolFields = allConfigFields.filter((f) => {
     const meta = resolveFieldMeta(service, activeInput, f);
-    return meta?.isBool ?? false;
+    return (meta?.isBool ?? false) && isFieldVisible(service, activeInput, f, varGroupSelections);
   });
   const primaryBoolFields = allBoolFields.filter((f) => !isAdvanced(f));
   const advancedBoolFields = allBoolFields.filter(isAdvanced);
@@ -269,6 +309,25 @@ function InputVarFields({
           {requiredTextFields.length > 0 && <EuiSpacer size="m" />}
         </>
       )}
+      {varGroups.map((group) => (
+        <React.Fragment key={group.name}>
+          <EuiFormRow label={group.title ?? group.name} helpText={group.description} fullWidth>
+            <EuiSelect
+              fullWidth
+              options={group.options.map((option) => ({
+                value: option.name,
+                text: option.title ?? option.name,
+              }))}
+              value={varGroupSelections[group.name]}
+              onChange={(e) => onVarGroupSelectionChange?.(activeInput, group.name, e.target.value)}
+              aria-label={group.selector_title ?? group.title ?? group.name}
+              data-test-subj={`serviceSettingsFlyout-${activeInput}-varGroup-${group.name}`}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+        </React.Fragment>
+      ))}
+
       {requiredTextFields.length > 0 && (
         <>
           {anyRequiredEmpty && (
@@ -295,6 +354,7 @@ function InputVarFields({
                 onFieldChange={onFieldChange}
                 forceShowErrors={anyRequiredEmpty}
                 datastreams={datastreams}
+                varGroupSelections={varGroupSelections}
               />
             </React.Fragment>
           ))}
@@ -418,6 +478,7 @@ export function ServiceFieldsForm({
   globalRegion,
   onFieldChange,
   onInputToggle,
+  onVarGroupSelectionChange,
 }: ServiceFieldsFormProps) {
   const { euiTheme } = useEuiTheme();
   const dataStreams = service.dataStreams ?? [];
@@ -458,8 +519,12 @@ export function ServiceFieldsForm({
                       service={dsView}
                       activeInput={input}
                       varsByInput={dsVars?.varsByInput ?? {}}
+                      varGroupSelectionsByInput={dsVars?.varGroupSelectionsByInput}
                       globalRegion={globalRegion}
                       onFieldChange={(inp, field, val) => onFieldChange(dsId, inp, field, val)}
+                      onVarGroupSelectionChange={(inp, group, option) =>
+                        onVarGroupSelectionChange?.(dsId, inp, group, option)
+                      }
                     />
                   </div>
                 </>
@@ -507,8 +572,12 @@ export function ServiceFieldsForm({
                     service={dsView}
                     activeInput={input}
                     varsByInput={dsVars?.varsByInput ?? {}}
+                    varGroupSelectionsByInput={dsVars?.varGroupSelectionsByInput}
                     globalRegion={globalRegion}
                     onFieldChange={(inp, field, val) => onFieldChange(dsId, inp, field, val)}
+                    onVarGroupSelectionChange={(inp, group, option) =>
+                      onVarGroupSelectionChange?.(dsId, inp, group, option)
+                    }
                   />
                 </div>
               </>
