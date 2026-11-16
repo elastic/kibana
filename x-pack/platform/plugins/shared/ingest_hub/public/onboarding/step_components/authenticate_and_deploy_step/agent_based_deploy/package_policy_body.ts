@@ -14,6 +14,7 @@ import {
   applyInputVars,
   buildPackageInputs,
   buildPackageVars,
+  disableUnselectedStreams,
   getPackageVarNames,
 } from '../package_inputs';
 import type { PackageInputEntry, AgentCredentialVars } from '../package_inputs';
@@ -51,8 +52,10 @@ export interface PkgInfo {
   /** All policy templates from the package manifest — used to disable unrelated inputs. */
   policy_templates?: Array<{
     name: string;
+    data_streams?: string[];
     inputs?: Array<{ type: string; id?: string; vars?: Array<{ name: string }> }>;
   }>;
+  data_streams?: Array<{ path: string; dataset?: string; streams?: Array<{ input: string }> }>;
 }
 
 /**
@@ -364,6 +367,9 @@ export async function buildGroupPackagePolicy(
     authenticateAndDeployStep.existingSecretRefs,
     getPolicyVarSettings(policySettings, 'agent_based', pkgVarNames)
   );
+
+  // Services of a shared template (aws_otel) must switch off their unselected sibling streams.
+  disableUnselectedStreams(prunedInputs, pkgInfo);
 
   // Packages that declare region and credentials on the input (e.g. aws_otel) get them there.
   applyInputVars(prunedInputs, pkgInfo, (inputVarNames) =>

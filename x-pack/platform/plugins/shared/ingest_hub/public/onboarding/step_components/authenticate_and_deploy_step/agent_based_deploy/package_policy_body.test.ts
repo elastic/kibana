@@ -362,7 +362,12 @@ describe('buildGroupPackagePolicy — input-level vars', () => {
     isStaticAgentBasedOnly: false,
     varDefsByInput: { otelcol: {} },
     varDefsByDataStream: {
-      ec2: { inputs: ['otelcol'], defaultEnabledInputs: ['otelcol'], varDefsByInput: {} },
+      ec2: {
+        inputs: ['otelcol'],
+        defaultEnabledInputs: ['otelcol'],
+        dataset: 'aws.ec2',
+        varDefsByInput: {},
+      },
     },
   } as unknown as AwsServiceMatrixEntry;
   const otelPkg: PkgInfo = {
@@ -414,5 +419,26 @@ describe('buildGroupPackagePolicy — input-level vars', () => {
       enabled: true,
       vars: { region: 'us-east-1', access_key_id: 'AKIA', secret_access_key: 'secret' },
     });
+  });
+
+  it('disables the sibling streams of the shared template that were not selected', async () => {
+    const pkg: PkgInfo = {
+      ...otelPkg,
+      policy_templates: [{ ...otelPkg.policy_templates![0], data_streams: ['ec2', 'sqs'] }],
+      data_streams: [
+        { path: 'ec2', dataset: 'aws.ec2', streams: [{ input: 'otelcol' }] },
+        { path: 'sqs', dataset: 'aws.sqs', streams: [{ input: 'otelcol' }] },
+      ],
+    };
+    const body = await buildGroupPackagePolicy(otelGroup, pkg, {
+      namespace: '',
+      globalRegion: 'us-east-1',
+      storedServiceVars: {},
+      authenticateAndDeployStep: {} as BuildPackagePolicyOpts['authenticateAndDeployStep'],
+      pkgVersion: '0.1.0',
+    });
+    const streams = (body.inputs['aws-otelcol'] as { streams: Record<string, unknown> }).streams;
+    expect(streams['aws.sqs']).toEqual({ enabled: false, vars: {} });
+    expect(streams['aws.ec2']).toMatchObject({ enabled: true });
   });
 });
