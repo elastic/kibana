@@ -42,7 +42,7 @@ apiTest.describe(
     let editorHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ requestAuth, apiClient, samlAuth, config, esClient }) => {
-      await setup({ apiClient, samlAuth, config, esClient });
+      await setup({ apiClient, samlAuth, requestAuth, config, esClient });
       const admin = await requestAuth.getApiKey('admin');
       const editor = await requestAuth.getApiKeyForCustomRole({
         elasticsearch: { cluster: [], indices: [] },
@@ -399,7 +399,7 @@ apiTest.describe(
             },
           ],
         });
-        const scopedHeaders = { ...getContext().headers, ...cookieHeader };
+        const scopedHeaders = { ...getContext().sessionHeaders, ...cookieHeader };
         const suffix = `scope-${Date.now()}`;
         const local = await apiClient.post(path(suffix), {
           headers: scopedHeaders,
