@@ -85,9 +85,7 @@ describe('getSessionsApplications', () => {
       },
     });
 
-    await expect(
-      getSessionsApplications({ tracedEsClient, ...PARAMS })
-    ).resolves.toMatchObject({
+    await expect(getSessionsApplications({ tracedEsClient, ...PARAMS })).resolves.toMatchObject({
       applications: [
         {
           serviceName: 'web',

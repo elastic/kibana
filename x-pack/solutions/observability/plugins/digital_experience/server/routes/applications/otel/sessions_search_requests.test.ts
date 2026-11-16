@@ -55,11 +55,13 @@ describe('sessionsSearch', () => {
   it('matches the sessions that overlap the time range, as the Sessions tab does', () => {
     const range = { start: new Date(START).toISOString(), end: new Date(END).toISOString() };
 
-    expect(sessionsSearch({
+    expect(
+      sessionsSearch({
         start: START,
         end: END,
         histogram: { interval: INTERVAL, timeZone: TIME_ZONE },
-      }).query).toEqual({
+      }).query
+    ).toEqual({
       bool: { filter: sessionOverlapFilters(range) },
     });
     expect(sessionOverlapFilters(range)).toEqual([

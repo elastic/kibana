@@ -108,7 +108,8 @@ export const sessionsSearch = ({
             filter: startedInRange,
             aggs: {
               pageLoadsOverTime: {
-                date_histogram: dateHistogram({ start, end, histogram, field: 'start_time' }).date_histogram,
+                date_histogram: dateHistogram({ start, end, histogram, field: 'start_time' })
+                  .date_histogram,
                 aggs: { pageLoads: sumOf('page_load_count') },
               },
             },
