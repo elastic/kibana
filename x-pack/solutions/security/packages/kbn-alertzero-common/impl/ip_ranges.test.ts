@@ -152,11 +152,23 @@ describe('isNonRoutableIpIoc', () => {
     ['private ip typed with a CIDR suffix', { type: 'ip', value: '10.0.0.5/32' }],
     ['bracketed IPv6 with a port', { type: 'ip', value: '[::1]:80' }],
     ['bracketed link-local with a port', { type: 'ip', value: '[fe80::1]:8080' }],
+    // Trailing junk must not hide the address: a full-string-anchored unwrap missed these.
+    ['bracketed loopback with trailing junk', { type: 'ip', value: '[::1]trailing' }],
+    ['loopback port with trailing junk', { type: 'ip', value: '127.0.0.1:443junk' }],
+    ['private ip with trailing junk', { type: 'ip', value: '10.0.0.5extra' }],
+    [
+      'bracketed link-local with URL junk after the port',
+      { type: 'ip', value: '[fe80::1]:80@[2606::1]' },
+    ],
   ])('still flags %s when the stored spelling is not a bare address', (_label, ioc) => {
     expect(isNonRoutableIpIoc(ioc)).toBe(true);
   });
 
   it('leaves a public IPv4 with a port routable', () => {
     expect(isNonRoutableIpIoc({ type: 'ip', value: '203.0.113.10:443' })).toBe(false);
+  });
+
+  it('leaves a public IPv4 with trailing junk routable', () => {
+    expect(isNonRoutableIpIoc({ type: 'ip', value: '203.0.113.10:443junk' })).toBe(false);
   });
 });

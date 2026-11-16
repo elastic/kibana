@@ -181,25 +181,31 @@ export const isNonRoutableIPv6 = (ip: string): boolean => {
 };
 
 const IPV4_DOTTED = /^(?:\d{1,3}\.){3}\d{1,3}$/;
-/** IPv4 with an optional `:port`. Stored `ip` values are usually bare, but free-form
- * extracts sometimes keep the port; the address check still applies to the host. */
-const IPV4_DOTTED_OPTIONAL_PORT = /^((?:\d{1,3}\.){3}\d{1,3})(?::\d+)?$/;
-/** `[ipv6]` or `[ipv6]:port` — brackets must come off before the IPv6 classifiers run. */
-const BRACKETED_IPV6_OPTIONAL_PORT = /^\[([^\]]+)\](?::\d+)?$/;
+/**
+ * Leading IPv4 with an optional `:port`. Unanchored on purpose: free-form extracts
+ * sometimes append junk (`127.0.0.1:443junk`, `10.0.0.5extra`), and the address
+ * check still applies to the dotted-quad prefix.
+ */
+const IPV4_DOTTED_OPTIONAL_PORT_PREFIX = /^((?:\d{1,3}\.){3}\d{1,3})(?::\d+)?/;
 
 /**
  * Host portion of a stored `ip` / `cidr` value for range classification. Strips a
  * CIDR suffix (for either type: a legacy `ip` of `127.0.0.1/32` still needs the
- * address check), an IPv4 `:port`, and IPv6 brackets / `[addr]:port`.
+ * address check), an IPv4 `:port` (and trailing junk after it), and IPv6 brackets
+ * (`[addr]`, `[addr]:port`, or `[addr]` with trailing junk). Bracket unwrap takes
+ * the first `]` only so a value like `[fe80::1]:80@[2606::1]` cannot keep the
+ * link-local address hidden behind trailing URL syntax.
  */
 const hostForIpIocValue = (raw: string): string => {
   const slash = raw.indexOf('/');
   const host = slash !== -1 ? raw.slice(0, slash) : raw;
-  const bracketed = host.match(BRACKETED_IPV6_OPTIONAL_PORT);
-  if (bracketed) {
-    return bracketed[1];
+  if (host.startsWith('[')) {
+    const end = host.indexOf(']');
+    if (end > 1) {
+      return host.slice(1, end);
+    }
   }
-  const ipv4 = host.match(IPV4_DOTTED_OPTIONAL_PORT);
+  const ipv4 = host.match(IPV4_DOTTED_OPTIONAL_PORT_PREFIX);
   if (ipv4) {
     return ipv4[1];
   }
