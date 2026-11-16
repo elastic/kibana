@@ -263,7 +263,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async isPlayButtonVisible() {
-    return await this.testSubjects.exists('sendRequestButton');
+    return await this.testSubjects.waitForExists('sendRequestButton');
   }
 
   public async clickCopyOutput() {
