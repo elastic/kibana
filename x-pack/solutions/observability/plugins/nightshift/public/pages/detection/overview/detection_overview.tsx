@@ -65,6 +65,11 @@ export const DetectionOverview = ({
   compact = false,
 }: DetectionOverviewProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+  const metricMinWidthPx = euiTheme.base * OVERVIEW_METRIC_MIN_WIDTH_BASE;
+  // Match auto-fill breakpoints: N columns need N*minWidth + (N-1)*gap.
+  const twoColumnMaxWidthPx =
+    OVERVIEW_MAX_COLUMNS * metricMinWidthPx + (OVERVIEW_MAX_COLUMNS - 1) * euiTheme.base - 1;
+  const oneColumnMaxWidthPx = 2 * metricMinWidthPx + euiTheme.base - 1;
   const metrics: Array<Omit<MetricCellProps, 'isLoading'>> = [
     {
       icon: 'chartTagCloud',
@@ -150,6 +155,7 @@ export const DetectionOverview = ({
           ) : (
             <div
               css={{
+                containerType: 'inline-size',
                 display: 'grid',
                 // auto-fill keeps empty tracks so a short last row does not stretch.
                 // Track min is max(floor, 1/3 of the row) so we never exceed three columns,
@@ -158,7 +164,7 @@ export const DetectionOverview = ({
                   auto-fill,
                   minmax(
                     max(
-                      ${euiTheme.base * OVERVIEW_METRIC_MIN_WIDTH_BASE}px,
+                      ${metricMinWidthPx}px,
                       calc(
                         (100% - ${(OVERVIEW_MAX_COLUMNS - 1).toString()} * ${euiTheme.size.base}) /
                           ${OVERVIEW_MAX_COLUMNS}
@@ -169,9 +175,22 @@ export const DetectionOverview = ({
                 )`,
                 gap: euiTheme.size.base,
                 alignItems: 'center',
-                // Hide the hairline on each row start while three columns fit.
+                // Hide hairlines on each row start for the current column count.
                 [`& > *:nth-child(${OVERVIEW_MAX_COLUMNS}n + 1) [data-metric-separator]`]: {
                   display: 'none',
+                },
+                [`@container (max-width: ${twoColumnMaxWidthPx}px)`]: {
+                  [`& > *:nth-child(${OVERVIEW_MAX_COLUMNS}n + 1) [data-metric-separator]`]: {
+                    display: 'block',
+                  },
+                  '& > *:nth-child(2n + 1) [data-metric-separator]': {
+                    display: 'none',
+                  },
+                },
+                [`@container (max-width: ${oneColumnMaxWidthPx}px)`]: {
+                  '& > * [data-metric-separator]': {
+                    display: 'none',
+                  },
                 },
               }}
             >
