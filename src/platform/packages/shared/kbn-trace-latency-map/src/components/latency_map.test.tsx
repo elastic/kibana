@@ -857,6 +857,36 @@ describe('LatencyMap', () => {
       expect(active.querySelector('[data-euiicon-type="check"]')).toBeInTheDocument();
     });
 
+    it('names the clicked percentile when several coincide on the same rows', async () => {
+      // Nearly every span at one duration: p90, p95 and p99 are equal, their selections too.
+      const spiked = { ...stats, p90: stats.p99, p95: stats.p99 };
+      const spikedGeometry = createMapGeometry({ plot, timeGrid, stats: spiked });
+      const slowest = spikedGeometry.rangeToSelection({
+        x0: 0,
+        x1: spikedGeometry.bins,
+        y0: 23,
+        y1: spikedGeometry.rows,
+      });
+      renderMap({
+        selection: slowest,
+        runEsql: async (query: string) =>
+          query.includes('PERCENTILE')
+            ? { ...statsTable, values: [Object.values(spiked)] }
+            : gridTable(CELLS),
+      });
+      await screen.findByTestId('traceLatencyMapSelectionBar');
+      const button = screen.getByTestId('traceLatencyMapSelectSlowest');
+      // Without a pick the committed rows cannot tell the percentiles apart: the highest is named.
+      expect(button).toHaveTextContent('Select slowest (p99)');
+      fireEvent.click(button);
+      fireEvent.click(screen.getByTestId('traceLatencyMapSlowest95'));
+      // The click commits an identical query, but the menu still answers with the picked one.
+      expect(button).toHaveTextContent('Select slowest (p95)');
+      fireEvent.click(button);
+      const active = screen.getByTestId('traceLatencyMapSlowest95');
+      expect(active.querySelector('[data-euiicon-type="check"]')).toBeInTheDocument();
+    });
+
     it('leads with the label of a selection that has one', async () => {
       renderMap({ selection: { ...selection, label: 'Slowest spans (> p95)' } });
       const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');

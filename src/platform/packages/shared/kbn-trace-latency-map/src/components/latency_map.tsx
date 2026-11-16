@@ -274,6 +274,9 @@ export function LatencyMap({
   );
 
   const gestureRef = useRef<Gesture>();
+  // The percentile the user picked on the menu: when several percentiles coincide on the same
+  // rows (a spike holding most spans), the committed range alone cannot tell them apart.
+  const [chosenSlowest, setChosenSlowest] = useState<SlowestPercentile>();
   const [draft, setDraft] = useState<CellRange>();
   const [keyboard, setKeyboard] = useState<KeyboardState>();
   const [hoverCell, setHoverCell] = useState<Cell>();
@@ -440,6 +443,7 @@ export function LatencyMap({
 
   const selectSlowest = (percentile: SlowestPercentile) => {
     if (!geometry || !stats) return;
+    setChosenSlowest(percentile);
     const duration = percentile === 99 ? stats.p99 : percentile === 95 ? stats.p95 : stats.p90;
     const row = Math.floor(durationToRow(duration, stats));
     commitRange(
@@ -821,7 +825,10 @@ export function LatencyMap({
   );
 
   // The slowest shortcut the committed selection matches, shown on the menu's button. The
-  // same snapping `selectSlowest` writes; overlapping rows prefer the higher percentile.
+  // same snapping `selectSlowest` writes. Percentiles that coincide on the same rows (a spike
+  // holding most spans) all match: the one the user picked wins, so the menu answers the
+  // click even when the query it commits is unchanged; without a pick (a restored URL), the
+  // higher percentile is named.
   const activeSlowest = useMemo((): SlowestPercentile | undefined => {
     if (!committedRange || !geometry || !stats) return undefined;
     if (
@@ -831,7 +838,7 @@ export function LatencyMap({
     ) {
       return undefined;
     }
-    return ([99, 95, 90] as SlowestPercentile[]).find((percentile) => {
+    const matches = ([99, 95, 90] as SlowestPercentile[]).filter((percentile) => {
       const duration = percentile === 99 ? stats.p99 : percentile === 95 ? stats.p95 : stats.p90;
       const row = Math.min(
         geometry.rows - 1,
@@ -839,7 +846,8 @@ export function LatencyMap({
       );
       return committedRange.y0 === row;
     });
-  }, [committedRange, geometry, stats]);
+    return chosenSlowest && matches.includes(chosenSlowest) ? chosenSlowest : matches[0];
+  }, [committedRange, geometry, stats, chosenSlowest]);
 
   return (
     <div ref={setContainer} data-test-subj={dataTestSubj}>
