@@ -60,7 +60,11 @@ export const sessionJourney = (index: number): string[] => {
 };
 
 /** A summary as the summaries task writes it. */
-const summaryOf = (sessionsStartMs: number, index: number) => {
+const summaryOf = (
+  sessionsStartMs: number,
+  index: number,
+  { id = sessionId(index), environment = 'production' }: { id?: string; environment?: string } = {}
+) => {
   const isDetailed = index === 0;
   const startMs = sessionStartOffsetMs(index);
   const durationMs = isDetailed ? 150 * SECOND_MS : (index + 1) * 10 * SECOND_MS;
@@ -72,7 +76,7 @@ const summaryOf = (sessionsStartMs: number, index: number) => {
     ? { browser: 'Firefox', browser_version: '131', os: 'Linux' }
     : { browser: 'Chrome', browser_version: '130', os: 'macOS' };
   return {
-    session: { id: sessionId(index) },
+    session: { id },
     service: { name: SESSIONS_APP },
     start_time: at(sessionsStartMs, startMs),
     end_time: at(sessionsStartMs, startMs + durationMs),
@@ -84,7 +88,7 @@ const summaryOf = (sessionsStartMs: number, index: number) => {
     js_error_count: errorCount,
     http_request_count: 2,
     http_failed_request_count: index % 4 === 0 ? 1 : 0,
-    environment: 'production',
+    environment,
     // The detailed session's raw events have one click.
     click_count: isDetailed ? 1 : index,
     bounced: false,
@@ -146,21 +150,22 @@ const rawEventId = (index: number) => `dx-session-event-${index}`;
 
 const RAW_EVENT_IDS = rawEventsOfDetailedSession(0).map((_, index) => rawEventId(index));
 
-/**
- * Sets sessions up as the system user, then writes the mock summaries straight to the sessions
- * index. The summaries task never rewrites them: their raw events have no
- * `telemetry.sdk.language`, which it filters on. Resolves to when the first session starts.
- */
-export const ingestSessionsData = async (
-  esClient: EsClient,
-  kbnClient: KbnClient
-): Promise<number> => {
-  const sessionsStartMs = Date.now() - DAY_MS;
+const enableSessions = async (kbnClient: KbnClient): Promise<void> => {
   await kbnClient.request({
     method: 'POST',
     path: '/internal/digital_experience/sessions/enable',
     headers: { 'x-elastic-internal-origin': 'kibana' },
   });
+};
+
+/**
+ * Sets sessions up as the system user, then writes the mock summaries straight to the sessions
+ * index. The summaries task never rewrites them: their raw events have no
+ * `telemetry.sdk.language`, which it filters on.
+ */
+export const ingestSessionsData = async (esClient: EsClient, kbnClient: KbnClient) => {
+  const sessionsStartMs = Date.now() - DAY_MS;
+  await enableSessions(kbnClient);
 
   const summaries = Array.from({ length: SESSION_COUNT }, (_, index) =>
     summaryOf(sessionsStartMs, index)
@@ -184,7 +189,6 @@ export const ingestSessionsData = async (
   if (errors && failure) {
     throw new Error(`Could not ingest the sessions data: ${JSON.stringify(failure)}`);
   }
-  return sessionsStartMs;
 };
 
 /** Removes the summaries task, which also invalidates its API key; a missing task is fine. */
@@ -218,6 +222,69 @@ export const deleteSessionsData = async (esClient: EsClient, kbnClient: KbnClien
   await esClient.deleteByQuery({
     index: RAW_EVENTS_INDEX,
     query: { ids: { values: RAW_EVENT_IDS } },
+    refresh: true,
+    ignore_unavailable: true,
+  });
+};
+
+/** Mock sessions a suite owns: their own ids and environment, so it reads and deletes only them. */
+export interface OwnedSessions {
+  idPrefix: string;
+  environment: string;
+  count: number;
+}
+
+const ownedSessionIds = ({ idPrefix, count }: OwnedSessions): string[] => {
+  return Array.from({ length: count }, (_, index) => {
+    return `${idPrefix}-${index}`;
+  });
+};
+
+/**
+ * Writes `sessions` from a day ago, setting sessions up first when they aren't. Resolves to when
+ * the first one starts, and whether this set sessions up, for `deleteOwnedSessions`.
+ */
+export const ingestOwnedSessions = async (
+  esClient: EsClient,
+  kbnClient: KbnClient,
+  sessions: OwnedSessions
+): Promise<{ sessionsStartMs: number; setUpSessions: boolean }> => {
+  const setUpSessions = !(await esClient.indices.exists({ index: SESSIONS_INDEX }));
+  if (setUpSessions) {
+    await enableSessions(kbnClient);
+  }
+  const sessionsStartMs = Date.now() - DAY_MS;
+  const { errors, items } = await esClient.bulk({
+    refresh: 'wait_for',
+    operations: ownedSessionIds(sessions).flatMap((id, index) => {
+      return [
+        { index: { _index: SESSIONS_INDEX, _id: id } },
+        summaryOf(sessionsStartMs, index, { id, environment: sessions.environment }),
+      ];
+    }),
+  });
+  if (errors) {
+    const failure = items.find((item) => {
+      return item.index?.error;
+    });
+    throw new Error(`Could not ingest the owned sessions: ${JSON.stringify(failure)}`);
+  }
+  return { sessionsStartMs, setUpSessions };
+};
+
+/** Deletes `sessions`, and the sessions setup only when `ingestOwnedSessions` made it. */
+export const deleteOwnedSessions = async (
+  esClient: EsClient,
+  sessions: OwnedSessions,
+  { setUpSessions }: { setUpSessions: boolean }
+): Promise<void> => {
+  if (setUpSessions) {
+    await deleteSessionsData(esClient);
+    return;
+  }
+  await esClient.deleteByQuery({
+    index: SESSIONS_INDEX,
+    query: { ids: { values: ownedSessionIds(sessions) } },
     refresh: true,
     ignore_unavailable: true,
   });

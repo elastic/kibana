@@ -8,9 +8,10 @@
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApplicationsResponse } from '../../../../common/types/applications';
+import type { OwnedSessions } from '../../common/fixtures/sessions_data';
 import {
-  deleteSessionsData,
-  ingestSessionsData,
+  deleteOwnedSessions,
+  ingestOwnedSessions,
   sessionJourney,
   sessionStartOffsetMs,
 } from '../../common/fixtures/sessions_data';
@@ -20,7 +21,13 @@ import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 const { APPLICATIONS_PATH, COMMON_HEADERS, withQuery } = testData;
 
-// Sessions start every 4 minutes from the first one, a day ago.
+// In their own environment, so the request reads only them. They start every 4 minutes from the
+// first one, a day ago.
+const SESSIONS: OwnedSessions = {
+  idPrefix: 'dx-sessions-histogram',
+  environment: 'sessions-histogram-test',
+  count: 8,
+};
 const LAST_SESSION_IN_RANGE = 5;
 
 apiTest.describe(
@@ -28,14 +35,19 @@ apiTest.describe(
   { tag: DIGITAL_EXPERIENCE_TAGS },
   () => {
     let sessionsStartMs: number;
+    let setUpSessions = false;
 
     apiTest.beforeAll(async ({ apiServices, esClient, kbnClient }) => {
       await apiServices.core.settings(FLAG_ON_OVERRIDE);
-      sessionsStartMs = await ingestSessionsData(esClient, kbnClient);
+      ({ sessionsStartMs, setUpSessions } = await ingestOwnedSessions(
+        esClient,
+        kbnClient,
+        SESSIONS
+      ));
     });
 
     apiTest.afterAll(async ({ apiServices, esClient }) => {
-      await deleteSessionsData(esClient);
+      await deleteOwnedSessions(esClient, SESSIONS, { setUpSessions });
       await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 
@@ -53,13 +65,15 @@ apiTest.describe(
           withQuery(APPLICATIONS_PATH, {
             start: new Date(sessionsStartMs - 10 * 60 * 1000).toISOString(),
             end: new Date(end).toISOString(),
+            environment: SESSIONS.environment,
           }),
           { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
         );
 
         expect(response).toHaveStatusCode(200);
         const { pageLoadsOverTime, sessionsOverTime } = response.body as ApplicationsResponse;
-        expect(sessionsOverTime).not.toBeNull();
+        // `null` when the applications came from the raw events instead of the sessions.
+        expect(Array.isArray(sessionsOverTime)).toBe(true);
         const sessions = sessionsOverTime ?? [];
         expect(sessions.map(({ timestamp }) => timestamp)).toStrictEqual(
           pageLoadsOverTime.otel.map(({ timestamp }) => timestamp)
