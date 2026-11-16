@@ -47,6 +47,11 @@ const Providers: React.FC<{ startServices: FleetStartServices; children: React.R
   </KibanaContextProvider>
 );
 
+// The rendered attachment carries no version number, so key the draft on what a new version
+// changes: the recorded answer and its problems. A new version then reseeds card and canvas.
+const draftKey = (attachment: AwsOnboardingSettingsAttachment) =>
+  `${attachment.id}:${JSON.stringify([attachment.data.answer, attachment.data.problems])}`;
+
 export const createAwsOnboardingSettingsAttachmentDefinition = (
   startServices: FleetStartServices
 ): AttachmentUIDefinition<AwsOnboardingSettingsAttachment> => ({
@@ -59,14 +64,18 @@ export const createAwsOnboardingSettingsAttachmentDefinition = (
   renderInlineContent: ({ attachment }) => (
     <Providers startServices={startServices}>
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazyCard data={attachment.data} />
+        <LazyCard
+          key={draftKey(attachment)}
+          attachmentId={draftKey(attachment)}
+          data={attachment.data}
+        />
       </Suspense>
     </Providers>
   ),
   renderCanvasContent: ({ attachment }, { closeCanvas }) => (
     <Providers startServices={startServices}>
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazyForm data={attachment.data} onSubmitted={closeCanvas} />
+        <LazyForm attachmentId={attachment.id} data={attachment.data} onSubmitted={closeCanvas} />
       </Suspense>
     </Providers>
   ),

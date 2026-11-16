@@ -8,6 +8,7 @@
 import React from 'react';
 import {
   EuiAccordion,
+  EuiComboBox,
   EuiFieldPassword,
   EuiFieldText,
   EuiFormErrorText,
@@ -21,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { validateSettingsAnswer } from '../../../../common/workflows/steps/settings';
 import type {
   AwsOnboardingSettingsAnswer,
   AwsOnboardingSettingsRequirement,
@@ -81,6 +83,25 @@ const updateStream = (
   };
 };
 
+/** Moves a stream to another input, dropping what only made sense for the previous one. */
+const withInput = (
+  previous: StreamAnswer,
+  nextInput: string | null,
+  stream: DataStream
+): StreamAnswer => {
+  if (nextInput === previous.input) return previous;
+  const fieldNames = new Set(
+    stream.inputs.find((candidate) => candidate.input === nextInput)?.fields.map(({ name }) => name)
+  );
+  const vars = Object.fromEntries(
+    Object.entries(previous.vars ?? {}).filter(([name]) => fieldNames.has(name))
+  );
+  return {
+    input: nextInput,
+    ...(Object.keys(vars).length > 0 ? { vars } : {}),
+  };
+};
+
 const isSecret = (field: Field) => field.type === 'password' || field.type === 'secret';
 
 const fieldLabel = (field: Field) =>
@@ -125,23 +146,22 @@ const FieldControl: React.FC<{
     );
   }
   if (field.multi) {
-    // One entry per line keeps multi-value fields editable without a combo box.
+    const selected = Array.isArray(value) ? value : [];
     return (
-      <EuiFieldText
+      <EuiComboBox
         fullWidth
         compressed
-        value={Array.isArray(value) ? value.join(', ') : ''}
+        noSuggestions
+        aria-label={field.title}
         placeholder={i18n.translate('xpack.fleet.awsOnboardingSettings.multiPlaceholder', {
-          defaultMessage: 'Comma-separated values',
+          defaultMessage: 'Type a value and press Enter',
         })}
-        onChange={(e) =>
-          onChange(
-            e.target.value
-              .split(',')
-              .map((entry) => entry.trim())
-              .filter(Boolean)
-          )
-        }
+        selectedOptions={selected.map((label) => ({ label }))}
+        onCreateOption={(entry) => {
+          const trimmed = entry.trim();
+          if (trimmed && !selected.includes(trimmed)) onChange([...selected, trimmed]);
+        }}
+        onChange={(options) => onChange(options.map(({ label }) => label))}
         data-test-subj={testSubj}
       />
     );
@@ -287,10 +307,9 @@ const StreamEditor: React.FC<{
           label={stream.title}
           checked={streamAnswer.input !== null}
           onChange={(e) =>
-            change((previous) => ({
-              ...previous,
-              input: e.target.checked ? stream.inputs[0]?.input ?? null : null,
-            }))
+            change((previous) =>
+              withInput(previous, e.target.checked ? stream.inputs[0]?.input ?? null : null, stream)
+            )
           }
           data-test-subj={`awsOnboardingSettings-${stream.id}-toggle`}
         />
@@ -336,7 +355,7 @@ const StreamEditor: React.FC<{
         ]}
         onChange={(id) => {
           const value = id.slice(stream.id.length + 1);
-          change((previous) => ({ ...previous, input: value === OFF ? null : value }));
+          change((previous) => withInput(previous, value === OFF ? null : value, stream));
         }}
       />
       {inputProblems.map((problem) => (
@@ -353,42 +372,61 @@ export const SettingsSections: React.FC<{
   draft: AwsOnboardingSettingsAnswer;
   problems?: SettingsProblem[];
   onChange: (draft: AwsOnboardingSettingsAnswer) => void;
-}> = ({ requirement, draft, problems = [], onChange }) => (
-  <>
-    {requirement.services.map((service) => (
-      <div key={service.id} data-test-subj={`awsOnboardingSettings-service-${service.id}`}>
-        <EuiTitle size="xxs">
-          <h4>{service.name}</h4>
-        </EuiTitle>
-        {service.data_streams.map((stream) => (
-          <React.Fragment key={stream.id}>
-            <EuiSpacer size="s" />
-            <StreamEditor
-              service={service}
-              stream={stream}
-              draft={draft}
-              problems={problems}
-              onChange={onChange}
-            />
-          </React.Fragment>
-        ))}
-        {service.readme_notes ? (
-          <>
-            <EuiSpacer size="s" />
-            <EuiAccordion
-              id={`awsOnboardingSettingsNotes-${service.id}`}
-              buttonContent={i18n.translate('xpack.fleet.awsOnboardingSettings.notes', {
-                defaultMessage: 'Integration notes',
-              })}
-              initialIsOpen
-              paddingSize="s"
+}> = ({ requirement, draft, problems = [], onChange }) => {
+  // Service-level rules, such as "enable at least one data stream", have no field to sit under.
+  const serviceProblems = (serviceId: string) => [
+    ...new Set(
+      [...validateSettingsAnswer(requirement, draft), ...problems]
+        .filter((problem) => problem.path === serviceId)
+        .map((problem) => problem.message)
+    ),
+  ];
+
+  return (
+    <>
+      {requirement.services.map((service) => (
+        <div key={service.id} data-test-subj={`awsOnboardingSettings-service-${service.id}`}>
+          <EuiTitle size="xxs">
+            <h4>{service.name}</h4>
+          </EuiTitle>
+          {serviceProblems(service.id).map((message) => (
+            <EuiFormErrorText
+              key={message}
+              data-test-subj={`awsOnboardingSettings-service-${service.id}-problem`}
             >
-              <EuiText size="s">{service.readme_notes}</EuiText>
-            </EuiAccordion>
-          </>
-        ) : null}
-        <EuiSpacer size="m" />
-      </div>
-    ))}
-  </>
-);
+              {message}
+            </EuiFormErrorText>
+          ))}
+          {service.data_streams.map((stream) => (
+            <React.Fragment key={stream.id}>
+              <EuiSpacer size="s" />
+              <StreamEditor
+                service={service}
+                stream={stream}
+                draft={draft}
+                problems={problems}
+                onChange={onChange}
+              />
+            </React.Fragment>
+          ))}
+          {service.readme_notes ? (
+            <>
+              <EuiSpacer size="s" />
+              <EuiAccordion
+                id={`awsOnboardingSettingsNotes-${service.id}`}
+                buttonContent={i18n.translate('xpack.fleet.awsOnboardingSettings.notes', {
+                  defaultMessage: 'Integration notes',
+                })}
+                initialIsOpen
+                paddingSize="s"
+              >
+                <EuiText size="s">{service.readme_notes}</EuiText>
+              </EuiAccordion>
+            </>
+          ) : null}
+          <EuiSpacer size="m" />
+        </div>
+      ))}
+    </>
+  );
+};

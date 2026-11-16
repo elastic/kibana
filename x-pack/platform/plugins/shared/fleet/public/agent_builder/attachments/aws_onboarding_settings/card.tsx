@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -13,6 +13,7 @@ import type { AwsOnboardingSettingsAttachmentData } from '../../../../common/age
 import { validateSettingsAnswer } from '../../../../common/workflows/steps/settings';
 import type { AwsOnboardingSettingsAnswer } from '../../../../common/workflows/steps/settings';
 
+import { useSettingsDraft } from './drafts';
 import { SettingsSections, seedDraft } from './fields';
 
 /** The pasted answer's problems apply only while the draft is still that answer. */
@@ -26,10 +27,13 @@ export const useInlineProblems = (
     [data.problems, data.answer, draft]
   );
 
-export const AwsOnboardingSettingsCard: React.FC<{ data: AwsOnboardingSettingsAttachmentData }> = ({
-  data,
-}) => {
-  const [draft, setDraft] = useState(() => seedDraft(data.requirement, data.answer));
+export const AwsOnboardingSettingsCard: React.FC<{
+  attachmentId: string;
+  data: AwsOnboardingSettingsAttachmentData;
+}> = ({ attachmentId, data }) => {
+  const [draft, setDraft] = useSettingsDraft(attachmentId, () =>
+    seedDraft(data.requirement, data.answer)
+  );
   const missing = useMemo(
     () => validateSettingsAnswer(data.requirement, draft).length,
     [data.requirement, draft]
@@ -56,7 +60,8 @@ export const AwsOnboardingSettingsCard: React.FC<{ data: AwsOnboardingSettingsAt
           >
             {missing > 0
               ? i18n.translate('xpack.fleet.awsOnboardingSettingsCard.missing', {
-                  defaultMessage: '{count} required values missing',
+                  defaultMessage:
+                    '{count, plural, one {# required value} other {# required values}} missing',
                   values: { count: missing },
                 })
               : i18n.translate('xpack.fleet.awsOnboardingSettingsCard.complete', {

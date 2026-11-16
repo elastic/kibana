@@ -87,6 +87,13 @@ export const settingsAttachmentData: AwsOnboardingSettingsAttachmentData = {
                 description: 'Needs a log group.',
                 fields: [
                   { name: 'log_group_arn', title: 'Log group ARN', type: 'text', required: true },
+                  {
+                    name: 'regions',
+                    title: 'Regions',
+                    type: 'text',
+                    required: false,
+                    multi: true,
+                  },
                 ],
                 var_groups: [],
               },

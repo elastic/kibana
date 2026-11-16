@@ -13,14 +13,18 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { AwsOnboardingSettingsAttachmentData } from '../../../../common/agent_builder/aws_onboarding_settings_attachment';
 import type { SettingsProblem } from '../../../../common/workflows/steps/settings';
 
+import { clearSettingsDraft, useSettingsDraft } from './drafts';
 import { SettingsSections, seedDraft } from './fields';
 import { submitSettings } from './submit';
 
 export const AwsOnboardingSettingsForm: React.FC<{
+  attachmentId: string;
   data: AwsOnboardingSettingsAttachmentData;
   onSubmitted: () => void;
-}> = ({ data, onSubmitted }) => {
-  const [draft, setDraft] = useState(() => seedDraft(data.requirement, data.answer));
+}> = ({ attachmentId, data, onSubmitted }) => {
+  const [draft, setDraft] = useSettingsDraft(attachmentId, () =>
+    seedDraft(data.requirement, data.answer)
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [problems, setProblems] = useState<SettingsProblem[]>(data.problems ?? []);
   const [requestError, setRequestError] = useState<string>();
@@ -33,6 +37,7 @@ export const AwsOnboardingSettingsForm: React.FC<{
       try {
         const result = await submitSettings(data.execution_id, draft);
         if (result.status === 'resumed') {
+          clearSettingsDraft(attachmentId);
           onSubmitted();
           return;
         }
@@ -44,7 +49,7 @@ export const AwsOnboardingSettingsForm: React.FC<{
         setIsSaving(false);
       }
     },
-    [data.execution_id, draft, onSubmitted]
+    [attachmentId, data.execution_id, draft, onSubmitted]
   );
 
   return (
