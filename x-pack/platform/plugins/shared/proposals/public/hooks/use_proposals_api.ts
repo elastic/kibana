@@ -24,6 +24,7 @@ import {
   PROPOSAL_REOPEN_URL,
   PROPOSAL_SETTLING_POLL_INTERVAL_MS,
   isAwaitingRetry,
+  isGatelessProposal,
   isProposalSettling,
   isTerminal,
 } from '@kbn/proposals-common';
@@ -59,15 +60,28 @@ export const isDecisionShown = (
     isTerminal(proposal.status) ||
     proposal.supersededBy !== undefined);
 
+/**
+ * A gateless proposal someone approved whose decision is not written yet. Reading it again is what
+ * settles an approval whose run died, so polling it always ends. Gated proposals are left out: a
+ * gate keeps its mark across a re-park, so there it does not mean a decision is on its way.
+ */
+const isBeingDecided = (proposal: Pick<Proposal, 'gate' | 'status' | 'gateReleasedAt'>): boolean =>
+  isGatelessProposal(proposal) &&
+  proposal.status === 'pending' &&
+  proposal.gateReleasedAt !== undefined;
+
 const hasUnseenDecision = (
   proposal: Pick<Proposal, 'id' | 'decision' | 'status' | 'supersededBy'>
 ): boolean => inFlightDecisions.hasUnseen(proposal.id) && !isDecisionShown(proposal);
 
 /** Running, or failed with no retry yet for up to `RETRY_WAIT_MS`. Poll while this is true. */
 export const isInFlux = (
-  proposal: Pick<Proposal, 'id' | 'decision' | 'status' | 'supersededBy'>
+  proposal: Pick<
+    Proposal,
+    'id' | 'decision' | 'status' | 'supersededBy' | 'gate' | 'gateReleasedAt'
+  >
 ): boolean => {
-  if (hasUnseenDecision(proposal) || isProposalSettling(proposal)) {
+  if (hasUnseenDecision(proposal) || isProposalSettling(proposal) || isBeingDecided(proposal)) {
     return true;
   }
   if (!isAwaitingRetry(proposal)) {
@@ -243,6 +257,21 @@ const invalidateProposals = (queryClient: ReturnType<typeof useQueryClient>) => 
   return queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
 };
 
+/**
+ * A 409 means the proposal moved on without this read of it: someone else decided it, or it
+ * settled. Nothing polls a proposal this tab did not decide, so the stale copy would keep offering
+ * a decision that can no longer be made. Awaited, so the mutation's error is shown beside the
+ * current state rather than ahead of it.
+ */
+const refreshOnConflict = async (
+  queryClient: ReturnType<typeof useQueryClient>,
+  error: unknown
+): Promise<void> => {
+  if (isHttpFetchError(error) && error.response?.status === 409) {
+    await invalidateProposals(queryClient);
+  }
+};
+
 /** How often, and for how long, to poll for the decision before giving up on it. */
 const DECISION_POLL_INTERVAL_MS = 750;
 const DECISION_POLL_MAX_ATTEMPTS = 8;
@@ -306,6 +335,7 @@ export const useApproveProposal = () => {
       await settleDecision(services.http!, 'approve', id);
       await invalidateProposals(queryClient);
     },
+    onError: (error) => refreshOnConflict(queryClient, error),
     onSettled: (_data, _error, { id }) => inFlightDecisions.end('approve', id),
   });
 };
@@ -326,6 +356,7 @@ export const useDismissProposal = () => {
       await settleDecision(services.http!, 'decline', id);
       await invalidateProposals(queryClient);
     },
+    onError: (error) => refreshOnConflict(queryClient, error),
     onSettled: (_data, _error, { id }) => inFlightDecisions.end('decline', id),
   });
 };
@@ -349,6 +380,7 @@ export const useReopenProposal = () => {
     onSuccess: async () => {
       await invalidateProposals(queryClient);
     },
+    onError: (error) => refreshOnConflict(queryClient, error),
   });
 };
 

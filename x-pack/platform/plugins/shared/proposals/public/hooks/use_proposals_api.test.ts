@@ -198,6 +198,28 @@ describe('isInFlux', () => {
       isInFlux({ id: 'fail-2', decision: 'approved', status: 'failed', supersededBy: 'retry' })
     ).toBe(false);
   });
+
+  it('is true for a gateless proposal someone approved whose decision is not written yet', () => {
+    expect(
+      isInFlux({
+        id: 'released-1',
+        status: 'pending',
+        gate: 'none',
+        gateReleasedAt: '2026-01-01T00:00:00.000Z',
+      })
+    ).toBe(true);
+  });
+
+  it('is false for a gated proposal that keeps its mark while its gate waits again', () => {
+    expect(
+      isInFlux({
+        id: 'reparked-1',
+        status: 'pending',
+        gate: 'workflow',
+        gateReleasedAt: '2026-01-01T00:00:00.000Z',
+      })
+    ).toBe(false);
+  });
 });
 
 describe('useConversationProposals', () => {
@@ -661,6 +683,36 @@ describe('useApproveProposal', () => {
       'Server error'
     );
   });
+
+  it('refetches the proposals when someone else decided first, before rejecting', async () => {
+    const http = makeHttp();
+    http.post.mockRejectedValue(makeHttpFetchError(409));
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper, queryClient } = createWrapper();
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+
+    await expect(result.current.mutateAsync({ id: 'p-1', body: {} })).rejects.toThrow('HTTP 409');
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
+  });
+
+  it('does not refetch the proposals for a failure that is not a conflict', async () => {
+    const http = makeHttp();
+    http.post.mockRejectedValue(makeHttpFetchError(500));
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper, queryClient } = createWrapper();
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+
+    await expect(result.current.mutateAsync({ id: 'p-1', body: {} })).rejects.toThrow('HTTP 500');
+    expect(invalidateSpy).not.toHaveBeenCalled();
+  });
 });
 
 describe('after an approval ends, before the new data arrives', () => {
@@ -776,6 +828,23 @@ describe('useDismissProposal', () => {
     await expect(
       result.current.mutateAsync({ id: 'p-1', body: { dismissReason: 'no_reason' } })
     ).rejects.toThrow('Conflict');
+  });
+
+  it('refetches the proposals when someone else decided first, before rejecting', async () => {
+    const http = makeHttp();
+    http.post.mockRejectedValue(makeHttpFetchError(409));
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper, queryClient } = createWrapper();
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const { result } = renderHook(() => useDismissProposal(), { wrapper: Wrapper });
+
+    await expect(
+      result.current.mutateAsync({ id: 'p-1', body: { dismissReason: 'no_reason' } })
+    ).rejects.toThrow('HTTP 409');
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
   });
 });
 
@@ -908,6 +977,21 @@ describe('useReopenProposal', () => {
     });
 
     expect(inFlightDecisions.hasUnseen('p-1')).toBe(false);
+  });
+
+  it('refetches the proposals when the proposal can no longer be reopened, before rejecting', async () => {
+    const http = makeHttp();
+    http.post.mockRejectedValue(makeHttpFetchError(409));
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper, queryClient } = createWrapper();
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const { result } = renderHook(() => useReopenProposal(), { wrapper: Wrapper });
+
+    await expect(result.current.mutateAsync({ id: 'p-1' })).rejects.toThrow('HTTP 409');
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
   });
 });
 

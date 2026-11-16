@@ -39,15 +39,15 @@ import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
  * here, where the plugin can read `isHttpFetchError`; the shared package only ever sees the
  * resulting message. A 409 covers all of those: `assertDecidable` rejects a non-`pending` proposal
  * (decided, expired, or otherwise settled) with the same conflict, so the message stays deliberately
- * generic rather than naming one cause.
+ * generic rather than naming one cause. It asks for no refresh: the decision hooks refetch the
+ * proposal on a 409, so the card already shows its current status beside it.
  */
 const toFriendlyError = (error: unknown): Error => {
   if (isHttpFetchError(error)) {
     if (error.response?.status === 409) {
       return new Error(
-        i18n.translate('xpack.proposals.proposalCard.conflictError', {
-          defaultMessage:
-            'This proposal is no longer available to decide. Refresh the page to see its current status.',
+        i18n.translate('xpack.proposals.proposalCard.noLongerDecidableError', {
+          defaultMessage: 'This proposal is no longer available to decide.',
         })
       );
     }
