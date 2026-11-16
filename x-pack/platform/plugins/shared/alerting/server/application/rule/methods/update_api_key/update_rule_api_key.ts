@@ -14,7 +14,12 @@ import { WriteOperations, AlertingAuthorizationEntity } from '../../../../author
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { createNewAPIKeySet, updateMeta } from '../../../../rules_client/lib';
+import {
+  createNewAPIKeySet,
+  getReferencedConnectorIds,
+  updateMeta,
+  validateNewRuleKeyConnectorAccess,
+} from '../../../../rules_client/lib';
 import { API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -113,6 +118,13 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     shouldUpdateApiKey: true,
     errorMessage: 'Error updating API key for rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: attributes.apiKeyCreatedByUser },
+  });
+
+  // The rule keeps its previous key when the new one is refused.
+  await validateNewRuleKeyConnectorAccess(context, {
+    spaceId: context.spaceId,
+    connectorIds: getReferencedConnectorIds(references),
+    keySet: apiKeyAttributes,
   });
 
   const updateAttributes = updateMeta(context, {

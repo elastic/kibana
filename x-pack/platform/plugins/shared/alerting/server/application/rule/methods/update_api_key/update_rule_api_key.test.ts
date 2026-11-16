@@ -7,7 +7,13 @@
 
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
-import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import {
+  CALLER_PRINCIPAL,
+  getBeforeSetup,
+  refuseConnector,
+  setGlobalDate,
+  setupRuleKeyConnectorAccess,
+} from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
@@ -458,6 +464,75 @@ describe('updateRuleApiKey()', () => {
       expect.any(Object),
       expect.any(Object)
     );
+  });
+
+  describe('rule key connector access', () => {
+    const references = [
+      { type: 'action', id: 'restricted', name: 'action_0' },
+      { type: 'action', id: 'public', name: 'action_1' },
+    ];
+    const newApiKey = Buffer.from('234:abc').toString('base64');
+
+    beforeEach(() => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingEncryptedAlert,
+        references,
+      });
+      rulesClientParams.createAPIKey.mockResolvedValue({
+        apiKeysEnabled: true,
+        result: { id: '234', name: '123', api_key: 'abc' },
+      });
+    });
+
+    test('makes no extra call when every connector is unrestricted', async () => {
+      const { options, actionsClient, getActionsClientWithRequest } =
+        await setupRuleKeyConnectorAccess(rulesClientParams, []);
+
+      await new RulesClient(options).updateRuleApiKey({ id: '1' });
+
+      expect(actionsClient.getRestrictedConnectorIds).toHaveBeenCalledWith([
+        'restricted',
+        'public',
+      ]);
+      expect(getActionsClientWithRequest).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    });
+
+    test('validates the new key as the caller before the rule is written', async () => {
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        'restricted',
+      ]);
+
+      await new RulesClient(options).updateRuleApiKey({ id: '1' });
+
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['restricted'], {
+        principal: CALLER_PRINCIPAL,
+      });
+      expect(keyActionsClient.ensureConnectorsUsable.mock.invocationCallOrder[0]).toBeLessThan(
+        unsecuredSavedObjectsClient.create.mock.invocationCallOrder[0]
+      );
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    });
+
+    test('refuses the new key and keeps the previous one', async () => {
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        'restricted',
+      ]);
+      refuseConnector(keyActionsClient, 'restricted');
+
+      await expect(new RulesClient(options).updateRuleApiKey({ id: '1' })).rejects.toThrow(
+        `The rule's API key cannot use connector "restricted"`
+      );
+
+      // Only the new key is invalidated: the rule still holds the previous one.
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+        { apiKeys: [newApiKey] },
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
   });
 
   describe('authorization', () => {
