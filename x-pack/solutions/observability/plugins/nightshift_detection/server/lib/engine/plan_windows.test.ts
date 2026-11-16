@@ -6,6 +6,7 @@
  */
 
 import { createTestStrategy } from '../../test_utils/test_strategy';
+import { InvalidStrategyScheduleError } from '../errors/invalid_strategy_schedule_error';
 import type { DetectionStrategy } from '../strategies/detection_strategy';
 import { MAX_CATCH_UP_MINUTES, MAX_MINUTES_PER_RUN, planWindows } from './plan_windows';
 
@@ -14,17 +15,26 @@ const MINUTE_MS = 60_000;
 const SETTLED_END = Date.UTC(2026, 10, 13, 10, 0);
 const NOW = SETTLED_END + 20_000;
 
-function createStrategy({ id, cadence }: { id: string; cadence: number }): DetectionStrategy {
+function createStrategy({
+  id,
+  cadence,
+  settle = 0,
+}: {
+  id: string;
+  cadence: number;
+  settle?: number;
+}): DetectionStrategy {
   const strategy = createTestStrategy();
 
   return {
     ...strategy,
-    descriptor: { ...strategy.descriptor, id, cadence_minutes: cadence, settle_minutes: 0 },
+    descriptor: { ...strategy.descriptor, id, cadence_minutes: cadence, settle_minutes: settle },
   };
 }
 
 const EVERY_MINUTE = createStrategy({ id: 'every_minute', cadence: 1 });
 const EVERY_FIVE_MINUTES = createStrategy({ id: 'every_five_minutes', cadence: 5 });
+const EVERY_FIFTEEN_MINUTES = createStrategy({ id: 'every_fifteen_minutes', cadence: 15 });
 
 function plan({
   strategies = [EVERY_MINUTE],
@@ -57,19 +67,13 @@ describe('planWindows', () => {
     ]);
   });
 
-  it('opens the first window of a strategy on a cadence boundary when the cadence does not divide a run', () => {
-    const everyThreeMinutes = createStrategy({ id: 'every_three_minutes', cadence: 3 });
-    const threeMinutesMs = 3 * MINUTE_MS;
+  it('opens the first window on a cadence boundary and leaves the settle time unread', () => {
+    // 09:58:20 is the time it can read up to; the last four-minute boundary before it is 09:56.
+    const everyFourMinutes = createStrategy({ id: 'every_four_minutes', cadence: 4, settle: 2 });
 
-    const [window] = planWindows({
-      strategies: [everyThreeMinutes],
-      watermarks: new Map(),
-      now: NOW,
-    });
-
-    expect(window.from % threeMinutesMs).toBe(0);
-    expect(window.to % threeMinutesMs).toBe(0);
-    expect(window.to - window.from).toBeGreaterThanOrEqual(threeMinutesMs);
+    expect(plan({ strategies: [everyFourMinutes] })).toEqual([
+      { id: 'every_four_minutes', from: -12, to: -4, skipped: 0 },
+    ]);
   });
 
   it('runs a one-minute strategy every minute and a five-minute one every fifth', () => {
@@ -150,12 +154,18 @@ describe('planWindows', () => {
   it('plans a strategy added later from its first-run window while others continue', () => {
     expect(
       plan({
-        strategies: [EVERY_MINUTE, EVERY_FIVE_MINUTES],
+        strategies: [EVERY_MINUTE, EVERY_FIFTEEN_MINUTES],
         watermarks: { every_minute: SETTLED_END - MINUTE_MS },
       })
     ).toEqual([
       { id: 'every_minute', from: -1, to: 0, skipped: 0 },
-      { id: 'every_five_minutes', from: -MAX_MINUTES_PER_RUN, to: 0, skipped: 0 },
+      { id: 'every_fifteen_minutes', from: -15, to: 0, skipped: 0 },
     ]);
+  });
+
+  it.each([0, -5, 1.5, Number.NaN])('refuses a strategy with a cadence of %s', (cadence) => {
+    expect(() => plan({ strategies: [createStrategy({ id: 'bad', cadence })] })).toThrow(
+      InvalidStrategyScheduleError
+    );
   });
 });
