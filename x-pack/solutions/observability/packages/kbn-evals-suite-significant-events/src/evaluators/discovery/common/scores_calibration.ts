@@ -44,11 +44,6 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
     score: 1,
   },
   {
-    id: 'recovery_preserves_incident_severity',
-    text: 'For an established incident that is recovering or inactive, assess compliance with the recovery rule in the severity field contract above. Compare against the supplied prior severity; do not infer a prior tier when none is supplied.',
-    score: 1,
-  },
-  {
     id: 'detection_metadata_not_severity',
     text: 'Severity must not be lowered (or raised) because of `p_value`, `change_point_type`, or alert volume when grounding confirms a non-benign failure or material degradation. Those inputs, and the `severity_score` of the rule, are not severity inputs.',
     score: 2,
