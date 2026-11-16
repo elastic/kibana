@@ -13838,7 +13838,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/{id}/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Creates a rule. You can supply your own `id`; if you omit it, Kibana generates one. If a rule with that `id` already exists, the request fails with HTTP 409 and the existing rule is not changed. To create or replace a rule at a specific ID, use PUT /api/alerting/v2/rules/{id}.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
       operationId: post-alerting-v2-rules
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13978,6 +13978,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the user does not have the required privileges to perform the request.
+        '409':
+          content:
+            application/json:
+              examples:
+                ruleAlreadyExists:
+                  summary: A rule with the requested ID already exists
+                  value:
+                    code: RULE_ALREADY_EXISTS
+                    details:
+                      rule_id: rule-1
+                    error: Conflict
+                    message: Rule with id "rule-1" already exists
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates a rule with the given ID already exists.
         '500':
           content:
             application/json:
@@ -87949,7 +87964,7 @@ paths:
                   type: string
                 initials:
                   description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                  maxLength: 2
+                  maxLength: 64
                   type: string
                 name:
                   description: 'The display name for the space. '
@@ -87995,7 +88010,7 @@ paths:
                     type: string
                   initials:
                     description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                    maxLength: 2
+                    maxLength: 64
                     type: string
                   name:
                     description: 'The display name for the space. '
@@ -88100,7 +88115,7 @@ paths:
                     type: string
                   initials:
                     description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                    maxLength: 2
+                    maxLength: 64
                     type: string
                   name:
                     description: 'The display name for the space. '
@@ -88166,7 +88181,7 @@ paths:
                   type: string
                 initials:
                   description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                  maxLength: 2
+                  maxLength: 64
                   type: string
                 name:
                   description: 'The display name for the space. '
@@ -88225,7 +88240,7 @@ paths:
                     type: string
                   initials:
                     description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
-                    maxLength: 2
+                    maxLength: 64
                     type: string
                   name:
                     description: 'The display name for the space. '
@@ -156615,7 +156630,7 @@ components:
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
         id:
-          description: Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.
+          description: 'Optional rule ID. If omitted, Kibana generates one. IDs must be unique within the request. If a rule with this ID already exists, that item is reported in `errors` with the code `RULE_ALREADY_EXISTS` and the existing rule is not changed. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           maxLength: 150
           minLength: 1
           pattern: ^[a-zA-Z0-9_-]+$
@@ -157016,6 +157031,12 @@ components:
           type: array
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
+        id:
+          description: 'Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, the request fails with HTTP 409 and the existing rule is not changed. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+          maxLength: 150
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
+          type: string
         kind:
           anyOf:
             - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
@@ -161451,9 +161472,7 @@ components:
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                        default:
-                          type: auto
-                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
                       summary:
                         additionalProperties: false
                         description: Summary row configuration
@@ -161538,8 +161557,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
                   visible:
                     default: true
                     description: When `false`, hides the column from the datatable.
@@ -164132,8 +164150,7 @@ components:
                         - enum:
                             - bands
                           type: string
-                      default: bands
-                      description: Tick placement mode.
+                      description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                     visible:
                       default: true
                       description: When `true`, displays tick marks on the gauge.
@@ -171471,9 +171488,7 @@ components:
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyColorByValueAbsolute'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                  default:
-                    type: auto
-                  description: Color configuration based on the metric value.
+                  description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
                 labels:
                   additionalProperties: false
                   description: Labels configuration
@@ -180070,8 +180085,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -184938,6 +184952,10 @@ components:
               properties:
                 color:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                  default:
+                    mapping: []
+                    mode: categorical
+                    palette: default
         tags:
           default: []
           description: Tag IDs to associate with this visualization.
@@ -185407,8 +185425,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -187695,10 +187712,6 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCategoricalColorMapping'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGradientColorMapping'
-      default:
-        mapping: []
-        mode: categorical
-        palette: default
       description: Color mapping for dimension values, either categorical (for specific values) or as a gradient.
       title: Color Mapping
     Kibana_HTTP_APIs_visCounterRateOperation:
@@ -187947,9 +187960,7 @@ components:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
-                    description: Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                    description: Color configuration for ES|QL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
                   column:
                     description: Column to use
                     type: string
@@ -188037,9 +188048,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-          default:
-            type: auto
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         column:
           description: Column to use
           type: string
@@ -188635,9 +188644,7 @@ components:
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                        default:
-                          type: auto
-                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
                       summary:
                         additionalProperties: false
                         description: Summary row configuration
@@ -188722,8 +188729,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
                   visible:
                     default: true
                     description: When `false`, hides the column from the datatable.
@@ -189453,8 +189459,7 @@ components:
                     - enum:
                         - bands
                       type: string
-                  default: bands
-                  description: Tick placement mode.
+                  description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                 visible:
                   default: true
                   description: When `true`, displays tick marks on the gauge.
@@ -189592,8 +189597,7 @@ components:
                         - enum:
                             - bands
                           type: string
-                      default: bands
-                      description: Tick placement mode.
+                      description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                     visible:
                       default: true
                       description: When `true`, displays tick marks on the gauge.
@@ -190323,9 +190327,7 @@ components:
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyColorByValueAbsolute'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                  default:
-                    type: auto
-                  description: Color configuration based on the metric value.
+                  description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
                 labels:
                   additionalProperties: false
                   description: Labels configuration
@@ -191057,8 +191059,7 @@ components:
               type: object
               properties:
                 placement:
-                  default: before
-                  description: 'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Ignored when the label is not visible.'
+                  description: 'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Defaults to `before`. Ignored when the label is not visible.'
                   enum:
                     - before
                     - after
@@ -191647,8 +191648,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -191813,8 +191813,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -192253,6 +192252,10 @@ components:
           properties:
             color:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+              default:
+                mapping: []
+                mode: categorical
+                palette: default
             column:
               description: Column to use
               type: string
@@ -192362,6 +192365,10 @@ components:
               properties:
                 color:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                  default:
+                    mapping: []
+                    mode: categorical
+                    palette: default
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -192774,8 +192781,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -192940,8 +192946,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -193098,8 +193103,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -193269,8 +193273,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -193908,8 +193911,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
               column:
                 description: Column to use
                 type: string
@@ -194044,8 +194046,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
           maxItems: 100
           type: array
       required:
@@ -195149,8 +195150,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
