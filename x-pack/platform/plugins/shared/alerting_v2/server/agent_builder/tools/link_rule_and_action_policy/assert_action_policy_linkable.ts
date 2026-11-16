@@ -20,9 +20,11 @@ export interface LinkableActionPolicy {
 
 /**
  * Checks that the action policy draft exists and can receive a routing tag. A policy that is
- * already saved and has no `matcher.tags` applies to every alert rule, so adding a tag narrows
- * it and other rules stop notifying through it once it is saved: this is allowed but reported
- * as a warning. An unsaved draft can be shaped freely.
+ * already saved and has no `matcher.tags` is either a catch-all (no expression either, it applies
+ * to every alert rule) or expression-only (any rule can match its KQL). Adding a tag narrows it
+ * to one rule (the tag is combined with the expression with AND) and other rules stop notifying
+ * through it once it is saved: this is allowed but reported as a warning. An unsaved draft can be
+ * shaped freely.
  */
 export const assertActionPolicyLinkable = (
   draft: AttachmentDraft<ActionPolicyAttachmentData>,
@@ -36,12 +38,21 @@ export const assertActionPolicyLinkable = (
 
   const { matcher } = draft.data;
   const tags = matcher?.tags ?? [];
-  const warnings =
-    draft.origin !== undefined && tags.length === 0
-      ? [
-          'This saved action policy has no `matcher.tags`, so it applies to every alert rule. Linking narrows it to this rule: once the user saves the policy, other rules will stop notifying through it. Tell the user about this.',
-        ]
-      : [];
+  const expression = matcher?.expression?.trim() ?? '';
+  const isCatchAll = tags.length === 0 && expression.length === 0;
+  const isExpressionOnly = tags.length === 0 && expression.length > 0;
+  const isSaved = draft.origin !== undefined;
+
+  const warnings: string[] = [];
+  if (isSaved && isCatchAll) {
+    warnings.push(
+      'This saved action policy has no matcher, so it applies to every alert rule. Linking narrows it to this rule: once the user saves the policy, other rules will stop notifying through it. Tell the user about this.'
+    );
+  } else if (isSaved && isExpressionOnly) {
+    warnings.push(
+      'This saved action policy matches by a KQL expression and has no `matcher.tags`, so any rule can match it. Linking adds a routing tag, which is combined with that expression with AND and restricts the policy to this rule: once the user saves the policy, other rules will stop notifying through it. Tell the user about this.'
+    );
+  }
 
   return { matcher, tags, warnings };
 };

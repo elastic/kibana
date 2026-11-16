@@ -58,13 +58,35 @@ describe('assertActionPolicyLinkable', () => {
 
   it.each([
     ['no matcher', undefined],
-    ['an expression-only matcher', { expression: 'severity: critical' }],
+    ['an empty matcher', {}],
+    ['a blank expression', { expression: '   ' }],
   ])('allows a saved catch-all policy with %s but warns about narrowing it', (_label, matcher) => {
     const { warnings } = assertActionPolicyLinkable(
       draft(matcher, { origin: 'policy-1' }),
       'policy-att'
     );
 
-    expect(warnings).toEqual([expect.stringContaining('other rules will stop notifying')]);
+    expect(warnings).toEqual([
+      expect.stringContaining('has no matcher, so it applies to every alert rule'),
+    ]);
+  });
+
+  it('allows a saved expression-only policy but warns that the tag restricts it to the rule', () => {
+    const { warnings } = assertActionPolicyLinkable(
+      draft({ expression: 'severity: critical' }, { origin: 'policy-1' }),
+      'policy-att'
+    );
+
+    expect(warnings).toEqual([
+      expect.stringContaining('combined with that expression with AND'),
+    ]);
+    expect(warnings[0]).not.toContain('applies to every alert rule');
+  });
+
+  it('does not warn about an unsaved expression-only draft', () => {
+    expect(
+      assertActionPolicyLinkable(draft({ expression: 'severity: critical' }), 'policy-att')
+        .warnings
+    ).toEqual([]);
   });
 });
