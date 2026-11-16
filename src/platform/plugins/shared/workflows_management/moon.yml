@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/entity-access-control'
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
+  - '@kbn/crypto'
   - '@kbn/esql-language'
   - '@kbn/esql-types'
   - '@kbn/esql-utils'
