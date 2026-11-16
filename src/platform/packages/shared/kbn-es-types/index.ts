@@ -23,5 +23,10 @@ export type {
   ESQLRow,
   ESQLSearchResponse,
   ESQLSearchParams,
+  EsqlQueryProfile,
+  EsqlProfileDriver,
+  EsqlProfileOperator,
+  EsqlProfilePlan,
+  EsqlProfileTimeSpan,
   SearchField,
 } from './src';

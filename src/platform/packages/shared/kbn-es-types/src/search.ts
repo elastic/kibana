@@ -664,6 +664,85 @@ export interface ESQLColumn {
 
 export type ESQLRow = unknown[];
 
+/** A planning or query phase duration from an ES|QL profile. */
+export interface EsqlProfileTimeSpan {
+  took_millis?: number;
+  took_nanos?: number;
+  /** Epoch millis. Present on newer profiles and absent on older ones. */
+  start_millis?: number;
+  /** Epoch millis. Present on newer profiles and absent on older ones. */
+  stop_millis?: number;
+}
+
+/** One operator inside an ES|QL profile driver. `status` fields vary by operator. */
+export interface EsqlProfileOperator {
+  operator: string;
+  status?: Record<string, unknown>;
+}
+
+/** One slice of ES|QL execution, usually one task on a node. */
+export interface EsqlProfileDriver {
+  description?: string;
+  cluster_name?: string;
+  node_name?: string;
+  operators?: EsqlProfileOperator[];
+  /** Epoch millis when this driver started. Absent on older profiles. */
+  start_millis?: number;
+  /** Epoch millis when this driver stopped. Absent on older profiles. */
+  stop_millis?: number;
+  took_nanos?: number;
+  /** CPU time for this driver, excluding waiting. */
+  cpu_nanos?: number;
+  /** Times this driver stopped to wait, for example for an exchange to fill. */
+  sleeps?: EsqlProfileSleeps;
+}
+
+/** One stretch where a driver was not running. Times are epoch millis. */
+export interface EsqlProfileSleep {
+  reason?: string;
+  thread_name?: string;
+  sleep_millis?: number;
+  wake_millis?: number;
+}
+
+/**
+ * Waiting summary for a driver. `counts` covers every sleep, while `first` and `last` only keep
+ * a few of them, so the recorded sleeps can be fewer than the counted ones.
+ */
+export interface EsqlProfileSleeps {
+  counts?: Record<string, number>;
+  first?: EsqlProfileSleep[];
+  last?: EsqlProfileSleep[];
+}
+
+/** Physical plan text attached to an ES|QL profile. */
+export interface EsqlProfilePlan {
+  description?: string;
+  cluster_name?: string;
+  node_name?: string;
+  plan?: string;
+  logical_plan?: string;
+}
+
+/**
+ * The `profile` object returned when an ES|QL query is run with `profile: true`.
+ * Unknown status fields stay on each operator so a new counter does not break readers.
+ */
+export interface EsqlQueryProfile {
+  query?: EsqlProfileTimeSpan;
+  planning?: EsqlProfileTimeSpan;
+  parsing?: EsqlProfileTimeSpan;
+  view_resolution?: EsqlProfileTimeSpan;
+  dataset_resolution?: EsqlProfileTimeSpan;
+  preanalysis?: EsqlProfileTimeSpan;
+  indices_resolution?: EsqlProfileTimeSpan;
+  enrich_resolution?: EsqlProfileTimeSpan;
+  inference_resolution?: EsqlProfileTimeSpan;
+  analysis?: EsqlProfileTimeSpan;
+  drivers?: EsqlProfileDriver[];
+  plans?: EsqlProfilePlan[];
+}
+
 export interface ESQLSearchResponse {
   approximation_applied?: boolean;
   columns: ESQLColumn[];
@@ -675,6 +754,7 @@ export interface ESQLSearchResponse {
   took?: number;
   documents_found?: number;
   _clusters?: estypes.ClusterStatistics;
+  profile?: EsqlQueryProfile;
 }
 
 export interface ESQLSearchParams {
@@ -686,6 +766,11 @@ export interface ESQLSearchParams {
   include_execution_metadata?: boolean;
   dropNullColumns?: boolean;
   approximation?: boolean;
+  /**
+   * When true, the response includes a `profile` object describing how the query ran.
+   * The profile is a debug payload and its shape can change.
+   */
+  profile?: boolean;
   /**
    * Request-level settings. `column_metadata` must be explicitly requested to receive
    * the `_meta` field on columns in the response.

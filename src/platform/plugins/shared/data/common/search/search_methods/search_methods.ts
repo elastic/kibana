@@ -419,6 +419,7 @@ export class SearchMethodsService implements ISearchMethods {
         dropNullColumns: params.dropNullColumns,
         include_execution_metadata: params.includeExecutionMetadata,
         ...(params.columnMetadata ? { settings: { column_metadata: true } } : {}),
+        ...(params.profile ? { profile: true } : {}),
       },
     };
   }

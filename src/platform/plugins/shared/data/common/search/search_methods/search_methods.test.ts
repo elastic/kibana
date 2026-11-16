@@ -145,6 +145,32 @@ describe('SearchMethodsService', () => {
       );
     });
 
+    it('requests a profile when the profile param is true', async () => {
+      const mockResponse = { columns: [], values: [] };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      await service.esql({ query: 'FROM logs', profile: true });
+
+      expect(mockSearch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            profile: true,
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('omits profile unless the profile param is set', async () => {
+      const mockResponse = { columns: [], values: [] };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      await service.esql({ query: 'FROM logs' });
+
+      const [{ params }] = mockSearch.mock.calls[0];
+      expect(params).not.toHaveProperty('profile');
+    });
+
     it('omits settings when columnMetadata option is not set', async () => {
       const mockResponse = { columns: [], values: [] };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
