@@ -189,7 +189,7 @@ export const createSourceUpdateTool = ({
             reportToolFailure({
               error,
               toolId: NIGHTSHIFT_SOURCE_UPDATE_TOOL_ID,
-              errorLogMessage: `Failed to update source ${current.id}: setting enabled failed: ${reason}`,
+              errorLogMessage: `Failed to update source: setting enabled failed: ${reason}`,
               logger,
               telemetry,
               request,

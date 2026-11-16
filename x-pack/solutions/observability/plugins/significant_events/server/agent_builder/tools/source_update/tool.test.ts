@@ -214,7 +214,7 @@ describe('source_update tool', () => {
 
     expect(result).toMatchObject({ results: [{ type: 'other' }] });
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining(`Failed to update source ${checkout.id}: setting enabled failed`)
+      expect.stringContaining('Failed to update source: setting enabled failed')
     );
     expect(telemetry.trackAgentToolFailed).toHaveBeenCalledTimes(1);
     expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(

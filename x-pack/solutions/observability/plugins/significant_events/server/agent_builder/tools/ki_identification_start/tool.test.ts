@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { createKiIdentificationStartTool } from './tool';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import {
+  createKiIdentificationStartTool,
+  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
+} from './tool';
 import {
   createMockToolContext,
   createSignificantEventsServer,
@@ -18,10 +22,11 @@ import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onb
 describe('createKiIdentificationStartTool', () => {
   const telemetry = {
     trackAgentToolKiIdentificationStarted: jest.fn(),
+    trackAgentToolFailed: jest.fn(),
   };
 
   beforeEach(() => {
-    telemetry.trackAgentToolKiIdentificationStarted.mockClear();
+    jest.clearAllMocks();
   });
 
   const setup = ({
@@ -53,6 +58,7 @@ describe('createKiIdentificationStartTool', () => {
 
     const tool = createKiIdentificationStartTool({
       server: createSignificantEventsServer({ featurePrivilege }),
+      logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
       streamsKIsOnboardingClient,
       maintenanceService: maintenanceService as never,
@@ -139,6 +145,13 @@ describe('createKiIdentificationStartTool', () => {
     expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledTimes(1);
     expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledWith(
       expect.objectContaining({ success: false, error_message: 'unknown_source' }),
+      expect.anything()
+    );
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool_id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
+        error_code: 'unknown_source',
+      }),
       expect.anything()
     );
     expect(result).toMatchObject({
