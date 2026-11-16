@@ -158,10 +158,7 @@ export function NightshiftApp({
   // Mute chrome from the no-search baseline, not the filtered list — a search that zeros Medium
   // must keep Medium filled while Critical (never present) stays hollow.
   const presentSeverities = useMemo(
-    () =>
-      new Set(
-        SEVERITY_OPTIONS.filter((severity) => unfilteredSeverityCounts[severity] > 0)
-      ),
+    () => new Set(SEVERITY_OPTIONS.filter((severity) => unfilteredSeverityCounts[severity] > 0)),
     [unfilteredSeverityCounts]
   );
 
