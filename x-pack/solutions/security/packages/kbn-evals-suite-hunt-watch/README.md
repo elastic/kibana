@@ -30,7 +30,7 @@ never part of that gate.
 | Investigation Status | CODE | conversation `metadata.status`, or no conversation at all |
 | Canary Inverted | CODE | 1 iff the hunt reached a verdict with Tier 1 `no_searchable_terms` and the prose-only report produced no hit, no Tier 2 execution, no Proposal, no SSE; a hunt that failed before searching scores 0 |
 | Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; reported, not gated |
-| Factuality | LLM | narrative claims against a ground truth synthesized from the row's pinned expectations plus the report's recorded metadata, search scope and executed behaviors; reported, not gated |
+| Factuality | LLM | the judge's verdict on the narrative's claims against a ground truth synthesized from the row's pinned expectations plus the report's recorded metadata, search scope and executed behaviors: 1 for `ACCURATE` or `MINOR_INACCURACIES`, 0 otherwise, with the claim-score mean kept as `claimScore`; reported, not gated |
 | Relevance | LLM | share of narrative claims that answer the hunt question; reported, not gated |
 | Groundedness | LLM | narrative claims against the hunt facts (hunt output, SSE `hunt_result`, packaging, Proposals, evidence); reported, not gated |
 
@@ -63,9 +63,11 @@ and asserts that a known-bad output turns the dataset red and a known-good one d
 wiring regression that left the suite green while measuring nothing would fail there.
 
 Read the LLM scores against their ceilings. The ground truth is synthesized from the row's
-pinned expectations, so Factuality docks the narrative's peripheral detail (publish date,
-indicator values, search window) as "not in ground truth"; about 0.9 is a healthy row, and a
-drop below that points at a central claim the judge contradicted. Counts a row leaves unpinned
+pinned expectations, so the judge marks the narrative's peripheral detail (publish date,
+indicator values, search window) as "not in ground truth". That drags the claim-score mean
+below 0.8 on narratives the judge itself calls accurate, so Factuality scores the verdict
+instead: a 0 means the judge found a central claim contradicted or unsupported, and
+`claimScore` shows how much peripheral detail it could not check. Counts a row leaves unpinned
 (no `tier1Status`, no `tier2Executed`, no `pendingProposals`) are stated to the judge
 as open, so the narrative is not docked for reporting them. Groundedness judges the same
 narrative against the collected hunt facts (report doc, hunt output, coordinator result, SSE,

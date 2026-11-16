@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
+import type { DefaultEvaluators, EvaluationResult, Evaluator } from '@kbn/evals';
 import {
   createQuantitativeCorrectnessEvaluators,
   createQuantitativeGroundednessEvaluator,
@@ -339,6 +339,25 @@ export const expectsNoNarrative = (expected: HuntExpected): boolean =>
   expected.reports.every((r) => r.investigationStatus === 'none') ||
   (expected.outcome?.length === 1 && expected.outcome[0] === 'failed');
 
+const FACTUALITY_PASS_LABELS: ReadonlySet<string> = new Set(['ACCURATE', 'MINOR_INACCURACIES']);
+
+/**
+ * Factuality scores the judge's own verdict, not the geometric mean of its claim scores. On a
+ * correct narrative, true detail the synthesized ground truth does not pin reads as
+ * NOT_IN_GROUND_TRUTH (0.5 per claim), so the mean falls below 0.8 even when the judge itself
+ * calls the narrative ACCURATE or MINOR_INACCURACIES. On the golden cohort two independent
+ * graders agreed with the verdict label on 63/65 and 55/65 rows, against 35/65 and 45/65 for the
+ * claim mean. The claim mean stays in metadata as `claimScore`.
+ */
+const scoreFactualityByVerdict = (result: EvaluationResult): EvaluationResult => {
+  if (typeof result.label !== 'string') return result;
+  return {
+    ...result,
+    score: FACTUALITY_PASS_LABELS.has(result.label) ? 1 : 0,
+    metadata: { ...(result.metadata ?? {}), claimScore: result.score },
+  };
+};
+
 /**
  * Wraps a built-in quantitative judge so it reads the analyses stored on the hunt artifacts and
  * reports in this suite's N/A (no Investigation expected) vs MISSING (judge produced nothing) terms.
@@ -374,9 +393,10 @@ const adaptJudgeEvaluator = (
         explanation: 'judge analysis unavailable: no narrative was posted or the judge call failed',
       };
     }
+    const scored = evaluator.name === 'Factuality' ? scoreFactualityByVerdict(result) : result;
     return {
-      ...result,
-      metadata: { ...(result.metadata ?? {}), ...(judge ? { judge } : {}) },
+      ...scored,
+      metadata: { ...(scored.metadata ?? {}), ...(judge ? { judge } : {}) },
     };
   },
 });

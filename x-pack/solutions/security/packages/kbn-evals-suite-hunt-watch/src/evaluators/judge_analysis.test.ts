@@ -224,6 +224,70 @@ describe('judge_analysis', () => {
     expect(result.label).toBe('MISSING');
   });
 
+  describe('Factuality scores the judge verdict, not the claim mean', () => {
+    const correctnessAnalysis = (factualAccuracySummary: string) => ({
+      summary: {
+        factual_accuracy_summary: factualAccuracySummary,
+        relevance_summary: 'RELEVANT',
+        sequence_accuracy_summary: 'NOT_APPLICABLE',
+      },
+      analysis: [
+        {
+          claim: 'No activity matched.',
+          centrality: 'central',
+          centrality_reason: 'the verdict',
+          verdict: 'FULLY_SUPPORTED',
+          sequence_match: 'NOT_APPLICABLE',
+          justification_snippet: undefined,
+          explanation: 'pinned',
+        },
+        {
+          claim: 'The report was published on 1 May.',
+          centrality: 'peripheral',
+          centrality_reason: 'context',
+          verdict: 'NOT_IN_GROUND_TRUTH',
+          sequence_match: 'NOT_APPLICABLE',
+          justification_snippet: undefined,
+          explanation: 'not pinned',
+        },
+      ],
+    });
+    const scoreFor = async (factualAccuracySummary: string) => {
+      const [factuality] = createJudgeEvaluators();
+      return factuality.evaluate(
+        evaluatorArgs(buildOutput(), {
+          ...buildArtifacts(),
+          correctnessAnalysis: correctnessAnalysis(factualAccuracySummary),
+        })
+      );
+    };
+
+    it('passes MINOR_INACCURACIES even though the claim mean is below 0.8', async () => {
+      const result = await scoreFor('MINOR_INACCURACIES');
+      expect(result.score).toBe(1);
+      expect(result.metadata?.claimScore).toBeCloseTo(Math.sqrt(0.5));
+    });
+
+    it('passes ACCURATE', async () => {
+      expect((await scoreFor('ACCURATE')).score).toBe(1);
+    });
+
+    it('fails MAJOR_INACCURACIES', async () => {
+      expect((await scoreFor('MAJOR_INACCURACIES')).score).toBe(0);
+    });
+
+    it('leaves Relevance on its claim score', async () => {
+      const [, relevance] = createJudgeEvaluators();
+      const result = await relevance.evaluate(
+        evaluatorArgs(buildOutput(), {
+          ...buildArtifacts(),
+          correctnessAnalysis: correctnessAnalysis('ACCURATE'),
+        })
+      );
+      expect(result.metadata?.claimScore).toBeUndefined();
+    });
+  });
+
   it('scores from the stored analysis and records judge provenance', async () => {
     const judge = { judgeConnectorId: 'eis-google-gemini-3-1-pro' };
     const [, , groundedness] = createJudgeEvaluators(judge);
