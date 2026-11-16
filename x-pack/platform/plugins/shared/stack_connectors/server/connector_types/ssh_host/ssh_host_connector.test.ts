@@ -5,33 +5,232 @@
  * 2.0.
  */
 
-import { execFile } from 'child_process';
-import { writeFileSync } from 'fs';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { AUTH_TYPE, CONNECTOR_ID } from '@kbn/connector-schemas/ssh_host';
+import type { EventEmitter } from 'events';
+import { Client } from 'ssh2';
 import { parseHost, SshHostConnector } from './ssh_host_connector';
+import { resetSshHostSessionsForTests, SSH_SESSION_IDLE_MS } from './ssh_host_session';
 
-jest.mock('child_process', () => {
-  const actual = jest.requireActual('child_process');
+jest.mock('ssh2', () => {
+  const { EventEmitter: Emitter } = jest.requireActual('events') as typeof import('events');
+  const { Readable, Writable } = jest.requireActual('stream') as typeof import('stream');
+
+  const createExecStream = (command: string) => {
+    const stream = new Emitter();
+    const execStream = Object.assign(stream, {
+      stderr: new Emitter(),
+      command,
+      stdin: Buffer.alloc(0),
+      write(chunk: Buffer | string) {
+        const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        execStream.stdin = Buffer.concat([execStream.stdin, buf]);
+        return true;
+      },
+      end(chunk?: Buffer | string) {
+        if (chunk !== undefined) {
+          execStream.write(chunk);
+        }
+        const result = MockSshClient.nextExecResult;
+        if (result.stdout) {
+          execStream.emit('data', Buffer.from(result.stdout));
+        }
+        if (result.stderr) {
+          execStream.stderr.emit('data', Buffer.from(result.stderr));
+        }
+        execStream.emit('close', result.code, null);
+        return execStream;
+      },
+      close() {
+        execStream.emit('close', null, 'KILL');
+      },
+      destroy() {
+        execStream.emit('error', new Error('destroyed'));
+        return execStream;
+      },
+    });
+    return execStream;
+  };
+
+  const createSftp = () => {
+    const sftp = {
+      calls: [] as string[],
+      files: new Map<string, Buffer>(),
+      statSize: undefined as number | undefined,
+      stat(path: string, callback: (err: Error | null, stats?: { size: number }) => void) {
+        sftp.calls.push(`stat ${path}`);
+        const file = sftp.files.get(path);
+        if (file) {
+          callback(null, { size: file.length });
+          return;
+        }
+        if (sftp.statSize !== undefined) {
+          callback(null, { size: sftp.statSize });
+          return;
+        }
+        callback(Object.assign(new Error('No such file'), { code: 2 }));
+      },
+      mkdir(path: string, callback: (err: Error | null) => void) {
+        sftp.calls.push(`mkdir ${path}`);
+        callback(null);
+      },
+      createReadStream(path: string) {
+        sftp.calls.push(`read ${path}`);
+        return Readable.from([sftp.files.get(path) ?? Buffer.alloc(0)]);
+      },
+      createWriteStream(path: string) {
+        sftp.calls.push(`write ${path}`);
+        const chunks: Buffer[] = [];
+        const stream = new Writable({
+          write(chunk, _encoding, callback) {
+            chunks.push(Buffer.from(chunk));
+            callback();
+          },
+        });
+        stream.on('finish', () => {
+          sftp.files.set(path, Buffer.concat(chunks));
+        });
+        return stream;
+      },
+      end() {
+        sftp.calls.push('end');
+      },
+    };
+    return sftp;
+  };
+
+  interface MockClientInstance {
+    config?: {
+      host?: string;
+      port?: number;
+      username?: string;
+      password?: string;
+      privateKey?: string;
+      tryKeyboard?: boolean;
+      readyTimeout?: number;
+      keepaliveInterval?: number;
+      keepaliveCountMax?: number;
+      hostVerifier?: (key: Buffer, verify: (valid: boolean) => void) => boolean | void;
+    };
+    ended: boolean;
+    emit(event: string, ...args: unknown[]): boolean;
+  }
+
+  const MockSshClient = function MockClient(this: MockClientInstance) {
+    Emitter.call(this as unknown as EventEmitter);
+    this.ended = false;
+  } as unknown as {
+    new (): MockClientInstance;
+    prototype: {
+      connect: (this: MockClientInstance, config: MockClientInstance['config']) => void;
+      exec: (
+        command: string,
+        callback: (err: Error | undefined, stream: ReturnType<typeof createExecStream>) => void
+      ) => void;
+      sftp: (
+        callback: (err: Error | undefined, sftp: ReturnType<typeof createSftp>) => void
+      ) => void;
+      end: (this: MockClientInstance) => void;
+    };
+    instances: MockClientInstance[];
+    hostKey: Buffer;
+    connectError: Error | null;
+    nextExecResult: { stdout: string; stderr: string; code: number };
+    sftp: ReturnType<typeof createSftp>;
+    lastStream?: ReturnType<typeof createExecStream>;
+    reset: () => void;
+  };
+  Object.setPrototypeOf(MockSshClient.prototype, Emitter.prototype);
+
+  MockSshClient.prototype.connect = function connect(
+    this: MockClientInstance,
+    config: MockClientInstance['config']
+  ) {
+    this.config = config;
+    MockSshClient.instances.push(this);
+    if (typeof config?.hostVerifier === 'function') {
+      const accepted = config.hostVerifier(MockSshClient.hostKey, () => undefined);
+      if (accepted === false) {
+        this.emit('error', new Error('Host denied (verification failed)'));
+        return;
+      }
+    }
+    if (MockSshClient.connectError) {
+      this.emit('error', MockSshClient.connectError);
+      return;
+    }
+    this.emit('ready');
+  };
+
+  MockSshClient.prototype.exec = function exec(
+    command: string,
+    callback: (err: Error | undefined, stream: ReturnType<typeof createExecStream>) => void
+  ) {
+    const stream = createExecStream(command);
+    MockSshClient.lastStream = stream;
+    callback(undefined, stream);
+  };
+
+  MockSshClient.prototype.sftp = function sftp(
+    callback: (err: Error | undefined, sftp: ReturnType<typeof createSftp>) => void
+  ) {
+    callback(undefined, MockSshClient.sftp);
+  };
+
+  MockSshClient.prototype.end = function end(this: MockClientInstance) {
+    this.ended = true;
+    this.emit('end');
+  };
+
+  MockSshClient.reset = () => {
+    MockSshClient.instances = [];
+    MockSshClient.hostKey = Buffer.from('host-key-a');
+    MockSshClient.connectError = null;
+    MockSshClient.nextExecResult = { stdout: '', stderr: '', code: 0 };
+    MockSshClient.sftp = createSftp();
+    MockSshClient.lastStream = undefined;
+  };
+  MockSshClient.reset();
+
   return {
-    ...actual,
-    execFile: jest.fn(),
+    Client: MockSshClient,
+    utils: { sftp: { STATUS_CODE: { NO_SUCH_FILE: 2 } } },
   };
 });
 
-const mockedExecFile = execFile as jest.MockedFunction<typeof execFile>;
-
-const mockExecFileSuccess = (stdout = '', stderr = '') => {
-  mockedExecFile.mockImplementation((bin, args, options, callback) => {
-    const cb = typeof options === 'function' ? options : callback;
-    cb?.(null, stdout, stderr);
-    return {} as ReturnType<typeof execFile>;
-  });
+const MockClient = Client as unknown as {
+  instances: Array<{
+    config?: {
+      host?: string;
+      port?: number;
+      username?: string;
+      password?: string;
+      privateKey?: string;
+      tryKeyboard?: boolean;
+      readyTimeout?: number;
+      keepaliveInterval?: number;
+      keepaliveCountMax?: number;
+      hostVerifier?: (key: Buffer, verify: (valid: boolean) => void) => boolean | void;
+    };
+    ended: boolean;
+  }>;
+  hostKey: Buffer;
+  connectError: Error | null;
+  nextExecResult: { stdout: string; stderr: string; code: number };
+  sftp: {
+    calls: string[];
+    files: Map<string, Buffer>;
+    statSize?: number;
+  };
+  lastStream?: { command: string; stdin: Buffer };
+  reset: () => void;
 };
 
 describe('SshHostConnector', () => {
+  const privateKey = '-----BEGIN OPENSSH PRIVATE KEY-----\ntest\n-----END OPENSSH PRIVATE KEY-----';
+
   const createConnector = (
     overrides: {
       id?: string;
@@ -54,19 +253,18 @@ describe('SshHostConnector', () => {
       connector: { id: overrides.id ?? '1', type: CONNECTOR_ID },
       secrets: {
         username: overrides.username ?? 'alice',
-        sshPrivateKey:
-          overrides.sshPrivateKey === undefined
-            ? '-----BEGIN OPENSSH PRIVATE KEY-----\ntest\n-----END OPENSSH PRIVATE KEY-----'
-            : overrides.sshPrivateKey,
+        sshPrivateKey: overrides.sshPrivateKey === undefined ? privateKey : overrides.sshPrivateKey,
         password: overrides.password === undefined ? null : overrides.password,
       },
       logger: loggingSystemMock.createLogger(),
       services: actionsMock.createServices(),
     });
 
+  const connectConfig = () => MockClient.instances.at(-1)?.config;
+
   beforeEach(() => {
-    mockedExecFile.mockReset();
-    mockExecFileSuccess();
+    resetSshHostSessionsForTests();
+    MockClient.reset();
   });
 
   describe('exec', () => {
@@ -82,176 +280,177 @@ describe('SshHostConnector', () => {
         })
       ).rejects.toThrow(/allowedHosts/);
       expect(configurationUtilities.ensureHostnameAllowed).toHaveBeenCalledWith('evil.example.com');
-      expect(mockedExecFile).not.toHaveBeenCalled();
+      expect(MockClient.instances).toHaveLength(0);
     });
 
-    it('invokes ssh with argv, not a shell string', async () => {
-      const connector = createConnector();
-      await connector.exec({ script: 'hostname -f' });
+    it('connects with ssh2 and sends the script as base64 on stdin', async () => {
+      await createConnector().exec({ script: 'hostname -f' });
 
-      expect(mockedExecFile).toHaveBeenCalledTimes(1);
-      const [bin, args] = mockedExecFile.mock.calls[0];
-      expect(bin).toBe('ssh');
-      expect(args).toEqual(expect.any(Array));
-      expect(args).toContain('alice@example.com');
-      expect(args).toContain('-p');
-      expect(args).toContain('22');
-      expect((args as string[]).join(' ')).not.toMatch(/alice@example.com "/);
-      expect(args).toContain('StrictHostKeyChecking=accept-new');
-      expect(args).toEqual(
-        expect.arrayContaining(['-o', expect.stringMatching(/^UserKnownHostsFile=.+kbn_ssh_kh_/)])
+      expect(MockClient.instances).toHaveLength(1);
+      expect(connectConfig()).toEqual(
+        expect.objectContaining({
+          host: 'example.com',
+          port: 22,
+          username: 'alice',
+          readyTimeout: 10000,
+          keepaliveInterval: 15000,
+          keepaliveCountMax: 3,
+        })
       );
+      expect(connectConfig()?.hostVerifier).toEqual(expect.any(Function));
+      expect(MockClient.lastStream?.command).toContain('base64 -d');
+      expect(
+        Buffer.from(MockClient.lastStream?.stdin.toString('utf8') ?? '', 'base64').toString()
+      ).toBe('hostname -f');
     });
 
     it('skips host key verification only when explicitly enabled', async () => {
-      const connector = createConnector({ skipHostKeyVerification: true });
-      await connector.exec({ script: 'true' });
+      await createConnector({ skipHostKeyVerification: true }).exec({ script: 'true' });
 
-      const args = mockedExecFile.mock.calls[0][1] as string[];
-      expect(args).toContain('StrictHostKeyChecking=no');
-      expect(args).toContain('UserKnownHostsFile=/dev/null');
+      expect(connectConfig()?.hostVerifier).toBeUndefined();
     });
 
-    it('rejects a username with whitespace or metacharacters before connecting', async () => {
+    it('rejects a changed host key as a client failure', async () => {
+      const connector = createConnector();
+      await connector.exec({ script: 'true' });
+      resetSshHostSessionsForTests();
+      MockClient.hostKey = Buffer.from('host-key-b');
+
+      const result = await connector.exec({ script: 'true' });
+
+      expect(result.code).toBe(255);
+      expect(result.stderr).toMatch(/Host key verification failed/i);
+    });
+
+    it('rejects a username with whitespace before connecting', async () => {
       const connector = createConnector({ username: 'alice; id' });
 
       await expect(connector.exec({ script: 'true' })).rejects.toThrow('Invalid SSH username');
-      expect(mockedExecFile).not.toHaveBeenCalled();
+      expect(MockClient.instances).toHaveLength(0);
     });
 
     it('rejects a username starting with a dash before connecting', async () => {
       const connector = createConnector({ username: '-oProxyCommand=id' });
 
       await expect(connector.exec({ script: 'true' })).rejects.toThrow('Invalid SSH username');
-      expect(mockedExecFile).not.toHaveBeenCalled();
+      expect(MockClient.instances).toHaveLength(0);
     });
 
-    it('passes host:port as -p and a destination argv', async () => {
-      const connector = createConnector({ host: 'example.com:2222' });
-      await connector.exec({ script: 'true' });
+    it('passes host:port to ssh2 separately from the hostname', async () => {
+      await createConnector({ host: 'example.com:2222' }).exec({ script: 'true' });
 
-      const args = mockedExecFile.mock.calls[0][1] as string[];
-      expect(args).toContain('-p');
-      expect(args[args.indexOf('-p') + 1]).toBe('2222');
-      expect(args).toContain('alice@example.com');
+      expect(connectConfig()).toEqual(expect.objectContaining({ host: 'example.com', port: 2222 }));
     });
 
     it('treats unbracketed IPv6 as host with port 22', async () => {
       await createConnector({ host: '::1' }).exec({ script: 'true' });
 
-      const args = mockedExecFile.mock.calls[0][1] as string[];
-      expect(args).toContain('alice@::1');
-      expect(args[args.indexOf('-p') + 1]).toBe('22');
+      expect(connectConfig()).toEqual(expect.objectContaining({ host: '::1', port: 22 }));
     });
 
-    it('parses [ipv6]:port for ssh', async () => {
+    it('parses [ipv6]:port', async () => {
       await createConnector({ host: '[2001:db8::1]:2222' }).exec({ script: 'true' });
 
-      const args = mockedExecFile.mock.calls[0][1] as string[];
-      expect(args).toContain('alice@2001:db8::1');
-      expect(args[args.indexOf('-p') + 1]).toBe('2222');
+      expect(connectConfig()).toEqual(expect.objectContaining({ host: '2001:db8::1', port: 2222 }));
     });
 
-    it('uses sshpass argv for password auth', async () => {
-      const connector = createConnector({
+    it('uses password auth without a local sshpass binary', async () => {
+      await createConnector({
         authType: AUTH_TYPE.Password,
         password: 'secret',
         sshPrivateKey: null,
-      });
-      await connector.exec({ script: 'true' });
+      }).exec({ script: 'true' });
 
-      const [bin, args, options] = mockedExecFile.mock.calls[0];
-      expect(bin).toBe('sshpass');
-      expect(args).toEqual(expect.arrayContaining(['-e', 'ssh']));
-      expect((options as { env: NodeJS.ProcessEnv }).env.SSHPASS).toBe('secret');
-    });
-
-    it('returns the remote exit code without throwing', async () => {
-      mockedExecFile.mockImplementation((bin, args, options, callback) => {
-        const cb = typeof options === 'function' ? options : callback;
-        const error = Object.assign(new Error('Command failed'), {
-          code: 7,
-          stdout: 'out',
-          stderr: 'err',
-        });
-        cb?.(error, 'out', 'err');
-        return {} as ReturnType<typeof execFile>;
-      });
-
-      const result = await createConnector().exec({ script: 'false' });
-      expect(result).toEqual({ stdout: 'out', stderr: 'err', code: 7 });
-    });
-
-    it('names the missing binary on ENOENT', async () => {
-      mockedExecFile.mockImplementation((bin, args, options, callback) => {
-        const cb = typeof options === 'function' ? options : callback;
-        const error = Object.assign(new Error(`spawn ${bin} ENOENT`), { code: 'ENOENT' });
-        cb?.(error, '', '');
-        return {} as ReturnType<typeof execFile>;
-      });
-
-      await expect(createConnector().exec({ script: 'true' })).rejects.toThrow(
-        /ssh is not installed on the Kibana host/
+      expect(connectConfig()).toEqual(
+        expect.objectContaining({ password: 'secret', tryKeyboard: true })
       );
+      expect(connectConfig()?.privateKey).toBeUndefined();
+    });
 
+    it('passes the private key to ssh2 and normalizes CRLF', async () => {
+      await createConnector({
+        sshPrivateKey:
+          '-----BEGIN OPENSSH PRIVATE KEY-----\r\ntest\r\n-----END OPENSSH PRIVATE KEY-----\r\n',
+      }).exec({ script: 'true' });
+
+      expect(connectConfig()?.privateKey).toBe(
+        '-----BEGIN OPENSSH PRIVATE KEY-----\ntest\n-----END OPENSSH PRIVATE KEY-----\n'
+      );
+      expect(connectConfig()?.password).toBeUndefined();
+    });
+
+    it('throws when password auth has no password', async () => {
       await expect(
         createConnector({
           authType: AUTH_TYPE.Password,
-          password: 'secret',
+          password: null,
           sshPrivateKey: null,
         }).exec({ script: 'true' })
-      ).rejects.toThrow(/sshpass is not installed on the Kibana host/);
+      ).rejects.toThrow('Password is required for password authentication');
+      expect(MockClient.instances).toHaveLength(0);
     });
 
-    it('scopes ControlPath to the connector and persists the master for 10s', async () => {
-      await createConnector({
-        id: 'conn-a',
-        username: 'a'.repeat(256),
-        host: `${'b'.repeat(200)}.example.com:22`,
-      }).exec({ script: 'true' });
-      const pathA = (mockedExecFile.mock.calls[0][1] as string[]).find((arg) =>
-        arg.startsWith('ControlPath=')
-      );
+    it('returns the remote exit code without throwing', async () => {
+      MockClient.nextExecResult = { stdout: 'out', stderr: 'err', code: 7 };
 
-      mockedExecFile.mockClear();
-      mockExecFileSuccess();
-      await createConnector({
-        id: 'conn-b',
-        username: 'a'.repeat(256),
-        host: `${'b'.repeat(200)}.example.com:22`,
-      }).exec({ script: 'true' });
-      const pathB = (mockedExecFile.mock.calls[0][1] as string[]).find((arg) =>
-        arg.startsWith('ControlPath=')
-      );
+      const result = await createConnector().exec({ script: 'false' });
 
-      mockedExecFile.mockClear();
-      mockExecFileSuccess();
-      await createConnector({
-        id: 'conn-a',
-        username: 'a'.repeat(256),
-        host: `${'b'.repeat(200)}.example.com:22`,
-      }).exec({ script: 'true' });
-      const pathAAgain = (mockedExecFile.mock.calls[0][1] as string[]).find((arg) =>
-        arg.startsWith('ControlPath=')
-      );
-      const persist = (mockedExecFile.mock.calls[0][1] as string[]).find((arg) =>
-        arg.startsWith('ControlPersist=')
-      );
-
-      expect(pathA).toMatch(/^ControlPath=\/tmp\/kbn_ssh_[^/]+\/kbn_cm_[a-f0-9]{12}$/);
-      expect(pathA!.length).toBeLessThan(60);
-      expect(pathB).not.toBe(pathA);
-      expect(pathAAgain).toBe(pathA);
-      expect(persist).toBe('ControlPersist=10s');
+      expect(result).toEqual({ stdout: 'out', stderr: 'err', code: 7 });
     });
 
-    it('writes the private key under mkdtemp', async () => {
-      await createConnector().exec({ script: 'true' });
+    it('returns code 255 for an authentication failure', async () => {
+      MockClient.connectError = Object.assign(
+        new Error('All configured authentication methods failed'),
+        { level: 'client-authentication' }
+      );
 
-      const args = mockedExecFile.mock.calls[0][1] as string[];
-      const keyPath = args[args.indexOf('-i') + 1];
-      expect(keyPath).toMatch(/ssh_host_key_/);
-      expect(keyPath).toMatch(/\/id$/);
+      const result = await createConnector().exec({ script: 'true' });
+
+      expect(result).toEqual({
+        stdout: '',
+        stderr: 'Permission denied (All configured authentication methods failed)',
+        code: 255,
+      });
+    });
+
+    it('returns code 255 when the host is unreachable', async () => {
+      MockClient.connectError = Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:22'), {
+        level: 'client-socket',
+      });
+
+      const result = await createConnector().exec({ script: 'true' });
+
+      expect(result.code).toBe(255);
+      expect(result.stderr).toBe('connect ECONNREFUSED 127.0.0.1:22');
+    });
+
+    it('reuses one session per connector for the idle window', async () => {
+      jest.useFakeTimers();
+      try {
+        const connector = createConnector({ id: 'conn-a' });
+        await connector.exec({ script: 'true' });
+        await connector.exec({ script: 'true' });
+        expect(MockClient.instances).toHaveLength(1);
+
+        await createConnector({ id: 'conn-b' }).exec({ script: 'true' });
+        expect(MockClient.instances).toHaveLength(2);
+
+        await createConnector({
+          id: 'conn-a',
+          authType: AUTH_TYPE.Password,
+          password: 'secret',
+          sshPrivateKey: null,
+        }).exec({ script: 'true' });
+        expect(MockClient.instances).toHaveLength(3);
+
+        await jest.advanceTimersByTimeAsync(SSH_SESSION_IDLE_MS);
+        expect(MockClient.instances[0].ended).toBe(true);
+
+        await connector.exec({ script: 'true' });
+        expect(MockClient.instances).toHaveLength(4);
+      } finally {
+        jest.useRealTimers();
+      }
     });
   });
 
@@ -266,57 +465,32 @@ describe('SshHostConnector', () => {
   });
 
   describe('downloadFile', () => {
-    const mockDownload = (remoteSize: string, fileContent: string) => {
-      mockedExecFile.mockImplementation((bin, args, options, callback) => {
-        const cb = typeof options === 'function' ? options : callback;
-        const argv = args as string[];
-        const isScp = bin === 'scp' || argv.includes('scp');
-        if (!isScp) {
-          cb?.(null, remoteSize, '');
-          return {} as ReturnType<typeof execFile>;
-        }
-        const localPath = argv[argv.length - 1];
-        writeFileSync(localPath, fileContent);
-        cb?.(null, '', '');
-        return {} as ReturnType<typeof execFile>;
-      });
-    };
+    const remotePath = '/var/log/app.log"; id; echo "';
 
-    it('invokes scp with a destination argv, not a quoted shell target', async () => {
-      mockDownload('5', 'hello');
+    it('reads the remote path over SFTP and returns base64', async () => {
+      MockClient.sftp.files.set(remotePath, Buffer.from('hello'));
 
-      const connector = createConnector();
-      const result = await connector.downloadFile({
-        remotePath: '/var/log/app.log"; id; echo "',
-      });
+      const result = await createConnector().downloadFile({ remotePath });
 
       expect(result).toEqual({
         content: Buffer.from('hello').toString('base64'),
         encoding: 'base64',
       });
-
-      expect(mockedExecFile).toHaveBeenCalledTimes(2);
-      const [statBin, statArgs] = mockedExecFile.mock.calls[0];
-      expect(statBin).toBe('ssh');
-      expect(statArgs).toContain(`wc -c < '/var/log/app.log"; id; echo "'`);
-
-      const [bin, args] = mockedExecFile.mock.calls[1];
-      expect(bin).toBe('scp');
-      expect(args).toContain('alice@example.com:/var/log/app.log"; id; echo "');
-      expect((args as string[]).some((arg) => arg.includes(':"/'))).toBe(false);
+      expect(MockClient.sftp.calls).toEqual([`stat ${remotePath}`, `read ${remotePath}`, 'end']);
+      expect(MockClient.lastStream).toBeUndefined();
     });
 
-    it('brackets IPv6 in the scp destination', async () => {
-      mockDownload('5', 'hello');
+    it('connects to an IPv6 host without a shell destination', async () => {
+      MockClient.sftp.files.set('/tmp/a', Buffer.from('hello'));
 
       await createConnector({ host: '::1' }).downloadFile({ remotePath: '/tmp/a' });
 
-      const args = mockedExecFile.mock.calls[1][1] as string[];
-      expect(args).toContain('alice@[::1]:/tmp/a');
+      expect(connectConfig()).toEqual(expect.objectContaining({ host: '::1', port: 22 }));
+      expect(MockClient.sftp.calls).toContain('read /tmp/a');
     });
 
-    it('rejects files larger than maxBytes before copying', async () => {
-      mockDownload('17', 'too-large-payload');
+    it('rejects files larger than maxBytes before reading', async () => {
+      MockClient.sftp.statSize = 17;
 
       await expect(
         createConnector().downloadFile({
@@ -324,29 +498,40 @@ describe('SshHostConnector', () => {
           maxBytes: 4,
         })
       ).rejects.toThrow(/exceeds max-step-size/);
-      expect(mockedExecFile).toHaveBeenCalledTimes(1);
-      expect(mockedExecFile.mock.calls[0][0]).toBe('ssh');
+      expect(MockClient.sftp.calls).toEqual(['stat /var/log/huge.log', 'end']);
+    });
+
+    it('throws when the host is unreachable', async () => {
+      MockClient.connectError = Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:22'), {
+        level: 'client-socket',
+      });
+
+      await expect(createConnector().downloadFile({ remotePath: '/tmp/a' })).rejects.toThrow(
+        /ECONNREFUSED/
+      );
     });
   });
 
   describe('uploadFile', () => {
-    it('uploads with scp argv instead of stuffing the payload into ssh exec', async () => {
-      const connector = createConnector();
-      await connector.uploadFile({
+    it('creates parent directories and writes the file over SFTP', async () => {
+      await createConnector().uploadFile({
         remotePath: '/opt/app/config.json',
         content: Buffer.from('{"ok":true}').toString('base64'),
         encoding: 'base64',
       });
 
-      expect(mockedExecFile).toHaveBeenCalledTimes(2);
-      const [mkdirBin, mkdirArgs] = mockedExecFile.mock.calls[0];
-      expect(mkdirBin).toBe('ssh');
-      expect(mkdirArgs).toContain("mkdir -p -- '/opt/app'");
-
-      const [scpBin, scpArgs] = mockedExecFile.mock.calls[1];
-      expect(scpBin).toBe('scp');
-      expect(scpArgs).toContain('alice@example.com:/opt/app/config.json');
-      expect((scpArgs as string[]).join(' ')).not.toContain('openssl');
+      expect(MockClient.sftp.calls).toEqual([
+        'stat /opt',
+        'mkdir /opt',
+        'stat /opt/app',
+        'mkdir /opt/app',
+        'write /opt/app/config.json',
+        'end',
+      ]);
+      expect(MockClient.sftp.files.get('/opt/app/config.json')?.toString('utf8')).toBe(
+        '{"ok":true}'
+      );
+      expect(MockClient.lastStream).toBeUndefined();
     });
   });
 });

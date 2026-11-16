@@ -15,7 +15,7 @@ import { execScript, uploadFile } from './execute_in_connector';
 const REMOTE_HOST_JOB_ROOT_PATTERN = /^\/tmp\/wf_remote_host_\d+$/;
 const REMOTE_HOST_JOB_ROOT_EXPRESSION = '/tmp/wf_remote_host_$(id -u)';
 
-/** OpenSSH exits 255 when the client fails. The status script does not. */
+/** The SSH connector reports a client failure as exit code 255. The status script does not. */
 const SSH_CLIENT_FAILURE_CODE = 255;
 const SSH_PERMANENT_FAILURE_PATTERN =
   /permission denied|host key verification failed|remote host identification has changed|no matching host key|too many authentication failures|no supported authentication methods/i;
