@@ -28,7 +28,7 @@ const roundFor = (message: string): EvidenceRound => ({
 const judgeOutput = (
   overrides: Partial<AlertOutcomeRcaAccuracyOutput> = {}
 ): AlertOutcomeRcaAccuracyOutput => ({
-  ground_truth_has_verified_cause: true,
+  ground_truth_verdict: 'verified_cause',
   root_cause_match: true,
   mechanism_match: true,
   evidence_match: true,
@@ -164,10 +164,10 @@ describe('nightshift_alert_outcome_rca_accuracy', () => {
     });
   });
 
-  it('returns notApplicable without scores when the recovery states no verified cause', async () => {
+  it('returns notApplicable without scores when the recovery neither verifies nor refutes a cause', async () => {
     const { inferenceClient } = createInferenceClient(
       judgeOutput({
-        ground_truth_has_verified_cause: false,
+        ground_truth_verdict: 'unresolved',
         root_cause_match: false,
         mechanism_match: false,
         evidence_match: false,
@@ -182,7 +182,50 @@ describe('nightshift_alert_outcome_rca_accuracy', () => {
 
     expect(result).toEqual({
       scores: [],
-      notApplicable: { reason: 'recovery states no verified cause' },
+      notApplicable: { reason: "recovery neither verifies a cause nor refutes the report's" },
+    });
+  });
+
+  describe('when the recovery refutes the reported cause without naming another', () => {
+    const REFUTED =
+      'The v3.2.1 deploy never reached productCatalogService: it is still on v3.2.0 and its memory stayed flat. What cleared the checkout 5xx is unresolved.';
+
+    it('scores a report that asserted the refuted cause as a materially wrong miss', async () => {
+      const { inferenceClient } = createInferenceClient(
+        judgeOutput({
+          ground_truth_verdict: 'contradicted',
+          root_cause_match: false,
+          mechanism_match: false,
+          evidence_match: false,
+          score: 0,
+          materially_wrong_claim: true,
+          offending_claim: 'The v3.2.1 deploy OOMed productCatalogService.',
+          reasoning: 'The recovery shows the blamed deploy never reached the service.',
+        })
+      );
+
+      const { scores, notApplicable } = await evaluate(inferenceClient, { cause: REFUTED });
+
+      expect(notApplicable).toBeUndefined();
+      expect(scoreMap(scores)).toEqual({
+        alert_outcome_rca_depth: 0,
+        alert_outcome_rca_accuracy: 0,
+        alert_outcome_rca_no_hallucination: 0,
+      });
+    });
+
+    it('gives at most symptom credit, even when the judge scores higher', async () => {
+      const { inferenceClient } = createInferenceClient(
+        judgeOutput({ ground_truth_verdict: 'contradicted', score: 3 })
+      );
+
+      const { scores } = await evaluate(inferenceClient, { cause: REFUTED });
+
+      expect(scoreMap(scores)).toEqual({
+        alert_outcome_rca_depth: 0.333,
+        alert_outcome_rca_accuracy: 0,
+        alert_outcome_rca_no_hallucination: 1,
+      });
     });
   });
 
@@ -285,5 +328,19 @@ describe('applyPenalty', () => {
 
   it('lowers a 3 to 2 when a sub-check is false', () => {
     expect(applyPenalty(judgeOutput({ evidence_match: false }))).toBe(2);
+  });
+
+  it('caps a contradicted verdict at 1, and the wrong-claim penalty takes it to 0', () => {
+    expect(applyPenalty(judgeOutput({ ground_truth_verdict: 'contradicted', score: 2 }))).toBe(1);
+    expect(
+      applyPenalty(
+        judgeOutput({
+          ground_truth_verdict: 'contradicted',
+          score: 1,
+          materially_wrong_claim: true,
+          offending_claim: 'asserted the refuted deploy as the cause',
+        })
+      )
+    ).toBe(0);
   });
 });

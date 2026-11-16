@@ -20,7 +20,7 @@ import {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
-  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
+  GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
   GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
@@ -123,13 +123,13 @@ const expandNode = async (container: HTMLElement, nodeId: string) => {
  * or null if the toolbar or button is absent.  Scoping prevents false positives when multiple
  * nodes have the same button test-subject in the DOM simultaneously.
  *
- * Label nodes render toolbar items in a ReactFlow NodeToolbar portal
+ * Event nodes render toolbar items in a ReactFlow NodeToolbar portal
  * (`.react-flow__node-toolbar[data-id]`). Entity nodes (single and grouped) render
  * their toolbar items in an absolutely-positioned div inside the node element itself,
  * so we fall back to searching within the node element when no portal is found.
  */
 const getNodeToolbarButton = (nodeId: string, testSubjectId: string) => {
-  // Label nodes: toolbar items live in a ReactFlow NodeToolbar portal
+  // Event nodes: toolbar items live in a ReactFlow NodeToolbar portal
   const portal = document.querySelector<HTMLElement>(
     `.react-flow__node-toolbar[data-id="${nodeId}"]`
   );
@@ -270,7 +270,7 @@ describe('GraphInvestigation Component', () => {
   });
 
   describe('popover', () => {
-    it('shows `Show event details` list item when label node has documentsData of event', async () => {
+    it('shows `Show event details` list item when event node has documentsData of event', async () => {
       const { container } = renderStory();
       const nodeId =
         'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)';
@@ -279,13 +279,13 @@ describe('GraphInvestigation Component', () => {
 
       const showDetailsItem = getNodeToolbarButton(
         nodeId,
-        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
+        GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
       );
       expect(showDetailsItem).not.toBeNull();
       expect(showDetailsItem).toHaveAttribute('aria-label', 'Show event details');
     });
 
-    it('shows `Show alert details` list item when label node has documentsData of alert', async () => {
+    it('shows `Show alert details` list item when event node has documentsData of alert', async () => {
       const { container } = renderStory();
       const nodeId =
         'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)';
@@ -294,13 +294,13 @@ describe('GraphInvestigation Component', () => {
 
       const showDetailsItem = getNodeToolbarButton(
         nodeId,
-        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
+        GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
       );
       expect(showDetailsItem).not.toBeNull();
       expect(showDetailsItem).toHaveAttribute('aria-label', 'Show alert details');
     });
 
-    it('should not show `Show event details` list item when label node misses documentsData', async () => {
+    it('should not show `Show event details` list item when event node misses documentsData', async () => {
       const { container } = renderStory();
       const nodeId =
         'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.DeleteRole)';
@@ -309,7 +309,7 @@ describe('GraphInvestigation Component', () => {
 
       const showDetailsItem = getNodeToolbarButton(
         nodeId,
-        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
+        GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
       );
       expect(showDetailsItem).toBeNull();
     });

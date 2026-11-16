@@ -7,6 +7,11 @@ set -euo pipefail
 source .buildkite/scripts/steps/artifacts/env.sh
 source .buildkite/scripts/common/util.sh
 
+GCS_SA_CDN_EMAIL="$(vault_get gcs-sa-cdn-prod email)"
+GCS_SA_CDN_BUCKET="$(vault_get gcs-sa-cdn-prod bucket)"
+GCS_SA_CDN_URL="$(vault_get gcs-sa-cdn-prod cdn)"
+GCS_SA_CDN_AUDIENCE="$(vault_get gcs-sa-cdn-prod audience)"
+
 GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   KIBANA_IMAGE_TAG="git-$GIT_ABBREV_COMMIT"

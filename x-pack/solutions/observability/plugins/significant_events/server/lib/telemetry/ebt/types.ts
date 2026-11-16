@@ -16,6 +16,7 @@ import type {
   StatusOutcome,
 } from '../../significant_events/events/lifecycle/lifecycle_controller';
 import type { SIGNIFICANT_EVENT_ENTITY_TYPE } from './constants';
+import type { EbtTelemetryContext } from './cps_telemetry_context';
 
 interface WorkflowExecutionTelemetryProps {
   workflow_execution_id: string;
@@ -30,7 +31,8 @@ interface ParentWorkflowExecutionTelemetryProps {
 }
 
 interface KnowledgeIndicatorQueriesGeneratedProps
-  extends OptionalWorkflowExecutionTelemetryProps,
+  extends EbtTelemetryContext,
+    OptionalWorkflowExecutionTelemetryProps,
     ParentWorkflowExecutionTelemetryProps {
   count: number;
   connector_id: string;
@@ -44,7 +46,8 @@ interface KnowledgeIndicatorQueriesGeneratedProps
 }
 
 interface KnowledgeIndicatorFeaturesIdentifiedProps
-  extends OptionalWorkflowExecutionTelemetryProps,
+  extends EbtTelemetryContext,
+    OptionalWorkflowExecutionTelemetryProps,
     ParentWorkflowExecutionTelemetryProps {
   /** @deprecated Use `workflow_execution_id`. */
   run_id: string;
@@ -70,7 +73,8 @@ interface KnowledgeIndicatorFeaturesIdentifiedProps
 }
 
 interface AgentBuilderKnowledgeIndicatorCreatedProps
-  extends OptionalWorkflowExecutionTelemetryProps {
+  extends EbtTelemetryContext,
+    OptionalWorkflowExecutionTelemetryProps {
   ki_kind: 'feature' | 'query';
   tool_id: 'ki_feature_create' | 'ki_query_create';
   success: boolean;
@@ -81,23 +85,22 @@ interface AgentBuilderKnowledgeIndicatorCreatedProps
 }
 
 interface AgentToolKnowledgeIndicatorIdentificationStartedProps
-  extends OptionalWorkflowExecutionTelemetryProps {
+  extends EbtTelemetryContext,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   source_id: string;
   error_message?: string;
 }
 
 /** Identity used to join telemetry to `.rule-events`; a failed operation may have no row. */
-interface ExistingAlertIdentityProps {
+interface ExistingAlertIdentityProps extends EbtTelemetryContext {
   alert_source: string;
   fingerprint: string;
-  space_id: string;
 }
 
 /** `fingerprint` is absent for an unpersisted server-generated id; `group_hash` only on create. */
-interface AlertCreationAttemptIdentityProps {
+interface AlertCreationAttemptIdentityProps extends EbtTelemetryContext {
   alert_source: string;
-  space_id: string;
   fingerprint?: string;
   group_hash?: string;
 }
@@ -143,31 +146,15 @@ interface EventStatusChangedProps extends ExistingAlertIdentityProps {
   workflow_execution_id?: string;
 }
 
-interface AgentToolEventInvestigationAttachProps
-  extends ExistingAlertIdentityProps,
-    OptionalWorkflowExecutionTelemetryProps {
-  success: boolean;
-  /**
-   * @deprecated Superseded by `event_id`. Kept optional for schema continuity with pre-#1517
-   * events; new events populate `event_id` instead.
-   */
-  event_uuid?: string;
-  /** Stable event_id slug. Optional for rolling-deploy compatibility with pre-#1517 nodes. */
-  event_id?: string;
-  investigation_id: string;
-  error_message?: string;
-}
-
-interface DiscoveryTriggeredProps extends WorkflowExecutionTelemetryProps {
+interface DiscoveryTriggeredProps extends EbtTelemetryContext, WorkflowExecutionTelemetryProps {
   /** @deprecated Use `workflow_execution_id`. */
   execution_id: string;
-  space_id: string;
 }
 
 interface DiscoveryRunIdentityProps
-  extends WorkflowExecutionTelemetryProps,
+  extends EbtTelemetryContext,
+    WorkflowExecutionTelemetryProps,
     ParentWorkflowExecutionTelemetryProps {
-  space_id: string;
   alert_source: string;
 }
 
@@ -187,7 +174,7 @@ interface DiscoveryCompletedProps extends DiscoveryRunIdentityProps {
   error_message?: string;
 }
 
-interface DetectionScanProps extends OptionalWorkflowExecutionTelemetryProps {
+interface DetectionScanProps extends EbtTelemetryContext, OptionalWorkflowExecutionTelemetryProps {
   /** ES `took` (ms) reported by the alerts-source search itself. */
   took_ms: number;
   /** Wall-clock (ms) around the reader call, including transport and parsing. */
@@ -212,16 +199,15 @@ interface DetectionScanProps extends OptionalWorkflowExecutionTelemetryProps {
   default_lookback: string;
   /** Default analysis outer bucket interval, e.g. `5m`. */
   default_bucket_interval: string;
-  /** The Kibana space in which the scan ran. */
-  space_id: string;
 }
 
-interface KnowledgeIndicatorOnboardingScheduledProps extends WorkflowExecutionTelemetryProps {
+interface KnowledgeIndicatorOnboardingScheduledProps
+  extends EbtTelemetryContext,
+    WorkflowExecutionTelemetryProps {
   source_id: string;
   /** @deprecated Use `workflow_execution_id`. */
   execution_id: string;
   workflow_id: string;
-  space_id: string;
   skip_features: boolean;
   skip_queries: boolean;
 }
@@ -241,7 +227,9 @@ interface AgentToolEventWriteProps
   severity?: Severity;
 }
 
-interface AgentToolEventSearchProps extends OptionalWorkflowExecutionTelemetryProps {
+interface AgentToolEventSearchProps
+  extends EbtTelemetryContext,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   result_count: number;
   has_query: boolean;
@@ -253,12 +241,12 @@ interface AgentToolEventSearchProps extends OptionalWorkflowExecutionTelemetryPr
 }
 
 export {
+  type EbtTelemetryContext,
   type AlertCreationAttemptIdentityProps,
   type ExistingAlertIdentityProps,
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
   type AgentToolEventCreateProps,
-  type AgentToolEventInvestigationAttachProps,
   type AgentToolEventSearchProps,
   type AgentToolEventStatusUpdateProps,
   type AgentToolEventWriteProps,
