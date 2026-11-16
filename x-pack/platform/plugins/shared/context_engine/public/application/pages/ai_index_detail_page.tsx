@@ -24,6 +24,7 @@ import {
   LockedSectionPanel,
   SignalsPanel,
   SourcesPanel,
+  SpendPanel,
 } from '../components/ai_index_detail';
 import { buildAiIndexOnboardingPrompt } from '../components/ai_index_detail/onboarding_prompt';
 import { ListKiPanel } from '../components/ki';
@@ -349,6 +350,12 @@ export const AiIndexDetailPage = () => {
             />
           }
         />
+      )}
+      {showAutomationsPanel && (
+        <>
+          <EuiSpacer size="m" />
+          <SpendPanel aiIndexId={aiIndex?.id} />
+        </>
       )}
       <EuiSpacer size="m" />
       {showSignalsSection &&
