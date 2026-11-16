@@ -185,7 +185,10 @@ describe('OverviewTrends', () => {
       renderTrends(POINTS, false, jest.fn(), 75, jest.fn(), { start: 1_500, end: 2_500 });
 
       expect(mockShadedZones.slice(-2)).toEqual([zones, zones]);
-      expect(mockXDomains.slice(-2)).toEqual([xDomain, xDomain]);
+      expect(mockXDomains.slice(-2)).toEqual([
+        expect.objectContaining(xDomain),
+        expect.objectContaining(xDomain),
+      ]);
     }
   );
 

@@ -121,6 +121,11 @@ const respondWith = (
     applications,
     environments,
     unavailableSources,
+    pageLoadsOverTime: {
+      otel: [],
+      classic: [],
+      histogram: { interval: { value: 30, unit: 's' }, start: 0, end: 15 * 60 * 1000 },
+    },
     sessionsOverTime,
     partiallyAvailableSources,
   });
