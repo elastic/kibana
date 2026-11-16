@@ -130,12 +130,15 @@ export const useTimelineStyles = () => {
       );
     `,
     waitSwatch: css`
+      /* Stripes and an outline in the text color, because the shades are too close to the page in dark mode. */
+      box-sizing: border-box;
+      border: 1px solid ${euiTheme.colors.textSubdued};
       background: repeating-linear-gradient(
         135deg,
-        ${euiTheme.colors.lightShade},
-        ${euiTheme.colors.lightShade} 2px,
-        ${euiTheme.colors.backgroundBasePlain} 2px,
-        ${euiTheme.colors.backgroundBasePlain} 4px
+        ${euiTheme.colors.textSubdued},
+        ${euiTheme.colors.textSubdued} 1px,
+        ${euiTheme.colors.backgroundBasePlain} 1px,
+        ${euiTheme.colors.backgroundBasePlain} 3px
       );
     `,
     planningColor: css`
