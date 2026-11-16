@@ -8,7 +8,11 @@
  */
 
 import { getIssueMetadata } from './issue_metadata';
-import { testHistoryDashboardUrl, withTestHistoryDashboardLink } from './test_history_dashboard';
+import {
+  testHistoryDashboardUrl,
+  testHistoryUrl,
+  withTestHistoryDashboardLink,
+} from './test_history_dashboard';
 
 const ftrFailure = {
   classname:
@@ -70,6 +74,16 @@ describe('testHistoryDashboardUrl', () => {
         classname: 'FTR Tests.x-pack/platform/test/functional/apps/maps',
       })
     ).toBeUndefined();
+  });
+});
+
+describe('testHistoryUrl', () => {
+  it('queries one test id over the last 30 days', () => {
+    expect(testHistoryUrl('387f6409090cad1-72adf96bc45a377')).toBe(
+      'https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history' +
+        '?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))' +
+        "&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22387f6409090cad1-72adf96bc45a377%22'))"
+    );
   });
 });
 
