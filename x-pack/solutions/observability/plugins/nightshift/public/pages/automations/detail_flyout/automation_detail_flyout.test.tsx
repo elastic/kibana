@@ -93,7 +93,12 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
         charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
       },
     });
-    (useAutomationRunsInRange as jest.Mock).mockReturnValue({ runs: [], isLoading: false });
+    (useAutomationRunsInRange as jest.Mock).mockReturnValue({
+      runs: [],
+      isLoading: false,
+      isError: false,
+      retry: jest.fn(),
+    });
     (useAutomationsRunCounts as jest.Mock).mockReturnValue(undefined);
     (useToggleAutomation as jest.Mock).mockReturnValue({ mutate: jest.fn() });
     (useUpdateAutomation as jest.Mock).mockReturnValue({ mutate, isLoading: false });

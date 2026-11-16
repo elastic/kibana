@@ -8,10 +8,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ExecutionType } from '@kbn/workflows';
+import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import type {
   EsWorkflowStepExecution,
-  ExecutionStatus,
   WorkflowExecutionDto,
   WorkflowExecutionListDto,
 } from '@kbn/workflows';
@@ -61,7 +60,6 @@ import type {
 } from '../api/workflows_management_service';
 
 const DEFAULT_PAGE_SIZE = 100;
-const STATUS_BUCKETS_SIZE = 20;
 
 /** Max completed steps fetched per page when resolving predecessor `output.reasoning`. */
 const PREDECESSOR_REASONING_MAX_HITS = 1000;
@@ -132,6 +130,7 @@ export interface WorkflowExecutionStatusCountsParams {
   workflowIds: string[];
   startedAfter?: string;
   startedBefore?: string;
+  executionIds?: string[];
   accessControlFilter?: estypes.QueryDslQueryContainer;
 }
 
@@ -325,6 +324,7 @@ export class WorkflowExecutionQueryService {
       workflowIds,
       startedAfter,
       startedBefore,
+      executionIds,
       accessControlFilter,
     }: WorkflowExecutionStatusCountsParams,
     spaceId: string
@@ -344,6 +344,7 @@ export class WorkflowExecutionQueryService {
               buildWorkflowExecutionsSpaceFilter(spaceId),
               ...(accessControlFilter ? [accessControlFilter] : []),
               ...(startedAtRange ? [startedAtRange] : []),
+              ...(executionIds ? [{ terms: { id: executionIds } }] : []),
             ],
             must_not: [{ exists: { field: 'stepId' } }],
           },
@@ -351,7 +352,9 @@ export class WorkflowExecutionQueryService {
         aggs: {
           byWorkflow: {
             terms: { field: 'workflowId', size: workflowIds.length },
-            aggs: { byStatus: { terms: { field: 'status', size: STATUS_BUCKETS_SIZE } } },
+            aggs: {
+              byStatus: { terms: { field: 'status', size: Object.values(ExecutionStatus).length } },
+            },
           },
         },
       })) as unknown as estypes.SearchResponse<unknown, StatusCountsAggs>;

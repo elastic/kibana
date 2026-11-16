@@ -7,6 +7,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  EuiButton,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -86,6 +88,12 @@ const labels = {
   }),
   trigger: i18n.translate('xpack.nightshift.automations.detail.trigger', {
     defaultMessage: 'Trigger',
+  }),
+  runsLoadErrorMessage: i18n.translate('xpack.nightshift.automations.detail.runsLoadErrorMessage', {
+    defaultMessage: 'Some runs could not be loaded.',
+  }),
+  runsRetryButton: i18n.translate('xpack.nightshift.automations.detail.runsRetryButton', {
+    defaultMessage: 'Retry',
   }),
 };
 
@@ -302,6 +310,8 @@ export const RunHistory = ({
   runs,
   runCounts,
   isLoading,
+  isError = false,
+  onRetry,
   startedAfter,
   startedBefore,
   rangeLabel,
@@ -312,6 +322,8 @@ export const RunHistory = ({
   runs: Run[];
   runCounts?: Record<RunStatus, number>;
   isLoading: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
   startedAfter: string;
   startedBefore: string;
   rangeLabel: string;
@@ -329,21 +341,43 @@ export const RunHistory = ({
   const timersRef = useRef<number[]>([]);
   useEffect(() => () => timersRef.current.forEach((id) => window.clearTimeout(id)), []);
 
+  const loadError = isError && (
+    <EuiCallOut
+      announceOnMount
+      color="warning"
+      size="s"
+      title={labels.runsLoadErrorMessage}
+      css={{ marginBlockEnd: euiTheme.size.base }}
+    >
+      <EuiButton
+        size="s"
+        color="warning"
+        onClick={onRetry}
+        data-test-subj="automationRunsRetryButton"
+      >
+        {labels.runsRetryButton}
+      </EuiButton>
+    </EuiCallOut>
+  );
+
   if (isLoading) return <EuiLoadingSpinner size="l" />;
   if (!runs.length)
     return (
-      <EuiEmptyPrompt
-        titleSize="xs"
-        title={
-          <h3>
-            {i18n.translate('xpack.nightshift.automations.detail.noRuns', {
-              defaultMessage: 'No runs in the {range}',
-              values: { range: rangeLabel.toLowerCase() },
-            })}
-          </h3>
-        }
-        body={<p>{labels.noRunsBody}</p>}
-      />
+      <>
+        {loadError}
+        <EuiEmptyPrompt
+          titleSize="xs"
+          title={
+            <h3>
+              {i18n.translate('xpack.nightshift.automations.detail.noRuns', {
+                defaultMessage: 'No runs in the {range}',
+                values: { range: rangeLabel.toLowerCase() },
+              })}
+            </h3>
+          }
+          body={<p>{labels.noRunsBody}</p>}
+        />
+      </>
     );
 
   const startMs = Date.parse(startedAfter);
@@ -507,6 +541,7 @@ export const RunHistory = ({
           padding-block: ${euiTheme.size.l} ${euiTheme.size.s};
         `}
       >
+        {loadError}
         {!visibleRuns.length ? (
           <EuiText size="s" color="subdued">
             {labels.noFilteredRuns}

@@ -30,7 +30,6 @@ interface StepSearch {
       page: number;
       size: number;
       startedAfter?: string;
-      startedBefore?: string;
       request: KibanaRequest;
     },
     spaceId: string
@@ -45,21 +44,19 @@ const hasSkipReason = (output: unknown) =>
   output !== null &&
   SKIP_REASONS.some((reason) => reason === (output as Record<string, unknown>).skip_reason);
 
-export const countSkippedRuns = async ({
+export const getSkippedRunIds = async ({
   management,
   workflowId,
   startedAfter,
-  startedBefore,
   request,
   spaceId,
 }: {
   management: StepSearch;
   workflowId: string;
   startedAfter?: string;
-  startedBefore?: string;
   request: KibanaRequest;
   spaceId: string;
-}): Promise<number> => {
+}): Promise<string[]> => {
   const skippedRunIds = new Set<string>();
   let page = 1;
   let total = 0;
@@ -69,11 +66,10 @@ export const countSkippedRuns = async ({
         workflowId,
         stepId: TRIGGER_STEP_IDS,
         includeOutput: true,
-        sourceIncludes: ['workflowRunId', 'output'],
+        sourceIncludes: ['workflowRunId', 'output.skip_reason'],
         page,
         size: PAGE_SIZE,
         startedAfter,
-        startedBefore,
         request,
       },
       spaceId
@@ -84,5 +80,5 @@ export const countSkippedRuns = async ({
     }
     page++;
   } while ((page - 1) * PAGE_SIZE < total);
-  return skippedRunIds.size;
+  return [...skippedRunIds];
 };

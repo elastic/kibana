@@ -126,3 +126,33 @@ describe('RunHistory skipped run summary', () => {
     expect(screen.queryByText('Alert triage')).not.toBeInTheDocument();
   });
 });
+
+describe('RunHistory load error', () => {
+  it('lets the user retry loading the remaining runs', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
+      },
+    });
+    const onRetry = jest.fn();
+    render(
+      <I18nProvider>
+        <RunHistory
+          runs={[skippedRun('daily_limit', 20)]}
+          isLoading={false}
+          isError
+          onRetry={onRetry}
+          startedAfter="2026-01-01T00:00:00.000Z"
+          startedBefore="2026-01-02T00:00:00.000Z"
+          rangeLabel="Last 24 hours"
+          automationName="Alert triage"
+          onSelect={jest.fn()}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('automationRunsRetryButton'));
+
+    expect(onRetry).toHaveBeenCalledTimes(1);
+  });
+});

@@ -186,6 +186,37 @@ describe('use_automations', () => {
     expect(result.current.runs).toHaveLength(100);
   });
 
+  it('resumes loading the remaining runs after retry succeeds', async () => {
+    let failPageTwo = true;
+    investigationsFetch.mockImplementation((_endpoint, { params }) => {
+      const { page } = params.query;
+      if (page === 2 && failPageTwo) return Promise.reject(new Error('boom'));
+      return Promise.resolve({
+        runs: Array.from({ length: page === 1 ? 100 : 1 }, (_, i) => ({
+          id: `p${page}-${i}`,
+          status: 'succeeded',
+          startedAt: '2026-10-01T00:00:00.000Z',
+        })),
+        total: 101,
+        usedToday: 0,
+      });
+    });
+    const { result } = renderWithClient(() =>
+      useAutomationRunsInRange('a', '2026-10-01T00:00:00.000Z', '2026-10-02T00:00:00.000Z')
+    );
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.runs).toHaveLength(100);
+
+    failPageTwo = false;
+    act(() => {
+      result.current.retry();
+    });
+
+    await waitFor(() => expect(result.current.runs).toHaveLength(101));
+    expect(result.current.isError).toBe(false);
+  });
+
   it('creates an automation, shows a toast, and refreshes the list', async () => {
     investigationsFetch.mockResolvedValue({ id: 'automation-1' });
     const { result, invalidateQueries } = renderWithClient(() => useCreateAutomation());

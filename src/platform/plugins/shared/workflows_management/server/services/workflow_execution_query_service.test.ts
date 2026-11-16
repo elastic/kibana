@@ -537,6 +537,18 @@ describe('WorkflowExecutionQueryService', () => {
       expect(call.aggs.byWorkflow.terms).toEqual({ field: 'workflowId', size: 2 });
     });
 
+    it('restricts counts to the given execution ids', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+
+      await service.getWorkflowExecutionStatusCounts(
+        { workflowIds: ['wf-1'], executionIds: ['e1', 'e2'] },
+        's'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.query.bool.must).toContainEqual({ terms: { id: ['e1', 'e2'] } });
+    });
+
     it('returns no counts without querying when no workflow ids are given', async () => {
       await expect(
         service.getWorkflowExecutionStatusCounts({ workflowIds: [] }, 's')

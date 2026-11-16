@@ -11,12 +11,14 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { mapRunStatus } from './map_run_status';
 import type { AutomationRunStatus } from './map_run_status';
-import { countSkippedRuns } from './count_skipped_runs';
+import { getSkippedRunIds } from './count_skipped_runs';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 
 type RunCounts = Record<AutomationRunStatus, number>;
+
+const EXECUTION_ID_CHUNK_SIZE = 1000;
 
 const emptyCounts = (): RunCounts => ({ succeeded: 0, running: 0, failed: 0, skipped: 0 });
 
@@ -84,17 +86,28 @@ export const getAutomationsRunCountsRoute = createNightshiftInvestigationsServer
             runCounts[mapRunStatus(status)] += statusCounts[status] ?? 0;
           }
           if (runCounts.succeeded === 0) return [id, runCounts];
-          const skipped = Math.min(
-            await countSkippedRuns({
-              management: workflowsManagement.management,
-              workflowId,
-              startedAfter,
-              startedBefore,
-              request,
-              spaceId,
-            }),
-            runCounts.succeeded
-          );
+          const skippedRunIds = await getSkippedRunIds({
+            management: workflowsManagement.management,
+            workflowId,
+            startedAfter,
+            request,
+            spaceId,
+          });
+          let skipped = 0;
+          for (let i = 0; i < skippedRunIds.length; i += EXECUTION_ID_CHUNK_SIZE) {
+            const chunkCounts =
+              await workflowsManagement.management.getWorkflowExecutionStatusCounts(
+                {
+                  workflowIds: [workflowId],
+                  executionIds: skippedRunIds.slice(i, i + EXECUTION_ID_CHUNK_SIZE),
+                  startedAfter,
+                  startedBefore,
+                  request,
+                },
+                spaceId
+              );
+            skipped += chunkCounts[workflowId]?.[ExecutionStatus.COMPLETED] ?? 0;
+          }
           runCounts.succeeded -= skipped;
           runCounts.skipped += skipped;
           return [id, runCounts];

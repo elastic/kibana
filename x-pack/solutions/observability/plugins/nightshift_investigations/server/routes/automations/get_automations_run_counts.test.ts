@@ -75,11 +75,16 @@ describe('POST /internal/nightshift/automations/run_counts', () => {
     );
   });
 
-  it('moves distinct skip_reason runs from succeeded to skipped across pages', async () => {
+  it('moves skip_reason runs whose parent completed in range from succeeded to skipped', async () => {
     mockBulkGet.mockResolvedValue({
       saved_objects: [{ id: 'a1', attributes: { workflowId: 'wf-1' } }],
     });
-    mockGetStatusCounts.mockResolvedValue({ 'wf-1': { completed: 150, skipped: 1 } });
+    const completedParents = new Set(['r0', 'r1', 'r100']);
+    mockGetStatusCounts.mockImplementation(async ({ executionIds }) => ({
+      'wf-1': executionIds
+        ? { completed: executionIds.filter((id: string) => completedParents.has(id)).length }
+        : { completed: 150, skipped: 1 },
+    }));
     const skipped = (workflowRunId: string) => ({
       workflowRunId,
       output: { skip_reason: 'daily_limit' },
@@ -98,31 +103,34 @@ describe('POST /internal/nightshift/automations/run_counts', () => {
       total: 105,
     }));
 
-    const result = await call({ ids: ['a1'] });
+    const result = await call({ ids: ['a1'], startedAfter: 'now-7d' });
 
     expect(result).toEqual({
-      counts: { a1: { succeeded: 48, skipped: 103, running: 0, failed: 0 } },
+      counts: { a1: { succeeded: 147, skipped: 4, running: 0, failed: 0 } },
     });
     expect(mockSearchSteps).toHaveBeenCalledTimes(2);
     expect(mockSearchSteps.mock.calls[0][0].stepId).toEqual(TRIGGER_STEP_IDS);
+    expect(mockGetStatusCounts).toHaveBeenLastCalledWith(
+      expect.objectContaining({ startedAfter: 'now-7d', executionIds: expect.any(Array) }),
+      'default'
+    );
   });
 
-  it('never lets succeeded go below zero', async () => {
+  it('does not subtract skipped steps whose parent execution is outside the range', async () => {
     mockBulkGet.mockResolvedValue({
       saved_objects: [{ id: 'a1', attributes: { workflowId: 'wf-1' } }],
     });
-    mockGetStatusCounts.mockResolvedValue({ 'wf-1': { completed: 1 } });
+    mockGetStatusCounts.mockImplementation(async ({ executionIds }) => ({
+      'wf-1': executionIds ? {} : { completed: 5 },
+    }));
     mockSearchSteps.mockResolvedValue({
-      results: [
-        { workflowRunId: 'r1', output: { skip_reason: 'daily_limit' } },
-        { workflowRunId: 'r2', output: { skip_reason: 'daily_limit' } },
-      ],
-      total: 2,
+      results: [{ workflowRunId: 'old', output: { skip_reason: 'daily_limit' } }],
+      total: 1,
     });
 
-    const result = await call({ ids: ['a1'] });
+    const result = await call({ ids: ['a1'], startedAfter: 'now-1d' });
 
-    expect(result).toEqual({ counts: { a1: { succeeded: 0, skipped: 1, running: 0, failed: 0 } } });
+    expect(result).toEqual({ counts: { a1: { succeeded: 5, skipped: 0, running: 0, failed: 0 } } });
   });
 
   it('returns zeros for automations without a workflow or without runs', async () => {

@@ -180,7 +180,14 @@ export const useAutomationRunsInRange = (
 
   const runs = useMemo(() => data?.pages.flatMap((page) => page.runs) ?? [], [data]);
   const [firstPage] = data?.pages ?? [];
-  return { runs, isLoading, usedToday: firstPage?.usedToday, total: firstPage?.total };
+  return {
+    runs,
+    isLoading,
+    isError,
+    retry: fetchNextPage,
+    usedToday: firstPage?.usedToday,
+    total: firstPage?.total,
+  };
 };
 
 type RunCountsResponse =
