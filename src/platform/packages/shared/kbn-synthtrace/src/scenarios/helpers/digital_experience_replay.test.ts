@@ -9,7 +9,6 @@
 
 import { createHash } from 'crypto';
 import { timerange, type EdotBrowserDocument, type ReplaySize } from '@kbn/synthtrace-client';
-import type { ToolingLog } from '@kbn/tooling-log';
 import {
   generateEdotBrowserSessions,
   parseDigitalExperienceScenarioOpts,
@@ -18,11 +17,7 @@ import {
 } from './digital_experience_apps';
 
 const REPLAY_INDEX = 'logs-rum.replay.otel-default';
-const range = timerange(
-  new Date('2026-10-16T12:00:00.000Z'),
-  new Date('2026-10-16T12:10:00.000Z'),
-  {} as ToolingLog
-);
+const range = timerange(new Date('2026-10-16T12:00:00.000Z'), new Date('2026-10-16T12:10:00.000Z'));
 const FROM = range.from.getTime();
 const TO = range.to.getTime();
 

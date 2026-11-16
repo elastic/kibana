@@ -12,7 +12,7 @@ import {
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   severitySchema,
   MAX_ID_LENGTH,
-  MAX_TEXT_LENGTH,
+  significantEventSchema,
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
@@ -412,7 +412,7 @@ const eventsUpdateRoute = createServerRoute({
       body: z.object({
         status: significantEventManualStatusSchema,
         close_reason: significantEventCloseReasonSchema.optional(),
-        assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
+        assessment_note: significantEventSchema.shape.assessment_note,
       }),
     })
   ),

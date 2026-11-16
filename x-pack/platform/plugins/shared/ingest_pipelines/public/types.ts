@@ -39,4 +39,5 @@ export interface IngestPipelineFlyoutProps {
 export interface Config {
   enableManageProcessors: boolean;
   canManage: boolean;
+  canRead: boolean;
 }

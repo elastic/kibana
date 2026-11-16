@@ -15,6 +15,7 @@ export const ELLIPSIS = '…';
 export const EXCERPT_MAX_CHARS = 300;
 export const MAX_INPUT_STRING_CHARS = 256;
 export const MAX_ITEM_IDS = 50;
+export const MAX_SAVED_OBJECT_IDS = 10;
 export const MAX_QUERY_CHARS = 1_024;
 export const MAX_FIND_LIMIT = 100;
 export const DEFAULT_FIND_LIMIT = 20;
