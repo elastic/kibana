@@ -8,11 +8,11 @@ responses:
       application/json:
         examples:
           resetSloResponse:
-            summary: Reset SLO response
+            summary: Reset SLO response (the revision is incremented)
             value:
               id: 8853df00-ae2e-11ed-90af-09bb6422b258
               name: My Service Availability
-              description: Availability of my web service
+              description: Availability of my web service measured by successful HTTP responses
               indicator:
                 type: sli.kql.custom
                 params:
@@ -30,15 +30,20 @@ responses:
               settings:
                 syncDelay: 5m
                 frequency: 5m
+                preventInitialBackfill: false
               revision: 2
               enabled: true
-              groupBy: '*'
               tags:
                 - production
                 - web-service
               createdAt: '2025-01-12T10:03:19.000Z'
               updatedAt: '2025-03-26T14:30:00.000Z'
+              groupBy: '*'
               version: 2
+              createdBy: elastic
+              updatedBy: elastic
+              artifacts:
+                dashboards: []
   '400':
     description: Bad request
     content:
@@ -46,12 +51,34 @@ responses:
         schema:
           $ref: ../oas_error_schemas.yaml#/400_response
         examples:
-          badRequestExample:
-            summary: Bad request
+          badRequestIdExample:
+            summary: Invalid SLO id
             value:
               statusCode: 400
               error: Bad Request
-              message: 'Invalid value ''foo'' supplied to: id'
+              message: |-
+                [
+                  {
+                    "origin": "string",
+                    "code": "too_small",
+                    "minimum": 8,
+                    "inclusive": true,
+                    "path": [
+                      "id"
+                    ],
+                    "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                  },
+                  {
+                    "origin": "string",
+                    "code": "invalid_format",
+                    "format": "regex",
+                    "pattern": "/^[a-z0-9-_]+$/",
+                    "path": [
+                      "id"
+                    ],
+                    "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                  }
+                ]
   '401':
     description: Unauthorized response
     content:
@@ -64,7 +91,7 @@ responses:
             value:
               statusCode: 401
               error: Unauthorized
-              message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+              message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
   '403':
     description: Forbidden response
     content:
@@ -77,7 +104,7 @@ responses:
             value:
               statusCode: 403
               error: Forbidden
-              message: 'security_exception: action [slo_write] is unauthorized for user'
+              message: 'API [POST /api/observability/slos/8853df00-ae2e-11ed-90af-09bb6422b258/_reset] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]'
   '404':
     description: Not found response
     content:
@@ -90,4 +117,17 @@ responses:
             value:
               statusCode: 404
               error: Not Found
-              message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+              message: 'SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found'
+  '503':
+    description: Service unavailable - The operation did not complete within the request deadline
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/503_response
+        examples:
+          serviceUnavailableExample:
+            summary: Service unavailable
+            value:
+              statusCode: 503
+              error: Service Unavailable
+              message: 'Operation did not complete within 60000ms'

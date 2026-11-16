@@ -68,7 +68,7 @@ export function MemoryTab() {
           <p>
             <FormattedMessage
               id="xpack.nightshift.knowledge.memory.loadErrorDescription"
-              defaultMessage="Confirm Nightshift investigations are enabled and refresh the page."
+              defaultMessage="Confirm nightshift investigations are enabled and refresh the page."
             />
           </p>
         }

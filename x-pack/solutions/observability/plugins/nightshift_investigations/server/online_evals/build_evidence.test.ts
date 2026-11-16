@@ -74,17 +74,23 @@ describe('buildOnlineEvalsEvidence', () => {
       expect(steps[1]).not.toHaveProperty('reasoning');
     });
 
-    it('drops blank notes and a note with no call after it', () => {
-      const { steps } = buildOnlineEvalsEvidence({
+    it('drops blank notes and passes the notes after the last call as the closing reasoning', () => {
+      const evidence = buildOnlineEvalsEvidence({
         round: round([
           { type: 'reasoning', reasoning: '   ' },
           toolCall('call-1'),
-          { type: 'reasoning', reasoning: 'Wrapping up' },
+          { type: 'reasoning', reasoning: 'The pool is exhausted' },
+          { type: 'reasoning', reasoning: 'so the deploy is the cause' },
         ]),
-      }).round;
+        alertOutcome: 'Confirmed: the deploy.',
+      });
 
-      expect(steps).toHaveLength(1);
-      expect(steps[0]).not.toHaveProperty('reasoning');
+      expect(evidence.round.steps).toHaveLength(1);
+      expect(evidence.round.steps[0]).not.toHaveProperty('reasoning');
+      expect(evidence.reference_data).toEqual({
+        alert_outcome: 'Confirmed: the deploy.',
+        closing_reasoning: 'The pool is exhausted\nso the deploy is the cause',
+      });
     });
   });
 
@@ -100,18 +106,17 @@ describe('buildOnlineEvalsEvidence', () => {
     expect(evidence.round.response.message).toBe('A bad deploy of the payments service.');
   });
 
-  it('keeps the earliest tool calls when there are more than evaluate() accepts', () => {
+  it('keeps the first and last tool calls when there are more than evaluate() accepts', () => {
     const calls = Array.from({ length: MAX_EVIDENCE_TOOL_CALLS + 5 }, (_, index) =>
       toolCall(`call-${index}`)
     );
 
     const { steps, response } = buildOnlineEvalsEvidence({ round: round(calls) }).round;
 
-    expect(steps).toHaveLength(MAX_EVIDENCE_TOOL_CALLS);
-    expect(steps[0].tool_call_id).toBe('call-0');
-    expect(steps[MAX_EVIDENCE_TOOL_CALLS - 1].tool_call_id).toBe(
-      `call-${MAX_EVIDENCE_TOOL_CALLS - 1}`
-    );
+    const ids = steps.map(({ tool_call_id: id }) => id);
+    expect(ids).toHaveLength(MAX_EVIDENCE_TOOL_CALLS);
+    expect(ids[0]).toBe('call-0');
+    expect(ids[ids.length - 1]).toBe(`call-${MAX_EVIDENCE_TOOL_CALLS + 4}`);
     expect(response.message).toBe('A bad deploy of the payments service.');
   });
 });

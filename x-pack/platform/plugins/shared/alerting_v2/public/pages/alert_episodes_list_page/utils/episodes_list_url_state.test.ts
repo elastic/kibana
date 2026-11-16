@@ -189,6 +189,38 @@ describe('episodes_list_url_state', () => {
       ]);
     });
 
+    it('round-trips sources and omits an empty selection', async () => {
+      const storage = await createKbnTestUrlStorage();
+
+      await writeEpisodesListAppStateToUrlStorage(
+        storage,
+        {
+          status: ['active'],
+          sources: ['v2', 'zabbix'],
+        },
+        DEFAULT_EPISODES_LIST_TIME_RANGE
+      );
+
+      expect(storage.get('_a')).toEqual({
+        [ALERTS_LIST_APP_STATE_KEY]: {
+          sources: ['v2', 'zabbix'],
+        },
+      });
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.sources).toEqual([
+        'v2',
+        'zabbix',
+      ]);
+
+      await writeEpisodesListAppStateToUrlStorage(
+        storage,
+        { status: ['active'], sources: [] },
+        DEFAULT_EPISODES_LIST_TIME_RANGE
+      );
+
+      expect(storage.get('_a')).toEqual({});
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.sources).toBeUndefined();
+    });
+
     it('round-trips groupHash and groupingValues', async () => {
       const storage = await createKbnTestUrlStorage();
 

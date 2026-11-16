@@ -12,6 +12,13 @@
  * means what it does in the sessions.
  */
 export const SESSION_ATTRIBUTE_FIELDS = {
+  // `deployment.environment.name` replaces the deprecated `deployment.environment`, which
+  // `service.environment` aliases; the applications list reads both.
+  environment: [
+    'resource.attributes.deployment.environment.name',
+    'attributes.deployment.environment.name',
+    'resource.attributes.deployment.environment',
+  ],
   user: [
     'attributes.user.email',
     'resource.attributes.user.email',
