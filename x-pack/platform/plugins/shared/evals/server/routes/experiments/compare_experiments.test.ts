@@ -255,6 +255,7 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.payload.pairing.skippedNullScores).toBe(0);
     expect(response.payload.pairing.truncatedBaseline).toBe(false);
     expect(response.payload.pairing.truncatedTarget).toBe(false);
+    expect(response.payload.pairing).not.toHaveProperty('rejectedSlices');
   });
 
   it('returns direction: minimize for lower-is-better evaluator metadata', async () => {

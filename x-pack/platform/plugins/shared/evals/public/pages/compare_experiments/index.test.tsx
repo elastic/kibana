@@ -51,8 +51,8 @@ const buildResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResul
   usedBaseline: 12,
   missingTarget: 0,
   missingBaseline: 0,
-  stabilityTarget: 0,
-  stabilityBaseline: 0,
+  stabilityTarget: null,
+  stabilityBaseline: null,
   repetitionWarning: false,
   ...overrides,
 });

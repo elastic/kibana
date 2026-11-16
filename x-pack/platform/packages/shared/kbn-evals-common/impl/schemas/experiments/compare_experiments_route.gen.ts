@@ -137,20 +137,22 @@ export const ComparisonResult = lazySchema(() =>
       .int()
       .describe('Repetitions of the target experiment in this slice without a valid score'),
     /**
-     * Mean of the sample standard deviations of each paired example's valid baseline repetitions, over the examples with at least two. 0 when no example has two.
+     * Mean of the sample standard deviations of each paired example's valid baseline repetitions, over the examples with at least two. Null when no example has two.
      */
     stabilityBaseline: z
       .number()
+      .nullable()
       .describe(
-        "Mean of the sample standard deviations of each paired example's valid baseline repetitions, over the examples with at least two. 0 when no example has two."
+        "Mean of the sample standard deviations of each paired example's valid baseline repetitions, over the examples with at least two. Null when no example has two."
       ),
     /**
-     * Mean of the sample standard deviations of each paired example's valid target repetitions, over the examples with at least two. 0 when no example has two.
+     * Mean of the sample standard deviations of each paired example's valid target repetitions, over the examples with at least two. Null when no example has two.
      */
     stabilityTarget: z
       .number()
+      .nullable()
       .describe(
-        "Mean of the sample standard deviations of each paired example's valid target repetitions, over the examples with at least two. 0 when no example has two."
+        "Mean of the sample standard deviations of each paired example's valid target repetitions, over the examples with at least two. Null when no example has two."
       ),
     /**
      * True when an example in this slice has a different number of valid repetitions in the two experiments, or a repetition without a valid score.

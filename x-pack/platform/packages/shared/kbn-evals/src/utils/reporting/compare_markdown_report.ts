@@ -26,8 +26,8 @@ function formatSig(pValue: number | null, threshold: number): string {
   return pValue < threshold ? 'Yes' : 'No';
 }
 
-function formatNumber(value: number): string {
-  return Number.isFinite(value) ? value.toFixed(2) : '-';
+function formatNumber(value: number | null): string {
+  return value !== null && Number.isFinite(value) ? value.toFixed(2) : '-';
 }
 
 function formatOutcome(
@@ -107,6 +107,11 @@ export function formatMarkdownCompareReport({
       result.pValue < significanceThreshold
   ).length;
 
+  // A suite with one repetition per example has no stability to show.
+  const showStability = sortedResults.some(
+    (result) => result.stabilityTarget !== null || result.stabilityBaseline !== null
+  );
+
   const lines: string[] = [];
 
   lines.push(
@@ -131,10 +136,14 @@ export function formatMarkdownCompareReport({
   lines.push(
     `Repetition policy: ${repetitionPolicy} (N counts ${
       repetitionPolicy === 'pool' ? 'repetition pairs' : 'examples'
-    }; stability is the mean standard deviation across an example's repetitions).`
+    }${
+      showStability
+        ? "; stability is the mean standard deviation across an example's repetitions"
+        : ''
+    }).`
   );
   lines.push(
-    `Test per row is chosen from the scores: McNemar for pass/fail (averaged pass rates count as continuous), otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ ${PARAMETRIC_UPGRADE_MIN_PAIRS} and differences look normal).`
+    `Test per row is chosen from the scores: McNemar when every compared score is 0 or 1, otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ ${PARAMETRIC_UPGRADE_MIN_PAIRS} and differences look normal).`
   );
   lines.push('');
 
@@ -203,10 +212,21 @@ export function formatMarkdownCompareReport({
 
   const renderTable = (rows: ComparisonResult[]) => {
     const tableLines: string[] = [];
-    tableLines.push(
-      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | Test | p-value | Sig | Outcome | Stability (PR/${baselineBranch}) |`
-    );
-    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+    const headers = [
+      'Dataset',
+      'Evaluator',
+      'N',
+      'Mean (PR)',
+      `Mean (${baselineBranch})`,
+      'Diff',
+      'Test',
+      'p-value',
+      'Sig',
+      'Outcome',
+      ...(showStability ? [`Stability (PR/${baselineBranch})`] : []),
+    ];
+    tableLines.push(`| ${headers.join(' | ')} |`);
+    tableLines.push(`| ${headers.map(() => '---').join(' | ')} |`);
     rows.forEach((r) => {
       const delta = r.meanTarget - r.meanBaseline;
       const cols = [
@@ -220,7 +240,9 @@ export function formatMarkdownCompareReport({
         formatPValue(r.pValue),
         formatSig(r.pValue, significanceThreshold),
         formatOutcome(delta, r.direction, r.pValue, significanceThreshold),
-        `${formatNumber(r.stabilityTarget)} / ${formatNumber(r.stabilityBaseline)}`,
+        ...(showStability
+          ? [`${formatNumber(r.stabilityTarget)} / ${formatNumber(r.stabilityBaseline)}`]
+          : []),
       ];
       tableLines.push(`| ${cols.join(' | ')} |`);
     });

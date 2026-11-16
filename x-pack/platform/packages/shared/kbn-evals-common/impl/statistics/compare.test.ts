@@ -160,6 +160,28 @@ describe('pairScores', () => {
     expect(mean.pairs.map((pair) => pair.evaluatorName)).toEqual(['Quality', 'Latency']);
     expect(mean.rejectedSlices).toEqual([]);
   });
+
+  it('pairs the scores of an example under mean whatever their repetition index', () => {
+    const target = [createMockScore({ repetitionIndex: 1, score: 0.8 })];
+    const baseline = [createMockScore({ repetitionIndex: 0, score: 0.2 })];
+
+    expect(pairScores(target, baseline, 'mean').pairs).toEqual([
+      expect.objectContaining({ scoreTarget: 0.8, scoreBaseline: 0.2 }),
+    ]);
+    expect(pairScores(target, baseline, 'pool').pairs).toEqual([]);
+  });
+
+  it('averages an example held twice under mean, where pool keeps the last score', () => {
+    const target = [createMockScore({ score: 0.8 })];
+    const baseline = [createMockScore({ score: 0.2 }), createMockScore({ score: 0.6 })];
+
+    expect(pairScores(target, baseline, 'mean').pairs).toEqual([
+      expect.objectContaining({ scoreTarget: 0.8, scoreBaseline: expect.closeTo(0.4, 12) }),
+    ]);
+    expect(pairScores(target, baseline, 'pool').pairs).toEqual([
+      expect.objectContaining({ scoreTarget: 0.8, scoreBaseline: 0.6 }),
+    ]);
+  });
 });
 
 describe('compareScores', () => {
@@ -470,8 +492,8 @@ describe('compareScores (repetitions)', () => {
           usedBaseline: 4,
           missingTarget: 0,
           missingBaseline: 0,
-          stabilityTarget: 0,
-          stabilityBaseline: 0,
+          stabilityTarget: null,
+          stabilityBaseline: null,
           repetitionWarning: false,
         },
         {
@@ -489,8 +511,8 @@ describe('compareScores (repetitions)', () => {
           usedBaseline: 4,
           missingTarget: 0,
           missingBaseline: 0,
-          stabilityTarget: 0,
-          stabilityBaseline: 0,
+          stabilityTarget: null,
+          stabilityBaseline: null,
           repetitionWarning: false,
         },
       ]);
@@ -560,11 +582,11 @@ describe('compareScores (repetitions)', () => {
       missingTarget: 2,
       missingBaseline: 0,
       stabilityTarget: expect.closeTo(Math.SQRT1_2 * 0.2, 12),
-      stabilityBaseline: 0,
+      stabilityBaseline: expect.closeTo(0, 12),
     });
   });
 
-  it('warns when the counts differ per example, even if the totals match, or a score is null', () => {
+  it('warns when the counts differ per example, a score is null or an example is on one side only', () => {
     const uneven = compareDocs(
       scoresPerExample([
         [0.1, 0.2, 0.3],
@@ -582,6 +604,34 @@ describe('compareScores (repetitions)', () => {
 
     expect(uneven[0]).toMatchObject({ usedTarget: 5, usedBaseline: 5, repetitionWarning: true });
     expect(nullOnBothSides[0].repetitionWarning).toBe(true);
+
+    // An example on one side only counts as 0 valid repetitions against n.
+    const oneSideOnly = compareDocs(scoresPerExample([[0.1], [0.4]]), scoresPerExample([[0.2]]));
+    expect(oneSideOnly[0]).toMatchObject({ sampleSize: 1, repetitionWarning: true });
+  });
+
+  it('treats averaged whole-number scores as continuous', () => {
+    const [result] = compareDocs(
+      scoresPerExample([
+        [4, 5],
+        [3, 3],
+        [2, 4],
+        [5, 5],
+        [1, 2],
+        [3, 4],
+      ]),
+      scoresPerExample([
+        [3, 4],
+        [2, 3],
+        [2, 2],
+        [4, 5],
+        [1, 1],
+        [3, 3],
+      ])
+    );
+
+    expect(result.metricType).toBe('continuous_unbounded');
+    expect(result.hypothesisTest.id).toBe('wilcoxon_signed_rank');
   });
 
   it('never passes averaged pass/fail scores to McNemar', () => {

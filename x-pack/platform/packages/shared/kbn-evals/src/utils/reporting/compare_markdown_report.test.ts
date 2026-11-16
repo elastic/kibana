@@ -197,6 +197,18 @@ describe('formatMarkdownCompareReport', () => {
       /\| Even \| 10 \|.*\| 0\.06 \/ 0\.03 \|$/
     );
     expect(lines.find((line) => line.includes('| Uneven |'))).toContain('| Uneven | 10* |');
+
+    const unmeasured = { stabilityTarget: null, stabilityBaseline: null };
+    const oneSide = makeResult({ evaluatorName: 'One side', stabilityBaseline: null });
+    expect(
+      report([oneSide, makeResult(unmeasured)])
+        .split('\n')
+        .find((line) => line.includes('| One side |'))
+    ).toMatch(/\| 0\.00 \/ - \|$/);
+
+    const hidden = report([makeResult(unmeasured)]);
+    expect(hidden).not.toMatch(/stability/i);
+    expect(hidden).toContain('| Sig | Outcome |\n| --- |');
   });
 
   describe('skipped pairs', () => {

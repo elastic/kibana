@@ -144,11 +144,11 @@ function sampleStandardDeviation(values: number[]): number {
   return Math.sqrt(squares / (values.length - 1));
 }
 
-function stability(sides: SideScores[]): number {
+function stability(sides: SideScores[]): number | null {
   const deviations = sides
     .filter((side) => side.values.length > 1)
     .map((side) => sampleStandardDeviation(side.values));
-  return deviations.length > 0 ? mean(deviations) : 0;
+  return deviations.length > 0 ? mean(deviations) : null;
 }
 
 const isPaired = ({ target, baseline }: ExampleScores) =>

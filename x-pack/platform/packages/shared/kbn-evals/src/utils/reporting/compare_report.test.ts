@@ -23,8 +23,8 @@ const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult
   usedBaseline: 10,
   missingTarget: 0,
   missingBaseline: 0,
-  stabilityTarget: 0,
-  stabilityBaseline: 0,
+  stabilityTarget: null,
+  stabilityBaseline: null,
   repetitionWarning: false,
   ...overrides,
 });

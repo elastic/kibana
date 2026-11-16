@@ -833,7 +833,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(evaluatorResult?.usedTarget).to.eql(4);
         expect(evaluatorResult?.usedBaseline).to.eql(3);
         expect(evaluatorResult?.stabilityTarget).to.be.within(0.7071067, 0.7071068);
-        expect(evaluatorResult?.stabilityBaseline).to.eql(0);
+        expect(evaluatorResult?.stabilityBaseline).to.be(null);
         expect(evaluatorResult?.repetitionWarning).to.eql(true);
       });
 
