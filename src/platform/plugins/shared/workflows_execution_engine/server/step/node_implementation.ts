@@ -359,10 +359,15 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     return undefined;
   }
 
-  private isDebugEnabled(): boolean {
-    const execution =
+  private getWorkflowExecution() {
+    return (
       this.workflowExecutionRuntime?.getWorkflowExecution?.() ??
-      this.stepExecutionRuntime.workflowExecution;
+      this.stepExecutionRuntime.workflowExecution
+    );
+  }
+
+  private isDebugEnabled(): boolean {
+    const execution = this.getWorkflowExecution();
     const debug = execution?.context?.debug as { enabled?: boolean } | undefined;
     return Boolean(execution?.isTestRun && debug?.enabled === true);
   }
@@ -371,10 +376,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     if (!this.isDebugEnabled()) {
       return false;
     }
-    const execution =
-      this.workflowExecutionRuntime?.getWorkflowExecution?.() ??
-      this.stepExecutionRuntime.workflowExecution;
-    const debug = execution?.context?.debug as { breakpoints?: unknown } | undefined;
+    const debug = this.getWorkflowExecution()?.context?.debug as
+      | { breakpoints?: unknown }
+      | undefined;
     if (!Array.isArray(debug?.breakpoints) || debug.breakpoints.length === 0) {
       return false;
     }
@@ -413,10 +417,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       ...currentState,
       breakpointPaused: false,
     });
-    const execution =
-      this.workflowExecutionRuntime?.getWorkflowExecution?.() ??
-      this.stepExecutionRuntime.workflowExecution;
-    const context = execution?.context;
+    const context = this.getWorkflowExecution()?.context;
     const rawResumeInput = context?.resumeInput;
     const overrideInput =
       rawResumeInput != null &&

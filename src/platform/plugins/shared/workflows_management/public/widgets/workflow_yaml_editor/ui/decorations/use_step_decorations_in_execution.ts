@@ -67,9 +67,8 @@ export const useStepDecorationsInExecution = (
         options: { glyphMarginClassName: glyphClassNames.join(' ') },
       };
 
-      // Only apply background decoration if the step is not nested, UNLESS it is actively
-      // paused at a breakpoint (in which case its header line gets the red breakpoint highlight).
-      // This prevents overlapped backgrounds (double transparency) when parent and child are both decorated.
+      // Only apply background decoration if the step is not nested
+      // This prevents overlapped backgrounds (double transparency) when parent and child are both decorated
       const isNested =
         stepInfo.parentStepId &&
         stepExecutions.some((otherStepExecution) => {

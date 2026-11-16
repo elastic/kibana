@@ -114,14 +114,12 @@ export const StepMockSchema = lazySchema(() =>
 export type StepMock = z.infer<typeof StepMockSchema>;
 
 // Base step schema, with recursive steps property
-export const BaseStepSchema = lazySchema(() =>
-  z.object({
-    name: z.string().min(1),
-    type: z.string(),
-    'max-step-size': ByteSizeSchema.optional(),
-    if: IfConditionSchema.optional(),
-  })
-);
+export const BaseStepSchema = z.object({
+  name: z.string().min(1),
+  type: z.string(),
+  'max-step-size': ByteSizeSchema.optional(),
+  if: IfConditionSchema.optional(),
+});
 export type BaseStep = z.infer<typeof BaseStepSchema>;
 
 export const WorkflowOnFailureSchema = z.object({

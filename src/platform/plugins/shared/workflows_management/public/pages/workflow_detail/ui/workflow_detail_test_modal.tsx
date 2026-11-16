@@ -25,7 +25,10 @@ import {
   clearReplay,
   setIsTestModalOpen,
 } from '../../../entities/workflows/store/workflow_detail/slice';
-import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
+import {
+  type TestWorkflowParams,
+  testWorkflowThunk,
+} from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
 import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { useAsyncThunk } from '../../../hooks/use_async_thunk';
@@ -58,7 +61,11 @@ export const WorkflowDetailTestModal = () => {
   const isProductionReplay = isReplay && !replayIsTestRun;
 
   const handleRunWorkflow = useCallback(
-    async (inputs: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
+    async (
+      inputs: Record<string, unknown>,
+      triggerTab?: WorkflowTriggerTab,
+      debug?: TestWorkflowParams['debug']
+    ) => {
       if (isReplay) {
         if (!workflowId) {
           const missingIdError = new Error(
@@ -76,9 +83,10 @@ export const WorkflowDetailTestModal = () => {
         }
 
         try {
-          const result = replayIsTestRun
-            ? await testSavedWorkflow({ workflowId, inputs })
-            : await runWorkflow({ id: workflowId, inputs });
+          const result =
+            replayIsTestRun || debug
+              ? await testSavedWorkflow({ workflowId, inputs, debug })
+              : await runWorkflow({ id: workflowId, inputs });
           if (result?.workflowExecutionId) {
             setSelectedExecution(result.workflowExecutionId);
           }
@@ -94,7 +102,7 @@ export const WorkflowDetailTestModal = () => {
         return;
       }
 
-      const executionId = await testWorkflow({ inputs, triggerTab });
+      const executionId = await testWorkflow({ inputs, triggerTab, debug });
 
       if (executionId) {
         selectEditorRun(executionId.workflowExecutionId);
@@ -114,70 +122,9 @@ export const WorkflowDetailTestModal = () => {
   );
 
   const handleDebugWorkflow = useCallback(
-    async (inputs: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
-      if (isReplay) {
-        if (!workflowId) {
-          const missingIdError = new Error(
-            i18n.translate('workflows.detail.testModal.reRunMissingWorkflowId', {
-              defaultMessage: 'Workflow id is missing',
-            })
-          );
-          notifications.toasts.addError(missingIdError, {
-            title: i18n.translate('workflows.detail.testModal.reRunFailed', {
-              defaultMessage: 'Failed to re-run workflow',
-            }),
-            toastLifeTimeMs: 5000,
-          });
-          throw missingIdError;
-        }
-
-        try {
-          const result = await testSavedWorkflow({
-            workflowId,
-            inputs,
-            debug: {
-              enabled: true,
-              breakpoints,
-            },
-          });
-          if (result?.workflowExecutionId) {
-            setSelectedExecution(result.workflowExecutionId);
-          }
-        } catch (error) {
-          notifications.toasts.addError(error as Error, {
-            title: i18n.translate('workflows.detail.testModal.reRunFailed', {
-              defaultMessage: 'Failed to re-run workflow',
-            }),
-            toastLifeTimeMs: 5000,
-          });
-          throw error;
-        }
-        return;
-      }
-
-      const executionId = await testWorkflow({
-        inputs,
-        triggerTab,
-        debug: {
-          enabled: true,
-          breakpoints,
-        },
-      });
-
-      if (executionId) {
-        selectEditorRun(executionId.workflowExecutionId);
-      }
-    },
-    [
-      breakpoints,
-      isReplay,
-      notifications.toasts,
-      selectEditorRun,
-      setSelectedExecution,
-      testSavedWorkflow,
-      testWorkflow,
-      workflowId,
-    ]
+    (inputs: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) =>
+      handleRunWorkflow(inputs, triggerTab, { enabled: true, breakpoints }),
+    [handleRunWorkflow, breakpoints]
   );
 
   const closeModal = useCallback(() => {
