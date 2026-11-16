@@ -185,6 +185,36 @@ describe('SearchMethodsService', () => {
       expect(result.datatable).toBeUndefined();
     });
 
+    describe('errors', () => {
+      it('rethrows an abort unchanged, so callers can recognize it', async () => {
+        const abort = new DOMException('The operation was aborted', 'AbortError');
+        mockSearch.mockReturnValue(throwError(() => abort));
+
+        await expect(service.esql({ query: 'FROM logs' })).rejects.toBe(abort);
+      });
+
+      it('does not present a failure that did not come from Elasticsearch as one', async () => {
+        const failure = new TypeError('Failed to fetch');
+        mockSearch.mockReturnValue(throwError(() => failure));
+
+        await expect(service.esql({ query: 'FROM logs' })).rejects.toMatchObject({
+          message: 'Failed to fetch',
+        });
+      });
+
+      it('rewords an Elasticsearch error', async () => {
+        const original = Object.assign(new Error('original message'), {
+          attributes: { type: 'verification_exception', reason: 'Unknown column [foo]' },
+        });
+        mockSearch.mockReturnValue(throwError(() => original));
+
+        await expect(service.esql({ query: 'FROM logs' })).rejects.toMatchObject({
+          message:
+            'Unexpected error from Elasticsearch: verification_exception - Unknown column [foo]',
+        });
+      });
+    });
+
     describe('inspector', () => {
       it('calls inspector.adapter.start with correct parameters', async () => {
         const mockResponse = { columns: [], values: [] };
@@ -291,7 +321,6 @@ describe('SearchMethodsService', () => {
 
         expect(requestResponder.error).toHaveBeenCalledWith({ json });
       });
-
       it('calls requestResponder.stats with getEsqlInspectorStats result on success', async () => {
         const mockResponse = {
           columns: [{ name: 'status', type: 'integer' }],

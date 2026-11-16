@@ -143,21 +143,28 @@ export const getInspectorErrorJson = (error: unknown): object => {
   return { message: error instanceof Error ? error.message : String(error) };
 };
 
-/** Re-formats an Elasticsearch ES|QL error into a user-friendly message and re-throws it. */
+const isAbortError = (error: object): boolean =>
+  (error as { name?: unknown }).name === 'AbortError';
+
+/**
+ * Re-formats an Elasticsearch ES|QL error into a user-friendly message and re-throws it.
+ * Only an error that carries Elasticsearch error attributes is reworded. Anything else was not
+ * reported by Elasticsearch (a network failure, an abort, a bug) and is rethrown as it is.
+ */
 export const formatAndRethrowEsqlError = (error: unknown): never => {
-  // A rejection is not always an object (e.g. a string), which would throw while it is annotated
-  const err = (
-    typeof error === 'object' && error !== null ? error : new Error(String(error))
-  ) as Record<string, unknown> & { message: string };
-  if (!err.attributes) {
-    err.message = `Unexpected error from Elasticsearch: ${err.message}`;
-  } else {
-    const { type, reason } = extractEsqlErrorInfo(err.attributes);
-    if (type === 'parsing_exception') {
-      err.message = `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`;
-    } else {
-      err.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
-    }
-  }
+  // A rejection is not always an object (e.g. a string)
+  if (typeof error !== 'object' || error === null) throw new Error(String(error));
+  // An abort is deliberate and callers recognize it by its name or type
+  if (isAbortError(error)) throw error;
+
+  const { attributes } = error as { attributes?: unknown };
+  if (!attributes) throw error;
+
+  const err = error as { message: string };
+  const { type, reason } = extractEsqlErrorInfo(attributes);
+  err.message =
+    type === 'parsing_exception'
+      ? `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`
+      : `Unexpected error from Elasticsearch: ${type} - ${reason}`;
   throw err;
 };
