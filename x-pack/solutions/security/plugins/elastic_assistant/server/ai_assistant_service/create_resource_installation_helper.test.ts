@@ -152,7 +152,11 @@ describe('createResourceInstallationHelper', () => {
 
   test(`should install a namespace once when it is added again before the first install settles`, async () => {
     const installFn = jest.fn().mockResolvedValue(undefined);
-    const helper = createResourceInstallationHelper(logger, getCommonInitPromise(true, 10), installFn);
+    const helper = createResourceInstallationHelper(
+      logger,
+      getCommonInitPromise(true, 10),
+      installFn
+    );
 
     helper.add('test1');
     helper.add('test1');

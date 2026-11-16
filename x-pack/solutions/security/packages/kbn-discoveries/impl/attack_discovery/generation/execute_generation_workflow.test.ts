@@ -1148,6 +1148,20 @@ describe('executeGenerationWorkflow', () => {
       expect(mockFetchAnonymizationFields).toHaveBeenCalled();
     });
 
+    it('warns and still fetches the anonymization fields when the install rejects', async () => {
+      const ensureSpaceResources = jest.fn().mockRejectedValue(new Error('cluster unavailable'));
+
+      const logger = await run({ ensureSpaceResources });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Could not install the AI Assistant resources for space 'default': cluster unavailable"
+      );
+      expect(mockFetchAnonymizationFields).toHaveBeenCalled();
+      expect(mockWriteAttackDiscoveryEvent).not.toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'generation-failed' })
+      );
+    });
+
     it('fetches the anonymization fields when elastic_assistant is not available', async () => {
       const logger = await run({ pluginsStart: {} });
 

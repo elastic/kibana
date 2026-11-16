@@ -491,6 +491,30 @@ const handleGenerationFailure = async ({
   }
 };
 
+/**
+ * A space that never used the AI Assistant has no anonymization fields data stream yet.
+ * A failed install is only logged: the anonymization fields fetch then fails with its own error.
+ */
+const ensureAssistantSpaceResources = async ({
+  elasticAssistant,
+  logger,
+  spaceId,
+}: {
+  elasticAssistant: ElasticAssistantStart | undefined;
+  logger: Logger;
+  spaceId: string;
+}): Promise<void> => {
+  try {
+    if ((await elasticAssistant?.ensureSpaceResources(spaceId)) === false) {
+      logger.warn(`Could not install the AI Assistant resources for space '${spaceId}'`);
+    }
+  } catch (error) {
+    logger.warn(
+      `Could not install the AI Assistant resources for space '${spaceId}': ${error.message}`
+    );
+  }
+};
+
 export async function executeGenerationWorkflow({
   alerts,
   alertsIndexPattern,
@@ -640,15 +664,10 @@ export async function executeGenerationWorkflow({
 
     authenticatedUser = createAuthenticatedUserForEventLogging({ authenticationInfo });
 
-    // A space that never used the AI Assistant has no anonymization fields data stream yet.
-    // A failed install is only logged: the fetch below then fails with its own error.
     const { elasticAssistant } = pluginsStart as {
       elasticAssistant?: ElasticAssistantStart;
     };
-
-    if ((await elasticAssistant?.ensureSpaceResources(spaceId)) === false) {
-      logger.warn(`Could not install the AI Assistant resources for space '${spaceId}'`);
-    }
+    await ensureAssistantSpaceResources({ elasticAssistant, logger, spaceId });
 
     // The anonymization fields index is Kibana-owned configuration, not user data.
     // It is read with the internal user, as the AI Assistant `_find` route does, so

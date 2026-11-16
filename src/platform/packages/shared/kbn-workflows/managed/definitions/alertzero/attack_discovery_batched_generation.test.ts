@@ -21,6 +21,7 @@ interface ParsedStep {
   name: string;
   type: string;
   'branch-timeout'?: string;
+  'on-failure'?: { continue?: boolean | string };
   concurrency?: number;
   foreach?: string;
   if?: string;
@@ -154,16 +155,59 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
         );
       });
 
-      it('skips retrieve_alert_ids unless the index exists, and only on that condition', () => {
-        expect(retrieve().if).toBe('${{ steps.check_alerts_index.output._shards.total > 0 }}');
+      const evalExpression = (expression: unknown, context: Record<string, unknown>) =>
+        createWorkflowLiquidEngine().evalValueSync(
+          String(expression)
+            .replace(/^\$\{\{/, '')
+            .replace(/\}\}$/, '')
+            .trim(),
+          context
+        );
+
+      it('skips retrieve_alert_ids only when the probe failed', () => {
         expect(retrieve().type).toBe('elasticsearch.esql.query');
+        expect(evalExpression(retrieve().if, { steps: { check_alerts_index: {} } })).toBe(true);
+        expect(
+          evalExpression(retrieve().if, {
+            steps: { check_alerts_index: { error: { type: 'ResponseError' } } },
+          })
+        ).toBe(false);
       });
 
       // `elasticsearch.indices.exists` needs `view_index_metadata`, which a principal that
       // can read the alerts alias may not hold. A size-0 search needs only `read`.
       it('probes with a read-only search, not an index-metadata call', () => {
         expect(check().type).toBe('elasticsearch.search');
-        expect(check().with).toMatchObject({ ignore_unavailable: true, size: 0 });
+        expect(check().with).toEqual({
+          index: '.alerts-security.alerts-{{ workflow.spaceId }}',
+          size: 0,
+        });
+      });
+
+      // The ES client names a response error `ResponseError` and puts the ES error type
+      // first in its message.
+      it.each([
+        [
+          'continues past a missing alerts index',
+          {
+            type: 'ResponseError',
+            message:
+              'index_not_found_exception\n\tRoot causes:\n\t\tindex_not_found_exception: no such index',
+          },
+          true,
+        ],
+        [
+          'fails when the caller cannot read the alerts index',
+          {
+            type: 'ResponseError',
+            message:
+              'security_exception\n\tRoot causes:\n\t\tsecurity_exception: action is unauthorized',
+          },
+          false,
+        ],
+        ['fails on any other error', { type: 'Error', message: 'socket hang up' }, false],
+      ] as const)('%s', (_label, error, continues) => {
+        expect(evalExpression(check()['on-failure']?.continue, { error })).toBe(continues);
       });
 
       it('does not loosen the query, so a genuine ES|QL error still fails the run', () => {
