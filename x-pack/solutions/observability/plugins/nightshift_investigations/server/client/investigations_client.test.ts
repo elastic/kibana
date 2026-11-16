@@ -1062,7 +1062,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(inputs).not.toHaveProperty('concurrency_key');
   });
 
-  it('uses the caller-supplied message and source_ids when provided', async () => {
+  it('uses the caller-supplied message when provided', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-789');
 
@@ -1071,17 +1071,15 @@ describe('NightshiftInvestigationsClient.start()', () => {
       subject: { type: 'significant_event', id: 'se-1' },
       trigger_type: 'manual',
       message: 'Checkout latency breach\n\nP99 latency climbed above 2s.',
-      source_ids: ['logs.checkout'],
     });
 
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
     expect(inputs.message).toBe('Checkout latency breach\n\nP99 latency climbed above 2s.');
-    expect(inputs.source_ids).toEqual(['logs.checkout']);
   });
 
   // Uses a significant event subject: an alert investigation cannot reach the generic fallback
   // any more, because it is rejected without the alert data the brief is composed from.
-  it('falls back to a generic message and omits source_ids when none are given', async () => {
+  it('falls back to a generic message when none is given', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-999');
 
@@ -1093,7 +1091,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
     expect(inputs.message).toBe('Investigation requested for significant_event se-1');
-    expect(inputs).not.toHaveProperty('source_ids');
   });
 
   it('ensures the investigation agent exists in the space before running the workflow', async () => {
