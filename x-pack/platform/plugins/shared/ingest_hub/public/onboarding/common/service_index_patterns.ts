@@ -39,9 +39,10 @@ export function getServiceIndexPatterns(
     for (const [, dsInfo] of Object.entries(entry.varDefsByDataStream)) {
       // OTel input packages (e.g. aws_otel) store the actual data stream
       // coordinates as variable defaults under varDefsByInput rather than at the top level.
+      // Composable packages (e.g. aws_otel) pin the dataset on the data stream manifest instead.
       const baseDataset =
         entry.dataFormat === 'otel'
-          ? getInputVarDefault(dsInfo.varDefsByInput, 'data_stream.dataset')
+          ? getInputVarDefault(dsInfo.varDefsByInput, 'data_stream.dataset') ?? dsInfo.dataset
           : dsInfo.dataset;
       // Data ingested through the `otelcol` input lands in `<dataset>.otel`, not in the manifest default.
       const dataset =
