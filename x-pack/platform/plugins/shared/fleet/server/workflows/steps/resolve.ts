@@ -14,10 +14,15 @@ import {
   buildPackageVars,
   disableUnlistedPackageInputs,
   getPackageVarNames,
+  buildSettingsRequirement,
   getServiceIndexPatterns,
 } from '../../../common/services/aws_onboarding_catalog';
 import type { AwsServiceMatrixEntry } from '../../../common/services/aws_onboarding_catalog';
 import { awsOnboardingResolveCommonDefinition } from '../../../common/workflows/steps/resolve';
+import {
+  settingsAnswerToServiceVars,
+  validateSettingsAnswer,
+} from '../../../common/workflows/steps/settings';
 import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_onboarding';
 
 import { loadAwsServiceMatrix, isAgentless } from './aws_service_matrix';
@@ -42,6 +47,7 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
       namespace = DEFAULT_NAMESPACE,
       account_id,
       run_suffix: runSuffix,
+      settings,
     } = context.input;
     const { packageVersion, packageInfo, matrix } = await loadAwsServiceMatrix(context);
 
@@ -69,8 +75,26 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
       };
     }
 
+    // The answer is untrusted input, so it is checked against the requirement the matrix yields.
+    const requirement = buildSettingsRequirement({ services: selected, packageInfo, region });
+    const problems = validateSettingsAnswer(requirement, settings);
+    if (problems.length > 0) {
+      return {
+        error: new ExecutionError({
+          type: 'ValidationError',
+          message: `Invalid onboarding settings: ${problems
+            .map(({ path, message }) => `${path}: ${message}`)
+            .join('; ')}`,
+          details: { problems },
+        }),
+      };
+    }
+    const serviceVars = settingsAnswerToServiceVars(requirement, settings);
+    // A service missing from the answer is deselected.
+    const answered = selected.filter(({ id }) => id in serviceVars);
+
     const integrations = buildIacIntegrations(
-      selected.map((service) => ({
+      answered.map((service) => ({
         instance: {
           instanceId: service.id,
           serviceId: service.id,
@@ -79,14 +103,14 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
         },
         service,
       })),
-      {}
+      serviceVars
     );
 
     // Fleet enforces unique policy and connector names, so a re-run needs its own suffix.
     const suffix = runSuffix?.trim() || Date.now().toString(36);
     const packageVars = buildPackageVars(region, undefined, getPackageVarNames(packageInfo));
 
-    const policies = selected.map((service) => {
+    const policies = answered.map((service) => {
       const name = `aws-${service.id}-agentless-${suffix}`;
       return {
         service: service.id,
@@ -100,7 +124,7 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
           policy_template: service.policyTemplate ?? service.id,
           ...(packageVars ? { vars: packageVars } : {}),
           inputs: disableUnlistedPackageInputs(
-            buildPackageInputs([service], {}, region),
+            buildPackageInputs([service], serviceVars, region),
             packageInfo.policy_templates
           ),
         },
@@ -112,7 +136,7 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
     );
 
     const indexPatterns = [
-      ...new Set(selected.flatMap((service) => getServiceIndexPatterns(service, namespace))),
+      ...new Set(answered.flatMap((service) => getServiceIndexPatterns(service, namespace))),
     ];
 
     return {

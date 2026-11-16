@@ -23,7 +23,7 @@ export const awsOnboardingResolveInputSchema = lazySchema(() =>
     /** Short per-run suffix that keeps policy and connector names unique across runs. */
     run_suffix: z.string().optional(),
     /** The per-service collection settings the user answered in the settings pause. */
-    settings: awsOnboardingSettingsAnswerSchema.optional(),
+    settings: awsOnboardingSettingsAnswerSchema,
   })
 );
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PackageInfo } from '../../../common/types';
 import { validateDeploymentModesForInputs } from '../../../common/services/agentless_policy_helper';
 import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import { getPackageInfo } from '../../services/epm/packages/get';
@@ -23,6 +24,73 @@ jest.mock('../../services/app_context', () => ({
   },
 }));
 
+const s3Answer = { input: 'aws-s3' };
+const logsSettings = {
+  services: {
+    guardduty: { data_streams: { guardduty: s3Answer } },
+    ec2: { data_streams: { ec2_logs: s3Answer } },
+  },
+};
+
+/** GuardDuty offers httpjson or S3; EC2 is reduced to a metrics stream with a CloudWatch input listed. */
+const choicePackageInfo = {
+  ...awsPackageInfoFixture,
+  policy_templates: [
+    {
+      name: 'guardduty',
+      title: 'AWS GuardDuty',
+      data_streams: ['guardduty'],
+      deployment_modes: { agentless: { enabled: true } },
+      inputs: [
+        { type: 'aws-s3', title: 'S3', deployment_modes: ['default', 'agentless'] },
+        { type: 'httpjson', title: 'API', deployment_modes: ['default', 'agentless'] },
+      ],
+    },
+    {
+      name: 'ec2',
+      title: 'AWS EC2',
+      data_streams: ['ec2_metrics'],
+      deployment_modes: { agentless: { enabled: true } },
+      inputs: [
+        { type: 'aws/metrics', title: 'Metrics', deployment_modes: ['default', 'agentless'] },
+        { type: 'aws-cloudwatch', title: 'CloudWatch', deployment_modes: ['default', 'agentless'] },
+      ],
+    },
+  ],
+  data_streams: [
+    {
+      path: 'guardduty',
+      type: 'logs',
+      dataset: 'aws.guardduty',
+      title: 'GuardDuty findings',
+      streams: [
+        { input: 'aws-s3', enabled: false, vars: [] },
+        {
+          input: 'httpjson',
+          enabled: true,
+          vars: [{ name: 'detector_id', title: 'Detector ID', type: 'text', required: true }],
+        },
+      ],
+    },
+    {
+      path: 'ec2_metrics',
+      type: 'metrics',
+      dataset: 'aws.ec2_metrics',
+      title: 'EC2 metrics',
+      streams: [{ input: 'aws/metrics', enabled: true, vars: [] }],
+    },
+  ],
+} as unknown as PackageInfo;
+
+const choiceSettings = {
+  services: {
+    guardduty: {
+      data_streams: { guardduty: { input: 'httpjson', vars: { detector_id: 'abc123' } } },
+    },
+    ec2: { data_streams: { ec2_metrics: { input: 'aws/metrics' } } },
+  },
+};
+
 describe('awsOnboardingResolveStepDefinition', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -32,7 +100,11 @@ describe('awsOnboardingResolveStepDefinition', () => {
 
   it('throws a ValidationError naming a service that is not agentless-capable', async () => {
     const result = await awsOnboardingResolveStepDefinition.handler(
-      createStepContext({ services: ['guardduty', 'cloudtrail'], region: 'us-east-1' })
+      createStepContext({
+        services: ['guardduty', 'cloudtrail'],
+        region: 'us-east-1',
+        settings: logsSettings,
+      })
     );
 
     expect(result).toEqual({
@@ -51,6 +123,7 @@ describe('awsOnboardingResolveStepDefinition', () => {
         namespace: 'prod',
         account_id: '123456789012',
         run_suffix: 'ab12cd34',
+        settings: logsSettings,
       })
     );
 
@@ -95,7 +168,11 @@ describe('awsOnboardingResolveStepDefinition', () => {
 
   it('produces policy bodies that pass the agentless conversion and deployment mode validation', async () => {
     const result = await awsOnboardingResolveStepDefinition.handler(
-      createStepContext({ services: ['guardduty', 'ec2'], region: 'us-west-2' })
+      createStepContext({
+        services: ['guardduty', 'ec2'],
+        region: 'us-west-2',
+        settings: logsSettings,
+      })
     );
     const { output } = result as { output: Record<string, any> };
 
@@ -116,11 +193,75 @@ describe('awsOnboardingResolveStepDefinition', () => {
     }
   });
 
+  it('enables only the chosen input per data stream with its vars', async () => {
+    (getPackageInfo as jest.Mock).mockResolvedValue(choicePackageInfo);
+
+    const result = await awsOnboardingResolveStepDefinition.handler(
+      createStepContext({
+        services: ['guardduty', 'ec2'],
+        region: 'us-east-1',
+        settings: choiceSettings,
+      })
+    );
+
+    const { output } = result as { output: Record<string, any> };
+    const [guardduty, ec2] = output.policies;
+    expect(guardduty.body.inputs['guardduty-httpjson'].enabled).toBe(true);
+    expect(
+      guardduty.body.inputs['guardduty-httpjson'].streams['aws.guardduty'].vars.detector_id
+    ).toBe('abc123');
+    expect(guardduty.body.inputs['guardduty-aws-s3'].enabled).toBe(false);
+    expect(ec2.body.inputs['ec2-aws/metrics'].enabled).toBe(true);
+    expect(ec2.body.inputs['ec2-aws-cloudwatch'].enabled).toBe(false);
+    expect(output.permissions_summary).toEqual(['ec2 (aws/metrics)', 'guardduty (httpjson)']);
+  });
+
+  it('builds policies only for the services present in the answer', async () => {
+    (getPackageInfo as jest.Mock).mockResolvedValue(choicePackageInfo);
+
+    const result = await awsOnboardingResolveStepDefinition.handler(
+      createStepContext({
+        services: ['guardduty', 'ec2'],
+        region: 'us-east-1',
+        settings: { services: { ec2: choiceSettings.services.ec2 } },
+      })
+    );
+
+    const { output } = result as { output: Record<string, any> };
+    expect(output.policies.map((p: any) => p.service)).toEqual(['ec2']);
+    expect(output.permissions_summary).toEqual(['ec2 (aws/metrics)']);
+  });
+
+  it('fails the step with the problem list when the answer is invalid', async () => {
+    (getPackageInfo as jest.Mock).mockResolvedValue(choicePackageInfo);
+
+    const result = await awsOnboardingResolveStepDefinition.handler(
+      createStepContext({
+        services: ['guardduty'],
+        region: 'us-east-1',
+        settings: {
+          services: { guardduty: { data_streams: { guardduty: { input: 'httpjson' } } } },
+        },
+      })
+    );
+
+    expect(result).toEqual({
+      error: expect.objectContaining({
+        type: 'ValidationError',
+        message: expect.stringContaining('detector_id'),
+      }),
+    });
+  });
+
   it('refuses to run while the feature flag is off', async () => {
     (isAgenticAwsOnboardingEnabled as jest.Mock).mockResolvedValue(false);
 
     const result = await awsOnboardingResolveStepDefinition.handler(
-      createStepContext({ services: ['guardduty'], region: 'us-east-1' })
+      createStepContext({
+        services: ['guardduty'],
+        region: 'us-east-1',
+        settings: logsSettings,
+      })
     );
 
     expect(result).toEqual({ error: expect.objectContaining({ type: 'PermissionError' }) });
