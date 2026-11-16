@@ -105,6 +105,12 @@ const evaluate = base.extend<
 
 const ESQL = 'elasticsearch.esql.query';
 
+// Without this, agents build an alerting rule (the query lives in the rule, the workflow only
+// notifies) or stop to ask which connector or case owner to use.
+const WORKFLOW_SCOPE =
+  ' Build it as a workflow that runs the ES|QL query itself, not as an alerting rule. ' +
+  'Use the existing Slack and email connectors, and create cases in Security.';
+
 const dataset: EvaluationDataset<WorkflowCreateExample> = {
   name: 'workflow-esql',
   description:
@@ -116,7 +122,8 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
         instruction:
           'Create a workflow that runs every hour. It uses an ES|QL query on logs-* to find process events where the process name is "curl.exe", ' +
           'sums the bytes they sent per destination address, converts the sum to KB, and keeps the top 10 by KB. ' +
-          'Post the result to the #soc-network Slack channel.',
+          'Post the result to the #soc-network Slack channel.' +
+          WORKFLOW_SCOPE,
       },
       output: {
         criteria: [
@@ -135,7 +142,8 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
         instruction:
           'Every 15 minutes, use an ES|QL query on metricbeat-* to compute the CPU usage per host: ' +
           'user CPU plus system CPU, divided by the number of cores, averaged per host. ' +
-          'If any host is above 0.9, send a Slack message to #infra-alerts listing those hosts.',
+          'If any host is above 0.9, send a Slack message to #infra-alerts listing those hosts.' +
+          WORKFLOW_SCOPE,
       },
       output: {
         criteria: [
@@ -154,7 +162,8 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
         instruction:
           'Build a daily APM health report. Use an ES|QL query on traces-apm-* to compute, for the last 24 hours and per service.name: ' +
           'the average transaction duration in microseconds, the success rate (successful / (successful + failed) transactions), ' +
-          'and the total number of requests. Index one summary document per service into the apm-daily-health index.',
+          'and the total number of requests. Index one summary document per service into the apm-daily-health index.' +
+          WORKFLOW_SCOPE,
       },
       output: {
         criteria: [
@@ -172,7 +181,8 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       input: {
         instruction:
           'Create a manual workflow that uses an ES|QL query to extract the query duration from the message field in postgres-logs-* ' +
-          '(messages look like "... duration: 123.4 ms ...") and calculates the average duration. Log the average with a console step.',
+          '(messages look like "... duration: 123.4 ms ...") and calculates the average duration. Log the average with a console step.' +
+          WORKFLOW_SCOPE,
       },
       output: {
         criteria: [
@@ -190,7 +200,8 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       input: {
         instruction:
           'Every morning at 8:00, use an ES|QL query to list the 5 earliest hires from employees-*. Show only the employee number and the hire month ' +
-          'formatted like "September 2019". Email the list to hr-team@example.com.',
+          'formatted like "September 2019". Email the list to hr-team@example.com.' +
+          WORKFLOW_SCOPE,
       },
       output: {
         criteria: [
@@ -208,7 +219,8 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       input: {
         instruction:
           'My ECS logs are in logs-*. Every 5 minutes, use an ES|QL query to find hosts whose average normalized CPU over the last 15 minutes, ' +
-          'in 1-minute buckets, is above 80%. Create a case for each host with the host name in the title.',
+          'in 1-minute buckets, is above 80%. Create a case for each host with the host name in the title.' +
+          WORKFLOW_SCOPE,
       },
       output: {
         criteria: [
@@ -228,7 +240,8 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       input: {
         instruction:
           'Create a manual workflow with a string input "host". It runs an ES|QL query on logs-* that returns the top 10 process names ' +
-          'by event count for that host in the last 24 hours, then logs the result with a console step.',
+          'by event count for that host in the last 24 hours, then logs the result with a console step.' +
+          WORKFLOW_SCOPE,
       },
       output: {
         criteria: [
@@ -247,7 +260,8 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       input: {
         instruction:
           'Every hour, run an ES|QL query on logs-* for the top 20 DNS registered domains in the last hour and the number of distinct hosts that queried each. ' +
-          'Use the real ECS field names from the index. Post the list to the #dns-watch Slack channel.',
+          'Use the real ECS field names from the index. Post the list to the #dns-watch Slack channel.' +
+          WORKFLOW_SCOPE,
       },
       output: {
         criteria: [
@@ -266,7 +280,8 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
         instruction:
           'Create a manual workflow that parses postgres-logs-* messages with the ES|QL GROK command. Messages look like ' +
           '`LOG:  duration: 12.5 ms  statement: SELECT ...`. Extract the duration as a float and the statement text, ' +
-          'then return the 10 slowest statements. Log them with a console step.',
+          'then return the 10 slowest statements. Log them with a console step.' +
+          WORKFLOW_SCOPE,
       },
       output: {
         criteria: [
@@ -284,7 +299,8 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       input: {
         instruction:
           'Every day, use an ES|QL query to find the 5 users in logs-* who sent the most bytes in the last 24 hours. ' +
-          'Then, for each of those users, send a separate Slack message to #data-exfil with the user name and the byte total.',
+          'Then, for each of those users, send a separate Slack message to #data-exfil with the user name and the byte total.' +
+          WORKFLOW_SCOPE,
       },
       output: {
         criteria: [
@@ -304,7 +320,8 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       input: {
         instruction:
           'Every hour, use an ES|QL query on logs-* to count the events per error code in the last hour, ' +
-          'keep the 10 most frequent codes, and post them to the #app-errors Slack channel.',
+          'keep the 10 most frequent codes, and post them to the #app-errors Slack channel.' +
+          WORKFLOW_SCOPE,
       },
       output: {
         criteria: [
@@ -324,7 +341,8 @@ const dataset: EvaluationDataset<WorkflowCreateExample> = {
       input: {
         instruction:
           'Every 5 minutes, use an ES|QL query on logs-* to find users with more than 10 failed logins in the last 5 minutes. ' +
-          'Create a case for each of those users with the user name and the failure count in the title.',
+          'Create a case for each of those users with the user name and the failure count in the title.' +
+          WORKFLOW_SCOPE,
       },
       output: {
         criteria: [
