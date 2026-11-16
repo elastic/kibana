@@ -31,7 +31,7 @@ describe('MatchesPopover', () => {
     renderPopover();
 
     expect(screen.getByText('Matching indices')).toBeInTheDocument();
-    expect(screen.getByTestId('searchBoostMatchesPopoverCount')).toHaveTextContent('2 matches');
+    expect(screen.getByTestId('searchBoostMatchesPopoverCount').textContent).toBe('2 matches');
     expect(screen.getAllByTestId('searchBoostMatchesPopoverItem')).toHaveLength(2);
   });
 
@@ -50,7 +50,7 @@ describe('MatchesPopover', () => {
       ],
     });
 
-    expect(screen.getByTestId('searchBoostMatchesPopoverCount')).toHaveTextContent(
+    expect(screen.getByTestId('searchBoostMatchesPopoverCount').textContent).toBe(
       '3 matches, 2 outranked'
     );
     expect(screen.getAllByTestId('searchBoostMatchesPopoverOutrankedIcon')).toHaveLength(2);
@@ -67,10 +67,10 @@ describe('MatchesPopover', () => {
       ],
     });
 
-    expect(screen.getByTestId('searchBoostMatchesPopoverCount')).toHaveTextContent('5 matches');
+    expect(screen.getByTestId('searchBoostMatchesPopoverCount').textContent).toBe('5 matches');
     expect(screen.getAllByTestId('searchBoostMatchesPopoverItem')).toHaveLength(2);
     expect(screen.queryByText('.hidden-1')).not.toBeInTheDocument();
-    expect(screen.getByTestId('searchBoostMatchesPopoverHidden')).toHaveTextContent(
+    expect(screen.getByTestId('searchBoostMatchesPopoverHidden').textContent).toBe(
       '+3 hidden indices'
     );
   });
@@ -82,7 +82,7 @@ describe('MatchesPopover', () => {
     });
 
     expect(screen.queryByTestId('searchBoostMatchesPopoverItem')).not.toBeInTheDocument();
-    expect(screen.getByTestId('searchBoostMatchesPopoverHidden')).toHaveTextContent(
+    expect(screen.getByTestId('searchBoostMatchesPopoverHidden').textContent).toBe(
       '1 hidden data stream'
     );
   });

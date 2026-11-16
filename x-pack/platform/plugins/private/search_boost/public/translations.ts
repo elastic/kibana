@@ -47,6 +47,10 @@ export const getOutrankedTooltip = (ruleName: string) =>
     values: { ruleName },
   });
 
+export const OUTRANKED_ICON_LABEL = i18n.translate('xpack.searchBoost.outrankedIconLabel', {
+  defaultMessage: 'Outranked',
+});
+
 export const getAdditionalHiddenIndices = (count: number) =>
   i18n.translate('xpack.searchBoost.additionalHiddenIndices', {
     defaultMessage: '+{count, plural, one {# hidden index} other {# hidden indices}}',

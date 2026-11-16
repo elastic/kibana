@@ -17,12 +17,14 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import type { BoostProfileType, BoostRuleMatch } from '../../../common/types';
 import {
   MATCHING_DATA_STREAMS_TITLE,
   MATCHING_INDICES_TITLE,
+  OUTRANKED_ICON_LABEL,
   getAdditionalHiddenDataStreams,
   getAdditionalHiddenIndices,
   getHiddenDataStreams,
@@ -56,6 +58,12 @@ const getHiddenLabel = (
     ? getAdditionalHiddenDataStreams(hiddenCount)
     : getHiddenDataStreams(hiddenCount);
 };
+
+const getListStyles = ({ base }: EuiThemeComputed) => css`
+  min-width: ${base * 15}px;
+  max-height: ${base * 15}px;
+  overflow-y: auto;
+`;
 
 const outrankedNameStyles = css`
   text-decoration: line-through;
@@ -95,14 +103,7 @@ export const MatchesPopover = ({
             : getMatchesCount(matches.length)}
         </EuiText>
       </EuiPopoverTitle>
-      <div
-        css={css`
-          min-width: 248px;
-          max-height: 240px;
-          overflow-y: auto;
-        `}
-        data-test-subj="searchBoostMatchesPopoverList"
-      >
+      <div css={getListStyles(euiTheme)} data-test-subj="searchBoostMatchesPopoverList">
         {visibleMatches.map(({ name, outrankedByRuleName }) => (
           <EuiFlexGroup
             key={name}
@@ -125,6 +126,7 @@ export const MatchesPopover = ({
                 <EuiIconTip
                   type="sortAscending"
                   color={euiTheme.colors.textDisabled}
+                  aria-label={OUTRANKED_ICON_LABEL}
                   content={getOutrankedTooltip(outrankedByRuleName)}
                   iconProps={{ 'data-test-subj': 'searchBoostMatchesPopoverOutrankedIcon' }}
                 />
