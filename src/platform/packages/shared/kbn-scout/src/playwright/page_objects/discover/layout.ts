@@ -390,7 +390,8 @@ export abstract class DiscoverLayout extends DiscoverSave {
   }
 
   getCustomDescriptionFormError(): Locator {
-    return this.page.testSubj.locator('customDescriptionRow').locator('.euiFormErrorText');
+    // EuiFormRow gives each error the id `<rowId>-error-<index>`
+    return this.page.testSubj.locator('customDescriptionRow').locator('[id*="-error-"]');
   }
 
   async saveOpenFieldEditor({ confirmChange = false }: { confirmChange?: boolean } = {}) {
