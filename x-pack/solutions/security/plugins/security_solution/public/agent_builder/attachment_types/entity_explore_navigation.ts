@@ -31,9 +31,6 @@ import {
   ServicePanelKey,
   UserPanelKey,
 } from '../../flyout/entity_details/shared/constants';
-import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_left';
-import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
-import { ServiceDetailsPanelKey } from '../../flyout/entity_details/service_details_left';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { EntityAttachmentIdentifier } from './entity_attachment/types';
 import { isFlyoutCapableIdentifierType } from './entity_attachment/types';
@@ -63,9 +60,11 @@ export interface EntityAnalyticsFlyoutNavigationState {
     id: string;
     params: Record<string, unknown>;
   };
+  /**
+   * Entity details tab to open as a tool flyout on top of the entity flyout.
+   */
   left?: {
-    id: string;
-    params: Record<string, unknown>;
+    path?: Partial<EntityDetailsPath>;
   };
 }
 
@@ -125,7 +124,7 @@ const getEntityToolDescriptor = (
   left: EntityAnalyticsFlyoutNavigationState['left'],
   context: EntityDescriptorContext
 ): FlyoutDescriptor | null => {
-  const path = left?.params.path as { tab?: string; subTab?: string } | undefined;
+  const path = left?.path;
   if (!path?.tab) return null;
 
   const { entityType, entityName, entityId, scopeId } = context;
@@ -346,67 +345,24 @@ export const buildEntityRightPanel = (
 };
 
 /**
- * Builds the expandable-flyout `left` (details) panel for a host/user/service
- * entity. Parameterized by `scopeId`, left-tab `path`, and `isRiskScoreExist`
+ * Builds the `left` entry (the entity details tab to open as a tool flyout) for a
+ * host/user/service entity.
  *
  * Returns `null` for generic entities and when `entityStoreId` is missing.
  */
 export const buildEntityLeftPanel = ({
   identifier,
-  scopeId,
   path,
-  isRiskScoreExist,
 }: {
   identifier: EntityAttachmentIdentifier;
-  scopeId: string;
   path: Partial<EntityDetailsPath>;
-  isRiskScoreExist: boolean;
 }): EntityAnalyticsFlyoutNavigationState['left'] | null => {
-  const { identifierType, identifier: displayName, entityStoreId } = identifier;
+  const { identifierType, entityStoreId } = identifier;
   if (!entityStoreId || !isFlyoutCapableIdentifierType(identifierType)) {
     return null;
   }
 
-  switch (identifierType) {
-    case 'host':
-      return {
-        id: HostDetailsPanelKey,
-        params: {
-          hostName: displayName,
-          entityId: entityStoreId,
-          entityStoreEntityId: entityStoreId,
-          scopeId,
-          isRiskScoreExist,
-          path,
-        },
-      };
-    case 'user':
-      return {
-        id: UserDetailsPanelKey,
-        params: {
-          userName: displayName,
-          identityFields: { 'user.name': displayName },
-          entityId: entityStoreId,
-          entityStoreEntityId: entityStoreId,
-          scopeId,
-          isRiskScoreExist,
-          path,
-        },
-      };
-    case 'service':
-      return {
-        id: ServiceDetailsPanelKey,
-        params: {
-          identityFields: { 'service.name': displayName },
-          entityStoreEntityId: entityStoreId,
-          scopeId,
-          isRiskScoreExist,
-          path,
-        },
-      };
-    default:
-      return null;
-  }
+  return { path };
 };
 
 const openSecurityAgentBuilderChatPreservingConversation = (

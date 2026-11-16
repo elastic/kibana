@@ -73,6 +73,7 @@ export interface SearchAndFilterBarProps {
   sortOrder?: 'asc' | 'desc';
   unsupportedMigrateAgents: Agent[];
   unsupportedPrivilegeLevelChangeAgents: Agent[];
+  selectionHasFleetServer: boolean;
 }
 
 export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
@@ -109,6 +110,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   sortOrder,
   unsupportedMigrateAgents,
   unsupportedPrivilegeLevelChangeAgents,
+  selectionHasFleetServer,
 }) => {
   const authz = useAuthz();
   const { enableOpAMP } = ExperimentalFeaturesService.get();
@@ -360,6 +362,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   sortOrder={sortOrder}
                   unsupportedMigrateAgents={unsupportedMigrateAgents}
                   unsupportedPrivilegeLevelChangeAgents={unsupportedPrivilegeLevelChangeAgents}
+                  selectionHasFleetServer={selectionHasFleetServer}
                 />
               </EuiFlexItem>
             ) : null}
