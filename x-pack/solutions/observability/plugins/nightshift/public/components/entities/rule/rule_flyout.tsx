@@ -125,6 +125,7 @@ export const RuleFlyout = ({
       onClose={onClose}
       size="s"
       type="push"
+      role="region"
       session="start"
       resizable
       historyKey={HISTORY_KEY}
