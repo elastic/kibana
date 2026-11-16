@@ -29,12 +29,13 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | `user_logout` | `unknown` | User is logging out. |
 | `session_cleanup` | `unknown` | Removing invalid or expired session. |
 | `access_agreement_acknowledged` | n/a | User has acknowledged the access agreement. |
-| `service_account_assume` {applies_to}`stack: preview 9.6+` | `success` | Workload [plugin/type/id] is executing as service account [id=x]. Logged when a run starts as a service account. Refer to [Trace what a workload did as a service account](#service-account-assume-details). |
+| `service_account_assume` {applies_to}`{stack: ga 9.6+, serverless: ga}` | `success` | Workload [plugin/type/id] is executing as service account [id=x]. Logged when a run starts as a service account. Refer to [Trace what a workload did as a service account](#service-account-assume-details). |
 | | `failure` | Workload [plugin/type/id] failed to execute as service account [id=x]. Refer to [Why a run fails](#service-account-assume-failures). |
 
 #### Trace what a workload did as a service account [service-account-assume-details]
 ```{applies_to}
-stack: preview 9.6+
+stack: ga 9.6+
+serverless: ga
 ```
 
 A `service_account_assume` event marks the start of a workload run that executes as a service account. Use it to find everything that run did.
@@ -387,7 +388,7 @@ Workflow events (`workflow_*`) are logged after the operation finishes, with `ev
 
 | **Action** | **Outcome** | **Description** |
 | --- | --- | --- |
-| `service_account_create` {applies_to}`stack: preview 9.6+` | `success` | User has created service account [id=x, name=y]. Logged after the account exists, so the event carries the id the backend assigned. |
+| `service_account_create` {applies_to}`{stack: ga 9.6+, serverless: ga}` | `success` | User has created service account [id=x, name=y]. Logged after the account exists, so the event carries the id the backend assigned. |
 | | `failure` | Failed attempt to create service account [name=y]: the user is not authorized. The name is omitted when it did not pass validation. |
 | | `unknown` | Failed attempt to create service account [id=x, name=y], which might have been left behind. The create failed after writing to {{es}} and {{kib}} could not confirm that it removed the partially created account. Refer to the {{kib}} server logs. |
 
@@ -395,16 +396,16 @@ Workflow events (`workflow_*`) are logged after the operation finishes, with `ev
 
 | **Action** | **Outcome** | **Description** |
 | --- | --- | --- |
-| `service_account_workload_bind` {applies_to}`stack: preview 9.6+` | `unknown` | User is binding service account [id=x] to workload [plugin/type/id]. Binding a workload that is already bound to a different account also writes a `service_account_workload_unbind` event for that account first. |
+| `service_account_workload_bind` {applies_to}`{stack: ga 9.6+, serverless: ga}` | `unknown` | User is binding service account [id=x] to workload [plugin/type/id]. Binding a workload that is already bound to a different account also writes a `service_account_workload_unbind` event for that account first. |
 | | `failure` | Failed attempt to bind service account [id=x] to workload [plugin/type/id]: the user is not authorized. |
-| `service_account_workload_unbind` {applies_to}`stack: preview 9.6+` | `unknown` | User is unbinding service account [id=x] from workload [plugin/type/id]. When the workload has no binding, or the stored binding failed integrity verification, the message drops `[id=x]` and `user.target` is omitted. |
+| `service_account_workload_unbind` {applies_to}`{stack: ga 9.6+, serverless: ga}` | `unknown` | User is unbinding service account [id=x] from workload [plugin/type/id]. When the workload has no binding, or the stored binding failed integrity verification, the message drops `[id=x]` and `user.target` is omitted. |
 | | `failure` | Failed attempt to unbind service account from workload [plugin/type/id]: the user is not authorized. |
 
 #### Type: deletion
 
 | **Action** | **Outcome** | **Description** |
 | --- | --- | --- |
-| `service_account_delete` {applies_to}`stack: preview 9.6+` | `unknown` | User is deleting service account [id=x]. A forced delete, which skips the check for bound workloads and leaves their bindings behind, appends `[force=true]` to the message. |
+| `service_account_delete` {applies_to}`{stack: ga 9.6+, serverless: ga}` | `unknown` | User is deleting service account [id=x]. A forced delete, which skips the check for bound workloads and leaves their bindings behind, appends `[force=true]` to the message. |
 | | `failure` | Failed attempt to delete service account [id=x]: the user is not authorized. A forced delete appends `[force=true]` to this message too. |
 
 ::::{note}
