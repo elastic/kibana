@@ -82,7 +82,8 @@ const FACETS: ReadonlyArray<{
 export function SessionsFilters({
   state,
   facets,
-  sessionsWithErrors,
+  sessionsWithJsErrors,
+  sessionsWithFailedRequests,
   hasActiveFilters,
   isLoading,
   formatters,
@@ -92,8 +93,9 @@ export function SessionsFilters({
 }: {
   state: SessionsListState;
   facets: SessionListFacets | undefined;
-  /** Shown on the errors filter, so users see how many sessions it keeps. */
-  sessionsWithErrors: number | undefined;
+  /** Shown on the error filters, so users see how many sessions each keeps. */
+  sessionsWithJsErrors: number | undefined;
+  sessionsWithFailedRequests: number | undefined;
   hasActiveFilters: boolean;
   isLoading: boolean;
   formatters: Formatters;
@@ -148,18 +150,35 @@ export function SessionsFilters({
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiFilterButton
-            data-test-subj="digitalExperienceSessionsErrorsFilter"
+            data-test-subj="digitalExperienceSessionsJsErrorsFilter"
             {...getEbtProps({
               action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
               element: SESSIONS_EBT_ELEMENTS.ERRORS_FILTER,
             })}
             withNext
-            hasActiveFilters={state.hasErrors}
-            numFilters={sessionsWithErrors}
-            onClick={() => onChange({ hasErrors: state.hasErrors ? undefined : 'true' })}
+            hasActiveFilters={state.withJsErrors}
+            numFilters={sessionsWithJsErrors}
+            onClick={() => onChange({ withJsErrors: state.withJsErrors ? undefined : 'true' })}
           >
-            {i18n.translate('xpack.digitalExperience.sessions.filters.hasErrorsLabel', {
-              defaultMessage: 'Has errors',
+            {i18n.translate('xpack.digitalExperience.sessions.filters.withJsErrorsLabel', {
+              defaultMessage: 'JS errors',
+            })}
+          </EuiFilterButton>
+          <EuiFilterButton
+            data-test-subj="digitalExperienceSessionsFailedRequestsFilter"
+            {...getEbtProps({
+              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+              element: SESSIONS_EBT_ELEMENTS.FAILED_REQUESTS_FILTER,
+            })}
+            withNext
+            hasActiveFilters={state.withFailedRequests}
+            numFilters={sessionsWithFailedRequests}
+            onClick={() =>
+              onChange({ withFailedRequests: state.withFailedRequests ? undefined : 'true' })
+            }
+          >
+            {i18n.translate('xpack.digitalExperience.sessions.filters.withFailedRequestsLabel', {
+              defaultMessage: 'Failed requests',
             })}
           </EuiFilterButton>
           <SingleSelectFilter

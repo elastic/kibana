@@ -75,4 +75,5 @@ const lightKbnPalettes = new KbnPalettes(
 export const getPalettes = (darkMode: boolean) => (darkMode ? darkKbnPalettes : lightKbnPalettes);
 
 export { elasticPalette, elasticLineOptimizedPalette } from './categorical';
+export { getLegacyKbnPalettes } from './legacy';
 export * from './get_kbn_palettes';

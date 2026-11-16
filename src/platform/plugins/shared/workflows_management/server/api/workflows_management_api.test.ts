@@ -141,6 +141,7 @@ describe('WorkflowsManagementApi', () => {
         .fn()
         .mockResolvedValue({ id: 'run-1', workflowId: 'workflow-123' }),
       getWorkflowExecutions: jest.fn(),
+      getWorkflowExecutionStatusCounts: jest.fn(),
       getExecutionStepExecutions: jest.fn(),
       searchStepExecutions: jest.fn(),
       markStepAsResponded: jest.fn(),
@@ -338,6 +339,21 @@ describe('WorkflowsManagementApi', () => {
       expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
       expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
         { request: mockRequest, accessControlFilter: filter },
+        'default'
+      );
+    });
+
+    it('applies the execution access filter to status counts', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      const filter = { bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] } };
+      jest.mocked(access.executionFilter).mockResolvedValue(filter);
+      const params = { workflowIds: [workflow.id], request: mockRequest };
+
+      await api.getWorkflowExecutionStatusCounts(params, 'default');
+
+      expect(access.executionFilter).toHaveBeenCalledWith('default', mockRequest);
+      expect(mockWorkflowsService.getWorkflowExecutionStatusCounts).toHaveBeenCalledWith(
+        { ...params, accessControlFilter: filter },
         'default'
       );
     });
