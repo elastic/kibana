@@ -50,7 +50,7 @@ export const registerSyntheticsStatusCheckRule = (
     },
     defaultActionGroupId: MONITOR_STATUS.id,
     actionGroups: [MONITOR_STATUS],
-    actionVariables: getActionVariables({ plugins }),
+    actionVariables: getActionVariables({ plugins, ruleType: 'monitorStatus' }),
     isExportable: true,
     minimumLicenseRequired: 'basic',
     doesSetRecoveryContext: true,

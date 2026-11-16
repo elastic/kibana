@@ -221,6 +221,8 @@ class AgentPolicyService {
         getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
       );
     }
+    // Defense in depth: internal callers may pass full policy objects, never persist `id`
+    agentPolicy = omit(agentPolicy, 'id');
     await soClient.update<AgentPolicySOAttributes>(savedObjectType, id, {
       ...agentPolicy,
       ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
@@ -775,7 +777,8 @@ class AgentPolicyService {
       });
     }
 
-    return this._update(soClient, esClient, id, agentPolicy, options?.user, {
+    // `id` is the saved object id and must never be persisted in the attributes
+    return this._update(soClient, esClient, id, omit(agentPolicy, 'id'), options?.user, {
       bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,

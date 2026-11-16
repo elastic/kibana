@@ -24,9 +24,14 @@ import {
   CRAWL_RULE,
 } from './_mocks_/crawler_domains.mock';
 
-import { CrawlerDomainValidationStep, CrawlerDomainValidationResultFromServer } from './types';
+import {
+  CrawlerCustomSchedule,
+  CrawlerDomainValidationStep,
+  CrawlerDomainValidationResultFromServer,
+} from './types';
 
 import {
+  crawlerCustomSchedulingClientToServer,
   crawlerDomainServerToClient,
   crawlerDataServerToClient,
   crawlDomainValidationToResult,
@@ -190,5 +195,71 @@ describe('crawlerDomainsWithMetaServerToClient', () => {
     expect(crawlerDomainsWithMetaServerToClient(CRAWLER_DOMAINS_WITH_META_FROM_SERVER)).toEqual(
       CRAWLER_DOMAINS_WITH_META
     );
+  });
+});
+
+describe('crawlerCustomSchedulingClientToServer', () => {
+  const schedule: CrawlerCustomSchedule = {
+    scheduleKey: 'daily-crawl',
+    name: 'Daily crawl',
+    interval: '0 0 * * *',
+    enabled: true,
+    maxCrawlDepth: 3,
+    includeSitemapsInRobotsTxt: true,
+    selectedDomainUrls: ['https://www.elastic.co'],
+    selectedEntryPointUrls: [],
+    selectedSitemapUrls: [],
+    customEntryPointUrls: [],
+    customSitemapUrls: [],
+    entryPointUrls: [],
+    sitemapUrls: [],
+  };
+
+  it('merges the selected and custom URLs of each type', () => {
+    const customSchedules = crawlerCustomSchedulingClientToServer([
+      {
+        ...schedule,
+        selectedEntryPointUrls: ['https://www.elastic.co/guide'],
+        customEntryPointUrls: ['https://www.elastic.co/blog'],
+        selectedSitemapUrls: ['https://www.elastic.co/sitemap.xml'],
+        customSitemapUrls: ['https://www.elastic.co/custom-sitemap.xml'],
+      },
+    ]);
+
+    expect(customSchedules.get('daily-crawl')).toEqual({
+      name: 'Daily crawl',
+      interval: '0 0 * * *',
+      enabled: true,
+      configurationOverrides: {
+        maxCrawlDepth: 3,
+        sitemapDiscoveryDisabled: false,
+        domainAllowlist: ['https://www.elastic.co'],
+        seedUrls: ['https://www.elastic.co/guide', 'https://www.elastic.co/blog'],
+        sitemapUrls: [
+          'https://www.elastic.co/sitemap.xml',
+          'https://www.elastic.co/custom-sitemap.xml',
+        ],
+      },
+    });
+  });
+
+  it('omits seedUrls when no entry points are selected', () => {
+    const customSchedules = crawlerCustomSchedulingClientToServer([
+      { ...schedule, customSitemapUrls: ['https://www.elastic.co/sitemap.xml'] },
+    ]);
+    const configurationOverrides = customSchedules.get('daily-crawl')?.configurationOverrides;
+
+    expect(configurationOverrides).not.toHaveProperty('seedUrls');
+    expect(configurationOverrides?.sitemapUrls).toEqual(['https://www.elastic.co/sitemap.xml']);
+  });
+
+  it('omits sitemapUrls when no sitemaps are selected', () => {
+    const customSchedules = crawlerCustomSchedulingClientToServer([
+      { ...schedule, customEntryPointUrls: ['https://www.elastic.co/blog'] },
+    ]);
+    const configurationOverrides = customSchedules.get('daily-crawl')?.configurationOverrides;
+
+    expect(configurationOverrides).not.toHaveProperty('sitemapUrls');
+    expect(configurationOverrides?.seedUrls).toEqual(['https://www.elastic.co/blog']);
   });
 });

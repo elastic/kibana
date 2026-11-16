@@ -48,6 +48,4 @@ fileGroups:
     - server/**/*.ts
     - common/**/*.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

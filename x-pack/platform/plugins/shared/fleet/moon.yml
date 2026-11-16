@@ -111,13 +111,15 @@ dependsOn:
   - '@kbn/embeddable-plugin'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
-  - '@kbn/fs'
+  - '@kbn/content-sanitization'
   - '@kbn/yaml-loader'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - .storybook/**/*
@@ -130,4 +132,15 @@ fileGroups:
     - package.json
     - test/scout/**/*
     - '!target/**/*'
+  jestConfigs:
+    - '**/jest.config.{js,cjs,json}'
+    - '!**/__fixtures__/**'
+    - '!cypress/**/*'
+  jestIntegrationConfigs:
+    - '**/jest.integration.config.{js,cjs,json}'
+    - '!**/__fixtures__/**'
+    - '!cypress/**/*'
+  scoutConfigs:
+    - '**/test/scout*/**/*playwright.config.ts'
+    - '!cypress/**/*'
 tasks: {}

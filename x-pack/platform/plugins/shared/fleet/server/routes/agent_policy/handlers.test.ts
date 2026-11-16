@@ -7,7 +7,7 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { agentPolicyService } from '../../services';
+import { agentPolicyService, appContextService } from '../../services';
 
 import type { FleetRequestHandlerContext } from '../..';
 import { xpackMocks } from '../../mocks';
@@ -19,12 +19,14 @@ import {
   downloadFullAgentPolicy,
   getFullAgentPolicy,
   populateAssignedAgentsCount,
+  updateAgentPolicyHandler,
 } from './handlers';
 
 jest.mock('../../services/agent_policy', () => {
   return {
     agentPolicyService: {
       get: jest.fn(),
+      update: jest.fn(),
       getByIDs: jest.fn(),
       copy: jest.fn(),
       listAllOutputsForPolicies: jest.fn(),
@@ -48,6 +50,50 @@ describe('Agent policy API handlers', () => {
   beforeEach(async () => {
     context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
     response = httpServerMock.createResponseFactory();
+  });
+
+  describe('updateAgentPolicyHandler ID immutability', () => {
+    beforeEach(() => {
+      jest.spyOn(appContextService, 'getSecurityCore').mockReturnValue({
+        authc: { getCurrentUser: jest.fn().mockReturnValue(undefined) },
+      } as any);
+      jest.spyOn(appContextService, 'getInternalUserSOClientForSpaceId').mockReturnValue({} as any);
+      agentPolicyServiceMock.update.mockResolvedValue({ id: 'policy' } as AgentPolicy);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should reject a body id that does not match the path id', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentPolicyId: 'policy' },
+        body: { id: '../../../some-other-policy', name: 'Policy', namespace: 'default' },
+      });
+
+      await updateAgentPolicyHandler(context, request, response);
+
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: expect.stringContaining('Cannot change agent policy ID'),
+        },
+      });
+      expect(agentPolicyServiceMock.update).not.toHaveBeenCalled();
+    });
+
+    it('should accept a body id matching the path id and not pass it to the service', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentPolicyId: 'policy' },
+        body: { id: 'policy', name: 'Policy', namespace: 'default' },
+      });
+
+      await updateAgentPolicyHandler(context, request, response);
+
+      expect(response.badRequest).not.toHaveBeenCalled();
+      expect(agentPolicyServiceMock.update).toHaveBeenCalledTimes(1);
+      expect(agentPolicyServiceMock.update.mock.calls[0][2]).toBe('policy');
+      expect(agentPolicyServiceMock.update.mock.calls[0][3]).not.toHaveProperty('id');
+    });
   });
 
   describe('bulkGetAgentPoliciesHandler', () => {

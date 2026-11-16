@@ -36353,14 +36353,26 @@ Object {
         },
         "keys": Object {
           "subAction": Object {
-            "allow": Array [
-              "postMessage",
-            ],
             "flags": Object {
+              "default": "postMessage",
               "error": [Function],
-              "only": true,
+              "presence": "optional",
             },
-            "type": "any",
+            "matches": Array [
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "postMessage",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+            ],
+            "type": "alternatives",
           },
           "subActionParams": Object {
             "flags": Object {

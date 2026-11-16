@@ -31,3 +31,6 @@ export const scoutFailedTestsReporter = (
     ? ['@kbn/scout-reporting/src/reporting/playwright/failed_test', options]
     : ['null'];
 };
+
+export * from './flaky_tests';
+export * from './consistent_failures';

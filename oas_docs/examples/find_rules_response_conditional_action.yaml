@@ -65,10 +65,10 @@ value:
           id: 49eae970-f401-11ed-9f8e-399c75a2deeb
           params:
             documents:
-              - rule_id: {{rule.id}}
-                rule_name: {{rule.name}}
-                alert_id: {{alert.id}}
-                context_message: {{context.message}}
+              - rule_id: "{{rule.id}}"
+                rule_name: "{{rule.name}}"
+                alert_id: "{{alert.id}}"
+                context_message: "{{context.message}}"
           connector_type_id: .index
           frequency:
             summary: true

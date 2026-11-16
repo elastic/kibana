@@ -15,6 +15,7 @@ import {
   listChangedFiles,
   touchedCriticalFiles,
 } from '../../affected-packages/index.ts';
+import type { MoonTestSelection } from '../../affected-packages/moon_test_tasks.ts';
 
 /**
  * The shared inputs both per-variant filters need: which packages the PR
@@ -55,29 +56,33 @@ export async function resolveSelectiveTestingContext(
   return { affectedPackages, prChangedFiles };
 }
 
-/** Narrow Jest unit configs to those owned by affected packages, unless a critical file changed. */
+/** Select Jest unit configs from affected packages and compare Moon selection. */
 export function filterJestUnitConfigsByAffected(
   jestUnitConfigs: string[],
-  context: SelectiveTestingContext
+  context: SelectiveTestingContext,
+  moonSelection?: MoonTestSelection
 ): string[] {
   return filterByAffected({
     label: 'unit',
     configs: jestUnitConfigs,
     criticalFiles: CRITICAL_FILES_JEST_UNIT_TESTS,
     context,
+    moonSelection,
   });
 }
 
 /** Narrow Jest integration configs to those owned by affected packages, unless a critical file changed. */
 export function filterJestIntegrationConfigsByAffected(
   jestIntegrationConfigs: string[],
-  context: SelectiveTestingContext
+  context: SelectiveTestingContext,
+  moonSelection?: MoonTestSelection
 ): string[] {
   return filterByAffected({
     label: 'integration',
     configs: jestIntegrationConfigs,
     criticalFiles: CRITICAL_FILES_JEST_INTEGRATION_TESTS,
     context,
+    moonSelection,
   });
 }
 
@@ -86,15 +91,36 @@ function filterByAffected(args: {
   configs: string[];
   criticalFiles: string[];
   context: SelectiveTestingContext;
+  moonSelection?: MoonTestSelection;
 }): string[] {
-  const { label, configs, criticalFiles, context } = args;
+  const { label, configs, criticalFiles, context, moonSelection } = args;
 
   if (touchedCriticalFiles(context.prChangedFiles, criticalFiles)) {
     console.log(`Not filtering Jest ${label} tests because critical files changed`);
     return configs;
   }
 
-  const filtered = filterFilesByPackages(configs, context.affectedPackages);
-  console.log(`Filtering Jest ${label} tests: ${configs.length} -> ${filtered.length}`);
-  return filtered;
+  const packageSelected = filterFilesByPackages(configs, context.affectedPackages);
+  if (moonSelection) {
+    logMoonSelection(label, configs, packageSelected, moonSelection);
+  }
+  console.log(`Filtering Jest ${label} tests: ${configs.length} -> ${packageSelected.length}`);
+  return packageSelected;
+}
+
+function logMoonSelection(
+  label: 'unit' | 'integration',
+  configs: string[],
+  packageSelected: string[],
+  { modeledConfigs, affectedConfigs }: MoonTestSelection
+): void {
+  const packageSet = new Set(packageSelected);
+  const moonSelected = configs.filter((config) => affectedConfigs.has(config));
+  const moonOnly = moonSelected.filter((config) => !packageSet.has(config));
+  const packageOnly = packageSelected.filter(
+    (config) => modeledConfigs.has(config) && !affectedConfigs.has(config)
+  );
+  console.log(
+    `Moon Jest ${label} shadow selection: ${moonSelected.length} selected, ${moonOnly.length} Moon-only, ${packageOnly.length} package-only`
+  );
 }

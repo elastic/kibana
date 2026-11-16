@@ -260,6 +260,64 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
+    it('should return a 400 with a path-traversal input config id override', async function () {
+      const { body } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `filetest-traversal-config-${uuidv4()}`,
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              type: 'logfile',
+              policy_template: 'template_a',
+              enabled: true,
+              config: { id: { value: '../../../../../../tmp/evil' } },
+              streams: [],
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(body.message).to.contain('path traversal');
+    });
+
+    it('should return a 400 with a path-traversal id in an input config streams override', async function () {
+      const { body } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `filetest-traversal-config-streams-${uuidv4()}`,
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              type: 'logfile',
+              policy_template: 'template_a',
+              enabled: true,
+              config: { streams: { value: [{ id: 'a/../../../../../../tmp/evil' }] } },
+              streams: [],
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(body.message).to.contain('path traversal');
+    });
+
     it('should not allow multiple limited packages on the same agent policy', async function () {
       await supertest
         .post(`/api/fleet/package_policies`)

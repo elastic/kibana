@@ -23,6 +23,7 @@ export const SCOUT_TEST_CONFIG_STATS_PATH = path.resolve(
   SCOUT_OUTPUT_ROOT,
   'test_config_stats.json'
 );
+export const SCOUT_FLAKY_TESTS_PATH = path.resolve(SCOUT_OUTPUT_ROOT, 'flaky_tests.json');
 
 // Scout definitions
 
@@ -193,6 +194,9 @@ export const CRITICAL_FILES_SCOUT: readonly string[] = [
   'src/platform/packages/shared/kbn-scout/**/*',
   'src/platform/packages/private/kbn-scout-reporting/**/*',
   'scripts/scout.js',
+  'scripts/moon_test_configs.js',
+  'packages/kbn-moon/src/test_config_selection.ts',
+  '.moon/tasks/scout-tests.yml',
   '.buildkite/scripts/steps/test/scout/**/*',
   '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
   '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',

@@ -26,9 +26,12 @@ import {
   getMvExpandUsage,
   updateExcludedDocuments,
   initiateExcludedDocuments,
+  getReservedMetadataColumns,
+  omitReservedMetadataColumns,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
+import type { BuildReasonMessage } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
@@ -43,6 +46,7 @@ import {
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
   getSuppressionMaxSignalsWarning,
+  getReservedMetadataColumnsWarning,
 } from '../utils/utils';
 import type { EsqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
@@ -50,7 +54,7 @@ import {
   alertSuppressionTypeGuard,
   getIsAlertSuppressionActive,
 } from '../utils/get_is_alert_suppression_active';
-import { bulkCreate } from '../factories';
+import { bulkCreate, wrapHits } from '../factories';
 import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 const MAX_EXCLUDED_DOCUMENTS = 100 * 1000;
@@ -111,6 +115,7 @@ export const esqlExecutor = async ({
     });
 
     let iteration = 0;
+    const removedMetadataColumns = new Set<string>();
     try {
       while (result.createdSignalsCount <= tuple.maxSignals) {
         if (excludedDocuments.length > MAX_EXCLUDED_DOCUMENTS) {
@@ -166,6 +171,7 @@ export const esqlExecutor = async ({
         );
 
         const results = response.values.map((row) => rowToDocument(response.columns, row));
+        getReservedMetadataColumns(results).forEach((column) => removedMetadataColumns.add(column));
         const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
         const sourceDocuments = await fetchSourceDocuments({
@@ -216,6 +222,21 @@ export const esqlExecutor = async ({
               expandedFields,
             });
 
+          // events that miss a suppression field are not wrapped by the ES|QL wrappers, therefore the
+          // reserved metadata columns have to be removed before they are wrapped as regular alerts
+          const wrapUnsuppressedHits = (
+            events: Array<estypes.SearchHit<SignalSource>>,
+            buildReasonMessage: BuildReasonMessage
+          ) =>
+            wrapHits(
+              sharedParams,
+              events.map((event) => ({
+                ...event,
+                _source: omitReservedMetadataColumns(event._source),
+              })),
+              buildReasonMessage
+            );
+
           const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({
             sharedParams,
             enrichedEvents: syntheticHits,
@@ -223,6 +244,7 @@ export const esqlExecutor = async ({
             services,
             alertSuppression: completeRule.ruleParams.alertSuppression,
             wrapSuppressedHits,
+            wrapUnsuppressedHits,
             buildReasonMessage: buildReasonMessageForEsqlAlert,
             mergeSourceAndFields: true,
             // passing 1 here since ES|QL does not support pagination
@@ -298,6 +320,11 @@ export const esqlExecutor = async ({
       }
       result.errors.push(error.message);
       result.success = false;
+    }
+
+    // a single warning with the columns removed in all iterations, also when the search failed midway
+    if (removedMetadataColumns.size > 0) {
+      result.warningMessages.push(getReservedMetadataColumnsWarning([...removedMetadataColumns]));
     }
 
     return {
