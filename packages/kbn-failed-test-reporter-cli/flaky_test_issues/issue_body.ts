@@ -498,13 +498,13 @@ const branchStatus = (worst: BuildCounts, flaky: boolean, skip?: BranchSkip): Br
 };
 
 const BRANCH_STATUS_LABELS: Readonly<Record<BranchStatus, string>> = {
-  flaky: '🔴 Flaky',
-  failing: '🟠 Some failures',
-  skipped: '⏭️ Skipped',
-  clean: '✅ No failures',
+  flaky: '🔴 **Flaky**',
+  failing: '🟠 **Some failures**',
+  skipped: '⏭️ **Skipped**',
+  clean: '✅ **No failures**',
 };
 
-/** `🔴 Flaky: \`main\``, or `⏭️ Skipped: \`main\`, last ran 7 Sep` for a skipped branch. */
+/** `🔴 **Flaky**: \`main\``, or `⏭️ **Skipped**: \`main\`, last ran 7 Sep` for a skipped branch. */
 const branchCell = (scope: string, status: BranchStatus, skip?: BranchSkip): string => {
   const cell = `${BRANCH_STATUS_LABELS[status]}: ${scope}`;
   if (status !== 'skipped') {
@@ -591,7 +591,9 @@ const statusByTarget = (suite: FlakySuite): string | undefined => {
     return undefined;
   }
   const rows = targets.map((row) => [
-    `${row.worst.failedBuilds > 0 ? '🔴' : '✅'} ${pipelineTargetEnvironment(row.worst)}`,
+    `${
+      row.worst.failedBuilds > 0 ? '🔴 **Failures**' : '✅ **No failures**'
+    }: ${pipelineTargetEnvironment(row.worst)}`,
     inlineCode(row.worst.mode),
     ...failuresCells(row),
   ]);

@@ -51,17 +51,17 @@ Hit by *reverts breakdown, interval, and visibility on a saved session* · seen 
 
 | Branch | Failed builds | Last failure |
 |---|---|---|
-| 🔴 Flaky: \`main\` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |
-| 🔴 Flaky: \`9.2\` | **5%**&nbsp;(3&nbsp;/&nbsp;64) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)&nbsp;·&nbsp;7&nbsp;Sep&nbsp;11:40 |
-| ✅ No failures: \`9.1\` | 0&nbsp;/&nbsp;58 |  |
+| 🔴 **Flaky**: \`main\` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |
+| 🔴 **Flaky**: \`9.2\` | **5%**&nbsp;(3&nbsp;/&nbsp;64) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)&nbsp;·&nbsp;7&nbsp;Sep&nbsp;11:40 |
+| ✅ **No failures**: \`9.1\` | 0&nbsp;/&nbsp;58 |  |
 
 #### Status by Target
 
 | Environment | Target | Failed builds | Last failure |
 |---|---|---|---|
-| 🔴 Local deployment | \`stateful-classic\` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |
-| 🔴 MKI | \`serverless-security_complete\` | **5%**&nbsp;(3&nbsp;/&nbsp;64) | 7&nbsp;Sep&nbsp;11:40 |
-| ✅ Local serverless simulation | \`serverless-observability_complete\` | 0&nbsp;/&nbsp;426 |  |
+| 🔴 **Failures**: Local deployment | \`stateful-classic\` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |
+| 🔴 **Failures**: MKI | \`serverless-security_complete\` | **5%**&nbsp;(3&nbsp;/&nbsp;64) | 7&nbsp;Sep&nbsp;11:40 |
+| ✅ **No failures**: Local serverless simulation | \`serverless-observability_complete\` | 0&nbsp;/&nbsp;426 |  |
 
 > [!TIP]
 > Review the failures. If you'd like to skip the test, ask the #kibana-operations team to \`/skip\` it, or skip the test case manually.
@@ -101,14 +101,14 @@ Seen on \`kibana-on-merge\` (40) and \`kibana-pull-request\` (9) · \`main\`, 1 
 
 | Branch | Failed builds | Last failure |
 |---|---|---|
-| 🔴 Flaky: \`main\` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |
+| 🔴 **Flaky**: \`main\` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |
 
 #### Status by Target
 
 | Environment | Target | Failed builds | Last failure |
 |---|---|---|---|
-| 🔴 Local deployment | \`stateful-classic\` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |
-| ✅ Local serverless simulation | \`serverless-observability_complete\` | 0&nbsp;/&nbsp;426 |  |
+| 🔴 **Failures**: Local deployment | \`stateful-classic\` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |
+| ✅ **No failures**: Local serverless simulation | \`serverless-observability_complete\` | 0&nbsp;/&nbsp;426 |  |
 
 #### Failures by Pipeline
 
