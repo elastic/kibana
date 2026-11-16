@@ -1829,6 +1829,18 @@ describe('analyzeRemovalImpact', () => {
     expect(saved.summary.indirectBreaking).toBe(1);
   });
 
+  it('fails callers whose fallback goes on, since the engine fails the step after it', () => {
+    const fallingBack = workflow('falling-back', [
+      {
+        ...callStep('ctx', { inputs: { alert_id: 'a' } }),
+        'on-failure': { fallback: [{ name: 'log', type: 'console' }] },
+      },
+    ]);
+    const top = workflow('top', [callStep('run', {}, undefined, 'falling-back')]);
+
+    expect(analyzeRemovalImpact([CHILD_ID], [fallingBack, top]).indirect).toBe(1);
+  });
+
   it('ignores calls between workflows that are removed together', () => {
     const impact = analyzeRemovalImpact([CHILD_ID, 'triage'], [triage, nightly]);
 
