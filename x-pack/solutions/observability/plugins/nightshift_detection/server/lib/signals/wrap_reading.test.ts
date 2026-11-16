@@ -28,35 +28,39 @@ const READING: DetectionSignalReading = {
 const wrap = ({
   reading = READING,
   spaceId = 'default',
-}: { reading?: DetectionSignalReading; spaceId?: string } = {}) =>
+  strategyId = 'error_rate',
+}: { reading?: DetectionSignalReading; spaceId?: string; strategyId?: string } = {}) =>
   wrapReading({
     reading,
-    strategyId: 'error_rate',
+    strategyId,
     strategyVersion: 1,
     spaceId,
     scheduledMinute: 60_000,
   });
 
 describe('wrapReading', () => {
-  it('gives a series the same group hash every time and another one in another space', () => {
+  it('gives a series the same group hash every time, and another one in another space or strategy', () => {
     const first = wrap();
     const again = wrap();
     const otherSpace = wrap({ spaceId: 'other' });
+    const otherStrategy = wrap({ strategyId: 'latency' });
 
-    if (first.dropped || again.dropped || otherSpace.dropped) {
+    if (first.dropped || again.dropped || otherSpace.dropped || otherStrategy.dropped) {
       throw new Error('expected every reading to be wrapped');
     }
 
     expect(again.signal.group_hash).toBe(first.signal.group_hash);
     expect(otherSpace.signal.group_hash).not.toBe(first.signal.group_hash);
+    // A fingerprint is unique within its strategy only: two strategies must not share a series.
+    expect(otherStrategy.signal.group_hash).not.toBe(first.signal.group_hash);
   });
 
-  it('pins the group hash to the formula Alerting v2 uses, sha256 of space, source and fingerprint', () => {
+  it('pins the group hash to the formula Alerting v2 uses, sha256 of space, source and the strategy-scoped fingerprint', () => {
     const result = wrap();
 
     expect(result).toMatchObject({
       signal: {
-        group_hash: 'cd70abc63445b2b9036b1a80a0c5e22b744a66ad3c4584353be0fcd9eb891564',
+        group_hash: 'b91b1128d775d1331665b0af165d2b930a68450bbbd47f609ae7d11e89f6533e',
       },
     });
   });

@@ -22,16 +22,20 @@ import type { DetectionSignalStore, WriteSignalsResult } from './signal_store';
 const RETENTION = '30d';
 const INGEST_PIPELINE_ID = `${DETECTION_SIGNALS_FALLBACK_STREAM}-ingest-timestamp`;
 const BUCKET_START_FIELD = 'signal.bucket_start';
-/** One history read returns at most this many readings; a window is minutes of a few series. */
+/** One history read returns at most this many readings, the newest. */
 const MAX_HISTORY_READINGS = 10_000;
 
 /**
- * One id per reading: the same series, strategy and bucket always map to the same document, so
- * writing a window again after a crash conflicts instead of duplicating the signal.
+ * One id per reading: the same series, strategy, strategy version and bucket always map to the
+ * same document, so writing a window again after a crash conflicts instead of duplicating the
+ * signal. The version is part of it, so a reading of a newer version is never taken for one
+ * already written.
  */
 function getSignalId(signal: DetectionSignal): string {
   return createHash('sha256')
-    .update(`${signal.group_hash}:${signal.data.strategy}:${signal.data.bucket_start}`)
+    .update(
+      `${signal.group_hash}:${signal.data.strategy}:${signal.data.strategy_version}:${signal.data.bucket_start}`
+    )
     .digest('hex');
 }
 
@@ -116,12 +120,14 @@ export class FallbackSignalStore implements DetectionSignalStore {
   public async readHistory({
     spaceId,
     strategy,
+    strategyVersion,
     fingerprints,
     from,
     to,
   }: {
     spaceId: string;
     strategy: string;
+    strategyVersion: number;
     fingerprints: string[];
     from: number;
     to: number;
@@ -142,12 +148,14 @@ export class FallbackSignalStore implements DetectionSignalStore {
             { term: { type: 'signal' } },
             { term: { space_id: spaceId } },
             { term: { 'data.strategy': strategy } },
+            { term: { 'data.strategy_version': strategyVersion } },
             { terms: { 'data.fingerprint': fingerprints } },
             { range: { [BUCKET_START_FIELD]: { gte: from, lt: to, format: 'epoch_millis' } } },
           ],
         },
       },
-      sort: [{ [BUCKET_START_FIELD]: 'asc' }],
+      // Newest first, so a read that hits the limit keeps the most recent baseline.
+      sort: [{ [BUCKET_START_FIELD]: 'desc' }],
       runtime_mappings: {
         [BUCKET_START_FIELD]: {
           type: 'date',
@@ -164,13 +172,24 @@ export class FallbackSignalStore implements DetectionSignalStore {
     const total =
       typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value;
     if (total !== undefined && total > MAX_HISTORY_READINGS) {
-      // Sorted oldest first, so the newest readings are the ones left out.
+      // Sorted newest first, so the oldest readings are the ones left out.
       this.logger.warn(
-        `History of ${strategy} in [${spaceId}] has ${total} readings; only the first ${MAX_HISTORY_READINGS} were read`
+        `History of ${strategy} in [${spaceId}] has ${total} readings; only the newest ${MAX_HISTORY_READINGS} were read`
       );
     }
 
-    for (const hit of response.hits.hits) {
+    // A signal written again after a rollover has the same id in another backing index.
+    const seenIds = new Set<string>();
+
+    // Back to oldest first.
+    for (const hit of [...response.hits.hits].reverse()) {
+      if (hit._id !== undefined) {
+        if (seenIds.has(hit._id)) {
+          continue;
+        }
+        seenIds.add(hit._id);
+      }
+
       const parsed = detectionSignalSchema.safeParse(hit._source);
       if (!parsed.success) {
         // A document an older or newer build wrote in another shape must not fail the whole read;
