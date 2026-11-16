@@ -126,12 +126,6 @@ export const RESOLVED_ROWS_COLUMNS = getColumnsWithout(
 // Individual rows: records; shows "Resolved to" identity, hides "Records" count.
 export const INDIVIDUAL_ROWS_COLUMNS = getColumnsWithout('group_size');
 
-// Child rows (expanded under a resolved entity): neither rows-mode column applies.
-export const CHILD_ROWS_COLUMNS = getColumnsWithout(
-  'group_size',
-  'entity.relationships.resolution.resolved_to'
-);
-
 /**
  * Whether the user can read each source the page queries: `undefined` while its check loads, and
  * `true` when the check fails, so the page still works.
