@@ -16,6 +16,7 @@ const SIGNAL = {
   space_id: 'default',
   data: {
     strategy: 'error_rate',
+    strategy_version: 1,
     fingerprint: 'checkout',
     entity: { type: 'service', name: 'checkout' },
     bucket_start: 1_000,

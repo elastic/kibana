@@ -94,6 +94,8 @@ export const detectionSignalSchema = alertEventSchema
     data: lazySchema(() =>
       detectionSignalReadingSchema.extend({
         strategy: z.string().min(1),
+        /** `version` of the strategy's descriptor when the reading was made. */
+        strategy_version: z.number().int().min(1),
         triage: detectionSignalTriageSchema.optional(),
       })
     ),
@@ -103,4 +105,4 @@ export const detectionSignalSchema = alertEventSchema
 /** One reading of one series in one bucket, as stored. */
 export type DetectionSignal = z.infer<typeof detectionSignalSchema>;
 /** What triage decided about a signal. */
-export type TDetectionSignalTriage = z.infer<typeof detectionSignalTriageSchema>;
+export type DetectionSignalTriage = z.infer<typeof detectionSignalTriageSchema>;

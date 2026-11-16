@@ -57,6 +57,7 @@ function wrapAll(
     const result = wrapReading({
       reading,
       strategyId,
+      strategyVersion: 1,
       spaceId,
       scheduledMinute: reading.bucket_end,
     });
