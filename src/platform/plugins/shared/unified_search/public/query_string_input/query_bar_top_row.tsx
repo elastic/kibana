@@ -98,7 +98,7 @@ const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
 ) as unknown as typeof EuiSuperDatePicker;
 
-const formatLoadedAgo = (loadedAt: string): string => {
+const formatTimeSinceLoaded = (loadedAt: string): string => {
   const { value, unit } = selectUnit(new Date(loadedAt), Date.now());
   return new Intl.RelativeTimeFormat(i18n.getLocale(), { numeric: 'auto' }).format(value, unit);
 };
@@ -137,7 +137,7 @@ export const strings = {
       defaultMessage: 'Search with updated query',
     }),
   getCachedResultsLabel: (loadedAt: string, isSearch: boolean) => {
-    const loadedAgo = formatLoadedAgo(loadedAt);
+    const loadedAgo = formatTimeSinceLoaded(loadedAt);
 
     return isSearch
       ? i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cachedResultsSearchLabel', {
