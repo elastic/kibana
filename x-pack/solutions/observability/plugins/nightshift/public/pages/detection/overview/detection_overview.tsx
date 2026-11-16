@@ -188,6 +188,13 @@ export const DetectionOverview = ({
                   },
                 },
                 [`@container (max-width: ${oneColumnMaxWidthPx}px)`]: {
+                  // Match the two-column reset's specificity so `display: block` does not win.
+                  [`& > *:nth-child(${OVERVIEW_MAX_COLUMNS}n + 1) [data-metric-separator]`]: {
+                    display: 'none',
+                  },
+                  '& > *:nth-child(2n + 1) [data-metric-separator]': {
+                    display: 'none',
+                  },
                   '& > * [data-metric-separator]': {
                     display: 'none',
                   },
