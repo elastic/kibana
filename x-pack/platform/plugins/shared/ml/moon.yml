@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-ml'
   - '@kbn/embeddable-plugin'
+  - '@kbn/es-errors'
   - '@kbn/es-query'
   - '@kbn/es-types'
   - '@kbn/es-ui-shared-plugin'
