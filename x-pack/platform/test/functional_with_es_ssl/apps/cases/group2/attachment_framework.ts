@@ -354,7 +354,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await openModal();
 
             await cases.casesTable.getCaseById(currentCaseId);
-            await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
+            await cases.common.selectCaseInModal(currentCaseId);
 
             await cases.common.expectToasterToContain('updated');
             await toasts.dismissAllWithChecks();
@@ -449,12 +449,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await dashboardPanelActions.clickPanelAction(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
 
-        // The library visualization is a by-reference attachment, so Select stays disabled until
-        // the "already attached" check loads, and a click on it then is dropped.
-        await retry.waitFor('select case button to be enabled', () =>
-          testSubjects.isEnabled(`cases-table-row-select-${theCase.id}`)
-        );
-        await testSubjects.click(`cases-table-row-select-${theCase.id}`);
+        await cases.common.selectCaseInModal(theCase.id);
 
         await cases.common.expectToasterToContain(`Case ${theCaseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
