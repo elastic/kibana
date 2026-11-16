@@ -13,6 +13,8 @@ import type { CoordinatorInputs, CurrentRunState, DecidePackageReportResult } fr
 
 /** CE's attribute string cap. */
 export const MAX_INVESTIGATION_SUMMARY_CHARS = 10_000;
+/** Cap on the "Not searched" gap list so a long list cannot crowd the rest of the summary. */
+const MAX_NOT_SEARCHED_CHARS = 800;
 
 const formatWindow = (window?: { from: string; to: string }): string =>
   window ? ` Window: ${window.from.slice(0, 10)} → ${window.to.slice(0, 10)}.` : '';
@@ -176,10 +178,12 @@ export const buildInvestigationSummary = ({
     ...((state.evidence.tier1HitCount ?? 0) > 0 ? ['tier1'] : []),
     ...(state.evidence.tier2Confirmed.length > 0 ? ['tier2'] : []),
   ];
-  const notSearched = unsearched ? describeGaps(unsearched) : undefined;
+  const notSearched = unsearched ? describeGaps(unsearched, MAX_NOT_SEARCHED_CHARS) : undefined;
   const retiredNote =
     unsearched && unsearched.gaps.length > 0
-      ? ` ${gapCountPhrase(unsearched)} left part of the report unsearched; the report is retired without a full search.`
+      ? ` ${gapCountPhrase(
+          unsearched
+        )} left part of the report unsearched; the report is retired without a full search.`
       : '';
   const outcome = state.hasConfirmedHit
     ? `Outcome: confirmed hit${
@@ -237,7 +241,7 @@ export const buildCleanInvestigationSummary = ({
   unsearched?: DedupedCoverageGaps;
 }): string => {
   const executed = toCoverageBehaviors(inputs.behaviors ?? []);
-  const notSearched = unsearched ? describeGaps(unsearched) : undefined;
+  const notSearched = unsearched ? describeGaps(unsearched, MAX_NOT_SEARCHED_CHARS) : undefined;
   const outcome = retired
     ? `Outcome: no confirmed hits, but ${
         unsearched && unsearched.gaps.length > 0

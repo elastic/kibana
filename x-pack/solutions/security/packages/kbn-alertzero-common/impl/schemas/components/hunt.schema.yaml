@@ -75,9 +75,11 @@ components:
           $ref: '#/components/schemas/HuntIncompleteReason'
         detail:
           type: string
+          maxLength: 2048
           description: What was not covered, in a form a human reading the run can act on.
         technique_id:
           type: string
+          maxLength: 64
           description: >-
             Set when the gap is scoped to one technique rather than to the whole
             search.
@@ -139,18 +141,22 @@ components:
           $ref: '#/components/schemas/HuntScopeResolution'
         index_patterns:
           type: array
+          maxItems: 500
           description: >-
             The universe as searched by IOC Hunt, with policy-skipped entries and
             unresolved local concrete names removed. Empty when the scope is blocked.
           items:
             type: string
+            maxLength: 512
         missing:
           type: array
+          maxItems: 500
           description: >-
             Universe patterns that resolved to nothing for the caller: not readable,
             not found, or on a remote cluster or linked project that did not answer.
           items:
             type: string
+            maxLength: 512
         policy_skipped:
           type: array
           maxItems: 500
@@ -162,19 +168,23 @@ components:
             maxLength: 512
         report_matches:
           type: array
+          maxItems: 500
           description: >-
             `*`-suffixed patterns of datasets the report's vendor or product matched
             deterministically. Empty when no report was supplied or nothing matched.
           items:
             type: string
+            maxLength: 512
         actionable_indices:
           type: array
+          maxItems: 500
           description: >-
             `*`-suffixed streams and indices whose mapping carries `process.entity_id`
             or `process.pid`: where a hit can become a Defend response action. Whether
             the host is enrolled is decided later, at packaging.
           items:
             type: string
+            maxLength: 512
         window:
           $ref: '#/components/schemas/IndexScopeWindow'
         row_limit:

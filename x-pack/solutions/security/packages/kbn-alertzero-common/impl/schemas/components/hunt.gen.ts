@@ -63,12 +63,14 @@ export const HuntIncompleteness = lazySchema(() =>
      */
     detail: z
       .string()
+      .max(2048)
       .describe('What was not covered, in a form a human reading the run can act on.'),
     /**
      * Set when the gap is scoped to one technique rather than to the whole search.
      */
     technique_id: z
       .string()
+      .max(64)
       .optional()
       .describe('Set when the gap is scoped to one technique rather than to the whole search.'),
   })
@@ -120,7 +122,8 @@ export const HuntScope = lazySchema(() =>
      * The universe as searched by IOC Hunt, with policy-skipped entries and unresolved local concrete names removed. Empty when the scope is blocked.
      */
     index_patterns: z
-      .array(z.string())
+      .array(z.string().max(512))
+      .max(500)
       .describe(
         'The universe as searched by IOC Hunt, with policy-skipped entries and unresolved local concrete names removed. Empty when the scope is blocked.'
       ),
@@ -128,7 +131,8 @@ export const HuntScope = lazySchema(() =>
      * Universe patterns that resolved to nothing for the caller: not readable, not found, or on a remote cluster or linked project that did not answer.
      */
     missing: z
-      .array(z.string())
+      .array(z.string().max(512))
+      .max(500)
       .describe(
         'Universe patterns that resolved to nothing for the caller: not readable, not found, or on a remote cluster or linked project that did not answer.'
       ),
@@ -146,7 +150,8 @@ export const HuntScope = lazySchema(() =>
      * `*`-suffixed patterns of datasets the report's vendor or product matched deterministically. Empty when no report was supplied or nothing matched.
      */
     report_matches: z
-      .array(z.string())
+      .array(z.string().max(512))
+      .max(500)
       .describe(
         "`*`-suffixed patterns of datasets the report's vendor or product matched deterministically. Empty when no report was supplied or nothing matched."
       ),
@@ -154,7 +159,8 @@ export const HuntScope = lazySchema(() =>
      * `*`-suffixed streams and indices whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. Whether the host is enrolled is decided later, at packaging.
      */
     actionable_indices: z
-      .array(z.string())
+      .array(z.string().max(512))
+      .max(500)
       .describe(
         '`*`-suffixed streams and indices whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. Whether the host is enrolled is decided later, at packaging.'
       ),
