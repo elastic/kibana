@@ -180,6 +180,34 @@ describe('createInlineDataViewService', () => {
       expect(original.getIndexPattern()).toBe(inlineSpec.title);
     });
 
+    it('does not reuse a view with a different scripted field', async () => {
+      const { service } = setup();
+      const scriptedField = {
+        name: 'calculated',
+        type: 'number',
+        scripted: true,
+        lang: 'painless',
+        script: 'return 1;',
+        searchable: true,
+        aggregatable: true,
+      };
+      const first = await service.finalize(
+        createDataView({ ...inlineSpec, id: 'first-id', fields: { calculated: scriptedField } })
+      );
+      const draft = createDataView({
+        ...inlineSpec,
+        id: 'second-id',
+        fields: { calculated: { ...scriptedField, script: 'return 2;' } },
+      });
+
+      const second = await service.finalize(draft);
+
+      expect(second.getFieldByName('calculated')?.script).toBe('return 2;');
+      expect(first.getFieldByName('calculated')?.script).toBe('return 1;');
+      expect(second).not.toBe(first);
+      expect(second.id).not.toBe(first.id);
+    });
+
     it('returns the shared instance when the final spec is unchanged', async () => {
       const { service } = setup();
       const original = await service.resolve(inlineSpec);

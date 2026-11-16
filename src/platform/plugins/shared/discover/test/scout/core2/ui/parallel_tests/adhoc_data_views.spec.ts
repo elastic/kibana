@@ -205,7 +205,6 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
       };
       await discover.loadSavedSearch('logstash-adhoc-save');
 
-      // Discover derives its runtime ID on load; the stored ID is compared only after a UI save.
       const idBeforeSave = await discover.getCurrentDataViewId();
       await expect(discover.unsavedChangesIndicator()).toBeHidden();
 
@@ -217,7 +216,10 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
       await discover.saveSearch('logstash*-ss');
       await discover.waitUntilTabIsLoaded();
       expect(await discover.getCurrentDataViewId()).toBe(idBeforeSave);
-      expect(await readStoredDataView()).toMatchObject({ id: idBeforeSave });
+
+      const storedDataView = await readStoredDataView();
+      expect(storedDataView).toMatchObject({ title: 'logstash*' });
+      expect(storedDataView).not.toHaveProperty('id');
 
       await page.reload();
       await discover.waitUntilTabIsLoaded();

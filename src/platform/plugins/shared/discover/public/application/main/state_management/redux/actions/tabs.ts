@@ -49,6 +49,13 @@ import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
+import { createInlineDataViewIdCompatibility } from '../../../../../../common/session/inline_data_view_id_compatibility';
+import {
+  getInlineDataViewIdentity,
+  normalizeInlineAppState,
+  normalizeInlineSearchSource,
+  remapDataViewReferences,
+} from '../../../../../../common/session/inline_data_view_references';
 import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_state_service';
 import { fetchData } from './tab_state';
 import { initializeAndSync, stopSyncing } from './tab_sync';
@@ -627,9 +634,22 @@ export const openInNewTab: InternalStateThunkActionCreator<
     }
 
     if (dataViewSpec) {
+      // New tabs bypass load-time normalization, including restored background searches.
+      const searchSource = { index: dataViewSpec };
+      const idCompatibility = createInlineDataViewIdCompatibility({
+        views: [getInlineDataViewIdentity(searchSource)],
+      });
+      newDefaultTab.appState = normalizeInlineAppState(initialAppState, {
+        searchSource,
+        idCompatibility,
+      });
+      newDefaultTab.globalState = remapDataViewReferences(
+        initialGlobalState,
+        idCompatibility.shared
+      );
       newDefaultTab.initialInternalState = {
         ...newDefaultTab.initialInternalState,
-        serializedSearchSource: { index: dataViewSpec },
+        serializedSearchSource: normalizeInlineSearchSource(searchSource, { idCompatibility }),
       };
     }
 

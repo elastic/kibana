@@ -731,7 +731,7 @@ describe('Discover state', () => {
       expectLoadedFilters(services, apiDataViewId);
     });
 
-    it('opens an HTTP session URL created before its inline view lost the stored ID', async () => {
+    it('warns and uses the saved HTTP session view when the URL references an unknown ID', async () => {
       const services = createServices([
         '/#?_tab=(tabId:inline-tab)&_a=(dataSource:(dataViewId:stored-inline-id,type:dataView))',
       ]);
@@ -741,15 +741,61 @@ describe('Discover state', () => {
         persistedDiscoverSession: fromDiscoverSessionApiResponse(cloneDeep(response)),
       });
       const tabId = state.getCurrentTab().id;
-      expect(state.stateStorageContainer.get(APP_STATE_URL_KEY)).toEqual({
-        dataSource: createDataViewDataSource({ dataViewId: apiDataViewId }),
+      expect(state.stateStorageContainer.get(APP_STATE_URL_KEY)).toStrictEqual({
+        dataSource: createDataViewDataSource({ dataViewId: 'stored-inline-id' }),
       });
 
       await state.initializeSingleTab({ tabId });
 
       expect(getCurrentDataViewId(state, tabId)).toBe(apiDataViewId);
       expectLoadedFilters(services, apiDataViewId);
+      expect(services.core.notifications.toasts.addWarning).toHaveBeenCalledWith(
+        expect.objectContaining({ 'data-test-subj': 'dscDataViewNotFoundShowSavedWarning' })
+      );
     });
+
+    it.each([
+      { identity: 'legacy', dataViewId: 'stored-inline-id', expectedDirty: true },
+      { identity: 'derived', dataViewId: apiDataViewId, expectedDirty: false },
+    ])(
+      'loads an ID-less HTTP session with $identity references in app and pinned URL filters',
+      async ({ dataViewId, expectedDirty }) => {
+        const services = createServices();
+        const [pinnedFilter, appFilter] = storedFilters.map((filter) => ({
+          ...filter,
+          meta: { ...filter.meta, index: dataViewId },
+        }));
+        pinnedFilter.$state = { store: FilterStateStore.GLOBAL_STATE };
+        const { path } = await appLocatorGetLocationCommon(
+          { useHash: false, setStateToKbnUrl, profileStateRegistry: services.profileStateRegistry },
+          {
+            savedSearchId: response.id,
+            tab: { id: 'inline-tab' },
+            dataViewId,
+            filters: [pinnedFilter, appFilter],
+          }
+        );
+        services.history = createMemoryHistory({ initialEntries: [path] });
+        const state = createState(services);
+        const savedResponse = cloneDeep(response);
+        // Both conditions belong to the inline view; only their URL references differ.
+        savedResponse.data.tabs = savedResponse.data.tabs.map((tab) => ({
+          ...tab,
+          filters: apiFilters.map((filter) => ({ ...filter, data_view_id: undefined })),
+        }));
+
+        await state.initializeTabs({
+          persistedDiscoverSession: fromDiscoverSessionApiResponse(savedResponse),
+        });
+        await state.initializeSingleTab({ tabId: 'inline-tab' });
+
+        expect(getCurrentDataViewId(state, 'inline-tab')).toBe(apiDataViewId);
+        expect(services.filterManager.getAppFilters()).toMatchObject([appFilter]);
+        expect(services.filterManager.getGlobalFilters()).toMatchObject([pinnedFilter]);
+        // Known limitation: no spec links the old URL ID to the derived view on this cold load.
+        expect(hasUnsavedChanges(state, services)).toBe(expectedDirty);
+      }
+    );
 
     it('keeps a CM session clean when stored filters omit their boolean defaults', async () => {
       const services = createServices();

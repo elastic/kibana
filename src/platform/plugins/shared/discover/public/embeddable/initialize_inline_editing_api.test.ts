@@ -24,7 +24,7 @@ import { createDiscoverServicesMock } from '../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getPersistedTabMock } from '../application/main/state_management/redux/__mocks__/internal_state.mocks';
 import { initializeInlineEditingApi } from './initialize_inline_editing_api';
-import type { SearchEmbeddableStateManager } from './types';
+import type { SearchEmbeddableSerializedAttributes, SearchEmbeddableStateManager } from './types';
 
 const defaultServices = createDiscoverServicesMock();
 
@@ -63,11 +63,18 @@ const createMockSavedSearch = (): SavedSearch => ({
   managed: false,
 });
 
-const buildSearchEmbeddable = () => ({
-  api: { savedSearch$: new BehaviorSubject(createMockSavedSearch()) },
-  reinitializeState: jest.fn().mockResolvedValue(undefined),
-  stateManager: createSearchEmbeddableStateManager(),
-});
+const buildSearchEmbeddable = () => {
+  const reinitializeState = jest.fn().mockResolvedValue(undefined);
+
+  return {
+    api: { savedSearch$: new BehaviorSubject(createMockSavedSearch()) },
+    reinitializeState,
+    createStateRestorer: jest.fn(
+      (state: SearchEmbeddableSerializedAttributes) => () => reinitializeState(state)
+    ),
+    stateManager: createSearchEmbeddableStateManager(),
+  };
+};
 
 const setupApi = (
   {

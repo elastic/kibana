@@ -157,7 +157,9 @@ describe('normalizeInlineDataViewIds', () => {
 
     const {
       sessionTabs: normalizedTabs,
-      loadCompatibility: { ids: { shared } },
+      loadCompatibility: {
+        ids: { shared },
+      },
     } = normalize({ sessionTabs });
 
     expect(normalizedTabs.map(({ serializedSearchSource }) => serializedSearchSource)).toEqual([
@@ -176,7 +178,9 @@ describe('normalizeInlineDataViewIds', () => {
   it('gives independent views with the same spec the same identity', () => {
     const {
       sessionTabs,
-      loadCompatibility: { ids: { shared } },
+      loadCompatibility: {
+        ids: { shared },
+      },
     } = normalize({
       sessionTabs: [
         createSessionTab('first', { ...inlineDataView, id: 'first-id' }),
@@ -270,7 +274,9 @@ describe('normalizeInlineDataViewIds', () => {
 
     const {
       openTabs,
-      loadCompatibility: { ids: { shared } },
+      loadCompatibility: {
+        ids: { shared },
+      },
     } = normalize({
       openTabs: [createTab('logs', inlineDataView), createTab('edited', editedDataView)],
     });
@@ -468,7 +474,9 @@ describe('normalizeInlineDataViewIds', () => {
     const {
       sessionTabs,
       openTabs,
-      loadCompatibility: { ids: { shared } },
+      loadCompatibility: {
+        ids: { shared },
+      },
     } = normalize({
       sessionTabs: [
         createSessionTab('saved', { ...inlineDataView, id: 'shared-id' }, [
@@ -579,7 +587,9 @@ describe('normalizeInlineDataViewIds', () => {
     it('remaps a previous ID shared by different specs with the view of each tab', () => {
       const {
         sessionTabs,
-        loadCompatibility: { ids: { shared } },
+        loadCompatibility: {
+          ids: { shared },
+        },
       } = normalize({
         sessionTabs: [
           withChart(createSessionTab('a', { ...inlineDataView, id: 'legacy-id' }), 'legacy-id'),
@@ -724,35 +734,37 @@ describe('prepareInlineDataViewLoadState', () => {
     expect(prepared.dataViewIdsToRemove).toStrictEqual([]);
   });
 
-  it('treats an unknown URL view of a tab whose document spec has no ID as its previous ID', () => {
-    const pinnedFilter = {
-      ...createFilter('legacy-id'),
-      $state: { store: FilterStateStore.GLOBAL_STATE },
-    };
-    const prepared = prepareInlineDataViewLoadState({
-      normalized: normalize({
-        sessionTabs: [createSessionTab('tab')],
-        savedDataViewIds: ['saved-id'],
-      }),
-      selectedTab: getTabStateMock({ id: 'tab' }),
-      urlAppState: {
-        dataSource: createDataViewDataSource({ dataViewId: 'legacy-id' }),
-        filters: [createFilter('legacy-id'), createFilter('unknown-id'), foreignFilter],
-      },
-      urlGlobalState: { filters: [pinnedFilter] },
-      initialTabState: undefined,
-    });
+  it.each(['unknown-id', 'profile-id', 'shared-id'])(
+    'does not guess a replacement for URL view %s',
+    (id) => {
+      const normalized = normalize({
+        sessionTabs: [
+          createSessionTab('tab'),
+          createSessionTab('profile', { ...inlineDataView, id: 'profile-id', managed: true }),
+          createSessionTab('first', { ...inlineDataView, id: 'shared-id' }),
+          createSessionTab('second', { ...editedDataView, id: 'shared-id' }),
+        ],
+      });
+      const urlAppState = {
+        dataSource: createDataViewDataSource({ dataViewId: id }),
+        filters: [createFilter(id), unreferencedFilter],
+      };
+      const urlGlobalState = {
+        filters: [{ ...createFilter(id), $state: { store: FilterStateStore.GLOBAL_STATE } }],
+      };
+      const prepared = prepareInlineDataViewLoadState({
+        normalized,
+        selectedTab: getTabStateMock({ id: 'tab' }),
+        urlAppState,
+        urlGlobalState,
+        initialTabState: undefined,
+      });
 
-    expect(prepared).toStrictEqual({
-      urlAppState: {
-        dataSource: createDataViewDataSource({ dataViewId: inlineDataViewId }),
-        filters: [createFilter(inlineDataViewId), createFilter('unknown-id'), foreignFilter],
-      },
-      urlGlobalState: { filters: [{ ...pinnedFilter, meta: { index: inlineDataViewId } }] },
-      initialTabState: undefined,
-      dataViewIdsToRemove: [],
-    });
-  });
+      expect(prepared.urlAppState).toStrictEqual(urlAppState);
+      expect(prepared.urlGlobalState).toStrictEqual(urlGlobalState);
+      expect(prepared.dataViewIdsToRemove).toStrictEqual([]);
+    }
+  );
 
   it('translates app state on a previous ID shared by different specs with the selected tab view', () => {
     const normalized = normalize({
@@ -815,17 +827,20 @@ describe('normalizeUrlAppState', () => {
     });
   });
 
-  it('binds unreferenced app filters to the navigation view when there is one', () => {
-    const normalized = normalize({
-      sessionTabs: [createSessionTab('tab')],
-      navigationDataViewSpec: editedDataView,
-    });
-    const appState = { filters: [unreferencedFilter] };
+  it.each([undefined, 'legacy-navigation-id'])(
+    'binds unreferenced app filters to the derived navigation ID when its original ID is %s',
+    (id) => {
+      const normalized = normalize({
+        sessionTabs: [createSessionTab('tab')],
+        navigationDataViewSpec: { ...editedDataView, id },
+      });
+      const appState = { filters: [unreferencedFilter] };
 
-    expect(normalizeUrlAppState({ appState, selectedTab, normalized })).toEqual({
-      filters: [createFilterWithIndex(unreferencedFilter, editedDataViewId)],
-    });
-  });
+      expect(normalizeUrlAppState({ appState, selectedTab, normalized })).toStrictEqual({
+        filters: [createFilterWithIndex(unreferencedFilter, editedDataViewId)],
+      });
+    }
+  );
 
   it('binds unreferenced app filters to the view restored for the tab when the URL has none', () => {
     const localTab = createStoredTab({

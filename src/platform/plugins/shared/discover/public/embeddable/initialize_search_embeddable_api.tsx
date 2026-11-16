@@ -166,6 +166,8 @@ export const initializeSearchEmbeddableApi = async ({
   anyStateChange$: Observable<void>;
   cleanup: () => void;
   reinitializeState: (lastSaved: SearchEmbeddableSerializedAttributes) => Promise<void>;
+  /** Captures the current legacy references together with a state snapshot for later restoration. */
+  createStateRestorer: (state: SearchEmbeddableSerializedAttributes) => () => Promise<void>;
   esqlSource$: BehaviorSubject<EsqlSource | undefined>;
 }> => {
   /** We **must** have a search source, so start by initializing it  */
@@ -281,7 +283,10 @@ export const initializeSearchEmbeddableApi = async ({
     stateManager.columns.next(columns);
   };
 
-  const reinitializeState = async (state: SearchEmbeddableSerializedAttributes) => {
+  const reinitializeState = async (
+    state: SearchEmbeddableSerializedAttributes,
+    restoredIdCompatibility?: InlineDataViewIdCompatibility
+  ) => {
     // Trigger dataLoading$ and clear rows$ to show the initial loading state
     dataLoading$.next(true);
     rows$.next([]);
@@ -298,7 +303,7 @@ export const initializeSearchEmbeddableApi = async ({
       state.serializedSearchSource,
       previousSourceId
     );
-    currentIdCompatibility = newIdCompatibility;
+    currentIdCompatibility = restoredIdCompatibility ?? newIdCompatibility;
 
     // Ensure all state updates happen synchronously to prevent multiple reloads
     savedSearch$.next({ ...savedSearch$.getValue(), tabTypeState: state.tabTypeState });
@@ -397,5 +402,11 @@ export const initializeSearchEmbeddableApi = async ({
       map(() => undefined)
     ),
     reinitializeState,
+    createStateRestorer: (state) => {
+      // Snapshot specs already have derived IDs, so keep their legacy mapping separately.
+      const snapshotIdCompatibility = currentIdCompatibility;
+
+      return () => reinitializeState(state, snapshotIdCompatibility);
+    },
   };
 };

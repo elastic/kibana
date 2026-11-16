@@ -31,6 +31,7 @@ type InlineEditSnapshot = {
 interface SearchEmbeddableDeps {
   api: { savedSearch$: PublishingSubject<SavedSearch> };
   reinitializeState: (state: SearchEmbeddableSerializedAttributes) => Promise<void>;
+  createStateRestorer: (state: SearchEmbeddableSerializedAttributes) => () => Promise<void>;
   stateManager: SearchEmbeddableStateManager;
 }
 
@@ -75,15 +76,13 @@ export const initializeInlineEditingApi = ({
   const overrideHoverActions$ = isInlineEditing$;
 
   // Pre-edit state, captured on the first tab switch; if set, discard restores it
-  let inlineEditStateSnapshot: InlineEditSnapshot | undefined;
+  let restoreStateSnapshot: (() => Promise<void>) | undefined;
 
-  const applyEmbeddableState = async (
-    state: SearchEmbeddableSerializedAttributes
-  ): Promise<boolean> => {
+  const applyEmbeddableState = async (applyState: () => Promise<void>): Promise<boolean> => {
     setSearchError(undefined);
 
     try {
-      await searchEmbeddable.reinitializeState(state);
+      await applyState();
       return true;
     } catch (error) {
       setSearchError(error as Error);
@@ -103,14 +102,14 @@ export const initializeInlineEditingApi = ({
 
     if (!tab || !isInlineEditing$.getValue()) return false;
 
-    inlineEditStateSnapshot ??= createSnapshot(searchEmbeddable);
+    restoreStateSnapshot ??= searchEmbeddable.createStateRestorer(createSnapshot(searchEmbeddable));
 
-    return applyEmbeddableState(tab);
+    return applyEmbeddableState(() => searchEmbeddable.reinitializeState(tab));
   };
 
   const restoreInlineEditSnapshot = async () => {
-    if (inlineEditStateSnapshot) {
-      await applyEmbeddableState(inlineEditStateSnapshot);
+    if (restoreStateSnapshot) {
+      await applyEmbeddableState(restoreStateSnapshot);
     }
   };
 
@@ -119,7 +118,7 @@ export const initializeInlineEditingApi = ({
     inlineEditDirty$.next(false);
     draftSelectedTabId$.next(selectedTabId$.getValue());
 
-    inlineEditStateSnapshot = undefined;
+    restoreStateSnapshot = undefined;
 
     setFocusedPanelId();
   };

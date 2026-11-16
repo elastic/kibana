@@ -55,9 +55,6 @@ export interface InlineDataViewLoadCompatibility {
   }) => PreparedInlineDataViewLoadState;
 }
 
-const withEntry = (idMap: DataViewIdMap, previousId: string, id: string): DataViewIdMap =>
-  new Map([...idMap, [previousId, id]]);
-
 const bindConventionalAppFilters = (
   appState: DiscoverAppState,
   targetId: string | undefined,
@@ -116,58 +113,28 @@ export const createInlineDataViewLoadCompatibility = ({
   views: ReadonlyArray<InlineDataViewIdentity | undefined>;
   tabViews: ReadonlyMap<string, InlineDataViewIdentity | undefined>;
   conventionalTabs: ReadonlyMap<string, ConventionalTab>;
-  /** Undefined when the saved list is unavailable, so no URL ID can be presumed previous. */
+  /** Distinguishes persisted navigation views from inline definitions; undefined if unavailable. */
   savedDataViewIds: readonly string[] | undefined;
   navigationDataViewSpec: DataViewSpec | undefined;
 }): InlineDataViewLoadCompatibility => {
   const savedIds = savedDataViewIds ?? [];
-  const navigationDataView = getNavigationDataView(navigationDataViewSpec, savedIds);
-  const navigationIdentity = getInlineDataViewIdentity({ index: navigationDataView });
+  const navigationIdentity = getInlineDataViewIdentity({
+    index: getNavigationDataView(navigationDataViewSpec, savedIds),
+  });
   const normalizedNavigationSpec = navigationIdentity
     ? { ...navigationIdentity.dataView, id: navigationIdentity.id }
     : navigationDataViewSpec;
+  const navigationDataView = getNavigationDataView(normalizedNavigationSpec, savedIds);
   const ids = createInlineDataViewIdCompatibility({
     views: [...views, navigationIdentity],
   });
-  const knownIds =
-    savedDataViewIds &&
-    new Set([
-      ...savedDataViewIds,
-      ...ids.shared.keys(),
-      ...views.flatMap((identity) => (identity ? [identity.id] : [])),
-      ...(navigationIdentity ? [navigationIdentity.id] : []),
-    ]);
-
-  const getUrlMaps = (
-    selectedTab: TabState | undefined,
-    urlAppState: DiscoverAppState | undefined
-  ): { app: DataViewIdMap; global: DataViewIdMap; presumedPreviousId?: string } => {
+  const getUrlAppIdMap = (selectedTab: TabState | undefined): DataViewIdMap => {
     if (!selectedTab || navigationDataView !== undefined) {
-      return { app: ids.shared, global: ids.shared };
+      return ids.shared;
     }
 
-    const tabIdMap = ids.forView(tabViews.get(selectedTab.id));
-    const conventionalTab = conventionalTabs.get(selectedTab.id);
-    const dataSource = urlAppState?.dataSource;
-    if (!conventionalTab || !knownIds || !isDataViewSource(dataSource)) {
-      return { app: tabIdMap, global: ids.shared };
-    }
-
-    const restoredId = tabViews.get(selectedTab.id)?.id;
-    const { dataViewId } = dataSource;
-    if (
-      (restoredId !== undefined && restoredId !== conventionalTab.documentId) ||
-      tabIdMap.has(dataViewId) ||
-      knownIds.has(dataViewId)
-    ) {
-      return { app: tabIdMap, global: ids.shared };
-    }
-
-    return {
-      app: withEntry(tabIdMap, dataViewId, conventionalTab.documentId),
-      global: withEntry(ids.shared, dataViewId, conventionalTab.documentId),
-      presumedPreviousId: dataViewId,
-    };
+    // An unknown URL ID is not evidence that it belonged to this tab's inline view.
+    return ids.forView(tabViews.get(selectedTab.id));
   };
 
   const prepare: InlineDataViewLoadCompatibility['prepare'] = ({
@@ -176,10 +143,10 @@ export const createInlineDataViewLoadCompatibility = ({
     urlGlobalState,
     initialTabState,
   }) => {
-    const urlMaps = getUrlMaps(selectedTab, urlAppState);
+    const urlAppIdMap = getUrlAppIdMap(selectedTab);
     let preparedUrlAppState = urlAppState;
     if (urlAppState) {
-      preparedUrlAppState = remapDataViewReferences(urlAppState, urlMaps.app);
+      preparedUrlAppState = remapDataViewReferences(urlAppState, urlAppIdMap);
       if (selectedTab) {
         const conventionalTab = conventionalTabs.get(selectedTab.id);
         if (conventionalTab) {
@@ -193,17 +160,13 @@ export const createInlineDataViewLoadCompatibility = ({
           if (navigationIdentity) {
             viewIds.add(navigationIdentity.id);
           }
-          preparedUrlAppState = bindConventionalAppFilters(
-            preparedUrlAppState,
-            targetId,
-            viewIds
-          );
+          preparedUrlAppState = bindConventionalAppFilters(preparedUrlAppState, targetId, viewIds);
         }
       }
     }
 
     const preparedUrlGlobalState = urlGlobalState
-      ? remapDataViewReferences(urlGlobalState, urlMaps.global)
+      ? remapDataViewReferences(urlGlobalState, ids.shared)
       : urlGlobalState;
     const preparedInitialTabState = initialTabState
       ? {
@@ -222,19 +185,14 @@ export const createInlineDataViewLoadCompatibility = ({
       urlAppState: preparedUrlAppState,
       urlGlobalState: preparedUrlGlobalState,
       initialTabState: preparedInitialTabState,
-      dataViewIdsToRemove: [
-        ...new Set([
-          ...ids.shared.keys(),
-          ...(urlMaps.presumedPreviousId ? [urlMaps.presumedPreviousId] : []),
-        ]),
-      ],
+      dataViewIdsToRemove: [...ids.shared.keys()],
     };
   };
 
   return {
     ids,
     navigationDataViewSpec: normalizedNavigationSpec,
-    navigationDataView: getNavigationDataView(normalizedNavigationSpec, savedIds),
+    navigationDataView,
     prepare,
   };
 };

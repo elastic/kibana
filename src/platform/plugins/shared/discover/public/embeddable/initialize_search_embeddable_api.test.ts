@@ -137,7 +137,7 @@ describe('initializeSearchEmbeddableApi inline views', () => {
     ]);
   });
 
-  it('normalizes a tab switch and restores the original instance from a snapshot', async () => {
+  it('restores the original instance and legacy filter mapping after a tab preview', async () => {
     const { initialize, clearInstanceCache } = setup();
     const first = await initialize({
       serializedSearchSource: {
@@ -146,7 +146,9 @@ describe('initializeSearchEmbeddableApi inline views', () => {
       },
     });
     const originalView = first.api.dataViews$.getValue()?.[0];
-    const snapshot = first.api.savedSearch$.getValue().searchSource.getSerializedFields();
+    const restoreSnapshot = first.createStateRestorer({
+      serializedSearchSource: first.api.savedSearch$.getValue().searchSource.getSerializedFields(),
+    });
     const otherSpec = { ...inlineSpec, title: 'other-logs-*', id: 'legacy-id' };
     const otherId = generateInlineDataViewId(otherSpec);
 
@@ -157,11 +159,17 @@ describe('initializeSearchEmbeddableApi inline views', () => {
     expect(first.api.dataViews$.getValue()?.[0].id).toBe(otherId);
     expect(first.api.filters$.getValue()).toStrictEqual([createFilter(otherId)]);
     expect(first.api.savedSearch$.getValue().searchSource.getField('index')?.id).toBe(otherId);
+    expect(first.internalApi.remapParentFilters([createFilter('legacy-id')])).toStrictEqual([
+      createFilter(otherId),
+    ]);
 
-    await first.reinitializeState({ serializedSearchSource: snapshot });
+    await restoreSnapshot();
 
     expect(first.api.dataViews$.getValue()?.[0]).toBe(originalView);
     expect(first.api.filters$.getValue()).toStrictEqual([createFilter(inlineId)]);
+    expect(first.internalApi.remapParentFilters([createFilter('legacy-id')])).toStrictEqual([
+      createFilter(inlineId),
+    ]);
     expect(clearInstanceCache).not.toHaveBeenCalled();
   });
 
