@@ -28,6 +28,8 @@ import {
   useSpaceItems,
 } from './hooks';
 import { resolveHostedSpaceSolution, useProjectPreview } from './project_preview';
+import { useContextSwitcherTrialBadge } from './trial_badge';
+import { TrialBadgeSlot } from './trial_badge_slot';
 import { ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../common';
 import { SPACES_QUERY_KEY, useSpaces } from '../nav_control/hooks/use_spaces';
 import type { SpacesManager } from '../spaces_manager';
@@ -68,6 +70,7 @@ const ContextSwitcherInner = ({
   variant = 'proposal1',
 }: ContextSwitcherComponentProps) => {
   const projectPreview = useProjectPreview();
+  const showTrialBadge = useContextSwitcherTrialBadge();
   const { data: spaces, isLoading } = useSpaces(spacesManager);
   const activeSpace = useActiveSpace(spacesManager);
 
@@ -135,7 +138,7 @@ const ContextSwitcherInner = ({
 
   if (!spacesConfig) return null;
 
-  if (variant === 'original' || variant === 'proposal3') {
+  if (variant === 'original') {
     return (
       <ContextSwitcher
         variant={variant}
@@ -176,6 +179,14 @@ const ContextSwitcherInner = ({
           href: cloud?.deploymentUrl || undefined,
           showSpaceSolutions,
         }}
+        trialBadge={
+          showTrialBadge ? (
+            <TrialBadgeSlot
+              cloud={cloud}
+              projectType={projectPreview.id === 'deployment' ? undefined : projectPreview.id}
+            />
+          ) : undefined
+        }
         onOpen={handleOpen}
       />
     );
@@ -199,6 +210,7 @@ const ProjectMenuInner = ({
   isServerless,
   allowSolutionVisibility,
 }: ContextSwitcherComponentProps) => {
+  const showTrialBadge = useContextSwitcherTrialBadge();
   const { data: spaces } = useSpaces(spacesManager);
   const activeSpace = useActiveSpace(spacesManager);
   const { activeSpaceItem } = useSpaceItems({
@@ -262,6 +274,14 @@ const ProjectMenuInner = ({
       description={description}
       actions={actions}
       footerLinks={footerLinks}
+      trialBadge={
+        showTrialBadge ? (
+          <TrialBadgeSlot
+            cloud={cloud}
+            projectType={isServerless ? cloud?.serverless.projectType : undefined}
+          />
+        ) : undefined
+      }
     />
   );
 };

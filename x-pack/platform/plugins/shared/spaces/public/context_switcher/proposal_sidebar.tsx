@@ -12,6 +12,7 @@ import {
   EuiFlyoutHeader,
   EuiRadioGroup,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -26,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { PROJECT_PREVIEWS, setProjectPreviewId, useProjectPreview } from './project_preview';
 import type { ProjectPreviewId } from './project_preview';
 import { setContextSwitcherProposal, useContextSwitcherProposal } from './proposal';
+import { setContextSwitcherTrialBadge, useContextSwitcherTrialBadge } from './trial_badge';
 
 const TITLE_ID = 'contextSwitcherProposalTitle';
 
@@ -79,20 +81,6 @@ const PROPOSAL_TWO_DESCRIPTION = i18n.translate(
   }
 );
 
-const PROPOSAL_THREE_LABEL = i18n.translate(
-  'xpack.spaces.contextSwitcher.proposalSidebar.proposalThreeLabel',
-  {
-    defaultMessage: 'Proposal 3',
-  }
-);
-
-const PROPOSAL_THREE_DESCRIPTION = i18n.translate(
-  'xpack.spaces.contextSwitcher.proposalSidebar.proposalThreeDescription',
-  {
-    defaultMessage: 'The original menu. The header shows the real Trial badge.',
-  }
-);
-
 const optionLabel = (label: string, description: string) => (
   <>
     <EuiText size="s">
@@ -108,11 +96,10 @@ const OPTIONS: Array<{ id: ContextSwitcherVariant; label: ReactNode }> = [
   { id: 'original', label: optionLabel(ORIGINAL_LABEL, ORIGINAL_DESCRIPTION) },
   { id: 'proposal1', label: optionLabel(PROPOSAL_ONE_LABEL, PROPOSAL_ONE_DESCRIPTION) },
   { id: 'proposal2', label: optionLabel(PROPOSAL_TWO_LABEL, PROPOSAL_TWO_DESCRIPTION) },
-  { id: 'proposal3', label: optionLabel(PROPOSAL_THREE_LABEL, PROPOSAL_THREE_DESCRIPTION) },
 ];
 
 const isProposal = (id: string): id is ContextSwitcherVariant =>
-  id === 'original' || id === 'proposal1' || id === 'proposal2' || id === 'proposal3';
+  OPTIONS.some((option) => option.id === id);
 
 const PREVIEW_TITLE = i18n.translate('xpack.spaces.contextSwitcher.proposalSidebar.previewTitle', {
   defaultMessage: 'Project type',
@@ -145,12 +132,20 @@ const PREVIEW_OPTIONS = PROJECT_PREVIEWS.map((preview) => ({
 const isPreviewId = (id: string): id is ProjectPreviewId =>
   PROJECT_PREVIEWS.some((preview) => preview.id === id);
 
+const TRIAL_BADGE_LABEL = i18n.translate(
+  'xpack.spaces.contextSwitcher.proposalSidebar.trialBadgeLabel',
+  {
+    defaultMessage: 'Trial badge',
+  }
+);
+
 /**
  * Header icon that opens the context switcher proposal list from the right.
  */
 export const ProposalSidebar = () => {
   const proposal = useContextSwitcherProposal();
   const projectPreview = useProjectPreview();
+  const showTrialBadge = useContextSwitcherTrialBadge();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -192,6 +187,14 @@ export const ProposalSidebar = () => {
                   }
                 }}
                 data-test-subj="contextSwitcherProposalOptions"
+              />
+              <EuiSpacer size="l" />
+              <EuiSwitch
+                compressed
+                label={TRIAL_BADGE_LABEL}
+                checked={showTrialBadge}
+                onChange={(event) => setContextSwitcherTrialBadge(event.target.checked)}
+                data-test-subj="contextSwitcherTrialBadgeToggle"
               />
               {proposal === 'proposal2' && (
                 <>

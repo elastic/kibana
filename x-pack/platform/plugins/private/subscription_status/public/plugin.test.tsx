@@ -39,6 +39,10 @@ const startPlugin = (flag$?: BehaviorSubject<boolean>) => {
 };
 
 describe('SubscriptionStatusPlugin', () => {
+  afterEach(() => {
+    sessionStorage.removeItem('kbn.contextSwitcherTrialBadge');
+  });
+
   it('shows the badge for a Serverless trial by default', async () => {
     const core = startPlugin();
 
@@ -48,6 +52,33 @@ describe('SubscriptionStatusPlugin', () => {
     expect(core.analytics.reportEvent).toHaveBeenCalledWith('subscription_status_badge_shown', {
       hasBillingAccess: false,
       projectType: 'search',
+    });
+  });
+
+  it('shows the trial popover when the context switcher preview is on and the org is not in trial', async () => {
+    sessionStorage.setItem('kbn.contextSwitcherTrialBadge', 'true');
+    const plugin = new SubscriptionStatusPlugin();
+    plugin.setup(coreMock.createSetup(), { cloud: cloudMock.createSetup() });
+    const core = coreMock.createStart();
+    const cloud = {
+      ...cloudMock.createStart(),
+      isCloudEnabled: true,
+      isServerlessEnabled: true,
+      serverless: {
+        projectId: 'project-id',
+        projectType: 'security' as const,
+        organizationInTrial: false,
+      },
+    };
+
+    plugin.start(core, { cloud });
+
+    await waitFor(() =>
+      expect(core.chrome.controls.subscriptionBadge.set).toHaveBeenCalledWith(expect.anything())
+    );
+    expect(core.analytics.reportEvent).toHaveBeenCalledWith('subscription_status_badge_shown', {
+      hasBillingAccess: true,
+      projectType: 'security',
     });
   });
 

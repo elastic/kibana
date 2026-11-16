@@ -53,7 +53,7 @@ export interface ContextSwitcherEnvironmentConfig {
 }
 
 /** Design variants for the header context switcher. */
-export type ContextSwitcherVariant = 'original' | 'proposal1' | 'proposal2' | 'proposal3';
+export type ContextSwitcherVariant = 'original' | 'proposal1' | 'proposal2';
 
 /** Project identity shown in the proposal 2 popover header. */
 export interface ContextSwitcherProjectSummary {
@@ -77,7 +77,6 @@ export interface ContextSwitcherProps {
    * `original` is the combined project and space menu.
    * `proposal1` is the project menu on the Elastic logo and a spaces-only switcher.
    * `proposal2` is a space-name trigger that opens a header, space list, and footer.
-   * `proposal3` is the original menu. The real header Trial badge is shown for this option.
    */
   variant?: ContextSwitcherVariant;
   /**
@@ -90,6 +89,11 @@ export interface ContextSwitcherProps {
   footerLinks?: LinksListItem[];
   /** Used by proposal 2. */
   projectSummary?: ContextSwitcherProjectSummary;
+  /**
+   * Trial badge rendered beside "Manage in Cloud" in proposal 2.
+   * Clicking it opens the upgrade popover.
+   */
+  trialBadge?: ReactNode;
   /** Called when the popover opens. */
   onOpen?: () => void;
 }

@@ -23,6 +23,7 @@ import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { LinksList } from './links_list';
+import { isTrialPopoverEvent } from './trial_badge';
 import { POPOVER_WIDTH_PX, type LinksListItem } from './types';
 
 export interface ProjectMenuProps {
@@ -34,6 +35,8 @@ export interface ProjectMenuProps {
   readonly actions?: ReadonlyArray<LinksListItem>;
   /** Secondary links such as "Get started" and "Invite users". */
   readonly footerLinks?: ReadonlyArray<LinksListItem>;
+  /** Trial badge shown beside the project name. Clicking it opens the upgrade popover. */
+  readonly trialBadge?: React.ReactNode;
 }
 
 const TRIGGER_ARIA_LABEL = i18n.translate('contextSwitcherComponents.projectMenu.triggerAriaLabel', {
@@ -43,7 +46,14 @@ const TRIGGER_ARIA_LABEL = i18n.translate('contextSwitcherComponents.projectMenu
 /**
  * Elastic logo button that opens the project menu. The project mark stays inside the popover.
  */
-export const ProjectMenu = ({ icon, name, description, actions, footerLinks }: ProjectMenuProps) => {
+export const ProjectMenu = ({
+  icon,
+  name,
+  description,
+  actions,
+  footerLinks,
+  trialBadge,
+}: ProjectMenuProps) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const closePopover = useCallback(() => setIsOpen(false), []);
@@ -98,6 +108,18 @@ export const ProjectMenu = ({ icon, name, description, actions, footerLinks }: P
       panelPaddingSize="s"
       panelProps={{ 'data-test-subj': 'projectMenuPopover' }}
       ownFocus
+      focusTrapProps={{
+        onClickOutside: (event) => {
+          const target = event.target;
+          if (
+            isTrialPopoverEvent(event) ||
+            (target instanceof Element && target.closest('[data-test-subj="projectMenuTrigger"]'))
+          ) {
+            return;
+          }
+          closePopover();
+        },
+      }}
       repositionOnScroll
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -118,6 +140,7 @@ export const ProjectMenu = ({ icon, name, description, actions, footerLinks }: P
             {description}
           </EuiText>
         </EuiFlexItem>
+        {trialBadge && <EuiFlexItem grow={false}>{trialBadge}</EuiFlexItem>}
       </EuiFlexGroup>
 
       {actions && actions.length > 0 && (

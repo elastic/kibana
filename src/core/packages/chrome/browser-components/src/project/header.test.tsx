@@ -20,6 +20,7 @@ import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
 describe('ChromeHeader', () => {
   afterEach(() => {
     sessionStorage.removeItem('kbn.contextSwitcherProposal');
+    sessionStorage.removeItem('kbn.contextSwitcherTrialBadge');
   });
 
   it('renders the project picker beside the context switcher', () => {
@@ -42,7 +43,8 @@ describe('ChromeHeader', () => {
   });
 
   it('renders the subscription badge only once it is set', () => {
-    sessionStorage.setItem('kbn.contextSwitcherProposal', 'proposal3');
+    sessionStorage.setItem('kbn.contextSwitcherProposal', 'original');
+    sessionStorage.setItem('kbn.contextSwitcherTrialBadge', 'true');
     const chrome = chromeServiceMock.createStartContract();
 
     renderWithI18n(
@@ -64,8 +66,42 @@ describe('ChromeHeader', () => {
     );
   });
 
-  it('hides the subscription badge unless proposal 3 is selected', () => {
+  it('renders the subscription badge for the original menu when the trial toggle is on', () => {
+    sessionStorage.setItem('kbn.contextSwitcherProposal', 'original');
+    sessionStorage.setItem('kbn.contextSwitcherTrialBadge', 'true');
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.controls.subscriptionBadge.set(<span>Trial</span>);
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeHeader />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge)).toHaveTextContent(
+      'Trial'
+    );
+  });
+
+  it('hides the header subscription badge for other proposals when the trial toggle is on', () => {
     sessionStorage.setItem('kbn.contextSwitcherProposal', 'proposal1');
+    sessionStorage.setItem('kbn.contextSwitcherTrialBadge', 'true');
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.controls.subscriptionBadge.set(<span>Trial</span>);
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeHeader />
+      </TestChromeProviders>
+    );
+
+    expect(
+      screen.queryByTestId(CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge)
+    ).not.toBeInTheDocument();
+  });
+
+  it('hides the subscription badge when the trial toggle is off', () => {
+    sessionStorage.setItem('kbn.contextSwitcherProposal', 'original');
     const chrome = chromeServiceMock.createStartContract();
     chrome.controls.subscriptionBadge.set(<span>Trial</span>);
 

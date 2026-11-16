@@ -24,6 +24,8 @@ import { ChromeHeaderPageAnnouncer } from '../shared/header_page_announcer';
 
 const PROPOSAL_STORAGE_KEY = 'kbn.contextSwitcherProposal';
 const PROPOSAL_CHANGE_EVENT = 'kbn.contextSwitcherProposalChange';
+const TRIAL_BADGE_STORAGE_KEY = 'kbn.contextSwitcherTrialBadge';
+const TRIAL_BADGE_CHANGE_EVENT = 'kbn.contextSwitcherTrialBadgeChange';
 
 const readContextSwitcherProposal = (): string | null => {
   try {
@@ -33,19 +35,38 @@ const readContextSwitcherProposal = (): string | null => {
   }
 };
 
-/** Proposal preview: the real subscription badge is visible only for proposal 3. */
+const readTrialBadge = (): boolean => {
+  try {
+    return sessionStorage.getItem(TRIAL_BADGE_STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Proposal preview. The header subscription badge is the original menu's trial badge.
+ * Proposal 1 and 2 render the badge inside their own popovers.
+ */
 const useShowSubscriptionBadge = (): boolean => {
   const [proposal, setProposal] = useState(readContextSwitcherProposal);
+  const [trialBadge, setTrialBadge] = useState(readTrialBadge);
 
   useEffect(() => {
-    const onChange = (event: Event) => {
+    const onProposal = (event: Event) => {
       setProposal((event as CustomEvent<string>).detail);
     };
-    window.addEventListener(PROPOSAL_CHANGE_EVENT, onChange);
-    return () => window.removeEventListener(PROPOSAL_CHANGE_EVENT, onChange);
+    const onTrialBadge = (event: Event) => {
+      setTrialBadge((event as CustomEvent<boolean>).detail);
+    };
+    window.addEventListener(PROPOSAL_CHANGE_EVENT, onProposal);
+    window.addEventListener(TRIAL_BADGE_CHANGE_EVENT, onTrialBadge);
+    return () => {
+      window.removeEventListener(PROPOSAL_CHANGE_EVENT, onProposal);
+      window.removeEventListener(TRIAL_BADGE_CHANGE_EVENT, onTrialBadge);
+    };
   }, []);
 
-  return proposal === 'proposal3';
+  return trialBadge && proposal === 'original';
 };
 
 export const ChromeHeader = React.memo(() => {

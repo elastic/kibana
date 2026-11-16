@@ -28,6 +28,7 @@ import { SpacesListView } from './views/spaces_list';
 import type { SpacesListViewProps } from './views/spaces_list';
 import { LinksList } from './links_list';
 import { ContextSwitcherTriggerButton } from './context_switcher_trigger_button';
+import { isTrialPopoverEvent } from './trial_badge';
 import {
   POPOVER_WIDTH_PX,
   type ContextSwitcherProps,
@@ -96,6 +97,7 @@ export const ProposalTwoContextSwitcher = ({
   spaces,
   footerLinks,
   projectSummary,
+  trialBadge,
   onOpen,
 }: ContextSwitcherProps) => {
   const { euiTheme } = useEuiTheme();
@@ -206,6 +208,19 @@ export const ProposalTwoContextSwitcher = ({
       panelProps={{ 'data-test-subj': 'contextSwitcherPopoverPanel' }}
       ownFocus
       repositionOnScroll
+      focusTrapProps={{
+        onClickOutside: (event) => {
+          const target = event.target;
+          if (
+            isTrialPopoverEvent(event) ||
+            (target instanceof Element &&
+              target.closest('[data-test-subj="contextSwitcherTriggerButton"]'))
+          ) {
+            return;
+          }
+          closePopover();
+        },
+      }}
       data-test-subj="contextSwitcherPopover"
     >
       <EuiSplitPanel.Outer direction="column" hasBorder={false} hasShadow={false}>
@@ -230,6 +245,7 @@ export const ProposalTwoContextSwitcher = ({
                 {projectSummary?.description}
               </EuiText>
             </EuiFlexItem>
+            {trialBadge && <EuiFlexItem grow={false}>{trialBadge}</EuiFlexItem>}
             {projectSummary?.href && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={CLOUD_BUTTON_LABEL} disableScreenReaderOutput>

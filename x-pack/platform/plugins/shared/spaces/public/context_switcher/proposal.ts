@@ -13,7 +13,7 @@ const STORAGE_KEY = 'kbn.contextSwitcherProposal';
 const PROPOSAL_CHANGE_EVENT = 'kbn.contextSwitcherProposalChange';
 
 const isProposal = (value: string | null): value is ContextSwitcherVariant =>
-  value === 'original' || value === 'proposal1' || value === 'proposal2' || value === 'proposal3';
+  value === 'original' || value === 'proposal1' || value === 'proposal2';
 
 const readStoredProposal = (): ContextSwitcherVariant => {
   try {

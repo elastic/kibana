@@ -7,10 +7,21 @@
 
 import React from 'react';
 import type { Observable } from 'rxjs';
-import { defer, distinctUntilChanged, map, of, switchMap, type Subscription } from 'rxjs';
+import {
+  defer,
+  distinctUntilChanged,
+  fromEvent,
+  map,
+  merge,
+  of,
+  startWith,
+  switchMap,
+  type Subscription,
+} from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ServerlessCloud } from './status/resolve_serverless';
 import type { SubscriptionStatus } from './status/types';
 import type { BadgeActionClickedEvent, BadgeOpenedEvent, BadgeShownEvent } from './telemetry';
 import {
@@ -21,6 +32,48 @@ import {
 } from './telemetry';
 
 const ENABLED_FLAG = 'subscriptionStatus.enabled';
+const TRIAL_BADGE_STORAGE_KEY = 'kbn.contextSwitcherTrialBadge';
+const TRIAL_BADGE_CHANGE_EVENT = 'kbn.contextSwitcherTrialBadgeChange';
+
+const readTrialBadgePreview = (): boolean => {
+  try {
+    return sessionStorage.getItem(TRIAL_BADGE_STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+};
+
+/** Context-switcher preview. The original option can force the Trial popover on. */
+const trialBadgePreview$ = () =>
+  merge(
+    fromEvent<CustomEvent<boolean>>(window, TRIAL_BADGE_CHANGE_EVENT).pipe(
+      map((event) => event.detail)
+    )
+  ).pipe(startWith(readTrialBadgePreview()));
+
+/**
+ * Forces the Serverless trial path so the existing popover content can be reviewed
+ * on a project that is not actually in trial. A missing billing URL would collapse
+ * that content to a tooltip, so the preview supplies one.
+ */
+const toTrialPreviewCloud = (cloud: CloudStart): ServerlessCloud => ({
+  isServerlessEnabled: true,
+  serverless: {
+    ...cloud.serverless,
+    organizationInTrial: true,
+  },
+  getPrivilegedUrls: async () => {
+    try {
+      const urls = await cloud.getPrivilegedUrls();
+      if (urls.billingUrl) return urls;
+    } catch {
+      // The preview still opens the popover.
+    }
+    const baseUrl = cloud.getUrls().baseUrl?.replace(/\/$/, '') || 'https://cloud.elastic.co';
+    return { billingUrl: `${baseUrl}/billing` };
+  },
+  getUrls: () => cloud.getUrls(),
+});
 
 interface SubscriptionStatusSetupDeps {
   cloud?: CloudSetup;
@@ -111,10 +164,18 @@ export class SubscriptionStatusPlugin
   }
 
   private getCloudBadge$(cloud: CloudStart): Observable<ResolvedBadge | undefined> {
-    return defer(async () => {
-      const { resolveServerlessStatus } = await import('./status/resolve_serverless');
-      return resolveServerlessStatus({ cloud, csp: this.csp, region: this.region });
-    }).pipe(map((status) => status && { status, hasBillingAccess: status.kind === 'popover' }));
+    return trialBadgePreview$().pipe(
+      switchMap((preview) =>
+        defer(async () => {
+          const { resolveServerlessStatus } = await import('./status/resolve_serverless');
+          return resolveServerlessStatus({
+            cloud: preview ? toTrialPreviewCloud(cloud) : cloud,
+            csp: this.csp,
+            region: this.region,
+          });
+        }).pipe(map((status) => status && { status, hasBillingAccess: status.kind === 'popover' }))
+      )
+    );
   }
 }
 
