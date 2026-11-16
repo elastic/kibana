@@ -708,6 +708,37 @@ describe('deliverCallbackEvents', () => {
     expect(calls).toEqual(['start:one', 'end:one', 'start:two', 'end:two']);
   });
 
+  it('does not start round_complete until the delivery of execution_terminated settles', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    let settleTerminated = () => {};
+    service.makeCallbackRequest.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          settleTerminated = resolve;
+        })
+    );
+
+    const delivery = deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: of(createRoundCompleteEvent(), createExecutionTerminatedEvent()),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(getDeliveredEvents(service).map(({ type }) => type)).toEqual(['execution_terminated']);
+
+    settleTerminated();
+    await delivery;
+
+    expect(getDeliveredEvents(service).map(({ type }) => type)).toEqual([
+      'execution_terminated',
+      'round_complete',
+    ]);
+  });
+
   it('continues with the next event when a delivery fails', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     service.makeCallbackRequest

@@ -103,17 +103,19 @@ export const deliverCallbackEvents = ({
     }
 
     const isTerminal = isExecutionTerminatedEvent(event) || isRoundCompleteEvent(event);
-    const delivery = callbackDeliveryService.makeCallbackRequest({
-      payload: {
-        execution_id: execution.executionId,
-        event,
-        ...(isTerminal ? { idempotency_key: execution.executionId } : {}),
-      },
-      callbackUrl,
-      retry: isTerminal,
-    });
 
-    return from(delivery).pipe(
+    // Deferred so the request only starts once subscribed, after the previous delivery settled.
+    return defer(() =>
+      callbackDeliveryService.makeCallbackRequest({
+        payload: {
+          execution_id: execution.executionId,
+          event,
+          ...(isTerminal ? { idempotency_key: execution.executionId } : {}),
+        },
+        callbackUrl,
+        retry: isTerminal,
+      })
+    ).pipe(
       catchError((error) => {
         logger.warn(
           `Failed to deliver callback event for execution ${execution.executionId}: ${error.message}`
