@@ -40,6 +40,7 @@ export type {
   Connector,
   ConnectorType,
 } from './application/connector/types';
+export type { UnusableConnectorErrorData } from './application/connector/methods/ensure_connectors_usable';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 export { RelayRequestError } from './lib/relay';
