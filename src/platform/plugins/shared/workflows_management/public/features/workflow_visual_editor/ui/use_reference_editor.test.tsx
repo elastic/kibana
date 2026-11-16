@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react';
-import { caretAfterChange, useReferenceEditor } from './use_reference_editor';
+import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
+import React from 'react';
+import {
+  caretAfterChange,
+  typedCharacter,
+  typedCharacterOfInput,
+  useReferenceEditor,
+} from './use_reference_editor';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { createFakeMonacoEditor } from '../test_utils/fake_monaco_editor';
 
@@ -204,5 +210,77 @@ describe('caretAfterChange', () => {
 
   it('never goes past the end of the text', () => {
     expect(caretAfterChange('abc', { changes: [{ rangeOffset: 2, text: 'xxxxxx' }] })).toBe(3);
+  });
+});
+
+describe('typedCharacter', () => {
+  it('is the single character the user just typed', () => {
+    expect(typedCharacter({ changes: [{ rangeOffset: 3, text: '{' }] })).toBe('{');
+  });
+
+  it('is nothing for a deletion, which inserts no text', () => {
+    expect(typedCharacter({ changes: [{ rangeOffset: 2, text: '' }] })).toBeUndefined();
+  });
+
+  it('is nothing for a paste, or any change of more than one character', () => {
+    expect(typedCharacter({ changes: [{ rangeOffset: 0, text: '{{' }] })).toBeUndefined();
+  });
+
+  it('is nothing for an edit made of several changes', () => {
+    expect(
+      typedCharacter({
+        changes: [
+          { rangeOffset: 0, text: '{' },
+          { rangeOffset: 4, text: '{' },
+        ],
+      })
+    ).toBeUndefined();
+  });
+
+  it('is nothing for an undo or a redo', () => {
+    const changes = [{ rangeOffset: 0, text: '{' }];
+    expect(typedCharacter({ changes, isUndoing: true })).toBeUndefined();
+    expect(typedCharacter({ changes, isRedoing: true })).toBeUndefined();
+  });
+
+  it('is nothing when the change is unknown', () => {
+    expect(typedCharacter(undefined)).toBeUndefined();
+  });
+});
+
+describe('typedCharacterOfInput', () => {
+  const seenFor = (init: { inputType?: string; data?: string | null } | undefined) => {
+    let seen: string | undefined = 'untouched';
+    const { unmount } = render(
+      <input
+        data-test-subj="input"
+        onChange={(event) => {
+          seen = typedCharacterOfInput(event);
+        }}
+      />
+    );
+    const input = screen.getByTestId('input');
+    if (init) fireEvent.input(input, { target: { value: 'x' }, ...init });
+    else fireEvent.change(input, { target: { value: 'x' } });
+    unmount();
+    return seen;
+  };
+
+  it('is the character typed into a plain input', () => {
+    expect(seenFor({ inputType: 'insertText', data: '{' })).toBe('{');
+  });
+
+  it('is nothing for a deletion, a paste or a drop', () => {
+    expect(seenFor({ inputType: 'deleteContentBackward', data: null })).toBeUndefined();
+    expect(seenFor({ inputType: 'insertFromPaste', data: '{{' })).toBeUndefined();
+    expect(seenFor({ inputType: 'insertFromDrop', data: '{' })).toBeUndefined();
+  });
+
+  it('is nothing when more than one character arrives at once', () => {
+    expect(seenFor({ inputType: 'insertText', data: '{{' })).toBeUndefined();
+  });
+
+  it('is nothing for a change that is not an input event', () => {
+    expect(seenFor(undefined)).toBeUndefined();
   });
 });

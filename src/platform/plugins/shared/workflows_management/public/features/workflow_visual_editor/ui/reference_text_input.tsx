@@ -8,7 +8,7 @@
  */
 
 import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import type { monaco } from '@kbn/code-editor';
 import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
@@ -16,7 +16,7 @@ import { createMonacoSelectionBridge } from './create_monaco_selection_bridge';
 import type { ReferenceCapableBind } from './reference_capable_field';
 import { ReferenceChip } from './reference_chip';
 import { ContainerInSentenceCallout } from './reference_container_callout';
-import { caretAfterChange, useReferenceEditor } from './use_reference_editor';
+import { caretAfterChange, typedCharacter, useReferenceEditor } from './use_reference_editor';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import type { ReferenceToken } from '../lib/reference_tokens';
 import { insertTokenAsJsonText } from '../lib/reference_tokens';
@@ -97,8 +97,8 @@ export function ReferenceTextInput({
   readonly ariaLabel: string;
   readonly isInvalid: boolean;
   readonly onBlur: () => void;
-  /** Text edits; wired to `bind.reportChange` so typed triggers open the picker. */
-  readonly onChange: (next: string, caret: number) => void;
+  /** Text edits; wired to `bind.reportChange` so a typed trigger opens the dropdown. */
+  readonly onChange: (next: string, caret: number, typed?: string) => void;
   readonly testSubj: string;
   /** Flag a known list or record inside a sentence (free text only). */
   readonly warnContainersInSentence: boolean;
@@ -112,12 +112,11 @@ export function ReferenceTextInput({
 }) {
   const { euiTheme } = useEuiTheme();
   const { fontSize } = useEuiFontSize('xs');
-  const { value, isOpen, appendControls, registerSelection, openPickerAtRange } = bind;
+  const { value, appendControls, registerSelection, openPickerAtRange, registerEditRequester } =
+    bind;
   const [isEditing, setIsEditing] = useState(false);
   const pendingRef = useRef<Pending | undefined>({ kind: 'end' });
   const heightPx = parseInt(String(euiTheme.size.xl), 10) || 32;
-  const isOpenRef = useRef(isOpen);
-  isOpenRef.current = isOpen;
   const valueRef = useRef(value);
   valueRef.current = value;
   // The editor registers its blur listener once, at mount; it must still call the latest handler.
@@ -147,6 +146,12 @@ export function ReferenceTextInput({
     releaseEditor();
     registerSelection(null);
   }, [registerSelection, releaseEditor]);
+
+  // The insert button on a field that shows text needs an editor to type into: it asks for one.
+  useEffect(() => {
+    registerEditRequester(() => startEditing({ kind: 'end' }));
+    return () => registerEditRequester(null);
+  }, [registerEditRequester, startEditing]);
 
   // Mousedown only keeps focus on the read view; the action runs on click, once the pointer is
   // released. Opening the picker earlier lets the trailing click count as an "outside click"
@@ -194,7 +199,6 @@ export function ReferenceTextInput({
         }
       });
       mounted.onDidBlurEditorText(() => {
-        if (isOpenRef.current) return;
         onBlurRef.current();
         stopEditing();
       });
@@ -301,7 +305,7 @@ export function ReferenceTextInput({
         value={value}
         onChange={(text, event) => {
           const single = text.replace(/\r?\n/g, ' ');
-          onChange(single, caretAfterChange(single, event));
+          onChange(single, caretAfterChange(single, event), typedCharacter(event));
         }}
         height={heightPx}
         aria-label={ariaLabel}
@@ -319,15 +323,7 @@ export function ReferenceTextInput({
     <>
       <div css={boxCss}>
         {isEditing ? editView : readView}
-        {/* Pressing a control must not take focus from the editor: it would blur and unmount, and the
-            picker would lose the caret it inserts at. */}
-        <div
-          role="presentation"
-          onMouseDown={(event) => event.preventDefault()}
-          css={{ paddingInlineEnd: euiTheme.size.xs, flex: '0 0 auto' }}
-        >
-          {appendControls}
-        </div>
+        <div css={{ paddingInlineEnd: euiTheme.size.xs, flex: '0 0 auto' }}>{appendControls}</div>
       </div>
       {warning ? (
         <ContainerInSentenceCallout

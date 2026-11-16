@@ -22,6 +22,7 @@ import { settingsEntryNameErrorMessage } from './settings_entry_row_shared';
 import type { OutputField } from './workflow_settings_fields_model';
 import type { DataReferenceCatalog } from '../../../features/workflow_visual_editor/lib/build_data_reference_catalog';
 import { ReferenceCapableField } from '../../../features/workflow_visual_editor/ui/reference_capable_field';
+import { typedCharacterOfInput } from '../../../features/workflow_visual_editor/ui/use_reference_editor';
 import {
   SCHEMA_PROPERTY_TYPE_OPTIONS,
   type SchemaPropertyField,
@@ -143,9 +144,15 @@ export const SettingsEntryOutputFields = ({
               placeholder={bind.teachingPlaceholder}
               inputRef={bind.attachInputRef}
               append={bind.appendControls}
+              onKeyDown={bind.handleTypeaheadKey}
+              onBlur={bind.closePicker}
               onChange={(e) => {
                 const el = e.target;
-                bind.reportChange(el.value, el.selectionStart ?? el.value.length);
+                bind.reportChange(
+                  el.value,
+                  el.selectionStart ?? el.value.length,
+                  typedCharacterOfInput(e)
+                );
               }}
               data-test-subj={`workflowSettingsOutputValue-${field.id}`}
             />

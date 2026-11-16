@@ -52,6 +52,22 @@ type NavigableEntry =
       readonly total: number;
     };
 
+/** A key press forwarded from the editor the typeahead belongs to. */
+export interface TypeaheadKeyEvent {
+  readonly key: string;
+  readonly preventDefault: () => void;
+}
+
+/**
+ * The picker as a dropdown under a field that is being typed in, instead of a popover of its own:
+ * what was typed after the trigger filters the list, the editor keeps the focus and sends its keys
+ * through `keyHandlerRef`. The handler returns true when it used the key.
+ */
+export interface DataReferenceTypeahead {
+  readonly query: string;
+  readonly keyHandlerRef: React.MutableRefObject<((event: TypeaheadKeyEvent) => boolean) | null>;
+}
+
 export interface DataReferencePickerProps {
   readonly catalog: DataReferenceCatalog;
   readonly isOpen: boolean;
@@ -64,6 +80,8 @@ export interface DataReferencePickerProps {
    * form fields leave this unset so the popover sizes to the control.
    */
   readonly fillHeight?: boolean;
+  /** Set to open as a typeahead (no search box, no focus change); unset for the search popover. */
+  readonly typeahead?: DataReferenceTypeahead;
   readonly 'data-test-subj'?: string;
 }
 
@@ -78,6 +96,7 @@ export function DataReferencePicker({
   onInsert,
   input,
   fillHeight = false,
+  typeahead,
   'data-test-subj': dataTestSubj = 'workflowDataReferencePicker',
 }: DataReferencePickerProps) {
   const { euiTheme } = useEuiTheme();
@@ -85,7 +104,12 @@ export function DataReferencePicker({
   const panelElRef = useRef<HTMLElement | null>(null);
   const inputElRef = useRef<HTMLElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const [search, setSearch] = useState('');
+  const [typedSearch, setSearch] = useState('');
+  const isTypeahead = typeahead !== undefined;
+  const search = typeahead ? typeahead.query : typedSearch;
+  // A dropdown for a text control opens under the control, not over the text being typed in. The
+  // expanded editor fills its pane, so there it follows the caret.
+  const underControl = isTypeahead && !fillHeight;
   const [drillStack, setDrillStack] = useState<DataReferenceItem[]>([]);
   const [highlightIndex, setHighlightIndex] = useState(0);
   const [expandedGroups, setExpandedGroups] = useState<ReadonlySet<DataReferenceGroupId>>(
@@ -107,15 +131,17 @@ export function DataReferencePicker({
       setCaretAnchor(null);
       return;
     }
+    // A typeahead leaves the focus in the editor the user is typing in.
+    if (isTypeahead) return;
     const id = window.setTimeout(() => searchRef.current?.focus(), 0);
     return () => window.clearTimeout(id);
-  }, [isOpen]);
+  }, [isOpen, isTypeahead]);
 
   // Position the popover under the caret (not the full field bbox). Critical for
   // the expanded editor where the textarea fills the pane — downLeft on that
   // box lands far from where the user typed `@`.
   useLayoutEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || underControl) return;
 
     const findField = (): HTMLInputElement | HTMLTextAreaElement | null => {
       const root = inputElRef.current;
@@ -149,7 +175,7 @@ export function DataReferencePicker({
     return () => {
       field?.removeEventListener('scroll', updateAnchor);
     };
-  }, [isOpen]);
+  }, [isOpen, underControl]);
 
   // Close when an ancestor of the anchor scrolls (e.g. the config panel body).
   useEffect(() => {
@@ -269,6 +295,40 @@ export function DataReferencePicker({
     },
     [insertItem, toggleGroupExpanded]
   );
+
+  const handleEditorKey = useCallback(
+    (event: TypeaheadKeyEvent): boolean => {
+      // With nothing listed the dropdown is not on screen, so the keys are the editor's.
+      if (flatNavigable.length === 0) return false;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        return true;
+      }
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const step = event.key === 'ArrowDown' ? 1 : -1;
+        setHighlightIndex((i) => Math.max(0, Math.min(i + step, flatNavigable.length - 1)));
+        return true;
+      }
+      if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault();
+        activateEntry(flatNavigable[highlightIndex]);
+        return true;
+      }
+      return false;
+    },
+    [activateEntry, flatNavigable, highlightIndex, onClose]
+  );
+
+  const keyHandlerRef = typeahead?.keyHandlerRef;
+  useEffect(() => {
+    if (!keyHandlerRef) return;
+    keyHandlerRef.current = handleEditorKey;
+    return () => {
+      keyHandlerRef.current = null;
+    };
+  }, [keyHandlerRef, handleEditorKey]);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -407,7 +467,7 @@ export function DataReferencePicker({
 
   const popover = (
     <EuiPopover
-      isOpen={isOpen}
+      isOpen={isOpen && (!isTypeahead || flatNavigable.length > 0)}
       closePopover={onClose}
       button={
         <span
@@ -415,11 +475,12 @@ export function DataReferencePicker({
           data-test-subj="workflowDataReferencePickerCaretAnchor"
           css={{
             position: 'absolute',
-            // Fall back to the field top-left until layout measures the caret.
-            top: caretAnchor?.top ?? 0,
-            left: caretAnchor?.left ?? 0,
+            // Under a control the anchor is the control's bottom edge from the first render, which
+            // is when the popover measures it; otherwise the caret, measured once it is laid out.
+            top: underControl ? '100%' : caretAnchor?.top ?? 0,
+            left: underControl ? 0 : caretAnchor?.left ?? 0,
             width: 1,
-            height: caretAnchor?.height ?? 1,
+            height: underControl ? 0 : caretAnchor?.height ?? 1,
             pointerEvents: 'none',
           }}
         />
@@ -435,6 +496,8 @@ export function DataReferencePicker({
         panelElRef.current = el;
       }}
       panelProps={{
+        // The panel only exists while open, so this id says whether the dropdown is on screen.
+        ...(isTypeahead ? { 'data-test-subj': 'workflowDataReferenceTypeahead' } : {}),
         css: {
           width: PICKER_WIDTH,
           maxWidth: PICKER_WIDTH,
@@ -449,7 +512,10 @@ export function DataReferencePicker({
       }}
     >
       <div
+        role="presentation"
         onKeyDown={handleKeyDown}
+        // A press must not take the focus from the editor being typed in: it would blur it.
+        onMouseDown={isTypeahead ? (event) => event.preventDefault() : undefined}
         css={{
           display: 'flex',
           flexDirection: 'column',
@@ -458,87 +524,95 @@ export function DataReferencePicker({
           minHeight: 0,
         }}
       >
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-          responsive={false}
-          css={{ padding: euiTheme.size.s, paddingBottom: 0, flexWrap: 'wrap' }}
-        >
-          {drillStack.length > 0 && !search ? (
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="chevronSingleLeft"
-                size="xs"
-                aria-label={i18n.translate('workflows.dataReferencePicker.back', {
-                  defaultMessage: 'Back',
-                })}
-                onClick={() => setDrillStack((stack) => stack.slice(0, -1))}
-                data-test-subj="workflowDataReferenceBack"
-              />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow>
-            {drillStack.length > 0 && !search ? (
-              <EuiFlexGroup
-                gutterSize="xs"
-                alignItems="center"
-                responsive={false}
-                wrap
-                data-test-subj="workflowDataReferenceBreadcrumb"
-              >
+        {isTypeahead && drillStack.length === 0 ? null : (
+          <>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              css={{ padding: euiTheme.size.s, paddingBottom: 0, flexWrap: 'wrap' }}
+            >
+              {drillStack.length > 0 && !search ? (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
+                  <EuiButtonIcon
+                    iconType="chevronSingleLeft"
                     size="xs"
-                    flush="both"
-                    onClick={() => navigateBreadcrumb(0)}
-                    css={{ fontWeight: euiTheme.font.weight.bold, fontSize: 12 }}
-                  >
-                    {insertDataLabel}
-                  </EuiButtonEmpty>
+                    aria-label={i18n.translate('workflows.dataReferencePicker.back', {
+                      defaultMessage: 'Back',
+                    })}
+                    onClick={() => setDrillStack((stack) => stack.slice(0, -1))}
+                    data-test-subj="workflowDataReferenceBack"
+                  />
                 </EuiFlexItem>
-                {drillStack.map((segment, i) => (
-                  <React.Fragment key={`${segment.path}-${i}`}>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        ›
-                      </EuiText>
-                    </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem grow>
+                {drillStack.length > 0 && !search ? (
+                  <EuiFlexGroup
+                    gutterSize="xs"
+                    alignItems="center"
+                    responsive={false}
+                    wrap
+                    data-test-subj="workflowDataReferenceBreadcrumb"
+                  >
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
                         size="xs"
                         flush="both"
-                        onClick={() => navigateBreadcrumb(i + 1)}
+                        onClick={() => navigateBreadcrumb(0)}
                         css={{ fontWeight: euiTheme.font.weight.bold, fontSize: 12 }}
                       >
-                        {segment.label}
+                        {insertDataLabel}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
-                  </React.Fragment>
-                ))}
-              </EuiFlexGroup>
-            ) : (
-              <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.bold, fontSize: 12 }}>
-                {insertDataLabel}
-              </EuiText>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                    {drillStack.map((segment, i) => (
+                      <React.Fragment key={`${segment.path}-${i}`}>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="xs" color="subdued">
+                            ›
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            flush="both"
+                            onClick={() => navigateBreadcrumb(i + 1)}
+                            css={{ fontWeight: euiTheme.font.weight.bold, fontSize: 12 }}
+                          >
+                            {segment.label}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                      </React.Fragment>
+                    ))}
+                  </EuiFlexGroup>
+                ) : (
+                  <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.bold, fontSize: 12 }}>
+                    {insertDataLabel}
+                  </EuiText>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
 
-        <div css={{ padding: euiTheme.size.s, paddingBottom: euiTheme.size.s }}>
-          <EuiFieldSearch
-            inputRef={(el) => {
-              searchRef.current = el;
-            }}
-            compressed
-            fullWidth
-            placeholder={i18n.translate('workflows.dataReferencePicker.search', {
-              defaultMessage: 'Search',
-            })}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            data-test-subj="workflowDataReferenceSearch"
-          />
-        </div>
+        {isTypeahead ? null : (
+          <>
+            <div css={{ padding: euiTheme.size.s, paddingBottom: euiTheme.size.s }}>
+              <EuiFieldSearch
+                inputRef={(el) => {
+                  searchRef.current = el;
+                }}
+                compressed
+                fullWidth
+                placeholder={i18n.translate('workflows.dataReferencePicker.search', {
+                  defaultMessage: 'Search',
+                })}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                data-test-subj="workflowDataReferenceSearch"
+              />
+            </div>
+          </>
+        )}
 
         <div
           css={{
@@ -631,23 +705,26 @@ export function DataReferencePicker({
           ) : null}
         </div>
 
-        <EuiText
-          size="xs"
-          color="subdued"
-          css={{
-            padding: euiTheme.size.s,
-            '& kbd': footerKeyCss,
-          }}
-        >
-          <FormattedMessage
-            id="workflows.dataReferencePicker.footer"
-            defaultMessage="Type {at} or {braces} in any field to open this"
-            values={{
-              at: <kbd>@</kbd>,
-              braces: <kbd>{'{{'}</kbd>,
-            }}
-          />
-        </EuiText>
+        {isTypeahead ? null : (
+          <>
+            <EuiText
+              size="xs"
+              color="subdued"
+              css={{
+                padding: euiTheme.size.s,
+                '& kbd': footerKeyCss,
+              }}
+            >
+              <FormattedMessage
+                id="workflows.dataReferencePicker.footer"
+                defaultMessage="Type {braces} in a text field to insert data"
+                values={{
+                  braces: <kbd>{'{{'}</kbd>,
+                }}
+              />
+            </EuiText>
+          </>
+        )}
       </div>
     </EuiPopover>
   );
@@ -674,7 +751,8 @@ export function DataReferencePicker({
           top: 0,
           left: 0,
           width: 0,
-          height: 0,
+          // Under a control the anchor's `100%` is the control's bottom edge.
+          height: underControl ? '100%' : 0,
           display: 'block !important',
         },
       }}

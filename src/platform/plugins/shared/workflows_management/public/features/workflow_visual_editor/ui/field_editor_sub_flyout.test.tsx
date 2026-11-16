@@ -123,11 +123,11 @@ describe('FieldEditorSubFlyout', () => {
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 
-  it('teaches both @ and {{ for plain text, where @ is not part of the language', () => {
+  it('teaches { and {{ for plain text, where a single { is not syntax', () => {
     renderFlyout({ value: 'hi' });
 
     expect(screen.getByTestId('workflowFieldEditorSubFlyoutValueDescription')).toHaveTextContent(
-      'Drag a reference in, or type @ / {{'
+      'Drag a reference in, or type { / {{'
     );
   });
 
@@ -139,7 +139,7 @@ describe('FieldEditorSubFlyout', () => {
     });
 
     expect(screen.getByTestId('workflowFieldEditorSubFlyoutValueLabel')).toHaveTextContent('Value');
-    // `@` is part of the language in JSON (`"@timestamp"`), so only {{ opens the picker.
+    // A single `{` is syntax in JSON, so only {{ opens the dropdown.
     expect(screen.getByTestId('workflowFieldEditorSubFlyoutValueDescription')).toHaveTextContent(
       'Drag a reference in, or type {{'
     );

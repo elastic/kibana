@@ -11,8 +11,9 @@ import type { monaco } from '@kbn/code-editor';
 import type { ReferenceSelectionBridge } from './reference_capable_field';
 
 /**
- * Lets `ReferenceCapableField` drive a Monaco editor: read and set the caret, and replace a
- * range through `executeEdits` so the insertion joins the editor's own undo stack.
+ * Lets `ReferenceCapableField` drive a Monaco editor: read and set the caret, replace a range
+ * through `executeEdits` so the insertion joins the editor's own undo stack, and hear its keys,
+ * caret moves and blur.
  * `fallbackCaret` is used when the editor has no position yet.
  */
 export const createMonacoSelectionBridge = (
@@ -55,6 +56,29 @@ export const createMonacoSelectionBridge = (
       editor.setPosition(next);
       editor.revealPosition(next);
       return true;
+    },
+    listen: ({ onKeyDown, onCaretChange, onBlur }) => {
+      // Keys are heard in the capture phase, ahead of the editor and of the code editor around it:
+      // Monaco tells every key listener whatever another one did, and the code editor leaves
+      // editing on Escape, so a key the dropdown used would still reach them otherwise.
+      const container = editor.getDomNode();
+      const handleKey = (event: KeyboardEvent) =>
+        onKeyDown({
+          key: event.key,
+          preventDefault: () => event.preventDefault(),
+          stopPropagation: () => event.stopPropagation(),
+        });
+      container?.addEventListener('keydown', handleKey, true);
+      const subscriptions = [
+        editor.onDidChangeCursorPosition(({ position }) => {
+          if (model) onCaretChange(model.getOffsetAt(position));
+        }),
+        editor.onDidBlurEditorText(onBlur),
+      ];
+      return () => {
+        container?.removeEventListener('keydown', handleKey, true);
+        subscriptions.forEach((subscription) => subscription.dispose());
+      };
     },
   };
 };

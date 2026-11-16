@@ -32,9 +32,8 @@ import { monacoLanguageFor } from './monaco_language';
 import { ReferenceCapableField } from './reference_capable_field';
 import type { ReferenceSelectionBridge } from './reference_capable_field';
 import { ContainerInSentenceCallout } from './reference_container_callout';
-import { caretAfterChange, useReferenceEditor } from './use_reference_editor';
+import { caretAfterChange, typedCharacter, useReferenceEditor } from './use_reference_editor';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
-import { opensPickerOnAt } from '../lib/opens_picker_on_at';
 import { insertTokenAsJsonText } from '../lib/reference_tokens';
 import { tokenForInsert } from '../lib/reference_value';
 import type { StepFieldLanguage } from '../lib/step_form_schema';
@@ -121,7 +120,6 @@ export function FieldEditorSubFlyout({
   // `{` is syntax in JSON and KQL, so only free text gets the `{` trigger and the "list inside a
   // sentence" warning (same rule as the inline fields).
   const isFreeText = language === undefined || language === 'plaintext';
-  const opensAtPicker = opensPickerOnAt(language);
   const { chipCss, editor, captureEditor, warning, dismissWarning } = useReferenceEditor({
     text: draft,
     catalog,
@@ -420,12 +418,12 @@ export function FieldEditorSubFlyout({
                 data-test-subj="workflowFieldEditorSubFlyoutValueDescription"
                 css={{ '& kbd': keyChipCss }}
               >
-                {opensAtPicker ? (
+                {isFreeText ? (
                   <FormattedMessage
                     id="workflows.fieldEditorSubFlyout.valueDescription"
-                    defaultMessage="Drag a reference in, or type {at} / {braces}"
+                    defaultMessage="Drag a reference in, or type {brace} / {braces}"
                     values={{
-                      at: <kbd>@</kbd>,
+                      brace: <kbd>{'{'}</kbd>,
                       braces: <kbd>{'{{'}</kbd>,
                     }}
                   />
@@ -459,7 +457,6 @@ export function FieldEditorSubFlyout({
                 onChange={applyDraft}
                 fillHeight
                 openOnBrace={isFreeText}
-                openOnAt={opensAtPicker}
                 valueFormWhenWhole={valueFormWhenWhole}
               >
                 {({ appendControls, reportChange, registerSelection, teachingPlaceholder }) => (
@@ -490,7 +487,7 @@ export function FieldEditorSubFlyout({
                         transparentBackground
                         value={draft}
                         onChange={(text, event) => {
-                          reportChange(text, caretAfterChange(text, event));
+                          reportChange(text, caretAfterChange(text, event), typedCharacter(event));
                         }}
                         height="100%"
                         aria-label={fieldLabel}

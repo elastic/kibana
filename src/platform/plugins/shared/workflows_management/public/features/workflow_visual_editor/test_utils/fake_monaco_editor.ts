@@ -46,6 +46,17 @@ export interface FakeMonacoEditor {
   readonly revealPosition: jest.Mock;
   readonly executeEdits: jest.Mock;
   readonly collections: readonly FakeDecorationsCollection[];
+  /** The editor's container, and the input inside it that keys go to, as in Monaco. */
+  readonly domNode: HTMLElement;
+  readonly input: HTMLElement;
+  /** Presses a key in the input; says whether it was cancelled, or kept from leaving the editor. */
+  readonly pressKey: (key: string) => { defaultPrevented: boolean; propagationStopped: boolean };
+  /** Moves the caret and tells the cursor listeners, like the user clicking or arrowing. */
+  readonly moveCaretTo: (offset: number) => void;
+  /** Tells the blur listeners. */
+  readonly blur: () => void;
+  /** How many listeners of all kinds are attached right now. */
+  readonly listenerCount: () => number;
 }
 
 /** Offsets count `\n` as one character, like a Monaco model with the LF end-of-line sequence. */
@@ -85,6 +96,30 @@ export const createFakeMonacoEditor = (
     getPositionAt: (offset: number) => positionAt(text, offset),
   };
 
+  const domNode = document.createElement('div');
+  const input = document.createElement('textarea');
+  domNode.appendChild(input);
+  // Whatever holds the editor, to tell a key that left it from one that was stopped on the way.
+  const surroundings = document.createElement('div');
+  surroundings.appendChild(domNode);
+  let keyListeners = 0;
+  const addDomListener = domNode.addEventListener.bind(domNode);
+  const removeDomListener = domNode.removeEventListener.bind(domNode);
+  domNode.addEventListener = (...args: Parameters<typeof addDomListener>) => {
+    if (args[0] === 'keydown') keyListeners++;
+    addDomListener(...args);
+  };
+  domNode.removeEventListener = (...args: Parameters<typeof removeDomListener>) => {
+    if (args[0] === 'keydown') keyListeners--;
+    removeDomListener(...args);
+  };
+  const cursorListeners = new Set<(event: { position: Position }) => void>();
+  const blurListeners = new Set<() => void>();
+  const subscribe = <T>(listeners: Set<T>, listener: T) => {
+    listeners.add(listener);
+    return { dispose: () => listeners.delete(listener) };
+  };
+
   const focus = jest.fn();
   const revealPosition = jest.fn();
   const executeEdits = jest.fn((_source: string, edits: readonly Edit[]) => {
@@ -112,6 +147,10 @@ export const createFakeMonacoEditor = (
     focus,
     revealPosition,
     executeEdits,
+    getDomNode: () => domNode,
+    onDidChangeCursorPosition: (listener: (event: { position: Position }) => void) =>
+      subscribe(cursorListeners, listener),
+    onDidBlurEditorText: (listener: () => void) => subscribe(blurListeners, listener),
     createDecorationsCollection: (decorations: readonly monaco.editor.IModelDeltaDecoration[]) => {
       let cleared = false;
       const clear = jest.fn(() => {
@@ -138,5 +177,24 @@ export const createFakeMonacoEditor = (
     revealPosition,
     executeEdits,
     collections,
+    domNode,
+    input,
+    pressKey: (key) => {
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+      let leftTheEditor = false;
+      const markLeft = () => {
+        leftTheEditor = true;
+      };
+      surroundings.addEventListener('keydown', markLeft);
+      input.dispatchEvent(event);
+      surroundings.removeEventListener('keydown', markLeft);
+      return { defaultPrevented: event.defaultPrevented, propagationStopped: !leftTheEditor };
+    },
+    moveCaretTo: (offset) => {
+      currentPosition = positionAt(text, offset);
+      cursorListeners.forEach((listener) => listener({ position: currentPosition as Position }));
+    },
+    blur: () => blurListeners.forEach((listener) => listener()),
+    listenerCount: () => keyListeners + cursorListeners.size + blurListeners.size,
   };
 };
