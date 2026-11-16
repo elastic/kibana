@@ -55,12 +55,20 @@ const warmUpInferenceEndpoint = (client: Client) =>
   );
 
 const reimportTruncatedModels = async (client: Client) => {
-  const { trained_model_configs: configs } = await client.ml.getTrainedModels({
+  const { trained_model_configs: elserModels } = await client.ml.getTrainedModels({
     model_id: '.elser_model_2*',
-    include: 'definition_status',
     allow_no_match: true,
   });
-  const truncated = configs.filter(({ fully_defined }) => fully_defined === false);
+
+  // Elasticsearch rejects `definition_status` when a request resolves to more than one model.
+  const statuses = await Promise.all(
+    elserModels.map(({ model_id: modelId }) =>
+      client.ml.getTrainedModels({ model_id: modelId, include: 'definition_status' })
+    )
+  );
+  const truncated = statuses
+    .flatMap(({ trained_model_configs: configs }) => configs)
+    .filter(({ fully_defined }) => fully_defined === false);
 
   for (const { model_id: modelId } of truncated) {
     await client.ml.deleteTrainedModel({ model_id: modelId, force: true });
