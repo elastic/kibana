@@ -35,7 +35,11 @@ import {
   type RoundCompleteEvent,
   type SurfacePayload,
 } from '@kbn/agent-builder-common';
-import type { AgentExecution } from '@kbn/agent-builder-server/execution';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  AgentExecution,
+  ConversationAgentExecution,
+} from '@kbn/agent-builder-server/execution';
 import type { ConversationService } from '../../conversation';
 import type { SurfacesService } from '../../surfaces';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
@@ -93,7 +97,11 @@ export const deliverCallbackEvents = ({
     return Promise.resolve();
   }
 
-  const deliverEvent = (event: ChatCallbackEvent) => {
+  const deliverEvent = (event?: ChatCallbackEvent) => {
+    if (!event) {
+      return EMPTY;
+    }
+
     const isTerminal = isExecutionTerminatedEvent(event) || isRoundCompleteEvent(event);
     const delivery = callbackDeliveryService.makeCallbackRequest({
       payload: {
@@ -116,58 +124,10 @@ export const deliverCallbackEvents = ({
     );
   };
 
-  /** The stored conversation's attachments, as the execution's owner; empty when not stored. */
-  const readAttachments = async () => {
-    const { owner, runAs } = execution;
-    const { conversationId, storeConversation } = execution.agentParams;
-
-    if (!owner || !conversationId || storeConversation === false) {
-      return [];
-    }
-
-    const conversationClient = await conversationService.getScopedClientAsUser({
-      request,
-      user: { ...owner, isAdmin: false },
-      ...(runAs ? { runAs: runAs.serviceAccountId } : {}),
-    });
-    const { attachments = [] } = await conversationClient.get(conversationId);
-
-    return attachments;
-  };
-
-  /** The response message ready to post on the execution's surface, such as Slack. */
-  const renderSurfacePayload = async ({
-    data: { outcome },
-  }: ExecutionTerminatedEvent): Promise<SurfacePayload | undefined> => {
-    if (outcome.type !== 'responded') {
-      return undefined;
-    }
-
-    try {
-      const attachments = await readAttachments();
-
-      return await surfacesService.renderPayload(
-        { message: outcome.response.message, attachments },
-        {
-          originType: execution.agentParams.origin?.type,
-          agentId: execution.agentId,
-          request,
-          spaceId: execution.spaceId,
-        }
-      );
-    } catch (error) {
-      logger.warn(
-        `Failed to read the attachments of execution ${execution.executionId} for its callback: ${error.message}`
-      );
-
-      return undefined;
-    }
-  };
-
   return new Promise<void>((resolve) => {
     let executionTerminatedEvent: ExecutionTerminatedEvent | undefined;
     let roundCompleteEvent: RoundCompleteEvent | undefined;
-    // The execution's tool calls, keyed by id, summarized for execution_terminated as their ids only.
+
     const toolCalls = new Map<string, ChatCallbackToolCall>();
 
     events$
@@ -181,10 +141,11 @@ export const deliverCallbackEvents = ({
             !isExecutionAbortedEvent(event)
         ),
         tap((event) => {
-          if (isToolCallEvent(event) && !toolCalls.has(event.data.tool_call_id)) {
-            const { tool_call_id: toolCallId, tool_id: toolId } = event.data;
-
-            toolCalls.set(toolCallId, { tool_call_id: toolCallId, tool_id: toolId });
+          if (isToolCallEvent(event)) {
+            toolCalls.set(event.data.tool_call_id, {
+              tool_call_id: event.data.tool_call_id,
+              tool_id: event.data.tool_id,
+            });
           }
         }),
         concatMap((event) => {
@@ -209,22 +170,29 @@ export const deliverCallbackEvents = ({
           defer(() =>
             from(
               executionTerminatedEvent
-                ? renderSurfacePayload(executionTerminatedEvent)
+                ? renderSurfacePayload({
+                    event: executionTerminatedEvent,
+                    execution,
+                    request,
+                    conversationService,
+                    surfacesService,
+                    logger,
+                  })
                 : Promise.resolve(undefined)
             )
           ).pipe(
             concatMap((surfacePayload) =>
               concat(
-                executionTerminatedEvent
-                  ? deliverEvent({
-                      ...executionTerminatedEvent,
-                      surface_payload: surfacePayload,
-                      tool_calls: [...toolCalls.values()],
-                    })
-                  : EMPTY,
-                roundCompleteEvent
-                  ? deliverEvent({ ...roundCompleteEvent, surface_payload: surfacePayload })
-                  : EMPTY
+                deliverEvent(
+                  executionTerminatedEvent && {
+                    ...executionTerminatedEvent,
+                    surface_payload: surfacePayload,
+                    tool_calls: [...toolCalls.values()],
+                  }
+                ),
+                deliverEvent(
+                  roundCompleteEvent && { ...roundCompleteEvent, surface_payload: surfacePayload }
+                )
               )
             )
           )
@@ -255,4 +223,72 @@ export const deliverCallbackEvents = ({
         error: () => resolve(),
       });
   });
+};
+
+const readAttachments = async ({
+  execution,
+  request,
+  conversationService,
+}: {
+  execution: ConversationAgentExecution;
+  request: KibanaRequest;
+  conversationService: ConversationService;
+}): Promise<VersionedAttachment[]> => {
+  const { owner, runAs } = execution;
+  const { conversationId, storeConversation } = execution.agentParams;
+
+  if (!owner || !conversationId || storeConversation === false) {
+    return [];
+  }
+
+  const conversationClient = await conversationService.getScopedClientAsUser({
+    request,
+    user: { ...owner, isAdmin: false },
+    ...(runAs ? { runAs: runAs.serviceAccountId } : {}),
+  });
+  const { attachments = [] } = await conversationClient.get(conversationId);
+
+  return attachments;
+};
+
+const renderSurfacePayload = async ({
+  event: {
+    data: { outcome },
+  },
+  execution,
+  request,
+  conversationService,
+  surfacesService,
+  logger,
+}: {
+  event: ExecutionTerminatedEvent;
+  execution: ConversationAgentExecution;
+  request: KibanaRequest;
+  conversationService: ConversationService;
+  surfacesService: SurfacesService;
+  logger: Logger;
+}): Promise<SurfacePayload | undefined> => {
+  if (outcome.type !== 'responded') {
+    return undefined;
+  }
+
+  try {
+    const attachments = await readAttachments({ execution, request, conversationService });
+
+    return await surfacesService.renderPayload(
+      { message: outcome.response.message, attachments },
+      {
+        originType: execution.agentParams.origin?.type,
+        agentId: execution.agentId,
+        request,
+        spaceId: execution.spaceId,
+      }
+    );
+  } catch (error) {
+    logger.warn(
+      `Failed to read the attachments of execution ${execution.executionId} for its callback: ${error.message}`
+    );
+
+    return undefined;
+  }
 };
