@@ -4993,16 +4993,31 @@ describe('workflow page lifecycle', () => {
       expect(pagesService.retireRemovedPages).toHaveBeenCalled();
     });
 
-    it('keeps the pages on a field-only update', async () => {
+    it.each([
+      ['a tags update', { tags: ['t'] }],
+      ['a disable', { enabled: false }],
+    ])('skips the page store on %s, which keeps every page', async (_, update) => {
       const { service, client, pagesService, request } = setup();
       storeLive(client);
+      pagesService.retireRemovedPages.mockRejectedValue(new Error('page store down'));
 
-      await service.updateWorkflow('wf-1', { tags: ['t'] } as any, 'default', request);
+      await service.updateWorkflow('wf-1', update as any, 'default', request);
 
-      expect(pagesService.retireRemovedPages).toHaveBeenCalledWith(
-        expect.objectContaining({ definition: expect.objectContaining(pageTriggerDefinition) })
-      );
+      expect(client.index).toHaveBeenCalled();
+      expect(pagesService.retireRemovedPages).not.toHaveBeenCalled();
       expect(pagesService.retireWorkflowPages).not.toHaveBeenCalled();
+    });
+
+    it('disables a page workflow while the page store is down', async () => {
+      const { service, client, pagesService } = setup();
+      storeLive(client);
+      pagesService.retireRemovedPages.mockRejectedValue(new Error('page store down'));
+
+      await service.disableWorkflow('wf-1', 'default');
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({ document: expect.objectContaining({ enabled: false }) })
+      );
     });
 
     it('retires nothing when a bound workflow save is rejected for missing manage_security', async () => {

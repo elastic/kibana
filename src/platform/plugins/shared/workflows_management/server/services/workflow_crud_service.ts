@@ -25,6 +25,7 @@ import {
 import {
   type CreateWorkflowCommand,
   type EsWorkflow,
+  getPageTriggerId,
   getWorkflowAccessDecisions,
   isPageTrigger,
   NonTerminalExecutionStatuses,
@@ -161,6 +162,9 @@ type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
 
 const hasPageTrigger = (definition: WorkflowYaml | null | undefined): boolean =>
   Boolean(definition?.triggers.some(isPageTrigger));
+
+const getPageIds = (definition: WorkflowYaml | null | undefined): Set<string> =>
+  new Set(definition?.triggers.filter(isPageTrigger).map(getPageTriggerId));
 
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
@@ -1392,8 +1396,16 @@ export class WorkflowCrudService {
       await pagesSystemClient.retireWorkflowPages({ workflowIds: [id], spaceId: previous.spaceId });
       return;
     }
-    // An invalid save keeps its pages. A valid stored definition without a page trigger has none.
-    if (!next.valid || (previous.valid && !hasPageTrigger(previous.definition))) return;
+    if (!next.valid) return; // An invalid save keeps its pages.
+    // A save that keeps every page of a valid stored definition has nothing to retire. Disables
+    // and field updates skip the page store this way, so it can never block them.
+    const kept = getPageIds(next.definition);
+    if (
+      previous.valid &&
+      [...getPageIds(previous.definition)].every((pageId) => kept.has(pageId))
+    ) {
+      return;
+    }
     await pagesSystemClient.retireRemovedPages({
       workflowId: id,
       spaceId: next.spaceId,
