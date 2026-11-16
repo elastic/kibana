@@ -140,8 +140,9 @@ const securitySchemeNames = (requirements: unknown): string[] =>
 const toKeptTokens = (tokens: string[]): string[] =>
   tokens[0] === 'components' ? tokens.slice(0, 3) : tokens;
 
-// Where a discriminator mapping value points: a schema name, or a ref. Undefined for a ref
-// outside the document, which can't be checked.
+// The path of the schema a discriminator mapping value names, given as a ref or a bare name.
+// Undefined for a ref to another file, which can't be checked. A bare name with no schema in the
+// source still counts as a name: a standalone snapshot can't load a relative file either.
 const mappingTargetTokens = (target: string): string[] | undefined => {
   const pointer = localRefToPointer(target);
   if (pointer !== undefined) {
@@ -157,12 +158,17 @@ const mappingTargetTokens = (target: string): string[] | undefined => {
  * `oasdiff` refuses a document whose mapping names a missing schema.
  */
 const pruneDiscriminatorMappings = (projected: JsonObject): void => {
-  const visit = (value: unknown): void => {
+  const visit = (value: unknown, isNameMap = false): void => {
     if (Array.isArray(value)) {
-      value.forEach(visit);
+      value.forEach((item) => visit(item));
       return;
     }
     if (!isJsonObject(value)) {
+      return;
+    }
+    if (isNameMap) {
+      // Keys are names here, so a property called `discriminator` isn't one.
+      Object.values(value).forEach((child) => visit(child));
       return;
     }
     const { discriminator } = value;
@@ -181,7 +187,7 @@ const pruneDiscriminatorMappings = (projected: JsonObject): void => {
     for (const [key, child] of Object.entries(value)) {
       // Literal values are data, not spec objects.
       if (!LITERAL_KEYWORDS.has(key)) {
-        visit(child);
+        visit(child, NAME_MAPS.has(key));
       }
     }
   };

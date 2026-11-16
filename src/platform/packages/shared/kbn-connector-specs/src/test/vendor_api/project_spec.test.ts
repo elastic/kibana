@@ -264,6 +264,25 @@ describe('projectSpec', () => {
       expect(mapped).toEqual(['https://example.com/reptiles.yaml#/Lizard']);
       expect(projectSpec(projected, animals)).toEqual(projected);
     });
+
+    it('leaves a property named `discriminator` alone', () => {
+      const property = { type: 'object', mapping: { gone: '#/components/schemas/Dog' } };
+      const projected = projectSpec(
+        {
+          ...polymorphic,
+          components: {
+            schemas: { Fish: { type: 'object', properties: { discriminator: property } } },
+          },
+        },
+        [],
+        ['#/components/schemas/Fish']
+      );
+
+      expect(schemasOf(projected).Fish).toEqual({
+        type: 'object',
+        properties: { discriminator: property },
+      });
+    });
   });
 
   it('keeps overlays applicable, reporting corrections of operations left out as no-match', () => {
