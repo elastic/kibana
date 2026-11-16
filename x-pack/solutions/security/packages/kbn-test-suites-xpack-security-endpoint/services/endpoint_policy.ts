@@ -6,17 +6,15 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  CreateAgentPolicyRequest,
-  CreateAgentPolicyResponse,
-  CreatePackagePolicyRequest,
-  CreatePackagePolicyResponse,
-  DeleteAgentPolicyRequest,
-  DeletePackagePoliciesRequest,
-  GetPackagePoliciesResponse,
-  GetFullAgentPolicyResponse,
-} from '@kbn/fleet-plugin/common';
 import {
+  type CreateAgentPolicyRequest,
+  type CreateAgentPolicyResponse,
+  type CreatePackagePolicyRequest,
+  type CreatePackagePolicyResponse,
+  type DeleteAgentPolicyRequest,
+  type DeletePackagePoliciesRequest,
+  type GetPackagePoliciesResponse,
+  type GetFullAgentPolicyResponse,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   epmRouteService,
   type GetInfoResponse,

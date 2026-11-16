@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/test-suites-xpack-security-endpoint
   channel: ''
   owner: '@elastic/security-defend-workflows'
-  sourceRoot: x-pack/solutions/security/test/security_solution_endpoint
+  sourceRoot: x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint
 dependsOn:
   - '@kbn/expect'
   - '@kbn/security-solution-plugin'
