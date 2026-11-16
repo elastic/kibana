@@ -511,14 +511,14 @@ const eventStatusChangedSchema: RootSchema<EventStatusChangedProps> = {
     type: 'keyword',
     _meta: {
       description:
-        'The entry point that wrote the version: `agent_tool` (an Agent Builder tool, in discovery or chat), `rest_api` (the event update route, which the UI calls) or `stale_event_cleanup` (the cleanup that closes events whose rule was deleted). It names the code path, not whether a person was behind it',
+        'The entry point that wrote the version: `agent_tool` (an Agent Builder tool, in discovery or chat), `rest_api` (the event update route, which the UI calls) or `stale_event_cleanup` (the cleanup that closes events whose rule was deleted or that stayed recovering past the timeout). It names the code path, not whether a person was behind it',
     },
   },
   change_kind: {
     type: 'keyword',
     _meta: {
       description:
-        'How the status was decided: `operator` (a status chosen through the update route or a chat tool), `assessment` (discovery re-checked the member signals) or `rule_deleted`. Absent when the writer supplied the status itself, as `event_create` does. An `operator` deactivation is a manual close; `close_reason` says why when the caller stated it',
+        'How the status was decided: `operator` (a status chosen through the update route or a chat tool), `assessment` (discovery re-checked the member signals), `rule_deleted` or `recovery_timeout` (the cleanup closed an event that stayed recovering past the timeout). Absent when the writer supplied the status itself, as `event_create` does. An `operator` deactivation is a manual close; `close_reason` says why when the caller stated it',
       optional: true,
     },
   },
