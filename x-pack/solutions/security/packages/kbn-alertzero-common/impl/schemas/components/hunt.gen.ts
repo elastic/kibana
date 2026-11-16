@@ -136,7 +136,8 @@ export const HuntScope = lazySchema(() =>
      * Default data view entries the hunt never searches because their index name is dot-prefixed (hidden or alerts indices).
      */
     policy_skipped: z
-      .array(z.string())
+      .array(z.string().max(512))
+      .max(500)
       .optional()
       .describe(
         'Default data view entries the hunt never searches because their index name is dot-prefixed (hidden or alerts indices).'

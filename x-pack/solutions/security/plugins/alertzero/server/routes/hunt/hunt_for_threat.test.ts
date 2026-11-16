@@ -248,6 +248,34 @@ describe('registerHuntForThreatRoute', () => {
     });
   });
 
+  it('does not use the policy-only 409 wording for discovery_failed', async () => {
+    resolveHuntScopeMock.mockResolvedValue({
+      ...okScope,
+      status: 'blocked',
+      resolution: 'blocked:discovery_failed',
+      index_patterns: [],
+      missing: [],
+      policy_skipped: ['.siem-signals-x'],
+    });
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 409,
+      body: {
+        message: expect.stringMatching(
+          /blocked:discovery_failed.*nothing in the default data view/s
+        ),
+      },
+    });
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 409,
+      body: { message: expect.not.stringContaining('no pattern this hunt may search') },
+    });
+  });
+
   it('hands the filtered universe and the skipped list to resolveHuntScope', async () => {
     const { handler, context } = makeDeps({
       indexPatterns: ['logs-*', '.alerts-security.alerts-default'],

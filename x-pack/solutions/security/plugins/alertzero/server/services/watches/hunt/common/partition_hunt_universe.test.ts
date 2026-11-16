@@ -5,7 +5,52 @@
  * 2.0.
  */
 
-import { partitionHuntUniverse } from './partition_hunt_universe';
+import { isBlockedByPolicyOnly, partitionHuntUniverse } from './partition_hunt_universe';
+
+describe('isBlockedByPolicyOnly', () => {
+  it('returns true only for empty_universe with policy_skipped and no missing', () => {
+    expect(
+      isBlockedByPolicyOnly({
+        resolution: 'blocked:empty_universe',
+        policy_skipped: ['.alerts-x'],
+        missing: [],
+      })
+    ).toBe(true);
+  });
+
+  it('returns false for discovery_failed even when policy_skipped is set and missing is empty', () => {
+    expect(
+      isBlockedByPolicyOnly({
+        resolution: 'blocked:discovery_failed',
+        policy_skipped: ['.alerts-x'],
+        missing: [],
+      })
+    ).toBe(false);
+  });
+
+  it('returns false when missing is non-empty, even with policy_skipped', () => {
+    expect(
+      isBlockedByPolicyOnly({
+        resolution: 'blocked:empty_universe',
+        policy_skipped: ['.alerts-x'],
+        missing: ['custom-1'],
+      })
+    ).toBe(false);
+  });
+
+  it('returns false when policy_skipped is empty or absent', () => {
+    expect(
+      isBlockedByPolicyOnly({
+        resolution: 'blocked:empty_universe',
+        policy_skipped: [],
+        missing: [],
+      })
+    ).toBe(false);
+    expect(isBlockedByPolicyOnly({ resolution: 'blocked:empty_universe', missing: [] })).toBe(
+      false
+    );
+  });
+});
 
 describe('partitionHuntUniverse', () => {
   it.each([

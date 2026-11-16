@@ -25,8 +25,8 @@ export const unsearchedPatterns = (
   return dropped.filter((entry) => {
     const bare = stripBackingPrefix(entry);
     // Still matched once the exclusions are applied means nothing excludes it.
-    return buildMatchesRequired(scopeGuardPatterns([bare, ...exclusionEntries], crossProjectSearch))(
-      bare
-    );
+    return buildMatchesRequired(
+      scopeGuardPatterns([bare, ...exclusionEntries], crossProjectSearch)
+    )(bare);
   });
 };

@@ -12,12 +12,17 @@ import { isDotPrefixedIndex, isIndexExclusion } from '../../../../../common/remo
 export const NO_SEARCHABLE_PATTERN_MESSAGE =
   'The default data view has no pattern this hunt may search: hidden and alerts indices are never searched.';
 
-/** The data view held only hidden or alerts indices, so policy alone left nothing to search. */
+/**
+ * The data view held only hidden or alerts indices, so policy alone left nothing to search.
+ * Requires `blocked:empty_universe`: a `blocked:discovery_failed` scope also has empty `missing`
+ * and may still carry `policy_skipped`, which is not the same failure.
+ */
 export const isBlockedByPolicyOnly = ({
+  resolution,
   policy_skipped: policySkipped = [],
   missing,
-}: Pick<HuntScope, 'policy_skipped' | 'missing'>): boolean =>
-  policySkipped.length > 0 && missing.length === 0;
+}: Pick<HuntScope, 'resolution' | 'policy_skipped' | 'missing'>): boolean =>
+  resolution === 'blocked:empty_universe' && policySkipped.length > 0 && missing.length === 0;
 
 /** The default data view split into what a hunt may search and what policy skips. */
 export interface HuntUniverse {

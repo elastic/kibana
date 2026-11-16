@@ -153,11 +153,13 @@ components:
             type: string
         policy_skipped:
           type: array
+          maxItems: 500
           description: >-
             Default data view entries the hunt never searches because their index name is
             dot-prefixed (hidden or alerts indices).
           items:
             type: string
+            maxLength: 512
         report_matches:
           type: array
           description: >-
