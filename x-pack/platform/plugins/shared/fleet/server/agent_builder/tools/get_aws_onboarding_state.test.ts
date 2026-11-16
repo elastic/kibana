@@ -239,6 +239,22 @@ describe('get_aws_onboarding_state', () => {
       });
     });
 
+    it('syncs the card status but does not hand the card back at a later pause', async () => {
+      const attachments = createAttachments([existingCard('pending')]);
+      const { results } = await runWithAttachments(
+        waitingExecution('ask_discover', [
+          step('credentials_recheck', 2, {
+            status: 'completed',
+            output: { configured: true, discovery_ok: true, provisioning_ok: true },
+          }),
+        ]),
+        attachments
+      );
+
+      expect(attachments.update).toHaveBeenCalledTimes(1);
+      expect(results[0].data).not.toHaveProperty('credentials_card_attachment_id');
+    });
+
     it('marks the card verify_failed with the reason when a role cannot be assumed', async () => {
       const attachments = createAttachments([existingCard('pending')]);
       await runWithAttachments(

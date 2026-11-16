@@ -6,12 +6,13 @@
  */
 
 import { sendGetAwsOnboardingBootstrapTemplate } from '../../../hooks/use_request/aws_onboarding';
+import { toRequestError } from '../../../hooks/use_request/errors';
 
 /** Fetches the fully-managed bootstrap template and saves it through a temporary anchor. */
 export const downloadBootstrapTemplate = async (): Promise<void> => {
   const { data, error } = await sendGetAwsOnboardingBootstrapTemplate('fully-managed');
   if (error || !data) {
-    throw error instanceof Error ? error : new Error('Failed to fetch the bootstrap template');
+    throw toRequestError(error, 'Failed to fetch the bootstrap template');
   }
 
   const blob = new Blob([data.template], { type: 'application/x-yaml' });

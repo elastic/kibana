@@ -100,6 +100,7 @@ import type {
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 import { getFleetDeepLinks } from './deep_links';
+import { registerFleetAgentBuilderAttachments } from './agent_builder';
 
 export type { FleetConfigType } from '../common/types';
 
@@ -205,7 +206,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     // them here the same way the app mounts do, then register the Agent Builder attachment UI.
     void core
       .getStartServices()
-      .then(async ([coreStartServices, startDepsServices, fleetStart]) => {
+      .then(([coreStartServices, startDepsServices, fleetStart]) => {
         const { agentBuilder } = startDepsServices;
         if (!agentBuilder) {
           return;
@@ -214,7 +215,6 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           deps.cloud && startDepsServices.cloud
             ? { ...deps.cloud, ...startDepsServices.cloud }
             : undefined;
-        const { registerFleetAgentBuilderAttachments } = await import('./agent_builder');
         registerFleetAgentBuilderAttachments({
           attachments: agentBuilder.attachments,
           startServices: {
@@ -226,8 +226,8 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           },
         });
       })
-      .catch(() => {
-        this.logger.error('Failed to register the Agent Builder attachments.');
+      .catch((error) => {
+        this.logger.error('Failed to register the Agent Builder attachments.', error);
       });
 
     // Register Integrations app

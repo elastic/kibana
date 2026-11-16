@@ -28,12 +28,12 @@ const startServices = {
   notifications: { toasts: { addError: jest.fn(), addSuccess: jest.fn() } },
 };
 
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+  logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() },
+});
+
 const renderForm = (onSaved: () => void) => {
-  // The failed-save test rejects on purpose; keep react-query from logging it to the console.
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-    logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() },
-  });
   return render(
     <I18nProvider>
       <KibanaContextProvider services={startServices}>
@@ -62,6 +62,7 @@ const fillAndSubmit = async () => {
 describe('AwsOnboardingCredentialsForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    queryClient.clear();
     jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
       data: { configured: false },
       error: null,
@@ -88,15 +89,38 @@ describe('AwsOnboardingCredentialsForm', () => {
   });
 
   it('keeps the form open when save fails', async () => {
-    jest
-      .mocked(sendPutAwsOnboardingCredentials)
-      .mockResolvedValue({ data: null, error: new Error('nope') } as never);
+    jest.mocked(sendPutAwsOnboardingCredentials).mockResolvedValue({
+      data: null,
+      error: { statusCode: 400, error: 'Bad Request', message: 'AWS AccessDenied: bad key' },
+    } as never);
     const onSaved = jest.fn();
     renderForm(onSaved);
 
     await fillAndSubmit();
 
-    await waitFor(() => expect(sendPutAwsOnboardingCredentials).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(startServices.notifications.toasts.addError).toHaveBeenCalled());
+    expect(startServices.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'AWS AccessDenied: bad key' }),
+      expect.anything()
+    );
     expect(onSaved).not.toHaveBeenCalled();
+  });
+
+  it('does not leave the secret in the mutation cache after a submit', async () => {
+    jest
+      .mocked(sendPutAwsOnboardingCredentials)
+      .mockResolvedValue({ data: { configured: true }, error: null } as never);
+    const onSaved = jest.fn();
+    renderForm(onSaved);
+
+    await fillAndSubmit();
+
+    await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
+    expect(
+      queryClient
+        .getMutationCache()
+        .getAll()
+        .some((mutation) => JSON.stringify(mutation.state.variables ?? null).includes('"x"'))
+    ).toBe(false);
   });
 });

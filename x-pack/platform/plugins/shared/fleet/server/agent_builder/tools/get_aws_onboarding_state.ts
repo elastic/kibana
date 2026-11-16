@@ -189,7 +189,11 @@ export const createGetAwsOnboardingStateTool = ({
                   schema: state.waiting_input.schema,
                 }
               : null,
-          ...(cardId && { credentials_card_attachment_id: cardId }),
+          // Only the credentials pause renders the card; later pauses must not repeat it.
+          ...(cardId &&
+            waitingStep?.stepId === 'ask_credentials' && {
+              credentials_card_attachment_id: cardId,
+            }),
           ...(discover && { region: discover.region, discovered_services: discover.services }),
           ...(resolve && {
             resolved: {

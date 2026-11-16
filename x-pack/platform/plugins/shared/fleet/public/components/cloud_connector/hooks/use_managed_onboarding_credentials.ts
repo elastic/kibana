@@ -18,15 +18,9 @@ import {
   sendDeleteAwsOnboardingCredentials,
   sendPutAwsOnboardingCredentials,
 } from '../../../hooks/use_request/aws_onboarding';
+import { toRequestError } from '../../../hooks/use_request/errors';
 
 import { AWS_ONBOARDING_CREDENTIALS_QUERY_KEY } from './use_managed_onboarding';
-
-const toError = (error: unknown): Error =>
-  (error as { body?: { message?: string } })?.body?.message
-    ? new Error((error as { body: { message: string } }).body.message)
-    : error instanceof Error
-    ? error
-    : new Error(String(error));
 
 /** Stores (PUT) or removes (DELETE) the bootstrap credentials; the secret is sent once and never kept client-side. */
 export const useManagedOnboardingCredentials = () => {
@@ -37,7 +31,7 @@ export const useManagedOnboardingCredentials = () => {
     async (body: PutAwsOnboardingCredentialsRequest) => {
       const { data, error } = await sendPutAwsOnboardingCredentials(body);
       if (error || !data) {
-        throw toError(error);
+        throw toRequestError(error, 'Request failed');
       }
       return data;
     },
@@ -64,7 +58,7 @@ export const useManagedOnboardingCredentials = () => {
     async (query: DeleteAwsOnboardingCredentialsRequestQuery = {}) => {
       const { data, error } = await sendDeleteAwsOnboardingCredentials(query);
       if (error || !data) {
-        throw toError(error);
+        throw toRequestError(error, 'Request failed');
       }
       return data;
     },

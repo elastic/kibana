@@ -54,6 +54,9 @@ const renderCard = ({
   );
 };
 
+// The shape Fleet's sendRequest returns on failure: the plain response body, not an Error.
+const serverError = (message: string) => ({ statusCode: 502, error: 'Bad Gateway', message });
+
 describe('AwsOnboardingCredentialsCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -101,19 +104,40 @@ describe('AwsOnboardingCredentialsCard', () => {
     expect(screen.getByTestId('awsOnboardingCredentialsCardReplyDone')).toBeInTheDocument();
   });
 
+  it('shows the server message in a warning when the verification request fails', async () => {
+    jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
+      data: { configured: true, mode: 'fully-managed' },
+      error: null,
+    } as never);
+    jest.mocked(sendGetAwsOnboardingVerify).mockResolvedValue({
+      data: null,
+      error: serverError('AWS AccessDenied: cannot assume the discovery role'),
+    } as never);
+    renderCard();
+
+    expect(await screen.findByTestId('awsOnboardingCredentialsCardError')).toHaveTextContent(
+      'AWS AccessDenied: cannot assume the discovery role'
+    );
+  });
+
   it('toasts when the template download fails', async () => {
     jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
       data: { configured: false },
       error: null,
     } as never);
-    jest
-      .mocked(sendGetAwsOnboardingBootstrapTemplate)
-      .mockResolvedValue({ data: null, error: new Error('boom') } as never);
+    jest.mocked(sendGetAwsOnboardingBootstrapTemplate).mockResolvedValue({
+      data: null,
+      error: serverError('Bootstrap template unavailable'),
+    } as never);
     renderCard();
 
     await userEvent.click(screen.getByTestId('awsOnboardingCredentialsCardDownload'));
 
     await waitFor(() => expect(mockToastsAddError).toHaveBeenCalledTimes(1));
+    expect(mockToastsAddError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Bootstrap template unavailable' }),
+      expect.anything()
+    );
   });
 
   it('trusts the attachment status when onboarding is not enabled, without inventing an account', async () => {

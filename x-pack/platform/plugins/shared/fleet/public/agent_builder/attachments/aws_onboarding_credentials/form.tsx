@@ -17,10 +17,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 
-import { AWS_ONBOARDING_CREDENTIALS_QUERY_KEY } from '../../../components/cloud_connector/hooks/use_managed_onboarding';
-import { useManagedOnboardingCredentials } from '../../../components/cloud_connector/hooks/use_managed_onboarding_credentials';
-
-import { AWS_ONBOARDING_VERIFY_QUERY_KEY } from './card';
+import {
+  AWS_ONBOARDING_CREDENTIALS_QUERY_KEY,
+  AWS_ONBOARDING_VERIFY_QUERY_KEY,
+} from '../../../components/cloud_connector/hooks/use_managed_onboarding';
+import { useStartServices } from '../../../hooks';
+import { sendPutAwsOnboardingCredentials } from '../../../hooks/use_request/aws_onboarding';
+import { toRequestError } from '../../../hooks/use_request/errors';
 
 interface FormState {
   region: string;
@@ -36,7 +39,8 @@ export const AwsOnboardingCredentialsForm: React.FC<{
   onSaved: () => void;
 }> = ({ region, onSaved }) => {
   const queryClient = useQueryClient();
-  const { save } = useManagedOnboardingCredentials();
+  const { notifications } = useStartServices();
+  const [isSaving, setIsSaving] = useState(false);
   const [values, setValues] = useState<FormState>({
     region,
     accessKeyId: '',
@@ -45,7 +49,8 @@ export const AwsOnboardingCredentialsForm: React.FC<{
     bootstrapStackArn: '',
     stackNamePrefix: '',
   });
-  // Kept in its own state and cleared on submit so the secret lives no longer than needed.
+  // Kept in its own state and cleared on submit. The request is sent directly rather than through
+  // a react-query mutation, whose cache would retain the variables (the secret) after the call.
   const [secretAccessKey, setSecretAccessKey] = useState('');
 
   const setField = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -63,8 +68,9 @@ export const AwsOnboardingCredentialsForm: React.FC<{
       e.preventDefault();
       const secret = secretAccessKey;
       setSecretAccessKey('');
+      setIsSaving(true);
       try {
-        await save.mutateAsync({
+        const { data, error } = await sendPutAwsOnboardingCredentials({
           region: values.region.trim(),
           accessKeyId: values.accessKeyId.trim(),
           discoveryRoleArn: values.discoveryRoleArn.trim(),
@@ -77,10 +83,25 @@ export const AwsOnboardingCredentialsForm: React.FC<{
             : {}),
           secrets: { secretAccessKey: secret },
         });
-      } catch {
-        // The mutation already toasted the error; keep the form open for another attempt.
+        if (error || !data) {
+          throw toRequestError(error, 'Request failed');
+        }
+      } catch (err) {
+        notifications.toasts.addError(err as Error, {
+          title: i18n.translate('xpack.fleet.awsOnboardingCredentialsForm.saveError', {
+            defaultMessage: 'Failed to store managed onboarding credentials',
+          }),
+        });
+        // Keep the form open for another attempt.
         return;
+      } finally {
+        setIsSaving(false);
       }
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.fleet.awsOnboardingCredentialsForm.saveSuccess', {
+          defaultMessage: 'Managed onboarding credentials stored',
+        }),
+      });
       // The card reads these queries, so refresh them before closing the canvas.
       await Promise.all([
         queryClient.invalidateQueries([AWS_ONBOARDING_CREDENTIALS_QUERY_KEY]),
@@ -88,7 +109,7 @@ export const AwsOnboardingCredentialsForm: React.FC<{
       ]);
       onSaved();
     },
-    [save, queryClient, onSaved, secretAccessKey, values]
+    [notifications.toasts, queryClient, onSaved, secretAccessKey, values]
   );
 
   return (
@@ -190,7 +211,7 @@ export const AwsOnboardingCredentialsForm: React.FC<{
       <EuiButton
         type="submit"
         fill
-        isLoading={save.isLoading}
+        isLoading={isSaving}
         isDisabled={!isValid}
         data-test-subj="awsOnboardingFormSubmit"
       >

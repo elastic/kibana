@@ -17,6 +17,7 @@ import { sendGetAwsOnboardingCredentials } from '../../../hooks/use_request/aws_
 import type { CloudSetupForCloudConnector } from '../types';
 
 export const AWS_ONBOARDING_CREDENTIALS_QUERY_KEY = 'aws-onboarding-credentials';
+export const AWS_ONBOARDING_VERIFY_QUERY_KEY = 'aws-onboarding-verify';
 
 const NOT_CONFIGURED: AwsOnboardingCredentialsPublic = { configured: false };
 

@@ -12,13 +12,15 @@ import { useQuery } from '@kbn/react-query';
 import { KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { AwsOnboardingCredentialsAttachmentData } from '../../../../common/agent_builder/aws_onboarding_credentials_attachment';
-import { useManagedOnboarding } from '../../../components/cloud_connector/hooks/use_managed_onboarding';
+import {
+  AWS_ONBOARDING_VERIFY_QUERY_KEY,
+  useManagedOnboarding,
+} from '../../../components/cloud_connector/hooks/use_managed_onboarding';
 import { useStartServices } from '../../../hooks';
 import { sendGetAwsOnboardingVerify } from '../../../hooks/use_request/aws_onboarding';
+import { toRequestError } from '../../../hooks/use_request/errors';
 
 import { downloadBootstrapTemplate } from './download_template';
-
-export const AWS_ONBOARDING_VERIFY_QUERY_KEY = 'aws-onboarding-verify';
 
 interface CardStatus {
   kind: 'pending' | 'configured' | 'verified' | 'failed';
@@ -35,7 +37,7 @@ const useCardStatus = (data: AwsOnboardingCredentialsAttachmentData): CardStatus
     async () => {
       const { data: result, error } = await sendGetAwsOnboardingVerify();
       if (error || !result) {
-        throw error instanceof Error ? error : new Error('Verification request failed');
+        throw toRequestError(error, 'Verification request failed');
       }
       return result;
     },
