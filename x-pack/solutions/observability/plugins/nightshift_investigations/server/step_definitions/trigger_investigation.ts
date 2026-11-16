@@ -347,12 +347,16 @@ export const triggerInvestigationStepDefinition = (
             `Skipped investigation of ${input.subject_type}/${subjectId} for automation ${input.automation_id}: daily limit of ${error.limit} reached`
           );
           // Other subjects have no triggering alert: the client ignores any alerts they carry.
+          const contextAlerts = input.context?.alerts;
+          const suppliedAlerts = Array.isArray(contextAlerts)
+            ? contextAlerts.filter(
+                (alert): alert is Record<string, unknown> =>
+                  alert != null && typeof alert === 'object' && !Array.isArray(alert)
+              )
+            : [];
           const alertIdentity =
             input.subject_type === 'alert'
-              ? alertIdentityOf(
-                  spaceId,
-                  triggeringAlertOf(subjectId, alerts ?? input.context?.alerts)
-                )
+              ? alertIdentityOf(spaceId, triggeringAlertOf(subjectId, alerts ?? suppliedAlerts))
               : {};
           const significantEventAlertId =
             alertIdentity.source_kind === 'significant_events'

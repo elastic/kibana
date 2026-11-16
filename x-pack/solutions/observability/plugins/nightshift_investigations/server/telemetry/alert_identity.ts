@@ -82,15 +82,9 @@ const asKeyword = (value: unknown): string | undefined =>
 /** The subject's snapshot, or the only alert the run carries. */
 export const triggeringAlertOf = (
   subjectId: string,
-  alerts: unknown
-): Record<string, unknown> | undefined => {
-  if (!Array.isArray(alerts)) return undefined;
-  const snapshots = alerts.filter(isPlainObject);
-  return (
-    snapshots.find(({ id }) => id === subjectId) ??
-    (snapshots.length === 1 ? snapshots[0] : undefined)
-  );
-};
+  alerts: ReadonlyArray<Record<string, unknown>>
+): Record<string, unknown> | undefined =>
+  alerts.find(({ id }) => id === subjectId) ?? (alerts.length === 1 ? alerts[0] : undefined);
 
 export const alertIdentityOf = (
   spaceId: string,
