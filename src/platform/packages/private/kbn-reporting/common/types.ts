@@ -27,8 +27,20 @@ export interface TaskRunMetrics {
   pdf?: ScreenshotMetrics & { pages?: number };
 }
 
+/**
+ * Values an export type can add to the email of a scheduled report. They are
+ * used for that run only and are not stored with the report.
+ */
+export interface TaskRunNotification {
+  /** Extra Mustache variables. Built-in variables (`title`, `filename`, ...) take precedence. */
+  templateVariables?: Record<string, string | number | boolean>;
+  /** Exposed to the email message as `{{summary}}`. Sanitised and length-capped. */
+  summaryMarkdown?: string;
+}
+
 export interface TaskRunResult {
   content_type: string | null;
+  notification?: TaskRunNotification;
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
   warnings?: string[];

@@ -11,7 +11,6 @@ import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugi
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ScheduleType } from '@kbn/reporting-server';
-import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { EXPORT_TYPE_SCHEDULED } from '@kbn/reporting-common';
 import {
   SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_DEFAULT_VALUE,
@@ -21,6 +20,7 @@ import type { ScheduledReportTaskParams, ScheduledReportTaskParamsWithoutSpaceId
 import { SCHEDULED_REPORTING_EXECUTE_TYPE } from '.';
 import type { SavedReport } from '../store';
 import { errorLogger } from './error_logger';
+import { renderScheduledReportEmail } from './scheduled_report_email';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { PrepareJobResults } from './run_report';
 import { RunReportTask } from './run_report';
@@ -155,18 +155,13 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           objectType: scheduledReport.attributes.meta.objectType,
           date: runAt.toISOString(),
         } satisfies ScheduledReportTemplateVariables;
-        const subject = renderMustacheString(
-          this.logger,
-          email.subject ?? SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_DEFAULT_VALUE,
-          templateVariables,
-          'none'
-        );
-        const message = renderMustacheString(
-          this.logger,
-          email.message ?? SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_DEFAULT_VALUE,
-          templateVariables,
-          'markdown'
-        );
+        const { subject, message } = renderScheduledReportEmail({
+          logger: this.logger,
+          subjectTemplate: email.subject ?? SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_DEFAULT_VALUE,
+          messageTemplate: email.message ?? SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_DEFAULT_VALUE,
+          baseVariables: templateVariables,
+          notification: output.notification,
+        });
 
         await this.emailNotificationService.notify({
           reporting: this.opts.reporting,

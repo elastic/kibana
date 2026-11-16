@@ -1596,6 +1596,60 @@ describe('Run Scheduled Report Task', () => {
       });
     });
 
+    it('adds the export type notification variables and summary to the email', async () => {
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+      const taskInstance = {
+        id: 'task-id',
+        runAt: new Date('2025-06-04T10:00:00Z'),
+        params: { id: 'report-so-id', jobtype: 'test1' },
+      };
+      const output = {
+        content_type: 'application/pdf',
+        notification: {
+          templateVariables: { lcp: 'good' },
+          summaryMarkdown: '**Highlights**',
+        },
+      };
+
+      // @ts-expect-error
+      await task.notify(
+        savedReport,
+        // @ts-expect-error
+        taskInstance,
+        output,
+        2097152,
+        {
+          ...scheduledReport,
+          attributes: {
+            ...scheduledReport.attributes,
+            notification: {
+              email: {
+                ...scheduledReport.attributes.notification!.email,
+                subject: '{{title}}: LCP {{lcp}}',
+                message: '{{summary}}',
+              },
+            },
+          },
+        },
+        'default'
+      );
+
+      expect(emailNotificationService.notify).toHaveBeenCalledWith(
+        expect.objectContaining({
+          emailParams: expect.objectContaining({
+            subject: 'Test Report: LCP good',
+            message: '**Highlights**',
+          }),
+        })
+      );
+    });
+
     it("gets the scheduled_report saved object if it's not defined", async () => {
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
