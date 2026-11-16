@@ -9,9 +9,15 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SignificantEventsQueriesGenerationResult } from '@kbn/significant-events-schema';
-import type { EbtTelemetryClient } from '../telemetry/ebt';
+import type {
+  EbtTelemetryClient,
+  KnowledgeIndicatorQueriesGenerationFailureCode,
+} from '../telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
-import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
+import {
+  executeKIQueryGenerationAgent,
+  KIQueryGenerationAgentError,
+} from './identify_ki_queries_via_agent';
 
 export interface GenerateKIQueriesParams {
   source: NightshiftSource;
@@ -31,6 +37,16 @@ export interface GenerateKIQueriesDependencies {
   signal: AbortSignal;
   telemetry: EbtTelemetryClient;
 }
+
+const toGenerationFailureCode = (
+  error: unknown,
+  signal: AbortSignal
+): KnowledgeIndicatorQueriesGenerationFailureCode => {
+  if (error instanceof KIQueryGenerationAgentError) {
+    return error.reason;
+  }
+  return signal.aborted ? 'aborted' : 'internal_error';
+};
 
 export async function generateKIQueries(
   params: GenerateKIQueriesParams,
@@ -71,6 +87,24 @@ export async function generateKIQueries(
     maxExistingQueriesForContext,
     signal,
     logger: logger.get('significant_events_queries_generation'),
+  }).catch((error: unknown) => {
+    try {
+      telemetry.trackSignificantEventsQueriesGenerationFailed({
+        workflow_execution_id: workflowExecutionId,
+        parent_workflow_execution_id: parentWorkflowExecutionId,
+        error_code: toGenerationFailureCode(error, signal),
+        connector_id: connectorId,
+        source_id: source.id,
+        duration_ms: Date.now() - startedAt,
+      });
+    } catch (telemetryError) {
+      logger.warn(
+        `Failed to track query generation failure: ${
+          telemetryError instanceof Error ? telemetryError.message : String(telemetryError)
+        }`
+      );
+    }
+    throw error;
   });
   const durationMs = Date.now() - startedAt;
 

@@ -14,9 +14,13 @@ import {
   generateKIQueries,
   type GenerateKIQueriesDependencies,
 } from './ki_queries_generation_service';
-import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
+import {
+  executeKIQueryGenerationAgent,
+  KIQueryGenerationAgentError,
+} from './identify_ki_queries_via_agent';
 
 jest.mock('./identify_ki_queries_via_agent', () => ({
+  ...jest.requireActual('./identify_ki_queries_via_agent'),
   executeKIQueryGenerationAgent: jest.fn(),
 }));
 
@@ -165,5 +169,88 @@ describe('generateKIQueries', () => {
     expect(executeKIQueryGenerationAgentMock).toHaveBeenCalledWith(
       expect.objectContaining({ connectorId: 'canonical-connector' })
     );
+  });
+
+  describe('when the agent fails', () => {
+    const createFailureTelemetry = () => ({
+      trackSignificantEventsQueriesGenerated: jest.fn(),
+      trackSignificantEventsQueriesGenerationFailed: jest.fn(),
+    });
+
+    const generate = (
+      telemetry: ReturnType<typeof createFailureTelemetry>,
+      signal = new AbortController().signal
+    ) =>
+      generateKIQueries(
+        {
+          source,
+          connectorId: 'test-connector',
+          runId: 'run-1',
+          workflowExecutionId: 'run-1',
+          parentWorkflowExecutionId: 'onboarding-run-1',
+          maxExistingQueriesForContext: 10,
+        },
+        makeDeps({ telemetry: telemetry as unknown as EbtTelemetryClient, logger, signal })
+      );
+
+    it('reports a run that never finalized by that cause and still fails', async () => {
+      const telemetry = createFailureTelemetry();
+      const error = new KIQueryGenerationAgentError(
+        'agent_did_not_finalize',
+        'KI query generation agent did not finalize a query result for source checkout'
+      );
+      executeKIQueryGenerationAgentMock.mockRejectedValue(error);
+
+      await expect(generate(telemetry)).rejects.toBe(error);
+
+      expect(telemetry.trackSignificantEventsQueriesGenerationFailed).toHaveBeenCalledTimes(1);
+      expect(telemetry.trackSignificantEventsQueriesGenerationFailed).toHaveBeenCalledWith({
+        workflow_execution_id: 'run-1',
+        parent_workflow_execution_id: 'onboarding-run-1',
+        error_code: 'agent_did_not_finalize',
+        connector_id: 'test-connector',
+        source_id: 'source-1',
+        duration_ms: expect.any(Number),
+      });
+      expect(telemetry.trackSignificantEventsQueriesGenerated).not.toHaveBeenCalled();
+    });
+
+    it('reports a cancelled run as aborted, not as an internal error', async () => {
+      const telemetry = createFailureTelemetry();
+      const controller = new AbortController();
+      controller.abort();
+      executeKIQueryGenerationAgentMock.mockRejectedValue(new Error('Request was aborted'));
+
+      await expect(generate(telemetry, controller.signal)).rejects.toThrow('Request was aborted');
+
+      expect(telemetry.trackSignificantEventsQueriesGenerationFailed).toHaveBeenCalledWith(
+        expect.objectContaining({ error_code: 'aborted' })
+      );
+    });
+
+    it('reports any other failure as an internal error', async () => {
+      const telemetry = createFailureTelemetry();
+      executeKIQueryGenerationAgentMock.mockRejectedValue(new Error('connector timeout'));
+
+      await expect(generate(telemetry)).rejects.toThrow('connector timeout');
+
+      expect(telemetry.trackSignificantEventsQueriesGenerationFailed).toHaveBeenCalledWith(
+        expect.objectContaining({ error_code: 'internal_error' })
+      );
+    });
+
+    it('fails with the agent error when telemetry throws', async () => {
+      const telemetry = createFailureTelemetry();
+      telemetry.trackSignificantEventsQueriesGenerationFailed.mockImplementation(() => {
+        throw new Error('analytics down');
+      });
+      executeKIQueryGenerationAgentMock.mockRejectedValue(new Error('connector timeout'));
+
+      await expect(generate(telemetry)).rejects.toThrow('connector timeout');
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to track query generation failure: analytics down'
+      );
+    });
   });
 });

@@ -25,6 +25,7 @@ import {
   DEFAULT_EVENTS_SEARCH_TO,
 } from '../../../lib/significant_events/events';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import {
   EVENT_SEARCH_DEFAULT_PER_PAGE,
   EVENT_SEARCH_MAX_PER_PAGE,
@@ -313,7 +314,15 @@ export function createSearchEventsTool({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running event_search: ${message}`);
+        const failure = reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID,
+          errorLogMessage: `Error running event_search: ${message}`,
+          logger,
+          telemetry,
+          request,
+          runContext: context.runContext,
+        });
 
         telemetry.trackAgentToolEventSearch({
           workflow_execution_id: workflowExecutionId,
@@ -324,7 +333,7 @@ export function createSearchEventsTool({
           status_filter: toolParams.status,
           view: toolParams.view,
           page: toolParams.page,
-          error_message: message,
+          error_message: toTelemetryErrorMessage(failure, message),
         });
 
         return {

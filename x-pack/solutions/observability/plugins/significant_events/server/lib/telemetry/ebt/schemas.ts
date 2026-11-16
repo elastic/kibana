@@ -12,7 +12,9 @@ import type {
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
   AgentToolEventStatusUpdateProps,
+  AgentToolFailedProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
+  KnowledgeIndicatorQueriesGenerationFailedProps,
   DetectionScanProps,
   DiscoveryCompletedProps,
   DiscoveryStartedProps,
@@ -938,7 +940,109 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
   },
 };
 
+const agentToolFailedSchema: RootSchema<AgentToolFailedProps> = {
+  ...optionalWorkflowExecutionTelemetrySchema,
+  tool_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'Agent Builder id of the tool whose call failed',
+    },
+  },
+  error_code: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Why the call failed. Calls refused for their arguments: unknown_source, source_disabled, detection_rule_mismatch, detection_not_stored, unresolved_feature_reference, validation_error, bad_request, not_found. Other failures: forbidden, paused, lease_held, reconcile_pending, stale_revision, conflict, outcome_unknown, bulk_error, internal_error',
+    },
+  },
+  input_rejected: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'True when the tool refused the call because of its arguments; false when it failed for a reason the caller could not avoid by changing them',
+    },
+  },
+  space_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The Kibana space in which the tool ran',
+    },
+  },
+  agent_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Agent that made the call: the id of a built-in agent, or custom-<hash> for a user-created one, as on the Agent Builder events. Absent when the tool ran outside an agent',
+      optional: true,
+    },
+  },
+  tool_call_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Id of the tool call, as on agent_builder_tool_call_error, which carries the model, the conversation and the error text',
+      optional: true,
+    },
+  },
+  status_code: {
+    type: 'long',
+    _meta: {
+      description: 'HTTP status the error carries, when it carries one',
+      optional: true,
+    },
+  },
+  item_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'Items in the failed call of a tool that takes a batch (events for events_write, candidates for ki_feature_similarity_search); a failed call processes none of them',
+      optional: true,
+    },
+  },
+  unresolved_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'How many of the values the call named could not be resolved (source slugs for unknown_source, feature ids for unresolved_feature_reference)',
+      optional: true,
+    },
+  },
+};
+
+const knowledgeIndicatorQueriesGenerationFailedSchema: RootSchema<KnowledgeIndicatorQueriesGenerationFailedProps> =
+  {
+    ...optionalWorkflowExecutionTelemetrySchema,
+    ...parentWorkflowExecutionTelemetrySchema,
+    error_code: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Why query generation failed: agent_did_not_finalize (the agent ended without a finalized validate_queries result), unexpected_source (it finalized for another source), aborted, or internal_error',
+      },
+    },
+    connector_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the LLM connector used for the inference',
+      },
+    },
+    source_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The nightshift source id the queries were generated for',
+      },
+    },
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description: 'Time spent in the query generation agent before it failed, in milliseconds',
+      },
+    },
+  };
+
 export {
+  agentToolFailedSchema,
+  knowledgeIndicatorQueriesGenerationFailedSchema,
   agentBuilderKnowledgeIndicatorCreatedSchema,
   agentToolEventCreateSchema,
   agentToolEventSearchSchema,

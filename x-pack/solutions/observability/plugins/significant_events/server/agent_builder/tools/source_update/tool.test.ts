@@ -40,18 +40,33 @@ describe('source_update tool', () => {
     setEnabled?: jest.Mock;
     maintenanceState?: SignificantEventsMaintenanceState;
     getState?: jest.Mock;
-  }) =>
-    createSourceUpdateTool({
-      ...createSourceToolDeps({
-        featurePrivilege,
-        sourcesClient: {
-          list: jest.fn().mockResolvedValue({ sources: [checkout], total: 1 }),
-          update,
-          setEnabled,
-        },
-      }),
-      maintenanceService: { getState },
+  }) => createToolWithDeps({ featurePrivilege, update, setEnabled, getState }).tool;
+
+  const createToolWithDeps = ({
+    featurePrivilege = 'all_and_manage_engines',
+    update = jest.fn(),
+    setEnabled = jest.fn(),
+    getState = jest.fn().mockResolvedValue('enabled'),
+  }: {
+    featurePrivilege?: NightshiftFeaturePrivilege;
+    update?: jest.Mock;
+    setEnabled?: jest.Mock;
+    getState?: jest.Mock;
+  }) => {
+    const deps = createSourceToolDeps({
+      featurePrivilege,
+      sourcesClient: {
+        list: jest.fn().mockResolvedValue({ sources: [checkout], total: 1 }),
+        update,
+        setEnabled,
+      },
     });
+    return {
+      tool: createSourceUpdateTool({ ...deps, maintenanceService: { getState } }),
+      logger: deps.logger,
+      telemetry: deps.telemetry,
+    };
+  };
 
   beforeEach(() => {
     jest.mocked(assertSignificantEventsAccess).mockReset().mockResolvedValue(undefined);
@@ -184,6 +199,27 @@ describe('source_update tool', () => {
         },
       ],
     });
+  });
+
+  it('reports a failed enabled change even though the call returns the saved changes', async () => {
+    const { tool, logger, telemetry } = createToolWithDeps({
+      update: jest.fn().mockResolvedValue({ ...checkout, title: 'Checkout v2' }),
+      setEnabled: jest.fn().mockRejectedValue(new Error('rules could not be aligned')),
+    });
+
+    const result = await tool.handler(
+      { source: 'checkout', title: 'Checkout v2', enabled: false },
+      createMockToolContext()
+    );
+
+    expect(result).toMatchObject({ results: [{ type: 'other' }] });
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining(`Failed to update source ${checkout.id}: setting enabled failed`)
+    );
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledTimes(1);
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ error_code: 'internal_error', input_rejected: false })
+    );
   });
 
   it('does not change a source without the Nightshift manage and configure privileges', async () => {

@@ -237,6 +237,53 @@ interface AgentToolEventSearchProps extends OptionalWorkflowExecutionTelemetryPr
   error_message?: string;
 }
 
+type AgentToolFailureCode =
+  | 'unknown_source'
+  | 'source_disabled'
+  | 'detection_rule_mismatch'
+  | 'detection_not_stored'
+  | 'unresolved_feature_reference'
+  | 'validation_error'
+  | 'bad_request'
+  | 'not_found'
+  | 'forbidden'
+  | 'paused'
+  | 'lease_held'
+  | 'reconcile_pending'
+  | 'stale_revision'
+  | 'conflict'
+  | 'outcome_unknown'
+  | 'bulk_error'
+  | 'internal_error';
+
+/** One event per failed tool call, whatever the tool; successes stay on the per-tool events. */
+interface AgentToolFailedProps extends OptionalWorkflowExecutionTelemetryProps {
+  tool_id: string;
+  error_code: AgentToolFailureCode;
+  input_rejected: boolean;
+  space_id: string;
+  agent_id?: string;
+  tool_call_id?: string;
+  status_code?: number;
+  item_count?: number;
+  unresolved_count?: number;
+}
+
+type KnowledgeIndicatorQueriesGenerationFailureCode =
+  | 'agent_did_not_finalize'
+  | 'unexpected_source'
+  | 'aborted'
+  | 'internal_error';
+
+interface KnowledgeIndicatorQueriesGenerationFailedProps
+  extends OptionalWorkflowExecutionTelemetryProps,
+    ParentWorkflowExecutionTelemetryProps {
+  error_code: KnowledgeIndicatorQueriesGenerationFailureCode;
+  connector_id: string;
+  source_id: string;
+  duration_ms: number;
+}
+
 export {
   type AlertCreationAttemptIdentityProps,
   type ExistingAlertIdentityProps,
@@ -244,6 +291,10 @@ export {
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
   type AgentToolEventCreateProps,
   type AgentToolEventSearchProps,
+  type AgentToolFailedProps,
+  type AgentToolFailureCode,
+  type KnowledgeIndicatorQueriesGenerationFailedProps,
+  type KnowledgeIndicatorQueriesGenerationFailureCode,
   type AgentToolEventStatusUpdateProps,
   type AgentToolEventWriteProps,
   type DetectionScanProps,
