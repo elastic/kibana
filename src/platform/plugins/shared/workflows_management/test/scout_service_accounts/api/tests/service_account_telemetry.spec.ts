@@ -34,8 +34,28 @@ const getCompletedEventProperties = async (
   return response.body[0].properties;
 };
 
+interface BoundWorkloadsUsage {
+  total: number;
+  serviceAccounts: number;
+  byWorkload: Record<string, number>;
+  byBinderType: Record<string, number>;
+}
+
+const getServiceAccountsUsage = async (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>
+): Promise<{ enabled: boolean; boundWorkloads?: BoundWorkloadsUsage }> => {
+  const response = await apiClient.post('internal/telemetry/clusters/_stats', {
+    headers: { ...headers, 'elastic-api-version': '2' },
+    body: { unencrypted: true, refreshCache: true },
+    responseType: 'json',
+  });
+  expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
+  return response.body[0].stats.stack_stats.kibana.plugins.security.serviceAccounts;
+};
+
 apiTest.describe(
-  '[NON-MKI] Workflow service accounts: execution telemetry',
+  '[NON-MKI] Workflow service accounts: telemetry',
   { tag: ['@local-stateful-classic'] },
   () => {
     const { getContext, setup, teardown, cleanupWorkflows } = createServiceAccountSuite();
@@ -78,6 +98,23 @@ apiTest.describe(
         const properties = await getCompletedEventProperties(apiClient, headers, execution.id);
         expect(properties).toMatchObject({ runAs: 'service_account', runAsInherited: false });
         expect(JSON.stringify(properties)).not.toContain(accountId);
+      }
+    );
+
+    apiTest(
+      'reports a workflow bound by its own run_as in the security usage collector',
+      async ({ apiClient }) => {
+        const { headers, accountId, create } = getContext();
+        await create(apiClient, workflowYaml(accountId));
+
+        const { enabled, boundWorkloads } = await getServiceAccountsUsage(apiClient, headers);
+        expect(enabled).toBe(true);
+        expect(boundWorkloads?.total).toBeGreaterThanOrEqual(1);
+        expect(boundWorkloads?.serviceAccounts).toBeGreaterThanOrEqual(1);
+        expect(
+          boundWorkloads?.byWorkload.workflowsExecutionEngine__workflow
+        ).toBeGreaterThanOrEqual(1);
+        expect(boundWorkloads?.byBinderType.user).toBeGreaterThanOrEqual(1);
       }
     );
   }

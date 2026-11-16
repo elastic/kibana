@@ -13968,6 +13968,64 @@
           "_meta": {
             "description": "The credential type that is configured for the anonymous authentication provider."
           }
+        },
+        "serviceAccounts": {
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "_meta": {
+                "description": "Indicates if service accounts are available on this deployment."
+              }
+            },
+            "boundWorkloads": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of workloads bound to a service account."
+                  }
+                },
+                "serviceAccounts": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of service accounts with at least one workload."
+                  }
+                },
+                "byWorkload": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of bound workloads, keyed by `<pluginId>__<workloadType>`."
+                      }
+                    }
+                  }
+                },
+                "byBinderType": {
+                  "properties": {
+                    "user": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of workloads bound by a user."
+                      }
+                    },
+                    "api_key": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of workloads bound with an API key."
+                      }
+                    },
+                    "service_account": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of workloads bound by a service account."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
