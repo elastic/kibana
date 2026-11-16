@@ -18,7 +18,10 @@ import {
 import { isTTY } from '../prompts';
 import { buildPlaywrightArgs } from './playwright_args';
 
-const formatEnvPrefix = (overrides: Record<string, string>, redactedKeys: ReadonlySet<string>) =>
+export const formatEnvPrefix = (
+  overrides: Record<string, string>,
+  redactedKeys: ReadonlySet<string>
+) =>
   Object.entries(overrides)
     .map(([key, value]) => {
       const isSensitive =
@@ -26,7 +29,8 @@ const formatEnvPrefix = (overrides: Record<string, string>, redactedKeys: Readon
         key.includes('API_KEY') ||
         key.includes('CREDENTIALS') ||
         key.includes('TOKEN') ||
-        key === 'TRACING_EXPORTERS';
+        key === 'TRACING_EXPORTERS' ||
+        key === 'TRACING_ES_URL';
       return `${key}=${isSensitive ? '[redacted]' : value}`;
     })
     .join(' ');

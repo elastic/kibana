@@ -73,6 +73,8 @@ node scripts/evals start --skip-init --suite agent-builder
 | `<name>`                        | Use `config.<name>.json`. If missing + TTY, runs the custom config wizard for that profile.   |
 | _(omitted)_                     | Interactive prompt: local / golden-cluster / custom. Required in non-interactive mode.        |
 
+For every profile, `EVAL_KBN_URL`, `EVAL_KBN_API_KEY`, `TRACING_ES_URL`, `TRACING_ES_API_KEY`, `TRACING_EXPORTERS` and `GCS_CREDENTIALS` that you already exported win over the profile's values, one variable at a time (export the matching API key too when you point a URL elsewhere). `--evaluations-kbn-url` and `--evaluations-kbn-api-key` win over both.
+
 | Flag                             | Alias     | Description                                                                     |
 | -------------------------------- | --------- | ------------------------------------------------------------------------------- |
 | `--suite <id>`                   |           | Suite to run (interactive prompt if omitted)                                    |
@@ -86,7 +88,7 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--repetitions <n>`              |           | Number of times to repeat each example                                          |
 | `--concurrency <n>`              |           | Examples each experiment runs at once (default 5; a spec's own value wins)      |
 | `--space-ids <ids>`              |           | Comma-separated spaces to assign datasets and scores to (see [Spaces](#spaces)) |
-| `--skip-server`                  |           | Skip EDOT/Scout/EIS startup (use existing services)                             |
+| `--skip-server[=false]`          |           | Skip EDOT/Scout/EIS startup (use existing services); `=true`/`=false` accepted  |
 | `--scout-arch <arch>`            |           | Scout `--arch` (`stateful`/`serverless`); defaults to the suite's `scoutArch`  |
 | `--scout-domain <domain>`        |           | Scout `--domain` (e.g. `observability_complete`); defaults to the suite's      |
 | `--skip-init`                    |           | Skip automatic config and connector setup                                       |
