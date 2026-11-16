@@ -41,7 +41,7 @@ const renderWithClient = <T,>(hook: () => T) => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  return { ...renderHook(hook, { wrapper }), invalidateQueries };
+  return { ...renderHook(hook, { wrapper }), invalidateQueries, queryClient };
 };
 
 describe('use_automations', () => {
@@ -215,6 +215,39 @@ describe('use_automations', () => {
 
     await waitFor(() => expect(result.current.runs).toHaveLength(101));
     expect(result.current.isError).toBe(false);
+  });
+
+  it('retries a failed refresh after every page has loaded', async () => {
+    let failRefresh = false;
+    investigationsFetch.mockImplementation(() =>
+      failRefresh
+        ? Promise.reject(new Error('boom'))
+        : Promise.resolve({
+            runs: [{ id: 'r1', status: 'succeeded', startedAt: '2026-10-01T00:00:00.000Z' }],
+            total: 1,
+            usedToday: 0,
+          })
+    );
+    const { result, queryClient } = renderWithClient(() =>
+      useAutomationRunsInRange('a', '2026-10-01T00:00:00.000Z', '2026-10-02T00:00:00.000Z')
+    );
+    await waitFor(() => expect(result.current.runs).toHaveLength(1));
+
+    failRefresh = true;
+    await act(async () => {
+      await queryClient.invalidateQueries();
+    });
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    failRefresh = false;
+    const callsBeforeRetry = investigationsFetch.mock.calls.length;
+    act(() => {
+      result.current.retry();
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(false));
+    expect(investigationsFetch.mock.calls.length).toBeGreaterThan(callsBeforeRetry);
+    expect(result.current.runs).toHaveLength(1);
   });
 
   it('creates an automation, shows a toast, and refreshes the list', async () => {

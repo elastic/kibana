@@ -153,7 +153,7 @@ export const useAutomationRunsInRange = (
   startedBefore: string
 ) => {
   const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage, isLoading, isError } =
+  const { data, hasNextPage, isFetchingNextPage, fetchNextPage, refetch, isLoading, isError } =
     useInfiniteQuery({
       queryKey: [...AUTOMATIONS_QUERY_KEY, id, 'pagedRuns', startedAfter, startedBefore],
       enabled: investigationsClient != null,
@@ -184,7 +184,7 @@ export const useAutomationRunsInRange = (
     runs,
     isLoading,
     isError,
-    retry: fetchNextPage,
+    retry: () => (hasNextPage ? fetchNextPage() : refetch()),
     usedToday: firstPage?.usedToday,
     total: firstPage?.total,
   };
