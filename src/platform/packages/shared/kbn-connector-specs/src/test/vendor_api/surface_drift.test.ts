@@ -359,7 +359,11 @@ const moved: ConnectorDrift = {
       action: 'listRules',
       operations: [],
       unmatched: [
-        { operation: 'GET /api/0/rules/', reason: 'Legacy endpoint, absent from the spec' },
+        {
+          operation: 'GET /api/0/rules/',
+          reason:
+            'Legacy endpoint, absent from the spec; see https://github.com/elastic/kibana/issues/296284',
+        },
       ],
       snapshotProblems: [],
       latestProblems: [],
@@ -387,7 +391,9 @@ describe('renderDriftIssue', () => {
     expect(body).toContain(
       "**Sentry's spec moved `/api/0` from its paths into its server URL. The connector most likely still works.**"
     );
-    expect(body).toContain("1 action isn't checked (see the table).");
+    expect(body).toContain(
+      "1 action calls an endpoint missing from the current spec, so it isn't checked (see the table)."
+    );
     expect(body).toContain(
       '| **Server URL** | `https://{region}.sentry.io` → `https://{region}.sentry.io/api/0` |'
     );
@@ -398,9 +404,11 @@ describe('renderDriftIssue', () => {
       '| `getIssue` | `GET /api/0/issues/{id}/` | ⚠️ Moved in the spec, same URL |'
     );
     expect(body).toContain(
-      '| `listRules` | `GET /api/0/rules/` | ➖ Not checked: not in the spec (see below) |'
+      '| `listRules` | `GET /api/0/rules/` | ⚠️ Endpoint is missing from current spec ([#296284](https://github.com/elastic/kibana/issues/296284), see below) |'
     );
-    expect(body).toContain('the manifest records why: _Legacy endpoint, absent from the spec_');
+    expect(body).toContain(
+      '⚠️ **Endpoint is missing from current spec** (`listRules`): the manifest records why: _Legacy endpoint, absent from the spec; see https://github.com/elastic/kibana/issues/296284_'
+    );
     expect(body).toContain('### Why the check fails');
     expect(body).toContain('Correction 1 in [`overlay.yaml`]');
     expect(body).toContain(

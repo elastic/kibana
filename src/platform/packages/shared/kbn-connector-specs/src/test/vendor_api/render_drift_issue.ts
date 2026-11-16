@@ -135,6 +135,13 @@ const ICONS: Record<Rank, string> = {
 };
 
 const MOVED_STATUS = 'Moved in the spec, same URL';
+const MISSING_STATUS = 'Endpoint is missing from current spec';
+
+// The issues a recorded reason links to, as `[#123](url)`.
+const issueLinksOf = (reason: string): string[] =>
+  [...reason.matchAll(/https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/issues\/(\d+)/g)].map(
+    ([url, number]) => `[#${number}](${url})`
+  );
 
 const firstProblem = (problems: readonly string[]): string =>
   `${problems[0]}${
@@ -165,7 +172,9 @@ const statusOf = (
       const missing = action.operations.filter(({ latest }) => latest?.status === 'missing');
       return {
         rank: 'fails',
-        text: `Not in the latest spec: ${listed(missing.map(({ operation }) => code(operation)))}`,
+        text: `Removed from current spec: ${listed(
+          missing.map(({ operation }) => code(operation))
+        )}`,
       };
     }
     return {
@@ -173,14 +182,16 @@ const statusOf = (
       text: `Fails against the latest spec: ${firstProblem(latestProblems)}`,
     };
   }
-  if (!isChecked(action)) {
+  if (!isChecked(action) && action.unmatched.length > 0) {
+    // Missing when the connector was recorded, and still missing, as the manifest acknowledges.
+    const issues = [...new Set(action.unmatched.flatMap(({ reason }) => issueLinksOf(reason)))];
     return {
-      rank: 'not-checked',
-      text:
-        action.unmatched.length > 0
-          ? 'Not checked: not in the spec (see below)'
-          : 'Not checked: calls no vendor operation',
+      rank: 'attention',
+      text: `${MISSING_STATUS} (${[...issues, 'see below'].join(', ')})`,
     };
+  }
+  if (!isChecked(action)) {
+    return { rank: 'not-checked', text: 'Not checked: calls no vendor operation' };
   }
   const changes = action.operations.flatMap(({ source, operation }) =>
     changesOf(source, operation)
@@ -540,9 +551,12 @@ export const renderDriftIssue = (
       }`;
     }
   }
-  if (notChecked.length > 0) {
-    summary += ` ${plural(notChecked.length, 'action')} ${
-      notChecked.length === 1 ? "isn't" : "aren't"
+  const missingEndpoints = notChecked.filter(({ unmatched }) => unmatched.length > 0);
+  if (missingEndpoints.length > 0) {
+    summary += ` ${plural(missingEndpoints.length, 'action')} ${
+      missingEndpoints.length === 1 ? 'calls an endpoint' : 'call endpoints'
+    } missing from the current spec, so ${
+      missingEndpoints.length === 1 ? "it isn't" : "they aren't"
     } checked (see the table).`;
   }
 
@@ -620,7 +634,7 @@ export const renderDriftIssue = (
   }
   for (const [reason, named] of reasons) {
     legend.push(
-      `${ICONS['not-checked']} **Not checked** (${named
+      `${ICONS.attention} **${MISSING_STATUS}** (${named
         .map(code)
         .join(', ')}): the manifest records why: _${reason}_`
     );
