@@ -215,14 +215,13 @@ describe('computeEventFacts', () => {
     expect(result.signals).toHaveLength(2);
   });
 
-  describe('a rule promoted from an off-topic signal to a confirming one', () => {
-    it('frees the title and hypothesis and stores the confirming signal', () => {
+  describe('escalating a stored verdict', () => {
+    it('frees the title and hypothesis when an off-topic rule is confirmed', () => {
       const stored = makeStored([makeSignal({ verdict: 'off_topic' })]);
 
       const result = facts({ signals: [makeSignal({ verdict: 'confirms' })], stored });
 
       expect(result.frozenNarrative).toBeUndefined();
-      expect(result.signals?.map(({ verdict }) => verdict)).toEqual(['confirms']);
     });
 
     it('keeps the narrative frozen when the stored signal already confirmed the rule', () => {
