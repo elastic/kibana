@@ -47099,7 +47099,6 @@
     "xpack.nightshift.automations.timeRange.last90Days": "90 derniers jours",
     "xpack.nightshift.automations.timeRange.today": "Aujourd'hui",
     "xpack.nightshift.automations.timeRange.yesterday": "Hier",
-    "xpack.nightshift.automations.toggleLabel": "{action} {name}",
     "xpack.nightshift.automations.triggerFilter": "Déclenchement",
     "xpack.nightshift.automations.updateError": "Échec de la mise à jour de l’automatisation",
     "xpack.nightshift.automations.updateSuccess": "Automatisation mise à jour",
