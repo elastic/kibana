@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/workflows'
   - '@kbn/workflows-extensions'
-  - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
 tags:
   - plugin
