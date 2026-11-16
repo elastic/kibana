@@ -7,8 +7,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  EuiButton,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +18,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import {
   AreaSeries,
   Axis,
@@ -342,22 +341,19 @@ export const RunHistory = ({
   useEffect(() => () => timersRef.current.forEach((id) => window.clearTimeout(id)), []);
 
   const loadError = isError && (
-    <EuiCallOut
+    <KbnWarningCallout
       announceOnMount
-      color="warning"
       size="s"
       title={labels.runsLoadErrorMessage}
       css={{ marginBlockEnd: euiTheme.size.base }}
-    >
-      <EuiButton
-        size="s"
-        color="warning"
-        onClick={onRetry}
-        data-test-subj="automationRunsRetryButton"
-      >
-        {labels.runsRetryButton}
-      </EuiButton>
-    </EuiCallOut>
+      actionProps={{
+        primary: {
+          children: labels.runsRetryButton,
+          onClick: onRetry,
+          'data-test-subj': 'automationRunsRetryButton',
+        },
+      }}
+    />
   );
 
   if (isLoading) return <EuiLoadingSpinner size="l" />;
