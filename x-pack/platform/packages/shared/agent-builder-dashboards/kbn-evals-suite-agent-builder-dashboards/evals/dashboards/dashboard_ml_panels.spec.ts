@@ -16,7 +16,6 @@ evaluate.describe('Agent Builder Dashboards - ML Panels', { tag: tags.serverless
     // Created through Kibana's ML API, not `esClient.ml.putJob`, so the jobs are registered
     // in the default space and the panels can load them. The jobs have no datafeed.
     for (const jobId of ML_PANEL_JOB_IDS) {
-      await esClient.ml.deleteJob({ job_id: jobId, force: true }).catch(() => {});
       await fetch(`/internal/ml/anomaly_detectors/${jobId}`, {
         method: 'PUT',
         version: '1',

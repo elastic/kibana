@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { randomBytes } from 'crypto';
 import type { DashboardDatasetExample } from '../../../src/types';
 import { mlPanelExample } from './factories';
 
 /**
  * ML anomaly panels. Their config schemas are not in the `generate_dashboard` tool schema, so
  * the agent has to read each type's reference before writing it. The spec creates these jobs
- * so the panels render without a "No known job" error.
+ * so the panels render without a "No known job" error. ML jobs are cluster-global, so the IDs
+ * carry a per-run suffix: the run never touches, and cleans up only, the jobs it created.
  */
-export const ML_PANEL_JOB_IDS = ['web-traffic-anomalies', 'cpu-usage-anomalies'] as const;
+const RUN_SUFFIX = randomBytes(4).toString('hex');
+export const ML_PANEL_JOB_IDS = [
+  `eval-web-traffic-anomalies-${RUN_SUFFIX}`,
+  `eval-cpu-usage-anomalies-${RUN_SUFFIX}`,
+] as const;
 
 export const DASHBOARD_ML_PANEL_EXAMPLES: DashboardDatasetExample[] = [
   mlPanelExample({
