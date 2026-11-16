@@ -911,7 +911,7 @@ describe('input-level vars (aws_otel)', () => {
   });
 
   it('keeps a stored secret ref instead of a typed credential', () => {
-    const ref = { isSecretRef: true, id: 'secret-1' };
+    const ref = { isSecretRef: true as const, id: 'secret-1' };
     const inputs: Record<string, PackageInputEntry> = {
       'aws-otelcol': { enabled: true, streams: {} },
     };

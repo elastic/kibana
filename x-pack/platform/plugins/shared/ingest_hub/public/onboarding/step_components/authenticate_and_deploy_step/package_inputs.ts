@@ -468,12 +468,12 @@ export function getInputVarNames(pkgInfo: unknown): Map<string, Set<string>> {
 export function applyInputVars(
   inputs: Record<string, PackageInputEntry>,
   pkgInfo: unknown,
-  buildVars: (varNames: Set<string>) => PackageInputEntry['vars']
+  buildVars: (varNames: Set<string>, inputKey: string) => PackageInputEntry['vars']
 ): void {
   for (const [key, varNames] of getInputVarNames(pkgInfo)) {
     const entry = inputs[key];
     if (!entry?.enabled) continue;
-    const vars = buildVars(varNames);
+    const vars = buildVars(varNames, key);
     if (vars && Object.keys(vars).length > 0) entry.vars = vars;
   }
 }

@@ -10,7 +10,12 @@ import type { AwsServiceMatrixEntry } from '../../../aws_service_matrix';
 import { getDefaultEnabledDataStreams } from '../../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../../onboarding_flow_context';
 import type { ServiceVars } from '../../service_settings_step/use_service_settings';
-import { buildPackageInputs, buildPackageVars, getPackageVarNames } from '../package_inputs';
+import {
+  applyInputVars,
+  buildPackageInputs,
+  buildPackageVars,
+  getPackageVarNames,
+} from '../package_inputs';
 import type { PackageInputEntry, AgentCredentialVars } from '../package_inputs';
 import { REGION_FIELD_NAMES } from '../../service_settings_step/field_config';
 import type { DeployGroup } from '../deploy_groups';
@@ -46,7 +51,7 @@ export interface PkgInfo {
   /** All policy templates from the package manifest — used to disable unrelated inputs. */
   policy_templates?: Array<{
     name: string;
-    inputs?: Array<{ type: string; id?: string }>;
+    inputs?: Array<{ type: string; id?: string; vars?: Array<{ name: string }> }>;
   }>;
 }
 
@@ -358,6 +363,18 @@ export async function buildGroupPackagePolicy(
     agentCredentials,
     authenticateAndDeployStep.existingSecretRefs,
     getPolicyVarSettings(policySettings, 'agent_based', pkgVarNames)
+  );
+
+  // Packages that declare region and credentials on the input (e.g. aws_otel) get them there.
+  applyInputVars(prunedInputs, pkgInfo, (inputVarNames) =>
+    buildPackageVars(
+      globalRegion,
+      authenticateAndDeployStep.staticKeys,
+      inputVarNames,
+      agentCredentials,
+      authenticateAndDeployStep.existingSecretRefs,
+      getPolicyVarSettings(policySettings, 'agent_based', inputVarNames)
+    )
   );
 
   if (Object.keys(prunedInputs).length === 0) {
