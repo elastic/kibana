@@ -25,13 +25,16 @@ permissions:
 # run for one of three triggers:
 # - manual dispatch with an issue number
 # - a failed-test issue opened, reopened, or first labeled failed-test
-# - kibanamachine's "new failure" comment that brings failcount to 2
+# - kibanamachine's "new failure" comment that brings failcount to 2, on an open issue: the
+#   reporter reopens an issue before commenting on a failure, and comments on a closed one when
+#   it closes a per-test issue in favor of a suite issue
 if: >-
   ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '')
   || (github.event_name == 'issues' && !github.event.issue.pull_request
   && contains(github.event.issue.labels.*.name, 'failed-test')
   && (github.event.action != 'labeled' || github.event.label.name == 'failed-test'))
   || (github.event_name == 'issue_comment' && !github.event.issue.pull_request
+  && github.event.issue.state == 'open'
   && contains(github.event.issue.labels.*.name, 'failed-test')
   && github.event.comment.user.login == 'kibanamachine'
   && (contains(github.event.issue.body, '"test.failCount":2,')
