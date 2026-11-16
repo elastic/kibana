@@ -8,6 +8,7 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
+import { isEqual, uniqWith } from 'lodash';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { IDslPagination } from '@kbn/search-types';
@@ -94,7 +95,10 @@ export function sendLoadingMoreFinishedMsg(
       result: moreRecords?.length
         ? [...(currentValue.result || []), ...moreRecords]
         : currentValue.result,
-      interceptedWarnings,
+      // keep warnings from earlier pages (e.g. shard failures) so the callout doesn't vanish
+      interceptedWarnings: interceptedWarnings
+        ? uniqWith([...(currentValue.interceptedWarnings ?? []), ...interceptedWarnings], isEqual)
+        : currentValue.interceptedWarnings,
       pagination,
     });
   }

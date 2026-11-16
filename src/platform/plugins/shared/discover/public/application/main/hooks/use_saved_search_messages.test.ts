@@ -124,7 +124,7 @@ describe('test useSavedSearch message generators', () => {
       if (value.fetchStatus !== FetchStatus.LOADING_MORE) {
         expect(value.fetchStatus).toBe(FetchStatus.COMPLETE);
         expect(value.result).toBe(initialRecords);
-        expect(value.interceptedWarnings).toBeUndefined();
+        expect(value.interceptedWarnings).toHaveLength(1);
         done();
       }
     });

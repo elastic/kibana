@@ -382,7 +382,6 @@ export class SearchMethodsService implements ISearchMethods {
       // It could make sense to lock this down further if we get more confident or if expression functions
       // can no longer be used directly in Canvas
       ...rest,
-      track_total_hits: trackTotalHits,
     };
 
     const { index: paramsIndex } = params;
@@ -396,6 +395,7 @@ export class SearchMethodsService implements ISearchMethods {
         // allow them, and the shard preference (which keeps search_after pages on the same copies)
         ...(isDataView && paramsIndex.getAllowHidden() && { expand_wildcards: 'all' }),
         ...(preference && { preference }),
+        ...(trackTotalHits !== undefined && { track_total_hits: trackTotalHits }),
         body,
       },
     };
@@ -425,9 +425,14 @@ export class SearchMethodsService implements ISearchMethods {
         ? rawResponse.hits.total
         : rawResponse.hits?.total?.value;
 
+    // A page with fewer hits than requested means every shard that responded is exhausted. The total
+    // can still be higher, e.g. when a shard failed, but those hits can never be loaded.
+    const { size } = originalParams;
+    const isShortPage = size !== undefined && (rawResponse.hits?.hits?.length ?? 0) < size;
+
     // Without a total from the caller or the response there is no way to know, so assume none
     const hasNextPage = (totalHits: number | undefined = responseTotal): boolean =>
-      Boolean(lastHit?.sort) && totalHits !== undefined && totalHits > currentCount;
+      Boolean(lastHit?.sort) && !isShortPage && totalHits !== undefined && totalHits > currentCount;
 
     return {
       hasNextPage,
