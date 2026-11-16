@@ -95,6 +95,13 @@ describe('AwsRds', () => {
       expect(AwsRds.schema?.safeParse({ ...valid, [field]: value }).success).toBe(false);
     });
 
+    it('accepts an RDS-managed master secret ARN, which is longer than 100 characters', () => {
+      const secretArn =
+        'arn:aws:secretsmanager:us-east-2:123456789012:secret:rds!cluster-00000000-0000-0000-0000-000000000000-AbCdEf';
+      expect(secretArn.length).toBeGreaterThan(100);
+      expect(AwsRds.schema?.safeParse({ ...valid, secretArn }).success).toBe(true);
+    });
+
     it('rejects an unsupported engine', () => {
       expect(AwsRds.schema?.safeParse({ ...valid, engine: 'oracle' }).success).toBe(false);
     });

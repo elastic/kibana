@@ -39,6 +39,8 @@ import {
   QueryInputSchema,
 } from './types';
 
+// AWS allows ARNs up to 2048 characters; RDS-managed secret ARNs already exceed 100.
+const MAX_ARN_LENGTH = 2048;
 const DEFAULT_MAX_ROWS = 100;
 const SCHEMA_MAX_ROWS = 2000;
 const DEFAULT_PG_SCHEMA = 'public';
@@ -117,7 +119,7 @@ export const AwsRds: ConnectorSpec = {
       clusterArn: z
         .string()
         .min(11)
-        .max(100)
+        .max(MAX_ARN_LENGTH)
         .regex(CLUSTER_ARN_PATTERN, 'Must be an Aurora DB cluster ARN')
         .describe(
           i18n.translate('core.kibanaConnectorSpecs.awsRds.config.clusterArn.description', {
@@ -138,7 +140,7 @@ export const AwsRds: ConnectorSpec = {
       secretArn: z
         .string()
         .min(11)
-        .max(100)
+        .max(MAX_ARN_LENGTH)
         .regex(SECRET_ARN_PATTERN, 'Must be a Secrets Manager secret ARN')
         .describe(
           i18n.translate('core.kibanaConnectorSpecs.awsRds.config.secretArn.description', {
