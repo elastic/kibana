@@ -58,6 +58,23 @@ describe('createStackTraceResolver', () => {
     ]);
   });
 
+  it('resolves locations below an install path with spaces', () => {
+    const trace = [
+      '    at fail (C:\\Program Files\\Kibana\\node_modules\\@kbn\\a\\a.js:1:1)',
+      '    at C:\\Program Files\\Kibana\\node_modules\\@kbn\\a\\a.js:1:1',
+      '    at async /opt/my kibana/node_modules/@kbn/a/a.js:1:1',
+    ];
+
+    expect(createStackTraceResolver(kibanaDir)(trace.join('\n')).split('\n')).toEqual([
+      '    at fail (src/a.ts:3:5)',
+      '    at src/a.ts:3:5',
+      '    at async src/a.ts:3:5',
+    ]);
+    expect(
+      createStackTraceResolver(kibanaDir)(JSON.stringify({ stack: `Error: problem\n${trace[1]}` }))
+    ).toBe(JSON.stringify({ stack: 'Error: problem\n    at src/a.ts:3:5' }));
+  });
+
   it('resolves locations in JSON, keeping its syntax', () => {
     const log = JSON.stringify({
       stack: 'Error: problem\n    at C:\\kibana\\node_modules\\@kbn\\a\\a.js:1:1',

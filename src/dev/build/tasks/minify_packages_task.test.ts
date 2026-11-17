@@ -13,12 +13,15 @@ import Path from 'path';
 import { minifyFile } from './minify_packages_task';
 
 describe('minifyFile', () => {
-  it('strips whitespace and comments, keeping names and escaping non-ASCII', async () => {
+  it('strips whitespace and comments, keeping the license header and names and escaping non-ASCII', async () => {
     const dir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'kbn-minify-'));
     const file = Path.join(dir, 'index.js');
     await Fsp.writeFile(
       file,
       [
+        '/*',
+        ' * Copyright Elasticsearch B.V. Licensed under the Elastic License 2.0.',
+        ' */',
         '// comment',
         'Worker = ((BaseWorker) => class Worker extends BaseWorker {})(Worker);',
         "const message = 'café';",
@@ -28,7 +31,8 @@ describe('minifyFile', () => {
     await minifyFile(file);
 
     expect(await Fsp.readFile(file, 'utf8')).toBe(
-      'Worker=(BaseWorker=>class Worker extends BaseWorker{})(Worker);const message="caf\\xe9";'
+      '/*!\n * Copyright Elasticsearch B.V. Licensed under the Elastic License 2.0.\n */' +
+        'Worker=(BaseWorker=>class Worker extends BaseWorker{})(Worker);const message="caf\\xe9";'
     );
     await Fsp.rm(dir, { recursive: true });
   });

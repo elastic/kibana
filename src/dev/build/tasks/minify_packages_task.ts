@@ -15,19 +15,31 @@ import { globby } from 'globby';
 import { asyncForEachWithLimit } from '@kbn/std';
 import type { Task } from '../lib';
 
-// Only strips whitespace and comments: compressing drops inferred function and class names,
-// mangling hides local names in errors, and ASCII output keeps V8 source strings one-byte.
+// Only strips whitespace and comments other than legal ones: compressing drops inferred function
+// and class names, mangling hides local names in errors, and ASCII output keeps V8 source strings
+// one-byte.
 const STRIP_ONLY: JsMinifyOptions = {
   compress: false,
   mangle: false,
-  format: { comments: false, asciiOnly: true },
+  format: { comments: 'some', asciiOnly: true },
+};
+
+// SWC can emit a file's license header after its directives.
+const LICENSE_HEADER_RE = /\/\*(?=\r?\n \* Copyright Elasticsearch)[^]*?\*\//;
+const toLegalComment = (header: string) => `/*!${header.slice(2)}`;
+
+/** Returns the license header in `source`, marked as a legal comment that minifiers keep. */
+export const getLicenseHeader = (source: string): string | undefined => {
+  const [header] = LICENSE_HEADER_RE.exec(source) ?? [];
+  return header && toLegalComment(header);
 };
 
 /** Minifies `file`, updating the source map next to it, if it has one. */
 export async function minifyFile(file: string, minify = STRIP_ONLY): Promise<void> {
   const inputSourceMap = await Fsp.readFile(`${file}.map`, 'utf8').catch(() => undefined);
+  const source = await Fsp.readFile(file, 'utf8');
   // `minify()` can't take an input source map, while `transform()` emits equivalent code.
-  const { code, map } = await transform(await Fsp.readFile(file, 'utf8'), {
+  const { code, map } = await transform(source.replace(LICENSE_HEADER_RE, toLegalComment), {
     swcrc: false,
     configFile: false,
     isModule: false,

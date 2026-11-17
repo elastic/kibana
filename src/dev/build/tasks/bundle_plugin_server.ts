@@ -17,6 +17,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit } from '@kbn/std';
 import { getNodeSwcConfig } from '@kbn/swc-config/node';
 import type { Task } from '../lib';
+import { getLicenseHeader } from './minify_packages_task';
 import { RELATIVE_REQUIRE_RESOLVE_RE } from './bundle_plugin_server_loader';
 
 const LOADER = require.resolve('./bundle_plugin_server_loader');
@@ -81,6 +82,9 @@ export async function bundlePluginServer({
     return 0;
   }
 
+  // Modules lose their license headers in the bundle, so each written file starts with the entry's.
+  const header = getLicenseHeader(await Fsp.readFile(rspackEntries.index, 'utf8'));
+
   const stats = await new Promise<Stats>((resolve, reject) => {
     const compiler = rspack({
       mode: 'production',
@@ -117,7 +121,7 @@ export async function bundlePluginServer({
       plugins: [
         new rspack.BannerPlugin({
           // Repeats "use strict", since the banner displaces Rspack's own directive.
-          banner: '"use strict";const __kbnBundleDirname=__dirname;',
+          banner: `${header ? `${header}\n` : ''}"use strict";const __kbnBundleDirname=__dirname;`,
           raw: true,
           entryOnly: false,
         }),
@@ -185,7 +189,10 @@ export async function bundlePluginServer({
 
   for (const [stub, target] of stubs) {
     const rel = Path.relative(Path.dirname(stub), target);
-    await Fsp.writeFile(stub, `module.exports = require(${JSON.stringify(`./${rel}`)});\n`);
+    await Fsp.writeFile(
+      stub,
+      `${header ? `${header}\n` : ''}module.exports = require(${JSON.stringify(`./${rel}`)});\n`
+    );
     // The source map was for the replaced module.
     await Fsp.rm(`${stub}.map`, { force: true });
   }
