@@ -446,4 +446,9 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.oracle',
+    lazy(() => import(/* webpackChunkName: "connectorIconoracle" */ './specs/oracle/icon')),
+  ],
 ]);
