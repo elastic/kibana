@@ -7,16 +7,28 @@
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 import { EsqlEditor } from '@kbn/scout';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 import { expect } from '../../../../../ui';
 
 /** One attempt to pick options before the selection is retried. */
 const OPTION_ATTEMPT_TIMEOUT_MS = 5_000;
 
-/** Path of the search requests that return the columns of an ES|QL query. */
-const ESQL_SEARCH_PATH = '/internal/search/esql';
+const CONTINUE_SELECTOR = '[data-test-subj="define-continue"]';
 
 type ComboBox = ReturnType<ScoutPage['components']['comboBox']>;
+
+/** Window flag that records whether "Continue" was disabled since the observer was installed. */
+type ContinueWindow = Window & { __esqlContinueWasDisabled?: boolean };
+
+/** Same derivation as the form, which treats a query the parser cannot read as having no index. */
+const getIndexPattern = (query: string): string => {
+  try {
+    return getIndexPatternFromESQLQuery(query);
+  } catch {
+    return '';
+  }
+};
 
 /**
  * ES|QL rule form, shared by rule creation and rule editing: the ES|QL query bar and the alert
@@ -38,11 +50,6 @@ export class EsqlRuleFormPage {
   readonly suppressPerTimePeriod: Locator;
   readonly suppressMissingFields: Locator;
   readonly doNotSuppressMissingFields: Locator;
-
-  /** Timeline of the ES|QL search requests and the clicks on "Continue", for failure messages. */
-  private readonly timeline: string[] = [];
-  private timelineStart = Date.now();
-  private isRecordingRequests = false;
 
   constructor(private readonly page: ScoutPage) {
     this.ruleTypeCard = this.page.testSubj.locator('esqlRuleType');
@@ -77,7 +84,6 @@ export class EsqlRuleFormPage {
   async gotoCreateEsqlRule(params: { kbnUrl: KibanaUrl; spaceId: string }): Promise<void> {
     const { kbnUrl, spaceId } = params;
 
-    this.recordEsqlSearchRequests();
     await this.page.addInitScript(() => {
       window.localStorage.setItem('cps:projectPicker:tourShown', 'true');
     });
@@ -92,7 +98,66 @@ export class EsqlRuleFormPage {
   /** Replaces the query of the ES|QL editor. */
   async setQuery(query: string): Promise<void> {
     await this.esqlEditor.setQuery(query);
-    this.recordEvent('query set');
+  }
+
+  /**
+   * Replaces the query and waits for the Define step to settle. About 300 ms after the index
+   * pattern of the query changes, the form resolves the data view again. "Continue" is disabled
+   * until it is done, and a click that lands in that window is ignored. The window lasts from tens
+   * of milliseconds to over a second, depending on the load of the machine. Polling the button can
+   * miss a short window, therefore we use an observer in the page to record this behaviour.
+   * The wait only applies when the index pattern changes. Otherwise "Continue" stays enabled.
+   */
+  async setQueryAndWaitToSettle(query: string): Promise<void> {
+    const previousQuery = await this.esqlEditor.getQuery();
+    const hasNewIndexPattern = getIndexPattern(previousQuery) !== getIndexPattern(query);
+
+    if (!hasNewIndexPattern) {
+      await this.setQuery(query);
+      return;
+    }
+
+    await this.recordWhenContinueIsDisabled();
+    await this.setQuery(query);
+    await this.waitForContinueToBeEnabledAgain();
+  }
+
+  /**
+   * Installs an observer in the page that remembers that "Continue" was disabled. The observer sees
+   * windows that polling from the test can miss.
+   */
+  private async recordWhenContinueIsDisabled(): Promise<void> {
+    await this.page.evaluate((selector) => {
+      const continueWindow: ContinueWindow = window;
+      continueWindow.__esqlContinueWasDisabled = false;
+
+      const observer = new MutationObserver(() => {
+        const button = document.querySelector<HTMLButtonElement>(selector);
+        if (button?.disabled) {
+          continueWindow.__esqlContinueWasDisabled = true;
+        }
+      });
+      observer.observe(document, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['disabled'],
+      });
+    }, CONTINUE_SELECTOR);
+  }
+
+  private async waitForContinueToBeEnabledAgain(): Promise<void> {
+    await this.page.waitForFunction(
+      (selector) => {
+        const button = document.querySelector<HTMLButtonElement>(selector);
+        return (
+          (window as ContinueWindow).__esqlContinueWasDisabled === true &&
+          button?.disabled === false
+        );
+      },
+      CONTINUE_SELECTOR,
+      { timeout: DATA_LOAD_TIMEOUT_MS }
+    );
   }
 
   /** Clicks "Continue" once. Use it when the Define step is expected to stay open on an error. */
@@ -101,54 +166,12 @@ export class EsqlRuleFormPage {
   }
 
   /**
-   * TEMPORARY, for the flaky test runner: clicks "Continue" once and waits for the Define step to
-   * collapse, with no retry, so a failure shows the first-click problem. The failure carries the
-   * text of the query bar (which includes the validation message) and a timeline of the ES|QL
-   * search requests and clicks. Replace it with the fix, or restore a retry, once the cause of
-   * the failures of CI runs 15502 and 15505 is known.
+   * Clicks "Continue" once and waits for the Define step to collapse. Set the query with
+   * `setQueryAndWaitToSettle` first, so the click cannot land while "Continue" is disabled.
    */
   async continueToAboutStep(): Promise<void> {
-    this.recordEvent('click Continue');
     await this.defineContinue.click();
-    try {
-      await expect(this.queryBar).toBeHidden({ timeout: DATA_LOAD_TIMEOUT_MS });
-    } catch (error) {
-      const queryBarText = (await this.queryBar.textContent()) ?? '';
-      throw new Error(
-        `The Define step did not close. Query bar: ${queryBarText}\nTimeline:\n${this.timeline.join(
-          '\n'
-        )}`,
-        { cause: error }
-      );
-    }
-  }
-
-  private recordEvent(event: string): void {
-    this.timeline.push(`+${Date.now() - this.timelineStart}ms ${event}`);
-  }
-
-  private recordEsqlSearchRequests(): void {
-    if (this.isRecordingRequests) {
-      return;
-    }
-    this.isRecordingRequests = true;
-    this.timelineStart = Date.now();
-
-    this.page.on('request', (request) => {
-      if (request.url().includes(ESQL_SEARCH_PATH)) {
-        this.recordEvent('ES|QL search request sent');
-      }
-    });
-    this.page.on('response', (response) => {
-      if (response.url().includes(ESQL_SEARCH_PATH)) {
-        this.recordEvent(`ES|QL search response ${response.status()}`);
-      }
-    });
-    this.page.on('requestfailed', (request) => {
-      if (request.url().includes(ESQL_SEARCH_PATH)) {
-        this.recordEvent(`ES|QL search request failed: ${request.failure()?.errorText}`);
-      }
-    });
+    await expect(this.queryBar).toBeHidden({ timeout: DATA_LOAD_TIMEOUT_MS });
   }
 
   /** Picks the field that provides the rule name in the "Rule name override" control. */

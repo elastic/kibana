@@ -56,7 +56,7 @@ spaceTest.describe(
         const query = getEsqlRuleQuery(esqlSourceIndexName(scoutSpace.id));
 
         await spaceTest.step('fill the define step', async () => {
-          await esqlRuleForm.setQuery(query);
+          await esqlRuleForm.setQueryAndWaitToSettle(query);
           await esqlRuleForm.continueToAboutStep();
         });
 
@@ -105,7 +105,9 @@ spaceTest.describe(
       async ({ pageObjects, scoutSpace }) => {
         const { esqlRuleForm, ruleCreateWizard, ruleDetailsPage } = pageObjects;
 
-        await esqlRuleForm.setQuery(getEsqlRuleQuery(esqlSourceIndexName(scoutSpace.id)));
+        await esqlRuleForm.setQueryAndWaitToSettle(
+          getEsqlRuleQuery(esqlSourceIndexName(scoutSpace.id))
+        );
         await esqlRuleForm.continueToAboutStep();
 
         await ruleCreateWizard.waitForAboutStepEnabled();
@@ -135,7 +137,7 @@ spaceTest.describe(
           'limit 5',
         ].join(' | ');
 
-        await esqlRuleForm.setQuery(query);
+        await esqlRuleForm.setQueryAndWaitToSettle(query);
         await esqlRuleForm.continueToAboutStep();
 
         await ruleCreateWizard.waitForAboutStepEnabled();
@@ -165,7 +167,7 @@ spaceTest.describe(
         ].join(' | ');
 
         await spaceTest.step('configure suppression on the define step', async () => {
-          await esqlRuleForm.setQuery(query);
+          await esqlRuleForm.setQueryAndWaitToSettle(query);
           await esqlRuleForm.selectSuppressionFields(SUPPRESS_BY_FIELDS);
           await esqlRuleForm.suppressPerTimePeriod.check();
           await esqlRuleForm.suppressionDurationValue.fill('2');

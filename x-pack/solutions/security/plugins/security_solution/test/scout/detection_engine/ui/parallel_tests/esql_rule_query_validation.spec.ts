@@ -61,7 +61,9 @@ spaceTest.describe(
         await esqlRuleForm.continueFromDefineStep();
         await expect(esqlRuleForm.queryBar).toContainText('required');
 
-        await esqlRuleForm.setQuery(getEsqlRuleQuery(esqlSourceIndexName(scoutSpace.id)));
+        await esqlRuleForm.setQueryAndWaitToSettle(
+          getEsqlRuleQuery(esqlSourceIndexName(scoutSpace.id))
+        );
         await esqlRuleForm.continueToAboutStep();
 
         await expect(esqlRuleForm.queryBar).toBeHidden();
@@ -76,7 +78,7 @@ spaceTest.describe(
         // The metadata operator is added when the rule runs, not in the form
         const query = `from ${esqlSourceIndexName(scoutSpace.id)} | limit 5`;
 
-        await esqlRuleForm.setQuery(query);
+        await esqlRuleForm.setQueryAndWaitToSettle(query);
         expect(await esqlRuleForm.esqlEditor.getQuery()).toBe(query);
         await esqlRuleForm.continueToAboutStep();
 
@@ -88,7 +90,7 @@ spaceTest.describe(
     spaceTest('shows an error when the query uses an unknown operator', async ({ pageObjects }) => {
       const { esqlRuleForm } = pageObjects;
 
-      await esqlRuleForm.setQuery(
+      await esqlRuleForm.setQueryAndWaitToSettle(
         'from auditbeat* metadata _id, _version, _index | not_existing_operator'
       );
       await esqlRuleForm.continueFromDefineStep();
@@ -99,7 +101,7 @@ spaceTest.describe(
     spaceTest('shows a syntax error when the query is not valid ES|QL', async ({ pageObjects }) => {
       const { esqlRuleForm } = pageObjects;
 
-      await esqlRuleForm.setQuery('from auditbeat* | where true test');
+      await esqlRuleForm.setQueryAndWaitToSettle('from auditbeat* | where true test');
       await esqlRuleForm.continueFromDefineStep();
 
       await expect(esqlRuleForm.queryBar).toContainText(
@@ -112,7 +114,7 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         const { esqlRuleForm, ruleCreateWizard, ruleDetailsPage } = pageObjects;
 
-        await esqlRuleForm.setQuery(
+        await esqlRuleForm.setQueryAndWaitToSettle(
           `from ${MISSING_ESQL_SOURCE} metadata _id, _version, _index | limit 5`
         );
         await esqlRuleForm.continueToAboutStep();
@@ -137,7 +139,7 @@ spaceTest.describe(
       async ({ pageObjects, scoutSpace }) => {
         const { esqlRuleForm, ruleCreateWizard, ruleDetailsPage } = pageObjects;
 
-        await esqlRuleForm.setQuery(
+        await esqlRuleForm.setQueryAndWaitToSettle(
           `from ${esqlSourceIndexName(
             scoutSpace.id
           )} metadata _id, _version, _index | drop _id | limit 5`
