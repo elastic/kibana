@@ -83,21 +83,33 @@ interface UrlReadResult {
 
 const URL_STATE_KEYS = ['dateRange', 'query', 'filters', 'filterControls'] as const;
 
+const resolveDateRange = (
+  range: TimeRange | undefined,
+  maxDays: number
+): { dateRange: TimeRange; wasLimited: boolean } => {
+  if (!range) {
+    return { dateRange: DEFAULT_URL_SEARCH_STATE.dateRange, wasLimited: false };
+  }
+  switch (checkTimeRange(range, maxDays)) {
+    case 'valid':
+      return { dateRange: range, wasLimited: false };
+    case 'not_allowed':
+      return { dateRange: getMaxTimeRange(maxDays), wasLimited: true };
+    default:
+      return { dateRange: DEFAULT_URL_SEARCH_STATE.dateRange, wasLimited: false };
+  }
+};
+
 const sanitize = (
   decoded: rt.TypeOf<typeof UrlSearchStateRT>,
   uiSettings: IUiSettingsClient,
   maxDays: number
 ): UrlReadResult => {
-  const rangeCheck = decoded.dateRange ? checkTimeRange(decoded.dateRange, maxDays) : undefined;
-  const wasLimited = rangeCheck === 'not_allowed';
-  const dateRange =
-    decoded.dateRange && rangeCheck === 'valid'
-      ? decoded.dateRange
-      : wasLimited
-      ? getMaxTimeRange(maxDays)
-      : DEFAULT_TIME_RANGE;
+  const { dateRange, wasLimited } = resolveDateRange(decoded.dateRange, maxDays);
   const query =
-    decoded.query && !validateQuery(decoded.query, uiSettings) ? decoded.query : DEFAULT_QUERY;
+    decoded.query && !validateQuery(decoded.query, uiSettings)
+      ? decoded.query
+      : DEFAULT_URL_SEARCH_STATE.query;
 
   const state: UrlSearchState = {
     dateRange: reuseDefaultIfEqual(dateRange, DEFAULT_URL_SEARCH_STATE.dateRange),
@@ -110,7 +122,7 @@ const sanitize = (
       DEFAULT_URL_SEARCH_STATE.filters
     ),
     filterControls: reuseDefaultIfEqual(
-      decoded.filterControls ?? EMPTY_SELECTION,
+      decoded.filterControls ?? DEFAULT_URL_SEARCH_STATE.filterControls,
       DEFAULT_URL_SEARCH_STATE.filterControls
     ),
   };
@@ -173,6 +185,8 @@ export const useUrlSearchState = ({
     [history]
   );
 
+  // Reads the URL when called, not the snapshot of the last render, so two updates in a row never
+  // write over each other.
   const readCurrent = useCallback(
     () => readUrlSearchState(getStateParam(history.location.search), uiSettings, maxDays),
     [history, uiSettings, maxDays]
@@ -195,7 +209,9 @@ export const useUrlSearchState = ({
     }
   }, [notifications, urlRead, write]);
 
-  useEffect(repairUrl, [repairUrl]);
+  useEffect(() => {
+    repairUrl();
+  }, [repairUrl]);
 
   return [urlRead?.state ?? DEFAULT_URL_SEARCH_STATE, update];
 };
