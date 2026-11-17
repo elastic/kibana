@@ -25,6 +25,12 @@ describe('shared integration shards', () => {
     expect(convertShardsToArray({ B: 0 }, policies, groups)[0].percentage).toBe(0);
   });
 
+  it('returns no rows when a new pack has no shards yet', () => {
+    expect(
+      convertShardsToArray(undefined as unknown as Record<string, number>, policies, groups)
+    ).toEqual([]);
+  });
+
   it('expands an integration row to every member without leaking integration ids', () => {
     expect(
       convertShardsToObject(

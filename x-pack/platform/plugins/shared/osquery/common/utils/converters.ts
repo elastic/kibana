@@ -94,7 +94,7 @@ export const convertShardsToArray = (
     )
   );
   const rows = new Map<string, ShardsArray[number]>();
-  for (const [policyId, percentage] of Object.entries(shards)) {
+  for (const [policyId, percentage] of Object.entries(shards ?? {})) {
     if (percentage == null) {
       continue;
     }

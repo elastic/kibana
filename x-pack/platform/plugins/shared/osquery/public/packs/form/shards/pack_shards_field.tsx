@@ -157,7 +157,7 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
     const availableIds = new Set(options.map(({ key }) => key));
 
     return [
-      ...options.filter(({ key }) => !memberIds.has(key)),
+      ...options.filter(({ key }) => key == null || !memberIds.has(key)),
       ...Object.entries(groupsByPackagePolicyId ?? {})
         .filter(([, { policyIds }]) => policyIds.every((id) => availableIds.has(id)))
         .map(([key, { policyIds }]) => ({
@@ -182,7 +182,7 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
             options={groupedOptions}
             isDisabled={isDisabled}
           />
-          {groupsByPackagePolicyId?.[formValue.shardsArray[index]?.policy?.key] && (
+          {groupsByPackagePolicyId?.[formValue.shardsArray?.[index]?.policy?.key] && (
             <EuiText size="xs">
               <FormattedMessage
                 id="xpack.osquery.pack.form.sharedIntegration.shardValueDescription"
