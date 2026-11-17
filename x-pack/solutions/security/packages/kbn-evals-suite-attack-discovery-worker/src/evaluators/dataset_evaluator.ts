@@ -95,10 +95,32 @@ export const failedRowArtifacts = (rowError: string): WorkerArtifacts => ({
   outcomes: [],
 });
 
-const rowFailedResult = (output: WorkerArtifacts) =>
-  output.rowError === undefined
+/**
+ * Why a runner that reports `completed` still produced nothing to score: it analyzed none of the
+ * seeded alerts. The run swallowed whatever stopped it, so its error (when one was read) goes in
+ * the explanation. A generation the model refused outright stays a scored `MODEL_FAULT` instead.
+ */
+const emptyCompletedRunError = (output: WorkerArtifacts): string | undefined => {
+  if (
+    output.runnerStatus !== 'completed' ||
+    output.alertsAnalyzed !== 0 ||
+    output.seededAlertCount === 0 ||
+    output.generationFault?.kind === 'refused'
+  ) {
+    return undefined;
+  }
+  const cause = output.generationFault?.message ?? output.runnerError;
+  return `runner completed but analyzed 0 alerts, ${output.seededAlertCount} seeded${
+    cause ? `: ${cause}` : ''
+  }`;
+};
+
+const rowFailedResult = (output: WorkerArtifacts) => {
+  const explanation = output.rowError ?? emptyCompletedRunError(output);
+  return explanation === undefined
     ? undefined
-    : { score: null, label: ROW_FAILED_LABEL, explanation: output.rowError };
+    : { score: null, label: ROW_FAILED_LABEL, explanation };
+};
 
 /** Stamps the stage and the cohort's models on a result, so every score doc carries them. */
 const withRoutingMetadata = (

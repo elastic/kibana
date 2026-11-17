@@ -16,7 +16,11 @@ import type { CohortRouting } from '../cohort_routing';
 import { assertCleanSpace, cleanupSeed, seedScenario } from '../seed';
 import type { ReviewArtifact, WorkerArtifacts, WorkerExample } from '../worker_types';
 import type { AttackDiscoveryWorkerClient } from '../worker_client';
-import { createEvaluateDataset } from './dataset_evaluator';
+import {
+  createAuditEvaluators,
+  createCodeEvaluators,
+  createEvaluateDataset,
+} from './dataset_evaluator';
 
 jest.mock('../collect', () => ({
   collectWorkerArtifacts: jest.fn(),
@@ -573,6 +577,86 @@ describe('createEvaluateDataset', () => {
       })
     );
     await expect(evaluateRow('positive-chain-with-noise')).rejects.toThrow(/StageModelResolved/);
+  });
+
+  describe('a runner that completed but analyzed none of the seeded alerts', () => {
+    const emptyRun = (overrides: Partial<WorkerArtifacts> = {}) =>
+      attackArtifacts({
+        alertsAnalyzed: 0,
+        insights: [],
+        persistedAttackIds: [],
+        reviews: [],
+        dispatchedReviewExecutionIds: [],
+        ...overrides,
+      });
+    const { seededAlertCount } = emptyRun();
+    const scoreOf = async (name: string, output: WorkerArtifacts) => {
+      const evaluator = [
+        ...createCodeEvaluators(routing),
+        ...createAuditEvaluators({ routing }),
+      ].find((candidate) => candidate.name === name);
+      if (!evaluator) throw new Error(`no evaluator ${name}`);
+      return evaluator.evaluate({
+        input: rowFor('positive-chain-with-noise').input,
+        output,
+        expected: rowFor('positive-chain-with-noise').output,
+        metadata: undefined,
+      });
+    };
+
+    it('fails the row instead of scoring the empty output, with the swallowed error', async () => {
+      const output = emptyRun({
+        generationFault: { kind: 'failed', message: 'connector returned 500' },
+      });
+      for (const name of ['AlertsRetrieved', 'PositiveControlRecall', 'RunnerCompleted']) {
+        expect(await scoreOf(name, output)).toMatchObject({
+          score: null,
+          label: 'ROW_FAILED',
+          explanation: `runner completed but analyzed 0 alerts, ${seededAlertCount} seeded: connector returned 500`,
+        });
+      }
+    });
+
+    it('falls back to the runner error, and to no cause when none was read', async () => {
+      expect(
+        await scoreOf('AlertsRetrieved', emptyRun({ runnerError: 'step timed out' }))
+      ).toMatchObject({
+        label: 'ROW_FAILED',
+        explanation: `runner completed but analyzed 0 alerts, ${seededAlertCount} seeded: step timed out`,
+      });
+      expect(await scoreOf('AlertsRetrieved', emptyRun())).toMatchObject({
+        label: 'ROW_FAILED',
+        explanation: `runner completed but analyzed 0 alerts, ${seededAlertCount} seeded`,
+      });
+    });
+
+    it('keeps a refused generation a scored MODEL_FAULT, not a failed row', async () => {
+      const result = await scoreOf(
+        'AlertsRetrieved',
+        emptyRun({ generationFault: { kind: 'refused', message: 'I cannot help' } })
+      );
+      expect(result).toMatchObject({ score: 0, label: 'MODEL_FAULT' });
+    });
+
+    it('leaves rows without an alert count, or with nothing seeded, to the regular checks', async () => {
+      expect(
+        await scoreOf('AlertsRetrieved', emptyRun({ alertsAnalyzed: undefined }))
+      ).toMatchObject({ label: 'MISSING' });
+      expect(
+        await scoreOf(
+          'AlertsRetrieved',
+          emptyRun({ seededAlertCount: 0, seededAlertIds: [], openAlertIds: [] })
+        )
+      ).not.toMatchObject({ label: 'ROW_FAILED' });
+    });
+
+    it('turns the dataset red through the gate', async () => {
+      collect.mockResolvedValue(emptyRun());
+      const error = await rejectionOf(evaluateRow('positive-chain-with-noise'));
+      expect(error.message).toMatch(
+        /positive-chain-with-noise: \d+ code evaluator\(s\) ROW_FAILED/
+      );
+    });
   });
 
   it('records a missing verdict as a quality miss, never as a pass', async () => {

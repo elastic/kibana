@@ -33,6 +33,12 @@ evaluators and the judges report the same label instead of scoring an empty row.
 has resolved, `createEvaluateDataset` throws one error (an `AggregateError` when there are several)
 listing the row failures, an executor-level rejection, every dirty space and the failed code scores.
 
+A runner that reports `completed` but analyzed 0 of the seeded alerts is also a failed row: the run
+swallowed whatever stopped it, so there is no output to score, and scoring the empty insights would
+read as a quiet model (`AlertsRetrieved` 0, `PositiveControlRecall` 0). Every evaluator reports
+`ROW_FAILED` with "runner completed but analyzed 0 alerts, N seeded" and the generation or runner
+error when one was read. A generation the model refused stays a scored `MODEL_FAULT`.
+
 If the executor itself throws (its own span or model lookup, not one of our rows), `runExperiment`
 rejects at once while a row may be mid-run and later rows are still queued. `createEvaluateDataset`
 then closes a gate so queued rows do not seed (they return an `experiment aborted` placeholder and
