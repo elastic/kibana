@@ -178,19 +178,23 @@ const formatGap = (vendor: JsonSchema, connector: JsonSchema): StrictnessGap | u
   return { keyword: 'format', vendor: wanted, connector: declared ?? NOTHING };
 };
 
+/**
+ * Whether one regex accepts everything another does can't be decided in general, and a connector
+ * often restates the vendor's shape differently on purpose: Trello takes a comma-separated list
+ * of the ids a vendor parameter describes one at a time. So a connector that constrains the
+ * shape at all is left to review, and only one that constrains it not at all is reported.
+ */
 const patternGap = (vendor: JsonSchema, connector: JsonSchema): StrictnessGap | undefined => {
   const wanted = stringAt(vendor, 'pattern');
-  if (wanted === undefined) {
+  if (
+    wanted === undefined ||
+    stringAt(connector, 'pattern') !== undefined ||
+    stringAt(connector, 'format') !== undefined ||
+    enumAt(connector) !== undefined
+  ) {
     return undefined;
   }
-  const declared = stringAt(connector, 'pattern');
-  if (declared === wanted) {
-    return undefined;
-  }
-  if (enumAt(connector) !== undefined) {
-    return undefined;
-  }
-  return { keyword: 'pattern', vendor: wanted, connector: declared ?? NOTHING };
+  return { keyword: 'pattern', vendor: wanted, connector: NOTHING };
 };
 
 const enumGap = (vendor: JsonSchema, connector: JsonSchema): StrictnessGap | undefined => {

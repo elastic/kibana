@@ -71,6 +71,15 @@ describe('compareInputStrictness', () => {
       const schema = { type: 'string', pattern: '^[0-9a-f]{24}$' };
       expect(compareInputStrictness(schema, { ...schema })).toEqual([]);
     });
+
+    it('leaves a differently spelled pattern to review', () => {
+      expect(
+        compareInputStrictness(
+          { type: 'string', pattern: '^[0-9a-f]{24}$' },
+          { type: 'string', pattern: '^[0-9a-f]{24}(,[0-9a-f]{24})*$' }
+        )
+      ).toEqual([]);
+    });
   });
 
   describe('enum', () => {

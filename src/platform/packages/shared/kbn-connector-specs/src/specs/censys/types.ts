@@ -161,7 +161,8 @@ export const ScanStatusInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_ID_LENGTH)
-      .describe('Scan ID returned by a prior rescan call'),
+      .uuid()
+      .describe('Scan ID (UUID) returned by a prior rescan call'),
   })
 );
 export type ScanStatusInput = z.infer<typeof ScanStatusInputSchema>;
@@ -215,7 +216,8 @@ export const CensEyeJobStatusInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_ID_LENGTH)
-      .describe('Censeye job ID returned by censEyeCreateAnalysisJob'),
+      .uuid()
+      .describe('Censeye job ID (UUID) returned by censEyeCreateAnalysisJob'),
   })
 );
 export type CensEyeJobStatusInput = z.infer<typeof CensEyeJobStatusInputSchema>;
@@ -226,8 +228,9 @@ export const CensEyeJobResultInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_ID_LENGTH)
+      .uuid()
       .describe(
-        'Censeye job ID whose results to retrieve. Call censEyeJobStatus first to confirm completion.'
+        'Censeye job ID (UUID) whose results to retrieve. Call censEyeJobStatus first to confirm completion.'
       ),
   })
 );

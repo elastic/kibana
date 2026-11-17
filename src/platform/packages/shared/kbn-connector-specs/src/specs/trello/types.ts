@@ -9,11 +9,24 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+/** Trello ids are 24-character hex strings, which every path and id parameter requires. */
+const TRELLO_ID = /^[0-9a-fA-F]{24}$/;
+/** The same ids as a comma-separated list, which Trello takes for its `id…` query parameters. */
+const TRELLO_ID_LIST = /^[0-9a-fA-F]{24}(,[0-9a-fA-F]{24})*$/;
+
+/**
+ * An ISO 8601 date or date-time, which is what Trello takes for a due date. Its spec says
+ * `format: date`, but the API accepts a full timestamp and the connector sends one.
+ */
+const ISO_DATE_OR_DATE_TIME =
+  /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$/;
+
 const trelloId = (label: string) =>
   z
     .string()
     .min(1)
     .max(200)
+    .regex(TRELLO_ID)
     .describe(
       `Trello ${label} ID (24-character hex string, e.g. "5f8a1b2c3d4e5f6a7b8c9d0e"), as returned by listBoards, search, or another action.`
     );
@@ -69,9 +82,10 @@ export const SearchInputSchema = lazySchema(() =>
     idBoards: z
       .string()
       .max(2000)
+      .regex(/^(mine|[0-9a-fA-F]{24}(,[0-9a-fA-F]{24})*)$/)
       .optional()
       .describe(
-        'Comma-separated Trello board IDs to restrict the search to. Omit to search all boards the member can access.'
+        'Comma-separated Trello board IDs to restrict the search to, or "mine". Omit to search all boards the member can access.'
       ),
     cardsLimit: z
       .number()
@@ -106,6 +120,7 @@ export const CreateCardInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(100)
+      .regex(ISO_DATE_OR_DATE_TIME)
       .optional()
       .describe('Due date as an ISO 8601 datetime string, e.g. "2024-06-15T17:00:00.000Z".'),
     pos: cardPosition
@@ -117,12 +132,14 @@ export const CreateCardInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(2000)
+      .regex(TRELLO_ID_LIST)
       .optional()
       .describe('Comma-separated Trello member IDs to assign to the card.'),
     idLabels: z
       .string()
       .min(1)
       .max(2000)
+      .regex(TRELLO_ID_LIST)
       .optional()
       .describe('Comma-separated Trello label IDs to apply to the card.'),
   })
@@ -139,6 +156,7 @@ export const UpdateCardInputSchema = lazySchema(() =>
         .string()
         .min(1)
         .max(100)
+        .regex(ISO_DATE_OR_DATE_TIME)
         .nullable()
         .optional()
         .describe(
@@ -161,6 +179,7 @@ export const UpdateCardInputSchema = lazySchema(() =>
         .string()
         .min(1)
         .max(2000)
+        .regex(TRELLO_ID_LIST)
         .optional()
         .describe(
           'Comma-separated Trello member IDs to assign to the card, replacing the current assignment. Use listBoardMembers to resolve names to IDs.'
@@ -169,6 +188,7 @@ export const UpdateCardInputSchema = lazySchema(() =>
         .string()
         .min(1)
         .max(2000)
+        .regex(TRELLO_ID_LIST)
         .optional()
         .describe(
           'Comma-separated Trello label IDs to apply to the card, replacing the current labels. Use listBoardLabels to resolve label names to IDs.'
