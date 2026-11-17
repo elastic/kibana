@@ -142,8 +142,8 @@ export const moveAction = (
       gridLayout$.next(nextLayout);
     }
   } else {
-    // check collisions against simulated rects, because the placeholder keeps shifting the live ones
-    const otherPanelRects = getFlowRects(gridLayoutStateManager);
+    // check collisions against simulated rects of the starting layout, because the placeholder keeps shifting the live ones
+    const otherPanelRects = getFlowRects(gridLayoutStateManager, startingLayout);
     if (otherPanelRects) {
       const sorted = getDragOrder({ activeId: activePanel.id, previewRect, otherPanelRects });
 

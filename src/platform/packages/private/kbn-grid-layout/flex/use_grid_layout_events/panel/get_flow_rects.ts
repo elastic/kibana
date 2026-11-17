@@ -8,7 +8,7 @@
  */
 
 import type { FlexPanelData } from '../../panel';
-import type { FlexLayoutStateManager } from '../../types';
+import type { FlexLayoutData, FlexLayoutStateManager } from '../../types';
 import { getPanelKeysInOrder } from '../../utils/panel_order';
 
 interface Rect {
@@ -26,35 +26,52 @@ interface FlowPanel {
 }
 
 /**
- * Simulates how the flex container wraps the panels, minus the one being dragged. Unlike live DOM rects,
- * the result doesn't shift with the drag placeholder. Returns `undefined` if the layout can't be measured.
+ * Simulates how the flex container wraps the panels and returns the rects of all but the dragged one, which
+ * still reserves its space at its position in `orderLayout` (default: the current layout). Pass the
+ * starting layout so the result doesn't shift with the drag placeholder.
  */
-export const getFlowRects = ({
-  gridLayout$,
-  gridSettings$,
-  activePanelEvent$,
-  layoutRef,
-}: Pick<
-  FlexLayoutStateManager,
-  'gridLayout$' | 'gridSettings$' | 'activePanelEvent$' | 'layoutRef'
->): Record<string, Rect> | undefined => {
+export const getFlowRects = (
+  {
+    gridLayout$,
+    gridSettings$,
+    activePanelEvent$,
+    layoutRef,
+  }: Pick<
+    FlexLayoutStateManager,
+    'gridLayout$' | 'gridSettings$' | 'activePanelEvent$' | 'layoutRef'
+  >,
+  orderLayout?: FlexLayoutData
+): Record<string, Rect> | undefined => {
   const layout = gridLayout$.value;
   const gridSettings = gridSettings$.value;
-  const container = layoutRef.current?.getBoundingClientRect();
-  if (!gridSettings || !container) return;
+  const layoutElement = layoutRef.current;
+  if (!gridSettings || !layoutElement) return;
+
+  const container = layoutElement.getBoundingClientRect();
+  // read the padding that is actually rendered, since renderers can override it (e.g. controls use `padding-top: 0`)
+  const { paddingTop, paddingLeft, paddingRight } = getComputedStyle(layoutElement);
+  const padding = {
+    top: parseFloat(paddingTop) || 0,
+    left: parseFloat(paddingLeft) || 0,
+    right: parseFloat(paddingRight) || 0,
+  };
 
   const { gutterSize, rowHeight } = gridSettings;
-  const usableRowWidth = container.width - gutterSize * 2;
+  const usableRowWidth = container.width - padding.left - padding.right;
   const activePanel = activePanelEvent$.value;
+  // the responsive breakpoint stacks every panel at once, giving each a computed `flex-basis` of 100%
+  const isStacked = activePanel
+    ? getComputedStyle(activePanel.panelDiv).flexBasis === '100%'
+    : false;
 
-  const panels: FlowPanel[] = getPanelKeysInOrder(layout)
-    .filter((id) => id !== activePanel?.id) // drop the active panel
-    .map((id) => ({
-      // get the base widths of each other panel
-      id,
-      width: getBaseWidth(layout[id], activePanel?.panelWidths?.[id], usableRowWidth),
-      grow: layout[id].grow,
-    }));
+  // keep the active panel in the flow so it reserves its footprint; panels missing from the layout are skipped
+  const orderedIds = getPanelKeysInOrder(orderLayout ?? layout).filter((id) => layout[id]);
+  const panels: FlowPanel[] = orderedIds.map((id) => ({
+    // get the base widths of each panel
+    id,
+    width: getBaseWidth(layout[id], activePanel?.panelWidths?.[id], isStacked, usableRowWidth),
+    grow: layout[id].grow,
+  }));
 
   // group the panels into rows
   const rows: FlowPanel[][] = [];
@@ -77,12 +94,12 @@ export const getFlowRects = ({
   // lay the rows out top to bottom, sharing any leftover width between each row's growing panels
   const rects: Record<string, Rect> = {};
   rows.forEach((row, rowIndex) => {
-    const top = container.top + gutterSize + rowIndex * (rowHeight + gutterSize);
+    const top = container.top + padding.top + rowIndex * (rowHeight + gutterSize);
     const growerCount = row.filter(({ grow }) => grow).length;
     // only applied to growers, so this is never used when `growerCount` is 0
     const extra = Math.max(usableRowWidth - getActualRowWidth(row, gutterSize), 0) / growerCount;
 
-    let left = container.left + gutterSize;
+    let left = container.left + padding.left;
     row.forEach(({ id, width, grow }) => {
       const finalWidth = grow ? width + extra : width;
       rects[id] = { top, bottom: top + rowHeight, left, right: left + finalWidth };
@@ -90,6 +107,8 @@ export const getFlowRects = ({
     });
   });
 
+  // the active panel only reserved space; it isn't a collision target
+  if (activePanel) delete rects[activePanel.id];
   return rects;
 };
 
@@ -102,9 +121,11 @@ const getActualRowWidth = (row: FlowPanel[], gutterSize: number) => {
 const getBaseWidth = (
   panel: FlexPanelData,
   measuredWidth: number | undefined,
+  isStacked: boolean,
   usableRowWidth: number
 ): number => {
-  if (measuredWidth === undefined) return panel.width;
-  // growers were measured after growing, so use their requested width unless they span the full row
-  return panel.grow && measuredWidth < usableRowWidth - 1 ? panel.width : measuredWidth;
+  // responsive stacking forces a full-width basis; ordinary growth must not be mistaken for it
+  if (isStacked) return usableRowWidth;
+  if (measuredWidth === undefined || panel.grow) return panel.width;
+  return measuredWidth;
 };
