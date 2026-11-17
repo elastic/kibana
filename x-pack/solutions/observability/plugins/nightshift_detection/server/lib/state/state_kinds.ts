@@ -19,8 +19,8 @@ export interface RunLeaseDocument {
   expires_at: string;
 }
 
-/** Where a strategy's processing got to. */
-export interface WatermarkDocument {
+/** Where a strategy's signal generator got to. */
+export interface GeneratorStateDocument {
   /** End of the last fully processed minute, in epoch milliseconds. */
   processed_until: number;
 }
@@ -28,7 +28,7 @@ export interface WatermarkDocument {
 /** The documents kept in the state index, by kind. */
 export interface StateDocuments {
   lease: RunLeaseDocument;
-  watermark: WatermarkDocument;
+  generator_state: GeneratorStateDocument;
 }
 
 /** The kinds of document in the state index. */

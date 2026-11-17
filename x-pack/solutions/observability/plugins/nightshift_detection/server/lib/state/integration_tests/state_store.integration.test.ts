@@ -76,13 +76,13 @@ describe('ElasticsearchStateStore', () => {
     const spaceId = nextSpaceId();
     const created = await store.put({
       spaceId,
-      kind: 'watermark',
+      kind: 'generator_state',
       key: 'strategy',
       value: { processed_until: 1 },
     });
     await store.put({
       spaceId,
-      kind: 'watermark',
+      kind: 'generator_state',
       key: 'strategy',
       value: { processed_until: 2 },
       version: created,
@@ -91,14 +91,15 @@ describe('ElasticsearchStateStore', () => {
     await expect(
       store.put({
         spaceId,
-        kind: 'watermark',
+        kind: 'generator_state',
         key: 'strategy',
         value: { processed_until: 3 },
         version: created,
       })
     ).rejects.toBeInstanceOf(StateConflictError);
     expect(
-      (await store.get({ spaceId, kind: 'watermark', key: 'strategy' }))?.value.processed_until
+      (await store.get({ spaceId, kind: 'generator_state', key: 'strategy' }))?.value
+        .processed_until
     ).toBe(2);
   });
 });

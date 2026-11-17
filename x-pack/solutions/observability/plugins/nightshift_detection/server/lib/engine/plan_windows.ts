@@ -35,19 +35,19 @@ const alignUp = ({ time, stepMs }: { time: number; stepMs: number }) =>
 
 function planWindow({
   strategy,
-  watermark,
+  processedUntil,
   now,
   skipBacklog,
 }: {
   strategy: DetectionStrategy;
-  watermark: number | undefined;
+  processedUntil: number | undefined;
   now: number;
   skipBacklog: boolean;
 }): PlannedWindow | undefined {
   const { id, cadence_minutes: cadence, settle_minutes: settle } = strategy.descriptor;
 
   // A zero cadence divides by zero and a fractional one breaks the whole-minute windows; either
-  // would plan a window of `NaN` and save it as the watermark.
+  // would plan a window of `NaN` and save it as the strategy's progress.
   if (!Number.isInteger(cadence) || cadence < 1 || !Number.isInteger(settle) || settle < 0) {
     throw new InvalidStrategyScheduleError(id);
   }
@@ -58,13 +58,13 @@ function planWindow({
   // Only buckets whose data has settled are read, and only whole cadence steps.
   const settledEnd = alignDown({ time: now - settle * MINUTE_MS, stepMs: cadenceMs });
 
-  if (watermark !== undefined && settledEnd - watermark < cadenceMs) {
+  if (processedUntil !== undefined && settledEnd - processedUntil < cadenceMs) {
     return undefined;
   }
 
   // A strategy that never ran starts about one run's worth back, so its first window has data to
   // read. Aligned up, so the window opens on a cadence boundary and has no partial first bucket.
-  const start = watermark ?? alignUp({ time: settledEnd - maxRunMs, stepMs: cadenceMs });
+  const start = processedUntil ?? alignUp({ time: settledEnd - maxRunMs, stepMs: cadenceMs });
   // The oldest minute a run may start at: the catch-up limit, or the latest cadence step when the
   // backlog is skipped. The limit never leaves less than one cadence step to run.
   const latestStep = settledEnd - cadenceMs;
@@ -86,13 +86,15 @@ function planWindow({
     from,
     to,
     skipped_minutes:
-      watermark !== undefined && from > watermark ? Math.round((from - watermark) / MINUTE_MS) : 0,
+      processedUntil !== undefined && from > processedUntil
+        ? Math.round((from - processedUntil) / MINUTE_MS)
+        : 0,
   };
 }
 
 /**
  * Plans the window of every strategy that is due. A strategy is due when a whole cadence step has
- * settled since its watermark; its window starts at the watermark and covers at most one run's
+ * settled since its last processed minute; its window starts there and covers at most one run's
  * worth of minutes. A strategy that never ran starts one run back; one too far behind jumps to
  * `MAX_CATCH_UP_MINUTES` back, or with `skipBacklog` to its latest settled cadence step.
  *
@@ -101,20 +103,20 @@ function planWindow({
  */
 export function planWindows({
   strategies,
-  watermarks,
+  processedUntil,
   now,
   skipBacklog = false,
 }: {
   strategies: DetectionStrategy[];
   /** Last processed minute per strategy id; a strategy that never ran is absent. */
-  watermarks: Map<string, number>;
+  processedUntil: Map<string, number>;
   now: number;
   skipBacklog?: boolean;
 }): PlannedWindow[] {
   return strategies.flatMap((strategy) => {
     const window = planWindow({
       strategy,
-      watermark: watermarks.get(strategy.descriptor.id),
+      processedUntil: processedUntil.get(strategy.descriptor.id),
       now,
       skipBacklog,
     });

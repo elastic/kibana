@@ -38,18 +38,18 @@ const EVERY_FIFTEEN_MINUTES = createStrategy({ id: 'every_fifteen_minutes', cade
 
 function plan({
   strategies = [EVERY_MINUTE],
-  watermarks = {},
+  processedUntil = {},
   now = NOW,
   skipBacklog,
 }: {
   strategies?: DetectionStrategy[];
-  watermarks?: Record<string, number>;
+  processedUntil?: Record<string, number>;
   now?: number;
   skipBacklog?: boolean;
 }) {
   return planWindows({
     strategies,
-    watermarks: new Map(Object.entries(watermarks)),
+    processedUntil: new Map(Object.entries(processedUntil)),
     now,
     skipBacklog,
   }).map(({ strategy, from, to, skipped_minutes: skipped }) => ({
@@ -78,26 +78,28 @@ describe('planWindows', () => {
 
   it('runs a one-minute strategy every minute and a five-minute one every fifth', () => {
     const strategies = [EVERY_MINUTE, EVERY_FIVE_MINUTES];
-    const watermarks: Record<string, number> = {
+    const processedUntil: Record<string, number> = {
       every_minute: SETTLED_END,
       every_five_minutes: SETTLED_END,
     };
     const windows: ReturnType<typeof plan> = [];
 
-    // Imperative on purpose: each tick's watermarks come from the previous tick's windows.
+    // Imperative on purpose: each tick's processedUntil come from the previous tick's windows.
     for (let minute = 1; minute <= 10; minute++) {
       const now = SETTLED_END + minute * MINUTE_MS + 20_000;
-      planWindows({ strategies, watermarks: new Map(Object.entries(watermarks)), now }).forEach(
-        ({ strategy, from, to }) => {
-          windows.push({
-            id: strategy.descriptor.id,
-            from: (from - SETTLED_END) / MINUTE_MS,
-            to: (to - SETTLED_END) / MINUTE_MS,
-            skipped: 0,
-          });
-          watermarks[strategy.descriptor.id] = to;
-        }
-      );
+      planWindows({
+        strategies,
+        processedUntil: new Map(Object.entries(processedUntil)),
+        now,
+      }).forEach(({ strategy, from, to }) => {
+        windows.push({
+          id: strategy.descriptor.id,
+          from: (from - SETTLED_END) / MINUTE_MS,
+          to: (to - SETTLED_END) / MINUTE_MS,
+          skipped: 0,
+        });
+        processedUntil[strategy.descriptor.id] = to;
+      });
     }
 
     expect(windows.filter(({ id }) => id === 'every_minute').map(({ from }) => from)).toEqual([
@@ -110,19 +112,19 @@ describe('planWindows', () => {
   });
 
   it('covers a five-minute gap in one run', () => {
-    expect(plan({ watermarks: { every_minute: SETTLED_END - 5 * MINUTE_MS } })).toEqual([
+    expect(plan({ processedUntil: { every_minute: SETTLED_END - 5 * MINUTE_MS } })).toEqual([
       { id: 'every_minute', from: -5, to: 0, skipped: 0 },
     ]);
   });
 
   it('catches up a gap between ten and 120 minutes over several runs', () => {
-    const watermarks = { every_minute: SETTLED_END - 20 * MINUTE_MS };
-    const [first] = plan({ watermarks });
+    const processedUntil = { every_minute: SETTLED_END - 20 * MINUTE_MS };
+    const [first] = plan({ processedUntil });
 
     expect(first).toEqual({ id: 'every_minute', from: -20, to: -10, skipped: 0 });
 
     const [second] = plan({
-      watermarks: { every_minute: SETTLED_END + first.to * MINUTE_MS },
+      processedUntil: { every_minute: SETTLED_END + first.to * MINUTE_MS },
     });
 
     expect(second).toEqual({ id: 'every_minute', from: -10, to: 0, skipped: 0 });
@@ -131,7 +133,7 @@ describe('planWindows', () => {
   it('jumps ahead and reports the skipped minutes when more than 120 minutes behind', () => {
     const behind = MAX_CATCH_UP_MINUTES + 30;
 
-    expect(plan({ watermarks: { every_minute: SETTLED_END - behind * MINUTE_MS } })).toEqual([
+    expect(plan({ processedUntil: { every_minute: SETTLED_END - behind * MINUTE_MS } })).toEqual([
       {
         id: 'every_minute',
         from: -MAX_CATCH_UP_MINUTES,
@@ -145,7 +147,7 @@ describe('planWindows', () => {
     expect(
       plan({
         strategies: [EVERY_FIVE_MINUTES],
-        watermarks: { every_five_minutes: SETTLED_END - 50 * MINUTE_MS },
+        processedUntil: { every_five_minutes: SETTLED_END - 50 * MINUTE_MS },
         skipBacklog: true,
       })
     ).toEqual([{ id: 'every_five_minutes', from: -5, to: 0, skipped: 45 }]);
@@ -155,7 +157,7 @@ describe('planWindows', () => {
     expect(
       plan({
         strategies: [EVERY_MINUTE, EVERY_FIFTEEN_MINUTES],
-        watermarks: { every_minute: SETTLED_END - MINUTE_MS },
+        processedUntil: { every_minute: SETTLED_END - MINUTE_MS },
       })
     ).toEqual([
       { id: 'every_minute', from: -1, to: 0, skipped: 0 },
