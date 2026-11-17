@@ -37,6 +37,7 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
+import type { ManagedFilter } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
@@ -84,6 +85,7 @@ import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
+import type { WorkflowLookupItem } from '../../common/lib/workflow_dependents/types';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
 import {
@@ -142,6 +144,8 @@ export interface SearchWorkflowExecutionsParams {
   request?: KibanaRequest;
   accessControlFilter?: estypes.QueryDslQueryContainer;
   workflowId?: string;
+  /** History identity of the current workflow document. Operational reads leave this unset and filter on `workflowId`. */
+  workflowUid?: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
@@ -368,6 +372,16 @@ export class WorkflowsService {
     return this.crudService.getWorkflow(id, spaceId, options);
   }
 
+  public async getDefinitionToStore(
+    yaml: string,
+    workflow: { id: string; enabled: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<EsWorkflow['definition'] | null> {
+    await this.ensureInitialized();
+    return this.crudService.getDefinitionToStore(yaml, workflow, spaceId, request);
+  }
+
   public async getHistoryForWorkflow(
     id: string,
     spaceId: string,
@@ -405,7 +419,12 @@ export class WorkflowsService {
     ids: string[],
     spaceId: string,
     source?: string[],
-    options?: { includeDeleted?: boolean; accessControlFilter?: estypes.QueryDslQueryContainer }
+    options?: {
+      includeDeleted?: boolean;
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+      managedFilter?: ManagedFilter;
+      allowPartialResults?: boolean;
+    }
   ): Promise<WorkflowPartialDetailDto[]> {
     await this.ensureInitialized();
     return this.crudService.getWorkflowsSourceByIds(ids, spaceId, source, options);
@@ -521,6 +540,24 @@ export class WorkflowsService {
   ): Promise<WorkflowDetailDto[]> {
     await this.ensureInitialized();
     return this.searchService.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
+  }
+
+  public async indexCalledWorkflowIds(ids: string[]): Promise<void> {
+    await this.ensureInitialized();
+    await this.crudService.indexCalledWorkflowIds(ids);
+  }
+
+  public async findWorkflowsCalling(
+    workflowIds: string[],
+    spaceId: string,
+    options: {
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+      includeUnindexed?: boolean;
+      managedFilter?: ManagedFilter;
+    }
+  ): Promise<WorkflowLookupItem[]> {
+    await this.ensureInitialized();
+    return this.searchService.findWorkflowsCalling(workflowIds, spaceId, options);
   }
 
   public async getWorkflows(

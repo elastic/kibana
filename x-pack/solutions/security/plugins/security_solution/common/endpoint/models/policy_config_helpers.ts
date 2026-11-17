@@ -629,11 +629,12 @@ export const setProtectionModeAndPopup = ({
 
 export const setBehaviorReputationService = (
   policy: PolicyConfig,
-  value: boolean
+  value: boolean,
+  osList: readonly (keyof UIPolicyConfig)[] = ['windows', 'mac', 'linux']
 ): PolicyConfig => {
-  policy.windows.behavior_protection.reputation_service = value;
-  policy.mac.behavior_protection.reputation_service = value;
-  policy.linux.behavior_protection.reputation_service = value;
+  forEachCouplingOs(osList, (os) => {
+    policy[os].behavior_protection.reputation_service = value;
+  });
   return policy;
 };
 
@@ -827,33 +828,20 @@ export const setDeviceControlSwitch = (policy: PolicyConfig, value: boolean): Po
 
 export const setDeviceControlUsbStorage = (
   policy: PolicyConfig,
-  value: DeviceControlAccessLevel
+  value: DeviceControlAccessLevel,
+  osList: readonly ('windows' | 'mac')[] = ['windows', 'mac']
 ): PolicyConfig => {
-  if (!policy.windows.device_control) {
-    policy.windows.device_control = { enabled: true, usb_storage: value };
-  } else {
-    policy.windows.device_control.usb_storage = value;
-  }
+  for (const os of osList) {
+    const deviceControl = policy[os].device_control;
+    if (!deviceControl) {
+      policy[os].device_control = { enabled: true, usb_storage: value };
+    } else {
+      deviceControl.usb_storage = value;
+    }
 
-  if (!policy.mac.device_control) {
-    policy.mac.device_control = { enabled: true, usb_storage: value };
-  } else {
-    policy.mac.device_control.usb_storage = value;
-  }
-
-  if (value === DeviceControlAccessLevel.deny_all) {
-    if (policy.windows.popup.device_control) {
-      policy.windows.popup.device_control.enabled = true;
-    }
-    if (policy.mac.popup.device_control) {
-      policy.mac.popup.device_control.enabled = true;
-    }
-  } else {
-    if (policy.windows.popup.device_control) {
-      policy.windows.popup.device_control.enabled = false;
-    }
-    if (policy.mac.popup.device_control) {
-      policy.mac.popup.device_control.enabled = false;
+    const popup = policy[os].popup.device_control;
+    if (popup) {
+      popup.enabled = value === DeviceControlAccessLevel.deny_all;
     }
   }
 

@@ -10,10 +10,12 @@ import {
   MAX_AI_INDEX_ID_LENGTH,
   MAX_AI_INDEX_USER_ID_LENGTH,
   MAX_KI_CONTENT_LENGTH,
+  MAX_KI_TYPE_FILTER_LENGTH,
 } from '../constants';
 
 export const MAX_KI_ID_LENGTH = 512;
-export const MAX_KI_TYPE_LENGTH = 256;
+/** Same limit as the list's type filter, so a written type can be sent back as a filter. */
+export const MAX_KI_TYPE_LENGTH = MAX_KI_TYPE_FILTER_LENGTH;
 export const MAX_KI_TITLE_LENGTH = 512;
 export const MAX_KI_DESCRIPTION_LENGTH = 2048;
 export const MAX_KI_TAG_LENGTH = 256;

@@ -10965,7 +10965,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an action policy with the given identifier, or fully replaces it if one already exists.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
+        Creates an action policy with the given identifier, or replaces its definition if one already exists.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
       operationId: put-alerting-v2-action-policies-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -16334,7 +16334,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a rule with the given identifier, or fully replaces it if one already exists.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Creates a rule with the given identifier, or replaces its definition if one already exists.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
       operationId: put-alerting-v2-rules-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -71899,7 +71899,7 @@ paths:
                   - message
                 title: Conflict
                 type: object
-          description: Conflict - The SLO id already exists
+          description: Conflict - The SLO ID already exists
         '503':
           content:
             application/json:
@@ -71968,7 +71968,7 @@ paths:
               type: object
               properties:
                 list:
-                  description: An array of SLO Definition id
+                  description: An array of SLO definition IDs
                   items:
                     description: The identifier of the SLO.
                     maxLength: 48
@@ -72118,7 +72118,7 @@ paths:
         Retrieve the status of the bulk deletion operation for SLOs. This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.<br/><br/>[Required authorization] Route required privileges: slo_write.
       operationId: bulkDeleteStatusOp
       parameters:
-        - description: The task id of the bulk delete operation
+        - description: The task ID of the bulk delete operation
           in: path
           name: taskId
           required: true
@@ -72277,7 +72277,7 @@ paths:
                 force:
                   type: boolean
                 list:
-                  description: An array of slo ids
+                  description: An array of SLO IDs
                   items:
                     type: string
                   type: array
@@ -73005,7 +73005,7 @@ paths:
               type: object
               properties:
                 list:
-                  description: An array of slo id and instance id
+                  description: An array of SLO ID and instance ID pairs
                   items:
                     type: object
                     properties:
@@ -73055,7 +73055,7 @@ paths:
                             0,
                             "sloId"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -73067,7 +73067,7 @@ paths:
                             0,
                             "sloId"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -73227,7 +73227,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -73237,7 +73237,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -73595,7 +73595,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -73605,7 +73605,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -74117,7 +74117,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -74127,7 +74127,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -74385,7 +74385,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -74395,7 +74395,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -74675,7 +74675,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -74685,7 +74685,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -74874,7 +74874,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -74884,7 +74884,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -75072,7 +75072,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -75082,7 +75082,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -163050,8 +163050,7 @@ components:
           minItems: 1
           type: array
         enabled:
-          default: true
-          description: If `true` (default), the rule runs on its schedule after creation. If `false`, the rule is saved but does not run until you enable it.
+          description: Whether the rule is enabled. Defaults to `true` when omitted. A disabled rule is saved but does not run until you enable it.
           type: boolean
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
@@ -163377,6 +163376,9 @@ components:
           maxItems: 10
           minItems: 1
           type: array
+        enabled:
+          description: Whether the action policy is enabled. Defaults to `true` when omitted. A disabled policy is saved but is not applied to alerts until you enable it.
+          type: boolean
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
           description: 'How matched alerts are batched into notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field.'
@@ -163455,6 +163457,9 @@ components:
           maxItems: 100
           minItems: 1
           type: array
+        enabled:
+          description: Whether the rule is enabled. Defaults to `true` when omitted. A disabled rule is saved but does not run until you enable it.
+          type: boolean
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
         id:
@@ -163533,6 +163538,9 @@ components:
           maxItems: 10
           minItems: 1
           type: array
+        enabled:
+          description: Whether the action policy is enabled. Unlike the other fields in this body, omitting it does not clear it. When the request creates the policy it defaults to `true`. When the request replaces an existing policy, omitting it keeps the current state and supplying it enables or disables the policy, the same as `_enable` or `_disable`. A disabled policy is saved but is not applied to alerts until you enable it.
+          type: boolean
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
           description: 'How matched alerts are batched into notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field.'
@@ -163578,7 +163586,7 @@ components:
           minItems: 1
           type: array
         enabled:
-          description: Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state.
+          description: Whether the rule is enabled. Unlike the other fields in this body, omitting it does not clear it. When the request creates the rule it defaults to `true`. When the request replaces an existing rule, omitting it keeps the current state and supplying it enables or disables the rule, the same as `_enable` or `_disable`. A disabled rule is saved but does not run until you enable it.
           type: boolean
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
@@ -164170,12 +164178,12 @@ components:
           type: integer
       required:
         - kind
+        - enabled
         - metadata
         - schedule
         - query
         - id
         - version
-        - enabled
         - created_by
         - created_at
         - updated_by
@@ -167898,9 +167906,7 @@ components:
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                        default:
-                          type: auto
-                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
                       summary:
                         additionalProperties: false
                         description: Summary row configuration
@@ -167985,8 +167991,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
                   visible:
                     default: true
                     description: When `false`, hides the column from the datatable.
@@ -170579,8 +170584,7 @@ components:
                         - enum:
                             - bands
                           type: string
-                      default: bands
-                      description: Tick placement mode.
+                      description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                     visible:
                       default: true
                       description: When `true`, displays tick marks on the gauge.
@@ -177918,9 +177922,7 @@ components:
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyColorByValueAbsolute'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                  default:
-                    type: auto
-                  description: Color configuration based on the metric value.
+                  description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
                 labels:
                   additionalProperties: false
                   description: Labels configuration
@@ -186517,8 +186519,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -188557,7 +188558,7 @@ components:
             type: object
             properties:
               id:
-                description: Dashboard saved-object id
+                description: Dashboard saved-object ID
                 type: string
             required:
               - id
@@ -188650,11 +188651,11 @@ components:
         - timestamp
     Kibana_HTTP_APIs_SLOBulkPurgeRollupResponse:
       additionalProperties: true
-      description: The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.
+      description: The bulk purge rollup data response returns a task ID from the elasticsearch deleteByQuery response.
       type: object
       properties:
         taskId:
-          description: The task id of the purge operation
+          description: The task ID of the purge operation
           type: string
     Kibana_HTTP_APIs_SLOCreateResponse:
       additionalProperties: true
@@ -189135,7 +189136,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             environment:
               anyOf:
@@ -189199,7 +189200,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             environment:
               anyOf:
@@ -189267,7 +189268,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -189317,7 +189318,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -189471,7 +189472,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -189611,7 +189612,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -189707,7 +189708,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -189859,10 +189860,10 @@ components:
           type: object
           properties:
             id:
-              description: The SLO definition id
+              description: The SLO definition ID
               type: string
             instanceId:
-              description: The SLO instance id. '*' represents the default (ungrouped) instance.
+              description: The SLO instance ID. '*' represents the default (ungrouped) instance.
               type: string
             summary:
               additionalProperties: true
@@ -189928,10 +189929,10 @@ components:
                 - statusCode
                 - message
             id:
-              description: The SLO definition id
+              description: The SLO definition ID
               type: string
             instanceId:
-              description: The SLO instance id. '*' represents the default (ungrouped) instance.
+              description: The SLO instance ID. '*' represents the default (ungrouped) instance.
               type: string
           required:
             - id
@@ -191411,6 +191412,10 @@ components:
               properties:
                 color:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                  default:
+                    mapping: []
+                    mode: categorical
+                    palette: default
         tags:
           default: []
           description: Tag IDs to associate with this visualization.
@@ -191880,8 +191885,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -194168,10 +194172,6 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCategoricalColorMapping'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGradientColorMapping'
-      default:
-        mapping: []
-        mode: categorical
-        palette: default
       description: Color mapping for dimension values, either categorical (for specific values) or as a gradient.
       title: Color Mapping
     Kibana_HTTP_APIs_visCounterRateOperation:
@@ -194420,9 +194420,7 @@ components:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
-                    description: Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                    description: Color configuration for ES|QL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
                   column:
                     description: Column to use
                     type: string
@@ -194510,9 +194508,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-          default:
-            type: auto
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         column:
           description: Column to use
           type: string
@@ -195108,9 +195104,7 @@ components:
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                        default:
-                          type: auto
-                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
                       summary:
                         additionalProperties: false
                         description: Summary row configuration
@@ -195195,8 +195189,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
                   visible:
                     default: true
                     description: When `false`, hides the column from the datatable.
@@ -195926,8 +195919,7 @@ components:
                     - enum:
                         - bands
                       type: string
-                  default: bands
-                  description: Tick placement mode.
+                  description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                 visible:
                   default: true
                   description: When `true`, displays tick marks on the gauge.
@@ -196065,8 +196057,7 @@ components:
                         - enum:
                             - bands
                           type: string
-                      default: bands
-                      description: Tick placement mode.
+                      description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                     visible:
                       default: true
                       description: When `true`, displays tick marks on the gauge.
@@ -196796,9 +196787,7 @@ components:
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyColorByValueAbsolute'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                  default:
-                    type: auto
-                  description: Color configuration based on the metric value.
+                  description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
                 labels:
                   additionalProperties: false
                   description: Labels configuration
@@ -197530,8 +197519,7 @@ components:
               type: object
               properties:
                 placement:
-                  default: before
-                  description: 'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Ignored when the label is not visible.'
+                  description: 'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Defaults to `before`. Ignored when the label is not visible.'
                   enum:
                     - before
                     - after
@@ -198120,8 +198108,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -198286,8 +198273,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -198726,6 +198712,10 @@ components:
           properties:
             color:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+              default:
+                mapping: []
+                mode: categorical
+                palette: default
             column:
               description: Column to use
               type: string
@@ -198835,6 +198825,10 @@ components:
               properties:
                 color:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                  default:
+                    mapping: []
+                    mode: categorical
+                    palette: default
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -199247,8 +199241,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -199413,8 +199406,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -199571,8 +199563,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -199742,8 +199733,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -200381,8 +200371,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
               column:
                 description: Column to use
                 type: string
@@ -200517,8 +200506,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
           maxItems: 100
           type: array
       required:
@@ -201622,8 +201610,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array

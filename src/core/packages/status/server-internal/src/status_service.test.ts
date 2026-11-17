@@ -127,6 +127,77 @@ describe('StatusService', () => {
   });
 
   describe('#setup', () => {
+    it('registers the /api/ready route with public unauthenticated access', async () => {
+      const router = mockRouter.create();
+      const http = httpServiceMock.createInternalSetupContract();
+      http.createRouter.mockReturnValue(router);
+
+      await service.setup(setupDeps({ http }));
+
+      const readyRouteConfig = (router.get as jest.Mock).mock.calls
+        .map(([config]) => config)
+        .find((config) => config.path === '/api/ready');
+
+      expect(readyRouteConfig).toEqual({
+        path: '/api/ready',
+        options: {
+          tags: ['api', 'oas-tag:system'],
+          access: 'public',
+          excludeFromRateLimiter: true,
+          summary: `Get Kibana's readiness`,
+          description:
+            'Returns whether Kibana is ready to serve traffic. This endpoint is intended for readiness probes.',
+        },
+        validate: false,
+        security: {
+          authz: {
+            enabled: false,
+            reason: expect.any(String),
+          },
+          authc: {
+            enabled: false,
+            reason: expect.any(String),
+          },
+        },
+      });
+    });
+
+    it('updates /api/ready response when setReady changes', async () => {
+      const router = mockRouter.create();
+      const http = httpServiceMock.createInternalSetupContract();
+      http.createRouter.mockReturnValue(router);
+
+      await service.setup(setupDeps({ http }));
+      const readyRoute = (router.get as jest.Mock).mock.calls.find(
+        ([config]) => config.path === '/api/ready'
+      );
+      const handler = readyRoute[1];
+
+      const notReadyResponse = mockRouter.createResponseFactory();
+      await handler({}, {}, notReadyResponse);
+      expect(notReadyResponse.custom).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 503,
+          body: { ok: false },
+        })
+      );
+
+      service.setReady(true);
+      const readyResponse = mockRouter.createResponseFactory();
+      await handler({}, {}, readyResponse);
+      expect(readyResponse.ok).toHaveBeenCalledWith({ body: { ok: true } });
+
+      service.setReady(false);
+      const notReadyAgainResponse = mockRouter.createResponseFactory();
+      await handler({}, {}, notReadyAgainResponse);
+      expect(notReadyAgainResponse.custom).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 503,
+          body: { ok: false },
+        })
+      );
+    });
+
     describe('core$', () => {
       it('rolls up core status observables into single observable', async () => {
         const setup = await service.setup(
@@ -677,6 +748,31 @@ describe('StatusService', () => {
           stop$: expect.any(Observable),
         })
       );
+    });
+  });
+
+  describe('#setReady', () => {
+    it('logs when transitioning to ready and back to not ready', () => {
+      service.setReady(true);
+      service.setReady(false);
+
+      expect(loggingSystemMock.collect(logger).info).toEqual([
+        ['Kibana is ready to serve traffic'],
+        ['Kibana is not ready to serve traffic'],
+      ]);
+    });
+
+    it('does not log when setting the same readiness state repeatedly', () => {
+      service.setReady(false);
+      service.setReady(true);
+      service.setReady(true);
+      service.setReady(false);
+      service.setReady(false);
+
+      expect(loggingSystemMock.collect(logger).info).toEqual([
+        ['Kibana is ready to serve traffic'],
+        ['Kibana is not ready to serve traffic'],
+      ]);
     });
   });
 });

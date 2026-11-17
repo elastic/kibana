@@ -272,7 +272,6 @@ export function NightshiftPage(): React.ReactElement | null {
     onboardingFinishedSpace === spaceBasePath ||
     onboardingFinishedSpacesThisLoad.has(spaceBasePath);
   const introBannerDismissal = useIntroBannerDismissal();
-  const [introBannerVisible, setIntroBannerVisible] = useState<boolean | undefined>();
   // All five onboarding steps replace the usual header actions, including First automation.
   const hidesHeaderActions = isOnboarding || onboarding.isLoading;
 
@@ -299,10 +298,6 @@ export function NightshiftPage(): React.ReactElement | null {
   const isSetupPending = requiresSetup && serviceAccount.isLoading;
   const needsSetup =
     requiresSetup && serviceAccount.isSuccess && !isNightshiftSetUp(serviceAccount.data);
-  const showExploreLiveExample =
-    !isSetupPending &&
-    (needsSetup || (isOnboarding && !onboarding.isLoading)) &&
-    introBannerVisible === false;
   useBreadcrumbs(
     [
       {
@@ -374,7 +369,7 @@ export function NightshiftPage(): React.ReactElement | null {
         restrictWidth={false}
         pageSectionProps={{ paddingSize: 'none' }}
       >
-        <NightshiftAppHeader page="landing" showExploreLiveExample={showExploreLiveExample} />
+        <NightshiftAppHeader page="landing" />
         <EuiPageTemplate.Section component="div" restrictWidth={ONBOARDING_MAX_WIDTH}>
           {isSetupPending ? (
             <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftSetupLoading">
@@ -384,7 +379,6 @@ export function NightshiftPage(): React.ReactElement | null {
             <SetupNightshiftOnboarding
               onFinish={finishOnboarding}
               introBannerDismissal={introBannerDismissal}
-              onIntroBannerVisibilityChange={setIntroBannerVisible}
             />
           )}
         </EuiPageTemplate.Section>
@@ -487,7 +481,6 @@ export function NightshiftPage(): React.ReactElement | null {
         <>
           <NightshiftAppHeader
             page={canUseAutomationsPage ? 'automations' : 'landing'}
-            showExploreLiveExample={showExploreLiveExample}
             onKnowledgeClick={navigateToKnowledge}
             knowledgeHref={knowledgeHref}
             onSettingsClick={
@@ -543,7 +536,6 @@ export function NightshiftPage(): React.ReactElement | null {
                 automationsHref={canUseAutomations ? automationsHref : undefined}
                 onFinish={finishOnboarding}
                 introBannerDismissal={introBannerDismissal}
-                onIntroBannerVisibilityChange={setIntroBannerVisible}
               />
             ) : onboarding.isLoading ? (
               <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftOnboardingLoading">

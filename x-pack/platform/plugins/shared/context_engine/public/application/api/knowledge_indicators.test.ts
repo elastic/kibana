@@ -53,7 +53,7 @@ describe('listKis', () => {
     });
   });
 
-  it('passes size, type, and status when provided', async () => {
+  it('passes size, type, status, and sort when provided', async () => {
     const http = createHttp();
     http.get.mockResolvedValue(emptyListKisResponse);
 
@@ -62,6 +62,7 @@ describe('listKis', () => {
       size: 50,
       type: 'playbook',
       status: [...KI_STATUSES],
+      sort: 'title',
     });
 
     expect(http.get).toHaveBeenCalledWith('/internal/context_engine/ai_index/support/kis', {
@@ -70,6 +71,7 @@ describe('listKis', () => {
         size: 50,
         type: 'playbook',
         status: ['active', 'deleted', 'verification_failed', 'expired'],
+        sort: 'title',
       },
     });
   });
