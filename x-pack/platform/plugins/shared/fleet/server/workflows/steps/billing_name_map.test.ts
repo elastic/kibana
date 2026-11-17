@@ -13,7 +13,8 @@ import {
 import { isAgentless } from './aws_service_matrix';
 import { BILLING_NAME_TO_SERVICE_ID } from './billing_name_map';
 
-// Policy templates of the `aws` package that enable the agentless deployment mode.
+// A snapshot of the `aws` package's agentless-enabled policy templates, taken from the package
+// manifest at version 8.18.1 on 2026-11-17. Refresh it when the package's agentless set changes.
 const AGENTLESS_POLICY_TEMPLATES = [
   'awshealth',
   'billing',

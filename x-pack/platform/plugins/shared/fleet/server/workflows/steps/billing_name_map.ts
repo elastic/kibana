@@ -6,8 +6,10 @@
  */
 
 /**
- * AWS Cost Explorer service names (as returned in `servicesInUse`) to catalog service ids.
- * Billing names that are not listed here are reported as unmatched.
+ * The keys are AWS Cost Explorer `SERVICE` dimension values as returned in `servicesInUse`.
+ * Names were checked against the AWS Price List `servicename` attribute and, where available,
+ * a real account's Cost Explorer output (the two can differ, as EC2 and ELB show).
+ * Names that are not listed here are reported as unmatched, not unsupported.
  */
 export const BILLING_NAME_TO_SERVICE_ID: Record<string, string> = {
   AmazonCloudWatch: 'cloudwatch',
@@ -16,6 +18,7 @@ export const BILLING_NAME_TO_SERVICE_ID: Record<string, string> = {
   'Amazon Elastic Compute Cloud - Compute': 'ec2',
   'Amazon Elastic Container Service': 'ecs',
   'Amazon Elastic Container Service for Kubernetes': 'eks',
+  'Amazon Elastic Load Balancing': 'elb',
   'Elastic Load Balancing': 'elb',
   'AWS Network Firewall': 'firewall',
   'Amazon GuardDuty': 'guardduty',
