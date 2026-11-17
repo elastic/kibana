@@ -59,7 +59,6 @@ export const createSessionEventsService = (
 
     const timestamp = new Date().toISOString();
     const response = await esClient.bulk<StoredSessionEvent>({
-      // Without a data stream template, Elasticsearch would create a plain index under this name.
       require_data_stream: true,
       operations: events.flatMap((event) => [
         { create: { _index: SESSION_EVENTS_DATA_STREAM } },
