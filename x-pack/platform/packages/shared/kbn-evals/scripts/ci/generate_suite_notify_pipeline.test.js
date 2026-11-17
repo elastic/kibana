@@ -14,12 +14,13 @@ const BUILD = {
 };
 
 describe('buildSuiteNotifyPipeline', () => {
-  it('posts a failed suite from a failing step, so the post fires on hard_failed', () => {
+  it('posts from a failing step by default, so the post fires on hard_failed', () => {
     const {
       steps: [step],
     } = buildSuiteNotifyPipeline({ message: 'Suite failed', slackChannel: '#alerts', ...BUILD });
 
     expect(step.command).toBe('exit 1');
+    expect(step.soft_fail).toBeUndefined();
     expect(step.notify).toEqual([
       {
         slack: {
@@ -31,18 +32,18 @@ describe('buildSuiteNotifyPipeline', () => {
     ]);
   });
 
-  it('posts a passed suite from a passing step, so the post does not fail the build', () => {
+  it('posts from a passing, soft-failing step, so the post never turns a green build red', () => {
     const {
       steps: [step],
     } = buildSuiteNotifyPipeline({
       message: 'Suite passed',
       slackChannel: '#alerts',
-      outcome: 'passed',
+      stepOutcome: 'passed',
       ...BUILD,
     });
 
     expect(step.command).toBe("echo 'Posted to Slack'");
-    expect(step.label).toBe('LLM Evals: suite owner Slack notify (passed)');
+    expect(step.soft_fail).toBe(true);
     expect(step.notify[0].if).toBe('step.outcome == "passed"');
     expect(step.notify[0].slack.channels).toEqual(['#alerts']);
   });
@@ -51,7 +52,12 @@ describe('buildSuiteNotifyPipeline', () => {
     const message = `Suite passed\n\n<${BUILD.buildUrl}|View build>`;
     const {
       steps: [step],
-    } = buildSuiteNotifyPipeline({ message, slackChannel: '#alerts', outcome: 'passed', ...BUILD });
+    } = buildSuiteNotifyPipeline({
+      message,
+      slackChannel: '#alerts',
+      stepOutcome: 'passed',
+      ...BUILD,
+    });
 
     expect(step.notify[0].slack.message).toBe(message);
   });

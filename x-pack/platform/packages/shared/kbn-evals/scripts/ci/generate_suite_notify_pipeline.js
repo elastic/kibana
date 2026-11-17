@@ -9,15 +9,17 @@
 const { readFileSync } = require('fs');
 const { stringify } = require('yaml');
 
+const STEP_OUTCOMES = ['hard_failed', 'passed'];
+
 /**
- * Builds a one-step pipeline whose own Slack notify posts the message. A failed suite uses a
- * step that fails, so the post fires on `hard_failed`; a passed suite uses a step that passes,
- * so the post does not fail a green build.
+ * Builds a one-step pipeline whose own Slack notify posts the message. `stepOutcome` is the
+ * outcome of that step: `hard_failed` (default) runs `exit 1` for a failed suite, whose build is
+ * already red; `passed` runs a soft-failing no-op, so the post never turns a green build red.
  */
 const buildSuiteNotifyPipeline = ({
   message,
   slackChannel,
-  outcome = 'failed',
+  stepOutcome = 'hard_failed',
   buildUrl = '',
   pipelineName = 'Buildkite',
   buildNumber = '',
@@ -26,37 +28,43 @@ const buildSuiteNotifyPipeline = ({
     buildUrl && !message.includes(buildUrl)
       ? `\n\n<${buildUrl}|${pipelineName} #${buildNumber}>`
       : '';
-  const passed = outcome === 'passed';
+  const notify = [
+    {
+      slack: {
+        channels: [slackChannel],
+        message: `${message}${footer}`,
+      },
+      if: `step.outcome == "${stepOutcome}"`,
+    },
+  ];
+
+  if (stepOutcome === 'passed') {
+    // If this job fails for an infra reason, it ends soft_failed: no post, and the build stays green.
+    return {
+      steps: [
+        {
+          label: 'LLM Evals: suite owner Slack notify (non-blocking)',
+          command: "echo 'Posted to Slack'",
+          soft_fail: true,
+          notify,
+        },
+      ],
+    };
+  }
 
   return {
-    steps: [
-      {
-        label: passed
-          ? 'LLM Evals: suite owner Slack notify (passed)'
-          : 'LLM Evals: suite owner Slack notify',
-        command: passed ? "echo 'Posted to Slack'" : 'exit 1',
-        notify: [
-          {
-            slack: {
-              channels: [slackChannel],
-              message: `${message}${footer}`,
-            },
-            if: passed ? 'step.outcome == "passed"' : 'step.outcome == "hard_failed"',
-          },
-        ],
-      },
-    ],
+    steps: [{ label: 'LLM Evals: suite owner Slack notify', command: 'exit 1', notify }],
   };
 };
 
 if (require.main === module) {
   const summaryPath = process.env.EVAL_TRIAGE_SUMMARY_PATH || '';
   const slackChannel = process.env.EVAL_SUITE_SLACK_CHANNEL || '';
-  const outcome = process.env.EVAL_SUITE_OUTCOME || 'failed';
+  const stepOutcome = process.env.EVAL_NOTIFY_STEP_OUTCOME || 'hard_failed';
 
-  if (!summaryPath || !slackChannel || !['passed', 'failed'].includes(outcome)) {
+  if (!summaryPath || !slackChannel || !STEP_OUTCOMES.includes(stepOutcome)) {
     console.error(
-      'Usage: set EVAL_TRIAGE_SUMMARY_PATH (summary.md), EVAL_SUITE_SLACK_CHANNEL (slack channel) and optionally EVAL_SUITE_OUTCOME (passed|failed, default failed).'
+      'Usage: set EVAL_TRIAGE_SUMMARY_PATH (summary.md), EVAL_SUITE_SLACK_CHANNEL (slack channel) and optionally EVAL_NOTIFY_STEP_OUTCOME (hard_failed|passed, default hard_failed).'
     );
     process.exit(1);
   }
@@ -64,7 +72,7 @@ if (require.main === module) {
   const pipeline = buildSuiteNotifyPipeline({
     message: readFileSync(summaryPath, 'utf8').trim(),
     slackChannel,
-    outcome,
+    stepOutcome,
     buildUrl: process.env.BUILDKITE_BUILD_URL || '',
     pipelineName: process.env.BUILDKITE_PIPELINE_NAME || 'Buildkite',
     buildNumber: process.env.BUILDKITE_BUILD_NUMBER || '',
