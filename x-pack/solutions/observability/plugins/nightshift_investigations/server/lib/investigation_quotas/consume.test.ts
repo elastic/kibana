@@ -63,6 +63,17 @@ describe('consumeInvestigationQuota', () => {
     expect(await counts()).toEqual({ automatic: 0, manual: 1, total: 1 });
   });
 
+  it('denies the first start at a limit of 0 without charging anything', async () => {
+    const { consume, counts } = await setup({ limits: { manual_investigation: 0 } });
+
+    await expect(consume('manual')).resolves.toEqual({
+      allowed: false,
+      deniedBy: 'manual',
+      limit: 0,
+    });
+    expect(await counts()).toEqual({ automatic: 0, manual: 0, total: 0 });
+  });
+
   it('denies at the total limit without charging the trigger limit', async () => {
     const { consume, counts } = await setup({
       limits: { automatic_investigation: 5, manual_investigation: 5, total_investigation: 2 },

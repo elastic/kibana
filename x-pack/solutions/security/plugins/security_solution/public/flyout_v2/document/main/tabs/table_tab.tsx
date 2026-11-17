@@ -19,7 +19,6 @@ import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import {
   TABLE_TAB_CONTENT_TEST_ID,
   TABLE_TAB_SEARCH_INPUT_TEST_ID,
@@ -31,7 +30,6 @@ import { timelineSelectors } from '../../../../timelines/store';
 import { getSourcererScopeId, isInTableScope, isTimelineScope } from '../../../../helpers';
 import { getTableItems } from '../utils/table_tab_utils';
 import { TableTabSettingButton } from '../components/table_tab_setting_button';
-import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { getTableTabColumns } from '../utils/table_tab_columns';
@@ -180,63 +178,6 @@ export const TableTab = memo(
       [rule?.investigation_fields?.field_names]
     );
 
-    const euidApi = useEntityStoreEuidApi();
-    const hostDocumentIdentityFields = useMemo(
-      () =>
-        euidApi?.euid.getEntityIdentifiersFromDocument(
-          euidApi.getBuiltInEntityDefinition('host'),
-          hit.flattened
-        ) ?? null,
-      [euidApi, hit.flattened]
-    );
-    const userDocumentIdentityFields = useMemo(
-      () =>
-        euidApi?.euid.getEntityIdentifiersFromDocument(
-          euidApi.getBuiltInEntityDefinition('user'),
-          hit.flattened
-        ) ?? null,
-      [euidApi, hit.flattened]
-    );
-    const isHostEntity = hostDocumentIdentityFields != null;
-    const hostEuidFromDocument = useMemo(
-      () =>
-        euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('host'), hit.flattened),
-      [euidApi, hit.flattened]
-    );
-    const userEuidFromDocument = useMemo(
-      () =>
-        euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('user'), hit.flattened),
-      [euidApi, hit.flattened]
-    );
-    const hostEntityFromStore = useEntityFromStore({
-      entityId: hostEuidFromDocument,
-      identityFields: hostDocumentIdentityFields ?? undefined,
-      entityType: 'host',
-      skip: !isHostEntity,
-    });
-    const userEntityFromStore = useEntityFromStore({
-      entityId: userEuidFromDocument,
-      identityFields: userDocumentIdentityFields ?? undefined,
-      entityType: 'user',
-      skip: isHostEntity,
-    });
-    const entityId = useMemo(() => {
-      if (isHostEntity) {
-        return (
-          hostEntityFromStore.entityRecord?.entity?.id ?? hostDocumentIdentityFields?.['entity.id']
-        );
-      }
-      return (
-        userEntityFromStore.entityRecord?.entity?.id ?? userDocumentIdentityFields?.['entity.id']
-      );
-    }, [
-      isHostEntity,
-      hostDocumentIdentityFields,
-      userDocumentIdentityFields,
-      hostEntityFromStore.entityRecord,
-      userEntityFromStore.entityRecord,
-    ]);
-
     const highlightedFieldsResult = useHighlightedFields({
       hit,
       investigationFields,
@@ -375,14 +316,12 @@ export const TableTab = memo(
           getLinkValue,
           ruleId,
           onTogglePinned,
-          entityId,
           renderCellActions,
           hit,
           renderFlyoutLink,
         }),
       [
         browserFields,
-        entityId,
         eventId,
         scopeId,
         getLinkValue,

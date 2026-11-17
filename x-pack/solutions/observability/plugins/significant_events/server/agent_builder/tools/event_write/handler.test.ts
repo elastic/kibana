@@ -8,12 +8,14 @@
 import { eventsWriteBulkHandler, eventsWriteHandler } from './handler';
 import type { EventsWriteInput } from './types';
 import type {
+  Severity,
   SignificantEvent,
   SignalEntry,
   BlastRadiusEntry,
   CausalFeature,
 } from '@kbn/significant-events-schema';
 import { operatorFallbackAssessmentNote } from '@kbn/significant-events-schema';
+import { RECOVERY_TIMEOUT_ASSESSMENT_NOTE } from '../../../lib/significant_events/events/cleanup_stale_events';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
@@ -340,6 +342,108 @@ describe('eventsWriteHandler', () => {
   });
 });
 
+describe('eventsWriteBulkHandler, severity resolved from investigations', () => {
+  const stored = (severity: Severity) => makeStoredEvent('checkout-stable', { severity });
+  const clientWith = (latest: SignificantEvent) =>
+    makeEventSearchClient({ findByEventId: jest.fn().mockResolvedValue({ hits: [latest] }) });
+  const write = (
+    eventClient: ReturnType<typeof makeEventSearchClient>,
+    resolved: Map<string, Severity> | undefined
+  ) =>
+    eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      inputs: [{ ...baseInput, event_id: 'checkout-stable', severity: 'high' }],
+      resolveSeverities: resolved ? jest.fn().mockResolvedValue(resolved) : undefined,
+    });
+
+  it("stores the resolved severity, not the agent's", async () => {
+    await write(clientWith(stored('low')), new Map([['checkout-stable', 'medium']]));
+
+    expect(writtenDocs()[0].severity).toBe('medium');
+  });
+
+  it('does not hand an event that stays closed to the resolver, so its stored severity is not rewritten', async () => {
+    const resolveSeverities = jest.fn().mockResolvedValue(new Map());
+
+    await eventsWriteBulkHandler({
+      eventSearchClient: clientWith(
+        makeStoredEvent('checkout-stable', { severity: 'low', status: 'inactive' })
+      ),
+      inputs: [{ ...baseInput, event_id: 'checkout-stable', status: 'inactive', severity: 'high' }],
+      resolveSeverities,
+    });
+
+    expect(resolveSeverities).not.toHaveBeenCalled();
+  });
+
+  it("stores the investigation's severity when a closed event reopens", async () => {
+    const resolveSeverities = jest.fn().mockResolvedValue(new Map([['checkout-stable', 'medium']]));
+
+    await eventsWriteBulkHandler({
+      eventSearchClient: clientWith(
+        makeStoredEvent('checkout-stable', { severity: 'low', status: 'inactive' })
+      ),
+      inputs: [{ ...baseInput, event_id: 'checkout-stable', status: 'active', severity: 'high' }],
+      resolveSeverities,
+    });
+
+    expect(resolveSeverities).toHaveBeenCalledWith([
+      { eventId: 'checkout-stable', storedSeverity: 'low' },
+    ]);
+    expect(writtenDocs()[0].severity).toBe('medium');
+  });
+
+  it("stores the severity a person set on the investigation when the stored copy and the agent's still hold the old one", async () => {
+    const [result] = await write(
+      clientWith(stored('high')),
+      new Map([['checkout-stable', 'critical']])
+    );
+
+    expect(result).toMatchObject({ written: true });
+    expect(writtenDocs()[0].severity).toBe('critical');
+  });
+
+  it('writes nothing when the agent only disagrees with the resolved severity (no churn)', async () => {
+    const [result] = await write(
+      clientWith(stored('medium')),
+      new Map([['checkout-stable', 'medium']])
+    );
+
+    expect(result).toMatchObject({ written: false, reason: 'unchanged_outcome' });
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+
+  it.each<[string, Map<string, Severity> | undefined]>([
+    ['nothing is resolved for the event', new Map()],
+    ['no resolver is given', undefined],
+  ])("keeps the agent's severity when %s", async (_name, resolved) => {
+    await write(clientWith(stored('low')), resolved);
+
+    expect(writtenDocs()[0].severity).toBe('high');
+  });
+
+  it("hands an existing event's stored severity to the resolver, but not a new event", async () => {
+    // The shape of the resolver while investigations are unreadable: it gives the stored severity back.
+    const keepStored = async (events: Array<{ eventId: string; storedSeverity: Severity }>) =>
+      new Map(events.map(({ eventId, storedSeverity }) => [eventId, storedSeverity]));
+
+    const [existing] = await eventsWriteBulkHandler({
+      eventSearchClient: clientWith(stored('low')),
+      inputs: [{ ...baseInput, event_id: 'checkout-stable', severity: 'high' }],
+      resolveSeverities: keepStored,
+    });
+    expect(existing).toMatchObject({ written: false, reason: 'unchanged_outcome' });
+
+    const [created] = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient(),
+      inputs: [{ ...baseInput, severity: 'high' }],
+      resolveSeverities: keepStored,
+    });
+    expect(created).toMatchObject({ written: true });
+    expect(writtenDocs()[0].severity).toBe('high');
+  });
+});
+
 describe('eventsWriteBulkHandler', () => {
   it('writes unique event ids with one lineage lookup per event and one write per event', async () => {
     const eventClient = makeEventSearchClient();
@@ -640,6 +744,37 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
 
     expect(results[0]).toMatchObject({ written: true, status: 'active' });
     expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps an incident’s severity through recovery without redundant writes', async () => {
+    const eventId = 'checkout-recovery';
+    const active = makeStoredEvent(eventId, {
+      severity: 'high',
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-1' })],
+    });
+    const findByEventId = jest.fn().mockResolvedValue({ hits: [active] });
+    const eventSearchClient = makeEventSearchClient({ findByEventId });
+    const recovery: EventsWriteInput = {
+      ...baseInput,
+      event_id: eventId,
+      status: undefined,
+      severity: 'low',
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-1', verdict: 'refutes' })],
+    };
+
+    const [result] = await eventsWriteBulkHandler({ eventSearchClient, inputs: [recovery] });
+    expect(result).toMatchObject({ written: true, status: 'recovering', severity: 'high' });
+    const [recovering] = writtenDocs();
+    expect(recovering).toMatchObject({ status: 'recovering', severity: 'high' });
+
+    findByEventId.mockResolvedValue({ hits: [active, recovering] });
+    const [repeated] = await eventsWriteBulkHandler({ eventSearchClient, inputs: [recovery] });
+    expect(repeated).toMatchObject({
+      written: false,
+      reason: 'unchanged_outcome',
+      severity: 'high',
+    });
+    expect(writtenDocs()).toHaveLength(1);
   });
 
   describe('a continuation onto a recovering event', () => {
@@ -998,15 +1133,15 @@ describe('eventsWriteBulkHandler — agent-proposed severity', () => {
     }
   );
 
-  it('floors an inactive event to low', async () => {
+  it('rates a new inactive event on its evidence', async () => {
     const [result] = await write({
       status: 'inactive',
       severity: 'critical',
       signals: [failingSignal('rule-1')],
     });
 
-    expect(result).toMatchObject({ written: true, status: 'inactive', severity: 'low' });
-    expect(writtenDocs()[0].severity).toBe('low');
+    expect(result).toMatchObject({ written: true, status: 'inactive', severity: 'critical' });
+    expect(writtenDocs()[0].severity).toBe('critical');
   });
 
   it('refuses an event with signals but no proposed severity, instead of guessing one', async () => {
@@ -1366,6 +1501,39 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
       findByEventId: jest.fn().mockResolvedValue({ hits: [closed] }),
     });
 
+  it('reopens a series that closed while recovering, which stores only refuted verdicts', async () => {
+    const [recoveringResult] = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient({
+        findByEventId: jest.fn().mockResolvedValue({
+          hits: [
+            makeStoredEvent(closedEventId, {
+              status: 'active',
+              signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' })],
+            }),
+          ],
+        }),
+      }),
+      inputs: [
+        {
+          ...baseInput,
+          event_id: closedEventId,
+          status: undefined,
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'refutes' })],
+        },
+      ],
+    });
+    expect(recoveringResult).toMatchObject({ written: true, status: 'recovering' });
+    const [recoveringVersion] = writtenDocs();
+    alertEventsClient.createAlertEvent.mockClear();
+
+    const [reopened] = await eventsWriteBulkHandler({
+      eventSearchClient: clientWithClosedSeries({ ...recoveringVersion, status: 'inactive' }),
+      inputs: [reopeningBreachFor('rule-a')],
+    });
+
+    expect(reopened).toMatchObject({ written: true, event_id: closedEventId, status: 'active' });
+  });
+
   it('holds the reopen of a closed series and returns the note that closed it', async () => {
     const results = await eventsWriteBulkHandler({
       eventSearchClient: clientWithClosedSeries(
@@ -1559,6 +1727,7 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
     it.each([
       ['blank', ''],
       ['the standard no-reason note', operatorFallbackAssessmentNote('inactive')],
+      ['the automatic close after a recovery timeout', RECOVERY_TIMEOUT_ASSESSMENT_NOTE],
     ])('does not hold a close whose only note is %s', async (_label, note) => {
       const results = await eventsWriteBulkHandler({
         eventSearchClient: clientWith(
