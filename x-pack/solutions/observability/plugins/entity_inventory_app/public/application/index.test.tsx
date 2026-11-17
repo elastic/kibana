@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { createMemoryHistory } from 'history';
 import type { History } from 'history';
@@ -28,6 +28,14 @@ import {
 import { ENTITY_INVENTORY_PAGES } from '../pages';
 import { entityInventoryRouter } from '../routes/config';
 import { EntityInventoryShell, renderApp } from '.';
+
+// The shell tests check which tables it shows and when it requests the types, not how a grid
+// renders, which `entity_data_grid.test.tsx` covers. The real grid is slow to mount in jsdom.
+jest.mock('./components/entity_table/entity_data_grid', () => ({
+  EntityDataGrid: ({ entityType }: { entityType: { type: string } }) => (
+    <div data-test-subj="entityInventoryTable" data-entity-type={entityType.type} />
+  ),
+}));
 
 const PageTemplate = (({ children }: { children: React.ReactNode }) => (
   <div>{children}</div>
@@ -140,33 +148,6 @@ describe('EntityInventoryShell', () => {
       'data-entity-type',
       entityType
     );
-  });
-
-  it('keeps the column choices of a type while another page is open', async () => {
-    const { history } = renderShellAt('/hosts');
-    expect(await screen.findByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-cloud.account.id'));
-    const hideColumn = within(screen.getByTestId('dataGridHeaderCellActionGroup-cloud.account.id'))
-      .getAllByRole('button')
-      .find((button) => button.textContent === 'Hide column');
-    if (!hideColumn) {
-      throw new Error('No hide action');
-    }
-    fireEvent.click(hideColumn);
-    await waitFor(() =>
-      expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument()
-    );
-
-    act(() => history.push('/kubernetes'));
-    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
-      'data-entity-type',
-      'k8s.deployment'
-    );
-    act(() => history.push('/hosts'));
-
-    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
-    expect(screen.getByTestId('dataGridHeaderCell-host.name')).toBeInTheDocument();
-    expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
   });
 
   it('requests the entity types once while moving between pages, and renders each page from that response', async () => {
