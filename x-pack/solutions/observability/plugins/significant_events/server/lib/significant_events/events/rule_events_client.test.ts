@@ -6,6 +6,7 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { loggerMock } from '@kbn/logging-mocks';
 import Boom from '@hapi/boom';
 import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
@@ -534,7 +535,7 @@ describe('RuleEventsClient', () => {
   });
 
   describe('status change telemetry', () => {
-    const telemetry = { trackEventStatusChanged: jest.fn() };
+    const telemetry = { trackEventStatusChanged: jest.fn(), logger: loggerMock.create() };
     const withTelemetry = (latest: SignificantEvent | undefined) =>
       asRuleEventsClient(
         { findLatestByEventId: jest.fn().mockResolvedValue(latest) },

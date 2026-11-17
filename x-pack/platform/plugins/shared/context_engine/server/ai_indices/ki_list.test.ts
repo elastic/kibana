@@ -150,7 +150,8 @@ describe('ki_list', () => {
         'EVAL ki_status = CASE(lifecycle_status == "active" AND COALESCE(false, false), "expired", lifecycle_status)',
         'WHERE lifecycle_status != "deleted"',
         'EVAL expires_at = TO_STRING(NULL)',
-        'SORT revision_time DESC, id ASC',
+        'EVAL updated_sort = COALESCE(TO_DATETIME(updated_at), revision_time)',
+        'SORT updated_sort DESC, id ASC',
         'KEEP _index, id, type, title, updated_at, expires_at, ki_status',
         'LIMIT 25',
       ].join('\n| ')
@@ -674,7 +675,7 @@ describe('ki_list', () => {
           'LIMIT 25',
         ].join('\n| ')
       );
-      expect(queryText(0)).not.toContain('revision_time DESC');
+      expect(queryText(0)).not.toContain('updated_sort');
       expect(queryText(1)).not.toContain('title_sort');
       expect(queryText(2)).not.toContain('title_sort');
     });
@@ -697,13 +698,45 @@ describe('ki_list', () => {
       );
     });
 
-    it('sorts newest first when sort is updated', async () => {
+    it('sorts by updated_at newest first, falling back to the revision timestamp', async () => {
       emptyResponses();
 
       await getKis(esClient, { dest: INDEX_DEST, size: 25, sort: 'updated' });
 
-      expect(queryText(0)).toContain('| SORT revision_time DESC, id ASC\n| KEEP');
+      expect(queryText(0)).toContain(
+        [
+          'EVAL updated_sort = COALESCE(TO_DATETIME(updated_at), revision_time)',
+          'SORT updated_sort DESC, id ASC',
+          'KEEP',
+        ].join('\n| ')
+      );
       expect(queryText(0)).not.toContain('title_sort');
+    });
+
+    it('sorts by updated_at with missing dates last when the index has no timestamp column', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(['id', 'updated_at', 'type']));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25 });
+
+      expect(queryText(0)).toContain(
+        [
+          'EVAL updated_sort = TO_DATETIME(updated_at)',
+          'SORT updated_sort DESC NULLS LAST, id ASC',
+        ].join('\n| ')
+      );
+    });
+
+    it('sorts by the revision timestamp when the index has no updated_at column', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(['id', '@timestamp', 'type']));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25 });
+
+      expect(queryText(0)).toContain('| SORT revision_time DESC, id ASC\n| KEEP');
+      expect(queryText(0)).not.toContain('updated_sort');
     });
 
     it('sorts by id when the index has no timestamp column', async () => {
@@ -723,7 +756,7 @@ describe('ki_list', () => {
 
       await getKis(esClient, { dest: INDEX_DEST, size: 25, query: 'refund' });
 
-      expect(queryText(0)).toContain('| SORT _score DESC, revision_time DESC, id ASC\n| KEEP');
+      expect(queryText(0)).toContain('| SORT _score DESC, updated_sort DESC, id ASC\n| KEEP');
     });
   });
 
@@ -772,7 +805,7 @@ describe('ki_list', () => {
       params: [{ searchQuery: 'refund' }],
     });
     expect(queryText(0)).toContain('METADATA _id, _index, _score\n');
-    expect(queryText(0)).toContain('SORT _score DESC, revision_time DESC, id ASC');
+    expect(queryText(0)).toContain('SORT _score DESC, updated_sort DESC, id ASC');
     expect(queryText(1)).toContain(
       'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
     );
