@@ -96,8 +96,11 @@ export const DataGridCell = <TRow extends object>({
     [activateFocusedCell, stableAddress]
   );
 
-  const cellContext = { row, ...stableAddress, displayIndex };
-  const textValue = getDataGridCellTextValue(column, cellContext, value);
+  const cellContext = useMemo(
+    () => ({ row, ...stableAddress, displayIndex }),
+    [displayIndex, row, stableAddress]
+  );
+
   const onCopy = useCallback(
     (event: ClipboardEvent<HTMLDivElement>) => {
       if (event.target !== event.currentTarget || hasExplicitTextSelection()) {
@@ -105,14 +108,17 @@ export const DataGridCell = <TRow extends object>({
       }
 
       try {
-        event.clipboardData.setData('text/plain', textValue);
+        event.clipboardData.setData(
+          'text/plain',
+          getDataGridCellTextValue(column, cellContext, value)
+        );
         event.preventDefault();
         announceCopySuccess();
       } catch {
         announceCopyFailure();
       }
     },
-    [announceCopyFailure, announceCopySuccess, textValue]
+    [announceCopyFailure, announceCopySuccess, cellContext, column, value]
   );
   // Inside the content, Escape returns to the cell and Tab wraps among the cell's tab stops.
   // Unhandled keys, and Tab in content without tab stops, are left to the grid and browser.
