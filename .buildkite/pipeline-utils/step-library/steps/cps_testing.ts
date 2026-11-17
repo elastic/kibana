@@ -18,7 +18,7 @@ export const cpsTests = (): readonly Step[] => [
     key: 'cps-testing',
     agents: { ...spotAgent('n2-standard-8', spotZones.n2), ...pdBalanced },
     depends_on: ['build'],
-    timeout_in_minutes: 30,
+    timeout_in_minutes: 45,
     retry: retry.agentLossOrAnyOnce,
   }),
 ];

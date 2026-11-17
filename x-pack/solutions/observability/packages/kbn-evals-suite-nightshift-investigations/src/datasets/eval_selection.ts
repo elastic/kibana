@@ -20,12 +20,18 @@ export const CONNECTOR_PROBE_DATASET_ID = 'connector-probe';
  * investigation.
  */
 export const WIKI_OPTIMIZE_DATASET_ID = 'wiki-optimize';
+/**
+ * `NIGHTSHIFT_DATASETS` id for the reinforcement micro-eval. Opt-in: it enables decision trees
+ * on the Scout server, so it needs its own server. Unset and `all` never select it.
+ */
+export const REINFORCEMENT_DATASET_ID = 'reinforcement';
 
 const ALL_DATASETS = 'all';
 const EVAL_IDS: readonly string[] = [
   INVESTIGATION_DATASET_ID,
   CONNECTOR_PROBE_DATASET_ID,
   WIKI_OPTIMIZE_DATASET_ID,
+  REINFORCEMENT_DATASET_ID,
 ];
 /** Stored dataset ids are opt-in too: they run live investigations, so unset and `all` skip them. */
 const STORED_DATASET_IDS: readonly string[] = STORED_DATASETS.map(({ id }) => id);
@@ -35,6 +41,11 @@ export interface EvalSelection {
   runOrca: boolean;
   runConnectorProbes: boolean;
   runWikiOptimize: boolean;
+  /**
+   * True only when `NIGHTSHIFT_DATASETS` lists `reinforcement` or `EVAL_SHARD_ID` is
+   * `reinforcement`. Not part of an unset or `all` run.
+   */
+  runReinforcement: boolean;
   /** Ids from `STORED_DATASETS` to run; a CI shard selects the entries that name it. */
   storedDatasetIds: string[];
 }
@@ -83,6 +94,31 @@ const assertDefaultConnectorSet = (
 export const resolveEvalSelection = (
   env: Record<string, string | undefined> = process.env
 ): EvalSelection => {
+  // The reinforcement eval seeds its own trees and keeps learning on, so it never restores
+  // knowledge: the switch would only load credentials and turn systems on for nothing.
+  const reinforcementSelected =
+    env.EVAL_SHARD_ID === REINFORCEMENT_DATASET_ID ||
+    (env.NIGHTSHIFT_DATASETS ?? '').split(',').some((id) => id.trim() === REINFORCEMENT_DATASET_ID);
+  if (reinforcementSelected && env.NIGHTSHIFT_KNOWLEDGE?.trim()) {
+    throw new Error(
+      'Run reinforcement without NIGHTSHIFT_KNOWLEDGE; it seeds its own decision trees and never restores knowledge'
+    );
+  }
+  // The CI reinforcement shard runs on its own Scout server, which its scout hook starts with
+  // decision trees on.
+  if (env.EVAL_SHARD_ID === REINFORCEMENT_DATASET_ID) {
+    if (!env.SANDBOX_API_KEY) {
+      throw new Error('The reinforcement shard runs agent evals, so SANDBOX_API_KEY is required');
+    }
+    return {
+      runInvestigations: false,
+      runOrca: false,
+      runConnectorProbes: false,
+      runWikiOptimize: false,
+      runReinforcement: true,
+      storedDatasetIds: [],
+    };
+  }
   const orca = env.EVAL_SHARD_ID === 'orcabench' || env.NIGHTSHIFT_DATASETS?.trim() === 'orcabench';
   if (orca) {
     if (!env.SANDBOX_API_KEY) throw new Error('ORCA investigations require SANDBOX_API_KEY');
@@ -96,6 +132,7 @@ export const resolveEvalSelection = (
       runOrca: true,
       runConnectorProbes: false,
       runWikiOptimize: false,
+      runReinforcement: false,
       storedDatasetIds: [],
     };
   }
@@ -110,11 +147,24 @@ export const resolveEvalSelection = (
       runOrca: false,
       runConnectorProbes: false,
       runWikiOptimize: false,
+      runReinforcement: false,
       storedDatasetIds: shardDatasetIds,
     };
   }
   if (env.NIGHTSHIFT_DATASETS?.split(',').some((id) => id.trim() === 'orcabench')) {
     throw new Error('Run orcabench on its own Scout server; it needs the orcabench connector set');
+  }
+  const listedIds = (env.NIGHTSHIFT_DATASETS ?? '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter((id) => id.length > 0);
+  if (
+    listedIds.includes(REINFORCEMENT_DATASET_ID) &&
+    listedIds.some((id) => id !== REINFORCEMENT_DATASET_ID)
+  ) {
+    throw new Error(
+      'Run reinforcement on its own Scout server; it enables decision trees on the server'
+    );
   }
   const requested =
     env.NIGHTSHIFT_DATASETS?.trim() ||
@@ -139,6 +189,7 @@ export const resolveEvalSelection = (
       runInvestigations: true,
       runConnectorProbes: false,
       runWikiOptimize: false,
+      runReinforcement: false,
       storedDatasetIds: [],
     };
   }
@@ -147,6 +198,8 @@ export const resolveEvalSelection = (
   if (runInvestigations) requiresSandbox(INVESTIGATION_DATASET_ID);
   const runConnectorProbes = ids.includes(CONNECTOR_PROBE_DATASET_ID);
   if (runConnectorProbes) requiresSandbox(CONNECTOR_PROBE_DATASET_ID);
+  const runReinforcement = ids.includes(REINFORCEMENT_DATASET_ID);
+  if (runReinforcement) requiresSandbox(REINFORCEMENT_DATASET_ID);
   const storedDatasetIds = ids.filter((id) => STORED_DATASET_IDS.includes(id));
   storedDatasetIds.forEach(requiresSandbox);
   if (storedDatasetIds.length > 0) {
@@ -158,6 +211,7 @@ export const resolveEvalSelection = (
     runInvestigations,
     runConnectorProbes,
     runWikiOptimize: ids.includes(WIKI_OPTIMIZE_DATASET_ID),
+    runReinforcement,
     storedDatasetIds,
   };
 };

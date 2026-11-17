@@ -56,7 +56,7 @@ describe('PausedActivityCallout', () => {
     );
 
     expect(screen.getByTestId('significantEventsPausedBanner')).toHaveTextContent(
-      'An administrator with the Nightshift Manage engines privilege must resume activity'
+      'An administrator with the nightshift Manage engines privilege must resume activity'
     );
     expect(screen.queryByRole('link', { name: 'Open settings' })).not.toBeInTheDocument();
   });

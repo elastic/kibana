@@ -11,6 +11,7 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_types/wildcard';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
@@ -20,6 +21,7 @@ import type {
   CaseIdIncrementerPersistedAttributes,
   CaseIdIncrementerSavedObject,
 } from '../../common/types/id_incrementer';
+import type { CasesAnalyticsV2WriterContract } from '../../cases_analytics_v2/writer';
 
 type GetCasesParameters = Pick<
   SavedObjectsFindOptions,
@@ -38,7 +40,8 @@ export class CasesIncrementalIdService {
 
   constructor(
     private internalSavedObjectsClient: SavedObjectsClientContract,
-    private logger: Logger
+    private logger: Logger,
+    private analyticsV2Writer?: CasesAnalyticsV2WriterContract
   ) {
     this.logger = logger.get('incremental_id_service');
     this.logger.debug('Cases incremental ID service initialized');
@@ -132,6 +135,7 @@ export class CasesIncrementalIdService {
     const incIdSoCache: Map<string, SavedObject<CaseIdIncrementerPersistedAttributes>> = new Map();
 
     let hasAppliedAnId = false;
+    const casesWithAppliedId: Array<{ id: string; namespace: string }> = [];
 
     for (let index = 0; index < casesWithoutIncrementalId.length && !this.isStopped; index++) {
       try {
@@ -172,6 +176,7 @@ export class CasesIncrementalIdService {
           incIdSo.attributes.last_id = newId;
           hasAppliedAnId = true;
           countProcessedCases++;
+          casesWithAppliedId.push({ id: caseSo.id, namespace: namespaceOfCase });
         }
       } catch (error) {
         this.logger.error(`ID incrementing paused due to error: ${error}`);
@@ -182,13 +187,60 @@ export class CasesIncrementalIdService {
     // If changes have been made, apply the changes to the counters
     // These are done in sequence, since we cannot guarantee that `incIdSoCache` is small.
     // It might have hundreds/thousands of SO objects cached that need updating.
-    if (hasAppliedAnId && !this.isStopped) {
-      for (const [namespace, incIdSo] of incIdSoCache) {
-        await this.incrementCounterSO(incIdSo, incIdSo.attributes.last_id, namespace);
+    try {
+      if (hasAppliedAnId && !this.isStopped) {
+        for (const [namespace, incIdSo] of incIdSoCache) {
+          await this.incrementCounterSO(incIdSo, incIdSo.attributes.last_id, namespace);
+        }
       }
+    } finally {
+      // The cases keep their numbers even if a counter update throws.
+      await this.mirrorToAnalyticsV2(casesWithAppliedId);
     }
 
     return countProcessedCases;
+  }
+
+  /**
+   * The id is written with a raw SO update that does not bump the case's
+   * `attributes.updated_at`, so analytics-v2 reconciliation (keyed on that
+   * field) never re-emits the case. Without this push, a case whose analytics
+   * doc was written before the id existed would never get it in `.cases`.
+   *
+   * Re-reads the cases rather than reusing the task's snapshot so a concurrent
+   * user edit isn't overwritten with stale attributes, and a case deleted
+   * mid-run isn't resurrected in `.cases`.
+   *
+   * Best effort: a case this misses (write failure, restart, stale overwrite
+   * by a reconciliation tick) is repaired by the incremental id pass that
+   * runs on every reconciliation tick.
+   */
+  private async mirrorToAnalyticsV2(cases: Array<{ id: string; namespace: string }>) {
+    if (!this.analyticsV2Writer || cases.length === 0) {
+      return;
+    }
+
+    try {
+      const { saved_objects: savedObjects } =
+        await this.internalSavedObjectsClient.bulkGet<CasePersistedAttributes>(
+          cases.map(({ id, namespace }) => ({
+            type: CASE_SAVED_OBJECT,
+            id,
+            namespaces: [namespace],
+          }))
+        );
+      // Awaited so per-item 429s are retried rather than leaving the id
+      // missing until the next reconciliation tick.
+      await this.analyticsV2Writer.bulkUpsertCasesAwait(
+        savedObjects.filter(
+          (so): so is SavedObject<CasePersistedAttributes> => !isSavedObjectErrorResult(so)
+        )
+      );
+    } catch (error) {
+      this.logger.error(
+        `Unable to mirror ${cases.length} incremental ids to cases analytics: ${error}`
+      );
+    }
   }
 
   getCaseIdIncrementerSo(namespace: string) {

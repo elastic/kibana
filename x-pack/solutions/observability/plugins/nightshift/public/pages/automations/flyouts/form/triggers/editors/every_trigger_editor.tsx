@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiButtonGroup, EuiCheckbox, EuiText } from '@elastic/eui';
 import type { ScheduleUnit, TriggerFormValues } from '../../automation_form_values';
 import { SelectPill } from '../pills/select_pill';
@@ -15,13 +16,48 @@ import { TimezonePicker } from '../pills/timezone_picker';
 import { triggerLabels } from '../translations';
 
 const DAYS = [
-  { id: '1', label: 'Mon' },
-  { id: '2', label: 'Tue' },
-  { id: '3', label: 'Wed' },
-  { id: '4', label: 'Thu' },
-  { id: '5', label: 'Fri' },
-  { id: '6', label: 'Sat' },
-  { id: '0', label: 'Sun' },
+  {
+    id: '1',
+    label: i18n.translate('xpack.nightshift.automations.flyout.dayOfWeek.monday', {
+      defaultMessage: 'Mon',
+    }),
+  },
+  {
+    id: '2',
+    label: i18n.translate('xpack.nightshift.automations.flyout.dayOfWeek.tuesday', {
+      defaultMessage: 'Tue',
+    }),
+  },
+  {
+    id: '3',
+    label: i18n.translate('xpack.nightshift.automations.flyout.dayOfWeek.wednesday', {
+      defaultMessage: 'Wed',
+    }),
+  },
+  {
+    id: '4',
+    label: i18n.translate('xpack.nightshift.automations.flyout.dayOfWeek.thursday', {
+      defaultMessage: 'Thu',
+    }),
+  },
+  {
+    id: '5',
+    label: i18n.translate('xpack.nightshift.automations.flyout.dayOfWeek.friday', {
+      defaultMessage: 'Fri',
+    }),
+  },
+  {
+    id: '6',
+    label: i18n.translate('xpack.nightshift.automations.flyout.dayOfWeek.saturday', {
+      defaultMessage: 'Sat',
+    }),
+  },
+  {
+    id: '0',
+    label: i18n.translate('xpack.nightshift.automations.flyout.dayOfWeek.sunday', {
+      defaultMessage: 'Sun',
+    }),
+  },
 ];
 
 export const EveryTriggerEditor = ({

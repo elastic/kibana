@@ -23,10 +23,11 @@ import {
   ChatEventType,
   AgentExecutionMode,
   EventActorType,
+  platformCoreTools,
   timelineExecutionId,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
-import { HookLifecycle } from '@kbn/agent-builder-server';
+import { HookLifecycle, resolveAllowedConnectorIds } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
@@ -103,6 +104,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     conversation,
     origin,
     author,
+    actor,
     agentConfiguration,
     runId = uuidv4(),
     agentId,
@@ -182,27 +184,30 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
   // configured. Without a fast model, `selectModel({ effortLevel: 'low' })` falls back to the default
   // (expensive) model, which defeats the feature — so we treat it as off (original full-list behavior).
-  const [model, resolvedConfiguration, relevantSkillsEnabled, pluginSkillIds] = await Promise.all([
-    modelProvider.getDefaultModel(),
-    resolveConfiguration(agentConfiguration, {
-      aiIndicesEnabled: experimentalFeatures.aiIndices,
-      request,
-      resolver: context.aiIndexResolver,
-      logger,
-    }),
-    experimentalFeatures.relevantSkills ? modelProvider.hasFastModel() : false,
-    context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []),
-  ]);
+  const [model, resolvedConfiguration, relevantSkillsEnabled, pluginSkillIds, connectorSkillIds] =
+    await Promise.all([
+      modelProvider.getDefaultModel(),
+      resolveConfiguration(agentConfiguration, {
+        aiIndicesEnabled: experimentalFeatures.aiIndices,
+        request,
+        resolver: context.aiIndexResolver,
+        logger,
+      }),
+      experimentalFeatures.relevantSkills ? modelProvider.hasFastModel() : false,
+      context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []),
+      context.connectorSkills.resolveSkillIds(agentConfiguration.connector_ids ?? []),
+    ]);
   const skillIdsOverride = configurationOverrides?.skill_ids;
-  const filteredPluginSkillIds =
-    skillIdsOverride !== undefined
-      ? pluginSkillIds.filter((id) => skillIdsOverride.includes(id))
-      : pluginSkillIds;
+  const filterBySkillIdsOverride = (ids: string[]) =>
+    skillIdsOverride !== undefined ? ids.filter((id) => skillIdsOverride.includes(id)) : ids;
   const filteredSkills = await selectSkills({
     skills,
     skillsStore,
     agentConfiguration,
-    additionalSkillIds: filteredPluginSkillIds,
+    additionalSkillIds: [
+      ...filterBySkillIdsOverride(pluginSkillIds),
+      ...filterBySkillIdsOverride(connectorSkillIds),
+    ],
   });
 
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
@@ -225,6 +230,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput,
     timeline,
     nextInputAuthor: pendingTurn?.compatRound.author ?? author,
+    nextInputActor: actor,
     context,
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
@@ -314,6 +320,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentConfiguration,
       aiIndexCatalog: resolvedConfiguration.aiIndexCatalog,
       aiIndicesEnabled: experimentalFeatures.aiIndices,
+      capabilities: resolvedConfiguration.capabilities,
       attachmentsService: attachments,
       request,
       spaceId: context.spaceId,
@@ -365,19 +372,27 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       subagentTracker,
       conversationExists: (id: string) => conversationClient.exists(id),
       agentConfiguration,
+      capabilities: resolvedConfiguration.capabilities,
     });
 
-    // Then add dynamic tools
-    await toolManager.addTools(
-      {
-        type: ToolManagerToolType.executable,
-        tools: dynamicTools,
-        logger,
-      },
-      {
-        dynamic: true,
-      }
-    );
+    // Then add the dynamic tools
+    if (experimentalFeatures.dynamicTools) {
+      // tools loaded in previous rounds in the registry behind
+      // `execute_dynamic_tool` when the feature is on
+      await toolManager.addTools({ type: ToolManagerToolType.dynamic, tools: dynamicTools });
+    } else {
+      // LRU bound tools with feature off
+      await toolManager.addTools(
+        {
+          type: ToolManagerToolType.executable,
+          tools: dynamicTools,
+          logger,
+        },
+        {
+          dynamic: true,
+        }
+      );
+    }
 
     const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
@@ -415,6 +430,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       imageResolver,
       conversationTemplates: context.conversationTemplates,
       conversationMetadataWritable: updateConversationMetadata !== undefined,
+      connectorsAssigned: (resolveAllowedConnectorIds(agentConfiguration) ?? []).length > 0,
+      // Static tools only: dynamic tools can change mid-conversation, which would change the system prompt and lose its cache.
+      smlSearchSelected: staticTools.some(({ id }) => id === platformCoreTools.smlSearch),
     });
 
     const agentGraph = createAgentGraph({
@@ -444,6 +462,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         analyticsService: context.analyticsService,
         agentId,
         executionId,
+        toolManager,
       },
       cycleHooks,
     });
@@ -582,7 +601,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
     }
 
-    // Fire post-round hooks (nonBlocking — round is already streamed, hooks run fire-and-forget).
+    // Run post-round hooks. Blocking hooks are awaited here, so the run returns only after they
+    // finish; nonBlocking hooks are started and left to run in the background.
     // The try/catch is defensive; nonBlocking hooks should never throw to the runner.
     try {
       await context.hooks.run(HookLifecycle.afterExecution, {
@@ -704,9 +724,9 @@ const createInitializerCommand = ({
       ? { lastCallUsage: { inputTokens: lastCallInputTokens } }
       : {}),
   };
-  // A pending tool call must be (re-)executed; an ask-only pause goes back to the agent loop,
-  // through context management.
-  const goto = init.pendingToolCallIds.length > 0 ? steps.executeTool : steps.contextManagement;
+  // A pending tool call must be (re-)executed; an ask-only pause goes back to the agent loop
+  // through the background check, so a sub-agent that finished during the pause is reported.
+  const goto = init.pendingToolCallIds.length > 0 ? steps.executeTool : steps.checkBackgroundWork;
   return new Command({ update, goto });
 };
 

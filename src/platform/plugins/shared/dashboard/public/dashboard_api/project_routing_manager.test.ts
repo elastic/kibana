@@ -14,7 +14,7 @@ import { initializeProjectRoutingManager } from './project_routing_manager';
 import { cpsService } from '../services/kibana_services';
 
 jest.mock('../services/kibana_services', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { cpsServiceMock } = require('@kbn/cps/public/__mocks__');
   return {
     cpsService: cpsServiceMock,
@@ -23,15 +23,13 @@ jest.mock('../services/kibana_services', () => {
 
 describe('projectRouting', () => {
   const createLastSavedState = (projectRouting?: string) =>
-    new BehaviorSubject<DashboardState>({
-      ...getSampleDashboardState({ project_routing: projectRouting }),
-    });
+    new BehaviorSubject<DashboardState>(
+      getSampleDashboardState({ project_routing: projectRouting })
+    );
 
   const initManager = (projectRoutingRestore: boolean, initialProjectRouting?: string) => {
     const projectRoutingRestore$ = new BehaviorSubject<boolean>(projectRoutingRestore);
-    const dashboardState = initialProjectRouting
-      ? { ...getSampleDashboardState({ project_routing: initialProjectRouting }) }
-      : getSampleDashboardState();
+    const dashboardState = getSampleDashboardState({ project_routing: initialProjectRouting });
 
     return {
       manager: initializeProjectRoutingManager(dashboardState, projectRoutingRestore$),
@@ -41,7 +39,7 @@ describe('projectRouting', () => {
 
   beforeEach(() => {
     // Reset the project routing subject before each test
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { resetCpsMock } = require('@kbn/cps/public/__mocks__');
     resetCpsMock();
   });
@@ -118,6 +116,38 @@ describe('projectRouting', () => {
 
     // Change projectRouting - should not be detected as a change
     manager!.api.setProjectRouting('_alias:_new');
+  });
+
+  test('Should report no changes after restore is turned on and the new state is saved', () => {
+    jest.useFakeTimers();
+    try {
+      const { manager, projectRoutingRestore$ } = initManager(false);
+      const lastSavedState$ = createLastSavedState();
+
+      const results: Array<Partial<Pick<DashboardState, 'project_routing'>>> = [];
+      const getLatestChanges = () => results[results.length - 1];
+
+      // user changes project routing
+      manager!.api.setProjectRouting('_alias:_origin');
+      manager!.internalApi.startComparing(lastSavedState$).subscribe((c) => results.push(c));
+      jest.advanceTimersByTime(200);
+      // unsaved changes unexpected because restore is off
+      expect(getLatestChanges()).toStrictEqual({});
+
+      // user enables restore
+      projectRoutingRestore$.next(true);
+      jest.advanceTimersByTime(200);
+      // unsaved changes expected because restore is on and the saved state has no project routing
+      expect(getLatestChanges()).toStrictEqual({ project_routing: '_alias:_origin' });
+
+      // user saves
+      lastSavedState$.next(createLastSavedState('_alias:_origin').value);
+      jest.advanceTimersByTime(200);
+      // unsaved changes unexpected because saved state now matches project routing
+      expect(getLatestChanges()).toStrictEqual({});
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   test('Should not include projectRouting in getState when projectRoutingRestore is false', () => {

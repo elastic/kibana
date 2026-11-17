@@ -24,9 +24,10 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/traced-es-client'
   - '@kbn/calculate-auto'
+  - '@kbn/charts-plugin'
   - '@kbn/charts-theme'
   - '@kbn/core'
-  - '@kbn/core-http-server-utils'
+  - '@kbn/core-security-server'
   - '@kbn/config-schema'
   - '@kbn/css-utils'
   - '@kbn/data-plugin'
@@ -36,6 +37,7 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/es-errors'
   - '@kbn/es-query'
+  - '@kbn/esql-utils'
   - '@kbn/event-stacktrace'
   - '@kbn/features-plugin'
   - '@kbn/field-formats-plugin'
@@ -47,6 +49,7 @@ dependsOn:
   - '@kbn/observability-shared-plugin'
   - '@kbn/react-hooks'
   - '@kbn/rison'
+  - '@kbn/share-plugin'
   - '@kbn/shared-ux-column-presets'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/ui-callout'
@@ -59,8 +62,10 @@ dependsOn:
   - '@kbn/timerange'
   - '@kbn/typed-react-router-config'
   - '@kbn/unified-search-plugin'
+  - '@kbn/utility-types'
   - '@kbn/ux-plugin'
   - '@kbn/zod'
+  - '@kbn/core-test-helpers-deprecations-getters'
 tags:
   - plugin
   - prod
@@ -74,6 +79,5 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
-    - test/scout_digital_experience/**/*
     - '!target/**/*'
 tasks: {}

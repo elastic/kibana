@@ -61,6 +61,7 @@ describe('Nightshift investigation agent type', () => {
 
     expect(base).toMatchObject({
       enable_elastic_capabilities: false,
+      capabilities: { api_tools: { enabled: false } },
       skill_ids: [],
       workflow_ids: ['system-nightshift-sandbox-materialize-workspace-bound-default'],
       post_execution_workflow_ids: ['system-nightshift-agent-optimize-bound-default'],
@@ -121,6 +122,25 @@ describe('Nightshift investigation agent type', () => {
     ]);
     expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
     expect(base.instructions).not.toContain('{{decision_trees_section}}');
+  });
+
+  it('hydrates and reinforces decision trees when Wiki and Memory are off', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        wikiEnabled: false,
+        memoryEnabled: false,
+        decisionTreesEnabled: true,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-default',
+    ]);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-default',
+    ]);
+    expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
   });
 
   it('keeps hydrating knowledge but drops the optimize hook when learning is disabled', async () => {
