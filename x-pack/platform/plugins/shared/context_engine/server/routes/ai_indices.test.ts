@@ -1389,7 +1389,6 @@ describe('ai indices routes', () => {
       columns: [{ name: 'count' }, { name: 'group_type' }, { name: 'total' }, { name: 'is_other' }],
       values,
     });
-    const otherTotal = (total: number) => ({ columns: [{ name: 'total' }], values: [[total]] });
     const rows = (values: unknown[][]) => ({
       columns: ['_index', 'id', 'type', 'title', 'updated_at', 'ki_status'].map((name) => ({
         name,
@@ -1436,7 +1435,6 @@ describe('ai indices routes', () => {
       esEsqlQuery
         .mockResolvedValueOnce(probe)
         .mockResolvedValueOnce(groupBuckets([[2, 'faq', 3, false]]))
-        .mockResolvedValueOnce(otherTotal(1))
         .mockResolvedValueOnce(rows([[kiBackingIndex, 'ki-1', 'faq', 'Refunds', null, 'active']]));
 
       await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, {
@@ -1450,8 +1448,8 @@ describe('ai indices routes', () => {
         params: [{ searchQuery: 'refund' }],
       });
       expect(esEsqlQuery.mock.calls[1][0].query).toContain('WHERE ki_status IN ("active")');
-      expect(esEsqlQuery.mock.calls[3][0].query).toContain('SORT _score DESC, title_sort ASC');
-      expect(esEsqlQuery.mock.calls[3][0].query).toContain('| LIMIT 1');
+      expect(esEsqlQuery.mock.calls[2][0].query).toContain('SORT _score DESC, title_sort ASC');
+      expect(esEsqlQuery.mock.calls[2][0].query).toContain('| LIMIT 1');
       expect(response.ok).toHaveBeenCalledWith({
         body: {
           total: 3,

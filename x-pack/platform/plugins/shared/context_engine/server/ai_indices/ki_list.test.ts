@@ -160,7 +160,7 @@ describe('ki_list', () => {
     );
     expect(queryText(1)).toContain('| STATS total = COUNT(*)');
     expect(queryText(2)).toContain(
-      '| WHERE type IS NOT NULL AND LENGTH(type) <= 256\n| STATS count = COUNT(*) BY type\n| SORT count DESC, type ASC\n| LIMIT 5'
+      '| WHERE type IS NOT NULL AND BYTE_LENGTH(type) <= 256\n| STATS count = COUNT(*) BY type\n| SORT count DESC, type ASC\n| LIMIT 5'
     );
   });
 
@@ -203,7 +203,7 @@ describe('ki_list', () => {
 
     const bucketsQuery = queryText(1);
     expect(bucketsQuery).toContain('| EVAL type = CASE(type == "", NULL, type)\n');
-    expect(bucketsQuery).toContain('| WHERE type IS NOT NULL AND LENGTH(type) <= 256\n');
+    expect(bucketsQuery).toContain('| WHERE type IS NOT NULL AND BYTE_LENGTH(type) <= 256\n');
   });
 
   describe('excludeTypes', () => {
@@ -1020,7 +1020,6 @@ describe('getKiGroups', () => {
           [2, 'policy', 7, false],
         ])
       )
-      .mockResolvedValueOnce(totalsResponse(1))
       .mockResolvedValueOnce(
         rowsResponse([[BACKING_INDEX, 'ki-1', 'faq', 'Refunds', null, 'active']])
       )
@@ -1060,7 +1059,7 @@ describe('getKiGroups', () => {
         'EVAL type = MV_MIN(type)',
         'EVAL type = CASE(type == "", NULL, type)',
         'EVAL expires_at = TO_STRING(NULL)',
-        'EVAL group_type = CASE(type IS NOT NULL AND LENGTH(type) <= 256, type, NULL)',
+        'EVAL group_type = CASE(type IS NOT NULL AND BYTE_LENGTH(type) <= 256, type, NULL)',
         'STATS count = COUNT(*) BY group_type',
         'INLINE STATS total = SUM(count)',
         'EVAL is_other = group_type IS NULL',
@@ -1068,19 +1067,15 @@ describe('getKiGroups', () => {
         'LIMIT 5',
       ].join('\n| ')
     );
+    // total_other = total - sum(counts), from the same query: no extra count query.
+    expect(query).toHaveBeenCalledTimes(4);
     expect(query.mock.calls[2][0]).toEqual({
-      query: expect.stringContaining(
-        '| WHERE (type IS NULL OR type NOT IN (?excludeType0, ?excludeType1))\n| STATS total = COUNT(*)'
-      ),
-      params: [{ excludeType0: 'faq' }, { excludeType1: 'policy' }],
-    });
-    expect(query.mock.calls[3][0]).toEqual({
       query: expect.stringContaining(
         '| WHERE type == ?type\n| EVAL updated_sort = COALESCE(TO_DATETIME(updated_at), revision_time)\n| SORT updated_sort DESC, id ASC\n| KEEP _index, id, type, title, updated_at, expires_at, ki_status\n| LIMIT 3'
       ),
       params: [{ type: 'faq' }],
     });
-    expect(query.mock.calls[4][0].params).toEqual([{ type: 'policy' }]);
+    expect(query.mock.calls[3][0].params).toEqual([{ type: 'policy' }]);
   });
 
   it('drops the bucket of KIs that cannot be a group', async () => {
@@ -1091,14 +1086,13 @@ describe('getKiGroups', () => {
           [5, null, 9, true],
         ])
       )
-      .mockResolvedValueOnce(totalsResponse(5))
       .mockResolvedValueOnce(rowsResponse([]));
 
     const { total, total_other: totalOther, groups } = await getKiGroups(esClient, OPTIONS);
 
     expect({ total, totalOther }).toEqual({ total: 9, totalOther: 5 });
     expect(groups.map(({ type }) => type)).toEqual(['faq']);
-    expect(query).toHaveBeenCalledTimes(4);
+    expect(query).toHaveBeenCalledTimes(3);
   });
 
   it('counts every KI as other when no KI has a groupable type', async () => {
@@ -1134,10 +1128,28 @@ describe('getKiGroups', () => {
     expect(query).toHaveBeenCalledTimes(1);
   });
 
-  it('applies status, search and sort to buckets, other and rows', async () => {
+  it('counts the types past maxGroups as other', async () => {
+    query
+      .mockResolvedValueOnce(
+        groupBucketsResponse([
+          [4, 'faq', 10, false],
+          [3, 'policy', 10, false],
+        ])
+      )
+      .mockResolvedValueOnce(rowsResponse([]))
+      .mockResolvedValueOnce(rowsResponse([]));
+
+    const { total, total_other: totalOther } = await getKiGroups(esClient, {
+      ...OPTIONS,
+      maxGroups: 2,
+    });
+
+    expect({ total, totalOther }).toEqual({ total: 10, totalOther: 3 });
+  });
+
+  it('applies status, search and sort to buckets and rows', async () => {
     query
       .mockResolvedValueOnce(groupBucketsResponse([[1, 'faq', 2, false]]))
-      .mockResolvedValueOnce(totalsResponse(1))
       .mockResolvedValueOnce(rowsResponse([]));
 
     await getKiGroups(esClient, {
@@ -1150,17 +1162,13 @@ describe('getKiGroups', () => {
     });
 
     expect(query.mock.calls[1][0].params).toEqual([{ searchQuery: 'refund' }]);
-    expect(query.mock.calls[2][0].params).toEqual([
-      { searchQuery: 'refund' },
-      { excludeType0: 'faq' },
-    ]);
-    expect(query.mock.calls[3][0].params).toEqual([{ type: 'faq' }, { searchQuery: 'refund' }]);
-    for (const call of [0, 1, 2]) {
+    expect(query.mock.calls[2][0].params).toEqual([{ type: 'faq' }, { searchQuery: 'refund' }]);
+    for (const call of [0, 1]) {
       expect(queryText(call)).toContain('| WHERE ki_status IN ("expired")\n');
       expect(queryText(call)).toContain('MATCH(title, ?searchQuery');
     }
     expect(queryText(0)).toContain('| LIMIT 2');
-    expect(queryText(2)).toContain('| SORT _score DESC, title_sort ASC NULLS LAST, id ASC');
-    expect(queryText(2)).toContain('| LIMIT 1');
+    expect(queryText(1)).toContain('| SORT _score DESC, title_sort ASC NULLS LAST, id ASC');
+    expect(queryText(1)).toContain('| LIMIT 1');
   });
 });

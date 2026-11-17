@@ -75,9 +75,10 @@ const KEEP_FIELDS = [
 
 /**
  * A type that can be a group. A longer type can't be sent back as a `type` or
- * `exclude_types` filter, so it stays in "Other".
+ * `exclude_types` filter, so it stays in "Other". UTF-8 bytes are never fewer than the
+ * UTF-16 units the request schema counts, so every groupable type passes that schema.
  */
-const GROUPABLE_TYPE_CONDITION = `type IS NOT NULL AND LENGTH(type) <= ${MAX_KI_TYPE_FILTER_LENGTH}`;
+const GROUPABLE_TYPE_CONDITION = `type IS NOT NULL AND BYTE_LENGTH(type) <= ${MAX_KI_TYPE_FILTER_LENGTH}`;
 
 const excludeTypeParam = (i: number): string => `excludeType${i}`;
 
@@ -426,7 +427,8 @@ export const getKis = async (
 
 /**
  * The biggest KI types, each with its count and its first KIs, plus the count of all other KIs.
- * Counts come first, rows after, so writes in between can make them differ by a few KIs.
+ * Counts come from one query, so `total` is always the sum of the group counts and
+ * `total_other`. Rows come after, so writes in between can make them differ by a few KIs.
  */
 export const getKiGroups = async (
   esClient: ElasticsearchClient,
@@ -459,34 +461,23 @@ export const getKiGroups = async (
   const groupCounts = buckets.flatMap(({ group_type: type, count }) =>
     typeof type === 'string' ? [{ type, count: Number(count) }] : []
   );
-  if (groupCounts.length === 0) {
-    return { total, total_other: total, groups: [] };
-  }
+  // The other KIs are the null bucket plus the types past `maxGroups`: the same KIs that
+  // `exclude_types` with the group types lists.
+  const totalOther = total - groupCounts.reduce((sum, { count }) => sum + count, 0);
 
-  const groupTypes = groupCounts.map(({ type }) => type);
-  const otherQuery = [
-    base,
-    `WHERE ${otherTypesCondition(groupTypes)}`,
-    'STATS total = COUNT(*)',
-  ].join('\n| ');
-  const [other, ...groupRows] = await Promise.all([
-    esClient.esql.query({
-      query: otherQuery,
-      ...listQueryParams({ query, excludeTypes: groupTypes }),
-    }),
-    ...groupTypes.map((type) =>
+  const groupRows = await Promise.all(
+    groupCounts.map(({ type }) =>
       esClient.esql.query({
         query: rowsQueryText(context, { filter: 'type == ?type', sort, query, size: previewSize }),
         ...listQueryParams({ type, query }),
       })
-    ),
-  ]);
+    )
+  );
 
-  const [otherRow] = toRecords(other as unknown as ESQLSearchResponse);
   const groups: KiGroup[] = groupCounts.map(({ type, count }, i) => ({
     type,
     count,
     kis: toKiListItems(groupRows[i]),
   }));
-  return { total, total_other: Number(otherRow?.total ?? 0), groups };
+  return { total, total_other: totalOther, groups };
 };
