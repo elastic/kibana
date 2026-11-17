@@ -27,7 +27,15 @@ export async function openAddIntegrationModal(
 ): Promise<CloseAddIntegrationModal> {
   const { startServices } = getFleetAppServices();
 
-  const { AddIntegrationModal } = await import('./add_integration_modal');
+  // Same chunk name as the Integrations app mount in `plugin.ts`, deliberately. Kibana's optimizer
+  // promotes any module referenced by three or more chunks into `shared-plugins` / `vendors`, which
+  // are page-load bundles (`config/split_chunks.ts`, `minChunks: 3`). The Integrations pages are
+  // already referenced by the Fleet app chunk and the Integrations app chunk; giving the modal its
+  // own chunk would make three and push ~285 KB onto every page load. Sharing the app's chunk keeps
+  // the count at two: opening the modal downloads that chunk, and page load is untouched.
+  const { AddIntegrationModal } = await import(
+    /* webpackChunkName: "fleet-integrations-app" */ './add_integration_modal'
+  );
 
   const container = document.createElement('div');
   container.className = 'fleetAddIntegrationModalHost';

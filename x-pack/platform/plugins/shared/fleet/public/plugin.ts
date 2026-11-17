@@ -233,7 +233,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           cloud,
           authz: fleetStart.authz,
         };
-        const { renderApp, teardownIntegrations } = await import('./applications/integrations');
+        const { renderApp, teardownIntegrations } = await import(
+          /* webpackChunkName: "fleet-integrations-app" */ './applications/integrations'
+        );
 
         const Tracker =
           deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
