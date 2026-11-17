@@ -28,42 +28,50 @@ export class SpaceRunLock {
     spaceId: string;
     callback: () => Promise<T>;
   }): Promise<SpaceRunOutcome<T>> {
-    let started = false;
     const lockId = getLockId(spaceId);
+    let started = false;
 
-    try {
-      const result = await withLock(
-        {
-          esClient: this.esClient,
-          logger: this.logger,
-          lockId,
-          metadata: { spaceId },
-        },
-        () => {
-          started = true;
-          return callback();
-        }
-      );
-
-      return { ran: true, result };
-    } catch (error) {
-      // A lock error thrown by the callback itself is the callback's failure, not a busy space.
-      if (!started && isLockAcquisitionError(error)) {
-        // The lock manager also fails to acquire when Elasticsearch times out or refuses the
-        // write. Only a live lock document means another run holds the space; anything else is a
-        // broken lock backend, which must not read as a busy space tick after tick.
-        const holder = await getLock({ esClient: this.esClient, logger: this.logger, lockId });
-        if (holder) {
-          return { ran: false };
-        }
-
-        throw new Error(
-          `Could not take the run lock of space [${spaceId}], and no other run holds it`,
-          { cause: error }
+    const attempt = async (): Promise<SpaceRunOutcome<T> | undefined> => {
+      try {
+        const result = await withLock(
+          { esClient: this.esClient, logger: this.logger, lockId, metadata: { spaceId } },
+          () => {
+            started = true;
+            return callback();
+          }
         );
-      }
 
-      throw error;
+        return { ran: true, result };
+      } catch (error) {
+        // A lock error thrown by the callback itself is the callback's failure, not a busy space.
+        if (started || !isLockAcquisitionError(error)) {
+          throw error;
+        }
+
+        return undefined;
+      }
+    };
+
+    // The lock manager also fails to acquire when Elasticsearch times out or refuses the write, and
+    // it does not say which. A live lock document means another run holds the space. No document
+    // may mean the holder finished between the two requests, so acquire once more before calling
+    // it a broken lock backend, which must not read as a busy space tick after tick.
+    const first = await attempt();
+    if (first) {
+      return first;
     }
+    if (await getLock({ esClient: this.esClient, logger: this.logger, lockId })) {
+      return { ran: false };
+    }
+
+    const second = await attempt();
+    if (second) {
+      return second;
+    }
+    if (await getLock({ esClient: this.esClient, logger: this.logger, lockId })) {
+      return { ran: false };
+    }
+
+    throw new Error(`Could not take the run lock of space [${spaceId}], and no other run holds it`);
   }
 }
