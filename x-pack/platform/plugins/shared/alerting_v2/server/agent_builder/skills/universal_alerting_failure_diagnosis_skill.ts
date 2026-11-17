@@ -196,8 +196,8 @@ Possible root causes:
 The message points at the recovery or no-data query (or the failing line sits in that query's text). These are separate ES|QL queries that can target a different index than the base query.
 
 When each query runs can help identify which one failed:
-- The recovery query only runs once an active group stops breaching, so the failure can appear intermittently.
-- The no-data query runs on every execution while no-data handling is enabled.
+- Both queries run at the end of an execution, only for rules of kind \`alert\`, and only when the rule already has active alert groups. A rule with no active groups skips them, so the failure can appear intermittently: only after the rule has started alerting.
+- Once active groups exist, the recovery query runs on every execution if the rule has a recovery query configured (not for \`manual\` recovery or the \`no_breach\` strategy), and the no-data query runs on every execution if no-data handling is enabled. Neither waits for a group to stop breaching.
 
 Possible root causes: every cause in A, B, and C, applied to that separate query, with the same checks and fixes. In addition:
 1. **The query was written for a different index or different grouping fields than the base query.**
