@@ -35,7 +35,11 @@ import {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+  CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
@@ -71,6 +75,10 @@ import {
   RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
   type WorkerSettingsDefaults,
 } from './definitions/alertzero/worker_settings_defaults';
+import CONTEXT_ENGINE_DREAMING_YAML from './definitions/context_engine/dreaming.yaml';
+import CONTEXT_ENGINE_TRACE_DREAMING_YAML from './definitions/context_engine/dreaming_traces.yaml';
+import CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_traces_batch.yaml';
+import CONTEXT_ENGINE_RELATIONSHIPS_YAML from './definitions/context_engine/relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -107,6 +115,50 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID]: {
     aiIndexId: 'my-ai-index',
     intervalMinutes: 1440,
+  },
+  [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    instanceKey: 'my-ai-index-0123456789abcdef',
+    memoriesIndex: 'ai-index-idx-my-ai-index',
+    intervalMinutes: 60,
+    connectorId: '',
+    instructions: 'Remember what customers "prefer".\nIgnore {{ small talk }}.',
+    factTypes: [{ type: 'preference', description: 'Something a customer wants: a seat.' }],
+    entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
+    relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
+  },
+  [CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    instanceKey: 'my-ai-index-0123456789abcdef',
+    memoriesIndex: 'ai-index-idx-my-ai-index',
+    intervalMinutes: 60,
+    connectorId: 'my-connector',
+    instructions: 'Remember what customers "prefer".\nIgnore {{ small talk }}.',
+    factTypes: [{ type: 'preference', description: 'Something a customer wants: a seat.' }],
+    entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
+    relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
+  },
+  [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    instanceKey: 'my-ai-index-0123456789abcdef',
+    memoriesIndex: 'ai-index-idx-my-ai-index',
+    intervalMinutes: 60,
+    connectorId: 'my-connector',
+    instructions: 'Remember what customers "prefer".\nIgnore {{ small talk }}.',
+    factTypes: [{ type: 'preference', description: 'Something a customer wants: a seat.' }],
+    entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
+    relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
+  },
+  [CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    instanceKey: 'my-ai-index-0123456789abcdef',
+    memoriesIndex: 'ai-index-idx-my-ai-index',
+    intervalMinutes: 60,
+    connectorId: 'my-connector',
+    instructions: 'Remember what customers "prefer".\nIgnore {{ small talk }}.',
+    factTypes: [{ type: 'preference', description: 'Something a customer wants: a seat.' }],
+    entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
+    relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
   },
   [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
     settingsVersion: 2,
@@ -187,6 +239,10 @@ const alertZeroWorkflowIds = new Set<string>([
 
 const alertZeroDefinitionsById = managedDefinitionsById.filter(([id]) =>
   alertZeroWorkflowIds.has(id)
+);
+
+const staticDefinitionsById = managedDefinitionsById.filter(
+  ([, definition]) => definition.management.lifecycle === 'static'
 );
 
 function hasYamlTemplate(
@@ -286,9 +342,17 @@ it.each([
     '5:d2801f59',
   ],
   [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID, RULE_TUNING_WORKER_YAML, '34:499cabfe'],
-  [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '5:fa71b87b'],
-  [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '7:2ce58cc9'],
-  [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '6:063c014a'],
+  [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '6:46476397'],
+  [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '8:54a3c745'],
+  [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '7:908d3f54'],
+  [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_DREAMING_YAML, '5:2fc422ee'],
+  [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID, CONTEXT_ENGINE_RELATIONSHIPS_YAML, '1:a86208ac'],
+  [CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_TRACE_DREAMING_YAML, '5:53938616'],
+  [
+    CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+    CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML,
+    '5:85da232f',
+  ],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
   (workflowId, inputs, expectedFingerprint) => {
@@ -468,6 +532,13 @@ describe('managedWorkflowDefinitions', () => {
     expect(renderWorkflowYaml(definition)).not.toMatch(
       /api\/asset_criticality|entityStore\.updateAssetCriticality/
     );
+  });
+
+  // Static workflows install without a user request, and creating or changing a service-account
+  // binding needs one (with manage_security, in a specific space). A static definition that set
+  // `run_as` would only fail when it is installed, so it fails here instead.
+  it.each(staticDefinitionsById)('%s does not bind a service account', (_id, definition) => {
+    expect(parse(renderWorkflowYaml(definition))?.settings?.run_as).toBeUndefined();
   });
 
   it.each(managedTemplateDefinitionsById)(

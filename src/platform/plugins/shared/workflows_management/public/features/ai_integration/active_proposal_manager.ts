@@ -25,6 +25,13 @@ export const setActiveProposalManager = (manager: ProposalManager | null): void 
 };
 
 /**
+ * The content saving would persist once pending diffs are accepted, without accepting them.
+ * Returns `undefined` if there is nothing pending.
+ */
+export const getActiveProposalContent = (): string | undefined =>
+  active?.hasPendingProposals() ? active.getCurrentContent() : undefined;
+
+/**
  * Accept pending diffs on the active editor and return the post-accept model
  * content. Returns `undefined` if there was nothing to accept.
  */

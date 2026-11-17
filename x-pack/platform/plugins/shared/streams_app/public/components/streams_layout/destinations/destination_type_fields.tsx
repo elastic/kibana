@@ -6,41 +6,57 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import type { EuiStepsProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { WRITING_MODE_STEP_TITLE } from './destination_type_config';
 import { LocalElasticsearchFields } from './local_elasticsearch_fields';
 import { RemoteElasticsearchConnectionFields } from './remote_elasticsearch_connection_fields';
 import { RemoteElasticsearchRoutingFields } from './remote_elasticsearch_routing_fields';
 import { S3Fields } from './s3_fields';
 import type { DestinationCreationFormErrors, DestinationStorageKind } from './types';
 
-interface DestinationTypeFieldsProps {
+interface DestinationTypeStepsProps {
   storageKind: DestinationStorageKind;
   errors: DestinationCreationFormErrors;
   disabled: boolean;
 }
 
-/**
- * Renders the form section for the selected destination type.
- * Add a case and a fields component when a new type becomes available.
- * Fields read and write their values through the surrounding `FormProvider`.
- */
-export const DestinationTypeFields = ({
+/** Modal steps for the selected destination type. Fields bind through the surrounding `FormProvider`. */
+export const getDestinationTypeSteps = ({
   storageKind,
   errors,
   disabled,
-}: DestinationTypeFieldsProps) => {
+}: DestinationTypeStepsProps): EuiStepsProps['steps'] => {
   switch (storageKind) {
     case 'local_elasticsearch':
-      return <LocalElasticsearchFields errors={errors} disabled={disabled} />;
+      return [
+        {
+          title: WRITING_MODE_STEP_TITLE,
+          children: <LocalElasticsearchFields errors={errors} disabled={disabled} />,
+        },
+      ];
     case 'remote_elasticsearch':
-      return (
-        <>
-          <RemoteElasticsearchRoutingFields errors={errors} disabled={disabled} />
-          <EuiSpacer size="m" />
-          <RemoteElasticsearchConnectionFields errors={errors} disabled={disabled} />
-        </>
-      );
+      return [
+        {
+          title: i18n.translate(
+            'xpack.streams.destinations.remoteElasticsearch.connectionStepTitle',
+            { defaultMessage: 'Connect your remote cluster' }
+          ),
+          children: <RemoteElasticsearchConnectionFields errors={errors} disabled={disabled} />,
+        },
+        {
+          title: WRITING_MODE_STEP_TITLE,
+          children: <RemoteElasticsearchRoutingFields errors={errors} disabled={disabled} />,
+        },
+      ];
     case 'external_storage':
-      return <S3Fields errors={errors} disabled={disabled} />;
+      return [
+        {
+          title: i18n.translate('xpack.streams.destinations.externalStorageStepTitle', {
+            defaultMessage: 'Configure external storage',
+          }),
+          children: <S3Fields errors={errors} disabled={disabled} />,
+        },
+      ];
   }
 };

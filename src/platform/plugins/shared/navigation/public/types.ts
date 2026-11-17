@@ -67,7 +67,13 @@ export interface NavigationPublicStart {
    */
   initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
     id: SolutionId,
-    navigationTree$: Observable<NavigationTreeDefinition<LinkId>>
+    navigationTree$: Observable<NavigationTreeDefinition<LinkId>>,
+    /**
+     * Id of the plugin that owns this navigation tree. When provided, Core attributes the tree's
+     * `link` references to this plugin for the navigation-dependency enforcement test
+     * (see https://github.com/elastic/kibana/issues/66682).
+     */
+    ownerPluginId?: string
   ) => void;
   /**
    * Attach hover lists to an existing project-nav deep link.

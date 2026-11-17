@@ -39,6 +39,7 @@ import {
 import * as workflowPrepare from '../api/lib/workflow_prepare';
 import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import { applyWorkflowVersion } from '../lib/workflow_version';
+import { workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
@@ -427,6 +428,32 @@ describe('WorkflowCrudService', () => {
       ).rejects.toThrow();
     });
 
+    it('reads more ids than one search returns in several searches', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      const ids = Array.from({ length: 10_001 }, (_, index) => `wf-${index}`);
+
+      const service = new WorkflowCrudService(deps);
+      await service.getWorkflowsSourceByIds(ids, 'default', ['name']);
+
+      expect(client.search.mock.calls.map(([params]) => params.size)).toEqual([10_000, 1]);
+      expect(client.search.mock.calls[0][0]).not.toHaveProperty('allow_partial_search_results');
+    });
+
+    it('fails rather than return partial results when asked to', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      const service = new WorkflowCrudService(deps);
+      await service.getWorkflowsSourceByIds(['wf-1'], 'default', ['name'], {
+        allowPartialResults: false,
+      });
+
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({ allow_partial_search_results: false })
+      );
+    });
+
     it('uses _source: true when no source fields specified', async () => {
       const { deps, client } = makeDeps();
       client.search.mockResolvedValue({ hits: { hits: [] } });
@@ -496,6 +523,369 @@ describe('WorkflowCrudService', () => {
           },
         })
       );
+    });
+  });
+
+  describe('indexCalledWorkflowIds', () => {
+    it('stores the workflows that unindexed workflows run, unless they were saved meanwhile', async () => {
+      const core = {
+        ...coreMock.createStart(),
+        elasticsearch: elasticsearchServiceMock.createStart(),
+      };
+      const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+      const definition = {
+        steps: [{ name: 'run', type: 'workflow.execute', with: { 'workflow-id': 'child' } }],
+      };
+      core.elasticsearch.client.asInternalUser.mget.mockResolvedValue({
+        docs: [
+          {
+            _index: workflowIndexName,
+            _id: 'old',
+            found: true,
+            _seq_no: 3,
+            _primary_term: 2,
+            _source: makeSource({ definition } as Partial<WorkflowProperties>),
+          },
+          {
+            _index: workflowIndexName,
+            _id: 'saved',
+            found: true,
+            _seq_no: 4,
+            _primary_term: 2,
+            _source: makeSource({ calledWorkflowIds: [], calledWorkflowIdsIndexed: true }),
+          },
+        ],
+      } as any);
+      client.bulk.mockResolvedValue({ items: [{ index: { status: 200 } }] });
+
+      await new WorkflowCrudService(deps).indexCalledWorkflowIds(['old', 'saved']);
+
+      const { operations } = client.bulk.mock.calls[0][0];
+      expect(operations).toEqual([
+        {
+          index: expect.objectContaining({
+            _id: 'old',
+            if_seq_no: 3,
+            if_primary_term: 2,
+            document: expect.objectContaining({
+              definition,
+              calledWorkflowIds: ['child'],
+              calledWorkflowIdsIndexed: true,
+            }),
+          }),
+        },
+      ]);
+    });
+  });
+
+  describe('getWorkflowDocumentsWithVersionByIds', () => {
+    const makeMgetDeps = () => {
+      const core = {
+        ...coreMock.createStart(),
+        elasticsearch: elasticsearchServiceMock.createStart(),
+      };
+      const { deps } = makeDeps(undefined, { getCoreStart: () => core });
+      return { deps, mget: core.elasticsearch.client.asInternalUser.mget };
+    };
+
+    it('reads every requested id once in real time, across spaces and including deleted documents', async () => {
+      const { deps, mget } = makeMgetDeps();
+      mget.mockResolvedValue({
+        docs: [
+          {
+            _index: workflowIndexName,
+            _id: 'wf-1',
+            found: true,
+            _seq_no: 3,
+            _primary_term: 2,
+            _source: makeSource({
+              spaceId: 'other',
+              deleted_at: new Date('2024-02-01T00:00:00.000Z'),
+            }),
+          },
+          { _index: workflowIndexName, _id: 'wf-2', found: false },
+        ],
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.getWorkflowDocumentsWithVersionByIds(['wf-1', 'wf-2', 'wf-1']);
+
+      expect(mget).toHaveBeenCalledWith({
+        index: workflowIndexName,
+        ids: ['wf-1', 'wf-2'],
+        realtime: true,
+      });
+      expect([...result]).toEqual([
+        [
+          'wf-1',
+          {
+            source: expect.objectContaining({ spaceId: 'other', deleted_at: expect.any(Date) }),
+            seqNo: 3,
+            primaryTerm: 2,
+          },
+        ],
+      ]);
+    });
+
+    it('reads no workflows before the workflow index exists', async () => {
+      const { deps, mget } = makeMgetDeps();
+      mget.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception' } },
+          headers: {},
+          warnings: [],
+          meta: {} as any,
+        })
+      );
+
+      const service = new WorkflowCrudService(deps);
+
+      await expect(service.getWorkflowDocumentsWithVersionByIds(['wf-1'])).resolves.toEqual(
+        new Map()
+      );
+    });
+
+    it('reads no workflows when Elasticsearch answers 200 with index_not_found_exception per document', async () => {
+      const { deps, mget } = makeMgetDeps();
+      // The real response for a missing index: HTTP 200, with the error on every document.
+      mget.mockResolvedValue({
+        docs: ['wf-1', 'wf-2'].map((id) => ({
+          _index: workflowIndexName,
+          _id: id,
+          error: {
+            type: 'index_not_found_exception',
+            reason: `no such index [${workflowIndexName}]`,
+          },
+        })),
+      });
+
+      const service = new WorkflowCrudService(deps);
+
+      await expect(service.getWorkflowDocumentsWithVersionByIds(['wf-1', 'wf-2'])).resolves.toEqual(
+        new Map()
+      );
+    });
+
+    it('throws without retrying instead of reporting a workflow as missing when it cannot be read', async () => {
+      const { deps, mget } = makeMgetDeps();
+      mget.mockResolvedValue({
+        docs: [
+          {
+            _index: workflowIndexName,
+            _id: 'wf-1',
+            error: { type: 'illegal_argument_exception', reason: 'invalid read' },
+          },
+        ],
+      });
+
+      const service = new WorkflowCrudService(deps);
+
+      await expect(service.getWorkflowDocumentsWithVersionByIds(['wf-1'])).rejects.toThrow(
+        'Could not read workflow wf-1: invalid read'
+      );
+      expect(mget).toHaveBeenCalledTimes(1);
+    });
+
+    describe('while the shard is not ready', () => {
+      // The response Elasticsearch gives right after another node or plugin creates the index.
+      const shardUnavailableResponse = {
+        docs: [
+          {
+            _index: workflowIndexName,
+            _id: 'wf-1',
+            error: {
+              type: 'no_shard_available_action_exception',
+              reason: 'No shard available for [MultiGetShardRequest/unset]',
+            },
+          },
+        ],
+      };
+
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('reads again until the shard is ready', async () => {
+        const { deps, mget } = makeMgetDeps();
+        mget
+          .mockResolvedValueOnce(shardUnavailableResponse)
+          .mockResolvedValueOnce(shardUnavailableResponse)
+          .mockResolvedValueOnce({
+            docs: [
+              {
+                _index: workflowIndexName,
+                _id: 'wf-1',
+                found: true,
+                _seq_no: 0,
+                _primary_term: 1,
+                _source: makeSource(),
+              },
+            ],
+          });
+
+        const service = new WorkflowCrudService(deps);
+        const read = service.getWorkflowDocumentsWithVersionByIds(['wf-1']);
+        await jest.advanceTimersByTimeAsync(100 + 200);
+
+        await expect(read).resolves.toEqual(
+          new Map([['wf-1', { source: expect.any(Object), seqNo: 0, primaryTerm: 1 }]])
+        );
+        expect(mget).toHaveBeenCalledTimes(3);
+      });
+
+      it('throws when the shard is still not ready after the retries', async () => {
+        const { deps, mget } = makeMgetDeps();
+        mget.mockResolvedValue(shardUnavailableResponse);
+
+        const service = new WorkflowCrudService(deps);
+        const read = service.getWorkflowDocumentsWithVersionByIds(['wf-1']);
+        const assertion = expect(read).rejects.toThrow(
+          'Could not read workflow wf-1: No shard available for [MultiGetShardRequest/unset]'
+        );
+        await jest.advanceTimersByTimeAsync(100 + 200 + 400 + 800 + 1600);
+
+        await assertion;
+        expect(mget).toHaveBeenCalledTimes(6);
+      });
+    });
+  });
+
+  describe('bulkWriteWorkflowDocuments', () => {
+    it('creates new documents and updates existing ones against their seq_no in one refreshed request', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockResolvedValue({
+        items: [
+          { create: { _id: 'wf-new', status: 201 } },
+          { index: { _id: 'wf-updated', status: 200 } },
+          { index: { _id: 'wf-raced', status: 409, error: { type: 'version_conflict' } } },
+          { create: { _id: 'wf-broken', status: 400, error: { type: 'x', reason: 'bad doc' } } },
+        ],
+      });
+      const document = makeSource();
+      const previous = { source: makeSource(), seqNo: 4, primaryTerm: 2 };
+
+      const service = new WorkflowCrudService(deps);
+      const results = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-new', document },
+        { id: 'wf-updated', document, previous },
+        { id: 'wf-raced', document, previous },
+        { id: 'wf-broken', document },
+      ]);
+
+      expect(client.bulk).toHaveBeenCalledWith({
+        operations: [
+          { create: { _id: 'wf-new', document } },
+          { index: { _id: 'wf-updated', document, if_seq_no: 4, if_primary_term: 2 } },
+          { index: { _id: 'wf-raced', document, if_seq_no: 4, if_primary_term: 2 } },
+          { create: { _id: 'wf-broken', document } },
+        ],
+        refresh: true,
+      });
+      expect(results).toEqual([
+        { status: 'written' },
+        { status: 'written' },
+        { status: 'conflict' },
+        { status: 'failed', error: new Error('bad doc') },
+      ]);
+    });
+
+    it('refuses documents that carry or replace a service-account binding', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockResolvedValue({ items: [{ create: { _id: 'wf-plain', status: 201 } }] });
+      const bound = makeSource({
+        definition: {
+          version: '1',
+          name: 'Test',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+          settings: { run_as: 'service-account-1' },
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const results = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-binds', document: bound },
+        {
+          id: 'wf-unbinds',
+          document: makeSource(),
+          previous: { source: bound, seqNo: 1, primaryTerm: 1 },
+        },
+        { id: 'wf-plain', document: makeSource() },
+      ]);
+
+      expect(client.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operations: [{ create: { _id: 'wf-plain', document: makeSource() } }],
+        })
+      );
+      expect(results.map(({ status }) => status)).toEqual(['failed', 'failed', 'written']);
+    });
+
+    it('reports items Elasticsearch rejected as too busy as rejected, not failed', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockResolvedValue({
+        items: [
+          { create: { _id: 'wf-written', status: 201 } },
+          {
+            create: {
+              _id: 'wf-rejected',
+              status: 429,
+              error: { type: 'es_rejected_execution_exception', reason: 'queue full' },
+            },
+          },
+        ],
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const results = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-written', document: makeSource() },
+        { id: 'wf-rejected', document: makeSource() },
+      ]);
+
+      expect(results).toEqual([
+        { status: 'written' },
+        { status: 'rejected', error: new Error('queue full') },
+      ]);
+    });
+
+    it('reports every item as rejected when Elasticsearch rejects the whole request as too busy', async () => {
+      const { deps, client } = makeDeps();
+      const tooManyRequests = new errors.ResponseError({
+        statusCode: 429,
+        body: { error: { type: 'es_rejected_execution_exception' } },
+        headers: {},
+        warnings: [],
+        meta: {} as any,
+      });
+      client.bulk.mockRejectedValue(tooManyRequests);
+
+      const service = new WorkflowCrudService(deps);
+      const results = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-1', document: makeSource() },
+        { id: 'wf-2', document: makeSource() },
+      ]);
+
+      expect(results).toEqual([
+        { status: 'rejected', error: tooManyRequests },
+        { status: 'rejected', error: tooManyRequests },
+      ]);
+    });
+
+    it('throws when the whole request fails for another reason', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockRejectedValue(new Error('connection reset'));
+
+      const service = new WorkflowCrudService(deps);
+
+      await expect(
+        service.bulkWriteWorkflowDocuments([{ id: 'wf-1', document: makeSource() }])
+      ).rejects.toThrow('connection reset');
     });
   });
 
@@ -1024,12 +1414,12 @@ describe('WorkflowCrudService', () => {
       client.search
         .mockResolvedValueOnce({
           hits: {
-            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+            hits: [occSearchHit('wf-1', { version: 4, workflowUid: 'uid-kept' }, 7, 2)],
           },
         })
         .mockResolvedValueOnce({
           hits: {
-            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+            hits: [occSearchHit('wf-1', { version: 4, workflowUid: 'uid-kept' }, 7, 2)],
           },
         });
       client.index.mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 2 });
@@ -1054,9 +1444,36 @@ describe('WorkflowCrudService', () => {
           refresh: true,
           if_seq_no: 7,
           if_primary_term: 2,
-          document: expect.objectContaining({ version: 5 }),
+          document: expect.objectContaining({ version: 5, workflowUid: 'uid-kept' }),
         })
       );
+    });
+
+    it('overwrite=true does not assign a workflowUid when the stored document has none', async () => {
+      const { deps, client } = makeDeps();
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+          },
+        });
+      client.index.mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 2 });
+
+      const service = new WorkflowCrudService(deps);
+      await service.bulkCreateWorkflows(
+        [{ id: 'wf-1', yaml: validYaml('A') }],
+        'default',
+        request,
+        { overwrite: true }
+      );
+
+      const indexed = client.index.mock.calls[0][0].document;
+      expect(indexed.workflowUid).toBeUndefined();
     });
 
     it('overwrite=true resurrects a soft-deleted tombstone in the same space', async () => {
@@ -2595,6 +3012,39 @@ describe('WorkflowCrudService', () => {
         })
       );
 
+      jest.restoreAllMocks();
+    });
+
+    it('previews the same enabled state that saving YAML without top-level enabled stores', async () => {
+      const yamlWithoutTopLevelEnabled = 'name: Parsed Workflow\nsteps: []';
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
+        updatedDataPatch: {
+          definition: {
+            name: 'Parsed Workflow',
+            enabled: true,
+            version: '1' as const,
+            triggers: [],
+            steps: [],
+          },
+          name: 'Parsed Workflow',
+          enabled: true,
+          triggerTypes: [],
+          valid: true,
+          yaml: yamlWithoutTopLevelEnabled,
+        },
+        validationErrors: [],
+        shouldUpdateScheduler: true,
+      });
+
+      const service = new WorkflowCrudService(makeDeps().deps);
+      const definition = await service.getDefinitionToStore(
+        yamlWithoutTopLevelEnabled,
+        { id: 'wf-1', enabled: false },
+        'default',
+        request
+      );
+
+      expect(definition).toMatchObject({ name: 'Parsed Workflow', enabled: false });
       jest.restoreAllMocks();
     });
 
@@ -4390,7 +4840,7 @@ describe('managed orphan cleanup without a request', () => {
     };
 
     it('deletes the observed revision of a bound orphan and leaves its binding', async () => {
-      const { core, bindings, client, service } = setup();
+      const { core, bindings, client, deps, service } = setup();
 
       await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).resolves.toBe(
         true
@@ -4404,6 +4854,8 @@ describe('managed orphan cleanup without a request', () => {
       );
       expectBindingUntouched(bindings);
       expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
+      expect(deps.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
+      expect(deps.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
     it('deletes an unbound orphan', async () => {

@@ -1088,6 +1088,11 @@
       "enabled": true
     },
     {
+      "description": "openapi-ts >= 0.91 is ESM-only and drops combined *_request schemas; the workflow connector codegen needs migrating first",
+      "matchDepNames": ["@hey-api/openapi-ts"],
+      "allowedVersions": "<0.91.0"
+    },
+    {
       "groupName": "jszip",
       "matchDepNames": ["jszip"],
       "reviewers": ["team:workflows-eng"],

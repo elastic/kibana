@@ -136,6 +136,8 @@ export interface IAlertsClient<
     rawActiveAlerts: Record<string, RawAlertInstance>;
     rawRecoveredAlerts: Record<string, RawAlertInstance>;
   };
+  /** Returns the task state entry of an alert that was active when the run started. */
+  getRawTrackedActiveAlert(id: string): RawAlertInstance | undefined;
   factory(): PublicAlertFactory<
     State,
     Context,
@@ -244,6 +246,7 @@ export interface SearchResult<AlertData, Aggregation = unknown> {
   hits: SearchResponseBody<Alert & AlertData>['hits']['hits'];
   total: SearchResponseBody<Alert & AlertData>['hits']['total'];
   aggregations: SearchResponseBody<Alert & AlertData, Aggregation>['aggregations'];
+  _shards: SearchResponseBody<Alert & AlertData>['_shards'];
 }
 
 export type GetSummarizedAlertsParams = {

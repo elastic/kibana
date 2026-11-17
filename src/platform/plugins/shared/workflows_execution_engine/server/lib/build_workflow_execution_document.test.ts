@@ -363,5 +363,21 @@ describe('buildWorkflowExecutionDocument', () => {
       managed: true,
       billable: true,
     });
+    expect(workflowExecution.workflowUid).toBeUndefined();
+  });
+
+  it('copies workflowUid from the workflow document and omits it for an ephemeral run', () => {
+    const withDocument = buildWorkflowExecutionDocument({
+      ...baseParams,
+      workflow: { ...baseWorkflow, workflowUid: 'uid-current' },
+    });
+    expect(withDocument.workflowUid).toBe('uid-current');
+
+    const ephemeral = buildWorkflowExecutionDocument({
+      ...baseParams,
+      workflow: { ...baseWorkflow, isEphemeral: true, isTestRun: true },
+    });
+    expect(ephemeral.workflowUid).toBeUndefined();
+    expect(ephemeral.isEphemeral).toBe(true);
   });
 });

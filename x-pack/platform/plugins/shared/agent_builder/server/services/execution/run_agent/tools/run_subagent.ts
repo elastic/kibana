@@ -37,6 +37,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type {
   InternalBuiltinToolDefinition,
+  ModelSource,
   SubAgentExecutor,
   ToolPromptManager,
 } from '@kbn/agent-builder-server';
@@ -46,7 +47,7 @@ import { partitionDestructiveApis } from '../api';
 import type { ResolvedSubagent } from '../../../agents/utils/resolve_allowed_subagents';
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
-import { selectSubagentConnectorId } from '../utils/select_subagent_connector_id';
+import { selectSubagentModelSource } from '../utils/select_subagent_model_source';
 import { triggerModeSchema } from '../utils/trigger_mode_schema';
 
 export const SubAgentToolName = internalTools.runSubagent;
@@ -310,7 +311,7 @@ export const createSubagentTool = ({
   ownerAgentId,
   allowedSubagents,
   executionId: parentExecutionId,
-  connectorId,
+  parentModel,
   subAgentExecutor,
   abortSignal,
   backgroundExecutionService,
@@ -326,7 +327,8 @@ export const createSubagentTool = ({
   /** Resolved, access-filtered allowlist of subagents. */
   allowedSubagents: ResolvedSubagent[];
   executionId: string;
-  connectorId?: string;
+  /** Model source the parent run was asked to run on, inherited by its sub-agents. */
+  parentModel?: ModelSource;
   subAgentExecutor: SubAgentExecutor;
   abortSignal?: AbortSignal;
   backgroundExecutionService?: BackgroundExecutionService;
@@ -495,8 +497,9 @@ export const createSubagentTool = ({
       };
 
       try {
-        const selectedConnectorId = await selectSubagentConnectorId({
+        const modelSource = await selectSubagentModelSource({
           modelProvider,
+          parentModel,
           effortLevel: effort as EffortLevel,
           inferenceFeatureId: inferenceFeatureIdBySubagent.get(agent_id),
         });
@@ -551,7 +554,7 @@ export const createSubagentTool = ({
             subagentPurpose: description,
             conversationId: newChildId,
             prompt: fullPrompt,
-            connectorId: selectedConnectorId,
+            modelSource,
             ...(autoApprovedApis ? { autoApprovedApis } : {}),
             ...(run_in_background
               ? {
@@ -618,7 +621,7 @@ export const createSubagentTool = ({
         // Transient path.
         const { executionId, events$ } = await subAgentExecutor.executeSubAgent({
           agentId: resolvedAgentId,
-          connectorId: selectedConnectorId,
+          modelSource,
           parentExecutionId,
           prompt: fullPrompt,
           ...(autoApprovedApis ? { autoApprovedApis } : {}),
