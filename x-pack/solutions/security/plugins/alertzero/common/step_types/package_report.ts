@@ -143,9 +143,9 @@ export const packageReportInputSchema = lazySchema(() =>
     coverageGaps: z
       .array(
         z.object({
-          reason: z.string().max(64),
-          detail: z.string().max(2048),
-          technique_id: z.string().max(64).optional(),
+          reason: z.string(),
+          detail: z.string(),
+          technique_id: z.string().optional(),
         })
       )
       .max(MAX_HUNT_TECHNIQUE_IDS)
