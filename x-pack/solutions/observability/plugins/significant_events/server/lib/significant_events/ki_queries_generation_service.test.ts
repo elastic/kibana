@@ -315,6 +315,18 @@ describe('generateKIQueries', () => {
       expect(executeKIQueryGenerationAgentMock).not.toHaveBeenCalled();
     });
 
+    it('returns the queries without reporting a failure when success telemetry throws', async () => {
+      const telemetry = createFailureTelemetry();
+      telemetry.trackSignificantEventsQueriesGenerated.mockImplementation(() => {
+        throw new Error('analytics down');
+      });
+
+      await expect(generate(telemetry)).resolves.toMatchObject({ connectorId: 'test-connector' });
+
+      expect(telemetry.trackSignificantEventsQueriesGenerationFailed).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith('Failed to track generated queries: analytics down');
+    });
+
     it('fails with the agent error when telemetry throws', async () => {
       const telemetry = createFailureTelemetry();
       telemetry.trackSignificantEventsQueriesGenerationFailed.mockImplementation(() => {

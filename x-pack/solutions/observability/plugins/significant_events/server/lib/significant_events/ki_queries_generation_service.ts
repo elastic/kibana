@@ -18,6 +18,7 @@ import type {
   KnowledgeIndicatorQueriesGenerationFailureCode,
 } from '../telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
+import { trackTelemetryBestEffort } from '../../agent_builder/tools/bulk_write';
 import {
   executeKIQueryGenerationAgent,
   KIQueryGenerationAgentError,
@@ -103,42 +104,45 @@ export async function generateKIQueries(
       logger: logger.get('significant_events_queries_generation'),
     });
 
-    telemetry.trackSignificantEventsQueriesGenerated(
-      {
-        workflow_execution_id: workflowExecutionId,
-        parent_workflow_execution_id: parentWorkflowExecutionId,
-        count: queries.length,
-        connector_id: connectorId,
-        source_id: source.id,
-        input_tokens_used: tokensUsed.prompt,
-        output_tokens_used: tokensUsed.completion,
-        cached_tokens_used: tokensUsed.cached ?? 0,
-        duration_ms: Date.now() - agentStartedAt,
-      },
-      request
-    );
+    const durationMs = Date.now() - agentStartedAt;
+    trackTelemetryBestEffort({
+      logger,
+      description: 'generated queries',
+      track: () =>
+        telemetry.trackSignificantEventsQueriesGenerated(
+          {
+            workflow_execution_id: workflowExecutionId,
+            parent_workflow_execution_id: parentWorkflowExecutionId,
+            count: queries.length,
+            connector_id: connectorId,
+            source_id: source.id,
+            input_tokens_used: tokensUsed.prompt,
+            output_tokens_used: tokensUsed.completion,
+            cached_tokens_used: tokensUsed.cached ?? 0,
+            duration_ms: durationMs,
+          },
+          request
+        ),
+    });
 
     return { queries, tokensUsed, connectorId };
   } catch (error) {
-    try {
-      telemetry.trackSignificantEventsQueriesGenerationFailed(
-        {
-          workflow_execution_id: workflowExecutionId,
-          parent_workflow_execution_id: parentWorkflowExecutionId,
-          error_code: toGenerationFailureCode(error, signal),
-          ...(resolvedConnectorId !== undefined ? { connector_id: resolvedConnectorId } : {}),
-          source_id: source.id,
-          duration_ms: Date.now() - attemptStartedAt,
-        },
-        request
-      );
-    } catch (telemetryError) {
-      logger.warn(
-        `Failed to track query generation failure: ${
-          telemetryError instanceof Error ? telemetryError.message : String(telemetryError)
-        }`
-      );
-    }
+    trackTelemetryBestEffort({
+      logger,
+      description: 'query generation failure',
+      track: () =>
+        telemetry.trackSignificantEventsQueriesGenerationFailed(
+          {
+            workflow_execution_id: workflowExecutionId,
+            parent_workflow_execution_id: parentWorkflowExecutionId,
+            error_code: toGenerationFailureCode(error, signal),
+            ...(resolvedConnectorId !== undefined ? { connector_id: resolvedConnectorId } : {}),
+            source_id: source.id,
+            duration_ms: Date.now() - attemptStartedAt,
+          },
+          request
+        ),
+    });
     throw error;
   }
 }
