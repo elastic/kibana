@@ -41,7 +41,7 @@ describe('registerDigitalExperienceFeature', () => {
     });
   });
 
-  it('grants setting up sessions only through a separate, all-spaces sub-feature privilege', () => {
+  it('grants setting up and configuring sessions only through a separate, all-spaces sub-feature privilege', () => {
     const [sessions] = registerKibanaFeature.mock.calls[0][0].subFeatures;
     expect(sessions.requireAllSpaces).toBe(true);
     expect(sessions.privilegeGroups).toEqual([
@@ -54,6 +54,8 @@ describe('registerDigitalExperienceFeature', () => {
             includeIn: 'none',
             api: ['manage_digital_experience_sessions'],
             ui: ['manageSessions'],
+            // Its settings, which the settings routes read and write as the user.
+            savedObject: { all: ['digital-experience-sessions-settings'], read: [] },
           }),
         ],
       },

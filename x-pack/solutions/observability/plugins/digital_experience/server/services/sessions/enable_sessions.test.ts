@@ -32,7 +32,7 @@ jest.mock('./sessions_privileges');
 type ScopedClient = ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
 type TaskManager = ReturnType<typeof taskManagerMock.createStart>;
 
-const settings = { frequency: '1m' };
+const settings = { frequency: '1m', concurrency: 2 };
 
 const esError = (statusCode: number, type: string) =>
   new errors.ResponseError({

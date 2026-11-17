@@ -15,6 +15,7 @@ import {
   MANAGE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID,
 } from '../common/feature';
 import { SESSIONS_INDEX_PATTERN } from '../common/sessions';
+import { SESSIONS_SETTINGS_SO_TYPE } from './saved_objects';
 
 export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup): void => {
   features.registerKibanaFeature({
@@ -48,7 +49,8 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
         name: i18n.translate('xpack.digitalExperience.featureRegistry.sessionsSubFeatureName', {
           defaultMessage: 'Sessions',
         }),
-        // The summaries task and index serve every space, so only grant this in all spaces.
+        // The summaries task, its settings and index serve every space, so only grant this in all
+        // spaces.
         requireAllSpaces: true,
         privilegesTooltip: i18n.translate(
           'xpack.digitalExperience.featureRegistry.sessionsSubFeatureTooltip',
@@ -69,11 +71,13 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
                   { defaultMessage: 'Set up session summaries' }
                 ),
                 // Never granted with `all`: setting sessions up runs the summaries task with this
-                // user's data access, for everyone who reads sessions.
+                // user's data access, for everyone who reads sessions, and its settings set what
+                // the summaries cost the whole cluster.
                 includeIn: 'none',
                 api: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
                 ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.manageSessions],
-                savedObject: { all: [], read: [] },
+                // The settings routes read and write the task's settings as the user.
+                savedObject: { all: [SESSIONS_SETTINGS_SO_TYPE], read: [] },
               },
             ],
           },

@@ -38,6 +38,8 @@ jest.mock('@kbn/server-route-repository-client', () => ({
 
 const STATUS_ENDPOINT = 'GET /internal/digital_experience/sessions/status';
 const ENABLE_ENDPOINT = 'POST /internal/digital_experience/sessions/enable';
+const SETTINGS_ENDPOINT = 'GET /internal/digital_experience/sessions/settings';
+const SAVE_SETTINGS_ENDPOINT = 'PUT /internal/digital_experience/sessions/settings';
 const LIST_ENDPOINT = 'GET /internal/digital_experience/applications/{serviceName}/sessions';
 
 const status = (overrides: Partial<SessionsStatus> = {}): SessionsStatus => ({
@@ -129,6 +131,10 @@ const respondWith = ({
     if (endpoint === ENABLE_ENDPOINT) {
       return status();
     }
+    if (endpoint === SETTINGS_ENDPOINT || endpoint === SAVE_SETTINGS_ENDPOINT) {
+      const defaults = { frequency: '1m', concurrency: 2 };
+      return { settings: { ...defaults, frequency: '5m' }, defaults };
+    }
     if (list instanceof Error) {
       throw list;
     }
@@ -146,6 +152,8 @@ const listRequests = () => fetchesOf(LIST_ENDPOINT).map(([, options]) => options
 
 const TIME_QUERY = 'rangeFrom=now-15m&rangeTo=now';
 
+const mockAddSuccess = jest.fn();
+
 const renderTab = ({
   search = '',
   manageSessions = true,
@@ -156,6 +164,7 @@ const renderTab = ({
       getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
     },
     http: {},
+    notifications: { toasts: { addSuccess: mockAddSuccess } },
     uiSettings: createUiSettingsMock(),
   } as unknown as ReturnType<typeof useKibanaServices>);
   const history = createMemoryHistory({
@@ -332,6 +341,43 @@ describe('SessionsTab', () => {
         await screen.findByTestId('digitalExperienceSessionRow-session-1')
       ).toBeInTheDocument();
       expect(screen.queryByTestId('digitalExperienceSessionsDegraded')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('session summaries settings', () => {
+    it('are only offered to users who can set sessions up', async () => {
+      respondWith();
+      renderTab({ manageSessions: false });
+
+      expect(
+        await screen.findByTestId('digitalExperienceSessionRow-session-1')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('digitalExperienceSessionsSettings')).not.toBeInTheDocument();
+    });
+
+    it('are saved from a flyout, then the status is checked again', async () => {
+      respondWith();
+      renderTab();
+
+      fireEvent.click(await screen.findByTestId('digitalExperienceSessionsSettings'));
+      const frequency = await screen.findByTestId<HTMLSelectElement>(
+        'digitalExperienceSessionsSettingsFrequency'
+      );
+      expect(frequency.value).toBe('5m');
+      fireEvent.change(frequency, { target: { value: '15m' } });
+      const statusChecks = fetchesOf(STATUS_ENDPOINT).length;
+      fireEvent.click(screen.getByTestId('digitalExperienceSessionsSettingsSave'));
+
+      await waitFor(() =>
+        expect(
+          screen.queryByTestId('digitalExperienceSessionsSettingsFlyout')
+        ).not.toBeInTheDocument()
+      );
+      expect(mockFetch).toHaveBeenCalledWith(SAVE_SETTINGS_ENDPOINT, {
+        params: { body: { frequency: '15m' } },
+      });
+      expect(mockAddSuccess).toHaveBeenCalledWith('Session summaries settings saved');
+      await waitFor(() => expect(fetchesOf(STATUS_ENDPOINT).length).toBeGreaterThan(statusChecks));
     });
   });
 

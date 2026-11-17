@@ -21,7 +21,8 @@ const isReadable = ({ installed, health, rebuilding }: SessionsStatus): boolean 
 export interface SessionsReadableParams {
   /** `undefined` without Task Manager, so without sessions. */
   taskManager: TaskManagerStartContract | undefined;
-  settings: SessionsSettings;
+  /** The settings the summaries task runs with, for its lag threshold; read only on a miss. */
+  getSettings: () => Promise<SessionsSettings>;
   logger: Logger;
 }
 
@@ -42,7 +43,7 @@ export const createSessionsReadableCache = (): SessionsReadableCache => {
      * Whether the sessions can be read, from a status the requests share, so it is not tied to the
      * abort signal of the one that read it. A failed read is not remembered.
      */
-    areSessionsReadable: ({ taskManager, settings, logger }) => {
+    areSessionsReadable: ({ taskManager, getSettings, logger }) => {
       if (!taskManager) {
         return Promise.resolve(false);
       }
@@ -50,7 +51,8 @@ export const createSessionsReadableCache = (): SessionsReadableCache => {
       if (readable && readable.expiresAt > now) {
         return readable.result;
       }
-      const result: Promise<boolean> = getSessionsStatus({ taskManager, settings })
+      const result: Promise<boolean> = getSettings()
+        .then((settings) => getSessionsStatus({ taskManager, settings }))
         .then(isReadable)
         .catch((error) => {
           logger.debug(`Could not read the sessions status: ${describeError(error)}`);

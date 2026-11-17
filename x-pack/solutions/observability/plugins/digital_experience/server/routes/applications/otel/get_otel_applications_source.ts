@@ -21,7 +21,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 interface GetOtelApplicationsFromBestSourceParams extends GetOtelApplicationsParams {
   /** Reads the summaries task's status; `undefined` without Task Manager, so without sessions. */
   taskManager: TaskManagerStartContract | undefined;
-  sessionsSettings: SessionsSettings;
+  /** The settings the summaries task runs with, for its lag threshold. */
+  getSessionsSettings: () => Promise<SessionsSettings>;
   /** Whether the sessions can be read, shared by the requests of one refresh. */
   sessionsReadable: SessionsReadableCache;
   logger: Logger;
@@ -44,7 +45,7 @@ const sessionsCoverTimeRange = async (
   params.start >= sessionsLookbackStart(Date.now()) &&
   params.sessionsReadable.areSessionsReadable({
     taskManager: params.taskManager,
-    settings: params.sessionsSettings,
+    getSettings: params.getSessionsSettings,
     logger: params.logger,
   });
 
@@ -59,7 +60,7 @@ const sessionsCoverTimeRange = async (
 export const getOtelApplicationsFromBestSource = async (
   params: GetOtelApplicationsFromBestSourceParams
 ): Promise<SourceApplications> => {
-  const { taskManager, sessionsSettings, sessionsReadable, logger, ...searchParams } = params;
+  const { taskManager, getSessionsSettings, sessionsReadable, logger, ...searchParams } = params;
   const { esClient, signal, start, end, environment } = searchParams;
 
   if (await sessionsCoverTimeRange(params)) {

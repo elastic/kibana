@@ -10,6 +10,7 @@ import { errorsRouteRepository } from './errors/route';
 import { networkRouteRepository } from './network/route';
 import { overviewRouteRepository } from './overview/route';
 import { sessionsRouteRepository } from './sessions/route';
+import { sessionsSettingsRouteRepository } from './sessions/settings_route';
 import { usageRouteRepository } from './usage/route';
 
 export const getGlobalDigitalExperienceServerRouteRepository = () => ({
@@ -19,6 +20,7 @@ export const getGlobalDigitalExperienceServerRouteRepository = () => ({
   ...errorsRouteRepository,
   ...networkRouteRepository,
   ...sessionsRouteRepository,
+  ...sessionsSettingsRouteRepository,
 });
 
 export type DigitalExperienceServerRouteRepository = ReturnType<
