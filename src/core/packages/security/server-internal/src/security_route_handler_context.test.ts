@@ -46,6 +46,21 @@ describe('CoreSecurityRouteHandlerContext', () => {
     expect(context.authz).toBe(authz);
   });
 
+  it('binds authz.uiam.canInviteOrganizationMembers to the context request', async () => {
+    const request = httpServerMock.createKibanaRequest();
+    const canInviteOrganizationMembers = jest.fn().mockResolvedValue(false);
+    const securityStart = {
+      authz: { uiam: { canInviteOrganizationMembers } },
+    } as unknown as InternalSecurityServiceStart;
+
+    const context = new CoreSecurityRouteHandlerContext(securityStart, request);
+
+    const { authz } = context;
+    await expect(authz.uiam?.canInviteOrganizationMembers()).resolves.toBe(false);
+    expect(canInviteOrganizationMembers).toHaveBeenCalledWith(request);
+    expect(context.authz).toBe(authz);
+  });
+
   it('exposes authz.uiam as null when UIAM is not configured', () => {
     const request = httpServerMock.createKibanaRequest();
     const securityStart = { authz: { uiam: null } } as unknown as InternalSecurityServiceStart;

@@ -255,6 +255,21 @@ describe('#security', () => {
       await expect(context.security.authz.uiam?.canViewBillingDetails()).resolves.toBe(true);
       expect(coreStart.security.authz.uiam?.canViewBillingDetails).toHaveBeenCalledWith(request);
     });
+
+    test('calls coreStart.security.authz.uiam.canInviteOrganizationMembers with the context request', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      coreStart.security.authz.uiam?.canInviteOrganizationMembers.mockResolvedValue(false);
+
+      await expect(context.security.authz.uiam?.canInviteOrganizationMembers()).resolves.toBe(
+        false
+      );
+      expect(coreStart.security.authz.uiam?.canInviteOrganizationMembers).toHaveBeenCalledWith(
+        request
+      );
+    });
   });
 });
 
