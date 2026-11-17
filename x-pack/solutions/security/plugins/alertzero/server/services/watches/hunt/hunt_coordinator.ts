@@ -29,8 +29,8 @@ import { needsModelDatasetMatch, resolveTier2Targets } from './common/resolve_ti
 import type { Tier2TargetSource } from './common/resolve_tier2_targets';
 import { generateRecommendations } from './common/build_recommendations';
 import { selectHuntCallModel } from './common/select_hunt_call_model';
-import { buildHuntHeadline, buildHuntNarrative, codeList } from './common/build_hunt_narrative';
-import { unsearchedPatterns } from './common/unsearched_patterns';
+import { buildHuntHeadline, buildHuntNarrative } from './common/build_hunt_narrative';
+import { describeUnsearched, unsearchedPatterns } from './common/unsearched_patterns';
 import {
   NO_SEARCHABLE_PATTERN_MESSAGE,
   isBlockedByPolicyOnly,
@@ -831,15 +831,7 @@ const huntCoordinatorCore = async (
   const unsearched = unsearchedPatterns(scope, crossProjectSearch);
   const scopeGaps: HuntIncompleteness[] =
     unsearched.length > 0
-      ? [
-          {
-            reason: 'index_not_searched',
-            detail: `The default data view names ${codeList(
-              unsearched,
-              10
-            )}, which this hunt could not resolve (not readable, or not found), so the hunt never searched there.`,
-          },
-        ]
+      ? [{ reason: 'index_not_searched', detail: describeUnsearched(unsearched) }]
       : [];
 
   const tier1Raw = await huntForThreat(esClient, {

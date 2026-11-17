@@ -8,6 +8,7 @@
 import type { HuntIncompleteReason } from '@kbn/alertzero-common';
 import type { PackageReportCoverageGap } from '../../../../../common/step_types/package_report';
 import { MAX_HUNT_TECHNIQUE_IDS } from '../common/hunt_technique_limit';
+import { MAX_UNSEARCHED_DETAIL_CHARS } from '../common/unsearched_patterns';
 import { truncateAtWord } from './coverage_text';
 
 const MAX_GAP_DETAIL_CHARS = 200;
@@ -61,7 +62,12 @@ export const dedupeCoverageGaps = (
     const key = `${gap.reason}|${gap.detail}|${gap.technique_id ?? ''}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    const detail = truncateAtWord(gap.detail, MAX_GAP_DETAIL_CHARS);
+    // An `index_not_searched` detail is the line's subject and the coordinator already bounds it,
+    // so it keeps that bound: the shorter cut dropped names and the "and N more" count.
+    const detail = truncateAtWord(
+      gap.detail,
+      gap.reason === 'index_not_searched' ? MAX_UNSEARCHED_DETAIL_CHARS : MAX_GAP_DETAIL_CHARS
+    );
     const techniqueId =
       gap.technique_id === undefined
         ? undefined

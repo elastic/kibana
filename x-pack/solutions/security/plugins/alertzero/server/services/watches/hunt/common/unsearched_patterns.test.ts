@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { unsearchedPatterns } from './unsearched_patterns';
+import {
+  MAX_UNSEARCHED_DETAIL_CHARS,
+  describeUnsearched,
+  unsearchedPatterns,
+} from './unsearched_patterns';
 
 describe('unsearchedPatterns', () => {
   it('returns names in missing that are absent from index_patterns, once each', () => {
@@ -42,5 +46,37 @@ describe('unsearchedPatterns', () => {
         false
       )
     ).toEqual(['.ds-custom-1-2026.09.30-000001']);
+  });
+});
+
+describe('describeUnsearched', () => {
+  it('names one index', () => {
+    expect(describeUnsearched(['custom-edr-1'])).toBe(
+      'The default data view names `custom-edr-1`, which this hunt could not resolve (not readable, or not found), so the hunt never searched there.'
+    );
+  });
+
+  it('lists ten names at most and counts the rest', () => {
+    const detail = describeUnsearched(
+      Array.from({ length: 12 }, (_value, index) => `idx-${index}`)
+    );
+
+    expect(detail).toContain('`idx-9` and 2 more');
+    expect(detail).not.toContain('idx-10');
+  });
+
+  it('lists fewer names when ten would pass the bound, and still counts the rest', () => {
+    const names = Array.from({ length: 10 }, (_value, index) => `${'x'.repeat(90)}-${index}`);
+    const detail = describeUnsearched(names);
+
+    expect(detail.length).toBeLessThanOrEqual(MAX_UNSEARCHED_DETAIL_CHARS);
+    expect(detail).toContain(`\`${names[2]}\` and 7 more`);
+    expect(detail).not.toContain(names[3]);
+  });
+
+  it('still names a single index that is longer than the bound', () => {
+    const name = 'y'.repeat(600);
+
+    expect(describeUnsearched([name, 'z-1'])).toContain(`\`${name}\` and 1 more`);
   });
 });

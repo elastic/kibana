@@ -6,6 +6,7 @@
  */
 
 import { HuntIncompleteReason } from '@kbn/alertzero-common';
+import { describeUnsearched } from '../common/unsearched_patterns';
 import {
   GAP_REASON_PHRASES,
   dedupeCoverageGaps,
@@ -107,6 +108,23 @@ describe('describeGap', () => {
     ).toBe(
       'The default data view names `custom-edr-1`, which this hunt could not resolve. (index not searched)'
     );
+  });
+
+  // The detail the coordinator really produces, at each cap a summary renders it under: the
+  // closure line (500) and the Investigation and threat summaries (800).
+  it.each([
+    [
+      'four names',
+      ['logs-custom.edr-production-default', 'winlogbeat-legacy-2025.01', 'a-1', 'b-1'],
+    ],
+    ['twelve names', Array.from({ length: 12 }, (_value, index) => `custom-edr-tenant-${index}`)],
+    ['ten long names', Array.from({ length: 10 }, (_value, index) => `${'x'.repeat(90)}-${index}`)],
+  ])('renders an index_not_searched detail of %s whole', (_label, names) => {
+    const detail = describeUnsearched(names);
+    const deduped = dedupeCoverageGaps([{ reason: 'index_not_searched', detail }]);
+
+    expect(describeGaps(deduped, 500)).toBe(`${detail} (index not searched)`);
+    expect(describeGaps(deduped, 800)).toBe(`${detail} (index not searched)`);
   });
 
   it('falls back to the raw reason for one it does not know', () => {
