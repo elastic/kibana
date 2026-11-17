@@ -10,12 +10,39 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import type { ISavedObjectsRepository, SavedObjectsBaseOptions } from '@kbn/core/server';
 import { StateConflictError } from '../../errors/state_conflict_error';
 import {
   DETECTION_STATE_SO_TYPE,
   detectionStateSavedObjectType,
 } from '../detection_state_saved_object';
 import { DetectionStateClient } from '..';
+
+/** A repository whose `get` answers only once `parties` reads have been made. */
+function withReadBarrier(repository: ISavedObjectsRepository, parties: number) {
+  let reads = 0;
+  let allRead: () => void;
+  const everyoneRead = new Promise<void>((resolve) => {
+    allRead = resolve;
+  });
+
+  return Object.assign(Object.create(repository), {
+    get: async (type: string, id: string, options?: SavedObjectsBaseOptions) => {
+      const outcome = await repository.get(type, id, options).then(
+        (value) => ({ value }),
+        (error) => ({ error })
+      );
+      if (++reads === parties) {
+        allRead();
+      }
+      await everyoneRead;
+      if ('error' in outcome) {
+        throw outcome.error;
+      }
+      return outcome.value;
+    },
+  }) as ISavedObjectsRepository;
+}
 
 // Runs against a Kibana root with its saved objects index, so it proves the conflict and namespace
 // rules of the real repository that the in-memory one only imitates.
@@ -25,6 +52,7 @@ describe('DetectionStateClient on saved objects', () => {
   let esServer: TestElasticsearchUtils;
   let root: ReturnType<typeof createRootWithCorePlugins>;
   let client: DetectionStateClient;
+  let repository: ISavedObjectsRepository;
   let spaceCounter = 0;
 
   const nextSpaceId = () => `space-${spaceCounter++}`;
@@ -40,9 +68,8 @@ describe('DetectionStateClient on saved objects', () => {
     const setup = await root.setup();
     setup.savedObjects.registerType(detectionStateSavedObjectType);
     const start = await root.start();
-    client = new DetectionStateClient(
-      start.savedObjects.createInternalRepository([DETECTION_STATE_SO_TYPE])
-    );
+    repository = start.savedObjects.createInternalRepository([DETECTION_STATE_SO_TYPE]);
+    client = new DetectionStateClient(repository);
   });
 
   afterAll(async () => {
@@ -58,6 +85,25 @@ describe('DetectionStateClient on saved objects', () => {
     );
 
     expect(attempts.filter(({ acquired }) => acquired)).toHaveLength(1);
+  });
+
+  it('takes over an expired lease, ignores a stale release and frees a released one', async () => {
+    const spaceId = nextSpaceId();
+    const start = Date.now();
+
+    const first = await client.acquireLease({ spaceId, ttlMs: 1_000, now: start });
+    const second = await client.acquireLease({ spaceId, now: start + 2_000 });
+    if (first.acquired) {
+      await first.held.release();
+    }
+
+    expect(first.acquired && second.acquired).toBe(true);
+    expect((await client.acquireLease({ spaceId, now: start + 2_500 })).acquired).toBe(false);
+
+    if (second.acquired) {
+      await second.held.release();
+    }
+    expect((await client.acquireLease({ spaceId, now: start + 3_000 })).acquired).toBe(true);
   });
 
   it('keeps the state of one space apart from another, the default space included', async () => {
@@ -77,10 +123,13 @@ describe('DetectionStateClient on saved objects', () => {
 
   it('throws a conflict to the writer that lost a race for a generator state', async () => {
     const spaceId = nextSpaceId();
+    // Both writers must read before either writes, or the second one would see the first one's
+    // state and move it forward instead of racing it.
+    const racing = new DetectionStateClient(withReadBarrier(repository, 2));
 
     const outcomes = await Promise.allSettled(
       [100, 200].map((processedUntil) =>
-        client.advanceGeneratorState({ spaceId, strategyId: 'strategy', processedUntil })
+        racing.advanceGeneratorState({ spaceId, strategyId: 'strategy', processedUntil })
       )
     );
 
