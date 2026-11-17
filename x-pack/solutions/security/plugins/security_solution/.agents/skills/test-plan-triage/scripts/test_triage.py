@@ -390,6 +390,17 @@ class CommentNoTests(unittest.TestCase):
             self.assertEqual(gh.posts(), [])
         self.assertEqual(self.comment(FakeGh(issues), suggested=self.parent, dry_run=True)["action"], "dry_run")
 
+    def test_parent_cycle_fails_like_context(self):
+        issues = {
+            "elastic/kibana#1": api_issue("elastic/kibana", 1, parent="elastic/kibana#2", children=1),
+            "elastic/kibana#2": api_issue("elastic/kibana", 2, parent="elastic/kibana#1", children=1),
+        }
+        gh = FakeGh(issues, post_result={"html_url": "x"})
+        with self.assertRaises(triage.TriageError) as raised:
+            self.comment(gh, suggested=self.parent)
+        self.assertIn("parent cycle", str(raised.exception))
+        self.assertEqual(gh.posts(), [])
+
     def test_private_issue_may_point_to_a_private_repo(self):
         self.ref = triage.IssueRef("elastic/security-team", 1)
         gh = FakeGh({

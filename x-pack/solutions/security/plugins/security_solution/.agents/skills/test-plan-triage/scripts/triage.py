@@ -266,22 +266,33 @@ def fetch_issue(gh: Gh, ref: IssueRef) -> dict:
         raise TriageError(f"{ref} does not exist or you have no access", gate="not_found") from error
 
 
-def collect_ancestors(gh: Gh, issue: dict) -> list[dict]:
-    """Walk parent links until there is none or a parent cannot be read; no fixed depth."""
-    ancestors: list[dict] = []
+def parent_chain(gh: Gh, issue: dict) -> list[tuple[IssueRef, Optional[dict]]]:
+    """Every parent up to the root, nearest first; an unreadable parent is kept as None and ends the walk."""
+    chain: list[tuple[IssueRef, Optional[dict]]] = []
     seen = {str(_ref(issue))}
     current = issue
-    child_ref = str(_ref(issue))
     while current.get("parent_issue_url"):
-        if len(ancestors) >= MAX_ANCESTORS:
+        if len(chain) >= MAX_ANCESTORS:
             raise TriageError(f"more than {MAX_ANCESTORS} ancestors; stopping")
         parent_ref = ref_from_api_url(current["parent_issue_url"])
         if str(parent_ref) in seen:
             raise TriageError(f"parent cycle at {parent_ref}")
         seen.add(str(parent_ref))
         try:
-            parent = gh.get(f"repos/{parent_ref.repo}/issues/{parent_ref.number}")
+            current = gh.get(f"repos/{parent_ref.repo}/issues/{parent_ref.number}")
         except NotFound:
+            chain.append((parent_ref, None))
+            break
+        chain.append((parent_ref, current))
+    return chain
+
+
+def collect_ancestors(gh: Gh, issue: dict) -> list[dict]:
+    """Summarize every parent from `parent_chain`, with its test plan state and its children."""
+    ancestors: list[dict] = []
+    child_ref = str(_ref(issue))
+    for parent_ref, parent in parent_chain(gh, issue):
+        if parent is None:
             ancestors.append({"ref": str(parent_ref), "unreadable": True})
             break
         entry = summarize(parent, body_limit=ANCESTOR_BODY_LIMIT)
@@ -299,7 +310,6 @@ def collect_ancestors(gh: Gh, issue: dict) -> list[dict]:
         ]
         ancestors.append(entry)
         child_ref = str(parent_ref)
-        current = parent
     return ancestors
 
 
@@ -454,24 +464,6 @@ def _check_public_comment(ref: IssueRef, reason: str, suggested: Optional[IssueR
         raise TriageError(f"{ref} is public; the reason must not name a private repo or its issues", gate="private_link")
 
 
-def _parent_chain(gh: Gh, ref: IssueRef, issue: dict) -> list[tuple[IssueRef, Optional[dict]]]:
-    """Every parent up to the root; an unreadable parent is kept with None and ends the walk."""
-    chain: list[tuple[IssueRef, Optional[dict]]] = []
-    current, seen = issue, {str(ref)}
-    while current.get("parent_issue_url") and len(seen) <= MAX_ANCESTORS:
-        parent_ref = ref_from_api_url(current["parent_issue_url"])
-        if str(parent_ref) in seen:
-            break
-        seen.add(str(parent_ref))
-        try:
-            current = gh.get(f"repos/{parent_ref.repo}/issues/{parent_ref.number}")
-        except NotFound:
-            chain.append((parent_ref, None))
-            break
-        chain.append((parent_ref, current))
-    return chain
-
-
 def _check_open_ancestor(ref: IssueRef, parents: list[tuple[IssueRef, Optional[dict]]], suggested: IssueRef) -> None:
     """The suggested level must be an open issue on the target's parent chain."""
     for parent_ref, parent in parents:
@@ -491,7 +483,7 @@ def comment_no(
     text = _check_reason(reason)
     _check_public_comment(ref, text, suggested, PRIVATE_REPOS)
     issue = _open_issue(gh, ref, "commented on")
-    parents = _parent_chain(gh, ref, issue)
+    parents = parent_chain(gh, issue)
     _check_public_comment(ref, text, suggested, {parent_ref.repo for parent_ref, _ in parents if parent_ref.repo not in PUBLIC_REPOS})
     if suggested:
         _check_open_ancestor(ref, parents, suggested)
