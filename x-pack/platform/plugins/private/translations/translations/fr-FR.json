@@ -70016,7 +70016,6 @@
     "xpack.synthetics.metricItemIcon.div.urlLabel": "URL :",
     "xpack.synthetics.metricItemIcon.euiButtonIcon.closePopover": "Fermer la fenêtre contextuelle",
     "xpack.synthetics.metricItemIcon.euiButtonIcon.maintenanceWindowActive": "Le moniteur est arrêté alors que des fenêtres de maintenance sont en cours d'exécution.",
-    "xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl": "URL du moniteur",
     "xpack.synthetics.metricItemIcon.staleTooltip": "Ce moniteur a cessé de transmettre des données. Son dernier état connu est peut-être obsolète ; cela mérite d'être examiné.",
     "xpack.synthetics.missingIntegration.callout.title": "Intégration Fleet manquante",
     "xpack.synthetics.missingIntegration.resetButton": "Réinitialiser le moniteur",

@@ -70272,7 +70272,6 @@
     "xpack.synthetics.metricItemIcon.div.urlLabel": "URL:",
     "xpack.synthetics.metricItemIcon.euiButtonIcon.closePopover": "Popover schließen",
     "xpack.synthetics.metricItemIcon.euiButtonIcon.maintenanceWindowActive": "Der Monitor wird gestoppt, während Wartungsfenster ausgeführt werden.",
-    "xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl": "URL überwachen",
     "xpack.synthetics.metricItemIcon.staleTooltip": "Dieser Monitor meldet keine Daten mehr. Der zuletzt bekannte Status ist möglicherweise veraltet – eine Überprüfung lohnt sich.",
     "xpack.synthetics.missingIntegration.callout.title": "Fehlende Fleet-Integration",
     "xpack.synthetics.missingIntegration.resetButton": "Überwachung zurücksetzen",

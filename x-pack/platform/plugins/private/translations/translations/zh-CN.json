@@ -70438,7 +70438,6 @@
     "xpack.synthetics.metricItemIcon.div.urlLabel": "URL：",
     "xpack.synthetics.metricItemIcon.euiButtonIcon.closePopover": "关闭弹出框",
     "xpack.synthetics.metricItemIcon.euiButtonIcon.maintenanceWindowActive": "在维护窗口运行期间，监测处于停止状态。",
-    "xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl": "监测 URL",
     "xpack.synthetics.metricItemIcon.staleTooltip": "此监测已停止报告。其最后已知状态可能已过时，建议进一步调查。",
     "xpack.synthetics.missingIntegration.callout.title": "缺少 Fleet 集成",
     "xpack.synthetics.missingIntegration.resetButton": "重置监测",
