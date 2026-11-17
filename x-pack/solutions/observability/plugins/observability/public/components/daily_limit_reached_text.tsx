@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { getEbtProps } from '@kbn/ebt-click';
-import { OBSERVABILITY_EBT_CLICK_ACTIONS, OBSERVABILITY_EBT_ELEMENTS } from '../ebt_constants';
 
 export interface DailyLimitReachedTextProps {
   message: string;
@@ -73,8 +72,8 @@ export function DailyLimitReachedText({
             href={changeLimitsUrl}
             data-test-subj="alertInvestigationChangeLimitsLink"
             {...getEbtProps({
-              action: OBSERVABILITY_EBT_CLICK_ACTIONS.CHANGE_INVESTIGATION_LIMITS,
-              element: OBSERVABILITY_EBT_ELEMENTS.INVESTIGATION_START_FAILURE_TOAST,
+              action: 'changeInvestigationLimits',
+              element: 'investigationStartFailureToast',
             })}
           >
             <FormattedMessage
