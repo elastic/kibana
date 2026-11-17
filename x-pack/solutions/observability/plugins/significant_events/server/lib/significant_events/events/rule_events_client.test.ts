@@ -1014,7 +1014,187 @@ describe('RuleEventsClient', () => {
         expect(q).not.toContain('IN ()');
       });
     });
+  });
 
+  describe('syncSeverity', () => {
+    const stored = createStatusEvent({ severity: 'low', workflow_execution_id: 'discovery-run' });
+    const setup = ({
+      latest = stored as SignificantEvent | undefined,
+      updates = [{ updated: true }] as Array<{ updated: boolean }>,
+    } = {}) => {
+      const findLatestByEventIds = jest.fn(
+        async () => new Map(latest ? [[latest.event_id, latest]] : [])
+      );
+      const updateEvent = jest.fn();
+      updates.forEach((update) => updateEvent.mockResolvedValueOnce(update));
+      return {
+        client: asRuleEventsClient({ findLatestByEventIds, updateEvent }),
+        findLatestByEventIds,
+        updateEvent,
+      };
+    };
+
+    it('writes a new version with the severity, copied but for the workflow that wrote the prior one', async () => {
+      const { client, updateEvent } = setup();
+
+      expect(await client.syncSeverity({ eventId: stored.event_id, severity: 'high' })).toBe(
+        'updated'
+      );
+      expect(updateEvent).toHaveBeenCalledWith({
+        event: {
+          ...stored,
+          severity: 'high',
+          '@timestamp': expect.any(String),
+          assessment_note: 'Severity set to high by its investigation.',
+          workflow_execution_id: undefined,
+        },
+        prior: stored,
+        origin: { actor: 'agent_tool' },
+      });
+    });
+
+    it.each([
+      ['the severity already matches', stored, stored.event_id, 'low', 'unchanged'],
+      ['the event is unknown', stored, 'gone', 'low', 'not_found'],
+      [
+        'the event is closed',
+        { ...stored, status: 'inactive' as const },
+        stored.event_id,
+        'high',
+        'closed',
+      ],
+    ] as const)('writes nothing when %s', async (_name, latest, eventId, severity, expected) => {
+      const { client, updateEvent } = setup({ latest });
+
+      expect(await client.syncSeverity({ eventId, severity })).toBe(expected);
+      expect(updateEvent).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['succeeds on a retry', [{ updated: false }, { updated: true }], 'updated', 2],
+      [
+        'gives up after two retries',
+        [{ updated: false }, { updated: false }, { updated: false }],
+        'superseded',
+        3,
+      ],
+    ])('re-reads a moved head and %s', async (_name, updates, expected, writes) => {
+      const { client, updateEvent } = setup({ updates });
+
+      expect(await client.syncSeverity({ eventId: stored.event_id, severity: 'high' })).toBe(
+        expected
+      );
+      expect(updateEvent).toHaveBeenCalledTimes(writes);
+    });
+
+    it('leaves a head whose severity another writer changed meanwhile', async () => {
+      const findLatestByEventIds = jest
+        .fn()
+        .mockResolvedValueOnce(new Map([[stored.event_id, stored]]))
+        .mockResolvedValueOnce(
+          new Map([[stored.event_id, { ...stored, severity: 'critical' as const }]])
+        );
+      const updateEvent = jest.fn().mockResolvedValue({ updated: false });
+      const client = asRuleEventsClient({ findLatestByEventIds, updateEvent });
+
+      expect(await client.syncSeverity({ eventId: stored.event_id, severity: 'high' })).toBe(
+        'superseded'
+      );
+      expect(updateEvent).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('findEpisodeIdsByEventIds', () => {
+    it('maps each event to every episode it has carried, and leaves an event with no episode out', async () => {
+      const { client } = createClient(
+        async () =>
+          ({
+            columns: [
+              { name: 'n', type: 'long' },
+              { name: 'event_id', type: 'keyword' },
+              { name: 'episode_id', type: 'keyword' },
+            ],
+            values: [
+              [2, 'event-1', 'episode-1'],
+              [1, 'event-1', 'episode-2'],
+              [1, 'event-2', null],
+            ],
+          } as unknown as ESQLSearchResponse)
+      );
+
+      const episodeIdsByEvent = await client.findEpisodeIdsByEventIds(['event-1', 'event-2']);
+
+      expect(Object.fromEntries(episodeIdsByEvent)).toEqual({
+        'event-1': ['episode-1', 'episode-2'],
+      });
+    });
+
+    it.each(['findEpisodeIdsByEventIds', 'findEventIdsByEpisodeIds'] as const)(
+      '%s reads nothing for no ids, and nothing when the index does not exist yet',
+      async (method) => {
+        const { client, query } = createClient(async () => {
+          throw new Error('verification_exception: Unknown index [.rule-events]');
+        });
+
+        expect((await client[method]([])).size).toBe(0);
+        expect(query).not.toHaveBeenCalled();
+        expect((await client[method](['id-1'])).size).toBe(0);
+      }
+    );
+
+    it.each(['findEpisodeIdsByEventIds', 'findEventIdsByEpisodeIds'] as const)(
+      '%s throws rather than return a truncated mapping',
+      async (method) => {
+        const { client, query } = createClient(
+          async () =>
+            ({
+              columns: [
+                { name: 'n', type: 'long' },
+                { name: 'event_id', type: 'keyword' },
+                { name: 'episode_id', type: 'keyword' },
+              ],
+              values: Array.from({ length: 10_000 }, (_, index) => [1, 'event-1', `ep-${index}`]),
+            } as unknown as ESQLSearchResponse)
+        );
+
+        await expect(client[method](['id-1'])).rejects.toThrow('10000 event-episode pairs');
+        expect(lastQuery(query)).toContain('LIMIT 10000');
+      }
+    );
+  });
+
+  describe('findEventIdsByEpisodeIds', () => {
+    it('maps each episode to the event ids that carry it, and leaves an unknown episode out', async () => {
+      const { client } = createClient(
+        async () =>
+          ({
+            columns: [
+              { name: 'n', type: 'long' },
+              { name: 'episode_id', type: 'keyword' },
+              { name: 'event_id', type: 'keyword' },
+            ],
+            values: [
+              [2, 'episode-1', 'event-1'],
+              [1, 'episode-2', 'event-2'],
+              [1, 'episode-2', 'event-3'],
+            ],
+          } as unknown as ESQLSearchResponse)
+      );
+
+      const eventIdsByEpisode = await client.findEventIdsByEpisodeIds([
+        'episode-1',
+        'episode-2',
+        'unknown',
+      ]);
+
+      expect(Object.fromEntries(eventIdsByEpisode)).toEqual({
+        'episode-1': ['event-1'],
+        'episode-2': ['event-2', 'event-3'],
+      });
+    });
+  });
+
+  describe('countFacets', () => {
     it('counts each dimension without its own filter and fills missing options with zero', async () => {
       const { client, query } = createClient(async (request) => {
         if (request.query.includes('BY severity')) {
@@ -1491,14 +1671,35 @@ describe('RuleEventsClient', () => {
       ]);
     });
 
-    it("reads when the member's verdict was reached from its signal", async () => {
+    it.each([
+      [
+        'prefers the explicit collection timestamp',
+        '2026-10-19T10:00:00.000Z',
+        '2026-10-19T11:00:00.000Z',
+        '2026-10-19T10:00:00.000Z',
+      ],
+      [
+        'falls back to evidence time',
+        undefined,
+        '2026-10-19T11:00:00.000Z',
+        '2026-10-19T11:00:00.000Z',
+      ],
+      ['leaves the verdict time unknown without either timestamp', undefined, undefined, undefined],
+    ])('%s', async (_name, collectedAt, evidenceTo, expected) => {
       const rows = [
         seriesRow({
           eventId: 'event-1',
           signals: [
             {
               ...detectionSignal({ ruleUuid: 'rule-A', verdict: 'confirms' }),
-              collected_at: '2026-10-19T10:00:00.000Z',
+              collected_at: collectedAt,
+              evidence: {
+                esql_query: 'FROM $.a',
+                result: 'found',
+                time_range: evidenceTo
+                  ? { from: '2026-10-19T09:00:00.000Z', to: evidenceTo }
+                  : undefined,
+              },
             },
           ],
         }),
@@ -1510,7 +1711,7 @@ describe('RuleEventsClient', () => {
         from: '2000-01-01T00:00:00.000Z',
       });
 
-      expect(live.get('rule-A')?.[0].verifiedAt).toBe('2026-10-19T10:00:00.000Z');
+      expect(live.get('rule-A')?.[0].verifiedAt).toBe(expected);
     });
 
     it('returns one entry per live series when a rule is a member of several', async () => {

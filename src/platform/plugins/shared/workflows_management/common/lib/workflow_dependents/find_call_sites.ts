@@ -26,6 +26,10 @@ export const isTemplatedValue = (value: unknown): boolean =>
   typeof value === 'string' &&
   (value.includes('{{') || value.includes('{%') || isDynamicValue(value));
 
+/** True for `{{ }}` / `{% %}` templates, which always render to a string; `${{ }}` keeps the type. */
+export const isTextTemplate = (value: unknown): boolean =>
+  isTemplatedValue(value) && !isDynamicValue(value);
+
 const getSteps = (definition: unknown): unknown =>
   isRecord(definition) ? definition.steps : undefined;
 
@@ -224,6 +228,28 @@ export const collectWorkflowOutputBlocks = (
     }
   });
   return blocks;
+};
+
+/**
+ * Names the completing `workflow.output` steps set; undefined when there is none or one of them is
+ * computed.
+ */
+export const getOutputStepNames = (definition: unknown): string[] | undefined => {
+  const names = new Set<string>();
+  let hasOutputStep = false;
+  let isComputed = false;
+  walkDefinitionSteps(definition, (step) => {
+    if (!isCompletingOutputStep(step)) {
+      return;
+    }
+    hasOutputStep = true;
+    if (isRecord(step.with)) {
+      Object.keys(step.with).forEach((name) => names.add(name));
+    } else {
+      isComputed = true;
+    }
+  });
+  return hasOutputStep && !isComputed ? [...names] : undefined;
 };
 
 export interface OutputUsage {

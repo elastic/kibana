@@ -58,7 +58,7 @@ asks whether something is written points here.
 
 | Grounding verdict | Outcome |
 |---|---|
-| `confirms`, event-aligned (an on-topic failure sample is enough) | Write. A continuation if routed to a live event (a breach must still pass `<incident_matching>`), otherwise a new event. |
+| `confirms`, event-aligned (an on-topic failure sample is enough) | Write. A continuation if Step 2 routes it to a live event, otherwise a new event. |
 | `off_topic` with a concrete error the system does not demonstrably tolerate | Its own event. The rule's signal keeps `off_topic`. |
 | `off_topic` otherwise (benign) | Not written. |
 | `refutes`, or `inconclusive` with `result: "empty"` | A continuation of the live event that holds the rule, per the recovery checklist below; otherwise not written. It never pairs or groups. |
@@ -174,28 +174,31 @@ Compare one current detection against one active event using that event's compac
    what the signal says it affects.
 
 **Pre-check — split immediately if any of the following hold**
-1. Either side's `<grounding_evidence>` verdict is `off_topic`, unless it is an observed-error
-   `off_topic` detection, which is its own event.
-2. Either side has no matched query KI, or its `<grounding_evidence>` has verdict
+1. Either detection's `<grounding_evidence>` verdict is `off_topic`: its observed error is not the
+   failure its rule describes, so it is not paired, and `<eligibility>` decides whether it is
+   written. Only this batch's verdict counts: an event's stored `off_topic` signal is an earlier
+   sample, and a later confirming detection of that rule can still continue the event.
+2. Either detection has no matched query KI, or its `<grounding_evidence>` has verdict
    `inconclusive`/`not_checked` (`<eligibility>`). A detection that fails this check is never paired
    or grouped: do not add it to the grouping graph or confirmed signal map, and, unless
    `<eligibility>` writes it on its own, include its `rule_uuid` in `written_rule_uuids`.
-3. The event holds no confirming signal: its `signal_counts.confirms` is 0.
+3. (Detection–event pairs only.) The event holds no confirming signal: its `signal_counts.confirms`
+   is 0.
    - Non-confirming signals never establish a continuation. The detection must pass the checks below
      against the event's compact fields.
    - Exception — same rule: a detection whose `rule_uuid` is already in an event's
-     `signal_rule_uuids` is exempt from this pre-check, because its stored verdict is the rule's own
-     latest state. Whether it is accepted is governed only by the recovery checklist in
-     `<eligibility>`; any other detection, including a breach, must still pass the remaining checks
-     and the Rule Match rejection conditions.
+     `signal_rule_uuids` is exempt from this check only, whatever the stored verdict; the matched-KI
+     check still applies and Rule Match **Breach** decides.
+   - A recovery detection is governed only by the recovery checklist in `<eligibility>`.
 
 **Impact check**
 - Use the affected operation when evaluating a match; different or uncertain effects do not reject a
-  topology-supported match unless the grounded evidence shows them independent or contradictory. The
-  affected operation alone cannot create a match.
+  topology-supported match. The affected operation alone cannot create a match.
 
 **Match eligible pairs**
-- Accept when any criterion below holds. Read each side's `<grounding_evidence>` as a whole.
+- Accept when any criterion below holds. Read each side's `<grounding_evidence>` as a whole. Outside a
+  same-rule Breach (Step 2, Rule Match), a pair is accepted only by a criterion below; Separate path
+  can only reject.
 
 1. **Cascade effect**
    - Compare pairwise using the grounded `causal_features` and `blast_radius`.
@@ -215,17 +218,28 @@ Compare one current detection against one active event using that event's compac
        `blast_radius` entity nodes and the `source` and `target` of every dependency edge —
        including a `target` both paths converge on, and a chain where one edge's `target` is the
        other's `source`.
-   - Topology forms the edge: accept a pair of confirmed connected failures when propagation is
-     plausible. Different signatures or effects do not reject unless they show an independent path
-     or failure class. A rule's authored text (name, KI description, **Alert symptom**) never makes a
-     connected pair independent; only the grounded evidence can, by showing an independent failure.
-     Use **Impact check** to qualify, not require identical operations.
-   - A pair with no connection above is rejected when `<grounding_evidence>` identifies a distinct
-     resource or dependency path. A pair that has a connection above is never rejected for its
-     different downstream targets.
-     Different local signatures on a connected path (backend error vs caller timeout, protocol vs pool)
-     are not an independent failure class. Timing and **Alert symptom** qualify the narrative only;
-     they never create or override a topology match.
+   - Topology forms the edge: accept a connected pair when propagation is plausible; otherwise it gets
+     no edge, which is not a rejection. A failure that propagates looks different at each hop, so
+     different targets, mechanisms, error signatures, timing, **Alert symptom** or a rule's authored
+     text do not reject a connected pair; different local signatures on a connected path (backend
+     error vs caller timeout, protocol vs pool) are expected. Timing and **Alert symptom** qualify the
+     narrative only; they never create or override a topology match. Use **Impact check** to
+     qualify, not require identical operations.
+   - **Separate path.** A pair of different rules with no topology connection above is rejected when
+     either detection's `<grounding_evidence>` names a failing service or dependency target that the
+     other detection's evidence does not also name as failing and that is neither a node of the
+     other side's topology (grounded for a detection, stored for an event) nor on a dependency edge
+     to one (`causal_features`, `blast_radius`, matched query KI `features[]`). It keeps two
+     unrelated failures out of one event. Check this rule for each pair before adding any edge; a
+     rejection here overrides Evidence convergence. A target both detections report as failing is
+     not a rejection: it is one failure the topology doesn't cover, so Evidence convergence decides
+     it. That carve-out applies between two detections; an event has no grounding evidence. A breach
+     of a rule an event already holds is decided by Rule Match **Breach** instead. A message
+     category groups log lines, not components, so it is not a target. A pair accepted under
+     Multi-service bridge is not a Separate path: the bridge KI already names both sides. When
+     either side has no topology, grounded or stored, there is nothing to compare, so the pair is
+     not a Separate path. Apart from the pre-checks, this is the only rule in `<incident_matching>`
+     that rejects a pair.
 2. **Evidence convergence**
    - Read each side's `<grounding_evidence>` description as two facts: the observed error/signature
      and target, and the outcome its quoted fields state for the operation (failing, completing, or
@@ -236,8 +250,7 @@ Compare one current detection against one active event using that event's compac
    - Accept the pair when the observed signatures and the affected operations support the same
      incident correlation or root cause. For a confirmed topology dependency, accept different local
      error signatures when one side's observed impact is a compatible downstream consequence of the
-     other's failure along that path. Affected operation alone never creates a match, and an
-     independent or contradictory impact rejects it.
+     other's failure along that path. Affected operation alone never creates a match.
    - Also compare each side's **Alert symptom**, mechanism, and failure keywords; different wording
      alone is not a rejection.
    - **Multi-service bridge:** `<grounding_evidence>` verdict is `confirms`, the matched query KI's
@@ -255,8 +268,8 @@ Example:
 - Detection C has `<grounding_evidence>` with verdict `confirms`: cache requests fail and
   cache-backed reads degrade. Its matched query KI explicitly covers `service-a` and `service-b`, so
   it can match despite different wording.
-- An independent target, an incompatible affected operation, or non-confirming
-  `<grounding_evidence>` creates no active edge and remains separate.
+- A Separate path pair or non-confirming `<grounding_evidence>` creates no active edge and
+  remains separate.
 
 </incident_matching>
 
@@ -345,10 +358,8 @@ For events returned by `platform_sig_events_event_search`, derive:
   block Topology Match. Topology Match does not require the new rule in `signal_rule_uuids` or a
   stored signal that passes `<incident_matching>` for that rule — compact search has no per-signal
   prose.
-- **Rule Match accept:** the event's compact fields pass `<incident_matching>` for this detection. A
-  rule in `signal_rule_uuids` (any verdict) identifies a candidate event but is not acceptance
-  evidence by itself for a breach: a new breach for it must still pass `<incident_matching>`. The
-  only exception is the recovery checklist in `<eligibility>`.
+- **Rule Match accept:** a rule in `signal_rule_uuids` (any verdict) identifies a candidate event; a
+  breach is accepted per Rule Match **Breach**, a recovery per the checklist in `<eligibility>`.
 - **Topology Match accept:** grounded topology overlaps the active event's stored topology, and the
   current detection's grounded evidence passes `<incident_matching>` against the event's returned
   topology and compact summary context (`title`, `summary`, `symptom_hypothesis`). That pair is
@@ -376,23 +387,14 @@ until both searches have returned.
      candidate events qualify, accept it onto the one with the greatest rule coverage. A recovery
      detection that meets the recovery checklist on no live event is not written; where the stored
      verdict is `off_topic`, the observed error is unchecked, so leave the event unchanged.
-   - **Breach.** A breach for that rule is never accepted by membership alone: the current
-     detection's grounded evidence must still pass `<incident_matching>` against the event's
-     returned topology and summary context. Collect all rule-uuid-matching candidates before
-     selecting the best one (tie-break: greatest rule coverage, then compact `summary` and topology overlap).
-     Reject a breach match when one of these holds:
-      - The `<grounding_evidence>`'s query rows show the failure now targets a different resource, host,
-        or downstream dependency than the event's `summary`, `causal_features`, or `blast_radius`.
-      - The authored KI explicitly scopes the new detection away from the active event's incident.
-      - The `<grounding_evidence>`'s query rows show a substantively different active failure
-        mechanism or error signature from the active event's `summary`, `symptom_hypothesis` or
-        topology — title wording alone never qualifies. A caller-side timeout or refusal on a
-        dependency edge whose target is the event's failing node is a downstream effect of that
-        failure, not a different mechanism: accept it.
-
-   A different title or `symptom_hypothesis` wording for the same `rule_uuid` is never, by itself,
-   sufficient to reject — evaluate the underlying target and mechanism, not how the symptom is
-   phrased. On accept, bind as stated at the top of this step.
+   - **Breach.** A breach detection that passes the `<incident_matching>` pre-checks (the same-rule
+     exception lifts the confirming-signal check) and whose rule is in the candidate's
+     `signal_rule_uuids` continues it. A rule's new breach is treated as that event's latest
+     evidence, so it continues the event holding the rule even when its title, `symptom_hypothesis`
+     wording, mechanism, error signature or topology differs from what the event stored. If more
+     than one live event holds the rule, collect all rule-uuid-matching candidates and pick one with
+     the tie-break (greatest rule coverage, then an event with `signal_counts.confirms` above 0, then
+     compact `summary` and topology overlap). On accept, bind as stated at the top of this step.
 
 **Topology Match**
 
@@ -401,7 +403,10 @@ Match never skips it, and a Topology hit is not waiting for a rule-uuid match.
 
 1. When `topology_feature_ids` is non-empty, call `platform_sig_events_event_search` with it; omit
    `rule_uuids` and `slugs`.
-2. For each rule not in `continued_rule_uuids`, accept an event continuation when both hold:
+2. Bind every Rule Match acceptance first, so a breach reaches the event that holds its rule before a
+   topology overlap with another event can claim it: a rule held by an event that Rule Match returned
+   is decided by Rule Match alone. For each other rule not in `continued_rule_uuids`, accept an event
+   continuation when both hold:
    - the current confirmed detection's grounded `causal_features[]` or exact `blast_radius[]` occurs
      in the returned active event's stored topology, and
    - the current detection's grounded evidence passes `<incident_matching>` against the event's
@@ -438,14 +443,15 @@ groups and the flow continues to Step 4.
 2. Compute connected components on the complete edge set. Each component is exactly one event
    group. Compute components before any service-scoped grouping, item drafting, or ownership.
    - **Transitive closure is mandatory**: if A connects to B and B connects to C, A and C belong
-     together even without a direct pair match.
-   - **A multi-service cascade is always one component**, never split by service name, protocol
+     together even without a direct pair match. Closure acts on accepted edges only: a rejected pair
+     is joined only through an accepted neighbour.
+   - **A multi-service cascade is one component**; it is never split by service name, protocol
      layer, error signature, user journey, or downstream impact. A cascade is any of: a shared
      caller fan-out, a shared cache or database dependency, or a bridge rule whose KI `features[]`
      names nodes on both sides.
 3. Merge to a fixed point, then assign. Repeat both merges until none remains:
    - **Topology merge.** Treat each component as one side of a pairwise topology check and merge any
-     two components where a topology connection exists per the `<incident_matching>` Cascade
+     two components between which a topology connection exists per the `<incident_matching>` Cascade
      criterion. Example: group A grounds to `service-x` and group B grounds to a cache or database
      that `service-x` also calls; merge A and B into one event group before composing either item.
      Emitting separate items that still share a topology connection is invalid.
@@ -498,7 +504,11 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
    not on the authored rule it refuted.
 5. **Continuation.** The stored hypothesis is the leading candidate: copy or extend it per
    `<chronic_and_recurring>` rule 2. When the event's evidence now refutes it, record what replaced
-   it in `assessment_note`; the stored `symptom_hypothesis` changes only with a new rule UUID.
+   it in `assessment_note`. The stored `symptom_hypothesis` changes only with a new rule UUID, or
+   when a rule the event held as `off_topic` (its stored verdict, from the `full` view) now
+   confirms: the stored `title`, `symptom_hypothesis` and `summary` then describe a sampled error,
+   so rewrite them from the event's confirming evidence, this cycle's signals together with the
+   stored confirming signals.
 
 ### Step 5: Rate severity and confidence
 
@@ -608,8 +618,9 @@ confirming descriptions measure.
    (stored `confirms` replaced by `refutes`) is not unchanged: keep the stored `title`,
    `symptom_hypothesis`, and `summary` as they are, and set `severity` per Step 5. An unchanged
    continuation copies compact `title`, `summary`, `symptom_hypothesis`, and `severity`. A changed
-   continuation rates severity per Step 5 and extends `summary` and `symptom_hypothesis` (keeping
-   their wording) only when mechanism or impact changed.
+   continuation rates severity per Step 5 and, unless a rule the event held as `off_topic` now
+   confirms (Step 4 item 5 owns that narrative), extends `summary` and `symptom_hypothesis`
+   (keeping their wording) only when mechanism or impact changed.
 
 </chronic_and_recurring>
 

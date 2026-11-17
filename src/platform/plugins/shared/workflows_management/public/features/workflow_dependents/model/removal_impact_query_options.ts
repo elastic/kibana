@@ -17,7 +17,7 @@ import type {
 
 /** Query for the workflows that fail when `workflowIds` are turned off or deleted. */
 export const removalImpactQueryOptions = (http: HttpStart, workflowIds: string[]) => ({
-  queryKey: ['workflows', 'removalImpact', [...workflowIds].sort()],
+  queryKey: ['workflowRemovalImpact', [...workflowIds].sort()],
   queryFn: ({ signal }: { signal?: AbortSignal }) =>
     http.post<WorkflowRemovalImpactResponse>(WORKFLOW_REMOVAL_IMPACT_ROUTE, {
       version: INTERNAL_API_VERSION,

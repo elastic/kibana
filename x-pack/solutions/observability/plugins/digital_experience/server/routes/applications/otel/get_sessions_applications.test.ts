@@ -206,7 +206,7 @@ describe('getSessionsApplications', () => {
     expect(search).toHaveBeenCalledTimes(1);
     expect(search).toHaveBeenCalledWith(
       'get_digital_experience_otel_applications_from_sessions',
-      expect.objectContaining({ index: 'digital-experience-sessions-*' })
+      expect.objectContaining({ index: 'digital-experience-sessions-browser-*' })
     );
   });
 });

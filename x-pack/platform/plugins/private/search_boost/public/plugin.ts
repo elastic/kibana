@@ -8,7 +8,7 @@
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { SEARCH_BOOST_APP_ID } from '../common/constants';
-import { SEARCH_BOOST_APP_TITLE } from './translations';
+import { SEARCH_BOOST_APP_TITLE } from './app_title';
 import type { SearchBoostSetupDependencies } from './types';
 
 export class SearchBoostPlugin implements Plugin<void, void, SearchBoostSetupDependencies> {
