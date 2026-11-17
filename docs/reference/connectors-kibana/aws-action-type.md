@@ -58,7 +58,7 @@ The `request` action has the following inputs:
 :   (Optional) Query string parameters, for example `{ "Action": "ListUsers", "Version": "2010-05-08" }`.
 
 `headers`
-:   (Optional) Extra request headers. Set `Content-Type` for bodies that are not JSON, and `X-Amz-Target` for AWS JSON APIs.
+:   (Optional) Extra request headers. Any other value is serialized to JSON. Set `Content-Type` to match, for example `application/json`, or `application/x-amz-json-1.1` together with `X-Amz-Target`.
 
 `body`
 :   (Optional) The request body. A string is sent as is, for example a form-encoded body. Any other value is sent as JSON.
