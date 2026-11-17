@@ -63,8 +63,8 @@ export class ListingTable {
       .locator(
         `[data-test-subj="${LEGACY_TABLE_LOADED}"], [data-test-subj="${LEGACY_TABLE_READY}"]`
       )
-      .getByRole('row')
-      .getByRole('link')
+      // TableListView renders the title as an EuiLink, which is an anchor or a button depending on `href`
+      .locator('[data-test-subj*="ListingTitleLink-"]')
       .or(page.testSubj.locator(CONTENT_LIST_ITEM_LINK));
     this.searchBox = page.testSubj
       .locator(LEGACY_SEARCH_BOX)
