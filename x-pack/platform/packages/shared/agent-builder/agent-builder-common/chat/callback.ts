@@ -13,6 +13,7 @@ import type { ExecutionTerminatedEvent } from './timeline_events';
 export interface ChatCallbackToolCall {
   tool_call_id: string;
   tool_id: string;
+  intent?: string;
 }
 
 export type ChatCallbackExecutionTerminatedEvent = ExecutionTerminatedEvent & {

@@ -144,9 +144,12 @@ export const deliverCallbackEvents = ({
         ),
         tap((event) => {
           if (isToolCallEvent(event)) {
-            toolCalls.set(event.data.tool_call_id, {
-              tool_call_id: event.data.tool_call_id,
-              tool_id: event.data.tool_id,
+            const { tool_call_id: toolCallId, tool_id: toolId, intent } = event.data;
+
+            toolCalls.set(toolCallId, {
+              tool_call_id: toolCallId,
+              tool_id: toolId,
+              ...(intent ? { intent } : {}),
             });
           }
         }),
