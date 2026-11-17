@@ -24,8 +24,7 @@ import {
 import { EngineRunner } from '../lib/engine/run_engine';
 import { EnabledSources, RunContext } from '../lib/engine/tokens';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
-import { DetectionStateClient } from '../lib/state';
-import { detectionStateSavedObjectType } from '../saved_objects/detection_state_saved_object';
+import { DetectionStateClient, detectionStateSavedObjectType } from '../lib/state';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 
 function createContainer() {
