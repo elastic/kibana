@@ -33,5 +33,26 @@ export interface Usage {
       occurrences: number;
       timeslices: number;
     };
+    composite: {
+      definitions: {
+        total: number;
+      };
+      by_status: {
+        enabled: number;
+        disabled: number;
+      };
+      by_budgeting_method: {
+        [budgeting_method: string]: number;
+      };
+      by_composite_method: {
+        [composite_method: string]: number;
+      };
+      members: {
+        min: number;
+        avg: number;
+        max: number;
+        at_max_count: number;
+      };
+    };
   };
 }
