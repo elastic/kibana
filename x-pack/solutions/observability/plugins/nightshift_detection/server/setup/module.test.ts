@@ -16,7 +16,7 @@ import { NIGHTSHIFT_DETECTION_TIERED_FEATURES } from '../../common/constants';
 import { module } from '..';
 import { AvailabilityService } from '../lib/availability/availability_service';
 import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
-import { DetectionStateClient } from '../lib/state/detection_state_client';
+import { DetectionStateClient } from '../lib/state';
 import { detectionStateSavedObjectType } from '../saved_objects/detection_state_saved_object';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 
