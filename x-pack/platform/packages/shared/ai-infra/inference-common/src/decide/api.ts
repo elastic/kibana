@@ -80,6 +80,7 @@ export type DecideResponse<T> = { inferenceId: string } & T;
  * Asks a decision model bounded questions about an input: fast, cheap answers with
  * probabilities. Throws an inference request error with status 404 when the cluster has no
  * usable `decision` endpoint.
+ * @experimental The Elasticsearch `decision` inference task it calls is experimental.
  */
 export interface DecideAPI {
   <const Q extends DecisionQuestion>(options: DecideOptions, question: Q): Promise<

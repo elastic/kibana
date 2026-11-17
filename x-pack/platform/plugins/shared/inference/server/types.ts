@@ -83,6 +83,10 @@ export type InferenceModelTarget =
  */
 export type InferenceServerClient = InferenceClient & {
   chatComplete: FeatureChatCompleteAPI;
+  /**
+   * Asks a decision model bounded questions about an input.
+   * @experimental The Elasticsearch `decision` inference task it calls is experimental.
+   */
   decide: DecideAPI;
 };
 
