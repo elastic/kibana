@@ -11,6 +11,7 @@ import type { HttpStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { QueryClient } from '@kbn/react-query';
 import type { ServiceAccountPickerStatus } from '@kbn/security-plugin/public';
+import type { ServiceAccountLookupResult } from '../../../../common/lib/validate_service_account_reference';
 
 export interface WorkflowServiceAccount {
   id: string;
@@ -32,14 +33,17 @@ export interface ServiceAccountDirectoryError {
 
 export const serviceAccountQueryOptions = (http: HttpStart, id: string) => ({
   queryKey: ['workflows', 'serviceAccounts', 'account', id],
-  queryFn: async (): Promise<WorkflowServiceAccount | null> => {
+  queryFn: async (): Promise<ServiceAccountLookupResult<WorkflowServiceAccount>> => {
     try {
-      return await http.get<WorkflowServiceAccount>(
+      const account = await http.get<WorkflowServiceAccount>(
         `/internal/security/service_account/${encodeURIComponent(id)}`
       );
-    } catch {
-      // Directory access is optional: workflow executors need not have manage_security.
-      return null;
+      return { status: 'found', account };
+    } catch (error) {
+      // Only a 404 proves the account is missing: executors need not have manage_security.
+      return isHttpFetchError(error) && error.response?.status === 404
+        ? { status: 'not_found' }
+        : { status: 'unknown' };
     }
   },
   retry: false,
@@ -53,10 +57,16 @@ export const createServiceAccountDirectory = (
   isEnabled: () => boolean
 ) => ({
   isEnabled,
-  get: (id: string): Promise<WorkflowServiceAccount | null> =>
+  get: async (id: string): Promise<WorkflowServiceAccount | null> => {
+    if (!isEnabled() || !id) return null;
+    const result = await queryClient.fetchQuery(serviceAccountQueryOptions(http, id));
+    return result.status === 'found' ? result.account : null;
+  },
+  /** Resolves an ID for validation; `unknown` when the directory is off or unreadable. */
+  lookup: async (id: string): Promise<ServiceAccountLookupResult<WorkflowServiceAccount>> =>
     isEnabled() && id
       ? queryClient.fetchQuery(serviceAccountQueryOptions(http, id))
-      : Promise.resolve(null),
+      : { status: 'unknown' },
   list: async (
     after?: string,
     refresh = false

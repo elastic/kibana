@@ -33,6 +33,7 @@ const setup = (value = yaml) => {
   const directory: jest.Mocked<ServiceAccountDirectory> = {
     isEnabled: jest.fn(() => true),
     get: jest.fn().mockResolvedValue(account),
+    lookup: jest.fn().mockResolvedValue({ status: 'found', account }),
     list: jest.fn(),
   };
   return { ...mocks, directory };

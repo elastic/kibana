@@ -21,6 +21,8 @@ import { validateGraphBuild } from './validate_graph_build';
 import { validateStepProperties } from './validate_step_properties';
 import { validateWorkflowExecutionIdentity } from './validate_workflow_execution_identity';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
+import type { ServiceAccountLookup } from '../../../../common/lib/validate_service_account_reference';
+import { validateServiceAccountReference } from '../../../../common/lib/validate_service_account_reference';
 import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
 import type { GraphBuildErrorInfo } from '../../../entities/workflows/store/workflow_detail/types';
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
@@ -42,6 +44,8 @@ export interface WorkflowYamlValidationContext {
   esqlCallbacks: ESQLCallbacks;
   signal?: AbortSignal;
   isManaged: boolean;
+  /** Omitted where no service account directory is available; the `run_as` check then skips. */
+  lookupServiceAccount?: ServiceAccountLookup;
 }
 
 export interface CollectFullWorkflowYamlValidationResultsParams {
@@ -109,6 +113,16 @@ export async function collectFullWorkflowYamlValidationResults({
     );
   }
   results.push(...validateGraphBuild(graphBuildError, workflowLookup, lineCounter));
+
+  if (context.lookupServiceAccount) {
+    results.push(
+      ...(await validateServiceAccountReference(
+        yamlDocument,
+        lineCounter,
+        context.lookupServiceAccount
+      ))
+    );
+  }
 
   if (stepPropertyItems.length > 0) {
     results.push(...(await validateStepProperties(stepPropertyItems)));

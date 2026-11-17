@@ -102,6 +102,19 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'error';
     values: { displayName: string; id: string };
   };
+  // -- service accounts ---------------------------------------------------------
+  /** `settings.run_as` names a service account that does not exist. */
+  serviceAccountNotFound: {
+    owner: 'service-account-validation';
+    defaultSeverity: 'error';
+    values: { id: string };
+  };
+  /** `settings.run_as` names a service account that is disabled or cannot be assumed. */
+  serviceAccountUnavailable: {
+    owner: 'service-account-validation';
+    defaultSeverity: 'warning';
+    values: { name: string };
+  };
   // -- step properties ----------------------------------------------------------
   invalidStepProperty: {
     owner: 'step-property-validation';
@@ -271,6 +284,9 @@ export const WORKFLOW_VALIDATION_RULES: {
   liquidSyntaxError: { owner: 'liquid-template-validation', defaultSeverity: 'error' },
 
   connectorNotFound: { owner: 'connector-id-validation', defaultSeverity: 'error' },
+
+  serviceAccountNotFound: { owner: 'service-account-validation', defaultSeverity: 'error' },
+  serviceAccountUnavailable: { owner: 'service-account-validation', defaultSeverity: 'warning' },
 
   invalidStepProperty: { owner: 'step-property-validation', defaultSeverity: 'error' },
 
