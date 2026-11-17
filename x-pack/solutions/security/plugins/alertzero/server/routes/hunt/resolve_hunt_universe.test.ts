@@ -109,6 +109,31 @@ describe('resolveHuntUniverse', () => {
     });
   });
 
+  it('reads a comma-joined entry as Elasticsearch does, so a hidden name inside one is still skipped', async () => {
+    const { context } = makeContext([
+      'logs-*, .alerts-security.alerts-default,-logs-elastic_agent*',
+      'filebeat-*,,',
+    ]);
+    const logger = loggingSystemMock.createLogger();
+
+    await expect(resolveHuntUniverse(context, logger)).resolves.toEqual({
+      patterns: ['logs-*', '-logs-elastic_agent*', 'filebeat-*'],
+      policySkipped: ['.alerts-security.alerts-default'],
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('falls back to logs-* when the entries hold nothing but commas', async () => {
+    const { context } = makeContext([' , ', ',']);
+    const logger = loggingSystemMock.createLogger();
+
+    await expect(resolveHuntUniverse(context, logger)).resolves.toEqual({
+      patterns: ['logs-*'],
+      policySkipped: [],
+    });
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+  });
+
   it('returns no fallback when every positive entry is skipped', async () => {
     const { context } = makeContext(['.siem-signals-infosec-detections']);
     const logger = loggingSystemMock.createLogger();

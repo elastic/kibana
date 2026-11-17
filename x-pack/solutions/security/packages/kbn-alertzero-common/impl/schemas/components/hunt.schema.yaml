@@ -75,14 +75,17 @@ components:
           $ref: '#/components/schemas/HuntIncompleteReason'
         detail:
           type: string
-          maxLength: 2048
-          description: What was not covered, in a form a human reading the run can act on.
+          description: >-
+            What was not covered, in a form a human reading the run can act on. No
+            length bound: the hunt result is validated whole when it is stored, so a
+            bound here would fail the run over one long gap. Readers truncate it
+            where they render it.
         technique_id:
           type: string
-          maxLength: 64
           description: >-
             Set when the gap is scoped to one technique rather than to the whole
-            search.
+            search. Can be an id the model emitted that is not in the ATT&CK
+            catalog, so it carries no length bound either.
 
     HuntCompleteness:
       type: string

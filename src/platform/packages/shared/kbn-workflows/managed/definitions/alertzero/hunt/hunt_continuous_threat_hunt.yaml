@@ -186,10 +186,10 @@ steps:
       # write_run_conclusion below no-op'ing on an empty conversation id).
       # Otherwise: hunt not succeeding is `failed`; packaging returning
       # `run_incomplete` is `partial`; anything else is `completed`. That includes `retired_incomplete`:
-      # the hunt stamped the report after a gap no rerun can close, packaging closed the Investigation,
-      # and nothing is left to retry, so the branch counts as completed (the conclusion says what was
-      # not searched). Only the unlisted-status fall-through is relied on, so a stale Worker degrades
-      # the same way.
+      # the hunt stamped the report after a gap no rerun can close, packaging closed the Investigation
+      # (no hit) or packaged the hit, and nothing is left to retry, so the branch counts as completed
+      # (the conclusion says what was not searched). Only the unlisted-status fall-through is relied
+      # on, so a stale Worker degrades the same way.
       - name: resolve_run_outcome
         type: data.set
         with:

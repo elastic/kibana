@@ -59,20 +59,22 @@ export const HuntIncompleteness = lazySchema(() =>
   z.object({
     reason: HuntIncompleteReason,
     /**
-     * What was not covered, in a form a human reading the run can act on.
+     * What was not covered, in a form a human reading the run can act on. No length bound: the hunt result is validated whole when it is stored, so a bound here would fail the run over one long gap. Readers truncate it where they render it.
      */
     detail: z
       .string()
-      .max(2048)
-      .describe('What was not covered, in a form a human reading the run can act on.'),
+      .describe(
+        'What was not covered, in a form a human reading the run can act on. No length bound: the hunt result is validated whole when it is stored, so a bound here would fail the run over one long gap. Readers truncate it where they render it.'
+      ),
     /**
-     * Set when the gap is scoped to one technique rather than to the whole search.
+     * Set when the gap is scoped to one technique rather than to the whole search. Can be an id the model emitted that is not in the ATT&CK catalog, so it carries no length bound either.
      */
     technique_id: z
       .string()
-      .max(64)
       .optional()
-      .describe('Set when the gap is scoped to one technique rather than to the whole search.'),
+      .describe(
+        'Set when the gap is scoped to one technique rather than to the whole search. Can be an id the model emitted that is not in the ATT&CK catalog, so it carries no length bound either.'
+      ),
   })
 );
 export type HuntIncompleteness = z.infer<typeof HuntIncompleteness>;

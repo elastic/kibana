@@ -59,9 +59,16 @@ export const resolveHuntUniverse = async (
     );
     return { patterns: [...FALLBACK_HUNT_UNIVERSE], policySkipped: [] };
   }
-  if (isPatternList(configured)) {
-    return partitionHuntUniverse(configured.map((pattern) => pattern.trim()));
-  }
+  // Elasticsearch splits a multi-target expression on commas whatever the array boundaries
+  // were, so a comma-joined entry is read as the entries it holds. Otherwise a hidden name
+  // inside one would pass the policy split below as part of a longer string.
+  const entries = isPatternList(configured)
+    ? configured
+        .flatMap((pattern) => pattern.split(','))
+        .map((entry) => entry.trim())
+        .filter((entry) => entry.length > 0)
+    : [];
+  if (entries.length > 0) return partitionHuntUniverse(entries);
 
   logger.warn(
     `${SECURITY_SOLUTION_DEFAULT_INDEX_ID} is missing or not a list of index patterns; hunting ${FALLBACK_HUNT_UNIVERSE.join(
