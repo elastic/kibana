@@ -31,11 +31,7 @@ import {
   createInvestigationBackgroundTelemetry,
   createOptimizeModel,
 } from '../lib/create_optimize_model';
-import {
-  investigationRoundInputsSchema,
-  resolveRound,
-  withToolResults,
-} from '../investigation_round';
+import { investigationRoundInputsSchema, withToolResults } from '../investigation_round';
 import type {
   CausalCheckErrorCode,
   CausalCheckOutcome,
@@ -246,9 +242,6 @@ export const decisionTreePrepareStepDefinition = ({
       const earlierRounds = roundsBefore(rounds, roundId);
       const isFollowUp = earlierRounds.length > 0;
       const savedCurrentRound = rounds.find((round) => round.id === roundId);
-      const roundResolution = isFollowUp
-        ? resolveRound({ rounds, attachments: conversation?.attachments }, { roundId })
-        : undefined;
       const roundToolCalls = withToolResults(
         (toolCalls ?? []) as InvestigationToolCall[],
         toolResults ?? []
@@ -347,24 +340,11 @@ export const decisionTreePrepareStepDefinition = ({
             : {}),
           tree_count: treeCount,
           opened_tree_count: openedTreeCount,
-          ...(roundResolution ? { recorder_outcome: roundResolution.outcome } : {}),
-          ...(roundResolution?.hasConfirmedCause !== undefined
-            ? { recorder_has_confirmed_cause: roundResolution.hasConfirmedCause }
-            : {}),
           ...(durationMs !== undefined ? { duration_ms: durationMs } : {}),
           ...(errorCode ? { error_code: errorCode } : {}),
         };
 
         span?.setAttribute('nightshift.causal_check.outcome', outcome);
-        if (roundResolution) {
-          span?.setAttribute('nightshift.causal_check.recorder_outcome', roundResolution.outcome);
-          if (roundResolution.hasConfirmedCause !== undefined) {
-            span?.setAttribute(
-              'nightshift.causal_check.recorder_has_confirmed_cause',
-              roundResolution.hasConfirmedCause
-            );
-          }
-        }
         if (verdict) {
           span?.setAttribute('nightshift.causal_check.is_feedback', verdict.isFeedback);
           span?.setAttribute('nightshift.causal_check.confirmed', verdict.causalConfirmed);
@@ -396,7 +376,6 @@ export const decisionTreePrepareStepDefinition = ({
             (verdict
               ? ` feedback=${verdict.isFeedback} confirmed=${verdict.causalConfirmed}`
               : '') +
-            (roundResolution ? ` recorder=${roundResolution.outcome}` : '') +
             ` trees=${treeCount}`;
           logger.info(message, { tags: CAUSAL_CHECK_LOG_TAGS, labels: { ...event } });
           context.logger.info(message);

@@ -42,18 +42,13 @@ const skipReasonSchema = lazySchema(() =>
 type SkipReason = z.infer<typeof skipReasonSchema>;
 
 /**
- * Scores initial rounds and every alert recovery. Follow-ups aren't scored yet: telling a
- * follow-up that changes the root cause from a question or Slack chatter comes with follow-up
- * scoring.
+ * Scores initial rounds and every alert recovery, whatever it concluded: it may confirm or refute
+ * the first round's cause, or show the alert was benign, and each alert-outcome judge decides
+ * whether it applies. Follow-ups aren't scored yet: telling a follow-up that changes the root
+ * cause from a question or Slack chatter comes with follow-up scoring.
  */
-const getRoundSkipReason = ({ roundKind }: RoundResolution): SkipReason | undefined => {
-  // A recovery that leaves no confirmed cause is still scored: it may refute the first round's
-  // cause, or show the alert was benign. Each alert-outcome judge decides whether it applies.
-  if (roundKind === 'follow_up') {
-    return 'follow_up_not_scored';
-  }
-  return undefined;
-};
+const getRoundSkipReason = ({ roundKind }: RoundResolution): SkipReason | undefined =>
+  roundKind === 'follow_up' ? 'follow_up_not_scored' : undefined;
 
 const skip = (skipReason: SkipReason) => ({
   output: { should_score: false, skip_reason: skipReason },
@@ -86,12 +81,6 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
         .optional()
         .describe('What kind of round this run created.'),
       round_id: z.string().optional().describe('The round this run created.'),
-      root_cause_outcome: z
-        .enum(['found', 'changed', 'withdrawn', 'unchanged', 'unknown'])
-        .optional()
-        .describe(
-          "What the round did to the confirmed root cause, from the findings recorder's hypotheses before and after it. `unknown` when they can't be compared."
-        ),
       skip_reason: skipReasonSchema.optional().describe('Why the round is not scored.'),
     }),
     handler: async (context) => {
@@ -130,12 +119,8 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
           return skip('no_round');
         }
 
-        const { roundKind, roundId, outcome } = resolution;
-        const roundOutput = {
-          round_kind: roundKind,
-          round_id: roundId,
-          root_cause_outcome: outcome,
-        };
+        const { roundKind, roundId } = resolution;
+        const roundOutput = { round_kind: roundKind, round_id: roundId };
 
         const skipReason = getRoundSkipReason(resolution);
         return skipReason

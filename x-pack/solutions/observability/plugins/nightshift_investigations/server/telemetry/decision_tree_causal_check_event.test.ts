@@ -32,8 +32,6 @@ describe('decisionTreeCausalCheckEvent schema', () => {
       has_learning: true,
       tree_count: 1,
       opened_tree_count: 1,
-      recorder_outcome: 'found',
-      recorder_has_confirmed_cause: true,
       duration_ms: 1840,
     },
     {
@@ -47,8 +45,6 @@ describe('decisionTreeCausalCheckEvent schema', () => {
       has_learning: true,
       tree_count: 2,
       opened_tree_count: 0,
-      recorder_outcome: 'unchanged',
-      recorder_has_confirmed_cause: false,
       duration_ms: 2100,
     },
     {
@@ -61,7 +57,6 @@ describe('decisionTreeCausalCheckEvent schema', () => {
       has_learning: false,
       tree_count: 1,
       opened_tree_count: 1,
-      recorder_outcome: 'unknown',
       duration_ms: 950,
     },
     {
@@ -71,7 +66,6 @@ describe('decisionTreeCausalCheckEvent schema', () => {
       outcome: 'skipped_no_trees',
       tree_count: 0,
       opened_tree_count: 0,
-      recorder_outcome: 'unknown',
     },
     {
       agent_id: 'nightshift.investigation',

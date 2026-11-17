@@ -96,7 +96,6 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
         should_score: true,
         round_kind: 'initial',
         round_id: 'round-1',
-        root_cause_outcome: 'unknown',
       },
     });
     expect(getScopedClient).toHaveBeenCalledWith({ request });
@@ -116,73 +115,36 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
         should_score: false,
         round_kind: 'follow_up',
         round_id: 'round-2',
-        root_cause_outcome: 'unknown',
         skip_reason: 'follow_up_not_scored',
       },
     });
   });
 
-  it('scores an alert recovery that leaves the root cause confirmed', async () => {
-    const { run } = setup({
-      rounds: recoveryRounds,
+  // A recovery is scored whatever the findings recorder wrote: it may confirm or refute the first
+  // round's cause, or show the alert was benign. Each alert-outcome judge decides whether it applies.
+  it.each([
+    {
+      name: 'keeps the root cause confirmed',
       attachments: hypotheses([END_OF_ROUND_1, 'confirmed'], [END_OF_RUN, 'confirmed']),
-    });
-
-    await expect(run({ follow_up: 'alert_recovered' })).resolves.toEqual({
-      output: {
-        should_score: true,
-        round_kind: 'alert_recovery',
-        round_id: 'round-2',
-        root_cause_outcome: 'unchanged',
-      },
-    });
-  });
-
-  it('scores an alert recovery that dismisses the confirmed root cause without confirming another', async () => {
-    const { run } = setup({
-      rounds: recoveryRounds,
+    },
+    {
+      name: 'dismisses the confirmed root cause without confirming another',
       attachments: hypotheses([END_OF_ROUND_1, 'confirmed'], [END_OF_RUN, 'dismissed']),
-    });
-
-    await expect(run({ follow_up: 'alert_recovered' })).resolves.toEqual({
-      output: {
-        should_score: true,
-        round_kind: 'alert_recovery',
-        round_id: 'round-2',
-        root_cause_outcome: 'withdrawn',
-      },
-    });
-  });
-
-  it('scores an alert recovery that leaves no hypothesis confirmed, such as a benign self-resolution', async () => {
-    const { run } = setup({
-      rounds: recoveryRounds,
+    },
+    {
+      name: 'leaves no hypothesis confirmed, such as a benign self-resolution',
       attachments: hypotheses([END_OF_ROUND_1, 'investigating'], [END_OF_RUN, 'dismissed']),
-    });
-
-    await expect(run({ follow_up: 'alert_recovered' })).resolves.toEqual({
-      output: {
-        should_score: true,
-        round_kind: 'alert_recovery',
-        round_id: 'round-2',
-        root_cause_outcome: 'unchanged',
-      },
-    });
-  });
-
-  it('scores an alert recovery the recorder wrote no hypotheses for, for the judges to decide', async () => {
-    const { run } = setup({
-      rounds: recoveryRounds,
+    },
+    {
+      name: 'has no hypotheses written for it',
       attachments: hypotheses([END_OF_ROUND_1, 'investigating']),
-    });
+    },
+    { name: 'has no findings recorder attachment', attachments: undefined },
+  ])('scores an alert recovery that $name', async ({ attachments }) => {
+    const { run } = setup({ rounds: recoveryRounds, attachments });
 
     await expect(run({ follow_up: 'alert_recovered' })).resolves.toEqual({
-      output: {
-        should_score: true,
-        round_kind: 'alert_recovery',
-        round_id: 'round-2',
-        root_cause_outcome: 'unknown',
-      },
+      output: { should_score: true, round_kind: 'alert_recovery', round_id: 'round-2' },
     });
   });
 

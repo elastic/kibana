@@ -6,7 +6,6 @@
  */
 
 import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
-import type { RootCauseChange } from '../investigation_round';
 
 export const NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT = 'nightshift-decision-tree-causal-check';
 
@@ -51,8 +50,6 @@ export interface DecisionTreeCausalCheckEvent {
   has_learning?: boolean;
   tree_count: number;
   opened_tree_count: number;
-  recorder_outcome?: RootCauseChange;
-  recorder_has_confirmed_cause?: boolean;
   duration_ms?: number;
   error_code?: CausalCheckErrorCode;
 }
@@ -121,22 +118,6 @@ const decisionTreeCausalCheckSchema: RootSchema<DecisionTreeCausalCheckEvent> = 
     type: 'long',
     _meta: {
       description: 'Editable decision trees opened by the investigator during this round.',
-    },
-  },
-  recorder_outcome: {
-    type: 'keyword',
-    _meta: {
-      description:
-        'Findings-recorder hypothesis transition for the round: found, changed, withdrawn, unchanged, or unknown.',
-      optional: true,
-    },
-  },
-  recorder_has_confirmed_cause: {
-    type: 'boolean',
-    _meta: {
-      description:
-        'Whether the findings recorder held at least one confirmed hypothesis after the round.',
-      optional: true,
     },
   },
   duration_ms: {
