@@ -8,39 +8,44 @@
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import {
+  mockDynamicToolResultCall,
+  mockDynamicToolResultCallOnAttachment,
   mockFinalAnswerRenderingAttachment,
-  mockToolResultCall,
-  mockToolResultCallOnAttachment,
-  toLlmToolName,
 } from '../../../common/ui/fixtures/llm_mocks';
 
-const MANAGE_ACTION_POLICY_LLM_TOOL_NAME = toLlmToolName(ALERTING_TOOL_IDS.manageActionPolicy);
-const ATTACH_ACTION_POLICY_LLM_TOOL_NAME = toLlmToolName(ALERTING_TOOL_IDS.attachActionPolicy);
+// The action policy tools are the ones the action policy authoring skill unlocks, so they are
+// called as dynamic tools.
 
 /** Answers the next tool result with a `manage_action_policy` call applying `operations`. */
 export const mockManageActionPolicy = (
   proxy: LlmProxy,
   operations: Array<Record<string, unknown>>
 ) =>
-  mockToolResultCall(proxy, 'agent:manage_action_policy', MANAGE_ACTION_POLICY_LLM_TOOL_NAME, {
-    operations,
-  });
+  mockDynamicToolResultCall(
+    proxy,
+    'agent:manage_action_policy',
+    ALERTING_TOOL_IDS.manageActionPolicy,
+    { operations }
+  );
 
 /** Answers the next tool result with an `attach_action_policy` call for the saved `policyId`. */
 export const mockAttachActionPolicy = (proxy: LlmProxy, policyId: string) =>
-  mockToolResultCall(proxy, 'agent:attach_action_policy', ATTACH_ACTION_POLICY_LLM_TOOL_NAME, {
-    policyId,
-  });
+  mockDynamicToolResultCall(
+    proxy,
+    'agent:attach_action_policy',
+    ALERTING_TOOL_IDS.attachActionPolicy,
+    { policyId }
+  );
 
 /** Answers the `attach_action_policy` result with a `manage_action_policy` call editing it. */
 export const mockManageAttachedActionPolicy = (
   proxy: LlmProxy,
   operations: Array<Record<string, unknown>>
 ) =>
-  mockToolResultCallOnAttachment(
+  mockDynamicToolResultCallOnAttachment(
     proxy,
     'agent:manage_attached_action_policy',
-    MANAGE_ACTION_POLICY_LLM_TOOL_NAME,
+    ALERTING_TOOL_IDS.manageActionPolicy,
     'actionPolicyAttachmentId',
     { operations }
   );
