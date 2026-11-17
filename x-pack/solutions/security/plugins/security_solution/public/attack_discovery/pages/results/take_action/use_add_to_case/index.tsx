@@ -21,23 +21,28 @@ import * as i18n from './translations';
 interface Props {
   canUserCreateAndReadCases: () => boolean;
   onClick?: () => void;
-  onSuccess?: (isNewCase: boolean) => void;
+  /** Called once the attachments have been posted, with the case they were posted to. */
+  onSuccess?: (theCase: CaseUI, isNewCase: boolean) => void;
   title: string;
 }
 
-export interface AddToCaseParams {
+/** Attaches the discoveries as markdown comments plus their constituent alerts. */
+interface AddMarkdownToCaseParams {
   alertIds: string[];
   markdownComments: string[];
   replacements?: Replacements;
-  /**
-   * When provided, posted verbatim instead of the payload built from `alertIds` /
-   * `markdownComments`. Resolved once the user has picked (or created) a case, so callers whose
-   * payload depends on the target case — its owner, or how many alerts it already holds — can
-   * build it against the real thing. `theCase` is undefined only before the create-case flyout
-   * has a case to hand back.
-   */
-  getAttachments?: (theCase?: CaseUI) => CaseAttachmentsWithoutOwner;
 }
+
+/** Attaches whatever the caller builds once the user has picked (or created) a case. */
+interface AddAttachmentsToCaseParams {
+  /**
+   * Builds the payload for the chosen case, or with no case before the create-case flyout has one.
+   * Must be pure, as the case selector also calls it on every render.
+   */
+  getAttachments: (theCase?: CaseUI) => CaseAttachmentsWithoutOwner;
+}
+
+export type AddToCaseParams = AddMarkdownToCaseParams | AddAttachmentsToCaseParams;
 
 export const useAddToCase = ({
   canUserCreateAndReadCases,
@@ -64,18 +69,21 @@ export const useAddToCase = ({
       },
     },
     onClose: onClick,
-    onSuccess: (_theCase, isNewCase) => onSuccess?.(isNewCase),
+    onSuccess,
     successToaster: {
       content: i18n.ADD_TO_CASE_SUCCESS,
     },
   });
 
   const onAddToCase = useCallback(
-    ({ alertIds, getAttachments, markdownComments, replacements }: AddToCaseParams) => {
-      if (getAttachments != null) {
+    (params: AddToCaseParams) => {
+      if ('getAttachments' in params) {
+        const { getAttachments } = params;
         openSelectCaseModal({ getAttachments: ({ theCase }) => getAttachments(theCase) });
         return;
       }
+
+      const { alertIds, markdownComments, replacements } = params;
 
       const userCommentAttachments = markdownComments.map<CaseAttachmentWithoutOwner>((x) => ({
         type: COMMENT_ATTACHMENT_TYPE,

@@ -8,6 +8,7 @@
 import type { IndicesResolveIndexResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { HuntScope, HuntScopeResolution, IndexScopeWindow } from '@kbn/alertzero-common';
+import { isIndexExclusion } from '../../../../../common/remote_cluster';
 import { classifyActionableIndices } from './classify_actionable_indices';
 import { discoverHuntDatasets } from './discover_hunt_datasets';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
@@ -39,13 +40,11 @@ const defaultWindow = (): IndexScopeWindow => ({
   to: new Date().toISOString(),
 });
 
-const isExclusion = (pattern: string): boolean => pattern.startsWith('-');
-
 /**
  * The universe patterns no resolved name globs to. A name counts whether it resolved as an
  * index, an alias, a data stream, or a data stream's backing index.
  */
-const unresolvedPatterns = (
+export const unresolvedPatterns = (
   patterns: string[],
   resolved: IndicesResolveIndexResponse
 ): string[] => {
@@ -115,7 +114,7 @@ export const resolveHuntScope = async ({
   logger?: Logger;
 }): Promise<ResolvedHuntScope> => {
   const resolvedWindow = window ?? defaultWindow();
-  const positivePatterns = indexPatterns.filter((pattern) => !isExclusion(pattern));
+  const positivePatterns = indexPatterns.filter((pattern) => !isIndexExclusion(pattern));
   const blocked = (
     resolution: Extract<HuntScopeResolution, `blocked:${string}`>,
     missing: string[]

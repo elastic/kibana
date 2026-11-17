@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { RegistryVarGroup } from '@kbn/fleet-plugin/common';
 import type { AwsServiceMatrixEntry } from '../../../aws_service_matrix';
+import { getDefaultEnabledDataStreams } from '../../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../../onboarding_flow_context';
 import type { ServiceVars } from '../../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from '../package_inputs';
@@ -13,7 +15,12 @@ import type { PackageInputEntry, AgentCredentialVars } from '../package_inputs';
 import { REGION_FIELD_NAMES } from '../../service_settings_step/field_config';
 import type { DeployGroup } from '../deploy_groups';
 import type { SecretRefValue } from '../secret_refs';
-import { buildGroupPolicyNameStem } from '../deploy_group_helpers';
+import { buildGroupPolicyNameStem, deriveGroupPolicyName } from '../deploy_group_helpers';
+import {
+  getPolicySettings,
+  getPolicyVarSettings,
+  type PolicySettings,
+} from '../../../common/policy_settings';
 
 export interface BuildPackagePolicyOpts {
   namespace: string;
@@ -22,6 +29,11 @@ export interface BuildPackagePolicyOpts {
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   pkgVersion: string;
   agentCredentials?: AgentCredentialVars;
+  /** Integration name as entered in step 2; the policy name is derived from it. */
+  integrationName?: string;
+  description?: string;
+  /** Package policy fields from Step 2 that every policy gets, such as the output. */
+  policySettings?: PolicySettings;
 }
 
 export interface PkgInfo {
@@ -40,8 +52,14 @@ export interface PkgInfo {
  * - Bundled originals (isDuplicateGroup: false): named after the package (e.g. "aws-logs").
  *   Date.now() suffix prevents cross-session name collisions (Fleet enforces unique names).
  * - Duplicates (isDuplicateGroup: true): named after the instance name the user typed.
+ *
+ * With an integration name, `deriveGroupPolicyName` decides instead and the Date.now() suffix is
+ * dropped.
  */
-export function buildPackagePolicyName(group: DeployGroup): string {
+export function buildPackagePolicyName(group: DeployGroup, integrationName?: string): string {
+  const derived = deriveGroupPolicyName(group, integrationName);
+  if (derived) return derived;
+  // Without an integration name (sessions that predate the field), keep the generated name.
   if (group.isDuplicateGroup) {
     const { instance } = group.members[0];
     const safe = instance.name.slice(0, 60).replace(/[^a-zA-Z0-9_\-. ]/g, '_');
@@ -77,6 +95,32 @@ function buildDisabledInputsForOtherTemplates(
   return disabled;
 }
 
+/**
+ * Build the set of input keys of this service's OWN policy templates that are not in `enabledKeys`.
+ *
+ * Fleet only overrides the inputs present in the request; an omitted input keeps its manifest
+ * default, which is enabled for most. So an input the user switched off (GuardDuty's API input
+ * when only S3 is collected), or that pruneUnsatisfiedInputs dropped, would still be validated and
+ * fail on its required vars. Sending it as disabled makes Fleet skip it, as the agentless path
+ * does for every input outside the selection.
+ */
+function buildDisabledInputsForOwnTemplates(
+  pkgInfo: PkgInfo,
+  servicePolicyTemplates: string[],
+  enabledKeys: Set<string>
+): Record<string, { enabled: false }> {
+  const ptSet = new Set(servicePolicyTemplates);
+  const disabled: Record<string, { enabled: false }> = {};
+  for (const pt of pkgInfo.policy_templates ?? []) {
+    if (!ptSet.has(pt.name)) continue;
+    for (const input of pt.inputs ?? []) {
+      const inputKey = `${pt.name}-${input.id ?? input.type}`;
+      if (!enabledKeys.has(inputKey)) disabled[inputKey] = { enabled: false };
+    }
+  }
+  return disabled;
+}
+
 /** Recover the input type from buildPackageInputs' `<ptName>-<inputType>` key. */
 function getInputType(inputKey: string, service: AwsServiceMatrixEntry): string {
   const ptName = service.policyTemplate ?? service.id;
@@ -97,6 +141,46 @@ function getRequiredVarNamesForInput(service: AwsServiceMatrixEntry, inputType: 
     .map(([name]) => name);
 }
 
+/**
+ * The stream-level var_groups that apply to one stream of `inputType`. buildPackageInputs keys
+ * streams as `<packageName>.<dsId>`, so the stream's own data stream decides: another data stream
+ * on the same input may declare different groups, or none. Falls back to the service-wide union
+ * only when the key does not name a known data stream.
+ */
+function getVarGroupsForStream(
+  service: AwsServiceMatrixEntry,
+  inputType: string,
+  streamKey: string
+): RegistryVarGroup[] {
+  const prefix = `${service.packageName}.`;
+  const dsId = streamKey.startsWith(prefix) ? streamKey.slice(prefix.length) : undefined;
+  const dsInfo = dsId ? service.varDefsByDataStream?.[dsId] : undefined;
+  if (dsInfo) return dsInfo.varGroupsByInput?.[inputType] ?? [];
+  return service.varGroupsByInput?.[inputType] ?? [];
+}
+
+/**
+ * Required var names for one stream: the input's required vars plus the vars of the option
+ * selected for each required stream-level var_group (region vars are backfilled by
+ * buildStreamVars, so they never block). Streams are per data stream, and Fleet validates each
+ * one independently.
+ */
+function getRequiredVarNamesForStream(
+  service: AwsServiceMatrixEntry,
+  inputType: string,
+  streamKey: string,
+  stream: PackageInputEntry['streams'][string]
+): string[] {
+  const selectedOptionVars = getVarGroupsForStream(service, inputType, streamKey)
+    .filter((group) => group.required)
+    .flatMap((group) => {
+      const selected = stream.var_group_selections?.[group.name];
+      const option = group.options.find((o) => o.name === selected) ?? group.options[0];
+      return (option?.vars ?? []).filter((name) => !REGION_FIELD_NAMES.has(name));
+    });
+  return [...getRequiredVarNamesForInput(service, inputType), ...selectedOptionVars];
+}
+
 function isVarSatisfied(value: string | boolean | string[] | undefined): boolean {
   if (value === undefined || value === null) return false;
   if (typeof value === 'string') return value.trim() !== '';
@@ -111,17 +195,13 @@ function pruneUnsatisfiedInputs(
   const kept: Record<string, PackageInputEntry> = {};
 
   for (const [inputKey, entry] of Object.entries(inputs)) {
-    const requiredVarNames = getRequiredVarNamesForInput(service, getInputType(inputKey, service));
+    const inputType = getInputType(inputKey, service);
 
-    if (requiredVarNames.length === 0) {
-      kept[inputKey] = entry;
-      continue;
-    }
-
-    // Every stream of the input must satisfy every required var. Streams are per data stream,
-    // and Fleet validates each one independently.
-    const allStreamsSatisfied = Object.values(entry.streams).every((stream) =>
-      requiredVarNames.every((name) => isVarSatisfied(stream.vars?.[name]))
+    // Every stream of the input must satisfy every required var (none required → kept).
+    const allStreamsSatisfied = Object.entries(entry.streams).every(([streamKey, stream]) =>
+      getRequiredVarNamesForStream(service, inputType, streamKey, stream).every((name) =>
+        isVarSatisfied(stream.vars?.[name])
+      )
     );
 
     if (allStreamsSatisfied) {
@@ -144,11 +224,10 @@ function describeMissingRequiredVars(
 
   for (const [inputKey, entry] of Object.entries(inputs)) {
     const inputType = getInputType(inputKey, service);
-    const requiredVarNames = getRequiredVarNamesForInput(service, inputType);
     const missing = new Set<string>();
 
-    for (const stream of Object.values(entry.streams)) {
-      for (const name of requiredVarNames) {
+    for (const [streamKey, stream] of Object.entries(entry.streams)) {
+      for (const name of getRequiredVarNamesForStream(service, inputType, streamKey, stream)) {
         if (!isVarSatisfied(stream.vars?.[name])) missing.add(name);
       }
     }
@@ -186,9 +265,12 @@ export async function buildGroupPackagePolicy(
   opts: BuildPackagePolicyOpts
 ): Promise<{
   name: string;
+  description?: string;
   package: { name: string; version: string };
   namespace?: string;
-  vars?: Record<string, string | SecretRefValue>;
+  output_id?: string;
+  condition?: string;
+  vars?: Record<string, string | SecretRefValue | null>;
   inputs: Record<string, unknown>;
 }> {
   const { members } = group;
@@ -199,7 +281,12 @@ export async function buildGroupPackagePolicy(
     authenticateAndDeployStep,
     pkgVersion,
     agentCredentials,
+    integrationName,
+    description,
+    policySettings,
   } = opts;
+  const descriptionField = description?.trim() ? { description: description.trim() } : {};
+  const policySettingsFields = getPolicySettings(policySettings, 'agent_based');
 
   // Build serviceVarsMap for all members. Key by service.id for buildPackageInputs.
   // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
@@ -210,7 +297,7 @@ export async function buildGroupPackagePolicy(
     const rawVars = storedServiceVars[instance.instanceId] ?? storedServiceVars[instance.serviceId];
     if (!rawVars) {
       serviceVarsMap[service.id] = {
-        enabledDataStreams: service.dataStreams,
+        enabledDataStreams: getDefaultEnabledDataStreams(service),
         varsByDataStream: {},
       };
     } else {
@@ -225,7 +312,12 @@ export async function buildGroupPackagePolicy(
   }
 
   const services = members.map(({ service }) => service);
-  const allInputs = buildPackageInputs(services, serviceVarsMap, globalRegion);
+  const allInputs = buildPackageInputs(
+    services,
+    serviceVarsMap,
+    globalRegion,
+    getPolicyVarSettings(policySettings, 'agent_based')
+  );
 
   // For a bundled group (multiple services), we apply per-service pruning independently.
   // For a duplicate group (one member), this is equivalent to the old single-target pruning.
@@ -254,7 +346,8 @@ export async function buildGroupPackagePolicy(
     authenticateAndDeployStep.staticKeys,
     pkgVarNames,
     agentCredentials,
-    authenticateAndDeployStep.existingSecretRefs
+    authenticateAndDeployStep.existingSecretRefs,
+    getPolicyVarSettings(policySettings, 'agent_based', pkgVarNames)
   );
 
   if (Object.keys(prunedInputs).length === 0) {
@@ -262,23 +355,15 @@ export async function buildGroupPackagePolicy(
       // No inputs were built at all — the service has no configured data streams (e.g. aws_logs
       // which has no dataStreams in the matrix). Send all inputs explicitly disabled so Fleet
       // installs the package with everything off, matching the Fleet UI's default toggle state.
-      const selfDisabled: Record<string, { enabled: false }> = {};
-      for (const { service } of members) {
-        const servicePt = service.policyTemplate ?? service.id;
-        for (const pt of pkgInfo.policy_templates ?? []) {
-          if (pt.name !== servicePt) continue;
-          for (const input of pt.inputs ?? []) {
-            const inputType = input.id ?? input.type;
-            selfDisabled[`${pt.name}-${inputType}`] = { enabled: false };
-          }
-        }
-      }
       const servicePts = members.map(({ service }) => service.policyTemplate ?? service.id);
       const disabledOtherInputs = buildDisabledInputsForOtherTemplates(pkgInfo, servicePts);
+      const selfDisabled = buildDisabledInputsForOwnTemplates(pkgInfo, servicePts, new Set());
       return {
-        name: buildPackagePolicyName(group),
+        name: buildPackagePolicyName(group, integrationName),
+        ...descriptionField,
         package: { name: firstService.packageName, version: pkgVersion },
         ...(group.namespace ? { namespace: group.namespace } : {}),
+        ...policySettingsFields,
         ...(vars ? { vars } : {}),
         inputs: { ...disabledOtherInputs, ...selfDisabled },
       };
@@ -295,16 +380,25 @@ export async function buildGroupPackagePolicy(
     throw new Error(`No fully configured input for ${firstService.name} (and possibly others).`);
   }
 
-  // Disable all inputs from other policy templates in the package.
+  // Disable all inputs from other policy templates in the package, and the inputs of this
+  // service's own templates that were not selected: both would otherwise keep their enabled
+  // manifest default and be validated.
   const servicePts = members.map(({ service }) => service.policyTemplate ?? service.id);
   const disabledOtherInputs = buildDisabledInputsForOtherTemplates(pkgInfo, servicePts);
+  const disabledOwnInputs = buildDisabledInputsForOwnTemplates(
+    pkgInfo,
+    servicePts,
+    new Set(Object.keys(prunedInputs))
+  );
 
   return {
-    name: buildPackagePolicyName(group),
+    name: buildPackagePolicyName(group, integrationName),
+    ...descriptionField,
     package: { name: firstService.packageName, version: pkgVersion },
     ...(group.namespace ? { namespace: group.namespace } : {}),
+    ...policySettingsFields,
     ...(vars ? { vars } : {}),
     // disabled entries first so our enabled inputs win if there's any key overlap
-    inputs: { ...disabledOtherInputs, ...prunedInputs },
+    inputs: { ...disabledOtherInputs, ...disabledOwnInputs, ...prunedInputs },
   };
 }

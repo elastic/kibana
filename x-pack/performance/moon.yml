@@ -43,6 +43,4 @@ fileGroups:
     - '**/*.ts'
     - kbn_archives/large_arrays_data_view.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

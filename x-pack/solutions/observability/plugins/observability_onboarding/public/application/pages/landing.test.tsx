@@ -253,10 +253,10 @@ const createObservabilityServices = (
   } as ObservabilityPublicStart,
 });
 
-const renderWithFlag = (enabled: boolean, initialPath: string = '/') => {
+const renderWithFlag = (enabled: boolean | undefined, initialPath: string = '/') => {
   const coreStart = coreMock.createStart();
   coreStart.featureFlags.useBooleanValue.mockImplementation((id, fallback) =>
-    id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
+    id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled ?? fallback : fallback
   );
   createCallApi(coreStart);
   const services = createObservabilityServices(coreStart);
@@ -336,6 +336,10 @@ beforeAll(() => {
 describe('LandingPage', () => {
   it('renders the V2 layout when the flag is on', () => {
     expect(renderWithFlag(true).queryByTestId('addDataPageV2')).toBeInTheDocument();
+  });
+
+  it('renders the V2 layout when no flag value is served', () => {
+    expect(renderWithFlag(undefined).queryByTestId('addDataPageV2')).toBeInTheDocument();
   });
 
   it('does not render the V2 layout when the flag is off', () => {

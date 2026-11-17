@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { Provider as ReduxProvider } from 'react-redux-v7';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +39,6 @@ export interface UptimeAppProps {
   basePath: string;
   canSave: boolean;
   core: CoreStart;
-  darkMode: boolean;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
@@ -52,12 +53,20 @@ export interface UptimeAppProps {
   isDev: boolean;
 }
 
+// A theme change must not re-render Application: it dispatches to the store during render.
+function StyledComponentsThemeProvider({
+  theme,
+  children,
+}: PropsWithChildren<{ theme: CoreStart['theme'] }>) {
+  const { darkMode } = useObservable(theme.theme$, theme.getTheme());
+  return <EuiThemeProvider darkMode={darkMode}>{children}</EuiThemeProvider>;
+}
+
 const Application = (props: UptimeAppProps) => {
   const {
     basePath,
     canSave,
     core,
-    darkMode,
     plugins,
     renderGlobalHelpControls,
     setBadge,
@@ -116,7 +125,7 @@ const Application = (props: UptimeAppProps) => {
             }}
           >
             <Router history={appMountParameters.history}>
-              <EuiThemeProvider darkMode={darkMode}>
+              <StyledComponentsThemeProvider theme={core.theme}>
                 <UptimeRefreshContextProvider>
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeStartupPluginsContextProvider {...startPlugins}>
@@ -140,7 +149,7 @@ const Application = (props: UptimeAppProps) => {
                     </UptimeStartupPluginsContextProvider>
                   </UptimeSettingsContextProvider>
                 </UptimeRefreshContextProvider>
-              </EuiThemeProvider>
+              </StyledComponentsThemeProvider>
             </Router>
           </KibanaContextProvider>
         </ReduxProvider>

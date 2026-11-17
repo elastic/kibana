@@ -19,6 +19,7 @@ import type { GetScopedClients } from '../../../routes/types';
 import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import {
   DEFAULT_EVENTS_SEARCH_FROM,
   DEFAULT_EVENTS_SEARCH_TO,
@@ -33,7 +34,7 @@ import {
 } from './handler';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
   type SourceCatalog,
 } from '../../utils/resolve_source_slugs';
@@ -50,7 +51,7 @@ const searchEventsSchema = lazySchema(() =>
       slugs: sourceSlugsSchema.optional().describe(
         i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.slugs', {
           defaultMessage:
-            'Optional Nightshift source slugs. Omit to search events for every source. Not titles and not view names. Disabled sources are accepted.',
+            'Optional nightshift source slugs. Omit to search events for every source. Not titles and not view names. Disabled sources are accepted.',
         })
       ),
       status: significantEventSchema.shape.status.default('active').describe(
@@ -104,7 +105,7 @@ const searchEventsSchema = lazySchema(() =>
             'xpack.significantEvents.agentBuilder.tools.eventSearch.schema.topologyFeatureIds',
             {
               defaultMessage:
-                'Optional Knowledge Indicator feature.id values to match against causal_features.feature_id or blast_radius.feature_id. Defaults to no topology filter. An event matches when either topology field contains any requested ID.',
+                "Optional Knowledge Indicator feature.id values. Defaults to no topology filter. An event matches when any requested ID appears in causal_features.feature_id, blast_radius.feature_id, or a dependency blast radius entry's source or target.",
             }
           )
         ),
@@ -259,6 +260,7 @@ export function createSearchEventsTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       const query = normalizeEventSearchQuery(toolParams.query);
 
       try {
@@ -269,7 +271,7 @@ export function createSearchEventsTool({
         await assertCanReadSignificantEvents({ request, server });
         const { slugs, ...searchParams } = toolParams;
         const catalog = await loadSourceCatalog(sourcesClient);
-        const filterSources = slugs ? resolveSourcesBySlug(catalog, slugs) : [];
+        const filterSources = slugs ? resolveSourcesBySlugOrId(catalog, slugs) : [];
 
         const data = await searchEventsToolHandler({
           eventSearchClient: await getEventSearchClient(),
@@ -281,6 +283,7 @@ export function createSearchEventsTool({
         });
 
         telemetry.trackAgentToolEventSearch({
+          workflow_execution_id: workflowExecutionId,
           success: true,
           result_count: data.total,
           has_query: query !== undefined,
@@ -313,6 +316,7 @@ export function createSearchEventsTool({
         logger.error(`Error running event_search: ${message}`);
 
         telemetry.trackAgentToolEventSearch({
+          workflow_execution_id: workflowExecutionId,
           success: false,
           result_count: 0,
           has_query: query !== undefined,

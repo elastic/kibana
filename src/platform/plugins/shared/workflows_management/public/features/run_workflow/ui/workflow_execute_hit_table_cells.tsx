@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { formatHitReact } from '@kbn/discover-utils';
+import { formatHitReact } from '@kbn/discover-utils/components';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';

@@ -9,6 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { KibanaContentListPageTab } from '@kbn/content-list-page';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import {
   TableListViewTable,
@@ -121,7 +122,7 @@ export const getDashboardListingTabs = ({
     title: i18n.translate('dashboard.listing.tabs.dashboards.title', {
       defaultMessage: 'Dashboards',
     }),
-    id: 'dashboards',
+    id: DASHBOARD_APP_ID,
     getTableList: (parentProps) => (
       <DashboardsTabContent {...commonProps} parentProps={parentProps} />
     ),
@@ -131,3 +132,17 @@ export const getDashboardListingTabs = ({
 
   return [dashboardsTab, ...additionalTabs];
 };
+
+/**
+ * Adapts the listing tabs to `KibanaContentListPage.ActiveTab`. The Dashboards tab renders
+ * synchronously; registered tabs resolve their legacy `getTableList` content asynchronously.
+ */
+export const toContentListPageTabs = (
+  tabs: DashboardListingTab[],
+  { parentProps, ...commonProps }: TabContentProps
+): KibanaContentListPageTab[] =>
+  tabs.map(({ id, getTableList }) =>
+    id === DASHBOARD_APP_ID
+      ? { id, render: () => <DashboardsTabContent {...commonProps} parentProps={parentProps} /> }
+      : { id, load: async () => getTableList(parentProps) }
+  );

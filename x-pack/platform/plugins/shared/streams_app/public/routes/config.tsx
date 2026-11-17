@@ -9,6 +9,7 @@ import type { RouteMap } from '@kbn/typed-react-router-config';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { StreamsAppPageTemplate } from '../components/streams_app_page_template';
 import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
@@ -18,6 +19,8 @@ import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
 import { StreamsLayout } from '../components/streams_layout';
 import { DEFAULT_STREAMS_LAYOUT_TAB } from '../components/streams_layout/tabs';
+import { IndexInspectPage } from '../components/index_inspect/index_inspect_page';
+import { DEFAULT_INDEX_INSPECT_TAB } from '../components/index_inspect/types';
 
 /**
  * Optional time range query params.
@@ -42,6 +45,13 @@ const managementQueryParams = t.partial({
   rangeTo: t.string,
   // Data quality page state
   pageState: t.string,
+});
+
+/**
+ * The unit an index page was opened from, used only for its back link.
+ */
+const unitQueryParams = t.partial({
+  unitId: t.string,
 });
 
 /**
@@ -73,35 +83,86 @@ const streamsAppRoutes = {
         }),
       },
       /**
-       * Declared before `/{key}` so the literal path wins over a stream name.
+       * Declared before `/{key}` so `v2` wins over a stream name.
        */
-      '/new-experience': {
+      '/v2': {
         element: <Outlet />,
         children: {
-          '/new-experience': {
+          '/v2': {
             element: (
               <RedirectTo
-                path="/new-experience/{tab}"
+                path="/v2/unit/{unitId}/{tab}"
+                params={{
+                  path: { unitId: STREAMS_DEFAULT_UNIT_ID, tab: DEFAULT_STREAMS_LAYOUT_TAB },
+                }}
+              />
+            ),
+            params: t.partial({
+              query: timeRangeQueryParams,
+            }),
+          },
+          '/v2/unit/{unitId}': {
+            element: (
+              <RedirectTo
+                path="/v2/unit/{unitId}/{tab}"
                 params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
               />
             ),
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  unitId: t.string,
+                }),
+              }),
+              t.partial({
+                query: timeRangeQueryParams,
+              }),
+            ]),
           },
-          '/new-experience/{tab}': {
+          '/v2/unit/{unitId}/{tab}': {
             element: <StreamsLayout />,
             params: t.intersection([
               t.type({
                 path: t.type({
+                  unitId: t.string,
                   tab: t.string,
                 }),
               }),
-              t.intersection([
-                t.partial({
-                  query: timeRangeQueryParams,
+              t.partial({
+                query: t.intersection([timeRangeQueryParams, flyoutParams]),
+              }),
+            ]),
+          },
+          '/v2/indices/{indexName}': {
+            element: (
+              <RedirectTo
+                path="/v2/indices/{indexName}/{tab}"
+                params={{ path: { tab: DEFAULT_INDEX_INSPECT_TAB } }}
+              />
+            ),
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  indexName: t.string,
                 }),
-                t.partial({
-                  query: flyoutParams,
+              }),
+              t.partial({
+                query: t.intersection([timeRangeQueryParams, unitQueryParams]),
+              }),
+            ]),
+          },
+          '/v2/indices/{indexName}/{tab}': {
+            element: <IndexInspectPage />,
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  indexName: t.string,
+                  tab: t.string,
                 }),
-              ]),
+              }),
+              t.partial({
+                query: t.intersection([managementQueryParams, unitQueryParams]),
+              }),
             ]),
           },
         },

@@ -29,6 +29,7 @@ const mockSpaces = createMockSpaces();
 const mockDefaultQuery = 'FROM .rule-events | WHERE type == "alert"';
 
 jest.mock('@kbn/alerting-v2-common-queries', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-common-queries'),
   buildEpisodesBaseQuery: jest.fn().mockReturnValue({
     print: jest.fn().mockReturnValue('FROM .rule-events | WHERE type == "alert"'),
   }),
@@ -106,7 +107,7 @@ describe('useAlertingEpisodesDataView', () => {
         },
       },
     });
-    expect(mockDataView.addRuntimeField).toHaveBeenCalledTimes(4);
+    expect(mockDataView.addRuntimeField).toHaveBeenCalledTimes(6);
   });
 
   it('should add a runtime field for the rule tags column, which has no backing query field', async () => {
@@ -138,6 +139,38 @@ describe('useAlertingEpisodesDataView', () => {
       type: 'keyword',
       script: { source: "emit('')" },
       customLabel: 'Source',
+    });
+  });
+
+  it('should add a runtime field for the maintenance windows column, which has no backing query field', async () => {
+    const services = { dataViews, http, spaces: mockSpaces };
+
+    renderHook(() => useAlertingEpisodesDataView({ services }));
+
+    await waitFor(() => {
+      expect(mockDataView.addRuntimeField).toHaveBeenCalled();
+    });
+
+    expect(mockDataView.addRuntimeField).toHaveBeenCalledWith('suppressed', {
+      type: 'keyword',
+      script: { source: "emit('')" },
+      customLabel: 'Suppressed',
+    });
+  });
+
+  it('should add a runtime field for the reason column, which has no backing query field', async () => {
+    const services = { dataViews, http, spaces: mockSpaces };
+
+    renderHook(() => useAlertingEpisodesDataView({ services }));
+
+    await waitFor(() => {
+      expect(mockDataView.addRuntimeField).toHaveBeenCalled();
+    });
+
+    expect(mockDataView.addRuntimeField).toHaveBeenCalledWith('reason', {
+      type: 'keyword',
+      script: { source: "emit('')" },
+      customLabel: 'Reason',
     });
   });
 

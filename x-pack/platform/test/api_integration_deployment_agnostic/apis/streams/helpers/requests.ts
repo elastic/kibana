@@ -274,23 +274,6 @@ export async function restoreDataStream(
     .then((response) => response.body);
 }
 
-export async function getIlmStats(
-  apiClient: StreamsSupertestRepositoryClient,
-  name: string,
-  expectStatusCode: number = 200
-) {
-  return await apiClient
-    .fetch('GET /internal/streams/{name}/lifecycle/_stats', {
-      params: {
-        path: {
-          name,
-        },
-      },
-    })
-    .expect(expectStatusCode)
-    .then((response) => response.body);
-}
-
 export async function getFailureStoreStats(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,

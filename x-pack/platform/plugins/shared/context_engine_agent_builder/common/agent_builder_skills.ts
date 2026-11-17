@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const KI_RETRIEVAL_SKILL_ID = 'ki-retrieval' as const;
+export { kiRetrievalSkillId as KI_RETRIEVAL_SKILL_ID } from '@kbn/agent-builder-common';
 
 /**
  * Decides what an AI index should hold and whether what it holds is working, whether the index is

@@ -17,4 +17,15 @@ export const PLUGIN_MIN_LICENSE_TYPE = basicLicense;
 
 export const API_BASE_PATH = '/api/ingest_pipelines';
 
-export const APP_CLUSTER_REQUIRED_PRIVILEGES = ['manage_pipeline', 'cluster:monitor/nodes/info'];
+export const APP_CLUSTER_REQUIRED_PRIVILEGE = 'manage_pipeline';
+
+export const MANAGE_PROCESSORS_CLUSTER_REQUIRED_PRIVILEGE = 'manage';
+
+export const APP_CAPABILITIES = {
+  manage: 'manage',
+  manageProcessors: 'manageProcessors',
+} as const;
+
+// Kept small because the parse_csv route checks ES privileges only after the body is buffered.
+// A mapping CSV is a few MB at most, so 10 MB bounds that allocation without limiting real use.
+export const PARSE_CSV_MAX_FILE_BYTES = 10 * 1024 * 1024;

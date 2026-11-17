@@ -38,6 +38,18 @@ export interface LatestAlertEventState {
   last_episode_status: AlertEpisodeStatus | null;
   last_episode_status_count: number | null;
   last_episode_timestamp: string | null;
+  /**
+   * Timestamp the current `pending` / `recovering` phase was entered, derived
+   * (not persisted) as the latest `status_count == 1` event: `status_count`
+   * resets to 1 on every phase entry and increments while the phase is held, so
+   * the most recent `status_count == 1` event marks the start of the current run.
+   * `null` when the episode has never been in a counted phase, or when the entry
+   * event is no longer derivable (aged out of retention, or `state_transition`
+   * configured mid-episode); the strategy then falls back to
+   * `last_episode_timestamp`. Lets a `timeframe` threshold accumulate elapsed time
+   * against phase entry rather than the previous evaluation.
+   */
+  last_episode_phase_started_at: string | null;
   last_lifecycle_action_type: LastLifecycleActionType;
   group_hash: string;
 }
@@ -103,6 +115,7 @@ export const getLatestAlertEventStateQuery = ({
       last_episode_status = LAST(alert.status, @timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
       last_episode_status_count = LAST(alert.status_count, @timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
       last_episode_timestamp = MAX(@timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
+      last_episode_phase_started_at = MAX(@timestamp) WHERE type == "alert" AND alert.status IS NOT NULL AND alert.status_count == 1,
       last_action_episode_id = LAST(alert_id, @timestamp) WHERE action_type IN (${ALERT_EPISODE_ACTION_TYPE.ACTIVATE}, ${ALERT_EPISODE_ACTION_TYPE.DEACTIVATE}),
       last_action_type = LAST(action_type, @timestamp) WHERE action_type IN (${ALERT_EPISODE_ACTION_TYPE.ACTIVATE}, ${ALERT_EPISODE_ACTION_TYPE.DEACTIVATE})
     BY group_hash`;
@@ -115,6 +128,7 @@ export const getLatestAlertEventStateQuery = ({
     'last_episode_status',
     'last_episode_status_count',
     'last_episode_timestamp',
+    'last_episode_phase_started_at',
     'last_lifecycle_action_type',
     'group_hash'
   );

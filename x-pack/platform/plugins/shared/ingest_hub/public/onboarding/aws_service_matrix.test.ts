@@ -5,34 +5,18 @@
  * 2.0.
  */
 
-import type {
-  AwsServiceMatrixEntry,
-  DeploymentMethod,
-  SignalType,
-  ServiceCategory,
-} from './aws_service_matrix';
+import { AWS_ONBOARDING_PACKAGE_NAMES } from '@kbn/fleet-plugin/common/constants';
+import type { AwsServiceMatrixEntry, DeploymentMethod, SignalType } from './aws_service_matrix';
 import {
   AWS_SERVICES_STATIC,
   applyDeploymentMethodView,
   buildAwsServiceMatrix,
+  getDefaultEnabledDataStreams,
   makeDsView,
 } from './aws_service_matrix';
 
 const VALID_SIGNAL_TYPES: SignalType[] = ['logs', 'metrics'];
 const VALID_DEPLOYMENT_METHODS: DeploymentMethod[] = ['managed_integration', 'ecf', 'agent_based'];
-const VALID_CATEGORIES: ServiceCategory[] = [
-  'analytics',
-  'application_integration',
-  'cloud_financial_management',
-  'compute',
-  'containers',
-  'databases',
-  'machine_learning',
-  'management_governance',
-  'networking_content_delivery',
-  'security_identity_compliance',
-  'storage',
-];
 
 // Build a mock packages record.
 // For the aws package: provide data streams for all aws entries so that signalType and
@@ -81,6 +65,12 @@ const MOCK_PACKAGES: Record<string, any> = {
 const BUILT_MATRIX = buildAwsServiceMatrix(MOCK_PACKAGES, AWS_SERVICES_STATIC);
 
 describe('AWS service matrix', () => {
+  it('should cover the packages Fleet marks as part of the AWS onboarding flow', () => {
+    expect([...new Set(AWS_SERVICES_STATIC.map((s) => s.packageName))].sort()).toEqual(
+      [...AWS_ONBOARDING_PACKAGE_NAMES].sort()
+    );
+  });
+
   it('should have at least 40 entries', () => {
     expect(BUILT_MATRIX.length).toBeGreaterThanOrEqual(40);
   });
@@ -100,10 +90,6 @@ describe('AWS service matrix', () => {
 
       it('has a non-empty name', () => {
         expect(entry.name).toBeTruthy();
-      });
-
-      it('has a valid category', () => {
-        expect(VALID_CATEGORIES).toContain(entry.category);
       });
 
       it('has a valid signalTypes array', () => {
@@ -411,7 +397,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
         {
           id: 'amazon_security_lake',
-          category: 'security_identity_compliance',
           packageName: 'amazon_security_lake',
         },
       ]);
@@ -427,7 +412,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({} as any, [
         {
           id: 'aws_securityhub',
-          category: 'security_identity_compliance',
           packageName: 'aws_securityhub',
         },
       ]);
@@ -439,7 +423,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({} as any, [
         {
           id: 'vpcflow_otel',
-          category: 'networking_content_delivery',
           packageName: 'aws',
           ecfOnly: true,
           deploymentMethods: [{ method: 'ecf', preferred: true }],
@@ -468,12 +451,57 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ awsfargate: pkg as any }, [
         {
           id: 'awsfargate',
-          category: 'containers',
           packageName: 'awsfargate',
           policyTemplate: 'fargate',
         },
       ]);
       expect(result.deploymentMethods).toEqual([{ method: 'agent_based', preferred: true }]);
+    });
+  });
+
+  describe('stream-level var_groups', () => {
+    const LOG_GROUP_SOURCE = {
+      name: 'log_group_source',
+      title: 'Log group',
+      required: true,
+      options: [{ name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] }],
+    };
+    const dsId = MOCK_PACKAGES.aws.data_streams[0].path as string;
+    const packages = {
+      ...MOCK_PACKAGES,
+      aws: {
+        ...MOCK_PACKAGES.aws,
+        data_streams: MOCK_PACKAGES.aws.data_streams.map((ds: any) =>
+          ds.path === dsId
+            ? {
+                ...ds,
+                streams: [
+                  {
+                    input: 'aws-s3',
+                    enabled: true,
+                    vars: [{ name: 'log_group_arn', type: 'text' }],
+                    var_groups: [LOG_GROUP_SOURCE],
+                  },
+                ],
+              }
+            : ds
+        ),
+      },
+    };
+    const entry = buildAwsServiceMatrix(packages, AWS_SERVICES_STATIC).find((e) => e.id === dsId)!;
+
+    it('captures the groups per input on the data stream, the entry union and the DS view', () => {
+      expect(entry.varDefsByDataStream?.[dsId]?.varGroupsByInput).toEqual({
+        'aws-s3': [LOG_GROUP_SOURCE],
+      });
+      expect(entry.varGroupsByInput).toEqual({ 'aws-s3': [LOG_GROUP_SOURCE] });
+      expect(makeDsView(entry, dsId).varGroupsByInput).toEqual({ 'aws-s3': [LOG_GROUP_SOURCE] });
+    });
+
+    it('leaves varGroupsByInput undefined when no stream declares groups', () => {
+      const plain = BUILT_MATRIX.find((e) => e.id === dsId)!;
+      expect(plain.varGroupsByInput).toBeUndefined();
+      expect(plain.varDefsByDataStream?.[dsId]?.varGroupsByInput).toBeUndefined();
     });
   });
 
@@ -500,7 +528,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ aws_securityhub: pkg as any }, [
         {
           id: 'aws_securityhub',
-          category: 'security_identity_compliance',
           packageName: 'aws_securityhub',
         },
       ]);
@@ -509,6 +536,67 @@ describe('AWS service matrix', () => {
       expect(result.inputs).toContain('cel');
       expect(result.varDefsByDataStream?.finding).toBeDefined();
       expect(result.varDefsByDataStream?.finding?.varDefsByInput?.cel?.proxy_url).toBeDefined();
+    });
+
+    it('flags a service whose stream declares proxy_url', () => {
+      const pkg = {
+        policy_templates: [
+          {
+            name: 'aws_securityhub',
+            inputs: [{ type: 'cel', title: 'Security Hub via API' }],
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ],
+        data_streams: [
+          {
+            path: 'finding',
+            type: 'logs',
+            streams: [
+              { input: 'cel', vars: [{ name: 'proxy_url', type: 'text', required: false }] },
+            ],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ aws_securityhub: pkg as any }, [
+        { id: 'aws_securityhub', packageName: 'aws_securityhub' },
+      ]);
+      expect(result.declaresProxyUrl).toBe(true);
+    });
+
+    it('flags a service whose package declares proxy_url as a package var', () => {
+      const pkg = {
+        vars: [{ name: 'proxy_url', type: 'text' }],
+        policy_templates: [
+          {
+            name: 'aws_logs',
+            inputs: [{ type: 'aws-s3', title: 'Logs' }],
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ],
+        data_streams: [{ path: 'generic', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] }],
+      };
+      const [result] = buildAwsServiceMatrix({ aws_logs: pkg as any }, [
+        { id: 'aws_logs', packageName: 'aws_logs' },
+      ]);
+      expect(result.declaresProxyUrl).toBe(true);
+    });
+
+    it('does not flag a service that declares no proxy_url', () => {
+      const pkg = {
+        vars: [{ name: 'default_region', type: 'text' }],
+        policy_templates: [
+          {
+            name: 'aws_logs',
+            inputs: [{ type: 'aws-s3', title: 'Logs' }],
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ],
+        data_streams: [{ path: 'generic', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] }],
+      };
+      const [result] = buildAwsServiceMatrix({ aws_logs: pkg as any }, [
+        { id: 'aws_logs', packageName: 'aws_logs' },
+      ]);
+      expect(result.declaresProxyUrl).toBe(false);
     });
 
     it('uses all package data_streams when PT has an explicit empty data_streams array', () => {
@@ -530,7 +618,7 @@ describe('AWS service matrix', () => {
         ],
       };
       const [result] = buildAwsServiceMatrix({ aws_bedrock: pkg as any }, [
-        { id: 'aws_bedrock', category: 'machine_learning', packageName: 'aws_bedrock' },
+        { id: 'aws_bedrock', packageName: 'aws_bedrock' },
       ]);
       expect(result.dataStreams).toEqual(['model_invocation']);
       expect(result.signalTypes).toContain('logs');
@@ -552,7 +640,7 @@ describe('AWS service matrix', () => {
         ],
       };
       const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
-        { id: 'elb', category: 'networking_content_delivery', packageName: 'aws' },
+        { id: 'elb', packageName: 'aws' },
       ]);
       expect(result.dataStreams).toEqual(['elb_logs']);
       expect(result.dataStreams).not.toContain('other_logs');
@@ -577,7 +665,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
         {
           id: 'amazon_security_lake',
-          category: 'security_identity_compliance',
           packageName: 'amazon_security_lake',
           deploymentMethods: [{ method: 'agent_based', preferred: true }],
         },
@@ -608,7 +695,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
         {
           id: 'amazon_security_lake',
-          category: 'security_identity_compliance',
           packageName: 'amazon_security_lake',
           deploymentMethods: [{ method: 'agent_based', preferred: true }],
         },
@@ -649,7 +735,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
         {
           id: 'amazon_security_lake',
-          category: 'security_identity_compliance',
           packageName: 'amazon_security_lake',
           deploymentMethods: [{ method: 'agent_based', preferred: true }],
         },
@@ -678,7 +763,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
         {
           id: 'amazon_security_lake',
-          category: 'security_identity_compliance',
           packageName: 'amazon_security_lake',
         },
       ]);
@@ -701,7 +785,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
         {
           id: 'elb',
-          category: 'networking_content_delivery',
           packageName: 'aws',
           policyTemplate: 'elb',
         },
@@ -728,7 +811,7 @@ describe('AWS service matrix', () => {
         ],
       };
       const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
-        { id: 'elb', category: 'networking_content_delivery', packageName: 'aws' },
+        { id: 'elb', packageName: 'aws' },
       ]);
       expect(result.inputs).toEqual(['aws-s3', 'aws-cloudwatch']);
       expect(result.defaultEnabledInputs).toEqual(['aws-s3']);
@@ -746,7 +829,7 @@ describe('AWS service matrix', () => {
         ],
       };
       const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
-        { id: 'elb', category: 'networking_content_delivery', packageName: 'aws' },
+        { id: 'elb', packageName: 'aws' },
       ]);
       expect(result.defaultEnabledInputs).toEqual(['aws-s3', 'aws-cloudwatch']);
     });
@@ -832,6 +915,49 @@ describe('AWS service matrix', () => {
         AWS_SERVICES_STATIC.filter((e) => e.id === 'waf_otel') as any
       );
       expect(applyDeploymentMethodView(wafOtel, 'agent_based').settingsScope).toBe('ecf');
+    });
+  });
+
+  describe('getDefaultEnabledDataStreams', () => {
+    const multiStream = (overrides: Partial<AwsServiceMatrixEntry> = {}) =>
+      ({
+        id: 'svc',
+        dataStreams: ['metrics_ds', 's3_ds', 'cw_ds'],
+        defaultEnabledInputs: ['aws/metrics', 'aws-s3', 'aws-cloudwatch'],
+        varDefsByDataStream: {
+          metrics_ds: { inputs: ['aws/metrics'], defaultEnabledInputs: ['aws/metrics'] },
+          s3_ds: { inputs: ['aws-s3'], defaultEnabledInputs: ['aws-s3'] },
+          cw_ds: { inputs: ['aws-cloudwatch'], defaultEnabledInputs: [] },
+        },
+        ...overrides,
+      } as unknown as AwsServiceMatrixEntry);
+
+    it('keeps the only data stream of a single-stream service', () => {
+      const single = multiStream({ dataStreams: ['cw_ds'] });
+      expect(getDefaultEnabledDataStreams(single)).toEqual(['cw_ds']);
+    });
+
+    it('keeps only the data streams the manifest enables by default', () => {
+      expect(getDefaultEnabledDataStreams(multiStream())).toEqual(['metrics_ds', 's3_ds']);
+    });
+
+    it('returns none when the manifest disables every data stream, as the flyout shows', () => {
+      const allOff = multiStream({
+        varDefsByDataStream: {
+          s3_ds: { inputs: ['aws-s3'], defaultEnabledInputs: [] },
+          cw_ds: { inputs: ['aws-cloudwatch'], defaultEnabledInputs: [] },
+        } as unknown as AwsServiceMatrixEntry['varDefsByDataStream'],
+        dataStreams: ['s3_ds', 'cw_ds'],
+      });
+      expect(getDefaultEnabledDataStreams(allOff)).toEqual([]);
+    });
+
+    it('drops a stream whose defaults ECF cannot route in the ECF view', () => {
+      const ecfView = multiStream({
+        settingsScope: 'ecf',
+        defaultEnabledInputs: ['aws-s3'],
+      });
+      expect(getDefaultEnabledDataStreams(ecfView)).toEqual(['s3_ds']);
     });
   });
 });

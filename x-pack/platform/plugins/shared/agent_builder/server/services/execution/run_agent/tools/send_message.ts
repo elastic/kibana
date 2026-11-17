@@ -13,6 +13,7 @@ import {
   ToolType,
   isRoundCompleteEvent,
   internalTools,
+  isConversationBusyError,
 } from '@kbn/agent-builder-common';
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
 import type { ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
@@ -161,6 +162,16 @@ export const createSendMessageTool = ({
           ],
         };
       } catch (error) {
+        if (isConversationBusyError(error)) {
+          return {
+            results: [
+              createErrorResult(
+                `Sub-agent "${to}" is still answering your previous message. Wait for its reply before sending another message.`
+              ),
+            ],
+          };
+        }
+
         const message = error instanceof Error ? error.message : String(error);
         return {
           results: [createErrorResult(`send_message failed: ${message}`)],

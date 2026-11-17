@@ -18,12 +18,12 @@ import {
   EuiForm,
   EuiFormRow,
   EuiIconTip,
+  EuiLink,
   EuiSpacer,
+  EuiText,
   EuiTitle,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useEffect, useRef, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -63,12 +63,6 @@ export const CreateServiceAccountFlyout = ({
   onClose,
   onCreated,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
-  const labelStyle = css({
-    fontSize: 14,
-    lineHeight: '22px',
-    fontWeight: euiTheme.font.weight.regular,
-  });
   const [nameTouched, setNameTouched] = useState(false);
   const titleId = useGeneratedHtmlId({ prefix: 'createServiceAccountTitle' });
   const formId = useGeneratedHtmlId({ prefix: 'createServiceAccountForm' });
@@ -164,36 +158,22 @@ export const CreateServiceAccountFlyout = ({
     <EuiFlyout
       size={540}
       maxWidth="100vw"
-      paddingSize="none"
       aria-labelledby={titleId}
       onClose={() => {
         if (!saving.current) onClose();
       }}
-      closeButtonProps={{
-        isDisabled: isSaving,
-        css: css({ top: euiTheme.size.base, right: euiTheme.size.m }),
-      }}
+      closeButtonProps={{ isDisabled: isSaving }}
       data-test-subj="createServiceAccountFlyout"
     >
-      <EuiFlyoutHeader
-        hasBorder
-        css={css({
-          height: 62,
-          display: 'flex',
-          alignItems: 'center',
-          backgroundColor: euiTheme.colors.backgroundLightText,
-        })}
-      >
-        <div css={css({ paddingInline: `calc(${euiTheme.size.base} + ${euiTheme.size.xs})` })}>
-          <EuiTitle size="xs" css={css({ fontSize: 18, lineHeight: '22px' })}>
-            <h2 id={titleId}>
-              <FormattedMessage
-                id="xpack.security.management.serviceAccounts.create.flyoutTitle"
-                defaultMessage="Create account"
-              />
-            </h2>
-          </EuiTitle>
-        </div>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id={titleId}>
+            <FormattedMessage
+              id="xpack.security.management.serviceAccounts.create.flyoutTitle"
+              defaultMessage="Create account"
+            />
+          </h2>
+        </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm
@@ -202,9 +182,6 @@ export const CreateServiceAccountFlyout = ({
           aria-labelledby={titleId}
           fullWidth
           noValidate
-          css={css({
-            padding: `${euiTheme.size.l} calc(${euiTheme.size.base} + ${euiTheme.size.xs}) ${euiTheme.size.l} ${euiTheme.size.base}`,
-          })}
           onSubmit={(event) => {
             event.preventDefault();
             void submit();
@@ -215,13 +192,9 @@ export const CreateServiceAccountFlyout = ({
           <EuiFormRow
             id={nameId}
             fullWidth
-            label={
-              <span css={labelStyle}>
-                {i18n.translate('xpack.security.management.serviceAccounts.create.nameLabel', {
-                  defaultMessage: 'Name',
-                })}
-              </span>
-            }
+            label={i18n.translate('xpack.security.management.serviceAccounts.create.nameLabel', {
+              defaultMessage: 'Name',
+            })}
             isInvalid={(hasSubmitted || nameTouched) && isNameInvalid}
             error={i18n.translate(
               'xpack.security.management.serviceAccounts.create.nameErrorMessage',
@@ -233,7 +206,6 @@ export const CreateServiceAccountFlyout = ({
             )}
           >
             <EuiFieldText
-              compressed
               onBlur={() => setNameTouched(true)}
               fullWidth
               value={name}
@@ -246,19 +218,12 @@ export const CreateServiceAccountFlyout = ({
           </EuiFormRow>
           <EuiFormRow
             fullWidth
-            label={
-              <span css={labelStyle}>
-                {i18n.translate(
-                  'xpack.security.management.serviceAccounts.create.descriptionLabel',
-                  {
-                    defaultMessage: 'Description (optional)',
-                  }
-                )}
-              </span>
-            }
+            label={i18n.translate(
+              'xpack.security.management.serviceAccounts.create.descriptionLabel',
+              { defaultMessage: 'Description (optional)' }
+            )}
           >
             <EuiFieldText
-              compressed
               fullWidth
               data-test-subj="createServiceAccountDescription"
               value={description}
@@ -267,70 +232,83 @@ export const CreateServiceAccountFlyout = ({
               disabled={isSaving}
             />
           </EuiFormRow>
-          <div css={css({ marginTop: euiTheme.size.l })}>
-            <EuiFormRow
-              id={rolesId}
-              fullWidth
-              label={
-                <span css={labelStyle}>
-                  <span id={`${rolesId}-label-text`}>
-                    {i18n.translate('xpack.security.management.serviceAccounts.create.rolesLabel', {
-                      defaultMessage: 'Set privileges',
-                    })}
-                  </span>{' '}
-                  <EuiIconTip
-                    type="info"
-                    aria-label={i18n.translate(
-                      'xpack.security.management.serviceAccounts.create.rolePrivilegesHelpLabel',
-                      { defaultMessage: 'About role privileges' }
-                    )}
-                    content={
-                      <>
-                        {isServerless ? (
+          <EuiFormRow
+            id={rolesId}
+            fullWidth
+            label={
+              <>
+                <span id={`${rolesId}-label-text`}>
+                  {i18n.translate('xpack.security.management.serviceAccounts.create.rolesLabel', {
+                    defaultMessage: 'Set privileges',
+                  })}
+                </span>{' '}
+                <EuiIconTip
+                  type="info"
+                  aria-label={i18n.translate(
+                    'xpack.security.management.serviceAccounts.create.rolePrivilegesHelpLabel',
+                    { defaultMessage: 'About role privileges' }
+                  )}
+                  content={
+                    <>
+                      {isServerless ? (
+                        <FormattedMessage
+                          id="xpack.security.management.serviceAccounts.create.serverlessRolesHelpDescription"
+                          defaultMessage="An account can only use privileges allowed by both its selected roles and your access at creation time. Selecting a role does not grant privileges you do not have."
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="xpack.security.management.serviceAccounts.create.rolesHelpDescription"
+                          defaultMessage="The account receives the privileges granted by its selected roles."
+                        />
+                      )}
+                      {isServerless && (
+                        <p>
                           <FormattedMessage
-                            id="xpack.security.management.serviceAccounts.create.serverlessRolesHelpDescription"
-                            defaultMessage="An account can only use privileges allowed by both its selected roles and your access at creation time. Selecting a role does not grant privileges you do not have."
+                            id="xpack.security.management.serviceAccounts.create.crossProjectRolesHelpDescription"
+                            defaultMessage="For cross-project search, selected role names also apply in linked projects where those roles exist. Custom roles are not copied between projects."
                           />
-                        ) : (
-                          <FormattedMessage
-                            id="xpack.security.management.serviceAccounts.create.rolesHelpDescription"
-                            defaultMessage="The account receives the privileges granted by its selected roles."
-                          />
-                        )}
-                        {isServerless && (
-                          <p>
-                            <FormattedMessage
-                              id="xpack.security.management.serviceAccounts.create.crossProjectRolesHelpDescription"
-                              defaultMessage="For cross-project search, selected role names also apply in linked projects where those roles exist. Custom roles are not copied between projects."
-                            />
-                          </p>
-                        )}
-                      </>
-                    }
-                  />
-                </span>
-              }
+                        </p>
+                      )}
+                    </>
+                  }
+                />
+              </>
+            }
+            labelAppend={
+              createRoleUrl ? (
+                <EuiText size="xs" component="span">
+                  <EuiLink
+                    href={createRoleUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-test-subj="createServiceAccountRoleLink"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.management.serviceAccounts.create.createRoleLinkText"
+                      defaultMessage="Create new role"
+                    />
+                  </EuiLink>
+                </EuiText>
+              ) : undefined
+            }
+            isInvalid={
+              (hasSubmitted || hasTooManyRoles || unavailableRoleNames.length > 0) && isRolesInvalid
+            }
+            error={rolesError}
+          >
+            <ServiceAccountRoleSelector
+              aria-labelledby={`${rolesId}-label-text`}
               isInvalid={
                 (hasSubmitted || hasTooManyRoles || unavailableRoleNames.length > 0) &&
                 isRolesInvalid
               }
-              error={rolesError}
-            >
-              <ServiceAccountRoleSelector
-                aria-labelledby={`${rolesId}-label-text`}
-                createRoleUrl={createRoleUrl}
-                isInvalid={
-                  (hasSubmitted || hasTooManyRoles || unavailableRoleNames.length > 0) &&
-                  isRolesInvalid
-                }
-                availableRoles={availableRoles.value ?? []}
-                selectedRoleNames={roles}
-                onChange={setRoles}
-                isLoading={availableRoles.loading}
-                isDisabled={isSaving || availableRoles.loading || Boolean(availableRoles.error)}
-              />
-            </EuiFormRow>
-          </div>
+              availableRoles={availableRoles.value ?? []}
+              selectedRoleNames={roles}
+              onChange={setRoles}
+              isLoading={availableRoles.loading}
+              isDisabled={isSaving || availableRoles.loading || Boolean(availableRoles.error)}
+            />
+          </EuiFormRow>
           {availableRoles.error && (
             <>
               <EuiSpacer size="m" />
@@ -359,54 +337,42 @@ export const CreateServiceAccountFlyout = ({
           )}
         </EuiForm>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter
-        css={css({
-          borderTop: euiTheme.border.thin,
-          backgroundColor: euiTheme.colors.backgroundBasePlain,
-        })}
-      >
-        <div
-          css={css({
-            padding: `${euiTheme.size.m} calc(${euiTheme.size.base} + ${euiTheme.size.xs})`,
-          })}
-        >
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                color="text"
-                onClick={onClose}
-                isDisabled={isSaving}
-                data-test-subj="createServiceAccountCancel"
-              >
-                <FormattedMessage
-                  id="xpack.security.management.serviceAccounts.create.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                type="submit"
-                form={formId}
-                isLoading={isSaving}
-                isDisabled={
-                  isNameInvalid ||
-                  isRolesInvalid ||
-                  availableRoles.loading ||
-                  Boolean(availableRoles.error)
-                }
-                data-test-subj="createServiceAccountSubmit"
-              >
-                <FormattedMessage
-                  id="xpack.security.management.serviceAccounts.create.submitButtonLabel"
-                  defaultMessage="Create account"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              flush="right"
+              onClick={onClose}
+              isDisabled={isSaving}
+              data-test-subj="createServiceAccountCancel"
+            >
+              <FormattedMessage
+                id="xpack.security.management.serviceAccounts.create.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              type="submit"
+              form={formId}
+              isLoading={isSaving}
+              isDisabled={
+                isNameInvalid ||
+                isRolesInvalid ||
+                availableRoles.loading ||
+                Boolean(availableRoles.error)
+              }
+              data-test-subj="createServiceAccountSubmit"
+            >
+              <FormattedMessage
+                id="xpack.security.management.serviceAccounts.create.submitButtonLabel"
+                defaultMessage="Create account"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

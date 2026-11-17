@@ -44,6 +44,7 @@ const mockExperimentalFeatures = { leadGenerationEnabled: true } as Experimental
 
 const CONNECTOR_ID = 'test-connector-id';
 const CONNECTOR_NAME = 'OpenAI Production';
+const CHAT_CONNECTOR_ID = 'chat-connector-id';
 
 describe('generateLeadsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
@@ -64,7 +65,14 @@ describe('generateLeadsTool', () => {
     inference: {},
     actions: { getActionsClientWithRequest: mockGetActionsClientWithRequest },
   };
-  const mockPipelineCoreStart = { analytics: {} };
+  const mockPipelineCoreStart = {
+    analytics: {},
+    elasticsearch: {
+      client: {
+        asInternalUser: mockEsClient.asInternalUser,
+      },
+    },
+  };
 
   const tool = generateLeadsTool(
     mockCore,
@@ -271,9 +279,61 @@ describe('generateLeadsTool', () => {
         expect((other.data as { status: string }).status).toBe('running');
       });
 
-      it('returns error when no connectorName in args and no saved config', async () => {
-        mockGetLeadGenerationConfig.mockResolvedValue(null);
+      it('does not use the chat connector when a connector is saved', async () => {
         const ctx = acceptedCtx();
+        await tool.handler({}, ctx);
+
+        expect(ctx.modelProvider.getDefaultModel).not.toHaveBeenCalled();
+        expect(mockResolveChatModel).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          CONNECTOR_ID
+        );
+      });
+    });
+
+    describe('fallback to chat connector', () => {
+      const chatConnectorCtx = () => {
+        const ctx = acceptedCtx();
+        (ctx.modelProvider.getDefaultModel as jest.Mock).mockResolvedValue({
+          connector: { connectorId: CHAT_CONNECTOR_ID },
+        });
+        return ctx;
+      };
+
+      beforeEach(() => {
+        mockGetLeadGenerationConfig.mockResolvedValue(null);
+      });
+
+      it('uses the chat connector when no connector is saved', async () => {
+        const ctx = chatConnectorCtx();
+        const result = (await tool.handler({}, ctx)) as ToolHandlerStandardReturn;
+
+        expect(mockResolveChatModel).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          CHAT_CONNECTOR_ID
+        );
+        const other = result.results[0] as OtherResult;
+        expect((other.data as { status: string }).status).toBe('running');
+      });
+
+      it('saves the chat connector to config, like any other resolved connector', async () => {
+        const ctx = chatConnectorCtx();
+        await tool.handler({}, ctx);
+
+        expect(mockUpsertLeadGenerationConfig).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.any(String),
+          expect.objectContaining({ connectorId: CHAT_CONNECTOR_ID })
+        );
+      });
+
+      it('returns error when no connector is saved and the chat has none', async () => {
+        const ctx = acceptedCtx();
+        (ctx.modelProvider.getDefaultModel as jest.Mock).mockRejectedValue(
+          new Error('No connector available')
+        );
         const result = (await tool.handler({}, ctx)) as ToolHandlerStandardReturn;
 
         expect(result.results).toHaveLength(1);
@@ -325,6 +385,7 @@ describe('generateLeadsTool', () => {
           expect.objectContaining({
             spaceId: 'default',
             sourceType: 'adhoc',
+            internalEsClient: mockEsClient.asInternalUser,
           })
         );
       });

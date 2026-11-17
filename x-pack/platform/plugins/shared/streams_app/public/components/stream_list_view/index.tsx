@@ -18,7 +18,6 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../streams_app_page_template';
-import { WelcomeTourCallout } from '../streams_tour';
 import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
 import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
@@ -96,17 +95,6 @@ export function StreamListView() {
   useEffect(() => {
     refreshWiredStatus();
   }, [refreshWiredStatus]);
-
-  const { hasClassicStreams, firstClassicStreamName } = useMemo(() => {
-    const allStreams = streamsListFetch.value?.streams ?? [];
-    const classicStreams = allStreams.filter(
-      (item) => item.stream && Streams.ClassicStream.Definition.is(item.stream)
-    );
-    return {
-      hasClassicStreams: classicStreams.length > 0,
-      firstClassicStreamName: classicStreams[0]?.stream?.name,
-    };
-  }, [streamsListFetch.value?.streams]);
 
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
@@ -245,10 +233,6 @@ export function StreamListView() {
           <StreamsListEmptyPrompt />
         ) : (
           <>
-            <WelcomeTourCallout
-              hasClassicStreams={hasClassicStreams}
-              firstClassicStreamName={firstClassicStreamName}
-            />
             <LegacyLogsDeprecationCallout
               streamsStatus={wiredStreamsStatus}
               openFlyout={() => setIsSettingsFlyoutOpen(true)}

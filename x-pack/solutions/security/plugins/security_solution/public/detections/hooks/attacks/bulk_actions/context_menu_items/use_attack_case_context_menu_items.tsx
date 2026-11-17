@@ -25,8 +25,8 @@ export interface UseAttackCaseContextMenuItemsProps extends BaseAttackContextMen
   attacksWithCase: AttackWithCase[];
   /** Title used to initialize the create-case flyout */
   title: string;
-  /** The single attack being attached; omit it to keep the markdown-comment payload. */
-  attackToAttach?: Omit<AttackToAttach, 'alertsIndex'>;
+  /** The attacks being attached; omit them to keep the markdown-comment payload. */
+  attacksToAttach?: ReadonlyArray<Omit<AttackToAttach, 'alertsIndex'>>;
 }
 
 export const useAttackCaseContextMenuItems = ({
@@ -37,13 +37,13 @@ export const useAttackCaseContextMenuItems = ({
   setIsLoading,
   refresh,
   telemetrySource,
-  attackToAttach,
+  attacksToAttach,
 }: UseAttackCaseContextMenuItemsProps): BulkAttackContextMenuItems => {
   const bulkActionItems = useBulkAttackCaseItems({
     closePopover,
     telemetrySource,
     title,
-    attackToAttach,
+    attacksToAttach,
   });
 
   const alertItems = useMemo(

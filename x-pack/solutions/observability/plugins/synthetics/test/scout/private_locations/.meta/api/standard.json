@@ -1,5 +1,5 @@
 {
-  "sha1": "354370793d3a875ec4dcbee393fd549517b5d06d",
+  "sha1": "b095ea503efbc3a7468b980a7da0a2ae7cd9bc62",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/clean_up_extra_package_policies.spec.ts",
-        "line": 49,
-        "column": 13
+        "line": 54,
+        "column": 40
       }
     },
     {
@@ -729,6 +729,48 @@
       }
     },
     {
+      "id": "bfe71bfe55df22b-788616bff506122",
+      "title": "MonitorHealthAllSpaces POST _health returns health for both monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/monitor_health_all_spaces.spec.ts",
+        "line": 105,
+        "column": 7
+      }
+    },
+    {
+      "id": "bfe71bfe55df22b-7541d4fbb2bed0b",
+      "title": "MonitorHealthAllSpaces GET {monitorId}/_health returns health for each monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/monitor_health_all_spaces.spec.ts",
+        "line": 117,
+        "column": 7
+      }
+    },
+    {
+      "id": "bfe71bfe55df22b-68716c5556870c0",
+      "title": "MonitorHealthAllSpaces POST _health by locationIds returns the location monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/monitor_health_all_spaces.spec.ts",
+        "line": 132,
+        "column": 13
+      }
+    },
+    {
       "id": "2f677958929dd78-932aa7702808a94",
       "title": "PrivateLocationAPI adds a test private location",
       "expectedStatus": "passed",
@@ -888,26 +930,26 @@
     {
       "id": "90667665ddacd0b-cd6af572a976a8b",
       "title": "ScalablePrivateLocationMaintenanceWindowSync redeploys an updated maintenance window and bumps the agent policy",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_mw_sync.spec.ts",
-        "line": 147,
+        "line": 148,
         "column": 42
       }
     },
     {
       "id": "90667665ddacd0b-abfaa12cb438db7",
       "title": "ScalablePrivateLocationMaintenanceWindowSync removes a deleted maintenance window from the package policy and the monitor",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_mw_sync.spec.ts",
-        "line": 181,
+        "line": 182,
         "column": 19
       }
     },

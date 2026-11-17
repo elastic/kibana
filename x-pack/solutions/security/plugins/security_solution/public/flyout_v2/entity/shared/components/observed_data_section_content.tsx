@@ -10,6 +10,7 @@ import { type EntityStoreEuidApi, useEntityStoreEuidApi } from '@kbn/entity-stor
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { getScopeFlyoutTimeRangeMs } from '../../../../entity_analytics/common/scope_time_ranges';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import type { ObservedEntityData } from './observed_entity/types';
 import { ObservedEntity } from './observed_entity';
@@ -24,7 +25,6 @@ import type { IdentityFields } from '../../../../flyout/document_details/shared/
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { UsersType } from '../../../../explore/users/store/model';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 
 export type ObservedData<T> = Omit<ObservedEntityData<T>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -101,9 +101,20 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
     hideAnomalies = false,
   } = props;
 
-  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
-
-  const { to, from, isInitializing } = useGlobalTime();
+  const globalTime = useGlobalTime();
+  const { isInitializing } = globalTime;
+  // A scope that pins a time range wins over global time for the anomalies row. The hook parses its
+  // dates with `new Date(...)`, so resolve the pinned datemath bounds (`now-24h`) to ISO strings;
+  // memoised because "now" resolves at call time.
+  const pinnedTimeRange = useMemo(() => {
+    const rangeMs = getScopeFlyoutTimeRangeMs(scopeId);
+    if (!rangeMs) return undefined;
+    return {
+      from: new Date(rangeMs.from).toISOString(),
+      to: new Date(rangeMs.to).toISOString(),
+    };
+  }, [scopeId]);
+  const { to, from } = pinnedTimeRange ?? globalTime;
 
   const { jobNameById } = useInstalledSecurityJobNameById();
   const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
@@ -171,7 +182,7 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
       contextID={contextID}
       scopeId={scopeId}
       observedFields={typedFields}
-      entityLink={newFlyoutSystemEnabled ? renderFlyoutLink : undefined}
+      entityLink={renderFlyoutLink}
     />
   );
 });

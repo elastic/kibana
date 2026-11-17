@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { logWorkflowTaskFailure } from './log_workflow_task_failure';
+import { toWorkflowIdentityTaskError } from './workflow_identity_task_error';
 
 describe('logWorkflowTaskFailure', () => {
   it('logs final-attempt failures at error level with structured context', () => {
@@ -127,6 +129,42 @@ describe('logWorkflowTaskFailure', () => {
         failureKind: 'task_manager_version_conflict',
       })
     );
+  });
+
+  it('logs final-attempt service account identity failures at warn level', () => {
+    const logger = loggingSystemMock.createLogger();
+    const error = toWorkflowIdentityTaskError(
+      Boom.notFound('Unable to exchange token for service account: missing stored credential')
+    );
+
+    logWorkflowTaskFailure(logger, error, {
+      taskType: 'workflow:resume',
+      workflowRunId: 'run-1',
+      attempt: 3,
+      maxAttempts: 3,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Workflow task failed',
+      expect.objectContaining({ failureKind: 'service_account_identity' })
+    );
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs unmarked 4xx failures at error level', () => {
+    const logger = loggingSystemMock.createLogger();
+
+    logWorkflowTaskFailure(logger, Boom.notFound('Workflow not found'), {
+      taskType: 'workflow:run',
+      attempt: 3,
+      maxAttempts: 3,
+    });
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Workflow task failed',
+      expect.not.objectContaining({ failureKind: 'service_account_identity' })
+    );
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('tags SavedObjects conflict errors', () => {

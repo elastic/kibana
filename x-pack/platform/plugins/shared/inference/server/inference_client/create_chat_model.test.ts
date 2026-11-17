@@ -81,6 +81,25 @@ describe('createChatModel', () => {
     });
   });
 
+  it('forwards the namespace to createClient', async () => {
+    await createChatModel({
+      request,
+      namespace: 'my-space',
+      connectorId: '.my-connector',
+      actions,
+      logger,
+      chatModelOptions: {},
+      anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
+      esClient: mockEsClient,
+      endpointIdCache: new InferenceEndpointIdCache(),
+    });
+
+    expect(createClientMock).toHaveBeenCalledWith(
+      expect.objectContaining({ namespace: 'my-space' })
+    );
+  });
+
   it('calls getConnectorById with the right parameters', async () => {
     await createChatModel({
       request,

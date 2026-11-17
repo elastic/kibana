@@ -35,13 +35,15 @@ describe('useAttackCaseContextMenuItems', () => {
     });
   });
 
-  it('should forward the attack to attach to the bulk hook', () => {
-    const attackToAttach = {
-      id: 'attack-1',
-      index: '.alerts-security.attack.discovery.alerts-default',
-      title: 'Attack title',
-      alertIds: ['alert-1'],
-    };
+  it('should forward the attacks to attach to the bulk hook', () => {
+    const attacksToAttach = [
+      {
+        id: 'attack-1',
+        index: '.alerts-security.attack.discovery.alerts-default',
+        title: 'Attack title',
+        alertIds: ['alert-1'],
+      },
+    ];
 
     renderHook(() =>
       useAttackCaseContextMenuItems({
@@ -54,12 +56,12 @@ describe('useAttackCaseContextMenuItems', () => {
         ],
         title: 'Attack title',
         closePopover,
-        attackToAttach,
+        attacksToAttach,
       })
     );
 
     expect(mockUseBulkAttackCaseItems).toHaveBeenCalledWith(
-      expect.objectContaining({ attackToAttach })
+      expect.objectContaining({ attacksToAttach })
     );
   });
 

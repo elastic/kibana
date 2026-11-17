@@ -30,3 +30,5 @@ export const MAX_STRING_LENGTH = {
   ecs_field_path: 256,
   field_mapping_path: 512,
 };
+
+export const MAX_USER_CONTEXT_DESCRIPTION_LENGTH = 2_000;

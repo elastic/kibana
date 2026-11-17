@@ -20,6 +20,8 @@ import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 export type PerOsSettingCardProps = React.PropsWithChildren<{
   title: string;
+  /** Rendered next to the title and vertically centred on it (e.g. a status badge). */
+  titleAppend?: ReactNode;
   description: string;
   dataTestSubj?: string;
   rightCorner?: ReactNode;
@@ -28,7 +30,16 @@ export type PerOsSettingCardProps = React.PropsWithChildren<{
 }>;
 
 export const PerOsSettingCard: FC<PerOsSettingCardProps> = memo(
-  ({ title, description, dataTestSubj, rightCorner, children, selected = true, mode = 'edit' }) => {
+  ({
+    title,
+    titleAppend,
+    description,
+    dataTestSubj,
+    rightCorner,
+    children,
+    selected = true,
+    mode = 'edit',
+  }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
@@ -40,9 +51,14 @@ export const PerOsSettingCard: FC<PerOsSettingCardProps> = memo(
           css={({ euiTheme }) => ({ padding: euiTheme.size.base })}
         >
           <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h4 data-test-subj={getTestId('title')}>{title}</h4>
-            </EuiTitle>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h4 data-test-subj={getTestId('title')}>{title}</h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              {titleAppend && <EuiFlexItem grow={false}>{titleAppend}</EuiFlexItem>}
+            </EuiFlexGroup>
             <EuiSpacer size="xs" />
             <EuiText size="s" color="subdued" data-test-subj={getTestId('description')}>
               <p>{description}</p>

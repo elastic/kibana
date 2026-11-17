@@ -35,6 +35,12 @@ spec:
         FLAKY_TESTS_MAX_NEW_ISSUES: '10'
         # Leave out flaky tests that were skipped since
         FLAKY_TESTS_OMIT_SKIPPED_TESTS: 'true'
+        # Refresh the suite issues of suites flaky again: a comment with the new numbers on new
+        # failures, a reopen on failures after the close; the body's text stays as filed, only its
+        # hidden metadata records the report
+        FLAKY_TESTS_UPDATE_ISSUES: 'true'
+        # Days to wait after a comment before the issue can get another; reopens always comment.
+        FLAKY_TESTS_COMMENT_COOLDOWN_DAYS: '3'
       allow_rebuilds: true
       branch_configuration: main
       cancel_intermediate_builds: true

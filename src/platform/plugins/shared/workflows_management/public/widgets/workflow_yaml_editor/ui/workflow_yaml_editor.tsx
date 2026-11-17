@@ -15,11 +15,12 @@ import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import type { Document } from 'yaml';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { isTriggerType, WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
-import { useWorkflowsMonacoTheme, WORKFLOW_MONACO_LAYOUT_OPTIONS } from '@kbn/workflows-ui';
+import { WORKFLOW_MONACO_LAYOUT_OPTIONS, workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
@@ -47,7 +48,6 @@ import { StepActions } from './step_actions';
 import { WorkflowStepMinimap } from './workflow_step_minimap';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
-import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import type { StepInfo } from '../../../entities/workflows/store';
 import {
   selectEditorFocusedStepInfo,
@@ -82,6 +82,8 @@ import type {
   EditorCommand,
   JumpToStepEntry,
 } from '../../../features/actions_menu_popover/types';
+import { useDisableWorkflowsConfirmation } from '../../../features/linked_rules/model/use_disable_workflows_confirmation';
+import { useSaveYamlWithConfirmation } from '../../../features/linked_rules/model/use_save_yaml_with_confirmation';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
 import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
@@ -192,6 +194,12 @@ export interface WorkflowYAMLEditorProps {
    * execution. The proposal shows once the parent opens the Workflow tab.
    */
   onAgentProposalHeld?: () => void;
+  /** Prompt from the agentic-first landing, sent when the chat auto-opens. */
+  initialAgentMessage?: string;
+  /** Attachments of that prompt (e.g. pasted images). */
+  initialAgentAttachments?: ConversationAttachment[];
+  /** Opens the Agent Builder sidebar on mount for an unsaved workflow. */
+  autoOpenAgentChat?: boolean;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -204,6 +212,9 @@ export const WorkflowYAMLEditor = ({
   hideEditorTools = false,
   onValidationPanelHeightChange,
   onAgentProposalHeld,
+  initialAgentMessage,
+  initialAgentAttachments,
+  autoOpenAgentChat,
 }: WorkflowYAMLEditorProps) => {
   const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -224,7 +235,8 @@ export const WorkflowYAMLEditor = ({
     setStabilityBadgeThemeContext(euiThemeContext);
   }, [euiThemeContext]);
 
-  const saveYaml = useSaveYaml();
+  const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
+  const saveYaml = useSaveYamlWithConfirmation(confirmDisable);
   const isSaving = useSelector(selectIsSavingYaml);
   const dispatch = useDispatch();
   const workflow = useSelector(selectWorkflow);
@@ -316,7 +328,6 @@ export const WorkflowYAMLEditor = ({
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
 
-  useWorkflowsMonacoTheme();
   useDynamicTypeIcons(connectorsData);
 
   // Lifecycle
@@ -380,11 +391,21 @@ export const WorkflowYAMLEditor = ({
     [customValidationResults, interceptorValidationErrors]
   );
 
+  // The executions tab shows a historical snapshot. Publishing "no errors" from that
+  // snapshot turns the enable switch on for a workflow whose saved YAML is invalid.
+  const workflowValidationErrors = useMemo(
+    () => (isExecutionYaml ? [] : validationErrors),
+    [isExecutionYaml, validationErrors]
+  );
+
   // Sync validation error state to Redux so sibling components (e.g. header toggle) can react
   useEffect(() => {
+    if (isExecutionYaml) {
+      return;
+    }
     const hasErrors = validationErrors.some((e) => e.severity === 'error');
     dispatch(setHasYamlSchemaValidationErrors(hasErrors));
-  }, [validationErrors, dispatch]);
+  }, [validationErrors, dispatch, isExecutionYaml]);
 
   const workflowTabYaml = useSelector(selectYamlString);
 
@@ -394,12 +415,15 @@ export const WorkflowYAMLEditor = ({
     isEditorMounted,
     workflowId: workflow?.id,
     workflowName: getWorkflowName(workflow, workflowDefinition),
-    validationErrors,
+    validationErrors: workflowValidationErrors,
     readOnlyReason,
     // The store catches up with the URL tab one render later, so wait for both.
     canApplyProposals: !isReadOnlyYaml && !isExecutionYaml,
     onProposalDeferred: readOnlyReason === 'executions_tab' ? onAgentProposalHeld : undefined,
     workflowTabYaml,
+    initialAgentMessage,
+    initialAgentAttachments,
+    autoOpenAgentChat,
   });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
@@ -465,7 +489,7 @@ export const WorkflowYAMLEditor = ({
           if (isSavingRef.current || isReadOnlyYamlRef.current) {
             return;
           }
-          saveYaml().then(() => dispatch(setIsTestModalOpen(true)));
+          saveYaml().then((confirmed) => confirmed && dispatch(setIsTestModalOpen(true)));
         },
       };
     },
@@ -939,6 +963,7 @@ export const WorkflowYAMLEditor = ({
         onJumpToStep={handleJumpToStep}
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
+      {disableConfirmModal}
       {/* Floating Elasticsearch step actions — anchored to the focused
           step's line in the Monaco editor, so they're meaningless (and
           visually orphaned) when the graph view replaces the editor body. */}
@@ -961,7 +986,7 @@ export const WorkflowYAMLEditor = ({
           >
             <WorkflowStepMinimap
               editor={mountedEditor}
-              validationErrors={validationErrors}
+              validationErrors={workflowValidationErrors}
               scrollContainerRef={minimapContainerRef}
             />
           </div>
@@ -979,6 +1004,7 @@ export const WorkflowYAMLEditor = ({
             onChange={onChange}
             onSyncStateChange={onSyncStateChange}
             options={options}
+            chromeOverrides={workflowsEditorChromeOverrides}
             schemas={schemas}
             value={workflowYaml}
             enableFindAction={true}
@@ -992,7 +1018,7 @@ export const WorkflowYAMLEditor = ({
             isMounted={isEditorMounted}
             isLoading={isLoadingValidation}
             error={errorValidating}
-            validationErrors={validationErrors}
+            validationErrors={workflowValidationErrors}
             onErrorClick={handleErrorClick}
             onFixWithAi={onFixWithAi}
             extraAction={hideEditorTools ? undefined : extraActionElement}

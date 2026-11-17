@@ -549,8 +549,7 @@ apiTest.describe(
       }
     );
 
-    // Failing: See https://github.com/elastic/kibana/issues/293847
-    apiTest.skip(
+    apiTest(
       'schedules a single execution for concurrent duplicate deliveries',
       async ({ apiClient }) => {
         await setupAgentDirectAnswer({

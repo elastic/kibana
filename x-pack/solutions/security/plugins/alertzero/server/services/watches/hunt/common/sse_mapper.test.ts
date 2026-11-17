@@ -397,7 +397,11 @@ describe('buildSseData', () => {
         expect.objectContaining({
           event_id: 't2-evt-1',
           source_index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
-          matched: { technique_id: 'T1078.004', field: '_id' },
+          matched: {
+            technique_id: 'T1078.004',
+            field: 'host.name',
+            detection: 'behavior:T1078.004',
+          },
         }),
       ])
     );
@@ -452,7 +456,7 @@ describe('buildSseData', () => {
     expect(secondEntry.data.corroborated_technique_id).toBe('T1552.001');
   });
 
-  it('returns a single report-scoped entry when Tier 2 produced no behaviors', async () => {
+  it('returns a single report-scoped entry when Behavior Hunt produced no behaviors', async () => {
     const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
     const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
     huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
@@ -484,7 +488,7 @@ describe('buildSseData', () => {
     expect(huntResultOf(entries[0]).tier2?.status).toBe('no_behaviors_found');
   });
 
-  it('emits a Tier 2-only hit with tier2 hit_sources and Tier 2 entities', async () => {
+  it('emits a Behavior Hunt-only hit with tier2 hit_sources and Behavior Hunt entities', async () => {
     const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
     const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
     huntForThreat.mockResolvedValue(CLEAN_TIER1_RESULT);
@@ -537,7 +541,7 @@ describe('buildSseData', () => {
     expect(entries[0].data.events).toEqual([
       expect.objectContaining({
         event_id: 't2-only-1',
-        matched: { technique_id: 'T1078.004', field: '_id' },
+        matched: { technique_id: 'T1078.004', field: 'host.name', detection: 'behavior:T1078.004' },
       }),
     ]);
 
@@ -663,7 +667,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     ]);
   });
 
-  it('falls back to one report-scoped entry when Tier 1 hit and no technique did', async () => {
+  it('falls back to one report-scoped entry when IOC Hunt hit and no technique did', async () => {
     // `HIT_TIER1_RESULT`'s hits carry no `matched.technique_id`, so they are shared
     // context for the report rather than corroboration of either proposal.
     const result = await run(HIT_TIER1_RESULT, [
@@ -692,7 +696,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
       'T1552.001',
     ]);
     expect(entries[0].data.evidence_against).toEqual([
-      'Tier 2 executed 2 proposed technique(s) with no required-index rows: T1078.004, T1552.001.',
+      'Behavior Hunt executed 2 proposed technique(s) with no required-index rows: T1078.004, T1552.001.',
     ]);
     // Neither proposed technique was corroborated, so this report-scoped entry must not
     // claim either one by name -- packaging relies on this to avoid crediting a technique
@@ -703,7 +707,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     );
   });
 
-  it('does not let a Tier 1 hit attributed to another technique corroborate this one', async () => {
+  it('does not let an IOC Hunt hit attributed to another technique corroborate this one', async () => {
     const result = await run(
       {
         ...HIT_TIER1_RESULT,
@@ -739,7 +743,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     expect(entries[0].attachment_id).toEqual(idFor());
   });
 
-  it('publishes a technique entry for a technique a Tier 1 hit was attributed to', async () => {
+  it('publishes a technique entry for a technique an IOC Hunt hit was attributed to', async () => {
     const result = await run(
       {
         ...HIT_TIER1_RESULT,
@@ -778,7 +782,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     // sentence says whose count it is, that it is a match count rather than a
     // confirmed one, and how much of it this entry carries.
     expect(entries[0].data.evidence_for).toContain(
-      'Tier 1 matched 1 event(s) for this report in the hunt window, at least one in a required index; 1 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
+      'IOC Hunt matched 1 event(s) for this report in the hunt window, at least one in a required index; 1 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
     );
     expect(entries[0].data.corroborated_technique_id).toBe('T1552.001');
   });
@@ -959,7 +963,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     ).toThrow(/time_range/);
   });
 
-  it('keeps Tier 1 per_index order when the list overflows the schema cap', () => {
+  it('keeps IOC Hunt per_index order when the list overflows the schema cap', () => {
     // Tier 1 aggregates up to 500 `_index` buckets; the schema accepts 20. The mapper
     // no longer reorders confirming-first: it keeps Tier 1's order and truncates.
     const perIndex = Array.from({ length: 25 }, (_, i) => ({
@@ -1122,7 +1126,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
 
     expect(entry.data.evidence_against).toEqual([
-      'Tier 2 executed 1 proposed technique(s) with no required-index rows: T1078.004.',
+      'Behavior Hunt executed 1 proposed technique(s) with no required-index rows: T1078.004.',
     ]);
     // The reason survives in the structured payload, so the distinction is recoverable
     // rather than asserted in prose the schema cannot check.
@@ -1134,7 +1138,70 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     });
   });
 
-  it('shares the event cap between the tiers instead of letting Tier 1 fill it', () => {
+  it('keeps an IOC attributed only to another technique out of a technique entry', () => {
+    const result = withBehaviors(
+      tier1Result({
+        resolved_iocs: [{ type: 'ip', value: '203.0.113.10' }],
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 1, affected_users: 0 },
+        // Report-wide aggregation names the IOC; only a T1552.001 alert actually matched it.
+        per_ioc: [{ type: 'ip', value: '203.0.113.10', field: 'source.ip', count: 1 }],
+        hits: [
+          {
+            id: 'evt-other-technique',
+            index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+            timestamp: '2026-07-30T13:05:00.000Z',
+            matched: {
+              ioc: { type: 'ip', value: '203.0.113.10' },
+              field: 'source.ip',
+              iocs: [{ type: 'ip', value: '203.0.113.10', field: 'source.ip' }],
+              technique_id: 'T1552.001',
+            },
+          },
+        ],
+      }),
+      [
+        behaviorFixture({
+          hits: [
+            {
+              id: 't2-a',
+              index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+              timestamp: '2026-07-30T14:00:00.000Z',
+            },
+          ],
+        }),
+        behaviorFixture({
+          technique_id: 'T1552.001',
+          technique_name: 'Credentials In Files',
+          title: 'Credential file read on CI runner',
+          hits: [
+            {
+              id: 't2-b',
+              index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+              timestamp: '2026-07-30T14:10:00.000Z',
+            },
+          ],
+        }),
+      ]
+    );
+
+    const entries = buildSseData(result, 'tr-two', { spaceId: 'default' });
+    const entryA = entries.find((entry) => entry.data.corroborated_technique_id === 'T1078.004');
+    const entryB = entries.find((entry) => entry.data.corroborated_technique_id === 'T1552.001');
+
+    expect(entryA?.data.detections?.map((detection) => detection.id)).toEqual([
+      'behavior:T1078.004',
+    ]);
+    expect(entryA?.data.basis).toBe('behavior_only');
+    expect(entryA?.data.summary).not.toContain('203.0.113.10');
+
+    expect(entryB?.data.detections?.map((detection) => detection.id)).toEqual([
+      'behavior:T1552.001',
+      'ioc:ip:203.0.113.10',
+    ]);
+    expect(entryB?.data.basis).toBe('ioc_and_behavior');
+  });
+
+  it('shares the event cap between the tiers instead of letting IOC Hunt fill it', () => {
     // Tier 1 returns up to the coordinator's `size: 100`, and `events` caps at 50, so
     // appending Tier 2 after Tier 1 drops every ref to the behavior that confirmed
     // the technique — the SSE keeps the report's sample and loses its own evidence.
@@ -1170,18 +1237,23 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
       expect.arrayContaining([
         expect.objectContaining({
           event_id: 't2-evt-1',
-          matched: { technique_id: 'T1078.004', field: '_id' },
+          matched: {
+            technique_id: 'T1078.004',
+            field: 'host.name',
+            detection: 'behavior:T1078.004',
+          },
         }),
       ])
     );
     // The Tier 1 count quoted to the reader is the refs the entry carries, not the
-    // ones it was offered.
+    // ones it was offered. Written even though `detections[]` tells the same story:
+    // packaging reads these bullets, and the card hides the restatement itself.
     expect(entry.data.evidence_for).toContain(
-      'Tier 1 matched 50 event(s) for this report in the hunt window, at least one in a required index; 49 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
+      'IOC Hunt matched 50 event(s) for this report in the hunt window, at least one in a required index; 49 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
     );
   });
 
-  it('shares the entity cap between the tiers instead of letting Tier 1 fill it', () => {
+  it('shares the entity cap between the tiers instead of letting IOC Hunt fill it', () => {
     // 50 Tier 1 affected hosts are within the default `maxAssets`, and `entities` caps
     // at 50, so the technique's own host and user are the ones that fall off.
     const hosts = Array.from({ length: 50 }, (_, i) => ({
@@ -1259,6 +1331,348 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     expect(byId.get('evt-epoch')).toBe('2026-07-30T13:05:00.000Z');
     expect(byId.get('evt-garbage')).toBeUndefined();
     expect(byId.get('evt-datemath')).toBeUndefined();
-    expect(entry.data.timeline).toHaveLength(2);
+    expect(Object.hasOwn(entry.data, 'timeline')).toBe(false);
+  });
+
+  it('keeps a remote event ref and drops a remote alert ref, which no local exit ramp can open', () => {
+    const remoteBacking = 'infosec_zocalo:.ds-logs-aws.cloudtrail-default-2026.10.26-000001';
+    const remoteAlerts = 'infosec_zocalo:.alerts-security.alerts-default';
+    const result = tier1Result({
+      hits: [
+        { id: 'evt-remote', index: remoteBacking, timestamp: '2026-07-30T13:05:00.000Z' },
+        { id: 'alert-remote', index: remoteAlerts, timestamp: '2026-07-30T13:06:00.000Z' },
+      ],
+      counts: { total_hits: 2, returned_hits: 2, affected_hosts: 0, affected_users: 0 },
+      per_index: [
+        { index: remoteBacking, hit_count: 1, required: true },
+        { index: remoteAlerts, hit_count: 1, required: true },
+      ],
+    });
+
+    expect(schemaIssues(result)).toEqual([]);
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+    expect(entry.data.events).toEqual([
+      expect.objectContaining({ event_id: 'evt-remote', source_index: remoteBacking }),
+    ]);
+    // Not filed as an event either: the remote alert gets no ref at all.
+    expect(entry.data.alerts ?? []).toEqual([]);
+    // The hit still counts where the hunt reports it.
+    expect(huntResultOf(entry).tier1.per_index.map((row) => row.index)).toContain(remoteAlerts);
+  });
+
+  it('keeps the Tier 1 verdict of a technique entry whose only Tier 1 hit is a remote alert', () => {
+    const remoteAlerts = 'infosec_zocalo:.alerts-security.alerts-default';
+    const result = withBehaviors(
+      tier1Result({
+        hits: [
+          {
+            id: 'alert-remote',
+            index: remoteAlerts,
+            timestamp: '2026-07-30T13:06:00.000Z',
+            matched: { field: 'file.hash.md5', technique_id: 'T1552.001' },
+          },
+        ],
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
+        per_index: [{ index: remoteAlerts, hit_count: 1, required: true }],
+      }),
+      [
+        behaviorFixture({
+          technique_id: 'T1552.001',
+          execution: { executed: true, row_count: 0, hit: false },
+        }),
+      ]
+    );
+
+    const entry = buildSseData(result, 'tr-1', { spaceId: 'default' }).find(
+      (candidate) => candidate.data.corroborated_technique_id === 'T1552.001'
+    );
+    if (!entry) throw new Error('expected a technique entry for T1552.001');
+    expect(entry.data.alerts ?? []).toEqual([]);
+    expect(huntResultOf(entry).has_confirmed_hit).toBe(true);
+    expect(huntResultOf(entry).hit_sources).toEqual(['tier1']);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+
+  it('drops a remote alert ref from Tier 2 hits too', () => {
+    const remoteAlerts = 'infosec_zocalo:.alerts-security.alerts-default';
+    const result = withBehaviors(tier1Result({}), [
+      behaviorFixture({
+        hits: [
+          { id: 't2-remote-alert', index: remoteAlerts },
+          { id: 't2-local-alert', index: '.alerts-security.alerts-default' },
+        ],
+      }),
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    const alertIds = buildSseData(result, 'tr-1', { spaceId: 'default' }).flatMap((entry) =>
+      (entry.data.alerts ?? []).map((alert) => alert.alert_id)
+    );
+    expect(alertIds).toContain('t2-local-alert');
+    expect(alertIds).not.toContain('t2-remote-alert');
+  });
+});
+
+describe('buildSseData host entity origins', () => {
+  const withHosts = (hosts: HuntCoordinatorCoreResult['tier1']['affected_assets']['hosts']) =>
+    tier1Result({
+      affected_assets: { hosts, users: [], services: [] },
+      counts: { total_hits: 1, returned_hits: 1, affected_hosts: hosts.length, affected_users: 0 },
+    });
+
+  const hostEntities = (result: HuntCoordinatorCoreResult) => {
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+    return entry.data.entities.filter((entity) => entity.field === 'host.name');
+  };
+
+  it('carries the Tier 1 origin onto each host entity, and parses', () => {
+    const result = withHosts([
+      { name: 'web-1', hit_count: 1, local: true, remote_clusters: [] },
+      { name: 'ubuntu', hit_count: 1, local: false, remote_clusters: ['cluster_b'] },
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    expect(hostEntities(result)).toEqual([
+      { field: 'host.name', value: 'web-1', local: true, remote_clusters: [] },
+      { field: 'host.name', value: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+    ]);
+  });
+
+  it('leaves a host entity without origin when Tier 1 could not tell', () => {
+    expect(hostEntities(withHosts([{ name: 'web-1', hit_count: 1 }]))).toEqual([
+      { field: 'host.name', value: 'web-1' },
+    ]);
+  });
+
+  it('carries the Tier 2 origin onto a host only a behavior named', () => {
+    const result = withBehaviors(withHosts([]), [
+      behaviorFixture({
+        affected_hosts: ['ubuntu'],
+        affected_host_origins: [{ name: 'ubuntu', local: false, remote_clusters: ['cluster_b'] }],
+      }),
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    expect(hostEntities(result)).toEqual([
+      { field: 'host.name', value: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+    ]);
+  });
+
+  it('merges the origins of a host both tiers named instead of keeping only the Tier 1 copy', () => {
+    const result = withBehaviors(
+      withHosts([{ name: 'web-1', hit_count: 1, local: false, remote_clusters: ['cluster_b'] }]),
+      [
+        behaviorFixture({
+          affected_hosts: ['web-1'],
+          affected_host_origins: [{ name: 'web-1', local: true, remote_clusters: [] }],
+        }),
+      ]
+    );
+
+    expect(hostEntities(result)).toEqual([
+      { field: 'host.name', value: 'web-1', local: true, remote_clusters: ['cluster_b'] },
+    ]);
+  });
+
+  it('leaves a remote host unknown when another tier named it without an origin', () => {
+    // The unknown sighting could have been local, so "remote only" is no longer proven.
+    const result = withBehaviors(
+      withHosts([{ name: 'ubuntu', hit_count: 1, local: false, remote_clusters: ['cluster_b'] }]),
+      [behaviorFixture({ affected_hosts: ['ubuntu'] })]
+    );
+
+    expect(hostEntities(result)).toEqual([{ field: 'host.name', value: 'ubuntu' }]);
+  });
+});
+
+describe('buildSseData hit-centric summary, basis and detections', () => {
+  it('writes summary, basis, detections with IOC field, and matched.detection for a Tier 1 hit', () => {
+    const result = tier1Result({
+      resolved_iocs: [{ type: 'ip', value: '203.0.113.10' }],
+      counts: { total_hits: 12, returned_hits: 1, affected_hosts: 3, affected_users: 1 },
+      per_ioc: [
+        {
+          type: 'ip',
+          value: '203.0.113.10',
+          field: 'destination.ip',
+          count: 12,
+          host_count: 3,
+          user_count: 1,
+          first_seen: '2026-07-30T13:00:00.000Z',
+          last_seen: '2026-07-30T14:00:00.000Z',
+        },
+      ],
+      searched_ioc_count: 1,
+      hits: [
+        {
+          id: 'evt-ip',
+          index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+          timestamp: '2026-07-30T13:05:00.000Z',
+          host: 'WIN-1',
+          fields: { 'destination.ip': '203.0.113.10', 'event.action': 'AssumeRole' },
+          matched: {
+            ioc: { type: 'ip', value: '203.0.113.10' },
+            field: 'destination.ip',
+            iocs: [{ type: 'ip', value: '203.0.113.10', field: 'destination.ip' }],
+          },
+        },
+      ],
+    });
+
+    const [entry] = buildSseData(result, 'tr-ioc', { spaceId: 'default' });
+    expect(entry.data.basis).toBe('ioc_strong');
+    expect(entry.data.summary).toBe('ip 203.0.113.10 seen 12x on 3 hosts');
+    expect(entry.data.detections).toEqual([
+      expect.objectContaining({
+        id: 'ioc:ip:203.0.113.10',
+        kind: 'ioc',
+        field: 'destination.ip',
+        total: 12,
+      }),
+    ]);
+    expect(entry.data.events?.[0].matched).toEqual(
+      expect.objectContaining({
+        field: 'destination.ip',
+        detection: 'ioc:ip:203.0.113.10',
+      })
+    );
+    expect(entry.data.events?.[0].matched?.field).not.toBe('_id');
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+
+  it('leads a technique-scoped summary with the behavior and never uses _id as matched.field', () => {
+    const result: HuntCoordinatorCoreResult = {
+      ...tier1Result({
+        hits: [
+          {
+            id: 'evt-1',
+            index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+            timestamp: '2026-07-30T13:05:00.000Z',
+            matched: {
+              ioc: { type: 'ip', value: '203.0.113.10' },
+              field: 'source.ip',
+              iocs: [{ type: 'ip', value: '203.0.113.10', field: 'source.ip' }],
+            },
+          },
+        ],
+        per_ioc: [{ type: 'ip', value: '203.0.113.10', field: 'source.ip', count: 1 }],
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 1, affected_users: 0 },
+      }),
+      status: 'tier1_and_tier2',
+      tier2: {
+        tier: 2,
+        status: 'behaviors_proposed',
+        behaviors: [
+          behaviorFixture({
+            validated_esql:
+              'FROM logs-aws.cloudtrail-* | WHERE event.action == "AssumeRole" | LIMIT 100',
+            hits: [
+              {
+                id: 't2-1',
+                index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+                timestamp: '2026-07-30T14:00:00.000Z',
+                fields: { 'event.action': 'AssumeRole' },
+              },
+            ],
+          }),
+        ],
+        indexed_behaviors: [],
+        has_hit: true,
+        next_step: 'n/a',
+      },
+    };
+
+    const [entry] = buildSseData(result, 'tr-mixed', { spaceId: 'default' });
+    expect(entry.data.corroborated_technique_id).toBe('T1078.004');
+    expect(entry.data.summary?.startsWith('T1078.004')).toBe(true);
+    expect(entry.data.basis).toBe('ioc_and_behavior');
+    expect(entry.data.detections?.map((d) => d.kind)).toEqual(
+      expect.arrayContaining(['ioc', 'behavior'])
+    );
+    const t2Event = entry.data.events?.find((e) => e.event_id === 't2-1');
+    expect(t2Event?.matched?.field).toBe('event.action');
+    expect(t2Event?.matched?.field).not.toBe('_id');
+    expect(t2Event?.matched?.detection).toBe('behavior:T1078.004');
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+});
+
+describe('buildSseData holds hit-centric fields to the SSE schema', () => {
+  it('normalizes epoch-digit per_ioc first_seen/last_seen to ISO and keeps the entry', () => {
+    const result = tier1Result({
+      resolved_iocs: [{ type: 'ip', value: '203.0.113.10' }],
+      counts: { total_hits: 3, returned_hits: 0, affected_hosts: 1, affected_users: 0 },
+      per_ioc: [
+        {
+          type: 'ip',
+          value: '203.0.113.10',
+          field: 'destination.ip',
+          count: 3,
+          first_seen: '1753880700000',
+          last_seen: '1753884300000',
+        },
+      ],
+    });
+
+    const [entry] = buildSseData(result, 'tr-epoch', { spaceId: 'default' });
+    expect(entry.data.hunt_result?.tier1.per_ioc).toEqual([
+      expect.objectContaining({
+        first_seen: '2025-07-30T13:05:00.000Z',
+        last_seen: '2025-07-30T14:05:00.000Z',
+      }),
+    ]);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+
+  it('caps matched.iocs on an event ref at the schema bound', () => {
+    const iocs = Array.from({ length: 12 }, (_, i) => ({
+      type: 'ip' as const,
+      value: `203.0.113.${i}`,
+      field: i % 2 === 0 ? 'source.ip' : 'destination.ip',
+    }));
+    const result = tier1Result({
+      resolved_iocs: iocs.map(({ type, value }) => ({ type, value })),
+      hits: [
+        {
+          id: 'evt-many',
+          index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+          timestamp: '2026-07-30T13:05:00.000Z',
+          matched: { ioc: { type: 'ip', value: '203.0.113.0' }, field: 'source.ip', iocs },
+        },
+      ],
+    });
+
+    const [entry] = buildSseData(result, 'tr-many', { spaceId: 'default' });
+    expect(entry.data.events?.[0].matched?.iocs).toHaveLength(10);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+
+  it('gives a long URL IOC a detection id and matched.detection the schema accepts', () => {
+    const longUrl = `https://evil.example.com/${'a'.repeat(300)}`;
+    const result = tier1Result({
+      resolved_iocs: [{ type: 'url', value: longUrl }],
+      counts: { total_hits: 2, returned_hits: 1, affected_hosts: 1, affected_users: 0 },
+      per_ioc: [{ type: 'url', value: longUrl, field: 'url.full', count: 2 }],
+      hits: [
+        {
+          id: 'evt-url',
+          index: '.ds-logs-proxy-default-2026.07.30-000001',
+          timestamp: '2026-07-30T13:05:00.000Z',
+          matched: {
+            ioc: { type: 'url', value: longUrl },
+            field: 'url.full',
+            iocs: [{ type: 'url', value: longUrl, field: 'url.full' }],
+          },
+        },
+      ],
+    });
+
+    const [entry] = buildSseData(result, 'tr-url', { spaceId: 'default' });
+    const [detection] = entry.data.detections ?? [];
+    expect(detection.id.length).toBeLessThanOrEqual(256);
+    expect(detection.matched_on[0].value).toBe(longUrl);
+    expect(entry.data.events?.[0].matched?.detection).toBe(detection.id);
+    expect(entry.data.summary?.startsWith('url https://evil.example.com/')).toBe(true);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
   });
 });

@@ -38,19 +38,18 @@ export const THREAT_INTEL_SUPPLY_SECTION_TITLE = i18n.translate(
 export const THREAT_INTEL_SUPPLY_SECTION_SUBTITLE = i18n.translate(
   'xpack.alertzero.watches.settings.threatIntelSupply.sectionSubtitle',
   {
-    defaultMessage:
-      'These workflows feed Hunt Watch. Ingest and enrich are shared across all spaces.',
+    defaultMessage: 'These workflows maintain the threat reports that the Hunt Watch searches.',
   }
 );
 
 export const THREAT_INTEL_SUPPLY_INGEST_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.threatIntelSupply.ingestLabel',
-  { defaultMessage: 'Ingest' }
+  { defaultMessage: 'Ingest threat feeds' }
 );
 
 export const THREAT_INTEL_SUPPLY_ENRICH_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.threatIntelSupply.enrichLabel',
-  { defaultMessage: 'Enrich' }
+  { defaultMessage: 'Enrich threat report' }
 );
 
 export const THREAT_INTEL_SUPPLY_ATTRIBUTE_LABEL = i18n.translate(
@@ -159,6 +158,54 @@ export const READ_ONLY_TOOLTIP = i18n.translate(
   }
 );
 
+export const UNSAVED_CHANGES_BADGE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.unsavedChangesBadgeLabel',
+  { defaultMessage: 'Unsaved changes' }
+);
+
+export const NO_CHANGES_TO_SAVE_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.noChangesToSaveTooltip',
+  { defaultMessage: 'No changes to save' }
+);
+
+export const KEEP_EDITING_BUTTON_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.keepEditingButtonLabel',
+  { defaultMessage: 'Keep editing' }
+);
+
+export const LEAVE_PROMPT_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.leavePromptTitle',
+  { defaultMessage: 'Leave without saving?' }
+);
+
+export const LEAVE_PROMPT_DESCRIPTION = i18n.translate(
+  'xpack.alertzero.watches.settings.leavePromptDescription',
+  {
+    defaultMessage:
+      'You have unsaved changes on this Watch. If you leave, those changes will be lost unless you save first.',
+  }
+);
+
+export const LEAVE_PROMPT_CONFIRM_BUTTON_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.leavePromptConfirmButtonLabel',
+  { defaultMessage: 'Leave without saving' }
+);
+
+export const DISCARD_CONFIRM_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.discardConfirmTitle',
+  { defaultMessage: 'Discard unsaved changes?' }
+);
+
+export const DISCARD_CONFIRM_DESCRIPTION = i18n.translate(
+  'xpack.alertzero.watches.settings.discardConfirmDescription',
+  { defaultMessage: 'The following Workers have unsaved changes that will be lost:' }
+);
+
+export const DISCARD_CONFIRM_BUTTON_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.discardConfirmButtonLabel',
+  { defaultMessage: 'Discard' }
+);
+
 /** Shown instead of navigating when managed workflows are hidden in this space. */
 export const MANAGED_WORKFLOWS_DISABLED_POPOVER_TITLE = i18n.translate(
   'xpack.alertzero.watches.settings.managedWorkflowsDisabledPopoverTitle',
@@ -211,6 +258,11 @@ export const WORKER_SETTINGS_SAVE_ERROR = i18n.translate(
   { defaultMessage: 'Could not save this Worker. Other saved changes were kept.' }
 );
 
+export const WORKER_DOCS_LINK_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.docsLinkLabel',
+  { defaultMessage: 'Learn more' }
+);
+
 export const WATCH_SETTINGS_INVALID = i18n.translate(
   'xpack.alertzero.watches.settings.invalidDrafts',
   { defaultMessage: 'Fix invalid settings before saving.' }
@@ -244,6 +296,35 @@ export const NO_MODEL_REASON_PLAIN = i18n.translate(
 export const AUTONOMY_SECTION_TITLE = i18n.translate(
   'xpack.alertzero.watches.settings.autonomy.sectionTitle',
   { defaultMessage: 'Autonomy' }
+);
+
+export const HUNT_INDEX_COVERAGE_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.huntIndexCoverage.title',
+  { defaultMessage: "Hunt Watch cannot read part of this space's default data view" }
+);
+
+export const HUNT_INDEX_COVERAGE_GUIDANCE_STATEFUL = i18n.translate(
+  'xpack.alertzero.watches.settings.huntIndexCoverage.guidanceStateful',
+  {
+    defaultMessage:
+      "The worker's built-in role reads the standard Elastic Agent and Beats patterns only. Remove other patterns from securitySolution:defaultIndex or route their data into a covered data stream.",
+  }
+);
+
+export const HUNT_INDEX_COVERAGE_GUIDANCE_STATEFUL_REMOTE = i18n.translate(
+  'xpack.alertzero.watches.settings.huntIndexCoverage.guidanceStatefulRemote',
+  {
+    defaultMessage:
+      'Cross-cluster patterns need an Elasticsearch version whose alertzero_threat_hunt role includes remote indices.',
+  }
+);
+
+export const HUNT_INDEX_COVERAGE_GUIDANCE_SERVERLESS = i18n.translate(
+  'xpack.alertzero.watches.settings.huntIndexCoverage.guidanceServerless',
+  {
+    defaultMessage:
+      "The worker's built-in role reads the standard Elastic Agent and Beats patterns only, in this project and in linked Security projects. Linked projects of other types are not searched. Remove other patterns from securitySolution:defaultIndex or route their data into a covered data stream.",
+  }
 );
 
 export const WORKER_SETTINGS_UNAVAILABLE = i18n.translate(
@@ -313,24 +394,23 @@ export const TRIGGER_AMOUNT_ARIA_LABEL = i18n.translate(
 );
 
 export const TRIGGER_EVERY = i18n.translate('xpack.alertzero.watches.settings.trigger.every', {
-  defaultMessage: 'Every',
+  defaultMessage: 'Runs every',
 });
 
 export const TRIGGER_HELP_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.trigger.helpText',
-  { defaultMessage: 'How often this Worker runs. Applies to this Worker only.' }
+  { defaultMessage: 'Set how often this Worker runs.' }
 );
 
 export const TRIGGER_HELP_READ_ONLY_4H = i18n.translate(
   'xpack.alertzero.watches.settings.trigger.helpTextReadOnly4h',
   {
-    defaultMessage:
-      'Hunt Watch runs every 4 hours on a fixed schedule. The interval cannot be changed.',
+    defaultMessage: 'The interval is fixed.',
   }
 );
 
 export const TRIGGER_LABEL = i18n.translate('xpack.alertzero.watches.settings.trigger.label', {
-  defaultMessage: 'Trigger',
+  defaultMessage: 'Schedule',
 });
 
 export const TRIGGER_UNIT_ARIA_LABEL = i18n.translate(
@@ -365,7 +445,7 @@ export const MINIMUM_CONFIDENCE_SCORE_HELP_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreHelpText',
   {
     defaultMessage:
-      'Lowest confidence at which a false positive is surfaced for review or auto-closed.',
+      'Set the lowest false positive confidence score at which an alert is proposed for closure or auto-closed.',
   }
 );
 
@@ -373,7 +453,7 @@ export const MINIMUM_CONFIDENCE_SCORE_DETAIL_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreDetailText',
   {
     defaultMessage:
-      'Alerts below the threshold are still tagged with the verdict but require no action. Lower values surface more alerts; higher values are more conservative.',
+      "Alerts below this score are still tagged with their classification, but aren't proposed for closure or closed. Lower scores let more alerts qualify; higher scores let fewer qualify.",
   }
 );
 
@@ -397,6 +477,87 @@ export const getBudgetPerHourDetailText = (min: number): string =>
 export const BUDGET_PER_HOUR_ARIA_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.budgetPerHourAriaLabel',
   { defaultMessage: 'Triage budget per hour' }
+);
+
+export const MINIMUM_SEVERITY_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumSeverityLabel',
+  { defaultMessage: 'Minimum severity' }
+);
+
+export const MINIMUM_SEVERITY_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumSeverityHelpText',
+  { defaultMessage: 'Select the lowest alert severity to triage.' }
+);
+
+export const MINIMUM_SEVERITY_DETAIL_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumSeverityDetailText',
+  {
+    defaultMessage: 'Alerts below this severity are skipped. To triage every alert, select Low.',
+  }
+);
+
+export const EXCLUDE_BUILDING_BLOCKS_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.excludeBuildingBlocksLabel',
+  { defaultMessage: 'Exclude building block alerts' }
+);
+
+export const EXCLUDE_BUILDING_BLOCKS_DETAIL_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.excludeBuildingBlocksDetailText',
+  {
+    defaultMessage:
+      'Alerts marked as Building Block detections by the rule configuration will be skipped.',
+  }
+);
+
+export const EXCLUDED_RULE_TAGS_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.excludedRuleTagsLabel',
+  { defaultMessage: 'Excluded rule tags' }
+);
+
+export const EXCLUDED_RULE_TAGS_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.excludedRuleTagsHelpText',
+  { defaultMessage: 'Skip alerts from rules that carry any of these tags.' }
+);
+
+export const EXCLUDED_RULE_TAGS_DETAIL_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.excludedRuleTagsDetailText',
+  {
+    defaultMessage: 'Press Enter after each tag to add multiple. Tags are case-sensitive.',
+  }
+);
+
+export const EXCLUDED_RULE_TAGS_PLACEHOLDER = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.excludedRuleTagsPlaceholder',
+  { defaultMessage: 'Add a rule tag, for example in-development' }
+);
+
+export const excludedRuleTagTooLong = (max: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.alertTriage.excludedRuleTagTooLong', {
+    defaultMessage: 'A tag can be at most {max} characters.',
+    values: { max },
+  });
+
+export const excludedRuleTagsLimitReached = (max: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.alertTriage.excludedRuleTagsLimitReached', {
+    defaultMessage: 'You can exclude at most {max} tags.',
+    values: { max },
+  });
+
+export const SEVERITY_LOW = i18n.translate('xpack.alertzero.watches.settings.severity.low', {
+  defaultMessage: 'Low',
+});
+
+export const SEVERITY_MEDIUM = i18n.translate('xpack.alertzero.watches.settings.severity.medium', {
+  defaultMessage: 'Medium',
+});
+
+export const SEVERITY_HIGH = i18n.translate('xpack.alertzero.watches.settings.severity.high', {
+  defaultMessage: 'High',
+});
+
+export const SEVERITY_CRITICAL = i18n.translate(
+  'xpack.alertzero.watches.settings.severity.critical',
+  { defaultMessage: 'Critical' }
 );
 
 export const LOOKBACK_HOURS_LABEL = i18n.translate(

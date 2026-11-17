@@ -559,15 +559,15 @@ export function AlertDetails() {
             onUpdate={onUpdate}
             rule={rule}
             refetch={refetch}
-          />,
-          ...(AlertAskAiAgentButton && alertDetail?.formatted.fields['kibana.alert.uuid']
-            ? [
+            addToChatButton={
+              AlertAskAiAgentButton && alertDetail?.formatted.fields['kibana.alert.uuid'] ? (
                 <AlertAskAiAgentButton
                   alertId={alertDetail.formatted.fields['kibana.alert.uuid'] as string}
                   alertTitle={ruleTypeBreached}
-                />,
-              ]
-            : []),
+                />
+              ) : null
+            }
+          />,
         ],
         bottomBorder: false,
         'data-test-subj': rule?.ruleTypeId || 'alertDetailsPageTitle',

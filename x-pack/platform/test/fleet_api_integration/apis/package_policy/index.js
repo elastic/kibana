@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import { waitForFleetStartupSetup } from '../../helpers';
 import { setupTestUsers } from '../test_users';
 
-export default function loadTests({ loadTestFile, getService }) {
+export default function loadTests(providerContext) {
+  const { loadTestFile, getService } = providerContext;
+
   describe('Package policies', () => {
-    before(async () => {
+    before(async function () {
+      this.timeout(3 * 60 * 1000);
+      // Runs before every child suite's `before`, so no suite wipes Fleet state mid startup setup
+      await waitForFleetStartupSetup(providerContext);
       await setupTestUsers(getService('security'));
     });
     loadTestFile(require.resolve('./create'));

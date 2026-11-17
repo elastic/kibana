@@ -9,48 +9,16 @@
 
 import type { Logger, SavedObjectReference } from '@kbn/core/server';
 import {
-  fromStoredFilters,
-  toStoredFilters,
-  type StoredFilter,
+  extractFilterReferences,
+  injectFilterReferences,
+  type StoredAsCodeFilter,
 } from '@kbn/as-code-filters-transforms';
-import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
-import type { Filter } from '@kbn/es-query';
 import type { VegaByValueState } from './schema';
 
-/** Panel filters are stored in the saved-filter shape so their data views become references. */
-export type StoredVegaState = Omit<VegaByValueState, 'filters'> & { filters?: StoredFilter[] };
-
-const toFilters = (storedFilters: StoredFilter[]): Filter[] =>
-  storedFilters.map(({ $state, ...filter }) =>
-    $state?.store ? { ...filter, $state: { store: $state.store } } : filter
-  );
-
-const transformFiltersIn = (
-  filters: VegaByValueState['filters'],
-  logger?: Logger
-): { filters?: StoredFilter[]; references: SavedObjectReference[] } => {
-  const storedFilters = toStoredFilters(filters, logger);
-  if (!storedFilters?.length) return { filters: storedFilters, references: [] };
-
-  const [{ filter }, references] = extractReferences({ filter: toFilters(storedFilters) });
-  return { filters: filter, references };
-};
-
-const transformFiltersOut = (
-  storedFilters: StoredFilter[] | undefined,
-  references: SavedObjectReference[] = [],
-  logger?: Logger
-): VegaByValueState['filters'] => {
-  if (!storedFilters?.length) return fromStoredFilters(storedFilters, logger);
-
-  let filters = storedFilters;
-  try {
-    filters = injectReferences({ filter: toFilters(storedFilters) }, references).filter;
-  } catch (error) {
-    logger?.warn(`Unable to inject Vega panel filter references. Error: ${error.message}`);
-  }
-  return fromStoredFilters(filters, logger);
+/** Panel filters are stored in their as code shape, with each `data_view_id` replaced by a reference name. */
+export type StoredVegaState = Omit<VegaByValueState, 'filters'> & {
+  filters?: StoredAsCodeFilter[];
 };
 
 export function getTransforms(drilldownTransforms: DrilldownTransforms, logger?: Logger) {
@@ -60,12 +28,11 @@ export function getTransforms(drilldownTransforms: DrilldownTransforms, logger?:
     ): { state: StoredVegaState; references: SavedObjectReference[] } => {
       const { state: drilldownsState, references: drilldownReferences } =
         drilldownTransforms.transformIn(state);
-      const { filters, references: filterReferences } = transformFiltersIn(
-        drilldownsState.filters,
-        logger
-      );
+      const { filters, ...rest } = drilldownsState;
+      const { filters: storedFilters, references: filterReferences } =
+        extractFilterReferences(filters);
       return {
-        state: { ...drilldownsState, filters },
+        state: { ...rest, ...(storedFilters && { filters: storedFilters }) },
         references: [...drilldownReferences, ...filterReferences],
       };
     },
@@ -74,10 +41,24 @@ export function getTransforms(drilldownTransforms: DrilldownTransforms, logger?:
       panelReferences?: SavedObjectReference[]
     ): VegaByValueState => {
       const drilldownsState = drilldownTransforms.transformOut(storedState, panelReferences);
-      return {
-        ...drilldownsState,
-        filters: transformFiltersOut(drilldownsState.filters, panelReferences, logger),
-      };
+      const { filters: storedFilters, ...rest } = drilldownsState as StoredVegaState;
+      if (!storedFilters) return rest as VegaByValueState;
+
+      try {
+        return {
+          ...rest,
+          filters: injectFilterReferences(storedFilters, panelReferences),
+        } as VegaByValueState;
+      } catch (error) {
+        logger?.warn(`Unable to transform filter and query state on read. Error: ${error.message}`);
+        // Keep the filters, without their unresolved data view, rather than failing the whole panel.
+        return {
+          ...rest,
+          filters: storedFilters.map(
+            ({ data_view_ref_name: dataViewRefName, ...filter }) => filter
+          ),
+        } as VegaByValueState;
+      }
     },
   };
 }

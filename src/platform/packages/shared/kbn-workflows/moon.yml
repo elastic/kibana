@@ -26,6 +26,8 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/human-readable-id'
   - '@kbn/std'
+  - '@kbn/core-user-profile-common'
+  - '@kbn/core-user-settings-types'
 tags:
   - shared-common
   - package
@@ -37,6 +39,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

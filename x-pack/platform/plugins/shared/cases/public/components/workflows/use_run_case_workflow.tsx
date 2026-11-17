@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
-import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
+import type { RunWorkflowExecutor, RunWorkflowTelemetry } from '@kbn/workflows-ui';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import { CASE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -15,6 +15,7 @@ import type { CaseUI } from '../../containers/types';
 import { useCasesConfig } from '../../common/lib/kibana';
 import { useCasesWorkflowExecutor } from './use_cases_workflow_executor';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCaseWorkflowRunTelemetry } from '../../analytics/use_case_workflow_run_telemetry';
 
 const CASE_TRIGGER_TYPE_PREFIX = 'cases.';
 
@@ -172,6 +173,8 @@ export interface UseRunCaseWorkflowResult {
   inputs: Record<string, unknown>;
   /** Cases-owned executor that routes runs through the Cases API. */
   runWorkflow: RunWorkflowExecutor;
+  /** Telemetry context for the run panel. */
+  telemetry: RunWorkflowTelemetry;
   /** Predicate limiting the workflow selector to configured tags. */
   filterWorkflow: (workflow: WorkflowListItemDto) => boolean;
   /** Comparator prioritising tagged then context-relevant workflows. */
@@ -197,6 +200,7 @@ export const useRunCaseWorkflow = ({
   );
 
   const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
+  const telemetry = useCaseWorkflowRunTelemetry(origin);
 
   return {
     canRunWorkflow,
@@ -205,6 +209,7 @@ export const useRunCaseWorkflow = ({
     closeModal,
     inputs,
     runWorkflow,
+    telemetry,
     filterWorkflow,
     sortWorkflow,
   };

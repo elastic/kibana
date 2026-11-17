@@ -54,3 +54,13 @@ responses:
                     failed_monitors: null
   404:
     description: Monitor not found.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/synthetics/monitor/test/monitor-id" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true"
+  - lang: Console
+    source: |
+      POST kbn://api/synthetics/monitor/test/monitor-id

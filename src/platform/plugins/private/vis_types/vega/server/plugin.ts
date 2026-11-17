@@ -8,13 +8,8 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-} from '@kbn/core/server';
+import type { PluginInitializerContext, CoreSetup, Logger, Plugin } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   VisTypeVegaPluginSetupDependencies,
   VisTypeVegaPluginSetup,
@@ -23,16 +18,25 @@ import type {
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
 import { getVegaEmbeddableSchema } from './embeddable/schema';
 import { getTransforms } from './embeddable/transforms';
+import { vegaLibraryItemSavedObjectType } from './vega_saved_object';
+import { registerRoutes } from './api/register_routes';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
   private readonly logger: Logger;
+  private apiUsageCounter?: UsageCounter;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, { embeddable }: VisTypeVegaPluginSetupDependencies) {
-    core
+  public setup(
+    core: CoreSetup,
+    { embeddable, usageCollection }: VisTypeVegaPluginSetupDependencies
+  ) {
+    // Startup-only: public API/OpenAPI contract should not hot-swap mid-process.
+    // The embeddable definition is registered only once the flag is known, so
+    // `getSchema` can never observe the default (disabled) value while the flag is on.
+    void core
       .getStartServices()
       .then(async ([{ featureFlags }]) => {
         const standaloneEmbeddableEnabled = await firstValueFrom(
@@ -45,11 +49,21 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
             standaloneEmbeddableEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        this.logger.error(`Failed to register the Vega embeddable: ${error}`);
+      });
+
+    core.savedObjects.registerType(vegaLibraryItemSavedObjectType);
+
+    if (usageCollection) {
+      this.apiUsageCounter = usageCollection.createUsageCounter('vega_api');
+    }
+    registerRoutes(core.http, this.apiUsageCounter, this.logger);
+
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start() {
     return {};
   }
 }

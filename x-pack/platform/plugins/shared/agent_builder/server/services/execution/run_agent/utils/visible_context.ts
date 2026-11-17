@@ -27,10 +27,13 @@ import {
   substituteToolCallResults,
 } from './filestore_substitution';
 import {
-  customEventToLangchain,
+  standaloneEventToLangchain,
   formatUserInput,
+  noticeRendererFor,
   prepareMessages,
+  roundAttachmentPlacement,
   roundOutcomeMessage,
+  roundOutcomeNotice,
 } from './to_langchain_messages';
 import {
   createPreExecutionWorkflowContextMessage,
@@ -110,12 +113,14 @@ export const renderVisibleContext = async (
   deps: VisibleContextDeps
 ): Promise<BaseMessage[]> => {
   const view = buildContextView({ conversation, run, conversationTimestamp }, deps);
+  const notices = noticeRendererFor(conversation);
   const history = await prepareMessages({
     conversation,
     roundResultTransformer: view.historyTransformer,
     compactionSummary: run.compactionSummary,
     visibility: view.visibility,
     conversationTimestamp,
+    attachmentNotices: notices,
   });
   const current = await renderCurrentRun({
     run,
@@ -124,6 +129,7 @@ export const renderVisibleContext = async (
     imageResolver,
     range: { start: view.visibility.currentFromStep },
     substitution: view.substitution,
+    attachments: { notices, resumeAnchors: conversation.resumeAnchors ?? new Map() },
   });
   return [...history, ...pinnedCurrentRunMessages(run, view.visibility), ...current];
 };
@@ -144,7 +150,10 @@ const pinnedCurrentRunMessages = (
         : []
     );
 
-/** One unit of the visible context, rendered as it is sent (images aside). */
+/**
+ * One unit of the visible context, rendered as it is sent (images aside), except for the attachment
+ * type instructions: those are given once per prompt, so a unit cannot know whether they land in it.
+ */
 export const renderUnit = async (
   unit: ContextUnit,
   {
@@ -153,17 +162,18 @@ export const renderUnit = async (
     conversation,
   }: { view: ContextView; run: CurrentRun; conversation: ProcessedConversation }
 ): Promise<BaseMessage[]> => {
+  const notices = noticeRendererFor(conversation, { withTypeInstructions: false });
   if (unit.kind === 'message') {
     return [
       formatUserInput({
         input: unit.entry.userMessage.data,
         timestamp: unit.entry.userMessage.created_at,
-        attachmentTypes: conversation.attachmentTypes,
+        notices,
       }),
     ];
   }
-  if (unit.kind === 'custom_event') {
-    return [customEventToLangchain(unit.entry.event)];
+  if (unit.kind === 'standalone_event') {
+    return [standaloneEventToLangchain(unit.entry.event)];
   }
   if (unit.kind === 'current_cycle') {
     return renderCurrentRun({
@@ -171,16 +181,19 @@ export const renderUnit = async (
       phase: 'research',
       range: unit.range,
       substitution: view.substitution,
+      attachments: { notices, resumeAnchors: conversation.resumeAnchors ?? new Map() },
     });
   }
   const { round } = unit;
+  const placement = roundAttachmentPlacement(round, conversation.resumeAnchors);
   return [
     ...(unit.first ? [roundUserMessage(unit, conversation)] : []),
     ...(await renderHistorySteps({
       steps: unitSteps(unit, run.steps),
       resultTransformer: view.historyTransformer(round.id),
+      attachments: { placement, notices },
     })),
-    ...(unit.last ? [roundOutcomeMessage(round)] : []),
+    ...(unit.last ? [roundOutcomeMessage(round), ...roundOutcomeNotice(placement, notices)] : []),
   ];
 };
 
@@ -192,5 +205,5 @@ export const roundUserMessage = (
   formatUserInput({
     input: round.userMessage.data,
     timestamp: round.userMessage.created_at,
-    attachmentTypes: conversation.attachmentTypes,
+    notices: noticeRendererFor(conversation, { withTypeInstructions: false }),
   });

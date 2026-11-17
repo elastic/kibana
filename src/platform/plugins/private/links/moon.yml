@@ -57,6 +57,7 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - '*.ts'
@@ -67,6 +68,4 @@ fileGroups:
     - test/scout/**/*
     - test/scout_links_external_url_policy/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

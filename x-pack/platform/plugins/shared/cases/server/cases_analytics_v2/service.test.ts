@@ -152,6 +152,7 @@ describe('CasesAnalyticsV2Service', () => {
         taskManager: taskManagerMock.createStart(),
         internalSavedObjectsClient: savedObjectsClientMock.create(),
         dataViewsService: {} as unknown as DataViewsServerPluginStart,
+        spacesEnabled: true,
       });
       return esClient;
     };
@@ -224,6 +225,7 @@ describe('CasesAnalyticsV2Service', () => {
         taskManager,
         internalSavedObjectsClient: savedObjectsClientMock.create(),
         dataViewsService: {} as unknown as DataViewsServerPluginStart,
+        spacesEnabled: true,
       });
       return taskManager;
     };

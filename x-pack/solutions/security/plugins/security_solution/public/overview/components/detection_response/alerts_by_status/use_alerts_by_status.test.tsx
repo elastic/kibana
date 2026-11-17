@@ -252,6 +252,50 @@ describe('useAlertsByStatus', () => {
     );
   });
 
+  it('should OR the filters of the entity record and its alias records in the resolution-group view', () => {
+    const mockEntityRecord = { entity: { id: 'host-1' }, host: { name: 'host-1' } };
+    const mockAliasRecords = [{ entity: { id: 'host-2' }, host: { name: 'host-2' } }];
+    const mockGetEuidFilterBasedOnDocument = jest.fn(
+      (_type: string, record: { entity: { id: string } }) => ({
+        term: { 'entity.id': record.entity.id },
+      })
+    );
+    mockUseUiSetting.mockReturnValue(true);
+    mockUseEntityStoreEuidApi.mockReturnValue({
+      euid: { dsl: { getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument } },
+      getBuiltInEntityDefinition,
+    });
+
+    renderUseAlertsByStatus({
+      entityRecord: mockEntityRecord as never,
+      aliasRecords: mockAliasRecords as never,
+      entityType: 'host',
+      identityFields: { 'host.name': 'host-1' },
+    });
+
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          query: {
+            bool: {
+              filter: expect.arrayContaining([
+                {
+                  bool: {
+                    should: [
+                      { term: { 'entity.id': 'host-1' } },
+                      { term: { 'entity.id': 'host-2' } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ]),
+            },
+          },
+        }),
+      })
+    );
+  });
+
   it('should include runtime_mappings in the query if provided', () => {
     const customRuntimeMappings = {
       'host.name.custom': {

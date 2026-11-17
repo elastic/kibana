@@ -440,4 +440,78 @@ describe('RulesSavedObjectService', () => {
       );
     });
   });
+
+  describe('countByTemplateIds', () => {
+    const mockTemplateCountsResponse = (buckets: Array<{ key: string; doc_count: number }>) =>
+      ({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+        aggregations: { template_counts: { buckets } },
+      } as unknown as Awaited<ReturnType<SavedObjectsClientContract['find']>>);
+
+    it('maps each bucket to its document count', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(
+        mockTemplateCountsResponse([
+          { key: 'template-1', doc_count: 3 },
+          { key: 'template-2', doc_count: 1 },
+        ])
+      );
+
+      const counts = await rulesSavedObjectService.countByTemplateIds(['template-1', 'template-2']);
+
+      expect(counts).toEqual({ 'template-1': 3, 'template-2': 1 });
+    });
+
+    it('omits templates without buckets', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(
+        mockTemplateCountsResponse([{ key: 'template-1', doc_count: 2 }])
+      );
+
+      const counts = await rulesSavedObjectService.countByTemplateIds(['template-1', 'template-2']);
+
+      expect(counts).toEqual({ 'template-1': 2 });
+    });
+
+    it('aggregates metadata.template.id limited to the exact requested ids', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTemplateCountsResponse([]));
+
+      await rulesSavedObjectService.countByTemplateIds(['template-1', 'a.b+c']);
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: RULE_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        aggs: {
+          template_counts: {
+            terms: {
+              field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.template.id`,
+              size: 2,
+              include: ['template-1', 'a.b+c'],
+            },
+          },
+        },
+      });
+    });
+
+    it('does not query when no ids are given', async () => {
+      const counts = await rulesSavedObjectService.countByTemplateIds([]);
+
+      expect(counts).toEqual({});
+      expect(mockSavedObjectsClient.find).not.toHaveBeenCalled();
+    });
+
+    it('returns an empty object when aggregations are missing', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+      } as Awaited<ReturnType<SavedObjectsClientContract['find']>>);
+
+      const counts = await rulesSavedObjectService.countByTemplateIds(['template-1']);
+
+      expect(counts).toEqual({});
+    });
+  });
 });

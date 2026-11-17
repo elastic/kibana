@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`resolveIdentityPlan matches the store output for inventory_host 1`] = `
+Object {
+  "idEvaluation": "host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ entity.id = CONCAT(\\"inventory_host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null))",
+  "presenceFilter": "(TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\")",
+}
+`;
+
+exports[`resolveIdentityPlan matches the store output for k8s.deployment 1`] = `
+Object {
+  "idEvaluation": "kubernetes_namespace_present = TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\",
+ kubernetes_deployment_name_present = TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\",
+ kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, TO_STRING(kubernetes.namespace)),
+ kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, TO_STRING(kubernetes.deployment.name)),
+ entity.id = CONCAT(\\"k8s.deployment:\\", CONCAT(kubernetes_namespace_present_or_null, \\"/\\", kubernetes_deployment_name_present_or_null))",
+  "presenceFilter": "(TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")",
+}
+`;
+
+exports[`resolveIdentityPlan matches the store output for k8s.node 1`] = `
+Object {
+  "idEvaluation": "entity.id = CONCAT(\\"k8s.node:\\", TO_STRING(kubernetes.node.name))",
+  "presenceFilter": "((TO_STRING(kubernetes.node.name) IS NOT NULL AND TO_STRING(kubernetes.node.name) != \\"\\"))",
+}
+`;

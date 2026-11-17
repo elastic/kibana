@@ -7,7 +7,9 @@
 
 import crypto from 'node:crypto';
 import { isPlainObject } from 'lodash';
-import type { ChangeHistoryFieldsToMask } from './types';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
+import type { Logger } from '@kbn/logging';
+import type { ChangeHistoryDocument, ChangeHistoryFieldsToMask } from './types';
 
 export const sha256 = (text: string) => crypto.createHash('sha256').update(text).digest('hex');
 
@@ -117,3 +119,38 @@ export function sanitizeFields(
     ),
   };
 }
+
+/**
+ * Best-effort read-time enrichment: mutates each item's `user.full_name` and `user.email` in
+ * place from the matching user profile. Short-circuits when no `user.id`s are present. `bulkGet` failures
+ * are logged via `logger.warn` and swallowed so history reads never fail on profile lookup.
+ * @param items - Change history documents to enrich in place.
+ * @param service - User profile service used to resolve display names.
+ * @param logger - Logger used to record lookup failures.
+ */
+export const enrichWithProfiles = async (
+  items: ChangeHistoryDocument[],
+  service: UserProfileServiceStart,
+  logger: Logger
+): Promise<void> => {
+  const uids = new Set<string>();
+  for (const item of items) {
+    if (item.user.id) uids.add(item.user.id);
+  }
+  if (uids.size === 0) return;
+  try {
+    const profiles = await service.bulkGet({ uids });
+    const map = new Map(profiles.map((p) => [p.uid, p]));
+    for (const item of items) {
+      const profile = item.user.id ? map.get(item.user.id) : undefined;
+      if (profile?.user.full_name) {
+        item.user.full_name = profile.user.full_name;
+      }
+      if (profile?.user.email) {
+        item.user.email = profile.user.email;
+      }
+    }
+  } catch (err) {
+    logger.warn(`Failed to resolve user profiles for change history: ${err}`);
+  }
+};

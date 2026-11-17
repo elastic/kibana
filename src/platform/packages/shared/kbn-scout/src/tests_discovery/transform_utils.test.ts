@@ -56,7 +56,7 @@ describe('flattenModulesByServerRunFlag', () => {
     });
   });
 
-  it('maps search group to search domain for stateful', () => {
+  it('maps stateful domain from serverRunFlag, not from module group', () => {
     const modules: ModuleDiscoveryInfo[] = [
       {
         name: 'searchPlugin',
@@ -74,7 +74,8 @@ describe('flattenModulesByServerRunFlag', () => {
       },
     ];
     const result = flattenModulesByServerRunFlag(modules);
-    expect(result[0].testTarget.domain).toBe('search');
+    expect(result[0].testTarget).toEqual({ arch: 'stateful', domain: 'classic' });
+    expect(result[0].group).toBe('search');
   });
 
   it('maps serverless serverRunFlag to domain', () => {

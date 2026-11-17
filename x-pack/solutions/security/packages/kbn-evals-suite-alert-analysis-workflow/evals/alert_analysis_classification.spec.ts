@@ -49,7 +49,7 @@ import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { selectEvaluators, type EvaluationDataset, type Example } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
 import { runAlertAnalysisWorkflow, type ClassificationMethod } from '../src/workflow_task';
-import { configureAlertAnalysisWorkflow } from '../src/space_config';
+import { configureAlertAnalysisWorkflow, ensureAlertsIndex } from '../src/space_config';
 import {
   classificationAccuracy,
   createAlertAnalysisTrajectoryEvaluator,
@@ -80,6 +80,10 @@ evaluate.describe(
   () => {
     // Alerts created by tasks, deleted after each run; afterAll sweeps any that slipped through.
     const createdAlertIds = new Set<string>();
+
+    evaluate.beforeAll(async ({ esClient }: { esClient: EsClient }) => {
+      await ensureAlertsIndex(esClient);
+    });
 
     evaluate.afterAll(async ({ esClient, log }: { esClient: EsClient; log: ToolingLog }) => {
       if (createdAlertIds.size === 0) {

@@ -8,12 +8,32 @@
  */
 
 import { of } from 'rxjs';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowValidationDeps } from './types';
-import { WorkflowValidationService } from './workflow_validation_service';
+import {
+  MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS,
+  MAX_ESQL_COLUMNS_REQUESTS,
+  MAX_VALIDATED_ESQL_STEPS,
+  WorkflowValidationService,
+} from './workflow_validation_service';
+
+const mockGetSources = jest.fn();
+const mockGetColumnsFor = jest.fn();
+jest.mock('@kbn/esql-server-utils', () => ({
+  buildServerESQLCallbacks: () => ({
+    getSources: mockGetSources,
+    getColumnsFor: mockGetColumnsFor,
+  }),
+}));
+
+const hostNameColumns = [{ name: 'host.name', type: 'keyword', userDefined: false }];
 
 interface MakeDepsOptions {
+  /** Value of `workflowsManagement.pages.enabled`. */
+  pagesEnabled?: boolean;
   /** Connector types the request can see, as `listTypes` returns them. */
   listedConnectorTypes?: Array<Record<string, unknown>>;
   /** Registered step definitions, keyed by step type. */
@@ -22,7 +42,7 @@ interface MakeDepsOptions {
 
 const makeDeps = (
   listedTriggers: CustomTriggerSchemaConfig[] = [],
-  { listedConnectorTypes = [], stepDefinitions = {} }: MakeDepsOptions = {}
+  { listedConnectorTypes = [], stepDefinitions = {}, pagesEnabled = false }: MakeDepsOptions = {}
 ): {
   deps: WorkflowValidationDeps;
   actionsClient: { getAll: jest.Mock };
@@ -45,10 +65,14 @@ const makeDeps = (
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest) as any,
       getCoreStart: () =>
         ({
-          featureFlags: {
-            getBooleanValue$: jest.fn().mockReturnValue(of(false)),
+          featureFlags: { getBooleanValue$: jest.fn(() => of(false)) },
+          elasticsearch: {
+            client: { asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }) },
           },
         } as any),
+      licensing: licensingMock.createStart(),
+      logger: loggingSystemMock.createLogger(),
+      pagesEnabled,
     },
     actionsClient,
     actionsClientWithRequest,
@@ -139,6 +163,7 @@ describe('WorkflowValidationService', () => {
 
       const result = await service.validateWorkflow(':::\nnot yaml', 'default', request, {
         includeVariableRules: false,
+        includeEsqlRules: false,
       });
 
       expect(result.valid).toBe(false);
@@ -165,6 +190,7 @@ describe('WorkflowValidationService', () => {
 
       const result = await service.validateWorkflow(yaml, 'default', request, {
         includeVariableRules: false,
+        includeEsqlRules: false,
       });
 
       expect(result.valid).toBe(true);
@@ -192,6 +218,7 @@ describe('WorkflowValidationService', () => {
 
       const result = await service.validateWorkflow(yaml, 'default', request, {
         includeVariableRules: true,
+        includeEsqlRules: true,
       });
 
       expect(result.diagnostics.some(({ source }) => source === 'variable')).toBe(true);
@@ -219,6 +246,7 @@ describe('WorkflowValidationService', () => {
 
       const result = await service.validateWorkflow(yaml, 'default', request, {
         includeVariableRules: true,
+        includeEsqlRules: true,
       });
 
       expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
@@ -239,13 +267,13 @@ describe('WorkflowValidationService', () => {
         slackWorkflowYaml('{{ steps.notify.output.known }}'),
         'default',
         request,
-        { includeVariableRules: true }
+        { includeVariableRules: true, includeEsqlRules: true }
       );
       const fromConnectorOnly = await service.validateWorkflow(
         slackWorkflowYaml('{{ steps.notify.output.channel }}'),
         'default',
         request,
-        { includeVariableRules: true }
+        { includeVariableRules: true, includeEsqlRules: true }
       );
 
       expect(resolves.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
@@ -265,13 +293,13 @@ describe('WorkflowValidationService', () => {
         slackWorkflowYaml('{{ steps.notify.output.channel }}'),
         'default',
         request,
-        { includeVariableRules: true }
+        { includeVariableRules: true, includeEsqlRules: true }
       );
       const missing = await service.validateWorkflow(
         slackWorkflowYaml('{{ steps.notify.output.missing }}'),
         'default',
         request,
-        { includeVariableRules: true }
+        { includeVariableRules: true, includeEsqlRules: true }
       );
 
       expect(resolves.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
@@ -302,9 +330,11 @@ describe('WorkflowValidationService', () => {
 
       const gate = await service.validateWorkflow(yaml, 'default', request, {
         includeVariableRules: false,
+        includeEsqlRules: false,
       });
       const diagnostics = await service.validateWorkflow(yaml, 'default', request, {
         includeVariableRules: true,
+        includeEsqlRules: true,
       });
 
       expect(gate.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
@@ -333,6 +363,7 @@ describe('WorkflowValidationService', () => {
 
       const result = await service.validateWorkflow(yaml, 'default', request, {
         includeVariableRules: false,
+        includeEsqlRules: false,
       });
 
       expect(result.valid).toBe(false);
@@ -362,9 +393,288 @@ describe('WorkflowValidationService', () => {
 
       const result = await service.validateWorkflow(yaml, 'default', request, {
         includeVariableRules: false,
+        includeEsqlRules: false,
       });
 
       expect(result.valid).toBe(true);
+    });
+  });
+
+  describe('page trigger feature flag', () => {
+    const pageWorkflowYaml = [
+      'name: page',
+      'triggers:',
+      '  - type: page',
+      '    title: Report an incident',
+      'steps:',
+      '  - name: step-one',
+      '    type: console',
+      '    with:',
+      '      message: "hello"',
+      '',
+    ].join('\n');
+
+    it.each([
+      [false, false],
+      [true, true],
+    ])(
+      'with workflowsManagement.pages.enabled %s, a page trigger is valid: %s',
+      async (pagesEnabled, valid) => {
+        const { deps } = makeDeps([], { pagesEnabled });
+        const service = new WorkflowValidationService(deps);
+        const request = {} as any;
+
+        const result = await service.validateWorkflow(pageWorkflowYaml, 'default', request, {
+          includeVariableRules: false,
+          includeEsqlRules: false,
+        });
+        const schema = await service.getWorkflowZodSchema({ loose: false }, 'default', request);
+
+        expect(result.valid).toBe(valid);
+        expect(
+          schema.safeParse({
+            name: 'page',
+            triggers: [{ type: 'page', title: 'Report an incident' }],
+            steps: [{ name: 'step-one', type: 'console', with: { message: 'hello' } }],
+          }).success
+        ).toBe(valid);
+      }
+    );
+  });
+
+  describe('validateWorkflow ES|QL rules', () => {
+    const esqlWorkflowYaml = (query: string) =>
+      [
+        'name: esql',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: search',
+        '    type: elasticsearch.esql.query',
+        '    with:',
+        `      query: "${query}"`,
+        '',
+      ].join('\n');
+
+    beforeEach(() => {
+      mockGetSources.mockReset();
+      mockGetSources.mockResolvedValue([{ name: 'logs-app', hidden: false }]);
+      mockGetColumnsFor.mockReset();
+      mockGetColumnsFor.mockResolvedValue(hostNameColumns);
+    });
+
+    const esqlSteps = (queries: string[]) =>
+      [
+        'name: esql',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        ...queries.flatMap((query, index) => [
+          `  - name: search_${index}`,
+          '    type: elasticsearch.esql.query',
+          '    with:',
+          `      query: "${query}"`,
+        ]),
+        '',
+      ].join('\n');
+
+    it('reports an unknown field as an esql error and marks the result invalid', async () => {
+      const { deps } = makeDeps();
+      const service = new WorkflowValidationService(deps);
+
+      const result = await service.validateWorkflow(
+        esqlWorkflowYaml('FROM logs-app | KEEP hostname'),
+        'default',
+        {} as any,
+        { includeVariableRules: true, includeEsqlRules: true }
+      );
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics).toEqual([
+        expect.objectContaining({
+          severity: 'error',
+          source: 'esql',
+          ruleId: 'esqlDiagnostic',
+          path: ['steps', 0, 'with', 'query'],
+          message: expect.stringContaining('hostname'),
+        }),
+      ]);
+    });
+
+    it('accepts a query against a known index and field', async () => {
+      const { deps } = makeDeps();
+      const service = new WorkflowValidationService(deps);
+
+      const result = await service.validateWorkflow(
+        esqlWorkflowYaml('FROM logs-app | KEEP host.name'),
+        'default',
+        {} as any,
+        { includeVariableRules: true, includeEsqlRules: true }
+      );
+
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics).toEqual([]);
+    });
+
+    it('reports a command the cluster license does not allow', async () => {
+      const { deps } = makeDeps();
+      deps.licensing.getLicense = jest
+        .fn()
+        .mockResolvedValue(licensingMock.createLicense({ license: { type: 'basic' } }));
+      const service = new WorkflowValidationService(deps);
+
+      const result = await service.validateWorkflow(
+        esqlWorkflowYaml('FROM logs-app | CHANGE_POINT host.name'),
+        'default',
+        {} as any,
+        { includeVariableRules: true, includeEsqlRules: true }
+      );
+
+      expect(result.diagnostics).toContainEqual(
+        expect.objectContaining({
+          source: 'esql',
+          message: expect.stringContaining('CHANGE_POINT requires a PLATINUM license'),
+        })
+      );
+    });
+
+    it('does not run ES|QL rules for callers that gate on the result', async () => {
+      const { deps } = makeDeps();
+      const service = new WorkflowValidationService(deps);
+
+      const result = await service.validateWorkflow(
+        esqlWorkflowYaml('FROM no-such-index | WHERE'),
+        'default',
+        {} as any,
+        { includeVariableRules: false, includeEsqlRules: false }
+      );
+
+      expect(result.valid).toBe(true);
+      expect(mockGetSources).not.toHaveBeenCalled();
+    });
+
+    it('fetches sources once for several ES|QL steps', async () => {
+      const { deps } = makeDeps();
+      const service = new WorkflowValidationService(deps);
+      const yaml = [
+        esqlWorkflowYaml('FROM logs-app | LIMIT 1'),
+        '  - name: search_two',
+        '    type: elasticsearch.esql.query',
+        '    with:',
+        '      query: "FROM logs-app | LIMIT 2"',
+        '',
+      ].join('\n');
+
+      await service.validateWorkflow(yaml, 'default', {} as any, {
+        includeVariableRules: true,
+        includeEsqlRules: true,
+      });
+
+      expect(mockGetSources).toHaveBeenCalledTimes(1);
+    });
+
+    it('requests columns once for many steps that read the same index', async () => {
+      const service = new WorkflowValidationService(makeDeps().deps);
+      const queries = Array.from({ length: 50 }, (_, i) => `FROM logs-app | LIMIT ${i + 1}`);
+
+      await service.validateWorkflow(esqlSteps(queries), 'default', {} as any, {
+        includeVariableRules: true,
+        includeEsqlRules: true,
+      });
+
+      expect(mockGetColumnsFor).toHaveBeenCalledTimes(1);
+    });
+
+    it('requests columns again for the next validation', async () => {
+      const service = new WorkflowValidationService(makeDeps().deps);
+      const yaml = esqlWorkflowYaml('FROM logs-app | LIMIT 1');
+      const options = { includeVariableRules: true, includeEsqlRules: true };
+
+      await service.validateWorkflow(yaml, 'default', {} as any, options);
+      await service.validateWorkflow(yaml, 'default', {} as any, options);
+
+      expect(mockGetColumnsFor).toHaveBeenCalledTimes(2);
+    });
+
+    it(`sends at most ${MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS} column requests at a time`, async () => {
+      const indices = Array.from({ length: 20 }, (_, i) => `logs-${i}`);
+      mockGetSources.mockResolvedValue(indices.map((name) => ({ name, hidden: false })));
+      let inFlight = 0;
+      let maxInFlight = 0;
+      mockGetColumnsFor.mockImplementation(async () => {
+        inFlight++;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        inFlight--;
+        return hostNameColumns;
+      });
+      const service = new WorkflowValidationService(makeDeps().deps);
+
+      await service.validateWorkflow(
+        esqlSteps(indices.map((index) => `FROM ${index} | LIMIT 1`)),
+        'default',
+        {} as any,
+        { includeVariableRules: true, includeEsqlRules: true }
+      );
+
+      expect(mockGetColumnsFor).toHaveBeenCalledTimes(indices.length);
+      expect(maxInFlight).toBe(MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS);
+    });
+
+    it(`validates only the first ${MAX_VALIDATED_ESQL_STEPS} ES|QL steps`, async () => {
+      const service = new WorkflowValidationService(makeDeps().deps);
+      const queries = Array.from(
+        { length: MAX_VALIDATED_ESQL_STEPS + 1 },
+        (_, i) =>
+          `FROM logs-app | KEEP ${i === MAX_VALIDATED_ESQL_STEPS ? 'hostname' : 'host.name'}`
+      );
+
+      const result = await service.validateWorkflow(esqlSteps(queries), 'default', {} as any, {
+        includeVariableRules: false,
+        includeEsqlRules: true,
+      });
+
+      expect(result.diagnostics.filter(({ source }) => source === 'esql')).toEqual([]);
+      expect(result.notChecked).toContain(
+        `ES|QL queries of 1 steps: only the first ${MAX_VALIDATED_ESQL_STEPS} ES|QL steps are validated.`
+      );
+    });
+
+    it(`fetches columns for at most ${MAX_ESQL_COLUMNS_REQUESTS} sources`, async () => {
+      const joinsPerStep = 3;
+      const lookups = Array.from(
+        { length: MAX_VALIDATED_ESQL_STEPS * joinsPerStep },
+        (_, i) => `lookup-${i}`
+      );
+      mockGetSources.mockResolvedValue(
+        ['logs-joins', ...lookups].map((name) => ({ name, hidden: false }))
+      );
+      const queries = Array.from({ length: MAX_VALIDATED_ESQL_STEPS }, (_, step) =>
+        [
+          'FROM logs-joins',
+          ...Array.from(
+            { length: joinsPerStep },
+            (__, join) => `LOOKUP JOIN ${lookups[step * joinsPerStep + join]} ON host.name`
+          ),
+          'KEEP host.name',
+        ].join(' | ')
+      );
+      const service = new WorkflowValidationService(makeDeps().deps);
+
+      const result = await service.validateWorkflow(esqlSteps(queries), 'default', {} as any, {
+        includeVariableRules: false,
+        includeEsqlRules: true,
+      });
+
+      const sourceCount = 1 + lookups.length;
+      expect(mockGetColumnsFor).toHaveBeenCalledTimes(MAX_ESQL_COLUMNS_REQUESTS);
+      expect(result.notChecked).toContain(
+        `ES|QL: fields of ${
+          sourceCount - MAX_ESQL_COLUMNS_REQUESTS
+        } sources were not checked: one validation fetches columns for at most ${MAX_ESQL_COLUMNS_REQUESTS} sources.`
+      );
     });
   });
 });

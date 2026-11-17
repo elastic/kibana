@@ -365,8 +365,6 @@ export const roundsFromEvents = (events: ConversationEvent[]): ConversationRound
  * Events are authoritative only for events-native documents (Agent Builder's live chat appends
  * events without rewriting `conversation_rounds`, so the stored rounds can lag behind). Legacy
  * documents keep their stored rounds, even if they carry transitional events.
- *
- * `feedback` lives on stored rounds only, so it is carried over onto the folded round.
  */
 export const roundsForDocument = ({
   schemaVersion,
@@ -381,11 +379,7 @@ export const roundsForDocument = ({
   if (!isEventsNativeVersion(schemaVersion) || !events?.length) {
     return stored;
   }
-  const storedById = new Map(stored.map((round) => [round.id, round]));
-  return roundsFromEvents(events).map((round) => {
-    const feedback = storedById.get(round.id)?.feedback;
-    return feedback ? { ...round, feedback } : round;
-  });
+  return roundsFromEvents(events);
 };
 
 // ---------------------------------------------------------------------------------------------

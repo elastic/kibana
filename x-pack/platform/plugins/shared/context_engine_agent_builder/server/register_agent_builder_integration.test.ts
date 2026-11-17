@@ -18,7 +18,6 @@ import {
   KI_RETRIEVAL_SKILL_ID,
   CONTEXT_ENGINE_SIGNALS_SKILL_ID,
 } from '../common/agent_builder_skills';
-import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import type {
   ContextEngineAgentBuilderPluginStart,
   ContextEngineAgentBuilderStartDependencies,
@@ -209,7 +208,6 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
         }),
         configuration: expect.objectContaining({
           enable_elastic_capabilities: false,
-          subagent_ids: [SELF_AGENT_ID],
           skill_ids: expect.arrayContaining([
             ANALYZE_AND_IMPROVE_SKILL_ID,
             AI_INDEX_AUTOMATIONS_SKILL_ID,

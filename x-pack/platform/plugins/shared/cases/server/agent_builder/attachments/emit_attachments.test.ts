@@ -10,6 +10,7 @@ import {
   CASE_ATTACHMENT_TYPE,
   CASES_ATTACHMENT_TYPE,
 } from '../../../common/types/agent_builder/attachment_schemas';
+import { CASES_UPDATED_UI_EVENT } from '../../../common/types/agent_builder/ui_events';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import type { Case } from '../../../common/types/domain';
 
@@ -47,6 +48,10 @@ const buildAttachments = () => ({
   add: jest.fn().mockResolvedValue({ id: 'att-1' }),
 });
 
+const buildEvents = () => ({
+  sendUiEvent: jest.fn(),
+});
+
 // ---------------------------------------------------------------------------
 // emitFromStepResult
 // ---------------------------------------------------------------------------
@@ -54,7 +59,8 @@ const buildAttachments = () => ({
 describe('emitFromStepResult', () => {
   it('emits a single-case attachment when result contains { case: Case }', async () => {
     const attachments = buildAttachments();
-    const ids = await emitFromStepResult(attachments as never, {
+    const events = buildEvents();
+    const ids = await emitFromStepResult({ attachments, events } as never, {
       results: [{ data: { case: buildCase('c1') } }],
     });
 
@@ -62,11 +68,13 @@ describe('emitFromStepResult', () => {
     const callArg = attachments.add.mock.calls[0][0];
     expect(callArg.type).toBe(CASE_ATTACHMENT_TYPE);
     expect(ids).toEqual(['att-1']);
+    expect(events.sendUiEvent).toHaveBeenCalledWith(CASES_UPDATED_UI_EVENT, { caseIds: ['c1'] });
   });
 
   it('emits a single-case attachment when { cases } contains exactly one case', async () => {
     const attachments = buildAttachments();
-    const ids = await emitFromStepResult(attachments as never, {
+    const events = buildEvents();
+    const ids = await emitFromStepResult({ attachments, events } as never, {
       results: [{ data: { cases: [buildCase('c1')] } }],
     });
 
@@ -74,11 +82,13 @@ describe('emitFromStepResult', () => {
     const callArg = attachments.add.mock.calls[0][0];
     expect(callArg.type).toBe(CASE_ATTACHMENT_TYPE);
     expect(ids).toEqual(['att-1']);
+    expect(events.sendUiEvent).toHaveBeenCalledWith(CASES_UPDATED_UI_EVENT, { caseIds: ['c1'] });
   });
 
   it('emits a cases-list attachment when { cases } contains multiple cases', async () => {
     const attachments = buildAttachments();
-    const ids = await emitFromStepResult(attachments as never, {
+    const events = buildEvents();
+    const ids = await emitFromStepResult({ attachments, events } as never, {
       results: [{ data: { cases: [buildCase('c1'), buildCase('c2')] } }],
     });
 
@@ -86,34 +96,43 @@ describe('emitFromStepResult', () => {
     const callArg = attachments.add.mock.calls[0][0];
     expect(callArg.type).toBe(CASES_ATTACHMENT_TYPE);
     expect(ids).toEqual(['att-1']);
+    expect(events.sendUiEvent).toHaveBeenCalledWith(CASES_UPDATED_UI_EVENT, {
+      caseIds: ['c1', 'c2'],
+    });
   });
 
   it('returns empty array when result data has no case or cases field', async () => {
     const attachments = buildAttachments();
-    const ids = await emitFromStepResult(attachments as never, {
+    const events = buildEvents();
+    const ids = await emitFromStepResult({ attachments, events } as never, {
       results: [{ data: { something_else: true } }],
     });
 
     expect(attachments.add).not.toHaveBeenCalled();
     expect(ids).toEqual([]);
+    expect(events.sendUiEvent).not.toHaveBeenCalled();
   });
 
   it('returns empty array when results is empty', async () => {
     const attachments = buildAttachments();
-    const ids = await emitFromStepResult(attachments as never, { results: [] });
+    const events = buildEvents();
+    const ids = await emitFromStepResult({ attachments, events } as never, { results: [] });
 
     expect(attachments.add).not.toHaveBeenCalled();
     expect(ids).toEqual([]);
+    expect(events.sendUiEvent).not.toHaveBeenCalled();
   });
 
   it('returns empty array when cases array is empty', async () => {
     const attachments = buildAttachments();
-    const ids = await emitFromStepResult(attachments as never, {
+    const events = buildEvents();
+    const ids = await emitFromStepResult({ attachments, events } as never, {
       results: [{ data: { cases: [] } }],
     });
 
     expect(attachments.add).not.toHaveBeenCalled();
     expect(ids).toEqual([]);
+    expect(events.sendUiEvent).not.toHaveBeenCalled();
   });
 });
 

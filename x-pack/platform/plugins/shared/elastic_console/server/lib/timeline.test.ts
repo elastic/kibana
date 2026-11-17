@@ -353,17 +353,6 @@ describe('roundsForDocument', () => {
     expect(rounds[0].response).toEqual({ message: 'deleted' });
   });
 
-  it('carries round feedback over from the stored rounds', () => {
-    const feedback = { vote: 'up' as const, submitted_at: '2025-01-01T00:00:00.000Z' };
-    const round = createRound();
-    const rounds = roundsForDocument({
-      schemaVersion: 1,
-      storedRounds: [{ ...round, feedback }],
-      events: eventsFromRounds([round], ctx),
-    });
-    expect(rounds[0].feedback).toEqual(feedback);
-  });
-
   it('falls back to stored rounds for an events-native document without events', () => {
     const round = createRound();
     expect(roundsForDocument({ schemaVersion: 1, storedRounds: [round], events: [] })).toEqual([

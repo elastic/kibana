@@ -15,6 +15,7 @@ import { getPushedTelemetryData } from './queries/push';
 import { getUserActionsTelemetryData } from './queries/user_actions';
 import { getTemplatesTelemetryData } from './queries/templates';
 import { getFieldLibraryTelemetryData } from './queries/field_definitions';
+import { getWorkflowsTelemetryData } from './queries/workflows';
 import type { CasesTelemetry, CollectTelemetryDataParams } from './types';
 
 export const collectTelemetryData = async ({
@@ -33,6 +34,7 @@ export const collectTelemetryData = async ({
       casesSystemAction,
       templates,
       fieldLibrary,
+      workflows,
     ] = await Promise.all([
       getCasesTelemetryData({ savedObjectsClient, logger }),
       getUserActionsTelemetryData({ savedObjectsClient, logger }),
@@ -53,6 +55,12 @@ export const collectTelemetryData = async ({
 
         return undefined;
       }),
+      getWorkflowsTelemetryData({ savedObjectsClient, logger }).catch((err) => {
+        logger.debug('Failed collecting Cases workflows telemetry data');
+        logger.debug(err);
+
+        return undefined;
+      }),
     ]);
 
     return {
@@ -66,6 +74,7 @@ export const collectTelemetryData = async ({
       casesSystemAction,
       ...(templates !== undefined ? { templates } : {}),
       ...(fieldLibrary !== undefined ? { fieldLibrary } : {}),
+      ...(workflows !== undefined ? { workflows } : {}),
     };
   } catch (err) {
     logger.debug('Failed collecting Cases telemetry data');
@@ -75,8 +84,8 @@ export const collectTelemetryData = async ({
      * clusters that they do not use cases thus all counts will be zero
      * and clusters where an error occurred.
      *
-     * The isolation above is one-directional: a templates or field library failure costs
-     * only its own numbers, but a failure in any area collected here still discards the
+     * The isolation above is one-directional: a templates, field library, or workflows failure
+     * costs only its own numbers, but a failure in any area collected here still discards the
      * whole payload.
      */
 

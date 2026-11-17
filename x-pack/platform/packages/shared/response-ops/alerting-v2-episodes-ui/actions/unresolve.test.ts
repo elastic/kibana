@@ -10,6 +10,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
 import type { AlertEpisode } from '../queries/episodes_query';
+import * as i18n from './translations';
 import { createUnresolveAction } from './unresolve';
 import * as bulk from './bulk_create_alert_actions';
 
@@ -83,6 +84,58 @@ describe('createUnresolveAction', () => {
 
     expect(action.isCompatible({ episodes })).toBe(false);
     expect(action.showWhenDisabled?.({ episodes })).toBe(false);
+  });
+
+  describe('getBulkDisabledReason', () => {
+    const classicEpisode = (status: string) =>
+      makeEpisode({
+        'episode.id': 'classic-1',
+        'episode.status': status as never,
+        supports_actions: false,
+        source_id: CLASSIC_EPISODE_SOURCE_ID,
+      });
+    const universalEpisode = (status: string) =>
+      makeEpisode({ 'episode.id': 'universal-1', 'episode.status': status as never });
+
+    const reasonFor = (episodes: AlertEpisode[]) =>
+      createUnresolveAction(makeDeps()).getBulkDisabledReason!(episodes);
+
+    it('gives a reason when a resolved classic alert is selected', () => {
+      expect(
+        reasonFor([
+          universalEpisode(ALERT_EPISODE_STATUS.INACTIVE),
+          classicEpisode(ALERT_EPISODE_STATUS.INACTIVE),
+        ])
+      ).toBe(i18n.UNRESOLVE_NOT_AVAILABLE);
+    });
+
+    it('gives a reason when only a resolved classic alert is selected', () => {
+      expect(reasonFor([classicEpisode(ALERT_EPISODE_STATUS.INACTIVE)])).toBe(
+        i18n.UNRESOLVE_NOT_AVAILABLE
+      );
+    });
+
+    it('gives no reason when the classic alert in the selection is still active', () => {
+      expect(
+        reasonFor([
+          universalEpisode(ALERT_EPISODE_STATUS.INACTIVE),
+          classicEpisode(ALERT_EPISODE_STATUS.ACTIVE),
+        ])
+      ).toBeUndefined();
+    });
+
+    it('gives no reason when every selected alert is still active', () => {
+      expect(
+        reasonFor([
+          universalEpisode(ALERT_EPISODE_STATUS.ACTIVE),
+          classicEpisode(ALERT_EPISODE_STATUS.ACTIVE),
+        ])
+      ).toBeUndefined();
+    });
+
+    it('gives no reason when every selected alert is universal', () => {
+      expect(reasonFor([universalEpisode(ALERT_EPISODE_STATUS.INACTIVE)])).toBeUndefined();
+    });
   });
 
   it('execute: POSTs per-episode ACTIVATE items with reason, toasts, calls onSuccess', async () => {

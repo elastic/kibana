@@ -26,12 +26,12 @@ import useLatest from 'react-use/lib/useLatest';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import type { ServiceAccountBoundWorkload } from '@kbn/core-security-common';
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { BoundWorkloadsTable } from './bound_workloads_table';
 import type {
-  ServiceAccountBoundWorkload,
   ServiceAccountDirectoryEntry,
   ServiceAccountsAPIClient,
 } from '../../service_accounts';

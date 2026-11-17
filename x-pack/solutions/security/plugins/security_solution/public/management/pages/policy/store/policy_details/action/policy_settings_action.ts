@@ -40,13 +40,6 @@ export interface UserChangedAntivirusRegistration {
   };
 }
 
-export interface UserChangedCredentialHardening {
-  type: 'userChangedCredentialHardening';
-  payload: {
-    enabled: boolean;
-  };
-}
-
 export interface ServerReturnedPolicyDetailsAgentSummaryData {
   type: 'serverReturnedPolicyDetailsAgentSummaryData';
   payload: {
@@ -85,5 +78,4 @@ export type PolicySettingsAction =
   | ServerFailedToReturnPolicyDetailsData
   | UserChangedPolicyConfig
   | UserChangedAntivirusRegistration
-  | UserChangedCredentialHardening
   | LicenseChanged;

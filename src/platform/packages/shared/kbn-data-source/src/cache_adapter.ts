@@ -8,23 +8,13 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { Column } from './types';
+import { buildFilterableFieldSpecs } from './filterable_fields';
 import type { EsqlSource } from './sources/esql_source';
 
 const esqlDataViewsById = new Map<string, DataView>();
-
-// LIMIT 0 reports no aggregatability. Heuristic for KQL value suggestions (_terms_enum / terms agg):
-// analyzed text types can't be suggested, `unsupported` types are unknown. Exact only with field caps.
-const NON_AGGREGATABLE_ES_TYPES: ReadonlySet<string> = new Set([
-  'text',
-  'match_only_text',
-  'semantic_text',
-  'unsupported',
-]);
 
 /**
  * Transitional shim: registers one DataView per dataset (FROM target, time field, project routing)
@@ -42,7 +32,7 @@ export async function registerEsqlSourceInDataViewsCache(
     title: source.title,
     type: ESQL_TYPE,
     timeFieldName: source.timeFieldName,
-    fields: withTimeField(makeFieldSpecs(filterableFields), source.timeFieldName),
+    fields: buildFilterableFieldSpecs(filterableFields, source.timeFieldName),
   };
   let dataView = await dataViews.create(spec, true);
   // The id is shared with the legacy ad-hoc DataView, which `getESQLAdHocDataview` callers (e.g.
@@ -81,39 +71,4 @@ export async function getOrRegisterEsqlDataView(
 /** The dataset DataView stays registered, as other queries on the same dataset share it. */
 export function unregisterFromDataViewsCache(id: string): void {
   esqlDataViewsById.delete(id);
-}
-
-function makeFieldSpecs(columns: readonly Column[]): Record<string, FieldSpec> {
-  return Object.fromEntries(columns.map((column) => [column.name, columnToFieldSpec(column)]));
-}
-
-function withTimeField(
-  fields: Record<string, FieldSpec>,
-  timeFieldName: string | undefined
-): Record<string, FieldSpec> {
-  if (!timeFieldName || fields[timeFieldName]) {
-    return fields;
-  }
-  return {
-    ...fields,
-    [timeFieldName]: {
-      name: timeFieldName,
-      type: KBN_FIELD_TYPES.DATE,
-      esTypes: ['date'],
-      searchable: true,
-      aggregatable: true,
-      isComputedColumn: false,
-    },
-  };
-}
-
-function columnToFieldSpec(column: Column): FieldSpec {
-  return {
-    name: column.name,
-    type: column.type,
-    esTypes: column.esType ? [column.esType] : undefined,
-    searchable: true,
-    aggregatable: !column.esType || !NON_AGGREGATABLE_ES_TYPES.has(column.esType),
-    isComputedColumn: column.source === 'esql-result',
-  };
 }

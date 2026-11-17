@@ -53,6 +53,7 @@ export interface RuleTypeModalProps {
   hasMoreTemplates: boolean;
   onLoadMoreTemplates: () => void;
   cps?: CPSPluginStart;
+  showClassicBadge?: boolean;
 }
 
 export interface RuleTypeModalState {
@@ -116,6 +117,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
   hasMoreTemplates,
   onLoadMoreTemplates,
   cps,
+  showClassicBadge = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
@@ -174,11 +176,13 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                       <h1>{ruleTypeModalTitle}</h1>
                     </EuiTitle>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow" data-test-subj="ruleTypeModalClassicBadge">
-                      {ruleTypeModalBadgeLabel}
-                    </EuiBadge>
-                  </EuiFlexItem>
+                  {showClassicBadge && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow" data-test-subj="ruleTypeModalClassicBadge">
+                        {ruleTypeModalBadgeLabel}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
                 <EuiFlexGroup alignItems="center">

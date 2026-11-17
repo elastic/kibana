@@ -1,5 +1,5 @@
 {
-  "sha1": "e764b777f6c14878350c50f629c0de2722d63509",
+  "sha1": "456b529ef960f6262c18ddaf9c1c351dbc07be47",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -394,6 +394,104 @@
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
         "line": 386,
         "column": 41
+      }
+    },
+    {
+      "id": "2c939c3daeb00d9-ced5e88212aef91",
+      "title": "automatic_import Integration API (base \"all\" privilege) GET /integrations: returns 200 for base \"all\" user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/integration_api_base_all.spec.ts",
+        "line": 32,
+        "column": 8
+      }
+    },
+    {
+      "id": "2c939c3daeb00d9-4967df47d00f128",
+      "title": "automatic_import Integration API (base \"all\" privilege) PUT /integrations: passes authorization (400 on an empty body, not 403) for base \"all\" user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/integration_api_base_all.spec.ts",
+        "line": 39,
+        "column": 92
+      }
+    },
+    {
+      "id": "2c939c3daeb00d9-4171da5eb1326df",
+      "title": "automatic_import Integration API (base \"all\" privilege) DELETE /integrations/{id}: passes authorization (404 on a missing id, not 403) for base \"all\" user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/integration_api_base_all.spec.ts",
+        "line": 49,
+        "column": 7
+      }
+    },
+    {
+      "id": "817d7b44ba46bca-d2d8df87f089071",
+      "title": "automatic_import Integration API (base \"read\" privilege) GET /integrations: returns 200 for base \"read\" user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/integration_api_base_read.spec.ts",
+        "line": 28,
+        "column": 8
+      }
+    },
+    {
+      "id": "817d7b44ba46bca-1501b7262e4cad0",
+      "title": "automatic_import Integration API (base \"read\" privilege) GET /integrations/{id}/download: returns 200 for base \"read\" user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/integration_api_base_read.spec.ts",
+        "line": 35,
+        "column": 93
+      }
+    },
+    {
+      "id": "817d7b44ba46bca-4c0b6cfa2ff7998",
+      "title": "automatic_import Integration API (base \"read\" privilege) PUT /integrations: returns 403 for base \"read\" user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/integration_api_base_read.spec.ts",
+        "line": 42,
+        "column": 7
+      }
+    },
+    {
+      "id": "817d7b44ba46bca-9d483037038e023",
+      "title": "automatic_import Integration API (base \"read\" privilege) DELETE /integrations/{id}: returns 403 for base \"read\" user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/integration_api_base_read.spec.ts",
+        "line": 54,
+        "column": 25
       }
     },
     {

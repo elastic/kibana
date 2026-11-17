@@ -44,6 +44,8 @@ import type {
 import { FleetNotFoundError } from '../../errors';
 import * as AgentService from '../../services/agents';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
+import { getPendingRestartActions } from '../../services/agents/pending_restart';
+import { throwIfAgentInAgentlessPolicy } from '../../services/agents/hosted_agent';
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
 import { isAgentInNamespace } from '../../services/spaces/agent_namespaces';
 import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
@@ -67,6 +69,18 @@ async function verifyNamespace(agent: Agent, namespace?: string) {
   }
 }
 
+async function assignPendingRestarts(agents: Agent[]): Promise<Agent[]> {
+  const pendingRestarts = await getPendingRestartActions(
+    appContextService.getInternalUserESClient(),
+    agents.map((agent) => agent.id)
+  );
+  return agents.map((agent) =>
+    pendingRestarts.has(agent.id)
+      ? { ...agent, pending_restart: pendingRestarts.get(agent.id) }
+      : agent
+  );
+}
+
 export const getAgentHandler: FleetRequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>,
   TypeOf<typeof GetOneAgentRequestSchema.query>
@@ -80,6 +94,9 @@ export const getAgentHandler: FleetRequestHandler<
 
     if (request.query.withMetrics) {
       agent = (await fetchAndAssignAgentMetrics(esClientCurrentUser, [agent]))[0];
+    }
+    if (request.query.withPendingRestart) {
+      agent = (await assignPendingRestarts([agent]))[0];
     }
 
     const body: GetOneAgentResponse = {
@@ -179,6 +196,11 @@ export const updateAgentHandler: FleetRequestHandler<
   try {
     const agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
     await verifyNamespace(agent, getCurrentNamespace(soClient));
+    await throwIfAgentInAgentlessPolicy(
+      soClient,
+      agent,
+      `Cannot update managed agent ${request.params.agentId}`
+    );
 
     await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
@@ -268,6 +290,9 @@ export const getAgentsHandler: FleetRequestHandler<
   // Assign metrics
   if (request.query.withMetrics) {
     agents = await fetchAndAssignAgentMetrics(esClientCurrentUser, agents);
+  }
+  if (request.query.withPendingRestart) {
+    agents = await assignPendingRestarts(agents);
   }
 
   // Retrieve last agent to use for nextSearchAfter

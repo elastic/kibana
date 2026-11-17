@@ -99,6 +99,13 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.isExperimental).toBeUndefined();
   });
 
+  it('keeps a reference to the source spec', () => {
+    const spec = createMockSpec();
+    const result = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+    expect(result.spec).toBe(spec);
+  });
+
   it('builds the connector network from the actions configuration utilities', () => {
     const createConnectorNetworkSettingsSpy = jest.spyOn(
       createConnectorNetworkSettingsModule,
@@ -138,6 +145,39 @@ describe('createConnectorTypeFromSpec', () => {
     });
     const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
     expect(connectorType.sandboxSupportedAuthTypes).toEqual(['bearer', 'oauth_authorization_code']);
+  });
+
+  it('derives getSandboxHosts from the spec fixed hosts and configured URL hosts', () => {
+    const spec = createMockSpec({
+      sandbox: { hosts: ['api.example.com'], hostsFromConfig: ['url'] },
+    });
+    const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+    expect(
+      connectorType.getSandboxHosts?.({ config: { url: 'https://cluster.example.com:9243' } })
+    ).toEqual(['api.example.com', 'cluster.example.com']);
+  });
+
+  it('returns no sandbox hosts when the spec declares none', () => {
+    const connectorType = createConnectorTypeFromSpec(createMockSpec(), mockActionsPlugin);
+    expect(connectorType.getSandboxHosts?.({ config: {} })).toEqual([]);
+  });
+
+  it('registers the shipped External Elasticsearch spec as sandbox capable for both auth types', () => {
+    const connectorType = createConnectorTypeFromSpec(
+      connectorsSpecs.Elasticsearch,
+      mockActionsPlugin
+    );
+    expect(connectorType.sandboxSupportedAuthTypes).toEqual(['api_key_header', 'basic']);
+  });
+
+  it('registers the shipped New Relic spec with no sandbox supported auth types', () => {
+    const connectorType = createConnectorTypeFromSpec(connectorsSpecs.NewRelic, mockActionsPlugin);
+    expect(connectorType.sandboxSupportedAuthTypes).toEqual([]);
+  });
+
+  it('registers the shipped Rootly spec with no sandbox supported auth types', () => {
+    const connectorType = createConnectorTypeFromSpec(connectorsSpecs.Rootly, mockActionsPlugin);
+    expect(connectorType.sandboxSupportedAuthTypes).toEqual([]);
   });
 
   it('sets description from metadata.description', () => {

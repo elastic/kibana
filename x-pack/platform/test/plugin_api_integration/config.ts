@@ -34,7 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...integrationConfig.get('kbnTestServer'),
       serverArgs: [
         ...integrationConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.eventLog.logEntries=true',
+        '--xpack.eventLog.logEntries=false',
         '--xpack.eventLog.indexEntries=true',
         // Pin cases analyticsV2 ON so the `check_registered_task_types` guard is
         // deterministic regardless of the plugin's default. With v2 enabled the
@@ -54,7 +54,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'crowdstrikeConnectorOn',
           'microsoftDefenderEndpointOn',
         ])}`,
-        ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
+        ...findTestPluginPaths([
+          path.resolve(__dirname, 'plugins'),
+          path.resolve(__dirname, '../../test_plugins/response_ops/plugin_api_integration'),
+        ]),
       ],
     },
   };

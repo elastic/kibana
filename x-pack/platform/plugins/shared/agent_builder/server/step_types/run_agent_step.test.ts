@@ -34,6 +34,7 @@ import {
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
 } from '../../common/resolve_connector_or_inference_id';
 import { getRunAgentStepDefinition, parseMaxStepSize } from './run_agent_step';
+import type { ServiceManager } from '../services';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 
 describe('parseMaxStepSize', () => {
@@ -739,13 +740,158 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(parsed.success).toBe(true);
     });
 
+    it('ConfigSchema accepts a feature list next to connector-id', () => {
+      const parsed = ConfigSchema.safeParse({
+        'connector-id': 'a',
+        'connector-id-by-feature': ['alertzero_template_models', 'my_feature'],
+      });
+      expect(parsed.success).toBe(true);
+    });
+
+    it('uses the first configured feature ahead of the next id in the list', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const getForFeature = jest.fn().mockImplementation(async (featureId: string) => {
+        if (featureId === 'alertzero_template_models') {
+          return {
+            endpoints: [{ connectorId: 'template-connector' }],
+            warnings: [],
+            soEntryFound: true,
+          };
+        }
+        return {
+          endpoints: [{ connectorId: 'tier-connector' }],
+          warnings: [],
+          soEntryFound: false,
+        };
+      });
+      const serviceManager = {
+        internalStart: {
+          execution,
+          searchInferenceEndpoints: {
+            features: {
+              get: jest.fn().mockReturnValue({ taskType: 'chat_completion' }),
+            },
+            endpoints: { getForFeature },
+          },
+        },
+      } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: {
+            'connector-id-by-feature': ['alertzero_template_models', 'alertzero_frontier'],
+          },
+        })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ connectorId: 'template-connector' }),
+        })
+      );
+      expect(getForFeature).toHaveBeenCalledWith('alertzero_template_models', expect.anything(), {
+        onlyReturnConfigured: true,
+      });
+      expect(getForFeature).not.toHaveBeenCalledWith(
+        'alertzero_frontier',
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('falls through to connector-id when the listed feature has no configured model', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const getForFeature = jest.fn().mockResolvedValue({
+        endpoints: [],
+        warnings: [],
+        soEntryFound: false,
+      });
+      const serviceManager = {
+        internalStart: {
+          execution,
+          searchInferenceEndpoints: {
+            features: {
+              get: jest.fn().mockReturnValue({ taskType: 'chat_completion' }),
+            },
+            endpoints: { getForFeature },
+          },
+        },
+      } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: {
+            'connector-id': 'explicit-connector',
+            'connector-id-by-feature': ['alertzero_template_models', '   '],
+          },
+        })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ connectorId: 'explicit-connector' }),
+        })
+      );
+    });
+
+    it('skips an unregistered template row and keeps the standalone connector', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const getForFeature = jest.fn();
+      const serviceManager = {
+        internalStart: {
+          execution,
+          searchInferenceEndpoints: {
+            features: { get: jest.fn().mockReturnValue(undefined) },
+            endpoints: { getForFeature },
+          },
+        },
+      } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: {
+            'connector-id': 'standalone-connector',
+            'connector-id-by-feature': ['alertzero_template_models'],
+          },
+        })
+      );
+
+      expect(res.error).toBeUndefined();
+      expect(getForFeature).not.toHaveBeenCalled();
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ connectorId: 'standalone-connector' }),
+        })
+      );
+    });
+
     it('resolves the connector from the feature and passes it to executeAgent', async () => {
       const events$ = of({
         type: ChatEventType.roundComplete,
         data: { round: { id: 'r-1', response: { message: 'ok' } } },
       });
       const execution = createExecutionMock(events$);
-      const featureServices = createFeatureServicesMock([{ connectorId: 'feature-connector' }]);
+      const featureServices = createFeatureServicesMock([{ connectorId: 'feature-connector' }], {
+        taskType: 'chat_completion',
+      });
       const serviceManager = { internalStart: { execution, ...featureServices } } as any;
 
       const step = getRunAgentStepDefinition(serviceManager);
@@ -758,7 +904,8 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
       expect(featureServices.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
         'significant_events_investigation',
-        expect.anything()
+        expect.anything(),
+        { onlyReturnConfigured: true }
       );
       expect(execution.executeAgent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -773,7 +920,9 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         data: { round: { id: 'r-1', response: { message: 'ok' } } },
       });
       const execution = createExecutionMock(events$);
-      const featureServices = createFeatureServicesMock();
+      const featureServices = createFeatureServicesMock([{ connectorId: 'feature-connector' }], {
+        taskType: 'chat_completion',
+      });
       const serviceManager = { internalStart: { execution, ...featureServices } } as any;
 
       const step = getRunAgentStepDefinition(serviceManager);
@@ -791,9 +940,13 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(res.error?.message).toBe(CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW);
     });
 
-    it('surfaces an error when no connector can be resolved for the feature', async () => {
-      const execution = createExecutionMock(of());
-      const featureServices = createFeatureServicesMock([]);
+    it('continues without a feature connector when the feature resolves no endpoints', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const featureServices = createFeatureServicesMock([], { taskType: 'chat_completion' });
       const serviceManager = { internalStart: { execution, ...featureServices } } as any;
 
       const step = getRunAgentStepDefinition(serviceManager);
@@ -804,8 +957,12 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         })
       );
 
-      expect(execution.executeAgent).not.toHaveBeenCalled();
-      expect(res.error?.message).toBe('No connector available for feature "unknown_feature".');
+      expect(res.error).toBeUndefined();
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ connectorId: undefined }),
+        })
+      );
     });
 
     it('surfaces an error when the feature is not a chat completion feature', async () => {
@@ -1048,6 +1205,63 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
   });
 
+  describe('author attribution', () => {
+    const roundCompleteEvents = () =>
+      of({
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+          },
+        },
+      });
+
+    const createServiceManager = (execution: ReturnType<typeof createExecutionMock>) =>
+      ({ internalStart: { execution } } as unknown as ServiceManager);
+
+    const runStep = async (input: Record<string, unknown>) => {
+      const execution = createExecutionMock(roundCompleteEvents());
+      const step = getRunAgentStepDefinition(createServiceManager(execution));
+
+      await step.handler(createContext({ input, config: {} }));
+
+      return execution.executeAgent.mock.calls[0][0].params;
+    };
+
+    it('passes a trimmed author_name as the author decoration', async () => {
+      const params = await runStep({
+        message: 'hello',
+        author_name: '  Attack Discovery Review  ',
+      });
+
+      expect(params.author).toEqual({ full_name: 'Attack Discovery Review' });
+    });
+
+    it.each([
+      { label: 'absent', input: { message: 'hello' } },
+      { label: 'blank', input: { message: 'hello', author_name: '   ' } },
+    ])('omits the author when author_name is $label', async ({ input }) => {
+      const params = await runStep(input);
+
+      expect(params).not.toHaveProperty('author');
+    });
+
+    it.each([
+      { label: 'absent', authorName: undefined, success: true },
+      { label: 'a name', authorName: 'Attack Discovery', success: true },
+      { label: 'exactly 256 characters', authorName: 'a'.repeat(256), success: true },
+      { label: 'empty', authorName: '', success: false },
+      { label: 'blank', authorName: '   ', success: false },
+      { label: '257 characters', authorName: 'a'.repeat(257), success: false },
+    ])('author_name $label -> success $success', ({ authorName, success }) => {
+      const input =
+        authorName === undefined ? { message: 'x' } : { message: 'x', author_name: authorName };
+
+      expect(InputSchema.safeParse(input).success).toBe(success);
+    });
+  });
+
   describe('metadata', () => {
     it('forwards input.metadata to executeAgent', async () => {
       const events$ = of({
@@ -1248,6 +1462,182 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         cachedTokens: 30,
         totalTokens: 210,
       });
+    });
+  });
+
+  describe('prompt template', () => {
+    const templateRequiredConnector = {
+      connectorId: 'daybreak',
+      metadata: { capabilities: { templates: { policy: 'required' } } },
+    };
+    const messagesConnector = { connectorId: 'default-llm', metadata: {} };
+
+    const createInference = ({
+      connector = templateRequiredConnector,
+      content = '{"verdict":"false_positive","checks":[]}',
+    }: {
+      connector?: { connectorId: string; metadata: unknown };
+      content?: string;
+    } = {}) => {
+      const chatComplete = jest.fn().mockResolvedValue({
+        content,
+        tokens: { prompt: 3, completion: 4, total: 7, cached: 1 },
+      });
+      const getConnectorById = jest.fn().mockResolvedValue(connector);
+      const getDefaultConnector = jest.fn().mockResolvedValue(connector);
+      return {
+        chatComplete,
+        getConnectorById,
+        getDefaultConnector,
+        inference: {
+          getClient: () => ({ chatComplete, getConnectorById }),
+          getDefaultConnector,
+        },
+      };
+    };
+
+    const templateInput = {
+      message: 'judge this alert',
+      template_id: '.attack-discovery-fp-tp',
+      template_version: 1,
+      template_variables: { cited_alerts: '[]' },
+    };
+
+    it('ignores template fields when the default connector accepts messages', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const { inference, chatComplete } = createInference({ connector: messagesConnector });
+      const step = getRunAgentStepDefinition({
+        internalStart: { execution, inference },
+      } as any);
+
+      await step.handler(createContext({ input: templateInput }));
+
+      expect(chatComplete).not.toHaveBeenCalled();
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ connectorId: undefined }),
+        })
+      );
+    });
+
+    it('uses the default connector when that connector requires a template', async () => {
+      const { inference, chatComplete } = createInference();
+      const execution = createExecutionMock(of());
+      const step = getRunAgentStepDefinition({
+        internalStart: { execution, inference },
+      } as any);
+
+      const res = await step.handler(createContext({ input: templateInput }));
+
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorId: 'daybreak',
+          template: expect.objectContaining({ id: '.attack-discovery-fp-tp', version: 1 }),
+        })
+      );
+      expect(res.output?.message).toContain('false_positive');
+    });
+
+    it('sends the step attribution and the workflow execution id', async () => {
+      const { inference, chatComplete } = createInference();
+      const step = getRunAgentStepDefinition({
+        internalStart: { execution: createExecutionMock(of()), inference },
+      } as any);
+
+      await step.handler(
+        createContext({
+          input: templateInput,
+          config: {
+            'connector-id': 'daybreak',
+            'plugin-id': 'alertzero_fp_tp_analysis',
+            'aggregate-by': 'alertzero_parent',
+          },
+        })
+      );
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: {
+            connectorTelemetry: expect.objectContaining({
+              pluginId: 'alertzero_fp_tp_analysis',
+              aggregateBy: 'alertzero_parent',
+              interactionId: 'exec-1',
+            }),
+          },
+        })
+      );
+    });
+
+    it('rejects a template response that does not match the output schema', async () => {
+      const { inference } = createInference({ content: '{"verdict":"false_positive"}' });
+      const step = getRunAgentStepDefinition({
+        internalStart: { execution: createExecutionMock(of()), inference },
+      } as any);
+
+      const res = await step.handler(
+        createContext({
+          input: {
+            ...templateInput,
+            schema: {
+              type: 'object',
+              required: ['checks'],
+              properties: { checks: { type: 'array' }, verdict: { type: 'string' } },
+            },
+          },
+          config: { 'connector-id': 'daybreak' },
+        })
+      );
+
+      expect(res.error?.message).toContain('does not match the output schema');
+    });
+
+    it('stores a conversation when create-conversation is set', async () => {
+      const { inference } = createInference({ content: 'plain answer' });
+      const conversation = {
+        id: 'c-template',
+        agent_id: 'agent-builder',
+        user: { id: 'user-1', username: 'user' },
+      };
+      const create = jest.fn().mockResolvedValue(conversation);
+      const appendEvents = jest.fn().mockResolvedValue(conversation);
+      const conversations = {
+        getScopedClient: jest.fn().mockResolvedValue({ create, appendEvents, get: jest.fn() }),
+      };
+      const execution = createExecutionMock(of());
+      const step = getRunAgentStepDefinition({
+        internalStart: { execution, inference, conversations },
+      } as any);
+
+      const res = await step.handler(
+        createContext({
+          input: { ...templateInput, template_id: '.attack-discovery-fp-tp' },
+          config: { 'connector-id': 'daybreak', 'create-conversation': true },
+        })
+      );
+
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({ agent_id: expect.any(String), rounds: [] }),
+        { source: 'workflow' }
+      );
+      expect(appendEvents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'c-template',
+          events: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'user_message',
+              data: { message: 'judge this alert' },
+            }),
+          ]),
+        }),
+        { source: 'workflow' }
+      );
+      expect(res.output?.conversation_id).toBe('c-template');
     });
   });
 });

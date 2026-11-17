@@ -31,9 +31,13 @@ export type {
   FlyoutBodySubsectionProps,
   FlyoutBodyAccordionProps,
   FlyoutFooterProps,
+  FlyoutFooterPrimaryActionColor,
   FlyoutFooterPrimaryActionProps,
   FlyoutFooterSecondaryActionProps,
+  FlyoutFooterAiActionIconType,
   FlyoutFooterPrimaryActionMenuProps,
   FlyoutFooterMenuPanel,
   FlyoutFooterMenuItem,
+  FlyoutFooterMenuCustomItem,
+  FlyoutFooterMenuItemRenderContext,
 } from './src/types';

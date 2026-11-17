@@ -13,6 +13,7 @@ import type {
   StacktracesLocator,
   FlamegraphLocator,
 } from '@kbn/observability-shared-plugin/common';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 
 const PROFILING_FEEDBACK_URL = 'https://ela.st/profiling-feedback';
@@ -23,6 +24,7 @@ interface Props {
   to: string;
   profilingLinkLocator: FlamegraphLocator | TopNFunctionsLocator | StacktracesLocator;
   profilingLinkLabel: string;
+  schema?: ProfilingSchema;
 }
 
 export function ProfilingLinks({
@@ -31,11 +33,13 @@ export function ProfilingLinks({
   to,
   profilingLinkLocator,
   profilingLinkLabel,
+  schema,
 }: Props) {
   const profilingLinkURL = profilingLinkLocator.getRedirectUrl({
     kuery: `${HOST_NAME_FIELD}:"${hostname}"`,
     rangeFrom: from,
     rangeTo: to,
+    schema,
   });
 
   return (

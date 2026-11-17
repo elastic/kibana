@@ -174,6 +174,16 @@ export class DiscoverPage extends DiscoverApp {
   }
 
   /**
+   * Saves a library session from the embedded Discover editor and returns to the dashboard.
+   * Unlike {@link saveAndReturnToEditor}, a by-reference panel opens the save modal first.
+   */
+  async saveEditorSessionAndReturn() {
+    await this.clickAppMenuItem('discoverSaveButton');
+    await this.page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'visible' });
+    await this.confirmSaveModal();
+  }
+
+  /**
    * Clicks "Save and return" in the top nav, available when Discover is opened as
    * the editor for a by-value dashboard panel. Transfers the panel state straight
    * back to the dashboard without opening a save modal.

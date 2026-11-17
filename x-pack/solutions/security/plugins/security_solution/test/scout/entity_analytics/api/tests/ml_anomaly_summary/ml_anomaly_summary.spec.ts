@@ -27,9 +27,15 @@ import {
 import {
   CAROL_EUID,
   DAVID_EUID,
+  DAVID_GEO_EVENT_IDS,
+  HENRY_EUID,
+  POPULATION_ANOMALY_ACTUAL,
+  POPULATION_ANOMALY_RECORD_ID,
+  POPULATION_ANOMALY_TYPICAL,
   WIN_APP01_EUID,
   NO_BEHAVIORS_EUID,
   OR_SEMANTICS_HOST_EUID,
+  davidGeoSourceTestData,
   sourceTestData,
   anomalyTestData,
   entityTestData,
@@ -186,7 +192,7 @@ apiTest.describe(
 
       // Index source events that determine baseline behavior for the rare detector.
       log.debug(`Indexing test source events...`);
-      const sourceData = sourceTestData();
+      const sourceData = [...sourceTestData(), ...davidGeoSourceTestData()];
       await esClient.bulk({
         operations: sourceData.flatMap((data) => [
           { create: { _index: SOURCE_EVENTS_INDEX } },
@@ -250,7 +256,9 @@ apiTest.describe(
       await esClient
         .deleteByQuery({
           index: SOURCE_EVENTS_INDEX,
-          query: { terms: { 'event.id': SOURCE_EVENT_IDS as unknown as string[] } },
+          query: {
+            terms: { 'event.id': [...SOURCE_EVENT_IDS, ...DAVID_GEO_EVENT_IDS] },
+          },
           refresh: true,
         })
         .catch(() => {});
@@ -288,6 +296,7 @@ apiTest.describe(
         expect(body.entity_id).toBe(CAROL_EUID);
         expect(Array.isArray(body.anomalies)).toBe(true);
         expect(body.anomalies).toHaveLength(2);
+        expect(body.anomalies.every((a) => a.entityId === CAROL_EUID)).toBe(true);
 
         const jobIds = body.anomalies.map((a) => a.jobId);
         expect(jobIds).toContain('auth_high_count_logon_events_ea');
@@ -334,11 +343,177 @@ apiTest.describe(
 
         const anomaly = body.anomalies[0];
         expect(anomaly.jobId).toBe('suspicious_login_activity_ea');
+        expect(anomaly.entityId).toBe(DAVID_EUID);
         expect(anomaly.jobName).toBe('Unusual Login Activity');
         expect(anomaly.threatTactics).toStrictEqual(['Credential Access']);
         expect(anomaly.threatTechniques).toStrictEqual(['Brute Force']);
       }
     );
+
+    apiTest(
+      'Anomaly summary API: mode=resolved returns the combined anomalies of the resolution group',
+      async ({ apiClient }) => {
+        // David's entity record resolves to Carol, so Carol's group covers both users.
+        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: { mode: 'resolved' },
+        });
+
+        expect(response.statusCode).toBe(200);
+        const body = response.body as AnomalySummaryResponse;
+        expect(body.entity_id).toBe(CAROL_EUID);
+        expect(body.total).toBe(3);
+        // Each record is attributed to the group member it matched (the named query), not
+        // to the requested id.
+        expect(
+          body.anomalies.map((a) => [a.jobId, a.entityId]).sort(([a], [b]) => a.localeCompare(b))
+        ).toStrictEqual([
+          ['auth_high_count_logon_events_ea', CAROL_EUID],
+          ['pad_windows_rare_region_name_by_user_ea', CAROL_EUID],
+          ['suspicious_login_activity_ea', DAVID_EUID],
+        ]);
+      }
+    );
+
+    apiTest(
+      'Anomaly summary API: mode=resolved for an alias returns only its own anomalies',
+      async ({ apiClient }) => {
+        // Only entities resolved *to* the requested id are included; an alias does not expand
+        // to its target's group.
+        const response = await apiClient.post(buildUrl(DAVID_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: { mode: 'resolved' },
+        });
+
+        expect(response.statusCode).toBe(200);
+        const body = response.body as AnomalySummaryResponse;
+        expect(body.entity_id).toBe(DAVID_EUID);
+        expect(body.total).toBe(1);
+        expect(body.anomalies[0].jobId).toBe('suspicious_login_activity_ea');
+        expect(body.anomalies[0].entityId).toBe(DAVID_EUID);
+      }
+    );
+
+    apiTest(
+      'Anomaly summary API: mode=resolved enriches baselines from the source events of every group member',
+      async ({ apiClient, config }) => {
+        apiTest.skip(
+          config.isCloud && config.serverless,
+          'Skipped on serverless MKI — ML datafeed setup is not properly supported'
+        );
+        const getRareAnomaly = async (body: Record<string, unknown>) => {
+          const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+            headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+            responseType: 'json',
+            body,
+          });
+          expect(response.statusCode).toBe(200);
+          return (response.body as AnomalySummaryResponse).anomalies.find(
+            (a) => a.jobId === 'pad_windows_rare_region_name_by_user_ea'
+          );
+        };
+
+        // Carol alone: 3 'New York' events, 1 'Crimea' event.
+        const single = await getRareAnomaly({ mode: 'single' });
+        expect(single?.baselineValues).toStrictEqual(['New York']);
+        expect(single?.anomalousValueCount).toBe(1);
+
+        // Carol's group also includes David: 4 'Texas' events outrank 'New York', and his
+        // 'Crimea' event adds to the anomalous value count.
+        const resolved = await getRareAnomaly({ mode: 'resolved' });
+        expect(resolved?.entityId).toBe(CAROL_EUID);
+        expect(resolved?.anomalousValue).toBe('Crimea');
+        expect(resolved?.baselineValues).toStrictEqual(['Texas', 'New York']);
+        expect(resolved?.anomalousValueCount).toBe(2);
+      }
+    );
+
+    apiTest(
+      'Anomaly summary API: lists population-analysis records whose actual/typical live only in causes',
+      async ({ apiClient }) => {
+        // Henry's only anomaly comes from auth_rare_hour_for_a_user_ea, a population job
+        // (`over_field_name`). ML writes `actual` / `typical` / `by_field_value` on `causes[]` for
+        // such records, not at the top level. The page must contain every record the query counts
+        // in `total`, completed from Henry's cause, rather than reporting total=1 and an empty page.
+        const response = await apiClient.post(buildUrl(HENRY_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(response.statusCode).toBe(200);
+        const body = response.body as AnomalySummaryResponse;
+        expect(body.entity_id).toBe(HENRY_EUID);
+        expect(body.total).toBe(1);
+        expect(body.anomalies).toHaveLength(body.total);
+
+        const [anomaly] = body.anomalies;
+        expect(anomaly.recordId).toBe(POPULATION_ANOMALY_RECORD_ID);
+        expect(anomaly.jobId).toBe('auth_rare_hour_for_a_user_ea');
+        expect(anomaly.jobName).toBe('Unusual Hour for a User to Logon');
+        expect(anomaly.entityId).toBe(HENRY_EUID);
+        expect(anomaly.detectorFunction).toBe('time_of_day');
+        expect(anomaly.overFieldName).toBe('source.geo.region_iso_code');
+        expect(anomaly.overFieldValue).toBe('US-CA');
+        // Dimensions and values come from Henry's cause, not the first cause (olivia.perez).
+        expect(anomaly.byFieldName).toBe('user.name');
+        expect(anomaly.byFieldValue).toBe('henry.clark');
+        expect(anomaly.actual).toStrictEqual([POPULATION_ANOMALY_ACTUAL]);
+        expect(anomaly.typical).toStrictEqual([POPULATION_ANOMALY_TYPICAL]);
+      }
+    );
+
+    apiTest(
+      'Anomaly summary API: derives baseline and anomalous value of population-analysis records from causes',
+      async ({ apiClient, config }) => {
+        apiTest.skip(
+          config.isCloud && config.serverless,
+          'Skipped on serverless MKI — ML datafeed setup is not properly supported'
+        );
+        const response = await apiClient.post(buildUrl(HENRY_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(response.statusCode).toBe(200);
+        const [anomaly] = (response.body as AnomalySummaryResponse).anomalies;
+        // time_ detectors use the record's own typical/actual as baseline/anomalous value.
+        expect(anomaly.baselineValues).toStrictEqual([String(POPULATION_ANOMALY_TYPICAL)]);
+        expect(anomaly.anomalousValue).toBe(String(POPULATION_ANOMALY_ACTUAL));
+      }
+    );
+
+    apiTest(
+      'Anomaly overview API: counts and lists population-analysis records consistently with the summary',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(buildOverviewUrl(HENRY_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as AnomalyOverviewResponse;
+        expect(body.totalAnomaliesCount).toBe(1);
+        expect(body.recentAnomalies).toHaveLength(1);
+        expect(body.recentAnomalies[0].recordId).toBe(POPULATION_ANOMALY_RECORD_ID);
+        // time_of_day: `actual` (seconds since midnight, from causes[0]) formatted as HH:MM.
+        expect(body.recentAnomalies[0].anomalousValue).toBe('03:11');
+      }
+    );
+
+    apiTest('Anomaly summary API: returns 400 for an unknown mode', async ({ apiClient }) => {
+      const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+        headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+        responseType: 'json',
+        body: { mode: 'everything' },
+      });
+
+      expect(response.statusCode).toBe(400);
+    });
 
     apiTest(
       'Anomaly summary API: returns empty anomalies for entity with no anomaly records',
@@ -654,6 +829,40 @@ apiTest.describe(
         for (const count of Object.values(body.tacticCounts)) {
           expect(count).toBeGreaterThan(0);
         }
+      }
+    );
+
+    apiTest(
+      'Anomaly overview API: mode=resolved aggregates the anomalies of the resolution group',
+      async ({ apiClient }) => {
+        // Carol has 2 anomalies and her alias David has 1 (suspicious_login_activity_ea).
+        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: { mode: 'resolved' },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as AnomalyOverviewResponse;
+        expect(body.entityId).toBe(CAROL_EUID);
+        expect(body.totalAnomaliesCount).toBe(3);
+        expect(body.recentAnomalies.map((a) => a.jobId)).toContain('suspicious_login_activity_ea');
+      }
+    );
+
+    apiTest(
+      'Anomaly overview API: mode=single matches the default behaviour',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: { mode: 'single' },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as AnomalyOverviewResponse;
+        expect(body.entityId).toBe(CAROL_EUID);
+        expect(body.totalAnomaliesCount).toBe(2);
       }
     );
 

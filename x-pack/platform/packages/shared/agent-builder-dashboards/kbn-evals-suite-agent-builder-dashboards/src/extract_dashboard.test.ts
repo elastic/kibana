@@ -11,19 +11,21 @@ import {
   combineTurnSteps,
   findAskUserQuestionPrompt,
   findModeOptionIndex,
-  getAddControlsFailures,
   getAttemptedControls,
+  getControlFailures,
   getLastWrittenDashboardId,
-  getOperationFailures,
+  getDashboardFailures,
+  hasWrittenDashboard,
 } from './extract_dashboard';
+import { SECTIONED_LOGS_DASHBOARD } from './fixtures/sectioned_logs_dashboard';
 
 const generateCall = (
-  operations: unknown[],
+  controls: unknown[],
   data: Record<string, unknown> = { attachment_id: 'dash' }
 ): Record<string, unknown> => ({
   type: 'tool_call',
   tool_id: GENERATE_DASHBOARD_TOOL_ID,
-  params: { operations },
+  params: { panels: [], controls },
   results: [{ type: 'dashboard', data }],
 });
 
@@ -39,29 +41,50 @@ describe('extract dashboard helpers', () => {
     expect(getLastWrittenDashboardId([{ type: 'reasoning' }])).toBeUndefined();
   });
 
+  describe('hasWrittenDashboard', () => {
+    const steps = [generateCall([])];
+    const edited = { ...SECTIONED_LOGS_DASHBOARD, title: 'Edited' };
+
+    it('counts a generate_dashboard call that changed the seed', () => {
+      expect(
+        hasWrittenDashboard({ steps, before: SECTIONED_LOGS_DASHBOARD, dashboard: edited })
+      ).toBe(true);
+    });
+
+    it('counts a new dashboard when there is no seed', () => {
+      expect(hasWrittenDashboard({ steps, dashboard: edited })).toBe(true);
+    });
+
+    it('does not count a call that left the seed as it was', () => {
+      expect(
+        hasWrittenDashboard({
+          steps,
+          before: SECTIONED_LOGS_DASHBOARD,
+          dashboard: structuredClone(SECTIONED_LOGS_DASHBOARD),
+        })
+      ).toBe(false);
+    });
+
+    it('does not count a changed dashboard without a generate_dashboard result', () => {
+      expect(
+        hasWrittenDashboard({ steps: [], before: SECTIONED_LOGS_DASHBOARD, dashboard: edited })
+      ).toBe(false);
+      expect(hasWrittenDashboard({ steps })).toBe(false);
+    });
+  });
+
   it('lists attempted controls with their call index and user_requested flag', () => {
     const steps = [
       generateCall([
-        { operation: 'add_panels', panels: [] },
         {
-          operation: 'add_controls',
-          controls: [
-            {
-              type: 'options_list_control',
-              field_name: 'status_code',
-              index: 'logs',
-              user_requested: true,
-            },
-            { type: 'time_slider_control' },
-          ],
+          type: 'options_list_control',
+          field_name: 'status_code',
+          index: 'logs',
+          user_requested: true,
         },
+        { type: 'time_slider_control' },
       ]),
-      generateCall([
-        {
-          operation: 'add_controls',
-          controls: [{ type: 'options_list_control', field_name: 'response', index: 'logs' }],
-        },
-      ]),
+      generateCall([{ type: 'options_list_control', field_name: 'response', index: 'logs' }]),
     ];
     expect(getAttemptedControls(steps)).toEqual([
       { type: 'options_list_control', field: 'status_code', userRequested: true, call: 0 },
@@ -70,21 +93,59 @@ describe('extract dashboard helpers', () => {
     ]);
   });
 
-  it('reads reported failures with their call index and filters by operation type', () => {
+  it('reads reported failures with their call index and keeps the control failures', () => {
+    const sent = (field: string) => ({ type: 'options_list_control', field_name: field });
     const steps = [
-      generateCall([], { attachment_id: 'dash' }),
-      generateCall([], {
-        attachment_id: 'dash',
-        failures: [
-          { type: 'add_controls', identifier: 'a, b', error: 'Not mapped on index "logs".' },
-          { type: 'add_panels', identifier: 'panels[0]', error: 'boom' },
-          { type: 'add_controls', identifier: 3 },
-        ],
-      }),
+      generateCall([sent('a')], { attachment_id: 'dash' }),
+      generateCall(
+        [sent('a'), sent('b'), { type: 'time_slider_control' }, { ...sent('c'), id: 'os' }],
+        {
+          attachment_id: 'dash',
+          failures: [
+            {
+              type: 'upsert_dashboard',
+              kind: 'control',
+              identifier: 'controls[1]',
+              error: 'Not mapped.',
+            },
+            { type: 'upsert_dashboard', identifier: 'panel-1', error: 'boom' },
+            {
+              type: 'upsert_dashboard',
+              kind: 'control',
+              identifier: 'controls[2]',
+              error: 'One time slider.',
+            },
+            { type: 'upsert_dashboard', kind: 'control', identifier: 'os', error: 'Not mapped.' },
+            { type: 'upsert_dashboard', identifier: 3 },
+          ],
+        }
+      ),
     ];
-    expect(getOperationFailures(steps)).toHaveLength(2);
-    expect(getAddControlsFailures(steps)).toEqual([
-      { type: 'add_controls', identifier: 'a, b', error: 'Not mapped on index "logs".', call: 1 },
+    expect(getDashboardFailures(steps)).toHaveLength(4);
+    expect(getControlFailures(steps)).toEqual([
+      {
+        type: 'upsert_dashboard',
+        kind: 'control',
+        identifier: 'controls[1]',
+        error: 'Not mapped.',
+        field: 'b',
+        call: 1,
+      },
+      {
+        type: 'upsert_dashboard',
+        kind: 'control',
+        identifier: 'controls[2]',
+        error: 'One time slider.',
+        call: 1,
+      },
+      {
+        type: 'upsert_dashboard',
+        kind: 'control',
+        identifier: 'os',
+        error: 'Not mapped.',
+        field: 'c',
+        call: 1,
+      },
     ]);
   });
 

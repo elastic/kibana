@@ -19,12 +19,12 @@ type Props = UnifiedReferenceAttachmentViewProps<
  * Component lazy loaded when rendering a unified `security.attack` attachment.
  * Renders the attack preview card in the case activity log.
  */
-const AttachmentChildren = ({ attachmentId, metadata }: Props) => {
+const AttachmentChildren = ({ metadata }: Props) => {
   if (!metadata) {
     return null;
   }
 
-  return <AttackChildren id={attachmentId} metadata={metadata} />;
+  return <AttackChildren metadata={metadata} />;
 };
 
 // eslint-disable-next-line import/no-default-export

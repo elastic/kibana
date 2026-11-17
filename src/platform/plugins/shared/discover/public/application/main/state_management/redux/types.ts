@@ -285,12 +285,18 @@ export enum TabsBarVisibility {
   hidden = 'hidden',
 }
 
+export interface SaveSessionModalState {
+  isOpen: boolean;
+  initialTitle: string | undefined;
+  initialCopyOnSave: boolean;
+}
+
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasDataView: boolean };
   userId: string | undefined;
   spaceId: string | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;
-  draftSessionTitle: string | undefined;
+  saveSessionModal: SaveSessionModalState;
   hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];

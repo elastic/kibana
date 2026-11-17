@@ -10,6 +10,7 @@ import { runMemoryOptimize } from '../memory/register_memory';
 import { memoryOptimizeStepDefinition } from './memory_optimize';
 
 jest.mock('../memory/register_memory', () => ({
+  isMemoryOptimizeSkipped: jest.requireActual('../memory/register_memory').isMemoryOptimizeSkipped,
   runMemoryOptimize: jest.fn().mockResolvedValue({
     recalledCount: 3,
     loadedCount: 3,
@@ -359,6 +360,31 @@ describe('memoryOptimizeStepDefinition', () => {
       workflow_execution_id: 'workflow-exec-1',
       outcome: 'failure',
     });
+  });
+
+  it('reports no telemetry for a round it skipped because the conversation is unreadable', async () => {
+    runMemoryOptimizeMock.mockResolvedValueOnce({ skipped: 'conversation_unreadable' });
+    const definition = memoryOptimizeStepDefinition({
+      getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
+      logger: loggerMock.create(),
+      telemetry: telemetry as never,
+    });
+
+    await expect(
+      definition.handler(
+        createContext({
+          prompt: 'why?',
+          response: 'because',
+          agent_id: 'nightshift.investigation',
+          conversation_id: 'private-1',
+          round_id: 'round-1',
+        })
+      )
+    ).resolves.toEqual({ output: { status: 'ok', skipped: true } });
+    expect(telemetry.reportSemanticMemoryOptimized).not.toHaveBeenCalled();
   });
 
   it('reports one failure event and fails the step when required writes fail', async () => {

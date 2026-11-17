@@ -9,6 +9,7 @@
 
 import type { Client as ESClient } from '@elastic/elasticsearch';
 import { SCOUT_TEST_EVENTS_INDEX_PATTERN } from '@kbn/scout-info';
+import type { SetupBuilds } from './breakages';
 import { ESQL_ROW_LIMIT, inList, quoteEsqlString } from './esql';
 import { buildExecutionModels } from './execution_model';
 import type {
@@ -60,7 +61,7 @@ export interface TestMetadataRow {
 }
 
 /** What the Jest reporter writes as the suite title of a test outside any describe block. */
-const UNKNOWN_SUITE_TITLE = 'unknown';
+export const UNKNOWN_SUITE_TITLE = 'unknown';
 
 const asArray = (value: string | string[] | null | undefined): string[] => {
   if (value === null || value === undefined) return [];
@@ -68,7 +69,7 @@ const asArray = (value: string | string[] | null | undefined): string[] => {
 };
 
 /** Tests split by execution model, so each group can be queried the way its framework requires. */
-const groupByExecutionModel = (
+export const groupByExecutionModel = (
   tests: ReadonlyArray<{ testId: string; framework: TestFramework }>
 ): Array<{ frameworks: readonly TestFramework[]; testIds: string[] }> =>
   buildExecutionModels([...new Set(tests.map((test) => test.framework))]).map((model) => ({
@@ -191,6 +192,16 @@ export const buildBranchStatsQuery = (
   ].join(' | ');
 };
 
+/** A pipeline, config file and Scout target, as one string; a build runs a test once per setup. */
+const SETUP_EXPRESSION = `CONCAT(${[
+  'buildkite.pipeline.slug',
+  'test_run.config.file.path',
+  'test_run.target.mode',
+  'test_run.target.type',
+]
+  .map((field) => `COALESCE(${field}, "-")`)
+  .join(', " ", ')})`;
+
 /** Per test and branch, how many setups (pipeline, config, target) ran it and skipped it last. */
 export const buildBranchSetupsQuery = (
   scope: FlakyTestQueryScope,
@@ -198,19 +209,13 @@ export const buildBranchSetupsQuery = (
   testIds: readonly string[]
 ): string => {
   const [model] = buildExecutionModels(frameworks);
-  const setupParts = [
-    'buildkite.pipeline.slug',
-    'test_run.config.file.path',
-    'test_run.target.mode',
-    'test_run.target.type',
-  ].map((field) => `COALESCE(${field}, "-")`);
 
   return [
     `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
     `WHERE ${[...scopeClauses(scope), model.runFilter, `test.id IN (${inList(testIds)})`].join(
       ' AND '
     )}`,
-    `EVAL status = ${RUN_STATUS}, setup = CONCAT(${setupParts.join(', " ", ')})`,
+    `EVAL status = ${RUN_STATUS}, setup = ${SETUP_EXPRESSION}`,
     'STATS latest_status = LAST(status, @timestamp) BY test.id, buildkite.branch, setup',
     'STATS setups = COUNT(*), skipped_setups = SUM(CASE(latest_status == "skipped", 1, 0))' +
       ' BY test.id, buildkite.branch',
@@ -270,7 +275,8 @@ export const buildTestMetadataQuery = (
   [
     `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
     `WHERE ${[...scopeClauses(scope), anyFailureFilter(frameworks)].join(' AND ')}`,
-    'STATS title = MAX(test.title.keyword),' +
+    // The text field: not every index has the `.keyword` sub-field
+    'STATS title = MAX(test.title),' +
       ' suite_title = MAX(suite.title.keyword),' +
       ' file_path = MAX(test.file.path),' +
       ' config_path = MAX(test_run.config.file.path),' +
@@ -282,7 +288,7 @@ export const buildTestMetadataQuery = (
     `LIMIT ${ESQL_ROW_LIMIT}`,
   ].join(' | ');
 
-const runEsql = async <T extends Record<string, unknown>>(
+export const runEsql = async <T extends Record<string, unknown>>(
   es: ESClient,
   query: string
 ): Promise<T[]> => {
@@ -527,6 +533,120 @@ export const fetchBranchCounts = async (
   return byTest;
 };
 
+/**
+ * One row per build of the given tests of one execution model, per branch and setup (pipeline,
+ * config file and Scout target): whether the test failed in the build, a failure that passed on
+ * a retry included. Over the same executions as the per-branch counts. Only setups where the test
+ * failed at least once: the others have no breakage, and they are most of the rows.
+ */
+export const buildSetupBuildsQuery = (
+  scope: FlakyTestQueryScope,
+  frameworks: readonly TestFramework[],
+  testIds: readonly string[]
+): string => {
+  const [model] = buildExecutionModels(frameworks);
+
+  return [
+    `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
+    `WHERE ${[
+      ...scopeClauses(scope),
+      model.executionFilter,
+      `test.id IN (${inList(testIds)})`,
+    ].join(' AND ')}`,
+    `EVAL failed = ${model.failedExpression}, setup = ${SETUP_EXPRESSION}`,
+    'STATS failed = MAX(failed), ran_at = MIN(@timestamp),' +
+      ' failed_at = MAX(CASE(failed == 1, @timestamp, NULL))' +
+      ' BY test.id, buildkite.branch, setup, buildkite.build.id, buildkite.build.number',
+    'INLINE STATS setup_failed = MAX(failed) BY test.id, buildkite.branch, setup',
+    'WHERE setup_failed == 1',
+    'DROP setup_failed',
+    'RENAME test.id AS test_id,' +
+      ' buildkite.branch AS branch,' +
+      ' buildkite.build.id AS build_id,' +
+      ' buildkite.build.number AS build_number',
+    `LIMIT ${ESQL_ROW_LIMIT}`,
+  ].join(' | ');
+};
+
+/**
+ * A flaky test runs in up to about 1,200 builds over a week, counted across the setups where it
+ * failed, on the busiest pipelines, so this many tests per query stays under the row limit.
+ */
+const TESTS_PER_SETUP_BUILDS_QUERY = 4;
+
+const chunk = <T>(values: readonly T[], size: number): T[][] =>
+  Array.from({ length: Math.ceil(values.length / size) }, (_, index) =>
+    values.slice(index * size, (index + 1) * size)
+  );
+
+export interface SetupBuildsResult {
+  /** Per test, its builds in each branch and setup where it failed, oldest first. */
+  byTest: Map<string, SetupBuilds[]>;
+  /** Tests whose query hit the row limit; their builds are left out, as they would have gaps. */
+  truncated: string[];
+}
+
+/**
+ * Reads every build of the given tests in each branch and setup where they failed, in batches per
+ * execution model.
+ */
+export const fetchSetupBuilds = async (
+  es: ESClient,
+  scope: FlakyTestQueryScope,
+  tests: ReadonlyArray<{ testId: string; framework: TestFramework }>
+): Promise<SetupBuildsResult> => {
+  const results = await Promise.all(
+    groupByExecutionModel(tests).flatMap(({ frameworks, testIds }) =>
+      chunk(testIds, TESTS_PER_SETUP_BUILDS_QUERY).map(async (batch) => ({
+        batch,
+        records: await runEsql<{
+          test_id: string;
+          branch: string | null;
+          setup: string;
+          build_id: string | null;
+          build_number: number | null;
+          failed: number;
+          ran_at: string;
+          failed_at: string | null;
+        }>(es, buildSetupBuildsQuery(scope, frameworks, batch)),
+      }))
+    )
+  );
+
+  const byTest = new Map<string, SetupBuilds[]>();
+  const truncated: string[] = [];
+  const bySetup = new Map<string, SetupBuilds>();
+  for (const { batch, records } of results) {
+    if (records.length >= ESQL_ROW_LIMIT) {
+      truncated.push(...batch);
+      continue;
+    }
+    for (const record of records) {
+      if (record.branch === null || record.build_id === null || record.build_number === null) {
+        continue;
+      }
+      const key = [record.test_id, record.branch, record.setup].join('\n');
+      let setupBuilds = bySetup.get(key);
+      if (!setupBuilds) {
+        setupBuilds = { branch: record.branch, setup: record.setup, builds: [] };
+        bySetup.set(key, setupBuilds);
+        byTest.set(record.test_id, [...(byTest.get(record.test_id) ?? []), setupBuilds]);
+      }
+      setupBuilds.builds.push({
+        buildId: record.build_id,
+        buildNumber: record.build_number,
+        failed: record.failed === 1,
+        ranAt: new Date(record.ran_at),
+        failedAt: record.failed_at === null ? undefined : new Date(record.failed_at),
+      });
+    }
+  }
+  for (const { builds } of bySetup.values()) {
+    builds.sort((a, b) => a.buildNumber - b.buildNumber);
+  }
+  return { byTest, truncated };
+};
+
 /** What the reporters record when a run has no Scout target; a missing field is grouped with it. */
 const UNKNOWN_TARGET = 'unknown';
 
@@ -639,11 +759,12 @@ const errorHeadExpression = (): string => {
 /**
  * The distinct errors of the given tests, per pipeline, across every pipeline and branch in the
  * window. Failures are attempt-level `test-end` documents with a message, for every framework
- * (Playwright attempts carry the error, its per-run outcome documents do not), so a Playwright
- * run that failed twice before passing counts two failures. Grouped by pipeline in the query and
+ * (Playwright attempts carry the error, its per-run outcome documents do not), counted as distinct
+ * builds so that a retry that failed again counts once. Grouped by pipeline in the query and
  * folded per error afterwards; a build belongs to one pipeline, so the distinct build counts add
- * up. The representative message is the newest failure's, cut to a bounded length as text cannot
- * be aggregated whole.
+ * up. The build ids let a consumer count the builds of an error shared by several tests. The
+ * representative message is the newest failure's, cut to a bounded length as text cannot be
+ * aggregated whole.
  */
 export const buildTestErrorsQuery = (
   window: Pick<FlakyTestQueryScope, 'from' | 'to'>,
@@ -664,8 +785,8 @@ export const buildTestErrorsQuery = (
     'EVAL lines = SPLIT(event.error.message, "\\n"),' +
       ` head = ${errorHeadExpression()},` +
       ` message = LEFT(event.error.message, ${ERROR_MESSAGE_CHARACTERS})`,
-    'STATS failures = COUNT(*),' +
-      ' builds = COUNT_DISTINCT(buildkite.build.id),' +
+    'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
+      ' build_ids = VALUES(buildkite.build.id),' +
       ' branches = VALUES(buildkite.branch),' +
       ' targets = VALUES(test_run.target.mode),' +
       ' first_failed_at = MIN(@timestamp),' +
@@ -682,8 +803,8 @@ interface TestErrorRow extends Record<string, unknown> {
   test_id: string;
   head: string | null;
   pipeline: string | null;
-  failures: number;
   builds: number;
+  build_ids: string | string[] | null;
   branches: string | string[] | null;
   targets: string | string[] | null;
   first_failed_at: string;
@@ -698,13 +819,20 @@ const foldErrorRows = (key: string, rows: readonly TestErrorRow[]): FlakyTestErr
   const newest = [...rows].sort((a, b) => b.last_failed_at.localeCompare(a.last_failed_at))[0];
   const byPipeline = rows
     .flatMap((row) =>
-      row.pipeline ? [{ pipeline: row.pipeline, failuresCount: row.failures }] : []
+      row.pipeline
+        ? [
+            {
+              pipeline: row.pipeline,
+              buildsCount: row.builds,
+              buildIds: [...asArray(row.build_ids)].sort(),
+            },
+          ]
+        : []
     )
-    .sort((a, b) => b.failuresCount - a.failuresCount || a.pipeline.localeCompare(b.pipeline));
+    .sort((a, b) => b.buildsCount - a.buildsCount || a.pipeline.localeCompare(b.pipeline));
   return {
     key,
     message: newest.message ?? '',
-    failuresCount: rows.reduce((sum, row) => sum + row.failures, 0),
     buildsCount: rows.reduce((sum, row) => sum + row.builds, 0),
     byPipeline,
     branches: [...new Set(rows.flatMap((row) => asArray(row.branches)))].sort(),
@@ -718,7 +846,7 @@ const foldErrorRows = (key: string, rows: readonly TestErrorRow[]): FlakyTestErr
   };
 };
 
-/** Distinct errors keyed by test id, most failures first. */
+/** Distinct errors keyed by test id, most builds first. */
 export const fetchTestErrors = async (
   es: ESClient,
   window: Pick<FlakyTestQueryScope, 'from' | 'to'>,
@@ -757,7 +885,7 @@ export const fetchTestErrors = async (
       testId,
       [...byKey.entries()]
         .map(([key, rows]) => foldErrorRows(key, rows))
-        .sort((a, b) => b.failuresCount - a.failuresCount || b.buildsCount - a.buildsCount)
+        .sort((a, b) => b.buildsCount - a.buildsCount || a.key.localeCompare(b.key))
     );
   }
   return byTest;

@@ -53,13 +53,11 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_SIEM_READINESS_SETTING,
   ENABLE_DE_HEALTH_UI_SETTING,
-  ENABLE_NEW_FLYOUT_SETTING,
   ENABLE_NEWS_FEED_SETTING,
   ENABLE_RULE_CHANGES_HISTORY_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
@@ -86,7 +84,7 @@ type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
  * Advanced Setting.
  *
  * Registered synchronously as part of the `securityUiSettings` object, positioned
- * immediately after `enableAlertsAndAttacksAlignment`. The Advanced Settings UI
+ * immediately before `enableAssetInventory`. The Advanced Settings UI
  * renders settings in server registration order (the `order` field is not honored
  * by the current management UI), so registering it here — rather than via a
  * deferred continuation — is what keeps it in the expected position.
@@ -267,34 +265,9 @@ export const initUiSettings = (
       solutionViews: ['classic', 'security'],
     },
     ...getDefaultColdAndFrozenTiersSettings(),
-    ...(experimentalFeatures.enableAlertsAndAttacksAlignment && {
-      [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: {
-        name: i18n.translate(
-          'xpack.securitySolution.uiSettings.enableAlertsAndAttacksAlignmentLabel',
-          {
-            defaultMessage: 'Enable alerts and attacks alignment',
-          }
-        ),
-        description: i18n.translate(
-          'xpack.securitySolution.uiSettings.enableAlertsAndAttacksAlignmentDescription',
-          {
-            defaultMessage:
-              'Enabling this setting will reveal a new Attacks page under the Detections navigation item. Similarly, the Alerts page will be part of the Detections navigation item.',
-          }
-        ),
-        type: 'boolean',
-        value: true,
-        category: [APP_ID],
-        requiresPageReload: true,
-        schema: schema.boolean(),
-        solutionViews: ['classic', 'security'],
-      },
-    }),
-    // Registered here (immediately after `enableAlertsAndAttacksAlignment`, before
-    // `enableAssetInventory`) so it renders in that position: the Advanced Settings
-    // UI displays settings in server registration order, not by the `order` field.
-    // When `enableAlertsAndAttacksAlignment` is disabled its entry is absent, so this
-    // setting falls into the same slot, immediately before `enableAssetInventory`.
+    // Registered here (immediately before `enableAssetInventory`) so it renders in that
+    // position: the Advanced Settings UI displays settings in server registration order,
+    // not by the `order` field.
     [ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING]: attackDiscoveryWorkflowsSetting,
     [ENABLE_ASSET_INVENTORY_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
@@ -394,27 +367,6 @@ export const initUiSettings = (
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
         technicalPreview: true,
-      },
-    }),
-    ...(!experimentalFeatures.newFlyoutSystemDisabled && {
-      [ENABLE_NEW_FLYOUT_SETTING]: {
-        name: i18n.translate('xpack.securitySolution.uiSettings.enableNewFlyoutLabel', {
-          defaultMessage: 'Enable new flyout',
-        }),
-        description: i18n.translate(
-          'xpack.securitySolution.uiSettings.enableNewFlyoutDescription',
-          {
-            defaultMessage:
-              '<p>Enables the new flyout system for document details in Security Solution.</p>',
-            values: { p: (chunks) => `<p>${chunks}</p>` },
-          }
-        ),
-        type: 'boolean',
-        value: true,
-        category: [APP_ID],
-        requiresPageReload: true,
-        schema: schema.boolean(),
-        solutionViews: ['classic', 'security'],
       },
     }),
     // TODO(rule-changes-history GA): remove this setting and its call sites (including alerting `log_rule_changes.ts`)

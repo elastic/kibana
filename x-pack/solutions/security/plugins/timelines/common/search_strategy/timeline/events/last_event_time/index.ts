@@ -6,7 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { Inspect, Maybe } from '../../../common';
+import type { Maybe } from '@kbn/securitysolution-timeline-common';
+import type { Inspect } from '../../../common';
 
 export interface LastTimeDetails {
   hostName?: Maybe<string>;

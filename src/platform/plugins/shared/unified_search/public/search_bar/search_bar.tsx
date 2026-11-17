@@ -34,13 +34,13 @@ import type {
   SavedQueryTimeFilter,
 } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { QuerySource, type ESQLQueryStats } from '@kbn/esql-types';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import type { SavedQueryMeta } from '../saved_query_form';
@@ -49,7 +49,11 @@ import { SavedQueryManagementList } from '../saved_query_management';
 import type { QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
-import type { QueryBarTopRowProps, ShowDatePicker } from '../query_string_input/query_bar_top_row';
+import type {
+  LegacyDatePickerProps,
+  QueryBarTopRowProps,
+  ShowDatePicker,
+} from '../query_string_input/query_bar_top_row';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { searchBarStyles } from './search_bar.styles';
@@ -67,7 +71,10 @@ export interface SearchBarInjectedDeps {
 }
 
 export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
-  indexPatterns?: DataView[];
+  /**
+   * What to filter on: a `DataView`, or for an ES|QL source the value of `source.toFilterableSource()`.
+   */
+  indexPatterns?: FilterableSource[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   dataViewPickerOverride?: React.ReactNode;
@@ -91,6 +98,15 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * Defaults to true.
    */
   showTimeWindowButtons?: boolean;
+  /**
+   * Options for the legacy `EuiSuperDatePicker`. They apply whenever the legacy picker is rendered
+   * (`enableDateRangePicker` is `false`, or the new picker feature flag is off) and are ignored by the
+   * new `DateRangePicker`. `minDate` disables the earlier days in the calendar and marks a range whose
+   * start is before it as invalid, so it cannot be applied. Quick ranges, recently used ranges and the
+   * time window buttons are applied directly and are not checked against it. `commonlyUsedRanges`
+   * replaces the quick ranges of the `timepicker:quickRanges` advanced setting.
+   */
+  legacyDatePickerProps?: LegacyDatePickerProps;
   filters?: Filter[];
   additionalQueryBarMenuItems?: AdditionalQueryBarMenuItems;
   filtersForSuggestions?: Filter[];
@@ -873,6 +889,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
           enableDateRangePicker={this.props.enableDateRangePicker}
           showTimeWindowButtons={this.props.showTimeWindowButtons}
+          legacyDatePickerProps={this.props.legacyDatePickerProps}
           enableResourceBrowser={this.props.enableResourceBrowser}
           enableCreateView={this.props.enableCreateView}
         />

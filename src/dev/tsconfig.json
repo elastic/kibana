@@ -16,9 +16,10 @@
     "type_check_validation_loader.js"
   ],
   "kbn_references": [
+    "@kbn/scout",
     "@kbn/core",
     "@kbn/screenshotting-plugin",
-    "@kbn/test",
+    "@kbn/jest",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
@@ -51,5 +52,6 @@
     "@kbn/sort-package-json",
     "@kbn/swc-register",
     "@kbn/dev-validation-runner",
+    "@kbn/test",
   ]
 }

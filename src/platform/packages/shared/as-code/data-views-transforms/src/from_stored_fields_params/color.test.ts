@@ -119,6 +119,38 @@ describe('fromStoredFields', () => {
       });
     });
 
+    describe('when the field type is number and a pattern is set', () => {
+      it('should include the numeral pattern', () => {
+        const result = fromStoredFields(
+          {},
+          {
+            'field-name': {
+              id: 'color',
+              params: {
+                fieldType: 'number',
+                pattern: '0,0.00',
+                colors: [{ text: '#FFFFFF', background: '#000000', range: '1:10' }],
+              },
+            },
+          },
+          {}
+        );
+        expect(result).toEqual({
+          'field-name': {
+            format: {
+              type: 'color',
+              params: {
+                field_type: 'number',
+                pattern: '0,0.00',
+                colors: [{ text: '#FFFFFF', background: '#000000', range: '1:10' }],
+              },
+            },
+          },
+        });
+        expectValidFormat(result);
+      });
+    });
+
     describe('when colors contains null or undefined entries', () => {
       it('should drop them', () => {
         const result = fromStoredFields(

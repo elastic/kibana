@@ -26,7 +26,9 @@ Array [
       "showMoveLeft": true,
       "showMoveRight": true,
     },
-    "cellActions": Array [],
+    "cellActions": Array [
+      [Function],
+    ],
     "display": <Memo(UnifiedDataTableSourceColumnHeader)
       columnDisplayName="Summary"
       headerRowHeight={5}
@@ -164,6 +166,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }
@@ -975,6 +978,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }
@@ -1190,6 +1194,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }
@@ -2584,6 +2589,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }
@@ -2798,6 +2804,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }

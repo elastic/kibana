@@ -164,15 +164,6 @@ export function createNavigationTree({
                 cloudLink: 'billingAndSub',
               },
               {
-                id: 'cloudLinkDeployment',
-                cloudLink: 'deployment',
-                title: MONITOR_PERFORMANCE_TITLE,
-              },
-              {
-                id: 'cloudLinkSearchPower',
-                cloudLink: 'searchPower',
-              },
-              {
                 cloudLink: 'userAndRoles',
               },
             ],
@@ -192,6 +183,15 @@ export function createNavigationTree({
             title: PROJECT_PERFORMANCE_TITLE,
             breadcrumbStatus: 'hidden',
             children: [
+              {
+                id: 'cloudLinkDeployment',
+                cloudLink: 'deployment',
+                title: MONITOR_PERFORMANCE_TITLE,
+              },
+              {
+                id: 'cloudLinkSearchPower',
+                cloudLink: 'searchPower',
+              },
               {
                 link: 'management:queryActivity',
                 breadcrumbStatus: 'hidden',
@@ -224,6 +224,7 @@ export function createNavigationTree({
             title: AI_TITLE,
             children: [
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+              { link: 'management:aiAnonymizationSettings', breadcrumbStatus: 'hidden' },
               { link: 'management:evals', breadcrumbStatus: 'hidden' },
               ...(showAiAssistant
                 ? [

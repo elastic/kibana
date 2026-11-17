@@ -7,6 +7,7 @@
 
 import type { TimeRange } from '../../entities_grid/common';
 import { buildAnomalyTileHead } from './entities_with_anomalies_query';
+import { buildGroupFilterSteps } from './group_filter_steps';
 import {
   SERIES_BUCKET_COLUMN,
   buildSeriesBucketExpression,
@@ -38,7 +39,6 @@ export const buildEntitiesWithAnomaliesSeriesQuery = (
   const parts = buildAnomalyTileHead({
     entitiesIndexName,
     windowCondition: `@timestamp >= NOW() - ${seriesFetchHours(timeRange)}h`,
-    entityFilterClauses,
     jobIds,
     bucketExpression: buildSeriesBucketExpression(timeRange),
   });
@@ -58,6 +58,8 @@ export const buildEntitiesWithAnomaliesSeriesQuery = (
   parts.push(`| STATS`);
   parts.push(`    ${perEntity.join(',\n    ')}`);
   parts.push(`    BY effective_id`);
+  // The filters judge the group by its main entity, as the count does.
+  parts.push(...buildGroupFilterSteps(entitiesIndexName, entityFilterClauses));
   parts.push(`| STATS`);
   parts.push(`    ${counts.join(',\n    ')}`);
 

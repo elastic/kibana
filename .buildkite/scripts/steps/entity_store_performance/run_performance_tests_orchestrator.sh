@@ -69,19 +69,13 @@ export ES_NODE_DETAILS
 # Get credentials from legacy vault
 echo "--- Get Deployment Credentials"
 
-# Ensure we're using legacy vault
-export VAULT_ADDR="$LEGACY_VAULT_ADDR"
-
-# Re-source vault_fns.sh to recalculate path prefixes based on VAULT_ADDR
-source .buildkite/scripts/common/vault_fns.sh
-
 VAULT_TOKEN_BAK="$VAULT_TOKEN"
-VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-vault login -no-print "$VAULT_TOKEN"
+VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
 
-# Use vault_get function (it will use VAULT_PATH_PREFIX which is already set to secret/kibana-issues/dev)
-VAULT_USERNAME=$(vault_get "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username)
-VAULT_PASSWORD=$(vault_get "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" password)
+LEGACY_DEPLOY_PATH="secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME"
+VAULT_USERNAME=$(retry 5 5 vault read -address=$LEGACY_VAULT_ADDR -field=username "$LEGACY_DEPLOY_PATH")
+VAULT_PASSWORD=$(retry 5 5 vault read -address=$LEGACY_VAULT_ADDR -field=password "$LEGACY_DEPLOY_PATH")
 
 
 VAULT_TOKEN="$VAULT_TOKEN_BAK"

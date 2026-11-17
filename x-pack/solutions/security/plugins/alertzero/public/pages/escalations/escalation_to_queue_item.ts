@@ -58,5 +58,6 @@ export const escalationToQueueItem = (
     linkedInvestigationCount,
     assigneeUids,
     entityIds: escalation.entity_ids,
+    entityTypes: escalation.entity_types,
   };
 };

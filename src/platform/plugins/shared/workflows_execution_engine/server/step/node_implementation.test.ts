@@ -28,6 +28,8 @@ const createStepExecutionRuntime = (overrides: Record<string, unknown> = {}) => 
   finishStep: jest.fn(),
   failStep: jest.fn(),
   setInput: jest.fn(),
+  isInputRecorded: false,
+  getCurrentStepResult: jest.fn(() => ({ input: {} })),
   stepExecutionId: 'step-exec-1',
   node: { configuration: {} },
   workflowExecution: { workflowDefinition: {} },
@@ -62,6 +64,37 @@ describe('isCancellableNode', () => {
 });
 
 describe('BaseAtomicNodeImplementation', () => {
+  it('records rendered input on the first entry', async () => {
+    const step: BaseStep = { name: 'test-step', stepId: 'test-step', type: 'atomic' };
+    const runtime = createStepExecutionRuntime();
+    const workflowRuntime = createWorkflowRuntime();
+    const impl = new TestStepImpl(step, runtime as any, undefined, workflowRuntime as any);
+    jest.spyOn(impl, 'getInput').mockResolvedValue({ message: 'rendered' });
+
+    await impl.run();
+
+    expect(runtime.setInput).toHaveBeenCalledWith({ message: 'rendered' });
+  });
+
+  it('reuses the recorded input when the step state flag is set', async () => {
+    const step: BaseStep = { name: 'test-step', stepId: 'test-step', type: 'atomic' };
+    const runtime = createStepExecutionRuntime({
+      isInputRecorded: true,
+      getCurrentStepResult: jest.fn(() => ({ input: { message: 'recorded' } })),
+    });
+    const workflowRuntime = createWorkflowRuntime();
+    const impl = new TestStepImpl(step, runtime as any, undefined, workflowRuntime as any);
+    const getInput = jest.spyOn(impl, 'getInput');
+    const run = jest.fn(async (_input: Record<string, unknown>) => ({ output: { data: 'ok' } }));
+    (impl as any)._run = run;
+
+    await impl.run();
+
+    expect(getInput).not.toHaveBeenCalled();
+    expect(runtime.setInput).not.toHaveBeenCalled();
+    expect(run).toHaveBeenCalledWith({ message: 'recorded' });
+  });
+
   it('runs a step and navigates to the next node on success', async () => {
     const step: BaseStep = { name: 'test-step', stepId: 'test-step', type: 'atomic' };
     const runtime = createStepExecutionRuntime();

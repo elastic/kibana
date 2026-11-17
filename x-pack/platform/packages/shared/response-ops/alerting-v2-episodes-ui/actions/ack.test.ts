@@ -34,8 +34,10 @@ const makeClassicEpisode = (id: string, status = 'open'): AlertEpisode =>
       alertUuid: id,
       instanceId: 'inst-1',
       ruleId: 'r1',
+      ruleTypeId: undefined,
       workflowStatus: status,
       workflowTags: [],
+      caseIds: [],
     } as ClassicAlertActionContext,
   });
 

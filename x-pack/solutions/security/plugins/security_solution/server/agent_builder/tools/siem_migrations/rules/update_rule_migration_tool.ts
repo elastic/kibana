@@ -12,7 +12,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
-import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_catalog';
 import { MigrationId } from '../common/schemas';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
@@ -59,7 +59,7 @@ export const updateRuleMigrationTool = (
 Accepts { name }. Returns { ok: true, migration_id } (the PATCH endpoint returns no body today;
 additional fields are spread if the endpoint later returns them).
 
-See the ${RULE_MIGRATION_SKILLS.UPDATE} skill for the full workflow.`,
+See the ${RULE_MIGRATION_SKILLS.UPDATE.id} skill for the full workflow.`,
 
     schema,
     tags: ['security', 'siem-migration', 'rules'],

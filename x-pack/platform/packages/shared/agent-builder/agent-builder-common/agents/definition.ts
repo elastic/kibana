@@ -35,6 +35,12 @@ export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
 export const agentBuilderDefaultAiIndexId = 'elastic';
 
 /**
+ * ID of the Context Engine retrieval skill. Agent Builder grants it at runtime to any agent that
+ * can reach an AI Index; it is never part of the agent's own configuration.
+ */
+export const kiRetrievalSkillId = 'ki-retrieval';
+
+/**
  * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {
@@ -103,6 +109,11 @@ export interface AgentDefinition {
    */
   avatar_symbol?: string;
   /**
+   * Service account the agent runs as for every conversation. A reference only: the binding
+   * itself is held by Core's service account workload bindings, never a credential.
+   */
+  service_account_id?: string;
+  /**
    * Configuration associated with this agent
    */
   configuration: AgentConfiguration;
@@ -127,6 +138,7 @@ export interface AgentConfiguration {
 
   /**
    * When true, enables built-in Elastic capabilities for the agent.
+   * It adds Elastic's default tools and skills, and is unrelated to `capabilities`.
    */
   enable_elastic_capabilities?: boolean;
 
@@ -182,6 +194,33 @@ export interface AgentConfiguration {
    * Destructive APIs pre-approved for every run of this agent.
    */
   approvals?: AgentApprovals;
+
+  /**
+   * Turns off built-in Agent Builder features for this agent. A missing key means the feature is on.
+   * Only agent types and built-in agents can set it: it cannot be set through the HTTP API, the
+   * agent form, `configuration_overrides` or the `ai.agent` workflow step.
+   */
+  capabilities?: AgentCapabilities;
+}
+
+/**
+ * The setting for one built-in agent feature.
+ */
+export interface AgentCapabilityConfig {
+  /**
+   * Set to `false` to turn the feature off. A missing value means on.
+   */
+  enabled?: boolean;
+}
+
+/**
+ * Built-in agent features that an agent type or built-in agent can turn off.
+ */
+export interface AgentCapabilities {
+  /**
+   * The generic attachment tools and the attachment instructions in the system prompt.
+   */
+  attachment_tools?: AgentCapabilityConfig;
 }
 
 /**
@@ -196,11 +235,12 @@ export interface AgentApprovals {
 }
 
 /**
- * Agent configuration without the fields that only built-in agents can declare.
+ * Agent configuration without the fields that only code can declare: built-in agents, and agent
+ * types for `capabilities`.
  */
 export type AgentConfigurationInput = Omit<
   AgentConfiguration,
-  'inference_feature_id' | 'reasoning_level'
+  'inference_feature_id' | 'reasoning_level' | 'capabilities'
 >;
 
 /**

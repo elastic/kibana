@@ -12,9 +12,9 @@ import {
   agentToolEventInvestigationAttachEventType,
   agentToolEventStatusUpdateEventType,
   agentToolKiIdentificationStartedEventType,
-  codeAnalysisGroundingEventType,
   detectionScanEventType,
   discoveryTriggeredEventType,
+  eventStatusChangedEventType,
   knowledgeIndicatorEventsGeneratedEventType,
   knowledgeIndicatorFeaturesIdentifiedEventType,
   onboardingScheduledEventType,
@@ -39,7 +39,7 @@ export class EbtTelemetryService {
     this.analytics.registerEventType(agentToolEventWriteEventType);
     this.analytics.registerEventType(agentToolEventSearchEventType);
     this.analytics.registerEventType(agentToolEventInvestigationAttachEventType);
-    this.analytics.registerEventType(codeAnalysisGroundingEventType);
+    this.analytics.registerEventType(eventStatusChangedEventType);
     this.analytics.registerEventType(discoveryTriggeredEventType);
     this.analytics.registerEventType(detectionScanEventType);
     this.analytics.registerEventType(onboardingScheduledEventType);

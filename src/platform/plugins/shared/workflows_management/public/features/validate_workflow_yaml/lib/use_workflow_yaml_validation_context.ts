@@ -53,7 +53,7 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
   );
   const warnIgnoredKibanaFetcher = featureFlags.useBooleanValue(
     WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
-    false
+    true
   );
   const esqlCallbacks = useWorkflowEsqlCallbacks({
     http,
@@ -102,7 +102,7 @@ export const getWorkflowYamlValidationContextError = (
 ): Error | null =>
   context.connectorTypes.status === 'failed'
     ? new Error(
-        i18n.translate('workflowsManagement.validation.connectorMetadataUnavailable', {
+        i18n.translate('workflows.validation.connectorMetadataUnavailable', {
           defaultMessage: 'Validation unavailable: connectors failed to load',
         }),
         // The underlying reason is usually generic transport text ("Failed to fetch"), so it

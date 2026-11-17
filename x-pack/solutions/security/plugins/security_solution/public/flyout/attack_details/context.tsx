@@ -6,7 +6,8 @@
  */
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { SearchHit } from '../../../common/search_strategy';
 import type { AttackDetailsProps } from './types';

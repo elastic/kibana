@@ -21,6 +21,10 @@ export const GENERATED_AT = new Date('2026-09-09T09:04:41.000Z');
 export const SUITE_PATH =
   'x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts';
 
+/** `count` distinct Buildkite build ids: `<prefix>-1`, `<prefix>-2`, ... */
+export const buildIds = (prefix: string, count: number): string[] =>
+  Array.from({ length: count }, (_, index) => `${prefix}-${index + 1}`);
+
 export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEntry => ({
   testId: 'playwright:default_status_alert:creates default alert',
   framework: 'playwright',
@@ -96,11 +100,10 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
     {
       key: 'Error: Timed out Nms waiting for expect(locator).toBeVisible()',
       message: 'Error: Timed out 30000ms waiting for expect(locator).toBeVisible()',
-      failuresCount: 61,
       buildsCount: 49,
       byPipeline: [
-        { pipeline: 'kibana-on-merge', failuresCount: 49 },
-        { pipeline: 'kibana-pull-request', failuresCount: 12 },
+        { pipeline: 'kibana-on-merge', buildsCount: 40, buildIds: buildIds('merge', 40) },
+        { pipeline: 'kibana-pull-request', buildsCount: 9, buildIds: buildIds('pr', 9) },
       ],
       branches: ['main', 'someone:fix-it'],
       targets: ['stateful-classic'],
@@ -134,7 +137,7 @@ export const flakyReport = (
   flaky: FlakyTestEntry[],
   files: FlakyTestFileStats[] = []
 ): FlakyTestReport => ({
-  schemaVersion: 1,
+  schemaVersion: 2,
   generatedAt: GENERATED_AT,
   window: {
     lookbackDays: 7,

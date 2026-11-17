@@ -77,6 +77,8 @@ export const CloudConnectorInputFields = ({
         }
 
         if (field.type === 'text') {
+          const formatError = field.validate?.(field.value);
+          const textFieldInvalid = invalid || !!formatError;
           const labelContent = field.tooltip ? (
             <span>
               {field.label} <EuiIconTip content={field.tooltip} position="right" type="info" />
@@ -89,8 +91,8 @@ export const CloudConnectorInputFields = ({
             <EuiFormRow
               key={field.id}
               label={labelContent}
-              isInvalid={invalid}
-              error={invalid ? invalidError : undefined}
+              isInvalid={textFieldInvalid}
+              error={invalid ? invalidError : formatError}
               fullWidth
               hasChildLabel={true}
               id={field.id}
@@ -100,7 +102,7 @@ export const CloudConnectorInputFields = ({
                 id={field.id}
                 fullWidth
                 value={field.value || ''}
-                isInvalid={invalid}
+                isInvalid={textFieldInvalid}
                 onChange={(event) => onChange(field.id, event.target.value)}
                 data-test-subj={field.dataTestSubj}
               />

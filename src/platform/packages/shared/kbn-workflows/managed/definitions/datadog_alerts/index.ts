@@ -15,7 +15,7 @@ export const DATADOG_ALERT_TRANSLATION_WORKFLOW_ID = 'system-datadog-alert-trans
 export const DATADOG_ALERT_TRANSLATION_WORKFLOW = {
   id: DATADOG_ALERT_TRANSLATION_WORKFLOW_ID,
   pluginId: 'alertingVTwo',
-  version: 1,
+  version: 2,
   billable: false,
   yaml: DATADOG_ALERT_TRANSLATION_YAML,
   management: {

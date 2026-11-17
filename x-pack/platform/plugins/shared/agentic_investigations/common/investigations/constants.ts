@@ -13,10 +13,13 @@ export const INVESTIGATIONS_INTERNAL_URL =
 /** URL for the per-investigation assignment route. */
 export const INVESTIGATION_ASSIGN_URL = `${INVESTIGATIONS_INTERNAL_URL}/{id}/assignees` as const;
 
+export const INVESTIGATIONS_UI_CAPABILITY_READ = 'readInvestigations' as const;
 export const INVESTIGATIONS_UI_CAPABILITY_SHOW = 'showInvestigations' as const;
 export const INVESTIGATIONS_UI_CAPABILITY_MANAGE = 'manageInvestigations' as const;
 
 export const INVESTIGATION_STATUS_URL = `${INVESTIGATIONS_INTERNAL_URL}/{id}/status` as const;
+/** Lets a user set an investigation's severity. */
+export const INVESTIGATION_SEVERITY_URL = `${INVESTIGATIONS_INTERNAL_URL}/{id}/severity` as const;
 export const INVESTIGATION_CLOSE_PREVIEW_URL =
   `${INVESTIGATIONS_INTERNAL_URL}/{id}/_close_preview` as const;
 
@@ -47,8 +50,8 @@ export const DEFAULT_INVESTIGATIONS_PAGE_SIZE = 20;
 
 /**
  * Ceiling on investigations a list or count considers. Filters that Agent Builder cannot apply
- * (subject, entity, free text on summary and verdict, severity sort) run in memory over at most
- * this many candidates, so pages beyond it are not reachable.
+ * (in progress, subject, entity, free text on summary and verdict, severity sort) run in memory
+ * over at most this many candidates, so pages beyond it are not reachable.
  */
 export const MAX_INVESTIGATION_CANDIDATES = 1000;
 

@@ -8,6 +8,8 @@
  */
 
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../../context_awareness/toolkit';
+import { waitFor } from '@testing-library/react';
+import { type IKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 import {
   ProfileStateType,
@@ -23,12 +25,15 @@ import {
   createRuntimeStateManager,
   selectAllTabs,
   selectTab,
+  selectHasUnsavedChanges,
   internalStateActions,
   DEFAULT_TAB_STATE,
+  type DiscoverAppState,
 } from '..';
 import * as runtimeStateModule from '../runtime_state';
 import * as contextAwarenessToolkitModule from '../context_awareness_toolkit';
-import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import { APP_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import { TABS_LOCAL_STORAGE_KEY } from '../../tabs_storage_manager';
 import type { UISession } from '@kbn/data-plugin/public';
 import { SearchSessionStatus } from '@kbn/data-plugin/common';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
@@ -90,9 +95,94 @@ const setup = async () => {
   return toolkit;
 };
 
+const kuery = (query: string) => ({ language: 'kuery', query });
+
 describe('tabs actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    localStorage.removeItem(TABS_LOCAL_STORAGE_KEY);
+  });
+
+  it.each([
+    {
+      name: 'restores an updated saved tab without stale URL overrides or unsaved changes',
+      urlQuery: undefined,
+      expectedQuery: kuery('extension: png'),
+      isUnsaved: false,
+    },
+    {
+      name: 'preserves a different shared link over an updated saved tab as unsaved changes',
+      urlQuery: kuery('extension: jpg'),
+      expectedQuery: kuery('extension: jpg'),
+      isUnsaved: true,
+    },
+  ])('$name', async ({ urlQuery, expectedQuery, isUnsaved }) => {
+    const services = createDiscoverServicesMock();
+    services.storage = new Storage(localStorage);
+    const createToolkit = (stateStorageContainer?: IKbnUrlStateStorage) =>
+      getDiscoverInternalStateMock({
+        services,
+        stateStorageContainer,
+        tabsStorageEnabled: true,
+        persistedDataViews: [dataViewMockWithTimeField],
+      });
+    const createTab = (query: string) =>
+      getPersistedTabMock({
+        dataView: dataViewMockWithTimeField,
+        services,
+        appStateOverrides: { query: kuery(query) },
+      });
+    const savedTab = createTab('extension: css');
+    const session = createDiscoverSessionMock({
+      id: 'test-session',
+      version: 'v1',
+      tabs: [savedTab],
+    });
+    const updatedSession = {
+      ...session,
+      version: 'v2',
+      tabs: [createTab('extension: png')],
+    };
+
+    const firstLoad = createToolkit();
+    await firstLoad.initializeTabs({ persistedDiscoverSession: session });
+    await firstLoad.initializeSingleTab({ tabId: savedTab.id });
+    await waitFor(() => {
+      expect(services.storage.get(TABS_LOCAL_STORAGE_KEY)).toMatchObject({
+        discoverSessionVersion: 'v1',
+        openTabs: [{ id: savedTab.id, appState: { query: savedTab.serializedSearchSource.query } }],
+      });
+      expect(
+        firstLoad.stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY)?.query
+      ).toEqual(savedTab.serializedSearchSource.query);
+    });
+    firstLoad.internalState.dispatch(internalStateActions.disconnectTab({ tabId: savedTab.id }));
+
+    const { stateStorageContainer } = firstLoad;
+    if (urlQuery) {
+      const writtenAppState = stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY);
+      await stateStorageContainer.set(APP_STATE_URL_KEY, { ...writtenAppState, query: urlQuery });
+    }
+
+    const reload = createToolkit(stateStorageContainer);
+    await reload.initializeTabs({ persistedDiscoverSession: updatedSession });
+    await reload.initializeSingleTab({ tabId: savedTab.id });
+
+    const { hasUnsavedChanges } = selectHasUnsavedChanges(reload.internalState.getState(), {
+      services,
+      runtimeStateManager: reload.runtimeStateManager,
+    });
+    expect(reload.getCurrentTab().appState.query).toEqual(expectedQuery);
+    expect(hasUnsavedChanges).toBe(isUnsaved);
+    await waitFor(() => {
+      expect(stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY)?.query).toEqual(
+        expectedQuery
+      );
+    });
+    reload.internalState.dispatch(internalStateActions.disconnectTab({ tabId: savedTab.id }));
   });
 
   describe('openInNewTabExtPointAction', () => {

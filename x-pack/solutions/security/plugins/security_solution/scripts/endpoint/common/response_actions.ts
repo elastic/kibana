@@ -58,8 +58,11 @@ export const sendFleetActionResponse = async (
   { state }: { state?: 'success' | 'failure' } = {}
 ): Promise<EndpointActionResponse> => {
   let fleetResponse: EndpointActionResponse;
+  const pendingAgentIds = action.agents.filter(
+    (agentId) => !action.agentState[agentId].isCompleted
+  );
 
-  for (const agentId of action.agents) {
+  for (const agentId of pendingAgentIds) {
     fleetResponse = fleetActionGenerator.generateResponse({
       action_id: action.id,
       agent_id: agentId,
@@ -96,8 +99,11 @@ export const sendEndpointActionResponse = async (
   { state, responseCode }: { state?: 'success' | 'failure'; responseCode?: string } = {}
 ): Promise<LogsEndpointActionResponse> => {
   let endpointResponse: LogsEndpointActionResponse;
+  const pendingAgentIds = action.agents.filter(
+    (agentId) => !action.agentState[agentId].isCompleted
+  );
 
-  for (const actionAgentId of action.agents) {
+  for (const actionAgentId of pendingAgentIds) {
     endpointResponse = endpointActionGenerator.generateResponse<EndpointActionResponseDataOutput>({
       agent: { id: actionAgentId },
       EndpointActions: {

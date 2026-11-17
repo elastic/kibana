@@ -57,6 +57,7 @@ function buildStepInfo(yamlContent: string, stepId: string, stepType: string): S
     stepId,
     stepType,
     stepYamlNode: rootMap,
+    path: ['steps', 0],
     lineStart: 1,
     lineEnd: yamlContent.split('\n').length,
     propInfos,
@@ -144,6 +145,7 @@ describe('checkExistingInputs', () => {
       stepId: 'exec',
       stepType: 'workflow.execute',
       stepYamlNode: rootMap,
+      path: ['steps', 0],
       lineStart: 1,
       lineEnd: 4,
       propInfos: {
@@ -171,6 +173,7 @@ describe('getEmptyInputsRangeAndIndent', () => {
       stepId: 'exec',
       stepType: 'workflow.execute',
       stepYamlNode: null as unknown as YAML.YAMLMap,
+      path: ['steps', 0],
       lineStart: 1,
       lineEnd: 1,
       propInfos: {},

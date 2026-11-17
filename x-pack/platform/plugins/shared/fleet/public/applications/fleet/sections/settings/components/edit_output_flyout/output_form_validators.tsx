@@ -339,6 +339,60 @@ export const validateKafkaOAuth2ClientCertificateKeySecret = toSecretValidator(
   validateKafkaOAuth2ClientCertificateKey
 );
 
+const requiredText = (value: string, message: string) => {
+  if (!value || value.trim() === '') {
+    return [message];
+  }
+};
+
+export function validateKafkaKerberosConfigPath(value: string) {
+  return requiredText(
+    value,
+    i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosConfigPathIsRequired', {
+      defaultMessage: 'Kerberos configuration file is required',
+    })
+  );
+}
+
+export function validateKafkaKerberosRealm(value: string) {
+  return requiredText(
+    value,
+    i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosRealmIsRequired', {
+      defaultMessage: 'Realm is required',
+    })
+  );
+}
+
+export function validateKafkaKerberosKeytab(value: string) {
+  return requiredText(
+    value,
+    i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosKeytabIsRequired', {
+      defaultMessage: 'Keytab file is required',
+    })
+  );
+}
+
+export function validateKafkaKerberosUsername(value: string) {
+  return requiredText(
+    value,
+    i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosUsernameIsRequired', {
+      defaultMessage: 'Username is required',
+    })
+  );
+}
+
+export function validateKafkaKerberosPassword(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosPasswordIsRequired', {
+        defaultMessage: 'Password is required',
+      }),
+    ];
+  }
+}
+
+export const validateKafkaKerberosPasswordSecret = toSecretValidator(validateKafkaKerberosPassword);
+
 /** A duration in seconds: optional, and a number that is not negative. */
 export function validateKafkaOAuth2Seconds(value: string) {
   if (!value || value.trim() === '') {

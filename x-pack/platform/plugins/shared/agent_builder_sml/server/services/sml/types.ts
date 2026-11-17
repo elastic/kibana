@@ -169,6 +169,15 @@ export interface SmlTypeDefinition {
     context: SmlContext
   ) => Promise<SmlPermissionsInput> | SmlPermissionsInput;
 
+  /** Optional: the attachment type items of this type are attached as, by reference, when linked in a message. */
+  attachmentType?: string;
+
+  /** Optional: typeahead through the owning API, for when the SML index is not in use. `title` may be empty. */
+  searchByTitle?: (
+    params: { title: string; size: number; constraints?: SmlSearchConstraints },
+    context: SmlToAttachmentContext
+  ) => Promise<Array<{ originId: string; title: string }>>;
+
   /**
    * Optional: custom crawl interval for the crawler.
    * Defaults to '10m' if not provided.
@@ -268,7 +277,7 @@ export interface SmlSearchResult {
 
 /**
  * An SML autocomplete result — narrower than {@link SmlSearchResult}, tuned for
- * @ menu / typeahead rendering. Drops bulk content (`content`, `description`,
+ * # menu / typeahead rendering. Drops bulk content (`content`, `description`,
  * `attributes`, etc.).
  */
 export interface SmlAutocompleteResult {
@@ -464,7 +473,7 @@ export interface SmlService {
    * so a "type/title" query matches each half against its own field. Filters by
    * space and permissions the same way as `search`, and accepts the same
    * per-type `constraints` and caller-supplied `filters` so a specialized UI
-   * picker (e.g. connectors-only or dashboards-only @ menu) can restrict
+   * picker (e.g. connectors-only or dashboards-only # menu) can restrict
    * results without any LLM involvement.
    */
   autocomplete: (params: {

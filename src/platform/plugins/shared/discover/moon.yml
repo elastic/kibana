@@ -85,6 +85,7 @@ dependsOn:
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/deeplinks-observability'
   - '@kbn/esql-utils'
+  - '@kbn/esql-controls-utils'
   - '@kbn/esql-language'
   - '@kbn/data-source'
   - '@kbn/managed-content-badge'
@@ -140,6 +141,7 @@ dependsOn:
   - '@kbn/as-code-data-views-schema'
   - '@kbn/as-code-data-views-transforms'
   - '@kbn/as-code-export-flyout-component'
+  - '@kbn/as-code-filters-schema'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-shared-telemetry'
@@ -184,6 +186,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -192,6 +195,4 @@ fileGroups:
     - test/**/*
     - .storybook/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

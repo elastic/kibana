@@ -23,6 +23,7 @@ import type { TokenUsageLogger } from '../token_usage';
 
 export interface CreateChatModelOptions {
   request: KibanaRequest;
+  namespace?: string;
   connectorId: string;
   actions: ActionsClientProvider;
   logger: Logger;
@@ -39,10 +40,12 @@ export interface CreateChatModelOptions {
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
   resolveConnectorId?: (connectorId: string) => Promise<string>;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
 }
 
 export const createChatModel = async ({
   request,
+  namespace,
   connectorId,
   actions,
   logger,
@@ -59,10 +62,12 @@ export const createChatModel = async ({
   isDefaultConnectorOnly,
   getDefaultConnectorId,
   resolveConnectorId,
+  shouldStreamInferenceEndpoint,
 }: CreateChatModelOptions): Promise<InferenceChatModel> => {
   const client = createClient({
     actions,
     request,
+    namespace,
     anonymizationRulesPromise,
     regexWorker,
     esClient,
@@ -76,6 +81,7 @@ export const createChatModel = async ({
     isDefaultConnectorOnly,
     getDefaultConnectorId,
     resolveConnectorId,
+    shouldStreamInferenceEndpoint,
   });
   const connector = await getConnectorById({ connectorId, actions, request, esClient, logger });
   return new InferenceChatModel({

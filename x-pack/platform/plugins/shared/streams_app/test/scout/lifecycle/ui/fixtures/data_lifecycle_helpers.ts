@@ -82,8 +82,7 @@ export const RETENTION_TEST_IDS = {
   ilmPolicyRow: (policyName: string) =>
     `retentionSelectableRow-${policyName.replace(/[^a-zA-Z0-9]+/g, '_')}`,
 
-  // Readiness signal: `-loading` while a stats (re)fetch is inflight, `-loaded` once it settles.
-  summaryStatsLoading: 'dataLifecycleSummary-stats-loading',
+  // Readiness signal: `-loaded` only once stats are settled and no (post-save held) preview is shown.
   summaryStatsLoaded: 'dataLifecycleSummary-stats-loaded',
 
   // Display elements
@@ -209,10 +208,10 @@ export async function openLifecycleMethodFlyout(page: ScoutPage): Promise<Locato
 
 /**
  * Waits for the summary's stats (re)fetch to settle so a following popover click isn't dismissed by
- * the re-render. Waits for `-loading` first to avoid matching the stale `-loaded` state on screen.
+ * the re-render. The flyout's preview is held until the refreshed stats land, so the signal already
+ * reads `-loading` when the flyout closes and there is no transient state to catch.
  */
 export async function waitForLifecycleSummaryStatsSettled(page: ScoutPage): Promise<void> {
-  await expect(page.getByTestId(RETENTION_TEST_IDS.summaryStatsLoading)).toBeVisible();
   await expect(page.getByTestId(RETENTION_TEST_IDS.summaryStatsLoaded)).toBeVisible();
 }
 

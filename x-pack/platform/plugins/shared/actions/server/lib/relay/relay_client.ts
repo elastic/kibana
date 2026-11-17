@@ -18,9 +18,15 @@ import type {
   RelayCallbackResponse,
   RelayClaimResponse,
   RelayClientContract,
+  RelayApiKeyInstallRequest,
   RelayInstallRequest,
   RelayInstallResponse,
+  RelayServiceAccountInstallRequest,
   RelayListBindingsOptions,
+  RelayReadMessage,
+  RelayReadMessagesInput,
+  RelayReadResponse,
+  RelayReadThreadInput,
   RelayTriggerInput,
   RelayTriggerResponse,
 } from './types';
@@ -49,6 +55,7 @@ const RELAY_MAX_PAGE_LIMIT = 200;
 
 interface RelayErrorResponse {
   message?: string;
+  reason?: string;
 }
 
 /** Raw shape of the cursor-paginated bindings list response body. */
@@ -66,9 +73,27 @@ interface RelayClaimResponseBody {
 /** Raw shape of the `POST /v1/slack/trigger` acknowledgement body. */
 interface RelayTriggerResponseBody {
   ref?: string;
-  tenant_key?: string;
   channel?: string;
+  origin?: { external_conversation_id?: string };
 }
+
+/** Raw shape of the channel and thread read response body. */
+interface RelayReadResponseBody {
+  channel?: { id?: string; name?: string };
+  messages?: Array<{
+    ts: string;
+    thread_ts?: string;
+    reply_count?: number;
+    author?: { id?: string; name?: string; is_bot?: boolean };
+    text?: string;
+  }>;
+  truncated?: boolean;
+}
+
+const parseRetryAfterSeconds = (value: unknown): number | undefined => {
+  const seconds = Number(Array.isArray(value) ? value[0] : value);
+  return Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined;
+};
 
 export class RelayClient implements RelayClientContract {
   private readonly axios = axios.create();
@@ -77,6 +102,11 @@ export class RelayClient implements RelayClientContract {
   private readonly logger: Logger;
   private readonly useSystemIdentity: boolean;
   private readonly getSystemIdentity: RelayClientOptions['getSystemIdentity'];
+
+  /** `xpack.actions.relay.uiam.enabled`. */
+  public get uiamEnabled(): boolean {
+    return this.useSystemIdentity;
+  }
 
   constructor({
     baseUrl,
@@ -93,8 +123,16 @@ export class RelayClient implements RelayClientContract {
   }
 
   async startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse> {
-    const response = await this.post('/v1/slack/install', body);
-    return response.data as RelayInstallResponse;
+    const wireBody = toRelayInstallWireBody(body, this.uiamEnabled);
+    const credential = installCredential(wireBody);
+    try {
+      const response = await this.post('/v1/slack/install', wireBody);
+      return response.data as RelayInstallResponse;
+    } catch (error) {
+      // Axios and Relay errors can echo the request. Drop that copy: the
+      // credential must not leave this method on the failure path.
+      throw sanitizeInstallFailure(error, credential);
+    }
   }
 
   async fetchClaim(claimId: string): Promise<RelayClaimResponse> {
@@ -189,6 +227,7 @@ export class RelayClient implements RelayClientContract {
     tenantKey,
     channel,
     message,
+    blocks,
     threadTs,
     messageTs,
   }: RelayTriggerInput): Promise<RelayTriggerResponse> {
@@ -196,6 +235,7 @@ export class RelayClient implements RelayClientContract {
       tenant_key: tenantKey,
       channel,
       message,
+      ...(blocks && blocks.length > 0 ? { blocks } : {}),
       ...(messageTs ? { message_ts: messageTs } : threadTs ? { thread_ts: threadTs } : {}),
     });
 
@@ -207,10 +247,70 @@ export class RelayClient implements RelayClientContract {
         'Relay invalid response format missing expected `ref`'
       );
     }
+    const externalConversationId = body.origin?.external_conversation_id;
     return {
       ref: body.ref,
-      tenantKey: body.tenant_key ?? tenantKey,
       channel: typeof body.channel === 'string' && body.channel.length > 0 ? body.channel : channel,
+      ...(typeof externalConversationId === 'string' && externalConversationId.length > 0
+        ? { externalConversationId }
+        : {}),
+    };
+  }
+
+  /** Read a window of a bound public channel. */
+  async readMessages(input: RelayReadMessagesInput): Promise<RelayReadResponse> {
+    return this.read(
+      `/v1/slack/tenants/${encodeURIComponent(input.tenantKey)}/channels/${encodeURIComponent(
+        input.channelId
+      )}/messages`,
+      input
+    );
+  }
+
+  /** Read one thread of a bound public channel. */
+  async readThread(input: RelayReadThreadInput): Promise<RelayReadResponse> {
+    return this.read(
+      `/v1/slack/tenants/${encodeURIComponent(input.tenantKey)}/channels/${encodeURIComponent(
+        input.channelId
+      )}/threads/${encodeURIComponent(input.threadTs)}`,
+      input
+    );
+  }
+
+  private async read(
+    path: string,
+    { oldest, latest, limit }: RelayReadMessagesInput
+  ): Promise<RelayReadResponse> {
+    const query = new URLSearchParams();
+    if (oldest) query.set('oldest', oldest);
+    if (latest) query.set('latest', latest);
+    if (limit !== undefined) query.set('limit', String(limit));
+    const search = query.toString();
+
+    const response = await this.get(search ? `${path}?${search}` : path);
+    const body = response.data as RelayReadResponseBody | undefined;
+    if (!Array.isArray(body?.messages) || typeof body?.channel?.id !== 'string') {
+      throw new RelayRequestError(
+        path,
+        response.status,
+        'Relay invalid response format missing expected `channel` or `messages`'
+      );
+    }
+
+    const messages: RelayReadMessage[] = body.messages.map(
+      ({ ts, thread_ts: threadTs, reply_count: replyCount, author, text }) => ({
+        ts,
+        ...(threadTs ? { threadTs } : {}),
+        ...(replyCount !== undefined ? { replyCount } : {}),
+        author: { id: author?.id, name: author?.name, isBot: author?.is_bot === true },
+        text: text ?? '',
+      })
+    );
+
+    return {
+      channel: { id: body.channel.id, name: body.channel.name ?? body.channel.id },
+      messages,
+      truncated: body.truncated === true,
     };
   }
 
@@ -261,8 +361,15 @@ export class RelayClient implements RelayClientContract {
       return response;
     }
 
-    const relayMessage = (response.data as RelayErrorResponse | undefined)?.message;
-    throw new RelayRequestError(path, response.status, relayMessage);
+    const { message: relayMessage, reason } =
+      (response.data as RelayErrorResponse | undefined) ?? {};
+    throw new RelayRequestError(
+      path,
+      response.status,
+      relayMessage,
+      typeof reason === 'string' ? reason : undefined,
+      parseRetryAfterSeconds(response.headers?.['retry-after'])
+    );
   }
 
   /**
@@ -306,3 +413,76 @@ export class RelayClient implements RelayClientContract {
     });
   }
 }
+
+const installCredential = (body: RelayInstallRequest): string =>
+  'uiam_service_account_id' in body
+    ? (body as RelayServiceAccountInstallRequest).uiam_service_account_id
+    : (body as RelayApiKeyInstallRequest).kibana_api_key;
+
+/**
+ * Copies the install body down to exactly one credential. A caller that sets
+ * both, or the credential that does not match the feature flag, is rejected
+ * before anything is sent.
+ */
+const toRelayInstallWireBody = (
+  body: RelayInstallRequest,
+  uiamEnabled: boolean
+): RelayInstallRequest => {
+  const apiKey = 'kibana_api_key' in body ? body.kibana_api_key : undefined;
+  const serviceAccountId =
+    'uiam_service_account_id' in body ? body.uiam_service_account_id : undefined;
+  const hasApiKey = typeof apiKey === 'string' && apiKey.length > 0;
+  const hasServiceAccountId = typeof serviceAccountId === 'string' && serviceAccountId.length > 0;
+
+  if (hasApiKey === hasServiceAccountId) {
+    throw new Error(
+      'Relay install requires exactly one of `kibana_api_key` or `uiam_service_account_id`.'
+    );
+  }
+  if (uiamEnabled !== hasServiceAccountId) {
+    throw new Error(
+      uiamEnabled
+        ? 'Relay UIAM install must send `uiam_service_account_id` only.'
+        : 'Relay install must send `kibana_api_key` only.'
+    );
+  }
+
+  const shared = {
+    kibana_url: body.kibana_url,
+    kibana_version: body.kibana_version,
+    license_info: body.license_info,
+    ...(body.created_by_user_key ? { created_by_user_key: body.created_by_user_key } : {}),
+    ...(body.agent_id ? { agent_id: body.agent_id } : {}),
+  };
+
+  if (hasServiceAccountId && serviceAccountId !== undefined) {
+    const wireBody: RelayServiceAccountInstallRequest = {
+      ...shared,
+      uiam_service_account_id: serviceAccountId,
+    };
+    return wireBody;
+  }
+  const wireBody: RelayApiKeyInstallRequest = { ...shared, kibana_api_key: apiKey as string };
+  return wireBody;
+};
+
+const redactCredential = (value: string, credential: string): string => {
+  if (credential.length === 0) {
+    return value;
+  }
+  return value.split(credential).join('[redacted]');
+};
+
+/** Rebuilds an install failure so the request body cannot ride out on it. */
+const sanitizeInstallFailure = (error: unknown, credential: string): Error => {
+  if (error instanceof RelayRequestError) {
+    const relayMessage =
+      error.relayMessage === undefined
+        ? undefined
+        : redactCredential(error.relayMessage, credential);
+    return new RelayRequestError('/v1/slack/install', error.statusCode, relayMessage);
+  }
+  const message =
+    error instanceof Error ? redactCredential(error.message, credential) : 'Relay install failed';
+  return new Error(message);
+};

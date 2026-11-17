@@ -17,6 +17,11 @@ import type {
 } from '@kbn/core/server';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+  type UiamAPIKeysType,
+} from '@kbn/core-security-server';
 import { ROUTE_TAG_AUTH_FLOW } from '@kbn/security-plugin/server';
 import { restApiKeySchema } from '@kbn/security-plugin-types-server';
 import {
@@ -35,6 +40,18 @@ const SELF_CLIENT_OAUTH_TARGET = '/internal/test_endpoints/self_client/oauth_me'
 const SELF_CLIENT_TARGET_PATH = schema.maybe(
   schema.oneOf([schema.literal(SELF_CLIENT_ES_TARGET), schema.literal(SELF_CLIENT_OAUTH_TARGET)])
 );
+
+const getReceivedSelfCallHeaders = (headers: Headers, uiam: UiamAPIKeysType | null) => {
+  const clientAuthentication = headers[ES_CLIENT_AUTHENTICATION_HEADER];
+  const isOwn = [clientAuthentication ?? []]
+    .flat()
+    .some((value) => uiam?.isOwnClientAuthentication(value));
+
+  return {
+    clientAuthentication: clientAuthentication === undefined ? 'absent' : isOwn ? 'own' : 'other',
+    attestation: headers[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER] !== undefined,
+  };
+};
 
 export function initRoutes(
   initializerContext: PluginInitializerContext,
@@ -775,8 +792,9 @@ export function initRoutes(
       validate: false,
       options: { access: 'internal' },
     },
-    async (context, _request, response) => {
+    async (context, request, response) => {
       const { elasticsearch, security } = await context.core;
+      const [{ security: securityStart }] = await core.getStartServices();
       const { has_all_requested: hasManage } =
         await elasticsearch.client.asCurrentUser.security.hasPrivileges({ cluster: ['manage'] });
 
@@ -784,6 +802,10 @@ export function initRoutes(
         body: {
           username: security.authc.getCurrentUser()?.username,
           hasManage,
+          receivedHeaders: getReceivedSelfCallHeaders(
+            request.headers,
+            securityStart.authc.apiKeys.uiam
+          ),
         },
       });
     }
@@ -841,8 +863,9 @@ export function initRoutes(
       validate: false,
       options: { access: 'internal', tags: ['security:acceptUiamOAuth'] },
     },
-    async (context, _request, response) => {
+    async (context, request, response) => {
       const { elasticsearch, security } = await context.core;
+      const [{ security: securityStart }] = await core.getStartServices();
       const { has_all_requested: hasManage } =
         await elasticsearch.client.asCurrentUser.security.hasPrivileges({ cluster: ['manage'] });
 
@@ -850,6 +873,10 @@ export function initRoutes(
         body: {
           username: security.authc.getCurrentUser()?.username,
           hasManage,
+          receivedHeaders: getReceivedSelfCallHeaders(
+            request.headers,
+            securityStart.authc.apiKeys.uiam
+          ),
         },
       });
     }

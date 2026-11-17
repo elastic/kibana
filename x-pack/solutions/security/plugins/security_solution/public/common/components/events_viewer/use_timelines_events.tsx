@@ -16,12 +16,11 @@ import { isRunningResponse } from '@kbn/data-plugin/common';
 import type {
   Inspect,
   PaginationInputPaginated,
-  TimelineEdges,
   TimelineEqlRequestOptionsInput,
   TimelineEventsAllOptionsInput,
   TimelineEventsAllStrategyResponse,
-  TimelineItem,
 } from '@kbn/timelines-plugin/common';
+import type { TimelineEdges, TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import type {
   EntityType,

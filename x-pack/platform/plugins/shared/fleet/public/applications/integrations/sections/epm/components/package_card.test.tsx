@@ -304,3 +304,19 @@ describe('package card — collection variant badge', () => {
     expect(queryByText(/variant/)).not.toBeInTheDocument();
   });
 });
+
+describe('package card — collection size badge', () => {
+  it('renders a "Collection of N" badge when collectionSize is set', () => {
+    const {
+      utils: { queryByText },
+    } = renderPackageCard(cardProps({ collectionSize: 40 }));
+    expect(queryByText('Collection of 40')).toBeInTheDocument();
+  });
+
+  it('does not render the badge when collectionSize is not set', () => {
+    const {
+      utils: { queryByText },
+    } = renderPackageCard(cardProps());
+    expect(queryByText(/Collection of/)).not.toBeInTheDocument();
+  });
+});
