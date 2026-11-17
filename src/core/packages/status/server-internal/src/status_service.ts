@@ -77,6 +77,7 @@ export interface StatusServiceSetupDeps {
 export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private readonly logger: Logger;
   private readonly config$: Observable<StatusConfigType>;
+  private readonly startupTime = performance.now();
   private readonly stop$ = new Subject<void>();
 
   private core$?: Observable<CoreStatus>;
@@ -203,6 +204,19 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   }
 
   public setReady(ready: boolean) {
+    if (this.#ready === ready) {
+      return;
+    }
+
+    if (ready) {
+      const startupDurationMs = Math.round(performance.now() - this.startupTime);
+      this.logger.info(
+        `Kibana readiness changed: ready=true (startup duration: ${startupDurationMs}ms)`
+      );
+    } else {
+      this.logger.info('Kibana readiness changed: ready=false');
+    }
+
     this.#ready = ready;
   }
 
