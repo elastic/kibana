@@ -12,6 +12,7 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 export class ConsolePage {
   public readonly inputEditor: Locator;
   public readonly outputEditor: Locator;
+  public readonly outputEditorContent: Locator;
   public readonly sendRequestButton: Locator;
   public readonly copyOutputButton: Locator;
   public readonly responseStatusBadge: Locator;
@@ -19,6 +20,7 @@ export class ConsolePage {
   constructor(private readonly page: ScoutPage) {
     this.inputEditor = this.page.testSubj.locator('consoleMonacoEditor');
     this.outputEditor = this.page.testSubj.locator('consoleMonacoOutput');
+    this.outputEditorContent = this.outputEditor.locator('.monaco-scrollable-element');
     this.sendRequestButton = this.page.testSubj.locator('sendRequestButton');
     this.copyOutputButton = this.page.testSubj.locator('copyOutputButton');
     this.responseStatusBadge = this.page.testSubj.locator('consoleResponseStatusBadge');
