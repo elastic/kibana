@@ -235,8 +235,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     templateId: conversation?.template_id,
     resumeAnchors,
     // Folding hides which execution made each delivery, so settlement comes from the stored events.
-    settledSteers: conversation?.events
-      ? analyzeDeliveries(conversation.events).settled
+    unfinishedDeliveries: conversation?.events
+      ? analyzeDeliveries(conversation.events).unfinishedDeliveries
       : undefined,
   });
   processedConversation.resumedRoundId = pendingTurn?.id;

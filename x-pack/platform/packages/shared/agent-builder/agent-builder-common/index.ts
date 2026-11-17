@@ -336,6 +336,7 @@ export {
   isInterimAnswerStep,
   STEERS_PER_RUN_MAX,
   analyzeDeliveries,
+  deliveryKey,
   pendingSteers,
   pendingSteersFor,
   type SteerDeliveries,

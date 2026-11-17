@@ -24,6 +24,10 @@ import {
   isConversationBusyError,
   isConversationWriteConflictError,
   isNoActiveExecutionError,
+  STEERS_PER_RUN_MAX,
+  isConversationAwaitingPromptError,
+  isConversationNotSteerableError,
+  isTooManyPendingSteersError,
 } from '@kbn/agent-builder-common';
 import type { ConversationAccessControlEntry } from '@kbn/agent-builder-common/chat/access_control';
 import {
@@ -44,6 +48,7 @@ import type {
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { CONVERSATION_BULK_GET_MAX_IDS } from '../../../../common/constants';
 import { createRound } from '../../../test_utils';
+import { pausedRoundTimeline } from '../../../test_utils/timeline';
 import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
@@ -6533,6 +6538,59 @@ describe('ConversationClient', () => {
         const error = await appendSteer().catch((caught: unknown) => caught);
 
         expect(isNoActiveExecutionError(error)).toBe(true);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('refuses a public conversation before looking at the run', async () => {
+        mockGetDocumentResponse(
+          documentWithHolder('e1', { accessMode: ConversationAccessControlMode.Public })
+        );
+        liveHolder();
+
+        const error = await appendSteer().catch((caught: unknown) => caught);
+
+        expect(isConversationNotSteerableError(error)).toBe(true);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('refuses while the conversation waits on a prompt, before the holder check', async () => {
+        mockGetDocumentResponse(
+          documentWithHolder('e1', { events: pausedRoundTimeline('round-1', ['tc1']) })
+        );
+        liveHolder();
+
+        const error = await appendSteer().catch((caught: unknown) => caught);
+
+        expect(isConversationAwaitingPromptError(error)).toBe(true);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('refuses the sixth pending steer of a run', async () => {
+        const pending = Array.from({ length: STEERS_PER_RUN_MAX }, (_, index) => ({
+          ...storedSteer,
+          id: `pending-${index}`,
+        }));
+        mockGetDocumentResponse(documentWithHolder('e1', { events: [userMessage, ...pending] }));
+        liveHolder();
+
+        const error = await appendSteer().catch((caught: unknown) => caught);
+
+        expect(isTooManyPendingSteersError(error)).toBe(true);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('refuses an event_id that names an event other than a steer of the same actor', async () => {
+        mockGetDocumentResponse(documentWithHolder('e1'));
+        liveHolder();
+
+        const error = await client
+          .appendSteer(
+            { id: 'conversation-1', message: 'use a table', eventId: userMessage.id, actor },
+            { source: 'http_api' }
+          )
+          .catch((caught: unknown) => caught);
+
+        expect(error).toMatchObject({ meta: { statusCode: 400 } });
         expect(mockEsClient.index).not.toHaveBeenCalled();
       });
     });

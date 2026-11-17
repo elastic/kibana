@@ -43,6 +43,7 @@ import type { ProcessedConversation } from './prepare_conversation';
 import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 import {
   T0,
+  T1,
   abortedExec0Timeline,
   attachmentEventFixture,
   completedRoundTimeline,
@@ -2006,7 +2007,7 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
       ];
       const conversation = {
         ...conversationOf(processedTimeline(events)),
-        settledSteers: analyzeDeliveries(events).settled,
+        unfinishedDeliveries: analyzeDeliveries(events).unfinishedDeliveries,
       };
 
       const messages = await prepareMessages({ conversation });
@@ -2015,6 +2016,43 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
       expect(contents.some((content) => content.includes('text of before-pause'))).toBe(true);
       expect(contents.some((content) => content.includes('text of in-resume'))).toBe(false);
       expect(contents.some((content) => content.includes('id in-resume'))).toBe(true);
+    });
+
+    it('renders the text once when a failed round read a steer and a later round finished with it', async () => {
+      const delivered = (deliveredAt: string): ConversationRoundStep =>
+        ({
+          type: ConversationRoundStepType.deliveredMessage,
+          event_id: 'again',
+          author: { type: 'user', id: 'u1' },
+          is_run_owner: true,
+          message: 'text of again',
+          delivered_at: deliveredAt,
+          cycle: 1,
+          redelivered: 0,
+        } as ConversationRoundStep);
+      const events: TimelineEvent[] = [
+        ...failedExec0Timeline('r1', [delivered(T0)], T0),
+        userMessageEvent('r2', T1),
+        ...terminatedExecutionEvents({
+          roundId: 'r2',
+          createdAt: T1,
+          steps: [delivered(T1)],
+          outcome: { type: 'responded', response: { message: 'done' } },
+        }),
+      ];
+      const conversation = {
+        ...conversationOf(processedTimeline(events)),
+        unfinishedDeliveries: analyzeDeliveries(events).unfinishedDeliveries,
+      };
+
+      const messages = await prepareMessages({ conversation });
+
+      const contents = messages.map((message) => String(message.content));
+      expect(contents.filter((content) => content.includes('text of again'))).toHaveLength(1);
+      expect(contents.filter((content) => content.includes('id again'))).toHaveLength(1);
+      expect(contents.findIndex((content) => content.includes('id again'))).toBeLessThan(
+        contents.findIndex((content) => content.includes('text of again'))
+      );
     });
 
     it('end to end: a confirmation-blocked call + prompt_response + failed setup-window resume renders the call as interrupted', async () => {

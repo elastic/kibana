@@ -12,6 +12,7 @@ import {
   isSteerMessageEvent,
 } from './timeline_events';
 import type { ConversationEvent, ExecutionStepEvent, UserMessageEvent } from './timeline_events';
+import type { DeliveredMessageStepData } from './conversation';
 
 /**
  * A steer is *picked up* when an execution writes a `delivered_message` step naming it. It is
@@ -32,7 +33,16 @@ export interface SteerDeliveries {
   readByLive: Set<string>;
   /** How many executions read each steer and then failed or were aborted. */
   unfinishedReads: Map<string, number>;
+  /** The deliveries (see `deliveryKey`) those executions made. */
+  unfinishedDeliveries: Set<string>;
 }
+
+/** Identifies one delivery of a steer: the same steer read by two executions has two keys. */
+export const deliveryKey = ({
+  event_id: eventId,
+  delivered_at: deliveredAt,
+}: Pick<DeliveredMessageStepData, 'event_id' | 'delivered_at'>): string =>
+  `${eventId}@${deliveredAt}`;
 
 export const analyzeDeliveries = (events: ReadonlyArray<ConversationEvent>): SteerDeliveries => {
   const terminals = new Map<string, TimelineEventType>();
@@ -45,6 +55,7 @@ export const analyzeDeliveries = (events: ReadonlyArray<ConversationEvent>): Ste
     settled: new Set(),
     readByLive: new Set(),
     unfinishedReads: new Map(),
+    unfinishedDeliveries: new Set(),
   };
   for (const event of events) {
     if (event.type !== TimelineEventType.executionStep || !event.execution_id) {
@@ -64,6 +75,7 @@ export const analyzeDeliveries = (events: ReadonlyArray<ConversationEvent>): Ste
         step.event_id,
         (deliveries.unfinishedReads.get(step.event_id) ?? 0) + 1
       );
+      deliveries.unfinishedDeliveries.add(deliveryKey(step));
     }
   }
   return deliveries;

@@ -79,8 +79,8 @@ export interface ProcessedConversation {
    * round the run does not resume is rendered as history.
    */
   resumedRoundId?: string;
-  /** Steers a finished execution read, from the stored events; absent on conversations without events. */
-  settledSteers?: ReadonlySet<string>;
+  /** Deliveries made by runs that did not finish (see `deliveryKey`); absent without stored events. */
+  unfinishedDeliveries?: ReadonlySet<string>;
 }
 
 export const prepareConversation = async ({
@@ -92,7 +92,7 @@ export const prepareConversation = async ({
   metadata,
   templateId,
   resumeAnchors,
-  settledSteers,
+  unfinishedDeliveries,
 }: {
   /** The conversation's normalized context timeline (see `eventsForContext`). */
   timeline: ContextTimelineEvent[];
@@ -104,7 +104,7 @@ export const prepareConversation = async ({
   metadata?: Record<string, MetadataFieldValue>;
   templateId?: string;
   resumeAnchors?: ResumeAnchors;
-  settledSteers?: ReadonlySet<string>;
+  unfinishedDeliveries?: ReadonlySet<string>;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const resolveContext: AttachmentResolveContext = {
@@ -238,7 +238,7 @@ export const prepareConversation = async ({
     ...(resumeAnchors ? { resumeAnchors } : {}),
     ...(metadata !== undefined ? { metadata } : {}),
     ...(templateId !== undefined ? { template_id: templateId } : {}),
-    ...(settledSteers ? { settledSteers } : {}),
+    ...(unfinishedDeliveries ? { unfinishedDeliveries } : {}),
   };
 };
 

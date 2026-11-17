@@ -196,7 +196,7 @@ export const renderUnit = async (
       steps: unitSteps(unit, run.steps),
       resultTransformer: view.historyTransformer(round.id),
       attachments: { placement, notices },
-      settledSteers: conversation.settledSteers,
+      unfinishedDeliveries: conversation.unfinishedDeliveries,
     })),
     ...(unit.last ? [roundOutcomeMessage(round), ...roundOutcomeNotice(placement, notices)] : []),
   ];

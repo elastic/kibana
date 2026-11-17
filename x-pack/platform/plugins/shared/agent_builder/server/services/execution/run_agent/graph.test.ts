@@ -17,6 +17,7 @@ import {
   ExecutionStatus,
   ToolCallInvocation,
   createInjectedContextStep,
+  isToolCallStep,
   type ConversationRoundStep,
 } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
@@ -84,6 +85,8 @@ const createTestGraph = ({
     bindTools: jest.fn(() => ({
       withConfig: researchWithConfig,
     })),
+    // the forced answer calls the model without tools
+    withConfig: researchWithConfig,
     withStructuredOutput: jest.fn(() => ({
       withConfig: jest.fn(() => ({ invoke: structuredInvoke })),
     })),
@@ -255,6 +258,29 @@ describe('createAgentGraph', () => {
       expect(result.finalAnswer).toBe('the answer');
       expect(result.steps).toEqual([]);
       expect(drain).toHaveBeenCalledTimes(2);
+    });
+
+    it('marks the tool calls a forced answer abandons as interrupted', async () => {
+      const drain = jest.fn().mockResolvedValue([steer('s1')]);
+      const { graph, researchInvoke } = createTestGraph({ incomingMessages: { drain } });
+      researchInvoke
+        .mockResolvedValueOnce(
+          new AIMessage({
+            content: 'looking',
+            tool_calls: [{ id: 'c1', name: 'my_tool', args: { q: 1 } }],
+          })
+        )
+        .mockResolvedValueOnce(new AIMessage({ content: 'answer' }));
+
+      const result = await graph.invoke({ cycleLimit: 0 });
+
+      expect(result.finalAnswer).toBe('answer');
+      expect(result.pendingToolCallIds).toEqual([]);
+      expect(result.steps.find(isToolCallStep)).toMatchObject({
+        tool_call_id: 'c1',
+        results: [],
+        interrupted: true,
+      });
     });
 
     it('does not check again once the cycle budget is spent', async () => {

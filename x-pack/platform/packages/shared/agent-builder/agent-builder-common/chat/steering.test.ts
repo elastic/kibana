@@ -8,7 +8,7 @@
 import { ConversationRoundStepType } from './conversation';
 import { EventActorType, TimelineEventType } from './timeline_events';
 import type { ConversationEvent } from './timeline_events';
-import { analyzeDeliveries, pendingSteers, pendingSteersFor } from './steering';
+import { analyzeDeliveries, deliveryKey, pendingSteers, pendingSteersFor } from './steering';
 
 const actor = { type: EventActorType.user, id: 'u1' };
 
@@ -24,7 +24,12 @@ const userMessage = (
   data: { message: `m-${id}`, ...(steer ? { steer } : {}) },
 });
 
-const deliveredStep = (executionId: string, eventId: string, sequence = 0): ConversationEvent => ({
+const deliveredStep = (
+  executionId: string,
+  eventId: string,
+  sequence = 0,
+  deliveredAt = '2026-01-01T00:00:10.000Z'
+): ConversationEvent => ({
   id: `${executionId}::step::${sequence}`,
   type: TimelineEventType.executionStep,
   execution_id: executionId,
@@ -38,7 +43,7 @@ const deliveredStep = (executionId: string, eventId: string, sequence = 0): Conv
       author: actor,
       is_run_owner: true,
       message: `m-${eventId}`,
-      delivered_at: '2026-01-01T00:00:10.000Z',
+      delivered_at: deliveredAt,
       cycle: 1,
       redelivered: 0,
     },
@@ -140,5 +145,20 @@ describe('steering predicates', () => {
     ];
     const deliveries = analyzeDeliveries(events);
     expect(pendingSteers(events, deliveries).map((e) => e.id)).toEqual(['s2']);
+  });
+
+  it('keys each unfinished delivery by steer and time, so a later finished read leaves it marked', () => {
+    const events = [
+      userMessage('s1', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
+      deliveredStep('e1', 's1'),
+      terminal('e1', TimelineEventType.executionFailed),
+      deliveredStep('e2', 's1', 0, '2026-01-01T00:00:30.000Z'),
+      terminal('e2', TimelineEventType.executionTerminated),
+    ];
+    const deliveries = analyzeDeliveries(events);
+    expect(deliveries.settled).toEqual(new Set(['s1']));
+    expect(deliveries.unfinishedDeliveries).toEqual(
+      new Set([deliveryKey({ event_id: 's1', delivered_at: '2026-01-01T00:00:10.000Z' })])
+    );
   });
 });

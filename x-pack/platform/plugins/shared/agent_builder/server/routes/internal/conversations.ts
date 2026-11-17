@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { validate as isUuid } from 'uuid';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_ID_MAX_LENGTH,
@@ -339,7 +340,11 @@ export function registerInternalConversationRoutes({
         body: schema.object({
           message: schema.string({ minLength: 1, maxLength: STEER_MESSAGE_MAX_LENGTH }),
           // Client-generated idempotency key.
-          event_id: schema.string({ minLength: 1, maxLength: 64 }),
+          event_id: schema.string({
+            minLength: 36,
+            maxLength: 36,
+            validate: (value) => (isUuid(value) ? undefined : 'must be a UUID'),
+          }),
         }),
       },
       options: { access: 'internal' },

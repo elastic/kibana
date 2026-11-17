@@ -39,6 +39,7 @@ import {
   ConversationAccessControlMode,
   isConversationAccessControlRole,
   isPublicConversation,
+  isSteerMessageEvent,
   normalizeConversationAccessControl,
   createBackgroundExecutionAlreadyReportedError,
   createBadRequestError,
@@ -896,7 +897,10 @@ class ConversationClientImpl implements ConversationClient {
           const currentEvents = current.events ?? [];
           const stored = currentEvents.find((event) => event.id === eventId);
           if (stored) {
-            throw new SteerSignal({ kind: 'already_stored', event: stored as UserMessageEvent });
+            if (!isSteerMessageEvent(stored) || stored.actor.id !== actor.id) {
+              throw new SteerSignal({ kind: 'event_id_taken' });
+            }
+            throw new SteerSignal({ kind: 'already_stored', event: stored });
           }
           // Checked before the holder: the lock is free while a round waits on a prompt.
           if (getPendingResumeRound(current) !== undefined) {
@@ -943,6 +947,10 @@ class ConversationClientImpl implements ConversationClient {
           throw createNoActiveExecutionError({ conversationId });
         case 'too_many_pending':
           throw createTooManyPendingSteersError({ conversationId });
+        case 'event_id_taken':
+          throw createBadRequestError(
+            `event_id "${eventId}" already names an event that is not a message of yours.`
+          );
       }
     }
 

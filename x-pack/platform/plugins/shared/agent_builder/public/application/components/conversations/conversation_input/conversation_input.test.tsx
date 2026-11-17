@@ -114,6 +114,17 @@ jest.mock('./message_editor', () => ({
   },
   CommandBadgeSerializationError: class extends Error {},
 }));
+const mockHandlePasteFile = jest.fn();
+jest.mock('./use_image_upload', () => {
+  const actual = jest.requireActual('./use_image_upload');
+  return {
+    ...actual,
+    useImageUpload: (params: unknown) => ({
+      ...actual.useImageUpload(params),
+      handlePasteFile: mockHandlePasteFile,
+    }),
+  };
+});
 jest.mock('./input_actions/connector_selector', () => ({
   ConnectorSelector: () => <div data-test-subj="mockConnectorSelector" />,
 }));
@@ -600,7 +611,7 @@ describe('ConversationInput', () => {
         await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
       });
 
-      it('refuses to steer while attachments wait to be sent', () => {
+      it('steers while the attachments of the active turn are still staged in the composer', async () => {
         mockedUseConversationContext.mockReturnValue({
           attachments: [{ id: 'a1', type: 'text', data: {} }],
           upsertAttachments: jest.fn(),
@@ -613,14 +624,15 @@ describe('ConversationInput', () => {
 
         fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
-        expect(mockSendSteer).not.toHaveBeenCalled();
-        expect(editorController.clear).not.toHaveBeenCalled();
-        expect(addErrorToast).toHaveBeenCalledTimes(1);
+        expect(mockSendSteer).toHaveBeenCalledWith('hello agent', {
+          onUnsent: expect.any(Function),
+        });
+        expect(addErrorToast).not.toHaveBeenCalled();
+        await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
       });
 
       it('refuses an image paste instead of uploading it', () => {
         renderInput(<ConversationInput />);
-        const { upsertAttachments } = mockedUseConversationContext.mock.results[0].value;
 
         const pasted = mockEditorProps.onPasteFile?.(
           new File([''], 'shot.png', { type: 'image/png' })
@@ -628,7 +640,20 @@ describe('ConversationInput', () => {
 
         expect(pasted).toBeUndefined();
         expect(addErrorToast).toHaveBeenCalledTimes(1);
-        expect(upsertAttachments).not.toHaveBeenCalled();
+        expect(mockHandlePasteFile).not.toHaveBeenCalled();
+      });
+
+      it('still uploads a pasted image when skipping the agent', () => {
+        mockHandlePasteFile.mockReturnValue('shot.png');
+        renderInput(<ConversationInput />);
+        selectTalkToUsers();
+
+        const file = new File([''], 'shot.png', { type: 'image/png' });
+        const pasted = mockEditorProps.onPasteFile?.(file);
+
+        expect(pasted).toBe('shot.png');
+        expect(mockHandlePasteFile).toHaveBeenCalledWith(file);
+        expect(addErrorToast).not.toHaveBeenCalled();
       });
 
       it('puts the text back when the steer fails after the submit', () => {

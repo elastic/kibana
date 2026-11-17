@@ -9,6 +9,7 @@ import type { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import type {
   ConversationRoundStep,
+  DeliveredMessageStep,
   ReasoningStep,
   ToolCallStep,
   ToolResult,
@@ -18,6 +19,7 @@ import {
   ToolCallInvocation,
   ToolResultType,
   createInjectedContextStep,
+  deliveryKey,
 } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode, ExecutionStatus } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
@@ -274,7 +276,7 @@ describe('renderHistorySteps', () => {
     expect(String(messages[1].content)).toContain('while you were writing the answer above');
   });
 
-  it('renders a delivery as a reference only when no finished execution settled its steer', async () => {
+  it('renders a delivery as a reference only when the run that made it did not finish', async () => {
     const delivered = (eventId: string): ConversationRoundStep =>
       ({
         type: ConversationRoundStepType.deliveredMessage,
@@ -290,7 +292,7 @@ describe('renderHistorySteps', () => {
 
     const [settled, unsettled] = await renderHistorySteps({
       steps,
-      settledSteers: new Set(['settled']),
+      unfinishedDeliveries: new Set([deliveryKey(steps[1] as DeliveredMessageStep)]),
     });
     expect(String(settled.content)).toContain('text of settled');
     expect(String(unsettled.content)).not.toContain('text of unsettled');

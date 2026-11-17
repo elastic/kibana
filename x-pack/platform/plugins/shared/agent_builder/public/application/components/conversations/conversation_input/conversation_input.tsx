@@ -191,14 +191,7 @@ interface ConversationInputProps {
   onSubmitOverride?: (message: string) => void;
 }
 
-// A steer carries text only; attachments wait for the next ordinary send.
-const attachmentsWhileRunningMessage = i18n.translate(
-  'xpack.agentBuilder.conversationInput.steer.attachmentsNotSent',
-  {
-    defaultMessage:
-      "Attachments can't be sent to a running agent. Wait for it to finish, then send them with your next message.",
-  }
-);
+// A steer carries text only.
 const imagePasteWhileRunningMessage = i18n.translate(
   'xpack.agentBuilder.conversationInput.steer.imagePasteRefused',
   {
@@ -341,7 +334,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
   const { sendSteer, steerIfBusy, isUnansweredSteer, isSending: isSendingSteer } = useSendSteer();
   const canSteer = canCancel && Boolean(conversationId) && !isAwaitingPrompt;
-  const hasUnsentAttachments = (attachments?.length ?? 0) > 0;
+  // Never mode posts to the team instead of steering, attachments included.
+  const willSteer = canSteer && triggerMode !== ChatTriggerMode.Never;
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
     useImageUpload({
@@ -558,10 +552,6 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
         );
         return;
       }
-      if (hasUnsentAttachments) {
-        addErrorToast(attachmentsWhileRunningMessage);
-        return;
-      }
       // Cleared at the submit, as for an ordinary send, so edits made during the request are kept.
       lastEditorContentRef.current = '';
       clearDraft();
@@ -627,7 +617,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
           ariaLabel={messageEditorAriaLabel}
           data-test-subj="agentBuilderConversationInputEditor"
           onPasteFile={
-            upsertAttachments ? (canSteer ? refuseImagePaste : handlePasteFile) : undefined
+            upsertAttachments ? (willSteer ? refuseImagePaste : handlePasteFile) : undefined
           }
           onAfterInput={handleAfterInput}
           onHoveredPlaceholderChange={setHoveredImageName}

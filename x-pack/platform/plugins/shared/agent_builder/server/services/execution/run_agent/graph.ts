@@ -413,7 +413,22 @@ export const createAgentGraph = ({
     });
     const prompt = await promptFactory.getMainPrompt({ run: toCurrentRun(state) });
     const response = await answerModel.invoke([...prompt, new HumanMessage(FORCED_ANSWER_NOTICE)]);
+    // The calls the last response asked for never run; left pending, the round would show them running.
+    const pending = new Set(state.pendingToolCallIds);
+    const abandoned = state.steps.filter(
+      (step): step is ToolCallStep => isToolCallStep(step) && pending.has(step.tool_call_id)
+    );
     return {
+      steps: abandoned.map((step) =>
+        stepUpdates.resolveToolCall({
+          toolCallId: step.tool_call_id,
+          toolId: step.tool_id,
+          results: [],
+          progression: [],
+          interrupted: true,
+        })
+      ),
+      pendingToolCallIds: [],
       researchOutcome: { type: 'handover', message: extractTextContent(response), forceful: true },
       currentCycle: state.currentCycle + 1,
     };

@@ -11,7 +11,8 @@ export type SteerRefusalKind =
   | 'not_steerable'
   | 'awaiting_prompt'
   | 'no_active_execution'
-  | 'too_many_pending';
+  | 'too_many_pending'
+  | 'event_id_taken';
 
 /** Exits the OCC mutation without treating a steer refusal or duplicate as a version conflict. */
 export type SteerSignalOutcome =

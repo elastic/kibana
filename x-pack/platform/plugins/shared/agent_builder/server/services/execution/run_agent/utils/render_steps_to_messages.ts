@@ -18,6 +18,7 @@ import type {
 import {
   isAskUserQuestionStep,
   isBackgroundAgentCompleteStep,
+  deliveryKey,
   isDeliveredMessageStep,
   isInjectedContextStep,
   isInterimAnswerStep,
@@ -96,11 +97,11 @@ interface HistoryRenderContext {
   resultTransformer?: ToolCallResultTransformer;
   stepAttachments?: StepAttachments;
   /**
-   * Steers a finished execution read. A delivery outside the set was made by a run that did not
-   * finish, so it is rendered as a reference and a later delivery supplies the text. Absent on
-   * conversations without events: every delivery keeps its text.
+   * Deliveries (see `deliveryKey`) made by runs that did not finish: each is rendered as a
+   * reference, and a later delivery supplies the text. Absent on conversations without events:
+   * every delivery keeps its text.
    */
-  settledSteers?: ReadonlySet<string>;
+  unfinishedDeliveries?: ReadonlySet<string>;
 }
 
 interface CurrentRenderContext extends Omit<CurrentRunRenderOptions, 'range' | 'attachments'> {
@@ -455,11 +456,11 @@ const renderSteps = async (
     if (isBackgroundAgentCompleteStep(step)) {
       messages.push(createUserMessage(formatSystemNotice(step)));
     } else if (isDeliveredMessageStep(step)) {
-      const unsettled =
-        context.type === 'history' && context.settledSteers?.has(step.event_id) === false;
+      const unfinished =
+        context.type === 'history' && context.unfinishedDeliveries?.has(deliveryKey(step)) === true;
       messages.push(
         createUserMessage(
-          unsettled ? formatDeliveredMessageReference(step) : formatDeliveredMessageNotice(step)
+          unfinished ? formatDeliveredMessageReference(step) : formatDeliveredMessageNotice(step)
         )
       );
     } else if (isInterimAnswerStep(step)) {
@@ -516,19 +517,19 @@ export const renderHistorySteps = async ({
   steps,
   resultTransformer,
   attachments,
-  settledSteers,
+  unfinishedDeliveries,
 }: {
   steps: ConversationRoundStep[];
   resultTransformer?: ToolCallResultTransformer;
   attachments?: StepAttachments;
-  /** Steers a finished execution read; see `HistoryRenderContext`. */
-  settledSteers?: ReadonlySet<string>;
+  /** Deliveries made by runs that did not finish; see `HistoryRenderContext`. */
+  unfinishedDeliveries?: ReadonlySet<string>;
 }): Promise<BaseMessage[]> =>
   renderSteps(steps, {
     type: 'history',
     resultTransformer,
     stepAttachments: attachments,
-    settledSteers,
+    unfinishedDeliveries,
   });
 
 /** Renders the current run (or the `range` of its steps) to LangChain messages. */

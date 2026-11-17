@@ -153,7 +153,7 @@ export const prepareMessages = async ({
           notices,
           resumeAnchors: conversation.resumeAnchors,
           fromStepIndex: index === 0 ? visibility.entryFromStep : 0,
-          settledSteers: conversation.settledSteers,
+          unfinishedDeliveries: conversation.unfinishedDeliveries,
         }))
       );
       continue;
@@ -213,7 +213,7 @@ export interface RoundToLangchainOptions {
    * message is kept so the visible steps stay anchored to the request they answer.
    */
   fromStepIndex?: number;
-  settledSteers?: ReadonlySet<string>;
+  unfinishedDeliveries?: ReadonlySet<string>;
 }
 
 export const roundToLangchain = async (
@@ -224,7 +224,7 @@ export const roundToLangchain = async (
     notices,
     resumeAnchors,
     fromStepIndex = 0,
-    settledSteers,
+    unfinishedDeliveries,
   }: RoundToLangchainOptions
 ): Promise<BaseMessage[]> => {
   const placement = roundAttachmentPlacement(round, resumeAnchors);
@@ -241,7 +241,7 @@ export const roundToLangchain = async (
         steps: round.steps.slice(fromStepIndex),
         resultTransformer,
         attachments: { placement, notices },
-        settledSteers,
+        unfinishedDeliveries,
       }))
     );
   }
