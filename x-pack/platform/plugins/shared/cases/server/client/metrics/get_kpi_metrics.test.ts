@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KpiMetricsRequest } from '../../../common/types/api';
 import type { KpiMetricConfiguration } from '../../../common/types/domain';
 import { CaseStatuses } from '../../../common/types/domain';
 import { MAX_KPI_FILTER_CASE_IDS, MAX_TAGS_FILTER_LENGTH } from '../../../common/constants';
@@ -255,7 +256,10 @@ describe('getKpiMetrics', () => {
 
     it('rejects a field in the filters that is not a case list filter', async () => {
       const clientArgs = createClientArgs({ casesList: [customMetric] });
-      const params = { owner: 'securitySolution', filters: { perPage: 10000 } };
+      const params = {
+        owner: 'securitySolution',
+        filters: { perPage: 10000 },
+      } as unknown as KpiMetricsRequest;
 
       await expect(getKpiMetrics(params, clientArgs, casesClient)).rejects.toThrow();
       expect(clientArgs.services.caseService.searchCaseIds).not.toHaveBeenCalled();
