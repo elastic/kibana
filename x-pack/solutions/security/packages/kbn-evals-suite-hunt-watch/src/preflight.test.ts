@@ -91,8 +91,6 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
     spaceWrites = [],
   } = overrides;
 
-  // What the bridge last wrote per space, so the connectors route can follow it like the server.
-  const currentSettings: Record<string, Record<string, unknown>> = {};
   // Saved tier picks per space, keyed `<spaceId> -> <featureId> -> endpoint id`, like the server's
   // `inference-settings` saved object the preflight now reads and writes.
   const inferenceSettingsBySpace: Record<
@@ -165,7 +163,6 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
       if (settingsWriteErrorSpaces.includes(spaceId) && DEFAULT_CONNECTOR_SETTING in changes) {
         throw Object.assign(new Error('Bad Request'), { status: 400 });
       }
-      currentSettings[spaceId] = { ...currentSettings[spaceId], ...changes };
       return {};
     }
     const connectorsMatch = /^\/s\/([^/]+)\/internal\/search_inference_endpoints\/connectors$/.exec(

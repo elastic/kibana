@@ -204,8 +204,8 @@ export const assertWorkflowInstalled = async ({
         `Worker "${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}" in space "${spaceId}" is ` +
           `not ready for evals (enabled=${worker.enabled}, state=${worker.state}; expected ` +
           `enabled with state ${readyStates.join(' or ')}). The preflight ` +
-          `fixture must enable the Worker (which first requires a subject-model connector bridged ` +
-          `via genAiSettings:defaultAIConnector) before any example runs.`
+          `fixture must enable the Worker (which first requires the subject-model connector pinned ` +
+          `to the tier and Cyber rows of the space's inference settings) before any example runs.`
       );
     }
     if (worker.state === 'degraded') {

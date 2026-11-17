@@ -206,8 +206,9 @@ export const ensureHuntEndpointMetadata = async ({
 };
 
 /**
- * Points the seeded `.fleet-agents` doc's `policy_id` at `policyId` and returns the previous
- * value, so teardown can restore it. Returns undefined when the agent doc is absent.
+ * Points the seeded `.fleet-agents` doc's `policy_id` at `policyId` (null clears it) and returns
+ * the previous value, null when the doc had none, so teardown can restore it. Throws when the
+ * agent doc is absent: the approve path cannot run without the seeded agent.
  */
 export const retargetFleetAgentPolicyId = async ({
   esClient,
@@ -215,16 +216,22 @@ export const retargetFleetAgentPolicyId = async ({
   log,
 }: {
   esClient: Client;
-  policyId: string;
+  policyId: string | null;
   log: ToolingLog;
-}): Promise<string | undefined> => {
+}): Promise<string | null> => {
   const session = await acquireSystemIndicesAuth(esClient, log);
   try {
-    const { _source } = await esClient.get<{ policy_id?: string }>(
+    const { found, _source } = await esClient.get<{ policy_id?: string }>(
       { index: FLEET_AGENTS_INDEX, id: HUNT_AGENT_ID },
-      session.auth
+      { ...session.auth, ignore: [404] }
     );
-    const previous = _source?.policy_id;
+    if (!found) {
+      throw new Error(
+        `The seeded Fleet agent "${HUNT_AGENT_ID}" is not in ${FLEET_AGENTS_INDEX}; the hunt ` +
+          `data seed must run before the approve path is staged.`
+      );
+    }
+    const previous = _source?.policy_id ?? null;
     await esClient.update(
       {
         index: FLEET_AGENTS_INDEX,

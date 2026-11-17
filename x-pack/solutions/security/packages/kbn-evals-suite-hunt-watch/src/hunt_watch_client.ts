@@ -112,7 +112,7 @@ export class HuntWatchClient {
           `Cancelling ${fresh.length} Worker execution(s) still holding the slot in space ` +
             `"${spaceId}" before triggering: ${fresh.join(', ')}`
         );
-        await Promise.allSettled(
+        const outcomes = await Promise.allSettled(
           fresh.map((id) =>
             this.fetch(this.executionPath(spaceId, id, '/cancel'), {
               method: 'POST',
@@ -120,13 +120,25 @@ export class HuntWatchClient {
             })
           )
         );
-        fresh.forEach((id) => cancelled.add(id));
+        // A failed cancel (5xx, timeout) is retried on the next poll rather than assumed done.
+        outcomes.forEach((outcome, i) => {
+          if (outcome.status === 'fulfilled') {
+            cancelled.add(fresh[i]);
+          } else {
+            this.log.warning(`Cancelling ${fresh[i]} failed: ${String(outcome.reason)}`);
+          }
+        });
       }
       if (Date.now() >= deadline) {
+        const uncancelled = holders.filter((id) => !cancelled.has(id));
+        const cause =
+          uncancelled.length > 0
+            ? `cancel requests failed for [${uncancelled.join(', ')}]`
+            : 'despite being cancelled';
         throw new Error(
           `Worker executions [${holders.join(', ')}] in space "${spaceId}" still hold the ` +
-            `Worker's concurrency slot ${maxWaitMs}ms after being cancelled; a trigger now ` +
-            `would be dropped.`
+            `Worker's concurrency slot after ${maxWaitMs}ms (${cause}); a trigger now would ` +
+            `be dropped.`
         );
       }
       await sleep(pollIntervalMs);

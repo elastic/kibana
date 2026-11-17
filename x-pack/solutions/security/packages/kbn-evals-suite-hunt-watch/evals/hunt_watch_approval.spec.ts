@@ -213,7 +213,7 @@ const stageApprovePath = async ({
     );
   }
 
-  let previousPolicyId: string | undefined;
+  let previousPolicyId: string | null;
   try {
     previousPolicyId = await retargetFleetAgentPolicyId({ esClient, policyId: agentPolicyId, log });
   } catch (error) {
@@ -230,16 +230,17 @@ const stageApprovePath = async ({
   );
 
   return async () => {
-    if (previousPolicyId) {
-      await retargetFleetAgentPolicyId({
-        esClient,
-        policyId: previousPolicyId,
-        log,
-      }).catch((error) => {
-        log.warning(`approve path: restoring the agent's policy_id failed: ${String(error)}`);
-      });
-    }
-    await deleteIndexedFleetEndpointPolicies(kbnClient, indexed);
+    // Restore even a missing policy_id, so the agent never points at the policies deleted below.
+    await retargetFleetAgentPolicyId({
+      esClient,
+      policyId: previousPolicyId,
+      log,
+    }).catch((error) => {
+      log.warning(`approve path: restoring the agent's policy_id failed: ${String(error)}`);
+    });
+    await deleteIndexedFleetEndpointPolicies(kbnClient, indexed).catch((error) => {
+      log.warning(`approve path: deleting the Fleet policies failed: ${String(error)}`);
+    });
   };
 };
 

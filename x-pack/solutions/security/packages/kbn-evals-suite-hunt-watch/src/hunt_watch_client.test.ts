@@ -27,12 +27,16 @@ interface Call {
 const buildMockFetch = ({
   slotHolders,
   stepCount = 1,
+  failingCancels = 0,
 }: {
   slotHolders: string[][];
   stepCount?: number;
+  /** How many cancel requests fail (5xx) before they start succeeding. */
+  failingCancels?: number;
 }) => {
   const calls: Call[] = [];
   let listCall = 0;
+  let cancelCall = 0;
   const fetch = jest.fn(async (path: string, options: { method?: string } = {}) => {
     const method = options.method ?? 'GET';
     calls.push({ method, path });
@@ -40,7 +44,12 @@ const buildMockFetch = ({
       const ids = slotHolders[Math.min(listCall++, slotHolders.length - 1)];
       return { results: ids.map((id) => ({ id })), page: 1, size: 100, total: ids.length };
     }
-    if (method === 'POST' && path.endsWith('/cancel')) return {};
+    if (method === 'POST' && path.endsWith('/cancel')) {
+      if (cancelCall++ < failingCancels) {
+        throw Object.assign(new Error('Service Unavailable'), { status: 503 });
+      }
+      return {};
+    }
     if (method === 'POST' && path === `${WORKER_PATH}/run`) {
       return { workflowExecutionId: NEW_EXECUTION_ID };
     }
@@ -101,6 +110,31 @@ describe('HuntWatchClient.run', () => {
       })
     ).rejects.toThrow(/still hold the Worker's concurrency slot/);
     expect(calls.some((c) => c.path === `${WORKER_PATH}/run`)).toBe(false);
+  });
+
+  it('retries a cancel request that failed instead of only waiting on it', async () => {
+    const { fetch, calls } = buildMockFetch({
+      slotHolders: [['stale-run'], ['stale-run'], ['stale-run'], []],
+      failingCancels: 1,
+    });
+
+    await run(new HuntWatchClient(fetch, log));
+
+    expect(calls.filter((c) => c.path.endsWith('/cancel'))).toHaveLength(2);
+    expect(calls.filter((c) => c.path === `${WORKER_PATH}/run`)).toHaveLength(1);
+  });
+
+  it('names the executions whose cancel request failed when the slot never frees', async () => {
+    const { fetch } = buildMockFetch({ slotHolders: [['stuck-run']], failingCancels: 1 });
+
+    await expect(
+      new HuntWatchClient(fetch, log).run({
+        spaceId: SPACE_ID,
+        reportIds: ['r1'],
+        pollIntervalMs: 0,
+        slotWaitMs: 0,
+      })
+    ).rejects.toThrow(/cancel requests failed for \[stuck-run\]/);
   });
 
   it('still rejects a run that ends with no step executions', async () => {
