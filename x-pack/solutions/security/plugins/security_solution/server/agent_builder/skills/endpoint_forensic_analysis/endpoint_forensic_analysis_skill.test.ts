@@ -258,7 +258,10 @@ describe('endpointForensicAnalysisSkill', () => {
       const data = await runHandler({ hosts: ['WKSTN-RECV01'] }, createContext(spaceId));
 
       expect(data.alerts_index).toBe(alertsIndex);
-      expect(data.guidance).toContain(`only from \`${alertsIndex}\``);
+      expect(data.guidance).toContain(
+        `If you need detection alerts, query them only from \`${alertsIndex}\``
+      );
+      expect(data.guidance).toContain('Do not query alerts otherwise.');
       expect(data.guidance).toContain(`FROM ${alertsIndex} METADATA _id, _index`);
       expect(data.guidance).toContain('`_id` and `_index` unchanged');
       expect(data.guidance).toContain(
@@ -285,6 +288,8 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(content).toContain('## Alerts in this space');
     expect(content).toContain('`alerts_index`');
     expect(content).toContain('FROM <alerts_index> METADATA _id, _index');
+    expect(content).toContain('When you need detection alerts');
+    expect(content).toContain('Do not query alerts otherwise.');
     expect(content).toContain('Pass `_id` and `_index` unchanged');
     expect(content).toContain('do not rewrite it to the alias');
     expect(content).toContain('`kibana.alert.uuid` equals `_id`');

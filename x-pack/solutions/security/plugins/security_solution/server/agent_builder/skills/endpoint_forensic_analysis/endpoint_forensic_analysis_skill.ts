@@ -231,7 +231,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
 
 ## Alerts in this space
 
-- Look up detection alerts with ES|QL against the \`alerts_index\` the discovery tool returned: \`FROM <alerts_index> METADATA _id, _index\`.
+- When you need detection alerts (for example, the user asks about alerts or to attach them to a case), query only the \`alerts_index\` the discovery tool returned: \`FROM <alerts_index> METADATA _id, _index\`. Do not query alerts otherwise.
 - Never hardcode \`${DEFAULT_ALERTS_INDEX}-default\`, \`.siem-signals-*\`, or another space's index.
 - If the \`alerts_index\` does not exist, the space has no alerts; do not query another index.
 - This skill has no case tool. Alerts are attached with the Cases attachments tool (\`platform.core.cases.manage_attachments\`, mode \`add_alerts\`, \`{alertId, index}\`); this rule is about which values to pass there.
@@ -309,10 +309,10 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
                       searchedWindow.anchor === 'incident'
                         ? 'The range is the incident window. Events outside it are history, not this incident.'
                         : 'The range is a lookback from now, not anchored on an incident.'
-                    } Query detection alerts only from \`${alertsIndex}\` (the current space) with ` +
+                    } If you need detection alerts, query them only from \`${alertsIndex}\` (the current space) with ` +
                     `\`FROM ${alertsIndex} METADATA _id, _index\`, and pass \`_id\` and \`_index\` unchanged ` +
                     `when attaching alerts to a case. If \`${alertsIndex}\` does not exist, the space has no ` +
-                    `alerts; do not query another index.`,
+                    `alerts; do not query another index. Do not query alerts otherwise.`,
                 },
               },
             ],
