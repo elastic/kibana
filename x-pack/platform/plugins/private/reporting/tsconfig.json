@@ -75,7 +75,8 @@
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/zod",
     "@kbn/deeplinks-analytics",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/core-logging-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }
