@@ -14,7 +14,7 @@ import {
   INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATE,
 } from '../../common/constants';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const logstashStatsResultSetOfMetricbeatMonitoring = require('./__mocks__/fixtures/logstash_stats_metricbeat_monitoring_results.json');
 
 const logstashStateResultsMapOfMetricbeatMonitoring = new Map();
@@ -23,7 +23,7 @@ const logstashStateResultsMapOfMetricbeatMonitoring = new Map();
 ['1n1p', '1nmp', 'mnmp'].forEach((data) => {
   logstashStateResultsMapOfMetricbeatMonitoring.set(
     data,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     require(`./__mocks__/fixtures/logstash_state_metricbeat_monitoring_results_${data}`)
   );
 });

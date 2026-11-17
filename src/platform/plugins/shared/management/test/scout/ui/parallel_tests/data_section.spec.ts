@@ -94,6 +94,7 @@ test.describe('Stack Management — data section', () => {
                 'transform',
                 'cross_cluster_replication',
                 'remote_clusters',
+                'content_connectors',
               ],
             },
             { sectionId: 'kibana', sectionLinks: ['settings'] },
@@ -118,7 +119,7 @@ test.describe('Stack Management — data section', () => {
         expect(sections).toHaveLength(2);
         expect(sections[0]).toStrictEqual({
           sectionId: 'data',
-          sectionLinks: ['index_management', 'esql_views', 'transform'],
+          sectionLinks: ['index_management', 'esql_views', 'transform', 'content_connectors'],
         });
       });
     }
