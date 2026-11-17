@@ -6,20 +6,19 @@
  */
 
 import type { KibanaRole } from '@kbn/scout-oblt';
-import { apiTest, type ApiClientFixture, type EsClient, type KbnClient } from '@kbn/scout-oblt';
+import { apiTest, type ApiClientFixture, type EsClient } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { BROWSER_SDK_LANGUAGE } from '../../../../common/otel_data';
 import {
   SESSIONS_INDEX,
   SESSIONS_SOURCE_INDICES,
-  SESSIONS_TASK_ID,
   type SessionsStatus,
 } from '../../../../common/sessions';
 import type {
   ApplicationSummary,
   ApplicationsResponse,
 } from '../../../../common/types/applications';
-import { deleteSessionsData } from '../../common/fixtures/sessions_data';
+import { deleteSessionsData, runSessionsTask } from '../../common/fixtures/sessions_data';
 import { findApplication, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
@@ -151,14 +150,6 @@ const buildEvents = (baseMs: number) => {
     ],
   };
 };
-
-/** Runs the summaries task now instead of at its next interval. */
-const runSessionsTask = (kbnClient: KbnClient) =>
-  kbnClient.request({
-    method: 'POST',
-    path: `/internal/ftr/task_manager/${encodeURIComponent(SESSIONS_TASK_ID)}/run_soon`,
-    headers: { 'x-elastic-internal-origin': 'kibana' },
-  });
 
 const deleteEvents = (esClient: EsClient) =>
   esClient.deleteByQuery({
