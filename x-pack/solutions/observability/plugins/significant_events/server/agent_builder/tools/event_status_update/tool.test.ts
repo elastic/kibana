@@ -82,11 +82,17 @@ describe('event_status_update tool', () => {
     });
     const result = await invokeHandler(
       tool as never,
-      { event_id: 'e1', status: 'inactive', assessment_note: 'Recovered after rollback' },
+      {
+        event_id: 'e1',
+        status: 'inactive',
+        close_reason: 'resolved',
+        assessment_note: 'Recovered after rollback',
+      },
       context
     );
     expect(updateEventStatusToolHandler).toHaveBeenCalledWith(
       expect.objectContaining({
+        closeReason: 'resolved',
         assessmentNote: 'Recovered after rollback',
         workflowExecutionId: 'workflow-run-1',
       })
@@ -99,7 +105,8 @@ describe('event_status_update tool', () => {
       expect.objectContaining({ request: expect.anything() })
     );
     expect(telemetry.trackAgentToolEventStatusUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
+      expect.objectContaining({ workflow_execution_id: 'workflow-run-1' }),
+      expect.anything()
     );
   });
 

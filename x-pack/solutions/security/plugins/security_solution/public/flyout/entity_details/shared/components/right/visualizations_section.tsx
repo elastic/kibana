@@ -14,6 +14,7 @@ import { VISUALIZATION_SECTION_TEST_ID } from '../../../../../flyout_v2/document
 import { VISUALIZATION_SECTION_TITLE } from '../../../../../flyout_v2/shared/constants/flyout_titles';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
 import { EntityDetailsLeftPanelTab, type EntityDetailsPath } from '../left_panel/left_panel_header';
+import type { GraphEntryPoint } from '../../../../../common/lib/telemetry';
 import { EntityGraphPreviewContainer } from './entity_graph_preview_container';
 
 const KEY = 'visualizations';
@@ -28,6 +29,7 @@ export const VisualizationsSection = memo(
     scopeId,
     openDetailsPanel,
     hideHeaderIcons = false,
+    graphEntryPoint,
   }: {
     entityId: string;
     isPreviewMode: boolean;
@@ -35,6 +37,8 @@ export const VisualizationsSection = memo(
     openDetailsPanel?: (path: EntityDetailsPath) => void;
     /** When true, hides the chevron icon in the graph preview header. Used by the v2 flyout. */
     hideHeaderIcons?: boolean;
+    /** Where the entity flyout was opened from, reported by the graph preview telemetry. */
+    graphEntryPoint?: GraphEntryPoint;
   }) => {
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -60,6 +64,7 @@ export const VisualizationsSection = memo(
             <EntityGraphPreviewContainer
               entityId={entityId}
               scopeId={scopeId}
+              entryPoint={graphEntryPoint}
               // header link + arrow only shown when navigation is wired up (onShowGraph set)
               showIcon={!isPreviewMode && openDetailsPanel != null && !hideHeaderIcons}
               onShowGraph={

@@ -27,8 +27,8 @@ export type { GraphProps } from './graph/graph';
 export type {
   NodeViewModel,
   EdgeViewModel,
-  GroupNodeViewModel,
-  LabelNodeViewModel,
+  ConnectorGroupNodeViewModel,
+  EventNodeViewModel,
   EntityNodeViewModel,
   RelationshipNodeViewModel,
   NodeProps,
@@ -39,7 +39,12 @@ export type {
   GraphNodeType,
   GraphNodeAction,
   GraphToggleState,
+  GraphExpansionAction,
+  GraphEmptyStateReason,
+  GraphFetchErrorCategory,
+  GraphGroupedItemType,
 } from './graph_telemetry';
+export { isExpansionAction, getEmptyStateReason } from './graph_telemetry';
 export {
   isEntityNode,
   getNodeDocumentMode,

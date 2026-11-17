@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SeriesType } from '@kbn/lens-common';
 import type { ColorMappingCategoricalType } from '../../../schema/color';
+import { DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../../schema/color';
 
 /**
  * Lens-known defaults for XY chart styling.
@@ -32,3 +34,11 @@ export const DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType
   palette: 'elastic_line_optimized',
   mapping: [],
 };
+
+/** Returns the breakdown color mapping Lens uses for a series type when none is set. */
+export const getDefaultBreakdownColorMapping = (
+  seriesType: SeriesType
+): ColorMappingCategoricalType =>
+  seriesType === 'line'
+    ? DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
+    : DEFAULT_CATEGORICAL_COLOR_MAPPING;

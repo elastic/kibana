@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLColumn } from '@kbn/es-types';
 import type { GeneratedQuery } from '../generator';
 import { esqlResultsToRows } from './esql_results_to_rows';
-import type { InventoryRow } from './types';
+import type { EsqlRequestBody, InventoryRow } from '../../../common';
 
 export interface EsqlStats {
   /** Cluster time in milliseconds, not wall time. */
@@ -41,18 +41,25 @@ export interface ExecuteEsqlOptions {
   signal?: AbortSignal;
 }
 
+/** Builds the `POST /_query` body for one generated query; the only place that body is built. */
+export const toEsqlRequestBody = ({ esql, params }: GeneratedQuery): EsqlRequestBody => ({
+  query: esql,
+  params,
+  // `drop_null_columns` stays off so every plan returns the same column list.
+  include_execution_metadata: true,
+});
+
 /**
  * Runs one generated query with its named parameters sent as request parameters, never
  * interpolated; throws the client's error unchanged.
  */
 export const executeEsql = async (
   client: ElasticsearchClient,
-  { esql, params }: GeneratedQuery,
+  query: GeneratedQuery,
   { signal }: ExecuteEsqlOptions = {}
 ): Promise<EsqlQueryResult> => {
-  // `drop_null_columns` stays off so every plan returns the same column list.
   const rawResponse: EsqlQueryResponseWithStats = await client.esql.query(
-    { query: esql, params, include_execution_metadata: true },
+    toEsqlRequestBody(query),
     { signal }
   );
 

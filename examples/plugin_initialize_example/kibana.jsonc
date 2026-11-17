@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/plugin-initialize-example-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "Example of the initialize() plugin lifecycle hook and of routes and contract functions that wait for it",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "pluginInitializeExample",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": []
+  }
+}
