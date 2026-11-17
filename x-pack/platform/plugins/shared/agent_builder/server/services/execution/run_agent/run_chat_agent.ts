@@ -339,12 +339,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   ]);
   processedConversation.boundToolDefinitions = (event) => attachmentBoundTools.get(event);
   // A conversation stored before attachment events existed carries its attachments on its
-  // messages: no event renders their definitions, so a notice ahead of the history does.
-  processedConversation.unannouncedBoundToolDefinitions =
-    await attachmentBoundTools.unannouncedDefinitions([
-      ...processedConversation.timeline.filter(isAttachmentEvent),
-      ...chatInputEvents,
-    ]);
+  // messages: no event renders their definitions, so a notice ahead of the history does. The
+  // events of the run reach `prepare`, so resolving at render time reflects them.
+  const storedAttachmentEvents = [
+    ...processedConversation.timeline.filter(isAttachmentEvent),
+    ...chatInputEvents,
+  ];
+  processedConversation.unannouncedBoundToolDefinitions = () =>
+    attachmentBoundTools.unannouncedDefinitions(storedAttachmentEvents);
 
   // Started before the tool setup so a 'first' hook overlaps it, as the skill selection below does.
   const cycleHooks = new CycleHookRuntime({

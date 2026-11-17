@@ -118,16 +118,19 @@ export class AttachmentBoundTools {
   private readonly definitions = new Map<string, DynamicToolDefinition[] | undefined>();
   /** The ids of the tools `sync` registered last. */
   private registeredIds = new Set<string>();
+  /** The attachment versions the events given to `prepare` announced, by key. */
+  private readonly announced = new Set<string>();
 
   constructor(private readonly options: AttachmentBoundToolsOptions) {}
 
   /** Resolves the definitions of the events that carry them; call before rendering the events. */
   async prepare(events: readonly AttachmentTimelineEvent[]): Promise<void> {
-    const announcedAttachmentVersions = announcedVersions(events).values();
+    const announcedAttachmentVersions = announcedVersions(events);
+    announcedAttachmentVersions.keys().forEach((key) => this.announced.add(key));
     await Promise.all(
-      announcedAttachmentVersions.map(({ attachmentId, version }) =>
-        this.resolveVersionDefinitions(attachmentId, version)
-      )
+      announcedAttachmentVersions
+        .values()
+        .map(({ attachmentId, version }) => this.resolveVersionDefinitions(attachmentId, version))
     );
   }
 
@@ -140,19 +143,20 @@ export class AttachmentBoundTools {
   }
 
   /**
-   * The definitions of the tools bound to the active attachments that no event in `events`
-   * announces at their current version. A conversation stored before attachment events existed
-   * carries its attachments on its messages, with no event to render their definitions after.
+   * The definitions of the tools bound to the attachments active now that no event announces at
+   * their current version: neither one in `events` nor one `prepare` saw. A conversation stored
+   * before attachment events existed carries its attachments on its messages, with no event to
+   * render their definitions after. Resolve this when the prompt is built: a tool that updates or
+   * deletes such an attachment during the run changes the answer.
    */
   async unannouncedDefinitions(
     events: readonly AttachmentTimelineEvent[]
   ): Promise<DynamicToolDefinition[]> {
     const announced = announcedVersions(events);
-    const unannounced = this.options.attachmentStateManager
-      .getActive()
-      .filter(
-        (attachment) => !announced.has(versionKey(attachment.id, attachment.current_version))
-      );
+    const unannounced = this.options.attachmentStateManager.getActive().filter((attachment) => {
+      const key = versionKey(attachment.id, attachment.current_version);
+      return !announced.has(key) && !this.announced.has(key);
+    });
     const definitions = await Promise.all(
       unannounced.map((attachment) =>
         this.resolveVersionDefinitions(attachment.id, attachment.current_version)

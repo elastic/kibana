@@ -72,9 +72,10 @@ export interface ProcessedConversation {
   /**
    * The definitions of the tools bound to active attachments no event announces, so no event
    * renders them: the attachments of a conversation stored before attachment events existed.
-   * Rendered in a notice ahead of the history.
+   * Rendered in a notice ahead of the history, and resolved when the prompt is built so that an
+   * attachment a tool updated or deleted during the run is reflected.
    */
-  unannouncedBoundToolDefinitions?: DynamicToolDefinition[];
+  unannouncedBoundToolDefinitions?: () => Promise<DynamicToolDefinition[]>;
   /** Where each resume's input attachments render: `prompt_response` id → the items its pause waited on. */
   resumeAnchors?: ResumeAnchors;
   attachmentStateManager: AttachmentStateManager;

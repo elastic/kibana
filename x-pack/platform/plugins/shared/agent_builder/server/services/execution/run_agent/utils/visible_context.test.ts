@@ -463,7 +463,7 @@ describe('renderVisibleContext', () => {
         {
           conversation: {
             ...conversation(twoRoundTimeline()),
-            unannouncedBoundToolDefinitions: [definition('legacy-bound')],
+            unannouncedBoundToolDefinitions: async () => [definition('legacy-bound')],
           },
           run: run([]),
           phase: 'research',
@@ -481,7 +481,7 @@ describe('renderVisibleContext', () => {
         {
           conversation: {
             ...conversation(twoRoundTimeline()),
-            unannouncedBoundToolDefinitions: [
+            unannouncedBoundToolDefinitions: async () => [
               { ...definition('dynamic-1'), description: 'rendered again' },
               definition('legacy-bound'),
             ],

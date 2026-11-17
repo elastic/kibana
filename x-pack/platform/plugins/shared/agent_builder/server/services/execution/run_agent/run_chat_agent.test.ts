@@ -1805,18 +1805,21 @@ describe('runDefaultAgentMode attachment bound tools', () => {
     );
   });
 
-  it('carries the definitions of the attachments no event announces', async () => {
+  it('resolves the definitions of the attachments no event announces when asked', async () => {
     const timelineEvent = attachmentEventFixture({ id: 'att' });
     const legacyDefinition: DynamicToolDefinition = { ...definition, tool_id: 'legacy.bound' };
     mockAttachmentBoundTools.unannouncedDefinitions.mockResolvedValueOnce([legacyDefinition]);
 
     const { processedConversation } = await run({ timeline: [timelineEvent] });
 
+    // resolved when the prompt is built, against the stored events
+    expect(await processedConversation.unannouncedBoundToolDefinitions?.()).toEqual([
+      legacyDefinition,
+    ]);
     expect(mockAttachmentBoundTools.unannouncedDefinitions).toHaveBeenCalledWith([
       timelineEvent,
       expect.objectContaining({ data: expect.objectContaining({ source: 'chat_input' }) }),
     ]);
-    expect(processedConversation.unannouncedBoundToolDefinitions).toEqual([legacyDefinition]);
   });
 
   it('syncs the bound tools into the registry after the restored dynamic tools', async () => {

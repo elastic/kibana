@@ -432,5 +432,31 @@ describe('AttachmentBoundTools', () => {
 
       expect(format).toHaveBeenCalledTimes(1);
     });
+
+    it('counts the versions prepare saw during the run as announced', async () => {
+      const { boundTools } = setup();
+      // the run updates the attachment to version 2 and prepares the event
+      await boundTools.prepare([
+        createEvent(TimelineEventType.attachmentUpdated, {
+          previous_version: 1,
+          current_version: 2,
+          render_inline: true,
+        }),
+      ]);
+
+      expect(await boundTools.unannouncedDefinitions([addedEvent(1)])).toEqual([]);
+    });
+
+    it('reflects the attachments active when resolved, not when constructed', async () => {
+      const active = [createAttachment()];
+      const { boundTools } = setup({ active });
+      const resolve = () => boundTools.unannouncedDefinitions([]);
+      expect(await resolve()).toHaveLength(1);
+
+      // the run deletes the attachment
+      active.splice(0, 1);
+
+      expect(await resolve()).toEqual([]);
+    });
   });
 });
