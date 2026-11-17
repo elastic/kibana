@@ -19,7 +19,10 @@ import {
   getAllCloudConnectorVarNames,
   type VarGroupSelection,
 } from '../../../../../../../common/services/cloud_connectors';
-import { hasConfiguredVarValue } from '../../../../../../../common/services/var_group_helpers';
+import {
+  hasConfiguredVarValue,
+  shouldShowVar,
+} from '../../../../../../../common/services/var_group_helpers';
 import type { RegistryVarGroup } from '../../../../types';
 
 /**
@@ -276,7 +279,11 @@ export function registerPolicyUpdateHandler(handler: PolicyUpdateHandler): void 
  * existing behaviour; package-level credential groups keep today's secret-ref-only
  * clearing in `updateCloudConnectorPolicy`.
  *
- * Vars shared with the newly selected option are kept. Any populated value is
+ * Vars shared with the newly selected option are kept. When the caller also
+ * passes all of the stream's var_groups and the post-change selections, vars
+ * shared with another group's selected option are kept too: `shouldShowVar`
+ * shows a var when any group's selected option lists it, so clearing it here
+ * would wipe a field the form still displays. Any populated value is
  * cleared, whatever its type — a `multi: true` array (e.g. a list of log group
  * names) or a number/boolean belonging to a deselected option would otherwise
  * still reach the compiled agent template, the same leak this PR fixes for
@@ -294,7 +301,9 @@ export function buildStreamVarGroupVarsUpdate(
   streamVars: PackagePolicyConfigRecord | undefined,
   varGroup: RegistryVarGroup,
   previousOptionName: string | undefined,
-  newOptionName: string
+  newOptionName: string,
+  varGroups?: RegistryVarGroup[],
+  varGroupSelections?: VarGroupSelection
 ): PackagePolicyConfigRecord | undefined {
   if (!streamVars || previousOptionName === newOptionName) return undefined;
 
@@ -313,9 +322,21 @@ export function buildStreamVarGroupVarsUpdate(
   }
   if (deselectedVarNames.size === 0) return undefined;
 
+  // A var counts as deselected only when no selected option on the stream uses
+  // it. Without the full context, the single-group rule above applies.
+  const clearedVarNames =
+    varGroups && varGroupSelections
+      ? new Set(
+          [...deselectedVarNames].filter(
+            (name) => !shouldShowVar(name, varGroups, varGroupSelections)
+          )
+        )
+      : deselectedVarNames;
+  if (clearedVarNames.size === 0) return undefined;
+
   let changed = false;
   const updated = { ...streamVars };
-  for (const name of deselectedVarNames) {
+  for (const name of clearedVarNames) {
     const entry = updated[name];
     if (!entry) continue;
     if (hasConfiguredVarValue(entry)) {

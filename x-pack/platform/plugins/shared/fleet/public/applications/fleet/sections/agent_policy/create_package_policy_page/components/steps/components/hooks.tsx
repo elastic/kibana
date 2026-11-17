@@ -232,7 +232,9 @@ export function useVarGroupSelections({
           : null;
 
       // Stream-level var_groups only: clear the deselected options' populated vars
-      // so stale values don't leak into the agent template.
+      // so stale values don't leak into the agent template. The full groups and
+      // post-change selections are passed so a var another selector still shows
+      // is kept.
       let clearedStreamVars: PackagePolicyConfigRecord | undefined;
       if (streamVars && varGroups) {
         const varGroup = varGroups.find((group) => group.name === groupName);
@@ -241,7 +243,9 @@ export function useVarGroupSelections({
             streamVars,
             varGroup,
             selections[groupName],
-            optionName
+            optionName,
+            varGroups,
+            newSelections
           );
         }
       }

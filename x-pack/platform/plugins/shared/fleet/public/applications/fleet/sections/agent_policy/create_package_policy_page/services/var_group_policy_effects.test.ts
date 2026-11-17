@@ -627,6 +627,100 @@ describe('var_group_policy_effects', () => {
       });
     });
 
+    it('should keep vars still selected by another var_group on the same stream', () => {
+      // shouldShowVar shows a var when any group's selected option uses it, so
+      // switching one selector must not clear a var another selector still shows.
+      const varGroups: RegistryVarGroup[] = [
+        {
+          name: 'log_group_source',
+          title: 'Log Group Source',
+          selector_title: 'Select log group source',
+          options: [
+            { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn', 'region'] },
+            { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
+          ],
+        },
+        {
+          name: 'region_source',
+          title: 'Region Source',
+          selector_title: 'Select region source',
+          options: [
+            { name: 'static_region', title: 'Static Region', vars: ['region'] },
+            { name: 'auto_region', title: 'Auto Region', vars: ['auto_region_var'] },
+          ],
+        },
+      ];
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+        log_group_name: { value: '' },
+        region: { value: 'us-east-1' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroups[0],
+        'log_group_arn',
+        'log_group_name',
+        varGroups,
+        {
+          log_group_source: 'log_group_name',
+          region_source: 'static_region',
+        }
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: undefined },
+        log_group_name: { value: '' },
+        region: { value: 'us-east-1' },
+      });
+    });
+
+    it('should clear a shared var when no other var_group still selects it', () => {
+      const varGroups: RegistryVarGroup[] = [
+        {
+          name: 'log_group_source',
+          title: 'Log Group Source',
+          selector_title: 'Select log group source',
+          options: [
+            { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn', 'region'] },
+            { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
+          ],
+        },
+        {
+          name: 'region_source',
+          title: 'Region Source',
+          selector_title: 'Select region source',
+          options: [
+            { name: 'static_region', title: 'Static Region', vars: ['region'] },
+            { name: 'auto_region', title: 'Auto Region', vars: ['auto_region_var'] },
+          ],
+        },
+      ];
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+        log_group_name: { value: '' },
+        region: { value: 'us-east-1' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroups[0],
+        'log_group_arn',
+        'log_group_name',
+        varGroups,
+        {
+          log_group_source: 'log_group_name',
+          region_source: 'auto_region',
+        }
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: undefined },
+        log_group_name: { value: '' },
+        region: { value: undefined },
+      });
+    });
+
     it('should return undefined when the selection does not change', () => {
       const varGroup = createMockStreamVarGroups()[0];
       const streamVars = {
