@@ -40,7 +40,7 @@ export const recall = async ({
     format,
   } = request;
   try {
-    const [pinned, candidates] = await Promise.all([
+    const [pinned, found] = await Promise.all([
       userId ? Promise.all(stores.map((store) => store.pinned?.(userId) ?? [])) : [],
       Promise.all(
         stores
@@ -48,20 +48,21 @@ export const recall = async ({
           .map((store) => store.search({ query, userId, sessionIds, aiIndexIds }))
       ),
     ]);
-    const ranked = await rerankCandidates({ esClient, query, candidates: candidates.flat() });
-    const { results, tokens } = packResults({ pinned: pinned.flat(), ranked, maxTokens });
-    const context = format === 'text' ? renderContext(results) : undefined;
-    const tokensReturned = context === undefined ? tokens : estimateTokens(context);
-    const tookMs = Date.now() - startedAt;
+    const candidates = found.flat();
+    const ranked = await rerankCandidates({ esClient, query, candidates });
+    const packed = packResults({ pinned: pinned.flat(), ranked, maxTokens });
+    const context = format === 'text' ? renderContext(packed.results) : undefined;
+    const usage = {
+      took_ms: Date.now() - startedAt,
+      tokens: context === undefined ? packed.tokens : estimateTokens(context),
+    };
     analyticsService.reportMemoryRecall({
       outcome: 'success',
-      totalMs: tookMs,
-      tokensReturned,
-      candidatesReranked: candidates.flat().length,
+      totalMs: usage.took_ms,
+      tokensReturned: usage.tokens,
+      candidatesReranked: candidates.length,
     });
-    return context === undefined
-      ? { results, took_ms: tookMs, tokens: tokensReturned }
-      : { context, took_ms: tookMs, tokens: tokensReturned };
+    return context === undefined ? { results: packed.results, ...usage } : { context, ...usage };
   } catch (error) {
     analyticsService.reportMemoryRecall({
       outcome: 'failure',

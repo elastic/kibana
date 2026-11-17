@@ -12,7 +12,7 @@ import type { RecallCandidate, RecallStore } from './types';
 
 const LIMIT = RECALL_CANDIDATES.ai_index;
 
-/** Lexical and semantic matches fused together, the same shape as the AI index example queries. */
+/** Lexical and semantic matches, fused. */
 export const buildAiIndexRecallQuery = (dests: string[]): string =>
   [
     `FROM ${dests.join(', ')} METADATA _id, _index, _score`,
@@ -45,14 +45,13 @@ export const createAiIndexRecallStore = (
       params: { query },
       limit: LIMIT,
     });
-    const at = (name: string) => columns.findIndex((column) => column.name === name);
     const [id, docId, index, content, timestamp] = [
-      at('id'),
-      at('_id'),
-      at('_index'),
-      at('content'),
-      at('@timestamp'),
-    ];
+      'id',
+      '_id',
+      '_index',
+      'content',
+      '@timestamp',
+    ].map((name) => columns.findIndex((column) => column.name === name));
     return values.flatMap((row): RecallCandidate[] =>
       typeof row[content] === 'string'
         ? [
