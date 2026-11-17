@@ -33,7 +33,15 @@ export const settingsAttachmentData: AwsOnboardingSettingsAttachmentData = {
                 ingestion_method: 'S3 + SQS notifications',
                 title: 'Collect logs from S3',
                 description: 'The agent reads SQS notifications.',
-                fields: [{ name: 'queue_url', title: 'Queue URL', type: 'text', required: true }],
+                fields: [
+                  {
+                    name: 'queue_url',
+                    title: 'Queue URL',
+                    type: 'text',
+                    required: true,
+                    advanced: false,
+                  },
+                ],
                 var_groups: [],
               },
               {
@@ -42,7 +50,13 @@ export const settingsAttachmentData: AwsOnboardingSettingsAttachmentData = {
                 title: 'Collect logs from the API',
                 description: 'The agent polls the GuardDuty API.',
                 fields: [
-                  { name: 'detector_id', title: 'Detector ID', type: 'text', required: true },
+                  {
+                    name: 'detector_id',
+                    title: 'Detector ID',
+                    type: 'text',
+                    required: true,
+                    advanced: false,
+                  },
                 ],
                 var_groups: [],
               },
@@ -86,12 +100,19 @@ export const settingsAttachmentData: AwsOnboardingSettingsAttachmentData = {
                 title: 'Collect logs from CloudWatch',
                 description: 'Needs a log group.',
                 fields: [
-                  { name: 'log_group_arn', title: 'Log group ARN', type: 'text', required: true },
+                  {
+                    name: 'log_group_arn',
+                    title: 'Log group ARN',
+                    type: 'text',
+                    required: true,
+                    advanced: false,
+                  },
                   {
                     name: 'regions',
                     title: 'Regions',
                     type: 'text',
                     required: false,
+                    advanced: true,
                     multi: true,
                   },
                 ],

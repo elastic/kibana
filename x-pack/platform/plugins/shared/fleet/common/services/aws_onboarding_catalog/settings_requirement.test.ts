@@ -20,7 +20,8 @@ const v = (name: string, extra: Partial<RegistryVarsEntry> = {}): RegistryVarsEn
 
 const s3Vars = {
   queue_url: v('queue_url', { title: 'Queue URL', show_user: true }),
-  bucket_arn: v('bucket_arn', { title: 'Bucket ARN', show_user: true }),
+  // Neither show_user nor required: only the var group makes it a field the user fills in.
+  bucket_arn: v('bucket_arn', { title: 'Bucket ARN' }),
   region: v('region', { required: true }),
   access_key_id: v('access_key_id', { required: true }),
   proxy_url: v('proxy_url'),
@@ -61,6 +62,8 @@ const guardduty = {
             // Registry YAML can carry an explicit null default, which the manifest type omits.
             default: null as unknown as undefined,
           }),
+          initial_interval: v('initial_interval', { required: true, default: '24h' }),
+          processors: v('processors'),
           access_key_id: v('access_key_id', { required: true }),
           region: v('region', { required: true }),
           proxy_url: v('proxy_url'),
@@ -184,19 +187,29 @@ describe('buildSettingsRequirement', () => {
     expect(stream).toMatchObject({ choice: 'toggle', type: 'metrics', default_enabled: true });
   });
 
-  it('lists only required or show_user fields under the right input, without region or credentials', () => {
+  it('carries every non-secret var and flags the ones Fleet hides behind Advanced options', () => {
     const stream = dataStream(build(), 'guardduty', 'guardduty');
-    const names = (input: string) =>
-      stream.inputs.find((i) => i.input === input)?.fields.map(({ name }) => name);
+    const fields = stream.inputs.find((i) => i.input === 'httpjson')?.fields ?? [];
 
-    expect(names('httpjson')).toEqual(['detector_id']);
-    expect(names('aws-s3')).toEqual(['queue_url', 'bucket_arn']);
-    expect(stream.inputs[0].fields[0]).toEqual({
+    expect(fields.map(({ name, required, advanced }) => [name, required, advanced])).toEqual([
+      ['detector_id', true, false],
+      ['initial_interval', true, true],
+      ['processors', false, true],
+      ['proxy_url', false, true],
+    ]);
+    expect(fields[0]).toEqual({
       name: 'detector_id',
       title: 'Detector ID',
       type: 'text',
       required: true,
+      advanced: false,
     });
+  });
+
+  it('never flags a var-group option var as advanced', () => {
+    const s3 = dataStream(build(), 'guardduty', 'guardduty').inputs[1];
+
+    expect(s3.fields.find(({ name }) => name === 'bucket_arn')?.advanced).toBe(false);
   });
 
   it('carries var groups from the matrix entry with the default option first and marks their vars required', () => {
@@ -212,7 +225,11 @@ describe('buildSettingsRequirement', () => {
         ],
       },
     ]);
-    expect(s3.fields.every(({ required }) => required)).toBe(true);
+    expect(
+      s3.fields
+        .filter(({ name }) => ['queue_url', 'bucket_arn'].includes(name))
+        .every(({ required }) => required)
+    ).toBe(true);
   });
 
   it('synthesises a required source group for an input whose manifest declares none', () => {

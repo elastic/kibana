@@ -17,6 +17,7 @@ const field = (name: string, extra: Record<string, unknown> = {}) => ({
   title: name,
   type: 'text',
   required: false,
+  advanced: false,
   ...extra,
 });
 
@@ -45,6 +46,7 @@ const req: AwsOnboardingSettingsRequirement = {
               fields: [
                 field('detector_id', { required: true }),
                 field('initial_interval', { required: true, default: '24h' }),
+                field('processors', { advanced: true }),
               ],
               var_groups: [],
             },
@@ -327,6 +329,27 @@ describe('settingsAnswerToServiceVars', () => {
       log_group_name: 'my-group',
       region_name: 'us-east-1',
     });
+  });
+
+  it('accepts an advanced value the user names and passes it through to ServiceVars', () => {
+    const answer = awsOnboardingSettingsAnswerSchema.parse({
+      services: {
+        guardduty: {
+          data_streams: {
+            guardduty: {
+              input: 'httpjson',
+              vars: { detector_id: 'd-1', processors: '- drop_fields: {}' },
+            },
+          },
+        },
+      },
+    });
+
+    expect(validateSettingsAnswer(req, answer)).toEqual([]);
+    expect(
+      settingsAnswerToServiceVars(req, answer).guardduty.varsByDataStream.guardduty?.varsByInput
+        .httpjson.processors
+    ).toBe('- drop_fields: {}');
   });
 
   it('accepts a number for a var and stringifies it', () => {

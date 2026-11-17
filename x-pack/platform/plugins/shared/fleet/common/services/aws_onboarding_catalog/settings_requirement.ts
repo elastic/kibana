@@ -16,6 +16,7 @@ import {
   SOURCE_VAR_GROUPS,
   SOURCE_VAR_REGION_FIELDS,
   getStreamVarGroups,
+  isAdvancedVar,
 } from './field_config';
 import type { CredentialVarName } from './types';
 
@@ -111,9 +112,9 @@ const buildFields = (
       if (REGION_FIELD_NAMES.has(name) || CREDENTIAL_VAR_NAMES.has(name as CredentialVarName)) {
         return false;
       }
-      // Secrets never travel through this pause: the agent would read them back in the chat.
-      if (def.secret === true || def.type === 'password') return false;
-      return def.required === true || def.show_user === true || groupVars.has(name);
+      // Secrets stay out because the agent would read them back in the chat. Everything else is
+      // carried so the agent can name and set optional values.
+      return def.secret !== true && def.type !== 'password';
     })
     .map(([name, def]) => {
       const { default: rawDefault, options, multi, description } = def;
@@ -124,6 +125,9 @@ const buildFields = (
         type: def.type,
         // A required var_group makes every var of its options required once selected.
         required: def.required === true || requiredGroupVars.has(name),
+        // The explicit null counts as no default here too, so a required var stays in the main form.
+        advanced:
+          isAdvancedVar({ ...def, default: rawDefault ?? undefined }) && !groupVars.has(name),
         // The manifest sometimes carries an explicit null: that is no default.
         ...(rawDefault !== undefined && rawDefault !== null ? { default: rawDefault } : {}),
         ...(options ? { options } : {}),

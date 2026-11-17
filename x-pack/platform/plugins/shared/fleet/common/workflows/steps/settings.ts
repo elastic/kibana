@@ -49,6 +49,8 @@ export const awsOnboardingSettingsRequirementSchema = lazySchema(() =>
                     description: z.string().optional(),
                     type: z.string(),
                     required: z.boolean(),
+                    /** Fleet hides the var behind Advanced options unless it is shown by default. */
+                    advanced: z.boolean(),
                     default: z.unknown().optional(),
                     options: z.array(z.object({ value: z.string(), text: z.string() })).optional(),
                     multi: z.boolean().optional(),
