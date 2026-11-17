@@ -76,7 +76,7 @@ steps:
   - name: ask_discover
     type: waitForApproval
     with:
-      message: "May I match Elastic integrations to the services in your AWS account? This reads billing and service metadata only."
+      message: "May I match Elastic integrations to the services in your AWS account? This uses the read-only discovery role to list billed services, CloudTrail trails and GuardDuty detectors; nothing is changed."
 
   - name: fail_no_discover
     type: if
