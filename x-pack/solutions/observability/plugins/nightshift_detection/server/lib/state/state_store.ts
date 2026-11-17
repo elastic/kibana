@@ -39,19 +39,7 @@ export interface StateStore {
     value: StateDocuments[TKind];
     version?: StateVersion;
   }): Promise<StateVersion>;
-
-  /**
-   * Deletes the document when it still has `version`.
-   *
-   * @throws StateConflictError when someone wrote or deleted it since `version`.
-   */
-  delete(params: {
-    spaceId: string;
-    kind: StateKind;
-    key?: string;
-    version: StateVersion;
-  }): Promise<void>;
 }
 
-/** The engine's state store. Bound to the Elasticsearch implementation; tests bind their own. */
+/** The engine's state store. Bound to the saved object implementation; tests bind their own. */
 export const StateStore = createToken<StateStore>('nightshiftDetection.StateStore');

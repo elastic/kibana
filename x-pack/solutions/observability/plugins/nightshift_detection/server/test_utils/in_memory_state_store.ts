@@ -12,7 +12,7 @@ import type { StateStore, VersionedState } from '../lib/state/state_store';
 /** A state store in memory with the conflict rules of the real one, for tests. */
 export class InMemoryStateStore implements StateStore {
   private readonly documents = new Map<string, { value: unknown; version: StateVersion }>();
-  private seqNo = 0;
+  private versionCounter = 0;
 
   private static toId({ spaceId, kind, key }: { spaceId: string; kind: StateKind; key?: string }) {
     return [spaceId, kind, key].filter((part) => part !== undefined).join(':');
@@ -40,36 +40,15 @@ export class InMemoryStateStore implements StateStore {
     const id = InMemoryStateStore.toId(params);
     this.assertVersion({ id, version: params.version });
 
-    const version = { seq_no: this.seqNo++, primary_term: 1 };
+    const version = String(this.versionCounter++);
     this.documents.set(id, { value: params.value, version });
 
     return version;
   }
 
-  public async delete(params: {
-    spaceId: string;
-    kind: StateKind;
-    key?: string;
-    version: StateVersion;
-  }): Promise<void> {
-    const id = InMemoryStateStore.toId(params);
-    this.assertVersion({ id, version: params.version, mustExist: true });
-    this.documents.delete(id);
-  }
-
-  private assertVersion({
-    id,
-    version,
-    mustExist = false,
-  }: {
-    id: string;
-    version?: StateVersion;
-    mustExist?: boolean;
-  }) {
+  private assertVersion({ id, version }: { id: string; version?: StateVersion }) {
     const stored = this.documents.get(id);
-    const matches = version
-      ? stored?.version.seq_no === version.seq_no
-      : stored === undefined && !mustExist;
+    const matches = version ? stored?.version === version : stored === undefined;
 
     if (!matches) {
       throw new StateConflictError(id);
