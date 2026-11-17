@@ -8,10 +8,10 @@
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { timeRangeComparators, titleComparators } from '@kbn/presentation-publishing';
 import { drilldownsComparators } from '@kbn/embeddable-plugin/common';
-import type { MapEmbeddableState } from './types';
+import type { MapByReferenceState, MapByValueState, MapEmbeddableState } from './types';
 
 export function getComparators(state: MapEmbeddableState): StateComparators<MapEmbeddableState> {
-  return {
+  const comparators: StateComparators<MapByReferenceState & MapByValueState> = {
     ...drilldownsComparators,
     ...titleComparators,
     ...timeRangeComparators,
@@ -22,7 +22,7 @@ export function getComparators(state: MapEmbeddableState): StateComparators<MapE
     isLayerTOCOpen: 'referenceEquality',
     isMovementSynchronized: 'referenceEquality',
     mapBuffer: 'skip',
-    mapCenter: (a?: MapEmbeddableState['mapCenter'], b?: MapEmbeddableState['mapCenter']) => {
+    mapCenter: (a, b) => {
       if (!a || !b) {
         return a === b;
       }
@@ -35,5 +35,6 @@ export function getComparators(state: MapEmbeddableState): StateComparators<MapE
     mapSettings: 'deepEquality',
     openTOCDetails: 'deepEquality',
     savedObjectId: 'skip',
-  } as StateComparators<MapEmbeddableState>;
+  };
+  return comparators;
 }
