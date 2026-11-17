@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import {
@@ -58,7 +59,9 @@ const expectBucket = (actual: Suggestion[], label: string, count: number) => {
  */
 apiTest.describe(
   'SyntheticsSuggestions',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  {
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
+  },
   () => {
     let editorHeaders: Record<string, string>;
     let spaceId: string;

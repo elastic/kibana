@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { mergeSyntheticsApiHeaders } from '../../../scout/common/fixtures';
 import { deleteMonitors, enableSynthetics } from '../../../scout/common/fixtures/monitors';
@@ -53,7 +54,7 @@ const MONITOR_COUNT = 2;
 // serverless, or update its tags so that it does.
 apiTest.describe(
   'Synthetics real-agent shard rebalance',
-  { tag: ['@local-stateful-classic'] },
+  { tag: tags.local.stateful.classic },
   () => {
     let editorHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;

@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { KibanaRole } from '@kbn/scout-oblt';
 import { apiTest, mergeSyntheticsApiHeaders } from '../../../common/fixtures';
@@ -41,45 +42,50 @@ const ROLE_CONFIGS = {
   },
 } satisfies Record<string, KibanaRole>;
 
-// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
-// serverless, or update its tags so that it does.
-apiTest.describe('RunTestManuallyPermissions', { tag: ['@local-stateful-classic'] }, () => {
-  let allHeaders: Record<string, string>;
-  let readOnlyHeaders: Record<string, string>;
-  let readWithRunHeaders: Record<string, string>;
-  let noSyntheticsHeaders: Record<string, string>;
+apiTest.describe(
+  'RunTestManuallyPermissions',
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
+  () => {
+    let allHeaders: Record<string, string>;
+    let readOnlyHeaders: Record<string, string>;
+    let readWithRunHeaders: Record<string, string>;
+    let noSyntheticsHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    const resolve = async (role: KibanaRole) => {
-      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(role);
-      return mergeSyntheticsApiHeaders(apiKeyHeader);
-    };
-    allHeaders = await resolve(ROLE_CONFIGS.SYNTHETICS_ALL);
-    readOnlyHeaders = await resolve(ROLE_CONFIGS.SYNTHETICS_READ_ONLY);
-    readWithRunHeaders = await resolve(ROLE_CONFIGS.SYNTHETICS_READ_WITH_RUN);
-    noSyntheticsHeaders = await resolve(ROLE_CONFIGS.NO_SYNTHETICS);
-  });
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      const resolve = async (role: KibanaRole) => {
+        const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(role);
+        return mergeSyntheticsApiHeaders(apiKeyHeader);
+      };
+      allHeaders = await resolve(ROLE_CONFIGS.SYNTHETICS_ALL);
+      readOnlyHeaders = await resolve(ROLE_CONFIGS.SYNTHETICS_READ_ONLY);
+      readWithRunHeaders = await resolve(ROLE_CONFIGS.SYNTHETICS_READ_WITH_RUN);
+      noSyntheticsHeaders = await resolve(ROLE_CONFIGS.NO_SYNTHETICS);
+    });
 
-  apiTest('read-only role cannot run tests (403)', async ({ apiClient }) => {
-    const res = await testNowMonitor(apiClient, readOnlyHeaders, uuidv4(), { statusCode: 403 });
-    expect(decodeURIComponent((res.body as { message?: string }).message ?? '')).toContain(
-      '[uptime-write,monitor-run-manually]'
+    apiTest('read-only role cannot run tests (403)', async ({ apiClient }) => {
+      const res = await testNowMonitor(apiClient, readOnlyHeaders, uuidv4(), { statusCode: 403 });
+      expect(decodeURIComponent((res.body as { message?: string }).message ?? '')).toContain(
+        '[uptime-write,monitor-run-manually]'
+      );
+    });
+
+    apiTest('user with no Synthetics access cannot run tests (403)', async ({ apiClient }) => {
+      await testNowMonitor(apiClient, noSyntheticsHeaders, uuidv4(), { statusCode: 403 });
+    });
+
+    apiTest(
+      'read + can_run_test_manually role is authorized to run tests',
+      async ({ apiClient }) => {
+        // Passes authz; the dummy monitor does not exist → 404, not 403.
+        await testNowMonitor(apiClient, readWithRunHeaders, uuidv4(), { statusCode: 404 });
+      }
     );
-  });
 
-  apiTest('user with no Synthetics access cannot run tests (403)', async ({ apiClient }) => {
-    await testNowMonitor(apiClient, noSyntheticsHeaders, uuidv4(), { statusCode: 403 });
-  });
-
-  apiTest('read + can_run_test_manually role is authorized to run tests', async ({ apiClient }) => {
-    // Passes authz; the dummy monitor does not exist → 404, not 403.
-    await testNowMonitor(apiClient, readWithRunHeaders, uuidv4(), { statusCode: 404 });
-  });
-
-  apiTest(
-    'base `all` role is still authorized to run tests (non-breaking)',
-    async ({ apiClient }) => {
-      await testNowMonitor(apiClient, allHeaders, uuidv4(), { statusCode: 404 });
-    }
-  );
-});
+    apiTest(
+      'base `all` role is still authorized to run tests (non-breaking)',
+      async ({ apiClient }) => {
+        await testNowMonitor(apiClient, allHeaders, uuidv4(), { statusCode: 404 });
+      }
+    );
+  }
+);

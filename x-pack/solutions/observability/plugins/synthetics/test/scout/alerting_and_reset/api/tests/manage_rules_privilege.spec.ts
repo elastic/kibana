@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import type { ApiClientFixture, KibanaRole } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import {
@@ -66,7 +67,9 @@ const postJson = (
 // Failing: See https://github.com/elastic/kibana/issues/291346
 apiTest.describe.skip(
   'Synthetics manage rules privilege',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  {
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
+  },
   () => {
     let readHeaders: Record<string, string>;
     let readWithManageRulesHeaders: Record<string, string>;

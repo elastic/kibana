@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -54,7 +55,7 @@ const TRIGGER_SYNC_TASK_PATH = 'internal/synthetics/trigger_task_run/syncPrivate
 // Failing: See https://github.com/elastic/kibana/issues/298264
 apiTest.describe.skip(
   'ScalablePrivateLocationMaintenanceWindowSync',
-  { tag: ['@local-stateful-classic'] },
+  { tag: tags.local.stateful.classic },
   () => {
     let adminHeaders: Record<string, string>;
     let privateLocation: ScoutPrivateLocation;

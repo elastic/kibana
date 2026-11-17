@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import { DISCOVER_KBN_ARCHIVES, DISCOVER_TIME_DEFAULTS, ES_ARCHIVES } from '../fixtures/setup';
 
 globalSetupHook(
   'Load Discover telemetry data',
-  { tag: ['@local-serverless-observability_complete'] },
+  { tag: tags.local.serverless.observability.complete },
   async ({ esArchiver, kbnClient }) => {
     for (const archive of ES_ARCHIVES) {
       await esArchiver.loadIfNeeded(archive);

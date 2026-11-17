@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants/settings_defaults';
@@ -52,7 +53,9 @@ const OMIT_RULE_FIELDS = [
  */
 apiTest.describe(
   'EnableDefaultAlerting',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  {
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
+  },
   () => {
     let editorHeaders: Record<string, string>;
     let privateLocation: ScoutPrivateLocation;

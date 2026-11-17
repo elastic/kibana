@@ -22,7 +22,9 @@ import { BIGGER_TIMEOUT, SHORTER_TIMEOUT } from '../fixtures/constants';
 // Excluding MKI runs due to consistent failures. See https://github.com/elastic/kibana/issues/267146
 test.describe(
   'Observability Landing Page',
-  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
+  {
+    tag: [...tags.stateful.classic, ...tags.local.serverless.observability.complete],
+  },
   () => {
     test.beforeEach(async ({ browserAuth, apmSynthtraceEsClient, logsSynthtraceEsClient }) => {
       await browserAuth.loginAsAdmin();

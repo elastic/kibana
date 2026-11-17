@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-test.describe('MonitorStatusFlyoutInAlertingApp', { tag: '@local-stateful-classic' }, () => {
+test.describe('MonitorStatusFlyoutInAlertingApp', { tag: tags.local.stateful.classic }, () => {
   test('opens monitor status alert flyout and verifies the form renders', async ({
     browserAuth,
     page,

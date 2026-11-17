@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { globalTeardownHook } from '@kbn/scout-oblt';
+import { globalTeardownHook, tags } from '@kbn/scout-oblt';
 
 globalTeardownHook(
   'Teardown uptime test data',
-  { tag: ['@local-stateful-classic'] },
+  { tag: tags.local.stateful.classic },
   async ({ kbnClient, log }) => {
     log.debug('[teardown] disabling legacy uptime app...');
     await kbnClient.uiSettings.unset('observability:enableLegacyUptimeApp');

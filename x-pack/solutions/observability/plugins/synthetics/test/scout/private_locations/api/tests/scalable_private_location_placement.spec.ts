@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ScoutPrivateLocation } from '../../../common/services/synthetics_private_location_api_service';
 import {
@@ -56,7 +57,7 @@ const MONITOR_COUNT = 10;
  * needed. A spec that wants the switch off should flip it at runtime with
  * `setRebalancePrivateLocationShardsEnabled`.
  */
-apiTest.describe('ScalablePrivateLocationPlacement', { tag: ['@local-stateful-classic'] }, () => {
+apiTest.describe('ScalablePrivateLocationPlacement', { tag: tags.local.stateful.classic }, () => {
   let editorHeaders: Record<string, string>;
   let adminHeaders: Record<string, string>;
   let privateLocation: ScoutPrivateLocation;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
@@ -13,7 +14,7 @@ const queryParams = {
   dateRangeEnd: '2021-11-21T22:10:08.203Z',
 };
 
-test.describe('DefaultEmailSettings', { tag: '@local-stateful-classic' }, () => {
+test.describe('DefaultEmailSettings', { tag: tags.local.stateful.classic }, () => {
   const name = `Test connector ${Date.now()}`;
 
   test('configures email connector and validates settings', async ({

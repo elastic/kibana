@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import type { KbnClient } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, mergeSyntheticsApiHeaders } from '../../../common/fixtures';
@@ -112,7 +113,7 @@ const expectSyncedMaintenanceWindow = (pkgPolicy: PackagePolicy, mw: Maintenance
 apiTest.describe(
   'SyncMaintenanceWindows',
   {
-    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
   },
   () => {
     let adminHeaders: Record<string, string>;

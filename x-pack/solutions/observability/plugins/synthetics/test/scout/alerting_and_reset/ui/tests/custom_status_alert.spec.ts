@@ -12,7 +12,9 @@ import { test } from '../../../common/ui/fixtures';
 // Failing: See https://github.com/elastic/kibana/issues/268088
 test.describe.skip(
   'CustomStatusAlert',
-  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
+  {
+    tag: [...tags.stateful.classic, ...tags.local.serverless.observability.complete],
+  },
   () => {
     let configId: string;
 

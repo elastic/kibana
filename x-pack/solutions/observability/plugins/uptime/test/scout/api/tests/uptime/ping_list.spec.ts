@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../../fixtures';
 
-apiTest.describe('pingList query', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('pingList query', { tag: tags.local.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
 
   // FULL_HEARTBEAT is entirely on 2019-09-11; keep the window tight so sibling

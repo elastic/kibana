@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import { testData } from '../fixtures';
 
 globalSetupHook(
   'Ingest uptime test data',
-  { tag: ['@local-stateful-classic'] },
+  { tag: tags.local.stateful.classic },
   async ({ esArchiver, kbnClient, log }) => {
     log.debug('[setup] enabling legacy uptime app...');
     await kbnClient.uiSettings.update({

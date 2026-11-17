@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { KibanaRole } from '@kbn/scout-oblt';
 import {
@@ -59,7 +60,7 @@ const UPTIME_READ_ROLE: KibanaRole = {
  */
 apiTest.describe(
   'AddNewMonitorsUI permissions and warnings',
-  { tag: ['@local-stateful-classic'] },
+  { tag: tags.local.stateful.classic },
   () => {
     let editorHeaders: Record<string, string>;
     let uptimeAllHeaders: Record<string, string>;
