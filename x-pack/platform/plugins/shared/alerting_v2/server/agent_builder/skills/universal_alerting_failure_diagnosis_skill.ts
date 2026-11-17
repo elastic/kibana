@@ -19,6 +19,7 @@ import type { AttachRuleToolDeps } from '../tools/attach_rule';
 import { attachRuleTool } from '../tools/attach_rule';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
+import { generateRuleDiscoveryGuidance } from './rule_discovery_guidance';
 
 type UniversalAlertingFailureDiagnosisSkillDeps = ManageRuleToolDeps &
   AttachRuleToolDeps & { availability: AvailabilityConfig };
@@ -74,7 +75,10 @@ Read everything that was attached before answering:
 - The "Execution details" text: outcome, reason, start time, and duration.
 - The "Rule / execution IDs" text with the rule and execution ids.
 
-If the rule attachment is missing, the rule may have been deleted or the user may lack access to it. Say so, and diagnose from the error text alone without inventing the rule definition.
+If the rule attachment is missing but the "Rule / execution IDs" text supplies a rule \`id\`, load the rule before falling back: read it with the Kibana API tools, then attach it with ${ALERTING_TOOL_IDS.attachRule} using that \`id\`.
+If no rule \`id\` was supplied, find the rule by name or keywords the user gave:
+${generateRuleDiscoveryGuidance()}
+If the rule still cannot be found, it may have been deleted or the user may lack access to it. Say so, and diagnose from the error text alone without inventing the rule definition.
 
 Do **not** rely on the \`reason\` field. It is frequently empty even for query failures. Classify the failure from the error **message**.
 
