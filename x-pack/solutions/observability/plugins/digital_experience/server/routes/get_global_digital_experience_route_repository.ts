@@ -11,6 +11,7 @@ import { networkRouteRepository } from './network/route';
 import { overviewRouteRepository } from './overview/route';
 import { sessionsRouteRepository } from './sessions/route';
 import { usageRouteRepository } from './usage/route';
+import { savedViewsRouteRepository } from './views/route';
 
 export const getGlobalDigitalExperienceServerRouteRepository = () => ({
   ...applicationsRouteRepository,
@@ -19,6 +20,7 @@ export const getGlobalDigitalExperienceServerRouteRepository = () => ({
   ...errorsRouteRepository,
   ...networkRouteRepository,
   ...sessionsRouteRepository,
+  ...savedViewsRouteRepository,
 });
 
 export type DigitalExperienceServerRouteRepository = ReturnType<

@@ -8,8 +8,13 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
+import { VEGA_TEST_INDEX } from '../fixtures/constants';
 
-export const VEGA_TEST_INDEX = 'vega-test-index';
+globalSetupHook('Enable the Vega as code feature flag', async ({ apiServices }) => {
+  await apiServices.core.settings({
+    'feature_flags.overrides': { 'vega.asCodeEnabled': true },
+  });
+});
 
 globalSetupHook('Setup Vega tests data', async ({ esClient }) => {
   const exists = await esClient.indices.exists({ index: VEGA_TEST_INDEX });

@@ -130,6 +130,14 @@ describe('validateAvatarInitials', () => {
     expect(validator.validateAvatarInitials(space)).toHaveProperty('isInvalid', true);
   });
 
+  it('counts characters as graphemes', () => {
+    const space = {
+      initials: '\u{1F44D}\u{1F3FD}\u{1F44D}\u{1F3FD}',
+    };
+
+    expect(validator.validateAvatarInitials(space)).toHaveProperty('isInvalid', false);
+  });
+
   it('must not exceed 2 characters', () => {
     const space = {
       initials: 'FFF',

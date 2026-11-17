@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
@@ -29,6 +30,7 @@ describe('createKiIdentificationCancelTool', () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      logger: loggerMock.create(),
       getSourcesClient: jest.fn().mockResolvedValue({
         get: jest.fn().mockResolvedValue({ source: { id: 'logs.nginx', slug: 'logs-nginx' } }),
       }),
