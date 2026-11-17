@@ -113,7 +113,7 @@ export const resolveTier1Status = (actual: HuntReportArtifacts): HuntTier1Status
  * downstream of the verdict exists yet. Outcome Label already scores that stop as 0; the checks
  * that read the verdict's consequences return N/A instead of failing again for the same cause.
  */
-const deferredVerdict = (
+export const deferredVerdict = (
   expected: HuntExpected,
   actual: HuntReportArtifacts
 ): CodeScore | undefined => {

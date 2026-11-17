@@ -245,6 +245,30 @@ describe('createNarrativeRubricEvaluator', () => {
     expect(criteria).not.toHaveBeenCalled();
   });
 
+  it('names Outcome Label, not Hit Consistency, when the run deferred its verdict', async () => {
+    const output = blockedArtifacts(
+      { indexScopeBlocked: false },
+      {
+        selected: true,
+        outcome: 'partial',
+        incompleteStage: 'hunt',
+        coordinator: { completeness: 'incomplete_retryable', has_confirmed_hit: false },
+        hunt: { hit: false },
+        narrative: 'Hunt Watch stopped before a verdict',
+      }
+    );
+    const result = await rubric.evaluate({
+      input: blockedRow.input,
+      output,
+      expected: { ...hitRow, expected: { ...hitRow.expected, outcome: ['completed'] } },
+      metadata: null,
+    });
+    expect(result.label).toBe('N/A');
+    expect(result.explanation).toContain('verdict deferred');
+    expect(result.metadata).toEqual({ cascadeFrom: 'Outcome Label' });
+    expect(criteria).not.toHaveBeenCalled();
+  });
+
   it('judges the narrative when only the SSE hit fields disagree', async () => {
     const output = judgedOutput(true);
     const huntResult: HuntResult = {
