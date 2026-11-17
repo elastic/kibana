@@ -331,20 +331,31 @@ export class UserProfileService {
   }
 
   /**
-   * Retrieves the user profile ID from an API key authenticated request by retrieving the API Key itself.
+   * Retrieves the user profile ID from an API key authenticated request. A UIAM API key is resolved through UIAM, which
+   * derives the ID from the key's creator, and any other key by retrieving the API Key itself.
    * @param clusterClient The cluster client
    * @param request The HTTP request
-   * @returns The profile ID if found, undefined otherwise
+   * @returns The profile ID if found, and whether it was derived from the creator of a UIAM API key
    */
   private async getCurrentUserProfileIdViaApiKey(
     clusterClient: IClusterClient,
     request: UserProfileGetCurrentParams['request']
-  ): Promise<string | undefined> {
+  ): Promise<Pick<ResolvedCurrentUserProfileId, 'profileId' | 'profileIdIsDerived'>> {
+    // Elasticsearch authenticates UIAM API keys but can't look them up (`with_profile_uid`), so
+    // those are resolved through UIAM instead.
+    const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (this.resolveUiamApiKeyProfileId && authorization && isUiamCredential(authorization)) {
+      return {
+        profileId: await this.resolveUiamApiKeyProfileId(request),
+        profileIdIsDerived: true,
+      };
+    }
+
     try {
       const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
       if (!id) {
         this.logger.debug(`Failed to decode API key ID from Authorization header.`);
-        return undefined;
+        return {};
       }
 
       const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
@@ -353,7 +364,7 @@ export class UserProfileService {
       });
 
       if (response.api_keys && response.api_keys.length > 0) {
-        return response.api_keys[0].profile_uid;
+        return { profileId: response.api_keys[0].profile_uid };
       } else {
         this.logger.debug(
           `No API keys were returned from query, cannot retrieve associated profile id.`
@@ -364,6 +375,8 @@ export class UserProfileService {
         `Failed to retrieve API key for user profile retrieval: ${getDetailedErrorMessage(error)}`
       );
     }
+
+    return {};
   }
 
   private recordGetCurrentSuccess(params: GetCurrentTelemetry) {
@@ -491,15 +504,10 @@ export class UserProfileService {
           `Request to get current user profile is authenticated via API key [fake=${!!fakeRequestProfileResolution}].`
         );
 
-        // Elasticsearch authenticates UIAM API keys but can't look them up (`with_profile_uid`), so
-        // those are resolved through UIAM instead.
-        const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
-        if (this.resolveUiamApiKeyProfileId && authorization && isUiamCredential(authorization)) {
-          profileId = await this.resolveUiamApiKeyProfileId(request);
-          profileIdIsDerived = true;
-        } else {
-          profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
-        }
+        ({ profileId, profileIdIsDerived } = await this.getCurrentUserProfileIdViaApiKey(
+          clusterClient,
+          request
+        ));
       }
     }
 
