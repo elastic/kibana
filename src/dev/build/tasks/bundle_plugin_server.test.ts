@@ -152,7 +152,7 @@ describe('bundlePluginServer', () => {
       "export const fail = () => require.resolve('./data.json') && import(`@kbn/repo-info/${'package.json'}`) && problem();";
     await setup(
       {
-        'server/index.ts': `export { fail } from './lib/fail';\n`,
+        'server/index.ts': `/*\n * Copyright Elasticsearch B.V.\n */\nexport { fail } from './lib/fail';\n`,
         'server/lib/fail.ts': [
           failLine,
           '',
@@ -165,6 +165,9 @@ describe('bundlePluginServer', () => {
     );
     await bundlePluginServer({ srcPluginDir: src, distPluginDir: dist, entries: [] });
     await minifyFile(Path.join(dist, 'server/index.js'));
+    expect(await Fsp.readFile(Path.join(dist, 'server/index.js'), 'utf8')).toMatch(
+      /^\/\*!\n \* Copyright Elasticsearch B\.V\.\n \*\/"use strict";/
+    );
 
     // In Node itself, since Jest's module wrapper shifts the first line's columns.
     const { stdout: stack } = await execa(process.execPath, [

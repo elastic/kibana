@@ -28,10 +28,10 @@ const STRIP_ONLY: JsMinifyOptions = {
 const LICENSE_HEADER_RE = /\/\*(?=\r?\n \* Copyright Elasticsearch)[^]*?\*\//;
 const toLegalComment = (header: string) => `/*!${header.slice(2)}`;
 
-/** Returns the license header in `source`, marked as a legal comment that minifiers keep. */
-export const getLicenseHeader = (source: string): string | undefined => {
+/** Returns the license header in `source`, if any, marked as a legal comment that minifiers keep. */
+export const getLicenseHeader = (source: string): string => {
   const [header] = LICENSE_HEADER_RE.exec(source) ?? [];
-  return header && toLegalComment(header);
+  return header ? toLegalComment(header) : '';
 };
 
 /** Minifies `file`, updating the source map next to it, if it has one. */

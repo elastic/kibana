@@ -33,6 +33,7 @@ import {
   getSharedCacheConfig,
   SHARED_PERFORMANCE_CONFIG,
   getMinimizer,
+  toRepoRelativePath,
 } from './shared_config';
 import type { ThemeTag } from '../types';
 import {
@@ -250,7 +251,7 @@ export async function createSingleCompileConfig(
       uniqueName: 'kibana-bundle',
       pathinfo: false,
       devtoolModuleFilenameTemplate: dist
-        ? ({ absoluteResourcePath }) => Path.relative(repoRoot, absoluteResourcePath)
+        ? ({ absoluteResourcePath }) => toRepoRelativePath(repoRoot, absoluteResourcePath)
         : 'kibana:///[resource-path]',
     },
 

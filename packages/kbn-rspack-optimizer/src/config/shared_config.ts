@@ -638,6 +638,13 @@ export function computeConfigHash(repoRoot: string, files: readonly string[]): s
 }
 
 /**
+ * Strips the repo root from a module's source map path. Not `Path.relative()`, since identifiers
+ * that aren't paths contain it too, like those of ignored modules.
+ */
+export const toRepoRelativePath = (repoRoot: string, path: string): string =>
+  path.replaceAll(`${repoRoot}${Path.sep}`, '');
+
+/**
  * Shared SWC minimizer configuration for production builds.
  * Targets ES2020 (safe based on .browserslistrc / Firefox ESR 115+).
  */

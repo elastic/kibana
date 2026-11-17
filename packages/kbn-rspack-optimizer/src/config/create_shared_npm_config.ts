@@ -11,6 +11,7 @@ import Path from 'path';
 import type { Configuration } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { rspack } from '../rspack_runtime';
+import { toRepoRelativePath } from './shared_config';
 import { resolveSharedAssetPaths } from './shared_asset_paths';
 
 export const SHARED_NPM_COMPILER = 'shared-npm';
@@ -119,11 +120,11 @@ export function createSharedNpmConfig({
       path: npmOutput,
       filename: '[name].dll.js',
       chunkFilename: 'kbn-ui-shared-deps-npm.chunk.[id].js',
-      devtoolModuleFilenameTemplate: (info) => {
-        // Also strips the root from identifiers that aren't paths, like those of ignored modules.
-        const path = info.absoluteResourcePath.replaceAll(`${repoRoot}${Path.sep}`, '');
-        return dist ? path : `kbn-ui-shared-deps-npm/${path}`;
-      },
+      devtoolModuleFilenameTemplate: (info) =>
+        `${dist ? '' : 'kbn-ui-shared-deps-npm/'}${toRepoRelativePath(
+          repoRoot,
+          info.absoluteResourcePath
+        )}`,
       library: '__kbnSharedDeps_npm__',
       clean: true,
     },

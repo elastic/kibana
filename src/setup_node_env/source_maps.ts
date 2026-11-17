@@ -25,7 +25,7 @@ const bundleLocation = (prefix: string) =>
 const LOCATIONS = [
   {
     dir: '',
-    re: /(?:(?<=\(|(?:^|\\n)\s*at (?:async )?)(?!async )[^()\n"']*|(?<![^\s("'])[^\s("']*)(node_modules[\\/]+@kbn[\\/]+[^\s():"']{1,1024}?\.js):(\d+):(\d+)/gm,
+    re: /(?:(?<=\(| at (?:async )?)(?!async )[^()\n"']*|(?<![^\s("'])[^\s("']*)(node_modules[\\/]+@kbn[\\/]+[^\s():"']{1,1024}?\.js):(\d+):(\d+)/g,
   },
   // Shared deps are served from their packages, so they're matched before other bundles.
   ...['npm', 'src'].map((name) => ({

@@ -29,6 +29,7 @@ export {
   getSharedModuleRules,
   getSharedIgnoreWarnings,
   getScssLoaderRule,
+  toRepoRelativePath,
 } from './config/shared_config';
 
 // Loaders

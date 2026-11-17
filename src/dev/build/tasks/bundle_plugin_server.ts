@@ -12,7 +12,7 @@ import Fsp from 'fs/promises';
 import Path from 'path';
 import { cpus } from 'os';
 import { globby } from 'globby';
-import { rspack, type Stats } from '@kbn/rspack-optimizer';
+import { rspack, toRepoRelativePath, type Stats } from '@kbn/rspack-optimizer';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit } from '@kbn/std';
 import { getNodeSwcConfig } from '@kbn/swc-config/node';
@@ -99,7 +99,7 @@ export async function bundlePluginServer({
         // A module that threw while loading throws again when required, instead of returning `{}`.
         strictModuleExceptionHandling: true,
         devtoolModuleFilenameTemplate: ({ absoluteResourcePath }) =>
-          Path.relative(REPO_ROOT, absoluteResourcePath),
+          toRepoRelativePath(REPO_ROOT, absoluteResourcePath),
       },
       resolve: { extensions: [...CODE_EXTS, '.json'] },
       externalsType: 'commonjs',
@@ -121,7 +121,7 @@ export async function bundlePluginServer({
       plugins: [
         new rspack.BannerPlugin({
           // Repeats "use strict", since the banner displaces Rspack's own directive.
-          banner: `${header ? `${header}\n` : ''}"use strict";const __kbnBundleDirname=__dirname;`,
+          banner: `${header}"use strict";const __kbnBundleDirname=__dirname;`,
           raw: true,
           entryOnly: false,
         }),
@@ -191,7 +191,7 @@ export async function bundlePluginServer({
     const rel = Path.relative(Path.dirname(stub), target);
     await Fsp.writeFile(
       stub,
-      `${header ? `${header}\n` : ''}module.exports = require(${JSON.stringify(`./${rel}`)});\n`
+      `${header}module.exports = require(${JSON.stringify(`./${rel}`)});\n`
     );
     // The source map was for the replaced module.
     await Fsp.rm(`${stub}.map`, { force: true });

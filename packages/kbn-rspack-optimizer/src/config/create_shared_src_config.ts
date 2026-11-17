@@ -11,7 +11,7 @@ import Path from 'path';
 import type { Configuration } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { rspack } from '../rspack_runtime';
-import { getSwcOptions } from './shared_config';
+import { getSwcOptions, toRepoRelativePath } from './shared_config';
 import { resolveSharedAssetPaths } from './shared_asset_paths';
 import { SHARED_NPM_COMPILER } from './create_shared_npm_config';
 
@@ -52,11 +52,11 @@ export function createSharedSrcConfig({
       filename: '[name].js',
       chunkFilename: 'kbn-ui-shared-deps-src.chunk.[id].js',
       sourceMapFilename: '[file].map',
-      devtoolModuleFilenameTemplate: (info) => {
-        // Also strips the root from identifiers that aren't paths, like those of ignored modules.
-        const path = info.absoluteResourcePath.replaceAll(`${repoRoot}${Path.sep}`, '');
-        return dist ? path : `kbn-ui-shared-deps-src/${path}`;
-      },
+      devtoolModuleFilenameTemplate: (info) =>
+        `${dist ? '' : 'kbn-ui-shared-deps-src/'}${toRepoRelativePath(
+          repoRoot,
+          info.absoluteResourcePath
+        )}`,
       library: '__kbnSharedDeps__',
       clean: true,
     },
