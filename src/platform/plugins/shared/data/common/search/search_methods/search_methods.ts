@@ -9,6 +9,7 @@
 
 import { lastValueFrom, takeWhile } from 'rxjs';
 import { castArray } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import {
   buildEsQuery,
   getTimeZoneFromSettings,
@@ -99,11 +100,21 @@ export class SearchMethodsService implements ISearchMethods {
 
     // A request that was aborted while its context was being resolved (e.g. superseded by a newer one,
     // which already reset the adapter) must not log a stale entry.
+    const requestId = uuidv4();
     const requestResponder = options?.abortSignal?.aborted
       ? undefined
       : options?.inspector?.adapter.start(options.inspector.title, {
           description: options.inspector.description,
+          id: requestId,
         });
+
+    // A request aborted on purpose while it ran (e.g. superseded, or ended along with a sibling) is
+    // not worth showing in Inspector, so its entry is removed rather than left PENDING.
+    const dropEntryIfAborted = (): boolean => {
+      if (!options?.abortSignal?.aborted) return false;
+      if (requestResponder) options?.inspector?.adapter.resetRequest(requestId);
+      return true;
+    };
 
     requestResponder?.json({
       ...((request.params ?? {}) as Record<string, unknown>),
@@ -114,9 +125,7 @@ export class SearchMethodsService implements ISearchMethods {
     try {
       const response = await this.executeSearch(request, searchOptions);
 
-      // A request aborted on purpose while it ran (e.g. superseded, or ended along with a sibling)
-      // is not worth showing in Inspector
-      if (!options?.abortSignal?.aborted) {
+      if (!dropEntryIfAborted()) {
         requestResponder?.stats(getEsqlInspectorStats(response.rawResponse));
         requestResponder?.ok({
           json: { rawResponse: response.rawResponse },
@@ -146,8 +155,7 @@ export class SearchMethodsService implements ISearchMethods {
         datatable,
       };
     } catch (error) {
-      // See above: an abort on purpose is not a failed request
-      if (!options?.abortSignal?.aborted) {
+      if (!dropEntryIfAborted()) {
         requestResponder?.error({
           json: getInspectorErrorJson(error),
         });

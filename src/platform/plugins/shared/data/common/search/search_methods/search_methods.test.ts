@@ -11,7 +11,7 @@ import { of, throwError } from 'rxjs';
 import { SearchMethodsService } from './search_methods';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { RequestAdapter, RequestStatus } from '@kbn/inspector-plugin/common';
 import type { EsQueryConfig, Filter } from '@kbn/es-query';
 import { ESQLVariableType } from '@kbn/esql-types';
 
@@ -55,7 +55,10 @@ describe('SearchMethodsService', () => {
   const createMockInspector = (
     requestResponder: ReturnType<typeof createMockRequestResponder>
   ) => ({
-    adapter: { start: jest.fn().mockReturnValue(requestResponder) } as unknown as RequestAdapter,
+    adapter: {
+      start: jest.fn().mockReturnValue(requestResponder),
+      resetRequest: jest.fn(),
+    } as unknown as RequestAdapter,
     title: 'Test Request',
     description: 'Test description',
   });
@@ -246,6 +249,7 @@ describe('SearchMethodsService', () => {
 
         expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
           description: 'Test description',
+          id: expect.any(String),
         });
       });
 
@@ -289,37 +293,86 @@ describe('SearchMethodsService', () => {
         expect(inspector.adapter.start).not.toHaveBeenCalled();
       });
 
-      it('does not log an error for a request aborted while it was running', async () => {
-        const controller = new AbortController();
-        mockSearch.mockImplementation(() =>
-          throwError(() => {
-            controller.abort();
-            return new DOMException('The operation was aborted', 'AbortError');
-          })
-        );
-        const requestResponder = createMockRequestResponder();
-        const inspector = createMockInspector(requestResponder);
-
-        await expect(
-          service.esql({ query: 'FROM logs' }, { inspector, abortSignal: controller.signal })
-        ).rejects.toMatchObject({ name: 'AbortError' });
-
-        expect(inspector.adapter.start).toHaveBeenCalledTimes(1);
-        expect(requestResponder.error).not.toHaveBeenCalled();
-      });
-
-      it('does not log a response that arrives after the request was aborted', async () => {
-        const controller = new AbortController();
-        mockSearch.mockImplementation(() => {
-          controller.abort();
-          return createMockResponse({ columns: [], values: [] });
+      describe('with a real RequestAdapter', () => {
+        const inspectorFor = (adapter: RequestAdapter) => ({
+          adapter,
+          title: 'Test Request',
+          description: 'Test description',
         });
-        const requestResponder = createMockRequestResponder();
-        const inspector = createMockInspector(requestResponder);
 
-        await service.esql({ query: 'FROM logs' }, { inspector, abortSignal: controller.signal });
+        it('removes the entry of a request aborted while it was running', async () => {
+          const adapter = new RequestAdapter();
+          const controller = new AbortController();
+          mockSearch.mockImplementation(() =>
+            throwError(() => {
+              controller.abort();
+              return new DOMException('The operation was aborted', 'AbortError');
+            })
+          );
 
-        expect(requestResponder.ok).not.toHaveBeenCalled();
+          await expect(
+            service.esql(
+              { query: 'FROM logs' },
+              { inspector: inspectorFor(adapter), abortSignal: controller.signal }
+            )
+          ).rejects.toMatchObject({ name: 'AbortError' });
+
+          expect(adapter.getRequests()).toEqual([]);
+        });
+
+        it('removes the entry of a response that arrives after the request was aborted', async () => {
+          const adapter = new RequestAdapter();
+          const controller = new AbortController();
+          mockSearch.mockImplementation(() => {
+            controller.abort();
+            return createMockResponse({ columns: [], values: [] });
+          });
+
+          await service.esql(
+            { query: 'FROM logs' },
+            { inspector: inspectorFor(adapter), abortSignal: controller.signal }
+          );
+
+          expect(adapter.getRequests()).toEqual([]);
+        });
+
+        it('removes only the aborted entry, leaving the others in place', async () => {
+          const adapter = new RequestAdapter();
+          const controller = new AbortController();
+          mockSearch.mockReturnValueOnce(createMockResponse({ columns: [], values: [] }));
+          await service.esql({ query: 'FROM a' }, { inspector: inspectorFor(adapter) });
+          mockSearch.mockImplementationOnce(() =>
+            throwError(() => {
+              controller.abort();
+              return new DOMException('The operation was aborted', 'AbortError');
+            })
+          );
+
+          await expect(
+            service.esql(
+              { query: 'FROM b' },
+              { inspector: inspectorFor(adapter), abortSignal: controller.signal }
+            )
+          ).rejects.toBeDefined();
+
+          expect(adapter.getRequests()).toHaveLength(1);
+          expect(adapter.getRequests()[0].status).toBe(RequestStatus.OK);
+        });
+
+        it('keeps a failure that was not aborted', async () => {
+          const adapter = new RequestAdapter();
+          mockSearch.mockReturnValue(throwError(() => new Error('boom')));
+
+          await expect(
+            service.esql(
+              { query: 'FROM logs' },
+              { inspector: inspectorFor(adapter), abortSignal: new AbortController().signal }
+            )
+          ).rejects.toThrow();
+
+          expect(adapter.getRequests()).toHaveLength(1);
+          expect(adapter.getRequests()[0].status).toBe(RequestStatus.ERROR);
+        });
       });
 
       it('still logs a failure when the request was not aborted', async () => {
