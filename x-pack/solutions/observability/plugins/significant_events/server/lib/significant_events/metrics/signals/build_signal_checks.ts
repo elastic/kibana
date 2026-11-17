@@ -154,9 +154,6 @@ const buildAggregationPipeline = ({
       aggregation = `| STATS idle_value = AVG(${variant.field})${sampleCount} BY ${groupBy}
 | EVAL signal_value = 1 - idle_value`;
       break;
-    case 'maximum':
-      aggregation = `| STATS signal_value = MAX(${variant.field}) BY ${groupBy}`;
-      break;
     case 'restart_delta':
       aggregation = `| STATS max_restarts = MAX(${variant.field}),
         min_restarts = MIN(${variant.field})

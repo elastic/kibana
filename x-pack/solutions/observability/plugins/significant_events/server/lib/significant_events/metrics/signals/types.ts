@@ -15,7 +15,6 @@ export type SignalComparison = '>' | '>=' | '==';
 export type SignalFormulaKind =
   | 'average'
   | 'inverse_average'
-  | 'maximum'
   | 'restart_delta'
   | 'not_ready_count'
   | 'minimum'
