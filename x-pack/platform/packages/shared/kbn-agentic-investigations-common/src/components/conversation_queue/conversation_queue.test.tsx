@@ -33,7 +33,6 @@ const queueElement = (props: Partial<React.ComponentProps<typeof ConversationQue
     onCopyLink={jest.fn()}
     onClickCard={jest.fn()}
     onOpenChat={jest.fn()}
-    onClickRecommendedAction={jest.fn()}
     renderAssignees={() => null}
     {...props}
   />

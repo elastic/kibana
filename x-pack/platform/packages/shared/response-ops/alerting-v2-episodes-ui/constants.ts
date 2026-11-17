@@ -13,7 +13,7 @@ export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
 export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;
 /** Max episodes returned per list page (ESQL LIMIT). */
 export const ALERT_EPISODES_LIST_PAGE_SIZE = 1000;
-/** Source id used when settling the native v2 ES|QL episode fetches. */
+/** Row source id for native v2 episodes. Not a source-filter value. */
 export const ALERTING_V2_EPISODE_SOURCE_ID = 'v2';
 export const QUERY_STALE_TIME = 30_000;
 /**
@@ -52,4 +52,15 @@ export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
   },
 ];
 export const HISTOGRAM_EPISODE_LIMIT = 10_000;
+/** Upper bound on histogram buckets per request; mirrors the `histogram:maxBars` default. */
+export const HISTOGRAM_MAX_BUCKETS = 1000;
+/** Maximum breakdown values drawn as their own histogram series; the rest are folded into one series. */
+export const HISTOGRAM_MAX_BREAKDOWN_SERIES = 9;
+/** Breakdown value for episodes and alerts without a value for the breakdown field. */
+export const HISTOGRAM_UNKNOWN_BREAKDOWN = 'unknown';
+/** Breakdown value of the series that folds every value beyond the top `HISTOGRAM_MAX_BREAKDOWN_SERIES`. */
+export const HISTOGRAM_OTHER_BREAKDOWN = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesHistogram.otherBreakdown',
+  { defaultMessage: 'Other' }
+);
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';

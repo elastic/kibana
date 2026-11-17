@@ -21,6 +21,7 @@ export const useWorkflowUrlState = () => {
     editorView: 'yaml' as const,
     graphDirection: 'TB' as const,
     selectedExecutionId: undefined,
+    isViewingExecution: false,
     lastViewedExecutionId: undefined,
     executionListFilters: {
       statuses: [],
@@ -34,6 +35,7 @@ export const useWorkflowUrlState = () => {
     setEditorView: () => {},
     setGraphDirection: () => {},
     setSelectedExecution: () => {},
+    selectEditorRun: () => {},
     setSelectedStepExecution: () => {},
     setSelectedStep: () => {},
     updateUrlState: () => {},

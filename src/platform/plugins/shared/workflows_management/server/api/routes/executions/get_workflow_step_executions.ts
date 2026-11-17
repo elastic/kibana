@@ -11,13 +11,20 @@ import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { SearchStepExecutionsParams } from '../../workflows_management_api';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
+import {
+  API_VERSION,
+  AVAILABILITY,
+  MAX_DATEMATH_LENGTH,
+  MAX_FILTER_VALUE_LENGTH,
+  MAX_PAGE_SIZE,
+  OAS_TAG,
+} from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
-import { workflowIdParamSchema } from '../utils/schemas';
+import { validatePaginationWindow, workflowIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: RouteDependencies) {
@@ -44,41 +51,51 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
         validate: {
           request: {
             params: workflowIdParamSchema,
-            query: schema.object({
-              stepId: schema.maybe(schema.string({ meta: { description: 'Filter by step ID.' } })),
-              includeInput: schema.maybe(
-                schema.boolean({ meta: { description: 'Include step input data.' } })
-              ),
-              includeOutput: schema.maybe(
-                schema.boolean({ meta: { description: 'Include step output data.' } })
-              ),
-              page: schema.maybe(
-                schema.number({ min: 1, meta: { description: 'Page number for pagination.' } })
-              ),
-              size: schema.maybe(
-                schema.number({
-                  min: 1,
-                  max: MAX_PAGE_SIZE,
-                  meta: { description: 'Number of results per page.' },
-                })
-              ),
-              startedAfter: schema.maybe(
-                schema.string({
-                  meta: {
-                    description:
-                      'Datemath lower bound for filtering step executions by startedAt (inclusive when parsed).',
-                  },
-                })
-              ),
-              startedBefore: schema.maybe(
-                schema.string({
-                  meta: {
-                    description:
-                      'Datemath upper bound for filtering step executions by startedAt (inclusive when parsed with roundUp).',
-                  },
-                })
-              ),
-            }),
+            query: schema.object(
+              {
+                stepId: schema.maybe(
+                  schema.string({
+                    maxLength: MAX_FILTER_VALUE_LENGTH,
+                    meta: { description: 'Filter by step ID.' },
+                  })
+                ),
+                includeInput: schema.maybe(
+                  schema.boolean({ meta: { description: 'Include step input data.' } })
+                ),
+                includeOutput: schema.maybe(
+                  schema.boolean({ meta: { description: 'Include step output data.' } })
+                ),
+                page: schema.maybe(
+                  schema.number({ min: 1, meta: { description: 'Page number for pagination.' } })
+                ),
+                size: schema.maybe(
+                  schema.number({
+                    min: 1,
+                    max: MAX_PAGE_SIZE,
+                    meta: { description: 'Number of results per page.' },
+                  })
+                ),
+                startedAfter: schema.maybe(
+                  schema.string({
+                    maxLength: MAX_DATEMATH_LENGTH,
+                    meta: {
+                      description:
+                        'Datemath lower bound for filtering step executions by startedAt (inclusive when parsed).',
+                    },
+                  })
+                ),
+                startedBefore: schema.maybe(
+                  schema.string({
+                    maxLength: MAX_DATEMATH_LENGTH,
+                    meta: {
+                      description:
+                        'Datemath upper bound for filtering step executions by startedAt (inclusive when parsed with roundUp).',
+                    },
+                  })
+                ),
+              },
+              { validate: validatePaginationWindow(MAX_PAGE_SIZE) }
+            ),
           },
         },
       },

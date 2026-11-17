@@ -33,6 +33,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const browser = getService('browser');
   const comboBox = getService('comboBox');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('Case View', function () {
@@ -225,15 +227,29 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/288565
-    describe.skip('Lens visualization', () => {
+    describe('Lens visualization', () => {
       before(async () => {
-        await cases.testResources.installKibanaSampleData('logs');
+        await esArchiver.loadIfNeeded(
+          'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+        );
+        await kibanaServer.importExport.load(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
+        );
+        // The inserted lens block records the global time filter, and the
+        // chart only renders when that range holds data.
+        await kibanaServer.uiSettings.update({
+          'timepicker:timeDefaults':
+            '{ "from": "2015-09-19T06:31:44.000Z", "to": "2015-09-23T18:31:44.000Z"}',
+        });
         await createAndNavigateToCase(getPageObject, getService, owner);
       });
 
       after(async () => {
-        await cases.testResources.removeKibanaSampleData('logs');
+        await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
+        await kibanaServer.importExport.unload(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
+        );
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
         await svlCases.api.deleteAllCaseItems();
       });
 
@@ -257,11 +273,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
         await addVisualizationButton.click();
 
-        await cases.singleCase.findAndSaveVisualization('[Logs] Bytes distribution');
+        await cases.singleCase.findAndSaveVisualization('lnsXYvis');
 
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.click('editable-save-markdown');
+        // Keep the button clear of the fixed timeline bottom bar
+        await testSubjects.click('editable-save-markdown', undefined, { bottomOffset: 100 });
 
         await header.waitUntilLoadingHasFinished();
 

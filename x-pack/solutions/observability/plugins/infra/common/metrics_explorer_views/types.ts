@@ -7,7 +7,7 @@
 
 import { isoToEpochRt, nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { Color } from '../color_palette';
+import { Color } from '../color';
 import {
   metricsExplorerAggregationRT,
   metricsExplorerMetricRT,

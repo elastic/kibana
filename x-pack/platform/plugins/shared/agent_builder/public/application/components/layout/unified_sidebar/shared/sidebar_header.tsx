@@ -60,10 +60,10 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   const history = useHistory();
   const { navigateToAgentBuilderUrl } = useNavigation();
 
+  // Vertical padding matches the compact app header beside it, so both rows share one height.
   const headerStyles = css`
     gap: ${euiTheme.size.s};
-    padding: ${euiTheme.size.base};
-    padding-left: ${euiTheme.size.l};
+    padding: ${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.l};
     flex-grow: 0;
   `;
 
@@ -72,7 +72,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   `;
 
   const condensedHeaderStyles = css`
-    padding: ${euiTheme.size.base} 0;
+    padding: ${euiTheme.size.s} 0;
     flex-grow: 0;
     align-items: center;
   `;

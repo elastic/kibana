@@ -48,7 +48,9 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
   let hasAtLeast: jest.Mock;
   let managedWorkflowsClient: {
     install: jest.Mock;
+    installMany: jest.Mock;
     uninstall: jest.Mock;
+    disable: jest.Mock;
     ready: jest.Mock;
     getWorkflowStatus: jest.Mock;
     getInstalledWorkflowState: jest.Mock;
@@ -89,7 +91,9 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
     };
     managedWorkflowsClient = {
       install: jest.fn().mockResolvedValue(undefined),
+      installMany: jest.fn().mockResolvedValue({ failed: [] }),
       uninstall: jest.fn().mockResolvedValue(undefined),
+      disable: jest.fn().mockResolvedValue(true),
       ready: jest.fn().mockResolvedValue(undefined),
       getWorkflowStatus: jest.fn().mockResolvedValue({ status: 'intact' }),
       getInstalledWorkflowState: jest.fn().mockResolvedValue(null),

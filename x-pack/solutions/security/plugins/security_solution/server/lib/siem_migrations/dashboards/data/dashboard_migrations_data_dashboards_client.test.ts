@@ -836,14 +836,46 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
               {
                 bool: {
                   should: [
-                    { match: { 'elastic_dashboard.title': { query: 'test', operator: 'and' } } },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              'elastic_dashboard.title': { query: 'test', operator: 'and' },
+                            },
+                          },
+                          {
+                            wildcard: {
+                              'elastic_dashboard.title.keyword': {
+                                value: '*test*',
+                                case_insensitive: true,
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
                     {
                       bool: {
                         must: [
                           { term: { status: 'failed' } },
                           {
-                            match: {
-                              'original_dashboard.title': { query: 'test', operator: 'and' },
+                            bool: {
+                              should: [
+                                {
+                                  match: {
+                                    'original_dashboard.title': { query: 'test', operator: 'and' },
+                                  },
+                                },
+                                {
+                                  wildcard: {
+                                    'original_dashboard.title.keyword': {
+                                      value: '*test*',
+                                      case_insensitive: true,
+                                    },
+                                  },
+                                },
+                              ],
                             },
                           },
                         ],
@@ -853,6 +885,18 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
                 },
               },
             ],
+          },
+        });
+      });
+
+      test('should match a sub-string of a dashboard title with underscores or hyphens', () => {
+        const result = getFilterQuery({ searchTerm: 'sysmon' });
+        const searchClause = result.bool.filter[1] as {
+          bool: { should: Array<{ bool: { should: unknown[] } }> };
+        };
+        expect(searchClause.bool.should[0].bool.should).toContainEqual({
+          wildcard: {
+            'elastic_dashboard.title.keyword': { value: '*sysmon*', case_insensitive: true },
           },
         });
       });
@@ -1015,14 +1059,46 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
               {
                 bool: {
                   should: [
-                    { match: { 'elastic_dashboard.title': { query: 'test', operator: 'and' } } },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              'elastic_dashboard.title': { query: 'test', operator: 'and' },
+                            },
+                          },
+                          {
+                            wildcard: {
+                              'elastic_dashboard.title.keyword': {
+                                value: '*test*',
+                                case_insensitive: true,
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
                     {
                       bool: {
                         must: [
                           { term: { status: 'failed' } },
                           {
-                            match: {
-                              'original_dashboard.title': { query: 'test', operator: 'and' },
+                            bool: {
+                              should: [
+                                {
+                                  match: {
+                                    'original_dashboard.title': { query: 'test', operator: 'and' },
+                                  },
+                                },
+                                {
+                                  wildcard: {
+                                    'original_dashboard.title.keyword': {
+                                      value: '*test*',
+                                      case_insensitive: true,
+                                    },
+                                  },
+                                },
+                              ],
                             },
                           },
                         ],

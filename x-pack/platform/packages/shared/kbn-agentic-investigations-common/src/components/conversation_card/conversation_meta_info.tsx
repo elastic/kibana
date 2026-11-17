@@ -27,8 +27,18 @@ export const ConversationMetaInfo = memo<{
   timestamp: Investigation['createdAt'];
   /** Rendered beside the age; the host supplies it only while a decision is in flight. */
   inFlightStatus?: React.ReactNode;
-}>(({ timestamp, inFlightStatus }) => {
+  /** Wraps the age, for example "Updated 2 hours ago". Without it the age is shown on its own. */
+  renderAge?: (age: React.ReactNode) => React.ReactNode;
+}>(({ timestamp, inFlightStatus, renderAge }) => {
   const { unit } = selectUnit(new Date(timestamp));
+  const age = (
+    <FormattedRelative
+      value={timestamp}
+      updateIntervalInSeconds={
+        INCREMENTABLE_UNITS.includes(unit) ? UPDATE_INTERVAL_SECONDS : undefined
+      }
+    />
+  );
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} direction="row">
@@ -36,12 +46,7 @@ export const ConversationMetaInfo = memo<{
         <EuiToolTip content={<FormattedDate value={timestamp} dateStyle="full" timeStyle="long" />}>
           {/* Focusable so the exact time is reachable without a pointer. */}
           <EuiText size="xs" color="subdued" component="span" tabIndex={0}>
-            <FormattedRelative
-              value={timestamp}
-              updateIntervalInSeconds={
-                INCREMENTABLE_UNITS.includes(unit) ? UPDATE_INTERVAL_SECONDS : undefined
-              }
-            />
+            {renderAge ? renderAge(age) : age}
           </EuiText>
         </EuiToolTip>
       </EuiFlexItem>

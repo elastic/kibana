@@ -212,7 +212,8 @@ export const promptForProject = async (
   return selected;
 };
 
-export const isTTY = (): boolean => Boolean(process.stdin.isTTY);
+/** True when stdin is a terminal and this process is not running in CI. */
+export const isTTY = (): boolean => Boolean(process.stdin.isTTY) && !process.env.CI;
 
 /**
  * Reads the first `elasticsearch.hosts` entry from config/kibana.dev.yml,

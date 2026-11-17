@@ -17,7 +17,6 @@ import { useFlyoutApi } from '../../use_flyout_api';
 import { createFlyoutApiMock } from '../../use_flyout_api.mock';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
 import { markFlyoutV2UrlWrite } from './flyout_v2_url_write_guard';
@@ -28,7 +27,6 @@ import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/ty
 // ---------------------------------------------------------------------------
 
 jest.mock('../../use_flyout_api');
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
 jest.mock('@kbn/unified-doc-viewer-plugin/public', () => ({
   useEsDocSearch: jest.fn(),
 }));
@@ -36,7 +34,6 @@ jest.mock('../../../data_view_manager/hooks/use_data_view');
 
 const mockFlyoutApi = createFlyoutApiMock();
 (useFlyoutApi as jest.Mock).mockReturnValue(mockFlyoutApi);
-(useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
 
 const mockDataView = {
   getRuntimeMappings: jest.fn(() => ({})),
@@ -103,26 +100,12 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     (useFlyoutApi as jest.Mock).mockReturnValue(mockFlyoutApi);
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
     (useDataView as jest.Mock).mockReturnValue({ dataView: mockDataView, status: 'ready' });
     noHit();
   });
 
   afterEach(() => {
     jest.useRealTimers();
-  });
-
-  // -----------------------------------------------------------------------
-  // Gate: new flyout disabled
-  // -----------------------------------------------------------------------
-
-  it('does not open anything when the new flyout is disabled', () => {
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
-    renderRestore(buildUrl([{ kind: 'document', documentId: 'doc-1', indexName: 'x' }]));
-    act(() => {
-      jest.runAllTimers();
-    });
-    expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
   });
 
   // -----------------------------------------------------------------------
@@ -180,6 +163,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       entityId: 'host:web-01',
       scopeId: 'agent-builder-entity-card',
       origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+      graphEntryPoint: 'ai_chat_attachment',
     });
   });
 
@@ -438,6 +422,238 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(
       expect.objectContaining({ origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT })
     );
+  });
+
+  describe('entity flyout graph entry point', () => {
+    const entityCases = [
+      {
+        kind: 'host',
+        descriptor: {
+          kind: 'host',
+          hostName: 'web-01',
+          entityId: 'host:web-01',
+          scopeId: 'some-scope',
+        },
+        openAsStart: () => mockFlyoutApi.openHostFlyout,
+        openAsChild: () => mockFlyoutApi.openHostFlyoutAsChild,
+      },
+      {
+        kind: 'user',
+        descriptor: {
+          kind: 'user',
+          userName: 'alice',
+          entityId: 'user:alice',
+          scopeId: 'some-scope',
+        },
+        openAsStart: () => mockFlyoutApi.openUserFlyout,
+        openAsChild: () => mockFlyoutApi.openUserFlyoutAsChild,
+      },
+      {
+        kind: 'service',
+        descriptor: {
+          kind: 'service',
+          serviceName: 'checkout',
+          entityId: 'service:checkout',
+          scopeId: 'some-scope',
+        },
+        openAsStart: () => mockFlyoutApi.openServiceFlyout,
+        openAsChild: () => mockFlyoutApi.openServiceFlyoutAsChild,
+      },
+    ] as const;
+
+    describe.each(entityCases)('$kind', ({ descriptor, openAsStart, openAsChild }) => {
+      const parent = { kind: 'rule', ruleId: 'rule-1' } as const;
+
+      it('passes the ai_chat_attachment graph entry point when restored as the chain root', () => {
+        const { history } = renderRestore('/');
+
+        act(() => {
+          history.push(
+            buildUrl([{ ...descriptor, origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT }])
+          );
+          jest.runAllTimers();
+        });
+
+        expect(openAsStart()).toHaveBeenCalledTimes(1);
+        expect(openAsStart()).toHaveBeenCalledWith(
+          expect.objectContaining({
+            origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+            graphEntryPoint: 'ai_chat_attachment',
+          })
+        );
+      });
+
+      it('passes the ai_chat_attachment graph entry point when restored as a child', () => {
+        const { history } = renderRestore('/');
+
+        act(() => {
+          history.push(
+            buildUrl([parent, { ...descriptor, origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT }])
+          );
+          jest.runAllTimers();
+        });
+
+        expect(openAsChild()).toHaveBeenCalledTimes(1);
+        expect(openAsChild()).toHaveBeenCalledWith(
+          expect.objectContaining({
+            origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+            graphEntryPoint: 'ai_chat_attachment',
+          })
+        );
+      });
+
+      it('keeps the descriptor origin for the graph entry point when the restore overrides the origin on app mount (chain root)', () => {
+        renderRestore(
+          buildUrl([{ ...descriptor, origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT }])
+        );
+
+        act(() => {
+          jest.runAllTimers();
+        });
+
+        expect(openAsStart()).toHaveBeenCalledTimes(1);
+        expect(openAsStart()).toHaveBeenCalledWith(
+          expect.objectContaining({
+            origin: FLYOUT_ORIGIN.URL_RESTORE,
+            graphEntryPoint: 'ai_chat_attachment',
+          })
+        );
+      });
+
+      it('keeps the descriptor origin for the graph entry point when the restore overrides the origin on app mount (child)', () => {
+        renderRestore(
+          buildUrl([parent, { ...descriptor, origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT }])
+        );
+
+        act(() => {
+          jest.runAllTimers();
+        });
+
+        expect(openAsChild()).toHaveBeenCalledTimes(1);
+        expect(openAsChild()).toHaveBeenCalledWith(
+          expect.objectContaining({
+            origin: FLYOUT_ORIGIN.URL_RESTORE,
+            graphEntryPoint: 'ai_chat_attachment',
+          })
+        );
+      });
+
+      it.each([
+        ['without an origin', undefined],
+        ['with another origin', FLYOUT_ORIGIN.GRAPH_NODE],
+      ])('passes no graph entry point %s (chain root and child)', (_, origin) => {
+        const withOrigin = origin ? { ...descriptor, origin } : descriptor;
+        renderRestore(buildUrl([withOrigin]));
+        act(() => {
+          jest.runAllTimers();
+        });
+
+        expect(openAsStart()).toHaveBeenCalledTimes(1);
+        expect(openAsStart().mock.calls[0][0].graphEntryPoint).toBeUndefined();
+
+        jest.clearAllMocks();
+        renderRestore(buildUrl([parent, withOrigin]));
+        act(() => {
+          jest.runAllTimers();
+        });
+
+        expect(openAsChild()).toHaveBeenCalledTimes(1);
+        expect(openAsChild().mock.calls[0][0].graphEntryPoint).toBeUndefined();
+      });
+    });
+  });
+
+  describe('entity graph view entry point', () => {
+    const graphDescriptor = {
+      kind: 'entityGraphView',
+      entityId: 'host:web-01',
+      scopeId: 'some-scope',
+      entityName: 'web-01',
+    } as const;
+
+    it('restores an entity graph view without an origin with no entry point, so no telemetry is reported', () => {
+      const { history } = renderRestore('/');
+
+      act(() => {
+        history.push(buildUrl([graphDescriptor]));
+      });
+
+      act(() => {
+        jest.runAllTimers();
+      });
+
+      expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledTimes(1);
+      const [params] = mockFlyoutApi.openEntityGraphView.mock.calls[0];
+      expect(params).toHaveProperty('entryPoint', undefined);
+      expect(params).toEqual(
+        expect.objectContaining({ entityId: 'host:web-01', entryPoint: undefined })
+      );
+    });
+
+    it('restores an entity graph view opened from the AI chat attachment with the ai_chat_attachment entry point', () => {
+      const { history } = renderRestore('/');
+
+      act(() => {
+        history.push(
+          buildUrl([{ ...graphDescriptor, origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT }])
+        );
+      });
+
+      act(() => {
+        jest.runAllTimers();
+      });
+
+      expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledTimes(1);
+      expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
+        expect.objectContaining({ entryPoint: 'ai_chat_attachment' })
+      );
+    });
+
+    it('keeps the descriptor origin for the entry point when the restore overrides the origin on app mount', () => {
+      renderRestore(
+        buildUrl([{ ...graphDescriptor, origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT }])
+      );
+
+      act(() => {
+        jest.runAllTimers();
+      });
+
+      expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledTimes(1);
+      expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
+        expect.objectContaining({
+          origin: FLYOUT_ORIGIN.URL_RESTORE,
+          entryPoint: 'ai_chat_attachment',
+        })
+      );
+    });
+
+    it('restores an entity graph view without an origin on app mount with no entry point', () => {
+      renderRestore(buildUrl([graphDescriptor]));
+
+      act(() => {
+        jest.runAllTimers();
+      });
+
+      expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledTimes(1);
+      const [params] = mockFlyoutApi.openEntityGraphView.mock.calls[0];
+      expect(params).toHaveProperty('entryPoint', undefined);
+    });
+
+    it('restores an entity graph view opened from another origin with no entry point', () => {
+      const { history } = renderRestore('/');
+
+      act(() => {
+        history.push(buildUrl([{ ...graphDescriptor, origin: FLYOUT_ORIGIN.ENTITIES_TABLE }]));
+      });
+
+      act(() => {
+        jest.runAllTimers();
+      });
+
+      expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledTimes(1);
+      const [params] = mockFlyoutApi.openEntityGraphView.mock.calls[0];
+      expect(params).toHaveProperty('entryPoint', undefined);
+    });
   });
 
   it('opens an entityResolution chain via same-app history navigation', () => {
@@ -821,6 +1037,26 @@ describe('useFlyoutV2RestoreFromUrl', () => {
         entityId: 'user:alice',
         subTab: 'resolution',
       })
+    );
+  });
+
+  it('opens entityRiskInputs with the scopeId when present on the descriptor', () => {
+    renderRestore(
+      buildUrl([
+        {
+          kind: 'entityRiskInputs',
+          entityType: 'host',
+          entityName: 'h',
+          entityId: 'eid',
+          scopeId: 'entity-analytics-new-entities-table-7d',
+        },
+      ])
+    );
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(mockFlyoutApi.openEntityRiskInputs).toHaveBeenCalledWith(
+      expect.objectContaining({ scopeId: 'entity-analytics-new-entities-table-7d' })
     );
   });
 

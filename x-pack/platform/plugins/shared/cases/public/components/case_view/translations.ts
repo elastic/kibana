@@ -114,6 +114,18 @@ export const STATUS = i18n.translate('xpack.cases.caseView.statusLabel', {
   defaultMessage: 'Status',
 });
 
+export const SEVERITY_BADGE_ARIA_LABEL = (severity: string) =>
+  i18n.translate('xpack.cases.caseView.severityBadgeAriaLabel', {
+    defaultMessage: 'Severity: {severity}',
+    values: { severity },
+  });
+
+export const STATUS_BADGE_ARIA_LABEL = (status: string) =>
+  i18n.translate('xpack.cases.caseView.statusBadgeAriaLabel', {
+    defaultMessage: 'Status: {status}',
+    values: { status },
+  });
+
 export const CASE = i18n.translate('xpack.cases.caseView.case', {
   defaultMessage: 'case',
 });

@@ -12,6 +12,38 @@ import {
   type SemanticMemoryMaterializedEvent,
   type SemanticMemoryOptimizedEvent,
 } from './events';
+import {
+  NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT,
+  type OnlineEvalScoreEvent,
+} from './online_eval_score_event';
+import {
+  NIGHTSHIFT_ONLINE_EVALS_STEP_FAILED_EVENT,
+  type OnlineEvalsStepFailedEvent,
+} from './online_evals_step_failed_event';
+import {
+  NIGHTSHIFT_INVESTIGATION_SKIPPED_EVENT,
+  type InvestigationSkippedEvent,
+} from './investigation_skipped_event';
+import {
+  NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT,
+  type AlertEnteredPipelineEvent,
+} from './alert_entered_pipeline_event';
+import {
+  NIGHTSHIFT_INVESTIGATION_STARTED_EVENT,
+  type InvestigationStartedEvent,
+} from './investigation_started_event';
+import {
+  NIGHTSHIFT_INVESTIGATION_ENDED_EVENT,
+  type InvestigationEndedEvent,
+} from './investigation_ended_event';
+import {
+  NIGHTSHIFT_BACKGROUND_ACTIVITY_EVENT,
+  type BackgroundActivityEvent,
+} from './background_activity_event';
+import {
+  NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT,
+  type DecisionTreeCausalCheckEvent,
+} from './decision_tree_causal_check_event';
 
 export class NightshiftTelemetryClient {
   constructor(private readonly analytics: AnalyticsServiceSetup, private readonly logger: Logger) {}
@@ -22,6 +54,38 @@ export class NightshiftTelemetryClient {
 
   reportSemanticMemoryOptimized(event: SemanticMemoryOptimizedEvent): void {
     this.report(NIGHTSHIFT_SEMANTIC_MEMORY_OPTIMIZED_EVENT, event);
+  }
+
+  reportOnlineEvalScore(event: OnlineEvalScoreEvent): void {
+    this.report(NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT, event);
+  }
+
+  reportOnlineEvalsStepFailed(event: OnlineEvalsStepFailedEvent): void {
+    this.report(NIGHTSHIFT_ONLINE_EVALS_STEP_FAILED_EVENT, event);
+  }
+
+  reportInvestigationSkipped(event: InvestigationSkippedEvent): void {
+    this.report(NIGHTSHIFT_INVESTIGATION_SKIPPED_EVENT, event);
+  }
+
+  reportAlertEnteredPipeline(event: AlertEnteredPipelineEvent): void {
+    this.report(NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT, event);
+  }
+
+  reportInvestigationStarted(event: InvestigationStartedEvent): void {
+    this.report(NIGHTSHIFT_INVESTIGATION_STARTED_EVENT, event);
+  }
+
+  reportInvestigationEnded(event: InvestigationEndedEvent): void {
+    this.report(NIGHTSHIFT_INVESTIGATION_ENDED_EVENT, event);
+  }
+
+  reportBackgroundActivity(event: BackgroundActivityEvent): void {
+    this.report(NIGHTSHIFT_BACKGROUND_ACTIVITY_EVENT, event);
+  }
+
+  reportDecisionTreeCausalCheck(event: DecisionTreeCausalCheckEvent): void {
+    this.report(NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT, event);
   }
 
   private report(eventType: string, event: object): void {

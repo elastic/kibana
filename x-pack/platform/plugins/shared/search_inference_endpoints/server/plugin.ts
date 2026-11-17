@@ -151,7 +151,6 @@ export class SearchInferenceEndpointsPlugin
       }
       return {
         connectorId: topEndpoint.connectorId,
-        temperature: topEndpoint.parameters?.temperature,
         reasoning: topEndpoint.parameters?.reasoning,
       };
     });

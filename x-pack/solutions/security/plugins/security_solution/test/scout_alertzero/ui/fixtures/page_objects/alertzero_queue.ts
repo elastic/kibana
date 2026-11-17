@@ -25,4 +25,15 @@ export class AlertZeroQueuePage {
   async goto() {
     await this.page.gotoApp('alertzero', { readyWhen: this.trendChartRow });
   }
+
+  async gotoInvestigationFlyout(conversationId: string, proposalId: string) {
+    await this.page.gotoApp('alertzero', {
+      params: { selectedConversationId: conversationId },
+      readyWhen: this.proposedAction(proposalId),
+    });
+  }
+
+  proposedAction(proposalId: string): Locator {
+    return this.page.testSubj.locator(`investigationFlyoutProposedAction-${proposalId}`);
+  }
 }

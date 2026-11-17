@@ -15,11 +15,49 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../../shared_imports';
 import { getCreateFromCsvPath, getCreatePath } from '../../services/navigation';
-
 export const EmptyList: FunctionComponent = () => {
-  const { services } = useKibana();
+  const {
+    services: {
+      config: { canManage },
+      documentation,
+    },
+  } = useKibana();
   const history = useHistory() as ScopedHistory;
   const [showPopover, setShowPopover] = useState<boolean>(false);
+
+  const learnMoreLink = (
+    <EuiLink href={documentation.getIngestNodeUrl()} target="_blank" external>
+      {i18n.translate('xpack.ingestPipelines.list.table.emptyPromptDocumentionLink', {
+        defaultMessage: 'Learn more',
+      })}
+    </EuiLink>
+  );
+
+  if (!canManage) {
+    return (
+      <EuiPageTemplate.EmptyPrompt
+        iconType="pipelineApp"
+        iconColor="default"
+        data-test-subj="emptyList"
+        title={
+          <h2 data-test-subj="title">
+            {i18n.translate('xpack.ingestPipelines.list.table.readOnlyEmptyPromptTitle', {
+              defaultMessage: 'No ingest pipelines',
+            })}
+          </h2>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.ingestPipelines.list.table.readOnlyEmptyPromptDescription"
+              defaultMessage="There are no ingest pipelines to display. Creating a pipeline requires the manage_pipeline cluster privilege."
+            />{' '}
+            {learnMoreLink}
+          </p>
+        }
+      />
+    );
+  }
 
   const createMenuItems = [
     {
@@ -59,11 +97,7 @@ export const EmptyList: FunctionComponent = () => {
             id="xpack.ingestPipelines.list.table.emptyPromptDescription"
             defaultMessage="Use pipelines to remove or transform fields, extract values from text, and enrich your data before indexing."
           />{' '}
-          <EuiLink href={services.documentation.getIngestNodeUrl()} target="_blank" external>
-            {i18n.translate('xpack.ingestPipelines.list.table.emptyPromptDocumentionLink', {
-              defaultMessage: 'Learn more',
-            })}
-          </EuiLink>
+          {learnMoreLink}
         </p>
       }
       actions={

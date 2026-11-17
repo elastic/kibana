@@ -3030,6 +3030,41 @@ export const labels = {
       defaultMessage: 'AI Indices',
     }),
   },
+  executionIdentity: {
+    configurationLockedTitle: i18n.translate(
+      'xpack.agentBuilder.executionIdentity.configurationLockedTitle',
+      { defaultMessage: 'This agent runs as a service account' }
+    ),
+    configurationLockedDescription: i18n.translate(
+      'xpack.agentBuilder.executionIdentity.configurationLockedDescription',
+      {
+        defaultMessage:
+          'Editing an agent that runs as a service account requires the manage_security privilege.',
+      }
+    ),
+    runsAsBadge: (serviceAccountId: string) =>
+      i18n.translate('xpack.agentBuilder.executionIdentity.runsAsBadge', {
+        defaultMessage: 'Runs as {serviceAccountId}',
+        values: { serviceAccountId },
+      }),
+    chatForbiddenTitle: i18n.translate('xpack.agentBuilder.executionIdentity.chatForbiddenTitle', {
+      defaultMessage: 'You cannot chat with this agent',
+    }),
+    chatForbiddenDescription: i18n.translate(
+      'xpack.agentBuilder.executionIdentity.chatForbiddenDescription',
+      {
+        defaultMessage:
+          'This agent runs as a service account. Chatting with it requires the Agent Builder privilege "Chat with agents that run as a service account".',
+      }
+    ),
+    chatForbiddenPlaceholder: i18n.translate(
+      'xpack.agentBuilder.executionIdentity.chatForbiddenPlaceholder',
+      {
+        defaultMessage:
+          "You don't have permission to chat with agents that run as a service account.",
+      }
+    ),
+  },
   autoApprovedApis: {
     sectionTitle: i18n.translate('xpack.agentBuilder.autoApprovedApis.sectionTitle', {
       defaultMessage: 'Auto-approved APIs',
