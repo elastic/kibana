@@ -182,7 +182,6 @@ export const DataGrid = <TRow extends object>({
     onCommandFailure: announceCommandFailure,
     onRowsBecameEmpty: announceRowsBecameEmpty,
   });
-  useImperativeHandle(apiRef, () => focus.api, [focus.api]);
 
   // Keeps the active row rendered while it is scrolled out of the virtual window, so the focused cell,
   // or focused content inside it, never loses DOM focus to virtualization. Rows stay in index order,
@@ -211,6 +210,8 @@ export const DataGrid = <TRow extends object>({
   });
   rowVirtualizerRef.current = rowVirtualizer;
   const virtualRows = rowVirtualizer.getVirtualItems();
+
+  useImperativeHandle(apiRef, () => focus.api, [focus.api]);
 
   const activeRowIsMounted = Boolean(
     focus.activeCell &&
