@@ -7,27 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const DotText = require('@kbn/dot-text');
+import type { Cache } from '../cache/types';
 
-/** @type {import('./types').Transform} */
-const dotTextTransform = (path, source, cache) => {
-  const key = cache.getKey(path, source);
-
-  const cached = cache.getCode(key);
-  if (cached) {
-    return cached;
-  }
-
-  const code = DotText.getJsSourceSync({
-    content: source,
-    path,
-  }).source;
-
-  cache.update(key, {
-    code,
-  });
-
-  return code;
-};
-
-module.exports = { dotTextTransform };
+export type Transform = (path: string, source: string, cache?: Cache) => string;

@@ -25,7 +25,7 @@ describe('RSPack cache invalidation configuration', () => {
     'externals.ts',
     'theme_loader.ts',
     'require_interop_loader.ts',
-    'kbn-swc-config/src/browser.ts',
+    'kbn-swc-config/src/browser.js',
     'kbn-transpiler-config/src/shared_config.ts',
     'package.json',
   ];
@@ -40,7 +40,7 @@ describe('RSPack cache invalidation configuration', () => {
       'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
       'packages/kbn-rspack-optimizer/src/loaders/hmr_boundary_loader.ts',
       'packages/kbn-rspack-optimizer/src/plugins/chunk_preload_manifest_plugin.ts',
-      'packages/kbn-swc-config/src/browser.ts',
+      'packages/kbn-swc-config/src/browser.js',
       'packages/kbn-transpiler-config/src/shared_config.ts',
     ];
 

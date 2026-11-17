@@ -29,7 +29,7 @@
     "@kbn/ci-stats-reporter",
     "@kbn/repo-info",
     "@kbn/dev-proc-runner",
-    "@kbn/babel-register",
+    "@kbn/swc-register",
     "@kbn/swc-config",
     "@kbn/repo-packages",
     "@kbn/scout-info",

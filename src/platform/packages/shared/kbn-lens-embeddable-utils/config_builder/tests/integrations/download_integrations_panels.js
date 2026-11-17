@@ -9,7 +9,7 @@
 
 // bypasses linking full package to @kbn/lens-plugin, only needed for script
 // uncomment these lines when running locally
-// require('@kbn/babel-register').install();
+// require('@kbn/swc-register').install();
 // const { migrateAttributes } = require('@kbn/lens-plugin/common/transforms/transform_out');
 // const {
 //   makeLensEmbeddableFactory,

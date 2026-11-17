@@ -7,8 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/jest/jest_node',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-babel-register'],
-};
+import Path from 'path';
+
+import { determineCachePrefix } from '.';
+
+const ORIGINAL_CWD = process.cwd();
+
+afterEach(() => {
+  process.chdir(ORIGINAL_CWD);
+});
+
+it('determines a cache prefix that is stable across working directories', () => {
+  const rootPrefix = determineCachePrefix();
+
+  process.chdir(Path.resolve(ORIGINAL_CWD, 'src'));
+
+  expect(determineCachePrefix()).toBe(rootPrefix);
+});
