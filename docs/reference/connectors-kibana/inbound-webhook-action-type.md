@@ -1,7 +1,7 @@
 ---
 navigation_title: "Inbound Webhook"
 type: reference
-description: "Use the Inbound Webhook connector to receive JSON from any tool that can send an HTTP POST request, and start a Kibana workflow for each request."
+description: "Use the Inbound Webhook connector to receive data from any tool that can send an HTTP POST request, and start a Kibana workflow for each request."
 applies_to:
   serverless: preview
   stack: preview 9.6
@@ -9,7 +9,7 @@ applies_to:
 
 # Inbound Webhook connector [inbound-webhook-action-type]
 
-The Inbound Webhook connector lets any tool that can send an HTTP `POST` request start {{kib}} workflows. The tool sends JSON to the connector's webhook URL. Each request starts the workflows that subscribe to the connector, and those workflows can read the request body. Use it with tools that have no built-in way to start a {{kib}} workflow, such as Prometheus Alertmanager, a CI/CD system, or an in-house service.
+The Inbound Webhook connector lets any tool that can send an HTTP `POST` request start {{kib}} workflows. The tool sends data, such as JSON, to the connector's webhook URL. Each request starts the workflows that subscribe to the connector, and those workflows can read the request body. Use it with tools that have no built-in way to start a {{kib}} workflow, such as Prometheus Alertmanager, a CI/CD system, or an in-house service.
 
 You can use this connector in **Workflows** only. It receives requests and has no actions, so workflows use it as a trigger, not as a step.
 
@@ -39,19 +39,27 @@ If the flyout warns that `server.publicBaseUrl` isn't set, the **Webhook URL** i
 
 ## Connect an external tool [inbound-webhook-url]
 
-Configure the external tool to send each event as an HTTP `POST` request with a JSON body to the connector's webhook URL. The URL uses one of the following formats. URLs in the default space have no `/s/<space-id>` prefix.
+Configure the external tool to send each event as an HTTP `POST` request to the connector's webhook URL. The URL uses one of the following formats. URLs in the default space have no `/s/<space-id>` prefix.
 
 ```text
 https://<kibana-host>/api/actions/events/.inboundWebhook/<connector-id>
 https://<kibana-host>/s/<space-id>/api/actions/events/.inboundWebhook/<connector-id>
 ```
 
+Set the request's `Content-Type` header to one of the following types. {{kib}} parses the body and passes the result to workflows as `event.body`:
+
+| Content type | `event.body` |
+| --- | --- |
+| `application/json`, or a type that ends in `+json`, such as `application/cloudevents+json` | The parsed JSON value |
+| `application/x-www-form-urlencoded` | An object of the form fields |
+| `text/plain` | The body as a string |
+
 Authenticate each request with the ingest token in one of these ways:
 
 - If the tool lets you set headers, send an `Authorization: Bearer <ingest-token>` header. This method keeps the token out of URLs and logs.
 - Append `?token=<ingest-token>` to the URL. {{kib}} reads this parameter only when the request has no `Authorization` header.
 
-Some tools confirm a webhook URL by sending a verification value before they send events. When the JSON body has a top-level string field named `challenge`, the connector returns HTTP 200 with `{"challenge": "<value>"}` and doesn't start any workflows. The connector ignores a `challenge` field inside a nested object, so that request starts workflows as usual.
+Some tools confirm a webhook URL by sending a verification value before they send events. When the body has a top-level `challenge` field whose value is a string of 1 to 1,024 characters, the connector returns HTTP 200 with `{"challenge": "<value>"}` and doesn't start any workflows. Any other `challenge` field, such as an empty string, a longer string, or a field inside a nested object, isn't treated as verification, so the request starts workflows as usual.
 
 Protect the ingest token like a password. Anyone who has the token can start the connector's workflows, and those workflows run with the privileges of the last user who saved the connector.
 
@@ -85,7 +93,7 @@ Workflow steps can use these fields from the `event` object:
 
 | Field | Description |
 | --- | --- |
-| `event.body` | The JSON body of the request, exactly as the tool sent it. |
+| `event.body` | The request body, parsed according to its `Content-Type` header. |
 | `event.connectorId` | The ID of the connector that received the request. |
 | `event.connectorTypeId` | The connector type, `.inboundWebhook`. |
 | `event.spaceId` | The space that the connector belongs to. |
@@ -130,8 +138,8 @@ The HTTP status that {{kib}} returns shows what happened to a request:
 | Status | What it means |
 | --- | --- |
 | 202 | {{kib}} accepted the request. If no workflow runs, check that the workflow is enabled, is in the connector's space, has the correct `connector-id`, and has an `on.condition` that matches the body. |
-| 200 | The body has a top-level `challenge` field. The connector answers the verification request and doesn't start any workflows. |
+| 200 | The body has a top-level `challenge` field with a string of 1 to 1,024 characters. The connector answers the verification request and doesn't start any workflows. |
 | 403 | This deployment doesn't accept webhook requests for any connector. |
-| 404 | The ingest token is missing or incorrect, or someone rotated it. The URL might also have the wrong connector ID or space. After repeated failed attempts from one address, {{kib}} returns 404 for that connector for up to a minute, even when the token is correct. |
+| 404 | The ingest token is missing or incorrect, or someone rotated it. The URL might also have the wrong connector ID or space. After repeated failed attempts from one address, {{kib}} returns 404 for that connector until the [failed-authentication window](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-ratelimit-remoteaddress-window) passes, even when the token is correct. If [`xpack.actions.inboundEvents.enabled`](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-enabled) is `false`, every webhook URL returns 404. |
 | 413 | The body is larger than the maximum size, which is 1 MB by default. |
-| 429 | The tool sent too many requests. Wait for the number of seconds in the `Retry-After` response header, then send the request again. By default, each {{kib}} instance accepts up to 300 requests per minute for one connector, and up to 10 at the same time. |
+| 429 | The tool sent too many requests. Wait for the number of seconds in the `Retry-After` response header, then send the request again. Each {{kib}} process applies these limits separately: [authenticated requests per minute for one connector](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-ratelimit-connector-limit), [requests in progress at once for one connector](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-admission-maxinflightperconnector), and [requests in progress at once across all connectors](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-admission-maxinflight). |
