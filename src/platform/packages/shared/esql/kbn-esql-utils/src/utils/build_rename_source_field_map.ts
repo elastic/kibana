@@ -75,7 +75,7 @@ function resolveOneField(
     renameNewToOldByCommandIndex,
     droppedColumnNamesByIndex,
   }: RenameResolutionContext
-): string {
+): string | undefined {
   const isComputedColumn = (oldName: string) =>
     fullNewColumns.has(oldName) && !renameOutputNames.has(oldName);
 
@@ -89,7 +89,7 @@ function resolveOneField(
       renameDefIndex
     )
   ) {
-    return fieldName;
+    return undefined;
   }
 
   let current = fieldName;
@@ -104,7 +104,7 @@ function resolveOneField(
       continue;
     }
     if (isComputedColumn(oldName)) {
-      return fieldName;
+      return undefined;
     }
     current = oldName;
   }
@@ -166,7 +166,7 @@ function renameMapFromContext(context: RenameResolutionContext): Map<string, str
   const map = new Map<string, string>();
   for (const name of context.renameOutputNames) {
     const resolved = resolveOneField(name, context);
-    if (resolved !== name) {
+    if (resolved !== undefined) {
       map.set(name, resolved);
     }
   }
@@ -179,7 +179,8 @@ export function buildRenameSourceFieldMapFromCommands(
   query: string,
   summaryContext: ESQLCommandSummaryContext
 ): Map<string, string> {
-  return renameMapFromContext(buildContext(commands, query, summaryContext));
+  const map = renameMapFromContext(buildContext(commands, query, summaryContext));
+  return new Map([...map].filter(([name, source]) => name !== source));
 }
 
 /**
@@ -190,10 +191,10 @@ export function buildRenameSourceFieldMapFromCommands(
  */
 export function buildRenameSourceFieldMap(query: string): Map<string, string> {
   const { root } = parseEsqlCached(query);
-  // Resolve renames within each nested pipeline before combining it with the outer pipeline.
+  // Keep identity mappings in nested summaries to distinguish source fields from computed columns.
   const summaryContext = createQuerySummaryContext(root, query, (commands, source, context) => ({
     ...getQuerySummaryFromCommands(commands, source, context),
-    renamedColumnsPairs: new Set(buildRenameSourceFieldMapFromCommands(commands, source, context)),
+    renamedColumnsPairs: new Set(renameMapFromContext(buildContext(commands, source, context))),
   }));
   return buildRenameSourceFieldMapFromCommands(root.commands, query, summaryContext);
 }

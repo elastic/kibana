@@ -166,6 +166,19 @@ describe('buildRenameSourceFieldMap', () => {
   });
 
   describe('nested pipelines', () => {
+    it('preserves rename provenance through an identity EVAL', () => {
+      const query = 'FROM (FROM logs | EVAL bytes = bytes | RENAME bytes AS size)';
+
+      expect(buildRenameSourceFieldMap(query)).toEqual(new Map([['size', 'bytes']]));
+    });
+
+    it('does not preserve an identity EVAL overwritten by a computed EVAL', () => {
+      const query =
+        'FROM (FROM logs | EVAL bytes = bytes | EVAL bytes = bytes * 2) | RENAME bytes AS size';
+
+      expect(buildRenameSourceFieldMap(query)).toEqual(new Map());
+    });
+
     it.each([
       'FROM (FROM logs | RENAME bytes AS size | RENAME size AS total)',
       'FROM logs | FORK (RENAME bytes AS size | RENAME size AS total) (LIMIT 1)',
