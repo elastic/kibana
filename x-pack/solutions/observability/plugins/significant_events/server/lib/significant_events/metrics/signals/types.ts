@@ -26,7 +26,7 @@ export type SignalFormulaKind =
   | 'average'
   | 'inverse_average'
   | 'restart_delta'
-  | 'not_ready_count'
+  | 'matching_value_count'
   | 'minimum'
   | 'maximum'
   | 'error_rate'
@@ -58,7 +58,7 @@ export type SignalTemplateVariant = SignalTemplateVariantBase &
           | 'maximum'
           | 'error_rate';
       }
-    | { formulaKind: 'not_ready_count'; matchingValues?: readonly string[] }
+    | { formulaKind: 'matching_value_count'; matchingValues: readonly string[] }
     | { formulaKind: 'ratio'; denominatorField: string }
     | { formulaKind: 'oom_killed_count'; reasonField: string; reasonValue: string }
   );

@@ -165,8 +165,8 @@ const buildAggregationPipeline = ({
 | EVAL restart_delta = max_restarts - min_restarts
 | STATS signal_value = SUM(restart_delta) BY ${groupBy}`;
       break;
-    case 'not_ready_count': {
-      const matchingValues = variant.matchingValues ?? ['false', 'unknown'];
+    case 'matching_value_count': {
+      const { matchingValues } = variant;
       const matchingCondition =
         matchingValues.length === 1
           ? `${variant.field} == ${quoteEsqlString(matchingValues[0])}`
