@@ -25,6 +25,13 @@ import { asyncForEach } from '@kbn/std';
 import { embeddableService } from '../../services/kibana_services';
 import type { DashboardLayout } from './types';
 
+/**
+ * Converts the dashboard layout into the shape `@kbn/grid-layout` renders.
+ * - Every section becomes a top-level section entry (keyed by section id) with an empty `panels` map.
+ * - Panels in a section are nested under that section, with their `row` relative to the section.
+ * - Panels outside of any section become top-level `panel` entries (keyed by panel id).
+ * - `resizeSettings` supplies per-panel-type resize constraints; types without an entry get none.
+ */
 export const transformDashboardLayoutToGridLayout = (
   layout: DashboardLayout,
   resizeSettings: { [panelType: string]: LayoutConstraints }
