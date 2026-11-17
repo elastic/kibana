@@ -215,7 +215,7 @@ describe('GithubConnector', () => {
   });
 
   describe('listIssues action', () => {
-    it('applies defaults for state and first when omitted', async () => {
+    it('applies defaults for state and perPage when omitted', async () => {
       const input = parse('listIssues', { owner: 'elastic', repo: 'kibana' });
       await GithubConnector.actions.listIssues.handler(mockContext, input);
 
@@ -224,8 +224,8 @@ describe('GithubConnector', () => {
         arguments: {
           owner: 'elastic',
           repo: 'kibana',
-          state: 'open',
-          first: 10,
+          state: 'OPEN',
+          perPage: 10,
           after: undefined,
         },
       });
@@ -236,7 +236,7 @@ describe('GithubConnector', () => {
         owner: 'elastic',
         repo: 'kibana',
         state: 'closed',
-        first: 5,
+        perPage: 5,
         after: 'cursor123',
       });
 
@@ -245,16 +245,36 @@ describe('GithubConnector', () => {
         arguments: {
           owner: 'elastic',
           repo: 'kibana',
-          state: 'closed',
-          first: 5,
+          state: 'CLOSED',
+          perPage: 5,
           after: 'cursor123',
+        },
+      });
+    });
+
+    it('lists both states by leaving state out, which the tool has no value for', async () => {
+      await GithubConnector.actions.listIssues.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        state: 'all',
+        perPage: 10,
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'list_issues',
+        arguments: {
+          owner: 'elastic',
+          repo: 'kibana',
+          state: undefined,
+          perPage: 10,
+          after: undefined,
         },
       });
     });
   });
 
   describe('listPullRequests action', () => {
-    it('applies defaults for state and first when omitted', async () => {
+    it('applies defaults for state and paging when omitted', async () => {
       const input = parse('listPullRequests', { owner: 'elastic', repo: 'kibana' });
       await GithubConnector.actions.listPullRequests.handler(mockContext, input);
 
@@ -264,15 +284,15 @@ describe('GithubConnector', () => {
           owner: 'elastic',
           repo: 'kibana',
           state: 'open',
-          first: 10,
-          after: undefined,
+          page: 1,
+          perPage: 10,
         },
       });
     });
   });
 
   describe('listCommits action', () => {
-    it('applies default first when omitted', async () => {
+    it('applies default paging when omitted', async () => {
       const input = parse('listCommits', { owner: 'elastic', repo: 'kibana' });
       await GithubConnector.actions.listCommits.handler(mockContext, input);
 
@@ -282,45 +302,45 @@ describe('GithubConnector', () => {
           owner: 'elastic',
           repo: 'kibana',
           sha: undefined,
-          first: 10,
-          after: undefined,
+          page: 1,
+          perPage: 10,
         },
       });
     });
   });
 
   describe('listBranches action', () => {
-    it('applies default first when omitted', async () => {
+    it('applies default paging when omitted', async () => {
       const input = parse('listBranches', { owner: 'elastic', repo: 'kibana' });
       await GithubConnector.actions.listBranches.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'list_branches',
-        arguments: { owner: 'elastic', repo: 'kibana', first: 10, after: undefined },
+        arguments: { owner: 'elastic', repo: 'kibana', page: 1, perPage: 10 },
       });
     });
   });
 
   describe('listReleases action', () => {
-    it('applies default first when omitted', async () => {
+    it('applies default paging when omitted', async () => {
       const input = parse('listReleases', { owner: 'elastic', repo: 'kibana' });
       await GithubConnector.actions.listReleases.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'list_releases',
-        arguments: { owner: 'elastic', repo: 'kibana', first: 10, after: undefined },
+        arguments: { owner: 'elastic', repo: 'kibana', page: 1, perPage: 10 },
       });
     });
   });
 
   describe('listTags action', () => {
-    it('applies default first when omitted', async () => {
+    it('applies default paging when omitted', async () => {
       const input = parse('listTags', { owner: 'elastic', repo: 'kibana' });
       await GithubConnector.actions.listTags.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'list_tags',
-        arguments: { owner: 'elastic', repo: 'kibana', first: 10, after: undefined },
+        arguments: { owner: 'elastic', repo: 'kibana', page: 1, perPage: 10 },
       });
     });
   });

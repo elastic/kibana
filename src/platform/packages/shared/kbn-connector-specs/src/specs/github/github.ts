@@ -265,8 +265,9 @@ export const GithubConnector: ConnectorSpec = {
         return callToolJson(ctx, 'list_issues', {
           owner: input.owner,
           repo: input.repo,
-          state: input.state,
-          first: input.first,
+          // The tool takes OPEN or CLOSED, and lists both when it is left out.
+          state: input.state === 'all' ? undefined : input.state.toUpperCase(),
+          perPage: input.perPage,
           after: input.after,
         });
       },
@@ -275,15 +276,15 @@ export const GithubConnector: ConnectorSpec = {
     listPullRequests: {
       isTool: true,
       scope: 'read',
-      description: 'List pull requests in a GitHub repository. Uses cursor-based pagination.',
+      description: 'List pull requests in a GitHub repository. Pages are numbered from 1.',
       input: ListPullRequestsInputSchema,
       handler: async (ctx, input: ListPullRequestsInput) => {
         return callToolJson(ctx, 'list_pull_requests', {
           owner: input.owner,
           repo: input.repo,
           state: input.state,
-          first: input.first,
-          after: input.after,
+          page: input.page,
+          perPage: input.perPage,
         });
       },
     },
@@ -291,15 +292,15 @@ export const GithubConnector: ConnectorSpec = {
     listCommits: {
       isTool: true,
       scope: 'read',
-      description: 'List commits in a GitHub repository. Uses cursor-based pagination.',
+      description: 'List commits in a GitHub repository. Pages are numbered from 1.',
       input: ListCommitsInputSchema,
       handler: async (ctx, input: ListCommitsInput) => {
         return callToolJson(ctx, 'list_commits', {
           owner: input.owner,
           repo: input.repo,
           sha: input.sha,
-          first: input.first,
-          after: input.after,
+          page: input.page,
+          perPage: input.perPage,
         });
       },
     },
@@ -307,14 +308,14 @@ export const GithubConnector: ConnectorSpec = {
     listBranches: {
       isTool: true,
       scope: 'read',
-      description: 'List branches in a GitHub repository. Uses cursor-based pagination.',
+      description: 'List branches in a GitHub repository. Pages are numbered from 1.',
       input: ListBranchesInputSchema,
       handler: async (ctx, input: ListBranchesInput) => {
         return callToolJson(ctx, 'list_branches', {
           owner: input.owner,
           repo: input.repo,
-          first: input.first,
-          after: input.after,
+          page: input.page,
+          perPage: input.perPage,
         });
       },
     },
@@ -322,14 +323,14 @@ export const GithubConnector: ConnectorSpec = {
     listReleases: {
       isTool: true,
       scope: 'read',
-      description: 'List releases in a GitHub repository. Uses cursor-based pagination.',
+      description: 'List releases in a GitHub repository. Pages are numbered from 1.',
       input: ListReleasesInputSchema,
       handler: async (ctx, input: ListReleasesInput) => {
         return callToolJson(ctx, 'list_releases', {
           owner: input.owner,
           repo: input.repo,
-          first: input.first,
-          after: input.after,
+          page: input.page,
+          perPage: input.perPage,
         });
       },
     },
@@ -337,14 +338,14 @@ export const GithubConnector: ConnectorSpec = {
     listTags: {
       isTool: true,
       scope: 'read',
-      description: 'List tags in a GitHub repository. Uses cursor-based pagination.',
+      description: 'List tags in a GitHub repository. Pages are numbered from 1.',
       input: ListTagsInputSchema,
       handler: async (ctx, input: ListTagsInput) => {
         return callToolJson(ctx, 'list_tags', {
           owner: input.owner,
           repo: input.repo,
-          first: input.first,
-          after: input.after,
+          page: input.page,
+          perPage: input.perPage,
         });
       },
     },
