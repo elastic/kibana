@@ -6,7 +6,7 @@
  */
 
 import { InMemoryStateStore } from '../../test_utils/in_memory_state_store';
-import { advanceWatermark, readWatermarks } from './watermarks';
+import { advanceGeneratorState, readGeneratorStates } from './generator_states';
 
 const SPACE_ID = 'default';
 const STRATEGY_ID = 'error_rate';
@@ -17,13 +17,15 @@ const advance = ({
 }: {
   state: InMemoryStateStore;
   processedUntil: number;
-}) => advanceWatermark({ state, spaceId: SPACE_ID, strategyId: STRATEGY_ID, processedUntil });
+}) => advanceGeneratorState({ state, spaceId: SPACE_ID, strategyId: STRATEGY_ID, processedUntil });
 
 const read = async (state: InMemoryStateStore) =>
-  (await readWatermarks({ state, spaceId: SPACE_ID, strategyIds: [STRATEGY_ID] })).get(STRATEGY_ID);
+  (await readGeneratorStates({ state, spaceId: SPACE_ID, strategyIds: [STRATEGY_ID] })).get(
+    STRATEGY_ID
+  );
 
-describe('advanceWatermark', () => {
-  it('moves an existing watermark forward, not only the first one', async () => {
+describe('advanceGeneratorState', () => {
+  it('moves an existing generator state forward, not only the first one', async () => {
     const state = new InMemoryStateStore();
     await advance({ state, processedUntil: 100 });
 
@@ -42,17 +44,17 @@ describe('advanceWatermark', () => {
   });
 });
 
-describe('readWatermarks', () => {
+describe('readGeneratorStates', () => {
   it('leaves out a strategy that never ran', async () => {
     const state = new InMemoryStateStore();
     await advance({ state, processedUntil: 100 });
 
-    const watermarks = await readWatermarks({
+    const states = await readGeneratorStates({
       state,
       spaceId: SPACE_ID,
       strategyIds: [STRATEGY_ID, 'never_ran'],
     });
 
-    expect([...watermarks.keys()]).toEqual([STRATEGY_ID]);
+    expect([...states.keys()]).toEqual([STRATEGY_ID]);
   });
 });
