@@ -18,8 +18,6 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.task_manager.poll_interval=30000',
-      // With at most 10 samples, p99 is the maximum poll duration, bounding the cycle start.
-      '--xpack.task_manager.monitored_stats_running_average_window=10',
       // Pinned in case the default changes.
       '--xpack.task_manager.claim_nudge.enabled=true',
       // Excludes every other task type so the backlog can't crowd out the nudged claim.
