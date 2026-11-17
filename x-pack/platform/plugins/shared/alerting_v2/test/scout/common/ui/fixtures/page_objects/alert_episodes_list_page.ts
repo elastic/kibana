@@ -37,6 +37,9 @@ export class AlertEpisodesListPage {
    * appears when more mutating actions are available than fit inline (editors).
    */
   public readonly rowActionsMenuButton: Locator;
+  /** Rule summary flyout opened from a row's rule name. */
+  public readonly ruleSummaryFlyout: Locator;
+  public readonly ruleSummaryFlyoutCloseButton: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.pageContainer = this.page.testSubj.locator('alertingV2AlertsListPage');
@@ -55,6 +58,12 @@ export class AlertEpisodesListPage {
     this.rowActionsMenuButton = this.page.testSubj.locator(
       'unifiedDataTable_additionalRowControl_actionsMenu'
     );
+    this.ruleSummaryFlyout = this.page.testSubj.locator('ruleSummaryFlyout');
+    this.ruleSummaryFlyoutCloseButton = this.ruleSummaryFlyout.getByTestId('euiFlyoutCloseButton');
+  }
+
+  ruleNameLink(ruleName: string): Locator {
+    return this.page.testSubj.locator('episodeRuleCellNameLink').filter({ hasText: ruleName });
   }
 
   async goto() {

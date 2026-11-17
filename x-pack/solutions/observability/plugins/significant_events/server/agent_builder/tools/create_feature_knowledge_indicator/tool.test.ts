@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { SourceWriteConflictError } from '../../../lib/errors/source_write_conflict_error';
@@ -162,6 +163,7 @@ describe('ki_feature_create tool', () => {
     });
 
     const context = createMockToolContext();
+    context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
     await invokeHandler(tool as never, featureParams, context);
 
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
@@ -170,8 +172,42 @@ describe('ki_feature_create tool', () => {
         tool_id: 'ki_feature_create',
         success: true,
         source_id: 'logs.test',
+        space_id: 'space-a',
+        knowledge_indicator_id: 'feature-1',
       })
     );
+  });
+
+  it.each([
+    [
+      'acknowledges a write',
+      { bulk: jest.fn().mockResolvedValue(undefined) },
+      { acknowledged: true },
+    ],
+    [
+      'keeps the write error',
+      { bulk: jest.fn().mockRejectedValue(new Error('write failed')) },
+      { message: 'Failed to create feature knowledge indicator: write failed' },
+    ],
+  ])('%s when telemetry throws', async (_name, kiClient, expected) => {
+    jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
+    jest.mocked(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).mockImplementationOnce(() => {
+      throw new Error('telemetry down');
+    });
+    const tool = createFeatureKnowledgeIndicatorTool({
+      getScopedClients: createScopedClients(kiClient),
+      server,
+      logger,
+      telemetry,
+    });
+
+    const result = await invokeHandler(tool as never, featureParams, createMockToolContext());
+
+    if (!('results' in result)) {
+      throw new Error('expected a tool result');
+    }
+
+    expect(result.results[0].data).toEqual(expect.objectContaining(expected));
   });
 
   it('stores the feature against the source id when the slug differs', async () => {
@@ -241,14 +277,19 @@ describe('ki_feature_create tool', () => {
     });
 
     const context = createMockToolContext();
+    context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
     await invokeHandler(tool as never, featureParams, context);
 
-    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
+    const [[reported]] = jest.mocked(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).mock
+      .calls;
+    expect(reported).toEqual(
       expect.objectContaining({
         ki_kind: 'feature',
         tool_id: 'ki_feature_create',
         success: false,
         source_id: 'logs.test',
+        space_id: 'space-a',
+        knowledge_indicator_id: 'feature-1',
         error_message: 'write failed',
       })
     );

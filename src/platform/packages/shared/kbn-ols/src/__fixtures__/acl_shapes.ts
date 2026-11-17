@@ -220,6 +220,13 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
     access: { owner: 'manage' },
   },
   {
+    name: 'general access the type does not allow is ignored next to an allowed one',
+    source: { acl: { ...VERSION, ...OWNER, general_access: ['view', 'edit'] } },
+    indexable: true,
+    state: 'valid',
+    access: { ...allProbesAt('edit'), owner: 'manage' },
+  },
+  {
     name: 'unknown values are ignored when an allowed one exists',
     source: { acl: { ...VERSION, ...OWNER, general_access: ['use', 'everyone'] } },
     indexable: true,
@@ -257,6 +264,20 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
   {
     name: 'owner with two known kinds is damaged',
     source: { acl: { ...PRIVATE, owner: { type: ['user', 'service_account'], id: 'u_owner' } } },
+    indexable: true,
+    state: 'invalid',
+    access: {},
+  },
+  {
+    name: 'owner with two known kinds is damaged even when general access and an entry grant',
+    source: {
+      acl: {
+        ...VERSION,
+        owner: { type: ['user', 'service_account'], id: 'u_owner' },
+        general_access: 'edit',
+        entries: [GRANTEE_USE],
+      },
+    },
     indexable: true,
     state: 'invalid',
     access: {},

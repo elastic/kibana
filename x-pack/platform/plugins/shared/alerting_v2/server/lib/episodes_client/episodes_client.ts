@@ -44,14 +44,14 @@ export class EpisodesClient {
     // lookups by id, so ES never aggregates the whole series of the episode.
     const dataRequest = buildEpisodeDataRequest(this.spaceId, episodeId);
     const [[row], [episodeData], [episodeActions]] = await Promise.all([
-      this.queryService.executeQueryRows<EpisodeEventsEsqlRow>({
+      this.queryService.executeQuery<EpisodeEventsEsqlRow>({
         query: buildEpisodeQuery(this.spaceId, episodeId).print('basic'),
       }),
-      this.queryService.executeQueryRows<EpisodeDataEsqlRow>({
+      this.queryService.executeQuery<EpisodeDataEsqlRow>({
         query: dataRequest.query.print('basic'),
         filter: dataRequest.filter,
       }),
-      this.queryService.executeQueryRows<EpisodeActionRow>({
+      this.queryService.executeQuery<EpisodeActionRow>({
         query: buildEpisodeActionsQuery(this.spaceId, [episodeId]).print('basic'),
       }),
     ]);
@@ -60,7 +60,7 @@ export class EpisodesClient {
     }
 
     // Snoozes target the series, which is only known from the episode row.
-    const [seriesSnooze] = await this.queryService.executeQueryRows<SeriesSnoozeEsqlRow>({
+    const [seriesSnooze] = await this.queryService.executeQuery<SeriesSnoozeEsqlRow>({
       query: buildSeriesSnoozeQuery(this.spaceId, row.group_hash, row.series_id).print('basic'),
     });
 
@@ -80,7 +80,7 @@ export class EpisodesClient {
     episodeId: string,
     options?: BuildEpisodeEventsQueryOptions
   ): Promise<EpisodeEventRow[]> {
-    return this.queryService.executeQueryRows<EpisodeEventRow>({
+    return this.queryService.executeQuery<EpisodeEventRow>({
       query: buildEpisodeEventsQuery(this.spaceId, episodeId, options).print('basic'),
     });
   }

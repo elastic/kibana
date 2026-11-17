@@ -9,6 +9,7 @@ import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { NotificationPhase } from './notification_routing';
 import { repliesUnderCallerMessage } from './notification_routing';
 import type { NotificationRoutingClient } from './notification_routing_client';
@@ -26,6 +27,7 @@ export interface InvestigationNotificationDeps {
   investigationLocator: Pick<InvestigationLocator, 'getRedirectUrl'>;
   getInvestigationsClient: GetInvestigationsClient;
   getActions: () => ActionsPluginStart | undefined;
+  getIsomerRuntime: IsomerPluginStart['getRuntime'];
   getRoutingClient: (
     request: KibanaRequest,
     spaceId: string,
@@ -75,6 +77,7 @@ export const sendInvestigationNotificationsForExecution = async (
     investigationLocator,
     getInvestigationsClient,
     getActions,
+    getIsomerRuntime,
     getRoutingClient,
   }: InvestigationNotificationDeps,
   context: InvestigationNotificationSource,
@@ -109,6 +112,7 @@ export const sendInvestigationNotificationsForExecution = async (
       kibanaUrl
     ).toString(),
     logger: context.logger,
+    getIsomerRuntime,
     getExecute: async () => {
       const actions = getActions();
       if (!actions) {

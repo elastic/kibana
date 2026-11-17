@@ -31,7 +31,12 @@ import {
 
 type DestinationsActor = Actor<typeof destinationsStateMachine>;
 
-const apiKeyResponse = { id: 'k', name: 'k', createdAt: 'now', encodedApiKey: 'enc' };
+const apiKeyResponse = {
+  id: 'k',
+  name: 'k',
+  createdAt: 'now',
+  encodedApiKey: 'encoded-secret-value',
+};
 const REMOTE_KEY = 'remote-key-value-1';
 
 describe('destinationsStateMachine', () => {
@@ -469,7 +474,7 @@ describe('destinationsStateMachine', () => {
     expect(actor.getSnapshot().context.destinationDetailRefs).toBe(context.destinationDetailRefs);
   });
 
-  it('still mints a key for a local Elasticsearch create and sends no secrets', async () => {
+  it('mints a key for a local Elasticsearch create and sends it only as a secret', async () => {
     actor.send({ type: 'modal.openCreate' });
     actor.send({
       type: 'destination.create',
@@ -480,8 +485,27 @@ describe('destinationsStateMachine', () => {
       'POST /internal/streams/destinations/api_key',
     ]);
     expect(parentSend).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'unit.changed', intent: 'create', secrets: undefined })
+      expect.objectContaining({
+        type: 'unit.changed',
+        intent: 'create',
+        secrets: { 'logs-api-key': 'encoded-secret-value' },
+      })
     );
+    const [[sent]] = parentSend.mock.calls;
+    const node = sent.unitDefinition.unit.destinations?.find(
+      ({ id }: UnitDestination) => id === 'logs'
+    );
+    expect(node?.config).toEqual(
+      expect.arrayContaining([{ name: 'api_key', value: { credential: 'logs-api-key' } }])
+    );
+    expect(JSON.stringify(sent.unitDefinition)).not.toContain('encoded-secret-value');
+
+    actor.send({
+      type: 'unit.persisted',
+      destinationIds: ['logs'],
+      unitDefinition: sent.unitDefinition,
+    });
+    expect(JSON.stringify(actor.getSnapshot().context)).not.toContain('encoded-secret-value');
   });
 
   it('revokes only the minted key when a local Elasticsearch create fails to save', async () => {
@@ -509,6 +533,7 @@ describe('destinationsStateMachine', () => {
         }),
       ],
     ]);
+    expect(JSON.stringify(actor.getSnapshot().context)).not.toContain('encoded-secret-value');
   });
 
   describe('remote Elasticsearch', () => {

@@ -13,6 +13,7 @@ import type { monaco } from '@kbn/monaco';
 import { createWorkflowContextRegistry } from '../../../../../common/lib/create_workflow_context_registry';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 import { selectDetail } from '../../../../entities/workflows/store/workflow_detail/selectors';
+import { getCalledWorkflowOutputs } from '../../../../entities/workflows/store/workflow_detail/utils/get_called_workflow_outputs';
 import { useGetPropertyHandler } from '../../../../features/validate_workflow_yaml/lib/property_handlers/use_get_property_handler';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getCompletionItemProvider } from '../../lib/autocomplete/get_completion_item_provider';
@@ -41,7 +42,10 @@ export const useWorkflowYamlCompletionProvider = (): monaco.languages.Completion
   esqlCallbacksRef.current = esqlCallbacks;
 
   const registry = useMemo(
-    () => createWorkflowContextRegistry(services.workflowsExtensions),
+    () =>
+      createWorkflowContextRegistry(services.workflowsExtensions, (workflowId) =>
+        getCalledWorkflowOutputs(editorStateRef.current.workflows, workflowId)
+      ),
     [services.workflowsExtensions]
   );
 

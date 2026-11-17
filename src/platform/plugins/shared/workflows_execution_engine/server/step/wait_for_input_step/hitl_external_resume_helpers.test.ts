@@ -12,6 +12,7 @@ import { computeTokenHmac } from '@kbn/workflows/server';
 import {
   invalidateHitlExternalResumeTokenIfPresent,
   mintHitlExternalResumeToken,
+  persistHitlExternalResumeToken,
   removeHitlExternalResumeTokenFields,
 } from './hitl_external_resume_helpers';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
@@ -97,7 +98,7 @@ describe('mintHitlExternalResumeToken', () => {
 });
 
 describe('removeHitlExternalResumeTokenFields', () => {
-  it('removes token metadata while preserving user input fields', () => {
+  it('nulls legacy token metadata while preserving user input fields', () => {
     expect(
       removeHitlExternalResumeTokenFields({
         message: 'Please respond',
@@ -108,6 +109,39 @@ describe('removeHitlExternalResumeTokenFields', () => {
     ).toEqual({
       message: 'Please respond',
       schema: { type: 'object' },
+      [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+      [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
+    });
+  });
+});
+
+describe('persistHitlExternalResumeToken', () => {
+  it('writes the same token onto step state and step input', () => {
+    const setInput = jest.fn();
+    const setCurrentStepState = jest.fn();
+    const stepExecutionRuntime = {
+      getCurrentStepState: jest.fn().mockReturnValue({ dynamicTimeout: '72h' }),
+      setCurrentStepState,
+      setInput,
+    } as unknown as StepExecutionRuntime;
+
+    persistHitlExternalResumeToken(
+      stepExecutionRuntime,
+      { tokenHash: 'hash', expiresAt: '2999-01-01T00:00:00.000Z' },
+      { message: 'Please respond' }
+    );
+
+    const tokenFields = {
+      [HITL_TOKEN_HASH_INPUT_FIELD]: 'hash',
+      [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: '2999-01-01T00:00:00.000Z',
+    };
+    expect(setCurrentStepState).toHaveBeenCalledWith({
+      dynamicTimeout: '72h',
+      ...tokenFields,
+    });
+    expect(setInput).toHaveBeenCalledWith({
+      message: 'Please respond',
+      ...tokenFields,
     });
   });
 });
@@ -115,26 +149,57 @@ describe('removeHitlExternalResumeTokenFields', () => {
 describe('invalidateHitlExternalResumeTokenIfPresent', () => {
   it('clears token metadata from the current step input', async () => {
     const setInput = jest.fn();
+    const setCurrentStepState = jest.fn();
     const stepExecutionRuntime = {
-      stepExecution: {
-        input: {
-          message: 'Please respond',
-          [HITL_TOKEN_HASH_INPUT_FIELD]: 'hash',
-          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: '2999-01-01T00:00:00.000Z',
-        },
-      },
+      getCurrentStepState: jest.fn().mockReturnValue({
+        dynamicTimeout: '1h',
+        [HITL_TOKEN_HASH_INPUT_FIELD]: 'hash',
+        [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: '2999-01-01T00:00:00.000Z',
+      }),
+      getCurrentStepInput: jest.fn().mockResolvedValue({ message: 'Please respond' }),
+      setCurrentStepState,
       setInput,
     } as unknown as StepExecutionRuntime;
 
     await invalidateHitlExternalResumeTokenIfPresent(stepExecutionRuntime);
 
-    expect(setInput).toHaveBeenCalledWith({ message: 'Please respond' });
+    expect(setCurrentStepState).toHaveBeenCalledWith({
+      dynamicTimeout: '1h',
+      [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+      [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
+    });
+    expect(setInput).not.toHaveBeenCalled();
+  });
+
+  it('nulls a legacy token stored on the step input', async () => {
+    const setInput = jest.fn();
+    const setCurrentStepState = jest.fn();
+    const stepExecutionRuntime = {
+      getCurrentStepState: jest.fn().mockReturnValue({ dynamicTimeout: '1h' }),
+      getCurrentStepInput: jest.fn().mockResolvedValue({
+        message: 'Please respond',
+        [HITL_TOKEN_HASH_INPUT_FIELD]: 'hash',
+        [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: '2999-01-01T00:00:00.000Z',
+      }),
+      setCurrentStepState,
+      setInput,
+    } as unknown as StepExecutionRuntime;
+
+    await invalidateHitlExternalResumeTokenIfPresent(stepExecutionRuntime);
+
+    expect(setCurrentStepState).not.toHaveBeenCalled();
+    expect(setInput).toHaveBeenCalledWith({
+      message: 'Please respond',
+      [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+      [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
+    });
   });
 
   it('reads the input through readBatch when the execution has none stored', async () => {
     const setInput = jest.fn();
     const stepExecutionRuntime = {
       stepExecution: {},
+      getCurrentStepState: jest.fn().mockReturnValue(undefined),
       getCurrentStepInput: jest.fn().mockResolvedValue({
         message: 'Please respond',
         [HITL_TOKEN_HASH_INPUT_FIELD]: 'hash',
@@ -145,18 +210,56 @@ describe('invalidateHitlExternalResumeTokenIfPresent', () => {
 
     await invalidateHitlExternalResumeTokenIfPresent(stepExecutionRuntime);
 
-    expect(setInput).toHaveBeenCalledWith({ message: 'Please respond' });
+    expect(setInput).toHaveBeenCalledWith({
+      message: 'Please respond',
+      [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+      [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
+    });
   });
 
   it('does nothing when token metadata is absent', async () => {
     const setInput = jest.fn();
+    const setCurrentStepState = jest.fn();
     const stepExecutionRuntime = {
-      stepExecution: { input: { message: 'Please respond' } },
+      getCurrentStepState: jest.fn().mockReturnValue({ dynamicTimeout: '1h' }),
+      getCurrentStepInput: jest.fn().mockResolvedValue({ message: 'Please respond' }),
+      setCurrentStepState,
       setInput,
     } as unknown as StepExecutionRuntime;
 
     await invalidateHitlExternalResumeTokenIfPresent(stepExecutionRuntime);
 
     expect(setInput).not.toHaveBeenCalled();
+    expect(setCurrentStepState).not.toHaveBeenCalled();
+  });
+
+  it('clears both copies when state and input hold the token', async () => {
+    const setInput = jest.fn();
+    const setCurrentStepState = jest.fn();
+    const tokenFields = {
+      [HITL_TOKEN_HASH_INPUT_FIELD]: 'hash',
+      [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: '2999-01-01T00:00:00.000Z',
+    };
+    const stepExecutionRuntime = {
+      getCurrentStepState: jest.fn().mockReturnValue({ dynamicTimeout: '1h', ...tokenFields }),
+      getCurrentStepInput: jest
+        .fn()
+        .mockResolvedValue({ message: 'Please respond', ...tokenFields }),
+      setCurrentStepState,
+      setInput,
+    } as unknown as StepExecutionRuntime;
+
+    await invalidateHitlExternalResumeTokenIfPresent(stepExecutionRuntime);
+
+    expect(setCurrentStepState).toHaveBeenCalledWith({
+      dynamicTimeout: '1h',
+      [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+      [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
+    });
+    expect(setInput).toHaveBeenCalledWith({
+      message: 'Please respond',
+      [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+      [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
+    });
   });
 });

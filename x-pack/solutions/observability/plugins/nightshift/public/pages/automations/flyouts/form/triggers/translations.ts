@@ -6,7 +6,54 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { AlertSeverity } from '@kbn/rule-data-utils';
 import type { SlackTriggerKind } from '../automation_form_values';
+
+export const alertSeverityLabels = {
+  any: i18n.translate('xpack.nightshift.automations.alertSeverity.anyLabel', {
+    defaultMessage: 'Any severity',
+  }),
+  title: i18n.translate('xpack.nightshift.automations.alertSeverity.pickerAriaLabel', {
+    defaultMessage: 'Alert severity',
+  }),
+  withSeverity: i18n.translate('xpack.nightshift.automations.alertSeverity.withSeverityLabel', {
+    defaultMessage: 'with severity',
+  }),
+  help: i18n.translate('xpack.nightshift.automations.alertSeverity.activationDescription', {
+    defaultMessage:
+      'Severity is checked when the alert becomes active. Later severity changes do not trigger an investigation.',
+  }),
+};
+
+export const alertSeverityOptions: Record<AlertSeverity, string> = {
+  critical: i18n.translate(
+    'xpack.nightshift.automations.alertSeverity.criticalDropDownOptionLabel',
+    {
+      defaultMessage: 'Critical',
+    }
+  ),
+  major: i18n.translate('xpack.nightshift.automations.alertSeverity.majorDropDownOptionLabel', {
+    defaultMessage: 'Major',
+  }),
+  high: i18n.translate('xpack.nightshift.automations.alertSeverity.highDropDownOptionLabel', {
+    defaultMessage: 'High',
+  }),
+  medium: i18n.translate('xpack.nightshift.automations.alertSeverity.mediumDropDownOptionLabel', {
+    defaultMessage: 'Medium',
+  }),
+  minor: i18n.translate('xpack.nightshift.automations.alertSeverity.minorDropDownOptionLabel', {
+    defaultMessage: 'Minor',
+  }),
+  low: i18n.translate('xpack.nightshift.automations.alertSeverity.lowDropDownOptionLabel', {
+    defaultMessage: 'Low',
+  }),
+  warning: i18n.translate('xpack.nightshift.automations.alertSeverity.warningDropDownOptionLabel', {
+    defaultMessage: 'Warning',
+  }),
+  info: i18n.translate('xpack.nightshift.automations.alertSeverity.infoDropDownOptionLabel', {
+    defaultMessage: 'Info',
+  }),
+};
 
 export const triggerLabels = {
   triggers: i18n.translate('xpack.nightshift.automations.flyout.triggers', {
