@@ -146,6 +146,9 @@ describe('ServiceAccountsTable', () => {
     expect(within(allRoles).getAllByText(/role-/)).toHaveLength(50);
     expect(within(allRoles).getByText('role-50')).toBeInTheDocument();
     expect(allRoles).toHaveStyle({ overflowY: 'auto' });
+    expect(allRoles).toHaveAccessibleName('Roles for nightshift-relay');
+    act(() => allRoles.focus());
+    expect(allRoles).toHaveFocus();
   });
 
   it.each([

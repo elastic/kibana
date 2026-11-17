@@ -110,6 +110,9 @@ const ServiceAccountRoles = ({ roles, name }: { roles: string[]; name: string })
           <EuiBadgeGroup
             gutterSize="xs"
             data-test-subj="serviceAccountAllRoles"
+            role="region"
+            aria-labelledby={popoverTitleId}
+            tabIndex={0}
             css={{ maxWidth: '20rem', maxHeight: 'min(40vh, 20rem)', overflowY: 'auto' }}
           >
             {roles.map((role) => (
