@@ -10,6 +10,7 @@
 import { randomUUID } from 'node:crypto';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
 import { spaceTest } from '../../fixtures';
 
 // Stable for this run, including the delete and recreate. A new run gets a new id.
@@ -64,7 +65,15 @@ spaceTest.describe(
           executionIds.push(workflowExecutionId);
         }
 
-        const history = await workflowsApi.getExecutions(WORKFLOW_ID);
+        const history = await waitForConditionOrThrow({
+          action: () => workflowsApi.getExecutions(WORKFLOW_ID),
+          condition: ({ results }) =>
+            executionIds.every((id) => results.some((execution) => execution.id === id)),
+          errorMessage: ({ total, results }) =>
+            `Expected ${executionIds.length} executions, got ${total}: ${results
+              .map((execution) => execution.id)
+              .join(', ')}`,
+        });
         expect(history.total).toBe(executionIds.length);
         expect(history.results.map((execution) => execution.id).sort()).toStrictEqual(
           [...executionIds].sort()
