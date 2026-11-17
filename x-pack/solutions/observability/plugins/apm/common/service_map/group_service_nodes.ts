@@ -239,27 +239,33 @@ function rollupSlo(members: ServiceNodeData[]): {
   sloStatus?: ServiceNodeData['sloStatus'];
   sloCount?: number;
 } {
+  // Per-service sloCount is the count in that service's worst status only
+  // (see getWorstSloStatus). Sum counts for the rolled-up worst status, not
+  // every member — otherwise healthy/degrading counts inflate a violated badge.
   const statuses = new Set<ServiceNodeData['sloStatus']>();
-  let sloCount = 0;
-  let sawSloCount = false;
-
   for (const member of members) {
-    if (member.sloCount !== undefined) {
-      sawSloCount = true;
-      sloCount += member.sloCount;
-    }
     if (member.sloStatus !== undefined) {
       statuses.add(member.sloStatus);
     }
   }
 
-  if (statuses.size === 0 && !sawSloCount) {
+  const sloStatus = pickWorstSloStatus(statuses);
+  if (sloStatus === undefined) {
     return {};
   }
 
-  const sloStatus = pickWorstSloStatus(statuses);
+  let sloCount = 0;
+  let sawSloCount = false;
+  for (const member of members) {
+    if (member.sloStatus !== sloStatus || member.sloCount === undefined) {
+      continue;
+    }
+    sawSloCount = true;
+    sloCount += member.sloCount;
+  }
+
   return {
-    ...(sloStatus !== undefined ? { sloStatus } : {}),
+    sloStatus,
     ...(sawSloCount ? { sloCount } : {}),
   };
 }

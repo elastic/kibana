@@ -320,8 +320,9 @@ describe('groupServiceNodes', () => {
     const shop = nextNodes.find((n) => n.id === 'service.namespace:shop');
     expect(shop?.data).toMatchObject({
       alertsCount: 3,
+      // Worst status is violated; only cart's violated count (2), not frontend's degrading (1)
       sloStatus: 'violated',
-      sloCount: 3,
+      sloCount: 2,
       serviceAnomalyStats: { anomalyScore: 90 },
       stats: {
         throughput: 20,
@@ -329,6 +330,43 @@ describe('groupServiceNodes', () => {
         failedTransactionRate: 0.1, // (0*50 + 0.2*50) / 100 — null member ignored
         latency: 500,
       },
+    });
+  });
+
+  it('sums sloCount only for members matching the rolled-up worst status', () => {
+    // Per-service sloCount is status-scoped (getWorstSloStatus). Mixing statuses must not
+    // inflate the badge — e.g. 1 violated + 10 healthy must stay "1 Violated", not "11".
+    const grouping: ServiceMapGrouping = {
+      services: ['alpha', 'beta', 'gamma'],
+      automatic: 'namePrefix',
+      strategies: [
+        {
+          source: 'namePrefix',
+          passes: true,
+          groups: [
+            {
+              id: 'namePrefix:service.namespace:svc',
+              kind: 'attribute',
+              attribute: 'namePrefix',
+              value: 'svc',
+            },
+          ],
+          assignment: [0, 0, 0],
+        },
+      ],
+    };
+    const nodes = [
+      serviceNode('alpha', { sloStatus: 'violated', sloCount: 1 }),
+      serviceNode('beta', { sloStatus: 'healthy', sloCount: 10 }),
+      serviceNode('gamma', { sloStatus: 'degrading', sloCount: 3 }),
+    ];
+
+    const { nodes: nextNodes } = groupServiceNodes(nodes, [], grouping);
+    const group = nextNodes.find((node) => isServiceGroupNodeData(node.data));
+
+    expect(group?.data).toMatchObject({
+      sloStatus: 'violated',
+      sloCount: 1,
     });
   });
 
