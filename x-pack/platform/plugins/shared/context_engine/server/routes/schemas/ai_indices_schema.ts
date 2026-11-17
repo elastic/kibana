@@ -11,6 +11,8 @@ import {
   DEFAULT_AI_INDEX_QUERY_LIMIT,
   DEFAULT_FEEDBACK_ANALYSIS_INTERVAL,
   DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM,
+  DEFAULT_KI_GROUP_PREVIEW_SIZE,
+  DEFAULT_KI_GROUPS,
   DEFAULT_KI_PAGE_SIZE,
   MAX_AI_INDEX_AUTOMATION_LENGTH,
   MAX_AI_INDEX_AUTOMATIONS,
@@ -33,6 +35,8 @@ import {
   MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
   MAX_INDEX_NAME_BYTES,
   MAX_KI_CONTENT_LENGTH,
+  MAX_KI_GROUP_PREVIEW_SIZE,
+  MAX_KI_GROUPS,
   MAX_KI_PAGE_SIZE,
   MAX_KI_SEARCH_QUERY_LENGTH,
   MAX_KI_TYPE_FILTER_LENGTH,
@@ -356,34 +360,80 @@ const kiListStatusesQuerySchema = schema.oneOf(
   }
 );
 
-export const listKisQuerySchema = schema.object({
-  size: schema.number({
-    min: 0,
-    max: MAX_KI_PAGE_SIZE,
-    defaultValue: DEFAULT_KI_PAGE_SIZE,
-  }),
-  type: schema.maybe(
-    schema.string({
-      minLength: 1,
-      maxLength: MAX_KI_TYPE_FILTER_LENGTH,
-      meta: { description: 'When set, return only KIs of this type.' },
-    })
-  ),
-  status: schema.maybe(kiListStatusesQuerySchema),
-  sort: schema.oneOf(KI_LIST_SORTS.map((value) => schema.literal(value)) as [Type<KiListSort>], {
+const validateInteger = (value: number): string | undefined =>
+  Number.isInteger(value) ? undefined : 'must be an integer';
+
+const kiTypeQuerySchema = (description: string) =>
+  schema.string({
+    minLength: 1,
+    maxLength: MAX_KI_TYPE_FILTER_LENGTH,
+    meta: { description },
+  });
+
+const kiExcludeTypesQuerySchema = schema.oneOf(
+  [
+    kiTypeQuerySchema('A Knowledge Indicator type.'),
+    schema.arrayOf(kiTypeQuerySchema('A Knowledge Indicator type.'), { maxSize: MAX_KI_GROUPS }),
+  ],
+  {
+    meta: {
+      description:
+        'When set, leave out KIs of these types. KIs without a type are kept. `total` follows this filter, `summary` does not.',
+    },
+  }
+);
+
+const kiListSortQuerySchema = schema.oneOf(
+  KI_LIST_SORTS.map((value) => schema.literal(value)) as [Type<KiListSort>],
+  {
     defaultValue: DEFAULT_KI_LIST_SORT,
     meta: {
       description:
         'Sort order. `updated` is newest first, `title` is A to Z (case-insensitive, KIs without a title last). When `query` is set, results rank by best match first and `sort` only breaks ties.',
     },
+  }
+);
+
+const kiSearchQuerySchema = schema.maybe(
+  schema.string({
+    minLength: 1,
+    maxLength: MAX_KI_SEARCH_QUERY_LENGTH,
+    meta: { description: 'When set, fuzzy full-text search over KI title and description.' },
+  })
+);
+
+export const listKisQuerySchema = schema.object({
+  size: schema.number({
+    min: 0,
+    max: MAX_KI_PAGE_SIZE,
+    defaultValue: DEFAULT_KI_PAGE_SIZE,
+    validate: validateInteger,
   }),
-  query: schema.maybe(
-    schema.string({
-      minLength: 1,
-      maxLength: MAX_KI_SEARCH_QUERY_LENGTH,
-      meta: { description: 'When set, fuzzy full-text search over KI title and description.' },
-    })
-  ),
+  type: schema.maybe(kiTypeQuerySchema('When set, return only KIs of this type.')),
+  exclude_types: schema.maybe(kiExcludeTypesQuerySchema),
+  status: schema.maybe(kiListStatusesQuerySchema),
+  sort: kiListSortQuerySchema,
+  query: kiSearchQuerySchema,
+});
+
+export const listKiGroupsQuerySchema = schema.object({
+  max_groups: schema.number({
+    min: 1,
+    max: MAX_KI_GROUPS,
+    defaultValue: DEFAULT_KI_GROUPS,
+    validate: validateInteger,
+    meta: { description: 'The most type groups to return, biggest first.' },
+  }),
+  preview_size: schema.number({
+    min: 1,
+    max: MAX_KI_GROUP_PREVIEW_SIZE,
+    defaultValue: DEFAULT_KI_GROUP_PREVIEW_SIZE,
+    validate: validateInteger,
+    meta: { description: 'The number of KIs returned in each group.' },
+  }),
+  status: schema.maybe(kiListStatusesQuerySchema),
+  sort: kiListSortQuerySchema,
+  query: kiSearchQuerySchema,
 });
 
 export const getKiQuerySchema = schema.object({
