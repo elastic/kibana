@@ -858,6 +858,16 @@ node scripts/connector_vendor_api --connector monday_com \
 ```
 
 - A `graphql` source's URL serves SDL or an introspection result, and an `mcp` source's serves a `tools/list` result, wrapped in JSON-RPC or not. The URL is only read with `GET`, so a server that needs an introspection request or an MCP session, or credentials, is captured once and served from a file.
+- Where an MCP server's own `tools/list` needs a session or credentials but its vendor publishes a document per tool, `--tool name=url` pins those instead, as URLs absolute or relative to the source's URL. `.github` is recorded this way, from the tool definitions its server's repository publishes:
+
+  ```bash
+  node scripts/connector_vendor_api --connector github \
+    --source mcp=https://raw.githubusercontent.com/github/github-mcp-server/main/pkg/github/__toolsnaps__/ \
+    --format mcp=mcp --endpoint mcp=https://api.githubcopilot.com/mcp/ \
+    --tool mcp=get_me.snap --tool mcp=search_code.snap
+  ```
+
+  Every listed document must be fetched, so a tool the vendor stops publishing fails the source rather than leaving the snapshot quietly short of it. The source's own URL is then never read, and the tools are kept in the order they are listed.
 - `--inspect` skips these sources, as it reads OpenAPI operations.
 - A `read` action may call GraphQL queries and MCP tools annotated `readOnlyHint`. Anything else needs a `{ "name": "..." }` entry in the action's `queries` in `fixtures.json`, which says it changes no vendor state.
 - `--drift` classifies changes to the operations the connector calls, as `oasdiff` does for OpenAPI. A response that widens is breaking, as a connector reading it may not handle the new value: for GraphQL a new value of an enum a response can hold, or a new union member (`findSchemaChanges`), and for MCP a new output enum value. New optional input is non-breaking, as is a new value of an enum only requests send. An MCP tool losing its `readOnlyHint` is breaking, as read actions may only call read-only tools. Any other change to an MCP schema, such as a tighter bound, is treated as breaking.

@@ -567,7 +567,13 @@ export const detectDrift = async ({
     const { url } = source;
     try {
       await (isProtocolFormat(source.format)
-        ? loadProtocolSpec(url, fetchOnce, source.format, source.endpoints ?? [])
+        ? loadProtocolSpec({
+            url,
+            fetchText: fetchOnce,
+            format: source.format,
+            endpoints: source.endpoints ?? [],
+            tools: source.tools,
+          })
         : loadVendorSpec(url, fetchOnce, source));
     } catch (error) {
       log.warning(

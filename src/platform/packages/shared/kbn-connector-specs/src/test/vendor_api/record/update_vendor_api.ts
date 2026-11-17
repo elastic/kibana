@@ -75,6 +75,8 @@ export interface UpdateVendorApiOptions {
   readonly endpoints?: Readonly<Record<string, readonly string[]>>;
   /** Per Markdown reference, the URL prefixes of the pages to fetch; see `ManifestSource`. */
   readonly pages?: Readonly<Record<string, readonly string[]>>;
+  /** Per MCP source, the tool documents to assemble its tools from; see `ManifestSource`. */
+  readonly tools?: Readonly<Record<string, readonly string[]>>;
   /**
    * Fetches the full vendor specs. Without it, actions are recorded against the committed
    * snapshots, which only picks up changes on the connector's side.
@@ -196,6 +198,7 @@ export const updateVendorApi = async ({
   formats: formatFlags = {},
   pages: pageFlags = {},
   endpoints: endpointFlags = {},
+  tools: toolFlags = {},
   refresh = false,
   check = false,
   trackFields = false,
@@ -230,7 +233,7 @@ export const updateVendorApi = async ({
   // Naming a source, or how to read one, means fetching it again.
   const fetchAll =
     refresh ||
-    [sourceFlags, formatFlags, pageFlags, endpointFlags].some(
+    [sourceFlags, formatFlags, pageFlags, endpointFlags, toolFlags].some(
       (flags) => Object.keys(flags).length > 0
     );
 
@@ -238,10 +241,11 @@ export const updateVendorApi = async ({
     ...Object.keys(formatFlags),
     ...Object.keys(pageFlags),
     ...Object.keys(endpointFlags),
+    ...Object.keys(toolFlags),
   ]) {
     if (!(name in urls)) {
       throw new Error(
-        `--format, --pages and --endpoint name a source, but there is no source "${name}"`
+        `--format, --pages, --endpoint and --tool name a source, but there is no source "${name}"`
       );
     }
   }
@@ -251,6 +255,8 @@ export const updateVendorApi = async ({
   };
   const pagesOf = (name: string): readonly string[] | undefined =>
     pageFlags[name] ?? previous?.sources[name]?.pages;
+  const toolsOf = (name: string): readonly string[] | undefined =>
+    toolFlags[name] ?? previous?.sources[name]?.tools;
 
   const raw: Record<string, OpenApiDocument> = {};
   const protocols: Record<string, GraphQLSpec | McpSpec> = {};
@@ -266,10 +272,20 @@ export const updateVendorApi = async ({
         throw new Error(`${name}: a ${declaredFormat} source needs --endpoint`);
       }
       formats[name] = declaredFormat;
+      const tools = toolsOf(name);
+      if (tools !== undefined && declaredFormat !== 'mcp') {
+        throw new Error(`${name}: --tool only applies to MCP sources`);
+      }
       const snapshot = fetchAll ? undefined : await read(snapshotFile(name, declaredFormat));
       if (snapshot === undefined) {
         log.info(`Loading ${name} from ${url}`);
-        protocols[name] = await loadProtocolSpec(url, fetchText, declaredFormat, endpoints);
+        protocols[name] = await loadProtocolSpec({
+          url,
+          fetchText,
+          format: declaredFormat,
+          endpoints,
+          tools,
+        });
         loaded.set(name, undefined);
       } else {
         protocols[name] = parseProtocolSnapshot(declaredFormat, snapshot, endpoints);
@@ -278,6 +294,9 @@ export const updateVendorApi = async ({
     }
     if (endpointFlags[name] !== undefined) {
       throw new Error(`${name}: --endpoint only applies to GraphQL and MCP sources; pass --format`);
+    }
+    if (toolFlags[name] !== undefined) {
+      throw new Error(`${name}: --tool only applies to MCP sources; pass --format`);
     }
     const snapshot = fetchAll ? undefined : await read(snapshotFile(name, declaredFormat));
     if (snapshot === undefined) {
@@ -487,10 +506,12 @@ export const updateVendorApi = async ({
       : (fetchedAtOf?.(urls[name]) ?? now()).toISOString();
     const note = previous?.sources[name]?.note;
     const endpoints = endpointFlags[name] ?? previous?.sources[name]?.endpoints;
+    const tools = formats[name] === 'mcp' ? toolsOf(name) : undefined;
     sources[name] = {
       format: formats[name],
       url: urls[name],
       ...(name in protocols && endpoints ? { endpoints: [...endpoints] } : {}),
+      ...(tools === undefined ? {} : { tools: [...tools] }),
       ...(pages === undefined ? {} : { pages: [...pages] }),
       ...(apiVersion === undefined ? {} : { apiVersion }),
       fetchedAt: fetchedAt ?? now().toISOString(),

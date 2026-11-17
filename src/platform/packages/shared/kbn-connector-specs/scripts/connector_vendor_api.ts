@@ -64,7 +64,8 @@ const parseFormat = (flag: string): [string, MarkdownSourceFormat | ProtocolForm
   return [name, parsed.data];
 };
 
-// Repeated `--pages name=prefix` and `--endpoint name=url` flags add up to one list per source.
+// Repeated `--pages name=prefix`, `--endpoint name=url` and `--tool name=url` flags add up to one
+// list per source.
 const groupByName = (option: string, value: string, flags: readonly string[]) => {
   const groups: Record<string, string[]> = {};
   for (const flag of flags) {
@@ -104,6 +105,7 @@ run(
     );
     const pages = groupByName('pages', 'prefix', flagsReader.arrayOfStrings('pages') ?? []);
     const endpoints = groupByName('endpoint', 'url', flagsReader.arrayOfStrings('endpoint') ?? []);
+    const tools = groupByName('tool', 'url', flagsReader.arrayOfStrings('tool') ?? []);
     const now = () => new Date();
     const cache = createSpecCache({ directory: SPEC_CACHE, fetchText, refresh, now, log });
 
@@ -230,6 +232,7 @@ run(
       formats,
       pages,
       endpoints,
+      tools,
       refresh,
       check,
       fetchText: cache.fetchText,
@@ -276,6 +279,7 @@ run(
         'format',
         'pages',
         'endpoint',
+        'tool',
         'operation',
         'grep',
         'depth',
@@ -296,6 +300,9 @@ run(
                      manifest.json.
         --pages      name=prefix of the reference pages to fetch, absolute or relative to the
                      index, such as an API group's folder; repeatable. Kept in manifest.json.
+        --tool       name=url of one tool document of an mcp source, absolute or relative to its
+                     url, for a vendor that publishes a document per tool rather than a tools/list
+                     result; repeatable. Kept in manifest.json.
         --refresh    Fetch every source URL again, instead of using the specs fetched before
         --check     Write nothing; fail if artifacts would change or problems are found
         --inspect    List the operations of the --source specs, or of the connector's manifest

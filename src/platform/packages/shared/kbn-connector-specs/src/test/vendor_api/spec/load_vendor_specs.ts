@@ -153,12 +153,12 @@ export const loadVendorSpecs = async ({
   const protocols: Record<string, GraphQLSpec | McpSpec> = {};
   let fetchedEverySource = true;
   for (const [name, source] of Object.entries(manifest.sources)) {
-    const { url, format, endpoints = [] } = source;
+    const { url, format, endpoints = [], tools } = source;
     const snapshot = latest ? undefined : await read(snapshotFile(name, format));
     if (isProtocolFormat(format)) {
       if (snapshot === undefined) {
         log.info(`Fetching ${name} from ${url}`);
-        protocols[name] = await loadProtocolSpec(url, fetchText, format, endpoints);
+        protocols[name] = await loadProtocolSpec({ url, fetchText, format, endpoints, tools });
       } else {
         protocols[name] = parseProtocolSnapshot(format, snapshot, endpoints);
         fetchedEverySource = false;
