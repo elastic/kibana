@@ -166,7 +166,6 @@ describe('ContextEngineAnalyticsService', () => {
     const run = {
       ai_index_id: 'my-index',
       mode: 'apply' as const,
-      braked: false,
       reviewed: 20,
       written: 3,
       merged: 1,

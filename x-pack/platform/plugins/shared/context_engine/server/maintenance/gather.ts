@@ -19,7 +19,6 @@ import {
   MAX_MAINTENANCE_BATCHES,
   MAX_MAINTENANCE_LISTED_CHANGES,
   MAX_MAINTENANCE_REMAINING_MEMORIES,
-  MIN_MAINTENANCE_TOMBSTONES,
   type GatherMaintenanceOutput,
   type MaintenanceBatch,
   type MaintenanceChange,
@@ -49,8 +48,6 @@ export interface GatherOptions {
   writerUri: string;
   neighbors: number;
   sweepSize: number;
-  /** The share of reviewed facts and entities one run may tombstone, from 0 to 1. */
-  maxTombstoneShare: number;
   since: string;
   afterId?: string;
   sweepAfterId?: string;
@@ -103,16 +100,7 @@ const newestFirst = (a: DreamedKi, b: DreamedKi): number =>
 /** Collects what memory maintenance reviews in one run, as batches for the model and fixes. */
 export const gatherMaintenance = async (
   reader: MaintenanceReader,
-  {
-    spaceId,
-    writerUri,
-    neighbors,
-    sweepSize,
-    maxTombstoneShare,
-    since,
-    afterId,
-    sweepAfterId,
-  }: GatherOptions
+  { spaceId, writerUri, neighbors, sweepSize, since, afterId, sweepAfterId }: GatherOptions
 ): Promise<GatherMaintenanceOutput> => {
   const isLiveItem = (ki: DreamedKi | undefined): ki is DreamedKi =>
     ki !== undefined &&
@@ -204,7 +192,6 @@ export const gatherMaintenance = async (
 
   const fixes: MaintenanceChange[] = [];
   const needsReview: MaintenanceChange[] = [];
-  let itemFixes = 0;
   const memories = await reader.latestByIds(
     [...review.values()].flatMap(({ ki }) => citedMemoryKiIds(ki))
   );
@@ -227,7 +214,6 @@ export const gatherMaintenance = async (
     }
     if (verdict.verdict === 'tombstone') {
       fixes.push({ id: ki.id, change: 'tombstoned', reason: verdict.reason });
-      itemFixes += 1;
       review.delete(ki.id);
       continue;
     }
@@ -478,12 +464,8 @@ export const gatherMaintenance = async (
       ? sweepAfterId ?? ''
       : swept[firstDroppedSweep - 1].id;
 
-  // Rounds a hair down first so a share such as 0.1 of 30 allows 3, not 4.
-  const shareOfRun = Math.ceil(maxTombstoneShare * (batched.length + itemFixes) - 1e-9);
-
   return {
     reviewed: batched.length,
-    max_tombstones: Math.max(shareOfRun, MIN_MAINTENANCE_TOMBSTONES),
     batches,
     fixes: fixes.slice(0, MAX_MAINTENANCE_LISTED_CHANGES),
     needs_review: needsReview.slice(0, MAX_MAINTENANCE_LISTED_CHANGES),

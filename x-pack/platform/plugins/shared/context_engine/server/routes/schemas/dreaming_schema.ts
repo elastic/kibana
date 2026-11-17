@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import {
   DEFAULT_MAINTENANCE_INTERVAL,
-  DEFAULT_MAINTENANCE_MAX_TOMBSTONE_SHARE,
   DEFAULT_MAINTENANCE_NEIGHBORS,
   DEFAULT_MAINTENANCE_SWEEP_SIZE,
   DREAMING_TYPE_PATTERN,
@@ -28,7 +27,6 @@ import {
   RESERVED_ENTITY_ATTRIBUTE_KEYS,
   validateDreamingConfig,
 } from '../../../common/dreaming';
-import { MIN_MAINTENANCE_TOMBSTONES } from '../../../common/step_types/gather_maintenance';
 import { validateDreamingInterval } from '../../../common/validation';
 
 const validateType = (value: string): string | undefined =>
@@ -105,15 +103,6 @@ const maintenanceSchema = schema.object(
         validate: validateWholeNumber,
         meta: {
           description: `How many unchanged items each run also reviews, so every item is reviewed in time. Defaults to ${DEFAULT_MAINTENANCE_SWEEP_SIZE}.`,
-        },
-      })
-    ),
-    max_tombstone_share: schema.maybe(
-      schema.number({
-        min: 0,
-        max: 1,
-        meta: {
-          description: `The largest share of reviewed facts and entities one run may tombstone, and at least ${MIN_MAINTENANCE_TOMBSTONES}. Over it, the run writes nothing. Defaults to ${DEFAULT_MAINTENANCE_MAX_TOMBSTONE_SHARE}.`,
         },
       })
     ),

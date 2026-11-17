@@ -32,20 +32,12 @@ describe('maintenanceConfigOf', () => {
       schedule: { interval: '24h' },
       neighbors: 5,
       sweep_size: 200,
-      max_tombstone_share: 0.1,
     });
   });
 
-  it('keeps what is set, including a brake of zero', () => {
-    expect(
-      maintenanceConfigOf({ enabled: true, mode: 'apply', neighbors: 3, max_tombstone_share: 0 })
-    ).toEqual(
-      expect.objectContaining({
-        enabled: true,
-        mode: 'apply',
-        neighbors: 3,
-        max_tombstone_share: 0,
-      })
+  it('keeps what is set', () => {
+    expect(maintenanceConfigOf({ enabled: true, mode: 'apply', neighbors: 3 })).toEqual(
+      expect.objectContaining({ enabled: true, mode: 'apply', neighbors: 3 })
     );
   });
 });

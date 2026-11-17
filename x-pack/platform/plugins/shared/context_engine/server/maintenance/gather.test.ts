@@ -101,7 +101,6 @@ const options: GatherOptions = {
   writerUri: WRITER,
   neighbors: 5,
   sweepSize: 0,
-  maxTombstoneShare: 0.1,
   since: '2026-11-01T00:00:00.000Z',
 };
 
@@ -533,24 +532,5 @@ describe('gatherMaintenance', () => {
     expect(output.counts.sweep).toBe(20);
     expect(output.sweep_after_id).toBe('s-019');
     expect(output.resume_from).toBe('');
-  });
-
-  it('allows a share of the reviewed items to be tombstoned, and at least a few', async () => {
-    const stored = [
-      memory('m-1'),
-      ...Array.from({ length: 30 }, (_, index) => fact(`fact-${String(index).padStart(2, '0')}`)),
-    ];
-
-    const few = await gatherMaintenance(fakeReader(stored), { ...options, sweepSize: 2 });
-    const exact = await gatherMaintenance(fakeReader(stored), { ...options, sweepSize: 30 });
-    const share = await gatherMaintenance(fakeReader(stored), {
-      ...options,
-      sweepSize: 30,
-      maxTombstoneShare: 0.15,
-    });
-
-    expect(few.max_tombstones).toBe(3);
-    expect(exact.max_tombstones).toBe(3);
-    expect(share.max_tombstones).toBe(5);
   });
 });

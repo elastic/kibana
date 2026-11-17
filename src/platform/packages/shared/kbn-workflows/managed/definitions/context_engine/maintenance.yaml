@@ -42,8 +42,6 @@ outputs:
     type: number
   - name: rejected
     type: number
-  - name: braked
-    type: boolean
   - name: reason
     type: string
   - name: resume_from
@@ -130,7 +128,6 @@ steps:
     with:
       plans: []
       written: '${{ steps.plan_fixes.output.written }}'
-      tombstones: '${{ steps.plan_fixes.output.tombstones }}'
       changes: '${{ steps.plan_fixes.output.changes }}'
       needs_review: '${{ steps.gather.output.needs_review }}'
       rejected: '${{ steps.plan_fixes.output.rejected }}'
@@ -323,16 +320,9 @@ steps:
             with:
               plans: '${{ variables.plans | concat: steps.plan_batch.output.plans }}'
               written: '${{ variables.written | plus: steps.plan_batch.output.written }}'
-              tombstones: '${{ variables.tombstones | plus: steps.plan_batch.output.tombstones }}'
               changes: '${{ variables.changes | concat: steps.plan_batch.output.changes }}'
               needs_review: '${{ variables.needs_review | concat: steps.plan_batch.output.needs_review }}'
               rejected: '${{ variables.rejected | concat: steps.plan_batch.output.rejected }}'
-
-  - name: brake
-    type: data.set
-    with:
-      braked: '${{ variables.tombstones > steps.gather.output.max_tombstones }}'
-      reason: '{% if variables.tombstones > steps.gather.output.max_tombstones %}It would tombstone {{ variables.tombstones }} facts and entities, more than the {{ steps.gather.output.max_tombstones }} one run may.{% endif %}'
 
   - name: dry_run_result
     type: if
@@ -343,7 +333,6 @@ steps:
         with:
           ai_index_id: '{{ consts.ai_index_id }}'
           mode: dry_run
-          braked: '${{ variables.braked }}'
           reviewed: '${{ steps.gather.output.reviewed }}'
           written: '${{ variables.written }}'
           changes: '${{ variables.changes }}'
@@ -363,8 +352,7 @@ steps:
           tombstoned: '${{ steps.record_dry_run.output.tombstoned }}'
           needs_review: '${{ steps.record_dry_run.output.needs_review }}'
           rejected: '${{ steps.record_dry_run.output.rejected }}'
-          braked: '${{ variables.braked }}'
-          reason: 'Dry run: nothing was changed. {{ variables.reason }}'
+          reason: 'Dry run: nothing was changed.'
           changes: '${{ variables.changes | concat: variables.needs_review }}'
 
   - name: report_result
@@ -376,7 +364,6 @@ steps:
         with:
           ai_index_id: '{{ consts.ai_index_id }}'
           mode: report
-          braked: '${{ variables.braked }}'
           reviewed: '${{ steps.gather.output.reviewed }}'
           written: '${{ variables.written }}'
           changes: '${{ variables.changes }}'
@@ -395,45 +382,11 @@ steps:
           tombstoned: '${{ steps.record_report.output.tombstoned }}'
           needs_review: '${{ steps.record_report.output.needs_review }}'
           rejected: '${{ steps.record_report.output.rejected }}'
-          braked: '${{ variables.braked }}'
-          reason: 'Report only: nothing was changed. {{ variables.reason }}'
+          reason: 'Report only: nothing was changed.'
           changes: '${{ variables.changes | concat: variables.needs_review }}'
           resume_from: '{{ steps.gather.output.resume_from }}'
           resume_after_id: '{{ steps.gather.output.resume_after_id }}'
           sweep_after_id: '{{ steps.gather.output.sweep_after_id }}'
-
-  - name: braked_result
-    type: if
-    condition: '${{ variables.braked == true }}'
-    steps:
-      - name: record_braked
-        type: context-engine.recordMaintenanceRun
-        with:
-          ai_index_id: '{{ consts.ai_index_id }}'
-          mode: apply
-          braked: true
-          reviewed: '${{ steps.gather.output.reviewed }}'
-          written: 0
-          changes: []
-          needs_review: '${{ variables.needs_review }}'
-          rejected: '${{ variables.rejected }}'
-      - name: braked_output
-        type: workflow.output
-        status: cancelled
-        with:
-          mode: apply
-          reviewed: '${{ steps.record_braked.output.reviewed }}'
-          written: '${{ steps.record_braked.output.written }}'
-          merged: '${{ steps.record_braked.output.merged }}'
-          superseded: '${{ steps.record_braked.output.superseded }}'
-          rewritten: '${{ steps.record_braked.output.rewritten }}'
-          summarized: '${{ steps.record_braked.output.summarized }}'
-          tombstoned: '${{ steps.record_braked.output.tombstoned }}'
-          needs_review: '${{ steps.record_braked.output.needs_review }}'
-          rejected: '${{ steps.record_braked.output.rejected }}'
-          braked: true
-          reason: '{{ variables.reason }} Nothing was changed.'
-          changes: '${{ variables.changes | concat: variables.needs_review }}'
 
   - name: apply_fixes
     type: context-engine.applyMaintenanceChanges
@@ -496,7 +449,6 @@ steps:
       tombstoned: '${{ steps.record.output.tombstoned }}'
       needs_review: '${{ steps.record.output.needs_review }}'
       rejected: '${{ steps.record.output.rejected }}'
-      braked: false
       changes: '${{ variables.changes | concat: variables.needs_review }}'
       resume_from: '{{ steps.gather.output.resume_from }}'
       resume_after_id: '{{ steps.gather.output.resume_after_id }}'

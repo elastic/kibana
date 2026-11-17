@@ -14,7 +14,7 @@ import {
 } from '../../common/step_types/apply_maintenance_changes';
 import { isKiDeleted } from '../ai_indices/ki_revision';
 import type { ApplyContext, PlannedWrite } from '../dreaming/apply';
-import { kindOf, type DreamedKi } from '../dreaming/dreamed_ki';
+import type { DreamedKi } from '../dreaming/dreamed_ki';
 import { kiUri } from '../dreaming/ids';
 import { applyMaintenanceGroups, emptyApplyResult } from '../maintenance/apply_maintenance';
 import { audienceOf, parseRelationship } from '../maintenance/gather';
@@ -174,10 +174,6 @@ export const getApplyMaintenanceChangesStepDefinition = ({
         result
       );
 
-      const tombstones = result.tombstoned.filter((id) => {
-        const ki = kis.get(id);
-        return ki !== undefined && kindOf(ki) !== undefined;
-      }).length;
       const rejected = [
         ...(batch ? parsed.rejected : []),
         ...resolved.rejected,
@@ -186,13 +182,12 @@ export const getApplyMaintenanceChangesStepDefinition = ({
       logger.debug(
         `${planOnly ? 'Plan: maintenance' : 'Maintenance'} of AI index '${aiIndexId}' wrote ${
           result.written
-        } KIs and tombstoned ${tombstones} items; ${resolved.needsReview.length} for review, ${
-          rejected.length
-        } rejected`
+        } KIs and tombstoned ${result.tombstoned.length}; ${
+          resolved.needsReview.length
+        } for review, ${rejected.length} rejected`
       );
       const output: ApplyMaintenanceChangesOutput = {
         written: result.written,
-        tombstones,
         changes: result.changes,
         needs_review: resolved.needsReview,
         rejected,

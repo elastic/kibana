@@ -120,7 +120,6 @@ export const applyMaintenanceChangesInputSchema = lazySchema(() =>
 export const applyMaintenanceChangesOutputSchema = lazySchema(() =>
   z.object({
     written: z.number().describe('Facts, entities and relationships written'),
-    tombstones: z.number().describe('Facts and entities tombstoned'),
     changes: z.array(maintenanceChangeSchema).describe('What changed, each with why'),
     needs_review: z
       .array(maintenanceChangeSchema)

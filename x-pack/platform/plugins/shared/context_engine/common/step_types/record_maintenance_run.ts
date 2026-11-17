@@ -26,7 +26,6 @@ export const recordMaintenanceRunInputSchema = lazySchema(() =>
     mode: z
       .enum(MAINTENANCE_RUN_MODES)
       .describe('report: planned only; apply: written; dry_run: a manual run that wrote nothing'),
-    braked: z.boolean().optional().describe('The run stopped before writing'),
     reviewed: countSchema.describe('Facts and entities the model reviewed'),
     written: countSchema.describe('Facts, entities and relationships written, or that would be'),
     changes: z.array(maintenanceChangeSchema).max(MAX_RUN_CHANGES),

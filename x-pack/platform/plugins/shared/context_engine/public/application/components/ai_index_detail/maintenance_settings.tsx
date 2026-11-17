@@ -27,10 +27,9 @@ import {
   type MaintenanceMode,
   type ResolvedMaintenanceConfig,
 } from '../../../../common/dreaming';
-import { MIN_MAINTENANCE_TOMBSTONES } from '../../../../common/step_types/gather_maintenance';
 import { validateDreamingInterval } from '../../../../common/validation';
 
-type MaintenanceField = 'interval' | 'neighbors' | 'sweep_size' | 'max_tombstone_share';
+type MaintenanceField = 'interval' | 'neighbors' | 'sweep_size';
 
 const wholeNumberError = (min: number, max: number) =>
   i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.maintenance.wholeNumberError', {
@@ -41,8 +40,6 @@ const wholeNumberError = (min: number, max: number) =>
 const inRange = (value: number, min: number, max: number): boolean =>
   Number.isInteger(value) && value >= min && value <= max;
 
-const toPercent = (share: number): number => Number((share * 100).toFixed(6));
-
 const fieldValue = (value: number): number | '' => (Number.isNaN(value) ? '' : value);
 
 /** What is wrong with each maintenance setting. Nothing is checked while maintenance is off. */
@@ -51,7 +48,6 @@ export const maintenanceErrorsOf = ({
   schedule,
   neighbors,
   sweep_size: sweepSize,
-  max_tombstone_share: maxTombstoneShare,
 }: ResolvedMaintenanceConfig): Partial<Record<MaintenanceField, string>> => {
   if (!enabled) {
     return {};
@@ -64,9 +60,6 @@ export const maintenanceErrorsOf = ({
     }),
     ...(!inRange(sweepSize, 1, MAX_MAINTENANCE_SWEEP_SIZE) && {
       sweep_size: wholeNumberError(1, MAX_MAINTENANCE_SWEEP_SIZE),
-    }),
-    ...(!inRange(toPercent(maxTombstoneShare), 0, 100) && {
-      max_tombstone_share: wholeNumberError(0, 100),
     }),
   };
 };
@@ -208,35 +201,6 @@ export const MaintenanceSettings = ({ maintenance, onChange }: MaintenanceSettin
                     isInvalid={errors.sweep_size !== undefined}
                     onChange={(event) => update({ sweep_size: event.target.valueAsNumber })}
                     data-test-subj="contextAiIndexMaintenanceSweepSize"
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.contextEngine.aiIndexDetail.dreaming.maintenance.maxTombstoneShareLabel',
-                    { defaultMessage: 'Most items one run may remove (%)' }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.contextEngine.aiIndexDetail.dreaming.maintenance.maxTombstoneShareHelp',
-                    {
-                      defaultMessage:
-                        'A run may always remove {min}. Over it, the run changes nothing.',
-                      values: { min: MIN_MAINTENANCE_TOMBSTONES },
-                    }
-                  )}
-                  isInvalid={errors.max_tombstone_share !== undefined}
-                  error={errors.max_tombstone_share}
-                >
-                  <EuiFieldNumber
-                    min={0}
-                    max={100}
-                    value={fieldValue(toPercent(maintenance.max_tombstone_share))}
-                    isInvalid={errors.max_tombstone_share !== undefined}
-                    onChange={(event) =>
-                      update({ max_tombstone_share: event.target.valueAsNumber / 100 })
-                    }
-                    data-test-subj="contextAiIndexMaintenanceMaxTombstoneShare"
                   />
                 </EuiFormRow>
               </EuiFlexItem>

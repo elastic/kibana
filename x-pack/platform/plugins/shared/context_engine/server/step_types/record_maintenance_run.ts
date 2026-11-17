@@ -44,7 +44,6 @@ export const getRecordMaintenanceRunStepDefinition = ({
       const {
         ai_index_id: aiIndexId,
         mode,
-        braked = false,
         reviewed,
         written,
         changes,
@@ -65,13 +64,10 @@ export const getRecordMaintenanceRunStepDefinition = ({
       analyticsService.reportMemoryMaintenanceRun({
         ai_index_id: aiIndexId,
         mode,
-        braked,
         ...output,
       });
       logger.debug(
-        `Memory maintenance of AI index '${aiIndexId}' (${mode}${
-          braked ? ', braked' : ''
-        }) reviewed ${reviewed} items and changed ${changes.length}`
+        `Memory maintenance of AI index '${aiIndexId}' (${mode}) reviewed ${reviewed} items and changed ${changes.length}`
       );
       return { output };
     },

@@ -66,11 +66,9 @@ export const getGatherMaintenanceStepDefinition = ({
         sweep_after_id: sweepAfterId,
       } = context.input;
       const aiIndex = await resolveDreamingAiIndex(getAiIndexService, aiIndexId, spaceId);
-      const {
-        neighbors,
-        sweep_size: sweepSize,
-        max_tombstone_share: maxTombstoneShare,
-      } = maintenanceConfigOf(aiIndex.dreaming.maintenance);
+      const { neighbors, sweep_size: sweepSize } = maintenanceConfigOf(
+        aiIndex.dreaming.maintenance
+      );
 
       const output = await gatherMaintenance(
         createMaintenanceReader({
@@ -84,7 +82,6 @@ export const getGatherMaintenanceStepDefinition = ({
           writerUri: kiWriterFromContext(stepContext).uri,
           neighbors,
           sweepSize,
-          maxTombstoneShare,
           since,
           ...(afterId && { afterId }),
           ...(sweepAfterId && { sweepAfterId }),

@@ -129,10 +129,8 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
       'plan_fixes',
       'planned',
       'review',
-      'brake',
       'dry_run_result',
       'report_result',
-      'braked_result',
       'apply_fixes',
       'applied',
       'apply',
@@ -241,7 +239,6 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
         variables: {
           plans: [],
           written: 1,
-          tombstones: 1,
           changes: [],
           needs_review: [],
           rejected: [],
@@ -251,7 +248,6 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
             output: {
               plans: [plan],
               written: 1,
-              tombstones: 1,
               changes: [change],
               needs_review: [],
               rejected: [{ item: 'x', reason: 'y' }],
@@ -262,7 +258,6 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
     ).toEqual({
       plans: [plan],
       written: 2,
-      tombstones: 2,
       changes: [change],
       needs_review: [],
       rejected: [{ item: 'x', reason: 'y' }],
@@ -300,21 +295,6 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
     expect(schema.required).toEqual(kinds);
   });
 
-  it('brakes when the run would tombstone more than the gather step allows', () => {
-    const brake = (tombstones: number) =>
-      renderWith(findStep(steps(), 'brake').with, {
-        consts: render().consts,
-        steps: { gather: { output: { max_tombstones: 3 } } },
-        variables: { tombstones },
-      });
-
-    expect(brake(3)).toEqual({ braked: false, reason: '' });
-    expect(brake(4)).toEqual({
-      braked: true,
-      reason: 'It would tombstone 4 facts and entities, more than the 3 one run may.',
-    });
-  });
-
   it('ends a dry run cancelled and a report successful with its cursors, writing nothing', () => {
     const dryRun = findStep(steps(), 'dry_run_result');
     const report = findStep(steps(), 'report_result');
@@ -344,24 +324,6 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
     );
   });
 
-  it('ends a braked run cancelled before writing, so the next run reviews the same items', () => {
-    const braked = findStep(steps(), 'braked_result');
-    const names = steps().map(({ name }) => name);
-
-    expect(braked.condition).toBe('${{ variables.braked == true }}');
-    expect(braked.steps?.map(({ type, status }) => [type, status])).toEqual([
-      ['context-engine.recordMaintenanceRun', undefined],
-      ['workflow.output', 'cancelled'],
-    ]);
-    expect(names.indexOf('braked_result')).toBeLessThan(names.indexOf('apply_fixes'));
-    expect(findStep(braked.steps ?? [], 'braked_output').with).toEqual(
-      expect.objectContaining({
-        mode: 'apply',
-        tombstoned: '${{ steps.record_braked.output.tombstoned }}',
-      })
-    );
-  });
-
   it('outputs its mode at every end that can be a successful run', () => {
     const report = findStep(findStep(steps(), 'report_result').steps ?? [], 'report_output');
 
@@ -386,7 +348,6 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
     expect(findStep(steps(), 'record').with?.mode).toBe('apply');
     expect(findStep(steps(), 'output_result').with).toEqual(
       expect.objectContaining({
-        braked: false,
         changes: '${{ variables.changes | concat: variables.needs_review }}',
         sweep_after_id: '{{ steps.gather.output.sweep_after_id }}',
       })

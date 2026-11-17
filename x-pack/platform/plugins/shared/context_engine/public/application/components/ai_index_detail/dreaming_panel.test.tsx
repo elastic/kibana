@@ -217,14 +217,13 @@ describe('DreamingPanel', () => {
             schedule: { interval: '24h' },
             neighbors: 5,
             sweep_size: 200,
-            max_tombstone_share: 0.1,
           },
         }),
       })
     );
   });
 
-  it('saves the maintenance mode, interval and brake', async () => {
+  it('saves the maintenance mode and interval', async () => {
     renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
 
     fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceMode'), {
@@ -232,9 +231,6 @@ describe('DreamingPanel', () => {
     });
     fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceInterval'), {
       target: { value: '12h' },
-    });
-    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceMaxTombstoneShare'), {
-      target: { value: '25' },
     });
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
 
@@ -245,7 +241,6 @@ describe('DreamingPanel', () => {
           maintenance: expect.objectContaining({
             mode: 'apply',
             schedule: { interval: '12h' },
-            max_tombstone_share: 0.25,
           }),
         }),
       })
@@ -260,18 +255,6 @@ describe('DreamingPanel', () => {
     });
 
     expect(screen.getByText('Must be a whole number from 1 to 20.')).toBeInTheDocument();
-    expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
-  });
-
-  it('does not round a share that is not a whole percent', () => {
-    renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
-
-    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceMaxTombstoneShare'), {
-      target: { value: '12.5' },
-    });
-
-    expect(screen.getByTestId('contextAiIndexMaintenanceMaxTombstoneShare')).toHaveValue(12.5);
-    expect(screen.getByText('Must be a whole number from 0 to 100.')).toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
   });
 

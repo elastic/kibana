@@ -98,7 +98,7 @@ describe('getApplyMaintenanceChangesStepDefinition', () => {
     }));
   });
 
-  it('plans the changes and fixes of a batch without writing, counting tombstones', async () => {
+  it('plans the changes and fixes of a batch without writing', async () => {
     const context = createMockStepContext({
       input: {
         ai_index_id: 'support',
@@ -116,7 +116,6 @@ describe('getApplyMaintenanceChangesStepDefinition', () => {
     expect(softDeleteKi).not.toHaveBeenCalled();
     expect(output).toEqual({
       written: 1,
-      tombstones: 2,
       changes: [
         { id: 'f-gone', change: 'tombstoned', reason: 'Every memory was deleted.' },
         {
@@ -144,7 +143,7 @@ describe('getApplyMaintenanceChangesStepDefinition', () => {
       expect.anything(),
       expect.objectContaining({ kiId: 'f-old' })
     );
-    expect(output).toEqual(expect.objectContaining({ written: 1, tombstones: 1 }));
+    expect(output).toEqual(expect.objectContaining({ written: 1 }));
     expect(output).not.toHaveProperty('plans');
   });
 

@@ -106,7 +106,6 @@ describe('dreamingConfigSchema', () => {
       schedule: { interval: '12h' },
       neighbors: 8,
       sweep_size: 500,
-      max_tombstone_share: 0.25,
     };
 
     it('accepts a full maintenance config as it is', () => {
@@ -135,8 +134,6 @@ describe('dreamingConfigSchema', () => {
       ['sweep_size', 0],
       ['sweep_size', 1001],
       ['sweep_size', 10.5],
-      ['max_tombstone_share', -0.1],
-      ['max_tombstone_share', 1.5],
     ])('rejects %s of %d', (field, value) => {
       expect(() =>
         dreamingConfigSchema.validate({

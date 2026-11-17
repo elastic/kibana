@@ -13,7 +13,6 @@ import { createMockStepContext, mockKiStepTelemetry } from './test_utils';
 const input = {
   ai_index_id: 'support',
   mode: 'report',
-  braked: true,
   reviewed: 12,
   written: 3,
   changes: [
@@ -66,7 +65,6 @@ describe('getRecordMaintenanceRunStepDefinition', () => {
     expect(telemetry.analyticsService.reportMemoryMaintenanceRun).toHaveBeenCalledWith({
       ai_index_id: 'support',
       mode: 'report',
-      braked: true,
       ...counts,
     });
   });

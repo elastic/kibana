@@ -170,7 +170,6 @@ const KI_VERIFICATION_EVENT: EventTypeOpts<ReportKiVerificationEventParams> = {
 export interface ReportMemoryMaintenanceRunEventParams {
   ai_index_id: string;
   mode: 'report' | 'apply' | 'dry_run';
-  braked: boolean;
   reviewed: number;
   written: number;
   merged: number;
@@ -195,13 +194,6 @@ const memoryMaintenanceRunEventSchema: RootSchema<ReportMemoryMaintenanceRunEven
     _meta: {
       description:
         'How the run ended: "report" planned changes only, "apply" wrote them, "dry_run" was a manual run that wrote nothing.',
-      optional: false,
-    },
-  },
-  braked: {
-    type: 'boolean',
-    _meta: {
-      description: 'Whether the run stopped before writing because it would tombstone too much.',
       optional: false,
     },
   },
