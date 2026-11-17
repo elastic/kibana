@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   ALERT_EPISODE_ACTION_TYPE,
@@ -38,7 +38,6 @@ export function AlertEpisodeStatusBadges({
 }: AlertEpisodeStatusBadgesProps) {
   const isAcknowledged = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
-  const hasSnoozeConditions = Boolean(groupAction?.snoozeConditions?.length);
   const isMuted = Boolean(groupAction?.isMuted);
 
   return (
@@ -68,38 +67,12 @@ export function AlertEpisodeStatusBadges({
         <EuiFlexItem grow={false}>
           <EuiToolTip
             anchorProps={tooltipAnchorProps}
-            content={
-              hasSnoozeConditions || isMuted ? (
-                buildSnoozeSummary({
-                  isMuted,
-                  expiresAt: groupAction?.snoozedUntil,
-                  conditions: groupAction?.snoozeConditions,
-                  conditionOperator: groupAction?.snoozeConditionOperator,
-                })
-              ) : groupAction?.snoozedUntil ? (
-                <FormattedMessage
-                  id="xpack.alertingV2EpisodesUi.snoozedUntilTooltip"
-                  defaultMessage="Notifications snoozed until {expiry}."
-                  values={{
-                    expiry: (
-                      <FormattedDate
-                        value={new Date(groupAction.snoozedUntil)}
-                        year="numeric"
-                        month="short"
-                        day="numeric"
-                        hour="numeric"
-                        minute="2-digit"
-                      />
-                    ),
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.alertingV2EpisodesUi.snoozedTooltipUnknownExpiry"
-                  defaultMessage="Notifications are snoozed."
-                />
-              )
-            }
+            content={buildSnoozeSummary({
+              isMuted,
+              expiresAt: groupAction?.snoozedUntil,
+              conditions: groupAction?.snoozeConditions,
+              conditionOperator: groupAction?.snoozeConditionOperator,
+            })}
           >
             <EuiBadge
               tabIndex={0}

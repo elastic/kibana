@@ -19395,8 +19395,6 @@
     "xpack.alertingV2EpisodesUi.severityFilter.label": "Gravidade",
     "xpack.alertingV2EpisodesUi.severityFilter.noMatch": "Nenhuma gravidade correspondente",
     "xpack.alertingV2EpisodesUi.severityFilter.noneLabel": "Sem gravidade",
-    "xpack.alertingV2EpisodesUi.snoozedTooltipUnknownExpiry": "As notificações estão silenciadas.",
-    "xpack.alertingV2EpisodesUi.snoozedUntilTooltip": "Notificações silenciadas até {expiry}.",
     "xpack.alertingV2EpisodesUi.source.classicAlertingLabel": "Alerting clássico",
     "xpack.alertingV2EpisodesUi.source.classicLabel": "Clássico",
     "xpack.alertingV2EpisodesUi.source.universalAlertingLabel": "Universal Alerting",

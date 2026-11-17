@@ -19369,8 +19369,6 @@
     "xpack.alertingV2EpisodesUi.severityFilter.label": "严重性",
     "xpack.alertingV2EpisodesUi.severityFilter.noMatch": "未找到匹配的严重性",
     "xpack.alertingV2EpisodesUi.severityFilter.noneLabel": "无严重性",
-    "xpack.alertingV2EpisodesUi.snoozedTooltipUnknownExpiry": "通知已延后。",
-    "xpack.alertingV2EpisodesUi.snoozedUntilTooltip": "通知已暂停，直到 {expiry}。",
     "xpack.alertingV2EpisodesUi.source.classicAlertingLabel": "经典 Alerting",
     "xpack.alertingV2EpisodesUi.source.classicLabel": "经典",
     "xpack.alertingV2EpisodesUi.source.universalAlertingLabel": "Universal Alerting",
