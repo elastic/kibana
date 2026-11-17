@@ -8,22 +8,15 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EMPTY_DESTINATION_FAILED } from '../../../../../services/unit_stats_client/map_stats_response';
-import type {
-  DestinationFailedView,
-  FailureCauseView,
-} from '../../../../../services/unit_stats_client/types';
+import type { DestinationFailedView } from '../../../../../services/unit_stats_client/types';
 import { DestinationFailureIcon } from './destination_failure_icon';
+
+// The sparklines are charts, which need the services of the page, and have tests of their own.
+jest.mock('../../../../unit_stats/failure_sparkline', () => ({ FailureSparkline: () => null }));
 
 const ICON = 'streamsCanvasDestinationFailures';
 const POPOVER = `${ICON}Popover`;
-
-const cause = (collection: string, rate: number, percentage: number): FailureCauseView => ({
-  collection,
-  reason: null,
-  rate,
-  unit: '{item}',
-  percentage,
-});
+const SUMMARY = 'streamsDestinationFailurePopoverSummary';
 
 const FAILED: DestinationFailedView = {
   ...EMPTY_DESTINATION_FAILED,
@@ -56,9 +49,11 @@ describe('DestinationFailureIcon', () => {
 
     const popover = await screen.findByTestId(POPOVER);
     expect(within(popover).getByText('Delivery failures')).toBeInTheDocument();
-    const stat = 'streamsDestinationFailureSummaryAuthenticationHeadingStat';
-    expect(screen.getByTestId(`${stat}Percentage`).textContent).toBe('12%');
-    expect(screen.getByTestId(`${stat}Basis`).textContent).toBe('of events');
+    expect(screen.getByTestId(`${SUMMARY}Subtitle`).textContent).toBe(
+      'Of events in the last 15 minutes'
+    );
+    expect(screen.getByTestId(`${SUMMARY}AuthenticationPercentage`).textContent).toContain('12%');
+    expect(screen.getByTestId(`${SUMMARY}AuthenticationRate`).textContent).toContain('0.50/s');
   });
 
   it('opens on focus, so the keyboard reaches it', async () => {
@@ -133,25 +128,6 @@ describe('DestinationFailureIcon', () => {
     const { container } = renderIcon();
 
     expect(container.querySelector('.nodrag.nopan')).not.toBeNull();
-  });
-
-  it('lists at most three causes of a class, and counts the others', async () => {
-    renderIcon({
-      ...EMPTY_DESTINATION_FAILED,
-      authorization: {
-        rate: 5,
-        unit: '{item}',
-        percentage: 50,
-        breakdown: Array.from({ length: 5 }, (_, index) => cause(`logs-c${index}-default`, 1, 10)),
-      },
-    });
-
-    fireEvent.mouseEnter(screen.getByTestId(ICON));
-
-    const section = 'streamsDestinationFailureSummaryAuthorization';
-    expect(await screen.findByTestId(`${section}Row2`)).toBeInTheDocument();
-    expect(isShown(`${section}Row3`)).toBe(false);
-    expect(screen.getByTestId(`${section}More`).textContent).toBe('and 2 more');
   });
 
   it('does not set a timer that outlives it', () => {

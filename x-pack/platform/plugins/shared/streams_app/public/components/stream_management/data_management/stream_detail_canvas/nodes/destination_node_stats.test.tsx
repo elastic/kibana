@@ -15,6 +15,9 @@ import type {
 import type { StatsEntry } from '../../../../unit_stats/state_management/types';
 import { DestinationNodeStats } from './destination_node_stats';
 
+// The sparklines are charts, which need the services of the page, and have tests of their own.
+jest.mock('../../../../unit_stats/failure_sparkline', () => ({ FailureSparkline: () => null }));
+
 const mockUseDestinationStats = jest.fn();
 
 jest.mock('../../../../unit_stats/state_management/use_stats_manager', () => ({
@@ -273,10 +276,10 @@ describe('DestinationNodeStats', () => {
 
       const popover = await screen.findByTestId('streamsCanvasDestinationFailuresPopover');
       expect(within(popover).getByText('Delivery failures')).toBeTruthy();
-      const stat = 'streamsDestinationFailureSummaryAuthenticationHeadingStat';
-      expect(text(`${stat}Percentage`)).toBe('12%');
-      expect(text(`${stat}Rate`)).toBe('0.50/s');
-      expect(text(`${stat}Basis`)).toBe('of events');
+      const summary = 'streamsDestinationFailurePopoverSummary';
+      expect(text(`${summary}Subtitle`)).toBe('Of events in the last 15 minutes');
+      expect(text(`${summary}AuthenticationPercentage`)).toContain('12%');
+      expect(text(`${summary}AuthenticationRate`)).toContain('0.50/s');
     });
 
     it('names upload attempts for a destination that counts them', async () => {
@@ -284,7 +287,7 @@ describe('DestinationNodeStats', () => {
 
       fireEvent.mouseOver(screen.getByTestId('streamsCanvasDestinationFailures'));
 
-      expect(await screen.findByText('of upload attempts')).toBeTruthy();
+      expect(await screen.findByText('Of upload attempts in the last 15 minutes')).toBeTruthy();
     });
 
     it('keeps the rate and the latency next to the icon', () => {

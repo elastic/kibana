@@ -9,8 +9,9 @@ import {
   formatDuration,
   formatEventsRate,
   formatFailureBasis,
-  formatFailureOfBasis,
   formatPercentage,
+  formatPercentageParts,
+  formatRateParts,
   STATS_NO_VALUE_LABEL,
 } from './format_stats';
 
@@ -68,10 +69,34 @@ describe('formatFailureBasis', () => {
   });
 });
 
-describe('formatFailureOfBasis', () => {
-  it('trails a stat with what it is a share of', () => {
-    expect(formatFailureOfBasis('{item}')).toBe('of events');
-    expect(formatFailureOfBasis('{request}')).toBe('of upload attempts');
+describe('formatPercentageParts', () => {
+  it('shows no data as a dash with no unit', () => {
+    expect(formatPercentageParts(null)).toEqual({ value: STATS_NO_VALUE_LABEL, unit: '' });
+  });
+
+  it.each<[string, number, { value: string; unit: string }]>([
+    ['zero is data', 0, { value: '0', unit: '%' }],
+    ['a tiny share is not shown as zero', 0.04, { value: '<0.1', unit: '%' }],
+    ['one decimal below 10', 3.74, { value: '3.7', unit: '%' }],
+    ['whole numbers from 10', 11.9, { value: '12', unit: '%' }],
+    ['almost all is not shown as all', 99.96, { value: '>99.9', unit: '%' }],
+  ])('%s', (_description, value, expected) => {
+    expect(formatPercentageParts(value)).toEqual(expected);
+  });
+});
+
+describe('formatRateParts', () => {
+  it('shows no data as a dash with no unit', () => {
+    expect(formatRateParts(null)).toEqual({ value: STATS_NO_VALUE_LABEL, unit: '' });
+  });
+
+  it.each<[string, number, { value: string; unit: string }]>([
+    ['zero is data', 0, { value: '0', unit: '/s' }],
+    ['a tiny rate', 0.004, { value: '<0.01', unit: '/s' }],
+    ['two decimals below 1', 0.5, { value: '0.50', unit: '/s' }],
+    ['compact from 1000', 3700, { value: '3.7k', unit: '/s' }],
+  ])('%s', (_description, value, expected) => {
+    expect(formatRateParts(value)).toEqual(expected);
   });
 });
 

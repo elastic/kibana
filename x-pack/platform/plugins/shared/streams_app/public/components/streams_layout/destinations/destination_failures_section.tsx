@@ -8,6 +8,7 @@
 import React from 'react';
 import {
   EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -29,7 +30,10 @@ import {
   getFailureRangeSubtitle,
   hasDestinationFailures,
 } from '../../unit_stats/destination_failures';
+import { DeliveryChart } from '../../unit_stats/delivery_chart';
+import { withPlaceholderDeliverySeries } from '../../unit_stats/placeholder_delivery_series';
 import { useDestinationFailures } from '../../unit_stats/use_destination_failures';
+import { useTimeRangeUpdate } from '../../../hooks/use_time_range_update';
 import { StatCell } from '../../stream_detail_overview/stat_cell';
 import { DestinationFailureCausesTable } from './destination_failure_causes_table';
 import { FlyoutPanel } from './flyout_panel';
@@ -41,11 +45,10 @@ const hasFailureData = ({ authentication, authorization }: DestinationFailedView
   );
 
 /**
- * One failure class: its name, its percentage and its rate as stats of the flyout, and its causes
- * as a table. A class with no causes, such as a request that was refused as a whole, has no table.
- * What the figures are a share of is in the subtitle of the panel, not in each unit.
+ * One failure class: its name, and its percentage and its rate as stats of the flyout. What the
+ * figures are a share of is in the subtitle of the panel, not in each unit.
  */
-function FailureClassBlock({
+function FailureClassStats({
   title,
   failureClass,
   dataTestSubj,
@@ -81,19 +84,34 @@ function FailureClassBlock({
           unit={rate.unit === '' ? undefined : rate.unit}
         />
       </EuiFlexGroup>
-      {failureClass.breakdown.length > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <DestinationFailureCausesTable
-            causes={failureClass.breakdown}
-            caption={i18n.translate('xpack.streams.destinations.failures.tableCaption', {
-              defaultMessage: '{class} failures by cause',
-              values: { class: title },
-            })}
-            dataTestSubj={`${dataTestSubj}Causes`}
-          />
-        </>
-      )}
+    </div>
+  );
+}
+
+/** The causes of one failure class as a table. A class with none, such as a request that was refused as a whole, has no table. */
+function FailureClassCauses({
+  title,
+  failureClass,
+  dataTestSubj,
+}: {
+  title: string;
+  failureClass: FailureClassView;
+  dataTestSubj: string;
+}) {
+  return (
+    <div>
+      <EuiTitle size="xxs">
+        <h4>{title}</h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <DestinationFailureCausesTable
+        causes={failureClass.breakdown}
+        caption={i18n.translate('xpack.streams.destinations.failures.tableCaption', {
+          defaultMessage: '{class} failures by cause',
+          values: { class: title },
+        })}
+        dataTestSubj={dataTestSubj}
+      />
     </div>
   );
 }
@@ -118,7 +136,35 @@ export function DestinationFailuresSection({
   showTimePicker: boolean;
 }) {
   const { value, loading, error } = useDestinationFailures(destinationId);
-  const failed = value?.stats.failed;
+  const { updateTimeRange } = useTimeRangeUpdate();
+
+  return (
+    <DestinationFailuresView
+      value={value}
+      loading={loading}
+      error={error}
+      showTimePicker={showTimePicker}
+      onBrushEnd={updateTimeRange}
+    />
+  );
+}
+
+export function DestinationFailuresView({
+  value,
+  loading,
+  error,
+  showTimePicker,
+  onBrushEnd,
+}: {
+  value: ReturnType<typeof useDestinationFailures>['value'];
+  loading: boolean;
+  error?: Error;
+  showTimePicker: boolean;
+  onBrushEnd?: (range: { from: string; to: string }) => void;
+}) {
+  // TEMPORARY: the API sends no delivery series yet, so this makes one up. Remove with the placeholder.
+  const failed = value && withPlaceholderDeliverySeries(value.stats.failed);
+  const failureClasses = failed ? getFailureClasses(failed) : [];
   const loadError = error?.message ?? (value?.status === 'error' ? value.error?.reason : undefined);
   const partialError = value?.status === 'ready' ? value.error?.reason : undefined;
 
@@ -162,16 +208,39 @@ export function DestinationFailuresSection({
           </>
         )}
         {hasDestinationFailures(failed) ? (
-          getFailureClasses(failed).map(({ key, title, failureClass }, index) => (
-            <React.Fragment key={key}>
-              {index > 0 && <EuiHorizontalRule margin="m" />}
-              <FailureClassBlock
-                title={title}
-                failureClass={failureClass}
-                dataTestSubj={`streamsDestinationFailures${key}`}
-              />
-            </React.Fragment>
-          ))
+          <>
+            <EuiFlexGroup gutterSize="xl" responsive>
+              <EuiFlexItem grow={2}>
+                {failureClasses.map(({ key, title, failureClass }, index) => (
+                  <React.Fragment key={key}>
+                    {index > 0 && <EuiHorizontalRule margin="m" />}
+                    <FailureClassStats
+                      title={title}
+                      failureClass={failureClass}
+                      dataTestSubj={`streamsDestinationFailures${key}`}
+                    />
+                  </React.Fragment>
+                ))}
+              </EuiFlexItem>
+              {failed.series && (
+                <EuiFlexItem grow={3} css={{ alignSelf: 'center' }}>
+                  <DeliveryChart series={failed.series} onBrushEnd={onBrushEnd} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            {failureClasses
+              .filter(({ failureClass }) => failureClass.breakdown.length > 0)
+              .map(({ key, title, failureClass }) => (
+                <React.Fragment key={key}>
+                  <EuiHorizontalRule margin="m" />
+                  <FailureClassCauses
+                    title={title}
+                    failureClass={failureClass}
+                    dataTestSubj={`streamsDestinationFailures${key}Causes`}
+                  />
+                </React.Fragment>
+              ))}
+          </>
         ) : hasFailureData(failed) ? (
           <EuiText size="s" color="subdued" data-test-subj="streamsDestinationFailuresNone">
             <p>

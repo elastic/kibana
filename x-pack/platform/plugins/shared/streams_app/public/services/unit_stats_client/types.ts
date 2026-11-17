@@ -55,10 +55,32 @@ export interface FailureClassView extends FailureRateView {
   series?: FailureSeriesView;
 }
 
+/**
+ * What was attempted and what failed in each bucket of `bucketMs`, as counts in `unit`, for the
+ * delivery chart of the flyout. `failed` includes both classes, so the delivered count is `total`
+ * minus `failed`, and the failures of other causes are `failed` minus the two classes. A bucket
+ * with no attempts may have no point, so `window` says what the series covers. The API does not
+ * send it yet, so it is absent.
+ */
+export interface DeliverySeriesView {
+  bucketMs: number;
+  unit: string;
+  /** The time that the series covers, as ISO times. */
+  window: { start: string; end: string };
+  points: Array<{
+    start: string;
+    total: number;
+    failed: number;
+    authentication: number;
+    authorization: number;
+  }>;
+}
+
 export interface DestinationFailedView {
   total: FailureRateView;
   authentication: FailureClassView;
   authorization: FailureClassView;
+  series?: DeliverySeriesView;
 }
 
 /** Rates are per second and durations are in seconds, as the API returns them. `null` means no data. */

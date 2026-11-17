@@ -49,6 +49,7 @@ describe('UnitDestinationFlyout', () => {
     const flyout = within(screen.getByTestId('streamsUnitDestinationFlyout'));
     expect(flyout.getByRole('heading', { name: 'Backup' })).toBeInTheDocument();
     expect(flyout.getByText('Long-term copy')).toBeInTheDocument();
+    expect(flyout.getByRole('heading', { name: 'Configuration' })).toBeInTheDocument();
     const details = within(flyout.getByTestId('streamsRemoteElasticsearchDestinationDetails'));
     expect(details.getByText('https://my-cluster.es.example.com')).toBeInTheDocument();
     expect(details.getByText('remote-logs')).toBeInTheDocument();
