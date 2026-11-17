@@ -14,7 +14,6 @@ import { getConfigurationTroubleshootingSkillName } from '../configuration_troub
 import type { InvestigationIocCategory } from '../../attachments/investigation_iocs';
 import { MAX_IOCS_PER_CATEGORY } from '../../attachments/investigation_iocs';
 import { securityTool } from '../../tools/constants';
-import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import {
   resolveSearchWindow,
@@ -232,9 +231,10 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
 
 ## Alerts in this space
 
-- Look up detection alerts in the \`alerts_index\` the discovery tool returned, or with \`${SECURITY_ALERTS_TOOL_ID}\`.
+- Look up detection alerts with ES|QL against the \`alerts_index\` the discovery tool returned: \`FROM <alerts_index> METADATA _id, _index\`.
 - Never hardcode \`${DEFAULT_ALERTS_INDEX}-default\`, \`.siem-signals-*\`, or another space's index.
-- Alert ids added to a case must come from the current space's index. Pass each alert's \`_id\` and \`_index\` exactly as returned.
+- This skill has no case tool. Alerts are attached with the Cases tools (for example \`add_alerts\` with \`{alertId, index}\`); this rule is about which values to pass there.
+- Pass \`_id\` and \`_index\` unchanged from the \`METADATA _id, _index\` columns. \`_index\` is the backing index (\`.internal.alerts-security.alerts-<space>-00000N\`); do not rewrite it to the alias. \`kibana.alert.uuid\` equals \`_id\`.
 
 ## Tool Selection Guardrails
 
@@ -257,7 +257,8 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
         description:
           'Resolve Defend telemetry index patterns, scoped hosts, and the exact time range for endpoint forensic ' +
           'reconstruction. Pass the incident `start`/`end` when one is known; otherwise `time_window_hours` counts ' +
-          'back from now. Call this before generate_esql/execute_esql on patient-zero, timeline, lateral-movement, ' +
+          'back from now. Also returns `alerts_index`, the detection alerts index for the current space. ' +
+          'Call this before generate_esql/execute_esql on patient-zero, timeline, lateral-movement, ' +
           'or persistence tasks.',
         schema: discoverTelemetrySchema,
         handler: async (args, context) => {
@@ -307,8 +308,9 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
                       searchedWindow.anchor === 'incident'
                         ? 'The range is the incident window. Events outside it are history, not this incident.'
                         : 'The range is a lookback from now, not anchored on an incident.'
-                    } Query detection alerts only from \`${alertsIndex}\` (the current space), and attach only ` +
-                    `alert \`_id\`s read from it.`,
+                    } Query detection alerts only from \`${alertsIndex}\` (the current space) with ` +
+                    `\`FROM ${alertsIndex} METADATA _id, _index\`, and pass \`_id\` and \`_index\` unchanged ` +
+                    `when attaching alerts to a case.`,
                 },
               },
             ],

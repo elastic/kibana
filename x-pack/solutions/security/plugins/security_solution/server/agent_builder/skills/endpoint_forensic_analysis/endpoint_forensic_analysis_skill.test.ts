@@ -12,7 +12,6 @@ import {
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
 } from '@kbn/agent-builder-server/tools';
-import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
 import {
   ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
   ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID,
@@ -260,7 +259,11 @@ describe('endpointForensicAnalysisSkill', () => {
 
       expect(data.alerts_index).toBe(alertsIndex);
       expect(data.guidance).toContain(`only from \`${alertsIndex}\``);
-      expect(data.guidance).toContain('`_id`');
+      expect(data.guidance).toContain(`FROM ${alertsIndex} METADATA _id, _index`);
+      expect(data.guidance).toContain('`_id` and `_index` unchanged');
+      if (spaceId !== 'default') {
+        expect(JSON.stringify(data)).not.toContain('alerts-default');
+      }
     });
 
     it('rejects a start without an end', async () => {
@@ -275,12 +278,18 @@ describe('endpointForensicAnalysisSkill', () => {
     const { content } = endpointForensicAnalysisSkill;
     expect(content).toContain('## Alerts in this space');
     expect(content).toContain('`alerts_index`');
-    expect(content).toContain(`\`${SECURITY_ALERTS_TOOL_ID}\``);
+    expect(content).toContain('FROM <alerts_index> METADATA _id, _index');
+    expect(content).toContain('Pass `_id` and `_index` unchanged');
+    expect(content).toContain('do not rewrite it to the alias');
+    expect(content).toContain('`kibana.alert.uuid` equals `_id`');
+    expect(content).toContain('This skill has no case tool');
+    // The skill registers no alerts tool, so it must not tell the agent to call one.
+    expect(content).not.toContain('`security.alerts`');
     expect(content).toContain('Never hardcode');
     expect(content).toContain('another space');
-    expect(content).toContain('`_id` and `_index` exactly as returned');
     // The default-space index may be named only as a thing to avoid, never as a query target.
     expect(content).toMatch(/Never hardcode[^\n]*`\.alerts-security\.alerts-default`/);
+    // Exactly one mention: the "Never hardcode" line above. A second one would be a usable query target.
     expect(content.match(/\.alerts-security\.alerts-default/g)).toHaveLength(1);
   });
 
