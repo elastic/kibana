@@ -15,7 +15,7 @@ import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { stableStringify } from '@kbn/std';
-import { every, isEmpty, isUndefined, omitBy, pick } from 'lodash';
+import { every, isEmpty, isUndefined, mapValues, omit, omitBy, pick } from 'lodash';
 
 export interface InlineDataViewIdentity {
   dataView: DataViewSpec;
@@ -68,10 +68,10 @@ export const getInlineDataViewIdentitySpec = (dataView: DataView): DataViewSpec 
 const getCanonicalInlineDataViewSpec = (dataView: DataViewSpec) => {
   const spec = fromStoredDataView(dataView) as AsCodeDataViewSpec;
   const fieldSettings = omitBy(spec.field_settings, (settings) => every(settings, isUndefined));
-  const scriptedFields = fromStoredScriptedFields(
-    dataView.fields,
-    dataView.fieldFormats,
-    dataView.fieldAttrs
+  // Popularity is usage metadata that minimal specs strip, so it is not part of the identity.
+  const scriptedFields = mapValues(
+    fromStoredScriptedFields(dataView.fields, dataView.fieldFormats, dataView.fieldAttrs),
+    (field) => omit(field, 'popularity')
   );
 
   return {

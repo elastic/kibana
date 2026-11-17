@@ -10,7 +10,7 @@ xpack.entityInventory.enabled: true
 
 ## Routes
 
-The routes exist only when the plugin is enabled. Both are internal: send `x-elastic-internal-origin: kibana`, and `kbn-xsrf` on `POST`.
+The routes exist only when the plugin is enabled. All are internal: send `x-elastic-internal-origin: kibana`, and `kbn-xsrf` on `POST`.
 
 ### `GET /internal/entity_inventory/types`
 
@@ -91,6 +91,22 @@ Errors that fail the request:
 | The definition cannot be turned into queries | 400 |
 
 The route does not cap the window length: it checks only that `from` and `to` are instants and that `from` is earlier than `to`. The limit lives in the UI, which clamps its picker to `ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS` (3 days, `entity_inventory_app/public/application/constants.ts`). A direct caller is therefore unbounded — `{"from":"1970-01-01T00:00:00Z","to":"2200-01-01T00:00:00Z"}` is a valid request — which is acceptable while the route is internal and both plugins are off by default.
+
+### `POST /internal/entity_inventory/entities/{type}/_plan`
+
+Lets a caller, such as a benchmark, run the inventory's generated queries itself: it plans the request exactly as `_list` does, probes included, and returns the probes and the list queries `_list` would send for the same request, without running the list queries. Planning and the request body are shared with `_list`, so the queries are the ones `_list` sends.
+
+Body: the same as `_list` (`from`, `to`, `limit`, strict).
+
+Response:
+
+| key | |
+| --- | --- |
+| `probes` | One entry per distinct source pattern, in source order: `indexPattern`, `request`, and `hasTimeSeries`, whether the probe found a readable time-series index (null when the probe failed). |
+| `queries` | One entry per plan query `_list` would send, in plan order: `indexPattern`, `engine` (`TS` or `FROM`) and `request`. A source whose probe failed has none, as in `_list`. |
+| `errors` | `{ indexPattern, status, reason }` per source whose probe failed. |
+
+Each `request` is the body to send to Elasticsearch's `POST /_query` unchanged: `query`, `params` (the named parameters, never interpolated) and `include_execution_metadata: true`. A probe that fails is reported in `errors` and never fails the request. The request errors and their statuses are those of `_list`.
 
 ### Access control (interim)
 

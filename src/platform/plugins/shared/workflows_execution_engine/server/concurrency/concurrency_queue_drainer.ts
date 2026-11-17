@@ -19,6 +19,7 @@ import {
 
 import { getConcurrencyGroupLock, withConcurrencyGroupLock } from './concurrency_group_lock';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 /** Covers the narrow window where QUEUED is visible before the dormant task exists. */
@@ -150,18 +151,28 @@ async function drainConcurrencyQueueSlotsUnlocked(
             `Promoted queued execution ${nextQueuedId} is missing id or spaceId; marking skipped`
           );
           const skipTimestamp = new Date().toISOString();
+          const cancellationReason =
+            'Queued promotion failed: execution document missing id or spaceId';
           await workflowExecutionRepository.updateWorkflowExecution(
             {
               id: nextQueuedId,
               status: ExecutionStatus.SKIPPED,
               cancelRequested: true,
-              cancellationReason:
-                'Queued promotion failed: execution document missing id or spaceId',
+              cancellationReason,
               cancelledAt: skipTimestamp,
               cancelledBy: 'system',
             },
             { refresh: 'wait_for' }
           );
+          await publishFinishedWorkflowExecution(execution, {
+            id: nextQueuedId,
+            spaceId: execution.spaceId ?? spaceId,
+            status: ExecutionStatus.SKIPPED,
+            cancelRequested: true,
+            cancellationReason,
+            cancelledAt: skipTimestamp,
+            cancelledBy: 'system',
+          });
         } else {
           const triggeredBy = execution.triggeredBy || 'manual';
 
@@ -190,19 +201,25 @@ async function drainConcurrencyQueueSlotsUnlocked(
             logger.warn(
               `Promoted queued workflow execution ${nextQueuedId} but failed to runSoon workflow:run (${message}); marking failed`
             );
+            const finishedAt = new Date().toISOString();
+            const executionError = {
+              type: 'QueuePromoteRunSoonError',
+              message: 'Failed to start queued workflow execution due to an unrecoverable error.',
+            };
             await workflowExecutionRepository.updateWorkflowExecution(
               {
                 id: nextQueuedId,
                 status: ExecutionStatus.FAILED,
-                error: {
-                  type: 'QueuePromoteRunSoonError',
-                  message:
-                    'Failed to start queued workflow execution due to an unrecoverable error.',
-                },
-                finishedAt: new Date().toISOString(),
+                error: executionError,
+                finishedAt,
               },
               { refresh: 'wait_for' }
             );
+            await publishFinishedWorkflowExecution(execution, {
+              status: ExecutionStatus.FAILED,
+              error: executionError,
+              finishedAt,
+            });
           }
         }
       }
