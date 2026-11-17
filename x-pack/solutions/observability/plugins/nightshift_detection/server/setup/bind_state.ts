@@ -6,20 +6,18 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { Logger, OnSetup } from '@kbn/core-di';
+import { OnSetup } from '@kbn/core-di';
 import { CoreSetup, CoreStart } from '@kbn/core-di-server';
-import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
 import {
   DETECTION_STATE_SO_TYPE,
   DetectionStateClient,
-  SpaceRunLock,
   detectionStateSavedObjectType,
 } from '../lib/state';
 
 /**
  * The module's setup and start phases are the `OnSetup` hook and the `CoreStart` token: the type is
  * registered at setup, and the client is built once Core has started, on the internal repository of
- * that type. The run lock lives in the shared `.kibana_locks` index, written as kibana_system.
+ * that type.
  */
 export function bindState({ bind }: ContainerModuleLoadOptions): void {
   bind(OnSetup).toResolvedValue(
@@ -34,13 +32,6 @@ export function bindState({ bind }: ContainerModuleLoadOptions): void {
       (savedObjects) =>
         new DetectionStateClient(savedObjects.createInternalRepository([DETECTION_STATE_SO_TYPE])),
       [CoreStart('savedObjects')]
-    )
-    .inSingletonScope();
-
-  bind(SpaceRunLock)
-    .toResolvedValue(
-      (esClient, logger) => new SpaceRunLock(esClient, logger.get('run-lock')),
-      [DetectionEngineSystemClient, Logger]
     )
     .inSingletonScope();
 }
