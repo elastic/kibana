@@ -342,11 +342,15 @@ describe('summarizeProfile', () => {
     expect(summary.samples).toBe(200);
     expect(summary.frames).toHaveLength(2);
     expect(summary.kibanaFrames).toHaveLength(3);
+    const isKibanaLocation = (location = '') =>
+      ['src/', 'x-pack/', 'node_modules/@kbn/', '...'].some((prefix) =>
+        location.startsWith(prefix)
+      );
     for (const { location, callers = [] } of summary.kibanaFrames) {
-      expect(location).toMatch(/^(src\/|x-pack\/|node_modules\/@kbn\/|\.\.\.)/);
+      expect(isKibanaLocation(location)).toBe(true);
       expect(callers.length).toBeLessThanOrEqual(2);
       for (const caller of callers) {
-        expect(caller.location).toMatch(/^(src\/|x-pack\/|node_modules\/@kbn\/|\.\.\.)/);
+        expect(isKibanaLocation(caller.location)).toBe(true);
       }
     }
     expect(summary.topKibanaFrame).toEqual({

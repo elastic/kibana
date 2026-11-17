@@ -8,14 +8,20 @@
  */
 
 import fs from 'node:fs';
+import Fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import type * as WorkerThreads from 'node:worker_threads';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createWorkerLogger, type WorkerLogger } from '@kbn/core-threads-server-internal';
-import { MAX_MESSAGE_FRAMES_LENGTH, runWatchdogWorker, type WatchdogWorkerDeps } from './worker';
-import type { ProfileLogMeta, StatsLogMeta, WatchdogWorkerData } from './types';
-import type { CpuProfile, InspectorSession } from './profile_capture';
+import {
+  MAX_MESSAGE_FRAMES_LENGTH,
+  fileName,
+  runWatchdogWorker,
+  type WatchdogWorkerDeps,
+} from './worker';
+import type { FileCounts, ProfileLogMeta, StatsLogMeta, WatchdogWorkerData } from './types';
+import { prepareProfile, type CpuProfile, type InspectorSession } from './profile_capture';
 import {
   ONGOING_REPORT_AFTER_MS,
   REPORT_REFILL_MS,
@@ -181,7 +187,7 @@ describe('runWatchdogWorker', () => {
   const posted = (session = 0) => sessions[session].post.mock.calls.map(([method]) => method);
   /** Lets the fake session's replies settle. */
   const settle = async () => {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
       await Promise.resolve();
     }
   };
@@ -198,7 +204,9 @@ describe('runWatchdogWorker', () => {
   const totalProfilingStats = () =>
     allStats().reduce<Record<string, number>>((totals, { profiling }) => {
       for (const [key, value] of Object.entries(profiling)) {
-        totals[key] = (totals[key] ?? 0) + value;
+        if (typeof value === 'number') {
+          totals[key] = (totals[key] ?? 0) + value;
+        }
       }
       return totals;
     }, {});
@@ -426,6 +434,10 @@ describe('runWatchdogWorker', () => {
         skippedCooldown: 0,
         profilingActiveMs: 0,
         maxStopHeartbeatGapMs: 0,
+        files: {
+          starting: { written: 0, inWindow: 0, fileLimit: 0, writeFailed: 0 },
+          running: { written: 0, inWindow: 0, fileLimit: 0, writeFailed: 0 },
+        },
       },
     });
   });
@@ -573,6 +585,7 @@ describe('runWatchdogWorker', () => {
         nodes: 5,
         heapUsed: 1234,
         stopReason: 'block_ended',
+        file: 'no_directory',
         // The block ended one poll before the stop resolved.
         stopHeartbeatGapMs: 25,
       });
@@ -902,7 +915,12 @@ describe('runWatchdogWorker', () => {
       profile = emptyProfile;
       startProfiling();
       await profiledBlock(1_500);
-      expect(profileMeta()).toMatchObject({ samples: 0, frames: [], kibanaFrames: [] });
+      expect(profileMeta()).toMatchObject({
+        samples: 0,
+        frames: [],
+        kibanaFrames: [],
+        file: 'empty',
+      });
       idle(STATS_INTERVAL_MS);
       expect(lastStats().profiling).toMatchObject({ profiled: 0, emptyTooLate: 1 });
     });
@@ -1053,6 +1071,7 @@ describe('runWatchdogWorker', () => {
     });
 
     /** Logs one capture with every name built from `noisyName`, through a real worker logger. */
+    const LONGEST_DIR = `/${'d'.repeat(63)}`;
     const logCaptureLine = async (
       noisyName: string
     ): Promise<{ line: string; droppedLogLines: number }> => {
@@ -1115,6 +1134,9 @@ describe('runWatchdogWorker', () => {
 
       jest.replaceProperty(workerThreads, 'isMainThread', false);
       jest.spyOn(process, 'uptime').mockReturnValue(999_999.999_999_999);
+      // The longest file path: a 64-character directory and a 63-character hostname.
+      jest.spyOn(Fs, 'writeFile').mockResolvedValue();
+      jest.spyOn(os, 'hostname').mockReturnValue('h'.repeat(63));
 
       const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'watchdog-line-size-'));
       const logFile = path.join(tmpDir, 'worker.log');
@@ -1140,6 +1162,7 @@ describe('runWatchdogWorker', () => {
               startAfterMs: { starting: 60_000, running: 60_000 },
               maxDurationMs: { starting: 100_000, running: 100_000 },
               cooldownMs: { starting: 60_000, running: 60_000 },
+              dir: LONGEST_DIR,
             },
           },
           () => nowUs,
@@ -1182,11 +1205,15 @@ describe('runWatchdogWorker', () => {
       // every name and location in the line is at its cap. Kibana names and paths are ASCII.
       const { line, droppedLogLines } = await logCaptureLine('a_long_function_name_'.repeat(4));
       expect(droppedLogLines).toBe(0);
-      const lineBytes = Buffer.byteLength(line, 'utf8');
+      // `process.pid` is read-only, so the digits a 7-digit pid would add are counted here.
+      const lineBytes = Buffer.byteLength(line, 'utf8') + 7 - String(process.pid).length;
       expect(lineBytes).toBeLessThanOrEqual(4_094);
 
       const parsed = JSON.parse(line);
       expect(parsed.message).not.toMatch(/\[truncated\]$/);
+      expect(parsed.message).toContain(`File: ${LONGEST_DIR}/event-loop-block-starting-100000ms-`);
+      expect(parsed.message).toContain(`-${'h'.repeat(63)}-${process.pid}.cpuprofile. Top: `);
+      expect(parsed.kibana.event_loop_watchdog.profile.file).toBe('written');
       expect(parsed.message).toContain('Kibana code: 45.5% ');
       // The frame lists are cut at their cap; the full lists are in `profile`.
       const frameLists = parsed.message.slice(parsed.message.indexOf('Top: '));
@@ -1223,9 +1250,9 @@ describe('runWatchdogWorker', () => {
       const parsed = JSON.parse(line);
       expect(parsed.kibana?.event_loop_watchdog).toBeUndefined();
       expect(parsed.message).toMatch(/\[truncated\]$/);
-      expect(parsed.message).toMatch(
-        /^Event loop block profile #1: block ~100000ms .* stopped: block_ended\. Top: /
-      );
+      expect(parsed.message).toContain('Event loop block profile #1: block ~100000ms ');
+      expect(parsed.message).toContain('stopped: block_ended. File: ');
+      expect(parsed.message).toContain('.cpuprofile. Top: ');
       // The message itself is not cut: the frame lists are all there, up to their own `...` cap.
       const frameLists = parsed.message.slice(
         parsed.message.indexOf('Top: '),
@@ -1234,6 +1261,145 @@ describe('runWatchdogWorker', () => {
       expect(frameLists).toContain('Kibana code: 45.5% ');
       expect(frameLists).toHaveLength(MAX_MESSAGE_FRAMES_LENGTH);
       expect(frameLists.endsWith('...')).toBe(true);
+    });
+
+    describe('files', () => {
+      const DIR = '/diag';
+      const startWriting = (dir: string = DIR) => {
+        start({ profiling: { ...profilingData, dir } });
+        setSlot(Slot.profiling, 1);
+      };
+      const warnLines = () =>
+        logger.warn.mock.calls.filter(([message]) =>
+          String(message).startsWith('Event loop block profile #')
+        );
+      const fileCounts = () => {
+        idle(STATS_INTERVAL_MS);
+        return lastStats().profiling.files;
+      };
+      /** A starting-phase file count summed over every stats period so far. */
+      const totalFiles = (key: keyof FileCounts) => {
+        idle(STATS_INTERVAL_MS);
+        return allStats().reduce((sum, { profiling }) => sum + profiling.files.starting[key], 0);
+      };
+
+      afterEach(() => jest.restoreAllMocks());
+
+      it('names a file by phase, zero-padded block length, time, host and pid', () => {
+        expect(fileName('running', 1234.6, new Date('2026-11-17T10:20:30.456Z'))).toBe(
+          `event-loop-block-running-001235ms-2026-11-17T10-20-30-456Z-${os.hostname()}-${
+            process.pid
+          }.cpuprofile`
+        );
+      });
+
+      it('writes the prepared profile and logs the capture at warn with the file path', async () => {
+        const writeFile = jest.spyOn(Fs, 'writeFile').mockResolvedValue();
+        startWriting();
+        await profiledBlock(2_000);
+
+        expect(writeFile).toHaveBeenCalledTimes(1);
+        const [file, data] = writeFile.mock.calls[0];
+        expect(path.dirname(String(file))).toBe(DIR);
+        expect(path.basename(String(file))).toContain('event-loop-block-starting-002000ms-');
+        expect(path.basename(String(file))).toContain('.cpuprofile');
+        expect(JSON.parse(String(data))).toEqual(
+          JSON.parse(JSON.stringify(prepareProfile(sampledProfile, ROOT)))
+        );
+        expect(profileLines()).toHaveLength(0);
+        expect(warnLines()).toHaveLength(1);
+        const [message, meta] = warnLines()[0];
+        expect(message).toContain(`stopped: block_ended. File: ${file}. Top: 100% spin`);
+        expect((meta as ProfileLogMeta).kibana.event_loop_watchdog.profile.file).toBe('written');
+        expect(fileCounts().starting).toEqual({
+          written: 1,
+          inWindow: 0,
+          fileLimit: 0,
+          writeFailed: 0,
+        });
+      });
+
+      it('writes a file a viewer can read to a real directory', async () => {
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'watchdog-profile-'));
+        try {
+          const writeFile = jest.spyOn(Fs, 'writeFile');
+          startWriting(dir);
+          await profiledBlock(2_000);
+          await writeFile.mock.results[0].value;
+          await settle();
+
+          const [file] = fs.readdirSync(dir);
+          expect(warnLines()[0][0]).toContain(`File: ${path.join(dir, file)}.`);
+          const written: CpuProfile = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
+          expect(written.samples).toHaveLength(written.timeDeltas?.length ?? -1);
+          expect(written.startTime).toBeLessThanOrEqual(written.endTime);
+        } finally {
+          fs.rmSync(dir, { recursive: true, force: true });
+        }
+      });
+
+      it('logs a failed write once at error and the capture at info without a path', async () => {
+        jest
+          .spyOn(Fs, 'writeFile')
+          .mockRejectedValue(
+            Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' })
+          );
+        startWriting();
+        await profiledBlock(2_000);
+
+        expect(logger.error).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledWith(
+          'Failed to write an event loop block profile: EACCES: permission denied',
+          { tags: ['event-loop-watchdog'] }
+        );
+        expect(warnLines()).toHaveLength(0);
+        expect(profileLines()[0][0]).not.toContain('File: ');
+        expect(profileMeta().file).toBe('write_failed');
+        expect(fileCounts().starting).toMatchObject({ written: 0, writeFailed: 1 });
+      });
+
+      it("doesn't write or ask admission without a directory", async () => {
+        const writeFile = jest.spyOn(Fs, 'writeFile');
+        startProfiling();
+        await profiledBlock(2_000);
+
+        expect(writeFile).not.toHaveBeenCalled();
+        expect(profileMeta().file).toBe('no_directory');
+        expect(fileCounts().starting).toEqual({
+          written: 0,
+          inWindow: 0,
+          fileLimit: 0,
+          writeFailed: 0,
+        });
+      });
+
+      it("doesn't write a capture with no busy samples", async () => {
+        const writeFile = jest.spyOn(Fs, 'writeFile');
+        profile = { nodes: [node(1, '(root)')], startTime: 0, endTime: 1_000 };
+        startWriting();
+        await profiledBlock(2_000);
+
+        expect(writeFile).not.toHaveBeenCalled();
+        expect(profileMeta().file).toBe('empty');
+      });
+
+      it('logs a capture admission refuses at info, without writing it', async () => {
+        const writeFile = jest.spyOn(Fs, 'writeFile').mockResolvedValue();
+        startWriting();
+        // Starting phase: 5 files in the rolling hour, then a block no longer than the longest.
+        for (let i = 0; i < 6; i++) {
+          await profiledBlock(2_000);
+          idle(profilingData.cooldownMs.starting);
+        }
+
+        expect(writeFile).toHaveBeenCalledTimes(5);
+        expect(warnLines()).toHaveLength(5);
+        expect(profileLines()).toHaveLength(1);
+        expect(profileLines()[0][0]).not.toContain('File: ');
+        expect(profileMeta().file).toBe('in_window');
+        expect(totalFiles('written')).toBe(5);
+        expect(totalFiles('inWindow')).toBe(1);
+      });
     });
 
     it('reports the active profiling time per stats period, splitting a capture across two', async () => {

@@ -12,16 +12,21 @@
  * its log lines straight to stdout, because the main thread is blocked exactly when they matter.
  */
 
+import Fs from 'node:fs/promises';
+import Os from 'node:os';
+import Path from 'node:path';
 import { getHeapStatistics } from 'node:v8';
 import { isMainThread, workerData } from 'node:worker_threads';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { WorkerLogger } from '@kbn/core-threads-server-internal';
 import { createWorkerLogger } from '@kbn/core-threads-server-internal';
+import { WriteAdmission } from './admission';
 import { BlockDetector, type DetectedBlock } from './block_detector';
 import { BlockStats } from './block_stats';
 import {
   ProfileCapture,
   createInspectorSession,
+  prepareProfile,
   type CpuProfile,
   type InspectorSession,
 } from './profile_capture';
@@ -29,7 +34,9 @@ import { summarizeProfile, type CallerSummary, type ProfileSummary } from './pro
 import type {
   BlockLogMeta,
   CaptureStopReason,
+  FileCounts,
   Phase,
+  ProfileFileOutcome,
   ProfileLogMeta,
   ProfilingStats,
   StatsLogMeta,
@@ -71,6 +78,7 @@ interface Capture {
 
 const toMs = (us: number): number => Math.floor(us / 1000);
 const blocks = (count: number): string => `${count} ${count === 1 ? 'block' : 'blocks'}`;
+const noFiles = (): FileCounts => ({ written: 0, inWindow: 0, fileLimit: 0, writeFailed: 0 });
 const noCaptures = (): ProfilingStats => ({
   pastStartAfter: 0,
   profiled: 0,
@@ -79,13 +87,26 @@ const noCaptures = (): ProfilingStats => ({
   skippedCooldown: 0,
   profilingActiveMs: 0,
   maxStopHeartbeatGapMs: 0,
+  files: { starting: noFiles(), running: noFiles() },
 });
+const FILE_COUNT_KEYS: Partial<Record<ProfileFileOutcome, keyof FileCounts>> = {
+  written: 'written',
+  in_window: 'inWindow',
+  file_limit: 'fileLimit',
+  write_failed: 'writeFailed',
+};
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
 /** Time from the first sample to the block's end (`block_ended`) or to the stop (`max_duration`). */
 const sampledMs = ({ startTime, endTime, timeDeltas }: CpuProfile, untilUs = endTime): number =>
   timeDeltas?.length ? Math.max(0, toMs(untilUs - (startTime + timeDeltas[0]))) : 0;
+
+/** Leads with the phase and the zero-padded block duration, so sorted listings surface the worst. */
+export const fileName = (phase: Phase, blockedMs: number, date: Date) =>
+  `event-loop-block-${phase}-${String(Math.round(blockedMs)).padStart(6, '0')}ms-${date
+    .toISOString()
+    .replace(/[:.]/g, '-')}-${Os.hostname()}-${process.pid}.cpuprofile`;
 
 const formatFrame = ({ name, location }: CallerSummary): string =>
   location === undefined ? name : `${name} (${location})`;
@@ -132,6 +153,7 @@ export const runWatchdogWorker = (
   const shared = new BigInt64Array(sharedBuffer);
   const detector = new BlockDetector();
   const stats = new BlockStats(thresholdsMs, toMs(nowUs()));
+  const admission = new WriteAdmission();
   let reportedDroppedLogLines = logger.getDroppedLogLineCount();
   let counts = noCaptures();
   /** Capture lines logged since the worker started, for the message's `#N`. */
@@ -270,7 +292,32 @@ export const runWatchdogWorker = (
       .finally(() => endCapture(current));
   };
 
-  const onProfile = (
+  const writeProfile = async (
+    phase: Phase,
+    blockedMs: number,
+    nowMs: number,
+    profile: CpuProfile
+  ): Promise<{ file: ProfileFileOutcome; path?: string }> => {
+    if (profiling.dir === undefined) {
+      return { file: 'no_directory' };
+    }
+    const admitted = admission.admit(phase, blockedMs, nowMs);
+    if (admitted !== 'admitted') {
+      return { file: admitted };
+    }
+    const path = Path.join(profiling.dir, fileName(phase, blockedMs, new Date()));
+    try {
+      await Fs.writeFile(path, JSON.stringify(prepareProfile(profile, root)));
+      return { file: 'written', path };
+    } catch (error) {
+      logger.error(`Failed to write an event loop block profile: ${errorMessage(error)}`, {
+        tags: ['event-loop-watchdog'],
+      });
+      return { file: 'write_failed' };
+    }
+  };
+
+  const onProfile = async (
     current: Capture,
     profile: CpuProfile,
     stopReason: CaptureStopReason,
@@ -314,14 +361,25 @@ export const runWatchdogWorker = (
       stopHeartbeatGapMs = Math.max(current.stopHeartbeatGapMs, heartbeatGapMs(nowMs));
       counts.maxStopHeartbeatGapMs = Math.max(counts.maxStopHeartbeatGapMs, stopHeartbeatGapMs);
     }
+    const { file, path } =
+      summary.samples > 0
+        ? await writeProfile(phase, blockedMs, nowMs, profile)
+        : { file: 'empty' as const };
+    const countKey = FILE_COUNT_KEYS[file];
+    if (countKey) {
+      counts.files[phase][countKey]++;
+    }
     captureNumber++;
     const frameLists = formatFrameLists(summary);
-    logger.info<ProfileLogMeta>(
+    // Written profiles are the ones to look at; the others still show where blocks come from.
+    logger[file === 'written' ? 'warn' : 'info']<ProfileLogMeta>(
       `Event loop block profile #${captureNumber}: block ~${blockedMs}ms${
         stopReason === 'block_ended' ? '' : ' so far'
       } (profiled after ~${profiledAfterMs}ms, profiler start took ~${profilerStartMs}ms), ${
         summary.samples
-      } samples; stopped: ${stopReason}.${frameLists ? ` ${frameLists}` : ''}`,
+      } samples; stopped: ${stopReason}.${path ? ` File: ${path}.` : ''}${
+        frameLists ? ` ${frameLists}` : ''
+      }`,
       {
         tags: ['event-loop-watchdog'],
         kibana: {
@@ -338,6 +396,7 @@ export const runWatchdogWorker = (
               nodes: profile.nodes.length,
               heapUsed: heap,
               stopReason,
+              file,
               ...(stopHeartbeatGapMs === undefined ? {} : { stopHeartbeatGapMs }),
             },
           },
