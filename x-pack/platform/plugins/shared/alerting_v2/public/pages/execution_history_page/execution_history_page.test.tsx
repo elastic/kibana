@@ -139,6 +139,11 @@ jest.mock('./hooks/use_unified_data_table_services', () => ({
   useUnifiedDataTableServices: () => ({}),
 }));
 
+// The diagnose button depends on Agent Builder services; they are covered in ./diagnose tests.
+jest.mock('./diagnose', () => ({
+  useRuleDiagnoseButton: () => () => null,
+}));
+
 const mockUseCountNewActionPolicyExecutions = jest.fn();
 jest.mock('../../hooks/use_count_new_action_policy_executions', () => ({
   useCountNewActionPolicyExecutions: (...args: unknown[]) =>

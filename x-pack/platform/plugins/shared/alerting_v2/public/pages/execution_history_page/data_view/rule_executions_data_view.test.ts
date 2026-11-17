@@ -42,6 +42,7 @@ describe('ruleExecutionToDataTableRecord', () => {
       [RULE_EXECUTION_FIELDS.duration]: 1500,
       [RULE_EXECUTION_FIELDS.outcome]: 'success',
       [RULE_EXECUTION_FIELDS.message]: 'Completed successfully',
+      [RULE_EXECUTION_FIELDS.actions]: '',
     });
   });
 

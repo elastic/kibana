@@ -82,6 +82,17 @@ jest.mock('../hooks/use_unified_data_table_services', () => ({
   useUnifiedDataTableServices: () => ({}),
 }));
 
+const mockRenderDiagnoseButton = jest.fn<React.ReactNode, [RuleExecutionView]>((execution) => (
+  <button type="button" data-test-subj="mockDiagnoseButton">
+    {`Diagnose ${execution.id}`}
+  </button>
+));
+const mockUseRuleDiagnoseButton = jest.fn((_params: unknown) => mockRenderDiagnoseButton);
+
+jest.mock('../diagnose', () => ({
+  useRuleDiagnoseButton: (params: unknown) => mockUseRuleDiagnoseButton(params),
+}));
+
 jest.mock('../../../hooks/use_fetch_rule_executions', () => ({
   useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
 }));
@@ -161,6 +172,58 @@ describe('RulesTabContent', () => {
 
     expect(screen.getByTestId('ruleExecutionHistoryTable')).toBeInTheDocument();
     expect(screen.getByTestId('ruleExecutionHistoryOutcomeFilter')).toBeInTheDocument();
+  });
+
+  it('declares an independent Actions column after Message', () => {
+    mockResult(withRows([buildItem()]));
+    renderComponent();
+
+    const { columns } = lastGridProps();
+    expect(columns).toEqual(expect.arrayContaining(['message', 'actions']));
+    expect(columns.indexOf('actions')).toBe(columns.length - 1);
+    expect(columns.indexOf('actions')).toBeGreaterThan(columns.indexOf('message'));
+  });
+
+  it('renders the diagnose action in the Actions cell of failed rows only', () => {
+    mockResult(
+      withRows([
+        buildItem({
+          id: 'exec-failed',
+          outcome: 'failure',
+          error: { message: 'Unknown column [x]' },
+        }),
+        buildItem({ id: 'exec-ok', outcome: 'success' }),
+      ])
+    );
+    renderComponent();
+
+    expect(screen.getAllByTestId('mockDiagnoseButton')).toHaveLength(1);
+    expect(screen.getByText('Diagnose exec-failed')).toBeInTheDocument();
+    expect(screen.queryByText('Diagnose exec-ok')).not.toBeInTheDocument();
+    // The Message column keeps showing just the error text.
+    expect(screen.getByText('Unknown column [x]')).toBeInTheDocument();
+  });
+
+  it('renders an empty Actions cell when the diagnose action is unavailable', () => {
+    mockRenderDiagnoseButton.mockReturnValueOnce(null);
+    mockResult(
+      withRows([buildItem({ outcome: 'failure', error: { message: 'Unknown column [x]' } })])
+    );
+    renderComponent();
+
+    expect(screen.queryByTestId('mockDiagnoseButton')).not.toBeInTheDocument();
+    expect(screen.getByText('Unknown column [x]')).toBeInTheDocument();
+  });
+
+  it('resolves rule names from the rules cache for the diagnose controls', () => {
+    mockResult(withRows([buildItem()]));
+    renderComponent();
+
+    const { getRuleName } = mockUseRuleDiagnoseButton.mock.calls[0][0] as {
+      getRuleName: (ruleId: string) => string | undefined;
+    };
+    expect(getRuleName('rule-1')).toBe('My Rule');
+    expect(getRuleName('rule-unknown')).toBeUndefined();
   });
 
   it('calls useFetchRuleExecutions with default params (page 1, perPage 10, default sort)', () => {

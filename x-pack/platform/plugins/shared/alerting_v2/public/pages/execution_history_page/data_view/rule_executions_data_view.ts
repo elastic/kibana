@@ -14,6 +14,7 @@ import {
   RULES_COLUMN_DURATION,
   RULES_COLUMN_RESPONSE,
   RULES_COLUMN_MESSAGE,
+  RULES_COLUMN_ACTIONS,
   RULES_SUCCESS_MESSAGE,
   RULES_MESSAGE_PLACEHOLDER,
 } from '../translations';
@@ -36,6 +37,8 @@ export const RULE_EXECUTION_FIELDS = {
   duration: 'duration',
   outcome: DIRECT_FIELDS.outcome,
   message: 'message',
+  // Display-only column that hosts row actions (rendered by a custom cell); carries no data.
+  actions: 'actions',
 } as const;
 
 // In-memory data view — the `title` does not resolve to any real index. Declaring the timestamp
@@ -74,6 +77,11 @@ const RULE_EXECUTIONS_DATA_VIEW_SPEC: DataViewSpec = {
       'string',
       RULES_COLUMN_MESSAGE
     ),
+    [RULE_EXECUTION_FIELDS.actions]: displayField(
+      RULE_EXECUTION_FIELDS.actions,
+      'string',
+      RULES_COLUMN_ACTIONS
+    ),
   },
 };
 
@@ -101,5 +109,6 @@ export const ruleExecutionToDataTableRecord = (item: RuleExecutionView): DataTab
     [RULE_EXECUTION_FIELDS.duration]: item.timings.duration_ms,
     [RULE_EXECUTION_FIELDS.outcome]: item.outcome,
     [RULE_EXECUTION_FIELDS.message]: getMessage(item),
+    [RULE_EXECUTION_FIELDS.actions]: '',
   },
 });

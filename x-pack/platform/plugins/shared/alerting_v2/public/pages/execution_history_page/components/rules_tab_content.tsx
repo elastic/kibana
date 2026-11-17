@@ -33,7 +33,7 @@ import {
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { asDuration } from '@kbn/alerts-ui-shared';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
-import type { RuleExecutionOutcome } from '@kbn/alerting-v2-schemas';
+import type { RuleExecutionOutcome, RuleExecutionView } from '@kbn/alerting-v2-schemas';
 import { EXECUTION_HISTORY_MAX_RESULT_WINDOW } from '@kbn/alerting-v2-schemas';
 import { UserCapabilities } from '../../../services/user_capabilities';
 import { useFetchRuleExecutions } from '../../../hooks/use_fetch_rule_executions';
@@ -42,6 +42,7 @@ import {
   ruleExecutionToDataTableRecord,
   useRuleExecutionsDataView,
 } from '../data_view';
+import { useRuleDiagnoseButton } from '../diagnose';
 import { useExecutionHistoryTableConfig } from '../hooks/use_execution_history_table_config';
 import { useUnifiedDataTableServices } from '../hooks/use_unified_data_table_services';
 import { FilteredEmptyState, RulesEmptyState } from './empty_state';
@@ -122,6 +123,7 @@ const RULES_DEFAULT_VISIBLE_COLUMNS: string[] = [
   RULE_EXECUTION_FIELDS.duration,
   RULE_EXECUTION_FIELDS.outcome,
   RULE_EXECUTION_FIELDS.message,
+  RULE_EXECUTION_FIELDS.actions,
 ];
 
 type RuleOutcomeFilter = 'all' | RuleExecutionOutcome;
@@ -199,6 +201,18 @@ const RuleResponseCell = ({ row }: DataGridCellValueElementProps) => {
   );
 };
 
+const RuleActionsCell = ({
+  row,
+  renderDiagnoseButton,
+}: DataGridCellValueElementProps & {
+  renderDiagnoseButton: (execution: RuleExecutionView) => React.ReactNode;
+}) => {
+  if (row.flattened[RULE_EXECUTION_FIELDS.outcome] !== 'failure') {
+    return null;
+  }
+  return <>{renderDiagnoseButton(row.raw._source as unknown as RuleExecutionView)}</>;
+};
+
 interface Props {
   onRuleClick: (ruleId: string) => void;
 }
@@ -253,6 +267,12 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
     services: { http },
   });
 
+  const getRuleName = useCallback(
+    (ruleId: string) => rulesCache[ruleId]?.metadata?.name,
+    [rulesCache]
+  );
+  const renderDiagnoseButton = useRuleDiagnoseButton({ getRuleName });
+
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       [RULE_EXECUTION_FIELDS.startedAt]: (props) => (
@@ -263,8 +283,11 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
       ),
       [RULE_EXECUTION_FIELDS.duration]: RuleDurationCell,
       [RULE_EXECUTION_FIELDS.outcome]: RuleResponseCell,
+      [RULE_EXECUTION_FIELDS.actions]: (props) => (
+        <RuleActionsCell {...props} renderDiagnoseButton={renderDiagnoseButton} />
+      ),
     }),
-    [dateTimeFormat, rulesCache, onRuleClick]
+    [dateTimeFormat, rulesCache, onRuleClick, renderDiagnoseButton]
   );
 
   const sort = useMemo<SortOrder[]>(() => [[sortField, sortDirection]], [sortField, sortDirection]);

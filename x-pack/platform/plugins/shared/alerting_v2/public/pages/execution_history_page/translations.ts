@@ -77,6 +77,13 @@ export const RULES_COLUMN_MESSAGE = i18n.translate(
   }
 );
 
+export const RULES_COLUMN_ACTIONS = i18n.translate(
+  'xpack.alertingV2.executionHistory.rulesTab.columns.actions',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
 export const RULES_SUCCESS_MESSAGE = i18n.translate(
   'xpack.alertingV2.executionHistory.rulesTab.successMessage',
   {
