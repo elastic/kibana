@@ -11,6 +11,7 @@ import type {
   ContextEngineOutcome,
   ReportKiVerificationEventParams,
   ReportKiWriteEventParams,
+  ReportMemoryRecallEventParams,
 } from './events';
 import { CONTEXT_ENGINE_EVENT_TYPES, contextEngineServerEbtEvents } from './events';
 
@@ -105,6 +106,35 @@ export class ContextEngineAnalyticsService {
       );
     } catch (error) {
       this.logger.debug('Failed to report KI verification telemetry event', { error });
+    }
+  }
+
+  reportMemoryRecall({
+    outcome,
+    totalMs,
+    tokensReturned,
+    candidatesReranked,
+    errorType,
+  }: {
+    outcome: ContextEngineOutcome;
+    totalMs: number;
+    tokensReturned?: number;
+    candidatesReranked?: number;
+    errorType?: string;
+  }): void {
+    try {
+      this.analytics.reportEvent<ReportMemoryRecallEventParams>(
+        CONTEXT_ENGINE_EVENT_TYPES.MemoryRecall,
+        {
+          outcome,
+          total_ms: totalMs,
+          ...(tokensReturned !== undefined && { tokens_returned: tokensReturned }),
+          ...(candidatesReranked !== undefined && { candidates_reranked: candidatesReranked }),
+          ...(errorType !== undefined && { error_type: errorType }),
+        }
+      );
+    } catch (error) {
+      this.logger.debug('Failed to report memory recall telemetry event', { error });
     }
   }
 }
