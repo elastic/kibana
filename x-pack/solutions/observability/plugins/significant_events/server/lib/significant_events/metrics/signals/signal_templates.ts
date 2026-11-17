@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignalTemplate } from './types';
+import type { SignalSource, SignalTemplate } from './types';
 
 const WORKLOAD_SUBTYPES = [
   'k8s.deployment',
@@ -14,13 +14,38 @@ const WORKLOAD_SUBTYPES = [
   'k8s.cronjob',
 ] as const;
 
+const kubernetesOtelRule = (ruleTemplateId: string, adapted?: string): SignalSource => ({
+  kind: 'integration_rule_template',
+  integration: 'kubernetes_otel',
+  integrationVersion: '2.6.1',
+  ruleTemplateId,
+  ...(adapted ? { adapted } : {}),
+});
+
+const systemRule = (ruleTemplateId: string): SignalSource => ({
+  kind: 'integration_rule_template',
+  integration: 'system',
+  integrationVersion: '3.5.0',
+  ruleTemplateId,
+});
+
+const nightshiftDefault = (reason: string): SignalSource => ({
+  kind: 'nightshift_default',
+  reason,
+});
+
+const undecided = (reason: string): SignalSource => ({
+  kind: 'undecided',
+  reason,
+});
+
+// Signal ids are stable API values; add new ids instead of renaming existing ones.
 export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
-  // kubernetes_otel container-cpu-throttling rule template, ES|QL L32 and window L40-L41.
+  // kubernetes_otel/kibana/alerting_rule_template/kubernetes_otel-container-cpu-throttling.json L32, L40-L41.
   {
     signal: 'k8s.container.cpu_vs_limit',
     subtypes: WORKLOAD_SUBTYPES.slice(0, 3),
     window: '15 minutes',
-    thresholdSource: 'kubernetes_otel container-cpu-throttling rule template',
     variants: [
       {
         schema: 'ecs',
@@ -31,7 +56,9 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         direction: 'higher_is_worse',
         comparison: '>',
         threshold: 0.9,
-        label: 'example',
+        source: nightshiftDefault(
+          'OTel template threshold applied to the Elastic Agent field; the classic Kubernetes package ships no rule template'
+        ),
       },
       {
         schema: 'otel',
@@ -42,16 +69,15 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         direction: 'higher_is_worse',
         comparison: '>',
         threshold: 0.9,
-        label: 'proven',
+        source: kubernetesOtelRule('kubernetes_otel-container-cpu-throttling'),
       },
     ],
   },
-  // kubernetes_otel pod-crashloopbackoff L31 and L39-L40; delta avoids stale restarts from MAX.
+  // kubernetes_otel/kibana/alerting_rule_template/kubernetes_otel-pod-crashloopbackoff.json L31, L39-L40.
   {
     signal: 'k8s.container.restarts',
     subtypes: WORKLOAD_SUBTYPES,
     window: '15 minutes',
-    thresholdSource: 'kubernetes_otel pod-crashloopbackoff rule template',
     variants: [
       {
         schema: 'ecs',
@@ -62,7 +88,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         direction: 'higher_is_worse',
         comparison: '>',
         threshold: 0,
-        label: 'to decide',
+        source: undecided('counter delta over 15 min; no rule template for the classic package'),
       },
       {
         schema: 'otel',
@@ -73,16 +99,18 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         direction: 'higher_is_worse',
         comparison: '>',
         threshold: 0,
-        label: 'example',
+        source: kubernetesOtelRule(
+          'kubernetes_otel-pod-crashloopbackoff',
+          "MAX minus MIN over the window instead of MAX, so restarts from before the window don't fire"
+        ),
       },
     ],
   },
-  // kubernetes_otel node-not-ready rule template, ES|QL L31 and window L39-L40.
+  // kubernetes_otel/kibana/alerting_rule_template/kubernetes_otel-node-not-ready.json L31, L39-L40.
   {
     signal: 'k8s.node.not_ready',
     subtypes: ['k8s.node'],
     window: '1 minute',
-    thresholdSource: 'kubernetes_otel node-not-ready rule template',
     variants: [
       {
         schema: 'ecs',
@@ -93,7 +121,9 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         direction: 'higher_is_worse',
         comparison: '>',
         threshold: 0,
-        label: 'example',
+        source: nightshiftDefault(
+          'condition from the classic Kubernetes dashboard, not a rule template'
+        ),
       },
       {
         schema: 'otel',
@@ -104,16 +134,15 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         direction: 'lower_is_worse',
         comparison: '==',
         threshold: 0,
-        label: 'proven',
+        source: kubernetesOtelRule('kubernetes_otel-node-not-ready'),
       },
     ],
   },
-  // system cpu-utilization rule template, ES|QL L18 and window L15-L16.
+  // system/kibana/alerting_rule_template/system-cpu-utilization.json L15-L18.
   {
     signal: 'host.cpu.utilization',
     subtypes: ['host', 'k8s.node'],
     window: '5 minutes',
-    thresholdSource: 'system cpu-utilization rule template',
     variants: [
       {
         schema: 'ecs',
@@ -125,7 +154,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         direction: 'higher_is_worse',
         comparison: '>=',
         threshold: 0.85,
-        label: 'proven',
+        source: systemRule('system-cpu-utilization'),
       },
       {
         schema: 'otel',
@@ -138,16 +167,17 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         direction: 'higher_is_worse',
         comparison: '>=',
         threshold: 0.85,
-        label: 'example',
+        source: nightshiftDefault(
+          'system template threshold applied to the OTel field; no system OTel template'
+        ),
       },
     ],
   },
-  // system memory-utilization rule template, ES|QL L18 and window L15-L16.
+  // system/kibana/alerting_rule_template/system-memory-utilization.json L15-L18.
   {
     signal: 'host.memory.utilization',
     subtypes: ['host', 'k8s.node'],
     window: '5 minutes',
-    thresholdSource: 'system memory-utilization rule template',
     variants: [
       {
         schema: 'ecs',
@@ -159,7 +189,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         direction: 'higher_is_worse',
         comparison: '>=',
         threshold: 0.9,
-        label: 'proven',
+        source: systemRule('system-memory-utilization'),
       },
       {
         schema: 'otel',
@@ -172,16 +202,17 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         direction: 'higher_is_worse',
         comparison: '>=',
         threshold: 0.9,
-        label: 'example',
+        source: nightshiftDefault(
+          'system template threshold applied to the OTel field; no system OTel template'
+        ),
       },
     ],
   },
-  // Our tested APM service error-rate example.
+  // Nightshift default; APM has no integration rule template for this error rate threshold.
   {
     signal: 'service.error_rate',
     subtypes: ['service'],
     window: '15 minutes',
-    thresholdSource: 'our example',
     variants: [
       {
         schema: 'ecs',
@@ -193,7 +224,9 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         direction: 'higher_is_worse',
         comparison: '>',
         threshold: 0.05,
-        label: 'example',
+        source: nightshiftDefault(
+          '5% error rate, our example; APM ships no error rate rule template'
+        ),
       },
     ],
   },

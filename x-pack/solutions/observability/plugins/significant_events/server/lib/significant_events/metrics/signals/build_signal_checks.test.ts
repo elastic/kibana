@@ -152,6 +152,19 @@ describe('buildSignalChecks', () => {
     ]);
   });
 
+  it('records source provenance for every template variant', () => {
+    SIGNAL_TEMPLATES.forEach(({ variants }) => {
+      variants.forEach(({ source }) => {
+        expect(source).toBeDefined();
+        if (source.kind === 'integration_rule_template') {
+          expect(source.integration).not.toBe('');
+          expect(source.integrationVersion).not.toBe('');
+          expect(source.ruleTemplateId).not.toBe('');
+        }
+      });
+    });
+  });
+
   it('renders ES|QL previews that parse for every template variant', () => {
     const checks = SIGNAL_TEMPLATES.flatMap((template: SignalTemplate) =>
       template.variants.flatMap((variant, index) => {

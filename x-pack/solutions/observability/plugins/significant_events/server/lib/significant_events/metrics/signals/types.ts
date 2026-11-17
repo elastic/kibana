@@ -8,9 +8,19 @@
 import type { Condition } from '@kbn/streamlang';
 
 export type SignalSchema = 'ecs' | 'otel';
-export type SignalLabel = 'proven' | 'example' | 'to decide';
 export type SignalDirection = 'higher_is_worse' | 'lower_is_worse';
 export type SignalComparison = '>' | '>=' | '==';
+
+export type SignalSource =
+  | {
+      kind: 'integration_rule_template';
+      integration: string;
+      integrationVersion: string;
+      ruleTemplateId: string;
+      adapted?: string;
+    }
+  | { kind: 'nightshift_default'; reason: string }
+  | { kind: 'undecided'; reason: string };
 
 export type SignalFormulaKind =
   | 'average'
@@ -32,14 +42,13 @@ export interface SignalTemplateVariant {
   direction: SignalDirection;
   comparison: SignalComparison;
   threshold: number;
-  label: SignalLabel;
+  source: SignalSource;
 }
 
 export interface SignalTemplate {
   signal: string;
   subtypes: readonly string[];
   window: string;
-  thresholdSource: string;
   variants: readonly SignalTemplateVariant[];
 }
 
@@ -56,8 +65,7 @@ export interface SignalCheck {
   window: string;
   direction: SignalDirection;
   threshold: number;
-  threshold_source: string;
-  label: SignalLabel;
+  source: SignalSource;
   esql_preview: string;
 }
 

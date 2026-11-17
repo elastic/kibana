@@ -288,8 +288,7 @@ export const buildSignalChecks = ({
         window: template.window,
         direction: variant.direction,
         threshold: variant.threshold,
-        threshold_source: template.thresholdSource,
-        label: variant.label,
+        source: variant.source,
         esql_preview: esqlPreview,
       });
     }
