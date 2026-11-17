@@ -156,7 +156,8 @@ describe('EngineRunner', () => {
     expect(result).toMatchObject({
       strategies: [{ id: 'waits_for_abort', error: 'aborted' }],
     });
-    expect(await state.get({ spaceId: SPACE_ID, kind: 'lease' })).toBeUndefined();
+    // Released: the next run takes the lease at once.
+    expect((await acquireRunLease({ state, spaceId: SPACE_ID, now: NOW })).acquired).toBe(true);
   });
 
   it('takes no lease while the engine is unavailable', async () => {
