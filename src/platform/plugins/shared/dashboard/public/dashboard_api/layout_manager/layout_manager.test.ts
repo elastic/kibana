@@ -14,8 +14,11 @@ import { waitFor } from '@testing-library/react';
 import {
   ControlValuesSource,
   DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_ESQL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
+  ESQL_CONTROL,
 } from '@kbn/controls-constants';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasLibraryTransforms,
@@ -28,7 +31,7 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { getSampleDashboardState } from '../../mocks';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
-import { deserializeLayout } from './deserialize_layout';
+import { deserializeLayout } from '../../../common/dashboard_state/layout/deserialize_layout';
 import { initializeLayoutManager } from './layout_manager';
 
 jest.mock('uuid', () => ({
@@ -44,6 +47,7 @@ jest.mock('rxjs', () => ({
 const trackPanelMock = {
   setScrollToPanelId: jest.fn(),
   setHighlightPanelId: jest.fn(),
+  scrollToBottom$: { next: jest.fn() },
 } as unknown as ReturnType<typeof initializeTrackPanel>['api'];
 
 const viewModeManagerMock = { api: { viewMode$: new BehaviorSubject('view') } } as ReturnType<
@@ -234,6 +238,194 @@ describe('layout manager', () => {
     });
   });
 
+  describe('addIncomingEmbeddables existing and pinned panel updates', () => {
+    const pinnedEsqlControl = {
+      ...DEFAULT_PINNED_CONTROL_STATE,
+      id: 'pinnedEsqlControl',
+      type: ESQL_CONTROL,
+      config: {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'geo_dest',
+        variable_type: ESQLVariableType.VALUES,
+        selected_options: ['US'],
+      },
+    } as NonNullable<DashboardState['pinned_panels']>[number];
+
+    test('should update an existing pinned ES|QL control in place when incoming control has the same id', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [pinnedEsqlControl],
+        trackPanelMock
+      );
+
+      layoutManager.api.addIncomingEmbeddables([
+        {
+          embeddableId: 'pinnedEsqlControl',
+          type: ESQL_CONTROL,
+          serializedState: {
+            ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+            variable_name: 'geo_dest',
+            variable_type: ESQLVariableType.VALUES,
+            selected_options: ['CN'],
+          },
+        },
+      ]);
+
+      const layout = layoutManager.api.layout$.value;
+      expect(Object.keys(layout.panels)).toEqual([PANEL_ONE_ID]);
+      expect(layout.panels.pinnedEsqlControl).toBeUndefined();
+      expect(layout.pinnedPanels).toEqual({
+        pinnedEsqlControl: {
+          type: ESQL_CONTROL,
+          width: DEFAULT_PINNED_CONTROL_STATE.width,
+          grow: DEFAULT_PINNED_CONTROL_STATE.grow,
+          order: 0,
+        },
+      });
+      expect(layoutManager.internalApi.getSerializedStateForPanel('pinnedEsqlControl')).toEqual({
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'geo_dest',
+        variable_type: ESQLVariableType.VALUES,
+        selected_options: ['CN'],
+      });
+    });
+
+    test('should scroll to and highlight the new grid panel, not the pinned control it updates', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [pinnedEsqlControl],
+        trackPanelMock
+      );
+
+      layoutManager.api.addIncomingEmbeddables([
+        {
+          embeddableId: 'pinnedEsqlControl',
+          type: ESQL_CONTROL,
+          serializedState: {
+            ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+            variable_name: 'geo_dest',
+            variable_type: ESQLVariableType.VALUES,
+            selected_options: ['CN'],
+          },
+        },
+        {
+          embeddableId: 'searchPanel',
+          type: 'search',
+          serializedState: { title: 'Session' },
+          size: { width: 1, height: 1 },
+        },
+      ]);
+
+      const layout = layoutManager.api.layout$.value;
+      expect(Object.keys(layout.panels)).toEqual([PANEL_ONE_ID, 'searchPanel']);
+      expect(layout.panels.pinnedEsqlControl).toBeUndefined();
+      expect(Object.keys(layout.pinnedPanels)).toEqual(['pinnedEsqlControl']);
+      expect(layoutManager.internalApi.getSerializedStateForPanel('pinnedEsqlControl')).toEqual({
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'geo_dest',
+        variable_type: ESQLVariableType.VALUES,
+        selected_options: ['CN'],
+      });
+      expect(trackPanelMock.setScrollToPanelId).toHaveBeenCalledWith('searchPanel');
+      expect(trackPanelMock.setHighlightPanelId).toHaveBeenCalledWith('searchPanel');
+    });
+
+    test('should apply incoming state to a mounted pinned ES|QL control when its id is sent again', async () => {
+      const existingState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'geo_dest',
+        variable_type: ESQLVariableType.VALUES,
+        selected_options: ['US'],
+      };
+      const updatedState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'geo_dest',
+        variable_type: ESQLVariableType.VALUES,
+        selected_options: ['CN'],
+      };
+      const latestState$ = new BehaviorSubject(existingState);
+      const applySerializedState = jest.fn((nextState) => {
+        latestState$.next(nextState);
+        return Promise.resolve();
+      });
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [pinnedEsqlControl],
+        trackPanelMock
+      );
+      layoutManager.api.registerChildApi({
+        ...panel1Api,
+        type: ESQL_CONTROL,
+        uuid: 'pinnedEsqlControl',
+        latestState$,
+        serializeState: () => latestState$.value,
+        applySerializedState,
+        hasUnsavedChanges$: new BehaviorSubject(false),
+      } as DefaultEmbeddableApi);
+
+      layoutManager.api.addIncomingEmbeddables([
+        {
+          embeddableId: 'pinnedEsqlControl',
+          type: ESQL_CONTROL,
+          serializedState: updatedState,
+        },
+      ]);
+
+      expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(true);
+      await waitFor(() => {
+        expect(applySerializedState).toHaveBeenCalledWith(updatedState);
+        expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(false);
+      });
+
+      const layout = layoutManager.api.layout$.value;
+      expect(Object.keys(layout.panels)).toEqual([PANEL_ONE_ID]);
+      expect(layout.panels.pinnedEsqlControl).toBeUndefined();
+      expect(Object.keys(layout.pinnedPanels)).toEqual(['pinnedEsqlControl']);
+      expect(layoutManager.internalApi.getSerializedStateForPanel('pinnedEsqlControl')).toEqual(
+        updatedState
+      );
+      expect(trackPanelMock.setScrollToPanelId).not.toHaveBeenCalled();
+      expect(trackPanelMock.setHighlightPanelId).not.toHaveBeenCalled();
+    });
+
+    test('should apply incoming state to a mounted grid panel and clear loading even if applySerializedState fails', async () => {
+      const applySerializedState = jest.fn(() => {
+        throw new Error('Failed to apply state');
+      });
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [],
+        trackPanelMock
+      );
+      layoutManager.api.registerChildApi({
+        ...panel1Api,
+        applySerializedState,
+        hasUnsavedChanges$: new BehaviorSubject(false),
+      } as DefaultEmbeddableApi);
+
+      layoutManager.api.addIncomingEmbeddables([
+        {
+          embeddableId: PANEL_ONE_ID,
+          type: panel1.type,
+          serializedState: { title: 'Updated Panel One' },
+        },
+      ]);
+
+      expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(true);
+      await waitFor(() => {
+        expect(applySerializedState).toHaveBeenCalledWith({ title: 'Updated Panel One' });
+        expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(false);
+      });
+
+      expect(trackPanelMock.setScrollToPanelId).toHaveBeenCalledWith(PANEL_ONE_ID);
+      expect(trackPanelMock.setHighlightPanelId).toHaveBeenCalledWith(PANEL_ONE_ID);
+    });
+  });
+
   describe('duplicatePanel', () => {
     test('should add duplicated panel to layout', async () => {
       const layoutManager = initializeLayoutManager(
@@ -330,6 +522,126 @@ describe('layout manager', () => {
         expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
       });
       expect(layoutManager.api.canRemovePanels()).toBe(false);
+    });
+  });
+
+  describe('removePanels', () => {
+    const panel2 = { ...panel1, id: 'panelTwo', grid: { w: 1, h: 1, x: 1, y: 0 } };
+    const pinnedControl3 = { ...pinnedControls[0], id: 'control3' };
+
+    test('removes grid and pinned panels in a single layout update', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1, panel2],
+        [...pinnedControls, pinnedControl3],
+        trackPanelMock
+      );
+      layoutManager.api.registerChildApi(panel1Api);
+      const layoutListener = jest.fn();
+      const subscription = layoutManager.api.layout$.subscribe(layoutListener);
+      layoutListener.mockClear();
+
+      layoutManager.api.removePanels([PANEL_ONE_ID, 'control1']);
+
+      expect(layoutListener).toHaveBeenCalledTimes(1);
+      const { panels, pinnedPanels } = layoutManager.api.layout$.getValue();
+      expect(Object.keys(panels)).toEqual(['panelTwo']);
+      expect(pinnedPanels).toEqual({
+        control2: { ...pick(pinnedControls[1], ['grow', 'width', 'type']), order: 0 },
+        control3: { ...pick(pinnedControl3, ['grow', 'width', 'type']), order: 1 },
+      });
+      expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBeUndefined();
+      subscription.unsubscribe();
+    });
+
+    test('clears the state of a panel whose API never registered', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [{ ...section1, collapsed: true }],
+        [],
+        trackPanelMock
+      );
+      expect(layoutManager.internalApi.getSerializedStateForPanel(PANEL_ONE_ID)).toBeDefined();
+
+      layoutManager.api.removePanels([PANEL_ONE_ID]);
+
+      expect(layoutManager.internalApi.getSerializedStateForPanel(PANEL_ONE_ID)).toBeUndefined();
+    });
+
+    test('does not update the layout when none of the panels exist', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [],
+        trackPanelMock
+      );
+      const layoutListener = jest.fn();
+      const subscription = layoutManager.api.layout$.subscribe(layoutListener);
+      layoutListener.mockClear();
+
+      layoutManager.api.removePanels(['unknownPanel']);
+
+      expect(layoutListener).not.toHaveBeenCalled();
+      subscription.unsubscribe();
+    });
+
+    test('removePanel removes a single pinned panel', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        pinnedControls,
+        trackPanelMock
+      );
+
+      layoutManager.api.removePanel('control1');
+
+      expect(layoutManager.api.layout$.getValue().pinnedPanels).toEqual({
+        control2: { ...pick(pinnedControls[1], ['grow', 'width', 'type']), order: 0 },
+      });
+      expect(Object.keys(layoutManager.api.layout$.getValue().panels)).toEqual([PANEL_ONE_ID]);
+    });
+  });
+
+  describe('groupPanelsInSection', () => {
+    const panel2 = { ...panel1, id: 'panelTwo', grid: { w: 1, h: 1, x: 1, y: 0 } };
+
+    test('moves the panels into a new section at the bottom in a single layout update', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel2, section1],
+        pinnedControls,
+        trackPanelMock
+      );
+      const layoutListener = jest.fn();
+      const subscription = layoutManager.api.layout$.subscribe(layoutListener);
+      layoutListener.mockClear();
+
+      layoutManager.api.groupPanelsInSection(['panelTwo', 'control1']);
+
+      expect(layoutListener).toHaveBeenCalledTimes(1);
+      const { panels, sections } = layoutManager.api.layout$.getValue();
+      expect(sections['54321']).toBeDefined();
+      expect(panels.panelTwo.grid.sectionId).toBe('54321');
+      expect(trackPanelMock.scrollToBottom$.next).toHaveBeenCalledTimes(1);
+      subscription.unsubscribe();
+    });
+
+    test('does not update the layout when none of the panels are grid panels', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        pinnedControls,
+        trackPanelMock
+      );
+      const layoutListener = jest.fn();
+      const subscription = layoutManager.api.layout$.subscribe(layoutListener);
+      layoutListener.mockClear();
+
+      layoutManager.api.groupPanelsInSection(['control1', 'unknownPanel']);
+
+      expect(layoutListener).not.toHaveBeenCalled();
+      expect(trackPanelMock.scrollToBottom$.next).not.toHaveBeenCalled();
+      subscription.unsubscribe();
     });
   });
 

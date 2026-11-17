@@ -136,16 +136,27 @@ export const WorkflowExecutionList = ({
     });
   }, [executedByUserProfiles, executedByValuesToResolve, showUnresolvedExecutors]);
 
+  const showExecutionName =
+    Boolean(filters.runName?.trim()) || Boolean(executions?.hasNamedExecution);
+
   const columns = useMemo(
     () =>
       getExecutionHistoryColumns({
         euiTheme,
+        showExecutionName,
         showExecutor,
         executedByUserProfiles,
         showUnresolvedExecutors,
         timeZoneSetting,
       }),
-    [euiTheme, showExecutor, executedByUserProfiles, showUnresolvedExecutors, timeZoneSetting]
+    [
+      euiTheme,
+      showExecutionName,
+      showExecutor,
+      executedByUserProfiles,
+      showUnresolvedExecutors,
+      timeZoneSetting,
+    ]
   );
 
   const handleRowClick = useCallback(
@@ -159,7 +170,13 @@ export const WorkflowExecutionList = ({
     if (scrollableContentRef.current) {
       scrollableContentRef.current.scrollTop = 0;
     }
-  }, [filters.statuses, filters.executionTypes, filters.executedBy]);
+  }, [filters.statuses, filters.executionTypes, filters.executedBy, filters.runName]);
+
+  const hasActiveFilters =
+    filters.statuses.length > 0 ||
+    filters.executionTypes.length > 0 ||
+    (showExecutor && filters.executedBy.length > 0) ||
+    Boolean(filters.runName?.trim());
 
   let content: React.ReactNode = null;
 
@@ -212,10 +229,17 @@ export const WorkflowExecutionList = ({
         }
         body={
           <p>
-            <FormattedMessage
-              id="workflows.workflowExecutionList.noExecutionsFoundDescription"
-              defaultMessage="Workflow has not been executed yet."
-            />
+            {hasActiveFilters ? (
+              <FormattedMessage
+                id="workflows.workflowExecutionList.noExecutionsMatchFiltersDescription"
+                defaultMessage="No executions match the filters."
+              />
+            ) : (
+              <FormattedMessage
+                id="workflows.workflowExecutionList.noExecutionsFoundDescription"
+                defaultMessage="Workflow has not been executed yet."
+              />
+            )}
           </p>
         }
       />
@@ -333,6 +357,7 @@ export const WorkflowExecutionList = ({
               filters={filters}
               onFiltersChange={onFiltersChange}
               availableExecutedByOptions={availableExecutedByOptions}
+              showExecutionName={showExecutionName}
               showExecutor={showExecutor}
             />
           </EuiFlexItem>

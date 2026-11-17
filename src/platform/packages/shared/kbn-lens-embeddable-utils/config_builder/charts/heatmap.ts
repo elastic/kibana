@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormBasedPersistedState, HeatmapVisualizationState } from '@kbn/lens-common';
+import type {
+  FormBasedPersistedState,
+  HeatmapPalette,
+  HeatmapVisualizationState,
+} from '@kbn/lens-common';
+import { LENS_HEATMAP_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BuildDependencies, LensAttributes, LensHeatmapConfig } from '../types';
 import { DEFAULT_LAYER_ID } from '../constants';
 import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
+import { fromColorByValueAPIToLensState, isAutoColor } from '../transforms/coloring';
 
 const ACCESSOR = 'metric_formula_accessor';
 
@@ -22,6 +28,10 @@ function getAccessorName(type: 'x' | 'y') {
 
 function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizationState {
   const layer = config;
+  const basePalette =
+    layer.color && !isAutoColor(layer.color)
+      ? fromColorByValueAPIToLensState(layer.color, LENS_HEATMAP_DEFAULT_COLOR_STEPS)
+      : undefined;
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -53,6 +63,12 @@ function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizatio
       position: config.legend?.position || 'left',
       type: 'heatmap_legend',
     },
+    ...(basePalette && {
+      palette: {
+        ...basePalette,
+        accessor: ACCESSOR,
+      } satisfies HeatmapPalette,
+    }),
   };
 }
 

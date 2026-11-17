@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { isValidElement, type ReactNode } from 'react';
 import { renderHook } from '@testing-library/react';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { EntityType } from '../../../common/entity_analytics/types';
 import { RiskScoreLeftPanelSubTab } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { useEntityFlyoutApi } from './use_entity_flyout_api';
+import { useEntityFlyoutApi, type EntityFlyoutApi } from './use_entity_flyout_api';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
@@ -59,6 +60,17 @@ jest.mock('../shared/url_state/flyout_v2_url_writer', () => ({
 
 const mockOpenSystemFlyout = jest.fn();
 const mockReportEvent = jest.fn();
+
+const unwrapChildren = (node: ReactNode): ReactNode =>
+  isValidElement<{ children?: ReactNode }>(node) ? node.props.children : undefined;
+
+/** Props of the content handed to the system flyout: session provider > suspense > the lazy content. */
+const getOpenedContentProps = (): { entryPoint?: string } => {
+  const content = unwrapChildren(
+    unwrapChildren(jest.mocked(flyoutProviders).mock.calls[0][0].children)
+  );
+  return isValidElement<{ entryPoint?: string }>(content) ? content.props : {};
+};
 
 const managedUser = { _id: 'managed-user-id', _index: 'managed-user-index' };
 
@@ -288,6 +300,42 @@ describe('useEntityFlyoutApi', () => {
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
   });
 
+  it.each([
+    ['openHostFlyout', (api: EntityFlyoutApi) => api.openHostFlyout],
+    ['openHostFlyoutAsChild', (api: EntityFlyoutApi) => api.openHostFlyoutAsChild],
+  ])('%s hands the graph entry point to the host flyout it renders', (_, getOpener) => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    getOpener(result.current)({ hostName: 'host-1', graphEntryPoint: 'ai_chat_attachment' });
+
+    expect(getOpenedContentProps()).toEqual(
+      expect.objectContaining({ graphEntryPoint: 'ai_chat_attachment' })
+    );
+  });
+
+  it.each([
+    ['openUserFlyout', (api: EntityFlyoutApi) => api.openUserFlyout],
+    ['openUserFlyoutAsChild', (api: EntityFlyoutApi) => api.openUserFlyoutAsChild],
+  ])('%s hands the graph entry point to the user flyout it renders', (_, getOpener) => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    getOpener(result.current)({ userName: 'user-1', graphEntryPoint: 'ai_chat_attachment' });
+
+    expect(getOpenedContentProps()).toEqual(
+      expect.objectContaining({ graphEntryPoint: 'ai_chat_attachment' })
+    );
+  });
+
+  it.each([
+    ['openServiceFlyout', (api: EntityFlyoutApi) => api.openServiceFlyout],
+    ['openServiceFlyoutAsChild', (api: EntityFlyoutApi) => api.openServiceFlyoutAsChild],
+  ])('%s hands the graph entry point to the service flyout it renders', (_, getOpener) => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    getOpener(result.current)({ serviceName: 'svc-1', graphEntryPoint: 'ai_chat_attachment' });
+
+    expect(getOpenedContentProps()).toEqual(
+      expect.objectContaining({ graphEntryPoint: 'ai_chat_attachment' })
+    );
+  });
+
   it('openGenericEntityFlyout writes a genericEntity descriptor to the URL', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openGenericEntityFlyout({ entityId: 'generic-1', scopeId: 'scope-1' });
@@ -494,6 +542,23 @@ describe('useEntityFlyoutApi', () => {
     });
   });
 
+  it('openEntityRiskInputs persists the scopeId on the URL descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityRiskInputs({
+      entityType: EntityType.host,
+      entityName: 'my-host',
+      entityId: 'e-1',
+      scopeId: 'entity-analytics-new-entities-table-7d',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityRiskInputs,
+        scopeId: 'entity-analytics-new-entities-table-7d',
+      })
+    );
+  });
+
   it('openEntityAnomalyInsights writes an entityAnomalyInsights descriptor and clears the param on close', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openEntityAnomalyInsights({
@@ -577,6 +642,7 @@ describe('useEntityFlyoutApi', () => {
       scopeId: 'scope-1',
       entityName: 'entity-name',
       onShowEntity: jest.fn(),
+      entryPoint: 'entity_flyout',
     });
 
     expect(mockWriteOnOpen).toHaveBeenCalledWith({
@@ -586,6 +652,36 @@ describe('useEntityFlyoutApi', () => {
       entityName: 'entity-name',
     });
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
+  it('openEntityGraphView hands the entry point to the graph view it renders', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityGraphView({
+      entityId: 'entity-1',
+      scopeId: 'scope-1',
+      entityName: 'entity-name',
+      onShowEntity: jest.fn(),
+      entryPoint: 'entity_data_grid',
+    });
+
+    expect(getOpenedContentProps()).toEqual(
+      expect.objectContaining({ entityId: 'entity-1', entryPoint: 'entity_data_grid' })
+    );
+  });
+
+  it('openEntityGraphView hands an undefined entry point to the graph view it renders as is', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityGraphView({
+      entityId: 'entity-1',
+      scopeId: 'scope-1',
+      entityName: 'entity-name',
+      onShowEntity: jest.fn(),
+      entryPoint: undefined,
+    });
+
+    const props = getOpenedContentProps();
+    expect(props).toEqual(expect.objectContaining({ entityId: 'entity-1' }));
+    expect(props).toHaveProperty('entryPoint', undefined);
   });
 
   it('openEntityResolution writes an entityResolution descriptor and clears the param on close', () => {

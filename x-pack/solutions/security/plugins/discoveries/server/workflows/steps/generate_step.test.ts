@@ -164,6 +164,58 @@ describe('GenerateStepDefinition', () => {
     });
   });
 
+  describe('telemetry attribution', () => {
+    beforeEach(() => {
+      mockInvokeAttackDiscoveryGraphWithAlerts.mockResolvedValue({
+        discoveries: mockDiscoveriesCamelCase,
+        replacements: { server1: 'SERVER_001' },
+      });
+    });
+
+    it('forwards plugin_id and aggregate_by to the graph as telemetryMetadata', async () => {
+      await stepDefinition.handler({
+        ...mockContext,
+        input: { ...defaultInput, aggregate_by: 'rollup_parent', plugin_id: 'some_plugin' },
+      } as any);
+
+      expect(mockInvokeAttackDiscoveryGraphWithAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          telemetryMetadata: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+        })
+      );
+    });
+
+    it('passes no telemetryMetadata when neither input is set', async () => {
+      await stepDefinition.handler(mockContext as any);
+
+      expect(mockInvokeAttackDiscoveryGraphWithAlerts.mock.calls[0][0]).not.toHaveProperty(
+        'telemetryMetadata'
+      );
+    });
+
+    it('treats an empty plugin_id as unset', async () => {
+      await stepDefinition.handler({
+        ...mockContext,
+        input: { ...defaultInput, aggregate_by: '', plugin_id: '' },
+      } as any);
+
+      expect(mockInvokeAttackDiscoveryGraphWithAlerts.mock.calls[0][0]).not.toHaveProperty(
+        'telemetryMetadata'
+      );
+    });
+
+    it('omits the unset half when only plugin_id is set', async () => {
+      await stepDefinition.handler({
+        ...mockContext,
+        input: { ...defaultInput, plugin_id: 'some_plugin' },
+      } as any);
+
+      expect(mockInvokeAttackDiscoveryGraphWithAlerts.mock.calls[0][0].telemetryMetadata).toEqual({
+        pluginId: 'some_plugin',
+      });
+    });
+  });
+
   describe('successful generation', () => {
     beforeEach(() => {
       mockInvokeAttackDiscoveryGraphWithAlerts.mockResolvedValue({

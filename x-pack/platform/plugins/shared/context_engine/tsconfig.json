@@ -40,7 +40,6 @@
     "@kbn/app-header",
     "@kbn/app-menu",
     "@kbn/core-chrome-browser",
-    "@kbn/core-chrome-browser-context",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
     "@kbn/esql",
@@ -82,7 +81,10 @@
     "@kbn/datemath",
     "@kbn/esql-utils",
     "@kbn/ebt-click",
+    "@kbn/std",
     "@kbn/usage-collection-plugin",
-    "@kbn/unsaved-changes-prompt"
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/cloud-plugin",
+    "@kbn/core-chrome-browser-context-mocks"
   ]
 }

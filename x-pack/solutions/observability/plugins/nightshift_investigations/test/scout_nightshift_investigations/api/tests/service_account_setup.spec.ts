@@ -13,8 +13,10 @@ import {
   apiTest,
   COMMON_HEADERS,
   getNightshiftServiceAccountStatus,
-  INVESTIGATIONS_READ_ROLE,
   INVESTIGATIONS_WRITE_ROLE,
+  NIGHTSHIFT_MANAGE_ENGINES_ROLE,
+  NIGHTSHIFT_MANAGE_ROLE,
+  NIGHTSHIFT_NO_ACCESS_ROLE,
   SERVICE_ACCOUNT_PATH,
   uniqueId,
 } from '../fixtures';
@@ -107,7 +109,7 @@ apiTest.describe(
     apiTest(
       'refuses to set a space up for a caller without manage_security',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+        const { cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGE_ENGINES_ROLE);
         const { serviceAccounts } = await readStatus(apiClient, adminCookieHeader);
         const serviceAccountIds = Object.fromEntries(
           serviceAccounts.map(({ kind, id }) => [kind, id])
@@ -120,13 +122,35 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(403);
+        expect(response.body.message).not.toContain('Kibana privileges');
       }
     );
 
     apiTest(
-      'tells a user without manage_security that the space is set up but not theirs to change',
+      'refuses to set a space up for a Nightshift manager without Manage engines',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
+        const { cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGE_ROLE);
+        const { serviceAccounts } = await readStatus(apiClient, adminCookieHeader);
+        const serviceAccountIds = Object.fromEntries(
+          serviceAccounts.map(({ kind, id }) => [kind, id])
+        );
+
+        const response = await apiClient.post(`${SERVICE_ACCOUNT_PATH}/_enable`, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          body: { serviceAccountIds },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(403);
+        expect(response.body.message).toContain('[configure_nightshift]');
+      }
+    );
+
+    apiTest(
+      'tells a Nightshift manager without manage_security that the space is set up but not theirs to change',
+      async ({ apiClient, samlAuth }) => {
+        // Nightshift `all` alone, without Agent Builder: the automations page gates on this status.
+        const { cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGE_ROLE);
 
         const status = await readStatus(apiClient, cookieHeader);
 
@@ -136,10 +160,25 @@ apiTest.describe(
     );
 
     apiTest(
-      'refuses investigations in a space that was never set up',
+      'does not show the setup to a user without Nightshift access',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_NO_ACCESS_ROLE);
+
+        const response = await apiClient.get(SERVICE_ACCOUNT_PATH, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+
+    // A space other than the default one is refused before anything is installed in it: Nightshift
+    // binds deployment-wide identities, so it runs in the default space only.
+    apiTest(
+      'refuses investigations outside the default space',
       async ({ apiClient, samlAuth, kbnClient }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
-        // A space of its own, so the default space the other specs investigate in stays set up.
         const spaceId = uniqueId('nightshift-unset');
         await kbnClient.spaces.create({ id: spaceId, name: spaceId });
 
@@ -148,12 +187,13 @@ apiTest.describe(
             headers: { ...COMMON_HEADERS, ...cookieHeader },
             body: {
               subject: { type: 'manual', id: uniqueId('setup-manual') },
-              message: 'Investigate in a space without the Nightshift service account',
+              message: 'Investigate in a space Nightshift does not run in',
             },
             responseType: 'json',
           });
 
-          expect(response).toHaveStatusCode(503);
+          expect(response).toHaveStatusCode(400);
+          expect(response.body.message).toContain('only available in the "default" space');
         } finally {
           await kbnClient.spaces.delete(spaceId);
         }

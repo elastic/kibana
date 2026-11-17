@@ -32,7 +32,7 @@ import type { DashboardChildren } from './layout_manager/types';
 import { initializePauseFetchManager } from './pause_fetch_manager';
 import { initializeProjectRoutingManager } from './project_routing_manager';
 import { openSaveModal } from './save_modal/open_save_modal';
-import { saveDashboard } from './save_modal/save_dashboard';
+import { generateDashboardNotSavedToast, saveDashboard } from './save_modal/save_dashboard';
 import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { reportDashboardSaved } from './telemetry/report_dashboard_saved';
@@ -41,6 +41,7 @@ import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
 import type { DashboardRedirect } from '../dashboard_app/types';
+import { coreServices } from '../services/kibana_services';
 import type {
   DashboardApi,
   DashboardCreationOptions,
@@ -219,9 +220,15 @@ export function getDashboardApi({
     saveEvent: DashboardSaveEvent,
     latestChangeBySource: LatestChangeBySource
   ) => {
-    const savedChangedBy = changeSourceTracker.markSaved(latestChangeBySource);
-    onSave$.next(saveEvent);
-    reportDashboardSaved({ ...saveEvent, changedBy: savedChangedBy });
+    // the dashboard is already saved at this point, so do not surface failures as a save error
+    try {
+      const savedChangedBy = changeSourceTracker.markSaved(latestChangeBySource);
+      onSave$.next(saveEvent);
+      reportDashboardSaved({ ...saveEvent, changedBy: savedChangedBy });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Error encountered publishing dashboard save', error);
+    }
   };
 
   const getHistoryState = (): DashboardHistoryState => ({
@@ -376,9 +383,19 @@ export function getDashboardApi({
     },
     runQuickSave: async (options: { restored?: boolean } = {}) => {
       if (isManaged) return;
-      const latestChangeBySource = changeSourceTracker.getLatestChanges();
-      const dashboardState = getState();
-      const previousDashboardId = savedObjectId$.value;
+      let latestChangeBySource: LatestChangeBySource;
+      let dashboardState: DashboardState;
+      let previousDashboardId: string | undefined;
+      try {
+        latestChangeBySource = changeSourceTracker.getLatestChanges();
+        dashboardState = getState();
+        previousDashboardId = savedObjectId$.value;
+      } catch (error) {
+        coreServices.notifications.toasts.addDanger(
+          generateDashboardNotSavedToast(settingsManager.api.title$.value ?? '', error.message)
+        );
+        return;
+      }
 
       // do not update the saved object when restoring a dashboard, since this would result in duplicate change history entries
       const saveResult = options.restored

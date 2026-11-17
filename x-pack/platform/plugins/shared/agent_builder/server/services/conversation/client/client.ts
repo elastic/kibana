@@ -40,6 +40,7 @@ import {
   isConversationAccessControlRole,
   isPublicConversation,
   normalizeConversationAccessControl,
+  createBackgroundExecutionAlreadyReportedError,
   createBadRequestError,
   createConversationAlreadyExistsError,
   createConversationBusyError,
@@ -52,6 +53,7 @@ import {
   isConversationNotFoundError,
   isExecutionTerminalEvent,
 } from '@kbn/agent-builder-common';
+import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type {
   ConversationSearchOptions,
   SerializedMetadataValue,
@@ -90,7 +92,9 @@ import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
 import {
   ConversationBusySignal,
   applyActiveExecutionUpdate,
+  isAcquireActiveExecution,
   isActiveExecutionUpdateNoop,
+  isExecutionStale,
   readHeldExecution,
   toActiveExecution,
 } from './active_execution';
@@ -120,7 +124,7 @@ export type { ActivityContext } from './activity_events';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
-import { reconcileAttachments } from './round_writes';
+import { keepStoredAgentMessages, reconcileAttachments } from './round_writes';
 import { updateReadBy } from './read_by';
 import { updatePinnedBy } from './pinned_by';
 import { buildSearchSort, compileConversationFilter } from '../search';
@@ -242,7 +246,11 @@ export interface ConversationClient {
   patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    options: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
+    options: ConversationWriteOptions & {
+      access?: ConversationAccess;
+      activity?: ActivityContext;
+      refresh?: Refresh;
+    }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
   getUser(): CurrentUser;
   getAuthor(
@@ -311,6 +319,7 @@ export const createClient = ({
   esClient,
   executionClient,
   user,
+  runAs,
   agentRegistry,
   conversationEvents,
   eventEmitter,
@@ -322,6 +331,8 @@ export const createClient = ({
   esClient: ElasticsearchClient;
   executionClient: AgentExecutionClient;
   user: CurrentUser;
+  /** Service account the execution runs as; see `GetAgentOptions.runAs`. */
+  runAs?: string;
   agentRegistry: AgentRegistry;
   conversationEvents: ConversationEventsServiceStart;
   eventEmitter?: ScopedConversationEventEmitter;
@@ -334,6 +345,7 @@ export const createClient = ({
     esClient,
     executionClient,
     user,
+    runAs,
     space,
     agentRegistry,
     conversationEvents,
@@ -364,6 +376,41 @@ const skipWrite = (current: NormalizedConversation): WriteSkipped => ({
 });
 const isWriteSkipped = (value: unknown): value is WriteSkipped =>
   typeof value === 'object' && value !== null && WRITE_SKIPPED in value;
+
+// Thrown from inside an OCC `fields` callback; the 409 error it becomes would be retried as a conflict.
+const BACKGROUND_EXECUTION_NOT_PENDING = Symbol('background execution not pending');
+interface BackgroundExecutionNotPending {
+  [BACKGROUND_EXECUTION_NOT_PENDING]: true;
+  executionId: string;
+}
+const backgroundExecutionNotPending = (executionId: string): BackgroundExecutionNotPending => ({
+  [BACKGROUND_EXECUTION_NOT_PENDING]: true,
+  executionId,
+});
+const isBackgroundExecutionNotPending = (value: unknown): value is BackgroundExecutionNotPending =>
+  typeof value === 'object' && value !== null && BACKGROUND_EXECUTION_NOT_PENDING in value;
+
+const consumeBackgroundExecution = (
+  current: NormalizedConversation,
+  executionId: string,
+  acquiring: boolean
+): ConversationInternalState | undefined => {
+  const { state: stored, active_execution: held, execution } = current;
+  // A live holder may report this child itself and writes its in-memory state back when it ends,
+  // so it answers busy, through the acquire when there is one.
+  if (held && !acquiring && !isExecutionStale(execution)) {
+    throw new ConversationBusySignal(held.execution_id);
+  }
+  if (!stored?.background_executions?.[executionId]) {
+    // A held conversation has not stored its state yet; a dead holder's state is never coming.
+    if (held) {
+      return undefined;
+    }
+    throw backgroundExecutionNotPending(executionId);
+  }
+  const { [executionId]: consumed, ...remaining } = stored.background_executions;
+  return { ...stored, background_executions: remaining };
+};
 
 /** True when the stored events already end `executionId` with a terminal lifecycle event. */
 const hasTerminalEventFor = (current: NormalizedConversation, executionId: string): boolean =>
@@ -406,6 +453,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly esClient: ElasticsearchClient;
   private readonly executionClient: AgentExecutionClient;
   private readonly user: CurrentUser;
+  private readonly runAs?: string;
   private readonly agentRegistry: AgentRegistry;
   private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly logger: Logger;
@@ -418,6 +466,7 @@ class ConversationClientImpl implements ConversationClient {
     esClient,
     executionClient,
     user,
+    runAs,
     space,
     agentRegistry,
     conversationEvents,
@@ -430,6 +479,7 @@ class ConversationClientImpl implements ConversationClient {
     esClient: ElasticsearchClient;
     executionClient: AgentExecutionClient;
     user: CurrentUser;
+    runAs?: string;
     space: string;
     agentRegistry: AgentRegistry;
     conversationEvents: ConversationEventsServiceStart;
@@ -442,6 +492,7 @@ class ConversationClientImpl implements ConversationClient {
     this.esClient = esClient;
     this.executionClient = executionClient;
     this.user = user;
+    this.runAs = runAs;
     this.space = space;
     this.agentRegistry = agentRegistry;
     this.conversationEvents = conversationEvents;
@@ -1090,6 +1141,7 @@ class ConversationClientImpl implements ConversationClient {
       workspaceId,
       skipIfTerminalExistsFor,
       activeExecution,
+      consumeBackgroundExecution: backgroundExecutionToConsume,
     } = request;
     const createdAt = new Date().toISOString();
 
@@ -1102,10 +1154,20 @@ class ConversationClientImpl implements ConversationClient {
       source,
       refresh,
       activeExecution,
+      peekHeld: Boolean(backgroundExecutionToConsume),
       fields: (current) => {
         if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
           throw skipWrite(current);
         }
+        const nextState =
+          state ??
+          (backgroundExecutionToConsume
+            ? consumeBackgroundExecution(
+                current,
+                backgroundExecutionToConsume,
+                isAcquireActiveExecution(activeExecution)
+              )
+            : undefined);
         const currentEvents = current.events ?? [];
         const existingIds = new Set(currentEvents.map((event) => event.id));
         const newEvents = events.filter((event) => !existingIds.has(event.id));
@@ -1127,7 +1189,7 @@ class ConversationClientImpl implements ConversationClient {
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
-          ...(state ? { state } : {}),
+          ...(nextState ? { state: nextState } : {}),
           ...(attachments
             ? {
                 attachments: reconcileAttachments({
@@ -1184,7 +1246,10 @@ class ConversationClientImpl implements ConversationClient {
         const existingIds = new Set(nonRoundEvents.map((event) => event.id));
         // Round-derived events for this round were just wiped, so they always pass; additive ids
         // collide only when a caller re-inserts an existing uuid, which we drop.
-        const eventsToWrite = events.filter((event) => !existingIds.has(event.id));
+        const eventsToWrite = keepStoredAgentMessages(
+          currentEvents.filter((event) => event.id.startsWith(roundPrefix)),
+          events.filter((event) => !existingIds.has(event.id))
+        );
         writtenEvents = eventsToWrite;
         const firstRoundIndex = currentEvents.findIndex((event) =>
           event.id.startsWith(roundPrefix)
@@ -1546,7 +1611,12 @@ class ConversationClientImpl implements ConversationClient {
       access = 'converse',
       source,
       activity,
-    }: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
+      refresh,
+    }: ConversationWriteOptions & {
+      access?: ConversationAccess;
+      activity?: ActivityContext;
+      refresh?: Refresh;
+    }
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
     const envelope = this.activityEnvelope(activity);
@@ -1555,6 +1625,7 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access,
       source,
+      refresh,
       fields: (current) => {
         if (!current.template_id) {
           throw createBadRequestError(
@@ -1570,8 +1641,7 @@ class ConversationClientImpl implements ConversationClient {
         }
 
         // validateMetadataUpdate throws with accumulated per-field errors if any key is invalid.
-        const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
-        validateMetadataUpdate(template.id, template.fields, updates, storedMetadata);
+        validateMetadataUpdate(template.id, template.fields, updates);
 
         const serialized = Object.fromEntries(
           Object.entries(updates).map(([k, v]) => {
@@ -1579,6 +1649,8 @@ class ConversationClientImpl implements ConversationClient {
             return [k, serializeMetadataValue(v as MetadataFieldValue, def.input_type)];
           })
         );
+
+        const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
 
         // Track which fields actually changed to suppress no-op trigger events.
         const metadata = { ...storedMetadata, ...serialized };
@@ -1735,7 +1807,10 @@ class ConversationClientImpl implements ConversationClient {
 
         if (allowed) {
           try {
-            await this.agentRegistry.get(conversation.agent_id, { access: 'use' });
+            await this.agentRegistry.get(conversation.agent_id, {
+              access: 'use',
+              ...(this.runAs !== undefined ? { runAs: this.runAs } : {}),
+            });
           } catch (error) {
             if (
               !isAgentNotFoundError(error) &&
@@ -1784,6 +1859,7 @@ class ConversationClientImpl implements ConversationClient {
     maxRetries = 5,
     refresh,
     activeExecution,
+    peekHeld,
     ...emission
   }: {
     conversationId: string;
@@ -1792,8 +1868,9 @@ class ConversationClientImpl implements ConversationClient {
     maxRetries?: number;
     refresh?: Refresh;
     activeExecution?: ActiveExecutionUpdate;
+    peekHeld?: boolean;
   } & ConversationWriteEmission): Promise<Conversation> {
-    const writer = this.createWriter({ access, maxRetries, refresh, activeExecution });
+    const writer = this.createWriter({ access, maxRetries, refresh, activeExecution, peekHeld });
     // `mutate` may run more than once on OCC retry; the last run is the one that was written.
     // Typed through `as` so the assignment inside the closure does not narrow it to `undefined`.
     let before = undefined as NormalizedConversation | undefined;
@@ -1844,6 +1921,12 @@ class ConversationClientImpl implements ConversationClient {
 
         throw createConversationBusyError({ conversationId, activeExecutionId });
       }
+      if (isBackgroundExecutionNotPending(error)) {
+        throw createBackgroundExecutionAlreadyReportedError({
+          conversationId,
+          executionId: error.executionId,
+        });
+      }
       // retries are exhausted
       if (isElasticsearchWriteConflict(error)) {
         this.logger.warn(
@@ -1862,11 +1945,13 @@ class ConversationClientImpl implements ConversationClient {
     maxRetries,
     refresh,
     activeExecution,
+    peekHeld,
   }: {
     access: ConversationAccess;
     maxRetries: number;
     refresh?: Refresh;
     activeExecution?: ActiveExecutionUpdate;
+    peekHeld?: boolean;
   }): OccWriter<NormalizedConversation> {
     return new OccWriter<NormalizedConversation>({
       get: async (id) => {
@@ -1875,6 +1960,7 @@ class ConversationClientImpl implements ConversationClient {
           document,
           update: activeExecution,
           executionClient: this.executionClient,
+          peekHeld,
         });
 
         return {

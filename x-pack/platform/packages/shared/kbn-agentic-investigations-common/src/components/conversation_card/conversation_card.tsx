@@ -26,7 +26,6 @@ interface ConversationCardProps {
   investigation: Investigation;
   /** Marks the card whose details flyout is currently open. */
   isSelected?: boolean;
-  onClickRecommendedAction: BaseActionsProps['onClickRecommendedAction'];
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
@@ -83,7 +82,6 @@ export const ConversationCard = memo<ConversationCardProps>(
   ({
     investigation,
     isSelected = false,
-    onClickRecommendedAction,
     onClickAction,
     onClickCard,
     onOpenChat,
@@ -160,7 +158,6 @@ export const ConversationCard = memo<ConversationCardProps>(
                   <EuiFlexItem grow={false}>
                     <ConversationsActionsGroup
                       investigation={investigation}
-                      onClickRecommendedAction={onClickRecommendedAction}
                       onClickAction={onClickAction}
                       onOpenChat={() => onOpenChat(investigation.id)}
                       chatHref={chatHref}

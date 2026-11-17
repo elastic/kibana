@@ -125,6 +125,12 @@ export class ActionTypeRegistry {
     Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
 
   /**
+   * Returns true if the action type is defined by a connector spec
+   */
+  public isSpecActionType = (actionTypeId: string): boolean =>
+    this.actionTypes.get(actionTypeId)?.source === ACTION_TYPE_SOURCES.spec;
+
+  /**
    * Returns true if the connector type has a sub-feature type defined
    */
   public hasSubFeature = (actionTypeId: string): boolean =>
@@ -147,7 +153,7 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Registers an action type to the action type registry
+   * Registers an action type or adds spec versions to an existing spec-backed type.
    */
   public register<
     Config extends ActionTypeConfig = ActionTypeConfig,
@@ -155,7 +161,13 @@ export class ActionTypeRegistry {
     Params extends ActionTypeParams = ActionTypeParams,
     ExecutorResultData = void
   >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
-    if (this.has(actionType.id)) {
+    const registeredActionType = this.actionTypes.get(actionType.id);
+    const hasVersionedSpecs =
+      registeredActionType?.specs !== undefined && registeredActionType?.specs?.size > 0;
+
+    const { specs } = actionType;
+
+    if (registeredActionType && (!hasVersionedSpecs || !specs?.size)) {
       throw new Error(
         i18n.translate(
           'xpack.actions.actionTypeRegistry.register.duplicateActionTypeErrorMessage',
@@ -167,6 +179,23 @@ export class ActionTypeRegistry {
           }
         )
       );
+    }
+
+    if (registeredActionType && specs) {
+      for (const version of specs.keys()) {
+        if (registeredActionType.specs?.has(version)) {
+          throw new Error(
+            i18n.translate(
+              'xpack.actions.actionTypeRegistry.register.duplicateSpecVersionErrorMessage',
+              {
+                defaultMessage:
+                  'Skipping catalog connector "{id}" version "{version}": type is already registered.',
+                values: { id: actionType.id, version },
+              }
+            )
+          );
+        }
+      }
     }
 
     if (!actionType.supportedFeatureIds || actionType.supportedFeatureIds.length === 0) {
@@ -224,10 +253,13 @@ export class ActionTypeRegistry {
       actionTypeMaxAttempts: actionType.maxAttempts,
     });
 
-    this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
+    this.actionTypes.set(actionType.id, {
+      ...actionType,
+      ...(specs && { specs: new Map([...(registeredActionType?.specs ?? []), ...specs]) }),
+    } as unknown as ActionType);
 
-    // Skip task type registration for connectors without execute/params
-    if (actionType.executor && actionType.validate.params) {
+    // Skip task type registration for new connectors without execute/params or for already registered connectors
+    if (!registeredActionType && actionType.executor && actionType.validate.params) {
       this.taskManager.registerTaskDefinitions({
         [`actions:${actionType.id}`]: {
           title: actionType.name,
@@ -324,9 +356,14 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns the connector spec stored for a spec-backed type, or undefined.
+   * Returns a requested spec version, or the legacy spec / first registered version if omitted.
    */
-  public getSpec(id: string): ConnectorSpec | undefined {
-    return this.actionTypes.get(id)?.spec;
+  public getSpec(id: string, version?: string): ConnectorSpec | undefined {
+    const actionType = this.actionTypes.get(id);
+    if (version !== undefined) {
+      return actionType?.specs?.get(version);
+    }
+
+    return actionType?.spec;
   }
 }
