@@ -14,7 +14,9 @@ export const resolveSource = ({
   _source = {},
 }: LiveActionHit): LiveHistoryRow['source'] => {
   const dispatchSourceRaw = fields.dispatch_source ?? _source.dispatch_source;
-  const dispatchSource = Array.isArray(dispatchSourceRaw) ? dispatchSourceRaw[0] : dispatchSourceRaw;
+  const dispatchSource = Array.isArray(dispatchSourceRaw)
+    ? dispatchSourceRaw[0]
+    : dispatchSourceRaw;
   if (dispatchSource === 'workflow') {
     return 'Workflow';
   }

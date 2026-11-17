@@ -79,10 +79,7 @@ describe('buildSourceClause', () => {
   test('live excludes both alerts and workflow actions', () => {
     expect(buildSourceClause('live')).toEqual({
       bool: {
-        must_not: [
-          { exists: { field: 'alert_ids' } },
-          { term: { dispatch_source: 'workflow' } },
-        ],
+        must_not: [{ exists: { field: 'alert_ids' } }, { term: { dispatch_source: 'workflow' } }],
       },
     });
   });
