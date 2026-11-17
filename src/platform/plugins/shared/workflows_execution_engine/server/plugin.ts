@@ -1447,8 +1447,7 @@ export class WorkflowsExecutionEnginePlugin
     const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
-      workflowExecutionRepository,
-      this.logger
+      workflowExecutionRepository
     );
     if (!this.coreSetup) {
       throw new Error('Core setup not available');

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
 import type {
   ConcurrencySettings,
   EsWorkflowExecution,
@@ -35,16 +34,13 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
 export class ConcurrencyManager {
   private readonly workflowTaskManager: WorkflowTaskManager;
   private readonly workflowExecutionRepository: WorkflowExecutionRepository;
-  private readonly logger?: Logger;
 
   constructor(
     workflowTaskManager: WorkflowTaskManager,
-    workflowExecutionRepository: WorkflowExecutionRepository,
-    logger?: Logger
+    workflowExecutionRepository: WorkflowExecutionRepository
   ) {
     this.workflowTaskManager = workflowTaskManager;
     this.workflowExecutionRepository = workflowExecutionRepository;
-    this.logger = logger;
   }
 
   /**
@@ -223,71 +219,22 @@ export class ConcurrencyManager {
       // Calculate how many executions to cancel
       const executionsToCancel = activeCount - maxConcurrency + 1;
 
-      // Cancel the oldest executions (they're already sorted by createdAt ascending)
+      // Cancel the oldest executions (they're already sorted by createdAt ascending).
+      // Leave the status alone. runWorkflow returns before the loop once the document
+      // is already cancelled, so the loop would never publish. The slot stays taken
+      // until that loop writes cancelled.
       const executionIdsToCancel = runningExecutionIds.slice(0, executionsToCancel);
-
-      // Read before the write. The bulk update flips every victim to cancelled, so a
-      // later get cannot tell a pending execution from a running one.
-      const victims = await Promise.all(
-        executionIdsToCancel.map(async (id) => {
-          try {
-            return await this.workflowExecutionRepository.getWorkflowExecutionById(id, spaceId);
-          } catch (error) {
-            const detail = error instanceof Error ? error.message : String(error);
-            this.logger?.warn(
-              `Could not read workflow execution ${id} before cancelling it for concurrency: ${detail}`
-            );
-            return null;
-          }
-        })
-      );
 
       const cancellationTimestamp = new Date().toISOString();
       const cancellationReason = `Cancelled due to concurrency limit (max: ${maxConcurrency})`;
-      const writtenCancel = {
-        status: ExecutionStatus.CANCELLED,
-        cancelRequested: true,
-        cancellationReason,
-        cancelledAt: cancellationTimestamp,
-        cancelledBy: 'system',
-      };
       await this.workflowExecutionRepository.bulkUpdateWorkflowExecutions(
         executionIdsToCancel.map((id) => ({
           id,
-          ...writtenCancel,
+          cancelRequested: true,
+          cancellationReason,
+          cancelledAt: cancellationTimestamp,
+          cancelledBy: 'system',
         }))
-      );
-      // Only a RUNNING execution with a task that is still active has a loop
-      // that will publish this cancel. A claimed task on a pending execution
-      // has not loaded it yet. runWorkflow then reads the cancelled document
-      // and returns before the loop, so that victim publishes here.
-      const victimsWithoutALiveLoop = (
-        await Promise.all(
-          victims.map(async (execution) => {
-            if (!execution?.id) {
-              return null;
-            }
-            if (execution.status !== ExecutionStatus.RUNNING) {
-              return execution;
-            }
-            try {
-              if (await this.workflowTaskManager.hasActiveExecutionTask(execution.id)) {
-                return null;
-              }
-            } catch (error) {
-              const detail = error instanceof Error ? error.message : String(error);
-              this.logger?.warn(
-                `Could not tell whether workflow execution ${execution.id} still has a running task: ${detail}`
-              );
-            }
-            return execution;
-          })
-        )
-      ).flatMap((execution) => (execution ? [execution] : []));
-      await Promise.all(
-        victimsWithoutALiveLoop.map((execution) =>
-          publishFinishedWorkflowExecution(execution, writtenCancel)
-        )
       );
 
       // Propagate cancellation to running tasks (can be done in parallel)
