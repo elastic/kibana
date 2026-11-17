@@ -316,4 +316,6 @@ export const maxAgentsFromHeader = (
 };
 
 const traceIdFromHeader = (header: string | string[] | undefined): string | undefined =>
-  typeof header === 'string' && header.length > 0 && header.length <= 256 ? header : undefined;
+  typeof header === 'string' && header.trim().length > 0 && header.length <= 256
+    ? header
+    : undefined;

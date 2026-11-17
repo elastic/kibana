@@ -287,6 +287,20 @@ describe('useHistoryUrlParams', () => {
     expect(getHistoryFilters()).toContain('q=fromUrl');
   });
 
+  it('keeps legacy sources and persists them alongside the workflow option', () => {
+    const { result } = renderWithRouter('/history?sources=live,rule,scheduled');
+
+    expect(result.current.filters.sources).toEqual(['live', 'rule', 'scheduled']);
+    expect(getHistoryFilters()).toContain('sources=live,rule,scheduled');
+
+    act(() => {
+      result.current.setFilter('sources', ['workflow']);
+    });
+
+    expect(result.current.filters.sources).toEqual(['workflow']);
+    expect(getHistoryFilters()).toContain('sources=workflow');
+  });
+
   it('stores empty string when all filters are at defaults', () => {
     const { result } = renderWithRouter('/history?q=test');
 

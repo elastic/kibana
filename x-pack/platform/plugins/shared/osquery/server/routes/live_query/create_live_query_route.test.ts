@@ -472,6 +472,15 @@ describe('createLiveQueryRoute', () => {
         undefined,
       ],
       [
+        'whitespace-only IDs',
+        {
+          [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: '   ',
+          [OSQUERY_DISPATCH_EXECUTION_ID_HEADER]: '\t',
+        },
+        undefined,
+        undefined,
+      ],
+      [
         'repeated IDs',
         {
           [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: ['workflow-1', 'workflow-2'],

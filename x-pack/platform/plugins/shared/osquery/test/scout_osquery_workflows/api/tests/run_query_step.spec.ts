@@ -197,6 +197,8 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
       expect(await history('workflow')).toMatchObject([{ source: 'Workflow' }]);
       expect(await history('live')).toHaveLength(0);
       expect(await history('rule')).toHaveLength(0);
+      expect(await history('workflow,rule')).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history('live,rule')).toHaveLength(0);
       await workflows.delete(workflowId);
     }
   );
