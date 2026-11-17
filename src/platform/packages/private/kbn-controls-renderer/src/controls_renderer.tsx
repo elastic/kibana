@@ -133,6 +133,12 @@ const controlsGroupStyles = {
 
       padding-top: 0; // remove padding added by FlexLayout
 
+      // hide hover actions while a control's edit flyout is open; the doubled selector
+      // outranks the floating actions' hover/focus visibility rule without !important
+      &.controlsGroup--editing .presentationUtil__floatingActions.controlFrameFloatingActions {
+        visibility: hidden;
+      }
+
       .kbnFlexPanel--dragPreview {
         border-radius: ${euiTheme.border.radius.control};
         background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
