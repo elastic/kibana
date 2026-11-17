@@ -190,12 +190,8 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
         continue;
       }
 
-      const {
-        strategy: _strategy,
-        strategy_version: _strategyVersion,
-        triage: _triage,
-        ...reading
-      } = parsed.data.data;
+      const { strategy: _strategy, strategy_version: _strategyVersion, ...reading } =
+        parsed.data.data;
 
       const key = `${parsed.data.group_hash}:${reading.bucket_start}`;
       if (seen.has(key)) {

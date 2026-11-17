@@ -11,70 +11,36 @@ import { z, lazySchema } from '@kbn/zod/v4';
 /** `source` of every signal the engine writes. */
 export const DETECTION_SIGNAL_SOURCE = 'elastic.nightshift_detection_engine';
 
-/** What triage did with a signal. Every signal ends up with exactly one. */
-export const DETECTION_SIGNAL_OUTCOMES = [
-  'background',
-  'warming_up',
-  'trial_would_raise',
-  'continued',
-  'joined',
-  'new_event',
-  'reopened',
-  'held_by_dismissal',
-  'capped',
-  'refuted',
-  'deferred',
-  'conflict',
-  'unconfirmed',
-  'supporting',
-] as const;
-
-/** How the reading compared with the series' own history. */
-export const DETECTION_SIGNAL_COMPARISONS = [
-  'above_normal',
-  'background',
-  'warming_up',
-  'skipped',
-] as const;
-
-/** What a generator reports for a series in a bucket, without the status that sits on the signal. */
+/**
+ * What a generator reports for one series in one bucket, without the status that sits on the
+ * signal. The engine wraps it into a `DetectionSignal`: it adds the strategy id, space, group hash
+ * and schedule time, so a reading carries only what the generator knows.
+ */
 export const detectionSignalReadingSchema = lazySchema(() =>
   z.object({
+    /** Identifies the series within the strategy; the engine hashes it into the group hash. */
     fingerprint: z.string().min(1),
     rule_id: z.string().optional(),
     source_id: z.string().optional(),
     entity: z.object({ type: z.string(), name: z.string() }),
-    /** Epoch milliseconds. */
+    /** Start of the bucket, in epoch milliseconds. */
     bucket_start: z.number(),
-    /** Epoch milliseconds. */
+    /** End of the bucket, in epoch milliseconds. */
     bucket_end: z.number(),
     value: z.number(),
     unit: z.string(),
     title: z.string(),
     description: z.string(),
+    /** 0 to 100. */
     importance: z.number().min(0).max(100),
+    /** The ES|QL query that reproduces the reading. */
     evidence_esql: z.string(),
+    /** A supporting reading may join an open event but never opens one. */
     role: z.enum(['primary', 'supporting']),
+    /** Whether the judge should compare the reading with what is normal for the series. */
     compare_with_normal: z.boolean(),
+    /** Strategy-specific detail, kept as reported. */
     details: z.record(z.string(), z.unknown()),
-  })
-);
-
-/** What triage decided about the signal; added after the signal is written. */
-export const detectionSignalTriageSchema = lazySchema(() =>
-  z.object({
-    comparison: z.enum(DETECTION_SIGNAL_COMPARISONS),
-    baseline: z.object({
-      samples: z.number().int(),
-      excluded_samples: z.number().int(),
-      median: z.number().optional(),
-      mad: z.number().optional(),
-      threshold: z.number().optional(),
-    }),
-    outcome: z.enum(DETECTION_SIGNAL_OUTCOMES),
-    outcome_reason: z.string(),
-    event_id: z.string().optional(),
-    run_id: z.string(),
   })
 );
 
@@ -93,7 +59,6 @@ export const detectionSignalSchema = alertEventSchema
         strategy: z.string().min(1),
         /** `version` of the strategy's descriptor when the reading was made. */
         strategy_version: z.number().int().min(1),
-        triage: detectionSignalTriageSchema.optional(),
       })
     ),
   })
@@ -101,5 +66,3 @@ export const detectionSignalSchema = alertEventSchema
 
 /** One reading of one series in one bucket, as stored. */
 export type DetectionSignal = z.infer<typeof detectionSignalSchema>;
-/** What triage decided about a signal. */
-export type DetectionSignalTriage = z.infer<typeof detectionSignalTriageSchema>;
