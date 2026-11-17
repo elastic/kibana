@@ -28,23 +28,29 @@ const matchesClause = (
     return Object.entries(clause.term).every(([field, term]) => {
       const expected = typeof term === 'string' ? term : term.value;
       const value = document[field];
+
       return Array.isArray(value) ? value.includes(expected) : value === expected;
     });
   }
+
   if (clause.exists) {
     const value = document[clause.exists.field];
+
     return Array.isArray(value) ? value.length > 0 : value != null;
   }
+
   if (clause.bool) {
     const { filter = [], must_not = [], should = [], minimum_should_match } = clause.bool;
     const excluded = Array.isArray(must_not) ? must_not : [must_not];
     const minimum = minimum_should_match ?? (should.length > 0 && filter.length === 0 ? 1 : 0);
+
     return (
       filter.every((child) => matchesClause(child, document)) &&
       excluded.every((child) => !matchesClause(child, document)) &&
       should.filter((child) => matchesClause(child, document)).length >= minimum
     );
   }
+
   throw new Error('Unsupported test clause');
 };
 
@@ -308,6 +314,7 @@ describe('buildLiveActionsQuery', () => {
               activeFilters: new Set([source]),
             })
           ) as TestClause[];
+
           return filters.every((clause) => matchesClause(clause, document));
         });
         expect(matching).toEqual([resolveSource({ _source: document }).toLowerCase()]);
@@ -315,7 +322,7 @@ describe('buildLiveActionsQuery', () => {
     });
 
     test.each([1, 2, 3, 4, 5, 6, 7])('ORs selected source clauses for subset %s', (mask) => {
-      const selected = sources.filter((source, index) => mask & (1 << index));
+      const selected = sources.filter((source, index) => Math.floor(mask / 2 ** index) % 2 === 1);
       const filters = getFilters(
         buildLiveActionsQuery({
           pageSize: 20,
@@ -328,6 +335,7 @@ describe('buildLiveActionsQuery', () => {
           selected.some((source) => source === resolveSource({ _source: document }).toLowerCase())
         );
       }
+
       if (mask === 7) expect(filters).toHaveLength(3);
     });
 

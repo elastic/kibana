@@ -85,23 +85,29 @@ const matchesClause = (
     return Object.entries(clause.term).every(([field, term]) => {
       const expected = typeof term === 'string' ? term : term.value;
       const value = document[field];
+
       return Array.isArray(value) ? value.includes(expected) : value === expected;
     });
   }
+
   if (clause.exists) {
     const value = document[clause.exists.field];
+
     return Array.isArray(value) ? value.length > 0 : value != null;
   }
+
   if (clause.bool) {
     const { filter = [], must_not = [], should = [], minimum_should_match } = clause.bool;
     const excluded = Array.isArray(must_not) ? must_not : [must_not];
     const minimum = minimum_should_match ?? (should.length > 0 && filter.length === 0 ? 1 : 0);
+
     return (
       filter.every((child) => matchesClause(child, document)) &&
       excluded.every((child) => !matchesClause(child, document)) &&
       should.filter((child) => matchesClause(child, document)).length >= minimum
     );
   }
+
   throw new Error('Unsupported test clause');
 };
 
