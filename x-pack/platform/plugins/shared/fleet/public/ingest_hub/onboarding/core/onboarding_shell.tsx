@@ -34,6 +34,7 @@ import { useStepState } from './use_step_state';
 import { useInvalidateDownstreamSteps } from './use_invalidate_downstream_steps';
 import { discardSessionOnUnmount } from './onboarding_session_storage';
 import { DEFAULT_RETURN_APP, getReturnUrl } from './return_url';
+import { useEmbeddedContext } from '../../../hooks/use_embedded_context';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import {
   AuthenticateAndDeployStep,
@@ -62,6 +63,7 @@ export function OnboardingShell() {
   const location = useLocation();
   const meta = getOnboardingProvider(integrationId)?.meta;
   const { services } = useKibana<CoreStart>();
+  const { isEmbedded, onClose } = useEmbeddedContext();
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const cancelModalTitleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
@@ -132,12 +134,17 @@ export function OnboardingShell() {
     // Not cleared here: the step state hooks would write it back before the app unmounts.
     discardSessionOnUnmount(integrationId);
     setIsCancelModalOpen(false);
+    // Embedded, there is nowhere to navigate: hand control back to the host, which unmounts us.
+    if (isEmbedded) {
+      onClose?.();
+      return;
+    }
     if (returnUrl) {
       services.application?.navigateToUrl(returnUrl);
     } else {
       services.application?.navigateToApp(DEFAULT_RETURN_APP);
     }
-  }, [integrationId, services.application]);
+  }, [integrationId, services.application, isEmbedded, onClose]);
 
   const horizontalStepsConfig = useMemo(
     () =>

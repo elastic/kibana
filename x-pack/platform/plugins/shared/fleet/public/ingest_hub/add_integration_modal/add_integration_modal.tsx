@@ -17,8 +17,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { createMemoryHistory } from 'history';
 
+import { Route, Routes } from '@kbn/shared-ux-router';
+
 import { EmbeddedIntegrationsProvider } from '../../applications/integrations/embedded_app';
 import { EPMApp } from '../../applications/integrations/sections/epm';
+import { EmbeddedOnboarding } from '../onboarding/core/embedded_onboarding';
+import { EMBEDDED_ONBOARDING_ROUTE } from '../onboarding/core/embedded_onboarding_route';
 
 export interface AddIntegrationModalProps {
   onClose: () => void;
@@ -72,7 +76,17 @@ export function AddIntegrationModal({
       </EuiModalHeader>
       <EuiModalBody>
         <EmbeddedIntegrationsProvider history={history} onClose={onClose}>
-          <EPMApp />
+          <Routes>
+            {/* The onboarding wizard, for integrations that have one (today: AWS). Anything
+                else falls through to the Integrations routes: catalogue, package detail and
+                the add-integration page. */}
+            <Route path={EMBEDDED_ONBOARDING_ROUTE}>
+              <EmbeddedOnboarding />
+            </Route>
+            <Route>
+              <EPMApp />
+            </Route>
+          </Routes>
         </EmbeddedIntegrationsProvider>
       </EuiModalBody>
     </EuiModal>

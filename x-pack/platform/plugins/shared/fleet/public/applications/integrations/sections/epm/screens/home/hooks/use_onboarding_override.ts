@@ -6,10 +6,13 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../../../../hooks';
+import { useEmbeddedContext } from '../../../../../../../hooks/use_embedded_context';
+import { getEmbeddedOnboardingPath } from '../../../../../../../ingest_hub/onboarding/core/embedded_onboarding_route';
 import {
   AWS_ONBOARDING_PACKAGE_NAME,
   AWS_TITLE,
@@ -30,6 +33,8 @@ export { AWS_ONBOARDING_PACKAGE_NAME };
 
 export function useOnboardingOverride() {
   const { featureFlags, application } = useStartServices();
+  const { isEmbedded } = useEmbeddedContext();
+  const history = useHistory();
   const isOnboardingEnabled = featureFlags.useBooleanValue(ONBOARDING_ENABLED_FLAG, false);
 
   const onboardingUrl = useMemo(
@@ -40,11 +45,16 @@ export function useOnboardingOverride() {
   // `newSession` makes the onboarding app drop session storage left over from an earlier run.
   // `returnUrl` is the page the user came from, where cancelling the flow takes them back.
   const navigateToOnboarding = useCallback(() => {
+    // Embedded, the wizard is a route on the host's router, so the flow stays in the modal.
+    if (isEmbedded) {
+      history.push(getEmbeddedOnboardingPath(AWS_ONBOARDING_PACKAGE_NAME));
+      return;
+    }
     application.navigateToApp(ONBOARDING_APP_ID, {
       path: ONBOARDING_AWS_PATH,
       state: { newSession: true, returnUrl: window.location.href },
     });
-  }, [application]);
+  }, [application, isEmbedded, history]);
 
   const applyOnboardingOverride = useMemo(() => {
     return (cards: IntegrationCardItem[]): IntegrationCardItem[] => {
