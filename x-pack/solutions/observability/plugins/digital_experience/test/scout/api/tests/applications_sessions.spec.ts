@@ -8,7 +8,7 @@
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApplicationsResponse } from '../../../../common/types/applications';
-import type { OwnedSessions } from '../../common/fixtures/sessions_data';
+import type { OwnedSessions, OwnedSessionsSetup } from '../../common/fixtures/sessions_data';
 import {
   deleteOwnedSessions,
   ingestOwnedSessions,
@@ -41,19 +41,17 @@ apiTest.describe(
   { tag: DIGITAL_EXPERIENCE_TAGS },
   () => {
     let sessionsStartMs: number;
-    let setUpSessions = false;
+    let setup: OwnedSessionsSetup | undefined;
 
     apiTest.beforeAll(async ({ apiServices, esClient, kbnClient }) => {
       await apiServices.core.settings(FLAG_ON_OVERRIDE);
-      ({ sessionsStartMs, setUpSessions } = await ingestOwnedSessions(
-        esClient,
-        kbnClient,
-        SESSIONS
-      ));
+      ({ sessionsStartMs, setup } = await ingestOwnedSessions(esClient, kbnClient, SESSIONS));
     });
 
     apiTest.afterAll(async ({ apiServices, esClient, kbnClient }) => {
-      await deleteOwnedSessions(esClient, kbnClient, SESSIONS, { setUpSessions });
+      if (setup) {
+        await deleteOwnedSessions(esClient, kbnClient, SESSIONS, setup);
+      }
       await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 

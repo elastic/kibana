@@ -227,9 +227,7 @@ export const removeSessionsTask = async (kbnClient: KbnClient) => {
   });
 };
 
-/** Removes the sessions setup and the mock sessions, leaving the rest of the data streams. */
-export const deleteSessionsData = async (esClient: EsClient, kbnClient: KbnClient) => {
-  await removeSessionsTask(kbnClient);
+const deleteSessionsIndices = async (esClient: EsClient) => {
   // Test clusters refuse wildcard deletes (`action.destructive_requires_name`), so by name.
   const indices = Object.keys(
     await esClient.indices.get({
@@ -241,10 +239,20 @@ export const deleteSessionsData = async (esClient: EsClient, kbnClient: KbnClien
   if (indices.length > 0) {
     await esClient.indices.delete({ index: indices });
   }
+};
+
+const deleteSessionsTemplate = async (esClient: EsClient) => {
   await esClient.indices.deleteIndexTemplate(
     { name: SESSIONS_INDEX_TEMPLATE_NAME },
     { ignore: [404] }
   );
+};
+
+/** Removes the sessions setup and the mock sessions, leaving the rest of the data streams. */
+export const deleteSessionsData = async (esClient: EsClient, kbnClient: KbnClient) => {
+  await removeSessionsTask(kbnClient);
+  await deleteSessionsIndices(esClient);
+  await deleteSessionsTemplate(esClient);
   await esClient.deleteByQuery({
     index: RAW_EVENTS_INDEX,
     query: { ids: { values: RAW_EVENT_IDS } },
@@ -266,17 +274,30 @@ const ownedSessionIds = ({ idPrefix, count }: OwnedSessions): string[] => {
   });
 };
 
+/** What `ingestOwnedSessions` created, so `deleteOwnedSessions` removes only that. */
+export interface OwnedSessionsSetup {
+  createdTask: boolean;
+  createdIndex: boolean;
+  createdTemplate: boolean;
+}
+
 /**
  * Writes `sessions` from a day ago, setting sessions up first when they aren't. Resolves to when
- * the first one starts, and whether this set sessions up, for `deleteOwnedSessions`.
+ * the first one starts, and what it created for `deleteOwnedSessions`.
  */
 export const ingestOwnedSessions = async (
   esClient: EsClient,
   kbnClient: KbnClient,
   sessions: OwnedSessions
-): Promise<{ sessionsStartMs: number; setUpSessions: boolean }> => {
-  const setUpSessions = !(await areSessionsInstalled(kbnClient));
-  if (setUpSessions) {
+): Promise<{ sessionsStartMs: number; setup: OwnedSessionsSetup }> => {
+  const setup: OwnedSessionsSetup = {
+    createdTask: !(await areSessionsInstalled(kbnClient)),
+    createdIndex: !(await esClient.indices.exists({ index: SESSIONS_INDEX })),
+    createdTemplate: !(await esClient.indices.existsIndexTemplate({
+      name: SESSIONS_INDEX_TEMPLATE_NAME,
+    })),
+  };
+  if (setup.createdTask) {
     await enableSessions(kbnClient);
   }
   const sessionsStartMs = Date.now() - DAY_MS;
@@ -295,24 +316,30 @@ export const ingestOwnedSessions = async (
     });
     throw new Error(`Could not ingest the owned sessions: ${JSON.stringify(failure)}`);
   }
-  return { sessionsStartMs, setUpSessions };
+  return { sessionsStartMs, setup };
 };
 
-/** Deletes `sessions`, and the sessions setup only when `ingestOwnedSessions` made it. */
+/** Deletes `sessions`, and the parts of the sessions setup that `ingestOwnedSessions` created. */
 export const deleteOwnedSessions = async (
   esClient: EsClient,
   kbnClient: KbnClient,
   sessions: OwnedSessions,
-  { setUpSessions }: { setUpSessions: boolean }
+  { createdTask, createdIndex, createdTemplate }: OwnedSessionsSetup
 ): Promise<void> => {
-  if (setUpSessions) {
-    await deleteSessionsData(esClient, kbnClient);
-    return;
+  if (createdTask) {
+    await removeSessionsTask(kbnClient);
   }
-  await esClient.deleteByQuery({
-    index: SESSIONS_INDEX,
-    query: { ids: { values: ownedSessionIds(sessions) } },
-    refresh: true,
-    ignore_unavailable: true,
-  });
+  if (createdIndex) {
+    await deleteSessionsIndices(esClient);
+  } else {
+    await esClient.deleteByQuery({
+      index: SESSIONS_INDEX,
+      query: { ids: { values: ownedSessionIds(sessions) } },
+      refresh: true,
+      ignore_unavailable: true,
+    });
+  }
+  if (createdTemplate) {
+    await deleteSessionsTemplate(esClient);
+  }
 };
