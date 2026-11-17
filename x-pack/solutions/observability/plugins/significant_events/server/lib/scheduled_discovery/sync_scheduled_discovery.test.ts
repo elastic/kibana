@@ -8,8 +8,10 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import {
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourceChangeEvent } from '@kbn/nightshift-sources-plugin/server';
@@ -53,12 +55,16 @@ const setup = ({
   paused = false,
   previousEnabled = false,
   storedInterval = 45,
+  storedBucketInterval,
+  storedLookback,
   withAgentBuilder = true,
 }: {
   total?: number;
   paused?: boolean;
   previousEnabled?: boolean;
   storedInterval?: number;
+  storedBucketInterval?: number;
+  storedLookback?: number;
   withAgentBuilder?: boolean;
 } = {}) => {
   const uiSettingsClient = {
@@ -66,6 +72,18 @@ const setup = ({
     getAll: jest.fn().mockResolvedValue({
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]:
         storedInterval,
+      ...(storedBucketInterval === undefined
+        ? {}
+        : {
+            [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES]:
+              storedBucketInterval,
+          }),
+      ...(storedLookback === undefined
+        ? {}
+        : {
+            [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES]:
+              storedLookback,
+          }),
     }),
     set: jest.fn().mockResolvedValue(undefined),
   };
@@ -199,6 +217,21 @@ describe('syncScheduledDiscovery', () => {
     });
   });
 
+  it('rejects an invalid stored detection window before enabling', async () => {
+    const { run, uiSettingsClient, workflowService } = setup({
+      previousEnabled: false,
+      storedBucketInterval: 7,
+      storedLookback: 150,
+    });
+
+    await expect(run(makeEvent('created'))).rejects.toThrow(
+      'must be an exact multiple of detectionBucketIntervalMinutes'
+    );
+
+    expect(uiSettingsClient.set).not.toHaveBeenCalled();
+    expect(workflowService.ensureWorkflow).not.toHaveBeenCalled();
+  });
+
   it('leaves an explicit disable in place when sources already exist', async () => {
     const { coreStart, run } = setup({ total: 2, previousEnabled: false });
 
@@ -218,6 +251,28 @@ describe('syncScheduledDiscovery', () => {
       false
     );
     expect(installDiscoveryAgentsMock).not.toHaveBeenCalled();
+    expect(workflowService.ensureWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        enabled: false,
+        skipExecutionDrain: true,
+      })
+    );
+  });
+
+  it('disables discovery when the last source is deleted even if the stored detection window is invalid', async () => {
+    const { run, uiSettingsClient, workflowService } = setup({
+      total: 0,
+      previousEnabled: true,
+      storedBucketInterval: 7,
+      storedLookback: 150,
+    });
+
+    await run(makeEvent('deleted'));
+
+    expect(uiSettingsClient.set).toHaveBeenCalledWith(
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+      false
+    );
     expect(workflowService.ensureWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({
         enabled: false,

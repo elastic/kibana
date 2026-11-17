@@ -12,22 +12,20 @@ import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
-import { StatusError } from '../../../lib/errors/status_error';
 import {
   SCHEDULED_DISCOVERY_NUMERIC_SETTINGS,
+  assertValidDetectionWindow,
   resolveScheduledDiscoveryConfig,
   type ScheduledDiscoveryNumericField,
 } from '../../../lib/scheduled_discovery/scheduled_discovery_config';
 import { setScheduledDiscoveryEnabled } from '../../../lib/scheduled_discovery/set_scheduled_discovery_enabled';
 import {
-  MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MAX_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
   MAX_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
   MAX_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
   MAX_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
-  MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS,
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
@@ -154,30 +152,12 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
 
     // Request values win over stored settings, which win over the registered default.
     // Validated before either write so a partial update cannot combine into an invalid
-    // change_point configuration (lookback must be an exact multiple of the bucket
-    // interval, and the bucket count must stay inside the aggregation bounds).
+    // change_point configuration.
     const resolvedConfig = resolveScheduledDiscoveryConfig({
       ...spaceSettings,
       ...spaceUpdates,
     });
-    const resolvedBucketIntervalMinutes = resolvedConfig.detectionBucketIntervalMinutes;
-    const resolvedLookbackMinutes = resolvedConfig.detectionLookbackMinutes;
-    if (resolvedLookbackMinutes % resolvedBucketIntervalMinutes !== 0) {
-      throw new StatusError(
-        `detectionLookbackMinutes (${resolvedLookbackMinutes}) must be an exact multiple of detectionBucketIntervalMinutes (${resolvedBucketIntervalMinutes})`,
-        400
-      );
-    }
-    const detectionBucketCount = resolvedLookbackMinutes / resolvedBucketIntervalMinutes;
-    if (
-      detectionBucketCount < MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS ||
-      detectionBucketCount > MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS
-    ) {
-      throw new StatusError(
-        `detectionLookbackMinutes (${resolvedLookbackMinutes}) divided by detectionBucketIntervalMinutes (${resolvedBucketIntervalMinutes}) must yield between ${MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS} and ${MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS} buckets, got ${detectionBucketCount}`,
-        400
-      );
-    }
+    assertValidDetectionWindow(resolvedConfig);
 
     const rollbackSettings = async () => {
       if (Object.keys(previousSpaceValues).length === 0) {

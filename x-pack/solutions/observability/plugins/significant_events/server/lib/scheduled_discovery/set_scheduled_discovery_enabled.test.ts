@@ -46,11 +46,11 @@ const setup = (previousEnabled: boolean) => {
       calls.push('set');
     }),
   } as unknown as jest.Mocked<IUiSettingsClient>;
-  const workflowService: jest.Mocked<SignificantEventsScheduledWorkflowsService> = {
+  const workflowService = {
     ensureWorkflow: jest.fn(async () => {
       calls.push('ensureWorkflow');
     }),
-  };
+  } as unknown as jest.Mocked<SignificantEventsScheduledWorkflowsService>;
   const logger = { warn: jest.fn() } as unknown as jest.Mocked<Logger>;
 
   const run = (

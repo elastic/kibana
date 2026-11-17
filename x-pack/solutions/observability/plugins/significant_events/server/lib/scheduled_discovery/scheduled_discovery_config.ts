@@ -28,7 +28,10 @@ import {
   DEFAULT_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
   DEFAULT_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
   DEFAULT_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
+  MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS,
+  MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS,
 } from '../../../common/constants';
+import { StatusError } from '../errors/status_error';
 import type { SignificantEventsScheduledWorkflowsConfig } from '../workflows/significant_events_scheduled_workflows';
 
 /**
@@ -109,4 +112,30 @@ export const resolveScheduledDiscoveryConfig = (
     flakyRuleProbeAfterMinutes: read('flakyRuleProbeAfterMinutes'),
     flakyRuleExemptSeverityScore: read('flakyRuleExemptSeverityScore'),
   };
+};
+
+/** Rejects a lookback that is not an exact multiple of the bucket interval, or a pair outside the change_point bucket bounds. */
+export const assertValidDetectionWindow = ({
+  detectionBucketIntervalMinutes,
+  detectionLookbackMinutes,
+}: Pick<
+  SignificantEventsScheduledWorkflowsConfig,
+  'detectionBucketIntervalMinutes' | 'detectionLookbackMinutes'
+>): void => {
+  if (detectionLookbackMinutes % detectionBucketIntervalMinutes !== 0) {
+    throw new StatusError(
+      `detectionLookbackMinutes (${detectionLookbackMinutes}) must be an exact multiple of detectionBucketIntervalMinutes (${detectionBucketIntervalMinutes})`,
+      400
+    );
+  }
+  const detectionBucketCount = detectionLookbackMinutes / detectionBucketIntervalMinutes;
+  if (
+    detectionBucketCount < MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS ||
+    detectionBucketCount > MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS
+  ) {
+    throw new StatusError(
+      `detectionLookbackMinutes (${detectionLookbackMinutes}) divided by detectionBucketIntervalMinutes (${detectionBucketIntervalMinutes}) must yield between ${MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS} and ${MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS} buckets, got ${detectionBucketCount}`,
+      400
+    );
+  }
 };

@@ -11,7 +11,10 @@ import type { SignificantEventsPluginStartDependencies } from '../../types';
 import type { SignificantEventsMaintenanceService } from '../maintenance/maintenance_service';
 import type { SignificantEventsScheduledWorkflowsService } from '../workflows/significant_events_scheduled_workflows';
 import { getSourcePresenceEnabledTarget } from '../source_presence/get_source_presence_enabled_target';
-import { resolveScheduledDiscoveryConfig } from './scheduled_discovery_config';
+import {
+  assertValidDetectionWindow,
+  resolveScheduledDiscoveryConfig,
+} from './scheduled_discovery_config';
 import { setScheduledDiscoveryEnabled } from './set_scheduled_discovery_enabled';
 
 interface StartServices {
@@ -74,6 +77,11 @@ export const syncScheduledDiscovery = async ({
     coreStart.savedObjects.getUnsafeInternalClient().asScopedToNamespace(event.request.spaceId)
   );
   const settings = await uiSettingsClient.getAll<boolean | number>();
+  const config = resolveScheduledDiscoveryConfig(settings);
+  // An invalid stored window fails the install. It must not block last-source teardown.
+  if (enabled) {
+    assertValidDetectionWindow(config);
+  }
   await setScheduledDiscoveryEnabled({
     uiSettingsClient,
     workflowService,
@@ -81,7 +89,7 @@ export const syncScheduledDiscovery = async ({
     request: event.request,
     spaceId: event.request.spaceId,
     enabled,
-    config: resolveScheduledDiscoveryConfig(settings),
+    config,
     logger,
     // Last-source teardown must not wait on in-flight runs, or the source DELETE races the drain.
     ...(enabled ? {} : { skipExecutionDrain: true }),
