@@ -8,6 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { chunk } from 'lodash';
 import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
@@ -72,6 +73,7 @@ import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowRestoreMetadata,
 } from '../../common/lib/workflow_change_history/types';
+import { getCalledWorkflowIds } from '../../common/lib/workflow_dependents/find_call_sites';
 import { getWorkflowZodSchema } from '../../common/schema';
 import {
   fetchOccHitsByIds,
@@ -116,6 +118,7 @@ import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks'
 // against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
 // candidates per call, so the practical ceiling is far higher than this number;
 // this only bounds repeated round-trips when many concurrent writers share a base ID.
+const INDEX_CALLED_WORKFLOW_IDS_BATCH_SIZE = 500;
 const TOCTOU_MAX_RETRIES = 5;
 
 // `OccWriter.readModifyWrite` always indexes what `mutate` returns; throwing this skips the write.
@@ -320,6 +323,35 @@ export class WorkflowCrudService {
       }
     }
     return { documents, unavailable };
+  }
+
+  /**
+   * Stores which workflows each of `ids` runs, for documents saved before saving stored it. A
+   * document saved meanwhile is left as it is, since the save stored it.
+   */
+  async indexCalledWorkflowIds(ids: string[]): Promise<void> {
+    for (const idsChunk of chunk(ids, INDEX_CALLED_WORKFLOW_IDS_BATCH_SIZE)) {
+      const { documents } = await this.readWorkflowDocumentsWithVersion(idsChunk);
+      const writes: WorkflowDocumentBulkWrite[] = [];
+      for (const [id, previous] of documents) {
+        const { source } = previous;
+        // Bound workflows can't be written in bulk (see bulkWriteWorkflowDocuments).
+        if (source.calledWorkflowIdsIndexed !== true && !source.definition?.settings?.run_as) {
+          writes.push({
+            id,
+            previous,
+            document: {
+              ...source,
+              calledWorkflowIds: getCalledWorkflowIds(source.definition),
+              calledWorkflowIdsIndexed: true,
+            },
+          });
+        }
+      }
+      if (writes.length > 0) {
+        await this.bulkWriteWorkflowDocuments(writes);
+      }
+    }
   }
 
   /**
@@ -1196,6 +1228,8 @@ export class WorkflowCrudService {
         if (merged.triggerTypes === undefined) {
           merged.triggerTypes = getTriggerTypesFromDefinition(merged.definition) ?? [];
         }
+        merged.calledWorkflowIds = getCalledWorkflowIds(merged.definition);
+        merged.calledWorkflowIdsIndexed = true;
         previousVersion = existingSource.version;
         return merged;
       },
