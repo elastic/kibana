@@ -13,14 +13,14 @@ describe('getUiamClientAuthentication', () => {
   it.each(['Bearer', 'bearer'])(
     'forwards supplied client authentication for %s tokens',
     (scheme) => {
-      for (const sharedSecret of ['upstream-secret', '']) {
+      for (const value of ['upstream-secret', 'Assertion upstream.jwt.value', '']) {
         const request = httpServerMock.createKibanaRequest({
           headers: {
             authorization: `${scheme} essu_token`,
-            'x-client-authentication': sharedSecret,
+            'x-client-authentication': value,
           },
         });
-        expect(getUiamClientAuthentication(request)).toEqual({ sharedSecret });
+        expect(getUiamClientAuthentication(request)).toEqual({ value });
       }
     }
   );

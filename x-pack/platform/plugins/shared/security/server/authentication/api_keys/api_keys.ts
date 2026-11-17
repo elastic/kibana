@@ -313,7 +313,7 @@ export class APIKeys implements NativeAPIKeysType {
     let clientAuthentication: ClientAuthentication | undefined;
 
     if (this.uiam && isUiamCredential(authorizationHeader)) {
-      clientAuthentication = this.uiam.getClientAuthentication(request);
+      clientAuthentication = this.uiam.getClientAuthentication(authorizationHeader, request);
     } else {
       const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
         request,

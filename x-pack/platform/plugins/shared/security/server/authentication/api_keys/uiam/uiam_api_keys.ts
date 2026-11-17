@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { timingSafeEqual } from 'crypto';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import {
@@ -89,7 +88,8 @@ export class UiamAPIKeys implements UiamAPIKeysType {
 
     try {
       // External API keys must not carry client authentication (`null`). For other credentials,
-      // preserve the request's secret and only default to Kibana's for internally created requests.
+      // preserve the request's client authentication and only default to Kibana's own assertion
+      // for internally created requests.
       const clientAuthentication = this.isExternalApiKey(request)
         ? null
         : getUiamClientAuthentication(request);
@@ -208,10 +208,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   }
 
   isOwnClientAuthentication(value: string): boolean {
-    const own = this.uiam.getClientAuthentication().value;
-    const presented = Buffer.from(value);
-    const expected = Buffer.from(own);
-    return presented.length === expected.length && timingSafeEqual(presented, expected);
+    return this.uiam.isOwnClientAuthentication(value);
   }
 
   /**

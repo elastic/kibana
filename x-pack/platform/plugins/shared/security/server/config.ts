@@ -379,12 +379,6 @@ export const ConfigSchema = schema.object({
           },
         }
       ),
-      sharedSecret: schema.conditional(
-        schema.siblingRef('enabled'),
-        true,
-        schema.string(),
-        schema.maybe(schema.string())
-      ),
       unsafe: schema.maybe(
         schema.object({
           // Default expiration for internal API keys granted via UIAM without an explicit expiration,

@@ -235,7 +235,6 @@ describe('AuthenticationService', () => {
         const { systemIdentity } = startWithUiamConfig({
           enabled: true,
           url: 'https://uiam.service',
-          sharedSecret: 'secret',
           ssl: { certificate: '/path/to/cert.pem', key: '/path/to/key.pem' },
         });
 
@@ -246,7 +245,6 @@ describe('AuthenticationService', () => {
         const { systemIdentity } = startWithUiamConfig({
           enabled: true,
           url: 'https://uiam.service',
-          sharedSecret: 'secret',
         });
 
         expect(systemIdentity).toBeUndefined();

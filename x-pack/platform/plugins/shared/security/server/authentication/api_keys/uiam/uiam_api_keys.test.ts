@@ -56,6 +56,7 @@ describe('UiamAPIKeys', () => {
     mockUiam = {
       getAuthenticationHeaders: jest.fn(),
       getClientAuthentication: jest.fn(),
+      isOwnClientAuthentication: jest.fn(),
       getInternalCallerAttestationHeaders: jest.fn(),
       refreshSessionTokens: jest.fn(),
       invalidateSessionTokens: jest.fn(),
@@ -223,7 +224,7 @@ describe('UiamAPIKeys', () => {
           },
         });
 
-        expect(await grantWith(request)).toEqual({ sharedSecret: 'upstream-shared-secret' });
+        expect(await grantWith(request)).toEqual({ value: 'upstream-shared-secret' });
       });
 
       it('is omitted for an external API key', async () => {
@@ -586,23 +587,20 @@ describe('UiamAPIKeys', () => {
 
   describe('isOwnClientAuthentication()', () => {
     beforeEach(() => {
-      mockUiam.getClientAuthentication.mockReturnValue({
-        scheme: 'SharedSecret',
-        value: 'kibana-shared-secret',
-      });
+      mockUiam.isOwnClientAuthentication.mockImplementation(
+        (value: string) => value === 'Assertion kibana-own-assertion'
+      );
     });
 
-    it("returns true for Kibana's own shared secret", () => {
-      expect(uiamApiKeys.isOwnClientAuthentication('kibana-shared-secret')).toBe(true);
-      expect(mockUiam.getClientAuthentication).toHaveBeenCalledWith();
+    it("returns true for Kibana's own assertion", () => {
+      expect(uiamApiKeys.isOwnClientAuthentication('Assertion kibana-own-assertion')).toBe(true);
+      expect(mockUiam.isOwnClientAuthentication).toHaveBeenCalledWith(
+        'Assertion kibana-own-assertion'
+      );
     });
 
-    it('returns false for an upstream relay secret', () => {
+    it('returns false for an upstream relayed value', () => {
       expect(uiamApiKeys.isOwnClientAuthentication('upstream-secret')).toBe(false);
-    });
-
-    it('returns false when the presented value has a different length', () => {
-      expect(uiamApiKeys.isOwnClientAuthentication('short')).toBe(false);
     });
   });
 

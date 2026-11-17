@@ -19,6 +19,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { SERVICE_ACCOUNT_REALM_TYPE } from '@kbn/core-security-common';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 
 import { APIKeys } from './api_keys';
@@ -1018,7 +1019,10 @@ describe('API Keys', () => {
           role_descriptors: {},
         });
 
-        expect(mockUiam.getClientAuthentication).toHaveBeenCalledWith(request);
+        expect(mockUiam.getClientAuthentication).toHaveBeenCalledWith(
+          new HTTPAuthorizationHeader('Bearer', 'essu_ephemeral_token'),
+          request
+        );
         expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
           api_key: { name: 'test-key', role_descriptors: {} },
           grant_type: 'access_token',

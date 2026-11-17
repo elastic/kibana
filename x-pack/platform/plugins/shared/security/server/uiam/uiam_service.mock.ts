@@ -14,9 +14,10 @@ export const uiamServiceMock = {
   create: (): jest.Mocked<UiamServicePublic> => ({
     getAuthenticationHeaders: jest.fn().mockImplementation((accessToken: string) => ({
       authorization: `Bearer ${accessToken}`,
-      [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+      [ES_CLIENT_AUTHENTICATION_HEADER]: 'Assertion some-assertion',
     })),
     getClientAuthentication: jest.fn(),
+    isOwnClientAuthentication: jest.fn().mockReturnValue(false),
     getInternalCallerAttestationHeaders: jest.fn().mockReturnValue({
       [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'some-internal-caller-attestation',
     }),

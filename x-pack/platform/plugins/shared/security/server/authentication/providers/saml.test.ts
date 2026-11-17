@@ -9,6 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import { ELASTIC_CLOUD_SSO_REALM_NAME } from './base';
 import type { MockAuthenticationProviderOptions } from './base.mock';
@@ -1885,8 +1886,8 @@ describe('SAMLAuthenticationProvider', () => {
         in_response_to: mockSAMLSet1.requestId,
       });
       mockOptions.uiam?.getClientAuthentication.mockReturnValue({
-        scheme: 'SharedSecret',
-        value: 'some-secret',
+        scheme: 'Assertion',
+        value: 'some-assertion',
       });
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -1916,7 +1917,7 @@ describe('SAMLAuthenticationProvider', () => {
             userProfileGrant: {
               type: 'uiamAccessToken',
               accessToken: 'essu_dev_some-token',
-              clientAuthentication: { scheme: 'SharedSecret', value: 'some-secret' },
+              clientAuthentication: { scheme: 'Assertion', value: 'some-assertion' },
             },
             state: {
               accessToken: 'essu_dev_some-token',
@@ -1928,6 +1929,9 @@ describe('SAMLAuthenticationProvider', () => {
         );
 
         expect(mockOptions.uiam?.getClientAuthentication).toHaveBeenCalledTimes(1);
+        expect(mockOptions.uiam?.getClientAuthentication).toHaveBeenCalledWith(
+          new HTTPAuthorizationHeader('Bearer', 'essu_dev_some-token')
+        );
         expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
           method: 'POST',
           path: '/_security/saml/authenticate',
@@ -1954,12 +1958,15 @@ describe('SAMLAuthenticationProvider', () => {
 
         await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
           AuthenticationResult.succeeded(mockUser, {
-            authHeaders: { authorization, [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
+            authHeaders: {
+              authorization,
+              [ES_CLIENT_AUTHENTICATION_HEADER]: 'Assertion some-assertion',
+            },
           })
         );
 
         expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
-          headers: { authorization, [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
+          headers: { authorization, [ES_CLIENT_AUTHENTICATION_HEADER]: 'Assertion some-assertion' },
         });
 
         expect(request.headers).not.toHaveProperty('authorization');
@@ -2051,20 +2058,20 @@ describe('SAMLAuthenticationProvider', () => {
         });
 
         mockOptions.uiam?.getClientAuthentication.mockReturnValue({
-          scheme: 'SharedSecret',
-          value: 'some-secret',
+          scheme: 'Assertion',
+          value: 'some-assertion',
         });
 
         await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
           AuthenticationResult.succeeded(mockUser, {
             authHeaders: {
               authorization: 'Bearer essu_dev_new-access-token',
-              [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+              [ES_CLIENT_AUTHENTICATION_HEADER]: 'Assertion some-assertion',
             },
             userProfileGrant: {
               type: 'uiamAccessToken',
               accessToken: 'essu_dev_new-access-token',
-              clientAuthentication: { scheme: 'SharedSecret', value: 'some-secret' },
+              clientAuthentication: { scheme: 'Assertion', value: 'some-assertion' },
             },
             state: {
               accessToken: 'essu_dev_new-access-token',
@@ -2111,7 +2118,7 @@ describe('SAMLAuthenticationProvider', () => {
         );
 
         expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
-          headers: { authorization, [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
+          headers: { authorization, [ES_CLIENT_AUTHENTICATION_HEADER]: 'Assertion some-assertion' },
         });
 
         expect(request.headers).not.toHaveProperty('authorization');

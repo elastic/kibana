@@ -13,15 +13,19 @@ import { Agent } from 'undici';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
+  createUiamAssertionSigner,
   deriveInternalCallerAttestation,
+  deriveUiamAttestationKey,
   HTTPAuthorizationHeader,
   isExternalUiamCredential,
   resolveUiamClientAuthentication,
+  UIAM_ASSERTION_SCHEME,
   UIAM_ERROR_CODES,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
+  UiamClientAuthenticationContext,
   UiamOAuthClientLogo,
   UiamOAuthClientResponse,
   UiamOAuthClientType,
@@ -204,26 +208,38 @@ export interface OAuthConnectionsResponse {
  */
 export interface UiamServicePublic {
   /**
-   * Creates a set of authentication headers used to authenticate user with UIAM service.
+   * Creates a set of authentication headers used to authenticate user with UIAM service: the
+   * access token together with Kibana's signed assertion for it.
    * @param accessToken UIAM session access token.
    */
   getAuthenticationHeaders(accessToken: string): Record<string, string>;
 
   /**
    * Returns the header(s) a trusted loopback caller stamps on a real HTTP request that carries an
-   * internal UIAM (`essu_`) credential, so the ES cluster client re-attaches the shared secret on
-   * its behalf. Carries a non-reversible HMAC of the shared secret (never the secret itself), bound
-   * to `credential` so it authorizes that credential only.
+   * internal UIAM (`essu_`) credential, so the ES cluster client attaches Kibana's own assertion on
+   * its behalf. Carries a non-reversible HMAC derived from the encryption key (never the key
+   * itself), bound to `credential` so it authorizes that credential only.
    */
   getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string>;
 
   /**
-   * Returns the Elasticsearch client authentication information with the shared secret value. This is to be used with
-   * `client_authentication` option in Elasticsearch client. When a request is provided and client authentication rode
-   * in with its UIAM bearer token, that inbound value is preserved instead of Kibana's own shared secret.
+   * Returns the Elasticsearch client authentication information for the given credential. This is
+   * to be used with `client_authentication` option in Elasticsearch client. When a request is
+   * provided and client authentication rode in with its UIAM bearer token, that inbound value is
+   * preserved instead of Kibana's own assertion.
+   * @param credential The credential the client authentication is presented with.
    * @param request Optional request whose inbound client authentication takes precedence.
    */
-  getClientAuthentication(request?: KibanaRequest): ClientAuthentication;
+  getClientAuthentication(
+    credential: HTTPAuthorizationHeader,
+    request?: KibanaRequest
+  ): ClientAuthentication;
+
+  /**
+   * Whether the `x-client-authentication` value is an assertion Kibana signed itself.
+   * @param value The client authentication value to check.
+   */
+  isOwnClientAuthentication(value: string): boolean;
 
   /**
    * Refreshes the UIAM user session and returns new access and refresh session tokens.
@@ -468,6 +484,8 @@ interface UiamServiceOptions {
   elasticsearchUrl?: string;
   /** The Kibana version, used to set the User-Agent header on outbound UIAM requests. */
   kibanaVersion: string;
+  /** `xpack.security.encryptionKey`, the internal-caller attestation key is derived from. */
+  encryptionKey: string;
 }
 
 /**
@@ -477,6 +495,7 @@ export class UiamService implements UiamServicePublic {
   readonly #logger: Logger;
   readonly #config: Required<UiamConfigType>;
   readonly #dispatcher: Agent | undefined;
+  readonly #clientAuthenticationContext: UiamClientAuthenticationContext;
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
@@ -488,7 +507,7 @@ export class UiamService implements UiamServicePublic {
     this.#userAgentHeader = `Kibana/${options.kibanaVersion}`;
 
     // Destructure existing config and re-create it again after validation to make TypeScript can infer the proper types.
-    const { enabled, url, sharedSecret, ssl, unsafe = {} } = config;
+    const { enabled, url, ssl, unsafe = {} } = config;
     if (!enabled) {
       throw new Error('UIAM is not enabled.');
     }
@@ -497,11 +516,18 @@ export class UiamService implements UiamServicePublic {
       throw new Error('UIAM URL is not configured.');
     }
 
-    if (!sharedSecret) {
-      throw new Error('UIAM shared secret is not configured.');
+    if (!ssl.certificate || !ssl.key) {
+      throw new Error('UIAM client certificate and key are not configured.');
     }
 
-    this.#config = { enabled, url, sharedSecret, ssl, unsafe };
+    this.#config = { enabled, url, ssl, unsafe };
+    this.#clientAuthenticationContext = {
+      signer: createUiamAssertionSigner({
+        certificate: readFileSync(ssl.certificate, 'utf8'),
+        key: readFileSync(ssl.key, 'utf8'),
+      }),
+      attestationKey: deriveUiamAttestationKey(options.encryptionKey),
+    };
 
     if (unsafe.grantedApiKeyDefaultExpiration) {
       this.#logger.warn(
@@ -512,12 +538,13 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
-   * Builds the client authentication header for a UIAM call. `undefined` means the caller did not
-   * supply anything, so Kibana presents its own shared secret; a {@link UiamClientAuthentication}
-   * carries the caller's secret verbatim; `null` deliberately presents none at all, which UIAM
-   * requires for external (organization) API keys.
+   * Builds the client authentication header for a UIAM call made with `credential`. `undefined`
+   * means the caller did not supply anything, so Kibana presents its own assertion for the
+   * credential; a {@link UiamClientAuthentication} carries the caller's value verbatim; `null`
+   * deliberately presents none at all, which UIAM requires for external (organization) API keys.
    */
   #getClientAuthenticationHeaders(
+    credential: HTTPAuthorizationHeader,
     clientAuthentication?: UiamClientAuthentication | null
   ): Record<string, string> {
     if (clientAuthentication === null) {
@@ -526,14 +553,14 @@ export class UiamService implements UiamServicePublic {
 
     return {
       [ES_CLIENT_AUTHENTICATION_HEADER]:
-        clientAuthentication?.sharedSecret ?? this.#config.sharedSecret,
+        clientAuthentication?.value ?? this.#clientAuthenticationContext.signer.sign(credential),
     };
   }
 
   #getRequestAuthenticationHeaders(request: KibanaRequest): Record<string, string> {
     const credential = getUiamAuthorizationHeaderFromRequest(request);
     const clientAuthentication = resolveUiamClientAuthentication(
-      this.#config.sharedSecret,
+      this.#clientAuthenticationContext,
       request.isFakeRequest
         ? {
             credentialSource: isExternalUiamCredential(request) ? 'external' : 'internal',
@@ -559,9 +586,11 @@ export class UiamService implements UiamServicePublic {
    * See {@link UiamServicePublic.getAuthenticationHeaders}.
    */
   getAuthenticationHeaders(accessToken: string): Record<string, string> {
+    const authorization = new HTTPAuthorizationHeader('Bearer', accessToken);
     return {
-      authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+      authorization: authorization.toString(),
+      [ES_CLIENT_AUTHENTICATION_HEADER]:
+        this.#clientAuthenticationContext.signer.sign(authorization),
     };
   }
 
@@ -571,7 +600,7 @@ export class UiamService implements UiamServicePublic {
   getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string> {
     return {
       [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-        this.#config.sharedSecret,
+        this.#clientAuthenticationContext.attestationKey,
         credential
       ),
     };
@@ -580,14 +609,21 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getClientAuthentication}.
    */
-  getClientAuthentication(request?: KibanaRequest): ClientAuthentication {
-    const suppliedSharedSecret = request
-      ? getUiamClientAuthentication(request)?.sharedSecret
-      : undefined;
-    return {
-      scheme: 'SharedSecret',
-      value: suppliedSharedSecret ?? this.#config.sharedSecret,
-    };
+  getClientAuthentication(
+    credential: HTTPAuthorizationHeader,
+    request?: KibanaRequest
+  ): ClientAuthentication {
+    const supplied = request ? getUiamClientAuthentication(request)?.value : undefined;
+    return UiamService.#toElasticsearchClientAuthentication(
+      supplied ?? this.#clientAuthenticationContext.signer.sign(credential)
+    );
+  }
+
+  /**
+   * See {@link UiamServicePublic.isOwnClientAuthentication}.
+   */
+  isOwnClientAuthentication(value: string): boolean {
+    return this.#clientAuthenticationContext.signer.isOwnAssertion(value);
   }
 
   /**
@@ -603,7 +639,6 @@ export class UiamService implements UiamServicePublic {
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': this.#userAgentHeader,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
           },
           body: JSON.stringify({ refresh_token: refreshToken }),
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
@@ -631,7 +666,6 @@ export class UiamService implements UiamServicePublic {
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': this.#userAgentHeader,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({ tokens: [accessToken, refreshToken] }),
@@ -738,7 +772,7 @@ export class UiamService implements UiamServicePublic {
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': this.#userAgentHeader,
-          ...this.#getClientAuthenticationHeaders(clientAuthentication),
+          ...this.#getClientAuthenticationHeaders(authorization, clientAuthentication),
           Authorization: authorization.toString(),
         },
         body: JSON.stringify(body),
@@ -765,14 +799,21 @@ export class UiamService implements UiamServicePublic {
     try {
       this.#logger.debug(`Attempting to revoke API key: ${apiKeyId}`);
 
+      const apiKeyAuthorization = new HTTPAuthorizationHeader(
+        'ApiKey',
+        getUiamCredentialsFromRequest(request)
+      );
       await UiamService.#parseUiamResponse(
         await fetch(`${this.#config.url}/uiam/api/v1/api-keys/${apiKeyId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': this.#userAgentHeader,
-            ...this.#getClientAuthenticationHeaders(getUiamClientAuthentication(request)),
-            Authorization: `ApiKey ${getUiamCredentialsFromRequest(request)}`,
+            ...this.#getClientAuthenticationHeaders(
+              apiKeyAuthorization,
+              getUiamClientAuthentication(request)
+            ),
+            Authorization: apiKeyAuthorization.toString(),
           },
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
           dispatcher: this.#dispatcher,
@@ -814,7 +855,6 @@ export class UiamService implements UiamServicePublic {
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': this.#userAgentHeader,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
           },
           body: JSON.stringify(body),
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
@@ -847,7 +887,7 @@ export class UiamService implements UiamServicePublic {
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': this.#userAgentHeader,
-          ...this.#getClientAuthenticationHeaders(clientAuthentication),
+          ...this.#getClientAuthenticationHeaders(authorization, clientAuthentication),
           Authorization: authorization.toString(),
         },
         // Kibana only creates organization service accounts scoped to its own project.
@@ -1539,6 +1579,13 @@ export class UiamService implements UiamServicePublic {
     };
 
     throw err;
+  }
+
+  static #toElasticsearchClientAuthentication(value: string): ClientAuthentication {
+    const assertionPrefix = `${UIAM_ASSERTION_SCHEME} `;
+    return value.startsWith(assertionPrefix)
+      ? { scheme: UIAM_ASSERTION_SCHEME, value: value.slice(assertionPrefix.length) }
+      : { scheme: 'SharedSecret', value };
   }
 
   static #getErrorCode(err: unknown): string | undefined {
