@@ -12,7 +12,6 @@ import type {
 import type { StatusRuleParamsProps } from '../../components/alerts/status_rule_ui';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import type { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
-import type { UpdateDefaultAlertingPayload } from './actions';
 import { apiService } from '../../../../utils/api_service';
 
 export async function inspectStatusAlertAPI(
@@ -35,8 +34,6 @@ export async function enableDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE
   return apiService.post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING);
 }
 
-export async function updateDefaultAlertingAPI(
-  payload?: UpdateDefaultAlertingPayload | void
-): Promise<DEFAULT_ALERT_RESPONSE> {
-  return apiService.put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING, payload || undefined);
+export async function updateDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {
+  return apiService.put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING);
 }

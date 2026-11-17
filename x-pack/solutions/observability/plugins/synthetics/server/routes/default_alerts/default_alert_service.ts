@@ -8,7 +8,7 @@
 import { omit } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction, RuleSystemAction } from '@kbn/alerting-plugin/common';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
@@ -151,14 +151,13 @@ export class DefaultRuleService {
     };
   }
 
-  async updateStatusRule(enabled?: boolean, previousDefaultConnectors?: string[]) {
+  async updateStatusRule(enabled?: boolean) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
       return this.upsertDefaultRule(
         SYNTHETICS_STATUS_RULE,
         `Synthetics status internal rule`,
-        minimumRuleInterval,
-        previousDefaultConnectors
+        minimumRuleInterval
       );
     } else {
       const rulesClient = await (await this.context.alerting)?.getRulesClient();
@@ -168,14 +167,13 @@ export class DefaultRuleService {
     }
   }
 
-  async updateTlsRule(enabled?: boolean, previousDefaultConnectors?: string[]) {
+  async updateTlsRule(enabled?: boolean) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
       return this.upsertDefaultRule(
         SYNTHETICS_TLS_RULE,
         `Synthetics internal TLS rule`,
-        minimumRuleInterval,
-        previousDefaultConnectors
+        minimumRuleInterval
       );
     } else {
       const rulesClient = await (await this.context.alerting)?.getRulesClient();
@@ -183,6 +181,25 @@ export class DefaultRuleService {
         filter: `alert.attributes.alertTypeId:"${SYNTHETICS_TLS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
       });
     }
+  }
+
+  /** Rebuilds settings-managed actions of default rules that already exist; never creates or deletes rules. */
+  async refreshDefaultRuleActions(previousDefaultConnectors: string[]) {
+    const settings = await this.getSettings();
+    const interval = this.getMinimumRuleInterval();
+    const refreshIfExists = async (ruleType: DefaultRuleType, name: string) => {
+      if (await this.getExistingAlert(ruleType)) {
+        await this.upsertDefaultRule(ruleType, name, interval, previousDefaultConnectors);
+      }
+    };
+    await Promise.all([
+      settings.defaultStatusRuleEnabled === false
+        ? undefined
+        : refreshIfExists(SYNTHETICS_STATUS_RULE, `Synthetics status internal rule`),
+      settings.defaultTLSRuleEnabled === false
+        ? undefined
+        : refreshIfExists(SYNTHETICS_TLS_RULE, `Synthetics internal TLS rule`),
+    ]);
   }
 
   async upsertDefaultRule(
@@ -209,6 +226,9 @@ export class DefaultRuleService {
             'group' in action && !settingsManagedConnectorIds.has(action.id)
         )
         .map((action) => omit(action, 'actionTypeId'));
+      const preservedSystemActions = alert.actions
+        .filter((action): action is RuleSystemAction => !('group' in action))
+        .map((action) => omit(action, 'actionTypeId'));
       const actions = [...userAddedActions, ...(await this.getAlertActions(ruleType))];
       const {
         actions: actionsFromRules = [],
@@ -218,6 +238,7 @@ export class DefaultRuleService {
         id: alert.id,
         data: {
           actions,
+          systemActions: preservedSystemActions,
           name: alert.name,
           tags: alert.tags,
           schedule: {

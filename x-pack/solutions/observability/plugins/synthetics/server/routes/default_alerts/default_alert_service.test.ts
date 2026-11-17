@@ -346,6 +346,7 @@ describe('DefaultAlertService', () => {
         expect(update.mock.calls[0][0]).toEqual({
           data: {
             actions: [],
+            systemActions: [],
             name: 'test-alert-name',
             params: { param: 'value' },
             schedule: { interval: '3m' },
@@ -356,29 +357,30 @@ describe('DefaultAlertService', () => {
         expect(getAll).toHaveBeenCalled();
       });
 
-      it('keeps actions added on the rule and rebuilds settings-managed ones', async () => {
+      it('keeps actions and system actions added on the rule and rebuilds settings-managed ones', async () => {
+        const group = 'xpack.synthetics.alerts.actionGroups.monitorStatus';
         const userAction = {
           id: 'user-email',
-          group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
+          group,
           params: { to: ['a@b.c'] },
           actionTypeId: '.email',
           uuid: 'u1',
         };
         const oldDefault = {
           id: 'old-default',
-          group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
+          group,
           params: {},
           actionTypeId: '.slack',
           uuid: 'u2',
         };
         const currentDefault = {
           id: 'id',
-          group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
+          group,
           params: {},
           actionTypeId: 'actionTypeId',
           uuid: 'u3',
         };
-        const systemAction = { id: 'sys', actionTypeId: '.sys', params: {} };
+        const systemAction = { id: 'sys', actionTypeId: '.cases', params: { a: 1 } };
         const {
           context,
           server,
@@ -395,13 +397,37 @@ describe('DefaultAlertService', () => {
         const service = new DefaultRuleService(context as any, server as any, {} as any);
         service.settings = { defaultConnectors: ['id'] } as any;
 
-        await service.updateStatusRule(true, ['old-default']);
+        await service.upsertDefaultRule(SYNTHETICS_STATUS_RULE, 'name', '1m', ['old-default']);
 
-        const { actions } = update.mock.calls[0][0].data;
+        const { actions, systemActions } = update.mock.calls[0][0].data;
         expect(actions).toEqual([
-          { id: 'user-email', group: userAction.group, params: userAction.params, uuid: 'u1' },
-          expect.objectContaining({ id: 'id', group: userAction.group }),
+          { id: 'user-email', group, params: userAction.params, uuid: 'u1' },
+          expect.objectContaining({ id: 'id', group }),
         ]);
+        expect(systemActions).toEqual([{ id: 'sys', params: { a: 1 } }]);
+      });
+
+      it('refreshDefaultRuleActions only updates existing, enabled rules', async () => {
+        const { context, server } = setUpUpdateTest();
+        const service = new DefaultRuleService(context as any, server as any, {} as any);
+        service.settings = { defaultStatusRuleEnabled: true, defaultTLSRuleEnabled: false } as any;
+        service.getExistingAlert = jest.fn().mockResolvedValue({ id: 'existing' }) as any;
+        service.upsertDefaultRule = jest.fn();
+
+        await service.refreshDefaultRuleActions(['old']);
+
+        expect(service.upsertDefaultRule).toHaveBeenCalledTimes(1);
+        expect(service.upsertDefaultRule).toHaveBeenCalledWith(
+          SYNTHETICS_STATUS_RULE,
+          'Synthetics status internal rule',
+          '3m',
+          ['old']
+        );
+
+        service.getExistingAlert = jest.fn().mockResolvedValue(undefined);
+        (service.upsertDefaultRule as jest.Mock).mockClear();
+        await service.refreshDefaultRuleActions(['old']);
+        expect(service.upsertDefaultRule).not.toHaveBeenCalled();
       });
 
       it('deletes the rule if it is disabled', async () => {

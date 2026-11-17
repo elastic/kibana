@@ -16,6 +16,7 @@ import {
   createPostDynamicSettingsRoute,
   DynamicSettingsSchema,
 } from './dynamic_settings';
+import { DefaultRuleService } from '../default_alerts/default_alert_service';
 import type { RouteContext } from '../types';
 import {
   REBALANCE_SHARDS_ENABLED_STATE_KEY,
@@ -124,6 +125,55 @@ describe('dynamic settings routes', () => {
       );
       expect(setSpy.mock.calls[0][1].rebalancePrivateLocationShardsEnabled).toBeUndefined();
       expect(result).toMatchObject({ rebalancePrivateLocationShardsEnabled: false });
+    });
+
+    describe('default rule actions', () => {
+      const setUp = (body: Record<string, unknown>) => {
+        jest.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue({
+          ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES,
+          defaultConnectors: ['old'],
+        });
+        jest
+          .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
+          .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+        const server = buildServer();
+        (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+          state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
+        });
+        return buildRouteContext({ server, request: { body } as never, context: {} as never });
+      };
+
+      it('refreshes default rule actions with the stored previous connectors when connectors change', async () => {
+        const refresh = jest
+          .spyOn(DefaultRuleService.prototype, 'refreshDefaultRuleActions')
+          .mockResolvedValue();
+
+        await createPostDynamicSettingsRoute().handler(setUp({ defaultConnectors: ['new'] }));
+
+        expect(refresh).toHaveBeenCalledWith(['old']);
+      });
+
+      it('does not refresh default rules when connectors and email are unchanged', async () => {
+        const refresh = jest
+          .spyOn(DefaultRuleService.prototype, 'refreshDefaultRuleActions')
+          .mockResolvedValue();
+
+        await createPostDynamicSettingsRoute().handler(setUp({ certAgeThreshold: 100 }));
+
+        expect(refresh).not.toHaveBeenCalled();
+      });
+
+      it('still saves settings when refreshing rules fails', async () => {
+        jest
+          .spyOn(DefaultRuleService.prototype, 'refreshDefaultRuleActions')
+          .mockRejectedValue(new Error('forbidden'));
+        const routeContext = setUp({ defaultConnectors: ['new'] });
+
+        const result = await createPostDynamicSettingsRoute().handler(routeContext);
+
+        expect(result).toMatchObject({ defaultConnectors: ['new'] });
+        expect(routeContext.server.logger.error).toHaveBeenCalled();
+      });
     });
 
     it('ignores privateLocationsSyncInterval from older clients', async () => {

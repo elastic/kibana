@@ -6,6 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
+import { isEqual } from 'lodash';
 import { z } from '@kbn/zod';
 import { MAX_ROUTE_STRING_LENGTH } from '../zod_query';
 import {
@@ -13,6 +14,7 @@ import {
   getSyntheticsDynamicSettings,
   setSyntheticsDynamicSettings,
 } from '../../saved_objects/synthetics_settings';
+import { DefaultRuleService } from '../default_alerts/default_alert_service';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import type { DynamicSettings } from '../../../common/runtime_types';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
@@ -55,7 +57,13 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
     body: DynamicSettingsSchema,
   },
   writeAccess: true,
-  handler: async ({ savedObjectsClient, request, response, server }): Promise<DynamicSettings> => {
+  handler: async ({
+    context,
+    savedObjectsClient,
+    request,
+    response,
+    server,
+  }): Promise<DynamicSettings> => {
     const {
       privateLocationsSyncInterval: _ignoredSyncInterval,
       rebalancePrivateLocationShardsEnabled,
@@ -86,6 +94,23 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       ...prevWithoutRebalance,
       ...otherSettings,
     } as DynamicSettingsAttributes);
+
+    const { defaultConnectors, defaultEmail } = attr as DynamicSettingsAttributes;
+    if (
+      !isEqual(prevSettings.defaultConnectors, defaultConnectors) ||
+      !isEqual(prevSettings.defaultEmail, defaultEmail)
+    ) {
+      // Best-effort: callers may lack rule privileges, which must not fail the settings save.
+      try {
+        await new DefaultRuleService(context, server, savedObjectsClient).refreshDefaultRuleActions(
+          prevSettings.defaultConnectors ?? []
+        );
+      } catch (error) {
+        server.logger.error(`Error refreshing default rule actions, Error: ${error.message}`, {
+          error,
+        });
+      }
+    }
 
     let persistedRebalance = true;
     if (rebalanceChanged) {
