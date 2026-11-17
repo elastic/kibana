@@ -1,0 +1,342 @@
+{
+  "10.4.0": [
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "cases",
+      "created_at": "2022-10-13T15:55:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2022-10-13T15:55:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "extractObservables": true
+    },
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "securitySolution",
+      "created_at": "2026-09-01T00:00:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2026-09-01T00:00:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "workflowTags": ["triage", "enrichment"],
+      "extractObservables": true
+    },
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "observability",
+      "created_at": "2026-09-01T00:00:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2026-09-01T00:00:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "extractObservables": false
+    },
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "securitySolution",
+      "created_at": "2026-11-09T00:00:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2026-11-09T00:00:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "extractObservables": true,
+      "observableTypes": [
+        {
+          "key": "ticket-ref",
+          "label": "Ticket ref"
+        }
+      ],
+      "observableTypeSettings": [
+        {
+          "key": "observable-type-agent-id",
+          "paths": [
+            {
+              "path": "agent.id",
+              "enabled": false
+            }
+          ]
+        },
+        {
+          "key": "employee-id",
+          "paths": [
+            {
+              "path": "user.employee_id",
+              "enabled": true,
+              "excludedValues": ["E000000"]
+            }
+          ],
+          "valuePattern": "^E\\d{6}$"
+        }
+      ]
+    },
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "securitySolution",
+      "created_at": "2026-11-17T00:00:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2026-11-17T00:00:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "extractObservables": true,
+      "metrics": {
+        "casesList": [
+          {
+            "id": "open-cases-tile",
+            "kind": "predefined",
+            "predefinedId": "open_cases",
+            "display": "value"
+          },
+          {
+            "id": "critical-cases-tile",
+            "kind": "custom",
+            "label": "Critical cases",
+            "index": "cases",
+            "query": "case.severity: critical",
+            "display": "trend",
+            "direction": "lower_is_better",
+            "threshold": {
+              "comparator": "above",
+              "value": 10
+            }
+          }
+        ],
+        "caseDetails": []
+      }
+    }
+  ],
+  "10.5.0": [
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "cases",
+      "created_at": "2022-10-13T15:55:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2022-10-13T15:55:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "extractObservables": true
+    },
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "securitySolution",
+      "created_at": "2026-09-01T00:00:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2026-09-01T00:00:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "workflowTags": ["triage", "enrichment"],
+      "extractObservables": true
+    },
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "observability",
+      "created_at": "2026-09-01T00:00:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2026-09-01T00:00:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "extractObservables": false
+    },
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "securitySolution",
+      "created_at": "2026-11-09T00:00:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2026-11-09T00:00:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "extractObservables": true,
+      "observableTypes": [
+        {
+          "key": "ticket-ref",
+          "label": "Ticket ref"
+        }
+      ],
+      "observableTypeSettings": [
+        {
+          "key": "observable-type-agent-id",
+          "paths": [
+            {
+              "path": "agent.id",
+              "enabled": false
+            }
+          ]
+        },
+        {
+          "key": "employee-id",
+          "paths": [
+            {
+              "path": "user.employee_id",
+              "enabled": true,
+              "excludedValues": ["E000000"]
+            }
+          ],
+          "valuePattern": "^E\\d{6}$"
+        }
+      ]
+    },
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "securitySolution",
+      "created_at": "2026-11-17T00:00:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2026-11-17T00:00:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "extractObservables": true,
+      "metrics": {
+        "casesList": [
+          {
+            "id": "open-cases-tile",
+            "kind": "predefined",
+            "predefinedId": "open_cases",
+            "display": "value"
+          },
+          {
+            "id": "critical-cases-tile",
+            "kind": "custom",
+            "label": "Critical cases",
+            "index": "cases",
+            "query": "case.severity: critical",
+            "display": "trend",
+            "direction": "lower_is_better",
+            "threshold": {
+              "comparator": "above",
+              "value": 10
+            }
+          }
+        ],
+        "caseDetails": []
+      }
+    }
+  ]
+}

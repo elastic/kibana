@@ -32,7 +32,7 @@ export const getConfigurationRequest = ({
   type = ConnectorTypes.none,
   fields = null,
   overrides,
-}: ConfigRequestParams = {}): ConfigurationRequest => {
+}: ConfigRequestParams = {}): Omit<ConfigurationRequest, 'metrics'> => {
   return {
     connector: {
       id,
