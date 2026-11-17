@@ -148,8 +148,13 @@ export interface EmulatorOptions extends PaginationOptions {
    * may be promises, and are validated like any other.
    */
   readonly respond?: Responder;
-  /** Called with each call as it is recorded, e.g. to log requests as they arrive. */
-  readonly onCall?: (call: ContractCall) => void;
+  /**
+   * Called with each call as it is recorded, e.g. to log requests as they arrive, and with the
+   * `fetch` input that produced it. Calls are recorded as their request is answered, so several
+   * requests in flight at once finish in any order; the input is what ties a call to its own
+   * request, which their order in `calls` doesn't.
+   */
+  readonly onCall?: (call: ContractCall, request: RequestInfo | URL) => void;
   /**
    * How the default chain samples responses the spec has no example for: `typical` values, or
    * values at the schema's upper bounds (`boundary`), which also skips examples.
@@ -702,14 +707,18 @@ export const createEmulatorFetch = ({
         operation.id === id && (source === undefined || operation.spec.source === source)
     );
 
-  const keep = (recorded: readonly ContractCall[], captured?: CapturedExchange) => {
+  const keep = (
+    recorded: readonly ContractCall[],
+    input: RequestInfo | URL,
+    captured?: CapturedExchange
+  ) => {
     for (const call of recorded) {
       const kept = captured ? { ...call, captured } : call;
       calls.push(kept);
       if (captured) {
         captureWindow?.add(calls.length - 1);
       }
-      onCall?.(kept);
+      onCall?.(kept, input);
     }
   };
 
@@ -723,7 +732,7 @@ export const createEmulatorFetch = ({
       response = await handle(request, (call) => recorded.push(call));
       return toResponse(response);
     } finally {
-      keep(recorded, response && captureExchange?.(request, withoutNullBody(response)));
+      keep(recorded, input, response && captureExchange?.(request, withoutNullBody(response)));
     }
   };
 

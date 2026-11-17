@@ -507,14 +507,18 @@ describe('createEmulatorFetch with capture', () => {
     });
   });
 
-  it('passes calls with their capture to onCall', async () => {
+  it('passes calls with their capture, and the request that made them, to onCall', async () => {
     const onCall = jest.fn();
     const { fetch } = createEmulatorFetch({ specs: [spec], capture: true, onCall });
 
     await sendItem(fetch, 'a');
 
     expect(onCall).toHaveBeenCalledWith(
-      expect.objectContaining({ captured: expect.objectContaining({ request: expect.anything() }) })
+      expect.objectContaining({
+        captured: expect.objectContaining({ request: expect.anything() }),
+      }),
+      // The `fetch` input the call came from, which ties it to its own request.
+      'https://api.example.com/v1/items'
     );
   });
 
