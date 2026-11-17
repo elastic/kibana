@@ -65,6 +65,8 @@ export interface GetCasesColumn {
   onRowClick?: (theCase: CaseUI) => void;
   disableActions?: boolean;
   disabledCases?: Set<string>;
+  /** While `disabledCases` is loading, no case can be selected, as any of them may be disabled. */
+  isLoadingDisabledCases?: boolean;
 }
 
 export interface UseCasesColumnsReturnValue {
@@ -81,6 +83,7 @@ export const useCasesColumns = ({
   disableActions = false,
   selectedColumns,
   disabledCases,
+  isLoadingDisabledCases = false,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
@@ -326,7 +329,7 @@ export const useCasesColumns = ({
           if (theCase.id != null) {
             const isAlreadyAttached = disabledCases?.has(theCase.id) ?? false;
             const isClosed = theCase.status === CaseStatuses.closed;
-            const disabled = isAlreadyAttached || isClosed;
+            const disabled = isAlreadyAttached || isClosed || isLoadingDisabledCases;
             const selectButton = (
               <EuiButton
                 data-test-subj={`cases-table-row-select-${theCase.id}`}
@@ -361,7 +364,15 @@ export const useCasesColumns = ({
         width: '8em',
       },
     }),
-    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, disabledCases]
+    [
+      assignCaseAction,
+      casesColumnsConfig,
+      connectors,
+      isSelectorView,
+      userProfiles,
+      disabledCases,
+      isLoadingDisabledCases,
+    ]
   );
 
   const allColumnsDict = useMemo(
