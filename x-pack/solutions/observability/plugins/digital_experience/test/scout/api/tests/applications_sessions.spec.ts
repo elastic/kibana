@@ -12,6 +12,7 @@ import type { OwnedSessions, OwnedSessionsSetup } from '../../common/fixtures/se
 import {
   deleteOwnedSessions,
   ingestOwnedSessions,
+  setUpOwnedSessions,
   runSessionsTask,
   sessionJourney,
   sessionStartOffsetMs,
@@ -45,13 +46,12 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ apiServices, esClient, kbnClient }) => {
       await apiServices.core.settings(FLAG_ON_OVERRIDE);
-      ({ sessionsStartMs, setup } = await ingestOwnedSessions(esClient, kbnClient, SESSIONS));
+      setup = await setUpOwnedSessions(esClient, kbnClient);
+      sessionsStartMs = await ingestOwnedSessions(esClient, SESSIONS);
     });
 
     apiTest.afterAll(async ({ apiServices, esClient, kbnClient }) => {
-      if (setup) {
-        await deleteOwnedSessions(esClient, kbnClient, SESSIONS, setup);
-      }
+      await deleteOwnedSessions(esClient, kbnClient, SESSIONS, setup);
       await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 

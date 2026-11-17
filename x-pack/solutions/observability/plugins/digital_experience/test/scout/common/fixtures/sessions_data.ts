@@ -274,22 +274,18 @@ const ownedSessionIds = ({ idPrefix, count }: OwnedSessions): string[] => {
   });
 };
 
-/** What `ingestOwnedSessions` created, so `deleteOwnedSessions` removes only that. */
+/** What `setUpOwnedSessions` created, so `deleteOwnedSessions` removes only that. */
 export interface OwnedSessionsSetup {
   createdTask: boolean;
   createdIndex: boolean;
   createdTemplate: boolean;
 }
 
-/**
- * Writes `sessions` from a day ago, setting sessions up first when they aren't. Resolves to when
- * the first one starts, and what it created for `deleteOwnedSessions`.
- */
-export const ingestOwnedSessions = async (
+/** Sets sessions up when they aren't, resolving to what it created for `deleteOwnedSessions`. */
+export const setUpOwnedSessions = async (
   esClient: EsClient,
-  kbnClient: KbnClient,
-  sessions: OwnedSessions
-): Promise<{ sessionsStartMs: number; setup: OwnedSessionsSetup }> => {
+  kbnClient: KbnClient
+): Promise<OwnedSessionsSetup> => {
   const setup: OwnedSessionsSetup = {
     createdTask: !(await areSessionsInstalled(kbnClient)),
     createdIndex: !(await esClient.indices.exists({ index: SESSIONS_INDEX })),
@@ -300,6 +296,14 @@ export const ingestOwnedSessions = async (
   if (setup.createdTask) {
     await enableSessions(kbnClient);
   }
+  return setup;
+};
+
+/** Writes `sessions` from a day ago, resolving to when the first one starts. */
+export const ingestOwnedSessions = async (
+  esClient: EsClient,
+  sessions: OwnedSessions
+): Promise<number> => {
   const sessionsStartMs = Date.now() - DAY_MS;
   const { errors, items } = await esClient.bulk({
     refresh: 'wait_for',
@@ -316,30 +320,32 @@ export const ingestOwnedSessions = async (
     });
     throw new Error(`Could not ingest the owned sessions: ${JSON.stringify(failure)}`);
   }
-  return { sessionsStartMs, setup };
+  return sessionsStartMs;
 };
 
-/** Deletes `sessions`, and the parts of the sessions setup that `ingestOwnedSessions` created. */
+/**
+ * Deletes `sessions`, also after a partial ingest, and the parts of the sessions setup that
+ * `setUpOwnedSessions` created; without `setup`, as when it failed, only the sessions.
+ */
 export const deleteOwnedSessions = async (
   esClient: EsClient,
   kbnClient: KbnClient,
   sessions: OwnedSessions,
-  { createdTask, createdIndex, createdTemplate }: OwnedSessionsSetup
+  setup: OwnedSessionsSetup | undefined
 ): Promise<void> => {
-  if (createdTask) {
+  await esClient.deleteByQuery({
+    index: SESSIONS_INDEX,
+    query: { ids: { values: ownedSessionIds(sessions) } },
+    refresh: true,
+    ignore_unavailable: true,
+  });
+  if (setup?.createdTask) {
     await removeSessionsTask(kbnClient);
   }
-  if (createdIndex) {
+  if (setup?.createdIndex) {
     await deleteSessionsIndices(esClient);
-  } else {
-    await esClient.deleteByQuery({
-      index: SESSIONS_INDEX,
-      query: { ids: { values: ownedSessionIds(sessions) } },
-      refresh: true,
-      ignore_unavailable: true,
-    });
   }
-  if (createdTemplate) {
+  if (setup?.createdTemplate) {
     await deleteSessionsTemplate(esClient);
   }
 };
