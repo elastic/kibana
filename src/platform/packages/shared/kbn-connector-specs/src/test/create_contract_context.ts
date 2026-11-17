@@ -204,34 +204,15 @@ const ensureWebCrypto = () => {
  * mock closes over its operations, which for large specs (Microsoft Graph) are gigabytes, so
  * axios gets a function that holds the mock weakly: the context owns the mock for as long as it
  * is used, and a collected context takes the mock with it.
- *
- * Given `matchedOf`, it also ties each request to the operation the mock matched it to: the
- * adapter passes the `Request` it built and hands that same object back as `response.request`, so
- * the calls the mock records while the request is in flight are the request's own.
  */
-const holdWeakly = (
-  target: Emulator,
-  matchedOf?: WeakMap<Request, OperationRef | NamedOperationRef>
-): typeof fetch => {
+const holdWeakly = (target: Emulator): typeof fetch => {
   const ref = new WeakRef(target);
-  return async (input, init) => {
+  return (input, init) => {
     const held = ref.deref();
     if (held === undefined) {
       throw new Error('The contract mock was used after its context was released');
     }
-    if (matchedOf === undefined) {
-      return held.fetch(input, init);
-    }
-    const from = held.calls.length;
-    try {
-      return await held.fetch(input, init);
-    } finally {
-      // Token requests authenticate the run; they aren't the vendor operation the request calls.
-      const { matched } = held.calls.slice(from).find(({ token }) => !token) ?? {};
-      if (input instanceof Request && matched) {
-        matchedOf.set(input, matched);
-      }
-    }
+    return held.fetch(input, init);
   };
 };
 
@@ -272,8 +253,21 @@ export const createContractContext = async ({
   trackFields,
   ...mockOptions
 }: ContractContextOptions): Promise<ContractContext> => {
-  const mock = createEmulatorFetch(mockOptions);
+  // The operation each request matched, recorded as the mock answers that request. The adapter
+  // passes the `Request` it built and hands the same object back as `response.request`, so this
+  // ties a response to its own operation even when several requests are in flight at once, which
+  // their order in `mock.calls` would not.
   const matchedOf = new WeakMap<Request, OperationRef | NamedOperationRef>();
+  const mock = createEmulatorFetch({
+    ...mockOptions,
+    onCall: (call, request) => {
+      mockOptions.onCall?.(call, request);
+      // Token requests authenticate the run; they aren't the vendor operation the request calls.
+      if (trackFields && !call.token && call.matched && request instanceof Request) {
+        matchedOf.set(request, call.matched);
+      }
+    },
+  });
   const definitions = connector.auth?.types.length ? connector.auth.types : ['none'];
   const definition =
     authType === undefined
@@ -290,7 +284,7 @@ export const createContractContext = async ({
   const streamed = new WeakSet<object>();
   const client = axios.create({
     adapter: 'fetch',
-    env: { fetch: holdWeakly(mock, trackFields ? matchedOf : undefined) },
+    env: { fetch: holdWeakly(mock) },
   });
   // Registered first, so it runs after the interceptors that connectors add.
   client.interceptors.request.use(async (requestConfig) => {

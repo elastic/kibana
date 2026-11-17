@@ -15,6 +15,8 @@ import type { ConnectorSpec } from '../connector_spec';
 import { FirecrawlConnector } from '../specs/firecrawl/firecrawl';
 import { FigmaConnector } from '../specs/figma/figma';
 import { createContractContext } from './create_contract_context';
+import type { FieldUse } from './field_use';
+import { createFieldUse } from './field_use';
 
 // Excerpts of the vendors' specs, with the operations and security the tests use.
 const firecrawlSpecWith = (waitFor: Record<string, unknown>) => ({
@@ -400,6 +402,96 @@ describe('createContractContext', () => {
         `${SECRETS_URL} was requested with the global fetch, bypassing the contract mock`
       );
       expect(globalThis.fetch).toBe(originalFetch);
+    });
+  });
+  describe('tracking field use', () => {
+    // Two operations whose responses share no field, so a response tracked under the wrong one
+    // shows up as a field the other operation never has.
+    const twoSpec = {
+      openapi: '3.0.0',
+      info: { title: 'Two', version: '1' },
+      servers: [{ url: 'https://api.example.com' }],
+      paths: {
+        '/slow': {
+          get: {
+            responses: {
+              '200': {
+                description: 'ok',
+                content: {
+                  'application/json': {
+                    schema: { type: 'object', properties: { slowField: { type: 'string' } } },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/fast': {
+          get: {
+            responses: {
+              '200': {
+                description: 'ok',
+                content: {
+                  'application/json': {
+                    schema: { type: 'object', properties: { fastField: { type: 'string' } } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const twoConnector: ConnectorSpec = {
+      metadata: {
+        id: '.two',
+        displayName: 'Two',
+        description: 'Two',
+        minimumLicense: 'enterprise',
+        supportedFeatureIds: ['workflows'],
+      },
+      test: { enabled: false, handler: async () => ({}) },
+      actions: {
+        both: {
+          input: z.object({}),
+          scope: 'read',
+          handler: async ({ client }) => {
+            const [slow, fast] = await Promise.all([
+              client.get('https://api.example.com/slow'),
+              client.get('https://api.example.com/fast'),
+            ]);
+            return { slow: slow.data.slowField, fast: fast.data.fastField };
+          },
+        },
+      },
+    };
+
+    it('tracks each response under its own operation when requests overlap', async () => {
+      const uses = new Map<string, FieldUse>();
+      const { runAction } = await createContractContext({
+        connector: twoConnector,
+        specs: [twoSpec],
+        // `/slow` is answered last, so the calls are recorded in the opposite order to the
+        // requests; the response still belongs to the operation its own request matched.
+        respond: async (operation, _request, context) => {
+          if (operation.path === '/slow') {
+            await new Promise((resolve) => setTimeout(resolve, 20));
+          }
+          return context.next();
+        },
+        trackFields: ({ method, path }) => {
+          const key = `${method} ${path}`;
+          const use = uses.get(key) ?? createFieldUse();
+          uses.set(key, use);
+          return use;
+        },
+      });
+
+      await runAction('both', {});
+
+      expect([...(uses.get('get /slow')?.read ?? [])]).toEqual(['slowField']);
+      expect([...(uses.get('get /fast')?.read ?? [])]).toEqual(['fastField']);
     });
   });
 });
