@@ -246,6 +246,22 @@ const FIXTURES: Record<string, Fixture> = {
       },
     ],
   },
+  ...Object.fromEntries(
+    ['loop.break', 'loop.continue'].map((type) => [
+      `a fallback whose ${type} leaves only a loop of its own`,
+      {
+        steps: [
+          failing('f', {
+            'on-failure': {
+              fallback: [
+                { name: 'inner', type: 'foreach', foreach: '[1]', steps: [{ name: 'b', type }] },
+              ],
+            },
+          }),
+        ],
+      },
+    ])
+  ),
   'a failing step in a nested fallback after a completing branch': {
     steps: [
       failing('f', {

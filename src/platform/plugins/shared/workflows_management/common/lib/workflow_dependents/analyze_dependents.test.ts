@@ -20,6 +20,7 @@ import {
   collectWorkflowCallSites,
   findOutputsPassingThrough,
   findOutputUsages,
+  mayLoseImplicitOutput,
 } from './find_call_sites';
 import { getCompletingOutputBlocks } from './run_outcomes';
 import type { DependentsAnalysis, ImpactIssue, WorkflowLookupItem } from './types';
@@ -1781,6 +1782,51 @@ describe('analyzeCalledWorkflows cycles', () => {
   });
 });
 
+describe('mayLoseImplicitOutput', () => {
+  const reads = [{ stepName: 'ctx' }];
+  const ctx = callStep('ctx', {});
+
+  it('is true when the last step is the step, holds it, or reads it without a fallback', () => {
+    const lastStep = (step: Record<string, unknown>) => ({ steps: [ctx, step] });
+
+    expect(mayLoseImplicitOutput({ steps: [ctx] }, reads)).toBe(true);
+    expect(
+      mayLoseImplicitOutput(
+        { steps: [{ name: 'if', type: 'if', condition: 'true', steps: [ctx] }] },
+        reads
+      )
+    ).toBe(true);
+    expect(
+      mayLoseImplicitOutput(
+        lastStep({ name: 'keep', type: 'data.set', with: { v: '{{ steps.ctx.output.v }}' } }),
+        reads
+      )
+    ).toBe(true);
+    expect(
+      mayLoseImplicitOutput(
+        lastStep({
+          name: 'keep',
+          type: 'data.set',
+          with: { v: '{{ steps.ctx.output.v | default: 1 }}' },
+        }),
+        reads
+      )
+    ).toBe(false);
+    expect(mayLoseImplicitOutput(lastStep({ name: 'log', type: 'console' }), reads)).toBe(false);
+  });
+
+  it('is false when every run that reaches the end returns a workflow.output', () => {
+    const output = {
+      name: 'out',
+      type: 'workflow.output',
+      with: { v: '{{ steps.ctx.output.v }}' },
+    };
+
+    expect(mayLoseImplicitOutput({ steps: [ctx, output] }, reads)).toBe(false);
+    expect(mayLoseImplicitOutput({ steps: [ctx, { ...output, if: 'true' }] }, reads)).toBe(true);
+  });
+});
+
 describe('analyzeRemovalImpact', () => {
   it('lists enabled callers and counts the workflows further up that fail', () => {
     const impact = analyzeRemovalImpact(
@@ -1839,6 +1885,45 @@ describe('analyzeRemovalImpact', () => {
     const top = workflow('top', [callStep('run', {}, undefined, 'falling-back')]);
 
     expect(analyzeRemovalImpact([CHILD_ID], [fallingBack, top]).indirect).toBe(1);
+  });
+
+  it.each(['loop.break', 'loop.continue'])(
+    'fails callers whose fallback runs %s in a loop of its own, which leaves only that loop',
+    (type) => {
+      const fallingBack = workflow('falling-back', [
+        {
+          ...callStep('ctx', {}),
+          'on-failure': {
+            fallback: [
+              { name: 'inner', type: 'foreach', foreach: '[1]', steps: [{ name: 'leave', type }] },
+            ],
+          },
+        },
+      ]);
+      const top = workflow('top', [callStep('run', {}, undefined, 'falling-back')]);
+
+      expect(analyzeRemovalImpact([CHILD_ID], [fallingBack, top]).indirect).toBe(1);
+    }
+  );
+
+  it('follows outputs a caller returns without a workflow.output step, from its last step', () => {
+    const forwards = workflow('forwards', [
+      { ...callStep('ctx', {}), 'on-failure': { continue: true } },
+      { name: 'keep', type: 'data.set', with: { value: '${{ steps.ctx.output.value }}' } },
+    ]);
+    const endsInCall = workflow('ends-in-call', [
+      { ...callStep('ctx', {}), 'on-failure': { continue: true } },
+    ]);
+    const readsOutput = (calledId: string) =>
+      workflow(`reads-${calledId}`, [
+        callStep('run', {}, undefined, calledId),
+        { name: 'emit', type: 'workflow.output', with: { value: '${{ steps.run.output.value }}' } },
+      ]);
+
+    expect(analyzeRemovalImpact([CHILD_ID], [forwards, readsOutput('forwards')]).indirect).toBe(1);
+    expect(
+      analyzeRemovalImpact([CHILD_ID], [endsInCall, readsOutput('ends-in-call')]).indirect
+    ).toBe(1);
   });
 
   it('ignores calls between workflows that are removed together', () => {

@@ -283,6 +283,23 @@ const getDefinitionReads = (definition: unknown): readonly VariableRead[] => {
 export const findOutputUsages = (definition: unknown, stepName: string): OutputUsage[] =>
   stepName ? toOutputUsages(getDefinitionReads(definition), stepName) : [];
 
+/** A read of a step's outputs; with no `field`, of every output of the step. */
+export interface StepOutputRead {
+  stepName: string;
+  field?: string;
+}
+
+// Whether `value` reads any of `reads` without a fallback.
+const readsWithoutFallback = (value: unknown, reads: ReadonlyArray<StepOutputRead>): boolean => {
+  const valueReads = collectReads(value);
+  return reads.some(({ stepName, field }) =>
+    toOutputUsages(valueReads, stepName).some(
+      (usage) =>
+        !usage.hasFallback && (field === undefined || usage.field === '' || usage.field === field)
+    )
+  );
+};
+
 /**
  * Returns the names of a workflow's own outputs (keys of its `workflow.output` steps' `with` maps,
  * `outputBlocks`) whose values read the given step outputs without a fallback. A read with no
@@ -290,23 +307,39 @@ export const findOutputUsages = (definition: unknown, stepName: string): OutputU
  */
 export const findOutputsPassingThrough = (
   outputBlocks: ReadonlyArray<Record<string, unknown>>,
-  reads: ReadonlyArray<{ stepName: string; field?: string }>
+  reads: ReadonlyArray<StepOutputRead>
 ): Set<string> => {
   const passedThrough = new Set<string>();
   for (const block of outputBlocks) {
     for (const [outputName, value] of Object.entries(block)) {
-      const valueReads = collectReads(value);
-      const isAffected = reads.some(({ stepName, field }) =>
-        toOutputUsages(valueReads, stepName).some(
-          (usage) =>
-            !usage.hasFallback &&
-            (field === undefined || usage.field === '' || usage.field === field)
-        )
-      );
-      if (isAffected) {
+      if (readsWithoutFallback(value, reads)) {
         passedThrough.add(outputName);
       }
     }
   }
   return passedThrough;
+};
+
+/**
+ * Whether the output a workflow returns when no `workflow.output` step ran, the output of its last
+ * step, may come back empty without the given step outputs. That last step is the step, holds it,
+ * or reads it. A run ending in an unconditional `workflow.output` never returns it.
+ */
+export const mayLoseImplicitOutput = (
+  definition: unknown,
+  reads: ReadonlyArray<StepOutputRead>
+): boolean => {
+  const steps = getSteps(definition);
+  const lastStep = Array.isArray(steps) ? steps[steps.length - 1] : undefined;
+  if (
+    !isWorkflowStep(lastStep) ||
+    (isCompletingOutputStep(lastStep) && lastStep.if === undefined)
+  ) {
+    return false;
+  }
+  let holdsReadStep = false;
+  walkSteps([lastStep], (step) => {
+    holdsReadStep ||= reads.some(({ stepName }) => step.name === stepName);
+  });
+  return holdsReadStep || readsWithoutFallback(lastStep, reads);
 };

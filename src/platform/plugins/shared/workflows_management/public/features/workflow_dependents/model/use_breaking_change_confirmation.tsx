@@ -18,7 +18,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector, useStore } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQueryClient } from '@kbn/react-query';
 import { dependentsImpactQueryOptions } from './dependents_impact_query_options';
 import type { ConfirmBreakingChange } from './workflow_dependents_context';
 import { isBreakingRun } from '../../../../common/lib/workflow_dependents/api';
@@ -49,7 +48,6 @@ export const useBreakingChangeConfirmation = (
   onReviewImpact: () => void
 ): { confirmBreakingChange: ConfirmBreakingChange; confirmModal: JSX.Element | null } => {
   const { http } = useKibana().services;
-  const queryClient = useQueryClient();
   const store = useStore<RootState>();
   const modalTitleId = useGeneratedHtmlId();
   const [pending, setPending] = useState<(SaveImpact & { workflowName: string }) | null>(null);
@@ -73,15 +71,14 @@ export const useBreakingChangeConfirmation = (
         return none;
       }
       try {
-        // Callers can change elsewhere at any time, so a save never reuses an earlier check.
-        const { analysis } = await queryClient.fetchQuery({
-          ...dependentsImpactQueryOptions(
-            http,
-            { id: workflow.id, savedVersion: workflow.lastUpdatedAt },
-            draftYaml
-          ),
-          staleTime: 0,
-        });
+        // Callers can change elsewhere at any time, so a save never reuses an earlier check. It
+        // runs outside the query cache: editing cancels the panel's query for the same draft.
+        const { queryFn } = dependentsImpactQueryOptions(
+          http,
+          { id: workflow.id, savedVersion: workflow.lastUpdatedAt },
+          draftYaml
+        );
+        const { analysis } = await queryFn({});
         return {
           breakingDependents: analysis.dependents.filter(isBreakingRun),
           indirectBreaking: analysis.summary.indirectBreaking,
@@ -91,7 +88,7 @@ export const useBreakingChangeConfirmation = (
         return { ...none, checkFailed: true };
       }
     },
-    [http, queryClient, store]
+    [http, store]
   );
 
   const confirmBreakingChange = useCallback<ConfirmBreakingChange>(
