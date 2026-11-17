@@ -397,11 +397,12 @@ function TrialInvestigationCard({
             )}
           </EuiText>
         </EuiFlexItem>
-        {!isActive && !isSelected && (
+        {!isActive && (
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
               color="success"
+              isDisabled={isSelected}
               onClick={() => onOpenInvestigation(investigation)}
               data-test-subj="nightshiftOnboardingTrialInvestigationOpen"
             >

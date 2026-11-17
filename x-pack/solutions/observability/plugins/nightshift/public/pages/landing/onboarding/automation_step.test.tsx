@@ -173,13 +173,10 @@ describe('OnboardingAutomationStep', () => {
     expect(screen.getByTestId('createAutomationFlyout')).toBeInTheDocument();
   });
 
-  it('hides the view results button while the investigation is open', () => {
+  it('disables the view results button while the investigation is open', () => {
     renderStep([], jest.fn(), true);
 
-    expect(screen.getByTestId('nightshiftOnboardingTrialInvestigationStatus')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('nightshiftOnboardingTrialInvestigationOpen')
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftOnboardingTrialInvestigationOpen')).toBeDisabled();
   });
 
   it('lists a saved automation beside a card to add another, and opens its overview', () => {
