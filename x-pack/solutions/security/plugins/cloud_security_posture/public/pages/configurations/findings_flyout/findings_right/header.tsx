@@ -49,7 +49,7 @@ export const TruncatedCopyableText = ({ textToCopy }: { textToCopy: string }) =>
           overflow: 'hidden',
           whiteSpace: 'nowrap',
           textOverflow: 'ellipsis',
-          maxWidth: 'calc(100% - 20px)',
+          maxWidth: 'calc(100% - 28px)',
           marginRight: '4px',
         }}
       >
