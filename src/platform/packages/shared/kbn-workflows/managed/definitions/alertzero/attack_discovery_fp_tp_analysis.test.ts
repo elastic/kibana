@@ -789,6 +789,89 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
   });
 
+  // An alert built from an event on a columnar index mode (`logsdb_columnar`) stores a
+  // flat `_source` (`{ 'host.id': ... }`), so the keys must not be read from nested
+  // `_source` paths: the entity and raw-event lookups would silently match nothing.
+  describe('the host and user keys the lookups match on', () => {
+    type KeyField = 'host_ids' | 'host_names' | 'user_names';
+    const KEY_FIELDS: KeyField[] = ['host_ids', 'host_names', 'user_names'];
+
+    const expressionFor = (field: KeyField): string =>
+      String(stepIn('count_alerts')?.with?.[field])
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+
+    const evaluate = (
+      field: KeyField,
+      aggregations: Record<string, unknown>,
+      hits: unknown[] = []
+    ) =>
+      createWorkflowLiquidEngine().evalValueSync(expressionFor(field), {
+        steps: { load_alerts: { output: { aggregations, hits: { hits } } } },
+      });
+
+    const aggregations = {
+      host_ids: {
+        buckets: [
+          { key: 'host-1', doc_count: 3 },
+          { key: 'host-2', doc_count: 1 },
+        ],
+      },
+      host_names: { buckets: [{ key: 'WIN-1', doc_count: 4 }] },
+      user_names: { buckets: [{ key: 'alice', doc_count: 4 }] },
+    };
+
+    it('collects the keys with terms aggregations over the cited alerts', () => {
+      const requested = stepIn('load_alerts')?.with?.aggregations as Record<
+        string,
+        { terms?: { field: string; size: number } }
+      >;
+
+      expect(requested.host_ids.terms?.field).toBe('host.id');
+      expect(requested.host_names.terms?.field).toBe('host.name');
+      expect(requested.user_names.terms?.field).toBe('user.name');
+    });
+
+    it('sizes the aggregations to cover every alert the search can return', () => {
+      const requested = stepIn('load_alerts')?.with?.aggregations as Record<
+        string,
+        { terms?: { size: number } }
+      >;
+      const pageSize = Number(stepIn('load_alerts')?.with?.size);
+
+      KEY_FIELDS.forEach((field) => {
+        expect(requested[field].terms?.size).toBeGreaterThanOrEqual(pageSize);
+      });
+    });
+
+    it.each(KEY_FIELDS)('returns the aggregation bucket keys for %s', (field) => {
+      expect(evaluate(field, aggregations)).toEqual(
+        (aggregations[field].buckets as Array<{ key: string }>).map(({ key }) => key)
+      );
+    });
+
+    it.each(KEY_FIELDS)('returns an empty list for %s when no cited alert has it', (field) => {
+      expect(evaluate(field, { [field]: { buckets: [] } })).toEqual([]);
+    });
+
+    it.each(KEY_FIELDS)('returns %s regardless of the shape of the alert _source', (field) => {
+      const flat = [
+        { _source: { 'host.id': 'host-1', 'host.name': 'WIN-1', 'user.name': 'alice' } },
+      ];
+      const nested = [
+        { _source: { host: { id: 'host-1', name: 'WIN-1' }, user: { name: 'alice' } } },
+      ];
+
+      expect(evaluate(field, aggregations, flat)).toEqual(evaluate(field, aggregations, nested));
+      expect(evaluate(field, aggregations, flat)).not.toEqual([]);
+    });
+
+    it.each(KEY_FIELDS)('does not read a _source path from the alert hits for %s', (field) => {
+      expect(String(stepIn('count_alerts')?.with?.[field])).not.toContain('_source');
+    });
+  });
+
   describe('the truncation clear', () => {
     const contextFor = (
       events: number | undefined,
