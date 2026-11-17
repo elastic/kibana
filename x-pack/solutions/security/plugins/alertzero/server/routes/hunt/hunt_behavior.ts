@@ -67,12 +67,22 @@ export const registerHuntBehaviorRoute = ({
       withAlertZeroEnabled(async (context, request, response) => {
         try {
           const core = await context.core;
-          // What the generated query may read: the same default data view Tier 1 searches.
-          const { patterns: indexPatterns } = await resolveHuntUniverse(context, logger);
+          // What the generated query may read: the default data view as configured, minus the
+          // policy-skipped entries. Unlike the coordinator, this route does not resolve the list
+          // first, so a concrete name the caller cannot read stays in it.
+          const { patterns: indexPatterns, policySkipped } = await resolveHuntUniverse(
+            context,
+            logger
+          );
           if (!indexPatterns.some((pattern) => !isIndexExclusion(pattern))) {
             return response.customError({
               statusCode: 409,
-              body: { message: NO_SEARCHABLE_PATTERN_MESSAGE },
+              body: {
+                message:
+                  policySkipped.length > 0
+                    ? NO_SEARCHABLE_PATTERN_MESSAGE
+                    : 'The default data view has no pattern this hunt may search: it holds only exclusions.',
+              },
             });
           }
           const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();

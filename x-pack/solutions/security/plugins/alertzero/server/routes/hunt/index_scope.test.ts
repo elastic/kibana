@@ -321,6 +321,8 @@ describe('registerHuntIndexScopeRoute', () => {
         );
 
         expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(expected));
+        // A blocked scope searched nothing, so nothing was "left out of the search".
+        expect(logger.warn).toHaveBeenCalledTimes(1);
       }
     );
   });

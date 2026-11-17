@@ -390,6 +390,8 @@ steps:
         The hunt was incomplete but retryable ({{ steps.read_hunt_result.output.data.result.message }}), so the report is not marked as hunted and stays eligible for a later sweep.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_final" and steps.write_evidence.error != nil -%}
         The hunt left a gap a later run could not close ({{ steps.read_hunt_result.output.data.result.message }}), but its result could not be recorded on the report ({{ steps.write_evidence.error.message }}), so the report is not marked as hunted and stays eligible for a later sweep.
+        {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_final" and steps.read_hunt_result.output.data.result.has_confirmed_hit == true -%}
+        The confirmed hit was recorded on the report, but the hunt left a gap a later run could not close ({{ steps.read_hunt_result.output.data.result.message }}), so the report is retired without having been fully searched; its executed searches are recorded.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_final" -%}
         The hunt left a gap a later run could not close ({{ steps.read_hunt_result.output.data.result.message }}), so the report is retired without having been fully searched; its executed searches are recorded and its evidence is marked incomplete rather than clean.
         {%- else -%}

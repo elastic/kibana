@@ -828,11 +828,15 @@ const huntCoordinatorCore = async (
 
   // Names the scope dropped from the search: the run never looked there, so it is not a clean
   // search, and the same data view reproduces it. One final gap carries them.
-  const unsearched = unsearchedPatterns(scope, crossProjectSearch);
+  const unsearched = unsearchedPatterns(scope);
   const scopeGaps: HuntIncompleteness[] =
     unsearched.length > 0
       ? [{ reason: 'index_not_searched', detail: describeUnsearched(unsearched) }]
       : [];
+  // The paths below with a fixed `message` name only why Behavior Hunt was skipped. The hunt
+  // child quotes `message` as the gap that retired the report, so the scope gap goes on it too.
+  const withScopeGap = (message: string): string =>
+    scopeGaps.length > 0 ? `${message} ${scopeGaps[0].detail}` : message;
 
   const tier1Raw = await huntForThreat(esClient, {
     scope: {
@@ -952,7 +956,7 @@ const huntCoordinatorCore = async (
       tier1,
       tier2_skipped_reason: reason,
       ...(surfaceSkipDetail && skipDetail ? { tier2_skip_detail: skipDetail } : {}),
-      message,
+      message: withScopeGap(message),
       next_step: nextStep,
       has_confirmed_hit: tier1Raw.has_confirmed_hit,
       completeness,
@@ -1004,7 +1008,9 @@ const huntCoordinatorCore = async (
       actionable_indices: scope.actionable_indices,
       tier1,
       tier2_skipped_reason: 'no_report_text',
-      message: `IOC Hunt: ${tier1Raw.status}. Behavior Hunt skipped (no report text).`,
+      message: withScopeGap(
+        `IOC Hunt: ${tier1Raw.status}. Behavior Hunt skipped (no report text).`
+      ),
       next_step:
         'Behavior Hunt needs report text. Pass `text` explicitly or use a `report_id` whose `content.body_text` has been ingested.',
       has_confirmed_hit: tier1Raw.has_confirmed_hit,

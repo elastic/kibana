@@ -1092,8 +1092,20 @@ describe('huntCoordinator', () => {
 
       if (policyCopy) {
         expect(result.message).toContain('no pattern this hunt may search');
+        expect(result.next_step).toBe(
+          'Add a pattern for the data to hunt to the `securitySolution:defaultIndex` setting.'
+        );
+        expect(result.headline).toBe(
+          "hunt blocked, the space's default data view names only hidden or alerts indices"
+        );
+        expect(result.narrative).toContain('names only hidden or alerts indices');
+        expect(result.narrative).not.toContain('is visible to this hunt');
       } else {
         expect(result.message).toContain('is visible to this hunt');
+        expect(result.headline).toBe(
+          "hunt blocked, no index in the space's default data view is visible to this hunt"
+        );
+        expect(result.narrative).toContain('is visible to this hunt');
       }
     });
 
@@ -3323,11 +3335,19 @@ describe('huntCoordinator', () => {
       expect(result.narrative).toContain('custom-edr-1');
     };
 
+    // The hunt child quotes `message` as the gap that retired the report, so it has to name it.
+    const GAP_SENTENCE =
+      'The default data view names `custom-edr-1`, which this hunt could not resolve (not readable, or not found), so the hunt never searched there.';
+
     it('records the gap on the tier1_only shape', async () => {
       mockScope.mockResolvedValueOnce(droppedScope(['custom-edr-1']));
       const result = await run({ tier2_when: 'on_hits' }, {});
       expect(result.status).toBe('tier1_only');
       expectRecorded(result);
+      expect(result.message).toMatch(
+        /^IOC Hunt: .*Behavior Hunt skipped \(.*\)\. The default data view/
+      );
+      expect(result.message).toContain(GAP_SENTENCE);
     });
 
     it('records the gap on the tier2_only_skipped shape', async () => {
@@ -3336,6 +3356,14 @@ describe('huntCoordinator', () => {
       expect(result.status).toBe('tier2_only_skipped');
       // This path carries a retryable gap of its own (no report text), which wins.
       expectRecorded(result, 'incomplete_retryable');
+      expect(result.message).toBe(
+        `IOC Hunt: ${result.tier1.status}. Behavior Hunt skipped (no report text). ${GAP_SENTENCE}`
+      );
+    });
+
+    it('leaves the message alone when nothing was dropped', async () => {
+      const result = await run({ tier2_when: 'on_hits' }, {});
+      expect(result.message).not.toContain('default data view names');
     });
 
     it('records the gap on the tier1_and_tier2 shape', async () => {

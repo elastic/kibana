@@ -313,13 +313,13 @@ export const HuntCoordinatorResult = lazySchema(() =>
         'The distinct reasons of the coverage gaps that kept this run `incomplete_retryable`, from the coordinator and both tiers, judged in the same context as `completeness`. A reason that is final for this run (a technique it gave up on, a gate nothing could pass) is left out. Empty when the run is not retryable; absent on paths that record nothing.'
       ),
     /**
-     * The coordinator's own coverage gaps — input this run had to truncate, and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the paths where only IOC Hunt ran, not even that. Absent or empty means the coordinator itself found nothing to report here.
+     * The coordinator's own coverage gaps — input this run had to truncate, a default data view name the scope dropped from the search (`index_not_searched`), and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the paths where only IOC Hunt ran, not even that. Absent or empty means the coordinator itself found nothing to report here.
      */
     incomplete: z
       .array(HuntIncompleteness)
       .optional()
       .describe(
-        "The coordinator's own coverage gaps — input this run had to truncate, and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the paths where only IOC Hunt ran, not even that. Absent or empty means the coordinator itself found nothing to report here."
+        "The coordinator's own coverage gaps — input this run had to truncate, a default data view name the scope dropped from the search (`index_not_searched`), and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the paths where only IOC Hunt ran, not even that. Absent or empty means the coordinator itself found nothing to report here."
       ),
     /**
      * Report IOCs excluded by adjudication, not searched by this run.

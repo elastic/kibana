@@ -78,6 +78,24 @@ describe('buildInvestigationSummary', () => {
     expect(summary).toContain('Not searched: logs-hidden-* (index not searched)');
   });
 
+  it('cuts a long gap list at an item boundary and counts the rest', () => {
+    const unsearched = dedupeCoverageGaps(
+      Array.from({ length: 60 }, (_value, index) => ({
+        reason: 'generation_budget',
+        detail: 'never searched',
+        technique_id: `T${1000 + index}.001`,
+      }))
+    );
+    const line = buildInvestigationSummary({ state: state(), decided, unsearched })
+      .split('\n')
+      .find((entry) => entry.startsWith('Not searched: '));
+
+    expect(line).toMatch(
+      /^Not searched: T1000\.001 \(generation budget exhausted\), .* \(\+\d+ more\)$/
+    );
+    expect((line ?? '').length).toBeLessThanOrEqual('Not searched: '.length + 800);
+  });
+
   it('names the corroborated technique with its name', () => {
     expect(buildInvestigationSummary({ state: state(), decided })).toContain(
       'Techniques corroborated: Cloud Accounts (T1078.004)'

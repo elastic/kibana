@@ -70,14 +70,16 @@ export const unresolvedPatterns = (
 
 /**
  * Whether an unresolved entry may leave the searched list: a local concrete name. Wildcards,
- * remote-qualified names, date math, selectors and comma lists stay, because a miss for one of
- * those does not show the name is unreadable (a remote that is down resolves nothing too).
+ * `_all`, remote-qualified names, date math, selectors and comma lists stay, because a miss for
+ * one of those does not show the name is unreadable (a remote that is down resolves nothing
+ * too). `_all` is a wildcard by another spelling: no resolved name ever equals it.
  */
 const isPrunableConcreteName = (entry: string): boolean => {
   const { cluster, index } = parseIndexScopeEntry(entry);
   return (
     cluster === undefined &&
     !index.includes('*') &&
+    index !== '_all' &&
     !entry.startsWith('<') &&
     !entry.includes('::') &&
     !entry.includes(',')
@@ -197,11 +199,10 @@ export const resolveHuntScope = async ({
     return blocked('blocked:empty_universe', missing);
   }
 
-  // Hand downstream only what can be searched: a local concrete name that resolved nothing
-  // is dropped from the list (it stays in `missing`), so no search names an index nobody read.
-  const dropped = new Set(
-    missing.filter((entry) => !isIndexExclusion(entry) && isPrunableConcreteName(entry))
-  );
+  // A local concrete name that resolved nothing is dropped from the list (it stays in
+  // `missing`), so no search names it. A name that resolves but cannot be searched (closed, or
+  // metadata-only privileges) is not caught here; the search skips it.
+  const dropped = new Set(missing.filter(isPrunableConcreteName));
   const searched = indexPatterns.filter((pattern) => !dropped.has(pattern));
   if (!searched.some((pattern) => !isIndexExclusion(pattern))) {
     return blocked('blocked:empty_universe', missing);

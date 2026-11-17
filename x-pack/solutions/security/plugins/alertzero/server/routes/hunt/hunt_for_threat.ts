@@ -18,6 +18,10 @@ import {
   NO_SEARCHABLE_PATTERN_MESSAGE,
   isBlockedByPolicyOnly,
 } from '../../services/watches/hunt/common/partition_hunt_universe';
+import {
+  describeUnsearched,
+  unsearchedPatterns,
+} from '../../services/watches/hunt/common/unsearched_patterns';
 import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 
@@ -113,7 +117,25 @@ export const registerHuntForThreatRoute = ({
           // from `_source` for Tier 2 and are not part of the wire schema.
           const { sample_event_summaries: _summaries, ...wireResult } = result;
 
-          const body: HuntForThreatResponse = { scope, result: wireResult };
+          // A name the scope dropped was never searched. The coordinator records that as a gap;
+          // this route has no coordinator, so it goes on the IOC Hunt result itself.
+          const unsearched = unsearchedPatterns(scope);
+          const incomplete = [
+            ...(unsearched.length > 0
+              ? [
+                  {
+                    reason: 'index_not_searched' as const,
+                    detail: describeUnsearched(unsearched),
+                  },
+                ]
+              : []),
+            ...(wireResult.incomplete ?? []),
+          ];
+
+          const body: HuntForThreatResponse = {
+            scope,
+            result: { ...wireResult, ...(incomplete.length > 0 ? { incomplete } : {}) },
+          };
           return response.ok({ body });
         } catch (err) {
           if (err instanceof InvalidHuntWindowError) {

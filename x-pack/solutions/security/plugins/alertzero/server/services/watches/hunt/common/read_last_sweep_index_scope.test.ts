@@ -90,6 +90,31 @@ describe('readLastSweepIndexScope', () => {
     management.getStepExecution.mockRejectedValue(new Error('boom'));
     await expect(readLastSweepIndexScope(params)).resolves.toBeUndefined();
   });
+
+  it('ignores a scope past the schema bounds and warns, instead of failing silently', async () => {
+    const { params } = setup({
+      stepId: 'check_index_scope',
+      startedAt: 's',
+      finishedAt: 'f',
+      output: {
+        ...scope,
+        missing: Array.from({ length: 501 }, (_value, index) => `custom-${index}`),
+      },
+    });
+
+    await expect(readLastSweepIndexScope(params)).resolves.toMatchObject({ scope: undefined });
+    expect(params.logger.warn).toHaveBeenCalledTimes(1);
+    expect(params.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('does not match the HuntScope schema and is ignored: missing')
+    );
+  });
+
+  it('does not warn for a scope that parses', async () => {
+    const { params } = setup({ stepId: 'check_index_scope', startedAt: 's', output: scope });
+
+    await readLastSweepIndexScope(params);
+    expect(params.logger.warn).not.toHaveBeenCalled();
+  });
 });
 
 describe('readLatestFinishedSweepIndexScope', () => {
@@ -156,6 +181,14 @@ describe('sweepEvaluatedUniverse', () => {
     index_patterns: ['logs-*', '-logs-x*'],
     missing: [],
   } as unknown as HuntScope;
+
+  // The policy-only block: every entry was skipped, so both sides hold no positive pattern.
+  it('matches an empty universe against a blocked scope that evaluated nothing', () => {
+    expect(sweepEvaluatedUniverse({ ...blocked, missing: [], policy_skipped: ['.a-1'] }, [])).toBe(
+      true
+    );
+    expect(sweepEvaluatedUniverse({ ...blocked, missing: [] }, ['-logs-x*'])).toBe(true);
+  });
 
   it('compares a blocked sweep to what it reported missing', () => {
     expect(sweepEvaluatedUniverse(blocked, ['logs-*'])).toBe(true);

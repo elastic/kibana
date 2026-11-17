@@ -30,6 +30,7 @@ apiTest.describe(
   'Hunt Watch - scope check with nothing searchable in the default data view',
   { tag: [...tags.stateful.classic] },
   () => {
+    // Stays unset when `setupBlock` throws; `teardownBlock` handles that.
     let state: BlockState;
     const patterns = [NAMES.customIndex, NAMES.hiddenAlias];
 

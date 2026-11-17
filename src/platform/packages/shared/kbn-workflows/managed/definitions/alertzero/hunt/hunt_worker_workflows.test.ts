@@ -750,8 +750,17 @@ describe('Hunt Watch worker chain', () => {
 
     it('is retired_incomplete for a settled incomplete_final run with a confirmed hit', () => {
       expect(status(incompleteFinal(true))).toBe('retired_incomplete');
-      expect(reason(incompleteFinal(true))).toContain(
-        'retired without having been fully searched; its executed searches are recorded'
+      // The write records `hit` for this run, so the no-hit wording about evidence "marked
+      // incomplete rather than clean" would be false here.
+      expect(reason(incompleteFinal(true))).toBe(
+        'The confirmed hit was recorded on the report, but the hunt left a gap a later run could not close (T9999 is not in the catalog), so the report is retired without having been fully searched; its executed searches are recorded.'
+      );
+    });
+
+    it('stays partial for an incomplete_final run with a confirmed hit whose evidence write failed', () => {
+      expect(status(incompleteFinal(true), 'write failed: 503')).toBe('partial');
+      expect(reason(incompleteFinal(true), 'write failed: 503')).toContain(
+        'could not be recorded on the report (write failed: 503)'
       );
     });
 
@@ -1545,6 +1554,36 @@ describe('Hunt Watch worker: a retired_incomplete hunt', () => {
         output: { status: 'packaged', summary: 'Closed this Investigation as benign.' },
       },
     },
+  });
+
+  it('keeps the hunt reason in the note when packaging did not complete on a retired run', () => {
+    const base = retiredContext('retired_incomplete');
+    const message = conclusion({
+      steps: {
+        ...base.steps,
+        resolve_run_outcome: { output: { outcome: 'partial' } },
+        package_report: { output: { status: 'run_incomplete', reason: 'No current-run SSE' } },
+      },
+    });
+
+    expect(message).toContain('### Hunt Watch run partial: packaging did not complete');
+    expect(message).toContain(
+      '**Hunt:** No confirmed hits. The hunt left a gap a later run could not close.'
+    );
+  });
+
+  it('adds no hunt reason to that note when the hunt itself was not retired', () => {
+    const base = retiredContext('success');
+    const message = conclusion({
+      steps: {
+        ...base.steps,
+        resolve_run_outcome: { output: { outcome: 'partial' } },
+        package_report: { output: { status: 'run_incomplete', reason: 'No current-run SSE' } },
+      },
+    });
+
+    expect(message).toContain('**Hunt:** No confirmed hits.\n');
+    expect(message).not.toContain('The hunt left a gap');
   });
 
   it('forwards the hunt coverage gaps to packaging, and an empty list when there are none', () => {

@@ -8,7 +8,6 @@
 import type { HuntScope } from '@kbn/alertzero-common';
 import { isIndexExclusion, stripBackingPrefix } from '../../../../../common/remote_cluster';
 import { codeList } from './build_hunt_narrative';
-import { scopeGuardPatterns } from './cps_scope';
 import { buildMatchesRequired } from './matches_required';
 
 /**
@@ -17,15 +16,20 @@ import { buildMatchesRequired } from './matches_required';
  */
 export const MAX_UNSEARCHED_DETAIL_CHARS = 450;
 const MAX_UNSEARCHED_NAMES = 10;
+/** Elasticsearch caps an index name at 255 bytes, so a longer entry is shown cut. */
+const MAX_SHOWN_NAME_CHARS = 255;
 
 /**
  * The `index_not_searched` gap detail: as many names as fit the bound, ten at most, with the
- * rest counted. Only a single name too long for the bound can exceed it.
+ * rest counted. One name always fits, since a name is shown at 255 characters at most.
  */
 export const describeUnsearched = (names: string[]): string => {
+  const shownNames = names.map((name) =>
+    name.length > MAX_SHOWN_NAME_CHARS ? `${name.slice(0, MAX_SHOWN_NAME_CHARS - 1)}…` : name
+  );
   const sentence = (shown: number) =>
     `The default data view names ${codeList(
-      names,
+      shownNames,
       shown
     )}, which this hunt could not resolve (not readable, or not found), so the hunt never searched there.`;
   let shown = Math.min(names.length, MAX_UNSEARCHED_NAMES);
@@ -37,10 +41,13 @@ export const describeUnsearched = (names: string[]): string => {
  * The names a scope dropped from the search: entries of `missing` that are absent from
  * `index_patterns` and that no exclusion entry of the data view covers (a name the data view
  * excludes itself resolved nothing by design). Meaningful only for a scope that is not blocked.
+ *
+ * A dropped name is always local, so cross-project search does not change the answer. Entry
+ * order is not kept on the scope, so an exclusion counts wherever it sits: a name listed again
+ * after the exclusion that covers it (which Elasticsearch would search) is not reported.
  */
 export const unsearchedPatterns = (
-  scope: Pick<HuntScope, 'index_patterns' | 'missing'>,
-  crossProjectSearch: boolean
+  scope: Pick<HuntScope, 'index_patterns' | 'missing'>
 ): string[] => {
   const exclusionEntries = scope.index_patterns.filter(isIndexExclusion);
   const kept = new Set(scope.index_patterns);
@@ -48,8 +55,6 @@ export const unsearchedPatterns = (
   return dropped.filter((entry) => {
     const bare = stripBackingPrefix(entry);
     // Still matched once the exclusions are applied means nothing excludes it.
-    return buildMatchesRequired(
-      scopeGuardPatterns([bare, ...exclusionEntries], crossProjectSearch)
-    )(bare);
+    return buildMatchesRequired([bare, ...exclusionEntries])(bare);
   });
 };

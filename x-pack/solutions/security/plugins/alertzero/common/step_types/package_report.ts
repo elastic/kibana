@@ -303,8 +303,8 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
         'fillable respond and investigate catalog actions, and returns mint payloads (including expectedProposalCount, the settlement barrier the ' +
         'packaging child threads into each gate) for the packaging child to dispatch as gate executions. ' +
         'A completed hunt that confirmed no hit leaves no current-run SSE attachment, so it packages as a ' +
-        'dismissal off huntStatus and hasConfirmedHit. A hunt that ended retired_incomplete (a gap no rerun can close) packages the same way, ' +
-        'with the unsearched techniques named in the coverage KI and the Investigation summary. ' +
+        'dismissal off huntStatus and hasConfirmedHit. A hunt that ended retired_incomplete (a gap no rerun can close) with no hit packages the same way, ' +
+        'and one with a confirmed hit packages its findings as usual; either way what was not searched is named in the coverage KI and the Investigation summary. ' +
         'A hunt that did not complete and will be retried returns run_incomplete instead, because its ' +
         'report may still be hunted again into this same Investigation. ' +
         'Does not close the Investigation; dismiss is a boolean the child applies.',

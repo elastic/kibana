@@ -306,6 +306,43 @@ describe('registerHuntForThreatRoute', () => {
     expect(body.result).toEqual(tier1Result);
   });
 
+  it('reports a name the scope dropped as an index_not_searched gap, ahead of the search gaps', async () => {
+    const searchGap = { reason: 'search_partial' as const, detail: 'one shard failed' };
+    resolveHuntScopeMock.mockResolvedValue({
+      ...okScope,
+      index_patterns: ['logs-*'],
+      missing: ['custom-edr-1'],
+    });
+    huntForThreatMock.mockResolvedValue({ ...tier1Result, incomplete: [searchGap] });
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    const { body } = response.ok.mock.calls[0][0] as {
+      body: { result: { incomplete?: unknown[] } };
+    };
+    expect(body.result.incomplete).toEqual([
+      {
+        reason: 'index_not_searched',
+        detail:
+          'The default data view names `custom-edr-1`, which this hunt could not resolve (not readable, or not found), so the hunt never searched there.',
+      },
+      searchGap,
+    ]);
+  });
+
+  it('adds no gap for an unresolved wildcard, which stays in the searched list', async () => {
+    resolveHuntScopeMock.mockResolvedValue({ ...okScope, missing: [UNIVERSE[0]] });
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    const { body } = response.ok.mock.calls[0][0] as { body: { result: object } };
+    expect(body.result).not.toHaveProperty('incomplete');
+  });
+
   it('returns the resolved scope without discovered alongside the result', async () => {
     const { handler, context } = makeDeps();
     const response = httpServerMock.createResponseFactory();

@@ -493,7 +493,9 @@ describe('resolveHuntScope', () => {
       '<logs-{now/d}>',
       '<logs-{now/d{yyyy.MM.dd|+12:00}}>',
       'logs-*::failures',
+      'custom-1::failures',
       'custom-1,custom-2',
+      '_all',
     ])('never drops %s', async (entry) => {
       const result = await run(
         ['logs-*', entry],

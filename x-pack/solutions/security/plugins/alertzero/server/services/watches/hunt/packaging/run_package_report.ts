@@ -414,7 +414,17 @@ export const runPackageReport = async ({
     // pointer to the Proposal, is a decision left for a follow-up.
     dismiss: decided.dismiss && dismissHold === 'none',
     dismissHold,
-    closureSummary: decided.closureSummary,
+    // The Investigation's own summary once its Proposals settle. A retired run says so here
+    // too, the way the no-hit closure does, or the closed Investigation reads as a full search.
+    closureSummary:
+      unsearched && unsearched.gaps.length > 0
+        ? `${decided.closureSummary} ${gapCountPhrase(
+            unsearched
+          )} left part of the report unsearched, so the report is retired without a full search. Not searched: ${describeGaps(
+            unsearched,
+            MAX_CLOSURE_GAP_CHARS
+          )}.`
+        : decided.closureSummary,
     expectedProposalCount,
     mintSuppression,
   };

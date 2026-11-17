@@ -1923,6 +1923,21 @@ describe('WorkersService Hunt index coverage', () => {
       });
     });
 
+    it('keeps the hidden-indices reason when the route supplies the now-empty universe', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        ...blockedScope('blocked:empty_universe'),
+        missing: [],
+        policy_skipped: ['.siem-signals-x'],
+      });
+
+      const { workers } = await service.list(request, SPACE, async () => []);
+
+      expect(workers.find(({ id }) => id === HUNT)?.stateReason).toContain(
+        'found only hidden or alerts indices'
+      );
+    });
+
     it('keeps the could-not-see reason when skipped and missing entries are both present', async () => {
       const { service, mocks } = await setup();
       finishedSweep(mocks, {

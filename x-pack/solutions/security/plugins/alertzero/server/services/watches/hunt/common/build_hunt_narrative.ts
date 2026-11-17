@@ -14,6 +14,7 @@ import type { HuntModelTier } from '../types';
 import type { ValidatedBehavior } from '../tier2/types';
 import { isRetryableIncompleteReason } from './completeness';
 import { TIER2_MODEL_TIERS, describeModelTiers } from './hunt_model_tiers';
+import { NO_SEARCHABLE_PATTERN_MESSAGE } from './partition_hunt_universe';
 import type { Tier2TargetSource } from './resolve_tier2_targets';
 
 /**
@@ -43,6 +44,10 @@ const listOf = (items: string[], max = MAX_LISTED): string => {
   if (shown.length === 1) return shown[0];
   return `${shown.slice(0, -1).join(', ')} and ${shown[shown.length - 1]}`;
 };
+
+/** A blocked result whose scope held only policy-skipped entries carries exactly this message. */
+const isBlockedByPolicyOnlyResult = ({ status, message }: HuntCoordinatorCoreResult): boolean =>
+  status === 'blocked' && message === NO_SEARCHABLE_PATTERN_MESSAGE;
 
 export const codeList = (items: string[], max = MAX_LISTED): string => listOf(items.map(code), max);
 
@@ -371,7 +376,9 @@ const describeOutcome = (
   if (result.status === 'blocked') {
     return {
       heading: 'Hunt Watch could not hunt this report',
-      summary: `Hunt Watch could not hunt ${report}: no index in the space's default data view is visible to this hunt, so nothing was searched.`,
+      summary: isBlockedByPolicyOnlyResult(result)
+        ? `Hunt Watch could not hunt ${report}: the space's default data view names only hidden or alerts indices, which Hunt does not search, so nothing was searched.`
+        : `Hunt Watch could not hunt ${report}: no index in the space's default data view is visible to this hunt, so nothing was searched.`,
     };
   }
   if (result.tier2_skipped_reason === 'report_not_found') {
@@ -437,7 +444,9 @@ const describeOutcome = (
 /** One short clause for the run conclusion, e.g. "confirmed hit: Tier 1 matched 121 documents; Tier 2 confirmed 2 of 5 behaviors". */
 export const buildHuntHeadline = (result: HuntCoordinatorCoreResult): string => {
   if (result.status === 'blocked') {
-    return "hunt blocked, no index in the space's default data view is visible to this hunt";
+    return isBlockedByPolicyOnlyResult(result)
+      ? "hunt blocked, the space's default data view names only hidden or alerts indices"
+      : "hunt blocked, no index in the space's default data view is visible to this hunt";
   }
   if (result.tier2_skipped_reason === 'report_not_found') {
     return 'hunt failed, the report is not visible in this space';

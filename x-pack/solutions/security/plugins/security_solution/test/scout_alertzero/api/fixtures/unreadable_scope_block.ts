@@ -125,15 +125,21 @@ export const setupBlock = async ({
     headers,
     spaceId: names.space,
   });
-  // Enabling Hunt turns the deployment-wide ingest and enrich workflows on; record them first.
-  const baseline = await readSupplyStatus(apiClient, headers, names.space);
-  expect(baseline.statusCode).toBe(200);
-  const initialSupply: Partial<Record<SupplyWorkflowKey, boolean>> = {};
-  for (const key of DEPLOYMENT_SUPPLY_KEYS) {
-    initialSupply[key] = baseline.body.workflows.find((row) => row.key === key)?.enabled;
+  try {
+    // Enabling Hunt turns the deployment-wide ingest and enrich workflows on; record them first.
+    const baseline = await readSupplyStatus(apiClient, headers, names.space);
+    expect(baseline.statusCode).toBe(200);
+    const initialSupply: Partial<Record<SupplyWorkflowKey, boolean>> = {};
+    for (const key of DEPLOYMENT_SUPPLY_KEYS) {
+      initialSupply[key] = baseline.body.workflows.find((row) => row.key === key)?.enabled;
+    }
+    await setDefaultIndexInSpace({ apiClient, headers, spaceId: names.space, patterns });
+    return { headers, prerequisites, initialSupply };
+  } catch (error) {
+    // No state is returned on this path, so teardown cannot reach the prerequisites.
+    await prerequisites.cleanup().catch(() => undefined);
+    throw error;
   }
-  await setDefaultIndexInSpace({ apiClient, headers, spaceId: names.space, patterns });
-  return { headers, prerequisites, initialSupply };
 };
 
 export const teardownBlock = async ({
@@ -145,30 +151,47 @@ export const teardownBlock = async ({
   fixtures: Omit<SetupFixtures, 'samlAuth'>;
   names: BlockNames;
   withLogsStream: boolean;
-  state: BlockState;
+  /** Undefined when `setupBlock` threw: the indices and the space are still removed. */
+  state: BlockState | undefined;
 }) => {
-  const { headers, prerequisites, initialSupply } = state;
+  const stateSteps = state
+    ? [
+        {
+          name: 'disable the hunt worker',
+          run: () =>
+            setHuntEnabled({
+              apiClient,
+              headers: state.headers,
+              spaceId: names.space,
+              enabled: false,
+            }),
+        },
+        {
+          name: 'restore deployment supply rows',
+          run: async () => {
+            const after = await readSupplyStatus(apiClient, state.headers, names.space);
+            for (const key of DEPLOYMENT_SUPPLY_KEYS) {
+              const initial = state.initialSupply[key];
+              const current =
+                after.statusCode === 200
+                  ? after.body.workflows.find((row) => row.key === key)
+                  : undefined;
+              if (initial !== undefined && current?.installed && current.enabled !== initial) {
+                await setSupplyWorkflowEnabled({
+                  apiClient,
+                  headers: state.headers,
+                  key,
+                  enabled: initial,
+                });
+              }
+            }
+          },
+        },
+        { name: 'clean up prerequisites', run: async () => state.prerequisites.cleanup() },
+      ]
+    : [];
   await runCleanupSteps([
-    {
-      name: 'disable the hunt worker',
-      run: () => setHuntEnabled({ apiClient, headers, spaceId: names.space, enabled: false }),
-    },
-    {
-      name: 'restore deployment supply rows',
-      run: async () => {
-        const after = await readSupplyStatus(apiClient, headers, names.space);
-        for (const key of DEPLOYMENT_SUPPLY_KEYS) {
-          const initial = initialSupply[key];
-          const current =
-            after.statusCode === 200
-              ? after.body.workflows.find((row) => row.key === key)
-              : undefined;
-          if (initial !== undefined && current?.installed && current.enabled !== initial) {
-            await setSupplyWorkflowEnabled({ apiClient, headers, key, enabled: initial });
-          }
-        }
-      },
-    },
+    ...stateSteps,
     {
       name: 'delete the logs data stream',
       run: async () => {
@@ -185,7 +208,6 @@ export const teardownBlock = async ({
       name: 'delete the hidden index',
       run: () => esClient.indices.delete({ index: names.hiddenIndex, ignore_unavailable: true }),
     },
-    { name: 'clean up prerequisites', run: async () => prerequisites.cleanup() },
     { name: `delete space ${names.space}`, run: () => apiServices.spaces.delete(names.space) },
   ]);
 };
@@ -305,21 +327,19 @@ export const verifyPartial = async ({
   compare(mismatches, 'worker stateReason', workerState?.stateReason, undefined);
 
   // 7. a human caller
-  const humanScope = (
-    await apiClient.get(spaceUrl(HUNT_INDEX_SCOPE_URL, names.space), {
-      headers,
-      responseType: 'json',
-    })
-  ).body as HuntIndexScopeResponse;
+  const humanResponse = await apiClient.get(spaceUrl(HUNT_INDEX_SCOPE_URL, names.space), {
+    headers,
+    responseType: 'json',
+  });
+  compare(mismatches, 'caller index_scope status code', humanResponse.statusCode, 200);
+  const humanScope = (humanResponse.body ?? {}) as Partial<HuntIndexScopeResponse>;
+  const humanPatterns = humanScope.index_patterns ?? [];
   compare(mismatches, 'caller policy_skipped', humanScope.policy_skipped, [names.hiddenAlias]);
   compare(mismatches, 'caller missing', humanScope.missing, [names.absent]);
-  if (
-    humanScope.index_patterns.includes(names.absent) ||
-    humanScope.index_patterns.includes(names.hiddenAlias)
-  ) {
+  if (humanPatterns.includes(names.absent) || humanPatterns.includes(names.hiddenAlias)) {
     mismatches.push(
       `caller index_patterns still names a dropped or hidden entry: ${JSON.stringify(
-        humanScope.index_patterns
+        humanPatterns
       )}`
     );
   }

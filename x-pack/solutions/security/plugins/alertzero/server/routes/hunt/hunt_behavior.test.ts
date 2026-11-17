@@ -388,5 +388,21 @@ describe('registerHuntBehaviorRoute', () => {
       expect(huntBehaviorMock).not.toHaveBeenCalled();
       expect(resolveScopedModelMock).not.toHaveBeenCalled();
     });
+
+    it('does not blame hidden indices when the data view holds only exclusions', async () => {
+      const { handler, context } = withSetting(['-logs-elastic_agent*']);
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 409,
+        body: {
+          message:
+            'The default data view has no pattern this hunt may search: it holds only exclusions.',
+        },
+      });
+      expect(huntBehaviorMock).not.toHaveBeenCalled();
+    });
   });
 });

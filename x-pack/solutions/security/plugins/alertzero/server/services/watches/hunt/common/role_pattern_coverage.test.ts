@@ -90,6 +90,22 @@ describe('uncoveredPatterns', () => {
       uncovered(['.ds-logs-okta.system-default-2026.09.30-000001', '.ds-custom-edr-1-2026-000001'])
     ).toEqual(['.ds-custom-edr-1-2026-000001']);
   });
+
+  it('covers a backing index entry when the role grants the .ds- name itself', () => {
+    const backing = '.ds-logs-okta.system-default-2026.09.30-000001';
+    const grantsBackingNames = role({ indices: [{ names: ['.ds-logs-*'], privileges: ['read'] }] });
+
+    expect(uncovered([backing], grantsBackingNames)).toEqual([]);
+    expect(
+      uncovered(
+        [`remote:${backing}`],
+        role({
+          indices: [],
+          remoteIndices: [{ clusters: ['remote'], names: ['.ds-logs-*'], privileges: ['read'] }],
+        })
+      )
+    ).toEqual([]);
+  });
 });
 
 describe('readWorkerRole', () => {
