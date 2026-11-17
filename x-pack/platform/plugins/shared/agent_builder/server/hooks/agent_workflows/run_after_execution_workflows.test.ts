@@ -42,7 +42,6 @@ const getCurrentSpaceIdMock = jest.mocked(getCurrentSpaceId);
 type RunAfterExecutionWorkflowsParams = Parameters<typeof runAfterExecutionWorkflows>[0];
 type WorkflowApi = RunAfterExecutionWorkflowsParams['workflowApi'];
 type GetInternalServices = RunAfterExecutionWorkflowsParams['getInternalServices'];
-type GetStartServices = RunAfterExecutionWorkflowsParams['getStartServices'];
 type Workflow = NonNullable<Awaited<ReturnType<WorkflowApi['getWorkflow']>>>;
 
 const makeWorkflow = (inputs?: Record<string, unknown>): Workflow =>
@@ -118,26 +117,16 @@ describe('runAfterExecutionWorkflows', () => {
     const soClient = savedObjects.createInternalRepository();
     savedObjects.getScopedClient.mockReturnValue(soClient);
     uiSettings.asScopedToClient.mockReturnValue(uiSettingsClient);
-    const mintedRequest = httpServerMock.createKibanaRequest();
-    const withScopedRequestForWorkload = jest.fn(
-      async (_params: unknown, fn: (req: typeof mintedRequest) => Promise<void>) =>
-        fn(mintedRequest)
-    );
 
     return {
       workflowApi: { getWorkflow } as unknown as WorkflowApi,
       getWorkflow,
       savedObjects,
-      mintedRequest,
-      withScopedRequestForWorkload,
       getInternalServices: jest.fn(() => ({
         spaces: {},
         uiSettings,
         savedObjects,
       })) as unknown as GetInternalServices,
-      getStartServices: jest.fn(async () => [
-        { security: { serviceAccounts: { withScopedRequestForWorkload } } },
-      ]) as unknown as GetStartServices,
     };
   };
 
@@ -169,14 +158,13 @@ describe('runAfterExecutionWorkflows', () => {
 
   describe('early-exit guards', () => {
     it('does nothing for an ephemeral run on an existing conversation', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({ conversationAccess: 'readOnly' });
 
       await runAfterExecutionWorkflows({
         context,
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -184,14 +172,13 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('still runs for a one-shot run that stores nothing', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({ conversationAccess: 'none' });
 
       await runAfterExecutionWorkflows({
         context,
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -199,7 +186,7 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('does nothing when post_execution_workflow_ids is empty', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({
         agentConfiguration: { tools: [], post_execution_workflow_ids: [] },
       });
@@ -208,7 +195,6 @@ describe('runAfterExecutionWorkflows', () => {
         context,
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -216,7 +202,7 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('does nothing when post_execution_workflow_ids is undefined', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({
         agentConfiguration: { tools: [] },
       });
@@ -225,7 +211,6 @@ describe('runAfterExecutionWorkflows', () => {
         context,
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -233,7 +218,7 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('does nothing when round status is in_progress', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({
         round: makeRound({ status: ConversationRoundStatus.inProgress }),
       });
@@ -242,7 +227,6 @@ describe('runAfterExecutionWorkflows', () => {
         context,
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -250,7 +234,7 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('does nothing when round status is awaiting_prompt', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({
         round: makeRound({ status: ConversationRoundStatus.awaitingPrompt }),
       });
@@ -259,7 +243,6 @@ describe('runAfterExecutionWorkflows', () => {
         context,
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -267,7 +250,7 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('does nothing when the workflows UI setting is disabled', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps({
+      const { workflowApi, getInternalServices } = createDeps({
         uiEnabled: false,
       });
 
@@ -275,7 +258,6 @@ describe('runAfterExecutionWorkflows', () => {
         context: createContext(),
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -285,7 +267,7 @@ describe('runAfterExecutionWorkflows', () => {
 
   describe('workflow params', () => {
     it('passes prompt, response, ids, round_connector_id, workflow_context, and tool_calls', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       const workflowContext = {
         'nightshift.semantic_memory.recall': {
           version: 1,
@@ -319,7 +301,6 @@ describe('runAfterExecutionWorkflows', () => {
         context,
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -343,7 +324,7 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('passes the in-memory round connector id to a workflow that declares it', async () => {
-      const { workflowApi, getWorkflow, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getWorkflow, getInternalServices } = createDeps();
       getWorkflow.mockResolvedValue(
         makeWorkflow({
           additionalProperties: false,
@@ -368,7 +349,6 @@ describe('runAfterExecutionWorkflows', () => {
         context,
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -385,7 +365,7 @@ describe('runAfterExecutionWorkflows', () => {
     it.each([undefined, '', '   ', 'unknown', ' unknown '])(
       'omits an unusable round connector id %p without looking up the workflow',
       async (connectorId) => {
-        const { workflowApi, getWorkflow, getInternalServices, getStartServices } = createDeps();
+        const { workflowApi, getWorkflow, getInternalServices } = createDeps();
         const context = createContext({
           round: makeRound({
             model_usage:
@@ -404,7 +384,6 @@ describe('runAfterExecutionWorkflows', () => {
           context,
           workflowApi,
           getInternalServices,
-          getStartServices,
           logger,
         });
 
@@ -418,7 +397,7 @@ describe('runAfterExecutionWorkflows', () => {
     );
 
     it('omits agent_id, conversation_id, and round_connector_id when undefined or blank', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({
         agentId: undefined,
         conversationId: undefined,
@@ -436,7 +415,6 @@ describe('runAfterExecutionWorkflows', () => {
         context,
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -448,7 +426,7 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('extracts tool_calls from round steps', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       const toolCallStep = {
         type: ConversationRoundStepType.toolCall,
         tool_id: 'my-tool',
@@ -467,7 +445,6 @@ describe('runAfterExecutionWorkflows', () => {
         context: createContext({ round }),
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -488,7 +465,7 @@ describe('runAfterExecutionWorkflows', () => {
       });
 
       it('does not send them to a strict workflow that predates them', async () => {
-        const { workflowApi, getWorkflow, getInternalServices, getStartServices } = createDeps({
+        const { workflowApi, getWorkflow, getInternalServices } = createDeps({
           definition: strictDefinition(legacyInputNames),
         });
 
@@ -496,7 +473,6 @@ describe('runAfterExecutionWorkflows', () => {
           context: createContext({ round, connectorId: 'current-connector' }),
           workflowApi,
           getInternalServices,
-          getStartServices,
           logger,
         });
 
@@ -506,7 +482,7 @@ describe('runAfterExecutionWorkflows', () => {
       });
 
       it('sends only the declared ones', async () => {
-        const { workflowApi, getInternalServices, getStartServices } = createDeps({
+        const { workflowApi, getInternalServices } = createDeps({
           definition: strictDefinition([...legacyInputNames, 'round_connector_id']),
         });
 
@@ -514,13 +490,32 @@ describe('runAfterExecutionWorkflows', () => {
           context: createContext({ round, connectorId: 'current-connector' }),
           workflowApi,
           getInternalServices,
-          getStartServices,
           logger,
         });
 
         const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
         expect(params).toHaveProperty('round_connector_id', 'current-connector');
         expect(params).not.toHaveProperty('workflow_context');
+      });
+
+      it('sends the round trace id (latest one when merged) only when declared', async () => {
+        const { workflowApi, getInternalServices } = createDeps({
+          definition: strictDefinition([...legacyInputNames, 'round_trace_id']),
+        });
+
+        await runAfterExecutionWorkflows({
+          context: createContext({
+            round: { ...round, trace_id: ['trace-1', 'trace-2'] },
+            connectorId: 'current-connector',
+          }),
+          workflowApi,
+          getInternalServices,
+          logger,
+        });
+
+        const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
+        expect(params).toHaveProperty('round_trace_id', 'trace-2');
+        expect(params).not.toHaveProperty('round_connector_id');
       });
 
       describe('tool_results', () => {
@@ -540,7 +535,7 @@ describe('runAfterExecutionWorkflows', () => {
         });
 
         it('sends tool call results to a workflow that declares tool_results', async () => {
-          const { workflowApi, getInternalServices, getStartServices } = createDeps({
+          const { workflowApi, getInternalServices } = createDeps({
             definition: strictDefinition([...legacyInputNames, 'tool_results']),
           });
 
@@ -548,7 +543,6 @@ describe('runAfterExecutionWorkflows', () => {
             context: createContext({ round: roundWithToolCall }),
             workflowApi,
             getInternalServices,
-            getStartServices,
             logger,
           });
 
@@ -562,7 +556,7 @@ describe('runAfterExecutionWorkflows', () => {
         });
 
         const sendResultData = async (data: Record<string, unknown>) => {
-          const { workflowApi, getInternalServices, getStartServices } = createDeps({
+          const { workflowApi, getInternalServices } = createDeps({
             definition: strictDefinition([...legacyInputNames, 'tool_results']),
           });
           const roundWithResult = makeRound({
@@ -581,7 +575,6 @@ describe('runAfterExecutionWorkflows', () => {
             context: createContext({ round: roundWithResult }),
             workflowApi,
             getInternalServices,
-            getStartServices,
             logger,
           });
 
@@ -637,7 +630,7 @@ describe('runAfterExecutionWorkflows', () => {
         });
 
         it('omits tool calls whose step has no results', async () => {
-          const { workflowApi, getInternalServices, getStartServices } = createDeps({
+          const { workflowApi, getInternalServices } = createDeps({
             definition: strictDefinition([...legacyInputNames, 'tool_results']),
           });
           const stepWithoutResults = {
@@ -654,7 +647,6 @@ describe('runAfterExecutionWorkflows', () => {
             context: createContext({ round: roundWithMissingResults }),
             workflowApi,
             getInternalServices,
-            getStartServices,
             logger,
           });
 
@@ -665,7 +657,7 @@ describe('runAfterExecutionWorkflows', () => {
         });
 
         it('does not send tool_results to a workflow that does not declare it', async () => {
-          const { workflowApi, getInternalServices, getStartServices } = createDeps({
+          const { workflowApi, getInternalServices } = createDeps({
             definition: strictDefinition(legacyInputNames),
           });
 
@@ -673,7 +665,6 @@ describe('runAfterExecutionWorkflows', () => {
             context: createContext({ round: roundWithToolCall }),
             workflowApi,
             getInternalServices,
-            getStartServices,
             logger,
           });
 
@@ -683,14 +674,13 @@ describe('runAfterExecutionWorkflows', () => {
       });
 
       it('sends the base inputs and still runs when the workflow cannot be read', async () => {
-        const { workflowApi, getWorkflow, getInternalServices, getStartServices } = createDeps();
+        const { workflowApi, getWorkflow, getInternalServices } = createDeps();
         getWorkflow.mockRejectedValue(new Error('boom'));
 
         await runAfterExecutionWorkflows({
           context: createContext({ round, connectorId: 'current-connector' }),
           workflowApi,
           getInternalServices,
-          getStartServices,
           logger,
         });
 
@@ -702,7 +692,7 @@ describe('runAfterExecutionWorkflows', () => {
       });
 
       it('skips the lookup when there is nothing optional to send', async () => {
-        const { workflowApi, getWorkflow, getInternalServices, getStartServices } = createDeps();
+        const { workflowApi, getWorkflow, getInternalServices } = createDeps();
 
         await runAfterExecutionWorkflows({
           context: createContext({
@@ -711,7 +701,6 @@ describe('runAfterExecutionWorkflows', () => {
           }),
           workflowApi,
           getInternalServices,
-          getStartServices,
           logger,
         });
 
@@ -725,7 +714,7 @@ describe('runAfterExecutionWorkflows', () => {
     it.each([null, { definition: undefined }])(
       'runs with original inputs when the lookup returns %p',
       async (workflow) => {
-        const { workflowApi, getWorkflow, getInternalServices, getStartServices } = createDeps();
+        const { workflowApi, getWorkflow, getInternalServices } = createDeps();
         getWorkflow.mockResolvedValue(workflow);
 
         await expect(
@@ -733,7 +722,6 @@ describe('runAfterExecutionWorkflows', () => {
             context: createContext(),
             workflowApi,
             getInternalServices,
-            getStartServices,
             logger,
           })
         ).resolves.toBeUndefined();
@@ -747,7 +735,7 @@ describe('runAfterExecutionWorkflows', () => {
     );
 
     it('executes a later workflow after an earlier workflow lookup fails', async () => {
-      const { workflowApi, getWorkflow, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getWorkflow, getInternalServices } = createDeps();
       getWorkflow.mockRejectedValueOnce(new Error('lookup failed')).mockResolvedValueOnce(
         makeWorkflow({
           properties: {
@@ -764,7 +752,6 @@ describe('runAfterExecutionWorkflows', () => {
           context,
           workflowApi,
           getInternalServices,
-          getStartServices,
           logger,
         })
       ).resolves.toBeUndefined();
@@ -788,7 +775,7 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('logs an error and continues when executeWorkflow returns success: false', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       executeWorkflowMock.mockResolvedValueOnce({ success: false, error: 'Network error' });
       executeWorkflowMock.mockResolvedValueOnce({
         success: true,
@@ -803,7 +790,6 @@ describe('runAfterExecutionWorkflows', () => {
           context,
           workflowApi,
           getInternalServices,
-          getStartServices,
           logger,
         })
       ).resolves.toBeUndefined();
@@ -814,7 +800,7 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('logs an error and continues when execution status is FAILED', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       executeWorkflowMock.mockResolvedValue({
         success: true,
         execution: {
@@ -832,7 +818,6 @@ describe('runAfterExecutionWorkflows', () => {
           context: createContext(),
           workflowApi,
           getInternalServices,
-          getStartServices,
           logger,
         })
       ).resolves.toBeUndefined();
@@ -842,7 +827,7 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('uses workflow_id as fallback name when workflow_name is absent', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       executeWorkflowMock.mockResolvedValue({
         success: true,
         execution: {
@@ -857,7 +842,6 @@ describe('runAfterExecutionWorkflows', () => {
         context: createContext(),
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -865,7 +849,7 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('uses "unknown error" when FAILED execution has no error_message', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       executeWorkflowMock.mockResolvedValue({
         success: true,
         execution: {
@@ -880,7 +864,6 @@ describe('runAfterExecutionWorkflows', () => {
         context: createContext(),
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -888,78 +871,14 @@ describe('runAfterExecutionWorkflows', () => {
     });
   });
 
-  describe('service-account bound agents', () => {
-    it('mints a credential for the agent workload and runs with that request', async () => {
-      const {
-        workflowApi,
-        getWorkflow,
-        getInternalServices,
-        getStartServices,
-        savedObjects,
-        mintedRequest,
-        withScopedRequestForWorkload,
-      } = createDeps();
-      const context = createContext({ runAs: 'sa-1' });
-
-      await runAfterExecutionWorkflows({
-        context,
-        workflowApi,
-        getInternalServices,
-        getStartServices,
-        logger,
-      });
-
-      expect(withScopedRequestForWorkload).toHaveBeenCalledTimes(1);
-      expect(withScopedRequestForWorkload).toHaveBeenCalledWith(
-        {
-          workloadType: 'agent',
-          workloadId: 'agent-1',
-          spaceId: 'default',
-          expectedServiceAccountId: 'sa-1',
-        },
-        expect.any(Function)
-      );
-      expect(savedObjects.getScopedClient).toHaveBeenCalledWith(mintedRequest);
-      expect(getWorkflow).toHaveBeenCalledWith('wf-1', 'default', mintedRequest);
-      expect(executeWorkflowMock).toHaveBeenCalledWith(
-        expect.objectContaining({ request: mintedRequest })
-      );
-      expect(savedObjects.getScopedClient).not.toHaveBeenCalledWith(request);
-      expect(executeWorkflowMock).not.toHaveBeenCalledWith(expect.objectContaining({ request }));
-    });
-
-    it('uses the hook request when the agent is not bound to a service account', async () => {
-      const {
-        workflowApi,
-        getInternalServices,
-        getStartServices,
-        savedObjects,
-        withScopedRequestForWorkload,
-      } = createDeps();
-
-      await runAfterExecutionWorkflows({
-        context: createContext(),
-        workflowApi,
-        getInternalServices,
-        getStartServices,
-        logger,
-      });
-
-      expect(withScopedRequestForWorkload).not.toHaveBeenCalled();
-      expect(savedObjects.getScopedClient).toHaveBeenCalledWith(request);
-      expect(executeWorkflowMock).toHaveBeenCalledWith(expect.objectContaining({ request }));
-    });
-  });
-
   describe('successful execution', () => {
     it('logs at debug level on success', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
 
       await runAfterExecutionWorkflows({
         context: createContext(),
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -969,7 +888,7 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('executes all workflow IDs in order', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
       executeWorkflowMock
         .mockResolvedValueOnce({
           success: true,
@@ -988,7 +907,6 @@ describe('runAfterExecutionWorkflows', () => {
         context,
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -1004,13 +922,12 @@ describe('runAfterExecutionWorkflows', () => {
     });
 
     it('calls executeWorkflow with waitForCompletion: true', async () => {
-      const { workflowApi, getInternalServices, getStartServices } = createDeps();
+      const { workflowApi, getInternalServices } = createDeps();
 
       await runAfterExecutionWorkflows({
         context: createContext(),
         workflowApi,
         getInternalServices,
-        getStartServices,
         logger,
       });
 
@@ -1025,7 +942,7 @@ describe('runAfterExecutionWorkflows', () => {
       contextManager.enable();
 
       try {
-        const { workflowApi, getInternalServices, getStartServices } = createDeps();
+        const { workflowApi, getInternalServices } = createDeps();
         const testKey = createContextKey('test.foreground_span_key');
         let observedContextBeforeHook: unknown;
         let observedContextDuringExecute: unknown = 'unset';
@@ -1042,7 +959,6 @@ describe('runAfterExecutionWorkflows', () => {
             context: createContext(),
             workflowApi,
             getInternalServices,
-            getStartServices,
             logger,
           });
         });

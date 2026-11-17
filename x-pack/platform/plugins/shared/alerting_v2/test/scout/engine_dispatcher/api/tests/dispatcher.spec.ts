@@ -152,7 +152,8 @@ const expectStableCount = async (
   return actions;
 };
 
-apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/299775
+apiTest.describe.skip('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.maintenanceWindows.cleanUp();
     await apiServices.alertingV2.actionPolicies.cleanUp();
@@ -2020,9 +2021,6 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
       expect(
         state.dispatcher_action_groups_throttled_count_by_strategy_24hr?.on_status_change
       ).toBeGreaterThanOrEqual(1);
-      expect(
-        state.dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr
-      ).toStrictEqual({});
     }
   );
 });

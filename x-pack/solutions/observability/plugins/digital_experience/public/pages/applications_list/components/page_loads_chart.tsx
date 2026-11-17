@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import {
   EuiButtonGroup,
@@ -18,9 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import type { TimeSeriesPoint } from '../../../../common/types/applications';
+import type { HistogramBuckets, TimeSeriesPoint } from '../../../../common/types/applications';
 import { ChartArea } from '../../../components/chart_area';
+import { PartialBucketsEndzones } from '../../../components/partial_buckets_endzones';
+import { getTimeChartXDomain } from '../../../utils/histogram_interval';
 import { useFormatters } from '../../../hooks/use_formatters';
+import { usePersistedChoice } from '../../../hooks/use_persisted_choice';
 import { PAGE_LOADS_LABEL, SESSIONS_LABEL, SESSIONS_UNAVAILABLE_LABEL } from '../../../labels';
 import type { TimeRangeSelect } from '../../../utils/brush_time_range';
 import { onBrushTimeRange } from '../../../utils/brush_time_range';
@@ -29,7 +31,9 @@ const CHART_HEIGHT = 140;
 
 const METRIC_STORAGE_KEY = 'xpack.digitalExperience.applications.chartMetric';
 
-type ChartMetric = 'pageLoads' | 'sessions';
+const CHART_METRICS = ['pageLoads', 'sessions'] as const;
+
+type ChartMetric = (typeof CHART_METRICS)[number];
 
 const METRIC_LABELS: Record<ChartMetric, string> = {
   pageLoads: PAGE_LOADS_LABEL,
@@ -49,16 +53,6 @@ const METRIC_LEGEND = i18n.translate('xpack.digitalExperience.pageLoadsChart.met
   defaultMessage: 'Chart metric',
 });
 
-const toChartMetric = (value: string | undefined): ChartMetric =>
-  value === 'sessions' ? 'sessions' : 'pageLoads';
-
-/** The metric the user last picked, kept across visits; page loads by default. */
-const useChartMetric = (): [ChartMetric, (metric: ChartMetric) => void] => {
-  const [saved, setSaved] = useLocalStorage<ChartMetric>(METRIC_STORAGE_KEY, 'pageLoads');
-  // Anything else in the storage, e.g. from an older version, falls back to page loads.
-  return [toChartMetric(saved), setSaved];
-};
-
 /**
  * Page loads, or the sessions that started, over the time range, where dragging over the bars
  * selects a narrower range; the chart area keeps its height while loading or empty. Sessions are
@@ -68,26 +62,35 @@ const useChartMetric = (): [ChartMetric, (metric: ChartMetric) => void] => {
 export function PageLoadsChart({
   pageLoads,
   sessions,
+  histogram,
   isLoading,
   onTimeRangeSelect,
 }: {
   pageLoads: TimeSeriesPoint[];
   /** The sessions that started in each bucket, `null` when they are not counted. */
   sessions: TimeSeriesPoint[] | null;
+  /** The buckets of both metrics; `undefined` until the first response. */
+  histogram: HistogramBuckets | undefined;
   isLoading: boolean;
   onTimeRangeSelect: TimeRangeSelect;
 }) {
   const baseTheme = useElasticChartsTheme();
   const { formatDate, timeZone } = useFormatters();
-  const [chosenMetric, setChosenMetric] = useChartMetric();
+  // The metric the user last picked, kept across visits; page loads by default.
+  const [chosenMetric, setChosenMetric] = usePersistedChoice(
+    METRIC_STORAGE_KEY,
+    CHART_METRICS,
+    'pageLoads'
+  );
 
-  // While the first answer is loading, the sessions are not known to be missing yet.
-  const sessionsUnavailable = !isLoading && sessions === null;
-  const metric: ChartMetric =
-    chosenMetric === 'sessions' && !sessionsUnavailable ? 'sessions' : 'pageLoads';
-  const points = metric === 'sessions' ? sessions ?? [] : pageLoads;
-  const label = METRIC_LABELS[metric];
+  // While loading, sessions may still arrive; after it, `null` means they can't be counted.
+  const canShowSessions = isLoading || sessions !== null;
+  const shownMetric: ChartMetric =
+    chosenMetric === 'sessions' && canShowSessions ? 'sessions' : 'pageLoads';
+  const points = shownMetric === 'sessions' ? sessions ?? [] : pageLoads;
+  const label = METRIC_LABELS[shownMetric];
   const hasData = points.some(({ count }) => count > 0);
+  const xDomain = getTimeChartXDomain({ points, histogram, timeZone, hasBars: true });
 
   return (
     <EuiPanel hasBorder data-test-subj="digitalExperiencePageLoadsChart">
@@ -112,13 +115,13 @@ export function PageLoadsChart({
               {
                 id: 'sessions',
                 label: SESSIONS_LABEL,
-                isDisabled: sessionsUnavailable,
-                toolTipContent: sessionsUnavailable ? SESSIONS_UNAVAILABLE_LABEL : undefined,
+                isDisabled: !canShowSessions,
+                toolTipContent: canShowSessions ? undefined : SESSIONS_UNAVAILABLE_LABEL,
                 'data-test-subj': 'digitalExperienceChartMetric-sessions',
               },
             ]}
-            idSelected={metric}
-            onChange={(id) => setChosenMetric(toChartMetric(id))}
+            idSelected={shownMetric}
+            onChange={setChosenMetric}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -127,7 +130,7 @@ export function PageLoadsChart({
         height={CHART_HEIGHT}
         isLoading={isLoading}
         hasData={hasData}
-        emptyMessage={NO_DATA[metric]}
+        emptyMessage={NO_DATA[shownMetric]}
       >
         <Chart size={{ height: CHART_HEIGHT }}>
           <Settings
@@ -135,12 +138,14 @@ export function PageLoadsChart({
             showLegend={false}
             locale={i18n.getLocale()}
             onBrushEnd={onBrushTimeRange(onTimeRangeSelect)}
+            xDomain={xDomain}
           />
           <Tooltip headerFormatter={({ value }) => formatDate(value)} />
+          <PartialBucketsEndzones xDomain={xDomain} />
           <Axis id="time" position={Position.Bottom} />
           <Axis id="count" position={Position.Left} gridLine={{ visible: true }} ticks={4} />
           <BarSeries
-            id={metric}
+            id={shownMetric}
             name={label}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
