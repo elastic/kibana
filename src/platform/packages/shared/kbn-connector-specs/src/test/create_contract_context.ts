@@ -10,7 +10,12 @@
 import { generateKeyPairSync, webcrypto } from 'crypto';
 import { Readable } from 'stream';
 import axios from 'axios';
-import type { Emulator, EmulatorOptions } from '@kbn/connector-emulate';
+import type {
+  Emulator,
+  EmulatorOptions,
+  NamedOperationRef,
+  OperationRef,
+} from '@kbn/connector-emulate';
 import { createEmulatorFetch, issueAccessToken } from '@kbn/connector-emulate';
 import type { Logger } from '@kbn/logging';
 import { z } from '@kbn/zod/v4';
@@ -194,18 +199,39 @@ const ensureWebCrypto = () => {
   }
 };
 
-// The axios fetch adapter keeps every `env.fetch` it is given in a module-level map, forever. A
-// mock closes over its operations, which for large specs (Microsoft Graph) are gigabytes, so
-// axios gets a function that holds the mock weakly: the context owns the mock for as long as it
-// is used, and a collected context takes the mock with it.
-const holdWeakly = (target: typeof fetch): typeof fetch => {
+/**
+ * The axios fetch adapter keeps every `env.fetch` it is given in a module-level map, forever. A
+ * mock closes over its operations, which for large specs (Microsoft Graph) are gigabytes, so
+ * axios gets a function that holds the mock weakly: the context owns the mock for as long as it
+ * is used, and a collected context takes the mock with it.
+ *
+ * Given `matchedOf`, it also ties each request to the operation the mock matched it to: the
+ * adapter passes the `Request` it built and hands that same object back as `response.request`, so
+ * the calls the mock records while the request is in flight are the request's own.
+ */
+const holdWeakly = (
+  target: Emulator,
+  matchedOf?: WeakMap<Request, OperationRef | NamedOperationRef>
+): typeof fetch => {
   const ref = new WeakRef(target);
-  return (input, init) => {
+  return async (input, init) => {
     const held = ref.deref();
     if (held === undefined) {
       throw new Error('The contract mock was used after its context was released');
     }
-    return held(input, init);
+    if (matchedOf === undefined) {
+      return held.fetch(input, init);
+    }
+    const from = held.calls.length;
+    try {
+      return await held.fetch(input, init);
+    } finally {
+      // Token requests authenticate the run; they aren't the vendor operation the request calls.
+      const { matched } = held.calls.slice(from).find(({ token }) => !token) ?? {};
+      if (input instanceof Request && matched) {
+        matchedOf.set(input, matched);
+      }
+    }
   };
 };
 
@@ -247,6 +273,7 @@ export const createContractContext = async ({
   ...mockOptions
 }: ContractContextOptions): Promise<ContractContext> => {
   const mock = createEmulatorFetch(mockOptions);
+  const matchedOf = new WeakMap<Request, OperationRef | NamedOperationRef>();
   const definitions = connector.auth?.types.length ? connector.auth.types : ['none'];
   const definition =
     authType === undefined
@@ -261,7 +288,10 @@ export const createContractContext = async ({
   const authSecrets = toSecrets(schema, { ...secrets, authType: id });
 
   const streamed = new WeakSet<object>();
-  const client = axios.create({ adapter: 'fetch', env: { fetch: holdWeakly(mock.fetch) } });
+  const client = axios.create({
+    adapter: 'fetch',
+    env: { fetch: holdWeakly(mock, trackFields ? matchedOf : undefined) },
+  });
   // Registered first, so it runs after the interceptors that connectors add.
   client.interceptors.request.use(async (requestConfig) => {
     if (requestConfig.data instanceof FormData) {
@@ -283,14 +313,9 @@ export const createContractContext = async ({
     if (!trackFields) {
       return response;
     }
-    // The mock records each request as `METHOD url`, without the query string.
-    const request = `${(response.config.method ?? 'get').toUpperCase()} ${
-      client.getUri(response.config).split('?')[0]
-    }`;
-    const call = [...mock.calls]
-      .reverse()
-      .find(({ request: called, matched }) => called === request && matched && 'method' in matched);
-    const matched = call?.matched;
+    // The operation this very request matched, recorded while it was in flight.
+    const matched =
+      response.request instanceof Request ? matchedOf.get(response.request) : undefined;
     if (!matched || !('method' in matched)) {
       return response;
     }
