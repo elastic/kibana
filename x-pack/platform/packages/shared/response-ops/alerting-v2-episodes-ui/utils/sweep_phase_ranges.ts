@@ -47,21 +47,22 @@ export const sweepPhaseRanges = <T>(
     (a, b) => a.atMs - b.atMs || (a.kind === b.kind ? 0 : a.kind === 'start' ? -1 : 1)
   );
 
-  let open: T[] = [];
+  // Values seen and not yet finished, in the order they started. The last one is current.
+  let openValues: T[] = [];
   const changes: Array<PhaseChange<T>> = [];
 
   for (const { atMs, kind, value } of boundaries) {
     if (kind === 'start') {
-      open = [...open, value];
+      openValues = [...openValues, value];
       changes.push({ value, atMs });
       continue;
     }
 
-    const wasCurrent = open[open.length - 1] === value;
-    open = open.filter((openValue) => openValue !== value);
-    const nowCurrent = open[open.length - 1];
-    if (wasCurrent && nowCurrent !== undefined) {
-      changes.push({ value: nowCurrent, atMs });
+    const endingValueWasCurrent = openValues.at(-1) === value;
+    openValues = openValues.filter((openValue) => openValue !== value);
+    const resumedValue = openValues.at(-1);
+    if (endingValueWasCurrent && resumedValue !== undefined) {
+      changes.push({ value: resumedValue, atMs });
     }
   }
 
