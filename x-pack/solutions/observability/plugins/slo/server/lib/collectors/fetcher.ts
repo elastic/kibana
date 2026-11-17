@@ -5,13 +5,19 @@
  * 2.0.
  */
 import { isNonLocalIndexName } from '@kbn/es-query';
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ISavedObjectsPointInTimeFinder,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { ALL_VALUE, COMPOSITE_SLO_MAX_MEMBERS } from '@kbn/slo-schema';
 import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import type { StoredCompositeSLODefinition, StoredSLODefinition } from '../../domain/models';
 import { SO_SLO_COMPOSITE_TYPE, SO_SLO_TYPE } from '../../saved_objects';
 import type { Usage } from './type';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
+
+export type GetCompositeSoClient = () => Promise<SavedObjectsClientContract>;
 
 const getEmptyCompositeUsage = (): Usage['slo']['composite'] => ({
   definitions: { total: 0 },
@@ -22,18 +28,21 @@ const getEmptyCompositeUsage = (): Usage['slo']['composite'] => ({
 });
 
 const fetchCompositeUsage = async (
-  soClient: SavedObjectsClientContract,
+  getCompositeSoClient: GetCompositeSoClient,
   logger: Logger
 ): Promise<Usage['slo']['composite']> => {
-  const finder = soClient.createPointInTimeFinder<StoredCompositeSLODefinition>({
-    type: SO_SLO_COMPOSITE_TYPE,
-    perPage: 100,
-  });
-
   const usage = getEmptyCompositeUsage();
   let totalMembers = 0;
+  let finder: ISavedObjectsPointInTimeFinder<StoredCompositeSLODefinition, unknown> | undefined;
 
   try {
+    const soClient = await getCompositeSoClient();
+    finder = soClient.createPointInTimeFinder<StoredCompositeSLODefinition>({
+      type: SO_SLO_COMPOSITE_TYPE,
+      perPage: 100,
+      namespaces: ['*'],
+    });
+
     for await (const response of finder.find()) {
       for (const { attributes } of response.saved_objects) {
         const { enabled, budgetingMethod, compositeMethod, members } = attributes;
@@ -64,13 +73,17 @@ const fetchCompositeUsage = async (
     logger.warn(`Failed to collect composite SLO usage: ${error.message}`);
     return getEmptyCompositeUsage();
   } finally {
-    await finder.close();
+    await finder?.close();
   }
 
   return usage;
 };
 
-export const fetcher = async (context: CollectorFetchContext, logger: Logger) => {
+export const fetcher = async (
+  context: CollectorFetchContext,
+  logger: Logger,
+  getCompositeSoClient: GetCompositeSoClient
+) => {
   const finder = context.soClient.createPointInTimeFinder<StoredSLODefinition>({
     type: SO_SLO_TYPE,
     perPage: 100,
@@ -112,7 +125,7 @@ export const fetcher = async (context: CollectorFetchContext, logger: Logger) =>
       occurrences: 0,
       timeslices: 0,
     },
-    composite: await fetchCompositeUsage(context.soClient, logger),
+    composite: await fetchCompositeUsage(getCompositeSoClient, logger),
   };
 
   for await (const response of finder.find()) {

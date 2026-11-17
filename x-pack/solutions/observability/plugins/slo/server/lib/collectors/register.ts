@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { fetcher } from './fetcher';
+import type { GetCompositeSoClient } from './fetcher';
 import type { Usage } from './type';
 
-export function registerSloUsageCollector(usageCollection?: UsageCollectionSetup): void {
+export function registerSloUsageCollector(
+  usageCollection: UsageCollectionSetup | undefined,
+  logger: Logger,
+  getCompositeSoClient: GetCompositeSoClient
+): void {
   if (!usageCollection) {
     return;
   }
@@ -107,7 +113,7 @@ export function registerSloUsageCollector(usageCollection?: UsageCollectionSetup
       },
     },
     isReady: () => true,
-    fetch: fetcher,
+    fetch: (context) => fetcher(context, logger, getCompositeSoClient),
   });
 
   // register usage collector
