@@ -33,8 +33,8 @@ export type UiamApiKeyProfileIdResolver = (request: KibanaRequest) => Promise<st
 /**
  * Creates a function that resolves the profile ID of the user who created the UIAM API key a
  * request carries, as {@link UiamServicePublic.getApiKeyCreator} reports it. The ID is not
- * available for a key created by another API key, or for an external (user-created) key. Failures
- * are logged and resolve to `undefined`.
+ * available for a key created by another API key or by an organization service account, or for an
+ * external (user-created) key. Failures are logged and resolve to `undefined`.
  */
 export const createUiamApiKeyProfileIdResolver = ({
   uiam,

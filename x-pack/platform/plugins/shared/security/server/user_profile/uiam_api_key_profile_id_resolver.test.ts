@@ -82,6 +82,13 @@ describe('createUiamApiKeyProfileIdResolver', () => {
   it.each<[string, UiamApiKeyCreator | undefined]>([
     ['no creator', undefined],
     ['an API key creator', { type: 'api-key', api_key_id: 'source-key-id' }],
+    [
+      'an organization service account creator',
+      {
+        type: 'organization-service-account',
+        organization_service_account_id: 'service-account-id',
+      },
+    ],
   ])('resolves nothing, without asking Elasticsearch, when UIAM reports %s', async (_, creator) => {
     uiam.getApiKeyCreator.mockResolvedValue(creator);
 

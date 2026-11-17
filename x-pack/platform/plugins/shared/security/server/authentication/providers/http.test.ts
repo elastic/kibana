@@ -779,6 +779,10 @@ describe('HTTPAuthenticationProvider', () => {
 
     it.each<[string, UiamApiKeyCreator | undefined]>([
       ['an API key creator', { type: 'api-key', api_key_id: 'source-key-id' }],
+      [
+        'an organization service account creator',
+        { type: 'organization-service-account', organization_service_account_id: 'sa-id' },
+      ],
       ['no creator', undefined],
     ])('keeps the key identity when UIAM reports %s', async (_, creator) => {
       uiam.getApiKeyCreator.mockResolvedValue(creator);

@@ -1719,11 +1719,27 @@ describe('UiamService', () => {
       });
     });
 
+    it('returns an organization service account creator for a key granted by one', async () => {
+      respondWith({
+        type: 'organization-service-account',
+        organization_service_account_id: 'service-account-id',
+      });
+
+      await expect(getCreator()).resolves.toEqual({
+        type: 'organization-service-account',
+        organization_service_account_id: 'service-account-id',
+      });
+    });
+
     it.each([
-      ['a creator type that is not supported', { type: 'service-account', id: 'sa-id' }],
+      ['a creator type that is not supported', { type: 'some-future-creator-type', id: 'id' }],
       ['no creator', undefined],
       ['a user creator without a numeric id', { type: 'user', user_id: 'not-a-number' }],
       ['an API key creator without an id', { type: 'api-key' }],
+      [
+        'an organization service account creator without an id',
+        { type: 'organization-service-account' },
+      ],
     ])('returns undefined when UIAM reports %s', async (_, creator) => {
       respondWith(creator);
 

@@ -194,12 +194,17 @@ const OAUTH_UNKNOWN_ERROR_TYPE = 'UNKNOWN';
 
 /**
  * The principal UIAM records as the creator of an API key: the user for a key granted from a
- * session, or the source key for a key granted from another API key.
+ * session, the source key for a key granted from another API key, or the organization service
+ * account that granted it.
  */
 const apiKeyCreatorSchema = lazySchema(() =>
   z.discriminatedUnion('type', [
     z.object({ type: z.literal('user'), user_id: z.number() }),
     z.object({ type: z.literal('api-key'), api_key_id: z.string() }),
+    z.object({
+      type: z.literal('organization-service-account'),
+      organization_service_account_id: z.string(),
+    }),
   ])
 );
 
