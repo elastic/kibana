@@ -13,6 +13,7 @@ export const CONTEXT_ENGINE_APP_PATH = '/app/context_engine';
 export const apiPrivileges = {
   readContextEngine: `${CONTEXT_ENGINE_FEATURE_ID}:read`,
   writeContextEngine: `${CONTEXT_ENGINE_FEATURE_ID}:write`,
+  manageMemory: `${CONTEXT_ENGINE_FEATURE_ID}:manageMemory`,
 };
 
 export const uiPrivileges = {
