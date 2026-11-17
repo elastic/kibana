@@ -22,7 +22,7 @@ export const INFERENCE_CONNECTORS_INTERNAL_API_PATH =
  */
 export interface ApiInferenceConnector extends InferenceConnector {
   isRecommended?: boolean;
-  parameters?: Pick<ChatCompleteOptions, 'temperature' | 'reasoning'>;
+  parameters?: Pick<ChatCompleteOptions, 'reasoning'>;
 }
 
 /**

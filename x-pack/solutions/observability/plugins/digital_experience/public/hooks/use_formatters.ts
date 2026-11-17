@@ -8,9 +8,19 @@
 import { useMemo } from 'react';
 import numeral from '@elastic/numeral';
 import moment from 'moment-timezone';
+import { getUserTimeZone } from '@kbn/data-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { useKibanaServices } from './use_kibana_services';
+
+// Every `moment.tz.names()` entry (and so `dateFormat:tz` option) that an Elasticsearch 9.7
+// `date_histogram` rejects, as the zone it links to.
+const ES_TIME_ZONE_OF: Readonly<Record<string, string>> = {
+  EST: 'America/Panama',
+  HST: 'Pacific/Honolulu',
+  MST: 'America/Phoenix',
+  ROC: 'Asia/Taipei',
+};
 
 export interface Formatters {
   /** A count or other number, with the `format:number:defaultPattern` advanced setting. */
@@ -19,7 +29,10 @@ export interface Formatters {
   formatPercent: (share: number) => string;
   /** An absolute date, with the `dateFormat` and `dateFormat:tz` advanced settings. */
   formatDate: (date: string | number) => string;
-  /** The `dateFormat:tz` advanced setting, as an IANA time zone (the browser's for `Browser`). */
+  /**
+   * The `dateFormat:tz` advanced setting, as an IANA time zone (the browser's for `Browser`) that
+   * Elasticsearch accepts, for the routes' histogram buckets.
+   */
   timeZone: string;
 }
 
@@ -36,10 +49,9 @@ export const useFormatters = (): Formatters => {
       FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN
     );
     const dateFormat = uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT);
-    const kibanaTimeZone = uiSettings.get<string>(UI_SETTINGS.DATEFORMAT_TZ);
-    // Elastic Charts only accepts IANA names, so `Browser` becomes the browser's own time zone.
-    const timeZone =
-      !kibanaTimeZone || kibanaTimeZone === 'Browser' ? moment.tz.guess() : kibanaTimeZone;
+    // As Kibana's own date histograms do: `Browser` becomes the browser's IANA time zone.
+    const userTimeZone = getUserTimeZone((key) => uiSettings.get(key));
+    const timeZone = ES_TIME_ZONE_OF[userTimeZone] ?? userTimeZone;
 
     return {
       formatNumber: (value) => numeral(value).format(numberPattern),

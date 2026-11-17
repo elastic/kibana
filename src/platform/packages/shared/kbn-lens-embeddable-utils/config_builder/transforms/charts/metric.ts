@@ -467,7 +467,7 @@ function buildFromFormBasedLayer(
     metrics.push(secondaryMetric);
   }
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   const breakdown_by = visualization.breakdownByAccessor
     ? operationFromColumn(visualization.breakdownByAccessor, layer)
     : undefined;

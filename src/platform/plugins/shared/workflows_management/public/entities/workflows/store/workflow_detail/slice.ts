@@ -40,6 +40,7 @@ export const initialWorkflowsState: WorkflowsResponse = {
 const initialState: WorkflowDetailState = {
   yamlString: '',
   isYamlSynced: true,
+  isCheckingSave: false,
   computed: undefined,
   workflow: undefined,
   execution: undefined,
@@ -50,7 +51,11 @@ const initialState: WorkflowDetailState = {
   connectors: undefined,
   connectorsLoadState: { status: 'loading' },
   workflows: initialWorkflowsState,
-  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredTriggersForSchema()),
+  schema: getWorkflowZodSchema(
+    {},
+    triggerSchemas.getRegisteredTriggersForSchema(),
+    triggerSchemas.getTriggerSchemaOptions()
+  ),
   cursorPosition: undefined,
   focusedStepId: undefined,
   focusedTriggerId: undefined,
@@ -95,6 +100,9 @@ const workflowDetailSlice = createSlice({
     },
     setIsYamlSynced: (state, action: { payload: boolean }) => {
       state.isYamlSynced = action.payload;
+    },
+    setIsCheckingSave: (state, action: { payload: boolean }) => {
+      state.isCheckingSave = action.payload;
     },
     setCursorPosition: (state, action: { payload: LineColumnPosition }) => {
       state.cursorPosition = action.payload;
@@ -308,6 +316,7 @@ export const {
   updateWorkflow,
   setYamlString,
   setIsYamlSynced,
+  setIsCheckingSave,
   setCursorPosition,
   setHighlightedStepId,
   setIsTestModalOpen,

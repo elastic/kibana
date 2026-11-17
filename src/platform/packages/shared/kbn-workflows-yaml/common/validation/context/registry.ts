@@ -21,6 +21,15 @@ export interface RegisteredStepOutput {
   getDynamicOutputSchema?: (args: { input: unknown; config: Record<string, unknown> }) => z.ZodType;
 }
 
+/** What a `workflow.execute` step can read from the output of the workflow it runs. */
+export interface CalledWorkflowOutputs {
+  name: string;
+  /** The `outputs` the workflow declares, as written in its definition. */
+  outputs: unknown;
+  /** Names its completing `workflow.output` steps set; undefined when any field may come back. */
+  returnedOutputNames?: readonly string[];
+}
+
 /**
  * Registered step and trigger metadata the workflow context schema needs.
  *
@@ -31,4 +40,6 @@ export interface WorkflowContextRegistry {
   getStepOutput(stepTypeId: string): RegisteredStepOutput | undefined;
   getConnector(stepTypeId: string): ConnectorContractUnion | undefined;
   getTriggerDefinition(triggerType: string): CommonTriggerDefinition | undefined;
+  /** Outputs of the workflow with this id; undefined when it isn't known. */
+  getCalledWorkflowOutputs?(workflowId: string): CalledWorkflowOutputs | undefined;
 }

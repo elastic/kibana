@@ -8,9 +8,9 @@
 import Path from 'path';
 import { internalTools, ToolResultType, type ToolResult } from '@kbn/agent-builder-common';
 import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
-import { CORTEX_ENTITY_TYPE_BUCKETS, CORTEX_ENTITY_TYPES } from '../../common/cortex';
+import { WIKI_ENTITY_TYPE_BUCKETS, WIKI_ENTITY_TYPES } from '../../common/wiki';
 import { INVESTIGATION_TOOL_IDS } from '../agents/investigation';
-import { CORTEX_WORKSPACE_ROOT } from '../cortex/materialize';
+import { WIKI_WORKSPACE_ROOT } from '../wiki/materialize';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
 import { MEMORY_WORKSPACE_ROOT } from '../memory/materialize';
@@ -23,29 +23,25 @@ import {
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_tool';
+import { TIME_CONVERTER_TOOL_ID } from '../tools/time_converter/tool';
 import type { InvestigationTranscriptStep } from './round_loader';
 
-export const SEEDED_WORKSPACE_KINDS = ['cortex', 'memories', 'decision_trees', 'env_docs'] as const;
+export const SEEDED_WORKSPACE_KINDS = ['wiki', 'memories', 'decision_trees', 'env_docs'] as const;
 
 export type SeededWorkspaceKind = (typeof SEEDED_WORKSPACE_KINDS)[number];
 
 export const SEEDED_ENV_FILES = [ELASTIC_MANIFEST_PATH, CONNECTOR_MANIFEST_PATH] as const;
 
 const SEEDED_ROOT_BY_KIND: Record<SeededWorkspaceKind, string> = {
-  cortex: CORTEX_WORKSPACE_ROOT,
+  wiki: WIKI_WORKSPACE_ROOT,
   memories: MEMORY_WORKSPACE_ROOT,
   decision_trees: DECISION_TREE_WORKSPACE_ROOT,
   env_docs: CONNECTOR_DOCS_ROOT,
 };
 
-const SEEDED_DIR_NAMES = new Set<string>([
-  'cortex',
-  'memories',
-  'decision-trees',
-  '.connector-docs',
-]);
-const CORTEX_BUCKET_NAMES = new Set<string>(
-  CORTEX_ENTITY_TYPES.map((entityType) => CORTEX_ENTITY_TYPE_BUCKETS[entityType])
+const SEEDED_DIR_NAMES = new Set<string>(['wiki', 'memories', 'decision-trees', '.connector-docs']);
+const WIKI_BUCKET_NAMES = new Set<string>(
+  WIKI_ENTITY_TYPES.map((entityType) => WIKI_ENTITY_TYPE_BUCKETS[entityType])
 );
 
 export const FILE_TOOL_IDS = new Set<string>([
@@ -59,7 +55,7 @@ export const NON_EVIDENCE_TOOL_IDS = new Set<string>([
   ...INVESTIGATION_TOOL_IDS,
   'platform.streams.investigation_progress_report',
   PROPOSALS_CREATE_TOOL_ID,
-  internalTools.writeTodos,
+  TIME_CONVERTER_TOOL_ID,
   internalTools.listFiles,
   internalTools.loadSkill,
   internalTools.searchRelevantSkills,
@@ -73,13 +69,13 @@ export const NON_EVIDENCE_TOOL_IDS = new Set<string>([
 export interface SeededFilterOptions {
   /**
    * Which seeded workspace roots/files to treat as non-evidence reads.
-   * Defaults to all 4 (`['cortex', 'memories', 'decision_trees', 'env_docs']`) so no optimizer
+   * Defaults to all 4 (`['wiki', 'memories', 'decision_trees', 'env_docs']`) so no optimizer
    * echoes its own seeded files or cross-contaminates another store.
    */
   skipRoots?: readonly SeededWorkspaceKind[];
   /**
-   * When true, also filters out non-evidence process/recording tools (`write_todos`,
-   * `record_hypothesis`, `str_replace`, `write_file`, etc.).
+   * When true, also filters out non-evidence process/recording tools (`record_hypothesis`,
+   * `str_replace`, `write_file`, etc.).
    */
   skipNonEvidenceTools?: boolean;
   /**
@@ -589,7 +585,7 @@ const isCandidateSeededToken = (
   if (parts.some((part) => SEEDED_DIR_NAMES.has(part))) {
     return rawToken.includes('/') || allowBareSeededDir;
   }
-  if (cwd === CORTEX_WORKSPACE_ROOT && parts.length > 0 && CORTEX_BUCKET_NAMES.has(parts[0])) {
+  if (cwd === WIKI_WORKSPACE_ROOT && parts.length > 0 && WIKI_BUCKET_NAMES.has(parts[0])) {
     return true;
   }
   return false;
@@ -652,7 +648,7 @@ const bashAccessesSeededWorkspace = (
 
 /**
  * True when a tool call accesses one of the specified Nightshift-seeded workspace roots or files
- * (`cortex`, `memories`, `decision_trees`, `env_docs`) via a file tool or `bash` command.
+ * (`wiki`, `memories`, `decision_trees`, `env_docs`) via a file tool or `bash` command.
  */
 export const isSeededWorkspaceAccess = (
   toolId: string | undefined,

@@ -18,7 +18,7 @@ import type {
   FormattedHit,
   EsHitRecord,
 } from '../types';
-import { formatFieldValueReact } from './format_value';
+import { formatFieldValueReact } from './format_value_react';
 import { getDataViewFieldFromDataSource } from './get_data_view_field_from_data_source';
 import { MAX_RENDERED_FIELD_VALUE_LENGTH } from './truncate_field_value';
 

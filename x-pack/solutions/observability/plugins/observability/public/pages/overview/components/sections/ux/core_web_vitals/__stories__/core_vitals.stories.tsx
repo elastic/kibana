@@ -51,6 +51,7 @@ export function OneHundredPercentGood() {
       title={LCP_LABEL}
       value={'0.00s'}
       loading={false}
+      rating="good"
       ranks={[100, 0, 0]}
       helpLabel={LCP_HELP_LABEL}
     />
@@ -64,6 +65,7 @@ export function FiftyPercentGood() {
       title={LCP_LABEL}
       value={'0.00s'}
       loading={false}
+      rating="needsImprovement"
       ranks={[50, 25, 25]}
       helpLabel={LCP_HELP_LABEL}
     />
@@ -77,6 +79,7 @@ export function OneHundredPercentBad() {
       title={LCP_LABEL}
       value={'0.00s'}
       loading={false}
+      rating="poor"
       ranks={[0, 0, 100]}
       helpLabel={LCP_HELP_LABEL}
     />
@@ -90,6 +93,7 @@ export function OneHundredPercentAverage() {
       title={LCP_LABEL}
       value={'0.00s'}
       loading={false}
+      rating="needsImprovement"
       ranks={[0, 100, 0]}
       helpLabel={LCP_HELP_LABEL}
     />

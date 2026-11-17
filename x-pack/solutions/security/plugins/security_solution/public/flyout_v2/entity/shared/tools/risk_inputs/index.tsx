@@ -12,6 +12,7 @@ import type { EntityType } from '../../../../../../common/entity_analytics/types
 import type { RiskScoreLeftPanelSubTab } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { RiskInputsTab } from '../../../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
+import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/scope_time_ranges';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
@@ -34,11 +35,14 @@ export interface RiskInputsProps {
   onShowEntity?: () => void;
   /** Initial sub-tab to display. Forwarded from the `openDetailsPanel` call in the entity flyout. */
   subTab?: RiskScoreLeftPanelSubTab;
+  /** Scope of the entity flyout that opened this tool; pins the initial risk score history range. */
+  scopeId?: string;
 }
 
 export const RiskInputs = memo(
-  ({ entityType, entityName, entityId, onShowEntity, subTab }: RiskInputsProps) => {
+  ({ entityType, entityName, entityId, onShowEntity, subTab, scopeId }: RiskInputsProps) => {
     const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
+    const historyDefaultRange = getScopeFlyoutTimeRange(scopeId);
 
     const onShowAlert = useCallback(
       (id: string, indexName: string, title?: string) => {
@@ -71,6 +75,7 @@ export const RiskInputs = memo(
             entityId={entityId}
             onShowAlert={onShowAlert}
             subTab={subTab}
+            historyDefaultRange={historyDefaultRange}
           />
         </EuiFlyoutBody>
       </>
