@@ -79,4 +79,41 @@ export interface ISavedObjectsEncryptionExtension {
    * @returns the set of encrypted attribute names, or undefined
    */
   getEncryptedAttributes: (type: string) => ReadonlySet<string> | undefined;
+
+  /**
+   * Given the attributes of a partial update, returns what the repository has to do to keep the
+   * object decryptable once those attributes are merged into the stored ones.
+   * @param type - the string name of the object type
+   * @param updatedAttributes - the (NOT encrypted) attributes supplied to the update
+   * @returns whether the stored attributes must be decrypted and whether the merged attributes
+   * must be encrypted
+   */
+  getUpdateEncryptionRequirements: (
+    type: string,
+    updatedAttributes: Record<string, unknown>
+  ) => SavedObjectsUpdateEncryptionRequirements;
+
+  /**
+   * Given a saved object descriptor and its stored attributes, returns the attributes with every
+   * encrypted attribute decrypted. Nothing is stripped.
+   * @param descriptor - an object containing a saved object id, type, and optional namespace.
+   * @param attributes - T, all attributes of the specified object as stored.
+   * @returns T, decrypted attributes
+   * @throws if any encrypted attribute cannot be decrypted
+   */
+  decryptAttributes: <T extends Record<string, unknown>>(
+    descriptor: EncryptedObjectDescriptor,
+    attributes: T
+  ) => Promise<T>;
+}
+
+/**
+ * The SavedObjectsUpdateEncryptionRequirements interface describes how the repository must handle
+ * encryption when it merges the attributes of a partial update into a stored object.
+ */
+export interface SavedObjectsUpdateEncryptionRequirements {
+  /** Whether the stored attributes must be decrypted before the merge. */
+  decryptCurrent: boolean;
+  /** Whether the merged attributes must be encrypted: not at all, or after the merge. */
+  encryptRequirement: 'none' | 'post-merge';
 }

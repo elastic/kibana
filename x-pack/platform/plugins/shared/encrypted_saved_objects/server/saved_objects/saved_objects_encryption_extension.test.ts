@@ -202,3 +202,83 @@ describe('#encryptAttributes', () => {
     expect(service.encryptAttributes).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('#getUpdateEncryptionRequirements', () => {
+  test('returns the requirements determined by the service', () => {
+    const { extension, service } = setup();
+    const requirements = { decryptCurrent: true, encryptRequirement: 'post-merge' as const };
+    service.getUpdateEncryptionRequirements.mockReturnValue(requirements);
+
+    const updatedAttributes = { attrOne: 'one' };
+    expect(extension.getUpdateEncryptionRequirements(KNOWN_TYPE, updatedAttributes)).toBe(
+      requirements
+    );
+    expect(service.getUpdateEncryptionRequirements).toHaveBeenCalledTimes(1);
+    expect(service.getUpdateEncryptionRequirements).toHaveBeenCalledWith(
+      KNOWN_TYPE,
+      updatedAttributes
+    );
+  });
+});
+
+describe('#decryptAttributes', () => {
+  const attributes = {
+    attrOne: 'one',
+    attrSecret: '*secret*',
+    attrNotSoSecret: '*not-so-secret*',
+    attrThree: 'three',
+  };
+
+  test('does not decrypt attributes if type is not registered', async () => {
+    const { extension, service } = setup();
+
+    await expect(
+      extension.decryptAttributes(
+        { type: 'unknown-type', id: 'mock-saved-object-id', namespace: undefined },
+        attributes
+      )
+    ).resolves.toEqual(attributes);
+
+    expect(service.decryptAttributes).not.toHaveBeenCalled();
+  });
+
+  test('decrypts all encrypted attributes, without stripping, if the type is registered', async () => {
+    const { extension, service } = setup();
+
+    await expect(
+      extension.decryptAttributes(
+        { type: KNOWN_TYPE, id: 'mock-saved-object-id', namespace: 'some-namespace' },
+        attributes
+      )
+    ).resolves.toEqual({
+      attrOne: 'one',
+      attrSecret: 'secret',
+      attrNotSoSecret: 'not-so-secret',
+      attrThree: 'three',
+    });
+
+    expect(service.decryptAttributes).toHaveBeenCalledTimes(1);
+    expect(service.decryptAttributes).toHaveBeenCalledWith(
+      { type: KNOWN_TYPE, id: 'mock-saved-object-id', namespace: DESCRIPTOR_NAMESPACE },
+      attributes,
+      { user: CURRENT_USER }
+    );
+  });
+
+  test('throws if decryption fails', async () => {
+    const { extension, service } = setup();
+    const decryptionError = new EncryptionError(
+      'Failed to decrypt attributes',
+      'attrSecret',
+      EncryptionErrorOperation.Decryption
+    );
+    service.decryptAttributes.mockRejectedValue(decryptionError);
+
+    await expect(
+      extension.decryptAttributes(
+        { type: KNOWN_TYPE, id: 'mock-saved-object-id', namespace: undefined },
+        attributes
+      )
+    ).rejects.toBe(decryptionError);
+  });
+});

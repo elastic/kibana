@@ -14,6 +14,9 @@ export type IEncryptionHelperMock = jest.Mocked<IEncryptionHelper>;
 export const createEncryptionHelperMock = (): IEncryptionHelperMock => {
   const mock: IEncryptionHelperMock = {
     optionallyEncryptAttributes: jest.fn(),
+    optionallyDecryptAttributes: jest.fn(),
+    getUpdateEncryptionRequirements: jest.fn(),
+    getEncryptedAttributes: jest.fn(),
     optionallyDecryptAndRedactSingleResult: jest.fn(),
     optionallyDecryptAndRedactBulkResult: jest.fn(),
   };

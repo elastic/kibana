@@ -322,4 +322,33 @@ export function registerHiddenSORoutes(
       });
     }
   );
+  router.put(
+    {
+      path: '/api/hidden_saved_objects/_bulk_update',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.arrayOf(
+          schema.object({
+            type: schema.string(),
+            id: schema.string(),
+            attributes: schema.recordOf(schema.string(), schema.any()),
+            version: schema.maybe(schema.string()),
+          })
+        ),
+      },
+    },
+    async (context, request, response) => {
+      const [{ savedObjects }] = await core.getStartServices();
+      return response.ok({
+        body: await savedObjects
+          .getScopedClient(request, { includedHiddenTypes: hiddenTypes })
+          .bulkUpdate(request.body),
+      });
+    }
+  );
 }

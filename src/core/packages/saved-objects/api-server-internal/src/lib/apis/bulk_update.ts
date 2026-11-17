@@ -44,7 +44,7 @@ import {
   isMgetDoc,
   rawDocExistsInNamespace,
   getSavedObjectFromSource,
-  mergeForUpdate,
+  mergeAndEncryptForUpdate,
 } from './utils';
 import type { ApiExecutionContext } from './types';
 
@@ -82,7 +82,15 @@ type ExpectedBulkUpdateResult = Either<
 
 export const performBulkUpdate = async <T>(
   { objects, options }: PerformUpdateParams<T>,
-  { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
+  {
+    registry,
+    helpers,
+    allowedTypes,
+    client,
+    serializer,
+    logger,
+    extensions = {},
+  }: ApiExecutionContext
 ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
   const {
     common: commonHelper,
@@ -316,22 +324,17 @@ export const performBulkUpdate = async <T>(
 
         const typeDefinition = registry.getType(type)!;
 
-        const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
+        const updatedAttributes = await mergeAndEncryptForUpdate({
+          encryptionHelper,
+          logger,
           type,
           id,
-          objectNamespace || namespace,
-          documentToSave[type]
-        );
-
-        const updatedAttributes = mergeAttributes
-          ? mergeForUpdate({
-              targetAttributes: {
-                ...(migrated!.attributes as Record<string, unknown>),
-              },
-              updatedAttributes: encryptedUpdatedAttributes,
-              typeMappings: typeDefinition.mappings,
-            })
-          : encryptedUpdatedAttributes;
+          namespace: objectNamespace || namespace,
+          storedAttributes: migrated!.attributes as Record<string, unknown>,
+          updatedAttributes: documentToSave[type],
+          typeMappings: typeDefinition.mappings,
+          mergeAttributes,
+        });
 
         const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
           ...migrated!,

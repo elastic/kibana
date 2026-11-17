@@ -100,6 +100,7 @@ export type { SavedObjectsValidationMap, SavedObjectsValidationSpec } from './sr
 export type {
   ISavedObjectsEncryptionExtension,
   EncryptedObjectDescriptor,
+  SavedObjectsUpdateEncryptionRequirements,
 } from './src/extensions/encryption';
 export type {
   AuthorizeObject,

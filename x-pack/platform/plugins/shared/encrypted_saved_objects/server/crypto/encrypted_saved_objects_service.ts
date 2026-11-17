@@ -9,6 +9,7 @@ import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
 import typeDetect from 'type-detect';
 
 import type { Logger } from '@kbn/core/server';
+import type { SavedObjectsUpdateEncryptionRequirements } from '@kbn/core-saved-objects-server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { stableStringify } from '@kbn/std';
 
@@ -218,6 +219,45 @@ export class EncryptedSavedObjectsService {
   public getEncryptedAttributes(type: string): ReadonlySet<string> | undefined {
     const attributes = this.typeDefinitions.get(type)?.attributesToEncrypt;
     return attributes ? new Set(attributes) : undefined;
+  }
+
+  /**
+   * Determines what a partial update has to do to keep the object decryptable once the supplied
+   * attributes are merged into the stored ones. An attribute counts as supplied when it is an own
+   * property of `updatedAttributes` with a value other than `undefined`.
+   * @param type Saved object type.
+   * @param updatedAttributes The (NOT encrypted) attributes supplied to the update.
+   */
+  public getUpdateEncryptionRequirements(
+    type: string,
+    updatedAttributes: Record<string, unknown>
+  ): SavedObjectsUpdateEncryptionRequirements {
+    const typeDefinition = this.typeDefinitions.get(type);
+    if (!typeDefinition || updatedAttributes == null) {
+      return { decryptCurrent: false, encryptRequirement: 'none' };
+    }
+
+    const suppliedAttributes = Object.keys(updatedAttributes).filter(
+      (attributeName) => updatedAttributes[attributeName] !== undefined
+    );
+    const suppliedSecretsCount = suppliedAttributes.filter((attributeName) =>
+      typeDefinition.shouldBeEncrypted(attributeName)
+    ).length;
+    const suppliesAAD = suppliedAttributes.some((attributeName) =>
+      typeDefinition.shouldBeIncludedInAAD(attributeName)
+    );
+
+    // Neither the encrypted attributes nor the AAD they are bound to change.
+    if (suppliedSecretsCount === 0 && !suppliesAAD) {
+      return { decryptCurrent: false, encryptRequirement: 'none' };
+    }
+
+    // The merged attributes must be encrypted as a whole. The stored attributes only have to be
+    // decrypted if some of the encrypted attributes are not replaced by the update.
+    return {
+      decryptCurrent: suppliedSecretsCount < typeDefinition.attributesToEncrypt.size,
+      encryptRequirement: 'post-merge',
+    };
   }
 
   /**
