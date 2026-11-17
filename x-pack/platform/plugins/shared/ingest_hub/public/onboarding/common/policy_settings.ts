@@ -39,7 +39,7 @@ export interface CustomField {
 export type PolicyFieldSettings = Pick<
   PolicySettings,
   'output_id' | 'condition' | 'additional_datastreams_permissions'
-> & { global_data_tags?: CustomField[] };
+> & { global_data_tags?: Array<{ name: string; value: string | number }> };
 
 type PolicySettingKey = keyof PolicySettings;
 
@@ -66,6 +66,23 @@ export const parseCustomFields = (value: unknown): CustomField[] => {
     return [];
   }
 };
+
+/**
+ * A value of digits only is sent as a number, as Fleet's Custom fields table does, so a field set
+ * here gets the same type in the data as one set in Fleet. One too large for a number to hold
+ * exactly stays text rather than losing digits.
+ */
+const toCustomFieldValue = (value: string): string | number => {
+  if (!/^[0-9]+$/.test(value)) return value;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) ? parsed : value;
+};
+
+const toCustomFieldsRequest = (value: unknown): Array<{ name: string; value: string | number }> =>
+  parseCustomFields(value).map(({ name, value: fieldValue }) => ({
+    name,
+    value: toCustomFieldValue(fieldValue),
+  }));
 
 export const serializeCustomFields = (fields: CustomField[]): string => JSON.stringify(fields);
 
@@ -131,7 +148,7 @@ const POLICY_SETTINGS: Record<
     target: 'field',
     isValid: isCustomFieldsText,
     cleared: [],
-    toRequest: parseCustomFields,
+    toRequest: toCustomFieldsRequest,
     normalize: normalizeCustomFields,
   },
 };

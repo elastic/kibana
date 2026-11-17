@@ -245,6 +245,11 @@ describe('deployGroup — custom fields', () => {
     expect(body.vars?.global_data_tags).toBeUndefined();
   });
 
+  it('sends a value of digits only as a number, as Fleet does', async () => {
+    const body = await deploy(JSON.stringify([{ name: 'priority', value: '1' }]));
+    expect(body.global_data_tags).toEqual([{ name: 'priority', value: 1 }]);
+  });
+
   it('leaves them out when none were set or all were removed', async () => {
     expect(await deploy(undefined)).not.toHaveProperty('global_data_tags');
     jest.clearAllMocks();

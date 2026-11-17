@@ -347,6 +347,41 @@ describe('policy settings', () => {
       expect(getPolicyVarSettings({ [key]: stored }, 'managed_integration')).toEqual({});
     });
 
+    it('sends a value of digits only as a number, like Fleet, and keeps the stored text', () => {
+      const numeric = serializeCustomFields([
+        { name: 'priority', value: '1' },
+        { name: 'code', value: '007' },
+        { name: 'build', value: '1a' },
+        { name: 'version', value: '1.5' },
+        { name: 'neg', value: '-1' },
+      ]);
+      expect(getPolicySettings({ [key]: numeric }, 'managed_integration')).toEqual({
+        [key]: [
+          { name: 'priority', value: 1 },
+          { name: 'code', value: 7 },
+          { name: 'build', value: '1a' },
+          { name: 'version', value: '1.5' },
+          { name: 'neg', value: '-1' },
+        ],
+      });
+      expect(getPolicySettingsUpdate({ [key]: numeric }, 'managed_integration')[key]).toEqual(
+        (getPolicySettings({ [key]: numeric }, 'managed_integration') as Record<string, unknown>)[
+          key
+        ]
+      );
+      expect(compactPolicySettings({ [key]: numeric })).toEqual({ [key]: numeric });
+    });
+
+    it('keeps a number too large to hold exactly as text instead of losing digits', () => {
+      const big = '12345678901234567890';
+      expect(
+        getPolicySettings(
+          { [key]: serializeCustomFields([{ name: 'id', value: big }]) },
+          'managed_integration'
+        )
+      ).toEqual({ [key]: [{ name: 'id', value: big }] });
+    });
+
     it('is not sent to agent-based or ECF, which would reject or ignore it', () => {
       expect(getPolicySettings({ [key]: stored }, 'agent_based')).toEqual({});
       expect(getPolicySettings({ [key]: stored }, 'ecf')).toEqual({});

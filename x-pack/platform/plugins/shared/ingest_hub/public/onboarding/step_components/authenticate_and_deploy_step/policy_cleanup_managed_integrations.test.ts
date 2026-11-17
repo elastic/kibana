@@ -353,6 +353,13 @@ describe('updateManagedIntegrationsPolicy — payload shape', () => {
       ).toEqual([{ name: 'team', value: 'platform' }]);
     });
 
+    it('sends a value of digits only as a number, as Fleet does', async () => {
+      expect(
+        (await updateWithFields(JSON.stringify([{ name: 'priority', value: '1' }])))
+          .global_data_tags
+      ).toEqual([{ name: 'priority', value: 1 }]);
+    });
+
     it('clears them with an empty list', async () => {
       expect((await updateWithFields('[]')).global_data_tags).toEqual([]);
     });
