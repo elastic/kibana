@@ -314,7 +314,12 @@ const includedHiddenTypes = [
 
 export class ActionsPlugin
   implements
-    Plugin<PluginSetupContract, PluginStartContract, ActionsPluginsSetup, ActionsPluginsStart>
+    Plugin<
+      PluginSetupContract,
+      PluginStartContract | Promise<PluginStartContract>,
+      ActionsPluginsSetup,
+      ActionsPluginsStart
+    >
 {
   private readonly logger: Logger;
   private readonly actionsConfig: ActionsConfig;
@@ -645,7 +650,10 @@ export class ActionsPlugin
     return setupContract;
   }
 
-  public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+  public start(
+    core: CoreStart,
+    plugins: ActionsPluginsStart
+  ): PluginStartContract | Promise<PluginStartContract> {
     this.securityStart = plugins.security;
     if (this.actionsConfig.relay?.uiam?.enabled && !plugins.security?.authc.systemIdentity) {
       this.logger.warn(
@@ -655,18 +663,12 @@ export class ActionsPlugin
 
     // The handle must exist first, because the first flag value can arrive synchronously.
     const connectorCatalog = this.startConnectorCatalog(core);
-    let connectorCatalogEnabled: boolean | undefined;
     this.connectorCatalogFeatureFlagSubscription = core.featureFlags
       .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
       .subscribe({
-        next: (isConnectorCatalogEnabled: boolean) => {
-          connectorCatalogEnabled ??= isConnectorCatalogEnabled;
-          connectorCatalog.onFlagValue(isConnectorCatalogEnabled);
-        },
-        error: (error: unknown) => {
-          connectorCatalogEnabled ??= false;
-          connectorCatalog.onFlagError(error);
-        },
+        next: (isConnectorCatalogEnabled: boolean) =>
+          connectorCatalog.onFlagValue(isConnectorCatalogEnabled),
+        error: (error: unknown) => connectorCatalog.onFlagError(error),
       });
 
     const {
@@ -932,28 +934,9 @@ export class ActionsPlugin
       }).catch(() => {});
     }
 
-    const shouldValidateServerlessConnectorTypes =
-      !!plugins.serverless &&
-      this.actionsConfig.enabledActionTypes.length > 0 &&
-      this.actionsConfig.enabledActionTypes[0] !== AllowedHosts.Any;
-    if (shouldValidateServerlessConnectorTypes && connectorCatalogEnabled !== false) {
-      // Keep start synchronous while catalog-only types are loaded asynchronously.
-      void connectorCatalog.ready
-        .then(() => this.validateEnabledConnectorTypes(plugins))
-        .catch((error: unknown) => {
-          this.logger.error(
-            `Failed to validate enabled connector types: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        });
-    } else {
-      this.validateEnabledConnectorTypes(plugins);
-    }
-
     this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
-    return {
+    const startContract: PluginStartContract = {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
       },
@@ -1003,6 +986,26 @@ export class ActionsPlugin
         }).getUsableOAuthConnectorIds({ profileUid, connectorIds });
       },
     };
+
+    const { enabledActionTypes } = actionsConfig;
+    const hasExplicitServerlessAllowlist =
+      !!plugins.serverless &&
+      enabledActionTypes.length > 0 &&
+      enabledActionTypes[0] !== AllowedHosts.Any;
+    const hasUnregisteredEnabledType = enabledActionTypes.some(
+      (connectorType) => !actionTypeRegistry!.has(connectorType)
+    );
+
+    if (hasExplicitServerlessAllowlist && hasUnregisteredEnabledType) {
+      // Only catalog-dependent allowlists need async start; Core enforces its lifecycle limit.
+      return connectorCatalog.ready.then(() => {
+        this.validateEnabledConnectorTypes(plugins);
+        return startContract;
+      });
+    }
+
+    this.validateEnabledConnectorTypes(plugins);
+    return startContract;
   }
 
   private getUnsecuredSavedObjectsClient = (

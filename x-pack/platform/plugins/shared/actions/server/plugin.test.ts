@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import moment from 'moment';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
@@ -478,7 +478,7 @@ describe('Actions Plugin', () => {
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           eventLog: eventLogMock.createStart(),
         };
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         pluginSetup.registerType(serverLogConnectorType);
         pluginSetup.registerType(slackConnectorType);
@@ -514,7 +514,7 @@ describe('Actions Plugin', () => {
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           eventLog: eventLogMock.createStart(),
         };
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         pluginSetup.registerType(serverLogConnectorType);
         pluginSetup.registerType(indexConnectorType);
@@ -535,7 +535,7 @@ describe('Actions Plugin', () => {
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           eventLog: eventLogMock.createStart(),
         };
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         pluginSetup.registerType(serverLogConnectorType);
         pluginSetup.registerType(indexConnectorType);
@@ -722,16 +722,18 @@ describe('Actions Plugin', () => {
           enabledActionTypes,
         });
         plugin = new ActionsPlugin(context);
-        await plugin.setup(coreSetup, {
+        return plugin.setup(coreSetup, {
           ...pluginsSetup,
           encryptedSavedObjects: { ...pluginsSetup.encryptedSavedObjects, canEncrypt: true },
           serverless: serverlessPluginMock.createSetupContract(),
         });
-        return plugin.start(coreStart, {
+      };
+
+      const startServerlessPlugin = () =>
+        plugin.start(coreStart, {
           ...pluginsStart,
           serverless: serverlessPluginMock.createStartContract(),
         });
-      };
 
       const getTypeIds = (pluginStart: PluginStartContract) => pluginStart.getAllTypes();
 
@@ -751,6 +753,10 @@ describe('Actions Plugin', () => {
           await setupPlugin();
 
           const pluginStart = plugin.start(coreStart, pluginsStart);
+          expect(pluginStart).not.toBeInstanceOf(Promise);
+          if (pluginStart instanceof Promise) {
+            throw new Error('Expected start to remain synchronous for the wildcard allowlist.');
+          }
           const state = await Promise.race([
             pluginStart.whenCatalogReady().then(() => 'ready'),
             flush().then(() => 'pending'),
@@ -779,7 +785,7 @@ describe('Actions Plugin', () => {
           await setupPlugin();
           const registerSpy = jest.spyOn(ActionTypeRegistry.prototype, 'register');
 
-          const pluginStart = plugin.start(coreStart, pluginsStart);
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
           await flush();
 
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
@@ -808,7 +814,7 @@ describe('Actions Plugin', () => {
           getEsClient().get.mockRejectedValue(missing);
           await setupPlugin();
 
-          const pluginStart = plugin.start(coreStart, pluginsStart);
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
 
           await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
@@ -823,14 +829,15 @@ describe('Actions Plugin', () => {
           getEsClient().get.mockRejectedValue(new Error('read failed'));
           await setupPlugin();
 
-          const pluginStart = plugin.start(coreStart, pluginsStart);
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
 
           await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
         });
 
         it('validates configured types after a delayed catalog load', async () => {
-          coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(true, false));
+          const connectorCatalogEnabled$ = new Subject<boolean>();
+          coreStart.featureFlags.getBooleanValue$.mockReturnValue(connectorCatalogEnabled$);
           seedCatalog();
           let resolveGet: (value: unknown) => void = () => {};
           getEsClient().get.mockReturnValue(
@@ -839,33 +846,57 @@ describe('Actions Plugin', () => {
             })
           );
 
-          const pluginStart = await setupServerlessPlugin([SPEC_TYPE_ID]);
-          await flush();
-
-          expect(context.logger.get().error).not.toHaveBeenCalled();
+          await setupServerlessPlugin([SPEC_TYPE_ID]);
+          const startResult = startServerlessPlugin();
+          expect(startResult).toBeInstanceOf(Promise);
+          connectorCatalogEnabled$.next(true);
+          const state = await Promise.race([
+            Promise.resolve(startResult).then(() => 'resolved'),
+            flush().then(() => 'pending'),
+          ]);
+          expect(state).toBe('pending');
 
           resolveGet(manifestDoc);
-          await pluginStart.whenCatalogReady();
-          await flush();
+          const pluginStart = await startResult;
 
           expect(getTypeIds(pluginStart)).toContain(SPEC_TYPE_ID);
           expect(context.logger.get().error).not.toHaveBeenCalled();
         });
 
-        it('logs an invalid configured type after the catalog load without rejecting start', async () => {
+        it('rejects an invalid configured type after the catalog load', async () => {
           getEsClient().get.mockResolvedValue({
             _index: CONNECTOR_TYPE_CATALOG_INDEX,
             _id: 'manifest',
             found: false,
           });
 
-          const pluginStart = await setupServerlessPlugin(['non-existing']);
-          await pluginStart.whenCatalogReady();
-          await flush();
-
-          expect(context.logger.get().error).toHaveBeenCalledWith(
-            'Failed to validate enabled connector types: Action type "non-existing" is not registered.'
+          await setupServerlessPlugin(['non-existing']);
+          await expect(startServerlessPlugin()).rejects.toThrow(
+            'Action type "non-existing" is not registered.'
           );
+        });
+
+        it('rejects an invalid configured type after an asynchronous false flag value', async () => {
+          const connectorCatalogEnabled$ = new Subject<boolean>();
+          coreStart.featureFlags.getBooleanValue$.mockReturnValue(connectorCatalogEnabled$);
+          await setupServerlessPlugin(['non-existing']);
+
+          const startResult = startServerlessPlugin();
+          expect(startResult).toBeInstanceOf(Promise);
+          connectorCatalogEnabled$.next(false);
+
+          await expect(Promise.resolve(startResult)).rejects.toThrow(
+            'Action type "non-existing" is not registered.'
+          );
+          expect(getEsClient().get).not.toHaveBeenCalled();
+        });
+
+        it('starts synchronously when an explicit allowlist only contains registered types', async () => {
+          coreStart.featureFlags.getBooleanValue$.mockReturnValue(new Subject<boolean>());
+          const pluginSetup = await setupServerlessPlugin(['.server-log']);
+          pluginSetup.registerType(serverLogConnectorType);
+
+          expect(startServerlessPlugin()).not.toBeInstanceOf(Promise);
         });
       });
 
@@ -874,7 +905,7 @@ describe('Actions Plugin', () => {
           seedCatalog();
           await setupPlugin();
 
-          const pluginStart = plugin.start(coreStart, pluginsStart);
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
           await pluginStart.whenCatalogReady();
 
           const esClient = getEsClient();
@@ -1370,7 +1401,7 @@ describe('Actions Plugin', () => {
 
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
         pluginSetup.registerType(actionType);
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         pluginStart.isActionTypeEnabled('my-connector-type', { notifyUsage: true });
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
@@ -1400,7 +1431,7 @@ describe('Actions Plugin', () => {
             },
           })
         );
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         const result = pluginStart.listTypes('alerting');
         expect(result).toEqual([
@@ -1457,7 +1488,7 @@ describe('Actions Plugin', () => {
 
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
         pluginSetup.registerType(actionType);
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         pluginStart.isActionExecutable('123', 'my-connector-type', { notifyUsage: true });
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
