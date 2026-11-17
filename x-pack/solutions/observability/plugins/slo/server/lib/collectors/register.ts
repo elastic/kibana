@@ -110,6 +110,73 @@ export function registerSloUsageCollector(
             },
           },
         },
+        composite: {
+          definitions: {
+            total: {
+              type: 'long',
+              _meta: {
+                description: 'The total number of composite SLO definitions in the cluster',
+              },
+            },
+          },
+          by_status: {
+            enabled: {
+              type: 'long',
+              _meta: {
+                description: 'The number of enabled composite SLOs in the cluster',
+              },
+            },
+            disabled: {
+              type: 'long',
+              _meta: {
+                description: 'The number of disabled composite SLOs in the cluster',
+              },
+            },
+          },
+          by_budgeting_method: {
+            DYNAMIC_KEY: {
+              type: 'long',
+              _meta: {
+                description: 'The number of composite SLOs by budgeting method in the cluster',
+              },
+            },
+          },
+          by_composite_method: {
+            DYNAMIC_KEY: {
+              type: 'long',
+              _meta: {
+                description: 'The number of composite SLOs by composite method in the cluster',
+              },
+            },
+          },
+          members: {
+            min: {
+              type: 'long',
+              _meta: {
+                description: 'The minimum number of members in a composite SLO in the cluster',
+              },
+            },
+            avg: {
+              type: 'float',
+              _meta: {
+                description: 'The average number of members per composite SLO in the cluster',
+              },
+            },
+            max: {
+              type: 'long',
+              _meta: {
+                description: 'The maximum number of members in a composite SLO in the cluster',
+              },
+            },
+            at_max_count: {
+              type: 'long',
+              _meta: {
+                description:
+                  'The number of composite SLOs in the cluster that have reached the maximum number of members',
+              },
+            },
+          },
+        },
       },
     },
     isReady: () => true,
