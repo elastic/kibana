@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { StateConflictError } from '../errors/state_conflict_error';
 import { InMemorySavedObjectsRepository } from '../../test_utils/in_memory_saved_objects_repository';
 import { DetectionStateClient } from './detection_state_client';
@@ -147,6 +148,26 @@ describe('DetectionStateClient', () => {
 
       expect([...states.keys()]).toEqual([STRATEGY_ID]);
       expect(await readProcessedUntil(client, 'other')).toBeUndefined();
+    });
+
+    it('does not take a checkpoint the bulk get failed to read for one that never ran', async () => {
+      const repository = new InMemorySavedObjectsRepository();
+      const client = new DetectionStateClient(repository.asRepository());
+      await client.advanceGeneratorState({
+        spaceId: SPACE_ID,
+        strategyId: STRATEGY_ID,
+        processedUntil: 100,
+      });
+      // A shard failure on one mget item comes back from the real repository as not found.
+      jest.spyOn(repository, 'bulkGet').mockImplementation(async (objects) => ({
+        saved_objects: objects.map(({ type, id }) => ({
+          type,
+          id,
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+        })),
+      }));
+
+      expect(await readProcessedUntil(client)).toBe(100);
     });
   });
 });
