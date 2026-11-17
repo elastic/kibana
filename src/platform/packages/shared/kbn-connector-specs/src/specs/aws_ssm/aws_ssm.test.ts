@@ -108,4 +108,81 @@ describe('AwsSsmConnector', () => {
       }
     );
   });
+
+  describe('sendCommand', () => {
+    it('sends the document and its parameters to the nodes, and returns the command ID', async () => {
+      mockClient.post.mockResolvedValue({
+        data: {
+          Command: {
+            CommandId: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab',
+            DocumentName: 'AWS-RunShellScript',
+            InstanceIds: ['i-1234567890abcdef0'],
+            RequestedDateTime: 1700000000.5,
+            Status: 'Pending',
+          },
+        },
+      });
+
+      const result = await AwsSsmConnector.actions.sendCommand.handler(mockContext, {
+        instanceIds: ['i-1234567890abcdef0'],
+        documentName: 'AWS-RunShellScript',
+        parameters: { commands: ['uptime'] },
+        timeoutSeconds: 60,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://ssm.us-east-1.amazonaws.com/',
+        JSON.stringify({
+          InstanceIds: ['i-1234567890abcdef0'],
+          DocumentName: 'AWS-RunShellScript',
+          Parameters: { commands: ['uptime'] },
+          TimeoutSeconds: 60,
+        }),
+        expect.objectContaining({
+          headers: expect.objectContaining({ 'X-Amz-Target': 'AmazonSSM.SendCommand' }),
+        })
+      );
+      expect(result).toEqual({
+        commandId: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab',
+        documentName: 'AWS-RunShellScript',
+        instanceIds: ['i-1234567890abcdef0'],
+        status: 'Pending',
+        requestedDateTime: '2023-11-14T22:13:20.500Z',
+      });
+    });
+  });
+
+  describe('getCommandInvocation', () => {
+    it('returns the output, and no end time while the command runs', async () => {
+      mockClient.post.mockResolvedValue({
+        data: {
+          CommandId: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab',
+          InstanceId: 'i-1234567890abcdef0',
+          Status: 'InProgress',
+          ResponseCode: -1,
+          ExecutionStartDateTime: '2023-11-14T22:13:21.181Z',
+          ExecutionEndDateTime: '',
+          StandardOutputContent: ' 22:13:21 up 3 days',
+          StandardErrorContent: '',
+        },
+      });
+
+      const result = await AwsSsmConnector.actions.getCommandInvocation.handler(mockContext, {
+        commandId: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab',
+        instanceId: 'i-1234567890abcdef0',
+      });
+
+      expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({
+        CommandId: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab',
+        InstanceId: 'i-1234567890abcdef0',
+      });
+      expect(result).toMatchObject({
+        status: 'InProgress',
+        responseCode: -1,
+        executionStartDateTime: '2023-11-14T22:13:21.181Z',
+        executionEndDateTime: null,
+        standardOutput: ' 22:13:21 up 3 days',
+      });
+    });
+  });
 });

@@ -11,10 +11,18 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import { callSsmApi } from './aws_ssm_api';
-import type { DescribeInstanceInformationInput } from './types';
+import type {
+  DescribeInstanceInformationInput,
+  GetCommandInvocationInput,
+  SendCommandInput,
+} from './types';
 import {
   DescribeInstanceInformationInputSchema,
   DescribeInstanceInformationResponseSchema,
+  GetCommandInvocationInputSchema,
+  GetCommandInvocationResponseSchema,
+  SendCommandInputSchema,
+  SendCommandResponseSchema,
 } from './types';
 
 interface SsmFilter {
@@ -44,7 +52,8 @@ export const AwsSsmConnector: ConnectorSpec = {
     id: '.aws_ssm',
     displayName: 'AWS Systems Manager',
     description: i18n.translate('connectorSpecs.awsSsm.metadata.description', {
-      defaultMessage: 'Find and inspect the managed nodes registered with AWS Systems Manager',
+      defaultMessage:
+        'Find and inspect the managed nodes registered with AWS Systems Manager, and run commands on them',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -134,15 +143,101 @@ export const AwsSsmConnector: ConnectorSpec = {
         };
       },
     },
+
+    sendCommand: {
+      // Runs arbitrary commands on the given nodes. Agent Builder does not ask for confirmation
+      // per call (`scope` is not consulted there), so the only guards are the IAM policy on the
+      // connector's credentials and which agents the connector is assigned to. Targeting is
+      // limited to explicit instance IDs so every call names the nodes it affects.
+      isTool: true,
+      scope: 'destroy',
+      description:
+        'Run an SSM document, typically shell commands, on up to 50 managed nodes. Use "AWS-RunShellScript" with parameters { "commands": [...] } for Linux and macOS, or "AWS-RunPowerShellScript" for Windows; get the instance IDs from describeInstanceInformation and check the nodes are Online first. Returns immediately with a commandId and status Pending: the command runs asynchronously, so call getCommandInvocation with the commandId and each instance ID to read the result. The commands run with the privileges of SSM Agent on the node (root or SYSTEM).',
+      input: SendCommandInputSchema,
+      handler: async (
+        ctx,
+        {
+          instanceIds,
+          documentName,
+          parameters,
+          documentVersion,
+          comment,
+          timeoutSeconds,
+        }: SendCommandInput
+      ) => {
+        const data = await callSsmApi({
+          ctx,
+          operation: 'SendCommand',
+          body: {
+            InstanceIds: instanceIds,
+            DocumentName: documentName,
+            Parameters: parameters,
+            DocumentVersion: documentVersion,
+            Comment: comment,
+            TimeoutSeconds: timeoutSeconds,
+          },
+        });
+        const { Command = {} } = SendCommandResponseSchema.parse(data);
+        return {
+          commandId: Command.CommandId,
+          documentName: Command.DocumentName,
+          instanceIds: Command.InstanceIds,
+          status: Command.Status,
+          requestedDateTime: toIsoDate(Command.RequestedDateTime),
+        };
+      },
+    },
+
+    getCommandInvocation: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'Get the result of a command sent with sendCommand on one node: its status (Pending, InProgress, Delayed, Success, Failed, TimedOut, Cancelled, Cancelling), the exit code, standard output (up to 24,000 characters) and standard error (up to 8,000 characters), and when it started and ended. Call again after a few seconds while the status is Pending, InProgress or Delayed. Right after sendCommand this can fail with InvocationDoesNotExist for a few seconds; wait and retry.',
+      input: GetCommandInvocationInputSchema,
+      handler: async (ctx, { commandId, instanceId }: GetCommandInvocationInput) => {
+        const data = await callSsmApi({
+          ctx,
+          operation: 'GetCommandInvocation',
+          body: { CommandId: commandId, InstanceId: instanceId },
+        });
+        const {
+          CommandId,
+          InstanceId,
+          DocumentName,
+          Status,
+          StatusDetails,
+          ResponseCode,
+          ExecutionStartDateTime,
+          ExecutionEndDateTime,
+          StandardOutputContent,
+          StandardErrorContent,
+        } = GetCommandInvocationResponseSchema.parse(data);
+        return {
+          commandId: CommandId,
+          instanceId: InstanceId,
+          documentName: DocumentName,
+          status: Status,
+          statusDetails: StatusDetails,
+          // -1 until the command has finished on the node.
+          responseCode: ResponseCode,
+          // SSM answers an empty string for a time that hasn't happened yet.
+          executionStartDateTime: ExecutionStartDateTime || null,
+          executionEndDateTime: ExecutionEndDateTime || null,
+          standardOutput: StandardOutputContent,
+          standardError: StandardErrorContent,
+        };
+      },
+    },
   },
 
   skill: [
     '## AWS Systems Manager Connector',
     '',
-    'Use this connector to find and inspect the managed nodes (EC2 instances and hybrid servers running SSM Agent) registered with Systems Manager in the region configured on the connector.',
+    'Use this connector to find and inspect the managed nodes (EC2 instances and hybrid servers running SSM Agent) registered with Systems Manager in the region configured on the connector, and to run commands on them.',
     '',
     '### Common patterns',
     '- To find unreachable nodes, call `describeInstanceInformation` with `pingStatus: ["ConnectionLost"]`.',
+    '- To run a shell command: find the nodes with `describeInstanceInformation` (they must be `Online`), call `sendCommand` with `documentName: "AWS-RunShellScript"` (or `"AWS-RunPowerShellScript"` on Windows) and `parameters: { "commands": [...] }`, then call `getCommandInvocation` with the returned `commandId` and each instance ID until `status` is no longer `Pending`, `InProgress` or `Delayed`.',
     '- To find nodes running an outdated SSM Agent, list the nodes and keep those with `isLatestAgentVersion: false`.',
     '- To scope to a team or environment, filter by `tags`, e.g. `[{ key: "Environment", values: ["Production"] }]`. Tags cannot be combined with `instanceIds`, `pingStatus` or `platformType` in the same call; filter the returned list yourself for the rest.',
     '',
@@ -151,6 +246,9 @@ export const AwsSsmConnector: ConnectorSpec = {
     '- Stopped and terminated EC2 instances are never returned, so a missing node may simply be stopped.',
     '- Passing an `instanceIds` value that is not a managed node, or that the credentials cannot see, fails with an `InvalidInstanceId` error rather than returning an empty list.',
     '- Only the connector region is searched; nodes in other regions need a connector configured for that region.',
+    '- `sendCommand` runs commands as root (or SYSTEM on Windows). Only run what the user asked for, and confirm the target nodes with the user before changing anything on them.',
+    '- `getCommandInvocation` can fail with `InvocationDoesNotExist` for a few seconds after `sendCommand`; wait and retry. If it keeps failing, the `commandId` and instance ID do not belong together.',
+    '- A node that is not `Online` does not run the command until it reconnects, within `timeoutSeconds`.',
   ].join('\n'),
 
   test: {

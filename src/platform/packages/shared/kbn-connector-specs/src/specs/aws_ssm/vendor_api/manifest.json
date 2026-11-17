@@ -18,6 +18,20 @@
         "path": "/DescribeInstanceInformation",
         "source": "ssm"
       }
+    ],
+    "getCommandInvocation": [
+      {
+        "method": "post",
+        "path": "/GetCommandInvocation",
+        "source": "ssm"
+      }
+    ],
+    "sendCommand": [
+      {
+        "method": "post",
+        "path": "/SendCommand",
+        "source": "ssm"
+      }
     ]
   },
   "sources": {

@@ -1,11 +1,12 @@
 {
   "describeInstanceInformation": {
     "queries": [
-      {
-        "source": "ssm",
-        "method": "POST",
-        "path": "/DescribeInstanceInformation"
-      }
+      { "source": "ssm", "method": "POST", "path": "/DescribeInstanceInformation" }
+    ]
+  },
+  "getCommandInvocation": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/GetCommandInvocation" }
     ]
   }
 }
