@@ -46,8 +46,7 @@ paths:
           description: >-
             How repetitions of one example are compared. `mean` and `median`
             reduce each example to one score per experiment and test one pair
-            per example. `pool` pairs every repetition by its index, which is
-            valid only when repetitions are independent by design.
+            per example.
       responses:
         '200':
           description: Successful response
@@ -67,15 +66,12 @@ paths:
                         $ref: '#/components/schemas/RepetitionPolicy'
                       totalPairs:
                         type: integer
-                        description: >-
-                          Number of pairs tested over all slices: examples
-                          under `mean` and `median`, repetitions under `pool`
+                        description: Number of pairs tested over all slices
                       skippedMissingPairs:
                         type: integer
                         description: >-
-                          Unpaired examples (repetitions under `pool`). A
-                          target example with only null scores counts in
-                          `skippedNullScores` instead.
+                          Unpaired examples. A target example with only null
+                          scores counts in `skippedNullScores` instead.
                       skippedNullScores:
                         type: integer
                       rejectedSlices:
@@ -117,7 +113,6 @@ components:
       enum:
         - mean
         - median
-        - pool
 
     StatisticalTestId:
       type: string
@@ -220,9 +215,7 @@ components:
           maxLength: 256
         sampleSize:
           type: integer
-          description: >-
-            Number of pairs tested in this slice: examples under `mean` and
-            `median`, repetitions under `pool`
+          description: Number of examples tested in this slice
         baseline:
           $ref: '#/components/schemas/ComparisonSide'
         target:

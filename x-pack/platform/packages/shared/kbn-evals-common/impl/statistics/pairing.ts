@@ -73,15 +73,6 @@ export function buildSliceKey(datasetId: string, evaluatorName: string): string 
   return `${datasetId}|${evaluatorName}`;
 }
 
-function buildPairKey(score: EvaluationScoreDocument): string {
-  return [
-    score.example.dataset.id,
-    score.example.id,
-    score.evaluator.name,
-    score.task.repetition_index,
-  ].join('\0');
-}
-
 function isFiniteNumber(value: number | null | undefined): value is number {
   return typeof value === 'number' && Number.isFinite(value);
 }
@@ -183,7 +174,7 @@ function summarizeRepetitions(examples: ExampleScores[]): Map<string, Repetition
   return new Map([...slices].map(([key, sliceExamples]) => [key, summarizeSlice(sliceExamples)]));
 }
 
-function pairByExample(examples: ExampleScores[], policy: 'mean' | 'median') {
+function pairByExample(examples: ExampleScores[], policy: RepetitionPolicy) {
   const aggregate = policy === 'median' ? median : mean;
   const outsideUnitInterval = new Set(
     (policy === 'median' ? examples : [])
@@ -219,8 +210,8 @@ function pairByExample(examples: ExampleScores[], policy: 'mean' | 'median') {
         });
       }
     } else if (target.values.length > 0 || (target.missing === 0 && baseline.values.length > 0)) {
-      // A target with only null scores counts as null and not as unpaired, as in the pairing by
-      // repetition, so that one repetition per example keeps today's counters.
+      // A target with only null scores counts as null and not as unpaired, as it did before
+      // repetitions were aggregated.
       skippedMissingPairs += 1;
     }
   }
@@ -233,74 +224,9 @@ function pairByExample(examples: ExampleScores[], policy: 'mean' | 'median') {
   };
 }
 
-function pairByRepetition(
-  targetScores: EvaluationScoreDocument[],
-  baselineScores: EvaluationScoreDocument[]
-): {
-  pairs: PairedScore[];
-  skippedMissingPairs: number;
-  skippedNullScores: number;
-} {
-  const baselineByKey = new Map<string, EvaluationScoreDocument>();
-  let skippedNullScores = 0;
-
-  for (const score of baselineScores) {
-    if (!isFiniteNumber(score.evaluator.score)) {
-      skippedNullScores += 1;
-      continue;
-    }
-    baselineByKey.set(buildPairKey(score), score);
-  }
-
-  const pairs: PairedScore[] = [];
-  let skippedMissingPairs = 0;
-
-  for (const targetScore of targetScores) {
-    const key = buildPairKey(targetScore);
-
-    if (!isFiniteNumber(targetScore.evaluator.score)) {
-      skippedNullScores += 1;
-      baselineByKey.delete(key);
-      continue;
-    }
-
-    const baselineMatch = baselineByKey.get(key);
-    if (!baselineMatch) {
-      skippedMissingPairs += 1;
-      continue;
-    }
-
-    baselineByKey.delete(key);
-
-    const direction = resolveDirection(
-      targetScore.evaluator.direction,
-      baselineMatch.evaluator.direction,
-      targetScore.evaluator.name
-    );
-
-    pairs.push({
-      datasetId: targetScore.example.dataset.id,
-      datasetName: targetScore.example.dataset.name,
-      evaluatorName: targetScore.evaluator.name,
-      scoreTarget: targetScore.evaluator.score!,
-      scoreBaseline: baselineMatch.evaluator.score!,
-      direction,
-    });
-  }
-
-  skippedMissingPairs += baselineByKey.size;
-
-  return {
-    pairs,
-    skippedMissingPairs,
-    skippedNullScores,
-  };
-}
-
 /**
- * Pair target scores against baseline scores per (dataset, example, evaluator). `mean` and
- * `median` reduce each side's valid repetitions to one score per example; `pool` pairs every
- * repetition by its index.
+ * Pair target scores against baseline scores per (dataset, example, evaluator). The policy
+ * reduces each side's valid repetitions to one score per example.
  */
 export function pairScores(
   targetScores: EvaluationScoreDocument[],
@@ -314,16 +240,5 @@ export function pairScores(
   repetitions: Map<string, RepetitionStats>;
 } {
   const examples = groupByExample(targetScores, baselineScores);
-  const repetitions = summarizeRepetitions(examples);
-  switch (policy) {
-    case 'mean':
-    case 'median':
-      return { ...pairByExample(examples, policy), repetitions };
-    case 'pool':
-      return {
-        ...pairByRepetition(targetScores, baselineScores),
-        rejectedSlices: [],
-        repetitions,
-      };
-  }
+  return { ...pairByExample(examples, policy), repetitions: summarizeRepetitions(examples) };
 }

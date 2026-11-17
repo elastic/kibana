@@ -134,9 +134,7 @@ export function formatMarkdownCompareReport({
 
   lines.push(`Significance threshold: p < ${significanceThreshold}`);
   lines.push(
-    `Repetition policy: ${repetitionPolicy} (N counts ${
-      repetitionPolicy === 'pool' ? 'repetition pairs' : 'examples'
-    }${
+    `Repetition policy: ${repetitionPolicy} (N counts examples${
       showStability
         ? "; stability is the mean standard deviation across an example's repetitions"
         : ''

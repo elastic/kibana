@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const RepetitionPolicy = lazySchema(() => z.enum(['mean', 'median', 'pool']));
+export const RepetitionPolicy = lazySchema(() => z.enum(['mean', 'median']));
 export type RepetitionPolicy = z.infer<typeof RepetitionPolicy>;
 export type RepetitionPolicyEnum = typeof RepetitionPolicy.enum;
 export const RepetitionPolicyEnum = RepetitionPolicy.enum;
@@ -122,14 +122,9 @@ export const ComparisonResult = lazySchema(() =>
     datasetName: z.string().max(256),
     evaluatorName: z.string().max(256),
     /**
-     * Number of pairs tested in this slice: examples under `mean` and `median`, repetitions under `pool`
+     * Number of examples tested in this slice
      */
-    sampleSize: z
-      .number()
-      .int()
-      .describe(
-        'Number of pairs tested in this slice: examples under `mean` and `median`, repetitions under `pool`'
-      ),
+    sampleSize: z.number().int().describe('Number of examples tested in this slice'),
     baseline: ComparisonSide,
     target: ComparisonSide,
     /**
@@ -183,12 +178,12 @@ export const CompareExperimentsRequestQuery = lazySchema(() =>
      */
     target_id: z.string().max(1024).describe('Target experiment or execution ID (depends on type)'),
     /**
-     * How repetitions of one example are compared. `mean` and `median` reduce each example to one score per experiment and test one pair per example. `pool` pairs every repetition by its index, which is valid only when repetitions are independent by design.
+     * How repetitions of one example are compared. `mean` and `median` reduce each example to one score per experiment and test one pair per example.
      */
     repetition_policy: RepetitionPolicy.optional()
       .default('mean')
       .describe(
-        'How repetitions of one example are compared. `mean` and `median` reduce each example to one score per experiment and test one pair per example. `pool` pairs every repetition by its index, which is valid only when repetitions are independent by design.'
+        'How repetitions of one example are compared. `mean` and `median` reduce each example to one score per experiment and test one pair per example.'
       ),
   })
 );
@@ -201,22 +196,17 @@ export const CompareExperimentsResponse = lazySchema(() =>
     pairing: z.object({
       repetitionPolicy: RepetitionPolicy,
       /**
-       * Number of pairs tested over all slices: examples under `mean` and `median`, repetitions under `pool`
+       * Number of pairs tested over all slices
        */
-      totalPairs: z
-        .number()
-        .int()
-        .describe(
-          'Number of pairs tested over all slices: examples under `mean` and `median`, repetitions under `pool`'
-        ),
+      totalPairs: z.number().int().describe('Number of pairs tested over all slices'),
       /**
-       * Unpaired examples (repetitions under `pool`). A target example with only null scores counts in `skippedNullScores` instead.
+       * Unpaired examples. A target example with only null scores counts in `skippedNullScores` instead.
        */
       skippedMissingPairs: z
         .number()
         .int()
         .describe(
-          'Unpaired examples (repetitions under `pool`). A target example with only null scores counts in `skippedNullScores` instead.'
+          'Unpaired examples. A target example with only null scores counts in `skippedNullScores` instead.'
         ),
       skippedNullScores: z.number().int(),
       /**

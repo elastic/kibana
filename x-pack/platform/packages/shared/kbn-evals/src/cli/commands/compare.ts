@@ -41,7 +41,7 @@ export const compareCmd: Command<void> = {
     --output           Append markdown output to a file instead of stdout
     --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
     --space-ids        Spaces the experiments were run in (same value as "evals run")
-    --repetition-policy  How repetitions of one example are compared: "mean" (default), "median" or "pool"
+    --repetition-policy  How repetitions of one example are compared: "mean" (default) or "median"
 
   Environment:
     EVAL_KBN_URL      Target Kibana URL (defaults to localhost)
@@ -67,7 +67,7 @@ export const compareCmd: Command<void> = {
       --output           Append markdown output to a file instead of stdout
       --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
       --space-ids        Spaces the experiments were run in
-      --repetition-policy  "mean" (default) and "median" test one pair per example; "pool" pairs every repetition
+      --repetition-policy  "mean" (default) or "median" of each example's repetitions
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -90,7 +90,7 @@ export const compareCmd: Command<void> = {
       flagsReader.string('repetition-policy') ?? 'mean'
     );
     if (!parsedPolicy.success) {
-      throw createFlagError('--repetition-policy must be "mean", "median" or "pool".');
+      throw createFlagError('--repetition-policy must be "mean" or "median".');
     }
     const repetitionPolicy = parsedPolicy.data;
 

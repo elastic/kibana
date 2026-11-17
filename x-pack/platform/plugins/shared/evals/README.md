@@ -329,7 +329,6 @@ A comparison runs one paired test per evaluator, and each example counts once: i
 
 - `mean` (default): the average of the example's valid scores.
 - `median`: the median. Only for scores in [0, 1]. Other slices are left out and listed in `pairing.rejectedSlices`, and the request fails with 400 when none is left.
-- `pool`: the old behaviour, one pair per repetition. Use it only when each repetition gets a different input.
 
 Under `mean`, pass/fail and whole-number scores become decimals when an example's repetitions disagree, so those rows get Wilcoxon signed-rank or the paired t-test instead of McNemar. With 5 or fewer examples, Wilcoxon cannot reach p < 0.05.
 

@@ -112,7 +112,7 @@ const referenceBaseline = scoresPerExample([
 ]);
 
 describe('pairScores', () => {
-  // Counters recorded from the pairing by repetition index before the policies existed.
+  // Counters recorded before repetitions were aggregated.
   // `v` is a valid score, `n` a null score and `-` no document.
   it.each([
     ['v', 'v', { pairs: 1, skippedMissingPairs: 0, skippedNullScores: 0 }],
@@ -129,14 +129,12 @@ describe('pairScores', () => {
       const docs = (side: string) =>
         side === '-' ? [] : [createMockScore({ score: side === 'v' ? 0.5 : null })];
 
-      for (const policy of ['mean', 'pool'] as const) {
-        const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
-          docs(target),
-          docs(baseline),
-          policy
-        );
-        expect({ pairs: pairs.length, skippedMissingPairs, skippedNullScores }).toEqual(expected);
-      }
+      const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
+        docs(target),
+        docs(baseline),
+        'mean'
+      );
+      expect({ pairs: pairs.length, skippedMissingPairs, skippedNullScores }).toEqual(expected);
     }
   );
 
@@ -161,17 +159,16 @@ describe('pairScores', () => {
     expect(mean.rejectedSlices).toEqual([]);
   });
 
-  it('pairs the scores of an example under mean whatever their repetition index', () => {
+  it('pairs the scores of an example whatever their repetition index', () => {
     const target = [createMockScore({ repetitionIndex: 1, score: 0.8 })];
     const baseline = [createMockScore({ repetitionIndex: 0, score: 0.2 })];
 
     expect(pairScores(target, baseline, 'mean').pairs).toEqual([
       expect.objectContaining({ scoreTarget: 0.8, scoreBaseline: 0.2 }),
     ]);
-    expect(pairScores(target, baseline, 'pool').pairs).toEqual([]);
   });
 
-  it('averages an example held twice under mean, where pool pairs only one of its scores', () => {
+  it('averages an example held twice', () => {
     const target = [createMockScore({ score: 0.8 }), createMockScore({ score: 0.4 })];
     const baseline = [createMockScore({ score: 0.2 }), createMockScore({ score: 0.6 })];
 
@@ -181,11 +178,6 @@ describe('pairScores', () => {
         scoreBaseline: expect.closeTo(0.4, 12),
       }),
     ]);
-
-    // Pool keeps the first target score and the last baseline score.
-    const pool = pairScores(target, baseline, 'pool');
-    expect(pool.pairs).toEqual([expect.objectContaining({ scoreTarget: 0.8, scoreBaseline: 0.6 })]);
-    expect(pool.skippedMissingPairs).toBe(1);
   });
 });
 
@@ -457,75 +449,56 @@ describe('compareScores (grouping, means and direction)', () => {
 });
 
 describe('compareScores (repetitions)', () => {
-  it.each(['mean', 'pool'] as const)(
-    'keeps the results of one repetition per example (%s)',
-    (policy) => {
-      const oneRepetition = (scores: number[], evaluatorName: string) =>
-        scoresPerExample(
-          scores.map((score) => [score]),
-          evaluatorName
-        );
-      const target = [
-        ...oneRepetition([1, 1, 1, 0], 'Pass'),
-        ...oneRepetition([0.9, 0.8, 0.7, 0.95], 'Quality'),
-      ];
-      // The baseline order must not change the order of the rows.
-      const baseline = [
-        ...oneRepetition([0, 1, 0, 0], 'Pass'),
-        ...oneRepetition([0.5, 0.4, 0.3, 0.2], 'Quality'),
-      ].reverse();
+  it('keeps the results of one repetition per example', () => {
+    const oneRepetition = (scores: number[], evaluatorName: string) =>
+      scoresPerExample(
+        scores.map((score) => [score]),
+        evaluatorName
+      );
+    const target = [
+      ...oneRepetition([1, 1, 1, 0], 'Pass'),
+      ...oneRepetition([0.9, 0.8, 0.7, 0.95], 'Quality'),
+    ];
+    // The baseline order must not change the order of the rows.
+    const baseline = [
+      ...oneRepetition([0, 1, 0, 0], 'Pass'),
+      ...oneRepetition([0.5, 0.4, 0.3, 0.2], 'Quality'),
+    ].reverse();
 
-      // Recorded from the pairing by repetition index before the policies existed.
-      expect(compareDocs(target, baseline, policy)).toEqual([
-        {
-          datasetId: 'dataset-1',
-          datasetName: 'Dataset 1',
-          evaluatorName: 'Pass',
-          sampleSize: 4,
-          target: { mean: 0.75, used: 4, missing: 0, stability: null },
-          baseline: { mean: 0.25, used: 4, missing: 0, stability: null },
-          pValue: 0.25,
-          direction: 'maximize',
-          metricType: 'binary',
-          hypothesisTest: {
-            id: 'mcnemar',
-            method: 'mid-p',
-            statistic: 0,
-            discordantPairs: { targetOnly: 2, baselineOnly: 0 },
-          },
-          repetitionWarning: false,
+    // Recorded before repetitions were aggregated.
+    expect(compareDocs(target, baseline)).toEqual([
+      {
+        datasetId: 'dataset-1',
+        datasetName: 'Dataset 1',
+        evaluatorName: 'Pass',
+        sampleSize: 4,
+        target: { mean: 0.75, used: 4, missing: 0, stability: null },
+        baseline: { mean: 0.25, used: 4, missing: 0, stability: null },
+        pValue: 0.25,
+        direction: 'maximize',
+        metricType: 'binary',
+        hypothesisTest: {
+          id: 'mcnemar',
+          method: 'mid-p',
+          statistic: 0,
+          discordantPairs: { targetOnly: 2, baselineOnly: 0 },
         },
-        {
-          datasetId: 'dataset-1',
-          datasetName: 'Dataset 1',
-          evaluatorName: 'Quality',
-          sampleSize: 4,
-          target: { mean: 0.8375, used: 4, missing: 0, stability: null },
-          baseline: { mean: 0.35, used: 4, missing: 0, stability: null },
-          pValue: 0.125,
-          direction: 'maximize',
-          metricType: 'continuous_bounded',
-          hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 0 },
-          repetitionWarning: false,
-        },
-      ]);
-    }
-  );
-
-  const referenceSides = (targetMean: number, baselineMean: number) => ({
-    target: {
-      mean: expect.closeTo(targetMean, 9),
-      used: 17,
-      missing: 1,
-      stability: expect.closeTo(0.05784782328354201, 9),
-    },
-    baseline: {
-      mean: expect.closeTo(baselineMean, 9),
-      used: 17,
-      missing: 0,
-      stability: expect.closeTo(0.03177176522930781, 9),
-    },
-    repetitionWarning: true,
+        repetitionWarning: false,
+      },
+      {
+        datasetId: 'dataset-1',
+        datasetName: 'Dataset 1',
+        evaluatorName: 'Quality',
+        sampleSize: 4,
+        target: { mean: 0.8375, used: 4, missing: 0, stability: null },
+        baseline: { mean: 0.35, used: 4, missing: 0, stability: null },
+        pValue: 0.125,
+        direction: 'maximize',
+        metricType: 'continuous_bounded',
+        hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 0 },
+        repetitionWarning: false,
+      },
+    ]);
   });
 
   it('tests one pair of repetition means per example under mean', () => {
@@ -535,24 +508,20 @@ describe('compareScores (repetitions)', () => {
       sampleSize: 6,
       pValue: expect.closeTo(0.0625, 9),
       hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 1 },
-      ...referenceSides(0.6472222222222223, 0.5480555555555556),
-    });
-  });
-
-  it('pairs every repetition by index under pool, as before the policies existed', () => {
-    expect(compareDocs(referenceTarget, referenceBaseline, 'pool')).toEqual([
-      {
-        datasetId: 'dataset-1',
-        datasetName: 'Dataset 1',
-        evaluatorName: 'Quality',
-        sampleSize: 16,
-        pValue: 0.003771590323760254,
-        direction: 'maximize',
-        metricType: 'continuous_bounded',
-        hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'asymptotic', statistic: 12 },
-        ...referenceSides(0.634375, 0.543125),
+      target: {
+        mean: expect.closeTo(0.6472222222222223, 9),
+        used: 17,
+        missing: 1,
+        stability: expect.closeTo(0.05784782328354201, 9),
       },
-    ]);
+      baseline: {
+        mean: expect.closeTo(0.5480555555555556, 9),
+        used: 17,
+        missing: 0,
+        stability: expect.closeTo(0.03177176522930781, 9),
+      },
+      repetitionWarning: true,
+    });
   });
 
   it('leaves unpaired examples and single values out of the stability only', () => {
