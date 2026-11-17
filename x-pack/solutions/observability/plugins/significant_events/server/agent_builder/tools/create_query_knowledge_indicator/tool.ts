@@ -21,7 +21,7 @@ import { createSignificantEventsAvailability } from '../significant_events_avail
 import { getSourceWriteConflictMetadata } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
-import { trackTelemetryBestEffort } from '../bulk_write';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 import {

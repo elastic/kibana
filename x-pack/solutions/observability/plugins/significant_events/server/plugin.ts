@@ -267,6 +267,7 @@ export class SignificantEventsPlugin
         telemetry: {
           trackEventStatusChanged: (params) =>
             this.ebtTelemetryService.getClient().trackEventStatusChanged(params, request),
+          logger: this.logger,
         },
       });
 
@@ -401,6 +402,7 @@ export class SignificantEventsPlugin
     const workflowClients = createWorkflowClients(
       plugins.workflowsManagement?.management,
       telemetryClient,
+      this.logger,
       async (request) => {
         const [, pluginsStart] = await core.getStartServices();
         return pluginsStart.nightshiftSources.getSourcesClient({ request });

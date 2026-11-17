@@ -1180,7 +1180,7 @@ export class RuleEventsClient {
     assessmentNote?: string;
     origin: WriteOrigin;
   }): Promise<UpdateEventStatusResult> {
-    const { getAlertActionsClient, emitTrigger, telemetry, logger, space } = this.clients;
+    const { getAlertActionsClient, emitTrigger, telemetry, space } = this.clients;
     if (!getAlertActionsClient) {
       throw new Error(
         'RuleEventsClient was created without an alert actions client, so it cannot apply an operator change'
@@ -1222,7 +1222,6 @@ export class RuleEventsClient {
     });
     reportEventStatusChange({
       telemetry,
-      logger,
       event,
       prior: latest,
       origin,
@@ -1240,7 +1239,7 @@ export class RuleEventsClient {
     prior?: SignificantEvent;
     origin: WriteOrigin;
   }): Promise<CreateAlertEventResponse> {
-    const { getAlertEventsClient, emitTrigger, telemetry, logger, space } = this.clients;
+    const { getAlertEventsClient, emitTrigger, telemetry, space } = this.clients;
     if (!getAlertEventsClient) {
       throw new Error('RuleEventsClient was created without a writer, so it cannot write events');
     }
@@ -1253,7 +1252,7 @@ export class RuleEventsClient {
       significantEvent: event,
       priorSignificantEvent: prior,
     });
-    reportEventStatusChange({ telemetry, logger, event, prior, origin, spaceId: space });
+    reportEventStatusChange({ telemetry, event, prior, origin, spaceId: space });
     return response;
   }
 }
