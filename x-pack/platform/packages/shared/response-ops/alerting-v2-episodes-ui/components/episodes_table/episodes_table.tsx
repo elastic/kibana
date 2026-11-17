@@ -75,7 +75,7 @@ import { useAlertingRulesCache } from '../../hooks/use_alerting_rules_cache';
 import { useAlertingRuleSourceDataViews } from '../../hooks/use_alerting_rule_source_data_views';
 import { useEpisodeActions } from '../../hooks/use_episode_actions';
 import { useEpisodesBulkActions } from '../../hooks/use_episodes_bulk_actions';
-import { useAlertHost } from '../../context/alert_host_context';
+import { useAlertHost, type CachedRule } from '../../context/alert_host_context';
 import { resolveTableHeight, TABLE_ROW_LINE_HEIGHT_PX } from '../../utils/resolve_table_height';
 import { useFetchAlertingEpisodesQuery } from '../../hooks/use_fetch_alerting_episodes_query';
 import { useInvalidateEpisodeQueries } from '../../hooks/use_invalidate_episode_queries';
@@ -244,7 +244,11 @@ export interface EpisodesTableProps {
   showLimitedResultsNotice?: boolean;
 
   renderAdditionalToolbarControls?: () => ReactNode;
-  onRuleNameClick?: (ruleId: string, sourceRuleInfo?: { category?: string }) => void;
+  onRuleNameClick?: (
+    ruleId: string,
+    sourceRuleInfo?: { category?: string },
+    cachedRule?: CachedRule
+  ) => void;
   getRuleDetailsHref?: (ruleId: string, isSourceRule?: boolean) => string | undefined;
   getEpisodeDetailsHref?: (episodeId: string) => string;
 }
@@ -323,16 +327,6 @@ export const EpisodesTable = ({
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
 
   const { openRuleFlyout: hostOpenRuleFlyout, closeRuleFlyout: hostCloseRuleFlyout } = host;
-  const onRuleNameClick = useMemo(() => {
-    const open = onRuleNameClickProp ?? hostOpenRuleFlyout;
-    if (!open) {
-      return undefined;
-    }
-    return (ruleId: string, sourceRuleInfo?: { category?: string }) => {
-      setExpandedDoc(undefined);
-      open(ruleId, sourceRuleInfo);
-    };
-  }, [onRuleNameClickProp, hostOpenRuleFlyout]);
 
   const expandDoc = useCallback(
     (doc?: DataTableRecord) => {
@@ -392,6 +386,17 @@ export const EpisodesTable = ({
   );
 
   const { rulesCache, loading: isLoadingRules } = useAlertingRulesCache({ ruleIds, services });
+
+  const onRuleNameClick = useMemo(() => {
+    const open = onRuleNameClickProp ?? hostOpenRuleFlyout;
+    if (!open) {
+      return undefined;
+    }
+    return (ruleId: string, sourceRuleInfo?: { category?: string }) => {
+      setExpandedDoc(undefined);
+      open(ruleId, sourceRuleInfo, rulesCache[ruleId]);
+    };
+  }, [onRuleNameClickProp, hostOpenRuleFlyout, rulesCache]);
 
   const sourceDataViewsByRule = useAlertingRuleSourceDataViews({
     rules: rulesCache,

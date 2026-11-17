@@ -565,6 +565,36 @@ describe('ThreatAttachmentInlineContent', () => {
     expect(screen.getByText('pending.example')).toBeInTheDocument();
   });
 
+  it('files non-routable IPs under Not hunted even when a legacy doc has no tier or a promotable tier', async () => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-legacy-private',
+        content: { title: 'Legacy Private IPs' },
+        extracted: {
+          iocs: [
+            { type: 'ip', value: '203.0.113.10', tier: 'discriminating' },
+            { type: 'ip', value: '127.0.0.1' },
+            { type: 'ip', value: '100.64.0.7', tier: 'uncertain' },
+          ],
+        },
+      }),
+    } as unknown as HttpStart;
+    render(
+      <ThreatAttachmentInlineContent
+        {...renderProps(buildAttachment({ report_id: 'r-legacy-private' }), http)}
+      />
+    );
+    await waitFor(() => {
+      expect(screen.getByText('203.0.113.10')).toBeInTheDocument();
+    });
+    expect(screen.getByText('1 indicator')).toBeInTheDocument();
+    expect(screen.queryByText('127.0.0.1')).not.toBeInTheDocument();
+    expect(screen.queryByText('100.64.0.7')).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertzeroThreatAttachmentIocNotHuntedToggle')).toHaveTextContent(
+      'Show (2)'
+    );
+  });
+
   it('still renders Indicators with 0 count when only not-hunted IOCs remain', async () => {
     const http = {
       fetch: jest.fn().mockResolvedValue({
@@ -625,6 +655,7 @@ describe('ThreatAttachmentInlineContent', () => {
             { type: 'hash', value: 'hash-disc', tier: 'discriminating' },
             { type: 'domain', value: 'uncert.example', tier: 'uncertain' },
             { type: 'ip', value: '203.0.113.9', tier: 'reference' },
+            { type: 'ip', value: '127.0.0.1', tier: 'discriminating' },
             {
               type: 'domain',
               value: 'pending.example',
@@ -653,6 +684,8 @@ describe('ThreatAttachmentInlineContent', () => {
     fireEvent.click(screen.getByTestId('alertzeroThreatAttachmentIocNotHuntedToggle'));
     fireEvent.mouseOver(screen.getByText('203.0.113.9'));
     expect(await screen.findByText('Reference')).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByText('127.0.0.1'));
+    expect(await screen.findByText('Non-routable address')).toBeInTheDocument();
     fireEvent.mouseOver(screen.getByText('pending.example'));
     expect(await screen.findByText('Pending review')).toBeInTheDocument();
   });

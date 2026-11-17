@@ -7,7 +7,6 @@
 
 import { formatValidationError } from '@elastic/isomer-sdk';
 import { splitAuthoredMarkdown } from '@elastic/isomer-sdk/markdown';
-import type { ConversationRound } from '@kbn/agent-builder-common';
 import {
   getLatestVersion,
   getVersion,
@@ -168,14 +167,14 @@ const resolveAttachmentNode = async (
  * `toSurfaceComposition` returns.
  */
 export const buildComposition = async ({
-  round: { response },
+  message,
   attachments,
   attachmentsService,
   context,
   logger,
   runtime,
 }: {
-  round: ConversationRound;
+  message: string;
   attachments: VersionedAttachment[];
   attachmentsService: AttachmentServiceStart;
   context: AttachmentSurfaceCompositionContext;
@@ -183,7 +182,7 @@ export const buildComposition = async ({
   runtime: KibanaIsomerRuntime;
 }): Promise<SurfaceComposition> => {
   const nodes = await Promise.all(
-    toMessageNodes(response.message).map((node): Promise<ComponentsNode[]> | ComponentsNode[] =>
+    toMessageNodes(message).map((node): Promise<ComponentsNode[]> | ComponentsNode[] =>
       node.type === 'attachment'
         ? resolveAttachmentNode(node, { attachments, attachmentsService, context, logger, runtime })
         : [node]

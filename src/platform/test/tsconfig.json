@@ -69,5 +69,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/core-chrome-browser-components",
     "@kbn/monaco",
+    "@kbn/dashboard-constants"
   ]
 }

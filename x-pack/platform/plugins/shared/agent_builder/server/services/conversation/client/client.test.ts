@@ -53,7 +53,7 @@ import type { ConversationEventsServiceStart } from '../../conversation_events';
 import { describeConversationWrite } from '../../../workflows/triggers/describe_conversation_write';
 
 jest.mock('../templates/registry', () => ({ getTemplate: jest.fn() }));
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const getTemplateMock: jest.Mock = require('../templates/registry').getTemplate;
 
 jest.mock('../../../workflows/triggers/describe_conversation_write', () => {
