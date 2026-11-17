@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSelectable, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiProgress, EuiSelectable, EuiSpacer } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,15 +30,25 @@ export const IndexMultiSelect = ({
   const [searchValue, setSearchValue] = useState('');
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
 
-  const { indexNames, isFetching } = useIndices({ search: debouncedSearch.trim() });
+  const { indexNames, isFetching, isInitialLoading } = useIndices({
+    search: debouncedSearch.trim(),
+    exclude: isIndexSelected,
+  });
 
-  const options: EuiSelectableOption[] = indexNames
-    .filter((name) => !isIndexSelected(name))
-    .map((name) => ({
-      label: name,
-      disabled,
-      'data-test-subj': `contextIndexOption-${name}`,
-    }));
+  const options: EuiSelectableOption[] = indexNames.map((name) => ({
+    label: name,
+    disabled,
+    'data-test-subj': `contextIndexOption-${name}`,
+  }));
+  const isDebouncing = searchValue.trim() !== debouncedSearch.trim();
+  // Stale options stay visible under a thin bar; the full spinner is only for the first load.
+  const isRefreshing = !isInitialLoading && (isFetching || isDebouncing);
+  const noMatchesMessage = i18n.translate('xpack.contextEngine.sourcePicker.index.noMatches', {
+    defaultMessage: 'No matches for this search.',
+  });
+  const emptyMessage = i18n.translate('xpack.contextEngine.sourcePicker.index.emptyMessage', {
+    defaultMessage: 'No indices, data streams or aliases found.',
+  });
 
   return (
     <EuiFormRow
@@ -63,7 +73,7 @@ export const IndexMultiSelect = ({
         })}
         searchable
         isPreFiltered
-        isLoading={isFetching}
+        isLoading={isInitialLoading}
         options={options}
         onChange={(_options, _event, changedOption) => onSelect(changedOption.label)}
         listProps={{ bordered: true, paddingSize: 's', rowHeight: 36, onFocusBadge: false }}
@@ -75,18 +85,21 @@ export const IndexMultiSelect = ({
           }),
           'data-test-subj': 'contextIndexSearch',
         }}
-        emptyMessage={i18n.translate('xpack.contextEngine.sourcePicker.index.emptyMessage', {
-          defaultMessage: 'No indices, data streams or aliases found.',
-        })}
-        noMatchesMessage={i18n.translate('xpack.contextEngine.sourcePicker.index.noMatches', {
-          defaultMessage: 'No matches for this search.',
-        })}
+        // Stale empty results linger after clearing the search; avoid flashing the empty-cluster text.
+        emptyMessage={isRefreshing ? noMatchesMessage : emptyMessage}
+        noMatchesMessage={noMatchesMessage}
         data-test-subj="contextIndexSelectable"
       >
         {(list, search) => (
           <>
             {search}
             <EuiSpacer size="s" />
+            <EuiProgress
+              size="xs"
+              color="accent"
+              css={{ visibility: isRefreshing ? 'visible' : 'hidden' }}
+              data-test-subj="contextIndexSelectableLoadingBar"
+            />
             {list}
           </>
         )}

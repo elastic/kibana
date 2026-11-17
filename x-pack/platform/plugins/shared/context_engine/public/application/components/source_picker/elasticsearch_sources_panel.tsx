@@ -17,7 +17,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { getEbtProps } from '@kbn/ebt-click';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useId, useState } from 'react';
+import React, { useCallback, useId, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { isIndexPickerSourceSelected } from '../../utils/sources';
 import { IndexMultiSelect } from './index_multi_select';
@@ -43,6 +43,10 @@ export const ElasticsearchSourcesPanel = ({
   const accordionId = useId();
   const [esqlQuery, setEsqlQuery] = useState('');
   const trimmedEsqlQuery = esqlQuery.trim();
+  const isIndexSelected = useCallback(
+    (indexName: string) => isIndexPickerSourceSelected(selectedSources, indexName),
+    [selectedSources]
+  );
   const handleAddEsql = () => {
     if (!trimmedEsqlQuery) {
       return;
@@ -54,7 +58,7 @@ export const ElasticsearchSourcesPanel = ({
   return (
     <div data-test-subj="contextElasticsearchSourcesPanel">
       <IndexMultiSelect
-        isIndexSelected={(indexName) => isIndexPickerSourceSelected(selectedSources, indexName)}
+        isIndexSelected={isIndexSelected}
         onSelect={onAddIndex}
         disabled={disabled}
       />

@@ -177,10 +177,10 @@ const typeIndexSearch = async (value: string) => {
 };
 
 const resolveIndicesForSearchTests = (pattern: string): MatchedItem[] => {
-  if (pattern === '*nginx*') {
+  if (pattern === '*nginx*,-.*') {
     return [buildMatchedItem('logs-nginx')];
   }
-  if (pattern === '*metrics*') {
+  if (pattern === '*metrics*,-.*') {
     return [buildMatchedItem('metrics-*'), buildMatchedItem('logs-nginx')];
   }
   if (pattern === '*,-.*') {
@@ -311,6 +311,85 @@ describe('SourcePicker', () => {
       expect(screen.getByTestId('contextIndexOption-metrics-*')).toBeInTheDocument();
     });
     expect(screen.queryByTestId('contextIndexOption-logs-nginx')).not.toBeInTheDocument();
+  });
+
+  it('shows the loading spinner only while the first index list loads', async () => {
+    let resolveIndices!: (value: MatchedItem[]) => void;
+    const services = createServices();
+    services.data.dataViews.getIndices = jest.fn(
+      () =>
+        new Promise<MatchedItem[]>((resolve) => {
+          resolveIndices = resolve;
+        })
+    );
+    renderWithProviders(<Harness />, services);
+
+    expect(await screen.findAllByText('Loading options')).not.toHaveLength(0);
+    expect(screen.getByTestId('contextIndexSelectableLoadingBar')).toHaveStyle({
+      visibility: 'hidden',
+    });
+
+    resolveIndices(INDEX_MATCHES);
+
+    expect(await screen.findByTestId('contextIndexOption-logs-*')).toBeInTheDocument();
+    expect(screen.queryAllByText('Loading options')).toHaveLength(0);
+  });
+
+  it('keeps the previous index list under a loading bar while a search is pending', async () => {
+    renderWithProviders(
+      <Harness />,
+      createServices({ resolveIndices: resolveIndicesForSearchTests })
+    );
+
+    await screen.findByTestId('contextIndexOption-logs-*');
+    expect(screen.getByTestId('contextIndexSelectableLoadingBar')).toHaveStyle({
+      visibility: 'hidden',
+    });
+
+    fireEvent.change(screen.getByTestId('contextIndexSearch'), { target: { value: 'nginx' } });
+
+    expect(screen.getByTestId('contextIndexOption-logs-*')).toBeInTheDocument();
+    expect(screen.queryAllByText('Loading options')).toHaveLength(0);
+    expect(screen.getByTestId('contextIndexSelectableLoadingBar')).toHaveStyle({
+      visibility: 'visible',
+    });
+
+    jest.advanceTimersByTime(INDEX_SEARCH_DEBOUNCE_MS);
+
+    expect(await screen.findByTestId('contextIndexOption-logs-nginx')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId('contextIndexSelectableLoadingBar')).toHaveStyle({
+        visibility: 'hidden',
+      })
+    );
+  });
+
+  it('does not flash the empty list message when clearing a search without matches', async () => {
+    renderWithProviders(
+      <Harness />,
+      createServices({ resolveIndices: resolveIndicesForSearchTests })
+    );
+
+    await screen.findByTestId('contextIndexOption-logs-*');
+    await typeIndexSearch('nomatch');
+    expect(await screen.findAllByText('No matches for this search.')).not.toHaveLength(0);
+
+    fireEvent.change(screen.getByTestId('contextIndexSearch'), { target: { value: '' } });
+
+    expect(screen.queryAllByText('No matches for this search.')).not.toHaveLength(0);
+    expect(screen.queryAllByText('No indices, data streams or aliases found.')).toHaveLength(0);
+
+    jest.advanceTimersByTime(INDEX_SEARCH_DEBOUNCE_MS);
+
+    expect(await screen.findByTestId('contextIndexOption-logs-*')).toBeInTheDocument();
+  });
+
+  it('shows the empty list message when there are no indices at all', async () => {
+    renderWithProviders(<Harness />, createServices({ indices: [] }));
+
+    expect(
+      await screen.findAllByText('No indices, data streams or aliases found.')
+    ).not.toHaveLength(0);
   });
 
   it('adds a raw ES|QL query as a source from the advanced accordion', async () => {
