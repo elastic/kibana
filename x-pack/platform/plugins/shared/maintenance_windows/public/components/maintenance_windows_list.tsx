@@ -97,9 +97,12 @@ const getColumns = ({
     render: (scope: MaintenanceWindowUI['scope']) => {
       const classic = scope?.alerting;
       const universal = scope?.alertingV2;
-      const showClassic = classic?.enabled === true;
-      const showUniversal = isUniversalAlertingEnabled && universal?.enabled === true;
-      if (!showClassic && !showUniversal) {
+      const hasClassicScope = classic?.enabled === true;
+      const hasUniversalScope = universal?.enabled === true;
+
+      // "No scope" describes the saved window, not what this view can show. Universal Alerting
+      // keeps applying a window while its UI is turned off, so don't call that window empty.
+      if (!hasClassicScope && !hasUniversalScope) {
         return (
           <ScopeBadge
             label={i18n.TABLE_SCOPE_BADGE_NONE}
@@ -107,6 +110,13 @@ const getColumns = ({
             data-test-subj="maintenanceWindowScopeBadgeNone"
           />
         );
+      }
+
+      const showClassic = hasClassicScope;
+      const showUniversal = isUniversalAlertingEnabled && hasUniversalScope;
+      // A Universal-only window while Universal Alerting is turned off: keep its badge hidden.
+      if (!showClassic && !showUniversal) {
+        return null;
       }
       const isClassicFiltered = Boolean(classic?.kql || classic?.filters?.length);
       const isUniversalFiltered = Boolean(universal?.kql);

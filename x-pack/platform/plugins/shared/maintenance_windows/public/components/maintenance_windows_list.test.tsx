@@ -239,10 +239,12 @@ describe('MaintenanceWindowsList', () => {
       expect(screen.getByTestId('maintenanceWindowScopeBadgeNone')).toHaveTextContent('No scope');
     });
 
-    test('it shows a No scope badge when the only scope is Universal Alerting and the setting is off', () => {
+    test('it shows no badge when the only scope is Universal Alerting and the setting is off', () => {
+      // The window still stops Universal Alerting notifications, so it isn't "No scope".
       renderScopedList(false, [{ ...items[0], scope: { alertingV2: { enabled: true } } }]);
 
-      expect(screen.getByTestId('maintenanceWindowScopeBadgeNone')).toBeInTheDocument();
+      expect(screen.queryByTestId('maintenanceWindowScopeBadgeNone')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('maintenanceWindowScopeBadgeUniversal')).not.toBeInTheDocument();
     });
 
     test('scope badges are focusable so keyboard users can reach their tooltips', () => {
