@@ -38,6 +38,7 @@ export const usePersistConfiguration = () => {
       observableTypes,
       extractObservables,
       workflowTags,
+      metrics,
     }: Request) => {
       if (isEmpty(id) || isEmpty(version)) {
         return postCaseConfigure({
@@ -49,6 +50,7 @@ export const usePersistConfiguration = () => {
           observableTypes,
           extractObservables,
           workflowTags,
+          ...(metrics !== undefined && { metrics }),
         });
       }
 
@@ -61,6 +63,7 @@ export const usePersistConfiguration = () => {
         observableTypes,
         extractObservables,
         workflowTags,
+        ...(metrics !== undefined && { metrics }),
       });
     },
     {

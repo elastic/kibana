@@ -13,3 +13,5 @@ export { V2_NOOP_ACTIVITY_WRITER } from './writer/activity';
 export type { CasesActivityV2WriterContract } from './writer/activity';
 export { V2_NOOP_ATTACHMENTS_WRITER } from './writer/attachments';
 export type { CasesAttachmentsV2WriterContract } from './writer/attachments';
+export { V2_NOOP_READER } from './reader';
+export type { CasesAnalyticsV2ReaderContract } from './reader';

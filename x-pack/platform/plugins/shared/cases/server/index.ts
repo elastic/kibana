@@ -31,6 +31,9 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     chat: {
       enabled: true,
     },
+    analyticsV2: {
+      enabled: true,
+    },
   },
   deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),
