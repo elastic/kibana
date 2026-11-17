@@ -279,13 +279,14 @@ AD_WORKER_EVAL_COHORT=whole \
 - Timeouts, sized from observed runs rather than worst-case stack stalls: runner 15 min, review
   settle 10 min, per-row overhead (seeding, cleanup, judge) 5 min, floor idle wait 2 min. A row
   that exceeds these is stuck, not slow. Playwright rows x (runner + review settle + overhead +
-  floor idle wait) per test, plus one review settle for the seeded row's floor-parent review and,
-  for each of the two floor-parent rows (that review and the large-batch runner), two floor idle
-  waits and one 1 min cancel settle (276 min for 8 rows: 8 x 32 + 10 + 2 x 5), so the suite's own
+  floor idle wait + 1 min cancel settle for the row's cleanup) per test, plus one review settle and
+  one more 1 min cancel settle for the seeded row's floor-parent review and, for each of the two
+  floor-parent rows (that review and the large-batch runner), two floor idle waits and one 1 min
+  cancel settle (285 min for 8 rows: 8 x 33 + 10 + 1 + 2 x 5), so the suite's own
   timeouts fire first. Wall time per row is dominated by one generation batch plus one review per
   unmatched attack (review concurrency 2).
 - CI step timeout: `stepTimeoutInMinutes` in `.buildkite/pipelines/evals/evals.suites.json` is 300
-  min, the 276 min Playwright timeout plus headroom for bootstrap, Scout boot and report upload.
+  min, the 285 min Playwright timeout plus headroom for bootstrap, Scout boot and report upload.
   Without it the step falls back to the 120 min default and Buildkite kills it before the suite's own
   timeouts fire, losing every score. `src/ci_step_timeout.test.ts` fails if the step timeout drops
   below the Playwright timeout (for example when a dataset row is added).

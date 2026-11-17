@@ -141,7 +141,9 @@ export const scoreRunnerCompleted: CodeScorer = (_expected, artifacts) => {
 const isModelRefusal = (error: string | undefined): boolean =>
   error !== undefined && MODEL_REFUSAL_PATTERN.test(error);
 
-const FAILED_ANALYSIS_STATUSES: readonly string[] = ['failed', 'cancelled', 'timed_out'];
+// `skipped` is terminal too: the engine sets it when a child never ran (concurrency drop, queue
+// full), so nothing was analysed.
+const FAILED_ANALYSIS_STATUSES: readonly string[] = ['failed', 'cancelled', 'timed_out', 'skipped'];
 
 /** Set when the review's FP/TP analysis child ended without completing. */
 const analysisFailureOf = (

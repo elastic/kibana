@@ -132,9 +132,19 @@ const FLOOR_PARENT_RUN_COUNT = 2;
 const FLOOR_PARENT_RUN_WAITS_MS = 2 * FLOOR_IDLE_WAIT_MS + FLOOR_TICK_CANCEL_TIMEOUT_MS;
 
 /**
+ * `cancelPending` waits up to `CANCEL_SETTLE_TIMEOUT_MS` (= `FLOOR_TICK_CANCEL_TIMEOUT_MS`) for the
+ * cancelled executions to end, in parallel, so each call costs one settle. Every row that seeds
+ * calls it once in its cleanup; the seeded false-positive row calls it once more before its
+ * floor-parent review. The floor-parent runs' own cancel settle is in `FLOOR_PARENT_RUN_WAITS_MS`.
+ */
+const CANCEL_SETTLES_PER_ROW = 1;
+const SEEDED_ROW_EXTRA_CANCEL_SETTLES = 1;
+
+/**
  * Playwright runs every row inside one test, so its timeout has to cover each row hitting its own
- * timeouts, `FLOOR_IDLE_WAIT_MS` for each floor settle, the seeded false-positive row's extra review
- * wait, and the waits of both floor-parent rows. The large-batch row's runner wait is already
+ * timeouts, `FLOOR_IDLE_WAIT_MS` for each floor settle, one cancel settle for each row's cleanup,
+ * the seeded false-positive row's extra review wait and extra cancel settle, and the waits of both
+ * floor-parent rows. The large-batch row's runner wait is already
  * inside its row's `RUNNER_TIMEOUT_MS`. Otherwise a slow model is killed mid-dataset with no
  * scores, and the failure reads as a generic test timeout instead of the suite's labeled one.
  *
@@ -144,8 +154,13 @@ const FLOOR_PARENT_RUN_WAITS_MS = 2 * FLOOR_IDLE_WAIT_MS + FLOOR_TICK_CANCEL_TIM
 export const getPlaywrightTestTimeoutMs = (rowCount: number, repetitions = 1): number =>
   repetitions *
   (rowCount *
-    (RUNNER_TIMEOUT_MS + REVIEW_SETTLE_TIMEOUT_MS + ROW_OVERHEAD_MS + FLOOR_IDLE_WAIT_MS) +
+    (RUNNER_TIMEOUT_MS +
+      REVIEW_SETTLE_TIMEOUT_MS +
+      ROW_OVERHEAD_MS +
+      FLOOR_IDLE_WAIT_MS +
+      CANCEL_SETTLES_PER_ROW * FLOOR_TICK_CANCEL_TIMEOUT_MS) +
     REVIEW_SETTLE_TIMEOUT_MS +
+    SEEDED_ROW_EXTRA_CANCEL_SETTLES * FLOOR_TICK_CANCEL_TIMEOUT_MS +
     FLOOR_PARENT_RUN_COUNT * FLOOR_PARENT_RUN_WAITS_MS);
 
 /**

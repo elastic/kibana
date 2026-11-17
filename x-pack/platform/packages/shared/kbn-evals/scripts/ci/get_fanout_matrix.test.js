@@ -201,6 +201,19 @@ describe('buildFanoutMatrix - fail-fast', () => {
     ).toThrow(/not-provisioned/);
   });
 
+  it('throws naming the operator groups when they match no connector, even though a required group matches', () => {
+    const build = () =>
+      buildFanoutMatrix({
+        connectors: CONNECTORS,
+        suiteInfo: { requiredModelGroups: ['eis/a'] },
+        requestedModelGroups: ['eis/typo-one', 'eis/typo-two'],
+        perSpec: false,
+        grepOverride: false,
+      });
+
+    expect(build).toThrow(/EVAL_MODEL_GROUPS="eis\/typo-one,eis\/typo-two"/);
+  });
+
   it('runs the matched connectors when only part of an operator-requested list is provisioned', () => {
     const rows = buildFanoutMatrix({
       connectors: CONNECTORS,

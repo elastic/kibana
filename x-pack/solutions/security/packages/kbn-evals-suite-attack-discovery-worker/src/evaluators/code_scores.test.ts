@@ -146,6 +146,17 @@ describe('scoreReviewsSettled', () => {
     expect(result.explanation).toContain('analysis failed: analyze step errored: boom');
   });
 
+  it('fails a completed review whose analysis child was skipped', () => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({
+        reviews: [review({ status: 'completed', analysis: analysed({ status: 'skipped' }) })],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('analysis skipped');
+  });
+
   it('labels a completed review whose analysis child was refused MODEL_FAULT', () => {
     const error = 'The model (x) refused to complete the response';
     const result = scoreReviewsSettled(
