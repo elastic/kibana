@@ -47,8 +47,8 @@ export interface AlertSeverityPhaseRow {
 export interface BuildAlertPhasesQueryOptions {
   /** Omit for alerts that have no rule, such as externally ingested alerts. */
   ruleId?: string;
-  /** Restricts the events to one space. */
-  spaceId?: string;
+  /** Restricts the events to one space. Required so a query never reads every space. */
+  spaceId: string;
   alertIds: string[];
   /** Display window (epoch ms) — segments are drawn within it. Omit to cover each alert's whole lifetime. */
   window?: {
@@ -67,11 +67,10 @@ const buildAlertEventsSource = ({
 }: BuildAlertPhasesQueryOptions) => {
   const alertLiterals = alertIds.map((id) => esql.str(id));
 
-  let query = esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`;
-
-  if (spaceId !== undefined) {
-    query = query.where`space_id == ${spaceId}`;
-  }
+  // prettier-ignore
+  let query = esql.from(ALERT_EVENTS_DATA_STREAM)
+    .where`space_id == ${spaceId}`
+    .where`type == "alert"`;
 
   if (ruleId !== undefined) {
     query = query.where`rule.id == ${ruleId}`;

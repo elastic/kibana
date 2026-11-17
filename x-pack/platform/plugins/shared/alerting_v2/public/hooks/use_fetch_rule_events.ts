@@ -55,6 +55,7 @@ export interface UseFetchRuleEventsOptions {
   groupingFields?: readonly string[];
   /** Max alerts drawn per series (lane). Defaults to {@link MAX_ALERTS_PER_LANE}. */
   perLaneLimit?: number;
+  spaceId: string;
   data: DataPublicPluginStart;
 }
 
@@ -64,6 +65,7 @@ export const useFetchRuleEvents = ({
   windowEndMs,
   groupingFields = [],
   perLaneLimit = MAX_ALERTS_PER_LANE,
+  spaceId,
   data,
 }: UseFetchRuleEventsOptions) => {
   const enabled = Boolean(ruleId) && windowEndMs > windowStartMs;
@@ -151,6 +153,7 @@ export const useFetchRuleEvents = ({
         data,
         params: {
           query: buildCollapsedStatusPhasesQuery({
+            spaceId,
             ruleId: ruleId!,
             window: { startMs: windowStartMs, endMs: windowEndMs },
             alertIds: selectedAlertIds,

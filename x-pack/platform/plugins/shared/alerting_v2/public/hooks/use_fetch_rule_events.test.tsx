@@ -57,13 +57,14 @@ describe('useFetchRuleEvents', () => {
     });
   });
 
-  it('bounds the phases query to the display window for the selected alerts', async () => {
+  it('bounds the phases query to the space and display window for the selected alerts', async () => {
     const { result } = renderHook(
       () =>
         useFetchRuleEvents({
           ruleId: 'rule-1',
           windowStartMs: WINDOW_START_MS,
           windowEndMs: WINDOW_END_MS,
+          spaceId: 'space-1',
           data: dataPluginMock.createStartContract(),
         }),
       { wrapper: createWrapper() }
@@ -75,6 +76,7 @@ describe('useFetchRuleEvents', () => {
       expect.objectContaining({
         params: expect.objectContaining({
           query: buildCollapsedStatusPhasesQuery({
+            spaceId: 'space-1',
             ruleId: 'rule-1',
             alertIds: ['ep-1'],
             window: { startMs: WINDOW_START_MS, endMs: WINDOW_END_MS },
@@ -91,6 +93,7 @@ describe('useFetchRuleEvents', () => {
           ruleId: undefined,
           windowStartMs: WINDOW_START_MS,
           windowEndMs: WINDOW_END_MS,
+          spaceId: 'space-1',
           data: dataPluginMock.createStartContract(),
         }),
       { wrapper: createWrapper() }

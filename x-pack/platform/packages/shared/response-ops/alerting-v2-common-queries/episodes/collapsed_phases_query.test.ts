@@ -11,17 +11,20 @@ import {
 } from './collapsed_phases_query';
 
 const RULE_ID = 'rule-abc';
+const SPACE_ID = 'space-1';
 const WINDOW_START_MS = Date.parse('2026-04-01T00:00:00Z');
 const WINDOW_END_MS = Date.parse('2026-04-08T00:00:00Z');
 
 describe('buildCollapsedStatusPhasesQuery', () => {
   const queryString = buildCollapsedStatusPhasesQuery({
+    spaceId: SPACE_ID,
     ruleId: RULE_ID,
     window: { startMs: WINDOW_START_MS, endMs: WINDOW_END_MS },
     alertIds: ['ep-1', 'ep-2'],
   }).print('basic');
 
-  it('scopes to alert type, rule, lookback window and the given episodes', () => {
+  it('scopes to space, alert type, rule, lookback window and the given episodes', () => {
+    expect(queryString).toContain(`space_id == "${SPACE_ID}"`);
     expect(queryString).toContain('type == "alert"');
     expect(queryString).toContain(RULE_ID);
     expect(queryString).toContain('2026-04-01T00:00:00.000Z');
@@ -50,20 +53,18 @@ describe('buildCollapsedStatusPhasesQuery', () => {
   });
 
   it('omits the time filter when no window is given', () => {
-    const untimed = buildCollapsedStatusPhasesQuery({ ruleId: RULE_ID, alertIds: ['ep-1'] }).print(
-      'basic'
-    );
+    const untimed = buildCollapsedStatusPhasesQuery({
+      spaceId: SPACE_ID,
+      ruleId: RULE_ID,
+      alertIds: ['ep-1'],
+    }).print('basic');
     expect(untimed).not.toContain('@timestamp >=');
     expect(untimed).toContain('LIMIT 4');
   });
 
-  it('does not filter by space unless a space is given', () => {
-    expect(queryString).not.toContain('space_id');
-  });
-
   it('scopes to the space and omits the rule filter for an alert without a rule', () => {
     const external = buildCollapsedStatusPhasesQuery({
-      spaceId: 'space-1',
+      spaceId: SPACE_ID,
       alertIds: ['ep-1'],
     }).print('basic');
     expect(external).toContain('space_id == "space-1"');
@@ -74,11 +75,13 @@ describe('buildCollapsedStatusPhasesQuery', () => {
 
 describe('buildCollapsedSeverityPhasesQuery', () => {
   const queryString = buildCollapsedSeverityPhasesQuery({
+    spaceId: SPACE_ID,
     ruleId: RULE_ID,
     alertIds: ['ep-1'],
   }).print('basic');
 
-  it('scopes to alert type, rule and the given episodes without a time filter', () => {
+  it('scopes to space, alert type, rule and the given episodes without a time filter', () => {
+    expect(queryString).toContain(`space_id == "${SPACE_ID}"`);
     expect(queryString).toContain('type == "alert"');
     expect(queryString).toContain(RULE_ID);
     expect(queryString).toContain('episode.id IN');
@@ -95,7 +98,7 @@ describe('buildCollapsedSeverityPhasesQuery', () => {
 
   it('scopes to the space and omits the rule filter for an alert without a rule', () => {
     const external = buildCollapsedSeverityPhasesQuery({
-      spaceId: 'space-1',
+      spaceId: SPACE_ID,
       alertIds: ['ep-1'],
     }).print('basic');
     expect(external).toContain('space_id == "space-1"');
