@@ -13,7 +13,8 @@ import {
 import { OutputErrorCode } from '../../../common/workflows/contract/error_codes';
 import type { OutputErrorCodeValue } from '../../../common/workflows/contract/error_codes';
 import type { StepStatus, TargetInput } from '../../../common/workflows/contract/schemas';
-import { DISPATCH_API_HEADERS, PUBLIC_API_HEADERS } from './api_headers';
+import type { WorkflowDispatchIds } from './api_headers';
+import { getDispatchApiHeaders, PUBLIC_API_HEADERS } from './api_headers';
 import { collectResults, countIndexedResults } from './collect_results';
 import type { OutputBudget } from './collect_results';
 import type { ResultRow } from './build_rows';
@@ -113,19 +114,21 @@ export const dispatchLiveQuery = async ({
   logger,
   fields,
   target,
+  workflowId,
+  executionId,
 }: {
   contextManager: KibanaApiCaller;
   logger: StepLogger;
   fields: Record<string, unknown>;
   target: TargetInput;
-}): Promise<DispatchOutcome> => {
+} & WorkflowDispatchIds): Promise<DispatchOutcome> => {
   let body: DispatchResponse;
   try {
     ({ body } = await contextManager.callKibanaApi<DispatchResponse>({
       method: 'POST',
       path: '/api/osquery/live_queries',
       body: { ...fields, ...targetFields(target) },
-      headers: DISPATCH_API_HEADERS,
+      headers: getDispatchApiHeaders({ workflowId, executionId }),
     }));
   } catch (error) {
     const rejection = toDispatchRejection(error);

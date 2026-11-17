@@ -83,7 +83,10 @@ export const runPackStepDefinition = createPollServerStepDefinition({
     const { packId } = await resolvePack(contextManager, input);
     await assertCanReadLiveQueries(contextManager);
 
+    const { workflow, execution } = contextManager.getContext();
     const dispatched = await dispatchLiveQuery({
+      workflowId: workflow.id,
+      executionId: execution.id,
       contextManager,
       logger,
       // Only `pack_id`: the route builds one query per enabled pack query and the step sends no
