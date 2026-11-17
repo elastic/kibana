@@ -11,10 +11,10 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import type { RiskEngineGetPrivilegesResponse } from '../../../../../common/api/entity_analytics';
 import { RISK_ENGINE_PRIVILEGES_URL, APP_ID } from '../../../../../common/constants';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { RiskScoreAuditActions } from '../../risk_score/audit';
+import { RiskScoreAuditActions } from '../audit';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-import { getEnableRiskEnginePrivileges } from '../risk_engine_privileges';
+import { getEnableRiskEnginePrivileges } from './risk_engine_privileges';
 
 export const riskEnginePrivilegesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],

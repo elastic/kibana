@@ -18,9 +18,9 @@ import {
   getConfiguration,
   initSavedObjects,
   updateSavedObjectAttribute,
-} from '../utils/saved_object_configuration';
+} from '../configuration/saved_object_configuration';
 
-jest.mock('../utils/saved_object_configuration', () => ({
+jest.mock('../configuration/saved_object_configuration', () => ({
   getConfiguration: jest.fn(),
   initSavedObjects: jest.fn(),
   updateSavedObjectAttribute: jest.fn(),
