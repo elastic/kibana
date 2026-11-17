@@ -476,6 +476,12 @@ describe('seedScenario world documents', () => {
           ).startsWith('.alerts-security')
       );
     cited.forEach((id) => expect(seededIds).toContain(id));
+    // The discovery names WS-MGMT-201, so every alert it cites is on that host.
+    const docsById = new Map(
+      actionsList.map((action, index) => [action.index?._id, bodies(operations)[index]])
+    );
+    cited.forEach((id) => expect(JSON.stringify(docsById.get(id))).toContain('"WS-MGMT-201"'));
+    expect(doc['kibana.alert.attack_discovery.title']).toContain('WS-MGMT-201');
     // No other scenario seeds a discovery.
     const quiet = await seedWith('benign-batch');
     expect(quiet.seededScenario.seededDiscoveryId).toBeUndefined();

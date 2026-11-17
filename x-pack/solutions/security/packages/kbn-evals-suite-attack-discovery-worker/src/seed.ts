@@ -943,7 +943,7 @@ export const seedScenario = async ({
     { [kind === 'event' ? 'create' : 'index']: { _index: index, _id: id } },
     toNestedSource(body),
   ]);
-  // Cites the first four seeded alerts by their full `_id`s.
+  // The discovery picks its cited alerts out of these full `_id`s.
   const seededDiscovery =
     scenario.id === SEEDED_FALSE_POSITIVE_SCENARIO_ID
       ? buildSeededFalsePositiveDiscovery({

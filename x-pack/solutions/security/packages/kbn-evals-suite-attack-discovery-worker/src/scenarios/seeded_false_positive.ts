@@ -130,7 +130,15 @@ const { alerts, alertGroups } = defineAlerts(SCENARIO_ID, drafts);
 export const seededFalsePositiveAttackId = (runMarker: string): string =>
   createHash('sha256').update(`${SCENARIO_ID}:${runMarker}:attack-discovery`).digest('hex');
 
-export const SEEDED_FALSE_POSITIVE_TITLE = 'Encoded PowerShell command-and-control on WS-MGMT-201';
+const CITED_HOST = HOSTS[0];
+
+export const SEEDED_FALSE_POSITIVE_TITLE = `Encoded PowerShell command-and-control on ${CITED_HOST}`;
+
+/** The discovery names one host, so it cites only that host's alerts (the first four). */
+export const SEEDED_FALSE_POSITIVE_CITED_ALERT_IDS: readonly string[] = alerts
+  .filter(({ fields }) => fields['host.name'] === CITED_HOST)
+  .slice(0, 4)
+  .map(({ id }) => id);
 
 /**
  * The authored false-positive Attack Discovery, seeded into the space's discovery index. It claims
@@ -151,7 +159,10 @@ export const buildSeededFalsePositiveDiscovery = ({
   timestampMs: number;
 }): { id: string; doc: Record<string, unknown> } => {
   const id = seededFalsePositiveAttackId(runMarker);
-  const cited = seededAlertIds.slice(0, 4);
+  const citedSeededIds = new Set(
+    SEEDED_FALSE_POSITIVE_CITED_ALERT_IDS.map((alertId) => `${runMarker}-${alertId}`)
+  );
+  const cited = seededAlertIds.filter((seededId) => citedSeededIds.has(seededId));
   const doc: Record<string, unknown> = {
     '@timestamp': new Date(timestampMs).toISOString(),
     'event.kind': 'signal',
@@ -169,10 +180,8 @@ export const buildSeededFalsePositiveDiscovery = ({
     'kibana.space_ids': [spaceId],
     'kibana.alert.attack_discovery.alert_ids': cited,
     'kibana.alert.attack_discovery.title': SEEDED_FALSE_POSITIVE_TITLE,
-    'kibana.alert.attack_discovery.summary_markdown':
-      'Hidden encoded PowerShell was observed on WS-MGMT-201, reaching an external command-and-control endpoint while masquerading as the endpoint management agent.',
-    'kibana.alert.attack_discovery.details_markdown':
-      'On WS-MGMT-201, powershell.exe ran with an encoded command under the management agent and established repeated connections to an external host. The pattern is consistent with a PowerShell download cradle and command-and-control beaconing.',
+    'kibana.alert.attack_discovery.summary_markdown': `Hidden encoded PowerShell was observed on ${CITED_HOST}, reaching an external command-and-control endpoint while masquerading as the endpoint management agent.`,
+    'kibana.alert.attack_discovery.details_markdown': `On ${CITED_HOST}, powershell.exe ran with an encoded command under the management agent and established repeated connections to an external host. The pattern is consistent with a PowerShell download cradle and command-and-control beaconing.`,
     'kibana.alert.attack_discovery.mitre_attack_tactics': ['Execution', 'Command and Control'],
     // Fields the review's attachment resolver requires (`getMissingFields` skips a document without
     // them, and the review fails with "not found, or is not readable"). The api_config is an object
