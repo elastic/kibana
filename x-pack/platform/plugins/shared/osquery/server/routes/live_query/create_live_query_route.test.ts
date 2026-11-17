@@ -9,11 +9,12 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CoreStart, RequestHandler } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, OSQUERY_MAX_AGENTS_HEADER } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { createLiveQueryRoute } from './create_live_query_route';
+import { createLiveQueryRoute, maxAgentsFromHeader } from './create_live_query_route';
 import { createActionHandler } from '../../handlers';
+import { CustomHttpRequestError } from '../../common/error';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 
 jest.mock('../../handlers', () => ({
@@ -108,12 +109,15 @@ describe('createLiveQueryRoute', () => {
     coreStart,
     racGet,
     getActiveSpace,
+    workflowsExtensionsEnabled = false,
   }: {
     coreStart: CoreStart;
     racGet?: jest.Mock;
     getActiveSpace?: jest.Mock;
+    workflowsExtensionsEnabled?: boolean;
   }): OsqueryAppContext =>
     ({
+      experimentalFeatures: { workflowsExtensionsEnabled },
       getStartServices: jest.fn().mockResolvedValue([coreStart, { security: {} }]),
       service: {
         getActiveSpace: getActiveSpace ?? jest.fn().mockResolvedValue({ id: 'default' }),
@@ -142,20 +146,24 @@ describe('createLiveQueryRoute', () => {
       coreStart,
       racGet,
       getActiveSpace,
+      workflowsExtensionsEnabled,
+      headers,
     }: {
       coreStart?: CoreStart;
       racGet?: jest.Mock;
       getActiveSpace?: jest.Mock;
+      workflowsExtensionsEnabled?: boolean;
+      headers?: Record<string, string>;
     } = {}
   ) => {
     const start = coreStart ?? createMockCoreStart({ [SAVED_QUERY_ID]: { query: STORED_QUERY } });
     const mockRouter = createMockRouter();
     createLiveQueryRoute(
       mockRouter,
-      createOsqueryContext({ coreStart: start, racGet, getActiveSpace })
+      createOsqueryContext({ coreStart: start, racGet, getActiveSpace, workflowsExtensionsEnabled })
     );
 
-    const mockRequest = httpServerMock.createKibanaRequest({ body });
+    const mockRequest = httpServerMock.createKibanaRequest({ body, headers });
     const mockResponse = httpServerMock.createResponseFactory();
 
     await getRouteHandler(mockRouter)({} as never, mockRequest, mockResponse);
@@ -416,6 +424,62 @@ describe('createLiveQueryRoute', () => {
     );
   });
 
+  describe('max agents header', () => {
+    const body = { saved_query_id: SAVED_QUERY_ID, query: STORED_QUERY, agent_ids: ['agent-1'] };
+    const headers = { [OSQUERY_MAX_AGENTS_HEADER]: '1000' };
+    const passedMaxAgents = () => mockedCreateActionHandler.mock.calls[0][2].maxAgents;
+
+    it('passes the header value to the action handler with the workflow steps on', async () => {
+      await invokeRoute(body, { workflowsExtensionsEnabled: true, headers });
+
+      expect(passedMaxAgents()).toBe(1000);
+    });
+
+    it('ignores the header while the workflow steps are off', async () => {
+      await invokeRoute(body, { workflowsExtensionsEnabled: false, headers });
+
+      expect(passedMaxAgents()).toBeUndefined();
+    });
+
+    it('returns 400 for a present but invalid header rather than dispatching unbounded', async () => {
+      const response = await invokeRoute(body, {
+        workflowsExtensionsEnabled: true,
+        headers: { [OSQUERY_MAX_AGENTS_HEADER]: 'all' },
+      });
+
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: `${OSQUERY_MAX_AGENTS_HEADER} must be a positive integer`,
+      });
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
+    it('accepts the request when the invalid header is ignored with the steps off', async () => {
+      const response = await invokeRoute(body, {
+        workflowsExtensionsEnabled: false,
+        headers: { [OSQUERY_MAX_AGENTS_HEADER]: 'all' },
+      });
+
+      expect(response.badRequest).not.toHaveBeenCalled();
+      expect(passedMaxAgents()).toBeUndefined();
+    });
+
+    it.each([
+      ['a positive integer', '250', 250],
+      ['the smallest of a repeated header', ['9', '5'], 5],
+      ['the smallest of a comma-joined header', '5, 9', 5],
+      ['a missing header', undefined, undefined],
+      ['zero', '0', null],
+      ['a negative number', '-1', null],
+      ['a decimal', '1.5', null],
+      ['a leading zero', '010', null],
+      ['more than seven digits', '12345678', null],
+      ['text', 'all', null],
+      ['a valid value next to an invalid one', '5, all', null],
+    ])('maxAgentsFromHeader reads %s', (_name, header, expected) => {
+      expect(maxAgentsFromHeader(header)).toBe(expected);
+    });
+  });
+
   it('dispatches ad-hoc SQL for a writeLiveQueries caller without stored fill-in', async () => {
     const coreStart = createMockCoreStart(
       { [SAVED_QUERY_ID]: { query: STORED_QUERY } },
@@ -483,6 +547,34 @@ describe('createLiveQueryRoute', () => {
         }),
       })
     );
+  });
+
+  describe('handler 400s', () => {
+    const body = { saved_query_id: SAVED_QUERY_ID, agent_ids: ['agent-1'] };
+
+    it('returns the machine-readable code in attributes for a coded handler 400', async () => {
+      mockedCreateActionHandler.mockRejectedValue(
+        new CustomHttpRequestError('No agents found for selection', 400, 'NO_AGENTS_FOUND')
+      );
+
+      const response = await invokeRoute(body);
+
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: 'No agents found for selection',
+          attributes: { code: 'NO_AGENTS_FOUND' },
+        },
+      });
+    });
+
+    it('returns an uncoded handler 400 unchanged', async () => {
+      const error = new CustomHttpRequestError('bad pack', 400);
+      mockedCreateActionHandler.mockRejectedValue(error);
+
+      const response = await invokeRoute(body);
+
+      expect(response.badRequest).toHaveBeenCalledWith({ body: error });
+    });
   });
 
   it('returns 400 PARAMETER_NOT_FOUND when the handler created no Fleet actions', async () => {

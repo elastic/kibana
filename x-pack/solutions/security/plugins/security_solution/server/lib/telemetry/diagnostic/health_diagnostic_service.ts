@@ -7,6 +7,7 @@
 
 import { randomUUID } from 'crypto';
 import semver from 'semver';
+import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import {
   bufferCount,
@@ -440,7 +441,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
           return true;
         }
         const { name, scheduleCron, enabled, expiresAt, stackVersions } = query;
-        if (expiresAt !== undefined && now.getTime() >= new Date(expiresAt).getTime()) {
+        if (expiresAt !== undefined && moment.utc(now).isAfter(moment.utc(expiresAt), 'day')) {
           this.logger.debug('Skipping expired health diagnostic query', {
             queryId: (query as { id?: string }).id,
             name,

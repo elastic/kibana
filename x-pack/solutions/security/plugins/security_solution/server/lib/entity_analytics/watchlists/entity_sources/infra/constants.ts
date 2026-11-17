@@ -37,3 +37,18 @@ export const getStreamPatternFor = (integration: IntegrationType, namespace: str
 
 export const oktaLastFullSyncMarkersIndex = (namespace: string) =>
   `logs-entityanalytics_okta.entity-${namespace}`;
+
+/**
+ * Index that carries the full-sync `completed`/`started` markers for a given integration.
+ * Used by `integrations.syncMarkerIndex` on `entity_analytics_integration` sources — without
+ * it, deletion detection never runs for that source (see sync_markers.ts).
+ */
+export const getLastFullSyncMarkersIndex = (
+  namespace: string,
+  integration: IntegrationType
+): string => {
+  if (integration === 'entityanalytics_ad') {
+    return getStreamPatternFor(integration, namespace);
+  }
+  return oktaLastFullSyncMarkersIndex(namespace);
+};

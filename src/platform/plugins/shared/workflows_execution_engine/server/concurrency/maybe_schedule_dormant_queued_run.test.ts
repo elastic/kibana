@@ -50,6 +50,8 @@ describe('handleConcurrencyBlockedExecution', () => {
     } as unknown as jest.Mocked<WorkflowExecutionRepository>;
     const workflowTaskManager = {
       scheduleDormantQueuedRunTask: jest.fn().mockResolvedValue(undefined),
+      hasActiveTaskForExecution: jest.fn().mockResolvedValue(false),
+      promoteQueuedRunTask: jest.fn().mockResolvedValue(undefined),
       scheduleAndRunImmediateResume: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<WorkflowTaskManager>;
     const internalResumeWorkflowExecution = jest.fn().mockResolvedValue(undefined);
@@ -109,7 +111,57 @@ describe('handleConcurrencyBlockedExecution', () => {
       workflowExecution: execution,
       request,
     });
+    expect(workflowTaskManager.promoteQueuedRunTask).not.toHaveBeenCalled();
     expect(internalResumeWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('schedules and starts a dormant run when promotion already reached pending', async () => {
+    const execution = createExecution({
+      status: ExecutionStatus.PENDING,
+      triggeredBy: 'alert',
+    });
+    const { workflowExecutionRepository, workflowTaskManager, internalResumeWorkflowExecution } =
+      createDependencies(execution);
+
+    await handleConcurrencyBlockedExecution({
+      workflowExecutionId,
+      spaceId,
+      request,
+      workflowExecutionRepository,
+      workflowTaskManager,
+      internalResumeWorkflowExecution,
+      logger,
+    });
+
+    expect(workflowTaskManager.scheduleDormantQueuedRunTask).toHaveBeenCalledWith({
+      workflowExecution: execution,
+      request,
+    });
+    expect(workflowTaskManager.promoteQueuedRunTask).toHaveBeenCalledWith({
+      executionId: workflowExecutionId,
+      triggeredBy: 'alert',
+    });
+    expect(internalResumeWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('leaves a pending execution alone when its dormant task already exists', async () => {
+    const execution = createExecution({ status: ExecutionStatus.PENDING });
+    const { workflowExecutionRepository, workflowTaskManager, internalResumeWorkflowExecution } =
+      createDependencies(execution);
+    workflowTaskManager.hasActiveTaskForExecution.mockResolvedValue(true);
+
+    await handleConcurrencyBlockedExecution({
+      workflowExecutionId,
+      spaceId,
+      request,
+      workflowExecutionRepository,
+      workflowTaskManager,
+      internalResumeWorkflowExecution,
+      logger,
+    });
+
+    expect(workflowTaskManager.scheduleDormantQueuedRunTask).not.toHaveBeenCalled();
+    expect(workflowTaskManager.promoteQueuedRunTask).not.toHaveBeenCalled();
   });
 
   it('does not resume when the terminal execution has no sync parent context', async () => {

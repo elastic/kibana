@@ -50,7 +50,7 @@ describe('validateIgnoredFetcherSetting', () => {
       throw new Error('Expected kibana fetcher fixture to parse');
     }
 
-    const results = validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter, true);
+    const results = validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter);
 
     expect(results).toEqual([
       expect.objectContaining({
@@ -62,16 +62,7 @@ describe('validateIgnoredFetcherSetting', () => {
     ]);
   });
 
-  it('does not warn on kibana.request fetcher when the self-client path is off', () => {
-    const { workflowLookup, yamlLineCounter } = performComputation(KIBANA_FETCHER_YAML);
-    if (!workflowLookup || !yamlLineCounter) {
-      throw new Error('Expected kibana fetcher fixture to parse');
-    }
-
-    expect(validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter)).toEqual([]);
-  });
-
-  it('does not warn on generated kibana.* fetcher when the self-client flag is off', () => {
+  it('warns on generated kibana.* step fetcher keys', () => {
     const yaml = [
       "version: '1'",
       'name: kibana-generated-fetcher',
@@ -91,7 +82,9 @@ describe('validateIgnoredFetcherSetting', () => {
       throw new Error('Expected generated kibana fetcher fixture to parse');
     }
 
-    expect(validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter)).toEqual([]);
+    expect(validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter)).toEqual([
+      expect.objectContaining({ ruleId: 'ignoredFetcherSetting', severity: 'warning' }),
+    ]);
   });
 
   it('does not warn on http connector fetcher keys', () => {

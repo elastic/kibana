@@ -9,7 +9,9 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { getDeploymentInfo } from './deployment_info';
 import { getUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
 import { ESQLExtensionsRegistry } from './extensions_registry';
@@ -18,7 +20,10 @@ import type { EsqlServerPluginSetup, EsqlServerPluginStart } from './types';
 export class EsqlServerPlugin implements Plugin<
   EsqlServerPluginSetup,
   void,
-  { contentManagement: ContentManagementServerSetup },
+  {
+    contentManagement: ContentManagementServerSetup;
+    cloud?: CloudSetup;
+  },
   EsqlServerPluginStart
 > {
   private readonly initContext: PluginInitializerContext;
@@ -30,7 +35,10 @@ export class EsqlServerPlugin implements Plugin<
 
   public setup(
     core: CoreSetup<EsqlServerPluginStart, void>,
-    plugins: { contentManagement: ContentManagementServerSetup }
+    plugins: {
+      contentManagement: ContentManagementServerSetup;
+      cloud?: CloudSetup;
+    }
   ) {
     const { initContext } = this;
 
@@ -44,7 +52,9 @@ export class EsqlServerPlugin implements Plugin<
       }),
     });
 
-    registerRoutes(core, this.extensionsRegistry, initContext);
+    registerRoutes(core, this.extensionsRegistry, initContext, {
+      deployment: getDeploymentInfo(initContext.env, plugins.cloud),
+    });
 
     return {
       getExtensionsRegistry: () => this.extensionsRegistry,

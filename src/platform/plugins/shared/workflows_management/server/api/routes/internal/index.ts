@@ -9,6 +9,9 @@
 
 import { registerDisableAllWorkflowsRoute } from './disable';
 import { registerGetConfigRoute } from './get_config';
+import { registerGetLinkedRulesRoute } from './get_linked_rules';
+import { registerGetReadableWorkflowIdsRoute } from './get_readable_workflow_ids';
+import { registerGetRemovalImpactRoute } from './get_removal_impact';
 import { registerGetWorkflowHistoryRoute } from './get_workflow_history';
 import { registerRestoreWorkflowVersionRoute } from './restore_workflow_version';
 import { registerTriggerEventsLogRoutes } from './trigger_events_log';
@@ -16,8 +19,11 @@ import type { RouteDependencies } from '../types';
 
 export function registerInternalRoutes(deps: RouteDependencies) {
   registerGetConfigRoute(deps);
+  registerGetReadableWorkflowIdsRoute(deps);
   registerDisableAllWorkflowsRoute(deps);
   registerGetWorkflowHistoryRoute(deps);
+  registerGetLinkedRulesRoute(deps);
+  registerGetRemovalImpactRoute(deps);
   registerRestoreWorkflowVersionRoute(deps);
   registerTriggerEventsLogRoutes(deps);
 }

@@ -14,11 +14,13 @@ import type {
   WorkflowExecutionEventDispatchMetadata,
 } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import { getExecutionServiceAccountId } from '../../../service_account_execution';
 import type { ExecutionChainHop } from '../../../utils';
 import { hasExecutionChain, parseDuration, toExecutionChainHop } from '../../../utils';
 import type {
   OutputSizeStats,
   OutputSizeTelemetryFields,
+  WorkflowExecutionRunAs,
 } from '../events/workflows_execution/types';
 
 /**
@@ -61,6 +63,15 @@ export interface WorkflowExecutionTelemetryMetadata extends OutputSizeTelemetryF
    * Number of unique step IDs that were executed (accounts for loops/retries)
    */
   uniqueStepIdsExecuted: number;
+  /**
+   * Whose credentials the execution runs with
+   */
+  runAs: WorkflowExecutionRunAs;
+  /**
+   * Whether the service account came from the parent workflow. Only present when runAs is
+   * 'service_account'.
+   */
+  runAsInherited?: boolean;
   /**
    * Alert rule ID if triggered by alert
    */
@@ -237,6 +248,7 @@ export function extractExecutionMetadata(
   // Extract alert rule ID
   const ruleId = extractAlertRuleId(workflowExecution);
 
+  const runAsContext = extractRunAs(workflowExecution);
   const compositionContext = extractCompositionContext(workflowExecution);
   const eventChainDepth = extractEventChainDepthFromExecution(workflowExecution);
 
@@ -268,6 +280,7 @@ export function extractExecutionMetadata(
     hasRetries,
     hasErrorHandling,
     uniqueStepIdsExecuted: uniqueStepIdsSet.size,
+    ...runAsContext,
     ...(ruleId && { ruleId }),
     ...compositionContext,
     ...(eventChainDepth !== undefined && { eventChainDepth }),
@@ -522,6 +535,25 @@ export function extractCompositionContext(workflowExecution: EsWorkflowExecution
     ...(parentWorkflowId && { parentWorkflowId }),
     ...(parentWorkflowInvocation && { parentWorkflowInvocation }),
     ...(executionChain && { executionChain }),
+  };
+}
+
+/**
+ * Reports whose credentials the execution runs with, using the rule the task runner binds it by.
+ *
+ * @param workflowExecution - The workflow execution
+ * @returns runAs, plus runAsInherited when the execution runs as a service account
+ */
+export function extractRunAs(workflowExecution: EsWorkflowExecution): {
+  runAs: WorkflowExecutionRunAs;
+  runAsInherited?: boolean;
+} {
+  if (!getExecutionServiceAccountId(workflowExecution)) {
+    return { runAs: 'user' };
+  }
+  return {
+    runAs: 'service_account',
+    runAsInherited: Boolean(workflowExecution.effectiveIdentity?.inheritedFrom),
   };
 }
 

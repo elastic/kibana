@@ -47,6 +47,7 @@ export class AgentBuilderDashboardsPlugin implements Plugin<
     const getDashboardClient = async (): Promise<DashboardPluginStart['client']> => {
       const [, { dashboard }] = await coreSetup.getStartServices();
       return {
+        ...dashboard.client,
         read: (savedObjectsClient, id) =>
           dashboard.client.read(savedObjectsClient, id, { isDashboardAppRequest: true }),
       };

@@ -55,6 +55,7 @@ import { scanDashboards } from './scan_dashboards';
 import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
 import { getDashboardStateSchema } from './api/dashboard_state_schemas';
 import { startChangeHistoryClient } from './change_history/change_history_service';
+import { createDashboardWriteClient } from './dashboard_write_client';
 
 export const DEFER_BELOW_FOLD = `labs:dashboard:deferBelowFold` as const;
 
@@ -241,6 +242,7 @@ export class DashboardPlugin implements Plugin<
             )
           ).body;
         },
+        ...createDashboardWriteClient(getCachedDashboardStateSchema),
       },
     };
   }

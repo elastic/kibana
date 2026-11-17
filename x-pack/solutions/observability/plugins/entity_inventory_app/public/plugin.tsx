@@ -11,15 +11,18 @@ import type {
   CoreSetup,
   CoreStart,
   Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import type { PanelOpenerChildDefinition } from '@kbn/core-chrome-browser';
 import { of } from 'rxjs';
 import type {
+  EntityInventoryAppPublicConfig,
   EntityInventoryAppPublicSetup,
   EntityInventoryAppPublicStart,
   EntityInventoryAppSetupDependencies,
   EntityInventoryAppStartDependencies,
 } from './types';
+import { ENTITY_INVENTORY_APP_NAME } from './application/constants';
 import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from './pages';
 
 export class EntityInventoryAppPlugin implements Plugin<
@@ -28,14 +31,19 @@ export class EntityInventoryAppPlugin implements Plugin<
   EntityInventoryAppSetupDependencies,
   EntityInventoryAppStartDependencies
 > {
+  constructor(
+    private readonly initializerContext: PluginInitializerContext<EntityInventoryAppPublicConfig>
+  ) {}
+
   setup(
     core: CoreSetup<EntityInventoryAppStartDependencies, EntityInventoryAppPublicStart>,
     _plugins: EntityInventoryAppSetupDependencies
   ): EntityInventoryAppPublicSetup {
     const visibleIn: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
+    const config = this.initializerContext.config.get();
 
     core.application.register({
-      id: 'entityInventoryApp',
+      id: ENTITY_INVENTORY_APP_NAME,
       title: ENTITY_INVENTORY_TITLE,
       appRoute: '/app/entity-inventory',
       visibleIn: [],
@@ -48,7 +56,7 @@ export class EntityInventoryAppPlugin implements Plugin<
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
-        return renderApp(coreStart, pluginsStart.observabilityShared, params);
+        return renderApp(coreStart, pluginsStart, params, config);
       },
     });
 
@@ -66,7 +74,7 @@ export class EntityInventoryAppPlugin implements Plugin<
           sortKey: 300,
           entries: ENTITY_INVENTORY_PAGES.map(({ title, path }) => ({
             label: title,
-            app: 'entityInventoryApp',
+            app: ENTITY_INVENTORY_APP_NAME,
             path,
           })),
         },
@@ -76,7 +84,7 @@ export class EntityInventoryAppPlugin implements Plugin<
     const navTreeGroup: PanelOpenerChildDefinition = {
       title: ENTITY_INVENTORY_TITLE,
       children: ENTITY_INVENTORY_PAGES.map(({ deepLinkId, title, path }) => ({
-        link: `entityInventoryApp:${deepLinkId}` as const,
+        link: `${ENTITY_INVENTORY_APP_NAME}:${deepLinkId}` as const,
         title,
         getIsActive: ({
           pathNameSerialized,

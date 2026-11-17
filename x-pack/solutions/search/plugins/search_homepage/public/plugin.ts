@@ -5,56 +5,22 @@
  * 2.0.
  */
 
-import type {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
-
-import { docLinks } from '../common/doc_links';
-import { SearchHomepage } from './embeddable';
-import { initQueryClient } from './services/query_client';
 import type {
-  SearchHomepageAppInfo,
   SearchHomepageAppPluginStartDependencies,
-  SearchHomepagePluginSetup,
-  SearchHomepagePluginStart,
   SearchHomepageServicesContextDeps,
 } from './types';
 
-const appInfo: SearchHomepageAppInfo = {
-  id: PLUGIN_ID,
-  appRoute: '/app/elasticsearch/home',
-  title: i18n.translate('xpack.searchHomepage.appTitle', { defaultMessage: 'Home' }),
-};
-
 export class SearchHomepagePlugin implements Plugin<
-  SearchHomepagePluginSetup,
-  SearchHomepagePluginStart,
+  void,
+  void,
   {},
-  {}
+  SearchHomepageAppPluginStartDependencies
 > {
-  private readonly kibanaVersion: string;
-
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.kibanaVersion = this.initializerContext.env.packageInfo.version;
-  }
-
-  public setup(
-    core: CoreSetup<SearchHomepageAppPluginStartDependencies, SearchHomepagePluginStart>
-  ) {
-    const queryClient = initQueryClient(core.notifications.toasts);
-    const result: SearchHomepagePluginSetup = {
-      app: appInfo,
-    };
-
-    const kibanaVersion = this.kibanaVersion;
-
+  public setup(core: CoreSetup<SearchHomepageAppPluginStartDependencies>) {
     core.application.register({
       id: PLUGIN_ID,
       appRoute: '/app/elasticsearch/home',
@@ -64,25 +30,17 @@ export class SearchHomepagePlugin implements Plugin<
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
-        docLinks.setDocLinks(coreStart.docLinks.links);
         const startDeps: SearchHomepageServicesContextDeps = {
           ...depsStart,
           history,
         };
 
-        return renderApp(coreStart, startDeps, element, queryClient, kibanaVersion);
+        return renderApp(coreStart, startDeps, element);
       },
       order: 0,
       visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
     });
-
-    return result;
   }
 
-  public start(core: CoreStart) {
-    return {
-      app: appInfo,
-      SearchHomepage,
-    };
-  }
+  public start() {}
 }

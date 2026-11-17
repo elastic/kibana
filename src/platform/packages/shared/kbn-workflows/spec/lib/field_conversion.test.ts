@@ -348,6 +348,21 @@ describe('applyInputDefaults', () => {
     });
   });
 
+  it('skips properties whose schema is not an object, as in a half-written draft', () => {
+    const inputsSchema = {
+      properties: {
+        bad: null,
+        nested: { type: 'object', properties: { inner: null, size: { default: 3 } } },
+        name: { type: 'string', default: 'Default Name' },
+      },
+    } as unknown as JsonModelSchemaType;
+
+    expect(applyInputDefaults(undefined, inputsSchema)).toEqual({
+      nested: { size: 3 },
+      name: 'Default Name',
+    });
+  });
+
   it('should render default values when a renderer is provided', () => {
     const inputsSchema = normalizeFieldsToJsonSchema({
       properties: {

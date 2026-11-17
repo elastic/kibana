@@ -14,16 +14,16 @@ import {
 import { installAssistantAgent } from './install_assistant_agent';
 
 describe('installAssistantAgent', () => {
-  it('ensures a typed agent in the requested space, hidden from the agent picker', async () => {
+  it('ensures a typed agent in the default space, visible in the agent picker', async () => {
     const agentBuilder = agentBuilderMocks.createStart();
     const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 
-    await installAssistantAgent({ agentBuilder, spaceId: 'space-1', availability });
+    await installAssistantAgent({ agentBuilder, spaceId: 'default', availability });
 
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
-      spaceId: 'space-1',
+      spaceId: 'default',
       availability,
-      hidden: true,
+      hidden: false,
       agent: {
         id: NIGHTSHIFT_ASSISTANT_AGENT_ID,
         type: NIGHTSHIFT_ASSISTANT_AGENT_TYPE_ID,
@@ -39,5 +39,14 @@ describe('installAssistantAgent', () => {
         },
       },
     });
+  });
+  it('refuses to install the assistant in another space', async () => {
+    const agentBuilder = agentBuilderMocks.createStart();
+    const availability = { cacheMode: 'space' as const, handler: jest.fn() };
+
+    await expect(
+      installAssistantAgent({ agentBuilder, spaceId: 'marketing', availability })
+    ).rejects.toThrow(/only available in the "default" space/);
+    expect(agentBuilder.agents.ensure).not.toHaveBeenCalled();
   });
 });

@@ -48,7 +48,10 @@ jest.mock('@kbn/workflows', () => {
 });
 
 jest.mock('./lib/get_user', () => ({
-  getAuthenticatedUser: jest.fn().mockResolvedValue('test-user'),
+  getAuthenticatedUser: jest.fn().mockResolvedValue({
+    executedBy: 'test-user',
+    user: { name: 'Test User', username: 'test-user' },
+  }),
 }));
 
 const mockRunWorkflow = jest.fn();
@@ -78,6 +81,16 @@ jest.mock('./concurrency/concurrency_manager', () => ({
     checkConcurrency: (...args: unknown[]) => mockCheckConcurrency(...args),
     evaluateConcurrencyKey: (...args: unknown[]) => mockEvaluateConcurrencyKey(...args),
   })),
+}));
+jest.mock('./concurrency/concurrency_group_lock', () => ({
+  setConcurrencyGroupLock: jest.fn(),
+  getConcurrencyGroupLock: jest.fn(),
+  withConcurrencyGroupLock: (
+    _lock: unknown,
+    _spaceId: string,
+    _key: string | null | undefined,
+    fn: () => Promise<unknown>
+  ) => fn(),
 }));
 
 const mockDiscardUnstartedExecution = jest.fn().mockResolvedValue(undefined);
@@ -402,6 +415,48 @@ describe('workflow:scheduled task runner', () => {
       space_id: spaceId,
       outcome: 'completed',
     });
+  });
+
+  it('stamps the scheduled run event with the task runAt so a retry of the same slot keeps it', async () => {
+    setupPlugin();
+    mockGetWorkflow.mockResolvedValue({
+      id: workflowId,
+      enabled: true,
+      yaml: 'name: test',
+      definition: {
+        name: 'test',
+        enabled: true,
+        triggers: [{ type: 'scheduled' }],
+        steps: [],
+      },
+    });
+    mockCreateWorkflowExecution.mockImplementation(async (execution: { id: string }) => {
+      mockGetWorkflowExecutionById.mockResolvedValue({
+        id: execution.id,
+        workflowId,
+        spaceId,
+        status: ExecutionStatus.COMPLETED,
+      });
+    });
+
+    const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: createTaskInstance(),
+        fakeRequest: {} as KibanaRequest,
+        setCustomTaskRunEventFields: jest.fn(),
+      })
+    );
+
+    await runner.run();
+
+    expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({
+          event: expect.objectContaining({ scheduledFor: '2024-01-01T10:00:00.000Z' }),
+        }),
+      }),
+      expect.anything()
+    );
   });
 
   it('stamps failed with workflow_execution_id when run fails after create', async () => {

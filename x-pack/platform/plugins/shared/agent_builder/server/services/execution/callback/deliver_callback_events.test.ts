@@ -7,6 +7,7 @@
 
 import { defer, of, throwError, concat } from 'rxjs';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { IBasePath } from '@kbn/core/server';
 import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -34,6 +35,8 @@ const surfacesDeps = {
     attachmentsService: { getTypeDefinition } as unknown as AttachmentServiceStart,
     logger: loggerMock.create(),
     isomer: isomerPluginMock.createStartContract(),
+    basePath: { publicBaseUrl: 'https://kibana.example.com' } as IBasePath,
+    cloud: undefined,
   }),
   request,
 };
@@ -400,7 +403,7 @@ describe('deliverCallbackEvents', () => {
     expect(slack).not.toContain('render_attachment');
   });
 
-  it("renders the surface payload with the execution's request and space", async () => {
+  it("renders the surface payload with the execution's agent, request and space", async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const renderPayload = jest.spyOn(surfacesDeps.surfacesService, 'renderPayload');
 
@@ -414,6 +417,7 @@ describe('deliverCallbackEvents', () => {
 
     expect(renderPayload).toHaveBeenCalledWith(expect.anything(), {
       originType: ConversationOriginType.Slack,
+      agentId: createSlackExecution().agentId,
       request,
       spaceId: 'space-1',
     });

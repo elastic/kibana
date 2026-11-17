@@ -734,8 +734,9 @@ export class ActionsClient {
   public async listTypes({
     featureId,
     includeSystemActionTypes = false,
+    sandboxCapableOnly = false,
   }: ListTypesParams = {}): Promise<ConnectorType[]> {
-    return listTypes(this.context, { featureId, includeSystemActionTypes });
+    return listTypes(this.context, { featureId, includeSystemActionTypes, sandboxCapableOnly });
   }
 
   public isActionTypeEnabled(

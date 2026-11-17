@@ -12,7 +12,7 @@ import {
   EventActorType,
   type ChatEvent,
 } from '@kbn/agent-builder-common';
-import { ConversationStreamService, type ChatEventSource } from './conversation_stream_service';
+import { ConversationStreamService } from './conversation_stream_service';
 import {
   EXECUTION_STREAMING_EVENT_TYPE,
   type ExecutionStreamingEvent,
@@ -88,36 +88,23 @@ const messageOf = (events: TimelineDisplayEvent[]): string | undefined => {
   return streaming?.data.message;
 };
 
-// Inject a fake source backed by per-conversation Subjects, so the fold can be driven event by
-// event without an EventsService.
-const makeFakeSource = () => {
-  const subjects = new Map<string, Subject<ChatEvent>>();
-  const runEndings = new Map<string, Subject<void>>();
-  const runStarts = new Subject<string>();
-  const getSubject = (id: string): Subject<ChatEvent> => {
-    if (!subjects.has(id)) subjects.set(id, new Subject());
-    return subjects.get(id)!;
+/**
+ * Drives the reducer the way a mutation does: a stream (a Subject here) piped through `trackStream`.
+ * `start` subscribes, which marks the run as running; `end` completes the stream, which is what
+ * a completed, errored or aborted connection does through `finalize`.
+ */
+const makeRun = (service: ConversationStreamService, conversationId: string) => {
+  const stream$ = new Subject<ChatEvent>();
+  return {
+    start: () => stream$.pipe(service.trackStream(conversationId)).subscribe(),
+    push: (event: ChatEvent) => stream$.next(event),
+    end: () => stream$.complete(),
   };
-  const getStreamEndings = (id: string): Subject<void> => {
-    if (!runEndings.has(id)) runEndings.set(id, new Subject());
-    return runEndings.get(id)!;
-  };
-  const source: ChatEventSource = {
-    // BrowserChatEvent = ChatEvent, structurally identical
-    getChatEvents$: (conversationId) => getSubject(conversationId).asObservable() as any,
-    getStreamEnded$: (conversationId) => getStreamEndings(conversationId).asObservable(),
-    getStreamStarted$: () => runStarts.asObservable(),
-  };
-  const startRun = (id: string) => runStarts.next(id);
-  // What `propagateEvents`' `finalize` does in production: the run terminated, however it ended.
-  const endRun = (id: string) => getStreamEndings(id).next();
-  return { source, getSubject, startRun, endRun };
 };
 
 describe('ConversationStreamService', () => {
   it('emits [] immediately on subscribe before any event', () => {
-    const { source } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
     const emissions: TimelineDisplayEvent[][] = [];
 
     const sub = service.getActiveStream$('A').subscribe((state) => emissions.push(state));
@@ -126,29 +113,33 @@ describe('ConversationStreamService', () => {
     sub.unsubscribe();
   });
 
-  it('does not subscribe to the source until the returned observable is subscribed', () => {
-    const { source, getSubject } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+  it('trackStream does not touch the stream until it is subscribed', () => {
+    const service = new ConversationStreamService();
+    const stream$ = new Subject<ChatEvent>();
 
-    // Obtained but never subscribed - no source subscription, no map entry to leak
-    service.getActiveStream$('A');
-    expect(getSubject('A').observed).toBe(false);
+    // Obtained but never subscribed - nothing is reduced and nothing is retained.
+    const tracked$ = stream$.pipe(service.trackStream('A'));
+    stream$.next(executionStartedEvent());
+    stream$.next(messageChunkEvent('missed'));
+    expect(service.getSnapshot('A')).toEqual([]);
 
-    const sub = service.getActiveStream$('A').subscribe(() => {});
-    expect(getSubject('A').observed).toBe(true);
-    sub.unsubscribe();
+    tracked$.subscribe();
+    stream$.next(executionStartedEvent());
+    stream$.next(messageChunkEvent('seen'));
+    expect(messageOf(service.getSnapshot('A'))).toBe('seen');
   });
 
   it('emits accumulated states in order as events are pushed', () => {
-    const { source, getSubject } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
     const emissions: TimelineDisplayEvent[][] = [];
 
     service.getActiveStream$('A').subscribe((state) => emissions.push(state));
 
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(messageChunkEvent('Hello'));
-    getSubject('A').next(messageChunkEvent(' World'));
+    run.start();
+    run.push(executionStartedEvent());
+    run.push(messageChunkEvent('Hello'));
+    run.push(messageChunkEvent(' World'));
 
     // [0] = initial seed, [1] = after execution_started, [2] = after 'Hello', [3] = after ' World'
     expect(emissions).toHaveLength(4);
@@ -158,18 +149,21 @@ describe('ConversationStreamService', () => {
   });
 
   it('isolates events per conversation - events for A do not appear on B stream', () => {
-    const { source, getSubject } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
+    const runA = makeRun(service, 'A');
+    const runB = makeRun(service, 'B');
     const fromA: TimelineDisplayEvent[][] = [];
     const fromB: TimelineDisplayEvent[][] = [];
 
     service.getActiveStream$('A').subscribe((state) => fromA.push(state));
     service.getActiveStream$('B').subscribe((state) => fromB.push(state));
 
-    getSubject('A').next(executionStartedEvent());
-    getSubject('B').next(executionStartedEvent());
-    getSubject('A').next(messageChunkEvent('a1'));
-    getSubject('B').next(messageChunkEvent('b1'));
+    runA.start();
+    runB.start();
+    runA.push(executionStartedEvent());
+    runB.push(executionStartedEvent());
+    runA.push(messageChunkEvent('a1'));
+    runB.push(messageChunkEvent('b1'));
 
     expect(messageOf(fromA[fromA.length - 1])).toBe('a1');
     expect(messageOf(fromB[fromB.length - 1])).toBe('b1');
@@ -177,14 +171,31 @@ describe('ConversationStreamService', () => {
     expect(fromA.every((state) => messageOf(state) !== 'b1')).toBe(true);
   });
 
-  it('late subscriber immediately receives current folded state (BehaviorSubject replay)', () => {
-    const { source, getSubject } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+  it('a second stream for the same conversation is added to the same state', () => {
+    // Two connections to one run in one view never happen, but the reducer does not care which
+    // connection an event came from: it is one state per conversation.
+    const service = new ConversationStreamService();
+    const first = makeRun(service, 'A');
+    const second = makeRun(service, 'A');
 
-    // First subscriber drives the fold to "Hello"
+    first.start();
+    first.push(executionStartedEvent());
+    first.push(messageChunkEvent('one'));
+    second.start();
+    second.push(messageChunkEvent(' two'));
+
+    expect(messageOf(service.getSnapshot('A'))).toBe('one two');
+  });
+
+  it('late subscriber immediately receives the current state (BehaviorSubject replay)', () => {
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
+
+    // First subscriber drives the state to "Hello"
     service.getActiveStream$('A').subscribe(() => {});
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(messageChunkEvent('Hello'));
+    run.start();
+    run.push(executionStartedEvent());
+    run.push(messageChunkEvent('Hello'));
 
     // Late subscriber - gets the current BehaviorSubject value immediately, not initial state
     const lateEmissions: TimelineDisplayEvent[][] = [];
@@ -195,137 +206,143 @@ describe('ConversationStreamService', () => {
     lateSub.unsubscribe();
   });
 
-  it('tears down source subscription once the run ends with no subscribers left', () => {
-    // maybeTeardown keeps the stream alive while the run is mid-flight.
-    // Once the run has ended, it tears down regardless of idle state.
-    const { source, getSubject, endRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+  it('keeps updating from a run in flight after the consumer leaves, so a new consumer catches up', () => {
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
 
-    // Subscribe, then push events so live events exist (run in flight)
-    const sub = service.getActiveStream$('Z').subscribe(() => {});
-    getSubject('Z').next(executionStartedEvent());
-    getSubject('Z').next(messageChunkEvent('running'));
-
-    // Unsubscribe - finalize fires maybeTeardown:
-    //   observed=false, ended=false, live events exist (not idle) -> keep alive
+    const sub = service.getActiveStream$('A').subscribe(() => {});
+    run.start();
+    run.push(executionStartedEvent());
+    run.push(messageChunkEvent('first'));
     sub.unsubscribe();
-    expect(getSubject('Z').observed).toBe(true); // source still subscribed
 
-    // The run ends: onStreamEnded drops the live events, then calls maybeTeardown:
-    //   observed=false, idle -> teardown
-    endRun('Z');
-    expect(getSubject('Z').observed).toBe(false); // source subscription torn down
+    // Still in flight: the state is held and keeps updating.
+    run.push(messageChunkEvent(' half'));
+
+    let state: TimelineDisplayEvent[] | undefined;
+    service.getActiveStream$('A').subscribe((next) => (state = next));
+    expect(messageOf(state ?? [])).toBe('first half');
   });
 
   it('starts fresh live events when a run ends without a terminal event (stop, error, disconnect)', () => {
-    const { source, getSubject, endRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
 
     let state: TimelineDisplayEvent[] | undefined;
     service.getActiveStream$('A').subscribe((next) => (state = next));
 
     // Run 1 streams, then the user hits stop - no terminal event ever arrives
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(messageChunkEvent('abandoned answer'));
-    endRun('A');
+    const first = makeRun(service, 'A');
+    first.start();
+    first.push(executionStartedEvent());
+    first.push(messageChunkEvent('abandoned answer'));
+    first.end();
     expect(state).toEqual([]);
 
     // Run 2 must not inherit run 1's live events
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(messageChunkEvent('second answer'));
+    const second = makeRun(service, 'A');
+    second.start();
+    second.push(executionStartedEvent());
+    second.push(messageChunkEvent('second answer'));
 
     expect(messageOf(state ?? [])).toBe('second answer');
   });
 
   it('keeps a second run alive when the consumer leaves mid-stream', () => {
-    const { source, getSubject, endRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
 
     // Run 1 finishes
     const sub = service.getActiveStream$('A').subscribe(() => {});
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(messageChunkEvent('first'));
-    endRun('A');
+    const first = makeRun(service, 'A');
+    first.start();
+    first.push(executionStartedEvent());
+    first.push(messageChunkEvent('first'));
+    first.end();
 
     // Run 2 starts, then the user navigates to another conversation
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(messageChunkEvent('second'));
+    const second = makeRun(service, 'A');
+    second.start();
+    second.push(executionStartedEvent());
+    second.push(messageChunkEvent('second'));
     sub.unsubscribe();
 
-    // Run 2 is still in flight, so the stream must survive and keep folding
-    expect(getSubject('A').observed).toBe(true);
-    getSubject('A').next(messageChunkEvent(' half'));
+    // Run 2 is still in flight, so the state must survive and keep updating
+    second.push(messageChunkEvent(' half'));
 
     let state: TimelineDisplayEvent[] | undefined;
     service.getActiveStream$('A').subscribe((next) => (state = next));
     expect(messageOf(state ?? [])).toBe('second half');
   });
 
-  it('the start signal retains a stream that has no subscriber and no cursor yet', () => {
-    // The gap this closes: a run begins before anything subscribes and before `execution_started`
-    // sets the cursor. Without the start signal the stream would be reclaimed immediately.
-    const { source, getSubject, startRun } = makeFakeSource();
-    // The constructor wires the start listener; we assert its side effect, not the instance.
-    new ConversationStreamService(source);
+  it('a running stream holds state recorded before its cursor, even with no subscriber', () => {
+    // The gap this closes: the resume mutation records its optimistic answer before the stream
+    // subscribes, and the consumer may leave before `execution_started` sets the cursor. Only
+    // `running` keeps that state from being reclaimed.
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
+    const promptResponse = {
+      id: 'pr-1',
+      type: TimelineEventType.promptResponse,
+      created_at: new Date().toISOString(),
+      actor: { type: EventActorType.user, id: 'user' },
+      data: { prompt_requested_event_id: 'pause-1', responses: {} },
+    } as TimelineDisplayEvent;
 
-    startRun('A');
-
-    // The service ensured the stream and marked it running, so the source is subscribed and held.
-    expect(getSubject('A').observed).toBe(true);
-  });
-
-  it('releases a start-retained stream once the run ends with nothing to keep', () => {
-    const { source, getSubject, startRun, endRun } = makeFakeSource();
-    // The constructor wires the start listener; we assert its side effect, not the instance.
-    new ConversationStreamService(source);
-
-    startRun('A');
-    expect(getSubject('A').observed).toBe(true);
-
-    // No subscriber, no cursor - once running clears, the stream is reclaimed.
-    endRun('A');
-    expect(getSubject('A').observed).toBe(false);
-  });
-
-  it('keeps a running stream alive when the only subscriber leaves before the cursor is set', () => {
-    const { source, getSubject, startRun, endRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
-
-    startRun('A');
+    service.recordPromptResponse('A', promptResponse as any);
+    run.start();
     const sub = service.getActiveStream$('A').subscribe(() => {});
-
-    // Subscriber leaves before any `execution_started`, so there is no cursor - only running holds it.
     sub.unsubscribe();
-    expect(getSubject('A').observed).toBe(true);
 
-    endRun('A');
-    expect(getSubject('A').observed).toBe(false);
+    expect(service.getSnapshot('A').find((e) => e.id === 'pr-1')).toBeDefined();
   });
 
-  it('sealed live events (terminal present) survive streamEnded', () => {
-    const { source, getSubject, endRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+  it('releases a run that ends with nothing to keep', () => {
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
+    const promptResponse = {
+      id: 'pr-1',
+      type: TimelineEventType.promptResponse,
+      created_at: new Date().toISOString(),
+      actor: { type: EventActorType.user, id: 'user' },
+      data: { prompt_requested_event_id: 'pause-1', responses: {} },
+    } as TimelineDisplayEvent;
+
+    run.start();
+    run.push(executionStartedEvent());
+    service.recordPromptResponse('A', promptResponse as any);
+    expect(service.getSnapshot('A')).not.toEqual([]);
+
+    // No subscriber and the run ends without a terminal: the half-written state is dropped and
+    // nothing holds the stream any more.
+    run.end();
+    expect(service.getSnapshot('A')).toEqual([]);
+  });
+
+  it('sealed live events (terminal present) survive the end of the stream', () => {
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
 
     let state: TimelineDisplayEvent[] | undefined;
     service.getActiveStream$('A').subscribe((next) => (state = next));
 
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(executionTerminatedEvent());
+    run.start();
+    run.push(executionStartedEvent());
+    run.push(executionTerminatedEvent());
     expect(hasTerminal(state ?? [])).toBe(true);
 
-    endRun('A');
+    run.end();
     expect(hasTerminal(state ?? [])).toBe(true);
   });
 
   it('a failed terminal seals the live events too', () => {
-    const { source, getSubject, endRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
 
     let state: TimelineDisplayEvent[] | undefined;
     service.getActiveStream$('A').subscribe((next) => (state = next));
 
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next({
+    run.start();
+    run.push(executionStartedEvent());
+    run.push({
       type: TimelineEventType.executionFailed,
       id: `${ROUND_ID}::execution_failed`,
       created_at: '2026-01-01T00:00:09.000Z',
@@ -335,105 +352,106 @@ describe('ConversationStreamService', () => {
       data: { error: { code: 'internalError', message: 'boom' }, time_to_last_token: 20 },
     } as ChatEvent);
 
-    endRun('A');
+    run.end();
     expect(state?.some((event) => event.type === TimelineEventType.executionFailed)).toBe(true);
   });
 
-  it('unsealed live events are still cleared on streamEnded', () => {
-    const { source, getSubject, endRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+  it('unsealed live events are still cleared when the stream ends', () => {
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
 
     let state: TimelineDisplayEvent[] | undefined;
     service.getActiveStream$('A').subscribe((next) => (state = next));
 
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(messageChunkEvent('partial'));
+    run.start();
+    run.push(executionStartedEvent());
+    run.push(messageChunkEvent('partial'));
     expect(hasTerminal(state ?? [])).toBe(false);
 
-    endRun('A');
+    run.end();
+    expect(state).toEqual([]);
+  });
+
+  it('a stream that errors ends the same way as one that completes', () => {
+    const service = new ConversationStreamService();
+    const stream$ = new Subject<ChatEvent>();
+
+    let state: TimelineDisplayEvent[] | undefined;
+    service.getActiveStream$('A').subscribe((next) => (state = next));
+
+    stream$.pipe(service.trackStream('A')).subscribe({ error: () => {} });
+    stream$.next(executionStartedEvent());
+    stream$.next(messageChunkEvent('partial'));
+    stream$.error(new Error('boom'));
+
     expect(state).toEqual([]);
   });
 
   it('clears a half-written resume even though the paused execution left a terminal behind', () => {
-    const { source, getSubject, endRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
 
     let state: TimelineDisplayEvent[] | undefined;
     service.getActiveStream$('A').subscribe((next) => (state = next));
 
+    run.start();
     // Execution 0 pauses for the human, so its terminal stays in the list.
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(executionTerminatedEvent());
+    run.push(executionStartedEvent());
+    run.push(executionTerminatedEvent());
     // The human answers and execution 1 starts streaming.
-    getSubject('A').next(resumeStartedEvent());
-    getSubject('A').next(messageChunkEvent('half'));
+    run.push(resumeStartedEvent());
+    run.push(messageChunkEvent('half'));
     expect(hasTerminal(state ?? [])).toBe(true);
 
     // The cursor, not the presence of a terminal, says a run is in flight.
-    endRun('A');
+    run.end();
     expect(state).toEqual([]);
   });
 
-  it('sealed unobserved stream gets torn down by maybeTeardown', () => {
-    const { source, getSubject, endRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+  it('re-subscribe after an ended run creates a fresh stream emitting []', () => {
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'X');
 
-    const sub = service.getActiveStream$('A').subscribe(() => {});
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(executionTerminatedEvent());
-    endRun('A');
-
-    // sealed live events kept, subscriber still active - not torn down yet
-    expect(getSubject('A').observed).toBe(true);
-
-    // Unsubscribe - finalize fires maybeTeardown: sealed + unobserved -> teardown allowed
-    sub.unsubscribe();
-    expect(getSubject('A').observed).toBe(false);
-  });
-
-  it('re-subscribe after ended stream creates a fresh stream emitting []', () => {
-    const { source, getSubject, endRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
-
-    // Create, run, then tear down
+    // Create, run, then let it end with no subscriber
     const sub = service.getActiveStream$('X').subscribe(() => {});
-    getSubject('X').next(executionStartedEvent());
-    getSubject('X').next(messageChunkEvent('data')); // live events exist
+    run.start();
+    run.push(executionStartedEvent());
+    run.push(messageChunkEvent('data')); // live events exist
     sub.unsubscribe(); // kept alive (not idle, not ended)
-    endRun('X'); // tears down, deletes from streams map
+    run.end(); // nothing holds it any more
 
-    // Re-subscribe: ensure() finds nothing, creates a fresh stream
+    // Re-subscribe: a fresh state with no live events
     const newEmissions: TimelineDisplayEvent[][] = [];
     const newSub = service.getActiveStream$('X').subscribe((state) => newEmissions.push(state));
 
-    // Fresh BehaviorSubject starts with no live events
     expect(newEmissions).toHaveLength(1);
     expect(newEmissions[0]).toEqual([]);
     newSub.unsubscribe();
   });
 
   it('getSnapshot returns the current live events without subscribing', () => {
-    const { source, getSubject } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
 
     expect(service.getSnapshot('A')).toEqual([]);
 
-    service.getActiveStream$('A').subscribe(() => {});
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(messageChunkEvent('partial'));
+    run.start();
+    run.push(executionStartedEvent());
+    run.push(messageChunkEvent('partial'));
 
     expect(messageOf(service.getSnapshot('A'))).toBe('partial');
   });
 
   it('clearPersistedExecution drops sealed live events with the matching execution id', () => {
-    const { source, getSubject, endRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
 
     let state: TimelineDisplayEvent[] | undefined;
     service.getActiveStream$('A').subscribe((next) => (state = next));
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(executionTerminatedEvent());
-    endRun('A');
+    run.start();
+    run.push(executionStartedEvent());
+    run.push(executionTerminatedEvent());
+    run.end();
     expect(hasTerminal(state ?? [])).toBe(true);
 
     service.clearPersistedExecution('A', EXECUTION_ID);
@@ -442,30 +460,32 @@ describe('ConversationStreamService', () => {
   });
 
   it('clearPersistedExecution ignores a different execution id and a run in flight', () => {
-    const { source, getSubject } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
 
     let state: TimelineDisplayEvent[] | undefined;
     service.getActiveStream$('A').subscribe((next) => (state = next));
 
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(messageChunkEvent('running'));
+    run.start();
+    run.push(executionStartedEvent());
+    run.push(messageChunkEvent('running'));
     service.clearPersistedExecution('A', 'exec-1');
     expect(messageOf(state ?? [])).toBe('running');
 
-    getSubject('A').next(executionTerminatedEvent('exec-2'));
+    run.push(executionTerminatedEvent('exec-2'));
     service.clearPersistedExecution('A', 'exec-1');
     expect(hasTerminal(state ?? [])).toBe(true);
   });
 
   it('clearPersistedExecution tears the stream down when nobody observes it', () => {
-    const { source, getSubject, endRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
 
     const sub = service.getActiveStream$('A').subscribe(() => {});
-    getSubject('A').next(executionStartedEvent());
-    getSubject('A').next(executionTerminatedEvent());
-    endRun('A');
+    run.start();
+    run.push(executionStartedEvent());
+    run.push(executionTerminatedEvent());
+    run.end();
     sub.unsubscribe();
     // A sealed, unobserved stream is already reclaimable; re-observe to keep it, then leave.
     const again = service.getActiveStream$('A').subscribe(() => {});
@@ -476,8 +496,7 @@ describe('ConversationStreamService', () => {
   });
 
   it('recordPromptResponse inserts the event into the live stream immediately', () => {
-    const { source } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
     const emissions: TimelineDisplayEvent[][] = [];
 
     service.getActiveStream$('A').subscribe((state) => emissions.push(state));
@@ -497,8 +516,7 @@ describe('ConversationStreamService', () => {
   });
 
   it('recordPromptResponse creates the stream when none exists', () => {
-    const { source } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
 
     const promptResponse = {
       id: 'pr-1',
@@ -513,8 +531,7 @@ describe('ConversationStreamService', () => {
   });
 
   it('clearPromptResponse removes the event by id', () => {
-    const { source } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
     const emissions: TimelineDisplayEvent[][] = [];
 
     service.getActiveStream$('A').subscribe((state) => emissions.push(state));
@@ -535,40 +552,29 @@ describe('ConversationStreamService', () => {
   });
 
   it('clearPromptResponse is a no-op when the stream does not exist', () => {
-    const { source } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
 
     expect(() => service.clearPromptResponse('A', 'pr-1')).not.toThrow();
   });
 
   it('clearPromptResponse is a no-op when the event is not in the stream', () => {
-    const { source } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    const service = new ConversationStreamService();
     service.getActiveStream$('A').subscribe(() => {});
 
     expect(() => service.clearPromptResponse('A', 'pr-999')).not.toThrow();
   });
 
-  it('dispose stops the service from reacting to further start signals', () => {
-    const { source, getSubject, startRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+  it('dispose drops every held stream', () => {
+    const service = new ConversationStreamService();
+    const run = makeRun(service, 'A');
+
+    run.start();
+    run.push(executionStartedEvent());
+    run.push(messageChunkEvent('partial'));
+    expect(messageOf(service.getSnapshot('A'))).toBe('partial');
 
     service.dispose();
-    startRun('A');
 
-    expect(getSubject('A').observed).toBe(false);
     expect(service.getSnapshot('A')).toEqual([]);
-  });
-
-  it('dispose unsubscribes any streams still held at teardown time', () => {
-    const { source, getSubject, startRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
-
-    startRun('A');
-    expect(getSubject('A').observed).toBe(true);
-
-    service.dispose();
-
-    expect(getSubject('A').observed).toBe(false);
   });
 });

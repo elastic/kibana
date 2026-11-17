@@ -73,6 +73,7 @@ const applyAssignee = async (
 export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeAction => ({
   id: EDIT_EPISODE_ASSIGNEE_ACTION_ID,
   order: 50,
+  enforcesOwnPrivileges: false,
   displayName: i18n.EDIT_ASSIGNEE,
   iconType: 'user',
   isCompatible: ({ episodes }: EpisodeActionContext) => episodes.some(episodeSupportsActions),

@@ -16,6 +16,7 @@ import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
 import type { Subscription } from 'rxjs';
+import { registerOsqueryWorkflowSteps } from './workflows/register';
 import { getInternalSavedObjectsClient } from './utils/get_internal_saved_object_client';
 import { upgradeIntegration } from './utils/upgrade_integration';
 import { getPackagePolicyCreateCallback } from './lib/create_package_policy_callback';
@@ -77,6 +78,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.rruleSchedulingEnabled = experimentalFeatures.rruleScheduling;
 
     registerFeatures(plugins.features);
+
+    registerOsqueryWorkflowSteps({
+      experimentalFeatures,
+      workflowsExtensions: plugins.workflowsExtensions,
+    });
 
     const router = core.http.createRouter<DataRequestHandlerContext>();
 
@@ -201,7 +207,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
         // If package is installed we want to make sure all needed assets are installed
         if (packageInfo) {
-          await this.initialize(core, dataViewsService);
+          await this.initializeOsqueryResources(core, dataViewsService);
         }
 
         // Upgrade integration into 1.6.0 and rollover if found 'generic' dataset - we do not want to wait for it
@@ -215,7 +221,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
             getPackagePolicyCreateCallback(
               core,
               this.osqueryAppContextService,
-              () => this.initialize(core, dataViewsService),
+              () => this.initializeOsqueryResources(core, dataViewsService),
               this.rruleSchedulingEnabled
             )
           );
@@ -243,8 +249,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.createActionService?.stop();
   }
 
-  async initialize(core: CoreStart, dataViewsService: DataViewsService): Promise<void> {
-    this.logger.debug('initialize');
+  async initializeOsqueryResources(
+    core: CoreStart,
+    dataViewsService: DataViewsService
+  ): Promise<void> {
+    this.logger.debug('initializeOsqueryResources');
     await initializeTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
     await initializeTransforms(core.elasticsearch.client.asInternalUser, this.logger);
     await createDataViews(dataViewsService);

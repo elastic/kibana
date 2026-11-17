@@ -8,7 +8,6 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { docLinks } from '@kbn/search-connectors/constants/doc_links';
 import type { ManagementApp, ManagementAppMountParams } from '@kbn/management-plugin/public';
-import type { FeatureCatalogueSolution } from '@kbn/home-plugin/public';
 import { type ClientConfigType } from '../common/types/config';
 import { getConnectorFullTypes, getConnectorTypes } from '../common/lib/connector_types';
 import type {
@@ -45,8 +44,8 @@ export class SearchConnectorsPlugin implements Plugin<
 
     // Register the management app synchronously in setup so the management plugin's
     // start-phase capability sweep can disable it for users without the
-    // `management.data.content_connectors` capability. Solution/config gating is
-    // applied later in start() via this.contentConnectorsApp.disable().
+    // `management.data.content_connectors` capability. Config gating is applied
+    // later in start() via this.contentConnectorsApp.disable().
     this.contentConnectorsApp = management.sections.section.data.registerApp({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -81,13 +80,7 @@ export class SearchConnectorsPlugin implements Plugin<
     docLinks.setDocLinks(core.docLinks.links);
     const connectorTypes = getConnectorFullTypes(http.staticAssets);
 
-    const hasAnyContentConnectorsSolutions = services.home.featureCatalogue
-      .getSolutions()
-      .some(({ id }: FeatureCatalogueSolution) =>
-        ['securitySolution', 'observability'].includes(id)
-      );
-
-    if (!this.config.ui.enabled || !hasAnyContentConnectorsSolutions) {
+    if (!this.config.ui.enabled) {
       this.contentConnectorsApp?.disable();
     }
 

@@ -32,6 +32,7 @@ const DEFAULT_ADD_TO_DATASET_LABEL = i18n.translate('xpack.evals.addToDatasetAct
 /** Browser-exposed subset of the evals config (see `exposeToBrowser` in `server/config.ts`). */
 interface EvalsPublicConfig {
   enabled: boolean;
+  mode: 'runtime' | 'full';
 }
 
 export class EvalsPublicPlugin implements Plugin<
@@ -50,7 +51,12 @@ export class EvalsPublicPlugin implements Plugin<
     coreSetup: CoreSetup<EvalsStartDependencies>,
     { management, workflowsExtensions }: EvalsSetupDependencies
   ): EvalsPublicSetup {
-    if (this.config.enabled && workflowsExtensions) {
+    // Runtime mode has no evals UI, routes or steps for these to reach.
+    if (!this.config.enabled || this.config.mode !== 'full') {
+      return {};
+    }
+
+    if (workflowsExtensions) {
       registerEvalsPublicWorkflowSteps(workflowsExtensions);
     }
 
@@ -87,6 +93,7 @@ export class EvalsPublicPlugin implements Plugin<
   }
 
   start(core: CoreStart, _plugins: EvalsStartDependencies): EvalsPublicStart {
+    // Runtime mode registers no `evals` feature server-side, so this capability is absent there.
     const canAddToDataset =
       !!core.application.capabilities?.[PLUGIN_ID]?.[EVALS_UI_PRIVILEGES.manage];
 

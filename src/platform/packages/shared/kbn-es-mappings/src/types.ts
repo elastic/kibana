@@ -25,6 +25,7 @@ export type StrictMappingTypeMapping = Strict<api.MappingTypeMapping>;
 
 export type AnyMapping = Strict<api.MappingProperty>;
 export type KeywordMapping = Strict<api.MappingKeywordProperty>;
+export type WildcardMapping = Strict<api.MappingWildcardProperty>;
 export type TextMapping = Strict<api.MappingTextProperty>;
 export type MatchOnlyTextMapping = Strict<api.MappingMatchOnlyTextProperty>;
 export type SemanticTextMapping = Strict<api.MappingSemanticTextProperty>;
@@ -54,6 +55,7 @@ type SupportedMappingPropertyType = AllMappingPropertyType &
     | 'semantic_text'
     | 'integer'
     | 'keyword'
+    | 'wildcard'
     | 'boolean'
     | 'date'
     | 'short'
@@ -102,41 +104,43 @@ export type ToPrimitives<O extends { properties: Record<string, MappingProperty>
                 ? TEnum
                 : never
               : string
-            : T extends 'text'
+            : T extends 'wildcard'
               ? string
-              : T extends 'match_only_text'
+              : T extends 'text'
                 ? string
-                : T extends 'semantic_text'
+                : T extends 'match_only_text'
                   ? string
-                  : T extends 'integer'
-                    ? number
-                    : T extends 'long'
+                  : T extends 'semantic_text'
+                    ? string
+                    : T extends 'integer'
                       ? number
-                      : T extends 'short'
+                      : T extends 'long'
                         ? number
-                        : T extends 'float'
+                        : T extends 'short'
                           ? number
-                          : T extends 'double'
+                          : T extends 'float'
                             ? number
-                            : T extends 'byte'
+                            : T extends 'double'
                               ? number
-                              : T extends 'boolean'
-                                ? boolean
-                                : T extends 'date'
-                                  ? O['properties'][K] extends {
-                                      format: 'strict_date_optional_time';
-                                    }
-                                    ? string
-                                    : string | number
-                                  : T extends 'date_nanos'
-                                    ? string
-                                    : T extends 'flattened'
-                                      ? Record<string, unknown>
-                                      : T extends 'object'
-                                        ? O['properties'][K] extends AnyMappingDefinition
-                                          ? ToPrimitives<O['properties'][K]>
+                              : T extends 'byte'
+                                ? number
+                                : T extends 'boolean'
+                                  ? boolean
+                                  : T extends 'date'
+                                    ? O['properties'][K] extends {
+                                        format: 'strict_date_optional_time';
+                                      }
+                                      ? string
+                                      : string | number
+                                    : T extends 'date_nanos'
+                                      ? string
+                                      : T extends 'flattened'
+                                        ? Record<string, unknown>
+                                        : T extends 'object'
+                                          ? O['properties'][K] extends AnyMappingDefinition
+                                            ? ToPrimitives<O['properties'][K]>
+                                            : never
                                           : never
-                                        : never
           : never;
     };
 

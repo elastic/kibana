@@ -12,6 +12,13 @@
  */
 export const WORKFLOWS_MANAGEMENT_FEATURE_ID = 'workflowsManagement';
 
+export const WORKFLOW_RUN_NAME_MAX_LENGTH = 1024;
+
+/**
+ * Longer substring patterns can be too complex for the `wildcard` field to determinize.
+ */
+export const WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH = 128;
+
 /**
  * UI Setting ID for enabling / disabling the workflows management UI
  */
@@ -25,13 +32,6 @@ export const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID = 'workflows:ui:show
  * Feature flag ID for enabling / disabling the workflow execution stats bar UI
  */
 export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStatsBar:enabled';
-
-/**
- * When true, all `kibana.*` steps use Core `http.selfClient`.
- * When false, all `kibana.*` steps use the global `fetch` client, including YAML `fetcher`.
- */
-export const WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG =
-  'workflows.kibanaRequest.coreSelfClientEnabled';
 
 /**
  * Global Advanced Setting gating the Workflow Template Library tech preview.

@@ -88,6 +88,21 @@ const makeSearchHit = ({
   },
 });
 
+const successfulShards = { total: 1, successful: 1, failed: 0 };
+
+const failedShards: SearchResult<RuleAlertData>['_shards'] = {
+  total: 2,
+  successful: 1,
+  failed: 1,
+  failures: [
+    {
+      shard: 0,
+      index: '.internal.alerts-test.alerts-default-000001',
+      reason: { type: 'circuit_breaking_exception', reason: '[parent] Data too large' },
+    },
+  ],
+};
+
 const reconcileWithSearch = (
   search: jest.Mock,
   state: ReturnType<typeof makeStateFromUuids> = makeStateFromUuids([]),
@@ -97,7 +112,8 @@ const reconcileWithSearch = (
     ruleId,
     ...state,
     maxAlerts,
-    search,
+    // Responses that do not set _shards come from shards that all succeeded.
+    search: async (queryBody) => ({ _shards: successfulShards, ...(await search(queryBody)) }),
     logger,
     ruleInfoMessage,
     logTags,
@@ -456,6 +472,46 @@ describe('reconcile_tracked_alerts', () => {
       await expect(reconcileWithSearch(search)).rejects.toThrow('search failure');
     });
 
+    it('throws when the tracked alerts query fails on some shards', async () => {
+      const search = jest.fn().mockResolvedValueOnce({ hits: [], _shards: failedShards });
+
+      await expect(reconcileWithSearch(search, makeStateFromUuids(['uuid-1']))).rejects.toThrow(
+        'Failed to load tracked alerts from 1 of 2 shards: circuit_breaking_exception'
+      );
+      expect(search).toHaveBeenCalledTimes(1);
+    });
+
+    it('lists each shard failure reason once', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        hits: [],
+        _shards: {
+          total: 3,
+          successful: 0,
+          failed: 3,
+          failures: [
+            { reason: { type: 'circuit_breaking_exception' } },
+            { reason: { type: 'circuit_breaking_exception' } },
+            { reason: { type: 'es_rejected_execution_exception' } },
+          ],
+        },
+      });
+
+      await expect(reconcileWithSearch(search)).rejects.toThrow(
+        'Failed to load tracked alerts from 3 of 3 shards: circuit_breaking_exception, es_rejected_execution_exception'
+      );
+    });
+
+    it('throws when shards fail without reporting a reason', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        hits: [],
+        _shards: { total: 2, successful: 1, failed: 1 },
+      });
+
+      await expect(reconcileWithSearch(search)).rejects.toThrow(
+        /^Failed to load tracked alerts from 1 of 2 shards$/
+      );
+    });
+
     describe('state -> index', () => {
       it('fetches missing alerts by id when state has extra uuids', async () => {
         const search = jest
@@ -601,27 +657,31 @@ describe('reconcile_tracked_alerts', () => {
         );
       });
 
-      it('logs error and returns partial results when the fetch by id fails', async () => {
-        const searchError = new Error('search failure');
+      it('rethrows when the fetch by id fails', async () => {
         const search = jest
           .fn()
           .mockResolvedValueOnce({ hits: [] })
-          .mockRejectedValueOnce(searchError);
+          .mockRejectedValueOnce(new Error('search failure'));
 
-        const result = await reconcileWithSearch(search, makeStateFromUuids(['uuid-1']));
-
-        expect(Object.keys(result.trackedAlerts.all)).toHaveLength(0);
+        await expect(reconcileWithSearch(search, makeStateFromUuids(['uuid-1']))).rejects.toThrow(
+          'search failure'
+        );
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringContaining('Found 1 alerts in task state'),
           logTags
         );
-        expect(logger.error).toHaveBeenCalledWith(
-          expect.stringContaining('Error fetching missing tracked alerts'),
-          expect.objectContaining({
-            tags: logTags.tags,
-            error: expect.objectContaining({ stack_trace: searchError.stack }),
-          })
+      });
+
+      it('throws when the fetch by id fails on some shards', async () => {
+        const search = jest
+          .fn()
+          .mockResolvedValueOnce({ hits: [] })
+          .mockResolvedValueOnce({ hits: [], _shards: failedShards });
+
+        await expect(reconcileWithSearch(search, makeStateFromUuids(['uuid-1']))).rejects.toThrow(
+          'Failed to load tracked alerts from 1 of 2 shards: circuit_breaking_exception'
         );
+        expect(search).toHaveBeenCalledTimes(2);
       });
     });
 

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
 import type { WatchlistsByEuid } from '../../../entities/service';
@@ -25,15 +21,7 @@ const createMockCrudClient = (): jest.Mocked<CRUDClient> =>
 
 const emptyWatchlistsByEuid: WatchlistsByEuid = new Map();
 
-jest.mock('../../infra/entity_source_client');
 jest.mock('../../bulk/soft_delete');
-
-const { WatchlistEntitySourceClient, mockGetLastFullSyncMarker, mockUpdateLastFullSyncMarker } =
-  jest.requireMock('../../infra/entity_source_client') as {
-    WatchlistEntitySourceClient: jest.Mock;
-    mockGetLastFullSyncMarker: jest.Mock;
-    mockUpdateLastFullSyncMarker: jest.Mock;
-  };
 
 const { applyBulkRemoveSource } = jest.requireMock('../../bulk/soft_delete') as {
   applyBulkRemoveSource: jest.Mock;
@@ -48,19 +36,13 @@ describe('DeletionDetectionService', () => {
     index: '.entity-analytics.watchlists.test-default',
   };
 
-  const createService = () => {
-    const descriptorClient = new WatchlistEntitySourceClient({
-      soClient: savedObjectsClientMock.create(),
-      namespace: 'default',
-    });
-    return createDeletionDetectionService({
+  const createService = () =>
+    createDeletionDetectionService({
       esClient,
       crudClient: createMockCrudClient(),
       logger,
-      descriptorClient,
       watchlist,
     });
-  };
 
   const indexSource: WatchlistDataSources.MonitoringEntitySource = {
     id: 'source-idx',
@@ -202,12 +184,18 @@ describe('DeletionDetectionService', () => {
       );
     });
 
-    it('does not check detectNewFullSync for index sources', async () => {
+    it('ignores hasNewFullSync for index sources (only entity_analytics_integration sources gate on it)', async () => {
       const service = createService();
-      await service.deletionDetection(indexSource, ['euid-1'], emptyWatchlistsByEuid);
+      await service.deletionDetection(
+        indexSource,
+        ['euid-1'],
+        emptyWatchlistsByEuid,
+        undefined,
+        false
+      );
 
-      // detectNewFullSync queries the sync marker index — should not happen for index sources
-      // The only search call should be the stale entity query on the target index
+      // The only search call should be the stale entity query on the target index — index
+      // sources always run, regardless of hasNewFullSync.
       expect(esClient.search).toHaveBeenCalledTimes(1);
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({ index: watchlist.index })
@@ -216,35 +204,54 @@ describe('DeletionDetectionService', () => {
   });
 
   describe('integration sources', () => {
-    it('skips deletion detection when no new full sync is detected', async () => {
-      // No completed event in sync marker index
-      mockGetLastFullSyncMarker.mockResolvedValue(undefined);
-      esClient.search.mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0, relation: 'eq' } },
-      } as unknown as ReturnType<typeof esClient.search>);
+    it('warns and skips deletion detection when syncMarkerIndex is not configured', async () => {
+      const sourceWithoutMarkerIndex: WatchlistDataSources.MonitoringEntitySource = {
+        ...integrationSource,
+        integrations: undefined,
+      };
 
       const service = createService();
-      await service.deletionDetection(integrationSource, ['euid-1'], emptyWatchlistsByEuid);
-
-      // Only the sync marker index query should happen, NOT the stale entity query
-      expect(esClient.search).toHaveBeenCalledTimes(1);
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: 'logs-entityanalytics_okta.entity-default',
-        })
+      await service.deletionDetection(
+        sourceWithoutMarkerIndex,
+        ['euid-1'],
+        emptyWatchlistsByEuid,
+        undefined,
+        true
       );
+
+      // No search at all — syncMarkerIndex is checked before anything else runs.
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(applyBulkRemoveSource).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `Source ${sourceWithoutMarkerIndex.id} (${sourceWithoutMarkerIndex.name}) has no integrations.syncMarkerIndex configured`
+        )
+      );
+    });
+
+    it('skips deletion detection when hasNewFullSync is false', async () => {
+      const service = createService();
+      await service.deletionDetection(
+        integrationSource,
+        ['euid-1'],
+        emptyWatchlistsByEuid,
+        undefined,
+        false
+      );
+
+      expect(esClient.search).not.toHaveBeenCalled();
       expect(applyBulkRemoveSource).not.toHaveBeenCalled();
     });
 
-    it('runs deletion detection when a new full sync is detected', async () => {
-      mockGetLastFullSyncMarker.mockResolvedValue(undefined);
-      // First call: sync marker index query returns a completed event
-      esClient.search.mockResolvedValueOnce({
-        hits: {
-          hits: [{ _id: 'marker-1', _source: { '@timestamp': '2024-03-01T00:00:00Z' } }],
-        },
-      } as unknown as ReturnType<typeof esClient.search>);
-      // Second call: stale entity query returns one stale entity
+    it('skips deletion detection when hasNewFullSync is omitted', async () => {
+      const service = createService();
+      await service.deletionDetection(integrationSource, ['euid-1'], emptyWatchlistsByEuid);
+
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(applyBulkRemoveSource).not.toHaveBeenCalled();
+    });
+
+    it('runs deletion detection when hasNewFullSync is true', async () => {
       esClient.search.mockResolvedValueOnce({
         hits: {
           hits: [{ _id: 'doc-stale', _source: {}, sort: ['s'] }],
@@ -253,11 +260,17 @@ describe('DeletionDetectionService', () => {
       } as unknown as ReturnType<typeof esClient.search>);
 
       const service = createService();
-      await service.deletionDetection(integrationSource, ['euid-1'], emptyWatchlistsByEuid);
-
-      expect(mockUpdateLastFullSyncMarker).toHaveBeenCalledWith(
+      await service.deletionDetection(
         integrationSource,
-        '2024-03-01T00:00:00Z'
+        ['euid-1'],
+        emptyWatchlistsByEuid,
+        undefined,
+        true
+      );
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: watchlist.index })
       );
       expect(applyBulkRemoveSource).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -265,21 +278,6 @@ describe('DeletionDetectionService', () => {
           sourceType: 'entity_analytics_integration',
         })
       );
-    });
-
-    it('skips when completed event is not newer than last full sync marker', async () => {
-      mockGetLastFullSyncMarker.mockResolvedValue('2024-03-01T00:00:00Z');
-      // Completed event is same as last full sync
-      esClient.search.mockResolvedValueOnce({
-        hits: {
-          hits: [{ _id: 'marker-1', _source: { '@timestamp': '2024-03-01T00:00:00Z' } }],
-        },
-      } as unknown as ReturnType<typeof esClient.search>);
-
-      const service = createService();
-      await service.deletionDetection(integrationSource, ['euid-1'], emptyWatchlistsByEuid);
-
-      expect(applyBulkRemoveSource).not.toHaveBeenCalled();
     });
   });
 });

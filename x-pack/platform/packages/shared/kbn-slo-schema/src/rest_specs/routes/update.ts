@@ -4,37 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
-import { allOrAnyStringOrArray } from '../../schema/zod/common';
-import { indicatorSchema } from '../../schema/zod/indicators';
+import { z, lazySchema } from '@kbn/zod';
+import { indicatorSchema } from '../../schema/indicators';
 import {
+  artifactsWithIdSchema,
   budgetingMethodSchema,
-  dashboardsWithIdSchema,
+  groupBySchema,
   objectiveSchema,
   optionalSettingsSchema,
   sloDefinitionSchema,
   sloIdSchema,
   tagsSchema,
-} from '../../schema/zod/slo';
-import { timeWindowSchema } from '../../schema/zod/time_window';
+} from '../../schema/slo';
+import { timeWindowSchema } from '../../schema/time_window';
 
-const updateSLOParamsSchema = z.object({
-  path: z.object({
-    id: sloIdSchema,
-  }),
-  body: z.object({
-    name: z.string().optional(),
-    description: z.string().optional(),
-    indicator: indicatorSchema.optional(),
-    timeWindow: timeWindowSchema.optional(),
-    budgetingMethod: budgetingMethodSchema.optional(),
-    objective: objectiveSchema.optional(),
-    settings: optionalSettingsSchema.optional(),
-    tags: tagsSchema.optional(),
-    groupBy: allOrAnyStringOrArray.optional(),
-    artifacts: dashboardsWithIdSchema.optional(),
-  }),
-});
+const updateSLOParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: sloIdSchema,
+    }),
+    body: z.object({
+      name: z.string().optional().describe('A name for the SLO.'),
+      description: z.string().optional().describe('A description for the SLO.'),
+      indicator: indicatorSchema.optional(),
+      timeWindow: timeWindowSchema.optional(),
+      budgetingMethod: budgetingMethodSchema.optional(),
+      objective: objectiveSchema.optional(),
+      settings: optionalSettingsSchema.optional().describe('Defines properties for SLO settings.'),
+      tags: tagsSchema.optional(),
+      groupBy: groupBySchema.optional(),
+      artifacts: artifactsWithIdSchema.optional(),
+    }),
+  })
+);
 
 const updateSLOResponseSchema = sloDefinitionSchema;
 

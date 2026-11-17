@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @kbn/compat/import-no-extraneous-dependencies */
 
 import React, { memo, useEffect } from 'react';
 import { EuiCode } from '@elastic/eui';

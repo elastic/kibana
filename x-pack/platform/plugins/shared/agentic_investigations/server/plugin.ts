@@ -16,6 +16,7 @@ import {
 import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgenticInvestigationsConfig } from './config';
+import { resolveLinkActor } from './escalations/services/link_actor';
 import { registerFeatures } from './features';
 import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
@@ -36,6 +37,7 @@ import {
   SubjectClaimsService,
 } from './subjects/services/subject_claims_service';
 import { createSubjectsClient } from './subjects/services/subjects_client';
+import { createFindingsWriter } from './findings/findings_writer';
 import { createThreadConversationResolver } from './subjects/services/thread_conversation_resolver';
 import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses/attachments';
 import { HypothesesService } from './hypotheses/services/hypotheses_service';
@@ -303,6 +305,12 @@ export class AgenticInvestigationsPlugin implements Plugin<
             spaceId: this.getSpaceId(request),
             logger: this.logger,
           }),
+        getLinkActor: (request) =>
+          resolveLinkActor({
+            request,
+            security: coreStart.security,
+            esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+          }),
       });
     }
 
@@ -329,6 +337,16 @@ export class AgenticInvestigationsPlugin implements Plugin<
 
     const getSubjectsClient = createSubjectsClient({
       getSubjectsService: () => this.requireSubjectsService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      privileges: startPrivileges,
+      resolveUser: (request) => this.requireUserResolver()(request),
+      getConversationClient: (request) => this.getConversationClient(request),
+      getAttachmentClient: (request) => this.getAttachmentClient(request),
+    });
+
+    const getFindingsWriter = createFindingsWriter({
+      getHypothesesService: () => this.requireHypothesesService(),
+      getImpactService: () => this.requireImpactService(),
       getSpaceId: (request) => this.getSpaceId(request),
       privileges: startPrivileges,
       resolveUser: (request) => this.requireUserResolver()(request),
@@ -367,6 +385,7 @@ export class AgenticInvestigationsPlugin implements Plugin<
         });
       },
       getEscalationsService: () => this.requireEscalationsService(),
+      getFindingsWriter,
     };
   }
 

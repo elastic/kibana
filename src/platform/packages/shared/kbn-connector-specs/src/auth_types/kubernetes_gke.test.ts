@@ -73,7 +73,29 @@ describe('KubernetesGkeAuth', () => {
     expect(mockGetGcpAccessToken).toHaveBeenCalledWith(
       'gke-sa@my-project.iam.gserviceaccount.com',
       expect.stringContaining('BEGIN PRIVATE KEY'),
-      'https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/userinfo.email'
+      'https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/userinfo.email',
+      undefined
+    );
+  });
+
+  it('exchanges the token with the context fetch when one is set', async () => {
+    mockGetGcpAccessToken.mockResolvedValue({
+      accessToken: 'ya29.gke-token',
+      expiresAt: Date.now() + 3600000,
+    });
+    const fetchTestOnly = jest.fn();
+
+    await KubernetesGkeAuth.configure(
+      { ...mockContext, fetchTestOnly },
+      createMockAxiosInstance(),
+      { serviceAccountJson: VALID_SERVICE_ACCOUNT_JSON }
+    );
+
+    expect(mockGetGcpAccessToken).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(String),
+      expect.any(String),
+      fetchTestOnly
     );
   });
 

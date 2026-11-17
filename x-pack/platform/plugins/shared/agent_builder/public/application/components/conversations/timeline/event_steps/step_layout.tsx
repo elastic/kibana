@@ -82,7 +82,14 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
             })
           : {})}
       >
-        <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            min-width: 0;
+          `}
+        >
+          {label}
+        </EuiFlexItem>
         {isClickable && isExpandable && (
           <EuiFlexItem grow={false}>
             <EuiIcon

@@ -193,7 +193,7 @@ export const indexEndpointHostDocs = usageTracker.track(
 
           mergeAndAppendArrays(response, createdPolicies);
 
-          // eslint-disable-next-line require-atomic-updates
+          // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
           realPolicies[appliedPolicyId] = createdPolicies.integrationPolicies[0];
         }
 

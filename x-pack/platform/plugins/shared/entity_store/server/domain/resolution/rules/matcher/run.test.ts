@@ -105,6 +105,12 @@ const matchGroup = ({
   };
 };
 
+const candidatesResponse = (page: MatchGroup[]) =>
+  esqlResponse(
+    [MATCH_GROUP_COLUMNS.matchValue],
+    page.map((group) => [group.row[GROUP_COLUMNS.indexOf(MATCH_GROUP_COLUMNS.matchValue)]])
+  );
+
 const entityHit = (id: string, namespace: string, resolvedTo?: string) => ({
   _id: `doc-${id}`,
   _source: {
@@ -121,17 +127,23 @@ describe('runEsqlMatcherRule', () => {
   let mockCascadeLink: jest.Mock;
   let mockResolutionClient: ResolutionClient;
 
-  /** Mocks the watermark query, one ES|QL response per page, and the entity fetch. */
+  /**
+   * Mocks the watermark query, then a candidate-values and a match-group ES|QL
+   * response per page (an empty page has no group query), and the entity fetch.
+   */
   const mockGroupPages = (...pages: MatchGroup[][]) => {
     const esqlQuery = mockEsClient.esql.query as jest.Mock;
     esqlQuery.mockResolvedValueOnce(watermarkResponse(WATERMARK));
     for (const page of pages) {
-      esqlQuery.mockResolvedValueOnce(
-        esqlResponse(
-          GROUP_COLUMNS,
-          page.map((group) => group.row)
-        )
-      );
+      esqlQuery.mockResolvedValueOnce(candidatesResponse(page));
+      if (page.length > 0) {
+        esqlQuery.mockResolvedValueOnce(
+          esqlResponse(
+            GROUP_COLUMNS,
+            page.map((group) => group.row)
+          )
+        );
+      }
     }
 
     const entities = new Map(
@@ -172,9 +184,12 @@ describe('runEsqlMatcherRule', () => {
     const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
     (mockEsClient.esql.query as jest.Mock)
       .mockResolvedValueOnce(watermarkResponse(null))
-      .mockResolvedValueOnce(emptyGroups());
+      .mockResolvedValueOnce(esqlResponse([MATCH_GROUP_COLUMNS.matchValue], []));
 
     const result = await runEsqlMatcherRule(createDeps(state, mockEsClient, mockResolutionClient));
+
+    // Only the watermark and newer-entity queries run: no candidate or group scan.
+    expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
 
     expect(result.lastProcessedTimestamp).toBe('2026-08-01T00:00:00Z');
     expect(result.lastRun).toEqual({
@@ -186,6 +201,128 @@ describe('runEsqlMatcherRule', () => {
       cascadesBlocked: 0,
     });
     expect(mockCascadeLink).not.toHaveBeenCalled();
+  });
+
+  it('still scans when the only newer entity is already resolved', async () => {
+    const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
+    const group = matchGroup({
+      matchValue: 'a@corp.com',
+      members: [['user-old', 'okta']],
+      existingTargets: [['target-1', 'entra_id']],
+    });
+    const esqlQuery = mockEsClient.esql.query as jest.Mock;
+    esqlQuery
+      .mockResolvedValueOnce(watermarkResponse(null))
+      .mockResolvedValueOnce(esqlResponse([MATCH_GROUP_COLUMNS.matchValue], [['a@corp.com']]))
+      .mockResolvedValueOnce(candidatesResponse([group]))
+      .mockResolvedValueOnce(esqlResponse(GROUP_COLUMNS, [group.row]));
+    (mockEsClient.search as jest.Mock).mockResolvedValue({
+      hits: { hits: group.entities.map((entity) => entityHit(...entity)) },
+    });
+
+    const result = await runEsqlMatcherRule(createDeps(state, mockEsClient, mockResolutionClient));
+
+    expect(mockCascadeLink).toHaveBeenCalledTimes(1);
+    // The watermark only follows unresolved entities, as before.
+    expect(result.lastProcessedTimestamp).toBe('2026-08-01T00:00:00Z');
+  });
+
+  describe('custom rule', () => {
+    const customDeps = (state: PerRuleState) =>
+      createDeps(state, mockEsClient, mockResolutionClient, {
+        spec: {
+          namespaces: ['okta'],
+          matchValueExpression: 'TO_LOWER(user.email)',
+          declineSameNamespaceDuplicates: true,
+        },
+        ruleId: 'custom:email',
+      });
+
+    it('scans with the single group query, without a candidate step', async () => {
+      const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
+      const esqlQuery = mockEsClient.esql.query as jest.Mock;
+      esqlQuery
+        .mockResolvedValueOnce(watermarkResponse(WATERMARK))
+        .mockResolvedValueOnce(esqlResponse(GROUP_COLUMNS, []));
+
+      await runEsqlMatcherRule(customDeps(state));
+
+      expect(esqlQuery).toHaveBeenCalledTimes(2);
+      expect(esqlQuery.mock.calls[1][0].query).not.toContain('match_value IN');
+    });
+
+    it('skips the scan when nothing is newer than the watermark', async () => {
+      const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
+      const esqlQuery = mockEsClient.esql.query as jest.Mock;
+      esqlQuery
+        .mockResolvedValueOnce(watermarkResponse(null))
+        .mockResolvedValueOnce(esqlResponse([MATCH_GROUP_COLUMNS.matchValue], []));
+
+      const result = await runEsqlMatcherRule(customDeps(state));
+
+      expect(esqlQuery).toHaveBeenCalledTimes(2);
+      expect(result.lastProcessedTimestamp).toBe('2026-08-01T00:00:00Z');
+    });
+  });
+
+  it('pages on the last candidate even when a full candidate page yields few groups', async () => {
+    const esqlQuery = mockEsClient.esql.query as jest.Mock;
+    const groupB = matchGroup({
+      matchValue: 'b@corp.com',
+      members: [
+        ['user-b1', 'okta'],
+        ['user-b2', 'entra_id'],
+      ],
+    });
+    const groupC = matchGroup({
+      matchValue: 'c@corp.com',
+      members: [
+        ['user-c1', 'okta'],
+        ['user-c2', 'entra_id'],
+      ],
+    });
+    esqlQuery
+      .mockResolvedValueOnce(watermarkResponse(WATERMARK))
+      // A full page of two candidates, only one of which forms a group.
+      .mockResolvedValueOnce(
+        esqlResponse([MATCH_GROUP_COLUMNS.matchValue], [['a@corp.com'], ['b@corp.com']])
+      )
+      .mockResolvedValueOnce(esqlResponse(GROUP_COLUMNS, [groupB.row]))
+      .mockResolvedValueOnce(candidatesResponse([groupC]))
+      .mockResolvedValueOnce(esqlResponse(GROUP_COLUMNS, [groupC.row]));
+    const entities = [...groupB.entities, ...groupC.entities];
+    (mockEsClient.search as jest.Mock).mockImplementation(async ({ query }) => {
+      const ids: string[] = query.bool.filter[0].terms['entity.id'];
+      return {
+        hits: {
+          hits: entities.filter(([id]) => ids.includes(id)).map((entity) => entityHit(...entity)),
+        },
+      };
+    });
+
+    await runEsqlMatcherRule(
+      createDeps(
+        createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' }),
+        mockEsClient,
+        mockResolutionClient,
+        {
+          pageSize: 2,
+        }
+      )
+    );
+
+    expect(esqlQuery.mock.calls[3][0].query).toContain('match_value > "b@corp.com"');
+    expect(mockCascadeLink).toHaveBeenCalledTimes(2);
+  });
+
+  it('still scans for candidates on a first run when no unresolved entity is found', async () => {
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse(null))
+      .mockResolvedValueOnce(esqlResponse([MATCH_GROUP_COLUMNS.matchValue], []));
+
+    await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
+
+    expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
   });
 
   it('omits the first_seen bound from the grouping query when watermark is null', async () => {
@@ -212,13 +349,20 @@ describe('runEsqlMatcherRule', () => {
       createDeps(createInitialState(), mockEsClient, mockResolutionClient, { pageSize: 5 })
     );
 
-    const groupingQueries = (mockEsClient.esql.query as jest.Mock).mock.calls
+    const pageQueries = (mockEsClient.esql.query as jest.Mock).mock.calls
       .slice(1)
       .map((call) => call[0].query as string);
+    const candidateQueries = pageQueries.filter((query) => query.includes('| KEEP match_value'));
+    const groupingQueries = pageQueries.filter((query) => query.includes('TOP(unresolved_id'));
+    expect(candidateQueries).toHaveLength(2);
+    expect(candidateQueries[0]).toContain('| LIMIT 5');
+    expect(candidateQueries[0]).not.toContain('match_value >');
+    expect(candidateQueries[1]).toContain('| WHERE match_value > "e@corp.com"');
     expect(groupingQueries).toHaveLength(2);
-    expect(groupingQueries[0]).toContain('| LIMIT 5');
-    expect(groupingQueries[0]).not.toContain('match_value >');
-    expect(groupingQueries[1]).toContain('| WHERE match_value > "e@corp.com"');
+    expect(groupingQueries[0]).toContain(
+      '| WHERE match_value IN ("a@corp.com", "b@corp.com", "c@corp.com", "d@corp.com", "e@corp.com")'
+    );
+    expect(groupingQueries[1]).toContain('| WHERE match_value IN ("f@corp.com", "g@corp.com")');
     expect(mockCascadeLink).toHaveBeenCalledTimes(7);
     expect(result.lastProcessedTimestamp).toBe(WATERMARK);
     expect(result.lastRun?.resolutionsCreated).toBe(7);
@@ -897,8 +1041,8 @@ describe('runEsqlMatcherRule', () => {
 
       expect(result.lastProcessedTimestamp).toBe(PRIOR);
       expect(mockCascadeLink).toHaveBeenCalledTimes(5);
-      // The watermark query plus one page; the second page is never read.
-      expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
+      // The watermark query plus one page (candidates + groups); the second page is never read.
+      expect(mockEsClient.esql.query).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -951,6 +1095,7 @@ describe('runEsqlMatcherRule', () => {
   it('throws when a required match-group column is missing', async () => {
     (mockEsClient.esql.query as jest.Mock)
       .mockResolvedValueOnce(watermarkResponse(WATERMARK))
+      .mockResolvedValueOnce(esqlResponse(['match_value'], [['a@corp.com']]))
       .mockResolvedValueOnce(esqlResponse(['match_value', 'ids'], [['a@corp.com', ['user-1']]]));
 
     await expect(

@@ -38,6 +38,7 @@ interface ServiceTileProps {
  */
 const STATUS_ICON: Record<string, { type: string; color: string }> = {
   receiving: { type: 'checkCircle', color: 'success' },
+  unverified: { type: 'info', color: 'subdued' },
   timeout: { type: 'warning', color: 'warning' },
   error: { type: 'errorFill', color: 'danger' },
 };

@@ -30,7 +30,12 @@ import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { TimeRange } from '@kbn/es-query';
-import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
+import {
+  CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
+  DISCOVER_APP_LOCATOR,
+  PLUGIN_ID,
+  type DiscoverAppLocator,
+} from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
   type DiscoverContextAppLocator,
@@ -45,6 +50,7 @@ import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import { defaultCustomizationContext } from './customizations/defaults';
 import {
   ACTION_ADD_DISCOVER_SESSION_PANEL,
+  ACTION_EXPLORE_CHANGE_POINT_GRID_IN_DISCOVER,
   ACTION_VIEW_SAVED_SEARCH,
   LEGACY_LOG_STREAM_EMBEDDABLE,
 } from './embeddable/constants';
@@ -310,6 +316,15 @@ export class DiscoverPlugin implements Plugin<
     );
 
     plugins.uiActions.addTriggerActionAsync(
+      ON_OPEN_PANEL_MENU,
+      ACTION_EXPLORE_CHANGE_POINT_GRID_IN_DISCOVER,
+      async () => {
+        const { ExploreChangePointGridInDiscoverAction } = await getEmbeddableServices();
+        return new ExploreChangePointGridInDiscoverAction(core.application, this.locator!);
+      }
+    );
+
+    plugins.uiActions.addTriggerActionAsync(
       ADD_PANEL_TRIGGER,
       ACTION_ADD_DISCOVER_SESSION_PANEL,
       async () => {
@@ -498,8 +513,20 @@ export class DiscoverPlugin implements Plugin<
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {
         defaultMessage: 'Discover session',
       }),
-      getIconForSavedObject: () => 'discoverApp',
+      getIconForSavedObject: () => 'productDiscover',
     });
+
+    plugins.embeddable.registerEmbeddablePublicDefinition(
+      CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
+      async () => {
+        const [discoverServices, { getChangePointGridEmbeddableFactory }] = await Promise.all([
+          getDiscoverServicesForEmbeddable(),
+          getEmbeddableServices(),
+        ]);
+
+        return getChangePointGridEmbeddableFactory({ discoverServices });
+      }
+    );
 
     plugins.embeddable.registerEmbeddablePublicDefinition(SEARCH_EMBEDDABLE_TYPE, async () => {
       const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([

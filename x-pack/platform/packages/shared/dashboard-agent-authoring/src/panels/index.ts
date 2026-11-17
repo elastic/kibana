@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { parseVegaSpec } from './vis';
 export type { VisPanelResolutionRequest } from './vis';
 export type {
   CustomContentPanelAddRequest,
@@ -13,10 +14,21 @@ export type {
 } from './custom_content';
 export {
   buildConfigPanelContent,
+  createPanelContentResolver,
+  getConfigPanelReferences,
   getEditableEmbeddableTypes,
+  getInlinePanelKindGuidance,
+  getPanelTypeSelection,
   getRendererEmbeddableType,
+  requiresRegisteredSchema,
   upsertPanelContentSchema,
 } from './registry';
-export type { PanelResolutionRequest, ResolvePanelContent, UpsertPanelContent } from './registry';
+export type {
+  ConfigPanelReference,
+  PanelKindExecutors,
+  PanelResolutionRequest,
+  ResolvePanelContent,
+  UpsertPanelContent,
+} from './registry';
 export { planPanelContent } from './resolution_requests';
 export type { PanelContentSource } from './resolution_requests';

@@ -20,7 +20,6 @@ import {
   type SecurityCanvasEmbeddedBundle,
 } from '../../components/security_redux_embedded_provider';
 import { EntityCardFlyoutOverviewCanvas } from '../../components/entity_card_flyout_overview_canvas';
-import { useEntityAnalyticsAgentNavigation } from '../entity_analytics_agent_navigation_context';
 
 export interface EntityAttachmentCanvasContentProps extends AttachmentRenderProps<EntityAttachment> {
   experimentalFeatures: ExperimentalFeatures;
@@ -45,7 +44,6 @@ export const EntityAttachmentCanvasContent: React.FC<EntityAttachmentCanvasConte
   experimentalFeatures,
   resolveSecurityCanvasContext,
 }) => {
-  const { isNewFlyoutEnabled } = useEntityAnalyticsAgentNavigation();
   const parsed = normaliseEntityAttachment(attachment);
   const watchlistsEnabled = experimentalFeatures.entityAnalyticsWatchlistEnabled;
   const privmonModifierEnabled = experimentalFeatures.enableRiskScorePrivmonModifier;
@@ -93,7 +91,7 @@ export const EntityAttachmentCanvasContent: React.FC<EntityAttachmentCanvasConte
             identifier={identifier}
             riskStats={parsed.riskStats}
             resolutionRiskStats={parsed.resolutionRiskStats}
-            hideHeaderIcons={isNewFlyoutEnabled}
+            hideHeaderIcons
           />
         </QueryClientProvider>
       </EuiPanel>

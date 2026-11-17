@@ -18,12 +18,17 @@ import {
   type SiemDashboardMigrationsClient,
   SiemDashboardMigrationsService,
 } from './dashboards/siem_dashboard_migration_service';
+import {
+  type SiemWorkflowMigrationsClient,
+  SiemWorkflowMigrationsService,
+} from './workflows/siem_workflow_migrations_service';
 import type { SiemMigrationsCreateClientParams } from './common/types';
 
 export class SiemMigrationsService {
   private pluginStop$: Subject<void>;
   private rulesService: SiemRuleMigrationsService;
   private dashboardsService: SiemDashboardMigrationsService;
+  private workflowsService: SiemWorkflowMigrationsService;
 
   constructor(
     private config: ConfigType,
@@ -41,6 +46,11 @@ export class SiemMigrationsService {
       kibanaVersion,
       config.siemRuleMigrations?.elserInferenceId
     );
+    this.workflowsService = new SiemWorkflowMigrationsService(
+      logger,
+      kibanaVersion,
+      config.siemRuleMigrations?.elserInferenceId
+    );
   }
 
   setup(params: SiemMigrationsSetupParams) {
@@ -49,6 +59,10 @@ export class SiemMigrationsService {
 
       if (this.config.experimentalFeatures.automaticDashboardsMigration) {
         this.dashboardsService.setup({ ...params, pluginStop$: this.pluginStop$ });
+      }
+
+      if (this.config.experimentalFeatures.tinesWorkflowsMigration) {
+        this.workflowsService.setup({ ...params, pluginStop$: this.pluginStop$ });
       }
     }
   }
@@ -61,9 +75,14 @@ export class SiemMigrationsService {
     return this.dashboardsService.createClient(params);
   }
 
+  createWorkflowsClient(params: SiemMigrationsCreateClientParams): SiemWorkflowMigrationsClient {
+    return this.workflowsService.createClient(params);
+  }
+
   stop() {
     this.rulesService.stop();
     this.dashboardsService.stop();
+    this.workflowsService.stop();
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }

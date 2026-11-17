@@ -39,6 +39,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import type { Control, FormState } from 'react-hook-form';
 import { Controller, useWatch } from 'react-hook-form';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { AccessForm } from '../../access/access_form';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
@@ -61,6 +62,8 @@ interface AgentSettingsTabProps {
   isFormDisabled: boolean;
   canChangeAccessControl: boolean;
   canChangeApprovals: boolean;
+  /** The agent runs as a service account and the caller cannot edit it. */
+  isBoundReadOnly: boolean;
   owner?: UserIdAndName;
   agentId?: string;
 }
@@ -72,6 +75,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   isFormDisabled,
   canChangeAccessControl,
   canChangeApprovals,
+  isBoundReadOnly,
   owner,
   agentId,
 }) => {
@@ -136,6 +140,18 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
   return (
     <>
+      {isBoundReadOnly && (
+        <>
+          <KbnInfoCallout
+            announceOnMount
+            title={labels.executionIdentity.configurationLockedTitle}
+            text={labels.executionIdentity.configurationLockedDescription}
+            size="s"
+            data-test-subj="agentSettingsConfigurationLockedCallout"
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
       <EuiSpacer size="l" />
       <EuiFlexGroup
         direction="row"

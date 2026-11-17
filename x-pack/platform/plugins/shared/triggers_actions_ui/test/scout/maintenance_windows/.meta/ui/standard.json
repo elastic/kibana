@@ -1,5 +1,5 @@
 {
-  "sha1": "70739219c26b00934d9bc7518b869dbec4cb62b0",
+  "sha1": "02ac47f133fc2da4bde0dd6e396903952dbc3cea",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_update.spec.ts",
-        "line": 116,
+        "line": 118,
         "column": 22
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_update.spec.ts",
-        "line": 146,
+        "line": 148,
         "column": 24
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_update.spec.ts",
-        "line": 174,
+        "line": 176,
         "column": 23
       }
     },

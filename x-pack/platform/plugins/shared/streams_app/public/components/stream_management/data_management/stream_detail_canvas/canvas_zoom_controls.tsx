@@ -78,7 +78,11 @@ function ZoomButton({
   );
 }
 
-export function CanvasZoomControls() {
+interface CanvasZoomControlsProps {
+  isDisabled?: boolean;
+}
+
+export function CanvasZoomControls({ isDisabled = false }: CanvasZoomControlsProps) {
   const { euiTheme } = useEuiTheme();
   const { zoomIn, zoomOut, fitView } = useReactFlow();
   const zoom = useStore((state) => state.transform[2]);
@@ -111,7 +115,7 @@ export function CanvasZoomControls() {
           defaultMessage: 'Zoom in',
         })}
         onClick={() => zoomIn()}
-        disabled={!canZoomIn}
+        disabled={isDisabled || !canZoomIn}
       />
       <ZoomButton
         iconType="minusCircle"
@@ -120,7 +124,7 @@ export function CanvasZoomControls() {
           defaultMessage: 'Zoom out',
         })}
         onClick={() => zoomOut()}
-        disabled={!canZoomOut}
+        disabled={isDisabled || !canZoomOut}
       />
       <ZoomButton
         iconType="crosshair"
@@ -129,6 +133,7 @@ export function CanvasZoomControls() {
           defaultMessage: 'Fit to screen',
         })}
         onClick={() => fitView({ padding: FIT_VIEW_PADDING, duration: FIT_VIEW_DURATION })}
+        disabled={isDisabled}
         hasTopBorder
       />
     </EuiPanel>

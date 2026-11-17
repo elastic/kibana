@@ -28,8 +28,8 @@ import { useEpisodeDetailsHeaderData } from '../../hooks/use_episode_details_hea
 import { isRuleLoaded } from '../../types/rule_state';
 import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
 import { isSupportedEpisodeSeverity, normalizeEpisodeSeverity } from '../severity/severity_utils';
-import { AlertEpisodeSeverityHealth } from '../severity/episode_severity_health';
-import { EPISODE_STATUS_BADGE_COLORS, getEpisodeStatusBadgeLabel } from '../status/status_badge';
+import { AlertEpisodeSeverityBadge } from '../severity/episode_severity_badge';
+import { AlertEpisodeStatusHealth } from '../status/status_badge';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
 import { UserProfileDisplay } from '../user_profile_display';
 import { CopyableShortId } from '../copyable_short_id';
@@ -282,8 +282,8 @@ export const AlertEpisodeDetailsFlyout = ({
   const assigneeUid = episodeAction?.lastAssigneeUid ?? undefined;
   const episodeData = parseEpisodeDataJson(episode?.episode_data);
   const rawAlertUrl =
-    typeof episodeData.alert_url === 'string' && episodeData.alert_url.length > 0
-      ? episodeData.alert_url
+    typeof episodeData.source_alert_url === 'string' && episodeData.source_alert_url.length > 0
+      ? episodeData.source_alert_url
       : undefined;
   const alertUrl = rawAlertUrl && /^https?:\/\//i.test(rawAlertUrl) ? rawAlertUrl : undefined;
 
@@ -324,10 +324,9 @@ export const AlertEpisodeDetailsFlyout = ({
         onTabChange={handleTabChange}
       >
         <FlyoutTemplate.Header title={titleNode} description={descriptionNode}>
-          {/* Status badge */}
           {status && (
-            <FlyoutTemplate.Header.Badge color={EPISODE_STATUS_BADGE_COLORS[status]}>
-              {getEpisodeStatusBadgeLabel(status)}
+            <FlyoutTemplate.Header.Badge color="hollow">
+              <AlertEpisodeStatusHealth status={status} />
             </FlyoutTemplate.Header.Badge>
           )}
 
@@ -382,13 +381,11 @@ export const AlertEpisodeDetailsFlyout = ({
             </Suspense>
           </FlyoutTemplate.Header.InfoBlock>
 
-          {/* Severity. The dot carries the color, so the value text stays default. */}
           {normalizedSeverity && (
             <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_SEVERITY}>
-              <AlertEpisodeSeverityHealth
-                severity={normalizedSeverity}
-                data-test-subj="alertingV2EpisodeFlyoutSeverity"
-              />
+              <span data-test-subj="alertingV2EpisodeFlyoutSeverity">
+                <AlertEpisodeSeverityBadge severity={normalizedSeverity} />
+              </span>
             </FlyoutTemplate.Header.InfoBlock>
           )}
 

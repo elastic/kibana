@@ -59,7 +59,7 @@ export const CasesTimelineIntegrationContext = React.createContext<CasesTimeline
 );
 
 // TODO: Fix this manually. Issue #123375
-/* eslint-disable react/display-name */
+/* eslint-disable @kbn/compat/react-display-name */
 export const CasesTimelineIntegrationProvider: FC<
   PropsWithChildren<{
     timelineIntegration?: CasesTimelineIntegration;
@@ -73,4 +73,4 @@ export const CasesTimelineIntegrationProvider: FC<
     </CasesTimelineIntegrationContext.Provider>
   );
 };
-/* eslint-enable react/display-name */
+/* eslint-enable @kbn/compat/react-display-name */

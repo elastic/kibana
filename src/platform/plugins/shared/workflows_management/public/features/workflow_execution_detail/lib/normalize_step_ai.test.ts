@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { normalizeStepAi, stepAiToTokenUsage } from './normalize_step_ai';
+import {
+  isAiStepType,
+  normalizeStepAi,
+  shouldShowAiSection,
+  stepAiToTokenUsage,
+} from './normalize_step_ai';
 
 describe('normalizeStepAi', () => {
   it('returns undefined when nothing is available', () => {
@@ -129,6 +134,37 @@ describe('normalizeStepAi', () => {
         connectorId: 'from-definition',
       })
     ).toMatchObject({ model: 'gpt-4o', connectorId: 'from-definition' });
+  });
+});
+
+describe('shouldShowAiSection', () => {
+  it('hides the AI section for a connector step that only has a connector-id', () => {
+    const ai = normalizeStepAi({ output: { ok: true }, connectorId: 'slack-conn' });
+    expect(shouldShowAiSection('slack', ai)).toBe(false);
+  });
+
+  it('shows the AI section for AI steps and for steps that report tokens or a model', () => {
+    expect(shouldShowAiSection('ai.prompt', normalizeStepAi({ connectorId: 'c1' }))).toBe(true);
+    expect(
+      shouldShowAiSection(
+        'openai.chat',
+        normalizeStepAi({ usage: { inputTokens: 1, outputTokens: 2, totalTokens: 3 } })
+      )
+    ).toBe(true);
+    expect(
+      shouldShowAiSection('openai.chat', normalizeStepAi({ output: { model: 'gpt-4o' } }))
+    ).toBe(true);
+  });
+});
+
+describe('isAiStepType', () => {
+  it('accepts ai.* and inference, rejects connector and control steps', () => {
+    expect(isAiStepType('ai.agent')).toBe(true);
+    expect(isAiStepType('ai.prompt')).toBe(true);
+    expect(isAiStepType('inference')).toBe(true);
+    expect(isAiStepType('confirm_lambda')).toBe(false);
+    expect(isAiStepType('http')).toBe(false);
+    expect(isAiStepType(undefined)).toBe(false);
   });
 });
 

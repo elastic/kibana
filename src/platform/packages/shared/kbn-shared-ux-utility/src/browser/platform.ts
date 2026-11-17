@@ -24,9 +24,19 @@ interface NavigatorWithUserAgentData extends Navigator {
 }
 
 /**
+ * First non-empty platform string.
+ * `??` keeps `""`, and Chromium can expose `userAgentData.platform` as `""`
+ * (headless or automated Chromium, some user-agent extensions). Keeping that
+ * empty string would hide a Macintosh user agent and report a Mac as non-Mac.
+ * A non-empty platform such as "Linux" or "Windows" is still trusted as-is.
+ */
+const firstNonEmpty = (...candidates: Array<string | undefined>): string =>
+  candidates.find((candidate) => !!candidate) ?? '';
+
+/**
  * Platform detection IIFE - runs once at module load.
  * Gets the normalized platform string from the browser's navigator API.
- * Prefers the modern userAgentData API with fallback to navigator.userAgent and navigator.platform.
+ * Prefers a non-empty userAgentData.platform, then navigator.userAgent, then navigator.platform.
  *
  * Note: The `typeof navigator === 'undefined'` check is defensive code for
  * non-browser environments (SSR/Node.js) where `navigator` is not available.
@@ -37,7 +47,7 @@ const platformIdentifier = (() => {
   }
 
   const nav = navigator as NavigatorWithUserAgentData;
-  const platform = nav.userAgentData?.platform ?? nav.userAgent ?? nav.platform ?? '';
+  const platform = firstNonEmpty(nav.userAgentData?.platform, nav.userAgent, nav.platform);
 
   return platform.toLowerCase();
 })();

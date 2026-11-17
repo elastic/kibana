@@ -6,8 +6,8 @@
  */
 import { z } from '@kbn/zod';
 
-import { durationType } from '../../schema/zod/duration';
-import { sloIdSchema } from '../../schema/zod/slo';
+import { durationType } from '../../schema/duration';
+import { sloIdSchema } from '../../schema/slo';
 
 const purgeInstancesParamsSchema = z.object({
   body: z.object({

@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  getLogLevelCoalescedValue,
-  getLogLevelCoalescedValueLabel,
-  getLogLevelColor,
-} from '@kbn/discover-utils';
+import { getLogLevelCoalescedValue, getLogLevelCoalescedValueLabel } from '@kbn/discover-utils';
+import { getLogLevelColor } from '@kbn/discover-utils/components';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { LOG_LEVEL_FIELDS } from '../../../../../../common/data_types/logs/constants';
 import type { DataSourceProfileProvider } from '../../../../profiles';

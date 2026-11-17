@@ -13,7 +13,9 @@ import dedent from 'dedent';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   compareByFailedBuilds,
+  describeScope,
   formatCounts,
+  scopeKey,
   type FlakyTestBranchStats,
   type FlakyTestClassification,
   type FlakyTestEntry,
@@ -140,12 +142,12 @@ export const qualifyingBranch = (
   if (!entry.flakiestBranch) {
     return flakiestBranch(entry.byBranch, minBuilds);
   }
-  const { branch } = entry.flakiestBranch;
-  return entry.byBranch.find((stats) => stats.branch === branch) ?? entry.flakiestBranch;
+  const key = scopeKey(entry.flakiestBranch);
+  return entry.byBranch.find((stats) => scopeKey(stats) === key) ?? entry.flakiestBranch;
 };
 
 const formatFlakiestBranch = (flakiest: FlakyTestBranchStats | undefined): string =>
-  flakiest ? `${flakiest.branch} (${formatRate(flakiest.buildFailRate)})` : '-';
+  flakiest ? `${describeScope(flakiest)} (${formatRate(flakiest.buildFailRate)})` : '-';
 
 /** Latest run on the flakiest branch, falling back to the latest run on any branch. */
 const formatLatestRun = (

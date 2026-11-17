@@ -12,7 +12,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/core/server';
 import type { Paginated, Pagination } from '@kbn/slo-schema';
-import { ALL_VALUE, sloDefinitionSchemaZod, storedSloDefinitionSchemaZod } from '@kbn/slo-schema';
+import { ALL_VALUE, sloDefinitionSchema, storedSloDefinitionSchema } from '@kbn/slo-schema';
 import { merge } from 'lodash';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import type { SLODefinition, StoredSLODefinition } from '../domain/models';
@@ -28,7 +28,7 @@ interface SearchParams {
 export interface SLODefinitionRepository {
   create(slo: SLODefinition): Promise<SLODefinition>;
   update(slo: SLODefinition): Promise<SLODefinition>;
-  findAllByIds(ids: string[]): Promise<SLODefinition[]>;
+  findAllByIds(ids: string[], options?: { namespace?: string }): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
   deleteById(id: string, options?: { ignoreNotFound?: boolean }): Promise<void>;
   search({ search, pagination, filters }: SearchParams): Promise<Paginated<SLODefinition>>;
@@ -106,7 +106,10 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
     await this.soClient.delete(SO_SLO_TYPE, response.saved_objects[0].id);
   }
 
-  async findAllByIds(ids: string[]): Promise<SLODefinition[]> {
+  async findAllByIds(
+    ids: string[],
+    { namespace }: { namespace?: string } = {}
+  ): Promise<SLODefinition[]> {
     if (ids.length === 0) return [];
 
     const response = await this.soClient.find<StoredSLODefinition>({
@@ -114,6 +117,7 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       page: 1,
       perPage: ids.length,
       filter: `slo.attributes.id:(${ids.join(' or ')})`,
+      ...(namespace && { namespaces: [namespace] }),
     });
 
     return response.saved_objects.map((so) => this.toSLO(so)).filter(this.isSLO);
@@ -161,7 +165,7 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       references: storedSLOObject.references,
     });
 
-    const result = sloDefinitionSchemaZod.safeParse({
+    const result = sloDefinitionSchema.safeParse({
       ...storedSLO,
       // groupBy was added in 8.10.0
       groupBy: storedSLO.groupBy ?? ALL_VALUE,
@@ -185,7 +189,7 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
     });
 
     if (!result.success) {
-      this.logger.debug(`Invalid stored SLO with id [${storedSLO.id}]`);
+      this.logger.debug(`Invalid stored SLO with ID [${storedSLO.id}]`);
       return undefined;
     }
 
@@ -233,7 +237,7 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       });
     }
     return {
-      storedSLO: storedSloDefinitionSchemaZod.encode({
+      storedSLO: storedSloDefinitionSchema.encode({
         ...slo,
         artifacts: { dashboards: dashboardsRef },
       }),

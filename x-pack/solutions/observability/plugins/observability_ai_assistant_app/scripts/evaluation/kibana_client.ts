@@ -53,7 +53,7 @@ import { inspect } from 'util';
 import type { ObservabilityAIAssistantAPIClientRequestParamsOf } from '@kbn/observability-ai-assistant-plugin/public';
 import type { EvaluationResult } from './types';
 
-// eslint-disable-next-line spaced-comment
+// eslint-disable-next-line @kbn/compat/eslint-spaced-comment
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 type InnerMessage = Message['message'];

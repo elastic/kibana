@@ -13,6 +13,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import { createUpdateDetectionService } from './update_detection';
+import { createWatchlistSyncMarkersService } from '../sync_markers';
 import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
 import type { EntityStoreEntityIdsByType, WatchlistsByEuid } from '../../../entities/service';
 import type { CorrelationMap } from '../../../entities/types';
@@ -186,7 +187,7 @@ describe('Watchlist update detection service', () => {
         emptyWatchlistsByEuid
       );
 
-      expect(result).toEqual([]);
+      expect(result).toEqual({ entities: [] });
       expect(dataEsClient.search).not.toHaveBeenCalled();
       expect(internalEsClient.bulk).not.toHaveBeenCalled();
     });
@@ -214,14 +215,14 @@ describe('Watchlist update detection service', () => {
         emptyWatchlistsByEuid
       );
 
-      expect(result).toEqual([]);
+      expect(result).toEqual({ entities: [] });
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('correlationMap not provided')
       );
     });
   });
 
-  describe('integration source without descriptorClient', () => {
+  describe('integration source without syncMarkersService', () => {
     it('logs warning and returns empty array without calling search or bulk', async () => {
       const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
       const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -246,9 +247,9 @@ describe('Watchlist update detection service', () => {
         emptyWatchlistsByEuid
       );
 
-      expect(result).toEqual([]);
+      expect(result).toEqual({ entities: [] });
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('descriptorClient not available')
+        expect.stringContaining('syncMarkersService not available')
       );
       expect(dataEsClient.search).not.toHaveBeenCalled();
       expect(internalEsClient.bulk).not.toHaveBeenCalled();
@@ -290,7 +291,7 @@ describe('Watchlist update detection service', () => {
         internalEsClient,
         dataEsClient,
         logger,
-        descriptorClient,
+        syncMarkersService: createWatchlistSyncMarkersService(descriptorClient, internalEsClient),
         crudClient: createMockCrudClient(),
         watchlist: watchlist5,
       });
@@ -361,7 +362,7 @@ describe('Watchlist update detection service', () => {
         internalEsClient,
         dataEsClient,
         logger,
-        descriptorClient,
+        syncMarkersService: createWatchlistSyncMarkersService(descriptorClient, internalEsClient),
         crudClient: createMockCrudClient(),
         watchlist: watchlist6,
       });
@@ -374,6 +375,131 @@ describe('Watchlist update detection service', () => {
       );
 
       expect(mockUpdateLastProcessedMarker).toHaveBeenCalledWith(integrationSource, maxTimestamp);
+    });
+
+    it('uses the full-sync window it is given instead of lastUpdateProcessed when told a new full sync was detected', async () => {
+      const staleProcessedMarker = '2024-01-01T00:00:00Z';
+      const fullSyncWindowStart = '2024-02-01T00:00:00Z';
+      const descriptorClient = createDescriptorClient();
+      mockGetLastProcessedMarker.mockResolvedValue(staleProcessedMarker);
+
+      const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
+
+      const searchCalls: CapturedSearchRequest[] = [];
+      dataEsClient.search.mockImplementation((params?: SearchRequest) => {
+        if (!params) {
+          throw new Error('Expected search params');
+        }
+        searchCalls.push(params as CapturedSearchRequest);
+        return Promise.resolve({
+          aggregations: { entities: { buckets: [], after_key: undefined } },
+        } as never);
+      });
+      internalEsClient.bulk.mockResolvedValue({ errors: false } as never);
+
+      const watchlist7 = {
+        id: 'test-watchlist-id',
+        name: 'test-watchlist',
+        index: '.watchlist-entities-default',
+      };
+      const service = createUpdateDetectionService({
+        internalEsClient,
+        dataEsClient,
+        logger,
+        syncMarkersService: createWatchlistSyncMarkersService(descriptorClient, internalEsClient),
+        crudClient: createMockCrudClient(),
+        watchlist: watchlist7,
+      });
+
+      await service.updateDetection(
+        integrationSource,
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] }),
+        undefined,
+        emptyWatchlistsByEuid,
+        { hasNewFullSync: true, syncMarker: fullSyncWindowStart }
+      );
+
+      expect(mockGetLastProcessedMarker).not.toHaveBeenCalled();
+      expect(searchCalls[0].query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: fullSyncWindowStart, lte: 'now' } },
+      });
+    });
+
+    it('excludes an entity whose true latest document does not match queryRule, but still advances the marker past it', async () => {
+      const syncMarker = '2024-01-01T00:00:00Z';
+      const sourceWithQueryRule: WatchlistDataSources.MonitoringEntitySource = {
+        ...integrationSource,
+        queryRule: 'user.roles: "admin"',
+      };
+      const descriptorClient = createDescriptorClient();
+      mockGetLastProcessedMarker.mockResolvedValue(syncMarker);
+      mockUpdateLastProcessedMarker.mockResolvedValue(undefined);
+
+      const targetIndex = '.watchlist-entities-default';
+      const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      internalEsClient.bulk.mockResolvedValue({ errors: false } as never);
+
+      const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const staleAdminDocId = 'doc-admin';
+      const demotionTimestamp = '2024-01-20T00:00:00Z';
+      dataEsClient.search.mockImplementation((params?: SearchRequest) => {
+        if (!params) {
+          throw new Error('Expected search params');
+        }
+        return Promise.resolve({
+          aggregations: {
+            entities: {
+              buckets: [
+                {
+                  key: { euid: 'user:bob' },
+                  latest_doc: {
+                    hits: {
+                      hits: [
+                        {
+                          _id: 'doc-demotion',
+                          _source: { '@timestamp': demotionTimestamp, 'user.name': 'bob' },
+                        },
+                      ],
+                    },
+                  },
+                  latest_matching_doc: {
+                    doc: { hits: { hits: [{ _id: staleAdminDocId }] } },
+                  },
+                },
+              ],
+              after_key: undefined,
+            },
+          },
+        } as never);
+      });
+
+      const watchlist8 = {
+        id: 'test-watchlist-id',
+        name: 'test-watchlist',
+        index: targetIndex,
+      };
+      const service = createUpdateDetectionService({
+        internalEsClient,
+        dataEsClient,
+        logger,
+        syncMarkersService: createWatchlistSyncMarkersService(descriptorClient, internalEsClient),
+        crudClient: createMockCrudClient(),
+        watchlist: watchlist8,
+      });
+
+      const result = await service.updateDetection(
+        sourceWithQueryRule,
+        createEntityStoreEntityIdsByType({ user: ['user:bob'] }),
+        undefined,
+        emptyWatchlistsByEuid
+      );
+
+      expect(result.entities).toEqual([]);
+      expect(mockUpdateLastProcessedMarker).toHaveBeenCalledWith(
+        sourceWithQueryRule,
+        demotionTimestamp
+      );
     });
   });
 });

@@ -42,6 +42,11 @@ const runQuotaSettingsAttributesV1 = schema.object({
   ),
 });
 
+// Settings saved before the flag existed read it as on.
+const runQuotaSettingsAttributesV2 = runQuotaSettingsAttributesV1.extends({
+  investigationLimitsEnabled: schema.maybe(schema.boolean()),
+});
+
 const runQuotaLedgerAttributesV1 = schema.object({
   date: schema.string({ maxLength: RUN_QUOTA_DATE_MAX_LENGTH }),
   group: schema.oneOf([
@@ -50,6 +55,16 @@ const runQuotaLedgerAttributesV1 = schema.object({
     schema.literal('ki_extraction'),
   ]),
   count: schema.number({ min: 0, validate: validateInteger }),
+});
+
+const runQuotaLedgerAttributesV2 = runQuotaLedgerAttributesV1.extends({
+  group: schema.oneOf([
+    schema.literal('detection'),
+    schema.literal('investigation'),
+    schema.literal('manual_investigation'),
+    schema.literal('total_investigation'),
+    schema.literal('ki_extraction'),
+  ]),
 });
 
 export const runQuotaSettingsSavedObjectType: SavedObjectsType = {
@@ -69,6 +84,13 @@ export const runQuotaSettingsSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: runQuotaSettingsAttributesV1.extends({}, { unknowns: 'ignore' }),
         create: runQuotaSettingsAttributesV1.extends({}, { unknowns: 'allow' }),
+      },
+    },
+    '2': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: runQuotaSettingsAttributesV2.extends({}, { unknowns: 'ignore' }),
+        create: runQuotaSettingsAttributesV2.extends({}, { unknowns: 'allow' }),
       },
     },
   },
@@ -91,6 +113,13 @@ export const runQuotaLedgerSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: runQuotaLedgerAttributesV1.extends({}, { unknowns: 'ignore' }),
         create: runQuotaLedgerAttributesV1.extends({}, { unknowns: 'allow' }),
+      },
+    },
+    '2': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: runQuotaLedgerAttributesV2.extends({}, { unknowns: 'ignore' }),
+        create: runQuotaLedgerAttributesV2.extends({}, { unknowns: 'allow' }),
       },
     },
   },

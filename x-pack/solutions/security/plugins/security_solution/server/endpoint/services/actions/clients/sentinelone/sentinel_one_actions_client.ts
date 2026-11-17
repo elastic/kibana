@@ -608,6 +608,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
       if (!error) {
         try {
+          // `paths` is only supported by the Elastic Defend Endpoint
+          if (!actionRequest.parameters.path) {
+            throw new ResponseActionsClientError('[parameters.path] is required', 400);
+          }
+
           await this.sendAction<unknown, SentinelOneFetchAgentFilesParams>(
             SUB_ACTION.FETCH_AGENT_FILES,
             {
@@ -639,7 +644,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           limit: 1,
           sortBy: 'createdAt',
           sortOrder: 'asc',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+          // eslint-disable-next-line @kbn/compat/typescript-naming-convention
           createdAt__gte: timestamp,
           agentIds: agentId,
         };

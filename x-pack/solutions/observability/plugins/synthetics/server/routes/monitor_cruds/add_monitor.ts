@@ -22,6 +22,7 @@ import {
 import { InvalidMaintenanceWindowError } from '../../synthetics_service/maintenance_windows/resolve_maintenance_windows';
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
+import { InvalidNamespaceError } from './add_monitor/invalid_namespace_error';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { ConfigKey } from '../../../common/runtime_types';
 import type { MonitorFields } from '../../../common/runtime_types';
@@ -54,7 +55,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         preserve_namespace: queryBoolean
           .optional()
           .describe(
-            'If `true`, store the `namespace` as sent. Otherwise, a `default` namespace is replaced with one derived from the space ID.'
+            'If `true`, store the `namespace` exactly as sent, skipping the space-derived fallback. If `false` or omitted, an explicit `namespace` is still stored as sent; only an omitted `namespace` is derived from the space ID.'
           ),
         gettingStarted: queryBoolean.optional().describe('For internal use only.'),
         internal: queryBoolean.optional().default(false).describe('For internal use only.'),
@@ -201,7 +202,8 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       if (
         error instanceof InvalidLocationError ||
         error instanceof InvalidScheduleError ||
-        error instanceof InvalidMaintenanceWindowError
+        error instanceof InvalidMaintenanceWindowError ||
+        error instanceof InvalidNamespaceError
       ) {
         return response.badRequest({ body: { message: error.message } });
       }

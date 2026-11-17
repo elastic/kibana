@@ -63,6 +63,9 @@ describe('registerSkills', () => {
       logger: logger as unknown as LoggerServiceContract,
       getWorkflowClient: jest.fn(() => ({ getWorkflow: jest.fn() })),
       getAvailableConnectors: jest.fn(),
+      getRulesClient: jest.fn(),
+      getActionPolicyClient: jest.fn(),
+      getPrivilegeChecker: jest.fn(),
       availability: {
         cacheMode: 'none',
         handler: jest.fn().mockResolvedValue({ status: 'available' }),

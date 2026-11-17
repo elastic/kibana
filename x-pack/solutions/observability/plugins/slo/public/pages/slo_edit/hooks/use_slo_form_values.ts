@@ -22,7 +22,14 @@ export interface UseSloFormValuesResponse {
 export function useSloFormValues(sloId?: string): UseSloFormValuesResponse {
   const isEditMode = Boolean(sloId);
 
-  const { data: slo, isInitialLoading: isSloLoading } = useFetchSloDetails({ sloId });
+  const {
+    data: slo,
+    isInitialLoading,
+    isFetching,
+    isFetchedAfterMount,
+  } = useFetchSloDetails({ sloId });
+  // The form reads its values on mount only, so wait for a fresh fetch instead of cached or previous-key data.
+  const isSloLoading = isInitialLoading || (isFetching && !isFetchedAfterMount);
   const sloFormValuesFromSloResponse = transformSloResponseToFormState(slo);
 
   const sloFormValuesFromUrlState = useParseUrlState();

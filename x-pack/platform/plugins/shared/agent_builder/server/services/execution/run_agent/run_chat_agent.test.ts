@@ -22,6 +22,7 @@ import {
   HookLifecycle,
   ToolOrigin,
   createAskUserQuestionStep,
+  platformCoreTools,
 } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
@@ -397,6 +398,121 @@ describe('runDefaultAgentMode', () => {
     });
   });
 
+  describe('attachment_tools capability', () => {
+    const setupBase = (context: ReturnType<typeof createAgentHandlerContextMock>) => {
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      getPendingTurnMock.mockReturnValue(undefined);
+      selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+    };
+
+    it('passes the resolved "off" value to selectTools', async () => {
+      const context = createAgentHandlerContextMock();
+      setupBase(context);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: {
+            tools: [],
+            capabilities: { attachment_tools: { enabled: false } },
+          },
+        },
+        context
+      );
+
+      expect(selectToolsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ capabilities: { attachmentTools: false, apiTools: true } })
+      );
+    });
+
+    it('passes "on" to selectTools when the agent has no capabilities', async () => {
+      const context = createAgentHandlerContextMock();
+      setupBase(context);
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } },
+        context
+      );
+
+      expect(selectToolsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ capabilities: { attachmentTools: true, apiTools: true } })
+      );
+    });
+  });
+
+  describe('connector prompt flags', () => {
+    const run = async ({
+      connectorIds,
+      staticToolIds,
+    }: {
+      connectorIds?: string[];
+      staticToolIds: string[];
+    }) => {
+      const context = createAgentHandlerContextMock();
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      getPendingTurnMock.mockReturnValue(undefined);
+      selectToolsMock.mockResolvedValue({
+        staticTools: staticToolIds.map((id) => ({ id })),
+        dynamicTools: [],
+      } as any);
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [], connector_ids: connectorIds },
+        },
+        context
+      );
+
+      return createPromptFactoryMock.mock.calls[0][0];
+    };
+
+    it('reports assigned connectors and a selected sml_search', async () => {
+      const params = await run({
+        connectorIds: ['c1'],
+        staticToolIds: [platformCoreTools.smlSearch],
+      });
+
+      expect(params.connectorsAssigned).toBe(true);
+      expect(params.smlSearchSelected).toBe(true);
+    });
+
+    it('reports no connectors when connector_ids is missing and no sml_search when it is not selected', async () => {
+      const params = await run({ staticToolIds: [] });
+
+      expect(params.connectorsAssigned).toBe(false);
+      expect(params.smlSearchSelected).toBe(false);
+    });
+  });
+
   describe('threaded roundId', () => {
     const setupBase = async (context: ReturnType<typeof createAgentHandlerContextMock>) => {
       jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
@@ -740,7 +856,6 @@ describe('runDefaultAgentMode', () => {
       expect(streamOptions(streamEvents).streamMode).toBe('values');
       // a sub-agent run must not inherit the checkpoint namespace of the parent node it runs in
       expect(streamOptions(streamEvents).configurable).toStrictEqual({ checkpoint_ns: '' });
-      expect(graphParams.todoStateManager).toBe(context.todoStateManager);
       // fresh run: starts at init with no pending calls
       const command = initialCommand(streamEvents);
       expect(command.goto).toEqual([nodeNames.init]);
@@ -1371,7 +1486,7 @@ describe('runDefaultAgentMode', () => {
       ]);
     });
 
-    it('resumes at contextManagement when the turn only paused on an ask_user_question', async () => {
+    it('resumes through the background check when the turn only paused on an ask_user_question', async () => {
       const { context, streamEvents } = setup();
       const question = { question: 'Pick', options: [{ label: 'a' }], multi_select: false };
       const conversation = createEmptyConversation({
@@ -1405,7 +1520,7 @@ describe('runDefaultAgentMode', () => {
       );
 
       const command = initialCommand(streamEvents);
-      expect(command.goto).toEqual([nodeNames.contextManagement]);
+      expect(command.goto).toEqual([nodeNames.checkBackgroundWork]);
       expect(command.update).toMatchObject({ pendingToolCallIds: [], researchOutcome: undefined });
       // the consumed answer is removed from the prompt manager and replayed as an event
       expect(context.promptManager.delete).toHaveBeenCalledWith('q1');
@@ -1416,6 +1531,45 @@ describe('runDefaultAgentMode', () => {
           data: { prompt_id: 'q1', answers: [{ choice: [0] }] },
         })
       );
+    });
+  });
+
+  describe('with dynamic tools enabled', () => {
+    it('re-registers the previous rounds dynamic tools behind execute_dynamic_tool', async () => {
+      const context = createAgentHandlerContextMock();
+      context.experimentalFeatures.dynamicTools = true;
+
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      getPendingTurnMock.mockReturnValue(undefined);
+
+      const dynamicTools: ExecutableToolWithOrigin[] = [
+        { ...createMockedExecutableTool({ id: 'dynamic-tool-1' }), origin: ToolOrigin.inline },
+      ];
+      selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools } as any);
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+        context
+      );
+
+      expect(context.toolManager.addTools).toHaveBeenNthCalledWith(3, {
+        type: ToolManagerToolType.dynamic,
+        tools: dynamicTools,
+      });
     });
   });
 });

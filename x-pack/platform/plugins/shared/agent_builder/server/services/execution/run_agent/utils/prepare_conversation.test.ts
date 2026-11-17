@@ -140,6 +140,45 @@ describe('prepareConversation', () => {
     };
   };
 
+  describe('agent messages', () => {
+    const reportActor = { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' };
+
+    it('attributes the next input of a wake run to the agent, not to the owner author', async () => {
+      const result = await prepareConversationFromTimeline({
+        timeline: [],
+        nextInput: { message: 'report' },
+        nextInputAuthor: { id: 'owner', username: 'owner' },
+        nextInputActor: reportActor,
+        context: mockContext,
+      });
+
+      expect(result.nextInput).toEqual({ message: 'report', attachments: [], actor: reportActor });
+    });
+
+    it('attributes a stored agent message to the agent in history', async () => {
+      const timeline = timelineFromRounds([
+        createRound({ id: 'round-1', input: { message: 'report' } }),
+      ]).map((event) =>
+        event.id === 'round-1::user_message'
+          ? { ...event, type: TimelineEventType.agentMessage, actor: reportActor }
+          : event
+      );
+
+      const result = await prepareConversationFromTimeline({
+        timeline,
+        nextInput: { message: 'next' },
+        context: mockContext,
+      });
+
+      const message = result.timeline.find((event) => event.id === 'round-1::user_message');
+      expect(message).toMatchObject({
+        type: TimelineEventType.agentMessage,
+        data: { message: 'report', actor: reportActor },
+      });
+      expect(message?.data).not.toHaveProperty('author');
+    });
+  });
+
   describe('with no attachments', () => {
     it('should process a simple nextInput with no attachments', async () => {
       const nextInput: ConverseInput = {

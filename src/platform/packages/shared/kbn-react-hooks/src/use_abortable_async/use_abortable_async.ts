@@ -56,63 +56,60 @@ export function useAbortableAsync<T>(
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState<T | undefined>(options?.defaultValue);
 
-  useEffect(
-    () => {
-      controllerRef.current.abort();
+  useEffect(() => {
+    controllerRef.current.abort();
 
-      const controller = new AbortController();
-      controllerRef.current = controller;
+    const controller = new AbortController();
+    controllerRef.current = controller;
 
-      function isRequestStale() {
-        return controllerRef.current !== controller;
-      }
+    function isRequestStale() {
+      return controllerRef.current !== controller;
+    }
 
-      if (clearValueOnNext) {
+    if (clearValueOnNext) {
+      setValue(undefined);
+      setError(undefined);
+    }
+
+    function handleError(err: Error) {
+      if (isRequestStale()) return;
+      setError(err);
+      if (unsetValueOnError) {
         setValue(undefined);
+      }
+      setLoading(false);
+      options?.onError?.(err);
+    }
+
+    try {
+      const response = fn({ signal: controller.signal });
+      if (isPromise(response)) {
+        setLoading(true);
+        response
+          .then((nextValue) => {
+            if (isRequestStale()) return;
+            setError(undefined);
+            setValue(nextValue);
+          })
+          .catch(handleError)
+          .finally(() => {
+            if (isRequestStale()) return;
+            setLoading(false);
+          });
+      } else {
         setError(undefined);
-      }
-
-      function handleError(err: Error) {
-        if (isRequestStale()) return;
-        setError(err);
-        if (unsetValueOnError) {
-          setValue(undefined);
-        }
+        setValue(response);
         setLoading(false);
-        options?.onError?.(err);
       }
+    } catch (err) {
+      handleError(err);
+    }
 
-      try {
-        const response = fn({ signal: controller.signal });
-        if (isPromise(response)) {
-          setLoading(true);
-          response
-            .then((nextValue) => {
-              if (isRequestStale()) return;
-              setError(undefined);
-              setValue(nextValue);
-            })
-            .catch(handleError)
-            .finally(() => {
-              if (isRequestStale()) return;
-              setLoading(false);
-            });
-        } else {
-          setError(undefined);
-          setValue(response);
-          setLoading(false);
-        }
-      } catch (err) {
-        handleError(err);
-      }
-
-      return () => {
-        controller.abort();
-      };
-    },
+    return () => {
+      controller.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    deps.concat(refreshId, clearValueOnNext)
-  );
+  }, [...deps, refreshId, clearValueOnNext]);
 
   const refresh = useCallback(() => {
     setRefreshId((id) => id + 1);

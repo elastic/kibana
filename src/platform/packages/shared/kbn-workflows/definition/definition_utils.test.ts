@@ -177,6 +177,27 @@ describe('getNestedStepGroups', () => {
     ]);
   });
 
+  it('skips malformed cases and branches of a draft, keeping the indexes of the rest', () => {
+    const switchStep = {
+      name: 'route',
+      type: 'switch',
+      cases: [null, { match: 'a', steps: [waitStep('case_a')] }],
+    } as unknown as Step;
+    const parallelStep = {
+      name: 'fan',
+      type: 'parallel',
+      branches: [null, { name: 'b', steps: [waitStep('branch_b')] }],
+    } as unknown as Step;
+
+    expect(getNestedStepGroups({ name: 'route', type: 'switch' } as unknown as Step)).toEqual([]);
+    expect(getNestedStepGroups(switchStep).map(({ pathSuffix }) => pathSuffix)).toEqual([
+      '.case[1]',
+    ]);
+    expect(getNestedStepGroups(parallelStep).map(({ pathSuffix }) => pathSuffix)).toEqual([
+      '.branch[1]',
+    ]);
+  });
+
   it('includes on-failure fallback steps for any step type', () => {
     const step = {
       name: 'risky',

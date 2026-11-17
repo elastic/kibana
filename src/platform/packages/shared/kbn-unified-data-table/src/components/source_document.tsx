@@ -18,11 +18,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import {
   canTruncateFieldValue,
-  formatFieldValueReact,
-  formatHitReact,
   MAX_RENDERED_FIELD_VALUE_LENGTH,
   truncateFieldValue,
 } from '@kbn/discover-utils';
+import { formatFieldValueReact, formatHitReact } from '@kbn/discover-utils/components';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,

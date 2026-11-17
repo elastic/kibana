@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  memo,
+  Suspense,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -32,6 +41,7 @@ import {
 } from '@kbn/response-ops-rule-form/src/translations';
 import { connectorTypePublishesKeys } from '@kbn/connector-specs';
 import { isConnectorTypeTestable } from '../../../lib/is_connector_type_testable';
+import { SectionLoading } from '../../../components/section_loading';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
   ActionConnector,
@@ -69,6 +79,11 @@ export interface CreateConnectorFlyoutProps {
   initialConnector?: Partial<Omit<ActionConnector, 'secrets'>> & { actionTypeId: string };
   icon?: IconType;
   size?: 's' | 'm' | 'l';
+  /**
+   * Skips the "Created '<name>'" success toast, for hosts that confirm the create with their own
+   * toast from `onConnectorCreated`. Errors are still toasted.
+   */
+  hideSuccessToast?: boolean;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -81,6 +96,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   initialConnector,
   icon,
   size,
+  hideSuccessToast,
 }) => {
   const services = useKibana().services;
   const connectorContext = useContext(ConnectorContext);
@@ -116,6 +132,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     actionTypeRegistry,
     actionTypeId: actionType?.id,
     initialConnector,
+    hideSuccessToast,
   });
 
   useEffect(() => {
@@ -568,15 +585,26 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               )}
           </>
         ) : (
-          <ActionTypeMenu
-            featureId={featureId}
-            onActionTypeChange={setActionType}
-            setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
-            setAllActionTypes={setAllActionTypes}
-            actionTypeRegistry={actionTypeRegistry}
-            searchValue={searchValue}
-            selectedFeatureIds={selectedFeatureIds}
-          />
+          <Suspense
+            fallback={
+              <SectionLoading>
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionsConnectorsList.loadingConnectorTypesDescription',
+                  { defaultMessage: 'Loading connector types…' }
+                )}
+              </SectionLoading>
+            }
+          >
+            <ActionTypeMenu
+              featureId={featureId}
+              onActionTypeChange={setActionType}
+              setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
+              setAllActionTypes={setAllActionTypes}
+              actionTypeRegistry={actionTypeRegistry}
+              searchValue={searchValue}
+              selectedFeatureIds={selectedFeatureIds}
+            />
+          </Suspense>
         )}
       </EuiFlyoutBody>
       <FlyoutFooter

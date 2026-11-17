@@ -14,6 +14,7 @@ const GIB = 1024 * MIB;
 interface FakeAgent {
   id?: string;
   last_checkin?: string;
+  policy_revision?: number | null;
   local_metadata?: {
     host?: { memory?: number };
     elastic?: { agent?: { complete?: boolean } };
@@ -49,7 +50,7 @@ describe('getAgentInfo', () => {
     const listAgents = pagedListAgents([
       [
         agent({ id: 'a', last_checkin: '2026-08-01T00:00:00.000Z', local_metadata: {} }),
-        agent({ id: 'b', last_checkin: '2026-08-01T00:01:00.000Z' }),
+        agent({ id: 'b', last_checkin: '2026-08-01T00:01:00.000Z', policy_revision: 4 }),
       ],
     ]);
 
@@ -60,11 +61,13 @@ describe('getAgentInfo', () => {
       lastCheckin: Date.parse('2026-08-01T00:00:00.000Z'),
       memoryMib: null,
       complete: false,
+      policyRevision: null,
     });
     expect(info.get('b')).toEqual({
       lastCheckin: Date.parse('2026-08-01T00:01:00.000Z'),
       memoryMib: 2048,
       complete: false,
+      policyRevision: 4,
     });
   });
 

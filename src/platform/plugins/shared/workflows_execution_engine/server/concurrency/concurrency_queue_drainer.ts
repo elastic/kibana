@@ -17,6 +17,7 @@ import {
   isTerminalStatus,
 } from '@kbn/workflows';
 
+import { getConcurrencyGroupLock, withConcurrencyGroupLock } from './concurrency_group_lock';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
@@ -71,14 +72,29 @@ const promoteQueuedRunTaskWithRetry = async (
  * Moves oldest `queued` executions to `pending` and promotes their pre-scheduled
  * `workflow:run` tasks via `runSoon` while slot occupancy is below `concurrency.max`.
  */
-export async function drainConcurrencyQueueSlots(params: {
+interface DrainConcurrencyQueueSlotsParams {
   workflowExecutionRepository: WorkflowExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
   logger: Logger;
   spaceId: string;
   concurrencyGroupKey: string;
   concurrencySettings: ConcurrencySettings;
-}): Promise<void> {
+}
+
+export async function drainConcurrencyQueueSlots(
+  params: DrainConcurrencyQueueSlotsParams
+): Promise<void> {
+  return withConcurrencyGroupLock(
+    getConcurrencyGroupLock(),
+    params.spaceId,
+    params.concurrencyGroupKey,
+    () => drainConcurrencyQueueSlotsUnlocked(params)
+  );
+}
+
+async function drainConcurrencyQueueSlotsUnlocked(
+  params: DrainConcurrencyQueueSlotsParams
+): Promise<void> {
   const {
     workflowExecutionRepository,
     workflowTaskManager,

@@ -342,7 +342,7 @@ export const ComponentTemplatesSelector = ({
 
   return (
     <EuiEmptyPrompt
-      iconType="managementApp"
+      iconType="gear"
       title={
         <h2>
           <FormattedMessage

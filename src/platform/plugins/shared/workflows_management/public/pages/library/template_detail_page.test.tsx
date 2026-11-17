@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, render } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { of } from 'rxjs';
@@ -19,9 +19,11 @@ import { getTestProvider } from '../../shared/mocks/test_providers';
 const mockSetWorkflowsBreadcrumbs = jest.fn();
 let mockOnLoaded: ((template: TemplateBody) => void) | undefined;
 let mockShowGraphPreview: boolean | undefined;
+const mockUseTemplate = jest.fn();
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
+  useTemplate: (slug: string | undefined) => mockUseTemplate(slug),
   TemplateDetail: ({
     slug,
     onLoaded,
@@ -37,6 +39,18 @@ jest.mock('@kbn/workflows-ui', () => ({
   },
 }));
 
+jest.mock('./template_not_found_page', () => ({
+  TemplateNotFoundPage: ({ onBackToLibrary }: { onBackToLibrary: () => void }) => (
+    <div data-test-subj="workflowLibraryTemplateNotFoundPage">
+      <button
+        type="button"
+        data-test-subj="workflowLibraryTemplateNotFoundBackButton"
+        onClick={onBackToLibrary}
+      />
+    </div>
+  ),
+}));
+
 jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
   useSetWorkflowsBreadcrumbs: () => mockSetWorkflowsBreadcrumbs,
 }));
@@ -49,6 +63,13 @@ function buildEnabledServices(): StartServicesMock {
   return services;
 }
 
+const createHttpFetchError = (status: number): Error =>
+  Object.assign(new Error(`Request failed with status ${status}`), {
+    name: 'HttpFetchError',
+    request: {},
+    response: { status },
+  });
+
 const routeProps = (slug: string) =>
   ({
     match: { params: { slug } },
@@ -59,6 +80,7 @@ describe('LibraryTemplateDetailPage', () => {
     jest.clearAllMocks();
     mockOnLoaded = undefined;
     mockShowGraphPreview = undefined;
+    mockUseTemplate.mockReturnValue({ error: null });
   });
 
   it('resets breadcrumbs to Library when the route slug changes', () => {
@@ -92,5 +114,32 @@ describe('LibraryTemplateDetailPage', () => {
     });
 
     expect(mockShowGraphPreview).toBe(true);
+  });
+
+  it('renders the not-found page when the template does not exist', () => {
+    const services = buildEnabledServices();
+    mockUseTemplate.mockReturnValue({ error: createHttpFetchError(404) });
+
+    render(<LibraryTemplateDetailPage {...routeProps('no-such-template')} />, {
+      wrapper: getTestProvider({ services }),
+    });
+
+    expect(screen.getByTestId('workflowLibraryTemplateNotFoundPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockTemplateDetail')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('workflowLibraryTemplateNotFoundBackButton'));
+    expect(services.application.navigateToUrl).toHaveBeenCalledWith('/app/workflows/library');
+  });
+
+  it('keeps the template detail for errors other than not found', () => {
+    const services = buildEnabledServices();
+    mockUseTemplate.mockReturnValue({ error: createHttpFetchError(500) });
+
+    render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
+      wrapper: getTestProvider({ services }),
+    });
+
+    expect(screen.queryByTestId('workflowLibraryTemplateNotFoundPage')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockTemplateDetail')).toBeInTheDocument();
   });
 });

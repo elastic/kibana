@@ -17,6 +17,8 @@ project:
   owner: '@elastic/security-solution'
   sourceRoot: x-pack/solutions/security/plugins/security_solution
 dependsOn:
+  - '@kbn/data-source'
+  - '@kbn/securitysolution-alerts-page-url'
   - '@kbn/setup-node-env'
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -61,6 +63,8 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/rule-data-utils'
   - '@kbn/securitysolution-t-grid'
+  - '@kbn/securitysolution-timeline-common'
+  - '@kbn/securitysolution-timeline-components'
   - '@kbn/rule-registry-plugin'
   - '@kbn/securitysolution-utils'
   - '@kbn/securitysolution-list-constants'
@@ -272,6 +276,7 @@ dependsOn:
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/agent-builder-browser'
   - '@kbn/agentic-investigations-common'
+  - '@kbn/agentic-investigations-impact'
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/mitre-attack-plugin'
   - '@kbn/security-mitre-attack-common'
@@ -321,11 +326,15 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/custom-content-common'
   - '@kbn/custom-content-renderer'
+  - '@kbn/securitysolution-timeline-search-strategy'
 tags:
   - plugin
   - prod
   - group-security
   - private
+  - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

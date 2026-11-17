@@ -18,14 +18,16 @@ export class ElasticsearchHomePlugin implements Plugin<
   ElasticsearchHomeServerSetupDependencies
 > {
   private readonly logger: Logger;
+  private readonly isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
     core: CoreSetup,
-    { agentBuilder, cloud, features }: ElasticsearchHomeServerSetupDependencies
+    { agentBuilder, features }: ElasticsearchHomeServerSetupDependencies
   ) {
     // Exposes the vector count privilege as a UI capability so the home page can render that tile
     // before the stats request resolves. Declared as an Elasticsearch feature, which resolves it
@@ -41,10 +43,12 @@ export class ElasticsearchHomePlugin implements Plugin<
       ],
     });
 
-    registerSearchSkills({ agentBuilder, cloud, logger: this.logger });
+    if (agentBuilder) {
+      registerSearchSkills({ agentBuilder, logger: this.logger });
+    }
 
     const router = core.http.createRouter();
-    registerDeploymentStatsRoute(router, this.logger);
+    registerDeploymentStatsRoute(router, this.logger, { isServerless: this.isServerless });
     registerStarredDashboardsCountRoute(router, this.logger);
   }
 

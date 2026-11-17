@@ -56,6 +56,7 @@ export class AgentBuilderDashboardsPlugin implements Plugin<
       data: plugins.data,
       dashboardPlugin: plugins.dashboard,
       draftAttachmentId,
+      toasts: core.notifications.toasts,
     });
 
     if (core.application.capabilities.agentBuilder?.show === true) {
