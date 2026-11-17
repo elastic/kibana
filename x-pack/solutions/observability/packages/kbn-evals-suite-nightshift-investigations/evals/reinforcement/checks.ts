@@ -116,24 +116,44 @@ const mergeTargets = (submissions: SubmitArguments[]): Map<string, string> => {
   return targets;
 };
 
+const edgePair = ({ source_node_id: source, target_node_id: target }: DecisionEdgeView): string =>
+  nodePair(source, target);
+
+const countBy = <T>(items: T[], key: (item: T) => string): Map<string, number> => {
+  const counts = new Map<string, number>();
+  for (const item of items) counts.set(key(item), (counts.get(key(item)) ?? 0) + 1);
+  return counts;
+};
+
 /**
  * ✅ edges in the submitted tree that the prior tree did not already mark. A prior ✅ follows its
- * nodes through the declared merges and ignores the condition, so a legacy mark stays legacy after
- * a merge or a relabel.
+ * nodes through the declared merges and exempts the same edge only: same nodes and condition, or,
+ * when the prior and submitted trees each have one edge between those nodes, that edge relabelled.
  */
 const newCheckmarks = ({ prior, submitted, submissions }: TreeState): DecisionEdgeView[] => {
   const merges = mergeTargets(submissions);
   const remap = (nodeId: string): string => merges.get(nodeId) ?? nodeId;
-  const priorTaken = new Set(
-    (prior?.edges ?? [])
-      .filter((edge) => edge.is_taken)
-      .map(({ source_node_id: source, target_node_id: target }) =>
-        nodePair(remap(source), remap(target))
-      )
-  );
-  return (submitted?.edges ?? []).filter(
-    (edge) => edge.is_taken && !priorTaken.has(nodePair(edge.source_node_id, edge.target_node_id))
-  );
+  const priorEdges = (prior?.edges ?? []).map((edge) => ({
+    ...edge,
+    source_node_id: remap(edge.source_node_id),
+    target_node_id: remap(edge.target_node_id),
+  }));
+  const priorTaken = priorEdges.filter((edge) => edge.is_taken);
+  const priorTakenKeys = new Set(priorTaken.map(decisionEdgeKey));
+  const priorTakenPairs = new Set(priorTaken.map(edgePair));
+  const priorPairCounts = countBy(priorEdges, edgePair);
+  const submittedEdges = submitted?.edges ?? [];
+  const submittedPairCounts = countBy(submittedEdges, edgePair);
+  const isLegacy = (edge: DecisionEdgeView): boolean => {
+    const pair = edgePair(edge);
+    return (
+      priorTakenKeys.has(decisionEdgeKey(edge)) ||
+      (priorTakenPairs.has(pair) &&
+        priorPairCounts.get(pair) === 1 &&
+        submittedPairCounts.get(pair) === 1)
+    );
+  };
+  return submittedEdges.filter((edge) => edge.is_taken && !isLegacy(edge));
 };
 
 interface ResolvedPath {
@@ -310,13 +330,51 @@ const walkedAndMerged = (submissions: SubmitArguments[]) => {
   return { walked, merged };
 };
 
-/**
- * The seeded tree keeps every node and edge the round did not walk or merge: same id, type and
- * label for nodes, and the same source, target and condition for edges (✅ ignored).
- */
 const branchKey = ({ source_node_id: source, condition }: DecisionEdgeView): string =>
-  `${source}\u0000${condition.trim().toLowerCase()}`;
+  `${source}${NODE_PAIR_SEPARATOR}${condition.trim().toLowerCase()}`;
 
+/** Submitted-tree edges the round's paths walk, one per pair of consecutive steps that resolves. */
+const walkedEdges = (submitted: DecisionTreeView, submissions: SubmitArguments[]) => {
+  const edges: DecisionEdgeView[] = [];
+  for (const submission of submissions) {
+    for (const { visited_path: visited, causal_path: causal } of submission.traversals ?? []) {
+      for (const path of [visited, causal]) {
+        const { refs } = walkEdges(path, 'path', submitted.tree_id);
+        for (const ref of refs) {
+          try {
+            edges.push(...resolveEdgeRefs(submitted, [ref]));
+          } catch {
+            // A step that does not resolve walks no edge; the submit-arguments check reports it.
+          }
+        }
+      }
+    }
+  }
+  return edges;
+};
+
+/** Whether `to` can be reached from `from` along the tree's edges. */
+const reaches = (tree: DecisionTreeView, from: string, to: string): boolean => {
+  const seen = new Set([from]);
+  const queue = [from];
+  for (let nodeId = queue.shift(); nodeId !== undefined; nodeId = queue.shift()) {
+    if (nodeId === to) return true;
+    for (const { source_node_id: source, target_node_id: target } of tree.edges) {
+      if (source === nodeId && !seen.has(target)) {
+        seen.add(target);
+        queue.push(target);
+      }
+    }
+  }
+  return false;
+};
+
+/**
+ * The seeded tree keeps every node the round did not walk or merge (same id, type and label) and
+ * every edge it did not merge (same source, target and condition, ✅ ignored). A walked edge may be
+ * relabelled when it is the only edge between its nodes, or gain verified steps when the walked
+ * branch still reaches its old target.
+ */
 export const checkStructurePreserved = ({ output, seededTreeId }: CheckContext): CheckResult => {
   if (!seededTreeId) return pass('No prior tree: the round created a new tree.');
   const seeded = gradedTrees(output).find((tree) => isSeededTree(seededTreeId, tree.tree_id));
@@ -332,16 +390,21 @@ export const checkStructurePreserved = ({ output, seededTreeId }: CheckContext):
   const { walked, merged } = walkedAndMerged(submissions);
   const after = new Map(submitted.nodes.map((node) => [node.node_id, node]));
   const afterEdges = new Set(submitted.edges.map(decisionEdgeKey));
-  // Branches the walk took out of a walked node. Reinforcing may insert verified steps on such a
-  // branch, so its old edge can move below the new nodes.
-  const walkedBranches = new Set(
-    submitted.edges
-      .filter(
-        ({ source_node_id: source, target_node_id: target }) =>
-          walked.has(source) && walked.has(target)
-      )
-      .map(branchKey)
-  );
+  const walkedOnTree = walkedEdges(submitted, submissions);
+  const priorPairCounts = countBy(prior.edges, edgePair);
+  const rewrittenByWalk = (edge: DecisionEdgeView): boolean => {
+    const { target_node_id: target } = edge;
+    const relabelled =
+      priorPairCounts.get(edgePair(edge)) === 1 &&
+      walkedOnTree.some((walkedEdge) => edgePair(walkedEdge) === edgePair(edge));
+    const extended = walkedOnTree.some(
+      (walkedEdge) =>
+        branchKey(walkedEdge) === branchKey(edge) &&
+        (reaches(submitted, walkedEdge.target_node_id, target) ||
+          (walked.has(target) && !after.has(target)))
+    );
+    return relabelled || extended;
+  };
   const problems: string[] = [];
 
   for (const node of prior.nodes) {
@@ -357,12 +420,9 @@ export const checkStructurePreserved = ({ output, seededTreeId }: CheckContext):
   }
   for (const edge of prior.edges) {
     const { source_node_id: source, target_node_id: target } = edge;
-    if (walked.has(source) && walked.has(target)) continue;
-    if (walked.has(source) && walkedBranches.has(branchKey(edge))) continue;
     if (merged.has(source) || merged.has(target)) continue;
-    if (!afterEdges.has(decisionEdgeKey(edge))) {
-      problems.push(`${treeId}: edge ${formatEdge(edge)} was removed.`);
-    }
+    if (afterEdges.has(decisionEdgeKey(edge)) || rewrittenByWalk(edge)) continue;
+    problems.push(`${treeId}: edge ${formatEdge(edge)} was removed.`);
   }
   return result(problems, `${treeId} keeps every node and edge the round did not walk or merge.`);
 };
@@ -388,9 +448,11 @@ export const checkReinforcementDetected = ({
   seededTreeId,
   causalConfirmed,
 }: CheckContext): CheckResult => {
+  // A confirmed round must reinforce the seeded tree; an unconfirmed one must reinforce no tree.
   const treeWrites = (output.applied_writes ?? []).filter(
     ({ store, item_id: itemId }) =>
-      store === 'decision_tree' && (!seededTreeId || isSeededTree(seededTreeId, itemId))
+      store === 'decision_tree' &&
+      (!causalConfirmed || !seededTreeId || isSeededTree(seededTreeId, itemId))
   );
   const listed =
     treeWrites.map(({ item_id: itemId, action }) => `${itemId}: ${action}`).join(', ') || 'none';

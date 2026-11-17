@@ -121,6 +121,27 @@ describe('checkNoVisitedCheckmarks', () => {
     expect(graded.score).toBe(1);
   });
 
+  it('does not let a legacy ✅ exempt a parallel edge between the same nodes', () => {
+    const parallel = (yes: string, no: string) =>
+      tree([
+        'S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]',
+        'E1 --> D1{{Errors point at one upstream?}}',
+        `D1 -->|${yes}| X1((Upstream pod loss))`,
+        `D1 -->|${no}| X1`,
+      ]);
+
+    const graded = checkNoVisitedCheckmarks(
+      context({
+        prior: parallel('✅ yes', 'no'),
+        submitted: parallel('✅ yes', '✅ no'),
+        causalConfirmed: false,
+      })
+    );
+
+    expect(graded.score).toBe(0);
+    expect(graded.explanation).toContain('D1 -->|no| X1');
+  });
+
   it('keeps a legacy ✅ legacy after its node is merged away', () => {
     const legacy = tree([
       'S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]',
@@ -309,6 +330,51 @@ describe('checkStructurePreserved', () => {
     expect(graded.score).toBe(1);
   });
 
+  it('fails when the round drops the parallel branch it did not take', () => {
+    const parallel = (edges: string[]) =>
+      tree([
+        'S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]',
+        'E1 --> D1{{Errors point at one upstream?}}',
+        ...edges,
+      ]);
+
+    const graded = checkStructurePreserved(
+      context({
+        prior: parallel(['D1 -->|yes| X1((Upstream pod loss))', 'D1 -->|no| X1']),
+        submitted: parallel(['D1 -->|yes| X1((Upstream pod loss))']),
+        submission: submit([], {
+          traversals: [
+            { tree_id: TREE_ID, visited_path: ['S1', 'E1', 'D1', { id: 'X1', condition: 'yes' }] },
+          ],
+        }),
+        causalConfirmed: false,
+      })
+    );
+
+    expect(graded.score).toBe(0);
+    expect(graded.explanation).toContain('edge D1 -->|no| X1 was removed');
+  });
+
+  it('fails when a walked branch is rerouted and no longer reaches its old target', () => {
+    const rerouted = PRIOR.replace(
+      'D1 -->|yes| E2[Correlate with the upstream pod]',
+      'D1 -->|yes| E4[Check the upstream pod lifecycle]\n    E4 --> D2\n    E2[Correlate with the upstream pod]'
+    );
+
+    const graded = checkStructurePreserved(
+      context({
+        submitted: rerouted,
+        submission: submit([], {
+          traversals: [{ tree_id: TREE_ID, visited_path: ['S1', 'E1', 'D1', 'E4', 'D2', 'X1'] }],
+        }),
+        causalConfirmed: false,
+      })
+    );
+
+    expect(graded.score).toBe(0);
+    expect(graded.explanation).toContain('edge D1 -->|yes| E2 was removed');
+  });
+
   it('passes when a merged node is removed', () => {
     const duplicate = tree([
       'S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]',
@@ -376,11 +442,14 @@ describe('checkReinforcementDetected', () => {
     ).toBe(1);
   });
 
-  it('fails an unconfirmed round that reinforced the tree', () => {
-    expect(
-      checkReinforcementDetected(
-        context({ submitted: PRIOR, causalConfirmed: false, writes: [write('reinforce')] })
-      ).score
-    ).toBe(0);
+  it('fails an unconfirmed round that reinforced any tree', () => {
+    const otherTree: AppliedWrite = { ...write('reinforce'), item_id: NEW_TREE_ID };
+
+    for (const writes of [[write('reinforce')], [write('update'), otherTree]]) {
+      expect(
+        checkReinforcementDetected(context({ submitted: PRIOR, causalConfirmed: false, writes }))
+          .score
+      ).toBe(0);
+    }
   });
 });

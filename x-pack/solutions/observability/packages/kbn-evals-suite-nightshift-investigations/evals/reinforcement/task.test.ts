@@ -75,9 +75,27 @@ const fieldOf = (source: Source, field: string): unknown =>
       source
     );
 
-/** An in-memory decision tree index that records each write in `events`. */
+interface WriteRequest {
+  id: string;
+  if_seq_no?: number;
+}
+
+/**
+ * An in-memory decision tree index that records each write in `events`. Every document carries a
+ * sequence number that each write through the client bumps; `touch` simulates another writer.
+ */
 const fakeEsClient = (events: string[], initial: Record<string, Source>) => {
   const docs = new Map<string, Source>(Object.entries(initial));
+  const seqNos = new Map<string, number>();
+  const seqNoOf = (id: string): number => seqNos.get(id) ?? 0;
+  const touch = (id: string) => seqNos.set(id, seqNoOf(id) + 1);
+  const assertVersion = ({ id, if_seq_no: ifSeqNo }: WriteRequest) => {
+    if (ifSeqNo !== undefined && ifSeqNo !== seqNoOf(id)) {
+      throw Object.assign(new Error('version conflict'), {
+        meta: { statusCode: 409, body: { error: { type: 'version_conflict_engine_exception' } } },
+      });
+    }
+  };
   const matches = (request: SearchRequest, source: Source): boolean =>
     (request.query?.bool?.filter ?? []).every(({ term = {}, terms = {} }) =>
       [
@@ -93,21 +111,30 @@ const fakeEsClient = (events: string[], initial: Record<string, Source>) => {
     search: jest.fn(async (request: SearchRequest) => {
       const hits = [...docs.entries()]
         .filter(([, source]) => matches(request, source))
-        .map(([id, source]) => ({ _id: id, _source: source }));
+        .map(([id, source]) => ({
+          _id: id,
+          _source: source,
+          _seq_no: seqNoOf(id),
+          _primary_term: 1,
+        }));
       return { hits: { hits } };
     }),
-    index: jest.fn(async ({ id, document }: { id: string; document: Source }) => {
-      events.push(`es:index ${id}`);
-      docs.set(id, document);
+    index: jest.fn(async (request: WriteRequest & { document: Source }) => {
+      assertVersion(request);
+      events.push(`es:index ${request.id}`);
+      docs.set(request.id, request.document);
+      touch(request.id);
       return {};
     }),
-    delete: jest.fn(async ({ id }: { id: string }) => {
-      events.push(`es:delete ${id}`);
-      docs.delete(id);
+    delete: jest.fn(async (request: WriteRequest) => {
+      assertVersion(request);
+      events.push(`es:delete ${request.id}`);
+      docs.delete(request.id);
+      touch(request.id);
       return {};
     }),
   };
-  return { esClient: esClient as unknown as Client, docs };
+  return { esClient: esClient as unknown as Client, docs, touch };
 };
 
 const completedWith = (
@@ -538,6 +565,46 @@ describe('runReinforcementExample', () => {
       expect(docs.get('default:dtree_learning_es-proxy-errors_remediation')?.content).toBe(
         'foreign learning'
       );
+    });
+
+    it('leaves a learning slot alone when another writer changes it during the rollback', async () => {
+      const slot = 'default:dtree_learning_otel-gateway-errors_remediation';
+      const learning = (content: string, conversationId: string): Source => ({
+        type: 'decision_tree_learning',
+        content,
+        attributes: { space_id: 'default', conversation_id: conversationId },
+      });
+      const { esClient, docs, touch } = fakeEsClient([], {
+        [slot]: learning('earlier learning', 'earlier-investigation'),
+      });
+      const fetch: jest.Mock = fakeFetch([], {
+        readExecution: async () => {
+          docs.set(slot, learning('replay learning', replayIdOf(fetch)));
+          touch(slot);
+          return completedWith([], { turnKind: 'feedback_reinforcement' });
+        },
+      });
+      const search = (esClient.search as jest.Mock).getMockImplementation();
+      (esClient.search as jest.Mock).mockImplementation(async (request: SearchRequest) => {
+        const response = await search?.(request);
+        // Another investigation writes the slot after the rollback listed it.
+        const query = JSON.stringify(request);
+        if (query.includes('decision_tree_learning') && query.includes('conversation_id')) {
+          docs.set(slot, learning('newer learning', 'other-investigation'));
+          touch(slot);
+        }
+        return response;
+      });
+
+      const output = await runReinforcementExample({
+        esClient,
+        fetch: fetch as unknown as HttpHandler,
+        connectorId: 'connector',
+        example: followUp,
+      });
+
+      expect(output.rollback_error).toBeUndefined();
+      expect(docs.get(slot)?.content).toBe('newer learning');
     });
   });
 

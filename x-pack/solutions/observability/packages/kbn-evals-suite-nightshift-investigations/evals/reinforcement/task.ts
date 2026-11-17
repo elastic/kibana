@@ -353,21 +353,28 @@ export const restoreDecisionTrees = async (
   if (firstError !== undefined) throw firstError;
 };
 
+interface LearningHit {
+  source: Record<string, unknown>;
+  seqNo?: number;
+  primaryTerm?: number;
+}
+
 /**
- * Learning documents in the space, by id. `filter` narrows them, for example to one writer. Throws on
- * a full page, since a partial list would leave learnings out.
+ * Learning documents in the space, by id, with the version each was read at. `filter` narrows them,
+ * for example to one writer. Throws on a full page, since a partial list would leave learnings out.
  */
 const searchLearnings = async (
   esClient: Client,
   filter: estypes.QueryDslQueryContainer[],
   fullPageMessage: string
-): Promise<Map<string, Record<string, unknown>>> => {
+): Promise<Map<string, LearningHit>> => {
   let response;
   try {
     response = await esClient.search<Record<string, unknown>>({
       index: DECISION_TREE_AI_INDEX_DEST,
       size: LEARNING_PAGE_SIZE,
       track_total_hits: false,
+      seq_no_primary_term: true,
       query: {
         bool: {
           filter: [
@@ -385,27 +392,34 @@ const searchLearnings = async (
 
   const hits = response.hits.hits;
   if (hits.length >= LEARNING_PAGE_SIZE) throw new Error(fullPageMessage);
-  const learnings = new Map<string, Record<string, unknown>>();
-  for (const hit of hits) {
-    if (hit._id && hit._source) learnings.set(hit._id, hit._source);
+  const learnings = new Map<string, LearningHit>();
+  for (const { _id: id, _source: source, _seq_no: seqNo, _primary_term: primaryTerm } of hits) {
+    if (id && source) learnings.set(id, { source, seqNo, primaryTerm });
   }
   return learnings;
 };
 
 /** Every learning document in the space, so a follow-up replay's learning writes can be undone. */
-export const snapshotLearnings = (
+export const snapshotLearnings = async (
   esClient: Client
-): Promise<Map<string, Record<string, unknown>>> =>
-  searchLearnings(
+): Promise<Map<string, Record<string, unknown>>> => {
+  const learnings = await searchLearnings(
     esClient,
     [],
     `The ${SPACE_ID} space has ${LEARNING_PAGE_SIZE} or more decision tree learnings, so the replay cannot snapshot all of them`
   );
+  return new Map([...learnings].map(([id, { source }]) => [id, source]));
+};
+
+/** Another writer changed the document after the replay read it. */
+const isVersionConflict = (error: unknown): boolean =>
+  errorType(error) === 'version_conflict_engine_exception' || statusCodeOf(error) === 409;
 
 /**
  * Puts back every learning slot `conversationId` wrote: the snapshot's document when the slot
- * existed before, otherwise nothing. A slot another investigation wrote since is left alone. Keeps
- * going past a failed write and throws the first error at the end.
+ * existed before, otherwise nothing. Each write is conditional on the version the replay read, so a
+ * slot another investigation wrote since is left alone. Keeps going past a failed write and throws
+ * the first error at the end.
  */
 export const restoreLearnings = async (
   esClient: Client,
@@ -418,8 +432,12 @@ export const restoreLearnings = async (
     `Conversation ${conversationId} wrote ${LEARNING_PAGE_SIZE} or more learnings, so the replay cannot list them`
   );
   let firstError: unknown;
-  for (const id of written.keys()) {
+  for (const [id, { seqNo, primaryTerm }] of written) {
     const previous = snapshot.get(id);
+    const ifVersion =
+      seqNo !== undefined && primaryTerm !== undefined
+        ? { if_seq_no: seqNo, if_primary_term: primaryTerm }
+        : {};
     try {
       if (previous) {
         await esClient.index({
@@ -427,11 +445,18 @@ export const restoreLearnings = async (
           id,
           document: previous,
           refresh: 'wait_for',
+          ...ifVersion,
         });
       } else {
-        await esClient.delete({ index: DECISION_TREE_AI_INDEX_DEST, id, refresh: 'wait_for' });
+        await esClient.delete({
+          index: DECISION_TREE_AI_INDEX_DEST,
+          id,
+          refresh: 'wait_for',
+          ...ifVersion,
+        });
       }
     } catch (error) {
+      if (isVersionConflict(error)) continue;
       if (previous || !isMissingDocument(error)) firstError ??= error;
     }
   }
