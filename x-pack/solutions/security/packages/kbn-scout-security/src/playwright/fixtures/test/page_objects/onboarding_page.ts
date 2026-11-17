@@ -33,6 +33,10 @@ export class OnboardingPage {
     await this.page.gotoApp(ONBOARDING_APP, {
       hash: INTEGRATIONS_CARD_ID,
       readyWhen: this.allIntegrationsTab,
+      // The default (30s) covers the app's bundle download, start and first render. The tab only
+      // shows after the card has lazy-loaded Fleet's grid and the package list has been fetched,
+      // which a cold CI Kibana can need more than the default for. Same budget as the other
+      // Security page objects use for a page load.
       readyTimeout: APP_LOAD_TIMEOUT_MS,
     });
     await this.allIntegrationsTab.click();
