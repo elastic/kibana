@@ -34,12 +34,14 @@ import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
 } from './errors/definition_not_found_error';
+import { RemovedStreamTypeError } from './errors/removed_stream_type_error';
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
 import { createRootStreamDefinition } from './root_stream_definition';
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
+import { RemovedStreamTypeNotFoundError } from './storage/removed_stream_types';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { upsertDataStream } from './data_streams/manage_data_streams';
 import { shouldIncludeFromStreamsList } from './data_streams/should_include_from_streams_list';
@@ -621,7 +623,9 @@ export class StreamsClient {
         throw error;
       } catch (e) {
         if (isNotFoundError(e)) {
-          throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
+          throw error instanceof RemovedStreamTypeNotFoundError
+            ? new RemovedStreamTypeError(`Cannot find stream ${name}`)
+            : new DefinitionNotFoundError(`Cannot find stream ${name}`);
         }
         throw e;
       }

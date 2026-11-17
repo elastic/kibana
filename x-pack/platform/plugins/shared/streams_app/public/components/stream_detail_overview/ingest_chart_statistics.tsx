@@ -177,7 +177,6 @@ export function IngestChartStatistics({
           })}
         />
 
-
         <StatCell
           data-test-subj="streamsAppIngestStatDocsInRange"
           title={i18n.translate('xpack.streams.ingestChartStatistics.docsInRange.label', {

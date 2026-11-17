@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import type { OmitUpsertProps } from './core';
 
 /* eslint-disable @typescript-eslint/no-namespace */
@@ -53,11 +53,13 @@ export namespace BaseStream {
   }
 }
 
-export const baseStreamDefinitionSchema = z.object({
-  name: z.string(),
-  description: z.string(),
-  updated_at: isoDateTime(),
-});
+export const baseStreamDefinitionSchema = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    description: z.string(),
+    updated_at: isoDateTime(),
+  })
+);
 
 export const baseStreamGetResponseSchema = z.object({
   dashboards: z.array(z.string()),
@@ -69,18 +71,20 @@ export const baseStreamUpsertRequestSchema = z.object({
   rules: z.array(z.string()),
 });
 
-export const baseStreamUpsertDefinitionSchema = baseStreamDefinitionSchema
-  .omit({
-    name: true,
-    updated_at: true,
-  })
-  .extend({
-    query_streams: z
-      .array(z.object({ name: z.string() }))
-      .optional()
-      .meta({
-        deprecated: true,
-        description:
-          'Deprecated. Query streams have been removed; this field is accepted for backwards compatibility and ignored.',
-      }),
-  });
+export const baseStreamUpsertDefinitionSchema = lazySchema(() =>
+  baseStreamDefinitionSchema
+    .omit({
+      name: true,
+      updated_at: true,
+    })
+    .extend({
+      query_streams: z
+        .array(z.object({ name: z.string() }))
+        .optional()
+        .meta({
+          deprecated: true,
+          description:
+            'Deprecated. Query streams have been removed; this field is accepted for backwards compatibility and ignored.',
+        }),
+    })
+);

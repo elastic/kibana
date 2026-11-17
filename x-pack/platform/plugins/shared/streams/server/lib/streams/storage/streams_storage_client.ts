@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
-import type { DiagnosticResult } from '@elastic/elasticsearch';
 import {
   StorageIndexAdapter,
   type IStorageClient,
@@ -17,7 +15,10 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Streams } from '@kbn/streams-schema';
 import { migrateOnRead } from './migrate_on_read';
-import { isRemovedStreamTypeDefinition } from './removed_stream_types';
+import {
+  isRemovedStreamTypeDefinition,
+  RemovedStreamTypeNotFoundError,
+} from './removed_stream_types';
 
 const streamsStorageSettings = {
   name: '.kibana_streams',
@@ -73,19 +74,7 @@ export function createStreamsStorageClient(
   const get: StreamsStorageClient['get'] = async (request, transportOptions) => {
     const response = await client.get(request, transportOptions);
     if (isRemovedStreamTypeDefinition(response._source)) {
-      throw new errors.ResponseError({
-        meta: {
-          aborted: false,
-          attempts: 1,
-          connection: null,
-          context: null,
-          name: 'resource_not_found_exception',
-          request: {} as unknown as DiagnosticResult['meta']['request'],
-        },
-        warnings: [],
-        body: 'resource_not_found_exception',
-        statusCode: 404,
-      });
+      throw new RemovedStreamTypeNotFoundError();
     }
     return response;
   };

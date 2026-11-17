@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -80,31 +80,33 @@ const failureStoreSchema = z.object({
     .describe('For "enabled" only: retention period for failed documents, e.g. "30d".'),
 });
 
-const updateStreamSchema = z.object({
-  name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
-  changes: z
-    .object({
-      processing: z
-        .array(stepSchema)
-        .optional()
-        .describe(
-          'The complete processing pipeline as an array of step objects. Replaces the entire pipeline. Use the design pipeline tool to construct new steps. To remove a step, omit it. To reorder, change the array order.'
-        ),
-      description: z.string().optional().describe('Updated stream description'),
-      lifecycle: lifecycleSchema.optional(),
-      fields: fieldsSchema.optional(),
-      failure_store: failureStoreSchema.optional(),
-    })
-    .describe(
-      'All modifications go INSIDE this object. For processing changes, set changes.processing = [steps]. For lifecycle changes, set changes.lifecycle = {...}. Never put processing or other change keys at the top level — they will be ignored.'
-    ),
-  confirmation_body: z
-    .string()
-    .optional()
-    .describe(
-      "Narrative summary of what will change and why. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the change. The actual changes go in the `changes` object."
-    ),
-});
+const updateStreamSchema = lazySchema(() =>
+  z.object({
+    name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
+    changes: z
+      .object({
+        processing: z
+          .array(stepSchema)
+          .optional()
+          .describe(
+            'The complete processing pipeline as an array of step objects. Replaces the entire pipeline. Use the design pipeline tool to construct new steps. To remove a step, omit it. To reorder, change the array order.'
+          ),
+        description: z.string().optional().describe('Updated stream description'),
+        lifecycle: lifecycleSchema.optional(),
+        fields: fieldsSchema.optional(),
+        failure_store: failureStoreSchema.optional(),
+      })
+      .describe(
+        'All modifications go INSIDE this object. For processing changes, set changes.processing = [steps]. For lifecycle changes, set changes.lifecycle = {...}. Never put processing or other change keys at the top level — they will be ignored.'
+      ),
+    confirmation_body: z
+      .string()
+      .optional()
+      .describe(
+        "Narrative summary of what will change and why. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the change. The actual changes go in the `changes` object."
+      ),
+  })
+);
 
 export const createUpdateStreamTool = ({
   getScopedClients,
