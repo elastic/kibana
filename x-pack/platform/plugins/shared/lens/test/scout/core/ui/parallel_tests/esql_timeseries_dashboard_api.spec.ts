@@ -8,6 +8,7 @@
 import type { DebugState } from '@elastic/charts';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { ApiServicesFixture } from '@kbn/scout';
+import { enableElasticChartDebug } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { spaceTest, testData } from '../fixtures';
@@ -132,9 +133,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, context }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await context.addInitScript(() => {
-        (window as unknown as { _echDebugStateFlag?: boolean })._echDebugStateFlag = true;
-      });
+      await enableElasticChartDebug(context);
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
