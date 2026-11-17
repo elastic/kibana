@@ -167,11 +167,53 @@ describe('WorkflowExecutionRepository', () => {
 
         await expect(
           repository.createWorkflowExecution({ id: '1', workflowId: 'wf', spaceId: 'default' })
-        ).resolves.toBeUndefined();
+        ).resolves.toEqual({ reusedExisting: true });
         expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledWith(['1'], {
-          sourceIncludes: ['spaceId', 'workflowId'],
+          sourceIncludes: ['spaceId', 'workflowId', 'labels'],
         });
         expect(workflowExecutionsDataClient.refresh).not.toHaveBeenCalled();
+      });
+
+      it('reuses a stored document whose labels carry the requested identity', async () => {
+        workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([
+            {
+              id: '1',
+              workflowId: 'wf',
+              spaceId: 'default',
+              labels: { 'hunt.kind': 'manual_session', 'hunt.outcome': 'exploratory' },
+            } as any,
+          ])
+        );
+
+        await expect(
+          repository.createWorkflowExecution({
+            id: '1',
+            workflowId: 'wf',
+            spaceId: 'default',
+            labels: { 'hunt.kind': 'manual_session' },
+          })
+        ).resolves.toEqual({ reusedExisting: true });
+      });
+
+      it.each([
+        ['differs', { 'hunt.kind': 'library_child' }],
+        ['is missing', undefined],
+      ])('rejects a deterministic id whose stored identity label %s', async (_, storedLabels) => {
+        workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([
+            { id: '1', workflowId: 'wf', spaceId: 'default', labels: storedLabels } as any,
+          ])
+        );
+
+        await expect(
+          repository.createWorkflowExecution({
+            id: '1',
+            workflowId: 'wf',
+            spaceId: 'default',
+            labels: { 'hunt.kind': 'manual_session' },
+          })
+        ).rejects.toThrow('Failed to create workflow execution 1');
       });
 
       it.each([true, 'wait_for'] as const)(
@@ -367,7 +409,7 @@ describe('WorkflowExecutionRepository', () => {
       ]);
       expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledTimes(1);
       expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledWith(['e2', 'e3'], {
-        sourceIncludes: ['spaceId', 'workflowId'],
+        sourceIncludes: ['spaceId', 'workflowId', 'labels'],
       });
       expect(workflowExecutionsDataClient.refresh).not.toHaveBeenCalled();
     });

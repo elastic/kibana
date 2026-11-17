@@ -17,11 +17,17 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
-import type { BulkScheduleWorkflowResult, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type {
+  BulkScheduleWorkflowResult,
+  ExecutionLabelsInput,
+  WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { ExecutionRetention } from './lib/execution_retention';
+import type { UpdateExecutionLabels } from './lib/update_execution_labels';
 import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
@@ -43,6 +49,8 @@ export type {
 
 export interface ExecuteWorkflowResponse {
   workflowExecutionId: string;
+  /** True when a deterministic execution id already existed; nothing was scheduled. */
+  reusedExisting?: boolean;
 }
 
 export interface ExecuteWorkflowStepResponse {
@@ -55,8 +63,24 @@ export interface ResumeWorkflowExecutionResponse {
 }
 
 export interface WorkflowsExecutionEnginePluginSetup {
-  // No setup contract exposed yet. Extend this interface when other plugins need to configure the engine during setup.
-  [key: string]: unknown;
+  /**
+   * Registers an execution label namespace (the key segment before the first dot) to its owning
+   * plugin. Only that owner may write keys in the namespace. Re-registering the same pair is a
+   * no-op; registering a namespace owned by another plugin throws.
+   */
+  registerExecutionLabelNamespace: (namespace: string, ownerId: string) => void;
+}
+
+/** In-process create options for labelled executions; never accepted from public HTTP callers. */
+export interface ExecutionLabelOptions {
+  /**
+   * Deterministic execution id. Requires labels: an existing execution is reused only when its
+   * space, workflow and the supplied labels (its immutable identity) match.
+   */
+  executionId?: string;
+  labels?: ExecutionLabelsInput;
+  /** Plugin id that owns every label namespace used in `labels`. Required with labels. */
+  labelOwnerId?: string;
 }
 
 export interface TriggerEventsContract {
@@ -87,6 +111,10 @@ export interface WorkflowsExecutionEnginePluginStart {
   scheduleWorkflow: ScheduleWorkflow;
   bulkScheduleWorkflow: BulkScheduleWorkflow;
   triggerEvents: TriggerEventsContract;
+  /** Internal: merges owner-checked labels onto an existing execution with optimistic concurrency. */
+  updateExecutionLabels: UpdateExecutionLabels;
+  /** How long executions are kept, derived from the storage configuration. */
+  executionRetention: ExecutionRetention;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
@@ -108,7 +136,8 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
 export type ExecuteWorkflow = (
   workflow: WorkflowExecutionEngineModel,
   context: Record<string, unknown>,
-  request: KibanaRequest
+  request: KibanaRequest,
+  labelOptions?: ExecutionLabelOptions
 ) => Promise<ExecuteWorkflowResponse>;
 
 export type ExecuteWorkflowStep = (
@@ -165,10 +194,15 @@ export type ScheduleWorkflow = (
   workflow: WorkflowExecutionEngineModel,
   context: Record<string, unknown>,
   request: KibanaRequest,
-  options?: { authenticatedUser?: string }
+  options?: { authenticatedUser?: string } & ExecutionLabelOptions
 ) => Promise<ExecuteWorkflowResponse>;
 
 export type BulkScheduleWorkflow = (
-  items: Array<{ workflow: WorkflowExecutionEngineModel; context: Record<string, unknown> }>,
+  items: Array<{
+    workflow: WorkflowExecutionEngineModel;
+    context: Record<string, unknown>;
+    labels?: ExecutionLabelsInput;
+    labelOwnerId?: string;
+  }>,
   request: KibanaRequest
 ) => Promise<BulkScheduleWorkflowResult>;

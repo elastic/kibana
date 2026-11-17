@@ -1,0 +1,90 @@
+{
+  "id": "rare_lsass_process_access",
+  "version": 1,
+  "name": "Rare LSASS Process Access Attempts",
+  "description": "This hunt identifies instances where a process attempts to open the Local Security Authority Subsystem Service (LSASS) memory and where the number of occurrences is limited to one unique agent and a low number of attempts. This may indicate either a rare legitimate condition or a malicious process attempting to obtain credentials or inject code into the LSASS.",
+  "hypothesis": "A process that opens LSASS memory on a single host, and only a handful of times in the window, may be credential dumping or code injection rather than routine security software.",
+  "platform": [
+    "windows"
+  ],
+  "mitreTechniques": [
+    "T1003",
+    "T1003.001"
+  ],
+  "references": [],
+  "guidance": {
+    "analystNotes": [
+      "Based on the process.executable and process.name you can pivot and investigate further for the matching instances.",
+      "Potential false-positives include rare legitimate conditions that may trigger this behavior due to third-party software or LSASS crashing."
+    ],
+    "expectedFalsePositives": [
+      "Third-party security, backup or monitoring software that legitimately reads LSASS.",
+      "LSASS crash handling and Windows Error Reporting."
+    ],
+    "suggestedPivots": [
+      "Pivot on process.executable and host.id to see every access by that binary.",
+      "Check the process code signature, parent process and command line.",
+      "Look for dumper artifacts (dump files, comsvcs.dll MiniDump, procdump) on the same host."
+    ]
+  },
+  "query": {
+    "id": "main",
+    "language": "esql",
+    "query": "from logs-endpoint.events.api*\n| where event.category == \"api\" and host.os.family == \"windows\" and process.Ext.api.name in (\"OpenProcess\", \"OpenThread\", \"ReadProcessMemory\") and\n Target.process.name == \"lsass.exe\"\n| keep @timestamp, process.executable.caseless, host.id\n /* normalize process paths to reduce known random patterns in process.executable */\n| eval process = replace(process.executable.caseless, \"\"\"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|ns[a-z][A-Z0-9]{3,4}\\.tmp|DX[A-Z0-9]{3,4}\\.tmp|7z[A-Z0-9]{3,5}\\.tmp|[0-9\\.\\-\\_]{3,})\"\"\", \"\")\n| stats occurrences = count(process), agents = count_distinct(host.id), last_seen = max(@timestamp) by process\n| where agents == 1 and occurrences <= 10",
+    "resultKind": "aggregate",
+    "defaultTimeRange": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "recommendedColumns": [
+      "process",
+      "occurrences",
+      "agents",
+      "last_seen"
+    ],
+    "requiredIndexPatterns": [
+      "logs-endpoint.events.api*"
+    ],
+    "requiredFields": [
+      "event.category",
+      "host.os.family",
+      "process.Ext.api.name",
+      "Target.process.name",
+      "process.executable.caseless",
+      "host.id",
+      "@timestamp"
+    ],
+    "evidenceFields": [
+      "process",
+      "occurrences",
+      "agents",
+      "last_seen"
+    ],
+    "adjudicationFields": [
+      "process",
+      "occurrences",
+      "agents",
+      "last_seen",
+      "host.name",
+      "user.name",
+      "process.executable",
+      "process.Ext.api.name",
+      "process.parent.executable",
+      "process.command_line"
+    ],
+    "surroundingEventQuery": "from logs-endpoint.events.api* METADATA _index, _id\n| where @timestamp >= {{param.bucket_start}} and @timestamp < {{param.bucket_end}}\n| where event.category == \"api\" and host.os.family == \"windows\" and process.Ext.api.name in (\"OpenProcess\", \"OpenThread\", \"ReadProcessMemory\") and\n Target.process.name == \"lsass.exe\"\n| eval process = replace(process.executable.caseless, \"\"\"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|ns[a-z][A-Z0-9]{3,4}\\.tmp|DX[A-Z0-9]{3,4}\\.tmp|7z[A-Z0-9]{3,5}\\.tmp|[0-9\\.\\-\\_]{3,})\"\"\", \"\")\n| where process == {{param.process}}\n| sort @timestamp desc\n| keep _index, _id, @timestamp, host.name, user.name, process.executable, process.Ext.api.name, process.parent.executable, process.command_line",
+    "occurrence": {
+      "keyFields": [
+        "process"
+      ],
+      "timeField": "last_seen",
+      "bucket": "1d"
+    }
+  },
+  "source": {
+    "kind": "elastic_seed",
+    "tradeId": "d0aed6f5-f84c-4da8-bb2a-b5ca0fbb55e0",
+    "path": "hunting/windows/queries/detect_rare_lsass_process_access_attempts.toml",
+    "revision": "20120bad39156ffdcf95311f12cfee6b4246d13a"
+  }
+}

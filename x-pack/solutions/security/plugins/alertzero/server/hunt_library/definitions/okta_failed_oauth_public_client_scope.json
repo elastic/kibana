@@ -1,0 +1,93 @@
+{
+  "id": "okta_failed_oauth_public_client_scope",
+  "version": 1,
+  "name": "Failed OAuth Access Token Retrieval via Public Client App",
+  "description": "This hunting query identifies when a public client app fails to retrieve an OAuth access token using client credentials because of an uauthorized scope. Adversaries may attempt to retrieve access tokens using client credentials to bypass user authentication and access resources. This query identifies when a public client app fails to retrieve an access token using client credentials and scopes that are not implicitly granted.",
+  "hypothesis": "A public client application repeatedly failing to obtain tokens for scopes that are not implicitly granted may be probing for over-privileged OAuth access.",
+  "platform": [
+    "identity"
+  ],
+  "mitreTechniques": [
+    "T1550.001"
+  ],
+  "references": [],
+  "guidance": {
+    "analystNotes": [
+      "Review `okta.debug_context.debug_data.flattened.grantType` to identify if the grant type is `client_credentials`",
+      "Ignore `okta.debug_context.debug_data.flattened.requestedScopes` values that indicate read-only access",
+      "Review `okta.actor.display_name` to identify the public client app that attempted to retrieve the access token. This may help identify the compromised client credentials.",
+      "Pivot for successful access token retrieval by the same public client app by searching `event.action` equal to `app.oauth2.as.token.grant.access_token` where the display name is the same."
+    ],
+    "expectedFalsePositives": [
+      "A newly deployed integration requesting a scope before an administrator grants it."
+    ],
+    "suggestedPivots": [
+      "Pivot on okta.actor.display_name for every event from the application in the same period.",
+      "Check whether the application later succeeded with a broader scope."
+    ]
+  },
+  "query": {
+    "id": "main",
+    "language": "esql",
+    "query": "from logs-okta.system* METADATA _index, _id\n| where\n    event.dataset == \"okta.system\"\n\n    // filter on failed access token grant requests where source is a public client app\n    and event.action == \"app.oauth2.as.token.grant\"\n    and okta.actor.type == \"PublicClientApp\"\n    and okta.outcome.result == \"FAILURE\"\n\n    // filter out known Okta and Datadog actors\n    and not (\n        okta.actor.display_name LIKE \"Okta*\"\n        or okta.actor.display_name LIKE \"Datadog*\"\n    )\n\n    // filter for scopes that are not implicitly granted\n    and okta.outcome.reason == \"no_matching_scope\"\n\n| keep _index, _id, @timestamp, event.action, okta.actor.type, okta.outcome.result, okta.outcome.reason, okta.actor.display_name",
+    "resultKind": "raw_event",
+    "defaultTimeRange": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "recommendedColumns": [
+      "_index",
+      "_id",
+      "@timestamp",
+      "event.action",
+      "okta.actor.type",
+      "okta.outcome.result",
+      "okta.outcome.reason",
+      "okta.actor.display_name"
+    ],
+    "requiredIndexPatterns": [
+      "logs-okta.system*"
+    ],
+    "requiredFields": [
+      "event.dataset",
+      "event.action",
+      "okta.actor.type",
+      "okta.outcome.result",
+      "okta.outcome.reason",
+      "okta.actor.display_name",
+      "@timestamp"
+    ],
+    "evidenceFields": [
+      "_index",
+      "_id",
+      "@timestamp",
+      "event.action",
+      "okta.actor.type",
+      "okta.outcome.result",
+      "okta.outcome.reason",
+      "okta.actor.display_name"
+    ],
+    "adjudicationFields": [
+      "@timestamp",
+      "event.action",
+      "okta.actor.display_name",
+      "okta.outcome.result",
+      "okta.outcome.reason",
+      "okta.client.ip"
+    ],
+    "surroundingEventQuery": "from logs-okta.system* METADATA _index, _id\n| where @timestamp >= {{param.bucket_start}} and @timestamp < {{param.bucket_end}}\n| where event.dataset == \"okta.system\" and okta.actor.display_name == {{param.okta.actor.display_name}}\n| sort @timestamp desc\n| keep _index, _id, @timestamp, event.action, okta.actor.display_name, okta.outcome.result, okta.outcome.reason, okta.client.ip",
+    "occurrence": {
+      "keyFields": [
+        "okta.actor.display_name"
+      ],
+      "timeField": "@timestamp",
+      "bucket": "1d"
+    }
+  },
+  "source": {
+    "kind": "elastic_seed",
+    "tradeId": "0b936024-71d9-11ef-a9be-f661ea17fbcc",
+    "path": "hunting/okta/queries/defense_evasion_failed_oauth_access_token_retrieval_via_public_client_app.toml",
+    "revision": "20120bad39156ffdcf95311f12cfee6b4246d13a"
+  }
+}

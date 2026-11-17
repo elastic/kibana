@@ -41,6 +41,7 @@ describe('isAllowedBuiltinAttachment', () => {
     expect(isAllowedBuiltinAttachment('security.alert')).toBe(true);
     expect(isAllowedBuiltinAttachment('security.entity_graph')).toBe(true);
     expect(isAllowedBuiltinAttachment('security.hunt_coordinator_result')).toBe(true);
+    expect(isAllowedBuiltinAttachment('security.hunt_session')).toBe(true);
     expect(isAllowedBuiltinAttachment('observability.service-map')).toBe(true);
     expect(isAllowedBuiltinAttachment('discover.session')).toBe(true);
     expect(isAllowedBuiltinAttachment('ml.anomaly_swimlane')).toBe(true);

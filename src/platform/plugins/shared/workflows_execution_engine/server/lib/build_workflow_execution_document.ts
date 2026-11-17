@@ -9,7 +9,11 @@
 
 import omit from 'lodash/omit';
 import { v4 as generateUuid } from 'uuid';
-import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type {
+  EsWorkflowExecution,
+  ExecutionLabels,
+  WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
 import {
   ExecutionStatus,
   pickManagedWorkflowFields,
@@ -32,6 +36,10 @@ export interface BuildWorkflowExecutionDocumentParams {
   defaultTriggeredBy: string;
   authenticatedUser: ResolvedExecutionIdentity | undefined;
   now: Date;
+  /** Caller-chosen deterministic id; a fresh UUID is generated when omitted. */
+  executionId?: string;
+  /** Already validated and normalized labels. */
+  labels?: ExecutionLabels;
   maxEventChainDepth: number;
   getConcurrencyGroupKey: (workflowExecution: WorkflowExecutionForInputRendering) => string | null;
   getRunName: (workflowExecution: WorkflowExecutionForInputRendering) => string | undefined;
@@ -58,6 +66,8 @@ export const buildWorkflowExecutionDocument = (
     defaultTriggeredBy,
     authenticatedUser,
     now,
+    executionId,
+    labels,
     maxEventChainDepth,
     getConcurrencyGroupKey,
     getRunName,
@@ -93,7 +103,7 @@ export const buildWorkflowExecutionDocument = (
     typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
   const missingIdentity = authenticatedUser == null;
   const workflowExecution: WorkflowExecutionForInputRendering = {
-    id: generateUuid(),
+    id: executionId ?? generateUuid(),
     spaceId,
     workflowId: workflow.id,
     ...pickManagedWorkflowFields(workflow),
@@ -127,6 +137,7 @@ export const buildWorkflowExecutionDocument = (
         }
       : {}),
     ...(metadata ? { metadata } : {}),
+    ...(labels && Object.keys(labels).length > 0 ? { labels } : {}),
     ...(rootEventChainDepth !== undefined ? { eventChainDepth: rootEventChainDepth } : {}),
     ...(rootVisited.length > 0 ? { eventChainVisitedWorkflowIds: rootVisited } : {}),
     ...(dispatchEventId ? { dispatchEventId } : {}),

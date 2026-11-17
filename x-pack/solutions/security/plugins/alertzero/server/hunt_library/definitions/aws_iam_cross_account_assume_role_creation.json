@@ -1,0 +1,91 @@
+{
+  "id": "aws_iam_cross_account_assume_role_creation",
+  "version": 1,
+  "name": "IAM Assume Role Creation with Attached Policy",
+  "description": "This hunting query gathers data for evidence of an adversary creating an IAM role with an inline attached policy that allows the role to assume another role. This only identifies flags for AWS account IDs that are different from the account ID where the role is being created indicating a potential backdoor IAM role.",
+  "hypothesis": "An IAM role created with a trust policy that lets another AWS account assume it may be a persistence or privilege-escalation foothold.",
+  "platform": [
+    "cloud"
+  ],
+  "mitreTechniques": [
+    "T1098.003"
+  ],
+  "references": [],
+  "guidance": {
+    "analystNotes": [
+      "Review the `target_account_id` field to identify the account that the role is being created in. This could be another AWS account your organization owns.",
+      "Review `aws.cloudtrail.request_parameters` to identify the role being created and the policy being attached. If the inline policy includes overly permissive permissions such as `AdministratorAccess`, this could be a sign of malicious activity.",
+      "Pivot for `event.action` where the value is `AttachRolePolicy` to identify the policy being attached to the role."
+    ],
+    "expectedFalsePositives": [
+      "Sanctioned cross-account access between an organisation’s own AWS accounts.",
+      "Vendor integrations that create a role for an external account during onboarding."
+    ],
+    "suggestedPivots": [
+      "Check whether the target account belongs to the organisation.",
+      "Pivot on the calling identity for other IAM changes, key creation and role assumptions.",
+      "Look for AssumeRole calls using the new role from the target account."
+    ]
+  },
+  "query": {
+    "id": "main",
+    "language": "esql",
+    "query": "from logs-aws.cloudtrail-* METADATA _index, _id\n| where\n    event.provider == \"iam.amazonaws.com\"\n    and event.action == \"CreateRole\"\n    and aws.cloudtrail.request_parameters RLIKE \".*Allow.*\"\n    and aws.cloudtrail.request_parameters RLIKE \".*sts:AssumeRole.*\"\n    and aws.cloudtrail.request_parameters RLIKE \".*assumeRolePolicyDocument.*\"\n    and aws.cloudtrail.request_parameters RLIKE \".*arn:aws:iam.*\"\n| dissect aws.cloudtrail.request_parameters \"%{}AWS\\\": \\\"arn:aws:iam::%{target_account_id}:\"\n| where cloud.account.id != target_account_id\n| keep _index, _id, @timestamp, event.action, aws.cloudtrail.request_parameters, target_account_id, cloud.account.id",
+    "resultKind": "raw_event",
+    "defaultTimeRange": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "recommendedColumns": [
+      "_index",
+      "_id",
+      "@timestamp",
+      "event.action",
+      "aws.cloudtrail.request_parameters",
+      "target_account_id",
+      "cloud.account.id"
+    ],
+    "requiredIndexPatterns": [
+      "logs-aws.cloudtrail-*"
+    ],
+    "requiredFields": [
+      "event.provider",
+      "event.action",
+      "aws.cloudtrail.request_parameters",
+      "cloud.account.id",
+      "@timestamp"
+    ],
+    "evidenceFields": [
+      "_index",
+      "_id",
+      "@timestamp",
+      "event.action",
+      "aws.cloudtrail.request_parameters",
+      "target_account_id",
+      "cloud.account.id"
+    ],
+    "adjudicationFields": [
+      "@timestamp",
+      "event.action",
+      "aws.cloudtrail.request_parameters",
+      "target_account_id",
+      "cloud.account.id",
+      "user.name",
+      "source.ip"
+    ],
+    "surroundingEventQuery": "from logs-aws.cloudtrail-* METADATA _index, _id\n| where @timestamp >= {{param.bucket_start}} and @timestamp < {{param.bucket_end}}\n| where event.provider == \"iam.amazonaws.com\" and cloud.account.id == {{param.cloud.account.id}}\n| sort @timestamp desc\n| keep _index, _id, @timestamp, event.action, cloud.account.id, user.name, source.ip, aws.cloudtrail.request_parameters",
+    "occurrence": {
+      "keyFields": [
+        "cloud.account.id"
+      ],
+      "timeField": "@timestamp",
+      "bucket": "1d"
+    }
+  },
+  "source": {
+    "kind": "elastic_seed",
+    "tradeId": "429824b6-60b2-11ef-b0a4-f661ea17fbce",
+    "path": "hunting/aws/queries/iam_assume_role_creation_with_attached_policy.toml",
+    "revision": "20120bad39156ffdcf95311f12cfee6b4246d13a"
+  }
+}

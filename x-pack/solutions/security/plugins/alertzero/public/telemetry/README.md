@@ -2,7 +2,7 @@
 
 Event-Based Telemetry (EBT) events the `alertzero` public plugin reports from the browser. They go through core analytics, so a deployment that has turned telemetry off sends nothing. The server events are in the [server telemetry README](../../server/telemetry/README.md).
 
-The four events are registered when the app first mounts (`registerAlertZeroUiEvents`, loaded with the app), so their schemas stay out of the page-load bundle; the app exists only inside the `xpack.alertzero.enabled` guard. Every event is reported from inside the app. They are reported through `useAlertZeroTelemetry()`, which reads `analytics` from the Kibana context and never throws. Names follow the RFC's naming Option B, `<plugin>_<object>_<verb>`: the epic's `alertzero.ui.*` events become `alertzero_ui_*`. The epic's fifth browser event, `flyout_interaction`, belongs to the Investigation flyout, which Agentic Investigations owns, so it is built there.
+The events are registered when the app first mounts (`registerAlertZeroUiEvents`, loaded with the app), so their schemas stay out of the page-load bundle; the app exists only inside the `xpack.alertzero.enabled` guard. Every event is reported from inside the app. They are reported through `useAlertZeroTelemetry()`, which reads `analytics` from the Kibana context and never throws. Names follow the RFC's naming Option B, `<plugin>_<object>_<verb>`: the epic's `alertzero.ui.*` events become `alertzero_ui_*`. The epic's fifth browser event, `flyout_interaction`, belongs to the Investigation flyout, which Agentic Investigations owns, so it is built there.
 
 ## Rules
 
@@ -70,3 +70,28 @@ Where it is sent:
 | The Workers failed to load on a Watch (`watch_detail.tsx`) | `watch_detail` | From the error |
 
 Not sent: form validation messages (an invalid trigger amount), and the read-only and permission notices, which describe access rather than an error. Nor is a failure to set up a Worker's service account (the onboarding toast, and the inline error on the Watch settings page): AlertZero gets it as a message, with no HTTP status to classify. Any other per-Worker save error shown inline on the Watch settings page is the same failure as the save toast, so only the toast reports. The Escalations page shows no AlertZero error of its own yet, so it has no surface value.
+
+### `alertzero_ui_hunt_library_opened`
+
+The Hunt library catalog loaded, once per mount, when the hunt list first arrives. Not sent for refetches or a list that failed to load.
+
+| Field | Type | Description |
+|---|---|---|
+| `hunt_count` | long | How many curated hunts the catalog listed |
+| `available_hunt_count` | long | How many of them the user could run, by the availability checks |
+
+### `alertzero_ui_hunt_library_filtered`
+
+The user set a Hunt library filter, including switching from one value to another. The search box reports when text first appears, not on each keystroke. Clearing a filter sends nothing. The search text and chosen value are never sent.
+
+| Field | Type | Description |
+|---|---|---|
+| `filter_type` | keyword | `search`, `platform` or `availability` |
+
+### `alertzero_ui_hunt_launched`
+
+The user ran a hunt in Discover and the session was recorded as run history. Sent after the launch succeeds, once per launch; a failed launch sends nothing.
+
+| Field | Type | Description |
+|---|---|---|
+| `hunt_id` | keyword | Stable id of the checked-in curated hunt. Never the query or any selected evidence |

@@ -91,7 +91,7 @@ describe.each(['threat', 'event'] as const)('%s registered content', (surface) =
       const attachmentClient = new QueryClient();
       const type = surface === 'threat' ? 'security.threat' : 'security.significant_security_event';
       await waitFor(() =>
-        expect(agentBuilder.attachments.addAttachmentType).toHaveBeenCalledTimes(2)
+        expect(agentBuilder.attachments.addAttachmentType).toHaveBeenCalledTimes(3)
       );
       const registration = agentBuilder.attachments.addAttachmentType.mock.calls.find(
         ([id]) => id === type
@@ -145,7 +145,7 @@ describe.each(['threat', 'event'] as const)('%s registered content', (surface) =
       await screen.findByTestId('feature-content');
       if (surface !== 'event')
         await waitFor(() => expect(mockRequest).toHaveBeenCalledWith(surface));
-      expect(agentBuilder.attachments.addAttachmentType).toHaveBeenCalledTimes(2);
+      expect(agentBuilder.attachments.addAttachmentType).toHaveBeenCalledTimes(3);
       mounted.unmount();
       attachmentClient.clear();
       plugin.stop();

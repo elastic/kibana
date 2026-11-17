@@ -112,6 +112,42 @@ export interface WatchWorkflowsManagementClient {
     spaceId: string,
     request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto>;
+
+  /**
+   * Starts a saved workflow with a deterministic execution id and indexed labels, without waiting
+   * for it to finish. A repeat with the same id and identity labels reuses the existing execution
+   * (`reusedExisting`); a clash on space, workflow or identity labels is rejected.
+   */
+  executeLabeledWorkflow(params: {
+    workflowId: string;
+    spaceId: string;
+    request: KibanaRequest;
+    inputs: Record<string, unknown>;
+    executionId: string;
+    labels: Readonly<Record<string, string>>;
+    labelOwnerId: string;
+  }): Promise<{ workflowExecutionId: string; reusedExisting: boolean }>;
+
+  /** Merges owner-checked labels onto an existing execution; keys are never deleted. */
+  updateExecutionLabels(params: {
+    executionId: string;
+    spaceId: string;
+    workflowId: string;
+    labelOwnerId: string;
+    labels: Readonly<Record<string, string>>;
+    immutableKeys?: readonly string[];
+  }): Promise<Readonly<Record<string, string>>>;
+
+  /** Executions of one workflow whose indexed label has exactly this value, newest first. */
+  findExecutionsByLabel(params: {
+    workflowId: string;
+    key: string;
+    value: string;
+    spaceId: string;
+    /** Omit it for a background read with no user, such as the handoff sweeper. */
+    request?: KibanaRequest;
+    size?: number;
+  }): Promise<WorkflowExecutionListDto['results']>;
 }
 
 export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagementClient {
@@ -277,5 +313,56 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
     request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto> {
     return this.management.updateWorkflow(id, workflow, spaceId, request);
+  }
+
+  async executeLabeledWorkflow({
+    workflowId,
+    spaceId,
+    request,
+    inputs,
+    executionId,
+    labels,
+    labelOwnerId,
+  }: Parameters<WatchWorkflowsManagementClient['executeLabeledWorkflow']>[0]) {
+    const { workflowExecutionId, reusedExisting } = await this.management.executeWorkflow({
+      workflowId,
+      spaceId,
+      request,
+      inputs,
+      waitForCompletion: false,
+      labelOptions: { executionId, labels, labelOwnerId },
+    });
+    return { workflowExecutionId, reusedExisting: reusedExisting === true };
+  }
+
+  updateExecutionLabels(
+    params: Parameters<WatchWorkflowsManagementClient['updateExecutionLabels']>[0]
+  ) {
+    return this.management.updateExecutionLabels(params);
+  }
+
+  async findExecutionsByLabel({
+    workflowId,
+    key,
+    value,
+    spaceId,
+    request,
+    size = 5,
+  }: Parameters<WatchWorkflowsManagementClient['findExecutionsByLabel']>[0]) {
+    const { results } = await this.management.searchExecutionsView(
+      {
+        request,
+        includeManagedExecutions: true,
+        query: {
+          bool: { filter: [{ term: { workflowId } }, { term: { [`labels.${key}`]: value } }] },
+        },
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        page: 1,
+        size,
+      },
+      spaceId
+    );
+    return results;
   }
 }

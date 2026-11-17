@@ -48,6 +48,14 @@ import type {
   AlertZeroStartDependencies,
   ThreatIntelSupplyWorkflowInstaller,
 } from './types';
+import { HUNT_LABEL_NAMESPACE, HUNT_LABEL_OWNER_ID } from './hunt_library/execution_labels';
+import {
+  HANDOFF_SWEEPER_TASK_ID,
+  HANDOFF_SWEEPER_TASK_TYPE,
+  HANDOFF_SWEEP_IDLE_INTERVAL_MS,
+  runHandoffSweep,
+} from './hunt_library/handoff_sweeper';
+import { runHuntLibraryPreflight, type HuntLibraryPreflight } from './hunt_library/preflight';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
@@ -97,6 +105,8 @@ export class AlertZeroPlugin
     >
 {
   private readonly logger: Logger;
+  /** Settles once start has checked execution retention, which the Library Hunt worker is gated on. */
+  private huntLibraryPreflight?: Promise<HuntLibraryPreflight | undefined>;
   private readonly config: AlertZeroConfig;
   private readonly isServerless: boolean;
   private serverlessTierAvailable = false;
@@ -106,6 +116,7 @@ export class AlertZeroPlugin
   };
   private spaces?: AlertZeroStartDependencies['spaces'];
   private taskManager?: AlertZeroStartDependencies['taskManager'];
+  private security?: AlertZeroStartDependencies['security'];
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
   /** Resolved during `start`; the report step awaits it for its owner-bound managed check. */
   private managedWorkflows?: Promise<PluginScopedManagedWorkflowsApi | undefined>;
@@ -181,6 +192,7 @@ export class AlertZeroPlugin
       searchInferenceEndpoints,
       workflowsExtensions,
       workflowsManagement,
+      taskManager,
     }: AlertZeroSetupDependencies
   ): AlertZeroPluginSetup {
     if (!this.config.enabled) {
@@ -197,6 +209,12 @@ export class AlertZeroPlugin
     registerAlertZeroTelemetryEvents(coreSetup.analytics);
 
     this.workflowsManagementApi = workflowsManagement.management;
+    this.workflowsManagementApi.registerExecutionLabelNamespace(
+      HUNT_LABEL_NAMESPACE,
+      HUNT_LABEL_OWNER_ID
+    );
+
+    this.registerHandoffSweeper(taskManager, coreSetup);
 
     // Missing runtime dependencies must not make installed workflows eligible for orphan cleanup.
     registerOwner({ workflowsExtensions });
@@ -343,6 +361,19 @@ export class AlertZeroPlugin
         this.workflowsManagementApi
           ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
           : undefined,
+      resolveUserNames: async (uids) => {
+        const names = new Map<string, string>();
+        if (!this.security || uids.length === 0) return names;
+        try {
+          const profiles = await this.security.userProfiles.bulkGet({ uids: new Set(uids) });
+          for (const { uid, user } of profiles) {
+            names.set(uid, user.full_name || user.email || user.username);
+          }
+        } catch (err) {
+          this.logger.warn(`Failed to resolve user profile names: ${(err as Error).message}`);
+        }
+        return names;
+      },
       reportTelemetryEvent: createAlertZeroTelemetryReporter({
         analytics: coreSetup.analytics,
         logger: this.logger.get('telemetry'),
@@ -352,9 +383,53 @@ export class AlertZeroPlugin
     return { isEnabled: true, setServerlessTierAvailable: this.setServerlessTierAvailable };
   }
 
+  /**
+   * Registers the sweeper that flags abandoned Hunt handoffs. It works from execution labels with no
+   * user request; the cleanup itself runs under a user's request (see `runHandoffCleanup`).
+   */
+  private registerHandoffSweeper(
+    taskManager: AlertZeroSetupDependencies['taskManager'],
+    coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>
+  ) {
+    taskManager.registerTaskDefinitions({
+      [HANDOFF_SWEEPER_TASK_TYPE]: {
+        title: 'AlertZero Hunt handoff sweeper',
+        timeout: '2m',
+        createTaskRunner: () => ({
+          run: async () => {
+            const [core] = await coreSetup.getStartServices();
+            const api = this.workflowsManagementApi;
+            if (!api) return { state: {} };
+
+            const result = await runHandoffSweep({
+              management: new WatchWorkflowsManagementClientImpl(api),
+              logger: this.logger.get('hunt-handoff-sweeper'),
+              listSpaceIds: async () => {
+                try {
+                  const spaces = await core.savedObjects
+                    .createInternalRepository(['space'])
+                    .find({ type: 'space', perPage: 1000, fields: [] });
+                  const ids = spaces.saved_objects.map(({ id }) => id);
+                  return ids.length > 0 ? ids : ['default'];
+                } catch {
+                  return ['default'];
+                }
+              },
+            });
+            return {
+              state: {},
+              runAt: new Date(Date.now() + result.nextRunInMs),
+            };
+          },
+        }),
+      },
+    });
+  }
+
   start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
     this.taskManager = plugins.taskManager;
+    this.security = plugins.security;
     this.coreStart = core;
     // The kill switch for Alert Triage grouping. It stays on where no flag provider exists.
     this.triageGroupingFlagSubscription = core.featureFlags
@@ -384,6 +459,35 @@ export class AlertZeroPlugin
         this.fingerprintWritesAllowed = false;
       }
     );
+
+    // Never blocks start: scheduling retries on the next restart, and cleanup also runs on demand.
+    Promise.resolve()
+      .then(() =>
+        plugins.taskManager.ensureScheduled({
+          id: HANDOFF_SWEEPER_TASK_ID,
+          taskType: HANDOFF_SWEEPER_TASK_TYPE,
+          schedule: { interval: `${HANDOFF_SWEEP_IDLE_INTERVAL_MS / 60_000}m` },
+          state: {},
+          params: {},
+        })
+      )
+      .catch((error) =>
+        this.logger.warn(`Could not schedule the Hunt handoff sweeper: ${(error as Error).message}`)
+      );
+
+    // Never blocks start: a failed check only logs and keeps the Library Hunt worker disabled.
+    const workflowsManagementApi = this.workflowsManagementApi;
+    if (workflowsManagementApi) {
+      this.huntLibraryPreflight = runHuntLibraryPreflight({
+        getExecutionRetention: () => workflowsManagementApi.getExecutionRetention(),
+        logger: this.logger,
+      }).catch((error) => {
+        this.logger.error(
+          `Hunt Library preflight failed: ${error instanceof Error ? error.message : String(error)}`
+        );
+        return undefined;
+      });
+    }
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
 
@@ -588,6 +692,11 @@ export class AlertZeroPlugin
 
   private getSpaceId(request: KibanaRequest): string {
     return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
+  }
+
+  /** Settles with the start-time Hunt Library checks, or undefined when they could not run. */
+  getHuntLibraryPreflight(): Promise<HuntLibraryPreflight | undefined> {
+    return this.huntLibraryPreflight ?? Promise.resolve(undefined);
   }
 
   stop() {

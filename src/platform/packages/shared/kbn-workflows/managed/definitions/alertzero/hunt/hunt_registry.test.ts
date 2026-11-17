@@ -9,7 +9,11 @@
 
 import { parse } from 'yaml';
 import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from '.';
-import { ALERTZERO_HUNT_CHILD_WORKFLOW_IDS } from '..';
+import {
+  ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
+  ALERTZERO_HUNT_LIBRARY_WORKFLOW_IDS,
+  ALERTZERO_HUNT_MANUAL_SESSION_WORKFLOW_ID,
+} from '..';
 import { managedWorkflowDefinitions } from '../../..';
 import {
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
@@ -97,5 +101,36 @@ describe('Hunt Watch and threat-intel supply: billable', () => {
     const definition = managedWorkflowDefinitions.find((candidate) => candidate.id === id);
 
     expect(definition?.billable).toBe(true);
+  });
+});
+
+describe('Hunt Library: manual session workflow', () => {
+  const definition = managedWorkflowDefinitions.find(
+    ({ id }) => id === ALERTZERO_HUNT_MANUAL_SESSION_WORKFLOW_ID
+  );
+
+  it('is registered once and installed globally with the Hunt Library workflow ids', () => {
+    const ids = managedWorkflowDefinitions.map(({ id }) => id);
+
+    expect(ids.filter((id) => id === ALERTZERO_HUNT_MANUAL_SESSION_WORKFLOW_ID)).toHaveLength(1);
+    expect(ALERTZERO_HUNT_LIBRARY_WORKFLOW_IDS).toEqual([
+      ALERTZERO_HUNT_MANUAL_SESSION_WORKFLOW_ID,
+    ]);
+  });
+
+  it('is not billable: it runs no query and calls no model', () => {
+    expect(definition?.billable).toBe(false);
+  });
+
+  it('is untagged, has a manual trigger and only a console step', () => {
+    const parsed = parse(renderWorkflowYaml(definition!)) as {
+      tags?: string[];
+      triggers?: Array<{ type: string }>;
+      steps?: Array<{ type: string }>;
+    };
+
+    expect(parsed.tags).toEqual([]);
+    expect(parsed.triggers?.map(({ type }) => type)).toEqual(['manual']);
+    expect(parsed.steps?.map(({ type }) => type)).toEqual(['console']);
   });
 });

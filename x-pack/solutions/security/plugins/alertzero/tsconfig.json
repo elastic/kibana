@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "server/**/*.json"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/securitysolution-alerts-page-url",
@@ -83,6 +83,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-test-helpers-kbn-server",
+    "@kbn/discover-shared-plugin",
+    "@kbn/core-notifications-browser",
     "@kbn/kibana-utils-plugin",
     "@kbn/discover-plugin",
     "@kbn/workflows-execution-engine"

@@ -79,6 +79,40 @@ describe('searchWorkflowExecutions', () => {
       );
     });
 
+    it('should include labels in list results and request them from the source', async () => {
+      mockWorkflowDataClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 1 },
+          hits: [
+            {
+              _id: 'exec-1',
+              _source: {
+                spaceId: 'default',
+                status: 'completed',
+                workflowId: 'workflow-1',
+                labels: { 'hunt.kind': 'manual_session' },
+              },
+            },
+            { _id: 'exec-2', _source: { spaceId: 'default', workflowId: 'workflow-1' } },
+          ],
+        },
+      } as any);
+
+      const result = await searchWorkflowExecutions({
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        logger: mockLogger,
+        query: { term: { workflowId: 'workflow-1' } },
+      });
+
+      expect(result.results[0].labels).toEqual({ 'hunt.kind': 'manual_session' });
+      expect(result.results[1]).not.toHaveProperty('labels');
+      expect(mockWorkflowDataClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: { includes: expect.arrayContaining(['labels']) },
+        })
+      );
+    });
+
     it('should include version in list results when present', async () => {
       mockWorkflowDataClient.search.mockResolvedValue({
         hits: {

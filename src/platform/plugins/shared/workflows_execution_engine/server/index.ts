@@ -20,6 +20,8 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 
 export type {
   DataClient,
+  ExecuteWorkflowResponse,
+  ExecutionLabelOptions,
   GetStepExecutionsByIdsOptions,
   GetWorkflowExecutionsByIdsOptions,
   StepExecutionsDataClient,
@@ -28,6 +30,12 @@ export type {
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
 } from './types';
+
+export type { ExecutionRetention } from './lib/execution_retention';
+export type {
+  UpdateExecutionLabels,
+  UpdateExecutionLabelsParams,
+} from './lib/update_execution_labels';
 
 export { getStepExecutionsByWorkflowExecution } from './repositories/data_access_layer/lib/get_step_executions_by_workflow_execution';
 export { getBulkUpdaterWriteResult } from './repositories/data_access_layer/lib/bulk/bulk_updater_write_result';

@@ -97,7 +97,7 @@ describe('task scheduling failure', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCreateWorkflowExecution.mockResolvedValue(undefined);
+    mockCreateWorkflowExecution.mockResolvedValue({ reusedExisting: false });
     mockBulkUpdateWorkflowExecutions.mockResolvedValue(undefined);
     mockGetWorkflowExecutionStates.mockResolvedValue(new Map());
 

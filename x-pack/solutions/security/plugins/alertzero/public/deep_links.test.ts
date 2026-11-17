@@ -9,7 +9,11 @@ import type { Capabilities } from '@kbn/core/public';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { getAlertZeroDeepLinks } from './deep_links';
 
-const ALL_LINK_IDS = [SecurityPageName.alertZeroEscalations, SecurityPageName.alertZeroWatches];
+const ALL_LINK_IDS = [
+  SecurityPageName.alertZeroEscalations,
+  SecurityPageName.alertZeroWatches,
+  SecurityPageName.alertZeroHuntLibrary,
+];
 
 describe('getAlertZeroDeepLinks', () => {
   it('registers the AlertZero pages without Discover or Dashboards stubs when no capabilities are passed', () => {
@@ -60,5 +64,14 @@ describe('getAlertZeroDeepLinks', () => {
     const ids = getAlertZeroDeepLinks(capabilities).map((link) => link.id);
 
     expect(ids).toContain(SecurityPageName.alertZeroEscalations);
+  });
+
+  it('lists the Hunt library for global search only, under the Watches section path', () => {
+    const link = getAlertZeroDeepLinks().find(
+      ({ id }) => id === SecurityPageName.alertZeroHuntLibrary
+    );
+
+    expect(link?.path).toBe('/watches/hunt_library');
+    expect(link?.visibleIn).toEqual(['globalSearch']);
   });
 });

@@ -1,0 +1,83 @@
+{
+  "id": "rare_createremotethread_source_process",
+  "version": 1,
+  "name": "Low Occurrence Rate of CreateRemoteThread by Source Process",
+  "description": "This hunt attempts to identify remote process injection by aggregating Sysmon `CreateRemoteThread` events by source process and returns the ones that we observed in only one unique host.",
+  "hypothesis": "A process that creates a remote thread in another process, seen once on a single host, may be injecting code to run under a trusted process.",
+  "platform": [
+    "windows"
+  ],
+  "mitreTechniques": [
+    "T1055"
+  ],
+  "references": [],
+  "guidance": {
+    "analystNotes": [
+      "Adding `winlog.event_data.TargetImage` to the aggregation clause can be beneficial but may introduce more false-positives."
+    ],
+    "expectedFalsePositives": [
+      "Debuggers, accessibility tools and some security or anti-cheat software create remote threads legitimately."
+    ],
+    "suggestedPivots": [
+      "Pivot on the target image to see which process received the thread.",
+      "Review the source process signature, parent and prior network activity on the host."
+    ]
+  },
+  "query": {
+    "id": "main",
+    "language": "esql",
+    "query": "from logs-windows.sysmon_operational-*\n| where host.os.family == \"windows\" and event.category == \"process\" and event.action == \"CreateRemoteThread\"\n| eval source_process = replace(process.executable, \"\"\"[cC]:\\\\[uU][sS][eE][rR][sS]\\\\[a-zA-Z0-9ñ\\.\\-\\_\\$~ ]+\\\\\"\"\", \"C:\\\\\\\\users\\\\\\\\user\\\\\\\\\")\n| stats cc = count(*), hosts = count_distinct(host.id), last_seen = max(@timestamp) by source_process\n /* unique source and target processes combined and observed in 1 host */\n| where hosts == 1 and cc == 1",
+    "resultKind": "aggregate",
+    "defaultTimeRange": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "recommendedColumns": [
+      "source_process",
+      "cc",
+      "hosts",
+      "last_seen"
+    ],
+    "requiredIndexPatterns": [
+      "logs-windows.sysmon_operational-*"
+    ],
+    "requiredFields": [
+      "host.os.family",
+      "event.category",
+      "event.action",
+      "process.executable",
+      "host.id",
+      "@timestamp"
+    ],
+    "evidenceFields": [
+      "source_process",
+      "cc",
+      "hosts",
+      "last_seen"
+    ],
+    "adjudicationFields": [
+      "source_process",
+      "cc",
+      "hosts",
+      "last_seen",
+      "host.name",
+      "user.name",
+      "process.executable",
+      "winlog.event_data.TargetImage"
+    ],
+    "surroundingEventQuery": "from logs-windows.sysmon_operational-* METADATA _index, _id\n| where @timestamp >= {{param.bucket_start}} and @timestamp < {{param.bucket_end}}\n| where host.os.family == \"windows\" and event.category == \"process\" and event.action == \"CreateRemoteThread\"\n| eval source_process = replace(process.executable, \"\"\"[cC]:\\\\[uU][sS][eE][rR][sS]\\\\[a-zA-Z0-9ñ\\.\\-\\_\\$~ ]+\\\\\"\"\", \"C:\\\\\\\\users\\\\\\\\user\\\\\\\\\")\n| where source_process == {{param.source_process}}\n| sort @timestamp desc\n| keep _index, _id, @timestamp, host.name, user.name, process.executable, winlog.event_data.TargetImage",
+    "occurrence": {
+      "keyFields": [
+        "source_process"
+      ],
+      "timeField": "last_seen",
+      "bucket": "1d"
+    }
+  },
+  "source": {
+    "kind": "elastic_seed",
+    "tradeId": "4f878255-53b8-4914-9a7d-4b668bd2ea6a",
+    "path": "hunting/windows/queries/createremotethread_by_source_process_with_low_occurrence.toml",
+    "revision": "20120bad39156ffdcf95311f12cfee6b4246d13a"
+  }
+}

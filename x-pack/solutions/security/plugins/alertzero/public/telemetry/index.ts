@@ -12,5 +12,6 @@ export { useAlertZeroTelemetry } from './use_alertzero_telemetry';
 export type { ReportAlertZeroUiEvent } from './use_alertzero_telemetry';
 export { useReportErrorShown } from './use_report_error_shown';
 export { useReportHomeOpened } from './use_report_home_opened';
+export { useReportHuntLibraryOpened } from './use_report_hunt_library_opened';
 export { useReportToastError } from './use_report_toast_error';
 export type { ReportToastError } from './use_report_toast_error';

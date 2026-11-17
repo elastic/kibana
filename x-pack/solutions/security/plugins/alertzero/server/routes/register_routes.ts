@@ -27,6 +27,10 @@ import { registerListActionsRoute } from './actions/list_actions';
 import { registerGetInvestigationsCountRoute } from './investigations/get_investigations_count';
 import { registerGetScanFailuresRoute } from './scan_failures/get_scan_failures';
 import { registerHuntRoutes } from './hunt/register_hunt_routes';
+import { registerHuntLibraryRoutes } from './hunt_library/hunt_library_routes';
+import { registerHuntPreserveRoute } from './hunt_library/preserve_route';
+import { registerHuntContinueRoute } from './hunt_library/continue_route';
+import { registerHuntHandoffCleanupRoute } from './hunt_library/handoff_cleanup_route';
 
 export interface RouteDependencies {
   router: AlertZeroRouter;
@@ -49,6 +53,8 @@ export interface RouteDependencies {
   isServerless: boolean;
   /** The workflows management client; undefined when workflows management is unavailable. */
   getWorkflowsManagement: () => WatchWorkflowsManagementClient | undefined;
+  /** Display names for user profile uids; uids that cannot be resolved are omitted. Never throws. */
+  resolveUserNames: (uids: string[]) => Promise<Map<string, string>>;
   /** Reports an AlertZero telemetry event; never throws. */
   reportTelemetryEvent: AlertZeroTelemetryReporter;
 }
@@ -64,4 +70,8 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerGetInvestigationsCountRoute(deps);
   registerGetScanFailuresRoute(deps);
   registerHuntRoutes(deps);
+  registerHuntLibraryRoutes(deps);
+  registerHuntPreserveRoute(deps);
+  registerHuntContinueRoute(deps);
+  registerHuntHandoffCleanupRoute(deps);
 };

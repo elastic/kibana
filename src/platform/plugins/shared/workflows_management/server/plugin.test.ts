@@ -11,6 +11,7 @@ jest.mock('./api/routes', () => ({ defineRoutes: jest.fn() }));
 jest.mock('./api/workflows_management_api', () => ({
   WorkflowsManagementApi: jest.fn().mockImplementation(() => ({
     setAuditLog: jest.fn(),
+    setExecutionLabelNamespaceRegistrar: jest.fn(),
   })),
 }));
 jest.mock('./api/workflows_management_service');
@@ -21,6 +22,7 @@ jest.mock('@kbn/workflows-execution-engine/server', () => ({
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
+import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 
 import { WorkflowsService } from './api/workflows_management_service';
@@ -69,6 +71,7 @@ describe('WorkflowsPlugin', () => {
     plugin.setup(coreSetup, {
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
+      workflowsExecutionEngine: workflowsExecutionEngineMock.createSetup(),
     });
 
     const start = plugin.start(coreMock.createStart(), {
@@ -99,6 +102,7 @@ describe('WorkflowsPlugin', () => {
     plugin.setup(coreMock.createSetup(), {
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
+      workflowsExecutionEngine: workflowsExecutionEngineMock.createSetup(),
     });
     plugin.start(coreMock.createStart(), {
       taskManager: {} as any,
@@ -143,6 +147,7 @@ describe('WorkflowsPlugin', () => {
     plugin.setup(coreSetup, {
       spaces: spaces as never,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
+      workflowsExecutionEngine: workflowsExecutionEngineMock.createSetup(),
     });
 
     const registerRouteHandlerContext = coreSetup.http.registerRouteHandlerContext as jest.Mock;
@@ -188,6 +193,7 @@ describe('WorkflowsPlugin', () => {
       actions,
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions,
+      workflowsExecutionEngine: workflowsExecutionEngineMock.createSetup(),
     });
 
     const connectorEventRegistrations =
@@ -217,6 +223,7 @@ describe('WorkflowsPlugin', () => {
       actions,
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions,
+      workflowsExecutionEngine: workflowsExecutionEngineMock.createSetup(),
     });
 
     expect(workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledWith(

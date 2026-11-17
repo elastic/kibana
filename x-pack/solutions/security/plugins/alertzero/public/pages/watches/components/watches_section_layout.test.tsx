@@ -121,6 +121,16 @@ describe('WatchesSectionLayout', () => {
     expect(history.location.pathname).toBe(`/watches/${SYSTEM_SECURITY_WATCH_HUNT_ID}`);
   });
 
+  it('offers a Hunt library entry that opens its page and marks it active there', () => {
+    const history = renderShell();
+    const nav = screen.getByTestId('alertZeroWatchesSubnav');
+    const entry = within(nav).getByTestId('alertZeroWatchesSubnav-huntLibrary');
+
+    expect(entry).not.toHaveAttribute('aria-current');
+    fireEvent.click(entry);
+    expect(history.location.pathname).toBe('/watches/hunt_library');
+  });
+
   // WatchesSectionLayout renders its own compact header; it must still pass the documentation link through.
   it('passes the Watches documentation link to the header', () => {
     renderShell();

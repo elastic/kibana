@@ -12,7 +12,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { DiscoverDataSource } from '../../../common/data_sources';
-import type { ProfileStateDefinition } from '../../../common/context_awareness';
+import type { ProfileStateDefinition, ProfileStateMap } from '../../../common/context_awareness';
 import type { AsyncProfileProvider, ContextWithProfileId } from '../profile_service';
 import { AsyncProfileService } from '../profile_service';
 import type { Profile } from '../types';
@@ -54,6 +54,11 @@ export interface DataSourceProfileProviderParams {
    * The current query
    */
   query?: Query | AggregateQuery;
+  /**
+   * The profile state of the current tab, keyed by profile state definition key. Lets a provider
+   * activate only when explicit state was supplied, for example by a locator link.
+   */
+  profileState?: ProfileStateMap;
 }
 
 /**

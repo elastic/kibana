@@ -13,6 +13,7 @@ import {
   ALERTZERO_UI_EVENTS,
   BRIEF_CARD_CONVERSATION_TYPES,
   BRIEF_CARD_SECTIONS,
+  HUNT_FILTER_TYPES,
   QUEUE_FILTER_TYPES,
   QUEUE_SIZE_BUCKETS,
   UI_ERROR_CLASSES,
@@ -49,6 +50,9 @@ const FIXTURES: AlertZeroUiEventPayloads = {
     section: 'investigate',
   },
   [ALERTZERO_UI_EVENTS.ErrorShown]: { error_class: 'forbidden', surface: 'watch_settings' },
+  [ALERTZERO_UI_EVENTS.HuntLibraryOpened]: { hunt_count: 8, available_hunt_count: 6 },
+  [ALERTZERO_UI_EVENTS.HuntLibraryFiltered]: { filter_type: 'platform' },
+  [ALERTZERO_UI_EVENTS.HuntLaunched]: { hunt_id: 'rare_lsass_process_access' },
 };
 
 const createRegisteredAnalytics = () => {
@@ -137,6 +141,7 @@ describe('AlertZero UI events', () => {
     [ALERTZERO_UI_EVENTS.BriefCardClicked, 'section', BRIEF_CARD_SECTIONS],
     [ALERTZERO_UI_EVENTS.ErrorShown, 'error_class', UI_ERROR_CLASSES],
     [ALERTZERO_UI_EVENTS.ErrorShown, 'surface', UI_ERROR_SURFACES],
+    [ALERTZERO_UI_EVENTS.HuntLibraryFiltered, 'filter_type', HUNT_FILTER_TYPES],
   ] as const)(
     'lists the whole %s %s vocabulary in the schema and the README',
     (eventType, field, values) => {

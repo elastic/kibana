@@ -51,6 +51,8 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
     eventChainVisitedWorkflowIds: mappings.keyword(),
     dispatchEventId: mappings.keyword(),
     concurrencyGroupKey: mappings.keyword(),
+    // Bounded, namespaced caller labels; see `execution_labels` in `@kbn/workflows`.
+    labels: mappings.flattened(),
     // Aggregated token usage across all token-consuming steps, accumulated
     // incrementally as each step finishes.
     usage: TOKEN_USAGE_MAPPING,

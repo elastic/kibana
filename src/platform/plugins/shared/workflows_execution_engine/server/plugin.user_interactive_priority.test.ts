@@ -36,7 +36,7 @@ jest.mock('./lib/get_user', () => ({
 }));
 
 const mockBulkCreateWorkflowExecutions = jest.fn();
-const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+const mockCreateWorkflowExecution = jest.fn().mockResolvedValue({ reusedExisting: false });
 const mockGetWorkflowExecutionById = jest.fn();
 const mockUpdateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
 const mockTryRevertResumeContext = jest.fn();
@@ -111,7 +111,7 @@ describe('user-interactive task priority', () => {
     mockGetWorkflow.mockResolvedValue(undefined);
     mockGetWorkflowExecutionStates.mockResolvedValue(new Map());
     mockIsWorkflowEnabled.mockResolvedValue(true);
-    mockCreateWorkflowExecution.mockResolvedValue(undefined);
+    mockCreateWorkflowExecution.mockResolvedValue({ reusedExisting: false });
     mockUpdateWorkflowExecution.mockResolvedValue(undefined);
 
     const initializerContext = coreMock.createPluginInitializerContext({

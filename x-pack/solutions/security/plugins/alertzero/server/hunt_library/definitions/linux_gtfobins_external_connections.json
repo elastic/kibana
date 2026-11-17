@@ -1,0 +1,89 @@
+{
+  "id": "linux_gtfobins_external_connections",
+  "version": 1,
+  "name": "Low Volume GTFOBins External Network Connections",
+  "description": "This hunt identifies low volume external network connections initiated by GTFOBins on Linux systems. GTFOBins are Unix binaries that can be exploited by attackers to bypass local security restrictions. The hunt focuses on network connections made by these binaries, excluding common internal IP ranges, to detect potentially malicious activity.",
+  "hypothesis": "A living-off-the-land binary (curl, nc, python and similar) making only a few external connections to an uncommon port may be staging a download or a reverse shell.",
+  "platform": [
+    "linux"
+  ],
+  "mitreTechniques": [
+    "T1219",
+    "T1071.001"
+  ],
+  "references": [],
+  "guidance": {
+    "analystNotes": [
+      "Monitors for external network connections initiated by known GTFOBins such as bash, curl, nc, wget, and others.",
+      "Excludes common internal IP ranges to minimize false positives.",
+      "Counts the occurrences of these connections by process name and limits to those seen infrequently (five or fewer connections).",
+      "This can help identify potentially malicious activity involving the exploitation of GTFOBins."
+    ],
+    "expectedFalsePositives": [
+      "Package managers, CI jobs and configuration management tools reaching external mirrors on unusual ports.",
+      "Administrators using ssh, scp or curl against a rarely used external service."
+    ],
+    "suggestedPivots": [
+      "Pivot on destination.ip for other hosts and processes that contacted it.",
+      "Check the process command line, parent and user for the same host and time.",
+      "Look for new files or cron entries written shortly after the connection."
+    ]
+  },
+  "query": {
+    "id": "main",
+    "language": "esql",
+    "query": "from logs-endpoint.events.network-*\n| where host.os.type == \"linux\" and event.type == \"start\" and process.name in (\n  \"ab\", \"aria2c\", \"bash\", \"cpan\", \"curl\", \"easy_install\", \"finger\", \"ftp\",\n  \"gdb\", \"gimp\", \"irb\", \"jjs\", \"jrunscript\", \"julia\", \"ksh\", \"lua\", \"lwp-download\",\n  \"nc\", \"nmap\", \"node\", \"openssl\", \"php\", \"pip\", \"python\", \"ruby\", \"rview\", \"rvim\",\n  \"scp\", \"sftp\", \"smbclient\", \"socat\", \"ssh\", \"tar\", \"tftp\", \"view\", \"vim\", \"vimdiff\",\n  \"wget\", \"whois\", \"yum\"\n) and\ndestination.ip IS NOT null and not CIDR_MATCH(destination.ip, \"10.0.0.0/8\", \"127.0.0.0/8\", \"169.254.0.0/16\", \"172.16.0.0/12\", \"192.0.0.0/24\", \"192.0.0.0/29\", \"192.0.0.8/32\", \"192.0.0.9/32\", \"192.0.0.10/32\", \"192.0.0.170/32\", \"192.0.0.171/32\", \"192.0.2.0/24\", \"192.31.196.0/24\", \"192.52.193.0/24\", \"192.168.0.0/16\", \"192.88.99.0/24\", \"224.0.0.0/4\", \"100.64.0.0/10\", \"192.175.48.0/24\",\"198.18.0.0/15\", \"198.51.100.0/24\", \"203.0.113.0/24\", \"224.0.0.0/4\", \"240.0.0.0/4\", \"::1\",\"FE80::/10\", \"FF00::/8\")\n| keep @timestamp, process.name, destination.port, destination.ip, user.name, host.name\n| stats cc = count(*), last_seen = max(@timestamp) by destination.port, process.name\n| where cc <= 5\n| sort cc asc, destination.port",
+    "resultKind": "aggregate",
+    "defaultTimeRange": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "recommendedColumns": [
+      "destination.port",
+      "process.name",
+      "cc",
+      "last_seen"
+    ],
+    "requiredIndexPatterns": [
+      "logs-endpoint.events.network-*"
+    ],
+    "requiredFields": [
+      "host.os.type",
+      "event.type",
+      "process.name",
+      "destination.ip",
+      "destination.port",
+      "@timestamp"
+    ],
+    "evidenceFields": [
+      "destination.port",
+      "process.name",
+      "cc",
+      "last_seen"
+    ],
+    "adjudicationFields": [
+      "destination.port",
+      "process.name",
+      "cc",
+      "last_seen",
+      "destination.ip",
+      "host.name",
+      "user.name"
+    ],
+    "surroundingEventQuery": "from logs-endpoint.events.network-* METADATA _index, _id\n| where @timestamp >= {{param.bucket_start}} and @timestamp < {{param.bucket_end}}\n| where host.os.type == \"linux\" and event.type == \"start\" and process.name == {{param.process.name}} and destination.port == {{param.destination.port}} and\ndestination.ip IS NOT null and not CIDR_MATCH(destination.ip, \"10.0.0.0/8\", \"127.0.0.0/8\", \"169.254.0.0/16\", \"172.16.0.0/12\", \"192.0.0.0/24\", \"192.0.0.0/29\", \"192.0.0.8/32\", \"192.0.0.9/32\", \"192.0.0.10/32\", \"192.0.0.170/32\", \"192.0.0.171/32\", \"192.0.2.0/24\", \"192.31.196.0/24\", \"192.52.193.0/24\", \"192.168.0.0/16\", \"192.88.99.0/24\", \"224.0.0.0/4\", \"100.64.0.0/10\", \"192.175.48.0/24\",\"198.18.0.0/15\", \"198.51.100.0/24\", \"203.0.113.0/24\", \"224.0.0.0/4\", \"240.0.0.0/4\", \"::1\",\"FE80::/10\", \"FF00::/8\")\n| sort @timestamp desc\n| keep _index, _id, @timestamp, host.name, user.name, process.name, destination.ip, destination.port",
+    "occurrence": {
+      "keyFields": [
+        "process.name",
+        "destination.port"
+      ],
+      "timeField": "last_seen",
+      "bucket": "1d"
+    }
+  },
+  "source": {
+    "kind": "elastic_seed",
+    "tradeId": "783d6091-b98d-45a8-a880-a07f112a8aa2",
+    "path": "hunting/linux/queries/low_volume_gtfobins_external_network_connections.toml",
+    "revision": "20120bad39156ffdcf95311f12cfee6b4246d13a"
+  }
+}

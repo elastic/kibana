@@ -10,6 +10,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 // Page-load critical: this module is reachable synchronously from `plugin.ts`, so it must not import
 // from `pages/**`. Every title it needs lives in the chrome translations module for that reason.
 import * as i18n from './components/app_chrome/translations';
+import { HUNT_LIBRARY_PATH } from './pages/hunt_library/paths';
 
 /**
  * Deep links for Security solution nav + global search (Discover + Dashboards are owned elsewhere).
@@ -42,6 +43,13 @@ export const getAlertZeroDeepLinks = (capabilities?: Capabilities): AppDeepLink[
       title: i18n.NAV_WATCHES,
       path: '/watches',
       visibleIn: ['globalSearch', 'projectSideNav'],
+    },
+    {
+      id: SecurityPageName.alertZeroHuntLibrary,
+      title: i18n.NAV_HUNT_LIBRARY,
+      path: HUNT_LIBRARY_PATH,
+      // Reachable from the Watches subnav; searchable, but not its own sidebar entry.
+      visibleIn: ['globalSearch'],
     },
   ];
 };

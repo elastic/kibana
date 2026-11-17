@@ -7,6 +7,7 @@
 
 import type React from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
 import type { AttachmentNavigationDeps } from './navigation';
@@ -69,21 +70,60 @@ const registerSignificantSecurityEventAttachmentUI = async (
   );
 };
 
+/**
+ * Registers the `security.hunt_session` attachment UI definition: the hunt and its preserved evidence,
+ * with an action that reopens the hunt in Discover. Lazy for the same reason as the others.
+ */
+const registerHuntSessionAttachmentUI = async (
+  attachments: AttachmentServiceStartContract,
+  {
+    http,
+    navigation,
+    notifications,
+    AccessBoundary,
+  }: {
+    http: HttpStart;
+    navigation: AttachmentNavigationDeps;
+    notifications?: NotificationsStart;
+    AccessBoundary: AttachmentAccessBoundary;
+  }
+): Promise<void> => {
+  const { createHuntSessionAttachmentDefinition } = await import(
+    /* webpackChunkName: "alertzero_hunt_session_attachment" */
+    './hunt_session'
+  );
+  attachments.addAttachmentType(
+    ALERTZERO_ATTACHMENT_TYPES.huntSession,
+    withAccessBoundary(
+      createHuntSessionAttachmentDefinition({ http, navigation, notifications }),
+      AccessBoundary
+    )
+  );
+};
+
 /** Registers all Hunt Watch attachment UI definitions with the Agent Builder attachments service. */
 export const registerAlertZeroAttachmentTypesUI = async (
   attachments: AttachmentServiceStartContract,
   {
     http,
     navigation,
+    notifications,
     AccessBoundary,
   }: {
     http: HttpStart;
     navigation: AttachmentNavigationDeps;
+    notifications?: NotificationsStart;
     AccessBoundary: AttachmentAccessBoundary;
   }
 ): Promise<void> => {
   await Promise.all([
     registerThreatAttachmentUI(attachments, { http, navigation, AccessBoundary }),
     registerSignificantSecurityEventAttachmentUI(attachments, { navigation, AccessBoundary }),
+    registerHuntSessionAttachmentUI(attachments, {
+      http,
+      navigation,
+      notifications,
+      AccessBoundary,
+    }),
   ]);
 };

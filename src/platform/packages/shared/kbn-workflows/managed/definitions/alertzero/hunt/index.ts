@@ -13,6 +13,10 @@ export {
 } from './find_or_create_investigation';
 export { ALERTZERO_HUNT_WORKFLOW, ALERTZERO_HUNT_WORKFLOW_ID } from './hunt';
 export {
+  ALERTZERO_HUNT_MANUAL_SESSION_WORKFLOW,
+  ALERTZERO_HUNT_MANUAL_SESSION_WORKFLOW_ID,
+} from './hunt_manual_session';
+export {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
 } from './hunt_continuous_threat_hunt';

@@ -12,6 +12,7 @@ import type { EsWorkflowExecution } from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus,
+  matchesImmutableIdentity,
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
 import type { WorkflowExecutionsDataClient } from './data_access_layer';
@@ -137,7 +138,7 @@ export class WorkflowExecutionRepository {
   public async createWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>,
     options: { refresh?: boolean | 'wait_for' } = {}
-  ): Promise<void> {
+  ): Promise<{ reusedExisting: boolean }> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for creation');
     }
@@ -157,13 +158,13 @@ export class WorkflowExecutionRepository {
     // silently proceed after a failed write (e.g. version conflict on duplicate ID).
     const itemError = response.items[0]?.error;
     if (!itemError) {
-      return;
+      return { reusedExisting: false };
     }
     if (isCreateConflict(itemError)) {
       const persistedIds = await this.getAlreadyPersistedIds([workflowExecution]);
       if (persistedIds.has(workflowExecution.id)) {
         await this.refreshAfterRecoveredCreate(options.refresh);
-        return;
+        return { reusedExisting: true };
       }
     }
     throw new Error(
@@ -177,20 +178,24 @@ export class WorkflowExecutionRepository {
    * A transient error (e.g. a client timeout) can hide a create that Elasticsearch already
    * persisted, so the retried `create` fails with a version conflict. Execution IDs are freshly
    * generated UUIDs, so a stored document with the same ID, space and workflow is that earlier
-   * attempt of the same create.
+   * attempt of the same create. A create that carries labels (its immutable identity) must also
+   * match them on the stored document, so a deterministic id cannot adopt a different identity.
    */
   private async getAlreadyPersistedIds(
     executions: Array<Partial<EsWorkflowExecution>>
   ): Promise<Set<string>> {
     const ids = executions.flatMap(({ id }) => (id ? [id] : []));
     const { items } = await this.workflowExecutionsDataClient.getByIds(ids, {
-      sourceIncludes: ['spaceId', 'workflowId'],
+      sourceIncludes: ['spaceId', 'workflowId', 'labels'],
     });
     const storedById = new Map(items.map(({ document }) => [document.id, document]));
     return new Set(
-      executions.flatMap(({ id, spaceId, workflowId }) => {
+      executions.flatMap(({ id, spaceId, workflowId, labels }) => {
         const stored = id ? storedById.get(id) : undefined;
-        return stored && stored.spaceId === spaceId && stored.workflowId === workflowId
+        return stored &&
+          stored.spaceId === spaceId &&
+          stored.workflowId === workflowId &&
+          (!labels || matchesImmutableIdentity(stored.labels, labels))
           ? [stored.id]
           : [];
       })

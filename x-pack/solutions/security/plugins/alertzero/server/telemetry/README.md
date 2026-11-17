@@ -328,3 +328,44 @@ Emitted by one Endpoint Analysis run for one indicator, once it has reached its 
 | `proposals_dispatched` | long | yes | Containment proposals dispatched to the queue |
 | `proposals_dispatch_failed` | long | yes | Containment proposals that did not reach the queue |
 | `auto_approve_requested` | boolean | yes | Whether the proposals ask the gate to auto-approve (supervised autonomy) |
+
+## Hunt Library events
+
+The Hunt Library routes emit these from the server, after the write they describe is durable and only when it changed something. A retried request and a repeated selection send nothing. They carry no envelope: a Hunt session is not a Worker run. They send the seeded hunt id and counts, never the query, filters, selected rows, field values or model output.
+
+### `alertzero_hunt_session_preserved`
+
+An analyst's preservation put the first evidence on an Investigation.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `hunt_id` | keyword | yes | Stable id of the checked-in curated hunt. Never the query, filters or any selected evidence |
+| `added_count` | long | yes | Evidence rows this preservation added |
+| `evidence_count` | long | yes | Unique evidence rows on the Investigation afterwards |
+
+### `alertzero_hunt_evidence_appended`
+
+An analyst's preservation added evidence to an Investigation that already had some.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `hunt_id` | keyword | yes | Stable id of the checked-in curated hunt |
+| `added_count` | long | yes | Evidence rows this preservation added |
+| `evidence_count` | long | yes | Unique evidence rows on the Investigation afterwards |
+
+### `alertzero_hunt_continued`
+
+An analyst reopened a hunt in Discover from an Investigation (Continue hunt). Sent once the new session is recorded.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `hunt_id` | keyword | yes | Stable id of the checked-in curated hunt |
+
+### `alertzero_hunt_investigation_created`
+
+A preservation created the Investigation. Sent once, by the request that created it.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `hunt_id` | keyword | yes | Stable id of the checked-in curated hunt |
+| `trigger` | keyword | yes | What started the hunt: `manual`. The worker adds `automated` when it ships |

@@ -1,0 +1,63 @@
+{
+  "tradeRevision": "20120bad39156ffdcf95311f12cfee6b4246d13a",
+  "approvedBy": "Steph",
+  "approvedAt": "2026-10-30",
+  "hunts": [
+    {
+      "tradeId": "d0aed6f5-f84c-4da8-bb2a-b5ca0fbb55e0",
+      "path": "hunting/windows/queries/detect_rare_lsass_process_access_attempts.toml",
+      "queryIndex": 0,
+      "resultKind": "aggregate",
+      "platform": "windows"
+    },
+    {
+      "tradeId": "4f878255-53b8-4914-9a7d-4b668bd2ea6a",
+      "path": "hunting/windows/queries/createremotethread_by_source_process_with_low_occurrence.toml",
+      "queryIndex": 0,
+      "resultKind": "aggregate",
+      "platform": "windows"
+    },
+    {
+      "tradeId": "783d6091-b98d-45a8-a880-a07f112a8aa2",
+      "path": "hunting/linux/queries/low_volume_gtfobins_external_network_connections.toml",
+      "queryIndex": 0,
+      "resultKind": "aggregate",
+      "platform": "linux"
+    },
+    {
+      "tradeId": "0b936024-71d9-11ef-a9be-f661ea17fbcc",
+      "path": "hunting/okta/queries/defense_evasion_failed_oauth_access_token_retrieval_via_public_client_app.toml",
+      "queryIndex": 0,
+      "resultKind": "raw_event",
+      "platform": "okta"
+    },
+    {
+      "tradeId": "429824b6-60b2-11ef-b0a4-f661ea17fbce",
+      "path": "hunting/aws/queries/iam_assume_role_creation_with_attached_policy.toml",
+      "queryIndex": 0,
+      "resultKind": "raw_event",
+      "platform": "aws"
+    },
+    {
+      "tradeId": "1c2d2b08-71ee-11ef-952e-f661ea17fbcc",
+      "path": "hunting/okta/queries/initial_access_password_spraying_from_repeat_source.toml",
+      "queryIndex": 0,
+      "resultKind": "aggregate",
+      "platform": "okta"
+    },
+    {
+      "tradeId": "0ea47044-b161-4785-ba99-e11f46d6ac51",
+      "path": "hunting/linux/queries/execution_uncommon_process_execution_from_suspicious_directory.toml",
+      "queryIndex": 0,
+      "resultKind": "aggregate",
+      "platform": "linux"
+    },
+    {
+      "tradeId": "44e6adc6-e183-4bfa-b06d-db41669641fa",
+      "path": "hunting/windows/queries/rundll32_execution_aggregated_by_cmdline.toml",
+      "queryIndex": 0,
+      "resultKind": "aggregate",
+      "platform": "windows"
+    }
+  ]
+}

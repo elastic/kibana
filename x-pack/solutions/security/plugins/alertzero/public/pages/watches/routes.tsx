@@ -9,6 +9,8 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/alertzero-common';
+import { HUNT_LIBRARY_PATH } from '../hunt_library/paths';
+import { HuntLibraryPage } from '../hunt_library/hunt_library_page';
 import { WatchDetailPage } from './watch_detail';
 
 const DEFAULT_WATCH_PATH = `/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`;
@@ -21,6 +23,7 @@ export const WatchesRoutes: React.FC = () => (
   <Routes>
     {/* Literal /watches/<section> routes must precede /watches/:watchId, or the section name is
         read as a watch id. */}
+    <Route path={HUNT_LIBRARY_PATH} exact component={HuntLibraryPage} />
     <Route path="/watches/:watchId" exact component={WatchDetailPage} />
     {/* Land on the first catalog Watch rather than an empty section. */}
     <Route path="/watches" exact render={() => <Redirect to={DEFAULT_WATCH_PATH} />} />

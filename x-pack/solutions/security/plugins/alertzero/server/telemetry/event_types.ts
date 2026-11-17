@@ -55,12 +55,13 @@ import {
 } from '../../common/telemetry/constants';
 import type {
   AlertZeroAutonomyLevel,
+  HuntInvestigationTrigger,
   AlertZeroAutonomyMode,
   AlertZeroTriggerType,
   AlertZeroWatchTag,
   AlertZeroWorkerId,
 } from './constants';
-import { ALERTZERO_TELEMETRY_EVENTS } from './constants';
+import { ALERTZERO_TELEMETRY_EVENTS, HUNT_INVESTIGATION_TRIGGERS } from './constants';
 import { formatVocabulary } from './format_vocabulary';
 
 /** The fields every AlertZero Worker run event carries, built by `buildAlertZeroEnvelope`. */
@@ -220,6 +221,24 @@ export interface AlertZeroEndpointAnalysisCompletedPayload extends AlertZeroEnve
 }
 
 /** The payload each AlertZero event type carries. */
+/** Rows a Hunt Library preservation put on an Investigation. Never the rows, query or filters. */
+export interface AlertZeroHuntEvidencePreservedPayload {
+  /** Evidence rows this request added. */
+  added_count: number;
+  /** Unique evidence rows on the Investigation afterwards. */
+  evidence_count: number;
+  hunt_id: string;
+}
+
+export interface AlertZeroHuntContinuedPayload {
+  hunt_id: string;
+}
+
+export interface AlertZeroHuntInvestigationCreatedPayload {
+  hunt_id: string;
+  trigger: HuntInvestigationTrigger;
+}
+
 export interface AlertZeroTelemetryEventPayloads {
   [ALERTZERO_TELEMETRY_EVENTS.AdWorkerRunCompleted]: AlertZeroAdWorkerRunCompletedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.AdWorkerReviewStarted]: AlertZeroAdWorkerReviewStartedPayload;
@@ -235,6 +254,10 @@ export interface AlertZeroTelemetryEventPayloads {
   [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted]: AlertZeroRuleCoverageReviewCompletedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.HuntReportCompleted]: AlertZeroHuntReportCompletedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.EndpointAnalysisCompleted]: AlertZeroEndpointAnalysisCompletedPayload;
+  [ALERTZERO_TELEMETRY_EVENTS.HuntSessionPreserved]: AlertZeroHuntEvidencePreservedPayload;
+  [ALERTZERO_TELEMETRY_EVENTS.HuntEvidenceAppended]: AlertZeroHuntEvidencePreservedPayload;
+  [ALERTZERO_TELEMETRY_EVENTS.HuntContinued]: AlertZeroHuntContinuedPayload;
+  [ALERTZERO_TELEMETRY_EVENTS.HuntInvestigationCreated]: AlertZeroHuntInvestigationCreatedPayload;
 }
 
 const WORKER_ID_DESCRIPTION =
@@ -782,6 +805,49 @@ export const ALERTZERO_ENDPOINT_ANALYSIS_COMPLETED_EVENT: EventTypeOpts<AlertZer
     },
   };
 
+const HUNT_ID_DESCRIPTION =
+  'Stable id of the checked-in curated hunt (a seeded definition id). Never the query, filters or any selected evidence';
+
+const huntIdField = () =>
+  ({ type: 'keyword', _meta: { description: HUNT_ID_DESCRIPTION, optional: false } } as const);
+
+export const ALERTZERO_HUNT_SESSION_PRESERVED_EVENT: EventTypeOpts<AlertZeroHuntEvidencePreservedPayload> =
+  {
+    eventType: ALERTZERO_TELEMETRY_EVENTS.HuntSessionPreserved,
+    schema: {
+      added_count: countField('Evidence rows this preservation added'),
+      evidence_count: countField('Unique evidence rows on the Investigation afterwards'),
+      hunt_id: huntIdField(),
+    },
+  };
+
+export const ALERTZERO_HUNT_EVIDENCE_APPENDED_EVENT: EventTypeOpts<AlertZeroHuntEvidencePreservedPayload> =
+  {
+    eventType: ALERTZERO_TELEMETRY_EVENTS.HuntEvidenceAppended,
+    schema: {
+      added_count: countField('Evidence rows this preservation added'),
+      evidence_count: countField('Unique evidence rows on the Investigation afterwards'),
+      hunt_id: huntIdField(),
+    },
+  };
+
+export const ALERTZERO_HUNT_CONTINUED_EVENT: EventTypeOpts<AlertZeroHuntContinuedPayload> = {
+  eventType: ALERTZERO_TELEMETRY_EVENTS.HuntContinued,
+  schema: { hunt_id: huntIdField() },
+};
+
+export const ALERTZERO_HUNT_INVESTIGATION_CREATED_EVENT: EventTypeOpts<AlertZeroHuntInvestigationCreatedPayload> =
+  {
+    eventType: ALERTZERO_TELEMETRY_EVENTS.HuntInvestigationCreated,
+    schema: {
+      hunt_id: huntIdField(),
+      trigger: vocabularyField(
+        'What started the hunt whose evidence created the Investigation',
+        HUNT_INVESTIGATION_TRIGGERS
+      ),
+    },
+  };
+
 /** Every AlertZero event type, in registration order. */
 export const ALERTZERO_TELEMETRY_EVENT_TYPES = [
   ALERTZERO_AD_WORKER_RUN_COMPLETED_EVENT,
@@ -798,4 +864,8 @@ export const ALERTZERO_TELEMETRY_EVENT_TYPES = [
   ALERTZERO_RULE_COVERAGE_REVIEW_COMPLETED_EVENT,
   ALERTZERO_HUNT_REPORT_COMPLETED_EVENT,
   ALERTZERO_ENDPOINT_ANALYSIS_COMPLETED_EVENT,
+  ALERTZERO_HUNT_SESSION_PRESERVED_EVENT,
+  ALERTZERO_HUNT_EVIDENCE_APPENDED_EVENT,
+  ALERTZERO_HUNT_CONTINUED_EVENT,
+  ALERTZERO_HUNT_INVESTIGATION_CREATED_EVENT,
 ] as const;

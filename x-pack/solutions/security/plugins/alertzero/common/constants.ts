@@ -26,6 +26,7 @@ export {
   FIND_OR_CREATE_INVESTIGATION_URL,
   WRITE_HUNT_EVIDENCE_URL,
 } from '@kbn/alertzero-common';
+import { HUNT_INTERNAL_ROUTE_BASE as HUNT_BASE } from '@kbn/alertzero-common';
 
 /** API privilege for read-only AlertZero internal routes. */
 export const ALERTZERO_API_PRIVILEGE_READ = 'alertzero_read' as const;
@@ -49,6 +50,8 @@ export const ALERTZERO_ATTACHMENT_TYPES = {
   significantSecurityEvent: 'security.significant_security_event',
   /** Hidden start+poll handoff; server-registered only. */
   huntCoordinatorResult: 'security.hunt_coordinator_result',
+  /** The durable record of a Hunt Library session on an Investigation. */
+  huntSession: 'security.hunt_session',
 } as const;
 
 /** Prefix for `hunt-coordinator-result-{runId}`; the route returns the full id. */
@@ -73,3 +76,9 @@ export const HUNT_INVESTIGATION_ID_NAMESPACE = 'hunt:report:' as const;
  * writes are always space-scoped to the caller's concrete space, never this sentinel.
  */
 export const HUNT_GLOBAL_SPACE_ID = '*' as const;
+
+/** Read API for the curated Hunt Library catalog: list, and detail at `/{id}`. */
+export const HUNT_LIBRARY_URL = `${HUNT_BASE}/library` as const;
+
+/** Operator remediation: re-queue the cleanup of a Hunt session whose handoff did not complete. */
+export const HUNT_HANDOFF_CLEANUP_RETRY_URL = `${HUNT_BASE}/handoff_cleanup/retry` as const;

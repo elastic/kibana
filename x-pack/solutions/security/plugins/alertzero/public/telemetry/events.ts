@@ -8,6 +8,7 @@
 import type { EventTypeOpts } from '@kbn/core/public';
 import type {
   BriefCardConversationType,
+  HuntFilterType,
   BriefCardSection,
   QueueFilterType,
   QueueSizeBucket,
@@ -18,6 +19,7 @@ import {
   ALERTZERO_UI_EVENTS,
   BRIEF_CARD_CONVERSATION_TYPES,
   BRIEF_CARD_SECTIONS,
+  HUNT_FILTER_TYPES,
   QUEUE_FILTER_TYPES,
   QUEUE_SIZE_BUCKETS,
   UI_ERROR_CLASSES,
@@ -48,12 +50,28 @@ export interface AlertZeroUiErrorShownPayload {
   surface: UiErrorSurface;
 }
 
+export interface AlertZeroUiHuntLibraryOpenedPayload {
+  hunt_count: number;
+  available_hunt_count: number;
+}
+
+export interface AlertZeroUiHuntLibraryFilteredPayload {
+  filter_type: HuntFilterType;
+}
+
+export interface AlertZeroUiHuntLaunchedPayload {
+  hunt_id: string;
+}
+
 /** The payload each AlertZero browser event type carries. */
 export interface AlertZeroUiEventPayloads {
   [ALERTZERO_UI_EVENTS.HomeOpened]: AlertZeroUiHomeOpenedPayload;
   [ALERTZERO_UI_EVENTS.QueueFiltered]: AlertZeroUiQueueFilteredPayload;
   [ALERTZERO_UI_EVENTS.BriefCardClicked]: AlertZeroUiBriefCardClickedPayload;
   [ALERTZERO_UI_EVENTS.ErrorShown]: AlertZeroUiErrorShownPayload;
+  [ALERTZERO_UI_EVENTS.HuntLibraryOpened]: AlertZeroUiHuntLibraryOpenedPayload;
+  [ALERTZERO_UI_EVENTS.HuntLibraryFiltered]: AlertZeroUiHuntLibraryFilteredPayload;
+  [ALERTZERO_UI_EVENTS.HuntLaunched]: AlertZeroUiHuntLaunchedPayload;
 }
 
 export const ALERTZERO_UI_HOME_OPENED_EVENT: EventTypeOpts<AlertZeroUiHomeOpenedPayload> = {
@@ -156,10 +174,65 @@ export const ALERTZERO_UI_ERROR_SHOWN_EVENT: EventTypeOpts<AlertZeroUiErrorShown
   },
 };
 
+export const ALERTZERO_UI_HUNT_LIBRARY_OPENED_EVENT: EventTypeOpts<AlertZeroUiHuntLibraryOpenedPayload> =
+  {
+    eventType: ALERTZERO_UI_EVENTS.HuntLibraryOpened,
+    schema: {
+      hunt_count: {
+        type: 'long',
+        _meta: {
+          description: 'How many curated hunts the Hunt library listed when it loaded',
+          optional: false,
+        },
+      },
+      available_hunt_count: {
+        type: 'long',
+        _meta: {
+          description:
+            'How many of the listed hunts the user could run, by the availability checks',
+          optional: false,
+        },
+      },
+    },
+  };
+
+export const ALERTZERO_UI_HUNT_LIBRARY_FILTERED_EVENT: EventTypeOpts<AlertZeroUiHuntLibraryFilteredPayload> =
+  {
+    eventType: ALERTZERO_UI_EVENTS.HuntLibraryFiltered,
+    schema: {
+      filter_type: {
+        type: 'keyword',
+        _meta: {
+          description: `Which Hunt library control the user set: ${formatValues(
+            HUNT_FILTER_TYPES
+          )}. Clearing a filter is not reported, and the search text or chosen value is never sent`,
+          optional: false,
+        },
+      },
+    },
+  };
+
+export const ALERTZERO_UI_HUNT_LAUNCHED_EVENT: EventTypeOpts<AlertZeroUiHuntLaunchedPayload> = {
+  eventType: ALERTZERO_UI_EVENTS.HuntLaunched,
+  schema: {
+    hunt_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Stable id of the checked-in curated hunt that was recorded and opened in Discover. Never the query or any selected evidence',
+        optional: false,
+      },
+    },
+  },
+};
+
 /** Every AlertZero browser event type, in registration order. */
 export const ALERTZERO_UI_EVENT_TYPES = [
   ALERTZERO_UI_HOME_OPENED_EVENT,
   ALERTZERO_UI_QUEUE_FILTERED_EVENT,
   ALERTZERO_UI_BRIEF_CARD_CLICKED_EVENT,
   ALERTZERO_UI_ERROR_SHOWN_EVENT,
+  ALERTZERO_UI_HUNT_LIBRARY_OPENED_EVENT,
+  ALERTZERO_UI_HUNT_LIBRARY_FILTERED_EVENT,
+  ALERTZERO_UI_HUNT_LAUNCHED_EVENT,
 ] as const;
