@@ -61,7 +61,8 @@
     "@kbn/ebt-click",
     "@kbn/apm-shared",
     "@kbn/ui-callout",
-    "@kbn/genai-common"
+    "@kbn/genai-common",
+    "@kbn/expressions-plugin"
   ],
   "exclude": ["target/**/*"]
 }
