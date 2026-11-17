@@ -135,7 +135,9 @@ export interface ConnectorDrift {
   readonly overlayFindings: readonly string[];
   readonly outcome: DriftOutcome;
   // The fields below describe the findings for the drift issue. Reports written before they
-  // existed lack them.
+  // existed lack them, which is why they are optional; `actions` tells the two apart. Only
+  // `conclusionsOf` in `render_drift_issue` reads them, so that is the one place that has to
+  // know a report may be of either kind.
   readonly displayName?: string;
   /** The connector's folder, relative to the repository root. */
   readonly folder?: string;
