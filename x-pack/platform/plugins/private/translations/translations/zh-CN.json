@@ -49523,7 +49523,6 @@
     "xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocButtonLabel": "卸载",
     "xpack.observabilityAiAssistantManagement.settingsTab.h3.searchConnectorIndexPatternLabel": "搜索连接器索引模式",
     "xpack.observabilityAiAssistantManagement.span.expandRowLabel": "展开行",
-    "xpack.observabilityAlerting.actions.investigateDisplayName": "调查",
     "xpack.observabilityAlerting.appTitle": "告警",
     "xpack.observabilityAlerting.breadcrumbs.alerting": "告警",
     "xpack.observabilityAlerting.breadcrumbs.observability": "Observability",

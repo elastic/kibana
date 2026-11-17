@@ -49327,7 +49327,6 @@
     "xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocButtonLabel": "Désinstaller",
     "xpack.observabilityAiAssistantManagement.settingsTab.h3.searchConnectorIndexPatternLabel": "Modèle d'indexation de connecteur de recherche",
     "xpack.observabilityAiAssistantManagement.span.expandRowLabel": "Développer la ligne",
-    "xpack.observabilityAlerting.actions.investigateDisplayName": "Examiner",
     "xpack.observabilityAlerting.appTitle": "Alerting",
     "xpack.observabilityAlerting.breadcrumbs.alerting": "Alerting",
     "xpack.observabilityAlerting.breadcrumbs.observability": "Observability",
