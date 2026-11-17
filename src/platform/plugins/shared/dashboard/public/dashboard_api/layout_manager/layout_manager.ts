@@ -76,7 +76,7 @@ import {
   arePinnedPanelLayoutsEqual,
 } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
-import { getLayoutBottomRow, groupPanelsInSection } from './group_panels_in_section';
+import { getLayoutBottomRow, groupPanelsInSection } from './layout_utils';
 import { serializeLayout } from './serialize_layout';
 import {
   isDashboardLayoutPanel,

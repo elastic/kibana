@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { groupPanelsInSection } from './group_panels_in_section';
+import { groupPanelsInSection } from './layout_utils';
 import type { DashboardLayout } from './types';
 
 const newSection = { id: 'newSection', title: 'New collapsible section' };
