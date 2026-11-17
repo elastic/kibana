@@ -19,6 +19,7 @@ import type { PointerPosition, UserInteractionEvent } from '../../../common/type
 import { isFlexPanelDataEqual } from '../../utils/equality_checks';
 import { getPanelKeysInOrder } from '../../utils/panel_order';
 import type { UserKeyboardEvent } from '../../../common/sensors/keyboard/types';
+import { getDragOrder } from './get_drag_order';
 import { getAllowedBreakpoints, getKeyboardDragPosition, getResizePreviewRect } from './utils';
 
 let startingLayout: FlexLayoutData | undefined;
@@ -110,7 +111,7 @@ export const moveAction = (
     return;
   }
 
-  const { gutterSize, rowHeight } = gridSettings;
+  const { gutterSize } = gridSettings;
   const isResize = activePanel.type === 'resize';
   const gridLayoutRect = gridLayoutElement?.getBoundingClientRect();
 
@@ -130,9 +131,6 @@ export const moveAction = (
   })();
 
   const requestedPanelData = { ...currentPanelData };
-  const rowSize = rowHeight + gutterSize / 2;
-  const gridTop = gridLayoutRect?.top ?? 0;
-  const getRow = ({ top }: { top: number }) => Math.ceil((top - gridTop) / rowSize);
 
   if (isResize) {
     const targetWidth = previewRect.right - previewRect.left;
@@ -147,34 +145,16 @@ export const moveAction = (
       gridLayout$.next(nextLayout);
     }
   } else {
-    const getSortKey = (rect: { top: number; bottom: number; left: number }) =>
-      rect.left + getRow(rect) * (gridLayoutRect?.width ?? 1);
-
-    // Full-width panels can produce identical sort keys; break ties using the drag direction so
-    // the active panel passes over the panel it lands on instead of keeping its original order.
-    const movedForward = getSortKey(previewRect) >= getSortKey(activePanel.position);
-
-    const sorted = Object.entries(panelElements)
-      .map(([id, panel]) => {
-        // the active panel's DOM position isn't updated until `activePanelEvent$.next()` below,
-        // so use the up-to-date preview rect rather than the stale DOM measurement
-        const rect =
-          id === activePanel.id
-            ? previewRect
-            : panel?.getBoundingClientRect() ?? { top: 0, bottom: 0, left: 0 };
-        return { id, sortKey: getSortKey(rect) };
-      })
-      .sort((a, b) => {
-        if (a.sortKey !== b.sortKey) return a.sortKey - b.sortKey;
-        const activeId = activePanel.id;
-        if (a.id === activeId) return movedForward ? 1 : -1;
-        if (b.id === activeId) return movedForward ? -1 : 1;
-        return 0;
-      });
+    const otherPanelRects = Object.fromEntries(
+      Object.entries(panelElements).flatMap(([id, panel]) =>
+        id === activePanel.id || !panel ? [] : [[id, panel.getBoundingClientRect()]]
+      )
+    );
+    const sorted = getDragOrder({ activeId: activePanel.id, previewRect, otherPanelRects });
 
     const nextLayout: FlexLayoutData = {};
-    sorted.forEach(({ id }, index) => {
-      nextLayout[id] = { ...currentLayout[id], order: index };
+    sorted.forEach((id, order) => {
+      nextLayout[id] = { ...currentLayout[id], order };
     });
     gridLayout$.next(nextLayout);
   }
