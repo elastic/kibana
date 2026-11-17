@@ -99,7 +99,7 @@ AWS JSON APIs, such as CloudWatch Logs and CloudTrail, take a JSON body and name
       limit: 5
 ```
 
-Later steps can read the parsed response from `steps.list_log_groups.output.data`, for example `steps.list_log_groups.output.data.logGroups`.
+Later steps read the parsed response from `steps.list_log_groups.output.data`.
 
 ## Connector networking configuration [aws-connector-networking-configuration]
 
