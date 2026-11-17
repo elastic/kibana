@@ -497,8 +497,18 @@ describe('SubFeatureCard', () => {
   });
 
   describe('Global default row', () => {
-    it('renders locked global default row and badge in custom mode when no saved object and global model is set', () => {
+    it('does not render the global default row while customizing the priority list', () => {
       renderCard(['ep-1', 'ep-2'], undefined, new Set(), ['__different__'], {
+        hasSavedObject: false,
+        isFeatureDirty: false,
+        globalDefaultId: 'ep-3',
+      });
+
+      expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('renders locked global default row and badge in custom mode when no models are assigned', () => {
+      renderCard([], undefined, new Set(), ['__different__'], {
         hasSavedObject: false,
         isFeatureDirty: false,
         globalDefaultId: 'ep-3',
@@ -507,10 +517,11 @@ describe('SubFeatureCard', () => {
       expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
       expect(screen.getByTestId('global-default-badge-test_feature')).toBeInTheDocument();
       expect(screen.getByText('Global default')).toBeInTheDocument();
+      expect(screen.queryByTestId('no-models-available-test_feature')).not.toBeInTheDocument();
     });
 
     it('hides the Global default badge when the feature is dirty but keeps the subdued row', () => {
-      renderCard(['ep-1', 'ep-2'], undefined, new Set(), ['__different__'], {
+      renderCard([], undefined, new Set(), ['__different__'], {
         hasSavedObject: false,
         isFeatureDirty: true,
         globalDefaultId: 'ep-3',
@@ -521,7 +532,7 @@ describe('SubFeatureCard', () => {
     });
 
     it('does not render the global default row when the feature has saved settings', () => {
-      renderCard(['ep-1', 'ep-2'], undefined, new Set(), ['__different__'], {
+      renderCard([], undefined, new Set(), ['__different__'], {
         hasSavedObject: true,
         isFeatureDirty: false,
         globalDefaultId: 'ep-3',
@@ -552,16 +563,6 @@ describe('SubFeatureCard', () => {
       );
 
       expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
-    });
-
-    it('suppresses the Default badge on the first draggable when the global default row is shown', () => {
-      renderCard(['ep-1', 'ep-2'], undefined, new Set(), ['__different__'], {
-        hasSavedObject: false,
-        isFeatureDirty: false,
-        globalDefaultId: 'ep-3',
-      });
-
-      expect(screen.queryByText('Default')).not.toBeInTheDocument();
     });
   });
 
@@ -665,7 +666,7 @@ describe('SubFeatureCard', () => {
 
   describe('ignoreGlobalDefault — globalDefaultId set to NO_DEFAULT_MODEL', () => {
     it('does not render the global default locked row when globalDefaultId is NO_DEFAULT_MODEL', () => {
-      renderCard(['ep-1'], undefined, new Set(), ['__different__'], {
+      renderCard([], undefined, new Set(), ['__different__'], {
         hasSavedObject: false,
         globalDefaultId: NO_DEFAULT_MODEL,
       });
@@ -720,7 +721,7 @@ describe('SubFeatureCard', () => {
 
     it('renders the deprecated badge on the global default locked row', () => {
       renderCard(
-        ['ep-1', 'ep-2'],
+        [],
         undefined,
         new Set(),
         ['__different__'],

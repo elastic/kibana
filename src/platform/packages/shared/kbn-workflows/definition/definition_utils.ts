@@ -19,8 +19,26 @@ const ON_FAILURE_STEP_KEYS = ['on-failure', 'iteration-on-failure'] as const;
 
 export type WorkflowStep = WorkflowYaml['steps'][number];
 
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
 const isStepArray = (value: unknown): value is WorkflowYaml['steps'] =>
-  Array.isArray(value) && value.every((entry) => typeof entry === 'object' && entry !== null);
+  Array.isArray(value) && value.every(isObject);
+
+// Drafts being typed can hold anything where a list of objects belongs. Indexes stay those of
+// the original list.
+const forEachObject = (
+  value: unknown,
+  callback: (item: Record<string, unknown>, index: number) => void
+): void => {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => {
+      if (isObject(item)) {
+        callback(item, index);
+      }
+    });
+  }
+};
 
 export interface NestedStepGroup {
   readonly pathSuffix: string;
@@ -48,9 +66,14 @@ const deleteNestedStepKey = (
   }
 };
 
-const stripObjectArraySteps = <T extends Record<string, unknown>>(
-  items: T[]
-): Array<Omit<T, 'steps'>> => items.map(({ steps: _steps, ...rest }) => rest as Omit<T, 'steps'>);
+const stripObjectArraySteps = (items: unknown[]): unknown[] =>
+  items.map((item) => {
+    if (!isObject(item)) {
+      return item;
+    }
+    const { steps: _steps, ...rest } = item;
+    return rest;
+  });
 
 const nestedStepHandlers: ReadonlyArray<NestedStepHandler> = [
   {
@@ -92,7 +115,7 @@ const nestedStepHandlers: ReadonlyArray<NestedStepHandler> = [
       const groups: NestedStepGroup[] = [];
 
       if (isSwitchStep(step)) {
-        step.cases.forEach((switchCase, caseIndex) => {
+        forEachObject(step.cases, (switchCase, caseIndex) => {
           pushStepGroup(groups, `.case[${caseIndex}]`, switchCase.steps);
         });
         pushStepGroup(groups, '.default', step.default);
@@ -104,7 +127,7 @@ const nestedStepHandlers: ReadonlyArray<NestedStepHandler> = [
       if (isSwitchStep(step)) {
         deleteNestedStepKey(stripped, 'default', step.default);
         if (Array.isArray(step.cases)) {
-          stripped.cases = stripObjectArraySteps(step.cases as Array<Record<string, unknown>>);
+          stripped.cases = stripObjectArraySteps(step.cases);
         }
       }
     },
@@ -122,11 +145,9 @@ const nestedStepHandlers: ReadonlyArray<NestedStepHandler> = [
         if (step.foreach !== undefined && Array.isArray(step.steps)) {
           pushStepGroup(groups, '', step.steps);
         }
-        if (Array.isArray(step.branches)) {
-          step.branches.forEach((branch, branchIndex) => {
-            pushStepGroup(groups, `.branch[${branchIndex}]`, branch.steps);
-          });
-        }
+        forEachObject(step.branches, (branch, branchIndex) => {
+          pushStepGroup(groups, `.branch[${branchIndex}]`, branch.steps);
+        });
       }
 
       return groups;
@@ -137,9 +158,7 @@ const nestedStepHandlers: ReadonlyArray<NestedStepHandler> = [
           deleteNestedStepKey(stripped, 'steps', step.steps);
         }
         if (Array.isArray(step.branches)) {
-          stripped.branches = stripObjectArraySteps(
-            step.branches as Array<Record<string, unknown>>
-          );
+          stripped.branches = stripObjectArraySteps(step.branches);
         }
       }
     },
