@@ -126,9 +126,6 @@ export interface RenderDriftIssueOptions {
   readonly buildUrl?: string;
 }
 
-/**
- * The alert at the top of the issue: what the check concluded, which actions need attention and
-
 /** The numbered steps that close every issue, and who to tell about it. */
 const whatToDoSection = (
   drift: ConnectorDrift,

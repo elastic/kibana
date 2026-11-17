@@ -225,5 +225,3 @@ export const statusOf = (
   }
   return passes('passes', changes.length > 0 ? plural(changes.length, 'non-breaking change') : '');
 };
-
-// What the check found, for the Result row; vendor drift needn't come from a failing action.

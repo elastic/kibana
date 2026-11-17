@@ -15,10 +15,10 @@ import type { DriftConclusions } from './drift_conclusions';
 import { ICONS, MOVED_STATUS, OUTCOMES, PASSES, RANKS } from './action_status';
 import { cell, code, link, listed } from './issue_markdown';
 
-// What the check found, for the Result row; vendor drift needn't come from a failing action.
 /** The row that says when the check last ran; it changes every run, so findings skip it. */
 export const LAST_CHECKED_ROW = '| **Last checked** |';
 
+// What the check found, for the Result row; vendor drift needn't come from a failing action.
 const resultOf = (verdict: ConnectorDrift['verdict'], actionsFail: boolean): string => {
   switch (verdict) {
     case 'healthy':
