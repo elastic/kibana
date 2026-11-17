@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { randomBytes } from 'crypto';
 import pMap from 'p-map';
@@ -75,6 +76,9 @@ type ChangeOutcome =
 /** The account a workload was bound to before a change, or why it could not be read. */
 type PreviousBinding = { ok: true; serviceAccountId?: string } | { ok: false; error: Error };
 
+/** What a change that failed with a server error reports in place of the error's message. */
+const SERVER_ERROR_MESSAGE = 'An internal server error occurred';
+
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(getDetailedErrorMessage(error));
 
@@ -84,14 +88,13 @@ const toError = (error: unknown): Error =>
  * and a generic message, since its details can carry what the caller's own client must not see.
  */
 const toChangeError = (error: Error): ServiceAccountWorkloadBindingChangeError => {
-  const boom = Boom.isBoom(error)
-    ? error
-    : new Boom.Boom(error.message, { statusCode: toErrorStatusCode(getErrorStatusCode(error)) });
-  const {
-    statusCode,
-    payload: { message },
-  } = boom.output;
-  return { statusCode, message };
+  const { statusCode, payload } = (
+    Boom.isBoom(error)
+      ? error
+      : new Boom.Boom(error.message, { statusCode: toErrorStatusCode(getErrorStatusCode(error)) })
+  ).output;
+  // Boom hides the message of a 500 only, and keeps that of a 502, 503 or 504 in its payload.
+  return { statusCode, message: statusCode >= 500 ? SERVER_ERROR_MESSAGE : payload.message };
 };
 
 /** The account a change replaced or removed, when it is known, for the change's outcome. */
@@ -669,7 +672,12 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     [first, ...rest]: readonly ServiceAccountWorkloadBindingChange[],
     error: Error
   ): void {
-    const detail = getDetailedErrorMessage(error);
+    // A Boom error's payload hides a 500's message, so its own message is logged instead. An
+    // Elasticsearch error keeps its response body, which says more, even once it is a Boom error.
+    const detail =
+      Boom.isBoom(error) && !(error instanceof errors.ResponseError)
+        ? error.message
+        : getDetailedErrorMessage(error);
     const workload = `[${first.workloadType}/${first.workloadId}]`;
     this.logger.error(
       rest.length === 0

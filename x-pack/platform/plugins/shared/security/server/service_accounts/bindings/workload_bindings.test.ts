@@ -916,6 +916,55 @@ describe('ServiceAccountWorkloadBindings', () => {
       );
     });
 
+    it.each([
+      [
+        'a binding the store could not write',
+        () =>
+          store.bulkSet.mockResolvedValue([
+            { ok: false, error: Boom.serverUnavailable('shard [.kibana_1][0] is relocating') },
+          ]),
+      ],
+      [
+        'a write that failed as a whole',
+        () =>
+          store.bulkSet.mockRejectedValue(
+            Object.assign(new Error('shard [.kibana_1][0] is relocating'), { statusCode: 503 })
+          ),
+      ],
+    ])(
+      'reports %s with status 503 with a generic message, as for any server error',
+      async (_kind, fail) => {
+        fail();
+
+        const [result] = await update([bindChange()]);
+
+        // Boom itself only hides the message of a 500.
+        expect(result).toMatchObject({
+          ok: false,
+          error: { statusCode: 503, message: 'An internal server error occurred' },
+        });
+        expect(logger.error).toHaveBeenCalledWith(
+          'Failed to bind workload [rule/rule-id] of plugin [alerting]: shard [.kibana_1][0] is relocating'
+        );
+      }
+    );
+
+    it('logs the message of a Boom server error that its payload hides', async () => {
+      store.bulkDelete.mockResolvedValue([
+        { ok: false, error: Boom.internal('version conflict on [binding-id]') },
+      ]);
+
+      const [result] = await update([unbindChange()]);
+
+      expect(result).toMatchObject({
+        ok: false,
+        error: { statusCode: 500, message: 'An internal server error occurred' },
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to unbind workload [rule/other-rule-id] of plugin [alerting]: version conflict on [binding-id]'
+      );
+    });
+
     it('reports an unbind that matched no binding', async () => {
       store.getVerified.mockResolvedValue(null);
       store.bulkDelete.mockResolvedValue([{ ok: true, value: false }]);
