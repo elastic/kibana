@@ -56,8 +56,6 @@ export const useManagedOnboarding = (cloud: CloudSetupForCloudConnector | undefi
   return {
     isEnabled,
     isConfigured,
-    /** Read-write role stored: Kibana may create/update the stack. Otherwise discovery only. */
-    isFullyManaged: isConfigured && credentials.mode === 'fully-managed',
     credentials,
     isLoading: isEnabled && isLoading,
     refetch,

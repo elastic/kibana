@@ -35,13 +35,10 @@ import {
 } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
 import type {
-  CreateAwsOnboardingStackRequestSchema,
   DeleteAwsOnboardingCredentialsRequestSchema,
   GetAwsOnboardingBootstrapLaunchRequestSchema,
   GetAwsOnboardingBootstrapTemplateRequestSchema,
-  GetAwsOnboardingStackRequestSchema,
   PutAwsOnboardingCredentialsRequestSchema,
-  UpdateAwsOnboardingStackRequestSchema,
 } from '../../types/rest_spec/aws_onboarding';
 
 const BOOTSTRAP_STACK_NAME = 'elastic-bootstrap-onboarding';
@@ -122,55 +119,6 @@ export const deleteCredentialsHandler: FleetRequestHandler<
   }
 };
 
-export const createStackHandler: FleetRequestHandler<
-  undefined,
-  undefined,
-  TypeOf<typeof CreateAwsOnboardingStackRequestSchema.body>
-> = async (context, request, response) => {
-  if (!(await isAwsManagedOnboardingEnabled())) return notEnabled(response);
-  try {
-    const { internalSoClient } = await context.fleet;
-    const result = await awsOnboardingStackService.create({
-      soClient: internalSoClient,
-      ...request.body,
-    });
-    return response.ok({ body: result });
-  } catch (error) {
-    return mapError(error, response);
-  }
-};
-
-export const getStackHandler: FleetRequestHandler<
-  TypeOf<typeof GetAwsOnboardingStackRequestSchema.params>
-> = async (context, request, response) => {
-  if (!(await isAwsManagedOnboardingEnabled())) return notEnabled(response);
-  try {
-    const result = await awsOnboardingStackService.status(request.params.stackId);
-    return response.ok({ body: result });
-  } catch (error) {
-    return mapError(error, response);
-  }
-};
-
-export const updateStackHandler: FleetRequestHandler<
-  TypeOf<typeof UpdateAwsOnboardingStackRequestSchema.params>,
-  undefined,
-  TypeOf<typeof UpdateAwsOnboardingStackRequestSchema.body>
-> = async (context, request, response) => {
-  if (!(await isAwsManagedOnboardingEnabled())) return notEnabled(response);
-  try {
-    const { internalSoClient } = await context.fleet;
-    const result = await awsOnboardingStackService.update({
-      soClient: internalSoClient,
-      cloudConnectorId: request.params.cloudConnectorId,
-      ...request.body,
-    });
-    return response.ok({ body: result });
-  } catch (error) {
-    return mapError(error, response);
-  }
-};
-
 export const getBootstrapTemplateHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAwsOnboardingBootstrapTemplateRequestSchema.query>
@@ -229,15 +177,6 @@ export const getBootstrapLaunchHandler: FleetRequestHandler<
       }`
     );
     if (canFallBackToTemplate(error)) return response.ok({ body: { kind: 'download' } });
-    return mapError(error, response);
-  }
-};
-
-export const getDiscoveryHandler: FleetRequestHandler = async (context, request, response) => {
-  if (!(await isAwsManagedOnboardingEnabled())) return notEnabled(response);
-  try {
-    return response.ok({ body: await awsOnboardingDiscoveryService.discover() });
-  } catch (error) {
     return mapError(error, response);
   }
 };

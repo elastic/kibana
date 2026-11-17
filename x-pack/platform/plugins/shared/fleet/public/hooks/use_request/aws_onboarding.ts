@@ -9,15 +9,7 @@ import type {
   AwsOnboardingCredentialsPublic,
   GetAwsOnboardingBootstrapLaunchResponse,
   GetAwsOnboardingBootstrapTemplateResponse,
-  CreateAwsOnboardingStackRequest,
-  CreateAwsOnboardingStackResponse,
-  GetAwsOnboardingStackResponse,
   PutAwsOnboardingCredentialsRequest,
-  UpdateAwsOnboardingStackRequest,
-  UpdateAwsOnboardingStackResponse,
-  DeleteAwsOnboardingCredentialsRequestQuery,
-  DeleteAwsOnboardingCredentialsResponse,
-  AwsOnboardingDiscoveryResponse,
   AwsOnboardingVerifyResponse,
   AwsOnboardingManagementMode,
 } from '../../../common/types/rest_spec/aws_onboarding';
@@ -43,52 +35,6 @@ export function sendPutAwsOnboardingCredentials(body: PutAwsOnboardingCredential
   });
 }
 
-export function sendDeleteAwsOnboardingCredentials(
-  query: DeleteAwsOnboardingCredentialsRequestQuery = {}
-) {
-  return sendRequest<DeleteAwsOnboardingCredentialsResponse>({
-    method: 'delete',
-    path: AWS_ONBOARDING_API_ROUTES.CREDENTIALS_PATTERN,
-    version: API_VERSIONS.internal.v1,
-    query: { force: query.force ?? false },
-  });
-}
-
-export function sendCreateAwsOnboardingStack(body: CreateAwsOnboardingStackRequest) {
-  return sendRequest<CreateAwsOnboardingStackResponse>({
-    method: 'post',
-    path: AWS_ONBOARDING_API_ROUTES.STACKS_PATTERN,
-    version: API_VERSIONS.internal.v1,
-    body,
-  });
-}
-
-export function sendGetAwsOnboardingStack(stackId: string) {
-  return sendRequest<GetAwsOnboardingStackResponse>({
-    method: 'get',
-    path: AWS_ONBOARDING_API_ROUTES.STACK_INFO_PATTERN.replace(
-      '{stackId}',
-      encodeURIComponent(stackId)
-    ),
-    version: API_VERSIONS.internal.v1,
-  });
-}
-
-export function sendUpdateAwsOnboardingStack(
-  cloudConnectorId: string,
-  body: UpdateAwsOnboardingStackRequest
-) {
-  return sendRequest<UpdateAwsOnboardingStackResponse>({
-    method: 'post',
-    path: AWS_ONBOARDING_API_ROUTES.STACK_UPDATE_PATTERN.replace(
-      '{cloudConnectorId}',
-      cloudConnectorId
-    ),
-    version: API_VERSIONS.internal.v1,
-    body,
-  });
-}
-
 export function sendGetAwsOnboardingBootstrapLaunch(
   mode: AwsOnboardingManagementMode,
   region?: string
@@ -107,14 +53,6 @@ export function sendGetAwsOnboardingBootstrapTemplate(mode: AwsOnboardingManagem
     path: AWS_ONBOARDING_API_ROUTES.BOOTSTRAP_TEMPLATE_PATTERN,
     version: API_VERSIONS.internal.v1,
     query: { mode },
-  });
-}
-
-export function sendGetAwsOnboardingDiscovery() {
-  return sendRequest<AwsOnboardingDiscoveryResponse>({
-    method: 'get',
-    path: AWS_ONBOARDING_API_ROUTES.DISCOVERY_PATTERN,
-    version: API_VERSIONS.internal.v1,
   });
 }
 

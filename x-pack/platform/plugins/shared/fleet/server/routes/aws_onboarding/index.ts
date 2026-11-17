@@ -9,26 +9,19 @@ import { API_VERSIONS, AWS_ONBOARDING_API_ROUTES } from '../../../common/constan
 import type { FleetAuthzRouter } from '../../services/security';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import {
-  CreateAwsOnboardingStackRequestSchema,
   DeleteAwsOnboardingCredentialsRequestSchema,
   GetAwsOnboardingBootstrapLaunchRequestSchema,
   GetAwsOnboardingBootstrapTemplateRequestSchema,
-  GetAwsOnboardingStackRequestSchema,
   PutAwsOnboardingCredentialsRequestSchema,
-  UpdateAwsOnboardingStackRequestSchema,
 } from '../../types/rest_spec/aws_onboarding';
 
 import {
-  createStackHandler,
   deleteCredentialsHandler,
   getBootstrapLaunchHandler,
   getBootstrapTemplateHandler,
   getCredentialsHandler,
-  getDiscoveryHandler,
-  getStackHandler,
   getVerifyHandler,
   putCredentialsHandler,
-  updateStackHandler,
 } from './handlers';
 
 const READ_SECURITY = {
@@ -128,60 +121,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       deleteCredentialsHandler
     );
-
-  router.versioned
-    .post({
-      path: AWS_ONBOARDING_API_ROUTES.STACKS_PATTERN,
-      summary: 'Create a Federated Identity CloudFormation stack',
-      access: 'internal',
-      security: WRITE_SECURITY,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.internal.v1,
-        validate: { request: CreateAwsOnboardingStackRequestSchema },
-      },
-      createStackHandler
-    );
-
-  router.versioned
-    .get({
-      path: AWS_ONBOARDING_API_ROUTES.STACK_INFO_PATTERN,
-      summary: 'Get a managed CloudFormation stack status',
-      access: 'internal',
-      security: READ_SECURITY,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.internal.v1,
-        validate: { request: GetAwsOnboardingStackRequestSchema },
-      },
-      getStackHandler
-    );
-
-  router.versioned
-    .post({
-      path: AWS_ONBOARDING_API_ROUTES.STACK_UPDATE_PATTERN,
-      summary: 'Update the CloudFormation stack of a cloud connector',
-      access: 'internal',
-      security: WRITE_SECURITY,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.internal.v1,
-        validate: { request: UpdateAwsOnboardingStackRequestSchema },
-      },
-      updateStackHandler
-    );
-
-  router.versioned
-    .get({
-      path: AWS_ONBOARDING_API_ROUTES.DISCOVERY_PATTERN,
-      summary: 'Discover AWS services in the customer account (read-only role)',
-      access: 'internal',
-      security: READ_SECURITY,
-    })
-    .addVersion({ version: API_VERSIONS.internal.v1, validate: false }, getDiscoveryHandler);
 
   router.versioned
     .get({

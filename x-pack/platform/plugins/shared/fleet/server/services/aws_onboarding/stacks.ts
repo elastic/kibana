@@ -19,11 +19,9 @@ import type {
   AwsOnboardingTemplateInfo,
   CreateAwsOnboardingStackResponse,
   GetAwsOnboardingStackResponse,
-  UpdateAwsOnboardingStackResponse,
 } from '../../../common/types/rest_spec/aws_onboarding';
 import { FleetError, FleetNotFoundError } from '../../errors';
 import { appContextService } from '../app_context';
-import { cloudConnectorService } from '../cloud_connector';
 import { iacProvisionerService } from '../iac_provisioner';
 import { buildIacProvisionerIntegrations, isBuildError } from '../iac_provisioner_integrations';
 import { isIacProvisionerEnabled } from '../utils/iac_provisioner';
@@ -84,15 +82,13 @@ export class AwsOnboardingStackService {
 
   /**
    * IaCP render when the provisioner is enabled (the pre-signed artifact URL stays server-side);
-   * otherwise the caller's static template URL. `up_to_date` is returned when IaCP reports the
-   * stored digest still matches (only possible when `templateSha` was sent).
+   * otherwise the caller's static template URL.
    */
   private async resolveTemplate(args: {
     soClient: SavedObjectsClientContract;
     integrations: RenderIacTemplateIntegration[];
     templateUrl?: string;
-    templateSha?: string;
-  }): Promise<ResolvedTemplate | 'up_to_date'> {
+  }): Promise<ResolvedTemplate> {
     if (await isIacProvisionerEnabled()) {
       // Same resolution as the render route: attaches each package's installed version.
       const built = await buildIacProvisionerIntegrations({
@@ -107,11 +103,7 @@ export class AwsOnboardingStackService {
           provider: AWS_CLOUD_PROVIDER,
           workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
           integrations: built.integrations,
-          ...(args.templateSha ? { templateSha: args.templateSha } : {}),
         });
-        if (rendered.render === false) {
-          return 'up_to_date';
-        }
         if (!rendered.artifactUrl) {
           throw new FleetError('IaC Provisioner rendered a template without an artifact URL');
         }
@@ -146,15 +138,11 @@ export class AwsOnboardingStackService {
   private async declaredParameters(
     client: AwsCloudFormationClient,
     templateUrl: string,
-    values: Record<string, string>,
-    usePreviousForMissing: boolean
+    values: Record<string, string>
   ): Promise<Parameter[]> {
     const declared = await client.getDeclaredParameterKeys(templateUrl);
     return declared.flatMap((key): Parameter[] => {
-      if (values[key] !== undefined) {
-        return [{ ParameterKey: key, ParameterValue: values[key] }];
-      }
-      return usePreviousForMissing ? [{ ParameterKey: key, UsePreviousValue: true }] : [];
+      return values[key] !== undefined ? [{ ParameterKey: key, ParameterValue: values[key] }] : [];
     });
   }
 
@@ -167,16 +155,8 @@ export class AwsOnboardingStackService {
     const logger = appContextService.getLogger().get('AwsOnboardingStackService');
     const { client, stackNamePrefix } = await this.getClient('create');
     const resolved = await this.resolveTemplate(args);
-    if (resolved === 'up_to_date') {
-      throw new FleetError('Unexpected render result for a new stack');
-    }
     const stackName = `${stackNamePrefix}-${randomBytes(4).toString('hex')}`;
-    const parameters = await this.declaredParameters(
-      client,
-      resolved.templateUrl,
-      args.parameters,
-      false
-    );
+    const parameters = await this.declaredParameters(client, resolved.templateUrl, args.parameters);
     logger.info(
       `Creating CloudFormation stack ${stackName} (template source: ${
         resolved.info.source
@@ -188,51 +168,6 @@ export class AwsOnboardingStackService {
       parameters,
     });
     return { stackId, stackName, template: resolved.info };
-  }
-
-  public async update(args: {
-    soClient: SavedObjectsClientContract;
-    cloudConnectorId: string;
-    integrations: RenderIacTemplateIntegration[];
-    templateUrl?: string;
-    parameters?: Record<string, string>;
-  }): Promise<UpdateAwsOnboardingStackResponse> {
-    const logger = appContextService.getLogger().get('AwsOnboardingStackService');
-    const connector = await cloudConnectorService.getById(args.soClient, args.cloudConnectorId);
-    const stackArn = connector.iac_deployment_id;
-    if (!stackArn) {
-      throw new FleetNotFoundError(
-        `Cloud connector ${args.cloudConnectorId} has no recorded CloudFormation stack ARN (iac_deployment_id)`
-      );
-    }
-    const { client } = await this.getClient('update');
-    const resolved = await this.resolveTemplate({
-      soClient: args.soClient,
-      integrations: args.integrations,
-      templateUrl: args.templateUrl,
-      templateSha: connector.iac_key ?? undefined,
-    });
-    if (resolved === 'up_to_date') {
-      return { status: 'up_to_date' };
-    }
-    const parameters = await this.declaredParameters(
-      client,
-      resolved.templateUrl,
-      args.parameters ?? {},
-      true
-    );
-    logger.info(
-      `Updating CloudFormation stack ${stackArn} (template source: ${resolved.info.source})`
-    );
-    const stackId = await client.updateStack({
-      stackArn,
-      templateUrl: resolved.templateUrl,
-      parameters,
-    });
-    if (!stackId) {
-      return { status: 'up_to_date' };
-    }
-    return { status: 'updating', stackId, template: resolved.info };
   }
 
   /**

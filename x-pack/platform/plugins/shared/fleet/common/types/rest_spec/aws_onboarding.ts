@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RenderIacTemplateIntegration, RenderedIacBlueprint } from './iac_provisioner';
+import type { RenderedIacBlueprint } from './iac_provisioner';
 
 /**
  * POC: Kibana-managed AWS onboarding.
@@ -95,29 +95,11 @@ export interface AwsOnboardingTemplateInfo {
   blueprint?: RenderedIacBlueprint;
 }
 
-export interface CreateAwsOnboardingStackRequest {
-  integrations: RenderIacTemplateIntegration[];
-  /** Raw CloudFormation template URL (the `templateURL` of the package's quick-create link). Used when IaCP is off. */
-  templateUrl?: string;
-  /** Stack parameters Kibana knows (ElasticOrganizationId, ElasticCloudRegion, …); undeclared ones are dropped server-side. */
-  parameters: Record<string, string>;
-}
-
 export interface CreateAwsOnboardingStackResponse {
   stackId: string;
   stackName: string;
   template: AwsOnboardingTemplateInfo;
 }
-
-export interface UpdateAwsOnboardingStackRequest {
-  integrations: RenderIacTemplateIntegration[];
-  templateUrl?: string;
-  parameters?: Record<string, string>;
-}
-
-export type UpdateAwsOnboardingStackResponse =
-  | { status: 'up_to_date' }
-  | { status: 'updating'; stackId: string; template: AwsOnboardingTemplateInfo };
 
 export type AwsOnboardingStackStatus = 'in_progress' | 'complete' | 'failed' | 'not_found';
 
