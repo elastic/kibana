@@ -13,7 +13,7 @@ import {
   DETECTION_STATE_SO_TYPE,
   type GeneratorStateAttributes,
   type RunLeaseAttributes,
-} from '../../saved_objects/detection_state_saved_object';
+} from './detection_state_saved_object';
 
 /**
  * Meant to be longer than a run. The lease is never renewed, so the runner must finish within a
