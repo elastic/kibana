@@ -12,19 +12,28 @@ import {
   EuiFormRow,
   EuiLink,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import { WorkflowSelectorEmptyState } from '@kbn/workflows-ui';
 import React, { useEffect, useState } from 'react';
 import type { UseControllerProps } from 'react-hook-form';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useFetchWorkflows } from '../../../../hooks/use_fetch_workflows';
+import { useFetchWorkflowsByIds } from '../../../../hooks/use_fetch_workflows_by_ids';
 import { DestinationCardList } from '../../destination_card/destination_card_list';
 import type { ActionPolicyFormState } from '../types';
+import type { WorkflowOptionValue } from './workflow_option';
+import {
+  renderWorkflowOption,
+  toWorkflowComboOption,
+  WORKFLOW_OPTION_ROW_HEIGHT,
+} from './workflow_option';
 
 interface SelectedWorkflow {
   id: string;
@@ -54,11 +63,23 @@ export const WorkflowSelector = () => {
   const {
     data: workflowsData,
     isLoading,
+    isError,
     refetch,
   } = useFetchWorkflows({
     query: debouncedQuery,
     isEnabled: isWorkflowsEnabled,
   });
+
+  const selectedWorkflowDetails = useFetchWorkflowsByIds(
+    destinations.map(({ id }) => id),
+    isWorkflowsEnabled
+  );
+  const disabledWorkflowNames = selectedWorkflowDetails
+    .filter(({ enabled }) => !enabled)
+    .map(({ name }) => name);
+  const selectedWorkflowNamesById = new Map(
+    selectedWorkflowDetails.map(({ id, name }) => [id, name])
+  );
 
   useEffect(() => {
     if (selectedWorkflows.length > 0 || destinations.length === 0 || !workflowsData) {
@@ -71,10 +92,27 @@ export const WorkflowSelector = () => {
     );
   }, [destinations, workflowsData, selectedWorkflows.length]);
 
-  const workflowOptions = (workflowsData?.results ?? []).map((w) => ({
-    label: w.name,
-    value: w.id,
-  }));
+  const workflowOptions = (workflowsData?.results ?? []).map(toWorkflowComboOption);
+  const showEmptyState =
+    !isLoading &&
+    !isError &&
+    debouncedQuery === '' &&
+    searchQuery === '' &&
+    workflowsData?.total === 0 &&
+    destinations.length === 0;
+
+  // The empty state replaces the combo box (and its onFocus refetch), so refetch on window focus
+  // to pick up a workflow created in the other tab.
+  useEffect(() => {
+    if (!showEmptyState) {
+      return;
+    }
+    const handleFocus = () => {
+      refetch();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [showEmptyState, refetch]);
 
   if (!isWorkflowsEnabled) {
     const settingsUrl = application.getUrlForApp('management', {
@@ -136,6 +174,23 @@ export const WorkflowSelector = () => {
             fullWidth
             isInvalid={!!error}
             error={error?.message}
+            helpText={
+              disabledWorkflowNames.length > 0 ? (
+                <EuiText size="xs" color="warning" data-test-subj="disabledDestinationsWarning">
+                  {i18n.translate(
+                    'xpack.alertingV2.actionPolicy.form.destination.disabledWorkflows',
+                    {
+                      defaultMessage:
+                        '{count, plural, one {Workflow {names} is disabled and will be skipped when dispatching.} other {Workflows {names} are disabled and will be skipped when dispatching.}}',
+                      values: {
+                        count: disabledWorkflowNames.length,
+                        names: disabledWorkflowNames.join(', '),
+                      },
+                    }
+                  )}
+                </EuiText>
+              ) : undefined
+            }
             labelAppend={
               <EuiLink
                 href={createWorkflowUrl}
@@ -149,29 +204,49 @@ export const WorkflowSelector = () => {
               </EuiLink>
             }
           >
-            <EuiComboBox
-              fullWidth
-              async
-              isLoading={isLoading}
-              isInvalid={!!error}
-              data-test-subj="destinationsInput"
-              placeholder={i18n.translate(
-                'xpack.alertingV2.actionPolicy.form.destination.placeholder',
-                { defaultMessage: 'Search and select workflows' }
-              )}
-              selectedOptions={selectedWorkflows.map((w) => ({ label: w.name, value: w.id }))}
-              onFocus={() => refetch()}
-              onSearchChange={setSearchQuery}
-              onChange={(options) => {
-                setSelectedWorkflows(
-                  options.map((o) => ({ id: o.value as string, name: o.label }))
-                );
-                field.onChange(
-                  options.map((o) => ({ type: 'workflow' as const, id: o.value as string }))
-                );
-              }}
-              options={workflowOptions}
-            />
+            {showEmptyState ? (
+              <div data-test-subj="workflowsEmptyState">
+                <WorkflowSelectorEmptyState createWorkflowHref={createWorkflowUrl} />
+              </div>
+            ) : (
+              <EuiComboBox<WorkflowOptionValue>
+                fullWidth
+                async
+                isLoading={isLoading}
+                isInvalid={!!error}
+                data-test-subj="destinationsInput"
+                placeholder={i18n.translate(
+                  'xpack.alertingV2.actionPolicy.form.destination.placeholder',
+                  { defaultMessage: 'Search and select workflows' }
+                )}
+                selectedOptions={selectedWorkflows.map(({ id, name }) => ({
+                  key: id,
+                  // Prefer the fetched name: the search results may not include every selected workflow.
+                  label: selectedWorkflowNamesById.get(id) ?? name,
+                  value: { id },
+                }))}
+                onFocus={() => refetch()}
+                onSearchChange={setSearchQuery}
+                onChange={(options) => {
+                  // Dedupe by id: a selected option whose label drifted from the search results
+                  // is not hidden from the list, so it can be picked a second time.
+                  const nextWorkflows = [
+                    ...new Map(
+                      options.flatMap(({ value, label }) =>
+                        value ? [[value.id, { id: value.id, name: label }] as const] : []
+                      )
+                    ).values(),
+                  ];
+                  setSelectedWorkflows(nextWorkflows);
+                  field.onChange(
+                    nextWorkflows.map(({ id }) => ({ type: 'workflow' as const, id }))
+                  );
+                }}
+                options={workflowOptions}
+                renderOption={renderWorkflowOption}
+                rowHeight={WORKFLOW_OPTION_ROW_HEIGHT}
+              />
+            )}
           </EuiFormRow>
         )}
       />

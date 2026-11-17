@@ -310,7 +310,7 @@ describe('parseListSessionsResponse', () => {
     const response = searchResponse({
       hits: {
         total: { value: 120, relation: 'eq' },
-        hits: [{ _index: 'digital-experience-sessions-1', _source: sessionDoc }],
+        hits: [{ _index: 'digital-experience-sessions-browser-1', _source: sessionDoc }],
       },
       aggregations: {
         browsers: { values: { buckets: [{ key: 'Chrome', doc_count: 80 }] } },

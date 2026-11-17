@@ -63,6 +63,7 @@ describe('createCustomContentTemplateResolver — system prompt selection', () =
     for (const [{ system }] of mockChatComplete.mock.calls) {
       expect(system).toContain('FRAME FILL');
       expect(system).toContain('flex: 1');
+      expect(system).toContain('clamp()');
     }
   });
 

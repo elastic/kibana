@@ -113,12 +113,10 @@ export function NightshiftOnboarding({
   automationsHref,
   onFinish,
   introBannerDismissal,
-  onIntroBannerVisibilityChange,
 }: {
   latestInvestigation?: InvestigationSummary;
   automationsHref?: string;
   introBannerDismissal?: IntroBannerDismissal;
-  onIntroBannerVisibilityChange?: (visible: boolean | undefined) => void;
   /** "Skip this step" / Done on the last step. */
   onFinish: () => void;
 }): React.ReactElement {
@@ -171,11 +169,6 @@ export function NightshiftOnboarding({
 
   const isIntroStep = step === 'enable' || step === 'addData' || step === 'connectSources';
   const introBannerVisible = isIntroStep && !introBannerDismissal?.isDismissed;
-  const isBannerVisibilityLoading = isInitialLoading || serviceAccount.isLoading;
-  useEffect(() => {
-    onIntroBannerVisibilityChange?.(isBannerVisibilityLoading ? undefined : introBannerVisible);
-    return () => onIntroBannerVisibilityChange?.(undefined);
-  }, [introBannerVisible, isBannerVisibilityLoading, onIntroBannerVisibilityChange]);
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),

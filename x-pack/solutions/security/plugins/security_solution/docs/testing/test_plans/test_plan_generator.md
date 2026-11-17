@@ -6,13 +6,15 @@ This guide walks you through setting up an AI agent in Cursor that automatically
 
 ## How It Works
 
-1. A GitHub issue is labeled **`needs Test Plan`** — this is a team convention to identify which issues need a test plan. The agent works on any issue regardless of labels.
+1. A GitHub issue is labeled **`Needs Test Plan`** — this is a team convention to identify which issues need a test plan. The agent works on any issue regardless of labels.
 2. You open Cursor and type: `/test-plan-generator generate test plan for issue #1234`
 3. The agent reads the issue, navigates the parent epic (if any), explores all sub-issues, fetches linked Figma designs and images, and generates a structured test plan
 4. The test plan is saved locally as a draft at `.agents/tmp/test-plan-#<issue_number>.md` for you to review and edit
 5. When you're happy with it, you run: `/test-plan-generator publish test plan for issue #1234`
 6. The agent posts the plan as a comment on the GitHub issue — using the `gh` CLI as the primary method, or the GitHub MCP as fallback if `gh` is not available
 7. If the issue changes later, run `/test-plan-generator update test plan for issue #1234` — the agent detects only what changed and updates the draft incrementally, without rewriting everything from scratch
+
+**Related:** to decide whether an issue needs a test plan and at which level of its hierarchy, use the separate `/test-plan-triage` skill. It adds the `Needs Test Plan` label only after you confirm, and when no test plan is needed it leaves a short comment on the issue saying so.
 
 ---
 
