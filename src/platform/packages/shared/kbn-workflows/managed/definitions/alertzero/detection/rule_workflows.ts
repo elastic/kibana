@@ -8,11 +8,11 @@
  */
 
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
 } from '../constants';
-import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 
 export const ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID = 'system-security-coverage-review';
 export const ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID = 'system-security-coverage-worker';
