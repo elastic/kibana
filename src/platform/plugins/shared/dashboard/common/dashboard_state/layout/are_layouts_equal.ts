@@ -9,7 +9,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { xor } from 'lodash';
-import type { DashboardLayout } from './types';
+import type { DashboardLayout } from './layout_types';
 
 /**
  * Checks whether the layouts have the same keys, and if they do, checks whether every layout item in the
