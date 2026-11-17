@@ -30,6 +30,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { get } from 'lodash';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
@@ -637,7 +638,7 @@ export const CompareExperimentsPage: React.FC = () => {
     direction: Direction;
   } | null>(null);
 
-  const [sortField, setSortField] = useState<keyof ComparisonResult>('datasetName');
+  const [sortField, setSortField] = useState('datasetName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const handleRowClick = useCallback((result: ComparisonResult) => {
@@ -665,8 +666,8 @@ export const CompareExperimentsPage: React.FC = () => {
     const dir = sortDirection === 'asc' ? 1 : -1;
 
     results.sort((a, b) => {
-      const valA = a[sortField];
-      const valB = b[sortField];
+      const valA = get(a, sortField);
+      const valB = get(b, sortField);
 
       if (valA == null && valB == null) return 0;
       if (valA == null) return 1;
@@ -707,7 +708,7 @@ export const CompareExperimentsPage: React.FC = () => {
       'Outcome',
     ];
     const rows = sortedResults.map((r) => {
-      const diff = computeCompareDiff(r.meanTarget, r.meanBaseline);
+      const diff = computeCompareDiff(r.target.mean, r.baseline.mean);
       const significant =
         r.pValue !== null && Number.isFinite(r.pValue) && r.pValue < SIGNIFICANCE_THRESHOLD;
       let outcome = '';
@@ -718,8 +719,8 @@ export const CompareExperimentsPage: React.FC = () => {
         `"${r.datasetName.replace(/"/g, '""')}"`,
         `"${r.evaluatorName.replace(/"/g, '""')}"`,
         r.sampleSize,
-        r.meanBaseline.toFixed(4),
-        r.meanTarget.toFixed(4),
+        r.baseline.mean.toFixed(4),
+        r.target.mean.toFixed(4),
         diff.toFixed(4),
         r.direction,
         r.metricType,
@@ -781,14 +782,14 @@ export const CompareExperimentsPage: React.FC = () => {
         align: 'right' as const,
       },
       {
-        field: 'meanBaseline',
+        field: 'baseline.mean',
         name: i18n.COLUMN_MEAN_BASELINE,
         sortable: true,
         render: (val: number) => formatScore(val),
         align: 'right' as const,
       },
       {
-        field: 'meanTarget',
+        field: 'target.mean',
         name: i18n.COLUMN_MEAN_TARGET,
         sortable: true,
         render: (val: number) => formatScore(val),
@@ -798,7 +799,7 @@ export const CompareExperimentsPage: React.FC = () => {
         name: i18n.COLUMN_DIFF,
         render: (item: ComparisonResult) => (
           <DiffValue
-            diff={computeCompareDiff(item.meanTarget, item.meanBaseline)}
+            diff={computeCompareDiff(item.target.mean, item.baseline.mean)}
             direction={item.direction}
             discordantPairs={item.hypothesisTest.discordantPairs}
           />
@@ -823,7 +824,7 @@ export const CompareExperimentsPage: React.FC = () => {
         render: (item: ComparisonResult) => (
           <SignificanceBadge
             pValue={item.pValue}
-            diff={computeCompareDiff(item.meanTarget, item.meanBaseline)}
+            diff={computeCompareDiff(item.target.mean, item.baseline.mean)}
             direction={item.direction}
           />
         ),
@@ -1010,11 +1011,11 @@ export const CompareExperimentsPage: React.FC = () => {
               items={sortedResults}
               columns={columns}
               sorting={{
-                sort: { field: sortField, direction: sortDirection },
+                sort: { field: sortField as keyof ComparisonResult, direction: sortDirection },
               }}
               onChange={({ sort }) => {
                 if (sort) {
-                  setSortField(sort.field as keyof ComparisonResult);
+                  setSortField(sort.field);
                   setSortDirection(sort.direction);
                 }
               }}

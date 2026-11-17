@@ -9,23 +9,24 @@ import type { ComparisonResult } from '@kbn/evals-common';
 import { PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
 import { formatMarkdownCompareReport } from './compare_markdown_report';
 
+const side = (mean: number, stability: number | null = 0) => ({
+  mean,
+  used: 10,
+  missing: 0,
+  stability,
+});
+
 const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
   datasetName: 'Dataset One',
   evaluatorName: 'Criteria',
   sampleSize: 10,
-  meanTarget: 0.8,
-  meanBaseline: 0.7,
+  target: side(0.8),
+  baseline: side(0.7),
   pValue: 0.03,
   direction: 'maximize',
   metricType: 'continuous_bounded',
   hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 5 },
-  usedTarget: 10,
-  usedBaseline: 10,
-  missingTarget: 0,
-  missingBaseline: 0,
-  stabilityTarget: 0,
-  stabilityBaseline: 0,
   repetitionWarning: false,
   ...overrides,
 });
@@ -182,8 +183,8 @@ describe('formatMarkdownCompareReport', () => {
       });
     const even = makeResult({
       evaluatorName: 'Even',
-      stabilityTarget: 0.06,
-      stabilityBaseline: 0.03,
+      target: side(0.8, 0.06),
+      baseline: side(0.7, 0.03),
     });
 
     const lines = report([
@@ -198,8 +199,8 @@ describe('formatMarkdownCompareReport', () => {
     );
     expect(lines.find((line) => line.includes('| Uneven |'))).toContain('| Uneven | 10* |');
 
-    const unmeasured = { stabilityTarget: null, stabilityBaseline: null };
-    const oneSide = makeResult({ evaluatorName: 'One side', stabilityBaseline: null });
+    const unmeasured = { target: side(0.8, null), baseline: side(0.7, null) };
+    const oneSide = makeResult({ evaluatorName: 'One side', baseline: side(0.7, null) });
     expect(
       report([oneSide, makeResult(unmeasured)])
         .split('\n')
@@ -289,9 +290,7 @@ describe('formatMarkdownCompareReport', () => {
       const output = formatMarkdownCompareReport({
         targetExperimentId: 'exp-a',
         baselineExperimentId: 'exp-b',
-        results: [
-          makeResult({ meanTarget: 0.8, meanBaseline: 0.7, pValue: 0.03, direction: 'maximize' }),
-        ],
+        results: [makeResult({ pValue: 0.03, direction: 'maximize' })],
       });
       const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
       expect(dataRow).toContain('Improvement');
@@ -302,7 +301,12 @@ describe('formatMarkdownCompareReport', () => {
         targetExperimentId: 'exp-a',
         baselineExperimentId: 'exp-b',
         results: [
-          makeResult({ meanTarget: 0.6, meanBaseline: 0.8, pValue: 0.03, direction: 'maximize' }),
+          makeResult({
+            target: side(0.6),
+            baseline: side(0.8),
+            pValue: 0.03,
+            direction: 'maximize',
+          }),
         ],
       });
       const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
@@ -314,7 +318,12 @@ describe('formatMarkdownCompareReport', () => {
         targetExperimentId: 'exp-a',
         baselineExperimentId: 'exp-b',
         results: [
-          makeResult({ meanTarget: 100, meanBaseline: 150, pValue: 0.03, direction: 'minimize' }),
+          makeResult({
+            target: side(100),
+            baseline: side(150),
+            pValue: 0.03,
+            direction: 'minimize',
+          }),
         ],
       });
       const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
@@ -336,9 +345,7 @@ describe('formatMarkdownCompareReport', () => {
       const output = formatMarkdownCompareReport({
         targetExperimentId: 'exp-a',
         baselineExperimentId: 'exp-b',
-        results: [
-          makeResult({ meanTarget: 0.8, meanBaseline: 0.7, pValue: 0.5, direction: 'maximize' }),
-        ],
+        results: [makeResult({ pValue: 0.5, direction: 'maximize' })],
       });
       const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
       expect(dataRow).not.toContain('Improvement');

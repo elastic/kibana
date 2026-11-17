@@ -93,7 +93,7 @@ export function formatCompareReport({
   const rowsByDataset = new Map<string, string[][]>();
 
   sortedResults.forEach((result) => {
-    const delta = result.meanTarget - result.meanBaseline;
+    const delta = result.target.mean - result.baseline.mean;
     const isSignificant = result.pValue !== null && result.pValue < significanceThreshold;
     const significanceLabel =
       result.pValue === null
@@ -106,8 +106,8 @@ export function formatCompareReport({
     rows.push([
       result.evaluatorName,
       `${result.sampleSize}${result.repetitionWarning ? '*' : ''}`,
-      formatNumber(result.meanTarget),
-      formatNumber(result.meanBaseline),
+      formatNumber(result.target.mean),
+      formatNumber(result.baseline.mean),
       formatDifference(delta, result.direction) + formatDiscordantPairs(result.hypothesisTest),
       getTestLabel(result.hypothesisTest.id),
       formatPValue(result.pValue),

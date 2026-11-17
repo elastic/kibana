@@ -830,10 +830,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         expect(evaluatorResult).to.not.be(undefined);
         expect(evaluatorResult?.sampleSize).to.eql(3);
-        expect(evaluatorResult?.usedTarget).to.eql(4);
-        expect(evaluatorResult?.usedBaseline).to.eql(3);
-        expect(evaluatorResult?.stabilityTarget).to.be.within(0.7071067, 0.7071068);
-        expect(evaluatorResult?.stabilityBaseline).to.be(null);
+        expect(evaluatorResult?.target.used).to.eql(4);
+        expect(evaluatorResult?.baseline.used).to.eql(3);
+        expect(evaluatorResult?.target.stability).to.be.within(0.7071067, 0.7071068);
+        expect(evaluatorResult?.baseline.stability).to.be(null);
         expect(evaluatorResult?.repetitionWarning).to.eql(true);
       });
 

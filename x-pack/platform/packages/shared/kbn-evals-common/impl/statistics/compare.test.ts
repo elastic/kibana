@@ -331,8 +331,8 @@ describe('compareScores (grouping, means and direction)', () => {
 
     const [result] = compare(targetScores, baselineScores);
 
-    expect(result.meanTarget).toBeCloseTo(0.3, 5);
-    expect(result.meanBaseline).toBeCloseTo(0.8, 5);
+    expect(result.target.mean).toBeCloseTo(0.3, 5);
+    expect(result.baseline.mean).toBeCloseTo(0.8, 5);
     expect(result.sampleSize).toBe(2);
   });
 
@@ -444,10 +444,10 @@ describe('compareScores (grouping, means and direction)', () => {
     const results = compare(scoresFor(0.9, 0.1), scoresFor(0.6, 0.4));
 
     expect(
-      results.map(({ evaluatorName, direction, meanTarget, meanBaseline }) => ({
+      results.map(({ evaluatorName, direction, target, baseline }) => ({
         evaluatorName,
         direction,
-        improved: isImproved(meanTarget - meanBaseline, direction),
+        improved: isImproved(target.mean - baseline.mean, direction),
       }))
     ).toEqual([
       { evaluatorName: 'answer-quality.grounded', direction: 'maximize', improved: true },
@@ -482,8 +482,8 @@ describe('compareScores (repetitions)', () => {
           datasetName: 'Dataset 1',
           evaluatorName: 'Pass',
           sampleSize: 4,
-          meanTarget: 0.75,
-          meanBaseline: 0.25,
+          target: { mean: 0.75, used: 4, missing: 0, stability: null },
+          baseline: { mean: 0.25, used: 4, missing: 0, stability: null },
           pValue: 0.25,
           direction: 'maximize',
           metricType: 'binary',
@@ -493,12 +493,6 @@ describe('compareScores (repetitions)', () => {
             statistic: 0,
             discordantPairs: { targetOnly: 2, baselineOnly: 0 },
           },
-          usedTarget: 4,
-          usedBaseline: 4,
-          missingTarget: 0,
-          missingBaseline: 0,
-          stabilityTarget: null,
-          stabilityBaseline: null,
           repetitionWarning: false,
         },
         {
@@ -506,44 +500,42 @@ describe('compareScores (repetitions)', () => {
           datasetName: 'Dataset 1',
           evaluatorName: 'Quality',
           sampleSize: 4,
-          meanTarget: 0.8375,
-          meanBaseline: 0.35,
+          target: { mean: 0.8375, used: 4, missing: 0, stability: null },
+          baseline: { mean: 0.35, used: 4, missing: 0, stability: null },
           pValue: 0.125,
           direction: 'maximize',
           metricType: 'continuous_bounded',
           hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 0 },
-          usedTarget: 4,
-          usedBaseline: 4,
-          missingTarget: 0,
-          missingBaseline: 0,
-          stabilityTarget: null,
-          stabilityBaseline: null,
           repetitionWarning: false,
         },
       ]);
     }
   );
 
-  const referenceRepetitions = {
-    usedTarget: 17,
-    usedBaseline: 17,
-    missingTarget: 1,
-    missingBaseline: 0,
-    stabilityTarget: expect.closeTo(0.05784782328354201, 9),
-    stabilityBaseline: expect.closeTo(0.03177176522930781, 9),
+  const referenceSides = (targetMean: number, baselineMean: number) => ({
+    target: {
+      mean: expect.closeTo(targetMean, 9),
+      used: 17,
+      missing: 1,
+      stability: expect.closeTo(0.05784782328354201, 9),
+    },
+    baseline: {
+      mean: expect.closeTo(baselineMean, 9),
+      used: 17,
+      missing: 0,
+      stability: expect.closeTo(0.03177176522930781, 9),
+    },
     repetitionWarning: true,
-  };
+  });
 
   it('tests one pair of repetition means per example under mean', () => {
     const [result] = compareDocs(referenceTarget, referenceBaseline, 'mean');
 
     expect(result).toMatchObject({
       sampleSize: 6,
-      meanTarget: expect.closeTo(0.6472222222222223, 9),
-      meanBaseline: expect.closeTo(0.5480555555555556, 9),
       pValue: expect.closeTo(0.0625, 9),
       hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 1 },
-      ...referenceRepetitions,
+      ...referenceSides(0.6472222222222223, 0.5480555555555556),
     });
   });
 
@@ -554,13 +546,11 @@ describe('compareScores (repetitions)', () => {
         datasetName: 'Dataset 1',
         evaluatorName: 'Quality',
         sampleSize: 16,
-        meanTarget: 0.634375,
-        meanBaseline: 0.543125,
         pValue: 0.003771590323760254,
         direction: 'maximize',
         metricType: 'continuous_bounded',
         hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'asymptotic', statistic: 12 },
-        ...referenceRepetitions,
+        ...referenceSides(0.634375, 0.543125),
       },
     ]);
   });
@@ -582,12 +572,8 @@ describe('compareScores (repetitions)', () => {
     });
     expect(result).toMatchObject({
       sampleSize: 2,
-      usedTarget: 3,
-      usedBaseline: 5,
-      missingTarget: 2,
-      missingBaseline: 0,
-      stabilityTarget: expect.closeTo(Math.SQRT1_2 * 0.2, 12),
-      stabilityBaseline: 0,
+      target: { used: 3, missing: 2, stability: expect.closeTo(Math.SQRT1_2 * 0.2, 12) },
+      baseline: { used: 5, missing: 0, stability: 0 },
     });
   });
 
@@ -607,7 +593,11 @@ describe('compareScores (repetitions)', () => {
       scoresPerExample([[0.2, null]])
     );
 
-    expect(uneven[0]).toMatchObject({ usedTarget: 5, usedBaseline: 5, repetitionWarning: true });
+    expect(uneven[0]).toMatchObject({
+      target: { used: 5 },
+      baseline: { used: 5 },
+      repetitionWarning: true,
+    });
     expect(nullOnBothSides[0].repetitionWarning).toBe(true);
 
     // An example on one side only counts as 0 valid repetitions against n.

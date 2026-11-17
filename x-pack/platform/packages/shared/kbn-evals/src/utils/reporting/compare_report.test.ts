@@ -8,23 +8,19 @@
 import type { ComparisonResult } from '@kbn/evals-common';
 import { formatCompareReport } from './compare_report';
 
+const side = (mean: number) => ({ mean, used: 10, missing: 0, stability: null });
+
 const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
   datasetName: 'Dataset One',
   evaluatorName: 'Correctness',
   sampleSize: 10,
-  meanTarget: 0.8,
-  meanBaseline: 0.7,
+  target: side(0.8),
+  baseline: side(0.7),
   pValue: 0.03,
   direction: 'maximize',
   metricType: 'continuous_bounded',
   hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 5 },
-  usedTarget: 10,
-  usedBaseline: 10,
-  missingTarget: 0,
-  missingBaseline: 0,
-  stabilityTarget: null,
-  stabilityBaseline: null,
   repetitionWarning: false,
   ...overrides,
 });
@@ -121,7 +117,7 @@ describe('formatCompareReport', () => {
   });
 
   it('formats positive differences with a "+" prefix', () => {
-    const results = [makeResult({ meanTarget: 0.9, meanBaseline: 0.5 })];
+    const results = [makeResult({ target: side(0.9), baseline: side(0.5) })];
 
     const { tableOutput } = formatCompareReport({
       targetExperimentId: 'experiment-1',
@@ -133,7 +129,7 @@ describe('formatCompareReport', () => {
   });
 
   it('formats negative differences without a "+" prefix', () => {
-    const results = [makeResult({ meanTarget: 0.3, meanBaseline: 0.8 })];
+    const results = [makeResult({ target: side(0.3), baseline: side(0.8) })];
 
     const { tableOutput } = formatCompareReport({
       targetExperimentId: 'experiment-1',
@@ -181,7 +177,7 @@ describe('formatCompareReport', () => {
   });
 
   it('includes sample size and formatted means in the table', () => {
-    const results = [makeResult({ sampleSize: 42, meanTarget: 0.1234, meanBaseline: 0.5678 })];
+    const results = [makeResult({ sampleSize: 42, target: side(0.1234), baseline: side(0.5678) })];
 
     const { tableOutput } = formatCompareReport({
       targetExperimentId: 'experiment-1',
@@ -218,8 +214,8 @@ describe('formatCompareReport', () => {
     const results = [
       makeResult({
         metricType: 'binary',
-        meanTarget: 0.75,
-        meanBaseline: 0.5,
+        target: side(0.75),
+        baseline: side(0.5),
         hypothesisTest: {
           id: 'mcnemar',
           method: 'mid-p',

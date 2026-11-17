@@ -8,23 +8,20 @@
 import { mean } from '@elastic/statistics';
 import type { Direction, EvaluationScoreDocument } from '../schemas/common_attributes.gen';
 import type {
-  ComparisonResult,
+  ComparisonSide,
   CompareExperimentsResponse,
   RepetitionPolicy,
 } from '../schemas/experiments/compare_experiments_route.gen';
 
 export type { Direction };
 
-export type RepetitionStats = Pick<
-  ComparisonResult,
-  | 'usedTarget'
-  | 'usedBaseline'
-  | 'missingTarget'
-  | 'missingBaseline'
-  | 'stabilityTarget'
-  | 'stabilityBaseline'
-  | 'repetitionWarning'
->;
+type SideRepetitions = Omit<ComparisonSide, 'mean'>;
+
+export interface RepetitionStats {
+  target: SideRepetitions;
+  baseline: SideRepetitions;
+  repetitionWarning: boolean;
+}
 
 type RejectedSlice = NonNullable<CompareExperimentsResponse['pairing']['rejectedSlices']>[number];
 
@@ -156,15 +153,14 @@ const isPaired = ({ target, baseline }: ExampleScores) =>
 
 function summarizeSlice(examples: ExampleScores[]): RepetitionStats {
   const paired = examples.filter(isPaired);
-  const sum = (count: (example: ExampleScores) => number) =>
-    examples.reduce((total, example) => total + count(example), 0);
+  const summarizeSide = (side: 'target' | 'baseline'): SideRepetitions => ({
+    used: examples.reduce((total, example) => total + example[side].values.length, 0),
+    missing: examples.reduce((total, example) => total + example[side].missing, 0),
+    stability: stability(paired.map((example) => example[side])),
+  });
   return {
-    usedTarget: sum(({ target }) => target.values.length),
-    usedBaseline: sum(({ baseline }) => baseline.values.length),
-    missingTarget: sum(({ target }) => target.missing),
-    missingBaseline: sum(({ baseline }) => baseline.missing),
-    stabilityTarget: stability(paired.map(({ target }) => target)),
-    stabilityBaseline: stability(paired.map(({ baseline }) => baseline)),
+    target: summarizeSide('target'),
+    baseline: summarizeSide('baseline'),
     repetitionWarning: examples.some(
       ({ target, baseline }) =>
         target.values.length !== baseline.values.length ||

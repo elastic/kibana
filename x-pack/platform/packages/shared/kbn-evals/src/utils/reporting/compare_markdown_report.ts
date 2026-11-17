@@ -109,7 +109,7 @@ export function formatMarkdownCompareReport({
 
   // A suite with one repetition per example has no stability to show.
   const showStability = sortedResults.some(
-    (result) => result.stabilityTarget !== null || result.stabilityBaseline !== null
+    (result) => result.target.stability !== null || result.baseline.stability !== null
   );
 
   const lines: string[] = [];
@@ -228,20 +228,20 @@ export function formatMarkdownCompareReport({
     tableLines.push(`| ${headers.join(' | ')} |`);
     tableLines.push(`| ${headers.map(() => '---').join(' | ')} |`);
     rows.forEach((r) => {
-      const delta = r.meanTarget - r.meanBaseline;
+      const delta = r.target.mean - r.baseline.mean;
       const cols = [
         escapeTableCell(r.datasetName),
         escapeTableCell(r.evaluatorName),
         `${r.sampleSize}${r.repetitionWarning ? '*' : ''}`,
-        formatNumber(r.meanTarget),
-        formatNumber(r.meanBaseline),
+        formatNumber(r.target.mean),
+        formatNumber(r.baseline.mean),
         formatDifference(delta) + formatDiscordantPairs(r.hypothesisTest),
         getTestLabel(r.hypothesisTest.id),
         formatPValue(r.pValue),
         formatSig(r.pValue, significanceThreshold),
         formatOutcome(delta, r.direction, r.pValue, significanceThreshold),
         ...(showStability
-          ? [`${formatNumber(r.stabilityTarget)} / ${formatNumber(r.stabilityBaseline)}`]
+          ? [`${formatNumber(r.target.stability)} / ${formatNumber(r.baseline.stability)}`]
           : []),
       ];
       tableLines.push(`| ${cols.join(' | ')} |`);

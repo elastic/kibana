@@ -180,6 +180,32 @@ components:
         - id
         - statistic
 
+    ComparisonSide:
+      type: object
+      description: One experiment's scores in a (dataset, evaluator) slice.
+      properties:
+        mean:
+          type: number
+          description: Mean of the paired scores
+        used:
+          type: integer
+          description: Valid repetition scores
+        missing:
+          type: integer
+          description: Repetitions without a valid score
+        stability:
+          type: number
+          nullable: true
+          description: >-
+            Mean of the sample standard deviations of each paired example's
+            valid repetitions, over the examples with at least two. Null when
+            no example has two.
+      required:
+        - mean
+        - used
+        - missing
+        - stability
+
     ComparisonResult:
       type: object
       properties:
@@ -197,38 +223,10 @@ components:
           description: >-
             Number of pairs tested in this slice: examples under `mean` and
             `median`, repetitions under `pool`
-        meanBaseline:
-          type: number
-          description: Mean of the paired scores of the baseline experiment
-        meanTarget:
-          type: number
-          description: Mean of the paired scores of the target experiment
-        usedBaseline:
-          type: integer
-          description: Valid repetition scores of the baseline experiment in this slice
-        usedTarget:
-          type: integer
-          description: Valid repetition scores of the target experiment in this slice
-        missingBaseline:
-          type: integer
-          description: Repetitions of the baseline experiment in this slice without a valid score
-        missingTarget:
-          type: integer
-          description: Repetitions of the target experiment in this slice without a valid score
-        stabilityBaseline:
-          type: number
-          nullable: true
-          description: >-
-            Mean of the sample standard deviations of each paired example's
-            valid baseline repetitions, over the examples with at least two.
-            Null when no example has two.
-        stabilityTarget:
-          type: number
-          nullable: true
-          description: >-
-            Mean of the sample standard deviations of each paired example's
-            valid target repetitions, over the examples with at least two.
-            Null when no example has two.
+        baseline:
+          $ref: '#/components/schemas/ComparisonSide'
+        target:
+          $ref: '#/components/schemas/ComparisonSide'
         repetitionWarning:
           type: boolean
           description: >-
@@ -258,14 +256,8 @@ components:
         - datasetName
         - evaluatorName
         - sampleSize
-        - meanBaseline
-        - meanTarget
-        - usedBaseline
-        - usedTarget
-        - missingBaseline
-        - missingTarget
-        - stabilityBaseline
-        - stabilityTarget
+        - baseline
+        - target
         - repetitionWarning
         - pValue
         - direction

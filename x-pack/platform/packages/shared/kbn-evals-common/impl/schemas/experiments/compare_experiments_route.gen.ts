@@ -86,6 +86,36 @@ export const HypothesisTest = lazySchema(() =>
 );
 export type HypothesisTest = z.infer<typeof HypothesisTest>;
 
+/**
+ * One experiment's scores in a (dataset, evaluator) slice.
+ */
+export const ComparisonSide = lazySchema(() =>
+  z.object({
+    /**
+     * Mean of the paired scores
+     */
+    mean: z.number().describe('Mean of the paired scores'),
+    /**
+     * Valid repetition scores
+     */
+    used: z.number().int().describe('Valid repetition scores'),
+    /**
+     * Repetitions without a valid score
+     */
+    missing: z.number().int().describe('Repetitions without a valid score'),
+    /**
+     * Mean of the sample standard deviations of each paired example's valid repetitions, over the examples with at least two. Null when no example has two.
+     */
+    stability: z
+      .number()
+      .nullable()
+      .describe(
+        "Mean of the sample standard deviations of each paired example's valid repetitions, over the examples with at least two. Null when no example has two."
+      ),
+  })
+);
+export type ComparisonSide = z.infer<typeof ComparisonSide>;
+
 export const ComparisonResult = lazySchema(() =>
   z.object({
     datasetId: z.string().max(1024),
@@ -100,60 +130,8 @@ export const ComparisonResult = lazySchema(() =>
       .describe(
         'Number of pairs tested in this slice: examples under `mean` and `median`, repetitions under `pool`'
       ),
-    /**
-     * Mean of the paired scores of the baseline experiment
-     */
-    meanBaseline: z.number().describe('Mean of the paired scores of the baseline experiment'),
-    /**
-     * Mean of the paired scores of the target experiment
-     */
-    meanTarget: z.number().describe('Mean of the paired scores of the target experiment'),
-    /**
-     * Valid repetition scores of the baseline experiment in this slice
-     */
-    usedBaseline: z
-      .number()
-      .int()
-      .describe('Valid repetition scores of the baseline experiment in this slice'),
-    /**
-     * Valid repetition scores of the target experiment in this slice
-     */
-    usedTarget: z
-      .number()
-      .int()
-      .describe('Valid repetition scores of the target experiment in this slice'),
-    /**
-     * Repetitions of the baseline experiment in this slice without a valid score
-     */
-    missingBaseline: z
-      .number()
-      .int()
-      .describe('Repetitions of the baseline experiment in this slice without a valid score'),
-    /**
-     * Repetitions of the target experiment in this slice without a valid score
-     */
-    missingTarget: z
-      .number()
-      .int()
-      .describe('Repetitions of the target experiment in this slice without a valid score'),
-    /**
-     * Mean of the sample standard deviations of each paired example's valid baseline repetitions, over the examples with at least two. Null when no example has two.
-     */
-    stabilityBaseline: z
-      .number()
-      .nullable()
-      .describe(
-        "Mean of the sample standard deviations of each paired example's valid baseline repetitions, over the examples with at least two. Null when no example has two."
-      ),
-    /**
-     * Mean of the sample standard deviations of each paired example's valid target repetitions, over the examples with at least two. Null when no example has two.
-     */
-    stabilityTarget: z
-      .number()
-      .nullable()
-      .describe(
-        "Mean of the sample standard deviations of each paired example's valid target repetitions, over the examples with at least two. Null when no example has two."
-      ),
+    baseline: ComparisonSide,
+    target: ComparisonSide,
     /**
      * True when an example in this slice has a different number of valid repetitions in the two experiments, or a repetition without a valid score.
      */
