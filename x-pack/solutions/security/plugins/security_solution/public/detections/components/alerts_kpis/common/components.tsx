@@ -15,7 +15,9 @@ import * as i18n from './translations';
 
 const DEFAULT_WIDTH = 400;
 
-export const KpiPanel = styled(EuiPanel)<{
+export const KpiPanel = styled(EuiPanel, {
+  shouldForwardProp: (prop) => !['$overflowY', '$toggleStatus'].includes(prop),
+})<{
   height?: number;
   $overflowY?:
     | 'auto'

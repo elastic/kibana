@@ -48,7 +48,9 @@ const LegendContainer = styled.div`
   margin-left: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
-const ChartFlexItem = styled(EuiFlexItem)<{ $minChartHeight: number }>`
+const ChartFlexItem = styled(EuiFlexItem, {
+  shouldForwardProp: (prop) => prop !== '$minChartHeight',
+})<{ $minChartHeight: number }>`
   min-height: ${({ $minChartHeight }) => `${$minChartHeight}px`};
 `;
 
