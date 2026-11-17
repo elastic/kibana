@@ -566,6 +566,8 @@ describe('When rendering the StorageProvidersLayout', () => {
       expect(renderResult.getByTestId('storageProviderFlyout')).toBeInTheDocument();
       expect(renderResult.getByTestId('storageProviderFlyout-saveButton')).toBeEnabled();
       expect(mockedContext.coreStart.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+      // The flyout shows the error; no second copy in a toast
+      expect(mockedContext.coreStart.notifications.toasts.addDanger).not.toHaveBeenCalled();
     });
 
     it('should keep the delete modal open and show the server error when the update fails', async () => {
@@ -583,6 +585,52 @@ describe('When rendering the StorageProvidersLayout', () => {
         'Platinum license does not support this action.'
       );
       expect(renderResult.getByTestId('deleteStorageProviderModal')).toBeInTheDocument();
+      expect(mockedContext.coreStart.notifications.toasts.addDanger).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [
+        'a save',
+        "Couldn't save the storage provider",
+        async () => {
+          await fillAddFlyout(createProvider('azure-2'));
+          await userEvent.click(renderResult.getByTestId('storageProviderFlyout-saveButton'));
+        },
+      ],
+      [
+        'a delete',
+        "Couldn't delete the storage provider",
+        async () => {
+          await clickRowAction('azure-1', 'storageProvidersDeleteAction');
+          await userEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
+        },
+      ],
+    ])('should show a toast when %s fails after the tab was left', async (_, title, start) => {
+      const serverMessage = 'Platinum license does not support this action.';
+      const response = getDeferred();
+      apiMocks.responseProvider.updateEndpointPolicy.mockDelay.mockReturnValue(response.promise);
+      apiMocks.responseProvider.updateEndpointPolicy.mockImplementation(() => {
+        throw Object.assign(new Error('Forbidden'), {
+          body: { statusCode: 403, message: serverMessage },
+        });
+      });
+      await render([createProvider('azure-1')]);
+
+      await start();
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.updateEndpointPolicy.mockDelay).toHaveBeenCalled();
+      });
+      // The user switches tabs before the server responds
+      renderResult.unmount();
+      await act(async () => {
+        response.resolve();
+      });
+
+      await waitFor(() => {
+        expect(mockedContext.coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          expect.objectContaining({ title, text: serverMessage })
+        );
+      });
     });
 
     it('should base the update on the latest policy in the store', async () => {

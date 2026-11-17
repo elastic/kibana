@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -44,6 +44,7 @@ import {
   DEFAULT_SERVICE_URL_LABEL,
   DELETE_ACTION_DESCRIPTION,
   DELETE_ACTION_LABEL,
+  DELETE_ERROR_TITLE,
   EDIT_ACTION_DESCRIPTION,
   EDIT_ACTION_LABEL,
   EMPTY_STATE_TITLE,
@@ -53,6 +54,7 @@ import {
   getEditSuccessMessage,
   MAX_PROVIDERS_TOOLTIP,
   NAME_COLUMN_LABEL,
+  SAVE_ERROR_TITLE,
   SERVICE_URL_COLUMN_LABEL,
   STORAGE_PROVIDERS_DESCRIPTION,
   STORAGE_PROVIDERS_TITLE,
@@ -67,6 +69,12 @@ const getServerErrorMessage = ({ body, message }: IHttpFetchError): string =>
 /** Which provider the add/edit flyout is open for; `provider` is undefined when adding */
 interface FlyoutState {
   provider?: ExportProvider;
+}
+
+interface SaveProvidersMessages {
+  successMessage: string;
+  /** Title of the danger toast shown when the update fails after its flyout/modal is gone */
+  errorTitle: string;
 }
 
 export interface StorageProvidersLayoutProps {
@@ -98,9 +106,22 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
   const isAtLimit = providers.length >= MAX_EXPORT_PROVIDERS_PER_POLICY;
   const saveErrorMessage = saveError ? getServerErrorMessage(saveError) : undefined;
 
+  // Whether a flyout or modal is open to show an update's error; false once this tab unmounts
+  const isDialogOpenRef = useRef(false);
+  useEffect(() => {
+    isDialogOpenRef.current = flyoutState !== undefined || providerToDelete !== undefined;
+    return () => {
+      isDialogOpenRef.current = false;
+    };
+  }, [flyoutState, providerToDelete]);
+
   /** Saves `nextProviders` into `policy`, the latest version from the store */
   const saveProviders = useCallback(
-    (nextProviders: readonly ExportProvider[], successMessage: string, onSuccess: () => void) => {
+    (
+      nextProviders: readonly ExportProvider[],
+      { successMessage, errorTitle }: SaveProvidersMessages,
+      onSuccess: () => void
+    ) => {
       const update = cloneDeep(policy as PolicyData);
       update.inputs[0].config.policy.value = setExportProviders(
         update.inputs[0].config.policy.value,
@@ -119,8 +140,17 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
           dispatch({ type: 'serverReturnedPolicyDetailsData', payload: { policyItem } });
           onSuccess();
         })
-        // The flyout or delete modal shows the error from the mutation state
-        .catch(() => {});
+        .catch((error: IHttpFetchError) => {
+          // An open flyout or modal shows the error from the mutation state; without one (the tab
+          // was left while the request was pending), nothing would
+          if (!isDialogOpenRef.current) {
+            toasts.addDanger({
+              title: errorTitle,
+              text: getServerErrorMessage(error),
+              'data-test-subj': 'storageProvidersSaveFailureToast',
+            });
+          }
+        });
     },
     [dispatch, policy, sendPolicyUpdate, toasts]
   );
@@ -156,11 +186,15 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
         const { id: savedId } = flyoutState.provider;
         saveProviders(
           providers.map((existing) => (existing.id === savedId ? provider : existing)),
-          getEditSuccessMessage(provider.id),
+          { successMessage: getEditSuccessMessage(provider.id), errorTitle: SAVE_ERROR_TITLE },
           closeFlyout
         );
       } else {
-        saveProviders([...providers, provider], getAddSuccessMessage(provider.id), closeFlyout);
+        saveProviders(
+          [...providers, provider],
+          { successMessage: getAddSuccessMessage(provider.id), errorTitle: SAVE_ERROR_TITLE },
+          closeFlyout
+        );
       }
     },
     [closeFlyout, flyoutState?.provider, providers, saveProviders]
@@ -170,7 +204,10 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
     if (providerToDelete) {
       saveProviders(
         providers.filter(({ id }) => id !== providerToDelete.id),
-        getDeleteSuccessMessage(providerToDelete.id),
+        {
+          successMessage: getDeleteSuccessMessage(providerToDelete.id),
+          errorTitle: DELETE_ERROR_TITLE,
+        },
         closeDeleteModal
       );
     }
