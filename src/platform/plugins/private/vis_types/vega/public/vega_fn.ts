@@ -19,7 +19,7 @@ import type { KibanaContext } from '@kbn/data-plugin/public';
 import { VEGA_VIS_NAME } from '../common/constants';
 import type { VegaVisualizationDependencies } from './plugin';
 import type { VegaInspectorAdapters } from './vega_inspector';
-import type { VegaParser } from './data_model/vega_parser';
+import type { VegaRenderDescriptor } from './data_model/types';
 
 type Input = KibanaContext | { type: 'null' };
 type Output = Promise<Render<RenderValue>>;
@@ -31,7 +31,9 @@ interface Arguments {
 export type VisParams = Required<Arguments>;
 
 export interface RenderValue {
-  visData: VegaParser;
+  visData: VegaRenderDescriptor;
+  /** Parent-side only and not cloneable, unlike `visData`; the view never receives these. */
+  inspectorAdapters?: VegaInspectorAdapters;
   visType: typeof VEGA_VIS_NAME;
   visConfig: VisParams;
 }
@@ -81,6 +83,7 @@ export const createVegaFn = (
       as: 'vega_vis',
       value: {
         visData: response,
+        inspectorAdapters: context.inspectorAdapters,
         visType: VEGA_VIS_NAME,
         visConfig: {
           spec: args.spec,

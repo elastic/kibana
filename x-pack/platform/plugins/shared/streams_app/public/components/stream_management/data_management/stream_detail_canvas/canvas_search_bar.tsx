@@ -33,7 +33,7 @@ export function CanvasSearchBar({ query, onQueryChange }: CanvasSearchBarProps) 
           defaultMessage: 'Search streams — e.g. nginx, otel, archive',
         })}
         aria-label={i18n.translate('xpack.streams.canvas.searchAriaLabel', {
-          defaultMessage: 'Search streams on the canvas',
+          defaultMessage: 'Search streams on the map',
         })}
         data-test-subj="streamsCanvasSearch"
       />

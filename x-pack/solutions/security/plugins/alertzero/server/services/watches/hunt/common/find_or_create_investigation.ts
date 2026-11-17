@@ -44,7 +44,7 @@ export interface FindOrCreateConversationClient {
     conversationId: string,
     updates: Record<string, MetadataFieldValue>,
     options?: { access?: 'owner' | 'converse' }
-  ) => Promise<unknown>;
+  ) => Promise<{ changedFields: readonly string[] }>;
 }
 
 export interface RunFindOrCreateInvestigationDeps {
@@ -56,6 +56,11 @@ export interface RunFindOrCreateInvestigationDeps {
    */
   loadReport?: () => Promise<ReportHuntContext | null>;
   logger?: Logger;
+  /**
+   * Told once this call has reopened a closed Investigation, for telemetry. Best-effort: an error
+   * it throws is logged and never fails the find-or-create.
+   */
+  onReopened?: (investigationConversationId: string) => void;
 }
 
 const MAX_SUMMARY_TECHNIQUES = 100;
@@ -89,12 +94,13 @@ const reopenIfClosed = async (
   if (metadata?.status !== 'closed') {
     return false;
   }
-  await conversationClient.patchMetadata(
+  const { changedFields } = await conversationClient.patchMetadata(
     investigationConversationId,
     { status: 'open' },
     { access: 'converse' }
   );
-  return true;
+  // A concurrent reopen that won the race leaves this write nothing to change.
+  return changedFields.includes('status');
 };
 
 export const summarizeReportForTrigger = (
@@ -119,9 +125,9 @@ export const summarizeReportForTrigger = (
  */
 export const runFindOrCreateInvestigation = async (
   { spaceId, reportId }: { spaceId: string; reportId: string },
-  { conversationClient, loadReport, logger }: RunFindOrCreateInvestigationDeps
+  { conversationClient, loadReport, logger, onReopened }: RunFindOrCreateInvestigationDeps
 ): Promise<FindOrCreateInvestigationOutput> => {
-  const investigationConversationId = buildHuntInvestigationConversationId(reportId);
+  const investigationConversationId = buildHuntInvestigationConversationId({ spaceId, reportId });
   const triggerAttachmentId = buildHuntTriggerAttachmentId({ spaceId, reportId });
 
   let report: FindOrCreateInvestigationReportSummary | undefined;
@@ -163,6 +169,15 @@ export const runFindOrCreateInvestigation = async (
       logger?.debug(
         `findOrCreateInvestigation: reopened Investigation ${investigationConversationId} for report ${reportId}, which a previous run had closed.`
       );
+      try {
+        onReopened?.(investigationConversationId);
+      } catch (reportError) {
+        logger?.debug(
+          `findOrCreateInvestigation: could not report the reopen of ${investigationConversationId}: ${
+            reportError instanceof Error ? reportError.message : String(reportError)
+          }`
+        );
+      }
     }
   }
 

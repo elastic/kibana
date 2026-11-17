@@ -6,12 +6,16 @@
  */
 
 require('@kbn/swc-register').install();
-const { retrieveConfigFromVault, getVaultPath } = require('./manage_secrets');
-const { KBN_EVALS_VAULT_TYPES, getKbnEvalsVaultAddr } = require('../../src/cli/utils');
+const {
+  retrieveConfigFromVault,
+  resolveVaultTarget,
+  describeVaultTarget,
+} = require('./manage_secrets');
+const { KBN_EVALS_VAULT_TYPES } = require('../../src/cli/utils');
 const minimist = require('minimist');
 
 async function retrieveSecrets() {
-  const argv = minimist(process.argv.slice(2), { string: ['version'] });
+  const argv = minimist(process.argv.slice(2), { string: ['suite', 'version'] });
   const vault = argv.vault;
 
   if (!vault || !KBN_EVALS_VAULT_TYPES.includes(vault)) {
@@ -32,9 +36,10 @@ async function retrieveSecrets() {
     version = Number(argv.version);
   }
 
+  const target = resolveVaultTarget(vault, argv.suite);
   // eslint-disable-next-line no-console
-  console.log(`Using ${vault} vault (${getKbnEvalsVaultAddr(vault)}, ${getVaultPath(vault)})...`);
-  await retrieveConfigFromVault(vault, version);
+  console.log(describeVaultTarget(target));
+  await retrieveConfigFromVault(target, version);
 }
 
 retrieveSecrets();

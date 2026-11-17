@@ -13,9 +13,11 @@ import {
   PREBUILT_RULE_CUSTOMIZATION,
   PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION,
   ENDPOINT_CUSTOM_YARA_SIGNATURES,
+  ENDPOINT_REGISTRY_CREDENTIAL_HARDENING,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   UpsellingMessageId,
+  UpsellingPageComponent,
   UpsellingSectionId,
 } from '@kbn/security-solution-upselling/service/types';
 import React from 'react';
@@ -54,7 +56,12 @@ interface UpsellingsMessageConfig {
   id: UpsellingMessageId;
 }
 
-type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName }>;
+type UpsellingPages = Array<
+  Omit<UpsellingsConfig, 'component'> & {
+    pageName: SecurityPageName;
+    component: UpsellingPageComponent;
+  }
+>;
 type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
 type UpsellingMessages = UpsellingsMessageConfig[];
 
@@ -64,8 +71,9 @@ export const upsellingPages: UpsellingPages = [
   {
     pageName: SecurityPageName.entityAnalytics,
     pli: ProductFeatureKey.advancedInsights,
-    component: () => (
+    component: ({ appHeader }) => (
       <EntityAnalyticsUpsellingPageLazy
+        appHeader={appHeader}
         upgradeToLabel={entityAnalyticsProductType}
         upgradeMessage={i18n.UPGRADE_PRODUCT_MESSAGE(entityAnalyticsProductType)}
       />
@@ -86,12 +94,12 @@ export const upsellingPages: UpsellingPages = [
   {
     pageName: SecurityPageName.attacks,
     pli: ProductFeatureKey.attackDiscovery,
-    component: () => <AttacksUpsellingPageLazy />,
+    component: AttacksUpsellingPageLazy,
   },
   {
     pageName: SecurityPageName.siemMigrationsRules,
     pli: ProductFeatureKey.siemMigrations,
-    component: () => <SiemMigrationsTranslatedRulesUpsellPageLazy />,
+    component: SiemMigrationsTranslatedRulesUpsellPageLazy,
   },
 ];
 
@@ -208,6 +216,13 @@ export const upsellingMessages: UpsellingMessages = [
     pli: ProductFeatureKey.endpointCustomYaraSignatures,
     message: ENDPOINT_CUSTOM_YARA_SIGNATURES(
       getProductTypeByPLI(ProductFeatureKey.endpointCustomYaraSignatures) ?? ''
+    ),
+  },
+  {
+    id: 'endpoint_registry_credential_hardening',
+    pli: ProductFeatureKey.endpointRegistryCredentialHardening,
+    message: ENDPOINT_REGISTRY_CREDENTIAL_HARDENING(
+      getProductTypeByPLI(ProductFeatureKey.endpointRegistryCredentialHardening) ?? ''
     ),
   },
 ];

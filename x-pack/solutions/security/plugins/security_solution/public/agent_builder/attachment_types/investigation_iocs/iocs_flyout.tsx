@@ -17,17 +17,11 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { IOCS_TITLE } from '../grouped_attachments';
 import type { IocCategoryRow } from './parse_iocs';
+import { copyValueAriaLabel } from './translations';
 
 export const INVESTIGATION_IOCS_FLYOUT_TEST_ID = 'investigationIocsFlyout';
-
-const copyValueAriaLabel = (value: string) =>
-  i18n.translate('xpack.securitySolution.agentBuilder.investigationIocs.copyValueAriaLabel', {
-    defaultMessage: 'Copy {value}',
-    values: { value },
-  });
 
 export interface InvestigationIocsFlyoutProps {
   categories: IocCategoryRow[];

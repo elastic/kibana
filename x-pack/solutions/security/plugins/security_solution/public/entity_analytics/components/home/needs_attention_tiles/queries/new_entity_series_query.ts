@@ -6,7 +6,7 @@
  */
 
 import type { TimeRange } from '../../entities_grid/common';
-import { buildNewEntityTileHead } from './new_entity_query';
+import { GROUP_FIRST_SEEN_COLUMN, buildNewEntityTileHead } from './new_entity_query';
 import {
   SERIES_BUCKET_COLUMN,
   buildSeriesBucketExpression,
@@ -14,8 +14,6 @@ import {
   getSeriesWindow,
   seriesFetchHours,
 } from './tile_series_window';
-
-const FIRST_SEEN_FIELD = 'entity.lifecycle.first_seen';
 
 /** Returns the result column of dot `k` (0 = newest) of the New entity tile. */
 export const newEntitySeriesColumn = (k: number): string => `new_entities_${k}`;
@@ -26,9 +24,8 @@ export const newEntitySeriesColumn = (k: number): string => `new_entities_${k}`;
  * with the same stages (`buildNewEntityTileHead`) and the same rules. The risk score and the
  * entity store are read as they are now, so entities deleted since are missing from past dots.
  *
- * Like the count it counts resolved entities exactly: each one gets a column per dot holding its
- * earliest bucket inside that dot's window (null outside it), and a final `COUNT` of each column
- * gives the dot.
+ * Like the count it works on resolved groups, one row each, so each dot is an exact `COUNT` of the
+ * groups whose earliest member was first seen inside that dot's window.
  */
 export const buildNewEntitySeriesQuery = (
   entitiesIndexName: string,
@@ -38,26 +35,22 @@ export const buildNewEntitySeriesQuery = (
   const { dots } = getSeriesWindow(timeRange);
   const parts = buildNewEntityTileHead({
     entitiesIndexName,
-    firstSeenCondition: `${FIRST_SEEN_FIELD} >= NOW() - ${seriesFetchHours(timeRange)}h`,
+    lowerBound: `NOW() - ${seriesFetchHours(timeRange)}h`,
+    firstSeenWindow: (field) => `${field} >= NOW() - ${seriesFetchHours(timeRange)}h`,
     entityFilterClauses,
-    bucketExpression: buildSeriesBucketExpression(timeRange, FIRST_SEEN_FIELD),
+    bucketExpression: buildSeriesBucketExpression(timeRange, GROUP_FIRST_SEEN_COLUMN),
   });
 
-  const perEntity: string[] = [];
-  const counts: string[] = [];
-  for (let k = 0; k < dots; k++) {
-    perEntity.push(
-      `${newEntitySeriesColumn(k)} = MIN(${SERIES_BUCKET_COLUMN}) WHERE ${buildSeriesDotWindow(
+  // One row per group, so each dot is an exact COUNT of the groups whose bucket is inside its window.
+  const counts = Array.from(
+    { length: dots },
+    (_, k) =>
+      `${newEntitySeriesColumn(k)} = COUNT(${SERIES_BUCKET_COLUMN}) WHERE ${buildSeriesDotWindow(
         timeRange,
         k
       )}`
-    );
-    counts.push(`${newEntitySeriesColumn(k)} = COUNT(${newEntitySeriesColumn(k)})`);
-  }
+  );
 
-  parts.push(`| STATS`);
-  parts.push(`    ${perEntity.join(',\n    ')}`);
-  parts.push(`    BY effective_id`);
   parts.push(`| STATS`);
   parts.push(`    ${counts.join(',\n    ')}`);
 

@@ -15,23 +15,23 @@ import {
 } from '@kbn/embeddable-plugin/server/mocks';
 import type { SerializedVis } from '@kbn/visualizations-plugin/common';
 import { VisTypeVegaPlugin } from './plugin';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import { VEGA_AS_CODE_ENABLED_FLAG, VEGA_EMBEDDABLE_TYPE } from '../common/constants';
 import { LEGACY_VEGA_PANEL_MIGRATION_FEATURE_FLAG } from './legacy_vega_panel_migration/constants';
 
 describe('VisTypeVegaPlugin (server)', () => {
   const plugins: VisTypeVegaPlugin[] = [];
 
   const setupPlugin = async ({
-    standaloneEmbeddableEnabled,
+    asCodeEnabled,
     legacyVegaPanelMigrationEnabled = false,
-  }: { standaloneEmbeddableEnabled?: boolean; legacyVegaPanelMigrationEnabled?: boolean } = {}) => {
+  }: { asCodeEnabled?: boolean; legacyVegaPanelMigrationEnabled?: boolean } = {}) => {
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
     const migrationFlag$ = new BehaviorSubject(legacyVegaPanelMigrationEnabled);
     coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) => {
       if (key === LEGACY_VEGA_PANEL_MIGRATION_FEATURE_FLAG) return migrationFlag$;
-      if (key === VEGA_STANDALONE_EMBEDDABLE_FLAG && standaloneEmbeddableEnabled !== undefined) {
-        return of(standaloneEmbeddableEnabled);
+      if (key === VEGA_AS_CODE_ENABLED_FLAG && asCodeEnabled !== undefined) {
+        return of(asCodeEnabled);
       }
       return of(fallback);
     });
@@ -48,7 +48,7 @@ describe('VisTypeVegaPlugin (server)', () => {
     plugin.start(coreStart);
     await new Promise(process.nextTick);
 
-    return { coreStart, embeddable, visualizations, migrationFlag$ };
+    return { embeddable, visualizations, migrationFlag$ };
   };
 
   afterEach(() => {
@@ -65,15 +65,15 @@ describe('VisTypeVegaPlugin (server)', () => {
     );
   });
 
-  test('does not expose a schema when vega.standaloneEmbeddable is disabled', async () => {
-    const { embeddable } = await setupPlugin({ standaloneEmbeddableEnabled: false });
+  test('does not expose a schema when vega.asCodeEnabled is disabled', async () => {
+    const { embeddable } = await setupPlugin({ asCodeEnabled: false });
 
     const [, serverDefinition] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
     expect(serverDefinition.getSchema(mockGetDrilldownsSchema)).toBeUndefined();
   });
 
-  test('exposes a schema when vega.standaloneEmbeddable is enabled', async () => {
-    const { embeddable } = await setupPlugin({ standaloneEmbeddableEnabled: true });
+  test('exposes a by-value and by-reference schema when vega.asCodeEnabled is enabled', async () => {
+    const { embeddable } = await setupPlugin({ asCodeEnabled: true });
 
     const [, serverDefinition] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
     const schema = serverDefinition.getSchema(mockGetDrilldownsSchema);
@@ -89,6 +89,10 @@ describe('VisTypeVegaPlugin (server)', () => {
     expect(() => schema!.parse({ spec: '' })).toThrow();
     expect(() => schema!.parse({ spec: { format: 'hjson', value: '' } })).toThrow();
     expect(() => schema!.parse({ spec: { format: 'json', value: 'not-an-object' } })).toThrow();
+
+    // The library item owns the query and filters.
+    const query = { language: 'kql', expression: 'bytes > 1000' };
+    expect(schema!.parse({ ref_id: 'library-item', query })).toEqual({ ref_id: 'library-item' });
   });
 
   describe('legacy Vega panel migration', () => {
@@ -113,9 +117,7 @@ describe('VisTypeVegaPlugin (server)', () => {
     };
 
     test('migrates when both flags are enabled and follows the dynamic migration flag', async () => {
-      const { visualizations, migrationFlag$ } = await setupPlugin({
-        standaloneEmbeddableEnabled: true,
-      });
+      const { visualizations, migrationFlag$ } = await setupPlugin({ asCodeEnabled: true });
       const { migrate } = getMigration(visualizations);
 
       expect(migrate(args)).toBeUndefined();
@@ -128,9 +130,9 @@ describe('VisTypeVegaPlugin (server)', () => {
       });
     });
 
-    test('does not migrate when vega.standaloneEmbeddable is disabled', async () => {
+    test('does not migrate when vega.asCodeEnabled is disabled', async () => {
       const { visualizations } = await setupPlugin({
-        standaloneEmbeddableEnabled: false,
+        asCodeEnabled: false,
         legacyVegaPanelMigrationEnabled: true,
       });
 

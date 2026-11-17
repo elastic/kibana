@@ -39,21 +39,10 @@ describe('suppressionAlertKey', () => {
     );
   });
 
-  it('treats null source as internal (uses rule_id)', () => {
-    expect(
-      suppressionAlertKey({ source: null, rule_id: 'rule-1', group_hash: 'h', alert_id: 'e' })
-    ).toBe('rule-1:h:e');
-  });
-
-  it('treats undefined source as internal (uses rule_id)', () => {
-    expect(
-      suppressionAlertKey({
-        source: undefined,
-        rule_id: 'rule-1',
-        group_hash: 'h',
-        alert_id: 'e',
-      })
-    ).toBe('rule-1:h:e');
+  it.each([null, undefined])('treats %s source as internal (uses rule_id)', (source) => {
+    expect(suppressionAlertKey({ source, rule_id: 'rule-1', group_hash: 'h', alert_id: 'e' })).toBe(
+      'rule-1:h:e'
+    );
   });
 });
 

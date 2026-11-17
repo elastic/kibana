@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 
 import { ACTIONS_INBOUND_EVENTS_ENABLED_FLAG } from '../../../common';
 import type {
@@ -37,7 +39,7 @@ export interface InboundEventsRouteParams {
   router: IRouter<ActionsRequestHandlerContext>;
   maxBodyBytes: number;
   inboundEventsClient: InboundEventsClient;
-  getSpaceId: (request: KibanaRequest) => string;
+  getSpaceId: (request: KibanaRequest) => SpaceId;
   logger: Logger;
 }
 
@@ -61,11 +63,13 @@ export function inboundEventsRoute({
       security: INBOUND_EVENTS_SECURITY,
       summary: 'Ingest an external event for a Kibana connector',
       description:
-        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. A connector HTTP ack returns 200 (JSON or a plain-text body) and does not emit.',
+        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. An emit that includes an HTTP ack returns that status, usually 200 with an empty body, and still emits. A connector HTTP-only ack returns 200 (JSON or a plain-text body; `.inboundWebhook` handshake is `{ challenge }`) and does not emit.',
       options: {
         // External vendors cannot send Kibana session XSRF headers (`kbn-xsrf`).
         // Auth is the ingest token (Bearer, or `token` query if Authorization is
         // absent); missing or invalid tokens 404.
+        // Internal only, intentionally not in the public description: Relay may instead send a
+        // service-account bearer plus `x-client-authentication`. See `resolveServiceAccountBearer`.
         xsrfRequired: false,
         tags: ['oas-tag:connectors'],
         availability: {
@@ -96,8 +100,8 @@ export function inboundEventsRoute({
           response: {
             200: {
               description:
-                'Connector HTTP 200 ack. No event is emitted. JSON or a plain-text body.',
-              body: () => ingestEventsAckResponseSchemaV1,
+                'Connector HTTP 200 ack. A handshake such as `.inboundWebhook` `{ challenge }` does not emit. An ack included with an emit may have an empty body, and the events are still emitted. The body may be JSON or plain-text.',
+              body: () => schema.maybe(ingestEventsAckResponseSchemaV1),
             },
             202: {
               description:
@@ -145,11 +149,7 @@ export function inboundEventsRoute({
           connectorTypeId,
           connectorId,
           spaceId: getSpaceId(request),
-          requestId: request.id,
-          headers: request.headers,
-          query: request.query,
-          body: request.body,
-          remoteAddress: request.socket.remoteAddress,
+          request,
         });
         return mapIngestResultToResponse(result, response);
       }

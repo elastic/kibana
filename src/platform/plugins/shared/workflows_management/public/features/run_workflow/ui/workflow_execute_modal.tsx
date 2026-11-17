@@ -397,7 +397,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         color="success"
         data-test-subj="executeWorkflowButton"
       >
-        <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
+        <FormattedMessage id="workflows.runButtonText" defaultMessage="Run" ignoreTag />
       </EuiButton>
     );
 

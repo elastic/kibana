@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/serverless'
   - '@kbn/utility-types'
   - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/management-settings-components-form'
   - '@kbn/licensing-plugin'
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/object-utils'
@@ -63,12 +64,15 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/ui-callout'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/core-test-helpers-model-versions'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __mocks__/**/*
@@ -77,6 +81,4 @@ fileGroups:
     - server/**/*
     - test/scout_inference_test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

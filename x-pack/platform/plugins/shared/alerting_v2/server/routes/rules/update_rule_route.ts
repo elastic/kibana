@@ -42,6 +42,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Update a rule',
     description: RULE_PATCH_SEMANTICS_DESCRIPTION,
     oasOperationObject: updateRuleOasExamples,

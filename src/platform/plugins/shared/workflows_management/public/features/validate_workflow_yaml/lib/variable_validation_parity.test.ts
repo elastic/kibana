@@ -61,12 +61,16 @@ const clientFingerprint = (yaml: string): string[] => {
   );
 };
 
-const serverFingerprint = (yaml: string): string[] =>
-  fingerprint(
-    validateWorkflowYaml(yaml, workflowSchema, { variableValidationRegistry: registry })
-      .diagnostics.filter(({ source }) => source === 'variable')
+const serverFingerprint = async (yaml: string): Promise<string[]> => {
+  const { diagnostics } = await validateWorkflowYaml(yaml, workflowSchema, {
+    variableValidationRegistry: registry,
+  });
+  return fingerprint(
+    diagnostics
+      .filter(({ source }) => source === 'variable')
       .map(({ ruleId, severity }) => ({ ruleId, severity }))
   );
+};
 
 const workflow = (...steps: string[]): string =>
   [
@@ -157,8 +161,8 @@ const FIXTURES: Array<{ name: string; yaml: string }> = [
 ];
 
 describe('variable-validation client/server parity', () => {
-  it.each(FIXTURES)('emits the same rule IDs and severities for $name', ({ yaml }) => {
-    expect(serverFingerprint(yaml)).toEqual(clientFingerprint(yaml));
+  it.each(FIXTURES)('emits the same rule IDs and severities for $name', async ({ yaml }) => {
+    expect(await serverFingerprint(yaml)).toEqual(clientFingerprint(yaml));
   });
 
   it('covers every registered variable-validation rule across the fixtures', () => {
@@ -168,9 +172,9 @@ describe('variable-validation client/server parity', () => {
     expect([...observed].sort()).toEqual([...VARIABLE_RULE_IDS].sort());
   });
 
-  it('does not run the variable rules unless asked, so create/update gating is unchanged', () => {
+  it('does not run the variable rules unless asked, so create/update gating is unchanged', async () => {
     const { yaml } = FIXTURES[0];
-    const diagnostics = validateWorkflowYaml(yaml, workflowSchema).diagnostics;
+    const { diagnostics } = await validateWorkflowYaml(yaml, workflowSchema);
     expect(diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
   });
 });

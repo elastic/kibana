@@ -188,6 +188,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:ingest_pipelines' },
                     { link: 'management:pipelines' },
+                    { link: 'management:content_connectors' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.ingest.pipelines.title', {
                     defaultMessage: 'Ingest',
@@ -320,6 +321,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:genAiSettings' },
+                    { link: 'management:aiAnonymizationSettings' },
                     { link: 'management:evals' },
                     { link: 'management:aiAssistantManagementSelection' },
                   ],

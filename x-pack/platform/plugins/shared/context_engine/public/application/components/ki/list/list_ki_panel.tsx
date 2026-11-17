@@ -5,60 +5,86 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
+import { KiViewer } from '../view/ki_viewer';
 import { ListKiBody } from './list_ki_body';
-import { ListKiFooter } from './list_ki_footer';
-import { ListKiHeader } from './list_ki_header';
+import { ListKiFiltersRow } from './list_ki_filters_row';
 import { useListKiPanel } from './use_list_ki_panel';
+import { useListKiPanelStyles } from './list_ki_panel_styles';
 
 interface ListKiPanelProps {
   aiIndex: GetAiIndexResponse;
+  discoverHref?: string;
 }
 
-export const ListKiPanel = ({ aiIndex }: ListKiPanelProps) => {
+/** The Knowledge documents tab: filters row, then the grouped list next to the viewer. */
+export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
   const {
     aiIndexId,
     typeFilter,
-    typeFilterOptions,
+    summary,
     onTypeFilterChange,
-    kis,
-    total,
-    size,
+    statusFilter,
+    onStatusFilterChange,
+    sort,
+    onSortChange,
+    searchText,
+    onSearchTextChange,
+    onSearchSubmit,
+    hasActiveFilters,
+    clearFilters,
+    groups,
+    showMore,
+    selectedKi,
+    selectKi,
     isLoading,
     isFetching,
     error,
-    discoverHref,
-    indexManagementHref,
-    destValue,
-    loadMore,
   } = useListKiPanel(aiIndex);
 
+  const styles = useListKiPanelStyles();
+  const isRefetching = isFetching && !isLoading;
+
   return (
-    <div data-test-subj="contextListKiPanel">
-      <ListKiHeader
-        total={total}
-        destValue={destValue}
-        indexManagementHref={indexManagementHref}
-        discoverHref={discoverHref}
+    <EuiPanel hasBorder paddingSize="l" css={styles.panel} data-test-subj="contextListKiPanel">
+      <ListKiFiltersRow
+        searchText={searchText}
+        isSearchLoading={isRefetching}
+        onSearchTextChange={onSearchTextChange}
+        onSearchSubmit={onSearchSubmit}
+        statusFilter={statusFilter}
+        onStatusFilterChange={onStatusFilterChange}
+        sort={sort}
+        onSortChange={onSortChange}
         typeFilter={typeFilter}
-        typeFilterOptions={typeFilterOptions}
+        summary={summary}
         onTypeFilterChange={onTypeFilterChange}
       />
 
-      <EuiSpacer size="l" />
-
-      <ListKiBody aiIndexId={aiIndexId} kis={kis} isLoading={isLoading} error={error} />
-
-      <ListKiFooter
-        loadedCount={kis.length}
-        total={total}
-        size={size}
-        isLoading={isFetching}
+      <ListKiBody
+        aiIndexId={aiIndexId}
+        groups={groups}
+        selectedKi={selectedKi}
+        onSelectKi={selectKi}
+        onShowMore={showMore}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={clearFilters}
+        isLoading={isLoading}
+        isRefetching={isRefetching}
+        error={error}
         discoverHref={discoverHref}
-        onLoadMore={loadMore}
+        viewer={
+          selectedKi ? (
+            <KiViewer
+              key={`${selectedKi.index}:${selectedKi.kiId}`}
+              aiIndexId={aiIndexId}
+              selectedKi={selectedKi}
+            />
+          ) : null
+        }
       />
-    </div>
+    </EuiPanel>
   );
 };

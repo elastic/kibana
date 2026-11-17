@@ -36,6 +36,8 @@ export interface WorkflowDetailState {
    * The save button should be disabled when this is false to prevent saving stale data.
    */
   isYamlSynced: boolean;
+  /** Whether a save is being checked for what it breaks, before `loading.isSavingYaml` takes over. */
+  isCheckingSave: boolean;
   /** The persisted workflow detail data */
   workflow?: WorkflowDetailDto;
   /** The computed data derived from the workflow yaml string, it is updated by the workflowComputationMiddleware */
@@ -43,7 +45,8 @@ export interface WorkflowDetailState {
   /** The currently selected execution (when viewing executions tab) */
   execution?: WorkflowExecutionDto;
   executionRequest?: { id: string; requestId: string; loadMore: boolean };
-  executionError?: { id: string; message: string };
+  /** Set while loading `id` keeps failing; `failureCount` is the length of the current streak. */
+  executionError?: { id: string; message: string; isNotFound: boolean; failureCount: number };
   /** `total` from the paginated execution-steps list; used for the truncation callout. */
   stepExecutionsTotal: number;
   /**

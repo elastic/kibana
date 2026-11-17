@@ -11,12 +11,15 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { appContextService } from '../app_context';
 import type { Agent } from '../../types';
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentlessAgentRestrictionError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 import { AgentRollbackError } from '../../errors';
 
 import { ActionRunner } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
 import { createErrorActionResults, createAgentAction } from './actions';
 import { bulkUpdateAgents } from './crud';
 import {
@@ -87,7 +90,7 @@ export async function rollbackBatch(
 ): Promise<{ actionIds: string[] }> {
   const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceIds?.[0]);
 
-  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
+  const restrictions = await getAgentPolicyRestrictions(soClient, givenAgents);
 
   // Eligible agents, grouped by rollback version
   const agentsByRollbackVersion: Record<string, Agent[]> = {};
@@ -124,15 +127,19 @@ export async function rollbackBatch(
       continue;
     }
 
-    // If agent is hosted, add to version-specific errors
-    if (isHostedAgent(hostedPolicies, agent)) {
+    // If agent is hosted or agentless, add to version-specific errors
+    const restrictionError = isHostedAgent(restrictions, agent)
+      ? new HostedAgentPolicyRestrictionRelatedError(
+          `Cannot rollback agent in hosted agent policy ${agent.policy_id}`
+        )
+      : isAgentlessAgent(restrictions, agent)
+      ? new AgentlessAgentRestrictionError(`Cannot rollback managed agent ${agent.id}`)
+      : undefined;
+    if (restrictionError) {
       if (!errorsByRollbackVersion[rollbackVersion]) {
         errorsByRollbackVersion[rollbackVersion] = {};
       }
-      errorsByRollbackVersion[rollbackVersion][agent.id] =
-        new HostedAgentPolicyRestrictionRelatedError(
-          `Cannot rollback agent in hosted agent policy ${agent.policy_id}`
-        );
+      errorsByRollbackVersion[rollbackVersion][agent.id] = restrictionError;
       continue;
     }
 

@@ -15,18 +15,21 @@ import type {
   Logger,
   Plugin,
 } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   VisTypeVegaPluginSetupDependencies,
   VisTypeVegaPluginSetup,
   VisTypeVegaPluginStart,
 } from './types';
 import {
+  VEGA_AS_CODE_ENABLED_FLAG,
   VEGA_EMBEDDABLE_TYPE,
-  VEGA_STANDALONE_EMBEDDABLE_FLAG,
   VEGA_VIS_NAME,
 } from '../common/constants';
 import { getVegaEmbeddableSchema } from './embeddable/schema';
 import { getTransforms } from './embeddable/transforms';
+import { vegaLibraryItemSavedObjectType } from './vega_saved_object';
+import { registerRoutes } from './api/register_routes';
 import {
   LEGACY_VEGA_PANEL_MIGRATION_DEFAULT,
   LEGACY_VEGA_PANEL_MIGRATION_FEATURE_FLAG,
@@ -35,7 +38,8 @@ import { migrateLegacyVegaPanel } from './legacy_vega_panel_migration/migrate';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
   private readonly logger: Logger;
-  private standaloneEmbeddableEnabled = false;
+  private apiUsageCounter?: UsageCounter;
+  private asCodeEnabled = false;
   private legacyVegaPanelMigrationEnabled = LEGACY_VEGA_PANEL_MIGRATION_DEFAULT;
   private legacyVegaPanelMigrationSubscription?: Subscription;
 
@@ -45,31 +49,44 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
 
   public setup(
     core: CoreSetup,
-    { embeddable, visualizations }: VisTypeVegaPluginSetupDependencies
+    { embeddable, usageCollection, visualizations }: VisTypeVegaPluginSetupDependencies
   ) {
-    core
+    // Startup-only: public API/OpenAPI contract should not hot-swap mid-process.
+    // The embeddable definition is registered only once the flag is known, so
+    // `getSchema` can never observe the default (disabled) value while the flag is on.
+    void core
       .getStartServices()
       .then(async ([{ featureFlags }]) => {
-        const standaloneEmbeddableEnabled = await firstValueFrom(
-          featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
+        const asCodeEnabled = await firstValueFrom(
+          featureFlags.getBooleanValue$(VEGA_AS_CODE_ENABLED_FLAG, false)
         );
-        this.standaloneEmbeddableEnabled = standaloneEmbeddableEnabled;
+        this.asCodeEnabled = asCodeEnabled;
         embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
           title: 'Vega',
           getTransforms: (drilldownTransforms) => getTransforms(drilldownTransforms, this.logger),
           getSchema: (getDrilldownsSchema) =>
-            standaloneEmbeddableEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
+            asCodeEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        this.logger.error(`Failed to register the Vega embeddable: ${error}`);
+      });
+
+    core.savedObjects.registerType(vegaLibraryItemSavedObjectType);
+
+    if (usageCollection) {
+      this.apiUsageCounter = usageCollection.createUsageCounter('vega_api');
+    }
+    registerRoutes(core.http, this.apiUsageCounter, this.logger);
 
     visualizations.registerLegacyPanelMigration(VEGA_VIS_NAME, {
       to: VEGA_EMBEDDABLE_TYPE,
       migrate: (args) =>
-        this.standaloneEmbeddableEnabled && this.legacyVegaPanelMigrationEnabled
+        this.asCodeEnabled && this.legacyVegaPanelMigrationEnabled
           ? migrateLegacyVegaPanel(args)
           : undefined,
     });
+
     return {};
   }
 

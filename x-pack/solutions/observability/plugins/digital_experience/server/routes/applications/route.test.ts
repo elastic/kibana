@@ -1,0 +1,245 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { NEVER } from 'rxjs';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { getClassicApplications } from './classic/get_classic_applications';
+import { hasPartialReadAccess } from './get_partial_access';
+import { getOtelApplicationsFromBestSource } from './otel/get_otel_applications_source';
+import { APPLICATIONS_ENDPOINT, applicationsRouteRepository } from './route';
+
+jest.mock('./classic/get_classic_applications');
+jest.mock('./otel/get_otel_applications_source');
+jest.mock('./get_partial_access');
+jest.mock('./classic/create_apm_event_client');
+
+const mockedPartialAccess = jest.mocked(hasPartialReadAccess);
+const mockedClassic = jest.mocked(getClassicApplications);
+
+const START = '2021-01-18T12:00:00.000Z';
+const END = '2021-01-18T13:00:00.000Z';
+const SESSIONS_SETTINGS = { frequency: '1m' };
+const mockedOtel = jest.mocked(getOtelApplicationsFromBestSource);
+
+const runHandler = ({
+  isServerless,
+  query = { start: START, end: END, timeZone: 'UTC' },
+  withApmDataAccess = true,
+  isUxEnabled = !isServerless,
+}: {
+  isServerless: boolean;
+  query?: { start: string; end: string; environment?: string; timeZone: string };
+  withApmDataAccess?: boolean;
+  isUxEnabled?: boolean;
+}) => {
+  const context = {
+    core: Promise.resolve({
+      featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+      elasticsearch: { client: { asCurrentUser: {}, asInternalUser: {} } },
+      savedObjects: { client: {} },
+      uiSettings: { client: { get: jest.fn().mockResolvedValue(false) } },
+    }),
+  };
+  const getApmIndices = jest.fn().mockResolvedValue({
+    transaction: 'traces-apm*',
+    error: 'logs-apm.error-*',
+    span: 'traces-apm*',
+  });
+  const taskManager = taskManagerMock.createStart();
+  const handler = applicationsRouteRepository[APPLICATIONS_ENDPOINT].handler as unknown as (
+    resources: unknown
+  ) => Promise<{
+    applications: unknown[];
+    environments: string[];
+    partiallyAvailableSources: string[];
+  }>;
+  const result = handler({
+    params: { query },
+    context,
+    request: { events: { aborted$: NEVER } },
+    plugins: { apmDataAccess: withApmDataAccess ? { getApmIndices } : undefined },
+    isServerless,
+    isUxEnabled,
+    sessionsSettings: SESSIONS_SETTINGS,
+    getSessionsServices: async () => ({ taskManager, canEncrypt: true }),
+    logger: loggingSystemMock.createLogger(),
+  });
+  return { result, getApmIndices, taskManager };
+};
+
+describe('GET /internal/digital_experience/applications', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedPartialAccess.mockResolvedValue(false);
+    mockedOtel.mockResolvedValue({
+      applications: [],
+      environments: ['production'],
+      pageLoadsOverTime: [],
+      sessionsOverTime: null,
+    });
+    mockedClassic.mockResolvedValue({
+      applications: [],
+      environments: ['staging'],
+      pageLoadsOverTime: [],
+      sessionsOverTime: null,
+    });
+  });
+
+  it('queries both sources on stateful', async () => {
+    await runHandler({ isServerless: false }).result;
+
+    expect(mockedOtel).toHaveBeenCalledTimes(1);
+    expect(mockedClassic).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes the environment to both sources and returns every environment', async () => {
+    const response = await runHandler({
+      isServerless: false,
+      query: { start: START, end: END, environment: 'production', timeZone: 'UTC' },
+    }).result;
+
+    expect(mockedOtel).toHaveBeenCalledWith(expect.objectContaining({ environment: 'production' }));
+    expect(mockedClassic).toHaveBeenCalledWith(
+      expect.objectContaining({ environment: 'production' })
+    );
+    expect(response.environments).toEqual(['production', 'staging']);
+  });
+
+  it('converts the ISO range to epoch milliseconds and passes an abort signal to OTel', async () => {
+    await runHandler({ isServerless: false }).result;
+
+    expect(mockedOtel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        start: Date.parse(START),
+        end: Date.parse(END),
+        signal: expect.any(AbortSignal),
+      })
+    );
+    expect(mockedClassic).toHaveBeenCalledWith(
+      expect.objectContaining({ start: Date.parse(START), end: Date.parse(END) })
+    );
+  });
+
+  it('lets the OTel source read the sessions status from Task Manager with the configured settings', async () => {
+    const { result, taskManager } = runHandler({ isServerless: false });
+    await result;
+
+    expect(mockedOtel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esClient: {},
+        taskManager,
+        sessionsSettings: SESSIONS_SETTINGS,
+      })
+    );
+    expect(mockedOtel).toHaveBeenCalledWith(
+      expect.not.objectContaining({ internalEsClient: expect.anything() })
+    );
+  });
+
+  it('passes the time zone to both sources', async () => {
+    await runHandler({
+      isServerless: false,
+      query: { start: START, end: END, timeZone: 'America/New_York' },
+    }).result;
+
+    expect(mockedOtel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        histogram: expect.objectContaining({ timeZone: 'America/New_York' }),
+      })
+    );
+    expect(mockedClassic).toHaveBeenCalledWith(
+      expect.objectContaining({
+        histogram: expect.objectContaining({ timeZone: 'America/New_York' }),
+      })
+    );
+  });
+
+  it('skips Classic without the APM data access plugin', async () => {
+    const response = await runHandler({ isServerless: false, withApmDataAccess: false }).result;
+
+    expect(mockedOtel).toHaveBeenCalledTimes(1);
+    expect(mockedClassic).not.toHaveBeenCalled();
+    expect(response.environments).toEqual(['production']);
+  });
+
+  it('skips Classic without the ux plugin, as the browser then offers no Classic RUM rows', async () => {
+    const response = await runHandler({ isServerless: false, isUxEnabled: false }).result;
+
+    expect(mockedClassic).not.toHaveBeenCalled();
+    expect(response.environments).toEqual(['production']);
+  });
+
+  it('never queries the Classic indices on serverless', async () => {
+    const { result, getApmIndices } = runHandler({ isServerless: true });
+    await result;
+
+    expect(mockedOtel).toHaveBeenCalledTimes(1);
+    expect(mockedClassic).not.toHaveBeenCalled();
+    expect(getApmIndices).not.toHaveBeenCalled();
+  });
+
+  it('reads the APM indices once and checks the access of both sources', async () => {
+    mockedPartialAccess.mockResolvedValue(true);
+
+    const { result, getApmIndices } = runHandler({ isServerless: false });
+    const response = await result;
+
+    expect(mockedPartialAccess).toHaveBeenCalledTimes(2);
+    const [[otelCheck], [classicCheck]] = mockedPartialAccess.mock.calls;
+    await expect(otelCheck.getIndices()).resolves.toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
+    expect(otelCheck.ignoredPatterns).toBeUndefined();
+    await expect(classicCheck.getIndices()).resolves.toEqual([
+      'traces-apm*',
+      'logs-apm.error-*',
+      'traces-apm*',
+    ]);
+    expect(classicCheck.ignoredPatterns).toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
+    expect(getApmIndices).toHaveBeenCalledTimes(1);
+    expect(response.partiallyAvailableSources).toEqual(['otel', 'classic']);
+  });
+
+  it('only checks the OTel access on serverless', async () => {
+    mockedPartialAccess.mockResolvedValue(false);
+
+    const response = await runHandler({ isServerless: true }).result;
+
+    expect(mockedPartialAccess).toHaveBeenCalledTimes(1);
+    expect(response.partiallyAvailableSources).toEqual([]);
+  });
+
+  it('requires the Digital Experience and APM privileges, like the app', () => {
+    const { security } = applicationsRouteRepository[APPLICATIONS_ENDPOINT];
+
+    expect(security).toEqual({
+      authz: { requiredPrivileges: ['read_digital_experience', 'apm'] },
+    });
+  });
+
+  it('validates that the range starts before it ends', () => {
+    const { params } = applicationsRouteRepository[APPLICATIONS_ENDPOINT];
+    const schema = params as unknown as {
+      shape: { query: { safeParse: (query: unknown) => { success: boolean } } };
+    };
+
+    expect(schema.shape.query.safeParse({ start: START, end: END }).success).toBe(true);
+    expect(schema.shape.query.safeParse({ start: END, end: END }).success).toBe(false);
+    expect(schema.shape.query.safeParse({ start: END, end: START }).success).toBe(false);
+  });
+
+  it('accepts every environment the picker lists, up to 1024 characters', () => {
+    const { params } = applicationsRouteRepository[APPLICATIONS_ENDPOINT];
+    const schema = params as unknown as {
+      shape: { query: { safeParse: (query: unknown) => { success: boolean } } };
+    };
+    const withEnvironment = (length: number) =>
+      schema.shape.query.safeParse({ start: START, end: END, environment: 'x'.repeat(length) });
+
+    expect(withEnvironment(1024).success).toBe(true);
+    expect(withEnvironment(1025).success).toBe(false);
+  });
+});

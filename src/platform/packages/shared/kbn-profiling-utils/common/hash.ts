@@ -27,7 +27,7 @@ const lowerHex = [
   'f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'fa', 'fb', 'fc', 'fd', 'fe', 'ff',
 ];
 
-/* eslint no-bitwise: ["error", { "allow": ["^=", ">>", "&"] }] */
+/* eslint-disable no-bitwise */
 
 /**
  * - fnv1a64 computes a 64-bit hash of a byte array using the FNV-1a hash function [1].

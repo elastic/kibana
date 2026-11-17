@@ -43,12 +43,15 @@ dependsOn:
   - '@kbn/significant-events-plugin'
   - '@kbn/nightshift-shared'
   - '@kbn/navigation-plugin'
+  - '@kbn/profiling-plugin'
+  - '@kbn/entity-inventory-app-plugin'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -58,6 +61,4 @@ fileGroups:
     - server/**/*.ts
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

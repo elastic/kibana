@@ -45,7 +45,7 @@ describe('useListKi', () => {
       expect(core.notifications.toasts.addError).toHaveBeenCalledWith(
         requestError,
         expect.objectContaining({
-          title: 'Unable to load Knowledge Indicators',
+          title: 'Unable to load Knowledge documents',
           toastMessage: 'Request timed out',
         })
       );
@@ -67,6 +67,27 @@ describe('useListKi', () => {
     expect(core.notifications.toasts.addError).not.toHaveBeenCalled();
   });
 
+  it('passes query through to the list endpoint', async () => {
+    const core = coreMock.createStart();
+    (core.http.get as jest.Mock).mockResolvedValue({ kis: [], total: 0 });
+
+    renderUseListKi(core, {
+      aiIndexId: 'my-ai-index',
+      query: 'refund',
+    });
+
+    await waitFor(() => {
+      expect(core.http.get).toHaveBeenCalledWith(
+        '/internal/context_engine/ai_index/my-ai-index/kis',
+        expect.objectContaining({
+          query: expect.objectContaining({
+            query: 'refund',
+          }),
+        })
+      );
+    });
+  });
+
   it('passes size and type through to the list endpoint', async () => {
     const core = coreMock.createStart();
     (core.http.get as jest.Mock).mockResolvedValue({ kis: [], total: 0 });
@@ -84,7 +105,36 @@ describe('useListKi', () => {
           query: expect.objectContaining({
             size: 10,
             type: 'playbook',
-            lifecycle_status: ['active', 'deleted'],
+          }),
+        })
+      );
+    });
+
+    expect(core.http.get).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        query: expect.not.objectContaining({
+          status: expect.anything(),
+        }),
+      })
+    );
+  });
+
+  it('passes status through to the list endpoint when set', async () => {
+    const core = coreMock.createStart();
+    (core.http.get as jest.Mock).mockResolvedValue({ kis: [], total: 0 });
+
+    renderUseListKi(core, {
+      aiIndexId: 'my-ai-index',
+      status: ['deleted'],
+    });
+
+    await waitFor(() => {
+      expect(core.http.get).toHaveBeenCalledWith(
+        '/internal/context_engine/ai_index/my-ai-index/kis',
+        expect.objectContaining({
+          query: expect.objectContaining({
+            status: ['deleted'],
           }),
         })
       );

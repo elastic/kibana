@@ -119,12 +119,18 @@ describe('SET Autocomplete', () => {
         await setExpectSuggestions('SET unmapped_fields = ', [
           '"DEFAULT";',
           '"LOAD";',
+          '"LOAD_ALL";',
           '"NULLIFY";',
         ]);
       });
 
       it('suggests unmapped fields values for partial input', async () => {
-        await setExpectSuggestions('SET unmapped_fields = "N', ['DEFAULT', 'LOAD', 'NULLIFY']);
+        await setExpectSuggestions('SET unmapped_fields = "N', [
+          'DEFAULT',
+          'LOAD',
+          'NULLIFY',
+          'LOAD_ALL',
+        ]);
       });
     });
 

@@ -16,7 +16,7 @@ This package provides a limited set of file system functions (no `openSync`, `mk
 - **Path Traversal Protection**: Prevents directory traversal attacks (e.g., `../` attempts)
 - **File Type Validation**: Only allows specific file extensions and MIME types
 - **File Size Limits**: Enforces maximum file size (1GB)
-- **Content Sanitization**: Automatically sanitizes SVG files
+- **Content Sanitization**: Automatically sanitizes SVG files (via `@kbn/content-sanitization`)
 - **Volume Support**: Organize files into subdirectories using volumes
 
 ## Usage

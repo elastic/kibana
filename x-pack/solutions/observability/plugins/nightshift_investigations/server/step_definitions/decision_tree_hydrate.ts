@@ -8,12 +8,16 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { Logger } from '@kbn/core/server';
-import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+import type { AnalyticsServiceSetup, CoreStart, Logger } from '@kbn/core/server';
+import type { NightshiftSandboxStart } from '../sandbox_audit';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
 import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
+import { parseRunMarker } from '../decision_trees/accessed_trees';
 import { degradeOnWriterFailure } from '../lib/hydrate_notification';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
+import { usesDecisionTrees } from '../agents/agent_policy';
+import { getSandboxStepCaller } from './sandbox_caller';
 import { withTimeout } from './with_timeout';
 
 /** Caps beforeAgent so a stuck sandbox write cannot stall the reinforcement round. */
@@ -21,10 +25,16 @@ const HYDRATE_TIMEOUT_MS = 20_000;
 
 export const decisionTreeHydrateStepDefinition = ({
   getSandboxStart,
+  getSavedObjects,
+  getUiSettings,
+  analytics,
   logger,
   isEnabled,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
+  getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings?: () => CoreStart['uiSettings'] | undefined;
+  analytics: AnalyticsServiceSetup;
   logger: Logger;
   isEnabled?: () => boolean;
 }) =>
@@ -49,6 +59,14 @@ export const decisionTreeHydrateStepDefinition = ({
         .describe(
           'The round message. Reinforcement messages carry an accessed-trees marker; without it every tree is written (investigator hydrate).'
         ),
+      agent_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe(
+          'Agent the round belongs to. When set, only the investigator gets trees; the ' +
+            'reinforcement hydrate workflow omits it.'
+        ),
     }),
     outputSchema: z.object({
       sandbox_id: z.string().describe('Sandbox that was hydrated.'),
@@ -56,6 +74,10 @@ export const decisionTreeHydrateStepDefinition = ({
         .string()
         .describe('Unscoped conversation id derived from the sandbox key.'),
       tree_count: z.number().describe('Number of decision trees written into the sandbox.'),
+      hydrated_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Canonical symptom:<slug> tree ids materialized into the sandbox.'),
       skipped: z.boolean().optional(),
       failed: z.boolean().optional().describe('The write failed; its contents may be incomplete.'),
       notification: z
@@ -66,14 +88,23 @@ export const decisionTreeHydrateStepDefinition = ({
         ),
     }),
     handler: async (context) => {
-      const { sandbox_id: sandboxId, prompt } = context.input;
-      const { spaceId } = context.contextManager.getContext().workflow;
+      const { sandbox_id: sandboxId, prompt, agent_id: agentId } = context.input;
+      const workflowContext = context.contextManager.getContext();
+      const { spaceId } = workflowContext.workflow;
+      const executionId = workflowContext.execution?.id;
       const conversationId = unscopeConversationId(spaceId, sandboxId);
 
-      // The combined materialize workflow installs with Cortex or Memory, so this step is
-      // registered even when the tree feature is off. Fail closed without touching the sandbox.
-      if (isEnabled && !isEnabled()) {
-        context.logger.info(`Skipped decision tree hydrate for sandbox ${sandboxId} (flag off)`);
+      // The combined materialize workflow also installs with Wiki or Memory alone, so this step
+      // is registered even when the tree feature is off. Fail closed without touching the sandbox.
+      // It is also every knowledge agent's before-agent hook, but only the investigator reads
+      // the trees.
+      const flagOff = Boolean(isEnabled && !isEnabled());
+      if (flagOff || (agentId !== undefined && !usesDecisionTrees(agentId))) {
+        context.logger.info(
+          `Skipped decision tree hydrate for sandbox ${sandboxId} (${
+            flagOff ? 'flag off' : 'agent does not use decision trees'
+          })`
+        );
         return {
           output: {
             sandbox_id: sandboxId,
@@ -96,27 +127,62 @@ export const decisionTreeHydrateStepDefinition = ({
 
       // getSessionForSpace scopes internally, so the space-scoped sandbox_id must be unscoped first.
       // This resolves the same session obtain_sandbox already allocated for this conversation.
-      const session = sandboxStart.getSessionForSpace(spaceId, conversationId);
+      const session = sandboxStart.getSessionForSpace(
+        spaceId,
+        conversationId,
+        getSandboxStepCaller(context)
+      );
+
+      // The reinforcement hydrate runs in a throwaway conversation. The prompt carries the
+      // investigator's ids (the hook can run on another node, so no process-local state), and those
+      // are the ids telemetry must join back to.
+      const investigatorIds = parseRunMarker(prompt);
+      const telemetryConversationId = investigatorIds?.conversationId ?? conversationId;
+      const telemetryRoundId = investigatorIds?.roundId;
 
       context.logger.info(`Hydrating decision trees into sandbox ${sandboxId} (space ${spaceId})`);
 
       // A failed write degrades to a system_update line rather than a failed step: this
       // step is also a before-agent hook for the reinforcement agent, so throwing would
       // abort that round over one writer.
-      let treeCount: number;
+      let hydrateResult: Awaited<ReturnType<typeof hydrateDecisionTreeWorkspace>>;
       try {
-        treeCount = await withTimeout(
-          (signal) =>
-            hydrateDecisionTreeWorkspace({
-              session,
-              esClient: context.contextManager.getScopedEsClient(),
-              logger,
-              spaceId,
-              prompt,
-              signal,
-            }),
-          HYDRATE_TIMEOUT_MS,
-          `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
+        hydrateResult = await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.decisionTreeHydrate',
+            traceId: executionId,
+            conversationId,
+            spaceId,
+            workflowExecutionId: executionId,
+            request: context.contextManager?.getFakeRequest?.(),
+            getSavedObjects,
+            getUiSettings,
+            logger,
+          },
+          async (span) => {
+            const res = await withTimeout(
+              (signal) =>
+                hydrateDecisionTreeWorkspace({
+                  session,
+                  esClient: context.contextManager.getScopedEsClient(),
+                  logger,
+                  spaceId,
+                  prompt,
+                  signal,
+                  analytics,
+                  conversationId: telemetryConversationId,
+                  roundId: telemetryRoundId,
+                }),
+              HYDRATE_TIMEOUT_MS,
+              `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
+            );
+            const count = typeof res === 'number' ? res : res.treeCount;
+            span?.setAttribute('nightshift.tree_count', count);
+            if (typeof res === 'object' && res !== null && Array.isArray(res.hydratedIds)) {
+              span?.setAttribute('nightshift.hydrated_ids', JSON.stringify(res.hydratedIds));
+            }
+            return res;
+          }
         );
       } catch (error) {
         return {
@@ -135,12 +201,21 @@ export const decisionTreeHydrateStepDefinition = ({
         };
       }
 
+      const treeCount = typeof hydrateResult === 'number' ? hydrateResult : hydrateResult.treeCount;
+      const hydratedIds =
+        typeof hydrateResult === 'object' &&
+        hydrateResult !== null &&
+        Array.isArray(hydrateResult.hydratedIds)
+          ? hydrateResult.hydratedIds
+          : undefined;
+
       return {
         output: {
           sandbox_id: sandboxId,
           conversation_id: conversationId,
           tree_count: treeCount,
           notification: '',
+          ...(hydratedIds ? { hydrated_ids: hydratedIds } : {}),
         },
       };
     },

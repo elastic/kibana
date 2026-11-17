@@ -8,9 +8,13 @@
 import type { KibanaRole } from '@kbn/scout';
 
 const DATA_SOURCE_BY_ID_ROUTE_PATH = '/internal/data_federation/data_sources/{id}' as const;
+const DATA_SET_BY_ID_ROUTE_PATH = '/internal/data_federation/dataset/{id}' as const;
 
 export const getDataSourceByIdApiPath = (id: string): string =>
   DATA_SOURCE_BY_ID_ROUTE_PATH.replace('{id}', encodeURIComponent(id));
+
+export const getDataSetByIdApiPath = (id: string): string =>
+  DATA_SET_BY_ID_ROUTE_PATH.replace('{id}', encodeURIComponent(id));
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'scout',
@@ -21,6 +25,13 @@ export const CUSTOM_ROLES: Record<string, KibanaRole> = {
   // The data source routes delegate authorization to Elasticsearch, which requires `manage`.
   data_source_manager: {
     elasticsearch: { cluster: ['manage'] },
+    kibana: [],
+  },
+  data_set_manager: {
+    elasticsearch: {
+      cluster: ['manage'],
+      indices: [{ names: ['*'], privileges: ['manage'] }],
+    },
     kibana: [],
   },
 };

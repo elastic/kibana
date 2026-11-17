@@ -67,7 +67,6 @@ const evaluate = base.extend<
           {
             datasets: [dataset],
             task: async ({ input, output: expected }) => {
-              const startMs = Date.now();
               const maxTurns = expected.maxTurns;
 
               const allMessages: Array<{ message: string }> = [];
@@ -136,7 +135,6 @@ const evaluate = base.extend<
                 steps: allSteps,
                 errors: allErrors,
                 resultYaml: finalResultYaml,
-                latencyMs: Date.now() - startMs,
                 turnsToRecovery,
               };
             },

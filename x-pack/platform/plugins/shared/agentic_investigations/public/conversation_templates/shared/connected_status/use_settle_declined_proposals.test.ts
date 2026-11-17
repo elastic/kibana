@@ -55,19 +55,28 @@ describe('useSettleDeclinedProposals', () => {
     expect(bump).not.toHaveBeenCalled();
   });
 
+  // Acts like the real tracker: it waits for the decision, then runs `afterDecision`, and only
+  // then ends.
+  const trackerFor =
+    (decision: Promise<void>) =>
+    async (_id: string, _client: QueryClient, afterDecision?: () => Promise<void>) => {
+      await decision;
+      await afterDecision?.();
+    };
+
   it('tracks each proposal on the shared client, not the caller’s', async () => {
-    mockSettle.mockResolvedValue(undefined);
+    mockSettle.mockImplementation(trackerFor(Promise.resolve()));
     const { result } = renderHook(() => useSettleDeclinedProposals());
 
     await act(() => result.current(['p-1', 'p-2']));
 
-    expect(mockSettle).toHaveBeenCalledWith('p-1', mockSharedClient);
-    expect(mockSettle).toHaveBeenCalledWith('p-2', mockSharedClient);
+    expect(mockSettle).toHaveBeenCalledWith('p-1', mockSharedClient, expect.any(Function));
+    expect(mockSettle).toHaveBeenCalledWith('p-2', mockSharedClient, expect.any(Function));
   });
 
   it('refreshes proposals only once every decision has landed', async () => {
     const decision = createDeferred();
-    mockSettle.mockReturnValue(decision.promise);
+    mockSettle.mockImplementation(trackerFor(decision.promise));
     const { result } = renderHook(() => useSettleDeclinedProposals());
 
     let done!: Promise<void>;
@@ -90,8 +99,9 @@ describe('useSettleDeclinedProposals', () => {
 
   it('drops the rows from the host queue after the decisions land and before refreshing', async () => {
     const order: string[] = [];
-    mockSettle.mockImplementation(async () => {
-      order.push('settled');
+    mockSettle.mockImplementation(async (_id, _client, afterDecision) => {
+      order.push('decided');
+      await afterDecision?.();
     });
     const dropDecidedProposal = jest.fn(async (id: string) => {
       order.push(`drop:${id}`);
@@ -104,6 +114,96 @@ describe('useSettleDeclinedProposals', () => {
 
     await act(() => result.current(['p-1']));
 
-    expect(order).toEqual(['settled', 'drop:p-1', 'invalidate']);
+    expect(order).toEqual(['decided', 'drop:p-1', 'invalidate']);
+  });
+
+  it('keeps every tracker open until one refresh has ended, so no row reads old data', async () => {
+    const first = createDeferred();
+    const second = createDeferred();
+    const refresh = createDeferred();
+    const ended: string[] = [];
+    mockSettle.mockImplementation(async (id, client, afterDecision) => {
+      await (id === 'p-1' ? first.promise : second.promise);
+      await afterDecision?.();
+      ended.push(id);
+    });
+    invalidateQueries.mockReturnValue(refresh.promise);
+    const { result } = renderHook(() => useSettleDeclinedProposals());
+
+    let done!: Promise<void>;
+    await act(async () => {
+      done = result.current(['p-1', 'p-2']);
+    });
+    await act(async () => {
+      first.resolve();
+    });
+    // One decision is still missing: no refresh yet, and the first tracker waits.
+    expect(invalidateQueries).not.toHaveBeenCalled();
+    expect(ended).toEqual([]);
+
+    await act(async () => {
+      second.resolve();
+    });
+    // Both decisions landed. The refresh runs once, and both trackers still wait for it.
+    expect(invalidateQueries).toHaveBeenCalledTimes(1);
+    expect(ended).toEqual([]);
+
+    await act(async () => {
+      refresh.resolve();
+      await done;
+    });
+    expect(ended.sort()).toEqual(['p-1', 'p-2']);
+    expect(invalidateQueries).toHaveBeenCalledTimes(1);
+  });
+
+  it('releases every tracker, and reports the error, when the host drop callback rejects', async () => {
+    const ended: string[] = [];
+    mockSettle.mockImplementation(async (id, client, afterDecision) => {
+      await afterDecision?.();
+      ended.push(id);
+    });
+    invalidateQueries.mockResolvedValue(undefined);
+    const dropDecidedProposal = jest.fn().mockRejectedValue(new Error('drop failed'));
+    const { result } = renderHook(() => useSettleDeclinedProposals(dropDecidedProposal));
+
+    await act(async () => {
+      await expect(result.current(['p-1', 'p-2'])).rejects.toThrow('drop failed');
+    });
+
+    expect(ended.sort()).toEqual(['p-1', 'p-2']);
+    expect(bump).toHaveBeenCalledTimes(1);
+  });
+
+  it('releases every tracker, and reports the error, when the refresh rejects', async () => {
+    const ended: string[] = [];
+    mockSettle.mockImplementation(async (id, client, afterDecision) => {
+      await afterDecision?.();
+      ended.push(id);
+    });
+    invalidateQueries.mockRejectedValue(new Error('refresh failed'));
+    const { result } = renderHook(() => useSettleDeclinedProposals());
+
+    await act(async () => {
+      await expect(result.current(['p-1'])).rejects.toThrow('refresh failed');
+    });
+
+    expect(ended).toEqual(['p-1']);
+  });
+
+  it('does not hold the other trackers open when one tracker fails', async () => {
+    mockSettle.mockImplementation(async (id, client, afterDecision) => {
+      if (id === 'p-1') {
+        throw new Error('tracker failed');
+      }
+      await afterDecision?.();
+    });
+    invalidateQueries.mockResolvedValue(undefined);
+    const { result } = renderHook(() => useSettleDeclinedProposals());
+
+    await act(async () => {
+      await expect(result.current(['p-1', 'p-2'])).rejects.toThrow('tracker failed');
+    });
+
+    expect(invalidateQueries).toHaveBeenCalledTimes(1);
   });
 });

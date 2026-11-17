@@ -13,12 +13,9 @@ import type { ESQLUserDefinedColumn, ICommandContext } from '../../registry/type
 
 export { getTrailingIdentifier } from './regex';
 
-export const techPreviewLabel = i18n.translate(
-  'kbn-esql-language.esql.autocomplete.techPreviewLabel',
-  {
-    defaultMessage: `Technical Preview`,
-  }
-);
+export const techPreviewLabel = i18n.translate('esqlLanguage.esql.autocomplete.techPreviewLabel', {
+  defaultMessage: `Technical Preview`,
+});
 
 /**
  * Checks the suggestion text for overlap with the current query.

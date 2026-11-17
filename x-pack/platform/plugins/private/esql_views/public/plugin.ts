@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
 import type { EsqlViewsTelemetryClient } from './telemetry';
-
-interface EsqlViewsPublicConfig {
-  managementUi: {
-    enabled: boolean;
-  };
-}
 
 interface SetupDependencies {
   management: ManagementSetup;
@@ -28,19 +22,9 @@ export interface StartDependencies {
 }
 
 export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies, StartDependencies> {
-  private readonly isManagementUiEnabled: boolean;
   private telemetryClient?: Promise<EsqlViewsTelemetryClient | undefined>;
 
-  constructor(initializerContext: PluginInitializerContext) {
-    const { managementUi } = initializerContext.config.get<EsqlViewsPublicConfig>();
-    this.isManagementUiEnabled = managementUi.enabled;
-  }
-
   public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
-    if (!this.isManagementUiEnabled) {
-      return;
-    }
-
     // Loaded once, on first mount; resolves to no client if the telemetry module fails to load.
     const getTelemetryClient = () =>
       (this.telemetryClient ??= import('./telemetry')

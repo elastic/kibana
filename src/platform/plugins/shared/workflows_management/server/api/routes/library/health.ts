@@ -31,7 +31,7 @@ export function registerLibraryHealthRoute(
       path: '/internal/workflows/library/health',
       access: 'internal',
       security: WORKFLOW_READ_SECURITY,
-      summary: 'Workflow Template Library health',
+      summary: 'Workflow Template library health',
       description: 'Returns the toggle state and the cache refresh diagnostic payload.',
     })
     .addVersion(

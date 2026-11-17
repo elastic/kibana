@@ -5,28 +5,20 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const RUNNING_LABEL = i18n.translate(
   'xpack.agenticInvestigations.investigations.runningLabel',
-  { defaultMessage: 'Investigating…' }
+  { defaultMessage: 'Investigating' }
 );
 
-export const NO_SEVERITY_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.investigations.noSeverityLabel',
-  { defaultMessage: 'Not rated' }
+/** List-card status next to the age while a worker is running. */
+export const IN_PROGRESS_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.investigations.inProgressLabel',
+  { defaultMessage: 'In progress' }
 );
-
-export const CLOSED_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.investigations.closedLabel',
-  { defaultMessage: 'Closed' }
-);
-
-export const pendingProposalsLabel = (count: number): string =>
-  i18n.translate('xpack.agenticInvestigations.investigations.pendingProposals', {
-    defaultMessage: '{count, plural, one {# proposal to review} other {# proposals to review}}',
-    values: { count },
-  });
 
 export const moreEntitiesLabel = (count: number): string =>
   i18n.translate('xpack.agenticInvestigations.investigations.moreEntities', {
@@ -39,3 +31,10 @@ export const NEW_INVESTIGATION_TITLE = i18n.translate(
   'xpack.agenticInvestigations.investigations.newInvestigationTitle',
   { defaultMessage: 'New investigation' }
 );
+
+export const updatedAgoLabel = (age: React.ReactNode): React.ReactNode =>
+  React.createElement(FormattedMessage, {
+    id: 'xpack.agenticInvestigations.investigations.updatedAgo',
+    defaultMessage: 'Updated {age}',
+    values: { age },
+  });

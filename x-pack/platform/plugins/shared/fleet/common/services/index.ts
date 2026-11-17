@@ -6,7 +6,12 @@
  */
 
 export * from './routes';
-export { validateFleetSavedObjectId } from './validate_fleet_id';
+export {
+  validateFleetSavedObjectId,
+  isPathTraversalId,
+  validateNoPathTraversalId,
+  validateNoPathTraversalIdSchema,
+} from './validate_fleet_id';
 export { isValidDuration, isValidEnrollmentKeyExpiration } from './validate_duration';
 export * as AgentStatusKueryHelper from './agent_status';
 export * from './package_helpers';
@@ -93,6 +98,7 @@ export {
   validatePackagePolicyConfig,
   validationHasErrors,
   countValidationErrors,
+  formatAgentConditionErrors,
 } from './validate_package_policy';
 
 export { normalizeHostsForAgents } from './hosts_utils';
@@ -142,12 +148,19 @@ export {
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
 
-export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';
+export { getIncompatibleIntegrations } from './agent_version_compatibility';
+export {
+  removeSOAttributes,
+  getSortConfig,
+  checkTargetVersionsValidity,
+  extractAgentIdsWithData,
+  filterIncomingDataWithData,
+} from './agent_utils';
 
 export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
 
 // Generic var_group helpers
-export type { VarGroupSelection } from './var_group_helpers';
+export type { VarGroupSelection, VarGroupDeploymentMode } from './var_group_helpers';
 export {
   getSelectedOption,
   getVisibleVarsForOption,
@@ -155,7 +168,11 @@ export {
   shouldShowVar,
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
+  hasConfiguredVarValue,
   inferVarGroupSelections,
+  isVarGroupOptionHiddenInDeploymentMode,
+  getFirstVisibleVarGroupOption,
+  sanitizeVarGroupSelections,
 } from './var_group_helpers';
 
 // Cloud Connector accessor module
@@ -187,3 +204,15 @@ export {
   buildPolicyBaseIdWithFallbackKuery,
   buildPolicyBaseIdsWithFallbackKuery,
 } from './version_specific_policies_utils';
+
+export {
+  parseYamlChangelog,
+  formatChangelog,
+  getBreakingChanges,
+  getBreakingChangesInRange,
+  ChangeType,
+  type Changelog,
+  type ChangelogEntry,
+  type BreakingChangesLog,
+  type YamlParseFn,
+} from './changelog_utils';

@@ -31,6 +31,4 @@ fileGroups:
     - storybook/**/*
     - index.*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

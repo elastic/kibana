@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   UpdateWorkerRequestBody,
@@ -27,6 +28,17 @@ import {
   type CoreServiceAccounts,
 } from '../service_accounts/ensure_worker_service_accounts';
 import { useUpdateWorker } from './use_workers_api';
+
+const SERVICE_ACCOUNT_SETUP_FAILED_TITLE = i18n.translate(
+  'xpack.alertzero.watchSettings.serviceAccountSetupFailedTitle',
+  { defaultMessage: "Some Worker changes weren't saved" }
+);
+
+const serviceAccountSetupFailedDescription = (failures: string) =>
+  i18n.translate('xpack.alertzero.watchSettings.serviceAccountSetupFailedDescription', {
+    defaultMessage: "AlertZero couldn't set up their service accounts. {failures}.",
+    values: { failures },
+  });
 
 interface WorkerSettingsDraft {
   /** The saved settings and revision the user started editing from. */
@@ -70,15 +82,21 @@ const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined):
  * would read as part of this draft and be written back with a fresh revision.
  *
  * A Worker saved as enabled without a service account is bound to its prebuilt account first,
- * which is created if missing. If that fails, the Worker keeps its draft and shows the error.
+ * which is created if missing. If that fails, the Worker keeps its draft and shows the error, and
+ * a toast names it, since no write runs that would report the failure.
+ *
+ * `discard()` detaches a save still in flight: its writes go through, but its results, errors and
+ * saving state no longer land on the draft, which by then may belong to another Watch.
  */
 export const useWatchSettingsDraft = (workers: Worker[]) => {
   const {
-    services: { http, serviceAccounts, isServerless = false },
+    services: { http, notifications, serviceAccounts, isServerless = false },
   } = useKibana<CoreStart & { serviceAccounts?: CoreServiceAccounts; isServerless?: boolean }>();
   const { mutateAsync } = useUpdateWorker();
   const [overlays, setOverlays] = useState<Record<string, WorkerDraftOverlay>>({});
   const [isSaving, setIsSaving] = useState(false);
+  // Bumped by `discard()`; a save started under an older value no longer owns the draft.
+  const draftGeneration = useRef(0);
 
   // Dropped rather than hidden, so the switch-on can't come back if the block later clears.
   useEffect(() => {
@@ -144,7 +162,9 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
   }, []);
 
   const discard = useCallback(() => {
+    draftGeneration.current += 1;
     setOverlays({});
+    setIsSaving(false);
   }, []);
 
   /** Resolves with each written Worker as the server returned it; a failed Worker keeps its draft. */
@@ -162,11 +182,17 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
       throw new Error('invalid');
     }
 
-    const setError = (workerId: string, message: string) =>
+    const generation = draftGeneration.current;
+    const ownsDraft = () => draftGeneration.current === generation;
+    const setError = (workerId: string, message: string) => {
+      if (!ownsDraft()) {
+        return;
+      }
       setOverlays((current) => ({
         ...current,
         [workerId]: { ...current[workerId], error: message },
       }));
+    };
 
     const savedWorkers: Worker[] = [];
     setIsSaving(true);
@@ -181,6 +207,16 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
         needsAccount.map((worker) => worker.id),
         { isServerless }
       );
+      const accountFailures = needsAccount.flatMap(({ id, name }) => {
+        const account = accounts.get(id);
+        return account && !account.ok ? [`${name}: ${account.error}`] : [];
+      });
+      if (accountFailures.length > 0) {
+        notifications.toasts.addDanger({
+          title: SERVICE_ACCOUNT_SETUP_FAILED_TITLE,
+          text: serviceAccountSetupFailedDescription(accountFailures.join('; ')),
+        });
+      }
 
       for (const worker of outstanding) {
         const draft = resolve(worker);
@@ -206,10 +242,14 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
         try {
           const { worker: savedWorker } = await mutateAsync({ workerId: worker.id, patch });
           savedWorkers.push(savedWorker);
-          setOverlays((current) => {
-            const { [worker.id]: _removed, ...rest } = current;
-            return rest;
-          });
+          // `watchIds` allows a Worker on several Watches; a detached save must not wipe an edit
+          // made on the next one.
+          if (ownsDraft()) {
+            setOverlays((current) => {
+              const { [worker.id]: _removed, ...rest } = current;
+              return rest;
+            });
+          }
         } catch (error) {
           const body = isHttpFetchError(error)
             ? (error.body as { message?: unknown } | undefined)
@@ -224,10 +264,12 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
         }
       }
     } finally {
-      setIsSaving(false);
+      if (ownsDraft()) {
+        setIsSaving(false);
+      }
     }
     return savedWorkers;
-  }, [http, isServerless, mutateAsync, overlays, resolve, serviceAccounts, workers]);
+  }, [http, isServerless, mutateAsync, notifications, overlays, resolve, serviceAccounts, workers]);
 
   return {
     discard,

@@ -203,11 +203,16 @@ export function DataTableDocumentToolbarBtn({
                 bulkAction.isAvailable?.({ selectedDocIds: docIdsInSelectionOrder }) ?? true
             )
             .map((bulkAction) => {
+              const disabledReason = bulkAction.getDisabledReason?.({
+                selectedDocIds: docIdsInSelectionOrder,
+              });
               return (
                 <EuiContextMenuItem
                   data-test-subj={bulkAction['data-test-subj']}
                   key={bulkAction.key}
                   icon={bulkAction.icon}
+                  disabled={disabledReason !== undefined}
+                  toolTipContent={disabledReason}
                   onClick={() => {
                     closePopover();
                     bulkAction.onClick({ selectedDocIds: docIdsInSelectionOrder });

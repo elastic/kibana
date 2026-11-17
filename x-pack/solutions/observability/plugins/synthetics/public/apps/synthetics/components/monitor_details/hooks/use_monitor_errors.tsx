@@ -8,11 +8,14 @@ import { useTimeZone } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useSelectedLocation } from './use_selected_location';
+import { useSelectedMonitor } from './use_selected_monitor';
 import type { Ping, PingState } from '../../../../../../common/runtime_types';
+import { isHeartbeatSyntheticsMonitor } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../../../common/constants/client_defaults';
+import { getHeartbeatLocationFilter, getMonitorIdentityFilter } from '../../../../../../common/lib';
 import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
@@ -24,6 +27,9 @@ export function useMonitorErrors(monitorIdArg?: string) {
   const { monitorId } = useParams<{ monitorId: string }>();
 
   const { dateRangeStart, dateRangeEnd, remoteName } = useGetUrlParams();
+
+  const { monitor } = useSelectedMonitor();
+  const origin = isHeartbeatSyntheticsMonitor(monitor) ? monitor.origin : undefined;
 
   const selectedLocation = useSelectedLocation();
 
@@ -47,16 +53,15 @@ export function useMonitorErrors(monitorIdArg?: string) {
                 },
               },
             },
-            {
-              term: {
-                config_id: monitorIdArg ?? monitorId,
-              },
-            },
-            {
-              term: {
-                'observer.geo.name': selectedLocation?.label,
-              },
-            },
+            getMonitorIdentityFilter({
+              monitorId: monitorIdArg ?? monitorId,
+              origin,
+              remoteName,
+            }),
+            ...getHeartbeatLocationFilter({
+              field: 'observer.geo.name',
+              value: selectedLocation?.label,
+            }),
           ],
         },
       },
@@ -102,6 +107,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
       dateRangeEnd,
       selectedLocation?.label,
       remoteName,
+      origin,
     ],
     {
       name: `getMonitorErrors/${dateRangeStart}/${dateRangeEnd}`,

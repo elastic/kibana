@@ -87,6 +87,7 @@ export const createDiscoverSessionService = ({
         ...session,
         id: response.id,
         managed: response.meta.managed ?? false,
+        version: response.meta.version,
         references: getDiscoverSessionReferences(response.data),
       };
     },

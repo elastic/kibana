@@ -233,29 +233,20 @@ describe('FetchSuppressionsStep', () => {
     }
   });
 
-  it('returns empty suppressions when no alerts exist', async () => {
+  it.each([
+    ['no alerts exist', { alerts: [] }],
+    ['alerts is undefined', {}],
+  ])('returns empty suppressions without querying when %s', async (_, overrides) => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchSuppressionsStep(queryService);
 
-    const state = createDispatcherPipelineState({ alerts: [] });
+    const state = createDispatcherPipelineState(overrides);
     const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.suppressions?.size).toBe(0);
     expect(mockEsClient.esql.query).not.toHaveBeenCalled();
-  });
-
-  it('returns empty suppressions when alerts is undefined', async () => {
-    const { queryService } = createQueryService();
-    const step = new FetchSuppressionsStep(queryService);
-
-    const state = createDispatcherPipelineState();
-    const result = await step.execute(state, logger);
-
-    expect(result.type).toBe('continue');
-    if (result.type !== 'continue') return;
-    expect(result.data?.suppressions?.size).toBe(0);
   });
 
   it('parses external suppressions (source != internal, null rule_id) correctly', async () => {

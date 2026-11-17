@@ -48,6 +48,13 @@ interface SeedEndpointHostsParams {
   config: ScoutTestConfig;
   count: number;
   isolation: boolean;
+  /**
+   * Agent version written to the host metadata. When omitted, the generator picks a
+   * random 7.x/8.x version, which decides the host capabilities (get-file needs 8.6+).
+   * Pass `kibanaPackageJson.version`, as the Cypress loader does, for commands that
+   * need a capability.
+   */
+  agentVersion?: string;
 }
 
 const hostIdentity = (indexed: IndexedHostsAndAlertsResponse): SeededEndpointHost[] => {
@@ -74,6 +81,7 @@ export const seedEndpointHosts = async ({
   config,
   count,
   isolation,
+  agentVersion,
 }: SeedEndpointHostsParams): Promise<SeededEndpointHosts> => {
   const kbnClient = scopeKbnClientToSpace(rootKbnClient, spaceId);
   const systemEsClient = await createSystemIndicesEsClient(esClient, config);
@@ -111,7 +119,10 @@ export const seedEndpointHosts = async ({
 
   try {
     const DocGenerator = EndpointDocGenerator.custom({
-      CustomMetadataGenerator: EndpointMetadataGenerator.custom({ isolation }),
+      CustomMetadataGenerator: EndpointMetadataGenerator.custom({
+        isolation,
+        version: agentVersion,
+      }),
     });
 
     indexed = await withMetadataTransformLock(() =>

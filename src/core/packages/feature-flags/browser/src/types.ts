@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Provider } from '@openfeature/web-sdk';
 import { type EvaluationContext as OpenFeatureEvaluationContext } from '@openfeature/core';
 import type { Observable } from 'rxjs';
 
@@ -94,14 +93,6 @@ export interface FeatureFlagsSetup {
   getInitialFeatureFlags: () => Record<string, unknown>;
 
   /**
-   * Registers an OpenFeature provider to talk to the
-   * 3rd-party service that manages the Feature Flags.
-   * @param provider The {@link Provider | OpenFeature Provider} to handle the communication with the feature flags management system.
-   * @public
-   */
-  setProvider(provider: Provider): void;
-
-  /**
    * Appends new keys to the evaluation context.
    * @param contextToAppend The additional keys that should be appended/modified in the evaluation context.
    * @public
@@ -177,4 +168,15 @@ export interface FeatureFlagsStart {
    * @public
    */
   useNumberValue<Value extends number>(flagName: string, fallbackValue: Value): Value;
+}
+
+/**
+ * Feature flags APIs used by the developer toolbar. Not part of the public contract.
+ * @internal
+ */
+export interface InternalFeatureFlagsStart extends FeatureFlagsStart {
+  helper: {
+    /** Opens the flyout without changing whether the corner button is shown. */
+    open(): void;
+  };
 }

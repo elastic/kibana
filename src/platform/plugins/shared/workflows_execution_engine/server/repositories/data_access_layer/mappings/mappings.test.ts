@@ -116,7 +116,9 @@ describe('ES FLS allowlist cross-repo sync', () => {
     const javaGrantedFields = [
       'spaceId',
       'id',
+      'runName',
       'workflowId',
+      'workflowUid',
       'managed',
       'managedBy',
       'originManagedWorkflowId',
@@ -127,6 +129,9 @@ describe('ES FLS allowlist cross-repo sync', () => {
       'stepId',
       'createdBy',
       'executedBy',
+      // Requires the matching ES-side grant in KibanaWorkflowsImplicitPrivilegesProvider
+      // before user-credentialed queries (e.g. the executions page filter) can read it.
+      'executedByUser.*',
       'effectiveIdentity.*',
       'startedAt',
       'finishedAt',
@@ -163,6 +168,7 @@ describe('WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS', () => {
     const properties = WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
     expect(properties.spaceId).toEqual({ type: 'keyword', ignore_above: 1024 });
     expect(properties.workflowId).toEqual({ type: 'keyword', ignore_above: 1024 });
+    expect(properties.workflowUid).toEqual({ type: 'keyword', ignore_above: 1024 });
     expect(properties.status).toEqual({ type: 'keyword', ignore_above: 1024 });
     expect(properties.createdBy).toEqual({ type: 'keyword', ignore_above: 1024 });
     expect(properties.executedBy).toEqual({ type: 'keyword', ignore_above: 1024 });

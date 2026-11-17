@@ -13,6 +13,7 @@ import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
 import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import {
+  useAuthz,
   useGetPackagesQuery,
   useGetCategoriesQuery,
   useGetAppendCustomIntegrationsQuery,
@@ -30,6 +31,7 @@ import {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   filterPolicyTemplatesTiles,
+  shouldAddIntegrationFromCatalog,
 } from '../../../../../../../../common/services';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
@@ -114,6 +116,9 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
         })
       : [];
 
+    // Classify before `policy_templates` is stripped from the tiles above
+    const addIntegrationFromCatalog = shouldAddIntegrationFromCatalog(pkg);
+
     const tiles = filterPolicyTemplatesTiles<PackageListItem>(
       pkg.policy_templates_behavior,
       topPackage,
@@ -122,6 +127,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       return {
         ...tile,
         supportsAgentless: isAgentlessIntegration(pkg, tile.integration || tile.name),
+        addIntegrationFromCatalog,
       };
     });
 
@@ -157,7 +163,10 @@ export const useAvailablePackages = ({
    * When true, packages sharing a `group` id are collapsed into a single collection
    * tile (subject to the `enableIntegrationCollectionTiles` feature flag).
    * Omit or pass false in contexts where collection tiles are not appropriate
-   * (e.g. the agent policy add-integration flyout, Security onboarding).
+   * (e.g. the agent policy add-integration flyout).
+   * Hosts outside the Integrations app that enable this must also pass
+   * `collectionReturnLocation` to `PackageListGrid` (or render their own chooser), otherwise a
+   * click on a collection tile has nowhere to go.
    */
   enableCollectionGrouping?: boolean;
 }) => {
@@ -224,6 +233,9 @@ export const useAvailablePackages = ({
     );
 
   const { enableIntegrationCollectionTiles } = ExperimentalFeaturesService.get();
+  // `authz` is not provided when the hook is used outside of Fleet (e.g. Observability onboarding),
+  // where the privileges are enforced by the destination page.
+  const canAddIntegration = useAuthz()?.integrations?.all ?? true;
 
   // All cards before any filter (no agentless filter, no category filter).
   // Used by useBrowseIntegrationHook which applies both filters from the live URL.
@@ -240,6 +252,7 @@ export const useAvailablePackages = ({
         getAbsolutePath,
         addBasePath,
         packageVerificationKeyId,
+        canAddIntegration,
       });
       itemsToMap = ungroupedItems;
       extraCards = collectionCards;
@@ -256,6 +269,7 @@ export const useAvailablePackages = ({
           item,
           addBasePath,
           packageVerificationKeyId,
+          canAddIntegration,
         })
       ),
     ].sort((a, b) => a.title.localeCompare(b.title));
@@ -264,6 +278,7 @@ export const useAvailablePackages = ({
   }, [
     addBasePath,
     appendCustomIntegrations,
+    canAddIntegration,
     applyOnboardingOverride,
     enableCollectionGrouping,
     enableIntegrationCollectionTiles,

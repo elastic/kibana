@@ -6,6 +6,11 @@
  */
 
 import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type {
+  SignificantEventInvestigationState,
+  SignificantEventsSortField,
+  SignificantEventsSortOrder,
+} from '../../../../common/events_list';
 import type { PaginatedSearchOptions } from '../query_utils';
 
 /** Filters shared by every "latest current state" read path over `.rule-events`. */
@@ -17,6 +22,22 @@ export interface EventsFilterOptions {
   eventIds?: string[];
   ruleUuids?: string[];
   topologyFeatureIds?: string[];
+  unassignedEntityIds?: string[];
+  investigation?: {
+    states: SignificantEventInvestigationState[];
+    episodes: InvestigationEpisodes;
+  };
 }
 
-export type EventsPaginatedSearchOptions = PaginatedSearchOptions & EventsFilterOptions;
+/** Episode ids (`alert.id`) by investigation state; any other episode is `not_started`. */
+export interface InvestigationEpisodes {
+  inProgress: string[];
+  completed: string[];
+}
+
+export type EventsPaginatedSearchOptions = PaginatedSearchOptions &
+  EventsFilterOptions & {
+    /** Defaults to the latest revision time, newest first. */
+    sortField?: SignificantEventsSortField;
+    sortOrder?: SignificantEventsSortOrder;
+  };

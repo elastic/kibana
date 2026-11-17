@@ -63,6 +63,53 @@ describe('buildRulesListFilter', () => {
     );
   });
 
+  it('builds a KQL filter for the template a rule was created from', () => {
+    expect(buildRulesListFilter({ templateIds: ['nginx-error-rate'] })).toBe(
+      '(metadata.template.id: "nginx-error-rate")'
+    );
+  });
+
+  it('builds a KQL OR filter for multiple templates', () => {
+    expect(buildRulesListFilter({ templateIds: ['a-template', 'b-template'] })).toBe(
+      '(metadata.template.id: "a-template" OR metadata.template.id: "b-template")'
+    );
+  });
+
+  it('negates the whole OR group when several templates are excluded', () => {
+    expect(buildRulesListFilter({ excludedTemplateIds: ['a-template', 'b-template'] })).toBe(
+      'NOT (metadata.template.id: "a-template" OR metadata.template.id: "b-template")'
+    );
+  });
+
+  it('intersects included and excluded templates', () => {
+    expect(
+      buildRulesListFilter({ templateIds: ['a-template'], excludedTemplateIds: ['b-template'] })
+    ).toBe('(metadata.template.id: "a-template") AND NOT (metadata.template.id: "b-template")');
+  });
+
+  it('escapes double quotes and backslashes in template ids', () => {
+    expect(buildRulesListFilter({ templateIds: ['a"b\\c'] })).toBe(
+      '(metadata.template.id: "a\\"b\\\\c")'
+    );
+  });
+
+  it('ignores empty template arrays', () => {
+    expect(buildRulesListFilter({ templateIds: [], excludedTemplateIds: [] })).toBeUndefined();
+  });
+
+  it('combines the template with the other filters', () => {
+    expect(
+      buildRulesListFilter({
+        enabled: 'true',
+        tags: ['prod'],
+        kind: 'alert',
+        templateIds: ['nginx-error-rate'],
+      })
+    ).toBe(
+      'enabled: true AND (metadata.tags: "prod") AND kind: alert AND (metadata.template.id: "nginx-error-rate")'
+    );
+  });
+
   it('ignores empty tag arrays', () => {
     expect(buildRulesListFilter({ tags: [], excludedTags: [] })).toBeUndefined();
   });

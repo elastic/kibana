@@ -10,12 +10,8 @@
 import {
   LensConfigBuilder,
   type LensAttributes,
-  type LensConfig,
-  type LensESQLDataset,
   type LensHeatmapConfig,
-  type LensLegendConfig,
-  type LensSeriesLayer,
-  type LensYBoundsConfig,
+  type LensXYConfig,
 } from '@kbn/lens-embeddable-utils';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -43,6 +39,17 @@ import { useEuiTheme } from '@elastic/eui';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { useReportChartSectionError } from './use_report_chart_section_error';
 
+/** XY series and heatmap only. Other Lens chart types are not built here. */
+export type ChartLensConfig = LensXYConfig | LensHeatmapConfig;
+
+const getLensConfigEsql = (config: ChartLensConfig): string => {
+  const { dataset } = config;
+  if (dataset && 'esql' in dataset) {
+    return dataset.esql;
+  }
+  return '';
+};
+
 export type LensProps = Pick<
   EmbeddableComponentProps,
   | 'id'
@@ -59,36 +66,22 @@ export type LensProps = Pick<
   | 'description'
 >;
 
+/** Builds Lens props for an XY series or heatmap config. Other chart types are not supported. */
 export const useLensProps = ({
   chartId,
-  title,
-  description,
-  query,
+  lensConfig,
   services,
   fetchParams,
   discoverFetch$,
   chartRef,
-  chartLayers,
-  yBounds,
-  legend,
-  yAxisTitle,
-  heatmapConfig,
   error,
   userMessages,
   profileId,
 }: {
   chartId: string;
-  title: string;
-  description?: string;
-  query: string;
+  lensConfig: ChartLensConfig;
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   chartRef?: React.RefObject<HTMLDivElement>;
-  chartLayers: LensSeriesLayer[];
-  yBounds?: LensYBoundsConfig;
-  legend?: LensLegendConfig;
-  yAxisTitle?: string;
-  /** When set, builds a heatmap with the same config builder as the XY chart. */
-  heatmapConfig?: LensHeatmapConfig;
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
@@ -106,56 +99,26 @@ export const useLensProps = ({
   // Dedup persistent failures by name+message so a fresh Error reference per retry
   // doesn't loop through setBuildError -> effectiveError -> rebuild.
   const lastBuildErrorKeyRef = useRef<string | null>(null);
+  const description = lensConfig.description;
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [
-    query,
-    title,
-    description,
-    chartLayers,
-    yBounds,
-    legend,
-    yAxisTitle,
-    heatmapConfig,
-    effectiveError,
-    userMessages,
-    profileId,
-  ]);
+  }, [lensConfig, effectiveError, userMessages, profileId]);
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
     const builder = new LensConfigBuilder(services.dataViews);
 
-    if (heatmapConfig) {
-      return (await builder.build(heatmapConfig, {
-        query: {
-          esql: (heatmapConfig.dataset as LensESQLDataset).esql,
-        },
-      })) as LensAttributes;
+    // Keep Lens from building an empty XY chart. An error still builds so Lens can show it.
+    if (lensConfig.chartType === 'xy' && lensConfig.layers.length === 0 && !effectiveError) {
+      return null;
     }
 
-    // keep Lens from building if there are no chart layers and no error
-    // force Lens to build with no datasource on error to show the error message
-    if (!chartLayers.length && !effectiveError) return null;
-
-    const lensParams = buildLensParams({
-      query,
-      title,
-      description,
-      chartLayers,
-      yBounds,
-      legend,
-      yAxisTitle,
-    });
-
-    const result = (await builder.build(lensParams, {
+    return (await builder.build(lensConfig, {
       query: {
-        esql: (lensParams.dataset as LensESQLDataset).esql,
+        esql: getLensConfigEsql(lensConfig),
       },
     })) as LensAttributes;
-
-    return result;
   });
 
   const buildLensProps = useCallback(
@@ -280,43 +243,6 @@ export const useLensProps = ({
   ]);
 
   return lensPropsContext;
-};
-
-const buildLensParams = ({
-  query,
-  title,
-  description,
-  chartLayers,
-  yBounds,
-  legend,
-  yAxisTitle,
-}: {
-  query: string;
-  title: string;
-  description?: string;
-  chartLayers: LensSeriesLayer[];
-  yBounds?: LensYBoundsConfig;
-  legend?: LensLegendConfig;
-  yAxisTitle?: string;
-}): LensConfig => {
-  return {
-    chartType: 'xy',
-    description,
-    dataset: {
-      esql: query,
-    },
-    title,
-    legend: legend ?? { show: false },
-    axisTitleVisibility: {
-      showXAxisTitle: false,
-      showYAxisTitle: yAxisTitle !== undefined,
-      showYRightAxisTitle: false,
-    },
-    yTitle: yAxisTitle,
-    layers: chartLayers,
-    fittingFunction: 'Linear',
-    yBounds,
-  };
 };
 
 const getLensProps = ({

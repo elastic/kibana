@@ -83,12 +83,12 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           `--xpack.alerting.rules.minimumScheduleInterval.value="1s"`,
-          '--xpack.eventLog.logEntries=true',
+          '--xpack.eventLog.logEntries=false',
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
           ...findTestPluginPaths([
-            path.resolve(__dirname, '../../alerting_api_integration/common/plugins'),
+            path.resolve(__dirname, '../../../test_plugins/response_ops/alerting_api_integration'),
           ]),
           '--xpack.ruleRegistry.write.enabled=true',
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,

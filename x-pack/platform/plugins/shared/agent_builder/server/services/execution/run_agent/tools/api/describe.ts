@@ -14,6 +14,7 @@ import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { EXPANDABLE_KEY, loadApi, targetSchema, toDescribedSchema } from '../../api';
 import type { ApiRegistryDefinition } from '../../api';
+import { createApiIdentifierSchema } from './api_identifier';
 import { apiFailureToErrorResult } from './errors';
 
 export interface ApiDescribeResultData {
@@ -27,32 +28,43 @@ export interface ApiDescribeResultData {
   expandable_types: string[];
 }
 
-const describeSchema = z.object({
-  target: targetSchema,
-  api: z
-    .string()
-    .describe(
-      'The API identifier, formed from the namespace and name (e.g. "indices.create", "bulk", ' +
-        '"cluster.health").'
-    ),
-});
+const createDescribeSchema = (discoveryEnabled: boolean) =>
+  z.object({
+    target: targetSchema,
+    api: createApiIdentifierSchema(discoveryEnabled),
+  });
 
 export const createDescribeApiTool = ({
   discoveryEnabled,
 }: {
   discoveryEnabled: boolean;
-}): InternalBuiltinToolDefinition<typeof describeSchema> => {
+}): InternalBuiltinToolDefinition<ReturnType<typeof createDescribeSchema>> => {
+  const usageGuidance = discoveryEnabled
+    ? ''
+    : `Do not call this tool unless a skill or the user explicitly names the operation to call. It
+cannot search for or list operations, and there is no other tool that can. Never invent an
+identifier, recall one from memory (even one you are confident exists), or adapt one from a URL,
+from documentation, or after an unknown-identifier error. Asking for a result does not name an
+operation. Only describe an operation you are about to call with \`${internalTools.executeApi}\`.
+This tool is not a general reference for how an API works. When nothing you were given names the
+operation, do not use this tool or \`${internalTools.executeApi}\` at all. Do the task with your
+other tools instead, or tell the user the operation is not available.
+
+`;
   const identifierGuidance = discoveryEnabled
     ? `Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identifier, then call`
-    : `The \`api\` identifier comes from the instruction you are following, or from what you already
-know the target exposes. Describe it here to confirm it exists and to see its params, then call`;
+    : `Describe the operation here to confirm it exists and to see its params, then call`;
+
+  const summary = discoveryEnabled
+    ? 'Get the full parameter specification for an HTTP API operation.'
+    : 'Get the full parameter specification for an HTTP API operation that a skill or the user explicitly named.';
 
   return {
     id: internalTools.describeApi,
     type: ToolType.builtin,
-    description: `Get the full parameter specification for an HTTP API operation.
+    description: `${summary}
 
-Returns:
+${usageGuidance}Returns:
 - The HTTP \`method\` and \`path\` template (e.g. \`PUT /{index}/_create/{id}\`). Every name it
   interpolates is one of the parameters below, and must be supplied for the call to run.
 - \`destructive\`: whether the operation modifies or deletes existing data. Prefer a non-destructive
@@ -72,7 +84,7 @@ Returns:
 
 ${identifierGuidance}
 \`${internalTools.executeApi}\` with the same \`target\` and \`api\` plus the \`params\` from this schema.`,
-    schema: describeSchema,
+    schema: createDescribeSchema(discoveryEnabled),
     handler: async ({ target, api }, { logger }) => {
       const loadResult = await loadApi(target, api);
       if (loadResult.status !== 'loaded') {

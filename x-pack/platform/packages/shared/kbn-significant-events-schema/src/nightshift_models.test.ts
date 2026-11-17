@@ -13,10 +13,11 @@ import { NIGHTSHIFT_DEFAULT_MODELS } from './nightshift_models';
 describe('NIGHTSHIFT_DEFAULT_MODELS', () => {
   it('pins each Nightshift step to its recommended default inference endpoint', () => {
     expect(NIGHTSHIFT_DEFAULT_MODELS).toEqual({
-      discovery: defaultInferenceEndpoints.OPENAI_GPT_5_4,
-      investigation: defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
-      kiExtraction: defaultInferenceEndpoints.OPENAI_GPT_5_4,
-      kiQueryGeneration: defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
+      discovery: defaultInferenceEndpoints.OPENAI_GPT_6_LUNA,
+      investigation: defaultInferenceEndpoints.ANTHROPIC_CLAUDE_5_5_SONNET,
+      kiExtraction: defaultInferenceEndpoints.OPENAI_GPT_6_LUNA_PRO,
+      kiQueryGeneration: defaultInferenceEndpoints.OPENAI_GPT_6_LUNA_PRO,
+      onlineEvalsJudge: defaultInferenceEndpoints.OPENAI_GPT_6_SOL,
     });
   });
 });
@@ -30,7 +31,7 @@ describe('Nightshift model errors', () => {
 
   it('names the restriction, selected model, and allowed default', () => {
     expect(new NightshiftModelBlockedError('selected-model', 'default-model').message).toBe(
-      `Nightshift can't use model "selected-model": the GenAI setting "Default connector only" (genAiSettings:defaultAIConnectorOnly) only allows "default-model". Turn that setting off, or run with "default-model" as the model.`
+      `Nightshift can't use model "selected-model": the GenAI setting "Default connector only" (genAiSettings:defaultAIConnectorOnly) only allows "default-model". Turn that setting off to use Nightshift.`
     );
   });
 

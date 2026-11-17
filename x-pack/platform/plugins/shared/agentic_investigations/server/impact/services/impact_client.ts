@@ -17,24 +17,19 @@ import type { ImpactService } from './impact_service';
 /**
  * In-process impact reads. The space and the principal both come from the
  * request, so a caller cannot supply another space or skip the investigations
- * read privilege (read or manage). Impact of a conversation the caller cannot
- * read is left out, as if it had none.
+ * read privilege (read or manage). Impact of a conversation the caller cannot read is left out, as
+ * if it had none.
  */
 export interface ImpactReadClient {
   listByConversationIds: (conversationIds: string[]) => Promise<Impact[]>;
   /**
-   * Entity ids per conversation, for landing-page hydration. Ids are deduped and read in
-   * chunks, so callers are not bound by the per-read cap. Conversations without an Impact
-   * document are absent from the map.
-   */
-  getEntityIdsByConversationId: (conversationIds: string[]) => Promise<Map<string, string[]>>;
-  /**
-   * Same read as `getEntityIdsByConversationId`, keeping each entity's `id` and `type` so the
-   * landing page can show what kind of entity a pill stands for.
+   * Each entity's `id`, `type`, and `name` per conversation. Ids are deduped and read in chunks,
+   * so callers are not bound by the per-read cap. Conversations without an Impact document are
+   * absent from the map.
    */
   getEntitiesByConversationId: (
     conversationIds: string[]
-  ) => Promise<Map<string, Array<Pick<ImpactEntity, 'id' | 'type'>>>>;
+  ) => Promise<Map<string, Array<Pick<ImpactEntity, 'id' | 'type' | 'name'>>>>;
   /**
    * Conversations whose impact lists the entity, for filtering a list by an Impact pill. Bounded
    * by {@link MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS}; conversations the caller cannot read
@@ -51,8 +46,8 @@ export interface ImpactClientDeps {
 }
 
 /**
- * Builds a request-scoped reader. The privilege check runs before any search, and the impact
- * index (read as the internal user) is only read for conversations the caller can read.
+ * Builds a request-scoped reader. The privilege check runs before any search. The impact index
+ * (read as the internal user) is only read for conversations the caller can read.
  */
 export const createImpactClient =
   ({ getImpactService, getSpaceId, privileges, getConversationClient }: ImpactClientDeps) =>
@@ -96,7 +91,11 @@ export const createImpactClient =
       return new Map(
         impacts.map((impact) => [
           impact.conversationId,
-          (impact.entities ?? []).map(({ id, type }) => ({ id, type })),
+          (impact.entities ?? []).map(({ id, type, name }) => ({
+            id,
+            type,
+            ...(name !== undefined ? { name } : {}),
+          })),
         ])
       );
     };
@@ -104,10 +103,6 @@ export const createImpactClient =
     return {
       listByConversationIds,
       getEntitiesByConversationId,
-      getEntityIdsByConversationId: async (conversationIds) => {
-        const entities = await getEntitiesByConversationId(conversationIds);
-        return new Map([...entities].map(([id, list]) => [id, list.map((entity) => entity.id)]));
-      },
       searchConversationIdsByEntityId: async (entityId) => {
         await privileges.assertCanRead(request);
         const conversationIds = await getImpactService()

@@ -232,11 +232,11 @@ While the run is in progress, a failure means one of these:
 | `workflow_hitl_timed_out` {applies_to}`stack: preview 9.5+` | `success` | A workflow human-input or approval wait has timed out [executionId=x]. |
 
 ::::{note}
-`alert_update` is written for alert workflow status changes made through:
+`alert_update` is written for alert workflow status, tag, and assignee changes made through:
   * The RAC bulk update API (`/internal/rac/alerts/*`)
-  * {applies_to}`stack: ga 9.6+` The Security Solution status routes (`/api/detection_engine/signals/status`, `/api/detection_engine/attacks/status`, and the internal unified alerts status route)
+  * {applies_to}`stack: ga 9.6+` The Security Solution alert routes (`/api/detection_engine/signals/status`, `/api/detection_engine/signals/tags`, `/api/detection_engine/signals/assignees`, `/api/detection_engine/attacks/status`, `/api/detection_engine/attacks/tags`, `/api/detection_engine/attacks/assignees`, and the internal unified alerts status, tag, and assignee routes)
 
-Intent is logged per requested alert ID, or once for query-based updates. Handler validation failures, unavailable alert targets, and Elasticsearch update failures are logged as failures. Authorization denials of these routes are logged as a single bulk `alert_update` failure before the handler runs.
+Intent is logged per requested alert ID, or once for query-based updates. Unavailable alert targets and Elasticsearch update failures are logged as failures. Authorization denials of these routes are logged as a single bulk `alert_update` failure before the handler runs.
 ::::
 
 #### Type: deletion
@@ -419,6 +419,27 @@ Across the `service_account_create`, `service_account_workload_bind`, `service_a
 | --- | --- | --- |
 | `http_request` | `unknown` | User is making an HTTP request. |
 
+### Category: process and file
+
+```{applies_to}
+stack: unavailable
+serverless: preview
+```
+
+#### Types: start, access, creation and change
+
+| **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
+| `sandbox_rpc` | `success` | Sandbox RPC [method] finished with gRPC status OK. Logged once for each call a plugin makes to the sandbox, after it finishes. `event.category` is `process` for `RunCommand` and `file` for the file calls. `event.type` is `start` for `RunCommand`, `access` for `ReadFiles` and `StatFiles`, `creation` for `Mkdirs`, and both `creation` and `change` for `WriteFiles`, which creates a file or overwrites one. Refer to [Trace a sandbox call](#sandbox-rpc-details). |
+| | `failure` | Sandbox RPC [method] finished with gRPC status [status], for example `UNAVAILABLE`. A call that fails without reaching the sandbox, such as a refused connection, is also logged. |
+
+#### Trace a sandbox call [sandbox-rpc-details]
+
+A `sandbox_rpc` event describes one call from a plugin to the sandbox, not the command or file operation inside it. It records no command, environment variable value, file path or file content.
+
+* **Who issued the call:** `kibana.sandbox_caller` names the plugin, the kind of caller (a tool, a workflow step, or the findings recorder), its ID, and the run it belongs to. Whether the event names who is behind the call depends on the request the caller holds: a request from a signed-in user names that user. A tool call usually runs in an Agent Builder execution on Task Manager, and a workflow step runs with a fake request. A fake request carries no authentication state and no socket, so the event names a service account in `user.id` and `user.name` only when the request is registered as one. Otherwise `user.*` is left out and `client` is empty, as it is for a workflow that runs as a user or a workflow without such a request. Either way the event carries `kibana.space_id`, and the tool call or workflow run in `kibana.sandbox_caller.execution_id`.
+* **Find the same call elsewhere:** The proxy's request ID is in `sandbox.proxy_request_id` — not in `http.request.id`, which carries {{kib}}'s own request ID — and the sandbox service logs it under the same name. `sandbox.conversation_id` identifies the conversation in the same way on both sides.
+
 
 ## Audit schema [xpack-security-ecs-audit-schema]
 
@@ -438,9 +459,10 @@ Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://ref
 | **Field** | **Description** |
 | --- | --- |
 | `event.action` | The action captured by the event.<br>Refer to [Audit events](./kibana-audit-events.md#xpack-security-ecs-audit-logging) for a table of possible actions. |
-| `event.category` | High level category associated with the event.<br>This field is closely related to `event.type`, which is used as a subcategory.<br>Possible values:`database`,`web`,`authentication`,`iam` |
+| `event.category` | High level category associated with the event.<br>This field is closely related to `event.type`, which is used as a subcategory.<br>Possible values:`database`,`web`,`authentication`,`iam`,`process`,`file`.<br>{applies_to}`stack: unavailable` {applies_to}`serverless: preview` `process` and `file` are only used by `sandbox_rpc` events. |
 | `event.type` | Subcategory associated with the event.<br>This field can be used along with the `event.category` field to enable filtering events down to a level appropriate for single visualization.<br>Possible values:`creation`,`access`,`change`,`deletion`,`start`,`user` |
 | `event.outcome` | Denotes whether the event represents a success or failure:<br><br>* Any actions that the user is not authorized to perform are logged with outcome:  `failure`<br>* Authorized read operations are only logged after successfully fetching the data from {{es}} with outcome: `success`<br>* Authorized create, update, or delete operations are logged before attempting the operation in {{es}} with outcome: `unknown`, unless the event's own description says otherwise (for example `service_account_create` is logged after the operation)<br><br>Possible values: `success`, `failure`, `unknown`<br> |
+| `event.duration` {applies_to}`stack: unavailable` {applies_to}`serverless: preview` | Duration of the operation the event describes, in nanoseconds. Recorded on `sandbox_rpc` events, where {{kib}} measures it from issuing the call to its result. |
 
 ### User fields
 
@@ -467,12 +489,31 @@ Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://ref
 | `kibana.workload.type` | Type of the workload.<br>Example: `workflow` |
 | `kibana.workload.id` | ID of the workload. |
 | `kibana.workload.execution_id` | ID of the run of the workload, when the plugin executing it supplied one. Recorded on `service_account_assume` events and in their message as `[executionId=…]`. |
+| `kibana.sandbox_caller.plugin_id` {applies_to}`stack: unavailable` {applies_to}`serverless: preview` | ID of the plugin that issued the sandbox RPC.<br>Example: `nightshiftInvestigations` |
+| `kibana.sandbox_caller.type` {applies_to}`stack: unavailable` {applies_to}`serverless: preview` | Type of the caller that issued the sandbox RPC.<br>Example: `tool`, `workflow_step` or `findings_recorder` |
+| `kibana.sandbox_caller.id` {applies_to}`stack: unavailable` {applies_to}`serverless: preview` | ID of the caller: the tool ID for a `tool`, the step type for a `workflow_step`. |
+| `kibana.sandbox_caller.execution_id` {applies_to}`stack: unavailable` {applies_to}`serverless: preview` | ID of the run of the caller, when it has one: the tool call ID for a `tool`, the workflow run ID for a `workflow_step`. |
 | `kibana.authentication_provider` | Name of the authentication provider associated with the event.<br>Example: `my-saml-provider` |
 | `kibana.authentication_type` | Type of the authentication provider associated with the event.<br>Example: `saml` |
 | `kibana.authentication_realm` | Name of the Elasticsearch realm that has authenticated the user.<br>Example: `native` |
 | `kibana.lookup_realm` | Name of the Elasticsearch realm where the user details were retrieved from.<br>Example: `native` |
 | `kibana.add_to_spaces[]` | Set of space IDs that a saved object is being shared to as part of the event.<br>Example: `[default, marketing]` |
 | `kibana.delete_from_spaces[]` | Set of space IDs that a saved object is being removed from as part of the event.<br>Example: `[marketing]` |
+
+### Sandbox fields
+
+```{applies_to}
+stack: unavailable
+serverless: preview
+```
+
+| **Field** | **Description** |
+| --- | --- |
+| `sandbox.conversation_id` | ID of the conversation a sandbox call belongs to, as {{kib}} sends it to the sandbox: `<space>__<conversation>`. Recorded on `sandbox_rpc` events. |
+| `sandbox.proxy_request_id` | Request ID the proxy in front of the sandbox assigned to the call. The sandbox service logs it under the same name, so one search finds both sides of a call. Omitted when no response arrived. |
+| `rpc.method` | Fully qualified name of the sandbox gRPC method that was called. Follows the [OpenTelemetry RPC semantic conventions](https://opentelemetry.io/docs/specs/semconv/rpc/rpc-spans/).<br>Example: `sandbox.SandboxService/RunCommand` |
+| `rpc.status_code` | gRPC status name the call finished with.<br>Example: `OK`, `UNAVAILABLE` |
+| `labels.step_id` | ID of the workflow step that issued the call, within its workflow. Recorded on `sandbox_rpc` events of workflow steps. |
 
 ### Error fields
 

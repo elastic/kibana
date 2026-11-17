@@ -6,9 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import {
   ActionButtonType,
+  type AttachmentPreviewState,
   type AttachmentRenderProps,
   type InlineRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
@@ -17,7 +19,6 @@ import type { AttachmentsService } from '../../../../../../services/attachments/
 import { InlineAttachmentWithActions } from './inline_attachment_with_actions';
 
 const mockOpenCanvas = jest.fn();
-const mockSetPreviewedAttachmentKey = jest.fn();
 const mockInvalidateConversation = jest.fn();
 const mockOpenSidebarConversation = jest.fn();
 
@@ -27,7 +28,6 @@ jest.mock('./canvas_context', () => ({
   useCanvasContext: () => ({
     openCanvas: mockOpenCanvas,
     previewedAttachmentKey: null,
-    setPreviewedAttachmentKey: mockSetPreviewedAttachmentKey,
   }),
 }));
 
@@ -118,6 +118,47 @@ describe('InlineAttachmentWithActions', () => {
     expect(screen.getByText("Couldn't render this attachment")).not.toBeNull();
   });
 
+  describe('header icon', () => {
+    const renderWithDefinition = (definition: Record<string, unknown>) => {
+      const attachmentsService = {
+        getAttachmentUiDefinition: jest.fn().mockReturnValue({
+          getLabel: () => 'Test attachment',
+          renderInlineContent: mockRenderInlineContent,
+          getActionButtons: () => [
+            { label: 'Open', type: ActionButtonType.PRIMARY, handler: jest.fn() },
+          ],
+          ...definition,
+        }),
+        updateOrigin: jest.fn(),
+      };
+
+      return render(
+        <InlineAttachmentWithActions
+          attachment={{ id: 'attachment-1', type: 'test', data: {} }}
+          attachmentsService={attachmentsService as unknown as AttachmentsService}
+          conversationId="conversation-1"
+          isSidebar={false}
+        />
+      );
+    };
+
+    it('falls back to the attachment type icon when getHeader sets none', () => {
+      const { container } = renderWithDefinition({ getIcon: () => 'document' });
+
+      expect(container.querySelector('[data-euiicon-type="document"]')).not.toBeNull();
+    });
+
+    it('prefers the icon from getHeader', () => {
+      const { container } = renderWithDefinition({
+        getIcon: () => 'document',
+        getHeader: () => ({ icon: 'code' }),
+      });
+
+      expect(container.querySelector('[data-euiicon-type="code"]')).not.toBeNull();
+      expect(container.querySelector('[data-euiicon-type="document"]')).toBeNull();
+    });
+  });
+
   it('renders action buttons registered by inline content', async () => {
     const attachment: UnknownAttachment = { id: 'attachment-1', type: 'test', data: {} };
     const attachmentsService = {
@@ -148,8 +189,10 @@ describe('InlineAttachmentWithActions', () => {
     );
 
     expect(screen.getByText('Inline content')).not.toBeNull();
-    expect(screen.getByRole('button', { name: 'Static action' })).not.toBeNull();
     expect(await screen.findByRole('button', { name: 'Dynamic action' })).not.toBeNull();
+
+    fireEvent.click(screen.getByTestId('agentBuilderAttachmentMoreActions'));
+    expect(await screen.findByText('Static action')).not.toBeNull();
   });
 
   describe('openSidebarConversation prop forwarded to inline content and action buttons', () => {
@@ -219,15 +262,26 @@ describe('InlineAttachmentWithActions', () => {
       });
     });
 
-    it('does not invoke openSidebarConversationInternal when rendered inside the sidebar', () => {
+    it('invokes openSidebarConversationInternal when triggered from inline content inside the sidebar', () => {
       renderWithFakeContent({ isSidebar: true });
 
-      // The action button is gated off entirely when openSidebarConversation is undefined.
-      expect(screen.queryByRole('button', { name: ACTION_TRIGGER })).toBeNull();
-
-      // The inline trigger is still rendered, but clicking it is a no-op.
       fireEvent.click(screen.getByRole('button', { name: INLINE_TRIGGER }));
-      expect(mockOpenSidebarConversation).not.toHaveBeenCalled();
+
+      expect(mockOpenSidebarConversation).toHaveBeenCalledTimes(1);
+      expect(mockOpenSidebarConversation).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+      });
+    });
+
+    it('invokes openSidebarConversationInternal when triggered from an action button inside the sidebar', () => {
+      renderWithFakeContent({ isSidebar: true });
+
+      fireEvent.click(screen.getByRole('button', { name: ACTION_TRIGGER }));
+
+      expect(mockOpenSidebarConversation).toHaveBeenCalledTimes(1);
+      expect(mockOpenSidebarConversation).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+      });
     });
   });
 
@@ -278,5 +332,37 @@ describe('InlineAttachmentWithActions', () => {
     );
 
     expect(mockRenderInlineContent).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows the previewing badge from getPreviewState$', () => {
+    const previewState$ = new BehaviorSubject<AttachmentPreviewState>('previewing');
+    const attachmentsService = {
+      getAttachmentUiDefinition: jest.fn().mockReturnValue({
+        getLabel: () => 'Test attachment',
+        renderInlineContent: () => <div>Inline content</div>,
+        getActionButtons: () => [
+          { label: 'Preview', type: ActionButtonType.SECONDARY, handler: jest.fn() },
+        ],
+        getPreviewState$: () => previewState$,
+      }),
+      updateOrigin: jest.fn(),
+    };
+
+    render(
+      <InlineAttachmentWithActions
+        attachment={createAttachment('first', 1)}
+        attachmentsService={attachmentsService as unknown as AttachmentsService}
+        conversationId="conversation-1"
+        isSidebar={false}
+      />
+    );
+
+    expect(screen.getByText("You're previewing this")).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Preview' })).not.toBeInTheDocument();
+
+    act(() => previewState$.next('none'));
+
+    expect(screen.queryByText("You're previewing this")).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Preview' })).toBeInTheDocument();
   });
 });

@@ -109,7 +109,7 @@ has_original_commentary (boolean):
 reason (string):
   One sentence (max 120 characters) explaining the classification. Be specific — name the signal
   that drove the decision (e.g. "Vendor blog announcing product feature, no IOCs or TTPs",
-  "Weekly newsletter linking CrowdStrike, Mandiant reports", "Needs render: navigation only, JS gate").
+  "Weekly newsletter linking third-party reports", "Needs render: navigation only, JS gate").
 
 ${urlLine}${titleLine}Article text:
 ${text}`;

@@ -381,7 +381,7 @@ export const configSchema = schema.object({
     ),
   }),
   inboundEvents: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
     maxBodyBytes: schema.byteSize({ defaultValue: '1mb' }),
     maxEmitted: schema.number({
       defaultValue: INBOUND_EVENTS_MAX_EMITTED_DEFAULT,

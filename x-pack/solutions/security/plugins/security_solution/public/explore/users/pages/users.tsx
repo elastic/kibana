@@ -13,11 +13,11 @@ import { useParams } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
+import { LastEventIndexKey } from '@kbn/securitysolution-timeline-search-strategy';
 import { PageScope } from '../../../data_view_manager/constants';
 import { SecurityPageName } from '../../../app/types';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
-import { SearchWithDataView } from '../../components/search_with_data_view';
+import { SearchWithDataView } from '../../../common/components/search_with_data_view';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { LastEventTimeHeader } from '../../components/last_event_time_header';
 import { Display } from '../../hosts/pages/display';
@@ -184,7 +184,7 @@ const UsersComponent = () => {
               />
             )}
             <Display show={!hasFullScreenContent}>
-              <SearchWithDataView dataView={dataView} />
+              <SearchWithDataView dataView={dataView} scope={PageScope.explore} />
 
               <EuiSpacer size="l" />
 
