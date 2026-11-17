@@ -255,7 +255,17 @@ groups:
 
       - setting: xpack.actions.inboundEvents.enabled
         description: |
-          Whether connectors can receive events from external systems, such as webhook requests that start workflows. When `true`, you can turn on **Receive events** for connectors that support it, and you can create [Inbound Webhook](/reference/connectors-kibana/inbound-webhook-action-type.md) connectors. When `false`, {{kib}} accepts no events for any connector, **Receive events** doesn't appear, and the Inbound Webhook connector type isn't available. Restart {{kib}} after you change this setting.
+          Whether connectors can receive events from external systems, such as webhook requests that start workflows.
+
+          When `true`, you can turn on **Receive events** for connectors that support it, and you can create [Inbound Webhook](/reference/connectors-kibana/inbound-webhook-action-type.md) connectors.
+
+          When `false`:
+
+          - {{kib}} accepts no events for any connector.
+          - **Receive events** doesn't appear.
+          - The Inbound Webhook connector type isn't available.
+
+          Restart {{kib}} after you change this setting.
         datatype: bool
         default: true
         applies_to:
