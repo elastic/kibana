@@ -13,6 +13,7 @@ jest.mock('@kbn/apm-config-loader', () => {
   return {
     ...originalPkg,
     getConfiguration: jest.fn(),
+    getKibanaName: jest.fn(),
   };
 });
 
@@ -28,12 +29,32 @@ const PROCESS_ARGS_COUNT = 'process.args_count';
 
 describe('buildOtelResources', () => {
   beforeEach(() => {
-    const { getConfiguration } = jest.requireMock('@kbn/apm-config-loader');
+    const { getConfiguration, getKibanaName } = jest.requireMock('@kbn/apm-config-loader');
     getConfiguration.mockReturnValue(undefined);
+    getKibanaName.mockReturnValue(undefined);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  describe('kibana.name', () => {
+    test('sets kibana.name from the Kibana configuration', async () => {
+      const { getKibanaName } = jest.requireMock('@kbn/apm-config-loader');
+      getKibanaName.mockReturnValue('my-kibana');
+
+      const resource = buildOtelResources();
+      await resource.waitForAsyncAttributes?.();
+
+      expect(resource.attributes['kibana.name']).toBe('my-kibana');
+    });
+
+    test('does not set kibana.name when the configuration is not loaded', async () => {
+      const resource = buildOtelResources();
+      await resource.waitForAsyncAttributes?.();
+
+      expect(resource.attributes).not.toHaveProperty('kibana.name');
+    });
   });
 
   describe('process command args', () => {

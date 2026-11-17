@@ -92,6 +92,7 @@ jest.mock('@opentelemetry/api', () => {
 export const mockGetConfiguration = jest.fn();
 jest.mock('@kbn/apm-config-loader', () => ({
   getConfiguration: mockGetConfiguration,
+  getKibanaName: jest.fn(),
 }));
 
 // @kbn/telemetry re-exports initTelemetry which transitively imports @kbn/tracing and
