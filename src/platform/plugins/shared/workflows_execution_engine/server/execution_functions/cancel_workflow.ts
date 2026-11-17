@@ -12,6 +12,7 @@ import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_drainer';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 /**
@@ -73,17 +74,29 @@ export const cancelWorkflow = async ({
     });
   }
 
+  const cancelledAt = new Date().toISOString();
   await workflowExecutionRepository.updateWorkflowExecution(
     {
       id: workflowExecution.id,
       ...(freesConcurrencySlotImmediately ? { status: ExecutionStatus.CANCELLED } : {}),
       cancelRequested: true,
       cancellationReason: 'Cancelled by user',
-      cancelledAt: new Date().toISOString(),
+      cancelledAt,
       cancelledBy: 'system',
     },
     shouldRefreshBeforeQueueDrain ? { refresh: 'wait_for' } : {}
   );
+
+  // Pending and queued have no execution loop to publish the terminal status.
+  if (freesConcurrencySlotImmediately) {
+    await publishFinishedWorkflowExecution(workflowExecution, {
+      status: ExecutionStatus.CANCELLED,
+      cancelRequested: true,
+      cancellationReason: 'Cancelled by user',
+      cancelledAt,
+      cancelledBy: 'system',
+    });
+  }
 
   // QUEUED: dormant task was removed above — forceRunIdleTasks would runSoon that id and throw not-found.
   if (!wasQueued) {
