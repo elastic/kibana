@@ -36,7 +36,11 @@ import type { TaskTypeDictionary } from './task_type_dictionary';
 import { getExecutionId } from './lib/get_execution_id';
 import { credentialMatchesRunAs } from './lib/service_account_credential';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
-import { EnsureScheduledOffsetMs, EnsureScheduledResetThresholdSecs } from './constants';
+import {
+  EnsureScheduledOffsetMs,
+  EnsureScheduledResetThresholdSecs,
+  MaxEnsureScheduledOffsetSecs,
+} from './constants';
 import {
   taskManagerClaimNudgeTelemetry,
   type ClaimNudgeSource,
@@ -515,8 +519,9 @@ export class TaskScheduling {
   }
 
   /**
-   * Delays `runAt` (unless set explicitly) by an offset that grows with each call made within
-   * `EnsureScheduledResetThresholdSecs` of the previous one, and resets once calls are further apart.
+   * Sets `runAt` (unless set explicitly or the task has an rrule schedule) to now plus an offset that
+   * grows with each call made within `EnsureScheduledResetThresholdSecs` of the previous one, and
+   * resets once calls are further apart.
    */
   private applyEnsureScheduledOffset(taskInstance: TaskInstanceWithId): TaskInstanceWithId {
     const now = Date.now();
@@ -525,9 +530,13 @@ export class TaskScheduling {
     } else {
       this.lastEnsuredScheduledOffset = 0;
     }
+    if (this.lastEnsuredScheduledOffset > MaxEnsureScheduledOffsetSecs * 1000) {
+      this.lastEnsuredScheduledOffset = 0; // reset when we exceed the maximum allowed offset
+    }
     this.lastEnsureScheduledTime = now;
 
-    if (taskInstance.runAt || this.lastEnsuredScheduledOffset === 0) {
+    // An rrule's first run is derived from the rule itself when `runAt` is not set.
+    if (taskInstance.runAt || taskInstance.schedule?.rrule) {
       return taskInstance;
     }
     return { ...taskInstance, runAt: new Date(now + this.lastEnsuredScheduledOffset) };

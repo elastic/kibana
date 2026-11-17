@@ -13,9 +13,11 @@ import { COMMON_HEADERS, TEST_TASK_TYPE } from '../fixtures/constants';
 import {
   EnsureScheduledOffsetMs,
   EnsureScheduledResetThresholdSecs,
+  MaxEnsureScheduledOffsetSecs,
 } from '../../../../server/constants';
 
 const THRESHOLD_MS = EnsureScheduledResetThresholdSecs * 1000;
+const MAX_OFFSET_STEPS = (MaxEnsureScheduledOffsetSecs * 1000) / EnsureScheduledOffsetMs;
 const TEST_TIMEOUT_MS = 4 * THRESHOLD_MS + 60_000;
 
 interface ScheduledTask {
@@ -96,7 +98,10 @@ apiTest.describe(
           tasks.push(await ensureScheduled(apiClient, cookieHeader));
         }
 
-        expect(tasks.map(offsetStepsOf)).toStrictEqual([0, 1, 2, 3]);
+        // Other `ensureScheduled` calls slipping in can only increase the offsets.
+        tasks.forEach((task, i) => {
+          expect(offsetStepsOf(task)).toBeGreaterThanOrEqual(i);
+        });
       }
     );
 
@@ -130,7 +135,25 @@ apiTest.describe(
         const afterExplicit = await ensureScheduled(apiClient, cookieHeader);
 
         expect(explicit.runAt).toBe(explicitRunAt);
-        expect(offsetStepsOf(afterExplicit)).toBe(2);
+        expect(offsetStepsOf(afterExplicit)).toBeGreaterThanOrEqual(2);
+      }
+    );
+
+    apiTest(
+      'resets the offset to 0 once it would exceed the maximum',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+
+        const steps: number[] = [];
+        for (let i = 0; i < MAX_OFFSET_STEPS + 2; i++) {
+          steps.push(offsetStepsOf(await ensureScheduled(apiClient, cookieHeader)));
+        }
+
+        // Each call raises the offset by one step until it resets, so more calls than the maximum
+        // allows must include a drop, wherever other calls slipping in moved it.
+        const drops = steps.filter((step, i) => i > 0 && step < steps[i - 1]);
+        expect(Math.max(...steps)).toBeLessThanOrEqual(MAX_OFFSET_STEPS);
+        expect(drops.length).toBeGreaterThan(0);
       }
     );
   }

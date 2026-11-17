@@ -28,6 +28,7 @@ export const CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: string[] = [
 
 // Calls to `ensureScheduled` made within this many seconds of the previous call get an increasing
 // `runAt` offset, to spread out bursts of tasks scheduled at startup.
+export const MaxEnsureScheduledOffsetSecs = 30;
 export const EnsureScheduledResetThresholdSecs = 10;
 export const EnsureScheduledOffsetMs = 500;
 
