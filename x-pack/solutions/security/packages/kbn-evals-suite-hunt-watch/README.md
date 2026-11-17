@@ -77,7 +77,11 @@ below 0.8 on narratives the judge itself calls accurate, so Factuality scores th
 instead: a 0 means the judge found a central claim contradicted or unsupported, and
 `claimScore` shows how much peripheral detail it could not check. Counts a row leaves unpinned
 (no `tier1Status`, no `tier2Executed`, no `pendingProposals`) are stated to the judge
-as open, so the narrative is not docked for reporting them. Groundedness judges the same
+as open, so the narrative is not docked for reporting them. The ground truth also states the
+Investigation status and `close_reason` the run recorded, so a narrative that reports them
+truthfully passes Factuality even when they differ from the row's expectation: Investigation
+Status and Outcome Label score the outcome itself, and `close_reason` is not pinned or scored
+by any code check. Groundedness judges the same
 narrative against the collected hunt facts (report doc, hunt output, coordinator result, SSE,
 packaging, Proposals, evidence, plus every pending Proposal in the space because convergence
 notes cite other Investigations), so a dip there is a claim the Worker made that none of its
