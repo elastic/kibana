@@ -363,14 +363,18 @@ const kiListStatusesQuerySchema = schema.oneOf(
 const validateInteger = (value: number): string | undefined =>
   Number.isInteger(value) ? undefined : 'must be an integer';
 
-const kiTypeQuerySchema = schema.string({
-  minLength: 1,
-  maxLength: MAX_KI_TYPE_FILTER_LENGTH,
-  meta: { description: 'A Knowledge Indicator type.' },
-});
+const kiTypeQuerySchema = (description: string) =>
+  schema.string({
+    minLength: 1,
+    maxLength: MAX_KI_TYPE_FILTER_LENGTH,
+    meta: { description },
+  });
 
 const kiExcludeTypesQuerySchema = schema.oneOf(
-  [kiTypeQuerySchema, schema.arrayOf(kiTypeQuerySchema, { maxSize: MAX_KI_GROUPS })],
+  [
+    kiTypeQuerySchema('A Knowledge Indicator type.'),
+    schema.arrayOf(kiTypeQuerySchema('A Knowledge Indicator type.'), { maxSize: MAX_KI_GROUPS }),
+  ],
   {
     meta: {
       description:
@@ -405,13 +409,7 @@ export const listKisQuerySchema = schema.object({
     defaultValue: DEFAULT_KI_PAGE_SIZE,
     validate: validateInteger,
   }),
-  type: schema.maybe(
-    schema.string({
-      minLength: 1,
-      maxLength: MAX_KI_TYPE_FILTER_LENGTH,
-      meta: { description: 'When set, return only KIs of this type.' },
-    })
-  ),
+  type: schema.maybe(kiTypeQuerySchema('When set, return only KIs of this type.')),
   exclude_types: schema.maybe(kiExcludeTypesQuerySchema),
   status: schema.maybe(kiListStatusesQuerySchema),
   sort: kiListSortQuerySchema,
