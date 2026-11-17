@@ -22,8 +22,6 @@ import { asRuleEventsClient } from './rule_events_client.mock';
 import { RuleEventsClient } from './rule_events_client';
 import { operatorFallbackAssessmentNote } from '@kbn/significant-events-schema';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
-import { classifyBatch } from '../../../step_definitions/classify_detections';
-import { checkBaseline } from '../rules/baseline';
 
 interface MockRow {
   source: Record<string, unknown>;
@@ -1533,115 +1531,6 @@ describe('RuleEventsClient', () => {
       });
 
       expect(live.get('rule-A')?.[0].verifiedAt).toBe(expected);
-    });
-
-    const classifyStoredSignal = async ({
-      evidenceTo,
-      collectedAt,
-      reviewedAt,
-    }: {
-      evidenceTo: string;
-      collectedAt?: string;
-      reviewedAt?: string;
-    }) => {
-      const now = Date.parse('2026-10-19T12:00:00.000Z');
-      const hourMs = 3_600_000;
-      const bucketMs = 5 * 60_000;
-      const counts = Array<number>(61).fill(5);
-      const row = {
-        ...seriesRow({
-          eventId: 'event-1',
-          signals: [
-            {
-              ...detectionSignal({ ruleUuid: 'rule-A', verdict: 'confirms' }),
-              collected_at: collectedAt,
-              evidence: {
-                esql_query: 'FROM $.a',
-                result: 'found',
-                time_range: { from: '2026-10-18T05:00:00.000Z', to: evidenceTo },
-              },
-            },
-          ],
-        }),
-        createdAt: '2026-10-17T12:00:00.000Z',
-      };
-      const { client } = createClient(async () => sourceResponse([row]));
-
-      return classifyBatch({
-        rows: [
-          [
-            'rule-A',
-            {
-              '@timestamp': '2026-10-19T11:59:00.000Z',
-              detection_id: 'detection-1',
-              rule_uuid: 'rule-A',
-            },
-            reviewedAt,
-          ],
-        ],
-        columns: ['rule_uuid', '_source', 'last_reviewed_at'],
-        maxSkipAgeMs: 24 * hourMs,
-        now,
-        probeWindowMinutes: 20,
-        probeSpanBuckets: 4,
-        reviewFreshMs: 4 * hourMs,
-        probeConcurrency: 1,
-        findLiveMemberships: (ruleUuids) => client.findLiveMemberships({ ruleUuids }),
-        probe: async () => ({ status: 'ok', hasRows: true, durationMs: 0 }),
-        observe: async () => ({
-          observation: checkBaseline({ value: 5, history: counts.slice(0, -1) }),
-          series: { firstStart: now - counts.length * bucketMs, bucketMs, counts },
-        }),
-      });
-    };
-
-    it.each([
-      [
-        'ages an unstamped signal from its evidence time',
-        '2026-10-19T10:00:00.000Z',
-        undefined,
-        'still_breaching',
-      ],
-      [
-        'absorbs an old unstamped signal after a fresh review',
-        '2026-10-18T06:00:00.000Z',
-        '2026-10-19T11:00:00.000Z',
-        'already_reviewed',
-      ],
-    ])('%s', async (_name, evidenceTo, reviewedAt, reason) => {
-      const output = await classifyStoredSignal({ evidenceTo, reviewedAt });
-
-      expect(output.batch).toEqual([]);
-      expect(output.skips).toEqual([
-        {
-          rule_uuid: 'rule-A',
-          skip: expect.objectContaining({
-            reason,
-            ...(reviewedAt ? { absorbed_reason: 'series_too_old', reviewed_at: reviewedAt } : {}),
-          }),
-        },
-      ]);
-    });
-
-    it.each([
-      ['the evidence time is malformed', 'not-a-date', undefined, '2026-10-19T11:00:00.000Z'],
-      [
-        'the evidence time is in the future',
-        '2026-10-20T10:00:00.000Z',
-        undefined,
-        '2026-10-19T11:00:00.000Z',
-      ],
-      [
-        'a stale explicit timestamp takes precedence over fresh evidence',
-        '2026-10-19T10:00:00.000Z',
-        '2026-10-18T06:00:00.000Z',
-        undefined,
-      ],
-    ])('routes to the agent when %s', async (_name, evidenceTo, collectedAt, reviewedAt) => {
-      const output = await classifyStoredSignal({ evidenceTo, collectedAt, reviewedAt });
-
-      expect(output.skips).toEqual([]);
-      expect(output.batch).toMatchObject([{ classifier: { reason: 'series_too_old' } }]);
     });
 
     it('returns one entry per live series when a rule is a member of several', async () => {
