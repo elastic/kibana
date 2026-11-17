@@ -96,17 +96,20 @@ if [[ -z "${failure_keys}" ]]; then
     echo "EVAL_FANOUT_STEP_KEYS is unset; cannot confirm the eval steps passed, so not posting"
     exit 0
   fi
-  unconfirmed_step=""
-  unconfirmed_outcome=""
+  # The first reason the run cannot be called passed, as a sentence for the Slack message. A failed
+  # lookup counts too, so a broken `step get` surfaces in the channel instead of going quiet.
+  unconfirmed_reason=""
   for step_key in "${eval_step_keys[@]}"; do
     if ! outcome="$(buildkite-agent step get outcome --step "${step_key}")"; then
-      echo "Could not read the outcome of eval step ${step_key}; not posting"
-      exit 0
+      echo "Could not read the outcome of eval step ${step_key}"
+      if [[ -z "${unconfirmed_reason}" ]]; then
+        unconfirmed_reason="The outcome of eval step \`${step_key}\` could not be read"
+      fi
+      continue
     fi
     echo "Eval step ${step_key}: ${outcome}"
-    if [[ "${outcome}" != "passed" && -z "${unconfirmed_step}" ]]; then
-      unconfirmed_step="${step_key}"
-      unconfirmed_outcome="${outcome:-unknown}"
+    if [[ "${outcome}" != "passed" && -z "${unconfirmed_reason}" ]]; then
+      unconfirmed_reason="Eval step \`${step_key}\` ended \`${outcome:-unknown}\` without recording a failure"
     fi
   done
 
@@ -124,11 +127,11 @@ if [[ -z "${failure_keys}" ]]; then
 
   SLACK_FILE="$(mktemp -t kbn-evals-pass-slack.XXXXXX.md)"
 
-  if [[ -n "${unconfirmed_step}" ]]; then
+  if [[ -n "${unconfirmed_reason}" ]]; then
     # Worded as unconfirmed rather than failed: the step may have been retried, and the
     # recorded outcome is the only signal here.
-    printf ':warning: *%s* — %s (`%s`): could not confirm the run passed. Eval step `%s` ended `%s` without recording a failure; see the build.\n' \
-      "$header_label" "$suite_name" "$EVAL_SUITE_ID" "$unconfirmed_step" "$unconfirmed_outcome" >"$SLACK_FILE"
+    printf ':warning: *%s* — %s (`%s`): could not confirm the run passed. %s; see the build.\n' \
+      "$header_label" "$suite_name" "$EVAL_SUITE_ID" "$unconfirmed_reason" >"$SLACK_FILE"
     upload_slack_notify "$SLACK_FILE" passed
     exit 0
   fi

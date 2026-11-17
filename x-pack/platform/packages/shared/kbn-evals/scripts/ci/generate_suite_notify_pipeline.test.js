@@ -48,6 +48,12 @@ describe('buildSuiteNotifyPipeline', () => {
     expect(step.notify[0].slack.channels).toEqual(['#alerts']);
   });
 
+  it('rejects a step outcome Buildkite would never match', () => {
+    expect(() =>
+      buildSuiteNotifyPipeline({ message: 'm', slackChannel: '#alerts', stepOutcome: 'failed' })
+    ).toThrow('Invalid stepOutcome "failed"');
+  });
+
   it('does not repeat the build link when the message already has it', () => {
     const message = `Suite passed\n\n<${BUILD.buildUrl}|View build>`;
     const {

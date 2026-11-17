@@ -24,6 +24,13 @@ const buildSuiteNotifyPipeline = ({
   pipelineName = 'Buildkite',
   buildNumber = '',
 }) => {
+  if (!STEP_OUTCOMES.includes(stepOutcome)) {
+    // Buildkite never matches any other outcome, so the step would fail the build and post nothing.
+    throw new Error(
+      `Invalid stepOutcome "${stepOutcome}"; expected one of: ${STEP_OUTCOMES.join(', ')}`
+    );
+  }
+
   const footer =
     buildUrl && !message.includes(buildUrl)
       ? `\n\n<${buildUrl}|${pipelineName} #${buildNumber}>`
@@ -62,23 +69,28 @@ if (require.main === module) {
   const slackChannel = process.env.EVAL_SUITE_SLACK_CHANNEL || '';
   const stepOutcome = process.env.EVAL_NOTIFY_STEP_OUTCOME || 'hard_failed';
 
-  if (!summaryPath || !slackChannel || !STEP_OUTCOMES.includes(stepOutcome)) {
-    console.error(
-      'Usage: set EVAL_TRIAGE_SUMMARY_PATH (summary.md), EVAL_SUITE_SLACK_CHANNEL (slack channel) and optionally EVAL_NOTIFY_STEP_OUTCOME (hard_failed|passed, default hard_failed).'
-    );
+  const usage =
+    'Usage: set EVAL_TRIAGE_SUMMARY_PATH (summary.md), EVAL_SUITE_SLACK_CHANNEL (slack channel) and optionally EVAL_NOTIFY_STEP_OUTCOME (hard_failed|passed, default hard_failed).';
+
+  if (!summaryPath || !slackChannel) {
+    console.error(usage);
     process.exit(1);
   }
 
-  const pipeline = buildSuiteNotifyPipeline({
-    message: readFileSync(summaryPath, 'utf8').trim(),
-    slackChannel,
-    stepOutcome,
-    buildUrl: process.env.BUILDKITE_BUILD_URL || '',
-    pipelineName: process.env.BUILDKITE_PIPELINE_NAME || 'Buildkite',
-    buildNumber: process.env.BUILDKITE_BUILD_NUMBER || '',
-  });
-
-  process.stdout.write(stringify(pipeline));
+  try {
+    const pipeline = buildSuiteNotifyPipeline({
+      message: readFileSync(summaryPath, 'utf8').trim(),
+      slackChannel,
+      stepOutcome,
+      buildUrl: process.env.BUILDKITE_BUILD_URL || '',
+      pipelineName: process.env.BUILDKITE_PIPELINE_NAME || 'Buildkite',
+      buildNumber: process.env.BUILDKITE_BUILD_NUMBER || '',
+    });
+    process.stdout.write(stringify(pipeline));
+  } catch (error) {
+    console.error(`${error.message}\n${usage}`);
+    process.exit(1);
+  }
 }
 
 module.exports = { buildSuiteNotifyPipeline };
