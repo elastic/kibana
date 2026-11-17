@@ -108,7 +108,7 @@ describe('recordSlotTime', () => {
   });
 
   test('a per-instance cost overrides the definition cost', () => {
-    const task = mockTask('normalTask', 'tiny' as ConcreteTaskInstance['cost']);
+    const task = mockTask('normalTask', TaskCost.Tiny);
     recordSlotTime(asTaskRunEvent(task.id, asOk(ranTask(task)), timing), definitions);
 
     expect(mockAdd).toHaveBeenCalledWith(2500, { 'task.type': 'normalTask' });
