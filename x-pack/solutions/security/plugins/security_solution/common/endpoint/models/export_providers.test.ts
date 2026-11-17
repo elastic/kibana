@@ -36,7 +36,7 @@ describe('getExportProviders', () => {
 });
 
 describe('setExportProviders', () => {
-  it('writes an equal list to windows, mac and linux without mutating the input', () => {
+  it('writes its own copy of the list to windows, mac and linux without mutating the input', () => {
     const policy = policyFactory();
     const originalPolicy = JSON.parse(JSON.stringify(policy));
     const providers = [AZURE_PROVIDER];
@@ -49,6 +49,11 @@ describe('setExportProviders', () => {
     expect(result.linux.response_actions?.export_providers).toEqual([AZURE_PROVIDER]);
     expect(policy).toEqual(originalPolicy);
     expect(providers).toEqual(originalProviders);
+
+    const lists = [result.windows, result.mac, result.linux].map(
+      (os) => os.response_actions?.export_providers
+    );
+    expect(new Set([...lists, providers]).size).toBe(4);
   });
 
   it('removes response_actions from every OS when given an empty list', () => {

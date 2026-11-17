@@ -2005,6 +2005,8 @@ describe('Fleet integrations', () => {
         account_name: 'acct',
         container: 'dumps',
       } as const;
+      // Not literals at the call sites, so the extra `credentials` key needs no cast
+      const providerWithCredentials = { ...provider, credentials: { account_key: 'key' } };
 
       const runUpdate = async (policy: PolicyConfig): Promise<PolicyConfig> => {
         const callback = getPackagePolicyUpdateCallback(
@@ -2050,11 +2052,8 @@ describe('Fleet integrations', () => {
         });
 
         it('should remove invalid export providers without an error', async () => {
-          const policy = await runUpdate(
-            setExportProviders(policyFactory(), [
-              { ...provider, id: 'not valid', credentials: { account_key: 'key' } },
-            ] as unknown as Array<typeof provider>)
-          );
+          const invalidProvider = { ...providerWithCredentials, id: 'not valid' };
+          const policy = await runUpdate(setExportProviders(policyFactory(), [invalidProvider]));
 
           expect(policy.windows).not.toHaveProperty('response_actions');
         });
@@ -2079,9 +2078,7 @@ describe('Fleet integrations', () => {
       });
 
       it('should reject export providers with credentials', async () => {
-        const policy = setExportProviders(policyFactory(), [
-          { ...provider, credentials: { account_key: 'key' } },
-        ] as unknown as Array<typeof provider>);
+        const policy = setExportProviders(policyFactory(), [providerWithCredentials]);
 
         await expect(runUpdate(policy)).rejects.toMatchObject({
           statusCode: 400,

@@ -273,6 +273,21 @@ describe('getExportProviderFieldErrors', () => {
       ).toEqual({ service_url: 'invalid_format' });
     });
 
+    // WHATWG `new URL()` accepts or normalizes all of these, but Endpoint gets the raw string
+    it.each([
+      ['an empty query', 'https://myaccount.blob.core.windows.net/?'],
+      ['an empty fragment', 'https://myaccount.blob.core.windows.net/#'],
+      ['user info without a password', 'https://user@myaccount.blob.core.windows.net'],
+      ['a single slash after the scheme', 'https:/myaccount.blob.core.windows.net'],
+      ['three slashes after the scheme', 'https:///myaccount.blob.core.windows.net'],
+      ['backslashes', 'https:\\\\myaccount.blob.core.windows.net'],
+      ['an uppercase scheme', 'HTTPS://myaccount.blob.core.windows.net'],
+    ])('is invalid_format for %s', (_desc, serviceUrl) => {
+      expect(
+        getExportProviderFieldErrors({ ...validProvider, service_url: serviceUrl }, [])
+      ).toEqual({ service_url: 'invalid_format' });
+    });
+
     it('is valid at exactly 2048 characters', () => {
       const serviceUrl = `https://myaccount.blob.core.windows.net/${'a'.repeat(
         2048 - 'https://myaccount.blob.core.windows.net/'.length

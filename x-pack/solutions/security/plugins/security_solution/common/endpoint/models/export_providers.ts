@@ -34,21 +34,19 @@ export const setExportProviders = (
     return removeExportProviders(policy);
   }
 
-  const exportProviders = [...providers];
-
   return {
     ...policy,
     windows: {
       ...policy.windows,
-      response_actions: { ...policy.windows.response_actions, export_providers: exportProviders },
+      response_actions: { ...policy.windows.response_actions, export_providers: [...providers] },
     },
     mac: {
       ...policy.mac,
-      response_actions: { ...policy.mac.response_actions, export_providers: exportProviders },
+      response_actions: { ...policy.mac.response_actions, export_providers: [...providers] },
     },
     linux: {
       ...policy.linux,
-      response_actions: { ...policy.linux.response_actions, export_providers: exportProviders },
+      response_actions: { ...policy.linux.response_actions, export_providers: [...providers] },
     },
   };
 };

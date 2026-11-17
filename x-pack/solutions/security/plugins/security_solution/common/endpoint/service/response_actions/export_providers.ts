@@ -107,7 +107,10 @@ const getServiceUrlFieldError = (serviceUrl: unknown): ExportProviderFieldError 
   if (serviceUrl.length > EXPORT_PROVIDER_SERVICE_URL_MAX_LENGTH) {
     return 'too_long';
   }
-  if (/\s/.test(serviceUrl)) {
+  // Endpoint gets the raw string, so it is checked as written: WHATWG parsing would accept an
+  // empty `?` or `#`, and normalize `\` and forms like `https:/host` or `https:///host`. `@` would
+  // be user info.
+  if (/[\s?#@\\]/.test(serviceUrl)) {
     return 'invalid_format';
   }
 
@@ -121,7 +124,7 @@ const getServiceUrlFieldError = (serviceUrl: unknown): ExportProviderFieldError 
   if (url.protocol !== 'https:') {
     return 'not_https';
   }
-  if (url.username || url.password || url.search || url.hash) {
+  if (!/^https:\/\/[^/]/.test(serviceUrl)) {
     return 'invalid_format';
   }
   return undefined;
