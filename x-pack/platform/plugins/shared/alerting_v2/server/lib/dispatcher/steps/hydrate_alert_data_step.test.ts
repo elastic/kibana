@@ -8,18 +8,28 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
-import {
-  HydrateAlertDataStep,
-  HYDRATION_MAX_RESPONSE_SIZE_BYTES,
-  HYDRATION_TICK_BUDGET_BYTES,
-} from './hydrate_alert_data_step';
+import { HydrateAlertDataStep, HYDRATION_TICK_BUDGET_RESPONSES } from './hydrate_alert_data_step';
 import { ESQL_QUERY_ROW_LIMIT } from '../queries';
 import type { SuppressedAlert } from '../state';
 import type { Alert } from '../types';
+import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { createAlert, createDispatcherPipelineState } from '../fixtures/test_utils';
+import {
+  createAlert,
+  createDispatcherConfigService,
+  createDispatcherPipelineState,
+  createDispatcherTelemetryMock,
+} from '../fixtures/test_utils';
 import { createAlertDataResponse } from '../fixtures/dispatcher';
+
+const HYDRATION_MAX_RESPONSE_SIZE_BYTES = 50 * 1024 * 1024;
+const HYDRATION_TICK_BUDGET_BYTES = HYDRATION_TICK_BUDGET_RESPONSES * HYDRATION_MAX_RESPONSE_SIZE_BYTES;
+
+const createStep = (
+  queryService: QueryServiceContract,
+  telemetry = createDispatcherTelemetryMock()
+) => new HydrateAlertDataStep(queryService, createDispatcherConfigService(), telemetry);
 
 const queriedIds = ({ esql }: DeeplyMockedApi<ElasticsearchClient>): string[][] =>
   esql.query.mock.calls.map(([{ query }]) =>
@@ -35,7 +45,7 @@ describe('HydrateAlertDataStep', () => {
   it('is named hydrate_alert_data', () => {
     const { queryService } = createQueryService();
 
-    expect(new HydrateAlertDataStep(queryService).name).toBe('hydrate_alert_data');
+    expect(createStep(queryService).name).toBe('hydrate_alert_data');
   });
 
   it.each([
@@ -44,7 +54,7 @@ describe('HydrateAlertDataStep', () => {
   ])('returns continue without querying when dispatchable is %s', async (_, overrides) => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
+    const step = createStep(queryService);
 
     const state = createDispatcherPipelineState(overrides);
     const result = await step.execute(state, loggerService);
@@ -56,7 +66,7 @@ describe('HydrateAlertDataStep', () => {
   it('un-flattens dot-separated keys in data_json', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
+    const step = createStep(queryService);
 
     const alerts = [createAlert({ alert_id: 'ep-1' })];
 
@@ -79,7 +89,7 @@ describe('HydrateAlertDataStep', () => {
   it('attaches an empty object for data_json "{}"', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
+    const step = createStep(queryService);
 
     const alerts = [createAlert({ alert_id: 'ep-1' })];
 
@@ -98,7 +108,7 @@ describe('HydrateAlertDataStep', () => {
   it('leaves data undefined when the hydration query returns no row for an alert', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService, mockLogger } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
+    const step = createStep(queryService);
 
     const alerts = [createAlert({ alert_id: 'ep-missing' })];
 
@@ -122,7 +132,7 @@ describe('HydrateAlertDataStep', () => {
   it('leaves data undefined when data_json is null', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
+    const step = createStep(queryService);
 
     const alerts = [createAlert({ alert_id: 'ep-1' })];
 
@@ -141,7 +151,7 @@ describe('HydrateAlertDataStep', () => {
   it('derives range bounds from min/max last_event_timestamp across all alerts', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
+    const step = createStep(queryService);
 
     const alerts = [
       createAlert({
@@ -177,7 +187,7 @@ describe('HydrateAlertDataStep', () => {
   it('attaches data to each alert by alert_id regardless of row order', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
+    const step = createStep(queryService);
 
     const alerts = [
       createAlert({ alert_id: 'ep-1', rule_id: 'r1' }),
@@ -203,7 +213,7 @@ describe('HydrateAlertDataStep', () => {
   it('concatenates results from multiple chunks', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
+    const step = createStep(queryService);
 
     // Two alerts that each end up in different chunks via oversized IDs
     const longId1 = 'a'.repeat(400_000) + '-1';
@@ -234,7 +244,7 @@ describe('HydrateAlertDataStep', () => {
   it('applies the same range bounds to every chunk', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
+    const step = createStep(queryService);
 
     const longId1 = 'a'.repeat(400_000) + '-1';
     const longId2 = 'b'.repeat(400_000) + '-2';
@@ -257,7 +267,7 @@ describe('HydrateAlertDataStep', () => {
   it('never puts more alert ids in a query than the row limit returns', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
+    const step = createStep(queryService);
 
     const alerts = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
       createAlert({ alert_id: `ep-${i}` })
@@ -276,7 +286,7 @@ describe('HydrateAlertDataStep', () => {
   it('caps the response size of every hydration query', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
+    const step = createStep(queryService);
 
     mockEsClient.esql.query.mockResolvedValueOnce(createAlertDataResponse([]));
 
@@ -291,11 +301,33 @@ describe('HydrateAlertDataStep', () => {
     );
   });
 
+  it('caps the response size at dispatcher.run.hydration.maxResponseSize', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService } = createLoggerService();
+    const step = new HydrateAlertDataStep(
+      queryService,
+      createDispatcherConfigService({ run: { hydration: { maxResponseSize: '10mb' } } }),
+      createDispatcherTelemetryMock()
+    );
+
+    mockEsClient.esql.query.mockResolvedValueOnce(createAlertDataResponse([]));
+
+    await step.execute(
+      createDispatcherPipelineState({ dispatchable: [createAlert({ alert_id: 'ep-1' })] }),
+      loggerService
+    );
+
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ maxResponseSize: 10 * 1024 * 1024 })
+    );
+  });
+
   describe('when a response exceeds the size cap', () => {
     it('halves the batch and retries until every alert is hydrated', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService, mockLogger } = createLoggerService();
-      const step = new HydrateAlertDataStep(queryService);
+      const step = createStep(queryService);
 
       const alerts = ['ep-1', 'ep-2', 'ep-3', 'ep-4'].map((id) => createAlert({ alert_id: id }));
 
@@ -338,7 +370,7 @@ describe('HydrateAlertDataStep', () => {
     it('keeps the halved batch size for the remaining alerts', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService } = createLoggerService();
-      const step = new HydrateAlertDataStep(queryService);
+      const step = createStep(queryService);
 
       const alerts = ['ep-1', 'ep-2', 'ep-3', 'ep-4'].map((id) => createAlert({ alert_id: id }));
 
@@ -362,7 +394,8 @@ describe('HydrateAlertDataStep', () => {
     it('skips an alert whose data alone exceeds the cap and hydrates the others', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService, mockLogger } = createLoggerService();
-      const step = new HydrateAlertDataStep(queryService);
+      const telemetry = createDispatcherTelemetryMock();
+      const step = createStep(queryService, telemetry);
 
       const alerts = ['ep-1', 'ep-2'].map((id) => createAlert({ alert_id: id }));
 
@@ -384,6 +417,7 @@ describe('HydrateAlertDataStep', () => {
         undefined,
         { a: 2 },
       ]);
+      expect(telemetry.recordOversizedAlertDataSkipped).toHaveBeenCalledWith(1);
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
         labels: { code: 'HYDRATE_ALERT_DATA_STEP_OVERSIZED_DATA_SKIPPED' },
@@ -413,7 +447,7 @@ describe('HydrateAlertDataStep', () => {
     it('defers the remaining series to the next tick and stops the scan before them', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService, mockLogger } = createLoggerService();
-      const step = new HydrateAlertDataStep(queryService);
+      const step = createStep(queryService);
 
       const alerts = [
         alertAt('ep-1', 21, 's1'),
@@ -458,7 +492,7 @@ describe('HydrateAlertDataStep', () => {
     it('starts another query while a full response still fits in the budget', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService } = createLoggerService();
-      const step = new HydrateAlertDataStep(queryService);
+      const step = createStep(queryService);
 
       const alerts = [alertAt('ep-1', 21, 's1'), alertAt('ep-2', 22, 's2')];
       const remainingBudget = HYDRATION_TICK_BUDGET_BYTES - HYDRATION_MAX_RESPONSE_SIZE_BYTES;
@@ -487,7 +521,7 @@ describe('HydrateAlertDataStep', () => {
     it('defers from the right position when the budget is reached in a later chunk', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService } = createLoggerService();
-      const step = new HydrateAlertDataStep(queryService);
+      const step = createStep(queryService);
 
       // Ids this long land in separate chunks.
       const [idA, idB, idC] = ['a', 'b', 'c'].map((prefix) => `${prefix.repeat(400_000)}-1`);
@@ -530,7 +564,7 @@ describe('HydrateAlertDataStep', () => {
     it('defers a series whole, dropping its hydrated and suppressed alerts', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService } = createLoggerService();
-      const step = new HydrateAlertDataStep(queryService);
+      const step = createStep(queryService);
 
       const suppressed: SuppressedAlert = {
         ...alertAt('ep-5', 22, 's2'),
@@ -572,7 +606,7 @@ describe('HydrateAlertDataStep', () => {
     it('hydrates first the series that owns the oldest scan alert, so the scan keeps an alert', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService } = createLoggerService();
-      const step = new HydrateAlertDataStep(queryService);
+      const step = createStep(queryService);
 
       // s2's suppressed ep-5 is older than every dispatchable alert.
       const suppressed: SuppressedAlert = {
@@ -619,7 +653,7 @@ describe('HydrateAlertDataStep', () => {
     it('keeps alerts after the cut dispatchable but out of the scan', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService } = createLoggerService();
-      const step = new HydrateAlertDataStep(queryService);
+      const step = createStep(queryService);
 
       // s1 holds the oldest and the newest alert, s2 sits between them.
       const alerts = [
@@ -653,7 +687,7 @@ describe('HydrateAlertDataStep', () => {
     it('never defers the first series, so every tick makes progress', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService } = createLoggerService();
-      const step = new HydrateAlertDataStep(queryService);
+      const step = createStep(queryService);
 
       const alerts = [
         alertAt('ep-1', 21, 's1'),
@@ -688,7 +722,7 @@ describe('HydrateAlertDataStep', () => {
     it('does not count a fully suppressed series as the first series', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService } = createLoggerService();
-      const step = new HydrateAlertDataStep(queryService);
+      const step = createStep(queryService);
 
       // s0 owns the oldest scan alert but has nothing to hydrate.
       const suppressed: SuppressedAlert = {
@@ -733,7 +767,7 @@ describe('HydrateAlertDataStep', () => {
   it('rethrows query errors that are not response size errors', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
+    const step = createStep(queryService);
 
     const failure = new errors.RequestAbortedError('Request aborted');
     mockEsClient.esql.query.mockRejectedValueOnce(failure);

@@ -21,20 +21,19 @@ import type {
 import { parseAlertDataForMatching } from './utils/parse_alert_data';
 import { suppressionSeriesKey } from './utils/suppression_key';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { ConfigService } from '../../services/config_service/config_service';
+import {
+  DispatcherTelemetryToken,
+  type DispatcherTelemetryContract,
+} from '../otel/dispatcher_telemetry';
 
 /**
- * Response body cap for one hydration query. Chunks are sized by statement bytes, not by the
- * `data` bytes they return, so wide alerts can push a chunk past the Elasticsearch client cap
- * (100 MB on Serverless). Kept below it so the step sees the size error and splits the chunk.
+ * The `data` one tick holds is capped at this many times the response cap, measured as
+ * `data_json` length (a close proxy for bytes). A query starts only while a full response still
+ * fits, so the bound holds even when every response is close to the cap. Series that do not fit
+ * are deferred to the next tick.
  */
-export const HYDRATION_MAX_RESPONSE_SIZE_BYTES = 50 * 1024 * 1024;
-
-/**
- * Upper bound on the `data` one tick holds, measured as `data_json` length (a close proxy for
- * bytes). A query starts only while a full response still fits, so the bound holds even when
- * every response is close to the cap. Series that do not fit are deferred to the next tick.
- */
-export const HYDRATION_TICK_BUDGET_BYTES = 2 * HYDRATION_MAX_RESPONSE_SIZE_BYTES;
+export const HYDRATION_TICK_BUDGET_RESPONSES = 2;
 
 const LOGGED_OVERSIZED_ALERT_IDS = 10;
 
@@ -59,9 +58,24 @@ interface FetchAlertDataResult {
 export class HydrateAlertDataStep implements DispatcherStep {
   public readonly name = 'hydrate_alert_data';
 
+  /**
+   * Response body cap for one hydration query (`dispatcher.run.hydration.maxResponseSize`).
+   * Chunks are sized by statement bytes, not by the `data` bytes they return, so wide alerts can
+   * push a chunk past the cap. The step sees the size error and splits the chunk.
+   */
+  private readonly maxResponseSizeBytes: number;
+  private readonly tickBudgetBytes: number;
+
   constructor(
-    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
-  ) {}
+    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
+    @inject(ConfigService) configService: ConfigService,
+    @inject(DispatcherTelemetryToken) private readonly telemetry: DispatcherTelemetryContract
+  ) {
+    this.maxResponseSizeBytes = configService
+      .get('dispatcher.run.hydration.maxResponseSize')
+      .getValueInBytes();
+    this.tickBudgetBytes = HYDRATION_TICK_BUDGET_RESPONSES * this.maxResponseSizeBytes;
+  }
 
   public async execute(
     state: Readonly<DispatcherPipelineState>,
@@ -92,11 +106,12 @@ export class HydrateAlertDataStep implements DispatcherStep {
 
     const requested = alertIds.length - deferredAlertIds.length;
     if (oversizedAlertIds.length > 0) {
+      this.telemetry.recordOversizedAlertDataSkipped(oversizedAlertIds.length);
       logger.warn({
         code: ALERTING_LOG_CODES.HYDRATE_ALERT_DATA_STEP_OVERSIZED_DATA_SKIPPED,
         message: () =>
           `${oversizedAlertIds.length} of ${requested} alerts have data larger than ` +
-          `${HYDRATION_MAX_RESPONSE_SIZE_BYTES} bytes; their data will be absent ` +
+          `${this.maxResponseSizeBytes} bytes; their data will be absent ` +
           `(first alert ids: ${oversizedAlertIds.slice(0, LOGGED_OVERSIZED_ALERT_IDS).join(', ')})`,
       });
     }
@@ -134,7 +149,7 @@ export class HydrateAlertDataStep implements DispatcherStep {
     logger.warn({
       code: ALERTING_LOG_CODES.HYDRATE_ALERT_DATA_STEP_TICK_BUDGET_REACHED,
       message: () =>
-        `alert data reached the ${HYDRATION_TICK_BUDGET_BYTES} bytes tick budget; ` +
+        `alert data reached the ${this.tickBudgetBytes} bytes tick budget; ` +
         `${deferredSeries.size} series (${deferredAlertIds.length} of ${alertIds.length} ` +
         `dispatchable alerts not hydrated) deferred to the next tick`,
     });
@@ -150,9 +165,9 @@ export class HydrateAlertDataStep implements DispatcherStep {
 
   /**
    * Runs the hydration queries one at a time, in `alertIds` order. When a response exceeds
-   * HYDRATION_MAX_RESPONSE_SIZE_BYTES, the batch is halved and retried; the halved size is kept
+   * the response cap, the batch is halved and retried; the halved size is kept
    * for the remaining batches, since they likely carry data as wide. Once the next response could
-   * overflow HYDRATION_TICK_BUDGET_BYTES, the remaining ids are deferred, but never before the
+   * overflow the tick budget, the remaining ids are deferred, but never before the
    * first series is complete, so every tick makes progress.
    */
   private async fetchAlertData({
@@ -179,7 +194,7 @@ export class HydrateAlertDataStep implements DispatcherStep {
       while (offset < chunk.length) {
         const processed = chunkStart + offset;
         const budgetReached =
-          hydratedBytes + HYDRATION_MAX_RESPONSE_SIZE_BYTES > HYDRATION_TICK_BUDGET_BYTES;
+          hydratedBytes + this.maxResponseSizeBytes > this.tickBudgetBytes;
         if (budgetReached && processed >= firstSeriesSize) {
           return { rows, oversizedAlertIds, deferredAlertIds: alertIds.slice(processed) };
         }
@@ -189,7 +204,7 @@ export class HydrateAlertDataStep implements DispatcherStep {
           const batchRows = await this.queryService.executeQuery<RawAlertData>({
             query: getAlertDataQuery(batch, bounds).query,
             abortSignal,
-            maxResponseSize: HYDRATION_MAX_RESPONSE_SIZE_BYTES,
+            maxResponseSize: this.maxResponseSizeBytes,
           });
           for (const row of batchRows) {
             rows.push(row);
@@ -209,7 +224,7 @@ export class HydrateAlertDataStep implements DispatcherStep {
           logger.debug({
             message: () =>
               `Hydration response for ${batch.length} alerts exceeded ` +
-              `${HYDRATION_MAX_RESPONSE_SIZE_BYTES} bytes; retrying with ${maxIdsPerQuery} alerts per query`,
+              `${this.maxResponseSizeBytes} bytes; retrying with ${maxIdsPerQuery} alerts per query`,
           });
         }
       }
