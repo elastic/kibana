@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaRequest } from '@kbn/core/server';
 import { SKIP_REASONS } from './map_run_status';
 
@@ -18,7 +19,7 @@ export const TRIGGER_STEP_IDS = [
   'follow_up_recovered_alert_v2',
 ];
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 1000;
 
 interface StepSearch {
   searchStepExecutions: (
@@ -27,8 +28,8 @@ interface StepSearch {
       stepId: string[];
       includeOutput: boolean;
       sourceIncludes: string[];
-      page: number;
       size: number;
+      searchAfter?: estypes.SortResults;
       startedAfter?: string;
       request: KibanaRequest;
     },
@@ -36,6 +37,7 @@ interface StepSearch {
   ) => Promise<{
     results: Array<{ workflowRunId: string; output?: unknown }>;
     total: number;
+    searchAfter?: estypes.SortResults;
   }>;
 }
 
@@ -58,27 +60,25 @@ export const getSkippedRunIds = async ({
   spaceId: string;
 }): Promise<string[]> => {
   const skippedRunIds = new Set<string>();
-  let page = 1;
-  let total = 0;
+  let searchAfter: estypes.SortResults | undefined;
   do {
-    const { results, total: stepTotal } = await management.searchStepExecutions(
+    const { results, searchAfter: nextSearchAfter } = await management.searchStepExecutions(
       {
         workflowId,
         stepId: TRIGGER_STEP_IDS,
         includeOutput: true,
         sourceIncludes: ['workflowRunId', 'output.skip_reason'],
-        page,
         size: PAGE_SIZE,
+        searchAfter,
         startedAfter,
         request,
       },
       spaceId
     );
-    total = stepTotal;
     for (const { workflowRunId, output } of results) {
       if (hasSkipReason(output)) skippedRunIds.add(workflowRunId);
     }
-    page++;
-  } while ((page - 1) * PAGE_SIZE < total);
+    searchAfter = nextSearchAfter;
+  } while (searchAfter);
   return [...skippedRunIds];
 };

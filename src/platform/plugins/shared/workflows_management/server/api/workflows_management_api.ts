@@ -225,6 +225,7 @@ export interface SearchStepExecutionsParams {
   sourceIncludes?: string[];
   page?: number;
   size?: number;
+  searchAfter?: estypes.SortResults;
   /** Datemath lower bound for filtering by startedAt. */
   startedAfter?: string;
   /** Datemath upper bound for filtering by startedAt. */

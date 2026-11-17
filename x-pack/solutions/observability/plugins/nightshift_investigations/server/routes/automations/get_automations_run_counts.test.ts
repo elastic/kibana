@@ -89,18 +89,18 @@ describe('POST /internal/nightshift/automations/run_counts', () => {
       workflowRunId,
       output: { skip_reason: 'daily_limit' },
     });
-    mockSearchSteps.mockImplementation(async ({ page }) => ({
-      results:
-        page === 1
-          ? Array.from({ length: 100 }, (_, i) => skipped(`r${i}`))
-          : [
-              skipped('r1'),
-              skipped('r100'),
-              skipped('r101'),
-              skipped('r100'),
-              { workflowRunId: 'ok', output: { investigation_id: 'x' } },
-            ],
+    mockSearchSteps.mockImplementation(async ({ searchAfter }) => ({
+      results: !searchAfter
+        ? Array.from({ length: 100 }, (_, i) => skipped(`r${i}`))
+        : [
+            skipped('r1'),
+            skipped('r100'),
+            skipped('r101'),
+            skipped('r100'),
+            { workflowRunId: 'ok', output: { investigation_id: 'x' } },
+          ],
       total: 105,
+      ...(!searchAfter && { searchAfter: [1, 'r99'] }),
     }));
 
     const result = await call({ ids: ['a1'], startedAfter: 'now-7d' });

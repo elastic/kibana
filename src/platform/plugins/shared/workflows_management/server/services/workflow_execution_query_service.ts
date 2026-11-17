@@ -500,6 +500,7 @@ export class WorkflowExecutionQueryService {
       sourceIncludes: params.sourceIncludes,
       page: params.page,
       size: params.size,
+      searchAfter: params.searchAfter,
       startedAfter: params.startedAfter,
       startedBefore: params.startedBefore,
     });

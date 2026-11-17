@@ -20,6 +20,7 @@ export interface StepExecutionListResult {
   total: number;
   page?: number;
   size?: number;
+  searchAfter?: estypes.SortResults;
 }
 
 export interface SearchStepExecutionsParams {
@@ -42,6 +43,7 @@ export interface SearchStepExecutionsParams {
   sourceIncludes?: string[];
   page?: number;
   size?: number;
+  searchAfter?: estypes.SortResults;
   /**
    * Defaults to newest-first for workflow-level search. Single-run lists
    * (execution detail) pass `startedAt:asc` so page 1 matches mget of `stepExecutionIds`.
@@ -117,6 +119,7 @@ export const searchStepExecutions = async ({
   sourceIncludes,
   page,
   size,
+  searchAfter,
   sort = 'startedAt:desc',
   startedAfter,
   startedBefore,
@@ -143,6 +146,8 @@ export const searchStepExecutions = async ({
     const pageSize = size ?? (isPaginated ? 100 : 1000);
     const from = isPaginated && page !== undefined ? (page - 1) * pageSize : 0;
 
+    const direction = sort === 'startedAt:asc' ? 'asc' : 'desc';
+
     const sourceFilter = sourceIncludes?.length
       ? { includes: sourceIncludes }
       : sourceExcludes?.length
@@ -152,8 +157,8 @@ export const searchStepExecutions = async ({
     const response = await stepExecutionsDataClient.search({
       query: { bool: { must: mustQueries } },
       ...(sourceFilter ? { _source: sourceFilter } : {}),
-      sort,
-      from,
+      sort: [{ startedAt: direction }, { id: direction }],
+      ...(searchAfter ? { search_after: searchAfter } : { from }),
       size: pageSize,
       track_total_hits: isPaginated,
     });
@@ -161,11 +166,13 @@ export const searchStepExecutions = async ({
     const results = response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
 
     const total = getTotalFromResponse(response, isPaginated, results.length);
+    const lastSort = response.hits.hits[results.length - 1]?.sort;
     logger.debug(`Found ${results.length} step executions`);
 
     return {
       results,
       total,
+      ...(results.length >= pageSize && lastSort ? { searchAfter: lastSort } : {}),
       ...(isPaginated && page !== undefined && { page, size: pageSize }),
     };
   } catch (error) {

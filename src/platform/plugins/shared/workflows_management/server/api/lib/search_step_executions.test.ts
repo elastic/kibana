@@ -113,7 +113,7 @@ describe('searchStepExecutions', () => {
         },
         from: 0,
         size: 50,
-        sort: 'startedAt:desc',
+        sort: [{ startedAt: 'desc' }, { id: 'desc' }],
         track_total_hits: true,
       })
     );
@@ -161,7 +161,7 @@ describe('searchStepExecutions', () => {
       expect.objectContaining({
         from: 50,
         size: 50,
-        sort: 'startedAt:desc',
+        sort: [{ startedAt: 'desc' }, { id: 'desc' }],
         track_total_hits: true,
       })
     );
@@ -187,8 +187,32 @@ describe('searchStepExecutions', () => {
 
     expect(mockStepDataClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        sort: 'startedAt:asc',
+        sort: [{ startedAt: 'asc' }, { id: 'asc' }],
       })
     );
+  });
+
+  it('pages with search_after and an id tiebreaker instead of from', async () => {
+    mockStepDataClient.search.mockResolvedValue({
+      hits: {
+        hits: [{ _source: { id: 's1' }, sort: [1, 's1'] }],
+        total: { value: 1 },
+      },
+    } as any);
+
+    const result = await searchStepExecutions({
+      ...baseParams,
+      stepExecutionsDataClient: mockStepDataClient,
+      logger: mockLogger,
+      workflowId: 'wf-1',
+      size: 1,
+      searchAfter: [5, 'prev'],
+    });
+
+    const body = mockStepDataClient.search.mock.calls[0][0];
+    expect(body.search_after).toEqual([5, 'prev']);
+    expect(body).not.toHaveProperty('from');
+    expect(body.sort).toEqual([{ startedAt: 'desc' }, { id: 'desc' }]);
+    expect(result.searchAfter).toEqual([1, 's1']);
   });
 });
