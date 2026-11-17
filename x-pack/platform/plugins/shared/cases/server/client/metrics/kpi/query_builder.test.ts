@@ -65,6 +65,31 @@ describe('buildKpiMetricSearch', () => {
     ).toThrow();
   });
 
+  it('adds the case ids of the list filters as a separate filter clause', () => {
+    const { body } = buildKpiMetricSearch(createMetric({ index: 'activity', query: '' }), {
+      ...context,
+      caseIds: ['case-1', 'case-2'],
+    });
+
+    expect(body.query?.bool?.filter).toEqual([
+      { term: { space_id: 'space-a' } },
+      { term: { owner: 'securitySolution' } },
+      { terms: { 'case.id': ['case-1', 'case-2'] } },
+      { range: { '@timestamp': { gte: 'now-30d', lte: 'now' } } },
+    ]);
+  });
+
+  it('matches no document when the list filters match no case', () => {
+    const { body } = buildKpiMetricSearch(createMetric({ query: '' }), {
+      ...context,
+      caseIds: [],
+    });
+
+    expect(body.query?.bool?.filter).toEqual(
+      expect.arrayContaining([{ terms: { 'case.id': [] } }])
+    );
+  });
+
   it('omits the KQL clause for an empty query', () => {
     expect(getFilters(createMetric({ query: '  ' }))).toHaveLength(3);
   });

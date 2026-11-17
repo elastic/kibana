@@ -8,21 +8,31 @@
 import { isEmpty, isArray } from 'lodash';
 import Boom from '@hapi/boom';
 
+import type { SavedObject } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import type { Template } from '../../../common/types/domain/template/latest';
+import type { InlineField } from '../../../common/types/domain/template/fields';
 import type { CasesSearchRequest, CasesSearchResponse } from '../../../common/types/api';
 import { CasesSearchRequestSchema, CasesSearchResponseSchema } from '../../../common/types/api';
 import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
+import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { constructQueryOptions } from '../utils';
 import { Operations } from '../../authorization';
+import type { EnsureSOAuthCallback } from '../../authorization';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesSearchParams } from '../types';
 import { validateSearchCasesCustomFields } from './validators';
+import type {
+  ResolvedExtendedFieldFilter,
+  ResolvedFieldLabelFilter,
+} from '../../services/cases/extended_field_search_utils';
 import {
   resolveExtendedFieldFilters,
   tokenizeSearchForLabels,
@@ -30,6 +40,171 @@ import {
 } from '../../services/cases/extended_field_search_utils';
 import { enrichCasesWithFieldLabels } from './utils';
 import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
+
+export interface PreparedCasesSearch {
+  caseOptions: SavedObjectFindOptionsKueryNode;
+  statsFilter?: KueryNode;
+  namespaces: string[];
+  extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
+  fieldLabelFilters?: ResolvedFieldLabelFilter[];
+  templateSOs: Array<SavedObject<Template>>;
+  globalFields: InlineField[];
+  ensureSavedObjectsAreAuthorized: EnsureSOAuthCallback;
+}
+
+/**
+ * Validates the search request and builds the query options of the case list search.
+ */
+export const prepareCasesSearch = async (
+  params: CasesSearchRequest,
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): Promise<PreparedCasesSearch> => {
+  const {
+    services: { licensingService, templatesService, fieldDefinitionsService },
+    authorization,
+    spaceId,
+    config,
+  } = clientArgs;
+
+  const paramArgs = decodeWithExcessOrThrowZod(CasesSearchRequestSchema)(params);
+  const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
+  const configurations = await casesClient.configure.get(configArgs);
+  const customFieldsConfiguration: CustomFieldsConfiguration = configurations
+    .map((configuration) => configuration.customFields)
+    .flat();
+
+  /**
+   * Assign users to a case is only available to Platinum+
+   */
+
+  if (!isEmpty(paramArgs.assignees)) {
+    const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+    if (!hasPlatinumLicenseOrGreater) {
+      throw Boom.forbidden(
+        'In order to filter cases by assignees, you must be subscribed to an Elastic Platinum license'
+      );
+    }
+
+    licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
+  }
+
+  /**
+   * Validate custom fields
+   */
+  if (paramArgs?.customFields && !isEmpty(paramArgs?.customFields)) {
+    /**
+     * throw error if params has customFields and no owner
+     */
+
+    const isValidArray =
+      isArray(paramArgs.owner) &&
+      (!paramArgs.owner.length || paramArgs.owner.length > 1 || isEmpty(paramArgs.owner[0]));
+
+    if (!paramArgs.owner || isValidArray) {
+      throw Boom.badRequest('Owner must be provided. Multiple owners are not supported.');
+    }
+
+    validateSearchCasesCustomFields({
+      customFieldsConfiguration,
+      customFields: paramArgs.customFields,
+    });
+  }
+
+  const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+    await authorization.getAuthorizationFilter(Operations.findCases);
+
+  const options: CasesSearchParams = {
+    tags: paramArgs.tags,
+    reporters: paramArgs.reporters,
+    sortField: paramArgs.sortField,
+    status: paramArgs.status,
+    severity: paramArgs.severity,
+    owner: paramArgs.owner,
+    from: paramArgs.from,
+    to: paramArgs.to,
+    assignees: paramArgs.assignees,
+    category: paramArgs.category,
+    customFields: paramArgs.customFields,
+  };
+
+  const statusStatsOptions = constructQueryOptions({
+    ...options,
+    status: undefined,
+    customFieldsConfiguration,
+    authorizationFilter,
+    searchType: 'search',
+  });
+
+  const caseQueryOptions = constructQueryOptions({
+    ...options,
+    customFieldsConfiguration,
+    authorizationFilter,
+    searchType: 'search',
+  });
+
+  const namespaces = [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING];
+
+  const ownerArray = asArray(paramArgs.owner).filter(Boolean);
+
+  /**
+   * Fetch ALL template versions upfront. This single fetch serves two purposes:
+   * 1. Extended field filter resolution — we need all versions (not just isLatest) to
+   *    correctly match cases created with older template versions where fields may differ.
+   * 2. Label enrichment — enrichCasesWithFieldLabels uses the same SOs to populate
+   *    extended_fields_labels on returned cases, avoiding redundant fetches.
+   *
+   */
+  const [templateSOs, globalFieldDefs] = config.templates.enabled
+    ? await Promise.all([
+        templatesService.getTemplateVersionsForExtendedFieldSearch({
+          owner: ownerArray.length > 0 ? ownerArray : undefined,
+        }),
+        fieldDefinitionsService.getGlobalFieldDefinitionsForSearch({
+          owner: ownerArray.length > 0 ? ownerArray : undefined,
+        }),
+      ])
+    : [[], []];
+
+  const templateMetadata = templateSOs.map((so) => ({
+    templateId: so.attributes.templateId,
+    templateVersion: so.attributes.templateVersion,
+    fieldDefinitions: so.attributes.fieldDefinitions,
+  }));
+
+  const globalFields = parseFieldDefinitionsToInlineFields(globalFieldDefs);
+
+  const rawFilters = paramArgs.extendedFieldFilters;
+  const resolvedExtendedFieldFilters =
+    rawFilters && rawFilters.length > 0
+      ? resolveExtendedFieldFilters(rawFilters, templateMetadata, globalFields)
+      : undefined;
+
+  const fieldLabelResults = paramArgs.search
+    ? resolveFieldLabelSearch(
+        tokenizeSearchForLabels(paramArgs.search),
+        templateMetadata,
+        globalFields
+      )
+    : [];
+  const resolvedFieldLabelFilters = fieldLabelResults.length > 0 ? fieldLabelResults : undefined;
+
+  return {
+    caseOptions: {
+      ...paramArgs,
+      ...caseQueryOptions,
+      searchFields: asArray(paramArgs.searchFields),
+    },
+    statsFilter: statusStatsOptions.filter,
+    namespaces,
+    extendedFieldFilters: resolvedExtendedFieldFilters,
+    fieldLabelFilters: resolvedFieldLabelFilters,
+    templateSOs,
+    globalFields,
+    ensureSavedObjectsAreAuthorized,
+  };
+};
 
 /**
  * Retrieves a case and optionally its comments.
@@ -42,151 +217,32 @@ export const search = async (
   casesClient: CasesClient
 ): Promise<CasesSearchResponse> => {
   const {
-    services: { caseService, licensingService, templatesService, fieldDefinitionsService },
-    authorization,
+    services: { caseService },
     logger,
-    spaceId,
-    config,
   } = clientArgs;
 
   try {
-    const paramArgs = decodeWithExcessOrThrowZod(CasesSearchRequestSchema)(params);
-    const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
-    const configurations = await casesClient.configure.get(configArgs);
-    const customFieldsConfiguration: CustomFieldsConfiguration = configurations
-      .map((configuration) => configuration.customFields)
-      .flat();
-
-    /**
-     * Assign users to a case is only available to Platinum+
-     */
-
-    if (!isEmpty(paramArgs.assignees)) {
-      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
-
-      if (!hasPlatinumLicenseOrGreater) {
-        throw Boom.forbidden(
-          'In order to filter cases by assignees, you must be subscribed to an Elastic Platinum license'
-        );
-      }
-
-      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
-    }
-
-    /**
-     * Validate custom fields
-     */
-    if (paramArgs?.customFields && !isEmpty(paramArgs?.customFields)) {
-      /**
-       * throw error if params has customFields and no owner
-       */
-
-      const isValidArray =
-        isArray(paramArgs.owner) &&
-        (!paramArgs.owner.length || paramArgs.owner.length > 1 || isEmpty(paramArgs.owner[0]));
-
-      if (!paramArgs.owner || isValidArray) {
-        throw Boom.badRequest('Owner must be provided. Multiple owners are not supported.');
-      }
-
-      validateSearchCasesCustomFields({
-        customFieldsConfiguration,
-        customFields: paramArgs.customFields,
-      });
-    }
-
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.findCases);
-
-    const options: CasesSearchParams = {
-      tags: paramArgs.tags,
-      reporters: paramArgs.reporters,
-      sortField: paramArgs.sortField,
-      status: paramArgs.status,
-      severity: paramArgs.severity,
-      owner: paramArgs.owner,
-      from: paramArgs.from,
-      to: paramArgs.to,
-      assignees: paramArgs.assignees,
-      category: paramArgs.category,
-      customFields: paramArgs.customFields,
-    };
-
-    const statusStatsOptions = constructQueryOptions({
-      ...options,
-      status: undefined,
-      customFieldsConfiguration,
-      authorizationFilter,
-      searchType: 'search',
-    });
-
-    const caseQueryOptions = constructQueryOptions({
-      ...options,
-      customFieldsConfiguration,
-      authorizationFilter,
-      searchType: 'search',
-    });
-
-    const namespaces = [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING];
-
-    const ownerArray = asArray(paramArgs.owner).filter(Boolean);
-
-    /**
-     * Fetch ALL template versions upfront. This single fetch serves two purposes:
-     * 1. Extended field filter resolution — we need all versions (not just isLatest) to
-     *    correctly match cases created with older template versions where fields may differ.
-     * 2. Label enrichment — enrichCasesWithFieldLabels uses the same SOs to populate
-     *    extended_fields_labels on returned cases, avoiding redundant fetches.
-     *
-     */
-    const [templateSOs, globalFieldDefs] = config.templates.enabled
-      ? await Promise.all([
-          templatesService.getTemplateVersionsForExtendedFieldSearch({
-            owner: ownerArray.length > 0 ? ownerArray : undefined,
-          }),
-          fieldDefinitionsService.getGlobalFieldDefinitionsForSearch({
-            owner: ownerArray.length > 0 ? ownerArray : undefined,
-          }),
-        ])
-      : [[], []];
-
-    const templateMetadata = templateSOs.map((so) => ({
-      templateId: so.attributes.templateId,
-      templateVersion: so.attributes.templateVersion,
-      fieldDefinitions: so.attributes.fieldDefinitions,
-    }));
-
-    const globalFields = parseFieldDefinitionsToInlineFields(globalFieldDefs);
-
-    const rawFilters = paramArgs.extendedFieldFilters;
-    const resolvedExtendedFieldFilters =
-      rawFilters && rawFilters.length > 0
-        ? resolveExtendedFieldFilters(rawFilters, templateMetadata, globalFields)
-        : undefined;
-
-    const fieldLabelResults = paramArgs.search
-      ? resolveFieldLabelSearch(
-          tokenizeSearchForLabels(paramArgs.search),
-          templateMetadata,
-          globalFields
-        )
-      : [];
-    const resolvedFieldLabelFilters = fieldLabelResults.length > 0 ? fieldLabelResults : undefined;
+    const {
+      caseOptions,
+      statsFilter,
+      namespaces,
+      extendedFieldFilters,
+      fieldLabelFilters,
+      templateSOs,
+      globalFields,
+      ensureSavedObjectsAreAuthorized,
+    } = await prepareCasesSearch(params, clientArgs, casesClient);
 
     const cases = await caseService.searchCasesGroupedByID({
-      caseOptions: {
-        ...paramArgs,
-        ...caseQueryOptions,
-        searchFields: asArray(paramArgs.searchFields),
-      },
+      caseOptions,
       namespaces,
-      extendedFieldFilters: resolvedExtendedFieldFilters,
-      fieldLabelFilters: resolvedFieldLabelFilters,
+      extendedFieldFilters,
+      fieldLabelFilters,
       // Status counts and MTTR are computed with the full search query (free-text search,
       // extended field filters, attachment matches) so the metrics shown next to the list
-      // always reflect it; only the status clause is stripped (statusStatsOptions) so all
+      // always reflect it; only the status clause is stripped (statsFilter) so all
       // three status counts stay populated.
-      statsOptions: { filter: statusStatsOptions.filter },
+      statsOptions: { filter: statsFilter },
     });
 
     const statusStats = cases.searchStats?.statusStats ?? {

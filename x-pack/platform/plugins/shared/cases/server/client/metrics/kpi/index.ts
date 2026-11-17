@@ -8,4 +8,5 @@
 export type { KpiQueryContext, KpiSearchRequest } from './query_builder';
 export { buildKpiMetricSearch } from './query_builder';
 export { runKpiMetrics } from './run';
+export { toKpiMetricError } from './result';
 export { getKpiMetricFieldError, getKpiMetricQueryError } from './validation';

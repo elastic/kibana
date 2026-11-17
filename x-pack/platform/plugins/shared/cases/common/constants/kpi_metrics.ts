@@ -102,6 +102,11 @@ export const PREDEFINED_KPI_METRIC_IDS = PREDEFINED_KPI_METRICS.map((metric) => 
  */
 export const KPI_METRIC_PREVIEW_ID = 'preview';
 
+/**
+ * The maximum number of cases that the case list filters can select for the custom metrics
+ */
+export const MAX_KPI_FILTER_CASE_IDS = 10000;
+
 export const getKpiField = (
   index: KpiMetricIndex,
   field: string

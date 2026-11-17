@@ -25,16 +25,21 @@ export interface KpiQueryContext {
   owner: string;
   from?: string;
   to?: string;
+  /**
+   * The ids of the cases that match the case list filters. Undefined when no list filter is active.
+   */
+  caseIds?: string[];
 }
 
 export type KpiSearchRequest = CasesAnalyticsV2SearchRequest;
 
 export const buildForcedFilters = (
   index: KpiMetricIndex,
-  { spaceId, owner, from, to }: KpiQueryContext
+  { spaceId, owner, from, to, caseIds }: KpiQueryContext
 ): estypes.QueryDslQueryContainer[] => [
   { term: { space_id: spaceId } },
   { term: { owner } },
+  ...(caseIds != null ? [{ terms: { 'case.id': caseIds } }] : []),
   ...(from != null || to != null
     ? [
         {
