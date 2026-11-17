@@ -14,8 +14,8 @@ import {
   type TaskManagerStartContract,
   type TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
-import { reconcile } from './reconcile';
-import type { LastRun, MigrationDefinition, MigrationRunnerDeps } from './types';
+import { reconcileAll } from './reconcile_all';
+import type { LastRun, MigrationDefinition, MigrationRunnerDeps, ReconcileResult } from './types';
 
 export const TASK_TYPE_PREFIX = 'es-index-migration';
 
@@ -41,11 +41,18 @@ export const DEFAULT_INTERVAL = '60m';
 export const DEFAULT_TIMEOUT = '10m';
 
 const lastRunSchema = schema.object({
-  version: schema.number(),
-  status: schema.string(),
-  namespace: schema.string(),
   at: schema.string(),
-  error: schema.maybe(schema.string()),
+  total: schema.number(),
+  failed: schema.number(),
+  target: schema.number(),
+  lowestInstalled: schema.number(),
+  firstError: schema.maybe(
+    schema.object({
+      namespace: schema.string(),
+      version: schema.number(),
+      error: schema.string(),
+    })
+  ),
 });
 
 const stateSchemaV1 = schema.object({
@@ -133,29 +140,56 @@ const createRunner =
           continue;
         }
 
-        for (const namespace of namespaces) {
-          if (signal.aborted) {
-            // Stop cleanly and keep what has been recorded; the next run resumes.
-            return { state: { lastRunByMigrationId } };
-          }
+        const results = await reconcileAll({
+          definition,
+          esClient,
+          logger,
+          namespaces,
+          signal,
+        });
 
-          const result = await reconcile({ definition, esClient, logger, namespace, signal });
-
-          // Only `auto` has no caller to receive the result, so it is the only mode whose
-          // outcome has to survive the run to stay answerable.
-          lastRunByMigrationId[definition.id] = {
-            version: result.installed,
-            status: result.status,
-            namespace,
-            at: new Date().toISOString(),
-            error: result.error,
-          };
+        // Only `auto` has no caller to receive the result, so it is the only mode whose
+        // outcome has to survive the run to stay answerable.
+        if (results.length > 0) {
+          lastRunByMigrationId[definition.id] = summarise(results);
         }
       }
 
       return { state: { lastRunByMigrationId } };
     },
   });
+
+/**
+ * Collapses a sweep into a fixed-size record.
+ *
+ * Size is independent of how many spaces a deployment has, which is what makes this safe
+ * to keep in task state. It answers "is it stuck, and how badly" - the per-namespace
+ * breakdown lives in metrics, which carry a namespace attribute.
+ */
+export const summarise = (results: ReconcileResult[]): LastRun => {
+  const failures = results.filter(({ status }) => status === 'failed');
+  const first = failures[0];
+
+  return {
+    at: new Date().toISOString(),
+    total: results.length,
+    failed: failures.length,
+    target: results[0].target,
+    lowestInstalled: results.reduce(
+      (lowest, { installed }) => Math.min(lowest, installed),
+      results[0].installed
+    ),
+    ...(first
+      ? {
+          firstError: {
+            namespace: first.namespace,
+            version: first.installed + 1,
+            error: first.error ?? 'unknown',
+          },
+        }
+      : {}),
+  };
+};
 
 /**
  * Schedules the plugin's task.

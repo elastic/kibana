@@ -8,6 +8,10 @@
 export { defineMigration } from './src/define_migration';
 export { createMigrationRegistry } from './src/registry';
 export { reconcile } from './src/reconcile';
+export { reconcileAll } from './src/reconcile_all';
+export { getMigrationStatus } from './src/status';
+export { isGlobal, namespacesFor, resolveName } from './src/resource';
+export { GLOBAL_NAMESPACE } from './src/types';
 export { VERSION_META_KEY } from './src/backends/index_backend';
 export { describeViolations, verifyAdditive } from './src/verify';
 export {
@@ -33,16 +37,21 @@ export type {
   Drift,
   ExecutionMode,
   LastRun,
+  LastRunRecorded,
   MigrationDefinition,
   MigrationRegistry,
   MigrationRegistryOptions,
   MigrationResource,
   MigrationRunnerDeps,
   MigrationStartOptions,
+  MigrationStatus,
   MigrationVersion,
+  NamespaceStatus,
+  ReconcileAllOptions,
   ReconcileOptions,
   ReconcileResult,
   ReconcileStatus,
+  StatusOptions,
   VerifyResult,
   Violation,
   ViolationKind,

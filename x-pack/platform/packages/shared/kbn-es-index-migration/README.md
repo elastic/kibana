@@ -134,8 +134,72 @@ Both were confirmed against a live cluster, and both are easy to get wrong:
   A partial write would erase the version, and the next reconcile would fall back to `baseline` and
   re-apply everything.
 
+## Scope: per-namespace or global
+
+A resource either exists once per space, or once for the whole deployment:
+
+```ts
+// one index per space - the default, and the common case
+resource: { kind: 'index', name: (namespace) => `.entities-${namespace}` }
+
+// one index shared by every space
+resource: { kind: 'index', scope: 'global', name: () => '.my-shared-index' }
+```
+
+A discriminated union rather than a flag, so a `global` resource **cannot** reference a namespace -
+the type rejects it instead of relying on the author to remember. Getting this wrong is otherwise
+invisible: a global index reconciled per namespace still ends up correct, because the first pass
+stamps the version and the rest no-op, while quietly costing a request pair per space and
+over-counting every metric.
+
+With `scope: 'global'`, the sweep runs once, the concurrency guard treats it as one resource, and
+status reports one entry.
+
+## Reconciling every namespace
+
+`reconcile` handles one namespace. `reconcileAll` sweeps them all:
+
+```ts
+const results = await reconcileAll({ definition, esClient, logger, namespaces });
+```
+
+Sequential rather than parallel - namespaces are independent indices, but a migration is never
+latency-sensitive and a hundred spaces reconciling at once is a load spike for no benefit.
+
+**One namespace cannot stop the others.** A space whose index is in a bad state should not leave
+every other space un-migrated, so a failure is recorded against that namespace and the sweep
+continues.
+
+## Overlapping runs
+
+Reconciles of the same migration and namespace are shared within a process: a second caller gets
+the first one's promise rather than a second run. Applying the same additive mappings twice is
+harmless, but a data step is the plugin's own code and may not be idempotent.
+
+Across nodes, `auto` is covered by Task Manager's claim. `lifecycle` and `triggered` are driven by
+their caller, so avoiding a concurrent run there is the caller's responsibility.
+
 ## Status
 
-Phase 1 - concrete indices only. Still to come: the gate that verifies a change declared `additive`
-really is, cluster-wide coordination with per-namespace fan-out, the predefined metric set, and a
-data stream backend.
+```ts
+const status = await getMigrationStatus({ definition, esClient, namespaces, lastRun });
+```
+
+Derived from Elasticsearch each time rather than cached, because the index is the only thing that
+knows what was applied to it. `versionsBehind` reports the furthest behind any namespace is -
+sustained above zero is the signal that something is stuck.
+
+`lastRunRecorded` is deliberately three-valued rather than a nullable error:
+
+| Value | Meaning |
+|---|---|
+| `yes` | An `auto` migration that has run; `lastRun` holds the outcome |
+| `never_run` | An `auto` migration that has not run yet |
+| `not_applicable` | Not `auto`, so no record is kept - the error is in the plugin's own logs |
+
+Without that distinction, a blank error on a `lifecycle` migration reads as "it succeeded" when it
+actually means "we never kept a record."
+
+## Status of the package
+
+Concrete indices only. Still to come: the predefined metric set, and a data stream backend.

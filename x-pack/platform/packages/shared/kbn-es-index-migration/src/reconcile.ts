@@ -8,6 +8,7 @@
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { sortedVersionNumbers } from './define_migration';
 import { classifyEsError, describeEsRefusal } from './es_errors';
+import { resolveName } from './resource';
 import {
   applyMappings,
   createIndex,
@@ -23,6 +24,19 @@ import type {
 } from './types';
 
 /**
+ * Reconciles already running in this process, keyed by migration and namespace.
+ *
+ * Applying the same additive mappings twice is harmless, but a data step is the plugin's
+ * own code and may not be idempotent, so two overlapping runs could execute a backfill
+ * twice. Callers that overlap share one run and one result instead.
+ *
+ * In-process only. Across nodes, `auto` is covered by Task Manager's claim; `lifecycle`
+ * and `triggered` are driven by their caller, so avoiding a concurrent run there is the
+ * caller's responsibility.
+ */
+const inFlight = new Map<string, Promise<ReconcileResult>>();
+
+/**
  * Brings one resource, in one namespace, to the version the code expects.
  *
  * Asks "is it current?" rather than "is it missing?" - an existence check cannot tell a
@@ -31,7 +45,25 @@ import type {
  *
  * Idempotent: re-running when installed already matches the target does nothing.
  */
-export const reconcile = async ({
+export const reconcile = async (options: ReconcileOptions): Promise<ReconcileResult> => {
+  // Keyed on the resolved resource, not the namespace, so a global index shared by every
+  // space is guarded as the single resource it is.
+  const key = `${options.definition.id}:${resolveName(
+    options.definition.resource,
+    options.namespace
+  )}`;
+  const running = inFlight.get(key);
+
+  if (running) {
+    return running;
+  }
+
+  const run = runReconcile(options).finally(() => inFlight.delete(key));
+  inFlight.set(key, run);
+  return run;
+};
+
+const runReconcile = async ({
   definition,
   esClient,
   logger,
@@ -39,7 +71,7 @@ export const reconcile = async ({
   signal,
 }: ReconcileOptions): Promise<ReconcileResult> => {
   const { id, resource, baseline, versions } = definition;
-  const resourceName = resource.name(namespace);
+  const resourceName = resolveName(resource, namespace);
   const declared = sortedVersionNumbers(versions);
   const target = declared.length > 0 ? declared[declared.length - 1] : baseline;
   const abortable = { signal };
