@@ -7,13 +7,16 @@
 
 import { Container } from 'inversify';
 import { of } from 'rxjs';
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { Logger, OnSetup, OnStart, PluginStart } from '@kbn/core-di';
-import { CoreSetup, CoreStart } from '@kbn/core-di-server';
+import { CoreSetup, CoreStart, Request } from '@kbn/core-di-server';
+import type { DetectionSignal } from '../../common/detection_signal';
 import { NIGHTSHIFT_DETECTION_TIERED_FEATURES } from '../../common/constants';
 import { module } from '..';
 import { AvailabilityService } from '../lib/availability/availability_service';
+import type { AlertingServerStart } from '@kbn/alerting-v2-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   DetectionEngineSystemClient,
   DetectionEngineDataClient,
@@ -35,6 +38,16 @@ function createContainer() {
   container.bind(CoreStart('elasticsearch')).toConstantValue(core.elasticsearch);
   container.bind(CoreStart('featureFlags')).toConstantValue(core.featureFlags);
   container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
+  container.bind(Request).toConstantValue(httpServerMock.createKibanaRequest());
+  const createSignalEvent = jest.fn().mockResolvedValue({ group_hash: 'hash' });
+  const alerting = {
+    getAlertEventsClientWithRequest: jest.fn().mockResolvedValue({ createSignalEvent }),
+  } as unknown as AlertingServerStart;
+  const spaces = {
+    spacesService: { getSpaceId: jest.fn().mockReturnValue('default') },
+  } as unknown as SpacesPluginStart;
+  container.bind(PluginStart('alertingVTwo')).toConstantValue(alerting);
+  container.bind(PluginStart('spaces')).toConstantValue(spaces);
   container.bind(CoreStart('pricing')).toConstantValue(core.pricing);
   container.bind(PluginStart('licensing')).toConstantValue(licensingMock.createStart());
   // What the `_tick` route binds for each tick.
@@ -47,8 +60,17 @@ function createContainer() {
     .toConstantValue(core.elasticsearch.client.asInternalUser);
   container.load(module);
 
-  return { container, core, coreSetup };
+  return { container, core, coreSetup, alerting };
 }
+
+const SIGNAL = {
+  space_id: 'default',
+  group_hash: 'hash',
+  source: 'elastic.nightshift_detection_engine',
+  status: 'breached',
+  scheduled_timestamp: '2026-11-13T10:00:00.000Z',
+  data: { strategy: 'error_rate', fingerprint: 'checkout' },
+} as unknown as DetectionSignal;
 
 describe('module', () => {
   // A new binding in the module goes in this test, so a missing dependency fails here and not
@@ -71,5 +93,22 @@ describe('module', () => {
     expect(container.get(DetectionEngineSystemClient)).toBe(
       core.elasticsearch.client.asInternalUser
     );
+  });
+
+  it('gives every tick scope the signal store of its own request', async () => {
+    const { container, alerting } = createContainer();
+    const requests = [httpServerMock.createKibanaRequest(), httpServerMock.createKibanaRequest()];
+
+    // A tick forks the container and binds its request, as the tick service does.
+    for (const request of requests) {
+      const tick = new Container({ parent: container, defaultScope: 'Singleton' });
+      tick.bind(Request).toConstantValue(request);
+      await tick.get(DetectionSignalStore).write([SIGNAL]);
+    }
+
+    const { calls } = jest.mocked(alerting.getAlertEventsClientWithRequest).mock;
+    expect(calls).toHaveLength(2);
+    expect(calls[0][0]).toBe(requests[0]);
+    expect(calls[1][0]).toBe(requests[1]);
   });
 });

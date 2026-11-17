@@ -11,9 +11,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 /** `source` of every signal the engine writes. */
 export const DETECTION_SIGNAL_SOURCE = 'elastic.nightshift_detection_engine';
 
-/** The fallback store: a data stream the engine owns, used until engine signals can go to `.rule-events`. */
-export const DETECTION_SIGNALS_FALLBACK_STREAM = '.nightshift-detection_engine-detection_signals';
-
 /** What triage did with a signal. Every signal ends up with exactly one. */
 export const DETECTION_SIGNAL_OUTCOMES = [
   'background',
@@ -83,7 +80,7 @@ export const detectionSignalTriageSchema = lazySchema(() =>
 
 /**
  * A detection signal in the `.rule-events` shape: the alert event schema narrowed to what the
- * engine writes. It has no `rule`, and no `@timestamp` until the store's ingest pipeline sets it.
+ * engine writes. It has no `rule`, and no `@timestamp` until `.rule-events` sets it from the schedule time.
  */
 export const detectionSignalSchema = alertEventSchema
   .omit({ rule: true })

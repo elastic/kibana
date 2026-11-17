@@ -337,7 +337,7 @@ describe('applyYamlUpdate', () => {
     expect(result.updatedDataPatch).not.toHaveProperty('tags');
   });
 
-  it('logs kibana.request fetcher on YAML updates when the self-client path is on', async () => {
+  it('logs kibana.request fetcher on YAML updates', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
     const yaml = [
@@ -361,7 +361,6 @@ describe('applyYamlUpdate', () => {
       zodSchema,
       triggerDefinitions: [],
       logger,
-      warnIgnoredKibanaFetcher: true,
       workflowId: 'wf-1',
     });
 
@@ -371,35 +370,6 @@ describe('applyYamlUpdate', () => {
         labels: expect.objectContaining({ workflow_id: 'wf-1', step_names: 'status' }),
       })
     );
-  });
-
-  it('does not log kibana.request fetcher on YAML updates when the self-client path is off', async () => {
-    const zodSchema = getWorkflowZodSchema({});
-    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
-    const yaml = [
-      "version: '1'",
-      'name: kibana-fetcher',
-      'enabled: true',
-      'triggers:',
-      '  - type: manual',
-      'steps:',
-      '  - name: status',
-      '    type: kibana.request',
-      '    with:',
-      '      method: GET',
-      '      path: /api/status',
-      '      fetcher:',
-      '        skip_ssl_verification: true',
-    ].join('\n');
-
-    await applyYamlUpdate({
-      workflowYaml: yaml,
-      zodSchema,
-      triggerDefinitions: [],
-      logger,
-    });
-
-    expect(logger.warn).not.toHaveBeenCalled();
   });
 });
 
@@ -551,7 +521,6 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       now,
       spaceId: 'default',
       logger,
-      warnIgnoredKibanaFetcher: true,
     });
 
     expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -564,38 +533,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     );
   });
 
-  it('does not log kibana fetcher when the self-client path is off', async () => {
-    const zodSchema = getWorkflowZodSchema({});
-    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
-    const yaml = [
-      "version: '1'",
-      'name: kibana-fetcher',
-      'enabled: true',
-      'triggers:',
-      '  - type: manual',
-      'steps:',
-      '  - name: status',
-      '    type: kibana.request',
-      '    with:',
-      '      method: GET',
-      '      path: /api/status',
-      '      fetcher:',
-      '        skip_ssl_verification: true',
-    ].join('\n');
-
-    await prepareWorkflowDocumentFromYaml({
-      yaml,
-      zodSchema,
-      authenticatedUser: 'user1',
-      now,
-      spaceId: 'default',
-      logger,
-    });
-
-    expect(logger.warn).not.toHaveBeenCalled();
-  });
-
-  it('does not log generated kibana.* fetcher when the self-client flag is off', async () => {
+  it('logs generated kibana.* fetcher', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
     const yaml = [
@@ -622,6 +560,11 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       logger,
     });
 
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('fetcher'),
+      expect.objectContaining({
+        labels: expect.objectContaining({ step_names: 'get-case' }),
+      })
+    );
   });
 });
