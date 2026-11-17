@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { IKbnPalette, KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
 import type { ColorMapping } from '@kbn/coloring';
-import { PaletteColors } from './palette_colors';
+import { PaletteColors, getPaletteSwatchesPerRow } from './palette_colors';
 import { RGBPicker } from './rgb_picker';
 
 export function ColorPicker({
@@ -38,8 +38,17 @@ export function ColorPicker({
       : 'custom'
   );
 
+  // EuiColorPicker's inline layout is fixed to 5 swatch columns
+  const columns = tab === 'palette' ? getPaletteSwatchesPerRow(palette.colorCount) : 5;
+
   return (
-    <div css={{ width: 168, position: 'relative' }}>
+    <div
+      css={({ euiTheme }) => ({
+        // swatch (size.l) × columns + gutters + horizontal padding
+        width: `calc(${euiTheme.size.l} * ${columns} + ${euiTheme.size.s} * ${columns + 1})`,
+        position: 'relative',
+      })}
+    >
       <EuiPopoverTitle
         paddingSize="none"
         css={{

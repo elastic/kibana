@@ -273,7 +273,7 @@ const colorFromPaletteSchema = lazySchema(() =>
       index: z.number().meta({ description: 'The index of the color in the palette.' }),
       palette: z.string().optional().meta({
         description:
-          "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
+          "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'elastic_line_optimized_extended', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
       }),
     })
     .strict()
@@ -313,7 +313,7 @@ const categoricalColorMappingSchema = lazySchema(() =>
       mode: z.literal('categorical'),
       palette: z.string().meta({
         description:
-          "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
+          "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'elastic_line_optimized_extended', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
       }),
       mapping: z
         .array(
@@ -342,7 +342,7 @@ const gradientColorMappingSchema = lazySchema(() =>
       mode: z.literal('gradient'),
       palette: z.string().meta({
         description:
-          "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
+          "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'elastic_line_optimized_extended', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
       }),
       sort: z
         .union([z.literal('asc'), z.literal('desc')])

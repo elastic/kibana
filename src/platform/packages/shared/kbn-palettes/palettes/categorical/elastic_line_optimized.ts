@@ -13,7 +13,12 @@ import { KbnPalette } from '../../constants';
 import { KbnColorFnPalette } from '../../classes/color_fn_palette';
 
 /**
- * Index pairs to swap within each group of 10 palette colors.
+ * Number of base colors in the legacy line optimized palette, from before the vis palette was extended.
+ */
+export const LEGACY_LINE_OPTIMIZED_PALETTE_SIZE = 10;
+
+/**
+ * Index pairs to swap within each group of vis palette colors.
  * Moves red tones away from pink for better adjacent-color contrast.
  */
 const COLOR_SWAP_PAIRS: Array<[number, number]> = [
@@ -22,13 +27,13 @@ const COLOR_SWAP_PAIRS: Array<[number, number]> = [
 ];
 
 /**
- * Swaps color pairs within each group of 10 to increase contrast
+ * Swaps color pairs within each group of `groupSize` colors to increase contrast
  * between adjacent hues (e.g., separating pink and red).
  */
-export function swapColorPairs(colors: string[]): string[] {
+export function swapColorPairs(colors: string[], groupSize: number): string[] {
   const result = [...colors];
-  for (let groupStart = 0; groupStart < result.length; groupStart += 10) {
-    if (groupStart + 9 < result.length) {
+  for (let groupStart = 0; groupStart < result.length; groupStart += groupSize) {
+    if (groupStart + groupSize <= result.length) {
       for (const [a, b] of COLOR_SWAP_PAIRS) {
         [result[groupStart + a], result[groupStart + b]] = [
           result[groupStart + b],
@@ -42,12 +47,12 @@ export function swapColorPairs(colors: string[]): string[] {
 
 /**
  * Reorders colors so dark tones (even indices) come before light tones (odd indices)
- * within each group of 10 colors.
+ * within each group of `groupSize` colors.
  */
-export function reorderDarkFirst(colors: string[]): string[] {
+export function reorderDarkFirst(colors: string[], groupSize: number): string[] {
   const result: string[] = [];
-  for (let i = 0; i < colors.length; i += 10) {
-    const group = colors.slice(i, i + 10);
+  for (let i = 0; i < colors.length; i += groupSize) {
+    const group = colors.slice(i, i + groupSize);
     const dark = group.filter((_, idx) => idx % 2 === 0);
     const light = group.filter((_, idx) => idx % 2 !== 0);
     result.push(...dark, ...light);
@@ -55,19 +60,39 @@ export function reorderDarkFirst(colors: string[]): string[] {
   return result;
 }
 
+/**
+ * Builds the line optimized color order from the given base colors.
+ */
+export function getLineOptimizedColors(baseColors: string[]): string[] {
+  return reorderDarkFirst(swapColorPairs(baseColors, baseColors.length), baseColors.length);
+}
+
+/**
+ * Repeats the base colors without lightening on each rotation. In lines, lighter tones contrast is too low
+ * + differences between rotations are hard to perceive.
+ */
+export function repeatColors(baseColors: string[], n: number): string[] {
+  return Array.from({ length: n }, (_, i) => baseColors[i % baseColors.length]);
+}
+
+/**
+ * Legacy line optimized palette. Color assignments store palette positions, so this must keep producing
+ * the same colors for saved charts. Not selectable for new charts.
+ */
 export const elasticLineOptimizedPalette = new KbnColorFnPalette({
-  id: KbnPalette.ElasticLineOptimized,
+  id: KbnPalette.ElasticLineOptimizedLegacy,
   type: 'categorical',
   aliases: [],
-  colorCount: 10,
-  defaultNumberOfColors: 30,
+  legacy: true,
+  standalone: true,
+  colorCount: LEGACY_LINE_OPTIMIZED_PALETTE_SIZE,
+  defaultNumberOfColors: LEGACY_LINE_OPTIMIZED_PALETTE_SIZE * 3,
   name: i18n.translate('palettes.elasticLineOptimized.name', {
     defaultMessage: 'Elastic (line optimized)',
   }),
-  colorFn: (n) => {
-    const base = reorderDarkFirst(swapColorPairs(euiPaletteColorBlind()));
-    // Repeat the base 10 colors without lightening on each rotation. In lines, lighter tones contrast is too low
-    // + differences between rotations are hard to perceive.
-    return Array.from({ length: n }, (_, i) => base[i % base.length]);
-  },
+  colorFn: (n) =>
+    repeatColors(
+      getLineOptimizedColors(euiPaletteColorBlind().slice(0, LEGACY_LINE_OPTIMIZED_PALETTE_SIZE)),
+      n
+    ),
 });

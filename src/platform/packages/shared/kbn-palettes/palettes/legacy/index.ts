@@ -9,6 +9,7 @@
 
 import { KbnPalettes } from '../../classes/palettes';
 import { elasticLineOptimizedPalette } from '../categorical/elastic_line_optimized';
+import { elasticLineOptimizedExtendedPalette } from '../categorical/elastic_line_optimized_extended';
 
 import {
   kibana7Palette,
@@ -31,6 +32,7 @@ import {
 const darkLegacyKbnPalettes = new KbnPalettes(
   [
     kibana7Palette,
+    elasticLineOptimizedExtendedPalette,
     elasticLineOptimizedPalette,
     kibana4Palette,
     kibana7BehindText,
@@ -51,6 +53,7 @@ const darkLegacyKbnPalettes = new KbnPalettes(
 const lightLegacyKbnPalettes = new KbnPalettes(
   [
     kibana7Palette,
+    elasticLineOptimizedExtendedPalette,
     elasticLineOptimizedPalette,
     kibana4Palette,
     kibana7BehindText,

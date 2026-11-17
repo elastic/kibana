@@ -31,13 +31,17 @@ const categorical = {
   /**
    * Variant of Default palette optimized for line charts: dark tones first, red/yellow swapped.
    */
-  ElasticLineOptimized: 'elastic_line_optimized' as const,
+  ElasticLineOptimized: 'elastic_line_optimized_extended' as const,
   /**
    * Neutral palette
    */
   Neutral: 'neutral' as const,
 
   // ---- Legacy Palettes ----
+  /**
+   * Line optimized palette built from the first 10 vis colors, kept so saved charts render unchanged.
+   */
+  ElasticLineOptimizedLegacy: 'elastic_line_optimized' as const,
   /**
    * Kibana legacy theme v7 to v9
    */

@@ -29,7 +29,7 @@ import {
 // strips it from the original side, so neither side carries it at compare time.
 const DEFAULT_LINE_COLOR_MAPPING = {
   colorMode: { type: 'categorical' as const },
-  paletteId: 'elastic_line_optimized',
+  paletteId: 'elastic_line_optimized_extended',
   assignments: [] as [],
   specialAssignments: [{ rules: [{ type: 'other' as const }], color: { type: 'loop' as const } }],
 };

@@ -31,7 +31,7 @@ export const DEFAULT_AREAS_FILL = 'gradient' as const;
 export const DEFAULT_REFERENCE_LINE_AXIS = 'y' as const;
 export const DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType = {
   mode: 'categorical',
-  palette: 'elastic_line_optimized',
+  palette: 'elastic_line_optimized_extended',
   mapping: [],
 };
 

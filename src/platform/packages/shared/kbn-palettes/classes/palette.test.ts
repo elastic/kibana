@@ -10,7 +10,7 @@
 import { EUI_VIS_COLOR_STORE, euiPaletteColorBlind } from '@elastic/eui';
 import { KbnCategoricalPalette } from './categorical_palette';
 import { KbnColorFnPalette } from './color_fn_palette';
-import { elasticPalette } from '../palettes/categorical/elastic';
+import { elasticPalette, visPaletteSize } from '../palettes/categorical/elastic';
 import { KbnPalette } from '../constants';
 
 const COLORS = ['#000001', '#000002', '#000003', '#000004'];
@@ -89,12 +89,13 @@ describe('elasticPalette', () => {
   const originalVisColors = EUI_VIS_COLOR_STORE.visColors;
   afterEach(() => EUI_VIS_COLOR_STORE.setVisColors(originalVisColors));
 
-  it('returns the EUI color blind palette colors in order, wrapping after the default 30', () => {
-    const expected = euiPaletteColorBlind({ rotations: 3 });
+  it('returns the extended EUI color blind palette colors in order, wrapping after the default 3 rotations', () => {
+    const expected = euiPaletteColorBlind({ rotations: 3, extended: true });
+    const defaultCount = visPaletteSize * 3;
     expect(elasticPalette.colors()).toEqual(expected);
     expect(elasticPalette.getColor(0)).toBe(expected[0]);
-    expect(elasticPalette.getColor(29)).toBe(expected[29]);
-    expect(elasticPalette.getColor(30)).toBe(expected[0]);
+    expect(elasticPalette.getColor(defaultCount - 1)).toBe(expected[defaultCount - 1]);
+    expect(elasticPalette.getColor(defaultCount)).toBe(expected[0]);
   });
 
   it('follows EUI vis color changes, e.g. on theme switch', () => {
@@ -102,6 +103,6 @@ describe('elasticPalette', () => {
     EUI_VIS_COLOR_STORE.setVisColors({ ...originalVisColors, euiColorVis0: '#123456' });
     const after = elasticPalette.getColor(0);
     expect(after).not.toBe(before);
-    expect(after).toBe(euiPaletteColorBlind({ rotations: 3 })[0]);
+    expect(after).toBe(euiPaletteColorBlind({ rotations: 3, extended: true })[0]);
   });
 });

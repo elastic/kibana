@@ -24,7 +24,7 @@ export function PalettePicker<T>({ palettes, activePalette, setPalette }: Palett
   const paletteName = getActivePaletteName(activePalette?.name);
   const palettesToShow: EuiColorPalettePickerPaletteProps[] = palettes
     .getAll()
-    .filter(({ internal }) => !internal)
+    .filter(({ id, internal }) => !internal || id === paletteName)
     .map(({ id, title, tag, getCategoricalColors }) => {
       return {
         value: id,
