@@ -200,10 +200,10 @@ export const selectEditorWorkflowLookup = createSelector(
   (computed) => computed?.workflowLookup
 );
 
-/** Breakpoints on steps that still exist, so renamed or deleted steps drop out. */
+/** Breakpoints on steps of the current workflow (not an execution snapshot), so renamed or deleted steps drop out. */
 export const selectBreakpoints = createSelector(
   (state: RootState) => state.detail.breakpoints,
-  selectEditorWorkflowLookup,
+  (state: RootState) => state.detail.computed?.workflowLookup,
   (breakpoints, workflowLookup) => {
     const existing = breakpoints.filter((stepId) => workflowLookup?.steps[stepId]);
     return existing.length === breakpoints.length ? breakpoints : existing;
