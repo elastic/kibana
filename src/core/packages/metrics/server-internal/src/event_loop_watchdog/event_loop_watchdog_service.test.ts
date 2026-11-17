@@ -100,7 +100,7 @@ describe('EventLoopWatchdogService', () => {
           startAfterMs: { starting: 30_000, running: 30_000 },
           maxDurationMs: { starting: 10_000, running: 10_000 },
           cooldownMs: { starting: 60_000, running: 60_000 },
-          diagnosticDir: '/diag',
+          dir: '/diag',
         },
       });
     });
@@ -136,10 +136,40 @@ describe('EventLoopWatchdogService', () => {
       });
     });
 
-    it('leaves the diagnostic directory unset when Node has none', async () => {
+    it('uses profiling.dir when set', async () => {
+      await setup({ profiling: { dir: '/configured' } });
+      expect(params().profiling.dir).toBe('/configured');
+      expect(resolveDiagnosticDirMock).not.toHaveBeenCalled();
+    });
+
+    it('uses diagnostic directory when profiling.dir is not set', async () => {
+      await setup();
+      expect(params().profiling.dir).toBe('/diag');
+      expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+    });
+
+    it('warns when the diagnostic dir character length is too long', async () => {
+      const long = `/${'a'.repeat(64)}`;
+      resolveDiagnosticDirMock.mockReturnValue(long);
+      await setup();
+      expect(params().profiling.dir).toBe(long);
+      expect(loggingSystemMock.collect(logger).warn).toEqual([
+        [
+          "Node's --diagnostic-dir is longer than 64 characters, the limit for ops.eventLoopWatchdog.profiling.dir. Set that setting to a shorter path.",
+        ],
+      ]);
+    });
+
+    it('does not warn for a 64-character diagnostic directory', async () => {
+      resolveDiagnosticDirMock.mockReturnValue(`/${'a'.repeat(63)}`);
+      await setup();
+      expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+    });
+
+    it('leaves the directory unset when neither diagnostic dir nor profiling.dir set', async () => {
       resolveDiagnosticDirMock.mockReturnValue(undefined);
       await setup();
-      expect(params().profiling.diagnosticDir).toBeUndefined();
+      expect(params().profiling.dir).toBeUndefined();
     });
   });
 

@@ -34,7 +34,7 @@ export interface OpsConfigEventLoopWatchdogProfiling {
 export interface OpsConfigEventLoopWatchdog {
   enabled: boolean;
   blockThreshold: Duration;
-  profiling: OpsConfigEventLoopWatchdogProfiling;
+  profiling: OpsConfigEventLoopWatchdogProfiling & { dir?: string };
   startup: {
     blockThreshold?: Duration;
     profiling: Partial<OpsConfigEventLoopWatchdogProfiling>;
@@ -56,6 +56,8 @@ const startAfterBounds = { min: '2s', max: '4m' } as const;
 // end before the profiler's ~1.5s cold start on Serverless, leaving it empty.
 const maxDurationBounds = { min: '2s', max: '10s' } as const;
 const cooldownBounds = { min: '10s', max: '24h' } as const;
+/** @internal */
+export const DIR_MAX_LENGTH = 64;
 
 const configSchema = schema.object({
   interval: schema.duration({ defaultValue: OPS_METRICS_INTERVAL }),
@@ -79,6 +81,8 @@ const configSchema = schema.object({
       maxDuration: schema.duration({ defaultValue: '10s', ...maxDurationBounds }),
       // Minimum wait after a capture before another can start.
       cooldown: schema.duration({ defaultValue: '1m', ...cooldownBounds }),
+      // Directory profiles are written to, limited to keep path length short in logs. If not set, uses `--diagnostic-dir` from `NODE_OPTIONS`.
+      dir: schema.maybe(schema.string({ minLength: 1, maxLength: DIR_MAX_LENGTH })),
     }),
     startup: schema.object({
       // Same for blocks that start in the `starting` phase; falls back to `blockThreshold`.

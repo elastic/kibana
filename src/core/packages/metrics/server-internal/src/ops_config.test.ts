@@ -99,6 +99,36 @@ describe('ops.eventLoopWatchdog config', () => {
     ).not.toThrow();
   });
 
+  describe('profiling.dir', () => {
+    it('is unset by default', () => {
+      expect(validate({}).profiling.dir).toBeUndefined();
+    });
+
+    it('accepts 1 to 64 characters', () => {
+      expect(validate({ profiling: { dir: '/' } }).profiling.dir).toBe('/');
+      const max = `/${'a'.repeat(63)}`;
+      expect(validate({ profiling: { dir: max } }).profiling.dir).toBe(max);
+    });
+
+    it('rejects an empty string', () => {
+      expect(() => validate({ profiling: { dir: '' } })).toThrow(
+        '[eventLoopWatchdog.profiling.dir]: value has length [0] but it must have a minimum length of [1].'
+      );
+    });
+
+    it('rejects more than 64 characters', () => {
+      expect(() => validate({ profiling: { dir: `/${'a'.repeat(64)}` } })).toThrow(
+        '[eventLoopWatchdog.profiling.dir]: value has length [65] but it must have a maximum length of [64].'
+      );
+    });
+
+    it('is not a startup setting', () => {
+      expect(() => validate({ startup: { profiling: { dir: '/a' } } })).toThrow(
+        "[eventLoopWatchdog.startup.profiling.dir]: Additional properties are not allowed ('dir' was unexpected)"
+      );
+    });
+  });
+
   it('leaves unset startup.profiling settings undefined', () => {
     const config = validate({ startup: { profiling: { startAfter: '45s' } } });
     expect(config.startup.profiling.startAfter?.asSeconds()).toBe(45);

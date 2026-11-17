@@ -20,7 +20,7 @@ export interface WatchdogProfilingData {
   maxDurationMs: Readonly<Record<Phase, number>>;
   cooldownMs: Readonly<Record<Phase, number>>;
   /** Where profiles are written. Unset when Node has no diagnostic directory. */
-  diagnosticDir?: string;
+  dir?: string;
 }
 
 /** Passed to the worker as `workerData.data`. */

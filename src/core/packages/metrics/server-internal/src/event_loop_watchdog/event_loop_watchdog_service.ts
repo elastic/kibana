@@ -29,7 +29,7 @@ import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
-import { OPS_CONFIG_PATH, type OpsConfigType } from '../ops_config';
+import { DIR_MAX_LENGTH, OPS_CONFIG_PATH, type OpsConfigType } from '../ops_config';
 import { EventLoopWatchdog } from './event_loop_watchdog';
 import { resolveDiagnosticDir } from './resolve_diagnostic_dir';
 import { resolveWorkerLogging, type LoggingConfigSubset } from './resolve_worker_logging';
@@ -83,7 +83,7 @@ export class EventLoopWatchdogService {
     ]);
     const runningThresholdMs = config.blockThreshold.asMilliseconds();
     const { profiling, startup } = config;
-    const perPhaseMs = (key: keyof typeof profiling) => ({
+    const perPhaseMs = (key: keyof typeof startup.profiling) => ({
       starting: (startup.profiling[key] ?? profiling[key]).asMilliseconds(),
       running: profiling[key].asMilliseconds(),
     });
@@ -103,7 +103,7 @@ export class EventLoopWatchdogService {
         startAfterMs: perPhaseMs('startAfter'),
         maxDurationMs: perPhaseMs('maxDuration'),
         cooldownMs: perPhaseMs('cooldown'),
-        diagnosticDir: resolveDiagnosticDir(),
+        dir: this.resolveDir(profiling.dir),
       },
     });
   }
@@ -197,6 +197,19 @@ export class EventLoopWatchdogService {
         skipWhile((enabled) => !enabled)
       )
       .subscribe((enabled) => watchdog.setProfiling(enabled));
+  }
+
+  private resolveDir(configured: string | undefined): string | undefined {
+    if (configured !== undefined) {
+      return configured;
+    }
+    const dir = resolveDiagnosticDir();
+    if (dir !== undefined && dir.length > DIR_MAX_LENGTH) {
+      this.logger.warn(
+        `Node's --diagnostic-dir is longer than ${DIR_MAX_LENGTH} characters, the limit for ops.eventLoopWatchdog.profiling.dir. Set that setting to a shorter path.`
+      );
+    }
+    return dir;
   }
 
   private logFailure(level: 'warn' | 'error', message: string, error: Error): void {

@@ -144,6 +144,7 @@ kibana_vars=(
     ops.eventLoopWatchdog.blockThreshold
     ops.eventLoopWatchdog.enabled
     ops.eventLoopWatchdog.profiling.cooldown
+    ops.eventLoopWatchdog.profiling.dir
     ops.eventLoopWatchdog.profiling.maxDuration
     ops.eventLoopWatchdog.profiling.startAfter
     ops.eventLoopWatchdog.startup.blockThreshold
