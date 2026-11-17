@@ -566,7 +566,7 @@ export const STOP_ALL_NOTIFICATIONS_MODAL_BODY_NO_FILTERS = i18n.translate(
   'xpack.maintenanceWindows.stopAllNotificationsModal.bodyNoFilters',
   {
     defaultMessage:
-      'This window has no filter, so it covers every alert. To limit it to specific alerts, cancel and add a filter.',
+      'With no filter, this window covers every alert. To limit it, cancel and add a filter.',
   }
 );
 
@@ -574,7 +574,7 @@ export const STOP_ALL_NOTIFICATIONS_MODAL_BODY_CLASSIC_UNFILTERED = i18n.transla
   'xpack.maintenanceWindows.stopAllNotificationsModal.bodyClassicUnfiltered',
   {
     defaultMessage:
-      'This window has no Classic filter, so it covers every Classic alert. The Universal filter still applies. To limit it to specific Classic alerts, cancel and add a filter.',
+      'This window covers every Classic alert, but only the Universal alerts that match your filter. To limit Classic alerts too, cancel and add a filter.',
   }
 );
 
@@ -582,7 +582,7 @@ export const STOP_ALL_NOTIFICATIONS_MODAL_BODY_UNIVERSAL_UNFILTERED = i18n.trans
   'xpack.maintenanceWindows.stopAllNotificationsModal.bodyUniversalUnfiltered',
   {
     defaultMessage:
-      'This window has no Universal filter, so it covers every Universal alert. The Classic filter still applies. To limit it to specific Universal alerts, cancel and add a filter.',
+      'This window covers every Universal alert, but only the Classic alerts that match your filter. To limit Universal alerts too, cancel and add a filter.',
   }
 );
 

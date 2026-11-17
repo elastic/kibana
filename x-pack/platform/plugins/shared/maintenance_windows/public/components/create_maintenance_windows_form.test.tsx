@@ -295,19 +295,19 @@ describe('CreateMaintenanceWindowForm', () => {
     const user = userEvent.setup({ delay: null });
     const CLASSIC_NO_FILTERS = {
       title: 'Stop notifications for Classic alerts?',
-      body: 'This window has no filter, so it covers every alert. To limit it to specific alerts, cancel and add a filter.',
+      body: 'With no filter, this window covers every alert. To limit it, cancel and add a filter.',
     };
     const UNIVERSAL_NO_FILTERS = {
       title: 'Stop notifications for Universal alerts?',
-      body: 'This window has no filter, so it covers every alert. To limit it to specific alerts, cancel and add a filter.',
+      body: 'With no filter, this window covers every alert. To limit it, cancel and add a filter.',
     };
     const UNIVERSAL_UNFILTERED_CLASSIC_FILTERED = {
       title: 'Stop notifications for Universal alerts?',
-      body: 'This window has no Universal filter, so it covers every Universal alert. The Classic filter still applies. To limit it to specific Universal alerts, cancel and add a filter.',
+      body: 'This window covers every Universal alert, but only the Classic alerts that match your filter. To limit Universal alerts too, cancel and add a filter.',
     };
     const CLASSIC_UNFILTERED_UNIVERSAL_FILTERED = {
       title: 'Stop notifications for Classic alerts?',
-      body: 'This window has no Classic filter, so it covers every Classic alert. The Universal filter still applies. To limit it to specific Classic alerts, cancel and add a filter.',
+      body: 'This window covers every Classic alert, but only the Universal alerts that match your filter. To limit Classic alerts too, cancel and add a filter.',
     };
     const v1Filtered = { kql: 'kibana.alert.rule.name : "x"', filters: [], dsl: '{}' };
     const v2Filtered = { enabled: true, kql: 'rule.id: "a"' };

@@ -34,35 +34,35 @@ describe('getStopNotificationsModalCopy', () => {
   it('names Classic Alerting when it is the only unfiltered scope', () => {
     expect(getStopNotificationsModalCopy('unfiltered', 'off')).toEqual({
       title: 'Stop notifications for Classic alerts?',
-      body: 'This window has no filter, so it covers every alert. To limit it to specific alerts, cancel and add a filter.',
+      body: 'With no filter, this window covers every alert. To limit it, cancel and add a filter.',
     });
   });
 
   it('names Universal Alerting when it is the only unfiltered scope', () => {
     expect(getStopNotificationsModalCopy('off', 'unfiltered')).toEqual({
       title: 'Stop notifications for Universal alerts?',
-      body: 'This window has no filter, so it covers every alert. To limit it to specific alerts, cancel and add a filter.',
+      body: 'With no filter, this window covers every alert. To limit it, cancel and add a filter.',
     });
   });
 
   it('names both systems when neither turned-on scope has a filter', () => {
     expect(getStopNotificationsModalCopy('unfiltered', 'unfiltered')).toEqual({
       title: 'Stop notifications for Classic and Universal alerts?',
-      body: 'This window has no filter, so it covers every alert. To limit it to specific alerts, cancel and add a filter.',
+      body: 'With no filter, this window covers every alert. To limit it, cancel and add a filter.',
     });
   });
 
   it('explains that Classic Alerting keeps its filter when only Universal Alerting is unfiltered', () => {
     expect(getStopNotificationsModalCopy('filtered', 'unfiltered')).toEqual({
       title: 'Stop notifications for Universal alerts?',
-      body: 'This window has no Universal filter, so it covers every Universal alert. The Classic filter still applies. To limit it to specific Universal alerts, cancel and add a filter.',
+      body: 'This window covers every Universal alert, but only the Classic alerts that match your filter. To limit Universal alerts too, cancel and add a filter.',
     });
   });
 
   it('explains that Universal Alerting keeps its filter when only Classic Alerting is unfiltered', () => {
     expect(getStopNotificationsModalCopy('unfiltered', 'filtered')).toEqual({
       title: 'Stop notifications for Classic alerts?',
-      body: 'This window has no Classic filter, so it covers every Classic alert. The Universal filter still applies. To limit it to specific Classic alerts, cancel and add a filter.',
+      body: 'This window covers every Classic alert, but only the Universal alerts that match your filter. To limit Classic alerts too, cancel and add a filter.',
     });
   });
 });
