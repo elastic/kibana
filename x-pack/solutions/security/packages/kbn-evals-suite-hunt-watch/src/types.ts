@@ -114,9 +114,10 @@ export type HuntFault = 'investigation_locked';
  */
 export type HuntGate = 'invariant' | 'capability';
 
-// A type alias, not an interface: dataset metadata must be assignable to
-// `Record<string, unknown>`, and interfaces carry no implicit index signature.
+// The index signature keeps this assignable to the `Example` metadata constraint
+// (`Record<string, unknown>`); an interface has no implicit one.
 export interface HuntRowMetadata {
+  [key: string]: unknown;
   gate?: HuntGate;
 }
 
@@ -124,7 +125,7 @@ export interface HuntWatchExample {
   id: string;
   cohort: HuntCohort;
   /** Forwarded to every evaluator by the executor, unlike `id`. */
-  metadata?: HuntRowMetadata;
+  metadata?: HuntRowMetadata | null;
   input: {
     spaceId: string;
     /** Named report ids for the manual trigger. */
