@@ -53,9 +53,13 @@ export const buildDisplayRowsFromEsqlValues = ({
 
   // Columns with no values stay on the column list (`isNull`) and are left out of
   // each row. Index by name so a different `columns` order still lines up.
-  const valueIndexPerGridColumn = displayColumns.flatMap((col) => {
-    const index = valueColumns.findIndex((valueColumn) => valueColumn.name === col.name);
-    return index >= 0 ? [index] : [];
+  const valueIndexByName = new Map<string, number>();
+  valueColumns.forEach(({ name }, index) => {
+    if (!valueIndexByName.has(name)) valueIndexByName.set(name, index);
+  });
+  const valueIndexPerGridColumn = displayColumns.flatMap(({ name }) => {
+    const index = valueIndexByName.get(name);
+    return index === undefined ? [] : [index];
   });
   return values.map((row) => valueIndexPerGridColumn.map((index) => row[index]));
 };

@@ -147,6 +147,25 @@ describe('Lens inline editing helpers', () => {
         })
       ).toEqual([[2, 1]]);
     });
+
+    it('uses the first value column when a name appears more than once', () => {
+      const displayColumns = [
+        { name: 'empty', type: 'keyword' },
+        { name: 'a', type: 'integer' },
+      ];
+      const valueColumns = [
+        { name: 'a', type: 'integer' },
+        { name: 'a', type: 'integer' },
+      ];
+
+      expect(
+        buildDisplayRowsFromEsqlValues({
+          displayColumns,
+          valueColumns,
+          values: [[1, 2]],
+        })
+      ).toEqual([[1]]);
+    });
   });
 
   describe('getSuggestions', () => {

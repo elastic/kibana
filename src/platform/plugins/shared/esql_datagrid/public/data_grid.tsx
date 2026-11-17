@@ -126,12 +126,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
 
   const rows: DataTableRecord[] = useMemo(() => {
-    // When callers mark all-null columns, row arrays contain only the columns
-    // that have values, in that same order. Other callers zip every column.
-    const hasEmptyColumns = props.columns?.some((column) => column.isNull);
-    const columnNames = (
-      hasEmptyColumns ? props.columns.filter((column) => !column.isNull) : props.columns
-    )?.map(({ name }) => name);
+    const columnNames = props.columns?.filter(({ isNull }) => !isNull).map(({ name }) => name);
     return props.rows
       .map((row) => zipObject(columnNames, row))
       .map((row, idx: number) => {

@@ -105,11 +105,9 @@ export const mapEsqlResponseToDatatable = (
 
   // All-null columns stay on `columns` (`isNull`). A key for each of them on every
   // row exhausts the browser heap for wide `FROM` patterns such as `logs-*`.
-  const valueColumnNames = (
-    hasEmptyColumns
-      ? updatedWithVariablesColumns.filter((column) => !column.isNull)
-      : updatedWithVariablesColumns
-  ).map(({ name }) => name);
+  const valueColumnNames = updatedWithVariablesColumns
+    .filter(({ isNull }) => !isNull)
+    .map(({ name }) => name);
   const rows = normalizedValues.map((row) => zipObject(valueColumnNames, row));
 
   return {
