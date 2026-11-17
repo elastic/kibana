@@ -185,4 +185,74 @@ describe('AwsSsmConnector', () => {
       });
     });
   });
+
+  describe('startAutomationExecution', () => {
+    it('starts the runbook with its parameters, and returns the execution ID', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { AutomationExecutionId: '4105a4fc-f944-11e6-9d32-0123456789ab' },
+      });
+
+      const result = await AwsSsmConnector.actions.startAutomationExecution.handler(mockContext, {
+        documentName: 'AWS-RestartEC2Instance',
+        parameters: { InstanceId: ['i-1234567890abcdef0'] },
+        clientToken: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab',
+      });
+
+      expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({
+        DocumentName: 'AWS-RestartEC2Instance',
+        Parameters: { InstanceId: ['i-1234567890abcdef0'] },
+        ClientToken: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab',
+      });
+      expect(result).toEqual({ automationExecutionId: '4105a4fc-f944-11e6-9d32-0123456789ab' });
+    });
+  });
+
+  describe('getAutomationExecution', () => {
+    it('returns the status and each step, with no end time while it runs', async () => {
+      mockClient.post.mockResolvedValue({
+        data: {
+          AutomationExecution: {
+            AutomationExecutionId: '4105a4fc-f944-11e6-9d32-0123456789ab',
+            AutomationExecutionStatus: 'InProgress',
+            CurrentStepName: 'startInstances',
+            ExecutionStartTime: 1700000000.5,
+            StepExecutions: [
+              {
+                StepName: 'stopInstances',
+                Action: 'aws:changeInstanceState',
+                StepStatus: 'Success',
+                ExecutionStartTime: 1700000000.5,
+                ExecutionEndTime: 1700000060,
+                Outputs: { InstanceStates: ['stopped'] },
+              },
+            ],
+          },
+        },
+      });
+
+      const result = await AwsSsmConnector.actions.getAutomationExecution.handler(mockContext, {
+        automationExecutionId: '4105a4fc-f944-11e6-9d32-0123456789ab',
+      });
+
+      expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({
+        AutomationExecutionId: '4105a4fc-f944-11e6-9d32-0123456789ab',
+      });
+      expect(result).toMatchObject({
+        status: 'InProgress',
+        currentStepName: 'startInstances',
+        executionStartTime: '2023-11-14T22:13:20.500Z',
+        executionEndTime: null,
+        steps: [
+          {
+            stepName: 'stopInstances',
+            action: 'aws:changeInstanceState',
+            stepStatus: 'Success',
+            executionEndTime: '2023-11-14T22:14:20.000Z',
+            outputs: { InstanceStates: ['stopped'] },
+          },
+        ],
+        stepsTruncated: false,
+      });
+    });
+  });
 });

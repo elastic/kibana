@@ -1,5 +1,12 @@
 {
   "operations": {
+    "cancelCommand": [
+      {
+        "method": "post",
+        "path": "/CancelCommand",
+        "source": "ssm"
+      }
+    ],
     "describeInstanceInformation": [
       {
         "method": "post",
@@ -19,6 +26,13 @@
         "source": "ssm"
       }
     ],
+    "getAutomationExecution": [
+      {
+        "method": "post",
+        "path": "/GetAutomationExecution",
+        "source": "ssm"
+      }
+    ],
     "getCommandInvocation": [
       {
         "method": "post",
@@ -30,6 +44,20 @@
       {
         "method": "post",
         "path": "/SendCommand",
+        "source": "ssm"
+      }
+    ],
+    "startAutomationExecution": [
+      {
+        "method": "post",
+        "path": "/StartAutomationExecution",
+        "source": "ssm"
+      }
+    ],
+    "stopAutomationExecution": [
+      {
+        "method": "post",
+        "path": "/StopAutomationExecution",
         "source": "ssm"
       }
     ]

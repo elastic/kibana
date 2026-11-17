@@ -4,6 +4,11 @@
       { "source": "ssm", "method": "POST", "path": "/DescribeInstanceInformation" }
     ]
   },
+  "getAutomationExecution": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/GetAutomationExecution" }
+    ]
+  },
   "getCommandInvocation": {
     "queries": [
       { "source": "ssm", "method": "POST", "path": "/GetCommandInvocation" }

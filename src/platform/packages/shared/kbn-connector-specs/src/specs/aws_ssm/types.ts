@@ -27,9 +27,10 @@ const TAG_FILTERS_MAX = 10;
 const PING_STATUSES = ['Online', 'ConnectionLost', 'Inactive'] as const;
 const PLATFORM_TYPES = ['Windows', 'Linux', 'MacOS'] as const;
 
-// SendCommand takes at most 50 instance IDs.
+// SendCommand and CancelCommand take at most 50 instance IDs.
 const SEND_COMMAND_INSTANCE_IDS_MAX = 50;
-// The patterns SSM's model gives SendCommand's DocumentName and DocumentVersion.
+// The patterns SSM's model gives the DocumentName and DocumentVersion of SendCommand and
+// StartAutomationExecution.
 const DOCUMENT_NAME_PATTERN = /^[a-zA-Z0-9_\-.:/]{3,128}$/;
 const DOCUMENT_NAME_MAX_LENGTH = 128;
 const DOCUMENT_VERSION_PATTERN = /^(\$LATEST|\$DEFAULT|[1-9][0-9]*)$/;
@@ -42,8 +43,15 @@ const PARAMETER_NAME_MAX_LENGTH = 255;
 const PARAMETERS_MAX = 50;
 const PARAMETER_VALUES_MAX = 100;
 const PARAMETER_VALUE_MAX_LENGTH = 65536;
-const COMMAND_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const COMMAND_ID_LENGTH = 36;
+// StartAutomationExecution's limits for runbook parameters.
+const AUTOMATION_PARAMETER_NAME_MAX_LENGTH = 50;
+const AUTOMATION_PARAMETERS_MAX = 200;
+const AUTOMATION_PARAMETER_VALUES_MAX = 50;
+const AUTOMATION_PARAMETER_VALUE_MAX_LENGTH = 512;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_LENGTH = 36;
+// SSM's model only fixes the length of an automation execution ID, not its format.
+const AUTOMATION_EXECUTION_ID_LENGTH = 36;
 
 const instanceIdSchema = () =>
   z
@@ -57,9 +65,24 @@ const instanceIdSchema = () =>
 const commandIdSchema = () =>
   z
     .string()
-    .min(COMMAND_ID_LENGTH)
-    .max(COMMAND_ID_LENGTH)
-    .regex(COMMAND_ID_PATTERN, 'Must be a command ID returned by sendCommand.');
+    .min(UUID_LENGTH)
+    .max(UUID_LENGTH)
+    .regex(UUID_PATTERN, 'Must be a command ID returned by sendCommand.');
+
+const automationExecutionIdSchema = () =>
+  z.string().min(AUTOMATION_EXECUTION_ID_LENGTH).max(AUTOMATION_EXECUTION_ID_LENGTH);
+
+const documentNameSchema = () =>
+  z
+    .string()
+    .max(DOCUMENT_NAME_MAX_LENGTH)
+    .regex(DOCUMENT_NAME_PATTERN, 'Must be the name or ARN of an SSM document.');
+
+const documentVersionSchema = () =>
+  z
+    .string()
+    .max(DOCUMENT_VERSION_MAX_LENGTH)
+    .regex(DOCUMENT_VERSION_PATTERN, 'Must be $DEFAULT, $LATEST, or a version number.');
 
 export const DescribeInstanceInformationInputSchema = lazySchema(() =>
   z
@@ -167,13 +190,9 @@ export const SendCommandInputSchema = lazySchema(() =>
       .describe(
         `The managed nodes to run the command on (1-${SEND_COMMAND_INSTANCE_IDS_MAX}), by EC2 instance ID (e.g. i-0123456789abcdef0) or hybrid managed node ID (e.g. mi-0123456789abcdef0). Find them with describeInstanceInformation.`
       ),
-    documentName: z
-      .string()
-      .max(DOCUMENT_NAME_MAX_LENGTH)
-      .regex(DOCUMENT_NAME_PATTERN, 'Must be the name or ARN of an SSM document.')
-      .describe(
-        'The SSM document to run. Use "AWS-RunShellScript" for shell commands on Linux and macOS nodes, or "AWS-RunPowerShellScript" for PowerShell on Windows nodes. Other AWS-owned or custom document names, and document ARNs shared from another account, also work.'
-      ),
+    documentName: documentNameSchema().describe(
+      'The SSM document to run. Use "AWS-RunShellScript" for shell commands on Linux and macOS nodes, or "AWS-RunPowerShellScript" for PowerShell on Windows nodes. Other AWS-owned or custom document names, and document ARNs shared from another account, also work.'
+    ),
     parameters: z
       .record(
         z.string().min(1).max(PARAMETER_NAME_MAX_LENGTH),
@@ -186,10 +205,7 @@ export const SendCommandInputSchema = lazySchema(() =>
       .describe(
         'The parameters the document takes, each as a list of strings. For AWS-RunShellScript and AWS-RunPowerShellScript: { "commands": ["uptime", "df -h"] }, optionally with "workingDirectory": ["/tmp"] and "executionTimeout": ["600"] (seconds the commands may run; defaults to 3600).'
       ),
-    documentVersion: z
-      .string()
-      .max(DOCUMENT_VERSION_MAX_LENGTH)
-      .regex(DOCUMENT_VERSION_PATTERN, 'Must be $DEFAULT, $LATEST, or a version number.')
+    documentVersion: documentVersionSchema()
       .optional()
       .describe('The document version to run: "$DEFAULT" (the default), "$LATEST", or a number.'),
     comment: z
@@ -250,5 +266,109 @@ export const GetCommandInvocationResponseSchema = lazySchema(() =>
     ExecutionEndDateTime: z.string().optional(),
     StandardOutputContent: z.string().optional(),
     StandardErrorContent: z.string().optional(),
+  })
+);
+
+export const CancelCommandInputSchema = lazySchema(() =>
+  z.object({
+    commandId: commandIdSchema().describe('The commandId returned by sendCommand.'),
+    instanceIds: z
+      .array(instanceIdSchema())
+      .min(1)
+      .max(SEND_COMMAND_INSTANCE_IDS_MAX)
+      .optional()
+      .describe(
+        'Only cancel the command on these nodes. Omit to cancel it on every node it was sent to.'
+      ),
+  })
+);
+export type CancelCommandInput = z.infer<typeof CancelCommandInputSchema>;
+
+export const StartAutomationExecutionInputSchema = lazySchema(() =>
+  z.object({
+    documentName: documentNameSchema().describe(
+      'The Automation runbook to run, e.g. "AWS-RestartEC2Instance". AWS-owned runbooks start with "AWS-"; custom runbook names and runbook ARNs shared from another account also work.'
+    ),
+    parameters: z
+      .record(
+        z.string().min(1).max(AUTOMATION_PARAMETER_NAME_MAX_LENGTH),
+        z
+          .array(z.string().min(1).max(AUTOMATION_PARAMETER_VALUE_MAX_LENGTH))
+          .max(AUTOMATION_PARAMETER_VALUES_MAX)
+      )
+      .refine(
+        (parameters) => {
+          const { length } = Object.keys(parameters);
+          return length >= 1 && length <= AUTOMATION_PARAMETERS_MAX;
+        },
+        {
+          message: `Pass between 1 and ${AUTOMATION_PARAMETERS_MAX} parameters, or omit parameters.`,
+        }
+      )
+      .optional()
+      .describe(
+        'The parameters the runbook takes, each as a list of strings, e.g. { "InstanceId": ["i-0123456789abcdef0"] } for AWS-RestartEC2Instance. Many runbooks also take "AutomationAssumeRole": the ARN of the IAM role the runbook runs as; without it, it runs as the connector credentials.'
+      ),
+    documentVersion: documentVersionSchema()
+      .optional()
+      .describe('The runbook version to run: "$DEFAULT" (the default), "$LATEST", or a number.'),
+    clientToken: z
+      .string()
+      .min(UUID_LENGTH)
+      .max(UUID_LENGTH)
+      .regex(UUID_PATTERN, 'Must be a UUID.')
+      .optional()
+      .describe(
+        'A UUID that identifies this start request. Retrying with the same clientToken does not start the runbook a second time.'
+      ),
+  })
+);
+export type StartAutomationExecutionInput = z.infer<typeof StartAutomationExecutionInputSchema>;
+
+export const StartAutomationExecutionResponseSchema = lazySchema(() =>
+  z.object({
+    AutomationExecutionId: z.string().optional(),
+  })
+);
+
+export const AutomationExecutionIdInputSchema = lazySchema(() =>
+  z.object({
+    automationExecutionId: automationExecutionIdSchema().describe(
+      'The automationExecutionId returned by startAutomationExecution.'
+    ),
+  })
+);
+export type AutomationExecutionIdInput = z.infer<typeof AutomationExecutionIdInputSchema>;
+
+const automationOutputsSchema = () => z.record(z.string(), z.array(z.string())).optional();
+
+export const GetAutomationExecutionResponseSchema = lazySchema(() =>
+  z.object({
+    AutomationExecution: z
+      .object({
+        AutomationExecutionId: z.string().optional(),
+        DocumentName: z.string().optional(),
+        AutomationExecutionStatus: z.string().optional(),
+        CurrentStepName: z.string().optional(),
+        FailureMessage: z.string().optional(),
+        Outputs: automationOutputsSchema(),
+        ExecutionStartTime: z.number().optional(),
+        ExecutionEndTime: z.number().optional(),
+        StepExecutions: z
+          .array(
+            z.object({
+              StepName: z.string().optional(),
+              Action: z.string().optional(),
+              StepStatus: z.string().optional(),
+              ExecutionStartTime: z.number().optional(),
+              ExecutionEndTime: z.number().optional(),
+              FailureMessage: z.string().optional(),
+              Outputs: automationOutputsSchema(),
+            })
+          )
+          .optional(),
+        StepExecutionsTruncated: z.boolean().optional(),
+      })
+      .optional(),
   })
 );
