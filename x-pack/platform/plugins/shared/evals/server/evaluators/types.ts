@@ -17,10 +17,23 @@ export interface TraceAccessor {
   esClient: ElasticsearchClient;
 }
 
+/** Every turn of a multi-turn subject, in order. */
+export interface ConversationEvidence {
+  rounds: EvidenceRound[];
+  /** The caller's id for each round, when it gave one. */
+  turnIds: Array<string | undefined>;
+}
+
 export interface EvaluatorContext<ReferenceData = Record<string, unknown>> {
   /** Absent when the round was passed in memory rather than read from a trace. */
   trace?: TraceAccessor;
+  /** The round being graded: the only one, or the last turn of a multi-turn subject. */
   round: EvidenceRound;
+  /**
+   * Every turn, for evaluators that grade the whole conversation. A single-turn subject is a
+   * conversation of one round.
+   */
+  conversation?: ConversationEvidence;
   referenceData?: ReferenceData;
   inferenceClient?: BoundInferenceClient;
   log: Logger;

@@ -18,7 +18,12 @@ export type JudgeScoreDefinition = JudgeScore;
  */
 export type JudgeEvidenceKey = LlmJudgeConfig['evidence'][number];
 
-export const JUDGE_EVIDENCE_KEYS: readonly JudgeEvidenceKey[] = ['input', 'response', 'steps'];
+export const JUDGE_EVIDENCE_KEYS: readonly JudgeEvidenceKey[] = [
+  'input',
+  'response',
+  'steps',
+  'transcript',
+];
 
 /**
  * Template variable each evidence key is rendered under. Named to match the
@@ -28,6 +33,7 @@ export const JUDGE_EVIDENCE_TEMPLATE_VARIABLES: Record<JudgeEvidenceKey, string>
   input: 'user_query',
   response: 'agent_response',
   steps: 'tool_calls',
+  transcript: 'conversation_transcript',
 };
 
 /**

@@ -282,16 +282,45 @@ export const EvaluationInstrumentationProfileEnum = EvaluationInstrumentationPro
 
 export const EvaluationSubject = lazySchema(() =>
   z.object({
-    mode: z.enum(['single-turn', 'multi-turn']).optional().default('single-turn'),
+    /**
+     * `single-turn` grades exactly one trace. `multi-turn` takes one trace per turn of a conversation, in order: turn-scoped evaluators grade the last turn, and conversation-scoped evaluators (such as judges with `transcript` evidence) read every turn.
+     */
+    mode: z
+      .enum(['single-turn', 'multi-turn'])
+      .optional()
+      .default('single-turn')
+      .describe(
+        '`single-turn` grades exactly one trace. `multi-turn` takes one trace per turn of a conversation, in order: turn-scoped evaluators grade the last turn, and conversation-scoped evaluators (such as judges with `transcript` evidence) read every turn.'
+      ),
     traces: z
       .array(
         z.object({
           trace_id: EvaluationTraceId,
-          reference_data: z.object({}).catchall(z.unknown()).optional(),
+          /**
+           * Identifies the turn in a multi-turn subject, e.g. in error messages and the transcript a judge is shown.
+           */
+          turn_id: z
+            .string()
+            .min(1)
+            .max(256)
+            .optional()
+            .describe(
+              'Identifies the turn in a multi-turn subject, e.g. in error messages and the transcript a judge is shown.'
+            ),
+          /**
+           * Ground truth for the evaluators. In a multi-turn subject, the last trace's reference data is used.
+           */
+          reference_data: z
+            .object({})
+            .catchall(z.unknown())
+            .optional()
+            .describe(
+              "Ground truth for the evaluators. In a multi-turn subject, the last trace's reference data is used."
+            ),
         })
       )
       .min(1)
-      .max(1),
+      .max(50),
     /**
      * Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.
      */
@@ -308,13 +337,13 @@ export const EvaluationSubject = lazySchema(() =>
 export type EvaluationSubject = z.infer<typeof EvaluationSubject>;
 
 /**
- * Which parts of the normalized trace the judge is shown, and therefore requires: the user query (`input`), the agent response (`response`), and the tool calls (`steps`). Rendered into the prompt as `user_query`, `agent_response`, and `tool_calls`. A trace missing any of them is reported as unmet rather than judged.
+ * Which parts of the normalized trace the judge is shown, and therefore requires: the user query (`input`), the agent response (`response`), the tool calls (`steps`), and every turn of a multi-turn subject in order (`transcript`). Rendered into the prompt as `user_query`, `agent_response`, `tool_calls` and `conversation_transcript`. A trace missing any of them is reported as unmet rather than judged. A judge with `transcript` grades the whole conversation; on a single-turn subject its transcript holds one turn.
  */
 export const JudgeEvidence = lazySchema(() =>
   z
-    .array(z.enum(['input', 'response', 'steps']))
+    .array(z.enum(['input', 'response', 'steps', 'transcript']))
     .min(1)
-    .max(3)
+    .max(4)
 );
 export type JudgeEvidence = z.infer<typeof JudgeEvidence>;
 

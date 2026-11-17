@@ -102,6 +102,7 @@ describe('createAgentBuilderClient', () => {
       structuredOutput: { foo: 'bar' },
       conversationId: 'conv-2',
       traceId: 'trace-2',
+      traceIds: ['trace-2'],
       prompts: [],
     });
   });
@@ -116,6 +117,7 @@ describe('createAgentBuilderClient', () => {
     });
 
     expect(result.traceId).toBe('trace-resume');
+    expect(result.traceIds).toEqual(['trace-opening', 'trace-resume']);
   });
 
   it('falls back to an empty message and steps when the API omits them', async () => {
@@ -129,6 +131,7 @@ describe('createAgentBuilderClient', () => {
       structuredOutput: undefined,
       conversationId: undefined,
       traceId: undefined,
+      traceIds: [],
       prompts: [],
     });
   });

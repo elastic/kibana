@@ -235,7 +235,12 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 },
                 async () => {
                   const _traceId = getCurrentTraceId();
-                  const _taskOutput = await task(example);
+                  const _taskOutput = await task(example, {
+                    datasetName: resolvedDataset.name,
+                    exampleIndex,
+                    repetition: rep,
+                    totalRepetitions: repetitions,
+                  });
                   return {
                     taskOutput: _taskOutput,
                     traceId: _traceId,

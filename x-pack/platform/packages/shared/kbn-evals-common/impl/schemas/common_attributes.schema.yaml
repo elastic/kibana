@@ -406,10 +406,16 @@ components:
             - single-turn
             - multi-turn
           default: single-turn
+          description: >-
+            `single-turn` grades exactly one trace. `multi-turn` takes one trace
+            per turn of a conversation, in order: turn-scoped evaluators grade
+            the last turn, and conversation-scoped evaluators (such as judges
+            with `transcript` evidence) read every turn.
         traces:
           type: array
           minItems: 1
-          maxItems: 1
+          # Keep in sync with MAX_MULTI_TURN_TRACES in constants.ts
+          maxItems: 50
           items:
             type: object
             required:
@@ -417,9 +423,19 @@ components:
             properties:
               trace_id:
                 $ref: '#/components/schemas/EvaluationTraceId'
+              turn_id:
+                type: string
+                minLength: 1
+                maxLength: 256
+                description: >-
+                  Identifies the turn in a multi-turn subject, e.g. in error
+                  messages and the transcript a judge is shown.
               reference_data:
                 type: object
                 additionalProperties: true
+                description: >-
+                  Ground truth for the evaluators. In a multi-turn subject, the
+                  last trace's reference data is used.
         instrumentation:
           type: object
           description: >-
@@ -435,19 +451,23 @@ components:
     JudgeEvidence:
       type: array
       minItems: 1
-      maxItems: 3
+      maxItems: 4
       items:
         type: string
         enum:
           - input
           - response
           - steps
+          - transcript
       description: >-
         Which parts of the normalized trace the judge is shown, and therefore
-        requires: the user query (`input`), the agent response (`response`), and
-        the tool calls (`steps`). Rendered into the prompt as `user_query`,
-        `agent_response`, and `tool_calls`. A trace missing any of them is
-        reported as unmet rather than judged.
+        requires: the user query (`input`), the agent response (`response`),
+        the tool calls (`steps`), and every turn of a multi-turn subject in
+        order (`transcript`). Rendered into the prompt as `user_query`,
+        `agent_response`, `tool_calls` and `conversation_transcript`. A trace
+        missing any of them is reported as unmet rather than judged. A judge
+        with `transcript` grades the whole conversation; on a single-turn
+        subject its transcript holds one turn.
 
     JudgeScore:
       type: object

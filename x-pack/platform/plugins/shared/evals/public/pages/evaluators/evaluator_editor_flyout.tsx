@@ -100,10 +100,12 @@ type ProbedProfile = ResolveInstrumentationResponse['profiles'][number]['profile
 const TRACE_ID_PATTERN = /^[0-9a-fA-F]{32}$/;
 const PROFILE_PROBE_ATTEMPTS = 3;
 const PROFILE_PROBE_DELAY_MS = 1000;
+// A transcript is built from each turn's user query and agent response.
 const EVIDENCE_PROFILE_KEYS = {
-  input: 'user_query',
-  response: 'agent_response',
-  steps: 'tool_calls',
+  input: ['user_query'],
+  response: ['agent_response'],
+  steps: ['tool_calls'],
+  transcript: ['user_query', 'agent_response'],
 } as const;
 
 const toScoreFormValue = (score: JudgeScore, id: number): ScoreFormValue => ({
@@ -230,7 +232,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
     [connectors]
   );
   const evidenceMap = Object.fromEntries(
-    ['input', 'response', 'steps'].map((key) => [
+    ['input', 'response', 'steps', 'transcript'].map((key) => [
       key,
       evidence.includes(key as JudgeEvidence[number]),
     ])
@@ -415,7 +417,11 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
           // declared `steps` must not take it on trust: pick a profile that supplies
           // everything this draft asks for.
           resolvedProfile = instrumentation.profiles.find((profile) =>
-            evidence.every((key) => profile.evidence[EVIDENCE_PROFILE_KEYS[key]].status === 'found')
+            evidence.every((key) =>
+              EVIDENCE_PROFILE_KEYS[key].every(
+                (profileKey) => profile.evidence[profileKey].status === 'found'
+              )
+            )
           )?.profile;
         } catch (error) {
           probeError = error;
@@ -595,6 +601,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
                   { id: 'input', label: i18n.INPUT_EVIDENCE },
                   { id: 'response', label: i18n.RESPONSE_EVIDENCE },
                   { id: 'steps', label: i18n.STEPS_EVIDENCE },
+                  { id: 'transcript', label: i18n.TRANSCRIPT_EVIDENCE },
                 ]}
                 idToSelectedMap={evidenceMap}
                 onChange={(id) =>

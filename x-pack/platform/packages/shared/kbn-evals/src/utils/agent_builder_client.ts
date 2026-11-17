@@ -40,6 +40,12 @@ export interface AgentBuilderConverseParams {
   promptResponses?: Record<string, unknown>;
   /** Attachments sent with this turn, e.g. a by-value dashboard the agent should act on. */
   attachments?: AgentBuilderConverseAttachment[];
+  /**
+   * Whether a failed call is sent again. Defaults to `true`. Multi-turn runs turn it off: a turn
+   * can change state (such as memory) before the response is lost, and sending it again would
+   * repeat that change.
+   */
+  retry?: boolean;
 }
 
 export interface AgentBuilderConverseAttachment {
@@ -57,7 +63,10 @@ export interface AgentBuilderClientResponse {
   /** Populated only when the agent ran with a schema; otherwise undefined on the public converse API. */
   structuredOutput?: unknown;
   conversationId?: string;
+  /** The last trace of the round. */
   traceId?: string;
+  /** Every trace of the round, in order; a round resumed by a prompt response has several. */
+  traceIds?: string[];
   /**
    * Structured prompts the agent asked the user to answer (e.g. `ask_user_question`
    * or `confirmation`). Empty when the agent did not ask any prompts.
@@ -133,6 +142,7 @@ export function createAgentBuilderClient({
     conversationId,
     promptResponses,
     attachments,
+    retry = true,
   }: AgentBuilderConverseParams): Promise<AgentBuilderClientResponse> => {
     const call = async (): Promise<AgentBuilderClientResponse> => {
       const response = await fetch<AgentBuilderConverseApiResponse>('/api/agent_builder/converse', {
@@ -156,12 +166,16 @@ export function createAgentBuilderClient({
       });
 
       const { model_usage } = response;
+      const traceIds = (
+        Array.isArray(response.trace_id) ? response.trace_id : [response.trace_id]
+      ).filter((traceId): traceId is string => Boolean(traceId));
       return {
         message: response.response?.message ?? '',
         steps: response.steps ?? [],
         structuredOutput: response.response?.structured_output,
         conversationId: response.conversation_id,
-        traceId: Array.isArray(response.trace_id) ? response.trace_id.at(-1) : response.trace_id,
+        traceId: traceIds.at(-1),
+        traceIds,
         prompts: response.response?.prompts ?? [],
         tokensUsed: model_usage
           ? {
@@ -174,7 +188,7 @@ export function createAgentBuilderClient({
       };
     };
 
-    return retryOnFail(`converse(${agentId})`, call);
+    return retry ? retryOnFail(`converse(${agentId})`, call) : call();
   };
 
   const createConversation = ({

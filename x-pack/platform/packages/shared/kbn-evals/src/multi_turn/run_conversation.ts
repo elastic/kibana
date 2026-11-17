@@ -5,202 +5,300 @@
  * 2.0.
  */
 
-import type { AgentBuilderClient } from '../utils/agent_builder_client';
 import { getCurrentTraceId, withTurnSpan } from '../utils/tracing';
 import { answerPromptsWithNextTurn } from './prompt_responses';
 import type {
+  ConversationInput,
   ConversationMessage,
   ConversationResult,
   ConversationStopReason,
+  ConversationTarget,
   ConversationTurnInput,
   ConversationTurnResult,
-  MultiTurnExample,
+  MultiTurnError,
+  MultiTurnHooks,
+  MultiTurnTaskContext,
   NextMessageFn,
   RespondToPromptsFn,
+  TargetConversation,
+  TargetTurnReply,
+  TargetTurnRequest,
 } from './types';
 
-const DEFAULT_MAX_TURNS = 20;
+export const DEFAULT_MAX_TURNS = 20;
 
 export interface RunConversationParams {
-  client: Pick<AgentBuilderClient, 'converse'>;
-  agentId: string;
-  /** Scripted user turns, sent in order before `nextMessage` is asked for more. */
-  turns: readonly ConversationTurnInput[];
-  /** Chooses further turns from the replies so far. Never sees the example's expected output. */
+  target: ConversationTarget;
+  conversation: ConversationInput;
+  context: MultiTurnTaskContext;
+  /** Chooses further turns after the scripted ones. Never sees the example's expected output. */
   nextMessage?: NextMessageFn;
   /** How to answer prompts the agent is waiting on. Defaults to {@link answerPromptsWithNextTurn}. */
   respondToPrompts?: RespondToPromptsFn;
-  /** Upper bound on turns, scripted and chosen together. */
+  /** Upper bound on the conversation's turns, scripted and chosen together. */
   maxTurns?: number;
-  /** Continues an existing conversation, e.g. one prepared by a setup step. */
-  conversationId?: string;
-  signal?: AbortSignal;
+  /** A turn that takes longer is checked against the target instead of being awaited. */
+  turnTimeoutMs?: number;
+  beforeTurn?: MultiTurnHooks['beforeTurn'];
+  /** Turn ids already used in the example; per-turn scores are named by them. */
+  usedTurnIds?: Set<string>;
 }
 
-/** Thrown when a turn fails; `result` holds the turns that completed before it. */
+/** Thrown when a conversation can't continue; `result` keeps the turns that completed. */
 export class ConversationRunError extends Error {
-  public readonly result: ConversationResult;
-
-  constructor(message: string, result: ConversationResult, options?: { cause?: unknown }) {
-    super(message, options);
+  constructor(
+    public readonly error: MultiTurnError,
+    public readonly result: ConversationResult,
+    options?: { cause?: unknown }
+  ) {
+    super(error.message, options);
     this.name = 'ConversationRunError';
-    this.result = result;
   }
 }
 
-const toMessages = (turns: readonly ConversationTurnResult[]): ConversationMessage[] =>
-  turns.flatMap(({ id, message, response }) => [
-    { role: 'user' as const, message, turnId: id },
-    { role: 'assistant' as const, message: response, turnId: id },
-  ]);
+const toErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
 
-const buildResult = (
-  conversationId: string | undefined,
-  turns: ConversationTurnResult[],
-  stopReason: ConversationStopReason
-): ConversationResult => ({
-  conversationId,
-  turns,
-  messages: toMessages(turns),
-  stopReason,
-});
-
-const assertUniqueTurnIds = (turns: readonly ConversationTurnInput[]): void => {
-  const seen = new Set<string>();
-  for (const { id } of turns) {
-    if (seen.has(id)) {
-      throw new Error(`Turn id "${id}" is used more than once; per-turn scores are named by it`);
-    }
-    seen.add(id);
+const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number | undefined): Promise<T> => {
+  if (timeoutMs === undefined) {
+    return promise;
+  }
+  let timer: NodeJS.Timeout | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error(`The turn took longer than ${timeoutMs}ms`)),
+          timeoutMs
+        );
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
   }
 };
 
+const toMessages = (
+  conversationKey: string,
+  turns: readonly ConversationTurnResult[]
+): ConversationMessage[] =>
+  turns.flatMap(({ id, message, response }) => [
+    { role: 'user' as const, message, turnId: id, conversationKey },
+    { role: 'assistant' as const, message: response, turnId: id, conversationKey },
+  ]);
+
+type TurnOutcome = 'failed' | 'unknown';
+
+/** Thrown by {@link sendTurn} when the turn failed; `outcome` says whether it may have applied. */
+const turnFailure = (outcome: TurnOutcome, cause: unknown): Error & { outcome: TurnOutcome } =>
+  Object.assign(new Error(toErrorMessage(cause), { cause }), { outcome });
+
+const outcomeOf = (error: unknown): TurnOutcome =>
+  error instanceof Error && 'outcome' in error && error.outcome === 'failed' ? 'failed' : 'unknown';
+
 /**
- * Runs one Agent Builder conversation: the scripted turns in order, then any turns
- * `nextMessage` chooses, up to `maxTurns`. Pending prompts (e.g. `ask_user_question`) are
- * answered with the next turn. Each turn runs in its own root span, so every turn has its
- * own trace id for trace-based evaluators.
+ * Sends a turn once. When the call fails or times out, the target is asked whether the turn was
+ * applied: an applied turn's reply is read back, and a turn that never reached the target is
+ * sent one more time. A turn the target can't account for is never sent again.
+ */
+const sendTurn = async (
+  conversation: TargetConversation,
+  request: TargetTurnRequest,
+  turnTimeoutMs: number | undefined
+): Promise<{ reply: TargetTurnReply; recovered: boolean }> => {
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      return {
+        reply: await withTimeout(conversation.send(request), turnTimeoutMs),
+        recovered: false,
+      };
+    } catch (error) {
+      if (!conversation.reconcile) {
+        throw turnFailure('unknown', error);
+      }
+      const outcome = await conversation.reconcile(request);
+      if (outcome === 'unknown') {
+        throw turnFailure('unknown', error);
+      }
+      if (outcome !== 'not_applied') {
+        return { reply: outcome, recovered: true };
+      }
+      if (attempt === 2) {
+        throw turnFailure('failed', error);
+      }
+    }
+  }
+  throw turnFailure('failed', new Error('The turn was not sent'));
+};
+
+/**
+ * Runs one conversation against a target: the scripted turns in order, then any turns
+ * `nextMessage` chooses, up to `maxTurns`. Prompts the agent is waiting on (such as
+ * `ask_user_question`) are answered with the next turn. Each turn runs in its own root span, so
+ * every turn has its own trace for trace-based evaluators.
  */
 export const runConversation = async ({
-  client,
-  agentId,
-  turns: scriptedTurns,
+  target,
+  conversation: { id: key, turns: scriptedTurns },
+  context,
   nextMessage,
   respondToPrompts = answerPromptsWithNextTurn,
   maxTurns = DEFAULT_MAX_TURNS,
-  conversationId: initialConversationId,
-  signal,
+  turnTimeoutMs,
+  beforeTurn,
+  usedTurnIds = new Set<string>(),
 }: RunConversationParams): Promise<ConversationResult> => {
-  assertUniqueTurnIds(scriptedTurns);
+  const turns: ConversationTurnResult[] = [];
+  let conversationId: string | undefined;
 
-  const results: ConversationTurnResult[] = [];
-  const usedTurnIds = new Set<string>();
-  let conversationId = initialConversationId;
-  let pendingPrompts: unknown[] = [];
+  const buildResult = (stopReason: ConversationStopReason): ConversationResult => ({
+    key,
+    conversationId,
+    turns,
+    messages: toMessages(key, turns),
+    stopReason,
+  });
+  const fail = (error: Omit<MultiTurnError, 'conversationKey'>, cause?: unknown) =>
+    new ConversationRunError({ ...error, conversationKey: key }, buildResult('failed'), { cause });
+
+  let targetConversation: TargetConversation;
+  try {
+    targetConversation = await target.startConversation({ key, context });
+    conversationId = targetConversation.id;
+  } catch (error) {
+    throw fail(
+      {
+        phase: 'setup',
+        message: `Could not start conversation "${key}": ${toErrorMessage(error)}`,
+      },
+      error
+    );
+  }
 
   const chooseNextTurn = async (): Promise<
     | { turn: ConversationTurnInput; source: ConversationTurnResult['source'] }
     | { stopReason: ConversationStopReason }
   > => {
-    if (signal?.aborted) {
-      return { stopReason: 'aborted' };
-    }
-    if (results.length >= maxTurns) {
+    if (turns.length >= maxTurns) {
       return { stopReason: 'max_turns' };
     }
-    if (results.length < scriptedTurns.length) {
-      return { turn: scriptedTurns[results.length], source: 'scripted' };
+    if (turns.length < scriptedTurns.length) {
+      return { turn: scriptedTurns[turns.length], source: 'scripted' };
     }
     if (!nextMessage) {
       return { stopReason: 'turns_exhausted' };
     }
-    const turn = await nextMessage({ turns: results });
-    return turn ? { turn, source: 'callback' } : { stopReason: 'stopped' };
+    try {
+      const turn = await nextMessage({
+        turns,
+        conversationKey: key,
+        input: context.example.input ?? {},
+      });
+      return turn ? { turn, source: 'callback' } : { stopReason: 'stopped' };
+    } catch (error) {
+      throw fail(
+        { phase: 'next_message', message: `nextMessage failed: ${toErrorMessage(error)}` },
+        error
+      );
+    }
   };
 
+  let pendingPrompts: unknown[] = [];
   let next = await chooseNextTurn();
+
   while (!('stopReason' in next)) {
     const { turn, source } = next;
     if (usedTurnIds.has(turn.id)) {
-      throw new ConversationRunError(
-        `Turn id "${turn.id}" is used more than once; per-turn scores are named by it`,
-        buildResult(conversationId, results, 'stopped')
-      );
+      throw fail({
+        phase: source === 'callback' ? 'next_message' : 'setup',
+        message: `Turn id "${turn.id}" is used more than once in the example; per-turn scores are named by it`,
+        turnId: turn.id,
+      });
     }
     usedTurnIds.add(turn.id);
+
+    if (beforeTurn) {
+      try {
+        await beforeTurn(turn, { ...context, conversationKey: key });
+      } catch (error) {
+        throw fail(
+          {
+            phase: 'setup',
+            message: `beforeTurn failed for "${turn.id}": ${toErrorMessage(error)}`,
+            turnId: turn.id,
+          },
+          error
+        );
+      }
+    }
 
     const promptResponses =
       pendingPrompts.length > 0 ? respondToPrompts(pendingPrompts, turn) : undefined;
     const answeredPrompts =
       promptResponses !== undefined && Object.keys(promptResponses).length > 0;
+    const request: TargetTurnRequest = {
+      turn,
+      ...(answeredPrompts ? { promptResponses } : {}),
+    };
     const startedAt = Date.now();
 
     try {
-      const { response, spanTraceId } = await withTurnSpan(
+      const { reply, recovered, spanTraceId } = await withTurnSpan(
         `turn · ${turn.id}`,
         {
           attributes: {
             'evals.turn.id': turn.id,
-            'evals.turn.index': results.length,
+            'evals.turn.index': turns.length,
+            'evals.conversation.key': key,
             ...(conversationId ? { 'gen_ai.conversation.id': conversationId } : {}),
           },
         },
         async () => ({
-          response: await client.converse({
-            agentId,
-            input: turn.message,
-            conversationId,
-            ...(answeredPrompts ? { promptResponses } : {}),
-            ...(turn.attachments ? { attachments: turn.attachments } : {}),
-          }),
+          ...(await sendTurn(targetConversation, request, turnTimeoutMs)),
           spanTraceId: getCurrentTraceId() ?? undefined,
         })
       );
 
-      conversationId = response.conversationId ?? conversationId;
-      pendingPrompts = response.prompts ?? [];
+      // The target's spans nest under the turn span, so the ids normally match. Ids the target
+      // reports win, as they do for single-turn tasks.
+      const traceIds =
+        reply.traceIds.length > 0 ? reply.traceIds : spanTraceId ? [spanTraceId] : [];
+      pendingPrompts = reply.prompts;
 
-      results.push({
+      turns.push({
         id: turn.id,
-        index: results.length,
+        index: turns.length,
+        conversationKey: key,
         source,
         message: turn.message,
         answeredPrompts,
-        response: response.message,
-        steps: response.steps,
-        prompts: pendingPrompts,
-        // The agent's spans nest under the turn span, so both ids normally match. The id the
-        // server reports wins, as it does for single-turn tasks.
-        traceId: response.traceId ?? spanTraceId,
-        tokensUsed: response.tokensUsed,
+        response: reply.response,
+        steps: reply.steps,
+        prompts: reply.prompts,
+        traceId: traceIds.at(-1),
+        traceIds,
+        tokensUsed: reply.tokensUsed,
         durationMs: Date.now() - startedAt,
+        ...(recovered ? { recovered } : {}),
       });
     } catch (error) {
-      throw new ConversationRunError(
-        `Turn "${turn.id}" failed after ${results.length} completed turn(s): ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-        buildResult(conversationId, results, 'stopped'),
-        { cause: error }
+      const outcome = outcomeOf(error);
+      throw fail(
+        {
+          phase: 'agent_call',
+          outcome,
+          turnId: turn.id,
+          message: `Turn "${turn.id}" ${
+            outcome === 'unknown' ? 'has an unknown outcome' : 'failed'
+          } after ${turns.length} completed turn(s): ${toErrorMessage(error)}`,
+        },
+        error
       );
     }
 
     next = await chooseNextTurn();
   }
 
-  return buildResult(conversationId, results, next.stopReason);
+  return buildResult(next.stopReason);
 };
-
-/** Options for {@link createConversationTask}; the turns come from each example. */
-export type ConversationTaskOptions = Omit<RunConversationParams, 'turns' | 'conversationId'>;
-
-/** Builds an experiment task that runs each example's `input.turns` as one conversation. */
-export const createConversationTask =
-  (options: ConversationTaskOptions) =>
-  async (example: MultiTurnExample): Promise<ConversationResult> => {
-    const turns = example.input?.turns ?? [];
-    if (turns.length === 0 && !options.nextMessage) {
-      throw new Error('A multi-turn example needs input.turns or a nextMessage callback');
-    }
-    return runConversation({ ...options, turns });
-  };
