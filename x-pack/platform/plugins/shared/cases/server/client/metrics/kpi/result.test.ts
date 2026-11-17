@@ -81,4 +81,23 @@ describe('readKpiMetricValue', () => {
       )
     ).toBe(300);
   });
+
+  describe('percent', () => {
+    it('returns percent as the format', () => {
+      expect(getKpiMetricFormat({ index: 'cases', percent: true })).toBe('percent');
+    });
+
+    it('divides the KQL matches by all documents', () => {
+      expect(readKpiMetricValue({ percent: true }, createResponse({ doc_count: 1 }))).toBe(25);
+    });
+
+    it('returns null when there are no documents', () => {
+      const response = {
+        ...createResponse({ doc_count: 0 }),
+        hits: { total: { value: 0, relation: 'eq' as const }, hits: [] },
+      };
+
+      expect(readKpiMetricValue({ percent: true }, response)).toBeNull();
+    });
+  });
 });

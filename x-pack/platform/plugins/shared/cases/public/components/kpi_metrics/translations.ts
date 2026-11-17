@@ -186,6 +186,45 @@ export const SAVE = i18n.translate('xpack.cases.kpiMetrics.save', {
   defaultMessage: 'Save',
 });
 
+export const PERCENT = i18n.translate('xpack.cases.kpiMetrics.percent', {
+  defaultMessage: 'Show as a percent',
+});
+
+export const CALCULATION_PERCENT = i18n.translate('xpack.cases.kpiMetrics.calculationPercent', {
+  defaultMessage: 'Percent',
+});
+
+export const PERCENT_HELP = i18n.translate('xpack.cases.kpiMetrics.percentHelp', {
+  defaultMessage:
+    'The metric shows the documents that match the KQL query as a percent of all documents in the date range.',
+});
+
+export const DIRECTION = i18n.translate('xpack.cases.kpiMetrics.direction', {
+  defaultMessage: 'Trend color',
+});
+
+export const DIRECTION_HELP = i18n.translate('xpack.cases.kpiMetrics.directionHelp', {
+  defaultMessage: 'The tile compares the value with the previous period of the same length.',
+});
+
+export const DIRECTION_NONE = i18n.translate('xpack.cases.kpiMetrics.directionNone', {
+  defaultMessage: 'No color',
+});
+
+export const DIRECTION_HIGHER_IS_BETTER = i18n.translate(
+  'xpack.cases.kpiMetrics.directionHigherIsBetter',
+  {
+    defaultMessage: 'Higher is better',
+  }
+);
+
+export const DIRECTION_LOWER_IS_BETTER = i18n.translate(
+  'xpack.cases.kpiMetrics.directionLowerIsBetter',
+  {
+    defaultMessage: 'Lower is better',
+  }
+);
+
 export const TEST_QUERY = i18n.translate('xpack.cases.kpiMetrics.testQuery', {
   defaultMessage: 'Test query',
 });

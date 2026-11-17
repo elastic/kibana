@@ -7,7 +7,7 @@
 
 export type KpiMetricIndex = 'cases' | 'activity' | 'attachments';
 export type KpiFieldType = 'keyword' | 'numeric' | 'date';
-export type KpiMetricFormat = 'number' | 'duration';
+export type KpiMetricFormat = 'number' | 'duration' | 'percent';
 export type KpiMetricSource = 'caseSearch' | 'analytics';
 
 export interface KpiFieldCatalogEntry {
@@ -37,6 +37,9 @@ export const KPI_FIELD_CATALOG: Record<KpiMetricIndex, readonly KpiFieldCatalogE
     { field: 'case.time_to_acknowledge', type: 'numeric', unit: 's' },
     { field: 'case.time_to_investigate', type: 'numeric', unit: 's' },
     { field: 'case.time_to_resolve', type: 'numeric', unit: 's' },
+    { field: 'case.active_time_open', type: 'numeric', unit: 's' },
+    { field: 'case.time_to_pickup', type: 'numeric', unit: 's' },
+    { field: 'case.reopen_count', type: 'numeric' },
     { field: 'case.total_alerts', type: 'numeric' },
     { field: 'case.total_comments', type: 'numeric' },
     { field: 'case.total_events', type: 'numeric' },

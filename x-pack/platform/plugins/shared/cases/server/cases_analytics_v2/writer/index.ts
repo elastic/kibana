@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CASE_INDEX_NAME } from '../constants';
 import { buildCaseDoc } from './case_doc_builder';
 import { withRetry } from './retry';
+import { findCaseStatusChanges } from './status_changes';
+import type { CaseStatusChange } from './status_history';
 
 /**
  * Default retry budget for analytics writes. A handful of attempts is
@@ -32,6 +39,8 @@ const RETRYABLE_BULK_ITEM_STATUSES = new Set<number>([408, 409, 429, 500, 502, 5
 interface CasesAnalyticsV2WriterDeps {
   esClient: ElasticsearchClient;
   logger: Logger;
+  /** Internal SO client that reads the status user actions. Without it, docs have no status-history fields. */
+  savedObjectsClient?: SavedObjectsClientContract;
   /** Override for tests. Production uses the defaults. */
   maxRetries?: number;
   /** Override for tests. Production uses the defaults. */
@@ -63,12 +72,14 @@ export interface CasesAnalyticsV2WriterContract {
 export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
   private readonly esClient: ElasticsearchClient;
   private readonly logger: Logger;
+  private readonly savedObjectsClient: SavedObjectsClientContract | undefined;
   private readonly maxRetries: number;
   private readonly retryInitialDelayMs: number;
 
   constructor(deps: CasesAnalyticsV2WriterDeps) {
     this.esClient = deps.esClient;
     this.logger = deps.logger.get('writer');
+    this.savedObjectsClient = deps.savedObjectsClient;
     this.maxRetries = deps.maxRetries ?? DEFAULT_MAX_RETRIES;
     this.retryInitialDelayMs = deps.retryInitialDelayMs ?? DEFAULT_INITIAL_DELAY_MS;
   }
@@ -149,7 +160,8 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
   // ----- Private "do" methods. Throw on failure so the retry wrapper can see. -----
 
   private async doUpsertCase(so: SavedObject<CasePersistedAttributes>): Promise<void> {
-    const doc = buildCaseDoc(so);
+    const statusChanges = await this.loadStatusChanges([so.id]);
+    const doc = buildCaseDoc(so, statusChanges?.get(so.id));
     await this.esClient.index({
       index: CASE_INDEX_NAME,
       id: so.id,
@@ -188,10 +200,11 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
     // headers and document bodies. `operations` accepts arbitrary header
     // shapes; plain object literals avoid pulling in estypes for one line
     // each.
+    const statusChanges = await this.loadStatusChanges(sos.map(({ id }) => id));
     const operations: object[] = [];
     for (const so of sos) {
       operations.push({ index: { _index: CASE_INDEX_NAME, _id: so.id } });
-      operations.push(buildCaseDoc(so));
+      operations.push(buildCaseDoc(so, statusChanges?.get(so.id)));
     }
     const response = await this.esClient.bulk({ operations });
     if (!response.errors) return;
@@ -204,6 +217,26 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
       throw new Error(
         `cases-analyticsV2: bulk upsert had ${retryableCount}/${sos.length} retryable item failure(s)`
       );
+    }
+  }
+
+  /**
+   * A failed read must not block the case doc, so it logs and returns
+   * `undefined`. The docs are then written without the status-history fields.
+   */
+  private async loadStatusChanges(
+    caseIds: string[]
+  ): Promise<Map<string, CaseStatusChange[]> | undefined> {
+    if (this.savedObjectsClient == null) return undefined;
+    try {
+      return await findCaseStatusChanges({ savedObjectsClient: this.savedObjectsClient, caseIds });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.warn(
+        `cases-analyticsV2: status history read failed [count=${caseIds.length}]: ${message}. Writing case docs without status-history fields.`,
+        { error: err }
+      );
+      return undefined;
     }
   }
 

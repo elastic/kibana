@@ -124,4 +124,37 @@ describe('buildKpiMetricSearch', () => {
       )
     ).toThrow('The field case.secret is not allowed for the cases index.');
   });
+
+  describe('percent', () => {
+    it('keeps only the forced filters in the query and counts the KQL matches in a filter aggregation', () => {
+      const { body } = buildKpiMetricSearch(
+        createMetric({ percent: true, query: 'space_id: * or owner: *' }),
+        context
+      );
+
+      expect(body.query).toEqual({
+        bool: {
+          filter: [
+            { term: { space_id: 'space-a' } },
+            { term: { owner: 'securitySolution' } },
+            { range: { 'case.created_at': { gte: 'now-30d', lte: 'now' } } },
+          ],
+        },
+      });
+      expect(JSON.stringify(body.aggs?.[KPI_METRIC_VALUE_AGG])).toContain('space_id');
+      expect(body.aggs?.[KPI_METRIC_VALUE_AGG]).toHaveProperty('filter.bool.filter');
+    });
+
+    it('throws for a percent metric with an aggregation', () => {
+      expect(() =>
+        buildKpiMetricSearch(
+          createMetric({
+            percent: true,
+            aggregation: { type: 'avg', field: 'case.time_to_resolve' },
+          }),
+          context
+        )
+      ).toThrow('A percent metric counts the documents');
+    });
+  });
 });

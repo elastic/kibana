@@ -39,6 +39,10 @@ export interface KpiMetricValueResult {
   type: 'value';
   format: KpiMetricFormat;
   value: number | null;
+  /**
+   * The value of the period of equal length directly before the selected range
+   */
+  previousValue?: number | null;
 }
 
 export interface KpiMetricErrorResult {

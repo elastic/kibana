@@ -26,7 +26,14 @@ const NUMERIC_AGGREGATIONS: readonly KpiMetricAggregationType[] = [
 export const getKpiMetricFieldError = ({
   index,
   aggregation,
-}: Pick<CustomKpiMetricConfiguration, 'index' | 'aggregation'>): string | undefined => {
+  percent,
+}: Pick<CustomKpiMetricConfiguration, 'index' | 'aggregation' | 'percent'>): string | undefined => {
+  const isCount = aggregation == null || aggregation.type === 'count';
+
+  if (percent === true && !isCount) {
+    return 'A percent metric counts the documents. It cannot use an aggregation.';
+  }
+
   if (aggregation == null || aggregation.type === 'count') {
     return;
   }

@@ -143,6 +143,47 @@ describe('KpiMetricsSettings', () => {
     expect(screen.getByTestId('kpi-metric-edit-0')).toBeDisabled();
   });
 
+  it('saves the trend color of an edited metric', async () => {
+    renderWithTestingProviders(
+      <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />
+    );
+
+    await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+    await userEvent.selectOptions(
+      await screen.findByTestId('kpi-metric-direction'),
+      'lower_is_better'
+    );
+    await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+    expect(onSave).toHaveBeenCalledWith([{ ...customMetric('a'), direction: 'lower_is_better' }]);
+  });
+
+  it('saves a percent metric', async () => {
+    renderWithTestingProviders(
+      <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />
+    );
+
+    await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+    await userEvent.click(await screen.findByTestId('kpi-metric-percent'));
+    await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+    expect(onSave).toHaveBeenCalledWith([{ ...customMetric('a'), percent: true }]);
+  });
+
+  it('describes a saved percent metric', async () => {
+    renderWithTestingProviders(
+      <KpiMetricsSettings
+        kpiMetrics={[{ ...customMetric('a'), percent: true }]}
+        isLoading={false}
+        onSave={onSave}
+      />
+    );
+
+    expect(await screen.findByTestId('kpi-metric-row-0')).toHaveTextContent(
+      'cases · Percent · case.status: closed'
+    );
+  });
+
   describe('Test query', () => {
     it('shows the value of the unsaved metric', async () => {
       const previewSpy = jest.spyOn(api, 'previewKpiMetric').mockResolvedValue({

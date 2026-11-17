@@ -20,7 +20,12 @@ const MEDIAN_KEY = '50.0';
 export const getKpiMetricFormat = ({
   index,
   aggregation,
-}: Pick<CustomKpiMetricConfiguration, 'index' | 'aggregation'>): KpiMetricFormat => {
+  percent,
+}: Pick<CustomKpiMetricConfiguration, 'index' | 'aggregation' | 'percent'>): KpiMetricFormat => {
+  if (percent === true) {
+    return 'percent';
+  }
+
   if (
     aggregation?.field == null ||
     aggregation.type === 'count' ||
@@ -67,13 +72,28 @@ const readAggregateValue = (
   return 'value' in aggregate && typeof aggregate.value === 'number' ? aggregate.value : null;
 };
 
+const readPercentValue = (response: estypes.MsearchMultiSearchItem): number | null => {
+  const total = readTotalHits(response);
+  const matches = response.aggregations?.[KPI_METRIC_VALUE_AGG];
+
+  if (total === 0 || matches == null || !('doc_count' in matches)) {
+    return null;
+  }
+
+  return (matches.doc_count / total) * 100;
+};
+
 /**
  * Reads the value of one metric from its search response.
  */
 export const readKpiMetricValue = (
-  { aggregation }: Pick<CustomKpiMetricConfiguration, 'aggregation'>,
+  { aggregation, percent }: Pick<CustomKpiMetricConfiguration, 'aggregation' | 'percent'>,
   response: estypes.MsearchMultiSearchItem
 ): number | null => {
+  if (percent === true) {
+    return readPercentValue(response);
+  }
+
   if (aggregation == null || aggregation.type === 'count') {
     return readTotalHits(response);
   }

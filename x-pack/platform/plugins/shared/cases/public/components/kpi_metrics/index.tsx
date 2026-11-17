@@ -40,9 +40,10 @@ const getMetricDescription = (metric: KpiMetricRequest): string => {
   }
 
   const { aggregation } = metric;
+  const countLabel = metric.percent === true ? i18n.CALCULATION_PERCENT : i18n.AGGREGATION_COUNT;
   const calculation =
     aggregation == null || aggregation.type === 'count'
-      ? i18n.AGGREGATION_COUNT
+      ? countLabel
       : `${aggregation.type} ${aggregation.field ?? ''}`;
 
   return [metric.index, calculation, metric.query].filter(Boolean).join(' · ');

@@ -68,6 +68,7 @@ const buildAggregations = (
 /**
  * Builds the search of one custom metric. The admin KQL is parsed into its own clause,
  * next to separate space, owner, and date range clauses, so no admin text can remove them.
+ * A percent metric keeps only the forced clauses in the query and counts the KQL matches in a filter aggregation.
  * Throws when the KQL does not parse or the field is not allowed.
  */
 export const buildKpiMetricSearch = (
@@ -83,6 +84,21 @@ export const buildKpiMetricSearch = (
   const kqlClause =
     metric.query.trim() === '' ? [] : [toElasticsearchQuery(fromKueryExpression(metric.query))];
   const forcedFilters = buildForcedFilters(metric.index, context);
+
+  if (metric.percent === true) {
+    return {
+      index: metric.index,
+      body: {
+        size: 0,
+        track_total_hits: true,
+        query: { bool: { filter: forcedFilters } },
+        aggs: {
+          [KPI_METRIC_VALUE_AGG]: { filter: { bool: { filter: kqlClause } } },
+        },
+      },
+    };
+  }
+
   const aggs = buildAggregations(metric.aggregation);
 
   return {

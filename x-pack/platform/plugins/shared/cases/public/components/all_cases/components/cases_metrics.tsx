@@ -56,7 +56,7 @@ export interface CasesMetricsProps {
   isAnalyticsEnabled?: boolean;
 }
 
-type KpiTileValues = Omit<KpiMetricTileProps, 'threshold' | 'dataTestSubj'>;
+type KpiTileValues = Omit<KpiMetricTileProps, 'threshold' | 'direction' | 'dataTestSubj'>;
 
 const getPredefinedTileValues = (
   predefinedId: string,
@@ -125,6 +125,7 @@ const getKpiTileValues = (
   return {
     ...base,
     value: result.value,
+    previousValue: result.previousValue,
     format: result.format,
     isLoading: isLoadingKpiResults,
   };
@@ -160,6 +161,7 @@ const CasesMetricsComponent: React.FC<CasesMetricsProps> = (props) => {
               <KpiMetricTile
                 {...getKpiTileValues(metric, props)}
                 threshold={metric.threshold}
+                direction={metric.direction}
                 dataTestSubj={`cases-kpi-tile-${metric.id}`}
               />
             </EuiFlexItem>

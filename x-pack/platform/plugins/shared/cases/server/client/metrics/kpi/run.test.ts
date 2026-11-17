@@ -11,6 +11,7 @@ import { KPI_METRIC_VALUE_AGG } from './query_builder';
 import { runKpiMetrics } from './run';
 
 const context = { spaceId: 'space-a', owner: 'securitySolution' };
+const rangeContext = { ...context, from: 'now-30d', to: 'now' };
 
 const createMetric = (
   overrides: Partial<CustomKpiMetricConfiguration> = {}
@@ -157,5 +158,88 @@ describe('runKpiMetrics', () => {
       { id: 'a', type: 'error', message: 'The metric search failed.' },
       { id: 'b', type: 'error', message: 'The metric search failed.' },
     ]);
+  });
+
+  describe('previous period', () => {
+    it('runs each metric for the previous period in the same msearch', async () => {
+      const msearch = jest
+        .fn()
+        .mockResolvedValue([
+          createResponse(12),
+          createResponse(5, { [KPI_METRIC_VALUE_AGG]: { value: 3600 } }),
+          createResponse(10),
+          createResponse(4, { [KPI_METRIC_VALUE_AGG]: { value: 7200 } }),
+        ]);
+
+      const results = await runKpiMetrics({
+        metrics: [
+          createMetric({ id: 'count' }),
+          createMetric({ id: 'avg', aggregation: { type: 'avg', field: 'case.time_to_resolve' } }),
+        ],
+        context: rangeContext,
+        reader: { msearch },
+      });
+
+      expect(msearch).toHaveBeenCalledTimes(1);
+      expect(msearch.mock.calls[0][0]).toHaveLength(4);
+      expect(results).toEqual([
+        { id: 'count', type: 'value', format: 'number', value: 12, previousValue: 10 },
+        { id: 'avg', type: 'value', format: 'duration', value: 3600, previousValue: 7200 },
+      ]);
+    });
+
+    it('keeps the forced filters and uses an absolute range in the previous search', async () => {
+      const msearch = jest.fn().mockResolvedValue([createResponse(1), createResponse(2)]);
+
+      await runKpiMetrics({
+        metrics: [createMetric({ query: 'space_id: * or owner: *' })],
+        context: rangeContext,
+        reader: { msearch },
+      });
+
+      const [, previousRequest] = msearch.mock.calls[0][0];
+      const filter = previousRequest.body.query.bool.filter;
+
+      expect(filter).toEqual(
+        expect.arrayContaining([
+          { term: { space_id: 'space-a' } },
+          { term: { owner: 'securitySolution' } },
+        ])
+      );
+      expect(filter[2].range['case.created_at'].gte).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(filter[2].range['case.created_at'].lte).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    });
+
+    it('gives a null previous value when the previous search fails', async () => {
+      const msearch = jest
+        .fn()
+        .mockResolvedValue([
+          createResponse(3),
+          { status: 400, error: { type: 'search_phase_execution_exception', reason: 'bad' } },
+        ]);
+
+      const results = await runKpiMetrics({
+        metrics: [createMetric({ id: 'a' })],
+        context: rangeContext,
+        reader: { msearch },
+      });
+
+      expect(results).toEqual([
+        { id: 'a', type: 'value', format: 'number', value: 3, previousValue: null },
+      ]);
+    });
+
+    it('does not run the previous period when the range has no start', async () => {
+      const msearch = jest.fn().mockResolvedValue([createResponse(3)]);
+
+      const results = await runKpiMetrics({
+        metrics: [createMetric({ id: 'a' })],
+        context: { ...context, to: 'now' },
+        reader: { msearch },
+      });
+
+      expect(msearch.mock.calls[0][0]).toHaveLength(1);
+      expect(results).toEqual([{ id: 'a', type: 'value', format: 'number', value: 3 }]);
+    });
   });
 });

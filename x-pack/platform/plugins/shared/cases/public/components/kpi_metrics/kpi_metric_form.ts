@@ -14,10 +14,11 @@ import {
   getKpiField,
 } from '../../../common/constants';
 import type { KpiMetricRequest } from '../../../common/types/api';
-import type { KpiMetricAggregationType } from '../../../common/types/domain';
+import type { KpiMetricAggregationType, KpiMetricDirection } from '../../../common/types/domain';
 import * as i18n from './translations';
 
 export type ThresholdComparatorOption = 'none' | 'above' | 'below';
+export type DirectionOption = 'none' | KpiMetricDirection;
 
 export interface KpiMetricFormState {
   kind: 'predefined' | 'custom';
@@ -27,8 +28,10 @@ export interface KpiMetricFormState {
   query: string;
   aggregationType: KpiMetricAggregationType;
   field: string;
+  percent: boolean;
   thresholdComparator: ThresholdComparatorOption;
   thresholdValue: string;
+  direction: DirectionOption;
 }
 
 export interface KpiMetricFormErrors {
@@ -70,8 +73,10 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
     query: '',
     aggregationType: 'count',
     field: '',
+    percent: false,
     thresholdComparator,
     thresholdValue,
+    direction: metric?.direction ?? 'none',
   };
 
   if (metric == null) {
@@ -89,6 +94,7 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
     query: metric.query,
     aggregationType: metric.aggregation?.type ?? 'count',
     field: metric.aggregation?.field ?? '',
+    percent: metric.percent ?? false,
   };
 };
 
@@ -145,7 +151,7 @@ export const toKpiMetricRequest = (
     ...(existing?.id != null && { id: existing.id }),
     display: existing?.display ?? ('value' as const),
     ...(threshold != null && { threshold }),
-    ...(existing?.direction != null && { direction: existing.direction }),
+    ...(state.direction !== 'none' && { direction: state.direction }),
   };
 
   if (state.kind === 'predefined') {
@@ -156,7 +162,6 @@ export const toKpiMetricRequest = (
 
   return {
     ...base,
-    ...(existingCustom?.percent != null && { percent: existingCustom.percent }),
     ...(existingCustom?.groupBy != null && { groupBy: existingCustom.groupBy }),
     kind: 'custom',
     label: state.label.trim(),
@@ -165,5 +170,6 @@ export const toKpiMetricRequest = (
     ...(state.aggregationType !== 'count' && {
       aggregation: { type: state.aggregationType, field: state.field },
     }),
+    ...(state.aggregationType === 'count' && state.percent && { percent: true }),
   };
 };

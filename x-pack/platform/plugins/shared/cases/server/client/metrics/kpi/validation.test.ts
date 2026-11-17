@@ -74,4 +74,20 @@ describe('getKpiMetricQueryError', () => {
       'The KQL query is not valid'
     );
   });
+
+  describe('percent', () => {
+    it('accepts a percent count', () => {
+      expect(getKpiMetricFieldError({ index: 'cases', percent: true })).toBeUndefined();
+    });
+
+    it('rejects a percent metric with an aggregation', () => {
+      expect(
+        getKpiMetricFieldError({
+          index: 'cases',
+          percent: true,
+          aggregation: { type: 'sum', field: 'case.total_alerts' },
+        })
+      ).toBe('A percent metric counts the documents. It cannot use an aggregation.');
+    });
+  });
 });

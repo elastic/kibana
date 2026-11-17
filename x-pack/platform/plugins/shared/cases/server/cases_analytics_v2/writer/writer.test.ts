@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { CASE_INDEX_NAME } from '../constants';
 import { makeCase } from '../__test_helpers__';
@@ -237,6 +237,57 @@ describe('CasesAnalyticsV2Writer', () => {
         expect.stringContaining('write failed after'),
         expect.objectContaining({ error: expect.any(Error) })
       );
+    });
+  });
+
+  describe('status-history fields', () => {
+    const buildWriterWithSavedObjectsClient = () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const logger = loggerMock.create();
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const writer = new CasesAnalyticsV2Writer({
+        esClient,
+        logger,
+        savedObjectsClient,
+        maxRetries: 1,
+        retryInitialDelayMs: 1,
+      });
+      return { writer, esClient, logger, savedObjectsClient };
+    };
+
+    it('adds the status-history fields to every bulk doc', async () => {
+      const { writer, esClient, savedObjectsClient } = buildWriterWithSavedObjectsClient();
+      savedObjectsClient.createPointInTimeFinder.mockReturnValue({
+        close: jest.fn(),
+        async *find() {
+          yield { saved_objects: [], total: 0, per_page: 1000, page: 1 };
+        },
+      } as unknown as ReturnType<typeof savedObjectsClient.createPointInTimeFinder>);
+      (esClient.bulk as unknown as jest.Mock).mockResolvedValue({ errors: false, items: [] });
+
+      await writer.bulkUpsertCasesAwait([makeCase('case-A'), makeCase('case-B')]);
+
+      const operations = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0].operations;
+      expect(operations[1].case.reopen_count).toBe(0);
+      expect(operations[3].case.reopen_count).toBe(0);
+    });
+
+    it('writes the doc without the fields when the status history read fails', async () => {
+      const { writer, esClient, logger, savedObjectsClient } = buildWriterWithSavedObjectsClient();
+      savedObjectsClient.createPointInTimeFinder.mockImplementation(() => {
+        throw new Error('so down');
+      });
+
+      writer.upsertCase(makeCase('case-A'));
+      await new Promise((r) => setImmediate(r));
+
+      const childLogger = (logger.get as jest.Mock).mock.results[0]?.value ?? logger;
+      expect(childLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('status history read failed'),
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+      const { document } = (esClient.index as unknown as jest.Mock).mock.calls[0][0];
+      expect(document.case).not.toHaveProperty('reopen_count');
     });
   });
 });

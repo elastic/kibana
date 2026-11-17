@@ -20,6 +20,7 @@ import {
   EuiFlyoutHeader,
   EuiFormRow,
   EuiSelect,
+  EuiSwitch,
   EuiText,
   EuiTextArea,
   EuiTitle,
@@ -31,7 +32,11 @@ import type { KpiMetricRequest } from '../../../common/types/api';
 import type { KpiMetricAggregationType } from '../../../common/types/domain';
 import { usePreviewKpiMetric } from '../../containers/use_preview_kpi_metric';
 import { formatKpiMetricValue } from '../all_cases/components/kpi_metric_tile';
-import type { KpiMetricFormState, ThresholdComparatorOption } from './kpi_metric_form';
+import type {
+  DirectionOption,
+  KpiMetricFormState,
+  ThresholdComparatorOption,
+} from './kpi_metric_form';
 import {
   getFieldOptions,
   isDurationField,
@@ -67,6 +72,13 @@ const THRESHOLD_OPTIONS: Array<{ value: ThresholdComparatorOption; text: string 
   { value: 'above', text: i18n.THRESHOLD_ABOVE },
   { value: 'below', text: i18n.THRESHOLD_BELOW },
 ];
+
+const DIRECTION_OPTIONS: Array<{ value: DirectionOption; text: string }> = [
+  { value: 'none', text: i18n.DIRECTION_NONE },
+  { value: 'higher_is_better', text: i18n.DIRECTION_HIGHER_IS_BETTER },
+  { value: 'lower_is_better', text: i18n.DIRECTION_LOWER_IS_BETTER },
+];
+
 export interface KpiMetricFlyoutProps {
   metric: KpiMetricRequest | null;
   isLoading: boolean;
@@ -226,6 +238,16 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
                 data-test-subj="kpi-metric-aggregation"
               />
             </EuiFormRow>
+            {state.aggregationType === 'count' && (
+              <EuiFormRow fullWidth helpText={i18n.PERCENT_HELP}>
+                <EuiSwitch
+                  label={i18n.PERCENT}
+                  checked={state.percent}
+                  onChange={(e) => update({ percent: e.target.checked })}
+                  data-test-subj="kpi-metric-percent"
+                />
+              </EuiFormRow>
+            )}
             {state.aggregationType !== 'count' && (
               <EuiFormRow
                 label={i18n.FIELD}
@@ -313,6 +335,22 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
+
+        {state.kind === 'custom' && (
+          <EuiFormRow label={i18n.DIRECTION} helpText={i18n.DIRECTION_HELP} fullWidth>
+            <EuiSelect
+              fullWidth
+              options={DIRECTION_OPTIONS}
+              value={state.direction}
+              onChange={(e) => {
+                const direction =
+                  DIRECTION_OPTIONS.find(({ value }) => value === e.target.value)?.value ?? 'none';
+                update({ direction });
+              }}
+              data-test-subj="kpi-metric-direction"
+            />
+          </EuiFormRow>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

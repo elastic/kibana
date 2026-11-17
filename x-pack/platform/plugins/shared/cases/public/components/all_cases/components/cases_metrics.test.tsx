@@ -12,7 +12,7 @@ import { renderWithTestingProviders } from '../../../common/mock';
 import type { KpiMetricResult } from '../../../../common/types/api';
 import type { KpiMetricConfiguration, KpiMetricThreshold } from '../../../../common/types/domain';
 import { CasesMetrics } from './cases_metrics';
-import { getKpiThresholdColor } from './kpi_metric_tile';
+import { getKpiChangeColor, getKpiChangePercent, getKpiThresholdColor } from './kpi_metric_tile';
 
 jest.mock('pretty-ms', () => jest.fn().mockReturnValue('2ms'));
 
@@ -189,6 +189,60 @@ describe('Cases metrics', () => {
       expect(
         within(await screen.findByTestId('cases-kpi-tile-c1')).getByText('-')
       ).toBeInTheDocument();
+    });
+
+    describe('previous period', () => {
+      it('shows the change from the previous period', async () => {
+        renderWithTestingProviders(
+          <CasesMetrics
+            {...props}
+            kpiMetrics={[{ ...customMetric('c1'), direction: 'lower_is_better' }]}
+            kpiResults={[
+              { id: 'c1', type: 'value', format: 'number', value: 12, previousValue: 10 },
+            ]}
+            isAnalyticsEnabled={true}
+          />
+        );
+
+        expect(await screen.findByTestId('cases-kpi-tile-c1-change')).toHaveTextContent(
+          '+20% vs. previous period'
+        );
+      });
+
+      it('does not show a change when the previous value is zero or missing', async () => {
+        renderWithTestingProviders(
+          <CasesMetrics
+            {...props}
+            kpiMetrics={[customMetric('zero'), customMetric('missing')]}
+            kpiResults={[
+              { id: 'zero', type: 'value', format: 'number', value: 3, previousValue: 0 },
+              { id: 'missing', type: 'value', format: 'number', value: 3 },
+            ]}
+            isAnalyticsEnabled={true}
+          />
+        );
+
+        expect(await screen.findByTestId('cases-kpi-tile-zero')).toBeInTheDocument();
+        expect(screen.queryByTestId('cases-kpi-tile-zero-change')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('cases-kpi-tile-missing-change')).not.toBeInTheDocument();
+      });
+
+      it('calculates the change in percent', () => {
+        expect(getKpiChangePercent(12, 10)).toBe(20);
+        expect(getKpiChangePercent(5, 10)).toBe(-50);
+        expect(getKpiChangePercent(5, 0)).toBeUndefined();
+        expect(getKpiChangePercent(null, 10)).toBeUndefined();
+        expect(getKpiChangePercent(5, null)).toBeUndefined();
+      });
+
+      it('colors the change with the direction of the metric', () => {
+        expect(getKpiChangeColor(20, 'higher_is_better')).toBe('success');
+        expect(getKpiChangeColor(-20, 'higher_is_better')).toBe('danger');
+        expect(getKpiChangeColor(20, 'lower_is_better')).toBe('danger');
+        expect(getKpiChangeColor(-20, 'lower_is_better')).toBe('success');
+        expect(getKpiChangeColor(0, 'lower_is_better')).toBe('subdued');
+        expect(getKpiChangeColor(20)).toBe('subdued');
+      });
     });
   });
 });

@@ -188,6 +188,13 @@ export const KPI_METRIC_ANALYTICS_DISABLED = i18n.translate(
 export const KPI_METRIC_UNKNOWN = i18n.translate('xpack.cases.casesStats.kpiMetricUnknown', {
   defaultMessage: 'This metric is not available.',
 });
+
+export const KPI_METRIC_CHANGE = (change: string) =>
+  i18n.translate('xpack.cases.casesStats.kpiMetricChange', {
+    values: { change },
+    defaultMessage: '{change} vs. previous period',
+  });
+
 export const FILTER_ASSIGNEES_ARIA_LABEL = i18n.translate(
   'xpack.cases.allCasesView.filterAssigneesAriaLabel',
   {

@@ -56,7 +56,7 @@ const createClientArgs = ({
     _shards: { total: 1, successful: 1, failed: 0 },
     hits: { total: { value: 9, relation: 'eq' as const }, hits: [] },
   };
-  clientArgs.analyticsV2Reader.msearch.mockResolvedValue([response]);
+  clientArgs.analyticsV2Reader.msearch.mockResolvedValue([response, response]);
 
   return args;
 };
@@ -103,9 +103,9 @@ describe('getKpiMetrics', () => {
 
     expect(res).toEqual({
       enabled: true,
-      metrics: [{ id: 'custom-1', type: 'value', format: 'number', value: 9 }],
+      metrics: [{ id: 'custom-1', type: 'value', format: 'number', value: 9, previousValue: 9 }],
     });
-    expect(clientArgs.analyticsV2Reader.msearch.mock.calls[0][0]).toHaveLength(1);
+    expect(clientArgs.analyticsV2Reader.msearch.mock.calls[0][0]).toHaveLength(2);
   });
 
   it('forces the space and the owner of the request on the search', async () => {
