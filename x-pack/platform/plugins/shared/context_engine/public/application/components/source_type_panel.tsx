@@ -23,9 +23,7 @@ interface SourceTypePanelProps {
   'data-test-subj'?: string;
 }
 
-/**
- * A bordered panel grouping sources of a single type (e.g. Elasticsearch data, Connectors).
- */
+/** Bordered panel grouping sources of a single type. */
 export const SourceTypePanel = ({
   title,
   badgeCount,

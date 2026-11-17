@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import type { getEbtProps } from '@kbn/ebt-click';
 import type { ReactNode } from 'react';
 import React from 'react';
 
@@ -42,7 +43,7 @@ interface SelectableConnectorCardProps extends ConnectorCardLabelProps {
   isChecked: boolean;
   isDisabled?: boolean;
   onChange: (checked: boolean) => void;
-  checkboxProps?: Record<string, string | undefined>;
+  checkboxProps?: ReturnType<typeof getEbtProps>;
   'data-test-subj'?: string;
 }
 

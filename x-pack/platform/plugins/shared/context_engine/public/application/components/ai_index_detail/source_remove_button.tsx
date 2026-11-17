@@ -40,7 +40,7 @@ export const SourceRemoveButton = ({
         aria-label={removeLabel}
         data-test-subj="contextRemoveSourceButton"
         {...getEbtProps({
-          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
           action: CONTEXT_ENGINE_UI_EBT.action.sources.REMOVE_SOURCE,
           ...(sourceType !== undefined && { detail: sourceType }),
         })}

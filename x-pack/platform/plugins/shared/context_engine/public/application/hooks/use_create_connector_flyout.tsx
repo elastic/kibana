@@ -76,7 +76,7 @@ export const useCreateConnectorFlyout = ({
         isDisabled={disabled}
         data-test-subj="contextCreateConnectorButton"
         {...getEbtProps({
-          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
           action: CONTEXT_ENGINE_UI_EBT.action.sources.CREATE_CONNECTOR,
         })}
       >

@@ -65,7 +65,7 @@ export const ConnectorsTab = ({
     canReadConnectors && !isLoading && !isError && connectors.length === 0 && !showCreateActions;
 
   const createCardEbtProps = getEbtProps({
-    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
     action: CONTEXT_ENGINE_UI_EBT.action.sources.CREATE_CONNECTOR,
   });
 
@@ -154,7 +154,7 @@ export const ConnectorsTab = ({
                           onToggle({ id: connector.id, name: connector.name, checked })
                         }
                         checkboxProps={getEbtProps({
-                          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+                          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
                           action: CONTEXT_ENGINE_UI_EBT.action.sources.TOGGLE_CONNECTOR,
                           detail: connector.actionTypeId,
                         })}

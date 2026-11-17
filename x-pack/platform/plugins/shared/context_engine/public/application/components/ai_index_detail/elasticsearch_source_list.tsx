@@ -20,6 +20,12 @@ import { getSourceDisplay } from '../source_display';
 import type { SelectedSource } from '../source_picker';
 import { SourceRemoveButton } from './source_remove_button';
 
+const emptyConnectorMaps = {
+  connectorNameById: new Map<string, string>(),
+  connectorActionTypeById: new Map<string, string>(),
+  connectorTypeNameById: new Map<string, string>(),
+};
+
 interface ElasticsearchSourceListProps {
   sources: SelectedSource[];
   onRemove?: (source: SelectedSource) => void;
@@ -45,12 +51,6 @@ export const ElasticsearchSourceList = ({
       </EuiText>
     );
   }
-
-  const emptyConnectorMaps = {
-    connectorNameById: new Map<string, string>(),
-    connectorActionTypeById: new Map<string, string>(),
-    connectorTypeNameById: new Map<string, string>(),
-  };
 
   return (
     <EuiPanel hasBorder paddingSize="none">
