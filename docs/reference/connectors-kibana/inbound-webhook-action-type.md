@@ -138,7 +138,7 @@ The HTTP status that {{kib}} returns shows what happened to a request:
 | Status | What it means |
 | --- | --- |
 | 202 | {{kib}} accepted the request. If no workflow runs, check that the workflow is enabled, is in the connector's space, has the correct `connector-id`, and has an `on.condition` that matches the body. |
-| 200 | The body has a top-level `challenge` field with a string of 1 to 1,024 characters. The connector answers the verification request and doesn't start any workflows. |
+| 200 | The body has a top-level `challenge` field. The connector answers the verification request and doesn't start any workflows. |
 | 403 | This deployment doesn't accept webhook requests for any connector. |
 | 404 | The ingest token is missing or incorrect, or someone rotated it. The URL might also have the wrong connector ID or space. After repeated failed attempts from one address, {{kib}} returns 404 for that connector until the [failed-authentication window](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-ratelimit-remoteaddress-window) passes, even when the token is correct. If [`xpack.actions.inboundEvents.enabled`](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-enabled) is `false`, every webhook URL returns 404. |
 | 413 | The body is larger than the maximum size, which is 1 MB by default. |
