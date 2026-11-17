@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/core-plugins-server'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/licensing-plugin'
+  - '@kbn/lock-manager'
   - '@kbn/nightshift-shared'
 tags:
   - plugin

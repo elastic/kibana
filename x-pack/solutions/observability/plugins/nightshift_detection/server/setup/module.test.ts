@@ -16,7 +16,7 @@ import { NIGHTSHIFT_DETECTION_TIERED_FEATURES } from '../../common/constants';
 import { module } from '..';
 import { AvailabilityService } from '../lib/availability/availability_service';
 import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
-import { DetectionStateClient, detectionStateSavedObjectType } from '../lib/state';
+import { DetectionStateClient, SpaceRunLock, detectionStateSavedObjectType } from '../lib/state';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 
 function createContainer() {
@@ -48,6 +48,7 @@ describe('module', () => {
     container.get(AvailabilityService);
     container.get(StrategyCatalog);
     container.get(DetectionStateClient);
+    container.get(SpaceRunLock);
     container.getAll(OnStart);
     container.getAll(OnSetup).forEach((onSetup) => onSetup(container));
 
