@@ -9,7 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
@@ -90,6 +90,8 @@ async function hasNoResults({
   query,
   rangeFilter,
   timeRange,
+  searchSessionId,
+  projectRouting,
 }: {
   abortSignal: AbortSignal;
   dataView: DataView;
@@ -97,6 +99,8 @@ async function hasNoResults({
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
   timeRange?: TimeRange;
+  searchSessionId?: string;
+  projectRouting?: ProjectRouting;
 }): Promise<boolean> {
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('size', 0);
@@ -120,10 +124,13 @@ async function hasNoResults({
     searchSource.setField('query', query);
   }
 
+  // Pass projectRouting so switching projects doesn't reuse the previous project's cached results.
   const resp = await lastValueFrom(
     searchSource.fetch$({
       abortSignal,
       legacyHitsTotal: false,
+      sessionId: searchSessionId,
+      projectRouting,
     })
   );
   const count = (resp?.rawResponse?.hits?.total as estypes.SearchTotalHits)?.value ?? 0;

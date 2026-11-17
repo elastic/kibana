@@ -76,6 +76,10 @@ describe('getChangePointGridEmbeddableFactory', () => {
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
 
     const [{ cards$, searchContext$ }] = jest.mocked(initializeChangePointGridFetch).mock.calls[0];
+    const resolvedTimeRange = { from: '2026-11-01T11:45:00.000Z', to: '2026-11-01T12:00:00.000Z' };
+    jest
+      .mocked(discoverServiceMock.data.search.session.resolveTimeRange)
+      .mockReturnValueOnce(resolvedTimeRange);
     searchContext$.next({
       timeRange: { from: 'now-15m', to: 'now' },
       filters: [],
@@ -89,10 +93,13 @@ describe('getChangePointGridEmbeddableFactory', () => {
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
     });
     expect(screen.getByTestId('changePointGridRenderer')).toBeInTheDocument();
-    expect(jest.mocked(ChangePointGridRenderer).mock.calls[0][0].fetchParams.timeRange).toEqual({
-      from: expect.stringMatching(/Z$/),
-      to: expect.stringMatching(/Z$/),
+    expect(discoverServiceMock.data.search.session.resolveTimeRange).toHaveBeenCalledWith({
+      from: 'now-15m',
+      to: 'now',
     });
+    expect(jest.mocked(ChangePointGridRenderer).mock.calls[0][0].fetchParams.timeRange).toEqual(
+      resolvedTimeRange
+    );
   });
 
   it('publishes a custom time range and serializes changes from panel settings', async () => {

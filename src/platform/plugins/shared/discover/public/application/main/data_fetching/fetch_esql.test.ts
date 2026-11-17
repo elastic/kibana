@@ -151,13 +151,23 @@ describe('fetchEsql', () => {
     }
   });
 
-  it('should use inputTimeRange if provided', async () => {
+  it('should resolve inputTimeRange with the search session reference time', async () => {
     const timeRange: TimeRange = { from: 'now-15m', to: 'now' };
+    const resolvedTimeRange = { from: '2026-11-01T11:45:00.000Z', to: '2026-11-01T12:00:00.000Z' };
+    jest
+      .mocked(discoverServiceMock.data.search.session.resolveTimeRange)
+      .mockReturnValueOnce(resolvedTimeRange);
     mockEsqlResult([], []);
     await fetchEsql({ ...fetchEsqlMockProps, timeRange });
+    expect(discoverServiceMock.data.search.session.resolveTimeRange).toHaveBeenCalledWith(
+      timeRange
+    );
     expect(discoverServiceMock.data.search.esql).toHaveBeenCalledWith(
       expect.objectContaining({
-        kibanaQueryContext: expect.objectContaining({ timeRange, timeField: '@timestamp' }),
+        kibanaQueryContext: expect.objectContaining({
+          timeRange: resolvedTimeRange,
+          timeField: '@timestamp',
+        }),
       }),
       expect.anything()
     );

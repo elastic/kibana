@@ -9,7 +9,14 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type {
+  AggregateQuery,
+  BoolQuery,
+  Filter,
+  ProjectRouting,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
 import type {
   FetchContext,
   PublishesDataSources,
@@ -134,6 +141,8 @@ export async function getMinMax({
   filters,
   query,
   timeRange,
+  searchSessionId,
+  projectRouting,
   esqlVariables,
   esqlPreFilter,
 }: {
@@ -143,13 +152,17 @@ export async function getMinMax({
   filters?: Filter[];
   query?: Query | AggregateQuery;
   timeRange?: TimeRange;
+  searchSessionId?: string;
+  projectRouting?: ProjectRouting;
   esqlVariables?: ESQLControlVariable[];
   esqlPreFilter?: { bool: BoolQuery };
 }): Promise<{ min: number | undefined; max: number | undefined }> {
   if (query && 'esql' in query) {
     const result = await getESQLSingleColumnValues({
       query: query.esql,
-      timeRange,
+      timeRange: timeRange && dataService.search.session.resolveTimeRange(timeRange),
+      sessionId: searchSessionId,
+      projectRouting,
       filter: esqlPreFilter,
       signal: abortSignal,
       search: dataService.search.search,
@@ -203,7 +216,10 @@ export async function getMinMax({
   };
   searchSource.setField('aggs', aggs);
 
-  const resp = await lastValueFrom(searchSource.fetch$({ abortSignal }));
+  // Pass projectRouting so switching projects doesn't reuse the previous project's cached results.
+  const resp = await lastValueFrom(
+    searchSource.fetch$({ abortSignal, sessionId: searchSessionId, projectRouting })
+  );
   return {
     min:
       (resp.rawResponse?.aggregations?.minAgg as estypes.AggregationsSingleMetricAggregateBase)

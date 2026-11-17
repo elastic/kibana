@@ -54,6 +54,7 @@ interface GetESQLSingleColumnValuesParams {
   /** From UI settings `dateFormat:tz` on either client or server. */
   timezone?: string;
   projectRouting?: string;
+  sessionId?: string;
 }
 export const getESQLSingleColumnValues = async ({
   query,
@@ -64,6 +65,7 @@ export const getESQLSingleColumnValues = async ({
   esqlVariables,
   timezone,
   projectRouting,
+  sessionId,
 }: GetESQLSingleColumnValuesParams): Promise<
   GetESQLSingleColumnValuesSuccess | GetESQLSingleColumnValuesFailure
 > => {
@@ -78,6 +80,7 @@ export const getESQLSingleColumnValues = async ({
       timezone,
       variables: esqlVariables,
       projectRouting,
+      sessionId,
     });
     const columns = results.response.columns;
     const allColumns = results.response.all_columns;

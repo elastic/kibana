@@ -8,6 +8,7 @@
  */
 
 import { getSampleDashboardState } from '../../mocks';
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
 import { saveDashboard } from './save_dashboard';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
@@ -74,6 +75,7 @@ describe('Save dashboard state', () => {
     `);
     expect(mockCreate).toHaveBeenCalled();
     expect(mockShowDashboardSavedToast).toHaveBeenCalled();
+    expect(getDashboardBackupService().clearState).toHaveBeenCalledWith('Boogaloonie');
   });
 
   it('should return an error when the save fails.', async () => {

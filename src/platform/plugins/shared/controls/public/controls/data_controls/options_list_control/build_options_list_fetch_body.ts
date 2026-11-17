@@ -22,6 +22,7 @@ import type {
   OptionsListSuccessResponse,
   OptionsListUnifiedFetchBody,
 } from '../../../../common/options_list/types';
+import { dataService } from '../../../services/kibana_services';
 import {
   buildESQLPreFilter,
   buildOptionsListDashboardFilters,
@@ -79,7 +80,7 @@ export function buildOptionsListFetchBody({
     const body: OptionsListESQLFetchBody = {
       kind: 'esql',
       esql: esqlQuery,
-      timeRange,
+      timeRange: timeRange && dataService.search.session.resolveTimeRange(timeRange),
       filter: buildESQLPreFilter({
         fetchContext,
         useGlobalFilters,

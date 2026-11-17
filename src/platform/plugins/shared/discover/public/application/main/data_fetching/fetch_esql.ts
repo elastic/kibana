@@ -81,7 +81,9 @@ export async function fetchEsql({
       {
         query: query.esql,
         kibanaQueryContext: {
-          timeRange: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
+          timeRange: timeRange
+            ? data.search.session.resolveTimeRange(timeRange)
+            : data.query.timefilter.timefilter.getAbsoluteTime(),
           timeField: esqlSource?.timeFieldName,
           kibanaFilters: filters,
           kqlQuery: inputQuery,

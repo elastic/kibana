@@ -24,8 +24,10 @@ import { ControlValuesSource } from '@kbn/controls-constants';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { RangeSliderControlApi } from './types';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ISearchOptions } from '@kbn/search-types';
 
 const mockGetESQLResults = jest.fn();
+const mockSearchSourceFetch = jest.fn();
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
   getESQLResults: (...args: unknown[]) => mockGetESQLResults(...args),
@@ -60,7 +62,9 @@ describe('RangeSliderControlApi', () => {
           isAggsRequest = true;
         }
       },
-      fetch$: () => {
+      fetch$: (options: ISearchOptions) => {
+        mockSearchSourceFetch(options);
+
         return isAggsRequest
           ? of({
               rawResponse: { aggregations: { minAgg: { value: min }, maxAgg: { value: max } } },
@@ -99,9 +103,46 @@ describe('RangeSliderControlApi', () => {
   dataViewsService.find = jest.fn().mockResolvedValue([{ id: 'myDataViewId' }]);
 
   beforeEach(() => {
+    mockSearchSourceFetch.mockClear();
     totalResults = DEFAULT_TOTAL_RESULTS;
     min = DEFAULT_MIN;
     max = DEFAULT_MAX;
+  });
+
+  test('passes updated routing to min/max and validation searches in the same session', async () => {
+    const projectRouting$ = new BehaviorSubject<string | undefined>('_alias:project-a');
+    const routedParentApi = {
+      ...parentApi,
+      projectRouting$,
+      searchSessionId$: new BehaviorSubject<string | undefined>('slider-session'),
+    };
+    await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
+      initialState: {
+        ...DEFAULT_RANGE_SLIDER_STATE,
+        data_view_id: 'myDataViewId',
+        field_name: 'myFieldName',
+        value: ['5', '10'],
+      } as RangeSliderControlState,
+      finalizeApi: getMockedFinalizeApi(uuid, factory, routedParentApi),
+      uuid,
+      parentApi: routedParentApi,
+    });
+
+    const expectSearchesWith = (projectRouting: string) =>
+      waitFor(() => {
+        const options = {
+          abortSignal: expect.anything(),
+          sessionId: 'slider-session',
+          projectRouting,
+        };
+        expect(mockSearchSourceFetch).toHaveBeenCalledWith(options);
+        expect(mockSearchSourceFetch).toHaveBeenCalledWith({ ...options, legacyHitsTotal: false });
+      });
+
+    await expectSearchesWith('_alias:project-a');
+    projectRouting$.next('_alias:project-b');
+    await expectSearchesWith('_alias:project-b');
   });
 
   describe('appliedFilters$', () => {
@@ -234,6 +275,11 @@ describe('RangeSliderControlApi', () => {
         },
       });
 
+      const routedParentApi = {
+        ...parentApi,
+        projectRouting$: new BehaviorSubject<string | undefined>('_alias:project-a'),
+        searchSessionId$: new BehaviorSubject<string | undefined>('esql-session'),
+      };
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
@@ -241,9 +287,9 @@ describe('RangeSliderControlApi', () => {
           values_source: ControlValuesSource.ESQL,
           esql_query: 'FROM bytes-* | KEEP bytes',
         } as RangeSliderControlState,
-        finalizeApi,
+        finalizeApi: getMockedFinalizeApi(uuid, factory, routedParentApi),
         uuid,
-        parentApi,
+        parentApi: routedParentApi,
       });
       const { findByTestId } = render(<Component />);
       await waitFor(async () => {
@@ -256,6 +302,12 @@ describe('RangeSliderControlApi', () => {
           '1024'
         );
       });
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sessionId: 'esql-session',
+          projectRouting: '_alias:project-a',
+        })
+      );
     });
   });
 

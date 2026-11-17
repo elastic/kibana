@@ -432,7 +432,7 @@ export function getDashboardApi({
     accessControl$: accessControlManager.api.accessControl$,
     changeAccessMode: accessControlManager.api.changeAccessMode,
     isAccessControlEnabled: Boolean(isAccessControlEnabled),
-  } as Omit<DashboardApi, 'searchSessionId$'>;
+  } as Omit<DashboardApi, 'searchSessionId$' | 'replayCacheLastFetched$'>;
 
   const internalApi: DashboardInternalApi = {
     ...historyManager.internalApi,
