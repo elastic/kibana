@@ -12,9 +12,7 @@ import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common'
 export type NightshiftSettingsLocator = LocatorPublic<NightshiftSettingsLocatorParams>;
 
 /** Server-side copy of the `nightshift` plugin's browser locator, with the same id. */
-export class NightshiftSettingsLocatorDefinition
-  implements LocatorDefinition<NightshiftSettingsLocatorParams>
-{
+export class NightshiftSettingsLocatorDefinition implements LocatorDefinition<NightshiftSettingsLocatorParams> {
   public readonly id = NIGHTSHIFT_SETTINGS_LOCATOR_ID;
 
   public readonly getLocation = async ({ tab }: NightshiftSettingsLocatorParams = {}) => ({

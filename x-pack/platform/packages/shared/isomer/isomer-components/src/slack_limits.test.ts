@@ -54,7 +54,7 @@ const firstField = (blocks: SlackBlock[]) =>
 
 const sectionText = (blocks: SlackBlock[]) => {
   const [block] = blocks;
-  return block?.type === 'section' ? block.text?.text ?? '' : '';
+  return block?.type === 'section' ? (block.text?.text ?? '') : '';
 };
 
 const fieldsNode = (fill: string): FieldsNode => ({

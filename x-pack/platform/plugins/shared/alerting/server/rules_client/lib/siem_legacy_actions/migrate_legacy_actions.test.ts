@@ -52,7 +52,7 @@ const buildRule = (
     type: RULE_SAVED_OBJECT_TYPE,
     references: actions.length > 0 ? [{ name: 'action_0', type: 'action', id: connectorId }] : [],
     attributes: { consumer, actions, throttle: '1h', notifyWhen: 'onThrottleInterval' },
-  } as unknown as SavedObject<RawRule>);
+  }) as unknown as SavedObject<RawRule>;
 
 // the action buildSidecar() holds, as saved on a rule by a previous migration
 const migratedSidecarAction: RawRuleAction = {

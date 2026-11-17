@@ -37,7 +37,7 @@ describe('registerStepDefinitions', () => {
         logger: telemetry.logger,
       },
       dreaming: {
-        getAiIndexService: () => ({} as AiIndexService),
+        getAiIndexService: () => ({}) as AiIndexService,
         isContextEngineEnabled: async () => true,
         isMemoryEnabled: async () => true,
         checkReadPrivilege: async () => true,

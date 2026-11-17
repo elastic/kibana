@@ -70,12 +70,9 @@ export const loadMarkdownReference = async ({
   if (selected.length === 0) {
     throw new Error(`${url} links to no Markdown page`);
   }
-  const fetched = await mapConcurrently(
-    selected,
-    async (link): Promise<MarkdownReferencePage> => ({
-      url: link,
-      markdown: await fetchText(link),
-    })
-  );
+  const fetched = await mapConcurrently(selected, async (link): Promise<MarkdownReferencePage> => ({
+    url: link,
+    markdown: await fetchText(link),
+  }));
   return convertMarkdownReference({ format, pages: fetched });
 };

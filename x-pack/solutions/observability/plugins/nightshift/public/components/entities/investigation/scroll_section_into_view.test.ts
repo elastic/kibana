@@ -30,8 +30,8 @@ describe('scrollSectionIntoView', () => {
     scrollArea.scrollTo = (({ top }: ScrollToOptions) => {
       scrollArea.scrollTop = top ?? 0;
     }) as typeof scrollArea.scrollTo;
-    scrollArea.getBoundingClientRect = () => ({ top: 100 } as DOMRect);
-    element.getBoundingClientRect = () => ({ top: 100 + 800 - scrollTop } as DOMRect);
+    scrollArea.getBoundingClientRect = () => ({ top: 100 }) as DOMRect;
+    element.getBoundingClientRect = () => ({ top: 100 + 800 - scrollTop }) as DOMRect;
     const onDone = jest.fn();
 
     scrollSectionIntoView(element, 250, onDone);

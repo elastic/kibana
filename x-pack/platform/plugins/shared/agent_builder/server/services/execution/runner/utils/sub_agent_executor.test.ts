@@ -349,7 +349,7 @@ describe('createSubAgentExecutor and background sub-agents', () => {
     return createSubAgentExecutor({
       request: httpServerMock.createKibanaRequest(),
       getExecutionService: () =>
-        ({ executeAgent: executeAgentMock } as unknown as AgentExecutionService),
+        ({ executeAgent: executeAgentMock }) as unknown as AgentExecutionService,
       interactivity,
     });
   };

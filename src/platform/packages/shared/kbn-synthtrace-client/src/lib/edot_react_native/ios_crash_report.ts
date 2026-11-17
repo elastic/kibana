@@ -309,8 +309,8 @@ export const iosCrashReport = ({
     signal === 'SIGSEGV'
       ? Math.floor(random() * 0x200) * 8
       : signal === 'SIGBUS'
-      ? images[HERMES].base + Math.floor(random() * 0x100000) * 8
-      : crashPc;
+        ? images[HERMES].base + Math.floor(random() * 0x100000) * 8
+        : crashPc;
 
   const header = [
     `Incident Identifier: ${toUuid(digest(`${installationId}:${crashedAt}`))}`,

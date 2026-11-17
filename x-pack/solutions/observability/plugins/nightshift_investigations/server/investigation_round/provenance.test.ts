@@ -231,7 +231,7 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
         .mockResolvedValue([{ success: true, content: Buffer.from(markdown, 'utf8') }]),
     };
     const tools = createDecisionTreeTools({
-      getSandboxStart: () => ({ getSession: jest.fn().mockReturnValue(sandboxSession) } as never),
+      getSandboxStart: () => ({ getSession: jest.fn().mockReturnValue(sandboxSession) }) as never,
       connectorNames: ['elasticsearch'],
       getSpaceId: () => 'space-1',
       getUsername: () => 'jdoe',
@@ -280,7 +280,7 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
     });
 
     const step = decisionTreeReinforceStepDefinition({
-      getAgentBuilder: () => ({ agents: { runAgent } } as never),
+      getAgentBuilder: () => ({ agents: { runAgent } }) as never,
     });
 
     const result = await step.handler({

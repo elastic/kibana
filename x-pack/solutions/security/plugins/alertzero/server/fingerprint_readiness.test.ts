@@ -61,7 +61,7 @@ const createCoreStart = (indices: { putIndexTemplate: jest.Mock; exists?: jest.M
     },
     featureFlags: { getBooleanValue$: () => of(true) },
     security: { serviceAccounts: { isEnabled: () => false } },
-  } as unknown as CoreStart);
+  }) as unknown as CoreStart;
 
 describe('fingerprint template readiness', () => {
   it('returns a contract and refuses writes until the template install succeeds', async () => {

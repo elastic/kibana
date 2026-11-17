@@ -87,14 +87,14 @@ const gh = async (args) => {
 export const ghJson = async (args) => JSON.parse(await gh(args));
 
 /** Fetches every page of a list endpoint and returns the pages as an array. */
-const ghPages = async (endpoint) =>
-  ghJson(['api', endpoint, '--paginate', '--slurp', '-X', 'GET']);
+const ghPages = async (endpoint) => ghJson(['api', endpoint, '--paginate', '--slurp', '-X', 'GET']);
 
 export const parseOptions = (args, allowed) => {
   const options = {};
   for (let i = 0; i < args.length; i += 2) {
     const flag = args[i];
-    if (!allowed.includes(flag) || args[i + 1] === undefined) fail(`unknown or incomplete option: ${flag}`);
+    if (!allowed.includes(flag) || args[i + 1] === undefined)
+      fail(`unknown or incomplete option: ${flag}`);
     options[flag.slice(2)] = args[i + 1];
   }
   return options;
@@ -195,12 +195,18 @@ export const settle = (result, { sinceMs, startupMs, timeoutMs, label }) => {
   const age = Date.now() - sinceMs;
   if (result.state === 'missing') {
     return age >= startupMs
-      ? { state: 'none', detail: `no ${label} result ${Math.round(startupMs / 1000)}s after it was first watched` }
+      ? {
+          state: 'none',
+          detail: `no ${label} result ${Math.round(startupMs / 1000)}s after it was first watched`,
+        }
       : undefined;
   }
   if (result.state === 'pending') {
     return age >= timeoutMs
-      ? { state: 'timeout', detail: `no ${label} result ${Math.round(timeoutMs / 1000)}s after it was first watched` }
+      ? {
+          state: 'timeout',
+          detail: `no ${label} result ${Math.round(timeoutMs / 1000)}s after it was first watched`,
+        }
       : undefined;
   }
   return result;

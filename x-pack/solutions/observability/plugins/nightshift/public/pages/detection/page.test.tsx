@@ -227,20 +227,20 @@ describe('DetectionPage', () => {
           isHistoryLookup && mockHistoryError && !mockHistoryHasCachedData
             ? undefined
             : isHistoryLookup
-            ? {
-                entities: 0,
-                knowledge_indicators: 0,
-                active_rules: 0,
-                detections: mockHistoryDetections,
-                significant_events: mockHistorySignificantEvents,
-              }
-            : {
-                entities: 6,
-                knowledge_indicators: 113,
-                active_rules: 80,
-                detections: 40,
-                significant_events: 23,
-              },
+              ? {
+                  entities: 0,
+                  knowledge_indicators: 0,
+                  active_rules: 0,
+                  detections: mockHistoryDetections,
+                  significant_events: mockHistorySignificantEvents,
+                }
+              : {
+                  entities: 6,
+                  knowledge_indicators: 113,
+                  active_rules: 80,
+                  detections: 40,
+                  significant_events: 23,
+                },
         isLoading: false,
         isFetching: isHistoryLookup && mockHistoryIsFetching,
         isError: isHistoryLookup && mockHistoryError,

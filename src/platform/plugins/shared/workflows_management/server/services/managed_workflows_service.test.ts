@@ -262,8 +262,8 @@ const createCrudServiceMock = () => {
       successfulIds: ids,
     })),
     deleteManagedOrphan: jest.fn().mockResolvedValue(true),
-    disableManagedWorkflowWithoutRequest: jest.fn(
-      async (): Promise<WorkflowProperties | null> => createWorkflowSource({ enabled: false })
+    disableManagedWorkflowWithoutRequest: jest.fn(async (): Promise<WorkflowProperties | null> =>
+      createWorkflowSource({ enabled: false })
     ),
     logWorkflowChangesAfterWrite: jest.fn().mockResolvedValue(undefined),
     prepareWorkflowDocumentForStorage: jest.fn(

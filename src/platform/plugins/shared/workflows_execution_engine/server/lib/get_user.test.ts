@@ -22,7 +22,7 @@ const createScopedClusterClient = (authenticate: jest.Mock): IClusterClient =>
     asScoped: jest.fn().mockReturnValue({
       asCurrentUser: { security: { authenticate } },
     }),
-  } as unknown as IClusterClient);
+  }) as unknown as IClusterClient;
 
 const createSecurity = (user: unknown): SecurityServiceStart =>
   ({

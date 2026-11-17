@@ -205,7 +205,7 @@ const getIndexQuality = (
   return calculateDataQuality({
     totalDocs: docs[index.name] ?? 0,
     degradedDocs: degradedDocs[index.name] ?? 0,
-    failedDocs: index.failure_store_enabled ? failedDocs?.[index.name] ?? 0 : 0,
+    failedDocs: index.failure_store_enabled ? (failedDocs?.[index.name] ?? 0) : 0,
   });
 };
 
@@ -223,17 +223,17 @@ export const buildDestinationIndexRows = (
     return {
       name: index.name,
       isDataStream: true,
-      documents: stats?.docs ? stats.docs[index.name] ?? 0 : undefined,
+      documents: stats?.docs ? (stats.docs[index.name] ?? 0) : undefined,
       throughput:
         ingested && timeRangeSec > 0 ? (ingested[index.name] ?? 0) / timeRangeSec : undefined,
-      storageBytes: stats?.storageBytes ? stats.storageBytes[index.name] ?? 0 : undefined,
+      storageBytes: stats?.storageBytes ? (stats.storageBytes[index.name] ?? 0) : undefined,
       quality: stats ? getIndexQuality(index, stats) : undefined,
       health: index.health,
       failureStoreEnabled: index.failure_store_enabled,
       lifecycle: index.lifecycle,
       retentionMs: isIlmLifecycle(index.lifecycle)
         ? Number.POSITIVE_INFINITY
-        : lifecycleToRetentionMs(index.lifecycle) ?? 0,
+        : (lifecycleToRetentionMs(index.lifecycle) ?? 0),
     };
   });
 };

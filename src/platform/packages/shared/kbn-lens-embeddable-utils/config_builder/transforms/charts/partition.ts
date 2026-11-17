@@ -311,7 +311,7 @@ function computeSharedPartitionLayerState(config: PartitionConfig) {
   // Only the first non-collapsed group is colored, as in `fromLensStateToAPIGroups`.
   const coloredGroup = config.group_by?.find(groupIsNotCollapsed);
   const groupColouring = coloredGroup
-    ? coloredGroup.color ?? DEFAULT_CATEGORICAL_COLOR_MAPPING
+    ? (coloredGroup.color ?? DEFAULT_CATEGORICAL_COLOR_MAPPING)
     : undefined;
   const hasColorMapping = groupColouring != null && !('type' in groupColouring);
   const collapseFns = Object.fromEntries(

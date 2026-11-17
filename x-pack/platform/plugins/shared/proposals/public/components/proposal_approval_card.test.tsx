@@ -202,7 +202,7 @@ const capabilitiesFor = (canDecide: boolean) =>
       },
       http: { basePath: { serverBasePath: '', prepend: (path: string) => path } },
     },
-  } as unknown as ReturnType<typeof useKibana>);
+  }) as unknown as ReturnType<typeof useKibana>;
 
 const baseProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMetadata => ({
   id: 'proposal-1',

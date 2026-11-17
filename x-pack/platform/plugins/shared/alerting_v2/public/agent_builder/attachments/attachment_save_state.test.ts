@@ -31,7 +31,7 @@ const originResponse = (originSnapshotAt?: string) =>
   ({
     success: true,
     attachment: { origin_snapshot_at: originSnapshotAt },
-  } as unknown as UpdateOriginResponse);
+  }) as unknown as UpdateOriginResponse;
 
 describe('hasUnsavedChanges', () => {
   it('is true when the latest version was created after the last sync', () => {

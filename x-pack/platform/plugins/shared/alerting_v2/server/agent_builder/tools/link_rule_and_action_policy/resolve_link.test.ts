@@ -40,10 +40,10 @@ const validRule = (extra: Record<string, unknown> = {}): Partial<RuleAttachmentD
     id: RULE_ID,
     kind: 'alert',
     metadata: { name: 'High CPU', ...extra },
-  } as Partial<RuleAttachmentData>);
+  }) as Partial<RuleAttachmentData>;
 
 const policy = (matcher?: Record<string, unknown>): Partial<ActionPolicyAttachmentData> =>
-  ({ name: 'Notify', matcher } as Partial<ActionPolicyAttachmentData>);
+  ({ name: 'Notify', matcher }) as Partial<ActionPolicyAttachmentData>;
 
 const resolve = (
   rule: AttachmentDraft<RuleAttachmentData>,

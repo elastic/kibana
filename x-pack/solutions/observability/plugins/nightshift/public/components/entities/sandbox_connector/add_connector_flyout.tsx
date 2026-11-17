@@ -145,8 +145,8 @@ export function AddConnectorFlyout({ onClose }: { onClose: () => void }): React.
                         !canCreate
                           ? noPermissionReason
                           : enabledCheck.isEnabled
-                          ? undefined
-                          : enabledCheck.message
+                            ? undefined
+                            : enabledCheck.message
                       }
                       onCreate={() => openAdd(group.actionType)}
                       assignedIds={assignedIds}

@@ -163,7 +163,7 @@ describe('useOutputs', () => {
     it('is true when the license is below the one required', () => {
       const { result } = renderWithLicense({
         hasAtLeast: () => false,
-        getLicenseInformation: () => ({ isAvailable: true } as any),
+        getLicenseInformation: () => ({ isAvailable: true }) as any,
       });
 
       expect(result.current.canUseOutputPerIntegration).toBe(false);
@@ -183,7 +183,7 @@ describe('useOutputs', () => {
     it('is false when the license is unavailable', () => {
       const { result } = renderWithLicense({
         hasAtLeast: () => false,
-        getLicenseInformation: () => ({ isAvailable: false } as any),
+        getLicenseInformation: () => ({ isAvailable: false }) as any,
       });
 
       expect(result.current.isLicenseKnown).toBe(false);

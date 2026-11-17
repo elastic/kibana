@@ -67,8 +67,7 @@ interface DestinationViewModelBase {
 }
 
 export interface ElasticsearchDestinationViewModel
-  extends DestinationViewModelBase,
-    DestinationSignalTargets {
+  extends DestinationViewModelBase, DestinationSignalTargets {
   type: 'elasticsearch';
   mode: DestinationIndexMode;
 }
@@ -121,17 +120,16 @@ export interface ElasticsearchDestinationFormData {
 }
 
 /** Remote indices are full names: no signal prefix and no write patterns. */
-export interface RemoteElasticsearchDestinationFormData
-  extends Pick<
-    ElasticsearchDestinationFormData,
-    | 'auto'
-    | 'staticNaming'
-    | 'staticNames'
-    | 'logsIndex'
-    | 'metricsIndex'
-    | 'tracesIndex'
-    | 'docsIndex'
-  > {
+export interface RemoteElasticsearchDestinationFormData extends Pick<
+  ElasticsearchDestinationFormData,
+  | 'auto'
+  | 'staticNaming'
+  | 'staticNames'
+  | 'logsIndex'
+  | 'metricsIndex'
+  | 'tracesIndex'
+  | 'docsIndex'
+> {
   endpoint: string;
   apiKey: string;
 }

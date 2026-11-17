@@ -33,7 +33,7 @@ describe('findUnregisteredToolIds', () => {
   const makeKbnClient = (tools: Array<{ id: string }>) =>
     ({
       request: jest.fn().mockResolvedValue({ data: { results: tools } }),
-    } as unknown as KbnClient);
+    }) as unknown as KbnClient;
 
   it('returns tool ids not present in the registry', async () => {
     const kbnClient = makeKbnClient([{ id: 'virustotal_lookup' }]);
@@ -100,7 +100,7 @@ describe('findUnattachedToolIds', () => {
   const makeAgentClient = (tools: Array<{ tool_ids?: string[] }>) =>
     ({
       request: jest.fn().mockResolvedValue({ data: { configuration: { tools } } }),
-    } as unknown as KbnClient);
+    }) as unknown as KbnClient;
 
   it('flags a registered tool that is not attached to the agent', async () => {
     // The 2026-08-22 defect: both tools existed in the registry, but the
@@ -157,7 +157,7 @@ describe('assertPersonaMatrixToolsRegistered', () => {
   const makeKbnClient = () =>
     ({
       request: jest.fn().mockResolvedValue({ data: { results: [{ id: 'security.get_entity' }] } }),
-    } as unknown as KbnClient);
+    }) as unknown as KbnClient;
 
   it('only requires the tools of the examples that will run', async () => {
     await expect(
@@ -204,7 +204,7 @@ describe('assertPersonaMatrixToolsRegistered for the parity agent', () => {
           ? { data: { results: PARITY_TOOLS.map((id) => ({ id })) } }
           : { data: { configuration: { tools: [{ tool_ids: attached }] } } }
       ),
-    } as unknown as KbnClient);
+    }) as unknown as KbnClient;
 
   it('maps the seeded lookup tool ids to their parity equivalents', async () => {
     await expect(

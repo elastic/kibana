@@ -22,7 +22,10 @@ export class AclChangeError extends Error {
    * @param code Why the requested access was refused.
    * @param message What the caller has to change, safe to return to the caller.
    */
-  constructor(public readonly code: AclChangeErrorCode, message: string) {
+  constructor(
+    public readonly code: AclChangeErrorCode,
+    message: string
+  ) {
     super(message);
     this.name = 'AclChangeError';
   }

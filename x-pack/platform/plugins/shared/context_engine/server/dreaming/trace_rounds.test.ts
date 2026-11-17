@@ -101,7 +101,7 @@ describe('findTraceRounds', () => {
     });
 
     const [{ query, params }] = esClient.esql.query.mock.calls[0] as [
-      { query: string; params: unknown[] }
+      { query: string; params: unknown[] },
     ];
     expect(query.startsWith(AGENT_QUERY)).toBe(true);
     expect(query).toContain(

@@ -146,7 +146,7 @@ const FlyoutTemplateFrameView = ({
     ariaLabelledBy ?? (!ariaLabel && hasHeader ? flyoutTitleId : undefined);
   const flyoutAriaLabel = flyoutAriaLabelledBy
     ? undefined
-    : ariaLabel ?? (typeof menuTitle === 'string' ? menuTitle : undefined);
+    : (ariaLabel ?? (typeof menuTitle === 'string' ? menuTitle : undefined));
 
   return (
     <EuiFlyout

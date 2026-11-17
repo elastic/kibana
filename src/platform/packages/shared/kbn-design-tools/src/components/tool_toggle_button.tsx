@@ -40,7 +40,7 @@ export const ToolToggleButton = ({
   return (
     <>
       <EuiWindowEvent event="keydown" handler={handleKeydown} />
-      <EuiToolTip content={isActive ? activeTooltip ?? '' : inactiveTooltip}>
+      <EuiToolTip content={isActive ? (activeTooltip ?? '') : inactiveTooltip}>
         <EuiButtonIcon
           onClick={onToggle}
           onMouseDown={preventTargetFromLosingFocus}

@@ -177,9 +177,9 @@ describe('unisolateHostTool', () => {
         .mockResolvedValue(getEndpointAuthzInitialStateMock({ canUnIsolateHost: false }));
       mockEndpointAppContextService.getProductFeaturesService = jest.fn(
         () =>
-          ({ isEnabled: () => false } as unknown as ReturnType<
+          ({ isEnabled: () => false }) as unknown as ReturnType<
             EndpointAppContextService['getProductFeaturesService']
-          >)
+          >
       ) as unknown as EndpointAppContextService['getProductFeaturesService'];
 
       const mockResponseActionsClient = { release: jest.fn() };
@@ -207,7 +207,7 @@ describe('unisolateHostTool', () => {
         () =>
           ({
             isEnabled: (key: string) => key === 'endpoint_host_isolation',
-          } as unknown as ReturnType<EndpointAppContextService['getProductFeaturesService']>)
+          }) as unknown as ReturnType<EndpointAppContextService['getProductFeaturesService']>
       ) as unknown as EndpointAppContextService['getProductFeaturesService'];
 
       const mockResponseActionsClient = { release: jest.fn() };

@@ -198,10 +198,10 @@ const hasRenderedArtifact = (output: TaskOutput): boolean => {
       const attachmentId = data?.attachment_id;
       return Boolean(
         data?.success === true &&
-          (payloadKey === null || payloadKey === undefined || data?.[payloadKey]) &&
-          typeof attachmentId === 'string' &&
-          attachmentId.length > 0 &&
-          texts.some((text) => isRenderTagFor(text, attachmentId))
+        (payloadKey === null || payloadKey === undefined || data?.[payloadKey]) &&
+        typeof attachmentId === 'string' &&
+        attachmentId.length > 0 &&
+        texts.some((text) => isRenderTagFor(text, attachmentId))
       );
     });
   });

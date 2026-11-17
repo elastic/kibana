@@ -99,8 +99,8 @@ export function formatColumnTime(
     binMs < 1000
       ? 'HH:mm:ss.SSS'
       : binMs < MINUTE || (binMs < DAY && binMs % MINUTE !== 0)
-      ? 'HH:mm:ss'
-      : 'HH:mm';
+        ? 'HH:mm:ss'
+        : 'HH:mm';
   const format = binMs >= DAY ? 'MMM D' : rangeMs > DAY ? `MMM D ${time}` : time;
   return moment.tz(timestampMs, resolveTimeZone(timeZone)).format(format);
 }

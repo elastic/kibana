@@ -49,7 +49,7 @@ export const createToolCallIndexResolver = () => {
  * see {@link createToolCallIndexResolver}.
  */
 export function normalizeToolCallIndexes<
-  T extends ChatCompletionChunkEvent | ChatCompletionTokenCountEvent
+  T extends ChatCompletionChunkEvent | ChatCompletionTokenCountEvent,
 >(): OperatorFunction<T, T> {
   return (source$) =>
     // defer so each subscription (e.g. a retry) starts with fresh state

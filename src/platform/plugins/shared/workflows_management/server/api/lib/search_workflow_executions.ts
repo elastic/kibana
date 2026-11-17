@@ -208,7 +208,7 @@ function transformToWorkflowExecutionListModel(
     results.length >= size && lastHit?.sort != null ? [...lastHit.sort] : undefined;
 
   const hasNamedExecution = includeNamedExecution
-    ? readHasNamedExecution(response) ?? false
+    ? (readHasNamedExecution(response) ?? false)
     : undefined;
 
   return {

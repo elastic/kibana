@@ -82,7 +82,7 @@ export function PageLoadsChart({
   const canShowSessions = isLoading || sessions !== null;
   const shownMetric: ChartMetric =
     chosenMetric === 'sessions' && canShowSessions ? 'sessions' : 'pageLoads';
-  const points = shownMetric === 'sessions' ? sessions ?? [] : pageLoads;
+  const points = shownMetric === 'sessions' ? (sessions ?? []) : pageLoads;
   const label = METRIC_LABELS[shownMetric];
   const hasData = points.some(({ count }) => count > 0);
 

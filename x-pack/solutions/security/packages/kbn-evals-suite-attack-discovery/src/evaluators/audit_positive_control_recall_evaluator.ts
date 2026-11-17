@@ -32,7 +32,7 @@ export const createAuditPositiveControlRecallEvaluator = (
     if ('result' in resolved) return resolved.result;
 
     const { gold, discoveries } = resolved;
-    const candidates = gold.requiredGroup ? [gold.requiredGroup] : gold.requiredAnyOf ?? [];
+    const candidates = gold.requiredGroup ? [gold.requiredGroup] : (gold.requiredAnyOf ?? []);
     if (candidates.length === 0) {
       return notApplicable('Scenario declares no required group.');
     }

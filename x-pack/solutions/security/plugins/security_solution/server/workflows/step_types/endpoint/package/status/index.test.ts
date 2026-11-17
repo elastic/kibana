@@ -102,9 +102,8 @@ describe('getEndpointPackageStatusStepDefinition', () => {
   it.each([false, true])('reads metadata settings with serverless=%s', async (isServerless) => {
     const context = createReadableContext();
     const client = context.contextManager.getScopedEsClient();
-    const result = await createGetEndpointPackageStatusStepDefinition(isServerless).handler(
-      context
-    );
+    const result =
+      await createGetEndpointPackageStatusStepDefinition(isServerless).handler(context);
     const output = getEndpointPackageStatusOutputSchema.parse(result.output);
 
     expect(output.configurations?.indices).toEqual([

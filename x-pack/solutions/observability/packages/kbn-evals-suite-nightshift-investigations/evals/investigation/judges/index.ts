@@ -559,8 +559,8 @@ export const createRecallUsageEvaluators = (deps: JudgeDeps): InvestigationEvalu
           explanation: !judge.trajectory
             ? NO_TRAJECTORY_EXPLANATION
             : !judge.answer
-            ? 'Investigation produced no answer to evaluate.'
-            : 'Investigation did not open any memory file.',
+              ? 'Investigation produced no answer to evaluate.'
+              : 'Investigation did not open any memory file.',
         };
       }
       const usage = await assess(output, judge, reads);

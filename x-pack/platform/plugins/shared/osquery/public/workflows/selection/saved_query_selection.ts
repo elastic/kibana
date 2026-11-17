@@ -105,15 +105,15 @@ export const createSavedQuerySelection = (http: HttpSetup): PropertySelectionHan
               values: { name: option.label ?? value },
             })
           : lookupError
-          ? i18n.translate('xpack.osquery.workflows.selection.savedQuery.loadFailed', {
-              defaultMessage: 'Could not load saved queries: {reason}',
-              values: { reason: lookupError },
-            })
-          : i18n.translate('xpack.osquery.workflows.selection.savedQuery.notFound', {
-              defaultMessage:
-                'No saved query named "{name}" in this space. Integration saved queries need the integration assets installed in this space.',
-              values: { name: value },
-            }),
+            ? i18n.translate('xpack.osquery.workflows.selection.savedQuery.loadFailed', {
+                defaultMessage: 'Could not load saved queries: {reason}',
+                values: { reason: lookupError },
+              })
+            : i18n.translate('xpack.osquery.workflows.selection.savedQuery.notFound', {
+                defaultMessage:
+                  'No saved query named "{name}" in this space. Integration saved queries need the integration assets installed in this space.',
+                values: { name: value },
+              }),
         links: [
           {
             text: i18n.translate('xpack.osquery.workflows.selection.savedQuery.manage', {

@@ -9,7 +9,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { IBasePath } from '@kbn/core/server';
 import { getPublicKibanaUrl } from './get_kibana_url';
 
-const basePath = (publicBaseUrl?: string) => ({ publicBaseUrl } as IBasePath);
+const basePath = (publicBaseUrl?: string) => ({ publicBaseUrl }) as IBasePath;
 const cloud = { kibanaUrl: 'https://cloud.example.com' } as CloudSetup;
 
 describe('getPublicKibanaUrl', () => {

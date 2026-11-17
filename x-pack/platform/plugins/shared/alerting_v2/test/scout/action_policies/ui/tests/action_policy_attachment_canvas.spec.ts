@@ -253,9 +253,8 @@ test.describe(
       await pageObjects.agentChat.openAttachmentCanvas();
       await pageObjects.agentChat.canvasAction('Create policy').click();
       await expect(page.getByText(`Policy "${policyName}" created`, { exact: true })).toBeVisible();
-      const viewInPolicies = await pageObjects.agentChat.openCanvasOverflowAction(
-        'View in Policies'
-      );
+      const viewInPolicies =
+        await pageObjects.agentChat.openCanvasOverflowAction('View in Policies');
 
       await viewInPolicies.click();
 

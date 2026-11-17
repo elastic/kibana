@@ -150,9 +150,8 @@ apiTest.describe(
     apiTest(
       'requires the configure privilege as well as manage to change the limits',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader: manageCookie } = await samlAuth.asInteractiveUser(
-          NIGHTSHIFT_MANAGE_ROLE
-        );
+        const { cookieHeader: manageCookie } =
+          await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGE_ROLE);
 
         const update = await putInvestigationQuotas(apiClient, manageCookie, { enabled: false });
 

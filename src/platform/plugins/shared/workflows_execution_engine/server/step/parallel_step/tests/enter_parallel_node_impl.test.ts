@@ -771,7 +771,7 @@ describe('EnterParallelNodeImpl', () => {
             },
             getCurrentStepResult: () => ({ output: { branch: 0 }, error: undefined }),
             timeoutStep: jest.fn(),
-          } as unknown as StepExecutionRuntime)
+          }) as unknown as StepExecutionRuntime
       );
 
       await build().run();
@@ -807,7 +807,7 @@ describe('EnterParallelNodeImpl', () => {
             },
             getCurrentStepResult: () => ({ output: { branch: 0 }, error: undefined }),
             timeoutStep: jest.fn(),
-          } as unknown as StepExecutionRuntime)
+          }) as unknown as StepExecutionRuntime
       );
 
       await build().run();

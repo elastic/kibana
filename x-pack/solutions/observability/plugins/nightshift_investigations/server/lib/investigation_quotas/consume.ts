@@ -90,7 +90,10 @@ export const releaseInvestigationQuota = ({
         : { result: { before: ledger.count, after: ledger.count } },
   });
 
-const describeRelease = (group: InvestigationQuotaGroup, { before, after }: GroupRelease): string =>
+const describeRelease = (
+  group: InvestigationQuotaGroup,
+  { before, after }: GroupRelease
+): string =>
   before === after ? `${group} already at ${before}` : `${group} ${before} -> ${after}`;
 
 /**

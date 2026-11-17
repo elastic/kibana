@@ -10,7 +10,7 @@ import { getPendingTechniqueIds } from './pending_technique_ids';
 import type { BehaviorExecution, ValidatedBehavior } from './types';
 
 const behavior = (techniqueId: string, execution?: BehaviorExecution): ValidatedBehavior =>
-  ({ technique_id: techniqueId, execution } as ValidatedBehavior);
+  ({ technique_id: techniqueId, execution }) as ValidatedBehavior;
 
 describe('getPendingTechniqueIds', () => {
   it('lists the techniques named by a retryable gap', () => {

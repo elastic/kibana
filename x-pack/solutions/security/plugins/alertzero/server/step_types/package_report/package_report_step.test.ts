@@ -160,16 +160,16 @@ describe('package_report step wiring', () => {
     const run = async (extra: Record<string, unknown>) => {
       runPackageReportMock.mockResolvedValue({ status: 'run_incomplete', reason: 'stub' });
       const definition = getPackageReportStepDefinition({
-        getActionsService: () => ({ list: jest.fn() } as never),
+        getActionsService: () => ({ list: jest.fn() }) as never,
         getConversations: () =>
           ({
             getScopedClient: async () => ({ get: async () => ({ attachments: [] }) }),
-          } as never),
+          }) as never,
         getHuntServices: () =>
           ({
             getProposalsService: () => ({}),
             getProposalPrivileges: () => ({ canManage: async () => true }),
-          } as never),
+          }) as never,
         isContextEngineEnabled: async () => false,
       });
       await definition.handler({

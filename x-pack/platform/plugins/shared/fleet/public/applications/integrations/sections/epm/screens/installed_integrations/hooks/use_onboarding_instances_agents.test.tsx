@@ -27,7 +27,7 @@ const onboardingInstance = (
   id: string,
   overrides: Partial<CloudOnboardingDeploymentListItem> = {}
 ): CloudOnboardingDeploymentListItem =>
-  ({ id, mechanisms: ['managed_integration'], services: [], ...overrides } as any);
+  ({ id, mechanisms: ['managed_integration'], services: [], ...overrides }) as any;
 
 describe('useOnboardingInstancesAgents', () => {
   beforeEach(() => {

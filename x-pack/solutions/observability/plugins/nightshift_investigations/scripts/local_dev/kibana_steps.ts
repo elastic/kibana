@@ -329,9 +329,8 @@ export const verifySetup = async ({
   const available =
     (await poll(
       async () =>
-        (
-          await kibana<{ available: boolean }>('/internal/nightshift/investigations/availability')
-        ).available || undefined,
+        (await kibana<{ available: boolean }>('/internal/nightshift/investigations/availability'))
+          .available || undefined,
       { timeoutMs: 60_000, intervalMs: 5_000 }
     )) ?? false;
   const { connectors } = await kibana<GetSandboxConnectorsResponse>(SANDBOX_CONNECTORS_API_PATH);

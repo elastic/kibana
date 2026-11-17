@@ -91,14 +91,14 @@ const unit = ({
 
 const src = { kind: 'source', id: 'in' } as const;
 const srcB = { kind: 'source', id: 'b' } as const;
-const dest = (id: string) => ({ kind: 'destination', id } as const);
-const pipe = (id: string) => ({ kind: 'pipeline', id } as const);
+const dest = (id: string) => ({ kind: 'destination', id }) as const;
+const pipe = (id: string) => ({ kind: 'pipeline', id }) as const;
 const rule = (pipelineId: string, ruleIndex: number) =>
-  ({ kind: 'rule', rule: { pipelineId, ruleIndex } } as const);
+  ({ kind: 'rule', rule: { pipelineId, ruleIndex } }) as const;
 const pipelineProcessing = (pipelineId: string) =>
-  ({ kind: 'processing', ref: { kind: 'pipeline', pipelineId } } as const);
+  ({ kind: 'processing', ref: { kind: 'pipeline', pipelineId } }) as const;
 const routeProcessing = (pipelineId: string, routeIndex: number) =>
-  ({ kind: 'processing', ref: { kind: 'route', pipelineId, routeIndex } } as const);
+  ({ kind: 'processing', ref: { kind: 'route', pipelineId, routeIndex } }) as const;
 
 export const unitScenarios: UnitScenario[] = [
   {

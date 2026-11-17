@@ -70,7 +70,7 @@ describe('createEvaluationService', () => {
     const service = createEvaluationService({
       evaluatorRegistry,
       logger,
-      getInferenceStart: async () => ({ getClient } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient }) as unknown as InferenceServerStart,
     });
     const evaluate = ({
       evaluators,

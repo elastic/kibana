@@ -745,8 +745,8 @@ const getSelectedDatasetTypes = (
     ? context.filters.types.length
       ? context.filters.types
       : context.authorizedDatasetTypes.length > 0
-      ? context.authorizedDatasetTypes
-      : KNOWN_TYPES
+        ? context.authorizedDatasetTypes
+        : KNOWN_TYPES
     : [DEFAULT_DATASET_TYPE]) as DataStreamType[];
 
 const getDataStreamDiscoveryTypes = (

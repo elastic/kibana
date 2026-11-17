@@ -483,8 +483,8 @@ export const EditPackagePolicyForm = memo<{
       from === 'installed-integrations' && isUpgrade
         ? 'upgrade-from-installed-integrations'
         : extensionView?.useLatestPackageVersion && isUpgrade
-        ? 'upgrade-from-extension'
-        : from,
+          ? 'upgrade-from-extension'
+          : from,
     cancelUrl,
     agentPolicies,
     packageInfo,

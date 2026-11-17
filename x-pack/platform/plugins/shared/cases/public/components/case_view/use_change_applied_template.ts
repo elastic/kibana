@@ -71,7 +71,7 @@ const buildTemplateSettings = (
 ): CaseSettings => ({
   syncAlerts: settings?.syncAlerts ?? false,
   extractObservables: canStoreExtractObservablesTrue(owner)
-    ? settings?.extractObservables ?? false
+    ? (settings?.extractObservables ?? false)
     : false,
 });
 

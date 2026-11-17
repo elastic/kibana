@@ -69,7 +69,9 @@ describe('SourceFilter', () => {
       data: { sources: ['zabbix'], truncated: false },
       isLoading: false,
       isError: false,
-    } as unknown as ReturnType<typeof useFetchEpisodeConnectorSourcesModule.useFetchEpisodeConnectorSources>);
+    } as unknown as ReturnType<
+      typeof useFetchEpisodeConnectorSourcesModule.useFetchEpisodeConnectorSources
+    >);
   });
 
   const openPopover = () => user.click(screen.getByTestId('test-source-filter-button'));
@@ -198,7 +200,9 @@ describe('SourceFilter', () => {
       data: { sources: [], truncated: false },
       isLoading: false,
       isError: true,
-    } as unknown as ReturnType<typeof useFetchEpisodeConnectorSourcesModule.useFetchEpisodeConnectorSources>);
+    } as unknown as ReturnType<
+      typeof useFetchEpisodeConnectorSourcesModule.useFetchEpisodeConnectorSources
+    >);
 
     renderFilter();
     await openPopover();

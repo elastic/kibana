@@ -39,7 +39,7 @@ const selectRelevantSkillsMock = selectRelevantSkills as jest.MockedFunction<
 >;
 
 const skill = (id: string): InternalSkillDefinition =>
-  ({ id, name: id, description: `${id} description` } as unknown as InternalSkillDefinition);
+  ({ id, name: id, description: `${id} description` }) as unknown as InternalSkillDefinition;
 
 const relevant = (id: string, relevanceNote?: string): RelevantSkill => ({
   id,
@@ -56,7 +56,7 @@ const userMessage = (id: string, message: string): ProcessedTimelineEvent =>
     created_at: '2026-01-01T00:00:00.000Z',
     actor: { type: 'user', id: 'u1' },
     data: { message, attachments: [] },
-  } as unknown as ProcessedTimelineEvent);
+  }) as unknown as ProcessedTimelineEvent;
 
 const answered = (trigger: ProcessedTimelineEvent, message: string): ExecutionSummary =>
   ({
@@ -66,7 +66,7 @@ const answered = (trigger: ProcessedTimelineEvent, message: string): ExecutionSu
     outcome: 'responded',
     response: { message },
     events: [trigger],
-  } as unknown as ExecutionSummary);
+  }) as unknown as ExecutionSummary;
 
 const setup = ({
   flag = true,

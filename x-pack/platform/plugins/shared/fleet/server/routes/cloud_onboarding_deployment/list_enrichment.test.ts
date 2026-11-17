@@ -94,7 +94,7 @@ describe('enrichDeployments', () => {
     ] as any);
     jest
       .mocked(agentPolicyService.getByIds)
-      .mockImplementation(async (_soClient, ids) => ids.map((id) => ({ id } as any)));
+      .mockImplementation(async (_soClient, ids) => ids.map((id) => ({ id }) as any));
     jest.mocked(getAgentCountForAgentPolicies).mockResolvedValue({ ap1: 1, ap2: 2 });
   });
 
@@ -150,7 +150,7 @@ describe('enrichDeployments', () => {
     jest
       .mocked(agentPolicyService.getByIds)
       .mockImplementation(async (_soClient, ids) =>
-        ids.filter((id) => id !== 'other-space-policy').map((id) => ({ id } as any))
+        ids.filter((id) => id !== 'other-space-policy').map((id) => ({ id }) as any)
       );
 
     const [item] = await enrichDeployments(

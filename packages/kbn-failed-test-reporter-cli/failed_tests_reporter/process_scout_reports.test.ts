@@ -71,7 +71,7 @@ describe('processScoutReports', () => {
       suiteIssueComments: false,
       indexInEs: true,
       reportUpdate: false,
-    } as unknown as ProcessReportsParams);
+    }) as unknown as ProcessReportsParams;
 
   beforeEach(() => {
     jest.clearAllMocks();

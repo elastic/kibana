@@ -140,7 +140,7 @@ export function createEvaluateCustomContentDataset({
           })
         : first;
 
-      const steps = [...(first.steps ?? []), ...(followUp ? last.steps ?? [] : [])];
+      const steps = [...(first.steps ?? []), ...(followUp ? (last.steps ?? []) : [])];
       const stored = await readStored(last, steps);
       const storedIn = stored?.storedIn ?? 'none';
 

@@ -25,7 +25,7 @@ const isResumeNotPendingError = (error: unknown): boolean =>
 
 /** Unwraps the engine's original resume error so callers keep their error-to-status mapping. */
 const unwrapResumeError = (error: unknown): unknown =>
-  error instanceof WorkflowResumeNotAppliedError ? error.cause ?? error : error;
+  error instanceof WorkflowResumeNotAppliedError ? (error.cause ?? error) : error;
 
 interface ReleaseHitlClaimParams {
   workflowsService: Pick<WorkflowsService, 'releaseHitlStepClaim'>;

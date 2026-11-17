@@ -327,10 +327,10 @@ const sendRequest = (
   const statusCode = isNetworkError
     ? undefined
     : random() < failureRate
-    ? pick(random, failureStatusCodes.length ? failureStatusCodes : DEFAULT_FAILURE_STATUS_CODES)
-    : method === 'POST'
-    ? 201
-    : 200;
+      ? pick(random, failureStatusCodes.length ? failureStatusCodes : DEFAULT_FAILURE_STATUS_CODES)
+      : method === 'POST'
+        ? 201
+        : 200;
   const transportError = isNetworkError
     ? pick(random, TRANSPORT_ERRORS[client.platform])
     : undefined;

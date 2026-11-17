@@ -208,7 +208,7 @@ const esqlResponse = (
 ) => ({
   columns: names.map((name) => ({
     name,
-    type: nullTyped.includes(name) ? 'null' : COLUMN_TYPES[name] ?? 'keyword',
+    type: nullTyped.includes(name) ? 'null' : (COLUMN_TYPES[name] ?? 'keyword'),
   })),
   values: rows.map((row) => names.map((name) => row[name] ?? null)),
   is_partial: isPartial ?? false,

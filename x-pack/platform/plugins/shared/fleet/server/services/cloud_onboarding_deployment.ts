@@ -364,9 +364,8 @@ class CloudOnboardingDeploymentService {
         return;
       }
 
-      const { saved_objects: results } = await soClient.bulkUpdate<PackagePolicySOAttributes>(
-        updates
-      );
+      const { saved_objects: results } =
+        await soClient.bulkUpdate<PackagePolicySOAttributes>(updates);
       for (const result of results) {
         if (isSavedObjectErrorResult(result)) {
           logger.warn(

@@ -162,12 +162,12 @@ export function NightshiftOnboarding({
   const step: OnboardingStepId = !isEnabled
     ? 'enable'
     : stepOverride === 'addData' || stepOverride === 'connectSources'
-    ? stepOverride
-    : !isConnected
-    ? 'addData'
-    : latestInvestigation && stepOverride !== 'investigate'
-    ? 'automate'
-    : 'investigate';
+      ? stepOverride
+      : !isConnected
+        ? 'addData'
+        : latestInvestigation && stepOverride !== 'investigate'
+          ? 'automate'
+          : 'investigate';
 
   const isIntroStep = step === 'enable' || step === 'addData' || step === 'connectSources';
   const introBannerVisible = isIntroStep && !introBannerDismissal?.isDismissed;
@@ -344,14 +344,14 @@ export function NightshiftOnboarding({
     step === 'enable'
       ? ENABLE_SECTION_TITLE
       : step === 'addData'
-      ? ADD_DATA_TITLE
-      : step === 'connectSources'
-      ? CONNECT_SOURCES_TITLE
-      : step === 'investigate'
-      ? INVESTIGATE_SECTION_TITLE
-      : step === 'automate'
-      ? AUTOMATE_SECTION_TITLE
-      : undefined;
+        ? ADD_DATA_TITLE
+        : step === 'connectSources'
+          ? CONNECT_SOURCES_TITLE
+          : step === 'investigate'
+            ? INVESTIGATE_SECTION_TITLE
+            : step === 'automate'
+              ? AUTOMATE_SECTION_TITLE
+              : undefined;
 
   return (
     <EuiFlexGroup

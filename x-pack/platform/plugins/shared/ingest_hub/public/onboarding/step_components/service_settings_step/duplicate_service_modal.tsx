@@ -259,8 +259,8 @@ export function DuplicateServiceModal({
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];
               const defaultInputs = singleDs
-                ? dsInfo?.inputs ?? []
-                : dsInfo?.defaultEnabledInputs ?? [];
+                ? (dsInfo?.inputs ?? [])
+                : (dsInfo?.defaultEnabledInputs ?? []);
               const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
               return {
                 ...prev,

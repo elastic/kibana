@@ -42,8 +42,10 @@ export interface CloudConnectorCallbackReceivedValues {
  * the cloud connector when the stack reports back; the template fields are the ones the
  * connector stores.
  */
-export interface CloudConnectorCallbackIdentity
-  extends Pick<CloudConnectorIacState, 'iac_key' | 'iac_blueprint_id' | 'iac_blueprint_version'> {
+export interface CloudConnectorCallbackIdentity extends Pick<
+  CloudConnectorIacState,
+  'iac_key' | 'iac_blueprint_id' | 'iac_blueprint_version'
+> {
   connector_name?: string;
   account_type?: AccountType;
 }
@@ -53,7 +55,8 @@ export interface CloudConnectorCallbackIdentity
  * stack reported, and the connector made from them.
  */
 export interface CloudConnectorCallback
-  extends ProvisioningCallback,
+  extends
+    ProvisioningCallback,
     CloudConnectorCallbackIdentity,
     Partial<CloudConnectorCallbackReceivedValues> {
   /** Set when the stack's report has created the cloud connector. */

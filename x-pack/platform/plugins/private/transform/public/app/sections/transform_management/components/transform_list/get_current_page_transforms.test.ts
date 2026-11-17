@@ -20,7 +20,7 @@ describe('getCurrentPageTransforms', () => {
           ...transformListRow,
           id,
           config: { ...transformListRow.config, id },
-        } as unknown as TransformListRow)
+        }) as unknown as TransformListRow
     );
     const columns: Array<EuiTableFieldDataColumnType<TransformListRow>> = [
       {

@@ -14,7 +14,7 @@ jest.mock('../../../hooks/use_api_client');
 
 /** A status the tests tell apart by the point its summaries reached. */
 const statusOf = (marker: string) =>
-  ({ installed: true, summarizedUntil: marker } as SessionsStatus);
+  ({ installed: true, summarizedUntil: marker }) as SessionsStatus;
 
 /** A promise and the function that resolves it. */
 const deferred = <T>() => {

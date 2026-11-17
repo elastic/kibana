@@ -1041,23 +1041,22 @@ describe('digital experience ongoing sessions', () => {
 
     const generate =
       (key: string, created: number[] = []) =>
-      (timeRange: Timerange) =>
-        [
-          generateOngoingPerMinute(timeRange, 2, {
-            key,
-            maxDuration: MAX_DURATION,
-            create: ({ time, index }) => {
-              created.push(index);
-              return OFFSETS.map(
-                (offset) =>
-                  new Serializable<EdotBrowserDocument>({
-                    '@timestamp': time + offset,
-                    event_name: String(index),
-                  })
-              );
-            },
-          }),
-        ];
+      (timeRange: Timerange) => [
+        generateOngoingPerMinute(timeRange, 2, {
+          key,
+          maxDuration: MAX_DURATION,
+          create: ({ time, index }) => {
+            created.push(index);
+            return OFFSETS.map(
+              (offset) =>
+                new Serializable<EdotBrowserDocument>({
+                  '@timestamp': time + offset,
+                  event_name: String(index),
+                })
+            );
+          },
+        }),
+      ];
     const describeDocs = (docs: EdotBrowserDocument[]) =>
       docs.map((doc) => `${'event_name' in doc ? doc.event_name : ''}@${timeOf(doc)}`).sort();
 

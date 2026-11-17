@@ -29,7 +29,7 @@ const marker = (id: string, date: string) =>
     references: [],
     version: 'v1',
     attributes: { automationId: id, date, used: 1 },
-  } as never);
+  }) as never;
 
 describe('notifyInvestigationQuotaReached', () => {
   const request = {} as KibanaRequest;

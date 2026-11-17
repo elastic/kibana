@@ -184,7 +184,7 @@ describe('createLocalElasticsearchConnector', () => {
 
 describe('createLocalElasticsearchConnectorLifecycleListener', () => {
   const connectorId = 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d';
-  const paramsFor = (id: string) => ({ connectorId: id, connectorType: '.elasticsearch' } as never);
+  const paramsFor = (id: string) => ({ connectorId: id, connectorType: '.elasticsearch' }) as never;
   const deleteParams = paramsFor(connectorId);
 
   const setup = () => {

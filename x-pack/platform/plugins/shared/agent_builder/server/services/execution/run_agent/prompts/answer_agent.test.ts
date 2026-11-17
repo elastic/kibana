@@ -119,7 +119,7 @@ describe('getStructuredAnswerPrompt', () => {
           attachments: [],
           attachmentTypes: [],
           attachmentStateManager: createAttachmentStateManager([], {
-            getTypeDefinition: (type: string) => ({ id: type } as any),
+            getTypeDefinition: (type: string) => ({ id: type }) as any,
           }),
         },
         configuration: { instructions: '', capabilities: { attachmentTools, apiTools: true } },

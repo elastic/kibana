@@ -24,7 +24,7 @@ describe('mountFeatureFlagsHelper', () => {
             onClose: new Promise<void>((resolve) => {
               resolveClose = resolve;
             }),
-          } as OverlayRef)
+          }) as OverlayRef
       ),
     };
     let helper: ReturnType<typeof mountFeatureFlagsHelper> | undefined;
@@ -69,7 +69,7 @@ describe('mountFeatureFlagsHelper', () => {
             onClose: new Promise<void>((resolve) => {
               resolveClose = resolve;
             }),
-          } as OverlayRef)
+          }) as OverlayRef
       ),
     };
     let helper: ReturnType<typeof mountFeatureFlagsHelper> | undefined;

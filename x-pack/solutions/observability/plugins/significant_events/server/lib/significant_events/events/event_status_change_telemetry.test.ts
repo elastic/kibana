@@ -20,7 +20,7 @@ const event = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
     severity: 'high',
     confidence: 0.7,
     ...overrides,
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 describe('buildEventStatusChangedProps', () => {
   it('describes a lifecycle-decided transition with its fan-in', () => {

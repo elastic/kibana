@@ -159,7 +159,7 @@ describe('Transform: Transform List <TransformList />', () => {
           ...transformListRow,
           id,
           config: { ...transformListRow.config, id },
-        } as unknown as TransformListRow)
+        }) as unknown as TransformListRow
     );
 
     const TestHarness = () => {

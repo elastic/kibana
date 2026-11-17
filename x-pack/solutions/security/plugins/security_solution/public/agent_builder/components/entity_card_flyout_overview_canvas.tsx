@@ -778,10 +778,10 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
 
   useQueryInspector({
     deleteQuery,
-    inspect: hasEntityStoreRecord ? entityFromStoreResult?.inspect ?? null : inspect,
-    loading: hasEntityStoreRecord ? entityFromStoreResult?.isLoading ?? false : loading,
+    inspect: hasEntityStoreRecord ? (entityFromStoreResult?.inspect ?? null) : inspect,
+    loading: hasEntityStoreRecord ? (entityFromStoreResult?.isLoading ?? false) : loading,
     queryId: AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID,
-    refetch: hasEntityStoreRecord ? entityFromStoreResult?.refetch ?? (() => {}) : refetch,
+    refetch: hasEntityStoreRecord ? (entityFromStoreResult?.refetch ?? (() => {})) : refetch,
     setQuery,
   });
 

@@ -1257,8 +1257,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const pkgInfo = packageInfos.get(
         `${newSo.attributes.package?.name}-${newSo.attributes.package?.version}`
       )!;
-      const assetsMap = packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)
-        ?.assetsMap!;
+      const assetsMap = packageInfosandAssetsMap.get(
+        `${pkgInfo.name}-${pkgInfo.version}`
+      )?.assetsMap!;
       agentVersionConditionsUnchanged &&= addsNoAgentVersionConditions(pkgInfo, assetsMap);
       await this.compilePackagePolicyForVersions(
         soClient,

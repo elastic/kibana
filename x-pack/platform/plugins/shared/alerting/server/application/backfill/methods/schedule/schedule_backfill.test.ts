@@ -653,7 +653,7 @@ describe('scheduleBackfill()', () => {
             ],
           },
           references: [{ name: 'action_0', type: 'action', id: 'connector-1' }],
-        } as typeof existingDecryptedRule1);
+        }) as typeof existingDecryptedRule1;
 
       const ruleWithActions = createRuleWithAction({
         frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },

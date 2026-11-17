@@ -50,9 +50,8 @@ export const registerSiemWorkflowMigrationsGetRoute = (
               ctx.securitySolution.siemMigrations.getWorkflowsClient();
             await siemMigrationAuditLogger.logGetMigration({ migrationId });
 
-            const storedMigration = await workflowsMigrationsClient.data.migrations.get(
-              migrationId
-            );
+            const storedMigration =
+              await workflowsMigrationsClient.data.migrations.get(migrationId);
 
             if (!storedMigration) {
               return res.notFound({

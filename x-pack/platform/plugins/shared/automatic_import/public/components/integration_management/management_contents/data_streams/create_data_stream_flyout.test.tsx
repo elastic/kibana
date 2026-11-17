@@ -27,8 +27,8 @@ import {
 const mockAddWarning = jest.fn();
 const mockAddError = jest.fn();
 const mockUploadMutateAsync = jest.fn();
-const mockFetchTakenPackageNames = jest.fn(
-  (): Promise<Set<string>> => Promise.resolve(new Set<string>())
+const mockFetchTakenPackageNames = jest.fn((): Promise<Set<string>> =>
+  Promise.resolve(new Set<string>())
 );
 
 jest.mock('../../../../common', () => ({

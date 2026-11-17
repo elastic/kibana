@@ -224,14 +224,12 @@ export const DIGITAL_EXPERIENCE_EDGE_CASES: Readonly<Record<string, DigitalExper
       { path: S3_INVOICE_URL, initiatorType: 'other', sizeBytes: 86_000, probability: 0.2 },
       { path: AD_CLICK_URL, initiatorType: 'other', sizeBytes: 300, probability: 0.15 },
       // One image in every size of its `srcset`
-      ...[320, 640, 768, 1024, 1366, 1920, 2560, 3840].map(
-        (width): EdotBrowserResource => ({
-          path: `${STORE_CDN_ORIGIN}/store/catalog/footwear/trail-running/hero/autumn-2026-collection/trail-running-shoes-hero-2400x1600-v3.webp?w=${width}&q=75`,
-          initiatorType: 'img',
-          sizeBytes: width * 90,
-          probability: 0.12,
-        })
-      ),
+      ...[320, 640, 768, 1024, 1366, 1920, 2560, 3840].map((width): EdotBrowserResource => ({
+        path: `${STORE_CDN_ORIGIN}/store/catalog/footwear/trail-running/hero/autumn-2026-collection/trail-running-shoes-hero-2400x1600-v3.webp?w=${width}&q=75`,
+        initiatorType: 'img',
+        sizeBytes: width * 90,
+        probability: 0.12,
+      })),
     ],
     pages: [
       // Pages of a list, each with its own URL

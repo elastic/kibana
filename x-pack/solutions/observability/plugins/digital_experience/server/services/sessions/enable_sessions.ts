@@ -22,7 +22,10 @@ export type SessionsEnableStep = (typeof SESSIONS_ENABLE_STEPS)[number];
  * own: enabling again repeats them and carries on from the failed one.
  */
 export class SessionsEnableError extends Error {
-  constructor(public readonly step: SessionsEnableStep, cause: unknown) {
+  constructor(
+    public readonly step: SessionsEnableStep,
+    cause: unknown
+  ) {
     super(`Enabling sessions failed at the ${step} step: ${describeError(cause)}`, { cause });
     this.name = 'SessionsEnableError';
   }

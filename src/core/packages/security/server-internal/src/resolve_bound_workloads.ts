@@ -108,7 +108,10 @@ const toResolvedWorkload = (
 
 /** Why Core stopped waiting for a resolver. */
 class WorkloadResolutionStoppedError extends Error {
-  constructor(public readonly reason: 'timeout' | 'aborted', message: string) {
+  constructor(
+    public readonly reason: 'timeout' | 'aborted',
+    message: string
+  ) {
     super(message);
   }
 }

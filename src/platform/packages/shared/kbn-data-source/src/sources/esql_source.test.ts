@@ -846,7 +846,7 @@ describe('EsqlSource', () => {
                 ],
               }
         ),
-      } as unknown as HttpStart);
+      }) as unknown as HttpStart;
 
     const bodyPostedTo = (http: HttpStart, route: string) =>
       JSON.parse(

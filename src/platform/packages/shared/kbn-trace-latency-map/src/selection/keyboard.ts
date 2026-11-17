@@ -49,7 +49,7 @@ export function reduceKeyboard(
       yi: clamp(state.cursor.yi + arrow.yi, rows - 1),
     };
     return {
-      state: { cursor, anchor: shiftKey ? state.anchor ?? state.cursor : undefined },
+      state: { cursor, anchor: shiftKey ? (state.anchor ?? state.cursor) : undefined },
       handled: true,
     };
   }

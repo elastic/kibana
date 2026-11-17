@@ -164,8 +164,8 @@ export const sliceOrcaDataset = (
     left.metadata.case_id < right.metadata.case_id
       ? -1
       : left.metadata.case_id > right.metadata.case_id
-      ? 1
-      : 0
+        ? 1
+        : 0
   );
   const start = Math.floor(((index - 1) * ordered.length) / count);
   const end = Math.floor((index * ordered.length) / count);

@@ -9,7 +9,10 @@ import type { GraphFetchErrorCategory } from '../components/graph_telemetry';
 
 /** A failed graph data request. `statusCode` is missing when the server never responded. */
 export class GraphFetchError extends Error {
-  constructor(message: string, public readonly statusCode?: number) {
+  constructor(
+    message: string,
+    public readonly statusCode?: number
+  ) {
     super(message);
     this.name = 'GraphFetchError';
   }

@@ -15,7 +15,10 @@ import type {
 
 /** A failure an online evals step knows the cause of. */
 export class OnlineEvalsStepError extends Error {
-  constructor(public readonly code: OnlineEvalsStepFailureCode, message: string) {
+  constructor(
+    public readonly code: OnlineEvalsStepFailureCode,
+    message: string
+  ) {
     super(message);
     this.name = 'OnlineEvalsStepError';
   }

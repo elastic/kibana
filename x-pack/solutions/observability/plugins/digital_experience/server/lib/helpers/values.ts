@@ -23,4 +23,4 @@ export const stringsOf = (value: unknown): string[] =>
 
 /** The total of a search response, whichever shape `track_total_hits` gave it. */
 export const totalHitsOf = (total: estypes.SearchTotalHits | number | undefined): number =>
-  typeof total === 'number' ? total : total?.value ?? 0;
+  typeof total === 'number' ? total : (total?.value ?? 0);

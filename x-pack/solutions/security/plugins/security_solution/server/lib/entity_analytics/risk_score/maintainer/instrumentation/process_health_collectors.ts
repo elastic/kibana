@@ -115,7 +115,7 @@ const summarizeGcActivity = (
 });
 
 const gcKindName = ({ detail }: PerformanceEntry & { detail?: NodeGCPerformanceDetail }): string =>
-  detail?.kind === undefined ? 'other' : GC_KIND_NAMES[detail.kind] ?? 'other';
+  detail?.kind === undefined ? 'other' : (GC_KIND_NAMES[detail.kind] ?? 'other');
 
 const roundPause = (pauseMs: number): number => Number(pauseMs.toFixed(1));
 const MEMORY_SAMPLE_INTERVAL_MS = 1000;

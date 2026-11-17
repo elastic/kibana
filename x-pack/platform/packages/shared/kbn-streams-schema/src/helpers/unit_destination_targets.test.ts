@@ -24,7 +24,7 @@ const elasticsearch = (
     type: 'elasticsearch',
     supported_telemetry: telemetry,
     config,
-  } as UnitDestination);
+  }) as UnitDestination;
 
 describe('getUnitDestinationWritePatterns', () => {
   it('returns nothing for non-elasticsearch destinations', () => {

@@ -88,13 +88,13 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
   const backHref = backToDetections
     ? '/detections/events'
     : backToAutomations
-    ? '/automations'
-    : '/';
+      ? '/automations'
+      : '/';
   const backLabel = backToDetections
     ? detectionsLabel
     : backToAutomations
-    ? automationsLabel
-    : nightshiftLabel;
+      ? automationsLabel
+      : nightshiftLabel;
 
   return (
     <>

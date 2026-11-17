@@ -183,7 +183,7 @@ describe('checkSandboxAccess', () => {
         checkPrivilegesDynamicallyWithRequest: () => async () => ({ hasAllRequested }),
         actions: { api: { get: (operation: string) => `api:${operation}` } },
       },
-    } as unknown as SecurityPluginStart);
+    }) as unknown as SecurityPluginStart;
   const { featureFlags } = coreMock.createStart();
   featureFlags.getBooleanValue$.mockReturnValue(of(true));
 

@@ -73,8 +73,8 @@ export const resolveDataQueries = async ({
   // Fail before any generation is paid for when the queries the caller supplied are too long already.
   const fixedQueries = Array.from({ length: total }, (_, position) =>
     dataQueries[position]?.esql?.trim()
-      ? dataQueries[position].esql ?? ''
-      : existingQueries[position] ?? ''
+      ? (dataQueries[position].esql ?? '')
+      : (existingQueries[position] ?? '')
   );
   if (!fitsEsqlQueriesTotalLength(fixedQueries)) throw new Error(ESQL_QUERIES_TOTAL_LENGTH_MESSAGE);
 

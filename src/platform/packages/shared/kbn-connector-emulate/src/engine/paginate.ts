@@ -394,8 +394,8 @@ const pagingParameters = (pagination: PaginationDescriptor): string[] => {
     'cursorParam' in request
       ? request.cursorParam
       : 'offsetParam' in request
-      ? request.offsetParam
-      : request.pageParam;
+        ? request.offsetParam
+        : request.pageParam;
   return request.sizeParam === undefined ? [selector] : [selector, request.sizeParam];
 };
 

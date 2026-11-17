@@ -25,7 +25,7 @@ jest.mock('@kbn/sse-utils-client', () => ({
 }));
 
 const chunk = (text: string): ChatEvent =>
-  ({ type: ChatEventType.messageChunk, data: { message_id: 'm1', text_chunk: text } } as ChatEvent);
+  ({ type: ChatEventType.messageChunk, data: { message_id: 'm1', text_chunk: text } }) as ChatEvent;
 const conversationUpdated = { type: ChatEventType.conversationUpdated, data: {} } as ChatEvent;
 
 /** A stand-in for core's `HttpFetchError` without a status: the connection was cut. */

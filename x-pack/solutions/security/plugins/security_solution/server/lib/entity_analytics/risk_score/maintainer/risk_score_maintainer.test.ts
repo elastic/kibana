@@ -100,7 +100,7 @@ describe('createRiskScoreMaintainer run', () => {
           init: jest.fn(),
           getRiskInputsIndex: jest.fn().mockResolvedValue({ index: '.alerts-default' }),
           getWriter: jest.fn().mockResolvedValue({}),
-        } as unknown as RiskScoreDataClient)
+        }) as unknown as RiskScoreDataClient
     );
     jest.mocked(getConfiguration).mockResolvedValue({
       identifierType: 'host',

@@ -184,7 +184,7 @@ export const createDreamingScheduleService = ({
   };
 
   const automationFor = (workflow: DreamingWorkflow, aiIndexId: string, spaceId: string) =>
-    ({ type: 'workflow', value: workflow.workflowIdFor(aiIndexId, spaceId) } as const);
+    ({ type: 'workflow', value: workflow.workflowIdFor(aiIndexId, spaceId) }) as const;
 
   return {
     async reconcile({ aiIndex, spaceId, request }) {

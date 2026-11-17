@@ -224,7 +224,7 @@ const buildTroubleshootingDiagnosis = (input: FinalizeInput): TroubleshootingDia
     caveats.add('target_ambiguous');
   }
 
-  const target = diagnosticsExpected ? r?.hosts[0] ?? null : null;
+  const target = diagnosticsExpected ? (r?.hosts[0] ?? null) : null;
   const diagnosticsParts = diagnosticsPartValues.filter(
     (part) => part !== 'policy_response' || target?.endpoint_id !== undefined
   );
@@ -320,8 +320,8 @@ const buildTroubleshootingDiagnosis = (input: FinalizeInput): TroubleshootingDia
   const targetResult: EndpointConfigurationTroubleshootingTargetResult = !resolveExpected
     ? 'no_target'
     : resolveAbsent
-    ? 'unavailable'
-    : toTargetResult(r?.status ?? 'unavailable');
+      ? 'unavailable'
+      : toTargetResult(r?.status ?? 'unavailable');
 
   return {
     diagnosis,

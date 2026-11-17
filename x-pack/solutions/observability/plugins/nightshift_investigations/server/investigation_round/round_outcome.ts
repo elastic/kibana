@@ -100,8 +100,8 @@ const changeAt = (
       ? 'changed'
       : 'found'
     : dropped
-    ? 'withdrawn'
-    : 'unchanged';
+      ? 'withdrawn'
+      : 'unchanged';
   return { outcome, hasConfirmedCause };
 };
 

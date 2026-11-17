@@ -177,18 +177,18 @@ export const RecommendedSourcesTable = ({
   const submitLabel = isSourcesPage
     ? ADD_SELECTED_SOURCE_LABEL
     : isAddingSources
-    ? ADD_SELECTED_SOURCES_LABEL
-    : ENABLE_DETECTION_LABEL;
+      ? ADD_SELECTED_SOURCES_LABEL
+      : ENABLE_DETECTION_LABEL;
   const introduction = isSourcesPage
     ? SOURCES_PAGE_INTRODUCTION
     : isAddingSources
-    ? SOURCES_INTRODUCTION
-    : INTRODUCTION;
+      ? SOURCES_INTRODUCTION
+      : INTRODUCTION;
   const tableCaption = isSourcesPage
     ? SOURCES_PAGE_TABLE_CAPTION
     : isAddingSources
-    ? SOURCES_TABLE_CAPTION
-    : TABLE_CAPTION;
+      ? SOURCES_TABLE_CAPTION
+      : TABLE_CAPTION;
 
   const columns: Array<EuiBasicTableColumn<SourceDraft>> = [
     {

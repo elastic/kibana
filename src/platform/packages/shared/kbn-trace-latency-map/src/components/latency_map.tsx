@@ -229,7 +229,7 @@ export function LatencyMap({
         minDuration: rowToDuration(cell.yi, stats!),
         maxDuration: rowToDuration(cell.yi + 1, stats!),
         // With "failed only" the map shows the failed spans alone, and so does the cell.
-        spans: failedOnly ? failed : counts?.spans ?? 0,
+        spans: failedOnly ? failed : (counts?.spans ?? 0),
         failed,
       };
     },

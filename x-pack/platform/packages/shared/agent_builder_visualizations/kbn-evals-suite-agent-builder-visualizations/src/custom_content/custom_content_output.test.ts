@@ -41,7 +41,7 @@ const conversationWith = (
         ...overrides,
       },
     ],
-  } as unknown as Conversation);
+  }) as unknown as Conversation;
 
 describe('toStoredCustomContent', () => {
   it('reads the query, template and height of a custom content panel', () => {
@@ -139,7 +139,7 @@ const dashboardConversation = (versions: Array<Record<string, unknown>>): Conver
         versions: versions.map((data, index) => ({ version: index + 1, data })),
       },
     ],
-  } as unknown as Conversation);
+  }) as unknown as Conversation;
 
 describe('getLastWrittenDashboardId', () => {
   const step = (toolId: string, attachmentId?: string) => ({

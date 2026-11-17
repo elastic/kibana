@@ -59,9 +59,8 @@ const createPersistedProviderMock = (
       configuration: { ...current.configuration, ...update.configuration },
     };
   }),
-  setServiceAccount: jest.fn(
-    async (agentId: string, _serviceAccountId: string | null) =>
-      agents.find((agent) => agent.id === agentId)!
+  setServiceAccount: jest.fn(async (agentId: string, _serviceAccountId: string | null) =>
+    agents.find((agent) => agent.id === agentId)!
   ),
   delete: jest.fn(),
   getAccessControl: jest.fn(),

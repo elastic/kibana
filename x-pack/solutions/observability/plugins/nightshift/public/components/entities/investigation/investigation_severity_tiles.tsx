@@ -165,8 +165,8 @@ export const InvestigationSeverityTiles = ({
         const tileState: SeverityTileState = !isPresent
           ? 'muted'
           : isScrollable
-          ? 'interactive'
-          : 'present';
+            ? 'interactive'
+            : 'present';
         const isMuted = tileState === 'muted';
         const stateStyles = styles.byState[tileState];
         const icon = SEVERITY_TILE_ICON[severity];

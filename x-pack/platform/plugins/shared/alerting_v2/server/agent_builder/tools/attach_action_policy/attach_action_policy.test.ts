@@ -44,7 +44,7 @@ describe('attachActionPolicyTool', () => {
       logger: loggerService,
       getActionPolicyClient: () => ({ getActionPolicy }),
       getPrivilegeChecker: () =>
-        ({ canRead, canWrite: jest.fn().mockResolvedValue(true) } as unknown as PrivilegeChecker),
+        ({ canRead, canWrite: jest.fn().mockResolvedValue(true) }) as unknown as PrivilegeChecker,
     });
   };
 

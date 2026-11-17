@@ -161,12 +161,12 @@ const DreamingTemplateSetup = ({ aiIndexId }: { aiIndexId: string }) => {
       isCustom
         ? EMPTY_DRAFT
         : template
-        ? draftOf(template.dreaming, { entitiesEnabled: false })
-        : undefined,
+          ? draftOf(template.dreaming, { entitiesEnabled: false })
+          : undefined,
     [isCustom, template]
   );
   const draft = edited !== undefined && edited.id === selectedId ? edited.draft : proposed;
-  const summary = editedSummary ?? (isCustom ? '' : template?.summary ?? '');
+  const summary = editedSummary ?? (isCustom ? '' : (template?.summary ?? ''));
   const selected = templates.find(({ id }) => id === selectedId);
 
   const select = (id: string) => {

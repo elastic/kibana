@@ -263,12 +263,12 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
 | EVAL is_page_view = event IN (${texts(PAGE_VIEW_EVENTS)}) OR span IN (${texts(PAGE_VIEW_EVENTS)}),
        is_click = event IN (${texts(CLICK_EVENTS)}) OR span IN (${texts(CLICK_EVENTS)}),
        is_http_request = COALESCE(${KIND} == ${escapeStringValue(
-    SPAN_KIND_CLIENT
-  )}, false) AND ${HTTP_REQUEST_METHOD} IS NOT NULL,
+         SPAN_KIND_CLIENT
+       )}, false) AND ${HTTP_REQUEST_METHOD} IS NOT NULL,
        no_response = COALESCE(${STATUS_CODE} == ${escapeStringValue(SPAN_STATUS_ERROR)}, false),
        vital = CASE((event == ${escapeStringValue(EVENT_WEB_VITAL)} OR span == ${escapeStringValue(
-    EVENT_WEB_VITAL
-  )}) AND ${SOURCE_WEB_VITAL_VALUE_FIELD} IS NOT NULL, TO_LOWER(${SOURCE_WEB_VITAL_NAME_FIELD}), null),
+         EVENT_WEB_VITAL
+       )}) AND ${SOURCE_WEB_VITAL_VALUE_FIELD} IS NOT NULL, TO_LOWER(${SOURCE_WEB_VITAL_NAME_FIELD}), null),
        vital_value = ${SOURCE_WEB_VITAL_VALUE_FIELD},
        ${SEEN_EVALS.join(',\n       ')}
 | EVAL page_url = CASE(is_page_view, ${SOURCE_URL_FIELD}, null)

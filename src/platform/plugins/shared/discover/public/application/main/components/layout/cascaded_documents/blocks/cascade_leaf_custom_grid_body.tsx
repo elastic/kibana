@@ -34,11 +34,10 @@ import {
 
 export { cascadeToolbarPortalNodeTestSubjAttribute };
 
-export interface CascadeGridBodyContextValue
-  extends Pick<
-    Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
-    'virtualizerController' | 'stickyHeaderExtensionPoint'
-  > {
+export interface CascadeGridBodyContextValue extends Pick<
+  Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
+  'virtualizerController' | 'stickyHeaderExtensionPoint'
+> {
   data: DataTableRecord[];
   isFullScreenMode?: boolean;
   cellId: string;
@@ -209,7 +208,7 @@ export function CustomCascadeGridBody({
           : 0;
       // Inline headers retain their full height in flow, independently of their current scroll position.
       const stickyHeaderHeight = stickyEnabled
-        ? inlineHeader?.getBoundingClientRect().height ?? 0
+        ? (inlineHeader?.getBoundingClientRect().height ?? 0)
         : 0;
 
       setScrollGeometry((previous) =>
@@ -293,7 +292,7 @@ export function CustomCascadeGridBody({
     }
   }, [Cell, hasRenderedRows, reportRowHeight]);
 
-  const scrollMargin = isDetached ? 0 : virtualizer.measurementsCache[0]?.start ?? 0;
+  const scrollMargin = isDetached ? 0 : (virtualizer.measurementsCache[0]?.start ?? 0);
   const listOffset = items.length > 0 ? items[0].start - scrollMargin : 0;
 
   const headerViewport = (

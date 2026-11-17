@@ -30,7 +30,7 @@ const job = (stepKey: string, overrides: Partial<Job> = {}): Job =>
     retried: false,
     soft_failed: false,
     ...overrides,
-  } as Job);
+  }) as Job;
 
 const previousBuild = (overrides: Partial<Build> = {}): Build =>
   ({
@@ -39,7 +39,7 @@ const previousBuild = (overrides: Partial<Build> = {}): Build =>
     meta_data: { ES_SNAPSHOT_MANIFEST_DEFAULT: MANIFEST },
     jobs: [job('jest'), job('jest-integration'), job('ftr_configs_0'), job('scout_test_lane_1')],
     ...overrides,
-  } as Build);
+  }) as Build;
 
 const createDeps = (overrides: Partial<OnMergeSelectionDeps> = {}): OnMergeSelectionDeps => ({
   commit: COMMIT,

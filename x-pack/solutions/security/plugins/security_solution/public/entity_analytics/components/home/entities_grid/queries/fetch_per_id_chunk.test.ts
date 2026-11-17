@@ -12,8 +12,11 @@ const ids = (count: number): string[] => Array.from({ length: count }, (_, i) =>
 
 const buildQuery =
   (fixedLength = 0) =>
-  (chunk: readonly string[]): string[] =>
-    ['FROM index', `| WHERE ${'x'.repeat(fixedLength)}`, `| WHERE id IN (${chunk.join(', ')})`];
+  (chunk: readonly string[]): string[] => [
+    'FROM index',
+    `| WHERE ${'x'.repeat(fixedLength)}`,
+    `| WHERE id IN (${chunk.join(', ')})`,
+  ];
 
 /** The ids each query was given. */
 const recordChunks = () => {

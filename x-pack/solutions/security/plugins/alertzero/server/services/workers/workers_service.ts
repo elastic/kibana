@@ -677,15 +677,15 @@ export class WorkersService {
       state: settingsUnavailable
         ? 'unavailable'
         : degradedReason
-        ? 'degraded'
-        : enabled
-        ? 'ok'
-        : 'paused',
+          ? 'degraded'
+          : enabled
+            ? 'ok'
+            : 'paused',
       ...(settingsUnavailable
         ? { stateReason: 'Worker settings could not be read from durable storage' }
         : degradedReason
-        ? { stateReason: degradedReason }
-        : {}),
+          ? { stateReason: degradedReason }
+          : {}),
       settings,
       settingsRevision,
       // `installed` is any document at this id, including a user workflow that is not ours.

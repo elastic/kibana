@@ -97,7 +97,7 @@ export interface ApplyContext {
 }
 
 const referenceKey = ({ uri, relation, description }: DreamedKiReference): string =>
-  `${relation ?? ''}\u0000${relation === 'relates_to' ? description ?? '' : ''}\u0000${uri}`;
+  `${relation ?? ''}\u0000${relation === 'relates_to' ? (description ?? '') : ''}\u0000${uri}`;
 
 /** Adds references without duplicates, dropping the oldest `derived_from` ones over the cap. */
 export const addReferences = (

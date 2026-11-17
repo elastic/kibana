@@ -43,7 +43,10 @@ export class WorkflowMigrationsDataService extends SiemMigrationsBaseDataService
 
   private readonly adapters: WorkflowMigrationAdapters;
 
-  constructor(private logger: Logger, protected kibanaVersion: string) {
+  constructor(
+    private logger: Logger,
+    protected kibanaVersion: string
+  ) {
     super(kibanaVersion);
     this.adapters = {
       migrations: this.createWorkflowIndexPatternAdapter({

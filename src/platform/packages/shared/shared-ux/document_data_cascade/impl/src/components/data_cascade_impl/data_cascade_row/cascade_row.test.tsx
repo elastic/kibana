@@ -69,7 +69,7 @@ const createRowProps = (): RowProps => {
             isDetached: jest.fn(() => false),
             clearPersistedAnchor: jest.fn(),
           },
-        } as unknown as ReturnType<RowProps['getVirtualizer']>)
+        }) as unknown as ReturnType<RowProps['getVirtualizer']>
     ),
     onCascadeGroupNodeExpanded: jest.fn(),
     rowHeaderTitleSlot: () => <div>Friday</div>,

@@ -17,7 +17,7 @@ import {
 } from './transform_search_bar_filters';
 
 const createFieldClause = (field: string, value: string): Clause =>
-  ({ type: 'field', field, value, match: 'must' } as Clause);
+  ({ type: 'field', field, value, match: 'must' }) as Clause;
 
 describe('transform search bar filters', () => {
   const batchTransform = transformListRow as unknown as TransformListRow;

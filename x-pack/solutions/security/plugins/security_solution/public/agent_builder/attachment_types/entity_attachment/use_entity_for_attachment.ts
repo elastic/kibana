@@ -186,7 +186,7 @@ const shapeRecord = (
   const ownCriticality =
     (assetField?.criticality as CriticalityLevelWithUnassigned | null | undefined) ?? undefined;
   const assetCriticality = group
-    ? (group.criticality as CriticalityLevelWithUnassigned | undefined) ?? ownCriticality
+    ? ((group.criticality as CriticalityLevelWithUnassigned | undefined) ?? ownCriticality)
     : ownCriticality;
 
   const riskStats = entityField?.risk
@@ -202,9 +202,11 @@ const shapeRecord = (
     displayName: entityField?.name ?? identifier.identifier,
     entityId: entityField?.id,
     isEntityInStore: Boolean(record),
-    firstSeen: group ? group.firstSeen ?? null : entityField?.lifecycle?.first_seen ?? null,
-    lastSeen: group ? group.lastActivity ?? null : entityField?.lifecycle?.last_activity ?? null,
-    timestamp: group ? group.lastSeen ?? null : record?.['@timestamp'] ?? null,
+    firstSeen: group ? (group.firstSeen ?? null) : (entityField?.lifecycle?.first_seen ?? null),
+    lastSeen: group
+      ? (group.lastActivity ?? null)
+      : (entityField?.lifecycle?.last_activity ?? null),
+    timestamp: group ? (group.lastSeen ?? null) : (record?.['@timestamp'] ?? null),
     riskScore,
     riskLevel,
     riskStats,

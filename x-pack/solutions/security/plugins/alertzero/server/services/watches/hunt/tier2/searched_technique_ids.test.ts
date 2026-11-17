@@ -10,7 +10,7 @@ import { MAX_HUNT_TECHNIQUE_IDS } from '../common/hunt_technique_limit';
 import { getSearchedTechniqueIds } from './searched_technique_ids';
 
 const behavior = (techniqueId: string, execution?: BehaviorExecution): ValidatedBehavior =>
-  ({ technique_id: techniqueId, execution } as ValidatedBehavior);
+  ({ technique_id: techniqueId, execution }) as ValidatedBehavior;
 
 const executed: BehaviorExecution = { executed: true, row_count: 0, hit: false };
 

@@ -231,16 +231,16 @@ export const Service: FC<ServiceProps> = memo(function Service({
   useQueryInspector({
     deleteQuery,
     inspect: useEntityStoreInspectForRisk
-      ? entityFromStoreResult?.inspect ?? null
+      ? (entityFromStoreResult?.inspect ?? null)
       : inspectRiskScore,
-    loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
+    loading: useEntityStoreInspectForRisk ? (entityFromStoreResult?.isLoading ?? false) : loading,
     queryId: SERVICE_PANEL_RISK_SCORE_QUERY_ID,
-    refetch: useEntityStoreInspectForRisk ? entityFromStoreResult?.refetch ?? noop : refetch,
+    refetch: useEntityStoreInspectForRisk ? (entityFromStoreResult?.refetch ?? noop) : refetch,
     setQuery,
   });
 
   const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
-    ? observedService.entityRecord ?? undefined
+    ? (observedService.entityRecord ?? undefined)
     : undefined;
 
   const riskScoreStateFromStore =
@@ -459,7 +459,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
             entityRecord={
-              entityStoreV2Enabled ? observedService.entityRecord ?? undefined : undefined
+              entityStoreV2Enabled ? (observedService.entityRecord ?? undefined) : undefined
             }
             aliasRecords={aliasRecords}
             noEntityInStore={noEntityInStore}

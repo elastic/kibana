@@ -55,7 +55,7 @@ const licenseServiceWith = (
     isPlatinumPlus: () => false,
     isEnterprise: () => false,
     getLicenseInformation: () => license,
-  } as unknown as Parameters<typeof licenseLimitOf>[0]);
+  }) as unknown as Parameters<typeof licenseLimitOf>[0];
 
 describe('response action error helpers', () => {
   it('responseActionErrorResult returns a typed error envelope', () => {

@@ -184,7 +184,7 @@ export interface EntityFromStoreResult<T> {
 }
 
 export function useEntityFromStore<
-  T extends HostItem | UserItem | ServiceItem = HostItem | UserItem
+  T extends HostItem | UserItem | ServiceItem = HostItem | UserItem,
 >(params: UseEntityFromStoreParams): EntityFromStoreResult<T> {
   const { entityId, mode = 'single', identityFields, entityType, skip, executionContext } = params;
   const euidApi = useEntityStoreEuidApi();

@@ -26,7 +26,7 @@ const makeParams = <T>(params: unknown, kiClient: Record<string, jest.Mock>) =>
       sourcesClient: { get: jest.fn() },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
     }),
-  } as unknown as T);
+  }) as unknown as T;
 
 describe('bulkFeaturesAcrossStreamsRoute', () => {
   it('counts retryable source conflicts apart from other failures and keeps the successful writes', async () => {

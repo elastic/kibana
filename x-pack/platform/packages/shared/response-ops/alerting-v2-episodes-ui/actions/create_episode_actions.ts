@@ -75,7 +75,7 @@ export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] 
     additionalDataSource?.actionExtensions?.find((e) => e.actionId === id);
   const actionDeps = { http: deps.http, notifications: deps.notifications };
   const canWriteEpisode = (episode: AlertEpisode): boolean =>
-    isSourceEpisode(episode) ? canWriteSourceEpisode?.(episode) ?? false : canWriteNativeEpisodes;
+    isSourceEpisode(episode) ? (canWriteSourceEpisode?.(episode) ?? false) : canWriteNativeEpisodes;
 
   return [
     createAckAction(actionDeps, ext('ALERTING_V2_ACK_EPISODE')),

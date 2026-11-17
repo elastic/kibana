@@ -57,8 +57,8 @@ export const policyScopeFromTags = (tags: readonly string[]): PolicyScope => {
   const kind = isArtifactGlobal(artifact)
     ? 'all'
     : policyIds.length >= 1
-    ? 'policies'
-    : 'unassigned';
+      ? 'policies'
+      : 'unassigned';
 
   return {
     kind,

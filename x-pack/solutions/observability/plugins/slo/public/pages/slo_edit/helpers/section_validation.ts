@@ -42,7 +42,7 @@ const isCustomMetricComplete = (
 const areCustomMetricsComplete = (getValues: GetValues, side: 'good' | 'total'): boolean => {
   const data = getValues(`indicator.params.${side}`);
   return (
-    isObject(data) && ('metrics' in data ? data.metrics ?? [] : []).every(isCustomMetricComplete)
+    isObject(data) && ('metrics' in data ? (data.metrics ?? []) : []).every(isCustomMetricComplete)
   );
 };
 

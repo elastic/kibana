@@ -1356,17 +1356,17 @@ export const huntBehavior = async (
         ? 'Every extracted technique was already searched by an earlier run on this report, so ' +
           'there was nothing new to hunt.'
         : validated.length === 0 &&
-          leftPending.length > 0 &&
-          incomplete.length === leftPending.length
-        ? 'Nothing new was extracted to hunt, and the techniques an earlier run left unsearched ' +
-          `were not returned either, so they were not searched and the report is settled.${partialSuffix}`
-        : validated.length === 0
-        ? 'No extracted candidate survived validation: each was either absent from the ' +
-          'canonical ATT&CK catalog or offered a quote the report does not contain. ' +
-          'Consider lowering the LLM threshold or falling back to IOC matching for this ' +
-          `report.${partialSuffix}`
-        : hasHit
-          ? `Behaviors proposed; at least one grounded query hit a required index.${partialSuffix}`
-          : `Behaviors proposed for Investigation staging.${partialSuffix}`,
+            leftPending.length > 0 &&
+            incomplete.length === leftPending.length
+          ? 'Nothing new was extracted to hunt, and the techniques an earlier run left unsearched ' +
+            `were not returned either, so they were not searched and the report is settled.${partialSuffix}`
+          : validated.length === 0
+            ? 'No extracted candidate survived validation: each was either absent from the ' +
+              'canonical ATT&CK catalog or offered a quote the report does not contain. ' +
+              'Consider lowering the LLM threshold or falling back to IOC matching for this ' +
+              `report.${partialSuffix}`
+            : hasHit
+              ? `Behaviors proposed; at least one grounded query hit a required index.${partialSuffix}`
+              : `Behaviors proposed for Investigation staging.${partialSuffix}`,
   };
 };

@@ -53,7 +53,7 @@ const packagePolicy = (supportsAgentless: boolean) =>
     supports_agentless: supportsAgentless,
     package: { name: 'aws', title: 'AWS', version: '8.11.0' },
     inputs: [],
-  } as unknown as PackagePolicy);
+  }) as unknown as PackagePolicy;
 
 describe('OnboardingInstanceAgentFlyout', () => {
   const render = (supportsAgentless: boolean) =>

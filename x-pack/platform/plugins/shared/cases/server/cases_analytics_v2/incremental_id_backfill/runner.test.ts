@@ -20,9 +20,9 @@ const hit = (id: string, spaceId?: string) => ({
 });
 
 const searchResponse = (hits: Array<ReturnType<typeof hit>>) =>
-  ({ hits: { hits } } as unknown as Awaited<
+  ({ hits: { hits } }) as unknown as Awaited<
     ReturnType<ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>['search']>
-  >);
+  >;
 
 const caseSo = (id: string, incrementalId: number | null, extra: object = {}) => ({
   type: CASE_SAVED_OBJECT,

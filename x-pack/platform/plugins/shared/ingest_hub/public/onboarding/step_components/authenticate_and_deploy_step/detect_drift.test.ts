@@ -170,7 +170,7 @@ describe('detectServiceVarsDrift — duplicates with typed vars', () => {
       varsByDataStream: {
         billing: { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { tags } } },
       },
-    } as Record<string, unknown>);
+    }) as Record<string, unknown>;
 
   it('finds no drift for a duplicate whose saved vars are typed', () => {
     const drift = detectServiceVarsDrift(

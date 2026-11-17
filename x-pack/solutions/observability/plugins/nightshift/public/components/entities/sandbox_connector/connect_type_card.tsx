@@ -48,8 +48,8 @@ export function ConnectTypeCard({
   const createDisabledReason = !canCreate
     ? noPermissionReason
     : enabledCheck.isEnabled
-    ? undefined
-    : enabledCheck.message;
+      ? undefined
+      : enabledCheck.message;
   const hasConnectors = connectors.length > 0;
 
   return (

@@ -817,19 +817,21 @@ describe('workflow:resume task runner event fields', () => {
         state: Record<string, unknown>,
         withScopedRequest: jest.Mock
       ) =>
-        taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
-          taskManagerMock.createRunContext({
-            taskInstance: {
-              ...taskManagerMock.createTask(),
-              id: getWorkflowImmediateResumeTaskId(workflowRunId),
-              attempts,
-              state,
-              params: { workflowRunId, spaceId: 'default' },
-            },
-            fakeRequest: undefined,
-            runAs: { withScopedRequest },
-          })
-        ).run();
+        taskDefinitions[WORKFLOW_RESUME_TASK_TYPE]
+          .createTaskRunner(
+            taskManagerMock.createRunContext({
+              taskInstance: {
+                ...taskManagerMock.createTask(),
+                id: getWorkflowImmediateResumeTaskId(workflowRunId),
+                attempts,
+                state,
+                params: { workflowRunId, spaceId: 'default' },
+              },
+              fakeRequest: undefined,
+              runAs: { withScopedRequest },
+            })
+          )
+          .run();
 
       const deferred = await claim(
         2,

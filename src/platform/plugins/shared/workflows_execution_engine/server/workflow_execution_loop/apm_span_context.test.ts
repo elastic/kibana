@@ -94,7 +94,7 @@ const createStepExecutionRuntime = () =>
       ensureContextReady: jest.fn().mockResolvedValue(undefined),
       releaseReadPins: jest.fn(),
     },
-  } as unknown as StepExecutionRuntime);
+  }) as unknown as StepExecutionRuntime;
 
 const createRunNodeParams = (): WorkflowExecutionLoopParams => {
   const node = { id: 'node1', stepId: 'step1', stepType: 'data.set' } as GraphNodeUnion;

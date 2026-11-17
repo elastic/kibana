@@ -30,7 +30,7 @@ const gradeResponse = (verdict: 'Y' | 'N', explanation: string) =>
       { toolCallId: 'call-1', function: { name: 'grade', arguments: { verdict, explanation } } },
     ],
     input: [],
-  } as unknown as Awaited<ReturnType<typeof executeUntilValid>>);
+  }) as unknown as Awaited<ReturnType<typeof executeUntilValid>>;
 
 /**
  * A real `_find` doc as returned by the public `GET /api/attack_discovery/_find`

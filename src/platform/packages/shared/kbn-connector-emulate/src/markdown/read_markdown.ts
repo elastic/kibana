@@ -123,8 +123,8 @@ export const toBounds = (
     unit === 'characters'
       ? (['minLength', 'maxLength'] as const)
       : unit === 'items'
-      ? (['minItems', 'maxItems'] as const)
-      : (['minimum', 'maximum'] as const);
+        ? (['minItems', 'maxItems'] as const)
+        : (['minimum', 'maximum'] as const);
   return {
     ...(minimum === undefined || !Number.isFinite(minimum) ? {} : { [min]: minimum }),
     ...(maximum === undefined || !Number.isFinite(maximum) ? {} : { [max]: maximum }),

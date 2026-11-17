@@ -123,7 +123,7 @@ const executionById = (parent: AgentExecution | null = parentRun) =>
   jest
     .fn()
     .mockImplementation(async (id: string) =>
-      id === 'parent-1' ? parent ?? undefined : finishedChild
+      id === 'parent-1' ? (parent ?? undefined) : finishedChild
     );
 
 describe('wakeParent', () => {

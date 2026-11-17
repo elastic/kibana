@@ -9,7 +9,7 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import fixture from './catalogue_snapshot/components_v1.json';
 import { createComponentCatalogueClient } from './api_client';
 
-const repositoryClient = (fetch: jest.Mock) => ({ fetch } as unknown as StreamsRepositoryClient);
+const repositoryClient = (fetch: jest.Mock) => ({ fetch }) as unknown as StreamsRepositoryClient;
 
 /** What `http.fetch` resolves with when asked for the response. */
 const httpResponse = (body: unknown, headers: Record<string, string> = {}) => ({

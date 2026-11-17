@@ -366,8 +366,8 @@ describe('affected monitors routes', () => {
       monitor.name === 'no-connection'
         ? 'plain'
         : monitor.name === 'tcp-via-param'
-        ? '${secret}'
-        : 'vault://prod@app#password',
+          ? '${secret}'
+          : 'vault://prod@app#password',
   }));
   const globalParams = { secret: 'vault://prod@app#key', tcpHost: 'x.example.com' };
 

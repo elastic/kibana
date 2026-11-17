@@ -50,7 +50,7 @@ const graph: ClassicCanvasGraph = {
   edges: [edge('s1', 'd1'), edge('s2', 'd2')],
 };
 
-const mouseEvent = (buttons = 0) => ({ buttons } as React.MouseEvent);
+const mouseEvent = (buttons = 0) => ({ buttons }) as React.MouseEvent;
 
 describe('useHoveredFlow', () => {
   it('has no flow until a node is hovered', () => {

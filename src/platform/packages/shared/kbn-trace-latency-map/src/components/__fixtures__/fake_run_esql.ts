@@ -68,8 +68,8 @@ export const sparseOutliers: Pattern = (time, row, random) => ({
     row < 12
       ? noise(random, 100 * bump(row, 7, 1.6))
       : random() < 0.025
-      ? 1 + Math.floor(random() * 3)
-      : 0,
+        ? 1 + Math.floor(random() * 3)
+        : 0,
   failed: row >= 12 && random() < 0.01 ? 1 : 0,
 });
 

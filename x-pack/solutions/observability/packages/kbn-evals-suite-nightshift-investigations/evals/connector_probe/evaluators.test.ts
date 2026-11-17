@@ -103,9 +103,12 @@ describe('connector probe evaluators', () => {
 
   it('scores 0 without calling the judge when no connector query succeeded', async () => {
     const evaluate = jest.fn().mockResolvedValue({ score: 1 });
-    const criteria = jest.fn(
-      (): Evaluator => ({ name: 'criteria', kind: 'LLM', direction: 'maximize', evaluate })
-    );
+    const criteria = jest.fn((): Evaluator => ({
+      name: 'criteria',
+      kind: 'LLM',
+      direction: 'maximize',
+      evaluate,
+    }));
     const evaluator = createReferenceBehaviourEvaluator({ criteria });
     const failedSandbox = output({
       tool_call_trajectory: [

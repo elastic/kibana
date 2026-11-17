@@ -318,8 +318,8 @@ export const personaMatrixJury: JuryAdapter = {
         payload === undefined
           ? ''
           : typeof payload === 'string'
-          ? payload
-          : JSON.stringify(payload);
+            ? payload
+            : JSON.stringify(payload);
     }
     if (!cell.expected || (!agentResponse && !isFallback)) {
       return null;

@@ -29,7 +29,7 @@ const waitingExecution = (overrides: Partial<EsWorkflowExecution> = {}): EsWorkf
     status: ExecutionStatus.WAITING_FOR_INPUT,
     context: previousContext,
     ...overrides,
-  } as EsWorkflowExecution);
+  }) as EsWorkflowExecution;
 
 const createDeps = () => ({
   workflowExecutionRepository: {

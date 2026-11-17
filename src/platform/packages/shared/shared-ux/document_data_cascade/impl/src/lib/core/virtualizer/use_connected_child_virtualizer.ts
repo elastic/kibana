@@ -134,8 +134,8 @@ export const useConnectedChildVirtualizer = <T extends VirtualizerItem>({
       isDetached && privateScrollElement?.current
         ? privateScrollElement.current
         : isActive
-        ? controller.getScrollElement()
-        : null,
+          ? controller.getScrollElement()
+          : null,
     [isDetached, privateScrollElement, controller, isActive]
   );
 

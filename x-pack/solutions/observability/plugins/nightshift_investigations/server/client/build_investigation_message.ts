@@ -152,8 +152,8 @@ function describeV2Alert(alert: V2AlertSnapshot): string {
           : sanitize(alert.rule_id)
       }`
     : label
-    ? ` (${label})`
-    : '';
+      ? ` (${label})`
+      : '';
   const ruleNote = alert.rule_id ? ', and the rule is the v2 rule with the id above' : '';
   const eventId = alert.data?.event_id;
   const significantEventNote =

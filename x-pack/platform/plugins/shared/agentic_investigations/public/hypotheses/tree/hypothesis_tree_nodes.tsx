@@ -541,8 +541,8 @@ const TriggerLink = ({
           {isSlack
             ? OPEN_SLACK_THREAD_LABEL
             : alertCount > 1
-            ? viewAlertsLabel(alertCount)
-            : VIEW_ALERT_LABEL}
+              ? viewAlertsLabel(alertCount)
+              : VIEW_ALERT_LABEL}
         </EuiLink>
       </EuiText>
       {flyout && <FlyoutClickBoundary>{flyout}</FlyoutClickBoundary>}

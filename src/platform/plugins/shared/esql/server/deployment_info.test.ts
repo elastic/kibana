@@ -13,7 +13,7 @@ import { describeDeployment, getDeploymentInfo } from './deployment_info';
 const env = (buildFlavor: 'serverless' | 'traditional') =>
   ({
     packageInfo: { version: '9.7.0', buildFlavor },
-  } as unknown as PluginInitializerContext['env']);
+  }) as unknown as PluginInitializerContext['env'];
 
 const cloud = (overrides: Record<string, unknown> = {}) =>
   ({
@@ -22,7 +22,7 @@ const cloud = (overrides: Record<string, unknown> = {}) =>
     isEce: undefined,
     serverless: {},
     ...overrides,
-  } as Parameters<typeof getDeploymentInfo>[1]);
+  }) as Parameters<typeof getDeploymentInfo>[1];
 
 describe('getDeploymentInfo', () => {
   it('is self-managed without the cloud plugin', () => {

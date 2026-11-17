@@ -16,8 +16,8 @@ const hasDottedKey = (value: unknown): boolean =>
   Array.isArray(value)
     ? value.some(hasDottedKey)
     : typeof value === 'object' && value !== null
-    ? Object.entries(value).some(([key, child]) => key.includes('.') || hasDottedKey(child))
-    : false;
+      ? Object.entries(value).some(([key, child]) => key.includes('.') || hasDottedKey(child))
+      : false;
 
 describe('normalizeAclSource', () => {
   it('merges nested objects, dotted keys, and arrays per field', () => {

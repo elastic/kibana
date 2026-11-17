@@ -14,7 +14,7 @@ const model = (id: string, templateRequired = false): ScopedModel =>
       connectorId: id,
       metadata: templateRequired ? { capabilities: { templates: { policy: 'required' } } } : {},
     },
-  } as unknown as ScopedModel);
+  }) as unknown as ScopedModel;
 
 describe('selectHuntCallModel', () => {
   const tier = model('frontier');

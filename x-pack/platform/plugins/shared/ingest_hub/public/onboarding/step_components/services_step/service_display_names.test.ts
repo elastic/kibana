@@ -10,7 +10,7 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { getServiceDisplayNames } from './service_display_names';
 
 const entry = (overrides: Partial<AwsServiceMatrixEntry>): AwsServiceMatrixEntry =>
-  ({ showInUI: true, signalTypes: ['logs'], ...overrides } as AwsServiceMatrixEntry);
+  ({ showInUI: true, signalTypes: ['logs'], ...overrides }) as AwsServiceMatrixEntry;
 
 describe('getServiceDisplayNames', () => {
   it('uses the plain name for a service whose name is unique', () => {

@@ -30,16 +30,16 @@ import { installAlertingV2ManagedWorkflows } from '../lib/workflow_extensions/ma
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toResolvedValue(
     (
-        resourceManager,
-        loggerService,
-        coreLogger,
-        esClient,
-        changeHistoryClient,
-        userProfileService,
-        taskManager,
-        configService,
-        workflowsExtensions
-      ) =>
+      resourceManager,
+      loggerService,
+      coreLogger,
+      esClient,
+      changeHistoryClient,
+      userProfileService,
+      taskManager,
+      configService,
+      workflowsExtensions
+    ) =>
       async (container) => {
         const tasksLogger = loggerService.forSubsystem('tasks');
 

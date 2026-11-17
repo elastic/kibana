@@ -534,10 +534,10 @@ const sendRequest = (
   const statusCode = isNetworkError
     ? undefined
     : random() < failureRate
-    ? pick(random, failureStatusCodes)
-    : method === 'POST'
-    ? 201
-    : 200;
+      ? pick(random, failureStatusCodes)
+      : method === 'POST'
+        ? 201
+        : 200;
   const traceContext = { traceId: randomHex(random, 32), spanId: randomHex(random, 16) };
 
   const events: EdotBrowserEvent[] = [
@@ -551,7 +551,7 @@ const sendRequest = (
         // XHR doesn't report the size of the body it sends
         requestBodySize:
           instrumentation === 'fetch' && (bodySizeBytes !== undefined || method === 'POST')
-            ? bodySizeBytes ?? Math.round(between(random, 120, 2_000))
+            ? (bodySizeBytes ?? Math.round(between(random, 120, 2_000)))
             : undefined,
         instrumentation,
         ...traceContext,

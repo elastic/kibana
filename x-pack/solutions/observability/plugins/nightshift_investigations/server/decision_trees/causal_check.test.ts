@@ -27,7 +27,7 @@ const round = (
     input: { message },
     response: { message: answer },
     steps,
-  } satisfies EarlierRound);
+  }) satisfies EarlierRound;
 
 const spanQuery = {
   type: 'tool_call',

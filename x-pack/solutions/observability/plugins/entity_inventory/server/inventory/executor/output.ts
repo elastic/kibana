@@ -73,6 +73,6 @@ export const summarizeResults = (
 export const fillColumns = (rows: InventoryRow[], columns: OutputColumn[]): InventoryRow[] =>
   rows.map((row) =>
     Object.fromEntries(
-      columns.map(({ name }) => [name, Object.hasOwn(row, name) ? row[name] ?? null : null])
+      columns.map(({ name }) => [name, Object.hasOwn(row, name) ? (row[name] ?? null) : null])
     )
   );

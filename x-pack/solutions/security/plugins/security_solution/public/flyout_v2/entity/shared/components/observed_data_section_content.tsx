@@ -182,8 +182,8 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
     entityType === EntityType.host
       ? hostFields
       : entityType === EntityType.user
-      ? userFields
-      : serviceFields;
+        ? userFields
+        : serviceFields;
 
   const renderFlyoutLink = useCallback(
     (flyoutLinkProps: OpenFlyoutLinkProps) => <OpenFlyoutLink {...flyoutLinkProps} />,

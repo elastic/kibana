@@ -101,8 +101,8 @@ export const validateContent = (
   const value = xml
     ? xml.value
     : mediaType === FORM_MEDIA_TYPE && typeof body === 'string'
-    ? coerceValue(toFormFields(body), content.schema?.schema, operation.spec.document)
-    : body;
+      ? coerceValue(toFormFields(body), content.schema?.schema, operation.spec.document)
+      : body;
   return validateValue(operation, content.schema, value, {
     path: ['body'],
     subject: `${subject} body`,

@@ -162,14 +162,14 @@ export function SessionsStatusCallout({
                   values: { error: status.lastError.message },
                 })
               : canManage
-              ? i18n.translate('xpack.digitalExperience.sessions.status.degradedDescription', {
-                  defaultMessage:
-                    'The task that builds sessions failed, so new sessions are missing. Check the Kibana server logs.',
-                })
-              : i18n.translate('xpack.digitalExperience.sessions.status.degradedAskAdmin', {
-                  defaultMessage:
-                    'The task that builds sessions failed, so new sessions are missing. An administrator with the Set up session summaries privilege can see why.',
-                })
+                ? i18n.translate('xpack.digitalExperience.sessions.status.degradedDescription', {
+                    defaultMessage:
+                      'The task that builds sessions failed, so new sessions are missing. Check the Kibana server logs.',
+                  })
+                : i18n.translate('xpack.digitalExperience.sessions.status.degradedAskAdmin', {
+                    defaultMessage:
+                      'The task that builds sessions failed, so new sessions are missing. An administrator with the Set up session summaries privilege can see why.',
+                  })
           }
         />
         <EuiSpacer size="m" />

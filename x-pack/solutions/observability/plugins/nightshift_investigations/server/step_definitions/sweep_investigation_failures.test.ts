@@ -37,7 +37,7 @@ const setup = () => {
   };
   const logger = loggerMock.create();
   const definition = sweepInvestigationFailuresStepDefinition({
-    getWorkflowsManagement: () => ({ management } as never),
+    getWorkflowsManagement: () => ({ management }) as never,
   } as never);
   const run = (isTestRun = false) =>
     definition.handler({

@@ -147,7 +147,7 @@ describe('useAttackCaseAttachments', () => {
         type: SECURITY_ATTACK_ATTACHMENT_TYPE,
         attachmentId,
         metadata: { index: ATTACK_INDEX, title: 'A multi-stage attack', alertCount: 2 },
-      } as unknown as CaseUI['comments'][number]);
+      }) as unknown as CaseUI['comments'][number];
 
     const createdAlerts = (attachmentId: string[]) =>
       ({
@@ -155,7 +155,7 @@ describe('useAttackCaseAttachments', () => {
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         attachmentId,
         metadata: { index: ALERTS_INDEX },
-      } as unknown as CaseUI['comments'][number]);
+      }) as unknown as CaseUI['comments'][number];
 
     it('warns when the server did not create a posted attack', () => {
       const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));

@@ -174,8 +174,8 @@ export const timeClose = (left: AttackMatchFields, right: AttackMatchFields): bo
     leftRange.end < rightRange.start
       ? rightRange.start - leftRange.end
       : rightRange.end < leftRange.start
-      ? leftRange.start - rightRange.end
-      : 0;
+        ? leftRange.start - rightRange.end
+        : 0;
   return gap <= ENTITY_GAP_MS;
 };
 

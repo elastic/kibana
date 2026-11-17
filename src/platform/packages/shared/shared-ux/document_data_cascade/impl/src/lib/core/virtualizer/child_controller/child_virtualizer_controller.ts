@@ -292,7 +292,7 @@ export const createChildVirtualizerController = ({
     getPersistedAnchor: (cellId) => controlledChildren.get(cellId)?.persistedAnchor ?? null,
     getRestoreAnchor: (cellId) =>
       rootStable && restoringCellId === cellId
-        ? controlledChildren.get(cellId)?.persistedAnchor ?? null
+        ? (controlledChildren.get(cellId)?.persistedAnchor ?? null)
         : null,
     finishRestoration,
     cancelRootScroll: () => getRootVirtualizer()?.cancelScroll(),

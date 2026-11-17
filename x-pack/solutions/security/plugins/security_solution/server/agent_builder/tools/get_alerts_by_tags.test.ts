@@ -15,7 +15,7 @@ const makeClient = (
 ) =>
   ({
     search: jest.fn().mockResolvedValue({ hits: { total, hits } }),
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('getAlertsByTags', () => {
   const index = '.alerts-security.alerts-default';

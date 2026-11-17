@@ -198,7 +198,7 @@ export const buildIocMatchEsql = ({
   const predicate = ipLiteral
     ? `MV_CONTAINS(TO_IP(${field}), "${ipLiteral}"::ip)`
     : iocType && HUNT_CASE_INSENSITIVE_IOC_TYPES.has(iocType)
-    ? `MV_CONTAINS(TO_LOWER(${field}), "${escapeEsqlString(value.toLowerCase())}")`
-    : `MV_CONTAINS(TO_STRING(${field}), "${escapeEsqlString(value)}")`;
+      ? `MV_CONTAINS(TO_LOWER(${field}), "${escapeEsqlString(value.toLowerCase())}")`
+      : `MV_CONTAINS(TO_STRING(${field}), "${escapeEsqlString(value)}")`;
   return `FROM ${cleanedIndices.map(quoteEsqlIdentifier).join(', ')} | WHERE ${predicate}`;
 };

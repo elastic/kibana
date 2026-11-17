@@ -23,7 +23,7 @@ const searchClient = (responsesByActionId: ResponsesByActionId) =>
         },
       })
     ),
-  } as unknown as IScopedSearchClient);
+  }) as unknown as IScopedSearchClient;
 
 describe('getActionResponses', () => {
   describe('search request', () => {

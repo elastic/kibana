@@ -152,7 +152,7 @@ describe('provisioningCallbackService', () => {
       // The stored hash is the one for this token, this record and this expiry.
       const [, attributes] = soClient.create.mock.calls[0] as [
         string,
-        ProvisioningCallbackSOAttributes
+        ProvisioningCallbackSOAttributes,
       ];
       expect(token).toMatch(/^[0-9a-f]{64}$/);
       expect(

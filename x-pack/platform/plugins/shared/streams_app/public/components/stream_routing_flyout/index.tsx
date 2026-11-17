@@ -57,8 +57,8 @@ const getRoutingTargetName = (target: RoutingFlyoutTarget): string => {
     origin.kind === 'rule'
       ? `${origin.rule.pipelineId}[${origin.rule.ruleIndex}]`
       : origin.kind === 'source'
-      ? origin.id
-      : origin.ref.pipelineId;
+        ? origin.id
+        : origin.ref.pipelineId;
   return `${from} → ${destinationId}`;
 };
 

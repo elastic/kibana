@@ -27,7 +27,7 @@ describe('getDreamingStatusStepDefinition', () => {
     source?: 'memories' | 'traces' | 'relationships';
   } = {}) =>
     getDreamingStatusStepDefinition({
-      getAiIndexService: () => ({ get } as unknown as AiIndexService),
+      getAiIndexService: () => ({ get }) as unknown as AiIndexService,
       isContextEngineEnabled: async () => contextEngineEnabled,
       isMemoryEnabled: async () => memoryEnabled,
       checkReadPrivilege: async () => canRead,

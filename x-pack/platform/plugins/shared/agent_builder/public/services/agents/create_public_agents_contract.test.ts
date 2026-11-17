@@ -64,7 +64,7 @@ const buildAgentWithConnectors = (connectorIds?: string[]): AgentDefinition =>
   ({
     id: 'agent-1',
     configuration: { tools: [], connector_ids: connectorIds },
-  } as unknown as AgentDefinition);
+  }) as unknown as AgentDefinition;
 
 describe('createPublicAgentsContract - connectors', () => {
   it('appends the connector id to the existing connector_ids and updates the agent', async () => {

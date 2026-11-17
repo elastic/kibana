@@ -536,7 +536,7 @@ describe('cloudOnboardingDeploymentService', () => {
         page: 1,
         per_page: 0,
         aggregations: { by_package: { buckets } },
-      } as any);
+      }) as any;
 
     it('counts the deployments of each package with a terms aggregation and no documents', async () => {
       soClient.find.mockResolvedValue(

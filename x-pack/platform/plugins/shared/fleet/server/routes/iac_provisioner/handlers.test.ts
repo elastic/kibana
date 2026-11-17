@@ -483,7 +483,7 @@ const ITEM: CloudConnectorCallback = {
 };
 
 const realmUser = () =>
-  ({ username: 'elastic', authentication_type: 'realm' } as unknown as AuthenticatedUser);
+  ({ username: 'elastic', authentication_type: 'realm' }) as unknown as AuthenticatedUser;
 
 const buildCallbackContext = (spaceId = 'default') =>
   ({
@@ -491,7 +491,7 @@ const buildCallbackContext = (spaceId = 'default') =>
       spaceId,
       internalSoClient: {},
     }),
-  } as any);
+  }) as any;
 
 describe('Provisioning callback handlers', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;

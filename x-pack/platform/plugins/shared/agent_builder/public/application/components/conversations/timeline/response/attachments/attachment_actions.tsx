@@ -84,21 +84,19 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
       panels={[
         {
           id: 0,
-          items: menuButtons.map(
-            (button): EuiContextMenuPanelItemDescriptor => ({
-              name: button.label,
-              icon: button.icon,
-              disabled: button.disabled || isAnyLoading,
-              toolTipContent: button.disabled ? button.disabledReason : undefined,
-              href: button.href,
-              target: button.href && button.openInNewTab ? '_blank' : undefined,
-              rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
-              onClick: async () => {
-                closePopover();
-                await makeClickHandler(button)();
-              },
-            })
-          ),
+          items: menuButtons.map((button): EuiContextMenuPanelItemDescriptor => ({
+            name: button.label,
+            icon: button.icon,
+            disabled: button.disabled || isAnyLoading,
+            toolTipContent: button.disabled ? button.disabledReason : undefined,
+            href: button.href,
+            target: button.href && button.openInNewTab ? '_blank' : undefined,
+            rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
+            onClick: async () => {
+              closePopover();
+              await makeClickHandler(button)();
+            },
+          })),
         },
       ]}
     />
@@ -144,8 +142,8 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
   const mainTooltipContent = mainButton.disabled
     ? mainButton.disabledReason
     : isIconOnly
-    ? mainButton.label
-    : undefined;
+      ? mainButton.label
+      : undefined;
   const isThisLoading = loadingLabel === mainButton.label;
   const mainProps = {
     ...getNavProps(mainButton),

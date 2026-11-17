@@ -639,7 +639,7 @@ export const RunHistory = ({
                       <EuiText size="xs" color="subdued" className="eui-textTruncate">
                         {run.status === 'skipped'
                           ? getSkippedRunSummary(run, labels.trigger)
-                          : run.error ?? automationName}
+                          : (run.error ?? automationName)}
                       </EuiText>
                     </button>
                   ))}

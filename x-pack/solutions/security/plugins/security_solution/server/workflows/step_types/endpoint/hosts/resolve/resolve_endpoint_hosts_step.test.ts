@@ -55,7 +55,7 @@ const createMockContext = (rawInput: Record<string, unknown>) =>
     abortSignal: new AbortController().signal,
     stepId: 'test-step',
     stepType: 'security.resolveEndpointHosts',
-  } as unknown as StepHandlerContext<unknown, unknown>);
+  }) as unknown as StepHandlerContext<unknown, unknown>;
 
 interface MockRouteResponse {
   status?: number;
@@ -642,8 +642,8 @@ describe('resolveEndpointHostsStepDefinition', () => {
               data: expanded
                 ? [fqdnHost]
                 : exactMetadata === 'full'
-                ? Array.from({ length: 100 }, () => ({}))
-                : [],
+                  ? Array.from({ length: 100 }, () => ({}))
+                  : [],
             },
           };
         }

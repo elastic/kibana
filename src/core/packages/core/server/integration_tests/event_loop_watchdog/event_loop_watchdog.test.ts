@@ -117,7 +117,7 @@ const runHarness = (
     const readStdout = (chunk: string, flush = false) => {
       pendingStdout += chunk;
       const lines = pendingStdout.split('\n');
-      pendingStdout = flush ? '' : lines.pop() ?? '';
+      pendingStdout = flush ? '' : (lines.pop() ?? '');
       for (const line of lines.filter(Boolean)) {
         try {
           workerLogLines.push(JSON.parse(line));

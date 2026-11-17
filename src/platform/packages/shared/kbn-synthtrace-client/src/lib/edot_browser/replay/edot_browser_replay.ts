@@ -185,7 +185,7 @@ export const replaySession = ({
   );
   const brokenSegment =
     missingChunk && !packEvents && segments.length > 0
-      ? recoverable[Math.floor(random() * recoverable.length)] ?? -1
+      ? (recoverable[Math.floor(random() * recoverable.length)] ?? -1)
       : -1;
   const desktopViewport = pick(random, DESKTOP_VIEWPORTS);
 

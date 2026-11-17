@@ -13,8 +13,10 @@ import type { GroupNode } from '../../../../store_provider';
 import type { CascadeTableRow } from '../../table';
 import type { CascadeVirtualizerReturnValue } from '../types';
 
-export interface VirtualizedCascadeListProps<G extends GroupNode>
-  extends Pick<CascadeVirtualizerReturnValue, 'getVirtualItems'> {
+export interface VirtualizedCascadeListProps<G extends GroupNode> extends Pick<
+  CascadeVirtualizerReturnValue,
+  'getVirtualItems'
+> {
   rows: Array<CascadeTableRow<G>>;
   activeStickyIndex: number | null;
   listItemRenderer: (props: {

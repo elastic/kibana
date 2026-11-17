@@ -18,5 +18,5 @@ const UI_SETTINGS_DEFAULTS: Record<string, string> = {
 /** A `uiSettings` client for tests, overridable per setting. */
 export const createUiSettingsMock = (overrides: Record<string, string> = {}): IUiSettingsClient =>
   ({
-    get: (key: string) => ({ ...UI_SETTINGS_DEFAULTS, ...overrides }[key]),
-  } as unknown as IUiSettingsClient);
+    get: (key: string) => ({ ...UI_SETTINGS_DEFAULTS, ...overrides })[key],
+  }) as unknown as IUiSettingsClient;

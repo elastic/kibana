@@ -26,9 +26,12 @@ interface StartDependencies {
   actions: PluginStartContract;
 }
 
-export class InboundHubTestPlugin
-  implements Plugin<void, void, StartDependencies, StartDependencies>
-{
+export class InboundHubTestPlugin implements Plugin<
+  void,
+  void,
+  StartDependencies,
+  StartDependencies
+> {
   public setup(): void {}
 
   public start(_core: CoreStart, { actions }: StartDependencies): void {

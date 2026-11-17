@@ -13,7 +13,7 @@ import type { MaybeDelegatedIdentityCapableWorkflow } from './requires_delegated
 // The predicate is deliberately defensive over raw definition shapes; fixtures below
 // use minimal step objects, so cast once here instead of per-site.
 const asWorkflow = (definition: unknown): MaybeDelegatedIdentityCapableWorkflow =>
-  ({ definition: definition as never } as MaybeDelegatedIdentityCapableWorkflow);
+  ({ definition: definition as never }) as MaybeDelegatedIdentityCapableWorkflow;
 
 const inheritStep = (name = 'inherit') => ({
   name,

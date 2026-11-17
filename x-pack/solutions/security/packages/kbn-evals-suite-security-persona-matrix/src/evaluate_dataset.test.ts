@@ -264,7 +264,9 @@ describe('createPersonaMatrixExpectedToolCalledEvaluator', () => {
         steps: [{ type: 'tool_call', tool_id: 'platform.core.generate_esql' }],
       } as unknown as TaskOutput,
       metadata: multiTool.metadata,
-    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
+    } as unknown as Parameters<
+      ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']
+    >[0]);
     expect(result.score).toBe(0);
     expect((result.metadata as { missingToolIds: string[] }).missingToolIds).toEqual([
       'platform.core.execute_esql',
@@ -291,7 +293,9 @@ describe('createPersonaMatrixExpectedToolCalledEvaluator', () => {
         ],
       } as unknown as TaskOutput,
       metadata: multiTool.metadata,
-    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
+    } as unknown as Parameters<
+      ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']
+    >[0]);
     expect(result.score).toBe(1);
     expect((result.metadata as { missingToolIds: string[] }).missingToolIds).toEqual([]);
   });
@@ -304,7 +308,9 @@ describe('createPersonaMatrixFinalAnswerPresentEvaluator', () => {
       expected: undefined,
       output,
       metadata: {},
-    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixFinalAnswerPresentEvaluator>['evaluate']>[0]);
+    } as unknown as Parameters<
+      ReturnType<typeof createPersonaMatrixFinalAnswerPresentEvaluator>['evaluate']
+    >[0]);
 
   it('scores 1 when the run produced a non-empty final message', async () => {
     const result = await evaluate({ messages: [{ message: 'Rule created: ...' }] });
@@ -493,7 +499,9 @@ describe('createPersonaMatrixMinExpectedStepsEvaluator', () => {
       expected: expectedTools ? { tool_sequence: expectedTools } : {},
       output,
       metadata: expectedTools ? { expectedTools } : {},
-    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixMinExpectedStepsEvaluator>['evaluate']>[0]);
+    } as unknown as Parameters<
+      ReturnType<typeof createPersonaMatrixMinExpectedStepsEvaluator>['evaluate']
+    >[0]);
 
   it('scores 1 when tool calls meet the expected minimum', async () => {
     const result = await evaluate(
@@ -1267,7 +1275,7 @@ describe('reporting identity per agent profile', () => {
               examples: Array<{ metadata?: Record<string, unknown> }>;
             }>;
             metadata: Record<string, unknown>;
-          }
+          },
         ]
       >
     )[0][0];

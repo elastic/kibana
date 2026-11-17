@@ -139,14 +139,14 @@ export function IngestChartStatistics({
   const totalDocs = hasTotals
     ? totals.docs
     : totalDocsFetch.error
-    ? undefined
-    : totalDocsFetch.value?.find((s) => s.stream === streamName)?.count ?? 0;
+      ? undefined
+      : (totalDocsFetch.value?.find((s) => s.stream === streamName)?.count ?? 0);
   const totalDocsLoading = hasTotals ? totals.loading : totalDocsFetch.loading;
   const storageBytes = hasTotals
     ? totals.storageBytes
     : storeStatsFetch.error
-    ? undefined
-    : storeStatsFetch.value?.store_size_bytes ?? 0;
+      ? undefined
+      : (storeStatsFetch.value?.store_size_bytes ?? 0);
   const storageLoading = hasTotals ? totals.loading : storeStatsFetch.loading;
   const storageError = hasTotals ? totals.storageError : Boolean(storeStatsFetch.error);
 

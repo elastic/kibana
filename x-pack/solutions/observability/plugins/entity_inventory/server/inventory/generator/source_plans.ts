@@ -36,9 +36,12 @@ export const planSources = (
       // `TS` reads only time-series indices and `FROM` excludes them, so together they cover the
       // pattern once; without a readable time-series index the `TS` query would fail to verify.
       const engines: QueryEngine[] = probes[sourceIndex].hasTimeSeries ? ['TS', 'FROM'] : ['FROM'];
-      return engines.map(
-        (engine): Omit<QueryPlan, 'index'> => ({ sourceIndex, indexPattern, attributes, engine })
-      );
+      return engines.map((engine): Omit<QueryPlan, 'index'> => ({
+        sourceIndex,
+        indexPattern,
+        attributes,
+        engine,
+      }));
     })
     .map((plan, index): QueryPlan => ({ index, ...plan }));
 

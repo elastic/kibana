@@ -32,7 +32,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const SETTINGS = { frequency: '1m' };
 
 const application = (serviceName: string) =>
-  ({ serviceName, source: 'otel' } as SourceApplications['applications'][number]);
+  ({ serviceName, source: 'otel' }) as SourceApplications['applications'][number];
 
 const FROM_SESSIONS: SourceApplications = {
   applications: [application('from-sessions')],
@@ -48,7 +48,7 @@ const FROM_RAW: SourceApplications = {
 };
 
 const status = (overrides: Partial<SessionsStatus> = {}) =>
-  ({ installed: true, health: 'healthy', rebuilding: false, ...overrides } as SessionsStatus);
+  ({ installed: true, health: 'healthy', rebuilding: false, ...overrides }) as SessionsStatus;
 
 /** One per test, so a test's requests share an answer and the next test starts without one. */
 let sessionsReadable: SessionsReadableCache;

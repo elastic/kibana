@@ -360,9 +360,7 @@ apiTest.describe(
                 async () =>
                   comparable(
                     findApplication(
-                      (
-                        await getApplications(apiClient, viewerHeaders)
-                      ).applications,
+                      (await getApplications(apiClient, viewerHeaders)).applications,
                       APP,
                       'otel'
                     )

@@ -499,7 +499,7 @@ export const fetchIndexStats = async (
   const newIndex = newIndexCandidate && {
     ...newIndexCandidate,
     sizeInBytes: indexSizes
-      ? indexSizes.find(({ name }) => name === newIndexCandidate.indexName)?.size_in_bytes ?? 0
+      ? (indexSizes.find(({ name }) => name === newIndexCandidate.indexName)?.size_in_bytes ?? 0)
       : null,
   };
 

@@ -1430,12 +1430,12 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const isHostsMissing = isOtlp
     ? !otlpInputs.otlpEndpointInput.value.trim()
     : isKafka
-    ? !kafkaHostsInput.value.some((v) => v.trim())
-    : isLogstash
-      ? !logstashHostsInput.value.some((v) => v.trim())
-      : isRemoteElasticsearch
-        ? !remoteElasticsearchUrlInput.value.some((v) => v.trim())
-        : !elasticsearchUrlInput.value.some((v) => v.trim());
+      ? !kafkaHostsInput.value.some((v) => v.trim())
+      : isLogstash
+        ? !logstashHostsInput.value.some((v) => v.trim())
+        : isRemoteElasticsearch
+          ? !remoteElasticsearchUrlInput.value.some((v) => v.trim())
+          : !elasticsearchUrlInput.value.some((v) => v.trim());
 
   return {
     inputs,

@@ -198,19 +198,16 @@ const Template = () => {
 
   const nodes: Array<EntityNodeViewModel | EventNodeViewModel> = useMemo(
     () => [
-      ...Array.from(
-        { length: 5 },
-        (_, idx): EntityNodeViewModel => ({
-          id: `${idx}`,
-          label: `Node ${idx}`,
-          color: 'primary',
-          icon: 'okta',
-          interactive: true,
-          kind: 'entity',
-          expandButtonClick: expandButtonClickHandler,
-          nodeClick: nodeClickHandler,
-        })
-      ),
+      ...Array.from({ length: 5 }, (_, idx): EntityNodeViewModel => ({
+        id: `${idx}`,
+        label: `Node ${idx}`,
+        color: 'primary',
+        icon: 'okta',
+        interactive: true,
+        kind: 'entity',
+        expandButtonClick: expandButtonClickHandler,
+        nodeClick: nodeClickHandler,
+      })),
       {
         id: 'label',
         label: 'Node 5',

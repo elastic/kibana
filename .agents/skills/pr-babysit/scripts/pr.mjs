@@ -65,7 +65,13 @@ import {
 
 const signals = async (pr) => {
   const view = await ghJson([
-    'pr', 'view', pr, '-R', REPO, '--json', 'isDraft,labels,mergeable,baseRefName,headRefName',
+    'pr',
+    'view',
+    pr,
+    '-R',
+    REPO,
+    '--json',
+    'isDraft,labels,mergeable,baseRefName,headRefName',
   ]);
   const labels = new Set(view.labels.map(({ name }) => name));
   const line = (name, offReason) =>
@@ -87,16 +93,19 @@ const wait = async (pr, rest) => {
   const options = parseOptions(rest, ['--for', '--sha', '--since', '--timeout']);
   if (!options.for) fail('wait requires --for <libra,ci>');
   const wanted = new Set(options.for.split(','));
-  for (const signal of wanted) if (!['libra', 'ci'].includes(signal)) fail(`unknown signal: ${signal}`);
+  for (const signal of wanted)
+    if (!['libra', 'ci'].includes(signal)) fail(`unknown signal: ${signal}`);
 
-  const budgetSeconds = options.timeout === undefined ? DEFAULT_WAIT_SECONDS : Number(options.timeout);
-  if (!Number.isFinite(budgetSeconds) || budgetSeconds < 0) fail(`invalid --timeout: ${options.timeout}`);
+  const budgetSeconds =
+    options.timeout === undefined ? DEFAULT_WAIT_SECONDS : Number(options.timeout);
+  if (!Number.isFinite(budgetSeconds) || budgetSeconds < 0)
+    fail(`invalid --timeout: ${options.timeout}`);
   const deadline = Date.now() + budgetSeconds * 1000;
 
   const sinceMs = options.since ? Date.parse(options.since) : null;
   if (options.since && Number.isNaN(sinceMs)) fail(`invalid --since: ${options.since}`);
 
-  const libraSha = wanted.has('libra') ? options.sha ?? (await getDefaultSha(pr)) : null;
+  const libraSha = wanted.has('libra') ? (options.sha ?? (await getDefaultSha(pr))) : null;
   const libraSinceMs = libraSha ? getFirstSeen(pr, `libra:${libraSha}`) : null;
 
   const results = new Map();
@@ -133,15 +142,26 @@ const wait = async (pr, rest) => {
   for (const signal of ['libra', 'ci']) {
     if (!wanted.has(signal)) continue;
     const sha = signal === 'libra' ? libraSha : ciHead;
-    console.log(formatLine(signal, results.get(signal) ?? { state: 'pending', sha, detail: 'no result yet' }));
+    console.log(
+      formatLine(signal, results.get(signal) ?? { state: 'pending', sha, detail: 'no result yet' })
+    );
   }
 };
 
 const threads = async (pr) => {
   const pages = await ghJson([
-    'api', 'graphql', '--paginate', '--slurp',
-    '-F', `owner=${OWNER}`, '-F', `repo=${NAME}`, '-F', `pr=${pr}`,
-    '-f', `query=${THREADS_QUERY}`,
+    'api',
+    'graphql',
+    '--paginate',
+    '--slurp',
+    '-F',
+    `owner=${OWNER}`,
+    '-F',
+    `repo=${NAME}`,
+    '-F',
+    `pr=${pr}`,
+    '-f',
+    `query=${THREADS_QUERY}`,
   ]);
 
   for (const page of pages) {
@@ -171,7 +191,14 @@ const threads = async (pr) => {
 };
 
 const resolveThread = async (threadId) => {
-  const result = await ghJson(['api', 'graphql', '-F', `id=${threadId}`, '-f', `query=${RESOLVE_MUTATION}`]);
+  const result = await ghJson([
+    'api',
+    'graphql',
+    '-F',
+    `id=${threadId}`,
+    '-f',
+    `query=${RESOLVE_MUTATION}`,
+  ]);
   console.log(result.data.resolveReviewThread.thread.isResolved);
 };
 

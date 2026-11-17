@@ -23,9 +23,12 @@ export interface SetupDependencies {
   features: FeaturesPluginSetup;
 }
 
-export class SmlTestTypesPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class SmlTestTypesPlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   setup(
     core: CoreSetup<StartDependencies>,
     { agentBuilder, agentBuilderSml, features }: SetupDependencies

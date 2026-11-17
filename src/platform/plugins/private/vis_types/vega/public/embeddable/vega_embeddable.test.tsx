@@ -804,7 +804,7 @@ describe('vegaEmbeddableFactory', () => {
       expect(await api.saveToLibrary?.('New item')).toBe('new-item');
       const [path, { body }] = coreStart.http.post.mock.calls[0] as unknown as [
         string,
-        { body: string }
+        { body: string },
       ];
       expect(path).toBe('/api/vega');
       expect(JSON.parse(body)).toEqual({

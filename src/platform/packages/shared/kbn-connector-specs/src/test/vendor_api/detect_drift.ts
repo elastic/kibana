@@ -123,10 +123,10 @@ const verdictOf = (
   snapshotProblems.length > 0
     ? 'kibana-regression'
     : latestProblems === undefined
-    ? 'unknown'
-    : latestProblems.length > 0
-    ? 'vendor-drift'
-    : 'healthy';
+      ? 'unknown'
+      : latestProblems.length > 0
+        ? 'vendor-drift'
+        : 'healthy';
 
 const outcomeOf = (drift: Omit<ConnectorDrift, 'outcome'>): DriftOutcome => {
   const sources = Object.values(drift.sources);

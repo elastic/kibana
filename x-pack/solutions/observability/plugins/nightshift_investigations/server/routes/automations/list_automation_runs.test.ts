@@ -372,14 +372,14 @@ it('titles a webhook recovery run after its alert, marked as recovered', async (
             },
           ]
         : stepId === 'follow_up_recovered_alert'
-        ? [
-            {
-              workflowRunId: 'exec-recovered',
-              input: { rule_name: 'Disk almost full on web-1' },
-              output: { investigation_id: 'inv-1' },
-            },
-          ]
-        : [],
+          ? [
+              {
+                workflowRunId: 'exec-recovered',
+                input: { rule_name: 'Disk almost full on web-1' },
+                output: { investigation_id: 'inv-1' },
+              },
+            ]
+          : [],
   }));
 
   const result = await call('auto-1');

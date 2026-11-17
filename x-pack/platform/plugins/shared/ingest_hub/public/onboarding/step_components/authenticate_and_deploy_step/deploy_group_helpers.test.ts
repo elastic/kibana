@@ -377,7 +377,7 @@ describe('getCreateDatasetTemplates', () => {
         instance: { instanceId: id, serviceId: service.id, name: id, isDuplicate: false },
         service,
       })),
-    } as unknown as Parameters<typeof getCreateDatasetTemplates>[0]);
+    }) as unknown as Parameters<typeof getCreateDatasetTemplates>[0];
   const optedOut = (createDatasetTemplates: boolean): ServiceVars => ({
     enabledDataStreams: ['ec2'],
     varsByDataStream: {},

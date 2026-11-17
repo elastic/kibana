@@ -4206,7 +4206,7 @@ describe('ProposalsService — gateless proposals', () => {
         confidence: 'medium',
         origin: 'nightshift',
         ...overrides,
-      } as CreateProposalParams);
+      }) as CreateProposalParams;
 
     it('stores the gate and attributes the creator to the request', async () => {
       const storage = createStorage();

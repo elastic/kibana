@@ -22,7 +22,7 @@ const createJob = (overrides: Partial<MlSummaryJob> = {}): MlSummaryJob =>
     id: 'job-1',
     isSingleMetricViewerJob: true,
     ...overrides,
-  } as MlSummaryJob);
+  }) as MlSummaryJob;
 
 describe('ResultLinks', () => {
   it('does not repeat the Single Metric Viewer link name as a tooltip description', async () => {

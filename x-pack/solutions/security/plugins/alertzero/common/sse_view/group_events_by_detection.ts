@@ -35,7 +35,7 @@ const labelForDetection = (detection: SseDetection): string => {
     return detection.technique_name ? `${techniqueId} ${detection.technique_name}` : techniqueId;
   }
   const parsed = iocOfDetection(detection);
-  return parsed ? `${parsed.type} ${parsed.value}` : detection.matched_on[0]?.value ?? '';
+  return parsed ? `${parsed.type} ${parsed.value}` : (detection.matched_on[0]?.value ?? '');
 };
 
 /**

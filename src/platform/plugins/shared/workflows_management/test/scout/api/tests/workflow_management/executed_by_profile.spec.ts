@@ -124,9 +124,7 @@ steps:
       await expect
         .poll(
           async () =>
-            (
-              await apiClient.get(listPath, { headers: userHeaders })
-            ).body.results?.length,
+            (await apiClient.get(listPath, { headers: userHeaders })).body.results?.length,
           { timeout: POLL_TIMEOUT_MS }
         )
         .toBe(1);

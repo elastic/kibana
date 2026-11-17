@@ -118,7 +118,7 @@ describe('buildRecorderMessages', () => {
     const messages = buildRecorderMessages({ steps: dotted, turns: [], final: false });
 
     const calls = messages.flatMap((message) =>
-      message.role === MessageRole.Assistant ? message.toolCalls ?? [] : []
+      message.role === MessageRole.Assistant ? (message.toolCalls ?? []) : []
     );
     expect(calls.map((call) => call.function.name)).toContain('attachments_read');
     expect(

@@ -24,14 +24,13 @@ const createClientMock = (
 
 const createWrapper =
   (inventoryApi: EntityInventoryApiClient) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-        <EntityInventorySearchProvider entityCategory="hosts">
-          {children}
-        </EntityInventorySearchProvider>
-      </KibanaContextProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
+      <EntityInventorySearchProvider entityCategory="hosts">
+        {children}
+      </EntityInventorySearchProvider>
+    </KibanaContextProvider>
+  );
 
 const renderUseEntityList = (inventoryApi: EntityInventoryApiClient, entityType = 'host') =>
   renderHook(() => ({ search: useEntityInventorySearch(), result: useEntityList(entityType) }), {

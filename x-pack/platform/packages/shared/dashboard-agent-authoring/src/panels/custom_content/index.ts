@@ -31,8 +31,7 @@ import { defineRequestPanelKind } from '../panel_kind';
  * the one way the builder is told: `dataQueries`, or `removeAllQueries` for static content.
  */
 export interface CustomContentPanelAddRequest
-  extends PanelResolutionRequestBase,
-    CustomContentQueryChanges {
+  extends PanelResolutionRequestBase, CustomContentQueryChanges {
   renderer: 'custom_content';
   /** What to display. */
   nlQuery: string;
@@ -41,8 +40,7 @@ export interface CustomContentPanelAddRequest
 
 /** Request to refine an existing custom content panel's template. */
 export interface CustomContentPanelEditRequest
-  extends PanelResolutionRequestBase,
-    CustomContentQueryChanges {
+  extends PanelResolutionRequestBase, CustomContentQueryChanges {
   renderer: 'custom_content';
   existingPanel: AttachmentPanel;
   /** What to change. Omitted when the edit only changes the query. */

@@ -218,9 +218,11 @@ export const TopFailingMonitors = ({
                     size="xs"
                     css={css`
                       position: absolute;
-                      left: ${barWidthPct > 30
-                        ? euiTheme.size.xs
-                        : `calc(${barWidthPct}% + ${euiTheme.size.xs})`};
+                      left: ${
+                        barWidthPct > 30
+                          ? euiTheme.size.xs
+                          : `calc(${barWidthPct}% + ${euiTheme.size.xs})`
+                      };
                       top: 50%;
                       transform: translateY(-50%);
                       font-weight: ${euiTheme.font.weight.medium};

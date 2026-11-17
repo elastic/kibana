@@ -89,14 +89,14 @@ export const useChangeHistoryCompare = ({
     baselineChangeId === selectedChangeId
       ? selectedChange
       : loadedBaselineChange?.id === baselineChangeId
-      ? loadedBaselineChange
-      : undefined;
+        ? loadedBaselineChange
+        : undefined;
   const targetChange =
     targetChangeId === selectedChangeId
       ? selectedChange
       : loadedTargetChange?.id === targetChangeId
-      ? loadedTargetChange
-      : undefined;
+        ? loadedTargetChange
+        : undefined;
 
   const isLoadingCompareContext =
     (shouldLoadBaseline && isLoadingBaseline) || (shouldLoadTarget && isLoadingTarget);

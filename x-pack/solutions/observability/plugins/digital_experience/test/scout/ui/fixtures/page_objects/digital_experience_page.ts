@@ -88,7 +88,10 @@ export class DigitalExperiencePage {
   public readonly classicRumPageLoadMetric: Locator;
   public readonly classicRumServiceSelect: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.mainContainer = page.getByTestId('digitalExperienceMainContainer');
     this.applicationsTable = page.components.basicTable('digitalExperienceApplicationsTable');
     this.environmentFilter = page.getByTestId('digitalExperienceEnvironmentFilter');

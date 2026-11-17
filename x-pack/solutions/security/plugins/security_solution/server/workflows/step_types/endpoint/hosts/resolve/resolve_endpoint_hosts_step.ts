@@ -462,8 +462,8 @@ const buildSelectionResult = (
     status = parts.unauthorized.includes('host_enrollments')
       ? 'unauthorized'
       : parts.unavailable.length > 0
-      ? 'unavailable'
-      : 'not_found';
+        ? 'unavailable'
+        : 'not_found';
     hosts = [];
   }
 

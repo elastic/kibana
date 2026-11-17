@@ -175,7 +175,7 @@ export const listInvestigationStateSets = async ({
           // Same rule as the per-event resolver, so a row, the filter and the facets agree.
           byEpisode.set(
             episodeId,
-            current ? pickInvestigation([current, summary]) ?? summary : summary
+            current ? (pickInvestigation([current, summary]) ?? summary) : summary
           );
         }
       }

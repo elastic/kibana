@@ -141,7 +141,7 @@ export const dreamingTypesOf = ({
   return {
     facts: facts ?? [],
     entities: nodes,
-    relationships: nodes.length > 0 ? relationships ?? [] : [],
+    relationships: nodes.length > 0 ? (relationships ?? []) : [],
   };
 };
 

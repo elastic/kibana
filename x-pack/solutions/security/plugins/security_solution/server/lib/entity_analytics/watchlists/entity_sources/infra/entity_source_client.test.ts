@@ -563,7 +563,7 @@ describe('WatchlistEntitySourceClient', () => {
       });
       soClient.update.mockImplementation(
         async (_type: string, id: string, attrs: Record<string, unknown>) =>
-          ({ id, attributes: { ...sources[id], ...attrs } } as never)
+          ({ id, attributes: { ...sources[id], ...attrs } }) as never
       );
     };
 

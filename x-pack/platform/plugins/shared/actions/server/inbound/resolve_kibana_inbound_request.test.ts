@@ -157,7 +157,7 @@ describe('resolveKibanaInboundRequest', () => {
           name: CLOUD_SERVICE_ACCOUNT_REALM_TYPE,
           type: CLOUD_SERVICE_ACCOUNT_REALM_TYPE,
         },
-      } as never);
+      }) as never;
 
     const inboundRequestFor = (
       extraHeaders: Record<string, string | string[] | undefined> = {

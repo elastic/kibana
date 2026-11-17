@@ -257,9 +257,8 @@ apiTest.describe(
         expect(typeof send.body.results[0].workflow_execution_id).toBe('string');
 
         const [{ workflow_execution_id: executionId }] = send.body.results;
-        const execution = await apiServices.alertingV2.workflows.waitForCompletedExecution(
-          executionId
-        );
+        const execution =
+          await apiServices.alertingV2.workflows.waitForCompletedExecution(executionId);
         expect(execution).toMatchObject({ isTestRun: true, workflowId });
 
         const [alert] = payload.alerts;

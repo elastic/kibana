@@ -100,8 +100,8 @@ export const VegaEditorBody = ({
   const dataViews = specDataViews?.length
     ? specDataViews
     : defaultDataView
-    ? [defaultDataView]
-    : [];
+      ? [defaultDataView]
+      : [];
   // Filters on the only ad-hoc data view are stored without its id, because the id isn't a
   // saved object and a reference to it fails import. The search bar gets the id back, because the
   // filter editor opens an empty filter when it can't match one.

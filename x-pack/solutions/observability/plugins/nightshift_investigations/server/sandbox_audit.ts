@@ -134,13 +134,13 @@ const auditEvent = (rpc: SandboxRpcInfo, caller: SandboxCaller, spaceId?: string
               execution_id: caller.toolCallId,
             }
           : caller.type === 'workflow_step'
-          ? {
-              plugin_id: PLUGIN_ID,
-              type: 'workflow_step',
-              id: caller.stepType,
-              ...(caller.workflowExecutionId ? { execution_id: caller.workflowExecutionId } : {}),
-            }
-          : { plugin_id: PLUGIN_ID, type: 'findings_recorder', id: 'final_pass' },
+            ? {
+                plugin_id: PLUGIN_ID,
+                type: 'workflow_step',
+                id: caller.stepType,
+                ...(caller.workflowExecutionId ? { execution_id: caller.workflowExecutionId } : {}),
+              }
+            : { plugin_id: PLUGIN_ID, type: 'findings_recorder', id: 'final_pass' },
     },
     ...(caller.type === 'workflow_step' ? { labels: { step_id: caller.stepId } } : {}),
     sandbox: {

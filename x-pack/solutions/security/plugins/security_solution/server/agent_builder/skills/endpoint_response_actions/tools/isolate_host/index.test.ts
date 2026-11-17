@@ -206,7 +206,7 @@ describe('isolateHostTool', () => {
             isPlatinumPlus: () => false,
             isEnterprise: () => false,
             getLicenseInformation: () => ({ isAvailable: true, isActive: true }),
-          } as unknown as ReturnType<EndpointAppContextService['getLicenseService']>)
+          }) as unknown as ReturnType<EndpointAppContextService['getLicenseService']>
       ) as unknown as EndpointAppContextService['getLicenseService'];
 
       const mockResponseActionsClient = { isolate: jest.fn() };
@@ -236,7 +236,7 @@ describe('isolateHostTool', () => {
             isPlatinumPlus: () => false,
             isEnterprise: () => false,
             getLicenseInformation: () => ({ isAvailable: true, isActive: true }),
-          } as unknown as ReturnType<EndpointAppContextService['getLicenseService']>)
+          }) as unknown as ReturnType<EndpointAppContextService['getLicenseService']>
       ) as unknown as EndpointAppContextService['getLicenseService'];
 
       const card = await tool.confirmation?.getConfirmation?.({
@@ -264,9 +264,9 @@ describe('isolateHostTool', () => {
         .mockResolvedValue(getEndpointAuthzInitialStateMock({ canIsolateHost: false }));
       mockEndpointAppContextService.getProductFeaturesService = jest.fn(
         () =>
-          ({ isEnabled: () => false } as unknown as ReturnType<
+          ({ isEnabled: () => false }) as unknown as ReturnType<
             EndpointAppContextService['getProductFeaturesService']
-          >)
+          >
       ) as unknown as EndpointAppContextService['getProductFeaturesService'];
 
       const mockResponseActionsClient = { isolate: jest.fn() };
@@ -292,9 +292,9 @@ describe('isolateHostTool', () => {
         .mockResolvedValue(getEndpointAuthzInitialStateMock({ canIsolateHost: false }));
       mockEndpointAppContextService.getProductFeaturesService = jest.fn(
         () =>
-          ({ isEnabled: () => false } as unknown as ReturnType<
+          ({ isEnabled: () => false }) as unknown as ReturnType<
             EndpointAppContextService['getProductFeaturesService']
-          >)
+          >
       ) as unknown as EndpointAppContextService['getProductFeaturesService'];
 
       const card = await tool.confirmation?.getConfirmation?.({

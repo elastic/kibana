@@ -65,7 +65,7 @@ export const getLifecycleTimelineLayout = (
     (acc, { period, startLabel: periodStartLabel, range }, index) => {
       const isLast = index === visible.length - 1;
       // A period with no end is as wide as the one before it.
-      const grow = Number.isFinite(range) ? range / maxRange : acc[index - 1]?.grow ?? 1;
+      const grow = Number.isFinite(range) ? range / maxRange : (acc[index - 1]?.grow ?? 1);
 
       acc.push({
         period,

@@ -90,12 +90,12 @@ const client = ({
   delete?: jest.Mock;
   index?: jest.Mock;
 } = {}) =>
-  ({ get, search, delete: deleteDoc, index } as unknown as Client & {
+  ({ get, search, delete: deleteDoc, index }) as unknown as Client & {
     get: jest.Mock;
     search: jest.Mock;
     delete: jest.Mock;
     index: jest.Mock;
-  });
+  };
 
 describe('snapshotDecisionTree', () => {
   it('reads every version page before treating the snapshot as complete', async () => {

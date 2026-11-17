@@ -325,30 +325,30 @@ export const convertSmithy = (
     const servers = prefixedServer
       ? [prefixedServer]
       : expressControl
-      ? [
-          {
-            url: `https://${endpointPrefix}express-control.{region}.amazonaws.com`,
-            variables: { region: { default: 'us-east-1' } },
-          },
-        ]
-      : hostLabel && uri.startsWith(`/{${hostLabel}}`)
-      ? [
-          // Regional, dual-stack (IPv6) and Transfer Acceleration hosts.
-          ...[
-            `${endpointPrefix}.{region}`,
-            `${endpointPrefix}.dualstack.{region}`,
-            `${endpointPrefix}-accelerate`,
-            `${endpointPrefix}-accelerate.dualstack`,
-          ].map((host) => ({
-            url: `https://{${hostLabel}}.${host}.amazonaws.com`,
-            variables: {
-              [hostLabel]: { default: 'example', 'x-path-parameter': true },
-              ...(host.includes('{region}') ? { region: { default: 'us-east-1' } } : {}),
+        ? [
+            {
+              url: `https://${endpointPrefix}express-control.{region}.amazonaws.com`,
+              variables: { region: { default: 'us-east-1' } },
             },
-          })),
-          regionalServer,
-        ]
-      : undefined;
+          ]
+        : hostLabel && uri.startsWith(`/{${hostLabel}}`)
+          ? [
+              // Regional, dual-stack (IPv6) and Transfer Acceleration hosts.
+              ...[
+                `${endpointPrefix}.{region}`,
+                `${endpointPrefix}.dualstack.{region}`,
+                `${endpointPrefix}-accelerate`,
+                `${endpointPrefix}-accelerate.dualstack`,
+              ].map((host) => ({
+                url: `https://{${hostLabel}}.${host}.amazonaws.com`,
+                variables: {
+                  [hostLabel]: { default: 'example', 'x-path-parameter': true },
+                  ...(host.includes('{region}') ? { region: { default: 'us-east-1' } } : {}),
+                },
+              })),
+              regionalServer,
+            ]
+          : undefined;
     const input = membersOf(model, operation.input?.target);
     const output = forResponse(membersOf(model, operation.output?.target));
     const parameters = input.flatMap(([memberName, member]): Node[] => {

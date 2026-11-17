@@ -45,7 +45,7 @@ const metadataWith = (key: string, ...values: string[]): Metadata => {
  * let a header with a control character through, so a response cannot carry one today.
  */
 const unvalidatedMetadata = (value: string): Metadata =>
-  ({ get: () => [value] } as unknown as Metadata);
+  ({ get: () => [value] }) as unknown as Metadata;
 
 /**
  * Plays a response back the way grpc-js does for a unary call: initial metadata, then the callback

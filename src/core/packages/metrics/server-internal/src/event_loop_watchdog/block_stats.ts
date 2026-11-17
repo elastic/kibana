@@ -63,7 +63,10 @@ export class BlockStats {
   private periodStart: number;
   private phases: Record<Phase, PhaseStats>;
 
-  constructor(private readonly thresholdsMs: Readonly<Record<Phase, number>>, now: number) {
+  constructor(
+    private readonly thresholdsMs: Readonly<Record<Phase, number>>,
+    now: number
+  ) {
     this.periodStart = now;
     this.phases = this.emptyPhases();
   }

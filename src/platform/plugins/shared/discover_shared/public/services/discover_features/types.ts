@@ -158,7 +158,7 @@ interface SecuritySolutionAlertFlyoutRenderProps extends DocViewRenderProps {
  */
 interface SecuritySolutionOverviewTabFeature<
   TId extends string,
-  TRenderProps extends DocViewRenderProps
+  TRenderProps extends DocViewRenderProps,
 > {
   id: TId;
   render: (props: TRenderProps & DocViewRestorableStateProps) => JSX.Element;

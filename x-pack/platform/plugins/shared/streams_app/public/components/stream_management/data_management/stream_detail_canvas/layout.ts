@@ -194,7 +194,7 @@ export const getConnectedNodeIds = (
   const pending = [...connected];
   while (pending.length > 0) {
     const id = pending.pop();
-    (id === undefined ? [] : neighbors.get(id) ?? []).forEach((neighborId) => {
+    (id === undefined ? [] : (neighbors.get(id) ?? [])).forEach((neighborId) => {
       if (!connected.has(neighborId)) {
         connected.add(neighborId);
         pending.push(neighborId);

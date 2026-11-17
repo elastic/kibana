@@ -92,7 +92,7 @@ const setup = () => {
 };
 
 const chunk = (text: string): ChatEvent =>
-  ({ type: ChatEventType.messageChunk, data: { message_id: 'm', text_chunk: text } } as ChatEvent);
+  ({ type: ChatEventType.messageChunk, data: { message_id: 'm', text_chunk: text } }) as ChatEvent;
 
 const streamToCompletion = (source: Subject<ChatEvent>) => {
   source.next(started as ChatEvent);

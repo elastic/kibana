@@ -49,7 +49,7 @@ const createMockItem = (overrides: Partial<ArtifactItem> = {}): ArtifactItem =>
     updated_by: 'elastic',
     _version: 'WzEsMV0=',
     ...overrides,
-  } as ArtifactItem);
+  }) as ArtifactItem;
 
 describe('findEndpointArtifactsStepDefinition', () => {
   let mockContextManager: jest.Mocked<Context['contextManager']>;

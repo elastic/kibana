@@ -262,8 +262,8 @@ const discoveryCompletedRoute = createServerRoute({
     const durationMs = !execution
       ? undefined
       : execution.finishedAt
-      ? execution.duration ?? undefined
-      : Date.now() - Date.parse(execution.startedAt);
+        ? (execution.duration ?? undefined)
+        : Date.now() - Date.parse(execution.startedAt);
 
     telemetry.trackSignificantEventsDiscoveryCompleted(
       {

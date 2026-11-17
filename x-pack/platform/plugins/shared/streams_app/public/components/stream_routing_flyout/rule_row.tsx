@@ -341,13 +341,13 @@ export function RoutingRuleRow({
         defaultMessage: 'Creating route rule',
       })
     : isCatchAll
-    ? i18n.translate('xpack.streams.routingFlyout.rule.defaultTitle', {
-        defaultMessage: 'Default',
-      })
-    : i18n.translate('xpack.streams.routingFlyout.rule.title', {
-        defaultMessage: 'Rule {position}',
-        values: { position },
-      });
+      ? i18n.translate('xpack.streams.routingFlyout.rule.defaultTitle', {
+          defaultMessage: 'Default',
+        })
+      : i18n.translate('xpack.streams.routingFlyout.rule.title', {
+          defaultMessage: 'Rule {position}',
+          values: { position },
+        });
   const deleteLabel = i18n.translate('xpack.streams.routingFlyout.rule.deleteLabel', {
     defaultMessage: 'Delete rule {position}',
     values: { position },

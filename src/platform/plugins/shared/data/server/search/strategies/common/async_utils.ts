@@ -80,8 +80,8 @@ export function getCommonDefaultAsyncGetParams(
     ...(options.pollLength
       ? { wait_for_completion_timeout: options.pollLength }
       : config.asyncSearch.pollLength
-      ? { wait_for_completion_timeout: `${config.asyncSearch.pollLength.asMilliseconds()}ms` }
-      : {}),
+        ? { wait_for_completion_timeout: `${config.asyncSearch.pollLength.asMilliseconds()}ms` }
+        : {}),
     ...(useSearchSessions && options.isStored
       ? // Use session's keep_alive if search belongs to a stored session
         options.isSearchStored || options.isRestore // if search was already stored and extended, then no need to extend keepAlive

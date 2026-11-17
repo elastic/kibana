@@ -47,7 +47,7 @@ const createContext = (input: Record<string, unknown>) =>
         execution: { id: 'investigation-exec-1' },
       }),
     },
-  } as never);
+  }) as never;
 
 const setup = ({
   rounds = [{ id: 'round-1', started_at: DURING_RUN, steps: [] }],

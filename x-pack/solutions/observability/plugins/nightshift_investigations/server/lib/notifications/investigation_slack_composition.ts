@@ -121,8 +121,8 @@ const findingsOf = ({ summary, verdict, impact }: NotifiableInvestigation): Find
           tail: affected,
         }
       : affected
-      ? { label: 'Impact', lead: affected, detail: '' }
-      : undefined,
+        ? { label: 'Impact', lead: affected, detail: '' }
+        : undefined,
     concluded && { label: 'Conclusion', lead: concluded.lead, detail: concluded.rest },
   ];
   // A lead another finding already states moves into its details, so no sentence is lost.

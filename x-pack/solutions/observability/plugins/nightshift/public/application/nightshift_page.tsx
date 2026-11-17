@@ -527,8 +527,8 @@ export function NightshiftPage(): React.ReactElement | null {
               canUseAutomationsPage
                 ? false
                 : isOnboarding || onboarding.isLoading
-                ? ONBOARDING_MAX_WIDTH
-                : '1000px'
+                  ? ONBOARDING_MAX_WIDTH
+                  : '1000px'
             }
           >
             {canUseAutomationsPage ? (

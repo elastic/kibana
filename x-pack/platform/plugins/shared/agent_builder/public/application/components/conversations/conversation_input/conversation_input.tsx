@@ -370,8 +370,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const placeholder = isAgentDeleted
     ? disabledPlaceholder(agentId)
     : isBoundAgentForbidden
-    ? labels.executionIdentity.chatForbiddenPlaceholder
-    : enabledPlaceholder;
+      ? labels.executionIdentity.chatForbiddenPlaceholder
+      : enabledPlaceholder;
 
   const editorContainerStyles = css`
     display: flex;

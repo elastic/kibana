@@ -1319,8 +1319,8 @@ export class NightshiftInvestigationsClient {
         ...(typeof context?.is_follow_up === 'boolean'
           ? { is_follow_up: context.is_follow_up }
           : entryPoint === 'alert_recovery'
-          ? { is_follow_up: true }
-          : {}),
+            ? { is_follow_up: true }
+            : {}),
         ...(asString(context?.nightshift_automation_id)
           ? { automation_id: asString(context?.nightshift_automation_id) }
           : {}),

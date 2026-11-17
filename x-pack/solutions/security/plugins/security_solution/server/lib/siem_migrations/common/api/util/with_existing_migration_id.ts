@@ -37,8 +37,8 @@ export const withExistingMigration = <
       | SiemWorkflowMigrationsClient = pathParts.includes('workflows')
       ? ctx.securitySolution.siemMigrations.getWorkflowsClient()
       : pathParts.includes('rules')
-      ? ctx.securitySolution.siemMigrations.getRulesClient()
-      : ctx.securitySolution.siemMigrations.getDashboardsClient();
+        ? ctx.securitySolution.siemMigrations.getRulesClient()
+        : ctx.securitySolution.siemMigrations.getDashboardsClient();
     const storedMigration = await migrationsClient.data.migrations.get(migrationId);
 
     if (!storedMigration) {

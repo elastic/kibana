@@ -54,7 +54,7 @@ describe('createSharedServices', () => {
       () => savedObjectsClientMock.create(),
       () => uiSettingsServiceMock.createStartContract(),
       () => null,
-      () => ({} as DataViewsPluginStart),
+      () => ({}) as DataViewsPluginStart,
       () => securityServiceMock.createStart().audit,
       () => Promise.resolve(),
       null,

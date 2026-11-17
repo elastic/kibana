@@ -28,7 +28,7 @@ describe('readTraceTranscripts step', () => {
   const run = (stepInput: Record<string, unknown> = input) =>
     getReadTraceTranscriptsStepDefinition(
       {
-        getAiIndexService: () => ({ get } as unknown as AiIndexService),
+        getAiIndexService: () => ({ get }) as unknown as AiIndexService,
         isContextEngineEnabled: async () => true,
         isMemoryEnabled: async () => memoryEnabled,
         checkReadPrivilege: async () => canRead,

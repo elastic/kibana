@@ -769,7 +769,7 @@ describe('buildPackageVars — stored secret refs', () => {
 
 describe('buildStreamVars — package vars from the shared settings', () => {
   const def = (name: string, extra: object = {}) =>
-    ({ name, type: 'text', title: name, show_user: false, ...extra } as any);
+    ({ name, type: 'text', title: name, show_user: false, ...extra }) as any;
   const dsVars = (vars: Record<string, string | string[]> = {}) => ({
     enabledInputs: ['aws-s3'],
     varsByInput: { 'aws-s3': vars },

@@ -62,7 +62,7 @@ describe('section', () => {
   it('falls back to a level 3 header when its children exceed a container', () => {
     const body = Array.from(
       { length: SLACK_LIMITS.containerChildBlocks + 1 },
-      () => ({ type: 'divider' } as const)
+      () => ({ type: 'divider' }) as const
     );
     const [first] = slack(section({ title: 'Impact', body }));
 

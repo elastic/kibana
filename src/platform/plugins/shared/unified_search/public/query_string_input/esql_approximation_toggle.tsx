@@ -54,7 +54,7 @@ const getLabels = (
       ? i18n.translate('unifiedSearch.esqlApproximationToggle.invalidLicenseText', {
           defaultMessage: 'Upgrade to Enterprise license to enable fast mode.',
         })
-      : additionalDisabledText ?? additionalText;
+      : (additionalDisabledText ?? additionalText);
     return {
       tooltipContent: (
         <>

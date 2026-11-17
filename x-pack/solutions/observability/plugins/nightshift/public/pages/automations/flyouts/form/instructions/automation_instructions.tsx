@@ -114,8 +114,8 @@ export const AutomationInstructions = ({
             isScheduled
               ? labels.schedulePlaceholder
               : trigger.kind === 'alert'
-              ? labels.alertPlaceholder
-              : labels.slackPlaceholder
+                ? labels.alertPlaceholder
+                : labels.slackPlaceholder
           }
           value={instructions}
           onChange={(event) => onInstructionsChange(event.target.value)}

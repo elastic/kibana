@@ -33,7 +33,7 @@ const createHit = (id: string, index = '.alerts-security.alerts-default') =>
     id,
     raw: { _id: id, _index: index, fields: { 'kibana.alert.rule.name': ['rule'] } },
     flattened: {},
-  } as unknown as DataTableRecord);
+  }) as unknown as DataTableRecord;
 
 const hit = createHit('alert-1');
 

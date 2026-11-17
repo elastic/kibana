@@ -307,8 +307,8 @@ export class WorkflowSearchService {
           { updated_at: { order: 'desc' as const } },
         ]
       : query
-      ? ['_score' as const, { updated_at: { order: 'desc' as const } }]
-      : [{ updated_at: { order: 'desc' as const } }];
+        ? ['_score' as const, { updated_at: { order: 'desc' as const } }]
+        : [{ updated_at: { order: 'desc' as const } }];
 
     const searchResponse = await this.deps.workflowStorage.getClient().search({
       size,

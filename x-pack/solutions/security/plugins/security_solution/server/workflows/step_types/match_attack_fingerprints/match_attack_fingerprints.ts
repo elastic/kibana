@@ -345,7 +345,7 @@ const toStored = (hit: {
     return undefined;
   }
   return {
-    id: typeof source.id === 'string' ? source.id : hit._id ?? '',
+    id: typeof source.id === 'string' ? source.id : (hit._id ?? ''),
     investigationId,
     alertIds: asStringList(attributes.alert_ids),
     analyzedAlertIds:
@@ -578,8 +578,8 @@ const extensionDoc = (
   const incoming = withholdAlertIds
     ? []
     : limitToAnalyzed
-    ? sharedIds(span.alertIds, analyzedIdsOf(current))
-    : span.alertIds;
+      ? sharedIds(span.alertIds, analyzedIdsOf(current))
+      : span.alertIds;
   const alertIds = uniqueSorted([...current.alertIds, ...incoming]);
   const storedIds = new Set(current.alertIds);
   const added = uniqueSorted(incoming).filter((id) => !storedIds.has(id)).length;

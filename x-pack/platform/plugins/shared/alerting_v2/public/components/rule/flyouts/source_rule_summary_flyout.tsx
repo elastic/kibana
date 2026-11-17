@@ -126,7 +126,7 @@ export const SourceRuleSummaryFlyout = ({
   const uiSettings = useService(CoreStart('uiSettings'));
   const dateFormat: string = uiSettings.get('dateFormat');
 
-  const ruleName = rule ? rule.metadata?.name ?? rule.id : RULE_SUMMARY_FLYOUT_TITLE;
+  const ruleName = rule ? (rule.metadata?.name ?? rule.id) : RULE_SUMMARY_FLYOUT_TITLE;
   const tags = rule?.metadata?.tags ?? [];
   const conditionItems = rule ? buildConditionItems(rule, ruleCategory) : [];
   const metadataItems = rule ? buildMetadataItems(rule, dateFormat) : [];

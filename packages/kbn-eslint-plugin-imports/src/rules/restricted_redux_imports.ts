@@ -74,8 +74,8 @@ export const RestrictedReduxImportsRule: CreateOnceRule = {
           specifier.type === 'ImportSpecifier'
             ? specifier.imported
             : specifier.type === 'ExportSpecifier'
-            ? specifier.local
-            : undefined;
+              ? specifier.local
+              : undefined;
         const name = imported?.type === 'Identifier' ? imported.name : imported?.value;
         if (typeof name !== 'string' || !restriction.importNames.includes(name)) continue;
         context.report({

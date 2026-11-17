@@ -74,7 +74,7 @@ describe('getDuplicate', () => {
               ) =>
                 Boolean(
                   incomingState.variable_name &&
-                    incomingState.variable_name === existingState.variable_name
+                  incomingState.variable_name === existingState.variable_name
                 ),
             }
           : {

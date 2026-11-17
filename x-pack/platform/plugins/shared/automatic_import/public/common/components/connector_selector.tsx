@@ -127,7 +127,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
       return;
     }
     const isSelectedAvailable = connectors.some(({ id }) => id === selectedId);
-    const nextId = isSelectedAvailable ? selectedId : defaultConnectorId ?? '';
+    const nextId = isSelectedAvailable ? selectedId : (defaultConnectorId ?? '');
     if (nextId !== selectedId) {
       setFieldValue(nextId);
     }

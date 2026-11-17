@@ -70,7 +70,7 @@ export const ColorStopsOrdinal = ({
         aria-label={i18n.translate('xpack.maps.styles.colorStops.ordinalStop.stopLabel', {
           defaultMessage: 'Stop',
         })}
-        value={index === 0 ? '' : stop ?? ''}
+        value={index === 0 ? '' : (stop ?? '')}
         onChange={handleOnChangeEvent}
         compressed
         disabled={index === 0}

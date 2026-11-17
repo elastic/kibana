@@ -281,7 +281,7 @@ export const getInlinePanelKindGuidance = (): string =>
 /** The resolution request of the kind with the given renderer. */
 type RequestForRenderer<
   Renderer extends RegisteredPanelRenderer,
-  Request = PanelResolutionRequest
+  Request = PanelResolutionRequest,
 > = Request extends { renderer?: infer Renderers }
   ? Renderer extends Renderers
     ? Request

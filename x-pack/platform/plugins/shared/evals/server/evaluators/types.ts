@@ -69,8 +69,9 @@ export interface RegisteredEvaluatorDefinition<ReferenceData = Record<string, un
   evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;
 }
 
-export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>>
-  extends RegisteredEvaluatorDefinition<ReferenceData> {
+export interface EvaluatorDefinition<
+  ReferenceData = Record<string, unknown>,
+> extends RegisteredEvaluatorDefinition<ReferenceData> {
   origin: EvaluatorOrigin;
 }
 

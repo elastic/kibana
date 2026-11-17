@@ -22,13 +22,13 @@ const buildDefinition = (stepName: string, type: string): WorkflowYaml =>
     enabled: true,
     triggers: [],
     steps: [{ name: stepName, type, 'connector-id': 'connector-1', with: {} }],
-  } as unknown as WorkflowYaml);
+  }) as unknown as WorkflowYaml;
 
 const buildExecution = (
   stepId: string,
   stepType: string,
   extra: Partial<WorkflowStepExecutionDto> = {}
-) => ({ stepId, stepType, ...extra } as unknown as WorkflowStepExecutionDto);
+) => ({ stepId, stepType, ...extra }) as unknown as WorkflowStepExecutionDto;
 
 describe('useStepAi', () => {
   it('does not return AI metadata for a Slack step that only has a connector-id', () => {

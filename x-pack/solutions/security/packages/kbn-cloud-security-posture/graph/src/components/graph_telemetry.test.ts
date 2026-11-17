@@ -272,7 +272,7 @@ describe('GraphTelemetryEvent new event typing', () => {
         state: 'show';
         nodesAdded: true;
         nodesLimitReached: false;
-      }>
+      }>,
     ] = [true, false, false, false];
 
     expect(results).toEqual([true, false, false, false]);
@@ -287,7 +287,7 @@ describe('GraphTelemetryEvent new event typing', () => {
       IsAssignable<{ type: 'grouped_panel_opened'; nodeType: 'grouped_entity' }>,
       IsAssignable<{ type: 'grouped_panel_opened'; nodeType: 'entity' }>,
       IsAssignable<{ type: 'grouped_item_viewed'; itemType: 'alert' }>,
-      IsAssignable<{ type: 'grouped_item_viewed'; itemType: 'node' }>
+      IsAssignable<{ type: 'grouped_item_viewed'; itemType: 'node' }>,
     ] = [true, false, true, false, true, false, true, false];
 
     expect(results).toEqual([true, false, true, false, true, false, true, false]);

@@ -109,13 +109,13 @@ const toRecord = (source: DecisionTreeLearningSource): LearningRecord => ({
   ...(source.tree_id ? { tree_id: source.tree_id } : {}),
   ...(source.category ? { category: source.category } : {}),
   ...(source.connector_name ? { connector_name: source.connector_name } : {}),
-  ...(source.attributes?.conversation_id ?? source.conversation_id
+  ...((source.attributes?.conversation_id ?? source.conversation_id)
     ? { conversation_id: source.attributes?.conversation_id ?? source.conversation_id }
     : {}),
-  ...(source.attributes?.round_id ?? source.round_id
+  ...((source.attributes?.round_id ?? source.round_id)
     ? { round_id: source.attributes?.round_id ?? source.round_id }
     : {}),
-  ...(source.attributes?.workflow_execution_id ?? source.workflow_execution_id
+  ...((source.attributes?.workflow_execution_id ?? source.workflow_execution_id)
     ? {
         workflow_execution_id:
           source.attributes?.workflow_execution_id ?? source.workflow_execution_id,

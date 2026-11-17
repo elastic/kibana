@@ -18,7 +18,7 @@ const heldBy = (executionId: string, record?: NormalizedConversation['execution'
   ({
     active_execution: { execution_id: executionId },
     ...(record ? { execution: record } : {}),
-  } as NormalizedConversation);
+  }) as NormalizedConversation;
 
 const heartbeatAgo = (seconds: number) => ({
   status: ExecutionStatus.running,

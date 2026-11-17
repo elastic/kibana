@@ -110,7 +110,7 @@ export function SessionsFilters({
   useEffect(
     () =>
       setSearch((current) =>
-        current.trim() === (state.search ?? '') ? current : state.search ?? ''
+        current.trim() === (state.search ?? '') ? current : (state.search ?? '')
       ),
     [state.search]
   );

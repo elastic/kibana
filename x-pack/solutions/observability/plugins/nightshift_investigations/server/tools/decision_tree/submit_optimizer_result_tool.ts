@@ -1028,7 +1028,8 @@ const persistSubmission = async ({
       action: existing ? (reinforced ? 'reinforce' : 'update') : 'create',
       version: head?.version ?? (existing ? existing.version + 1 : 1),
       ...(existing ? { before_status: existing.status, before_content: existing.markdown } : {}),
-      after_status: head?.status ?? (reinforced ? 'established' : existing?.status ?? 'tentative'),
+      after_status:
+        head?.status ?? (reinforced ? 'established' : (existing?.status ?? 'tentative')),
       after_content: afterContent,
     });
   try {
