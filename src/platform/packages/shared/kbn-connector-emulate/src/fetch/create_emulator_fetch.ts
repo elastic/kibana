@@ -123,7 +123,8 @@ export type EmulatorSpec = OpenApiDocument | GraphQLSpec | McpSpec | SmithyModel
 /**
  * What to do with operations whose schemas have defects that break validation: fail to load
  * (`throw`, the default), or leave them out and list them in `invalidOperations` (`skip`), as a
- * recorder does so a broken operation no action calls doesn't stop the others.
+ * recorder does so a broken operation no action calls doesn't stop the others. A request for a
+ * left-out operation is answered 404 naming it, not routed to another operation it also fits.
  */
 export type InvalidSchemasMode = 'throw' | 'skip';
 
@@ -277,7 +278,9 @@ const toNamedSpecs = (
 // as Microsoft Graph, so mocks created from the same document share its operations.
 interface LoadedSpec {
   readonly operations: ContractOperation[];
-  /** The operations left out, as their schemas have defects. */
+  /** The operations left out, as their schemas have defects; still routed, so answered 404. */
+  readonly broken: ContractOperation[];
+  /** The defects of the broken operations' schemas. */
   readonly invalid: InvalidSchemaFailure[];
 }
 
@@ -295,7 +298,7 @@ const loadSpec = (
     loaded.get(key) ??
     (invalidSchemas === 'skip'
       ? loadValidContractOperations(document, source)
-      : { operations: loadContractOperations(document, source), invalid: [] });
+      : { operations: loadContractOperations(document, source), broken: [], invalid: [] });
   loaded.set(key, spec);
   return spec;
 };
@@ -336,6 +339,7 @@ const loadSpecs = (
   });
   return {
     operations: loaded.flatMap(({ operations }) => operations),
+    broken: loaded.flatMap(({ broken }) => broken),
     invalid: loaded.flatMap(({ invalid }) => invalid),
   };
 };
@@ -421,7 +425,11 @@ export const createEmulatorFetch = ({
   }
   const maxCapturedCalls =
     captureOptions && (captureOptions.maxCalls ?? DEFAULT_MAX_CAPTURED_CALLS);
-  const { operations, invalid: invalidOperations } = loadSpecs(specs, invalidSchemas);
+  const {
+    operations,
+    broken: brokenOperations,
+    invalid: invalidOperations,
+  } = loadSpecs(specs, invalidSchemas);
   // The spec's API key parameters are redacted too, whatever their name.
   const captureExchange =
     captureOptions && createCaptureExchange(captureOptions, toCredentialNames(operations));
@@ -458,7 +466,8 @@ export const createEmulatorFetch = ({
     {
       isPreferred: ({ spec: { source }, method, path }) =>
         preferred.has(`${source ?? ''} ${method} ${path}`),
-    }
+    },
+    brokenOperations
   );
   const awsJsonServices = loadAwsJsonServices(specs);
   const state = new Map<unknown, unknown>();

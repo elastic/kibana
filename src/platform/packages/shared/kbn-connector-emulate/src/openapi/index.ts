@@ -29,24 +29,31 @@ export const loadContractOperations = (
 };
 
 /**
- * Like {@link loadContractOperations}, but leaves out the operations whose schemas have defects
- * instead of failing, and lists them, so one broken operation doesn't take the spec down.
+ * Like {@link loadContractOperations}, but sets apart the operations whose schemas have defects
+ * instead of failing (`broken`), and lists the defects, so one broken operation doesn't take the
+ * spec down.
  */
 export const loadValidContractOperations = (
   document: OpenApiDocument,
   source?: string
-): { operations: ContractOperation[]; invalid: InvalidSchemaFailure[] } => {
+): {
+  operations: ContractOperation[];
+  broken: ContractOperation[];
+  invalid: InvalidSchemaFailure[];
+} => {
   const operations = normalizeOperations(loadOperations(document, source));
   try {
     assertSchemasValid(operations);
-    return { operations, invalid: [] };
+    return { operations, broken: [], invalid: [] };
   } catch (error) {
     if (!(error instanceof InvalidSchemaError)) {
       throw error;
     }
-    const broken = new Set(error.failures.map(({ operation }) => operation));
+    const described = new Set(error.failures.map(({ operation }) => operation));
+    const isBroken = (operation: ContractOperation) => described.has(describeOperation(operation));
     return {
-      operations: operations.filter((operation) => !broken.has(describeOperation(operation))),
+      operations: operations.filter((operation) => !isBroken(operation)),
+      broken: operations.filter(isBroken),
       invalid: [...error.failures],
     };
   }

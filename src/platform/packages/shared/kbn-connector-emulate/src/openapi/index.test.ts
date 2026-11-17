@@ -78,7 +78,7 @@ describe('loadContractOperations', () => {
 describe('loadValidContractOperations', () => {
   it('leaves out the operations whose schemas have defects, and lists them', () => {
     const document = documentWith({ Item: { $ref: '#/components/schemas/Missing' } });
-    const { operations, invalid } = loadValidContractOperations({
+    const { operations, broken, invalid } = loadValidContractOperations({
       ...document,
       paths: {
         ...document.paths,
@@ -87,6 +87,7 @@ describe('loadValidContractOperations', () => {
     });
 
     expect(operations.map(({ method, path }) => `${method} ${path}`)).toEqual(['get /health']);
+    expect(broken.map(({ method, path }) => `${method} ${path}`)).toEqual(['post /items']);
     expect(invalid).toEqual([
       expect.objectContaining({
         operation: 'POST /items',
