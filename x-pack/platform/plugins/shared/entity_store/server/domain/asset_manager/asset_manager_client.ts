@@ -36,9 +36,12 @@ import {
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import {
+  LIFECYCLE_ACTION,
   installSystemEventsStreams,
   uninstallSystemEventsStreams,
+  type LifecycleEventInput,
   type SystemEventsDashboardClient,
+  type SystemEventsWriter,
 } from '../system_events';
 import { deleteLegacyRemoteStateSavedObjects } from '../saved_objects/remote_log_extraction_state/types';
 import type { LogExtractionConfig } from '../saved_objects';
@@ -113,6 +116,7 @@ interface AssetManagerDependencies {
   isLegacySecurityAssetsMigrationEnabled?: () => Promise<boolean>;
   isDualProcessEnabled?: () => Promise<boolean>;
   systemEventsDashboard?: SystemEventsDashboardClient;
+  systemEventsWriter?: SystemEventsWriter;
 }
 
 export class AssetManagerClient {
@@ -131,6 +135,7 @@ export class AssetManagerClient {
   private readonly isLegacySecurityAssetsMigrationEnabled: () => Promise<boolean>;
   private readonly isDualProcessEnabled: () => Promise<boolean>;
   private readonly systemEventsDashboard?: SystemEventsDashboardClient;
+  private readonly systemEventsWriter?: SystemEventsWriter;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -149,6 +154,22 @@ export class AssetManagerClient {
       deps.isLegacySecurityAssetsMigrationEnabled ?? (async () => false);
     this.isDualProcessEnabled = deps.isDualProcessEnabled ?? (async () => false);
     this.systemEventsDashboard = deps.systemEventsDashboard;
+    this.systemEventsWriter = deps.systemEventsWriter;
+  }
+
+  /** Runs a lifecycle action and records one system event with its outcome. Rethrows errors. */
+  private async withLifecycleEvent<T>(
+    event: Omit<LifecycleEventInput, 'outcome' | 'error'>,
+    action: () => Promise<T>
+  ): Promise<T> {
+    try {
+      const result = await action();
+      await this.systemEventsWriter?.writeLifecycle({ ...event, outcome: 'success' });
+      return result;
+    } catch (error) {
+      await this.systemEventsWriter?.writeLifecycle({ ...event, outcome: 'failure', error });
+      throw error;
+    }
   }
 
   public async init(
@@ -208,6 +229,14 @@ export class AssetManagerClient {
 
       // Phase 3: Schedule namespace-scoped background tasks after descriptors exist.
       await Promise.all([
+        ...entityTypes.map((entityType) =>
+          this.systemEventsWriter?.writeLifecycle({
+            action: LIFECYCLE_ACTION.install,
+            outcome: 'success',
+            trigger: 'user',
+            entityType,
+          })
+        ),
         scheduleHistorySnapshotTasks({
           logger: this.logger,
           taskManager: this.taskManager,
@@ -238,6 +267,17 @@ export class AssetManagerClient {
         error: getErrorMessage(error),
       });
       this.logger.error(`Error during entity store init: ${getErrorMessage(error)}`);
+      await Promise.all(
+        entityTypes.map((entityType) =>
+          this.systemEventsWriter?.writeLifecycle({
+            action: LIFECYCLE_ACTION.install,
+            outcome: 'failure',
+            trigger: 'user',
+            entityType,
+            error,
+          })
+        )
+      );
       throw error;
     }
   }
@@ -273,6 +313,13 @@ export class AssetManagerClient {
   }
 
   public async start(request: KibanaRequest, type: EntityType) {
+    await this.withLifecycleEvent(
+      { action: LIFECYCLE_ACTION.start, trigger: 'user', entityType: type },
+      () => this.startEngine(request, type)
+    );
+  }
+
+  private async startEngine(request: KibanaRequest, type: EntityType) {
     const dualProcess = await this.isDualProcessType(type);
     try {
       this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
@@ -366,6 +413,13 @@ export class AssetManagerClient {
   }
 
   public async stop(type: EntityType) {
+    await this.withLifecycleEvent(
+      { action: LIFECYCLE_ACTION.stop, trigger: 'user', entityType: type },
+      () => this.stopEngine(type)
+    );
+  }
+
+  private async stopEngine(type: EntityType) {
     try {
       await this.removeExtractionTasks(type);
       await this.engineDescriptorClient.update(type, {
@@ -394,6 +448,17 @@ export class AssetManagerClient {
    * `priority` also covers the single process.
    */
   public async startProcess(
+    request: KibanaRequest,
+    type: EntityType,
+    process: Exclude<ExtractionMode, 'single'>
+  ) {
+    await this.withLifecycleEvent(
+      { action: LIFECYCLE_ACTION.startProcess, trigger: 'user', entityType: type, mode: process },
+      () => this.startOneProcess(request, type, process)
+    );
+  }
+
+  private async startOneProcess(
     request: KibanaRequest,
     type: EntityType,
     process: Exclude<ExtractionMode, 'single'>
@@ -432,6 +497,13 @@ export class AssetManagerClient {
 
   /** Stops one extraction process without touching the other. Counterpart of `startProcess`. */
   public async stopProcess(type: EntityType, process: Exclude<ExtractionMode, 'single'>) {
+    await this.withLifecycleEvent(
+      { action: LIFECYCLE_ACTION.stopProcess, trigger: 'user', entityType: type, mode: process },
+      () => this.stopOneProcess(type, process)
+    );
+  }
+
+  private async stopOneProcess(type: EntityType, process: Exclude<ExtractionMode, 'single'>) {
     const isNonPriority = process === EXTRACTION_MODE.nonPriority;
     try {
       await stopExtractEntityTask({
@@ -460,13 +532,24 @@ export class AssetManagerClient {
     }
   }
 
+  /**
+   * Uninstalls one engine. The event is dropped when it was the last engine: the system event
+   * streams are deleted with the namespace.
+   */
   public async uninstall(type: EntityType) {
+    return this.withLifecycleEvent(
+      { action: LIFECYCLE_ACTION.uninstallType, trigger: 'user', entityType: type },
+      () => this.uninstallEngine(type)
+    );
+  }
+
+  private async uninstallEngine(type: EntityType) {
     try {
       const { engines } = await this.getStatus();
       if (!engines.some((e) => e.type === type)) {
         return false;
       }
-      await this.stop(type);
+      await this.stopEngine(type);
 
       // Per-type saved objects — always safe to remove for this type alone.
       await this.engineDescriptorClient.delete(type);
@@ -657,7 +740,7 @@ export class AssetManagerClient {
   private async initEntity(request: KibanaRequest, type: EntityType): Promise<boolean> {
     const installed = await this.install(type);
     if (installed) {
-      await this.start(request, type);
+      await this.startEngine(request, type);
     }
     this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
       entityType: type,
@@ -948,13 +1031,18 @@ export class AssetManagerClient {
       `Recreating missing entity store assets in ${this.namespace}: ${missing.join(', ')}`
     );
 
-    await installSharedElasticsearchAssets({
-      esClient: this.esClient,
-      migrationEsClient: this.internalEsClient,
-      logger: this.logger,
-      namespace: this.namespace,
-      allowLegacyMigration: await this.isLegacySecurityAssetsMigrationEnabled(),
-    });
+    const allowLegacyMigration = await this.isLegacySecurityAssetsMigrationEnabled();
+    await this.withLifecycleEvent(
+      { action: LIFECYCLE_ACTION.assetsRepaired, trigger: 'system', reason: missing.join(', ') },
+      () =>
+        installSharedElasticsearchAssets({
+          esClient: this.esClient,
+          migrationEsClient: this.internalEsClient,
+          logger: this.logger,
+          namespace: this.namespace,
+          allowLegacyMigration,
+        })
+    );
     return true;
   }
 

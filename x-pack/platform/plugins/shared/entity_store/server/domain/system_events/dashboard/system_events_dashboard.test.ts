@@ -53,6 +53,7 @@ describe('buildSystemEventsDashboard', () => {
         ['Log extraction: last 3 days', false],
         ['Log extraction: 30-day trend', false],
         ['History snapshot and maintainers (30 days)', false],
+        ['Engine changes (30 days)', true],
         ['Details', true],
       ]
     );
