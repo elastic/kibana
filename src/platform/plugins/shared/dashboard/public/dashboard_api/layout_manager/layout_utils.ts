@@ -36,8 +36,10 @@ export const groupPanelsInSection = (
   const panelIdsToMove = panelIds.filter((id) => Object.hasOwn(panels, id));
   if (!panelIdsToMove.length) return;
 
-  // Top-level panels share the dashboard's rows with the section headers, while panels in a
-  // section are positioned relative to their section; so a section's panels sort at its header row
+  // Sorts panels in dashboard order by comparing [dashboard row, row, column] one element at a time.
+  // A panel in a section uses its section's header row as its dashboard row, because its own
+  // y is relative to the section. So a section's panels sort together where the section sits,
+  // and ties fall through to the panel's row, then its column.
   const getDashboardOrder = (id: string) => {
     const { sectionId, y, x } = panels[id].grid;
     return [sectionId ? sections[sectionId].grid.y : y, y, x];
