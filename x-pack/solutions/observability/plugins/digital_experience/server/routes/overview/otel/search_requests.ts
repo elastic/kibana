@@ -10,6 +10,7 @@ import { termQuery, termsQuery } from '@kbn/es-query';
 import { OTEL_EVENT_NAME } from '@kbn/apm-types';
 import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
 import { countOf, percentileOf } from '../../../lib/helpers/aggregations';
+import type { HistogramParams } from '../../../lib/helpers/time_series';
 import { dateHistogram } from '../../../lib/helpers/time_series';
 import type { OverviewFilters, OverviewPercentile } from '../../../../common/overview_filters';
 import { DEFAULT_OVERVIEW_PERCENTILE } from '../../../../common/overview_filters';
@@ -52,6 +53,8 @@ export interface OverviewSearchParams {
   percentile?: OverviewPercentile;
   /** Only the documents this query (the Overview's KQL, as a query) matches. */
   kuery?: estypes.QueryDslQueryContainer;
+  /** The buckets of the trend. */
+  histogram: HistogramParams;
 }
 
 /**
@@ -72,6 +75,7 @@ export const logsSearch = ({
   filters = {},
   percentile = DEFAULT_OVERVIEW_PERCENTILE,
   kuery,
+  histogram,
 }: OverviewSearchParams): estypes.SearchRequest => ({
   ...otelSearchDefaults(OTEL_LOGS_INDEX),
   runtime_mappings: filterRuntimeMappings(),
@@ -106,7 +110,7 @@ export const logsSearch = ({
             loadTimeSamples: countOf(NAVIGATION_TIMING_LOAD_EVENT_END),
             // The counts of the trend sum to the page loads, and both charts share its buckets.
             trend: {
-              ...dateHistogram(start, end),
+              ...dateHistogram({ start, end, histogram }),
               aggs: { loadTime: percentileOf(NAVIGATION_TIMING_LOAD_EVENT_END, percentile) },
             },
           },

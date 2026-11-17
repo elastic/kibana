@@ -216,7 +216,9 @@ async function failClosedIfParentStillWaiting({
       workflowExecutionRepository,
       stepExecutionRepository,
       parentExecId,
-      { type: TASK_RECOVERY_ERROR_TYPE, message }
+      { type: TASK_RECOVERY_ERROR_TYPE, message },
+      {},
+      parent
     );
     logger.error(`Marked parent workflow ${parentExecId} FAILED: ${message}`);
 

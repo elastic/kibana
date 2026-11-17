@@ -21,6 +21,7 @@ export type WorkflowExecutionEngineModelSource = {
   yaml: string;
   definition?: WorkflowYaml | null;
   version?: number;
+  workflowUid?: string;
 } & ManagedWorkflowFieldsSource;
 
 export type ToWorkflowExecutionEngineModelOptions = Pick<
@@ -42,6 +43,7 @@ export const toWorkflowExecutionEngineModel = (
     yaml: workflow.yaml,
     ...pickManagedWorkflowFields(workflow),
     ...pickWorkflowDocumentVersion(workflow),
+    ...(workflow.workflowUid ? { workflowUid: workflow.workflowUid } : {}),
     ...options,
   };
 };
