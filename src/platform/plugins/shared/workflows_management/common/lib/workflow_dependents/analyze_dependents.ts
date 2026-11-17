@@ -12,8 +12,10 @@ import {
   collectWorkflowOutputBlocks,
   findOutputsPassingThrough,
   findOutputUsages,
+  mayLoseImplicitOutput,
   mayRecoverFromFailure,
 } from './find_call_sites';
+import type { StepOutputRead } from './find_call_sites';
 import type { RemovalImpact, UpstreamImpact, WorkflowCallSite, WorkflowLookupItem } from './types';
 
 /**
@@ -32,16 +34,12 @@ const appendTo = <Key, Item>(groups: Map<Key, Item[]>, key: Key, items: readonly
   groups.set(key, [...(groups.get(key) ?? []), ...items]);
 };
 
-interface StepRead {
-  stepName: string;
-  /** Undefined when every output of the step is missing, because the step failed. */
-  field?: string;
-}
-
 /** How a broken workflow affects whatever runs it: it fails, or its listed outputs come back empty. */
 interface WorkflowEffect {
   fails: boolean;
   emptyOutputs: ReadonlySet<string>;
+  /** True when a run without a `workflow.output` step may return an empty output, of any field. */
+  emptiesImplicitOutput: boolean;
 }
 
 interface CallerEdge {
@@ -49,16 +47,21 @@ interface CallerEdge {
   callSites: WorkflowCallSite[];
 }
 
+// A read with no `field` stands for every output of a step that failed.
 const toEffect = (
   definition: unknown,
   fails: boolean,
-  reads: readonly StepRead[]
+  reads: readonly StepOutputRead[]
 ): WorkflowEffect => ({
   fails,
   emptyOutputs: fails
     ? new Set()
     : findOutputsPassingThrough(collectWorkflowOutputBlocks(definition), reads),
+  emptiesImplicitOutput: !fails && mayLoseImplicitOutput(definition, reads),
 });
+
+const losesOutputs = ({ emptyOutputs, emptiesImplicitOutput }: WorkflowEffect): boolean =>
+  emptyOutputs.size > 0 || emptiesImplicitOutput;
 
 // A failing call fails the caller's run unless a handler might recover from it; then the caller is
 // taken to keep running without the step's outputs.
@@ -72,7 +75,7 @@ const getCallerEffect = (
 ): { effect: WorkflowEffect; field?: string } | undefined => {
   let fails = false;
   let firstField: string | undefined;
-  const reads: StepRead[] = [];
+  const reads: StepOutputRead[] = [];
   // Background runs report neither their failure nor their outputs to the caller.
   const waitingCallSites = callSites.filter(({ stepType }) => stepType === 'workflow.execute');
   for (const callSite of waitingCallSites) {
@@ -85,9 +88,9 @@ const getCallerEffect = (
       }
     } else {
       for (const usage of findOutputUsages(parent.definition, stepName)) {
-        const isEmpty = usage.field
-          ? effect.emptyOutputs.has(usage.field)
-          : effect.emptyOutputs.size > 0;
+        const isEmpty =
+          effect.emptiesImplicitOutput ||
+          (usage.field ? effect.emptyOutputs.has(usage.field) : effect.emptyOutputs.size > 0);
         if (isEmpty && !usage.hasFallback) {
           reads.push({ stepName, field: usage.field || undefined });
           firstField ??= usage.field || [...effect.emptyOutputs][0];
@@ -106,13 +109,17 @@ const mergeEffects = (first: WorkflowEffect, second: WorkflowEffect): WorkflowEf
   return {
     fails,
     emptyOutputs: fails ? new Set() : new Set([...first.emptyOutputs, ...second.emptyOutputs]),
+    emptiesImplicitOutput: !fails && (first.emptiesImplicitOutput || second.emptiesImplicitOutput),
   };
 };
 
 // Failing beats losing outputs, and losing more outputs beats losing fewer.
 const isWorseEffect = (effect: WorkflowEffect, than: WorkflowEffect): boolean =>
   (effect.fails && !than.fails) ||
-  (!effect.fails && !than.fails && effect.emptyOutputs.size > than.emptyOutputs.size);
+  (!effect.fails &&
+    !than.fails &&
+    (effect.emptyOutputs.size > than.emptyOutputs.size ||
+      (effect.emptiesImplicitOutput && !than.emptiesImplicitOutput)));
 
 /**
  * Follows a broken direct caller up the chain to the enabled workflows that fail or lose data.
@@ -159,7 +166,7 @@ const propagateUpstream = (
             viaName: isNewCause ? workflow.name : previousImpact.viaName,
             field: isNewCause ? callerEffect.field : previousImpact.field,
           });
-          if (merged.fails || merged.emptyOutputs.size > 0) {
+          if (merged.fails || losesOutputs(merged)) {
             next.set(edge.parent.id, { workflow: edge.parent, effect: merged });
           }
         }
