@@ -8,7 +8,6 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
-import { isEqual, uniqWith } from 'lodash';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { IDslPagination } from '@kbn/search-types';
@@ -95,10 +94,9 @@ export function sendLoadingMoreFinishedMsg(
       result: moreRecords?.length
         ? [...(currentValue.result || []), ...moreRecords]
         : currentValue.result,
-      // keep warnings from earlier pages (e.g. shard failures) so the callout doesn't vanish
-      interceptedWarnings: interceptedWarnings
-        ? uniqWith([...(currentValue.interceptedWarnings ?? []), ...interceptedWarnings], isEqual)
-        : currentValue.interceptedWarnings,
+      // A page that sent a request reports every warning of the retained requests, so it replaces
+      // the current ones. A page that sent none (nothing left to load) keeps them.
+      interceptedWarnings: interceptedWarnings ?? currentValue.interceptedWarnings,
       pagination,
     });
   }

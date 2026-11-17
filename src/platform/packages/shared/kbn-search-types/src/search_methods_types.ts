@@ -483,10 +483,16 @@ export interface ISearchMethods {
   /**
    * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
    */
-  dslPaginated: (
-    params: IDslPaginatedSearchParams,
-    options?: IDslPaginatedSearchOptions
-  ) => Promise<IDslPaginatedSearchResult>;
+  dslPaginated: {
+    (
+      params: IDslPaginatedSearchParams,
+      options?: IDslPaginatedSearchOptions
+    ): Promise<IDslPaginatedSearchResult>;
+    /** Opts out of counting total hits, so `hasNextPage` needs the total from the caller */
+    (params: IDslUntrackedPaginatedSearchParams, options?: IDslPaginatedSearchOptions): Promise<
+      IDslPaginatedSearchResult<true>
+    >;
+  };
 
   /**
    * Execute an EQL (Event Query Language) search

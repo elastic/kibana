@@ -18,7 +18,12 @@ import type {
   StartServicesAccessor,
 } from '@kbn/core/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type {
+  IDslPaginatedSearchOptions,
+  IDslPaginatedSearchParams,
+  ISearchGeneric,
+  ISearchMethods,
+} from '@kbn/search-types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
@@ -306,7 +311,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       evictResponseCacheForSession: (sessionId) =>
         this.searchInterceptor.evictResponseCacheForSession(sessionId),
       dsl: (params, options) => this.searchMethodsService.dsl(params, options),
-      dslPaginated: (params, options) => this.searchMethodsService.dslPaginated(params, options),
+      dslPaginated: ((params: IDslPaginatedSearchParams, options?: IDslPaginatedSearchOptions) =>
+        this.searchMethodsService.dslPaginated(params, options)) as ISearchMethods['dslPaginated'],
       esql: (params, options) => this.searchMethodsService.esql(params, options),
       eql: (params, options) => this.searchMethodsService.eql(params, options),
       sql: (params, options) => this.searchMethodsService.sql(params, options),
