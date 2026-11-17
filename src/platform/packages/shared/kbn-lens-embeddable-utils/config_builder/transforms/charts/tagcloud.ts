@@ -78,7 +78,7 @@ function buildVisualizationState(config: TagcloudConfig): LensTagCloudState {
     minFontSize: layer.styling?.font_size?.min ?? LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
     showLabel: layer.styling?.caption?.visible ?? LENS_TAGCLOUD_DEFAULT_STATE.showCaption,
     tagAccessor: getAccessorName('tag'),
-    ...(layer.tag_by.color ? { ...fromColorMappingAPIToLensState(layer.tag_by.color) } : {}),
+    ...fromColorMappingAPIToLensState(layer.tag_by.color ?? DEFAULT_CATEGORICAL_COLOR_MAPPING),
   };
 }
 
