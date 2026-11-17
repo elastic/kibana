@@ -9,7 +9,10 @@ node scripts/check_floating_dependency_tags.js
 
 # dedupe re-resolves against the live registry (e.g. new deprecation notices), so only gate PRs on it
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
-  node scripts/deduplicate_dependencies && node scripts/kbn bootstrap --force-install
+  node scripts/deduplicate_dependencies
+  if [[ -n "$(git status --porcelain -- pnpm-lock.yaml)" ]]; then
+    node scripts/kbn bootstrap --force-install
+  fi
   check_for_changed_files 'node scripts/deduplicate_dependencies' true
 else
   echo "Skipping pnpm dedupe check outside of PR builds"
