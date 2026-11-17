@@ -147,6 +147,24 @@ describe('WorkflowPagesClient', () => {
       await expect(client.getSecret(key)).resolves.toBe(rotated);
     });
 
+    it('serves the same link after an invalid save, a fix, and a new publish', async () => {
+      const { client, systemClient } = await setup();
+      await client.setAccess(key, { level: 'secret_link' });
+      const secret = await client.getSecret(key);
+
+      // The invalid save unpublishes the page, and the fixed save keeps its trigger.
+      await systemClient.unpublishWorkflowPages(ref);
+      await expect(systemClient.verifyPageSecret(ref, secret)).resolves.toEqual({
+        reason: 'page_offline',
+      });
+      await systemClient.retireRemovedPages({ ...ref, definition: pageDefinition() });
+
+      await client.setAccess(key, { level: 'secret_link' });
+      await expect(systemClient.verifyPageSecret(ref, secret)).resolves.toEqual({
+        workflowCreatedAt: WORKFLOW_CREATED_AT,
+      });
+    });
+
     it('disables a page and enables it again', async () => {
       const { client, systemClient } = await setup();
       await client.setAccess(key, { level: 'secret_link' });

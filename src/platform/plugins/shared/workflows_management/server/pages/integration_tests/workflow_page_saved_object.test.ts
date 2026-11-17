@@ -165,6 +165,28 @@ describe('workflow-page saved object', () => {
     ).resolves.toHaveProperty('reason');
   });
 
+  it('unpublishes a page in its space, and the same secret works after a new publish', async () => {
+    const pageRef = ref('workflow-unpublish');
+    await sync('workflow-unpublish');
+    await publishWithSecret(pageRef, 'the-secret');
+
+    await systemClient.unpublishWorkflowPages(pageRef);
+
+    expect((await getPage(pageRef)).attributes.access).toBeNull();
+    await expect(systemClient.verifyPageSecret(pageRef, 'the-secret')).resolves.toEqual({
+      reason: 'page_offline',
+    });
+    await partiallyUpdateWorkflowPage(
+      spaceClient(pageRef.spaceId),
+      getWorkflowPageSavedObjectId(pageRef),
+      { access: { level: 'secret_link' } },
+      { refresh: 'wait_for' }
+    );
+    await expect(systemClient.verifyPageSecret(pageRef, 'the-secret')).resolves.toEqual({
+      workflowCreatedAt: CREATED_AT,
+    });
+  });
+
   it('moves the page with a workflow that moved to another space', async () => {
     await sync('workflow-move', 'team');
 

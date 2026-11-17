@@ -575,7 +575,7 @@ export class WorkflowManagementAuditLog implements WorkflowPageAuditLog {
   }
 
   logPageAccessChanged(
-    request: KibanaRequest,
+    request: KibanaRequest | undefined,
     params: WorkflowPageAuditParams & { access: WorkflowPageAccess | null }
   ): void {
     this.logPageEvent(request, WorkflowManagementAuditActions.PAGE_ACCESS_CHANGE, 'change', {

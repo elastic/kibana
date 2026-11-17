@@ -4738,6 +4738,7 @@ describe('workflow page lifecycle', () => {
     const pagesService = {
       syncWorkflowPages: jest.fn().mockResolvedValue(undefined),
       retireRemovedPages: jest.fn().mockResolvedValue(undefined),
+      unpublishWorkflowPages: jest.fn().mockResolvedValue(undefined),
       retireWorkflowPages: jest.fn().mockResolvedValue(undefined),
     };
     const { deps, client } = makeDeps(undefined, {
@@ -4937,14 +4938,42 @@ describe('workflow page lifecycle', () => {
       expect(client.index).not.toHaveBeenCalled();
     });
 
-    it('keeps the pages on an invalid save', async () => {
+    it('unpublishes the pages on an invalid save, before the write, and retires none', async () => {
       const { service, client, pagesService, request } = setup();
       storeLive(client);
 
       await service.updateWorkflow('wf-1', { yaml: 'triggers: [' }, 'default', request);
 
+      expect(pagesService.unpublishWorkflowPages).toHaveBeenCalledWith({
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        request,
+      });
+      expect(pagesService.unpublishWorkflowPages.mock.invocationCallOrder[0]).toBeLessThan(
+        client.index.mock.invocationCallOrder[0]
+      );
       expect(pagesService.retireRemovedPages).not.toHaveBeenCalled();
       expect(pagesService.retireWorkflowPages).not.toHaveBeenCalled();
+    });
+
+    it('fails an invalid save and writes nothing when the unpublish fails', async () => {
+      const { service, client, pagesService, request } = setup();
+      storeLive(client);
+      pagesService.unpublishWorkflowPages.mockRejectedValue(new Error('unpublish failed'));
+
+      await expect(
+        service.updateWorkflow('wf-1', { yaml: 'triggers: [' }, 'default', request)
+      ).rejects.toThrow('unpublish failed');
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    it('skips the page store when an invalid workflow is saved invalid again', async () => {
+      const { service, client, pagesService, request } = setup();
+      storeLive(client, { definition: null, valid: false });
+
+      await service.updateWorkflow('wf-1', { yaml: 'triggers: [' }, 'default', request);
+
+      expect(pagesService.unpublishWorkflowPages).not.toHaveBeenCalled();
     });
 
     it('retires nothing for a user who cannot edit the workflow', async () => {

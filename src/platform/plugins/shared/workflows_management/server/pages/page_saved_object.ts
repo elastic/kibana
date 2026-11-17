@@ -99,11 +99,14 @@ export const partiallyUpdateWorkflowPage = async (
   client: Pick<SavedObjectsClientContract, 'update'>,
   id: string,
   attributes: PartiallyUpdatableWorkflowPageAttributes,
-  options: Pick<SavedObjectsUpdateOptions<WorkflowPageAttributes>, 'version' | 'refresh'> = {}
+  options: Pick<
+    SavedObjectsUpdateOptions<WorkflowPageAttributes>,
+    'version' | 'refresh' | 'namespace'
+  > = {}
 ): Promise<SavedObjectsUpdateResponse<WorkflowPageAttributes>> => {
   const { access, enabled } = attributes;
   // Drops other options at runtime too: `mergeAttributes: false` and `upsert` corrupt the page.
-  const { version, refresh } = options;
+  const { version, refresh, namespace } = options;
   return client.update<WorkflowPageAttributes>(
     WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
     id,
@@ -111,7 +114,7 @@ export const partiallyUpdateWorkflowPage = async (
       ...(access !== undefined ? { access } : {}),
       ...(enabled !== undefined ? { enabled } : {}),
     },
-    { version, refresh }
+    { version, refresh, namespace }
   );
 };
 

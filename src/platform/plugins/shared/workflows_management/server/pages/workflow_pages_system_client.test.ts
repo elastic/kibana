@@ -263,6 +263,32 @@ describe('WorkflowPagesSystemClient', () => {
     });
   });
 
+  describe('unpublishWorkflowPages', () => {
+    it('clears the access level, keeps the secret, and audits it', async () => {
+      const { audit, client, putOnline, storedPage, sync } = setup();
+      await sync(pageDefinition());
+      putOnline('the-secret');
+      const request = httpServerMock.createKibanaRequest();
+
+      await client.unpublishWorkflowPages({ ...ref, request });
+
+      expect(storedPage()?.attributes).toEqual(
+        expect.objectContaining({ access: null, enabled: true, secret: 'the-secret' })
+      );
+      expect(audit.logPageAccessChanged).toHaveBeenCalledWith(request, { ...ref, access: null });
+    });
+
+    it('leaves a page without an access level alone', async () => {
+      const { audit, client, savedObjectsClient, sync } = setup();
+      await sync(pageDefinition());
+
+      await client.unpublishWorkflowPages(ref);
+
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
+      expect(audit.logPageAccessChanged).not.toHaveBeenCalled();
+    });
+  });
+
   describe('retireRemovedPages', () => {
     it('retires only the pages whose trigger the definition dropped', async () => {
       const { client, sync, store } = setup();

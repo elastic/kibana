@@ -72,7 +72,7 @@ export interface WorkflowPageAuditLog {
   logPageLinkRead(request: KibanaRequest, params: WorkflowPageAuditParams): void;
   logPageSecretRotated(request: KibanaRequest, params: WorkflowPageAuditParams): void;
   logPageAccessChanged(
-    request: KibanaRequest,
+    request: KibanaRequest | undefined,
     params: WorkflowPageAuditParams & { access: WorkflowPageAccess | null }
   ): void;
   logPageEnabledChanged(

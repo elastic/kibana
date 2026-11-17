@@ -20,7 +20,11 @@ import { nodeBuilder } from '@kbn/es-query';
 import { getPageTriggerId, isPageTrigger } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import { getWorkflowPageSavedObjectId, WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
+import {
+  getWorkflowPageSavedObjectId,
+  partiallyUpdateWorkflowPage,
+  WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+} from './page_saved_object';
 import type { WorkflowPageAttributes } from './page_saved_object';
 import { computePageSecretHash, generatePageSecret, isPageSecretValid } from './page_secret';
 import type { WorkflowPageRef } from './page_secret';
@@ -76,6 +80,15 @@ export interface WorkflowPagesSystemClient {
     definition: WorkflowYaml | null | undefined;
     request?: KibanaRequest;
   }): Promise<void>;
+  /**
+   * Takes the pages of a workflow offline by clearing their access level. The secret stays, so
+   * publishing again brings back the same link. Throws when an update fails.
+   */
+  unpublishWorkflowPages(params: {
+    workflowId: string;
+    spaceId: string;
+    request?: KibanaRequest;
+  }): Promise<void>;
   /** Deletes every page of the given workflows in the space. Throws when a delete fails. */
   retireWorkflowPages(params: {
     workflowIds: string[];
@@ -98,7 +111,7 @@ export interface WorkflowPagesSystemClientDeps {
   /** Internal client with the page type. */
   savedObjectsClient: SavedObjectsClientContract;
   /** The internal client has no security extension, so the page lifecycle audits itself. */
-  audit: Pick<WorkflowPageAuditLog, 'logPageCreated' | 'logPageRetired'>;
+  audit: Pick<WorkflowPageAuditLog, 'logPageCreated' | 'logPageRetired' | 'logPageAccessChanged'>;
 }
 
 export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient {
@@ -166,6 +179,33 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
         .filter(({ attributes }) => !wanted.has(attributes.pageId))
         .map((page) => ({ page, reason: 'trigger_removed' as const })),
       request
+    );
+  }
+
+  async unpublishWorkflowPages({
+    workflowId,
+    spaceId,
+    request,
+  }: Parameters<WorkflowPagesSystemClient['unpublishWorkflowPages']>[0]): Promise<void> {
+    const published = (await this.findWorkflowPages([workflowId], spaceId)).filter(
+      ({ attributes }) => attributes.access !== null
+    );
+    await Promise.all(
+      published.map(async ({ id, attributes: { pageId } }) => {
+        const ref = { workflowId, spaceId, pageId };
+        try {
+          await partiallyUpdateWorkflowPage(
+            this.deps.savedObjectsClient,
+            id,
+            { access: null },
+            { namespace: namespaceOf(spaceId), refresh: 'wait_for' }
+          );
+          this.deps.audit.logPageAccessChanged(request, { ...ref, access: null });
+        } catch (error) {
+          this.deps.audit.logPageAccessChanged(request, { ...ref, access: null, error });
+          throw error;
+        }
+      })
     );
   }
 

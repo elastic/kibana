@@ -299,7 +299,7 @@ export class WorkflowCrudService {
           })
         : null);
     const write = async () => {
-      await this.retireDroppedPages(id, previous, document, options?.request);
+      await this.updatePagesBeforeWrite(id, previous, document, options?.request);
       const response = await this.deps.workflowStorage.getClient().index({
         id,
         document,
@@ -1389,10 +1389,11 @@ export class WorkflowCrudService {
   }
 
   /**
-   * Retires the pages a write drops, right before it, after every write gate passed. A failed
-   * retire fails the write, so a dropped page never stays live.
+   * Retires the pages a write drops, and unpublishes them on an invalid save, right before the
+   * write and after every write gate passed. A failure fails the write, so a page never stays
+   * live by mistake.
    */
-  private async retireDroppedPages(
+  private async updatePagesBeforeWrite(
     id: string,
     previous: WorkflowProperties | null | undefined,
     next: WorkflowProperties,
@@ -1410,7 +1411,18 @@ export class WorkflowCrudService {
       });
       return;
     }
-    if (!next.valid) return; // An invalid save keeps its pages.
+    if (!next.valid) {
+      // An invalid workflow cannot serve a page. Unpublishing keeps the secret, so an admin can
+      // publish the same link again after a fix.
+      if (previous.valid && hasPageTrigger(previous.definition)) {
+        await pagesSystemClient.unpublishWorkflowPages({
+          workflowId: id,
+          spaceId: next.spaceId,
+          request,
+        });
+      }
+      return;
+    }
     // A save that keeps every page of a valid stored definition has nothing to retire. Disables
     // and field updates skip the page store this way, so it can never block them.
     const kept = getPageIds(next.definition);
