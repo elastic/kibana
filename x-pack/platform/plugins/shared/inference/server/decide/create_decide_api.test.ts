@@ -19,7 +19,6 @@ import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import { executeRegexRulesTask } from '@kbn/ai-anonymization-server';
 import { createRegexWorkerServiceMock } from '../test_utils';
 import { decisionResponse } from './__fixtures__/decision_response';
-import { decisionEndpoints } from './__fixtures__/decision_endpoints';
 import { createDecideApi } from './create_decide_api';
 
 const shouldRespond: DecisionPredicateQuestion = {
@@ -112,43 +111,16 @@ describe('createDecideApi', () => {
     );
   });
 
-  it('uses the first decision endpoint the cluster lists when no inference id is given', async () => {
-    const { decide, transportRequest } = setup();
-
-    transportRequest.mockImplementation(async ({ method }) =>
-      method === 'GET' ? decisionEndpoints : decisionResponse
-    );
-
-    const { inferenceId } = await decide({ input }, shouldRespond);
-
-    expect(transportRequest.mock.calls[0][0]).toEqual({
-      method: 'GET',
-      path: '/_inference/decision/_all',
-    });
-    expect(inferenceId).toBe('.jev-1.13-decision');
-  });
-
   it('rejects a call without questions', async () => {
     const { decide, transportRequest } = setup();
 
-    const error = await Reflect.apply(decide, undefined, [{ input }]).catch(
-      (thrown: Error) => thrown
-    );
+    const error = await Reflect.apply(decide, undefined, [
+      { input, inferenceId: 'my-decision' },
+    ]).catch((thrown: Error) => thrown);
 
     expect(isInferenceRequestError(error)).toBe(true);
     expect(error.message).toContain('at least one question');
     expect(transportRequest).not.toHaveBeenCalled();
-  });
-
-  it('throws a 404 request error when the cluster lists no decision endpoint', async () => {
-    const { decide, transportRequest } = setup();
-
-    transportRequest.mockResolvedValue({ endpoints: [] });
-
-    const error = await decide({ input }, shouldRespond).catch((thrown) => thrown);
-
-    expect(isInferenceRequestError(error)).toBe(true);
-    expect(error.meta.status).toBe(404);
   });
 
   it('throws a 404 request error when the endpoint does not exist', async () => {
@@ -169,7 +141,9 @@ describe('createDecideApi', () => {
 
     transportRequest.mockRejectedValue(responseError(400, 'Unknown task_type [decision]'));
 
-    const error = await decide({ input }, shouldRespond).catch((thrown) => thrown);
+    const error = await decide({ input, inferenceId: 'my-decision' }, shouldRespond).catch(
+      (thrown) => thrown
+    );
 
     expect(isInferenceRequestError(error)).toBe(true);
     expect(error.meta.status).toBe(404);

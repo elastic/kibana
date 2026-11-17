@@ -39,41 +39,10 @@ interface CreateDecideApiOptions {
   anonymization?: InferenceAnonymizationOptions;
 }
 
-interface DecisionEndpointsResponse {
-  endpoints?: Array<{ inference_id: string }>;
-}
-
 const toKeyedQuestions = (
   questions: readonly DecisionQuestion[]
 ): Record<string, DecisionQuestion> =>
   Object.fromEntries(questions.map((question, index) => [questionKey(index), question]));
-
-/** The given inference id, else the first `decision` endpoint the cluster lists. */
-const resolveInferenceId = async ({
-  esClient,
-  inferenceId,
-  abortSignal,
-}: {
-  esClient: ElasticsearchClient;
-  inferenceId?: string;
-  abortSignal?: AbortSignal;
-}): Promise<string> => {
-  if (inferenceId) {
-    return inferenceId;
-  }
-
-  const { endpoints = [] } = await esClient.transport.request<DecisionEndpointsResponse>(
-    { method: 'GET', path: '/_inference/decision/_all' },
-    { signal: abortSignal }
-  );
-  const [first] = endpoints;
-
-  if (!first) {
-    throw createInferenceRequestError('No decision inference endpoint on the cluster', 404);
-  }
-
-  return first.inference_id;
-};
 
 /** Maps Elasticsearch errors: a missing endpoint or task type is a 404 request error. */
 const toInferenceError = ({
@@ -138,7 +107,7 @@ const anonymizeInput = async ({
 /** Sends the questions to the `decision` inference task and reads the answers back. */
 const invokeDecision = async ({
   esClient,
-  options: { input, inferenceId: requestedInferenceId, abortSignal },
+  options: { input, inferenceId, abortSignal },
   questions,
 }: {
   esClient: ElasticsearchClient;
@@ -148,12 +117,6 @@ const invokeDecision = async ({
   if (abortSignal?.aborted) {
     throw createInferenceRequestAbortedError();
   }
-
-  const inferenceId = await resolveInferenceId({
-    esClient,
-    inferenceId: requestedInferenceId,
-    abortSignal,
-  });
 
   const body = await esClient.transport.request(
     {

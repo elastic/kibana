@@ -69,8 +69,8 @@ export type DecisionAnswersFor<Q extends readonly DecisionQuestion[]> = {
 export interface DecideOptions {
   /** The text the decision model reads. */
   input: string;
-  /** The `decision` inference endpoint to use. Defaults to the first one the cluster lists. */
-  inferenceId?: string;
+  /** The `decision` inference endpoint to use. */
+  inferenceId: string;
   abortSignal?: AbortSignal;
 }
 
@@ -78,8 +78,8 @@ export type DecideResponse<T> = { inferenceId: string } & T;
 
 /**
  * Asks a decision model bounded questions about an input: fast, cheap answers with
- * probabilities. Throws an inference request error with status 404 when the cluster has no
- * usable `decision` endpoint.
+ * probabilities. Throws an inference request error with status 404 when the `decision` endpoint
+ * doesn't exist.
  * @experimental The Elasticsearch `decision` inference task it calls is experimental.
  */
 export interface DecideAPI {
