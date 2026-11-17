@@ -16,6 +16,11 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { isIndexExclusion } from '../../../common/remote_cluster';
 import { NO_SEARCHABLE_PATTERN_MESSAGE } from '../../services/watches/hunt/common/partition_hunt_universe';
+import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_index_scope';
+import {
+  describeUnsearched,
+  unsearchedPatterns,
+} from '../../services/watches/hunt/common/unsearched_patterns';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import { TIER2_MODEL_TIERS } from '../../services/watches/hunt/common/hunt_model_tiers';
 import {
@@ -24,6 +29,7 @@ import {
 } from '../../services/watches/hunt/common/cps_scope';
 import { selectHuntCallModel } from '../../services/watches/hunt/common/select_hunt_call_model';
 import { mostSevereFailure, resolveHuntModels } from './lib/hunt_models';
+import { blockedScopeMessage } from './blocked_scope_message';
 import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
@@ -33,13 +39,14 @@ export const HUNT_BEHAVIOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_behavior` as 
 
 /**
  * Runs Tier 2's LLM-backed behavioral extraction against report text.
- * Returns 503 when the inference plugin is not installed, or 400 when no
- * connector is configured.
+ * Returns 409 when the default data view leaves nothing to search, 503 when the
+ * inference plugin is not installed, or 400 when no connector is configured.
  */
 export const registerHuntBehaviorRoute = ({
   router,
   logger,
   getHuntServices,
+  getSpaceId,
   getClusterClient,
   isCpsEnabled,
 }: RouteDependencies): void => {
@@ -67,14 +74,8 @@ export const registerHuntBehaviorRoute = ({
       withAlertZeroEnabled(async (context, request, response) => {
         try {
           const core = await context.core;
-          // What the generated query may read: the default data view as configured, minus the
-          // policy-skipped entries. Unlike the coordinator, this route does not resolve the list
-          // first, so a concrete name the caller cannot read stays in it.
-          const { patterns: indexPatterns, policySkipped } = await resolveHuntUniverse(
-            context,
-            logger
-          );
-          if (!indexPatterns.some((pattern) => !isIndexExclusion(pattern))) {
+          const { patterns: universe, policySkipped } = await resolveHuntUniverse(context, logger);
+          if (!universe.some((pattern) => !isIndexExclusion(pattern))) {
             return response.customError({
               statusCode: 409,
               body: {
@@ -85,6 +86,26 @@ export const registerHuntBehaviorRoute = ({
               },
             });
           }
+          const esClient = huntEsClient({ getClusterClient, request });
+          const crossProjectSearch = isCpsEnabled();
+          // What the generated query may read: the default data view minus the policy-skipped
+          // entries and the concrete names that resolved nothing. A generated `FROM` naming one
+          // index the caller cannot read fails whole, so those names are dropped up front.
+          const scope = await resolveHuntScope({
+            esClient,
+            spaceId: getSpaceId(request),
+            indexPatterns: universe,
+            policySkippedPatterns: policySkipped,
+            crossProjectSearch,
+            logger,
+          });
+          if (scope.status === 'blocked') {
+            return response.customError({
+              statusCode: 409,
+              body: { message: blockedScopeMessage(scope, universe) },
+            });
+          }
+          const { index_patterns: indexPatterns } = scope;
           const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
 
           // Resolved by tier, not the deployment default — see resolveScopedModel's doc for
@@ -138,10 +159,8 @@ export const registerHuntBehaviorRoute = ({
             excluded_iocs,
             article_context,
           } = request.body;
-          const esClient = huntEsClient({ getClusterClient, request });
-          const crossProjectSearch = isCpsEnabled();
 
-          const body: HuntBehaviorResponse = await huntBehavior(
+          const result = await huntBehavior(
             { extraction, esql },
             logger,
             {
@@ -160,6 +179,23 @@ export const registerHuntBehaviorRoute = ({
             esClient,
             mitreDataClient
           );
+
+          // A name the scope dropped was never offered to the generated queries. The coordinator
+          // records that as a gap; this route has no coordinator, so it goes on the result.
+          const unsearched = unsearchedPatterns(scope);
+          const body: HuntBehaviorResponse =
+            unsearched.length > 0
+              ? {
+                  ...result,
+                  incomplete: [
+                    {
+                      reason: 'index_not_searched',
+                      detail: describeUnsearched(unsearched),
+                    },
+                    ...(result.incomplete ?? []),
+                  ],
+                }
+              : result;
 
           return response.ok({ body });
         } catch (err) {

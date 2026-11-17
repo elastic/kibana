@@ -15,13 +15,10 @@ import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 import {
-  NO_SEARCHABLE_PATTERN_MESSAGE,
-  isBlockedByPolicyOnly,
-} from '../../services/watches/hunt/common/partition_hunt_universe';
-import {
   describeUnsearched,
   unsearchedPatterns,
 } from '../../services/watches/hunt/common/unsearched_patterns';
+import { blockedScopeMessage } from './blocked_scope_message';
 import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 
@@ -90,13 +87,7 @@ export const registerHuntForThreatRoute = ({
             return response.customError({
               statusCode: 409,
               body: {
-                message: isBlockedByPolicyOnly(scope)
-                  ? `Hunt scope is blocked (${scope.resolution}): ${NO_SEARCHABLE_PATTERN_MESSAGE}`
-                  : `Hunt scope is blocked (${
-                      scope.resolution
-                    }): nothing in the default data view is visible to this hunt (checked: ${indexPatterns.join(
-                      ', '
-                    )})`,
+                message: blockedScopeMessage(scope, indexPatterns),
               },
             });
           }

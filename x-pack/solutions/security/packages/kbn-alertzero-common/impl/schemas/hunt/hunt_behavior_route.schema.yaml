@@ -214,7 +214,9 @@ paths:
                       each with why: an id absent from the ATT&CK catalog, a quote that
                       is not in the report, a query that could not be generated,
                       published or executed, or a technique the per-run generation
-                      budget never reached. Absent or empty means nothing went wrong
+                      budget never reached. A default data view name the scope dropped
+                      from the search comes first, as `index_not_searched`. Absent or
+                      empty means nothing went wrong
                       that Behavior Hunt could name — not that the environment was searched:
                       a proposed behavior whose query was never executed queried
                       nothing, and that is reported per behavior in `execution`, not
@@ -235,7 +237,7 @@ paths:
         '400':
           description: No GenAI connector configured
         '409':
-          description: The default data view has no pattern this hunt may search
+          description: The hunt scope is blocked (nothing in the default data view is visible to this hunt, or it has no searchable pattern)
         '503':
           description: The inference plugin is not available in this deployment
 components:
