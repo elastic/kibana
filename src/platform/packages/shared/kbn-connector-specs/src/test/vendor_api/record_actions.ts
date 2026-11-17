@@ -10,7 +10,9 @@
 import type {
   ContractCall,
   Emulator,
+  GraphQLSpec,
   InvalidSchemaFailure,
+  McpSpec,
   OpenApiDocument,
   Violation,
 } from '@kbn/connector-emulate';
@@ -24,7 +26,7 @@ import type { ActionFixture, QueryOperation, VendorApiFixtures } from './fixture
 import { toResponseFixtures } from './fixtures';
 import type { GeneratedInputs, RejectedInput } from './generate_action_inputs';
 import { generateActionInputs } from './generate_action_inputs';
-import type { ManifestOperation } from './manifest';
+import type { ManifestCall } from './manifest';
 import { matchesPathTemplate } from './manifest';
 import { errorMessage } from './values';
 
@@ -55,7 +57,7 @@ export class NoUsableAuthTypeError extends Error {
 export interface RecordActionsOptions
   extends Omit<ContractContextOptions, 'specs' | 'fixtures' | 'recordings' | 'trackFields'> {
   /** The vendor specs by source name, as in the manifest's `sources`. */
-  readonly specs: Readonly<Record<string, OpenApiDocument>>;
+  readonly specs: Readonly<Record<string, OpenApiDocument | GraphQLSpec | McpSpec>>;
   readonly fixtures?: VendorApiFixtures;
   /** Records which response fields each action reads, copies and returns. */
   readonly trackFields?: boolean;
@@ -119,9 +121,13 @@ export type RecordingFinding =
 
 export interface ActionsRecording {
   /** Per action, the operations its runs matched, sorted by source, path and method. */
-  readonly operations: Record<string, ManifestOperation[]>;
+  readonly operations: Record<string, ManifestCall[]>;
   /** Per action, the requests that matched no operation, sorted by path and method. */
   readonly unmatched: Record<string, RequestedPath[]>;
+  /** Per source, the types GraphQL requests name, sorted, which its snapshot has to keep. */
+  readonly namedTypes: Record<string, string[]>;
+  /** Per source, the root fields GraphQL requests' documents mention, likewise. */
+  readonly namedRootFields: Record<string, string[]>;
   readonly findings: RecordingFinding[];
   /**
    * With `invalidSchemas: 'skip'`: the operations the mock left out, as their schemas are broken,
@@ -164,7 +170,7 @@ const uniqueSorted = <T>(items: readonly T[], keyOf: (item: T) => string): T[] =
     .map(([, item]) => item);
 
 const isOperation = (
-  { source, method, path }: QueryOperation,
+  { source, method, path }: { source?: string; method: string; path: string },
   matched: ContractCall['matched']
 ): boolean =>
   matched !== undefined &&
@@ -173,11 +179,31 @@ const isOperation = (
   method.toLowerCase() === matched.method &&
   path === matched.path;
 
+const isNamedOperation = (
+  { source, name }: { source?: string; name: string },
+  matched: ContractCall['matched']
+): boolean =>
+  matched !== undefined &&
+  'name' in matched &&
+  (source === undefined || source === matched.source) &&
+  name === matched.name;
+
+// GraphQL and MCP go over POST whatever they do, so a call counts as read-only by what it called:
+// a query or a tool annotated as read-only. Messages such as MCP's `initialize` call nothing.
+const isSafeCall = (call: ContractCall): boolean =>
+  call.protocolMessage === true ||
+  ((call.matched !== undefined && 'name' in call.matched) || call.source !== undefined
+    ? call.readOnly === true
+    : SAFE_METHODS.has(toRequestedPath(call).method));
+
 const isUnmatched = ({ matched, operation, status }: ContractCall): boolean =>
   matched === undefined && operation === undefined && (status === 404 || status === 405);
 
 // Requests that match no operation, such as those listed in "unmatched", are compared by path.
 const isQueryCall = (query: QueryOperation, call: ContractCall): boolean => {
+  if ('name' in query) {
+    return isNamedOperation(query, call.matched);
+  }
   if (!isUnmatched(call)) {
     return isOperation(query, call.matched);
   }
@@ -271,6 +297,15 @@ export const recordActions = async ({
   const authTypes = authType === undefined ? authTypeIdsOf(connector) : [authType];
   const operations: ActionsRecording['operations'] = {};
   const unmatched: ActionsRecording['unmatched'] = {};
+  const namedTypes = new Map<string, Set<string>>();
+  const namedRootFields = new Map<string, Set<string>>();
+  const addNamed = (names: Map<string, Set<string>>, source: string, items: readonly string[]) => {
+    if (items.length > 0) {
+      names.set(source, new Set([...(names.get(source) ?? []), ...items]));
+    }
+  };
+  const toSortedRecord = (names: Map<string, Set<string>>): Record<string, string[]> =>
+    Object.fromEntries([...names].map(([source, items]) => [source, [...items].sort()]));
   const findings: RecordingFinding[] = [];
   const invalidOperations = new Map<string, Emulator['invalidOperations'][number]>();
   const brokenAuthTypes = new Map<string, BrokenAuthType>();
@@ -397,7 +432,7 @@ export const recordActions = async ({
     const usedQueries = new Set<QueryOperation>();
     for (const call of calls) {
       const { request, requestViolations, responseViolations, matched } = call;
-      if (isRead && !SAFE_METHODS.has(toRequestedPath(call).method)) {
+      if (isRead && !isSafeCall(call)) {
         const query = queries.find((candidate) => isQueryCall(candidate, call));
         if (query) {
           usedQueries.add(query);
@@ -429,17 +464,33 @@ export const recordActions = async ({
       }
     }
     for (const query of queries.filter((candidate) => !usedQueries.has(candidate))) {
-      const operation = `${query.method.toUpperCase()} ${query.path}`;
+      const operation =
+        'name' in query ? query.name : `${query.method.toUpperCase()} ${query.path}`;
       findings.push({ kind: 'unused-query', action, operation });
     }
     operations[action] = uniqueSorted(
-      calls.flatMap(({ matched }) =>
-        matched?.source === undefined || !('method' in matched)
-          ? []
-          : [{ source: matched.source, method: matched.method, path: matched.path }]
-      ),
-      ({ source, method, path }) => `${source} ${path} ${method}`
+      calls.flatMap(({ matched }): ManifestCall[] => {
+        if (matched?.source === undefined) {
+          return [];
+        }
+        return 'method' in matched
+          ? [{ source: matched.source, method: matched.method, path: matched.path }]
+          : [{ source: matched.source, name: matched.name }];
+      }),
+      (call) =>
+        'method' in call
+          ? `${call.source} ${call.path} ${call.method}`
+          : `${call.source} ${call.name}`
     );
+    for (const call of calls) {
+      // A request that executed nothing, such as GraphQL fields all behind `@skip`, has no matched
+      // operation but still depends on the schema it names.
+      const source = call.matched?.source ?? call.source;
+      if (source !== undefined) {
+        addNamed(namedTypes, source, call.namedTypes ?? []);
+        addNamed(namedRootFields, source, call.namedRootFields ?? []);
+      }
+    }
     const notFound = calls.filter(isUnmatched).map(toRequestedPath);
     if (notFound.length > 0) {
       unmatched[action] = uniqueSorted(notFound, ({ method, path }) => `${path} ${method}`);
@@ -461,6 +512,8 @@ export const recordActions = async ({
     operations,
     unmatched,
     invalidOperations: [...invalidOperations.values()],
+    namedTypes: toSortedRecord(namedTypes),
+    namedRootFields: toSortedRecord(namedRootFields),
     ...(trackFields
       ? {
           fieldUse: Object.fromEntries(

@@ -25,11 +25,12 @@ import {
 } from './oasdiff_text';
 import type { RecordedFieldUse } from './record_actions';
 import { NoUsableAuthTypeError } from './record_actions';
-import type { VendorApiManifest } from './manifest';
-import { parseManifest } from './manifest';
+import type { ManifestSource, VendorApiManifest } from './manifest';
+import { isNamedCall, isProtocolFormat, parseManifest } from './manifest';
 import type { DriftProblem } from './drift_problem';
 import { otherProblem } from './drift_problem';
 import { parseSpecText } from './parse_spec_text';
+import { diffProtocolSnapshots, loadProtocolSpec } from './protocol_sources';
 import type { DiffSpecs, OasdiffEntry } from './run_oasdiff';
 import { createOasdiff } from './run_oasdiff';
 import { toStableJson } from './stable_json';
@@ -44,10 +45,13 @@ export type ChangeKind = 'breaking' | 'deprecation' | 'non-breaking';
 /** A change in the latest vendor spec to an operation the connector calls. */
 export interface SpecChange {
   readonly kind: ChangeKind;
-  /** The `oasdiff` rule, e.g. `response-property-enum-value-added`. */
+  /**
+   * The rule: of `oasdiff`, e.g. `response-property-enum-value-added`; of `graphql`, e.g.
+   * `FIELD_REMOVED`; or for MCP, e.g. `mcp-tool-removed`.
+   */
   readonly id: string;
   readonly text: string;
-  /** `METHOD /path`, for changes to an operation. */
+  /** `METHOD /path`, or an MCP tool's name, for changes to an operation. */
   readonly operation?: string;
 }
 
@@ -349,6 +353,35 @@ const outcomeOf = (drift: Omit<ConnectorDrift, 'outcome'>): DriftOutcome => {
     : 'none';
 };
 
+const classifyChanges = async ({
+  format,
+  committed,
+  current,
+  diff,
+  latestDocument,
+}: {
+  readonly format: ManifestSource['format'];
+  readonly committed: string | undefined;
+  readonly current: string | undefined;
+  readonly diff: DiffSpecs;
+  /** The latest spec, which tells a removal of the whole snapshot from one of its own. */
+  readonly latestDocument: unknown;
+}): Promise<readonly SpecChange[] | undefined> => {
+  if (!isProtocolFormat(format)) {
+    const entries = await diff(committed ?? '{}', current ?? '{}');
+    return entries?.filter((entry) => !stillInSpec(entry, latestDocument)).map(toSpecChange);
+  }
+  if (committed === undefined || current === undefined) {
+    return undefined;
+  }
+  // A snapshot that can't be read leaves the change unclassified, which gets an issue.
+  try {
+    return diffProtocolSnapshots(format, committed, current);
+  } catch {
+    return undefined;
+  }
+};
+
 interface LatestComparison {
   readonly sources: Record<string, SourceDrift>;
   readonly operationsChanged: boolean;
@@ -428,9 +461,9 @@ const compareWithLatest = async ({
     );
     const refreshed = await readOptional(path.join(copy, MANIFEST));
     const sources: Record<string, SourceDrift> = {};
-    for (const name of Object.keys(manifest.sources)) {
+    for (const [name, { format }] of Object.entries(manifest.sources)) {
       const [committed, current] = await Promise.all(
-        [directory, copy].map((root) => readOptional(path.join(root, snapshotFile(name))))
+        [directory, copy].map((root) => readOptional(path.join(root, snapshotFile(name, format))))
       );
       const latestDocument = result?.specs[name];
       const servers = latestDocument
@@ -445,10 +478,13 @@ const compareWithLatest = async ({
       if (committed === current) {
         sources[name] = { status: 'unchanged', ...servers, url };
       } else {
-        const entries = await diff(committed ?? '{}', current ?? '{}');
-        const changes = entries
-          ?.filter((entry) => !stillInSpec(entry, latestDocument))
-          .map(toSpecChange);
+        const changes = await classifyChanges({
+          format,
+          committed,
+          current,
+          diff,
+          latestDocument,
+        });
         sources[name] = {
           status: 'changed',
           ...(changes === undefined ? {} : { changes }),
@@ -530,7 +566,9 @@ export const detectDrift = async ({
   for (const [name, source] of Object.entries(manifest.sources)) {
     const { url } = source;
     try {
-      await loadVendorSpec(url, fetchOnce, source);
+      await (isProtocolFormat(source.format)
+        ? loadProtocolSpec(url, fetchOnce, source.format, source.endpoints ?? [])
+        : loadVendorSpec(url, fetchOnce, source));
     } catch (error) {
       log.warning(
         `${connector.metadata.id}: ${name} at ${url} didn't load: ${errorMessage(error)}`
@@ -635,7 +673,14 @@ const describeAction = ({
   readonly snapshotSpecs?: Readonly<Record<string, OpenApiDocument>>;
   readonly latestSpecs?: Readonly<Record<string, OpenApiDocument>>;
 }): ActionDrift => {
-  const operations = (manifest.operations[action] ?? []).map(({ source, method, path: opPath }) => {
+  const operations = (manifest.operations[action] ?? []).map((call) => {
+    // A GraphQL root field or MCP tool is named rather than addressed by method and path, so it
+    // has no location in an OpenAPI document and nothing to compare field by field.
+    if (isNamedCall(call)) {
+      const { source, name } = call;
+      return { source, method: '', path: '', operation: name };
+    }
+    const { source, method, path: opPath } = call;
     const document = latestSpecs?.[source];
     return {
       source,
