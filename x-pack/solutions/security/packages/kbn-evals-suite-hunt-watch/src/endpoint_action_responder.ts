@@ -139,6 +139,36 @@ const releaseSystemIndicesUser = async (
 };
 
 /**
+ * Starts stopped endpoint transforms and force-restarts failed ones, the way the endpoint
+ * suite's `waitForEndpointPackage` does. Returns `id:state` pairs for the timeout message.
+ */
+const restartEndpointTransforms = async ({
+  esClient,
+  log,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+}): Promise<string[]> => {
+  const stats = await esClient.transform
+    .getTransformStats({ transform_id: 'endpoint*', allow_no_match: true })
+    .catch(() => undefined);
+  if (!stats) return [];
+  const stuck = stats.transforms.filter(({ state }) => state === 'stopped' || state === 'failed');
+  for (const { id, state } of stuck) {
+    log.info(`approve path: transform ${id} is ${state}; restarting`);
+    try {
+      if (state === 'failed') {
+        await esClient.transform.stopTransform({ transform_id: id, force: true });
+      }
+      await esClient.transform.startTransform({ transform_id: id });
+    } catch {
+      // restarted elsewhere or reinstalled mid-call; the next poll re-checks
+    }
+  }
+  return stats.transforms.map(({ id, state }) => `${id}:${state}`);
+};
+
+/**
  * Indexes the hunt host's endpoint metadata and waits for the metadata transforms to propagate
  * it into `metrics-endpoint.metadata_current` / `metadata_united`, which is where endpoint-id
  * validation resolves the agent.
@@ -160,23 +190,12 @@ export const ensureHuntEndpointMetadata = async ({
   });
   log.info(`approve path: indexed endpoint metadata for ${HUNT_HOST_NAME}; awaiting transforms`);
 
-  // The metadata_current / metadata_united views are transform outputs. Restart any stopped
-  // transform before waiting, the way the endpoint suite's `waitForEndpointPackage` does.
-  try {
-    const stats = await esClient.transform.getTransformStats({ transform_id: 'endpoint*' });
-    for (const stat of stats.transforms.filter((s) => s.state === 'stopped')) {
-      try {
-        await esClient.transform.startTransform({ transform_id: stat.id });
-      } catch {
-        // already started elsewhere; the wait below still guards
-      }
-    }
-  } catch {
-    // transforms not installed (endpoint package missing): the wait below fails loud instead
-  }
-
   const deadline = Date.now() + maxWaitMs;
+  let transformStates: string[] = [];
   while (Date.now() < deadline) {
+    // Re-checked every poll: Fleet can delete and reinstall the endpoint metadata transforms
+    // while Kibana boots, leaving the new ones stopped or failed after a one-off restart.
+    transformStates = await restartEndpointTransforms({ esClient, log });
     const [current, united] = await Promise.all([
       esClient
         .count({
@@ -201,7 +220,8 @@ export const ensureHuntEndpointMetadata = async ({
   }
   throw new Error(
     `approve path: hunt host metadata did not reach metrics-endpoint.metadata_current / ` +
-      `metadata_united within ${maxWaitMs}ms; endpoint-id validation would reject the agent`
+      `metadata_united within ${maxWaitMs}ms; endpoint-id validation would reject the agent ` +
+      `(endpoint transforms: ${transformStates.join(', ') || 'none installed'})`
   );
 };
 

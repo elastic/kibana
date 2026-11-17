@@ -15,11 +15,13 @@ import { readFileSync } from 'fs';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import {
   HUNT_AGENT_ID,
   HUNT_HOST_NAME,
   SUSPENDED_PROCESS_PID,
   buildSuspendProcessResponseDoc,
+  ensureHuntEndpointMetadata,
   listUnansweredActionIds,
 } from './endpoint_action_responder';
 
@@ -82,5 +84,66 @@ describe('endpoint action responder', () => {
       listUnansweredActionIds({ esClient, since: '2026-11-06T10:00:00.000Z' })
     ).resolves.toEqual([]);
     expect(search).toHaveBeenCalledTimes(1);
+  });
+
+  describe('ensureHuntEndpointMetadata', () => {
+    const log = { info: jest.fn() } as unknown as ToolingLog;
+    const transformClient = (states: Array<[string, string]>, propagatedCount: number) => {
+      const transform = {
+        getTransformStats: jest
+          .fn()
+          .mockResolvedValue({ transforms: states.map(([id, state]) => ({ id, state })) }),
+        stopTransform: jest.fn().mockResolvedValue({}),
+        startTransform: jest.fn().mockResolvedValue({}),
+      };
+      const esClient = {
+        create: jest.fn().mockResolvedValue({}),
+        count: jest.fn().mockResolvedValue({ count: propagatedCount }),
+        transform,
+      } as unknown as Client;
+      return { esClient, transform };
+    };
+
+    afterEach(() => jest.useRealTimers());
+
+    it('force-stops failed transforms before starting them, and starts stopped ones', async () => {
+      const { esClient, transform } = transformClient(
+        [
+          ['endpoint.metadata_united-default-9.6.1', 'failed'],
+          ['endpoint.metadata_current-default-9.6.1', 'stopped'],
+          ['endpoint.metadata_current-default-9.6.0', 'started'],
+        ],
+        1
+      );
+
+      await ensureHuntEndpointMetadata({ esClient, log });
+
+      expect(transform.stopTransform).toHaveBeenCalledTimes(1);
+      expect(transform.stopTransform).toHaveBeenCalledWith({
+        transform_id: 'endpoint.metadata_united-default-9.6.1',
+        force: true,
+      });
+      expect(transform.startTransform.mock.calls.map(([req]) => req.transform_id)).toEqual([
+        'endpoint.metadata_united-default-9.6.1',
+        'endpoint.metadata_current-default-9.6.1',
+      ]);
+    });
+
+    it('names the transform states when the metadata never propagates', async () => {
+      jest.useFakeTimers();
+      const { esClient } = transformClient(
+        [['endpoint.metadata_united-default-9.6.1', 'started']],
+        0
+      );
+
+      const settled = ensureHuntEndpointMetadata({ esClient, log, maxWaitMs: 1_000 }).catch(
+        (error: Error) => error
+      );
+      await jest.advanceTimersByTimeAsync(5_000);
+
+      expect(String(await settled)).toContain(
+        'endpoint transforms: endpoint.metadata_united-default-9.6.1:started'
+      );
+    });
   });
 });
