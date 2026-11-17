@@ -56,6 +56,23 @@ export const contribution: WorkflowStepsContribution = {
     schedulableTypes: [/^agent-builder:run-agent$/],
     savedObjectTypes: [agentBuilderSpaceSettingsType, createInferenceSettingsSavedObjectType()],
     settings: [AGENT_BUILDER_RUN_SETTINGS_ID, INFERENCE_FEATURES_TASK_PROCESS_SETTINGS_ID],
+    // `registerAgentBuilderWorkflowSteps` (../workflows/register_workflow_steps.ts) registers all of
+    // these when `register` below does not return early (agent builder's run settings are on). Lets
+    // `resolvePacksForDefinition` select this pack for a workflow that uses `ai.agent` or reads and
+    // writes conversations and attachments, instead of falling back to a full load.
+    stepTypes: [
+      'ai.agent',
+      'ai.attachment.add',
+      'ai.attachment.delete',
+      'ai.attachment.list',
+      'ai.attachment.read',
+      'ai.attachment.update',
+      'ai.conversation.add_event',
+      'ai.conversation.add_user_message',
+      'ai.conversation.create',
+      'ai.conversation.metadata.patch',
+      'ai.conversation.metadata.read',
+    ],
     uiSettings: getAgentBuilderUiSettings(),
     // The global settings of the Deductive agent (registered when Kibana's config opts in).
     globalUiSettings: [DEDUCTIVE_UI_SETTINGS],

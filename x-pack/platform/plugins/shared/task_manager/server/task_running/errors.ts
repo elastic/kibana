@@ -155,10 +155,17 @@ const CODE_DECLINED = 'TaskManager/declined';
 /**
  * Thrown by a runner in a task process that cannot serve this run, such as a rule that uses a
  * connector type the process does not know. Task Manager reports a capability failure.
+ *
+ * `detail.missingPacks`, when present, is read by the dispatcher to redispatch once more to a
+ * worker initialized with the union of what it asked for and what this one reports lacking,
+ * instead of treating a pack gap the same as any other decline.
  */
 export class DeclinedRunError extends Error {
   public readonly code = CODE_DECLINED;
-  constructor(public readonly reason: string) {
+  constructor(
+    public readonly reason: string,
+    public readonly detail?: { missingPacks?: string[] }
+  ) {
     super(reason);
     this.name = 'DeclinedRunError';
   }

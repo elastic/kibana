@@ -26,8 +26,15 @@ const {
 // node scripts/task_bundle_bench [--dir <bundles>] [--name <substring>] [--runs <n>] [--settle <ms>]
 //   [--es-url <url>] [--es-user <user>] [--es-password <password>] [--json <file>] [--node-defaults]
 //   [--run <request.json>] [--settings <settings.json>] [--init <init.json>]
+//   [--cpu-profile <file.cpuprofile>] [--heap-profile <file.heapsnapshot>] [--check-no-load-after-ready]
 // Processes start with the Node flags Kibana's supervisor gives them (a small young generation);
 // `--node-defaults` starts them with Node's own, to compare.
+// `--check-no-load-after-ready` fails if the floor or any selected pack loads a module after the
+// worker says it is ready (floor code that keeps loading past boot, or a pack a step's `register`
+// reaches for only once a task actually runs, both hide real startup/idle cost from this bench's own
+// numbers). It attaches a V8 inspector session in the child to watch `Debugger.scriptParsed`, which
+// adds real overhead; don't trust the startup/idle numbers from a `--check-no-load-after-ready` run,
+// only its pass/fail.
 // For every bundle in the manifest: forks it as Kibana's supervisor does, sends `init`, and measures
 // the time until the process says it is ready to serve (Core booted, plugins started) and its resident
 // memory once idle, before it has served a task. Needs a running Elasticsearch, since Core connects.
@@ -44,6 +51,12 @@ const settingsFile = getArg('--settings');
 const extraSettings = settingsFile ? JSON.parse(fs.readFileSync(settingsFile, 'utf8')) : {};
 const initFile = getArg('--init');
 const extraInit = initFile ? JSON.parse(fs.readFileSync(initFile, 'utf8')) : {};
+// A profile pins the bench to the one bundle its file path was given for; forcing one run and one
+// bundle keeps it unambiguous which run's cost the file holds.
+const cpuProfileFile = getArg('--cpu-profile') && path.resolve(getArg('--cpu-profile'));
+const heapProfileFile = getArg('--heap-profile') && path.resolve(getArg('--heap-profile'));
+const profiling = Boolean(cpuProfileFile || heapProfileFile);
+const checkNoLoadAfterReady = args.includes('--check-no-load-after-ready');
 const readyTimeoutMs = 60000;
 // The flags of a process as the supervisor starts it, without Kibana's own.
 const childOptions = args.includes('--node-defaults')
@@ -103,6 +116,12 @@ const measureOnce = (file, settingIds) =>
     const env = { ...process.env, PORT: '0' };
     if (childOptions.nodeOptions) env.NODE_OPTIONS = childOptions.nodeOptions;
     else delete env.NODE_OPTIONS;
+    if (cpuProfileFile) env.TASK_BUNDLE_CPU_PROFILE_FILE = cpuProfileFile;
+    else delete env.TASK_BUNDLE_CPU_PROFILE_FILE;
+    if (heapProfileFile) env.TASK_BUNDLE_HEAP_PROFILE_FILE = heapProfileFile;
+    else delete env.TASK_BUNDLE_HEAP_PROFILE_FILE;
+    if (checkNoLoadAfterReady) env.TASK_BUNDLE_CHECK_LATE_LOADS = '1';
+    else delete env.TASK_BUNDLE_CHECK_LATE_LOADS;
     const child = fork(file, [], {
       env,
       execArgv: [...childOptions.execArgv, '--require', path.join(__dirname, 'memory_probe.js')],
@@ -120,6 +139,9 @@ const measureOnce = (file, settingIds) =>
     let taskMs;
     let runStarted;
     const probes = {};
+    // The `idle` probe's `lateLoads` already covers everything parsed between ready and idle; a later
+    // `afterRun` probe (after a task actually executed) can only add to that set, never shrink it.
+    let lateLoads = [];
     const finish = (result) => {
       if (finished) return;
       finished = true;
@@ -147,7 +169,11 @@ const measureOnce = (file, settingIds) =>
       if (message?.kind === 'task-bundle-memory') {
         probes[message.phase] = message;
         peakRss = Math.max(peakRss, message.usage.rss / 1048576, message.peakRss / 1048576);
-        if ((message.phase === 'idle' && !runRequest) || message.phase === 'afterRun') {
+        if (message.lateLoads) lateLoads = [...new Set([...lateLoads, ...message.lateLoads])];
+        if (
+          (message.phase === 'idle' && !runRequest && !profiling) ||
+          message.phase === 'afterRun'
+        ) {
           finish({
             startupMs,
             readyRss,
@@ -156,8 +182,26 @@ const measureOnce = (file, settingIds) =>
             probes,
             runStatus,
             taskMs,
+            lateLoads,
           });
         }
+        return;
+      }
+      if (message?.kind === 'task-bundle-profile') {
+        finish({
+          startupMs,
+          readyRss,
+          idleRss,
+          peakRss: Math.max(peakRss, readyRss ?? 0, idleRss ?? 0),
+          probes,
+          runStatus,
+          taskMs,
+          lateLoads,
+          profile: {
+            cpuProfileFile: message.cpuProfileFile,
+            heapProfileFile: message.heapProfileFile,
+          },
+        });
         return;
       }
       if (message?.kind !== 'ready') return;
@@ -234,7 +278,7 @@ const measureOnce = (file, settingIds) =>
     let settingIds = [];
     const samples = [];
     let error;
-    for (let i = 0; i < runs; i++) {
+    for (let i = 0; i < (profiling ? 1 : runs); i++) {
       let sample = await measureOnce(path.join(bundleDir, file), settingIds);
       const missing = sample.error && /not given the settings of: ([\w, ]+)/.exec(sample.error);
       if (missing) {
@@ -280,6 +324,9 @@ const measureOnce = (file, settingIds) =>
                   ),
                 }
               : {}),
+            ...(checkNoLoadAfterReady
+              ? { lateLoads: [...new Set(samples.flatMap((sample) => sample.lateLoads ?? []))] }
+              : {}),
             samples: samples.map((sample) => ({
               startupMs: sample.startupMs,
               readyRssMb: sample.readyRss,
@@ -301,6 +348,24 @@ const measureOnce = (file, settingIds) =>
         ? `${taskType}: FAILED ${error}`
         : `${taskType}: ready in ${row.startupMs} ms, idle ${row.idleRssMb} MB (bundle ${row.bundleMb} MB)`
     );
+    const profile = samples[0]?.profile;
+    if (profile?.cpuProfileFile) console.log(`  profile written to ${profile.cpuProfileFile}`);
+    if (profile?.heapProfileFile) console.log(`  profile written to ${profile.heapProfileFile}`);
+    if (row.lateLoads?.length) {
+      console.log(`  loaded after READY, which a floor or a selected pack should not do:`);
+      for (const url of row.lateLoads) console.log(`    ${url}`);
+    }
+  }
+  if (checkNoLoadAfterReady) {
+    const withLateLoads = results.filter((row) => row.lateLoads?.length);
+    if (withLateLoads.length) {
+      console.error(
+        `\n${withLateLoads.length} of ${results.length} bundle(s) loaded a module after READY.`
+      );
+      process.exitCode = 1;
+    } else {
+      console.log(`\nno bundle loaded a module after READY.`);
+    }
   }
   const ok = results.filter((r) => !r.error);
   if (ok.length) {

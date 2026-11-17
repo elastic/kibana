@@ -8,7 +8,6 @@
  */
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { getConnectorSpec } from '@kbn/connector-specs';
 import { SystemConnectorsMap } from '@kbn/workflows/common/constants';
 import { ExecutionError } from '@kbn/workflows/server';
 import { ActionsResponseContentLengthLimitError } from './actions_response_content_length_limit_error';
@@ -16,6 +15,7 @@ import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
+import { isSpecConnectorStepType } from '../lib/is_spec_connector_step_type';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -55,9 +55,6 @@ const getEstimatedOutputBytes = (
   return typeof estimatedOutputBytes === 'number' ? estimatedOutputBytes : undefined;
 };
 
-const isSpecConnectorType = (connectorType: string): boolean =>
-  getConnectorSpec(`.${connectorType}`) !== undefined;
-
 const shouldUseWorkflowTransportLimit = ({
   rawType,
   stepType,
@@ -71,7 +68,7 @@ const shouldUseWorkflowTransportLimit = ({
     return true;
   }
 
-  return hasStepMaxSize && isSpecConnectorType(stepType);
+  return hasStepMaxSize && isSpecConnectorStepType(stepType);
 };
 
 // Extend BaseStep for connector-specific properties
@@ -135,7 +132,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
       // so axios can abort mid-stream (Layer 1 OOM prevention).
       // The HTTP system connector uses "fetcher"; spec-based connectors use "fetchOptions".
       const rawType = step.type;
-      const isSpecConnector = isSpecConnectorType(stepType);
+      const isSpecConnector = isSpecConnectorStepType(stepType);
       const hasStepMaxSize = Boolean(step['max-step-size']);
       const usesWorkflowTransportLimit = shouldUseWorkflowTransportLimit({
         rawType,

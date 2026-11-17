@@ -60,7 +60,12 @@ export type WorkflowRuntimeTaskManager = Pick<
   | 'ensureScheduled'
   | 'removeIfExists'
   | 'bulkRemove'
->;
+> &
+  /**
+   * Bundle manifests live in Main's supervisor, so only Kibana's real start contract has this; a
+   * task process's host does not, and schedules a sub-workflow without resolving its packs there.
+   */
+  Partial<Pick<TaskManagerStartContract, 'getTaskBundlePacks'>>;
 
 /** The cloud fields the engine reads: the link to Kibana and what metering is keyed by. */
 export type WorkflowCloudInfo = Pick<

@@ -42,6 +42,47 @@ export interface SecurityWorkflowEvents {
 export const contribution: WorkflowStepsContribution = {
   declares: {
     settings: [SECURITY_ALERTS_SETTINGS_ID, SECURITY_AGENT_BUILDER_SETTINGS_ID],
+    // `registerSecurityWorkflowSteps` (../workflows/register_security_workflow_steps.ts) registers
+    // every `security.*` step below unconditionally, and `threat_intel.fetch_source` only when the
+    // process is given a `threatIntelLogger` (always true here). Lets `resolvePacksForDefinition`
+    // select this pack for a workflow that uses one of these steps instead of falling back to a
+    // full load.
+    stepTypes: [
+      'security.assignAlert',
+      'security.assignAttack',
+      'security.buildAlertEntityGraph',
+      'security.buildExceptionEntriesFilter',
+      'security.createExceptionListItem',
+      'security.createNote',
+      'security.createRule',
+      'security.createRuleException',
+      'security.deleteNote',
+      'security.disableRule',
+      'security.enableRule',
+      'security.getAlertEntities',
+      'security.getNotes',
+      'security.patchRule',
+      'security.renderAlertNarrative',
+      'security.setAlertStatus',
+      'security.setAlertTags',
+      'security.setAttackStatus',
+      'security.setAttackTags',
+      'security.updateNote',
+      'threat_intel.fetch_source',
+    ],
+    // `registerSecurityWorkflowTriggers` registers these unconditionally. `resolvePacksForDefinition`
+    // does not yet read trigger coverage (only `stepTypes`), so this is metadata for now, not a
+    // second selection path; a workflow that only differs by trigger still resolves by its steps.
+    triggers: [
+      'security.alertAssigneesChanged',
+      'security.alertStatusChanged',
+      'security.alertTagsChanged',
+      'security.attackAssigneesChanged',
+      'security.attackStatusChanged',
+      'security.attackTagsChanged',
+      'security.noteCreated',
+      'security.noteUpdated',
+    ],
     registerAnalyticsEventTypes: (analytics) => {
       events.forEach((event) => analytics.registerEventType(event));
     },

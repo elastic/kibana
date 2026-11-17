@@ -178,6 +178,10 @@ export class WorkflowsExecutionEnginePlugin
       },
       settings: this.taskTypeSettings,
       parity: this.taskTypeParity,
+      // Packs were resolved once at schedule time (`resolveWorkflowTaskPacks`) and persisted on
+      // the task instance's params, so this is a pure, synchronous read: no Elasticsearch call
+      // between a run being due and a worker being acquired.
+      getPacks: (taskInstance) => (taskInstance.params as { packs?: string[] } | undefined)?.packs,
     };
     Object.assign(this.taskTypeSettings, {
       workflowsExecutionEngine: () => this.config,

@@ -69,6 +69,45 @@ export const contribution: WorkflowStepsContribution = {
   declares: {
     savedObjectTypes: getCasesTaskProcessSavedObjectTypes(),
     settings: ['cases'],
+    // Every `cases.*` step type `register` below can register: `casesStepRegistry` (./registry.ts)
+    // plus the three it adds on top (`createCaseFromTemplate` always, `setExtendedFields` and
+    // `addAttachments` each behind their own flag). Lets `resolvePacksForDefinition` select this
+    // pack for a workflow that uses one of these steps instead of falling back to a full load.
+    stepTypes: [
+      'cases.addAlerts',
+      'cases.addAttachments',
+      'cases.addComment',
+      'cases.addEvents',
+      'cases.addObservables',
+      'cases.addTags',
+      'cases.assignCase',
+      'cases.bulkDeleteObservables',
+      'cases.closeCase',
+      'cases.createCase',
+      'cases.createCaseFromTemplate',
+      'cases.deleteAttachments',
+      'cases.deleteCases',
+      'cases.deleteObservable',
+      'cases.findCases',
+      'cases.findSimilarCases',
+      'cases.getAllAttachments',
+      'cases.getCase',
+      'cases.getCases',
+      'cases.getCasesByAlertId',
+      'cases.pushCases',
+      'cases.removeTags',
+      'cases.setCategory',
+      'cases.setCustomField',
+      'cases.setDescription',
+      'cases.setExtendedFields',
+      'cases.setSeverity',
+      'cases.setStatus',
+      'cases.setTitle',
+      'cases.unassignCase',
+      'cases.updateCase',
+      'cases.updateCases',
+      'cases.updateObservable',
+    ],
   },
   provides: {
     'cases.attachmentTypes': ({ host, settings }) => {

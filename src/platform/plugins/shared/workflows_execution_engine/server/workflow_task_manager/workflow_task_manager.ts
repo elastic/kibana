@@ -21,6 +21,7 @@ import { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams, StartWorkflowExecutionParams } from './types';
 import { resolveQueueTtlMs } from '../concurrency/queue_concurrency_utils';
+import { resolveWorkflowTaskPacks } from '../lib/get_workflow_task_packs';
 import type { ExecutionIdentityContexts } from '../service_account_execution';
 import { getWorkflowOriginalRequest } from '../service_account_execution';
 import { generateExecutionTaskScope } from '../utils';
@@ -70,7 +71,8 @@ export class WorkflowTaskManager {
       | 'bulkGet'
       | 'bulkRemove'
       | 'ensureScheduled'
-    >,
+    > &
+      Partial<Pick<TaskManagerStartContract, 'getTaskBundlePacks'>>,
     private identityContexts?: Pick<ExecutionIdentityContexts, 'get'>
   ) {}
 
@@ -128,6 +130,11 @@ export class WorkflowTaskManager {
 
     await this.taskManager.removeIfExists(taskId);
 
+    const packs = resolveWorkflowTaskPacks(
+      this.taskManager,
+      WORKFLOW_RESUME_TASK_TYPE,
+      workflowExecution.workflowDefinition
+    );
     const task = await this.taskManager.schedule(
       {
         id: taskId,
@@ -136,6 +143,7 @@ export class WorkflowTaskManager {
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
+          ...(packs ? { packs } : {}),
         } satisfies ResumeWorkflowExecutionParams,
         state: {},
         runAt: resumeAt,
@@ -159,6 +167,11 @@ export class WorkflowTaskManager {
     resumeAt: Date;
     fakeRequest: KibanaRequest;
   }): Promise<{ taskId: string }> {
+    const packs = resolveWorkflowTaskPacks(
+      this.taskManager,
+      WORKFLOW_RESUME_TASK_TYPE,
+      workflowExecution.workflowDefinition
+    );
     const task = await this.taskManager.schedule(
       {
         id: v4(),
@@ -167,6 +180,7 @@ export class WorkflowTaskManager {
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
+          ...(packs ? { packs } : {}),
         } satisfies ResumeWorkflowExecutionParams,
         state: {},
         runAt: resumeAt,
@@ -204,6 +218,11 @@ export class WorkflowTaskManager {
     await this.taskManager.removeIfExists(taskId);
 
     const priority = getTaskPriority(workflowExecution.context);
+    const packs = resolveWorkflowTaskPacks(
+      this.taskManager,
+      WORKFLOW_RUN_TASK_TYPE,
+      workflowExecution.workflowDefinition
+    );
 
     const task = await this.taskManager.schedule(
       {
@@ -212,6 +231,7 @@ export class WorkflowTaskManager {
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
+          ...(packs ? { packs } : {}),
         } satisfies StartWorkflowExecutionParams,
         state: {
           lastRunAt: null,

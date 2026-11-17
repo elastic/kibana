@@ -33,6 +33,7 @@ import type {
 import type { CancellableTask, RunContext } from './task';
 import type { HostTaskManager } from './task_process/host_capabilities/task_scheduling';
 import type { TaskProcessParity, TaskTypeParityHook } from './task_process/parity';
+import type { TaskTypePackSelector } from './task_process/packs';
 import type { TaskRegisterDefinition } from './task_type_dictionary';
 
 export interface TaskHostEventLog {
@@ -151,6 +152,12 @@ export interface TaskHost {
   settings?: Record<string, unknown>;
   /** A task process only: what plugins contribute, by key, for the keys the module lists. */
   contributions?: Record<string, unknown[]>;
+  /**
+   * A task process only: the ids of the packs it actually loaded for this run (`init.packs`, or
+   * every pack its bundle declares when Main sent none). Read by `TaskTypeModule.requiredPacks` to
+   * decline a run the worker was not initialized for instead of running it without what it needs.
+   */
+  loadedPacks?: string[];
   /** A task process only: the `start` contracts of `taskPlugins`, by plugin id. */
   plugins?: Record<string, unknown>;
 }
@@ -261,6 +268,13 @@ export interface TaskTypeModule extends Omit<TaskRegisterDefinition, 'createTask
    * of behaving differently. Kibana ignores it.
    */
   parity?: TaskTypeParityHook[];
+  /**
+   * What a run needs from the packs a worker may have been initialized without: declining it is the
+   * same defense as `parity`, but for Main's own pack selection instead of another plugin's
+   * registrations. Without this a worker runs every assigned run with whatever packs it loaded,
+   * which is the pre-pack behavior.
+   */
+  requiredPacks?: TaskTypePackSelector;
   createTaskRunner: (context: RunContext, host: TaskHost) => CancellableTask;
 }
 
@@ -306,6 +320,11 @@ export interface TaskTypeRegistrationOptions {
    * runs declares, such as the opt-ins of plugins that other plugins register with Kibana.
    */
   featureFlags?: () => Record<string, boolean | string | number>;
+  /**
+   * The pack ids this run needs, read for the task instance being dispatched. Without it a task
+   * type gets every pack its bundle declares, which is the pre-pack behavior.
+   */
+  getPacks?: TaskTypePackSelector;
 }
 
 /** Throws when a declared capability has no real service to hand to the module in Kibana. */
@@ -342,8 +361,8 @@ export const defineTaskType = (module: TaskTypeModule): TaskTypeModule => module
 export const toTaskDefinition = (
   module: TaskTypeModule,
   getHost: () => Promise<TaskHost>,
-  /** Runs before every run, with the host; throwing (a `DeclinedRunError`, say) stops the run. */
-  beforeRun?: (host: TaskHost) => Promise<void>
+  /** Runs before every run, with the host and its context; throwing (a `DeclinedRunError`, say) stops the run. */
+  beforeRun?: (host: TaskHost, context: RunContext) => Promise<void>
 ): TaskRegisterDefinition => {
   const {
     type,
@@ -367,6 +386,7 @@ export const toTaskDefinition = (
     featureFlags,
     optionalSettings,
     parity,
+    requiredPacks,
     createTaskRunner,
     ...definition
   } = module;
@@ -378,7 +398,7 @@ export const toTaskDefinition = (
       return {
         run: async () => {
           const host = await getHost();
-          await beforeRun?.(host);
+          await beforeRun?.(host, context);
           created = createTaskRunner(context, host);
           // Cancelled while the host was resolving: the run never starts.
           if (cancelled) await created.cancel?.();

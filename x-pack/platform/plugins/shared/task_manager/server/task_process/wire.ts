@@ -60,6 +60,12 @@ export interface TaskProcessInit {
    * runs anything (see `TaskTypeModule.parity`). Absent for a remote process.
    */
   parity?: TaskProcessParity;
+  /**
+   * Ids of the packs this process should load, read from `TaskTypeRegistrationOptions.getPacks` for
+   * the run being dispatched. Absent (not empty) means every pack the bundle declares, which is the
+   * pre-pack behavior; a remote process not sent one takes the same default.
+   */
+  packs?: string[];
   /** Plugin configs by plugin id in `serializeSettings` format; only the ids the module declares. */
   settings?: Record<string, SerializedValue>;
 }

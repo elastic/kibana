@@ -29,11 +29,32 @@ import { forwardChildLogs, getChildLogLevel } from './child_log_forwarder';
 import type { SerializedElasticsearchConfig } from './es_config';
 import type { TaskProcessInit, TaskProcessReady } from './wire';
 
+/**
+ * One pack in a bundle's manifest: what it declares (for a workflow step contribution, the step
+ * types and triggers it registers, and the pack ids it requires), read by a task type's own plugin
+ * to resolve what a specific run needs (`TaskTypeRegistrationOptions.getPacks`).
+ */
+export interface TaskBundlePackManifest {
+  id: string;
+  stepTypes?: string[];
+  triggers?: string[];
+  requires?: string[];
+  /** The service ids this pack's `provides` offers, which another pack's `requires` may name. */
+  provides?: string[];
+  dependsOn?: string[];
+  bytes?: number;
+}
+
 /** `manifest.json` of a task bundle directory: which task types each bundle serves. */
 export interface TaskBundleManifest {
   bundles: Record<
     string,
-    { file: string; taskType: string; featureFlags?: TaskFeatureFlagDefinitions }
+    {
+      file: string;
+      taskType: string;
+      featureFlags?: TaskFeatureFlagDefinitions;
+      packs?: TaskBundlePackManifest[];
+    }
   >;
 }
 
@@ -90,6 +111,7 @@ interface Bundle {
   file: string;
   taskType: string;
   featureFlags?: TaskFeatureFlagDefinitions;
+  packs?: TaskBundlePackManifest[];
 }
 
 interface ReusableChild {
@@ -140,12 +162,15 @@ export class TaskProcessSupervisor {
       );
     }
     const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as TaskBundleManifest;
-    for (const [name, { file, taskType, featureFlags }] of Object.entries(manifest.bundles)) {
+    for (const [name, { file, taskType, featureFlags, packs }] of Object.entries(
+      manifest.bundles
+    )) {
       this.bundleByTaskType.set(taskType, {
         name,
         file: join(settings.bundle_dir, file),
         taskType,
         featureFlags,
+        packs,
       });
     }
     const required = new Set([...requiredTaskTypes, ...this.bundleByTaskType.keys()]);
@@ -181,6 +206,11 @@ export class TaskProcessSupervisor {
 
   public getFeatureFlagDefinitions(taskType: string): TaskFeatureFlagDefinitions | undefined {
     return this.bundleByTaskType.get(taskType)?.featureFlags;
+  }
+
+  /** Undefined when the bundle predates packs (every pack loads, the pre-pack behavior). */
+  public getTaskBundlePacks(taskType: string): TaskBundlePackManifest[] | undefined {
+    return this.bundleByTaskType.get(taskType)?.packs;
   }
 
   public getStats(): TaskProcessSupervisorStats {
@@ -277,7 +307,15 @@ export class TaskProcessSupervisor {
     const elasticsearch =
       context?.snapshot?.init.elasticsearch ?? settings.getElasticsearchConfig();
     const fingerprint = settings.reuse
-      ? createHash('sha256').update(JSON.stringify({ init, elasticsearch })).digest('hex')
+      ? createHash('sha256')
+          // Sorted, so the same pack set in a different order still reuses a warm process.
+          .update(
+            JSON.stringify({
+              init: init?.packs ? { ...init, packs: [...init.packs].sort() } : init,
+              elasticsearch,
+            })
+          )
+          .digest('hex')
       : '';
     for (const process of this.idle) {
       if (process.bundle.taskType !== bundle.taskType) continue;
@@ -328,6 +366,8 @@ export class TaskProcessSupervisor {
     const labels: Record<string, string> = {
       task_type: bundle.taskType,
       ...(context?.executionUuid ? { run_id: context.executionUuid } : {}),
+      // Sorted, so two runs that asked for the same packs in a different order reuse one label.
+      ...(init?.packs ? { packs: [...init.packs].sort().join(',') } : {}),
     };
     const managed: ReusableChild = {
       child,

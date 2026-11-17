@@ -33,6 +33,7 @@ import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_d
 import { checkLicense } from './lib/check_license';
 import { ensureBoundExecutionAdmitted } from './lib/ensure_bound_execution_admitted';
 import { getAuthenticatedUser } from './lib/get_user';
+import { resolveWorkflowTaskPacks } from './lib/get_workflow_task_packs';
 import { hasWorkflowAccess } from './lib/has_workflow_access';
 import { scheduleRunTaskOrMarkFailed } from './lib/schedule_workflow_run_task';
 import type {
@@ -322,12 +323,18 @@ export const createWorkflowScheduler = ({
   // Helper function to create a task instance
   const createTaskInstance = (workflowExecution: Partial<EsWorkflowExecution>, scope: string[]) => {
     const priority = getTaskPriority(workflowExecution.context);
+    const packs = resolveWorkflowTaskPacks(
+      taskManager,
+      WORKFLOW_RUN_TASK_TYPE,
+      workflowExecution.workflowDefinition
+    );
     return {
       id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
       taskType: WORKFLOW_RUN_TASK_TYPE,
       params: {
         workflowRunId: workflowExecution.id,
         spaceId: workflowExecution.spaceId,
+        ...(packs ? { packs } : {}),
       } as StartWorkflowExecutionParams,
       state: {
         lastRunAt: null,

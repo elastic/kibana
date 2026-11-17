@@ -16,7 +16,8 @@ declare const __KBN_VERSION__: string | undefined;
  * ESO_ENCRYPTION_KEY and ESO_DECRYPTION_ONLY_KEYS (comma separated), KIBANA_SERVER_UUID,
  * KIBANA_BUILD_NUM, KIBANA_PUBLIC_BASE_URL, KIBANA_BASE_PATH, KIBANA_SERVERLESS, and TASK_PROCESS_SETTINGS, the path
  * of a JSON file `{ "settings": { "<pluginId>": <config> }, "uiSettingsOverrides": {}, "uiSettingsGlobalOverrides": {}, "parity": [{ "kind": "...", "ids": [] }] }` whose
- * configs use the format of `serializeSettings` (a duration is `{"__kind":"duration","ms":1000}`).
+ * configs use the format of `serializeSettings` (a duration is `{"__kind":"duration","ms":1000}`), and
+ * "packs": ["..."].
  */
 export const initFromEnv = (env: NodeJS.ProcessEnv = process.env): TaskProcessInit => {
   const file = env.TASK_PROCESS_SETTINGS
@@ -26,6 +27,7 @@ export const initFromEnv = (env: NodeJS.ProcessEnv = process.env): TaskProcessIn
         | 'uiSettingsOverrides'
         | 'uiSettingsGlobalOverrides'
         | 'parity'
+        | 'packs'
         | 'instrumentation'
         | 'executionContext'
       >)
@@ -59,6 +61,7 @@ export const initFromEnv = (env: NodeJS.ProcessEnv = process.env): TaskProcessIn
     uiSettingsOverrides: file.uiSettingsOverrides,
     uiSettingsGlobalOverrides: file.uiSettingsGlobalOverrides,
     parity: file.parity,
+    packs: file.packs,
   };
 };
 

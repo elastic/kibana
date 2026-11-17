@@ -37,7 +37,7 @@ import { TASK_PROCESS_PROTOCOL_VERSION } from './task_process/protocol';
 import type { TaskProcessDispatch } from './task_process/remote_task_runner';
 import { serializeElasticsearchConfig } from './task_process/es_config';
 import { TaskProcessSupervisor } from './task_process/supervisor';
-import type { TaskProcessSupervisorStats } from './task_process/supervisor';
+import type { TaskBundlePackManifest, TaskProcessSupervisorStats } from './task_process/supervisor';
 import type { TaskHost, TaskTypeModule, TaskTypeRegistrationOptions } from './task_type_module';
 import { assertHostExtensions, toTaskDefinition } from './task_type_module';
 import { resolveSettingsByPlugin, serializeSettings } from './task_process/settings';
@@ -162,6 +162,12 @@ export type TaskManagerStartContract = Pick<
      * processes started now. The failures are counted in the `taskManager` usage counter as `taskProcessDispatchFailure:<reason>:<type>`.
      */
     getTaskProcessStats: () => TaskProcessStats;
+    /**
+     * The packs a task type's bundle declares (from `manifest.json`), for the plugin that registered
+     * it to resolve what a specific run needs itself (`TaskTypeRegistrationOptions.getPacks`).
+     * Undefined before process execution starts, or for a task type with no bundle.
+     */
+    getTaskBundlePacks: (taskType: string) => TaskBundlePackManifest[] | undefined;
     registerEncryptedSavedObjectsClient: (
       client: EncryptedSavedObjectsClient,
       isEncryptionError?: (error: Error) => boolean
@@ -554,14 +560,20 @@ export class TaskManagerPlugin
           );
           return Object.fromEntries(values);
         },
-        getSnapshot: async (taskType) => ({
-          protocolVersion: TASK_PROCESS_PROTOCOL_VERSION,
-          init: {
-            ...(await this.getTaskProcessInit?.(taskType)),
-            elasticsearch: serializeElasticsearchConfig(this.elasticsearchConfig!),
-            kibanaVersion: this.kibanaVersion,
-          },
-        }),
+        getSnapshot: async (taskType, taskInstance) => {
+          const registration = this.moduleRegistrations.get(taskType);
+          const packs = await registration?.options?.getPacks?.(taskInstance);
+          return {
+            protocolVersion: TASK_PROCESS_PROTOCOL_VERSION,
+            init: {
+              ...(await this.getTaskProcessInit?.(taskType)),
+              // `[]` (load nothing) and `undefined` (unresolved, load every pack) are different.
+              ...(packs !== undefined ? { packs } : {}),
+              elasticsearch: serializeElasticsearchConfig(this.elasticsearchConfig!),
+              kibanaVersion: this.kibanaVersion,
+            },
+          };
+        },
         getCancelGracePeriodMs: (taskType) =>
           this.moduleRegistrations.get(taskType)?.module.cancelGracePeriodMs,
         getRoute: (taskType) => {
@@ -929,6 +941,7 @@ export class TaskManagerPlugin
         dispatchFailures: this.taskProcessDispatchFailures.getCounts(),
         processes: this.taskProcessSupervisor?.getStats(),
       }),
+      getTaskBundlePacks: (taskType) => this.taskProcessSupervisor?.getTaskBundlePacks(taskType),
       bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
       registerEncryptedSavedObjectsClient: (
         client: EncryptedSavedObjectsClient,

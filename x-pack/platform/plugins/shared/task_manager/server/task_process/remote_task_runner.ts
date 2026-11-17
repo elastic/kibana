@@ -10,7 +10,7 @@ import { combineMetricCollections, decodeMetricScopes } from '@kbn/metrics';
 import type { ScopeMetrics } from '@kbn/metrics';
 import { captureTaskRunTrace } from '../task_running/task_tracing';
 import type { TaskExecutionPool } from '../task_scheduling';
-import type { CancellableTask, RemoteRunObserver, RunResult } from '../task';
+import type { CancellableTask, ConcreteTaskInstance, RemoteRunObserver, RunResult } from '../task';
 import {
   createRetryableError,
   DeclinedRunError,
@@ -73,7 +73,11 @@ export interface TaskProcessDispatch {
     taskType: string,
     declarations?: TaskFeatureFlagDefinitions
   ) => Promise<TaskProcessRunRequest['featureFlags']>;
-  getSnapshot?: (taskType: string) => Promise<TaskProcessDispatchSnapshot>;
+  /** `taskInstance` is the run being dispatched, read by `TaskTypeRegistrationOptions.getPacks`. */
+  getSnapshot?: (
+    taskType: string,
+    taskInstance: ConcreteTaskInstance
+  ) => Promise<TaskProcessDispatchSnapshot>;
   getCurrentTasksInPool?: TaskExecutionPool['getCurrentTasksInPool'];
   onTasksCreated?: (count: number) => void;
   onMetrics?: (metrics: ScopeMetrics[]) => void;
@@ -151,8 +155,30 @@ export class RemoteTaskRunner implements CancellableTask {
   private cancelled = false;
   private target?: TaskProcessAddress | TaskProcessLease;
   private cancellation?: Promise<void>;
+  private retriedForMissingPacks = false;
 
+  /**
+   * A process that declines because it did not load a pack this run needs is asked once more, with
+   * the ids it reported missing added to what Main already requested, instead of failing the run and
+   * waiting for Task Manager's own retry and backoff.
+   */
   public async run(): Promise<RunResult | undefined | void> {
+    try {
+      return await this.attempt();
+    } catch (error) {
+      if (
+        !this.retriedForMissingPacks &&
+        error instanceof DeclinedRunError &&
+        error.detail?.missingPacks?.length
+      ) {
+        this.retriedForMissingPacks = true;
+        return this.attempt(error.detail.missingPacks);
+      }
+      throw error;
+    }
+  }
+
+  private async attempt(extraPacks?: string[]): Promise<RunResult | undefined | void> {
     const {
       route,
       request: originalRequest,
@@ -164,6 +190,19 @@ export class RemoteTaskRunner implements CancellableTask {
       ...originalRequest,
       protocolVersion: TASK_PROCESS_PROTOCOL_VERSION,
       tracing: originalRequest.tracing ?? captureTaskRunTrace(),
+      ...(extraPacks?.length && originalRequest.snapshot
+        ? {
+            snapshot: {
+              ...originalRequest.snapshot,
+              init: {
+                ...originalRequest.snapshot.init,
+                packs: [
+                  ...new Set([...(originalRequest.snapshot.init.packs ?? []), ...extraPacks]),
+                ],
+              },
+            },
+          }
+        : {}),
     };
     signal?.throwIfAborted();
     if (this.cancelled)
@@ -312,6 +351,7 @@ export class RemoteTaskRunner implements CancellableTask {
         // A process that declines says why, which is what to alarm on.
         let reason: string | undefined;
         let incompatible = false;
+        let missingPacks: string[] | undefined;
         if (response.status === DECLINED_STATUS) {
           const failure = (await response.json().catch(() => undefined)) as
             | {
@@ -319,10 +359,12 @@ export class RemoteTaskRunner implements CancellableTask {
                 reason?: string;
                 createdTaskCount?: number;
                 prometheus?: TaskProcessMetricSnapshot;
+                missingPacks?: string[];
               }
             | undefined;
           reason = failure?.reason;
           incompatible = failure?.kind === 'incompatible';
+          missingPacks = failure?.missingPacks;
           this.reportCreatedTasks(failure?.createdTaskCount);
           this.reportMetrics(failure?.prometheus);
         } else {
@@ -342,7 +384,9 @@ export class RemoteTaskRunner implements CancellableTask {
             reason ?? message
           );
           if (response.status === DECLINED_STATUS && !incompatible) {
-            throwUnrecoverableError(new DeclinedRunError(message));
+            throwUnrecoverableError(
+              new DeclinedRunError(message, missingPacks?.length ? { missingPacks } : undefined)
+            );
           }
           throwUnrecoverableError(new Error(message));
         }

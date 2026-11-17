@@ -26,11 +26,14 @@ export const runTaskProcess = async (
   module: TaskTypeModule,
   {
     contributions,
+    loadedPacks,
     init: providedInit,
     instrumentation,
     registerStop,
   }: {
     contributions?: Record<string, unknown[]>;
+    /** Ids of the packs this process actually loaded; see `TaskHost.loadedPacks`. */
+    loadedPacks?: string[];
     init?: TaskProcessInit;
     instrumentation?: TaskProcessInstrumentation;
     registerStop?: ReturnType<typeof createTaskProcessParentWatcher>;
@@ -39,7 +42,7 @@ export const runTaskProcess = async (
   const onCoreStarted = registerStop ?? createTaskProcessParentWatcher();
   try {
     const init = providedInit ?? (await readTaskProcessInit());
-    const core = await startTaskProcessCore({ init, module, contributions });
+    const core = await startTaskProcessCore({ init, module, contributions, loadedPacks });
     const stop = async (): Promise<void> => {
       try {
         await core.stop();

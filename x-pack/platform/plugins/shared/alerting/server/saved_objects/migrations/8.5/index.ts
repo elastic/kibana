@@ -10,10 +10,10 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { isSerializedSearchSource } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
 import type { RawRule } from '../../../types';
 import { createEsoMigration, isEsQueryRuleType, pipeMigrations } from '../utils';
+import { isSerializedSearchSource } from '../is_serialized_search_source';
 import type { AlertLogMeta } from '../types';
 
 function stripOutRuntimeFieldsInOldESQuery(

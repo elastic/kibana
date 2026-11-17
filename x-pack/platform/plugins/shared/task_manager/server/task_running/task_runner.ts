@@ -544,7 +544,10 @@ export class TaskManagerRunner implements TaskRunner {
 
           const route = this.taskProcessDispatch?.getRoute(this.taskType);
           if (route && this.taskProcessDispatch) {
-            const snapshot = await this.taskProcessDispatch.getSnapshot?.(this.taskType);
+            const snapshot = await this.taskProcessDispatch.getSnapshot?.(
+              this.taskType,
+              sanitizedTaskInstance
+            );
             this.task = new RemoteTaskRunner({
               route,
               request: {

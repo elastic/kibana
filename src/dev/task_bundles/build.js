@@ -31,7 +31,10 @@ const loadTaskType = (file) => createRequire(__filename)(file).taskType;
  * Native modules stay out of the bundle and resolve from node_modules at run time. `canvas` is the
  * optional native dependency of jsdom, which jsdom loads inside a try/catch.
  */
-const EXTERNALS = ['re2', 'canvas'];
+// `node-liblzma` (pulled in by `just-bash`) and `@mongodb-js/zstd` (the MongoDB connector's
+// compression dependency) do a runtime `require('node-gyp-build'...)` relative to their own
+// package directory, which esbuild's bundling breaks; they stay a real `require()` too.
+const EXTERNALS = ['re2', 'canvas', 'node-liblzma', '@mongodb-js/zstd'];
 
 // The Node resolver selects EUI's CommonJS entry. A server task that uses one palette helper then
 // retains EUI's entire UI library. Resolve the package entry to its declared ES module instead.
@@ -356,6 +359,148 @@ const getStartupAnalysis = (metafile, outfile) => {
   };
 };
 
+/**
+ * Reachable bytes per contribution file: for each, the output chunk(s) esbuild generated for its
+ * `import()` call site in the entry, plus what they statically import (not through a further
+ * dynamic import). A contribution's number is inclusive, not exclusive: two contributions that both
+ * reference a shared chunk each count its full size, since that is what removing either one alone
+ * would not save. Used to order future pack and contribution work by measured weight, not guesswork.
+ */
+const getContributionAnalysis = (metafile, contributionFiles) => {
+  const outputs = Object.entries(metafile.outputs).map(([file, output]) => [
+    path.resolve(REPO_ROOT, file),
+    output,
+  ]);
+  return contributionFiles.map((contributionFile) => {
+    const absolute = path.resolve(REPO_ROOT, contributionFile);
+    // The output chunk esbuild generated to hold this file's own code (not one it merely imports).
+    const [rootFile] =
+      outputs.find(([, output]) =>
+        Object.keys(output.inputs ?? {}).includes(path.relative(REPO_ROOT, absolute))
+      ) ?? [];
+    if (!rootFile) return { file: path.relative(REPO_ROOT, absolute), bytes: 0 };
+    const loaded = new Set();
+    const visit = (file) => {
+      if (loaded.has(file)) return;
+      const output = metafile.outputs[path.relative(REPO_ROOT, file)];
+      if (!output) return;
+      loaded.add(file);
+      for (const dependency of output.imports) {
+        if (dependency.external || dependency.kind === 'dynamic-import') continue;
+        visit(path.resolve(REPO_ROOT, dependency.path));
+      }
+    };
+    visit(rootFile);
+    const bytes = [...loaded]
+      .filter((file) => file.endsWith('.mjs'))
+      .reduce((total, file) => total + fs.statSync(file).size, 0);
+    return { file: path.relative(REPO_ROOT, absolute), bytes };
+  });
+};
+
+/** The id a pack is known by, inside a generated entry and across the manifest and dispatch. */
+const packId = (key, absoluteFile) => `${key}:${path.relative(REPO_ROOT, absoluteFile)}`;
+
+/**
+ * One pack per contribution file: its id, what it declares (`stepTypes`, `triggers`, `requires`,
+ * when the contribution is a workflow step; read by Main to resolve a workflow definition to the
+ * packs it needs), the chunk closure and bytes it pulls in standing alone, which other packs' own
+ * chunks it reaches (so Task Manager can resolve a pack's dependencies before dispatching a run),
+ * and any dynamic import inside its closure that is neither folded into its own closure nor the
+ * root chunk of another declared pack, so the build can say so instead of silently dropping it at
+ * run time.
+ */
+const getPackManifest = (metafile, contributions, declarations = new Map()) => {
+  const outputs = Object.entries(metafile.outputs).map(([file, output]) => [
+    path.resolve(REPO_ROOT, file),
+    output,
+  ]);
+  const findRootFile = (absolute) =>
+    outputs.find(([, output]) =>
+      Object.keys(output.inputs ?? {}).includes(path.relative(REPO_ROOT, absolute))
+    )?.[0];
+  const entries = Object.entries(contributions).flatMap(([key, files]) =>
+    files.map((file) => {
+      const absolute = path.resolve(REPO_ROOT, file);
+      const contribution = declarations.get(file);
+      const declares = contribution?.declares ?? {};
+      return {
+        id: packId(key, absolute),
+        key,
+        file: path.relative(REPO_ROOT, absolute),
+        rootFile: findRootFile(absolute),
+        stepTypes: declares.stepTypes ?? [],
+        triggers: declares.triggers ?? [],
+        requires: declares.requires ?? [],
+        provides: Object.keys(contribution?.provides ?? {}),
+      };
+    })
+  );
+  const rootFileToPackIds = new Map();
+  for (const entry of entries) {
+    if (!entry.rootFile) continue;
+    rootFileToPackIds.set(entry.rootFile, [
+      ...(rootFileToPackIds.get(entry.rootFile) ?? []),
+      entry.id,
+    ]);
+  }
+  return entries.map((entry) => {
+    const declares = {
+      stepTypes: entry.stepTypes,
+      triggers: entry.triggers,
+      requires: entry.requires,
+      provides: entry.provides,
+    };
+    if (!entry.rootFile) {
+      return {
+        id: entry.id,
+        file: entry.file,
+        ...declares,
+        bytes: 0,
+        files: [],
+        dependsOn: [],
+        dynamicImports: [],
+      };
+    }
+    const loaded = new Set();
+    const dependsOn = new Set();
+    const dynamicImports = new Set();
+    const visit = (file, isOwnRoot) => {
+      if (loaded.has(file)) return;
+      const output = metafile.outputs[path.relative(REPO_ROOT, file)];
+      if (!output) return;
+      loaded.add(file);
+      if (!isOwnRoot) {
+        for (const otherId of rootFileToPackIds.get(file) ?? []) {
+          if (otherId !== entry.id) dependsOn.add(otherId);
+        }
+      }
+      for (const dependency of output.imports) {
+        if (dependency.external) continue;
+        const depPath = path.resolve(REPO_ROOT, dependency.path);
+        if (dependency.kind === 'dynamic-import') {
+          if (!(rootFileToPackIds.get(depPath) ?? []).length) {
+            dynamicImports.add(path.relative(REPO_ROOT, depPath));
+          }
+          continue;
+        }
+        visit(depPath, false);
+      }
+    };
+    visit(entry.rootFile, true);
+    const files = [...loaded].filter((file) => file.endsWith('.mjs'));
+    return {
+      id: entry.id,
+      file: entry.file,
+      ...declares,
+      bytes: files.reduce((total, file) => total + fs.statSync(file).size, 0),
+      files: files.map((file) => path.relative(REPO_ROOT, file)),
+      dependsOn: [...dependsOn],
+      dynamicImports: [...dynamicImports],
+    };
+  });
+};
+
 /** Lists the complete reachable code and source maps belonging to one native task entry. */
 const getBundleOutputs = (metafile, outfile) => {
   const outputs = new Map(
@@ -378,10 +523,14 @@ const getBundleOutputs = (metafile, outfile) => {
 };
 
 // Syntax minification drops cross-entry imports backing namespace getters in the pinned esbuild.
+// `keepNames` is off and identifiers are minified: nothing in the task process relies on a
+// function or class's original `.name` for behavior (only `instanceof` and error codes), and
+// minifying identifiers shrinks the floor's ~24 MB of retained V8 bytecode/string tables.
 const TASK_BUNDLE_OPTIMIZATION = {
   minifyWhitespace: true,
   minifySyntax: false,
-  keepNames: true,
+  minifyIdentifiers: true,
+  keepNames: false,
 };
 
 /** Builds native task entries in one graph, sharing their common runtime chunks. */
@@ -392,18 +541,36 @@ const buildTaskBundles = async ({
   sourcemap = true,
   metafile = false,
   additionalContributions = {},
+  // False builds the floor alone (no plugin's contributions), for baselining what every workflow
+  // worker pays before any step, trigger or service a plugin contributes is added.
+  withContributions = true,
 }) => {
   const version = kibanaVersion ?? require('@kbn/repo-info').kibanaPackageJson.version;
   const runtime = copyTaskRuntimeDependencies(outDir);
+  const packages = getPackages(REPO_ROOT);
   const prepared = entries.map((entry) => {
     const loaded = loadTaskType(entry.file);
     if (!loaded) throw new Error(`Task module ${entry.file} has no taskType export`);
+    // A task type's own plugin may declare contributions it requires of itself (the workflow
+    // engine's own scheduling snapshot and runtime services, say), not an optional extension from
+    // another plugin. The floor keeps those and drops every other plugin's.
+    const ownPluginDir = packages.find((pkg) =>
+      path
+        .resolve(REPO_ROOT, entry.file)
+        .startsWith(path.resolve(REPO_ROOT, pkg.directory) + path.sep)
+    )?.directory;
+    const getFiles = withContributions
+      ? getContributionFiles
+      : (key) =>
+          getContributionFiles(key, packages).filter((file) =>
+            ownPluginDir ? file.startsWith(path.resolve(REPO_ROOT, ownPluginDir) + path.sep) : false
+          );
     // What the module says it takes from other plugins: every plugin's file under each key.
     const declarations = new Map();
     const contributions = resolveTaskContributions(
       loaded,
-      additionalContributions,
-      getContributionFiles,
+      withContributions ? additionalContributions : {},
+      getFiles,
       (file) => {
         const contribution = createRequire(__filename)(file).contribution;
         declarations.set(file, contribution);
@@ -411,30 +578,47 @@ const buildTaskBundles = async ({
       }
     );
     const featureFlags = collectTaskFeatureFlags(loaded, [...declarations.values()]);
-    const contributionImports = Object.values(contributions).flat();
+    // One pack per contribution file. Without a selection from Main (`init.packs`), every pack
+    // loads, which is the pre-pack behavior: nothing here changes what a worker does if nothing
+    // upstream ever sets `packs` on `TaskProcessInit`.
+    const packs = Object.entries(contributions).flatMap(([key, files]) =>
+      files.map((file) => ({ id: packId(key, path.resolve(REPO_ROOT, file)), key, file }))
+    );
     return {
       entry,
       featureFlags,
+      contributions,
+      declarations,
+      packs,
       contents: [
         `import { bootstrapTaskProcess } from ${JSON.stringify(
           path.join(path.dirname(RUNTIME_ENTRY), 'bootstrap')
         )};`,
         `const initialization = await bootstrapTaskProcess();`,
-        `const [runtime, taskModule, ${contributionImports
-          .map((_, i) => `contributionModule${i}`)
-          .join(', ')}] = await Promise.all([`,
+        `const PACKS = [`,
+        ...packs.map(
+          ({ id, key, file }) =>
+            `  { id: ${JSON.stringify(id)}, key: ${JSON.stringify(
+              key
+            )}, load: () => import(${JSON.stringify(file)}) },`
+        ),
+        `];`,
+        `const selected = new Set(initialization.init.packs ?? PACKS.map((pack) => pack.id));`,
+        `const loadedPacks = PACKS.filter((pack) => selected.has(pack.id));`,
+        `const [runtime, taskModule, ...packModules] = await Promise.all([`,
         `  import(${JSON.stringify(RUNTIME_ENTRY)}),`,
         `  import(${JSON.stringify(entry.file)}),`,
-        ...contributionImports.map((file) => `  import(${JSON.stringify(file)}),`),
+        `  ...loadedPacks.map((pack) => pack.load()),`,
         `]);`,
-        `runtime.runTaskProcess(taskModule.taskType, { ...initialization, contributions: {`,
-        ...Object.entries(contributions).map(([key, files]) => {
-          const names = files.map(
-            (file) => `contributionModule${contributionImports.indexOf(file)}.contribution`
-          );
-          return `  ${JSON.stringify(key)}: [${names.join(', ')}],`;
-        }),
-        `} });`,
+        `const contributions = {};`,
+        `loadedPacks.forEach((pack, i) => {`,
+        `  (contributions[pack.key] ??= []).push(packModules[i].contribution);`,
+        `});`,
+        `runtime.runTaskProcess(taskModule.taskType, {`,
+        `  ...initialization,`,
+        `  contributions,`,
+        `  loadedPacks: loadedPacks.map((pack) => pack.id),`,
+        `});`,
       ].join('\n'),
     };
   });
@@ -520,9 +704,15 @@ const buildTaskBundles = async ({
     // V8 retains each loaded chunk's source; keep every chunk at one byte per character.
     fs.writeFileSync(file, escapeNonLatin1(fs.readFileSync(file, 'utf8')));
   }
-  return prepared.map(({ entry, featureFlags }) => {
+  return prepared.map(({ entry, featureFlags, contributions, declarations, packs }) => {
     const outfile = path.join(outDir, `${entry.name}.mjs`);
     const bundleFiles = getBundleOutputs(result.metafile, outfile);
+    const contributionBytes = Object.fromEntries(
+      Object.entries(contributions).map(([key, files]) => [
+        key,
+        getContributionAnalysis(result.metafile, files),
+      ])
+    );
     return {
       name: entry.name,
       runtime,
@@ -535,7 +725,12 @@ const buildTaskBundles = async ({
         (total, file) => total + fs.statSync(file).size,
         0
       ),
-      startupAnalysis: getStartupAnalysis(result.metafile, outfile),
+      startupAnalysis: {
+        ...getStartupAnalysis(result.metafile, outfile),
+        contributions: contributionBytes,
+      },
+      packs: getPackManifest(result.metafile, contributions, declarations),
+      packIds: packs.map(({ id }) => id),
       entry,
       featureFlags,
       ...(metafile ? { metafile: result.metafile } : {}),
@@ -559,7 +754,18 @@ const writeManifest = (results, outDir = OUT_DIR, kibanaVersion) => {
     runtime: results[0]?.runtime,
     bundles: Object.fromEntries(
       results.map(
-        ({ entry, name, bytes, outfile, files, startupBytes, startupAnalysis, featureFlags }) => [
+        ({
+          entry,
+          name,
+          bytes,
+          outfile,
+          files,
+          startupBytes,
+          startupAnalysis,
+          featureFlags,
+          packs,
+          packIds,
+        }) => [
           name,
           {
             file: path.relative(outDir, outfile),
@@ -569,6 +775,8 @@ const writeManifest = (results, outDir = OUT_DIR, kibanaVersion) => {
             startupBytes,
             startupAnalysis,
             featureFlags,
+            packs,
+            packIds,
           },
         ]
       )
@@ -590,6 +798,9 @@ module.exports = {
   collectTaskFeatureFlags,
   getStartupOutputs,
   getStartupAnalysis,
+  getContributionAnalysis,
+  getPackManifest,
+  packId,
   buildTaskBundle,
   buildTaskBundles,
   getBundleOutputs,

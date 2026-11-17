@@ -28,6 +28,7 @@ import { withTaskProcessTrace } from './task_tracing';
 import { ActiveTaskPoolRequests } from './active_task_pool_requests';
 import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 import {
+  type DeclinedRunError,
   isDeclinedRunError,
   serializeTaskRunError,
   throwUnrecoverableError,
@@ -101,7 +102,8 @@ class RefusedRun extends Error {
     public readonly status: number,
     message: string,
     public readonly createdTaskCount?: number,
-    public readonly prometheus?: TaskProcessMetricSnapshot
+    public readonly prometheus?: TaskProcessMetricSnapshot,
+    public readonly missingPacks?: string[]
   ) {
     super(message);
   }
@@ -348,7 +350,8 @@ export const startTaskProcessServer = ({
             DECLINED_STATUS,
             (error as Error).message,
             adHocTaskCounter.count,
-            prometheus
+            prometheus,
+            (error as DeclinedRunError).detail?.missingPacks
           );
         }
         return {
@@ -526,6 +529,7 @@ export const startTaskProcessServer = ({
                 reason: error.message,
                 createdTaskCount: error.createdTaskCount,
                 prometheus: error.prometheus,
+                ...(error.missingPacks?.length ? { missingPacks: error.missingPacks } : {}),
               }
             : { error: error.message }
         );

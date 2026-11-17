@@ -16,9 +16,18 @@ export const WORKFLOW_SCHEDULED_TASK_TYPE = 'workflow:scheduled';
 export interface StartWorkflowExecutionParams {
   workflowRunId: string;
   spaceId: string;
+  /**
+   * The pack ids this run's definition needs, resolved once at schedule time
+   * (see `resolveWorkflowTaskPacks`) so `getPacks` at dispatch is a pure params read. Absent when
+   * the definition was not available, or packs could not be resolved, at schedule time: a worker
+   * then loads every pack, same as before packs existed.
+   */
+  packs?: string[];
 }
 
 export interface ResumeWorkflowExecutionParams {
   workflowRunId: string;
   spaceId: string;
+  /** See {@link StartWorkflowExecutionParams.packs}. */
+  packs?: string[];
 }

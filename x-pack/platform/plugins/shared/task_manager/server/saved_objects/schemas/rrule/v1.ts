@@ -7,14 +7,18 @@
 
 import { schema } from '@kbn/config-schema';
 import { Frequency } from '@kbn/rrule';
-import moment from 'moment-timezone';
 
+/**
+ * Validated with `Intl`'s own time zone database instead of `moment-timezone`, which bundles its
+ * own multi-hundred-KB copy of the IANA time zone database just for this one check.
+ */
 export function validateTimezone(timezone: string) {
-  if (moment.tz.zone(timezone) != null) {
-    return;
+  try {
+    // eslint-disable-next-line no-new
+    new Intl.DateTimeFormat('en-US', { timeZone: timezone });
+  } catch {
+    return 'string is not a valid timezone: ' + timezone;
   }
-
-  return 'string is not a valid timezone: ' + timezone;
 }
 
 const validateRecurrenceByWeekday = (array: string[]) => {
