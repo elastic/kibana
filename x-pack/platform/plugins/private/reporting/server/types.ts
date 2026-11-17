@@ -15,7 +15,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { ReportSource, UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
-import type { ReportingConfigType } from '@kbn/reporting-server';
+import type { ReportingConfigType, ReportingServerPluginSetup } from '@kbn/reporting-server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
   PdfScreenshotOptions as BasePdfScreenshotOptions,
@@ -32,7 +32,6 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
-import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
@@ -49,7 +48,11 @@ import type {
  * Plugin Setup Contract
  */
 export interface ReportingSetup {
-  registerExportTypes: ExportTypesRegistry['register'];
+  /**
+   * Register an export type owned by another plugin. Call it during `setup`; Reporting builds the
+   * export type with its own config, so it takes part in scheduling, permissions and email delivery.
+   */
+  registerExportTypes: ReportingServerPluginSetup['registerExportTypes'];
   /**
    * Process a user request to generate a report
    * that requires accessing system indices as an internal user.

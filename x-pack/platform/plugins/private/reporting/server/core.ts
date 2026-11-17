@@ -35,7 +35,7 @@ import { CsvSearchSourceExportType, CsvV2ExportType } from '@kbn/reporting-expor
 import { PdfExportType, PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
-import type { ExportType, ScheduleType } from '@kbn/reporting-server';
+import type { ExportType, ExportTypeFactory, ScheduleType } from '@kbn/reporting-server';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -143,7 +143,7 @@ export class ReportingCore {
     });
 
     this.getContract = () => ({
-      registerExportTypes: (id) => id,
+      registerExportTypes: (createExportType) => this.registerExportType(createExportType),
       getSpaceId: this.getSpaceId.bind(this),
       handleGenerateSystemReportRequest: (path, requestParams, handleResponseFunc) =>
         handleGenerateSystemReportRequest(
@@ -156,6 +156,24 @@ export class ReportingCore {
     });
 
     this.executing = new Set();
+  }
+
+  private registerExportType(createExportType: ExportTypeFactory) {
+    const exportType = createExportType({
+      core: this.core,
+      config: this.config,
+      logger: this.logger,
+      context: this.context,
+    });
+    this.exportTypesRegistry.register(exportType);
+
+    // Types registered before `pluginSetup`/`pluginStart` are initialized there with the others.
+    if (this.pluginSetupDeps) {
+      exportType.setup(this.pluginSetupDeps);
+    }
+    if (this.pluginStartDeps) {
+      exportType.start({ ...this.pluginStartDeps });
+    }
   }
 
   public getKibanaPackageInfo() {

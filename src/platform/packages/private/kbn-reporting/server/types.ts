@@ -11,6 +11,9 @@ import type { Writable } from 'stream';
 import type { TypeOf } from '@kbn/config-schema';
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import type { PluginInitializerContext } from '@kbn/core-plugins-server';
+import type { Logger } from '@kbn/logging';
 import type { CancellationToken } from '@kbn/reporting-common';
 import type {
   BaseParams,
@@ -22,8 +25,21 @@ import type {
 import type { ConfigSchema } from './config_schema';
 import type { ExportType } from './export_type';
 
+export interface ExportTypeFactoryDeps {
+  core: CoreSetup;
+  config: ReportingConfigType;
+  logger: Logger;
+  context: PluginInitializerContext<ReportingConfigType>;
+}
+
+export type ExportTypeFactory = (deps: ExportTypeFactoryDeps) => ExportType;
+
 export interface ReportingServerPluginSetup {
-  registerExportTypes: (item: ExportType) => void;
+  /**
+   * Register an export type owned by another plugin. Call it during `setup`; Reporting builds the
+   * export type with its own config, so it takes part in scheduling, permissions and email delivery.
+   */
+  registerExportTypes: (createExportType: ExportTypeFactory) => void;
 }
 
 // standard type for create job function of any ExportType implementation
