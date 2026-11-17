@@ -15,7 +15,7 @@ import type { CoverageAtBase } from './test/vendor_api/exemptions';
 import { findLostCoverage, vendorApiExemptionsSchema } from './test/vendor_api/exemptions';
 import type { FoundConnector } from './test/vendor_api/find_connector';
 import { listConnectors } from './test/vendor_api/find_connector';
-import { updateVendorApi } from './test/vendor_api/update_vendor_api';
+import { updateVendorApi } from './test/vendor_api/record/update_vendor_api';
 
 const PACKAGE_DIR = path.resolve(__dirname, '..');
 const SPECS_DIR = path.join(__dirname, 'specs');
