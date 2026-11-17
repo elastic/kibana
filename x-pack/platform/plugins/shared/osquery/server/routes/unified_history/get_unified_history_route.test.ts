@@ -115,6 +115,23 @@ describe('getUnifiedHistoryRoute', () => {
     });
   });
 
+  it('sourceFilters=workflow alone queries live actions and does not query scheduled rows', async () => {
+    mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+    setupRoute();
+    const response = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      httpServerMock.createKibanaRequest({ query: { sourceFilters: 'workflow' } }),
+      response
+    );
+    expect(response.ok).toHaveBeenCalled();
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0][0].index).toContain(ACTIONS_INDEX);
+    expect(mockEsClient.search.mock.calls[0][0].body.query.bool.filter).toContainEqual({
+      bool: { should: [{ term: { dispatch_source: 'workflow' } }], minimum_should_match: 1 },
+    });
+  });
+
   describe('when CPS is enabled', () => {
     beforeEach(() => {
       mockOsqueryContext = {
