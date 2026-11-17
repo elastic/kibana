@@ -75,7 +75,9 @@ Read everything that was attached before answering:
 - The "Execution details" text: outcome, reason, start time, and duration.
 - The "Rule / execution IDs" text with the rule and execution ids.
 
-If the rule attachment is missing but the "Rule / execution IDs" text supplies a rule \`id\`, load the rule before falling back: read it with the Kibana API tools, then attach it with ${ALERTING_TOOL_IDS.attachRule} using that \`id\`.
+If the rule attachment is missing but the "Rule / execution IDs" text supplies a rule \`id\`, load the rule before falling back: read it with the Kibana API tools, then attach it with ${
+      ALERTING_TOOL_IDS.attachRule
+    } using that \`id\`.
 If no rule \`id\` was supplied, find the rule by name or keywords the user gave:
 ${generateRuleDiscoveryGuidance()}
 If the rule still cannot be found, it may have been deleted or the user may lack access to it. Say so, and diagnose from the error text alone without inventing the rule definition.
@@ -119,18 +121,28 @@ Elasticsearch reports an index the caller cannot read exactly like an index that
 
 Possible root causes:
 1. **Typo or renamed field** in the query.
-   - Confirm: ${platformCoreTools.listIndices} finds matching indices, and ${platformCoreTools.getIndexMapping} shows a similarly named field (for example a different spelling or casing) but not the exact name in the query.
+   - Confirm: ${platformCoreTools.listIndices} finds matching indices, and ${
+      platformCoreTools.getIndexMapping
+    } shows a similarly named field (for example a different spelling or casing) but not the exact name in the query.
    - Possible fix (rule change): correct the field name in the query.
 2. **Mapping issue: the field is not mapped in any matched index.** For example the field exists only in \`_source\` (dynamic mapping disabled or \`dynamic: false\`), it only appears after the first document that contains it is indexed, it lives under a different path (\`host.name\` versus \`host.hostname\`), or a \`text\` field needs its \`.keyword\` sub-field for grouping or sorting.
-   - Confirm: ${platformCoreTools.listIndices} finds matching indices, but ${platformCoreTools.getIndexMapping} shows no mapping for the field under any similar name, shows \`dynamic: false\` on the parent object, or shows the value under a different path.
+   - Confirm: ${platformCoreTools.listIndices} finds matching indices, but ${
+      platformCoreTools.getIndexMapping
+    } shows no mapping for the field under any similar name, shows \`dynamic: false\` on the parent object, or shows the value under a different path.
    - Possible fix (rule change): if the value is mapped under a different path or a \`.keyword\` sub-field, use that field in the query.
    - Possible fix (not a rule change): otherwise have the index owner correct the mapping or ingest pipeline.
 3. **The index pattern matches no index**: wrong or misspelled pattern, data not ingested yet, an ILM-deleted or rolled-over index, a concrete backing index name that no longer exists, or a missing cross-cluster alias.
-   - Confirm: ${platformCoreTools.listIndices} returns no index for the pattern. Apply the access caveats under Debugging tools: the index may exist but be hidden from this user.
+   - Confirm: ${
+     platformCoreTools.listIndices
+   } returns no index for the pattern. Apply the access caveats under Debugging tools: the index may exist but be hidden from this user.
    - Possible fix (rule change): if the pattern is misspelled or names a concrete backing index, correct the \`FROM\` pattern (prefer the data stream or alias over a backing index).
    - Possible fix (not a rule change): if the data has not been ingested yet or was deleted, have the data owner restore ingestion; for a cross-cluster pattern, have an administrator configure the remote cluster.
 4. **Missing privileges: the rule owner cannot read the index.** The rule's API key carries the owner's privileges as they were when the key was created, so a role changed later does not apply until its API key is refreshed by a user who now has access.
-   - Confirm: the index and the field are visible to the user in ${platformCoreTools.listIndices} and ${platformCoreTools.getIndexMapping}, yet the rule still fails, and cause 5 does not apply. Check the role of the user who last updated the rule's API key for \`read\` and \`view_index_metadata\` on the pattern.
+   - Confirm: the index and the field are visible to the user in ${
+     platformCoreTools.listIndices
+   } and ${
+      platformCoreTools.getIndexMapping
+    }, yet the rule still fails, and cause 5 does not apply. Check the role of the user who last updated the rule's API key for \`read\` and \`view_index_metadata\` on the pattern.
    - Possible fix (not a rule change): grant the missing privileges, then have a user with access refresh the rule's API key with the **Update API key** action (the bulk update API key endpoint); re-saving the rule does not refresh it, and you have no tool for it. Do not rewrite the query for a privileges problem.
 5. **The column was removed earlier in the query.** ES|QL resolves each command against the columns produced by the previous one, so after \`STATS\`, \`KEEP\`, \`DROP\`, or \`RENAME\`, a source field that is still mapped no longer exists. This often happens when \`query.breach.segment\`, a \`condition\` recovery segment, or a later command in \`query.base\` uses a field the base query already aggregated away (for example \`STATS c = COUNT(*) BY host.name | WHERE http.response.status_code >= 500\`).
    - Confirm: the field is mapped (so causes 1 to 4 do not fit), and an earlier command in the composed query does not output it: a \`STATS\` that neither groups by nor computes it, a \`KEEP\` that omits it, a \`DROP\` that removes it, or a \`RENAME\` that changes its name. The position in the error (\`line:column\`) points at the reference after that command.
@@ -141,18 +153,26 @@ Messages: \`verification_exception\` with an argument or type message, for examp
 
 Possible root causes:
 1. **Wrong type for the function or comparison.** A function or comparison is applied to a field of the wrong type (for example comparing a keyword field to a number).
-   - Confirm: ${platformCoreTools.getIndexMapping} shows the field with one consistent type across the matched indices, and that type is not the one the error says the function expects.
+   - Confirm: ${
+     platformCoreTools.getIndexMapping
+   } shows the field with one consistent type across the matched indices, and that type is not the one the error says the function expects.
    - Possible fix (rule change): use a function or comparison that matches the field's type, or cast explicitly (\`TO_INTEGER\`, \`TO_STRING\`, \`::\`).
 2. **Mapping issue: the same field is mapped with different types across the indices matched by \`FROM\`** (for example \`long\` in one index and \`keyword\` in another), so ES|QL cannot use it directly.
-   - Confirm: the error lists more than one type for the field, or ${platformCoreTools.getIndexMapping} on the matched indices shows the field with different types in different indices.
+   - Confirm: the error lists more than one type for the field, or ${
+     platformCoreTools.getIndexMapping
+   } on the matched indices shows the field with different types in different indices.
    - Possible fix (rule change): cast the field explicitly to one type, or narrow the \`FROM\` pattern to indices with a consistent mapping.
    - Possible fix (not a rule change): for a lasting fix, ask the index owner to align the mappings.
 3. **Text or unsupported field type.** The field is mapped as \`text\` or an unsupported type where a keyword, numeric, or date value is needed.
-   - Confirm: ${platformCoreTools.getIndexMapping} shows the field as \`text\` (check for a \`.keyword\` sub-field) or another type ES|QL does not support, or the error says "unsupported type".
+   - Confirm: ${
+     platformCoreTools.getIndexMapping
+   } shows the field as \`text\` (check for a \`.keyword\` sub-field) or another type ES|QL does not support, or the error says "unsupported type".
    - Possible fix (rule change): use the \`.keyword\` sub-field if one exists.
    - Possible fix (not a rule change): otherwise ask the index owner to add a keyword, numeric, or date mapping.
 4. **Numbers or dates stored as strings.**
-   - Confirm: ${platformCoreTools.getIndexMapping} shows the field as \`keyword\` while the query treats it as a number or date, and the field name or the rule's intent suggests numeric or date values.
+   - Confirm: ${
+     platformCoreTools.getIndexMapping
+   } shows the field as \`keyword\` while the query treats it as a number or date, and the field name or the rule's intent suggests numeric or date values.
    - Possible fix (rule change): convert the value in the query (\`TO_INTEGER\`, \`TO_DOUBLE\`, \`TO_DATETIME\`, or \`::\`).
    - Possible fix (not a rule change): for a lasting fix, ask the index owner to map the field with a numeric or date type.
 
@@ -194,7 +214,9 @@ Possible root causes:
    - Confirm: the base query has no \`STATS\` and no \`KEEP\`.
    - Possible fix (rule change): aggregate with \`STATS\`, or keep only the needed columns with \`KEEP\`.
 2. **Wide fields** (large text or object fields) in the result.
-   - Confirm: the query returns all columns or explicitly keeps large fields, and ${platformCoreTools.getIndexMapping} shows \`text\`, \`object\`, or \`flattened\` fields in the matched indices.
+   - Confirm: the query returns all columns or explicitly keeps large fields, and ${
+     platformCoreTools.getIndexMapping
+   } shows \`text\`, \`object\`, or \`flattened\` fields in the matched indices.
    - Possible fix (rule change): drop the wide fields with \`KEEP\` or \`DROP\`.
 3. **Too many groups**, for example grouping by a high-cardinality field.
    - Confirm: the \`BY\` clause or \`grouping\` uses a field with many distinct values, such as ids, raw timestamps, or IP addresses.
@@ -231,7 +253,11 @@ Internal errors, storage failures, or task failures. This is a platform problem,
 ## 3. Explain and Fix
 
 1. Explain the most likely root cause in plain language, quoting the relevant part of the error message and the part of the rule it points at.
-2. If the fix is a change to the rule, attach the saved rule with ${ALERTING_TOOL_IDS.attachRule} (use the rule \`id\`), apply only the operations needed with ${ALERTING_TOOL_IDS.manageRule}, and end with \`{ operation: "validate" }\`.
+2. If the fix is a change to the rule, attach the saved rule with ${
+      ALERTING_TOOL_IDS.attachRule
+    } (use the rule \`id\`), apply only the operations needed with ${
+      ALERTING_TOOL_IDS.manageRule
+    }, and end with \`{ operation: "validate" }\`.
 3. Render the corrected rule inline with \`<render_attachment id="<ruleAttachment.id>" version="<version>" />\`. The \`version\` attribute is always required.
 4. Direct the user to the rendered attachment's **Update Rule** action to save the change. These tools only change an in-memory attachment; never claim the rule was saved.
 5. If the fix is **not** a rule change (privileges, mappings, a missing index, server limits, platform errors), say what the user or an administrator needs to do instead, and do not modify the rule.
