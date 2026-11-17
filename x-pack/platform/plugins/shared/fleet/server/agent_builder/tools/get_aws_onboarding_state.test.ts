@@ -347,7 +347,7 @@ describe('get_aws_onboarding_state', () => {
     });
   });
 
-  describe('settings card', () => {
+  describe('settings requirement', () => {
     const requirement = {
       package_name: 'aws',
       package_version: '8.18.1',
@@ -357,38 +357,24 @@ describe('get_aws_onboarding_state', () => {
     const requirementStep = () =>
       step('settings_requirement', 2, { status: 'completed', output: requirement });
 
-    it('returns settings_requirement and creates the settings card at ask_settings', async () => {
+    it('returns settings_requirement at ask_settings without creating a card', async () => {
       const attachments = createAttachments();
       const { results } = await runWithAttachments(
         waitingExecution('ask_settings', [requirementStep()]),
         attachments
       );
 
-      expect(attachments.add).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'fleet_aws_onboarding_settings',
-          data: { execution_id: 'exec-1', requirement },
-        })
-      );
-      expect(results[0].data.settings_card_attachment_id).toBe('att-1');
       expect(results[0].data.settings_requirement).toEqual(requirement);
+      expect(results[0].data.settings_card_attachment_id).toBeUndefined();
+      expect(attachments.add).not.toHaveBeenCalled();
     });
 
-    it('does not return the settings card id at other pauses', async () => {
-      const attachments = createAttachments([
-        {
-          id: 'att-5',
-          type: 'fleet_aws_onboarding_settings',
-          versions: [{ version: 1, data: { execution_id: 'exec-1', requirement } }],
-          current_version: 1,
-        },
-      ]);
+    it('does not return settings_requirement at other pauses', async () => {
       const { results } = await runWithAttachments(
         waitingExecution('ask_resolve', [requirementStep()]),
-        attachments
+        createAttachments()
       );
 
-      expect(results[0].data).not.toHaveProperty('settings_card_attachment_id');
       expect(results[0].data).not.toHaveProperty('settings_requirement');
     });
   });
