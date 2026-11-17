@@ -23,8 +23,8 @@ interface ApprovalContentFooterProps {
   onPrimaryClick: (action: ApprovalAction) => void;
 }
 
-const permissionTooltipFor = (action: ApprovalAction): string | undefined =>
-  action.isDisabled && action.disabledReason !== undefined ? action.disabledReason : undefined;
+const getPermissionTooltipForAction = (action?: ApprovalAction): string | undefined =>
+  action?.isDisabled && action?.disabledReason ? action.disabledReason : undefined;
 
 /**
  * The Approve/Decline row. Rendered only while a decision is still pending: `ApprovalContent`
@@ -34,9 +34,7 @@ const permissionTooltipFor = (action: ApprovalAction): string | undefined =>
 export const ApprovalContentFooter = memo<ApprovalContentFooterProps>(
   ({ secondaryActions, primaryAction, defaultButtonColor, onPrimaryClick }) => {
     const { euiTheme } = useEuiTheme();
-    const primaryPermissionTooltip = primaryAction
-      ? permissionTooltipFor(primaryAction)
-      : undefined;
+    const primaryPermissionTooltip = getPermissionTooltipForAction(primaryAction);
 
     const primaryButton = primaryAction ? (
       <EuiButton
@@ -45,13 +43,9 @@ export const ApprovalContentFooter = memo<ApprovalContentFooterProps>(
         color={primaryAction.color ?? defaultButtonColor}
         iconType={primaryAction.iconType ?? 'play'}
         isDisabled={primaryAction.isDisabled}
-        hasAriaDisabled={primaryPermissionTooltip !== undefined}
+        hasAriaDisabled={!!primaryPermissionTooltip}
         isLoading={primaryAction.isLoading}
-        onClick={
-          primaryPermissionTooltip !== undefined
-            ? () => undefined
-            : () => onPrimaryClick(primaryAction)
-        }
+        onClick={primaryPermissionTooltip ? undefined : () => onPrimaryClick(primaryAction)}
         data-test-subj={primaryAction['data-test-subj']}
       >
         {primaryAction.label}
@@ -69,16 +63,16 @@ export const ApprovalContentFooter = memo<ApprovalContentFooterProps>(
       >
         {/* Secondaries first so the decision that commits something sits rightmost. */}
         {secondaryActions?.map((action, i) => {
-          const permissionTooltip = permissionTooltipFor(action);
+          const permissionTooltip = getPermissionTooltipForAction(action);
           const button = (
             <EuiButtonEmpty
               size="s"
               color={action.color ?? 'primary'}
               iconType={action.iconType}
               isDisabled={action.isDisabled}
-              hasAriaDisabled={permissionTooltip !== undefined}
+              hasAriaDisabled={!!permissionTooltip}
               isLoading={action.isLoading}
-              onClick={permissionTooltip !== undefined ? () => undefined : action.onClick}
+              onClick={permissionTooltip ? undefined : action.onClick}
               data-test-subj={action['data-test-subj']}
             >
               {action.label}
@@ -86,7 +80,7 @@ export const ApprovalContentFooter = memo<ApprovalContentFooterProps>(
           );
           return (
             <React.Fragment key={i}>
-              {permissionTooltip !== undefined ? (
+              {permissionTooltip ? (
                 <EuiToolTip content={permissionTooltip} position="top">
                   {button}
                 </EuiToolTip>
@@ -97,7 +91,7 @@ export const ApprovalContentFooter = memo<ApprovalContentFooterProps>(
           );
         })}
         {primaryButton &&
-          (primaryPermissionTooltip !== undefined ? (
+          (primaryPermissionTooltip ? (
             <EuiToolTip content={primaryPermissionTooltip} position="top">
               {primaryButton}
             </EuiToolTip>
