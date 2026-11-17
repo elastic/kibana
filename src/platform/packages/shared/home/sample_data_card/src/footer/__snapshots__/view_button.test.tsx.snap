@@ -20,6 +20,7 @@ exports[`should render popover when appLinks is not empty 1`] = `
         View data
       </span>
       <span
+        aria-hidden="true"
         color="inherit"
         data-euiicon-type="chevronSingleDown"
       />
@@ -48,6 +49,7 @@ exports[`should render popover with ordered appLinks 1`] = `
         View data
       </span>
       <span
+        aria-hidden="true"
         color="inherit"
         data-euiicon-type="chevronSingleDown"
       />

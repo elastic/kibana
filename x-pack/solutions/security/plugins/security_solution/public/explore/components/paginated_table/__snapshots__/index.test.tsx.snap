@@ -390,6 +390,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   Rows per page: 1
                 </span>
                 <span
+                  aria-hidden="true"
                   color="inherit"
                   data-euiicon-type="chevronSingleDown"
                 />
