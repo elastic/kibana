@@ -8,110 +8,45 @@
  */
 
 /**
- * Coming back to a dashboard replays the cached responses of its panels and controls while the
- * time picker selection, the pinned filters and the project routing are the same.
+ * Coming back to a dashboard replays the cached responses of its panels and controls: those of the
+ * first load, and those of the session started by a Refresh or a time range change.
  */
 
-import type { DashboardApiDataInput } from '@kbn/as-code-dashboard-schema';
-import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { spaceTest } from '@kbn/data-plugin/test/scout_search_sessions/ui/fixtures';
 import {
-  spaceTest,
-  DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE,
-} from '@kbn/data-plugin/test/scout_search_sessions/ui/fixtures';
-import { createMetricPanel, readMetricValue } from '../../../scout/ui/metric_panel';
+  countSearchesOnReturn,
+  getReplayCacheDashboard,
+  readResults,
+  refetchDashboard,
+} from '../fixtures/replay_cache';
 
-const ALL_SOURCES_DASHBOARD = 'Replay cache all sources';
-const SINGLE_PANEL_DASHBOARD = 'Replay cache single panel';
-const FILTERED_DASHBOARD = 'Replay cache filtered';
-const FILTER_FIELD = 'machine.os.raw';
-
-/** Relative on purpose: a return that resolved "now" again would never replay. */
-const RELATIVE_TIME_RANGE = { from: 'now-30y', to: 'now', mode: 'relative' } as const;
-
-/** Search requests of every strategy: DSL panels and controls, and ES|QL panels and controls. */
-const SEARCH_REQUESTS = { endpoint: '/internal/search/', method: 'POST' } as const;
-
-const esqlMetricPanel: NonNullable<DashboardApiDataInput['panels']>[number] = {
-  type: 'vis',
-  grid: { x: 24, y: 0, w: 24, h: 10 },
-  config: {
-    type: 'metric',
-    data_source: {
-      type: 'esql',
-      query:
-        'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS docs = COUNT(*)',
-    },
-    metrics: [{ type: 'primary', column: 'docs' }],
-  },
+/** The window the logstash-* archive holds documents in, so the changed range still has results. */
+const LOGSTASH_RANGE = {
+  from: 'Sep 19, 2015 @ 06:31:44.000',
+  to: 'Sep 23, 2015 @ 18:31:44.000',
 };
 
-const getControls = (dataViewId: string): DashboardApiDataInput['pinned_panels'] => [
-  {
-    type: 'esql_control',
-    width: 'medium',
-    grow: false,
-    config: {
-      control_type: 'VALUES_FROM_QUERY',
-      esql_query: `FROM logstash-* | WHERE @timestamp >= ?_tstart | STATS BY ${FILTER_FIELD}`,
-      selected_options: [],
-      single_select: true,
-      title: 'os',
-      variable_name: 'os',
-      variable_type: 'values',
-    },
-  },
-  {
-    type: 'range_slider_control',
-    width: 'medium',
-    grow: false,
-    config: { data_view_id: dataViewId, field_name: 'bytes', title: 'bytes' },
-  },
-];
+const OS_FILTER = { field: 'machine.os.raw', operator: 'is', value: 'ios' } as const;
 
 spaceTest.describe('Dashboard replay cache', { tag: '@local-stateful-classic' }, () => {
-  const dashboardIds: Record<string, string> = {};
+  let dashboardId: string;
 
   spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
-    await scoutSpace.savedObjects.cleanStandardList();
-    const loadedObjects = await scoutSpace.savedObjects.load(DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE);
-    const dataView = loadedObjects.find(
-      ({ type, title }) => type === 'index-pattern' && title === 'logstash-*'
-    );
-    if (!dataView) throw new Error('The logstash-* data view was not loaded');
-
-    dashboardIds[ALL_SOURCES_DASHBOARD] = await apiServices.dashboard.create(
-      {
-        title: ALL_SOURCES_DASHBOARD,
-        time_range: RELATIVE_TIME_RANGE,
-        panels: [createMetricPanel('logstash-*'), esqlMetricPanel],
-        pinned_panels: getControls(dataView.id),
-      },
-      scoutSpace.id
-    );
-    dashboardIds[SINGLE_PANEL_DASHBOARD] = await apiServices.dashboard.create(
-      {
-        title: SINGLE_PANEL_DASHBOARD,
-        time_range: RELATIVE_TIME_RANGE,
-        panels: [createMetricPanel('logstash-*')],
-      },
-      scoutSpace.id
-    );
-    dashboardIds[FILTERED_DASHBOARD] = await apiServices.dashboard.create(
-      {
-        title: FILTERED_DASHBOARD,
-        time_range: RELATIVE_TIME_RANGE,
-        filters: [
-          { type: 'condition', condition: { field: FILTER_FIELD, operator: 'is', value: 'ios' } },
-        ],
-        panels: [createMetricPanel('logstash-*')],
-      },
+    const { data: dataView } = await apiServices.dataViews.create({
+      title: 'logstash-*',
+      timeFieldName: '@timestamp',
+      spaceId: scoutSpace.id,
+    });
+    dashboardId = await apiServices.dashboard.create(
+      getReplayCacheDashboard(dataView.id),
       scoutSpace.id
     );
   });
 
-  spaceTest.beforeEach(async ({ browserAuth }) => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
+    await pageObjects.dashboard.openDashboardWithId(dashboardId);
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -119,100 +54,51 @@ spaceTest.describe('Dashboard replay cache', { tag: '@local-stateful-classic' },
   });
 
   spaceTest(
-    'replays Lens DSL and ES|QL panels and ES|QL and range slider controls, also after Refresh',
+    'replays panels and controls when coming back',
     async ({ page, pageObjects, network }) => {
-      const { dashboard } = pageObjects;
-      await dashboard.openDashboardWithId(dashboardIds[ALL_SOURCES_DASHBOARD]);
+      const { controls, dashboard } = pageObjects;
+      const results = await readResults(page, controls);
 
-      await spaceTest.step('returns without search requests', async () => {
-        await dashboard.navigateToListingFromCurrentDashboard();
-        const requestCount = await network.countMatchingRequests(SEARCH_REQUESTS, () =>
-          openFromListing(dashboard, ALL_SOURCES_DASHBOARD)
-        );
-        expect(requestCount).toBe(0);
-      });
-
-      await spaceTest.step('Refresh fetches every panel and control again', async () => {
-        await network.trackMatchingRequests(SEARCH_REQUESTS, async (getCount) => {
-          await dashboard.refresh();
-          await expect.poll(getCount, { timeout: 30_000 }).toBeGreaterThanOrEqual(4);
-          await dashboard.waitForRenderComplete();
-        });
-      });
-
-      await spaceTest.step('returns to the refreshed session without search requests', async () => {
-        await dashboard.navigateToListingFromCurrentDashboard();
-        const requestCount = await network.countMatchingRequests(SEARCH_REQUESTS, () =>
-          openFromListing(dashboard, ALL_SOURCES_DASHBOARD)
-        );
-        expect(requestCount).toBe(0);
-      });
+      expect(await countSearchesOnReturn(dashboard, network)).toBe(0);
+      expect(await readResults(page, controls)).toEqual(results);
     }
   );
+
+  spaceTest('replays the session started by Refresh', async ({ page, pageObjects, network }) => {
+    const { controls, dashboard } = pageObjects;
+    await refetchDashboard(dashboard, network, () => dashboard.refresh());
+    const results = await readResults(page, controls);
+
+    expect(await countSearchesOnReturn(dashboard, network)).toBe(0);
+    expect(await readResults(page, controls)).toEqual(results);
+  });
 
   spaceTest(
     'replays the session started by a time range change',
     async ({ page, pageObjects, network }) => {
-      const { dashboard, datePicker } = pageObjects;
-      await dashboard.openDashboardWithId(dashboardIds[SINGLE_PANEL_DASHBOARD]);
+      const { controls, dashboard, datePicker } = pageObjects;
+      await refetchDashboard(dashboard, network, () => datePicker.setAbsoluteRange(LOGSTASH_RANGE));
+      const results = await readResults(page, controls);
 
-      const changedValue = await spaceTest.step('changes the time range', async () => {
-        await network.trackMatchingRequests(SEARCH_REQUESTS, async (getCount) => {
-          await datePicker.setCommonlyUsedTime('Last_1 year');
-          await expect.poll(getCount, { timeout: 30_000 }).toBeGreaterThanOrEqual(1);
-          await dashboard.waitForRenderComplete();
-        });
-        return readMetricValue(page);
-      });
-
-      await spaceTest.step('returns without search requests', async () => {
-        await dashboard.navigateToListingFromCurrentDashboard();
-        const requestCount = await network.countMatchingRequests(SEARCH_REQUESTS, async () => {
-          await openFromListing(dashboard, SINGLE_PANEL_DASHBOARD);
-          expect(await readMetricValue(page)).toBe(changedValue);
-        });
-        expect(requestCount).toBe(0);
-      });
+      expect(await countSearchesOnReturn(dashboard, network)).toBe(0);
+      expect(await readResults(page, controls)).toEqual(results);
     }
   );
 
   spaceTest(
-    'fetches once after a filter is pinned, then replays',
+    'fetches again after the pinned filters change, then replays',
     async ({ page, pageObjects, network }) => {
-      const { dashboard, filterBar } = pageObjects;
-      await dashboard.openDashboardWithId(dashboardIds[FILTERED_DASHBOARD]);
+      const { controls, dashboard, filterBar } = pageObjects;
+      await filterBar.addFilter(OS_FILTER);
+      await dashboard.waitForRenderComplete();
+      // Pinning changes the context the session was registered with, without starting a new one.
+      await filterBar.toggleFilterPinned(OS_FILTER.field);
 
-      await spaceTest.step('pinning the filter does not fetch', async () => {
-        const requestCount = await network.countMatchingRequests(SEARCH_REQUESTS, async () => {
-          await filterBar.toggleFilterPinned(FILTER_FIELD);
-          await expect
-            .poll(() => filterBar.hasFilter({ field: FILTER_FIELD, pinned: true }))
-            .toBe(true);
-        });
-        expect(requestCount).toBe(0);
-      });
+      expect(await countSearchesOnReturn(dashboard, network)).toBeGreaterThan(0);
+      const results = await readResults(page, controls);
 
-      await spaceTest.step('the first return fetches with the new pinned filters', async () => {
-        await dashboard.navigateToListingFromCurrentDashboard();
-        const requestCount = await network.countMatchingRequests(SEARCH_REQUESTS, () =>
-          openFromListing(dashboard, FILTERED_DASHBOARD)
-        );
-        expect(requestCount).toBeGreaterThanOrEqual(1);
-      });
-
-      await spaceTest.step('the next return replays', async () => {
-        await dashboard.navigateToListingFromCurrentDashboard();
-        const requestCount = await network.countMatchingRequests(SEARCH_REQUESTS, () =>
-          openFromListing(dashboard, FILTERED_DASHBOARD)
-        );
-        expect(requestCount).toBe(0);
-      });
+      expect(await countSearchesOnReturn(dashboard, network)).toBe(0);
+      expect(await readResults(page, controls)).toEqual(results);
     }
   );
 });
-
-/** Opens a dashboard from the listing without reloading the page, which would empty the cache. */
-const openFromListing = async (dashboard: PageObjects['dashboard'], title: string) => {
-  await dashboard.getDashboardListingLink(title).click();
-  await dashboard.waitForRenderComplete();
-};
