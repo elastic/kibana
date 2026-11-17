@@ -1,6 +1,6 @@
 # Recipes
 
-These are field choices, not indexes you should assume exist.
+These are field choices, not indexes you should assume exist. Creating the job also creates a data view titled with the destination index. Delete removes that data view with the index.
 
 ## Unusual clients in web logs
 

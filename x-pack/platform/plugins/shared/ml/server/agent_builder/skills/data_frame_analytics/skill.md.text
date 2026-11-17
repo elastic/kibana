@@ -11,7 +11,7 @@ Read `choose-analysis`, `create-job`, `interpret-results`, `troubleshoot`, `esql
 | `ml.dfa_get_job` | `canGetDataFrameAnalytics`. Model metadata also needs `canGetTrainedModels`. | Internal client, space-filtered |
 | `ml.dfa_explain` | `canCreateDataFrameAnalytics` | Current user (secondary auth) |
 | `ml.dfa_evaluate` | `canGetDataFrameAnalytics` | Current user (secondary auth) |
-| `ml.dfa_create_job` | `canCreateDataFrameAnalytics` | Current user (secondary auth). Does not start. |
+| `ml.dfa_create_job` | `canCreateDataFrameAnalytics` | Current user (secondary auth). Does not start. Also saves a data view titled with the destination index. |
 | `ml.dfa_manage_job` | `start`/`stop`: `canStartStopDataFrameAnalytics`. `update`: `canCreateDataFrameAnalytics`. | Internal client for start/stop. Update is the current user. |
 | `ml.dfa_delete_job` | `canDeleteDataFrameAnalytics` | Job delete is the internal client. Destination-index and data view deletes use the current user. |
 | `platform.core.execute_esql` | Index read on the destination index | Current user |
@@ -33,7 +33,7 @@ Copy a template from `esql-result-queries` into `platform.core.execute_esql`. Th
 | Stuck phase, skipped docs, memory, bad metrics | `troubleshoot` |
 | Start, stop, update memory, delete, evaluate | This file's manage rules, then the matching tool |
 
-Finish one mode before starting the next. Create order is explain, then create, then start.
+Finish one mode before starting the next. Create order is explain, then create, then start. Create saves a data view whose title is the destination index before the job starts. Keep an existing data view with that title. A data view error does not undo the job.
 
 ## Rules
 

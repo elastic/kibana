@@ -196,6 +196,84 @@ describe('data frame analytics tools', () => {
     expect(resultData(result)?.message).toContain('secret-index');
   });
 
+  const dataViewsCreateFor = (
+    createAndSave = jest.fn().mockResolvedValue({ id: 'dv-1' }),
+    find = jest.fn().mockResolvedValue([])
+  ) => ({
+    getDataViews: () => ({
+      dataViewsServiceFactory: async () => ({
+        find,
+        createAndSave,
+      }),
+    }),
+  });
+
+  it('create saves a data view titled with the destination index', async () => {
+    const mlClient = createMlClient();
+    const createAndSave = jest.fn().mockResolvedValue({ id: 'dv-1' });
+    const tool = createDfaCreateJobTool({
+      resolveMlCapabilities: resolveWith(adminCapabilities()),
+      buildMlClient: () => mlClient as any,
+      ...dataViewsCreateFor(createAndSave),
+    } as any);
+    const result = await tool.handler(flightConfig, createContext());
+    expect(createAndSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'flight-delay-results',
+        allowNoIndex: true,
+      }),
+      false,
+      true
+    );
+    expect(resultData(result)).toEqual(
+      expect.objectContaining({
+        created: true,
+        data_view_created: true,
+        data_view_id: 'dv-1',
+      })
+    );
+  });
+
+  it('create keeps an existing data view with the destination title', async () => {
+    const mlClient = createMlClient();
+    const createAndSave = jest.fn();
+    const find = jest
+      .fn()
+      .mockResolvedValue([{ id: 'dv-existing', title: 'flight-delay-results' }]);
+    const tool = createDfaCreateJobTool({
+      resolveMlCapabilities: resolveWith(adminCapabilities()),
+      buildMlClient: () => mlClient as any,
+      ...dataViewsCreateFor(createAndSave, find),
+    } as any);
+    const result = await tool.handler(flightConfig, createContext());
+    expect(createAndSave).not.toHaveBeenCalled();
+    expect(mlClient.putDataFrameAnalytics).toHaveBeenCalled();
+    expect(resultData(result)).toEqual(
+      expect.objectContaining({
+        created: true,
+        data_view_created: false,
+        data_view_existed: true,
+        data_view_id: 'dv-existing',
+      })
+    );
+  });
+
+  it('a data view failure does not undo the created job', async () => {
+    const mlClient = createMlClient();
+    const createAndSave = jest.fn().mockRejectedValue(new Error('saved object denied'));
+    const tool = createDfaCreateJobTool({
+      resolveMlCapabilities: resolveWith(adminCapabilities()),
+      buildMlClient: () => mlClient as any,
+      ...dataViewsCreateFor(createAndSave),
+    } as any);
+    const result = await tool.handler(flightConfig, createContext());
+    expect(mlClient.putDataFrameAnalytics).toHaveBeenCalled();
+    expect(resultData(result)?.created).toBe(true);
+    expect(resultData(result)?.data_view_created).toBe(false);
+    expect(resultData(result)?.data_view_error).toContain('flight-delay-results');
+    expect(resultData(result)?.data_view_error).toContain('saved object denied');
+  });
+
   it('start reports already_running and does not call start', async () => {
     const mlClient = createMlClient();
     mlClient.getDataFrameAnalyticsStats.mockResolvedValue({

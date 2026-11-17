@@ -92,6 +92,8 @@ describe('createDataFrameAnalyticsSkill', () => {
     expect(combined).toContain('custom_content');
     expect(combined).not.toContain('Normalized confusion matrix');
     expect(combined).toContain('Do not call `attachments.read`');
+    expect(combined).toContain('data view whose title is the destination index');
+    expect(combined).toContain('data view titled with the destination index');
     expect(combined).toContain('Do not build another feature importance chart');
     for (const reference of skill.referencedContent!) {
       expect(reference.relativePath).toBe('./references');
