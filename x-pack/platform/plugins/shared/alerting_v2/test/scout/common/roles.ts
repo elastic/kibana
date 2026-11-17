@@ -123,7 +123,7 @@ export const ALERTING_V2_RULES_READ_ROLE: KibanaRole = {
 };
 
 export const ALERTING_V2_ALERTS_ALL_ROLE: KibanaRole = {
-  elasticsearch: WRITER_ES_PRIVILEGES,
+  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -137,7 +137,7 @@ export const ALERTING_V2_ALERTS_ALL_ROLE: KibanaRole = {
 };
 
 export const ALERTING_V2_ALERTS_READ_ROLE: KibanaRole = {
-  elasticsearch: READER_ES_PRIVILEGES,
+  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
   kibana: [
     {
       base: [],

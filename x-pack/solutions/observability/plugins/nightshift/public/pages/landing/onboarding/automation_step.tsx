@@ -37,6 +37,7 @@ import { IconMark } from '../../../components/ui/icon_mark';
 import {
   useCreateAutomation,
   useDeleteAutomation,
+  useRunAutomation,
   type Automation,
 } from '../../../data/automations/use_automations';
 import { useInvestigatorServiceAccount } from '../../../data/service_accounts/use_investigator_service_account';
@@ -555,8 +556,9 @@ function EditAutomationFlyout({
 }): React.ReactElement {
   const deleteAutomation = useDeleteAutomation();
   const cloneAutomation = useCreateAutomation(true);
+  const runAutomation = useRunAutomation();
   const [automationToDelete, setAutomationToDelete] = useState<Automation>();
-  const [refreshedAt] = useState(() => Date.now());
+  const [refreshedAt, setRefreshedAt] = useState(() => Date.now());
   const { runRange, usedToday } = useAutomationUsage(
     automations,
     { start: 'now-48h', end: 'now' },
@@ -579,6 +581,10 @@ function EditAutomationFlyout({
         rangeLabel={listLabels.last48Hours}
         onClose={onClose}
         onSelectAutomation={onSelectAutomation}
+        onRun={(source) =>
+          runAutomation.mutate(source, { onSuccess: () => setRefreshedAt(Date.now()) })
+        }
+        isRunPending={runAutomation.isLoading}
         onClone={
           canManage
             ? (source) =>

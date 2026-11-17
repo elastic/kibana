@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import HUNT_PROPOSAL_GATE_YAML from './hunt_proposal_gate.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
@@ -32,5 +32,7 @@ export const ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW = {
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 3,
-  yaml: HUNT_PROPOSAL_GATE_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'hunt_proposal_gate.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

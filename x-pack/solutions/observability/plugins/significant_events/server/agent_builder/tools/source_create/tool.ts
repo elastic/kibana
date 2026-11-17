@@ -42,6 +42,7 @@ export const createSourceCreateTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
   maintenanceService,
 }: SourceToolDeps & {
   maintenanceService: MaintenanceStateReader;
@@ -49,13 +50,13 @@ export const createSourceCreateTool = ({
   id: NIGHTSHIFT_SOURCE_CREATE_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    Create a Nightshift source in the current space. The query is validated and run as the current
+    Create a nightshift source in the current space. The query is validated and run as the current
     user, so the user needs read access to the indices it targets. An invalid query returns an
     error that says why.
 
     The source is created enabled by default, and its onboarding starts on its own. With
     \`enabled: false\` it is created switched off instead, and onboarding starts when it is enabled
-    later, with source_update or from the Nightshift Sources page.
+    later, with source_update or from the nightshift Sources page.
     ${ONBOARDING_PROGRESS_DESCRIPTION} Returns the created source, including its \`slug\`.
     ${ONBOARDING_PAUSED_DESCRIPTION}
   `,
@@ -103,14 +104,17 @@ export const createSourceCreateTool = ({
     logger,
     requireSourceChangePrivilege: true,
   }),
-  handler: async (toolParams, { request }) =>
+  handler: async (toolParams, { request, runContext }) =>
     runSourceTool({
       action: 'create source',
       privilege: 'changeSources',
+      toolId: NIGHTSHIFT_SOURCE_CREATE_TOOL_ID,
       request,
+      runContext,
       getScopedClients,
       server,
       logger,
+      telemetry,
       run: async ({ sourcesClient }) => {
         const onboardingPaused = await getOnboardingPausedFlag({ maintenanceService, request });
         return {

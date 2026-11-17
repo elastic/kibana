@@ -50,13 +50,21 @@ describe('getClassicApplications', () => {
   it('maps the buckets to application summaries, with sample counts', async () => {
     const { apmEventClient } = createClient([shopBucket], ['production', 'staging']);
 
-    await expect(getClassicApplications({ apmEventClient, start: 1, end: 2 })).resolves.toEqual({
+    await expect(
+      getClassicApplications({
+        apmEventClient,
+        start: 1,
+        end: 2,
+        histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
+      })
+    ).resolves.toEqual({
       applications: [
         {
           serviceName: 'shop',
           source: 'classic',
           environments: ['production'],
           pageLoads: { count: 40 },
+          sessions: null,
           webVitals: {
             lcp: { p75Ms: 2412.5, sampleCount: 38, ratings: ALL_GOOD },
             inp: { p75Ms: null, sampleCount: 0, ratings: null },
@@ -71,6 +79,7 @@ describe('getClassicApplications', () => {
       ],
       environments: ['production', 'staging'],
       pageLoadsOverTime: [],
+      sessionsOverTime: null,
     });
   });
 
@@ -81,7 +90,12 @@ describe('getClassicApplications', () => {
 
     const {
       applications: [{ httpRequests }],
-    } = await getClassicApplications({ apmEventClient, start: 1, end: 2 });
+    } = await getClassicApplications({
+      apmEventClient,
+      start: 1,
+      end: 2,
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
+    });
 
     expect(httpRequests).toEqual({ count: 0, failedCount: 0, failedRatio: null });
   });
@@ -89,7 +103,12 @@ describe('getClassicApplications', () => {
   it('filters by RUM agent, time range and measured documents, with a bounded terms aggregation', async () => {
     const { apmEventClient, search } = createClient([]);
 
-    await getClassicApplications({ apmEventClient, start: 10, end: 20 });
+    await getClassicApplications({
+      apmEventClient,
+      start: 10,
+      end: 20,
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
+    });
 
     const [, params] = search.mock.calls[0];
     expect(params.query.bool.filter).toEqual([
@@ -130,7 +149,12 @@ describe('getClassicApplications', () => {
   it('counts failed HTTP requests from the external spans', async () => {
     const { apmEventClient, search } = createClient([]);
 
-    await getClassicApplications({ apmEventClient, start: 10, end: 20 });
+    await getClassicApplications({
+      apmEventClient,
+      start: 10,
+      end: 20,
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
+    });
 
     const [, params] = search.mock.calls[0];
     expect(params.apm.events).toEqual(['transaction', 'error', 'span']);
@@ -150,7 +174,12 @@ describe('getClassicApplications', () => {
   it('counts the samples of each vital as the documents that have it', async () => {
     const { apmEventClient, search } = createClient([]);
 
-    await getClassicApplications({ apmEventClient, start: 10, end: 20 });
+    await getClassicApplications({
+      apmEventClient,
+      start: 10,
+      end: 20,
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
+    });
 
     const [, { aggs }] = search.mock.calls[0];
     expect(aggs.inEnvironment.aggs.applications.aggs.lcp).toEqual({
@@ -176,7 +205,13 @@ describe('getClassicApplications', () => {
   it('filters the applications by environment, but lists every environment', async () => {
     const { apmEventClient, search } = createClient([]);
 
-    await getClassicApplications({ apmEventClient, start: 10, end: 20, environment: 'production' });
+    await getClassicApplications({
+      apmEventClient,
+      start: 10,
+      end: 20,
+      environment: 'production',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
+    });
 
     const [, { aggs }] = search.mock.calls[0];
     expect(aggs.inEnvironment.filter).toEqual({
@@ -191,7 +226,12 @@ describe('getClassicApplications', () => {
   it('lists "Not defined" when some documents have no environment', async () => {
     const { apmEventClient } = createClient([], ['production'], 3);
 
-    const { environments } = await getClassicApplications({ apmEventClient, start: 1, end: 2 });
+    const { environments } = await getClassicApplications({
+      apmEventClient,
+      start: 1,
+      end: 2,
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
+    });
 
     expect(environments).toEqual(['production', 'ENVIRONMENT_NOT_DEFINED']);
   });
@@ -204,6 +244,7 @@ describe('getClassicApplications', () => {
       start: 10,
       end: 20,
       environment: 'ENVIRONMENT_NOT_DEFINED',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     expect(search.mock.calls[0][1].aggs.inEnvironment.filter).toEqual({
@@ -220,12 +261,18 @@ describe('getClassicApplications', () => {
   it('matches every environment without one, or with the "All" sentinel', async () => {
     const { apmEventClient, search } = createClient([]);
 
-    await getClassicApplications({ apmEventClient, start: 10, end: 20 });
+    await getClassicApplications({
+      apmEventClient,
+      start: 10,
+      end: 20,
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
+    });
     await getClassicApplications({
       apmEventClient,
       start: 10,
       end: 20,
       environment: 'ENVIRONMENT_ALL',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
     expect(search.mock.calls.map(([, { aggs }]) => aggs.inEnvironment.filter)).toEqual([

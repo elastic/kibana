@@ -20,6 +20,7 @@ import { OnboardingAutomationStep } from './automation_step';
 jest.mock('../../../data/automations/use_automations', () => ({
   useDeleteAutomation: jest.fn(),
   useCreateAutomation: jest.fn(),
+  useRunAutomation: () => ({ mutate: jest.fn(), isLoading: false }),
 }));
 
 jest.mock('../../../data/service_accounts/use_investigator_service_account', () => ({

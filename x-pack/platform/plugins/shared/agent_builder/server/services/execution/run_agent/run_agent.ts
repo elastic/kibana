@@ -12,6 +12,7 @@ import type {
   AgentConfiguration,
   RuntimeAgentConfigurationOverrides,
   ConversationRoundAuthor,
+  EventActor,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
@@ -39,6 +40,8 @@ export interface RunAgentParams {
    * conversations). Stamped onto the completed round.
    */
   author?: ConversationRoundAuthor;
+  /** The actor that posted the input, when it is an agent (a sub-agent's report) rather than the requesting user. */
+  actor?: EventActor;
   /**
    * Configuration of the agent to run
    */
