@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DEFAULT_KI_GROUPS, DEFAULT_KI_PAGE_SIZE } from '../../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
-import type { KiListItem } from '../../../../../common/http_api/knowledge_indicators';
+import type { KiGroup, KiListItem } from '../../../../../common/http_api/knowledge_indicators';
 import { DEFAULT_KI_LIST_SORT, type KiListSort } from '../../../../../common/ki_list_sort';
 import { useListKi } from '../../../hooks/use_list_ki';
 import { useListKiByType } from '../../../hooks/use_list_ki_by_type';
@@ -22,6 +22,7 @@ import {
 import {
   EMPTY_TILE_SELECTION,
   OTHER_SECTION_KEY,
+  getOwnValue,
   buildListKiSections,
   getNextGroupSize,
   hasTileSelection,
@@ -40,6 +41,13 @@ import {
 export const LIST_KI_GROUP_PREVIEW_SIZE = 10;
 
 const EMPTY_GROUP_SIZES: Record<string, number> = {};
+
+/** The groups part of a `_groups` answer, as the list uses it. */
+interface ListKiGroupsSnapshot {
+  groups: KiGroup[];
+  total: number;
+  totalOther: number;
+}
 
 const isSameKi = (ki: KiListItem, { kiId, index }: SelectedKi): boolean =>
   ki.id === kiId && (index.length === 0 || ki.index === index);
@@ -115,10 +123,21 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     sort,
     enabled: isSearching && !tileGroupsQuery.isLoading && !tileGroupsQuery.isPreviousData,
   });
-  // Until the first search answer arrives, the list keeps showing what it had.
-  const listGroupsQuery =
-    isSearching && !searchGroupsQuery.isLoading ? searchGroupsQuery : tileGroupsQuery;
-  const { groups, total, totalOther } = listGroupsQuery;
+  // The last search answer, kept only while searching. A new search keeps showing it until its
+  // own answer arrives; after the search is cleared it is dropped. (`keepPreviousData` alone
+  // would bring back the answer of a search from before the clear.)
+  const lastSearchAnswerRef = useRef<ListKiGroupsSnapshot | undefined>(undefined);
+  if (!isSearching) {
+    lastSearchAnswerRef.current = undefined;
+  } else if (!searchGroupsQuery.isLoading && !searchGroupsQuery.isPreviousData) {
+    lastSearchAnswerRef.current = {
+      groups: searchGroupsQuery.groups,
+      total: searchGroupsQuery.total,
+      totalOther: searchGroupsQuery.totalOther,
+    };
+  }
+  const { groups, total, totalOther }: ListKiGroupsSnapshot =
+    (isSearching ? lastSearchAnswerRef.current : undefined) ?? tileGroupsQuery;
   const isLoading = tileGroupsQuery.isLoading;
   const isFetchingGroups =
     tileGroupsQuery.isFetching || (isSearching && searchGroupsQuery.isFetching);
@@ -157,6 +176,8 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     status,
     sort,
     enabled: showOther && !isLoading && !tileGroupsQuery.isPreviousData,
+    // A failed "Other" page shows a toast; its "Show more" then asks again.
+    notifyOnError: true,
   });
   const isFetchingOther = showOther && otherQuery.isFetching;
 
@@ -172,7 +193,7 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
       if (group && group.count > group.kis.length) {
         setGroupSizes((current) => ({
           ...current,
-          [tile.type]: Math.max(current[tile.type] ?? 0, DEFAULT_KI_PAGE_SIZE),
+          [tile.type]: Math.max(getOwnValue(current, tile.type) ?? 0, DEFAULT_KI_PAGE_SIZE),
         }));
       }
     },
@@ -200,7 +221,12 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
         groupResults,
         other: {
           kis: otherQuery.kis,
-          total: otherQuery.isPreviousData || otherQuery.isLoading ? undefined : otherQuery.total,
+          // Unknown while loading or after an error: the count from the groups is used instead,
+          // so "Other" keeps its "Show more" (which retries after an error).
+          total:
+            otherQuery.isPreviousData || otherQuery.isLoading || otherQuery.error
+              ? undefined
+              : otherQuery.total,
           isFetching: isFetchingOther,
         },
         selection,
@@ -210,6 +236,7 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
       groupResults,
       groups,
       isFetchingOther,
+      otherQuery.error,
       otherQuery.isLoading,
       otherQuery.isPreviousData,
       otherQuery.kis,
@@ -236,7 +263,7 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
       if (!section) {
         return;
       }
-      const groupResult = groupResults[section.type];
+      const groupResult = getOwnValue(groupResults, section.type);
       if (groupResult?.isError) {
         groupResult.retry();
         return;

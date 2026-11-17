@@ -149,6 +149,67 @@ describe('useListKiPanel', () => {
     expect(result.current.total).toBe(3);
   });
 
+  it('does not flash the answer of a search from before a cleared search', () => {
+    const fooGroups = [{ type: 'faq', count: 1, kis: rows(1, 'faq') }];
+    // The search request keeps the "foo" answer as previous data (also while it is disabled).
+    mockUseListKiGroups.mockImplementation(
+      ({ query, types }: { query?: string; types?: string[] }) => {
+        if (types === undefined) {
+          return groupsResult();
+        }
+        return query === 'foo'
+          ? groupsResult({ groups: fooGroups, total: 1, totalOther: 0 })
+          : groupsResult({ groups: fooGroups, total: 1, totalOther: 0, isPreviousData: true });
+      }
+    );
+    const { result } = renderPanelHook();
+
+    act(() => {
+      result.current.onSearchSubmit('foo');
+    });
+    expect(result.current.total).toBe(1);
+
+    act(() => {
+      result.current.onSearchSubmit('');
+    });
+    act(() => {
+      result.current.onSearchSubmit('bar');
+    });
+    // While "bar" loads: the full list, not the "foo" answer.
+    expect(result.current.total).toBe(48);
+    expect(result.current.groups.map(({ key }) => key)).toEqual(['type:faq', 'type:playbook']);
+  });
+
+  it('loads a page of a selected type even when the type is named like an object key', () => {
+    mockUseListKiGroups.mockReturnValue(
+      groupsResult({ groups: [{ type: 'constructor', count: 30, kis: rows(10, 'constructor') }] })
+    );
+    const { result } = renderPanelHook();
+
+    act(() => {
+      result.current.onToggleTile(tile(result, 'type:constructor'));
+    });
+    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: { constructor: 25 } }));
+  });
+
+  it('keeps "Show more" (as a retry) and shows a toast when the "Other" request fails', () => {
+    const refetch = jest.fn();
+    mockUseListKi.mockReturnValue(otherResult({ error: new Error('boom'), refetch }));
+    const { result } = renderPanelHook();
+
+    act(() => {
+      result.current.onToggleTile(tile(result, 'other'));
+    });
+    expect(otherQuery()).toEqual(expect.objectContaining({ notifyOnError: true }));
+    const [otherSection] = result.current.groups;
+    expect(otherSection).toMatchObject({ key: 'other', count: 5, canShowMore: true });
+
+    act(() => {
+      result.current.showMore('other', 0);
+    });
+    expect(refetch).toHaveBeenCalled();
+  });
+
   it('keeps query undefined until search is submitted, and trims it', () => {
     const { result } = renderPanelHook();
     expect(groupsQuery()).toEqual(expect.objectContaining({ query: undefined }));

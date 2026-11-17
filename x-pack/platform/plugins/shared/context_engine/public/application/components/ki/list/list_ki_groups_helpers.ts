@@ -13,6 +13,13 @@ export const OTHER_SECTION_KEY = 'other';
 
 export const getTypeSectionKey = (type: string): string => `type:${type}`;
 
+/**
+ * Reads a record entry by a KI type. Types are free text, so a type like `constructor` must not
+ * read a value inherited from `Object.prototype`.
+ */
+export const getOwnValue = <T>(record: Record<string, T>, key: string): T | undefined =>
+  Object.prototype.hasOwnProperty.call(record, key) ? record[key] : undefined;
+
 export interface ListKiGroup {
   /** Stable key: `type:<type>` or `other`. */
   key: string;
@@ -120,7 +127,7 @@ export const buildListKiSections = ({
   const typeSections = orderedGroups
     .filter(({ type }) => showAllTypes || selection.types.has(type))
     .map(({ type, count, kis }) => {
-      const groupResult = groupResults[type];
+      const groupResult = getOwnValue(groupResults, type);
       return toSection({
         key: getTypeSectionKey(type),
         kind: 'type',
