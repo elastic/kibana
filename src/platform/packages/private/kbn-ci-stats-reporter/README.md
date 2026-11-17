@@ -4,7 +4,9 @@ We're working on building a new service, the Kibana CI Stats service, which will
 
 ### `CiStatsReporter`
 
-This class integrates with the `ciStats.trackBuild {}` Jenkins Pipeline function, consuming the `KIBANA_CI_STATS_CONFIG` variable produced by that wrapper, and then allowing test code to report stats to the service.
+This class consumes `KIBANA_CI_STATS_CONFIG` from CI job setup, allowing test code to report stats to the service.
+
+Direct access uses `{buildId, apiToken}` and optionally `apiUrl`. Access-broker access uses `{buildId, apiUrl, authType: 'buildkite_oidc'}` without an upstream token. The reporter mints a short-lived Buildkite OIDC token on the first report in each process and refreshes it on demand for long-running jobs.
 
 To create an instance of the reporter, import the class and call `CiStatsReporter.fromEnv(log)` (passing it a tooling log).
 

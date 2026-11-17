@@ -15,8 +15,12 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
  * exported by this module.
  */
 export interface Config {
-  /** ApiToken necessary for writing build data to ci-stats service */
-  apiToken: string;
+  /** Upstream token for direct access; omitted when using the access broker. */
+  apiToken?: string;
+  /** CI Stats endpoint, including the capability path when using the access broker. */
+  apiUrl?: string;
+  /** Buildkite OIDC tokens are minted on demand when using the access broker. */
+  authType?: 'token' | 'buildkite_oidc';
   /**
    * uuid which should be obtained by first creating a build with the
    * ci-stats service and then passing it to all subsequent steps
@@ -25,8 +29,25 @@ export interface Config {
 }
 
 function validateConfig(log: SomeDevLog, config: { [k in keyof Config]: unknown }) {
+  if (
+    config.authType !== undefined &&
+    config.authType !== 'token' &&
+    config.authType !== 'buildkite_oidc'
+  ) {
+    log.warning(
+      'KIBANA_CI_STATS_CONFIG has an invalid authentication type, stats will not be reported'
+    );
+    return;
+  }
+
+  const validApiUrl = typeof config.apiUrl === 'string' && /^https?:\/\//.test(config.apiUrl);
+  if ((config.apiUrl !== undefined || config.authType === 'buildkite_oidc') && !validApiUrl) {
+    log.warning('KIBANA_CI_STATS_CONFIG is missing a valid api URL, stats will not be reported');
+    return;
+  }
+
   const validApiToken = typeof config.apiToken === 'string' && config.apiToken.length !== 0;
-  if (!validApiToken) {
+  if (config.authType !== 'buildkite_oidc' && !validApiToken) {
     log.warning('KIBANA_CI_STATS_CONFIG is missing a valid api token, stats will not be reported');
     return;
   }
