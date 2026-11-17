@@ -456,6 +456,7 @@ export class SearchMethodsService implements ISearchMethods {
     // this is for backward compatibility, if the query is of fields or functions type
     // and the query is not set with ?? in the query, we should set it
     // https://github.com/elastic/elasticsearch/pull/122459
+    // TODO: remove with fixESQLQueryWithVariables in the next major release
     const esqlQuery = fixESQLQueryWithVariables(params.query, esqlVariables);
 
     const timeFilter = timeRange && getTime(undefined, timeRange, { fieldName: timeField });
