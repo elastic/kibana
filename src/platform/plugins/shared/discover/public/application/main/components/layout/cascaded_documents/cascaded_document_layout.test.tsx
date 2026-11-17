@@ -63,6 +63,9 @@ jest.mock('@kbn/shared-ux-document-data-cascade', () => {
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLStatsQueryMeta: jest.fn(),
+  // this suite stubs the package rather than loading it, so the helpers the cascade hooks reach
+  // for have to be stubbed too
+  isAggregateFilteringFunction: jest.fn().mockReturnValue(false),
 }));
 
 jest.mock('@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils', () => ({

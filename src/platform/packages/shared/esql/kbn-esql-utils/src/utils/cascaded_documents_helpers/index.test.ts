@@ -958,6 +958,85 @@ describe('cascaded documents helpers utils', () => {
           );
         });
 
+        it('emits one predicate per distinct value when a value is displayed more than once', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb | STATS values(tags) BY host.name
+            `,
+          };
+
+          mockDataViewFields({ 'host.name': keywordField, tags: keywordField });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['host.name'],
+            nodePathMap: { 'host.name': 'www.elastic.co' },
+            // the values of several result rows are collected into one cascade node
+            nodeAggregatedValues: { 'values(tags)': ['info', 'warning', 'info'] },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND (MATCH_PHRASE(tags, "info") OR MATCH_PHRASE(tags, "warning"))'
+          );
+        });
+
+        it('filters on null when the row held no value for the aggregate', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb | STATS values(tags) BY host.name
+            `,
+          };
+
+          mockDataViewFields({ 'host.name': keywordField, tags: keywordField });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['host.name'],
+            nodePathMap: { 'host.name': 'www.elastic.co' },
+            // the aggregate functions we filter on skip nulls, so a null reported for the row
+            // means every document behind it lacks the field
+            nodeAggregatedValues: { 'values(tags)': null },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND tags IS NULL'
+          );
+        });
+
+        it('leaves documents unconstrained when an aggregate is absent from the row', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb | STATS values(tags), COUNT(*) BY host.name
+            `,
+          };
+
+          mockDataViewFields({ 'host.name': keywordField, tags: keywordField });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['host.name'],
+            nodePathMap: { 'host.name': 'www.elastic.co' },
+            // an absent aggregate says nothing about the documents, unlike one reported as null
+            nodeAggregatedValues: { 'COUNT(*)': 12 },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co"'
+          );
+        });
+
         it('ignores aggregates that have no document level equivalent', () => {
           const editorQuery: AggregateQuery = {
             esql: `
@@ -1052,7 +1131,7 @@ describe('cascaded documents helpers utils', () => {
           );
         });
 
-        it('constrains documents fetched for a categorize operation', () => {
+        it('does not constrain a categorize operation with the values displayed for the row', () => {
           const editorQuery: AggregateQuery = {
             esql: `
               FROM kibana_sample_data_logs | STATS values(tags) BY CATEGORIZE(message)
@@ -1073,7 +1152,9 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"}) AND MATCH_PHRASE(tags, "info")'
+            // CATEGORIZE is only available to sources that support INLINE STATS, so the row's
+            // aggregates never disagree with the documents behind it
+            'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
           );
         });
       });
