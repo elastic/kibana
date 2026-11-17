@@ -10,9 +10,21 @@
  * Billing names that are not listed here are reported as unmatched.
  */
 export const BILLING_NAME_TO_SERVICE_ID: Record<string, string> = {
-  'Amazon GuardDuty': 'guardduty',
+  AmazonCloudWatch: 'cloudwatch',
+  'AWS Config': 'config',
+  'Amazon DynamoDB': 'dynamodb',
   'Amazon Elastic Compute Cloud - Compute': 'ec2',
+  'Amazon Elastic Container Service': 'ecs',
+  'Amazon Elastic Container Service for Kubernetes': 'eks',
+  'Elastic Load Balancing': 'elb',
+  'AWS Network Firewall': 'firewall',
+  'Amazon GuardDuty': 'guardduty',
+  'Amazon Inspector': 'inspector',
+  'Amazon Kinesis': 'kinesis',
   'AWS Lambda': 'lambda',
-  'Amazon Simple Storage Service': 's3',
   'Amazon Relational Database Service': 'rds',
+  'Amazon Redshift': 'redshift',
+  'Amazon Simple Storage Service': 's3',
+  'Amazon Simple Notification Service': 'sns',
+  'Amazon Simple Queue Service': 'sqs',
 };
