@@ -6,14 +6,7 @@
  */
 
 import { usePerformanceContext } from '@kbn/ebt-tools/react';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react';
@@ -44,7 +37,6 @@ import { useServiceMap } from './use_service_map';
 import { useServiceMapBadges } from './use_service_map_badges';
 import { useServiceMapClosedGroups } from './use_service_map_closed_groups';
 import { ServiceMapGraph } from './graph';
-import { ServiceMapGroupingCountLine } from './service_map_grouping_count_line';
 import { ServiceMapSloFlyoutProvider } from '../../shared/service_map/service_map_slo_flyout_context';
 import { useServiceMapSearchContext } from './service_map_search_context';
 
@@ -133,7 +125,6 @@ export function ServiceMap({
 
   const { ref, height } = useRefDimensions();
   const windowHeight = useWindowSize().height;
-  const { euiTheme } = useEuiTheme();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { styles, bodyClassesToToggle } = useServiceMapFullScreen();
   const fullScreenContainerStyles = styles[SERVICE_MAP_FULL_SCREEN_CLASS];
@@ -294,14 +285,12 @@ export function ServiceMap({
             data-test-subj="serviceMap"
             style={{
               height: isFullscreen ? '100%' : mapHeight,
-              zIndex: Number(euiTheme.levels.content) + 1,
               position: 'relative',
               ...(isFullscreen ? { minHeight: 0, flex: 1 } : {}),
             }}
             ref={ref}
           >
             {isLoading && <LoadingSpinner />}
-            {!isLoading && <ServiceMapGroupingCountLine countLine={groupingCountLine} />}
             <ServiceMapGraph
               height={isFullscreen ? '100%' : mapHeight}
               nodes={isLoading ? [] : nodesForGraph}
@@ -317,6 +306,7 @@ export function ServiceMap({
               serviceGroupId={serviceGroupId}
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}
+              groupingCountLine={isLoading ? undefined : groupingCountLine}
             />
           </div>
         </EuiPanel>

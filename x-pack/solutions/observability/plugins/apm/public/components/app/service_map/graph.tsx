@@ -58,6 +58,7 @@ import { useEdgeHighlighting } from './use_edge_highlighting';
 import { useReducedMotion } from './use_reduced_motion';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
 import { MapPopover } from './popover';
+import { ServiceMapGroupingCountLine } from './service_map_grouping_count_line';
 import { ServiceMapMinimap } from './service_map_minimap';
 import {
   DEFAULT_SERVICE_MAP_VIEW_FILTERS,
@@ -171,6 +172,8 @@ interface GraphProps {
    */
   rangeFrom?: string;
   rangeTo?: string;
+  /** Closed-groups count line rendered as a ReactFlow Panel overlay. */
+  groupingCountLine?: string;
 }
 
 function GraphInner({
@@ -200,6 +203,7 @@ function GraphInner({
   serviceGroupId,
   rangeFrom,
   rangeTo,
+  groupingCountLine,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
@@ -1008,6 +1012,7 @@ function GraphInner({
                 </Panel>
               )}
               {showControls && <ServiceMapMinimap />}
+              <ServiceMapGroupingCountLine countLine={groupingCountLine} />
             </ReactFlow>
             <MapPopover
               selectedNode={selectedNodeForPopover}

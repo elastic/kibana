@@ -5,33 +5,27 @@
  * 2.0.
  */
 
-import { EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { Panel } from '@xyflow/react';
 import React from 'react';
 
-/** Floating count line over the service map / dashboard panel. Renders nothing when there is no line. */
+/** ReactFlow overlay with the grouping count line. Renders nothing when there is no line. */
 export function ServiceMapGroupingCountLine({ countLine }: { countLine?: string }) {
-  const { euiTheme } = useEuiTheme();
-
   if (!countLine) {
     return null;
   }
 
   return (
-    <EuiText
-      size="s"
-      color="subdued"
-      data-test-subj="serviceMapGroupingCountLine"
+    <Panel
+      position="bottom-left"
       css={css`
-        position: absolute;
-        bottom: ${euiTheme.size.m};
-        left: 0;
-        z-index: ${euiTheme.levels.content};
-        padding: ${euiTheme.size.s} ${euiTheme.size.m};
         pointer-events: none;
       `}
     >
-      <p>{countLine}</p>
-    </EuiText>
+      <EuiText size="s" color="subdued" data-test-subj="serviceMapGroupingCountLine">
+        <p>{countLine}</p>
+      </EuiText>
+    </Panel>
   );
 }
