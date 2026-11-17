@@ -8,6 +8,7 @@
 import {
   MAX_TEXT_LENGTH,
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+  type Severity,
   type SignificantEvent,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
@@ -17,6 +18,7 @@ import {
 } from '../../../lib/significant_events/events';
 import { isBreachMemberSignal } from '../../../lib/significant_events/events/event_members';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import { getSignalCollectedAt } from '../../../lib/significant_events/events/signal_collected_at';
 import { StatusError } from '../../../lib/errors/status_error';
 
 export const EVENT_SEARCH_DEFAULT_PER_PAGE = 20;
@@ -140,7 +142,7 @@ const byMemberThenRecency = (left: Signal, right: Signal): number => {
   if (leftIsMember !== rightIsMember) {
     return leftIsMember ? -1 : 1;
   }
-  return (right.collected_at ?? '').localeCompare(left.collected_at ?? '');
+  return (getSignalCollectedAt(right) ?? '').localeCompare(getSignalCollectedAt(left) ?? '');
 };
 
 const getRuleUuid = (signal: Signal): string | undefined =>
@@ -229,7 +231,7 @@ const toDetailedEvent = (
       rule_uuid: getRuleUuid(signal),
       verdict: signal.verdict,
       description: truncateSignalDescription(signal.description),
-      collected_at: signal.collected_at,
+      collected_at: getSignalCollectedAt(signal),
     })),
     signals_page: signalsPage,
     signals_per_page: signalsPerPage,
@@ -274,9 +276,14 @@ const toEnvelope = (response: {
 export async function searchEventsToolHandler<V extends EventSearchView = 'compact'>({
   eventSearchClient,
   params,
+  reconcileSeverities,
 }: {
   eventSearchClient: RuleEventsClient;
   params: EventSearchInput & { view?: V };
+  /** Gives the returned events the severity of their investigations, so they agree with the list. */
+  reconcileSeverities?: <T extends { event_id: string; severity: Severity; status?: string }>(
+    hits: T[]
+  ) => Promise<T[]>;
 }): Promise<Extract<EventSearchResponse, { view: V }>> {
   const view = params.view ?? 'compact';
   if (view === 'full' && params.event_ids?.length !== 1) {
@@ -284,7 +291,7 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
   }
 
   const sharedParams = buildSearchParams(view, params);
-  const response = hasEventSearchFilters(params)
+  const found = hasEventSearchFilters(params)
     ? await eventSearchClient.findLatestByCurrentStatePaginated({
         ...sharedParams,
         status: toStatusFilter(params.status),
@@ -293,6 +300,10 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
         topologyFeatureIds: params.topology_feature_ids,
       })
     : await eventSearchClient.findLatestPaginated(sharedParams);
+  const response = {
+    ...found,
+    hits: reconcileSeverities ? await reconcileSeverities(found.hits) : found.hits,
+  };
 
   const envelope = toEnvelope(response);
 

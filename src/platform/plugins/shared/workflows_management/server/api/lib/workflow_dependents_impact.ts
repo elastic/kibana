@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parseDocument } from 'yaml';
 import {
+  analyzeCalledWorkflows,
+  analyzeDependents,
   analyzeRemovalImpact,
+  buildDependentsIndex,
   MAX_INDIRECT_DEPTH,
 } from '../../../common/lib/workflow_dependents/analyze_dependents';
+import type { WorkflowDependentsImpactResponse } from '../../../common/lib/workflow_dependents/api';
 import { getCalledWorkflowIds } from '../../../common/lib/workflow_dependents/find_call_sites';
 import type {
   RemovalImpact,
@@ -22,7 +27,22 @@ export interface WorkflowDependentsLookup {
   findIndexedCallers: (workflowIds: string[]) => Promise<WorkflowLookupItem[]>;
   /** Workflows saved before `calledWorkflowIds` existed, whose callees are not indexed. */
   findUnindexedWorkflows: () => Promise<WorkflowLookupItem[]>;
+  getWorkflowsByIds: (workflowIds: string[]) => Promise<WorkflowLookupItem[]>;
 }
+
+/** Parses draft YAML into the plain definition the analysis reads; null when it doesn't parse. */
+export const parseDraftDefinition = (yaml: string): unknown => {
+  const document = parseDocument(yaml);
+  if (document.errors.length > 0) {
+    return null;
+  }
+  // `toJS` throws on an unresolved alias, which `parseDocument` doesn't report as an error.
+  try {
+    return document.toJS();
+  } catch {
+    return null;
+  }
+};
 
 /** Collects every workflow that runs any of `workflowIds`, directly or through other workflows. */
 export const collectCallers = async (
@@ -48,6 +68,68 @@ export const collectCallers = async (
   }
 
   return [...found.values()];
+};
+
+/** Collects the workflows `definition` runs, and the ones those run, down the chain. */
+export const collectCalledWorkflows = async (
+  workflowId: string,
+  definition: unknown,
+  lookup: WorkflowDependentsLookup
+): Promise<WorkflowLookupItem[]> => {
+  const found = new Map<string, WorkflowLookupItem>();
+  const requested = new Set([workflowId]);
+  let frontier = getCalledWorkflowIds(definition).filter((id) => !requested.has(id));
+
+  for (let depth = 1; depth <= MAX_INDIRECT_DEPTH && frontier.length > 0; depth++) {
+    frontier.forEach((id) => requested.add(id));
+    const workflows = await lookup.getWorkflowsByIds(frontier);
+    workflows.forEach((workflow) => found.set(workflow.id, workflow));
+    frontier = [
+      ...new Set(workflows.flatMap((workflow) => getCalledWorkflowIds(workflow.definition))),
+    ].filter((id) => !requested.has(id));
+  }
+
+  return [...found.values()];
+};
+
+/** Grades the workflows that run a workflow, and the ones it runs, against its draft. */
+export const analyzeWorkflowDependentsImpact = async ({
+  workflowId,
+  savedDefinition,
+  draftDefinition,
+  isDraftValid = true,
+  managed = false,
+  lookup,
+}: {
+  workflowId: string;
+  savedDefinition: unknown;
+  draftDefinition: unknown;
+  /** False when saving the draft would store it invalid. */
+  isDraftValid?: boolean;
+  /** Whether the workflow is managed, which decides what it can run and what can run it. */
+  managed?: boolean;
+  lookup: WorkflowDependentsLookup;
+}): Promise<WorkflowDependentsImpactResponse> => {
+  const [callers, calledWorkflows] = await Promise.all([
+    collectCallers([workflowId], lookup),
+    collectCalledWorkflows(workflowId, draftDefinition, lookup),
+  ]);
+
+  return {
+    analysis: analyzeDependents({
+      index: buildDependentsIndex(workflowId, callers),
+      savedDefinition,
+      draftDefinition,
+      isDraftValid,
+      managed,
+    }),
+    calledWorkflows: analyzeCalledWorkflows({
+      workflowId,
+      definition: draftDefinition,
+      workflows: calledWorkflows,
+      managed,
+    }),
+  };
 };
 
 /** Lists the workflows that fail when `workflowIds` are turned off or deleted. */

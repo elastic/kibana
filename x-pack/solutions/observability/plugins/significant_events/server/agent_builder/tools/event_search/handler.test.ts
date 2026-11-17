@@ -107,6 +107,25 @@ describe('searchEventsToolHandler', () => {
     }
   );
 
+  it('returns the severities the reconcile step gives, on both read paths', async () => {
+    const reconcileSeverities = async <T extends { severity: string }>(hits: T[]) =>
+      hits.map((hit) => ({ ...hit, severity: 'low' }));
+
+    const filtered = await searchEventsToolHandler({
+      eventSearchClient: makeClient() as never,
+      params: { status: 'active' },
+      reconcileSeverities: reconcileSeverities as never,
+    });
+    const unfiltered = await searchEventsToolHandler({
+      eventSearchClient: makeClient() as never,
+      params: {},
+      reconcileSeverities: reconcileSeverities as never,
+    });
+
+    expect(filtered.events[0].severity).toBe('low');
+    expect(unfiltered.events[0].severity).toBe('low');
+  });
+
   it('lists a rule whose only signal is inconclusive', async () => {
     const result = await searchEventsToolHandler({
       eventSearchClient: makeClient([{ ...event, signals: [event.signals[2]] }]) as never,
@@ -228,6 +247,47 @@ describe('searchEventsToolHandler', () => {
     expect(result.events[0].signals[0]).toEqual(
       expect.objectContaining({ rule_uuid: 'rule-11', verdict: 'confirms' })
     );
+  });
+
+  it('uses recovered collection times for full-view ordering and timestamps', async () => {
+    const explicit = {
+      ...event.signals[0],
+      evidence: {
+        esql_query: 'FROM logs.checkout',
+        result: 'found',
+        time_range: { from: '2026-07-20T07:00:00.000Z', to: '2026-07-20T11:00:00.000Z' },
+      },
+    };
+    const unstamped = {
+      ...event.signals[0],
+      collected_at: undefined,
+      evidence: {
+        ...explicit.evidence,
+        time_range: { from: '2026-07-20T09:00:00.000Z', to: '2026-07-20T10:00:00.000Z' },
+      },
+      metadata: { rule_uuid: 'rule-unstamped' },
+    };
+    const unknown = {
+      ...event.signals[0],
+      collected_at: undefined,
+      metadata: { rule_uuid: 'rule-no-time' },
+    };
+
+    const result = await searchEventsToolHandler({
+      eventSearchClient: makeClient([
+        { ...event, signals: [explicit, unknown, unstamped] },
+      ]) as never,
+      params: { view: 'full', event_ids: [event.event_id], signals_per_page: 2 },
+    });
+
+    expect(result.events[0]).toMatchObject({
+      signals: [
+        { rule_uuid: 'rule-unstamped', collected_at: unstamped.evidence.time_range.to },
+        { rule_uuid: 'rule-active', collected_at: explicit.collected_at },
+      ],
+      signals_total: 3,
+      signals_has_more: true,
+    });
   });
 
   it('returns the final signal page without unrelated events', async () => {
