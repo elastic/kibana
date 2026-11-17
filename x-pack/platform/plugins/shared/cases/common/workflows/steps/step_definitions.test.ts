@@ -48,6 +48,10 @@ import {
   BulkDeleteObservablesStepTypeId,
   bulkDeleteObservablesStepCommonDefinition,
 } from './bulk_delete_observables';
+import {
+  ExtractObservablesStepTypeId,
+  extractObservablesStepCommonDefinition,
+} from './extract_observables';
 import { GetCasesStepTypeId, getCasesStepCommonDefinition } from './get_cases';
 import { PushCasesStepTypeId, pushCasesStepCommonDefinition } from './push_cases';
 import {
@@ -79,6 +83,8 @@ import {
   deleteAttachmentsOutputFixture,
   bulkDeleteObservablesInputFixture,
   bulkDeleteObservablesOutputFixture,
+  extractObservablesInputFixture,
+  extractObservablesOutputFixture,
   getCasesInputFixture,
   getCasesOutputFixture,
   pushCasesInputFixture,
@@ -207,6 +213,12 @@ const stepDefinitions = [
     definition: bulkDeleteObservablesStepCommonDefinition,
     input: bulkDeleteObservablesInputFixture,
     output: bulkDeleteObservablesOutputFixture,
+  },
+  {
+    typeId: ExtractObservablesStepTypeId,
+    definition: extractObservablesStepCommonDefinition,
+    input: extractObservablesInputFixture,
+    output: extractObservablesOutputFixture,
   },
   {
     typeId: GetCasesStepTypeId,

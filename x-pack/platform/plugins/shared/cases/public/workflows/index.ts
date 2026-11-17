@@ -140,6 +140,10 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.extractObservablesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
     import('./simple_steps').then((m) => m.getCasesStepDefinition)
   );
 

@@ -50,6 +50,16 @@ export const BULK_DELETE_OBSERVABLES_FAILED_MESSAGE = (
     }
   );
 
+export const EXTRACT_OBSERVABLES_FAILED_MESSAGE = (caseId: string, errorMessage: string) =>
+  i18n.translate(
+    'xpack.cases.workflowSteps.extractObservables.error.observablesCouldNotBeExtracted',
+    {
+      defaultMessage:
+        'Observables could not be extracted on case "{caseId}". Reason: {errorMessage}',
+      values: { caseId, errorMessage },
+    }
+  );
+
 export const SET_CUSTOM_FIELD_FAILED_MESSAGE = (caseId: string, fieldName: string) =>
   i18n.translate(
     'xpack.cases.workflowSteps.setCustomField.error.caseCustomFieldCouldNotBeUpdated',
