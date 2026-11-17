@@ -46,9 +46,6 @@ The Box connector exposes the following actions:
 `listFolderContent`
 :   List files and subfolders inside a specific Box folder. Use folder ID `0` for the root folder.
 
-`listRecentItems`
-:   List files and folders recently accessed or modified by the authenticated user. Useful for surfacing active content without a search query.
-
 `searchByMetadata`
 :   Search for Box files and folders using metadata template fields and a structured query expression (for example, `amount >= 100 AND currency = "USD"`).
 
