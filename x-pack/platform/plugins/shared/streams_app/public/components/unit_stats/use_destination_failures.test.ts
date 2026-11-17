@@ -44,7 +44,7 @@ describe('useDestinationFailures', () => {
     mockUseStreamsAppFetch.mockReturnValue({ value: undefined, loading: false });
   });
 
-  it('asks for the one destination, over the range of the time picker', async () => {
+  it('asks for the one destination, with its delivery series, over the range of the time picker', async () => {
     const client: UnitStatsClient = {
       fetchStats: jest.fn(createFixtureUnitStatsClient({ scenario: 'authFailures' }).fetchStats),
     };
@@ -53,7 +53,7 @@ describe('useDestinationFailures', () => {
 
     expect(client.fetchStats).toHaveBeenCalledWith(
       {
-        components: [{ kind: 'destination', id: 'es-dev' }],
+        components: [{ kind: 'destination', id: 'es-dev', include: { delivery_series: true } }],
         window: {
           kind: 'range',
           start: '2026-11-16T19:00:00.000Z',

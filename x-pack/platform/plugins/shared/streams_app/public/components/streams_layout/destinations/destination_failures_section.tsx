@@ -31,7 +31,6 @@ import {
   hasDestinationFailures,
 } from '../../unit_stats/destination_failures';
 import { DeliveryChart } from '../../unit_stats/delivery_chart';
-import { withPlaceholderDeliverySeries } from '../../unit_stats/placeholder_delivery_series';
 import { useDestinationFailures } from '../../unit_stats/use_destination_failures';
 import { useTimeRangeUpdate } from '../../../hooks/use_time_range_update';
 import { StatCell } from '../../stream_detail_overview/stat_cell';
@@ -162,8 +161,7 @@ export function DestinationFailuresView({
   showTimePicker: boolean;
   onBrushEnd?: (range: { from: string; to: string }) => void;
 }) {
-  // TEMPORARY: the API sends no delivery series yet, so this makes one up. Remove with the placeholder.
-  const failed = value && withPlaceholderDeliverySeries(value.stats.failed);
+  const failed = value?.stats.failed;
   const failureClasses = failed ? getFailureClasses(failed) : [];
   const loadError = error?.message ?? (value?.status === 'error' ? value.error?.reason : undefined);
   const partialError = value?.status === 'ready' ? value.error?.reason : undefined;

@@ -193,6 +193,41 @@ describe('mapStatsResponse', () => {
       });
     });
 
+    it('maps the delivery series with its unit and the window of the response, which it does not repeat', () => {
+      const { stats } = map('authFailures', [destination('es-dev')]).destinations['es-dev'];
+      const { window } = STATS_FIXTURE_RESPONSES.authFailures.meta;
+
+      expect(stats.failed.series).toEqual({
+        bucketMs: 30_000,
+        unit: '{item}',
+        window,
+        points: expect.any(Array),
+      });
+      const [first, ...rest] = stats.failed.series?.points ?? [];
+      expect(first).toEqual({
+        start: window.start,
+        total: 40,
+        failed: 0,
+        authentication: 0,
+        authorization: 0,
+      });
+      expect(rest.at(-1)).toEqual(
+        expect.objectContaining({ total: 40, authentication: 5, authorization: 18 })
+      );
+    });
+
+    it('keeps the unit of an S3 series in requests', () => {
+      const { stats } = map('s3Failures', [destination('s3-test')]).destinations['s3-test'];
+
+      expect(stats.failed.series?.unit).toBe('{request}');
+    });
+
+    it('has no series for a destination that the response sends none for', () => {
+      const { stats } = map('authFailures', [destination('es-prod')]).destinations['es-prod'];
+
+      expect(stats.failed.series).toBeUndefined();
+    });
+
     it('keeps a rate and a percentage of 0 as values, and a null as no data', () => {
       const { failed } = map('s3Failures', [destination('s3-test')]).destinations['s3-test'].stats;
       const { failed: none } = map('noData', [destination('es-prod')]).destinations['es-prod']

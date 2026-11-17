@@ -38,7 +38,9 @@ export const useDestinationFailures = (destinationId: string) => {
     async ({ signal, timeState }) => {
       const { destinations } = await client.fetchStats(
         {
-          components: [{ kind: 'destination', id: destinationId }],
+          components: [
+            { kind: 'destination', id: destinationId, include: { delivery_series: true } },
+          ],
           window: {
             kind: 'range',
             start: new Date(timeState.start).toISOString(),

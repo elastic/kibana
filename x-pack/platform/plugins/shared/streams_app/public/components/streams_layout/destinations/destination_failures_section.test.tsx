@@ -104,6 +104,18 @@ describe('DestinationFailuresView', () => {
     });
   });
 
+  it('shows the stats and no chart for a destination that has no delivery series', () => {
+    renderView({
+      value: entryWith({
+        ...EMPTY_DESTINATION_FAILED,
+        authentication: { rate: 0.5, unit: '{item}', percentage: 11.9, breakdown: [] },
+      }),
+    });
+
+    expect(isShown('streamsDestinationFailuresAuthentication')).toBe(true);
+    expect(isShown('streamsDestinationDeliveryChart')).toBe(false);
+  });
+
   it('names upload attempts for a destination that counts them, and shows only the class with failures', () => {
     renderView({ value: fixtureEntry('s3Failures', 's3-test') });
 

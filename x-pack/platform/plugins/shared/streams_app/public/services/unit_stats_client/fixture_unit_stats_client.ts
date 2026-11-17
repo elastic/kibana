@@ -55,6 +55,49 @@ const failureClass = (
     : {}),
 });
 
+/**
+ * A delivery series over the window of the fixtures, in buckets of 30 seconds, as the API sends it.
+ * Each count of failures is the share of the attempts of a bucket that it ends at, and it rises to
+ * that share over the window, as when a credential has just been revoked. The rest was delivered.
+ */
+const deliverySeries = ({
+  unit,
+  attemptsPerBucket = 40,
+  authentication = 0,
+  authorization = 0,
+  other = 0,
+}: {
+  unit: string;
+  attemptsPerBucket?: number;
+  /** The share of the attempts, from 0 to 1, that each count ends at. */
+  authentication?: number;
+  authorization?: number;
+  other?: number;
+}): StreamsUnit.StatsDeliverySeries => {
+  const bucketMs = 30_000;
+  const start = Date.parse(META.window.start);
+  const count = (Date.parse(META.window.end) - start) / bucketMs;
+
+  return {
+    bucket_ms: bucketMs,
+    unit,
+    points: Array.from({ length: count }, (_, index) => {
+      const ramp = Math.min(1, (index / (count - 1)) * 1.6);
+      const part = (share: number) => Math.round(attemptsPerBucket * share * ramp);
+      const authenticationCount = part(authentication);
+      const authorizationCount = part(authorization);
+
+      return {
+        start: new Date(start + index * bucketMs).toISOString(),
+        total: attemptsPerBucket,
+        failed: authenticationCount + authorizationCount + part(other),
+        authentication: authenticationCount,
+        authorization: authorizationCount,
+      };
+    }),
+  };
+};
+
 const destinationResult = ({
   eventsRate = null,
   eventsTotal = null,
@@ -65,8 +108,11 @@ const destinationResult = ({
   authorization = NO_FAILURE_CLASS,
   latencyAverage = null,
   series = { bucketMs: 300000, points: [] },
+  delivery,
   error,
 }: Partial<Omit<DestinationStatsView, 'failed'>> & {
+  /** What the API sends when the request asks for the delivery series. */
+  delivery?: StreamsUnit.StatsDeliverySeries;
   failedRate?: number | null;
   failedPercentage?: number | null;
   /** `{item}`, or `{request}` for a destination type that reports upload attempts, such as S3. */
@@ -89,6 +135,7 @@ const destinationResult = ({
       authentication: failureClass(authentication, failedUnit),
       authorization: failureClass(authorization, failedUnit),
     },
+    ...(delivery ? { delivery: { series: delivery } } : {}),
   },
 });
 
@@ -271,6 +318,11 @@ export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.S
           failedRate: 2.4,
           failedPercentage: 57.1,
           latencyAverage: 0.17,
+          delivery: deliverySeries({
+            unit: '{item}',
+            authentication: 0.119,
+            authorization: 0.452,
+          }),
           authentication: { rate: 0.5, percentage: 11.9 },
           authorization: {
             rate: 1.9,
@@ -303,6 +355,7 @@ export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.S
           failedPercentage: 100,
           failedUnit: '{request}',
           latencyAverage: 0.06,
+          delivery: deliverySeries({ unit: '{request}', authentication: 1 }),
           authentication: {
             rate: 0.44,
             percentage: 100,
@@ -335,6 +388,34 @@ export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.S
     },
     meta: META,
   },
+};
+
+/**
+ * The response with the delivery series only on the destinations that ask for it, as the API
+ * leaves it out of the others.
+ */
+const withRequestedSeries = (
+  response: StreamsUnit.StatsResponse,
+  components: StreamsUnit.StatsComponentRef[]
+): StreamsUnit.StatsResponse => {
+  const asked = new Set(
+    components.flatMap((ref) =>
+      ref.kind === 'destination' && ref.include?.delivery_series ? [ref.id] : []
+    )
+  );
+
+  return {
+    ...response,
+    components: {
+      ...response.components,
+      destinations: Object.fromEntries(
+        Object.entries(response.components.destinations).map(([id, { events, ...result }]) => {
+          const { delivery, ...otherEvents } = events;
+          return [id, { ...result, events: asked.has(id) && delivery ? events : otherEvents }];
+        })
+      ),
+    },
+  };
 };
 
 const createAbortError = () => new DOMException('The request was aborted', 'AbortError');
@@ -384,6 +465,9 @@ export const createFixtureUnitStatsClient = ({
       throw createServiceUnavailableError();
     }
 
-    return mapStatsResponse(STATS_FIXTURE_RESPONSES[scenario], components);
+    return mapStatsResponse(
+      withRequestedSeries(STATS_FIXTURE_RESPONSES[scenario], components),
+      components
+    );
   },
 });

@@ -7,6 +7,7 @@
 
 import type { StreamsUnit } from '@kbn/streams-schema';
 import type {
+  DeliverySeriesView,
   DestinationFailedView,
   DestinationStatsView,
   FailureClassView,
@@ -64,16 +65,23 @@ const toFailureClassView = (failureClass: FailedResult['authentication']): Failu
   })),
 });
 
-const toDestinationStats = ({
-  events,
-  latency,
-}: StreamsUnit.StatsDestinationResult): DestinationStatsView => ({
+/** The series covers the window of the response, which it does not repeat. */
+const toDeliverySeriesView = (
+  { bucket_ms: bucketMs, unit, points }: StreamsUnit.StatsDeliverySeries,
+  window: StreamsUnit.StatsMeta['window']
+): DeliverySeriesView => ({ bucketMs, unit, window, points });
+
+const toDestinationStats = (
+  { events, latency }: StreamsUnit.StatsDestinationResult,
+  window: StreamsUnit.StatsMeta['window']
+): DestinationStatsView => ({
   eventsRate: events.incoming.rate.value,
   eventsTotal: events.incoming.total.value,
   failed: {
     total: toFailureRateView(events.failed),
     authentication: toFailureClassView(events.failed.authentication),
     authorization: toFailureClassView(events.failed.authorization),
+    ...(events.delivery ? { series: toDeliverySeriesView(events.delivery.series, window) } : {}),
   },
   latencyAverage: latency.average.value,
   series: {
@@ -135,10 +143,11 @@ const classify = <TStats>(
 
 /** A destination that the response leaves out shows as no data. */
 const mapDestinationResult = (
-  result: StreamsUnit.StatsDestinationResult | undefined
+  result: StreamsUnit.StatsDestinationResult | undefined,
+  window: StreamsUnit.StatsMeta['window']
 ): MappedComponentStats<DestinationStatsView> =>
   result
-    ? classify(toDestinationStats(result), hasDestinationData, result.error)
+    ? classify(toDestinationStats(result, window), hasDestinationData, result.error)
     : classify(EMPTY_DESTINATION_STATS, hasDestinationData);
 
 /** A processor that the response leaves out shows as no data. */
@@ -205,7 +214,10 @@ export const mapStatsResponse = (
   for (const { kind, id } of requested) {
     switch (kind) {
       case 'destination':
-        destinations[id] = mapDestinationResult(getOwnResult(components.destinations, id));
+        destinations[id] = mapDestinationResult(
+          getOwnResult(components.destinations, id),
+          meta.window
+        );
         break;
       case 'processor':
         processors[id] = mapProcessorResult(getOwnResult(components.processors, id));
