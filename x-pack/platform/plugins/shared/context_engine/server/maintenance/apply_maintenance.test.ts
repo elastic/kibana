@@ -130,6 +130,19 @@ describe('applyMaintenanceGroups', () => {
     ]);
   });
 
+  it('still tombstones when the kept item already holds everything the merge adds', async () => {
+    const result = await applyMaintenanceGroups(context(), [
+      mergeGroup({ writes: [{ id: 'e-1', build: () => undefined }] }),
+    ]);
+
+    expect(softDeleteKi).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ kiId: 'e-2' })
+    );
+    expect(result.tombstoned).toEqual(['e-2']);
+    expect(result.rejected).toEqual([]);
+  });
+
   it('never tombstones a person-edited item', async () => {
     stored.set(
       'e-2',

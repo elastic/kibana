@@ -58,6 +58,23 @@ describe('parseMaintenanceChanges', () => {
     });
   });
 
+  it('rejects a list the model returned as something else, and fails on changes that are not an object', () => {
+    expect(
+      parseMaintenanceChanges({
+        rewrites: { id: 'f-1', content: 'Corrected', reason: 'Deleted source' },
+        merges: null,
+      })
+    ).toEqual({
+      changeSet: expect.objectContaining({ rewrites: [], merges: [] }),
+      rejected: [
+        { item: 'rewrites', reason: 'the model returned it as something other than a list' },
+      ],
+    });
+    expect(parseMaintenanceChanges('nothing to change')).toEqual({
+      error: 'the changes are not an object',
+    });
+  });
+
   it('fails on more changes than a batch can hold', () => {
     const parsed = parseMaintenanceChanges({
       relationships: Array.from({ length: 10000 }, (_, index) => ({

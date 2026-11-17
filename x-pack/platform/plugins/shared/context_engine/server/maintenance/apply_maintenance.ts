@@ -40,12 +40,16 @@ export const applyMaintenanceGroups = async (
   for (const { item, writes, moves, tombstones, changes } of groups) {
     let refused: string | undefined;
     for (const { id, build } of writes) {
-      const written = await writeKi(context, id, build);
+      let found = false;
+      const written = await writeKi(context, id, (current) => {
+        found = current !== undefined;
+        return build(current);
+      });
       if (written === 'rejected') {
         refused = `${id} has different permissions than the batch`;
         break;
       }
-      if (written === 'skipped' && tombstones.length > 0) {
+      if (!found && tombstones.length > 0) {
         refused = `${id} no longer exists, so nothing can be merged into it`;
         break;
       }

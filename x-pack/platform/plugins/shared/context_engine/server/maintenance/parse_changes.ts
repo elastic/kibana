@@ -48,11 +48,18 @@ const tidy = (change: unknown): unknown => {
  * change is rejected on its own rather than failing the run.
  */
 export const parseMaintenanceChanges = (input: unknown): ParsedMaintenanceChanges => {
-  const raw = isRecord(input) ? input : {};
+  if (input !== undefined && !isRecord(input)) {
+    return { error: 'the changes are not an object' };
+  }
+  const raw = input ?? {};
   const rejected: Array<{ item: string; reason: string }> = [];
   const listOf = <T>(key: keyof MaintenanceChangeSet, label: string, schema: z.ZodType<T>): T[] => {
     const entries = raw[key];
+    if (entries === undefined || entries === null) {
+      return [];
+    }
     if (!Array.isArray(entries)) {
+      rejected.push({ item: key, reason: 'the model returned it as something other than a list' });
       return [];
     }
     return entries.flatMap((entry, index) => {
