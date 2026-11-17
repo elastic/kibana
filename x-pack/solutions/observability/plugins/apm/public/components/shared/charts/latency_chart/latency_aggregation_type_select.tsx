@@ -14,9 +14,24 @@ import { LatencyAggregationType } from '../../../../../common/latency_aggregatio
 import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
 
 const options: Array<{ value: LatencyAggregationType; text: string }> = [
-  { value: LatencyAggregationType.avg, text: 'Average' },
-  { value: LatencyAggregationType.p95, text: '95th percentile' },
-  { value: LatencyAggregationType.p99, text: '99th percentile' },
+  {
+    value: LatencyAggregationType.avg,
+    text: i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.option.avg', {
+      defaultMessage: 'Average',
+    }),
+  },
+  {
+    value: LatencyAggregationType.p95,
+    text: i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.option.p95', {
+      defaultMessage: '95th percentile',
+    }),
+  },
+  {
+    value: LatencyAggregationType.p99,
+    text: i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.option.p99', {
+      defaultMessage: '99th percentile',
+    }),
+  },
 ];
 
 const compactOptions: Array<{ value: LatencyAggregationType; text: string }> = [

@@ -39,37 +39,30 @@ import { useTransactionDetailFlyoutRedMetricsCharts } from './use_transaction_de
 
 const CHART_HEIGHT = 200;
 
-// Keep the synced crosshair across the three charts, but don't mirror the tooltip onto
-// sibling charts: the columns are too narrow for three tooltips side by side.
-const FLYOUT_CHART_SETTINGS = {
-  externalPointerEvents: { tooltip: { visible: false } },
-} as const;
-
 const CHARTS_LOAD_ERROR = i18n.translate('xpack.apm.transactionDetailFlyout.chartsUnavailable', {
   defaultMessage: 'Unable to load charts',
 });
 
-// Single row of RED charts like the service flyout. This flyout is narrower, so the
-// columns and gap are smaller to keep all three charts (and their titles) on one row.
-function useRedMetricsChartsGridCss() {
+function useSecondaryChartsGridCss() {
   const { euiTheme } = useEuiTheme();
 
   return css`
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: ${euiTheme.size.s};
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: ${euiTheme.size.m};
   `;
 }
 
 function RedMetricsChartsSkeleton() {
-  const chartsGridCss = useRedMetricsChartsGridCss();
+  const secondaryChartsGridCss = useSecondaryChartsGridCss();
 
   return (
     <div data-test-subj="transactionDetailFlyoutRedMetricsSkeleton">
       <EuiSkeletonRectangle width="30%" height={16} borderRadius="m" />
       <EuiSpacer size="s" />
-      <div css={chartsGridCss}>
-        <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
+      <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
+      <EuiSpacer size="m" />
+      <div css={secondaryChartsGridCss}>
         <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
         <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
       </div>
@@ -108,23 +101,19 @@ function FlyoutTimeseriesChartPanel({
           padding: ${euiTheme.size.s} ${euiTheme.size.m} 0;
         `}
       >
-        {/* Title and action share one row, and every header reserves the compressed
-            action height, so panels with and without an action stay aligned. */}
+        {/* Title and action share one row, like the service flyout charts. */}
         <EuiFlexGroup
           gutterSize="s"
           alignItems="center"
           justifyContent="spaceBetween"
           responsive={false}
           data-test-subj={`${id}-header`}
-          css={css`
-            min-height: ${euiTheme.size.xl};
-          `}
         >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xxs">
-                  <h4 css={{ whiteSpace: 'nowrap' }}>{title}</h4>
+                  <h4>{title}</h4>
                 </EuiTitle>
               </EuiFlexItem>
               {titleTip ? <EuiFlexItem grow={false}>{titleTip}</EuiFlexItem> : null}
@@ -160,7 +149,7 @@ function TransactionDetailFlyoutApiRedMetrics({
     filters,
   } = useTransactionDetailFlyoutContext();
   const timeZone = getTimeZone(core.uiSettings);
-  const chartsGridCss = useRedMetricsChartsGridCss();
+  const secondaryChartsGridCss = useSecondaryChartsGridCss();
 
   const {
     latencyTimeseries,
@@ -195,33 +184,34 @@ function TransactionDetailFlyoutApiRedMetrics({
 
   return (
     <ChartPointerEventContextProvider>
-      <div css={chartsGridCss} data-test-subj="transactionDetailFlyoutRedMetricsCharts">
-        <FlyoutTimeseriesChartPanel
-          id="transactionDetailFlyoutRedMetricsChart-latency"
-          title={i18n.translate('xpack.apm.transactionDetailFlyout.latencyChartTitle', {
-            defaultMessage: 'Latency',
-          })}
-          titleAction={
-            <LatencyAggregationTypeSelect
-              latencyAggregationType={latencyAggregationType}
-              onChange={setLatencyAggregationType}
-              compact
-            />
-          }
-        >
-          <TimeseriesChart
-            id="transactionDetailFlyoutLatencyChart"
-            height={CHART_HEIGHT}
-            fetchStatus={latencyStatus}
-            timeseries={latencyTimeseries}
-            yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-            comparisonEnabled={false}
-            timeZone={timeZone}
-            showAnnotations={false}
-            settings={FLYOUT_CHART_SETTINGS}
+      <FlyoutTimeseriesChartPanel
+        id="transactionDetailFlyoutRedMetricsChart-latency"
+        title={i18n.translate('xpack.apm.transactionDetailFlyout.latencyChartTitle', {
+          defaultMessage: 'Latency',
+        })}
+        titleAction={
+          <LatencyAggregationTypeSelect
+            latencyAggregationType={latencyAggregationType}
+            onChange={setLatencyAggregationType}
+            compact
           />
-        </FlyoutTimeseriesChartPanel>
+        }
+      >
+        <TimeseriesChart
+          id="transactionDetailFlyoutLatencyChart"
+          height={CHART_HEIGHT}
+          fetchStatus={latencyStatus}
+          timeseries={latencyTimeseries}
+          yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+          comparisonEnabled={false}
+          timeZone={timeZone}
+          showAnnotations={false}
+        />
+      </FlyoutTimeseriesChartPanel>
 
+      <EuiSpacer size="m" />
+
+      <div css={secondaryChartsGridCss}>
         <FlyoutTimeseriesChartPanel
           id="transactionDetailFlyoutRedMetricsChart-throughput"
           title={i18n.translate('xpack.apm.transactionDetailFlyout.throughputChartTitle', {
@@ -245,7 +235,6 @@ function TransactionDetailFlyoutApiRedMetrics({
             comparisonEnabled={false}
             timeZone={timeZone}
             showAnnotations={false}
-            settings={FLYOUT_CHART_SETTINGS}
           />
         </FlyoutTimeseriesChartPanel>
 
@@ -266,7 +255,6 @@ function TransactionDetailFlyoutApiRedMetrics({
             comparisonEnabled={false}
             timeZone={timeZone}
             showAnnotations={false}
-            settings={FLYOUT_CHART_SETTINGS}
           />
         </FlyoutTimeseriesChartPanel>
       </div>
@@ -289,7 +277,7 @@ function TransactionDetailFlyoutEsqlRedMetrics({
     refreshToken,
   } = useTransactionDetailFlyoutContext();
   const projectRouting = useProjectRouting();
-  const chartsGridCss = useRedMetricsChartsGridCss();
+  const secondaryChartsGridCss = useSecondaryChartsGridCss();
 
   const charts = useMemo(
     () =>
@@ -347,8 +335,9 @@ function TransactionDetailFlyoutEsqlRedMetrics({
     );
   }
 
-  // Same layout as the API path: latency, throughput and failed rate in one row.
-  const orderedCharts = ['latency', 'throughput', 'failedTransactionRate']
+  const latencyChart = charts.find((chart) => chart.id === 'latency');
+  // Same layout as the API path: latency full-width, then throughput + failed rate.
+  const secondaryCharts = ['throughput', 'failedTransactionRate']
     .map((id) => charts.find((chart) => chart.id === id))
     .filter((chart): chart is (typeof charts)[number] => chart != null);
 
@@ -371,8 +360,14 @@ function TransactionDetailFlyoutEsqlRedMetrics({
   );
 
   return (
-    <div data-test-subj="transactionDetailFlyoutEsqlRedMetrics" css={chartsGridCss}>
-      {orderedCharts.map(renderLensChart)}
+    <div data-test-subj="transactionDetailFlyoutEsqlRedMetrics">
+      {latencyChart ? renderLensChart(latencyChart) : null}
+      {secondaryCharts.length > 0 ? (
+        <>
+          <EuiSpacer size="m" />
+          <div css={secondaryChartsGridCss}>{secondaryCharts.map(renderLensChart)}</div>
+        </>
+      ) : null}
     </div>
   );
 }
