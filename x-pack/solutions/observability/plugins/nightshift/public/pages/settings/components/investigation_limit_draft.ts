@@ -13,11 +13,11 @@ import {
   type InvestigationQuotasResponse,
   type InvestigationQuotasUpdate,
 } from '@kbn/nightshift-investigations-plugin/common';
-import { MAX_RUN_LIMIT } from '@kbn/nightshift-shared';
+import { MAX_RUN_LIMIT, MIN_RUN_LIMIT } from '@kbn/nightshift-shared';
 
 export { INVESTIGATION_QUOTA_GROUPS, MAX_RUN_LIMIT };
 
-export const MIN_INVESTIGATION_LIMIT = 1;
+export const MIN_INVESTIGATION_LIMIT = MIN_RUN_LIMIT;
 
 /** An input left empty is an unlimited limit. */
 export type InvestigationLimitDraft = number | '';

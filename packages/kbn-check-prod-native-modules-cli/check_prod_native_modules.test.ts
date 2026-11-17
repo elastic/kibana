@@ -117,7 +117,7 @@ describe('Check Prod Native Modules', () => {
         .mockResolvedValueOnce([]);
       (existsSync as jest.Mock).mockReturnValue(true);
       jest
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
         .spyOn(require('./check_prod_native_modules'), 'isNativeModule')
         .mockResolvedValueOnce(true);
 
@@ -150,7 +150,7 @@ describe('Check Prod Native Modules', () => {
       (existsSync as jest.Mock).mockReturnValue(true);
       (existsSync as jest.Mock).mockReturnValue(true);
       jest
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
         .spyOn(require('./check_prod_native_modules'), 'isNativeModule')
         .mockResolvedValueOnce(true);
 
@@ -174,7 +174,7 @@ describe('Check Prod Native Modules', () => {
       (readPnpmLock as jest.Mock).mockResolvedValueOnce({});
       (fs.readdir as jest.Mock).mockResolvedValue([]);
       jest
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
         .spyOn(require('./check_prod_native_modules'), 'checkDependencies')
         .mockResolvedValue(undefined);
 
@@ -197,7 +197,7 @@ describe('Check Prod Native Modules', () => {
 
       // Mock loadPackageJson to return a mock package JSON object
       jest
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
         .spyOn(require('./helpers'), 'loadPackageJson')
         .mockImplementation((packageJsonPath: any) => {
           return {
@@ -212,7 +212,7 @@ describe('Check Prod Native Modules', () => {
         // .mockResolvedValueOnce([{ name: 'package.json', isDirectory: () => false }])
         .mockResolvedValueOnce([{ name: 'binding.gyp', isDirectory: () => false }]);
       jest
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
         .spyOn(require('./check_prod_native_modules'), 'checkDependencies')
         .mockImplementationOnce((_, __, prodNativeModulesFound: any) => {
           prodNativeModulesFound.push({
