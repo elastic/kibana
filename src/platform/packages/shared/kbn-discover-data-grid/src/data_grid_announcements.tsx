@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiLiveAnnouncer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -26,11 +26,24 @@ interface AnnouncementEvent {
   readonly message: string;
 }
 
+const ANNOUNCEMENT_TIMEOUT_MS = 2000;
+
 export const useDataGridAnnouncements = (): DataGridAnnouncements => {
   const [announcement, setAnnouncement] = useState<AnnouncementEvent>();
   const announce = useCallback((message: string) => {
     setAnnouncement((previous) => ({ id: (previous?.id ?? 0) + 1, message }));
   }, []);
+  useEffect(() => {
+    if (!announcement) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setAnnouncement((current) => (current?.id === announcement.id ? undefined : current));
+    }, ANNOUNCEMENT_TIMEOUT_MS);
+
+    return () => window.clearTimeout(timeout);
+  }, [announcement]);
   const announceCopySuccess = useCallback(() => {
     announce(
       i18n.translate('discoverDataGrid.accessibility.copySuccessDetail', {
@@ -80,11 +93,15 @@ export const useDataGridAnnouncements = (): DataGridAnnouncements => {
       })
     );
   }, [announce]);
+  const liveMessage = useMemo(
+    () => <span key={announcement?.id ?? 0}>{announcement?.message}</span>,
+    [announcement]
+  );
 
   return {
     liveRegion: (
-      <EuiLiveAnnouncer role="status" aria-live="polite">
-        {announcement ? <span key={announcement.id}>{announcement.message}</span> : null}
+      <EuiLiveAnnouncer role="status" aria-live="polite" clearAfterMs={false}>
+        {liveMessage}
       </EuiLiveAnnouncer>
     ),
     announceCopySuccess,
