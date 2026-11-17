@@ -111,6 +111,8 @@ export { extractCategorizeTokens } from './utils/extract_categorize_tokens';
 export { getLookupIndicesFromQuery } from './utils/get_lookup_indices';
 export {
   type ESQLStatsQueryMeta,
+  type ESQLStatsQueryMetaExclusionReason,
+  ESQL_STATS_QUERY_META_EXCLUSION_REASON,
   getESQLStatsQueryMeta,
   constructCascadeQuery,
   appendFilteringWhereClauseForCascadeLayout,

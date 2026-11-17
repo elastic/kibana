@@ -9,7 +9,7 @@
 
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
-import { Builder, isColumn, isFunctionExpression, mutate } from '@elastic/esql';
+import { Builder, isColumn, isFunctionExpression, mutate, Walker } from '@elastic/esql';
 import type { EsqlQuery } from '@elastic/esql';
 import type {
   ESQLAstExpression,
@@ -397,3 +397,55 @@ export const combineFilterExpressionsWithAnd = (expressions: ESQLAstExpression[]
  */
 export const isTimeseriesSourceQuery = (esqlQuery: EsqlQuery) =>
   getESQLQueryDataSourceCommand(esqlQuery)?.name === 'ts';
+
+/**
+ * The shapes of a TS (timeseries) query whose cascade rows cannot be resolved back to documents.
+ */
+export type UnsupportedTimeseriesCascadeShape = 'multiple-stats' | 'stats-in-fork';
+
+const forkContainsStatsCommand = (forkCommand: ESQLCommand): boolean => {
+  let containsStats = false;
+
+  // a FORK holds its branches as parenthesised sub-commands rather than command arguments,
+  // so the walker is what reaches the commands inside them
+  Walker.walk(forkCommand, {
+    visitCommand: (cmd) => {
+      containsStats ||= cmd.name === 'stats';
+    },
+  });
+
+  return containsStats;
+};
+
+/**
+ * Returns the shape that disqualifies a TS (timeseries) query from the cascade experience, or
+ * undefined when the query can be served.
+ *
+ * Leaf (document fetch) queries for the cascade experience are always rewritten to read from FROM,
+ * because INLINE STATS is not supported for TS queries. Any STATS command other than the one
+ * driving the cascade has to be carried over verbatim, and when it applies an aggregate function
+ * exclusive to TS queries (the `*_OVER_TIME` family) the resulting FROM query is not valid ES|QL,
+ * so there is no way to resolve the documents behind such a row. That applies to a STATS preceding
+ * the operating one, and equally to a STATS inside a FORK branch, which is copied into the leaf
+ * query along with the rest of the FORK. Rather than emit a query that silently returns nothing,
+ * these queries are opted out of the cascade experience entirely.
+ */
+export const getUnsupportedTimeseriesCascadeShape = (
+  esqlQuery: EsqlQuery
+): UnsupportedTimeseriesCascadeShape | undefined => {
+  if (!isTimeseriesSourceQuery(esqlQuery)) {
+    return;
+  }
+
+  const { commands } = esqlQuery.ast;
+
+  if (commands.filter((cmd) => cmd.name === 'stats').length > 1) {
+    return 'multiple-stats';
+  }
+
+  if (commands.some((cmd) => cmd.name === 'fork' && forkContainsStatsCommand(cmd))) {
+    return 'stats-in-fork';
+  }
+
+  return;
+};
