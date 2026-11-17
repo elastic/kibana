@@ -580,18 +580,19 @@ export function getDataStateContainer({
             reset: options.reset,
             abortController,
             onFetchRecordsComplete: async () => {
-              const { profileAppStateDefaults: currentProfileAppStateDefaults } = getCurrentTab();
-
-              if (currentProfileAppStateDefaults.resetId !== profileAppStateDefaults.resetId) {
-                return;
-              }
-
               const { dataSource } = dataSubjects.documents$.getValue();
               if (dataSource?.kind === 'esql') {
                 internalState.dispatch(
                   injectCurrentTab(internalStateActions.publishFetchedEsqlSource)({ dataSource })
                 );
               }
+
+              const { profileAppStateDefaults: currentProfileAppStateDefaults } = getCurrentTab();
+
+              if (currentProfileAppStateDefaults.resetId !== profileAppStateDefaults.resetId) {
+                return;
+              }
+
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
               const postFetchStateUpdate = resolvedProfileAppStateDefaults?.getPostFetchState({
                 defaultColumns,

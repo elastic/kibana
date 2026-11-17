@@ -107,9 +107,13 @@ export const publishFetchedEsqlSource: InternalStateThunkActionCreator<
       return;
     }
 
-    if (pinDataViewOfSource(dataSource)) {
-      currentDataSource$.next(dataSource);
+    const dataView = getDataViewOfSource(currentSource);
+    if (!dataView) {
+      return;
     }
+
+    pinDataViewOfSource(dataSource, dataView);
+    currentDataSource$.next(dataSource);
   };
 
 /**

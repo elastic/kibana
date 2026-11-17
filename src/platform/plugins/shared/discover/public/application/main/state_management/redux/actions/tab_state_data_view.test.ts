@@ -239,6 +239,20 @@ describe('tab_state_data_view actions', () => {
       expect(emissions).not.toHaveBeenCalled();
     });
 
+    it('keeps the pinned DataView when another tab unregistered the source', async () => {
+      const { internalState, tabId, esqlSource, shim, currentDataSource$ } = await setupEsqlTab();
+      unregisterFromDataViewsCache(esqlSource.id);
+      const fetchedSource = esqlSource.withColumns([column('empty', true)]);
+
+      internalState.dispatch(
+        internalStateActions.publishFetchedEsqlSource({ tabId, dataSource: fetchedSource })
+      );
+
+      const published = currentDataSource$.getValue();
+      expect(published).toBe(fetchedSource);
+      expect(getDataViewOfSource(published)).toBe(shim);
+    });
+
     it('does not publish a source of another query', async () => {
       const { internalState, tabId, esqlSource, currentDataSource$ } = await setupEsqlTab();
       const otherSource = esqlSource.withColumns([column('empty', true)]);
