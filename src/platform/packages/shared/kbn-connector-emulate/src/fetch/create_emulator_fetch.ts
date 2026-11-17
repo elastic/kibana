@@ -459,16 +459,14 @@ export const createEmulatorFetch = ({
       ({ source, method, path }) => `${source ?? ''} ${method.toLowerCase()} ${path}`
     )
   );
-  const contract = createOpenApiAdapter(
-    operations,
-    respond ?? defaultChain,
-    { checkScopes: checkScopes !== false },
-    {
+  const contract = createOpenApiAdapter(operations, respond ?? defaultChain, {
+    securityOptions: { checkScopes: checkScopes !== false },
+    matcherOptions: {
       isPreferred: ({ spec: { source }, method, path }) =>
         preferred.has(`${source ?? ''} ${method} ${path}`),
     },
-    brokenOperations
-  );
+    broken: brokenOperations,
+  });
   const awsJsonServices = loadAwsJsonServices(specs);
   const state = new Map<unknown, unknown>();
   // The contexts whose responder deferred to the default chain, for `responseSource`.

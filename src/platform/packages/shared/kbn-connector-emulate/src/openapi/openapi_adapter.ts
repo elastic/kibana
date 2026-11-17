@@ -17,17 +17,21 @@ import { validateResponse } from './validate_response';
 import type { SecurityOptions } from './validate_security';
 import { validateSecurity } from './validate_security';
 
-/**
- * Implements the contract steps for OpenAPI specs. `broken` operations, whose schemas have
- * defects, are routed but answered 404 naming them, so their requests don't reach another
- * operation whose template also matches.
- */
+export interface OpenApiAdapterOptions {
+  readonly securityOptions?: SecurityOptions;
+  readonly matcherOptions?: OperationMatcherOptions;
+  /**
+   * Operations whose schemas have defects. They are routed but answered 404 naming them, so their
+   * requests don't reach another operation whose template also matches.
+   */
+  readonly broken?: readonly ContractOperation[];
+}
+
+/** Implements the contract steps for OpenAPI specs. */
 export const createOpenApiAdapter = (
   operations: readonly ContractOperation[],
   respond: Responder,
-  securityOptions: SecurityOptions = {},
-  matcherOptions: OperationMatcherOptions = {},
-  broken: readonly ContractOperation[] = []
+  { securityOptions = {}, matcherOptions = {}, broken = [] }: OpenApiAdapterOptions = {}
 ): ContractAdapter => {
   const match = createOperationMatcher([...operations, ...broken], matcherOptions);
   const isBroken = new Set(broken);
