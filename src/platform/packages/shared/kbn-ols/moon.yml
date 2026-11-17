@@ -16,7 +16,9 @@ project:
   channel: ''
   owner: '@elastic/kibana-security'
   sourceRoot: src/platform/packages/shared/kbn-ols
-dependsOn: []
+dependsOn:
+  - '@kbn/test-es-server'
+  - '@kbn/tooling-log'
 tags:
   - shared-common
   - package
@@ -24,6 +26,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'

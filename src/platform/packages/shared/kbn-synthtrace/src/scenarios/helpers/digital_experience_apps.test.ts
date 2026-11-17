@@ -8,27 +8,25 @@
  */
 
 import {
+  Serializable,
   timerange,
   type EdotBrowserDocument,
   type EdotBrowserSpanDocument,
   type OtelLogDocument,
+  type SynthtraceGenerator,
   type Timerange,
 } from '@kbn/synthtrace-client';
-import type { ToolingLog } from '@kbn/tooling-log';
 import {
   DIGITAL_EXPERIENCE_APPS,
   generateEdotBrowserSessions,
+  generateOngoingPerMinute,
   generatePerMinute,
   getDefaultSeed,
   parseDigitalExperienceScenarioOpts,
 } from './digital_experience_apps';
 import { DIGITAL_EXPERIENCE_EDGE_CASES } from './digital_experience_edge_cases';
 
-const range = timerange(
-  new Date('2026-10-16T12:00:00.000Z'),
-  new Date('2026-10-16T12:02:00.000Z'),
-  {} as ToolingLog
-);
+const range = timerange(new Date('2026-10-16T12:00:00.000Z'), new Date('2026-10-16T12:02:00.000Z'));
 
 const FROM = range.from.getTime();
 
@@ -46,6 +44,11 @@ const collect = (
     includeRawAttribution,
     environments: false,
     edgeCases: false,
+    replayRate: 0,
+    errorReplayRate: 0,
+    replaySize: 'typical',
+    sessionLength: 'typical',
+    ongoingSessions: false,
     scale,
     // Pin the seed so the minimums the tests rely on don't depend on the range's start
     seed: 'digital-experience-test',
@@ -53,8 +56,7 @@ const collect = (
     Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
   );
 
-// Failing: See https://github.com/elastic/kibana/issues/303882
-describe.skip('digital experience apps', () => {
+describe('digital experience apps', () => {
   describe('parseDigitalExperienceScenarioOpts', () => {
     it('defaults to session.id, no raw attribution, one environment, no edge cases and scale 1', () => {
       expect(parseDigitalExperienceScenarioOpts(undefined, FROM)).toEqual({
@@ -62,6 +64,11 @@ describe.skip('digital experience apps', () => {
         includeRawAttribution: false,
         environments: false,
         edgeCases: false,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
+        sessionLength: 'typical',
+        ongoingSessions: false,
         scale: 1,
         seed: getDefaultSeed(FROM),
       });
@@ -75,6 +82,11 @@ describe.skip('digital experience apps', () => {
             includeRawAttribution: true,
             environments: true,
             edgeCases: true,
+            replayRate: 0,
+            errorReplayRate: 0,
+            replaySize: 'typical',
+            sessionLength: 'typical',
+            ongoingSessions: false,
             scale: 3,
           },
           FROM
@@ -84,6 +96,11 @@ describe.skip('digital experience apps', () => {
         includeRawAttribution: true,
         environments: true,
         edgeCases: true,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
+        sessionLength: 'typical',
+        ongoingSessions: false,
         scale: 3,
         seed: getDefaultSeed(FROM),
       });
@@ -106,6 +123,11 @@ describe.skip('digital experience apps', () => {
         includeRawAttribution: true,
         environments: true,
         edgeCases: true,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
+        sessionLength: 'typical',
+        ongoingSessions: false,
         scale: 2.5,
         seed: getDefaultSeed(FROM),
       });
@@ -191,7 +213,7 @@ describe.skip('digital experience apps', () => {
 
     it('generates data for runs of one minute or less', () => {
       [60, 30].forEach((seconds) => {
-        const shortRange = timerange(range.from, at(seconds), {} as ToolingLog);
+        const shortRange = timerange(range.from, at(seconds));
         const docs = collect(false, false, { timeRange: shortRange });
 
         expect(docs.length).toBeGreaterThan(0);
@@ -219,6 +241,11 @@ describe.skip('digital experience apps', () => {
           includeRawAttribution: false,
           environments: false,
           edgeCases: false,
+          replayRate: 0,
+          errorReplayRate: 0,
+          replaySize: 'typical',
+          sessionLength: 'typical',
+          ongoingSessions: false,
           scale,
           // Like the scenarios, without a seed option the parser defaults it to the run's start
           seed: parseDigitalExperienceScenarioOpts(seed === undefined ? {} : { seed }, from).seed,
@@ -252,7 +279,7 @@ describe.skip('digital experience apps', () => {
         const batched = batches
           .slice(1)
           .flatMap((end, i) =>
-            generate(undefined, { timeRange: timerange(batches[i], end, {} as ToolingLog), from })
+            generate(undefined, { timeRange: timerange(batches[i], end), from })
           );
 
         expect(sorted(batched)).toEqual(sorted(generate(undefined)));
@@ -275,9 +302,7 @@ describe.skip('digital experience apps', () => {
         const batches = [0, 13.37, 61.5, 119.25, 120].map((seconds) => at(seconds));
         const batched = batches
           .slice(1)
-          .flatMap((end, i) =>
-            generate('seed-a', { timeRange: timerange(batches[i], end, {} as ToolingLog), from })
-          );
+          .flatMap((end, i) => generate('seed-a', { timeRange: timerange(batches[i], end), from }));
 
         expect(sorted(batched)).toEqual(sorted(generate('seed-a')));
       });
@@ -310,7 +335,7 @@ describe.skip('digital experience apps', () => {
       });
 
       describe('visits', () => {
-        const hour = timerange(at(0), at(3600), {} as ToolingLog);
+        const hour = timerange(at(0), at(3600));
         // From the epoch on, so that sessions that started before the run are kept whole
         const docs = generate('seed-a', { timeRange: hour, from: 0, scale: 3 });
         const attribute = (doc: EdotBrowserDocument, key: string) => doc.attributes?.[key];
@@ -422,7 +447,7 @@ describe.skip('digital experience apps', () => {
       });
 
       it('does not repeat session, trace or span IDs', () => {
-        const hour = timerange(at(0), at(3600), {} as ToolingLog);
+        const hour = timerange(at(0), at(3600));
         // From the epoch on, so that sessions that started before the run are kept whole
         const docs = generate('seed-a', { timeRange: hour, from: 0, scale: 3 });
         const sessionCount = docs.filter(
@@ -513,7 +538,7 @@ describe.skip('digital experience apps', () => {
 
   describe('catalogue', () => {
     // Half an hour of every app, with the traffic of two, to see rare cases too
-    const halfHour = timerange(at(0), at(1800), {} as ToolingLog);
+    const halfHour = timerange(at(0), at(1800));
     const generate = (environments: boolean, edgeCases: boolean = false) =>
       generateEdotBrowserSessions(halfHour, {
         environment: 'test',
@@ -522,6 +547,11 @@ describe.skip('digital experience apps', () => {
         includeRawAttribution: false,
         environments,
         edgeCases,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
+        sessionLength: 'typical',
+        ongoingSessions: false,
         scale: 2,
         seed: 'digital-experience-test',
       }).flatMap((generator) =>
@@ -746,7 +776,7 @@ describe.skip('digital experience apps', () => {
 
       it('has the errors that one engine words or throws in the sessions of that engine only', () => {
         // Rare ones, as only the sessions of one engine throw them: three hours of traffic
-        const threeHours = timerange(at(0), at(3 * 3_600), {} as ToolingLog);
+        const threeHours = timerange(at(0), at(3 * 3_600));
         const longRun = generateEdotBrowserSessions(threeHours, {
           environment: 'test',
           from: threeHours.from.getTime(),
@@ -754,6 +784,11 @@ describe.skip('digital experience apps', () => {
           includeRawAttribution: false,
           environments: false,
           edgeCases: true,
+          replayRate: 0,
+          errorReplayRate: 0,
+          replaySize: 'typical',
+          sessionLength: 'typical',
+          ongoingSessions: false,
           scale: 1,
           seed: 'digital-experience-test',
         }).flatMap((generator) =>
@@ -913,7 +948,7 @@ describe.skip('digital experience apps', () => {
     it('creates the same events whatever the batch size', () => {
       // Live mode uploads batches of one second, each generated on its own
       const liveBatches = Array.from({ length: 120 }, (_, second) =>
-        indices(timerange(at(second), at(second + 1), {} as ToolingLog), 7.5)
+        indices(timerange(at(second), at(second + 1)), 7.5)
       ).flat();
 
       expect(liveBatches).toEqual(indices(range, 7.5));
@@ -932,32 +967,225 @@ describe.skip('digital experience apps', () => {
         return created;
       };
       const batches = [0, 7.3, 31, 60].map((seconds) => at(seconds));
-      const batchTimes = batches
-        .slice(1)
-        .flatMap((end, i) => times(timerange(batches[i], end, {} as ToolingLog)));
+      const batchTimes = batches.slice(1).flatMap((end, i) => times(timerange(batches[i], end)));
 
-      expect(batchTimes).toEqual(times(timerange(at(0), at(60), {} as ToolingLog)));
-      expect(times(timerange(at(0), at(60), {} as ToolingLog))).toEqual(
+      expect(batchTimes).toEqual(times(timerange(at(0), at(60))));
+      expect(times(timerange(at(0), at(60)))).toEqual(
         Array.from({ length: 6 }, (_, i) => range.from.getTime() + (i + 1) * 10_000 - 1)
       );
     });
 
     it('creates events in runs of less than a minute', () => {
-      expect(indices(timerange(at(0), at(30), {} as ToolingLog), 6).length).toBeGreaterThan(0);
-      expect(indices(timerange(at(0), at(0.5), {} as ToolingLog), 600).length).toBeGreaterThan(0);
+      expect(indices(timerange(at(0), at(30)), 6).length).toBeGreaterThan(0);
+      expect(indices(timerange(at(0), at(0.5)), 600).length).toBeGreaterThan(0);
     });
 
     it('keeps fractional rates, so apps stay apart at a low scale', () => {
-      const fiveMinutes = timerange(at(0), at(300), {} as ToolingLog);
+      const fiveMinutes = timerange(at(0), at(300));
 
       expect(indices(fiveMinutes, 6 * 0.2)).toHaveLength(6);
       expect(indices(fiveMinutes, 1 * 0.2)).toHaveLength(1);
     });
 
     it('numbers events by absolute time', () => {
-      expect(indices(timerange(at(0), at(60), {} as ToolingLog), 3)).toEqual(
-        indices(range, 3).slice(0, 3)
+      expect(indices(timerange(at(0), at(60)), 3)).toEqual(indices(range, 3).slice(0, 3));
+    });
+  });
+});
+
+describe('digital experience ongoing sessions', () => {
+  const END = Date.parse('2026-10-16T12:00:00.000Z');
+  const MINUTE = 60_000;
+  const HOUR = 60 * MINUTE;
+
+  interface Batch {
+    from: number;
+    to: number;
+    docs: EdotBrowserDocument[];
+  }
+
+  // Generates `[from, to)` in batches of `batchMs`, one after the other, like live mode does
+  const runInBatches = (
+    from: number,
+    to: number,
+    batchMs: number,
+    generate: (timeRange: Timerange) => Array<SynthtraceGenerator<EdotBrowserDocument>>
+  ): Batch[] =>
+    Array.from({ length: Math.ceil((to - from) / batchMs) }, (_, index) => {
+      const batchFrom = from + index * batchMs;
+      const batchTo = Math.min(batchFrom + batchMs, to);
+      return {
+        from: batchFrom,
+        to: batchTo,
+        docs: generate(timerange(new Date(batchFrom), new Date(batchTo))).flatMap((generator) =>
+          Array.from(generator).flatMap((event) => event.serialize())
+        ),
+      };
+    });
+
+  const docsOf = (batches: Batch[]) => batches.flatMap(({ docs }) => docs);
+  const timeOf = (doc: EdotBrowserDocument) => Number(doc['@timestamp']);
+
+  const outsideTheirBatch = (batches: Batch[]) =>
+    batches.flatMap(({ from, to, docs }) =>
+      docs.filter((doc) => timeOf(doc) < from || timeOf(doc) >= to)
+    );
+
+  describe('generateOngoingPerMinute', () => {
+    const MAX_DURATION = 5 * MINUTE;
+    // The events of every session, after its start. The last one is past its maximum duration.
+    const OFFSETS = [0, 30_000, 150_000, 10 * MINUTE];
+    // At two sessions a minute, session `index` starts right before its rate tick
+    const startOf = (index: number) => (index + 1) * 30_000 - 1;
+    const from = END - 10 * MINUTE;
+
+    const generate =
+      (key: string, created: number[] = []) =>
+      (timeRange: Timerange) =>
+        [
+          generateOngoingPerMinute(timeRange, 2, {
+            key,
+            maxDuration: MAX_DURATION,
+            create: ({ time, index }) => {
+              created.push(index);
+              return OFFSETS.map(
+                (offset) =>
+                  new Serializable<EdotBrowserDocument>({
+                    '@timestamp': time + offset,
+                    event_name: String(index),
+                  })
+              );
+            },
+          }),
+        ];
+    const describeDocs = (docs: EdotBrowserDocument[]) =>
+      docs.map((doc) => `${'event_name' in doc ? doc.event_name : ''}@${timeOf(doc)}`).sort();
+
+    it('writes the events of the sessions in progress in the window they happen in', () => {
+      const batches = runInBatches(from, END, 1000, generate('windows'));
+      // Sessions that started before the run count too, and events past the maximum duration don't
+      const firstIndex = Math.floor((2 * (from - MAX_DURATION)) / MINUTE) - 1;
+      const expected = Array.from({ length: 2 * 16 }, (_, i) => firstIndex + i).flatMap((index) =>
+        OFFSETS.filter((offset) => offset < MAX_DURATION)
+          .map((offset) => startOf(index) + offset)
+          .filter((time) => time >= from && time < END)
+          .map((time) => `${index}@${time}`)
       );
+
+      expect(outsideTheirBatch(batches)).toEqual([]);
+      expect(describeDocs(docsOf(batches))).toEqual(expected.sort());
+    });
+
+    it('writes the same events however the run is split, and when it starts over', () => {
+      const whole = docsOf(runInBatches(from, END, END - from, generate('split')));
+      const live = docsOf(runInBatches(from, END, 1000, generate('split')));
+      // A batch that doesn't follow the last one written, like the first of a worker, starts over
+      const restartAt = from + 5 * MINUTE + 500;
+      const restarted = runInBatches(restartAt, END, 7_300, generate('split'));
+
+      expect(describeDocs(live)).toEqual(describeDocs(whole));
+      expect(outsideTheirBatch(restarted)).toEqual([]);
+      expect(describeDocs(docsOf(restarted))).toEqual(
+        describeDocs(whole.filter((doc) => timeOf(doc) >= restartAt))
+      );
+    });
+
+    it('creates each session once while the batches follow each other', () => {
+      const created: number[] = [];
+      runInBatches(from, END, 1000, generate('once', created));
+
+      // The sessions started within the maximum duration before the run, one more, and the run's own
+      expect(created).toHaveLength(2 * 15 + 1);
+      expect(new Set(created).size).toBe(created.length);
+    });
+  });
+
+  describe('generateEdotBrowserSessions', () => {
+    const generate =
+      (scenarioOpts: Record<string, unknown>, from: number) => (timeRange: Timerange) =>
+        generateEdotBrowserSessions(timeRange, {
+          ...parseDigitalExperienceScenarioOpts(
+            { seed: 'ongoing-sessions', ...scenarioOpts },
+            from
+          ),
+          environment: 'test',
+          from,
+        });
+    const sessionIdOf = (doc: EdotBrowserDocument) => doc.attributes?.['session.id'];
+
+    it('is off unless asked', () => {
+      expect(parseDigitalExperienceScenarioOpts(undefined, END).ongoingSessions).toBe(false);
+      expect(
+        parseDigitalExperienceScenarioOpts({ ongoingSessions: 'true' }, END).ongoingSessions
+      ).toBe(true);
+      expect(() =>
+        parseDigitalExperienceScenarioOpts({ ongoingSessions: 'sometimes' }, END)
+      ).toThrow('ongoingSessions must be true or false');
+    });
+
+    it('writes long sessions over many minutes of live mode, instead of whole when they end', () => {
+      const from = END - 30 * MINUTE;
+      const minutesWrittenIn = (ongoingSessions: boolean) => {
+        const batches = runInBatches(
+          from,
+          END,
+          MINUTE,
+          generate({ sessionLength: 'long', ongoingSessions, scale: 0.2 }, from)
+        );
+        const minutes = new Map<unknown, Set<number>>();
+        batches.forEach(({ docs }, minute) =>
+          docs.forEach((doc) => {
+            const sessionId = sessionIdOf(doc);
+            if (sessionId) {
+              minutes.set(sessionId, (minutes.get(sessionId) ?? new Set()).add(minute));
+            }
+          })
+        );
+        return {
+          batches,
+          counts: [...minutes.values()].map(({ size }) => size).sort((a, b) => a - b),
+        };
+      };
+      const ending = minutesWrittenIn(false);
+      const ongoing = minutesWrittenIn(true);
+
+      expect(ending.counts.length).toBeGreaterThan(0);
+      expect(Math.max(...ending.counts)).toBe(1);
+      expect(outsideTheirBatch(ongoing.batches)).toEqual([]);
+      expect(ongoing.counts[Math.floor(ongoing.counts.length / 2)]).toBeGreaterThan(5);
+      expect(Math.max(...ongoing.counts)).toBeGreaterThanOrEqual(20);
+    });
+
+    it('moves every session to start when it ended without the option, with all of its events', () => {
+      const from = END - 5 * HOUR;
+      const timesBySession = (ongoingSessions: boolean) => {
+        const docs = docsOf(
+          runInBatches(from, END, END - from, generate({ ongoingSessions, scale: 0.1 }, from))
+        );
+        const times = new Map<unknown, number[]>();
+        docs.forEach((doc) => {
+          const sessionId = sessionIdOf(doc);
+          if (sessionId) {
+            times.set(sessionId, [...(times.get(sessionId) ?? []), timeOf(doc)]);
+          }
+        });
+        times.forEach((sessionTimes) => sessionTimes.sort((a, b) => a - b));
+        return times;
+      };
+      const ending = timesBySession(false);
+      const starting = timesBySession(true);
+      // Typical sessions run for less than 2 hours: those of the middle hour are whole in both runs
+      const whole = [...ending].filter(
+        ([sessionId, times]) =>
+          times[times.length - 1] >= from + 2 * HOUR &&
+          (starting.get(sessionId)?.[0] ?? END) < END - 2 * HOUR
+      );
+
+      expect(whole.length).toBeGreaterThan(50);
+      whole.forEach(([sessionId, times]) => {
+        const moved = starting.get(sessionId) ?? [];
+        expect(moved).toEqual(times.map((time) => time + moved[0] - times[0]));
+      });
     });
   });
 });

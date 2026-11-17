@@ -52,53 +52,100 @@ export interface GroupResourceNodesResponse extends Pick<ServiceMapTelemetry, 'n
 export type ConnectionType = Connection | ConnectionLegacy;
 export type DestinationType = ExitSpanDestination | ExitSpanDestinationLegacy;
 
-/**
- * How the server groups a large service map. Absent when grouping is off, under 100 services,
- * or grouping failed — render the map as today.
- */
+export interface ServiceMapRawResponse {
+  spans: ServiceMapSpan[];
+  servicesData: ServicesResponse[];
+  anomalies: ServiceAnomaliesResponse;
+  /**
+   * Absent when grouping is off, the map has fewer services than `SERVICE_GROUPING_MIN_SERVICES`
+   * or grouping failed.
+   */
+  serviceGrouping?: ServiceMapGrouping;
+}
+
+/** What a service map grouping strategy groups services by. */
 export type ServiceGroupingSource =
-  | 'serviceGroups'
+  | 'savedGroups'
   | 'service.namespace'
   | 'kubernetes.namespace'
   | 'namePrefix'
   | 'calls';
 
-export type ServiceMapGroup =
-  | { id: string; kind: 'savedGroup'; name: string }
-  | {
-      id: string;
-      kind: 'attribute';
-      attribute: 'service.namespace' | 'kubernetes.namespace' | 'namePrefix';
-      value: string;
-    }
-  | { id: string; kind: 'calls'; busiestService: string }
-  | { id: string; kind: 'shared' }
-  | { id: string; kind: 'notConnected' };
+/** A source that groups services sharing one value. */
+export type AttributeGroupingSource = Exclude<ServiceGroupingSource, 'savedGroups' | 'calls'>;
 
+/** A saved service group the service matches. */
+export interface SavedGroupServiceMapGroup {
+  /** The saved group's id, after `savedGroups:`. It survives renames; the name is in `name`. */
+  id: `savedGroups:${string}`;
+  kind: 'savedGroup';
+  name: string;
+}
+
+/** Services sharing the value of an attribute. */
+export interface AttributeServiceMapGroup {
+  /** The attribute, then its value: `service.namespace:checkout`. */
+  id: `${AttributeGroupingSource}:${string}`;
+  kind: 'attribute';
+  attribute: AttributeGroupingSource;
+  value: string;
+}
+
+/** Services that call each other a lot, named after the busiest of them. */
+export interface CallsServiceMapGroup {
+  /**
+   * The member whose name sorts first, after `calls:`. It stays the same while the members do,
+   * whatever their calls. Not stable across requests in general: it changes when that member
+   * leaves the group or one whose name sorts earlier joins. Can hold any character a service
+   * name can.
+   */
+  id: `calls:${string}`;
+  kind: 'calls';
+  /** The member with the most calls made and received, ties broken by name: the group's label. */
+  busiestService: string;
+}
+
+/** Services called by a large share of the estate, or connected to far more services than most. */
+export interface SharedServiceMapGroup {
+  id: 'shared';
+  kind: 'shared';
+}
+
+/** Services with no calls, or in a small piece of the call graph cut off from the rest. */
+export interface NotConnectedServiceMapGroup {
+  id: 'notConnected';
+  kind: 'notConnected';
+}
+
+/**
+ * A group of services on the map. Ids are the source and a value, `<source>:<value>`, or `shared`
+ * and `notConnected`, so groups of different kinds never share one, even within a strategy.
+ */
+export type ServiceMapGroup =
+  | SavedGroupServiceMapGroup
+  | AttributeServiceMapGroup
+  | CallsServiceMapGroup
+  | SharedServiceMapGroup
+  | NotConnectedServiceMapGroup;
+
+/** One way of grouping the map's services. */
 export interface ServiceGroupingStrategy {
   source: ServiceGroupingSource;
-  /** Whether this grouping passed readability checks */
+  /** Whether this grouping passed the readability checks. */
   passes: boolean;
-  /** This strategy's own groups (not shared across strategies) */
+  /** This strategy's own groups. The same id can hold different services in another strategy. */
   groups: ServiceMapGroup[];
-  /** assignment[i] = index in `groups` of services[i] */
+  /** `assignment[i]` is the index in `groups` of `services[i]`. */
   assignment: number[];
 }
 
+/** Every grouping the map can show, and the one shown automatically. */
 export interface ServiceMapGrouping {
-  /** Every service on the map, sorted */
+  /** Every service on the map, sorted. */
   services: string[];
-  /** Strategy "Automatic" renders; always one of `strategies` */
+  /** The strategy shown automatically. Always one of `strategies`. */
   automatic: ServiceGroupingSource;
   strategies: ServiceGroupingStrategy[];
-}
-
-export interface ServiceMapRawResponse {
-  spans: ServiceMapSpan[];
-  servicesData: ServicesResponse[];
-  anomalies: ServiceAnomaliesResponse;
-  /** Present when service map grouping produced a grouping for this map */
-  serviceGrouping?: ServiceMapGrouping;
 }
 
 export type ServiceMapResponse = Pick<ServiceMapTelemetry, 'tracesCount'> & ServiceMapRawResponse;

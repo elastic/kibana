@@ -8,59 +8,38 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { RedirectToDefaultLayoutTab } from './redirect_to_default_layout_tab';
-import { useShowClassicTab } from './use_show_classic_tab';
 
 jest.mock('../../hooks/use_streams_app_params', () => ({ useStreamsAppParams: jest.fn() }));
-jest.mock('./use_show_classic_tab', () => ({ useShowClassicTab: jest.fn() }));
+jest.mock('../../hooks/use_streams_privileges', () => ({ useStreamsPrivileges: jest.fn() }));
 jest.mock('../redirect_to', () => ({
   RedirectTo: ({ params }: { params: { path: { unitId: string; tab: string } } }) => (
     <div data-test-subj="redirectTo">{`${params.path.unitId}/${params.path.tab}`}</div>
   ),
 }));
-jest.mock('../streams_app_page_template', () => ({
-  StreamsAppPageTemplate: {
-    EmptyPrompt: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
-      <div data-test-subj={dataTestSubj} />
-    ),
-  },
-}));
 
-const setup = ({
-  unitId,
-  loading = false,
-  showClassic = false,
-}: {
-  unitId?: string;
-  loading?: boolean;
-  showClassic?: boolean;
-}) => {
+const setup = ({ unitId, legacy }: { unitId?: string; legacy: boolean }) => {
   jest
     .mocked(useStreamsAppParams)
     .mockReturnValue(
       (unitId ? { path: { unitId } } : undefined) as ReturnType<typeof useStreamsAppParams>
     );
-  jest.mocked(useShowClassicTab).mockReturnValue({ loading, showClassic });
+  jest.mocked(useStreamsPrivileges).mockReturnValue({
+    access: { v2: true, legacy },
+  } as unknown as ReturnType<typeof useStreamsPrivileges>);
 };
 
 describe('RedirectToDefaultLayoutTab', () => {
-  it('waits for the classic stream check', () => {
-    setup({ loading: true });
-    render(<RedirectToDefaultLayoutTab />);
-
-    expect(screen.getByTestId('streamsClassicTabLoading')).toBeInTheDocument();
-    expect(screen.queryByTestId('redirectTo')).not.toBeInTheDocument();
-  });
-
-  it('opens Classic on the current unit when a saved classic stream exists', () => {
-    setup({ unitId: 'edge', showClassic: true });
+  it('opens Classic on the current unit with Streams access', () => {
+    setup({ unitId: 'edge', legacy: true });
     render(<RedirectToDefaultLayoutTab />);
 
     expect(screen.getByTestId('redirectTo')).toHaveTextContent('edge/classic');
   });
 
-  it('opens the Map when no saved classic stream exists', () => {
-    setup({ showClassic: false });
+  it('opens the Map on the default unit without Streams access', () => {
+    setup({ legacy: false });
     render(<RedirectToDefaultLayoutTab />);
 
     expect(screen.getByTestId('redirectTo')).toHaveTextContent('default/map');

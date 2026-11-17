@@ -56,8 +56,8 @@ function formatServiceGroupingSource(source: ServiceGroupingSource): string {
       return i18n.translate('xpack.apm.serviceMap.groupingSource.namePrefix', {
         defaultMessage: 'name prefix',
       });
-    case 'serviceGroups':
-      return i18n.translate('xpack.apm.serviceMap.groupingSource.serviceGroups', {
+    case 'savedGroups':
+      return i18n.translate('xpack.apm.serviceMap.groupingSource.savedGroups', {
         defaultMessage: 'service groups',
       });
   }
