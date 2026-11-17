@@ -27,6 +27,22 @@ jest.mock('../../components/entities/investigation/use_investigation_assignees',
   useInvestigationAssignees: () => () => null,
 }));
 jest.mock('./use_detection_setup_banner');
+jest.mock('../../components/ui/time_range_picker', () => ({
+  NightshiftTimeRangePicker: ({
+    start,
+    end,
+    showRefreshButton,
+  }: {
+    start: string;
+    end: string;
+    showRefreshButton?: boolean;
+  }) => (
+    <div data-test-subj="nightshiftInvestigationsTimeRangePicker">
+      {`${start} to ${end}`}
+      {showRefreshButton && <button data-test-subj="stubRefresh" type="button" />}
+    </div>
+  ),
+}));
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
@@ -145,7 +161,11 @@ function setSections({
   mockUseInvestigationSections.mockReturnValue({
     sections,
     severityCounts,
+    // Tests without a search treat filtered and unfiltered counts as the same.
+    unfilteredSeverityCounts: severityCounts,
     areSeverityCountsLoading,
+    areUnfilteredSeverityCountsLoading: false,
+    areSeverityCountsStale: false,
     hasSeverityCountsError,
     hasActiveInvestigations: hasActiveInvestigations || resolvedActiveCount > 0,
     activeInvestigationCount: resolvedActiveCount,
@@ -251,6 +271,42 @@ describe('NightshiftApp', () => {
         }),
       })
     );
+  });
+
+  it('filters investigations to those modified in the last 48 hours by default', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-11-09T12:00:30.000Z'));
+    try {
+      renderApp();
+
+      expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toHaveTextContent(
+        'now-48h to now'
+      );
+      expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          updatedAfter: '2026-11-07T12:00:30.000Z',
+          updatedBefore: undefined,
+        })
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('offers a refresh button next to the time range', () => {
+    renderApp();
+
+    expect(screen.getByTestId('stubRefresh')).toBeInTheDocument();
+  });
+
+  it('filters by the time range in the URL', () => {
+    renderApp({ initialEntries: ['/?rangeFrom=now-7d&rangeTo=now-1d'] });
+
+    expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toHaveTextContent(
+      'now-7d to now-1d'
+    );
+    const [{ updatedAfter, updatedBefore }] = mockUseInvestigationSections.mock.calls.at(-1)!;
+    expect(updatedAfter).toBeDefined();
+    expect(updatedBefore).toBeDefined();
   });
 
   it('shows the finished open severity sum when nothing is in progress', () => {
@@ -633,6 +689,17 @@ describe('NightshiftApp', () => {
     ).toHaveLength(1);
   });
 
+  it('shows no tile counts until the counts query lands, even when the sections have rows', () => {
+    const sections = defaultSections({
+      critical: { investigations: [criticalInvestigation], total: 1 },
+    });
+    setSections({ sections, areSeverityCountsLoading: true });
+
+    renderApp();
+
+    expect(screen.queryByTestId('nightshiftSeverityTileCount-critical')).toBeNull();
+  });
+
   it('waits for the severity counts before reporting the landing page view', () => {
     const sections = defaultSections({
       critical: { investigations: [criticalInvestigation], total: 1 },
@@ -684,6 +751,23 @@ describe('NightshiftApp', () => {
         'nightshift_investigation_viewed',
         expect.objectContaining({ investigation_id: 'conversation-9', source: 'deepLink' })
       )
+    );
+  });
+
+  it('does not send a whitespace-only search term to the API', () => {
+    renderApp({ initialEntries: ['/?q=%20%20'] });
+
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: undefined })
+    );
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toHaveValue('  ');
+  });
+
+  it('sends the trimmed search term to the API', () => {
+    renderApp({ initialEntries: ['/?q=%20checkout%20'] });
+
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'checkout' })
     );
   });
 

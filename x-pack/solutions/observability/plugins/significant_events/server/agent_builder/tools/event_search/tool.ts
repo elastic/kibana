@@ -25,6 +25,8 @@ import {
   DEFAULT_EVENTS_SEARCH_TO,
 } from '../../../lib/significant_events/events';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { trackTelemetryBestEffort } from '../bulk_write';
+import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import {
   EVENT_SEARCH_DEFAULT_PER_PAGE,
   EVENT_SEARCH_MAX_PER_PAGE,
@@ -282,15 +284,23 @@ export function createSearchEventsTool({
           },
         });
 
-        telemetry.trackAgentToolEventSearch({
-          workflow_execution_id: workflowExecutionId,
-          success: true,
-          result_count: data.total,
-          has_query: query !== undefined,
-          has_source_filter: (slugs?.length ?? 0) > 0,
-          status_filter: toolParams.status,
-          view: data.view,
-          page: data.page,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'event_search telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventSearch(
+              {
+                workflow_execution_id: workflowExecutionId,
+                success: true,
+                result_count: data.total,
+                has_query: query !== undefined,
+                has_source_filter: (slugs?.length ?? 0) > 0,
+                status_filter: toolParams.status,
+                view: data.view,
+                page: data.page,
+              },
+              request
+            ),
         });
 
         return {
@@ -313,18 +323,34 @@ export function createSearchEventsTool({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running event_search: ${message}`);
+        const failure = reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID,
+          errorLogMessage: `Error running event_search: ${message}`,
+          logger,
+          telemetry,
+          request,
+          runContext: context.runContext,
+        });
 
-        telemetry.trackAgentToolEventSearch({
-          workflow_execution_id: workflowExecutionId,
-          success: false,
-          result_count: 0,
-          has_query: query !== undefined,
-          has_source_filter: (toolParams.slugs?.length ?? 0) > 0,
-          status_filter: toolParams.status,
-          view: toolParams.view,
-          page: toolParams.page,
-          error_message: message,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'failed event_search telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventSearch(
+              {
+                workflow_execution_id: workflowExecutionId,
+                success: false,
+                result_count: 0,
+                has_query: query !== undefined,
+                has_source_filter: (toolParams.slugs?.length ?? 0) > 0,
+                status_filter: toolParams.status,
+                view: toolParams.view,
+                page: toolParams.page,
+                error_message: toTelemetryErrorMessage(failure, message),
+              },
+              request
+            ),
         });
 
         return {

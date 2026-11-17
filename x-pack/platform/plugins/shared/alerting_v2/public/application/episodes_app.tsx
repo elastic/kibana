@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useRouteMatch } from 'react-router-dom';
-import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import { AlertsListPage } from '../pages/alert_episodes_list_page/alerts_list_page';
 import {
   EpisodeDetailsPage,
@@ -17,12 +16,9 @@ import {
 } from '../pages/episode_details_page/episode_details_page';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
-export interface EpisodesAppProps extends EpisodeDetailsPageProps {
-  dataSource?: EpisodeDataSource;
-}
+export type EpisodesAppProps = EpisodeDetailsPageProps;
 
 export const EpisodesApp = ({
-  dataSource,
   useAdditionalEpisodeDetailsHeaderMenuItems,
 }: EpisodesAppProps = {}) => {
   const { path } = useRouteMatch();
@@ -36,7 +32,7 @@ export const EpisodesApp = ({
     >
       <Routes>
         <Route exact path={path}>
-          <AlertsListPage dataSource={dataSource} />
+          <AlertsListPage />
         </Route>
         <Route path={`${base}/:episodeId`}>
           <EpisodeDetailsPage

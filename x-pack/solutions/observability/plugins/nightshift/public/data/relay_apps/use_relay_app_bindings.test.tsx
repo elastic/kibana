@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SlackAppBindingsResponse } from '@kbn/significant-events-plugin/common';
 import {
   formatChannelValue,
   RELAY_APP_BINDINGS_QUERY_KEY,
   useAllRelayAppBindings,
+  useAvailableChannels,
   useRelayAppBindings,
   useBindChannel,
   useUnbindChannel,
@@ -41,6 +42,42 @@ const createSetup = () => {
 };
 
 const flush = (ms = 0) => act(() => jest.advanceTimersByTimeAsync(ms));
+
+describe('useAvailableChannels', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({ services: { http: { get: httpGet } } } as any);
+  });
+
+  it('fetches the available channels and exposes truncated', async () => {
+    httpGet.mockResolvedValue({
+      channels: [{ channel: 'C1', displayName: 'alerts' }],
+      truncated: true,
+    });
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useAvailableChannels(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(httpGet).toHaveBeenCalledWith(
+      '/internal/significant_events/apps/slack/available_channels',
+      expect.any(Object)
+    );
+    expect(result.current).toMatchObject({
+      channels: [{ channel: 'C1', displayName: 'alerts' }],
+      isTruncated: true,
+      isError: false,
+    });
+  });
+
+  it('reports an error without throwing, so the picker can fall back to an id', async () => {
+    httpGet.mockRejectedValue(new Error('boom'));
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useAvailableChannels(), { wrapper });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.channels).toEqual([]);
+  });
+});
 
 describe('useRelayAppBindings', () => {
   beforeEach(() => {
