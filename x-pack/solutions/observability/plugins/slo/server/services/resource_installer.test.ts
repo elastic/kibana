@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+jest.mock('timers/promises');
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -216,43 +218,23 @@ describe('resourceInstaller', () => {
     expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
   });
 
-  it('does not skip other resources when a component template fails', async () => {
+  it('stops at the first resource that fails, naming it', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.indices.get.mockResponse({});
     esClient.cluster.putComponentTemplate.mockImplementation((params) =>
       params.name === SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME
         ? Promise.reject(new Error('boom'))
         : Promise.resolve({ acknowledged: true })
     );
 
-    const installer = createInstaller(esClient);
-    const result = installer.install();
+    const result = createInstaller(esClient).install();
 
     await expect(result).rejects.toThrow(SLOResourcesNotInstalled);
     await expect(result).rejects.toThrow(
-      new RegExp(`${SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME}.*${SLI_INDEX_TEMPLATE_NAME}`)
+      `Failed to install SLO resource [${SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME}]: boom`
     );
-
-    // the SLI index template and base index depend on the failed component template
-    const indexTemplateNames = esClient.indices.putIndexTemplate.mock.calls.map(
-      ([params]) => params.name
-    );
-    expect(indexTemplateNames).toEqual([
-      SUMMARY_INDEX_TEMPLATE_NAME,
-      COMPOSITE_SUMMARY_INDEX_TEMPLATE_NAME,
-      HEALTH_INDEX_TEMPLATE_NAME,
-    ]);
-    const createdIndices = esClient.indices.create.mock.calls.map(([params]) => params.index);
-    expect(createdIndices).toEqual([
-      SUMMARY_DESTINATION_INDEX_NAME,
-      SUMMARY_TEMP_INDEX_NAME,
-      COMPOSITE_SUMMARY_INDEX_NAME,
-    ]);
-    expect(createdIndices).not.toContain(SLI_DESTINATION_INDEX_NAME);
-    expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
-    expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
-      name: HEALTH_DATA_STREAM_NAME,
-    });
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.create).not.toHaveBeenCalled();
+    expect(esClient.ingest.putPipeline).not.toHaveBeenCalled();
   });
 
   it('resolves when every resource is installed', async () => {
@@ -260,35 +242,54 @@ describe('resourceInstaller', () => {
     esClient.indices.get.mockResponse({});
 
     await expect(createInstaller(esClient).install()).resolves.toBeUndefined();
+    expect(esClient.indices.create.mock.calls.map(([params]) => params.index)).toEqual([
+      SLI_DESTINATION_INDEX_NAME,
+      SUMMARY_DESTINATION_INDEX_NAME,
+      SUMMARY_TEMP_INDEX_NAME,
+      COMPOSITE_SUMMARY_INDEX_NAME,
+    ]);
+    expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
+      name: HEALTH_DATA_STREAM_NAME,
+    });
   });
 
-  it('resolves and logs an error when only non-critical resources fail', async () => {
+  it('ignores resources that already exist', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.get.mockResponse({});
-    esClient.indices.putMapping.mockRejectedValue(new Error('mapping conflict'));
-    esClient.indices.createDataStream.mockRejectedValue(new Error('boom'));
-    const logger = loggerMock.create();
+    const alreadyExists = new EsErrors.ResponseError(
+      elasticsearchServiceMock.createApiResponse({
+        statusCode: 400,
+        body: { error: { type: 'resource_already_exists_exception' } },
+      })
+    );
+    esClient.indices.create.mockRejectedValue(alreadyExists);
+    esClient.indices.createDataStream.mockRejectedValue(alreadyExists);
 
-    await expect(
-      new DefaultResourceInstaller(esClient, logger, 'M', () => NOW).install()
-    ).resolves.toBeUndefined();
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining(`[${COMPOSITE_SUMMARY_INDEX_NAME} mappings]`)
-    );
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining(`[${HEALTH_DATA_STREAM_NAME}]`)
-    );
+    await expect(createInstaller(esClient).install()).resolves.toBeUndefined();
   });
 
-  it('only lists the critical resources when the install fails', async () => {
+  it.each([
+    ['composite summary mappings', 'putMapping', `${COMPOSITE_SUMMARY_INDEX_NAME} mappings`],
+    ['health data stream', 'createDataStream', HEALTH_DATA_STREAM_NAME],
+  ] as const)('fails when the %s fails', async (_label, method, resourceName) => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.get.mockResponse({});
-    esClient.indices.createDataStream.mockRejectedValue(new Error('boom'));
-    esClient.ingest.putPipeline.mockRejectedValue(new Error('boom'));
+    esClient.indices[method].mockRejectedValue(new Error('boom'));
 
     await expect(createInstaller(esClient).install()).rejects.toThrow(
-      'Failed to install SLO resources: [.slo-observability.sli.routing-v3.6]'
+      `Failed to install SLO resource [${resourceName}]: boom`
     );
+  });
+
+  it('retries transient Elasticsearch errors', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.get.mockResponse({});
+    esClient.ingest.putPipeline
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('connection reset'))
+      .mockResolvedValueOnce({ acknowledged: true });
+
+    await expect(createInstaller(esClient).install()).resolves.toBeUndefined();
+    expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(2);
   });
 
   describe('routing pipelines', () => {
@@ -386,101 +387,18 @@ describe('resourceInstaller', () => {
       );
     });
 
-    it('still installs the other versions when one routing pipeline fails', async () => {
+    it('stops at the first routing pipeline that fails', async () => {
       mockRoutedVersions = [3.6, 3.7];
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       mockTemplatesUpToDate(esClient);
       mockRoutingPipelines(esClient, {});
       esClient.indices.get.mockResponse({});
-      esClient.ingest.putPipeline.mockImplementation((params) =>
-        params.id === '.slo-observability.sli.routing-v3.6'
-          ? Promise.reject(new Error('boom'))
-          : Promise.resolve({ acknowledged: true })
-      );
+      esClient.ingest.putPipeline.mockRejectedValue(new Error('boom'));
 
       await expect(createInstaller(esClient).install()).rejects.toThrow(
-        /\.slo-observability\.sli\.routing-v3\.6/
+        'Failed to install SLO resource [.slo-observability.sli.routing-v3.6]: boom'
       );
-      expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('verify', () => {
-    const upToDateRouting = routingPipeline(3.6, { rounding: 'M', cutover: DEC_1 });
-
-    it('returns true when every resource is up to date', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      mockTemplatesUpToDate(esClient);
-      esClient.indices.exists.mockResponse(true);
-      mockRoutingPipelines(esClient, { '.slo-observability.sli.routing-v3.6': upToDateRouting });
-
-      await expect(createInstaller(esClient).verify()).resolves.toBe(true);
-      expect(esClient.ingest.putPipeline).not.toHaveBeenCalled();
-    });
-
-    it('returns false when the routing pipeline is missing', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      mockTemplatesUpToDate(esClient);
-      esClient.indices.exists.mockResponse(true);
-      mockRoutingPipelines(esClient, {});
-
-      await expect(createInstaller(esClient).verify()).resolves.toBe(false);
-    });
-
-    it('returns true when the configured rounding differs from the routing state', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      mockTemplatesUpToDate(esClient);
-      esClient.indices.exists.mockResponse(true);
-      mockRoutingPipelines(esClient, { '.slo-observability.sli.routing-v3.6': upToDateRouting });
-
-      const installer = new DefaultResourceInstaller(esClient, loggerMock.create(), 'd', () => NOW);
-
-      await expect(installer.verify()).resolves.toBe(true);
-    });
-
-    it('returns false when a base index is missing', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      mockTemplatesUpToDate(esClient);
-      esClient.indices.exists.mockImplementation((params) =>
-        Promise.resolve(params.index !== SLI_DESTINATION_INDEX_NAME)
-      );
-      mockRoutingPipelines(esClient, { '.slo-observability.sli.routing-v3.6': upToDateRouting });
-
-      await expect(createInstaller(esClient).verify()).resolves.toBe(false);
-    });
-
-    it('ignores the non-critical resources', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      mockTemplatesUpToDate(esClient);
-      esClient.indices.getIndexTemplate.mockImplementation((params) => {
-        const name = params?.name ?? '';
-        const isNonCritical = name.includes('composite') || name === HEALTH_INDEX_TEMPLATE_NAME;
-        return Promise.resolve({
-          index_templates: [
-            {
-              name,
-              index_template: {
-                index_patterns: name,
-                composed_of: [],
-                _meta: { version: isNonCritical ? 0 : SLO_RESOURCES_VERSION },
-              },
-            },
-          ],
-        });
-      });
-      esClient.indices.exists.mockImplementation((params) =>
-        Promise.resolve(params.index !== COMPOSITE_SUMMARY_INDEX_NAME)
-      );
-      mockRoutingPipelines(esClient, { '.slo-observability.sli.routing-v3.6': upToDateRouting });
-
-      await expect(createInstaller(esClient).verify()).resolves.toBe(true);
-    });
-
-    it('returns false on Elasticsearch errors', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.cluster.getComponentTemplate.mockRejectedValue(new Error('boom'));
-
-      await expect(createInstaller(esClient).verify()).resolves.toBe(false);
+      expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
     });
   });
 });

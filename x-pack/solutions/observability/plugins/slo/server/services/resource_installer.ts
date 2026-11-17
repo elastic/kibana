@@ -41,7 +41,6 @@ import { computeInitialRoutingState, parseRoutingStateFromMeta } from './sli_rou
 
 export interface ResourceInstaller {
   install(): Promise<void>;
-  verify(): Promise<boolean>;
 }
 
 const COMPONENT_TEMPLATES: readonly ClusterPutComponentTemplateRequest[] = [
@@ -56,29 +55,15 @@ const INDEX_TEMPLATES: readonly IndicesPutIndexTemplateRequest[] = [
   SLI_INDEX_TEMPLATE,
   SUMMARY_INDEX_TEMPLATE,
   COMPOSITE_SUMMARY_INDEX_TEMPLATE,
+  HEALTH_INDEX_TEMPLATE,
 ];
 
-const BASE_INDICES: ReadonlyArray<{ index: string; template: IndicesPutIndexTemplateRequest }> = [
-  { index: SLI_DESTINATION_INDEX_NAME, template: SLI_INDEX_TEMPLATE },
-  { index: SUMMARY_DESTINATION_INDEX_NAME, template: SUMMARY_INDEX_TEMPLATE },
-  { index: SUMMARY_TEMP_INDEX_NAME, template: SUMMARY_INDEX_TEMPLATE },
-  { index: COMPOSITE_SUMMARY_INDEX_NAME, template: COMPOSITE_SUMMARY_INDEX_TEMPLATE },
-];
-
-// Resources SLO create, update and reset do not need: a failure is logged without failing the install.
-const NON_CRITICAL_RESOURCES: ReadonlySet<string> = new Set([
-  COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE.name,
-  COMPOSITE_SUMMARY_INDEX_TEMPLATE.name,
+const BASE_INDICES: readonly string[] = [
+  SLI_DESTINATION_INDEX_NAME,
+  SUMMARY_DESTINATION_INDEX_NAME,
+  SUMMARY_TEMP_INDEX_NAME,
   COMPOSITE_SUMMARY_INDEX_NAME,
-  `${COMPOSITE_SUMMARY_INDEX_NAME} mappings`,
-  HEALTH_INDEX_TEMPLATE.name,
-  HEALTH_DATA_STREAM_NAME,
-]);
-
-const isCritical = (name: string): boolean => !NON_CRITICAL_RESOURCES.has(name);
-
-const getComposedOf = ({ composed_of: composedOf }: IndicesPutIndexTemplateRequest): string[] =>
-  [composedOf ?? []].flat();
+];
 
 export class DefaultResourceInstaller implements ResourceInstaller {
   constructor(
@@ -88,105 +73,45 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     private now: () => Date = () => new Date()
   ) {}
 
+  // Every Elasticsearch call retries transient errors; the install stops at the first resource that still fails.
   public async install(): Promise<void> {
     this.logger.debug('Installing SLO shared resources');
-    const failed = new Set<string>();
-
-    // Runs one install step, recording its failure instead of aborting the install.
-    // A step whose dependencies failed is skipped and recorded as failed.
-    const runStep = async (
-      name: string,
-      step: () => Promise<unknown>,
-      dependsOn: string[] = []
-    ): Promise<void> => {
-      const failedDependencies = dependsOn.filter((dependency) => failed.has(dependency));
-      if (failedDependencies.length > 0) {
-        this.logger.warn(
-          `Skipping SLO resource [${name}], failed dependencies: [${failedDependencies.join(', ')}]`
-        );
-        failed.add(name);
-        return;
-      }
-
-      try {
-        await step();
-      } catch (err) {
-        this.logger.error(`Failed to install SLO resource [${name}]: ${err.message}`);
-        failed.add(name);
-      }
-    };
 
     await Promise.all(
       COMPONENT_TEMPLATES.map((template) =>
-        runStep(template.name, () => this.createOrUpdateComponentTemplate(template))
+        this.installResource(template.name, () => this.createOrUpdateComponentTemplate(template))
       )
     );
 
     for (const template of INDEX_TEMPLATES) {
-      await runStep(
-        template.name,
-        () => this.createOrUpdateIndexTemplate(template),
-        getComposedOf(template)
-      );
+      await this.installResource(template.name, () => this.createOrUpdateIndexTemplate(template));
     }
 
-    for (const { index, template } of BASE_INDICES) {
-      await runStep(index, () => this.createIndex(index), [template.name]);
+    for (const index of BASE_INDICES) {
+      await this.installResource(index, () => this.createIndex(index));
     }
-    await runStep(
-      `${COMPOSITE_SUMMARY_INDEX_NAME} mappings`,
-      () => this.updateCompositeSummaryMapping(),
-      [COMPOSITE_SUMMARY_INDEX_NAME]
+    await this.installResource(`${COMPOSITE_SUMMARY_INDEX_NAME} mappings`, () =>
+      this.updateCompositeSummaryMapping()
+    );
+    await this.installResource(HEALTH_DATA_STREAM_NAME, () =>
+      this.createDataStream(HEALTH_DATA_STREAM_NAME)
     );
 
     const hasDailyHistory = this.createDailyHistoryChecker();
     for (const version of SLI_ROUTED_VERSIONS) {
-      await runStep(getSLIRoutingPipelineName(version), () =>
+      await this.installResource(getSLIRoutingPipelineName(version), () =>
         this.ensureRoutingPipeline(version, hasDailyHistory)
-      );
-    }
-
-    await runStep(HEALTH_INDEX_TEMPLATE.name, () =>
-      this.createOrUpdateIndexTemplate(HEALTH_INDEX_TEMPLATE)
-    );
-    await runStep(HEALTH_DATA_STREAM_NAME, () => this.createDataStream(HEALTH_DATA_STREAM_NAME), [
-      HEALTH_INDEX_TEMPLATE.name,
-    ]);
-
-    const failedCritical = [...failed].filter(isCritical);
-    if (failedCritical.length > 0) {
-      throw new SLOResourcesNotInstalled(
-        `Failed to install SLO resources: [${failedCritical.join(', ')}]`
       );
     }
   }
 
-  // Checks the critical resources only, matching what install() fails on.
-  public async verify(): Promise<boolean> {
+  private async installResource(name: string, install: () => Promise<unknown>): Promise<void> {
     try {
-      const results = await Promise.all([
-        ...COMPONENT_TEMPLATES.filter(({ name }) => isCritical(name)).map(
-          async ({ name, _meta: meta }) => {
-            const version = await this.fetchComponentTemplateVersion(name);
-            return version !== null && version === meta?.version;
-          }
-        ),
-        ...INDEX_TEMPLATES.filter(({ name }) => isCritical(name)).map(
-          async ({ name, _meta: meta }) => {
-            const version = await this.fetchIndexTemplateVersion(name);
-            return version !== null && version === meta?.version;
-          }
-        ),
-        ...BASE_INDICES.filter(({ index }) => isCritical(index)).map(({ index }) =>
-          this.execute(() => this.esClient.indices.exists({ index }))
-        ),
-        ...SLI_ROUTED_VERSIONS.map((version) => this.isRoutingPipelineUpToDate(version)),
-      ]);
-
-      return results.every(Boolean);
+      await install();
     } catch (err) {
-      this.logger.debug(`Failed to verify SLO resources: ${err.message}`);
-      return false;
+      throw new SLOResourcesNotInstalled(
+        `Failed to install SLO resource [${name}]: ${err.message}`
+      );
     }
   }
 
@@ -222,15 +147,6 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     await this.execute(() =>
       this.esClient.ingest.putPipeline(getSLIRoutingPipelineTemplate(version, routing))
     );
-  }
-
-  private async isRoutingPipelineUpToDate(version: number): Promise<boolean> {
-    const current = await this.fetchRoutingPipeline(version);
-    if (!current || !parseRoutingStateFromMeta(current._meta)) {
-      return false;
-    }
-
-    return this.isRoutingPipelineCurrent(current, version);
   }
 
   private isRoutingPipelineCurrent({ _meta: meta }: IngestPipeline, version: number): boolean {

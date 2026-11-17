@@ -97,35 +97,37 @@ describe('ResourceInstallState', () => {
     );
   });
 
-  it('resolves when another process holds the lock and the resources are verified', async () => {
+  it('installs once another process releases the lock', async () => {
     jest.useFakeTimers();
     const { installer, lockManager, state } = setup();
-    lockManager.withLock.mockRejectedValue(new LockAcquisitionError('lock held'));
-    installer.verify.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    lockManager.withLock.mockRejectedValueOnce(new LockAcquisitionError('lock held'));
+    installer.install.mockResolvedValue();
 
     const result = state.ensureInstalled();
     await jest.advanceTimersByTimeAsync(2_000);
 
     await expect(result).resolves.toBeUndefined();
-    expect(installer.install).not.toHaveBeenCalled();
-    expect(installer.verify).toHaveBeenCalledTimes(2);
+    expect(lockManager.withLock).toHaveBeenCalledTimes(2);
+    expect(installer.install).toHaveBeenCalledTimes(1);
 
-    // memoized once verified
+    // memoized once installed
     await state.ensureInstalled();
-    expect(lockManager.withLock).toHaveBeenCalledTimes(1);
+    expect(lockManager.withLock).toHaveBeenCalledTimes(2);
   });
 
-  it('throws SLOResourcesNotInstalled when the resources are not verified before the timeout', async () => {
+  it('throws SLOResourcesNotInstalled when the lock is still held after the timeout', async () => {
     jest.useFakeTimers();
     const { installer, lockManager, state } = setup();
     lockManager.withLock.mockRejectedValue(new LockAcquisitionError('lock held'));
-    installer.verify.mockResolvedValue(false);
 
     const result = state.ensureInstalled();
-    const assertion = expect(result).rejects.toThrow(SLOResourcesNotInstalled);
+    const assertion = expect(result).rejects.toThrow(
+      new SLOResourcesNotInstalled('SLO resources are being installed by another process')
+    );
     await jest.advanceTimersByTimeAsync(30_000);
     await assertion;
 
-    expect(installer.verify).toHaveBeenCalledTimes(16);
+    expect(lockManager.withLock).toHaveBeenCalledTimes(16);
+    expect(installer.install).not.toHaveBeenCalled();
   });
 });

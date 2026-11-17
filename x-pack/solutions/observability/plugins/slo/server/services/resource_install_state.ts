@@ -12,9 +12,9 @@ import { LOCK_ID_RESOURCE_INSTALLER } from '../../common/constants';
 import { SLOResourcesNotInstalled } from '../errors';
 import type { ResourceInstaller } from './resource_installer';
 
-const VERIFY_INTERVAL_MS = 2_000;
-// Matches the lock manager default TTL.
-const VERIFY_TIMEOUT_MS = 30_000;
+const LOCK_RETRY_INTERVAL_MS = 2_000;
+// Bounds how long a caller waits while another process installs the resources.
+const LOCK_WAIT_TIMEOUT_MS = 30_000;
 
 interface ResourceInstallStateDependencies {
   installerFactory: () => Promise<ResourceInstaller>;
@@ -48,23 +48,19 @@ export class ResourceInstallState {
   }
 
   private async install(): Promise<void> {
-    const { installerFactory, lockManager, logger } = this.dependencies;
+    const { installerFactory, logger } = this.dependencies;
 
     try {
       const installer = await installerFactory();
-      try {
-        await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () => installer.install());
-      } catch (err) {
-        if (!isLockAcquisitionError(err)) {
-          throw err;
-        }
-
-        logger.debug('SLO resources are being installed by another process, verifying them');
-        if (!(await this.waitUntilVerified(installer))) {
+      const deadline = Date.now() + LOCK_WAIT_TIMEOUT_MS;
+      while (!(await this.installUnderLock(installer))) {
+        if (Date.now() >= deadline) {
           throw new SLOResourcesNotInstalled(
-            'SLO resources are being installed by another process and could not be verified'
+            'SLO resources are being installed by another process'
           );
         }
+        logger.debug('SLO resources are being installed by another process, retrying');
+        await sleep(LOCK_RETRY_INTERVAL_MS);
       }
     } catch (err) {
       if (err instanceof SLOResourcesNotInstalled) {
@@ -74,16 +70,19 @@ export class ResourceInstallState {
     }
   }
 
-  private async waitUntilVerified(installer: ResourceInstaller): Promise<boolean> {
-    const maxAttempts = Math.floor(VERIFY_TIMEOUT_MS / VERIFY_INTERVAL_MS);
-    for (let attempt = 0; attempt <= maxAttempts; attempt++) {
-      if (attempt > 0) {
-        await sleep(VERIFY_INTERVAL_MS);
+  // Returns false when another process holds the lock. Installing again after that process is done
+  // is cheap: up-to-date resources are skipped.
+  private async installUnderLock(installer: ResourceInstaller): Promise<boolean> {
+    try {
+      await this.dependencies.lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () =>
+        installer.install()
+      );
+      return true;
+    } catch (err) {
+      if (isLockAcquisitionError(err)) {
+        return false;
       }
-      if (await installer.verify()) {
-        return true;
-      }
+      throw err;
     }
-    return false;
   }
 }

@@ -17,7 +17,6 @@ import type { TransformManager } from '../transform_manager';
 const createResourceInstallerMock = (): jest.Mocked<ResourceInstaller> => {
   return {
     install: jest.fn(),
-    verify: jest.fn(),
   };
 };
 

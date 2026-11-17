@@ -27,7 +27,6 @@ const mockInstall = jest.fn();
 jest.mock('../../resource_installer', () => ({
   DefaultResourceInstaller: jest.fn().mockImplementation(() => ({
     install: mockInstall,
-    verify: jest.fn(),
   })),
 }));
 
