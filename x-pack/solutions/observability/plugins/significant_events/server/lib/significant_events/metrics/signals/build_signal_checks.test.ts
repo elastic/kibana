@@ -122,6 +122,36 @@ describe('buildSignalChecks', () => {
     ]);
   });
 
+  it('builds a host CPU check for a Kubernetes node KI', () => {
+    const cpuTemplate = SIGNAL_TEMPLATES.find(({ signal }) => signal === 'host.cpu.utilization');
+    if (!cpuTemplate) {
+      throw new Error('Host CPU template is missing');
+    }
+    const [ecs] = cpuTemplate.variants;
+    const typeKI = createTypeKI({
+      id: 'k8s.nodes:cluster-a',
+      subtype: 'k8s.node',
+      breakdown: ['kubernetes.node.name'],
+      cluster: 'cluster-a',
+    });
+
+    const { checks } = buildSignalChecks({
+      esql: 'FROM metrics-*',
+      typeKIs: [typeKI],
+      templates: [cpuTemplate],
+      fieldPresence: [createPresence(ecs, 'cluster-a')],
+    });
+
+    expect(checks).toEqual([
+      expect.objectContaining({
+        signal: 'host.cpu.utilization',
+        schema: 'ecs',
+        breakdown: ['kubernetes.node.name'],
+        esql_preview: expect.stringContaining('BY kubernetes.node.name'),
+      }),
+    ]);
+  });
+
   it('renders ES|QL previews that parse for every template variant', () => {
     const checks = SIGNAL_TEMPLATES.flatMap((template: SignalTemplate) =>
       template.variants.flatMap((variant, index) => {
@@ -148,6 +178,8 @@ describe('buildSignalChecks', () => {
     );
     checks.forEach(({ esql_preview: esqlPreview }) => {
       expect(Parser.parse(esqlPreview).errors).toEqual([]);
+      expect(esqlPreview).toContain('| WHERE @timestamp >= NOW() - ');
+      expect(esqlPreview).not.toContain('\n\n');
     });
   });
 

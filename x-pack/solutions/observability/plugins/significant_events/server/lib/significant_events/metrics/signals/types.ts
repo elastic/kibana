@@ -28,6 +28,7 @@ export interface SignalTemplateVariant {
   formula: string;
   formulaKind: SignalFormulaKind;
   preAggregationFilter?: string;
+  additionalBreakdown?: readonly string[];
   minimumSampleCount?: number;
   direction: SignalDirection;
   comparison: SignalComparison;

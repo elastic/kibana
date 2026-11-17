@@ -175,6 +175,7 @@ const buildAggregationPipeline = ({
     case 'error_rate':
       aggregation = `| STATS successful = SUM(${variant.field}), total = COUNT(${variant.field})
   BY ${groupBy}
+| WHERE total > 0
 | EVAL signal_value = 1 - successful / total`;
       break;
   }
@@ -192,33 +193,38 @@ const buildEsqlPreview = ({
   subtype,
   scope,
   breakdown,
+  window,
   variant,
 }: {
   esql: string;
   subtype: string;
   scope: Condition | undefined;
   breakdown: readonly string[];
+  window: string;
   variant: SignalTemplateVariant;
 }): { breakdown: string[]; esqlPreview: string } => {
   const filters = [
+    `@timestamp >= NOW() - ${window}`,
     scope ? conditionToESQL(scope) : undefined,
     `data_stream.dataset == ${quoteEsqlString(variant.dataset)}`,
     variant.preAggregationFilter,
   ].filter((filter): filter is string => filter !== undefined);
   const workloadKind = getWorkloadKind(subtype);
-  const resolvedBreakdown = workloadKind ? ['kubernetes.namespace', 'workload'] : [...breakdown];
+  const resolvedBreakdown = workloadKind
+    ? ['kubernetes.namespace', 'workload']
+    : [...breakdown, ...(variant.additionalBreakdown ?? [])];
   const workloadPipeline = workloadKind
     ? `${WORKLOAD_OWNER_DERIVATION}
 | WHERE kind == ${quoteEsqlString(workloadKind)}
     AND workload IS NOT NULL
     AND kubernetes.namespace IS NOT NULL`
     : '';
+  const workloadSection = workloadPipeline ? `\n${workloadPipeline}` : '';
 
   return {
     breakdown: resolvedBreakdown,
     esqlPreview: `SET unmapped_fields = "NULLIFY"; ${toFromSourceQuery(esql)}
-| WHERE ${filters.join('\n    AND ')}
-${workloadPipeline}
+| WHERE ${filters.join('\n    AND ')}${workloadSection}
 ${buildAggregationPipeline({ variant, breakdown: resolvedBreakdown })}`,
   };
 };
@@ -269,6 +275,7 @@ export const buildSignalChecks = ({
         subtype: typeKI.subtype,
         scope,
         breakdown,
+        window: template.window,
         variant,
       });
       checks.push({

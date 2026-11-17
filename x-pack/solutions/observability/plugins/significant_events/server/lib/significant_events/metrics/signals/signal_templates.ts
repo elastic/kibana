@@ -46,7 +46,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
       },
     ],
   },
-  // kubernetes_otel pod-crashloopbackoff rule template, ES|QL L31 and window L39-L40.
+  // kubernetes_otel pod-crashloopbackoff L31 and L39-L40; delta avoids stale restarts from MAX.
   {
     signal: 'k8s.container.restarts',
     subtypes: WORKLOAD_SUBTYPES,
@@ -68,12 +68,12 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         schema: 'otel',
         dataset: 'k8sclusterreceiver.otel',
         field: 'k8s.container.restarts',
-        formula: 'MAX(k8s.container.restarts)',
-        formulaKind: 'maximum',
+        formula: 'SUM(MAX(restarts) - MIN(restarts) per container)',
+        formulaKind: 'restart_delta',
         direction: 'higher_is_worse',
         comparison: '>',
         threshold: 0,
-        label: 'proven',
+        label: 'example',
       },
     ],
   },
@@ -111,7 +111,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   // system cpu-utilization rule template, ES|QL L18 and window L15-L16.
   {
     signal: 'host.cpu.utilization',
-    subtypes: ['host'],
+    subtypes: ['host', 'k8s.node'],
     window: '5 minutes',
     thresholdSource: 'system cpu-utilization rule template',
     variants: [
@@ -145,7 +145,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   // system memory-utilization rule template, ES|QL L18 and window L15-L16.
   {
     signal: 'host.memory.utilization',
-    subtypes: ['host'],
+    subtypes: ['host', 'k8s.node'],
     window: '5 minutes',
     thresholdSource: 'system memory-utilization rule template',
     variants: [
@@ -189,7 +189,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         field: 'event.success_count',
         formula: '1 - SUM(event.success_count) / COUNT(event.success_count)',
         formulaKind: 'error_rate',
-        preAggregationFilter: 'transaction.type == "request"',
+        additionalBreakdown: ['transaction.type'],
         direction: 'higher_is_worse',
         comparison: '>',
         threshold: 0.05,
