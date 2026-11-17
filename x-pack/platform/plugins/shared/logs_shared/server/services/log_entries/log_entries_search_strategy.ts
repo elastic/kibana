@@ -71,17 +71,11 @@ export const logEntriesSearchStrategyProvider = ({
     search: (rawRequest, options, dependencies) =>
       defer(() => {
         const request = decodeOrThrow(asyncRequestRT, createBadRequestError)(rawRequest);
+        assertBoundedRequestColumns(request.params);
 
         const resolvedLogView$ = defer(() =>
           logViews.getScopedClient(dependencies.request).getResolvedLogView(request.params.logView)
         ).pipe(take(1), shareReplay(1));
-
-        // Bounded here rather than in the request codec because, without `params.columns`, the
-        // columns come from the log view, which can be supplied inline in the request body.
-        const columns$ = resolvedLogView$.pipe(
-          map(({ columns }) => getBoundedColumns(request.params.columns ?? columns)),
-          shareReplay(1)
-        );
 
         const messageFormattingRules$ = defer(() =>
           resolvedLogView$.pipe(
@@ -89,21 +83,18 @@ export const logEntriesSearchStrategyProvider = ({
           )
         ).pipe(take(1), shareReplay(1));
 
-        // Waits for `columns$` like the initial request does, so a polling request with too many
-        // columns is rejected before it reaches Elasticsearch.
         const recoveredRequest$ = of(request).pipe(
           filter(asyncRecoveredRequestRT.is),
-          concatMap(({ id: { esRequestId } }) => columns$.pipe(map(() => ({ id: esRequestId }))))
+          map(({ id: { esRequestId } }) => ({ id: esRequestId }))
         );
 
         const initialRequest$ = of(request).pipe(
           filter(asyncInitialRequestRT.is),
           concatMap(({ params }) =>
-            forkJoin([resolvedLogView$, columns$, messageFormattingRules$]).pipe(
+            forkJoin([resolvedLogView$, messageFormattingRules$]).pipe(
               map(
                 ([
-                  { indices, timestampField, tiebreakerField, runtimeMappings },
-                  columns,
+                  { indices, timestampField, tiebreakerField, columns, runtimeMappings },
                   messageFormattingRules,
                 ]): IEsSearchRequest => {
                   return {
@@ -115,7 +106,7 @@ export const logEntriesSearchStrategyProvider = ({
                       params.size + 1,
                       timestampField,
                       tiebreakerField,
-                      getRequiredFields(columns, messageFormattingRules),
+                      getRequiredFields(params.columns ?? columns, messageFormattingRules),
                       runtimeMappings,
                       params.query,
                       params.highlightPhrase
@@ -141,13 +132,13 @@ export const logEntriesSearchStrategyProvider = ({
           )
         );
 
-        return combineLatest([searchResponse$, columns$, messageFormattingRules$]).pipe(
-          map(([esResponse, columns, messageFormattingRules]) => {
+        return combineLatest([searchResponse$, resolvedLogView$, messageFormattingRules$]).pipe(
+          map(([esResponse, { columns }, messageFormattingRules]) => {
             const rawResponse = decodeOrThrow(getLogEntriesResponseRT)(esResponse.rawResponse);
 
             const entries = rawResponse.hits.hits
               .slice(0, request.params.size)
-              .map(getLogEntryFromHit(columns, messageFormattingRules));
+              .map(getLogEntryFromHit(request.params.columns ?? columns, messageFormattingRules));
 
             const sortDirection = getSortDirection(pickRequestCursor(request.params));
 
@@ -267,15 +258,17 @@ function getResponseCursors(entries: LogEntry[]) {
   return { topCursor, bottomCursor };
 }
 
-// Every entry in the response allocates one object per column, so the count must be bounded
-// before any hit is mapped (see LOG_ENTRIES_MAX_COLUMNS).
-const getBoundedColumns = (columns: LogViewColumnConfiguration[]): LogViewColumnConfiguration[] => {
-  if (columns.length > LOG_ENTRIES_MAX_COLUMNS) {
+// Only request-supplied columns are bounded: persisted log views can only be written by users
+// with write privileges on log views, and existing ones may legitimately exceed the limit.
+const assertBoundedRequestColumns = ({ columns, logView }: LogEntriesSearchRequestParams): void => {
+  const inlineColumns = logView.type === 'log-view-inline' ? logView.attributes.logColumns : [];
+  const columnCount = Math.max(columns?.length ?? 0, inlineColumns.length);
+
+  if (columnCount > LOG_ENTRIES_MAX_COLUMNS) {
     throw createBadRequestError(
-      `Expected at most ${LOG_ENTRIES_MAX_COLUMNS} columns, got ${columns.length}`
+      `Expected at most ${LOG_ENTRIES_MAX_COLUMNS} columns, got ${columnCount}`
     );
   }
-  return columns;
 };
 
 const createBadRequestError = (message: string): KbnServerError => new KbnServerError(message, 400);

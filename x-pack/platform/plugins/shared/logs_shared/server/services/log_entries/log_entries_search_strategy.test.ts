@@ -307,15 +307,27 @@ describe('LogEntries search strategy', () => {
       expect(esSearchStrategyMock.search).not.toHaveBeenCalled();
     });
 
-    it('rejects log views with more columns than allowed', async () => {
-      const { esSearchStrategyMock, logEntriesSearchStrategy } = setup(
-        createResolvedLogViewLazyMock({ columns: tooManyColumns })
-      );
+    it('rejects inline log views with more columns than allowed', async () => {
+      const { esSearchStrategyMock, logEntriesSearchStrategy } = setup();
 
       await expect(
         lastValueFrom(
           logEntriesSearchStrategy.search(
-            { params: baseParams },
+            {
+              params: {
+                ...baseParams,
+                logView: {
+                  type: 'log-view-inline',
+                  id: 'INLINE_LOG_VIEW_ID',
+                  attributes: {
+                    name: 'INLINE LOG VIEW',
+                    description: '',
+                    logIndices: { type: 'index_name', indexName: 'log-indices-*' },
+                    logColumns: tooManyColumns,
+                  },
+                },
+              },
+            },
             {},
             createSearchStrategyDependenciesMock()
           )
@@ -325,6 +337,22 @@ describe('LogEntries search strategy', () => {
         message: expect.stringContaining(`Expected at most ${LOG_ENTRIES_MAX_COLUMNS} columns`),
       });
       expect(esSearchStrategyMock.search).not.toHaveBeenCalled();
+    });
+
+    it('accepts persisted log views with more columns than the request limit', async () => {
+      const { esSearchStrategyMock, logEntriesSearchStrategy } = setup(
+        createResolvedLogViewLazyMock({ columns: tooManyColumns })
+      );
+
+      await lastValueFrom(
+        logEntriesSearchStrategy.search(
+          { params: baseParams },
+          {},
+          createSearchStrategyDependenciesMock()
+        )
+      );
+
+      expect(esSearchStrategyMock.search).toHaveBeenCalled();
     });
 
     it('rejects polling requests with more columns than allowed', async () => {

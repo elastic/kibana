@@ -23,8 +23,6 @@ export const LOG_ENTRIES_SEARCH_STRATEGY = 'infra-log-entries';
 /**
  * The response holds `size × columns` column values, and every message column carries its own
  * copy of the formatted message, so both factors must be bounded to cap memory per request.
- * The limits leave ample headroom over real usage: LogStream pages hold 200 entries and the
- * default log view has 3 columns.
  */
 export const LOG_ENTRIES_MAX_SIZE = 1000;
 export const LOG_ENTRIES_MAX_COLUMNS = 20;
