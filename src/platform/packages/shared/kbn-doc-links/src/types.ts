@@ -545,6 +545,7 @@ export interface DocLinks {
     slackAction: string;
     slackApiAction: string;
     teamsAction: string;
+    universalAlertingFieldReference: string;
     casesWebhookAction: string;
     connectors: string;
     agentBuilderConnectors: string;

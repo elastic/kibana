@@ -16,6 +16,7 @@ import {
   EuiBasicTable,
   EuiFieldSearch,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -49,6 +50,23 @@ interface MaintenanceWindowsListProps {
   onSearchChange: (value: string) => void;
 }
 
+// The badge is focusable so keyboard users can reach the tooltip that explains it.
+const ScopeBadge = ({
+  label,
+  tooltip,
+  'data-test-subj': dataTestSubj,
+}: {
+  label: string;
+  tooltip: string;
+  'data-test-subj': string;
+}) => (
+  <EuiToolTip content={tooltip}>
+    <EuiBadge color="hollow" tabIndex={0} data-test-subj={dataTestSubj}>
+      {label}
+    </EuiBadge>
+  </EuiToolTip>
+);
+
 const getColumns = ({
   dateFormat,
   isUniversalAlertingEnabled,
@@ -77,19 +95,47 @@ const getColumns = ({
     name: i18n.TABLE_SCOPE,
     'data-test-subj': 'maintenance-windows-column-scope',
     render: (scope: MaintenanceWindowUI['scope']) => {
-      const showClassic = scope?.alerting?.enabled === true;
-      const showUniversal = isUniversalAlertingEnabled && scope?.alertingV2?.enabled === true;
-      if (!showClassic && !showUniversal) return null;
+      const classic = scope?.alerting;
+      const universal = scope?.alertingV2;
+      const showClassic = classic?.enabled === true;
+      const showUniversal = isUniversalAlertingEnabled && universal?.enabled === true;
+      if (!showClassic && !showUniversal) {
+        return (
+          <ScopeBadge
+            label={i18n.TABLE_SCOPE_BADGE_NONE}
+            tooltip={i18n.TABLE_SCOPE_TOOLTIP_NONE}
+            data-test-subj="maintenanceWindowScopeBadgeNone"
+          />
+        );
+      }
+      const isClassicFiltered = Boolean(classic?.kql || classic?.filters?.length);
+      const isUniversalFiltered = Boolean(universal?.kql);
       return (
         <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
           {showClassic && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{i18n.TABLE_SCOPE_BADGE_CLASSIC_ALERTING}</EuiBadge>
+              <ScopeBadge
+                label={i18n.TABLE_SCOPE_BADGE_CLASSIC_ALERTING}
+                tooltip={
+                  isClassicFiltered
+                    ? i18n.TABLE_SCOPE_TOOLTIP_CLASSIC_ALERTING_FILTERED
+                    : i18n.TABLE_SCOPE_TOOLTIP_CLASSIC_ALERTING
+                }
+                data-test-subj="maintenanceWindowScopeBadgeClassic"
+              />
             </EuiFlexItem>
           )}
           {showUniversal && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{i18n.TABLE_SCOPE_BADGE_UNIVERSAL_ALERTING}</EuiBadge>
+              <ScopeBadge
+                label={i18n.TABLE_SCOPE_BADGE_UNIVERSAL_ALERTING}
+                tooltip={
+                  isUniversalFiltered
+                    ? i18n.TABLE_SCOPE_TOOLTIP_UNIVERSAL_ALERTING_FILTERED
+                    : i18n.TABLE_SCOPE_TOOLTIP_UNIVERSAL_ALERTING
+                }
+                data-test-subj="maintenanceWindowScopeBadgeUniversal"
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

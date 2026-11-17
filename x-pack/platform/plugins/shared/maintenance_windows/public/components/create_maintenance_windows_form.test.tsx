@@ -89,6 +89,12 @@ const mockKibanaServices = (isUniversalAlertingEnabled: boolean) => {
           get: jest.fn().mockReturnValue(isUniversalAlertingEnabled),
         },
       },
+      docLinks: {
+        links: {
+          query: { kueryQuerySyntax: 'https://docs.example/kql' },
+          alerting: { universalAlertingFieldReference: 'https://docs.example/field-reference' },
+        },
+      },
     },
   });
 };
@@ -287,10 +293,22 @@ describe('CreateMaintenanceWindowForm', () => {
 
   describe('confirmation modal for saving without filters', () => {
     const user = userEvent.setup({ delay: null });
-    const APPLY_TO_ALL_BODY =
-      'This maintenance window has no alert filters, so it will apply to all alerts.';
-    const SCOPED_BODY =
-      'One of the selected scopes has no alert filters, so it will apply to all of its alerts.';
+    const CLASSIC_NO_FILTERS = {
+      title: 'Stop notifications for Classic alerts?',
+      body: 'This window has no filter, so it covers every alert. To limit it to specific alerts, cancel and add a filter.',
+    };
+    const UNIVERSAL_NO_FILTERS = {
+      title: 'Stop notifications for Universal alerts?',
+      body: 'This window has no filter, so it covers every alert. To limit it to specific alerts, cancel and add a filter.',
+    };
+    const UNIVERSAL_UNFILTERED_CLASSIC_FILTERED = {
+      title: 'Stop notifications for Universal alerts?',
+      body: 'This window has no Universal filter, so it covers every Universal alert. The Classic filter still applies. To limit it to specific Universal alerts, cancel and add a filter.',
+    };
+    const CLASSIC_UNFILTERED_UNIVERSAL_FILTERED = {
+      title: 'Stop notifications for Classic alerts?',
+      body: 'This window has no Classic filter, so it covers every Classic alert. The Universal filter still applies. To limit it to specific Classic alerts, cancel and add a filter.',
+    };
     const v1Filtered = { kql: 'kibana.alert.rule.name : "x"', filters: [], dsl: '{}' };
     const v2Filtered = { enabled: true, kql: 'rule.id: "a"' };
 
@@ -317,10 +335,11 @@ describe('CreateMaintenanceWindowForm', () => {
         />
       );
 
-    const confirmApplyToAllAlerts = async (expectedBody: string) => {
+    const confirmApplyToAllAlerts = async (expected: { title: string; body: string }) => {
       const modal = await screen.findByTestId('applyToAllAlertsConfirmModal');
-      expect(within(modal).getByText(expectedBody)).toBeInTheDocument();
-      await user.click(within(modal).getByRole('button', { name: 'Apply to all alerts' }));
+      expect(within(modal).getByText(expected.title)).toBeInTheDocument();
+      expect(within(modal).getByText(expected.body)).toBeInTheDocument();
+      await user.click(within(modal).getByRole('button', { name: 'Stop notifications' }));
     };
 
     it('creates with the title entered by the user', async () => {
@@ -332,7 +351,7 @@ describe('CreateMaintenanceWindowForm', () => {
       await user.click(screen.getByTestId('create-submit'));
 
       expect(createMutate).not.toHaveBeenCalled();
-      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
+      await confirmApplyToAllAlerts(CLASSIC_NO_FILTERS);
 
       await waitFor(() => {
         expect(createMutate).toHaveBeenCalledTimes(1);
@@ -352,7 +371,7 @@ describe('CreateMaintenanceWindowForm', () => {
 
       expect(createMutate).not.toHaveBeenCalled();
       expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
-      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
+      await confirmApplyToAllAlerts(UNIVERSAL_NO_FILTERS);
 
       await waitFor(() => {
         expect(createMutate).toHaveBeenCalledTimes(1);
@@ -367,7 +386,7 @@ describe('CreateMaintenanceWindowForm', () => {
       renderCreateMode();
 
       await user.click(await screen.findByTestId('create-submit'));
-      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
+      await confirmApplyToAllAlerts(CLASSIC_NO_FILTERS);
 
       await waitFor(() => {
         expect(createMutate).toHaveBeenCalledTimes(1);
@@ -389,7 +408,13 @@ describe('CreateMaintenanceWindowForm', () => {
       await user.click(screen.getByTestId('create-submit'));
 
       const modal = await screen.findByTestId('saveWithoutScopesConfirmModal');
-      await user.click(within(modal).getByRole('button', { name: 'Save without scope' }));
+      expect(within(modal).getByText('Save without a scope?')).toBeInTheDocument();
+      expect(
+        within(modal).getByText(
+          "This window won't stop any notifications until you turn on at least one alerting system."
+        )
+      ).toBeInTheDocument();
+      await user.click(within(modal).getByRole('button', { name: 'Save without a scope' }));
 
       await waitFor(() => {
         expect(createMutate).toHaveBeenCalledTimes(1);
@@ -428,14 +453,14 @@ describe('CreateMaintenanceWindowForm', () => {
       expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
     });
 
-    it('shows the generic body when only Episodes is on with no filter', async () => {
+    it('names Universal Alerting when it is the only scope and has no filter', async () => {
       renderCreateMode({ alertingV2: { enabled: true } });
 
       // Alerts (v1) is force-selected in create mode, so it still has to be toggled off.
       await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
       await user.click(screen.getByTestId('create-submit'));
 
-      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
+      await confirmApplyToAllAlerts(UNIVERSAL_NO_FILTERS);
 
       await waitFor(() => {
         expect(createMutate).toHaveBeenCalledTimes(1);
@@ -446,11 +471,11 @@ describe('CreateMaintenanceWindowForm', () => {
       });
     });
 
-    it('shows the scoped body when Alerts is filtered and Episodes is not', async () => {
+    it('names Universal Alerting and keeps the Classic Alerting filter when only Classic Alerting is filtered', async () => {
       renderEditMode({ alerting: v1Filtered, alertingV2: { enabled: true } });
 
       await user.click(screen.getByTestId('create-submit'));
-      await confirmApplyToAllAlerts(SCOPED_BODY);
+      await confirmApplyToAllAlerts(UNIVERSAL_UNFILTERED_CLASSIC_FILTERED);
 
       await waitFor(() => {
         expect(updateMutate).toHaveBeenCalledTimes(1);
@@ -462,11 +487,11 @@ describe('CreateMaintenanceWindowForm', () => {
       });
     });
 
-    it('shows the scoped body when Episodes is filtered and Alerts is not', async () => {
+    it('names Classic Alerting and keeps the Universal Alerting filter when only Universal Alerting is filtered', async () => {
       renderEditMode({ alerting: null, alertingV2: v2Filtered });
 
       await user.click(screen.getByTestId('create-submit'));
-      await confirmApplyToAllAlerts(SCOPED_BODY);
+      await confirmApplyToAllAlerts(CLASSIC_UNFILTERED_UNIVERSAL_FILTERED);
 
       await waitFor(() => {
         expect(updateMutate).toHaveBeenCalledTimes(1);
@@ -513,7 +538,10 @@ describe('CreateMaintenanceWindowForm', () => {
       body: { statusCode: 400, message },
     });
 
-    it('shows "Invalid episode filter." under the Episodes field (v2) when attributes name alertingV2', async () => {
+    const SYNTAX_ERROR = /KQL syntax error/;
+    const getClassicFilter = () => within(screen.getByTestId('maintenanceWindowScopeQuery'));
+
+    it('shows the parser detail under the Universal Alerting filter when attributes name alertingV2', async () => {
       appMockRenderer.render(
         <CreateMaintenanceWindowForm
           {...formProps}
@@ -536,22 +564,58 @@ describe('CreateMaintenanceWindowForm', () => {
       capturedOnError!(buildError([{ scope: 'alertingV2', message: 'parse error' }]));
 
       await waitFor(() => {
-        expect(screen.getByText('Invalid episode filter.')).toBeInTheDocument();
+        expect(
+          screen.getByText('This filter has a KQL syntax error. parse error')
+        ).toBeInTheDocument();
       });
       // v1 field must NOT show an error.
-      expect(screen.queryByText('Invalid scoped query.')).not.toBeInTheDocument();
+      expect(getClassicFilter().queryByText(SYNTAX_ERROR)).not.toBeInTheDocument();
     });
 
-    it('shows "Invalid scoped query." under the alerts (v1) field when attributes name alerting', async () => {
+    it('shows the parser detail under the Classic Alerting filter when attributes name alerting', async () => {
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
 
       expect(capturedOnError).toBeDefined();
       capturedOnError!(buildError([{ scope: 'alerting', message: 'parse error' }]));
 
       await waitFor(() => {
-        expect(screen.getByText('Invalid scoped query.')).toBeInTheDocument();
+        expect(
+          getClassicFilter().getByText('This filter has a KQL syntax error. parse error')
+        ).toBeInTheDocument();
       });
-      expect(screen.queryByText('Invalid episode filter.')).not.toBeInTheDocument();
+      // v2 field must NOT show an error.
+      expect(screen.getAllByText(SYNTAX_ERROR)).toHaveLength(1);
+    });
+
+    it('keeps only the first line of a multi-line parser message', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
+
+      capturedOnError!(
+        buildError([
+          {
+            scope: 'alerting',
+            message: 'Expected "(", value but end of input found.\nhost.name:\n----------^',
+          },
+        ])
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            'This filter has a KQL syntax error. Expected "(", value but end of input found.'
+          )
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('omits the detail when the server sends no message', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
+
+      capturedOnError!(buildError([{ scope: 'alerting', message: '' }]));
+
+      await waitFor(() => {
+        expect(screen.getByText('This filter has a KQL syntax error.')).toBeInTheDocument();
+      });
     });
 
     it('does not show any inline error when attributes are absent', async () => {
@@ -563,8 +627,7 @@ describe('CreateMaintenanceWindowForm', () => {
 
       // Give React a tick to settle; neither error string should be rendered.
       await waitFor(() => {
-        expect(screen.queryByText('Invalid scoped query.')).not.toBeInTheDocument();
-        expect(screen.queryByText('Invalid episode filter.')).not.toBeInTheDocument();
+        expect(screen.queryByText(SYNTAX_ERROR)).not.toBeInTheDocument();
       });
     });
   });
@@ -584,6 +647,29 @@ describe('CreateMaintenanceWindowForm', () => {
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
       expect(await screen.findByTestId('alertingV2ScopedQuerySwitch')).toBeInTheDocument();
+    });
+
+    it('shows help text with a doc link under each filter', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+      const classicHelp = await screen.findByTestId('maintenanceWindowClassicFilterHelpText');
+      expect(classicHelp).toHaveTextContent(
+        'Optional. Filter with KQL or add filters. Leave empty to cover all Classic alerts.'
+      );
+      expect(within(classicHelp).getByRole('link', { name: /KQL syntax/ })).toHaveAttribute(
+        'href',
+        'https://docs.example/kql'
+      );
+
+      await user.click(screen.getByTestId('alertingV2ScopedQuerySwitch'));
+
+      const universalHelp = await screen.findByTestId('maintenanceWindowUniversalFilterHelpText');
+      expect(universalHelp).toHaveTextContent(
+        'Optional. Filter with KQL using alert data fields. Leave empty to cover all Universal alerts.'
+      );
+      expect(
+        within(universalHelp).getByRole('link', { name: /Alert field reference/ })
+      ).toHaveAttribute('href', 'https://docs.example/field-reference');
     });
 
     it('hides the Universal Alerting scope section when the setting is off', async () => {
@@ -606,7 +692,7 @@ describe('CreateMaintenanceWindowForm', () => {
       await user.click(await screen.findByTestId('create-submit'));
 
       const modal = await screen.findByTestId('saveWithoutScopesConfirmModal');
-      await user.click(within(modal).getByRole('button', { name: 'Save without scope' }));
+      await user.click(within(modal).getByRole('button', { name: 'Save without a scope' }));
 
       await waitFor(() => {
         expect(updateMutate).toHaveBeenCalledTimes(1);

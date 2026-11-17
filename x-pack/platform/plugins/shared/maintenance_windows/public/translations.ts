@@ -16,7 +16,7 @@ export const MAINTENANCE_WINDOWS = i18n.translate(
 export const MAINTENANCE_WINDOWS_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.description',
   {
-    defaultMessage: 'Suppress rule notifications for scheduled periods of time.',
+    defaultMessage: 'Schedule periods when notifications stop.',
   }
 );
 
@@ -39,17 +39,10 @@ export const EMPTY_PROMPT_BUTTON = i18n.translate('xpack.maintenanceWindows.empt
   defaultMessage: 'Create maintenance window',
 });
 
-export const EMPTY_PROMPT_LEARN_MORE = i18n.translate(
-  'xpack.maintenanceWindows.emptyPrompt.learnMore',
+export const EMPTY_PROMPT_LEARN_HOW_LINK = i18n.translate(
+  'xpack.maintenanceWindows.emptyPrompt.learnHowLink',
   {
-    defaultMessage: 'Want to learn more?',
-  }
-);
-
-export const EMPTY_PROMPT_READ_THE_DOCS = i18n.translate(
-  'xpack.maintenanceWindows.emptyPrompt.readTheDocs',
-  {
-    defaultMessage: 'Read the docs',
+    defaultMessage: 'Learn how maintenance windows work',
   }
 );
 
@@ -60,7 +53,7 @@ export const EMPTY_PROMPT_TITLE = i18n.translate('xpack.maintenanceWindows.empty
 export const EMPTY_PROMPT_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.emptyPrompt.description',
   {
-    defaultMessage: 'Schedule a time period in which rule notifications cease.',
+    defaultMessage: 'Schedule a period when notifications stop, such as planned maintenance.',
   }
 );
 
@@ -135,20 +128,19 @@ export const SCOPE_TITLE = i18n.translate('xpack.maintenanceWindows.scope.title'
 });
 
 export const SCOPE_DESCRIPTION = i18n.translate('xpack.maintenanceWindows.scope.description', {
-  defaultMessage:
-    'Select the scope of this maintenance window by choosing what to suppress during maintenance',
+  defaultMessage: 'Select which alerting systems this window covers.',
 });
+
+export const SCOPE_SWITCH_DESCRIPTION = i18n.translate(
+  'xpack.maintenanceWindows.scope.switchDescription',
+  {
+    defaultMessage: 'Stops notifications for every alert, or only the ones that match a filter.',
+  }
+);
 
 export const ALERTS_SCOPE_TITLE = i18n.translate('xpack.maintenanceWindows.scope.alerts.title', {
   defaultMessage: 'Classic Alerting',
 });
-
-export const ALERTS_SCOPE_DESCRIPTION = i18n.translate(
-  'xpack.maintenanceWindows.scope.alerts.description',
-  {
-    defaultMessage: 'Suppress notifications from Classic Alerting during maintenance',
-  }
-);
 
 export const FILTER_ALERTS_SUBTITLE = i18n.translate(
   'xpack.maintenanceWindows.scope.alerts.filterAlertsSubtitle',
@@ -164,13 +156,6 @@ export const ALERTING_V2_SCOPE_TITLE = i18n.translate(
   }
 );
 
-export const ALERTING_V2_SCOPE_DESCRIPTION = i18n.translate(
-  'xpack.maintenanceWindows.scope.alertingV2.description',
-  {
-    defaultMessage: 'Suppress notifications from Universal Alerting during maintenance',
-  }
-);
-
 export const FILTER_ALERTING_V2_SUBTITLE = i18n.translate(
   'xpack.maintenanceWindows.scope.alertingV2.filterEpisodesSubtitle',
   {
@@ -178,24 +163,40 @@ export const FILTER_ALERTING_V2_SUBTITLE = i18n.translate(
   }
 );
 
-export const CREATE_FORM_ALERTING_V2_QUERY_EMPTY_ERROR_MESSAGE = i18n.translate(
-  'xpack.maintenanceWindows.createForm.alertingV2Query.emptyErrorMessage',
-  {
-    defaultMessage: 'Episode filter is required.',
-  }
-);
-
-export const CREATE_FORM_ALERTING_V2_QUERY_INVALID_ERROR_MESSAGE = i18n.translate(
-  'xpack.maintenanceWindows.createForm.alertingV2Query.invalidErrorMessage',
-  {
-    defaultMessage: 'Invalid episode filter.',
-  }
-);
-
 export const CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER = i18n.translate(
   'xpack.maintenanceWindows.createForm.alertingV2FiltersPlaceholder',
   {
-    defaultMessage: 'Search alerts (e.g. data.host.name:"my-host" or data.severity:"low")',
+    defaultMessage: 'Search alerts (for example, data.host.name:"my-host" or data.severity:"low")',
+  }
+);
+
+export const CLASSIC_FILTER_HELP_TEXT = i18n.translate(
+  'xpack.maintenanceWindows.createForm.scopedQuery.helpText',
+  {
+    defaultMessage:
+      'Optional. Filter with KQL or add filters. Leave empty to cover all Classic alerts.',
+  }
+);
+
+export const UNIVERSAL_FILTER_HELP_TEXT = i18n.translate(
+  'xpack.maintenanceWindows.createForm.alertingV2Query.helpText',
+  {
+    defaultMessage:
+      'Optional. Filter with KQL using alert data fields. Leave empty to cover all Universal alerts.',
+  }
+);
+
+export const KQL_SYNTAX_LINK = i18n.translate(
+  'xpack.maintenanceWindows.createForm.scopedQuery.kqlSyntaxLink',
+  {
+    defaultMessage: 'KQL syntax',
+  }
+);
+
+export const ALERT_FIELD_REFERENCE_LINK = i18n.translate(
+  'xpack.maintenanceWindows.createForm.alertingV2Query.fieldReferenceLink',
+  {
+    defaultMessage: 'Alert field reference',
   }
 );
 
@@ -263,19 +264,19 @@ export const CREATE_FORM_SCOPED_QUERY_TOGGLE_TITLE = i18n.translate(
   }
 );
 
-export const CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE = i18n.translate(
-  'xpack.maintenanceWindows.createForm.scopedQuery.invalidErrorMessage',
-  {
-    defaultMessage: 'Invalid scoped query.',
-  }
-);
-
-export const CREATE_FORM_SCOPED_QUERY_EMPTY_ERROR_MESSAGE = i18n.translate(
-  'xpack.maintenanceWindows.createForm.scopedQuery.emptyErrorMessage',
-  {
-    defaultMessage: 'Scoped query is required.',
-  }
-);
+/**
+ * Shown under a scope's filter when the server rejects its KQL. `detail` is the first line of
+ * the parser message. The filter's help text, shown under the error, explains how to recover.
+ */
+export const getFilterSyntaxError = (detail?: string) =>
+  detail
+    ? i18n.translate('xpack.maintenanceWindows.createForm.filterSyntaxErrorWithDetail', {
+        defaultMessage: 'This filter has a KQL syntax error. {detail}',
+        values: { detail },
+      })
+    : i18n.translate('xpack.maintenanceWindows.createForm.filterSyntaxError', {
+        defaultMessage: 'This filter has a KQL syntax error.',
+      });
 
 export const CREATE_FORM_RECURRING_SUMMARY_PREFIX = (summary: string) =>
   i18n.translate('xpack.maintenanceWindows.createForm.recurringSummaryPrefix', {
@@ -521,7 +522,7 @@ export const SEARCH_PLACEHOLDER = i18n.translate('xpack.maintenanceWindows.searc
 export const SAVE_WITHOUT_SCOPES_MODAL_TITLE = i18n.translate(
   'xpack.maintenanceWindows.saveWithoutScopesModal.title',
   {
-    defaultMessage: 'Save maintenance window without a scope?',
+    defaultMessage: 'Save without a scope?',
   }
 );
 
@@ -529,43 +530,66 @@ export const SAVE_WITHOUT_SCOPES_MODAL_SUBTITLE = i18n.translate(
   'xpack.maintenanceWindows.saveWithoutScopesModal.subtitle',
   {
     defaultMessage:
-      'No scope is selected, so this maintenance window will not suppress any notifications. Enable at least one scope to start suppressing alerts or episodes.',
+      "This window won't stop any notifications until you turn on at least one alerting system.",
   }
 );
 
 export const SAVE_WITHOUT_SCOPES_MODAL_CONFIRM = i18n.translate(
   'xpack.maintenanceWindows.saveWithoutScopesModal.confirm',
   {
-    defaultMessage: 'Save without scope',
+    defaultMessage: 'Save without a scope',
   }
 );
 
-export const APPLY_TO_ALL_ALERTS_MODAL_TITLE = i18n.translate(
-  'xpack.maintenanceWindows.applyToAllAlertsModal.title',
+export const STOP_ALL_NOTIFICATIONS_MODAL_TITLE_CLASSIC = i18n.translate(
+  'xpack.maintenanceWindows.stopAllNotificationsModal.titleClassic',
   {
-    defaultMessage: 'Apply this maintenance window to all alerts?',
+    defaultMessage: 'Stop notifications for Classic alerts?',
   }
 );
 
-export const APPLY_TO_ALL_ALERTS_MODAL_BODY = i18n.translate(
-  'xpack.maintenanceWindows.applyToAllAlertsModal.body',
+export const STOP_ALL_NOTIFICATIONS_MODAL_TITLE_UNIVERSAL = i18n.translate(
+  'xpack.maintenanceWindows.stopAllNotificationsModal.titleUniversal',
   {
-    defaultMessage: 'This maintenance window has no alert filters, so it will apply to all alerts.',
+    defaultMessage: 'Stop notifications for Universal alerts?',
   }
 );
 
-export const APPLY_TO_ALL_ALERTS_SCOPED_MODAL_BODY = i18n.translate(
-  'xpack.maintenanceWindows.applyToAllAlertsModal.scopedBody',
+export const STOP_ALL_NOTIFICATIONS_MODAL_TITLE_BOTH = i18n.translate(
+  'xpack.maintenanceWindows.stopAllNotificationsModal.titleBoth',
+  {
+    defaultMessage: 'Stop notifications for Classic and Universal alerts?',
+  }
+);
+
+export const STOP_ALL_NOTIFICATIONS_MODAL_BODY_NO_FILTERS = i18n.translate(
+  'xpack.maintenanceWindows.stopAllNotificationsModal.bodyNoFilters',
   {
     defaultMessage:
-      'One of the selected scopes has no alert filters, so it will apply to all of its alerts.',
+      'This window has no filter, so it covers every alert. To limit it to specific alerts, cancel and add a filter.',
   }
 );
 
-export const APPLY_TO_ALL_ALERTS_MODAL_CONFIRM = i18n.translate(
-  'xpack.maintenanceWindows.applyToAllAlertsModal.confirm',
+export const STOP_ALL_NOTIFICATIONS_MODAL_BODY_CLASSIC_UNFILTERED = i18n.translate(
+  'xpack.maintenanceWindows.stopAllNotificationsModal.bodyClassicUnfiltered',
   {
-    defaultMessage: 'Apply to all alerts',
+    defaultMessage:
+      'This window has no Classic filter, so it covers every Classic alert. The Universal filter still applies. To limit it to specific Classic alerts, cancel and add a filter.',
+  }
+);
+
+export const STOP_ALL_NOTIFICATIONS_MODAL_BODY_UNIVERSAL_UNFILTERED = i18n.translate(
+  'xpack.maintenanceWindows.stopAllNotificationsModal.bodyUniversalUnfiltered',
+  {
+    defaultMessage:
+      'This window has no Universal filter, so it covers every Universal alert. The Classic filter still applies. To limit it to specific Universal alerts, cancel and add a filter.',
+  }
+);
+
+export const STOP_ALL_NOTIFICATIONS_MODAL_CONFIRM = i18n.translate(
+  'xpack.maintenanceWindows.stopAllNotificationsModal.confirm',
+  {
+    defaultMessage: 'Stop notifications',
   }
 );
 
@@ -599,4 +623,41 @@ export const TABLE_SCOPE_BADGE_CLASSIC_ALERTING = i18n.translate(
 export const TABLE_SCOPE_BADGE_UNIVERSAL_ALERTING = i18n.translate(
   'xpack.maintenanceWindows.table.scopeBadgeUniversalAlerting',
   { defaultMessage: 'Universal Alerting' }
+);
+
+export const TABLE_SCOPE_BADGE_NONE = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeBadgeNone',
+  { defaultMessage: 'No scope' }
+);
+
+export const TABLE_SCOPE_TOOLTIP_CLASSIC_ALERTING = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeTooltipClassicAlerting',
+  { defaultMessage: 'Stops notifications for Classic alerts during this window.' }
+);
+
+export const TABLE_SCOPE_TOOLTIP_CLASSIC_ALERTING_FILTERED = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeTooltipClassicAlertingFiltered',
+  {
+    defaultMessage: "Stops notifications for Classic alerts that match this window's filter.",
+  }
+);
+
+export const TABLE_SCOPE_TOOLTIP_UNIVERSAL_ALERTING = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeTooltipUniversalAlerting',
+  { defaultMessage: 'Stops notifications for Universal alerts during this window.' }
+);
+
+export const TABLE_SCOPE_TOOLTIP_UNIVERSAL_ALERTING_FILTERED = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeTooltipUniversalAlertingFiltered',
+  {
+    defaultMessage: "Stops notifications for Universal alerts that match this window's filter.",
+  }
+);
+
+export const TABLE_SCOPE_TOOLTIP_NONE = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeTooltipNone',
+  {
+    defaultMessage:
+      "This window doesn't stop any notifications. Edit the window to turn on at least one alerting system.",
+  }
 );

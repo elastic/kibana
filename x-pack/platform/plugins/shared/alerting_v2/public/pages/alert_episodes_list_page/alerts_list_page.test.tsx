@@ -331,7 +331,7 @@ describe('AlertsListPage', () => {
   it.each([
     ['tags', 'Alert tags'],
     ['rule_tags', 'Rule tags'],
-    ['suppressed', 'Suppressed'],
+    ['suppressed', 'Notifications'],
     ['reason', 'Reason'],
   ])('labels the %s column %p and takes its sort control away', (columnId, label) => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];

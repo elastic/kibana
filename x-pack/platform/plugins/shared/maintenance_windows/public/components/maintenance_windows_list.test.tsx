@@ -194,7 +194,10 @@ describe('MaintenanceWindowsList', () => {
       },
     ];
 
-    const renderScopedList = (isUniversalAlertingEnabled: boolean) => {
+    const renderScopedList = (
+      isUniversalAlertingEnabled: boolean,
+      listItems: MaintenanceWindowUI[] = scopedItems
+    ) => {
       const globalClient = appMockRenderer.coreStart.settings.globalClient;
       (globalClient.isDeclared as jest.Mock).mockReturnValue(true);
       (globalClient.get as jest.Mock).mockReturnValue(isUniversalAlertingEnabled);
@@ -203,7 +206,7 @@ describe('MaintenanceWindowsList', () => {
         <MaintenanceWindowsList
           refreshData={() => {}}
           isLoading={false}
-          items={scopedItems}
+          items={listItems}
           readOnly={false}
           page={1}
           perPage={10}
@@ -228,6 +231,70 @@ describe('MaintenanceWindowsList', () => {
 
       expect(screen.getByText('Classic Alerting')).toBeInTheDocument();
       expect(screen.queryByText('Universal Alerting')).not.toBeInTheDocument();
+    });
+
+    test('it shows a No scope badge when no scope is turned on', () => {
+      renderScopedList(true, [{ ...items[0], scope: {} }]);
+
+      expect(screen.getByTestId('maintenanceWindowScopeBadgeNone')).toHaveTextContent('No scope');
+    });
+
+    test('it shows a No scope badge when the only scope is Universal Alerting and the setting is off', () => {
+      renderScopedList(false, [{ ...items[0], scope: { alertingV2: { enabled: true } } }]);
+
+      expect(screen.getByTestId('maintenanceWindowScopeBadgeNone')).toBeInTheDocument();
+    });
+
+    test('scope badges are focusable so keyboard users can reach their tooltips', () => {
+      renderScopedList(true);
+
+      expect(screen.getByTestId('maintenanceWindowScopeBadgeClassic')).toHaveAttribute(
+        'tabindex',
+        '0'
+      );
+      expect(screen.getByTestId('maintenanceWindowScopeBadgeUniversal')).toHaveAttribute(
+        'tabindex',
+        '0'
+      );
+    });
+
+    test.each([
+      [
+        'an unfiltered Classic Alerting scope',
+        { alerting: { enabled: true, kql: '', filters: [] } },
+        'maintenanceWindowScopeBadgeClassic',
+        'Stops notifications for Classic alerts during this window.',
+      ],
+      [
+        'a filtered Classic Alerting scope',
+        { alerting: { enabled: true, kql: 'kibana.alert.rule.name : "x"', filters: [] } },
+        'maintenanceWindowScopeBadgeClassic',
+        "Stops notifications for Classic alerts that match this window's filter.",
+      ],
+      [
+        'an unfiltered Universal Alerting scope',
+        { alertingV2: { enabled: true } },
+        'maintenanceWindowScopeBadgeUniversal',
+        'Stops notifications for Universal alerts during this window.',
+      ],
+      [
+        'a filtered Universal Alerting scope',
+        { alertingV2: { enabled: true, kql: 'data.host.name: "web-01"' } },
+        'maintenanceWindowScopeBadgeUniversal',
+        "Stops notifications for Universal alerts that match this window's filter.",
+      ],
+      [
+        'no scope',
+        {},
+        'maintenanceWindowScopeBadgeNone',
+        "This window doesn't stop any notifications. Edit the window to turn on at least one alerting system.",
+      ],
+    ])('it explains %s in a tooltip', async (_name, scope, badgeTestId, tooltip) => {
+      renderScopedList(true, [{ ...items[0], scope }]);
+
+      fireEvent.mouseOver(screen.getByTestId(badgeTestId));
+
+      await waitFor(() => expect(screen.getByRole('tooltip')).toHaveTextContent(tooltip));
     });
   });
 });

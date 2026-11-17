@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiLink, EuiPageTemplate, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiPageTemplate } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import * as i18n from '../translations';
 
@@ -34,14 +34,9 @@ export const EmptyPrompt = React.memo<EmptyPromptProps>(
           ) : undefined
         }
         footer={
-          <>
-            <EuiTitle size="xxs">
-              <span>{i18n.EMPTY_PROMPT_LEARN_MORE}</span>
-            </EuiTitle>{' '}
-            <EuiLink href={docLinks.alerting.maintenanceWindows} target="_blank">
-              {i18n.EMPTY_PROMPT_READ_THE_DOCS}
-            </EuiLink>
-          </>
+          <EuiLink href={docLinks.alerting.maintenanceWindows} target="_blank">
+            {i18n.EMPTY_PROMPT_LEARN_HOW_LINK}
+          </EuiLink>
         }
       />
     );
