@@ -85,20 +85,22 @@ Tracks tab lifecycle and navigation interactions in Discover.
 
 ### `discover_cascade`
 
-Tracks cascaded document expansion/collapse, opt-out, and open-in-new-tab actions.
+Tracks cascaded document expansion/collapse, opt-out, and open-in-new-tab actions, and the queries the cascade experience was withheld for.
 
-| Event name                                   | Description                                                    |
-| -------------------------------------------- | -------------------------------------------------------------- |
-| `cascaded_documents_expanded`                | Cascaded documents were expanded.                              |
-| `cascaded_documents_collapsed`               | Cascaded documents were collapsed.                             |
-| `cascaded_documents_opt_out`                 | The user opted out of cascaded documents.                      |
-| `cascaded_documents_open_in_new_tab_clicked` | The open-in-new-tab action was clicked for cascaded documents. |
+| Event name                                   | Description                                                                 |
+| -------------------------------------------- | --------------------------------------------------------------------------- |
+| `cascaded_documents_expanded`                | Cascaded documents were expanded.                                           |
+| `cascaded_documents_collapsed`               | Cascaded documents were collapsed.                                          |
+| `cascaded_documents_opt_out`                 | The user opted out of cascaded documents.                                   |
+| `cascaded_documents_open_in_new_tab_clicked` | The open-in-new-tab action was clicked for cascaded documents.              |
+| `cascaded_documents_unsupported_query`       | The query described a cascade we don't support, so it was not offered.      |
 
-| Field       | Type                 | Description                                           |
-| ----------- | -------------------- | ----------------------------------------------------- |
-| `eventName` | `keyword`            | Cascade action.                                       |
-| `tabId`     | `keyword`            | ID of the tab where the cascade interaction occurred. |
-| `nodeId`    | `keyword` (optional) | ID of the cascaded document node, when applicable.    |
+| Field              | Type                 | Description                                                               |
+| ------------------ | -------------------- | ------------------------------------------------------------------------- |
+| `eventName`        | `keyword`            | Cascade action.                                                           |
+| `tabId`            | `keyword`            | ID of the tab where the cascade interaction occurred.                     |
+| `nodeId`           | `keyword` (optional) | ID of the cascaded document node, when applicable.                        |
+| `exclusionReason`  | `keyword` (optional) | Why the cascade was withheld, e.g. `timeseries_multiple_stats`, `timeseries_stats_in_fork`. |
 
 ### `discover_in_dashboard`
 

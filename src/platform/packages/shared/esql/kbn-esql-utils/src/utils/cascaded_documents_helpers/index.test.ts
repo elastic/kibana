@@ -175,6 +175,7 @@ describe('cascaded documents helpers utils', () => {
         ).toEqual({
           groupByFields: [],
           appliedFunctions: [],
+          exclusionReason: 'parse_failure',
         });
         expect(consoleErrorSpy).toHaveBeenCalled();
       } finally {
@@ -299,6 +300,120 @@ describe('cascaded documents helpers utils', () => {
       const result = getESQLStatsQueryMeta(queryString);
       expect(result.groupByFields).toEqual([]);
       expect(result.appliedFunctions).toEqual([]);
+    });
+
+    describe('exclusion reasons', () => {
+      it.each([
+        [
+          'the query sources its data from a subquery',
+          'FROM kibana_sample_data_logs, (FROM kibana_sample_data_flights) | STATS count = COUNT(bytes) BY clientip',
+          'subquery_source',
+        ],
+        [
+          'the query reads synthetic timeseries metadata',
+          'TS kibana_sample_data_logstsdb | TS_INFO | STATS count = COUNT() BY metric_name',
+          'timeseries_info_source',
+        ],
+        [
+          'the query declares no STATS command',
+          'FROM kibana_sample_data_logs | WHERE bytes > 1000 | LIMIT 10',
+          'no_stats_command',
+        ],
+        [
+          'the STATS command declares no grouping options',
+          'FROM kibana_sample_data_logs | STATS count = COUNT(*)',
+          'no_grouping_options',
+        ],
+        [
+          'a grouping option applies an unsupported function',
+          'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY ts = BUCKET(@timestamp, 1 hour)::string',
+          'unsupported_grouping_function',
+        ],
+        [
+          'a KEEP command strips the grouping option',
+          'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | KEEP count',
+          'group_field_stripped_by_keep',
+        ],
+      ])('reports why no metadata was produced when %s', (_, queryString, exclusionReason) => {
+        const result = getESQLStatsQueryMeta(queryString);
+        expect(result.groupByFields).toEqual([]);
+        expect(result.exclusionReason).toBe(exclusionReason);
+      });
+
+      it('withholds the cascade experience from TS queries that declare multiple STATS commands', () => {
+        // a STATS command preceding the one driving the cascade is carried over verbatim into the
+        // FROM query built for a leaf node, which cannot resolve TS only aggregate functions
+        const queryString = `
+          TS kibana_sample_data_logstsdb
+          | STATS peak = MAX(AVG_OVER_TIME(bytes_gauge)) BY host.name, agent.keyword
+          | STATS count = COUNT(peak) BY host.name
+        `;
+
+        const result = getESQLStatsQueryMeta(queryString);
+        expect(result.groupByFields).toEqual([]);
+        expect(result.appliedFunctions).toEqual([]);
+        expect(result.exclusionReason).toBe('timeseries_multiple_stats');
+      });
+
+      it('withholds the cascade experience from TS queries whose FORK holds a STATS command', () => {
+        // the FORK and everything inside it is copied into the FROM query built for a leaf node,
+        // so a TS only aggregate in one of its branches makes that query unservable
+        const queryString = `
+          TS kibana_sample_data_logstsdb
+          | FORK (WHERE bytes_gauge > 1000 | STATS peak = MAX(AVG_OVER_TIME(bytes_gauge)) BY host.name)
+                 (WHERE bytes_gauge <= 1000)
+          | STATS count = COUNT(*) BY host.name
+        `;
+
+        const result = getESQLStatsQueryMeta(queryString);
+        expect(result.groupByFields).toEqual([]);
+        expect(result.appliedFunctions).toEqual([]);
+        expect(result.exclusionReason).toBe('timeseries_stats_in_fork');
+      });
+
+      it('leaves TS queries whose FORK holds no STATS command alone', () => {
+        const queryString = `
+          TS kibana_sample_data_logstsdb
+          | FORK (WHERE bytes_gauge > 1000) (WHERE bytes_gauge <= 1000)
+          | STATS count = COUNT(*) BY host.name
+        `;
+
+        const result = getESQLStatsQueryMeta(queryString);
+        expect(result.groupByFields).toEqual([{ field: 'host.name', type: 'column' }]);
+        expect(result.exclusionReason).toBeUndefined();
+      });
+
+      it('leaves a FROM query whose FORK holds a STATS command alone', () => {
+        const queryString = `
+          FROM kibana_sample_data_logs
+          | FORK (WHERE bytes > 1000 | STATS peak = MAX(bytes) BY host.name)
+                 (WHERE bytes <= 1000)
+          | STATS count = COUNT(*) BY host.name
+        `;
+
+        const result = getESQLStatsQueryMeta(queryString);
+        expect(result.groupByFields).toEqual([{ field: 'host.name', type: 'column' }]);
+        expect(result.exclusionReason).toBeUndefined();
+      });
+
+      it('leaves TS queries with a single STATS command alone', () => {
+        const queryString = `
+          TS kibana_sample_data_logstsdb
+          | STATS count = COUNT(AVG_OVER_TIME(bytes_gauge)) BY host.name
+        `;
+
+        const result = getESQLStatsQueryMeta(queryString);
+        expect(result.groupByFields).toEqual([{ field: 'host.name', type: 'column' }]);
+        expect(result.exclusionReason).toBeUndefined();
+      });
+
+      it('does not report a reason when metadata was produced', () => {
+        const result = getESQLStatsQueryMeta(
+          'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip'
+        );
+        expect(result.groupByFields).toEqual([{ field: 'clientip', type: 'column' }]);
+        expect(result.exclusionReason).toBeUndefined();
+      });
     });
   });
 
@@ -702,6 +817,53 @@ describe('cascaded documents helpers utils', () => {
           expect(cascadeQuery!.esql).toBe(
             'FROM kibana_sample_data_logstsdb | WHERE `agent.keyword` == "Mozilla/5.0"'
           );
+        });
+
+        it('refuses to build a leaf query for a TS query whose FORK holds a STATS command', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb
+              | FORK (WHERE bytes_gauge > 1000 | STATS peak = MAX(AVG_OVER_TIME(bytes_gauge)) BY host.name)
+                     (WHERE bytes_gauge <= 1000)
+              | STATS count = COUNT(*) BY host.name
+            `,
+          };
+
+          mockDataViewFields({ 'host.name': keywordField });
+
+          expect(() =>
+            constructCascadeQuery({
+              query: editorQuery,
+              dataView: dataViewMock,
+              esqlVariables: [],
+              nodeType,
+              nodePath: ['host.name'],
+              nodePathMap: { 'host.name': 'www.elastic.co' },
+            })
+          ).toThrow('TS source queries with a STATS command inside a FORK are not supported');
+        });
+
+        it('refuses to build a leaf query for a TS query that declares multiple STATS commands', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb
+              | STATS peak = MAX(AVG_OVER_TIME(bytes_gauge)) BY host.name, agent.keyword
+              | STATS count = COUNT(peak) BY host.name
+            `,
+          };
+
+          mockDataViewFields({ 'host.name': keywordField });
+
+          expect(() =>
+            constructCascadeQuery({
+              query: editorQuery,
+              dataView: dataViewMock,
+              esqlVariables: [],
+              nodeType,
+              nodePath: ['host.name'],
+              nodePathMap: { 'host.name': 'www.elastic.co' },
+            })
+          ).toThrow('TS source queries with multiple STATS commands are not supported');
         });
 
         it('constrains documents with the values displayed for the expanded row when a match phrase is required', () => {
