@@ -158,6 +158,31 @@ describe('useSaveYamlWithConfirmation', () => {
     expect(mockSaveYaml).toHaveBeenCalledTimes(1);
   });
 
+  it('marks the save as being checked until it is sent', async () => {
+    let finishCheck: (confirmed: boolean) => void = () => {};
+    const confirmBreakingChange = jest.fn(
+      () => new Promise<boolean>((resolve) => (finishCheck = resolve))
+    );
+    mockSaveYaml.mockImplementation(async () => {
+      expect(store.getState().detail.isCheckingSave).toBe(false);
+    });
+    const save = renderSave([true], confirmBreakingChange)();
+
+    expect(store.getState().detail.isCheckingSave).toBe(true);
+    finishCheck(true);
+    await expect(save).resolves.toBe(true);
+    expect(store.getState().detail.isCheckingSave).toBe(false);
+    expect(mockSaveYaml).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores a save while the previous one is being stored', async () => {
+    const save = renderSave([true]);
+    store.dispatch({ type: 'detail/saveYamlThunk/pending' });
+
+    await expect(save()).resolves.toBe(false);
+    expect(mockSaveYaml).not.toHaveBeenCalled();
+  });
+
   it('checks the draft again when it changes while the check is pending', async () => {
     const editedYaml = `${buildYaml(true)}\n`;
     const confirmBreakingChange = jest
@@ -209,6 +234,7 @@ describe('useSaveYamlWithConfirmation', () => {
     const save = renderSave([true], confirmBreakingChange)();
 
     unmount();
+    expect(store.getState().detail.isCheckingSave).toBe(false);
     finishCheck(true);
 
     await expect(save).resolves.toBe(false);

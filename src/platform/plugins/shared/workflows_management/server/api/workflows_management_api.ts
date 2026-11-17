@@ -64,7 +64,11 @@ import type {
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
-import { parseYamlToJSONWithoutValidation, WorkflowValidationError } from '@kbn/workflows-yaml';
+import {
+  isRecord,
+  parseYamlToJSONWithoutValidation,
+  WorkflowValidationError,
+} from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import {
   type ExternalResumeFormPageParams,
@@ -347,6 +351,9 @@ const withEnabledState = ({
   enabled,
 }: Pick<WorkflowPartialDetailDto, 'definition' | 'enabled'>): unknown =>
   definition ? { ...definition, enabled: enabled ?? definition.enabled } : definition;
+
+const hasServiceAccount = (definition: unknown): boolean =>
+  isRecord(definition) && isRecord(definition.settings) && Boolean(definition.settings.run_as);
 
 export class WorkflowsManagementApi {
   private smlClient: Pick<
@@ -772,7 +779,11 @@ export class WorkflowsManagementApi {
           managedFilter,
           includeUnindexed: true,
         });
-        this.indexCalledWorkflowIdsInBackground(workflows.map(({ id }) => id));
+        // Writing a workflow bound to a service account needs a user request, so those stay
+        // unindexed until they are next saved.
+        this.indexCalledWorkflowIdsInBackground(
+          workflows.filter(({ definition }) => !hasServiceAccount(definition)).map(({ id }) => id)
+        );
         return workflows;
       },
       getWorkflowsByIds: async (ids) => {

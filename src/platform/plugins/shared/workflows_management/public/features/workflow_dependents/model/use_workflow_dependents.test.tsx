@@ -20,6 +20,14 @@ import { createStartServicesMock } from '../../../mocks';
 import { TestProvider } from '../../../shared/mocks/test_providers';
 
 const SAVED_YAML = 'name: Alert context\nsteps: []';
+const CALLING_YAML = `name: Alert context
+steps:
+  - name: enrich
+    type: workflow.execute
+    with:
+      workflow-id: enrichment`;
+// Longer than the draft debounce.
+const DEBOUNCED = { timeout: 3000 };
 
 const response: WorkflowDependentsImpactResponse = {
   analysis: {
@@ -31,7 +39,10 @@ const response: WorkflowDependentsImpactResponse = {
 };
 
 describe('useWorkflowDependents', () => {
-  const setup = (mockPost: (services: ReturnType<typeof createStartServicesMock>) => void) => {
+  const setup = (
+    mockPost: (services: ReturnType<typeof createStartServicesMock>) => void,
+    draftYaml = `${SAVED_YAML}\ndescription: first`
+  ) => {
     const services = createStartServicesMock();
     mockPost(services);
     const store = createMockStore();
@@ -49,7 +60,7 @@ describe('useWorkflowDependents', () => {
         valid: true,
       })
     );
-    store.dispatch(setYamlString(`${SAVED_YAML}\ndescription: first`));
+    store.dispatch(setYamlString(draftYaml));
     const wrapper = ({ children }: PropsWithChildren) => (
       <TestProvider services={services} store={store}>
         {children}
@@ -77,7 +88,7 @@ describe('useWorkflowDependents', () => {
     });
     expect(result.current).toMatchObject({ isUpdating: true, analysis: response.analysis });
 
-    await waitFor(() => expect(services.http.post).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(services.http.post).toHaveBeenCalledTimes(2), DEBOUNCED);
     act(() => rejectRefresh(new Error('Bad YAML')));
 
     await waitFor(() => expect(result.current.isRefreshError).toBe(true));
@@ -123,5 +134,51 @@ describe('useWorkflowDependents', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current).toMatchObject({ analysis: undefined, isRefreshError: false });
+  });
+
+  describe('when nothing runs the workflow and it runs nothing', () => {
+    const sending = (body: Record<string, unknown>) =>
+      [expect.any(String), expect.objectContaining({ body: JSON.stringify(body) })] as const;
+
+    it('checks no draft until the draft runs a workflow', async () => {
+      const { services, store, result } = setup(({ http }) => {
+        http.post.mockResolvedValue(response);
+      }, SAVED_YAML);
+      await waitFor(() => expect(result.current.analysis).toBeDefined());
+
+      act(() => {
+        store.dispatch(setYamlString(`${SAVED_YAML}\ndescription: second`));
+      });
+      expect(result.current.isUpdating).toBe(true);
+      await waitFor(() => expect(result.current.isUpdating).toBe(false), DEBOUNCED);
+      expect(services.http.post).toHaveBeenCalledTimes(1);
+      expect(services.http.post).toHaveBeenCalledWith(...sending({}));
+
+      act(() => {
+        store.dispatch(setYamlString(CALLING_YAML));
+      });
+      await waitFor(() => expect(services.http.post).toHaveBeenCalledTimes(2), DEBOUNCED);
+      expect(services.http.post).toHaveBeenLastCalledWith(...sending({ yaml: CALLING_YAML }));
+    });
+
+    it('checks drafts once the saved version runs a workflow', async () => {
+      const { services, store, result } = setup(({ http }) => {
+        http.post.mockResolvedValue({
+          ...response,
+          calledWorkflows: [
+            { workflowId: 'enrichment', status: 'safe', callSites: [], issues: [] },
+          ],
+        });
+      }, SAVED_YAML);
+      await waitFor(() => expect(result.current.analysis).toBeDefined());
+
+      act(() => {
+        store.dispatch(setYamlString(`${SAVED_YAML}\ndescription: second`));
+      });
+      await waitFor(() => expect(services.http.post).toHaveBeenCalledTimes(2), DEBOUNCED);
+      expect(services.http.post).toHaveBeenLastCalledWith(
+        ...sending({ yaml: `${SAVED_YAML}\ndescription: second` })
+      );
+    });
   });
 });

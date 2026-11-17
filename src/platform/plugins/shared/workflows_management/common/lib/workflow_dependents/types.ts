@@ -63,6 +63,11 @@ export interface WorkflowContract {
    * of them is computed.
    */
   returnedOutputs?: readonly string[];
+  /**
+   * Names the `workflow.output` steps set, even when a run can complete without one; undefined
+   * when one of them is computed.
+   */
+  outputStepNames?: readonly string[];
 }
 
 export type Severity = 'breaking' | 'warning' | 'info';
@@ -112,6 +117,8 @@ export type ImpactIssueKind =
   | 'runEndsUnsuccessfully'
   | 'selfCall'
   | 'missingRequiredInput'
+  /** The caller forwards its own optional input, which runs can leave out, to a required one. */
+  | 'inputMayBeMissing'
   | 'unknownInput'
   | 'inputTypeMismatch'
   | 'inputRendersAsText'

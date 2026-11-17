@@ -14,7 +14,12 @@ import {
   findAlwaysFailure as graphFindAlwaysFailure,
 } from '@kbn/workflows/graph';
 import { isRecord } from '@kbn/workflows-yaml';
-import { collectWorkflowOutputBlocks, isCompletingOutputStep, toCallSite } from './find_call_sites';
+import {
+  collectWorkflowOutputBlocks,
+  getOutputStepNames,
+  isCompletingOutputStep,
+  toCallSite,
+} from './find_call_sites';
 import type { WorkflowCallSite } from './types';
 
 /** What the analysis knows about the steps whose result it can tell, with calls read as call sites. */
@@ -61,4 +66,19 @@ export const getCompletingOutputBlocks = (definition: unknown): Array<Record<str
     .filter(isCompletingOutputStep)
     .map(({ with: values }) => values)
     .filter(isRecord);
+};
+
+/**
+ * Names the completing `workflow.output` steps a run might reach set; undefined when one of them is
+ * computed. Of every one in the definition when the workflow doesn't compile.
+ */
+export const getReachableOutputStepNames = (definition: unknown): string[] | undefined => {
+  const steps = getOutputSteps(definition);
+  if (!steps) {
+    return getOutputStepNames(definition);
+  }
+  const blocks = steps.filter(isCompletingOutputStep).map(({ with: values }) => values);
+  return blocks.every(isRecord)
+    ? [...new Set(blocks.flatMap((values) => Object.keys(values)))]
+    : undefined;
 };

@@ -12,7 +12,10 @@ import {
   buildFieldsZodValidator,
   convertJsonSchemaToZodWithRefs,
 } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
-import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import {
+  applyInputDefaults,
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import { isDynamicValue, isRecord } from '@kbn/workflows-yaml';
 import { isBreakingRun } from './api';
 import {
@@ -254,6 +257,20 @@ const validateAgainstField = (
   }
 };
 
+// Runs fill in the defaults of the fields a sent object or list leaves out before validating it.
+const withNestedDefaults = (name: string, value: unknown, contract: WorkflowContract): unknown => {
+  if ((!isRecord(value) && !Array.isArray(value)) || !contract.inputsSchema) {
+    return value;
+  }
+  try {
+    return (
+      getOwn(applyInputDefaults({ [name]: value }, contract.inputsSchema) ?? {}, name) ?? value
+    );
+  } catch {
+    return value;
+  }
+};
+
 const describeIssue = ({ path, message }: ValidationIssue): string =>
   path.length > 0 ? `${path.map(String).join('.')}: ${message}` : message;
 
@@ -271,8 +288,14 @@ const checkReferencedInput = (
   const mayBeOmitted = !callerField.required && !callerField.hasDefault;
   const omissionFails = field.required && !field.hasDefault;
   if (isTypeWithin(callerField.type, field.type)) {
+    if (mayBeOmitted && omissionFails) {
+      return {
+        issue: { kind: 'inputMayBeMissing', severity: 'warning', stepName, field: name },
+        isUnknown: false,
+      };
+    }
     // The caller's own input only guarantees the type; anything stricter is checked while running.
-    return { isUnknown: (mayBeOmitted && omissionFails) || hasConstraintsBeyondType(field) };
+    return { isUnknown: hasConstraintsBeyondType(field) };
   }
   const alwaysFails =
     !typesOverlap(callerField.type, field.type) && (!mayBeOmitted || omissionFails);
@@ -330,8 +353,9 @@ const checkInputValue = (
       isUnknown: false,
     };
   }
-  const [firstIssue] = validateAgainstField(value, field, contract).filter((issue) =>
-    isCertainIssue(issue, value)
+  const filledValue = withNestedDefaults(name, value, contract);
+  const [firstIssue] = validateAgainstField(filledValue, field, contract).filter((issue) =>
+    isCertainIssue(issue, filledValue)
   );
   if (!firstIssue) {
     return { isUnknown: containsTemplate(value) };
@@ -482,6 +506,21 @@ const evaluateInputs = (
   return { rows, issues };
 };
 
+const returnsOutput = (contract: WorkflowContract, field: string): boolean =>
+  getOwn(contract.outputs, field) !== undefined ||
+  contract.outputStepNames?.includes(field) === true;
+
+// The saved version declared or set the output, and the draft neither declares nor sets it.
+const stopsReturning = (
+  field: string,
+  contract: WorkflowContract,
+  previousContract: WorkflowContract | undefined
+): boolean =>
+  previousContract !== undefined &&
+  returnsOutput(previousContract, field) &&
+  contract.outputStepNames !== undefined &&
+  !returnsOutput(contract, field);
+
 const evaluateOutputs = (
   callSite: WorkflowCallSite,
   parentDefinition: unknown,
@@ -501,8 +540,11 @@ const evaluateOutputs = (
     // A `| default:` filter replaces a missing value, so the caller keeps working.
     const lossSeverity = hasFallback ? 'warning' : 'breaking';
     if (field && !contract.alwaysReturnsOutput) {
-      // The caller gets whatever the child's last step returns, which may or may not hold `field`.
-      issue = { kind: 'outputFromLastStep', severity: 'warning', stepName, field };
+      // The caller gets whatever the child's last step returns, which may or may not hold `field`,
+      // unless the run ends in a `workflow.output` step, which no longer returns it.
+      issue = stopsReturning(field, contract, previousContract)
+        ? { kind: 'removedOutput', severity: lossSeverity, stepName, field }
+        : { kind: 'outputFromLastStep', severity: 'warning', stepName, field };
     } else if (field && contract.outputsSource === 'none' && !contract.returnedOutputs) {
       // Nothing is declared and the returned outputs are computed, so `field` may be among them.
       issue = { kind: 'undeclaredOutput', severity: 'warning', stepName, field };

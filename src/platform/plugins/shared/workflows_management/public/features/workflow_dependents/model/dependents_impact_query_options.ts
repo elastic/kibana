@@ -24,7 +24,7 @@ export const dependentsImpactQueryOptions = (
   { id, savedVersion }: { id: string; savedVersion?: string },
   draftYaml: string | undefined
 ) => ({
-  queryKey: ['workflows', 'dependentsImpact', id, savedVersion, draftYaml ?? null],
+  queryKey: ['workflowDependentsImpact', id, savedVersion, draftYaml ?? null],
   queryFn: ({ signal }: { signal?: AbortSignal }) =>
     http.post<WorkflowDependentsImpactResponse>(getWorkflowDependentsImpactPath(id), {
       version: INTERNAL_API_VERSION,

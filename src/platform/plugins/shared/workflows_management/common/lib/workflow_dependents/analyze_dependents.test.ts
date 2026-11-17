@@ -535,6 +535,29 @@ describe('analyzeDependents', () => {
     expect(kinds(dependentOf(analysis, 'triage')?.issues)).toEqual(['outputFromLastStep:warning']);
   });
 
+  it('breaks callers of an output a run that can finish without workflow.output stops returning', () => {
+    const emitsIfDeep = (child: ReturnType<typeof makeChild>) => ({
+      ...child,
+      steps: [{ name: 'maybe', type: 'if', condition: 'inputs.depth > 1', steps: child.steps }],
+    });
+    const saved = emitsIfDeep(makeChild());
+    const analyzeDraft = (draft: unknown) => analyzeWith([triage, childItem], draft, saved);
+
+    const dropped = analyzeDraft(emitsIfDeep(withoutSeverity));
+    expect(statusById(dropped).triage).toBe('breaking');
+    expect(kinds(dependentOf(dropped, 'triage')?.issues)).toEqual(['removedOutput:breaking']);
+
+    // An output step that still sets it keeps the run that reaches it returning it.
+    const undeclared = analyzeDraft(
+      emitsIfDeep(makeChild({ outputs: [{ name: 'score', type: 'number' }] }))
+    );
+    expect(statusById(undeclared).triage).toBe('safe');
+
+    const unchanged = analyzeDraft(saved);
+    expect(statusById(unchanged).triage).toBe('safe');
+    expect(kinds(dependentOf(unchanged, 'triage')?.issues)).toEqual(['outputFromLastStep:warning']);
+  });
+
   it('still checks returned outputs when the other branch fails the run', () => {
     const analysis = analyze({
       ...makeChild(),
@@ -964,6 +987,60 @@ describe('analyzeDependents', () => {
       expect(issuesFor(forwarded, optional, optional, optionalNumber)).toEqual([
         'inputTypeMismatch:warning',
       ]);
+    });
+
+    it('warns when an optional input the caller passes on becomes required', () => {
+      const callerInputs = { inputs: { properties: { x: { type: 'string' } } } };
+      const forwarded = { x: '${{ inputs.x }}' };
+      const optional = childWithInputs({ x: { type: 'string' } });
+      const required = childWithInputs({ x: { type: 'string' } }, { required: ['x'] });
+      const withDefault = childWithInputs(
+        { x: { type: 'string', default: 'a' } },
+        { required: ['x'] }
+      );
+      const callerOf = (draft: unknown, saved: unknown) =>
+        dependentOf(analyzeWith([typedCaller(forwarded, callerInputs)], draft, saved), 'caller');
+
+      expect(kinds(callerOf(required, optional)?.issues)).toEqual(['inputMayBeMissing:warning']);
+      expect(callerOf(required, optional)?.status).toBe('warning');
+      // Already required in the saved version, so saving changes nothing for it.
+      expect(callerOf(required, required)?.status).toBe('safe');
+      expect(issuesFor(forwarded, withDefault, optional, callerInputs)).toEqual([]);
+      expect(issuesFor(forwarded, optional, optional, callerInputs)).toEqual([]);
+    });
+
+    it('fills in the defaults of a sent object’s missing fields like the run does', () => {
+      const draft = childWithInputs({
+        config: {
+          type: 'object',
+          properties: {
+            options: {
+              type: 'object',
+              properties: { limit: { type: 'number', default: 10 } },
+              required: ['limit'],
+            },
+          },
+          required: ['options'],
+        },
+      });
+
+      expect(issuesFor({ config: {} }, draft)).toEqual([]);
+      expect(issuesFor({ config: { options: { limit: 'ten' } } }, draft)).toEqual([
+        'inputValueRejected:breaking',
+      ]);
+    });
+
+    it('requires the keys a map-only inputs schema requires', () => {
+      const mapOf = (extra = {}) => ({
+        ...makeChild(),
+        triggers: [{ type: 'manual' }],
+        inputs: { type: 'object', additionalProperties: { type: 'string' }, ...extra },
+      });
+      const draft = mapOf({ required: ['token'] });
+
+      expect(issuesFor({}, draft, mapOf())).toEqual(['missingRequiredInput:breaking']);
+      expect(issuesFor({ token: 'abc' }, draft, mapOf())).toEqual([]);
+      expect(issuesFor({ token: 1 }, draft, mapOf())).toEqual(['inputTypeMismatch:breaking']);
     });
 
     it('checks undeclared inputs against an additionalProperties schema', () => {

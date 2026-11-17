@@ -76,7 +76,8 @@ export const getIssueMessage = (
   switch (kind) {
     case 'childNotFound':
       return i18n.translate('workflows.dependents.issue.childNotFound', {
-        defaultMessage: 'Runs a workflow that doesn’t exist (ID "{field}")',
+        defaultMessage:
+          'Runs a workflow that doesn’t exist or that you can’t access (ID "{field}")',
         values: { field },
       });
     case 'childManaged':
@@ -126,6 +127,12 @@ export const getIssueMessage = (
     case 'missingRequiredInput':
       return i18n.translate('workflows.dependents.issue.missingRequiredInput', {
         defaultMessage: 'Doesn’t send the input "{field}", which {childName} requires',
+        values: { childName, field },
+      });
+    case 'inputMayBeMissing':
+      return i18n.translate('workflows.dependents.issue.inputMayBeMissing', {
+        defaultMessage:
+          'Sends "{field}" from one of its own optional inputs, but {childName} requires it, so runs that leave it out fail',
         values: { childName, field },
       });
     case 'unknownInput':

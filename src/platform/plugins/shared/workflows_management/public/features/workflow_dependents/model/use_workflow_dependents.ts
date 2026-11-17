@@ -9,10 +9,12 @@
 
 import { useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux-v7';
+import { parseDocument } from 'yaml';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQuery } from '@kbn/react-query';
 import { dependentsImpactQueryOptions } from './dependents_impact_query_options';
 import type { WorkflowDependentsImpactResponse } from '../../../../common/lib/workflow_dependents/api';
+import { getCalledWorkflowIds } from '../../../../common/lib/workflow_dependents/find_call_sites';
 import type {
   CalledWorkflowImpact,
   DependentsAnalysis,
@@ -24,7 +26,24 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
 
-const DRAFT_DEBOUNCE_MS = 400;
+const DRAFT_DEBOUNCE_MS = 1000;
+
+// The server reads a draft that doesn't parse as one that runs nothing.
+const runsWorkflows = (yaml: string): boolean => {
+  const document = parseDocument(yaml);
+  return document.errors.length === 0 && getCalledWorkflowIds(document.toJS()).length > 0;
+};
+
+// Callers don't depend on the draft, so when the saved version has none and runs nothing, a draft
+// can only change the result by running another workflow.
+const isUnchangedByDraft = (
+  savedResult: WorkflowDependentsImpactResponse | undefined,
+  draftYaml: string
+): boolean =>
+  savedResult !== undefined &&
+  savedResult.analysis.dependents.length === 0 &&
+  savedResult.calledWorkflows.length === 0 &&
+  !runsWorkflows(draftYaml);
 
 export interface UseWorkflowDependentsResult {
   analysis?: DependentsAnalysis;
@@ -55,18 +74,42 @@ export const useWorkflowDependents = (): UseWorkflowDependentsResult => {
     DRAFT_DEBOUNCE_MS
   );
   // Once saved, the saved version is analyzed right away rather than the last draft.
-  const queriedDraftYaml = hasUnsavedChanges ? debouncedDraftYaml : undefined;
+  const checkedDraftYaml = hasUnsavedChanges ? debouncedDraftYaml : undefined;
+  const savedVersion = workflow?.lastUpdatedAt;
+
+  const savedResultRef = useRef<{
+    id: string;
+    savedVersion?: string;
+    result: WorkflowDependentsImpactResponse;
+  }>();
+  const savedResult =
+    savedResultRef.current?.id === workflow?.id &&
+    savedResultRef.current?.savedVersion === savedVersion
+      ? savedResultRef.current?.result
+      : undefined;
+  const queriedDraftYaml = useMemo(
+    () =>
+      checkedDraftYaml !== undefined && isUnchangedByDraft(savedResult, checkedDraftYaml)
+        ? undefined
+        : checkedDraftYaml,
+    [checkedDraftYaml, savedResult]
+  );
 
   const { data, isError, isFetching, isPreviousData, refetch } = useQuery({
     ...dependentsImpactQueryOptions(
       http,
-      { id: workflow?.id ?? '', savedVersion: workflow?.lastUpdatedAt },
+      { id: workflow?.id ?? '', savedVersion },
       queriedDraftYaml
     ),
     enabled: Boolean(workflow?.id),
     // While typing, the draft is briefly invalid YAML; keep showing the last good analysis.
     keepPreviousData: true,
+    // Other workflows can start or stop running this one while it isn't open.
+    refetchOnMount: 'always',
   });
+  if (data && !isPreviousData && workflow?.id && queriedDraftYaml === undefined) {
+    savedResultRef.current = { id: workflow.id, savedVersion, result: data };
+  }
 
   // The last result of this workflow's own queries. `keepPreviousData` can hand over another
   // workflow's result after navigating, and drops the previous one once a newer query fails.
@@ -81,7 +124,7 @@ export const useWorkflowDependents = (): UseWorkflowDependentsResult => {
   const isLoading = !shown && !isError && Boolean(workflow?.id);
   const hasError = isError && !shown;
   const isRefreshError = isError && Boolean(shown);
-  const isDebouncing = queriedDraftYaml !== (hasUnsavedChanges ? draftYaml : undefined);
+  const isDebouncing = checkedDraftYaml !== (hasUnsavedChanges ? draftYaml : undefined);
   const isUpdating =
     Boolean(shown) && !isRefreshError && (isFetching || isPreviousData || isDebouncing);
   return useMemo(

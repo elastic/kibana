@@ -2165,6 +2165,36 @@ steps:
       ]);
       expect(calledWorkflows).toEqual([]);
     });
+
+    it('leaves workflows bound to a service account out of the background indexing', async () => {
+      const unindexed = (id: string, settings?: Record<string, unknown>) => ({
+        id,
+        name: id,
+        enabled: true,
+        definition: { name: id, settings, steps: [] },
+      });
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        valid: true,
+        definition: { name: 'Test workflow', triggers: [{ type: 'manual' }], steps: [] },
+      } as any);
+      const indexCalledWorkflowIds = jest.fn().mockResolvedValue(undefined);
+      Object.assign(mockWorkflowsService, {
+        indexCalledWorkflowIds,
+        findWorkflowsCalling: jest.fn(
+          async (_ids: string[], _spaceId: string, options?: { includeUnindexed?: boolean }) =>
+            options?.includeUnindexed
+              ? [unindexed('bound', { run_as: 'service-account-1' }), unindexed('unbound')]
+              : []
+        ),
+      });
+
+      await api.getWorkflowDependentsImpact('workflow-123', 'default', mockRequest, undefined);
+
+      expect(indexCalledWorkflowIds).toHaveBeenCalledWith(['unbound']);
+    });
   });
 
   describe('restoreWorkflowVersion', () => {
